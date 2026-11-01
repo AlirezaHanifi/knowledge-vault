@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sort the Workloads</title>
+<meta name="description" content="Classify queries as operational (OLTP) or analytical (OLAP), and datasets as systems of record or derived data — with feedback drawn from the characteristics the book uses. Illustrates DDIA 2nd ed., Chapter 1.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .deck { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); align-items: start; }
+  .item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .item.right { border-color: var(--ok); background: var(--ok-soft); }
+  .item.wrong { border-color: var(--bad); background: var(--bad-soft); }
+  .item .why { grid-column: 1 / -1; font-size: .88rem; color: var(--ink-2); }
+  .item .what { font-weight: 550; }
+  @media (max-width: 560px) { .item { grid-template-columns: minmax(0, 1fr); } }
+  .score { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/01-trade-offs-in-data-systems-architecture.html">Chapter 1</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Workloads</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 1 · Trade-Offs in Data Systems Architecture</div>
+  <h1>Sort the workloads</h1>
+  <p class="lede">Two distinctions run through the whole book: operational versus analytical workloads, and systems of record versus derived data. Classify each item; the feedback names the characteristic that decides it.</p>
+  <p class="source-note">Illustrates “Characterizing Transaction Processing and Analytics” (pp. 5–7, Table 1-1) and “Systems of Record and Derived Data” (pp. 10–11). The example items are the vault’s own.</p>
+
+  <div class="tabs" style="margin-top:20px">
+    <div role="tablist" aria-label="Exercises">
+      <button role="tab" id="t1" aria-controls="p1" aria-selected="true">OLTP or OLAP?</button>
+      <button role="tab" id="t2" aria-controls="p2" aria-selected="false">Record or derived?</button>
+    </div>
+    <div role="tabpanel" id="p1" aria-labelledby="t1"><div class="deck" id="deck1"></div></div>
+    <div role="tabpanel" id="p2" aria-labelledby="t2"><div class="deck" id="deck2"></div></div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <p class="panel-title">Score</p>
+    <div class="score">
+      <div class="stat"><span class="stat-label">Answered</span><span class="stat-value" id="answered">0</span></div>
+      <div class="stat"><span class="stat-label">Correct</span><span class="stat-value ok" id="correct">0</span></div>
+    </div>
+    <p style="margin:10px 0 0"><button class="btn small" type="button" id="reset">↺ Start over</button></p>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The access pattern decides, not the data.</strong> The same orders table serves point lookups (operational) and year-long aggregates (analytical).</li>
+    <li><strong>Who asks matters.</strong> Operational queries come from end users through an application; analytical queries come from analysts and data scientists supporting decisions.</li>
+    <li><strong>Derived data can be thrown away and rebuilt.</strong> If you can recompute it from somewhere else, it isn’t the system of record — even if it is a copy you rely on every day.</li>
+  </ul>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/01-trade-offs-in-data-systems-architecture.html"><small>Lesson</small>1. Trade-Offs in Data Systems Architecture</a></li>
+    <li><a href="04-lsm-tree.html"><small>Simulation</small>Inside an LSM-tree (storage for OLTP)</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault exercise · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var SETS = [
+    { mount: "#deck1", choices: ["OLTP", "OLAP"], items: [
+      ["Show the contents of customer 4711’s shopping cart", 0, "A point query that fetches a small number of records by key, for an end user."],
+      ["Total revenue per store per month over the last two years", 1, "Aggregates over a large number of records — the classic analytical read pattern."],
+      ["Change the delivery address of one order", 0, "Updates an individual record: operational write pattern."],
+      ["Load yesterday’s data from twenty operational databases", 1, "Bulk import (ETL) is how analytical systems are typically written."],
+      ["Which products are most often bought together?", 1, "Scans the history of many purchases to support a business decision."],
+      ["Post a comment on a photo", 0, "Creates one record on behalf of a user, with low latency expected."],
+      ["Did conversion drop after last week’s redesign?", 1, "An analyst’s question over the history of events, not the latest state."],
+      ["Check the current balance of an account before a payment", 0, "Reads the latest state of one record, in the critical path of a user request."]
+    ] },
+    { mount: "#deck2", choices: ["System of record", "Derived"], items: [
+      ["The orders table that the checkout service writes to", 0, "Each order is first written here; it is the authoritative version of the fact."],
+      ["A full-text search index over product descriptions", 1, "Built from the product data; if lost, it can be rebuilt by reindexing."],
+      ["A cache of rendered product pages", 1, "A copy computed from other data, kept for faster reads."],
+      ["A recommendation model trained on purchase history", 1, "Computed by transforming other data; retrain it from the source if needed."],
+      ["A data-warehouse table loaded nightly by ETL", 1, "Copied and transformed from operational systems."],
+      ["The event log where an event-sourced app first records each user action", 0, "Events are written here first and other views are derived from them."]
+    ] }
+  ];
+  var answered = 0, correct = 0;
+
+  function score() {
+    Kit.$("#answered").textContent = answered;
+    Kit.$("#correct").textContent = correct;
+  }
+  function build() {
+    answered = 0; correct = 0; score();
+    SETS.forEach(function (set) {
+      var deck = Kit.clear(Kit.$(set.mount));
+      set.items.forEach(function (it) {
+        var why = el("div", { class: "why", "aria-live": "polite" });
+        var buttons = set.choices.map(function (c, ci) {
+          var b = el("button", { class: "btn small", type: "button" }, c);
+          b.addEventListener("click", function () {
+            if (card.dataset.done) return;
+            card.dataset.done = "1";
+            var ok = ci === it[1];
+            answered++; if (ok) correct++; score();
+            card.classList.add(ok ? "right" : "wrong");
+            buttons.forEach(function (x, xi) { x.disabled = true; if (xi === it[1]) x.setAttribute("aria-pressed", "true"); });
+            why.textContent = (ok ? "Correct — " : "It’s " + set.choices[it[1]] + ". ") + it[2];
+          });
+          return b;
+        });
+        var card = el("div", { class: "item" }, el("span", { class: "what" }, it[0]), el("div", { class: "row" }, buttons), why);
+        deck.appendChild(card);
+      });
+    });
+  }
+  Kit.tabs(document.querySelector(".tabs"));
+  Kit.$("#reset").addEventListener("click", build);
+  build();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{Short Title}}</title>
+<meta name="description" content="{{One sentence: what you can do here. Illustrates <Book>, Chapter N.}}">
+<!-- Lives at books/<book-slug>/widgets/NN-slug.html -->
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  /* Page-specific styles only. Use kit tokens (var(--accent), var(--ok), …) — never raw colours. */
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">{{Book short name}}</a><span aria-hidden="true">/</span>
+      <a href="../chapters/{{NN-slug}}.html">Chapter {{N}}</a><span aria-hidden="true">/</span>
+      <span aria-current="page">{{Topic}}</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter {{N}} · {{Chapter title}}</div>
+  <h1>{{Title}}</h1>
+  <p class="lede">{{One paragraph: the mechanism and why it is worth manipulating.}}</p>
+  <p class="source-note">Illustrates “{{Section}}” (pp. {{a–b}}). {{Simplifications.}} Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel"><!-- visualization: render from state --><div class="stage" id="stage"></div></div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="controls"></div><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>{{An observation the reader should make, phrased as an instruction to try something.}}</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/{{NN-slug}}.html"><small>Lesson</small>{{N}}. {{Chapter title}}</a></li>
+    <li><a href="../lab/{{NN-slug}}/README.md"><small>Experiment</small>{{Experiment}}</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var log = Kit.log(document.getElementById("log"));
+  var state;
+
+  function reset() { state = { t: 0 }; log.clear(); render(); }
+  function step() { state.t++; render(); return true; /* return false when finished */ }
+  function render() { /* draw everything from state */ }
+
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "{{Question}}", options: ["{{A}}", "{{B}}", "{{C}}"], answer: 0, explain: "{{Why}}" }
+  ]);
+})();
+</script>
+</body>
+</html>

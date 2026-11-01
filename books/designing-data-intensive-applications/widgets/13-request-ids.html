@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exactly Once, End to End</title>
+<meta name="description" content="Transfer $11 over a flaky network: responses get lost, the client retries, and money moves twice — unless a request ID travels from the client to a uniqueness constraint in the database. Illustrates DDIA Chapter 13.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .hops { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hop { border: 1.5px solid var(--line-strong); border-radius: var(--radius); padding: 8px 10px; background: var(--surface); font-size: .8rem; }
+  .hop h3 { font-size: .85rem; margin: 0 0 4px; }
+  .hop .sub { color: var(--ink-3); font-size: .74rem; }
+  .accts { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+  .acct { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); }
+  .acct .bal { font-family: var(--mono); font-size: 1.3rem; font-weight: 600; }
+  .acct .exp { font-size: .74rem; color: var(--ink-3); }
+  .acct.off .bal { color: var(--bad); }
+  table.data td { font-family: var(--mono); font-size: .74rem; }
+  table.data tr.dup td { background: var(--bad-soft); }
+  table.data tr.rej td { color: var(--ink-3); text-decoration: line-through; }
+  .tbl { max-height: 190px; overflow-y: auto; margin-top: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  pre.sql { font-size: .72rem; background: var(--surface-2); padding: 8px 10px; border-radius: var(--radius-sm); margin: 10px 0 0; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/13-a-philosophy-of-streaming-systems.html">Chapter 13</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Request IDs</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 13 · A Philosophy of Streaming Systems</div>
+  <h1>Exactly once, end to end</h1>
+  <p class="lede">A user submits a transfer; it commits, but the response is lost on a weak connection, so they press submit again. To the server and the database that retry is a brand-new request, and every transaction commits. Only an ID created at the client and checked by the database can tell the two apart.</p>
+  <p class="source-note">Illustrates “Duplicate suppression”, “Uniquely identifying requests” and “The end-to-end argument” (pp. 563–566, Example 13-2: $11.00 from account 4321 to 1234, guarded by a unique <code>request_id</code>). Lost responses are random (seeded); each client gives up after three attempts. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="hops">
+        <div class="hop"><h3>Client (browser)</h3><div class="sub" id="h-client"></div></div>
+        <div class="hop"><h3>Web server</h3><div class="sub">Each retry arrives as a new HTTP request and a new database transaction.</div></div>
+        <div class="hop"><h3>Database</h3><div class="sub" id="h-db"></div></div>
+      </div>
+      <div class="accts" id="accts"></div>
+      <div class="tbl"><table class="data"><thead><tr><th>#</th><th>request_id</th><th>from → to</th><th>amount</th><th>outcome</th></tr></thead><tbody id="rows"></tbody></table></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Setup</p>
+        <label class="check"><input type="checkbox" id="rid"> Client attaches a request ID; database has <code>UNIQUE (request_id)</code></label>
+        <div id="sliders" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" type="button" id="one">Submit one transfer</button>
+          <button class="btn" type="button" id="many">Submit 50</button>
+          <button class="btn" type="button" id="reset">↺ Reset</button>
+        </div>
+        <pre class="sql" id="sql"></pre>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Counters</p>
+        <div class="stats" id="stats"></div>
+      </div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Every hop is “reliable” and still wrong.</strong> TCP removes duplicate packets and the database runs each transfer atomically, but a user’s retry is a new connection and a new transaction.</li>
+    <li><strong>The fix spans the whole path.</strong> Generate the ID in the client (e.g. a hidden form field), carry it through, and let a uniqueness constraint reject the second insert — the whole transaction aborts.</li>
+    <li><strong>The requests table is an event log.</strong> Balances could be derived from it downstream, as long as each event is processed exactly once — again using the request ID.</li>
+    <li><strong>The end-to-end argument:</strong> lower layers can make problems rarer, but only the endpoints can make the function correct (p. 565).</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/13-a-philosophy-of-streaming-systems.html"><small>Lesson</small>13. A Philosophy of Streaming Systems</a></li>
+    <li><a href="13-dual-writes.html"><small>Simulation</small>Dual writes vs a change log</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { rid: false, loss: 30 }, s, r;
+
+  function uuid() { var h = "0123456789ABCDEF", out = ""; for (var i = 0; i < 8; i++) out += h[r.int(16)]; return out + "-…"; }
+  function reset() {
+    r = Kit.rng(13);
+    s = { bal: { 4321: 1000, 1234: 1000 }, intended: 0, executed: 0, dup: 0, rejected: 0, rows: [], seen: {}, failed: 0 };
+    log.clear(); log.add("Both accounts start at $1,000.00.", "muted");
+    render();
+  }
+
+  function transfer(quiet) {
+    var id = uuid(), attempt = 0, committedOnce = false, gotReply = false;
+    s.intended++;
+    while (!gotReply && attempt < 3) {
+      attempt++;
+      var rid = cfg.rid ? id : "—";
+      var dup = cfg.rid && s.seen[id];
+      if (dup) {
+        s.rejected++;
+        s.rows.push({ n: s.rows.length + 1, rid: rid, outcome: "rejected: duplicate request_id", cls: "rej" });
+        if (!quiet) log.add("Attempt " + attempt + ": INSERT fails on the unique request_id → transaction aborted, no money moves", "ok");
+      } else {
+        s.bal[4321] -= 11; s.bal[1234] += 11; s.executed++;
+        if (committedOnce) s.dup++;
+        if (cfg.rid) s.seen[id] = true;
+        s.rows.push({ n: s.rows.length + 1, rid: rid, outcome: committedOnce ? "committed AGAIN" : "committed", cls: committedOnce ? "dup" : "" });
+        if (!quiet) log.add("Attempt " + attempt + ": transaction commits, $11.00 moved" + (committedOnce ? " — a second time!" : ""), committedOnce ? "bad" : "ok");
+        committedOnce = true;
+      }
+      gotReply = !r.chance(cfg.loss / 100);
+      if (!gotReply && !quiet) log.add("…the response is lost; the user sees an error and submits again", "warn");
+    }
+    if (!gotReply) s.failed++;
+    if (!quiet) render();
+  }
+
+  function render() {
+    var acc = Kit.clear(document.getElementById("accts"));
+    [[4321, -1], [1234, 1]].forEach(function (a) {
+      var exp = 1000 + a[1] * 11 * s.intended, off = s.bal[a[0]] !== exp;
+      acc.appendChild(Kit.el("div", { class: "acct" + (off ? " off" : "") }, Kit.el("div", { class: "exp" }, "account " + a[0]),
+        Kit.el("div", { class: "bal" }, "$" + s.bal[a[0]].toFixed(2)), Kit.el("div", { class: "exp" }, "should be $" + exp.toFixed(2))));
+    });
+    var rows = Kit.clear(document.getElementById("rows"));
+    s.rows.slice(-40).forEach(function (row) {
+      rows.appendChild(Kit.el("tr", { class: row.cls || null }, Kit.el("td", null, String(row.n)), Kit.el("td", null, row.rid), Kit.el("td", null, "4321 → 1234"), Kit.el("td", null, "11.00"), Kit.el("td", null, row.outcome)));
+    });
+    var stats = Kit.clear(document.getElementById("stats"));
+    [["Transfers intended", s.intended, ""], ["Executed", s.executed, s.executed > s.intended ? "bad" : "ok"], ["Duplicates", s.dup, s.dup ? "bad" : "ok"], ["Rejected retries", s.rejected, ""]].forEach(function (x) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    });
+    document.getElementById("h-client").textContent = cfg.rid ? "Generates one request ID per form and resends it on every retry." : "Resends the form; nothing identifies the retry as the same request.";
+    document.getElementById("h-db").textContent = cfg.rid ? "requests.request_id is UNIQUE: a second insert aborts the whole transaction." : "Commits each transaction it receives.";
+    document.getElementById("sql").textContent = cfg.rid
+      ? "BEGIN;\nINSERT INTO requests (request_id, from_account, to_account, amount)\n  VALUES ('…', 4321, 1234, 11.00);   -- fails if seen before\nUPDATE accounts SET balance = balance + 11.00 WHERE account_id = 1234;\nUPDATE accounts SET balance = balance - 11.00 WHERE account_id = 4321;\nCOMMIT;"
+      : "BEGIN;\nUPDATE accounts SET balance = balance + 11.00 WHERE account_id = 1234;\nUPDATE accounts SET balance = balance - 11.00 WHERE account_id = 4321;\nCOMMIT;";
+  }
+
+  document.getElementById("rid").addEventListener("change", function (e) { cfg.rid = e.target.checked; reset(); });
+  document.getElementById("sliders").appendChild(Kit.slider({ label: "Responses lost", min: 0, max: 60, step: 5, value: cfg.loss, unit: "%", onInput: function (v) { cfg.loss = v; } }).element);
+  document.getElementById("one").addEventListener("click", function () { transfer(false); });
+  document.getElementById("many").addEventListener("click", function () {
+    var before = s.dup;
+    for (var i = 0; i < 50; i++) transfer(true);
+    log.add("50 more transfers: " + (s.dup - before) + " executed twice or more", s.dup > before ? "bad" : "ok");
+    render();
+  });
+  document.getElementById("reset").addEventListener("click", reset);
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "The first POST committed but its response was lost; the user resubmits. What does the database see?",
+      options: ["A duplicate TCP packet, which it drops", "A separate request and a separate transaction", "Nothing; browsers never resubmit"],
+      answer: 1, explain: "From the web server’s and database’s point of view the retry is a new request (p. 564)." },
+    { q: "Where must the duplicate check live to be correct?",
+      options: ["In TCP", "In the stream processor", "End to end: an ID from the client checked where the write is recorded"],
+      answer: 2, explain: "TCP, transactions and stream processors alone can’t rule out user-level duplicates (p. 565)." },
+    { q: "Why does a uniqueness constraint work even at weak isolation levels?",
+      options: ["It doesn’t", "Databases maintain uniqueness constraints correctly, unlike an application-level check-then-insert", "Because transfers are small"],
+      answer: 1, explain: "A check-then-insert in application code can suffer write skew under non-serializable isolation (p. 564)." }
+  ]);
+})();
+</script>
+</body>
+</html>

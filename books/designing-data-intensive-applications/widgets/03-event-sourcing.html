@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Sourcing and CQRS</title>
+<meta name="description" content="Run the book's conference-booking example: commands are validated and become immutable events, materialized views are derived from the log, and a buggy view is fixed by deleting it and replaying the events. Illustrates DDIA Chapter 3.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .es { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: start; }
+  @media (max-width: 640px) { .es { grid-template-columns: 1fr; } }
+  .events { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 330px; overflow-y: auto; }
+  .events li { font-family: var(--mono); font-size: .74rem; padding: 4px 8px; border-radius: 4px; background: var(--surface-2); border-left: 3px solid var(--s1); }
+  .events li.cancel { border-left-color: var(--s2); }
+  .events li.room { border-left-color: var(--s4); }
+  .events li.future { opacity: .35; }
+  .events li .n { color: var(--ink-3); margin-right: 6px; }
+  .views { display: grid; gap: 10px; }
+  .view { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface); }
+  .view h4 { font-size: .78rem; margin: 0 0 6px; color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; display: flex; justify-content: space-between; }
+  .view.wrong { border-color: var(--bad); }
+  .meter { height: 14px; border-radius: 7px; background: var(--surface-2); overflow: hidden; display: flex; }
+  .meter i { display: block; height: 100%; background: var(--s1); }
+  .meter i.over { background: var(--bad); }
+  .kv { display: flex; justify-content: space-between; font-size: .8rem; }
+  .badges { display: flex; gap: 4px; flex-wrap: wrap; }
+  .badges span { font-size: .72rem; padding: 2px 6px; border: 1px dashed var(--line-strong); border-radius: 4px; }
+  table.data td { font-size: .76rem; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-data-models-and-query-languages.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Event sourcing</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · Data Models and Query Languages</div>
+  <h1>Event sourcing and CQRS</h1>
+  <p class="lede">Write in the form that is easiest to write — an append-only log of immutable events — and derive whatever read-optimized views you need from it. Commands are validated first; only valid ones become events, named in the past tense. Because the views are derived, you can delete one, fix its code, and rebuild it by replaying the log.</p>
+  <p class="source-note">Illustrates “Event Sourcing and CQRS” (pp. 101–105, Figure 3-8): the book’s conference-management example with a booking-status view, an organizer’s dashboard and a badge-printing view. Event names, attendees and the deliberate bug are the vault’s own. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="es">
+        <div>
+          <p class="panel-title">Event log (source of truth, append-only)</p>
+          <ol class="events" id="events"></ol>
+        </div>
+        <div>
+          <p class="panel-title">Materialized views (derived)</p>
+          <div class="views" id="views"></div>
+        </div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Commands</p>
+        <div class="row">
+          <label for="who">Attendee</label>
+          <select id="who"></select>
+          <label for="seats">Seats</label>
+          <select id="seats"><option>1</option><option>2</option><option>5</option><option>10</option></select>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" type="button" id="book">Book seats</button>
+          <button class="btn" type="button" id="cancel">Cancel booking</button>
+          <button class="btn" type="button" id="room">Move to bigger room</button>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="panel-title">View code &amp; replay</p>
+        <div id="code"></div>
+        <button class="btn" type="button" id="rebuild" style="margin-top:8px">Delete views and replay the log</button>
+        <div id="travel" style="margin-top:10px"></div>
+      </div>
+      <div class="panel wide"><p class="panel-title">Event log of actions</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Commands vs events.</strong> A booking larger than the free seats is rejected <em>before</em> anything is logged; a view consuming the log may never reject an event.</li>
+    <li><strong>Intent is preserved.</strong> “BookingCancelled” says why rows changed, instead of a set of anonymous updates to several tables.</li>
+    <li><strong>Views are reproducible.</strong> The dashboard’s v1 code forgets cancellations. Switch to v2 and replay: the same events in the same order produce the corrected view.</li>
+    <li><strong>Time travel.</strong> Replaying only the first k events shows the state at any past point; order matters, unlike rows in a fact table.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-data-models-and-query-languages.html"><small>Lesson</small>3. Data Models and Query Languages</a></li>
+    <li><a href="13-dual-writes.html"><small>Simulation</small>Dual writes vs a change log</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var PEOPLE = ["Ada", "Grace", "Linus", "Margaret", "Barbara", "Edsger"];
+  var log = Kit.log(document.getElementById("log"));
+  var events, views, code = "v1", builtWith = "v1", upTo = null, travel;
+
+  function seed() {
+    events = [];
+    append({ type: "RegistrationOpened", capacity: 20 });
+    append({ type: "SeatsBooked", who: "Ada", seats: 2 });
+    append({ type: "SeatsBooked", who: "Grace", seats: 5 });
+    append({ type: "SeatsBooked", who: "Linus", seats: 1 });
+    append({ type: "BookingCancelled", who: "Grace", seats: 5 });
+    builtWith = code; upTo = null;
+    log.clear(); log.add("Seeded with five events. Views were built by dashboard code " + code + ".", "muted");
+  }
+  function append(e) { e.n = events.length + 1; events.push(e); }
+
+  // Projections: pure functions of the event list (plus the version of the view code).
+  function project(evts, version) {
+    var v = { capacity: 0, bookings: {}, booked: 0, dashBooked: 0 };
+    evts.forEach(function (e) {
+      if (e.type === "RegistrationOpened" || e.type === "RoomChanged") v.capacity = e.capacity;
+      if (e.type === "SeatsBooked") { v.bookings[e.who] = (v.bookings[e.who] || 0) + e.seats; v.booked += e.seats; v.dashBooked += e.seats; }
+      if (e.type === "BookingCancelled") {
+        delete v.bookings[e.who]; v.booked -= e.seats;
+        if (version === "v2") v.dashBooked -= e.seats; // v1 has a bug: it ignores cancellations
+      }
+    });
+    return v;
+  }
+  function current() { return project(events, "v2"); } // command validation reads the correct state
+
+  function command(kind) {
+    var who = document.getElementById("who").value, seats = parseInt(document.getElementById("seats").value, 10);
+    var st = current();
+    if (kind === "book") {
+      var free = st.capacity - st.booked;
+      if (seats > free) { log.add("Command “book " + seats + " for " + who + "” rejected: only " + free + " seat(s) free. Nothing is logged.", "bad"); return; }
+      append({ type: "SeatsBooked", who: who, seats: seats });
+      log.add("Command accepted → event #" + events.length + " SeatsBooked", "ok");
+    } else if (kind === "cancel") {
+      if (!st.bookings[who]) { log.add("Command “cancel " + who + "” rejected: no booking.", "bad"); return; }
+      append({ type: "BookingCancelled", who: who, seats: st.bookings[who] });
+      log.add("Command accepted → event #" + events.length + " BookingCancelled", "ok");
+    } else {
+      append({ type: "RoomChanged", capacity: st.capacity + 10 });
+      log.add("Command accepted → event #" + events.length + " RoomChanged (capacity " + (st.capacity + 10) + ")", "ok");
+    }
+    upTo = null; travel.set(events.length);
+    render();
+  }
+
+  function render() {
+    var k = upTo === null ? events.length : upTo;
+    var evList = Kit.clear(document.getElementById("events"));
+    events.forEach(function (e, i) {
+      var txt = e.type === "SeatsBooked" ? "SeatsBooked { " + e.who + ", " + e.seats + " }" : e.type === "BookingCancelled" ? "BookingCancelled { " + e.who + ", " + e.seats + " }" : e.type + " { capacity " + e.capacity + " }";
+      evList.appendChild(Kit.el("li", { class: (e.type === "BookingCancelled" ? "cancel" : e.type === "SeatsBooked" ? "" : "room") + (i >= k ? " future" : "") }, Kit.el("span", { class: "n" }, "#" + e.n), txt));
+    });
+    evList.scrollTop = evList.scrollHeight;
+    var v = project(events.slice(0, k), builtWith), truth = project(events.slice(0, k), "v2");
+    var views = Kit.clear(document.getElementById("views"));
+    var rows = Object.keys(v.bookings).map(function (p) { return Kit.el("tr", null, Kit.el("td", null, p), Kit.el("td", { class: "num" }, String(v.bookings[p]))); });
+    views.appendChild(Kit.el("div", { class: "view" }, Kit.el("h4", null, "Booking status"),
+      rows.length ? Kit.el("table", { class: "data" }, Kit.el("tbody", null, rows)) : Kit.el("div", { class: "kv" }, "no bookings")));
+    var pct = v.capacity ? Math.min(100, v.dashBooked / v.capacity * 100) : 0, wrong = v.dashBooked !== truth.dashBooked;
+    views.appendChild(Kit.el("div", { class: "view" + (wrong ? " wrong" : "") }, Kit.el("h4", null, Kit.el("span", null, "Organizer dashboard"), Kit.el("span", null, "code " + builtWith)),
+      Kit.el("div", { class: "meter" }, Kit.el("i", { class: v.dashBooked > v.capacity ? "over" : null, style: "width:" + pct + "%" })),
+      Kit.el("div", { class: "kv", style: "margin-top:4px" }, Kit.el("span", null, v.dashBooked + " booked of " + v.capacity), Kit.el("span", null, (v.capacity - v.dashBooked) + " free")),
+      wrong ? Kit.el("div", { class: "field-hint", style: "color:var(--bad)" }, "Wrong: cancellations were never subtracted (true figure: " + truth.dashBooked + ").") : null));
+    var badges = []; Object.keys(v.bookings).forEach(function (p) { for (var i = 0; i < Math.min(v.bookings[p], 6); i++) badges.push(Kit.el("span", null, p + (v.bookings[p] > 1 ? " +" + (i + 1) : ""))); });
+    views.appendChild(Kit.el("div", { class: "view" }, Kit.el("h4", null, "Badge printer"), Kit.el("div", { class: "badges" }, badges.length ? badges : "nothing to print")));
+  }
+
+  var who = document.getElementById("who");
+  PEOPLE.forEach(function (p) { who.appendChild(Kit.el("option", null, p)); });
+  document.getElementById("book").addEventListener("click", function () { command("book"); });
+  document.getElementById("cancel").addEventListener("click", function () { command("cancel"); });
+  document.getElementById("room").addEventListener("click", function () { command("room"); });
+  document.getElementById("code").appendChild(Kit.segmented({ label: "Dashboard view code", value: code,
+    options: [{ value: "v1", label: "v1 (ignores cancellations)" }, { value: "v2", label: "v2 (fixed)" }],
+    onChange: function (v) { code = v; log.add("Deployed dashboard code " + v + ". The existing view is unchanged until it is rebuilt.", "muted"); } }).element);
+  document.getElementById("rebuild").addEventListener("click", function () {
+    builtWith = code; upTo = null; travel.set(events.length);
+    log.add("Deleted the views and replayed all " + events.length + " events with code " + code + ".", "ok");
+    render();
+  });
+  seed();
+  travel = Kit.slider({ label: "Show state after event", min: 1, max: 40, value: events.length,
+    format: function (v) { return "#" + Math.min(v, events.length) + " of " + events.length; },
+    onInput: function (v) { upTo = Math.min(v, events.length); render(); } });
+  document.getElementById("travel").appendChild(travel.element);
+  var setMax = travel.set;
+  travel.set = function (v) { travel.input.max = Math.max(1, events.length); setMax(v); };
+  travel.set(events.length);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "A booking request asks for more seats than are free. What happens in an event-sourced system?",
+      options: ["An event is logged and the view rejects it", "The command fails validation and no event is appended", "The event is logged and later deleted"],
+      answer: 1, explain: "Only valid commands become events; consumers of the log may not reject an event (pp. 102–103)." },
+    { q: "How do you fix a materialized view whose code had a bug?",
+      options: ["Edit the events", "Delete the view and recompute it from the same events with the fixed code", "Add a correcting event for every affected row"],
+      answer: 1, explain: "Views are derived reproducibly from the log (p. 103)." },
+    { q: "How does an event log differ from a star-schema fact table?",
+      options: ["It doesn’t", "Events can have different types and properties, and their order matters", "Fact tables are append-only, logs are not"],
+      answer: 1, explain: "Fact-table rows share columns and form an unordered collection (p. 103)." }
+  ]);
+})();
+</script>
+</body>
+</html>

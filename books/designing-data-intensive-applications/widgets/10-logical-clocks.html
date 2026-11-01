@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ordering Events with Logical Clocks</title>
+<meta name="description" content="Post and reply in the book's three-person chat and compare three ways to order the messages: skewed wall-clock timestamps, Lamport timestamps, and vector clocks that reveal which messages were concurrent. Illustrates DDIA Chapter 10.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .people { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .person { border: 1.5px solid var(--line-strong); border-radius: var(--radius); padding: 8px 10px; background: var(--surface); font-size: .82rem; }
+  .person h3 { font-size: .9rem; margin: 0 0 4px; display: flex; justify-content: space-between; }
+  .person .clk { font-family: var(--mono); font-size: .74rem; color: var(--ink-2); }
+  .person .btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .inflight { font-size: .76rem; color: var(--ink-3); margin-top: 6px; min-height: 1.2em; }
+  .orders { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px; }
+  @media (max-width: 700px) { .people, .orders { grid-template-columns: 1fr; } }
+  .order h4 { font-size: .8rem; margin: 0 0 4px; color: var(--ink-2); }
+  .order ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+  .order li { font-size: .76rem; padding: 4px 6px; border-radius: 4px; background: var(--surface-2); border-left: 3px solid var(--line-strong); }
+  .order li .ts { font-family: var(--mono); color: var(--ink-3); float: right; margin-left: 6px; }
+  .order li.bad { background: var(--bad-soft); border-left-color: var(--bad); }
+  .order li.conc { border-left-color: var(--warn); }
+  .A { color: var(--s1); font-weight: 650; } .B { color: var(--s2); font-weight: 650; } .C { color: var(--s3); font-weight: 650; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/10-consistency-and-consensus.html">Chapter 10</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Logical clocks</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 10 · Consistency and Consensus</div>
+  <h1>Ordering events: wall clocks, Lamport clocks, vector clocks</h1>
+  <p class="lede">A reply must never be ordered before the message it answers. Wall-clock timestamps can get that wrong when clocks are skewed. A Lamport clock — a counter that jumps forward whenever it sees a larger one — always orders causes before effects; a vector clock additionally tells you which messages were concurrent.</p>
+  <p class="source-note">Illustrates “ID Generators and Logical Clocks”, “Lamport timestamps” and “Lamport/hybrid logical clocks versus vector clocks” (pp. 417–422, Figures 10-8 and 10-9), with the book’s Aaliyah, Bryce and Caleb chat. Clock offsets, delivery delays and message texts are the vault’s own. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel">
+        <div class="people" id="people"></div>
+        <div class="orders" id="orders"></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Network</p>
+        <div class="row">
+          <button class="btn primary" type="button" id="deliver">Deliver next message</button>
+          <button class="btn" type="button" id="all">Deliver all</button>
+        </div>
+        <div id="sliders" style="margin-top:10px"></div>
+        <p class="panel-title" style="margin-top:12px">The book’s scenario (Figure 10-9)</p>
+        <div id="player"></div>
+      </div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Wall clocks break causality.</strong> With Bryce’s clock slow, his reply is stamped earlier than Aaliyah’s message — red in the first list.</li>
+    <li><strong>Lamport: (counter, node).</strong> Both first messages get counter 1; Bryce, having seen 1, stamps his reply 2. Ties are broken by node name: (1, Aaliyah) &lt; (1, Caleb) &lt; (2, Bryce).</li>
+    <li><strong>Total order, not concurrency.</strong> Lamport timestamps order concurrent messages arbitrarily; the vector clocks show that Aaliyah’s and Caleb’s messages were concurrent (amber).</li>
+    <li><strong>The cost of vectors.</strong> A vector clock carries one counter per node — fine for three people, heavy for thousands of nodes (p. 422).</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/10-consistency-and-consensus.html"><small>Lesson</small>10. Consistency and Consensus</a></li>
+    <li><a href="../lab/10-logical-clocks/README.md"><small>Experiment</small>Physical, Lamport and hybrid logical clocks</a></li>
+    <li><a href="09-clock-skew.html"><small>Simulation</small>Clock skew and last write wins</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var IDS = ["A", "B", "C"], NAME = { A: "Aaliyah", B: "Bryce", C: "Caleb" };
+  var OFF = { A: 0, B: -40, C: 15 };
+  var log = Kit.log(document.getElementById("log"));
+  var s;
+
+  function reset() {
+    s = { t: 1000, msgs: [], flight: [], nodes: {}, pc: 0 };
+    IDS.forEach(function (id) { s.nodes[id] = { lam: 0, vc: { A: 0, B: 0, C: 0 }, seen: [] }; });
+    log.clear(); log.add("Everyone starts with counter 0. Bryce’s clock is " + Math.abs(OFF.B) + " ms slow.", "muted");
+    render();
+  }
+  function wall(id) { return s.t + OFF[id]; }
+
+  function send(id, replyTo) {
+    s.t += 10;
+    var n = s.nodes[id];
+    n.lam += 1; n.vc[id] += 1;
+    var m = { id: s.msgs.length + 1, from: id, replyTo: replyTo || null, wall: wall(id), lam: n.lam, vc: Object.assign({}, n.vc) };
+    m.text = replyTo ? "re: #" + replyTo.id : ["Lunch?", "Ship it", "Who broke main?", "Coffee", "LGTM"][m.id % 5];
+    s.msgs.push(m); n.seen.push(m);
+    IDS.forEach(function (to) { if (to !== id) s.flight.push({ m: m, to: to }); });
+    log.add(NAME[id] + (replyTo ? " replies to #" + replyTo.id : " posts #" + m.id) + " — wall " + m.wall + " ms, Lamport (" + m.lam + ", " + NAME[id] + ")", "ok");
+    render();
+    return m;
+  }
+  function deliver(k) {
+    if (!s.flight.length) return false;
+    s.t += 5;
+    var f = s.flight.splice(k || 0, 1)[0], n = s.nodes[f.to];
+    var before = n.lam;
+    n.lam = Math.max(n.lam, f.m.lam);
+    IDS.forEach(function (i) { n.vc[i] = Math.max(n.vc[i], f.m.vc[i]); });
+    n.seen.push(f.m);
+    log.add(NAME[f.to] + " receives #" + f.m.id + (n.lam > before ? "; counter jumps " + before + " → " + n.lam : ""), "muted");
+    render();
+    return true;
+  }
+
+  // Figure 10-9: Aaliyah and Caleb post concurrently; Bryce sees both and replies to Aaliyah.
+  var SCRIPT = [
+    function () { send("A"); },
+    function () { send("C"); },
+    function () { deliverTo("B", "A"); },
+    function () { deliverTo("B", "C"); },
+    function () { var a = s.msgs.filter(function (m) { return m.from === "A"; })[0]; send("B", a); },
+    function () { while (deliver(0)) { /* deliver everything */ } }
+  ];
+  function deliverTo(to, from) {
+    for (var i = 0; i < s.flight.length; i++) if (s.flight[i].to === to && s.flight[i].m.from === from) return deliver(i);
+  }
+  function step() { if (s.pc >= SCRIPT.length) return false; SCRIPT[s.pc++](); return s.pc < SCRIPT.length; }
+
+  function happenedBefore(a, b) {
+    var le = IDS.every(function (i) { return a.vc[i] <= b.vc[i]; });
+    return le && IDS.some(function (i) { return a.vc[i] < b.vc[i]; });
+  }
+  function ordered(list, key) {
+    var pos = {}; list.forEach(function (m, i) { pos[m.id] = i; });
+    return list.map(function (m) { return { m: m, bad: m.replyTo && pos[m.replyTo.id] > pos[m.id], key: key(m) }; });
+  }
+  function orderEl(title, items, concurrentMark) {
+    return Kit.el("div", { class: "order" }, Kit.el("h4", null, title), Kit.el("ol", null, items.map(function (it) {
+      var conc = concurrentMark && s.msgs.some(function (o) { return o !== it.m && !happenedBefore(o, it.m) && !happenedBefore(it.m, o); });
+      return Kit.el("li", { class: it.bad ? "bad" : conc ? "conc" : null },
+        Kit.el("span", { class: "ts" }, it.key), Kit.el("span", { class: it.m.from }, NAME[it.m.from]), " #" + it.m.id + " " + it.m.text + (it.bad ? " ✕ before its original" : ""));
+    })));
+  }
+
+  function render() {
+    var ppl = Kit.clear(document.getElementById("people"));
+    IDS.forEach(function (id) {
+      var n = s.nodes[id];
+      var lastOther = n.seen.filter(function (m) { return m.from !== id; }).slice(-1)[0];
+      var post = Kit.el("button", { class: "btn small", type: "button" }, "Post");
+      post.addEventListener("click", function () { send(id); });
+      var reply = Kit.el("button", { class: "btn small", type: "button", disabled: !lastOther }, lastOther ? "Reply to #" + lastOther.id : "Reply");
+      reply.addEventListener("click", function () { send(id, lastOther); });
+      var waiting = s.flight.filter(function (f) { return f.to === id; }).map(function (f) { return "#" + f.m.id; });
+      ppl.appendChild(Kit.el("div", { class: "person" },
+        Kit.el("h3", null, Kit.el("span", { class: id }, NAME[id]), Kit.el("span", { class: "clk" }, "clock " + (OFF[id] >= 0 ? "+" : "") + OFF[id] + " ms")),
+        Kit.el("div", { class: "clk" }, "Lamport counter " + n.lam), Kit.el("div", { class: "clk" }, "vector [A " + n.vc.A + ", B " + n.vc.B + ", C " + n.vc.C + "]"),
+        Kit.el("div", { class: "btns" }, post, reply),
+        Kit.el("div", { class: "inflight" }, waiting.length ? "on its way: " + waiting.join(", ") : "")));
+    });
+    var byWall = s.msgs.slice().sort(function (a, b) { return a.wall - b.wall; });
+    var byLam = s.msgs.slice().sort(function (a, b) { return a.lam - b.lam || (NAME[a.from] < NAME[b.from] ? -1 : 1); });
+    var ord = Kit.clear(document.getElementById("orders"));
+    ord.appendChild(orderEl("By wall-clock timestamp", ordered(byWall, function (m) { return m.wall + " ms"; })));
+    ord.appendChild(orderEl("By Lamport timestamp", ordered(byLam, function (m) { return "(" + m.lam + ", " + NAME[m.from][0] + ")"; })));
+    ord.appendChild(orderEl("Vector clocks (amber = concurrent)", ordered(byLam, function (m) { return "[" + m.vc.A + "," + m.vc.B + "," + m.vc.C + "]"; }), true));
+    document.getElementById("deliver").disabled = !s.flight.length;
+    document.getElementById("all").disabled = !s.flight.length;
+  }
+
+  document.getElementById("deliver").addEventListener("click", function () { deliver(0); });
+  document.getElementById("all").addEventListener("click", function () { while (deliver(0)) { /* drain */ } });
+  document.getElementById("sliders").appendChild(Kit.slider({ label: "Bryce’s clock offset", min: -60, max: 30, step: 5, value: OFF.B,
+    format: function (v) { return (v > 0 ? "+" : "") + v + " ms"; }, onInput: function (v) { OFF.B = v; player.reset(); } }).element);
+  var player = Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1000, speeds: false });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does a node do when it receives a Lamport timestamp with a larger counter than its own?",
+      options: ["Ignores it", "Moves its own counter up to that value", "Resets to zero"],
+      answer: 1, explain: "That jump is what makes the order consistent with causality (p. 421)." },
+    { q: "Two messages have Lamport timestamps (1, Aaliyah) and (2, Bryce). What can you conclude?",
+      options: ["Aaliyah’s happened before Bryce’s", "Only that Aaliyah’s sorts first — they may or may not be concurrent", "They were concurrent"],
+      answer: 1, explain: "With different counters you can’t tell whether they were concurrent; that needs vector clocks (p. 422)." },
+    { q: "Are Lamport clocks linearizable?",
+      options: ["Yes", "No — they order events consistently with causality but don’t ensure a value is up to date", "Only on one node"],
+      answer: 1, explain: "Lamport clocks provide a total order, not linearizability (p. 420)." }
+  ]);
+})();
+</script>
+</body>
+</html>

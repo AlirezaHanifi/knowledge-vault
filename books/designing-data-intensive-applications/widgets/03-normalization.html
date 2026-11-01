@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Normalize or Denormalize</title>
+<meta name="description" content="Store a region once and reference it by ID, or copy its name into every profile? Rename a region, read profiles, and watch the costs move between the write path and the read path. Illustrates DDIA 2nd ed., Chapter 3.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .tables { display: grid; gap: 12px; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+  @media (max-width: 760px) { .tables { grid-template-columns: minmax(0, 1fr); } }
+  table.data tr.touch td { background: var(--warn-soft); }
+  table.data tr.read td { background: var(--accent-soft); }
+  table.data tr.stale td.region { color: var(--bad); text-decoration: line-through; }
+  .cost { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+  .mix { display: grid; gap: 8px; }
+  .verdict-box { font-size: .92rem; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-data-models-and-query-languages.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Normalization</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · Data Models and Query Languages</div>
+  <h1>Normalize or denormalize?</h1>
+  <p class="lede">A profile says where a person lives. You can store the region once and give every profile its ID (normalized), or copy the region’s name into every profile (denormalized). One makes reads do a join; the other makes a rename touch many rows — and risks copies that disagree.</p>
+  <p class="source-note">Illustrates “Normalization, Denormalization, and Joins” (pp. 72–75), which uses the region “Washington, DC, United States” as its example. The profiles, the second region and the cost model (one row read or written = one unit) are the vault’s own simplifications.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="row" style="margin-bottom:12px">
+      <div id="mode"></div>
+      <span class="spacer"></span>
+      <button class="btn" type="button" id="read">Read a profile</button>
+      <button class="btn primary" type="button" id="rename">Rename the region</button>
+      <button class="btn" type="button" id="reset">↺ Reset</button>
+    </div>
+    <div class="tables" id="tables"></div>
+  </div>
+
+  <div class="grid-2" style="margin-top:16px">
+    <div class="panel">
+      <p class="panel-title">Cost so far</p>
+      <div class="cost">
+        <div class="stat"><span class="stat-label">Rows read</span><span class="stat-value" id="reads">0</span></div>
+        <div class="stat"><span class="stat-label">Rows written</span><span class="stat-value" id="writes">0</span></div>
+        <div class="stat"><span class="stat-label">Copies still stale</span><span class="stat-value" id="stale">0</span></div>
+      </div>
+      <ol id="log" style="margin-top:12px"></ol>
+    </div>
+    <div class="panel mix">
+      <p class="panel-title">Which wins for a workload?</p>
+      <div id="ratio"></div>
+      <div id="sharing"></div>
+      <div class="callout verdict-box" id="verdict"></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Normalized: one fact, one place.</strong> A rename is a single write, and every profile sees it at once — but each profile read needs a second lookup (a join).</li>
+    <li><strong>Denormalized: reads are self-contained</strong>, but a rename must update every copy. Step through it: until the last row is written, readers can see two spellings of the same region.</li>
+    <li><strong>The right choice depends on the workload.</strong> Frequent reads and rare changes favour copying; frequent changes favour referencing. Many systems keep normalized data as the system of record and maintain denormalized views derived from it.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-data-models-and-query-languages.html"><small>Lesson</small>3. Data Models and Query Languages</a></li>
+    <li><a href="02-tail-latency.html"><small>Simulation</small>Percentiles and tail latency</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var OLD = "Washington, DC, United States", NEW = "Washington, D.C., USA";
+  var PEOPLE = ["Ada", "Ben", "Chen", "Dara", "Emil", "Fatima", "Goran", "Hana"];
+  var mode = "norm", regions, profiles, reads, writes, renaming = null, highlight = {}, readIdx = 0;
+  var log = Kit.log(Kit.$("#log"), { max: 40 });
+
+  function reset() {
+    regions = [{ id: 1, name: OLD }, { id: 2, name: "Seattle, WA, United States" }];
+    profiles = PEOPLE.map(function (n, i) { var r = i % 4 === 3 ? 2 : 1; return { id: 100 + i, name: n, region_id: r, region: regions[r - 1].name }; });
+    reads = 0; writes = 0; renaming = null; highlight = {}; readIdx = 0;
+    log.clear(); render();
+  }
+  // Copies that still show the old name while a denormalized rename is in progress.
+  function stale() { return renaming ? renaming.queue.length : 0; }
+  function render() {
+    var t = Kit.clear(Kit.$("#tables"));
+    var head = mode === "norm" ? ["id", "name", "region_id"] : ["id", "name", "region"];
+    var rows = profiles.map(function (p) {
+      var cls = highlight["p" + p.id] || "";
+      if (mode === "denorm" && p.region_id === 1 && renaming && p.region === renaming.from) cls += " stale";
+      return el("tr", { class: cls }, el("td", { class: "num" }, p.id), el("td", null, p.name),
+        el("td", { class: "region" }, mode === "norm" ? String(p.region_id) : p.region));
+    });
+    t.appendChild(el("div", { class: "table-wrap" }, el("p", { class: "panel-title" }, "profiles"),
+      el("table", { class: "data" }, el("thead", null, el("tr", null, head.map(function (h) { return el("th", null, h); }))), el("tbody", null, rows))));
+    if (mode === "norm") {
+      t.appendChild(el("div", { class: "table-wrap" }, el("p", { class: "panel-title" }, "regions"),
+        el("table", { class: "data" }, el("thead", null, el("tr", null, el("th", null, "id"), el("th", null, "name"))),
+          el("tbody", null, regions.map(function (r) { return el("tr", { class: highlight["r" + r.id] || "" }, el("td", { class: "num" }, r.id), el("td", null, r.name)); })))));
+    } else {
+      t.appendChild(el("div", { class: "callout" }, "No regions table: each profile carries its own copy of the region name."));
+    }
+    Kit.$("#reads").textContent = reads;
+    Kit.$("#writes").textContent = writes;
+    var s = stale();
+    var st = Kit.$("#stale");
+    st.textContent = s; st.className = "stat-value" + (s ? " bad" : "");
+    Kit.$("#rename").textContent = renaming ? "Write next copy ›" : "Rename the region";
+    Kit.$("#read").disabled = false;
+  }
+
+  Kit.$("#read").addEventListener("click", function () {
+    var p = profiles[readIdx++ % profiles.length];
+    highlight = {}; highlight["p" + p.id] = "read";
+    if (mode === "norm") {
+      var r = regions[p.region_id - 1];
+      highlight["r" + r.id] = "read"; reads += 2;
+      log.add("Read " + p.name + ": profile row + join to regions → " + r.name, "muted");
+    } else {
+      reads += 1;
+      log.add("Read " + p.name + ": one row → " + p.region, stale() ? "warn" : "muted");
+    }
+    render();
+  });
+  Kit.$("#rename").addEventListener("click", function () {
+    highlight = {};
+    if (mode === "norm") {
+      var target = regions[0].name === OLD ? NEW : OLD;
+      regions[0].name = target; writes += 1; highlight.r1 = "touch";
+      log.add("Rename: 1 row written in regions → every profile sees “" + target + "”", "ok");
+      render(); return;
+    }
+    if (!renaming) {
+      var from = profiles.filter(function (p) { return p.region_id === 1; })[0].region;
+      renaming = { from: from, to: from === OLD ? NEW : OLD, queue: profiles.filter(function (p) { return p.region_id === 1; }) };
+      log.add("Rename started: " + renaming.queue.length + " copies to update", "warn");
+    }
+    var p = renaming.queue.shift();
+    p.region = renaming.to; writes += 1; highlight["p" + p.id] = "touch";
+    log.add("Wrote copy in " + p.name + "’s row" + (renaming.queue.length ? " — " + renaming.queue.length + " still say the old name" : " — done"), renaming.queue.length ? "warn" : "ok");
+    if (!renaming.queue.length) renaming = null;
+    render();
+  });
+  Kit.$("#reset").addEventListener("click", reset);
+
+  var seg = Kit.segmented({ label: "Storage layout", value: mode,
+    options: [{ value: "norm", label: "Normalized (region ID)" }, { value: "denorm", label: "Denormalized (copied name)" }],
+    onChange: function (v) { mode = v; reset(); } });
+  Kit.$("#mode").appendChild(seg.element);
+
+  // Workload comparison
+  var ratio = 95, share = 6;
+  function verdict() {
+    var n = 1000, r = n * ratio / 100, w = n - r;
+    var norm = r * 2 + w * 1, den = r * 1 + w * share;
+    var box = Kit.$("#verdict");
+    box.className = "callout verdict-box " + (den < norm ? "ok" : "warn");
+    box.textContent = "Per 1,000 operations: normalized ≈ " + Math.round(norm) + " row operations, denormalized ≈ " + Math.round(den) +
+      ". " + (den < norm ? "Copying wins: reads dominate." : "Referencing wins: renames are too frequent or too widely shared.");
+  }
+  var s1 = Kit.slider({ label: "Reads among operations", min: 50, max: 99, value: ratio, unit: "%", onInput: function (v) { ratio = v; verdict(); } });
+  var s2 = Kit.slider({ label: "Profiles sharing a region", min: 1, max: 100, value: share, hint: "How many copies a rename must update when denormalized.", onInput: function (v) { share = v; verdict(); } });
+  Kit.$("#ratio").appendChild(s1.element);
+  Kit.$("#sharing").appendChild(s2.element);
+  verdict();
+  reset();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "Which is an advantage of storing a region ID rather than the region’s name in each profile?",
+      options: ["Reads never need a join", "The name is stored once, so it is spelled consistently and can be changed in one place", "It uses a document database", "Profiles become independent of each other"],
+      answer: 1, explain: "Normalization stores each fact once and refers to it by ID: consistent spelling, easy updates, and support for localization and search (pp. 72–74)." },
+    { q: "What is the main cost of denormalization?",
+      options: ["Reads need more joins", "Writes must update every copy, and copies can become inconsistent", "It prevents caching", "It requires a schema"],
+      answer: 1, explain: "Denormalized data is faster to read but more expensive to keep up to date, and is a form of derived data (pp. 74–75)." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Column Storage and Bitmap Indexes</title>
+<meta name="description" content="Store a fact table by column, turn a column into one bitmap per distinct value, run-length encode the bitmaps, and answer IN and AND filters with bitwise OR and AND. Illustrates DDIA Chapter 4.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .grid24 { display: grid; gap: 3px; font-family: var(--mono); font-size: .72rem; overflow-x: auto; }
+  .ln { display: grid; grid-template-columns: 118px repeat(24, minmax(14px, 1fr)) 84px; gap: 1px; align-items: center; }
+  .ln .lbl { white-space: nowrap; color: var(--ink-2); }
+  .ln .c { text-align: center; padding: 2px 0; border-radius: 2px; background: var(--surface-2); }
+  .ln .c.match { background: var(--ok-soft); color: var(--ok); font-weight: 700; }
+  .ln .b { height: 16px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .ln .b.on { background: var(--s1); border-color: var(--s1); }
+  .ln.sel .lbl { font-weight: 700; color: var(--accent); }
+  .ln.result .b.on { background: var(--ok); border-color: var(--ok); }
+  .ln.result .lbl { font-weight: 700; color: var(--ok); }
+  .ln .rle { color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 6px; }
+  .ln.head .c { background: none; color: var(--ink-3); }
+  .sub { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin: 8px 0 2px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chips button { font: inherit; font-family: var(--mono); font-size: .8rem; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+  .chips button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  code.q { display: block; font-size: .82rem; background: var(--surface-2); padding: 8px 10px; border-radius: var(--radius-sm); margin-top: 10px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-storage-and-retrieval.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Column storage</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Storage and Retrieval</div>
+  <h1>Column storage and bitmap indexes</h1>
+  <p class="lede">A column store keeps each column’s values together, in the same row order. A column with few distinct values becomes one bitmap per value — a bit per row — and those mostly-zero bitmaps run-length encode to almost nothing. Filters then turn into bitwise OR and AND.</p>
+  <p class="source-note">Illustrates “Column-Oriented Storage”, “Column compression” and “Sort order in column storage” (pp. 137–141, Figures 4-7 and 4-8, and the two example <code>WHERE</code> clauses on p. 140). The 24 sales rows are the vault’s own toy data; real blocks hold thousands to millions of rows. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="grid24" id="grid" role="img" aria-label="Columns and bitmaps; the result line lists matching rows"></div>
+      <p class="field-hint" style="margin-top:8px">Each column is one line: row <em>k</em> is position <em>k</em> in every line. Run-length encoding (right) lists alternating run lengths, starting with zeros — <code>3,2,19</code> = 3 zeros, 2 ones, 19 zeros.</p>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Query</p>
+        <div class="field"><span class="field-head">product_sk IN (…) — bitwise OR</span><div class="chips" id="prod"></div></div>
+        <div class="field" style="margin-top:10px"><span class="field-head">AND store_sk = … — bitwise AND</span><div id="store"></div></div>
+        <code class="q" id="sql"></code>
+        <label class="check" style="margin-top:12px"><input type="checkbox" id="sorted"> Sort rows by product_sk, then store_sk</label>
+      </div>
+      <div class="panel wide">
+        <p class="panel-title">Result</p>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Row k is bit k everywhere.</strong> AND-ing a product bitmap with a store bitmap only works because every column keeps the rows in the same order.</li>
+    <li><strong>Sparse bitmaps compress.</strong> Each bitmap is mostly zeros; run-length encoding stores a few counts instead of 24 bits.</li>
+    <li><strong>Sorting helps compression.</strong> Sort by product_sk and each product’s ones become one contiguous run — the first sort column compresses best (p. 141).</li>
+    <li><strong>Only touched columns are read.</strong> The query needs product_sk and store_sk; the other columns never leave disk.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-storage-and-retrieval.html"><small>Lesson</small>4. Storage and Retrieval</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var PRODUCTS = [29, 30, 31, 68, 69, 74], STORES = [3, 4, 5];
+  var r = Kit.rng(11), BASE = [];
+  for (var i = 0; i < 24; i++) {
+    BASE.push({ date_key: 140102 + Math.floor(i / 6), product_sk: PRODUCTS[r.int(PRODUCTS.length)], store_sk: STORES[r.int(STORES.length)], quantity: 1 + r.int(5) });
+  }
+  var state = { prods: [31, 68, 69], store: 0, sorted: false };
+
+  function rows() {
+    if (!state.sorted) return BASE;
+    return BASE.slice().sort(function (a, b) { return a.product_sk - b.product_sk || a.store_sk - b.store_sk; });
+  }
+  function bitmap(rs, col, v) { return rs.map(function (row) { return row[col] === v ? 1 : 0; }); }
+  function rle(bits) {
+    var out = [], cur = 0, n = 0;
+    bits.forEach(function (b) { if (b === cur) n++; else { out.push(n); cur = b; n = 1; } });
+    out.push(n);
+    return out;
+  }
+  function line(label, cells, cls, tail, aria) {
+    return Kit.el("div", { class: "ln" + (cls ? " " + cls : ""), "aria-label": aria || null },
+      Kit.el("span", { class: "lbl" }, label), cells, Kit.el("span", { class: "rle" }, tail || ""));
+  }
+  function bitLine(label, bits, cls) {
+    return line(label, bits.map(function (b) { return Kit.el("span", { class: "b" + (b ? " on" : "") }); }), cls, rle(bits).join(","),
+      label + ": rows " + bits.map(function (b, i) { return b ? i + 1 : null; }).filter(Boolean).join(", "));
+  }
+  function render() {
+    var rs = rows();
+    var prodOr = rs.map(function () { return 0; });
+    state.prods.forEach(function (p) { bitmap(rs, "product_sk", p).forEach(function (b, i) { prodOr[i] |= b; }); });
+    var storeBits = state.store ? bitmap(rs, "store_sk", state.store) : null;
+    var result = storeBits ? prodOr.map(function (b, i) { return b & storeBits[i]; }) : prodOr;
+
+    var grid = Kit.clear(document.getElementById("grid"));
+    grid.appendChild(line("row", rs.map(function (_, i) { return Kit.el("span", { class: "c" }, String(i + 1)); }), "head"));
+    grid.appendChild(Kit.el("div", { class: "sub" }, "fact_sales, stored column by column"));
+    [["date_key (1401…)", "date_key"], ["product_sk", "product_sk"], ["store_sk", "store_sk"], ["quantity", "quantity"]].forEach(function (c) {
+      grid.appendChild(line(c[0], rs.map(function (row, i) {
+        var v = c[1] === "date_key" ? String(row.date_key).slice(-2) : String(row[c[1]]);
+        return Kit.el("span", { class: "c" + (result[i] && (c[1] === "product_sk" || c[1] === "store_sk") ? " match" : "") }, v);
+      })));
+    });
+    grid.appendChild(Kit.el("div", { class: "sub" }, "bitmaps for product_sk, one bit per row · RLE"));
+    var rleTotal = 0;
+    PRODUCTS.forEach(function (p) {
+      var b = bitmap(rs, "product_sk", p);
+      rleTotal += rle(b).length;
+      grid.appendChild(bitLine("= " + p, b, state.prods.indexOf(p) >= 0 ? "sel" : null));
+    });
+    grid.appendChild(Kit.el("div", { class: "sub" }, "query"));
+    if (state.prods.length) grid.appendChild(bitLine("OR (" + state.prods.join(",") + ")", prodOr));
+    if (storeBits) grid.appendChild(bitLine("store_sk = " + state.store, storeBits, "sel"));
+    grid.appendChild(bitLine(storeBits ? "AND → result" : "result", result, "result"));
+
+    var where = [];
+    if (state.prods.length) where.push("product_sk IN (" + state.prods.join(", ") + ")");
+    if (state.store) where.push("store_sk = " + state.store);
+    document.getElementById("sql").textContent = "SELECT SUM(quantity) FROM fact_sales" + (where.length ? "\nWHERE " + where.join("\n  AND ") : "") + ";";
+
+    var matches = result.reduce(function (a, b) { return a + b; }, 0);
+    var qty = rs.reduce(function (a, row, i) { return a + (result[i] ? row.quantity : 0); }, 0);
+    var stats = Kit.clear(document.getElementById("stats"));
+    [["Matching rows", matches], ["SUM(quantity)", qty], ["Bitmap bits", PRODUCTS.length * rs.length], ["RLE numbers", rleTotal]].forEach(function (s) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value" }, String(s[1]))));
+    });
+  }
+
+  var prod = document.getElementById("prod");
+  PRODUCTS.forEach(function (p) {
+    var b = Kit.el("button", { type: "button", "aria-pressed": String(state.prods.indexOf(p) >= 0) }, String(p));
+    b.addEventListener("click", function () {
+      var i = state.prods.indexOf(p);
+      if (i >= 0) state.prods.splice(i, 1); else state.prods.push(p);
+      state.prods.sort(function (a, b2) { return a - b2; });
+      b.setAttribute("aria-pressed", String(i < 0));
+      render();
+    });
+    prod.appendChild(b);
+  });
+  document.getElementById("store").appendChild(Kit.segmented({ label: "Store filter", value: 0,
+    options: [{ value: 0, label: "any" }].concat(STORES.map(function (s) { return { value: s, label: String(s) }; })),
+    onChange: function (v) { state.store = v; render(); } }).element);
+  document.getElementById("sorted").addEventListener("change", function (e) { state.sorted = e.target.checked; render(); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How does a column store answer WHERE product_sk IN (31, 68, 69)?",
+      options: ["Scan every row and test each value", "Load the three bitmaps and OR them together", "Look the values up in a B-tree"],
+      answer: 1, explain: "Each value has its own bitmap; IN becomes a bitwise OR (p. 140)." },
+    { q: "Why can the product_sk and store_sk bitmaps be AND-ed?",
+      options: ["Both columns are sorted independently", "Every column stores the rows in the same order, so bit k means row k in both", "Bitmaps are always the same length by chance"],
+      answer: 1, explain: "Sorting columns independently would break this; rows are sorted as a whole even though they are stored by column (p. 140)." },
+    { q: "Which column compresses best after sorting by (product_sk, store_sk)?",
+      options: ["product_sk — its equal values become long runs", "store_sk", "quantity"],
+      answer: 0, explain: "The first sort key gets the longest runs; later keys are only sorted within groups (p. 141)." }
+  ]);
+})();
+</script>
+</body>
+</html>

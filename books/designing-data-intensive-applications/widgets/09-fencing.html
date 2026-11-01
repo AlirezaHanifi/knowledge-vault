@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leases and Fencing Tokens</title>
+<meta name="description" content="A lease-holder pauses, its lease expires, another client takes over — and the paused client wakes up and writes anyway. Turn on fencing tokens and watch the storage reject it. Illustrates DDIA 2nd ed., Chapter 9.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lane-label { font-size: 12px; font-weight: 600; }
+  .axis text { font-size: 10px; fill: var(--ink-3); }
+  .axis line { stroke: var(--line); }
+  .lane-bg { fill: var(--surface-2); }
+  .bar-lease { fill: var(--accent-soft); stroke: var(--accent); }
+  .bar-lease.c2 { fill: color-mix(in srgb, var(--s3) 18%, transparent); stroke: var(--s3); }
+  .bar-pause { fill: url(#hatch); stroke: var(--warn); }
+  .ev circle { stroke: var(--surface); stroke-width: 2; }
+  .ev.ok circle { fill: var(--ok); }
+  .ev.bad circle { fill: var(--bad); }
+  .ev.warn circle { fill: var(--warn); }
+  .ev.muted circle { fill: var(--ink-3); }
+  .ev text { font-size: 10px; }
+  .now { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 3 3; }
+  .store { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-the-trouble-with-distributed-systems.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Fencing tokens</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · The Trouble with Distributed Systems</div>
+  <h1>Leases, process pauses, and fencing tokens</h1>
+  <p class="lede">Client 1 holds a lease that lets it write a file. It checks the lease, then stalls in a long garbage-collection pause. The lease expires, Client 2 takes over and writes — and then Client 1 wakes up, still believing it holds the lease, and writes too.</p>
+  <p class="source-note">Illustrates “Process Pauses” (pp. 366–371) and “Distributed Locks and Leases” (pp. 373–377), Figures 9-4 and 9-5, including the tokens 33 and 34. Time is in abstract ticks; the lease lasts 10 ticks. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="stage" id="stage"></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Controls</p>
+        <div id="player"></div>
+        <div id="pause-slot" style="margin-top:12px"></div>
+        <label class="check" style="margin-top:12px"><input type="checkbox" id="fence"> Storage checks fencing tokens</label>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Storage</p>
+        <div class="store">
+          <div class="stat"><span class="stat-label">File contents</span><span class="stat-value" id="content">—</span></div>
+          <div class="stat"><span class="stat-label">Highest token seen</span><span class="stat-value" id="maxtok">—</span></div>
+        </div>
+        <div class="callout" id="outcome" style="margin-top:12px">Press play or step through the timeline.</div>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Event log</p>
+        <ol id="log"></ol>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The check and the write are not atomic.</strong> Client 1 checked its lease at tick 2 and found it valid; nothing stops time passing before it acts on that knowledge.</li>
+    <li><strong>A paused process doesn’t know it was paused.</strong> From Client 1’s point of view, no time passed at all.</li>
+    <li><strong>Short pauses are harmless.</strong> Drag the pause below the lease length: Client 1 finishes and releases the lease before anyone else needs it.</li>
+    <li><strong>Fencing moves the check to the resource.</strong> The storage remembers the highest token it has seen and rejects older ones — the client’s belief no longer matters.</li>
+    <li><strong>Fencing isn’t a cure-all.</strong> With a pause of 8–9 ticks, Client 1 writes after its lease expired but before Client 2’s first write; the storage has seen no higher token yet, so it accepts the write.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>Lesson</small>9. The Trouble with Distributed Systems</a></li>
+    <li><a href="10-consensus.html"><small>Simulation</small>Consensus: elect a leader, replicate a log</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var LEASE = 10, END = 24;
+  var X0 = 92, DX = 27, LANE_H = 46, TOP = 26;
+  var LANES = [["c1", "Client 1"], ["lock", "Lock service"], ["store", "Storage"], ["c2", "Client 2"]];
+  var pause = 14, fencing = false, now = -1, events = [], applied = 0;
+  var store = { content: null, max: null };
+  var log = Kit.log(Kit.$("#log"));
+
+  // Build the whole scenario for a given pause length.
+  function plan() {
+    var ev = [], wake = 2 + pause, release = null, c2Acq;
+    ev.push({ t: 0, lane: "c1", kind: "ok", text: "Client 1 acquires the lease: token 33, valid until t=" + LEASE });
+    ev.push({ t: 2, lane: "c1", kind: "muted", text: "Client 1 checks the lease — valid. Then a GC pause begins." });
+    if (wake < LEASE) { release = wake + 1; c2Acq = Math.max(5, release); } else { c2Acq = LEASE; }
+    for (var t = 5; t < c2Acq; t++) ev.push({ t: t, lane: "c2", kind: "muted", text: "Client 2 asks for the lease — refused, it is held" });
+    if (wake >= LEASE) ev.push({ t: LEASE, lane: "lock", kind: "warn", text: "Client 1’s lease expires (it is paused and cannot renew)" });
+    ev.push({ t: wake, lane: "c1", kind: wake < LEASE ? "muted" : "warn",
+      text: wake < LEASE ? "Client 1 resumes; its lease is still valid" : "Client 1 wakes up, believing it still holds the lease" });
+    ev.push({ t: wake, lane: "store", write: { who: "Client 1", token: 33, data: "C1" } });
+    if (release !== null) ev.push({ t: release, lane: "c1", kind: "muted", text: "Client 1 releases the lease" });
+    ev.push({ t: c2Acq, lane: "c2", kind: "ok", text: "Client 2 acquires the lease: token 34" });
+    ev.push({ t: c2Acq + 2, lane: "store", write: { who: "Client 2", token: 34, data: "C2" } });
+    ev.forEach(function (e, i) { e.i = i; });
+    // Time order; on a tie Client 2's write goes first (it is the legitimate holder).
+    ev.sort(function (a, b) {
+      if (a.t !== b.t) return a.t - b.t;
+      if (a.write && b.write) return a.write.token === 34 ? -1 : 1;
+      return a.i - b.i;
+    });
+    return ev;
+  }
+
+  function apply(e) {
+    if (!e.write) { log.add("t=" + e.t + "  " + e.text, e.kind); return; }
+    var w = e.write;
+    if (fencing && store.max !== null && w.token < store.max) {
+      e.kind = "bad"; e.text = "Storage rejects " + w.who + "’s write: token " + w.token + " < " + store.max;
+    } else {
+      var overwrite = store.content && store.content !== w.data;
+      store.content = w.data; store.max = Math.max(store.max || 0, w.token);
+      e.kind = (w.token === 33 && e.t >= LEASE) ? "warn" : "ok";
+      e.text = "Storage accepts " + w.who + "’s write (token " + w.token + ")" + (overwrite ? " — overwriting the previous data" : "");
+    }
+    log.add("t=" + e.t + "  " + e.text, e.kind);
+  }
+
+  function outcome() {
+    var box = Kit.$("#outcome");
+    var c1 = events.filter(function (e) { return e.write && e.write.token === 33; })[0];
+    var c2 = events.filter(function (e) { return e.write && e.write.token === 34; })[0];
+    if (applied < events.length) { box.className = "callout"; box.textContent = "Running… t = " + Math.max(now, 0); return; }
+    if (c1.t < LEASE) { box.className = "callout ok"; box.textContent = "Safe: the pause was shorter than the lease, so Client 1 wrote while it really held the lease."; }
+    else if (c1.kind === "bad") { box.className = "callout ok"; box.textContent = "Fenced: the storage had already seen token 34, so the stale write with token 33 was rejected. Client 2’s data survives."; }
+    else if (c1.t > c2.t) { box.className = "callout bad"; box.textContent = "Corrupted: Client 1 overwrote Client 2’s data with an expired lease. Turn on fencing tokens and replay."; }
+    else { box.className = "callout warn"; box.textContent = "Client 1 wrote after its lease expired but before Client 2’s first write — the storage had seen no higher token, so it accepted. Client 2’s write then replaced it."; }
+  }
+
+  function x(t) { return X0 + t * DX; }
+  function laneY(id) { for (var i = 0; i < LANES.length; i++) if (LANES[i][0] === id) return TOP + i * LANE_H + LANE_H / 2; }
+
+  function draw() {
+    var S = Kit.svg, W = x(END) + 20, H = TOP + LANES.length * LANE_H + 8;
+    var root = S("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Timeline of the lease scenario up to t=" + Math.max(now, 0) });
+    root.appendChild(S("defs", null, S("pattern", { id: "hatch", width: 6, height: 6, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" },
+      S("rect", { width: 6, height: 6, fill: "var(--warn-soft)" }), S("line", { x1: 0, y1: 0, x2: 0, y2: 6, stroke: "var(--warn)", "stroke-width": 1.5 }))));
+    var axis = S("g", { class: "axis" });
+    for (var t = 0; t <= END; t += 2) {
+      axis.appendChild(S("line", { x1: x(t), x2: x(t), y1: TOP - 4, y2: H - 6 }));
+      axis.appendChild(S("text", { x: x(t), y: TOP - 10, "text-anchor": "middle" }, "t=" + t));
+    }
+    root.appendChild(axis);
+    LANES.forEach(function (l, i) {
+      var y = TOP + i * LANE_H;
+      root.appendChild(S("rect", { class: "lane-bg", x: X0 - 4, y: y + 8, width: x(END) - X0 + 8, height: LANE_H - 16, rx: 4, opacity: .5 }));
+      root.appendChild(S("text", { class: "lane-label", x: 6, y: y + LANE_H / 2 + 4 }, l[1]));
+    });
+    var vis = Math.max(now, 0);
+    var wake = 2 + pause;
+    var c1End = wake < LEASE ? wake + 1 : LEASE;
+    var c2Acq = events.filter(function (e) { return e.lane === "c2" && /acquires/.test(e.text); })[0].t;
+    function bar(cls, lane, a, b, h) {
+      if (vis <= a) return;
+      var y = laneY(lane);
+      root.appendChild(S("rect", { class: cls, x: x(a), y: y - h / 2, width: Math.max(2, x(Math.min(b, vis)) - x(a)), height: h, rx: 3 }));
+    }
+    bar("bar-lease", "c1", 0, c1End, 22);
+    bar("bar-pause", "c1", 2, wake, 12);
+    bar("bar-lease c2", "c2", c2Acq, END, 22);
+    events.slice(0, applied).forEach(function (e) {
+      var g = S("g", { class: "ev " + e.kind });
+      var y = laneY(e.lane);
+      g.appendChild(S("circle", { cx: x(e.t), cy: y, r: 6 }));
+      if (e.write) g.appendChild(S("text", { x: x(e.t), y: y - 10, "text-anchor": "middle" }, (e.kind === "bad" ? "✗ " : "✓ ") + e.write.token));
+      root.appendChild(g);
+    });
+    if (now >= 0) root.appendChild(S("line", { class: "now", x1: x(vis), x2: x(vis), y1: TOP - 4, y2: H - 6 }));
+    Kit.clear(Kit.$("#stage")).appendChild(root);
+    Kit.$("#content").textContent = store.content || "—";
+    Kit.$("#maxtok").textContent = store.max === null ? "—" : store.max;
+    outcome();
+  }
+
+  function reset() {
+    events = plan(); now = -1; applied = 0; store = { content: null, max: null };
+    log.clear(); draw();
+  }
+  function step() {
+    if (applied >= events.length) return false;
+    now += 1;
+    while (applied < events.length && events[applied].t <= now) apply(events[applied++]);
+    draw();
+    return applied < events.length;
+  }
+
+  Kit.player({ mount: Kit.$("#player"), step: step, reset: reset, interval: 450 });
+  var s = Kit.slider({ label: "GC pause length", min: 2, max: 18, value: pause, unit: " ticks",
+    hint: "Lease length is 10 ticks.", onInput: function (v) { pause = v; reset(); } });
+  Kit.$("#pause-slot").appendChild(s.element);
+  Kit.$("#fence").addEventListener("change", function (e) { fencing = e.target.checked; reset(); });
+  reset();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "Why doesn’t checking the lease right before writing make Client 1 safe?",
+      options: ["The lock service may lie", "The process can pause for an unbounded time between the check and the write", "Clocks on the storage server are wrong", "Leases can only be checked once"],
+      answer: 1, explain: "Any instruction can be followed by a pause (GC, VM suspension, swapping…), so knowledge can be stale by the time it is acted on (pp. 366–371)." },
+    { q: "Who must check the fencing token for it to work?",
+      options: ["The client, before writing", "The lock service", "The resource being protected (here, the storage)", "Every node in the cluster"],
+      answer: 2, explain: "The storage remembers the highest token it has processed and rejects lower ones, so a client with an expired lease cannot do damage even if it is unaware of the expiry (pp. 375–376)." }
+  ]);
+})();
+</script>
+</body>
+</html>

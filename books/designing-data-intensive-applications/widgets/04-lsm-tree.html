@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSM-Tree Explorer</title>
+<meta name="description" content="Write, flush, compact and read from a toy LSM-tree with a write-ahead log and Bloom filters. Illustrates DDIA 2nd ed., Chapter 4.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lsm { display: grid; gap: 12px; }
+  .tier { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px; background: var(--surface); }
+  .tier-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .85rem; font-weight: 600; margin-bottom: 6px; flex-wrap: wrap; }
+  .tier-head .hint { font-weight: 400; color: var(--ink-3); font-size: .78rem; }
+  .tier.mem { border-color: var(--accent); }
+  .tier.disk { background: var(--surface-2); }
+  .tier.hit { outline: 2px solid var(--ok); }
+  .tier.probe { outline: 2px dashed var(--warn); }
+  .tier.skip { opacity: .55; }
+  .bloom { display: flex; gap: 2px; margin-top: 6px; flex-wrap: wrap; }
+  .bloom i { width: 9px; height: 9px; border-radius: 2px; background: var(--line); display: inline-block; }
+  .bloom i.on { background: var(--s4); }
+  .bloom i.q { outline: 2px solid var(--ink); outline-offset: 0; }
+  .chip.tomb { color: var(--bad); }
+  .chip.found { background: var(--ok-soft); border-color: var(--ok); }
+  .empty { color: var(--ink-3); font-size: .8rem; font-style: italic; }
+  .ops { display: grid; gap: 8px; }
+  .ops .row input { width: 70px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-storage-and-retrieval.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">LSM-tree</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Storage and Retrieval</div>
+  <h1>Inside an LSM-tree</h1>
+  <p class="lede">Writes go to an in-memory sorted table and a write-ahead log. When the memtable fills up, it is written out as an immutable sorted file (SSTable). Reads check the newest data first; compaction merges old files so reads stay cheap and overwritten values get discarded.</p>
+  <p class="source-note">Illustrates “Log-Structured Storage” (pp. 118–125) and “Comparing B-Trees and LSM-Trees” (pp. 129–132). A deliberately tiny model: keys are single letters, Bloom filters have 24 bits and 2 hash functions, compaction merges all SSTables into one. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="lsm" id="lsm"></div>
+    </div>
+    <div class="stack">
+      <div class="panel ops">
+        <p class="panel-title">Operations</p>
+        <div class="row">
+          <label for="k">Key</label><input id="k" type="text" maxlength="1" value="m" autocomplete="off">
+          <label for="v">Value</label><input id="v" type="text" maxlength="4" value="1" autocomplete="off">
+        </div>
+        <div class="row">
+          <button class="btn" type="button" id="put">Put</button>
+          <button class="btn" type="button" id="del">Delete</button>
+          <button class="btn" type="button" id="get">Get</button>
+        </div>
+        <div class="row">
+          <button class="btn" type="button" id="flush">Flush memtable</button>
+          <button class="btn" type="button" id="compact">Compact</button>
+          <button class="btn danger" type="button" id="crash">Crash &amp; recover</button>
+        </div>
+        <label class="check"><input type="checkbox" id="auto" checked> Auto-compact at 4 SSTables</label>
+        <div id="cap"></div>
+        <p class="panel-title" style="margin-top:8px">Random workload</p>
+        <div id="player"></div>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Counters</p>
+        <div class="stats" id="stats"></div>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Event log</p>
+        <ol id="log"></ol>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Writes are sequential appends.</strong> A put touches only memory and the log; disk files are never modified in place — only written whole and later deleted.</li>
+    <li><strong>Reads may probe several files.</strong> Get a key that was written long ago: the memtable and newer SSTables are checked first. The Bloom filter lets a read skip files that definitely lack the key — but watch for false positives (“maybe”, then not found).</li>
+    <li><strong>Deletes are writes.</strong> A tombstone shadows older values until compaction removes both.</li>
+    <li><strong>Compaction trades write work for read cost.</strong> Watch write amplification rise as the same keys are rewritten into new SSTables.</li>
+    <li><strong>The WAL is only for recovery.</strong> Crash the node: the memtable is rebuilt from the log; flushed SSTables are already durable.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-storage-and-retrieval.html"><small>Lesson</small>4. Storage and Retrieval</a></li>
+    <li><a href="../lab/04-lsm-tree/README.md"><small>Experiment</small>A runnable LSM-tree in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var BITS = 24, KEYS = "abcdefghijklmnopqrstuvwx";
+  var TOMB = "␀"; // tombstone marker
+  var S, r, log = Kit.log(document.getElementById("log"));
+  var capacity = 4, highlight = null;
+
+  function fresh() {
+    S = { mem: {}, wal: [], ssts: [], nextId: 1, userBytes: 0, diskBytes: 0, lastProbe: 0, seq: 1 };
+    r = Kit.rng(2024);
+    highlight = null;
+  }
+
+  // Two cheap string hashes -> Bloom filter bit positions.
+  function hashes(k) {
+    var h1 = 2166136261, h2 = 5381;
+    for (var i = 0; i < k.length; i++) { h1 = Math.imul(h1 ^ k.charCodeAt(i), 16777619); h2 = (h2 * 33 + k.charCodeAt(i)) | 0; }
+    return [Math.abs(h1) % BITS, Math.abs(h2 * 7 + 3) % BITS];
+  }
+  function bloomFor(keys) {
+    var bits = new Array(BITS).fill(false);
+    keys.forEach(function (k) { hashes(k).forEach(function (b) { bits[b] = true; }); });
+    return bits;
+  }
+  function size(k, v) { return k.length + String(v).length + 2; }
+
+  function put(k, v, quiet) {
+    S.mem[k] = v; S.wal.push(k + "=" + v);
+    S.userBytes += size(k, v); S.diskBytes += size(k, v); // the WAL append
+    if (!quiet) log.add((v === TOMB ? "DELETE " + k : "PUT " + k + "=" + v) + " → memtable + WAL");
+    if (Object.keys(S.mem).length >= capacity) flush();
+  }
+
+  function flush() {
+    var keys = Object.keys(S.mem).sort();
+    if (!keys.length) { log.add("Flush: memtable is empty", "muted"); return; }
+    var rows = keys.map(function (k) { return [k, S.mem[k]]; });
+    var t = { id: S.nextId++, rows: rows, bloom: bloomFor(keys), born: S.seq++ };
+    S.ssts.unshift(t);
+    rows.forEach(function (kv) { S.diskBytes += size(kv[0], kv[1]); });
+    S.mem = {}; S.wal = [];
+    log.add("Flush → SSTable #" + t.id + " (" + rows.length + " keys, sorted); WAL truncated", "ok");
+    if (document.getElementById("auto").checked && S.ssts.length >= 4) compact();
+  }
+
+  function compact() {
+    if (S.ssts.length < 2) { log.add("Compact: need at least two SSTables", "muted"); return; }
+    var merged = {}, dropped = 0, input = 0;
+    // Oldest first, so newer values overwrite older ones (the merge step of a k-way merge).
+    S.ssts.slice().reverse().forEach(function (t) {
+      t.rows.forEach(function (kv) { if (kv[0] in merged) dropped++; merged[kv[0]] = kv[1]; input++; });
+    });
+    var keys = Object.keys(merged).sort(), tombs = 0;
+    var rows = [];
+    keys.forEach(function (k) { if (merged[k] === TOMB) tombs++; else rows.push([k, merged[k]]); });
+    var ids = S.ssts.map(function (t) { return "#" + t.id; }).reverse().join(" + ");
+    var t = { id: S.nextId++, rows: rows, bloom: bloomFor(rows.map(function (kv) { return kv[0]; })), born: S.seq++ };
+    rows.forEach(function (kv) { S.diskBytes += size(kv[0], kv[1]); });
+    S.ssts = [t];
+    log.add("Compact " + ids + " → #" + t.id + ": " + input + " entries in, " + rows.length + " out (" + dropped + " overwritten, " + tombs + " tombstones purged)", "ok");
+  }
+
+  function get(k) {
+    highlight = { key: k, tiers: {} };
+    var probes = 0;
+    if (k in S.mem) {
+      highlight.tiers.mem = "hit";
+      S.lastProbe = 0;
+      log.add("GET " + k + " → memtable: " + (S.mem[k] === TOMB ? "deleted" : S.mem[k]), "ok");
+      return;
+    }
+    highlight.tiers.mem = "probe";
+    for (var i = 0; i < S.ssts.length; i++) {
+      var t = S.ssts[i];
+      var maybe = hashes(k).every(function (b) { return t.bloom[b]; });
+      if (!maybe) { highlight.tiers[t.id] = "skip"; continue; }
+      probes++;
+      var row = t.rows.filter(function (kv) { return kv[0] === k; })[0];
+      if (row) {
+        highlight.tiers[t.id] = "hit"; S.lastProbe = probes;
+        log.add("GET " + k + " → SSTable #" + t.id + ": " + (row[1] === TOMB ? "deleted (tombstone)" : row[1]) + " · " + probes + " file read(s)", "ok");
+        return;
+      }
+      highlight.tiers[t.id] = "probe";
+      log.add("Bloom filter of #" + t.id + " said “maybe” for " + k + " — false positive", "warn");
+    }
+    S.lastProbe = probes;
+    log.add("GET " + k + " → not found · " + probes + " file read(s)", probes ? "warn" : "muted");
+  }
+
+  function crash() {
+    var lost = Object.keys(S.mem).length;
+    var wal = S.wal.slice();
+    S.mem = {};
+    log.add("CRASH: memtable lost (" + lost + " keys in memory)", "bad");
+    wal.forEach(function (line) { var i = line.indexOf("="); S.mem[line.slice(0, i)] = line.slice(i + 1); });
+    log.add("Recovery: replayed " + wal.length + " WAL record(s) → memtable restored", "ok");
+  }
+
+  function chips(rows, extra) {
+    if (!rows.length) return el("span", { class: "empty" }, "empty");
+    return rows.map(function (kv) {
+      var cls = "chip" + (kv[1] === TOMB ? " tomb" : "") + (highlight && highlight.key === kv[0] && extra === "hit" ? " found" : "");
+      return el("span", { class: cls }, kv[0] + "=" + (kv[1] === TOMB ? "✝" : kv[1]));
+    });
+  }
+
+  function render() {
+    var root = Kit.clear(document.getElementById("lsm"));
+    var memRows = Object.keys(S.mem).sort().map(function (k) { return [k, S.mem[k]]; });
+    var hm = highlight && highlight.tiers.mem;
+    root.appendChild(el("div", { class: "tier mem" + (hm ? " " + hm : "") },
+      el("div", { class: "tier-head" }, el("span", null, "Memtable (in memory, sorted)"),
+        el("span", { class: "hint" }, memRows.length + " / " + capacity + " keys")),
+      chips(memRows, hm)));
+    root.appendChild(el("div", { class: "tier disk" },
+      el("div", { class: "tier-head" }, el("span", null, "Write-ahead log (on disk, append-only)"),
+        el("span", { class: "hint" }, "for crash recovery only")),
+      S.wal.length ? S.wal.map(function (l) { return el("span", { class: "chip" }, l.replace(TOMB, "✝")); }) : el("span", { class: "empty" }, "empty")));
+    if (!S.ssts.length) root.appendChild(el("p", { class: "empty" }, "No SSTables yet — fill the memtable or press Flush."));
+    S.ssts.forEach(function (t, i) {
+      var h = highlight && highlight.tiers[t.id];
+      var q = highlight ? hashes(highlight.key) : [];
+      root.appendChild(el("div", { class: "tier disk" + (h ? " " + h : "") },
+        el("div", { class: "tier-head" },
+          el("span", null, "SSTable #" + t.id + (i === 0 ? " · newest" : i === S.ssts.length - 1 ? " · oldest" : "")),
+          el("span", { class: "hint" }, h === "skip" ? "skipped: Bloom filter says no" : h === "probe" ? "read, key absent" : h === "hit" ? "found here" : t.rows.length + " keys")),
+        chips(t.rows, h),
+        el("div", { class: "bloom", title: "Bloom filter bits", "aria-label": "Bloom filter: " + t.bloom.filter(Boolean).length + " of " + BITS + " bits set" },
+          t.bloom.map(function (on, b) { return el("i", { class: (on ? "on" : "") + (q.indexOf(b) >= 0 ? " q" : "") }); }))));
+    });
+    var wa = S.userBytes ? S.diskBytes / S.userBytes : 0;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["SSTables", S.ssts.length], ["Last read", S.lastProbe + " file(s)"], ["Write amp.", wa ? wa.toFixed(2) + "×" : "–"]].forEach(function (x) {
+      st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value" }, x[1])));
+    });
+  }
+
+  function key() { var k = document.getElementById("k").value.trim().toLowerCase(); return /^[a-z]$/.test(k) ? k : null; }
+  function act(fn) { return function () { highlight = null; fn(); render(); }; }
+  document.getElementById("put").addEventListener("click", act(function () {
+    var k = key(); if (!k) return log.add("Key must be a single letter a–z", "bad");
+    put(k, document.getElementById("v").value.trim() || "1");
+  }));
+  document.getElementById("del").addEventListener("click", act(function () {
+    var k = key(); if (!k) return log.add("Key must be a single letter a–z", "bad");
+    put(k, TOMB);
+  }));
+  document.getElementById("get").addEventListener("click", function () {
+    var k = key(); if (!k) { log.add("Key must be a single letter a–z", "bad"); return; }
+    get(k); render();
+  });
+  document.getElementById("flush").addEventListener("click", act(flush));
+  document.getElementById("compact").addEventListener("click", act(compact));
+  document.getElementById("crash").addEventListener("click", act(crash));
+
+  document.getElementById("cap").appendChild(Kit.slider({ label: "Memtable capacity", min: 2, max: 8, value: capacity, unit: " keys",
+    onInput: function (v) { capacity = v; render(); } }).element);
+
+  // Random workload: mostly puts over a skewed key space, some gets and deletes.
+  function step() {
+    highlight = null;
+    var k = KEYS[Math.min(KEYS.length - 1, Math.floor(Math.pow(r.next(), 1.6) * KEYS.length))];
+    var x = r.next();
+    if (x < 0.65) put(k, String(1 + r.int(99)));
+    else if (x < 0.72) put(k, TOMB);
+    else get(k);
+    render();
+  }
+  Kit.player({ mount: document.getElementById("player"), step: step, interval: 900,
+    reset: function () { fresh(); log.clear(); log.add("Reset: empty tree", "muted"); render(); } });
+
+  fresh();
+  ["c", "a", "t", "s"].forEach(function (k, i) { put(k, String(i + 1), true); });
+  ["d", "o", "g"].forEach(function (k, i) { put(k, String(i + 5), true); });
+  put("a", "9", true);
+  log.add("Seeded: 8 writes, one SSTable flushed; “a” was overwritten in the memtable", "muted");
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why can an SSTable be read with a sparse index rather than an index entry per key?",
+      options: ["Because keys inside an SSTable are sorted", "Because SSTables are small", "Because of the Bloom filter"],
+      answer: 0, explain: "Sorted keys mean you only need the offset of some keys; a lookup scans forward from the nearest preceding one." },
+    { q: "A Bloom filter for an SSTable answers “no”. What do you know?",
+      options: ["The key is definitely not in that SSTable", "The key is probably not in that SSTable", "The key was deleted"],
+      answer: 0, explain: "Bloom filters have no false negatives; a “no” lets the read skip the file. “Maybe” can be a false positive." },
+    { q: "Why are deletes written as tombstones instead of removing the key?",
+      options: ["SSTables are immutable, so older files may still contain the key", "Tombstones are faster to write", "To keep the WAL small"],
+      answer: 0, explain: "Older SSTables still hold the old value; the tombstone shadows it until compaction discards both." }
+  ]);
+})();
+</script>
+</body>
+</html>

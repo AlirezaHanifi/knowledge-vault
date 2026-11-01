@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Credit-Score Feedback Loop</title>
+<meta name="description" content="Give 300 workers random misfortunes, let employers screen applicants by credit score, and watch a temporary setback turn into a self-reinforcing spiral of joblessness. Illustrates DDIA Chapter 14.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .charts { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .charts figure { margin: 0; }
+  .charts figcaption { font-size: .78rem; color: var(--ink-3); margin-bottom: 4px; }
+  .dots { display: grid; grid-template-columns: repeat(50, 1fr); gap: 2px; margin-top: 6px; }
+  .dots i { aspect-ratio: 1; border-radius: 50%; background: var(--ok); }
+  .dots i.out { background: var(--warn); }
+  .dots i.trap { background: var(--bad); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .76rem; color: var(--ink-2); margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/14-doing-the-right-thing.html">Chapter 14</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Feedback loop</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 14 · Doing the Right Thing</div>
+  <h1>A credit-score feedback loop</h1>
+  <p class="lede">A good worker hits a misfortune outside their control, misses payments, and their credit score drops. If employers screen applicants by credit score, the drop makes a new job harder to find — and joblessness pushes the score lower still. Compare the same population with and without that screening.</p>
+  <p class="source-note">Illustrates “Feedback Loops” (pp. 588–589) and “Responsibility and Accountability” (pp. 587–588). Everything numeric here — 300 workers, monthly steps, shock rate, score changes, hiring odds — is the vault’s own toy model, not data from the book. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="charts">
+        <figure>
+          <figcaption>Share without work, month by month</figcaption>
+          <svg id="unemp" role="img" aria-label="Unemployment over time, with and without credit screening"></svg>
+        </figure>
+        <figure>
+          <figcaption>Share out of work for 12+ months (trapped)</figcaption>
+          <svg id="trap" role="img" aria-label="Long-term unemployment over time"></svg>
+        </figure>
+      </div>
+      <p class="panel-title" style="margin-top:12px">The 300 workers at the end of the run (with screening as set)</p>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+      <div class="legend"><span><i style="background:var(--ok)"></i>employed</span><span><i style="background:var(--warn)"></i>out of work</span><span><i style="background:var(--bad)"></i>out of work 12+ months</span></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">The system</p>
+        <label class="check"><input type="checkbox" id="screen" checked> Employers reject applicants with low credit scores</label>
+        <div id="sliders" style="margin-top:10px"></div>
+      </div>
+      <div class="panel wide">
+        <p class="panel-title">After 10 years</p>
+        <div class="stats" id="stats"></div>
+        <p class="field-hint" id="verdict" aria-live="polite" style="margin:8px 0 0"></p>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Same people, same luck.</strong> Both runs use identical misfortunes; only the screening differs — yet long-term exclusion appears only with it.</li>
+    <li><strong>A spiral, not a verdict.</strong> Trapped workers weren’t worse workers; their score fell because they lost a job, and then kept them from the next one.</li>
+    <li><strong>Systems thinking.</strong> Looking only at the scoring model, each rejection seems “prudent”; the harm shows up only when you model the people responding to it (p. 589).</li>
+    <li><strong>Tune the screen.</strong> A stricter threshold or harsher score drops deepen the trap; recovery while unemployed is impossible in this model, as in the book’s story.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/14-doing-the-right-thing.html"><small>Lesson</small>14. Doing the Right Thing</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var N = 300, MONTHS = 120;
+  var cfg = { shock: 1.5, threshold: 600, drop: 25 };
+
+  // Monthly toy model: employed workers lose their job with probability `shock`% (misfortune);
+  // while out of work they miss payments and lose `drop` points per month; at work the score
+  // recovers 10 points per month up to 750. An applicant is hired with 30% chance per month,
+  // or 3% if screening is on and their score is below `threshold`.
+  function run(screen) {
+    var r = Kit.rng(2024), people = [], unemp = [], trapped = [];
+    for (var i = 0; i < N; i++) people.push({ score: 720, out: 0 });
+    for (var m = 1; m <= MONTHS; m++) {
+      var u = 0, t = 0;
+      people.forEach(function (p) {
+        var shock = r.next(), hire = r.next();
+        if (p.out === 0) {
+          if (shock < cfg.shock / 100) p.out = 1; else p.score = Math.min(750, p.score + 10);
+        } else {
+          p.score = Math.max(300, p.score - cfg.drop);
+          var chance = screen && p.score < cfg.threshold ? 0.03 : 0.30;
+          if (hire < chance) p.out = 0; else p.out++;
+        }
+        if (p.out) u++;
+        if (p.out > 12) t++;
+      });
+      unemp.push([m / 12, u / N * 100]); trapped.push([m / 12, t / N * 100]);
+    }
+    return { people: people, unemp: unemp, trapped: trapped };
+  }
+
+  function render() {
+    var screen = document.getElementById("screen").checked;
+    var on = run(true), off = run(false), cur = screen ? on : off;
+    var yMax = Math.max(10, Math.ceil(Math.max.apply(null, on.unemp.concat(off.unemp).map(function (p) { return p[1]; })) / 5) * 5);
+    var opts = function (a, b) {
+      return { width: 360, height: 200, xMax: 10, yMax: yMax, xLabel: "years", yFormat: function (v) { return v + "%"; },
+        series: [{ points: a, cls: "bad", label: "with screening" }, { points: b, cls: "s1 dashed", label: "without" }] };
+    };
+    Kit.lineChart(document.getElementById("unemp"), opts(on.unemp, off.unemp));
+    Kit.lineChart(document.getElementById("trap"), opts(on.trapped, off.trapped));
+
+    var dots = Kit.clear(document.getElementById("dots"));
+    cur.people.forEach(function (p) { dots.appendChild(Kit.el("i", { class: p.out > 12 ? "trap" : p.out ? "out" : null })); });
+
+    var last = function (s) { return s[s.length - 1][1]; };
+    var stats = Kit.clear(document.getElementById("stats"));
+    [["Out of work", last(cur.unemp).toFixed(0) + "%", ""], ["Trapped 12+ mo", last(cur.trapped).toFixed(0) + "%", last(cur.trapped) > 2 ? "bad" : "ok"],
+     ["Without screening", last(off.trapped).toFixed(0) + "% trapped", ""]].forEach(function (x) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    document.getElementById("verdict").textContent = screen
+      ? "Identical misfortunes; screening by credit score turns " + last(on.trapped).toFixed(0) + "% of workers into long-term unemployed, versus " + last(off.trapped).toFixed(0) + "% without it."
+      : "Without screening, people recover from the same misfortunes — joblessness stays short.";
+  }
+
+  var sl = document.getElementById("sliders");
+  sl.appendChild(Kit.slider({ label: "Misfortune per month", min: 0.5, max: 4, step: 0.5, value: cfg.shock, unit: "%", onInput: function (v) { cfg.shock = v; render(); } }).element);
+  sl.appendChild(Kit.slider({ label: "Score needed to be hired", min: 450, max: 700, step: 10, value: cfg.threshold, onInput: function (v) { cfg.threshold = v; render(); } }).element);
+  sl.appendChild(Kit.slider({ label: "Score lost per month out of work", min: 5, max: 50, step: 5, value: cfg.drop, onInput: function (v) { cfg.drop = v; render(); } }).element);
+  document.getElementById("screen").addEventListener("change", render);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "In the book’s example, what makes the credit-score loop self-reinforcing?",
+      options: ["Workers become less skilled", "Joblessness worsens the score, and the score is used to decide hiring", "Credit agencies deliberately punish the unemployed"],
+      answer: 1, explain: "A misfortune lowers the score, which blocks hiring, which pushes people toward poverty and lowers the score further (pp. 588–589)." },
+    { q: "What approach does the book suggest for anticipating such loops?",
+      options: ["More training data", "Systems thinking — considering the whole system, including the people interacting with it", "Removing protected attributes"],
+      answer: 1, explain: "Many consequences can be predicted by thinking about the entire system, not just its computerized parts (p. 589)." },
+    { q: "How does ML-based scoring differ from a traditional credit score, per the book?",
+      options: ["It asks who is similar to you and how such people behaved", "It only uses your own borrowing history", "It is easier to appeal"],
+      answer: 0, explain: "Predictive analytics stereotypes by similarity, using wider and more opaque inputs (pp. 587–588)." }
+  ]);
+})();
+</script>
+</body>
+</html>
