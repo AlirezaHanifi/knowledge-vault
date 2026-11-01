@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shuffle and Sort-Merge Join</title>
+<meta name="description" content="Step a batch join through map, shuffle, sort and reduce: activity events meet user records by user ID, and a secondary sort keeps reducer memory to one record. Illustrates DDIA 2nd ed., Chapter 11.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .pipeline { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 760px) { .pipeline { grid-template-columns: minmax(0, 1fr); } }
+  .col { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; background: var(--surface); min-height: 120px; }
+  .col.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .col h3 { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); margin: 0 0 6px; }
+  .box { border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); padding: 6px; margin-bottom: 8px; }
+  .box-title { font-size: .75rem; font-weight: 600; color: var(--ink-2); margin-bottom: 4px; display: flex; justify-content: space-between; gap: 6px; }
+  .rec { display: block; font-family: var(--mono); font-size: .74rem; padding: 2px 6px; margin: 2px 0; border-radius: 4px; border: 1px solid var(--line); background: var(--surface-2); overflow-wrap: anywhere; }
+  .rec.user { border-left: 4px solid var(--s2); }
+  .rec.event { border-left: 4px solid var(--s1); }
+  .rec.out { border-left: 4px solid var(--s3); }
+  .rec.hold { outline: 2px solid var(--warn); }
+  .rec.cur { background: var(--accent-soft); }
+  .k { font-weight: 700; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/11-batch-processing.html">Chapter 11</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Sort-merge join</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 11 · Batch Processing</div>
+  <h1>Shuffle and sort-merge join</h1>
+  <p class="lede">To analyse page views by age, a batch job joins activity events with the user database. Mappers key every record by user ID; the shuffle routes each key to one reducer and sorts it; the reducer then sees one user’s record next to that user’s events — no lookups, no network requests.</p>
+  <p class="source-note">Illustrates “Shuffling Data” and “Joins and Grouping” (pp. 469–473), after Figures 11-1 to 11-3. The records, the two reducers and the hash function (user number mod 2) are the vault’s own toy choices; implementation is the vault’s own.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="row" style="margin-bottom:12px">
+      <div id="player"></div>
+      <span class="spacer"></span>
+      <label class="check"><input type="checkbox" id="secondary" checked> Secondary sort (user record first)</label>
+    </div>
+    <div class="pipeline" id="pipeline"></div>
+  </div>
+
+  <div class="grid-2" style="margin-top:16px">
+    <div class="panel">
+      <p class="panel-title">Reducer memory</p>
+      <div class="grid-3">
+        <div class="stat"><span class="stat-label">Stage</span><span class="stat-value" id="stage">inputs</span></div>
+        <div class="stat"><span class="stat-label">Held now (both reducers)</span><span class="stat-value" id="held">0</span></div>
+        <div class="stat"><span class="stat-label">Peak (both reducers)</span><span class="stat-value" id="peak">0</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="panel-title">Event log</p>
+      <ol id="log"></ol>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The shuffle is a distributed sort.</strong> Each mapper splits its output by hash of the key, one partition per reducer; each reducer merges the sorted partitions it fetches from every mapper.</li>
+    <li><strong>All records with the same key meet in one place.</strong> That is what makes the join local: the reducer needs no database lookups.</li>
+    <li><strong>The secondary sort keeps memory constant.</strong> With the user record first, the reducer holds one record at a time. Turn it off and the reducer must buffer a user’s events until the user record turns up.</li>
+    <li><strong>Inputs are never modified.</strong> If a reducer failed, it could rerun on the same sorted partitions.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/11-batch-processing.html"><small>Lesson</small>11. Batch Processing</a></li>
+    <li><a href="04-lsm-tree.html"><small>Simulation</small>Inside an LSM-tree — merging sorted files</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var USERS = [{ id: 1, dob: "1989-02-17" }, { id: 2, dob: "1975-11-03" }, { id: 3, dob: "2001-06-30" }, { id: 4, dob: "1994-09-12" }];
+  var EVENTS = [
+    { id: 3, url: "/pricing" }, { id: 1, url: "/docs" }, { id: 4, url: "/docs" }, { id: 1, url: "/pricing" },
+    { id: 2, url: "/blog" }, { id: 3, url: "/docs" }, { id: 4, url: "/blog" }, { id: 1, url: "/blog" }
+  ];
+  var R = 2;
+  var STAGES = ["inputs", "map", "shuffle", "sort", "reduce"];
+  var secondary = true, stage = 0, cursor = 0, held = [], peak = 0, outputs = [[], []], current = [null, null];
+  var log = Kit.log(Kit.$("#log"));
+
+  function rec(kind, text, extra) { return el("span", { class: "rec " + kind + (extra ? " " + extra : "") }, text); }
+  function userRec(u, extra) { return rec("user", "user " + u.id + " · born " + u.dob, extra); }
+  function evRec(e, extra) { return rec("event", "user " + e.id + " · viewed " + e.url, extra); }
+  function keyed(r) { return r.kind === "user" ? "(" + r.id + ", user: " + r.dob + ")" : "(" + r.id + ", view: " + r.url + ")"; }
+
+  // Map output: mapper A reads events, mapper B reads users.
+  function mapped() {
+    return {
+      A: EVENTS.map(function (e, i) { return { kind: "event", id: e.id, url: e.url, seq: i }; }),
+      B: USERS.map(function (u, i) { return { kind: "user", id: u.id, dob: u.dob, seq: i }; })
+    };
+  }
+  function part(r) { return r.id % R; }
+  // What each reducer receives, in fetch order (mapper A's partition, then mapper B's).
+  function fetched(r) {
+    var m = mapped();
+    return m.A.filter(function (x) { return part(x) === r; }).concat(m.B.filter(function (x) { return part(x) === r; }));
+  }
+  function sorted(r) {
+    return fetched(r).slice().sort(function (a, b) {
+      if (a.id !== b.id) return a.id - b.id;
+      if (secondary) return (a.kind === "user" ? 0 : 1) - (b.kind === "user" ? 0 : 1) || a.seq - b.seq;
+      return (a.kind === "user" ? 1 : 0) - (b.kind === "user" ? 1 : 0) || a.seq - b.seq; // arrival order: events first
+    });
+  }
+
+  function render() {
+    var p = Kit.clear(Kit.$("#pipeline"));
+    var m = mapped();
+    // 1. inputs / map output
+    var c1 = el("div", { class: "col" + (stage <= 1 ? " active" : "") }, el("h3", null, stage >= 1 ? "Map output (key, value)" : "Inputs"));
+    c1.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "Mapper A · activity events"),
+      m.A.map(function (r) { return stage >= 1 ? rec("event", keyed(r)) : evRec(r); })));
+    c1.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "Mapper B · user database"),
+      m.B.map(function (r) { return stage >= 1 ? rec("user", keyed(r)) : userRec({ id: r.id, dob: r.dob }); })));
+    p.appendChild(c1);
+    // 2-3. reducers' input
+    var c2 = el("div", { class: "col" + (stage === 2 || stage === 3 ? " active" : "") },
+      el("h3", null, stage >= 3 ? "Sorted by key" : "Shuffled to reducers"));
+    for (var r = 0; r < R; r++) {
+      var list = stage >= 3 ? sorted(r) : stage >= 2 ? fetched(r) : [];
+      c2.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "Reducer " + r, el("span", { class: "muted" }, "user # mod 2 = " + r)),
+        list.length ? list.map(function (x, i) {
+          var extra = (stage === 4 && i === current[r]) ? "cur" : "";
+          if (stage === 4 && held.some(function (h) { return h.r === r && h.x === x; })) extra += " hold";
+          return rec(x.kind, keyed(x), extra);
+        }) : el("span", { class: "muted", style: "font-size:.8rem" }, "—")));
+    }
+    p.appendChild(c2);
+    // 4. reduce
+    var c3 = el("div", { class: "col" + (stage === 4 ? " active" : "") }, el("h3", null, "Reduce: join"));
+    c3.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-2);margin:0" },
+      secondary ? "For each key: remember the user record (it comes first), then annotate every event with it."
+                : "Events can arrive before their user record, so they must be buffered until it shows up."));
+    p.appendChild(c3);
+    var c4 = el("div", { class: "col" }, el("h3", null, "Output: view + date of birth"));
+    for (r = 0; r < R; r++) c4.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "Output shard " + r),
+      outputs[r].length ? outputs[r].map(function (o) { return rec("out", o); }) : el("span", { class: "muted", style: "font-size:.8rem" }, "—")));
+    p.appendChild(c4);
+    Kit.$("#stage").textContent = STAGES[stage];
+    Kit.$("#held").textContent = held.length;
+    Kit.$("#peak").textContent = peak;
+  }
+
+  // Reduce one record per step, on both reducers in turn.
+  var queue = [];
+  function startReduce() {
+    queue = [];
+    var lists = [sorted(0), sorted(1)], n = Math.max(lists[0].length, lists[1].length);
+    for (var i = 0; i < n; i++) for (var r = 0; r < R; r++) if (i < lists[r].length) queue.push({ r: r, i: i, x: lists[r][i] });
+  }
+  var userOf = [{}, {}];
+  function reduceOne() {
+    var q = queue.shift();
+    current[q.r] = q.i;
+    var x = q.x, r = q.r;
+    if (x.kind === "user") {
+      userOf[r] = { id: x.id, dob: x.dob };
+      held = held.filter(function (h) { return !(h.r === r && h.x.kind === "user"); });
+      held.push({ r: r, x: x });
+      var waiting = held.filter(function (h) { return h.r === r && h.x.kind === "event" && h.x.id === x.id; });
+      waiting.forEach(function (h) { outputs[r].push(h.x.url + " · born " + x.dob); });
+      held = held.filter(function (h) { return waiting.indexOf(h) < 0; });
+      log.add("Reducer " + r + ": user " + x.id + " record" + (waiting.length ? " — releases " + waiting.length + " buffered event(s)" : ""), waiting.length ? "warn" : "muted");
+    } else if (userOf[r].id === x.id) {
+      outputs[r].push(x.url + " · born " + userOf[r].dob);
+      log.add("Reducer " + r + ": joined user " + x.id + " → " + x.url, "ok");
+    } else {
+      held.push({ r: r, x: x });
+      log.add("Reducer " + r + ": event for user " + x.id + " before its user record — buffered", "warn");
+    }
+    peak = Math.max(peak, held.length);
+  }
+
+  function step() {
+    if (stage < 4) {
+      stage++;
+      if (stage === 1) log.add("Map: each record becomes (user ID, value)", "muted");
+      if (stage === 2) log.add("Shuffle: partition by user ID mod 2, fetch from every mapper", "muted");
+      if (stage === 3) log.add("Sort: each reducer merges its partitions by key" + (secondary ? ", user record first" : ""), "muted");
+      if (stage === 4) { startReduce(); log.add("Reduce: walk the sorted records", "muted"); }
+      render();
+      return true;
+    }
+    if (!queue.length) return false;
+    reduceOne();
+    render();
+    if (queue.length) return true;
+    log.add("Done: " + (outputs[0].length + outputs[1].length) + " joined records; peak memory " + peak + " record(s)", "ok");
+    return false;
+  }
+  function reset() {
+    stage = 0; held = []; peak = 0; outputs = [[], []]; current = [null, null]; userOf = [{}, {}]; queue = [];
+    log.clear(); render();
+  }
+
+  Kit.player({ mount: Kit.$("#player"), step: step, reset: reset, interval: 650 });
+  Kit.$("#secondary").addEventListener("change", function (e) { secondary = e.target.checked; reset(); });
+  reset();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "Why does the reducer need no network requests to perform the join?",
+      options: ["It caches the whole user database", "The shuffle has already brought every record with the same user ID to the same reducer", "Mappers perform the join", "Events contain the date of birth"],
+      answer: 1, explain: "Partitioning by key plus sorting puts each user’s record next to that user’s events, so the reducer joins them locally (pp. 471–473)." },
+    { q: "What does the secondary sort guarantee?",
+      options: ["Events are sorted by URL", "The user record arrives before that user’s events, so only one record has to be kept in memory", "Each reducer receives the same number of records", "Output files are sorted by date of birth"],
+      answer: 1, explain: "Ordering within each key so the user record comes first lets the reducer stream through the events holding just that record (p. 472)." }
+  ]);
+})();
+</script>
+</body>
+</html>

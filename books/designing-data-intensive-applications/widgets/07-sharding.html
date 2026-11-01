@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sharding and Rebalancing</title>
+<meta name="description" content="Compare hash mod N, a fixed number of shards, and rendezvous hashing when nodes join; see how key-range sharding and hot keys create hot spots. Illustrates DDIA 2nd ed., Chapter 7.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bars { display: grid; gap: 6px; }
+  .bar { display: grid; grid-template-columns: 70px 1fr 64px; gap: 8px; align-items: center; font-size: .82rem; }
+  .bar .track { height: 18px; background: var(--surface-2); border-radius: 4px; overflow: hidden; display: flex; }
+  .bar .stay { background: var(--accent); opacity: .75; }
+  .bar .moved { background: var(--s2); }
+  .bar .num { font-family: var(--mono); text-align: right; color: var(--ink-2); }
+  .bar.hot .track { outline: 2px solid var(--bad); }
+  .keymap { display: grid; grid-template-columns: repeat(64, 1fr); gap: 1px; }
+  .keymap i { aspect-ratio: 1; border-radius: 2px; display: block; }
+  .keymap i.mv { outline: 1.5px solid var(--ink); outline-offset: -1px; }
+  .legend { display: flex; gap: 14px; font-size: .8rem; color: var(--ink-2); flex-wrap: wrap; margin-top: 8px; }
+  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; }
+  .legend .s::before { background: var(--accent); opacity: .75; }
+  .legend .m::before { background: var(--s2); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-sharding.html">Chapter 7</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Sharding</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 7 · Sharding</div>
+  <h1>Sharding and rebalancing</h1>
+  <p class="lede">Sharding spreads data and load over many machines. Two questions decide whether it works: how much data has to move when a node joins, and whether the load actually ends up even.</p>
+  <p class="source-note">Illustrates “Sharding by Hash of Key” (hash mod N, fixed number of shards, hash-range sharding, consistent hashing; pp. 258–263) and “Skewed Workloads and Relieving Hot Spots” (pp. 263–264). Rendezvous (highest-random-weight) hashing is one of the consistent hashing algorithms the book names. Implementation is the vault’s own.</p>
+
+  <div class="tabs" id="tabs">
+    <div role="tablist" aria-label="Scenarios">
+      <button role="tab" id="t-rb" aria-controls="p-rb" aria-selected="true">Rebalancing</button>
+      <button role="tab" id="t-hot" aria-controls="p-hot" aria-selected="false">Hot spots</button>
+    </div>
+
+    <section id="p-rb" role="tabpanel" aria-labelledby="t-rb">
+      <div class="sim">
+        <div class="panel">
+          <p class="panel-title">Keys per node after going from <span id="from"></span> to <span id="to"></span> nodes</p>
+          <div class="bars" id="rb-bars"></div>
+          <div class="legend"><span class="s">stayed on its node</span><span class="m">moved here</span></div>
+          <p class="panel-title" style="margin-top:14px">First 512 keys (colour = node, outline = moved)</p>
+          <div class="keymap" id="keymap" aria-hidden="true"></div>
+          <div class="stats" id="rb-stats" style="margin-top:14px"></div>
+        </div>
+        <div class="stack">
+          <div class="panel">
+            <p class="panel-title">Setup</p>
+            <div class="field"><span class="field-head">Assignment strategy</span><div id="strategy"></div><span class="field-hint" id="strategy-hint"></span></div>
+            <div id="rb-sliders" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+      <h3 style="margin-top:20px">What to notice</h3>
+      <ul class="notice-list">
+        <li><strong>Hash mod N</strong> moves almost every key when N changes (going from 3 to 4 nodes keeps only about a quarter in place) — far more than the 1/N share the new node needs.</li>
+        <li><strong>Fixed number of shards</strong> moves whole shards: the new node steals some shards from each existing node, so only about 1/N of the data moves. Balance is limited by shard granularity — try 16 shards on 12 nodes.</li>
+        <li><strong>Rendezvous hashing</strong> also moves ~1/N, but the new node receives individual keys scattered across all old nodes rather than whole shards.</li>
+      </ul>
+    </section>
+
+    <section id="p-hot" role="tabpanel" aria-labelledby="t-hot" hidden>
+      <div class="sim">
+        <div class="panel">
+          <p class="panel-title">Write load per shard (last 2,000 writes)</p>
+          <div class="bars" id="hot-bars"></div>
+          <div class="stats" id="hot-stats" style="margin-top:14px"></div>
+        </div>
+        <div class="panel">
+          <p class="panel-title">Workload</p>
+          <div class="field"><span class="field-head">Sharding scheme</span><div id="scheme"></div></div>
+          <div class="field"><span class="field-head">Keys being written</span><div id="keys"></div></div>
+          <div id="hot-sliders" style="margin-top:10px"></div>
+          <label class="check" style="margin-top:10px"><input type="checkbox" id="split"> Split the hot key with a two-digit random suffix</label>
+          <p class="field-hint" id="split-hint"></p>
+        </div>
+      </div>
+      <h3 style="margin-top:20px">What to notice</h3>
+      <ul class="notice-list">
+        <li><strong>Key-range sharding + sequential keys</strong> (e.g. timestamps): every write lands on the shard holding the newest range — one hot shard, the rest idle. Hashing the key spreads them.</li>
+        <li><strong>A single hot key</strong> (a celebrity's post) defeats any hash: all its writes go to one shard. Appending two random digits splits its writes over 100 keys — at the cost of reads that must now fetch and combine all 100.</li>
+      </ul>
+    </section>
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-sharding.html"><small>Lesson</small>7. Sharding</a></li>
+    <li><a href="../lab/07-rebalancing/README.md"><small>Experiment</small>Measure key movement in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  Kit.tabs(document.getElementById("tabs"));
+
+  // 32-bit FNV-1a then a murmur-style finaliser: deterministic, well spread.
+  function hash(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+    h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;
+    return h >>> 0;
+  }
+  function color(i) { return "hsl(" + ((i * 137.5) % 360) + " 55% 55%)"; }
+  function bar(label, stay, moved, max, note, hot) {
+    var w1 = 100 * stay / max, w2 = 100 * moved / max;
+    return el("div", { class: "bar" + (hot ? " hot" : "") },
+      el("span", null, label),
+      el("span", { class: "track", role: "img", "aria-label": label + ": " + (stay + moved) + (moved ? ", of which " + moved + " moved in" : "") },
+        el("span", { class: "stay", style: "width:" + w1 + "%" }), el("span", { class: "moved", style: "width:" + w2 + "%" })),
+      el("span", { class: "num" }, note));
+  }
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
+  }
+
+  /* ---------- Rebalancing ---------- */
+  var KEYS = 10000, keyHashes = [];
+  for (var i = 0; i < KEYS; i++) keyHashes.push(hash("user:" + i));
+  var R = { strategy: "mod", nodes: 4, shards: 64 };
+  var hints = {
+    mod: "node = hash(key) mod N",
+    fixed: "shard = hash(key) mod S (S fixed); shards are dealt to nodes; a new node steals shards evenly",
+    hrw: "node = the node with the highest hash(key, node) — rendezvous hashing"
+  };
+
+  // Fixed shards: deterministic "steal evenly" assignment built up node by node.
+  function shardOwners(S, N) {
+    var owner = [];
+    for (var s = 0; s < S; s++) owner.push(0);
+    for (var n = 2; n <= N; n++) {
+      var counts = new Array(n - 1).fill(0);
+      owner.forEach(function (o) { counts[o]++; });
+      var want = Math.floor(S / n), taken = 0;
+      while (taken < want) {
+        var donor = counts.indexOf(Math.max.apply(null, counts));
+        for (var s2 = S - 1; s2 >= 0; s2--) if (owner[s2] === donor) { owner[s2] = n - 1; counts[donor]--; break; }
+        taken++;
+      }
+    }
+    return owner;
+  }
+  function assign(N) {
+    var out = new Array(KEYS);
+    if (R.strategy === "mod") for (var i = 0; i < KEYS; i++) out[i] = keyHashes[i] % N;
+    else if (R.strategy === "fixed") {
+      var owners = shardOwners(R.shards, N);
+      for (var j = 0; j < KEYS; j++) out[j] = owners[keyHashes[j] % R.shards];
+    } else {
+      for (var k = 0; k < KEYS; k++) {
+        var best = -1, who = 0;
+        for (var n = 0; n < N; n++) { var w = hash(keyHashes[k] + ":" + n); if (w > best) { best = w; who = n; } }
+        out[k] = who;
+      }
+    }
+    return out;
+  }
+  function renderRb() {
+    var N = R.nodes, before = assign(N - 1), after = assign(N);
+    var per = [], movedIn = [], moved = 0;
+    for (var n = 0; n < N; n++) { per.push(0); movedIn.push(0); }
+    for (var i = 0; i < KEYS; i++) { per[after[i]]++; if (after[i] !== before[i]) { moved++; movedIn[after[i]]++; } }
+    var max = Math.max.apply(null, per);
+    var bars = Kit.clear(document.getElementById("rb-bars"));
+    per.forEach(function (c, n) { bars.appendChild(bar("node " + n + (n === N - 1 ? " ★" : ""), c - movedIn[n], movedIn[n], max, c)); });
+    document.getElementById("from").textContent = N - 1;
+    document.getElementById("to").textContent = N;
+    var km = Kit.clear(document.getElementById("keymap"));
+    for (var k = 0; k < 512; k++) km.appendChild(el("i", { class: after[k] !== before[k] ? "mv" : null, style: "background:" + color(after[k]) }));
+    var ideal = 1 / N, frac = moved / KEYS;
+    var mean = KEYS / N, imb = max / mean;
+    stats("rb-stats", [["keys moved", Kit.pct(frac), frac > 2 * ideal ? "bad" : "ok"], ["ideal (1/N)", Kit.pct(ideal)], ["max / mean load", imb.toFixed(2) + "×", imb > 1.3 ? "warn" : ""]]);
+  }
+  var shardSlider;
+  document.getElementById("strategy").appendChild(Kit.segmented({ label: "Assignment strategy", value: R.strategy,
+    options: [{ value: "mod", label: "hash mod N" }, { value: "fixed", label: "Fixed shards" }, { value: "hrw", label: "Rendezvous" }],
+    onChange: function (v) { R.strategy = v; document.getElementById("strategy-hint").textContent = hints[v]; shardSlider.element.hidden = v !== "fixed"; renderRb(); } }).element);
+  document.getElementById("strategy-hint").textContent = hints[R.strategy];
+  var rs = document.getElementById("rb-sliders");
+  rs.appendChild(Kit.slider({ label: "Nodes after adding one (N)", min: 2, max: 12, value: R.nodes, onInput: function (v) { R.nodes = v; renderRb(); } }).element);
+  shardSlider = Kit.slider({ label: "Number of shards (S)", min: 16, max: 256, step: 16, value: R.shards, onInput: function (v) { R.shards = v; renderRb(); } });
+  shardSlider.element.hidden = true;
+  rs.appendChild(shardSlider.element);
+  renderRb();
+
+  /* ---------- Hot spots ---------- */
+  var H = { scheme: "range", keys: "seq", hotShare: 0.3 };
+  var SHARDS = 8;
+  function renderHot() {
+    var r = Kit.rng(3), load = new Array(SHARDS).fill(0), split = document.getElementById("split").checked;
+    var t0 = 1700000000;
+    for (var i = 0; i < 2000; i++) {
+      var key;
+      if (H.keys === "seq") key = String(t0 + 50000 * 7 + i);            // newest timestamps only
+      else if (H.keys === "uniform") key = String(t0 + r.int(400000));
+      else key = r.chance(H.hotShare) ? "post:celebrity" + (split ? ":" + String(r.int(100)).padStart(2, "0") : "") : "post:" + r.int(100000);
+      var shard;
+      if (H.scheme === "range") {
+        // Key-range boundaries chosen for the keys seen so far: 8 equal slices of [t0, t0+400000).
+        var num = parseInt(key.replace(/\D/g, "").slice(0, 10), 10) || 0;
+        // Non-numeric keys: stand-in for their sort position. A suffix appended to the
+        // end keeps the split keys adjacent in sort order, so they share a range shard.
+        if (H.keys === "hot") num = t0 + (hash(key.replace(/:\d\d$/, "")) % 400000);
+        shard = Math.min(SHARDS - 1, Math.max(0, Math.floor((num - t0) / 50000)));
+      } else shard = hash(key) % SHARDS;
+      load[shard]++;
+    }
+    var max = Math.max.apply(null, load), mean = 2000 / SHARDS;
+    var bars = Kit.clear(document.getElementById("hot-bars"));
+    load.forEach(function (c, s) { bars.appendChild(bar("shard " + s, c, 0, max, c, c > 2 * mean)); });
+    var busiest = max / 2000;
+    stats("hot-stats", [["busiest shard", Kit.pct(busiest), busiest > 0.3 ? "bad" : busiest > 0.2 ? "warn" : "ok"], ["fair share", Kit.pct(1 / SHARDS)]]);
+    document.getElementById("split-hint").textContent = H.keys === "hot" ? (split ? (H.scheme === "range" ? "With key-range sharding a suffix keeps the 100 keys adjacent, so they stay on one shard — switch to hash sharding (or put the digits at the start of the key)." : "Writes to the hot key now spread over 100 keys; a read must query all of them.") : "All writes to the hot key share one partition key.") : "Applies to the hot-key workload.";
+  }
+  document.getElementById("scheme").appendChild(Kit.segmented({ label: "Sharding scheme", value: H.scheme,
+    options: [{ value: "range", label: "Key range" }, { value: "hash", label: "Hash of key" }], onChange: function (v) { H.scheme = v; renderHot(); } }).element);
+  document.getElementById("keys").appendChild(Kit.segmented({ label: "Keys being written", value: H.keys,
+    options: [{ value: "seq", label: "Sequential timestamps" }, { value: "uniform", label: "Uniform" }, { value: "hot", label: "One hot key" }], onChange: function (v) { H.keys = v; renderHot(); } }).element);
+  document.getElementById("hot-sliders").appendChild(Kit.slider({ label: "Share of writes to the hot key", min: 0.05, max: 0.8, step: 0.05, value: H.hotShare,
+    format: function (v) { return Kit.pct(v, 0); }, onInput: function (v) { H.hotShare = v; renderHot(); } }).element);
+  document.getElementById("split").addEventListener("change", renderHot);
+  renderHot();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why is hash(key) mod N a poor way to assign keys to nodes?",
+      options: ["It distributes keys unevenly", "Changing N moves most keys to a different node", "It cannot be computed by clients"],
+      answer: 1, explain: "Distribution is even, but almost every key's remainder changes when N changes, so rebalancing moves nearly everything." },
+    { q: "What do you give up by sharding on a hash of the key instead of the key itself?",
+      options: ["Even distribution", "Efficient range queries over the key", "The ability to add nodes"],
+      answer: 1, explain: "Adjacent keys land on unrelated shards, so a range scan must query all shards." },
+    { q: "Appending a random two-digit suffix to a hot key…",
+      options: ["Reduces both read and write load per shard", "Splits the writes, but each read must now combine up to 100 keys", "Makes the key cold"],
+      answer: 1, explain: "Writes spread across 100 keys; reads have to fetch and merge all of them, and you must track which keys are split." }
+  ]);
+})();
+</script>
+</body>
+</html>

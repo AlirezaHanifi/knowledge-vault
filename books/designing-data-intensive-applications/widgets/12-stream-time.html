@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Time and Stragglers</title>
+<meta name="description" content="Count events in tumbling windows by event time and by processing time, decide when to close a window, and handle straggler events. Illustrates DDIA 2nd ed., Chapter 12.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .axis { stroke: var(--line-strong); }
+  .grid { stroke: var(--line); stroke-dasharray: 2 4; }
+  .diag { stroke: var(--ink-3); stroke-dasharray: 5 4; }
+  .band { fill: var(--accent); opacity: .06; }
+  .band.alt { opacity: .12; }
+  .now { stroke: var(--accent); stroke-width: 2; }
+  .ev { fill: var(--accent); }
+  .ev.late { fill: var(--bad); }
+  .ev.pending { fill: var(--ink-3); opacity: .35; }
+  .close { stroke: var(--s5); stroke-width: 2; }
+  td.bad { color: var(--bad); font-weight: 600; }
+  td.ok { color: var(--ok); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-stream-processing.html">Chapter 12</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Event time</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 12 · Stream Processing</div>
+  <h1>Event time, processing time, and stragglers</h1>
+  <p class="lede">An event carries the time it happened (event time), but reaches the stream processor later (processing time). Windowing by arrival time is easy but wrong when delays vary; windowing by event time is right but forces a decision: when is a window complete, and what happens to events that arrive after that?</p>
+  <p class="source-note">Illustrates “Reasoning About Time” (pp. 518–523): event versus processing time, Figure 12-8’s processing-time artifacts, handling straggler events (ignore them or publish a correction, p. 520), and tumbling windows (p. 522). The arrival model is the vault’s own illustration.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <p class="panel-title">Each dot is an event · x = event time · y = arrival (processing) time</p>
+      <div class="stage" id="plot" role="img" aria-label="Scatter of events by event time and arrival time, with tumbling windows and their closing times"></div>
+      <div class="table-wrap" style="margin-top:12px"><table class="data" id="table"></table></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Stream</p>
+        <div id="sliders"></div>
+        <div class="field" style="margin-top:12px"><span class="field-head">Stragglers after a window closes</span><div id="policy"></div></div>
+        <div style="margin-top:12px" id="player"></div>
+      </div>
+      <div class="panel"><p class="panel-title">Totals</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Processing-time windows are distorted by delay</strong>: the “by arrival” column counts events in the window they happened to arrive in, not the one they belong to. Raise the delay or add a backlog burst and the two columns diverge.</li>
+    <li><strong>Waiting longer reduces stragglers but delays results.</strong> The grace period is the trade-off between completeness and latency — there is no setting that gives both when some devices are offline for a long time.</li>
+    <li><strong>Ignoring stragglers</strong> leaves permanently wrong counts (track how many you drop). <strong>Publishing corrections</strong> fixes them, but downstream consumers must handle a window’s value changing after it was first emitted.</li>
+  </ul>
+  <div class="callout"><p><strong>Vault note:</strong> the book describes a processor emitting a special message meaning “no more events earlier than <em>t</em> will arrive”. Stream frameworks commonly call this a <em>watermark</em>; the grace-period rule used here is the simplest such heuristic.</p></div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-stream-processing.html"><small>Lesson</small>12. Stream Processing</a></li>
+    <li><a href="../lab/12-stream-windows/README.md"><small>Experiment</small>Tumbling windows in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el, svg = Kit.svg;
+  var W = 10, SPAN = 60, TMAX = 100; // window size (s), event-time span, processing-time axis
+  var cfg = { delay: 2, offline: 0.06, grace: 4, policy: "drop" };
+  var events = [], now = 0, closed = {}, log = Kit.log(document.getElementById("log"));
+
+  function generate() {
+    var r = Kit.rng(31);
+    events = [];
+    for (var i = 0; i < 160; i++) {
+      var et = r.next() * SPAN;
+      var d = r.exp(cfg.delay);
+      if (r.chance(cfg.offline)) d += 10 + r.next() * 25;     // device was offline: buffered, sent later
+      events.push({ et: et, at: et + d });
+    }
+  }
+  function win(t) { return Math.floor(t / W); }
+  function closesAt(w) { return (w + 1) * W + cfg.grace; }
+
+  function reset() { now = 0; closed = {}; generate(); log.clear(); log.add("Processing time starts at 0 s; press Play.", "muted"); render(); }
+
+  function step() {
+    if (now >= TMAX) return false;
+    var prev = now; now = Math.min(TMAX, now + 1);
+    for (var w = 0; w < SPAN / W; w++) {
+      if (!closed[w] && closesAt(w) <= now) {
+        var n = events.filter(function (e) { return win(e.et) === w && e.at <= closesAt(w); }).length;
+        closed[w] = { first: n, corrections: 0 };
+        log.add("t=" + now + "s window [" + w * W + ", " + (w + 1) * W + ") closed with count " + n, "ok");
+      }
+    }
+    events.forEach(function (e) {
+      var w = win(e.et);
+      if (closed[w] && e.at > prev && e.at <= now && e.at > closesAt(w)) {
+        if (cfg.policy === "drop") log.add("Straggler (event time " + e.et.toFixed(1) + "s) for closed window " + w + " — dropped", "bad");
+        else { closed[w].corrections++; log.add("Straggler for window " + w + " — correction published", "warn"); }
+      }
+    });
+    render();
+    return now < TMAX;
+  }
+
+  function render() {
+    var Wd = 640, H = 340, L = 44, B = 34, T = 10, R = 10;
+    var x = function (t) { return L + (Wd - L - R) * t / SPAN; };
+    var y = function (t) { return H - B - (H - B - T) * Math.min(t, TMAX) / TMAX; };
+    var s = svg("svg", { viewBox: "0 0 " + Wd + " " + H, "aria-hidden": "true" });
+    for (var w = 0; w < SPAN / W; w++) {
+      s.appendChild(svg("rect", { class: "band" + (w % 2 ? " alt" : ""), x: x(w * W), y: T, width: x(W) - x(0), height: H - B - T }));
+      s.appendChild(svg("line", { class: "close", x1: x(w * W), x2: x((w + 1) * W), y1: y(closesAt(w)), y2: y(closesAt(w)) }));
+      s.appendChild(svg("text", { x: x(w * W + W / 2), y: H - B + 14, "text-anchor": "middle", "font-size": 11, class: "muted" }, "w" + w));
+    }
+    [0, 25, 50, 75, 100].forEach(function (t) {
+      s.appendChild(svg("line", { class: "grid", x1: L, x2: Wd - R, y1: y(t), y2: y(t) }));
+      s.appendChild(svg("text", { x: L - 6, y: y(t) + 4, "text-anchor": "end", "font-size": 11, class: "muted" }, t + "s"));
+    });
+    s.appendChild(svg("text", { x: (L + Wd) / 2, y: H - 4, "text-anchor": "middle", "font-size": 11, class: "muted" }, "event time →"));
+    s.appendChild(svg("line", { class: "axis", x1: L, x2: Wd - R, y1: H - B, y2: H - B }));
+    s.appendChild(svg("line", { class: "axis", x1: L, x2: L, y1: T, y2: H - B }));
+    s.appendChild(svg("line", { class: "diag", x1: x(0), y1: y(0), x2: x(SPAN), y2: y(SPAN) }));
+    s.appendChild(svg("line", { class: "now", x1: L, x2: Wd - R, y1: y(now), y2: y(now) }));
+    s.appendChild(svg("text", { x: Wd - R - 4, y: y(now) < 24 ? y(now) + 14 : y(now) - 5, "text-anchor": "end", "font-size": 11, fill: "var(--accent)" }, "now = " + now + "s"));
+    events.forEach(function (e) {
+      var late = e.at > closesAt(win(e.et));
+      s.appendChild(svg("circle", { class: "ev" + (e.at > now ? " pending" : late ? " late" : ""), cx: x(e.et), cy: y(e.at), r: late ? 4 : 3 }));
+    });
+    Kit.clear(document.getElementById("plot")).appendChild(s);
+
+    var tb = Kit.clear(document.getElementById("table"));
+    tb.appendChild(el("tr", null, ["window", "true count", "by arrival", "emitted", "stragglers", "final"].map(function (h, i) { return el("th", { class: i ? "num" : null }, h); })));
+    var dropped = 0, totalLate = 0;
+    for (var k = 0; k < SPAN / W; k++) {
+      var truth = events.filter(function (e) { return win(e.et) === k; }).length;
+      var byArrival = events.filter(function (e) { return e.at <= now && Math.floor(e.at / W) === k; }).length;
+      var c = closed[k];
+      var late = events.filter(function (e) { return win(e.et) === k && e.at > closesAt(k) && e.at <= now; }).length;
+      totalLate += late;
+      var fin = !c ? "–" : cfg.policy === "drop" ? c.first : c.first + c.corrections;
+      if (c && cfg.policy === "drop") dropped += late;
+      tb.appendChild(el("tr", null,
+        el("td", { class: "mono" }, "[" + k * W + ", " + (k + 1) * W + ")"),
+        el("td", { class: "num" }, truth),
+        el("td", { class: "num" + (byArrival !== truth && now >= TMAX ? " bad" : "") }, byArrival),
+        el("td", { class: "num" }, c ? c.first : "open"),
+        el("td", { class: "num" + (late ? " bad" : "") }, late),
+        el("td", { class: "num " + (c ? (fin === truth || now < TMAX ? "ok" : "bad") : "") }, fin)));
+    }
+    var st = Kit.clear(document.getElementById("stats"));
+    [["now", now + " s", ""], ["stragglers", totalLate, totalLate ? "warn" : "ok"], ["dropped", dropped, dropped ? "bad" : "ok"]]
+      .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, x[1]))); });
+  }
+
+  var sl = document.getElementById("sliders");
+  sl.appendChild(Kit.slider({ label: "Typical network delay", min: 0.5, max: 8, step: 0.5, value: cfg.delay, unit: " s", onInput: function (v) { cfg.delay = v; reset(); } }).element);
+  sl.appendChild(Kit.slider({ label: "Events from offline devices", min: 0, max: 0.3, step: 0.01, value: cfg.offline, format: function (v) { return Kit.pct(v, 0); },
+    hint: "Buffered on the device and sent 10–35 s later", onInput: function (v) { cfg.offline = v; reset(); } }).element);
+  sl.appendChild(Kit.slider({ label: "Grace period before closing a window", min: 0, max: 30, value: cfg.grace, unit: " s", hint: "Gold lines: when each window is declared complete",
+    onInput: function (v) { cfg.grace = v; reset(); } }).element);
+  document.getElementById("policy").appendChild(Kit.segmented({ label: "Straggler policy", value: cfg.policy,
+    options: [{ value: "drop", label: "Ignore (drop)" }, { value: "correct", label: "Publish correction" }],
+    onChange: function (v) { cfg.policy = v; reset(); } }).element);
+
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 250 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "A stream job restarts and reprocesses an hour of backlog in two minutes. What happens to per-minute counts computed by processing time?",
+      options: ["Nothing changes", "The backlog lands in a couple of windows, creating a spike that never happened", "Counts are dropped"],
+      answer: 1, explain: "Processing-time windows measure when events were processed, not when they occurred (Figure 12-8)." },
+    { q: "You can never be sure a window has received all its events. What are the two broad options for stragglers?",
+      options: ["Ignore them (and monitor how many) or publish a correction", "Block until all devices report", "Reorder the stream"],
+      answer: 0, explain: "Both are legitimate; corrections need consumers that can handle updated (and possibly retracted) results." },
+    { q: "Why might you log the device's send time in addition to the event time and the server's receive time?",
+      options: ["To compress events", "To estimate the offset between the device clock and the server clock", "To deduplicate events"],
+      answer: 1, explain: "Receive time minus send time estimates the clock offset (ignoring network delay), which can then correct the event timestamp." }
+  ]);
+})();
+</script>
+</body>
+</html>

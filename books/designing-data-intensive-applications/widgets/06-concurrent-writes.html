@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concurrent Writes and Siblings</title>
+<meta name="description" content="Replay the book's shopping-cart example: two clients add items concurrently, the server uses version numbers to keep concurrent values as siblings, and last write wins loses items. Illustrates DDIA Chapter 6.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .actors { display: grid; gap: 12px; grid-template-columns: 1fr 1.2fr 1fr; align-items: start; }
+  @media (max-width: 640px) { .actors { grid-template-columns: 1fr; } }
+  .actor { border: 1.5px solid var(--line-strong); border-radius: var(--radius); padding: 10px; background: var(--surface); }
+  .actor.server { border-color: var(--accent); }
+  .actor h3 { font-size: .9rem; margin: 0 0 6px; display: flex; justify-content: space-between; }
+  .sib { font-family: var(--mono); font-size: .8rem; padding: 6px 8px; margin: 4px 0; border-radius: var(--radius-sm); background: var(--surface-2); display: flex; justify-content: space-between; gap: 8px; }
+  .sib.fresh { background: var(--accent-soft); }
+  .ver { color: var(--ink-3); white-space: nowrap; }
+  .know { font-family: var(--mono); font-size: .78rem; color: var(--ink-2); }
+  .add { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .lost { color: var(--bad); font-weight: 600; }
+  .script { font-size: .84rem; margin: 0; padding-left: 1.3em; }
+  .script li { margin: 2px 0; color: var(--ink-3); }
+  .script li.done { color: var(--ink); }
+  .script li.next { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/06-replication.html">Chapter 6</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Concurrent writes</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 6 · Replication</div>
+  <h1>Concurrent writes: siblings vs last write wins</h1>
+  <p class="lede">Two writes are concurrent when neither knew about the other. The server can tell from version numbers: a write carries the version it was based on, overwrites everything up to that version, and keeps anything newer as a sibling for the client to merge. Last write wins skips all that — and silently drops items.</p>
+  <p class="source-note">Illustrates “Last write wins”, “The happens-before relation and concurrency” and “Capturing the happens-before relationship” (pp. 237–242, Figures 6-15 and 6-16): the book’s five cart writes on a single replica. With several replicas the same idea needs a version vector (p. 242). Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel">
+        <div class="actors">
+          <div class="actor" id="c1"></div>
+          <div class="actor server" id="server"></div>
+          <div class="actor" id="c2"></div>
+        </div>
+      </div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Conflict handling on the server</p>
+        <div id="mode"></div>
+        <p class="panel-title" style="margin-top:14px">The book’s sequence (Figure 6-15)</p>
+        <ol class="script" id="script"></ol>
+        <div id="player" style="margin-top:10px"></div>
+      </div>
+      <div class="panel wide">
+        <p class="panel-title">Outcome</p>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Version numbers capture “knew about”.</strong> Client 1 writes [milk, flour] based on version 1: it replaces [milk] but cannot replace [eggs], which it never saw — so [eggs] stays as a sibling.</li>
+    <li><strong>Clients merge siblings.</strong> Each write merges everything the client last received, so nothing is lost even though the clients are never fully up to date.</li>
+    <li><strong>Last write wins is not “latest”.</strong> Switch modes and replay: each write overwrites the cart, and items added by the other client vanish without an error.</li>
+    <li><strong>Try your own order.</strong> Add items directly from either client; a client that never read writes with version 0, concurrent with everything.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/06-replication.html"><small>Lesson</small>6. Replication</a></li>
+    <li><a href="../lab/06-version-vectors/README.md"><small>Experiment</small>Concurrent writes and version vectors</a></li>
+    <li><a href="06-replication.html"><small>Simulation</small>Replication lag and quorums</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var SCRIPT = [[1, "milk"], [2, "eggs"], [1, "flour"], [2, "ham"], [1, "bacon"]];
+  var ITEMS = ["milk", "eggs", "flour", "ham", "bacon", "jam"];
+  var log = Kit.log(document.getElementById("log"));
+  var mode = "versions", s;
+
+  function reset() {
+    s = { counter: 0, siblings: [], clients: { 1: { version: 0, seen: [] }, 2: { version: 0, seen: [] } }, added: [], pos: 0, fresh: null };
+    log.clear();
+    log.add(mode === "versions" ? "Empty cart. The server keeps a version number per key." : "Empty cart. The server keeps only the value with the latest timestamp.", "muted");
+    render();
+  }
+
+  function write(cid, item) {
+    var c = s.clients[cid];
+    var merged = [];
+    // The client's own last value first, then the siblings it received (the order used in the book's walkthrough).
+    c.seen.slice().sort(function (a, b) { return (b.v === c.version) - (a.v === c.version); })
+      .forEach(function (sib) { sib.value.forEach(function (x) { if (merged.indexOf(x) < 0) merged.push(x); }); });
+    merged.push(item);
+    s.added.push(item);
+    var v = ++s.counter;
+    if (mode === "versions") {
+      var kept = s.siblings.filter(function (sib) { return sib.v > c.version; });
+      var dropped = s.siblings.length - kept.length;
+      s.siblings = kept.concat([{ v: v, value: merged }]);
+      log.add("Client " + cid + " writes [" + merged.join(", ") + "] based on version " + c.version + " → version " + v +
+        (dropped ? "; overwrites " + dropped + " value(s)" : "") + (kept.length ? "; keeps " + kept.length + " concurrent sibling(s)" : ""), kept.length ? "warn" : "ok");
+    } else {
+      var lostNow = s.siblings.length ? s.siblings[0].value.filter(function (x) { return merged.indexOf(x) < 0; }) : [];
+      s.siblings = [{ v: v, value: merged }];
+      log.add("Client " + cid + " writes [" + merged.join(", ") + "] with timestamp " + v + " → replaces the cart" + (lostNow.length ? "; " + lostNow.join(", ") + " silently lost" : ""), lostNow.length ? "bad" : "ok");
+    }
+    c.version = v; c.seen = s.siblings.map(function (sib) { return { v: sib.v, value: sib.value.slice() }; });
+    s.fresh = v;
+    render();
+  }
+
+  function step() {
+    if (s.pos >= SCRIPT.length) return false;
+    var w = SCRIPT[s.pos++];
+    write(w[0], w[1]);
+    return s.pos < SCRIPT.length;
+  }
+
+  function sibEl(sib) {
+    return Kit.el("div", { class: "sib" + (sib.v === s.fresh ? " fresh" : "") }, Kit.el("span", null, "[" + sib.value.join(", ") + "]"), Kit.el("span", { class: "ver" }, (mode === "versions" ? "v" : "t=") + sib.v));
+  }
+  function clientEl(cid) {
+    var c = s.clients[cid], box = Kit.clear(document.getElementById("c" + cid));
+    box.appendChild(Kit.el("h3", null, Kit.el("span", null, "Client " + cid), Kit.el("span", { class: "ver" }, "based on v" + c.version)));
+    box.appendChild(Kit.el("div", { class: "know" }, c.seen.length ? "last saw: " + c.seen.map(function (x) { return "[" + x.value.join(", ") + "]"; }).join(" + ") : "has not read the cart"));
+    var row = Kit.el("div", { class: "add" });
+    ITEMS.forEach(function (it) {
+      var b = Kit.el("button", { class: "btn small", type: "button" }, "+ " + it);
+      b.addEventListener("click", function () { write(cid, it); });
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+  }
+
+  function render() {
+    clientEl(1); clientEl(2);
+    var srv = Kit.clear(document.getElementById("server"));
+    srv.appendChild(Kit.el("h3", null, Kit.el("span", null, "Server: cart"), Kit.el("span", { class: "ver" }, mode === "versions" ? "counter " + s.counter : "LWW")));
+    if (!s.siblings.length) srv.appendChild(Kit.el("div", { class: "know" }, "empty"));
+    s.siblings.forEach(function (sib) { srv.appendChild(sibEl(sib)); });
+    var present = [];
+    s.siblings.forEach(function (sib) { sib.value.forEach(function (x) { if (present.indexOf(x) < 0) present.push(x); }); });
+    var lost = s.added.filter(function (x, i) { return s.added.indexOf(x) === i && present.indexOf(x) < 0; });
+    srv.appendChild(Kit.el("div", { class: "know", style: "margin-top:6px" }, "a read returns " + s.siblings.length + " value(s)" + (s.siblings.length > 1 ? " — the client must merge them" : "")));
+    var stats = Kit.clear(document.getElementById("stats"));
+    [["Siblings", s.siblings.length, ""], ["Items added", s.added.length, ""], ["Items lost", lost.length, lost.length ? "bad" : "ok"]].forEach(function (x) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    });
+    if (lost.length) stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, "Lost"), Kit.el("span", { class: "lost" }, lost.join(", "))));
+    var sc = Kit.clear(document.getElementById("script"));
+    SCRIPT.forEach(function (w, i) { sc.appendChild(Kit.el("li", { class: i < s.pos ? "done" : i === s.pos ? "next" : null }, "Client " + w[0] + " adds " + w[1])); });
+  }
+
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Conflict handling", value: mode,
+    options: [{ value: "versions", label: "Version numbers + siblings" }, { value: "lww", label: "Last write wins" }],
+    onChange: function (v) { mode = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1200, speeds: false });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "When are two writes concurrent?",
+      options: ["When they happen within the same millisecond", "When neither knew about the other, whatever the physical time", "When they go to different replicas"],
+      answer: 1, explain: "Exact time doesn’t matter; operations are concurrent if both are unaware of each other (pp. 238–239)." },
+    { q: "A write arrives based on version 3 while the server holds siblings v3 and v4. What happens?",
+      options: ["Both are overwritten", "v3 is overwritten; v4 is kept as a concurrent sibling", "The write is rejected"],
+      answer: 1, explain: "The server may overwrite values with that version or below, but must keep higher ones (p. 240)." },
+    { q: "What does a single replica’s version number become with several replicas accepting writes?",
+      options: ["A timestamp", "A version vector — one version number per replica", "A lock"],
+      answer: 1, explain: "Each replica increments its own counter and tracks the others’; the collection is a version vector (p. 242)." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partitioned Logs and Consumer Offsets</title>
+<meta name="description" content="Produce keyed messages into a sharded log, consume them with a consumer group that records offsets, then crash a consumer to see messages processed twice, or let one fall behind retention and miss messages. Illustrates DDIA Chapter 12.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .parts { display: grid; gap: 10px; }
+  .part { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 8px; align-items: center; }
+  .part .pn { font-size: .8rem; font-weight: 600; }
+  .part .pn small { display: block; font-weight: 400; color: var(--ink-3); }
+  .cells { display: flex; gap: 2px; overflow: hidden; position: relative; padding: 14px 0 16px; }
+  .cell { flex: none; width: 30px; height: 26px; border-radius: 3px; font-family: var(--mono); font-size: .66rem; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); line-height: 1.05; text-align: center; }
+  .cell.done { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 40%, var(--line)); }
+  .cell.dup { background: var(--warn-soft); border-color: var(--warn); }
+  .cell.deleted { opacity: .25; border-style: dashed; }
+  .cell.skipped { background: var(--bad-soft); border-color: var(--bad); }
+  .mark { position: absolute; font-size: .62rem; font-family: var(--mono); white-space: nowrap; transform: translateX(-50%); }
+  .mark.pos { bottom: 0; color: var(--accent); }
+  .mark.com { top: 0; color: var(--s4); }
+  .consumers { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .cons { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 10px; font-size: .8rem; background: var(--surface); }
+  .cons.down { opacity: .5; border-style: dashed; }
+  .cons.slow { border-color: var(--warn); }
+  .cons b { margin-right: 6px; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .76rem; color: var(--ink-2); margin-top: 6px; }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-stream-processing.html">Chapter 12</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Log offsets</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 12 · Stream Processing</div>
+  <h1>Partitioned logs and consumer offsets</h1>
+  <p class="lede">A log-based broker appends each message to one partition of a topic, chosen by its key, and gives it an increasing offset. Consumers in a group each own whole partitions and read them in order; the broker only needs to remember each partition’s committed offset — which is exactly why a crash causes re-processing, and a slow consumer can fall off the end of retention.</p>
+  <p class="source-note">Illustrates “Using logs for message storage”, “Logs compared to traditional messaging”, “Consumer offsets” and “Disk space usage” (pp. 496–499, Figure 12-3). Three partitions, keys hashed to partitions, offsets committed every few messages, and retention counted in messages rather than disk segments. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="consumers" id="consumers"></div>
+      <div class="parts" id="parts"></div>
+      <div class="legend"><span><i style="background:var(--ok-soft)"></i>processed</span><span><i style="background:var(--warn-soft)"></i>processed twice</span><span><i style="background:var(--bad-soft)"></i>deleted before it was read</span><span style="color:var(--accent)">▲ consumer position</span><span style="color:var(--s4)">▼ committed offset</span></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Run</p>
+        <div id="player"></div>
+        <div class="row" style="margin-top:10px" id="actions"></div>
+        <div id="sliders" style="margin-top:10px"></div>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Counters</p>
+        <div class="stats" id="stats"></div>
+      </div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Order per partition, not per topic.</strong> All of one user’s messages go to the same partition, so they stay in order; there is no ordering across partitions.</li>
+    <li><strong>Crash → duplicates.</strong> Kill a consumer: its partitions move to a survivor, which resumes from the last <em>committed</em> offset, so everything after it is processed again. Commit more often and fewer repeat — at more bookkeeping cost.</li>
+    <li><strong>At most one consumer per partition.</strong> A third consumer helps; a fourth would sit idle with three partitions.</li>
+    <li><strong>The log is a bounded buffer.</strong> Pause a consumer: when retention deletes old messages, a consumer that fell too far behind skips them for good.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-stream-processing.html"><small>Lesson</small>12. Stream Processing</a></li>
+    <li><a href="13-dual-writes.html"><small>Simulation</small>Dual writes vs a change log</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var P = 3, SHOW = 14, USERS = ["u1", "u2", "u3", "u4", "u5", "u6"];
+  var cfg = { commitEvery: 4, retention: 24, rate: 2 };
+  var log = Kit.log(document.getElementById("log"));
+  var s, r;
+
+  function hash(u) { return (u.charCodeAt(1) * 7) % P; }
+  function reset() {
+    r = Kit.rng(17);
+    s = { tick: 0, parts: [], cons: [], dups: 0, skipped: 0, processed: 0 };
+    for (var p = 0; p < P; p++) s.parts.push({ msgs: [], start: 0, committed: 0, pos: 0, owner: null, sinceCommit: 0 });
+    ["C1", "C2"].forEach(function (n) { s.cons.push({ name: n, up: true, slow: false }); });
+    assign();
+    log.clear(); log.add("Two consumers share three partitions. Press Play.", "muted");
+    render();
+  }
+  function live() { return s.cons.filter(function (c) { return c.up; }); }
+  function assign() {
+    var l = live();
+    s.parts.forEach(function (p, i) { p.owner = l.length ? l[i % l.length].name : null; });
+  }
+  function owner(p) { return s.cons.filter(function (c) { return c.name === p.owner; })[0]; }
+
+  function step() {
+    s.tick++;
+    for (var k = 0; k < cfg.rate; k++) {
+      var u = USERS[r.int(USERS.length)], p = s.parts[hash(u)];
+      p.msgs.push({ off: p.msgs.length, key: u, seen: 0 });
+    }
+    s.parts.forEach(function (p, i) {
+      while (p.msgs.length - p.start > cfg.retention) {
+        var m = p.msgs[p.start];
+        if (m.seen === 0 && p.pos <= p.start) { m.skipped = true; s.skipped++; }
+        p.start++;
+      }
+      if (p.pos < p.start) { log.add("P" + i + ": consumer position " + p.pos + " was deleted by retention; jumps to " + p.start, "bad"); p.pos = p.start; if (p.committed < p.start) p.committed = p.start; }
+      var c = owner(p);
+      if (!c || !c.up || (c.slow && s.tick % 4)) return;
+      if (p.pos < p.msgs.length) {
+        var msg = p.msgs[p.pos];
+        msg.seen++; s.processed++;
+        if (msg.seen > 1) s.dups++;
+        p.pos++; p.sinceCommit++;
+        if (p.sinceCommit >= cfg.commitEvery) { p.committed = p.pos; p.sinceCommit = 0; }
+      }
+    });
+    render();
+    return true;
+  }
+
+  function crash(name) {
+    var c = s.cons.filter(function (x) { return x.name === name; })[0];
+    if (!c || !c.up) return;
+    c.up = false;
+    var lostWork = 0;
+    s.parts.forEach(function (p) { if (p.owner === name) { lostWork += p.pos - p.committed; p.pos = p.committed; p.sinceCommit = 0; } });
+    assign();
+    log.add(name + " crashes. Its partitions go to " + (live().map(function (x) { return x.name; }).join(", ") || "nobody") + ", resuming from the committed offsets: " + lostWork + " message(s) will be processed again.", lostWork ? "warn" : "ok");
+    render();
+  }
+  function addConsumer() {
+    var name = "C" + (s.cons.length + 1);
+    s.cons.push({ name: name, up: true, slow: false });
+    s.parts.forEach(function (p) { p.committed = p.pos; p.sinceCommit = 0; });
+    assign();
+    var idle = live().length > P;
+    log.add(name + " joins; partitions are rebalanced." + (idle ? " There are more consumers than partitions, so one has nothing to do." : ""), idle ? "warn" : "ok");
+    render();
+  }
+
+  function render() {
+    var cons = Kit.clear(document.getElementById("consumers"));
+    s.cons.forEach(function (c) {
+      var mine = s.parts.map(function (p, i) { return p.owner === c.name && c.up ? "P" + i : null; }).filter(Boolean);
+      var kill = Kit.el("button", { class: "btn small danger", type: "button", disabled: !c.up }, "Crash");
+      kill.addEventListener("click", function () { crash(c.name); });
+      var slow = Kit.el("button", { class: "btn small", type: "button", "aria-pressed": String(c.slow), disabled: !c.up }, c.slow ? "Slow ✓" : "Slow");
+      slow.addEventListener("click", function () { c.slow = !c.slow; log.add(c.name + (c.slow ? " slows down to a quarter of its speed" : " is back to normal speed"), "muted"); render(); });
+      cons.appendChild(Kit.el("div", { class: "cons" + (c.up ? "" : " down") + (c.slow ? " slow" : "") },
+        Kit.el("b", null, c.name), c.up ? (mine.length ? "reads " + mine.join(", ") : "idle") : "down", " ", slow, " ", kill));
+    });
+    var parts = Kit.clear(document.getElementById("parts"));
+    s.parts.forEach(function (p, i) {
+      var from = Math.max(0, Math.min(p.pos - 3, p.msgs.length - SHOW)); // keep the consumer's position in view
+      var row = Kit.el("div", { class: "cells" });
+      for (var o = from; o < Math.max(p.msgs.length, from + SHOW); o++) {
+        var m = p.msgs[o];
+        if (!m) { row.appendChild(Kit.el("span", { class: "cell", style: "opacity:.25" }, "")); continue; }
+        var cls = "cell" + (m.skipped ? " skipped" : o < p.start ? " deleted" : m.seen > 1 ? " dup" : m.seen ? " done" : "");
+        row.appendChild(Kit.el("span", { class: cls, title: "offset " + o + ", key " + m.key }, String(o), Kit.el("br"), m.key));
+      }
+      var x = function (off) { return (off - from) * 32 + 15; };
+      if (p.pos >= from) row.appendChild(Kit.el("span", { class: "mark pos", style: "left:" + x(p.pos) + "px" }, "▲ " + p.pos));
+      if (p.committed >= from) row.appendChild(Kit.el("span", { class: "mark com", style: "left:" + x(p.committed) + "px" }, "▼ " + p.committed));
+      var newer = p.msgs.length - (from + SHOW);
+      parts.appendChild(Kit.el("div", { class: "part" }, Kit.el("span", { class: "pn" }, "Partition " + i, Kit.el("small", null, p.owner ? "→ " + p.owner : "no consumer"),
+        newer > 0 ? Kit.el("small", null, "+" + newer + " newer →") : null), row));
+    });
+    var stats = Kit.clear(document.getElementById("stats"));
+    var lag = s.parts.reduce(function (a, p) { return a + (p.msgs.length - p.pos); }, 0);
+    [["Processed", s.processed, ""], ["Twice", s.dups, s.dups ? "warn" : ""], ["Never read", s.skipped, s.skipped ? "bad" : ""], ["Lag", lag, lag > 20 ? "warn" : ""]].forEach(function (x2) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x2[0]), Kit.el("span", { class: "stat-value " + x2[2] }, String(x2[1]))));
+    });
+  }
+
+  var actions = document.getElementById("actions");
+  var add = Kit.el("button", { class: "btn", type: "button" }, "Add a consumer");
+  add.addEventListener("click", addConsumer);
+  actions.appendChild(add);
+  var sl = document.getElementById("sliders");
+  sl.appendChild(Kit.slider({ label: "Commit offset every", min: 1, max: 10, value: cfg.commitEvery, unit: " msgs", onInput: function (v) { cfg.commitEvery = v; } }).element);
+  sl.appendChild(Kit.slider({ label: "Retention per partition", min: 8, max: 40, value: cfg.retention, unit: " msgs", onInput: function (v) { cfg.retention = v; } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 500 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why does a log-based broker not need to track an acknowledgment for every message?",
+      options: ["It never redelivers", "Consumers read each partition in order, so one offset per partition says what has been processed", "Messages are deleted once read"],
+      answer: 1, explain: "All messages below the consumer offset are processed; those above are not (p. 498)." },
+    { q: "A consumer crashes after processing offsets 40–45 but committing only 40. What happens?",
+      options: ["Messages 41–45 are lost", "The new owner resumes at 40 and processes 41–45 a second time", "The broker replays the whole partition"],
+      answer: 1, explain: "Restart from the last recorded offset can cause a consumer to see some messages twice (p. 498)." },
+    { q: "How do you keep all events for one user in order?",
+      options: ["Use one consumer", "Make the user ID the partition key, so all of them land in one partition", "Sort by timestamp later"],
+      answer: 1, explain: "Order is only guaranteed within a partition (p. 498)." }
+  ]);
+})();
+</script>
+</body>
+</html>

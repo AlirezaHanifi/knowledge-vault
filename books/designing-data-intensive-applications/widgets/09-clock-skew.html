@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clock Skew and Last Write Wins</title>
+<meta name="description" content="Replay the book's Figure 9-3: with a few milliseconds of clock skew, last write wins orders a causally later increment before the write it built on and silently drops it. Then measure how many writes are lost as skew grows. Illustrates DDIA Chapter 9.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .tl .life { stroke: var(--line-strong); }
+  .tl .name { font-size: 12px; font-weight: 600; }
+  .tl .ev { fill: var(--surface); stroke: var(--s1); stroke-width: 2; }
+  .tl .ev.b { stroke: var(--s2); }
+  .tl .rep { stroke: var(--ink-3); stroke-width: 1.2; stroke-dasharray: 4 3; fill: none; marker-end: url(#tip); }
+  .tl #tip path { fill: var(--ink-3); }
+  .tl .lbl { font-size: 11px; }
+  .tl .ts { font-size: 10.5px; font-family: var(--mono); fill: var(--ink-2); }
+  .tl .ok { fill: var(--ok); font-weight: 700; } .tl .bad { fill: var(--bad); font-weight: 700; }
+  .tl .real { font-size: 10px; fill: var(--ink-3); }
+  .twocol { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); align-items: start; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-the-trouble-with-distributed-systems.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Clock skew</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · The Trouble with Distributed Systems</div>
+  <h1>Clock skew and last write wins</h1>
+  <p class="lede">Last write wins keeps the value with the greatest timestamp — but the timestamp comes from the clock of whichever node accepted the write. If that clock is a few milliseconds slow, a write that clearly happened later gets an earlier timestamp and is thrown away, with no error.</p>
+  <p class="source-note">Illustrates “Timestamps for ordering events” (pp. 362–364, Figure 9-3: x = 1 stamped 42.004 s, the increment stamped 42.003 s). The bottom chart is the vault’s own experiment: 400 dependent writes alternating between two nodes, about 5 ms apart. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="twocol">
+        <div>
+          <p class="panel-title">Figure 9-3, replayed</p>
+          <div class="stage"><svg class="tl" id="tl" viewBox="0 0 360 240" role="img" aria-label="Three nodes; see the verdict for the outcome"></svg></div>
+        </div>
+        <div>
+          <p class="panel-title">Writes lost vs clock skew (vault experiment)</p>
+          <svg id="chart" role="img" aria-label="Share of writes lost rises with clock skew"></svg>
+        </div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Clocks and conflict resolution</p>
+        <div id="sliders"></div>
+        <div class="field" style="margin-top:10px"><span class="field-head">When a write overwrites a value…</span><div id="mode"></div></div>
+      </div>
+      <div class="panel wide">
+        <p class="panel-title">Verdict at node 2</p>
+        <div class="stats" id="stats"></div>
+        <p class="field-hint" id="verdict" aria-live="polite" style="margin:8px 0 0"></p>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Causality vs timestamps.</strong> B’s increment reads x = 1, so it must come after A’s write — yet with node 3 just 3 ms slow it is stamped earlier, and node 2 keeps x = 1.</li>
+    <li><strong>Silent loss.</strong> Nothing fails; the increment simply disappears. The chart shows how quickly losses climb once skew approaches the gap between dependent writes.</li>
+    <li><strong>The book’s fix.</strong> Give an overwriting write a timestamp above the value it replaces (at the cost of reading it first): no write is lost, whatever the skew.</li>
+    <li><strong>Better still:</strong> logical clocks and version vectors order events by causality instead of quartz crystals (pp. 364, 420).</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>Lesson</small>9. The Trouble with Distributed Systems</a></li>
+    <li><a href="10-logical-clocks.html"><small>Simulation</small>Ordering events with logical clocks</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var cfg = { skew: -3, mode: "lww" };
+
+  // Figure 9-3 in real time (ms after 42.000 s): A writes on node 1 at 4.0; it reaches node 3 at 5.0;
+  // B increments on node 3 at 6.0; both writes reach node 2 later. Node 1's clock is exact.
+  function figure() {
+    var tsA = 42.004, tsB = 42.006 + cfg.skew / 1000;
+    if (cfg.mode === "bump" && tsB <= tsA) tsB = tsA + 0.001;
+    var keeps = tsB > tsA ? 2 : 1;
+    return { tsA: tsA, tsB: tsB, keeps: keeps };
+  }
+
+  // Vault experiment: 400 writes, each building on the previous one, alternating nodes; gap ~ exp(5 ms).
+  function lostShare(skew, mode) {
+    var r = Kit.rng(9), t = 0, lastTs = -Infinity, lost = 0, n = 400;
+    for (var i = 0; i < n; i++) {
+      t += r.exp(5);
+      var ts = t + (i % 2 ? skew : 0);
+      if (mode === "bump" && ts <= lastTs) ts = lastTs + 0.001;
+      if (ts > lastTs) lastTs = ts; else lost++;
+    }
+    return lost / n;
+  }
+
+  function render() {
+    var f = figure();
+    var svgEl = Kit.clear(document.getElementById("tl"));
+    svgEl.appendChild(Kit.svg("defs", null, Kit.svg("marker", { id: "tip", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto" }, Kit.svg("path", { d: "M0 0 L10 5 L0 10 z" }))));
+    var Y = { 1: 50, 3: 130, 2: 210 }, X = function (ms) { return 60 + ms * 30; };
+    [1, 3, 2].forEach(function (n) {
+      svgEl.appendChild(Kit.svg("text", { class: "name", x: 6, y: Y[n] + 4 }, "Node " + n));
+      svgEl.appendChild(Kit.svg("line", { class: "life", x1: 60, x2: 350, y1: Y[n], y2: Y[n] }));
+    });
+    svgEl.appendChild(Kit.svg("text", { class: "real", x: 60, y: 18 }, "real time →"));
+    // A's write on node 1
+    svgEl.appendChild(Kit.svg("circle", { class: "ev", cx: X(4), cy: Y[1], r: 6 }));
+    svgEl.appendChild(Kit.svg("text", { class: "lbl", x: X(4) - 10, y: Y[1] - 14 }, "A: x = 1"));
+    svgEl.appendChild(Kit.svg("text", { class: "ts", x: X(4) - 10, y: Y[1] + 20 }, "ts " + f.tsA.toFixed(3)));
+    svgEl.appendChild(Kit.svg("path", { class: "rep", d: "M" + X(4) + " " + (Y[1] + 6) + " L" + (X(5) + 2) + " " + (Y[3] - 8) }));
+    // B's increment on node 3
+    svgEl.appendChild(Kit.svg("circle", { class: "ev b", cx: X(6), cy: Y[3], r: 6 }));
+    svgEl.appendChild(Kit.svg("text", { class: "lbl", x: X(6) + 10, y: Y[3] - 10 }, "B: x += 1 → 2"));
+    svgEl.appendChild(Kit.svg("text", { class: "ts", x: X(6) + 10, y: Y[3] + 18 }, "ts " + f.tsB.toFixed(3)));
+    // replication to node 2
+    svgEl.appendChild(Kit.svg("path", { class: "rep", d: "M" + X(4) + " " + (Y[1] + 6) + " L" + (X(8.5) - 2) + " " + (Y[2] - 8) }));
+    svgEl.appendChild(Kit.svg("path", { class: "rep", d: "M" + X(6) + " " + (Y[3] + 6) + " L" + (X(8)) + " " + (Y[2] - 8) }));
+    svgEl.appendChild(Kit.svg("text", { class: "lbl " + (f.keeps === 2 ? "ok" : "bad"), x: X(8.3), y: Y[2] + 22, "text-anchor": "middle" },
+      "x = " + f.keeps + (f.keeps === 2 ? " ✓" : "  (increment lost)")));
+
+    var pts = [], ptsFix = [];
+    for (var sk = 0; sk <= 12; sk += 0.5) { pts.push([sk, lostShare(-sk, "lww") * 100]); ptsFix.push([sk, lostShare(-sk, "bump") * 100]); }
+    Kit.lineChart(document.getElementById("chart"), {
+      width: 360, height: 230, xMax: 12, yMax: 60, xLabel: "how far node 3 is behind (ms)", yFormat: function (v) { return v + "%"; },
+      series: [{ points: pts, cls: "s2", label: "LWW" }, { points: ptsFix, cls: "ok", label: "ts above overwritten" }],
+      marks: [{ x: Math.max(0, Math.min(12, -cfg.skew)), label: "now" }]
+    });
+
+    var stats = Kit.clear(document.getElementById("stats"));
+    [["A’s timestamp", f.tsA.toFixed(3), ""], ["B’s timestamp", f.tsB.toFixed(3), f.tsB <= f.tsA ? "bad" : ""], ["Node 2 keeps", "x = " + f.keeps, f.keeps === 2 ? "ok" : "bad"]].forEach(function (x) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    document.getElementById("verdict").textContent = f.keeps === 2
+      ? (cfg.mode === "bump" && 42.006 + cfg.skew / 1000 <= 42.004 ? "B’s write was bumped above the value it overwrote, so it survives despite the slow clock." : "B’s timestamp is later, so LWW happens to keep the increment.")
+      : "B’s increment happened after A’s write, but its timestamp is earlier: node 2 discards it. No error is reported.";
+  }
+
+  document.getElementById("sliders").appendChild(Kit.slider({ label: "Node 3 clock offset", min: -10, max: 5, step: 0.5, value: cfg.skew,
+    format: function (v) { return (v > 0 ? "+" : "") + v + " ms"; }, hint: "Node 1’s clock is exact; negative = node 3 runs slow.",
+    onInput: function (v) { cfg.skew = v; render(); } }).element);
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Conflict resolution", value: cfg.mode,
+    options: [{ value: "lww", label: "Plain LWW (writer’s clock)" }, { value: "bump", label: "Timestamp above overwritten" }],
+    onChange: function (v) { cfg.mode = v; render(); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why does node 2 drop the increment in Figure 9-3?",
+      options: ["The network lost it", "Its timestamp, from node 3’s slightly slow clock, is lower than that of the write it built on", "Node 2 crashed"],
+      answer: 1, explain: "B’s write is causally later but stamped 42.003 vs 42.004; LWW keeps the greater timestamp (p. 363)." },
+    { q: "Could better NTP make LWW ordering always correct?",
+      options: ["Yes, with a local NTP server", "Probably not: NTP accuracy is itself limited by network round-trip time", "Yes, if clocks have microsecond resolution"],
+      answer: 1, explain: "You would need clock error far below network delay, which is not possible (p. 364)." },
+    { q: "What is the safer alternative for ordering events?",
+      options: ["Monotonic clocks", "Logical clocks, which count events rather than seconds", "Bigger timestamps"],
+      answer: 1, explain: "Logical clocks capture relative order (happened-before), not time of day (p. 364)." }
+  ]);
+})();
+</script>
+</body>
+</html>

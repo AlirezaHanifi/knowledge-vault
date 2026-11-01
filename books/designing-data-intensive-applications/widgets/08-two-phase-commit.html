@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two-Phase Commit</title>
+<meta name="description" content="Step a distributed transaction through two-phase commit — prepare, votes, commit point, commit — and inject failures: a no vote, a timeout, a crashed participant, and a coordinator that crashes leaving a participant in doubt. Illustrates DDIA Chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .seq .life { stroke: var(--line-strong); stroke-dasharray: 4 4; }
+  .seq .head rect { fill: var(--surface-2); stroke: var(--line-strong); }
+  .seq .head text { font-size: 12px; font-weight: 600; }
+  .seq .msg { stroke: var(--ink-2); stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+  .seq .msg.lost { stroke: var(--bad); stroke-dasharray: 5 4; marker-end: none; }
+  .seq .msg.yes { stroke: var(--ok); } .seq .msg.no { stroke: var(--bad); }
+  .seq .lbl { font-size: 11px; fill: var(--ink-2); }
+  .seq .note { font-size: 11px; fill: var(--ink-3); font-style: italic; }
+  .seq .disk { fill: var(--accent); }
+  .seq .crash { stroke: var(--bad); stroke-width: 3; }
+  .seq #arrow path { fill: var(--ink-2); }
+  .states { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 8px; }
+  .st { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; font-size: .8rem; background: var(--surface); }
+  .st b { display: block; font-size: .85rem; }
+  .st.doubt { border-color: var(--warn); background: var(--warn-soft); }
+  .st.committed { border-color: var(--ok); background: var(--ok-soft); }
+  .st.aborted { border-color: var(--bad); background: var(--bad-soft); }
+  .st.down { opacity: .55; border-style: dashed; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-transactions.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Two-phase commit</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Transactions</div>
+  <h1>Two-phase commit and the in-doubt participant</h1>
+  <p class="lede">2PC makes a transaction atomic across nodes with two promises: a participant that votes yes gives up the right to abort, and the coordinator’s decision, once written to its log, is final. The price: if the coordinator crashes after the votes, participants can only wait — in doubt, holding their locks.</p>
+  <p class="source-note">Illustrates “Two-Phase Commit (2PC)”, “A system of promises” and “Coordinator failure” (pp. 324–328, Figures 8-13 and 8-14). Two participants, one transaction, messages in order; real coordinators also time out and retry. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="states" id="states"></div>
+      <div class="stage"><svg class="seq" id="seq" viewBox="0 0 520 330" role="img" aria-label="Sequence of 2PC messages; see the event log"></svg></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Scenario</p>
+        <div id="scenario"></div>
+        <p class="field-hint" id="scenario-hint" style="margin-top:6px"></p>
+        <div id="player" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" type="button" id="recover" disabled>Recover coordinator</button>
+          <button class="btn danger" type="button" id="giveup" disabled>DB 1 gives up and aborts</button>
+        </div>
+      </div>
+      <div class="panel wide"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Before the votes, anyone can abort.</strong> A no vote or a timed-out prepare makes the coordinator abort everywhere.</li>
+    <li><strong>The commit point is a disk write.</strong> The decision is final once it is in the coordinator’s log; after that, commit requests are retried until they succeed — even to a participant that crashed and came back.</li>
+    <li><strong>In doubt.</strong> Crash the coordinator after deciding: DB 1 voted yes, so it can neither commit nor abort on its own, and its locks stay held until the coordinator recovers.</li>
+    <li><strong>A timeout doesn’t help.</strong> Let DB 1 give up and abort while DB 2 has committed: atomicity is broken. That is why 2PC is called blocking.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-transactions.html"><small>Lesson</small>8. Transactions</a></li>
+    <li><a href="10-consensus.html"><small>Simulation</small>Consensus: elect a leader, replicate a log</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var X = { C: 80, D1: 260, D2: 440 }, NAMES = { C: "Coordinator", D1: "DB 1", D2: "DB 2" };
+  var SCEN = {
+    ok: "Everything works (Figure 8-13).",
+    no: "DB 2 finds a constraint violation and votes no.",
+    timeout: "The prepare request to DB 2 is lost; the coordinator times out.",
+    pcrash: "DB 1 crashes right after voting yes, and later recovers.",
+    ccrash: "The coordinator crashes after deciding to commit, having reached only DB 2 (Figure 8-14).",
+    cearly: "The coordinator crashes after the votes but before writing its decision."
+  };
+  var log = Kit.log(document.getElementById("log"));
+  var scen = "ccrash", s, plan;
+
+  function reset() {
+    s = { y: 64, items: [], st: { C: "running", D1: "active", D2: "active" }, down: {}, decision: null, logged: false, pc: 0, waiting: false, broken: false };
+    plan = build();
+    log.clear(); log.add("Transaction T1 writes to DB 1 and DB 2. Press Step to begin committing.", "muted");
+    document.getElementById("recover").disabled = true;
+    document.getElementById("giveup").disabled = true;
+    render();
+  }
+  function msg(from, to, label, cls) { s.items.push({ t: "msg", from: from, to: to, label: label, cls: cls || "", y: s.y }); s.y += 30; }
+  function note(at, text) { s.items.push({ t: "note", at: at, text: text, y: s.y }); s.y += 22; }
+  function disk(at, text) { s.items.push({ t: "disk", at: at, text: text, y: s.y }); s.y += 24; }
+  function crash(at) { s.items.push({ t: "crash", at: at, y: s.y }); s.y += 22; }
+
+  function build() {
+    var p = [];
+    p.push(function () { msg("C", "D1", "prepare T1"); log.add("Phase 1: coordinator sends prepare to DB 1"); });
+    if (scen === "timeout") p.push(function () { msg("C", "D2", "prepare T1 (lost)", "lost"); log.add("Prepare to DB 2 is lost in the network", "warn"); });
+    else p.push(function () { msg("C", "D2", "prepare T1"); log.add("…and to DB 2"); });
+    p.push(function () { disk("D1", "writes T1 to disk"); msg("D1", "C", "yes", "yes"); s.st.D1 = "prepared"; log.add("DB 1 makes sure it can commit, then votes yes — it may no longer abort on its own", "ok"); });
+    if (scen === "pcrash") p.push(function () { crash("D1"); s.down.D1 = true; log.add("DB 1 crashes (its prepared data is safe on disk)", "bad"); });
+    if (scen === "no") p.push(function () { msg("D2", "C", "no", "no"); log.add("DB 2 votes no", "bad"); });
+    else if (scen === "timeout") p.push(function () { note("C", "no reply from DB 2… timeout"); log.add("No reply from DB 2 within the timeout", "warn"); });
+    else p.push(function () { disk("D2", "writes T1 to disk"); msg("D2", "C", "yes", "yes"); s.st.D2 = "prepared"; log.add("DB 2 votes yes", "ok"); });
+
+    var commit = scen !== "no" && scen !== "timeout";
+    if (scen === "cearly") {
+      p.push(function () { crash("C"); s.down.C = true; s.st.C = "crashed"; wait("The coordinator crashed before writing a decision. Both participants voted yes and are in doubt."); });
+      return p;
+    }
+    p.push(function () {
+      s.decision = commit ? "commit" : "abort"; s.logged = true; s.st.C = commit ? "decided commit" : "decided abort";
+      disk("C", "log: " + s.decision.toUpperCase() + " T1 — commit point");
+      log.add("Phase 2: coordinator writes “" + s.decision + "” to its log. The decision is now irrevocable.", commit ? "ok" : "bad");
+    });
+    p.push(function () { msg("C", "D2", s.decision); s.st.D2 = commit ? "committed" : "aborted"; log.add("DB 2 " + (commit ? "commits" : "aborts") + " and releases its locks", commit ? "ok" : "warn"); });
+    if (scen === "ccrash") {
+      p.push(function () { crash("C"); s.down.C = true; s.st.C = "crashed"; wait("The coordinator crashed before telling DB 1. DB 1 voted yes, so it is in doubt: it must keep T1’s locks and wait."); });
+      return p;
+    }
+    if (scen === "pcrash") {
+      p.push(function () { msg("C", "D1", s.decision + " (no answer)", "lost"); log.add("DB 1 is down; the coordinator will retry forever", "warn"); });
+      p.push(function () { s.down.D1 = false; note("D1", "DB 1 recovers, still prepared"); log.add("DB 1 restarts: T1 is still prepared on disk", "muted"); });
+      p.push(function () { msg("C", "D1", s.decision + " (retry)"); s.st.D1 = "committed"; log.add("The retry reaches DB 1: it commits. Atomicity holds.", "ok"); s.st.C = "done"; });
+      return p;
+    }
+    p.push(function () { msg("C", "D1", s.decision); s.st.D1 = commit ? "committed" : "aborted"; s.st.C = "done"; log.add("DB 1 " + (commit ? "commits" : "aborts") + ". T1 is " + (commit ? "committed" : "aborted") + " everywhere.", commit ? "ok" : "warn"); });
+    return p;
+  }
+  function wait(text) {
+    if (s.st.D1 === "prepared") s.st.D1 = "in doubt";
+    if (s.st.D2 === "prepared") s.st.D2 = "in doubt";
+    log.add(text, "bad");
+    document.getElementById("recover").disabled = false;
+    document.getElementById("giveup").disabled = s.st.D1 !== "in doubt";
+  }
+
+  function step() { if (s.pc >= plan.length) return false; plan[s.pc++](); render(); return s.pc < plan.length; }
+
+  document.getElementById("recover").addEventListener("click", function () {
+    s.down.C = false;
+    note("C", "coordinator restarts, reads its log");
+    var dec = s.logged ? s.decision : "abort";
+    if (!s.logged) { s.decision = "abort"; disk("C", "no decision in log → ABORT T1"); log.add("No commit record in the log, so T1 is aborted", "warn"); }
+    else log.add("The log says “" + dec + "”: resend it to every participant still in doubt", "ok");
+    ["D1", "D2"].forEach(function (d) {
+      if (s.st[d] === "in doubt") { msg("C", d, dec); s.st[d] = dec === "commit" ? "committed" : "aborted"; }
+    });
+    s.st.C = "done";
+    log.add(s.broken ? "Too late: DB 1 already aborted while DB 2 committed. The transaction is no longer atomic." : "Every participant has resolved T1 the same way.", s.broken ? "bad" : "ok");
+    document.getElementById("recover").disabled = true; document.getElementById("giveup").disabled = true;
+    render();
+  });
+  document.getElementById("giveup").addEventListener("click", function () {
+    s.st.D1 = "aborted"; s.broken = s.decision === "commit";
+    note("D1", "DB 1 times out and aborts on its own");
+    log.add(s.broken ? "DB 1 aborted, but the coordinator had decided commit and DB 2 committed: inconsistent!" : "DB 1 aborted unilaterally — this time it got lucky", s.broken ? "bad" : "warn");
+    document.getElementById("giveup").disabled = true;
+    render();
+  });
+
+  function render() {
+    var svgEl = Kit.clear(document.getElementById("seq"));
+    var H = Math.max(330, s.y + 20);
+    svgEl.setAttribute("viewBox", "0 0 520 " + H);
+    svgEl.appendChild(Kit.svg("defs", null, Kit.svg("marker", { id: "arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, Kit.svg("path", { d: "M0 0 L10 5 L0 10 z" }))));
+    Object.keys(X).forEach(function (k) {
+      svgEl.appendChild(Kit.svg("line", { class: "life", x1: X[k], x2: X[k], y1: 40, y2: H - 10 }));
+      svgEl.appendChild(Kit.svg("g", { class: "head" }, Kit.svg("rect", { x: X[k] - 55, y: 8, width: 110, height: 26, rx: 6 }), Kit.svg("text", { x: X[k], y: 25, "text-anchor": "middle" }, NAMES[k])));
+    });
+    s.items.forEach(function (it) {
+      if (it.t === "msg") {
+        var x1 = X[it.from], x2 = X[it.to], dir = x2 > x1 ? 1 : -1;
+        var end = it.cls === "lost" ? x1 + (x2 - x1) * 0.55 : x2 - dir * 4;
+        svgEl.appendChild(Kit.svg("line", { class: "msg " + it.cls, x1: x1, y1: it.y, x2: end, y2: it.y + 14 }));
+        svgEl.appendChild(Kit.svg("text", { class: "lbl", x: (x1 + (it.cls === "lost" ? end : x2)) / 2, y: it.y - 2, "text-anchor": "middle" }, it.label));
+        if (it.cls === "lost") svgEl.appendChild(Kit.svg("text", { class: "lbl", x: end + 4, y: it.y + 18, fill: "var(--bad)" }, "✕"));
+      } else if (it.t === "disk") {
+        svgEl.appendChild(Kit.svg("rect", { class: "disk", x: X[it.at] - 4, y: it.y - 4, width: 8, height: 8, rx: 2 }));
+        svgEl.appendChild(Kit.svg("text", { class: "note", x: X[it.at] + (it.at === "D2" ? -10 : 10), y: it.y + 4, "text-anchor": it.at === "D2" ? "end" : "start" }, it.text));
+      } else if (it.t === "note") {
+        svgEl.appendChild(Kit.svg("text", { class: "note", x: X[it.at] + (it.at === "D2" ? -8 : 8), y: it.y + 4, "text-anchor": it.at === "D2" ? "end" : "start" }, it.text));
+      } else if (it.t === "crash") {
+        var cx = X[it.at];
+        svgEl.appendChild(Kit.svg("path", { class: "crash", d: "M" + (cx - 9) + " " + (it.y - 9) + " L" + (cx + 9) + " " + (it.y + 9) + " M" + (cx + 9) + " " + (it.y - 9) + " L" + (cx - 9) + " " + (it.y + 9) }));
+        svgEl.appendChild(Kit.svg("text", { class: "note", x: cx + 14, y: it.y + 4 }, "crash"));
+      }
+    });
+    var st = Kit.clear(document.getElementById("states"));
+    ["C", "D1", "D2"].forEach(function (k) {
+      var v = s.st[k], cls = v === "in doubt" ? "doubt" : v === "committed" ? "committed" : v === "aborted" ? "aborted" : "";
+      var locks = k !== "C" && (v === "active" || v === "prepared" || v === "in doubt");
+      st.appendChild(Kit.el("div", { class: "st " + cls + (s.down[k] ? " down" : "") }, Kit.el("b", null, NAMES[k] + (s.down[k] ? " (down)" : "")), v + (locks ? " · holds T1’s locks" : "")));
+    });
+  }
+
+  document.getElementById("scenario").appendChild(Kit.segmented({ label: "Scenario", value: scen,
+    options: [{ value: "ok", label: "Success" }, { value: "no", label: "No vote" }, { value: "timeout", label: "Lost prepare" },
+              { value: "pcrash", label: "Participant crash" }, { value: "ccrash", label: "Coordinator crash" }, { value: "cearly", label: "Crash before log" }],
+    onChange: function (v) { scen = v; document.getElementById("scenario-hint").textContent = SCEN[v]; player.reset(); } }).element);
+  document.getElementById("scenario-hint").textContent = SCEN[scen];
+  var player = Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1100, speeds: false });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does a participant promise when it votes yes?",
+      options: ["That it has already committed", "That it will commit if asked, under all circumstances — it gives up the right to abort", "Nothing; it can still abort later"],
+      answer: 1, explain: "It writes the data to disk and checks constraints first, so it can definitely commit later (p. 326)." },
+    { q: "Where is the commit point of 2PC?",
+      options: ["When the first participant commits", "When the coordinator writes its decision to its transaction log on disk", "When the client receives a reply"],
+      answer: 1, explain: "The commit point comes down to a single-node atomic commit on the coordinator (pp. 326–328)." },
+    { q: "A participant is in doubt. Why can’t it simply time out and abort?",
+      options: ["It can; that is safe", "The coordinator may have decided commit and another participant may already have committed", "Timeouts are not allowed in databases"],
+      answer: 1, explain: "Unilaterally aborting (or committing) can leave participants inconsistent; it must wait for the coordinator (p. 327)." }
+  ]);
+})();
+</script>
+</body>
+</html>

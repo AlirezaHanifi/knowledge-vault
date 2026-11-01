@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Queueing and Retry Storms</title>
+<meta name="description" content="Push a server towards its capacity and watch queueing delay explode, then add a load spike with client retries and see it fail to recover. Illustrates DDIA Chapter 2.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .charts { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .charts figure { margin: 0; }
+  .charts figcaption { font-size: .78rem; color: var(--ink-3); margin-bottom: 4px; }
+  .wide-chart { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-defining-nonfunctional-requirements.html">Chapter 2</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Queueing</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 2 · Defining Nonfunctional Requirements</div>
+  <h1>Queueing, overload, and retry storms</h1>
+  <p class="lede">A server can only work on one request at a time, so every request that arrives while it is busy waits in a queue. Near capacity those waits dominate the response time — and if clients retry the requests that time out, a short spike can leave the system stuck in overload.</p>
+  <p class="source-note">Illustrates “Describing Performance” (pp. 37–39: Figure 2-3, queueing delay, head-of-line blocking) and the sidebar “When an Overloaded System Won’t Recover” (p. 38: retry storms, metastable failure, backoff, load shedding). A single first-come-first-served server with random (seeded) arrivals and service times of 10 ms, with an occasional 100 ms slow request; clients time out after 1 s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="charts">
+        <figure>
+          <figcaption>Response time vs load (steady load, no retries)</figcaption>
+          <svg id="curve" role="img" aria-label="Median and p99 response time rise sharply as load approaches capacity"></svg>
+        </figure>
+        <figure>
+          <figcaption>Requests waiting in the queue over 20 s</figcaption>
+          <svg id="queue" role="img" aria-label="Queue length over time"></svg>
+        </figure>
+        <figure class="wide-chart">
+          <figcaption>Requests per second: arriving (including retries) vs answered within the 1 s timeout</figcaption>
+          <svg id="rates" role="img" aria-label="Incoming request rate and goodput over time"></svg>
+        </figure>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Workload</p>
+        <div id="sliders"></div>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="spike" checked> Load spike ×1.6 from 6 s to 9 s</label>
+        <div class="field" style="margin-top:10px"><span class="field-head">When a request times out, the client…</span><div id="retry"></div></div>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="shed"> Server sheds load (rejects when 40 requests are queued)</label>
+      </div>
+      <div class="panel wide">
+        <p class="panel-title">Over the whole run</p>
+        <div class="stats" id="stats"></div>
+        <p class="field-hint" id="verdict" aria-live="polite" style="margin:10px 0 0"></p>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The knee.</strong> Response time stays flat at low load and climbs steeply past ~80% of capacity — not because each request gets slower, but because each one waits longer behind others.</li>
+    <li><strong>Head-of-line blocking.</strong> Raise the share of slow requests: a few 100 ms requests hold up the fast ones queued behind them, so p99 grows much faster than the median.</li>
+    <li><strong>Metastable failure.</strong> At 85% load with immediate retries, the spike ends at 9 s but the queue never drains: timed-out requests are still served (wasted work) while their retries add even more load.</li>
+    <li><strong>The fixes from the book.</strong> Backoff with jitter cuts the number of requests sent, but on its own it does not end this storm: the server still works through requests whose clients have given up. Add load shedding and the queue stays short, so accepted requests finish in time and the system recovers.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-defining-nonfunctional-requirements.html"><small>Lesson</small>2. Defining Nonfunctional Requirements</a></li>
+    <li><a href="02-tail-latency.html"><small>Simulation</small>Percentiles and tail latency</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var DURATION = 20000, TIMEOUT = 1000, FAST = 10, SLOW = 100, QUEUE_LIMIT = 40;
+  var cfg = { load: 0.85, slow: 0.02, spike: true, retry: "immediate", shed: false };
+
+  function capacity(slow) { return 1000 / ((1 - slow) * FAST + slow * SLOW); } // requests per second
+
+  // One run of a single FIFO server. Returns per-request records and summary numbers.
+  function simulate(c, duration) {
+    var r = Kit.rng(7), cap = capacity(c.slow);
+    var arrivals = [], t = 0;
+    while (t < duration) {
+      var rate = cap * c.load * (c.spike && t >= 6000 && t < 9000 ? 1.6 : 1);
+      t += r.exp(1000 / rate);
+      if (t < duration) arrivals.push({ t: t, attempt: 1 });
+    }
+    // A small binary heap keeps arrivals (including retries scheduled later) in time order.
+    var heap = [];
+    function push(x) { heap.push(x); var i = heap.length - 1; while (i) { var p = (i - 1) >> 1; if (heap[p].t <= heap[i].t) break; var tmp = heap[p]; heap[p] = heap[i]; heap[i] = tmp; i = p; } }
+    function pop() { var top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; var i = 0; for (;;) { var l = 2 * i + 1, rr = l + 1, m = i; if (l < heap.length && heap[l].t < heap[m].t) m = l; if (rr < heap.length && heap[rr].t < heap[m].t) m = rr; if (m === i) break; var tmp = heap[m]; heap[m] = heap[i]; heap[i] = tmp; i = m; } } return top; }
+    arrivals.forEach(push);
+    var free = 0, waiting = [], done = [], rejected = 0, timedOut = 0, ok = 0;
+    function retry(req, at) {
+      if (c.retry === "never" || req.attempt >= 8) return;
+      var delay = c.retry === "immediate" ? 0 : Math.min(8000, 100 * Math.pow(2, req.attempt)) * (0.5 + r.next());
+      if (at + delay < duration) push({ t: at + delay, attempt: req.attempt + 1 });
+    }
+    while (heap.length) {
+      var q = pop();
+      while (waiting.length && waiting[0] <= q.t) waiting.shift();
+      if (c.shed && waiting.length >= QUEUE_LIMIT) { rejected++; done.push({ a: q.t, s: q.t, f: q.t, rejected: true }); retry(q, q.t + 1); continue; }
+      var start = Math.max(q.t, free), svc = r.chance(c.slow) ? SLOW : r.exp(FAST);
+      free = start + svc;
+      if (start > q.t) waiting.push(start);
+      var rec = { a: q.t, s: start, f: free, rt: free - q.t };
+      done.push(rec);
+      if (rec.rt > TIMEOUT) { timedOut++; retry(q, q.t + TIMEOUT); } else ok++;
+    }
+    return { done: done, ok: ok, timedOut: timedOut, rejected: rejected };
+  }
+
+  function curve(slow) {
+    var pts50 = [], pts99 = [];
+    [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.93, 0.96].forEach(function (load) {
+      var res = simulate({ load: load, slow: slow, spike: false, retry: "never", shed: false }, 30000);
+      var rts = res.done.map(function (d) { return d.rt; }).sort(function (a, b) { return a - b; });
+      pts50.push([load * 100, Kit.percentile(rts, 0.5)]);
+      pts99.push([load * 100, Kit.percentile(rts, 0.99)]);
+    });
+    return { p50: pts50, p99: pts99 };
+  }
+
+  var curveCache = {};
+  function render() {
+    var key = cfg.slow.toFixed(3);
+    var cv = curveCache[key] || (curveCache[key] = curve(cfg.slow));
+    var yMax = Math.max(100, Math.ceil(Math.max.apply(null, cv.p99.map(function (p) { return p[1]; })) / 100) * 100);
+    Kit.lineChart(document.getElementById("curve"), {
+      width: 360, height: 210, xMax: 100, yMax: Math.min(yMax, 2000), xLabel: "load (% of capacity)", yFormat: Kit.fmtMs,
+      series: [{ points: cv.p50, cls: "s1", label: "median", dots: true }, { points: cv.p99, cls: "s2", label: "p99", dots: true }],
+      marks: [{ x: cfg.load * 100, label: "you" }]
+    });
+
+    var res = simulate(cfg, DURATION);
+    // queue length sampled every 100 ms: requests that arrived but have not started
+    var qpts = [], step = 100, deltas = [];
+    res.done.forEach(function (d) { if (!d.rejected && d.s > d.a) deltas.push([d.a, 1], [d.s, -1]); });
+    deltas.sort(function (a, b) { return a[0] - b[0]; });
+    var k = 0, n = 0, qmax = 1;
+    for (var t = 0; t <= DURATION; t += step) {
+      while (k < deltas.length && deltas[k][0] <= t) n += deltas[k++][1];
+      qpts.push([t / 1000, n]); qmax = Math.max(qmax, n);
+    }
+    var bands = cfg.spike ? [{ from: 6, to: 9, label: "spike" }] : [];
+    Kit.lineChart(document.getElementById("queue"), {
+      width: 360, height: 210, xMax: 20, yMax: Math.max(10, Math.ceil(qmax / 10) * 10), xLabel: "time (s)", bands: bands,
+      series: [{ points: qpts, cls: "s4" }]
+    });
+
+    var bins = 40, inRate = new Array(bins).fill(0), good = new Array(bins).fill(0), w = DURATION / bins;
+    res.done.forEach(function (d) {
+      inRate[Math.min(bins - 1, Math.floor(d.a / w))]++;
+      if (!d.rejected && d.rt <= TIMEOUT) good[Math.min(bins - 1, Math.floor(d.f / w))]++;
+    });
+    function perSec(arr) { return arr.map(function (v, i) { return [(i + 0.5) * w / 1000, v * 1000 / w]; }); }
+    var cap = capacity(cfg.slow), rmax = Math.max.apply(null, inRate) * 1000 / w;
+    Kit.lineChart(document.getElementById("rates"), {
+      width: 740, height: 200, xMax: 20, yMax: Math.ceil(Math.max(rmax, cap * 1.2) / 50) * 50, xLabel: "time (s)", bands: bands,
+      series: [{ points: perSec(inRate), cls: "s2", label: "arriving (incl. retries)" },
+               { points: perSec(good), cls: "ok", label: "answered in time" },
+               { points: [[0, cap], [20, cap]], cls: "s4 dashed", label: "capacity" }]
+    });
+
+    var rts = res.done.filter(function (d) { return !d.rejected; }).map(function (d) { return d.rt; }).sort(function (a, b) { return a - b; });
+    var total = res.done.length;
+    var stats = document.getElementById("stats");
+    Kit.clear(stats);
+    [["Median", Kit.fmtMs(Kit.percentile(rts, 0.5)), ""],
+     ["p99", Kit.fmtMs(Kit.percentile(rts, 0.99)), Kit.percentile(rts, 0.99) > TIMEOUT ? "bad" : ""],
+     ["Timed out", Kit.pct(res.timedOut / total, 0), res.timedOut / total > 0.1 ? "bad" : ""],
+     ["Rejected", Kit.pct(res.rejected / total, 0), res.rejected ? "warn" : ""],
+     ["Requests sent", String(total), ""]].forEach(function (s) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value " + s[2] }, s[1])));
+    });
+    var tail = qpts.slice(-20).reduce(function (a, p) { return a + p[1]; }, 0) / 20;
+    document.getElementById("verdict").textContent =
+      tail > 30 ? "Still overloaded at the end of the run, long after the spike: a metastable failure."
+      : cfg.spike ? "The queue drains after the spike: the system recovers."
+      : "Steady load: compare the queue with the response-time curve.";
+  }
+
+  var sliders = document.getElementById("sliders");
+  sliders.appendChild(Kit.slider({ label: "Offered load", min: 10, max: 98, value: 85, unit: "% of capacity",
+    onInput: function (v) { cfg.load = v / 100; render(); } }).element);
+  sliders.appendChild(Kit.slider({ label: "Slow requests (100 ms)", min: 0, max: 10, step: 0.5, value: 2, unit: "%",
+    onInput: function (v) { cfg.slow = v / 100; render(); } }).element);
+  document.getElementById("retry").appendChild(Kit.segmented({ label: "Retry policy", value: "immediate",
+    options: [{ value: "never", label: "Gives up" }, { value: "immediate", label: "Retries at once" }, { value: "backoff", label: "Backs off + jitter" }],
+    onChange: function (v) { cfg.retry = v; render(); } }).element);
+  document.getElementById("spike").addEventListener("change", function (e) { cfg.spike = e.target.checked; render(); });
+  document.getElementById("shed").addEventListener("change", function (e) { cfg.shed = e.target.checked; render(); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Service time stays 10 ms, yet response time at 95% load is many times higher than at 50%. Why?",
+      options: ["The CPU runs slower when busy", "Requests spend longer waiting in the queue before service starts", "The network is slower at high load"],
+      answer: 1, explain: "Queueing delay is not part of the service time; it grows sharply as throughput approaches capacity (p. 37)." },
+    { q: "Why should response times be measured on the client side?",
+      options: ["Servers cannot measure time", "Server-side measurements leave out the time a request spends queued before it is processed", "Clients have better clocks"],
+      answer: 1, explain: "The queueing delay is not part of the service time, so only the client sees the full response time (p. 39)." },
+    { q: "The spike is over, but the system stays overloaded. Which change from the book helps most?",
+      options: ["Retry faster", "Exponential backoff and load shedding", "Lower the client timeout"],
+      answer: 1, explain: "Backoff spreads retries out; shedding rejects work early so accepted requests still finish in time (p. 38)." }
+  ]);
+})();
+</script>
+</body>
+</html>

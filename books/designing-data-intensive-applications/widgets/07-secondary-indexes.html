@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local vs Global Secondary Indexes</title>
+<meta name="description" content="Search the book's used-car listings by colour and make with local (document-partitioned) and global (term-partitioned) secondary indexes, and count the shards each read and write touches. Illustrates DDIA Chapter 7.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .shards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+  .shard { border: 1.5px solid var(--line-strong); border-radius: var(--radius); padding: 10px; background: var(--surface); transition: border-color var(--step); }
+  .shard.touched { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .shard.wtouched { border-color: var(--s2); box-shadow: 0 0 0 2px color-mix(in srgb, var(--s2) 20%, transparent); }
+  .shard h3 { font-size: .85rem; margin: 0 0 6px; display: flex; justify-content: space-between; }
+  .rec { font-family: var(--mono); font-size: .74rem; padding: 2px 6px; border-radius: 3px; display: flex; gap: 6px; }
+  .rec.hit { background: var(--ok-soft); }
+  .rec.new { outline: 1.5px solid var(--s2); }
+  .idx { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--line); font-family: var(--mono); font-size: .72rem; color: var(--ink-2); }
+  .idx div { padding: 1px 0; }
+  .idx .hit { color: var(--ok); font-weight: 700; }
+  .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; vertical-align: 0; margin-right: 2px; border: 1px solid var(--line-strong); }
+  .sub { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-sharding.html">Chapter 7</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Secondary indexes</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 7 · Sharding</div>
+  <h1>Local vs global secondary indexes</h1>
+  <p class="lede">Car listings are sharded by ID. To find red cars you need a secondary index on colour — and it does not map neatly onto the shards. A local index lives beside each shard’s data (cheap writes, every read asks every shard); a global index is sharded by the indexed term (targeted reads, writes may touch other shards).</p>
+  <p class="source-note">Illustrates “Sharding and Secondary Indexes”, “Local Secondary Indexes” and “Global Secondary Indexes” (pp. 268–271, Figures 7-9 and 7-10): IDs 0–499 in shard 0 and 500–999 in shard 1, and a global index split at a–r / s–z for colour and a–f / h–z for make. A third shard and the particular cars are the vault’s own. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <p class="sub" id="shard-title"></p>
+      <div class="shards" id="shards"></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Index type</p>
+        <div id="kind"></div>
+        <p class="panel-title" style="margin-top:14px">Query</p>
+        <div class="field"><span class="field-head">color =</span><div id="color"></div></div>
+        <div class="field" style="margin-top:8px"><span class="field-head">AND make =</span><div id="make"></div></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary" type="button" id="search">Search</button>
+          <button class="btn" type="button" id="add">Add a random listing</button>
+        </div>
+      </div>
+      <div class="panel wide">
+        <p class="panel-title">Cost of the last operation</p>
+        <div class="stats" id="stats"></div>
+        <p class="field-hint" id="explain" aria-live="polite" style="margin:8px 0 0"></p>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Local: scatter/gather reads.</strong> Red cars can be on any shard, so a search for all of them asks every shard and combines the results — prone to tail latency, and adding shards doesn’t add query throughput.</li>
+    <li><strong>Local: writes stay on one shard.</strong> Adding a listing only touches the shard that holds its ID.</li>
+    <li><strong>Global: one shard per term.</strong> color = red reads one index shard for the postings list — but fetching the records themselves still goes to the shards holding those IDs.</li>
+    <li><strong>Global: AND across terms and multi-shard writes.</strong> colour and make may live on different index shards; the postings lists must be shipped and intersected, and one new listing can update several index shards.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-sharding.html"><small>Lesson</small>7. Sharding</a></li>
+    <li><a href="07-sharding.html"><small>Simulation</small>Sharding and rebalancing</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var COLORS = ["black", "red", "silver", "yellow"], MAKES = ["Audi", "Dodge", "Ford", "Honda"];
+  var SW = { black: "var(--ink)", red: "var(--bad)", silver: "var(--line-strong)", yellow: "var(--s5)" };
+  var NSHARDS = 3, r = Kit.rng(5);
+  var cars, kind = "local", q = { color: "red", make: "" }, last = null;
+
+  function dataShard(id) { return Math.floor(id / 500); }
+  // Global index shards by term: first letter a–r → 0, s–z → 1 for colour; a–f → 0, h–z → 1 for make (book's boundaries).
+  function termShard(field, value) {
+    var c = value[0].toLowerCase();
+    if (field === "color") return c <= "r" ? 0 : 1;
+    return c <= "f" ? 0 : 1;
+  }
+  function seed() {
+    cars = [];
+    var ids = [16, 48, 191, 306, 527, 583, 615, 768, 893, 1012, 1088, 1405];
+    ids.forEach(function (id) { cars.push({ id: id, color: COLORS[r.int(4)], make: MAKES[r.int(4)] }); });
+    cars[0].color = "red"; cars[0].make = "Honda"; cars[4].color = "red"; cars[4].make = "Ford"; cars[9].color = "red"; cars[9].make = "Dodge";
+  }
+  function match(c) { return (!q.color || c.color === q.color) && (!q.make || c.make === q.make); }
+
+  function search() {
+    var hits = cars.filter(match).map(function (c) { return c.id; });
+    var touched = [], explain;
+    if (kind === "local") {
+      touched = [0, 1, 2];
+      explain = "Local index: no shard knows where the other shards’ matches are, so the query goes to all " + NSHARDS + " shards and the results are merged.";
+      last = { op: "read", touched: touched, index: touched, data: touched, msgs: NSHARDS, hits: hits };
+    } else {
+      var terms = [];
+      if (q.color) terms.push(["color", q.color]);
+      if (q.make) terms.push(["make", q.make]);
+      var idx = []; terms.forEach(function (t) { var s = termShard(t[0], t[1]); if (idx.indexOf(s) < 0) idx.push(s); });
+      var data = []; hits.forEach(function (id) { var s = dataShard(id); if (data.indexOf(s) < 0) data.push(s); });
+      explain = "Global index: " + terms.map(function (t) { return t[0] + ":" + t[1] + " lives on index shard " + termShard(t[0], t[1]); }).join(", ") + "." +
+        (terms.length > 1 && idx.length > 1 ? " The two postings lists sit on different shards and must be sent over the network to be intersected." : "") +
+        (hits.length ? " Fetching the " + hits.length + " record(s) then reads shard(s) " + data.join(", ") + "." : "");
+      last = { op: "read", index: idx, data: data, msgs: idx.length + data.length, hits: hits };
+    }
+    last.explain = explain;
+    render();
+  }
+
+  function add() {
+    var id; do { id = r.int(1500); } while (cars.some(function (c) { return c.id === id; }));
+    var car = { id: id, color: COLORS[r.int(4)], make: MAKES[r.int(4)], fresh: true };
+    cars.forEach(function (c) { c.fresh = false; });
+    cars.push(car); cars.sort(function (a, b) { return a.id - b.id; });
+    var ds = dataShard(id), idx = [ds];
+    if (kind === "global") { idx = []; [termShard("color", car.color), termShard("make", car.make)].forEach(function (s) { if (idx.indexOf(s) < 0) idx.push(s); }); }
+    var all = [ds]; idx.forEach(function (s) { if (all.indexOf(s) < 0) all.push(s); });
+    last = { op: "write", index: idx, data: [ds], msgs: all.length, hits: [],
+      explain: kind === "local"
+        ? "Car " + id + " (" + car.color + " " + car.make + ") goes to shard " + ds + ", which also updates its own local index: one shard."
+        : "Car " + id + " goes to shard " + ds + "; its index entries color:" + car.color + " and make:" + car.make + " live on index shard(s) " + idx.join(", ") + ". " +
+          (all.length > 1 ? "That is " + all.length + " shards to keep in sync — the book suggests a distributed transaction, or accepts that the index lags (as DynamoDB’s does)." : "This time everything happens to land on one shard.") };
+    render();
+  }
+
+  function render() {
+    var wrap = Kit.clear(document.getElementById("shards"));
+    document.getElementById("shard-title").textContent = kind === "local" ? "Each shard: its records + a local index of only those records" : "Each shard: its records + one slice of the global index (by term)";
+    for (var s = 0; s < NSHARDS; s++) {
+      var mine = cars.filter(function (c) { return dataShard(c.id) === s; });
+      var cls = "shard";
+      if (last && last.op === "read" && (last.index.indexOf(s) >= 0 || last.data.indexOf(s) >= 0)) cls += " touched";
+      if (last && last.op === "write" && (last.index.indexOf(s) >= 0 || last.data.indexOf(s) >= 0)) cls += " wtouched";
+      var box = Kit.el("div", { class: cls },
+        Kit.el("h3", null, Kit.el("span", null, "Shard " + s), Kit.el("span", { class: "sub" }, "IDs " + s * 500 + "–" + (s * 500 + 499))));
+      mine.forEach(function (c) {
+        box.appendChild(Kit.el("div", { class: "rec" + (last && last.hits.indexOf(c.id) >= 0 ? " hit" : "") + (c.fresh ? " new" : "") },
+          Kit.el("span", null, "#" + c.id), Kit.el("span", null, Kit.el("i", { class: "swatch", style: "background:" + SW[c.color] }), c.color), Kit.el("span", null, c.make)));
+      });
+      var idx = Kit.el("div", { class: "idx" });
+      var entries = [];
+      if (kind === "local") {
+        COLORS.forEach(function (col) { var ids = mine.filter(function (c) { return c.color === col; }).map(function (c) { return c.id; }); if (ids.length) entries.push(["color:" + col, ids]); });
+        MAKES.forEach(function (m) { var ids = mine.filter(function (c) { return c.make === m; }).map(function (c) { return c.id; }); if (ids.length) entries.push(["make:" + m, ids]); });
+      } else {
+        COLORS.forEach(function (col) { if (termShard("color", col) === s) entries.push(["color:" + col, cars.filter(function (c) { return c.color === col; }).map(function (c) { return c.id; })]); });
+        MAKES.forEach(function (m) { if (termShard("make", m) === s) entries.push(["make:" + m, cars.filter(function (c) { return c.make === m; }).map(function (c) { return c.id; })]); });
+      }
+      if (!entries.length) idx.appendChild(Kit.el("div", { class: "sub" }, "no index entries"));
+      entries.forEach(function (e) {
+        var hot = last && last.op === "read" && (e[0] === "color:" + q.color || e[0] === "make:" + q.make);
+        idx.appendChild(Kit.el("div", { class: hot ? "hit" : null }, e[0] + " → [" + e[1].join(", ") + "]"));
+      });
+      box.appendChild(idx);
+      wrap.appendChild(box);
+    }
+    var stats = Kit.clear(document.getElementById("stats"));
+    var rows = last ? [["Operation", last.op], ["Shard requests", last.msgs], ["Matches", last.op === "read" ? last.hits.length : "–"]] : [["Operation", "–"]];
+    rows.forEach(function (x) { stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value" }, String(x[1])))); });
+    document.getElementById("explain").textContent = last ? last.explain : "Search, or add a listing.";
+  }
+
+  document.getElementById("kind").appendChild(Kit.segmented({ label: "Index type", value: kind,
+    options: [{ value: "local", label: "Local (document-partitioned)" }, { value: "global", label: "Global (term-partitioned)" }],
+    onChange: function (v) { kind = v; last = null; render(); } }).element);
+  document.getElementById("color").appendChild(Kit.segmented({ label: "Colour", value: q.color,
+    options: [{ value: "", label: "any" }].concat(COLORS.map(function (c) { return { value: c, label: c }; })), onChange: function (v) { q.color = v; } }).element);
+  document.getElementById("make").appendChild(Kit.segmented({ label: "Make", value: q.make,
+    options: [{ value: "", label: "any" }].concat(MAKES.map(function (m) { return { value: m, label: m }; })), onChange: function (v) { q.make = v; } }).element);
+  document.getElementById("search").addEventListener("click", search);
+  document.getElementById("add").addEventListener("click", add);
+  seed(); render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "With local secondary indexes, how is “all red cars” answered?",
+      options: ["From the one shard that holds color:red", "By sending the query to every shard and combining the results", "From a cache"],
+      answer: 1, explain: "Matching records may be on any shard, so all shards must be asked (p. 269)." },
+    { q: "Why are writes harder with a global secondary index?",
+      options: ["Records are bigger", "One record’s index terms may live on several other shards that must be updated too", "Global indexes are not sharded"],
+      answer: 1, explain: "Every term in a document might be on a different index shard (p. 271)." },
+    { q: "When is a global index a good fit, according to the book?",
+      options: ["When writes vastly outnumber reads", "When reads outnumber writes and postings lists are not too long", "Never"],
+      answer: 1, explain: "Global indexes are useful if read throughput is higher than write throughput and postings lists are short (p. 271)." }
+  ]);
+})();
+</script>
+</body>
+</html>

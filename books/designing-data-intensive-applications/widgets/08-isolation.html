@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isolation Level Stepper</title>
+<meta name="description" content="Step through two interleaved transactions and see which anomalies each isolation level prevents: dirty reads, read skew, lost updates, write skew. Illustrates DDIA 2nd ed., Chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .timeline { display: grid; grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr); gap: 4px 10px; font-size: .86rem; }
+  .timeline .h { font-weight: 600; font-size: .8rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .timeline .n { color: var(--ink-3); font-family: var(--mono); font-size: .76rem; padding-top: 6px; }
+  .op { padding: 5px 8px; border-radius: var(--radius-sm); border: 1px solid transparent; font-family: var(--mono); font-size: .8rem; min-height: 30px; }
+  .op.todo { border-color: var(--line); color: var(--ink-3); }
+  .op.cur { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+  .op.done { border-color: var(--line); background: var(--surface); }
+  .op.wait { border-color: var(--warn); background: var(--warn-soft); }
+  .op.abort { border-color: var(--bad); background: var(--bad-soft); }
+  .op .res { display: block; font-family: var(--font); font-size: .78rem; color: var(--ink-2); margin-top: 2px; }
+  .ver { font-family: var(--mono); font-size: .8rem; }
+  .ver .unc { color: var(--warn); }
+  .ver .old { color: var(--ink-3); text-decoration: line-through; }
+  table.matrix td, table.matrix th { text-align: center; }
+  table.matrix td:first-child, table.matrix th:first-child { text-align: left; }
+  table.matrix tr.sel td { background: var(--accent-soft); }
+  table.matrix td.focus { outline: 2px solid var(--accent); outline-offset: -2px; font-weight: 600; }
+  .yes { color: var(--bad); } .no { color: var(--ok); } .dep { color: var(--warn); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-transactions.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Isolation levels</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Transactions</div>
+  <h1>Isolation levels, one interleaving at a time</h1>
+  <p class="lede">Race conditions between transactions only show up under particular interleavings. Pick an anomaly, pick an isolation level, and step through the same interleaving to see whether the database lets it through, blocks a transaction, or aborts one.</p>
+  <p class="source-note">Scenarios follow the book’s examples: the unread-counter dirty read (Figure 8-2, p. 285), Aaliyah’s two $500 accounts (read skew, Figure 8-6, p. 294), the counter incremented from 42 (lost update, Figure 8-1, p. 282), and Aaliyah and Bryce going off call (write skew, pp. 303–304). The engine is a simplified MVCC model written for the vault: row-level write locks at every level; snapshot isolation optionally aborts on concurrent updates (as PostgreSQL’s repeatable read does, p. 301); “serializable” is a simplified SSI that aborts a committing read-write transaction if anything it read was overwritten by a concurrent commit.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="row" style="margin-bottom:12px"><div id="scenario"></div></div>
+      <p id="story" style="color:var(--ink-2);font-size:.95rem"></p>
+      <div class="timeline" id="timeline"></div>
+      <div class="callout" id="outcome" style="margin-top:14px" aria-live="polite"></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Isolation level</p>
+        <div id="level"></div>
+        <label class="check" style="margin-top:10px" id="detect-wrap"><input type="checkbox" id="detect" checked> Snapshot isolation detects lost updates</label>
+        <div style="margin-top:12px" id="player"></div>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Database rows (versions)</p>
+        <div id="db"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Which level prevents what</h2>
+  <p class="source-note">Table 8-1 (p. 335), reproduced as a reference; the highlighted cell is the current scenario and level.</p>
+  <div class="table-wrap panel"><table class="data matrix" id="matrix"></table></div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>All levels here prevent <strong>dirty writes</strong>: a second writer to the same row waits for the first to commit or abort (shown in amber).</li>
+    <li><strong>Read committed</strong> lets each statement see the latest committed data, so two reads in one transaction can see different moments — read skew.</li>
+    <li><strong>Snapshot isolation</strong> reads from a consistent snapshot. Whether it stops lost updates depends on the implementation — toggle the checkbox.</li>
+    <li><strong>Write skew</strong> slips through snapshot isolation because the two transactions write <em>different</em> rows; there is no write conflict to detect. Only serializable isolation catches it — by aborting one transaction, which the application must retry.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-transactions.html"><small>Lesson</small>8. Transactions</a></li>
+    <li><a href="../lab/08-write-skew/README.md"><small>Experiment</small>MVCC, write skew and SSI in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LEVELS = [
+    { value: "ru", label: "Read uncommitted" }, { value: "rc", label: "Read committed" },
+    { value: "si", label: "Snapshot" }, { value: "ser", label: "Serializable" }
+  ];
+
+  // Steps: tx 1|2; op read|write|commit|abort|count; key/keys; as = local var; val(locals) -> value or undefined (skip)
+  var SCENARIOS = {
+    dirty: {
+      label: "Dirty read", col: 0,
+      story: "User 1 inserts a new email and increments the unread counter, but the transaction later aborts. Meanwhile user 2 reads the counter.",
+      init: { unread: 2 },
+      steps: [
+        { tx: 1, op: "write", key: "unread", val: function () { return 3; }, text: "UPDATE unread = 3" },
+        { tx: 2, op: "read", key: "unread", as: "u", text: "SELECT unread" },
+        { tx: 1, op: "abort", text: "ABORT" },
+        { tx: 2, op: "commit", text: "COMMIT" }
+      ],
+      check: function (L) { return L[2].u === 3 ? "User 2 saw unread = 3, a value that was never committed (dirty read)." : null; }
+    },
+    skew: {
+      label: "Read skew", col: 1,
+      story: "Aaliyah has $500 in each of two accounts. A transfer moves $100 from account 2 to account 1 while she reads both balances.",
+      init: { acct1: 500, acct2: 500 },
+      steps: [
+        { tx: 2, op: "read", key: "acct1", as: "a", text: "SELECT acct1" },
+        { tx: 1, op: "write", key: "acct1", val: function () { return 600; }, text: "UPDATE acct1 = 600" },
+        { tx: 1, op: "write", key: "acct2", val: function () { return 400; }, text: "UPDATE acct2 = 400" },
+        { tx: 1, op: "commit", text: "COMMIT" },
+        { tx: 2, op: "read", key: "acct2", as: "b", text: "SELECT acct2" },
+        { tx: 2, op: "commit", text: "COMMIT" }
+      ],
+      check: function (L) { return L[2].a !== undefined && L[2].b !== undefined && L[2].a + L[2].b !== 1000 ? "Aaliyah saw a total of $" + (L[2].a + L[2].b) + " — $100 seems to have vanished (read skew)." : null; }
+    },
+    lost: {
+      label: "Lost update", col: 3,
+      story: "Two clients increment a counter that starts at 42 with read-modify-write. After both commit it should be 44.",
+      init: { counter: 42 },
+      steps: [
+        { tx: 1, op: "read", key: "counter", as: "c", text: "SELECT counter" },
+        { tx: 2, op: "read", key: "counter", as: "c", text: "SELECT counter" },
+        { tx: 1, op: "write", key: "counter", val: function (L) { return L.c + 1; }, text: "UPDATE counter = c + 1" },
+        { tx: 2, op: "write", key: "counter", val: function (L) { return L.c + 1; }, text: "UPDATE counter = c + 1" },
+        { tx: 1, op: "commit", text: "COMMIT" },
+        { tx: 2, op: "commit", text: "COMMIT" }
+      ],
+      check: function (L, db) { var v = committed(db, "counter"); return v !== 44 && L.aborted.length === 0 ? "Final counter is " + v + ", not 44: one increment was lost." : null; }
+    },
+    wskew: {
+      label: "Write skew", col: 4,
+      story: "Aaliyah and Bryce are both on call. Each checks that at least two doctors are on call, then goes off call. At least one must remain.",
+      init: { aaliyah: "on", bryce: "on" },
+      steps: [
+        { tx: 1, op: "count", keys: ["aaliyah", "bryce"], as: "n", text: "SELECT count(*) WHERE on_call" },
+        { tx: 2, op: "count", keys: ["aaliyah", "bryce"], as: "n", text: "SELECT count(*) WHERE on_call" },
+        { tx: 1, op: "write", key: "aaliyah", val: function (L) { return L.n >= 2 ? "off" : undefined; }, text: "IF n ≥ 2: aaliyah off call" },
+        { tx: 2, op: "write", key: "bryce", val: function (L) { return L.n >= 2 ? "off" : undefined; }, text: "IF n ≥ 2: bryce off call" },
+        { tx: 1, op: "commit", text: "COMMIT" },
+        { tx: 2, op: "commit", text: "COMMIT" }
+      ],
+      check: function (L, db) { return committed(db, "aaliyah") === "off" && committed(db, "bryce") === "off" ? "Nobody is on call — both decisions were based on a premise the other transaction invalidated (write skew)." : null; }
+    }
+  };
+
+  var scenario = "skew", level = "rc";
+  var db, txs, pos, pending, ts, done, results;
+
+  function committed(d, key) {
+    var vs = d[key].filter(function (v) { return v.commit !== null; });
+    return vs[vs.length - 1].value;
+  }
+
+  function reset() {
+    var sc = SCENARIOS[scenario];
+    ts = 1; db = {};
+    Object.keys(sc.init).forEach(function (k) { db[k] = [{ value: sc.init[k], tx: 0, commit: 0 }]; });
+    txs = { 1: { id: 1, start: null, status: "active", locals: {}, reads: {} }, 2: { id: 2, start: null, status: "active", locals: {}, reads: {} } };
+    pos = 0; pending = { 1: [], 2: [] }; done = false;
+    results = sc.steps.map(function () { return { state: "todo", res: "" }; });
+    render();
+  }
+
+  function begin(t) { if (t.start === null) t.start = ts; }
+
+  function visible(t, key) {
+    var vs = db[key];
+    for (var i = vs.length - 1; i >= 0; i--) {
+      var v = vs[i];
+      if (v.aborted) continue;
+      if (v.tx === t.id) return v;                                  // own write
+      if (level === "ru") return v;                                // anything not aborted
+      if (v.commit === null) continue;
+      if (level === "rc") return v;                                // latest committed
+      if (v.commit <= t.start) return v;                           // snapshot
+    }
+    return vs[0];
+  }
+
+  function holder(t, key) { // another transaction's uncommitted write on this row
+    var vs = db[key];
+    for (var i = vs.length - 1; i >= 0; i--) if (vs[i].commit === null && !vs[i].aborted && vs[i].tx !== t.id) return vs[i].tx;
+    return null;
+  }
+
+  function abort(t, why) {
+    t.status = "aborted";
+    Object.keys(db).forEach(function (k) { db[k].forEach(function (v) { if (v.tx === t.id && v.commit === null) v.aborted = true; }); });
+    return why;
+  }
+
+  // Execute one step for its transaction; returns {state, res}
+  function exec(i) {
+    var s = SCENARIOS[scenario].steps[i], t = txs[s.tx];
+    if (t.status !== "active") return { state: "abort", res: "skipped — transaction aborted" };
+    begin(t);
+    if (s.op === "read") {
+      var v = visible(t, s.key);
+      t.locals[s.as] = v.value; t.reads[s.key] = true;
+      return { state: "done", res: "→ " + v.value + (v.commit === null && v.tx !== t.id ? " (uncommitted!)" : "") };
+    }
+    if (s.op === "count") {
+      var n = 0;
+      s.keys.forEach(function (k) { if (visible(t, k).value === "on") n++; t.reads[k] = true; });
+      t.locals[s.as] = n;
+      return { state: "done", res: "→ " + n };
+    }
+    if (s.op === "write") {
+      var val = s.val(t.locals);
+      if (val === undefined) return { state: "done", res: "condition false — no write" };
+      var h = holder(t, s.key);
+      if (h) return { state: "wait", res: "waits for T" + h + "’s lock on " + s.key };
+      if ((level === "si" && document.getElementById("detect").checked) || level === "ser") {
+        var newer = db[s.key].some(function (v) { return v.commit !== null && v.commit > t.start && v.tx !== t.id; });
+        if (newer) return { state: "abort", res: abort(t, "ABORTED: concurrent update to " + s.key) };
+      }
+      db[s.key] = db[s.key].filter(function (v) { return !(v.tx === t.id && v.commit === null); });
+      db[s.key].push({ value: val, tx: t.id, commit: null });
+      t.wrote = true;
+      return { state: "done", res: "wrote " + s.key + " = " + val };
+    }
+    if (s.op === "commit") {
+      // Simplified SSI: a transaction that wrote something must abort if any of its
+      // reads were overwritten by a concurrent commit (its premise is outdated).
+      // Read-only transactions saw a consistent snapshot and can always commit.
+      if (level === "ser" && t.wrote) {
+        var stale = Object.keys(t.reads).filter(function (k) {
+          return db[k].some(function (v) { return v.commit !== null && v.commit > t.start && v.tx !== t.id; });
+        });
+        if (stale.length) return { state: "abort", res: abort(t, "ABORTED at commit: it read " + stale.join(", ") + ", which a concurrent transaction has since changed") };
+      }
+      var c = ++ts;
+      Object.keys(db).forEach(function (k) { db[k].forEach(function (v) { if (v.tx === t.id && v.commit === null && !v.aborted) v.commit = c; }); });
+      t.status = "committed";
+      return { state: "done", res: "committed" };
+    }
+    if (s.op === "abort") { abort(t, ""); return { state: "done", res: "rolled back" }; }
+  }
+
+  function step() {
+    if (done) return false;
+    // First retry any waiting step whose lock may now be free.
+    for (var tx = 1; tx <= 2; tx++) {
+      if (pending[tx].length) {
+        var i = pending[tx][0], r = exec(i);
+        if (r.state !== "wait") { results[i] = r; pending[tx].shift(); render(); return true; }
+      }
+    }
+    var steps = SCENARIOS[scenario].steps;
+    if (pos >= steps.length) {
+      if (pending[1].length || pending[2].length) { done = true; render(); return false; }
+      done = true; render(); return false;
+    }
+    var j = pos++, s = steps[j];
+    if (pending[s.tx].length) { pending[s.tx].push(j); results[j] = { state: "wait", res: "queued behind a waiting statement" }; }
+    else {
+      var res = exec(j);
+      results[j] = res;
+      if (res.state === "wait") pending[s.tx].push(j);
+    }
+    if (pos >= steps.length && !pending[1].length && !pending[2].length) done = true;
+    render();
+    return !done;
+  }
+
+  function render() {
+    var sc = SCENARIOS[scenario];
+    document.getElementById("story").textContent = sc.story;
+    var tl = Kit.clear(document.getElementById("timeline"));
+    tl.appendChild(el("div", { class: "h" }, "#"));
+    tl.appendChild(el("div", { class: "h" }, "Transaction 1 · " + txs[1].status));
+    tl.appendChild(el("div", { class: "h" }, "Transaction 2 · " + txs[2].status));
+    sc.steps.forEach(function (s, i) {
+      var r = results[i], cls = "op " + (i === pos && !done ? "cur" : r.state);
+      var cell = el("div", { class: cls }, s.text, r.res ? el("span", { class: "res" }, r.res) : null);
+      tl.appendChild(el("div", { class: "n" }, i + 1));
+      tl.appendChild(s.tx === 1 ? cell : el("div"));
+      tl.appendChild(s.tx === 2 ? cell : el("div"));
+    });
+    var dbEl = Kit.clear(document.getElementById("db"));
+    var tbl = el("table", { class: "data" }, el("tr", null, el("th", null, "row"), el("th", null, "versions (oldest → newest)")));
+    Object.keys(db).forEach(function (k) {
+      tbl.appendChild(el("tr", null, el("td", { class: "mono" }, k), el("td", { class: "ver" },
+        db[k].map(function (v, i) {
+          var tag = v.aborted ? "old" : v.commit === null ? "unc" : "";
+          return el("span", { class: tag }, (i ? " → " : "") + v.value + (v.tx ? " (T" + v.tx + (v.aborted ? ", aborted" : v.commit === null ? ", uncommitted" : "") + ")" : ""));
+        }))));
+    });
+    dbEl.appendChild(tbl);
+    var out = Kit.clear(document.getElementById("outcome"));
+    if (!done) { out.className = "callout"; out.appendChild(el("p", null, "Step through the interleaving (" + Math.min(pos, sc.steps.length) + " / " + sc.steps.length + ").")); }
+    else {
+      var L = { 1: txs[1].locals, 2: txs[2].locals, aborted: [1, 2].filter(function (x) { return txs[x].status === "aborted"; }) };
+      var bad = sc.check(L, db);
+      var aborted = [1, 2].filter(function (x) { return txs[x].status === "aborted"; });
+      if (scenario === "dirty") aborted = [];
+      if (bad) { out.className = "callout bad"; out.appendChild(el("p", null, el("strong", null, "Anomaly. "), bad)); }
+      else if (aborted.length) { out.className = "callout warn"; out.appendChild(el("p", null, el("strong", null, "Prevented by abort. "), "Transaction " + aborted.join(" & ") + " was aborted; the application must retry it.")); }
+      else { out.className = "callout ok"; out.appendChild(el("p", null, el("strong", null, "Prevented. "), "The interleaving produced a correct result.")); }
+    }
+    renderMatrix();
+    document.getElementById("detect-wrap").hidden = level !== "si";
+  }
+
+  var MATRIX = [
+    ["Read uncommitted", "ru", ["yes", "yes", "yes", "yes", "yes"]],
+    ["Read committed", "rc", ["no", "yes", "yes", "yes", "yes"]],
+    ["Snapshot isolation", "si", ["no", "no", "no", "dep", "yes"]],
+    ["Serializable", "ser", ["no", "no", "no", "no", "no"]]
+  ];
+  function renderMatrix() {
+    var m = Kit.clear(document.getElementById("matrix"));
+    m.appendChild(el("tr", null, ["Isolation level", "Dirty reads", "Read skew", "Phantom reads", "Lost updates", "Write skew"].map(function (h) { return el("th", { scope: "col" }, h); })));
+    var col = SCENARIOS[scenario].col;
+    MATRIX.forEach(function (row) {
+      m.appendChild(el("tr", { class: row[1] === level ? "sel" : null }, el("td", null, row[0]),
+        row[2].map(function (c, i) {
+          var txt = c === "yes" ? "✗ possible" : c === "no" ? "✓ prevented" : "? depends";
+          return el("td", { class: (c === "yes" ? "yes" : c === "no" ? "no" : "dep") + (row[1] === level && i === col ? " focus" : "") }, txt);
+        })));
+    });
+  }
+
+  document.getElementById("scenario").appendChild(Kit.segmented({ label: "Anomaly", value: scenario,
+    options: Object.keys(SCENARIOS).map(function (k) { return { value: k, label: SCENARIOS[k].label }; }),
+    onChange: function (v) { scenario = v; player.pause(); reset(); } }).element);
+  document.getElementById("level").appendChild(Kit.segmented({ label: "Isolation level", value: level, options: LEVELS,
+    onChange: function (v) { level = v; player.pause(); reset(); } }).element);
+  document.getElementById("detect").addEventListener("change", function () { player.pause(); reset(); });
+  var player = Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why doesn't snapshot isolation prevent the on-call write skew?",
+      options: ["The transactions write different rows, so there is no write–write conflict to detect", "Snapshots are taken too late", "Because both transactions read uncommitted data"],
+      answer: 0, explain: "Each transaction updates its own row based on a premise (count ≥ 2) the other invalidates. Detecting that needs read tracking — serializable isolation." },
+    { q: "Under read committed, why does Aaliyah see $900?",
+      options: ["She reads uncommitted data", "Her two reads see the database at two different points in time", "The transfer is lost"],
+      answer: 1, explain: "Each statement sees the latest committed data. The first read happened before the transfer committed, the second after." },
+    { q: "Serializable snapshot isolation aborts a transaction. What should the application do?",
+      options: ["Report data corruption", "Retry the transaction", "Lower the isolation level"],
+      answer: 1, explain: "An abort is the price of optimistic concurrency control: the retried transaction will see the new data and decide correctly." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B-Tree Page Splits</title>
+<meta name="description" content="Insert and look up keys in a small B-tree: follow page references from the root, watch full pages split and the tree grow a level, and crash in the middle of a split with and without a write-ahead log. Illustrates DDIA Chapter 4.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .tree { display: grid; gap: 22px; padding: 6px 0; }
+  .level { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .level-name { font-size: .72rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; text-align: center; margin-bottom: -14px; }
+  .page-box { display: inline-flex; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); font-family: var(--mono); font-size: .78rem; min-height: 30px; }
+  .page-box .k { padding: 5px 6px; border-right: 1px solid var(--line); min-width: 30px; text-align: center; }
+  .page-box .k:last-child { border-right: 0; }
+  .page-box .free { color: var(--ink-3); }
+  .page-box .pid { padding: 5px 6px; color: var(--ink-3); border-right: 1px solid var(--line); background: var(--surface-2); }
+  .page-box.path { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .page-box.written { border-color: var(--s2); }
+  .page-box.written .pid { background: color-mix(in srgb, var(--s2) 18%, var(--surface)); color: var(--ink); }
+  .page-box.orphan { border-style: dashed; border-color: var(--bad); }
+  .page-box .hit { background: var(--ok-soft); font-weight: 700; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .78rem; color: var(--ink-2); margin-top: 14px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 2px solid; margin-right: 5px; vertical-align: -2px; }
+  .legend .lp { border-color: var(--accent); } .legend .lw { border-color: var(--s2); } .legend .lo { border-color: var(--bad); border-style: dashed; }
+  .orphans { margin-top: 14px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-storage-and-retrieval.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">B-tree</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Storage and Retrieval</div>
+  <h1>B-tree pages, lookups and splits</h1>
+  <p class="lede">A B-tree breaks the database into fixed-size pages and overwrites them in place. A lookup follows page references from the root down to a leaf; an insert into a full page splits it in two and updates the parent — sometimes all the way up, which is how the tree grows a new root.</p>
+  <p class="source-note">Illustrates “B-Trees” and “Making B-trees reliable” (pp. 125–128, Figures 4-5 and 4-6). Pages here hold at most 4 keys, so the branching factor is 5 instead of the several hundred of a real database; leaves hold keys only, and deletes are left out. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="tree" id="tree" aria-label="B-tree pages by level"></div>
+      <div class="orphans" id="orphans"></div>
+      <div class="legend"><span><i class="lp"></i>pages read by the last operation</span><span><i class="lw"></i>pages written by the last operation</span><span><i class="lo"></i>orphan page (unreachable)</span></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Operations</p>
+        <div class="row">
+          <label for="key">Key</label><input id="key" type="number" min="1" max="999" value="334" style="width:90px">
+          <button class="btn primary" type="button" id="ins">Insert</button>
+          <button class="btn" type="button" id="get">Look up</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" type="button" id="rand">Insert 5 random keys</button>
+          <button class="btn" type="button" id="reset">↺ Reset</button>
+        </div>
+        <label class="check" style="margin-top:12px"><input type="checkbox" id="crash"> Crash in the middle of the next split</label>
+        <label class="check" style="margin-top:6px"><input type="checkbox" id="wal" checked> Write-ahead log</label>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Counters</p>
+        <div class="stats" id="stats"></div>
+      </div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Lookups read one page per level.</strong> The depth grows only when the root splits, so it stays logarithmic in the number of keys — the book’s four levels of 4 KiB pages with branching factor 500 hold up to 250 TB.</li>
+    <li><strong>Most inserts write one page.</strong> A split writes the two halves plus the parent; occasionally a cascade rewrites a page on every level.</li>
+    <li><strong>A split overwrites several pages.</strong> Crash halfway without a WAL: the left half is on disk but the parent never learned about the right half, so its keys are orphaned. With the WAL, recovery replays the insert.</li>
+    <li><strong>Contrast with the LSM-tree.</strong> Here pages are modified in place; an LSM-tree only appends and later deletes whole files.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-storage-and-retrieval.html"><small>Lesson</small>4. Storage and Retrieval</a></li>
+    <li><a href="04-lsm-tree.html"><small>Simulation</small>Inside an LSM-tree</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var MAX = 4; // keys per page
+  var log = Kit.log(document.getElementById("log"));
+  var root, nextId, read, written, orphans, hitKey, totalWrites, rnd, ops;
+
+  function page(leaf, keys, children) { return { id: nextId++, leaf: leaf, keys: keys || [], children: children || [] }; }
+  function clone(n) { return { id: n.id, leaf: n.leaf, keys: n.keys.slice(), children: n.children.map(clone) }; }
+  function childIndex(n, key) { var i = 0; while (i < n.keys.length && key >= n.keys[i]) i++; return i; }
+
+  // Returns null, or {boundary, right} when the page split.
+  function insertInto(n, key) {
+    read.push(n.id);
+    if (n.leaf) {
+      if (n.keys.indexOf(key) >= 0) return "dup";
+      n.keys.push(key); n.keys.sort(function (a, b) { return a - b; });
+      written.push(n.id);
+      if (n.keys.length <= MAX) return null;
+      var r = page(true, n.keys.splice(Math.floor(n.keys.length / 2)));
+      written.push(r.id);
+      return { boundary: r.keys[0], right: r };
+    }
+    var i = childIndex(n, key), res = insertInto(n.children[i], key);
+    if (!res || res === "dup") return res;
+    n.keys.splice(i, 0, res.boundary); n.children.splice(i + 1, 0, res.right);
+    written.push(n.id);
+    if (n.keys.length <= MAX) return null;
+    var mid = Math.floor(n.keys.length / 2), up = n.keys[mid];
+    var right = page(false, n.keys.splice(mid + 1), n.children.splice(mid + 1));
+    n.keys.pop();
+    written.push(right.id);
+    return { boundary: up, right: right };
+  }
+
+  function insert(key, quiet) {
+    read = []; written = []; hitKey = key;
+    var before = clone(root), beforeNext = nextId;
+    var res = insertInto(root, key);
+    if (res === "dup") { if (!quiet) log.add("Key " + key + " is already in the tree", "muted"); return; }
+    if (res) { root = page(false, [res.boundary], [root, res.right]); written.push(root.id); }
+    var split = written.length > 1;
+    if (split && document.getElementById("crash").checked) {
+      document.getElementById("crash").checked = false;
+      crashMidSplit(key, before, beforeNext);
+      return;
+    }
+    totalWrites += new Set(written).size; ops++;
+    if (!quiet) log.add("Insert " + key + ": read " + read.length + " page(s), wrote " + new Set(written).size + (split ? " — page split" + (res ? ", new root" : "") : ""), split ? "warn" : "ok");
+    render();
+  }
+
+  // The leaf's new left half reached disk; the new right page and the parent update did not.
+  function crashMidSplit(key, before, beforeNext) {
+    var wal = document.getElementById("wal").checked;
+    if (wal) {
+      totalWrites += new Set(written).size; ops++;
+      log.add("Crash during the split for " + key + ". Recovery replays the insert from the write-ahead log: the tree is consistent.", "ok");
+      render(); return;
+    }
+    var afterLeafId = read[read.length - 1];
+    var leftKeys = findPage(root, afterLeafId).keys.slice();
+    var rightPage = findSibling(root, afterLeafId);
+    root = before; nextId = Math.max(nextId, beforeNext + 1);
+    var leaf = findPage(root, afterLeafId);
+    leaf.keys = leftKeys;
+    orphans.push({ id: rightPage ? rightPage.id : nextId++, keys: rightPage ? rightPage.keys.slice() : [] });
+    written = [afterLeafId]; read = [];
+    log.add("Crash during the split for " + key + " with no WAL: the left half overwrote the old page, but the parent never got a reference to the right half. Keys " + orphans[orphans.length - 1].keys.join(", ") + " are now unreachable.", "bad");
+    render();
+  }
+  function findPage(n, id) { if (n.id === id) return n; for (var i = 0; i < n.children.length; i++) { var f = findPage(n.children[i], id); if (f) return f; } return null; }
+  function findSibling(n, id) {
+    for (var i = 0; i < n.children.length; i++) {
+      if (n.children[i].id === id) return n.children[i + 1] || null;
+      var f = findSibling(n.children[i], id); if (f) return f;
+    }
+    return null;
+  }
+
+  function lookup(key) {
+    read = []; written = []; hitKey = key;
+    var n = root;
+    for (;;) { read.push(n.id); if (n.leaf) break; n = n.children[childIndex(n, key)]; }
+    var found = n.keys.indexOf(key) >= 0;
+    var lost = orphans.some(function (o) { return o.keys.indexOf(key) >= 0; });
+    log.add("Look up " + key + ": " + read.length + " page read(s) → " + (found ? "found" : lost ? "not found (it is in an orphan page)" : "not found"), found ? "ok" : lost ? "bad" : "muted");
+    render();
+  }
+
+  function levels() { var out = [], cur = [root]; while (cur.length) { out.push(cur); cur = [].concat.apply([], cur.map(function (n) { return n.children; })); } return out; }
+  function count(n) { return n.leaf ? n.keys.length : n.children.reduce(function (a, c) { return a + count(c); }, 0); }
+
+  function box(n, extra) {
+    var cls = "page-box" + (read.indexOf(n.id) >= 0 ? " path" : "") + (written.indexOf(n.id) >= 0 ? " written" : "") + (extra || "");
+    var cells = [Kit.el("span", { class: "pid", title: "page number" }, "p" + n.id)];
+    n.keys.forEach(function (k) { cells.push(Kit.el("span", { class: "k" + (n.leaf && k === hitKey ? " hit" : "") }, String(k))); });
+    for (var i = n.keys.length; i < MAX; i++) cells.push(Kit.el("span", { class: "k free" }, "·"));
+    return Kit.el("span", { class: cls, "aria-label": "page " + n.id + (n.leaf ? " leaf" : "") + " keys " + n.keys.join(", ") }, cells);
+  }
+
+  function render() {
+    var tree = Kit.clear(document.getElementById("tree"));
+    var lv = levels();
+    lv.forEach(function (row, i) {
+      tree.appendChild(Kit.el("div", { class: "level-name" }, i === 0 ? "root" : i === lv.length - 1 ? "leaf pages" : "level " + (i + 1)));
+      tree.appendChild(Kit.el("div", { class: "level" }, row.map(function (n) { return box(n); })));
+    });
+    var o = Kit.clear(document.getElementById("orphans"));
+    if (orphans.length) o.appendChild(Kit.el("div", { class: "level" }, orphans.map(function (p) { return box({ id: p.id, leaf: true, keys: p.keys, children: [] }, " orphan"); })));
+    var stats = Kit.clear(document.getElementById("stats"));
+    [["Depth", lv.length], ["Pages", lv.reduce(function (a, r) { return a + r.length; }, 0)], ["Keys", count(root)],
+     ["Writes / insert", ops ? (totalWrites / ops).toFixed(2) : "–"]].forEach(function (s) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value" }, String(s[1]))));
+    });
+  }
+
+  function reset() {
+    nextId = 1; orphans = []; totalWrites = 0; ops = 0; rnd = Kit.rng(42);
+    // Shaped like Figure 4-6: the page for 333–400 is full, so inserting 334 splits it.
+    root = page(false, [200, 333, 400], [page(true, [100, 120, 150]), page(true, [200, 250, 270, 300]),
+                                         page(true, [333, 337, 340, 345]), page(true, [400, 410, 470])]);
+    log.clear();
+    read = []; written = []; hitKey = null;
+    log.add("Start: two levels, 14 keys. Insert 334 to split the full page 333–345, as in Figure 4-6.", "muted");
+    render();
+  }
+
+  var keyInput = document.getElementById("key");
+  function key() { var v = parseInt(keyInput.value, 10); return v >= 1 && v <= 999 ? v : null; }
+  document.getElementById("ins").addEventListener("click", function () { var k = key(); if (k) insert(k); });
+  document.getElementById("get").addEventListener("click", function () { var k = key(); if (k) lookup(k); });
+  document.getElementById("rand").addEventListener("click", function () { for (var i = 0; i < 5; i++) insert(1 + rnd.int(999)); });
+  document.getElementById("reset").addEventListener("click", reset);
+  keyInput.addEventListener("keydown", function (e) { if (e.key === "Enter") { var k = key(); if (k) insert(k); } });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why does a lookup in a B-tree with millions of keys read only a handful of pages?",
+      options: ["Pages are cached", "Each level narrows the key range by the branching factor, so depth is O(log n)", "Keys are hashed"],
+      answer: 1, explain: "With a branching factor of several hundred, three or four levels are enough for most databases (p. 127)." },
+    { q: "What does a page split write?",
+      options: ["Only the new page", "The two half-full pages and the updated parent (possibly more parents up to the root)", "A new SSTable"],
+      answer: 1, explain: "The parent must reference both halves; if it is full, it splits as well, up to a new root (p. 127)." },
+    { q: "Why do B-trees need a write-ahead log?",
+      options: ["To make reads faster", "Because a split overwrites several pages, and a crash part-way through could leave an orphan page", "To compress pages"],
+      answer: 1, explain: "Every modification goes to the append-only WAL first, so recovery can restore a consistent tree (p. 128)." }
+  ]);
+})();
+</script>
+</body>
+</html>

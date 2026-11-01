@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consensus: Leader Election and Log Replication</title>
+<meta name="description" content="A five-node, Raft-style cluster: elect leaders with epoch (term) numbers, replicate log entries to a quorum, crash nodes and partition the network. Illustrates DDIA 2nd ed., Chapter 10.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .ring-svg .link { stroke: var(--line); stroke-width: 1.5; }
+  .ring-svg .link.cut { stroke: var(--bad); stroke-dasharray: 4 4; }
+  .ring-svg .node circle { fill: var(--surface); stroke: var(--line-strong); stroke-width: 2; }
+  .ring-svg .node.leader circle { stroke: var(--accent); stroke-width: 4; }
+  .ring-svg .node.candidate circle { stroke: var(--warn); stroke-width: 3; stroke-dasharray: 6 3; }
+  .ring-svg .node.down circle { opacity: .35; stroke-dasharray: 3 3; }
+  .ring-svg .node { cursor: pointer; }
+  .ring-svg .node:focus { outline: none; }
+  .ring-svg .node:focus-visible circle { stroke: var(--accent); stroke-width: 4; }
+  .ring-svg .timer { fill: none; stroke: var(--s3); stroke-width: 3; }
+  .ring-svg .msg-vote { fill: var(--warn); }
+  .ring-svg .msg-append { fill: var(--accent); }
+  .ring-svg .msg-resp { fill: var(--ink-3); }
+  .logs { display: grid; gap: 4px; font-size: .8rem; }
+  .logrow { display: grid; grid-template-columns: minmax(22px, auto) 1fr; gap: 8px; align-items: center; }
+  .logrow .who { font-weight: 600; }
+  .cells { display: flex; gap: 3px; flex-wrap: wrap; min-height: 26px; }
+  .cell { font-family: var(--mono); font-size: .72rem; padding: 3px 5px; border-radius: 4px; border: 1.5px dashed var(--line-strong); background: var(--surface); }
+  .cell.committed { border-style: solid; }
+  .cell.t0 { border-color: var(--s1); } .cell.t1 { border-color: var(--s2); } .cell.t2 { border-color: var(--s3); } .cell.t3 { border-color: var(--s4); } .cell.t4 { border-color: var(--s5); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/10-consistency-and-consensus.html">Chapter 10</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Consensus</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 10 · Consistency and Consensus</div>
+  <h1>Consensus: elect a leader, replicate a log</h1>
+  <p class="lede">Consensus algorithms are single-leader replication with automatic, safe failover. A node that stops hearing from the leader starts an election for a new, higher epoch (Raft calls it a <em>term</em>); a quorum must vote for it, and a quorum must store every log entry before it counts as committed.</p>
+  <p class="source-note">Illustrates “From single-leader replication to consensus” and “Subtleties of consensus” (pp. 434–436) and the cost of quorums in “Pros and cons of consensus” (p. 436). A teaching model loosely following Raft: leaders send their whole log rather than incremental entries, there is no log compaction or membership change, and timing is in abstract ticks. Implementation is the vault’s own — not a production algorithm.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="stage"><svg class="ring-svg" id="ring" viewBox="0 0 420 330" role="img" aria-label="Five nodes; see the event log for changes"></svg></div>
+      <div class="stats" id="stats" style="margin-top:8px"></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Controls</p>
+        <div id="player"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" type="button" id="req">Client write</button>
+          <button class="btn danger" type="button" id="kill">Crash leader</button>
+          <button class="btn" type="button" id="part" aria-pressed="false">Partition {A,B} | {C,D,E}</button>
+        </div>
+        <p class="field-hint" style="margin-top:8px">Click (or focus + Enter) a node to crash or restart it.</p>
+        <div id="sliders" style="margin-top:8px"></div>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Logs (term·cmd; solid = committed)</p>
+        <div class="logs" id="logs"></div>
+      </div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Epochs make leaders unique per term, not globally.</strong> After a partition heals, an old leader with a lower term steps down the moment it sees a higher term.</li>
+    <li><strong>Writes need a majority.</strong> Partition the leader into the minority {A,B}: it keeps accepting client writes but can never commit them. The majority side elects a new leader and continues; when the partition heals, the minority's uncommitted entries are overwritten.</li>
+    <li><strong>Votes check log freshness.</strong> A node only votes for a candidate whose log is at least as up-to-date as its own, so a new leader always has every committed entry.</li>
+    <li><strong>Five nodes tolerate two failures.</strong> Crash a third node and the cluster stops making progress — safe, but unavailable.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/10-consistency-and-consensus.html"><small>Lesson</small>10. Consistency and Consensus</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el, svg = Kit.svg;
+  var NAMES = ["A", "B", "C", "D", "E"], N = 5, MAJ = 3;
+  var HEARTBEAT = 4, cfg = { tMin: 14, tMax: 28, delay: 2 };
+  var log = Kit.log(document.getElementById("log"));
+  var S, r;
+
+  function fresh() {
+    r = Kit.rng(17);
+    S = { t: 0, msgs: [], partition: false, cmd: 0, nodes: NAMES.map(function (n, i) {
+      return { id: i, name: n, up: true, role: "follower", term: 0, votedFor: null, votes: 0, log: [], commit: 0,
+               timer: timeout(), hb: 0, match: [0, 0, 0, 0, 0] };
+    }) };
+  }
+  function timeout() { return cfg.tMin + r.int(cfg.tMax - cfg.tMin + 1); }
+  function side(i) { return i < 2 ? 0 : 1; }
+  function connected(a, b) { return !S.partition || side(a) === side(b); }
+  function lastTerm(n) { return n.log.length ? n.log[n.log.length - 1].term : 0; }
+
+  function send(from, to, m) {
+    m.from = from; m.to = to; m.sent = S.t; m.at = S.t + cfg.delay + r.int(2);
+    S.msgs.push(m);
+  }
+  function broadcast(n, mk) { for (var j = 0; j < N; j++) if (j !== n.id) send(n.id, j, mk(j)); }
+
+  function stepDown(n, term) {
+    if (n.role === "leader") log.add(n.name + " sees term " + term + " > " + n.term + " and steps down", "warn");
+    n.term = term; n.role = "follower"; n.votedFor = null;
+  }
+
+  function startElection(n) {
+    n.term++; n.role = "candidate"; n.votedFor = n.id; n.votes = 1; n.timer = timeout();
+    log.add("t=" + S.t + " " + n.name + " timed out → candidate for term " + n.term);
+    broadcast(n, function () { return { type: "vote", term: n.term, lastIdx: n.log.length, lastTerm: lastTerm(n) }; });
+  }
+
+  function becomeLeader(n) {
+    n.role = "leader"; n.hb = 0; n.match = [0, 0, 0, 0, 0]; n.match[n.id] = n.log.length;
+    log.add("t=" + S.t + " " + n.name + " won a majority → LEADER for term " + n.term, "ok");
+    heartbeat(n);
+  }
+
+  function heartbeat(n) {
+    broadcast(n, function () { return { type: "append", term: n.term, entries: n.log.slice(), commit: n.commit }; });
+  }
+
+  function deliver(m) {
+    var n = S.nodes[m.to];
+    if (!n.up || !connected(m.from, m.to)) return;
+    if (m.term > n.term) stepDown(n, m.term);
+    if (m.type === "vote") {
+      var upToDate = m.lastTerm > lastTerm(n) || (m.lastTerm === lastTerm(n) && m.lastIdx >= n.log.length);
+      var grant = m.term === n.term && (n.votedFor === null || n.votedFor === m.from) && upToDate;
+      if (grant) { n.votedFor = m.from; n.timer = timeout(); }
+      else if (m.term === n.term && !upToDate) log.add(n.name + " refuses to vote for " + NAMES[m.from] + ": its log is less up-to-date", "muted");
+      send(n.id, m.from, { type: "vote-resp", term: n.term, granted: grant });
+    } else if (m.type === "vote-resp") {
+      if (n.role === "candidate" && m.term === n.term && m.granted && ++n.votes >= MAJ) becomeLeader(n);
+    } else if (m.type === "append") {
+      if (m.term < n.term) { send(n.id, m.from, { type: "append-resp", term: n.term, ok: false, len: 0 }); return; }
+      if (n.role !== "follower") n.role = "follower";
+      n.timer = timeout();
+      // Simplification: adopt the leader's log wholesale (Raft reaches the same state incrementally).
+      var dropped = n.log.length > m.entries.length || n.log.some(function (e, i) { return !m.entries[i] || m.entries[i].term !== e.term; });
+      if (dropped && n.log.length > n.commit) log.add(n.name + " discards uncommitted entries that conflict with leader " + NAMES[m.from] + "'s log", "warn");
+      n.log = m.entries.slice();
+      n.commit = Math.max(n.commit, Math.min(m.commit, n.log.length));
+      send(n.id, m.from, { type: "append-resp", term: n.term, ok: true, len: n.log.length });
+    } else if (m.type === "append-resp") {
+      if (n.role !== "leader" || m.term !== n.term || !m.ok) return;
+      n.match[m.from] = m.len;
+      for (var idx = n.log.length; idx > n.commit; idx--) {
+        var count = n.match.filter(function (x, j) { return j === n.id ? n.log.length >= idx : x >= idx; }).length;
+        if (count >= MAJ && n.log[idx - 1].term === n.term) {
+          log.add("t=" + S.t + " leader " + n.name + " committed entries up to #" + idx + " (stored on " + count + " nodes)", "ok");
+          n.commit = idx; break;
+        }
+      }
+    }
+  }
+
+  function step() {
+    S.t++;
+    var due = S.msgs.filter(function (m) { return m.at <= S.t; });
+    S.msgs = S.msgs.filter(function (m) { return m.at > S.t; });
+    due.forEach(deliver);
+    S.nodes.forEach(function (n) {
+      if (!n.up) return;
+      if (n.role === "leader") { if (++n.hb >= HEARTBEAT) { n.hb = 0; n.match[n.id] = n.log.length; heartbeat(n); } }
+      else if (--n.timer <= 0) startElection(n);
+    });
+    render();
+  }
+
+  function leader() {
+    var best = null;
+    S.nodes.forEach(function (n) { if (n.up && n.role === "leader" && (!best || n.term > best.term)) best = n; });
+    return best;
+  }
+
+  // Clients may sit on either side of a partition, so every node that believes
+  // it is leader receives a write — a stale leader accepts it but can't commit it.
+  function clientWrite() {
+    var leaders = S.nodes.filter(function (n) { return n.up && n.role === "leader"; });
+    if (!leaders.length) { log.add("Client write rejected: no leader right now", "bad"); return; }
+    leaders.forEach(function (L) {
+      var e = { term: L.term, cmd: "x" + (++S.cmd) };
+      L.log.push(e); L.match[L.id] = L.log.length;
+      log.add("Client write " + e.cmd + " → leader " + L.name + " (term " + L.term + "), appended as #" + L.log.length);
+      heartbeat(L);
+    });
+  }
+
+  function toggle(i) {
+    var n = S.nodes[i];
+    n.up = !n.up;
+    if (n.up) { n.role = "follower"; n.timer = timeout(); log.add(n.name + " restarted (term and log survive on disk)", "muted"); }
+    else log.add(n.name + " crashed" + (n.role === "leader" ? " (it was the leader)" : ""), "bad");
+    render();
+  }
+
+  var POS = [];
+  for (var i = 0; i < N; i++) {
+    var a = -Math.PI / 2 + i * 2 * Math.PI / N;
+    POS.push([210 + 125 * Math.cos(a), 168 + 125 * Math.sin(a)]);
+  }
+  function render() {
+    var s = Kit.clear(document.getElementById("ring"));
+    for (var a = 0; a < N; a++) for (var b = a + 1; b < N; b++)
+      s.appendChild(svg("line", { class: "link" + (connected(a, b) ? "" : " cut"), x1: POS[a][0], y1: POS[a][1], x2: POS[b][0], y2: POS[b][1] }));
+    S.msgs.forEach(function (m) {
+      if (!connected(m.from, m.to)) return;
+      var f = Math.min(1, (S.t - m.sent + 0.5) / Math.max(1, m.at - m.sent));
+      var x = POS[m.from][0] + (POS[m.to][0] - POS[m.from][0]) * f, y = POS[m.from][1] + (POS[m.to][1] - POS[m.from][1]) * f;
+      var cls = m.type === "vote" ? "msg-vote" : m.type === "append" ? "msg-append" : "msg-resp";
+      s.appendChild(svg("circle", { class: cls, cx: x, cy: y, r: m.type.indexOf("resp") > 0 ? 3 : 5 }));
+    });
+    S.nodes.forEach(function (n, i) {
+      var g = svg("g", { class: "node " + (n.up ? n.role : "down"), tabindex: 0, role: "button",
+        "aria-label": "Node " + n.name + ", " + (n.up ? n.role : "crashed") + ", term " + n.term + ". Press to " + (n.up ? "crash" : "restart") });
+      g.addEventListener("click", function () { toggle(i); });
+      g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggle(i); } });
+      var x = POS[i][0], y = POS[i][1];
+      g.appendChild(svg("circle", { cx: x, cy: y, r: 30 }));
+      if (n.up && n.role !== "leader") {
+        var frac = Math.max(0, n.timer) / cfg.tMax, ang = frac * 2 * Math.PI;
+        var x2 = x + 36 * Math.sin(ang), y2 = y - 36 * Math.cos(ang);
+        g.appendChild(svg("path", { class: "timer", d: "M " + x + " " + (y - 36) + " A 36 36 0 " + (ang > Math.PI ? 1 : 0) + " 1 " + x2.toFixed(1) + " " + y2.toFixed(1) }));
+      }
+      g.appendChild(svg("text", { x: x, y: y - 4, "text-anchor": "middle", "font-size": 16, "font-weight": 700 }, n.name));
+      g.appendChild(svg("text", { x: x, y: y + 13, "text-anchor": "middle", "font-size": 10, class: "muted" },
+        n.up ? (n.role === "leader" ? "LEADER" : n.role === "candidate" ? "candidate" : "follower") + " · t" + n.term : "crashed"));
+      s.appendChild(g);
+    });
+    var logs = Kit.clear(document.getElementById("logs"));
+    S.nodes.forEach(function (n) {
+      logs.appendChild(el("div", { class: "logrow" },
+        el("span", { class: "who" }, n.name + (n.role === "leader" && n.up ? " ★" : "") + (n.up ? "" : " ✕")),
+        el("div", { class: "cells" }, n.log.length ? n.log.map(function (e, k) {
+          return el("span", { class: "cell t" + (e.term % 5) + (k < n.commit ? " committed" : ""), title: k < n.commit ? "committed" : "not committed" }, e.term + "·" + e.cmd);
+        }) : el("span", { class: "muted", style: "font-size:.78rem" }, "empty"))));
+    });
+    var L = leader(), up = S.nodes.filter(function (n) { return n.up; }).length;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["tick", S.t, ""], ["leader", L ? L.name + " (t" + L.term + ")" : "none", L ? "ok" : "warn"], ["nodes up", up + " / 5", up >= MAJ ? "ok" : "bad"],
+     ["committed", L ? L.commit : Math.max.apply(null, S.nodes.map(function (n) { return n.commit; })), ""]]
+      .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, x[1]))); });
+  }
+
+  document.getElementById("req").addEventListener("click", function () { clientWrite(); render(); });
+  document.getElementById("kill").addEventListener("click", function () { var L = leader(); if (L) toggle(L.id); else log.add("No leader to crash", "muted"); });
+  var partBtn = document.getElementById("part");
+  partBtn.addEventListener("click", function () {
+    S.partition = !S.partition;
+    partBtn.setAttribute("aria-pressed", String(S.partition));
+    log.add(S.partition ? "Network partition: {A,B} cannot reach {C,D,E}" : "Partition healed", S.partition ? "warn" : "muted");
+    render();
+  });
+  var sl = document.getElementById("sliders");
+  sl.appendChild(Kit.slider({ label: "Message delay", min: 1, max: 6, value: cfg.delay, unit: " ticks", onInput: function (v) { cfg.delay = v; } }).element);
+  sl.appendChild(Kit.slider({ label: "Election timeout (min)", min: 8, max: 26, value: cfg.tMin, unit: " ticks", hint: "Randomised between min and min + 14 so candidates rarely collide",
+    onInput: function (v) { cfg.tMin = v; cfg.tMax = v + 14; } }).element);
+
+  Kit.player({ mount: document.getElementById("player"), step: step, interval: 260,
+    reset: function () { fresh(); partBtn.setAttribute("aria-pressed", "false"); log.clear(); log.add("Reset: all followers in term 0", "muted"); render(); } });
+  fresh(); render();
+  log.add("Press Play. A follower whose timer (green arc) runs out starts an election.", "muted");
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Two nodes both believe they are leader. How does a consensus algorithm keep this safe?",
+      options: ["It cannot happen", "Each leader belongs to a different epoch (term); the higher epoch wins, and the old leader cannot get a quorum to accept its writes", "The leaders merge their logs"],
+      answer: 1, explain: "Uniqueness is per epoch. Any decision needs a quorum, and quorums overlap, so the stale leader learns of the higher epoch before it can commit anything." },
+    { q: "Why does a five-node cluster keep working with two nodes down but stop with three?",
+      options: ["Leader election needs all nodes", "Every election and every commit needs a majority (3 of 5)", "Heartbeats time out"],
+      answer: 1, explain: "Safety requires overlapping quorums; with only two nodes left, no majority exists, so the cluster waits rather than risking split brain." },
+    { q: "Why must a node refuse to vote for a candidate whose log is behind its own?",
+      options: ["To save network bandwidth", "So that a newly elected leader always holds every committed entry", "To make elections faster"],
+      answer: 1, explain: "A committed entry is stored on a majority; any winning candidate needs votes from a majority; the overlap guarantees the winner has the entry." }
+  ]);
+})();
+</script>
+</body>
+</html>

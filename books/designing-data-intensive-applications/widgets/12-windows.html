@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stream Window Types</title>
+<meta name="description" content="Group the same stream of user events into tumbling, hopping, sliding and session windows, and see which events each window counts. Illustrates DDIA Chapter 12.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .win .lane { stroke: var(--line); }
+  .win .lname { font-size: 11px; fill: var(--ink-2); font-weight: 600; }
+  .win .ev.a { fill: var(--s1); } .win .ev.b { fill: var(--s2); }
+  .win .box { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.2; }
+  .win .box.b { fill: color-mix(in srgb, var(--s2) 14%, var(--surface)); stroke: var(--s2); }
+  .win .box.sel { stroke-width: 2.5; }
+  .win .cnt { font-size: 10.5px; font-family: var(--mono); fill: var(--ink); }
+  .win .tick { font-size: 10px; fill: var(--ink-3); font-family: var(--mono); }
+  .win .grid { stroke: var(--line); stroke-dasharray: 2 3; }
+  .win .slide { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .win .slidefill { fill: var(--accent-soft); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-stream-processing.html">Chapter 12</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Window types</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 12 · Stream Processing</div>
+  <h1>Tumbling, hopping, sliding and session windows</h1>
+  <p class="lede">An aggregation over an unbounded stream needs a window: a rule for which events count together. The same twenty minutes of clicks from two users give very different answers depending on whether windows have fixed boundaries, overlap, slide with the events, or follow each user’s bursts of activity.</p>
+  <p class="source-note">Illustrates “Types of windows” (p. 522): the book’s one-minute tumbling, five-minute hopping with one-minute hop, five-minute sliding, and 30-minute-inactivity session examples, scaled down so twenty minutes fit on screen. The event stream is the vault’s own. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="panel">
+      <div class="stage"><svg class="win" id="win" viewBox="0 0 740 300" role="img" aria-label="Events on a timeline and the windows that group them"></svg></div>
+      <p class="field-hint" id="explain" aria-live="polite" style="margin:6px 0 0"></p>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Window type</p>
+        <div id="type"></div>
+        <div id="sliders" style="margin-top:10px"></div>
+      </div>
+      <div class="panel wide">
+        <p class="panel-title">Result</p>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Tumbling:</strong> fixed length, every event in exactly one window — implemented by rounding each timestamp down.</li>
+    <li><strong>Hopping:</strong> fixed length but overlapping, so each event is counted in several windows; the result is smoother.</li>
+    <li><strong>Sliding:</strong> no fixed boundaries — two events a few minutes apart share a window even if a tumbling boundary falls between them. It needs a buffer of recent events.</li>
+    <li><strong>Session:</strong> no fixed length at all; a user’s window ends after a gap of inactivity. Shrink the gap and sessions split.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-stream-processing.html"><small>Lesson</small>12. Stream Processing</a></li>
+    <li><a href="../lab/12-stream-windows/README.md"><small>Experiment</small>Event-time windows and stragglers</a></li>
+    <li><a href="12-stream-time.html"><small>Simulation</small>Event time, processing time, and stragglers</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var SPAN = 20, L = 60, R = 730, W = R - L; // minutes 10:00–10:20
+  var cfg = { type: "tumbling", size: 5, hop: 1, gap: 3 };
+  function X(m) { return L + m / SPAN * W; }
+  function clock(m) { var t = 600 + Math.floor(m); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); }
+
+  var events = (function () {
+    var r = Kit.rng(21), out = [];
+    [["a", [0.6, 2.4, 3.1, 3.7, 8.2, 8.9, 9.4, 15.5, 16.1, 16.4, 17.0]], ["b", [1.8, 4.6, 5.2, 5.5, 6.1, 11.2, 12.0, 12.4, 18.6, 19.3]]].forEach(function (u) {
+      u[1].forEach(function (t) { out.push({ u: u[0], t: Math.min(19.9, t + r.range(-0.1, 0.1)) }); });
+    });
+    return out.sort(function (a, b) { return a.t - b.t; });
+  })();
+
+  function windows() {
+    var out = [];
+    if (cfg.type === "tumbling") for (var s = 0; s < SPAN; s += cfg.size) out.push({ from: s, to: s + cfg.size });
+    else if (cfg.type === "hopping") for (var h = -cfg.size + cfg.hop; h < SPAN; h += cfg.hop) out.push({ from: h, to: h + cfg.size });
+    else if (cfg.type === "session") {
+      ["a", "b"].forEach(function (u) {
+        var cur = null;
+        events.filter(function (e) { return e.u === u; }).forEach(function (e) {
+          if (cur && e.t - cur.last <= cfg.gap) { cur.last = e.t; cur.to = e.t; }
+          else { if (cur) out.push(cur); cur = { u: u, from: e.t, to: e.t, last: e.t }; }
+        });
+        if (cur) out.push(cur);
+      });
+    }
+    out.forEach(function (w) {
+      w.events = events.filter(function (e) { return e.t >= w.from && (cfg.type === "session" ? e.t <= w.to && e.u === w.u : e.t < w.to); });
+    });
+    return out;
+  }
+
+  function render() {
+    var svgEl = Kit.clear(document.getElementById("win"));
+    var ws = cfg.type === "sliding" ? [] : windows();
+    var rows = cfg.type === "hopping" ? Math.round(cfg.size / cfg.hop) : cfg.type === "session" ? 2 : 1;
+    var H = 120 + (cfg.type === "sliding" ? 120 : rows * 30 + 20);
+    svgEl.setAttribute("viewBox", "0 0 740 " + H);
+    for (var m = 0; m <= SPAN; m++) {
+      svgEl.appendChild(Kit.svg("line", { class: "grid", x1: X(m), x2: X(m), y1: 20, y2: H - 18 }));
+      if (m % 2 === 0) svgEl.appendChild(Kit.svg("text", { class: "tick", x: X(m), y: H - 4, "text-anchor": "middle" }, clock(m)));
+    }
+    [["a", 40, "user A"], ["b", 80, "user B"]].forEach(function (u) {
+      svgEl.appendChild(Kit.svg("text", { class: "lname", x: 4, y: u[1] + 4 }, u[2]));
+      svgEl.appendChild(Kit.svg("line", { class: "lane", x1: L, x2: R, y1: u[1], y2: u[1] }));
+    });
+    events.forEach(function (e) { svgEl.appendChild(Kit.svg("circle", { class: "ev " + e.u, cx: X(e.t), cy: e.u === "a" ? 40 : 80, r: 5 })); });
+    var top = 110;
+    if (cfg.type === "sliding") {
+      // count of events in the last `size` minutes, sampled every 0.05 min
+      var pts = [], max = 1;
+      for (var t = 0; t <= SPAN; t += 0.05) {
+        var c = events.filter(function (e) { return e.t <= t && e.t > t - cfg.size; }).length;
+        pts.push([t, c]); max = Math.max(max, c);
+      }
+      var y = function (v) { return top + 100 - v / max * 90; };
+      var d = pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + y(p[1]).toFixed(1); }).join(" ");
+      svgEl.appendChild(Kit.svg("path", { class: "slidefill", d: d + " L" + X(SPAN) + " " + y(0) + " L" + X(0) + " " + y(0) + " Z" }));
+      svgEl.appendChild(Kit.svg("path", { class: "slide", d: d }));
+      svgEl.appendChild(Kit.svg("text", { class: "lname", x: 4, y: top + 14 }, "events in"));
+      svgEl.appendChild(Kit.svg("text", { class: "lname", x: 4, y: top + 28 }, "last " + cfg.size + " min"));
+      svgEl.appendChild(Kit.svg("text", { class: "cnt", x: L + 4, y: y(max) - 4 }, "max " + max));
+    } else {
+      svgEl.appendChild(Kit.svg("text", { class: "lname", x: 4, y: top + 18 }, "windows"));
+      ws.forEach(function (w, i) {
+        var row = cfg.type === "hopping" ? ((i % rows) + rows) % rows : cfg.type === "session" ? (w.u === "a" ? 0 : 1) : 0;
+        var x1 = X(Math.max(0, w.from)), x2 = X(Math.min(SPAN, w.to));
+        if (cfg.type === "session") { x1 = X(w.from) - 6; x2 = X(w.to) + 6; }
+        var y0 = top + row * 30;
+        svgEl.appendChild(Kit.svg("rect", { class: "box" + (w.u === "b" ? " b" : ""), x: x1, y: y0, width: Math.max(10, x2 - x1), height: 22, rx: 4 }));
+        svgEl.appendChild(Kit.svg("text", { class: "cnt", x: (x1 + x2) / 2, y: y0 + 15, "text-anchor": "middle" }, String(w.events.length)));
+      });
+    }
+    var stats = Kit.clear(document.getElementById("stats")), rowsOut, explain;
+    if (cfg.type === "sliding") {
+      rowsOut = [["Window", cfg.size + " min, any start"], ["State kept", "a buffer of events"]];
+      explain = "The line counts the events in the " + cfg.size + " minutes up to each moment; any two events less than " + cfg.size + " minutes apart share some window.";
+    } else {
+      var counted = ws.reduce(function (a, w) { return a + w.events.length; }, 0);
+      rowsOut = [["Windows", ws.length], ["Events", events.length], ["Times counted", counted]];
+      explain = cfg.type === "tumbling" ? "Each event is in exactly one window: counted " + counted + " times for " + events.length + " events."
+        : cfg.type === "hopping" ? "Windows of " + cfg.size + " min start every " + cfg.hop + " min, so each event is counted in up to " + Math.round(cfg.size / cfg.hop) + " windows."
+        : "A session ends after " + cfg.gap + " min without an event from that user: " + ws.filter(function (w) { return w.u === "a"; }).length + " sessions for A, " + ws.filter(function (w) { return w.u === "b"; }).length + " for B.";
+    }
+    rowsOut.forEach(function (x) { stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value" }, String(x[1])))); });
+    document.getElementById("explain").textContent = explain;
+  }
+
+  var sliders = document.getElementById("sliders");
+  var sizeS = Kit.slider({ label: "Window length", min: 1, max: 8, value: cfg.size, unit: " min", onInput: function (v) { cfg.size = v; if (cfg.hop > v) { cfg.hop = v; hopS.set(v); } render(); } });
+  var hopS = Kit.slider({ label: "Hop", min: 1, max: 4, value: cfg.hop, unit: " min", onInput: function (v) { cfg.hop = Math.min(v, cfg.size); render(); } });
+  var gapS = Kit.slider({ label: "Session ends after inactivity of", min: 1, max: 6, step: 0.5, value: cfg.gap, unit: " min", onInput: function (v) { cfg.gap = v; render(); } });
+  [sizeS, hopS, gapS].forEach(function (x) { sliders.appendChild(x.element); });
+  function showSliders() {
+    sizeS.element.hidden = cfg.type === "session";
+    hopS.element.hidden = cfg.type !== "hopping";
+    gapS.element.hidden = cfg.type !== "session";
+  }
+  document.getElementById("type").appendChild(Kit.segmented({ label: "Window type", value: cfg.type,
+    options: [{ value: "tumbling", label: "Tumbling" }, { value: "hopping", label: "Hopping" }, { value: "sliding", label: "Sliding" }, { value: "session", label: "Session" }],
+    onChange: function (v) { cfg.type = v; showSliders(); render(); } }).element);
+  showSliders(); render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How can a one-minute tumbling window be implemented?",
+      options: ["Keep a buffer of all events", "Round each event’s timestamp down to the minute to find its window", "Wait for a gap in activity"],
+      answer: 1, explain: "Every event belongs to exactly one window (p. 522)." },
+    { q: "Events at 10:03:39 and 10:08:12 — which five-minute window type can put them together?",
+      options: ["Tumbling", "Hopping", "Sliding"],
+      answer: 2, explain: "They are less than five minutes apart, but fixed boundaries separate them in tumbling and hopping windows (p. 522)." },
+    { q: "Which window type has no fixed duration?",
+      options: ["Hopping", "Session", "Tumbling"],
+      answer: 1, explain: "A session window ends when the user has been inactive for some time (p. 522)." }
+  ]);
+})();
+</script>
+</body>
+</html>
