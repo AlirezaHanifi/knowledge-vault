@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorums and Witness Replicas</title>
+<meta name="description" content="Set N, W and R, turn some replicas into witnesses, fail nodes, and issue writes and reads to see which succeed, whether a read is guaranteed to see the latest write, and when a witness is temporarily upgraded to hold data. Illustrates Database Internals, Chapter 11.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .nodes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .nd { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; min-width: 88px; background: var(--surface); text-align: center; cursor: pointer; font: inherit; color: inherit; }
+  .nd .nm { font-weight: 600; } .nd .kv { font-size: .76rem; color: var(--ink-2); }
+  .nd.w { background: var(--surface-2); border-style: dotted; }
+  .nd.down { opacity: .45; border-style: dashed; }
+  .nd.inq { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .checks { display: grid; gap: 6px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/11-replication-and-consistency.html">Chapter 11</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Quorums &amp; witnesses</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 11 · Replication and Consistency</div>
+  <h1>Quorums and witness replicas</h1>
+  <p class="lede">With <strong>N</strong> replicas, a write needs <strong>W</strong> acknowledgments and a read <strong>R</strong> responses. If <strong>R + W &gt; N</strong>, every read set overlaps every write set, so some node in the read set has the latest write. A <strong>witness</strong> replica normally records only the fact that a write happened. When a copy replica is down, a witness takes the record temporarily.</p>
+  <p class="source-note">Illustrates “Tunable Consistency”, “Quorums” and “Witness Replicas” (pp. 235–237). The book’s condition for witnesses to keep the availability of full copies is majority quorums with at least one copy replica in every quorum; the widget checks both. Which live nodes a request reaches is the vault’s choice (copies first for writes, seeded random for reads). Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="nodes" id="nodes"></div>
+        <p class="field-hint">Click a node to fail or recover it. c = copy replica, w = witness (dotted). Blue outline: nodes in the last request’s quorum.</p>
+        <div class="checks" id="checks"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="sl"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="wr">Write next version</button><button class="btn small" type="button" id="rd">Read</button><button class="btn small" type="button" id="rep">Repair</button></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>R + W &gt; N is about overlap, not majorities.</strong> W = 1, R = N also overlaps, but then every replica must be up for a read.</li>
+    <li><strong>Witnesses save storage, not availability.</strong> With majorities and at least one copy in every quorum, n copies plus m witnesses tolerate as many failures as n + m copies.</li>
+    <li><strong>Fail a copy and write.</strong> A witness in the write quorum temporarily stores the record; <em>Repair</em> brings the copy back up to date and the witness drops it again.</li>
+    <li><strong>Too many witnesses break the guarantee.</strong> If a quorum could consist of witnesses only, a read might know a newer version exists but find no node holding its data.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/11-replication-and-consistency.html"><small>Lesson</small>11. Replication and Consistency</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { n: 3, w: 2, r: 2, wit: 1 }, nodes, ver, lastQ, rr;
+  function build() {
+    nodes = []; for (var i = 0; i < cfg.n; i++) nodes.push({ id: i + 1, wit: i >= cfg.n - cfg.wit, up: true, v: 0, data: 0 });
+    ver = 0; lastQ = []; rr = Kit.rng(4); log.clear(); log.add("N = " + cfg.n + " (" + (cfg.n - cfg.wit) + " copies, " + cfg.wit + " witness" + (cfg.wit === 1 ? "" : "es") + "), W = " + cfg.w + ", R = " + cfg.r, "muted"); render();
+  }
+  function live() { return nodes.filter(function (x) { return x.up; }); }
+  function write() {
+    var L = live(); if (L.length < cfg.w) { log.add("Write v" + (ver + 1) + " fails: only " + L.length + " nodes up, W = " + cfg.w, "bad"); lastQ = []; render(); return; }
+    var copies = L.filter(function (x) { return !x.wit; }), wits = L.filter(function (x) { return x.wit; });
+    var q = copies.concat(wits).slice(0, cfg.w);
+    if (!q.some(function (x) { return !x.wit; })) { log.add("Write v" + (ver + 1) + " fails: the only reachable quorum has no copy replica", "bad"); lastQ = []; render(); return; }
+    ver++; var downCopies = nodes.filter(function (x) { return !x.wit && !x.up; }).length;
+    q.forEach(function (x) { x.v = ver; if (!x.wit || downCopies) x.data = ver; });
+    lastQ = q; var up = q.filter(function (x) { return x.wit && x.data === ver; });
+    log.add("Write v" + ver + " acknowledged by " + q.map(function (x) { return x.id + (x.wit ? "w" : "c"); }).join(", ") + (up.length ? "; a copy is down, so witness " + up.map(function (x) { return x.id; }).join(", ") + " stores the record temporarily" : ""), "ok");
+    render();
+  }
+  function read() {
+    var L = live(); if (L.length < cfg.r) { log.add("Read fails: only " + L.length + " nodes up, R = " + cfg.r, "bad"); lastQ = []; render(); return; }
+    var pool = L.slice(), q = []; while (q.length < cfg.r) q.push(pool.splice(rr.int(pool.length), 1)[0]);
+    lastQ = q;
+    var known = Math.max.apply(null, q.map(function (x) { return x.v; })), have = Math.max.apply(null, q.map(function (x) { return x.data; }));
+    var msg = "Read from " + q.map(function (x) { return x.id + (x.wit ? "w" : "c"); }).join(", ") + ": ";
+    if (have === ver) log.add(msg + "returns v" + have + " (latest)", "ok");
+    else if (known === ver) log.add(msg + "a witness knows v" + ver + " exists, but no node in this quorum holds its data", "warn");
+    else log.add(msg + "returns v" + have + ", stale (latest is v" + ver + ")", "bad");
+    render();
+  }
+  function repair() {
+    var src = nodes.filter(function (x) { return x.data === ver; }).length;
+    if (!src) { log.add("Nothing to repair from", "muted"); return; }
+    nodes.forEach(function (x) { if (x.up && !x.wit) { x.data = ver; x.v = ver; } });
+    var copiesOk = nodes.filter(function (x) { return !x.wit; }).every(function (x) { return x.data === ver; });
+    if (copiesOk) nodes.forEach(function (x) { if (x.wit) x.data = 0; });
+    log.add("Repair: live copies brought to v" + ver + (copiesOk ? "; witnesses drop their temporary data" : "; a copy is still down, witnesses keep the record"), "ok"); lastQ = []; render();
+  }
+  function render() {
+    var m = Kit.clear(document.getElementById("nodes"));
+    nodes.forEach(function (x) {
+      m.appendChild(Kit.el("button", { type: "button", class: "nd" + (x.wit ? " w" : "") + (x.up ? "" : " down") + (lastQ.indexOf(x) >= 0 ? " inq" : ""), "aria-pressed": String(!x.up), onclick: function () { x.up = !x.up; log.add("Node " + x.id + (x.up ? " recovers" : " fails"), x.up ? "ok" : "warn"); render(); } },
+        Kit.el("div", { class: "nm" }, x.id + (x.wit ? "w" : "c") + (x.up ? "" : " · down")),
+        Kit.el("div", { class: "kv" }, x.wit ? "knows v" + x.v + (x.data ? ", holds v" + x.data : "") : "holds v" + x.data)));
+    });
+    var c = Kit.clear(document.getElementById("checks")), maj = Math.floor(cfg.n / 2) + 1;
+    function check(ok, text) { c.appendChild(Kit.el("div", { class: "callout " + (ok ? "ok" : "warn") }, (ok ? "✓ " : "✗ ") + text)); }
+    check(cfg.r + cfg.w > cfg.n, "R + W = " + (cfg.r + cfg.w) + (cfg.r + cfg.w > cfg.n ? " > " : " ≤ ") + "N = " + cfg.n + ": reads " + (cfg.r + cfg.w > cfg.n ? "always" : "don't always") + " overlap the latest write");
+    check(cfg.w > cfg.wit && cfg.r > cfg.wit, "Every quorum contains a copy replica (W and R larger than the " + cfg.wit + " witness" + (cfg.wit === 1 ? "" : "es") + ")");
+    check(cfg.w >= maj && cfg.r >= maj, "Majority quorums (⌊N/2⌋ + 1 = " + maj + ")");
+    var L = live().length;
+    stats([["Nodes up", L + " / " + cfg.n, L < cfg.n ? "warn" : ""], ["Writes possible", L >= cfg.w ? "yes" : "no", L >= cfg.w ? "ok" : "bad"], ["Reads possible", L >= cfg.r ? "yes" : "no", L >= cfg.r ? "ok" : "bad"], ["Latest version", "v" + ver]]);
+  }
+  var sl = document.getElementById("sl"), sN, sW, sR, sWit;
+  function clamp() { cfg.w = Math.min(cfg.w, cfg.n); cfg.r = Math.min(cfg.r, cfg.n); cfg.wit = Math.min(cfg.wit, cfg.n - 1); sW.input.max = sR.input.max = cfg.n; sWit.input.max = cfg.n - 1; sW.set(cfg.w); sR.set(cfg.r); sWit.set(cfg.wit); }
+  sN = Kit.slider({ label: "N replicas", min: 3, max: 7, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; clamp(); build(); } });
+  sW = Kit.slider({ label: "W", min: 1, max: cfg.n, step: 1, value: cfg.w, onInput: function (v) { cfg.w = v; build(); } });
+  sR = Kit.slider({ label: "R", min: 1, max: cfg.n, step: 1, value: cfg.r, onInput: function (v) { cfg.r = v; build(); } });
+  sWit = Kit.slider({ label: "Witnesses", min: 0, max: cfg.n - 1, step: 1, value: cfg.wit, onInput: function (v) { cfg.wit = v; build(); } });
+  [sN, sW, sR, sWit].forEach(function (s) { sl.appendChild(s.element); });
+  document.getElementById("wr").addEventListener("click", write);
+  document.getElementById("rd").addEventListener("click", read);
+  document.getElementById("rep").addEventListener("click", repair);
+  build();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "N = 3, W = 2, R = 2. How many failures can reads and writes tolerate?",
+      options: ["None", "One", "Two"], answer: 1,
+      explain: "p. 235." },
+    { q: "What does a witness replica normally store?",
+      options: ["A full copy", "Only the fact that a write happened, until a copy fails and it holds the record temporarily", "Nothing"], answer: 1,
+      explain: "pp. 236–237." },
+    { q: "With [1c, 2c, 3w], a write arrives while 2c is down. What happens?",
+      options: ["The write fails", "It is stored on 1c and temporarily on 3w; 2c is repaired later and 3w drops its copy", "Only 1c stores it"], answer: 1,
+      explain: "The book's example (p. 237)." }
+  ]);
+})();
+</script>
+</body>
+</html>

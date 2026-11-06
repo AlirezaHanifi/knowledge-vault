@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From Fair-Loss to Perfect Links</title>
+<meta name="description" content="Send numbered messages over a link that loses, duplicates and reorders them, then add acknowledgments and retransmits, and finally sequence numbers with a reorder buffer and deduplication. Watch n_consecutive and n_processed. Illustrates Database Internals, Chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lane { display: flex; flex-wrap: wrap; gap: 4px; min-height: 28px; }
+  .m { font-family: var(--mono); font-size: .76rem; min-width: 30px; text-align: center; padding: 3px 5px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface); }
+  .m.fly { border-color: var(--accent); background: var(--accent-soft); }
+  .m.ack { border-color: var(--ok); background: var(--ok-soft); }
+  .m.bad { border-color: var(--bad); background: var(--bad-soft); }
+  .m.buf { border-style: dashed; border-color: var(--warn); }
+  .lbl { font-size: .74rem; color: var(--ink-3); margin: 10px 0 4px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-introduction-and-overview.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Perfect link</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Introduction and Overview</div>
+  <h1>From fair-loss to perfect links</h1>
+  <p class="lede">A <strong>fair-loss link</strong> may lose, duplicate or reorder messages, and the sender can’t tell which happened. <strong>Acknowledgments</strong> plus <strong>retransmits</strong> (a stubborn link) make sure nothing is lost forever, but retries create duplicates. <strong>Sequence numbers</strong> let the receiver hold early messages in a <strong>reorder buffer</strong> and drop anything it has already processed. The result is a <strong>perfect link</strong>: reliable delivery, no duplication, no creation.</p>
+  <p class="source-note">Illustrates “Links” (pp. 182–186): fair-loss links, message acknowledgments, message retransmits, problems with retransmission, message order and exactly-once delivery. The loss, duplication and delay settings, the retransmit timeout and the 12-message workload are the vault’s (seeded). Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel">
+        <div class="lbl">Sender: messages (✓ acknowledged)</div><div class="lane" id="snd"></div>
+        <div class="lbl">On the wire (→ data, ← ACK)</div><div class="lane" id="wire"></div>
+        <div class="lbl">Receiver: reorder buffer</div><div class="lane" id="buf"></div>
+        <div class="lbl">Receiver: processed, in processing order (✕ duplicate or out of order)</div><div class="lane" id="proc"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="lvl"></div><div id="sl" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Fair-loss alone loses messages</strong> and processes duplicates and reordered messages as they come.</li>
+    <li><strong>ACKs and retransmits</strong> eventually deliver everything, but a lost ACK makes the sender resend a message that was already processed: duplicates go up.</li>
+    <li><strong>Sequence numbers fix both.</strong> Messages above n_consecutive + 1 wait in the reorder buffer; anything at or below n_processed is a duplicate and is discarded.</li>
+    <li><strong>Set loss to 0 and delay jitter to 0:</strong> all three links then behave the same; the machinery only matters when the network misbehaves.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-introduction-and-overview.html"><small>Lesson</small>8. Introduction and Overview</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var N = 12, TIMEOUT = 6, cfg = { lvl: 2, loss: 25, dup: 10, jitter: 4 }, r, t, next, wire, acked, sentAt, proc, buf, ncons, nproc, sends, dups, ooo;
+  function reset() {
+    r = Kit.rng(21); t = 0; next = 1; wire = []; acked = {}; sentAt = {}; proc = []; buf = []; ncons = 0; nproc = 0; sends = dups = ooo = 0;
+    log.clear(); log.add(["Fair-loss link: send each message once.", "Stubborn link with ACKs: retransmit every " + TIMEOUT + " ticks until acknowledged.", "Perfect link: ACKs and retransmits, plus sequence numbers, a reorder buffer and dedup."][cfg.lvl], "muted"); render();
+  }
+  function send(n, re) {
+    sends++; sentAt[n] = t;
+    if (r.chance(cfg.loss / 100)) { log.add((re ? "Retransmit " : "Send ") + n + ": lost on the wire", "bad"); return; }
+    wire.push({ n: n, at: t + 1 + r.int(cfg.jitter + 1), ack: false });
+    if (r.chance(cfg.dup / 100)) { wire.push({ n: n, at: t + 1 + r.int(cfg.jitter + 1), ack: false }); log.add((re ? "Retransmit " : "Send ") + n + " (the link duplicates it)", "warn"); }
+    else log.add((re ? "Retransmit " : "Send ") + n, re ? "warn" : "muted");
+  }
+  function deliver(n) {
+    if (cfg.lvl < 2) {
+      var dup = proc.some(function (p) { return p.n === n; }), out = proc.length && n < proc[proc.length - 1].n;
+      proc.push({ n: n, bad: dup || out }); if (dup) dups++; if (out && !dup) ooo++;
+      log.add("Receiver processes " + n + (dup ? ": duplicate!" : out ? ": out of order!" : ""), dup || out ? "bad" : "ok");
+    } else {
+      if (n <= nproc || buf.indexOf(n) >= 0) { log.add("Receiver drops duplicate " + n + " (≤ n_processed = " + nproc + " or already buffered)", "muted"); return; }
+      if (n !== ncons + 1) { buf.push(n); buf.sort(function (a, b) { return a - b; }); log.add("Receiver buffers " + n + ": waiting for " + (ncons + 1), "warn"); return; }
+      ncons = n; proc.push({ n: n }); nproc = n; log.add("Receiver processes " + n, "ok");
+      while (buf.length && buf[0] === ncons + 1) { var b = buf.shift(); ncons = b; nproc = b; proc.push({ n: b }); log.add("…and " + b + " from the reorder buffer", "ok"); }
+    }
+  }
+  function done() { return cfg.lvl === 0 ? next > N && !wire.length : Object.keys(acked).length === N && !wire.some(function (w) { return !w.ack; }); }
+  function step() {
+    if (done()) return false;
+    t++;
+    var arriving = wire.filter(function (w) { return w.at <= t; }); wire = wire.filter(function (w) { return w.at > t; });
+    arriving.forEach(function (w) {
+      if (w.ack) { if (!acked[w.n]) log.add("Sender gets ACK(" + w.n + ")", "ok"); acked[w.n] = true; return; }
+      deliver(w.n);
+      if (cfg.lvl >= 1) { if (r.chance(cfg.loss / 100)) log.add("ACK(" + w.n + ") lost", "bad"); else wire.push({ n: w.n, at: t + 1 + r.int(cfg.jitter + 1), ack: true }); }
+    });
+    if (next <= N && t % 2 === 1) send(next++, false);
+    if (cfg.lvl >= 1) for (var n = 1; n < next; n++) if (!acked[n] && t - sentAt[n] >= TIMEOUT) send(n, true);
+    render(); return !done();
+  }
+  function render() {
+    var s = Kit.clear(document.getElementById("snd"));
+    for (var n = 1; n <= N; n++) s.appendChild(Kit.el("span", { class: "m" + (acked[n] ? " ack" : n < next ? " fly" : "") }, n + (acked[n] ? " ✓" : "")));
+    var w = Kit.clear(document.getElementById("wire"));
+    wire.forEach(function (x) { w.appendChild(Kit.el("span", { class: "m" + (x.ack ? " ack" : " fly") }, x.ack ? "← A" + x.n : x.n + " →")); });
+    var b = Kit.clear(document.getElementById("buf"));
+    if (cfg.lvl < 2) b.appendChild(Kit.el("span", { class: "field-hint" }, "No sequence numbers: nothing is buffered."));
+    buf.forEach(function (x) { b.appendChild(Kit.el("span", { class: "m buf" }, x)); });
+    var p = Kit.clear(document.getElementById("proc"));
+    proc.forEach(function (x) { p.appendChild(Kit.el("span", { class: "m" + (x.bad ? " bad" : " ack") }, x.n + (x.bad ? " ✕" : ""))); });
+    var uniq = {}; proc.forEach(function (x) { uniq[x.n] = 1; });
+    var rows = [["Sends (incl. retransmits)", sends], ["Unique messages processed", Object.keys(uniq).length + " / " + N, done() && Object.keys(uniq).length < N ? "bad" : ""], ["Duplicates processed", dups, dups ? "bad" : "ok"], ["Out-of-order processed", ooo, ooo ? "bad" : "ok"]];
+    if (cfg.lvl === 2) rows.push(["n_consecutive / n_processed", ncons + " / " + nproc]);
+    stats(rows);
+  }
+  document.getElementById("lvl").appendChild(Kit.segmented({ label: "Link", value: String(cfg.lvl), options: [{ value: "0", label: "Fair-loss" }, { value: "1", label: "+ ACK & retransmit" }, { value: "2", label: "+ sequence numbers" }], onChange: function (v) { cfg.lvl = +v; reset(); } }).element);
+  var sl = document.getElementById("sl");
+  sl.appendChild(Kit.slider({ label: "Loss (data and ACKs)", min: 0, max: 50, step: 5, value: cfg.loss, unit: "%", onInput: function (v) { cfg.loss = v; reset(); } }).element);
+  sl.appendChild(Kit.slider({ label: "Duplication", min: 0, max: 40, step: 5, value: cfg.dup, unit: "%", onInput: function (v) { cfg.dup = v; reset(); } }).element);
+  sl.appendChild(Kit.slider({ label: "Delay jitter", min: 0, max: 8, step: 1, value: cfg.jitter, unit: " ticks", onInput: function (v) { cfg.jitter = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 450 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "A sender gets no ACK and resends. What might have happened to the first copy?",
+      options: ["Only that it was lost", "It may have been lost, processed, still be in flight, or the receiver may have crashed; the sender can't tell", "It was certainly processed"], answer: 1,
+      explain: "pp. 184–185." },
+    { q: "When is resending harmless without deduplication?",
+      options: ["Always", "Only for idempotent operations", "Never"], answer: 1,
+      explain: "Shutting down a server is idempotent; charging a credit card is not (p. 185)." },
+    { q: "The receiver has n_consecutive = 3 and receives 5. What happens?",
+      options: ["5 is processed", "5 waits in the reorder buffer until 4 arrives", "5 is dropped as a duplicate"], answer: 1,
+      explain: "p. 185." }
+  ]);
+})();
+</script>
+</body>
+</html>

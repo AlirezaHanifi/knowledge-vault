@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vector Clocks and Causal Delivery</title>
+<meta name="description" content="Broadcast messages between three processes, deliver them in any order, and watch receivers buffer messages whose causal dependencies have not arrived yet. Compare two processes&#x27; vector clocks to see before, after or concurrent. Illustrates Database Internals, Chapter 11.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .procs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .proc { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); }
+  .proc h3 { margin: 0 0 4px; font-size: .9rem; }
+  .vc { font-family: var(--mono); font-size: 1rem; font-weight: 600; }
+  .seen { font-family: var(--mono); font-size: .74rem; color: var(--ink-2); margin-top: 6px; min-height: 1.2em; }
+  .bufd { font-family: var(--mono); font-size: .74rem; color: var(--warn); min-height: 1.2em; }
+  .net { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .net button { font-family: var(--mono); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/11-replication-and-consistency.html">Chapter 11</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Vector clocks</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 11 · Replication and Consistency</div>
+  <h1>Vector clocks and causal delivery</h1>
+  <p class="lede">A <strong>vector clock</strong> holds one counter per process. Each message carries its sender’s vector, so a receiver can tell whether it has already seen everything the message depends on. If it hasn’t, the message waits in a <strong>buffer</strong> until its dependencies arrive. Comparing two vectors element by element shows whether one event <strong>happened before</strong> the other or whether they are <strong>concurrent</strong>.</p>
+  <p class="source-note">Illustrates “Causal Consistency” and “Vector clocks” (pp. 230–233). The widget uses the causal-broadcast form of vector clocks, in which each entry counts the messages a process has broadcast; the book’s description increments on every event. The processes and the scenario are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="procs" id="procs"></div>
+        <p class="panel-title" style="margin-top:14px">In flight (click to deliver)</p><div class="net" id="net"></div>
+        <div class="callout" id="cmp" style="margin-top:12px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div class="row"><button class="btn small primary" type="button" data-b="0">P1 broadcasts</button><button class="btn small primary" type="button" data-b="1">P2 broadcasts</button><button class="btn small primary" type="button" data-b="2">P3 broadcasts</button></div>
+        <div id="pair" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="scen">Load the out-of-order scenario</button><button class="btn small" type="button" id="reset">↺ Reset</button></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Run the scenario.</strong> P2 sees M1 and then broadcasts M2, so M2 depends on M1. P3 receives M2 first and buffers it, because its clock shows that it hasn’t seen M1 yet.</li>
+    <li><strong>Delivery merges clocks.</strong> Delivering a message raises the receiver’s entry for that sender, which can release buffered messages.</li>
+    <li><strong>Concurrent means incomparable.</strong> If each vector is larger somewhere, neither event knew about the other. That is how replicas detect conflicting writes.</li>
+    <li><strong>Detection is not resolution.</strong> Vector clocks tell you that two writes conflict, not which one should win.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/11-replication-and-consistency.html"><small>Lesson</small>11. Replication and Consistency</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var vc, seen, bufs, net, mid, pair = "01";
+  function reset() { vc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; seen = [[], [], []]; bufs = [[], [], []]; net = []; mid = 0; log.clear(); log.add("Three processes with clocks [0, 0, 0].", "muted"); render(); }
+  function bcast(p) {
+    vc[p][p]++; var m = { id: "M" + (++mid), from: p, vc: vc[p].slice() }; seen[p].push(m.id);
+    [0, 1, 2].forEach(function (q) { if (q !== p) net.push({ m: m, to: q }); });
+    log.add("P" + (p + 1) + " broadcasts " + m.id + " " + fmt(m.vc), "ok");
+  }
+  function ready(q, m) { return m.vc[m.from] === vc[q][m.from] + 1 && m.vc.every(function (x, k) { return k === m.from || x <= vc[q][k]; }); }
+  function apply(q, m) { vc[q][m.from] = m.vc[m.from]; seen[q].push(m.id); log.add("P" + (q + 1) + " delivers " + m.id + " → clock " + fmt(vc[q]), "ok"); }
+  function arrive(i) {
+    var e = net.splice(i, 1)[0], q = e.to;
+    if (!ready(q, e.m)) { bufs[q].push(e.m); log.add("P" + (q + 1) + " receives " + e.m.id + " " + fmt(e.m.vc) + " but its clock is " + fmt(vc[q]) + ": buffer until the dependencies arrive", "warn"); }
+    else { apply(q, e.m); var again = true; while (again) { again = false; for (var k = 0; k < bufs[q].length; k++) if (ready(q, bufs[q][k])) { var b = bufs[q].splice(k, 1)[0]; log.add("…now " + b.id + " is ready", "muted"); apply(q, b); again = true; break; } } }
+    render();
+  }
+  function fmt(v) { return "[" + v.join(", ") + "]"; }
+  function relation(a, b) { var le = a.every(function (x, k) { return x <= b[k]; }), ge = a.every(function (x, k) { return x >= b[k]; }); return le && ge ? "equal" : le ? "before" : ge ? "after" : "concurrent"; }
+  function render() {
+    var pr = Kit.clear(document.getElementById("procs"));
+    [0, 1, 2].forEach(function (p) {
+      pr.appendChild(Kit.el("div", { class: "proc" }, Kit.el("h3", null, "P" + (p + 1)), Kit.el("div", { class: "vc", "aria-label": "clock" }, fmt(vc[p])),
+        Kit.el("div", { class: "seen" }, "seen: " + (seen[p].join(" ") || "—")), Kit.el("div", { class: "bufd" }, bufs[p].length ? "buffered: " + bufs[p].map(function (m) { return m.id; }).join(" ") : "")));
+    });
+    var n = Kit.clear(document.getElementById("net"));
+    net.forEach(function (e, i) { n.appendChild(Kit.el("button", { class: "btn small", type: "button", onclick: function () { arrive(i); } }, e.m.id + " " + fmt(e.m.vc) + " → P" + (e.to + 1))); });
+    if (!net.length) n.appendChild(Kit.el("span", { class: "field-hint" }, "Nothing in flight."));
+    var a = +pair[0], b = +pair[1], rel = relation(vc[a], vc[b]), c = document.getElementById("cmp");
+    c.className = "callout " + (rel === "concurrent" ? "warn" : "ok");
+    Kit.clear(c).appendChild(Kit.el("strong", null, "P" + (a + 1) + " " + fmt(vc[a]) + " vs P" + (b + 1) + " " + fmt(vc[b]) + ": "));
+    c.appendChild(document.createTextNode(rel === "before" ? "P" + (a + 1) + "'s state happened before P" + (b + 1) + "'s" : rel === "after" ? "P" + (b + 1) + "'s state happened before P" + (a + 1) + "'s" : rel === "equal" ? "identical" : "concurrent: neither has seen everything the other has"));
+    stats([["Messages in flight", net.length], ["Buffered", bufs[0].length + bufs[1].length + bufs[2].length, bufs.some(function (x) { return x.length; }) ? "warn" : ""]]);
+  }
+  [].forEach.call(document.querySelectorAll("[data-b]"), function (b) { b.addEventListener("click", function () { bcast(+b.getAttribute("data-b")); render(); }); });
+  document.getElementById("pair").appendChild(Kit.segmented({ label: "Compare clocks", value: pair, options: [{ value: "01", label: "P1 vs P2" }, { value: "02", label: "P1 vs P3" }, { value: "12", label: "P2 vs P3" }], onChange: function (v) { pair = v; render(); } }).element);
+  document.getElementById("scen").addEventListener("click", function () {
+    reset(); bcast(0);
+    var toP2 = net.findIndex(function (e) { return e.to === 1; }); arrive(toP2); bcast(1);
+    log.add("Now deliver M2 to P3 before M1 to see buffering.", "muted"); render();
+  });
+  document.getElementById("reset").addEventListener("click", reset);
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Clocks [2, 1, 0] and [1, 1, 1]: which relation holds?",
+      options: ["The first happened before the second", "The second happened before the first", "They are concurrent"], answer: 2,
+      explain: "Each is larger in some entry, so neither dominates." },
+    { q: "Why does a receiver buffer a message?",
+      options: ["The message is a duplicate", "Its vector shows dependencies the receiver hasn't seen yet", "The network is congested"], answer: 1,
+      explain: "Out-of-order messages wait until their dependencies arrive (pp. 230–232)." },
+    { q: "Why did Cassandra choose last-write-wins instead of vector clocks?",
+      options: ["Vector clocks can't detect conflicts", "Resolving conflicts needs application logic, stored causal history and garbage collection", "LWW is causally consistent"], answer: 1,
+      explain: "p. 233." }
+  ]);
+})();
+</script>
+</body>
+</html>

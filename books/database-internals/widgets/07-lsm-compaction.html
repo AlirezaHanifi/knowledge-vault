@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSM Merge and Compaction</title>
+<meta name="description" content="Write, overwrite and delete keys in an LSM Tree, flush memtables to sorted tables, step through the book&#x27;s merge-iteration example, and compare leveled and size-tiered compaction by tables per read, records rewritten and space used. Illustrates Database Internals, Chapter 7.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lv { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: start; margin-bottom: 8px; }
+  .lv > b { font-size: .76rem; color: var(--ink-3); padding-top: 4px; }
+  .tbls { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tb { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 3px 5px; font-family: var(--mono); font-size: .7rem; background: var(--surface-2); max-width: 100%; }
+  .tb.new { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .tb.hit { border-color: var(--warn); }
+  .rec { white-space: nowrap; margin-right: 4px; }
+  .rec.ts { color: var(--bad); }
+  .mi { font-family: var(--mono); font-size: .78rem; }
+  .mi table { border-collapse: collapse; width: 100%; }
+  .mi td, .mi th { border-bottom: 1px solid var(--line); padding: 3px 5px; text-align: left; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-log-structured-storage.html">Chapter 7</a><span aria-hidden="true">/</span>
+      <span aria-current="page">LSM compaction</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 7 · Log-Structured Storage</div>
+  <h1>LSM Trees: merge-iteration and compaction</h1>
+  <p class="lede">An LSM Tree buffers writes in a <strong>memtable</strong> and flushes it as an immutable sorted table. Updates and deletes (<strong>tombstones</strong>) never touch older tables, so a read <strong>merge-iterates</strong> several tables and keeps the newest record per key. <strong>Compaction</strong> merges tables to bound that read cost. <strong>Leveled</strong> compaction keeps key ranges disjoint from level 1 on; <strong>size-tiered</strong> merges tables of similar size.</p>
+  <p class="source-note">Illustrates “LSM Tree Lookups”, “Merge-Iteration”, “Reconciliation” and “Maintenance in LSM Trees” (pp. 137–144). The merge-iteration stepper replays the book’s two-iterator example (pp. 139–140) exactly. The workload is the vault’s (seeded), and so are the thresholds: a 4-record memtable; leveled compaction with L0 merged into L1 at 2 tables, L1 holding up to 3 tables and tables of up to 4 records; size-tiered merging 3 tables of one size class. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Memtable and tables (newest first within a level)</p><div id="lsm"></div>
+        <p class="field-hint"><span class="rec ts">k07:⟂</span> is a tombstone. Each record shows key:value and, after the dot, its write timestamp. The outlined table was written last; the amber-bordered tables were consulted by the last read.</p></div>
+      <div class="panel mi"><p class="panel-title">Merge-iteration, the book’s example (pp. 139–140)</p>
+        <div class="row"><button class="btn small" type="button" id="mi-step">Step merge ›</button><button class="btn small" type="button" id="mi-reset">↺</button></div>
+        <div id="mi" style="margin-top:8px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="strat"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="put">Put</button><button class="btn small danger" type="button" id="delk">Delete</button><button class="btn small" type="button" id="read">Read</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="flush">Flush memtable</button><button class="btn small" type="button" id="compact">Compact</button></div>
+        <p class="field-hint">Play runs a seeded workload (mostly puts to keys 1–16, some deletes) that flushes when the memtable is full and compacts automatically.</p>
+        <div id="player" style="margin-top:8px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Reads get more expensive between compactions.</strong> Every table in L0 or in a size tier may contain the key, so all of them are checked; from L1 on, leveled compaction needs at most one table per level.</li>
+    <li><strong>Compaction rewrites data.</strong> Records rewritten per user write is the write amplification; leveled compaction usually pays more of it in exchange for fewer tables per read.</li>
+    <li><strong>Shadowed records waste space</strong> until compaction drops them: compare records stored with live keys.</li>
+    <li><strong>Tombstones live until the bottom.</strong> A tombstone is dropped only when the merge reaches the oldest data, otherwise the deleted value could resurrect.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-log-structured-storage.html"><small>Lesson</small>7. Log-Structured Storage</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var MEM = 4, strat = "leveled", r, mem, L0, levels, tiers, ts, tid, writes, rewritten, lastNew, lastHit;
+  function key(k) { return "k" + (k < 10 ? "0" : "") + k; }
+  function reset() {
+    r = Kit.rng(17); mem = {}; L0 = []; levels = [[], []]; tiers = []; ts = 0; tid = 0; writes = rewritten = 0; lastNew = null; lastHit = [];
+    log.clear(); log.add("Empty LSM Tree, " + (strat === "leveled" ? "leveled" : "size-tiered") + " compaction.", "muted"); render();
+  }
+  function table(recs) { return { id: ++tid, recs: recs, lo: recs[0].k, hi: recs[recs.length - 1].k }; }
+  function put(k, del) { mem[k] = { k: k, v: del ? null : "v" + (ts + 1), ts: ++ts, del: !!del }; writes++; log.add((del ? "Delete " : "Put ") + key(k) + (del ? " → tombstone" : " = v" + ts), del ? "warn" : "ok"); if (Object.keys(mem).length >= MEM) flush(); }
+  function flush() {
+    var ks = Object.keys(mem).map(Number).sort(function (a, b) { return a - b; }); if (!ks.length) return;
+    var t = table(ks.map(function (k) { return mem[k]; })); mem = {}; lastNew = t;
+    if (strat === "leveled") L0.unshift(t); else tiers.unshift(t);
+    log.add("Flush memtable → table #" + t.id + " (" + t.recs.length + " records)", "muted"); autoCompact();
+  }
+  function merge(tables, dropTomb) {
+    var best = {};
+    tables.forEach(function (t) { t.recs.forEach(function (x) { if (!best[x.k] || best[x.k].ts < x.ts) best[x.k] = x; }); });
+    return Object.keys(best).map(Number).sort(function (a, b) { return a - b; }).map(function (k) { return best[k]; }).filter(function (x) { return !(dropTomb && x.del); });
+  }
+  function chunk(recs) { var out = []; for (var i = 0; i < recs.length; i += 4) out.push(table(recs.slice(i, i + 4))); return out; }
+  function overlaps(t, lo, hi) { return t.lo <= hi && t.hi >= lo; }
+  function compactLevel(src, n) {
+    // merge src tables into level n (1-based index into levels)
+    var lo = Math.min.apply(null, src.map(function (t) { return t.lo; })), hi = Math.max.apply(null, src.map(function (t) { return t.hi; }));
+    var dst = levels[n - 1], over = dst.filter(function (t) { return overlaps(t, lo, hi); });
+    var bottom = levels.slice(n).every(function (l) { return !l.length; });
+    var recs = merge(src.concat(over), bottom), out = recs.length ? chunk(recs) : [];
+    rewritten += recs.length;
+    levels[n - 1] = dst.filter(function (t) { return over.indexOf(t) < 0; }).concat(out).sort(function (a, b) { return a.lo - b.lo; });
+    lastNew = out[0] || null;
+    log.add("Compact " + src.length + " table" + (src.length > 1 ? "s" : "") + " + " + over.length + " overlapping in L" + n + " → " + out.length + " table" + (out.length === 1 ? "" : "s") + " in L" + n + (bottom ? " (bottom level: tombstones dropped)" : ""), "warn");
+  }
+  function autoCompact() {
+    if (strat === "leveled") {
+      if (L0.length >= 2) { var src = L0; L0 = []; compactLevel(src, 1); }
+      if (levels[0].length > 3) { var t = levels[0].shift(); compactLevel([t], 2); }
+    } else {
+      var again = true;
+      while (again) {
+        again = false; var by = {};
+        tiers.forEach(function (t) { var c = Math.floor(Math.log2(t.recs.length)); (by[c] = by[c] || []).push(t); });
+        Object.keys(by).forEach(function (c) {
+          if (again || by[c].length < 3) return;
+          var grp = by[c].slice(0, 3), all = grp.length === tiers.length;
+          var recs = merge(grp, all); rewritten += recs.length;
+          tiers = tiers.filter(function (t) { return grp.indexOf(t) < 0; });
+          if (recs.length) { var nt = table(recs); tiers.push(nt); lastNew = nt; }
+          log.add("Size tier " + Math.pow(2, +c) + "–" + (Math.pow(2, +c + 1) - 1) + " records has 3 tables: merge into one of " + recs.length + " records", "warn"); again = true;
+        });
+      }
+    }
+  }
+  function forceCompact() {
+    if (strat === "leveled") { if (L0.length) { var s = L0; L0 = []; compactLevel(s, 1); } else if (levels[0].length) { var t = levels[0].shift(); compactLevel([t], 2); } }
+    else if (tiers.length > 1) { var recs = merge(tiers, true); rewritten += recs.length; log.add("Major compaction: merge all " + tiers.length + " tables", "warn"); tiers = recs.length ? [table(recs)] : []; lastNew = tiers[0]; }
+  }
+  function allTables() { return strat === "leveled" ? L0.concat(levels[0], levels[1]) : tiers; }
+  function consulted(k) { return allTables().filter(function (t) { return k >= t.lo && k <= t.hi; }); }
+  function read(k) {
+    lastHit = consulted(k); var cand = mem[k] ? [mem[k]] : [];
+    lastHit.forEach(function (t) { t.recs.forEach(function (x) { if (x.k === k) cand.push(x); }); });
+    var best = cand.sort(function (a, b) { return b.ts - a.ts; })[0];
+    log.add("Read " + key(k) + ": memtable + " + lastHit.length + " table" + (lastHit.length === 1 ? "" : "s") + " checked → " + (!best || best.del ? "not found" : best.v), "muted");
+  }
+  function step() {
+    var k = 1 + r.int(16), roll = r.next();
+    if (roll < 0.12) put(k, true); else if (roll < 0.25) read(k); else put(k, false);
+    render(); return ts < 160;
+  }
+  function render() {
+    var m = Kit.clear(document.getElementById("lsm"));
+    function rowFor(label, tables, memRecs) {
+      var box = Kit.el("div", { class: "tbls" });
+      if (memRecs) box.appendChild(Kit.el("div", { class: "tb" }, memRecs.length ? memRecs.map(recEl) : "empty"));
+      tables.forEach(function (t) { box.appendChild(Kit.el("div", { class: "tb" + (t === lastNew ? " new" : "") + (lastHit.indexOf(t) >= 0 ? " hit" : ""), title: "table #" + t.id }, t.recs.map(recEl))); });
+      if (!memRecs && !tables.length) box.appendChild(Kit.el("span", { class: "field-hint" }, "—"));
+      m.appendChild(Kit.el("div", { class: "lv" }, Kit.el("b", null, label), box));
+    }
+    function recEl(x) { return Kit.el("span", { class: "rec" + (x.del ? " ts" : "") }, key(x.k) + ":" + (x.del ? "⟂" : x.v) + "·" + x.ts); }
+    rowFor("mem", [], Object.keys(mem).map(Number).sort(function (a, b) { return a - b; }).map(function (k) { return mem[k]; }));
+    if (strat === "leveled") { rowFor("L0", L0); rowFor("L1", levels[0]); rowFor("L2", levels[1]); } else rowFor("tables", tiers);
+    var stored = allTables().reduce(function (a, t) { return a + t.recs.length; }, 0) + Object.keys(mem).length;
+    var live = {}; [mem].concat(allTables().map(function (t) { var o = {}; t.recs.forEach(function (x) { o[x.k] = x; }); return o; })).forEach(function (o) { Object.keys(o).forEach(function (k) { if (!live[k] || live[k].ts < o[k].ts) live[k] = o[k]; }); });
+    var liveN = Object.keys(live).filter(function (k) { return !live[k].del; }).length, worst = 0;
+    for (var k = 1; k <= 16; k++) worst = Math.max(worst, consulted(k).length);
+    stats([["Tables", allTables().length], ["Worst tables per read", worst, worst > 3 ? "warn" : ""], ["Write amplification", writes ? (1 + rewritten / writes).toFixed(2) + "×" : "–"], ["Records stored / live keys", stored + " / " + liveN, stored > 2 * liveN ? "warn" : ""]]);
+  }
+  // ---- merge-iteration stepper (book's example) ----
+  var MI = [
+    { it1: "k2:v1, k4:v2", it2: "k1:v3, k2:v4, k3:v5", q: "—", out: "—", note: "Two iterators over sorted tables." },
+    { it1: "k4:v2", it2: "k2:v4, k3:v5", q: "k1:v3, k2:v1", out: "—", note: "Fill the priority queue with each iterator's head." },
+    { it1: "k4:v2", it2: "k3:v5", q: "k2:v1, k2:v4", out: "k1:v3", note: "Pop the smallest, k1; refill from iterator 2." },
+    { it1: "—", it2: "—", q: "k3:v5, k4:v2", out: "k1:v3, k2:v4", note: "Two k2 records from different sources: reconcile (v4 wins), refill from both." },
+    { it1: "—", it2: "—", q: "—", out: "k1:v3, k2:v4, k3:v5, k4:v2", note: "Drain the queue: one sorted, reconciled stream." }];
+  var mi = 0;
+  function renderMI() {
+    var m = Kit.clear(document.getElementById("mi")), s = MI[mi];
+    m.appendChild(Kit.el("table", null, Kit.el("tbody", null,
+      [["Iterator 1", s.it1], ["Iterator 2", s.it2], ["Queue", s.q], ["Output", s.out]].map(function (rw) { return Kit.el("tr", null, Kit.el("th", { scope: "row" }, rw[0]), Kit.el("td", null, rw[1])); }))));
+    m.appendChild(Kit.el("p", { class: "field-hint", "aria-live": "polite" }, "Step " + (mi + 1) + "/" + MI.length + ": " + s.note));
+  }
+  document.getElementById("mi-step").addEventListener("click", function () { if (mi < MI.length - 1) mi++; renderMI(); });
+  document.getElementById("mi-reset").addEventListener("click", function () { mi = 0; renderMI(); });
+  document.getElementById("strat").appendChild(Kit.segmented({ label: "Compaction strategy", value: strat, options: [{ value: "leveled", label: "Leveled" }, { value: "tiered", label: "Size-tiered" }], onChange: function (v) { strat = v; reset(); } }).element);
+  document.getElementById("put").addEventListener("click", function () { put(1 + r.int(16), false); render(); });
+  document.getElementById("delk").addEventListener("click", function () { put(1 + r.int(16), true); render(); });
+  document.getElementById("read").addEventListener("click", function () { read(1 + r.int(16)); render(); });
+  document.getElementById("flush").addEventListener("click", function () { flush(); render(); });
+  document.getElementById("compact").addEventListener("click", function () { forceCompact(); render(); });
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 400 });
+  reset(); renderMI();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Two iterators both offer a record for k2. What does merge-iteration do?",
+      options: ["Returns both", "Reconciles them, typically by timestamp, and returns only the newest", "Returns the one from the first iterator"], answer: 1,
+      explain: "Each iterator holds at most one record per key, so duplicates come from different sources and are reconciled (pp. 138–140)." },
+    { q: "Why is deleting a key from the memtable not enough?",
+      options: ["The memtable is immutable", "An older table may still hold the key, which would resurrect it; a tombstone shadows it", "Deletes are not logged"], answer: 1,
+      explain: "pp. 136–137." },
+    { q: "What does leveled compaction guarantee from level 1 on?",
+      options: ["All tables are the same size", "Tables in a level have non-overlapping key ranges, so a read checks at most one table per level", "Tombstones are dropped immediately"], answer: 1,
+      explain: "pp. 142–143." }
+  ]);
+})();
+</script>
+</body>
+</html>
