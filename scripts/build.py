@@ -634,11 +634,20 @@ def render_library(books: list[Book]) -> str:
     for b in books:
         nw, nl = len(b.widget_pages()), len(b.labs())
         cover = b.meta.get("cover")
+        m = b.meta
+        ed = m.get("edition")
+        facts = [f"{ed} edition" if ed else "", str(m.get("year") or ""), m.get("publisher") or "",
+                 f"{m['pages']} pages" if m.get("pages") else ""]
+        stats = "".join(f'<span class="book-stat"><b>{n}</b> {label}</span>'
+                        for n, label in ((len(b.chapters), "lessons"), (nw, "simulations"), (nl, "experiments")))
         cards.append(f'<li><a class="card book-card" href="books/{b.slug}/index.html">'
                      + (f'<img class="cover" src="books/{b.slug}/{esc(cover)}" alt="" width="120">' if cover else "") +
-                     f'<span class="card-ch">{esc(" · ".join(b.meta.get("authors") or []))}</span>'
-                     f'<span class="card-title">{esc(b.full_title)}</span>'
-                     f'<span class="card-desc">{len(b.chapters)} lessons · {nw} simulations · {nl} experiments</span></a></li>')
+                     '<span class="book-info">'
+                     f'<span class="card-ch">{esc(" · ".join(m.get("authors") or []))}</span>'
+                     f'<span class="card-title">{esc(m["title"])}</span>'
+                     f'<span class="book-facts">{esc(" · ".join(f for f in facts if f))}</span>'
+                     '</span>'
+                     f'<span class="book-stats">{stats}</span></a></li>')
     body = f"""<main class="page hub" id="main">
   <section class="hero">
     <p class="eyebrow">Knowledge Vault</p>
@@ -646,7 +655,7 @@ def render_library(books: list[Book]) -> str:
     <p class="lede">Each book becomes a set of chapter lessons — faithful notes with page references, diagrams, interactive simulations, and self-checks — plus small experiments you can run. Everything works offline, straight from disk.</p>
   </section>
   <h2>Books</h2>
-  <ul class="cards">{''.join(cards)}</ul>
+  <ul class="cards library">{''.join(cards)}</ul>
   <p class="footer">Generated from Markdown by <code>scripts/build.py</code>. To add a book or a chapter, see <a href="AGENTS.md">AGENTS.md</a>.</p>
 </main>"""
     return page(title="Knowledge Vault", description="Interactive lessons for technical books.", root="",
