@@ -13,6 +13,7 @@ Technical books turned into interactive lessons. For each book there is one fold
 | [Data-Oriented Programming](books/data-oriented-programming/README.md) | Yehonathan Sharvit |
 | [Database Internals](books/database-internals/README.md) | Alex Petrov |
 | [Think Distributed Systems](books/think-distributed-systems/README.md) | Dominik Tornow |
+| [The Pragmatic Programmer](books/the-pragmatic-programmer/README.md) | David Thomas, Andrew Hunt |
 
 ## Layout
 

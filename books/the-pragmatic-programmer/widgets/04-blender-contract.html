@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Blender Contract</title>
+<meta name="description" content="Drive the book&#x27;s Exercise 14 kitchen blender with its contract switched on or off, make the calls that break it, and see whether the caller or the blender is blamed. Illustrates The Pragmatic Programmer, Topic 23.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .blender { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
+  .jar { width: 110px; height: 150px; border: 3px solid var(--line-strong); border-radius: 8px 8px 22px 22px; position: relative; overflow: hidden; background: var(--surface); }
+  .jar .fill { position: absolute; left: 0; right: 0; bottom: 0; background: var(--accent-soft); border-top: 2px solid var(--accent); }
+  .jar .spd { position: absolute; inset: 0; display: grid; place-items: center; font: 700 2rem var(--mono); color: var(--ink); }
+  .contract { font-family: var(--mono); font-size: .8rem; line-height: 1.6; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+  .contract .hot { background: var(--bad-soft); color: var(--bad); font-weight: 700; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-pragmatic-paranoia.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">The blender contract</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Pragmatic Paranoia</div>
+  <h1>The blender contract</h1>
+  <p class="lede">Exercise 14’s blender has ten speeds (0 is off). It <strong>can’t run empty</strong>, and its speed changes <strong>one step at a time</strong>. A contract makes those rules explicit. A failed <strong>precondition</strong> is the caller’s bug; a failed <strong>postcondition</strong> or <strong>invariant</strong> is the blender’s.</p>
+  <p class="source-note">Illustrates Topic 23, Design by Contract, Exercise 14 (pp. 191–202). The book asks the reader to write the contract; the one shown here (including “don’t empty while running”) is the vault’s answer, not the book’s appendix. The faulty-motor option is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Blender</p>
+        <div class="blender"><div class="jar" id="jar" role="img"><div class="fill" id="fill"></div><div class="spd" id="spd"></div></div>
+        <div><div class="row" id="calls"></div><div class="row" style="margin-top:8px"><label for="x">setSpeed(</label><input id="x" type="number" min="-2" max="12" value="3" style="width:4em"><span>)</span><button class="btn small" id="setx" type="button">call</button></div></div></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Contract (vault’s answer to Exercise 14)</p><div class="contract" id="contract"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><label style="display:flex;gap:6px"><input type="checkbox" id="on" checked> Check the contract</label>
+        <label style="display:flex;gap:6px;margin-top:6px"><input type="checkbox" id="faulty"> Faulty motor (sometimes overshoots)</label>
+        <button class="btn small" id="reset" type="button" style="margin-top:10px">New blender</button></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Preconditions protect the blender from its callers.</strong> Jumping from 0 to 2, or running it empty, is rejected at the call and blamed on the caller, where the bug is.</li>
+    <li><strong>With checking off</strong>, the same calls go through. The blender ends up running empty, a state its invariant says can never happen, and nothing says whose fault it was.</li>
+    <li><strong>A faulty motor</strong> breaks the postcondition getSpeed() == x even for a correct call. That bug belongs to the blender: the supplier broke its promise.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-pragmatic-paranoia.html"><small>Lesson</small>4. Pragmatic Paranoia</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var b, cnt, rng = Kit.rng(5);
+  var LINES = [["inv", "invariant: 0 <= speed <= 9 and (speed == 0 or full)"], ["", ""], ["sp1", "setSpeed(x)  pre: 0 <= x <= 9"], ["sp2", "             pre: |x - getSpeed()| <= 1"], ["sp3", "             pre: x == 0 or isFull()"], ["sp4", "             post: getSpeed() == x"],
+    ["", ""], ["f1", "fill()       pre: not isFull()"], ["f2", "             post: isFull()"], ["e1", "empty()      pre: isFull() and getSpeed() == 0"], ["e2", "             post: not isFull()"]];
+  var hot = null;
+  function reset() { b = { speed: 0, full: false }; cnt = { calls: 0, caller: 0, supplier: 0, silent: 0 }; hot = null; log.clear(); log.add("New blender: empty, speed 0.", "muted"); render(); }
+  function invOk() { return b.speed >= 0 && b.speed <= 9 && (b.speed === 0 || b.full); }
+  function fail(id, who, msg) { hot = id; cnt[who]++; log.add((who === "caller" ? "Precondition failed — caller’s bug: " : "Postcondition failed — blender’s bug: ") + msg, "bad"); }
+  function call(name, x) {
+    cnt.calls++; hot = null; var on = document.getElementById("on").checked, wasOk = invOk();
+    var label = name + (x !== undefined ? "(" + x + ")" : "()");
+    if (name === "setSpeed") {
+      if (on) { if (!(x >= 0 && x <= 9)) return fail("sp1", "caller", label + ": speed must be 0–9"), render();
+        if (Math.abs(x - b.speed) > 1) return fail("sp2", "caller", label + ": can only change one step from " + b.speed), render();
+        if (x !== 0 && !b.full) return fail("sp3", "caller", label + ": can’t run it empty"), render(); }
+      var target = x; if (document.getElementById("faulty").checked && x > 0 && rng.chance(0.5)) target = x + 1;
+      b.speed = target;
+      if (on && b.speed !== x) { fail("sp4", "supplier", label + " left the speed at " + b.speed); b.speed = x; return render(); }
+    } else if (name === "fill") {
+      if (on && b.full) return fail("f1", "caller", "fill(): it’s already full"), render(); b.full = true;
+    } else if (name === "empty") {
+      if (on && !b.full) return fail("e1", "caller", "empty(): it’s already empty"), render();
+      if (on && b.speed !== 0) return fail("e1", "caller", "empty(): stop the motor first"), render(); b.full = false;
+    }
+    if (!on && wasOk && !invOk()) { cnt.silent++; hot = "inv"; log.add(label + " went through unchecked: the invariant is now broken, and nobody was told.", "warn"); }
+    else log.add(label + " ✓ speed " + b.speed + ", " + (b.full ? "full" : "empty"), "ok");
+    render();
+  }
+  function render() {
+    document.getElementById("fill").style.height = b.full ? "70%" : "0";
+    document.getElementById("spd").textContent = b.speed;
+    document.getElementById("jar").setAttribute("aria-label", "Blender at speed " + b.speed + ", " + (b.full ? "full" : "empty"));
+    var c = Kit.clear(document.getElementById("contract"));
+    LINES.forEach(function (l) { c.appendChild(Kit.el("div", { class: l[0] && (l[0] === hot || (hot === "inv" && l[0] === "inv")) ? "hot" : "" }, (l[0] && l[0] === hot ? "▶ " : "  ") + l[1])); });
+    var v = document.getElementById("verdict"), ok = invOk();
+    v.className = "callout " + (ok ? (hot ? "warn" : "ok") : "bad");
+    v.textContent = !ok ? "Broken state: the motor is running at " + b.speed + " with nothing in the jar. Without the contract, nothing stopped it." : hot ? "The call was stopped at the contract, and the log says whose bug it is." : "The blender is in a valid state.";
+    stats([["Calls", cnt.calls], ["Blamed on caller", cnt.caller, cnt.caller ? "warn" : ""], ["Blamed on blender", cnt.supplier, cnt.supplier ? "bad" : ""], ["Silent breakages", cnt.silent, cnt.silent ? "bad" : ""]]);
+  }
+  var calls = document.getElementById("calls");
+  [["fill()", function () { call("fill"); }], ["empty()", function () { call("empty"); }], ["speed + 1", function () { call("setSpeed", b.speed + 1); }], ["speed − 1", function () { call("setSpeed", b.speed - 1); }], ["0 → 2 jump", function () { call("setSpeed", b.speed + 2); }]]
+    .forEach(function (x) { var btn = Kit.el("button", { class: "btn small", type: "button" }, x[0]); btn.addEventListener("click", x[1]); calls.appendChild(btn); });
+  document.getElementById("setx").addEventListener("click", function () { call("setSpeed", Number(document.getElementById("x").value)); });
+  document.getElementById("reset").addEventListener("click", reset);
+  document.getElementById("on").addEventListener("change", function (e) { log.add("Contract checking " + (e.target.checked ? "on" : "off"), "muted"); render(); });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "A caller asks the blender to go from speed 0 to speed 2. Whose bug is it?",
+      options: ["The blender's: it should cope", "The caller's: it violated a precondition", "Nobody's"], answer: 1,
+      explain: "A precondition is the caller's responsibility: it shifts the burden of correctness to the caller (p. 198)." },
+    { q: "What does a class invariant promise?",
+      options: ["Something true when a method starts", "A condition that is always true from the caller's point of view", "That methods are pure"], answer: 1,
+      explain: "pp. 192–193." },
+    { q: "Why does crashing at a failed precondition beat continuing?",
+      options: ["It's faster", "The failure is reported where it happened, not as strange behaviour far away", "It saves memory"], answer: 1,
+      explain: "pp. 198–199: a failed contract with a stack trace is easier to diagnose than a NaN later." }
+  ]);
+})();
+</script>
+</body>
+</html>

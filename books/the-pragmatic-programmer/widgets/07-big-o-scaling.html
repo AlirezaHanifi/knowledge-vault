@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Does It Scale?</title>
+<meta name="description" content="Set a baseline time and input size, grow the input, and compare how long algorithms of seven orders take, with the book&#x27;s one-second example as a preset. Illustrates The Pragmatic Programmer, Topic 39.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .ord { display: grid; grid-template-columns: 6.5em 1fr 8.5em; gap: 8px; align-items: center; font-size: .85rem; margin-bottom: 5px; }
+  .ord .track { height: 16px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .ord .fill { height: 100%; background: var(--accent); } .ord .fill.slow { background: var(--warn); } .ord .fill.hopeless { background: var(--bad); }
+  .ord code { font-size: .85rem; } .ord .t { font-family: var(--mono); text-align: right; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-while-you-are-coding.html">Chapter 7</a><span aria-hidden="true">/</span>
+      <span aria-current="page">How does it scale?</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 7 · While You Are Coding</div>
+  <h1>How does it scale?</h1>
+  <p class="lede">Big-O doesn’t give actual times: it says how time <strong>changes</strong> as input grows. If a routine takes one second for 100 records, how long for 1,000? It depends entirely on its order.</p>
+  <p class="source-note">Illustrates Topic 39, Algorithm Speed (pp. 343–351, Tips 63–64): the orders and examples from the book’s table, and its one-second, 100-to-1,000-records example (p. 345). The times here scale each formula exactly, so O(lg n) and O(n lg n) differ from the book’s rounder “about 3 s” and “some 33 s” (see the vault note in the lesson). Exponential is shown as 2ⁿ. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title" id="pt">Time at the new size (log scale bar)</p><div id="ords"></div>
+        <p class="field-hint">Bars are on a logarithmic scale: each tick of length is ten times longer.</p>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="t0"></div><div id="n0"></div><div id="n1"></div><button class="btn small" id="book" type="button" style="margin-top:8px">Book’s example: 1 s for 100 → 1,000</button></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Constant factors vanish</strong>: two O(n) routines can differ by a factor of 1,000, but both get ten times slower for ten times the data.</li>
+    <li><strong>O(n²) and worse</strong> run away quickly. The book’s O(n²) example goes from one second to 100 seconds, and exponential becomes cosmic almost immediately.</li>
+    <li><strong>Test your estimates</strong>: run the code at three or four sizes and see which row of this table your timings follow.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-while-you-are-coding.html"><small>Lesson</small>7. While You Are Coding</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { t0: 1, n0: 100, n1: 1000 };
+  var BOOK = { "1": "1 s", lg: "about 3 s", n: "10 s", nlg: "some 33 s", n2: "100 s", n3: "—", exp: "years (make coffee)" };
+  var ORD = [["1", "O(1)", "array access", function () { return 0; }], ["lg", "O(lg n)", "binary search", function (n) { return Math.log10(Math.log2(n)); }], ["n", "O(n)", "sequential search", function (n) { return Math.log10(n); }],
+    ["nlg", "O(n lg n)", "quicksort (average)", function (n) { return Math.log10(n * Math.log2(n)); }], ["n2", "O(n²)", "insertion sort", function (n) { return 2 * Math.log10(n); }], ["n3", "O(n³)", "matrix multiply", function (n) { return 3 * Math.log10(n); }], ["exp", "O(2ⁿ)", "set partitioning", function (n) { return n * Math.LOG10E * Math.LN2; }]];
+  function human(l10) { // l10 = log10(seconds)
+    if (l10 > 15) return "10^" + Math.round(l10 - 7.5) + " years";
+    var s = Math.pow(10, l10); if (s < 1e-3) return (s * 1e6).toFixed(0) + " µs"; if (s < 1) return (s * 1000).toFixed(0) + " ms"; if (s < 120) return s.toFixed(s < 10 ? 1 : 0) + " s"; if (s < 7200) return (s / 60).toFixed(0) + " min"; if (s < 172800) return (s / 3600).toFixed(1) + " h"; if (s < 3.15e7 * 2) return (s / 86400).toFixed(0) + " days"; return (s / 3.15e7).toExponential(1) + " years";
+  }
+  function render() {
+    var box = Kit.clear(document.getElementById("ords")), isBook = cfg.t0 === 1 && cfg.n0 === 100 && cfg.n1 === 1000, worst = null;
+    document.getElementById("pt").textContent = "Time for " + cfg.n1.toLocaleString() + " records, given " + human(Math.log10(cfg.t0)) + " for " + cfg.n0.toLocaleString();
+    ORD.forEach(function (o) {
+      var l = Math.log10(cfg.t0) + o[3](cfg.n1) - o[3](cfg.n0), w = Math.max(2, Math.min(100, (l + 3) / 12 * 100));
+      var cls = l > Math.log10(3600) ? "hopeless" : l > Math.log10(60) ? "slow" : "";
+      if (l > Math.log10(3600) && !worst) worst = o[1];
+      box.appendChild(Kit.el("div", { class: "ord", role: "img", "aria-label": o[1] + ": " + human(l) + (isBook && BOOK[o[0]] !== "—" ? "; the book says " + BOOK[o[0]] : "") },
+        Kit.el("code", null, o[1]), Kit.el("div", { class: "track", title: o[2] }, Kit.el("div", { class: "fill " + cls, style: "width:" + w + "%" })), Kit.el("span", { class: "t" }, human(l) + (isBook && BOOK[o[0]] !== "—" ? " (book: " + BOOK[o[0]] + ")" : ""))));
+    });
+    var v = document.getElementById("verdict"), ratio = cfg.n1 / cfg.n0; v.className = "callout " + (worst ? "warn" : "ok");
+    v.textContent = "Input grows " + (ratio >= 1 ? ratio.toFixed(ratio < 10 ? 1 : 0) + "×" : "to " + Kit.pct(ratio, 0)) + ". " + (worst ? "From " + worst + " on, the run takes over an hour." : "Every order still finishes within an hour.");
+    stats([["Growth factor", ratio.toFixed(1) + "×"], ["O(n) time", human(Math.log10(cfg.t0 * ratio))], ["O(n²) time", human(Math.log10(cfg.t0 * ratio * ratio)), ratio * ratio * cfg.t0 > 3600 ? "bad" : ""]]);
+  }
+  var N = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 100000, 1000000];
+  var s0 = Kit.slider({ label: "Baseline time", min: -3, max: 2, step: 1, value: 0, format: function (v) { return human(v); }, onInput: function (v) { cfg.t0 = Math.pow(10, v); render(); } });
+  var s1 = Kit.slider({ label: "Baseline size", min: 0, max: 7, step: 1, value: 3, format: function (v) { return N[v].toLocaleString(); }, onInput: function (v) { cfg.n0 = N[v]; render(); } });
+  var s2 = Kit.slider({ label: "New size", min: 0, max: 11, step: 1, value: 6, format: function (v) { return N[v].toLocaleString(); }, onInput: function (v) { cfg.n1 = N[v]; render(); log.add("New size " + N[v].toLocaleString(), "muted"); } });
+  document.getElementById("t0").appendChild(s0.element); document.getElementById("n0").appendChild(s1.element); document.getElementById("n1").appendChild(s2.element);
+  document.getElementById("book").addEventListener("click", function () { s0.set(0); s1.set(3); s2.set(6); cfg = { t0: 1, n0: 100, n1: 1000 }; render(); log.add("Book’s example: 1 s for 100 records, now 1,000.", "ok"); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "A routine takes 1 s for 100 records. If it's O(n²), about how long for 1,000?",
+      options: ["10 s", "100 s", "1,000 s"], answer: 1,
+      explain: "p. 345: ten times the data, a hundred times the time." },
+    { q: "What does Big-O leave out?",
+      options: ["The growth rate", "Constant factors and low-order terms", "The input size"], answer: 1,
+      explain: "pp. 344–345: one algorithm may be 1,000 times faster than another with the same O()." },
+    { q: "How does the book suggest testing an estimate?",
+      options: ["Prove it mathematically", "Run it at varying input sizes and plot the results; three or four points show the shape", "Ask a colleague"], answer: 1,
+      explain: "p. 350, Tip 64." }
+  ]);
+})();
+</script>
+</body>
+</html>

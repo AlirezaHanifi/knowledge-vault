@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Turtle-Graphics Mini-Language</title>
+<meta name="description" content="Run the book&#x27;s Exercise 4 turtle program, write your own, see each line parsed into a command or an error, and add a new command by extending the command table. Illustrates The Pragmatic Programmer, Topic 14.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  textarea { width: 100%; min-height: 170px; font-family: var(--mono); font-size: .9rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; }
+  .canvas { width: 100%; height: 260px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .canvas .ink { fill: none; stroke-width: 3; stroke-linecap: round; } .canvas .p1 { stroke: var(--s1); } .canvas .p2 { stroke: var(--s2); } .canvas .p3 { stroke: var(--s3); }
+  .canvas .turtle { fill: var(--ink); } .canvas .gridl { stroke: var(--line); stroke-width: 1; }
+  .parsed td:first-child { font-family: var(--mono); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-a-pragmatic-approach.html">Chapter 2</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Turtle mini-language</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 2 · A Pragmatic Approach</div>
+  <h1>A turtle-graphics mini-language</h1>
+  <p class="lede">Exercise 4 asks for a parser for a tiny external language of <strong>single-letter commands, some followed by a number</strong>, designed so that new commands are simple to add. A table that maps each letter to its argument rule and its action keeps the parser itself tiny.</p>
+  <p class="source-note">Illustrates Topic 14, Domain Languages, Exercise 4 (pp. 130–131): P selects a pen, D and U put it down and up, and N, E, S, W draw in a direction (in centimetres). The diagonal command, the canvas scale and the error messages are the vault’s. Implementation is the vault’s own; the book’s possible answer is in its appendix.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Program</p><label class="sr-only" for="src">Turtle program</label><textarea id="src" spellcheck="false"></textarea>
+        <div class="row" style="margin-top:8px"><button class="btn primary" id="run" type="button">Run</button><button class="btn" id="ex" type="button">Book’s rectangle</button><button class="btn" id="bad" type="button">Program with errors</button></div></div>
+      <div class="panel"><p class="panel-title">Drawing (1 cm = 20 px; pens 1–3)</p><svg class="canvas" id="cv" viewBox="0 0 400 260" role="img" aria-label="Turtle drawing"></svg></div>
+      <div class="panel"><p class="panel-title">Parsed lines</p><div class="table-wrap"><table class="parsed" id="parsed"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><p class="panel-title">Command table</p><div class="table-wrap"><table id="cmds"></table></div>
+        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="addx"> Add <code>X n</code>: draw north-east n cm</label></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The parser never changes</strong> when you add <code>X</code>: one new row in the table is enough. That is the “simple to add new commands” design the exercise asks for.</li>
+    <li><strong>Errors are per line</strong>: an unknown letter or a missing or extra argument is reported with its line number, and the rest of the program still runs.</li>
+    <li><strong>Comments after #</strong> are stripped first, exactly as in the book’s example program.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-a-pragmatic-approach.html"><small>Lesson</small>2. A Pragmatic Approach</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var BOOK = "P 2 # select pen 2\nD # pen down\nW 2 # draw west 2cm\nN 1 # then north 1\nE 2 # then east 2\nS 1 # then back south\nU # pen up";
+  var BAD = "P 1\nD\nE 3\nQ 2 # unknown command\nN\nS 1 2\nU";
+  var DIRS = { N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0], X: [Math.SQRT1_2, -Math.SQRT1_2] };
+  function move(d) { return function (t, n) { var dx = DIRS[d][0] * n * 20, dy = DIRS[d][1] * n * 20; if (t.down) t.lines.push([t.x, t.y, t.x + dx, t.y + dy, t.pen]); t.x += dx; t.y += dy; }; }
+  var TABLE = {
+    P: { arg: true, doc: "select pen n", fn: function (t, n) { t.pen = n; } },
+    D: { arg: false, doc: "pen down", fn: function (t) { t.down = true; } },
+    U: { arg: false, doc: "pen up", fn: function (t) { t.down = false; } },
+    N: { arg: true, doc: "draw north n cm", fn: move("N") }, E: { arg: true, doc: "draw east n cm", fn: move("E") },
+    S: { arg: true, doc: "draw south n cm", fn: move("S") }, W: { arg: true, doc: "draw west n cm", fn: move("W") }
+  };
+  function parse(src) {
+    return src.split("\n").map(function (raw, i) {
+      var line = raw.replace(/#.*$/, "").trim(); if (!line) return { n: i + 1, raw: raw, skip: true };
+      var parts = line.split(/\s+/), cmd = TABLE[parts[0].toUpperCase()];
+      if (!cmd) return { n: i + 1, raw: raw, err: "unknown command “" + parts[0] + "”" };
+      if (cmd.arg && parts.length !== 2) return { n: i + 1, raw: raw, err: parts[0] + " needs one number" };
+      if (!cmd.arg && parts.length !== 1) return { n: i + 1, raw: raw, err: parts[0] + " takes no argument" };
+      var num = cmd.arg ? Number(parts[1]) : null; if (cmd.arg && !isFinite(num)) return { n: i + 1, raw: raw, err: "“" + parts[1] + "” is not a number" };
+      return { n: i + 1, raw: raw, cmd: parts[0].toUpperCase(), num: num };
+    });
+  }
+  function renderTable() {
+    var t = Kit.clear(document.getElementById("cmds"));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "Letter"), Kit.el("th", null, "Arg"), Kit.el("th", null, "Action"))));
+    var tb = Kit.el("tbody"); Object.keys(TABLE).forEach(function (k) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, Kit.el("code", null, k)), Kit.el("td", null, TABLE[k].arg ? "n" : "—"), Kit.el("td", null, TABLE[k].doc))); }); t.appendChild(tb);
+  }
+  function run() {
+    var ps = parse(document.getElementById("src").value), t = { x: 260, y: 140, pen: 1, down: false, lines: [] }, ok = 0, bad = 0;
+    var pt = Kit.clear(document.getElementById("parsed"));
+    pt.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "Line"), Kit.el("th", null, "Source"), Kit.el("th", null, "Parsed as"))));
+    var tb = Kit.el("tbody");
+    ps.forEach(function (p) {
+      if (p.skip) return;
+      if (p.err) { bad++; log.add("Line " + p.n + ": " + p.err, "bad"); tb.appendChild(Kit.el("tr", null, Kit.el("td", null, String(p.n)), Kit.el("td", null, Kit.el("code", null, p.raw)), Kit.el("td", null, Kit.el("span", { class: "badge bad" }, "✗ error"), " " + p.err))); return; }
+      ok++; TABLE[p.cmd].fn(t, p.num);
+      tb.appendChild(Kit.el("tr", null, Kit.el("td", null, String(p.n)), Kit.el("td", null, Kit.el("code", null, p.raw)), Kit.el("td", null, Kit.el("span", { class: "badge ok" }, "✓"), " " + p.cmd + (p.num !== null ? "(" + p.num + ")" : "") + " — " + TABLE[p.cmd].doc)));
+    });
+    pt.appendChild(tb);
+    var cv = Kit.clear(document.getElementById("cv"));
+    for (var gx = 0; gx <= 400; gx += 20) cv.appendChild(Kit.svg("line", { class: "gridl", x1: gx, x2: gx, y1: 0, y2: 260 }));
+    for (var gy = 0; gy <= 260; gy += 20) cv.appendChild(Kit.svg("line", { class: "gridl", x1: 0, x2: 400, y1: gy, y2: gy }));
+    t.lines.forEach(function (l) { cv.appendChild(Kit.svg("line", { class: "ink p" + Math.min(3, Math.max(1, Math.round(l[4]))), x1: l[0], y1: l[1], x2: l[2], y2: l[3] })); });
+    cv.appendChild(Kit.svg("circle", { class: "turtle", cx: t.x, cy: t.y, r: 5 }));
+    cv.setAttribute("aria-label", "Turtle drawing: " + t.lines.length + " line segment(s); turtle at " + ((t.x - 260) / 20).toFixed(1) + ", " + ((140 - t.y) / 20).toFixed(1) + " cm from the start, pen " + (t.down ? "down" : "up"));
+    log.add("Ran " + ok + " command(s), " + bad + " error(s), drew " + t.lines.length + " segment(s)", bad ? "warn" : "ok");
+    stats([["Commands run", ok, "ok"], ["Errors", bad, bad ? "bad" : ""], ["Segments drawn", t.lines.length], ["Commands in table", Object.keys(TABLE).length]]);
+  }
+  var src = document.getElementById("src"); src.value = BOOK;
+  document.getElementById("run").addEventListener("click", run);
+  document.getElementById("ex").addEventListener("click", function () { src.value = BOOK; run(); });
+  document.getElementById("bad").addEventListener("click", function () { src.value = BAD; run(); });
+  document.getElementById("addx").addEventListener("change", function (e) {
+    if (e.target.checked) { TABLE.X = { arg: true, doc: "draw north-east n cm", fn: move("X") }; if (src.value.indexOf("X ") < 0) src.value += "\nD\nX 3\nU"; log.add("Added one row to the table: X n. The parser is unchanged.", "ok"); }
+    else { delete TABLE.X; log.add("Removed X from the table.", "muted"); }
+    renderTable(); run(); });
+  renderTable(); run();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does the line “W 2” do in the book's example?",
+      options: ["Selects pen 2", "Draws west 2 cm", "Waits 2 seconds"], answer: 1,
+      explain: "p. 131." },
+    { q: "Why use a command table?",
+      options: ["It runs faster", "A new command is one new table entry; the parser doesn't change", "Tables are required by external languages"], answer: 1,
+      explain: "Exercise 4 asks for a design in which new commands are simple to add (p. 131)." },
+    { q: "Exercise 5 re-implements the language as an internal one. How?",
+      options: ["With a parser generator", "Write a function for each command, perhaps lower-cased", "Using YAML"], answer: 1,
+      explain: "p. 131: “Don't do anything clever: just write a function for each of the commands.”" }
+  ]);
+})();
+</script>
+</body>
+</html>

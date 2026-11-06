@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Last Slice of Pie</title>
+<meta name="description" content="Step two waiters through their code in any interleaving, with no lock, with a semaphore, or with a transactional get_pie_if_available, and count how often two customers are promised one slice. Illustrates The Pragmatic Programmer, Topic 34.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .waiters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .code { font-family: var(--mono); font-size: .8rem; line-height: 1.7; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; }
+  .code div { padding: 0 4px; border-radius: 3px; } .code .pc { background: var(--accent-soft); outline: 1px solid var(--accent); } .code .ran { color: var(--ink-3); }
+  .case { font-size: 1.6rem; letter-spacing: 4px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/06-concurrency.html">Chapter 6</a><span aria-hidden="true">/</span>
+      <span aria-current="page">The last slice of pie</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 6 · Concurrency</div>
+  <h1>The last slice of pie</h1>
+  <p class="lede">Two waiters each see one slice in the display case and promise it to their customers. The problem isn’t that both can change the count. It’s that <strong>neither can be sure its view is still true</strong>: checking and taking aren’t atomic. <strong>Shared state is incorrect state.</strong></p>
+  <p class="source-note">Illustrates Topic 34, Shared State Is Incorrect State (pp. 299–306, Tip 57): the waiters’ code, the semaphore (the diner’s plastic leprechaun), get_pie_if_available, and the forgotten unlock when update_sales_data raises. The step breakdown, the enumeration of interleavings and the exception toggle are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Pie case</p><div class="case" id="case" role="img"></div><p class="field-hint" id="lock"></p>
+        <div class="waiters" id="waiters" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:8px"><button class="btn" id="sa" type="button">Step waiter A</button><button class="btn" id="sb" type="button">Step waiter B</button><button class="btn" id="rs" type="button">↺ Reset</button></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Every interleaving</p><button class="btn primary" id="all" type="button">Run all interleavings</button><div class="table-wrap" style="margin-top:8px"><table id="tbl"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div id="slices" style="margin-top:10px"></div>
+        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="exc"> Waiter A’s update_sales_data raises</label>
+        <label style="display:flex;gap:6px;margin-top:4px"><input type="checkbox" id="ens" checked> Unlock in an ensure block</label></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>With no lock</strong>, almost every interleaving (240 of 246 with one slice) lets both waiters read “1 slice” before either takes it, so two customers are promised one pie. Only when one waiter finishes taking before the other looks is it safe.</li>
+    <li><strong>The semaphore</strong> serializes the check and the take. It works only because both waiters follow the convention of holding the leprechaun first.</li>
+    <li><strong>Forget the ensure</strong> and let update_sales_data raise: waiter A never unlocks, and waiter B waits forever. That is the case the book fixes with ensure or protect.</li>
+    <li><strong>get_pie_if_available</strong> moves the check and take into one call on the resource, so callers can’t get it wrong.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/06-concurrency.html"><small>Lesson</small>6. Concurrency</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { mode: "none", slices: 1, exc: false, ens: true };
+  var PROG = {
+    none: [["read", "count = case.pie_count"], ["check", "if count > 0:"], ["promise", "  promise customer pie"], ["take", "  case.take_pie()"], ["give", "  give pie to customer"]],
+    lock: [["lock", "case_lock.lock()"], ["read", "count = case.pie_count"], ["check", "if count > 0:"], ["promise", "  promise customer pie"], ["take", "  case.take_pie()"], ["sales", "  update_sales_data(:pie)"], ["unlock", "case_lock.unlock()"], ["give", "give pie to customer"]],
+    tx: [["get", "slice = case.get_pie_if_available()"], ["check", "if slice:"], ["give", "  give pie to customer"]]
+  };
+  function init() { return { pies: cfg.slices, lockHeld: null, w: [{ pc: 0, count: null, slice: false, promised: false, served: false, sorry: false, dead: false }, { pc: 0, count: null, slice: false, promised: false, served: false, sorry: false, dead: false }] }; }
+  function finished(S, i) { var w = S.w[i]; return w.dead || w.pc >= PROG[cfg.mode].length; }
+  function canStep(S, i) { if (finished(S, i)) return false; var op = PROG[cfg.mode][S.w[i].pc][0]; return !(op === "lock" && S.lockHeld !== null && S.lockHeld !== i); }
+  function step(S, i, quiet) {
+    var w = S.w[i], P = PROG[cfg.mode], op = P[w.pc][0], name = "Waiter " + "AB"[i];
+    function say(t, k) { if (!quiet) log.add(name + ": " + t, k || "muted"); }
+    if (op === "lock") { S.lockHeld = i; say("holds the leprechaun"); }
+    else if (op === "unlock") { if (cfg.exc && i === 0 && !cfg.ens) { say("never reaches unlock(): the exception skipped it", "bad"); w.dead = true; return; } S.lockHeld = null; say("unlocks"); }
+    else if (op === "read") { w.count = S.pies; say("sees " + w.count + " slice(s)"); }
+    else if (op === "check") { var ok = cfg.mode === "tx" ? w.slice : w.count > 0; if (!ok) { w.sorry = true; say("tells the customer there’s no pie", "warn"); if (cfg.mode === "lock") { w.pc = P.length - 2; return; } w.pc = P.length; return; } }
+    else if (op === "promise") { w.promised = true; say("promises the customer pie"); }
+    else if (op === "take") { S.pies--; say("takes a slice; case now holds " + S.pies, S.pies < 0 ? "bad" : "muted"); }
+    else if (op === "sales") { if (cfg.exc && i === 0) { say("update_sales_data raises!", "bad"); if (cfg.ens) { S.lockHeld = null; say("ensure block unlocks the case", "ok"); w.pc = P.length; w.dead = true; return; } w.pc = P.length - 2; return; } say("updates the sales data"); }
+    else if (op === "get") { if (S.pies > 0) { S.pies--; w.slice = true; w.promised = true; say("gets a slice atomically; case now holds " + S.pies); } else say("gets nothing: no pie left"); }
+    else if (op === "give") { if (w.sorry || (cfg.mode === "tx" && !w.slice)) { w.pc++; return; } if (cfg.mode !== "tx" && S.pies < 0 && !w.slice) { w.served = false; w.pc++; say("reaches for a slice that isn’t there", "bad"); return; } w.served = true; say("serves the pie", "ok"); }
+    w.pc++;
+  }
+  function outcome(S) {
+    var stuck = [0, 1].some(function (i) { return !finished(S, i) && !canStep(S, i); }) && ![0, 1].some(function (i) { return canStep(S, i); });
+    var promised = S.w.filter(function (w) { return w.promised; }).length;
+    if (stuck) return "deadlock";
+    if (promised > cfg.slices) return "oversold";
+    return "ok";
+  }
+  var S;
+  function reset() { S = init(); log.clear(); log.add("The case holds " + cfg.slices + " slice(s). Step the waiters in any order.", "muted"); render(); }
+  function render() {
+    document.getElementById("case").textContent = S.pies > 0 ? new Array(S.pies + 1).join("🥧 ") : "(empty)";
+    document.getElementById("case").setAttribute("aria-label", "Pie case: " + Math.max(0, S.pies) + " slice(s)");
+    document.getElementById("lock").textContent = cfg.mode === "lock" ? (S.lockHeld === null ? "Leprechaun: on the counter (unlocked)" : "Leprechaun: held by waiter " + "AB"[S.lockHeld]) : cfg.mode === "tx" ? "The case checks and takes in one call." : "No lock.";
+    var wr = Kit.clear(document.getElementById("waiters"));
+    S.w.forEach(function (w, i) { var c = Kit.el("div", { class: "code", "aria-label": "Waiter " + "AB"[i] + " code" });
+      PROG[cfg.mode].forEach(function (l, k) { c.appendChild(Kit.el("div", { class: k === w.pc && !finished(S, i) ? "pc" : k < w.pc ? "ran" : "" }, (k === w.pc && !finished(S, i) ? "▶ " : "  ") + l[1])); });
+      wr.appendChild(Kit.el("div", null, Kit.el("strong", null, "Waiter " + "AB"[i] + (w.dead ? " (stopped)" : finished(S, i) ? " (done)" : !canStep(S, i) ? " (waiting for lock)" : "")), c)); });
+    document.getElementById("sa").disabled = !canStep(S, 0); document.getElementById("sb").disabled = !canStep(S, 1);
+    var o = outcome(S), both = finished(S, 0) && finished(S, 1), v = document.getElementById("verdict");
+    v.className = "callout " + (o === "ok" ? (both ? "ok" : "") : "bad");
+    v.textContent = o === "deadlock" ? "Stuck: waiter B waits for a lock that will never be released." : o === "oversold" ? "Two customers have been promised one slice: someone will be disappointed." : both ? "Every promise can be kept." : "Keep stepping.";
+    stats([["Slices left", S.pies, S.pies < 0 ? "bad" : ""], ["Promises", S.w.filter(function (w) { return w.promised; }).length], ["Outcome", o, o === "ok" ? "ok" : "bad"]]);
+  }
+  function enumerate() {
+    var res = { ok: 0, oversold: 0, deadlock: 0 }, n = 0;
+    function dfs(st) { var any = false; [0, 1].forEach(function (i) { if (canStep(st, i)) { any = true; var c = JSON.parse(JSON.stringify(st)); step(c, i, true); dfs(c); } }); if (!any) { res[outcome(st)]++; n++; } }
+    dfs(init());
+    var t = Kit.clear(document.getElementById("tbl")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "Outcome"), Kit.el("th", null, "Interleavings"), Kit.el("th", null, "Share"))));
+    var tb = Kit.el("tbody"); [["ok", "every promise kept"], ["oversold", "two promised, one slice"], ["deadlock", "stuck forever"]].forEach(function (r) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, r[1]), Kit.el("td", null, String(res[r[0]])), Kit.el("td", null, Kit.pct(res[r[0]] / n, 0)))); });
+    t.appendChild(tb); log.add(n + " interleavings: " + res.oversold + " oversold, " + res.deadlock + " deadlocked", res.oversold || res.deadlock ? "bad" : "ok");
+  }
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Protection", value: cfg.mode, options: [{ value: "none", label: "No lock" }, { value: "lock", label: "Semaphore" }, { value: "tx", label: "get_pie_if_available" }], onChange: function (v) { cfg.mode = v; reset(); Kit.clear(document.getElementById("tbl")); } }).element);
+  document.getElementById("slices").appendChild(Kit.slider({ label: "Slices in the case", min: 1, max: 2, step: 1, value: 1, onInput: function (v) { cfg.slices = v; reset(); } }).element);
+  document.getElementById("exc").addEventListener("change", function (e) { cfg.exc = e.target.checked; reset(); });
+  document.getElementById("ens").addEventListener("change", function (e) { cfg.ens = e.target.checked; reset(); });
+  document.getElementById("sa").addEventListener("click", function () { step(S, 0); render(); });
+  document.getElementById("sb").addEventListener("click", function () { step(S, 1); render(); });
+  document.getElementById("rs").addEventListener("click", reset);
+  document.getElementById("all").addEventListener("click", enumerate);
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does the book say is the real problem in the pie example?",
+      options: ["Two processes can write the same memory", "Neither waiter can guarantee its view of the count is consistent", "The pie count is too small"], answer: 1,
+      explain: "pp. 300–301." },
+    { q: "Why does a semaphore only partly solve it?",
+      options: ["It's slow", "It works only if everyone follows the convention of taking it first", "It can only be used once"], answer: 1,
+      explain: "pp. 301–302." },
+    { q: "Why must the unlock go in an ensure block?",
+      options: ["Style", "If update_sales_data raises, the unlock is skipped and the case stays locked forever", "To make it faster"], answer: 1,
+      explain: "pp. 303–304." }
+  ]);
+})();
+</script>
+</body>
+</html>

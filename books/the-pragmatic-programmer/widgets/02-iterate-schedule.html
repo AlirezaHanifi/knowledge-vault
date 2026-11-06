@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iterating the Schedule</title>
+<meta name="description" content="Estimate a project up front, then run it one iteration at a time and watch the forecast based on the team&#x27;s measured pace close in on the real finish. Illustrates The Pragmatic Programmer, Topic 15.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-a-pragmatic-approach.html">Chapter 2</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Iterating the schedule</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 2 · A Pragmatic Approach</div>
+  <h1>Iterating the schedule</h1>
+  <p class="lede">Often the only way to know a project’s timetable is to gain experience on that same project. Work in thin slices, then <strong>refine the estimate</strong> of the remaining iterations after each one. <strong>Iterate the schedule with the code.</strong></p>
+  <p class="source-note">Illustrates “Estimating Project Schedules” in Topic 15, Estimating (pp. 138–140, Tip 24). The project, the team’s pace (random around 8 points per iteration) and the scope found along the way are the vault’s model. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Forecast finish after each iteration</p><svg id="chart" role="img" aria-label="Forecast finish by iteration"></svg>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="est"></div><div id="grow"></div><div id="seed"></div><div id="play" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The up-front estimate</strong> is a single guess that can’t improve: whatever it misses (true size, pace, scope found along the way) shows up only at the end.</li>
+    <li><strong>The iterated forecast</strong> uses the pace the team has actually shown on this project, so after a few iterations it closes in on the real finish.</li>
+    <li><strong>Scope found along the way</strong> moves the target. The forecast follows it, which is the book’s reason for saying “I’ll get back to you” rather than committing at the coffee machine.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-a-pragmatic-approach.html"><small>Lesson</small>2. A Pragmatic Approach</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { est: 40, grow: 2, seed: 3 }, plan = null, k = 0;
+  function build() {
+    var r = Kit.rng(cfg.seed), scope = 60, done = 0, its = [];
+    while (done < scope && its.length < 40) { var v = Math.max(3, Math.round(8 + (r.next() + r.next() + r.next() - 1.5) * 4)); done = Math.min(scope, done + v); scope += r.int(cfg.grow * 2 + 1); its.push({ v: v, done: done, scope: scope }); }
+    var finish = its.length; return { its: its, finish: finish };
+  }
+  function forecast(i) {
+    if (i === 0) return cfg.est / 8;
+    var it = plan.its[i - 1], avg = it.done / i; return i + Math.max(0, it.scope - it.done) / avg;
+  }
+  function render() {
+    var pts = []; for (var i = 0; i <= k; i++) pts.push([i, forecast(i)]);
+    var up = cfg.est / 8, yMax = Math.max(plan.finish, up, 12) * 1.3;
+    Kit.lineChart(document.getElementById("chart"), { xMax: plan.finish, yMax: yMax, xLabel: "iterations completed", yLabel: "forecast finish (iteration)", xTicks: Math.min(plan.finish, 10),
+      series: [{ label: "iterated forecast", cls: "s1", points: pts, dots: true }, { label: "up-front estimate", cls: "s2", points: [[0, up], [plan.finish, up]] }, { label: "actual finish", cls: "s3", points: [[0, plan.finish], [plan.finish, plan.finish]] }] });
+    var f = forecast(k), err = Math.abs(f - plan.finish) / plan.finish, v = document.getElementById("verdict");
+    v.className = "callout " + (err < 0.1 ? "ok" : err < 0.3 ? "warn" : "bad");
+    v.textContent = k === 0 ? "Before any work, the only forecast is the up-front guess: " + up.toFixed(1) + " iterations, against a real finish of " + plan.finish + "." :
+      "After " + k + " iteration(s) the forecast is " + f.toFixed(1) + " (off by " + Kit.pct(err, 0) + "); the up-front guess is off by " + Kit.pct(Math.abs(up - plan.finish) / plan.finish, 0) + ".";
+    var it = k ? plan.its[k - 1] : { done: 0, scope: 60 };
+    stats([["Iteration", k + " / " + plan.finish], ["Points done / scope", it.done + " / " + it.scope], ["Measured pace", k ? (it.done / k).toFixed(1) : "—"], ["Forecast error", Kit.pct(err, 0), err < 0.1 ? "ok" : "bad"]]);
+  }
+  function reset() { plan = build(); k = 0; log.clear(); log.add("New project: 60 points known up front. Up-front estimate: " + cfg.est + " points at 8 per iteration.", "muted"); render(); }
+  document.getElementById("est").appendChild(Kit.slider({ label: "Up-front size estimate", min: 20, max: 100, step: 5, value: cfg.est, unit: " points", onInput: function (v) { cfg.est = v; render(); } }).element);
+  document.getElementById("grow").appendChild(Kit.slider({ label: "Scope found per iteration (max)", min: 0, max: 6, step: 1, value: cfg.grow, unit: " pts", onInput: function (v) { cfg.grow = v; reset(); } }).element);
+  document.getElementById("seed").appendChild(Kit.slider({ label: "Random seed", min: 1, max: 20, step: 1, value: cfg.seed, onInput: function (v) { cfg.seed = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("play"), interval: 600,
+    step: function () { if (k >= plan.finish) { log.add("Project finished after " + plan.finish + " iterations.", "ok"); return false; } k++; var it = plan.its[k - 1]; log.add("Iteration " + k + ": " + it.v + " points done; scope now " + it.scope + "; forecast " + forecast(k).toFixed(1), "muted"); render(); },
+    reset: reset });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does the book say is often the only way to determine a project's timetable?",
+      options: ["A PERT chart", "Gaining experience on that same project", "Asking the sponsor"], answer: 1,
+      explain: "pp. 139–140." },
+    { q: "What should you say when asked for an estimate at the coffee machine?",
+      options: ["A number with a range", "“I'll get back to you.”", "Double your first guess"], answer: 1,
+      explain: "p. 141." },
+    { q: "What does PERT give each task?",
+      options: ["One most-likely estimate", "Optimistic, most likely and pessimistic estimates", "A budget"], answer: 1,
+      explain: "p. 139." }
+  ]);
+})();
+</script>
+</body>
+</html>

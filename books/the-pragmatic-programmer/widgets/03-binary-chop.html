@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binary Chop</title>
+<meta name="description" content="Hunt a regression through a history of releases, or the record that crashes a program in a big dataset, stepping one at a time or chopping in half, and compare how many test runs each takes. Illustrates The Pragmatic Programmer, Topic 20.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .strip { display: grid; grid-template-columns: repeat(32, 1fr); gap: 2px; }
+  .it { height: 22px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); font-size: .6rem; display: grid; place-items: center; font-family: var(--mono); }
+  .it.good { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); } .it.bad { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+  .it.out { opacity: .35; } .it.probe { outline: 2px solid var(--accent); outline-offset: 1px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-the-basic-tools.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Binary chop</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · The Basic Tools</div>
+  <h1>Binary chop</h1>
+  <p class="lede">When a bug appears somewhere in a long history or a big dataset, don’t step through it one item at a time. <strong>Chop it in half</strong>, test, and keep the half that still shows the problem: with n items that takes about log₂ n tests instead of up to n.</p>
+  <p class="source-note">Illustrates “The Binary Chop” in Topic 20, Debugging (pp. 174–175): finding the first release with a regression, and finding the record that crashes a program. The history size, the hidden culprit (seeded) and the visual are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title" id="st">History</p><div class="strip" id="strip" role="img"></div>
+        <p class="field-hint" id="hint" style="margin-top:6px"></p>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div id="strat" style="margin-top:10px"></div><div id="nsl" style="margin-top:10px"></div><div id="play" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Stepping back one release at a time</strong> costs as many tests as there are releases since the bug, which can be all of them.</li>
+    <li><strong>Chopping</strong> needs about log₂ n tests: 7 for 128 releases, 10 for 1,024. Every test halves what’s left, whether the item is a release or a record.</li>
+    <li><strong>The invariant</strong> is what makes it work: the newest release (or the full dataset) is known bad and the oldest is known good, so the culprit is always between them.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-the-basic-tools.html"><small>Lesson</small>3. The Basic Tools</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { mode: "rel", strat: "chop", n: 128, seed: 0 }, s;
+  function reset() {
+    var r = Kit.rng(11 + cfg.seed++); s = { culprit: 1 + r.int(cfg.n - 1), lo: 0, hi: cfg.n - 1, tests: 0, known: {}, probe: null, done: false };
+    // rel mode: index 0 = oldest (good), n-1 = newest (bad); the bug is in releases >= culprit.
+    s.known[0] = "good"; s.known[cfg.n - 1] = "bad"; if (cfg.strat === "linear") s.next = cfg.n - 2;
+    log.clear(); log.add(cfg.mode === "rel" ? "Release " + cfg.n + " fails its test; release 1 passed. Some release in between broke it." : "The full " + cfg.n + "-record dataset crashes the program. One record is the trigger.", "muted");
+    render();
+  }
+  function step() {
+    if (s.done) return false;
+    var m, fails;
+    if (cfg.mode === "rel") {
+      if (cfg.strat === "chop") { m = Math.floor((s.lo + s.hi) / 2); fails = m >= s.culprit; s.tests++; s.known[m] = fails ? "bad" : "good"; if (fails) s.hi = m; else s.lo = m; }
+      else { m = s.next--; fails = m >= s.culprit; s.tests++; s.known[m] = fails ? "bad" : "good"; if (fails) s.hi = m; else s.lo = m; }
+      s.probe = m; log.add("Test release " + (m + 1) + ": " + (fails ? "fails ✗" : "passes ✓"), fails ? "bad" : "ok");
+      if (s.hi - s.lo === 1) { s.done = true; log.add("Found it in " + s.tests + " test runs: release " + (s.hi + 1) + " introduced the bug.", "ok"); }
+    } else {
+      // data mode: candidates are records lo..hi; run the program on the first half (chop) or on a single record (linear).
+      if (cfg.strat === "chop") { var a = s.lo; m = Math.floor((s.lo + s.hi) / 2); fails = s.culprit <= m; s.tests++; s.probe = m;
+        log.add("Run on records " + (a + 1) + "–" + (m + 1) + ": " + (fails ? "crashes ✗" : "runs fine ✓"), fails ? "bad" : "ok"); if (fails) s.hi = m; else s.lo = m + 1; }
+      else { m = s.lo; fails = m === s.culprit; s.tests++; s.probe = m; if (!fails) s.lo = m + 1; else s.hi = m; log.add("Run on record " + (m + 1) + " alone: " + (fails ? "crashes ✗" : "fine ✓"), fails ? "bad" : "ok"); }
+      if (s.lo >= s.hi) { s.done = true; s.hi = s.lo; log.add("Found it in " + s.tests + " runs: record " + (s.lo + 1) + " crashes the program.", "ok"); }
+    }
+    render(); if (s.done) return false;
+  }
+  function render() {
+    var st = Kit.clear(document.getElementById("strip")), n = cfg.n;
+    document.getElementById("strip").style.gridTemplateColumns = "repeat(" + Math.min(32, n) + ", 1fr)";
+    for (var i = 0; i < n; i++) {
+      var cls = "it", txt = "";
+      if (cfg.mode === "rel") { var k = s.known[i]; if (k) { cls += " " + k; txt = k === "bad" ? "✗" : "✓"; } if (i < s.lo || i > s.hi) cls += " out"; if (s.done && i === s.hi) { cls += " bad probe"; txt = "!"; } }
+      else { if (i < s.lo || i > s.hi) { cls += " good out"; txt = "✓"; } if (s.done && i === s.lo) { cls += " bad probe"; txt = "!"; } }
+      if (i === s.probe && !s.done) cls += " probe";
+      st.appendChild(Kit.el("div", { class: cls, title: (cfg.mode === "rel" ? "Release " : "Record ") + (i + 1) }, txt));
+    }
+    var left = s.hi - s.lo + (cfg.mode === "rel" ? -1 : 1);
+    document.getElementById("strip").setAttribute("aria-label", (cfg.mode === "rel" ? "Releases" : "Records") + ": " + Math.max(0, left) + " candidate(s) left");
+    document.getElementById("st").textContent = cfg.mode === "rel" ? n + " releases, oldest on the left" : "Dataset of " + n + " records";
+    document.getElementById("hint").textContent = cfg.mode === "rel" ? "✓ passes the test, ✗ fails it; faded releases are ruled out." : "Faded records are ruled out; the crash is in the bright range.";
+    var v = document.getElementById("verdict"), worst = cfg.strat === "chop" ? Math.ceil(Math.log2(n)) : (cfg.mode === "rel" ? n - 2 : n - 1);
+    v.className = "callout " + (s.done ? "ok" : "");
+    v.textContent = s.done ? "Done in " + s.tests + " test runs (worst case for this strategy: " + worst + "; chopping needs at most " + Math.ceil(Math.log2(n)) + ")." : Math.max(0, left) + " candidate(s) left after " + s.tests + " test run(s).";
+    stats([["Test runs", s.tests], ["Candidates left", Math.max(0, left)], ["log₂ n", Math.log2(n).toFixed(1)], ["Strategy worst case", worst, cfg.strat === "chop" ? "ok" : "bad"]]);
+  }
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "What to search", value: cfg.mode, options: [{ value: "rel", label: "Releases" }, { value: "data", label: "Dataset" }], onChange: function (v) { cfg.mode = v; reset(); } }).element);
+  document.getElementById("strat").appendChild(Kit.segmented({ label: "Strategy", value: cfg.strat, options: [{ value: "chop", label: "Chop in half" }, { value: "linear", label: "One at a time" }], onChange: function (v) { cfg.strat = v; reset(); } }).element);
+  document.getElementById("nsl").appendChild(Kit.slider({ label: "Items", min: 4, max: 10, step: 1, value: 7, format: function (v) { return String(Math.pow(2, v)); }, onInput: function (v) { cfg.n = Math.pow(2, v); reset(); } }).element);
+  Kit.player({ mount: document.getElementById("play"), interval: 450, step: step, reset: reset });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "About how many test runs does a binary chop need for 1,024 releases?",
+      options: ["About 10", "About 100", "About 512"], answer: 0,
+      explain: "Each test halves the candidates: log₂ 1024 = 10." },
+    { q: "What do you need before chopping through releases?",
+      options: ["A test that fails on the current release", "A debugger", "The source of every release"], answer: 0,
+      explain: "p. 175: with a test that fails now, try a release halfway back to the last good one." },
+    { q: "How does the book chop a big dataset that crashes a program?",
+      options: ["Run it on one record at a time", "Split the data in two and see which half still crashes", "Sort it first"], answer: 1,
+      explain: "p. 174." }
+  ]);
+})();
+</script>
+</body>
+</html>

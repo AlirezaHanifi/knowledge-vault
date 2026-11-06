@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hunt the Falsifying Example</title>
+<meta name="description" content="Run the book&#x27;s stock-level property against the buggy and the fixed Warehouse with random items and quantities, watch cases until one fails, and shrink it to the smallest counterexample. Illustrates The Pragmatic Programmer, Topic 42.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.cases td { font-family: var(--mono); font-size: .82rem; } pre.unit { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-while-you-are-coding.html">Chapter 7</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Hunt the falsifying example</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 7 · While You Are Coding</div>
+  <h1>Hunt the falsifying example</h1>
+  <p class="lede">The hand-written unit tests pass. The property says that <strong>stock can’t appear or disappear</strong>: what was taken plus what is left equals what was there. Generate random orders and check it, and the computer finds the assumption you and your code shared.</p>
+  <p class="source-note">Illustrates “Finding Bad Assumptions” in Topic 42, Property-Based Testing (pp. 378–383, Tip 71): the Warehouse with shoes 10, hats 2, umbrellas 0, the property, the strategies (item from shoes or hats, quantity 1–4) and the fix. The generator, the simple shrinker and the wider quantity option are the vault’s; the book uses Hypothesis. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Generated cases (newest first)</p><div class="table-wrap"><table class="cases" id="cases"></table></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Regression unit test for the failure</p><pre class="unit" id="unit">Find a failure first.</pre></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="ver"></div><div id="qmax" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small" id="one" type="button">Run 1 case</button><button class="btn small primary" id="hunt" type="button">Run until failure</button><button class="btn small" id="shrink" type="button">Shrink</button><button class="btn small" id="clr" type="button">Clear</button></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The unit tests all pass</strong>, because they only order one hat at a time. The property fails the first time a random order asks for more hats than are in stock.</li>
+    <li><strong>The bug isn’t where the property points.</strong> The test is about stock levels, but the fault is in in_stock, which only checks that there is at least one. That is the surprise the book describes.</li>
+    <li><strong>Shrinking</strong> tries simpler inputs (the first item, smaller quantities) until the failure is as small as it can be: hats, 3, the book’s falsifying example. Turn it into a unit test so it can’t come back.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-while-you-are-coding.html"><small>Lesson</small>7. While You Are Coding</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { ver: "buggy", qmax: 4 }, rng = Kit.rng(2), cases = [], fail = null;
+  function Warehouse() { this.stock = { shoes: 10, hats: 2, umbrellas: 0 }; }
+  Warehouse.prototype.in_stock = function (item, q) { return cfg.ver === "buggy" ? (item in this.stock) && this.stock[item] > 0 : (item in this.stock) && this.stock[item] >= q; };
+  Warehouse.prototype.take_from_stock = function (item, q) { if (q <= this.stock[item]) this.stock[item] -= q; else throw new Error("Oversold " + item); };
+  function order(wh, item, q) { if (wh.in_stock(item, q)) { wh.take_from_stock(item, q); return ["ok", item, q]; } return ["not available", item, q]; }
+  function prop(item, q) { var wh = new Warehouse(), init = wh.stock[item]; try { var r = order(wh, item, q); if (r[0] === "ok" && wh.stock[item] + q !== init) return "stock changed"; return null; } catch (e) { return "Exception: " + e.message; } }
+  function runOne(item, q, tag) { var res = prop(item, q); cases.unshift({ item: item, q: q, res: res, tag: tag || "" }); if (cases.length > 40) cases.pop(); return res; }
+  function gen() { return [rng.pick(["shoes", "hats"]), 1 + rng.int(cfg.qmax)]; }
+  function render() {
+    var t = Kit.clear(document.getElementById("cases")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "item"), Kit.el("th", null, "quantity"), Kit.el("th", null, "result"))));
+    var tb = Kit.el("tbody"); cases.slice(0, 14).forEach(function (c) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, c.item), Kit.el("td", null, String(c.q)), Kit.el("td", null, Kit.el("span", { class: "badge " + (c.res ? "bad" : "ok") }, c.res ? "✗ " + c.res : "✓ holds"), c.tag ? " " + c.tag : ""))); }); t.appendChild(tb);
+    var v = document.getElementById("verdict"); v.className = "callout " + (fail ? "bad" : cases.length ? "ok" : "");
+    v.textContent = fail ? "Falsifying example: item=" + JSON.stringify(fail.item) + ", quantity=" + fail.q + (fail.min ? " (shrunk to the minimum)" : " (try Shrink)") + ". " + fail.res + "." : cases.length ? "The property held for all " + cases.length + " case(s) shown so far." : "No cases run yet.";
+    document.getElementById("unit").textContent = fail ? "def test_order_more_than_in_stock():\n    wh = Warehouse({\"shoes\": 10, \"hats\": 2, \"umbrellas\": 0})\n    status, item, quantity = order(wh, " + JSON.stringify(fail.item) + ", " + fail.q + ")\n    assert status == \"not available\"\n    assert wh.stock_count(" + JSON.stringify(fail.item) + ") == " + ({ shoes: 10, hats: 2 })[fail.item] : "Find a failure first.";
+    stats([["Cases run", cases.length], ["Failures", cases.filter(function (c) { return c.res; }).length, fail ? "bad" : ""], ["Version", cfg.ver === "buggy" ? "in_stock(item)" : "in_stock(item, qty)"]]);
+  }
+  document.getElementById("ver").appendChild(Kit.segmented({ label: "Warehouse", value: cfg.ver, options: [{ value: "buggy", label: "Buggy (stock.py)" }, { value: "fixed", label: "Fixed (stock1.py)" }], onChange: function (v) { cfg.ver = v; cases = []; fail = null; log.add("Switched to the " + v + " warehouse", "muted"); render(); } }).element);
+  document.getElementById("qmax").appendChild(Kit.slider({ label: "Largest quantity generated", min: 4, max: 20, step: 1, value: 4, hint: "The book’s strategy uses 1–4.", onInput: function (v) { cfg.qmax = v; } }).element);
+  document.getElementById("one").addEventListener("click", function () { var g = gen(), r = runOne(g[0], g[1]); if (r && !fail) fail = { item: g[0], q: g[1], res: r }; log.add(g[0] + " × " + g[1] + ": " + (r || "holds"), r ? "bad" : "ok"); render(); });
+  document.getElementById("hunt").addEventListener("click", function () { for (var i = 0; i < 100; i++) { var g = gen(), r = runOne(g[0], g[1]); if (r) { fail = { item: g[0], q: g[1], res: r }; log.add("Failed after " + (i + 1) + " case(s): " + g[0] + " × " + g[1], "bad"); render(); return; } }
+    log.add("100 cases, no failure.", "ok"); render(); });
+  document.getElementById("shrink").addEventListener("click", function () {
+    if (!fail) { log.add("Nothing to shrink yet.", "warn"); return; }
+    var cur = { item: fail.item, q: fail.q, res: fail.res }, improved = true;
+    while (improved) { improved = false;
+      var tries = []; if (cur.item !== "shoes") tries.push(["shoes", cur.q]); for (var q = 1; q < cur.q; q++) tries.push([cur.item, q]);
+      for (var k = 0; k < tries.length; k++) { var r = runOne(tries[k][0], tries[k][1], "(shrink)"); if (r) { cur = { item: tries[k][0], q: tries[k][1], res: r }; improved = true; break; } } }
+    fail = { item: cur.item, q: cur.q, res: cur.res, min: true }; log.add("Shrunk to " + cur.item + " × " + cur.q, "ok"); render(); });
+  document.getElementById("clr").addEventListener("click", function () { cases = []; fail = null; log.clear(); render(); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What falsifying example did Hypothesis report in the book?",
+      options: ["item='shoes', quantity=11", "item='hats', quantity=3", "item='umbrellas', quantity=1"], answer: 1,
+      explain: "p. 381." },
+    { q: "Where was the bug the property found?",
+      options: ["In the stock-level arithmetic", "In in_stock, which only checked for at least one item", "In the test"], answer: 1,
+      explain: "pp. 381–382." },
+    { q: "What should you do with a failing property test's parameters?",
+      options: ["Nothing: the tool remembers them", "Write a regular unit test with them, to focus on the bug and prevent regressions", "Increase the number of examples"], answer: 1,
+      explain: "p. 383." }
+  ]);
+})();
+</script>
+</body>
+</html>
