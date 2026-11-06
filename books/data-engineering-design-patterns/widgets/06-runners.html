@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Single vs Concurrent Runner</title>
+<meta name="description" content="Schedule hourly runs, stretch their duration past the hour, and compare how delays accumulate when only one run may execute at a time and when several may run concurrently. Illustrates Data Engineering Design Patterns, Chapter 6.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  svg.g { width: 100%; height: auto; display: block; }
+  svg.g .run { fill: var(--accent-soft); stroke: var(--accent); }
+  svg.g .run.late { fill: var(--warn-soft); stroke: var(--warn); }
+  svg.g .wait { stroke: var(--bad); stroke-dasharray: 3 3; stroke-width: 1.5; }
+  svg.g .sched { stroke: var(--ink-3); }
+  svg.g .tick { fill: var(--ink-3); font-size: 10px; }
+  svg.g .lbl { fill: var(--ink); font-size: 10px; font-family: var(--mono); }
+  svg.g .axis { stroke: var(--line-strong); }
+  svg.g .now { stroke: var(--ink-2); stroke-width: 1.5; }
+  .charts { margin-top: 10px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/06-data-flow-design-patterns.html">Chapter 6</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Runners</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 6 · Data Flow Design Patterns</div>
+  <h1>Single vs concurrent runner</h1>
+  <p class="lede">An hourly pipeline is fine while each run takes less than an hour. When runs take longer, a <strong>Single Runner</strong> queues them, and every delivery is later than the one before it. A <strong>Concurrent Runner</strong> starts the next run while earlier ones are still going. That only works when runs don't depend on each other.</p>
+  <p class="source-note">Illustrates “Pattern: Single Runner” and “Pattern: Concurrent Runner” (pp. 191–195). The book's example is an hourly flow whose 30-minute runs grow to 1.5 hours, which makes delays accumulate (p. 192). Here every run has the same duration, and a run starts as soon as a slot is free. Shared state between concurrent runs (p. 194) isn't simulated. Implementation is the vault's own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel">
+        <svg class="g" id="g" role="img" aria-label="Timeline of scheduled and executed runs"></svg>
+        <div class="charts"><svg id="c" role="img" aria-label="Delay of each run's delivery"></svg></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Controls</p>
+        <div id="sliders"></div>
+        <div id="player" style="margin-top:12px"></div>
+      </div>
+      <div class="panel"><p class="panel-title">After <span id="hrs">0</span> scheduled runs</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Stretch the runs to 90 minutes with concurrency 1.</strong> Each delivery is 30 minutes later than the previous one. After 12 runs, the last is 5.5 hours late.</li>
+    <li><strong>Raise the concurrency to 2.</strong> The delay disappears, because two 90-minute runs fit into two hourly slots.</li>
+    <li><strong>Concurrency isn't free.</strong> It's only safe if runs are independent. Incremental logic such as the Incremental Sessionizer needs one run at a time, and backfills can then only be sequential (p. 192).</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/06-data-flow-design-patterns.html"><small>Lesson</small>6. Data Flow Design Patterns</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var N = 12, log = Kit.log(document.getElementById("log"));
+  var cfg = { dur: 90, conc: 1 }, s;
+
+  function plan() {
+    var free = [], runs = [];
+    for (var c = 0; c < cfg.conc; c++) free.push(0);
+    for (var i = 0; i < N; i++) {
+      var sched = 60 * i, lane = 0;
+      for (var l = 1; l < free.length; l++) if (free[l] < free[lane]) lane = l;
+      var start = Math.max(sched, free[lane]), end = start + cfg.dur;
+      free[lane] = end;
+      runs.push({ i: i, sched: sched, start: start, end: end, lane: lane, delay: start - sched });
+    }
+    return runs;
+  }
+  function hhmm(m) { var h = Math.floor(m / 60), mm = m % 60; return (h < 10 ? "0" : "") + h + ":" + (mm < 10 ? "0" : "") + mm; }
+
+  function reset() {
+    s = { runs: plan(), shown: 0 };
+    log.clear(); log.add("Hourly schedule, runs take " + cfg.dur + " min, at most " + cfg.conc + " at a time.", "muted");
+    render();
+  }
+  function step() {
+    if (s.shown >= N) return false;
+    var x = s.runs[s.shown++];
+    log.add("Run " + hhmm(x.sched) + ": starts " + hhmm(x.start) + ", delivers " + hhmm(x.end) + (x.delay ? " (" + x.delay + " min late)" : " (on time)"), x.delay ? (x.delay >= 120 ? "bad" : "warn") : "ok");
+    render();
+    return s.shown < N;
+  }
+
+  function render() {
+    var root = Kit.clear(document.getElementById("g"));
+    var tMax = Math.max(60 * N, s.runs[N - 1].end) + 30, lanes = cfg.conc, W = 640, L = 46, R = 12, T = 22, LH = 26, H = T + lanes * LH + 30;
+    function X(t) { return L + t / tMax * (W - L - R); }
+    root.setAttribute("viewBox", "0 0 " + W + " " + H);
+    for (var h = 0; h <= tMax; h += 120) {
+      root.appendChild(Kit.svg("line", { class: "axis", x1: X(h), x2: X(h), y1: T - 4, y2: T + lanes * LH }));
+      root.appendChild(Kit.svg("text", { class: "tick", x: X(h), y: T + lanes * LH + 14, "text-anchor": "middle" }, hhmm(h)));
+    }
+    for (var l = 0; l < lanes; l++) root.appendChild(Kit.svg("text", { class: "tick", x: 4, y: T + l * LH + 16 }, "slot " + (l + 1)));
+    for (var i = 0; i < N; i++) root.appendChild(Kit.svg("line", { class: "sched", x1: X(60 * i), x2: X(60 * i), y1: 6, y2: 14 }));
+    root.appendChild(Kit.svg("text", { class: "tick", x: X(0) + 2, y: 12 }, "▾ schedule"));
+    s.runs.slice(0, s.shown).forEach(function (x) {
+      var y = T + x.lane * LH + 3;
+      if (x.delay) root.appendChild(Kit.svg("line", { class: "wait", x1: X(x.sched), x2: X(x.start), y1: y + 10, y2: y + 10 }));
+      root.appendChild(Kit.svg("rect", { class: "run" + (x.delay ? " late" : ""), x: X(x.start), y: y, width: X(x.end) - X(x.start), height: 20, rx: 3 }));
+      root.appendChild(Kit.svg("text", { class: "lbl", x: X(x.start) + 3, y: y + 14 }, hhmm(x.sched)));
+    });
+    Kit.lineChart(document.getElementById("c"), { width: 640, height: 170, xMax: N - 1, yMax: Math.max(60, Math.ceil(s.runs[N - 1].delay / 60) * 60), xLabel: "run (hour of schedule)", yLabel: "delay (min)", xTicks: N - 1,
+      xFormat: function (v) { return hhmm(60 * Math.round(v)); },
+      series: [{ points: s.runs.slice(0, s.shown).map(function (x) { return [x.i, x.delay]; }), cls: s.runs[N - 1].delay ? "bad" : "ok", dots: true, label: "delivery delay" }] });
+    document.getElementById("hrs").textContent = s.shown;
+    var last = s.shown ? s.runs[s.shown - 1] : null;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["Last run delay", last ? last.delay + " min" : "–", last && last.delay ? "bad" : "ok"], ["Running in parallel (max)", cfg.conc === 1 ? 1 : Math.min(cfg.conc, Math.ceil(cfg.dur / 60)), ""],
+     ["Delay growth per run", cfg.conc * 60 >= cfg.dur ? "0 min" : (cfg.dur - cfg.conc * 60) / cfg.conc + " min", cfg.conc * 60 >= cfg.dur ? "ok" : "warn"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    });
+  }
+
+  var sl = document.getElementById("sliders");
+  sl.appendChild(Kit.slider({ label: "Run duration", min: 30, max: 180, step: 15, value: cfg.dur, unit: " min", hint: "The book's example: 30 min growing to 1.5 h", onInput: function (v) { cfg.dur = v; reset(); } }).element);
+  sl.appendChild(Kit.slider({ label: "Max concurrent runs", min: 1, max: 5, value: cfg.conc, hint: "Airflow max_active_runs; 1 = Single Runner", onInput: function (v) { cfg.conc = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 600 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "An hourly Single Runner pipeline's runs grow from 30 minutes to 1.5 hours. What happens to deliveries?",
+      options: ["One late run, then back on schedule", "Each delivery is 30 minutes later than the previous one", "Runs are skipped automatically"], answer: 1,
+      explain: "Delays accumulate for you and all consumers (p. 192)." },
+    { q: "Why can't an incremental sessionizer just switch to a Concurrent Runner?",
+      options: ["Orchestrators don't support it", "Each run depends on the previous run's results", "It would use too much memory"], answer: 1,
+      explain: "Incremental logic is sequential, so it needs one run at a time (pp. 191–192)." },
+    { q: "Which Airflow settings implement a Single Runner in the book's example?",
+      options: ["max_active_runs=1 with depends_on_past=True", "max_active_runs=5 with depends_on_past=False", "catchup=False"], answer: 0,
+      explain: "pp. 192–193." }
+  ]);
+})();
+</script>
+</body>
+</html>

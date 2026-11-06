@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Small Files and Compaction</title>
+<meta name="description" content="Stream 10-minute micro-batches into a table for 90 days, watch the daily batch job's file overhead grow, and compare compaction schedules and vacuum retention. Illustrates Data Engineering Design Patterns, Chapter 2.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .charts { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .charts h3 { font-size: .8rem; margin: 0 0 4px; color: var(--ink-2); }
+  .bar { height: 18px; display: flex; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--line); margin-top: 6px; }
+  .bar span { display: block; height: 100%; }
+  .bar .l { background: var(--bad); } .bar .p { background: var(--ok); }
+  .barlab { display: flex; justify-content: space-between; font-size: .74rem; color: var(--ink-2); margin-top: 3px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-data-ingestion-design-patterns.html">Chapter 2</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Compactor</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 2 · Data Ingestion Design Patterns</div>
+  <h1>Small files and compaction</h1>
+  <p class="lede">A streaming job that writes every few minutes creates a new small file each time. Every reader then pays a fixed cost per file, for listing and opening it, on top of the cost of reading the data. Compaction merges small files into big ones. It costs compute itself, and the replaced files stay on storage until a vacuum removes them.</p>
+  <p class="source-note">Illustrates “Pattern: Compactor” (pp. 27–30). The book's scenario is a sync job writing to an object store, with batch jobs spending <strong>70%</strong> of their time listing files after three months. The cost model here is the vault's and only illustrative: one 2 MB file per 10-minute micro-batch (144 per day), 50 ms of overhead per file, 10 ms per MB processed and 128 MB compacted files. With these numbers, an uncompacted table spends about 70% of its time on files. A daily batch job reads the whole table. Vacuum removes replaced files older than the retention period. Implementation is the vault's own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel">
+        <div class="charts">
+          <div><h3>Daily batch job duration (minutes)</h3><svg id="c1" role="img" aria-label="Batch job duration over days"></svg></div>
+          <div><h3>Files on storage (thousands)</h3><svg id="c2" role="img" aria-label="Files on storage over days"></svg></div>
+        </div>
+        <div id="share"></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Controls</p>
+        <div id="sched"></div>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="vac" checked> Vacuum after compaction</label>
+        <div id="sliders" style="margin-top:10px"></div>
+        <div id="player" style="margin-top:12px"></div>
+      </div>
+      <div class="panel"><p class="panel-title">Day <span id="day">0</span></p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Without compaction, file overhead dominates.</strong> The red share of the batch job stays around 70%, and the job keeps getting slower as files pile up.</li>
+    <li><strong>Rare compaction is cheap but leaves gaps.</strong> With weekly compaction, readers face up to a week of small files between runs. Daily compaction keeps that to the current day.</li>
+    <li><strong>Compaction alone doesn't free storage.</strong> Turn off vacuum and the replaced files stay. With vacuum on, you can no longer restore versions older than the retention period.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-data-ingestion-design-patterns.html"><small>Lesson</small>2. Data Ingestion Design Patterns</a></li>
+    <li><a href="02-incremental-loader.html"><small>Simulation</small>Incremental loading and backfills</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var DAYS = 90, PER_DAY = 144, MB = 2, FILE_MS = 50, MB_MS = 10, BIG = 128;
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { sched: 1, vac: true, ret: 7 }, s;
+
+  function reset() {
+    s = { d: 0, small: 0, big: 0, bigMb: 0, smallMb: 0, dead: [], compMs: 0, dur: [], durNone: [], files: [], noneFiles: 0, oldestRestore: 0 };
+    log.clear(); log.add(cfg.sched ? "Compaction every " + cfg.sched + " day(s), vacuum " + (cfg.vac ? "on, retention " + cfg.ret + " days" : "off") + "." : "No compaction.", "muted");
+    render();
+  }
+  function jobMs(files, mb) { return files * FILE_MS + mb * MB_MS; }
+
+  function step() {
+    if (s.d >= DAYS) return false;
+    s.d++;
+    s.small += PER_DAY; s.smallMb += PER_DAY * MB; s.noneFiles += PER_DAY;
+    if (cfg.sched && s.d % cfg.sched === 0) {
+      var n = Math.ceil(s.smallMb / BIG);
+      s.compMs += jobMs(s.small, s.smallMb) + s.smallMb * MB_MS;
+      s.dead.push({ day: s.d, files: s.small });
+      if (s.d === cfg.sched) log.add("Day " + s.d + ": compaction merges " + s.small + " small files into " + n + " files of up to " + BIG + " MB", "ok");
+      s.big += n; s.bigMb += s.smallMb; s.small = 0; s.smallMb = 0;
+    }
+    if (cfg.vac) {
+      var before = s.dead.length;
+      s.dead = s.dead.filter(function (x) { return s.d - x.day < cfg.ret; });
+      if (s.dead.length < before && s.d <= cfg.sched + cfg.ret) log.add("Day " + s.d + ": vacuum deletes replaced files older than " + cfg.ret + " days. Versions before day " + (s.d - cfg.ret) + " can't be restored any more", "warn");
+    }
+    var ms = jobMs(s.small + s.big, s.smallMb + s.bigMb);
+    s.dur.push([s.d, ms / 60000]);
+    s.durNone.push([s.d, jobMs(s.noneFiles, s.noneFiles * MB) / 60000]);
+    var deadFiles = s.dead.reduce(function (a, x) { return a + x.files; }, 0);
+    s.files.push([s.d, (s.small + s.big + deadFiles) / 1000]);
+    if (s.d === DAYS) log.add("Day 90: batch job takes " + (ms / 60000).toFixed(1) + " min (vs " + (jobMs(s.noneFiles, s.noneFiles * MB) / 60000).toFixed(1) + " min without compaction)", "ok");
+    render();
+    return s.d < DAYS;
+  }
+
+  function render() {
+    var none = jobMs(s.noneFiles, s.noneFiles * MB) / 60000;
+    Kit.lineChart(document.getElementById("c1"), { width: 340, height: 200, xMax: DAYS, yMax: 25, xLabel: "day", yTicks: 5,
+      series: [{ points: s.durNone, cls: "bad", label: "no compaction" }, { points: cfg.sched ? s.dur : [], cls: "ok", label: "with schedule" }] });
+    Kit.lineChart(document.getElementById("c2"), { width: 340, height: 200, xMax: DAYS, yMax: 14, xLabel: "day", yTicks: 7,
+      series: [{ points: s.files, cls: "s1", label: "files on storage" }] });
+    var live = s.small + s.big, mb = s.smallMb + s.bigMb, lms = live * FILE_MS, pms = mb * MB_MS, tot = lms + pms || 1;
+    var sh = Kit.clear(document.getElementById("share"));
+    sh.appendChild(Kit.el("div", { class: "bar", role: "img", "aria-label": "Share of batch time on files: " + Kit.pct(lms / tot, 0) },
+      Kit.el("span", { class: "l", style: "width:" + (lms / tot * 100) + "%" }), Kit.el("span", { class: "p", style: "width:" + (pms / tot * 100) + "%" })));
+    sh.appendChild(Kit.el("div", { class: "barlab" }, Kit.el("span", null, "listing/opening files: " + Kit.pct(lms / tot, 0)), Kit.el("span", null, "processing data: " + Kit.pct(pms / tot, 0))));
+    document.getElementById("day").textContent = s.d;
+    var dead = s.dead.reduce(function (a, x) { return a + x.files; }, 0);
+    var st = Kit.clear(document.getElementById("stats"));
+    [["Live files", live.toLocaleString(), ""], ["Replaced, not vacuumed", dead.toLocaleString(), dead ? "warn" : ""],
+     ["Batch job", (tot / 60000).toFixed(1) + " min", ""], ["Compaction compute", (s.compMs / 60000).toFixed(0) + " min", ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    });
+  }
+
+  document.getElementById("sched").appendChild(Kit.segmented({ label: "Compaction schedule", value: cfg.sched,
+    options: [{ value: 0, label: "None" }, { value: 1, label: "Daily" }, { value: 7, label: "Weekly" }],
+    onChange: function (v) { cfg.sched = v; reset(); } }).element);
+  document.getElementById("vac").addEventListener("change", function (e) { cfg.vac = e.target.checked; reset(); });
+  document.getElementById("sliders").appendChild(Kit.slider({ label: "Vacuum retention", min: 1, max: 30, value: cfg.ret, unit: " days", onInput: function (v) { cfg.ret = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 120 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why do many small files slow down readers even when the total data size is the same?",
+      options: ["Small files compress worse", "Every file adds a fixed cost to list and open it", "Readers can't read small files in parallel"], answer: 1,
+      explain: "In the book's scenario, batch jobs spend 70% of their time listing files (p. 27)." },
+    { q: "You compact the table but storage usage doesn't drop. Why?",
+      options: ["Compaction failed", "The replaced files remain until a vacuum removes them", "Compaction duplicates data on purpose"], answer: 1,
+      explain: "Vacuum reclaims them, but versions built on deleted files can no longer be restored (pp. 28–29)." },
+    { q: "Why is Kafka log compaction different from Delta Lake's OPTIMIZE?",
+      options: ["It keeps only the latest record per key, so it overwrites data", "It only runs on new segments", "It doesn't exist"], answer: 0,
+      explain: "It also runs nondeterministically, so you can't count on one record per key (pp. 28–30)." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watermarks and Late Data</title>
+<meta name="description" content="Replay the book's Table 3-1 and Table 3-2 event streams, change the allowed lateness and the window size, and see which events are ignored and when windows are emitted. Illustrates Data Engineering Design Patterns, Chapter 3.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  svg.tl { width: 100%; height: auto; display: block; }
+  svg.tl .axis { stroke: var(--line-strong); }
+  svg.tl .tick { fill: var(--ink-3); font-size: 10px; }
+  svg.tl .win { fill: var(--surface-2); stroke: var(--line-strong); }
+  svg.tl .win.buf { fill: var(--accent-soft); stroke: var(--accent); }
+  svg.tl .win.out { fill: var(--ok-soft); stroke: var(--ok); }
+  svg.tl .wlabel { fill: var(--ink-2); font-size: 10px; }
+  svg.tl .ev { fill: var(--accent); }
+  svg.tl .ev.late { fill: var(--bad); }
+  svg.tl .ev.next { fill: none; stroke: var(--ink-3); stroke-dasharray: 2 2; }
+  svg.tl .evl { fill: var(--ink); font-size: 10px; }
+  svg.tl .wm { stroke: var(--warn); stroke-width: 2; }
+  svg.tl .wmt { fill: var(--warn); font-size: 11px; font-weight: 600; }
+  .tbl { max-height: 220px; overflow-y: auto; margin-top: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  table.data td { font-family: var(--mono); font-size: .74rem; vertical-align: top; }
+  table.data tr.cur td { background: var(--accent-soft); }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .78rem; color: var(--ink-2); margin-top: 6px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-error-management-design-patterns.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Watermarks</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · Error Management Design Patterns</div>
+  <h1>Watermarks and late data</h1>
+  <p class="lede">A streaming job can't wait forever for stragglers. It tracks the maximum event time it has seen and subtracts an allowed lateness to get the <strong>watermark</strong>. Events older than the watermark are late and are ignored, and a window is emitted once the watermark passes its end. The watermark never moves back.</p>
+  <p class="source-note">Illustrates “Pattern: Late Data Detector” (pp. 51–57). It replays Table 3-1 (two micro-batches, 30-minute lateness, p. 54) and Table 3-2 (five events of 2023-06-30, 1-hour lateness, 10-minute windows, p. 56). Each step processes one micro-batch: events are checked against the watermark from <em>before</em> the batch, and the watermark is then updated. Windows on the Table 3-1 stream are the vault's addition. Like the book's table, it ignores Spark's rounding of the watermark to window bounds. Implementation is the vault's own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel">
+        <svg class="tl" id="tl" role="img" aria-label="Event-time timeline with events, windows and the watermark"></svg>
+        <div class="legend"><span>● on-time event</span><span style="color:var(--bad)">✕ late, ignored</span><span style="color:var(--accent)">▭ … buffered window</span><span style="color:var(--ok)">▭ ✓ emitted window</span><span style="color:var(--warn)">│ watermark</span></div>
+        <div class="tbl"><table class="data"><thead><tr><th>Batch</th><th>Event times</th><th>Watermark in → out</th><th>Ignored</th><th>Emitted windows</th></tr></thead><tbody id="rows"></tbody></table></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Controls</p>
+        <div id="scen"></div>
+        <div id="sliders" style="margin-top:10px"></div>
+        <div id="player" style="margin-top:12px"></div>
+      </div>
+      <div class="panel"><p class="panel-title">State</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Lateness is relative to the watermark, not the clock.</strong> In Table 3-1, 9:20 and 9:31 are dropped because the first batch already pushed the watermark to 9:36.</li>
+    <li><strong>The watermark only moves forward.</strong> A batch whose MAX event time is low produces a smaller candidate, which is discarded (p. 54).</li>
+    <li><strong>Windows wait for the watermark.</strong> In Table 3-2 nothing is emitted until 04:31 moves the watermark to 03:31. Then both 03:00 windows close at once.</li>
+    <li><strong>Raise the allowed lateness to 2 hours.</strong> 01:50 is now accepted, but every window is held in state longer.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-error-management-design-patterns.html"><small>Lesson</small>3. Error Management Design Patterns</a></li>
+    <li><a href="../lab/03-dedup-window/README.md"><small>Experiment</small>Deduplication window vs missed duplicates</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var log = Kit.log(document.getElementById("log"));
+  function hm(h, m) { return h * 60 + m; }
+  function fmt(t) { if (t === null) return "–"; var h = Math.floor(t / 60), m = t % 60; return h + ":" + (m < 10 ? "0" : "") + m; }
+  var SCEN = {
+    t31: { label: "Table 3-1", lateness: 30, win: 10, batches: [[hm(10, 0), hm(10, 5), hm(10, 6)], [hm(9, 20), hm(9, 31), hm(10, 7)]], lo: hm(9, 10), hi: hm(10, 20),
+      intro: "Table 3-1: allowed lateness 30 min. Two micro-batches." },
+    t32: { label: "Table 3-2", lateness: 60, win: 10, batches: [[hm(3, 15)], [hm(3, 0)], [hm(1, 50)], [hm(3, 11)], [hm(4, 31)]], lo: hm(1, 40), hi: hm(4, 50),
+      intro: "Table 3-2: allowed lateness 1 hour, 10-minute windows, one event per batch." }
+  };
+  var cfg = { scen: "t32", lateness: 60, win: 10 }, s;
+
+  function reset() {
+    var sc = SCEN[cfg.scen];
+    s = { i: 0, wm: null, maxEv: null, events: [], windows: {}, rows: [], ignored: 0 };
+    log.clear(); log.add(sc.intro + " Lateness now " + cfg.lateness + " min, windows " + cfg.win + " min.", "muted");
+    render();
+  }
+  function winStart(t) { return Math.floor(t / cfg.win) * cfg.win; }
+
+  function step() {
+    var sc = SCEN[cfg.scen];
+    if (s.i >= sc.batches.length) { log.add("End of stream.", "muted"); return false; }
+    var batch = sc.batches[s.i], wmIn = s.wm, ignored = [], accepted = [];
+    batch.forEach(function (t) {
+      if (wmIn !== null && t < wmIn) { ignored.push(t); s.events.push({ t: t, late: true }); }
+      else {
+        accepted.push(t); s.events.push({ t: t, late: false });
+        var ws = winStart(t);
+        if (!s.windows[ws]) s.windows[ws] = { start: ws, state: "buf", n: 0 };
+        s.windows[ws].n++;
+      }
+    });
+    var cand = accepted.length ? Math.max.apply(null, accepted) - cfg.lateness : null;
+    var wmOut = wmIn === null ? cand : (cand === null ? wmIn : Math.max(wmIn, cand));
+    s.wm = wmOut;
+    var emitted = [];
+    Object.keys(s.windows).forEach(function (k) {
+      var w = s.windows[k];
+      if (w.state === "buf" && s.wm !== null && w.start + cfg.win <= s.wm) { w.state = "out"; emitted.push(w); }
+    });
+    s.ignored += ignored.length;
+    s.rows.push({ n: s.i + 1, ev: batch.map(fmt).join(", "), wm: (wmIn === null ? "–" : fmt(wmIn)) + " → " + fmt(wmOut) + (cand !== null && wmIn !== null && cand < wmIn ? " (candidate " + fmt(cand) + " discarded)" : ""),
+      ign: ignored.length ? ignored.map(fmt).join(", ") : "–", out: emitted.length ? emitted.map(function (w) { return fmt(w.start) + "–" + fmt(w.start + cfg.win); }).join(", ") : "–" });
+    log.add("Batch " + (s.i + 1) + " [" + batch.map(fmt).join(", ") + "]: watermark " + (wmIn === null ? "unset" : fmt(wmIn)) + " → " + fmt(wmOut), "");
+    ignored.forEach(function (t) { log.add("  " + fmt(t) + " is before the watermark " + fmt(wmIn) + " → ignored", "bad"); });
+    emitted.forEach(function (w) { log.add("  window " + fmt(w.start) + "–" + fmt(w.start + cfg.win) + " closed and emitted (" + w.n + " events)", "ok"); });
+    s.i++;
+    render();
+    return s.i < sc.batches.length;
+  }
+
+  function render() {
+    var sc = SCEN[cfg.scen], root = Kit.clear(document.getElementById("tl"));
+    var W = 640, H = 210, L = 20, R = 20, lo = sc.lo, hi = sc.hi;
+    function X(t) { return L + (t - lo) / (hi - lo) * (W - L - R); }
+    root.setAttribute("viewBox", "0 0 " + W + " " + H);
+    Object.keys(s.windows).forEach(function (k) {
+      var w = s.windows[k];
+      root.appendChild(Kit.svg("rect", { class: "win " + w.state, x: X(w.start), y: 40, width: X(w.start + cfg.win) - X(w.start), height: 90, rx: 3 }));
+      root.appendChild(Kit.svg("text", { class: "wlabel", x: (X(w.start) + X(w.start + cfg.win)) / 2, y: 52, "text-anchor": "middle" }, w.state === "out" ? "✓" : "…"));
+    });
+    root.appendChild(Kit.svg("line", { class: "axis", x1: L, x2: W - R, y1: 150, y2: 150 }));
+    var stepT = (hi - lo) > 120 ? 30 : 10;
+    for (var t = Math.ceil(lo / stepT) * stepT; t <= hi; t += stepT) {
+      root.appendChild(Kit.svg("line", { class: "axis", x1: X(t), x2: X(t), y1: 147, y2: 153 }));
+      root.appendChild(Kit.svg("text", { class: "tick", x: X(t), y: 168, "text-anchor": "middle" }, fmt(t)));
+    }
+    var rowY = {};
+    s.events.forEach(function (e, idx) {
+      var y = 115 - ((rowY[e.t] = (rowY[e.t] || 0) + 1) - 1) * 14;
+      if (e.late) {
+        root.appendChild(Kit.svg("path", { class: "wm", style: "stroke:var(--bad)", d: "M" + (X(e.t) - 5) + " " + (y - 5) + "L" + (X(e.t) + 5) + " " + (y + 5) + "M" + (X(e.t) + 5) + " " + (y - 5) + "L" + (X(e.t) - 5) + " " + (y + 5) }));
+      } else root.appendChild(Kit.svg("circle", { class: "ev", cx: X(e.t), cy: y, r: 5 }));
+      root.appendChild(Kit.svg("text", { class: "evl", x: X(e.t), y: idx % 2 ? y + 17 : y - 9, "text-anchor": "middle" }, fmt(e.t)));
+    });
+    if (s.i < sc.batches.length) sc.batches[s.i].forEach(function (t) {
+      root.appendChild(Kit.svg("circle", { class: "ev next", cx: X(t), cy: 190, r: 5 }));
+    });
+    if (s.i < sc.batches.length) root.appendChild(Kit.svg("text", { class: "tick", x: L, y: 194 }, "next batch ○"));
+    if (s.wm !== null) {
+      var wx = Math.max(L, Math.min(W - R, X(s.wm)));
+      root.appendChild(Kit.svg("line", { class: "wm", x1: wx, x2: wx, y1: 18, y2: 150 }));
+      root.appendChild(Kit.svg("text", { class: "wmt", x: wx + 4, y: 28 }, "watermark " + fmt(s.wm) + (X(s.wm) < L ? " (off left)" : "")));
+    }
+    var rows = Kit.clear(document.getElementById("rows"));
+    s.rows.forEach(function (r, i) {
+      rows.appendChild(Kit.el("tr", { class: i === s.rows.length - 1 ? "cur" : null }, Kit.el("td", null, String(r.n)), Kit.el("td", null, r.ev), Kit.el("td", null, r.wm), Kit.el("td", null, r.ign), Kit.el("td", null, r.out)));
+    });
+    var buf = 0, out = 0;
+    Object.keys(s.windows).forEach(function (k) { if (s.windows[k].state === "buf") buf++; else out++; });
+    var st = Kit.clear(document.getElementById("stats"));
+    [["Watermark", fmt(s.wm), "warn"], ["Ignored events", s.ignored, s.ignored ? "bad" : ""], ["Buffered windows", buf, ""], ["Emitted windows", out, "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    });
+  }
+
+  var lat = Kit.slider({ label: "Allowed lateness", min: 0, max: 150, step: 5, value: cfg.lateness, unit: " min", onInput: function (v) { cfg.lateness = v; reset(); } });
+  var win = Kit.slider({ label: "Window size", min: 5, max: 30, step: 5, value: cfg.win, unit: " min", onInput: function (v) { cfg.win = v; reset(); } });
+  document.getElementById("scen").appendChild(Kit.segmented({ label: "Event stream", value: cfg.scen,
+    options: [{ value: "t31", label: "Table 3-1" }, { value: "t32", label: "Table 3-2" }],
+    onChange: function (v) { cfg.scen = v; cfg.lateness = SCEN[v].lateness; cfg.win = SCEN[v].win; lat.set(cfg.lateness); win.set(cfg.win); reset(); } }).element);
+  document.getElementById("sliders").appendChild(lat.element);
+  document.getElementById("sliders").appendChild(win.element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1200 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "The watermark is 9:36. A batch's MAX event time is 10:00 and the allowed lateness is 30 minutes. What's the new watermark?",
+      options: ["9:30", "9:36", "10:00"], answer: 1, explain: "The candidate 9:30 is lower than 9:36, and the watermark never moves back (p. 54)." },
+    { q: "Why do per-partition trackers use MAX event time rather than MIN?",
+      options: ["MAX is cheaper", "A MIN could get stuck in the past and never advance", "MIN would drop more events"], answer: 1, explain: "Progress must be monotonically increasing (pp. 51–54)." },
+    { q: "In Table 3-2, why is 01:50 ignored while 03:00, which also arrives after 03:15, is kept?",
+      options: ["03:00 is in the same window as 03:15", "01:50 is earlier than the 02:15 watermark; 03:00 isn't", "Spark only keeps the first event per window"], answer: 1, explain: "Lateness is measured against the watermark (03:15 − 1 h = 02:15) (p. 56)." }
+  ]);
+})();
+</script>
+</body>
+</html>

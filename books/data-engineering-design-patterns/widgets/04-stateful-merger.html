@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merger vs Stateful Merger</title>
+<meta name="description" content="Replay the book's A/B/C/M/N/O increments with a plain MERGE and with a state table that restores the right version before backfilling, and compare what consumers see during the replay. Illustrates Data Engineering Design Patterns, Chapter 4.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .cols { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .cols h3 { font-size: .8rem; margin: 0 0 6px; color: var(--ink-2); }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .rk { font-family: var(--mono); font-size: .8rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface-2); }
+  .rk.bad { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+  .rk.miss { border-style: dashed; color: var(--ink-3); background: transparent; }
+  table.data td { font-family: var(--mono); font-size: .76rem; vertical-align: top; }
+  table.data tr.cur td { background: var(--accent-soft); }
+  .tbl { max-height: 200px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .verdict { margin-top: 10px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-idempotency-design-patterns.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Stateful Merger</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Idempotency Design Patterns</div>
+  <h1>Merger vs Stateful Merger</h1>
+  <p class="lede">A <code>MERGE</code> upserts each increment into the latest table. That is idempotent for a single rerun. During a backfill, though, the replay starts from <em>today's</em> table, so consumers see rows that didn't exist yet at the replayed time. The Stateful Merger records which table version each run produced. Before a backfill it restores the version of the previous run.</p>
+  <p class="source-note">Illustrates “Pattern: Merger” and “Pattern: Stateful Merger” (pp. 89–100). The increments and expected outputs are those of Tables 4-1 and 4-2 (p. 92): A at 07:00; A–U and B at 08:00; B–D and C at 09:00; M, N and O at 10:00. U is an update and D a soft delete. The restore rule follows pp. 95–96: no previous version → truncate; previous version = latest → normal run; otherwise restore. As in Tables 4-4 and 4-5, only MERGE commits get version numbers, so restores aren't counted. Implementation is the vault's own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel">
+        <div class="cols">
+          <div><h3>Output table now</h3><div class="chips" id="now"></div></div>
+          <div><h3>Correct for this execution time</h3><div class="chips" id="truth"></div></div>
+        </div>
+        <div class="verdict" id="verdict"></div>
+        <h3 style="font-size:.8rem;margin:14px 0 6px;color:var(--ink-2)">Runs (what consumers saw after each)</h3>
+        <div class="tbl"><table class="data"><thead><tr><th>Run</th><th>New rows</th><th>Restore step</th><th>Output rows</th><th>Version</th></tr></thead><tbody id="runs"></tbody></table></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Controls</p>
+        <div id="mode"></div>
+        <div class="row" style="margin-top:10px">
+          <label for="from" class="sr-only">Backfill from</label>
+          <select id="from"><option value="0">Backfill from 07:00</option><option value="1" selected>Backfill from 08:00</option><option value="2">Backfill from 09:00</option><option value="3">Backfill from 10:00</option></select>
+          <button class="btn" type="button" id="bf">Queue backfill</button>
+        </div>
+        <div id="player" style="margin-top:12px"></div>
+        <p class="field-hint" id="queue" style="margin-top:8px"></p>
+      </div>
+      <div class="panel"><p class="panel-title">State table (execution → version)</p><div class="tbl" style="max-height:130px"><table class="data"><tbody id="state"></tbody></table></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Run the four hours, then backfill from 08:00 with the plain Merger.</strong> After the 08:00 rerun the table holds A–U, B, C, M, N and O, as in Table 4-2. C, M, N and O didn't exist at 08:00.</li>
+    <li><strong>Switch to the Stateful Merger and repeat.</strong> The 08:00 rerun finds version 1 for 07:00, which differs from the latest version, 4. It restores version 1 first, so consumers see exactly Table 4-1's rows.</li>
+    <li><strong>Backfill from 07:00.</strong> There is no earlier run, so the table is truncated before the merge (p. 96).</li>
+    <li><strong>The rest of the replay needs no restores.</strong> Each later run finds that its predecessor's new version is the latest one.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-idempotency-design-patterns.html"><small>Lesson</small>4. Idempotency Design Patterns</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var INC = [
+    { t: "07:00", ops: [["A", "A"]] },
+    { t: "08:00", ops: [["A", "A–U"], ["B", "B"]] },
+    { t: "09:00", ops: [["B", null], ["C", "C"]] },
+    { t: "10:00", ops: [["M", "M"], ["N", "N"], ["O", "O"]] }
+  ];
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { mode: "merger" }, s;
+
+  function apply(table, inc) { var t = Object.assign({}, table); inc.ops.forEach(function (o) { if (o[1] === null) delete t[o[0]]; else t[o[0]] = o[1]; }); return t; }
+  function truth(i) { var t = {}; for (var k = 0; k <= i; k++) t = apply(t, INC[k]); return t; }
+  function rows(t) { return Object.keys(t).sort().map(function (k) { return t[k]; }); }
+  function newRows(inc) { return inc.ops.map(function (o) { return o[1] === null ? o[0] + "–D" : o[1]; }).join(", "); }
+
+  function reset() {
+    s = { table: {}, versions: [{}], state: {}, queue: [0, 1, 2, 3], runs: [], last: null, phase: "normal" };
+    log.clear(); log.add((cfg.mode === "merger" ? "Merger" : "Stateful Merger") + ": four hourly runs are queued.", "muted");
+    render();
+  }
+
+  function step() {
+    if (!s.queue.length) { log.add("Queue empty. Queue a backfill to replay hours.", "muted"); return false; }
+    var i = s.queue.shift(), inc = INC[i], restore = "—", latest = s.versions.length - 1;
+    if (cfg.mode === "stateful") {
+      var prev = i === 0 ? undefined : s.state[INC[i - 1].t];
+      if (prev === undefined) { s.table = {}; restore = "no previous version → TRUNCATE"; log.add(inc.t + ": no version for the previous execution → truncate", "warn"); }
+      else if (prev === latest) { restore = "prev " + prev + " = latest " + latest + " → none"; }
+      else { s.table = Object.assign({}, s.versions[prev]); restore = "prev " + prev + " ≠ latest " + latest + " → RESTORE " + prev; log.add(inc.t + ": previous execution's version " + prev + " ≠ latest " + latest + " → restore to version " + prev, "warn"); }
+    }
+    s.table = apply(s.table, inc);
+    s.versions.push(Object.assign({}, s.table));
+    var v = s.versions.length - 1;
+    s.state[inc.t] = v;
+    var ok = rows(s.table).join() === rows(truth(i)).join();
+    s.runs.push({ t: inc.t, nr: newRows(inc), restore: restore, out: rows(s.table).join(", "), v: v, ok: ok, i: i });
+    s.last = i;
+    log.add(inc.t + ": MERGE " + newRows(inc) + " → version " + v + ". Consumers see " + rows(s.table).join(", ") + (ok ? "" : " — wrong for " + inc.t), ok ? "ok" : "bad");
+    render();
+    return s.queue.length > 0;
+  }
+
+  function render() {
+    function chips(mount, t, ref) {
+      var m = Kit.clear(document.getElementById(mount));
+      rows(t).forEach(function (rw) { var extra = ref && rows(ref).indexOf(rw) < 0; m.appendChild(Kit.el("span", { class: "rk" + (extra ? " bad" : "") }, rw + (extra ? " ✕" : ""))); });
+      if (ref) rows(ref).forEach(function (rw) { if (rows(t).indexOf(rw) < 0) m.appendChild(Kit.el("span", { class: "rk miss" }, rw + " missing")); });
+      if (!rows(t).length && !(ref && rows(ref).length)) m.appendChild(Kit.el("span", { class: "field-hint" }, "empty"));
+    }
+    var tr = s.last === null ? {} : truth(s.last);
+    chips("now", s.table, s.last === null ? null : tr);
+    chips("truth", tr, null);
+    var vd = Kit.clear(document.getElementById("verdict"));
+    if (s.last !== null) {
+      var ok = rows(s.table).join() === rows(tr).join();
+      vd.appendChild(Kit.el("div", { class: "callout " + (ok ? "ok" : "bad") }, ok ? "After the " + INC[s.last].t + " run, consumers see the correct rows." : "After the " + INC[s.last].t + " run, consumers see rows that are wrong for " + INC[s.last].t + " (✕ = shouldn't exist yet)."));
+    }
+    var rb = Kit.clear(document.getElementById("runs"));
+    s.runs.forEach(function (x, k) {
+      rb.appendChild(Kit.el("tr", { class: k === s.runs.length - 1 ? "cur" : null }, Kit.el("td", null, x.t + (k > 3 ? " (backfill)" : "")), Kit.el("td", null, x.nr), Kit.el("td", null, x.restore),
+        Kit.el("td", null, Kit.el("span", { style: x.ok ? "" : "color:var(--bad)" }, x.out + (x.ok ? "" : " ✕"))), Kit.el("td", null, String(x.v))));
+    });
+    var sb = Kit.clear(document.getElementById("state"));
+    if (cfg.mode !== "stateful") sb.appendChild(Kit.el("tr", null, Kit.el("td", null, "The plain Merger keeps no state.")));
+    else INC.forEach(function (inc) { if (s.state[inc.t] !== undefined) sb.appendChild(Kit.el("tr", null, Kit.el("td", null, inc.t), Kit.el("td", null, "version " + s.state[inc.t]))); });
+    document.getElementById("queue").textContent = s.queue.length ? "Queued: " + s.queue.map(function (i) { return INC[i].t; }).join(" → ") : "Nothing queued.";
+  }
+
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Pattern", value: cfg.mode,
+    options: [{ value: "merger", label: "Merger" }, { value: "stateful", label: "Stateful Merger" }],
+    onChange: function (v) { cfg.mode = v; reset(); } }).element);
+  document.getElementById("bf").addEventListener("click", function () {
+    var from = parseInt(document.getElementById("from").value, 10);
+    for (var i = from; i < INC.length; i++) s.queue.push(i);
+    log.add("Backfill queued from " + INC[from].t + ".", "muted"); render();
+  });
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1200 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why does a plain MERGE backfill from 08:00 show C, M, N and O at 08:00?",
+      options: ["MERGE duplicates rows", "The replay starts from the latest table, not the table as it was at 08:00", "The 08:00 increment contains them"], answer: 1,
+      explain: "Table 4-2 shows exactly this (p. 92)." },
+    { q: "Rerunning 2024-10-07: the state table has version 2 for 10-06, and the latest version is 4. What happens?",
+      options: ["A normal merge", "Truncate, then merge", "Restore to version 2, then merge"], answer: 2,
+      explain: "The versions differ, so this is a backfill (pp. 95–96)." },
+    { q: "A compaction runs between two merges. Why is restoring “the previous run's version” then wrong?",
+      options: ["Compaction deletes the state table", "It would drop the compaction commit. Restore the current run's version − 1 instead", "Restores can't follow a compaction"], answer: 1,
+      explain: "No-data commits create versions too (pp. 98–99)." }
+  ]);
+})();
+</script>
+</body>
+</html>
