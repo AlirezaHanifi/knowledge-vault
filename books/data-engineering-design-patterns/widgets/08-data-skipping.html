@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bucket Pruning and Z-Order Skipping</title>
+<meta name="description" content="Hash keys into buckets to see bucket pruning and shuffle-free joins, then lay out a two-column dataset lexicographically or in Z-order and count the data blocks a query must read using per-block min/max statistics. Illustrates Data Engineering Design Patterns, Chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .two { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .two h3 { font-size: .85rem; margin: 0 0 6px; }
+  svg.grid8 { width: 100%; max-width: 330px; height: auto; display: block; }
+  svg.grid8 .c { stroke: var(--surface); stroke-width: 1; }
+  svg.grid8 .blk-read { fill: var(--accent-soft); }
+  svg.grid8 .blk-skip { fill: var(--surface-2); }
+  svg.grid8 .hit { fill: var(--accent); }
+  svg.grid8 .q { fill: none; stroke: var(--warn); stroke-width: 2.5; }
+  svg.grid8 .bl { fill: var(--ink-3); font-size: 9px; font-family: var(--mono); }
+  svg.grid8 .bl.r { fill: var(--accent-ink); font-weight: 700; }
+  svg.grid8 .ax { fill: var(--ink-3); font-size: 10px; }
+  svg.grid8 .edge { fill: none; stroke: var(--ink-2); stroke-width: 1.5; }
+  .buckets { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 4px; margin-top: 8px; }
+  .bk { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 4px; font-size: .7rem; text-align: center; font-family: var(--mono); background: var(--surface-2); color: var(--ink-3); }
+  .bk.hit { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .join { margin-top: 10px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-data-storage-design-patterns.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Data skipping</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Data Storage Design Patterns</div>
+  <h1>Bucket pruning and Z-order skipping</h1>
+  <p class="lede">Partitioning breaks down for high-cardinality columns. The <strong>Bucket</strong> pattern groups keys with <code>hash(key) % buckets</code>, so a query on one key opens one bucket. The <strong>Sorter</strong> orders rows so that each data block covers a narrow range, and min/max statistics let the engine skip blocks. A lexicographic sort helps only queries on its first column. A Z-order curve helps both columns.</p>
+  <p class="source-note">Illustrates “Pattern: Bucket” (pp. 243–245) and “Pattern: Sorter” (pp. 246–251), with Figures 8-3 to 8-6. The book's Figure 8-5 reads nine blocks lexicographically and seven with Z-order for its predicate. The 8 × 8 dataset here (64 rows, 8 rows per block) and the hash function are the vault's, so the counts differ from the book's. Implementation is the vault's own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel">
+        <div class="two">
+          <div>
+            <h3>Lexicographic sort (x, y)</h3>
+            <svg class="grid8" id="lex" role="img" aria-label="Lexicographically sorted blocks"></svg>
+            <p class="field-hint" id="lexn"></p>
+          </div>
+          <div>
+            <h3>Z-order (x, y)</h3>
+            <svg class="grid8" id="zo" role="img" aria-label="Z-order blocks"></svg>
+            <p class="field-hint" id="zon"></p>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="panel-title">Buckets: <code>bucketBy(N, 'user_id')</code></p>
+        <div id="bctl"></div>
+        <div class="buckets" id="buckets"></div>
+        <div class="join" id="join"></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <p class="panel-title">Query predicate</p>
+        <div id="preset"></div>
+        <div id="qs" style="margin-top:10px"></div>
+      </div>
+      <div class="panel"><p class="panel-title">Blocks read (of 8; ✓ = read)</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Filter on x only.</strong> The lexicographic layout reads only the matching blocks, because its blocks are slices of x.</li>
+    <li><strong>Filter on y only.</strong> The lexicographic layout now reads every block: each block covers all y values. This is the composite-sort-key trap of Figure 8-6. Z-order reads half of them.</li>
+    <li><strong>A small box on both columns</strong> favours Z-order, as in Figure 8-5. Its blocks are compact squares and rectangles.</li>
+    <li><strong>Buckets prune by key.</strong> A query on one <code>user_id</code> opens one bucket. A join avoids the shuffle only when both tables use the same bucket count.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-data-storage-design-patterns.html"><small>Lesson</small>8. Data Storage Design Patterns</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var log = Kit.log(document.getElementById("log"));
+  var q = { x1: 2, x2: 5, y1: 1, y2: 2 }, bk = { n: 8, other: 8, key: 4021 }, sliders = {};
+  function morton(x, y) { var z = 0; for (var i = 0; i < 3; i++) { z |= ((x >> i) & 1) << (2 * i + 1); z |= ((y >> i) & 1) << (2 * i); } return z; }
+  function layout(kind) {
+    var cells = [];
+    for (var x = 0; x < 8; x++) for (var y = 0; y < 8; y++) cells.push({ x: x, y: y, k: kind === "lex" ? x * 8 + y : morton(x, y) });
+    cells.sort(function (a, b) { return a.k - b.k; });
+    var blocks = [];
+    cells.forEach(function (c, i) { c.b = Math.floor(i / 8); (blocks[c.b] = blocks[c.b] || []).push(c); });
+    return { cells: cells, blocks: blocks.map(function (bl, i) {
+      var xs = bl.map(function (c) { return c.x; }), ys = bl.map(function (c) { return c.y; });
+      var st = { id: i, minx: Math.min.apply(null, xs), maxx: Math.max.apply(null, xs), miny: Math.min.apply(null, ys), maxy: Math.max.apply(null, ys), cells: bl };
+      st.read = !(st.maxx < q.x1 || st.minx > q.x2 || st.maxy < q.y1 || st.miny > q.y2);
+      return st;
+    }) };
+  }
+  function draw(id, kind) {
+    var L = layout(kind), root = Kit.clear(document.getElementById(id)), S = 36, O = 18;
+    root.setAttribute("viewBox", "0 0 " + (O + 8 * S + 4) + " " + (O + 8 * S + 4));
+    function cx(x) { return O + x * S; } function cy(y) { return O + (7 - y) * S; }
+    L.blocks.forEach(function (b) {
+      b.cells.forEach(function (c) {
+        var inQ = c.x >= q.x1 && c.x <= q.x2 && c.y >= q.y1 && c.y <= q.y2;
+        root.appendChild(Kit.svg("rect", { class: "c " + (inQ ? "hit" : b.read ? "blk-read" : "blk-skip"), x: cx(c.x), y: cy(c.y), width: S, height: S }));
+      });
+      var mx = (b.minx + b.maxx + 1) / 2, my = (b.miny + b.maxy + 1) / 2;
+      root.appendChild(Kit.svg("rect", { class: "edge", x: cx(b.minx) + 1, y: cy(b.maxy) + 1, width: (b.maxx - b.minx + 1) * S - 2, height: (b.maxy - b.miny + 1) * S - 2, rx: 3 }));
+      root.appendChild(Kit.svg("text", { class: "bl" + (b.read ? " r" : ""), x: O + mx * S, y: O + (8 - my) * S + 3, "text-anchor": "middle" }, "B" + b.id + (b.read ? "✓" : "")));
+    });
+    root.appendChild(Kit.svg("rect", { class: "q", x: cx(q.x1), y: cy(q.y2), width: (q.x2 - q.x1 + 1) * S, height: (q.y2 - q.y1 + 1) * S }));
+    for (var i = 0; i < 8; i++) {
+      root.appendChild(Kit.svg("text", { class: "ax", x: cx(i) + S / 2, y: 12, "text-anchor": "middle" }, "x" + i));
+      root.appendChild(Kit.svg("text", { class: "ax", x: 2, y: cy(i) + S / 2 + 3 }, "y" + i));
+    }
+    return L.blocks.filter(function (b) { return b.read; }).length;
+  }
+  function hash(k) { var h = 2166136261; String(k).split("").forEach(function (ch) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }); return h; }
+
+  var prev = null;
+  function render() {
+    var a = draw("lex", "lex"), b = draw("zo", "zo");
+    document.getElementById("lexn").textContent = "Each block is one x value with all eight y values.";
+    document.getElementById("zon").textContent = "Each block is a compact region of the Z-curve.";
+    var st = Kit.clear(document.getElementById("stats"));
+    [["Lexicographic", a, a > b ? "bad" : "ok"], ["Z-order", b, b > a ? "bad" : "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1] + " / 8")));
+    });
+    var key = "x " + q.x1 + "–" + q.x2 + ", y " + q.y1 + "–" + q.y2;
+    if (key !== prev) { log.add("WHERE " + key + ": lexicographic reads " + a + " blocks, Z-order " + b, a === b ? "muted" : a > b ? "warn" : "ok"); prev = key; }
+    var bm = Kit.clear(document.getElementById("buckets")), target = hash(bk.key) % bk.n;
+    for (var i = 0; i < bk.n; i++) bm.appendChild(Kit.el("div", { class: "bk" + (i === target ? " hit" : "") }, "b" + i));
+    var j = Kit.clear(document.getElementById("join"));
+    j.appendChild(Kit.el("p", { class: "field-hint" }, "WHERE user_id = " + bk.key + " → hash % " + bk.n + " = bucket " + target + ": reads 1 of " + bk.n + " buckets."));
+    var same = bk.n === bk.other;
+    j.appendChild(Kit.el("div", { class: "callout " + (same ? "ok" : "bad") }, same ? "visits and users both use " + bk.n + " buckets: matching keys share a bucket number, so the join runs bucket by bucket without a shuffle." : "visits has " + bk.n + " buckets and users has " + bk.other + ": the same key lands in different buckets, so the join must shuffle."));
+  }
+  function setQ(p) { q = Object.assign({}, p); ["x1", "x2", "y1", "y2"].forEach(function (k) { sliders[k].set(q[k]); }); render(); }
+
+  var qs = document.getElementById("qs");
+  [["x1", "x from"], ["x2", "x to"], ["y1", "y from"], ["y2", "y to"]].forEach(function (d) {
+    sliders[d[0]] = Kit.slider({ label: d[1], min: 0, max: 7, value: q[d[0]], onInput: function (v) {
+      q[d[0]] = v; if (q.x1 > q.x2) { if (d[0] === "x1") q.x2 = v; else q.x1 = v; } if (q.y1 > q.y2) { if (d[0] === "y1") q.y2 = v; else q.y1 = v; }
+      ["x1", "x2", "y1", "y2"].forEach(function (k) { sliders[k].set(q[k]); }); render(); } });
+    qs.appendChild(sliders[d[0]].element);
+  });
+  document.getElementById("preset").appendChild(Kit.segmented({ label: "Preset predicates", value: "box",
+    options: [{ value: "box", label: "Small box" }, { value: "x", label: "x only" }, { value: "y", label: "y only" }],
+    onChange: function (v) { setQ(v === "x" ? { x1: 2, x2: 3, y1: 0, y2: 7 } : v === "y" ? { x1: 0, x2: 7, y1: 2, y2: 3 } : { x1: 2, x2: 5, y1: 1, y2: 2 }); } }).element);
+  var bc = document.getElementById("bctl");
+  bc.appendChild(Kit.slider({ label: "visits buckets", min: 2, max: 16, value: bk.n, onInput: function (v) { bk.n = v; render(); } }).element);
+  bc.appendChild(Kit.slider({ label: "users buckets", min: 2, max: 16, value: bk.other, onInput: function (v) { bk.other = v; render(); } }).element);
+  bc.appendChild(Kit.slider({ label: "user_id in the query", min: 1000, max: 9999, value: bk.key, onInput: function (v) { bk.key = v; render(); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "A table is sorted lexicographically by (visit_time, page). Which filter skips the fewest blocks?",
+      options: ["visit_time only", "visit_time and page", "page only"], answer: 2,
+      explain: "Without the preceding sort column, the engine iterates over most blocks (Figure 8-6, pp. 249–250)." },
+    { q: "How does an engine know it can skip a block?",
+      options: ["It reads the block and filters it", "From per-block metadata such as min/max values", "From the bucket count"], answer: 1,
+      explain: "Sorted storage plus statistics (Figure 8-4, pp. 246–247)." },
+    { q: "Why does a join of two tables bucketed into 50 and 64 buckets still need a shuffle?",
+      options: ["Bucketing never avoids shuffles", "hash(key) % 50 and hash(key) % 64 put the same key into different bucket numbers", "Bucketed tables can't be joined"], answer: 1,
+      explain: "Shuffle elimination needs identical bucketing on both sides (p. 244)." }
+  ]);
+})();
+</script>
+</body>
+</html>

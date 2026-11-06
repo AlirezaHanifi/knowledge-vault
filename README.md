@@ -9,6 +9,7 @@ Technical books turned into interactive lessons. For each book there is one fold
 | Book | Authors |
 |---|---|
 | [Designing Data-Intensive Applications, 2nd Edition](books/designing-data-intensive-applications/README.md) | Martin Kleppmann, Chris Riccomini |
+| [Data Engineering Design Patterns](books/data-engineering-design-patterns/README.md) | Bartosz Konieczny |
 
 ## Layout
 
