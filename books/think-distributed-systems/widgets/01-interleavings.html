@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interleavings and Race Conditions</title>
+<meta name="description" content="Two processes each read, update and write a shared counter. Enumerate all 20 interleavings of their actions, see which give a result no serial order gives, or build an interleaving step by step. Illustrates Think Distributed Systems, Chapters 1 and 5.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  table.il { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .8rem; }
+  table.il td, table.il th { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: left; }
+  table.il tr.bad td { background: var(--bad-soft); } table.il tr.ok td { background: var(--ok-soft); }
+  .seq { font-family: var(--mono); font-size: .9rem; margin: 6px 0; min-height: 1.6em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html">Chapter 1</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Interleavings</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 1 · Thinking in distributed systems</div>
+  <h1>Interleavings and race conditions</h1>
+  <p class="lede">A process is a sequence of atomic actions. Two concurrent processes P and Q can run in any <strong>interleaving</strong> of their actions; (P | Q) is the set of all of them. A <strong>race condition</strong> exists when some of those interleavings are considered incorrect. The process pair is <strong>serializable</strong> if every interleaving has the same effect as P·Q or Q·P.</p>
+  <p class="source-note">Illustrates “Thinking above the code” (pp. 21–22, Figures 1.19–1.20) and the lost update of Figure 5.4 (p. 71). The read–update–write counter and the ×2 variant are the vault’s choice of actions. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Build an interleaving</p>
+        <div class="seq" id="seq" aria-live="polite"></div><div class="kv" id="regs"></div>
+        <div class="btns"><button class="btn small" id="stepP">Next action of P</button><button class="btn small" id="stepQ">Next action of Q</button><button class="btn small" id="clr">Start over</button></div>
+        <div class="callout" id="res" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">All interleavings</p><div class="table-wrap" style="max-height:420px;overflow:auto"><table class="il" id="all"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="qop"></div><div id="atomic" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>With read, update and write as separate actions</strong>, only the two serial interleavings give the serial result. In the other 18, one process reads before the other writes, and one update is lost.</li>
+    <li><strong>Making the update one atomic action</strong> leaves only two interleavings, P·Q and Q·P, so there’s no race.</li>
+    <li><strong>With +1 and ×2</strong> the two serial orders give different results (4 and 3). Both are correct under serializability; anything else is not.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html"><small>Lesson</small>1. Thinking in distributed systems</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { q: "inc", atomic: "no" }, X0 = 1, built, pc;
+  function acts(p) {
+    var name = p === "P" ? "P" : "Q", op = p === "P" ? "inc" : cfg.q;
+    if (cfg.atomic === "yes") return [{ p: name, k: "rmw", op: op, label: name + ":" + (op === "inc" ? "x+=1" : "x*=2") }];
+    return [{ p: name, k: "r", label: name + ":read" }, { p: name, k: "u", op: op, label: name + ":" + (op === "inc" ? "+1" : "×2") }, { p: name, k: "w", label: name + ":write" }];
+  }
+  function run(seq) {
+    var x = X0, reg = { P: null, Q: null };
+    seq.forEach(function (a) {
+      if (a.k === "r") reg[a.p] = x;
+      else if (a.k === "u") reg[a.p] = a.op === "inc" ? reg[a.p] + 1 : reg[a.p] * 2;
+      else if (a.k === "w") x = reg[a.p];
+      else x = a.op === "inc" ? x + 1 : x * 2;
+    });
+    return { x: x, reg: reg };
+  }
+  function interleavings(a, b) {
+    if (!a.length) return [b.slice()]; if (!b.length) return [a.slice()];
+    return interleavings(a.slice(1), b).map(function (r) { return [a[0]].concat(r); }).concat(interleavings(a, b.slice(1)).map(function (r) { return [b[0]].concat(r); }));
+  }
+  function serials() { var P = acts("P"), Q = acts("Q"); return [run(P.concat(Q)).x, run(Q.concat(P)).x]; }
+  function renderAll() {
+    var P = acts("P"), Q = acts("Q"), all = interleavings(P, Q), ser = serials(), t = Kit.clear(document.getElementById("all")), bad = 0;
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["#", "Interleaving", "x", "Verdict"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    var tb = Kit.el("tbody");
+    all.forEach(function (seq, i) {
+      var x = run(seq).x, ok = ser.indexOf(x) >= 0; if (!ok) bad++;
+      tb.appendChild(Kit.el("tr", { class: ok ? "ok" : "bad" }, Kit.el("td", null, String(i + 1)), Kit.el("td", null, seq.map(function (a) { return a.label; }).join(" · ")), Kit.el("td", null, String(x)), Kit.el("td", null, ok ? "✓ = serial" : "✗ race")));
+    });
+    t.appendChild(tb);
+    stats([["x initially", X0], ["Serial results (P·Q, Q·P)", ser[0] + ", " + ser[1]], ["Interleavings", all.length], ["Incorrect", bad, bad ? "bad" : "ok"]]);
+  }
+  function resetBuild() { built = []; pc = { P: 0, Q: 0 }; log.clear(); log.add("x = " + X0 + ". P adds 1; Q " + (cfg.q === "inc" ? "adds 1" : "doubles") + ".", "muted"); renderBuild(); }
+  function stepOf(p) { var a = acts(p); if (pc[p] >= a.length) return; built.push(a[pc[p]++]); var r = run(built); log.add(built[built.length - 1].label + "  →  x = " + r.x + ", P's register = " + r.reg.P + ", Q's register = " + r.reg.Q, "muted"); renderBuild(); }
+  function renderBuild() {
+    var r = run(built), n = acts("P").length;
+    document.getElementById("seq").textContent = built.length ? built.map(function (a) { return a.label; }).join(" · ") : "(no actions yet)";
+    var kv = Kit.clear(document.getElementById("regs"));
+    [["shared x", r.x], ["P's register", r.reg.P === null ? "–" : r.reg.P], ["Q's register", r.reg.Q === null ? "–" : r.reg.Q]].forEach(function (x) { kv.appendChild(Kit.el("div", null, Kit.el("span", null, x[0] + ": "), Kit.el("strong", null, String(x[1])))); });
+    document.getElementById("stepP").disabled = pc.P >= n; document.getElementById("stepQ").disabled = pc.Q >= n;
+    var res = document.getElementById("res"), ser = serials();
+    if (pc.P >= n && pc.Q >= n) { var ok = ser.indexOf(r.x) >= 0; res.className = "callout " + (ok ? "ok" : "bad"); res.textContent = ok ? "x = " + r.x + ": same effect as a serial order." : "x = " + r.x + ": no serial order gives this. An update was lost."; }
+    else { res.className = "callout"; res.textContent = "Interleave the actions of P and Q in any order."; }
+  }
+  function reset() { renderAll(); resetBuild(); }
+  document.getElementById("qop").appendChild(Kit.segmented({ label: "Q's update", value: cfg.q, options: [{ value: "inc", label: "+1 (like P)" }, { value: "dbl", label: "×2" }], onChange: function (v) { cfg.q = v; reset(); } }).element);
+  document.getElementById("atomic").appendChild(Kit.segmented({ label: "Read–update–write is", value: cfg.atomic, options: [{ value: "no", label: "three actions" }, { value: "yes", label: "one atomic action" }], onChange: function (v) { cfg.atomic = v; reset(); } }).element);
+  document.getElementById("stepP").addEventListener("click", function () { stepOf("P"); });
+  document.getElementById("stepQ").addEventListener("click", function () { stepOf("Q"); });
+  document.getElementById("clr").addEventListener("click", resetBuild);
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How many interleavings do two processes of three actions each have?",
+      options: ["6", "9", "20"], answer: 2,
+      explain: "C(6, 3) = 20. That growth is why reasoning over (P | Q) is hard." },
+    { q: "When does (P | Q) contain a race condition, in the book's definition?",
+      options: ["When P and Q share memory", "When some subset of the interleavings is considered incorrect", "When P and Q run in parallel"], answer: 1,
+      explain: "p. 21." },
+    { q: "With P = +1 and Q = ×2 starting from x = 1, which result is NOT serializable?",
+      options: ["3", "4", "2"], answer: 2,
+      explain: "P·Q gives 4 and Q·P gives 3. A result of 2 needs a lost update (p. 22)." }
+  ]);
+})();
+</script>
+</body>
+</html>

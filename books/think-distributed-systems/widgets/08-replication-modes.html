@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Replicating a Counter</title>
+<meta name="description" content="Issue increment-by(n) operations to a leader with two followers, switch between synchronous, asynchronous and quorum acknowledgment and between state-based and log-based messages, then cut a link to turn inherent replication lag into imposed lag. Illustrates Think Distributed Systems, Chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .reps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .rep { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); text-align: center; }
+  .rep .v { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; } .rep.stale { border-color: var(--warn); background: var(--warn-soft); }
+  .inflight { font-family: var(--mono); font-size: .8rem; margin-top: 8px; min-height: 2.4em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-replication.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Replicating a counter</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Replication</div>
+  <h1>Replicating a counter</h1>
+  <p class="lede">A client sends <strong>increment-by(n)</strong> to the leader, which replicates the change to two followers over point-to-point links. <strong>Synchronous</strong> replication answers the client after every follower acknowledges, <strong>asynchronous</strong> immediately, and <strong>quorum</strong> after a majority. The change travels either as the new <strong>state</strong> or as the <strong>operation</strong>.</p>
+  <p class="source-note">Illustrates “Replication lag”, “Synchronous vs. asynchronous replication”, “State-based vs. log-based replication” and the leaderboard aha! moment (pp. 111–115, Figures 8.5–8.8). Message latency (2 ticks per hop), the tick model and the read buttons are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="reps" id="reps"></div><div class="inflight" id="inflight" aria-live="polite"></div>
+        <div class="callout" id="client" style="margin-top:8px"></div>
+        <div class="btns"><button class="btn small primary" id="inc2">Client: increment-by(2)</button><button class="btn small primary" id="inc3">Client: increment-by(3)</button><button class="btn small" id="rdL">Read from leader</button><button class="btn small" id="rdF">Read from follower 2</button></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="ack"></div><div id="fmt" style="margin-top:10px"></div><div id="cut" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Inherent lag:</strong> even with healthy links, a follower applies each change a few ticks after the leader, because updates can’t reach every replica in the same step.</li>
+    <li><strong>Imposed lag:</strong> cut a link and that follower falls further behind. A synchronous client now waits indefinitely; a quorum client still gets its answer from the leader plus the other follower.</li>
+    <li><strong>State vs. log:</strong> the wire carries counter = 5 or increment-by(3). Applying a state message twice is harmless; applying an operation twice is not, which is why log-based replication needs each operation exactly once and in order.</li>
+    <li><strong>Reading from a follower</strong> can return a value older than one the client already had acknowledged, which is the book’s warning about “followers for reads”.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-replication.html"><small>Lesson</small>8. Replication</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { ack: "quorum", fmt: "log", cut: "none" }, t, R, msgs, pend, opId, acked;
+  function reset() { t = 0; R = [0, 0, 0]; msgs = []; pend = []; opId = 0; acked = 0; log.clear(); log.add("Leader and two followers at 0. Each hop takes 2 ticks.", "muted"); render(); }
+  function cutLink(f) { return cfg.cut === "f" + f; }
+  function need() { return cfg.ack === "sync" ? 2 : cfg.ack === "quorum" ? 1 : 0; }
+  function inc(n) {
+    opId++; R[0] += n; var op = { id: opId, n: n, state: R[0], acks: 0, done: false, t: t };
+    log.add("t=" + t + ": leader applies increment-by(" + n + ") → " + R[0], "muted");
+    [1, 2].forEach(function (f) { msgs.push({ to: f, at: t + 2, op: op, kind: "rep", blocked: cutLink(f) }); });
+    pend.push(op); if (need() === 0) { op.done = true; acked = R[0]; log.add("Asynchronous: client gets OK at once", "ok"); }
+    render();
+  }
+  function step() {
+    t++;
+    msgs.slice().forEach(function (m) {
+      if (m.blocked && cutLink(m.to)) { m.at = t + 1; return; }
+      if (m.at > t) return;
+      msgs.splice(msgs.indexOf(m), 1);
+      if (m.kind === "rep") {
+        if (cfg.fmt === "state") R[m.to] = Math.max(R[m.to], m.op.state); else R[m.to] += m.op.n;
+        log.add("t=" + t + ": follower " + m.to + " receives " + (cfg.fmt === "state" ? "counter = " + m.op.state : "increment-by(" + m.op.n + ")") + " → " + R[m.to], "muted");
+        msgs.push({ to: 0, from: m.to, at: t + 2, op: m.op, kind: "ack", blocked: false });
+      } else {
+        m.op.acks++;
+        if (!m.op.done && m.op.acks >= need()) { m.op.done = true; acked = Math.max(acked, m.op.state); log.add("t=" + t + ": " + (cfg.ack === "sync" ? "all followers" : "a quorum") + " acknowledged op " + m.op.id + "; client gets OK", "ok"); }
+      }
+    });
+    render(); return true;
+  }
+  function render() {
+    var b = Kit.clear(document.getElementById("reps"));
+    ["Leader", "Follower 1", "Follower 2"].forEach(function (n, i) { b.appendChild(Kit.el("div", { class: "rep" + (R[i] < R[0] ? " stale" : "") }, Kit.el("div", null, n + (i && cutLink(i) ? " (link cut)" : "")), Kit.el("div", { class: "v" }, String(R[i])), Kit.el("div", null, i && R[i] < R[0] ? "lags by " + (R[0] - R[i]) : "up to date"))); });
+    document.getElementById("inflight").textContent = msgs.length ? "In flight: " + msgs.map(function (m) { return m.kind === "rep" ? "→F" + m.to + " " + (cfg.fmt === "state" ? "counter=" + m.op.state : "inc(" + m.op.n + ")") + (m.blocked && cutLink(m.to) ? " (held: link cut)" : "") : "ack F" + m.from + "→L"; }).join(" · ") : "Nothing in flight.";
+    var waiting = pend.filter(function (o) { return !o.done; }), c = document.getElementById("client");
+    c.className = "callout " + (waiting.length ? "warn" : "ok");
+    c.textContent = waiting.length ? "Client waiting for op " + waiting.map(function (o) { return o.id; }).join(", ") + " (" + cfg.ack + " acknowledgment)" : "Client has an answer for every operation. Last acknowledged value: " + acked + ".";
+    stats([["Tick", t], ["Max lag", Math.max(R[0] - R[1], R[0] - R[2]), R[0] - Math.min(R[1], R[2]) ? "warn" : "ok"], ["Ops waiting", waiting.length, waiting.length ? "warn" : "ok"]]);
+  }
+  document.getElementById("ack").appendChild(Kit.segmented({ label: "Acknowledge the client after", value: cfg.ack, options: [{ value: "sync", label: "All (sync)" }, { value: "quorum", label: "Quorum" }, { value: "async", label: "Leader only (async)" }], onChange: function (v) { cfg.ack = v; reset(); } }).element);
+  document.getElementById("fmt").appendChild(Kit.segmented({ label: "Replicate", value: cfg.fmt, options: [{ value: "log", label: "Operations (log)" }, { value: "state", label: "State" }], onChange: function (v) { cfg.fmt = v; reset(); } }).element);
+  document.getElementById("cut").appendChild(Kit.segmented({ label: "Network partition", value: cfg.cut, options: [{ value: "none", label: "None" }, { value: "f2", label: "Cut leader ↔ follower 2" }], onChange: function (v) { cfg.cut = v; log.add(v === "none" ? "Link restored" : "Link to follower 2 cut", v === "none" ? "ok" : "bad"); render(); } }).element);
+  document.getElementById("inc2").addEventListener("click", function () { inc(2); });
+  document.getElementById("inc3").addEventListener("click", function () { inc(3); });
+  document.getElementById("rdL").addEventListener("click", function () { log.add("Read from leader: " + R[0], "ok"); });
+  document.getElementById("rdF").addEventListener("click", function () { log.add("Read from follower 2: " + R[2] + (R[2] < acked ? " (stale: the client was already told " + acked + ")" : ""), R[2] < acked ? "bad" : "ok"); });
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 700 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "With synchronous replication and one follower unreachable, the client…",
+      options: ["gets an answer immediately", "waits until that follower acknowledges", "gets an error at once"], answer: 1,
+      explain: "Completion is coupled to every node's acknowledgment (p. 113)." },
+    { q: "Which messages does log-based replication send for increment-by(2), increment-by(3)?",
+      options: ["counter = 2, counter = 5", "increment-by(2), increment-by(3)", "2, 3, 5"], answer: 1,
+      explain: "p. 114." },
+    { q: "Why can a read from a follower surprise the client?",
+      options: ["Followers are slower", "Replication lag: the follower may not have the latest value", "Followers lie"], answer: 1,
+      explain: "p. 115." }
+  ]);
+})();
+</script>
+</body>
+</html>

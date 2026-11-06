@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Eventually Consistent Shopping Cart</title>
+<meta name="description" content="Partition two replicas of a shopping cart, add and remove items on each side, heal the partition and compare reconciliation rules: Amazon&#x27;s adds-win union, last write wins, a grow-only set, and an observed-remove set. Illustrates Think Distributed Systems, Chapter 9.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .reps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .rep { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); }
+  .rep .items { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; min-height: 1.4em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-consistency.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Eventually consistent cart</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · Consistency</div>
+  <h1>The eventually consistent shopping cart</h1>
+  <p class="lede">During a partition, both cart replicas stay available and accept changes. When the partition heals they must <strong>converge</strong>, which means resolving the conflict. Amazon’s rule keeps added items over removed ones, so nothing a customer added disappears, but a removed item can <strong>come back</strong>.</p>
+  <p class="source-note">Illustrates “The shopping cart”, “Variants of eventual consistency” and “Implementation” (pp. 124–126, Figure 9.9, Table 9.4). The “Figure 9.9” button replays the book’s example. Last write wins and the observed-remove set are the vault’s additions for comparison. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="callout" id="net"></div><div class="reps" id="reps" style="margin-top:8px"></div>
+        <div class="callout" id="out" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="rule"></div><div class="btns" style="margin-top:10px"><button class="btn small" id="part">Partition</button><button class="btn small primary" id="heal">Heal and merge</button><button class="btn small" id="fig">Replay Figure 9.9</button><button class="btn small" id="reset">Reset</button></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Figure 9.9 with adds win:</strong> replica 1 removes A and adds B, replica 2 adds C, and the merged cart is {A, B, C}. A comes back.</li>
+    <li><strong>Last write wins</strong> keeps whichever replica changed last and silently drops the other side’s changes, here item B or C.</li>
+    <li><strong>A grow-only set</strong> converges trivially because its merge is a union, but it can’t express removal at all.</li>
+    <li><strong>An observed-remove set</strong> tags each add, and a remove deletes only the tags it has seen. It ends with {B, C}: the removal of A sticks, and concurrent adds survive.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-consistency.html"><small>Lesson</small>9. Consistency</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var ITEMS = ["A", "B", "C", "D"], rule = "adds", R, parted, clock, tagN;
+  function reset() { clock = 0; tagN = 0; R = [mk(), mk()]; addTo(0, "A", true); R[1] = clone(R[0]); parted = false; log.clear(); log.add("Both replicas hold {A}.", "muted"); render(); }
+  function mk() { return { tags: {}, removed: {}, ts: 0 }; }
+  function clone(r) { return JSON.parse(JSON.stringify(r)); }
+  function items(r) { var out = []; ITEMS.forEach(function (x) { if (Object.keys(r.tags).some(function (t) { return r.tags[t] === x && !r.removed[t]; })) out.push(x); }); return out; }
+  function addTo(i, x, quiet) { var t = "t" + (++tagN); R[i].tags[t] = x; R[i].ts = ++clock; if (!parted && !quiet) R[1 - i] = clone(R[i]); if (!quiet) log.add("Replica " + (i + 1) + ": add(" + x + ")" + (parted ? "" : ", replicated"), "muted"); }
+  function rem(i, x) {
+    if (rule === "gset") { log.add("A grow-only set has no remove operation", "warn"); return; }
+    Object.keys(R[i].tags).forEach(function (t) { if (R[i].tags[t] === x) R[i].removed[t] = true; }); R[i].ts = ++clock;
+    if (!parted) R[1 - i] = clone(R[i]); log.add("Replica " + (i + 1) + ": remove(" + x + ")" + (parted ? "" : ", replicated"), "muted");
+  }
+  function merge() {
+    var a = R[0], b = R[1], m = mk();
+    if (rule === "lww") { m = clone(a.ts >= b.ts ? a : b); log.add("Last write wins: replica " + (a.ts >= b.ts ? 1 : 2) + " changed last; its cart replaces the other", "warn"); }
+    else if (rule === "adds" || rule === "gset") {
+      var u = items(a).concat(items(b)).filter(function (x, i, arr) { return arr.indexOf(x) === i; });
+      u.forEach(function (x) { m.tags["m" + x] = x; }); log.add("Union of both carts: everything that was in either cart stays", "warn");
+    } else {
+      [a, b].forEach(function (r) { Object.keys(r.tags).forEach(function (t) { m.tags[t] = r.tags[t]; if (r.removed[t]) m.removed[t] = true; }); });
+      log.add("Observed-remove: union of add tags, minus every tag either side removed", "warn");
+    }
+    m.ts = ++clock; R = [m, clone(m)];
+  }
+  function render() {
+    var n = document.getElementById("net"); n.className = "callout " + (parted ? "bad" : "ok"); n.textContent = parted ? "Partitioned: changes stay on the replica that accepted them." : "Connected: every change is replicated immediately.";
+    var b = Kit.clear(document.getElementById("reps"));
+    [0, 1].forEach(function (i) {
+      var btns = Kit.el("div", { class: "btns" });
+      ITEMS.forEach(function (x) { var a = Kit.el("button", { class: "btn small" }, "+" + x); a.addEventListener("click", function () { addTo(i, x); render(); }); btns.appendChild(a); });
+      ITEMS.forEach(function (x) { var r = Kit.el("button", { class: "btn small" }, "−" + x); r.disabled = rule === "gset" || items(R[i]).indexOf(x) < 0; r.addEventListener("click", function () { rem(i, x); render(); }); btns.appendChild(r); });
+      b.appendChild(Kit.el("div", { class: "rep" }, Kit.el("div", null, "Replica " + (i + 1)), Kit.el("div", { class: "items" }, "{" + items(R[i]).join(", ") + "}"), btns));
+    });
+    var same = items(R[0]).join() === items(R[1]).join(), o = document.getElementById("out");
+    o.className = "callout " + (same ? "ok" : "warn"); o.textContent = same ? "Replicas agree: {" + items(R[0]).join(", ") + "}." : "Replicas have diverged. Heal the partition to reconcile them.";
+    document.getElementById("part").disabled = parted; document.getElementById("heal").disabled = !parted;
+    stats([["Network", parted ? "partitioned" : "connected", parted ? "bad" : "ok"], ["Replica 1", "{" + items(R[0]).join(", ") + "}"], ["Replica 2", "{" + items(R[1]).join(", ") + "}"]]);
+  }
+  document.getElementById("rule").appendChild(Kit.segmented({ label: "Reconciliation", value: rule, options: [{ value: "adds", label: "Adds win (Amazon)" }, { value: "lww", label: "Last write wins" }, { value: "gset", label: "Grow-only set" }, { value: "orset", label: "Observed-remove set" }], onChange: function (v) { rule = v; reset(); } }).element);
+  document.getElementById("part").addEventListener("click", function () { parted = true; log.add("Network partition: the replicas can't communicate", "bad"); render(); });
+  document.getElementById("heal").addEventListener("click", function () { parted = false; merge(); log.add("Healed: both replicas now hold {" + items(R[0]).join(", ") + "}", "ok"); render(); });
+  document.getElementById("reset").addEventListener("click", reset);
+  document.getElementById("fig").addEventListener("click", function () {
+    reset(); parted = true; log.add("Network partition", "bad");
+    if (rule !== "gset") rem(0, "A"); addTo(0, "B"); addTo(1, "C"); render();
+    parted = false; merge(); log.add("Healed: both replicas now hold {" + items(R[0]).join(", ") + "}", "ok"); render();
+  });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "In Figure 9.9, why does item A come back?",
+      options: ["A network bug", "The merge keeps every item added on either side, and replica 2 still had A", "Replica 1 never removed it"], answer: 1,
+      explain: "Amazon prefers keeping added items over honouring removals (p. 125)." },
+    { q: "Which property must a state-based CRDT's merge have?",
+      options: ["Associative, commutative, idempotent", "Fast", "Ordered by time"], answer: 0,
+      explain: "p. 126." },
+    { q: "Strong eventual consistency guarantees that…",
+      options: ["reads are always fresh", "replicas that received the same updates are in the same state", "updates never conflict"], answer: 1,
+      explain: "p. 125." }
+  ]);
+})();
+</script>
+</body>
+</html>

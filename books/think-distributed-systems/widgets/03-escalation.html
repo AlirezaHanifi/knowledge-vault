@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escalating Failure Handling</title>
+<meta name="description" content="Run an e-commerce checkout&#x27;s Charge credit card step against transient, intermittent and permanent CouldNotConnect failures and an InsufficientFunds failure, and watch the strategy escalate from immediate retry to backoff, to suspend-repair-resume, to compensation and the human layer. Illustrates Think Distributed Systems, Chapter 3.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .ladder { display: grid; gap: 6px; }
+  .rung { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); font-size: .86rem; }
+  .rung.cur { box-shadow: inset 0 0 0 3px var(--accent); } .rung.done { opacity: .6; } .rung.win { border-color: var(--ok); background: var(--ok-soft); opacity: 1; } .rung.lose { border-color: var(--bad); background: var(--bad-soft); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-failure-tolerance.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Escalating failure handling</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · Failure tolerance</div>
+  <h1>Escalating failure handling</h1>
+  <p class="lede">The book’s ideal strategy first asks whether a failure is unambiguously <strong>application-level</strong>. If so, the application compensates (backward recovery). Otherwise the platform assumes the mildest failure first: <strong>transient</strong> (retry immediately), then <strong>intermittent</strong> (retry with backoff), then <strong>permanent</strong> (suspend, repair, resume). Only then is the failure handed to the application, and if compensation fails, to people.</p>
+  <p class="source-note">Illustrates “Failure classification” and “Putting everything together” (pp. 47–53, Figures 3.10–3.16). The number of backoff retries (4), the delays (1, 2, 4, 8 s), the repair time and each failure’s duration are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">The ladder (Figure 3.16)</p><div class="ladder" id="ladder"></div>
+        <div class="callout" id="out" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="fail"></div><div id="refund" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>A transient failure</strong> (a router restart) is fixed by the very first retry.</li>
+    <li><strong>An intermittent failure</strong> (a stale routing table) survives the immediate retry and a few backoff retries, then clears by itself: autorepair after a delay.</li>
+    <li><strong>A permanent failure</strong> (an expired certificate) never clears by itself. Suspending the process, letting an operator install a certificate and resuming is what gets the charge through.</li>
+    <li><strong>InsufficientFunds</strong> is meaningless to the platform, so retries are pointless. The application compensates the steps already done, and if that refund fails too, operators take over.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-failure-tolerance.html"><small>Lesson</small>3. Failure tolerance</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { fail: "transient", refund: "ok" }, k, steps, cur, attempts, clock, result;
+  var RUNGS = ["Classify: application-level?", "Assume transient: immediate retry", "Assume intermittent: retries with backoff", "Assume permanent: suspend, repair, resume", "Application: compensate (refund)", "Human layer: operators"];
+  var DESC = { transient: "CouldNotConnect · router restart (clears after 1 failed attempt)", intermittent: "CouldNotConnect · outdated routing table (clears after ~10 s)", permanent: "CouldNotConnect · expired certificate (needs manual repair)", app: "InsufficientFunds" };
+  function works(time, repaired) {
+    if (cfg.fail === "transient") return attempts >= 2;
+    if (cfg.fail === "intermittent") return time >= 10;
+    if (cfg.fail === "permanent") return repaired;
+    return false;
+  }
+  function plan() {
+    steps = []; var time = 0, n = 0, repaired = false, done = false;
+    function attempt(rung, label, wait) {
+      if (done) return; time += wait || 0; n++; attempts = n;
+      var ok = works(time, repaired);
+      steps.push({ rung: rung, text: "t=" + time + " s · attempt " + n + " (" + label + "): " + (ok ? "charge succeeds" : (cfg.fail === "app" ? "InsufficientFunds" : "CouldNotConnect")), kind: ok ? "ok" : "warn", time: time, n: n });
+      if (ok) { done = true; steps.push({ rung: rung, text: "Process continues: payment collected exactly once", kind: "ok", end: "win", time: time, n: n }); }
+    }
+    attempts = 0; attempt(0, "first try");
+    if (!done && cfg.fail === "app") {
+      steps.push({ rung: 0, text: "The failure is unambiguously application-level: no retries", kind: "bad" });
+      steps.push({ rung: 4, text: "Backward recovery: compensate the steps already completed (release reserved stock, refund deposit)", kind: "warn" });
+      if (cfg.refund === "ok") steps.push({ rung: 4, text: "Compensation succeeded: observably equivalent to no application", kind: "ok", end: "back" });
+      else { steps.push({ rung: 4, text: "The refund itself fails", kind: "bad" }); steps.push({ rung: 5, text: "Escalate to the human layer: an operator investigates; worst case, a refund check is mailed", kind: "bad", end: "human" }); }
+      return;
+    }
+    if (!done) steps.push({ rung: 0, text: "Not unambiguously application-level: the platform handles it", kind: "muted" });
+    attempt(1, "immediate retry");
+    [1, 2, 4, 8].forEach(function (d) { attempt(2, "backoff " + d + " s", d); });
+    if (!done) { steps.push({ rung: 3, text: "Suspend the process; an operator repairs the condition (new certificate)", kind: "warn" }); time += 60; repaired = cfg.fail === "permanent"; attempt(3, "resume after repair", 0); }
+    if (!done) { steps.push({ rung: 4, text: "Mitigation failed: elevate to the application, which compensates", kind: "bad", end: "back" }); }
+  }
+  function fill() { var n = 0, t = 0; steps.forEach(function (s) { if (s.n !== undefined) { n = s.n; t = s.time; } else { s.n = n; s.time = t; } }); }
+  function reset() { plan(); fill(); k = 0; cur = -1; result = null; log.clear(); log.add("Failure: " + DESC[cfg.fail], "muted"); render(); }
+  function step() { if (k >= steps.length) return false; var s = steps[k++]; cur = s.rung; if (s.end) result = s.end; log.add(s.text, s.kind); render(); return k < steps.length; }
+  function render() {
+    var l = Kit.clear(document.getElementById("ladder"));
+    RUNGS.forEach(function (r, i) { l.appendChild(Kit.el("div", { class: "rung" + (i === cur ? " cur" : i < cur ? " done" : "") + (i === cur && result === "win" ? " win" : "") + (i === cur && result === "human" ? " lose" : "") }, (i + 1) + ". " + r)); });
+    var last = steps[Math.max(0, k - 1)] || {}, o = document.getElementById("out");
+    var msg = { win: ["ok", "Forward recovery: the process completed."], back: ["warn", "Backward recovery: the process was undone instead of completed (correct, but less desirable)."], human: ["bad", "Even compensation failed; people must fix it."] };
+    if (result) { o.className = "callout " + msg[result][0]; o.textContent = msg[result][1]; } else { o.className = "callout"; o.textContent = "Step through the strategy."; }
+    stats([["Attempts", last.n || (k ? 1 : 0)], ["Elapsed", (last.time || 0) + " s"], ["Rung", cur >= 0 ? cur + 1 : "–"]]);
+  }
+  document.getElementById("fail").appendChild(Kit.segmented({ label: "Failure", value: cfg.fail, options: [{ value: "transient", label: "Transient" }, { value: "intermittent", label: "Intermittent" }, { value: "permanent", label: "Permanent" }, { value: "app", label: "InsufficientFunds" }], onChange: function (v) { cfg.fail = v; reset(); } }).element);
+  document.getElementById("refund").appendChild(Kit.segmented({ label: "Refund (compensation)", value: cfg.refund, options: [{ value: "ok", label: "Succeeds" }, { value: "fail", label: "Fails" }], onChange: function (v) { cfg.refund = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1000 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does the strategy assume first about a platform-level failure?",
+      options: ["That it's permanent", "That it's transient, so retry immediately", "That it's application-level"], answer: 1,
+      explain: "Step 1 of the escalation (p. 53)." },
+    { q: "Why doesn't the platform retry InsufficientFunds?",
+      options: ["Retries are expensive", "It's an application-level failure: only the application can resolve it", "The network is down"], answer: 1,
+      explain: "The end-to-end argument (p. 48)." },
+    { q: "A refund fails during backward recovery. Who handles it?",
+      options: ["The platform retries forever", "The human layer: operators", "Nobody"], answer: 1,
+      explain: "“Be vigilant” (p. 53)." }
+  ]);
+})();
+</script>
+</body>
+</html>

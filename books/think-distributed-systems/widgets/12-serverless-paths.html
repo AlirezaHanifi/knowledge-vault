@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cold Path, Hot Path</title>
+<meta name="description" content="Send seeded bursts of events to a traditional system with pre-provisioned instances and to a serverless one that acquires resources after each event arrives; change the serverless keep-alive and trade cold-path latency against resources held idle. Illustrates Think Distributed Systems, Chapter 12.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  svg.tl { width: 100%; height: auto; display: block; } svg.tl text { fill: var(--muted); font-size: 10px; font-family: var(--mono); }
+  svg.tl .cold { fill: var(--bad); } svg.tl .hot { fill: var(--ok); } svg.tl .q { fill: var(--warn); } svg.tl path.inst { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-cloud-and-services.html">Chapter 12</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Cold path, hot path</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 12 · Cloud and services</div>
+  <h1>Cold path, hot path</h1>
+  <p class="lede">A <strong>traditional</strong> system acquires resources before events arrive (acquire → receive → process → release). A <strong>serverless</strong> system acquires them after (receive → acquire → process → release). Real platforms keep resources for a while after an event, so a later event takes the <strong>hot path</strong> and skips acquisition; otherwise it takes the <strong>cold path</strong>.</p>
+  <p class="source-note">Illustrates “Traditional”, “Serverless” and “Cold path vs. hot path” (pp. 160–161, Figures 12.5–12.7). The workload, the 800 ms acquisition time, the 200 ms processing time and the cost metrics are the vault’s assumptions, not the book’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title" id="ttl"></p><div id="tl"></div>
+        <p class="field-hint">Each tick is an event: ▲ red = cold path (or queued, in the traditional system: ▲ orange), ● green = hot path. The blue line is the number of instances held.</p>
+        <div class="callout" id="out" style="margin-top:8px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div id="traffic" style="margin-top:10px"></div><div id="nsl" style="margin-top:12px"></div><div id="ksl"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Traditional:</strong> no event waits for acquisition, but the instances are paid for the whole time. Too few, and bursts queue; too many, and most resource-seconds are idle.</li>
+    <li><strong>Serverless, keep-alive 0:</strong> every event takes the cold path, and nothing is held idle.</li>
+    <li><strong>Longer keep-alive:</strong> events inside a burst find a warm instance and take the hot path, at the price of instances held idle between bursts.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-cloud-and-services.html"><small>Lesson</small>12. Cloud and services</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { mode: "sl", traffic: "bursty", N: 3, k: 30 }, ACQ = 0.8, PROC = 0.2, T = 600;
+  function arrivals() {
+    var r = Kit.rng(cfg.traffic === "bursty" ? 7 : 11), out = [], t = 0;
+    if (cfg.traffic === "steady") { while ((t += r.exp(4)) < T) out.push(t); return out; }
+    while (t < T) { t += r.exp(70); var n = 5 + r.int(25), b = t; for (var i = 0; i < n && b < T; i++) { out.push(b); b += r.exp(0.6); } t = b; }
+    return out;
+  }
+  function simulate() {
+    var A = arrivals(), ev = [], held = [], busySec = A.length * PROC, rs = 0, acqSec = 0;
+    if (cfg.mode === "trad") {
+      var free = new Array(cfg.N).fill(0);
+      A.forEach(function (a) { var i = free.indexOf(Math.min.apply(null, free)), st = Math.max(a, free[i]); free[i] = st + PROC; ev.push({ t: a, lat: st + PROC - a, kind: st > a + 1e-9 ? "q" : "hot" }); });
+      rs = cfg.N * T; held = [[0, cfg.N], [T, cfg.N]];
+    } else {
+      var inst = [], chg = [];
+      A.forEach(function (a) {
+        inst = inst.filter(function (x) { if (x.free + cfg.k < a) { rs += x.free + cfg.k - x.start; chg.push([x.free + cfg.k, -1]); return false; } return true; });
+        var warm = inst.filter(function (x) { return x.free <= a; }).sort(function (p, q) { return q.free - p.free; })[0];
+        if (warm) { warm.free = a + PROC; ev.push({ t: a, lat: PROC, kind: "hot" }); }
+        else { inst.push({ start: a, free: a + ACQ + PROC }); acqSec += ACQ; chg.push([a, 1]); ev.push({ t: a, lat: ACQ + PROC, kind: "cold" }); }
+      });
+      inst.forEach(function (x) { var end = Math.min(T, x.free + cfg.k); rs += end - x.start; chg.push([end, -1]); });
+      chg.sort(function (p, q) { return p[0] - q[0]; }); var c = 0; held = [[0, 0]]; chg.forEach(function (x) { c += x[1]; held.push([x[0], c]); }); held.push([T, c]);
+    }
+    var lats = ev.map(function (e) { return e.lat; }).sort(function (a, b) { return a - b; });
+    return { ev: ev, held: held, rs: rs, idle: Math.max(0, rs - busySec - acqSec), mean: lats.reduce(function (a, b) { return a + b; }, 0) / lats.length, p99: lats[Math.min(lats.length - 1, Math.floor(lats.length * 0.99))], slow: ev.filter(function (e) { return e.kind !== "hot"; }).length };
+  }
+  function render() {
+    var s = simulate(), W = 600, H = 120, sx = function (t) { return 10 + t * (W - 20) / T; }, maxI = Math.max(1, Math.max.apply(null, s.held.map(function (h) { return h[1]; })));
+    var sy = function (v) { return 100 - v * 70 / maxI; };
+    var svg = Kit.svg("svg", { class: "tl", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": s.ev.length + " events over " + T + " seconds; " + s.slow + " not on the hot path" });
+    var d = "M" + sx(0) + " " + sy(s.held[0][1]); s.held.forEach(function (h) { d += " H" + sx(h[0]) + " V" + sy(h[1]); }); svg.appendChild(Kit.svg("path", { class: "inst", d: d }));
+    s.ev.forEach(function (e) { var x = sx(e.t); if (e.kind === "hot") svg.appendChild(Kit.svg("circle", { class: "hot", cx: x, cy: 110, r: 2.2 })); else svg.appendChild(Kit.svg("path", { class: e.kind === "q" ? "q" : "cold", d: "M" + (x - 3) + " 114 L" + x + " 106 L" + (x + 3) + " 114 Z" })); });
+    for (var g = 0; g <= T; g += 100) { var tx = Kit.svg("text", { x: sx(g) - 6, y: 12 }); tx.textContent = g + "s"; svg.appendChild(tx); }
+    var mx = Kit.svg("text", { x: W - 70, y: sy(maxI) - 3 }); mx.textContent = "max " + maxI + " inst."; svg.appendChild(mx);
+    Kit.clear(document.getElementById("tl")).appendChild(svg);
+    document.getElementById("ttl").textContent = (cfg.mode === "trad" ? "Traditional, " + cfg.N + " pre-provisioned instances" : "Serverless, keep-alive " + cfg.k + " s") + " · " + s.ev.length + " events in " + T + " s";
+    var idleShare = s.idle / Math.max(1e-9, s.rs), o = document.getElementById("out");
+    o.className = "callout " + (s.slow / s.ev.length > 0.3 ? "bad" : idleShare > 0.8 ? "warn" : "ok");
+    o.textContent = (cfg.mode === "trad" ? Kit.pct(s.slow / s.ev.length, 1) + " of events waited in a queue. " : Kit.pct(s.slow / s.ev.length, 1) + " of events took the cold path. ") + Kit.pct(idleShare, 0) + " of the " + Math.round(s.rs) + " resource-seconds were idle.";
+    stats([["Events", s.ev.length], [cfg.mode === "trad" ? "Queued" : "Cold path", Kit.pct(s.slow / s.ev.length, 1), s.slow / s.ev.length > 0.3 ? "bad" : "ok"], ["Mean latency", Math.round(s.mean * 1000) + " ms"], ["p99 latency", Math.round(s.p99 * 1000) + " ms"], ["Resource-seconds", Math.round(s.rs)], ["Idle resource-seconds", Math.round(s.idle), idleShare > 0.8 ? "warn" : "ok"]]);
+  }
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "System", value: cfg.mode, options: [{ value: "trad", label: "Traditional" }, { value: "sl", label: "Serverless" }], onChange: function (v) { cfg.mode = v; log.add(v === "trad" ? "Traditional: acquire, then receive" : "Serverless: receive, then acquire", "muted"); render(); } }).element);
+  document.getElementById("traffic").appendChild(Kit.segmented({ label: "Traffic", value: cfg.traffic, options: [{ value: "bursty", label: "Bursty" }, { value: "steady", label: "Steady" }], onChange: function (v) { cfg.traffic = v; log.add("Traffic: " + v, "muted"); render(); } }).element);
+  document.getElementById("nsl").appendChild(Kit.slider({ label: "Traditional: instances", min: 1, max: 10, step: 1, value: cfg.N, onInput: function (v) { cfg.N = v; render(); } }).element);
+  document.getElementById("ksl").appendChild(Kit.slider({ label: "Serverless: keep-alive after an event", min: 0, max: 120, step: 5, value: cfg.k, unit: " s", onInput: function (v) { cfg.k = v; render(); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "In the minimal model, what distinguishes serverless from traditional computing?",
+      options: ["There are no servers", "Resources are acquired after the event arrives", "It's always cheaper"], answer: 1,
+      explain: "pp. 160–161." },
+    { q: "What is a hot path?",
+      options: ["An event served by resources still held from earlier events", "A path through a busy network", "An event that failed"], answer: 0,
+      explain: "p. 161." },
+    { q: "What does a longer keep-alive trade?",
+      options: ["Fewer cold paths for more idle resources", "Lower latency for less safety", "Nothing"], answer: 0,
+      explain: "The vault's reading of p. 161, measured in this simulation." }
+  ]);
+})();
+</script>
+</body>
+</html>
