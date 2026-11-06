@@ -124,7 +124,6 @@ Ideas that recur across chapters, with the chapters that discuss them. Definitio
 
 ## Source
 
-
 - **Primary source:** the publisher's PDF of the second edition (673 PDF pages; the printed page number is the PDF page number minus 24). The PDF is kept outside version control (see `.gitignore`).
 - **Table of contents:** taken from the PDF's bookmark outline, which gives the full two-level section hierarchy with page numbers; chapter titles match the [O'Reilly catalog page](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/).
 - **Structure:** 14 chapters plus preface, glossary, index, and author biographies; the second edition has **no part divisions**.

@@ -1,0 +1,18 @@
+{
+  "config": {
+    // Prose is written one paragraph per line; no hard wrap limit.
+    "MD013": false,
+    // Repeated headings across different sections are part of the fixed note shape.
+    "MD024": { "siblings_only": true },
+    // Chapter notes carry a `title` in YAML front matter as well as an `# H1`.
+    "MD025": { "front_matter_title": "" },
+    // Adjacent `> **Try it:**` / `> **Vault note:**` callouts are separate blockquotes.
+    "MD028": false,
+    // Collapsible answers, keys and footnote markers, all rendered by GitHub.
+    "MD033": { "allowed_elements": ["details", "summary", "kbd", "sup"] },
+    // Italic lines are table and figure captions, not headings.
+    "MD036": false
+  },
+  "globs": ["**/*.md"],
+  "ignores": [".git", "node_modules"]
+}

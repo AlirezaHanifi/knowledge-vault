@@ -14,3 +14,5 @@ jobs:
           python-version: "3.12"
       - name: Validate vault structure, metadata, and links
         run: python scripts/validate.py
+      - name: Lint Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v20

@@ -200,7 +200,7 @@ It maps onto two tables — `vertices(vertex_id, label, properties jsonb)` and `
 
 Created for Neo4j, now openCypher, also in Memgraph, KùzuDB, Neptune and Apache AGE; named after a character in *The Matrix* (p. 88).
 
-```
+```cypher
 MATCH
   (person) -[:BORN_IN]->  () -[:WITHIN*0..]-> (:Location {name:'United States'}),
   (person) -[:LIVES_IN]-> () -[:WITHIN*0..]-> (:Location {name:'Europe'})
@@ -217,7 +217,7 @@ Each traversed edge is a join, and the number of joins isn’t known in advance.
 
 Everything is a **(subject, predicate, object)** triple — (Jim, likes, bananas). The object is either a primitive value — then predicate + object are a property, as in (lucy, birthYear, 1989) — or another vertex — then the predicate is an edge, as in (lucy, marriedTo, alain). Real systems add metadata: Neptune uses quads (graph ID), Datomic 5-tuples (transaction ID, deletion flag) (p. 92). Data can be written in **Turtle** (a subset of N3) or RDF/XML; RDF uses URIs as names so different publishers’ “within” don’t collide (pp. 93–95). The **Semantic Web** didn’t succeed as envisioned, but its legacy lives on in JSON-LD, biomedical ontologies, Facebook’s Open Graph (link unfurling), Wikidata and Schema.org (p. 94).
 
-```
+```sparql
 PREFIX : <urn:example:>
 SELECT ?personName WHERE {
   ?person :name ?personName.
