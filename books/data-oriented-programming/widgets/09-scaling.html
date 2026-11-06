@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copying at Scale</title>
+<meta name="description" content="Grow a collection from a thousand to ten billion elements and compare a full shallow copy with path copying at branching factors 2 and 32, counting elements copied and cache lines touched per update. Illustrates Data-Oriented Programming, chapter 9.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-persistent-data-structures.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Copying at scale</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · Persistent data structures</div>
+  <h1>Copying at scale</h1>
+  <p class="lede">Structural sharing by shallow copying, as in chapter 4, copies a whole map or array at each level: fine for small data, slow for big collections. Persistent data structures copy only a path, so the cost grows with log N and stays “effectively constant” up to the largest collections that fit in memory.</p>
+  <p class="source-note">Illustrates sections 9.1–9.2 (pp. 176–183): why shallow copying slows down as collections grow, log₂ and log₃₂ depths, and the 10-billion-element bound (about 33 versus 6.64 levels). The 4-byte elements follow the book; the 64-byte cache line and the cost model are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Elements copied per update (log₁₀ scale)</p><svg id="chart" role="img" aria-label="Elements copied per update by collection size"></svg></div>
+      <div class="panel"><p class="panel-title">At this size</p><div class="table-wrap"><table id="tbl"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="n"></div><div id="line"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>A shallow copy grows with N</strong>: ten billion elements means copying ten billion slots for every update.</li>
+    <li><strong>Path copying grows with log N</strong>: 34 levels at branching factor 2, 7 at 32. The book rounds that to “effectively constant”, though not constant in theory.</li>
+    <li><strong>Cache lines</strong> are the vault’s way to show the book’s point: a 32-slot node of 4-byte elements spans two 64-byte lines, so a 32-way update touches a few dozen lines, while a binary tree touches one line per level but many more levels.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-persistent-data-structures.html"><small>Lesson</small>9. Persistent data structures</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), cfg = { e: 6, line: 64 };
+  function lv(n, b) { return Math.ceil(Math.log(n) / Math.log(b) - 1e-9); }
+  function cost(n, b) { var d = lv(n, b); return { levels: d, slots: d * b, lines: d * Math.ceil(b * 4 / cfg.line) }; }
+  function render() { var n = Math.pow(10, cfg.e), s = [[], [], []];
+    for (var e = 3; e <= 10; e += 0.25) { var m = Math.pow(10, e); s[0].push([e, e]); s[1].push([e, Math.log10(cost(m, 2).slots)]); s[2].push([e, Math.log10(cost(m, 32).slots)]); }
+    Kit.lineChart(document.getElementById("chart"), { xMin: 3, xMax: 10, yMax: 10, xLabel: "log₁₀ N (elements)", yLabel: "log₁₀ slots copied", series: [{ label: "shallow copy", cls: "s3", points: s[0] }, { label: "path, b = 2", cls: "s2", points: s[1] }, { label: "path, b = 32", cls: "s1", points: s[2] }], marks: [{ x: cfg.e, label: "N" }] });
+    var t = Kit.clear(document.getElementById("tbl")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["strategy", "levels", "slots copied", "cache lines"].map(function (h) { return Kit.el("th", null, h); }))));
+    var tb = Kit.el("tbody"), c2 = cost(n, 2), c32 = cost(n, 32);
+    [["Shallow copy", "1", n.toLocaleString("en-US"), Math.ceil(n * 4 / cfg.line).toLocaleString("en-US")], ["Path copy, b = 2", c2.levels, c2.slots, c2.lines], ["Path copy, b = 32", c32.levels, c32.slots, c32.lines]].forEach(function (r) { tb.appendChild(Kit.el("tr", null, r.map(function (x) { return Kit.el("td", null, String(x)); }))); });
+    t.appendChild(tb);
+    stats([["N", n.toLocaleString("en-US")], ["Memory at 4 B", n * 4 >= 1e9 ? (n * 4 / 1e9).toFixed(0) + " GB" : n * 4 >= 1e6 ? (n * 4 / 1e6).toFixed(0) + " MB" : (n * 4 / 1e3).toFixed(0) + " KB"], ["log₂ N", Math.log2(n).toFixed(1)], ["log₃₂ N", (Math.log2(n) / 5).toFixed(2)]]); }
+  document.getElementById("n").appendChild(Kit.slider({ label: "Collection size", min: 3, max: 10, step: 0.5, value: cfg.e, format: function (v) { return Math.round(Math.pow(10, v)).toLocaleString("en-US"); }, onInput: function (v) { cfg.e = v; render(); if (v === 10) log.add("Ten billion elements: about 40 GB, the book’s upper bound. log₂ ≈ 33, log₃₂ ≈ 6.64.", "ok"); } }).element);
+  document.getElementById("line").appendChild(Kit.segmented({ label: "Cache line", value: 64, options: [{ value: 32, label: "32-byte lines" }, { value: 64, label: "64-byte lines" }], onChange: function (v) { cfg.line = v; render(); log.add(v + "-byte cache lines.", "muted"); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What's the book's reasonable upper bound for a list in memory, and its log₃₂?",
+      options: ["10 billion elements, about 6.64", "1 million, about 4", "1 trillion, about 8"], answer: 0,
+      explain: "pp. 182–183." },
+    { q: "Why does structural sharing by shallow copying become slow?",
+      options: ["Garbage collection", "Each level copies a whole map or array, which is large for big collections", "Locks"], answer: 1,
+      explain: "Section 9.1 (pp. 176–178)." },
+    { q: "How does the book describe the cost of get and update in persistent structures?",
+      options: ["Constant in theory", "Effectively constant in practice, though not in theory", "Linear"], answer: 1,
+      explain: "p. 183." }
+  ]);
+})();
+</script>
+</body>
+</html>

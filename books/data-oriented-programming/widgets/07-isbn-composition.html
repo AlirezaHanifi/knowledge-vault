@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISBN Composition</title>
+<meta name="description" content="Toggle which ISBN fields an Open Library book response has and see how allOf with anyOf accepts it, while oneOf would reject Watchmen, which has both. Illustrates Data-Oriented Programming, chapter 7.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; } table.tt td, table.tt th { text-align: center; } table.tt td.y { color: var(--ok); } table.tt td.n { color: var(--bad); font-weight: 600; } table.tt tr.cur td { background: var(--accent-soft); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-basic-data-validation.html">Chapter 7</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ISBN composition</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 7 · Basic data validation</div>
+  <h1>ISBN composition</h1>
+  <p class="lede">An Open Library response always has <code>isbn_10</code>, <code>isbn_13</code> or both: books published before 2007 have the first, later ones the second, and republished books like <em>Watchmen</em> both. Theo’s rule is <code>basic AND (isbn13 OR isbn10)</code>: in JSON Schema, <code>allOf</code> and <code>anyOf</code>.</p>
+  <p class="source-note">Illustrates section 7.4, Schema composition (listings 7.16–7.19, pp. 154–157). The response is listing 7.16’s Watchmen; the <code>oneOf</code> comparison follows the book’s remark that <code>oneOf</code> exists, and the truth table is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">The book response</p><pre class="code" id="data"></pre></div>
+      <div class="panel"><p class="panel-title">Every combination</p><div class="table-wrap"><table class="tt" id="tt"></table></div><div class="callout" id="verdict" style="margin-top:8px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><label style="display:flex;gap:6px"><input type="checkbox" id="i10" checked> has <code>isbn_10</code></label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="i13" checked> has <code>isbn_13</code></label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="tt0" checked> has <code>title</code></label>
+        <div id="comb" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong><code>allOf</code> is AND</strong>: the basic book schema must hold, including the required <code>title</code>.</li>
+    <li><strong><code>anyOf</code> is OR</strong>: one ISBN or both are fine, which is the rule Theo states.</li>
+    <li><strong><code>oneOf</code> is “exactly one”</strong>: it would reject <em>Watchmen</em>, which has both ISBNs because it was republished after 2007.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-basic-data-validation.html"><small>Lesson</small>7. Basic data validation</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  // A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
+  // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
+  // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
+  function jsType(x) { return x === null ? "null" : Array.isArray(x) ? "array" : typeof x; }
+  function validate(schema, data, allErrors) {
+    var errors = [];
+    function err(path, kw, msg, sp) { errors.push({ instancePath: path, schemaPath: sp, keyword: kw, message: msg }); }
+    function v(s, d, path, sp) {
+      var start = errors.length;
+      function stop() { return !allErrors && errors.length > start; }
+      if (s.type) { var t = jsType(d), ok = s.type === t || (s.type === "integer" && t === "number" && Math.floor(d) === d) || (s.type === "number" && t === "number");
+        if (!ok) { err(path, "type", "must be " + s.type, sp + "/type"); return; } }
+      if (s.enum && !s.enum.some(function (e) { return JSON.stringify(e) === JSON.stringify(d); })) { err(path, "enum", "must be equal to one of the allowed values", sp + "/enum"); if (stop()) return; }
+      if (typeof d === "number") {
+        if (s.minimum !== undefined && d < s.minimum) { err(path, "minimum", "must be >= " + s.minimum, sp + "/minimum"); if (stop()) return; }
+        if (s.maximum !== undefined && d > s.maximum) { err(path, "maximum", "must be <= " + s.maximum, sp + "/maximum"); if (stop()) return; } }
+      if (typeof d === "string") {
+        if (s.pattern && !new RegExp(s.pattern).test(d)) { err(path, "pattern", "must match pattern \"" + s.pattern + "\"", sp + "/pattern"); if (stop()) return; }
+        if (s.format === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { err(path, "format", "must match format \"date\"", sp + "/format"); if (stop()) return; } }
+      if (jsType(d) === "object") {
+        (s.required || []).forEach(function (k) { if (stop()) return; if (!Object.prototype.hasOwnProperty.call(d, k)) err(path, "required", "must have required property '" + k + "'", sp + "/required"); });
+        if (stop()) return;
+        Object.keys(d).forEach(function (k) { if (stop()) return; var p = path + "/" + k;
+          if (s.properties && s.properties[k]) v(s.properties[k], d[k], p, sp + "/properties/" + k);
+          else if (s.additionalProperties === false) err(path, "additionalProperties", "must NOT have additional properties ('" + k + "')", sp + "/additionalProperties");
+          else if (s.additionalProperties && typeof s.additionalProperties === "object") v(s.additionalProperties, d[k], p, sp + "/additionalProperties"); });
+        if (stop()) return; }
+      if (jsType(d) === "array") {
+        var pre = s.prefixItems || [];
+        pre.forEach(function (ps, i) { if (stop()) return; if (i < d.length) v(ps, d[i], path + "/" + i, sp + "/prefixItems/" + i); });
+        if (s.items) d.forEach(function (x, i) { if (stop()) return; if (i >= pre.length) v(s.items, x, path + "/" + i, sp + "/items"); });
+        if (stop()) return; }
+      if (s.allOf) s.allOf.forEach(function (ss, i) { if (!stop()) v(ss, d, path, sp + "/allOf/" + i); });
+      if (stop()) return;
+      ["anyOf", "oneOf"].forEach(function (kw) { if (!s[kw] || stop()) return;
+        var n = s[kw].filter(function (ss) { return validate(ss, d, false).length === 0; }).length;
+        if (kw === "anyOf" && n === 0) err(path, "anyOf", "must match a schema in anyOf", sp + "/anyOf");
+        if (kw === "oneOf" && n !== 1) err(path, "oneOf", "must match exactly one schema in oneOf (" + n + " matched)", sp + "/oneOf"); });
+    }
+    v(schema, data, "", "#");
+    return errors;
+  }
+  function errorsText(errs) { return errs.map(function (e) { return "data" + e.instancePath + " " + e.message; }).join(", "); }
+
+  var log = Kit.log(document.getElementById("log")), comb = "anyOf";
+  var basic = { type: "object", required: ["title"], properties: { title: { type: "string" }, publishers: { type: "array", items: { type: "string" } }, number_of_pages: { type: "integer" }, isbn_13: { type: "array", items: { type: "string" } }, isbn_10: { type: "array", items: { type: "string" } } } };
+  var m13 = { type: "object", required: ["isbn_13"] }, m10 = { type: "object", required: ["isbn_10"] };
+  function schema() { var o = {}; o[comb] = [m13, m10]; return { allOf: [basic, o] }; }
+  function book(t, a, b) { var x = { publishers: ["DC Comics"], number_of_pages: 334 }; if (b) x.isbn_13 = ["9780930289232"]; if (t) x.title = "Watchmen"; if (a) x.isbn_10 = ["0930289234"]; x.publish_date = "April 1, 1995"; return x; }
+  function render() { var t = document.getElementById("tt0").checked, a = document.getElementById("i10").checked, b = document.getElementById("i13").checked, d = book(t, a, b), errs = validate(schema(), d, true);
+    document.getElementById("data").textContent = JSON.stringify(d, null, 2);
+    var tb = Kit.clear(document.getElementById("tt")); tb.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["title", "isbn_10", "isbn_13", "allOf + anyOf", "allOf + oneOf"].map(function (h) { return Kit.el("th", null, h); }))));
+    var body = Kit.el("tbody");
+    [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0], [0, 1, 1]].forEach(function (r) { var dd = book(r[0], r[1], r[2]), sv = comb, res = ["anyOf", "oneOf"].map(function (c) { comb = c; return validate(schema(), dd, false).length === 0; }); comb = sv;
+      body.appendChild(Kit.el("tr", { class: r[0] === +t && r[1] === +a && r[2] === +b ? "cur" : "" }, r.map(function (x) { return Kit.el("td", null, x ? "yes" : "—"); }).concat(res.map(function (ok) { return Kit.el("td", { class: ok ? "y" : "n" }, ok ? "✓ valid" : "✗ invalid"); })))); });
+    tb.appendChild(body);
+    var v = document.getElementById("verdict"); v.className = "callout " + (errs.length ? "bad" : "ok"); v.textContent = "With " + comb + ": " + (errs.length ? errorsText(errs) : "valid.");
+    stats([["Valid", errs.length ? "no" : "yes", errs.length ? "bad" : "ok"], ["ISBN fields", (a ? 1 : 0) + (b ? 1 : 0)], ["Combinator", comb]]); }
+  ["i10", "i13", "tt0"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { render(); log.add((e.target.checked ? "Added " : "Removed ") + id.replace("i", "isbn_").replace("tt0", "title"), "muted"); }); });
+  document.getElementById("comb").appendChild(Kit.segmented({ label: "Combinator for the ISBNs", value: comb, options: [{ value: "anyOf", label: "anyOf (book)" }, { value: "oneOf", label: "oneOf" }], onChange: function (v) { comb = v; render(); log.add("Using " + v + (v === "oneOf" ? ": Watchmen, with both ISBNs, is now rejected." : "."), v === "oneOf" ? "warn" : "ok"); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Which ISBN does a book published before 2007 have in the Open Library response?",
+      options: ["isbn_10", "isbn_13", "Both"], answer: 0,
+      explain: "p. 155." },
+    { q: "How does JSON Schema write Theo's AND and OR?",
+      options: ["and / or", "allOf / anyOf", "required / enum"], answer: 1,
+      explain: "p. 156." },
+    { q: "Would Watchmen validate if anyOf were replaced by oneOf?",
+      options: ["Yes", "No: it has both ISBNs, and oneOf requires exactly one", "Only without a title"], answer: 1,
+      explain: "Watchmen has both (p. 155); oneOf means exactly one (pp. 156–157)." }
+  ]);
+})();
+</script>
+</body>
+</html>

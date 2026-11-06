@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validation Inside the System</title>
+<meta name="description" content="Call searchBooksByTitle with valid and broken catalogs and queries, switch between dev, staging and production, and see the argument and return-value schema checks report each mistake, or let it through. Illustrates Data-Oriented Programming, chapter 12.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-advanced-data-validation.html">Chapter 12</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Validation inside</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 12 · Advanced data validation</div>
+  <h1>Validation inside the system</h1>
+  <p class="lede">Boundary validation guards production. <strong>Inside</strong> the system, Dave validates a function’s arguments and its return value against schemas, but only when <code>dev()</code> is true: in every environment except production. A mistake then fails early, with a message that says what is wrong and where.</p>
+  <p class="source-note">Illustrates sections 12.1–12.2 (listings 12.1–12.11, pp. 248–257): the catalog, book, book-item and author schemas, the tuple schema with <code>prefixItems</code>, homogeneous maps with <code>additionalProperties</code>, and the two dev-only checks. The catalog combines listing 15.10’s books and authors with listing 14.10’s book items; the author IDs and purchase dates are the vault’s. Error texts follow Ajv’s style. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">catalogData (JSON)</p><textarea class="code" id="cat" spellcheck="false" aria-label="catalogData as JSON" style="min-height:260px"></textarea></div>
+      <div class="panel"><p class="panel-title">Result</p><div class="callout" id="verdict"></div><pre class="code" id="out"></pre></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="sc">Scenario</label><select id="sc"></select>
+        <label class="field-head" for="q" style="margin-top:10px">query (JSON)</label><input id="q" class="code" style="width:100%">
+        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="swap"> Pass the arguments in the wrong order</label>
+        <div id="env" style="margin-top:10px"></div>
+        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="fix"> Apply Dave’s fix (listing 12.28)</label>
+        <button class="btn primary" id="go" type="button" style="margin-top:10px">Call searchBooksByTitle</button></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>In production, most mistakes slip through quietly</strong>: a number as the query or swapped arguments just return <code>[]</code>, and a missing author returns <code>undefined</code> in the names.</li>
+    <li><strong>A book without a title</strong> crashes in production with a JavaScript <code>TypeError</code> deep inside the filter, the kind of unclear error Dave struggled with. In dev, the argument check names the exact path.</li>
+    <li><strong>The return-value check</strong> catches what the argument check can’t: valid arguments that still make the function return data that breaks its contract.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-advanced-data-validation.html"><small>Lesson</small>12. Advanced data validation</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+// A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
+  // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
+  // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
+  function jsType(x) { return x === null ? "null" : Array.isArray(x) ? "array" : typeof x; }
+  function validate(schema, data, allErrors) {
+    var errors = [];
+    function err(path, kw, msg, sp) { errors.push({ instancePath: path, schemaPath: sp, keyword: kw, message: msg }); }
+    function v(s, d, path, sp) {
+      var start = errors.length;
+      function stop() { return !allErrors && errors.length > start; }
+      if (s.type) { var t = jsType(d), ok = s.type === t || (s.type === "integer" && t === "number" && Math.floor(d) === d) || (s.type === "number" && t === "number");
+        if (!ok) { err(path, "type", "must be " + s.type, sp + "/type"); return; } }
+      if (s.enum && !s.enum.some(function (e) { return JSON.stringify(e) === JSON.stringify(d); })) { err(path, "enum", "must be equal to one of the allowed values", sp + "/enum"); if (stop()) return; }
+      if (typeof d === "number") {
+        if (s.minimum !== undefined && d < s.minimum) { err(path, "minimum", "must be >= " + s.minimum, sp + "/minimum"); if (stop()) return; }
+        if (s.maximum !== undefined && d > s.maximum) { err(path, "maximum", "must be <= " + s.maximum, sp + "/maximum"); if (stop()) return; } }
+      if (typeof d === "string") {
+        if (s.pattern && !new RegExp(s.pattern).test(d)) { err(path, "pattern", "must match pattern \"" + s.pattern + "\"", sp + "/pattern"); if (stop()) return; }
+        if (s.format === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { err(path, "format", "must match format \"date\"", sp + "/format"); if (stop()) return; } }
+      if (jsType(d) === "object") {
+        (s.required || []).forEach(function (k) { if (stop()) return; if (!Object.prototype.hasOwnProperty.call(d, k)) err(path, "required", "must have required property '" + k + "'", sp + "/required"); });
+        if (stop()) return;
+        Object.keys(d).forEach(function (k) { if (stop()) return; var p = path + "/" + k;
+          if (s.properties && s.properties[k]) v(s.properties[k], d[k], p, sp + "/properties/" + k);
+          else if (s.additionalProperties === false) err(path, "additionalProperties", "must NOT have additional properties ('" + k + "')", sp + "/additionalProperties");
+          else if (s.additionalProperties && typeof s.additionalProperties === "object") v(s.additionalProperties, d[k], p, sp + "/additionalProperties"); });
+        if (stop()) return; }
+      if (jsType(d) === "array") {
+        var pre = s.prefixItems || [];
+        pre.forEach(function (ps, i) { if (stop()) return; if (i < d.length) v(ps, d[i], path + "/" + i, sp + "/prefixItems/" + i); });
+        if (s.items) d.forEach(function (x, i) { if (stop()) return; if (i >= pre.length) v(s.items, x, path + "/" + i, sp + "/items"); });
+        if (stop()) return; }
+      if (s.allOf) s.allOf.forEach(function (ss, i) { if (!stop()) v(ss, d, path, sp + "/allOf/" + i); });
+      if (stop()) return;
+      ["anyOf", "oneOf"].forEach(function (kw) { if (!s[kw] || stop()) return;
+        var n = s[kw].filter(function (ss) { return validate(ss, d, false).length === 0; }).length;
+        if (kw === "anyOf" && n === 0) err(path, "anyOf", "must match a schema in anyOf", sp + "/anyOf");
+        if (kw === "oneOf" && n !== 1) err(path, "oneOf", "must match exactly one schema in oneOf (" + n + " matched)", sp + "/oneOf"); });
+    }
+    v(schema, data, "", "#");
+    return errors;
+  }
+  function errorsText(errs) { return errs.map(function (e) { return "data" + e.instancePath + " " + e.message; }).join(", "); }
+
+  var authorSchema = { type: "object", required: ["id", "name", "bookIsbns"],
+    properties: { id: { type: "string" }, name: { type: "string" }, bookIsbns: { type: "array", items: { type: "string" } } } };
+  var bookItemSchema = { type: "object", properties: { id: { type: "string" }, libId: { type: "string" }, purchaseDate: { type: "string" }, isLent: { type: "boolean" } },
+    required: ["id", "libId", "purchaseDate", "isLent"] };
+  var bookSchema = { type: "object", required: ["title", "isbn", "authorIds", "bookItems"],
+    properties: { title: { type: "string" }, publicationYear: { type: "integer" }, isbn: { type: "string" },
+      authorIds: { type: "array", items: { type: "string" } }, bookItems: { type: "array", items: bookItemSchema } } };
+  var catalogSchema = { type: "object", properties: { booksByIsbn: { type: "object", additionalProperties: bookSchema },
+    authorsById: { type: "object", additionalProperties: authorSchema } }, required: ["booksByIsbn", "authorsById"] };
+  var searchBooksArgsSchema = { type: "array", prefixItems: [catalogSchema, { type: "string" }] };
+  var searchBooksResponseSchema = { type: "array", items: { type: "object", required: ["title", "isbn", "authorNames"],
+    properties: { title: { type: "string" }, isbn: { type: "string" }, authorNames: { type: "array", items: { type: "string" } } } } };
+  function get(m, path, dflt) { var ks = Array.isArray(path) ? path : [path], x = m;
+    for (var i = 0; i < ks.length; i++) { if (x === null || x === undefined) return dflt; x = x[ks[i]]; }
+    return x === undefined ? dflt : x; }
+  function vals(m) { return m && typeof m === "object" ? Object.keys(m).map(function (k) { return m[k]; }) : []; }
+  // Listing 12.1, with the checks of listings 12.9 and 12.11 and, optionally, the fix of listing 12.28.
+  function searchBooksByTitle(catalogData, query, dev, fixed) {
+    if (dev) { var ea = validate(searchBooksArgsSchema, [catalogData, query], false);
+      if (ea.length) throw { check: "args", message: "searchBooksByTitle called with invalid arguments: " + errorsText(ea) }; }
+    var matching = vals(get(catalogData, "booksByIsbn")).filter(function (book) { return get(book, "title").includes(query); });
+    var infos = matching.map(function (book) {
+      return { title: get(book, "title"), isbn: get(book, "isbn"),
+        authorNames: (get(book, "authorIds") || []).map(function (id) { return fixed ? get(catalogData, ["authorsById", id, "name"], "Not available") : get(catalogData, ["authorsById", id, "name"]); }) }; });
+    if (dev) { var er = validate(searchBooksResponseSchema, infos, false);
+      if (er.length) throw { check: "return", message: "searchBooksByTitle returned an invalid value: " + errorsText(er) }; }
+    return infos; }
+  function show(x) { return JSON.stringify(x, function (k, v) { return v === undefined ? "«undefined»" : v; }, 2); }
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), env = "dev";
+  var BASE = { booksByIsbn: {
+      "978-1982137274": { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", authorIds: ["sean-covey", "stephen-covey"],
+        bookItems: [{ id: "book-item-123", libId: "hudson-park-lib", purchaseDate: "2021-04-18", isLent: true }, { id: "book-item-17", libId: "nyc-central-lib", purchaseDate: "2020-11-02", isLent: false }] },
+      "978-1779501127": { isbn: "978-1779501127", title: "Watchmen", publicationYear: 1987, authorIds: ["alan-moore", "dave-gibbons"],
+        bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", purchaseDate: "2019-06-30", isLent: true }] } },
+    authorsById: {
+      "stephen-covey": { id: "stephen-covey", name: "Stephen Covey", bookIsbns: ["978-1982137274"] },
+      "sean-covey": { id: "sean-covey", name: "Sean Covey", bookIsbns: ["978-1982137274"] },
+      "dave-gibbons": { id: "dave-gibbons", name: "Dave Gibbons", bookIsbns: ["978-1779501127"] },
+      "alan-moore": { id: "alan-moore", name: "Alan Moore", bookIsbns: ["978-1779501127"] } } };
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  var SC = [
+    ["Valid catalog and query", function (c) { return [c, "Watch"]; }],
+    ["Query is a number", function (c) { return [c, 42]; }],
+    ["Watchmen has no title", function (c) { delete c.booksByIsbn["978-1779501127"].title; return [c, "Watch"]; }],
+    ["Publication year is a string", function (c) { c.booksByIsbn["978-1779501127"].publicationYear = "1987"; return [c, "Watch"]; }],
+    ["A book item lacks isLent", function (c) { delete c.booksByIsbn["978-1982137274"].bookItems[1].isLent; return [c, "Habits"]; }],
+    ["Dave Gibbons missing from authorsById", function (c) { delete c.authorsById["dave-gibbons"]; return [c, "Watch"]; }]];
+  var sel = document.getElementById("sc");
+  SC.forEach(function (s, i) { sel.appendChild(Kit.el("option", { value: i }, s[0])); });
+  function load() { var r = SC[+sel.value][1](clone(BASE)); document.getElementById("cat").value = JSON.stringify(r[0], null, 2); document.getElementById("q").value = JSON.stringify(r[1]); document.getElementById("swap").checked = false; run(true); }
+  function run(quiet) { var v = document.getElementById("verdict"), out = document.getElementById("out"), cat, q, dev = env !== "production", fixed = document.getElementById("fix").checked, argC = dev ? "pass" : "skipped", retC = dev ? "pass" : "skipped";
+    try { cat = JSON.parse(document.getElementById("cat").value); q = JSON.parse(document.getElementById("q").value); }
+    catch (e) { v.className = "callout warn"; v.textContent = "That isn’t valid JSON: " + e.message; out.textContent = ""; return; }
+    var a = document.getElementById("swap").checked ? [q, cat] : [cat, q], kind, msg;
+    try { var res = searchBooksByTitle(a[0], a[1], dev, fixed); out.textContent = show(res);
+      var silent = JSON.stringify(res).indexOf("null") >= 0 || show(res).indexOf("«undefined»") >= 0;
+      kind = silent ? "warn" : "ok"; msg = "Returned " + res.length + " book info(s)" + (dev ? "; both checks passed." : silent ? ", with undefined values nobody checked." : "; nothing was checked.");
+      if (!dev && res.length === 0) { kind = "warn"; msg = "Returned an empty array, with no hint whether that’s a real “no match” or a mistake."; } }
+    catch (e) { out.textContent = "";
+      if (e && e.check) { kind = "bad"; msg = e.message; if (e.check === "args") { argC = "fail"; retC = "not reached"; } else retC = "fail"; }
+      else { kind = "bad"; msg = "Uncaught " + (e && e.name ? e.name + ": " + e.message : String(e)); argC = dev ? "pass" : "skipped"; retC = "not reached"; } }
+    v.className = "callout " + kind; v.textContent = msg;
+    if (!quiet) log.add("[" + env + "] " + SC[+sel.value][0] + (document.getElementById("swap").checked ? ", swapped" : "") + " → " + msg, kind);
+    stats([["Environment", env], ["dev()", String(dev)], ["Argument check", argC, argC === "fail" ? "bad" : argC === "pass" ? "ok" : ""], ["Return check", retC, retC === "fail" ? "bad" : retC === "pass" ? "ok" : ""]]); }
+  document.getElementById("env").appendChild(Kit.segmented({ label: "Environment", value: env, options: [{ value: "dev", label: "dev" }, { value: "staging", label: "staging" }, { value: "production", label: "production" }], onChange: function (x) { env = x; run(); } }).element);
+  sel.addEventListener("change", function () { load(); log.add("Scenario: " + SC[+sel.value][0] + ".", "muted"); });
+  document.getElementById("go").addEventListener("click", function () { run(); });
+  document.getElementById("fix").addEventListener("change", function () { run(); });
+  document.getElementById("swap").addEventListener("change", function () { run(); });
+  load();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "When does dev() return true?",
+      options: ["Only on developers’ laptops", "In every environment except production, including testing and staging", "Only in production"], answer: 1,
+      explain: "p. 255." },
+    { q: "How does the book express that searchBooksByTitle takes a catalog then a string?",
+      options: ["Two separate validate calls", "A tuple: an array schema with prefixItems", "A class with two fields"], answer: 1,
+      explain: "Listing 12.8 (p. 254)." },
+    { q: "How is an index like booksByIsbn described in JSON Schema?",
+      options: ["An array of books", "An object whose additionalProperties is the book schema", "An object with a required isbn key"], answer: 1,
+      explain: "Homogeneous maps (listings 12.5–12.6, pp. 252–253)." }
+  ]);
+})();
+</script>
+</body>
+</html>

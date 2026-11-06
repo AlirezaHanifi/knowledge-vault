@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Least Generic Tool</title>
+<meta name="description" content="Toggle book items lent or not and switch between the forEach, reduce and countByBoolField versions of lendingRatio: the ratio is the same, but the business logic shrinks to what it means. Illustrates Data-Oriented Programming, chapter 14.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+  .items label { display: flex; gap: 8px; align-items: center; font-family: var(--mono); font-size: .8rem; padding: 3px 0; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/14-advanced-data-manipulation.html">Chapter 14</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Least generic tool</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 14 · Advanced data manipulation</div>
+  <h1>The least generic tool</h1>
+  <p class="lede">Three versions of <code>lendingRatio</code> compute the same number. <code>forEach</code> is a Swiss army knife; <code>reduce</code> is narrower but still low level; <code>countByBoolField</code> is a screwdriver that says what it does. When <em>using</em> a utility, pick the least generic one that solves the problem.</p>
+  <p class="source-note">Illustrates section 14.3 (listings 14.10–14.15, pp. 301–305): the two books with nested book items, the three versions of <code>lendingRatio</code>, the unit test of <code>countByBoolField</code> and its implementation with <code>update</code>. Added book items are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="grid-2"><div class="panel"><p class="panel-title">Book items (listing 14.10)</p><div class="items" id="items"></div>
+          <button class="btn small" id="add" type="button" style="margin-top:6px">Add a book item</button></div>
+        <div class="panel"><p class="panel-title">lendingRatio(books)</p><div class="callout" id="verdict" aria-live="polite"></div>
+          <p class="panel-title" style="margin-top:10px">Unit test (listing 14.14)</p><pre class="code" id="test"></pre></div></div>
+      <div class="panel"><p class="panel-title" id="ct">Business logic</p><pre class="code" id="code"></pre></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="ver"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The result never changes</strong>: all three versions return lent ÷ (lent + not lent). What changes is how much of the code is about iterating and how much is about the business.</li>
+    <li><strong>Moving the counters into a map</strong> is what lets the <code>reduce</code> hide behind a named function: <code>countByBoolField</code> is itself a <code>reduce</code> with <code>update</code>.</li>
+    <li><strong>With no book items</strong>, every version divides 0 by 0. The book doesn’t handle it; the widget shows JavaScript’s <code>NaN</code>.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/14-advanced-data-manipulation.html"><small>Lesson</small>14. Advanced data manipulation</a></li>
+    <li><a href="../lab/14-custom-data-tools/README.md"><small>Experiment</small>update, flatMap, countByBoolField and unwind in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+var BOOKS = [
+    { isbn: "978-1779501127", title: "Watchmen", bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }] },
+    { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", bookItems: [
+      { id: "book-item-123", libId: "hudson-park-lib", isLent: true }, { id: "book-item-17", libId: "nyc-central-lib", isLent: false }] }];
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  function flatMap(coll, f) { return [].concat.apply([], coll.map(typeof f === "string" ? function (x) { return x[f]; } : f)); }
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), books = clone(BOOKS), ver = "count", nextId = 200;
+  var CODE = {
+    forEach: "function lendingRatio(books) {\n  var bookItems = flatMap(books, \"bookItems\");\n  var lent = 0;\n  var notLent = 0;\n  _.forEach(bookItems, function(item) {\n    if(_.get(item, \"isLent\")) {\n      lent = lent + 1;\n    } else {\n      notLent = notLent + 1;\n    }\n  });\n  return lent/(lent + notLent);\n}",
+    reduce: "function lendingRatio(books) {\n  var bookItems = flatMap(books, \"bookItems\");\n  var stats = _.reduce(bookItems, function(res, item) {\n    if(_.get(item, \"isLent\")) {\n      res.lent = res.lent + 1;\n    } else {\n      res.notLent = res.notLent + 1;\n    }\n    return res;\n  }, {notLent: 0, lent:0});\n  return stats.lent/(stats.lent + stats.notLent);\n}",
+    count: "function lendingRatio(books) {\n  var bookItems = flatMap(books, \"bookItems\");\n  var stats = countByBoolField(bookItems, \"isLent\", \"lent\", \"notLent\");\n  return stats.lent/(stats.lent + stats.notLent);\n}\n\n// the utility, written once (listing 14.15)\nfunction countByBoolField(coll, field, keyTrue, keyFalse) {\n  return _.reduce(coll, function(res, item) {\n    if (_.get(item, field)) {\n      return update(res, keyTrue, inc);\n    }\n    return update(res, keyFalse, inc);\n  }, {[keyTrue]: 0, [keyFalse]: 0});\n}" };
+  function update(map, key, fun) { var r = Object.assign({}, map); r[key] = fun(map[key]); return r; }
+  function inc(n) { return n + 1; }
+  function countByBoolField(coll, field, kT, kF) { var init = {}; init[kT] = 0; init[kF] = 0; return coll.reduce(function (res, item) { return item[field] ? update(res, kT, inc) : update(res, kF, inc); }, init); }
+  var IMPL = {
+    forEach: function (bs) { var items = flatMap(bs, "bookItems"), lent = 0, notLent = 0; items.forEach(function (it) { if (it.isLent) lent = lent + 1; else notLent = notLent + 1; }); return lent / (lent + notLent); },
+    reduce: function (bs) { var s = flatMap(bs, "bookItems").reduce(function (res, it) { if (it.isLent) res.lent = res.lent + 1; else res.notLent = res.notLent + 1; return res; }, { notLent: 0, lent: 0 }); return s.lent / (s.lent + s.notLent); },
+    count: function (bs) { var s = countByBoolField(flatMap(bs, "bookItems"), "isLent", "lent", "notLent"); return s.lent / (s.lent + s.notLent); } };
+  function drawItems() { var box = Kit.clear(document.getElementById("items"));
+    books.forEach(function (b, bi) { box.appendChild(Kit.el("p", { class: "field-hint", style: "margin:6px 0 0" }, b.title));
+      b.bookItems.forEach(function (it, ii) { var cb = Kit.el("input", { type: "checkbox" }); cb.checked = it.isLent;
+        cb.addEventListener("change", function () { books[bi].bookItems[ii].isLent = cb.checked; log.add(it.id + (cb.checked ? " lent" : " returned") + ".", "muted"); render(); });
+        box.appendChild(Kit.el("label", null, [cb, it.id + " @ " + it.libId + " — isLent"])); }); }); }
+  function render() { var items = flatMap(books, "bookItems"), lent = items.filter(function (i) { return i.isLent; }).length, r = IMPL[ver](books), same = [IMPL.forEach(books), IMPL.reduce(books), IMPL.count(books)].every(function (x) { return String(x) === String(r); });
+    var v = document.getElementById("verdict"); v.className = "callout " + (isNaN(r) ? "warn" : "ok");
+    v.textContent = "→ " + (isNaN(r) ? "NaN (0 ÷ 0)" : r.toFixed(4) + " (" + lent + " of " + items.length + " lent)") + (same ? "; all three versions agree." : "; versions disagree!");
+    var lines = CODE[ver].split("\n"), bl = ver === "count" ? 5 : lines.length;
+    document.getElementById("code").textContent = CODE[ver];
+    document.getElementById("ct").textContent = { forEach: "Listing 14.11: forEach", reduce: "Listing 14.12: reduce", count: "Listing 14.13: countByBoolField" }[ver];
+    document.getElementById("test").textContent = "countByBoolField(\n  [{\"a\": true}, {\"a\": true}, {\"a\": true}, {\"a\": false}],\n  \"a\", \"aTrue\", \"aFalse\")\n// → " + JSON.stringify(countByBoolField([{ a: true }, { a: true }, { a: true }, { a: false }], "a", "aTrue", "aFalse"));
+    stats([["Lent", lent], ["Not lent", items.length - lent], ["Ratio", isNaN(r) ? "NaN" : r.toFixed(3)], ["Lines of business logic", bl, ver === "count" ? "ok" : ""]]); }
+  document.getElementById("ver").appendChild(Kit.segmented({ label: "Version", value: ver, options: [{ value: "forEach", label: "forEach" }, { value: "reduce", label: "reduce" }, { value: "count", label: "countByBoolField" }], onChange: function (v) { ver = v; render(); log.add("Switched to the " + v + " version; same result.", "ok"); } }).element);
+  document.getElementById("add").addEventListener("click", function () { var id = "book-item-" + (nextId++); books[0].bookItems.push({ id: id, libId: "nyc-central-lib", isLent: false }); log.add("Added " + id + " to Watchmen, not lent.", "muted"); drawItems(); render(); });
+  drawItems(); render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What’s Theo’s rule for choosing a utility function when using one?",
+      options: ["The most generic, for flexibility", "The least generic one that solves the problem", "Always reduce"], answer: 1,
+      explain: "p. 303." },
+    { q: "What does countByBoolField([{a:true},{a:true},{a:true},{a:false}], \"a\", \"aTrue\", \"aFalse\") return?",
+      options: ["{aTrue: 3, aFalse: 1}", "[3, 1]", "0.75"], answer: 0,
+      explain: "Listing 14.14 (pp. 304–305)." },
+    { q: "What made it possible to hide the reduce behind a named function?",
+      options: ["Using variables for the counters", "Keeping the counters as fields of a map", "Using forEach"], answer: 1,
+      explain: "p. 304." }
+  ]);
+})();
+</script>
+</body>
+</html>

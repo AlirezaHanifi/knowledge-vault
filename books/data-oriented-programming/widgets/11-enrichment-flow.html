@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enrichment Flow</title>
+<meta name="description" content="Choose the fields a client requests and step through the chapter 11 search endpoint: validate the request, query the database, fetch and double-filter each Open Library record, and join the two arrays by ISBN.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; } ol.flow li { margin: 4px 0; } ol.flow li.cur { font-weight: 600; } ol.flow li.done { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/11-web-services.html">Chapter 11</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Enrichment flow</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 11 · Web services</div>
+  <h1>Enrichment flow</h1>
+  <p class="lede">The enriched search endpoint passes data through seven steps, and every step takes and returns <strong>generic data</strong>: a parsed request, database rows, parsed Open Library responses, filtered with <code>_.pick</code> twice and joined by ISBN with <code>_.keyBy</code> and <code>_.merge</code>.</p>
+  <p class="source-note">Illustrates sections 11.4–11.6 (listings 11.8–11.25, pp. 227–243): the seven steps on p. 234, double field filtering with Nancy’s <code>relevantFields</code> (listing 11.9) and <code>joinArrays</code>. The Open Library records are a mock: 7 Habits follows listing 11.6, The Power of Habit is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">The data flow (p. 234)</p><ol class="flow" id="flow"></ol></div>
+      <div class="panel"><p class="panel-title" id="st">Data</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><p class="panel-title">Requested fields</p><div id="fields"></div>
+        <label class="field-head" for="title" style="margin-top:8px">Title query</label><input id="title" value="habit" style="width:100%">
+        <div id="pl" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Double filtering</strong>: Nancy’s allowed fields first, then the client’s request. A field must pass both to reach the response.</li>
+    <li><strong>Look closely at <code>relevantFields</code></strong>: it lists <code>publisher</code>, while the API returns <code>publishers</code>, so publishers never get through as printed. Request it and see.</li>
+    <li><strong>The join doesn’t assume order</strong>: both arrays are keyed by ISBN and merged, so the database’s availability and Open Library’s details meet in one flat map per book.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/11-web-services.html"><small>Lesson</small>11. Web services</a></li>
+    <li><a href="../lab/11-join-arrays/README.md"><small>Experiment</small>Joining arrays in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  // A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
+  // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
+  // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
+  function jsType(x) { return x === null ? "null" : Array.isArray(x) ? "array" : typeof x; }
+  function validate(schema, data, allErrors) {
+    var errors = [];
+    function err(path, kw, msg, sp) { errors.push({ instancePath: path, schemaPath: sp, keyword: kw, message: msg }); }
+    function v(s, d, path, sp) {
+      var start = errors.length;
+      function stop() { return !allErrors && errors.length > start; }
+      if (s.type) { var t = jsType(d), ok = s.type === t || (s.type === "integer" && t === "number" && Math.floor(d) === d) || (s.type === "number" && t === "number");
+        if (!ok) { err(path, "type", "must be " + s.type, sp + "/type"); return; } }
+      if (s.enum && !s.enum.some(function (e) { return JSON.stringify(e) === JSON.stringify(d); })) { err(path, "enum", "must be equal to one of the allowed values", sp + "/enum"); if (stop()) return; }
+      if (typeof d === "number") {
+        if (s.minimum !== undefined && d < s.minimum) { err(path, "minimum", "must be >= " + s.minimum, sp + "/minimum"); if (stop()) return; }
+        if (s.maximum !== undefined && d > s.maximum) { err(path, "maximum", "must be <= " + s.maximum, sp + "/maximum"); if (stop()) return; } }
+      if (typeof d === "string") {
+        if (s.pattern && !new RegExp(s.pattern).test(d)) { err(path, "pattern", "must match pattern \"" + s.pattern + "\"", sp + "/pattern"); if (stop()) return; }
+        if (s.format === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { err(path, "format", "must match format \"date\"", sp + "/format"); if (stop()) return; } }
+      if (jsType(d) === "object") {
+        (s.required || []).forEach(function (k) { if (stop()) return; if (!Object.prototype.hasOwnProperty.call(d, k)) err(path, "required", "must have required property '" + k + "'", sp + "/required"); });
+        if (stop()) return;
+        Object.keys(d).forEach(function (k) { if (stop()) return; var p = path + "/" + k;
+          if (s.properties && s.properties[k]) v(s.properties[k], d[k], p, sp + "/properties/" + k);
+          else if (s.additionalProperties === false) err(path, "additionalProperties", "must NOT have additional properties ('" + k + "')", sp + "/additionalProperties");
+          else if (s.additionalProperties && typeof s.additionalProperties === "object") v(s.additionalProperties, d[k], p, sp + "/additionalProperties"); });
+        if (stop()) return; }
+      if (jsType(d) === "array") {
+        var pre = s.prefixItems || [];
+        pre.forEach(function (ps, i) { if (stop()) return; if (i < d.length) v(ps, d[i], path + "/" + i, sp + "/prefixItems/" + i); });
+        if (s.items) d.forEach(function (x, i) { if (stop()) return; if (i >= pre.length) v(s.items, x, path + "/" + i, sp + "/items"); });
+        if (stop()) return; }
+      if (s.allOf) s.allOf.forEach(function (ss, i) { if (!stop()) v(ss, d, path, sp + "/allOf/" + i); });
+      if (stop()) return;
+      ["anyOf", "oneOf"].forEach(function (kw) { if (!s[kw] || stop()) return;
+        var n = s[kw].filter(function (ss) { return validate(ss, d, false).length === 0; }).length;
+        if (kw === "anyOf" && n === 0) err(path, "anyOf", "must match a schema in anyOf", sp + "/anyOf");
+        if (kw === "oneOf" && n !== 1) err(path, "oneOf", "must match exactly one schema in oneOf (" + n + " matched)", sp + "/oneOf"); });
+    }
+    v(schema, data, "", "#");
+    return errors;
+  }
+  function errorsText(errs) { return errs.map(function (e) { return "data" + e.instancePath + " " + e.message; }).join(", "); }
+
+  var log = Kit.log(document.getElementById("log")), stage = 0;
+  var ENUM = ["title", "full_title", "subtitle", "publishers", "publish_date", "weight", "physical_dimensions", "genre", "subjects", "number_of_pages"];
+  var RELEVANT = ["title", "full_title", "subtitle", "publisher", "publish_date", "weight", "physical_dimensions", "genre", "subjects", "number_of_pages"];
+  var DB = [{ title: "7 Habits of Highly Effective People", isbn: "978-1982137274", available: true }, { title: "The Power of Habit", isbn: "978-0812981605", available: false }];
+  var OL = { "978-1982137274": { title: "7 Habits of Highly Effective People", subtitle: "Powerful Lessons in Personal Change", number_of_pages: 432, publish_date: "2020", publishers: ["Simon & Schuster, Incorporated"], isbn_13: ["9781982137274"], revision: 1, latest_revision: 1, works: [{ key: "/works/OL2629977W" }] },
+    "978-0812981605": { title: "The Power of Habit", subtitle: "Why We Do What We Do in Life and Business", subjects: ["Social aspects", "Habit", "Change (Psychology)"], isbn_13: ["9780812981605"], publishers: ["Random House"], revision: 3 } };
+  var reqSchema = { type: "object", required: ["title", "fields"], properties: { title: { type: "string" }, fields: { type: "array", items: { enum: ENUM } } } };
+  var olSchema = { allOf: [{ type: "object", required: ["title"] }, { anyOf: [{ type: "object", required: ["isbn_13"] }, { type: "object", required: ["isbn_10"] }] }] };
+  var STEPS = ["Receive the request", "Extract the query and the fields", "Retrieve matching books from the database", "Fetch Open Library information for each ISBN", "Extract the required fields (double _.pick)", "Combine with joinArrays by ISBN", "Send the response"];
+  var chosen = { title: true, weight: false, number_of_pages: true, subtitle: true, publishers: false, subjects: false };
+  function pick(m, ks) { var r = {}; ks.forEach(function (k) { if (k in m) r[k] = m[k]; }); return r; }
+  function compute() { var req = { title: document.getElementById("title").value, fields: Object.keys(chosen).filter(function (k) { return chosen[k]; }) };
+    var errs = validate(reqSchema, req, true), db = DB.filter(function (b) { return b.title.toLowerCase().indexOf(req.title.toLowerCase()) >= 0; }).map(function (b) { return pick(b, ["isbn", "available"]); });
+    var raw = db.map(function (b) { return OL[b.isbn]; }), filtered = db.map(function (b) { var r = pick(pick(OL[b.isbn], RELEVANT), req.fields); r.isbn = b.isbn; return r; });
+    var ka = {}, kb = {}; db.forEach(function (x) { ka[x.isbn] = x; }); filtered.forEach(function (x) { kb[x.isbn] = x; });
+    var joined = Object.keys(ka).map(function (k) { return Object.assign({}, ka[k], kb[k]); });
+    return { req: req, errs: errs, fields: req.fields, db: db, raw: raw, rawErr: raw.map(function (x) { return validate(olSchema, x, false).length; }), filtered: filtered, joined: joined }; }
+  function render() { var c = compute(), ol = Kit.clear(document.getElementById("flow"));
+    STEPS.forEach(function (s, i) { ol.appendChild(Kit.el("li", { class: i === stage ? "cur" : i < stage ? "done" : "" }, (i < stage ? "✓ " : "") + s)); });
+    var out = [c.req, { title: c.req.title, fields: c.fields, valid: !c.errs.length }, c.db, c.raw, c.filtered, c.joined, JSON.stringify(c.joined)][stage];
+    document.getElementById("st").textContent = "Step " + (stage + 1) + ": " + STEPS[stage];
+    document.getElementById("out").textContent = typeof out === "string" ? out : JSON.stringify(out, null, 2);
+    var v = document.getElementById("verdict"), lostPub = chosen.publishers;
+    v.className = "callout " + (c.errs.length ? "bad" : stage === 4 && lostPub ? "warn" : "ok");
+    v.textContent = c.errs.length ? "Invalid request: " + errorsText(c.errs) : stage === 3 ? "Each response validated against the Books API schema: " + c.rawErr.filter(function (n) { return !n; }).length + "/" + c.raw.length + " valid." : stage === 4 && lostPub ? "“publishers” was requested but relevantFields lists “publisher”: it is filtered out." : stage === 5 ? c.db.length + " database rows joined with " + c.filtered.length + " Open Library records, by ISBN." : "Step through the endpoint.";
+    stats([["Requested fields", c.fields.length], ["Matching books", c.db.length], ["Fields kept per book", c.filtered.length ? Object.keys(c.filtered[0]).length - 1 : 0]]); }
+  var fbox = document.getElementById("fields"); Object.keys(chosen).forEach(function (k) { var id = "f-" + k, cb = Kit.el("input", { type: "checkbox", id: id }); cb.checked = chosen[k];
+    cb.addEventListener("change", function () { chosen[k] = cb.checked; render(); log.add((cb.checked ? "Requests " : "Drops ") + k, "muted"); });
+    fbox.appendChild(Kit.el("label", { for: id, style: "display:flex;gap:6px" }, cb, Kit.el("code", null, k))); });
+  document.getElementById("title").addEventListener("input", function () { render(); });
+  Kit.player({ mount: document.getElementById("pl"), interval: 1200, step: function () { if (stage >= 6) return false; stage++; log.add("Step " + (stage + 1) + ": " + STEPS[stage], "muted"); render(); return stage < 6; }, reset: function () { stage = 0; render(); } });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What is double field filtering?",
+      options: ["Filtering twice for safety", "Keeping Nancy's allowed fields, then the fields the client requested", "Filtering the database and the API"], answer: 1,
+      explain: "pp. 229–231." },
+    { q: "Why does joinArrays key both arrays by ISBN?",
+      options: ["The two arrays may list books in different orders", "For speed only", "To remove duplicates"], answer: 0,
+      explain: "pp. 236–237." },
+    { q: "Which Lodash function is like groupBy but keeps one element per key?",
+      options: ["_.keyBy", "_.pick", "_.at"], answer: 0,
+      explain: "p. 237." }
+  ]);
+})();
+</script>
+</body>
+</html>

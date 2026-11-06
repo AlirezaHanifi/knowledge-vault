@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unwind and Group</title>
+<meta name="description" content="Step through unwind on each book of Data-Oriented Programming&#x27;s chapter 14, then flatMap and groupBy on bookItems.libId, and watch each book&#x27;s title and ISBN travel with its items; add an item at a new library, or see what a mutating set does to unwind.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/14-advanced-data-manipulation.html">Chapter 14</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Unwind and group</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 14 · Advanced data manipulation</div>
+  <h1>Unwind and group</h1>
+  <p class="lede">To group book items by library, each item needs its book’s title and ISBN. <code>unwind(map, field)</code>, after MongoDB’s <code>$unwind</code>, returns one copy of the map per element of the array field, with the field set to that element. Then <code>groupBy</code> on <code>bookItems.libId</code> does the rest.</p>
+  <p class="source-note">Illustrates section 14.4 (figure 14.2; listings 14.16–14.19, pp. 305–309): the expected result, the business logic with <code>flatMap</code>, <code>unwind</code> and <code>_.groupBy</code>, and <code>unwind</code>’s implementation with <code>_.map</code> and <code>_.set</code>. The extra item and the mutating-set comparison are the vault’s (see the vault note on p. 309 in the lesson). Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title" id="st">Step</p><p class="field-hint" id="expl" aria-live="polite"></p><pre class="code" id="out" style="max-height:420px;overflow:auto"></pre></div>
+      <div class="panel"><p class="panel-title">The code (listings 14.17 and 14.19)</p><pre class="code">function unwind(map, field) {
+  var arr = _.get(map, field);
+  return _.map(arr, function(elem) {
+    return _.set(map, field, elem);
+  });
+}
+var bookItems = flatMap(books, function(book) {
+  return unwind(book, "bookItems");
+});
+_.groupBy(bookItems, "bookItems.libId");</pre></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="ply"></div>
+        <button class="btn small" id="add" type="button" style="margin-top:10px">Add an item at a new library</button>
+        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="mut"> Use a mutating <code>set</code></label></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Each unwound map keeps everything else</strong>: <code>isbn</code> and <code>title</code> ride along with each single item.</li>
+    <li><strong>No cloning is needed</strong> because the data is immutable: <code>_.set</code> returns a new map each time and the original book is untouched.</li>
+    <li><strong>With a mutating set</strong>, every “copy” is the same object, so all of them show the last item and the grouping collapses into one library.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/14-advanced-data-manipulation.html"><small>Lesson</small>14. Advanced data manipulation</a></li>
+    <li><a href="../lab/14-custom-data-tools/README.md"><small>Experiment</small>update, flatMap, countByBoolField and unwind in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+var BOOKS = [
+    { isbn: "978-1779501127", title: "Watchmen", bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }] },
+    { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", bookItems: [
+      { id: "book-item-123", libId: "hudson-park-lib", isLent: true }, { id: "book-item-17", libId: "nyc-central-lib", isLent: false }] }];
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  function flatMap(coll, f) { return [].concat.apply([], coll.map(typeof f === "string" ? function (x) { return x[f]; } : f)); }
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), books = clone(BOOKS), step = 0, added = false;
+  function setImm(m, f, v) { var r = Object.assign({}, m); r[f] = v; return r; }
+  function setMut(m, f, v) { m[f] = v; return m; }
+  function unwind(map, field) { var set = document.getElementById("mut").checked ? setMut : setImm, arr = map[field].slice();
+    return arr.map(function (elem) { return set(map, field, elem); }); }
+  function groupBy(coll, path) { var g = {}; coll.forEach(function (x) { var k = path.split(".").reduce(function (a, p) { return a && a[p]; }, x); (g[k] = g[k] || []).push(x); }); return g; }
+  function stages() { var bs = clone(books), s = [["Input: books (listing 14.10)", "Two books; the second has two book items. Items don’t know their book’s title or ISBN.", bs]];
+    var per = bs.map(function (b) { return unwind(b, "bookItems"); });
+    per.forEach(function (u, i) { s.push(["unwind(books[" + i + "], \"bookItems\")", u.length + " map(s), each with one item and the book’s other fields.", u]); });
+    var flat = flatMap(per, function (u) { return u; });
+    s.push(["flatMap: one list of unwound maps", flat.length + " maps in total.", flat]);
+    var g = groupBy(flat, "bookItems.libId");
+    s.push(["_.groupBy(bookItems, \"bookItems.libId\")", Object.keys(g).length + " libraries: " + Object.keys(g).join(", ") + ".", g]);
+    return s; }
+  function render() { var s = stages(), cur = s[step], last = s[s.length - 1][2];
+    document.getElementById("st").textContent = "Step " + (step + 1) + " of " + s.length + ": " + cur[0];
+    document.getElementById("expl").textContent = cur[1];
+    document.getElementById("out").textContent = JSON.stringify(cur[2], null, 2);
+    var flat = s[s.length - 2][2], distinct = new Set(flat.map(function (x) { return JSON.stringify(x.bookItems); })).size;
+    stats([["Books", books.length], ["Book items", flatMap(books, "bookItems").length], ["Distinct unwound items", distinct, distinct < flat.length ? "bad" : "ok"], ["Libraries", Object.keys(last).length]]);
+    return s.length; }
+  var p = Kit.player({ mount: document.getElementById("ply"), interval: 1400,
+    step: function () { var n = stages().length; if (step >= n - 1) return false; step++; render(); log.add(stages()[step][0] + ": " + stages()[step][1], "ok"); return step < n - 1; },
+    reset: function () { step = 0; render(); log.add("Reset to the input books.", "muted"); } });
+  document.getElementById("add").addEventListener("click", function () { if (added) return; added = true; books[0].bookItems.push({ id: "book-item-42", libId: "brooklyn-lib", isLent: false });
+    document.getElementById("add").disabled = true; step = 0; render(); log.add("Added book-item-42 at brooklyn-lib to Watchmen (the vault’s example). Step through again.", "muted"); });
+  document.getElementById("mut").addEventListener("change", function (e) { step = 0; render(); log.add(e.target.checked ? "Mutating set: every unwound map is the same object." : "Immutable set: each unwound map is new.", e.target.checked ? "warn" : "ok"); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does unwind({\"customer-id\": \"joe\", \"items\": [a, b]}, \"items\") return?",
+      options: ["{\"customer-id\": \"joe\"}", "Two maps, each with customer-id and one item", "[a, b]"], answer: 1,
+      explain: "Listing 14.18 (p. 309)." },
+    { q: "Which MongoDB operator inspired unwind?",
+      options: ["$group", "$lookup", "$unwind"], answer: 2,
+      explain: "pp. 307–308." },
+    { q: "Why doesn’t unwind need to clone the map for each element?",
+      options: ["Because data is immutable: set returns a new version", "Because arrays are small", "It does clone"], answer: 0,
+      explain: "p. 309." }
+  ]);
+})();
+</script>
+</body>
+</html>

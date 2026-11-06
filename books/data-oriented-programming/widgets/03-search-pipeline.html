@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search as Data Manipulation</title>
+<meta name="description" content="Run the chapter 3 book search stage by stage over a small catalog: get the books, filter by title, map each to a BookInfo and serialize to JSON. Change the query, add a field to a book, and see which code cares. Illustrates Data-Oriented Programming, chapter 3.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>ul.tree { list-style: none; padding-left: 14px; margin: 0; font-family: var(--mono); font-size: .8rem; } ul.tree li { margin: 1px 0; }
+  .tree .k { color: var(--ink-2); } .tree .v { color: var(--ink); } .tree button.key { font: inherit; background: none; border: 0; padding: 0 2px; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
+  .tree .on > .lbl, .tree .on > button.key { background: var(--accent-soft); outline: 1px solid var(--accent); border-radius: 3px; }
+  .tree .new > .tag, .tree .shared > .tag { font-size: .7rem; border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+  .tree .new > .tag { background: var(--warn-soft); color: var(--ink); border: 1px solid var(--warn); } .tree .shared > .tag { background: var(--ok-soft); color: var(--ink); border: 1px solid var(--ok); }
+  ol.steps { font-family: var(--mono); font-size: .8rem; } ol.steps li.miss { color: var(--bad); }
+  pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; } .stage-list li { margin: 6px 0; } .stage-list li.cur pre.code { border-color: var(--accent); } .stage-list li.todo { opacity: .5; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-basic-data-manipulation.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Search as data manipulation</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · Basic data manipulation</div>
+  <h1>Search as data manipulation</h1>
+  <p class="lede">Joe’s search is four small functions and no classes: <code>_.get</code> the books, <code>_.filter</code> by title, <code>_.map</code> each to a <code>BookInfo</code> map literal, and <code>JSON.stringify</code> the result. “The code contains no abstractions. It’s just data manipulation!”</p>
+  <p class="source-note">Illustrates section 3.4, Calculating search results (listings 3.10–3.24, pp. 58–64), with Watchmen from listing 3.5. The two extra books, the stage view and the extra-field experiment are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Library.searchBooksByTitleJSON(libraryData, query)</p><ol class="stage-list" id="stages"></ol></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="q">Query</label><input id="q" type="text" value="Wat" style="width:100%">
+        <div id="pl" style="margin-top:10px"></div>
+        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="extra"> Add a <code>"genre"</code> field to every book</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="noauth"> Remove Dave Gibbons from <code>authorsById</code></label></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Each stage is data in, data out</strong>, so you can look at any intermediate value, and serializing the result needs no code: it is already JSON-shaped.</li>
+    <li><strong>Adding a field to books changes nothing</strong> in the search: <code>authorNames</code> reads only <code>authorIds</code>, and <code>bookInfo</code> picks only <code>title</code> and <code>isbn</code>. The data model is flexible.</li>
+    <li><strong>The flip side is safety</strong>: remove an author and the search returns <code>null</code> where a name should be, silently. Chapters 7 and 12 add schemas for that.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-basic-data-manipulation.html"><small>Lesson</small>3. Basic data manipulation</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  function catalog() { return {
+    booksByIsbn: {
+      "978-1779501127": { isbn: "978-1779501127", title: "Watchmen", publicationYear: 1987, authorIds: ["alan-moore", "dave-gibbons"],
+        bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }, { id: "book-item-2", libId: "nyc-central-lib", isLent: false }] } },
+    authorsById: { "alan-moore": { name: "Alan Moore", bookIsbns: ["978-1779501127"] }, "dave-gibbons": { name: "Dave Gibbons", bookIsbns: ["978-1779501127"] } } }; }
+  function isObj(x) { return x !== null && typeof x === "object"; }
+  function fmt(v) { return Array.isArray(v) ? "[…" + v.length + "]" : isObj(v) ? "{…" + Object.keys(v).length + "}" : JSON.stringify(v); }
+
+  var log = Kit.log(document.getElementById("log")), stage = 4;
+  function libraryData() { var c = catalog();
+    c.booksByIsbn["978-1982137274"] = { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", publicationYear: 1989, authorIds: ["sean-covey", "stephen-covey"], bookItems: [] };
+    c.booksByIsbn["978-0441172719"] = { isbn: "978-0441172719", title: "Dune", publicationYear: 1965, authorIds: ["frank-herbert"], bookItems: [] };
+    c.authorsById["sean-covey"] = { name: "Sean Covey", bookIsbns: ["978-1982137274"] }; c.authorsById["stephen-covey"] = { name: "Stephen Covey", bookIsbns: ["978-1982137274"] };
+    c.authorsById["frank-herbert"] = { name: "Frank Herbert", bookIsbns: ["978-0441172719"] };
+    if (document.getElementById("extra").checked) Object.keys(c.booksByIsbn).forEach(function (k) { c.booksByIsbn[k].genre = k === "978-0441172719" ? "science fiction" : "non-fiction"; });
+    if (document.getElementById("noauth").checked) delete c.authorsById["dave-gibbons"];
+    return { catalog: c, userManagement: {} }; }
+  function g(m, p) { var c = m; (Array.isArray(p) ? p : [p]).forEach(function (k) { c = c == null ? undefined : c[k]; }); return c; }
+  function run() {
+    var q = document.getElementById("q").value, lib = libraryData(), cat = g(lib, "catalog"), all = Object.values(g(cat, "booksByIsbn"));
+    var matching = all.filter(function (b) { return g(b, "title").includes(q); });
+    var infos = matching.map(function (b) { return { title: g(b, "title"), isbn: g(b, "isbn"), authorNames: g(b, "authorIds").map(function (id) { var n = g(cat, ["authorsById", id, "name"]); return n === undefined ? null : n; }) }; });
+    var json = JSON.stringify(infos);
+    var S = [["_.get(libraryData, \"catalog\") → booksByIsbn", all.map(function (b) { return b.isbn + "  " + JSON.stringify(b.title) + (b.genre ? "  genre: " + b.genre : ""); }).join("\n")],
+      ["_.filter(allBooks, book => _.get(book, \"title\").includes(" + JSON.stringify(q) + "))", matching.length ? matching.map(function (b) { return JSON.stringify(b.title); }).join("\n") : "[]  (no title includes the query; includes is case-sensitive)"],
+      ["_.map(matchingBooks, book => Catalog.bookInfo(catalogData, book))", JSON.stringify(infos, null, 1)],
+      ["JSON.stringify(results)", json]];
+    var ol = Kit.clear(document.getElementById("stages"));
+    S.forEach(function (s, i) { ol.appendChild(Kit.el("li", { class: i + 1 === stage ? "cur" : i + 1 > stage ? "todo" : "" }, Kit.el("code", null, s[0]), Kit.el("pre", { class: "code" }, i + 1 > stage ? "…" : s[1]))); });
+    var nulls = infos.reduce(function (a, x) { return a + x.authorNames.filter(function (n) { return n === null; }).length; }, 0);
+    stats([["Books", all.length], ["Matching", matching.length], ["Classes defined", 0, "ok"], ["Missing author names", nulls, nulls ? "bad" : "ok"]]);
+    return { m: matching.length, nulls: nulls };
+  }
+  var pl = Kit.player({ mount: document.getElementById("pl"), interval: 900, step: function () { if (stage >= 4) return false; stage++; log.add("Stage " + stage + " computed.", "muted"); run(); return stage < 4; }, reset: function () { stage = 1; run(); log.add("Back to the first stage.", "muted"); } });
+  document.getElementById("q").addEventListener("input", function () { var r = run(); log.add("Query " + JSON.stringify(document.getElementById("q").value) + ": " + r.m + " book(s).", "muted"); });
+  document.getElementById("extra").addEventListener("change", function (e) { run(); log.add(e.target.checked ? "Added genre to every book: the search code is unchanged and so is its output." : "Removed the genre field.", "ok"); });
+  document.getElementById("noauth").addEventListener("change", function (e) { var r = run(); log.add(e.target.checked ? "Dave Gibbons removed: " + r.nulls + " missing author name(s) in the result, with no error." : "Dave Gibbons restored.", e.target.checked ? "bad" : "muted"); });
+  run();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How is a BookInfo created in Joe's code?",
+      options: ["With a BookInfo class", "As a map literal in Catalog.bookInfo", "By a JSON parser"], answer: 1,
+      explain: "p. 64: there's no need to create a class for bookInfo." },
+    { q: "What does _.filter do when passed a map such as booksByIsbn?",
+      options: ["Throws", "Iterates over the map's values", "Iterates over its keys"], answer: 1,
+      explain: "Listing 3.23, p. 64." },
+    { q: "Which module does searchBooksByTitleJSON belong to?",
+      options: ["Catalog", "Library", "UserManagement"], answer: 1,
+      explain: "p. 63." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capture and Replay</title>
+<meta name="description" content="Capture a function&#x27;s context with console.log or JSON.stringify, replay the captured catalog and query in a mock REPL, and run the eight test queries against the three versions of book search from Data-Oriented Programming&#x27;s chapter 15.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+  table.q td { font-family: var(--mono); font-size: .8rem; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/15-debugging.html">Chapter 15</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Capture and replay</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 15 · Debugging</div>
+  <h1>Capture and replay</h1>
+  <p class="lede">In DOP the <strong>function context</strong> is just the arguments, and arguments are data. Serialize them to JSON at the top of the function, paste them into a REPL, and you can replay the call and improve the code there, with a much shorter feedback loop than triggering the endpoint.</p>
+  <p class="source-note">Illustrates sections 15.2–15.4 (listings 15.4–15.26, pp. 314–328): <code>console.log</code> versus <code>JSON.stringify</code> on a string with quotes, the captured catalog of listing 15.9, and three searches: lowercase <code>startsWith</code> on the title (listing 15.8), <code>hasWordStartingWith</code> on words (listings 15.3 and 15.12), and the lowercase <code>\b</code> regular expression (listing 15.24). The eight queries are listings 15.25–15.26’s. The REPL is a mock. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="grid-2"><div class="panel"><p class="panel-title">1 · Capture a string (listings 15.4–15.7)</p>
+          <pre class="code" id="sc"></pre><button class="btn small" id="sr" type="button">Paste into the REPL</button><div class="callout" id="sv" style="margin-top:6px"></div></div>
+        <div class="panel"><p class="panel-title">2 · Capture searchBooksByTitle (listing 15.9)</p><label class="field-head" for="tq">Endpoint query</label><input id="tq" value="Watch" style="width:100%">
+          <button class="btn small" id="trig" type="button" style="margin-top:6px">Trigger the search endpoint</button><pre class="code" id="cap" style="max-height:160px;overflow:auto"></pre></div></div>
+      <div class="panel"><p class="panel-title">3 · Replay in the REPL</p><label class="field-head" for="rq">query</label><input id="rq" value="Habit" style="width:100%">
+        <pre class="code" id="rout"></pre></div>
+      <div class="panel"><p class="panel-title">4 · The eight test queries (listings 15.25–15.26)</p><div class="table-wrap"><table class="data q" id="qt"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div id="ind" style="margin-top:8px"></div><div id="ver" style="margin-top:8px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>console.log drops the quotes</strong> around a string and the backslashes before inner quotes, so what you copy isn’t a valid literal. JSON keeps both, and works for any data.</li>
+    <li><strong>The replay uses the captured data, not the live system</strong>: change the endpoint query, recapture, and the REPL works on what was captured.</li>
+    <li><strong>Only the third version passes all eight queries</strong>: lowercasing fixes “habit”, and the word-boundary regular expression handles prefixes that span words, like “7 Habit” and “habits of”.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/15-debugging.html"><small>Lesson</small>15. Debugging</a></li>
+    <li><a href="../lab/15-capture-replay/README.md"><small>Experiment</small>Dump, replay and the async-dump race in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+var CATALOG = {"booksByIsbn":{"978-1982137274":{"isbn":"978-1982137274","title":"7 Habits of Highly Effective People","authorIds":["sean-covey","stephen-covey"]},"978-1779501127":{"isbn":"978-1779501127","title":"Watchmen","publicationYear":1987,"authorIds":["alan-moore","dave-gibbons"]}},"authorsById":{"stephen-covey":{"name":"Stephen Covey","bookIsbns":["978-1982137274"]},"sean-covey":{"name":"Sean Covey","bookIsbns":["978-1982137274"]},"dave-gibbons":{"name":"Dave Gibbons","bookIsbns":["978-1779501127"]},"alan-moore":{"name":"Alan Moore","bookIsbns":["978-1779501127"]}}};
+  var MATCH = {
+    v1: function (title, q) { return title.toLowerCase().startsWith(q.toLowerCase()); },
+    v2: function (title, q) { return title.split(" ").some(function (w) { return w.startsWith(q); }); },
+    v3: function (title, q) { return title.toLowerCase().match(new RegExp("\\b" + q.toLowerCase())) != null; } };
+  function search(catalogData, query, v) {
+    return Object.keys(catalogData.booksByIsbn).map(function (k) { return catalogData.booksByIsbn[k]; })
+      .filter(function (b) { return MATCH[v](b.title, query); })
+      .map(function (b) { return { title: b.title, isbn: b.isbn, authorNames: b.authorIds.map(function (id) { return catalogData.authorsById[id].name; }) }; }); }
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), mode = "json", indent = false, ver = "v3", captured = null;
+  var SENT = "I like the word \"reproducibility\"", PREF = "li";
+  var QUERIES = [["Habit", 1], ["habit", 1], ["7 Habit", 1], ["habits of", 1], ["abit", 0], ["bit", 0], ["7 abit", 0], ["habit of", 0]];
+  function capLines() { return mode === "log" ? [SENT, PREF] : [JSON.stringify(SENT), JSON.stringify(PREF)]; }
+  function drawString() { document.getElementById("sc").textContent = "// console output\n" + capLines().join("\n"); document.getElementById("sv").className = "callout"; document.getElementById("sv").textContent = "hasWordStartingWith(sentence, prefix) → true"; }
+  function pasteString() { var v = document.getElementById("sv");
+    try { var a = capLines().map(function (l) { return JSON.parse(l); }); v.className = "callout ok"; v.textContent = "Parsed back: " + JSON.stringify(a[0]) + " and " + JSON.stringify(a[1]) + ". Same arguments, same result."; log.add("Replayed the string context: identical.", "ok"); }
+    catch (e) { v.className = "callout bad"; v.textContent = "The pasted text isn’t a valid literal (" + e.name + "): you’d have to add quotes and backslashes by hand."; log.add("console.log capture can’t be pasted back as is.", "bad"); } }
+  function trigger() { var q = document.getElementById("tq").value;
+    captured = indent ? JSON.stringify(CATALOG, null, 2) + "\n" + JSON.stringify(q) : JSON.stringify(CATALOG) + "\n" + JSON.stringify(q);
+    document.getElementById("cap").textContent = captured; log.add("Endpoint triggered with " + JSON.stringify(q) + "; context captured (" + captured.length + " characters).", "muted"); replay(); }
+  function replay() { var out = document.getElementById("rout"), q = document.getElementById("rq").value;
+    if (!captured) { out.textContent = "Trigger the endpoint first, to capture a catalog."; return; }
+    var lines = captured.split("\n"), cat = JSON.parse(lines.slice(0, -1).join("\n"));
+    out.textContent = "> var catalogData = /* pasted */;\n> Catalog.searchBooksByTitle(catalogData, " + JSON.stringify(q) + ");\n" + JSON.stringify(search(cat, q, ver), null, 2); table(cat); }
+  function table(cat) { var t = Kit.clear(document.getElementById("qt")), pass = 0;
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["query", "expected", "listing 15.8", "listing 15.12", "listing 15.24"].map(function (h) { return Kit.el("th", null, h); }))));
+    var tb = Kit.el("tbody");
+    QUERIES.forEach(function (r) { var cells = [Kit.el("td", null, JSON.stringify(r[0])), Kit.el("td", null, r[1] ? "the book" : "nothing")];
+      ["v1", "v2", "v3"].forEach(function (v) { var got = search(cat, r[0], v).length > 0 ? 1 : 0, ok = got === r[1]; if (v === ver && ok) pass++;
+        cells.push(Kit.el("td", { class: ok ? "" : "bad" }, (ok ? "✓ " : "✗ ") + (got ? "found" : "none"))); });
+      tb.appendChild(Kit.el("tr", null, cells)); });
+    t.appendChild(tb);
+    stats([["Version", { v1: "15.8", v2: "15.12", v3: "15.24" }[ver]], ["Queries passing", pass + " / 8", pass === 8 ? "ok" : "warn"], ["Capture", captured.length + " chars"], ["Endpoint calls", "1"]]); }
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Capture strings with", value: mode, options: [{ value: "log", label: "console.log" }, { value: "json", label: "JSON.stringify" }], onChange: function (v) { mode = v; drawString(); } }).element);
+  document.getElementById("ind").appendChild(Kit.segmented({ label: "Captured JSON", value: "one", options: [{ value: "one", label: "One line (15.9)" }, { value: "two", label: "Indented (15.21)" }], onChange: function (v) { indent = v === "two"; trigger(); } }).element);
+  document.getElementById("ver").appendChild(Kit.segmented({ label: "Search version", value: ver, options: [{ value: "v1", label: "startsWith (15.8)" }, { value: "v2", label: "word prefix (15.12)" }, { value: "v3", label: "\\b regex (15.24)" }], onChange: function (v) { ver = v; replay(); log.add("Version " + v + " in the REPL; no endpoint triggered.", "muted"); } }).element);
+  document.getElementById("sr").addEventListener("click", pasteString);
+  document.getElementById("trig").addEventListener("click", trigger);
+  document.getElementById("rq").addEventListener("input", replay);
+  drawString(); trigger();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "In DOP, what must be captured to replay a function call?",
+      options: ["The arguments and the program state", "Only the arguments, since data is immutable and state lives in one place", "A heap dump"], answer: 1,
+      explain: "pp. 312–313." },
+    { q: "Why use JSON.stringify rather than console.log to capture a string?",
+      options: ["It’s faster", "It keeps the quotes and escaped quotes, so the output is a valid literal", "console.log truncates"], answer: 1,
+      explain: "Listings 15.5–15.7 (p. 317)." },
+    { q: "Which queries make the word-prefix version of listing 15.12 fail?",
+      options: ["\"abit\" and \"bit\"", "\"habit\" and \"7 Habits\"", "None"], answer: 1,
+      explain: "p. 321." }
+  ]);
+})();
+</script>
+</body>
+</html>

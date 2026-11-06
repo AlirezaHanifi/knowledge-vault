@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schema-Based Tests</title>
+<meta name="description" content="Generate random catalogs from the catalog schema with a seed, search by the first letter of the first title, and let the return-value check decide whether the test passes; then apply Dave&#x27;s &quot;Not available&quot; fix and rerun. Illustrates Data-Oriented Programming, chapter 12.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-advanced-data-validation.html">Chapter 12</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Schema-based tests</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 12 · Advanced data validation</div>
+  <h1>Schema-based tests</h1>
+  <p class="lede">With a schema for the arguments and one for the return value, a unit test writes itself: <strong>generate random data that conforms to the input schema, call the function, and check the output against the output schema</strong>. Random catalogs cite authors that don’t exist, and that is exactly the bug the test finds.</p>
+  <p class="source-note">Illustrates section 12.5 (figure 12.3; listings 12.19–12.29, pp. 262–268): random data from JSON Schema Faker, the test that returns true or false, the query built from the first letter of the first book’s title, the logged error, and the <code>"Not available"</code> fix. The generator here is the vault’s small stand-in for JSON Schema Faker: lorem-style words, seeded, with one to four books. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="grid-2"><div class="panel"><p class="panel-title">Generated catalogData</p><pre class="code" id="cat" style="max-height:320px;overflow:auto"></pre></div>
+        <div class="panel"><p class="panel-title">searchBooksTest()</p><div class="callout" id="verdict"></div><pre class="code" id="out"></pre></div></div>
+      <div class="panel"><p class="panel-title">The test (after listing 12.24)</p><pre class="code">function searchBooksTest() {
+  var catalogRandom = JSONSchemaFaker.generate(catalogSchema);
+  var queryRandom = firstLetterOfFirstTitle(catalogRandom);
+  try {
+    Catalog.searchBooksByTitle(catalogRandom, queryRandom);  // throws in dev
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}</pre></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="seed"></div><div id="ver" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn primary" id="one" type="button">Run test</button><button class="btn" id="many" type="button">Run 200 seeds</button></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Random IDs almost never line up</strong>: a book’s <code>authorIds</code> and the keys of <code>authorsById</code> are generated independently, so most matching books have unknown authors and <code>authorNames</code> holds <code>undefined</code>.</li>
+    <li><strong>A test can pass by luck</strong>: when the matching books have no author IDs at all. Running many seeds shows how often.</li>
+    <li><strong>With the fix</strong>, a missing author becomes <code>"Not available"</code>, a string, so every run passes the return-value check.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-advanced-data-validation.html"><small>Lesson</small>12. Advanced data validation</a></li>
+    <li><a href="../lab/12-schema-based-tests/README.md"><small>Experiment</small>Seeded schema-based tests in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+// A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
+  // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
+  // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
+  function jsType(x) { return x === null ? "null" : Array.isArray(x) ? "array" : typeof x; }
+  function validate(schema, data, allErrors) {
+    var errors = [];
+    function err(path, kw, msg, sp) { errors.push({ instancePath: path, schemaPath: sp, keyword: kw, message: msg }); }
+    function v(s, d, path, sp) {
+      var start = errors.length;
+      function stop() { return !allErrors && errors.length > start; }
+      if (s.type) { var t = jsType(d), ok = s.type === t || (s.type === "integer" && t === "number" && Math.floor(d) === d) || (s.type === "number" && t === "number");
+        if (!ok) { err(path, "type", "must be " + s.type, sp + "/type"); return; } }
+      if (s.enum && !s.enum.some(function (e) { return JSON.stringify(e) === JSON.stringify(d); })) { err(path, "enum", "must be equal to one of the allowed values", sp + "/enum"); if (stop()) return; }
+      if (typeof d === "number") {
+        if (s.minimum !== undefined && d < s.minimum) { err(path, "minimum", "must be >= " + s.minimum, sp + "/minimum"); if (stop()) return; }
+        if (s.maximum !== undefined && d > s.maximum) { err(path, "maximum", "must be <= " + s.maximum, sp + "/maximum"); if (stop()) return; } }
+      if (typeof d === "string") {
+        if (s.pattern && !new RegExp(s.pattern).test(d)) { err(path, "pattern", "must match pattern \"" + s.pattern + "\"", sp + "/pattern"); if (stop()) return; }
+        if (s.format === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { err(path, "format", "must match format \"date\"", sp + "/format"); if (stop()) return; } }
+      if (jsType(d) === "object") {
+        (s.required || []).forEach(function (k) { if (stop()) return; if (!Object.prototype.hasOwnProperty.call(d, k)) err(path, "required", "must have required property '" + k + "'", sp + "/required"); });
+        if (stop()) return;
+        Object.keys(d).forEach(function (k) { if (stop()) return; var p = path + "/" + k;
+          if (s.properties && s.properties[k]) v(s.properties[k], d[k], p, sp + "/properties/" + k);
+          else if (s.additionalProperties === false) err(path, "additionalProperties", "must NOT have additional properties ('" + k + "')", sp + "/additionalProperties");
+          else if (s.additionalProperties && typeof s.additionalProperties === "object") v(s.additionalProperties, d[k], p, sp + "/additionalProperties"); });
+        if (stop()) return; }
+      if (jsType(d) === "array") {
+        var pre = s.prefixItems || [];
+        pre.forEach(function (ps, i) { if (stop()) return; if (i < d.length) v(ps, d[i], path + "/" + i, sp + "/prefixItems/" + i); });
+        if (s.items) d.forEach(function (x, i) { if (stop()) return; if (i >= pre.length) v(s.items, x, path + "/" + i, sp + "/items"); });
+        if (stop()) return; }
+      if (s.allOf) s.allOf.forEach(function (ss, i) { if (!stop()) v(ss, d, path, sp + "/allOf/" + i); });
+      if (stop()) return;
+      ["anyOf", "oneOf"].forEach(function (kw) { if (!s[kw] || stop()) return;
+        var n = s[kw].filter(function (ss) { return validate(ss, d, false).length === 0; }).length;
+        if (kw === "anyOf" && n === 0) err(path, "anyOf", "must match a schema in anyOf", sp + "/anyOf");
+        if (kw === "oneOf" && n !== 1) err(path, "oneOf", "must match exactly one schema in oneOf (" + n + " matched)", sp + "/oneOf"); });
+    }
+    v(schema, data, "", "#");
+    return errors;
+  }
+  function errorsText(errs) { return errs.map(function (e) { return "data" + e.instancePath + " " + e.message; }).join(", "); }
+
+  var authorSchema = { type: "object", required: ["id", "name", "bookIsbns"],
+    properties: { id: { type: "string" }, name: { type: "string" }, bookIsbns: { type: "array", items: { type: "string" } } } };
+  var bookItemSchema = { type: "object", properties: { id: { type: "string" }, libId: { type: "string" }, purchaseDate: { type: "string" }, isLent: { type: "boolean" } },
+    required: ["id", "libId", "purchaseDate", "isLent"] };
+  var bookSchema = { type: "object", required: ["title", "isbn", "authorIds", "bookItems"],
+    properties: { title: { type: "string" }, publicationYear: { type: "integer" }, isbn: { type: "string" },
+      authorIds: { type: "array", items: { type: "string" } }, bookItems: { type: "array", items: bookItemSchema } } };
+  var catalogSchema = { type: "object", properties: { booksByIsbn: { type: "object", additionalProperties: bookSchema },
+    authorsById: { type: "object", additionalProperties: authorSchema } }, required: ["booksByIsbn", "authorsById"] };
+  var searchBooksArgsSchema = { type: "array", prefixItems: [catalogSchema, { type: "string" }] };
+  var searchBooksResponseSchema = { type: "array", items: { type: "object", required: ["title", "isbn", "authorNames"],
+    properties: { title: { type: "string" }, isbn: { type: "string" }, authorNames: { type: "array", items: { type: "string" } } } } };
+  function get(m, path, dflt) { var ks = Array.isArray(path) ? path : [path], x = m;
+    for (var i = 0; i < ks.length; i++) { if (x === null || x === undefined) return dflt; x = x[ks[i]]; }
+    return x === undefined ? dflt : x; }
+  function vals(m) { return m && typeof m === "object" ? Object.keys(m).map(function (k) { return m[k]; }) : []; }
+  // Listing 12.1, with the checks of listings 12.9 and 12.11 and, optionally, the fix of listing 12.28.
+  function searchBooksByTitle(catalogData, query, dev, fixed) {
+    if (dev) { var ea = validate(searchBooksArgsSchema, [catalogData, query], false);
+      if (ea.length) throw { check: "args", message: "searchBooksByTitle called with invalid arguments: " + errorsText(ea) }; }
+    var matching = vals(get(catalogData, "booksByIsbn")).filter(function (book) { return get(book, "title").includes(query); });
+    var infos = matching.map(function (book) {
+      return { title: get(book, "title"), isbn: get(book, "isbn"),
+        authorNames: (get(book, "authorIds") || []).map(function (id) { return fixed ? get(catalogData, ["authorsById", id, "name"], "Not available") : get(catalogData, ["authorsById", id, "name"]); }) }; });
+    if (dev) { var er = validate(searchBooksResponseSchema, infos, false);
+      if (er.length) throw { check: "return", message: "searchBooksByTitle returned an invalid value: " + errorsText(er) }; }
+    return infos; }
+  function show(x) { return JSON.stringify(x, function (k, v) { return v === undefined ? "«undefined»" : v; }, 2); }
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), cfg = { seed: 7, fixed: false }, tally = { run: 0, pass: 0, fail: 0 };
+  var W = ["lorem", "ipsum", "dolor", "sit", "amet", "ullamco", "laboris", "nisi", "aliquip", "commodo", "consequat", "duis", "aute", "irure", "culpa", "officia", "deserunt", "mollit", "anim", "est", "velit", "esse", "fugiat", "nulla"];
+  function gen(seed) { var r = Kit.rng(seed);
+    function word() { return r.pick(W); } function key() { return word() + r.int(100); }
+    function str() { var n = 1 + r.int(3), a = []; for (var i = 0; i < n; i++) a.push(word()); return a.join(" "); }
+    function arr(f, max) { var n = r.int(max + 1), a = []; for (var i = 0; i < n; i++) a.push(f()); return a; }
+    var books = {}, nb = 1 + r.int(4);
+    for (var i = 0; i < nb; i++) { var b = { title: str(), isbn: key(), authorIds: arr(key, 3),
+        bookItems: arr(function () { return { id: key(), libId: key(), purchaseDate: str(), isLent: r.chance(0.5) }; }, 2) };
+      if (r.chance(0.5)) b.publicationYear = 1900 + r.int(122); books[key()] = b; }
+    var authors = {}, na = r.int(4);
+    for (var j = 0; j < na; j++) authors[key()] = { id: key(), name: str(), bookIsbns: arr(key, 2) };
+    return { booksByIsbn: books, authorsById: authors }; }
+  function test(seed, quiet) { var c = gen(seed), first = vals(c.booksByIsbn)[0], q = first.title[0];
+    if (!quiet) document.getElementById("cat").textContent = JSON.stringify(c, null, 2);
+    try { var res = searchBooksByTitle(c, q, true, cfg.fixed); return { ok: true, q: q, res: res }; }
+    catch (e) { return { ok: false, q: q, err: e.message || String(e) }; } }
+  function one() { var t = test(cfg.seed), v = document.getElementById("verdict");
+    tally.run++; tally[t.ok ? "pass" : "fail"]++;
+    v.className = "callout " + (t.ok ? "ok" : "bad"); v.textContent = "query = " + JSON.stringify(t.q) + " → " + (t.ok ? "true: the return value conforms." : "false");
+    document.getElementById("out").textContent = t.ok ? show(t.res) : t.err;
+    log.add("Seed " + cfg.seed + (cfg.fixed ? " (fixed)" : "") + ": " + (t.ok ? "pass" : "fail — " + t.err), t.ok ? "ok" : "bad");
+    upd(); }
+  function many() { var p = 0, f = 0; for (var s = 1; s <= 200; s++) { if (test(s, true).ok) p++; else f++; }
+    tally.run += 200; tally.pass += p; tally.fail += f;
+    log.add("Seeds 1–200 " + (cfg.fixed ? "with the fix" : "as printed") + ": " + p + " passed, " + f + " failed (" + Kit.pct(f / 200) + ").", f ? "warn" : "ok"); upd(); }
+  function upd() { stats([["Version", cfg.fixed ? "fixed" : "listing 12.1"], ["Tests run", tally.run], ["Passed", tally.pass, "ok"], ["Failed", tally.fail, tally.fail ? "bad" : ""]]); }
+  document.getElementById("seed").appendChild(Kit.slider({ label: "Random seed", min: 1, max: 200, value: cfg.seed, onInput: function (v) { cfg.seed = v; one(); } }).element);
+  document.getElementById("ver").appendChild(Kit.segmented({ label: "authorNames", value: "orig", options: [{ value: "orig", label: "As printed" }, { value: "fix", label: "With “Not available”" }], onChange: function (v) { cfg.fixed = v === "fix"; tally = { run: 0, pass: 0, fail: 0 }; one(); } }).element);
+  document.getElementById("one").addEventListener("click", one);
+  document.getElementById("many").addEventListener("click", many);
+  one();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What are the three steps of a schema-based unit test (figure 12.3)?",
+      options: ["Mock, call, assert equality", "Generate data conforming to the input schema, execute the function, check the output against the output schema", "Write, compile, run"], answer: 1,
+      explain: "p. 263." },
+    { q: "Why does the first test have no explicit assertion?",
+      options: ["It’s a smoke test", "The function’s own dev-mode return-value validation throws on a bad output", "Assertions are disabled"], answer: 1,
+      explain: "Listings 12.21–12.23 (pp. 265–266)." },
+    { q: "What bug did the generated data reveal?",
+      options: ["Titles were too long", "Books cite authors absent from authorsById, so authorNames held undefined", "ISBNs were duplicated"], answer: 1,
+      explain: "pp. 267–268; fixed with a default in listing 12.28." }
+  ]);
+})();
+</script>
+</body>
+</html>

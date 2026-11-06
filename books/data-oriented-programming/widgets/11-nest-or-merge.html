@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nest or Merge</title>
+<meta name="description" content="Combine a database book record with an Open Library record by nesting or merging, add a field both sides share, and choose which side wins the conflict. Illustrates Data-Oriented Programming, chapter 11.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/11-web-services.html">Chapter 11</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Nest or merge</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 11 · Web services</div>
+  <h1>Nest or merge</h1>
+  <p class="lede">Two sources describe the same book. You can <strong>nest</strong> one inside the other, as an <code>extendedInfo</code> field, and never worry about conflicts, or <strong>merge</strong> them into one flat map and handle fields both sides define. Either way, the information is passed forward as data, unopened.</p>
+  <p class="source-note">Illustrates section 11.5, Passing information forward (table 11.1 and listings 11.10–11.12, pp. 231–233), and the conflicting titles of listing 11.19 (p. 238). The extra shared fields are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="grid-2"><div class="panel"><p class="panel-title">Database</p><pre class="code" id="db"></pre></div>
+        <div class="panel"><p class="panel-title">Open Library</p><pre class="code" id="ol"></pre></div></div>
+      <div class="panel"><p class="panel-title" id="rt">Result</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="how"></div><div id="win" style="margin-top:10px"></div>
+        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="t"> Open Library also sends a different <code>title</code> (listing 11.19)</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="a"> Open Library also sends <code>available</code></label></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Nesting never conflicts</strong>, but the result is not flat: the client must know to look inside <code>extendedInfo</code>.</li>
+    <li><strong>Merging is flat</strong>, and safe as long as the two maps share no fields. In listing 11.19 they share <code>title</code>, with different values, and the side merged last wins silently.</li>
+    <li><strong>Hugo’s letter</strong>: neither option opens the information. Data is passed forward in generic structures, without a class per source.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/11-web-services.html"><small>Lesson</small>11. Web services</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), how = "merge", win = "ol";
+  var DBR = { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", available: true };
+  function olr() { var o = { isbn: "978-1982137274", subtitle: "Powerful Lessons in Personal Change", number_of_pages: 432 }; if (document.getElementById("t").checked) o.title = "The Power of Habit"; if (document.getElementById("a").checked) o.available = false; return o; }
+  function render(quiet) { var o = olr(), out, conflicts = Object.keys(o).filter(function (k) { return k !== "isbn" && k in DBR && JSON.stringify(DBR[k]) !== JSON.stringify(o[k]); });
+    document.getElementById("db").textContent = JSON.stringify(DBR, null, 2); document.getElementById("ol").textContent = JSON.stringify(o, null, 2);
+    if (how === "nest") out = Object.assign({}, DBR, { extendedInfo: o }); else out = win === "ol" ? Object.assign({}, DBR, o) : Object.assign({}, o, DBR);
+    document.getElementById("out").textContent = JSON.stringify(out, null, 2);
+    document.getElementById("rt").textContent = how === "nest" ? "Nested: _.set(dbInfo, \"extendedInfo\", openLibInfo)" : "Merged: _.merge(" + (win === "ol" ? "dbInfo, openLibInfo" : "openLibInfo, dbInfo") + ")";
+    var v = document.getElementById("verdict"); v.className = "callout " + (how === "merge" && conflicts.length ? "bad" : "ok");
+    v.textContent = how === "nest" ? "No conflicts possible; the result has " + Object.keys(out).length + " top-level fields, one of them nested." : conflicts.length ? "Conflict on " + conflicts.join(", ") + ": " + conflicts.map(function (k) { return k + " = " + JSON.stringify(out[k]); }).join(", ") + ", from " + (win === "ol" ? "Open Library" : "the database") + ". The other value is lost." : "Disjoint fields (apart from isbn): a flat, conflict-free merge.";
+    if (!quiet) log.add(v.textContent, conflicts.length && how === "merge" ? "bad" : "ok");
+    stats([["Top-level fields", Object.keys(out).length], ["Shared fields", conflicts.length, conflicts.length ? "warn" : "ok"], ["Flat", how === "merge" ? "yes" : "no"]]); }
+  document.getElementById("how").appendChild(Kit.segmented({ label: "Combine by", value: how, options: [{ value: "nest", label: "Nesting" }, { value: "merge", label: "Merging" }], onChange: function (v) { how = v; render(); } }).element);
+  document.getElementById("win").appendChild(Kit.segmented({ label: "Merged last (wins)", value: win, options: [{ value: "ol", label: "Open Library wins" }, { value: "db", label: "Database wins" }], onChange: function (v) { win = v; render(); } }).element);
+  ["t", "a"].forEach(function (id) { document.getElementById(id).addEventListener("change", function () { render(); }); });
+  render(true);
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What is the disadvantage of nesting, according to table 11.1?",
+      options: ["Conflicts", "The result is not flat", "It needs a class"], answer: 1,
+      explain: "p. 232." },
+    { q: "In Joe's story, who is like traditional OOP?",
+      options: ["Hugo", "Willy, who opens the letter to pass it on", "Iris"], answer: 1,
+      explain: "pp. 231–232." },
+    { q: "When is merging safe without conflict handling?",
+      options: ["Always", "When the two maps share no fields", "When both come from the database"], answer: 1,
+      explain: "pp. 232–233." }
+  ]);
+})();
+</script>
+</body>
+</html>
