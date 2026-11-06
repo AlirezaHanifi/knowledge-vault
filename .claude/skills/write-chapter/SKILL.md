@@ -24,7 +24,6 @@ The chapter note `books/<slug>/chapters/NN-*.md` is the single source of truth: 
 4. **Fact-check** with the `fact-check` skill before calling it done.
 5. **Rebuild and validate:** `python3 scripts/build.py && python3 scripts/validate.py`, then open the lesson (see `check-site`).
 
-
 ## Done when
 
 - Every section of the book's outline is covered under *Notes*; no placeholders remain.

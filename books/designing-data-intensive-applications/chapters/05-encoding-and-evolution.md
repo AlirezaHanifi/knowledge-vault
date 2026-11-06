@@ -117,7 +117,7 @@ Encoded fields carry **tag numbers** (1, 2, 3) instead of names. Integers are **
 
 Started in 2009 as a Hadoop subproject because Protocol Buffers fit Hadoop poorly; two schema languages, Avro IDL for humans and JSON for machines:
 
-```
+```text
 record Person {
   string               userName;
   union { null, long } favoriteNumber = null;
