@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Restartable Undo Log</title>
+<meta name="description" content="Run the book&#x27;s money transfer with an Undo log, crash it between recording an Undo and applying its operation or in the middle of recovery, and compare a relative Undo (add 10 back) with one that restores the old value. Only the second is noop and idempotent. Illustrates Think Distributed Systems, Chapter 5.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  table.ul { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .82rem; } table.ul td, table.ul th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; }
+  .acct { display: flex; gap: 8px; } .acct div { flex: 1; text-align: center; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); } .acct strong { font-size: 1.4rem; font-family: var(--mono); display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/05-transactions.html">Chapter 5</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Restartable Undo</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 5 · Transactions</div>
+  <h1>A restartable Undo log</h1>
+  <p class="lede">Before each operation, the database appends its <strong>Undo</strong> to the Transaction Undo Log. After a crash, recovery runs the Undo of every uncommitted operation in reverse order. But logging and applying are separate steps, so an Undo may run for an operation that never happened, and a crash during recovery runs Undos twice. Undo must be <strong>noop</strong> and <strong>idempotent</strong>: restartable.</p>
+  <p class="source-note">Illustrates “Completeness” and “Platform-level abort” (pp. 77–78) on the transfer of Listing 5.1 and Figure 5.5. The two Undo styles and the crash points are the vault’s; the book states the requirement without choosing an encoding. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="acct" id="acct"></div><p class="panel-title" style="margin-top:10px">Transaction Undo Log</p><div class="table-wrap"><table class="ul" id="ulog"></table></div>
+        <div class="callout" id="out" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="style"></div><div id="crash" style="margin-top:10px"></div><div id="rcrash" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Crash after logging an Undo but before its operation</strong>: a relative Undo (“A += 10”) adds 10 to a balance that was never debited, creating money.</li>
+    <li><strong>Crash during recovery</strong>: recovery starts over and runs the same Undos again. A relative Undo applied twice over-corrects.</li>
+    <li><strong>An absolute Undo</strong> (“A := 50”, the old value) is a noop if its operation never ran and has the same effect no matter how often it runs, so recovery always restores 50 / 50.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/05-transactions.html"><small>Lesson</small>5. Transactions</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { style: "rel", crash: "afterLog1", rcrash: "no" }, acc, ulog, steps, k, phase;
+  function undoOf(i) { var acct = i === 0 ? "A" : "B", delta = i === 0 ? 10 : -10; return cfg.style === "rel" ? { acct: acct, text: acct + " := " + acct + (delta > 0 ? " + " : " − ") + Math.abs(delta), rel: delta } : { acct: acct, text: acct + " := 50", abs: 50 }; }
+  function plan() {
+    steps = [];
+    var ops = [{ acct: "A", d: -10 }, { acct: "B", d: 10 }];
+    var points = { afterLog1: 1, afterOp1: 2, afterLog2: 3, afterOp2: 4, none: 99 };
+    var stop = points[cfg.crash], n = 0;
+    for (var i = 0; i < 2; i++) {
+      n++; if (n > stop) break; steps.push({ k: "log", i: i });
+      n++; if (n > stop) break; steps.push({ k: "op", i: i, op: ops[i] });
+    }
+    if (stop >= 99) { steps.push({ k: "commit" }); return; }
+    steps.push({ k: "crash" });
+    steps.push({ k: "recover" });
+  }
+  function reset() { plan(); k = 0; acc = { A: 50, B: 50 }; ulog = []; phase = "running"; log.clear(); log.add("Transfer $10 from A (50) to B (50). Undo style: " + (cfg.style === "rel" ? "relative" : "absolute (restore old value)"), "muted"); render(); }
+  function runUndo(e) { if (e.u.rel !== undefined) acc[e.u.acct] += e.u.rel; else acc[e.u.acct] = e.u.abs; e.runs++; }
+  function step() {
+    if (k >= steps.length) return false;
+    var s = steps[k++];
+    if (s.k === "log") { var u = undoOf(s.i); ulog.push({ u: u, runs: 0, opDone: false }); log.add("Log Undo: " + u.text, "muted"); }
+    else if (s.k === "op") { acc[s.op.acct] += s.op.d; ulog[s.i].opDone = true; log.add("Apply: " + s.op.acct + " := " + s.op.acct + (s.op.d > 0 ? " + " : " − ") + Math.abs(s.op.d) + " → " + acc[s.op.acct], "muted"); }
+    else if (s.k === "commit") { phase = "committed"; log.add("Commit: the transfer is complete", "ok"); }
+    else if (s.k === "crash") { phase = "crashed"; log.add("⚡ Crash: the transaction never committed", "bad"); }
+    else if (s.k === "recover") {
+      phase = "recovering";
+      var rev = ulog.slice().reverse();
+      log.add("Recovery: run the logged Undos in reverse order", "warn");
+      rev.forEach(function (e, j) {
+        if (cfg.rcrash === "yes" && j === 1) return;
+        runUndo(e); log.add("Undo " + e.u.text + (e.opDone ? "" : " (its operation never ran)") + " → A = " + acc.A + ", B = " + acc.B, e.opDone || e.u.abs !== undefined ? "muted" : "bad");
+      });
+      if (cfg.rcrash === "yes") {
+        log.add("⚡ Crash during recovery; recovery restarts from the top of the log", "bad");
+        rev.forEach(function (e) { runUndo(e); log.add("Undo " + e.u.text + " again → A = " + acc.A + ", B = " + acc.B, e.u.abs !== undefined ? "muted" : "bad"); });
+      }
+      phase = "recovered";
+    }
+    render(); return k < steps.length;
+  }
+  function render() {
+    var a = Kit.clear(document.getElementById("acct"));
+    ["A", "B"].forEach(function (x) { a.appendChild(Kit.el("div", null, "Account " + x, Kit.el("strong", null, String(acc[x])))); });
+    var t = Kit.clear(document.getElementById("ulog"));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["#", "Undo", "Operation ran?", "Undo runs"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    var tb = Kit.el("tbody"); ulog.forEach(function (e, i) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, String(i + 1)), Kit.el("td", null, e.u.text), Kit.el("td", null, e.opDone ? "yes" : "no"), Kit.el("td", null, String(e.runs)))); });
+    if (!ulog.length) tb.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 4 }, "(empty)"))); t.appendChild(tb);
+    var o = document.getElementById("out"), sum = acc.A + acc.B;
+    if (phase === "committed") { o.className = "callout ok"; o.textContent = "Committed: A = 40, B = 60."; }
+    else if (phase === "recovered") { var ok = acc.A === 50 && acc.B === 50; o.className = "callout " + (ok ? "ok" : "bad"); o.textContent = ok ? "Recovered to the state before the transaction: 50 / 50." : "Recovery produced A = " + acc.A + ", B = " + acc.B + " (total " + sum + "): the Undo wasn't restartable."; }
+    else { o.className = "callout"; o.textContent = "Phase: " + phase + "."; }
+    stats([["Undo style", cfg.style === "rel" ? "relative" : "absolute"], ["Total money", sum, sum === 100 ? "ok" : "bad"], ["Step", k + " / " + steps.length]]);
+  }
+  document.getElementById("style").appendChild(Kit.segmented({ label: "Undo style", value: cfg.style, options: [{ value: "rel", label: "Relative (add back)" }, { value: "abs", label: "Absolute (old value)" }], onChange: function (v) { cfg.style = v; reset(); } }).element);
+  document.getElementById("crash").appendChild(Kit.segmented({ label: "Crash", value: cfg.crash, options: [{ value: "afterLog1", label: "After logging Undo 1" }, { value: "afterOp1", label: "After op 1" }, { value: "afterLog2", label: "After logging Undo 2" }, { value: "afterOp2", label: "Before commit" }, { value: "none", label: "None" }], onChange: function (v) { cfg.crash = v; reset(); } }).element);
+  document.getElementById("rcrash").appendChild(Kit.segmented({ label: "Crash during recovery", value: cfg.rcrash, options: [{ value: "no", label: "No" }, { value: "yes", label: "Yes, after one Undo" }], onChange: function (v) { cfg.rcrash = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why is the Undo recorded before the operation, not after?",
+      options: ["It's faster", "If the system crashes after the operation, recovery must find its Undo", "To save space"], answer: 1,
+      explain: "p. 77." },
+    { q: "Which property does “A := A + 10” lack when its debit never ran?",
+      options: ["Noop", "Durability", "Isolation"], answer: 0,
+      explain: "Applying only the Undo must equal applying the operation and its Undo (p. 78)." },
+    { q: "Recovery crashes halfway and restarts. Which Undo style still gives 50 / 50?",
+      options: ["Relative", "Absolute (restore the old value)", "Neither"], answer: 1,
+      explain: "It's idempotent (p. 78)." }
+  ]);
+})();
+</script>
+</body>
+</html>

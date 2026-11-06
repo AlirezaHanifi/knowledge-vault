@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Behavior Space of a Transaction</title>
+<meta name="description" content="Step the two participants of the book&#x27;s distributed transaction (Figure 1.9) one transition at a time, enumerate every behavior, and see which violate safety, which violate liveness and which are correct. Illustrates Think Distributed Systems, Chapter 1.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .grid3 { display: grid; grid-template-columns: auto repeat(3, 1fr); gap: 6px; font-size: .82rem; }
+  .grid3 .h { font-weight: 600; text-align: center; align-self: end; }
+  .grid3 .rh { font-weight: 600; align-self: center; }
+  .cell { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px 4px; text-align: center; background: var(--surface-2); }
+  .cell.ok { border-color: var(--ok); background: var(--ok-soft); } .cell.bad { border-color: var(--bad); background: var(--bad-soft); }
+  .cell.cur { box-shadow: inset 0 0 0 3px var(--accent); font-weight: 700; }
+  .cell.seen { outline: 2px dashed var(--accent); }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  table.bh { width: 100%; border-collapse: collapse; font-size: .82rem; } table.bh td, table.bh th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html">Chapter 1</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Behavior space</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 1 · Thinking in distributed systems</div>
+  <h1>The behavior space of a two-participant transaction</h1>
+  <p class="lede">Each participant starts <strong>working</strong> and eventually moves to <strong>committed</strong> or <strong>aborted</strong>; each step moves exactly one participant. <strong>Safety</strong> says the system must never reach a state where one committed and the other aborted. <strong>Liveness</strong> says it can’t stay in <em>working</em> forever. A system is correct if <em>every possible behavior</em> satisfies both.</p>
+  <p class="source-note">Illustrates “Correctness” (pp. 9–12, Listing 1.1, Figure 1.9). The “unanimous” protocol switch, which forbids the transitions into mixed states, is the vault’s way of showing what a correct system must rule out. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">State space (rows: P1, columns: P2)</p><div class="grid3" id="grid"></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Every behavior</p><div class="table-wrap"><table class="bh" id="all"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="proto"></div><div class="btns" id="moves"></div>
+        <div class="btns"><button class="btn small" id="stay">Stay working (another step passes)</button><button class="btn small" id="rand">Random behavior</button><button class="btn small" id="reset">Reset</button></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Eight complete behaviors exist without coordination</strong>: either participant moves first, and each decides commit or abort. Four of them end in a mixed state and violate safety.</li>
+    <li><strong>Liveness is about infinite behaviors.</strong> A behavior that stays in working forever never does anything bad, so it’s safe, but it isn’t live. Pressing “stay” models that waiting.</li>
+    <li><strong>The unanimous protocol</strong> removes the transitions into mixed states. Every remaining complete behavior is safe, but liveness still requires that the participants eventually take their steps.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html"><small>Lesson</small>1. Thinking in distributed systems</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var ST = ["working", "committed", "aborted"], cfg = { proto: "none" }, s, path, stays, rng = Kit.rng(7);
+  function mixed(a, b) { return (a === 1 && b === 2) || (a === 2 && b === 1); }
+  function allowed(who, to) {
+    if (s[who] !== 0) return false;
+    if (cfg.proto === "unan") { var other = s[1 - who]; if (other !== 0 && other !== to) return false; }
+    return true;
+  }
+  function reset() { s = [0, 0]; path = [[0, 0]]; stays = 0; log.clear(); log.add("Both participants are working.", "muted"); render(); }
+  function move(who, to) {
+    if (!allowed(who, to)) return;
+    s[who] = to; path.push(s.slice());
+    log.add("P" + (who + 1) + " → " + ST[to] + "  (state: " + ST[s[0]] + " · " + ST[s[1]] + ")", mixed(s[0], s[1]) ? "bad" : (s[0] && s[1] ? "ok" : "muted"));
+    render();
+  }
+  function render() {
+    var g = Kit.clear(document.getElementById("grid"));
+    g.appendChild(Kit.el("div")); ST.forEach(function (x) { g.appendChild(Kit.el("div", { class: "h" }, "P2 " + x)); });
+    ST.forEach(function (x, i) {
+      g.appendChild(Kit.el("div", { class: "rh" }, "P1 " + x));
+      ST.forEach(function (y, j) {
+        var seen = path.some(function (p) { return p[0] === i && p[1] === j; });
+        var cls = "cell " + (mixed(i, j) ? "bad" : (i && j ? "ok" : "")) + (s[0] === i && s[1] === j ? " cur" : "") + (seen ? " seen" : "");
+        g.appendChild(Kit.el("div", { class: cls, "aria-label": "P1 " + x + ", P2 " + y + (mixed(i, j) ? ", violates safety" : "") }, mixed(i, j) ? "✗ must not get here" : (i && j ? "✓ decided" : (i === 0 && j === 0 ? "start" : "…"))));
+      });
+    });
+    var m = Kit.clear(document.getElementById("moves"));
+    [[0, 1], [0, 2], [1, 1], [1, 2]].forEach(function (x) {
+      var b = Kit.el("button", { class: "btn small" }, "P" + (x[0] + 1) + (x[1] === 1 ? " commits" : " aborts"));
+      b.disabled = !allowed(x[0], x[1]); b.addEventListener("click", function () { move(x[0], x[1]); }); m.appendChild(b);
+    });
+    var v = document.getElementById("verdict"), done = s[0] && s[1];
+    if (mixed(s[0], s[1])) { v.className = "callout bad"; v.textContent = "Safety violated: one participant committed and the other aborted."; }
+    else if (done) { v.className = "callout ok"; v.textContent = "Correct behavior: both decided " + ST[s[0]] + "."; }
+    else if (stays >= 3) { v.className = "callout warn"; v.textContent = "Still working after " + stays + " idle steps. If this goes on forever, liveness is violated (“can’t stay here”)."; }
+    else { v.className = "callout"; v.textContent = "In progress."; }
+    var t = Kit.clear(document.getElementById("all")), rows = [];
+    [0, 1].forEach(function (first) { [1, 2].forEach(function (a) { [1, 2].forEach(function (b) {
+      var st = [0, 0]; st[first] = a; st[1 - first] = b;
+      var ok = cfg.proto !== "unan" || a === b;
+      if (ok) rows.push(["P" + (first + 1) + " " + ST[a] + ", then P" + (2 - first) + " " + ST[b], mixed(st[0], st[1])]);
+    }); }); });
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", { scope: "col" }, "Behavior"), Kit.el("th", { scope: "col" }, "Verdict"))));
+    var tb = Kit.el("tbody");
+    rows.forEach(function (r) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, r[0]), Kit.el("td", null, r[1] ? "✗ violates safety" : "✓ safe and live"))); });
+    tb.appendChild(Kit.el("tr", null, Kit.el("td", null, "Either participant stays working forever"), Kit.el("td", null, "✗ violates liveness")));
+    t.appendChild(tb);
+    var bad = rows.filter(function (r) { return r[1]; }).length;
+    stats([["Protocol", cfg.proto === "unan" ? "unanimous" : "none"], ["Complete behaviors", rows.length], ["Violating safety", bad, bad ? "bad" : "ok"], ["Idle steps", stays, stays >= 3 ? "warn" : ""]]);
+  }
+  document.getElementById("proto").appendChild(Kit.segmented({ label: "Protocol", value: cfg.proto, options: [{ value: "none", label: "No coordination" }, { value: "unan", label: "Unanimous decision" }], onChange: function (v) { cfg.proto = v; reset(); } }).element);
+  document.getElementById("stay").addEventListener("click", function () { if (s[0] && s[1]) return; stays++; log.add("A step passes; nobody leaves working (" + stays + ")", "warn"); render(); });
+  document.getElementById("reset").addEventListener("click", reset);
+  document.getElementById("rand").addEventListener("click", function () {
+    reset();
+    for (var guard = 0; guard < 10 && !(s[0] && s[1]); guard++) {
+      var opts = [[0, 1], [0, 2], [1, 1], [1, 2]].filter(function (x) { return allowed(x[0], x[1]); });
+      var x = opts[rng.int(opts.length)]; move(x[0], x[1]);
+    }
+  });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Which state violates safety?",
+      options: ["Both working", "P1 committed, P2 aborted", "Both aborted"], answer: 1,
+      explain: "Mixed decisions are what the transaction must never reach (p. 11)." },
+    { q: "A behavior where both participants stay working forever is…",
+      options: ["safe but not live", "live but not safe", "correct"], answer: 0,
+      explain: "Nothing bad happens, but nothing good happens either (pp. 10–11)." },
+    { q: "When is a system correct in Lamport's sense?",
+      options: ["When one behavior satisfies safety and liveness", "When every possible behavior satisfies both", "When most behaviors do"], answer: 1,
+      explain: "pp. 9–10." }
+  ]);
+})();
+</script>
+</body>
+</html>

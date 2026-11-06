@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposers, Acceptors and a Coordinator</title>
+<meta name="description" content="Replay Figures 2.11 and 2.12: two proposers broadcast +2 and ×2 to two acceptors. Shuffle the network&#x27;s delivery order and watch the acceptors diverge, then route requests through a coordinator that tags them so the acceptors can reorder. Illustrates Think Distributed Systems, Chapter 2.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .accs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .acc { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; background: var(--surface-2); }
+  .acc h3 { margin: 0 0 4px; font-size: .9rem; } .acc .v { font-size: 1.6rem; font-weight: 700; font-family: var(--mono); }
+  .acc .q { font-family: var(--mono); font-size: .8rem; color: var(--muted); min-height: 1.2em; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-system-models-order-and-time.html">Chapter 2</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Coordinator ordering</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 2 · System models, order, and time</div>
+  <h1>Proposers, acceptors and a coordinator</h1>
+  <p class="lede">Proposer P1 sends <strong>(+2)</strong> and proposer P2 sends <strong>(×2)</strong>. Two acceptors start at 0 and apply requests in the order they arrive. The operations don’t commute, so different arrival orders leave the acceptors with different values. A <strong>coordinator</strong> that tags each request with a sequence number lets the acceptors apply them in tag order, whatever order the network delivers them in.</p>
+  <p class="source-note">Illustrates “Order and time” (pp. 30–32, Figures 2.11–2.12). The random delivery orders, the seed and the trial counter are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="kv" id="coord"></div><div class="accs" id="accs" style="margin-top:8px"></div>
+        <div class="callout" id="out" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div class="btns"><button class="btn small" id="shuffle">New delivery order</button><button class="btn small" id="many">Run 1,000 random trials</button></div>
+        <div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Without a coordinator</strong>, an acceptor that receives (+2) then (×2) ends at 4, while one that receives (×2) then (+2) ends at 2, which is Figure 2.11.</li>
+    <li><strong>With a coordinator</strong>, the order in which C happens to receive the two requests becomes <em>the</em> order. Either is acceptable, because the proposers never coordinated.</li>
+    <li><strong>An acceptor that sees tag 1 before tag 0</strong> knows it skipped a step and holds the request until the missing one arrives (Figure 2.12).</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-system-models-order-and-time.html"><small>Lesson</small>2. System models, order, and time</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { mode: "direct" }, seed = 3, rng, steps, k, A, C, tags, trials = null;
+  var REQ = { P1: { op: "+2", f: function (x) { return x + 2; } }, P2: { op: "×2", f: function (x) { return x * 2; } } };
+  function order() { return rng.chance(0.5) ? ["P1", "P2"] : ["P2", "P1"]; }
+  function plan() {
+    rng = Kit.rng(seed); steps = [];
+    if (cfg.mode === "direct") {
+      ["A1", "A2"].forEach(function (a) { order().forEach(function (p) { steps.push({ k: "deliver", a: a, p: p }); }); });
+      steps.sort(function () { return 0; });
+      var mix = []; for (var i = 0; i < 2; i++) { mix.push(steps[i]); mix.push(steps[i + 2]); } steps = mix;
+    } else {
+      var co = order(); co.forEach(function (p, i) { steps.push({ k: "tag", p: p, t: i }); });
+      ["A1", "A2"].forEach(function (a) { var o = order(); o.forEach(function (p) { steps.push({ k: "deliver", a: a, p: p, tagged: true }); }); });
+      var d = steps.slice(2), m2 = []; for (var j = 0; j < 2; j++) { m2.push(d[j]); m2.push(d[j + 2]); } steps = steps.slice(0, 2).concat(m2);
+    }
+  }
+  function reset() { plan(); k = 0; A = { A1: { v: 0, next: 0, buf: [] , seen: [] }, A2: { v: 0, next: 0, buf: [], seen: [] } }; C = 0; tags = {}; log.clear(); log.add(cfg.mode === "direct" ? "Proposers broadcast straight to both acceptors." : "Proposers send to the coordinator C (C = 0), which tags and broadcasts.", "muted"); render(); }
+  function apply(a, p) { A[a].v = REQ[p].f(A[a].v); A[a].seen.push(REQ[p].op); }
+  function step() {
+    if (k >= steps.length) return false;
+    var s = steps[k++];
+    if (s.k === "tag") { tags[s.p] = C; log.add("C receives " + s.p + "'s (" + REQ[s.p].op + "), tags it ⟨" + REQ[s.p].op + ", " + C + "⟩ and broadcasts; C = " + (C + 1), "muted"); C++; }
+    else if (!s.tagged) { apply(s.a, s.p); log.add(s.a + " receives (" + REQ[s.p].op + ") from " + s.p + " and applies it: " + s.a + " = " + A[s.a].v, "muted"); }
+    else {
+      var acc = A[s.a], t = tags[s.p];
+      if (t !== acc.next) { acc.buf.push(s.p); log.add(s.a + " receives ⟨" + REQ[s.p].op + ", " + t + "⟩ but expects tag " + acc.next + ": holds it", "warn"); }
+      else {
+        apply(s.a, s.p); acc.next++; log.add(s.a + " applies ⟨" + REQ[s.p].op + ", " + t + "⟩: " + s.a + " = " + acc.v, "ok");
+        acc.buf.slice().forEach(function (p) { if (tags[p] === acc.next) { apply(s.a, p); acc.next++; acc.buf.splice(acc.buf.indexOf(p), 1); log.add(s.a + " now applies the held ⟨" + REQ[p].op + ", " + tags[p] + "⟩: " + s.a + " = " + acc.v, "ok"); } });
+      }
+    }
+    render(); return k < steps.length;
+  }
+  function render() {
+    var cd = Kit.clear(document.getElementById("coord"));
+    cd.appendChild(Kit.el("div", null, Kit.el("span", null, "Requests: "), Kit.el("strong", null, "P1 → (+2), P2 → (×2)")));
+    if (cfg.mode === "coord") cd.appendChild(Kit.el("div", null, Kit.el("span", null, "Coordinator C = "), Kit.el("strong", null, String(C))));
+    var box = Kit.clear(document.getElementById("accs"));
+    ["A1", "A2"].forEach(function (a) { box.appendChild(Kit.el("div", { class: "acc" }, Kit.el("h3", null, "Acceptor " + a), Kit.el("div", { class: "v" }, String(A[a].v)), Kit.el("div", { class: "q" }, "applied: " + (A[a].seen.join(", ") || "–") + (A[a].buf.length ? " · holding " + A[a].buf.length : "")))); });
+    var out = document.getElementById("out"), fin = k >= steps.length;
+    if (!fin) { out.className = "callout"; out.textContent = "Step through the deliveries."; }
+    else if (A.A1.v === A.A2.v) { out.className = "callout ok"; out.textContent = "Both acceptors end at " + A.A1.v + " and applied the operations in the same order."; }
+    else { out.className = "callout bad"; out.textContent = "Acceptors diverge: A1 = " + A.A1.v + ", A2 = " + A.A2.v + "."; }
+    var rows = [["Step", k + " / " + steps.length], ["Delivery seed", seed]];
+    if (trials) rows.push(["Diverged in 1,000 trials", trials.mode + ": " + trials.bad, trials.bad ? "bad" : "ok"]);
+    stats(rows);
+  }
+  function simulate() {
+    var bad = 0;
+    for (var i = 0; i < 1000; i++) {
+      var r = Kit.rng(1000 + i), o1 = r.chance(0.5), o2 = r.chance(0.5);
+      if (cfg.mode === "direct") { if (o1 !== o2) bad++; }
+    }
+    trials = { mode: cfg.mode === "direct" ? "no coordinator" : "coordinator", bad: bad };
+    log.add("1,000 random delivery orders: acceptors diverged " + bad + " times" + (cfg.mode === "coord" ? " (tags force one order)" : " (whenever their orders differ)"), bad ? "bad" : "ok");
+    render();
+  }
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Routing", value: cfg.mode, options: [{ value: "direct", label: "Broadcast directly" }, { value: "coord", label: "Through a coordinator" }], onChange: function (v) { cfg.mode = v; trials = null; reset(); } }).element);
+  document.getElementById("shuffle").addEventListener("click", function () { seed++; reset(); });
+  document.getElementById("many").addEventListener("click", simulate);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1100 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why don't two (+2) requests cause a problem?",
+      options: ["They're small", "Addition commutes, so the order of application doesn't matter", "The network never reorders them"], answer: 1,
+      explain: "p. 30." },
+    { q: "Which order does the coordinator impose?",
+      options: ["The order the proposers sent their requests", "The order in which C itself received them", "Alphabetical order of proposers"], answer: 1,
+      explain: "C can't observe the proposers sending, so any order it receives is acceptable (p. 32)." },
+    { q: "An acceptor receives a request tagged 1 but has applied nothing. What does it do?",
+      options: ["Applies it immediately", "Waits for the request tagged 0", "Discards it"], answer: 1,
+      explain: "A larger tag means it skipped a step (p. 32)." }
+  ]);
+})();
+</script>
+</body>
+</html>

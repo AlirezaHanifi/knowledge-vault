@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deduplicating a Retried Request</title>
+<meta name="description" content="Pick a receiver-side handler (track then process, process then track, or transactional), crash the receiver at a chosen point, let the sender retry, and count how many times the balance transfer actually happened. Illustrates Think Distributed Systems, Chapter 4.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  pre.code { font-family: var(--mono); font-size: .8rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; white-space: pre-wrap; }
+  pre.code .hl { background: var(--accent-soft); display: inline-block; width: 100%; } pre.code .cr { background: var(--bad-soft); display: inline-block; width: 100%; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-message-delivery-and-processing.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Deduplicating a retry</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Message delivery and processing</div>
+  <h1>Deduplicating a retried request</h1>
+  <p class="lede">The sender retries until it gets a response, so the receiver must expect duplicates. The receiver keeps a durable set of requests it has seen. Where the handler records the request, relative to processing it, decides what a crash in between does: the book’s two failed attempts give <strong>at-most-once</strong> or <strong>at-least-once</strong> processing, and only recording and processing in <strong>one transaction</strong> gives exactly-once processing semantics.</p>
+  <p class="source-note">Illustrates “Silence and chatter”, “Exactly-once processing semantics” and “Idempotence” (pp. 60–64, the two failed attempts and Listing 4.3). The crash points, the lost-response option and the single retry are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Receiver's handler</p><pre class="code" id="code"></pre>
+        <div class="kv" id="state" style="margin-top:8px"></div><div class="callout" id="out" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="handler"></div><div id="crash" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Track, then process.</strong> A crash between the two lines leaves the request marked as received but never processed. The retry is skipped: <strong>at most once</strong>.</li>
+    <li><strong>Process, then track.</strong> A crash between the two lines leaves the transfer done but unmarked. The retry runs it again: <strong>at least once</strong>.</li>
+    <li><strong>Transactional.</strong> The transfer and the record commit together or not at all, so a crash rolls both back and the retry runs exactly one effective transfer.</li>
+    <li><strong>A lost response</strong> looks the same to the sender as a crash. Every handler then sees a duplicate, and only the record of the request stops it from transferring twice.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-message-delivery-and-processing.html"><small>Lesson</small>4. Message delivery and processing</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { h: "track", crash: "between" }, steps, k, S, hl;
+  var CODE = {
+    track: ["on message request do", "  if request in received then return", "  received := received + request", "  process(request)  // transfer $10", "  return response", "end"],
+    proc: ["on message request do", "  if request in received then return response", "  process(request)  // transfer $10", "  received := received + request", "  return response", "end"],
+    tx: ["on message request do", "  if request in received then return response", "  begin transaction", "  process(request)  // transfer $10", "  received := received + request", "  commit transaction", "  return response", "end"]
+  };
+  function reset() { k = 0; S = { received: false, txReceived: false, transfers: 0, txTransfers: 0, inTx: false, attempt: 0, phase: "send", crashed: false, responded: false, done: false }; hl = -1; log.clear(); log.add("Sender sends request r: transfer $10. It retries if it gets no response.", "muted"); render(); }
+  function L() { return CODE[cfg.h]; }
+  function step() {
+    if (S.done) return false;
+    var c = L();
+    if (S.phase === "send") { S.attempt++; S.phase = "run"; hl = 0; S.pc = 1; log.add("Attempt " + S.attempt + ": the receiver gets request r", "muted"); render(); return true; }
+    if (S.phase === "run") {
+      var line = c[S.pc]; hl = S.pc;
+      var crashHere = cfg.crash === "between" && S.attempt === 1 && ((cfg.h === "track" && S.pc === 3) || (cfg.h === "proc" && S.pc === 3) || (cfg.h === "tx" && S.pc === 4));
+      if (crashHere) {
+        S.phase = "crash"; log.add("⚡ Receiver crashes before: " + line.trim(), "bad");
+        if (cfg.h === "tx") { S.txTransfers = 0; S.inTx = false; log.add("Recovery rolls back the uncommitted transaction: the transfer is undone", "warn"); }
+        render(); return true;
+      }
+      if (/if request in received/.test(line)) {
+        if (S.received) { log.add("r is already in received: skip processing" + (/response/.test(line) ? " and return the saved response" : ""), S.transfers ? "ok" : "bad"); S.phase = "respond"; render(); return true; }
+        log.add("r not seen before: continue", "muted");
+      } else if (/begin/.test(line)) { S.inTx = true; log.add("Begin transaction", "muted"); }
+      else if (/process/.test(line)) { if (cfg.h === "tx") S.txTransfers++; else S.transfers++; log.add("Transfer $10 executed" + (cfg.h === "tx" ? " (inside the transaction)" : ""), "muted"); }
+      else if (/received :=|received =/.test(line)) { if (cfg.h === "tx") S.txReceived = true; else S.received = true; log.add("r recorded in received" + (cfg.h === "tx" ? " (inside the transaction)" : ""), "muted"); }
+      else if (/commit/.test(line)) { S.inTx = false; S.transfers += S.txTransfers; S.txTransfers = 0; S.received = S.received || S.txReceived; log.add("Commit: transfer and record become durable together", "ok"); }
+      else if (/return response/.test(line)) { S.phase = "respond"; render(); return true; }
+      S.pc++; render(); return true;
+    }
+    if (S.phase === "crash") { S.phase = "send"; hl = -1; log.add("Sender times out without a response and retries", "warn"); render(); return true; }
+    if (S.phase === "respond") {
+      if (cfg.crash === "response" && S.attempt === 1) { S.phase = "send"; hl = -1; log.add("⚡ The response is lost in the network; the sender times out and retries", "bad"); render(); return true; }
+      S.done = true; hl = -1; log.add("Sender receives a response and stops", "ok"); render(); return false;
+    }
+  }
+  function render() {
+    var pre = Kit.clear(document.getElementById("code"));
+    L().forEach(function (ln, i) { pre.appendChild(Kit.el("span", { class: i === hl ? (S.phase === "crash" ? "cr" : "hl") : "" }, ln)); pre.appendChild(document.createTextNode("\n")); });
+    var kv = Kit.clear(document.getElementById("state"));
+    var tr = S.transfers + S.txTransfers;
+    [["Attempts by the sender", S.attempt], ["Transfers executed (durable)", S.transfers], ["r in received", S.received ? "yes" : "no"]].forEach(function (x) { kv.appendChild(Kit.el("div", null, Kit.el("span", null, x[0] + ": "), Kit.el("strong", null, String(x[1])))); });
+    var o = document.getElementById("out");
+    if (!S.done) { o.className = "callout"; o.textContent = "Step through the request, the crash and the retry."; }
+    else if (S.transfers === 1) { o.className = "callout ok"; o.textContent = "Exactly one transfer: equivalent to processing once."; }
+    else if (S.transfers === 0) { o.className = "callout bad"; o.textContent = "No transfer happened although the sender got a response: at-most-once processing."; }
+    else { o.className = "callout bad"; o.textContent = S.transfers + " transfers: at-least-once processing, and the money moved twice."; }
+    stats([["Handler", ({ track: "track → process", proc: "process → track", tx: "transactional" })[cfg.h]], ["Transfers", S.transfers, S.done ? (S.transfers === 1 ? "ok" : "bad") : ""]]);
+  }
+  document.getElementById("handler").appendChild(Kit.segmented({ label: "Handler", value: cfg.h, options: [{ value: "track", label: "Track, then process" }, { value: "proc", label: "Process, then track" }, { value: "tx", label: "Transactional" }], onChange: function (v) { cfg.h = v; reset(); } }).element);
+  document.getElementById("crash").appendChild(Kit.segmented({ label: "Failure on attempt 1", value: cfg.crash, options: [{ value: "none", label: "None" }, { value: "between", label: "Crash between the steps" }, { value: "response", label: "Response lost" }], onChange: function (v) { cfg.crash = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Process-then-track crashes after processing. The retry is…",
+      options: ["skipped", "processed again: at-least-once", "processed exactly once"], answer: 1,
+      explain: "p. 62." },
+    { q: "What makes the transactional handler safe?",
+      options: ["It's faster", "Processing and recording commit together, so a crash undoes both", "It never crashes"], answer: 1,
+      explain: "Listing 4.3 (pp. 63–64)." },
+    { q: "Why must the sender keep retrying for exactly-once processing semantics?",
+      options: ["To create load", "The guarantee needs at-least-once delivery and processing", "Retries are free"], answer: 1,
+      explain: "p. 62." }
+  ]);
+})();
+</script>
+</body>
+</html>
