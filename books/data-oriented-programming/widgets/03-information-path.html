@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Information Paths</title>
+<meta name="description" content="Click through the catalog data of Data-Oriented Programming&#x27;s chapter 3, or type a path, and watch a generic get resolve it one key at a time, including missing keys and array indexes.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>ul.tree { list-style: none; padding-left: 14px; margin: 0; font-family: var(--mono); font-size: .8rem; } ul.tree li { margin: 1px 0; }
+  .tree .k { color: var(--ink-2); } .tree .v { color: var(--ink); } .tree button.key { font: inherit; background: none; border: 0; padding: 0 2px; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
+  .tree .on > .lbl, .tree .on > button.key { background: var(--accent-soft); outline: 1px solid var(--accent); border-radius: 3px; }
+  .tree .new > .tag, .tree .shared > .tag { font-size: .7rem; border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+  .tree .new > .tag { background: var(--warn-soft); color: var(--ink); border: 1px solid var(--warn); } .tree .shared > .tag { background: var(--ok-soft); color: var(--ink); border: 1px solid var(--ok); }
+  ol.steps { font-family: var(--mono); font-size: .8rem; } ol.steps li.miss { color: var(--bad); }
+  pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-basic-data-manipulation.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Information paths</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · Basic data manipulation</div>
+  <h1>Information paths</h1>
+  <p class="lede">In DOP every piece of information has an <strong>information path</strong>, like a file path whose names are nested entities. One generic function, <code>_.get</code>, retrieves any of them, because the path is just data: you can store it in a variable and pass it around.</p>
+  <p class="source-note">Illustrates section 3.3 (pp. 54–57): the catalog record of listing 3.5, the path to Watchmen’s title, Theo’s own <code>get</code> (listing 3.7) and the mixed string-and-integer paths of figure 3.5. The step-by-step trace is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">catalogData (listing 3.5) — click any key</p><ul class="tree" id="tree"></ul></div>
+      <div class="panel"><p class="panel-title">get(catalogData, path)</p>
+        <label class="field-head" for="path">Path (JSON array)</label><input id="path" type="text" style="width:100%;font-family:var(--mono)" spellcheck="false">
+        <ol class="steps" id="steps"></ol><div class="callout" id="verdict"></div>
+        <p class="field-hint">The same path through classes would need dot notation for members, brackets for index keys and class imports in Java: code specific to each kind of path (p. 57).</p></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><p class="panel-title">Paths from the book</p>
+        <button class="btn small" data-p='["booksByIsbn","978-1779501127","title"]' type="button">Watchmen’s title (p. 55)</button>
+        <button class="btn small" data-p='["authorsById","alan-moore","bookIsbns",0]' type="button">Alan Moore’s first book (fig. 3.5)</button>
+        <button class="btn small" data-p='["booksByIsbn","978-1779501127","bookItems",1,"isLent"]' type="button">Is the second copy lent?</button>
+        <button class="btn small" data-p='["authorsById","dave-chester-gibbons","name"]' type="button">A missing author</button></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>A path mixes strings and integers</strong>: map keys for records and indexes, positions for arrays.</li>
+    <li><strong>A missing key ends the walk with <code>undefined</code></strong>, without throwing; that is how <code>_.get</code> behaves (Lodash also accepts a default value).</li>
+    <li><strong>The path is a first-class value.</strong> The buttons on the right are just arrays; the same few lines of code resolve every one of them.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-basic-data-manipulation.html"><small>Lesson</small>3. Basic data manipulation</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  function catalog() { return {
+    booksByIsbn: {
+      "978-1779501127": { isbn: "978-1779501127", title: "Watchmen", publicationYear: 1987, authorIds: ["alan-moore", "dave-gibbons"],
+        bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }, { id: "book-item-2", libId: "nyc-central-lib", isLent: false }] } },
+    authorsById: { "alan-moore": { name: "Alan Moore", bookIsbns: ["978-1779501127"] }, "dave-gibbons": { name: "Dave Gibbons", bookIsbns: ["978-1779501127"] } } }; }
+  function isObj(x) { return x !== null && typeof x === "object"; }
+  function fmt(v) { return Array.isArray(v) ? "[…" + v.length + "]" : isObj(v) ? "{…" + Object.keys(v).length + "}" : JSON.stringify(v); }
+
+  var log = Kit.log(document.getElementById("log")), data = catalog(), path = ["booksByIsbn", "978-1779501127", "title"], hits = 0, misses = 0;
+  function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+  function drawTree() {
+    var root = Kit.clear(document.getElementById("tree"));
+    (function walk(node, at, ul) {
+      Object.keys(node).forEach(function (k) {
+        var key = Array.isArray(node) ? Number(k) : k, p = at.concat([key]), v = node[k], onPath = same(p, path.slice(0, p.length)) && p.length <= path.length;
+        var b = Kit.el("button", { class: "key", type: "button", "aria-label": "Path " + JSON.stringify(p) }, Array.isArray(node) ? String(k) : JSON.stringify(k));
+        b.addEventListener("click", function () { setPath(p); log.add("Clicked " + JSON.stringify(p), "muted"); });
+        var li = Kit.el("li", { class: onPath ? "on" : "" }, b, ": ", isObj(v) ? Kit.el("span", { class: "k" }, Array.isArray(v) ? "[" : "{") : Kit.el("span", { class: "v" }, JSON.stringify(v)));
+        if (isObj(v)) { var sub = Kit.el("ul", { class: "tree" }); walk(v, p, sub); li.appendChild(sub); li.appendChild(Kit.el("span", { class: "k" }, Array.isArray(v) ? "]" : "}")); }
+        ul.appendChild(li); });
+    })(data, [], root);
+  }
+  function get(map, p, trace) { var cur = map; for (var i = 0; i < p.length; i++) { var has = isObj(cur) && Object.prototype.hasOwnProperty.call(cur, p[i]); trace.push({ key: p[i], ok: has, val: has ? cur[p[i]] : undefined }); if (!has) return undefined; cur = cur[p[i]]; } return cur; }
+  function setPath(p) { path = p; document.getElementById("path").value = JSON.stringify(p); run(); }
+  function run() {
+    var tr = [], res = get(data, path, tr), ol = Kit.clear(document.getElementById("steps"));
+    ol.appendChild(Kit.el("li", null, "start at catalogData " + fmt(data)));
+    tr.forEach(function (s) { ol.appendChild(Kit.el("li", { class: s.ok ? "" : "miss" }, (typeof s.key === "number" ? "[" + s.key + "]" : "." + s.key) + " → " + (s.ok ? fmt(s.val) : "missing: stop"))); });
+    var miss = tr.some(function (s) { return !s.ok; }), v = document.getElementById("verdict");
+    if (miss) misses++; else hits++;
+    v.className = "callout " + (miss ? "warn" : "ok"); v.textContent = "get(catalogData, " + JSON.stringify(path) + ") → " + (res === undefined ? "undefined" : JSON.stringify(res));
+    drawTree(); stats([["Path length", path.length], ["Keys resolved", tr.filter(function (s) { return s.ok; }).length], ["Resolved paths", hits, "ok"], ["Missing paths", misses, misses ? "warn" : ""]]);
+  }
+  document.getElementById("path").addEventListener("change", function (e) { try { var p = JSON.parse(e.target.value); if (!Array.isArray(p)) throw 0; path = p; log.add("Typed " + JSON.stringify(p), "muted"); run(); } catch (x) { log.add("A path is a JSON array, such as [\"authorsById\", \"alan-moore\", \"name\"].", "bad"); } });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-p]"), function (b) { b.addEventListener("click", function () { setPath(JSON.parse(b.getAttribute("data-p"))); log.add(b.textContent + ": " + b.getAttribute("data-p"), "ok"); }); });
+  setPath(path);
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What is the information path to Watchmen's title in the catalog?",
+      options: ["catalog.Watchmen.title", "[\"booksByIsbn\", \"978-1779501127\", \"title\"]", "[\"title\"]"], answer: 1,
+      explain: "p. 55." },
+    { q: "What can an information path contain?",
+      options: ["Only strings", "Strings and integers", "Only class names"], answer: 1,
+      explain: "Figure 3.5, p. 57: map keys and array positions." },
+    { q: "Why does Joe prefer maps to objects for paths?",
+      options: ["Maps are faster", "One generic function can take the path as an argument", "Objects can't be nested"], answer: 1,
+      explain: "With objects you need specific code for each kind of path (p. 57)." }
+  ]);
+})();
+</script>
+</body>
+</html>

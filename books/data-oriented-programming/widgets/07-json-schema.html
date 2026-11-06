@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSON Schema Playground</title>
+<meta name="description" content="Validate the chapter 7 search requests and responses against their JSON Schemas, edit the data to introduce typos and extra fields, and switch between first-error and all-errors reporting. Illustrates Data-Oriented Programming, chapter 7.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-basic-data-validation.html">Chapter 7</a><span aria-hidden="true">/</span>
+      <span aria-current="page">JSON Schema playground</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 7 · Basic data validation</div>
+  <h1>JSON Schema playground</h1>
+  <p class="lede">In DOP the <strong>schema is separate from the representation</strong>: data is a plain map, and a schema, itself just data, says what shape it should have. Validate at the system’s boundaries and report what went wrong in detail.</p>
+  <p class="source-note">Illustrates sections 7.2, 7.3 and 7.5 (listings 7.2–7.23, pp. 144–159): the search request and response schemas, the database response with and without <code>additionalProperties: false</code>, and Ajv’s error details. The validator is the vault’s small subset of JSON Schema, not Ajv; its messages imitate Ajv’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="grid-2"><div class="panel"><p class="panel-title">Schema</p><pre class="code" id="schema"></pre></div>
+        <div class="panel"><p class="panel-title"><label for="data">Data (edit me)</label></p><textarea class="code" id="data" spellcheck="false"></textarea></div></div>
+      <div class="panel"><p class="panel-title">validate(schema, data)</p><div class="callout" id="verdict"></div><pre class="code" id="errs"></pre></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="ex">Example</label><select id="ex" style="width:100%"></select>
+        <div id="all" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Fields are optional by default</strong>: only names in <code>required</code> must be present. Mistyping <code>title</code> as <code>tilte</code> fails because <code>title</code> is required, not because <code>tilte</code> is unknown.</li>
+    <li><strong>Extra fields pass unless the schema is strict</strong>: <code>dummy_property</code> validates until <code>additionalProperties: false</code> is added. Joe allows extra fields in requests and forbids them in responses.</li>
+    <li><strong>By default only the first error is reported</strong>; with <code>allErrors</code> you see all three problems of listing 7.23. Note that listing 7.7’s request asks for a <code>title</code> field, which the enum of listing 7.5 doesn’t list: try it.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-basic-data-validation.html"><small>Lesson</small>7. Basic data validation</a></li>
+    <li><a href="../lab/07-mini-json-schema/README.md"><small>Experiment</small>A mini JSON Schema validator</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  // A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
+  // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
+  // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
+  function jsType(x) { return x === null ? "null" : Array.isArray(x) ? "array" : typeof x; }
+  function validate(schema, data, allErrors) {
+    var errors = [];
+    function err(path, kw, msg, sp) { errors.push({ instancePath: path, schemaPath: sp, keyword: kw, message: msg }); }
+    function v(s, d, path, sp) {
+      var start = errors.length;
+      function stop() { return !allErrors && errors.length > start; }
+      if (s.type) { var t = jsType(d), ok = s.type === t || (s.type === "integer" && t === "number" && Math.floor(d) === d) || (s.type === "number" && t === "number");
+        if (!ok) { err(path, "type", "must be " + s.type, sp + "/type"); return; } }
+      if (s.enum && !s.enum.some(function (e) { return JSON.stringify(e) === JSON.stringify(d); })) { err(path, "enum", "must be equal to one of the allowed values", sp + "/enum"); if (stop()) return; }
+      if (typeof d === "number") {
+        if (s.minimum !== undefined && d < s.minimum) { err(path, "minimum", "must be >= " + s.minimum, sp + "/minimum"); if (stop()) return; }
+        if (s.maximum !== undefined && d > s.maximum) { err(path, "maximum", "must be <= " + s.maximum, sp + "/maximum"); if (stop()) return; } }
+      if (typeof d === "string") {
+        if (s.pattern && !new RegExp(s.pattern).test(d)) { err(path, "pattern", "must match pattern \"" + s.pattern + "\"", sp + "/pattern"); if (stop()) return; }
+        if (s.format === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { err(path, "format", "must match format \"date\"", sp + "/format"); if (stop()) return; } }
+      if (jsType(d) === "object") {
+        (s.required || []).forEach(function (k) { if (stop()) return; if (!Object.prototype.hasOwnProperty.call(d, k)) err(path, "required", "must have required property '" + k + "'", sp + "/required"); });
+        if (stop()) return;
+        Object.keys(d).forEach(function (k) { if (stop()) return; var p = path + "/" + k;
+          if (s.properties && s.properties[k]) v(s.properties[k], d[k], p, sp + "/properties/" + k);
+          else if (s.additionalProperties === false) err(path, "additionalProperties", "must NOT have additional properties ('" + k + "')", sp + "/additionalProperties");
+          else if (s.additionalProperties && typeof s.additionalProperties === "object") v(s.additionalProperties, d[k], p, sp + "/additionalProperties"); });
+        if (stop()) return; }
+      if (jsType(d) === "array") {
+        var pre = s.prefixItems || [];
+        pre.forEach(function (ps, i) { if (stop()) return; if (i < d.length) v(ps, d[i], path + "/" + i, sp + "/prefixItems/" + i); });
+        if (s.items) d.forEach(function (x, i) { if (stop()) return; if (i >= pre.length) v(s.items, x, path + "/" + i, sp + "/items"); });
+        if (stop()) return; }
+      if (s.allOf) s.allOf.forEach(function (ss, i) { if (!stop()) v(ss, d, path, sp + "/allOf/" + i); });
+      if (stop()) return;
+      ["anyOf", "oneOf"].forEach(function (kw) { if (!s[kw] || stop()) return;
+        var n = s[kw].filter(function (ss) { return validate(ss, d, false).length === 0; }).length;
+        if (kw === "anyOf" && n === 0) err(path, "anyOf", "must match a schema in anyOf", sp + "/anyOf");
+        if (kw === "oneOf" && n !== 1) err(path, "oneOf", "must match exactly one schema in oneOf (" + n + " matched)", sp + "/oneOf"); });
+    }
+    v(schema, data, "", "#");
+    return errors;
+  }
+  function errorsText(errs) { return errs.map(function (e) { return "data" + e.instancePath + " " + e.message; }).join(", "); }
+
+  var log = Kit.log(document.getElementById("log")), allErrors = false;
+  var REQ = { type: "object", properties: { title: { type: "string" }, fields: { type: "array", items: { type: "string" } } }, required: ["title", "fields"] };
+  var REQ_ENUM = { type: "object", properties: { title: { type: "string" }, fields: { type: "array", items: { enum: ["publishers", "number_of_pages", "weight", "physical_format", "subjects", "publish_date", "physical_dimensions"] } } }, required: ["title", "fields"] };
+  var RESP = { type: "array", items: { type: "object", required: ["title", "available"], properties: { title: { type: "string" }, available: { type: "boolean" }, subtitle: { type: "string" }, number_of_pages: { type: "integer" }, subjects: { type: "array", items: { type: "string" } }, isbn: { type: "string" }, isbn_13: { type: "string" } } } };
+  var DB = { type: "array", items: { type: "object", required: ["title", "isbn", "available"], properties: { title: { type: "string" }, available: { type: "boolean" }, isbn: { type: "string" } } } };
+  var DB_STRICT = JSON.parse(JSON.stringify(DB)); DB_STRICT.items.additionalProperties = false;
+  var DUMMY = [{ title: "7 Habits of Highly Effective People", available: true, isbn: "978-0812981605", dummy_property: 42 }, { title: "The Power of Habit", available: false, isbn: "978-1982137274", dummy_property: 45 }];
+  var EX = [["Search request (listing 7.8)", REQ, { title: "habit", fields: ["title", "weight", "number_of_pages"] }],
+    ["Typo: tilte (listing 7.9)", REQ, { tilte: "habit", fields: ["title", "weight", "number_of_pages"] }],
+    ["Request against the enum schema (listing 7.5 + required)", REQ_ENUM, { title: "habit", fields: ["title", "weight", "number_of_pages"] }],
+    ["Search response (listing 7.11)", RESP, [{ title: "7 Habits of Highly Effective People", available: true, isbn: "978-0812981605" }, { title: "The Power of Habit", available: false, isbn_13: "978-1982137274", subtitle: "Why We Do What We Do in Life and Business", subjects: ["Social aspects", "Habit", "Change (Psychology)"] }]],
+    ["Database response with dummy_property (listing 7.14)", DB, DUMMY],
+    ["Same, strict schema (listing 7.15)", DB_STRICT, DUMMY],
+    ["Three errors (listing 7.23)", REQ, { myTitle: "habit", fields: [1, 2] }]];
+  var cur = 0;
+  function load(i) { cur = i; document.getElementById("schema").textContent = JSON.stringify(EX[i][1], null, 2); document.getElementById("data").value = JSON.stringify(EX[i][2], null, 2); run(); }
+  function run(quiet) { var d, v = document.getElementById("verdict"), pre = document.getElementById("errs");
+    try { d = JSON.parse(document.getElementById("data").value); } catch (e) { v.className = "callout bad"; v.textContent = "Not valid JSON: " + e.message; pre.textContent = ""; return; }
+    var errs = validate(EX[cur][1], d, allErrors); v.className = "callout " + (errs.length ? "bad" : "ok");
+    v.textContent = errs.length ? "→ false. errorsText: " + errorsText(errs) : "→ true";
+    pre.textContent = errs.length ? JSON.stringify(errs, null, 2) : "(no errors)";
+    if (!quiet) log.add(EX[cur][0] + ": " + (errs.length ? errs.length + " error(s): " + errorsText(errs) : "valid"), errs.length ? "bad" : "ok");
+    stats([["Valid", errs.length ? "no" : "yes", errs.length ? "bad" : "ok"], ["Errors reported", errs.length], ["Mode", allErrors ? "allErrors" : "first error"]]); }
+  var sel = document.getElementById("ex"); EX.forEach(function (e, i) { sel.appendChild(Kit.el("option", { value: i }, e[0])); });
+  sel.addEventListener("change", function () { load(Number(sel.value)); });
+  document.getElementById("data").addEventListener("input", function () { run(true); });
+  document.getElementById("data").addEventListener("change", function () { run(); });
+  document.getElementById("all").appendChild(Kit.segmented({ label: "Error reporting", value: false, options: [{ value: false, label: "First error (default)" }, { value: true, label: "allErrors: true" }], onChange: function (v) { allErrors = v; run(); } }).element);
+  load(0);
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why does the request with \"tilte\" fail validation?",
+      options: ["tilte is an unknown field", "title is required and missing", "fields is not an array"], answer: 1,
+      explain: "Listing 7.9, pp. 148–149." },
+    { q: "Does an array of books with an extra dummy_property validate against listing 7.13?",
+      options: ["Yes: additional properties are allowed by default", "No", "Only if dummy_property is a string"], answer: 0,
+      explain: "pp. 152–153." },
+    { q: "Which Ajv option reports every failure instead of the first?",
+      options: ["{strict: true}", "{allErrors: true}", "{verbose: true}"], answer: 1,
+      explain: "Listing 7.23, p. 159." }
+  ]);
+})();
+</script>
+</body>
+</html>

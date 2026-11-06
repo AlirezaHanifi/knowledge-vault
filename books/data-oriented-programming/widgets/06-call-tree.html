@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tree of Function Calls</title>
+<meta name="description" content="Pick a node in the search or add-member call tree of Data-Oriented Programming&#x27;s chapter 6 to see its inputs and outputs, the fields it reads, the minimal test data valid in its context, and how many test cases the book&#x27;s rule suggests.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; } ul.ct { list-style: none; padding-left: 16px; margin: 0; font-family: var(--mono); font-size: .82rem; } ul.ct button { font: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; margin: 2px 0; cursor: pointer; color: var(--ink); }
+  ul.ct button.ext { color: var(--ink-3); border-style: dotted; } ul.ct button[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/06-unit-tests.html">Chapter 6</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Tree of function calls</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 6 · Unit tests</div>
+  <h1>Tree of function calls</h1>
+  <p class="lede">To unit test a DOP function, draw its <strong>tree of function calls</strong> down to functions outside your code base. Test bottom-up: deep nodes get <strong>many cases with simple data</strong>; nodes near the root get <strong>few cases with richer data</strong>, assuming their children already work.</p>
+  <p class="source-note">Illustrates sections 6.2 and 6.4 (figures 6.1–6.5, table 6.2, pp. 113–131): the search tree, the add-member tree, minimal data valid in context (listing 6.7) and the depth rule. The per-node case counts are the vault’s reading of the book’s examples. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title" id="tt">Tree</p><ul class="ct" id="tree"></ul><p class="field-hint">Dotted: outside the application code base (Lodash, JSON, SystemState): a leaf, not tested here.</p></div>
+      <div class="panel"><p class="panel-title" id="nt">Node</p><div id="info"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="which"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Validity depends on the context</strong>: the minimal catalog for <code>authorNames</code> has only <code>authorsById</code>, and that is perfectly valid there, though not for <code>searchBooksByTitle</code>.</li>
+    <li><strong>Deeper nodes, more cases, simpler data</strong>: <code>authorNames</code> gets empty, one-ID, two-ID, unknown-ID and empty-catalog cases; <code>bookInfo</code> gets one.</li>
+    <li><strong>Mutations test the state they produce</strong>: <code>UserManagement.addMember</code> gets an empty-state, an existing-members and a negative case; the stateful <code>System.addMember</code> is tested through <code>SystemState.get()</code>.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/06-unit-tests.html"><small>Lesson</small>6. Unit tests</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), which = "search", sel = null;
+  var T = {
+    search: ["Library.searchBooksByTitleJSON", [["_.get"], ["JSON.stringify"], ["Catalog.searchBooksByTitle", [["_.get"], ["_.map"], ["_.filter"], ["Catalog.bookInfo", [["_.get"], ["Catalog.authorNames", [["_.get"], ["_.map"]]]]]]]]],
+    add: ["System.addMember", [["SystemState.get"], ["SystemState.commit"], ["Library.addMember", [["_.get"], ["_.set"], ["UserManagement.addMember", [["_.has"], ["_.set"]]]]]]] };
+  var INFO = {
+    "Catalog.authorNames": ["catalogData, authorIds", "array of author names", "authorsById.*.name", '{"authorsById": {"alan-moore": {"name": "Alan Moore"}, "dave-gibbons": {"name": "Dave Gibbons"}}}', ["empty authorIds → []", "one ID → one name", "two IDs → two names", "unknown ID → [undefined]", "empty catalogData → [undefined]"], "Table 6.1 and listing 6.9 (pp. 116–118)"],
+    "Catalog.bookInfo": ["catalogData, book", "a BookInfo map: title, isbn, authorNames", "book.title, book.isbn, book.authorIds, authorsById.*.name", '{"authorsById": {…}} and {"isbn": "978-1779501127", "title": "Watchmen", "authorIds": ["alan-moore", "dave-gibbons"]}', ["one case: Watchmen with its two authors"], "Listing 6.11 (pp. 119–120): its callee is assumed to work"],
+    "Catalog.searchBooksByTitle": ["catalogData, query", "array of BookInfo maps", "booksByIsbn.*.title, plus what bookInfo reads", "a catalog with booksByIsbn and authorsById", ["a matching query", "a query with no match", "an all-lowercase query (finds the bug)"], "Listings 6.16–6.20 (pp. 124–125)"],
+    "Library.searchBooksByTitleJSON": ["libraryData, query", "a JSON string", "catalog, plus what its callees read", '{"catalog": {…}}', ["one case, compared after JSON.parse"], "Listings 6.12–6.15 (pp. 121–123)"],
+    "UserManagement.addMember": ["userManagementData, member", "the next user-management data, or an exception", "membersByEmail.<email>", '{} or {"membersByEmail": {"franck@gmail.com": {…}}}', ["empty state → membersByEmail with jessie", "existing members → franck and jessie", "existing email → \"Member already exists.\""], "Listings 6.22–6.24 (pp. 128–129)"],
+    "Library.addMember": ["libraryData, member", "the next library data", "userManagement", '{"userManagement": {"membersByEmail": {…}}}', ["one case: existing members"], "Listing 6.25 (pp. 130–131): a wrapper around a covered callee"],
+    "System.addMember": ["member (state is implicit)", "nothing: it changes the system state", "SystemState", "a SystemState committed with libraryStateBefore", ["one case: compare systemState.get() with the expected state"], "Listing 6.27 (pp. 131–133): the stateful part still exists" ] };
+  function depth(node, name, d) { if (node[0] === name) return d; var r = -1; (node[1] || []).forEach(function (c) { var x = depth(c, name, d + 1); if (x >= 0) r = x; }); return r; }
+  function draw() { var ul = Kit.clear(document.getElementById("tree")); document.getElementById("tt").textContent = which === "search" ? "Search query (figure 6.1)" : "Add-member mutation (figure 6.5)";
+    (function walk(n, into) { var ext = !INFO[n[0]], b = Kit.el("button", { type: "button", class: ext ? "ext" : "", "aria-pressed": String(sel === n[0]) }, n[0]);
+      b.addEventListener("click", function () { sel = n[0]; draw(); show(); log.add(ext ? n[0] + ": outside the code base, a leaf of the tree." : "Selected " + n[0] + ".", "muted"); });
+      var li = Kit.el("li", null, b); if (n[1]) { var sub = Kit.el("ul", { class: "ct" }); n[1].forEach(function (c) { walk(c, sub); }); li.appendChild(sub); } into.appendChild(li); })(T[which], ul); }
+  function show() { var box = Kit.clear(document.getElementById("info")), i = INFO[sel]; document.getElementById("nt").textContent = sel || "Node";
+    if (!sel) { box.appendChild(Kit.el("p", null, "Pick a node.")); stats([]); return; }
+    if (!i) { box.appendChild(Kit.el("p", null, sel + " is outside the application code base: the tree stops here and it isn’t unit tested as part of this function.")); stats([["Depth", depth(T[which], sel, 0)], ["Test cases", 0]]); return; }
+    [["Input", i[0]], ["Output", i[1]], ["Fields it actually reads", i[2]]].forEach(function (r) { box.appendChild(Kit.el("p", null, Kit.el("strong", null, r[0] + ": "), r[1])); });
+    box.appendChild(Kit.el("p", null, Kit.el("strong", null, "Minimal data valid in this context:"))); box.appendChild(Kit.el("pre", { class: "code" }, i[3]));
+    box.appendChild(Kit.el("p", null, Kit.el("strong", null, "Test cases:"))); box.appendChild(Kit.el("ul", null, i[4].map(function (c) { return Kit.el("li", null, c); })));
+    box.appendChild(Kit.el("p", { class: "field-hint" }, i[5]));
+    var d = depth(T[which], sel, 0); stats([["Depth", d], ["Test cases", i[4].length, i[4].length > 2 ? "ok" : ""], ["Data complexity", d >= 3 ? "low" : d >= 1 ? "medium" : "high"]]); }
+  document.getElementById("which").appendChild(Kit.segmented({ label: "Tree", value: which, options: [{ value: "search", label: "Search (query)" }, { value: "add", label: "Add member (mutation)" }], onChange: function (v) { which = v; sel = v === "search" ? "Catalog.authorNames" : "UserManagement.addMember"; draw(); show(); log.add("Showing the " + (v === "search" ? "search" : "add-member") + " tree.", "muted"); } }).element);
+  sel = "Catalog.authorNames"; draw(); show();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Where does the tree of function calls stop?",
+      options: ["At depth 3", "At functions outside the application's code base, or that call nothing", "At the first Lodash call only"], answer: 1,
+      explain: "p. 114." },
+    { q: "Is a catalogData with only authorsById valid test data for Catalog.authorNames?",
+      options: ["No, it lacks booksByIsbn", "Yes: in DOP, validity depends on the context", "Only in production"], answer: 1,
+      explain: "p. 117." },
+    { q: "Which nodes get the most test cases?",
+      options: ["Those near the root", "Those deep in the tree, with simpler data", "All nodes equally"], answer: 1,
+      explain: "Table 6.2, p. 121." }
+  ]);
+})();
+</script>
+</body>
+</html>

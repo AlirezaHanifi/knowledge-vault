@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swap or Lock</title>
+<meta name="description" content="Run threads that increment a shared counter with no protection, with a mutex, or with an atom, step through a seeded interleaving, and count lost updates, lock waits and swap retries. Illustrates Data-Oriented Programming, chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; } table.th td { font-family: var(--mono); font-size: .8rem; } table.th tr.run td { background: var(--accent-soft); } .big { font-size: 2rem; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-advanced-concurrency-control.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Swap or lock</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Advanced concurrency control</div>
+  <h1>Swap or lock</h1>
+  <p class="lede">Three threads each increment a counter of database accesses. Unprotected, a context switch between read and write loses updates. A <strong>mutex</strong> makes the others wait. An <strong>atom</strong> lets everyone compute, then commits with an atomic compare-and-set and <strong>retries</strong> if the value changed meanwhile.</p>
+  <p class="source-note">Illustrates sections 8.1–8.2 (listings 8.1–8.4, figure 8.2, pp. 164–170): the counter, the mutex version, and <code>swap</code> built on <code>atomicCompareAndSet</code>. The threads are simulated by a seeded scheduler that picks which one takes the next step. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Threads</p><div class="table-wrap"><table class="th" id="th"></table></div></div>
+      <div class="panel"><p class="panel-title">Shared counter</p><div class="big" id="ctr" aria-live="polite"></div><div class="callout" id="verdict"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div id="pl" style="margin-top:10px"></div><div id="n"></div><div id="seed"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Unprotected increments lose updates</strong>: two threads read the same value, both add one, and one write overwrites the other.</li>
+    <li><strong>A mutex is correct but makes threads wait</strong>, and the book’s war stories show how a lock not released, or released in the wrong order, deadlocks.</li>
+    <li><strong>An atom never waits and never loses an update.</strong> A failed compare-and-set means another thread succeeded, so “there is always a winner”; the loser just recomputes.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-advanced-concurrency-control.html"><small>Lesson</small>8. Advanced concurrency control</a></li>
+    <li><a href="../lab/08-atom-swap/README.md"><small>Experiment</small>Atoms and mutexes, scheduled</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), mode = "atom", cfg = { n: 4, seed: 3 }, st;
+  var PROG = { none: ["read", "write"], mutex: ["lock", "read", "write", "unlock"], atom: ["snapshot", "compute", "cas"] };
+  function reset() { var r = Kit.rng(cfg.seed); st = { r: r, counter: 0, owner: null, t: [0, 1, 2].map(function (i) { return { id: i, pc: 0, done: 0, local: null, snap: null, waits: 0, retries: 0 }; }), steps: 0, last: -1 }; log.clear(); log.add("Three threads, " + cfg.n + " increments each, mode: " + mode + ".", "muted"); render(); }
+  function step() { var live = st.t.filter(function (x) { return x.done < cfg.n; }); if (!live.length) return false;
+    var th = live[st.r.int(live.length)], op = PROG[mode][th.pc], name = "T" + (th.id + 1); st.last = th.id; st.steps++;
+    if (op === "read") { th.local = st.counter; log.add(name + " reads " + th.local, "muted"); th.pc++; }
+    else if (op === "write") { var lost = st.counter !== th.local; st.counter = th.local + 1; log.add(name + " writes " + st.counter + (lost ? " (overwrites a concurrent update)" : ""), lost ? "bad" : ""); th.pc++; }
+    else if (op === "lock") { if (st.owner === null) { st.owner = th.id; log.add(name + " locks", "muted"); th.pc++; } else { th.waits++; log.add(name + " waits for the lock held by T" + (st.owner + 1), "warn"); } }
+    else if (op === "unlock") { st.owner = null; log.add(name + " unlocks", "muted"); th.pc++; }
+    else if (op === "snapshot") { th.snap = st.counter; log.add(name + " snapshot = " + th.snap, "muted"); th.pc++; }
+    else if (op === "compute") { th.local = th.snap + 1; log.add(name + " computes next = " + th.local, "muted"); th.pc++; }
+    else if (op === "cas") { if (st.counter === th.snap) { st.counter = th.local; log.add(name + " compareAndSet(" + th.snap + ", " + th.local + ") ✓", "ok"); th.pc++; } else { th.retries++; th.pc = 0; log.add(name + " compareAndSet(" + th.snap + ", " + th.local + ") fails: value is " + st.counter + ". Retry.", "warn"); } }
+    if (th.pc >= PROG[mode].length) { th.pc = 0; th.done++; }
+    render(); return st.t.some(function (x) { return x.done < cfg.n; }); }
+  function render() { var tb = Kit.clear(document.getElementById("th"));
+    tb.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["thread", "next step", "local", "done", "waits", "retries"].map(function (h) { return Kit.el("th", null, h); }))));
+    var b = Kit.el("tbody"); st.t.forEach(function (x) { b.appendChild(Kit.el("tr", { class: st.last === x.id ? "run" : "" }, Kit.el("td", null, "T" + (x.id + 1)), Kit.el("td", null, x.done >= cfg.n ? "finished" : PROG[mode][x.pc]), Kit.el("td", null, x.local === null ? "—" : String(x.local)), Kit.el("td", null, x.done + "/" + cfg.n), Kit.el("td", null, String(x.waits)), Kit.el("td", null, String(x.retries)))); }); tb.appendChild(b);
+    document.getElementById("ctr").textContent = String(st.counter);
+    var finished = st.t.every(function (x) { return x.done >= cfg.n; }), expect = 3 * cfg.n, lost = finished ? expect - st.counter : 0, w = 0, rt = 0; st.t.forEach(function (x) { w += x.waits; rt += x.retries; });
+    var v = document.getElementById("verdict"); v.className = "callout " + (!finished ? "" : lost ? "bad" : "ok");
+    v.textContent = !finished ? "Running: " + st.steps + " steps so far. Expected final value: " + expect + "." : lost ? "Finished at " + st.counter + " instead of " + expect + ": " + lost + " update(s) lost." : "Finished at " + expect + ": no update lost" + (mode === "mutex" ? ", after " + w + " wait(s)." : mode === "atom" ? ", with " + rt + " retry(ies) and no waiting." : ".");
+    stats([["Counter", st.counter + " / " + expect], ["Lost updates", lost, lost ? "bad" : "ok"], ["Lock waits", w, w ? "warn" : ""], ["Swap retries", rt, rt ? "warn" : ""]]); }
+  var pl = Kit.player({ mount: document.getElementById("pl"), interval: 450, step: step, reset: reset });
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Protection", value: mode, options: [{ value: "none", label: "None" }, { value: "mutex", label: "Mutex" }, { value: "atom", label: "Atom (swap)" }], onChange: function (m) { mode = m; pl.pause(); reset(); } }).element);
+  document.getElementById("n").appendChild(Kit.slider({ label: "Increments per thread", min: 1, max: 8, value: cfg.n, onInput: function (v) { cfg.n = v; pl.pause(); reset(); } }).element);
+  document.getElementById("seed").appendChild(Kit.slider({ label: "Scheduler seed", min: 1, max: 40, value: cfg.seed, onInput: function (v) { cfg.seed = v; pl.pause(); reset(); } }).element);
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does atomicCompareAndSet do?",
+      options: ["Locks, sets and unlocks", "Sets the state to a new value only if it still equals the old value, and says whether it succeeded", "Compares two maps deeply"], answer: 1,
+      explain: "p. 168." },
+    { q: "Can swap loop forever?",
+      options: ["Yes, often", "No: a failed compare-and-set means another thread won", "Only in JavaScript"], answer: 1,
+      explain: "p. 170; starvation is possible only in theory." },
+    { q: "Why don't reads need a lock in DOP?",
+      options: ["Reads are atomic", "A write never mutates the data being read: a read works on a snapshot", "They do need one"], answer: 1,
+      explain: "p. 164." }
+  ]);
+})();
+</script>
+</body>
+</html>

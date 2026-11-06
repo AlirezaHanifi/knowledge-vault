@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Phone-Call Deadlock</title>
+<meta name="description" content="Let Theo and Joe each pick up their own line and then dial the other at nearly the same time, see the deadlock, then replay the same conversation as text messages through an atom. Illustrates Data-Oriented Programming, chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.lane { display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; margin: 6px 0; font-family: var(--mono); font-size: .82rem; }
+  .bar { height: 26px; border: 1px solid var(--line); border-radius: 4px; position: relative; background: var(--surface-2); overflow: hidden; }
+  .seg { position: absolute; top: 0; bottom: 0; font-size: .7rem; display: flex; align-items: center; padding-left: 3px; white-space: nowrap; overflow: hidden; }
+  .seg.hold { background: var(--warn-soft); border-right: 1px solid var(--warn); } .seg.wait { background: var(--bad-soft); } .seg.talk { background: var(--ok-soft); } .seg.msg { background: var(--accent-soft); border-right: 1px solid var(--accent); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-advanced-concurrency-control.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">The phone-call deadlock</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Advanced concurrency control</div>
+  <h1>The phone-call deadlock</h1>
+  <p class="lede">All weekend, Theo and Joe call each other at exactly the same times, and the line is always busy. Each holds one resource, his own line, and waits for the other’s. “Mutexes are like phone calls, and atoms are like text messages”: a message never waits for the other side.</p>
+  <p class="source-note">Illustrates the busy-line story and Theo’s closing analogy (pp. 164, 174). Modeling each line as a lock, the timing and the retry policy are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Timeline (minutes)</p><div id="lanes"></div><div class="callout" id="verdict" style="margin-top:8px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div id="gap" style="margin-top:10px"></div><div id="hold"></div>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="giveup" checked> Hang up after waiting 5 minutes, then try again</label></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>A deadlock needs each side to hold one resource and wait for the other</strong>: here, each caller’s own line. Starting a few minutes apart avoids it; starting together repeats it, all weekend.</li>
+    <li><strong>Hanging up and retrying</strong> breaks the deadlock only if the two retries drift apart. With identical habits they collide again, which is the book’s busy weekend.</li>
+    <li><strong>Text messages are swaps into an atom</strong>: each sender appends to the conversation without holding anything, so nobody ever waits and both messages arrive.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-advanced-concurrency-control.html"><small>Lesson</small>8. Advanced concurrency control</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), mode = "phone", cfg = { gap: 0, hold: 2 };
+  function simulate() { var T = 60, ev = { Theo: [], Joe: [] }, talk = null, tries = 0;
+    if (mode === "text") { ev.Theo.push(["msg", 0, 1, "swap: append msg"]); ev.Joe.push(["msg", cfg.gap, cfg.gap + 1, "swap: append msg"]); return { ev: ev, talk: Math.max(1, cfg.gap + 1), tries: 2, deadlocks: 0 }; }
+    var start = { Theo: 0, Joe: cfg.gap }, deadlocks = 0, giveup = document.getElementById("giveup").checked;
+    for (var round = 0; round < 6 && talk === null; round++) { tries++;
+      var a = start.Theo, b = start.Joe, aDial = a + cfg.hold, bDial = b + cfg.hold;
+      // A caller holds his own line from start until dialing; if the other line is held then, he waits
+      if (aDial <= b) { ev.Theo.push(["hold", a, aDial, "picks up"]); ev.Theo.push(["talk", aDial, aDial + 8, "talking"]); ev.Joe.push(["talk", aDial, aDial + 8, "answers"]); talk = aDial; break; }
+      if (bDial <= a) { ev.Joe.push(["hold", b, bDial, "picks up"]); ev.Joe.push(["talk", bDial, bDial + 8, "talking"]); ev.Theo.push(["talk", bDial, bDial + 8, "answers"]); talk = bDial; break; }
+      deadlocks++; var end = giveup ? Math.max(aDial, bDial) + 5 : T;
+      ev.Theo.push(["hold", a, aDial, "picks up"]); ev.Theo.push(["wait", aDial, end, "busy…"]); ev.Joe.push(["hold", b, bDial, "picks up"]); ev.Joe.push(["wait", bDial, end, "busy…"]);
+      if (!giveup) break; start = { Theo: end + 2, Joe: end + 2 + cfg.gap }; }
+    return { ev: ev, talk: talk, tries: tries, deadlocks: deadlocks }; }
+  function render(quiet) { var r = simulate(), L = Kit.clear(document.getElementById("lanes")), T = 60;
+    ["Theo", "Joe"].forEach(function (who) { var bar = Kit.el("div", { class: "bar", role: "img", "aria-label": who + ": " + r.ev[who].map(function (e) { return e[3] + " " + e[1] + "–" + Math.min(T, e[2]); }).join(", ") });
+      r.ev[who].forEach(function (e) { var l = Math.min(T, e[1]), w = Math.min(T, e[2]) - l; if (w <= 0) return; bar.appendChild(Kit.el("div", { class: "seg " + e[0], style: "left:" + (l / T * 100) + "%;width:" + (w / T * 100) + "%" }, e[3])); });
+      L.appendChild(Kit.el("div", { class: "lane" }, Kit.el("span", null, who), bar)); });
+    var v = document.getElementById("verdict"); v.className = "callout " + (r.talk === null ? "bad" : r.deadlocks ? "warn" : "ok");
+    v.textContent = mode === "text" ? "Both messages are in the conversation; nobody held a line or waited." : r.talk === null ? r.deadlocks + " deadlock(s): each holds his own line and waits for the other. No conversation in the hour." : r.deadlocks ? "Connected at minute " + r.talk + " after " + r.deadlocks + " deadlock(s)." : "Connected at minute " + r.talk + ": one called while the other was still free.";
+    if (!quiet) log.add(v.textContent, r.talk === null ? "bad" : "ok");
+    stats([["Attempts", r.tries], ["Deadlocks", r.deadlocks, r.deadlocks ? "bad" : "ok"], ["Connected at", r.talk === null ? "never" : "min " + r.talk]]); }
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Medium", value: mode, options: [{ value: "phone", label: "Phone calls (mutex)" }, { value: "text", label: "Text messages (atom)" }], onChange: function (m) { mode = m; render(); } }).element);
+  document.getElementById("gap").appendChild(Kit.slider({ label: "Joe starts after Theo (min)", min: 0, max: 10, value: 0, onInput: function (v) { cfg.gap = v; render(); } }).element);
+  document.getElementById("hold").appendChild(Kit.slider({ label: "Time from pick-up to dialing (min)", min: 1, max: 5, value: 2, onInput: function (v) { cfg.hold = v; render(); } }).element);
+  document.getElementById("giveup").addEventListener("change", function () { render(); });
+  render(true);
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why was the line always busy all weekend?",
+      options: ["The phones were broken", "Theo and Joe called each other at exactly the same times", "Joe was traveling"], answer: 1,
+      explain: "p. 164." },
+    { q: "In Theo's analogy, what are atoms like?",
+      options: ["Phone calls", "Text messages", "Voicemail"], answer: 1,
+      explain: "p. 174." },
+    { q: "Which earlier deadlock does Theo recall from the previous year?",
+      options: ["Two locks not released in the proper order", "An infinite loop", "A full disk"], answer: 0,
+      explain: "p. 165." }
+  ]);
+})();
+</script>
+</body>
+</html>

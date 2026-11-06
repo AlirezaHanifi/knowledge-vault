@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Author Names by Prolificity</title>
+<meta name="description" content="Drag an author&#x27;s number of books across the 10/11 and 50/51 boundaries and switch between HTML and Markdown to see Author.myName&#x27;s dispatch value, the chosen method and the formatted name. Illustrates Data-Oriented Programming, chapter 13.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+  table.mt td, table.mt th { font-family: var(--mono); font-size: .8rem; } table.mt tr.hit td { background: var(--accent-soft); font-weight: 600; }
+  .bands { display: grid; grid-template-columns: 10fr 40fr 30fr; gap: 2px; font-size: .75rem; margin: 6px 0; } .bands span { padding: 4px 6px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .bands span.on { background: var(--accent-soft); border-color: var(--accent); font-weight: 600; } .rendered { font-size: 1.3rem; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/13-polymorphism.html">Chapter 13</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Author names</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 13 · Polymorphism</div>
+  <h1>Author names by prolificity</h1>
+  <p class="lede">Nancy’s “tiny” feature: show an author’s name in italic, bold, or both, depending on how many books they wrote, in HTML or Markdown. Dave recognizes dynamic dispatch: the dispatch function emits <code>[prolificity level, format]</code>, and six small methods do the formatting.</p>
+  <p class="source-note">Illustrates section 13.5 (table 13.1; listings 13.23–13.29, pp. 289–293): <code>Author.prolificityLevel</code> (≤ 10 low, ≥ 51 high, otherwise medium), <code>authorNameDispatch</code>, and the six HTML and Markdown methods. The book counts are the vault’s slider; the default author is the book’s test. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Prolificity level (listing 13.23)</p><div class="bands" id="bands"><span>low: 0–10</span><span>medium: 11–50</span><span>high: 51+</span></div>
+        <pre class="code" id="call"></pre><p class="field-hint">Dispatch value: <code id="dv"></code></p></div>
+      <div class="panel"><p class="panel-title">Method table of Author.myName</p><div class="table-wrap"><table class="data mt" id="mt"></table></div></div>
+      <div class="panel"><p class="panel-title">Output</p><pre class="code" id="raw"></pre><p class="field-hint">Rendered:</p><p class="rendered" id="ren" aria-live="polite"></p></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="nm">Author name</label><input id="nm" style="width:100%" value="Yehonathan Sharvit">
+        <div id="n" style="margin-top:10px"></div><div id="fmt" style="margin-top:8px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The boundaries are inclusive on the outside</strong>: 10 books is still low and 51 is already high; 11 to 50 are medium.</li>
+    <li><strong>Formats are plain strings</strong>, <code>"html"</code> or <code>"markdown"</code>, validated by an <code>enum</code> in the dispatch function’s argument schema.</li>
+    <li><strong>Adding a third format</strong> would mean three new methods and a new enum value, and no change to the six existing methods.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/13-polymorphism.html"><small>Lesson</small>13. Polymorphism</a></li>
+    <li><a href="../lab/13-multimethods/README.md"><small>Experiment</small>Multimethods from scratch in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), cfg = { n: 1, fmt: "html" }, last = "";
+  var WRAP = { low: { html: ["<i>", "</i>"], markdown: ["*", "*"] }, medium: { html: ["<b>", "</b>"], markdown: ["**", "**"] }, high: { html: ["<b><i>", "</i></b>"], markdown: ["***", "***"] } };
+  function level(n) { if (n <= 10) return "low"; if (n >= 51) return "high"; return "medium"; }
+  function cap(s) { return s[0].toUpperCase() + s.slice(1); }
+  function render() { var name = document.getElementById("nm").value || "?", lv = level(cfg.n), dv = [lv, cfg.fmt], w = WRAP[lv][cfg.fmt], out = w[0] + name + w[1];
+    document.getElementById("call").textContent = "Author.myName({\"name\": " + JSON.stringify(name) + ", \"bookIsbns\": [" + cfg.n + " ISBNs]}, " + JSON.stringify(cfg.fmt) + ")";
+    document.getElementById("dv").textContent = JSON.stringify(dv);
+    Array.prototype.forEach.call(document.getElementById("bands").children, function (s, i) { var on = ["low", "medium", "high"][i] === lv; s.className = on ? "on" : ""; s.setAttribute("aria-current", on ? "true" : "false"); });
+    var mt = Kit.clear(document.getElementById("mt")), tb = Kit.el("tbody");
+    mt.appendChild(Kit.el("thead", null, Kit.el("tr", null, [Kit.el("th", null, "dispatch value"), Kit.el("th", null, "method"), Kit.el("th", null, "wraps the name in"), Kit.el("th", null, "")])));
+    ["html", "markdown"].forEach(function (f) { ["low", "medium", "high"].forEach(function (l) { var hit = l === lv && f === cfg.fmt;
+      tb.appendChild(Kit.el("tr", { class: hit ? "hit" : "" }, [Kit.el("td", null, JSON.stringify([l, f])), Kit.el("td", null, "authorName" + cap(l) + (f === "html" ? "Html" : "Markdown")), Kit.el("td", null, WRAP[l][f][0] + "…" + WRAP[l][f][1]), Kit.el("td", null, hit ? "← chosen" : "")])); }); });
+    mt.appendChild(tb);
+    document.getElementById("raw").textContent = JSON.stringify(out);
+    var ren = Kit.clear(document.getElementById("ren")), node = document.createTextNode(name);
+    if (lv !== "medium") node = Kit.el("i", null, node); if (lv !== "low") node = Kit.el("b", null, node); ren.appendChild(node);
+    if (lv !== last) { if (last) log.add(cfg.n + " book(s): level " + lv + " → " + JSON.stringify(out), "ok"); last = lv; }
+    stats([["Books", cfg.n], ["Level", lv], ["Italic", lv !== "medium" ? "yes" : "no"], ["Bold", lv !== "low" ? "yes" : "no"]]); }
+  document.getElementById("n").appendChild(Kit.slider({ label: "Number of books (bookIsbns)", min: 0, max: 80, value: cfg.n, onInput: function (v) { cfg.n = v; render(); } }).element);
+  document.getElementById("fmt").appendChild(Kit.segmented({ label: "Format", value: cfg.fmt, options: [{ value: "html", label: "HTML" }, { value: "markdown", label: "Markdown" }], onChange: function (v) { cfg.fmt = v; render(); log.add("Format " + v + ".", "muted"); } }).element);
+  document.getElementById("nm").addEventListener("input", render);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "An author has written exactly 50 books. Which level?",
+      options: ["low", "medium", "high"], answer: 1,
+      explain: "11 to 50 is medium (table 13.1, p. 290)." },
+    { q: "What does authorNameDispatch return?",
+      options: ["The author’s name", "[Author.prolificityLevel(author), format]", "The number of books"], answer: 1,
+      explain: "Listing 13.23 (p. 291)." },
+    { q: "How does the book represent a format?",
+      options: ["A class per format", "A map with type and name", "A plain string, \"html\" or \"markdown\""], answer: 2,
+      explain: "p. 290." }
+  ]);
+})();
+</script>
+</body>
+</html>

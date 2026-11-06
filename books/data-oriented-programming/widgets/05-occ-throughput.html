@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optimistic or Locked</title>
+<meta name="description" content="Simulate concurrent mutations against a store with optimistic commits or a global lock, vary how many distinct fields they touch, and compare throughput and aborts. Illustrates the optimistic strategy of Data-Oriented Programming, chapter 5.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/05-basic-concurrency-control.html">Chapter 5</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Optimistic or locked</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 5 · Basic concurrency control</div>
+  <h1>Optimistic or locked</h1>
+  <p class="lede">A global lock lets one mutation compute at a time. Optimistic concurrency lets every mutation compute in parallel and checks for conflicts only at commit, aborting and retrying the losers. It pays off when conflicts are rare, which is the “optimistic” assumption.</p>
+  <p class="source-note">Illustrates the strategy of sections 5.1 and 5.5 (pp. 92–94, 108): optimistic concurrency control, aborts on conflict, and its assumption that conflicts are rare. The workload model, timings and retry policy are the vault’s; the book has no such measurements. Seeded randomness. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Throughput by number of distinct fields (more fields = fewer conflicts)</p><svg id="chart" role="img" aria-label="Committed mutations per 100 ticks by number of fields"></svg></div>
+      <div class="panel"><p class="panel-title">This configuration</p><div class="callout" id="verdict"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="w"></div><div id="f"></div><div id="t"></div><div id="s"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>With many fields, optimistic wins by about the number of workers</strong>: everyone computes at once, and almost every commit succeeds.</li>
+    <li><strong>With very few fields, aborts eat the advantage.</strong> Every abort wastes a whole calculation; at a single hot field, optimistic can do no better than one commit per calculation time, like the lock.</li>
+    <li><strong>The lock never aborts but never overlaps</strong>, so its throughput is flat: one mutation per calculation time, whatever the data.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/05-basic-concurrency-control.html"><small>Lesson</small>5. Basic concurrency control</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), cfg = { w: 8, f: 20, t: 5, seed: 7 };
+  function simulate(strategy, fields, w, t, seed) {
+    var r = Kit.rng(seed), T = 1000, commits = 0, aborts = 0, version = {}, i;
+    if (strategy === "lock") return { commits: Math.floor(T / t), aborts: 0 };
+    var workers = []; for (i = 0; i < w; i++) workers.push({ start: Math.floor(r.next() * t), field: r.int(fields), seen: 0 });
+    workers.forEach(function (x) { x.seen = version[x.field] || 0; });
+    for (var now = 0; now < T; now++) workers.forEach(function (x) { if (now - x.start < t) return;
+      if ((version[x.field] || 0) === x.seen) { version[x.field] = (version[x.field] || 0) + 1; commits++; } else aborts++;
+      x.start = now; x.field = r.int(fields); x.seen = version[x.field] || 0; });
+    return { commits: commits, aborts: aborts };
+  }
+  function render() {
+    var o = simulate("occ", cfg.f, cfg.w, cfg.t, cfg.seed), l = simulate("lock", cfg.f, cfg.w, cfg.t, cfg.seed), occ = [], lk = [];
+    [1, 2, 3, 5, 8, 12, 20, 35, 60, 100].forEach(function (f) { occ.push([f, simulate("occ", f, cfg.w, cfg.t, cfg.seed).commits / 10]); lk.push([f, l.commits / 10]); });
+    Kit.lineChart(document.getElementById("chart"), { xMax: 100, yMax: Math.max(10, Math.ceil(cfg.w * 100 / cfg.t / 5) * 5 * 1.1), xLabel: "distinct fields touched", yLabel: "commits / 100 ticks",
+      series: [{ label: "optimistic", cls: "s1", points: occ }, { label: "global lock", cls: "s2", points: lk }], marks: [{ x: cfg.f, label: "now" }] });
+    var v = document.getElementById("verdict"), ratio = o.commits / l.commits;
+    v.className = "callout " + (ratio > 1.5 ? "ok" : ratio < 1.1 ? "warn" : "");
+    v.textContent = "Optimistic: " + o.commits + " commits and " + o.aborts + " aborts in 1,000 ticks. Lock: " + l.commits + " commits, no aborts. Optimistic is " + ratio.toFixed(1) + "× the lock here.";
+    stats([["Optimistic commits", o.commits, "ok"], ["Optimistic aborts", o.aborts, o.aborts ? "warn" : ""], ["Abort rate", Kit.pct(o.aborts / Math.max(1, o.commits + o.aborts))], ["Lock commits", l.commits]]);
+  }
+  function sl(id, label, min, max, key, msg) { document.getElementById(id).appendChild(Kit.slider({ label: label, min: min, max: max, value: cfg[key], onInput: function (v) { cfg[key] = v; render(); log.add(msg(v), "muted"); } }).element); }
+  sl("w", "Concurrent workers", 1, 16, "w", function (v) { return v + " workers"; });
+  sl("f", "Distinct fields", 1, 100, "f", function (v) { return v + " distinct field(s): " + (v === 1 ? "every mutation conflicts with every other" : "random field per mutation"); });
+  sl("t", "Calculation time (ticks)", 1, 20, "t", function (v) { return "Each calculation takes " + v + " ticks"; });
+  sl("s", "Seed", 1, 50, "seed", function (v) { return "Seed " + v; });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why is the strategy called optimistic?",
+      options: ["It never fails", "It assumes conflicts don't occur often", "It retries forever"], answer: 1,
+      explain: "p. 108." },
+    { q: "What happens to a mutation whose diff conflicts with a concurrent one?",
+      options: ["It waits for a lock", "It is aborted", "It overwrites the other"], answer: 1,
+      explain: "pp. 95, 107." },
+    { q: "In this simulation, when does a global lock come close to optimistic control?",
+      options: ["When mutations touch many different fields", "When almost every mutation touches the same field", "Never"], answer: 1,
+      explain: "Conflicts make optimistic work wasted; this is the vault's model, not a book measurement." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rename Keys</title>
+<meta name="description" content="Edit a key map and watch one generic renameResultKeys function reshape book rows and user rows from Data-Oriented Programming&#x27;s chapter 10, including keys that aren&#x27;t present.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/10-database-operations.html">Chapter 10</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Rename keys</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 10 · Database operations</div>
+  <h1>Rename keys</h1>
+  <p class="lede">Database columns are in snake case; the JSON response wants <code>bookTitle</code> and <code>publicationYear</code>. Instead of a function per query, Theo writes one generic <code>renameResultKeys(rows, keyMap)</code>. It works because fields are accessed by string: <strong>fields are first-class citizens</strong>.</p>
+  <p class="source-note">Illustrates section 10.3, Simple data manipulation (listings 10.11–10.16, pp. 207–211): the three options, <code>renameKeys</code> with <code>_.reduce</code>, <code>_.set</code> and <code>_.omit</code>, and its reuse on users. Rows from tables 10.1 and listing 10.16. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="grid-2"><div class="panel"><p class="panel-title">Rows from the database</p><pre class="code" id="in"></pre></div>
+        <div class="panel"><p class="panel-title">renameResultKeys(rows, keyMap)</p><pre class="code" id="out"></pre></div></div>
+      <div class="panel"><p class="panel-title">The generic code (listing 10.14)</p><pre class="code">function renameKeys(map, keyMap) {
+  return _.reduce(keyMap, function(res, newKey, oldKey) {
+    var value = _.get(map, oldKey);
+    var resWithNewKey = _.set(res, newKey, value);
+    var resWithoutOldKey = _.omit(resWithNewKey, oldKey);
+    return resWithoutOldKey;
+  }, map);
+}
+function renameResultKeys(results, keyMap) {
+  return _.map(results, function(result) { return renameKeys(result, keyMap); });
+}</pre></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="ds"></div><label class="field-head" for="km" style="margin-top:10px">keyMap (JSON)</label><textarea class="code" id="km" spellcheck="false" style="min-height:90px"></textarea>
+        <div class="callout" id="verdict" style="margin-top:8px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>One function, any entity</strong>: the same code renames book columns and user fields, because it never names a field itself.</li>
+    <li><strong>Unmentioned fields stay as they are</strong>; only the keys in the key map move.</li>
+    <li><strong>A key that isn’t in the row</strong> still gets its new name, with an <code>undefined</code> value, because <code>renameKeys</code> doesn’t check. The vault’s widget shows it; decide whether that is what you want.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/10-database-operations.html"><small>Lesson</small>10. Database operations</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), ds = "books";
+  var DATA = { books: [[{ title: "The Power of Habit", isbn: "978-0812981605", publication_year: 2012 }, { title: "7 Habits of Highly Effective People", isbn: "978-1982137274", publication_year: 1989 }], { title: "bookTitle", publication_year: "publicationYear" }],
+    users: [[{ email: "jennie@gmail.com", encryptedPassword: "secret-pass" }, { email: "franck@hotmail.com", encryptedPassword: "my-secret" }], { email: "userEmail" }] };
+  function renameKeys(map, keyMap) { return Object.keys(keyMap).reduce(function (res, oldKey) { var value = map[oldKey], r = Object.assign({}, res); r[keyMap[oldKey]] = value; if (oldKey !== keyMap[oldKey]) delete r[oldKey]; return r; }, map); }
+  function run(quiet) { var rows = DATA[ds][0], km; document.getElementById("in").textContent = JSON.stringify(rows, null, 2);
+    try { km = JSON.parse(document.getElementById("km").value); if (typeof km !== "object" || Array.isArray(km)) throw 0; } catch (e) { var v0 = document.getElementById("verdict"); v0.className = "callout bad"; v0.textContent = "The key map is a JSON object from old key to new key."; return; }
+    var out = rows.map(function (r) { return renameKeys(r, km); }), missing = Object.keys(km).filter(function (k) { return !rows.every(function (r) { return k in r; }); });
+    document.getElementById("out").textContent = JSON.stringify(out, function (k, v) { return v === undefined ? "«undefined»" : v; }, 2);
+    var v = document.getElementById("verdict"); v.className = "callout " + (missing.length ? "warn" : "ok");
+    v.textContent = missing.length ? "Not in every row: " + missing.join(", ") + ". The new key is set to undefined." : Object.keys(km).length + " key(s) renamed in " + rows.length + " rows; other fields untouched.";
+    if (!quiet) log.add("renameResultKeys(" + ds + ", " + JSON.stringify(km) + ")", missing.length ? "warn" : "ok");
+    stats([["Rows", rows.length], ["Keys renamed", Object.keys(km).length], ["Missing keys", missing.length, missing.length ? "warn" : "ok"], ["Functions per entity", 0, "ok"]]); }
+  function load() { document.getElementById("km").value = JSON.stringify(DATA[ds][1], null, 1); run(true); }
+  document.getElementById("ds").appendChild(Kit.segmented({ label: "Rows", value: ds, options: [{ value: "books", label: "Books (table 10.1)" }, { value: "users", label: "Users (listing 10.16)" }], onChange: function (v) { ds = v; load(); log.add("Same function, " + v + " rows.", "muted"); } }).element);
+  document.getElementById("km").addEventListener("input", function () { run(true); });
+  document.getElementById("km").addEventListener("change", function () { run(); });
+  load();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why doesn't Joe like renaming in the SQL query?",
+      options: ["It's slower", "It's odd to bend a query to the application's naming, and harder in databases like MongoDB", "SQL can't rename"], answer: 1,
+      explain: "pp. 207–208." },
+    { q: "What makes a generic renameResultKeys possible?",
+      options: ["Reflection", "Fields are accessed dynamically by string: they are first-class citizens", "A schema"], answer: 1,
+      explain: "p. 209." },
+    { q: "Which Lodash function removes the old key?",
+      options: ["_.pick", "_.omit", "_.at"], answer: 1,
+      explain: "Listing 10.14, p. 209." }
+  ]);
+})();
+</script>
+</body>
+</html>

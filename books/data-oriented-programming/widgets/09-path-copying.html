@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Path Copying</title>
+<meta name="description" content="Update one element of a 64-element persistent vector with branching factor 2, 4 or 32, and see which nodes are copied, which are shared, and how the depth changes. Illustrates Data-Oriented Programming, chapter 9.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.tv { width: 100%; display: block; } .tv rect { fill: var(--surface); stroke: var(--ink-3); stroke-width: 1; } .tv rect.copy { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 2; }
+  .tv rect.leaf { fill: var(--surface-2); } .tv rect.leaf.copy { fill: var(--warn-soft); } .tv line { stroke: var(--line); } .tv line.copy { stroke: var(--warn); stroke-width: 2; } .tv text { font-size: 9px; fill: var(--ink-2); text-anchor: middle; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-persistent-data-structures.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Path copying</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · Persistent data structures</div>
+  <h1>Path copying</h1>
+  <p class="lede">A persistent list is a <strong>tree</strong>. Changing one element copies only the nodes on the path from the root to that leaf; everything else is shared with the previous version. The <strong>branching factor</strong> trades depth against the size of each copied node.</p>
+  <p class="source-note">Illustrates section 9.2 (figures 9.2–9.3, pp. 179–183): splitting a list into halves and quarters, depth log₂ N versus log₃₂ N, and why 32 suits cache lines. The 64-element vector and the drawing are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title" id="tt">Tree</p><svg class="tv" id="tv" viewBox="0 0 640 260" role="img"></svg>
+        <p class="field-hint">Orange: nodes copied by the update (the path). Grey: shared with the previous version.</p><div class="callout" id="verdict"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="b"></div><div id="i"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Only the path is copied</strong>: one node per level. With branching factor 2 that is 6 small nodes for 64 elements; with 32 it is 2 wider ones.</li>
+    <li><strong>Elements copied per update</strong> is depth × branching factor: 2 × 6 = 12, 4 × 3 = 12, 32 × 2 = 64 here. Wider nodes copy more elements but touch far fewer nodes.</li>
+    <li><strong>The book’s argument for 32</strong> is the CPU: copying one 32-slot array is a pair of cache accesses, while chasing many small nodes means many separate memory accesses.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-persistent-data-structures.html"><small>Lesson</small>9. Persistent data structures</a></li>
+    <li><a href="../lab/09-persistent-vector/README.md"><small>Experiment</small>A persistent vector in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), cfg = { b: 2, i: 41 }, N = 64;
+  function depth(b) { var d = 0, c = 1; while (c < N) { c *= b; d++; } return d; }
+  function render() { var b = cfg.b, D = depth(b), g = Kit.clear(document.getElementById("tv")), H = 260, rowH = (H - 20) / (D + 1), copied = 0;
+    var levels = []; for (var l = 0; l <= D; l++) { var count = l === D ? N : Math.ceil(N / Math.pow(b, D - l)); levels.push(count); }
+    function x(l, k) { return 10 + (k + 0.5) * (620 / levels[l]); }
+    for (var l2 = 0; l2 <= D; l2++) { var onPath = Math.floor(cfg.i / Math.pow(b, D - l2));
+      for (var k = 0; k < levels[l2]; k++) { var cp = k === onPath, w = Math.max(2, Math.min(40, 620 / levels[l2] - 2)), y = 10 + l2 * rowH;
+        if (l2 > 0) { var parent = Math.floor(k / b); g.appendChild(Kit.svg("line", { class: cp ? "copy" : "", x1: x(l2 - 1, parent), y1: 10 + (l2 - 1) * rowH + 12, x2: x(l2, k), y2: y })); }
+        g.appendChild(Kit.svg("rect", { class: (l2 === D ? "leaf " : "") + (cp ? "copy" : ""), x: x(l2, k) - w / 2, y: y, width: w, height: 12 }));
+        if (cp && l2 < D) copied++; } }
+    var lbl = Kit.svg("text", { x: x(D, cfg.i), y: 10 + D * rowH + 24 }); lbl.textContent = "#" + cfg.i; g.appendChild(lbl);
+    g.setAttribute("aria-label", "Branching factor " + b + ", depth " + D + ", " + D + " nodes copied to change element " + cfg.i);
+    document.getElementById("tt").textContent = "64 elements, branching factor " + b + ": depth " + D;
+    var shared = levels.slice(0, D).reduce(function (a, c) { return a + c; }, 0) - D;
+    document.getElementById("verdict").className = "callout ok";
+    document.getElementById("verdict").textContent = "Changing element " + cfg.i + " copies " + D + " node(s) (" + D * b + " slots) and shares " + shared + " inner node(s) and the other " + (N - b) + " leaves' slots.";
+    stats([["Depth", D], ["Nodes copied", D, "warn"], ["Slots copied", D * b], ["Full copy would be", N + " slots"]]); }
+  document.getElementById("b").appendChild(Kit.segmented({ label: "Branching factor", value: 2, options: [{ value: 2, label: "2" }, { value: 4, label: "4" }, { value: 32, label: "32" }], onChange: function (v) { cfg.b = v; render(); log.add("Branching factor " + v + ": depth " + depth(v) + ".", "muted"); } }).element);
+  document.getElementById("i").appendChild(Kit.slider({ label: "Element to change", min: 0, max: N - 1, value: cfg.i, onInput: function (v) { cfg.i = v; render(); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "For a 100,000-element list split until leaves hold at most two, about how many levels are there?",
+      options: ["About 3.3", "About 16.6 (log₂ N)", "100,000"], answer: 1,
+      explain: "pp. 180–181." },
+    { q: "With a branching factor of 32, roughly how deep is that tree?",
+      options: ["About 3.3 levels", "About 16.6", "About 32"], answer: 0,
+      explain: "log₃₂ N = log₂ N / 5 (p. 181)." },
+    { q: "Why does the book prefer 32 despite copying more elements per level?",
+      options: ["Fewer pointers", "CPU cache lines make copying one array of 32 cheap", "Because 32 is a power of 2"], answer: 1,
+      explain: "pp. 181–182." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multimethod Dispatch</title>
+<meta name="description" content="Call greet, greetLang and dysGreet on the book&#x27;s animals, watch the dispatch function emit a value and the method table pick a method, and register a default or a new animal without touching the existing methods. Illustrates Data-Oriented Programming, chapter 13.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+  table.mt td, table.mt th { font-family: var(--mono); font-size: .8rem; } table.mt tr.hit td { background: var(--accent-soft); font-weight: 600; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/13-polymorphism.html">Chapter 13</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Multimethod dispatch</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 13 · Polymorphism</div>
+  <h1>Multimethod dispatch</h1>
+  <p class="lede">A multimethod is a <strong>dispatch function</strong> plus <strong>a table of methods</strong> keyed by the values it emits. Emit the type and you have single dispatch; emit two types for multiple dispatch; emit anything computed, like whether a name is long, for dynamic dispatch. New methods can be added anywhere, without editing the others.</p>
+  <p class="source-note">Illustrates sections 13.2–13.4 (figures 13.1–13.4; listings 13.6–13.20, pp. 277–288): <code>greet</code> with single dispatch and a default, <code>greetLang</code> on <code>[animal type, language type]</code>, and <code>dysGreet</code> on <code>[animal type, name length &gt; 5]</code>. Animals, languages and greetings are the book’s; the horse method and the error text are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Call</p><pre class="code" id="call"></pre><p class="panel-title">Dispatch function</p><pre class="code" id="disp"></pre>
+        <p class="field-hint">Dispatch value: <code id="dv"></code></p></div>
+      <div class="panel"><p class="panel-title" id="mtt">Method table</p><div class="table-wrap"><table class="data mt" id="mt"></table></div></div>
+      <div class="panel"><p class="panel-title">Output</p><div class="callout" id="verdict" aria-live="polite"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div>
+        <label class="field-head" for="an" style="margin-top:10px">Animal</label><select id="an"></select>
+        <label class="field-head" for="nm" style="margin-top:8px">Name</label><input id="nm" style="width:100%">
+        <div id="lang" style="margin-top:10px"></div>
+        <p class="field-head" style="margin-top:10px">Extend greet</p>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="dflt"> Register greetDefault (listing 13.11)</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="horse"> Register a "horse" method (vault’s example)</label></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The dispatch value is just data</strong>: a string, an array of two strings, or an array with a Boolean. The table is a hash map from those values to methods.</li>
+    <li><strong>Extending is adding a row</strong>: the default and the horse method are new registrations; the dog, cat and cow methods are never edited.</li>
+    <li><strong>No match and no default</strong> means an error. Try Horace with <code>greetLang</code> or <code>dysGreet</code>, which have no default.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/13-polymorphism.html"><small>Lesson</small>13. Polymorphism</a></li>
+    <li><a href="../lab/13-multimethods/README.md"><small>Experiment</small>Multimethods from scratch in Python</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log")), mode = "greet", lang = "en";
+  var ANIMALS = [{ type: "dog", name: "Fido" }, { type: "cat", name: "Milo" }, { type: "cow", name: "Clarabelle" }, { type: "horse", name: "Horace" }];
+  var LANGS = { en: { type: "en", name: "English" }, fr: { type: "fr", name: "Français" } };
+  var SOUND = { dog: ["Woof woof! My name is ", "Woof woof!"], cat: ["Meow! I am ", "Meow!"], cow: ["Moo! Call me ", "Moo!"] };
+  var FR = { dog: "Ouaf Ouaf! Je m'appelle ", cat: "Miaou! Je m'appelle ", cow: "Meuh! Appelle moi " };
+  function cap(s) { return s[0].toUpperCase() + s.slice(1); }
+  function table() { var t = [];
+    if (mode === "greet") { ["dog", "cat", "cow"].forEach(function (k) { t.push([k, "greet" + cap(k), function (a) { return SOUND[k][0] + a.name; }]); });
+      if (document.getElementById("horse").checked) t.push(["horse", "greetHorse", function (a) { return "Neigh! I’m " + a.name; }]); }
+    if (mode === "greetLang") ["dog", "cat", "cow"].forEach(function (k) {
+      t.push([[k, "en"], "greetLang" + cap(k) + "En", function (a, l) { return SOUND[k][0] + a.name + " and I speak " + l.name; }]);
+      t.push([[k, "fr"], "greetLang" + cap(k) + "Fr", function (a, l) { return FR[k] + a.name + " et je parle " + l.name; }]); });
+    if (mode === "dysGreet") ["dog", "cat", "cow"].forEach(function (k) {
+      t.push([[k, true], "dysGreet" + cap(k) + "Long", function (a) { return SOUND[k][0] + a.name; }]);
+      t.push([[k, false], "dysGreet" + cap(k) + "Short", function () { return SOUND[k][1]; }]); });
+    return t; }
+  function run(quiet) { var a = { type: ANIMALS[+document.getElementById("an").value].type, name: document.getElementById("nm").value }, l = LANGS[lang], dv, dcode, call;
+    if (mode === "greet") { dv = a.type; dcode = "function greetDispatch(animal) {\n  // validates animal in dev\n  return animal.type;\n}"; call = "greet(" + JSON.stringify(a) + ")"; }
+    if (mode === "greetLang") { dv = [a.type, l.type]; dcode = "function greetLangDispatch(animal, language) {\n  // validates [animal, language] in dev\n  return [animal.type, language.type];\n}"; call = "greetLang(" + JSON.stringify(a) + ",\n          " + JSON.stringify(l) + ")"; }
+    if (mode === "dysGreet") { dv = [a.type, a.name.length > 5]; dcode = "function dysGreetDispatch(animal) {\n  // validates animal in dev\n  return [animal.type, animal.name.length > 5];\n}"; call = "dysGreet(" + JSON.stringify(a) + ")"; }
+    document.getElementById("call").textContent = call; document.getElementById("disp").textContent = dcode; document.getElementById("dv").textContent = JSON.stringify(dv);
+    var t = table(), key = JSON.stringify(dv), hit = -1, dflt = mode === "greet" && document.getElementById("dflt").checked;
+    t.forEach(function (r, i) { if (JSON.stringify(r[0]) === key) hit = i; });
+    var mt = Kit.clear(document.getElementById("mt"));
+    mt.appendChild(Kit.el("thead", null, Kit.el("tr", null, [Kit.el("th", null, "dispatch value"), Kit.el("th", null, "method"), Kit.el("th", null, "")])));
+    var tb = Kit.el("tbody");
+    t.forEach(function (r, i) { tb.appendChild(Kit.el("tr", { class: i === hit ? "hit" : "" }, [Kit.el("td", null, JSON.stringify(r[0])), Kit.el("td", null, r[1]), Kit.el("td", null, i === hit ? "← chosen" : "")])); });
+    if (dflt) tb.appendChild(Kit.el("tr", { class: hit < 0 ? "hit" : "" }, [Kit.el("td", null, "(default)"), Kit.el("td", null, "greetDefault"), Kit.el("td", null, hit < 0 ? "← chosen" : "")]));
+    mt.appendChild(tb); document.getElementById("mtt").textContent = "Method table of " + mode + " (" + (t.length + (dflt ? 1 : 0)) + " methods)";
+    var v = document.getElementById("verdict"), out, kind;
+    if (hit >= 0) { out = t[hit][2](a, l); kind = "ok"; } else if (dflt) { out = "My name is " + a.name; kind = "ok"; } else { out = "NoMethodError: no method for " + key + " and no default"; kind = "bad"; }
+    v.className = "callout " + kind; v.textContent = (kind === "ok" ? "→ " : "") + out;
+    if (!quiet) log.add(mode + " dispatched " + key + " → " + (hit >= 0 ? t[hit][1] : dflt ? "greetDefault" : "no method"), kind);
+    stats([["Kind", mode === "greet" ? "single" : mode === "greetLang" ? "multiple" : "dynamic"], ["Dispatch value", key], ["Methods", t.length + (dflt ? 1 : 0)], ["Name length", a.name.length]]); }
+  var an = document.getElementById("an");
+  ANIMALS.forEach(function (x, i) { an.appendChild(Kit.el("option", { value: i }, x.name + " (" + x.type + ")")); });
+  an.addEventListener("change", function () { document.getElementById("nm").value = ANIMALS[+an.value].name; run(); });
+  document.getElementById("nm").value = "Fido";
+  document.getElementById("nm").addEventListener("input", function () { run(true); });
+  document.getElementById("nm").addEventListener("change", function () { run(); });
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "Multimethod", value: mode, options: [{ value: "greet", label: "greet (single)" }, { value: "greetLang", label: "greetLang (multiple)" }, { value: "dysGreet", label: "dysGreet (dynamic)" }], onChange: function (v) { mode = v; run(); } }).element);
+  document.getElementById("lang").appendChild(Kit.segmented({ label: "Language (greetLang)", value: lang, options: [{ value: "en", label: "English" }, { value: "fr", label: "Français" }], onChange: function (v) { lang = v; run(); } }).element);
+  ["dflt", "horse"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { log.add((e.target.checked ? "Registered " : "Removed ") + (id === "dflt" ? "greetDefault" : "greetHorse") + "; no other method changed.", "muted"); run(true); }); });
+  run(true);
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What are the two parts of a multimethod?",
+      options: ["A class and an interface", "A dispatch function and a set of methods keyed by dispatch value", "A switch and a default"], answer: 1,
+      explain: "p. 277." },
+    { q: "What does greetLangDispatch return?",
+      options: ["The language name", "[animal.type, language.type]", "A method"], answer: 1,
+      explain: "Listing 13.15 (pp. 283–284)." },
+    { q: "Why is dysGreet an example of dynamic dispatch?",
+      options: ["It uses a Map", "Its dispatch value includes a computed Boolean, name.length > 5, not just types", "It loads methods at run time"], answer: 1,
+      explain: "pp. 286–287." }
+  ]);
+})();
+</script>
+</body>
+</html>
