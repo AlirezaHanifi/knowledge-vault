@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gossip Dissemination</title>
+<meta name="description" content="Seed one rumour in a cluster of 64 nodes, set the fanout and the interest-loss rule, and watch susceptible, infective and removed counts per round, total messages, redundancy, and nodes never reached. Illustrates Database Internals, Chapter 12.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .grid8 { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; }
+  .cell { aspect-ratio: 1; border-radius: 50%; border: 1px solid var(--line-strong); display: flex; align-items: center; justify-content: center; font-size: .55rem; font-family: var(--mono); color: var(--ink-3); }
+  .cell.I { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .cell.R { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+  .cell.hit { box-shadow: 0 0 0 2px var(--warn); }
+  .ch svg { width: 100%; height: auto; display: block; margin-top: 10px; }
+  .ch .s { stroke: var(--ink-3); fill: none; stroke-width: 2; } .ch .i { stroke: var(--accent); fill: none; stroke-width: 2; } .ch .r { stroke: var(--ok); fill: none; stroke-width: 2; stroke-dasharray: 5 3; }
+  .ch text { font-size: 10px; fill: var(--ink-3); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-anti-entropy-and-dissemination.html">Chapter 12</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Gossip</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 12 · Anti-Entropy and Dissemination</div>
+  <h1>Gossip: spreading a rumour like an epidemic</h1>
+  <p class="lede">Gossip spreads information like an epidemic. A node that has news is <strong>infective</strong> and each round pushes it to <strong>fanout</strong> random peers. <strong>Susceptible</strong> nodes that receive it become infective too. Messages to nodes that already know are <strong>redundant</strong>. <strong>Interest loss</strong> eventually makes a node <strong>removed</strong>, so it stops spreading: either with some probability every round, or after it has hit a threshold of nodes that already knew.</p>
+  <p class="source-note">Illustrates “Gossip Dissemination” and “Gossip Mechanics” (pp. 250–252): the epidemic model, fanout, redundancy and the two interest-loss variants. The 64-node cluster, the seeds and the parameter ranges are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="grid8" id="grid" role="img"></div>
+        <p class="field-hint">Empty: susceptible (S). Filled blue with “I”: infective. Green with “R”: removed. An amber ring marks a node that received a message this round.</p>
+        <div class="ch" id="chart"></div>
+        <p class="field-hint">Per round: grey solid S, blue solid I, green dashed R.</p></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="sl"></div><div id="rule" style="margin-top:10px"></div><div id="k" style="margin-top:10px"></div>
+        <div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Spread is logarithmic.</strong> Infective counts roughly multiply each round at first, so 64 nodes are covered in a handful of rounds.</li>
+    <li><strong>Redundancy is the price of robustness.</strong> Once most nodes know, almost every message lands on a node that already knew.</li>
+    <li><strong>Interest loss trades coverage for messages.</strong> Lose interest too quickly and the rumour dies out before reaching everyone: watch “never reached”.</li>
+    <li><strong>Fanout matters most early.</strong> A larger fanout reaches everyone sooner and survives aggressive interest loss, at the cost of more messages per round.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-anti-entropy-and-dissemination.html"><small>Lesson</small>12. Anti-Entropy and Dissemination</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var N = 64, cfg = { fanout: 2, rule: "prob", p: 25, k: 2, seed: 1 }, st, dups, round, msgs, red, hist, hit, r;
+  function reset() {
+    r = Kit.rng(100 + cfg.seed); st = []; dups = []; for (var i = 0; i < N; i++) { st.push("S"); dups.push(0); }
+    st[0] = "I"; round = 0; msgs = 0; red = 0; hist = [[N - 1, 1, 0]]; hit = {};
+    log.clear(); log.add("Node 0 learns the rumour. Fanout " + cfg.fanout + ", " + (cfg.rule === "prob" ? "lose interest with probability " + cfg.p + "% per round" : "lose interest after " + cfg.k + " redundant message" + (cfg.k > 1 ? "s" : "")) + ".", "muted"); render();
+  }
+  function count(s) { return st.filter(function (x) { return x === s; }).length; }
+  function step() {
+    if (!count("I")) return false;
+    round++; hit = {}; var newI = [], before = msgs, beforeRed = red;
+    st.forEach(function (s, i) {
+      if (s !== "I") return;
+      for (var f = 0; f < cfg.fanout; f++) {
+        var j; do { j = r.int(N); } while (j === i);
+        msgs++; hit[j] = true;
+        if (st[j] === "S" && newI.indexOf(j) < 0) newI.push(j); else { red++; dups[i]++; }
+      }
+    });
+    var removed = 0;
+    st.forEach(function (s, i) { if (s !== "I") return; if (cfg.rule === "prob" ? r.chance(cfg.p / 100) : dups[i] >= cfg.k) { st[i] = "R"; removed++; } });
+    newI.forEach(function (j) { st[j] = "I"; });
+    hist.push([count("S"), count("I"), count("R")]);
+    log.add("Round " + round + ": " + (msgs - before) + " messages, " + newI.length + " newly infected, " + (red - beforeRed) + " redundant, " + removed + " lose interest", newI.length ? "ok" : "muted");
+    if (!count("I")) log.add(count("S") ? "The rumour died out: " + count("S") + " nodes never heard it" : "Every node heard the rumour", count("S") ? "bad" : "ok");
+    render(); return count("I") > 0;
+  }
+  function render() {
+    var g = Kit.clear(document.getElementById("grid"));
+    st.forEach(function (s, i) { g.appendChild(Kit.el("div", { class: "cell " + (s === "S" ? "" : s) + (hit[i] ? " hit" : "") }, s === "S" ? "" : s)); });
+    g.setAttribute("aria-label", "Round " + round + ": " + count("S") + " susceptible, " + count("I") + " infective, " + count("R") + " removed");
+    var W = 600, H = 120, mx = Math.max(10, hist.length - 1), sx = function (i) { return 24 + i / mx * (W - 30); }, sy = function (v) { return H - 14 - v / N * (H - 20); };
+    var s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H });
+    ["s", "i", "r"].forEach(function (c, k) { s.appendChild(Kit.svg("polyline", { class: c, points: hist.map(function (h, i) { return sx(i).toFixed(1) + "," + sy(h[k]).toFixed(1); }).join(" ") })); });
+    s.appendChild(Kit.svg("text", { x: 0, y: sy(N) + 4 }, String(N))); s.appendChild(Kit.svg("text", { x: 0, y: sy(0) }, "0")); s.appendChild(Kit.svg("text", { x: W - 50, y: H - 2 }, "round " + round));
+    Kit.clear(document.getElementById("chart")).appendChild(s);
+    stats([["Round", round], ["S / I / R", count("S") + " / " + count("I") + " / " + count("R")], ["Messages", msgs], ["Redundant", msgs ? Kit.pct(red / msgs, 0) : "–", red / Math.max(1, msgs) > 0.5 ? "warn" : ""], ["Never reached", count("I") ? "–" : count("S"), !count("I") && count("S") ? "bad" : ""]]);
+  }
+  var sl = document.getElementById("sl");
+  sl.appendChild(Kit.slider({ label: "Fanout", min: 1, max: 5, step: 1, value: cfg.fanout, onInput: function (v) { cfg.fanout = v; reset(); } }).element);
+  sl.appendChild(Kit.slider({ label: "Run (seed)", min: 1, max: 9, step: 1, value: cfg.seed, onInput: function (v) { cfg.seed = v; reset(); } }).element);
+  document.getElementById("rule").appendChild(Kit.segmented({ label: "Interest loss", value: cfg.rule, options: [{ value: "prob", label: "Probabilistic" }, { value: "thr", label: "Threshold" }], onChange: function (v) { cfg.rule = v; reset(); } }).element);
+  var km = document.getElementById("k");
+  km.appendChild(Kit.slider({ label: "Stop probability per round (probabilistic)", min: 5, max: 80, step: 5, value: cfg.p, unit: "%", onInput: function (v) { cfg.p = v; reset(); } }).element);
+  km.appendChild(Kit.slider({ label: "Redundant messages before stopping (threshold)", min: 1, max: 6, step: 1, value: cfg.k, onInput: function (v) { cfg.k = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 700 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What makes a gossip message redundant?",
+      options: ["It is lost", "It reaches a node that already has the information", "It is sent twice by the same node in one round"], answer: 1,
+      explain: "Efficiency means infecting many nodes with few redundant messages (p. 250)." },
+    { q: "What is the role of interest loss?",
+      options: ["To decide when an infective node stops spreading", "To pick peers", "To detect failures"], answer: 0,
+      explain: "Probabilistic or threshold-based (pp. 250–251)." },
+    { q: "How should fanout change as the cluster grows, for the same latency?",
+      options: ["It can shrink", "It needs to grow, or you accept more rounds", "It doesn't matter"], answer: 1,
+      explain: "p. 251." }
+  ]);
+})();
+</script>
+</body>
+</html>

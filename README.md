@@ -11,6 +11,7 @@ Technical books turned into interactive lessons. For each book there is one fold
 | [Designing Data-Intensive Applications, 2nd Edition](books/designing-data-intensive-applications/README.md) | Martin Kleppmann, Chris Riccomini |
 | [Data Engineering Design Patterns](books/data-engineering-design-patterns/README.md) | Bartosz Konieczny |
 | [Data-Oriented Programming](books/data-oriented-programming/README.md) | Yehonathan Sharvit |
+| [Database Internals](books/database-internals/README.md) | Alex Petrov |
 
 ## Layout
 

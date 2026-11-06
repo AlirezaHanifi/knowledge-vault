@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRDT Counters and Sets</title>
+<meta name="description" content="Partition three replicas, increment, decrement, add and remove on each side, then heal the partition and watch G-Counter, PN-Counter and two-phase-set states merge to the same value regardless of merge order. Illustrates Database Internals, Chapter 11.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .reps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .rp { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); font-size: .8rem; }
+  .rp h3 { margin: 0 0 6px; font-size: .9rem; display: flex; justify-content: space-between; }
+  .rp .kv { display: block; margin-bottom: 4px; }
+  .rp .val { font-weight: 600; color: var(--ink); }
+  .split { border-left: 3px dashed var(--bad); }
+  @media (max-width: 560px) { .reps { grid-template-columns: 1fr; } .split { border-left: 0; border-top: 3px dashed var(--bad); } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/11-replication-and-consistency.html">Chapter 11</a><span aria-hidden="true">/</span>
+      <span aria-current="page">CRDTs</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 11 · Replication and Consistency</div>
+  <h1>CRDTs: counters and sets that always merge</h1>
+  <p class="lede">A <strong>conflict-free replicated data type</strong> lets replicas accept updates independently, even during a partition, and still converge. Their merge is commutative, associative and idempotent. A <strong>G-Counter</strong> keeps one slot per replica, merges by element-wise maximum and reads as the sum. A <strong>PN-Counter</strong> pairs two G-Counters, one for increments and one for decrements. A <strong>two-phase set</strong> keeps an add-set and a remove-set, and a removed element can never come back.</p>
+  <p class="source-note">Illustrates “Strong Eventual Consistency” and “Conflict-Free Replicated Data Types” (pp. 238–240), including the G-Counter example of Table 11-1. The replicas, elements and partition are the vault’s. Merges are state-based (whole states exchanged), the form the book’s counter examples use. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="reps" id="reps"></div><div class="callout" id="conv" style="margin-top:12px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="who"></div><div id="elem" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="inc">Increment</button><button class="btn small" type="button" id="dec">Decrement</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn small primary" type="button" id="add">Add element</button><button class="btn small danger" type="button" id="rem">Remove element</button></div>
+        <div class="row" style="margin-top:8px"><label class="field" style="margin:0"><input type="checkbox" id="part" checked> Partition {A, B} | {C}</label></div>
+        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="sync">Exchange states (random order)</button><button class="btn small" type="button" id="reset">↺ Reset</button></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>No update is lost.</strong> Increments made on both sides of the partition all survive the merge, because each replica only ever writes its own slot.</li>
+    <li><strong>Order doesn’t matter.</strong> States are exchanged in a random order each time, and the result is always the same: max and union are commutative and idempotent.</li>
+    <li><strong>A G-Counter can’t go down.</strong> Decrements only change the PN-Counter, whose value is the sum of P minus the sum of N.</li>
+    <li><strong>Two-phase sets remember removals.</strong> Remove an element on one side and add it again on the other: after the merge it stays removed, because the remove-set wins.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/11-replication-and-consistency.html"><small>Lesson</small>11. Replication and Consistency</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var NAMES = ["A", "B", "C"], ELEMS = ["apple", "fig", "pear"], who = 0, elem = "apple", part = true, R, rr, syncs;
+  function fresh() { return { g: [0, 0, 0], p: [0, 0, 0], n: [0, 0, 0], add: {}, rem: {} }; }
+  function reset() { R = [fresh(), fresh(), fresh()]; rr = Kit.rng(8); syncs = 0; log.clear(); log.add("Three replicas, partitioned into {A, B} and {C}.", "muted"); render(); }
+  function side(i) { return part ? (i < 2 ? 0 : 1) : 0; }
+  function merge(a, b) {
+    for (var k = 0; k < 3; k++) { a.g[k] = Math.max(a.g[k], b.g[k]); a.p[k] = Math.max(a.p[k], b.p[k]); a.n[k] = Math.max(a.n[k], b.n[k]); }
+    Object.keys(b.add).forEach(function (e) { a.add[e] = true; }); Object.keys(b.rem).forEach(function (e) { a.rem[e] = true; });
+  }
+  function sync() {
+    var pairs = []; for (var i = 0; i < 3; i++) for (var j = 0; j < 3; j++) if (i !== j && side(i) === side(j)) pairs.push([i, j]);
+    for (var k = pairs.length - 1; k > 0; k--) { var x = rr.int(k + 1), t = pairs[k]; pairs[k] = pairs[x]; pairs[x] = t; }
+    pairs.forEach(function (pr) { merge(R[pr[1]], R[pr[0]]); });
+    syncs++; log.add("Exchange states: " + (pairs.map(function (pr) { return NAMES[pr[0]] + "→" + NAMES[pr[1]]; }).join(", ") || "nothing reachable"), "ok"); render();
+  }
+  function sum(v) { return v[0] + v[1] + v[2]; }
+  function setVal(s) { return ELEMS.filter(function (e) { return s.add[e] && !s.rem[e]; }); }
+  function render() {
+    var m = Kit.clear(document.getElementById("reps"));
+    R.forEach(function (s, i) {
+      m.appendChild(Kit.el("div", { class: "rp" + (part && i === 2 ? " split" : "") },
+        Kit.el("h3", null, Kit.el("span", null, "Replica " + NAMES[i]), Kit.el("span", { class: "badge" + (i === who ? " accent" : "") }, i === who ? "acting" : "")),
+        Kit.el("span", { class: "kv" }, "G-Counter [" + s.g.join(", ") + "] = ", Kit.el("span", { class: "val" }, sum(s.g))),
+        Kit.el("span", { class: "kv" }, "PN P [" + s.p.join(", ") + "] N [" + s.n.join(", ") + "] = ", Kit.el("span", { class: "val" }, sum(s.p) - sum(s.n))),
+        Kit.el("span", { class: "kv" }, "2P-set add {" + Object.keys(s.add).join(", ") + "} rem {" + Object.keys(s.rem).join(", ") + "}"),
+        Kit.el("span", { class: "kv" }, "value {", Kit.el("span", { class: "val" }, setVal(s).join(", ")), "}")));
+    });
+    var key = function (s) { return [sum(s.g), sum(s.p) - sum(s.n), setVal(s).join(",")].join("|"); }, same = key(R[0]) === key(R[1]) && key(R[1]) === key(R[2]);
+    var c = document.getElementById("conv"); c.className = "callout " + (same ? "ok" : "warn");
+    c.textContent = same ? "✓ All three replicas show the same values." : "✗ Replicas disagree; exchange states (and heal the partition) to converge.";
+    stats([["Partition", part ? "on" : "healed", part ? "warn" : "ok"], ["State exchanges", syncs], ["Converged", same ? "yes" : "no", same ? "ok" : "warn"]]);
+  }
+  document.getElementById("who").appendChild(Kit.segmented({ label: "Acting replica", value: "0", options: NAMES.map(function (n, i) { return { value: String(i), label: n }; }), onChange: function (v) { who = +v; render(); } }).element);
+  document.getElementById("elem").appendChild(Kit.segmented({ label: "Element", value: elem, options: ELEMS.map(function (e) { return { value: e, label: e }; }), onChange: function (v) { elem = v; } }).element);
+  document.getElementById("inc").addEventListener("click", function () { R[who].g[who]++; R[who].p[who]++; log.add(NAMES[who] + ": increment (own slot only)", "ok"); render(); });
+  document.getElementById("dec").addEventListener("click", function () { R[who].n[who]++; log.add(NAMES[who] + ": decrement, PN-Counter only; a G-Counter can't decrement", "warn"); render(); });
+  document.getElementById("add").addEventListener("click", function () { if (R[who].rem[elem]) log.add(NAMES[who] + ": add " + elem + " has no effect, it is in the remove-set", "warn"); else { R[who].add[elem] = true; log.add(NAMES[who] + ": add " + elem, "ok"); } render(); });
+  document.getElementById("rem").addEventListener("click", function () { if (!R[who].add[elem]) log.add(NAMES[who] + ": can't remove " + elem + ", it was never added here", "muted"); else { R[who].rem[elem] = true; log.add(NAMES[who] + ": remove " + elem + " (forever)", "warn"); } render(); });
+  document.getElementById("part").addEventListener("change", function (e) { part = e.target.checked; log.add(part ? "Partition {A, B} | {C}" : "Partition healed", part ? "warn" : "ok"); render(); });
+  document.getElementById("sync").addEventListener("click", sync);
+  document.getElementById("reset").addEventListener("click", reset);
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How is a G-Counter's value computed after merging [1, 0, 0] and [0, 0, 1]?",
+      options: ["max = 1", "element-wise max [1, 0, 1], then sum = 2", "average"], answer: 1,
+      explain: "Table 11-1 (p. 239)." },
+    { q: "Why can't a single G-Counter support decrements?",
+      options: ["Merging takes the maximum, so a lowered slot would be overwritten by the old higher value", "It has no slots", "Decrements need timestamps"], answer: 0,
+      explain: "PN-Counters keep a separate vector for decrements (pp. 239–240)." },
+    { q: "An element is removed on one replica and re-added on another. After merging a two-phase set, is it present?",
+      options: ["Yes", "No: once in the remove-set it stays removed", "Depends on merge order"], answer: 1,
+      explain: "Value = add-set minus remove-set (p. 240)." }
+  ]);
+})();
+</script>
+</body>
+</html>

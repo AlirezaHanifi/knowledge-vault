@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paxos, Round by Round</title>
+<meta name="description" content="Step through single-decree Paxos with five acceptors and two proposers: a normal round, the book&#x27;s three proposer-failure scenarios (Figures 14-4 to 14-6), and dueling proposers. Acceptors follow the real promise and accept rules, so the chosen value is computed, not scripted. Illustrates Database Internals, Chapter 14.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  table.px { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .82rem; }
+  table.px td, table.px th { border-bottom: 1px solid var(--line); padding: 5px 6px; text-align: left; }
+  table.px tr.down td { opacity: .5; text-decoration: line-through; }
+  table.px tr.touch td { background: var(--accent-soft); }
+  .props { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .props .callout { margin: 0; font-size: .82rem; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/14-consensus.html">Chapter 14</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Paxos</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 14 · Consensus</div>
+  <h1>Paxos, round by round</h1>
+  <p class="lede">A proposer first sends <strong>Prepare(n)</strong> to a majority of acceptors. Each one <strong>promises</strong> to ignore proposals numbered lower than n and reports any value it has already accepted. The proposer then sends <strong>Accept!(n, v)</strong>, where v is the value of the <strong>highest-numbered accepted proposal</strong> it heard about, or its own if there is none. A value is <strong>chosen</strong> once a majority accepts the same proposal.</p>
+  <p class="source-note">Illustrates “Paxos Algorithm”, “Quorums in Paxos” and “Failure Scenarios” (pp. 286–291, Figures 14-3 to 14-6). The scenarios follow the book’s figures: in the fourth, proposer P1 retries with number 3 to show that a later proposer prefers the more recent accepted proposal. The dueling scenario’s length and the five-acceptor setup are the vault’s. The acceptor rules are the book’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><div class="table-wrap"><table class="px" id="acc"></table></div><div class="props" id="props"></div>
+        <div class="callout" id="chosen" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="scen"></div><div id="player" style="margin-top:12px"></div>
+        <p class="field-hint">Highlighted rows received a message in the last step. A struck-through row is a crashed acceptor.</p></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Figure 14-4.</strong> P1’s value reached only A1 before P1 crashed. P2’s quorum includes A1, which reports (1, V1), so P2 must propose V1, not its own value.</li>
+    <li><strong>Figure 14-5.</strong> P2’s quorum misses A1, nobody reports an accepted value, and P2 gets V2 chosen. V1 was accepted by one acceptor but never chosen, so this is still safe.</li>
+    <li><strong>Figure 14-6.</strong> A1 accepted V1 and crashed; V2 is chosen without it. When P1 retries and reaches A1 again, it sees (1, V1) and (2, V2) and picks the higher-numbered one, so the decision stands.</li>
+    <li><strong>Dueling proposers</strong> keep invalidating each other’s promises with higher numbers, and nobody finishes. Random backoff lets one of them complete a round.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/14-consensus.html"><small>Lesson</small>14. Consensus</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var ACC = ["A1", "A2", "A3", "A4", "A5"], scen = "f4", A, P, steps, k, touched, chosen;
+  var SCEN = {
+    normal: [["prep", "P1", 1, [0, 1, 2]], ["acc", "P1", [0, 1, 2]]],
+    f4: [["prep", "P1", 1, [0, 1, 2]], ["acc", "P1", [0]], ["crashP", "P1"], ["prep", "P2", 2, [0, 1, 2]], ["acc", "P2", [0, 1, 2]]],
+    f5: [["prep", "P1", 1, [0, 1, 2]], ["acc", "P1", [0]], ["crashP", "P1"], ["prep", "P2", 2, [1, 2, 3]], ["acc", "P2", [1, 2, 3]]],
+    f6: [["prep", "P1", 1, [0, 1, 2]], ["acc", "P1", [0]], ["crashP", "P1"], ["crashA", 0], ["prep", "P2", 2, [1, 2, 3]], ["acc", "P2", [1, 2, 3]], ["recoverA", 0], ["recoverP", "P1"], ["prep", "P1", 3, [0, 1, 2]], ["acc", "P1", [0, 1, 2]]],
+    duel: [["prep", "P1", 1, [0, 1, 2]], ["prep", "P2", 2, [0, 1, 2]], ["acc", "P1", [0, 1, 2]], ["prep", "P1", 3, [0, 1, 2]], ["acc", "P2", [0, 1, 2]], ["prep", "P2", 4, [0, 1, 2]], ["acc", "P1", [0, 1, 2]], ["backoff", "P2"], ["prep", "P1", 5, [0, 1, 2]], ["acc", "P1", [0, 1, 2]]]
+  };
+  function reset() {
+    A = ACC.map(function () { return { promised: 0, acc: null, up: true }; });
+    P = { P1: { own: "V1", n: 0, promises: [], value: null, up: true }, P2: { own: "V2", n: 0, promises: [], value: null, up: true } };
+    steps = SCEN[scen]; k = 0; touched = []; chosen = null;
+    log.clear(); log.add("Five acceptors; a majority is 3. P1 wants V1, P2 wants V2.", "muted"); render();
+  }
+  function names(ix) { return ix.map(function (i) { return ACC[i]; }).join(", "); }
+  function step() {
+    if (k >= steps.length) return false;
+    var s = steps[k++]; touched = [];
+    if (s[0] === "prep") {
+      var p = P[s[1]], n = s[2]; p.n = n; p.promises = []; p.value = null;
+      var replies = [];
+      s[3].forEach(function (i) {
+        var a = A[i]; if (!a.up) return; touched.push(i);
+        if (n > a.promised) { a.promised = n; p.promises.push({ i: i, acc: a.acc }); replies.push(ACC[i] + " promises" + (a.acc ? " and reports (" + a.acc.n + ", " + a.acc.v + ")" : "")); }
+        else replies.push(ACC[i] + " rejects: already promised " + a.promised);
+      });
+      var ok = p.promises.length >= 3;
+      if (ok) { var best = null; p.promises.forEach(function (x) { if (x.acc && (!best || x.acc.n > best.n)) best = x.acc; }); p.value = best ? best.v : p.own; }
+      log.add(s[1] + " sends Prepare(" + n + ") to " + names(s[3]) + ". " + replies.join("; ") + "." + (ok ? " Quorum of promises: " + s[1] + " will propose " + p.value + (p.value !== p.own ? " (adopted, not its own)" : "") : " No quorum."), ok ? "ok" : "warn");
+    } else if (s[0] === "acc") {
+      var q = P[s[1]];
+      if (!q.value) { log.add(s[1] + " has no quorum of promises; it can't send Accept!", "muted"); render(); return k < steps.length; }
+      var res = [];
+      s[2].forEach(function (i) {
+        var a = A[i]; if (!a.up) return; touched.push(i);
+        if (q.n >= a.promised) { a.promised = q.n; a.acc = { n: q.n, v: q.value }; res.push(ACC[i] + " accepts"); }
+        else res.push(ACC[i] + " rejects (promised " + a.promised + ")");
+      });
+      log.add(s[1] + " sends Accept!(" + q.n + ", " + q.value + ") to " + names(s[2]) + ". " + res.join("; ") + ".", res.some(function (x) { return /rejects/.test(x); }) ? "bad" : "ok");
+    } else if (s[0] === "crashP") { P[s[1]].up = false; log.add(s[1] + " crashes", "bad"); }
+    else if (s[0] === "recoverP") { P[s[1]].up = true; log.add(s[1] + " recovers and starts a new round", "muted"); }
+    else if (s[0] === "crashA") { A[s[1]].up = false; log.add(ACC[s[1]] + " crashes, before any new proposer hears about its value", "bad"); }
+    else if (s[0] === "recoverA") { A[s[1]].up = true; touched.push(s[1]); log.add(ACC[s[1]] + " recovers, still holding (" + A[s[1]].acc.n + ", " + A[s[1]].acc.v + ")", "muted"); }
+    else if (s[0] === "backoff") log.add(s[1] + " backs off for a random delay", "warn");
+    var counts = {}; A.forEach(function (a) { if (a.acc) { var key = a.acc.n + "|" + a.acc.v; counts[key] = (counts[key] || 0) + 1; } });
+    Object.keys(counts).forEach(function (key) { if (counts[key] >= 3) { var v = key.split("|")[1]; if (!chosen) log.add("A majority accepted the same proposal: " + v + " is chosen", "ok"); else if (chosen !== v) log.add("SAFETY VIOLATION: " + v + " chosen after " + chosen, "bad"); chosen = chosen || v; } });
+    render(); return k < steps.length;
+  }
+  function render() {
+    var t = Kit.clear(document.getElementById("acc"));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["Acceptor", "Promised", "Accepted (n, v)"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    var tb = Kit.el("tbody");
+    A.forEach(function (a, i) { tb.appendChild(Kit.el("tr", { class: (a.up ? "" : "down ") + (touched.indexOf(i) >= 0 ? "touch" : "") }, Kit.el("th", { scope: "row" }, ACC[i] + (a.up ? "" : " (down)")), Kit.el("td", null, a.promised || "–"), Kit.el("td", null, a.acc ? "(" + a.acc.n + ", " + a.acc.v + ")" : "–"))); });
+    t.appendChild(tb);
+    var pr = Kit.clear(document.getElementById("props"));
+    ["P1", "P2"].forEach(function (id) { var p = P[id]; pr.appendChild(Kit.el("div", { class: "callout " + (p.up ? "" : "bad") }, Kit.el("strong", null, id + (p.up ? "" : " (crashed)")), Kit.el("div", null, "wants " + p.own + "; round " + (p.n || "–") + (p.value ? ", proposing " + p.value : "")))); });
+    var c = document.getElementById("chosen"); c.className = "callout " + (chosen ? "ok" : "");
+    c.textContent = chosen ? "Chosen value: " + chosen + ". Every later round will also choose " + chosen + "." : "No value chosen yet.";
+    stats([["Step", k + " / " + steps.length], ["Chosen", chosen || "–", chosen ? "ok" : ""]]);
+  }
+  document.getElementById("scen").appendChild(Kit.segmented({ label: "Scenario", value: scen, options: [{ value: "normal", label: "Normal round" }, { value: "f4", label: "Fig. 14-4" }, { value: "f5", label: "Fig. 14-5" }, { value: "f6", label: "Fig. 14-6" }, { value: "duel", label: "Dueling" }], onChange: function (v) { scen = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1300 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "An acceptor promised 2 and then receives Accept!(1, V1). What does it do?",
+      options: ["Accepts it", "Rejects it and reports the higher number it has seen", "Accepts it but doesn't tell anyone"], answer: 1,
+      explain: "pp. 286–287." },
+    { q: "Why must P2 propose V1 in Figure 14-4?",
+      options: ["V1 is alphabetically first", "A1 in its quorum reported an accepted proposal (1, V1), and a proposer must use the highest-numbered accepted value it hears about", "P1 told it to"], answer: 1,
+      explain: "pp. 286, 289." },
+    { q: "How many acceptors are needed to tolerate two failures?",
+      options: ["3", "4", "5"], answer: 2,
+      explain: "2f + 1 (p. 288)." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slotted Page</title>
+<meta name="description" content="Insert and delete variable-size records in a slotted page: the cell-pointer array stays sorted by key while cells stay where they were written; freed space goes on an availability list filled by first fit or best fit, and defragmentation reclaims fragments. Illustrates Database Internals, Chapter 3.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .pagebar { position: relative; height: 64px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); overflow: hidden; }
+  .seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .7rem; overflow: hidden; border-right: 1px solid var(--line); }
+  .seg.hdr { background: var(--surface-2); color: var(--ink-3); }
+  .seg.ptr { background: var(--accent-soft); color: var(--ink); top: 0; bottom: 50%; }
+  .seg.cell { background: var(--ok-soft); color: var(--ink); }
+  .seg.hole { background: repeating-linear-gradient(45deg, var(--warn-soft), var(--warn-soft) 4px, transparent 4px, transparent 8px); color: var(--warn); }
+  .seg.new { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .scale { display: flex; justify-content: space-between; font-size: .72rem; color: var(--ink-3); font-family: var(--mono); margin-top: 3px; }
+  .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; margin-top: 12px; }
+  .slot { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px 6px; font-family: var(--mono); font-size: .74rem; background: var(--surface-2); }
+  .slot b { color: var(--accent); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-file-formats.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Slotted page</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · File Formats</div>
+  <h1>Slotted page: sorted pointers, unsorted cells</h1>
+  <p class="lede">A slotted page grows a <strong>cell-pointer array</strong> from the start of the page and <strong>cells</strong> from the end. Keys stay in order by reordering the small fixed-size pointers, never the cells. A deleted cell becomes a free segment on an <strong>availability list</strong>, and later inserts reuse it by <strong>first fit</strong> or <strong>best fit</strong>. When no single gap is large enough but the free bytes add up, the page is <strong>defragmented</strong>.</p>
+  <p class="source-note">Illustrates “Slotted Pages” and “Managing Variable-Size Data” (pp. 52–58, Figures 3-5 to 3-9). The 256-byte page, the 8-byte header, 4-byte pointers and the record sizes are the vault’s (seeded). Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Page bytes (0 → 255)</p>
+        <div class="pagebar" id="bar" role="img"></div>
+        <div class="scale"><span>0 · header, then pointers →</span><span>← cells · 255</span></div>
+        <p class="panel-title" style="margin-top:14px">Cell pointers in key order</p>
+        <div class="slots" id="slots"></div>
+        <p class="panel-title" style="margin-top:14px">Availability list</p>
+        <div id="avail" class="kv"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="fit"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="ins">Insert a record</button>
+          <button class="btn small danger" type="button" id="del">Delete a random record</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="defrag">Defragment</button><button class="btn small" type="button" id="reset">↺ Reset</button></div>
+        <p class="field-hint">Each insert uses the next record from a seeded list of keys and sizes (12–44 bytes).</p></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Pointers move, cells don’t.</strong> After each insert the pointer array is re-sorted by key, but the cell bytes stay at their offsets; external references use the slot, not the offset.</li>
+    <li><strong>Deletes leave holes.</strong> The cell is only marked free and added to the availability list; nothing is shifted.</li>
+    <li><strong>First fit vs best fit.</strong> First fit takes the first hole that is large enough and can leave a sliver too small to use; best fit picks the hole that leaves the least.</li>
+    <li><strong>Defragmentation is the fallback.</strong> When the next record doesn’t fit anywhere but the total free bytes would hold it, live cells are rewritten contiguously and the holes disappear.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-file-formats.html"><small>Lesson</small>3. File Formats</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var SIZE = 256, HDR = 8, PTR = 4, fit = "first", r, cells, holes, upper, nextRec, last;
+  var WORDS = ["apple", "kiwi", "fig", "plum", "lime", "pear", "date", "grape", "melon", "mango", "peach", "lemon", "cherry", "guava", "olive", "quince"];
+  function reset() {
+    r = Kit.rng(3); cells = []; holes = []; upper = SIZE; last = null; nextRec = 0;
+    log.clear(); log.add("Empty 256-byte page: 8-byte header, pointers grow right, cells grow left.", "muted"); render();
+  }
+  function record() { var w = WORDS[nextRec % WORDS.length] + (nextRec >= WORDS.length ? nextRec : ""); nextRec++; return { key: w, size: 12 + r.int(33) }; }
+  function lower() { return HDR + cells.length * PTR; }
+  function freeTotal() { return upper - lower() + holes.reduce(function (a, h) { return a + h.size; }, 0); }
+  function sortCells() { cells.sort(function (a, b) { return a.key < b.key ? -1 : a.key > b.key ? 1 : 0; }); }
+  function insert() {
+    var rec = record(), need = rec.size;
+    if (upper - lower() < PTR) { log.add("No room for another pointer: page is full", "bad"); nextRec--; return; }
+    var cand = holes.filter(function (h) { return h.size >= need; }), h = null;
+    if (cand.length) h = fit === "first" ? cand[0] : cand.sort(function (a, b) { return (a.size - need) - (b.size - need); })[0];
+    if (h) {
+      rec.off = h.off; holes.splice(holes.indexOf(h), 1);
+      if (h.size > need) holes.push({ off: h.off + need, size: h.size - need });
+      log.add("Insert " + rec.key + " (" + need + " B) into a free segment at " + h.off + (h.size > need ? ", leaving a " + (h.size - need) + "-byte remainder" : ""), "ok");
+    } else if (upper - lower() - PTR >= need) {
+      upper -= need; rec.off = upper; log.add("Insert " + rec.key + " (" + need + " B) at offset " + upper + " from contiguous free space", "ok");
+    } else if (freeTotal() - PTR >= need) {
+      log.add(rec.key + " (" + need + " B) fits in no gap, but " + freeTotal() + " B are free in total: defragment first", "warn"); nextRec--; last = null; return;
+    } else { log.add(rec.key + " (" + need + " B) does not fit even after defragmentation: it would need an overflow page", "bad"); nextRec--; return; }
+    cells.push(rec); sortCells(); last = rec;
+  }
+  function del() {
+    if (!cells.length) return;
+    var c = cells[r.int(cells.length)]; cells.splice(cells.indexOf(c), 1);
+    holes.push({ off: c.off, size: c.size }); last = null;
+    log.add("Delete " + c.key + ": its " + c.size + " B at offset " + c.off + " go on the availability list", "warn");
+  }
+  function defrag() {
+    var before = holes.length; upper = SIZE;
+    cells.slice().sort(function (a, b) { return b.off - a.off; }).forEach(function (c) { upper -= c.size; c.off = upper; });
+    holes = []; last = null;
+    log.add("Defragment: rewrite " + cells.length + " live cells contiguously, " + before + " free segment" + (before === 1 ? "" : "s") + " reclaimed", "ok");
+  }
+  function render() {
+    var bar = Kit.clear(document.getElementById("bar")), pct = function (b) { return (b / SIZE * 100) + "%"; };
+    bar.appendChild(Kit.el("div", { class: "seg hdr", style: "left:0;width:" + pct(HDR) }, "hdr"));
+    cells.forEach(function (c, i) { bar.appendChild(Kit.el("div", { class: "seg ptr", style: "left:" + pct(HDR + i * PTR) + ";width:" + pct(PTR), title: "slot " + i + " → " + c.off }, "")); });
+    cells.forEach(function (c) { bar.appendChild(Kit.el("div", { class: "seg cell" + (c === last ? " new" : ""), style: "left:" + pct(c.off) + ";width:" + pct(c.size), title: c.key + " · " + c.size + " B @ " + c.off }, c.key)); });
+    holes.forEach(function (h) { bar.appendChild(Kit.el("div", { class: "seg hole", style: "left:" + pct(h.off) + ";width:" + pct(h.size), title: "free " + h.size + " B @ " + h.off }, h.size >= 14 ? "free" : "")); });
+    bar.setAttribute("aria-label", "Page with " + cells.length + " cells and " + holes.length + " free segments");
+    var sl = Kit.clear(document.getElementById("slots"));
+    cells.forEach(function (c, i) { sl.appendChild(Kit.el("div", { class: "slot" }, Kit.el("b", null, "#" + i), " " + c.key, Kit.el("br"), "→ @" + c.off)); });
+    if (!cells.length) sl.appendChild(Kit.el("span", { class: "field-hint" }, "No records yet."));
+    var av = Kit.clear(document.getElementById("avail"));
+    av.textContent = holes.length ? holes.slice().sort(function (a, b) { return a.off - b.off; }).map(function (h) { return "(@" + h.off + ", " + h.size + " B)"; }).join("  ") : "empty";
+    var frag = holes.reduce(function (a, h) { return a + h.size; }, 0);
+    stats([["Records", cells.length], ["Contiguous free", (upper - lower()) + " B"], ["In free segments", frag + " B", frag ? "warn" : ""], ["Largest gap", Math.max(upper - lower() - PTR, holes.reduce(function (a, h) { return Math.max(a, h.size); }, 0)) + " B"]]);
+  }
+  document.getElementById("fit").appendChild(Kit.segmented({ label: "Free-segment strategy", value: fit, options: [{ value: "first", label: "First fit" }, { value: "best", label: "Best fit" }], onChange: function (v) { fit = v; log.add("Strategy: " + (v === "first" ? "first fit" : "best fit"), "muted"); } }).element);
+  document.getElementById("ins").addEventListener("click", function () { insert(); render(); });
+  document.getElementById("del").addEventListener("click", function () { del(); render(); });
+  document.getElementById("defrag").addEventListener("click", function () { defrag(); render(); });
+  document.getElementById("reset").addEventListener("click", reset);
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why are records referenced by slot number rather than byte offset?",
+      options: ["Slot numbers are shorter", "Cells can be moved, for example by defragmentation, without changing external references", "Offsets are not stored"], answer: 1,
+      explain: "The pointer array adds indirection, so cells can be rewritten inside the page (p. 54)." },
+    { q: "What does a delete do to the page bytes?",
+      options: ["Shifts all later cells left", "Marks the cell free and records its offset and size on the availability list", "Zeroes the whole page"], answer: 1,
+      explain: "p. 57, Figure 3-9." },
+    { q: "When is a page defragmented?",
+      options: ["After every delete", "When no free segment fits a new cell but the total free space would", "Never; an overflow page is always used"], answer: 1,
+      explain: "If even defragmentation isn't enough, an overflow page is created (p. 58)." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merkle Tree Repair</title>
+<meta name="description" content="Diverge two replicas of 16 keys, compare Merkle root hashes, and descend only into mismatching subtrees to find the ranges to stream. Change the leaf range size to trade tree size against repair precision. Illustrates Database Internals, Chapter 12.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .mt svg { width: 100%; height: auto; display: block; }
+  .mt rect { fill: var(--surface); stroke: var(--line-strong); }
+  .mt .eq rect { fill: var(--ok-soft); stroke: var(--ok); }
+  .mt .ne rect { fill: var(--bad-soft); stroke: var(--bad); }
+  .mt text { font-family: var(--mono); font-size: 10px; fill: var(--ink); }
+  .mt .edge { stroke: var(--line-strong); }
+  .keys { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 10px; font-family: var(--mono); font-size: .72rem; }
+  .keys span { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 2px 3px; text-align: center; }
+  .keys .diff { border-color: var(--bad); color: var(--bad); font-weight: 600; }
+  .keys .stream { background: var(--warn-soft); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-anti-entropy-and-dissemination.html">Chapter 12</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Merkle tree</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 12 · Anti-Entropy and Dissemination</div>
+  <h1>Merkle trees: find the difference, not the data</h1>
+  <p class="lede">Comparing replicas record by record is too expensive. A <strong>Merkle tree</strong> hashes <strong>ranges</strong> of records into leaves, and each parent hashes its children. Two replicas first compare <strong>root hashes</strong>. If they differ, they descend only into the subtrees whose hashes differ, and stream just the leaf ranges that mismatch.</p>
+  <p class="source-note">Illustrates “Merkle Trees” (pp. 247–248, Figure 12-2). The 16 keys, the values and the short hash are the vault’s (the hash is FNV-1a cut to 16 bits, for display only). Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel mt"><p class="panel-title">Replica B's Merkle tree, compared with replica A's</p><div id="tree" role="img"></div>
+        <p class="field-hint">Green (=) means the hashes match and the subtree is skipped. Red (≠) means they differ, so the comparison descends. Grey nodes are never compared.</p>
+        <p class="panel-title" style="margin-top:10px">Keys on replica B (bold red: differs from A; amber: in a streamed range)</p><div class="keys" id="keys"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="leaf"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small danger" type="button" id="div">Diverge a random key</button></div>
+        <div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Matching roots end the comparison</strong> after one hash. With no divergence that is all the repair costs.</li>
+    <li><strong>Only differing branches are explored.</strong> One changed key costs one hash per level, not one per key.</li>
+    <li><strong>Bigger leaf ranges make a smaller tree</strong> but stream more data: a whole range is sent even if only one key in it differs.</li>
+    <li><strong>Hashes need a scan.</strong> Building the tree reads the whole table, and any change invalidates the hashes up to the root (p. 248).</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-anti-entropy-and-dissemination.html"><small>Lesson</small>12. Anti-Entropy and Dissemination</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var K = 16, leafSize = 2, r, A, Bv, tree, queue, visited, hashes, streamed, done;
+  function h(s) { var x = 0x811c9dc5; for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 0x01000193) >>> 0; } return ("000" + (x & 0xffff).toString(16)).slice(-4); }
+  function init() { r = Kit.rng(12); A = []; Bv = []; for (var i = 0; i < K; i++) { var v = "v" + (100 + i); A.push(v); Bv.push(v); } }
+  function build(vals) {
+    var leaves = []; for (var i = 0; i < K; i += leafSize) { var s = ""; for (var j = i; j < i + leafSize; j++) s += "k" + j + "=" + vals[j] + ";"; leaves.push({ h: h(s), lo: i, hi: i + leafSize - 1 }); }
+    var lv = [leaves]; while (lv[lv.length - 1].length > 1) { var up = [], c = lv[lv.length - 1]; for (var k = 0; k < c.length; k += 2) up.push({ h: h(c[k].h + c[k + 1].h), lo: c[k].lo, hi: c[k + 1].hi, kids: [c[k], c[k + 1]] }); lv.push(up); }
+    return lv.reverse();
+  }
+  function reset() { var ta = build(A); tree = build(Bv); tree.forEach(function (lvl, d) { lvl.forEach(function (n, i) { n.other = ta[d][i].h; n.state = ""; }); }); queue = [tree[0][0]]; hashes = 0; streamed = []; done = false; log.clear(); log.add("Leaf ranges of " + leafSize + " key" + (leafSize > 1 ? "s" : "") + ": " + tree[tree.length - 1].length + " leaves, " + tree.reduce(function (a, l) { return a + l.length; }, 0) + " hashes in each tree. Step to compare.", "muted"); render(); }
+  function step() {
+    if (!queue.length) { if (!done) { done = true; log.add(streamed.length ? "Stream " + streamed.length + " range" + (streamed.length > 1 ? "s" : "") + " (" + streamed.length * leafSize + " keys) from A to B" : "Trees are identical: nothing to repair", streamed.length ? "warn" : "ok"); render(); } return false; }
+    var n = queue.shift(); hashes++;
+    var eq = n.h === n.other; n.state = eq ? "eq" : "ne";
+    var label = n.lo === n.hi ? "k" + n.lo : "k" + n.lo + "–k" + n.hi;
+    if (eq) log.add("Hashes match for " + label + " (" + n.h + "): skip", "ok");
+    else if (n.kids) { log.add("Hashes differ for " + label + " (" + n.h + " vs " + n.other + "): descend", "warn"); queue.push(n.kids[0], n.kids[1]); }
+    else { log.add("Leaf " + label + " differs: mark its range for streaming", "bad"); streamed.push(n); }
+    render(); return true;
+  }
+  function render() {
+    var lv = tree, W = 640, LH = 52, H = lv.length * LH + 6, s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H }), pos = new Map();
+    lv.forEach(function (l, d) { var bw = W / l.length; l.forEach(function (n, i) { pos.set(n, { x: i * bw + bw / 2, y: d * LH + 4 }); }); });
+    lv.forEach(function (l) { l.forEach(function (n) { if (n.kids) n.kids.forEach(function (c) { var a = pos.get(n), b = pos.get(c); s.appendChild(Kit.svg("line", { class: "edge", x1: a.x, y1: a.y + 30, x2: b.x, y2: b.y })); }); }); });
+    lv.forEach(function (l) { var bw = Math.min(70, W / l.length - 4); l.forEach(function (n) {
+      var p = pos.get(n), g = Kit.svg("g", { class: n.state });
+      g.appendChild(Kit.svg("rect", { x: p.x - bw / 2, y: p.y, width: bw, height: 30, rx: 3 }));
+      g.appendChild(Kit.svg("text", { x: p.x, y: p.y + 13, "text-anchor": "middle" }, (n.state === "eq" ? "= " : n.state === "ne" ? "≠ " : "") + n.h));
+      if (bw > 40) g.appendChild(Kit.svg("text", { x: p.x, y: p.y + 25, "text-anchor": "middle" }, n.lo === n.hi ? "k" + n.lo : n.lo + "–" + n.hi));
+      s.appendChild(g);
+    }); });
+    var t = Kit.clear(document.getElementById("tree")); t.appendChild(s); t.setAttribute("aria-label", "Merkle tree comparison; " + hashes + " hashes compared");
+    var ks = Kit.clear(document.getElementById("keys")), diff = 0;
+    for (var i = 0; i < K; i++) { var d = A[i] !== Bv[i]; if (d) diff++; var st = streamed.some(function (n) { return i >= n.lo && i <= n.hi; }); ks.appendChild(Kit.el("span", { class: (d ? "diff " : "") + (st ? "stream" : "") }, "k" + i + (d ? " ≠" : ""))); }
+    var total = tree.reduce(function (a, l) { return a + l.length; }, 0);
+    stats([["Keys that differ", diff, diff ? "bad" : "ok"], ["Hashes compared", hashes + " of " + total], ["Keys streamed", streamed.length * leafSize, streamed.length * leafSize > diff ? "warn" : ""]]);
+  }
+  document.getElementById("leaf").appendChild(Kit.segmented({ label: "Keys per leaf range", value: "2", options: [1, 2, 4, 8].map(function (x) { return { value: String(x), label: String(x) }; }), onChange: function (v) { leafSize = +v; reset(); } }).element);
+  document.getElementById("div").addEventListener("click", function () { var k = r.int(K); Bv[k] = "v" + (500 + r.int(400)); log.add("Replica B changes k" + k + " to " + Bv[k], "warn"); reset(); });
+  init();
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 600 });
+  Bv[5] = "v905"; reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Two replicas' root hashes match. What does that tell you?",
+      options: ["Nothing", "With overwhelming probability the datasets are identical, so no further comparison is needed", "Only the first key matches"], answer: 1,
+      explain: "pp. 247–248." },
+    { q: "What do you trade by making leaf ranges larger?",
+      options: ["Fewer hashes to build and compare, but more data streamed per mismatching range", "Better precision", "Faster hashing of each record"], answer: 0,
+      explain: "Smaller ranges are more precise but make the tree bigger (p. 248)." },
+    { q: "Why are Merkle trees a background mechanism?",
+      options: ["They run inside reads", "They need a full scan of the table to build, and repair data that no client is reading", "They replace replication"], answer: 1,
+      explain: "pp. 247–248." }
+  ]);
+})();
+</script>
+</body>
+</html>

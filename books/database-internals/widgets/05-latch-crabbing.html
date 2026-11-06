@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latch Crabbing</title>
+<meta name="description" content="Descend a B-Tree for a read, an insert or a delete with latch crabbing: latch the child, then release the ancestors if the child is safe. See which latches are held at each step and why a full or minimal child keeps the parent latched. Illustrates Database Internals, Chapter 5.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lvl { display: flex; justify-content: space-around; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .nb { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 8px; background: var(--surface); min-width: 84px; text-align: center; font-family: var(--mono); font-size: .8rem; }
+  .nb .nm { font-family: var(--font); font-size: .7rem; color: var(--ink-3); display: flex; justify-content: space-between; gap: 6px; }
+  .nb.path { border-color: var(--ink-3); }
+  .nb.w { border-color: var(--bad); box-shadow: 0 0 0 2px var(--bad-soft); }
+  .nb.r { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .nb.done { opacity: .6; }
+  .tag { font-weight: 700; font-size: .7rem; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/05-transaction-processing-and-recovery.html">Chapter 5</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Latch crabbing</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 5 · Transaction Processing and Recovery</div>
+  <h1>Latch crabbing down a B-Tree</h1>
+  <p class="lede">Latch crabbing (latch coupling) lets many threads use a B-Tree at once. A thread latches the root, then moves down like a crab: it latches the child <em>before</em> letting go of the parent. It releases every ancestor as soon as the child is <strong>safe</strong>, meaning the operation can’t change the structure above it. For a read, every child is safe. For an insert, a child is safe if it isn’t full; for a delete, if it won’t underflow.</p>
+  <p class="source-note">Illustrates “Latch Crabbing” (pp. 105–106, Figure 5-8). The tree, its node capacity (3 keys, minimum 1) and the operations are the vault’s. The widget shows which latches are held; it doesn’t carry out the split or merge itself. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel" id="tree" aria-label="B-Tree with latches"></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="op"></div><div id="player" style="margin-top:12px"></div>
+        <p class="field-hint">Node labels: <b>W</b> exclusive latch, <b>R</b> shared latch; “full” and “min” mark nodes that make an insert or a delete unsafe.</p></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Reads hold at most two latches.</strong> Latch the child, release the parent, all the way down.</li>
+    <li><strong>Insert into a node with room:</strong> the parent is released as soon as the child is latched and found not to be full.</li>
+    <li><strong>A full child keeps its ancestors latched</strong>, because a split there might propagate into them. The insert of 13 keeps the whole path latched: the leaf and its parent are full.</li>
+    <li><strong>Deletes mirror inserts.</strong> A child that holds only the minimum number of keys could underflow and force a merge, so its parent stays latched.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>Lesson</small>5. Transaction Processing and Recovery</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var CAP = 3, MIN = 1;
+  var T = { id: "R", keys: [40], kids: [
+    { id: "A", keys: [10, 20, 30], kids: [{ id: "L1", keys: [1, 5] }, { id: "L2", keys: [12, 15, 18] }, { id: "L3", keys: [22, 25] }, { id: "L4", keys: [33, 35, 38] }] },
+    { id: "B", keys: [60], kids: [{ id: "L5", keys: [41, 50, 55] }, { id: "L6", keys: [62] }] }] };
+  var OPS = [
+    { v: "read15", label: "Read 15", kind: "read", key: 15 },
+    { v: "ins23", label: "Insert 23", kind: "insert", key: 23 },
+    { v: "ins42", label: "Insert 42", kind: "insert", key: 42 },
+    { v: "ins13", label: "Insert 13", kind: "insert", key: 13 },
+    { v: "del25", label: "Delete 25", kind: "delete", key: 25 },
+    { v: "del62", label: "Delete 62", kind: "delete", key: 62 }];
+  var op = OPS[3], held, path, k, maxHeld, released;
+
+  function child(n, key) { var i = 0; while (i < n.keys.length && key >= n.keys[i]) i++; return n.kids[i]; }
+  function safe(n) { return op.kind === "read" ? true : op.kind === "insert" ? n.keys.length < CAP : n.keys.length > MIN; }
+  function reset() {
+    path = [T]; while (path[path.length - 1].kids) path.push(child(path[path.length - 1], op.key));
+    held = []; k = -1; maxHeld = 0; released = 0;
+    log.clear(); log.add(op.label + ": path " + path.map(function (n) { return n.id; }).join(" → "), "muted"); render();
+  }
+  function step() {
+    var mode = op.kind === "read" ? "R" : "W";
+    if (k < path.length - 1) {
+      k++; var n = path[k]; held.push(n); maxHeld = Math.max(maxHeld, held.length);
+      var msg = "Latch " + n.id + " (" + (mode === "R" ? "shared" : "exclusive") + ")";
+      if (k > 0 && safe(n)) {
+        var rel = held.slice(0, -1); held = [n]; released += rel.length;
+        msg += "; " + n.id + " is safe" + (op.kind === "insert" ? " (not full)" : op.kind === "delete" ? " (above minimum)" : "") + ", release " + rel.map(function (x) { return x.id; }).join(", ");
+        log.add(msg, "ok");
+      } else if (k > 0) log.add(msg + "; " + n.id + " is " + (op.kind === "insert" ? "full" : "at minimum") + ", so keep " + held.slice(0, -1).map(function (x) { return x.id; }).join(", ") + " latched", "warn");
+      else log.add(msg, "muted");
+      render(); return true;
+    }
+    if (held.length) {
+      var leaf = path[path.length - 1];
+      if (op.kind === "read") log.add("Read " + op.key + " in " + leaf.id + (leaf.keys.indexOf(op.key) >= 0 ? ": found" : ": not found"), "ok");
+      else if (safe(leaf)) log.add(op.label + " fits in " + leaf.id + ": no structural change", "ok");
+      else log.add(op.label + " " + (op.kind === "insert" ? "splits " : "underflows ") + leaf.id + "; the change can propagate into " + held.slice(0, -1).map(function (x) { return x.id; }).join(", ") + ", which are still latched", "bad");
+      log.add("Release " + held.map(function (x) { return x.id; }).join(", "), "muted");
+      released += held.length; held = []; k++; render(); return false;
+    }
+    return false;
+  }
+  function render() {
+    var mount = Kit.clear(document.getElementById("tree")), levels = [[T], T.kids, T.kids[0].kids.concat(T.kids[1].kids)];
+    var mode = op.kind === "read" ? "r" : "w";
+    levels.forEach(function (lvl) {
+      var row = Kit.el("div", { class: "lvl" });
+      lvl.forEach(function (n) {
+        var isHeld = held.indexOf(n) >= 0, onPath = path.indexOf(n) >= 0, passed = onPath && path.indexOf(n) <= k && !isHeld;
+        var note = n.keys.length === CAP ? "full" : n.keys.length === MIN ? "min" : "";
+        row.appendChild(Kit.el("div", { class: "nb" + (onPath ? " path" : "") + (isHeld ? " " + mode : "") + (passed ? " done" : "") },
+          Kit.el("div", { class: "nm" }, Kit.el("span", null, n.id + (note ? " · " + note : "")), isHeld ? Kit.el("span", { class: "tag" }, mode.toUpperCase()) : passed ? Kit.el("span", null, "released") : null),
+          n.keys.join(" ")));
+      });
+      mount.appendChild(row);
+    });
+    mount.setAttribute("aria-label", "Latches held: " + (held.map(function (n) { return n.id; }).join(", ") || "none"));
+    stats([["Latches held", held.length, held.length > 2 ? "warn" : ""], ["Most held at once", maxHeld], ["Released early", released]]);
+  }
+  document.getElementById("op").appendChild(Kit.segmented({ label: "Operation", value: op.v, options: OPS.map(function (o) { return { value: o.v, label: o.label }; }), onChange: function (v) { op = OPS.filter(function (o) { return o.v === v; })[0]; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "During a read, when is the parent's latch released?",
+      options: ["At the end of the read", "As soon as the child is latched", "Never; reads don't latch"], answer: 1,
+      explain: "Reads latch the child, then release the parent (p. 105)." },
+    { q: "Why must an insert keep the parent latched when the child is full?",
+      options: ["The child might split and insert a separator into the parent", "Full nodes are slower to read", "To block readers"], answer: 0,
+      explain: "A split propagates upwards, so the parent must stay protected (pp. 105–106)." },
+    { q: "Why is latch crabbing called optimistic?",
+      options: ["It never latches the root", "Most nodes are safe, so ancestors are usually released quickly; structural changes higher in the tree are rare", "It retries on conflict"], answer: 1,
+      explain: "Splits and merges become rarer towards the root (p. 106)." }
+  ]);
+})();
+</script>
+</body>
+</html>

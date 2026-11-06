@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page Replacement</title>
+<meta name="description" content="Replay a page-reference string through a buffer pool under FIFO, LRU, CLOCK and LFU, change the number of frames, and watch hits, misses, the clock hand and Bélády&#x27;s anomaly. Illustrates Database Internals, Chapter 5.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .refs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .ref { font-family: var(--mono); font-size: .78rem; min-width: 30px; text-align: center; padding: 3px 4px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface); }
+  .ref.hit { background: var(--ok-soft); border-color: var(--ok); }
+  .ref.miss { background: var(--bad-soft); border-color: var(--bad); }
+  .ref.cur { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .frames { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; margin-top: 14px; }
+  .frame { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; text-align: center; background: var(--surface-2); }
+  .frame .pg { font-family: var(--mono); font-size: 1.1rem; font-weight: 600; }
+  .frame .meta { font-size: .72rem; color: var(--ink-3); }
+  .frame.in { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .frame.hand { border-style: dashed; border-color: var(--warn); }
+  table.cmp { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 8px; }
+  table.cmp td, table.cmp th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; }
+  table.cmp th:first-child, table.cmp td:first-child { text-align: left; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
+      <a href="../chapters/05-transaction-processing-and-recovery.html">Chapter 5</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Page replacement</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 5 · Transaction Processing and Recovery</div>
+  <h1>Page replacement: FIFO, LRU, CLOCK, LFU</h1>
+  <p class="lede">When the buffer pool is full, a page must be evicted before another can be read. <strong>FIFO</strong> evicts the oldest arrival, even the B-Tree root that every lookup needs. <strong>LRU</strong> evicts the least recently used page. <strong>CLOCK</strong> approximates LRU with one access bit per frame and a sweeping hand. <strong>LFU</strong> evicts the least frequently used page.</p>
+  <p class="source-note">Illustrates “Page Replacement” (pp. 85–88). The reference strings are the vault’s, except the Bélády string 1 2 3 4 1 2 5 1 2 3 4 5, the standard example of the anomaly. LFU ties are broken by evicting the earliest-loaded page. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Reference string</p><div class="refs" id="refs"></div>
+        <p class="panel-title" style="margin-top:14px">Frames</p><div class="frames" id="frames"></div>
+        <p class="field-hint">✓ hit, ✕ miss. For CLOCK, the dashed frame is under the hand and “bit 1” means referenced since the hand last passed.</p></div>
+      <div class="panel"><p class="panel-title">Faults for the whole string, by policy and frame count</p><div class="table-wrap"><table class="cmp" id="cmp"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="preset"></div><div id="policy" style="margin-top:10px"></div><div id="frames-sl" style="margin-top:10px"></div>
+        <div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Bélády’s anomaly.</strong> With the Bélády string, FIFO makes 9 faults with 3 frames and 10 with 4: more memory, more misses. LRU never does this.</li>
+    <li><strong>FIFO evicts hot pages.</strong> In the B-Tree string every lookup touches the root <code>R</code>, yet FIFO evicts it as soon as it is the oldest arrival.</li>
+    <li><strong>CLOCK gives second chances.</strong> The hand clears a set bit and moves on; a page is evicted only when the hand finds its bit already cleared.</li>
+    <li><strong>Scans pollute recency.</strong> In the scan string, a one-off pass over many leaves pushes the hot pages out of LRU, while LFU keeps them because they were used often.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>Lesson</small>5. Transaction Processing and Recovery</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var PRESETS = {
+    belady: "1 2 3 4 1 2 5 1 2 3 4 5",
+    btree: "R A 1 R A 2 R B 7 R A 1 R B 8 R A 2 R A 3 R B 7 R A 1 R A 2",
+    scan: "R A 1 R A 2 R A 1 R A 2 4 5 6 7 8 9 R A 1 R A 2 R A 1"
+  };
+  var cfg = { preset: "belady", policy: "FIFO", frames: 3 }, refs, i, st;
+
+  function sim(policy, seq, n, onStep) {
+    var frames = [], meta = {}, hand = 0, clockAt = {}, freq = {}, t = 0, faults = 0;
+    seq.forEach(function (p) {
+      t++; freq[p] = (freq[p] || 0) + 1;
+      var hit = frames.indexOf(p) >= 0, victim = null;
+      if (hit) { meta[p].used = t; meta[p].bit = 1; }
+      else {
+        faults++;
+        if (frames.length < n) { frames.push(p); if (policy === "CLOCK") hand = frames.length % n; }
+        else {
+          var idx;
+          if (policy === "FIFO") { idx = 0; frames.forEach(function (q, k) { if (meta[q].loaded < meta[frames[idx]].loaded) idx = k; }); }
+          else if (policy === "LRU") { idx = 0; frames.forEach(function (q, k) { if (meta[q].used < meta[frames[idx]].used) idx = k; }); }
+          else if (policy === "LFU") { idx = 0; frames.forEach(function (q, k) { var a = meta[q], b = meta[frames[idx]]; if (freq[q] < freq[frames[idx]] || (freq[q] === freq[frames[idx]] && a.loaded < b.loaded)) idx = k; }); }
+          else { while (meta[frames[hand]].bit) { meta[frames[hand]].bit = 0; hand = (hand + 1) % n; } idx = hand; hand = (hand + 1) % n; }
+          victim = frames[idx]; frames[idx] = p;
+        }
+        meta[p] = { loaded: t, used: t, bit: 1 };
+      }
+      if (onStep) onStep({ p: p, hit: hit, victim: victim, frames: frames.slice(), meta: meta, freq: freq, hand: hand });
+    });
+    return faults;
+  }
+
+  function reset() {
+    refs = PRESETS[cfg.preset].split(" "); i = 0; st = null;
+    log.clear(); log.add(cfg.policy + " with " + cfg.frames + " frame" + (cfg.frames > 1 ? "s" : "") + ", " + refs.length + " references.", "muted");
+    render(); compare();
+  }
+  var history = [];
+  function step() {
+    if (i >= refs.length) return false;
+    var seen = []; sim(cfg.policy, refs.slice(0, i + 1), cfg.frames, function (s) { seen.push(s); });
+    history = seen; st = seen[seen.length - 1]; i++;
+    log.add("Ref " + st.p + ": " + (st.hit ? "hit" : "miss" + (st.victim !== null ? ", evict " + st.victim : ", load into a free frame")), st.hit ? "ok" : "bad");
+    render(); return i < refs.length;
+  }
+  function render() {
+    var rf = Kit.clear(document.getElementById("refs"));
+    refs.forEach(function (p, k) {
+      var h = k < i ? history[k] : null;
+      rf.appendChild(Kit.el("span", { class: "ref" + (h ? (h.hit ? " hit" : " miss") : "") + (k === i - 1 ? " cur" : "") }, p + (h ? (h.hit ? " ✓" : " ✕") : "")));
+    });
+    var fr = Kit.clear(document.getElementById("frames"));
+    for (var k = 0; k < cfg.frames; k++) {
+      var p = st && st.frames[k] !== undefined ? st.frames[k] : null, m = p !== null ? st.meta[p] : null, extra = "";
+      if (m) extra = cfg.policy === "CLOCK" ? "bit " + m.bit : cfg.policy === "LFU" ? "used " + st.freq[p] + "×" : cfg.policy === "LRU" ? "last use t" + m.used : "loaded t" + m.loaded;
+      fr.appendChild(Kit.el("div", { class: "frame" + (st && p === st.p ? " in" : "") + (cfg.policy === "CLOCK" && st && st.hand === k ? " hand" : "") },
+        Kit.el("div", { class: "pg" }, p === null ? "—" : p), Kit.el("div", { class: "meta" }, extra || "empty"),
+        cfg.policy === "CLOCK" && st && st.hand === k ? Kit.el("div", { class: "meta" }, "▲ hand") : null));
+    }
+    var hits = history.slice(0, i).filter(function (h) { return h.hit; }).length;
+    stats([["References", i + " / " + refs.length], ["Hits", hits, "ok"], ["Misses", i - hits, i - hits ? "bad" : ""], ["Hit ratio", i ? Kit.pct(hits / i, 0) : "–"]]);
+  }
+  function compare() {
+    var t = Kit.clear(document.getElementById("cmp")), seq = PRESETS[cfg.preset].split(" ");
+    var head = Kit.el("tr", null, Kit.el("th", null, "Policy")); for (var n = 1; n <= 6; n++) head.appendChild(Kit.el("th", { scope: "col" }, n + (n === 1 ? " frame" : "")));
+    t.appendChild(Kit.el("thead", null, head)); var tb = Kit.el("tbody");
+    ["FIFO", "LRU", "CLOCK", "LFU"].forEach(function (pol) {
+      var tr = Kit.el("tr", null, Kit.el("th", { scope: "row" }, pol)), prev = null;
+      for (var n = 1; n <= 6; n++) { var f = sim(pol, seq, n); tr.appendChild(Kit.el("td", { class: prev !== null && f > prev ? "bad" : "" }, f + (prev !== null && f > prev ? " ▲" : ""))); prev = f; }
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+  }
+  document.getElementById("preset").appendChild(Kit.segmented({ label: "Reference string", value: cfg.preset, options: [{ value: "belady", label: "Bélády" }, { value: "btree", label: "B-Tree lookups" }, { value: "scan", label: "Hot pages + scan" }], onChange: function (v) { cfg.preset = v; reset(); } }).element);
+  document.getElementById("policy").appendChild(Kit.segmented({ label: "Policy", value: cfg.policy, options: ["FIFO", "LRU", "CLOCK", "LFU"].map(function (x) { return { value: x, label: x }; }), onChange: function (v) { cfg.policy = v; reset(); } }).element);
+  document.getElementById("frames-sl").appendChild(Kit.slider({ label: "Frames in the buffer pool", min: 1, max: 6, step: 1, value: cfg.frames, onInput: function (v) { cfg.frames = v; reset(); } }).element);
+  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 700 });
+  reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Why is FIFO a poor fit for a B-Tree's buffer pool?",
+      options: ["It needs too much metadata", "It evicts the root and upper levels, which every lookup needs, just because they were loaded first", "It cannot handle dirty pages"], answer: 1,
+      explain: "The book points out that FIFO would evict the root first (pp. 86–87)." },
+    { q: "What does CLOCK keep per frame?",
+      options: ["A full access timestamp", "An access bit that the sweeping hand clears, giving pages a second chance", "A frequency histogram"], answer: 1,
+      explain: "CLOCK-sweep approximates LRU compactly (p. 87)." },
+    { q: "With the Bélády string, FIFO and 4 frames makes how many faults compared with 3 frames?",
+      options: ["Fewer", "The same", "More (10 vs 9)"], answer: 2,
+      explain: "Bélády's anomaly: FIFO isn't a stack algorithm, so more frames can mean more faults. (The string is a standard example, not from the book.)" }
+  ]);
+})();
+</script>
+</body>
+</html>
