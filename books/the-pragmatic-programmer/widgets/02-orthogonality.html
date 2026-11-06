@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orthogonality and the Ripple of a Change</title>
+<meta name="description" content="Wire up a six-module system with or without shared globals, cross-layer calls, duplicated rules and scattered authentication; change one requirement and count how many modules have to change. Illustrates The Pragmatic Programmer, Topic 10.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .mods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .mod { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; background: var(--surface-2); font-size: .85rem; min-height: 64px; }
+  .mod b { display: block; } .mod small { color: var(--ink-3); }
+  .mod.hit { background: var(--bad-soft); border-color: var(--bad); } .mod.home { background: var(--accent-soft); border-color: var(--accent); }
+  .reqs { display: grid; gap: 6px; } .reqs label { display: flex; gap: 6px; align-items: baseline; font-size: .88rem; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-a-pragmatic-approach.html">Chapter 2</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Orthogonality</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 2 · A Pragmatic Approach</div>
+  <h1>Orthogonality and the ripple of a change</h1>
+  <p class="lede">In an <strong>orthogonal</strong> system, changing one thing doesn’t affect the others. The book’s test: if the requirements behind one function change dramatically, how many modules are affected? In an orthogonal system the answer is <strong>one</strong>.</p>
+  <p class="source-note">Illustrates Topic 10, Orthogonality (pp. 93–103, Tips 17–18), including the mobile interface for a heating-plant controller (p. 97), global data (p. 98) and similar functions (p. 99). The six modules, the four couplings and which modules each requirement touches are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Modules</p><div class="mods" id="mods"></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Modules touched by every requirement</p><div class="table-wrap"><table id="tbl"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="req">Requirement that changes</label><select id="req" style="width:100%"></select>
+        <p class="panel-title" style="margin-top:12px">Couplings in this design</p><div class="reqs" id="cpl"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>With no couplings</strong> every requirement lands in exactly one module: the book’s test for orthogonality.</li>
+    <li><strong>A shared global</strong> (the tax rate) drags the UI and reports into a tax change, which is why the book treats global data as a source of coupling.</li>
+    <li><strong>Scattered authentication</strong> is the worst ripple: one decision duplicated everywhere means changing the login provider touches every module.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-a-pragmatic-approach.html"><small>Lesson</small>2. A Pragmatic Approach</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var MODS = [["ui", "Web UI", "screens and forms"], ["mobile", "Mobile UI", "new client"], ["logic", "Billing logic", "rules and tax"], ["store", "Storage", "database access"], ["reports", "Reports", "monthly statements"], ["auth", "Auth", "login and sessions"]];
+  var REQ = [["tax", "Change the tax rule", "logic"], ["db", "Switch to another database", "store"], ["mobile", "Add a mobile interface", "mobile"], ["report", "New report format", "reports"], ["login", "Change the login provider", "auth"]];
+  var CPL = [["glob", "Tax rate is a shared global read by the UI and reports"], ["cross", "UIs query the database directly, skipping the logic layer"], ["dup", "Reports re-implement the tax calculation"], ["auth", "Every module checks sessions itself"]];
+  var on = { glob: false, cross: false, dup: false, auth: false }, req = "tax";
+  function hits(r) {
+    var home = REQ.filter(function (x) { return x[0] === r; })[0][2], s = {}; s[home] = 1;
+    if (on.glob && r === "tax") { s.ui = 1; s.reports = 1; }
+    if (on.dup && r === "tax") s.reports = 1;
+    if (on.cross && r === "db") { s.ui = 1; s.mobile = 1; }
+    if (on.cross && r === "mobile") s.store = 1;
+    if (on.auth && r === "login") MODS.forEach(function (m) { s[m[0]] = 1; });
+    if (on.auth && r === "mobile") s.auth = 1;
+    return { home: home, set: Object.keys(s) };
+  }
+  function render() {
+    var h = hits(req), m = Kit.clear(document.getElementById("mods"));
+    MODS.forEach(function (x) { var isHome = x[0] === h.home, hit = h.set.indexOf(x[0]) >= 0;
+      m.appendChild(Kit.el("div", { class: "mod" + (isHome ? " home" : hit ? " hit" : "") }, Kit.el("b", null, x[1] + (isHome ? " ●" : hit ? " ✗" : "")), Kit.el("small", null, isHome ? "where the change belongs" : hit ? "must change too" : x[2]))); });
+    var n = h.set.length, v = document.getElementById("verdict");
+    v.className = "callout " + (n === 1 ? "ok" : n <= 3 ? "warn" : "bad");
+    v.textContent = n === 1 ? "One module changes: this part of the design is orthogonal." : n + " modules change for one requirement: " + (n - 1) + " of them only because of coupling.";
+    var t = Kit.clear(document.getElementById("tbl")), total = 0;
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "Requirement"), Kit.el("th", null, "Modules"), Kit.el("th", null, "Extra"))));
+    var tb = Kit.el("tbody"); REQ.forEach(function (r) { var k = hits(r[0]).set.length; total += k; tb.appendChild(Kit.el("tr", r[0] === req ? { "aria-current": "true", style: "font-weight:600" } : null, Kit.el("td", null, r[1]), Kit.el("td", null, String(k)), Kit.el("td", null, k > 1 ? "+" + (k - 1) : "—"))); });
+    t.appendChild(tb);
+    stats([["Modules touched now", n, n > 1 ? "bad" : "ok"], ["Across all 5 requirements", total, total > 5 ? "bad" : "ok"], ["Ideal (orthogonal)", 5]]);
+  }
+  var sel = document.getElementById("req"); REQ.forEach(function (r) { sel.appendChild(Kit.el("option", { value: r[0] }, r[1])); });
+  sel.addEventListener("change", function () { req = sel.value; var h = hits(req); log.add(sel.options[sel.selectedIndex].text + ": " + h.set.length + " module(s)", h.set.length > 1 ? "warn" : "ok"); render(); });
+  var c = document.getElementById("cpl"); CPL.forEach(function (x) { var cb = Kit.el("input", { type: "checkbox", id: "c-" + x[0] });
+    cb.addEventListener("change", function () { on[x[0]] = cb.checked; log.add((cb.checked ? "Added: " : "Removed: ") + x[1], cb.checked ? "warn" : "muted"); render(); });
+    c.appendChild(Kit.el("label", { for: "c-" + x[0] }, cb, x[1])); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What is the book's test for whether a design is orthogonal?",
+      options: ["Whether it uses layers", "If the requirements behind one function change dramatically, how many modules are affected? Ideally one", "Whether every module has unit tests"], answer: 1,
+      explain: "p. 96." },
+    { q: "Adding a mobile interface to the heating-plant controller should touch:",
+      options: ["Only the user-interface modules", "The control logic and the UI", "Every module"], answer: 0,
+      explain: "p. 97." },
+    { q: "How do orthogonality and DRY relate, according to the book?",
+      options: ["They are the same principle", "DRY minimizes duplication; orthogonality minimizes interdependency", "They conflict"], answer: 1,
+      explain: "p. 101." }
+  ]);
+})();
+</script>
+</body>
+</html>

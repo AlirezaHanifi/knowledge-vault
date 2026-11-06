@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table-Driven State Machines</title>
+<meta name="description" content="Feed characters to the book&#x27;s string-extracting state machine, or message types to its multipart parser, one event at a time, and watch the transition table pick each next state and action. Illustrates The Pragmatic Programmer, Topic 29.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .tape { display: flex; flex-wrap: wrap; gap: 2px; font-family: var(--mono); }
+  .tape span { min-width: 1.4em; text-align: center; padding: 2px 3px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface-2); }
+  .tape span.done { opacity: .45; } .tape span.cur { outline: 2px solid var(--accent); background: var(--accent-soft); }
+  .fsm tr.cur td { background: var(--accent-soft); font-weight: 600; } .fsm td { font-family: var(--mono); font-size: .82rem; }
+  .states { display: flex; gap: 8px; flex-wrap: wrap; } .st { padding: 6px 10px; border: 1px solid var(--line-strong); border-radius: 999px; font-family: var(--mono); font-size: .82rem; }
+  .st.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); } .st.err.on { background: var(--bad); border-color: var(--bad); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/05-bend-or-break.html">Chapter 5</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Table-driven state machines</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 5 · Bend, or Break</div>
+  <h1>Table-driven state machines</h1>
+  <p class="lede">A finite state machine is just a <strong>table</strong>: for each state and event, the next state and optionally an <strong>action</strong>. The code that runs it is one line: look up <code>TRANSITIONS[state][event]</code>, falling back to a default entry or to <code>:error</code>.</p>
+  <p class="source-note">Illustrates “Finite State Machines” in Topic 29, Juggling the Real World (pp. 240–246): the multipart message parser (pp. 241–243) and the string extractor with actions (pp. 243–245). The states, events and actions are the book’s; the stepping display is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">State</p><div class="states" id="states"></div>
+        <p class="panel-title" style="margin-top:12px" id="intitle">Input</p><div class="tape" id="tape"></div><div id="inctl" style="margin-top:8px"></div>
+        <div class="callout" id="out" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Transition table</p><div class="table-wrap"><table class="fsm" id="tbl"></table></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mach"></div><div id="play" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>All the behaviour lives in the table.</strong> Adding a state or an event is a new row, not a new branch of nested if statements.</li>
+    <li><strong>The backslash state</strong> (<code>copy_next_char</code>) copies the next character whatever it is, so an escaped quote doesn’t end the string.</li>
+    <li><strong>The multipart parser has no default row</strong>: any event the table doesn’t list, such as data before a header or a second trailer, sends it to <code>:error</code>.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/05-bend-or-break.html"><small>Lesson</small>5. Bend, or Break</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var STR = { states: ["look_for_string", "in_string", "copy_next_char"], start: "look_for_string",
+    T: { look_for_string: { '"': ["in_string", "start_new_string"], default: ["look_for_string", "ignore"] },
+         in_string: { '"': ["look_for_string", "finish_current_string"], "\\": ["copy_next_char", "add_current_to_string"], default: ["in_string", "add_current_to_string"] },
+         copy_next_char: { default: ["in_string", "add_current_to_string"] } } };
+  var MP = { states: ["initial", "reading", "done", "error"], start: "initial",
+    T: { initial: { header: ["reading"] }, reading: { data: ["reading"], trailer: ["done"] } } };
+  var mach = "str", st, pos, input, out, cur, events, lastRow;
+  var SAMPLE = 'say "hi \\"you\\"" and "bye"';
+  function reset() {
+    var M = mach === "str" ? STR : MP; st = M.start; pos = 0; out = []; cur = ""; lastRow = null; events = [];
+    if (mach === "str") input = document.getElementById("txt") ? document.getElementById("txt").value : SAMPLE;
+    log.clear(); log.add("Start in " + st, "muted"); render();
+  }
+  function feed(ev) {
+    var M = mach === "str" ? STR : MP, row = M.T[st] || {}, key = row[ev] ? ev : (row.default ? "default" : null);
+    var tr = key ? row[key] : ["error"], from = st; st = tr[0]; lastRow = [from, key || ev];
+    var act = tr[1];
+    if (act === "start_new_string") cur = ""; else if (act === "add_current_to_string") cur += ev; else if (act === "finish_current_string") out.push(cur);
+    log.add(from + " + " + JSON.stringify(ev) + " → " + st + (act ? " / " + act : ""), st === "error" ? "bad" : act === "finish_current_string" ? "ok" : "muted");
+  }
+  function step() {
+    if (mach === "str") { if (pos >= input.length) return false; feed(input[pos++]); render(); if (pos >= input.length) return false; }
+    else return false;
+  }
+  function render() {
+    var M = mach === "str" ? STR : MP, s = Kit.clear(document.getElementById("states"));
+    M.states.forEach(function (x) { s.appendChild(Kit.el("span", { class: "st" + (x === st ? " on" : "") + (x === "error" ? " err" : ""), "aria-current": x === st ? "true" : null }, (x === st ? "● " : "") + x)); });
+    var tp = Kit.clear(document.getElementById("tape"));
+    if (mach === "str") { for (var i = 0; i < input.length; i++) tp.appendChild(Kit.el("span", { class: i < pos - 1 ? "done" : i === pos - 1 ? "cur" : "" }, input[i] === " " ? "␣" : input[i])); }
+    else events.forEach(function (e, i) { tp.appendChild(Kit.el("span", { class: i === events.length - 1 ? "cur" : "done" }, e)); });
+    var t = Kit.clear(document.getElementById("tbl"));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "State"), Kit.el("th", null, "Event"), Kit.el("th", null, "Next state"), mach === "str" ? Kit.el("th", null, "Action") : null)));
+    var tb = Kit.el("tbody");
+    Object.keys(M.T).forEach(function (a) { Object.keys(M.T[a]).forEach(function (e) { var isCur = lastRow && lastRow[0] === a && lastRow[1] === e;
+      tb.appendChild(Kit.el("tr", { class: isCur ? "cur" : "", "aria-current": isCur ? "true" : null }, Kit.el("td", null, (isCur ? "▶ " : "") + a), Kit.el("td", null, e === "default" ? ":default" : mach === "str" ? JSON.stringify(e) : e), Kit.el("td", null, M.T[a][e][0]), mach === "str" ? Kit.el("td", null, M.T[a][e][1]) : null)); }); });
+    if (mach === "mp") tb.appendChild(Kit.el("tr", { class: lastRow && st === "error" ? "cur" : "" }, Kit.el("td", null, "any other"), Kit.el("td", null, "any other"), Kit.el("td", null, "error"), null));
+    t.appendChild(tb);
+    var o = document.getElementById("out");
+    if (mach === "str") { o.className = "callout ok"; o.textContent = "Strings found: " + (out.length ? out.map(function (x) { return "“" + x + "”"; }).join(", ") : "none yet") + (st === "in_string" || st === "copy_next_char" ? " · building “" + cur + "”" : ""); }
+    else { o.className = "callout " + (st === "error" ? "bad" : st === "done" ? "ok" : ""); o.textContent = st === "error" ? "Error: the table has no entry for that event in that state." : st === "done" ? "Message complete." : "Waiting for " + (st === "initial" ? "a header." : "data or a trailer."); }
+    stats([["State", st, st === "error" ? "bad" : ""], [mach === "str" ? "Characters read" : "Messages", mach === "str" ? pos + " / " + input.length : events.length], [mach === "str" ? "Strings found" : "Table rows", mach === "str" ? out.length : 4]]);
+  }
+  function buildInput() {
+    var c = Kit.clear(document.getElementById("inctl"));
+    if (mach === "str") { var inp = Kit.el("input", { id: "txt", type: "text", value: SAMPLE, style: "width:100%;font-family:var(--mono)", "aria-label": "Text to scan" });
+      inp.addEventListener("change", reset); c.appendChild(inp); document.getElementById("intitle").textContent = "Input (one character per event)"; }
+    else { document.getElementById("intitle").textContent = "Messages received";
+      ["header", "data", "trailer", "other"].forEach(function (e) { var b = Kit.el("button", { class: "btn small", type: "button" }, "receive " + e);
+        b.addEventListener("click", function () { if (st === "error" || st === "done") { log.add("Machine is in " + st + "; reset to start again.", "warn"); return; } events.push(e); feed(e); render(); }); c.appendChild(b); }); }
+  }
+  document.getElementById("mach").appendChild(Kit.segmented({ label: "Machine", value: mach, options: [{ value: "str", label: "String extractor" }, { value: "mp", label: "Multipart parser" }], onChange: function (v) { mach = v; buildInput(); reset(); } }).element);
+  Kit.player({ mount: document.getElementById("play"), interval: 350, step: step, reset: reset });
+  buildInput(); reset();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "In the multipart parser, what happens if data arrives before a header?",
+      options: ["It's buffered", "There is no table entry, so the machine goes to :error", "It is ignored"], answer: 1,
+      explain: "The loop is state = TRANSITIONS[state][msg_type] || :error (pp. 241–243)." },
+    { q: "Why does the string extractor need a copy_next_char state?",
+      options: ["To skip whitespace", "So an escaped character, such as a quote after a backslash, is copied rather than ending the string", "To count characters"], answer: 1,
+      explain: "pp. 243–245." },
+    { q: "What does the :default entry do?",
+      options: ["Handles any event not listed for that state", "Resets the machine", "Marks the start state"], answer: 0,
+      explain: "pp. 244–245." }
+  ]);
+})();
+</script>
+</body>
+</html>

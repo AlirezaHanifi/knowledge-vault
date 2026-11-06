@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Shipping over $50</title>
+<meta name="description" content="Build an order from the book&#x27;s requirements example, switch what the $50 free-shipping threshold includes, and find the orders where the rule gives away more than the client meant. Illustrates The Pragmatic Programmer, Topic 45.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.items label { display: flex; justify-content: space-between; gap: 8px; margin: 4px 0; } .items input[type=number] { width: 4em; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-before-the-project.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Free shipping over $50</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Before the Project</div>
+  <h1>Free shipping over $50</h1>
+  <p class="lede">“Shipping should be free on all orders costing $50 or more.” It sounds complete, but it isn’t. Does the $50 include tax? Shipping? Ebooks? Your job is to find the edge cases and <strong>feed the consequences back</strong>, then let the client decide.</p>
+  <p class="source-note">Illustrates “Programming as Therapy” in Topic 45, The Requirements Pit (pp. 406–409): the rule, the developer’s questions, and the $25 book with about $30 of overnight shipping. Prices of the other items and shipping options, and the 8% tax, are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">The order</p><div class="items" id="items"></div>
+        <label class="field-head" for="ship" style="margin-top:8px">Shipping</label><select id="ship" style="width:100%"></select>
+        <div class="table-wrap" style="margin-top:10px"><table id="bill"></table></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Every small order (0–3 of each item, every shipping option)</p><div id="sweep"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><p class="panel-title">What does “costing $50” include?</p>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="incShip" checked> Shipping charge</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="incTax"> Tax</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="incE" checked> Ebooks</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="intl"> Allow international shipping</label>
+        <div id="thr" style="margin-top:10px"></div><button class="btn small" id="book" type="button" style="margin-top:8px">Book’s example</button></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Counting shipping toward the $50</strong> is simple to explain, but it lets a $25 book with $30 of overnight shipping become a free-shipping order: overnight delivery of a $25 book for $25.</li>
+    <li><strong>Every answer to the developer’s questions changes the set of orders that qualify.</strong> None of them is “wrong”: they are decisions the client hadn’t realized they were making.</li>
+    <li><strong>Deliver facts, then stop.</strong> The page shows what each choice costs; choosing which rule they want is the client’s job.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-before-the-project.html"><small>Lesson</small>8. Before the Project</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var ITEMS = [["paper", "Paper book", 25, false], ["paper2", "Paper box set", 45, false], ["ebook", "Ebook", 12, true]];
+  var SHIP = [["ground", "Ground", 5, false], ["priority", "Priority", 12, false], ["overnight", "Overnight", 30, false], ["intl", "International", 40, true]];
+  var q = { paper: 1, paper2: 0, ebook: 0 }, ship = "overnight", thr = 50;
+  function opt(id) { return document.getElementById(id).checked; }
+  function price(qty, sh) {
+    var paper = 0, ebooks = 0; ITEMS.forEach(function (it) { if (it[3]) ebooks += qty[it[0]] * it[2]; else paper += qty[it[0]] * it[2]; });
+    var s = SHIP.filter(function (x) { return x[0] === sh; })[0], shipCost = paper > 0 ? s[2] : 0, tax = (paper + ebooks) * 0.08;
+    var counted = paper + (opt("incE") ? ebooks : 0) + (opt("incShip") ? shipCost : 0) + (opt("incTax") ? tax : 0);
+    var free = paper > 0 && counted >= thr && (!s[3] || opt("intl"));
+    var without = paper + (opt("incE") ? ebooks : 0) + (opt("incTax") ? tax : 0) >= thr;
+    return { paper: paper, ebooks: ebooks, ship: shipCost, tax: tax, counted: counted, free: free, gamed: free && !without, s: s };
+  }
+  function money(x) { return "$" + x.toFixed(2); }
+  function render() {
+    var p = price(q, ship), b = Kit.clear(document.getElementById("bill")), tb = Kit.el("tbody");
+    [["Paper books", p.paper], ["Ebooks", p.ebooks], ["Tax (8%)", p.tax], ["Shipping (" + p.s[1] + ")", p.ship], ["Shipping refunded", p.free ? -p.ship : 0]].forEach(function (r) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, r[0]), Kit.el("td", null, money(r[1])))); });
+    tb.appendChild(Kit.el("tr", { style: "font-weight:600" }, Kit.el("td", null, "Customer pays"), Kit.el("td", null, money(p.paper + p.ebooks + p.tax + (p.free ? 0 : p.ship)))));
+    tb.appendChild(Kit.el("tr", null, Kit.el("td", null, "Counted toward " + money(thr)), Kit.el("td", null, money(p.counted)))); b.appendChild(tb);
+    var v = document.getElementById("verdict");
+    v.className = "callout " + (p.gamed ? "bad" : p.free ? "ok" : "");
+    v.textContent = p.paper === 0 ? "Nothing to ship: ebooks only." : p.gamed ? "Ships free only because the shipping charge itself pushed it over " + money(thr) + ": the publisher pays " + money(p.ship) + " to ship " + money(p.paper) + " of books." : p.free ? "Ships free on the merchandise alone." : "Doesn’t qualify: " + money(thr - p.counted) + " short" + (p.s[3] && !opt("intl") ? " (international orders excluded)" : "") + ".";
+    // sweep
+    var n = 0, freeN = 0, gamed = 0, given = 0;
+    for (var a = 0; a <= 3; a++) for (var c = 0; c <= 3; c++) for (var e = 0; e <= 3; e++) SHIP.forEach(function (s) { var x = price({ paper: a, paper2: c, ebook: e }, s[0]); if (!x.paper) return; n++; if (x.free) { freeN++; given += x.ship; } if (x.gamed) gamed++; });
+    var sw = Kit.clear(document.getElementById("sweep"));
+    sw.appendChild(Kit.el("div", { class: "stats" }, [["Orders", n], ["Ship free", freeN], ["Free only because of shipping", gamed, gamed ? "bad" : "ok"], ["Shipping given away", "$" + Math.round(given)]].map(function (x) { return Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))); })));
+    stats([["Qualifies", p.free ? "yes" : "no", p.free ? "ok" : ""], ["Counted", money(p.counted)], ["Gaming the rule", p.gamed ? "yes" : "no", p.gamed ? "bad" : "ok"]]);
+  }
+  var it = document.getElementById("items");
+  ITEMS.forEach(function (x) { var inp = Kit.el("input", { type: "number", min: 0, max: 5, value: q[x[0]], id: "q-" + x[0] }); inp.addEventListener("input", function () { q[x[0]] = Math.max(0, Math.min(5, Number(inp.value) || 0)); render(); });
+    it.appendChild(Kit.el("label", { for: "q-" + x[0] }, Kit.el("span", null, x[1] + " (" + money(x[2]) + ")"), inp)); });
+  var sel = document.getElementById("ship"); SHIP.forEach(function (s) { sel.appendChild(Kit.el("option", { value: s[0] }, s[1] + " — " + money(s[2]))); }); sel.value = ship;
+  sel.addEventListener("change", function () { ship = sel.value; render(); });
+  ["incShip", "incTax", "incE", "intl"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { log.add(e.target.parentNode.textContent.trim() + ": " + (e.target.checked ? "counts" : "doesn’t count"), "muted"); render(); }); });
+  var ts = Kit.slider({ label: "Threshold", min: 20, max: 100, step: 5, value: thr, unit: "", format: function (v) { return "$" + v; }, onInput: function (v) { thr = v; render(); } });
+  document.getElementById("thr").appendChild(ts.element);
+  document.getElementById("book").addEventListener("click", function () { q = { paper: 1, paper2: 0, ebook: 0 }; ship = "overnight"; sel.value = ship; ITEMS.forEach(function (x) { document.getElementById("q-" + x[0]).value = q[x[0]]; }); document.getElementById("incShip").checked = true; ts.set(50); thr = 50; render(); log.add("Book’s example: a $25 book with overnight shipping.", "ok"); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "In the book's dialogue, what does the experienced developer do after pointing out the overnight-shipping loophole?",
+      options: ["Proposes the fix and implements it", "Stops: delivers facts and lets the client decide", "Escalates to management"], answer: 1,
+      explain: "pp. 408–409." },
+    { q: "According to the book, a client's initial statement of need is:",
+      options: ["An absolute requirement", "An invitation to explore", "A contract"], answer: 1,
+      explain: "p. 407." },
+    { q: "Which tip sums up the process?",
+      options: ["Requirements Are Learned in a Feedback Loop", "Use a Project Glossary", "Policy Is Metadata"], answer: 0,
+      explain: "Tip 77, p. 409." }
+  ]);
+})();
+</script>
+</body>
+</html>

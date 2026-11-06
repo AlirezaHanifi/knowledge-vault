@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saboteurs and State Coverage</title>
+<meta name="description" content="Plant bugs in a small function and see which ones its test suite catches; then sample the book&#x27;s a / (a + b) input space and see how rarely random tests find the one failing state. Illustrates The Pragmatic Programmer, Topic 51.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.mut td { font-family: var(--mono); font-size: .8rem; } .tests label { display: flex; gap: 6px; font-family: var(--mono); font-size: .82rem; margin: 3px 0; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-pragmatic-projects.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Saboteurs and state coverage</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · Pragmatic Projects</div>
+  <h1>Saboteurs and state coverage</h1>
+  <p class="lede">To test your tests, <strong>cause the bug deliberately</strong> and check that the tests complain. And remember that running every line isn’t enough: what matters is the <strong>states</strong> a program can be in, not the lines it has.</p>
+  <p class="source-note">Illustrates “Testing the Tests” and “Testing Thoroughly” in Topic 51, Pragmatic Starter Kit (pp. 457–458, Tips 92–93), including the book’s a / (a + b) function with a and b from 0 to 999. The clamp function, its mutants and its tests are the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">clamp(x, lo, hi): if x &lt; lo return lo; if x &gt; hi return hi; return x</p><div class="table-wrap"><table class="mut" id="mut"></table></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">test(a, b) = a / (a + b), with a, b in 0–999</p><div id="ssl"></div><button class="btn small" id="sample" type="button">Run random tests</button>
+        <div class="stats" id="st2" style="margin-top:8px"></div><div class="callout" id="sv" style="margin-top:8px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><p class="panel-title">Tests in the suite</p><div class="tests" id="tests"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>A single happy-path test</strong> passes, and lets six of the seven real planted bugs survive. A green suite says little about whether the alarms work.</li>
+    <li><strong>Tests just outside the range</strong> (11 and −1) kill the off-by-one mutants that move a boundary; tests far outside (42 and −3) miss them. Some mutants, such as &lt; becoming &lt;=, are <em>equivalent</em>: they behave the same, so no test can catch them.</li>
+    <li><strong>One line, a million states</strong>: a / (a + b) fails only when a = b = 0. Covering the line takes one test; finding that state by chance takes about a million.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-pragmatic-projects.html"><small>Lesson</small>9. Pragmatic Projects</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  function clamp(x, lo, hi) { if (x < lo) return lo; if (x > hi) return hi; return x; }
+  var MUT = [["< becomes <=", function (x, lo, hi) { if (x <= lo) return lo; if (x > hi) return hi; return x; }, "equiv"], ["> becomes >=", function (x, lo, hi) { if (x < lo) return lo; if (x >= hi) return hi; return x; }, "equiv"],
+    ["return lo becomes return hi", function (x, lo, hi) { if (x < lo) return hi; if (x > hi) return hi; return x; }, false], ["return hi becomes return lo", function (x, lo, hi) { if (x < lo) return lo; if (x > hi) return lo; return x; }, false],
+    ["first check deleted", function (x, lo, hi) { if (x > hi) return hi; return x; }, false], ["second check deleted", function (x, lo, hi) { if (x < lo) return lo; return x; }, false],
+    ["checks swapped (hi before lo)", function (x, lo, hi) { if (x > hi) return hi; if (x < lo) return lo; return x; }, "equiv"], ["x < lo becomes x < hi", function (x, lo, hi) { if (x < hi) return lo; if (x > hi) return hi; return x; }, false],
+    ["x > hi becomes x > hi + 1", function (x, lo, hi) { if (x < lo) return lo; if (x > hi + 1) return hi; return x; }, false], ["x < lo becomes x < lo − 1", function (x, lo, hi) { if (x < lo - 1) return lo; if (x > hi) return hi; return x; }, false]];
+  var TESTS = [["clamp(5, 0, 10) == 5", [5, 0, 10, 5], true], ["clamp(-3, 0, 10) == 0", [-3, 0, 10, 0], false], ["clamp(42, 0, 10) == 10", [42, 0, 10, 10], false], ["clamp(0, 0, 10) == 0", [0, 0, 10, 0], false], ["clamp(10, 0, 10) == 10", [10, 0, 10, 10], false], ["clamp(11, 0, 10) == 10", [11, 0, 10, 10], false], ["clamp(-1, 0, 10) == 0", [-1, 0, 10, 0], false]];
+  var on = TESTS.map(function (t) { return t[2]; });
+  function render() {
+    var t = Kit.clear(document.getElementById("mut")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "Planted bug"), Kit.el("th", null, "Caught by"), Kit.el("th", null, "Result"))));
+    var tb = Kit.el("tbody"), killed = 0, real = 0;
+    MUT.forEach(function (m) { var by = []; TESTS.forEach(function (ts, i) { if (on[i] && m[1](ts[1][0], ts[1][1], ts[1][2]) !== ts[1][3]) by.push("#" + (i + 1)); });
+      var equiv = m[2] === "equiv"; if (!equiv) { real++; if (by.length) killed++; }
+      tb.appendChild(Kit.el("tr", null, Kit.el("td", null, m[0]), Kit.el("td", null, by.join(" ") || "—"), Kit.el("td", null, equiv ? Kit.el("span", { class: "badge accent" }, "≡ same behaviour") : by.length ? Kit.el("span", { class: "badge ok" }, "✓ caught") : Kit.el("span", { class: "badge bad" }, "✗ survives")))); });
+    t.appendChild(tb);
+    var v = document.getElementById("verdict"); v.className = "callout " + (killed === real ? "ok" : killed > real / 2 ? "warn" : "bad");
+    v.textContent = killed === real ? "Every real planted bug sets off an alarm. The three equivalent mutants behave exactly like the original, so no test could catch them." : (real - killed) + " of " + real + " planted bugs survive this suite: those alarms don’t work.";
+    stats([["Tests", on.filter(Boolean).length], ["Bugs caught", killed + " / " + real, killed === real ? "ok" : "bad"], ["Mutation score", Kit.pct(killed / real, 0)]]);
+    return [killed, real];
+  }
+  var box = document.getElementById("tests");
+  TESTS.forEach(function (ts, i) { var cb = Kit.el("input", { type: "checkbox", id: "t" + i }); cb.checked = on[i];
+    cb.addEventListener("change", function () { on[i] = cb.checked; var r = render(); log.add((cb.checked ? "Added " : "Removed ") + "#" + (i + 1) + " → " + r[0] + "/" + r[1] + " caught", "muted"); });
+    box.appendChild(Kit.el("label", { for: "t" + i }, cb, "#" + (i + 1) + " " + ts[0])); });
+  var K = 1000, rng = Kit.rng(9);
+  document.getElementById("ssl").appendChild(Kit.slider({ label: "Random tests per run", min: 2, max: 6, step: 1, value: 3, format: function (v) { return Math.pow(10, v).toLocaleString(); }, onInput: function (v) { K = Math.pow(10, v); } }).element);
+  document.getElementById("sample").addEventListener("click", function () { var found = 0; for (var i = 0; i < K; i++) { var a = rng.int(1000), b = rng.int(1000); if (a + b === 0) found++; }
+    var p = 1 - Math.pow(1 - 1e-6, K), st = Kit.clear(document.getElementById("st2"));
+    [["Tests run", K.toLocaleString()], ["Line coverage", "100%"], ["Hit a = b = 0", found ? "yes" : "no", found ? "ok" : "bad"], ["Chance per run", Kit.pct(p, p < 0.01 ? 2 : 0)]].forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
+    var sv = document.getElementById("sv"); sv.className = "callout " + (found ? "ok" : "bad");
+    sv.textContent = found ? "This run hit the division by zero." : "Every line ran, every test passed, and the one failing state of 1,000,000 was never tried.";
+    log.add(K.toLocaleString() + " random (a, b) tests: " + (found ? "found the zero state" : "never hit a = b = 0"), found ? "ok" : "warn"); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How does the book suggest testing your tests?",
+      options: ["Measure code coverage", "Cause the bug deliberately and make sure a test complains", "Run them twice"], answer: 1,
+      explain: "p. 457, Tip 92." },
+    { q: "How many logical states does a / (a + b) have for a, b in 0–999, and how many fail?",
+      options: ["1,000 and 1", "1,000,000 and 1", "2,000 and 2"], answer: 1,
+      explain: "p. 458." },
+    { q: "What does Tip 93 say?",
+      options: ["Aim for 100% code coverage", "Test State Coverage, Not Code Coverage", "Test Only the Public API"], answer: 1,
+      explain: "p. 458." }
+  ]);
+})();
+</script>
+</body>
+</html>

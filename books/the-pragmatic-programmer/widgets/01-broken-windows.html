@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Broken Windows</title>
+<meta name="description" content="Let a team keep working on a 144-module codebase where every visible mess makes the next one more likely; compare ignoring broken windows, boarding them up, and fixing them at once. Illustrates The Pragmatic Programmer, Topic 3.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+  .cell { aspect-ratio: 1; border-radius: 3px; border: 1px solid var(--line); background: var(--surface-2); display: grid; place-items: center; font-size: .7rem; font-family: var(--mono); color: var(--ink-3); }
+  .cell.broken { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+  .cell.boarded { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .8rem; color: var(--ink-2); margin-top: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; } .legend .cell { width: 16px; height: 16px; aspect-ratio: auto; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/01-a-pragmatic-philosophy.html">Chapter 1</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Broken windows</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 1 · A Pragmatic Philosophy</div>
+  <h1>Broken windows</h1>
+  <p class="lede">One unrepaired <strong>broken window</strong> signals that nobody cares, and decay speeds up from there. The book’s advice: don’t live with broken windows. Fix them as soon as you find them, or at least <strong>board them up</strong> so the damage stops spreading.</p>
+  <p class="source-note">Illustrates Topic 3, Software Entropy (pp. 42–45, Tip 5). The model is the vault’s: each edit has a 2% base chance of leaving a mess, plus the share of modules showing visible (unboarded) mess; the team makes ten edits a week. Edits in messy modules deliver half a feature. Fixing a window costs one edit; boarding costs a fifth of one. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title" id="gt">Codebase: 144 modules</p><div class="grid" id="grid" role="img" aria-label="Codebase grid"></div>
+        <div class="legend"><span><i class="cell"></i> clean</span><span><i class="cell broken">✗</i> broken window</span><span><i class="cell boarded">▭</i> boarded up</span></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Visible mess over time (all three policies, same seed)</p><svg id="chart" role="img" aria-label="Share of broken modules over time for each policy"></svg></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="pol"></div><div id="play" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Ignoring</strong> starts slowly, then accelerates: each new mess raises the chance of the next. This is the feedback loop the book describes, where decline speeds up once nobody seems to care.</li>
+    <li><strong>Fixing at once</strong> costs a little feature work every week, but keeps the codebase near pristine, so features keep flowing at full speed.</li>
+    <li><strong>Boarding up</strong> is cheap and stops the spread, but the boarded modules are still debt. In this model they still deliver half speed until someone really fixes them.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/01-a-pragmatic-philosophy.html"><small>Lesson</small>1. A Pragmatic Philosophy</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var N = 144, EDITS = 10, cfg = { pol: "ignore" };
+  function sim(pol, weeks) {
+    var r = Kit.rng(7), m = new Array(N).fill(0), hist = [], feat = 0;   // 0 clean, 1 broken, 2 boarded
+    for (var w = 0; w <= weeks; w++) {
+      var broken = m.filter(function (x) { return x === 1; }).length, boarded = m.filter(function (x) { return x === 2; }).length;
+      hist.push({ m: m.slice(), broken: broken, boarded: boarded, feat: feat });
+      var budget = EDITS;
+      if (pol === "fix") { for (var i = 0; i < N && budget > 1; i++) if (m[i]) { m[i] = 0; budget -= 1; } }
+      if (pol === "board") { for (var j = 0; j < N && budget > 1; j++) if (m[j] === 1) { m[j] = 2; budget -= 0.2; } }
+      for (var e = 0; e < Math.floor(budget); e++) {
+        var k = r.int(N), vis = m.filter(function (x) { return x === 1; }).length / N;
+        feat += m[k] ? 0.5 : 1;
+        if (m[k] === 0 && r.chance(0.02 + 1.0 * vis)) m[k] = 1;
+      }
+    }
+    return hist;
+  }
+  var WEEKS = 52, H = {}, week = 0;
+  ["ignore", "board", "fix"].forEach(function (p) { H[p] = sim(p, WEEKS); });
+  var NAMES = { ignore: "Ignore them", board: "Board them up", fix: "Fix at once" };
+  function render() {
+    var h = H[cfg.pol][week], g = Kit.clear(document.getElementById("grid"));
+    h.m.forEach(function (x, i) { g.appendChild(Kit.el("div", { class: "cell" + (x === 1 ? " broken" : x === 2 ? " boarded" : ""), title: "Module " + (i + 1) }, x === 1 ? "✗" : x === 2 ? "▭" : "")); });
+    document.getElementById("grid").setAttribute("aria-label", "Week " + week + ": " + h.broken + " broken, " + h.boarded + " boarded, " + (N - h.broken - h.boarded) + " clean modules");
+    document.getElementById("gt").textContent = "Codebase: 144 modules, week " + week + " (" + NAMES[cfg.pol].toLowerCase() + ")";
+    var v = document.getElementById("verdict"), share = (h.broken + h.boarded) / N;
+    v.className = "callout " + (h.broken / N > 0.25 ? "bad" : share > 0.1 ? "warn" : "ok");
+    v.textContent = h.broken / N > 0.25 ? "Rot has taken hold: a quarter of the modules are visibly broken, and every edit is likely to add more." :
+      h.boarded > h.broken ? "Boarded windows stop the spread, but " + h.boarded + " modules are still waiting for a real fix." :
+      share > 0.1 ? "Mess is spreading: each broken window makes the next more likely." : "The codebase stays close to pristine; people take care not to be the first to make a mess.";
+    var pts = {}; ["ignore", "board", "fix"].forEach(function (p) { pts[p] = H[p].slice(0, week + 1).map(function (x, i) { return [i, x.broken / N]; }); });
+    Kit.lineChart(document.getElementById("chart"), { xMax: WEEKS, yMax: 1, xLabel: "week", yLabel: "visibly broken", yFormat: function (y) { return Kit.pct(y, 0); },
+      series: [{ label: "ignore", cls: "s2", points: pts.ignore }, { label: "board up", cls: "s4", points: pts.board }, { label: "fix at once", cls: "s3", points: pts.fix }],
+      marks: [{ x: week, label: "now" }] });
+    stats([["Week", week], ["Broken", h.broken, h.broken > 20 ? "bad" : ""], ["Boarded", h.boarded], ["Features delivered", Math.round(h.feat)]]);
+  }
+  document.getElementById("pol").appendChild(Kit.segmented({ label: "Policy", value: cfg.pol, options: [{ value: "ignore", label: "Ignore" }, { value: "board", label: "Board up" }, { value: "fix", label: "Fix at once" }],
+    onChange: function (v) { cfg.pol = v; log.add("Policy: " + NAMES[v] + " (week " + week + ": " + Math.round(H[v][week].feat) + " features so far)", "muted"); render(); } }).element);
+  Kit.player({ mount: document.getElementById("play"), interval: 260,
+    step: function () { if (week >= WEEKS) { log.add("Year over. Features: ignore " + Math.round(H.ignore[WEEKS].feat) + ", board up " + Math.round(H.board[WEEKS].feat) + ", fix " + Math.round(H.fix[WEEKS].feat) + ".", "ok"); return false; }
+      week++; var h = H[cfg.pol][week], p = H[cfg.pol][week - 1]; if (h.broken > p.broken) log.add("Week " + week + ": " + (h.broken - p.broken) + " new broken window(s)", "warn"); render(); },
+    reset: function () { week = 0; log.clear(); render(); } });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What does the book suggest when there isn't time to fix a broken window properly?",
+      options: ["Leave it for the next release", "Board it up: comment it out, show “Not Implemented”, or use dummy data", "Call it technical debt"], answer: 1,
+      explain: "p. 43: stop the damage from spreading." },
+    { q: "In the original broken-window experiment, what happened to the abandoned car once a window was broken?",
+      options: ["Nothing changed", "It was stripped within hours", "It was towed away"], answer: 1,
+      explain: "p. 45." },
+    { q: "Why does ignoring mess get worse faster than linearly in this model?",
+      options: ["Each visible mess raises the chance that the next edit adds another", "The team gets slower every week", "Modules are added over time"], answer: 0,
+      explain: "That feedback loop is the vault's way to model the book's point that neglect speeds up rot." }
+  ]);
+})();
+</script>
+</body>
+</html>

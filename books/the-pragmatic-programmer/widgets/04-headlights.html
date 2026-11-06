@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outrunning Your Headlights</title>
+<meta name="description" content="Compare stopping distance with headlight throw using the book&#x27;s NHTSA numbers, then choose how many steps a team commits to before getting feedback and see how much work each change of direction throws away. Illustrates The Pragmatic Programmer, Topic 27.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .road { width: 100%; height: 90px; } .road .beam { fill: var(--warn-soft); stroke: var(--warn); } .road .stop { fill: var(--accent-soft); stroke: var(--accent); }
+  .road .over { fill: var(--bad-soft); stroke: var(--bad); } .road text { font-size: 11px; fill: var(--ink-2); } .road .car { fill: var(--ink); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-pragmatic-paranoia.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Outrunning your headlights</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Pragmatic Paranoia</div>
+  <h1>Outrunning your headlights</h1>
+  <p class="lede">Low beams light about <strong>160 feet</strong>, but at 40 mph a car needs 189 feet to stop, and 464 feet at 70 mph. In software the headlights are feedback. <strong>The rate of feedback is your speed limit</strong>, so take small steps, always.</p>
+  <p class="source-note">Illustrates Topic 27, Don’t Outrun Your Headlights (pp. 222–225, Tip 42): the NHTSA figures of 160 ft throw, 1.5 s reaction time and 17.02 ft/s² deceleration. The stopping-distance formula (reaction distance plus v²/2a) reproduces the book’s 189 ft and 464 ft. The project model in the lower half (random changes of direction, a fixed cost per feedback check) is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Stopping distance vs. headlight throw</p><svg class="road" id="road" viewBox="0 0 520 90" role="img"></svg>
+        <div class="callout" id="carv" style="margin-top:8px"></div></div>
+      <div class="panel"><p class="panel-title">Work wasted per 100 steps, by steps committed before feedback</p><svg id="chart" role="img" aria-label="Cost by batch size"></svg>
+        <div class="callout" id="projv" style="margin-top:8px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="mph"></div><hr><div id="batch"></div><div id="chg"></div><div id="fb"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The book’s numbers check out</strong>: 1.5 s of reaction plus braking at 17.02 ft/s² gives 189 ft at 40 mph and 464 ft at 70 mph. Above about 36 mph you are driving faster than your headlights can see.</li>
+    <li><strong>Big steps waste work</strong>: when the direction changes in the middle of a large committed batch, everything built past that point is thrown away.</li>
+    <li><strong>Tiny steps aren’t free</strong> in this model, because each feedback check costs something. The cheaper feedback is (a REPL, a unit test), the smaller the best step becomes.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-pragmatic-paranoia.html"><small>Lesson</small>4. Pragmatic Paranoia</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { mph: 40, k: 10, p: 0.05, c: 0.5 };
+  function stopFt(mph) { var v = mph * 5280 / 3600; return 1.5 * v + v * v / (2 * 17.02); }
+  var safe = (function () { var lo = 0, hi = 100; for (var i = 0; i < 60; i++) { var m = (lo + hi) / 2; if (stopFt(m) > 160) hi = m; else lo = m; } return lo; })();
+  function cost(k, p, c) { // waste per 100 useful steps: a change of direction at step i of a batch keeps the i steps before it and wastes the rest, which were built without feedback.
+    var r = Kit.rng(100 + k), useful = 0, wasted = 0, checks = 0;
+    while (useful < 2000) { checks++; var hitAt = -1; for (var i = 0; i < k; i++) if (r.chance(p)) { hitAt = i; break; }
+      if (hitAt < 0) useful += k; else { useful += hitAt; wasted += k - hitAt; } }
+    return { waste: wasted / useful * 100, fb: checks * c / useful * 100 };
+  }
+  function render() {
+    var d = stopFt(cfg.mph), sv = Kit.clear(document.getElementById("road")), X = function (ft) { return 40 + ft / 500 * 470; };
+    sv.appendChild(Kit.svg("rect", { class: "car", x: 8, y: 34, width: 30, height: 18, rx: 4 }));
+    sv.appendChild(Kit.svg("rect", { class: "beam", x: X(0), y: 14, width: X(160) - X(0), height: 22 }));
+    sv.appendChild(Kit.svg("text", { x: X(0) + 4, y: 29 }, "headlights: 160 ft"));
+    sv.appendChild(Kit.svg("rect", { class: d > 160 ? "over" : "stop", x: X(0), y: 50, width: Math.min(470, X(d) - X(0)), height: 22 }));
+    sv.appendChild(Kit.svg("text", { x: X(0) + 4, y: 65 }, "stopping distance: " + Math.round(d) + " ft" + (d > 160 ? " ✗ beyond the light" : " ✓")));
+    sv.setAttribute("aria-label", "At " + cfg.mph + " mph the stopping distance is " + Math.round(d) + " feet against 160 feet of headlight throw");
+    var cv = document.getElementById("carv"); cv.className = "callout " + (d > 160 ? "bad" : "ok");
+    cv.textContent = d > 160 ? "At " + cfg.mph + " mph you can’t stop within what you can see: " + Math.round(d - 160) + " ft of blind stopping. The safe limit is about " + safe.toFixed(0) + " mph." : "At " + cfg.mph + " mph you can stop within the lit road (safe up to about " + safe.toFixed(0) + " mph).";
+    var ks = [1, 2, 3, 5, 8, 10, 15, 20, 30, 40], W = [], F = [], T = [], best = null;
+    ks.forEach(function (k) { var x = cost(k, cfg.p, cfg.c); W.push([k, x.waste]); F.push([k, x.fb]); T.push([k, x.waste + x.fb]); if (!best || x.waste + x.fb < best[1]) best = [k, x.waste + x.fb]; });
+    var me = cost(cfg.k, cfg.p, cfg.c), yMax = Math.max.apply(null, T.map(function (x) { return x[1]; }).concat([20])) * 1.1;
+    Kit.lineChart(document.getElementById("chart"), { xMax: 40, yMax: yMax, xLabel: "steps committed before feedback", yLabel: "cost per 100 steps", series: [{ label: "wasted work", cls: "s2", points: W, dots: true }, { label: "feedback cost", cls: "s3", points: F, dots: true }, { label: "total", cls: "s1", points: T, dots: true }], marks: [{ x: cfg.k, label: "you" }] });
+    var pv = document.getElementById("projv"), tot = me.waste + me.fb; pv.className = "callout " + (tot <= best[1] * 1.15 ? "ok" : "warn");
+    pv.textContent = "Committing " + cfg.k + " step(s) at a time wastes " + me.waste.toFixed(1) + " and spends " + me.fb.toFixed(1) + " on feedback per 100 useful steps. Best here: about " + best[0] + " step(s) (" + best[1].toFixed(1) + ").";
+    stats([["Stopping distance", Math.round(d) + " ft", d > 160 ? "bad" : "ok"], ["Safe speed", safe.toFixed(0) + " mph"], ["Waste per 100", me.waste.toFixed(1), me.waste > 20 ? "bad" : ""], ["Best batch", best[0]]]);
+  }
+  document.getElementById("mph").appendChild(Kit.slider({ label: "Speed", min: 20, max: 80, step: 5, value: cfg.mph, unit: " mph", onInput: function (v) { cfg.mph = v; render(); log.add(v + " mph → " + Math.round(stopFt(v)) + " ft to stop", stopFt(v) > 160 ? "bad" : "ok"); } }).element);
+  document.getElementById("batch").appendChild(Kit.slider({ label: "Steps committed before feedback", min: 1, max: 40, step: 1, value: cfg.k, onInput: function (v) { cfg.k = v; render(); } }).element);
+  document.getElementById("chg").appendChild(Kit.slider({ label: "Chance the direction changes, per step", min: 0.01, max: 0.2, step: 0.01, value: cfg.p, format: function (v) { return Kit.pct(v, 0); }, onInput: function (v) { cfg.p = v; render(); log.add("Direction changes " + Kit.pct(v, 0) + " of steps", "muted"); } }).element);
+  document.getElementById("fb").appendChild(Kit.slider({ label: "Cost of one feedback check", min: 0.1, max: 3, step: 0.1, value: cfg.c, unit: " steps", onInput: function (v) { cfg.c = v; render(); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Per the NHTSA figures in the book, how far do low beams illuminate?",
+      options: ["About 160 feet", "About 464 feet", "About 50 feet"], answer: 0,
+      explain: "p. 222." },
+    { q: "What does the book call your speed limit?",
+      options: ["Your typing speed", "The rate of feedback", "The sprint length"], answer: 1,
+      explain: "p. 223." },
+    { q: "Which of these is a task that is too big, in the book's terms?",
+      options: ["Running a unit test", "Estimating completion dates months in the future", "Renaming a variable"], answer: 1,
+      explain: "pp. 223–224: anything that requires fortune-telling." }
+  ]);
+})();
+</script>
+</body>
+</html>

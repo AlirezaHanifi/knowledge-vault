@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Size and Communication Paths</title>
+<meta name="description" content="Grow a team and watch the pairwise communication paths multiply, with the book&#x27;s ten-to-twelve guideline and its horde of fifty marked; then split a large group into small teams. Illustrates The Pragmatic Programmer, Topic 49.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.net { width: 100%; max-width: 420px; display: block; margin: 0 auto; } .net line { stroke: var(--accent); stroke-opacity: .25; } .net line.x { stroke: var(--s2); stroke-opacity: .7; stroke-width: 1.5; }
+  .net circle { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; } .net circle.lead { fill: var(--s2); stroke: var(--s2); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">PP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-pragmatic-projects.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Team size</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · Pragmatic Projects</div>
+  <h1>Team size and communication paths</h1>
+  <p class="lede">A pragmatic team is <strong>small, under 10–12</strong> people, and stable. Fifty people aren’t a team; they’re a horde. One reason, from the book’s footnote: communication paths grow much faster than the number of people, until communication breaks down.</p>
+  <p class="source-note">Illustrates Topic 49, Pragmatic Teams (pp. 437–438, Tip 84, and footnote 75 on p. 467). The pair count n(n − 1)/2 is the standard formula for the growth the footnote describes. Splitting into teams that talk through one liaison each is the vault’s model. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title" id="nt">People and their communication paths</p><svg class="net" id="net" viewBox="0 0 400 400" role="img"></svg>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Paths by group size</p><svg id="chart" role="img" aria-label="Communication paths by number of people"></svg></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="n"></div><div id="split" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Each new person adds a path to everyone already there</strong>: 10 people have 45 paths, 12 have 66, and 50 have 1,225.</li>
+    <li><strong>Small stable teams</strong> keep that number low enough that everyone can know and trust everyone else.</li>
+    <li><strong>Splitting a horde into teams</strong> cuts the paths sharply, but only if the teams are fully functional (Tip 86), so most work doesn’t need the paths between teams.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-pragmatic-projects.html"><small>Lesson</small>9. Pragmatic Projects</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
+        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    });
+  }
+
+  var log = Kit.log(document.getElementById("log"));
+  var cfg = { n: 8, t: 1 };
+  function pairs(n) { return n * (n - 1) / 2; }
+  function split(n, t) { var sizes = []; for (var i = 0; i < t; i++) sizes.push(Math.floor(n / t) + (i < n % t ? 1 : 0)); var inner = sizes.reduce(function (a, s) { return a + pairs(s); }, 0); return { sizes: sizes, inner: inner, cross: t > 1 ? pairs(t) : 0 }; }
+  function render() {
+    var n = cfg.n, t = Math.min(cfg.t, n), s = split(n, t), g = Kit.clear(document.getElementById("net")), pos = [], leads = [];
+    var idx = 0; s.sizes.forEach(function (sz, ti) { var cx = t === 1 ? 200 : 200 + 120 * Math.cos(2 * Math.PI * ti / t), cy = t === 1 ? 200 : 200 + 120 * Math.sin(2 * Math.PI * ti / t), R = t === 1 ? 170 : Math.min(70, 30 + sz * 3);
+      for (var j = 0; j < sz; j++) { pos.push({ x: cx + R * Math.cos(2 * Math.PI * j / sz), y: cy + R * Math.sin(2 * Math.PI * j / sz), team: ti, lead: j === 0 }); if (j === 0) leads.push(idx); idx++; } });
+    for (var a = 0; a < pos.length; a++) for (var b = a + 1; b < pos.length; b++) if (pos[a].team === pos[b].team) g.appendChild(Kit.svg("line", { x1: pos[a].x, y1: pos[a].y, x2: pos[b].x, y2: pos[b].y }));
+    if (t > 1) for (var i = 0; i < leads.length; i++) for (var j2 = i + 1; j2 < leads.length; j2++) g.appendChild(Kit.svg("line", { class: "x", x1: pos[leads[i]].x, y1: pos[leads[i]].y, x2: pos[leads[j2]].x, y2: pos[leads[j2]].y }));
+    pos.forEach(function (p) { g.appendChild(Kit.svg("circle", { class: p.lead && t > 1 ? "lead" : "", cx: p.x, cy: p.y, r: n > 40 ? 3.5 : 6 })); });
+    var total = t > 1 ? s.inner + s.cross : pairs(n);
+    g.setAttribute("aria-label", n + " people" + (t > 1 ? " in " + t + " teams" : "") + ", " + total + " communication paths");
+    document.getElementById("nt").textContent = n + " people" + (t > 1 ? " in " + t + " teams of " + s.sizes.join(", ") + " (liaisons in orange)" : "") + ": " + total + " paths";
+    var v = document.getElementById("verdict"), big = Math.max.apply(null, s.sizes); v.className = "callout " + (big <= 12 ? "ok" : big < 50 ? "warn" : "bad");
+    v.textContent = big <= 12 ? "A pragmatic team: small enough for everyone to know and trust everyone." : big >= 50 ? "A horde, not a team: " + pairs(big) + " paths inside one group." : "Bigger than the book’s 10–12: " + pairs(big) + " paths inside the largest group.";
+    var pts = []; for (var k = 1; k <= 60; k++) pts.push([k, pairs(k)]);
+    Kit.lineChart(document.getElementById("chart"), { xMax: 60, yMax: 1800, xLabel: "people in one group", yLabel: "paths", series: [{ label: "n(n − 1)/2", cls: "s1", points: pts }], bands: [{ from: 10, to: 12, label: "10–12" }], marks: [{ x: 50, label: "horde" }, { x: n, label: "you" }] });
+    stats([["People", n], ["Paths (one group)", pairs(n), n > 12 ? "bad" : "ok"], ["Paths with teams", total, total < pairs(n) ? "ok" : ""], ["Largest group", big]]);
+  }
+  document.getElementById("n").appendChild(Kit.slider({ label: "People", min: 2, max: 60, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; render(); if (v === 13) log.add("13 people: past the book’s 10–12.", "warn"); if (v === 50) log.add("50 people: a horde.", "bad"); } }).element);
+  document.getElementById("split").appendChild(Kit.slider({ label: "Split into teams", min: 1, max: 8, step: 1, value: 1, onInput: function (v) { cfg.t = v; render(); log.add(v === 1 ? "One group" : "Split into " + v + " teams", "muted"); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How big is a pragmatic team, according to the book?",
+      options: ["Under 10–12 people", "About 50", "As big as the project needs"], answer: 0,
+      explain: "p. 437." },
+    { q: "How many pairwise communication paths does a team of 10 have?",
+      options: ["10", "45", "100"], answer: 1,
+      explain: "10 × 9 / 2. The footnote on p. 467 describes this growth." },
+    { q: "Why does the book want teams to be stable as well as small?",
+      options: ["To cut costs", "So that everyone knows, trusts and depends on each other", "To simplify payroll"], answer: 1,
+      explain: "pp. 437–438." }
+  ]);
+})();
+</script>
+</body>
+</html>
