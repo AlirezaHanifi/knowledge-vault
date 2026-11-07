@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Levels and Salary Bands</title>
+<meta name="description" content="Choose few wide overlapping levels or many narrow ones, starting from the book&#x27;s example bands, and see how promotion pace, overlap and pay spread change. Illustrates The Manager&#x27;s Path, Chapter 9.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.bands { width: 100%; display: block; } .bands rect.b { fill: var(--accent-soft); stroke: var(--s1); stroke-width: 1.5; } .bands rect.bp { fill: var(--warn-soft); stroke: var(--s2); stroke-width: 2; }
+  .bands line.me { stroke: var(--s3); stroke-width: 2.5; } .bands text { font-size: 12px; } .bands line.g { stroke: var(--line); }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-bootstrapping-culture.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Salary bands</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · Bootstrapping Culture</div>
+  <h1>Levels and salary bands</h1>
+  <p class="lede">Each level of a career ladder has a salary band. <strong>Many early levels with narrow bands</strong> let you promote people every year and keep pay at a level close together; <strong>few levels with wide, overlapping bands</strong> make levels clearly distinct and let strong people be paid well without a promotion.</p>
+  <p class="source-note">Illustrates “Writing a Career Ladder” (pp. 205–207). The “few levels” bands start from the book’s example — software engineer $50–100K, senior $80–150K (p. 206); the other levels and the whole “many levels” ladder are invented. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Salary bands by level ($K)</p><svg class="bands" id="bands" viewBox="0 0 520 260" role="img"></svg>
+        <p class="field-hint">Orange outline: the breakpoint level, where someone can stay indefinitely · green line: the engineer below.</p>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="shape"></div><div id="pay" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>With wide overlapping bands</strong>, a strong engineer can earn more than a new senior engineer without being promoted — the book’s example, $50–100K against $80–150K.</li>
+    <li><strong>With narrow bands</strong>, people at a level are paid alike, which helps avoid bias, but adjacent levels are hard to tell apart.</li>
+    <li><strong>The breakpoint level</strong> (often senior engineer) is where people can stay; expect them to cluster there, and keep the keystone promotions above it rare and celebrated.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-bootstrapping-culture.html"><small>Lesson</small>9. Bootstrapping Culture</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var L = {
+    few: { label: "Few, wide, overlapping", bp: 1, lv: [["Software Engineer", 50, 100], ["Senior Engineer", 80, 150], ["Staff Engineer", 130, 200], ["Principal Engineer", 180, 260]] },
+    many: { label: "Many, narrow", bp: 4, lv: [["Engineer I", 50, 60], ["Engineer II", 58, 70], ["Engineer III", 68, 82], ["Engineer IV", 80, 96], ["Senior Engineer", 94, 120], ["Staff Engineer", 118, 150], ["Senior Staff", 148, 190], ["Principal Engineer", 185, 260]] }
+  };
+  var cfg = { s: "few", pay: 95 }, prevLevel = null;
+  function render() {
+    var d = L[cfg.s], g = Kit.clear(document.getElementById("bands")), n = d.lv.length, X = function (k) { return 130 + (k - 40) / 230 * 375; }, h = Math.min(40, 220 / n - 6);
+    for (var k = 50; k <= 250; k += 50) { g.appendChild(Kit.svg("line", { class: "g", x1: X(k), x2: X(k), y1: 4, y2: 236 })); g.appendChild(Kit.svg("text", { x: X(k), y: 252, "text-anchor": "middle", class: "muted" }, "$" + k + "K")); }
+    var over = 0, spread = 0, fits = [];
+    d.lv.forEach(function (l, i) { var y = 8 + i * (220 / n);
+      g.appendChild(Kit.svg("rect", { class: i === d.bp ? "bp" : "b", x: X(l[1]), y: y, width: X(l[2]) - X(l[1]), height: h, rx: 4 }));
+      g.appendChild(Kit.svg("text", { x: 126, y: y + h / 2 + 4, "text-anchor": "end" }, l[0] + (i === d.bp ? " ◆" : "")));
+      spread += (l[2] - l[1]) / l[1]; if (i && d.lv[i - 1][2] > l[1]) over++;
+      if (cfg.pay >= l[1] && cfg.pay <= l[2]) fits.push(l[0]); });
+    g.appendChild(Kit.svg("line", { class: "me", x1: X(cfg.pay), x2: X(cfg.pay), y1: 2, y2: 238 }));
+    g.setAttribute("aria-label", d.label + " ladder with " + n + " levels; a salary of $" + cfg.pay + "K falls in: " + (fits.join(", ") || "no band"));
+    var toBp = d.bp, v = document.getElementById("verdict");
+    v.className = "callout " + (fits.length > 1 ? "ok" : fits.length ? "" : "warn");
+    v.textContent = "$" + cfg.pay + "K is " + (fits.length ? "within the band for " + fits.join(" and ") + "." : "outside every band.") + (fits.length > 1 ? " Overlap: this salary is valid at more than one level, so a strong engineer can be paid well without a promotion." : "");
+    if (prevLevel !== null && prevLevel !== fits.join()) log.add("$" + cfg.pay + "K: " + (fits.join(" / ") || "no band"), "muted"); prevLevel = fits.join();
+    stats([["Levels", n], ["Promotions to the breakpoint", toBp, toBp >= 3 ? "ok" : ""], ["Overlapping neighbours", over + " of " + (n - 1)], ["Average band width", Math.round(spread / n * 100) + "% of its minimum"]]);
+  }
+  document.getElementById("shape").appendChild(Kit.segmented({ label: "Ladder shape", value: cfg.s, options: [{ value: "few", label: L.few.label }, { value: "many", label: L.many.label }], onChange: function (v) { cfg.s = v; prevLevel = null; log.add("Ladder: " + L[v].label, "muted"); render(); } }).element);
+  document.getElementById("pay").appendChild(Kit.slider({ label: "An engineer’s salary", min: 50, max: 260, step: 5, value: cfg.pay, format: function (v) { return "$" + v + "K"; }, onInput: function (v) { cfg.pay = v; render(); } }).element);
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What do many early levels with narrow bands make possible?", options: ["Paying strong performers far above their level", "Promoting people every year for their first two or three years", "Skipping performance reviews"], answer: 1, explain: "p. 205." },
+    { q: "In the book’s example, a software engineer earns $50–100K and a senior $80–150K. What does the overlap allow?", options: ["A strong engineer can earn more than some seniors without a promotion", "Seniors can be demoted", "Nothing — overlap is a mistake"], answer: 0, explain: "p. 206." },
+    { q: "What is a breakpoint level?", options: ["The level where people are fired", "The lowest level where someone can stay indefinitely without underperforming", "The highest level on the ladder"], answer: 1, explain: "Often senior engineer (p. 206)." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

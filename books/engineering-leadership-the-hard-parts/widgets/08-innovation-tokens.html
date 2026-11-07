@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Innovation Tokens</title>
+<meta name="description" content="Build April&#x27;s StudioOps stack from boring and shiny choices with about three innovation tokens to spend, and see whether the tokens go to what differentiates the business. Illustrates Engineering Leadership: The Hard Parts, Chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.layer { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 10px; background: var(--surface); }
+  .layer legend { font-weight: 600; font-size: .92rem; padding: 0 4px; } .layer label { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; font-size: .9rem; }
+  .tok { font-size: .78rem; color: var(--ink-3); white-space: nowrap; } .meter { display: flex; gap: 6px; margin: 4px 0 8px; }
+  .meter span { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; font-size: .8rem; font-weight: 700; }
+  .meter span.used { background: var(--accent); border-color: var(--accent-ink); color: var(--surface); } .meter span.over { background: var(--bad); border-color: var(--bad); color: var(--surface); }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-technical-principles-and-strategy.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Innovation tokens</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · Technical Principles and Strategy</div>
+  <h1>Innovation tokens</h1>
+  <p class="lede">In Dan McKinley’s model, which the book quotes, a company gets <strong>about three innovation tokens</strong>, and every technology choice that isn’t boring spends one. Choose a stack for April’s team and see where your tokens go: on what differentiates the business, or on making authentication 30 ms faster.</p>
+  <p class="source-note">Illustrates “Scaling Without Overengineering” and “Choose Boring Technology”, pp. 158–162, including April’s database consolidation (p. 159) and Rust proposal (p. 162). The choices come from the book; their token costs follow McKinley’s examples and the authors’ update (Kubernetes and service meshes now count) — the token prices for the five-database mix and a homegrown database are the vault’s.</p>
+
+  <div class="sim stack">
+    <div id="layers" class="stack"></div>
+    <div class="panel"><p class="panel-title">Tokens spent</p><div class="meter" id="meter" role="img"></div><div id="verdict" class="callout" aria-live="polite"></div></div>
+    <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>Boring isn’t bad. PostgreSQL, Python and cron are boring <em>and</em> good — you already know how they fail.</li>
+    <li>April spends her tokens where customers notice: the animation rendering engine and real-time collaboration. That leaves nothing for a Rust rewrite customers never asked for.</li>
+    <li>Every non-boring choice brings operational overhead, a smaller hiring pool and more for juniors to learn — the cost isn’t paid once, it’s paid every day.</li>
+    <li>A new technology should create measurable value — lower costs, faster development, a bigger market, happier customers or new revenue. If you can’t say which, you’re probably spending a token unwisely.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-technical-principles-and-strategy.html"><small>Lesson</small>8. Technical Principles and Strategy</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var log = Kit.log(document.getElementById("log"));
+  var L = [
+    ["Animation rendering", [["Custom rendering engine — the product’s competitive advantage", 1, true], ["Off-the-shelf renderer", 0, false]]],
+    ["Collaboration", [["Real-time collaboration features — a differentiator", 1, true], ["Share-by-export only", 0, false]]],
+    ["Authentication service", [["Keep Node.js; spend a week optimizing hot paths (p99 50 → 35 ms)", 0, false], ["Rewrite in Rust (p99 maybe 20 ms; nobody on the team knows Rust)", 1, false]]],
+    ["Data", [["PostgreSQL for everything except caching (keep Redis)", 0, false], ["MongoDB, PostgreSQL, Redis, Elasticsearch and DynamoDB — each senior’s favourite", 2, false], ["Write our own database", 3, false]]],
+    ["Platform", [["Managed cloud services", 0, false], ["Kubernetes", 1, false], ["Kubernetes and a service mesh", 2, false]]]
+  ];
+  var pick = [0, 0, 0, 0, 0], box = document.getElementById("layers");
+  L.forEach(function (l, i) {
+    var fs = Kit.el("fieldset", { class: "layer" }, Kit.el("legend", null, l[0]));
+    l[1].forEach(function (o, j) {
+      var id = "o" + i + "-" + j, r = Kit.el("input", { type: "radio", name: "l" + i, id: id, value: String(j) }); if (j === pick[i]) r.checked = true;
+      r.addEventListener("change", function () { pick[i] = j; log.add(l[0] + ": " + o[0].split(" — ")[0].split(" (")[0] + (o[1] ? " (" + o[1] + " token" + (o[1] > 1 ? "s" : "") + ")" : " (boring)"), o[1] ? (o[2] ? "ok" : "warn") : "muted"); render(); });
+      fs.appendChild(Kit.el("label", { for: id }, r, Kit.el("span", null, o[0], " ", Kit.el("span", { class: "tok" }, o[1] ? "· " + o[1] + " token" + (o[1] > 1 ? "s" : "") : "· boring"))));
+    });
+    box.appendChild(fs);
+  });
+  function render() {
+    var spent = 0, diff = 0, waste = [];
+    L.forEach(function (l, i) { var o = l[1][pick[i]]; spent += o[1]; if (o[1]) { if (o[2]) diff += o[1]; else waste.push(l[0]); } });
+    var m = Kit.clear(document.getElementById("meter")), n = Math.max(3, spent);
+    for (var k = 0; k < n; k++) m.appendChild(Kit.el("span", { class: k < spent ? (k < 3 ? "used" : "over") : "" }, String(k + 1)));
+    m.setAttribute("aria-label", spent + " of about 3 innovation tokens spent");
+    var v = document.getElementById("verdict");
+    if (spent > 3) { v.className = "callout bad"; v.textContent = spent + " tokens — more than the wallet holds. " + (waste.length ? "Tokens on " + waste.join(", ") + " don’t differentiate the business; that’s where to go back to boring." : "Even differentiators can overdraw the wallet."); }
+    else if (waste.length) { v.className = "callout warn"; v.textContent = spent + " of about 3 tokens, but some go to " + waste.join(", ") + ", which doesn’t differentiate the business. Is that where you want your limited attention?"; }
+    else if (spent === 0) { v.className = "callout"; v.textContent = "No tokens spent. Safe — but are you investing anywhere that makes the product different?"; }
+    else { v.className = "callout ok"; v.textContent = spent + " of about 3 tokens, all on what differentiates the business — April’s choice. Everything else stays boring."; }
+  }
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "In McKinley’s model, roughly how many innovation tokens does a company get?", options: ["One", "About three", "One per team"], answer: 1, explain: "pp. 160–161." },
+    { q: "Why did April’s team consolidate onto PostgreSQL (keeping Redis)?", options: ["PostgreSQL is perfect", "To cut operational complexity — the AWS bill fell from $45,000 to $31,000 a month", "Because MongoDB is bad"], answer: 1, explain: "p. 159." },
+    { q: "Which choice would the authors now put in the token bucket?", options: ["Python", "Cron", "Kubernetes"], answer: 2, explain: "p. 161." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whole Year or Last Two Months?</title>
+<meta name="description" content="A year of observed work, scored once from memory that favours recent months and once from running 1-1 notes, to see how recency changes a review. Illustrates The Manager&#x27;s Path, Chapter 4.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style></style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-managing-people.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Review recency</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Managing People</div>
+  <h1>Whole year or last two months?</h1>
+  <p class="lede">A performance review should <strong>account for the whole year</strong>, not the last couple of months. Keep running 1-1 notes, or reconstruct the year month by month from email and launches, so early wins and growth since then both get credit.</p>
+  <p class="source-note">Illustrates “Writing and Delivering a Performance Review” (pp. 64–65). The monthly scores and the exponential memory curve are invented, a simple model of recency bias; the book doesn’t quantify it. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">A year of work (1–5) and how much each month weighs in memory</p>
+        <svg id="chart" role="img"></svg>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="prof"></div><div id="tau" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>A strong first half fades from memory</strong>: an engineer who shipped the year’s biggest project in spring is rated on a quiet autumn.</li>
+    <li><strong>A late bloomer is flattered</strong> — memory rates the person they became, not the year they had.</li>
+    <li><strong>Notes make every month count equally</strong>. The longer your memory’s reach (the slider), the smaller the gap, but nobody remembers twelve months evenly.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-managing-people.html"><small>Lesson</small>4. Managing People</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var PROFILES = {
+    early: { label: "Strong start", s: [4.6, 4.8, 4.9, 4.7, 4.5, 4.2, 3.4, 3.1, 3.0, 3.2, 3.0, 3.1] },
+    steady: { label: "Steady", s: [3.8, 3.9, 4.0, 3.7, 3.9, 4.0, 3.8, 3.9, 4.1, 3.8, 3.9, 4.0] },
+    late: { label: "Late bloomer", s: [2.6, 2.8, 2.7, 3.0, 3.1, 3.3, 3.6, 3.9, 4.2, 4.5, 4.6, 4.7] }
+  };
+  var cfg = { p: "early", tau: 2 };
+  function render() {
+    var s = PROFILES[cfg.p].s, w = s.map(function (_, i) { return Math.exp(-(11 - i) / cfg.tau); }), sw = w.reduce(function (a, b) { return a + b; }, 0);
+    var mem = s.reduce(function (a, x, i) { return a + x * w[i]; }, 0) / sw, notes = s.reduce(function (a, b) { return a + b; }, 0) / 12;
+    var recent = w.slice(10).reduce(function (a, b) { return a + b; }, 0) / sw;
+    Kit.lineChart(document.getElementById("chart"), { xMin: 1, xMax: 12, yMax: 5, xTicks: 11, yTicks: 5, xLabel: "month", yLabel: "score / weight",
+      series: [{ label: "monthly score", cls: "s1", dots: true, points: s.map(function (x, i) { return [i + 1, x]; }) },
+               { label: "memory weight (×5)", cls: "s2", points: w.map(function (x, i) { return [i + 1, x / Math.max.apply(null, w) * 5]; }) }] });
+    document.getElementById("chart").setAttribute("aria-label", PROFILES[cfg.p].label + " year: notes average " + notes.toFixed(2) + ", memory average " + mem.toFixed(2));
+    var d = mem - notes, v = document.getElementById("verdict");
+    v.className = "callout " + (Math.abs(d) < 0.15 ? "ok" : Math.abs(d) < 0.5 ? "warn" : "bad");
+    v.textContent = Math.abs(d) < 0.15 ? "Memory and notes agree: recency hardly matters for a steady year." : "Memory " + (d < 0 ? "underrates" : "overrates") + " this year by " + Math.abs(d).toFixed(2) + " points; the last two months carry " + Math.round(recent * 100) + "% of the weight.";
+    stats([["Rating from notes", notes.toFixed(2)], ["Rating from memory", mem.toFixed(2), Math.abs(d) >= 0.5 ? "bad" : ""], ["Gap", (d >= 0 ? "+" : "") + d.toFixed(2)], ["Weight on last 2 months", Math.round(recent * 100) + "%"]]);
+  }
+  document.getElementById("prof").appendChild(Kit.segmented({ label: "The year", value: cfg.p, options: Object.keys(PROFILES).map(function (k) { return { value: k, label: PROFILES[k].label }; }), onChange: function (v) { cfg.p = v; log.add("Year: " + PROFILES[v].label, "muted"); render(); } }).element);
+  document.getElementById("tau").appendChild(Kit.slider({ label: "Memory’s reach", min: 1, max: 12, step: 1, value: cfg.tau, unit: " months", hint: "How far back a month still weighs about a third as much as this month", onInput: function (v) { cfg.tau = v; render(); } }).element);
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What should a performance review cover?", options: ["The last couple of months", "The whole year", "Only the last project"], answer: 1, explain: "p. 65." },
+    { q: "How does the book suggest you capture the whole year?", options: ["Ask the employee to write it", "Keep running 1-1 notes, or reconstruct month by month from email and launches", "Use only peer feedback"], answer: 1, explain: "p. 65." },
+    { q: "In this model, whose rating does recency hurt most?", options: ["The steady performer", "The strong starter", "The late bloomer"], answer: 1, explain: "Their best months are the oldest, so memory weighs them least." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drift Diagnostic</title>
+<meta name="description" content="Tick the signs of drift you see; the book&#x27;s Table 5-1 gives the likely root causes, one action for this week and the practice that keeps drift away. Illustrates Engineering Leadership: The Hard Parts, Chapter 5.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.sign { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .plan { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; margin-top: 8px; background: var(--surface); font-size: .9rem; }
+  .plan h3 { margin: 0 0 6px; font-size: .95rem; } .plan dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 10px; } .plan dt { color: var(--ink-3); } .plan dd { margin: 0; }
+  @media (max-width: 520px) { .plan dl { grid-template-columns: 1fr; } }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/05-setting-direction.html">Chapter 5</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Drift diagnostic</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 5 · Setting Direction</div>
+  <h1>Drift diagnostic</h1>
+  <p class="lede">Drift looks like momentum from outside and feels like motion without meaning from inside. Tick the signs you recognise. <strong>Two or more</strong> mean the team has lost focus — then choose <strong>one</strong> immediate action and do it this week.</p>
+  <p class="source-note">Illustrates “Table 5-1. The drift diagnostic” (p. 77) and its two-or-more rule (p. 78). The signs, causes, actions and practices are the book’s; the interactive form is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim stack">
+    <fieldset class="panel"><legend class="panel-title">Which of these do you see on your team?</legend><div id="signs"></div></fieldset>
+    <div id="verdict" class="callout" aria-live="polite"></div>
+    <div class="panel"><p class="panel-title">What the table says</p><div id="plans"><p class="field-hint">Tick a sign to see its root cause, immediate action and sustained practice.</p></div>
+      <div id="pickwrap" style="margin-top:10px" hidden><label for="pick">Your one action this week</label><br><select id="pick"></select></div>
+    </div>
+    <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>Every sign is a symptom of a decision someone avoided — too many priorities, a tough call not made, trade-offs not named.</li>
+    <li>Immediate actions are small and concrete (one six-week goal, a “stop doing” list); sustained practices keep drift from returning.</li>
+    <li>The book’s rule is one action <em>this week</em>, not a programme: even several signs call for one move first.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/05-setting-direction.html"><small>Lesson</small>5. Setting Direction</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var log = Kit.log(document.getElementById("log"));
+  var T = [
+    ["People say “We’ll circle back,” but never do", "Too many competing priorities, no clear focus", "Choose one main goal for the next six weeks", "Track all work visibly; untracked work gets deprioritized"],
+    ["Teams constantly ask “What should we work on first?”", "Leadership avoiding tough priority calls", "Make a clear priority decision and explain your reasoning", "Communicate priorities repeatedly until the message sticks"],
+    ["Work gets completed but doesn’t build toward anything", "Reacting to whatever seems urgent instead of following a plan", "Create an explicit “stop doing” list", "Review every meeting’s purpose before it happens"],
+    ["The best team members start looking elsewhere", "Important decisions stuck because everyone needs to agree", "Share regular updates on what you’re building and why", "Create safe ways to disagree and ask hard questions"],
+    ["The same arguments resurface in every planning session", "Decisions made without acknowledging what’s given up", "Name what you’re not doing", "Follow up after decisions to keep commitment strong"]
+  ];
+  var on = T.map(function () { return false; }), box = document.getElementById("signs"), pick = document.getElementById("pick");
+  T.forEach(function (t, i) {
+    var id = "d" + i, cb = Kit.el("input", { type: "checkbox", id: id });
+    cb.addEventListener("change", function () { on[i] = cb.checked; log.add((cb.checked ? "Seen: " : "Cleared: ") + t[0], cb.checked ? "warn" : "muted"); render(); });
+    box.appendChild(Kit.el("div", { class: "sign" }, cb, Kit.el("label", { for: id }, t[0])));
+  });
+  pick.addEventListener("change", function () { if (pick.value !== "") { log.add("This week: " + T[+pick.value][2], "ok"); verdict(); } });
+  function verdict() {
+    var n = on.filter(Boolean).length, v = document.getElementById("verdict");
+    if (n === 0) { v.className = "callout"; v.textContent = "No signs ticked."; }
+    else if (n === 1) { v.className = "callout"; v.textContent = "One sign: worth watching, but not yet the book’s threshold for lost focus."; }
+    else { v.className = "callout " + (pick.value !== "" ? "ok" : "warn"); v.textContent = n + " signs: by the book’s rule the team has lost focus. " + (pick.value !== "" ? "This week: " + T[+pick.value][2].toLowerCase() + "." : "Choose one immediate action and do it this week."); }
+  }
+  function render() {
+    var pl = Kit.clear(document.getElementById("plans")), prev = pick.value; Kit.clear(pick);
+    pick.appendChild(Kit.el("option", { value: "" }, "Choose one…"));
+    T.forEach(function (t, i) {
+      if (!on[i]) return;
+      pl.appendChild(Kit.el("div", { class: "plan" }, Kit.el("h3", null, t[0]), Kit.el("dl", null,
+        Kit.el("dt", null, "Root cause"), Kit.el("dd", null, t[1]), Kit.el("dt", null, "Immediate action"), Kit.el("dd", null, t[2]), Kit.el("dt", null, "Sustained practice"), Kit.el("dd", null, t[3]))));
+      pick.appendChild(Kit.el("option", { value: String(i) }, t[2]));
+    });
+    if (!on.some(Boolean)) pl.appendChild(Kit.el("p", { class: "field-hint" }, "Tick a sign to see its root cause, immediate action and sustained practice."));
+    pick.value = prev !== "" && on[+prev] ? prev : "";
+    document.getElementById("pickwrap").hidden = on.filter(Boolean).length < 2;
+    verdict();
+  }
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How many signs from the diagnostic mean a team has lost focus?", options: ["One", "Two or more", "All five"], answer: 1, explain: "p. 78." },
+    { q: "Work keeps getting done but builds toward nothing. What is the table’s immediate action?", options: ["Hire more people", "Create an explicit “stop doing” list", "Add a weekly status report"], answer: 1, explain: "The root cause is reacting to whatever seems urgent (p. 77)." },
+    { q: "The same arguments resurface in every planning session. Why, according to the table?", options: ["Decisions were made without acknowledging what’s given up", "The team is lazy", "Planning sessions are too short"], answer: 0, explain: "Name what you’re not doing (p. 77)." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

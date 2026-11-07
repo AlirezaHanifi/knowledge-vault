@@ -14,6 +14,8 @@ Technical books turned into interactive lessons. For each book there is one fold
 | [Database Internals](books/database-internals/README.md) | Alex Petrov |
 | [Think Distributed Systems](books/think-distributed-systems/README.md) | Dominik Tornow |
 | [The Pragmatic Programmer](books/the-pragmatic-programmer/README.md) | David Thomas, Andrew Hunt |
+| [The Manager's Path](books/the-managers-path/README.md) | Camille Fournier |
+| [Engineering Leadership: The Hard Parts](books/engineering-leadership-the-hard-parts/README.md) | Juan Pablo Buriticá, James Turnbull |
 
 ## Layout
 

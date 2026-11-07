@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pilot, Medic or Engineer?</title>
+<meta name="description" content="Tell burnout from resistance by its signals, then choose the leadership mode — pilot, medic or engineer — for situations drawn from the book. Illustrates Engineering Leadership: The Hard Parts, Chapter 3.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.item { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
+  .item .badge { grid-column: 1 / -1; justify-self: start; white-space: normal; } .item select { max-width: 12em; }
+  .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .modes .cell { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; font-size: .84rem; background: var(--surface); }
+  .modes h3 { margin: 0 0 4px; font-size: .9rem; } @media (max-width: 560px) { .modes { grid-template-columns: 1fr; } }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-navigating-chaos.html">Chapter 3</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Leadership modes</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 3 · Navigating Chaos</div>
+  <h1>Pilot, medic or engineer?</h1>
+  <p class="lede">Range means switching on purpose. First read the signals — <strong>burnout often masquerades as resistance</strong>, and the two need opposite responses. Then pick the mode each moment needs: <strong>pilot</strong> to zoom out, <strong>medic</strong> to stabilize, <strong>engineer</strong> to get into the work.</p>
+  <p class="source-note">Illustrates “Four Lenses for Reading Context” (p. 39) and “Shift Between Roles” (pp. 51–56). The signals, modes and situations are the book’s, including April’s post-incident meeting (p. 56); the sorting exercise is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="tabs" id="tabs">
+    <div role="tablist" aria-label="Exercise">
+      <button role="tab" id="t1" aria-controls="p1" aria-selected="true" type="button">1 · Burnout or resistance?</button>
+      <button role="tab" id="t2" aria-controls="p2" aria-selected="false" type="button">2 · Choose the mode</button>
+    </div>
+    <div role="tabpanel" id="p1" aria-labelledby="t1"></div>
+    <div role="tabpanel" id="p2" aria-labelledby="t2" hidden></div>
+  </div>
+  <div class="panel" style="margin-top:12px"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>Resistance is loud — pushback and vocal concerns. Burnout is quiet — withdrawal, slipping quality, compliance with nothing behind it.</li>
+    <li>Treating burnout as resistance (selling the vision harder) piles on more load; the book’s answer is to protect capacity: slow down, cut scope, allow recovery.</li>
+    <li>One meeting can need all three modes. April moves from pilot to medic to engineer as the conversation changes — and the team needs to know <em>why</em> you switched.</li>
+    <li>Each mode backfires when overused: a pilot feels distant to an overwhelmed team, an engineer undermines autonomy, and medic work can become unequal emotional labour.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-navigating-chaos.html"><small>Lesson</small>3. Navigating Chaos</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var log = Kit.log(document.getElementById("log"));
+  function opts(sel, list) { sel.appendChild(Kit.el("option", { value: "" }, "Choose…")); list.forEach(function (o) { sel.appendChild(Kit.el("option", { value: o[0] }, o[1])); }); }
+  // Part 1
+  var p1 = document.getElementById("p1");
+  p1.appendChild(Kit.el("p", { style: "margin-top:12px" }, "Which does each signal suggest? (Table 3-2 and p. 39)"));
+  var S = [["Active pushback in planning", "r"], ["Engineers voicing concerns about the new direction", "r"], ["People going quiet in meetings that used to be lively", "b"],
+           ["Declining code quality from strong engineers", "b"], ["Everyone agrees, nothing changes — hollow compliance", "b"], ["Debate about whether the plan is the right one", "r"]];
+  var LBL = { r: "Resistance", b: "Burnout" }, RESP = { r: "clarify the vision and rebuild buy-in", b: "protect capacity — slow down, reduce scope, allow recovery" };
+  var tally = { ok: 0, done: {} }, sum = Kit.el("div", { class: "callout", "aria-live": "polite" }, "Sort all six signals.");
+  S.forEach(function (s, i) {
+    var id = "s" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "not sorted"); opts(sel, [["r", "Resistance"], ["b", "Burnout"]]);
+    sel.addEventListener("change", function () {
+      if (!sel.value) return; var ok = sel.value === s[1]; tally.done[i] = ok;
+      b.className = "badge " + (ok ? "ok" : "bad"); b.textContent = (ok ? "✓ " : "✗ the book reads this as ") + LBL[s[1]].toLowerCase() + " → " + RESP[s[1]];
+      log.add(s[0] + ": " + LBL[s[1]], ok ? "ok" : "bad");
+      var n = Object.keys(tally.done).length, c = Object.keys(tally.done).filter(function (k) { return tally.done[k]; }).length;
+      sum.className = "callout " + (n === S.length ? (c === n ? "ok" : "warn") : "");
+      sum.textContent = n === S.length ? c + " of " + n + " match the book. The same symptom of “not moving” can need opposite interventions." : c + " of " + n + " sorted signals match the book.";
+    });
+    p1.appendChild(Kit.el("div", { class: "item" }, Kit.el("label", { for: id }, s[0]), sel, b));
+  });
+  p1.appendChild(sum);
+  // Part 2
+  var p2 = document.getElementById("p2");
+  var M = { pilot: ["Pilot", "Zoom out for direction", "Priorities unclear; tactical debates; competing stakeholders"], medic: ["Medic", "Stabilize and rebuild trust", "Tension rising; someone burned out or isolated; a hard decision just landed"], engineer: ["Engineer", "Get into the work", "Momentum stalled despite clarity; details blocking; the team needs you with them"] };
+  var grid = Kit.el("div", { class: "modes", style: "margin-top:12px" });
+  Object.keys(M).forEach(function (k) { grid.appendChild(Kit.el("div", { class: "cell" }, Kit.el("h3", null, M[k][0] + " — " + M[k][1]), Kit.el("span", null, "Use when: " + M[k][2]))); });
+  p2.appendChild(grid);
+  var C = [
+    ["An architecture discussion has gone in circles for three meetings.", "pilot", "Reframe it around user impact and surface the real trade-offs (p. 52)."],
+    ["A quiet senior engineer has gone silent since the third scope change this month.", "medic", "Check in privately — they may be overwhelmed by the scope changes (p. 53)."],
+    ["Everyone agrees on the migration plan, but it hasn’t moved in two weeks.", "engineer", "Get into the work — the book’s example is pairing with a junior developer on a complex migration (p. 54)."],
+    ["April’s post-incident meeting opens: the business wants timelines.", "pilot", "She starts by framing the outage and the infrastructure needs (p. 56)."],
+    ["Tension rises between product and the defensive senior engineers.", "medic", "She acknowledges the stress and the team’s capacity (p. 56)."],
+    ["The discussion stalls on which fixes come first.", "engineer", "She gets into the detail and maps the fixes (p. 56)."]
+  ];
+  C.forEach(function (c, i) {
+    var id = "c" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "no mode chosen");
+    opts(sel, Object.keys(M).map(function (k) { return [k, M[k][0]]; }));
+    sel.addEventListener("change", function () {
+      if (!sel.value) return; var ok = sel.value === c[1];
+      b.className = "badge " + (ok ? "ok" : "warn"); b.textContent = (ok ? "✓ " : "The book’s choice: " + M[c[1]][0] + ". ") + c[2];
+      log.add((i >= 3 ? "April’s meeting: " : "") + M[sel.value][0] + (ok ? " — matches" : " — book says " + M[c[1]][0]), ok ? "ok" : "warn");
+    });
+    if (i === 3) p2.appendChild(Kit.el("p", { class: "panel-title", style: "margin-top:14px" }, "One meeting, three switches — April’s post-incident meeting"));
+    p2.appendChild(Kit.el("div", { class: "item" }, Kit.el("label", { for: id }, c[0]), sel, b));
+  });
+  Kit.tabs(document.getElementById("tabs"));
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "A once-lively team goes quiet and quality slips. What does the book suggest first?", options: ["Re-sell the vision", "Protect capacity: slow down, reduce scope, allow recovery", "Add approval checkpoints"], answer: 1, explain: "These are burnout signals, which masquerade as resistance (p. 39)." },
+    { q: "When does pilot mode backfire?", options: ["When priorities are unclear", "When the team is overwhelmed by operational problems", "When stakeholders compete"], answer: 1, explain: "p. 53." },
+    { q: "What does the switching skill include besides choosing a mode?", options: ["Hiding the switch", "Letting the team know why you changed approach", "Sticking to one style for consistency"], answer: 1, explain: "Switching has costs; explain it (p. 54)." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

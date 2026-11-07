@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Senior Role Is This?</title>
+<meta name="description" content="Tick the building blocks a senior technology job involves and see which of the book&#x27;s combinations and titles match. Illustrates The Manager&#x27;s Path, Chapter 8.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.roles label.check { margin: 6px 0; } .combo { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; margin-bottom: 8px; background: var(--surface); }
+  .combo.best { border-color: var(--accent); background: var(--accent-soft); } .combo .ttl { font-weight: 600; } .combo .parts { font-size: .82rem; color: var(--ink-2); }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/08-the-big-leagues.html">Chapter 8</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Leadership roles</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 8 · The Big Leagues</div>
+  <h1>Which senior role is this?</h1>
+  <p class="lede">Rather than defining every title, the book lists <strong>seven roles senior technology leaders play</strong> and the combinations the author has seen, with their usual titles. Describe a job by its building blocks and see which combination it resembles.</p>
+  <p class="source-note">Illustrates “Models for Thinking About Tech Senior Leadership” (pp. 162–164). The roles, combinations and titles are the book’s; the matching score is the vault’s. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">The book’s combinations, best match first</p><div id="combos" aria-live="polite"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">What does the job involve?</p><div class="roles" id="roles"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="clear">Clear</button></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>The same title covers very different jobs.</strong> “CTO” appears in five of the seven combinations.</li>
+    <li><strong>Most strong CTOs keep a strategic function</strong> — business, technology or both (p. 164).</li>
+    <li><strong>Organization + execution</strong> is the core of the VP of Engineering; adding the business executive makes it a general manager’s job.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/08-the-big-leagues.html"><small>Lesson</small>8. The Big Leagues</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var log = Kit.log(document.getElementById("log"));
+  var R = [["rd", "Research and development", "Experimentation, research, new technology"], ["strat", "Technology strategy / visionary", "How technology grows the business"],
+           ["org", "Organization", "Staffing plans, org structure"], ["exec", "Execution", "Roadmaps, planning, breaking roadblocks"],
+           ["ext", "External face of technology", "Sales meetings, talks, engineering brand"], ["infra", "Infrastructure and technical operations", "All infrastructure and its operation"],
+           ["biz", "Business executive", "The business first; high-level prioritization"]];
+  var C = [[["biz", "strat", "org", "exec"], "CTO or Head of Engineering (VP/SVP)"], [["rd", "strat", "ext"], "CTO, Chief Scientist, Chief Architect, sometimes Chief Product Officer"],
+           [["org", "exec", "biz"], "VP of Engineering, General Manager"], [["infra", "org", "exec"], "CTO/CIO, possibly VP of Technical Operations"],
+           [["strat", "biz", "exec"], "Head of Product / Chief Product Officer, sometimes CTO"], [["rd", "biz"], "CTO or Chief Scientist, cofounder"],
+           [["org", "exec"], "VP of Engineering, sometimes Chief of Staff"]];
+  var on = {}, boxes = [], name = {}; R.forEach(function (r) { name[r[0]] = r[1]; });
+  var mount = document.getElementById("roles");
+  R.forEach(function (r) { var cb = Kit.el("input", { type: "checkbox", value: r[0] }); boxes.push(cb);
+    cb.addEventListener("change", function () { on[r[0]] = cb.checked; log.add((cb.checked ? "Added: " : "Removed: ") + r[1], "muted"); render(); });
+    mount.appendChild(Kit.el("label", { class: "check" }, cb, Kit.el("span", null, Kit.el("strong", null, r[1]), " — " + r[2]))); });
+  document.getElementById("clear").addEventListener("click", function () { boxes.forEach(function (b) { b.checked = false; }); on = {}; log.add("Cleared", "muted"); render(); });
+  function render() {
+    var sel = R.filter(function (r) { return on[r[0]]; }).map(function (r) { return r[0]; });
+    var scored = C.map(function (c) { var hit = c[0].filter(function (k) { return on[k]; }).length, union = sel.length + c[0].length - hit; return { c: c, hit: hit, j: union ? hit / union : 0 }; });
+    scored.sort(function (a, b) { return b.j - a.j; });
+    var m = Kit.clear(document.getElementById("combos"));
+    if (!sel.length) m.appendChild(Kit.el("p", { class: "field-hint" }, "Tick the roles on the right; combinations are ranked by overlap."));
+    scored.forEach(function (s, i) {
+      var exact = s.hit === s.c[0].length && s.c[0].length === sel.length, best = sel.length && i === 0 && s.j > 0;
+      m.appendChild(Kit.el("div", { class: "combo" + (best ? " best" : "") },
+        Kit.el("div", { class: "ttl" }, s.c[1], " ", sel.length ? Kit.el("span", { class: "badge " + (exact ? "ok" : s.hit ? "warn" : "") }, exact ? "exact match" : s.hit + " of " + s.c[0].length + " roles") : null),
+        Kit.el("div", { class: "parts" }, s.c[0].map(function (k) { return (on[k] ? "✓ " : "") + name[k]; }).join(" + "))));
+    });
+  }
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "Which combination does the book associate with the VP of Engineering, sometimes Chief of Staff?", options: ["R&D + business executive", "Organization + execution", "Infrastructure + external face"], answer: 1, explain: "p. 164." },
+    { q: "What do most strong CTOs keep, according to the book?", options: ["Direct reports in every team", "A strategic function — business, technology or both", "Ownership of infrastructure"], answer: 1, explain: "p. 164." },
+    { q: "Why does the book list roles instead of defining titles?", options: ["Titles are illegal to define", "The same title covers different combinations, and companies need different ones", "Roles pay better"], answer: 1, explain: "p. 162." }
+  ]);
+
+})();
+</script>
+</body>
+</html>
