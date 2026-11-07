@@ -38,44 +38,18 @@
 <div class="table-wrap"><table class="data"><thead><tr><th>Guarantee</th><th>Formula</th><th>In words</th></tr></thead><tbody><tr><td><strong>Safety</strong></td><td>∄ rm₁, rm₂: state[rm₁] = commit ∧ state[rm₂] = abort</td><td>No two RMs reach conflicting decisions</td></tr><tr><td><strong>Liveness</strong></td><td>∀ rm: ◇□ state[rm] = commit ∨ ◇□ state[rm] = abort</td><td>Every RM is <em>eventually always</em> committed or eventually always aborted</td></tr></tbody></table></div></div></div></section>
 <section class="slide" id="613-blocking-and-nonblocking" aria-label="6.1.3 Blocking and nonblocking"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">6.1 Atomic commitment: From a single RM to multiple RMs</p><h2>6.1.3 Blocking and nonblocking</h2><span class="pages">p. 82</span></header><div class="slide-body"><div class="table-wrap"><table class="data"><thead><tr><th>Protocol type</th><th>When a participant fails</th></tr></thead><tbody><tr><td><strong>Blocking</strong></td><td>Safety, but not necessarily liveness</td></tr><tr><td><strong>Nonblocking</strong></td><td>Safety <em>and</em> liveness despite a single participant failure: one failure can&#x27;t stop the others from deciding</td></tr></tbody></table></div></div></div></section>
 <section class="slide" id="62-the-essence-of-distributed-transactions" aria-label="6.2 The essence of distributed transactions"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>6.2 The essence of distributed transactions</h2></header><div class="slide-body"><p>A <strong>distributed (global) transaction</strong> consists of two or more <strong>nondistributed (local) transactions</strong> (Figure 6.3) (p. 82). Each local transaction follows the state machine of Figure 6.4 (pp. 82–83):</p>
-<figure class="diagram"><pre class="mermaid">stateDiagram-v2
-    [*] --&gt; Working
-    Working --&gt; Aborted: decides to abort (e.g. a constraint is violated)
-    Working --&gt; Prepared: done, waits for the decision
-    Prepared --&gt; Committed: commit request
-    Prepared --&gt; Aborted: abort request
-    Committed --&gt; [*]
-    Aborted --&gt; [*]</pre></figure>
-<p><em>After Figure 6.4.</em> A prepared transaction executes no more operations but hasn&#x27;t yet decided. Committed and aborted are final and irreversible (p. 82). The global state is a <strong>state vector</strong> of the local states, plus the outstanding messages in the network. Figure 6.5 steps (working, working) → (prepared, working) → (prepared, prepared) → (committed, prepared) → (committed, committed) (p. 83).</p></div></div></section>
+<figure class="book-fig"><a href="../figures/06-04.png" title="Open the figure at full size"><img src="../figures/06-04.png" alt="States of a local transaction: Working goes to Prepared or directly to Aborted; Prepared goes to Committed or Aborted" loading="lazy"></a><figcaption><span class="fig-label">Figure 6.4 (p. 83):</span> Working can abort on its own; once Prepared, the transaction waits for someone else&#x27;s decision.</figcaption></figure>
+<p>A prepared transaction executes no more operations but hasn&#x27;t yet decided. Committed and aborted are final and irreversible (p. 82). The global state is a <strong>state vector</strong> of the local states, plus the outstanding messages in the network. Figure 6.5 steps (working, working) → (prepared, working) → (prepared, prepared) → (committed, prepared) → (committed, committed) (p. 83).</p></div></div></section>
 <section class="slide" id="63-two-phase-commit-protocol" aria-label="6.3 Two-Phase Commit protocol"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>6.3 Two-Phase Commit protocol</h2></header><div class="slide-body"><p>2PC is the best-known and most-studied atomic commit protocol. It guarantees safety and liveness without participant failures, but only safety if one <em>specific</em> participant, the coordinator, fails. It is therefore <strong>blocking</strong> (p. 83).</p></div></div></section>
 <section class="slide" id="631-in-the-absence-of-failure" aria-label="6.3.1 In the absence of failure"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">6.3 Two-Phase Commit protocol</p><h2>6.3.1 In the absence of failure</h2><span class="pages">pp. 83–85</span></header><div class="slide-body"><p>The client begins a transaction on each RM and runs ordinary reads and writes. Then, instead of asking the RMs to commit, it asks the <strong>TC</strong> to commit, which starts 2PC (Figure 6.6):</p>
-<figure class="diagram"><pre class="mermaid">sequenceDiagram
-    participant C as Client
-    participant TC as Transaction coordinator
-    participant R1 as RM1
-    participant R2 as RM2
-    C-&gt;&gt;R1: begin t1 … reads and writes
-    C-&gt;&gt;R2: begin t1 … reads and writes
-    C-&gt;&gt;TC: commit t1
-    Note over TC: log ⟨Prepare, Timeout⟩
-    TC-&gt;&gt;R1: prepare t1
-    TC-&gt;&gt;R2: prepare t1
-    Note over R1,R2: log ⟨Vote-to-Commit⟩
-    R1--&gt;&gt;TC: vote to commit
-    R2--&gt;&gt;TC: vote to commit
-    Note over TC: all voted commit, log ⟨Commit⟩
-    TC-&gt;&gt;R1: commit
-    TC-&gt;&gt;R2: commit
-    Note over R1,R2: log ⟨Commit⟩ and commit
-    R1--&gt;&gt;TC: ack
-    R2--&gt;&gt;TC: ack
-    TC--&gt;&gt;C: ack</pre></figure>
+<figure class="book-fig"><a href="../figures/06-06.png" title="Open the figure at full size"><img src="../figures/06-06.png" alt="Sequence diagram between client, transaction coordinator and two resource managers: the client begins t1 on both RMs, runs the usual transaction, then sends commit t1 to the coordinator; in the prepare phase the coordinator sends prepare and both RMs vote to commit; in the commit phase it sends commit, both RMs ack, and the coordinator acks the client" loading="lazy"></a><figcaption><span class="fig-label">Figure 6.6 (p. 84):</span> the client hands the commit to the coordinator; each phase is one round trip to every RM. What each party logs at each step is in the table below.</figcaption></figure>
 <div class="table-wrap"><table class="data"><thead><tr><th>Phase</th><th>Step (pp. 84–85)</th></tr></thead><tbody><tr><td><strong>1 · Prepare</strong></td><td>TC persists ⟨Prepare, Timeout⟩ and sends ⟨Prepare⟩ to all RMs</td></tr><tr><td></td><td>To commit, an RM persists ⟨Vote-to-Commit⟩ and sends it. To abort, it persists ⟨Abort⟩, sends it <strong>and aborts at once</strong></td></tr><tr><td><strong>2 · Commit</strong></td><td>All voted to commit ⇒ TC persists ⟨Commit⟩ and sends ⟨Commit⟩ to all</td></tr><tr><td></td><td>At least one ⟨Abort⟩ <em>or a timeout</em> ⇒ TC persists ⟨Abort⟩ and sends ⟨Abort⟩ to all</td></tr><tr><td></td><td>Each RM persists ⟨Commit⟩ or ⟨Abort⟩ and commits or aborts its local transaction</td></tr></tbody></table></div>
 <p><strong>Aha! moment, the asymmetry</strong> (p. 85): the vote isn&#x27;t a Vote-to-Commit/Vote-to-Abort pair or a Commit/Abort pair. It&#x27;s a <strong>Vote-to-Commit/Abort</strong> pair. During Prepare, an RM can&#x27;t commit on its own, but it can abort on its own.</p></div></div></section>
 <section class="slide" id="632-in-the-presence-of-failure" aria-label="6.3.2 In the presence of failure"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">6.3 Two-Phase Commit protocol</p><h2>6.3.2 In the presence of failure</h2><span class="pages">pp. 85–86</span></header><div class="slide-body"><p>The system model is the partially synchronous one of Chapter 2 (p. 85).</p>
 <p><strong>RM failure doesn&#x27;t block 2PC.</strong> What a recovering RM does depends on the last entry in its log (Figures 6.7–6.10):</p>
 <div class="table-wrap"><table class="data"><thead><tr><th>Last persisted entry</th><th>Meaning</th><th>On recovery</th></tr></thead><tbody><tr><td>Neither ⟨Vote-to-Commit⟩ nor ⟨Abort⟩</td><td>&quot;We haven&#x27;t promised yet&quot;</td><td>Persist ⟨Abort⟩ and send ⟨Abort⟩ to the TC</td></tr><tr><td>⟨Vote-to-Commit⟩</td><td>&quot;We already promised&quot;</td><td><strong>Ask the TC</strong> for the decision</td></tr><tr><td>⟨Commit⟩</td><td>&quot;We already committed&quot;</td><td><strong>REDO</strong>, so the operations take effect</td></tr><tr><td>⟨Abort⟩</td><td>&quot;We already aborted&quot;</td><td><strong>UNDO</strong>, so no operation takes effect</td></tr></tbody></table></div>
-<p><strong>TC failure may block 2PC</strong> (p. 86): an RM that has persisted ⟨Vote-to-Commit⟩ is stuck until the TC is repaired. In Figure 6.11, the TC fails during Commit <em>after</em> telling RM1 to commit. RM2 can neither commit nor abort, because it doesn&#x27;t know what anyone else did.</p></div></div></section>
+<p><strong>TC failure may block 2PC</strong> (p. 86): an RM that has persisted ⟨Vote-to-Commit⟩ is stuck until the TC is repaired. In Figure 6.11, the TC fails during Commit <em>after</em> telling RM1 to commit. RM2 can neither commit nor abort, because it doesn&#x27;t know what anyone else did.</p>
+<figure class="book-fig"><a href="../figures/06-11.png" title="Open the figure at full size"><img src="../figures/06-11.png" alt="The same 2PC sequence as before, with a cross on the transaction coordinator&#x27;s line in the commit phase after it sent commit to resource manager 1 and before it sent commit to resource manager 2" loading="lazy"></a><figcaption><span class="fig-label">Figure 6.11 (p. 87):</span> RM1 has committed; RM2 has voted and can only wait for a coordinator that is down.</figcaption></figure></div></div></section>
 <section class="slide slide-widget" id="try-06-two-phase-commit" aria-label="2PC: recovery and blocking"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">Try it</p><h2>2PC: recovery and blocking</h2></header><div class="slide-body"><div class="widget-frame"><iframe data-src="../widgets/06-two-phase-commit.html#embed" title="Two-Phase Commit: recovery and blocking"></iframe></div><p class="widget-open"><a href="../widgets/06-two-phase-commit.html">Open full screen ↗</a> · the simulation is the vault’s own model of the mechanism the book describes.</p></div></div></section>
 <section class="slide" id="633-improvement" aria-label="6.3.3 Improvement"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">6.3 Two-Phase Commit protocol</p><h2>6.3.3 Improvement</h2><span class="pages">pp. 86–88</span></header><div class="slide-body"><p>Many 2PC variants improve liveness. They have fewer blocking executions, but still some (p. 86).</p>
 <div class="table-wrap"><table class="data"><thead><tr><th>Idea</th><th>When it works</th><th>When it doesn&#x27;t (pp. 87–88)</th></tr></thead><tbody><tr><td><strong>Ask the other RMs</strong></td><td>If some RMj has already committed or aborted, RMi can safely do the same</td><td>If all RMs voted to commit and none has received the decision (Figure 6.12), nobody knows</td></tr><tr><td><strong>Time out and abort</strong></td><td>—</td><td><strong>Unsafe</strong>: clocks aren&#x27;t perfectly synchronized, so when the TC recovers and sends ⟨Commit⟩, some RMs think it arrived within their window and commit, while others have already aborted</td></tr></tbody></table></div>
@@ -101,7 +75,6 @@
   <button class="btn primary" type="button" data-go="1" aria-label="Next slide"><span>Next</span> →</button>
 </nav>
 <script src="../../../assets/kit.js"></script>
-<script src="../../../assets/vendor/mermaid.min.js"></script>
 <script src="../../../assets/site.js"></script>
 </body>
 </html>

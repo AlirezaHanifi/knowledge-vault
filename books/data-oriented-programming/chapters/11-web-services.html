@@ -35,16 +35,7 @@
 <section class="slide" id="112-building-the-insides-like-the-outsides" aria-label="11.2 Building the insides like the outsides"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>11.2 Building the insides like the outsides</h2></header><div class="slide-body"><p>The steps of the data flow inside a web service (p. 222):</p>
 <ol><li>Receive a request from a client.</li><li>Apply business logic to the request.</li><li>Fetch data from external sources, such as the database and other web services.</li><li>Apply business logic to the responses from external sources.</li><li>Send the response to the client.</li></ol>
 <p>Over the wire, the data format, often JSON, doesn&#x27;t depend on the components&#x27; languages. Inside a program, traditional OOP breaks that idiom: to access a class member, a component must import the class definition. DOP components communicate with generic data collections, which need no knowledge of other components&#x27; internals, only the names of the fields (p. 223).</p>
-<figure class="diagram"><pre class="mermaid">flowchart TB
-    WB[Web browser] --&gt;|data| P1[&quot;(1) JSON parser&quot;]
-    P1 --&gt;|data| DM2[&quot;(2) Data manipulation — business logic&quot;]
-    DM2 --&gt;|data| S3[&quot;(3) JSON serializer&quot;]
-    S3 --&gt;|data| EXT[(Database · Web service)]
-    EXT --&gt;|data| P4[&quot;(4) JSON parser&quot;]
-    P4 --&gt;|data| DM5[&quot;(5) Data manipulation — business logic&quot;]
-    DM5 --&gt;|data| S6[&quot;(6) JSON serializer&quot;]
-    S6 --&gt;|data| WB</pre></figure>
-<p><em>Redrawn from figure 11.3 (p. 224), which Theo draws alone while Joe takes a call.</em></p></div></div></section>
+<figure class="book-fig"><a href="../figures/11-03.png" title="Open the figure at full size"><img src="../figures/11-03.png" alt="A web service between a web browser and a back end: JSON parser (1), data manipulation (2) and JSON serializer (3) on the way to another web service or the database, then JSON parser (4), data manipulation (5) and JSON serializer (6) on the way back" loading="lazy"></a><figcaption><span class="fig-label">Figure 11.3 (p. 224):</span> Theo&#x27;s drawing, made alone while Joe takes a call — data stays generic between every step, in both directions.</figcaption></figure></div></div></section>
 <section class="slide" id="113-representing-a-client-request-as-a-map" aria-label="11.3 Representing a client request as a map"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>11.3 Representing a client request as a map</h2></header><div class="slide-body"><p>Should the client decide which Open Library fields to retrieve? Theo first proposes separate endpoints for mobile and desktop. Joe adds extended and basic result screens, which would make four endpoints, and Theo agrees to a single endpoint that lets the client choose (p. 225). The payload is <code>{&quot;title&quot;: &quot;habit&quot;, &quot;fields&quot;: [&quot;title&quot;, &quot;weight&quot;, &quot;number_of_pages&quot;]}</code> (listing 11.1). Web frameworks usually parse it: Express, Spring, Django, Ruby on Rails or ASP.NET. Manually, it&#x27;s <code>JSON.parse</code> in JavaScript or Gson&#x27;s <code>fromJson(s, Map.class)</code> in Java (listings 11.2–11.3, p. 226). The request schema restricts <code>fields</code> to an <code>enum</code> of the fields Nancy wants exposed (listings 11.4–11.5, pp. 226–227).</p></div></div></section>
 <section class="slide" id="114-representing-a-server-response-as-a-map" aria-label="11.4 Representing a server response as a map"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>11.4 Representing a server response as a map</h2></header><div class="slide-body"><p><code>GET https://openlibrary.org/isbn/978-1982137274.json</code> returns many fields for <em>7 Habits of Highly Effective People</em>: author keys, <code>created</code>, <code>full_title</code>, <code>isbn_13</code>, languages, <code>number_of_pages</code> (432), <code>publish_date</code> (2020), <code>publishers</code>, revisions, <code>subtitle</code>, <code>title</code>, <code>works</code>, and more (listing 11.6, pp. 227–228).</p>
 <p><strong>Double field filtering</strong> (pp. 229–231): keep only the fields Nancy allows, then only those the client requested. <code>OpenLibraryDataSource.bookInfo</code> does it in four steps (listing 11.9):</p>
@@ -85,7 +76,6 @@ python3 join_arrays.py</code></pre></div><h3>Connections</h3><ul><li><strong>Req
   <button class="btn primary" type="button" data-go="1" aria-label="Next slide"><span>Next</span> →</button>
 </nav>
 <script src="../../../assets/kit.js"></script>
-<script src="../../../assets/vendor/mermaid.min.js"></script>
 <script src="../../../assets/site.js"></script>
 </body>
 </html>

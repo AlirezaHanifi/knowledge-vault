@@ -78,6 +78,10 @@ A **magic number** is a multibyte constant in the file or page header. It marks 
 
 Some engines store forward and backward links to sibling pages, so a neighbour can be found without climbing back to the parent. Without them, the climb may go all the way to the root, because a parent only addresses its own children (Figure 4-1) (p. 62). The price: when a non-rightmost node splits, its right sibling's backward pointer has to be redirected to the new node. Because that change happens in a *different* node, it may need extra locking. B-link trees exploit sibling links for concurrency (Ch. 6, p. 107) (pp. 62–63).
 
+![Two copies of a three-level tree: (a) reaching the right-hand leaf from its left neighbour means climbing to the parent and down again; (b) a direct link joins neighbouring nodes on the same level](../figures/04-01.png)
+
+*Figure 4-1 (p. 62): (a) without sibling links the path to a neighbour goes through the parent; (b) with them it is one hop.*
+
 #### Rightmost pointers
 
 There is always one more child pointer than keys, which is where the "+1" comes from (p. 63). Many implementations pair each separator key with a child pointer and store the last pointer separately (Figure 4-2). SQLite keeps it in the header (p. 63). When the rightmost child splits, the cell appended to the parent holds the promoted key and points to the *split* node, while the pointer to the *new* node replaces the old rightmost pointer (Figure 4-3; SQLite's `balance_deeper`) (pp. 63–64).
@@ -99,13 +103,9 @@ Node size and fanout are fixed, but no single value suits every workload: large 
 
 Nodes therefore grow in page-size increments: a 4 KB **overflow page** is linked from the **primary page** (p. 65). Most implementations store at most `max_payload_size` = node size / fanout bytes inline and spill the rest to overflow pages, so the primary page can never run completely out of space (p. 65).
 
-```mermaid
-flowchart LR
-    H["Primary page header<br/>first overflow page ID"] --> O1["Overflow page 1<br/>header: next overflow ID"] --> O2["Overflow page 2"]
-    C["Cell: key prefix + payload start"] -. "payload continues" .-> O1
-```
+![A primary page holding the start of Payload1 and load2, linked to an overflow page holding "Payload1 continued" and "load2 continued"](../figures/04-06.png)
 
-*The vault's sketch of Figure 4-6 and the linking scheme described on p. 66.*
+*Figure 4-6 (p. 66): each record keeps its first bytes in the primary page and continues in the linked overflow page.*
 
 - If the node already has an overflow page with room, the extra bytes go there; otherwise a new one is allocated (p. 66).
 - The first overflow page's ID goes in the primary page's header. Further overflow pages are chained through their own headers, so finding an overflow part may mean walking several pages (p. 66).
@@ -120,6 +120,10 @@ Binary search only works on sorted data, which is why the sorted-key invariant m
 
 Cells are in insertion order and only the offsets are sorted. Each probe therefore picks the middle *offset*, follows it to its cell, compares that cell's key, and recurses left or right (Figure 4-7) (pp. 67–68).
 
+![A row of sorted cell pointers above unsorted cells; binary-search probes jump between pointers and follow each one down to its cell, ending at the shaded target](../figures/04-07.png)
+
+*Figure 4-7 (p. 68): the search halves the pointer array, not the cells; every probe dereferences a pointer to read the key it compares.*
+
 ### Propagating splits and merges
 
 Splits and merges have to be able to walk back to the root (p. 68). Nodes may store **parent pointers**. They don't even need to be persisted, because a child is always paged in from its parent. They do have to be updated whenever a separator key and page ID move between nodes: during parent splits, merges and rebalancing (p. 68). WiredTiger traverses leaves through parent pointers rather than sibling pointers to avoid deadlocks (p. 68).
@@ -127,6 +131,10 @@ Splits and merges have to be able to walk back to the root (p. 68). Nodes may st
 #### Breadcrumbs
 
 Instead of maintaining parent pointers, record the path on the way down. Whether an insert or delete will split or merge isn't known until the leaf is reached, so the path is always collected (p. 69). **Breadcrumbs** are references to the visited nodes plus the index of each child pointer followed, kept on an in-memory stack. PostgreSQL's stack is `BTStack` (p. 69).
+
+![A descent through nodes 13|51, 23|31 and 31|37 to a leaf; a breadcrumbs stack beside it records each visited node with the index of the pointer followed: 1, 2, 2](../figures/04-08.png)
+
+*Figure 4-8 (p. 70): on the way down, each visited node and the index of the pointer taken are pushed; a split pops them to find exactly where the promoted key goes.*
 
 ```mermaid
 flowchart TB
@@ -147,6 +155,10 @@ flowchart TB
 Some engines postpone splits and merges by moving elements between siblings, which raises occupancy and can reduce height, at a higher maintenance cost (p. 70). On overflow, elements move to a sibling instead of splitting. On a delete, elements are borrowed from a neighbour so the node stays at least half full [Graefe 2011] (p. 70).
 
 **B\*-Trees** keep redistributing until both siblings are full, then split **two nodes into three**, each two-thirds full. SQLite uses this variant (pp. 70–71). Higher occupancy means a lower tree and fewer pages per search. Rebalancing changes the siblings' min/max boundaries, so the parent's keys and pointers have to be updated (Figure 4-9) (p. 71). SQLite's `balance-siblings` is close to this. Because rebalancing is isolated, it can be added later as an optimization (p. 71).
+
+![Before balancing: a left leaf with 10, 13, 16 and a right leaf with 18 under a parent holding 10 and 18. After: the left leaf holds 10, 13 and the right 16, 18, and the parent separator becomes 16](../figures/04-09.png)
+
+*Figure 4-9 (p. 71): 16 moves from the fuller node to the emptier sibling, so the parent's separator changes from 18 to 16 — no split, no new node.*
 
 ### Right-only appends
 

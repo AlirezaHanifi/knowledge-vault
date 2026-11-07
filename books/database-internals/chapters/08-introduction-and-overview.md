@@ -74,6 +74,10 @@ Part II opens with Lamport's quip that a computer you didn't know existed can ma
 
 A single thread running `i = 1; i += 2; i *= 2` always produces 6. With two threads sharing `x`, the outcome depends on the interleaving (Figure 8-1, p. 172):
 
+![Four interleavings of an adder thread and a multiplier thread over x = 1, ending with x = 2, 3, 4 and 6](../figures/08-01.png)
+
+*Figure 8-1 (p. 172): the same two threads give four results depending on which read sees which write.*
+
 | Case | Interleaving | Result |
 |---|---|---|
 | a | Both read 1; adder writes 3; multiplier overwrites with 2 | **2** |

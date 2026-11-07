@@ -54,16 +54,11 @@ The book uses *failure* rather than fault or error, and *failure tolerance* rath
 
 Informally, a **failure** is an unwanted but possible state transition from a good state to a bad one (p. 41). Formally (Figure 3.1):
 
-```mermaid
-stateDiagram-v2
-    Legal --> Legal: 1 · normal transition
-    Legal --> Illegal: 2 · failure transition
-    Illegal --> Legal: 3 · (repeated) normal transitions = recovery
-    Illegal --> Illegal: 4 · failure transition
-    Intolerable: Intolerable ("everything is lost")
-```
+![Nested regions: legal states inside illegal states inside intolerable states; numbered dots show 1 a normal transition between legal states, 2 a failure transition from legal to illegal, 3 normal transitions from illegal back to legal, and 4 a failure transition between illegal states](../figures/03-01.png)
 
-*After Figure 3.1.* The sequence of transitions from an illegal state back to a legal one is **failure recovery** (p. 42). Intolerable states are excluded from discussions of failure-tolerant computing, because by definition we don't try to tolerate them. The book's example is the earth being hit by a meteor (p. 42).
+*Figure 3.1 (p. 41): transitions 2 and 3 are the ones that matter — a failure takes the system out of the legal region, and recovery is the sequence of normal transitions that brings it back (p. 42).*
+
+Intolerable states are excluded from discussions of failure-tolerant computing, because by definition we don't try to tolerate them. The book's example is the earth being hit by a meteor (p. 42).
 
 ### 3.2 Types of failure tolerance
 
@@ -172,6 +167,10 @@ In a partially synchronous or asynchronous system over an unreliable network, a 
 
 The ideal strategy for an orchestrated process (Figure 3.16):
 
+![A failure passes through a chain of assumptions: platform-level transient with autorepair (retry), platform-level intermittent with autorepair (retry), platform-level permanent with manual repair (repair and retry), and finally application-level; any successful retry leads to success, and the last failure leads to failure](../figures/03-16.png)
+
+*Figure 3.16 (p. 53): each failed retry escalates to a more pessimistic assumption about the failure.*
+
 ```mermaid
 flowchart LR
     F([failure]) --> Q{"unambiguously<br/>application-level?"}
@@ -184,7 +183,7 @@ flowchart LR
     APP -- "compensation fails<br/>(refund fails)" --> HUM["human layer:<br/>operators, or a mailed refund check"]
 ```
 
-*After Figure 3.16 and the "Be vigilant" note (pp. 52–53).*
+*The vault's flow, adding the application-level path (p. 52) and the "Be vigilant" note (p. 53) to Figure 3.16.*
 
 > **Try it:** [Escalating failure handling](../widgets/03-escalation.html) — run the checkout's *Charge credit card* step against transient, intermittent and permanent `CouldNotConnect` failures and an `InsufficientFunds` failure, and watch the strategy escalate from immediate retry to backoff, to suspend and repair, to compensation.
 

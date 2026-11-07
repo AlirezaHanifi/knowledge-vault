@@ -36,18 +36,7 @@
 <section class="slide" id="21-the-two-parts-of-a-dop-system" aria-label="2.1 The two parts of a DOP system"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>2.1 The two parts of a DOP system</h2></header><div class="slide-body"><p>Theo knows he satisfied the customer more by luck than brains: had Nancy kept Super members, he would have missed the deadline (p. 27). Joe tells him that most of DOP&#x27;s foundational ideas are known best practices, combined into a cohesive whole (p. 28). On the relation between code and data:</p>
 <ul><li><strong>DOP is against data encapsulation.</strong> Encapsulation has merits and drawbacks, and the mixing of code and data in objects is the main cause of complexity and inflexibility (p. 28).</li><li><strong>DOP is language-agnostic:</strong> it applies in object-oriented and in functional languages (p. 28).</li><li><strong>Data entities only hold members; code is aggregated into modules where all functions are stateless,</strong> taking the data entity as an argument instead of encapsulating it (pp. 28–29).</li></ul></div></div></section>
 <section class="slide" id="22-data-entities" aria-label="2.2 Data entities"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>2.2 Data entities</h2></header><div class="slide-body"><p>&quot;It&#x27;s data-oriented programming, so let&#x27;s start with data&quot; (p. 29). Data entities are the parts of the system that hold information. One way to find them is to highlight the nouns and noun phrases in the requirements (p. 29). Theo groups them into two (p. 30):</p>
-<figure class="diagram"><pre class="mermaid">mindmap
-  root((Library data))
-    Catalog
-      Books
-      Authors
-      Book items
-      Book lendings
-    User management
-      Users
-      Members
-      Librarians</pre></figure>
-<p><em>Redrawn from figure 2.3 (p. 30).</em></p>
+<figure class="book-fig"><a href="../figures/02-03.png" title="Open the figure at full size"><img src="../figures/02-03.png" alt="A mind map: library data branches into catalog (books, authors, book items, book lendings) and user management (users, members, librarians)" loading="lazy"></a><figcaption><span class="fig-label">Figure 2.3 (p. 30):</span> data entities grouped by what they belong to, with no code attached.</figcaption></figure>
 <p>Theo asks whether books and authors are an association or a composition; Joe says not to worry yet. The most precise view is a data entity diagram with different arrows for the two, which comes later (pp. 30–31).</p></div></div></section>
 <section class="slide slide-widget" id="try-02-nouns-and-verbs" aria-label="Nouns and verbs"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">Try it</p><h2>Nouns and verbs</h2></header><div class="slide-body"><div class="widget-frame"><iframe data-src="../widgets/02-nouns-and-verbs.html#embed" title="Nouns and verbs"></iframe></div><p class="widget-open"><a href="../widgets/02-nouns-and-verbs.html">Open full screen ↗</a> · the simulation is the vault’s own model of the mechanism the book describes.</p></div></div></section>
 <section class="slide" id="23-code-modules" aria-label="2.3 Code modules"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>2.3 Code modules</h2></header><div class="slide-body"><p>The second step is the code. Highlight the verb phrases, which represent functionality (p. 31). Theo adds two obvious ones, returning a book and checking whether a user is a librarian, to get nine functions (pp. 31–32). All of them except the librarian check are exposed to the outside world, for example as HTTP endpoints. They go into a module box called <code>Library</code> (figure 2.4, p. 32):</p>
@@ -58,13 +47,7 @@
 <p>Theo compares it to Python&#x27;s <code>self</code> in method signatures (listing 2.2). Joe says the difference is deeper than syntax: the data lives <em>outside</em> the modules (p. 34). Figure 2.5 then gives every <code>Library</code> function a <code>libraryData</code> first argument (p. 34).</p>
 <p><strong>High-level design</strong> in DOP means defining the modules and their interactions. The high-level modules correspond to the high-level data entities of the mind map (pp. 34–36):</p>
 <ul><li><strong><code>Catalog</code></strong> functions receive <code>catalogData</code> first: <code>searchBook</code>, <code>addBookItem</code>, <code>checkoutBook</code>, <code>returnBook</code>, <code>getBookLendings</code>.</li><li><strong><code>UserManagement</code></strong> functions receive <code>userManagementData</code> first: <code>blockMember</code>, <code>unblockMember</code>, <code>login</code>, <code>isLibrarian</code>.</li><li><strong><code>Library</code></strong> functions receive <code>libraryData</code>, and pass <code>libraryData.catalog</code> and <code>libraryData.userManagement</code> on to the other two modules. For now Theo thinks of <code>libraryData</code> as a class with those two members (p. 36).</li></ul>
-<figure class="diagram"><pre class="mermaid">flowchart TB
-    LIB[&quot;Library&lt;br/&gt;searchBook(libraryData, searchQuery)&lt;br/&gt;getBookLendings(libraryData, userId)&lt;br/&gt;…&quot;]
-    CAT[&quot;Catalog&lt;br/&gt;searchBook(catalogData, searchQuery)&lt;br/&gt;getBookLendings(catalogData, userId)&lt;br/&gt;…&quot;]
-    UM[&quot;UserManagement&lt;br/&gt;isLibrarian(userManagementData, userId)&lt;br/&gt;login(userManagementData, loginInfo)&lt;br/&gt;…&quot;]
-    LIB -.-&gt;|&quot;uses (libraryData.catalog)&quot;| CAT
-    LIB -.-&gt;|&quot;uses (libraryData.userManagement)&quot;| UM</pre></figure>
-<p><em>Condensed from figure 2.7 (p. 35). The only relation between modules is usage.</em></p></div></div></section>
+<figure class="book-fig"><a href="../figures/02-07.png" title="Open the figure at full size"><img src="../figures/02-07.png" alt="Three modules with stateless functions: Library (searchBook, addBookItem, blockMember, login, checkoutBook, returnBook, …) uses UserManagement and Catalog, each listing its own functions with explicit data arguments" loading="lazy"></a><figcaption><span class="fig-label">Figure 2.7 (p. 35):</span> every function receives the data it works on as an argument; the only relation between modules is usage.</figcaption></figure></div></div></section>
 <section class="slide" id="24-dop-systems-are-easy-to-understand" aria-label="2.4 DOP systems are easy to understand"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>2.4 DOP systems are easy to understand</h2></header><div class="slide-body"><p>The main benefit over traditional OOP is that the system splits cleanly into code modules and data entities (p. 36). To understand the data you don&#x27;t think about the code, and vice versa. Theo&#x27;s &quot;Aha!&quot;: data lives on its own (p. 36).</p>
 <p>The module diagram looks like a class diagram but is simpler, because it has constraints (pp. 37–38):</p>
 <div class="table-wrap"><table class="data"><thead><tr><th>System part</th><th>Constraint on entities</th><th>Constraint on relations (table 2.1, p. 38)</th></tr></thead><tbody><tr><td>Data entities</td><td>Members only (no code)</td><td>Association and composition</td></tr><tr><td>Code modules</td><td>Stateless functions (no members)</td><td>Usage (no inheritance)</td></tr></tbody></table></div>
@@ -93,7 +76,6 @@
   <button class="btn primary" type="button" data-go="1" aria-label="Next slide"><span>Next</span> →</button>
 </nav>
 <script src="../../../assets/kit.js"></script>
-<script src="../../../assets/vendor/mermaid.min.js"></script>
 <script src="../../../assets/site.js"></script>
 </body>
 </html>

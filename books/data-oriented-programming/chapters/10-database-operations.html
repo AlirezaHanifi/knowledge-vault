@@ -31,31 +31,11 @@
 <p>Values stay typed as <code>Object</code> until the JSON serializer looks at them, which Joe calls <strong>late binding</strong> (pp. 202–204). Storing data passes map fields as query parameters, and <code>_.at</code> picks several at once (pp. 204–206). Because field names are just strings, <strong>fields are first-class</strong>, so generic functions can reshape any query&#x27;s results. <code>renameResultKeys</code> renames columns from a key map (pp. 207–211). <code>aggregateFields</code> turns a join&#x27;s three rows into two books, each with a list of author names, via <code>_.groupBy</code> (pp. 211–218). The chapter title&#x27;s koan, &quot;A cloud is a cloud,&quot; means: represent data as data (pp. 198, 218).</p></div><details class="outline"><summary>The chapter’s own outline <span>(from the book’s table of contents)</span></summary><ul><li>10.1 Fetching data from the database — p. 198</li><li>10.2 Storing data in the database — p. 204</li><li>10.3 Simple data manipulation — p. 207</li><li>10.4 Advanced data manipulation — p. 211</li><li>Summary — p. 218</li></ul></details></div></div></section>
 <section class="slide" id="introduction" aria-label="Introduction"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>Introduction</h2></header><div class="slide-body"><p>The chapter assumes basic SQL (<code>SELECT</code>, <code>AS</code>, <code>WHERE</code>, <code>INNER JOIN</code>) and says the approach adapts easily to NoSQL databases (p. 197). Representing database data as generic collections gives reduced system complexity and increased genericity (p. 198).</p></div></div></section>
 <section class="slide" id="101-fetching-data-from-the-database" aria-label="10.1 Fetching data from the database"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>10.1 Fetching data from the database</h2></header><div class="slide-body"><p>On a bench by a lake, Theo sees a horse and a car in the clouds; Joe answers, &quot;A cloud is a cloud&quot; (p. 198). Theo&#x27;s rough database model (figure 10.1, p. 199):</p>
-<figure class="diagram"><pre class="mermaid">erDiagram
-    books {
-        VARCHAR isbn
-        VARCHAR title
-        INTEGER publication_year
-    }
-    authors {
-        VARCHAR id
-        VARCHAR name
-    }
-    book_authors {
-        VARCHAR book_isbn
-        VARCHAR author_id
-    }
-    books ||--o{ book_authors : &quot;has&quot;
-    authors ||--o{ book_authors : &quot;writes&quot;</pre></figure>
-<p><em>Redrawn from figure 10.1 (p. 199): a many-to-many relation through <code>book_authors</code>.</em></p>
+<figure class="book-fig"><a href="../figures/10-01.png" title="Open the figure at full size"><img src="../figures/10-01.png" alt="Tables books (isbn, title, publication_year) and authors (id, name), each in a one-to-many relation with book_authors (book_isbn, author_id)" loading="lazy"></a><figcaption><span class="fig-label">Figure 10.1 (p. 199):</span> a many-to-many relation between books and authors stored through the <code>book_authors</code> table.</figcaption></figure>
 <p>The sample data (tables 10.1–10.3, p. 199):</p>
 <ul><li><strong>Books:</strong> <em>The Power of Habit</em> (2012) and <em>7 Habits of Highly Effective People</em> (1989).</li><li><strong>Authors:</strong> Sean Covey, Stephen Covey and Charles Duhigg.</li><li><strong>Links:</strong> <em>7 Habits</em> to both Coveys, and <em>The Power of Habit</em> to Duhigg.</li></ul>
 <p>A <code>SELECT title, isbn, publication_year FROM books WHERE title LIKE &#x27;%habit%&#x27;</code> returns both books. As data, that is a list of two maps, described by a JSON Schema that requires the three fields (listings 10.1–10.4, pp. 200–201). Theo writes the schema with Joe&#x27;s cheat sheet, since &quot;the purpose of a gift is to be used by the one who receives it&quot; (p. 201).</p>
-<figure class="diagram"><pre class="mermaid">flowchart TB
-    DB[(Database)] --&gt; DR[Database driver]
-    DR --&gt;|&quot;data (list of maps)&quot;| DM[Data manipulation]
-    DM --&gt;|data| JS[JSON serialize]</pre></figure>
-<p><em>Redrawn from figure 10.2 (p. 202). The data manipulation step uses generic functions.</em></p>
+<figure class="book-fig"><a href="../figures/10-02.png" title="Open the figure at full size"><img src="../figures/10-02.png" alt="Data flows from the database through the database driver as a list of maps, through data manipulation, to a JSON serializer" loading="lazy"></a><figcaption><span class="fig-label">Figure 10.2 (p. 202):</span> the driver already returns generic data, so no step needs a class for a row.</figcaption></figure>
 <div class="table-wrap"><table class="data"><thead><tr><th>Language</th><th>Driver to list of maps</th></tr></thead><tbody><tr><td>JavaScript</td><td>A driver like node-postgres (p. 202)</td></tr><tr><td>Java</td><td>JDBC plus <code>convertJDBCResultSetToListOfMaps</code>, which loops over rows and puts <code>getColumnLabel(i)</code> → <code>getObject(i)</code> in a <code>HashMap</code> (listing 10.5, pp. 202–203)</td></tr></tbody></table></div>
 <p><strong>Late binding</strong> (pp. 203–204): each value in the converted maps is an <code>Object</code>. Book search never looks at the types; it passes them along. The type only matters at JSON serialization, where a library like Gson detects it at run time and writes <code>publication_year</code> without quotes and <code>title</code> with them. &quot;With late binding, we defer dealing with data types as long as possible.&quot;</p>
 <p>Listing 10.6 puts it together (p. 204):</p>
@@ -71,11 +51,7 @@
 <div class="callout vault"><p><strong>Vault note:</strong> the book calls <code>publicationYear</code> &quot;Pascal case&quot; (p. 207); the usual name for that style is camel case. Pascal case capitalizes the first letter too (<code>PublicationYear</code>).</p></div></div></div></section>
 <section class="slide slide-widget" id="try-10-rename-keys" aria-label="Rename keys"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">Try it</p><h2>Rename keys</h2></header><div class="slide-body"><div class="widget-frame"><iframe data-src="../widgets/10-rename-keys.html#embed" title="Rename keys"></iframe></div><p class="widget-open"><a href="../widgets/10-rename-keys.html">Open full screen ↗</a> · the simulation is the vault’s own model of the mechanism the book describes.</p></div></div></section>
 <section class="slide" id="104-advanced-data-manipulation" aria-label="10.4 Advanced data manipulation"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>10.4 Advanced data manipulation</h2></header><div class="slide-body"><p>Sometimes rows must be restructured, for example aggregating fields from several rows into one map. PostgreSQL&#x27;s JSON aggregation can do that in SQL, but reshaping in the application keeps the SQL simple, and the code is reusable for other entities (p. 211). Joining <code>books</code>, <code>book_authors</code> and <code>authors</code> for &quot;habit&quot; gives three rows for two books, because <em>7 Habits</em> has two authors (listing 10.17 and table 10.6, pp. 211–212). The target is two maps with <code>authorNames</code> lists (listing 10.19, p. 213).</p>
-<figure class="diagram"><pre class="mermaid">flowchart TB
-    R[&quot;3 rows&lt;br/&gt;7 Habits · Sean Covey&lt;br/&gt;7 Habits · Stephen Covey&lt;br/&gt;Power of Habit · Charles Duhigg&quot;]
-    R --&gt;|&quot;_.groupBy(rows, &#x27;isbn&#x27;)&quot;| G[&quot;978-1982137274: 2 rows&lt;br/&gt;978-0812981605: 1 row&quot;]
-    G --&gt;|&quot;_.values, then _.map aggregateField&quot;| A[&quot;7 Habits · [Sean Covey, Stephen Covey]&lt;br/&gt;Power of Habit · [Charles Duhigg]&quot;]</pre></figure>
-<p><em>Redrawn from figure 10.3 (p. 214).</em></p>
+<figure class="book-fig"><a href="../figures/10-03.png" title="Open the figure at full size"><img src="../figures/10-03.png" alt="Three rows (two for the same book with different authors) are grouped by isbn into two groups, then each group is aggregated into one book with an authorNames list" loading="lazy"></a><figcaption><span class="fig-label">Figure 10.3 (p. 214):</span> a SQL join returns one row per book–author pair; two generic steps, group and aggregate, turn them back into one map per book.</figcaption></figure>
 <p>The steps (pp. 213–218):</p>
 <ol><li><strong><code>_.groupBy(sqlRows, &quot;isbn&quot;)</code></strong> gives a map from ISBN to that book&#x27;s rows (listings 10.20–10.21).</li><li><strong>For one group</strong> (listing 10.22): <code>_.map(rows, &quot;author_name&quot;)</code> collects the names. <code>_.nth(rows, 0)</code> takes the first row as the basis, <code>_.set</code> adds <code>authorNames</code>, and <code>_.omit</code> removes <code>author_name</code>.</li><li><strong>Generalize</strong> to <code>aggregateField(rows, fieldName, aggregateFieldName)</code> and test it (listings 10.23–10.24).</li><li><strong>Combine</strong> into <code>aggregateFields(rows, idFieldName, fieldName, aggregateFieldName)</code>: group by the ID field, take the values (the keys don&#x27;t matter), and map <code>aggregateField</code> over each group (listings 10.25–10.26).</li></ol>
 <p>Theo understands the koan now: instead of trapping data in objects, represent data as data (p. 218).</p>
@@ -104,7 +80,6 @@ python3 rows_as_maps.py</code></pre></div><h3>Connections</h3><ul><li><strong>Ge
   <button class="btn primary" type="button" data-go="1" aria-label="Next slide"><span>Next</span> →</button>
 </nav>
 <script src="../../../assets/kit.js"></script>
-<script src="../../../assets/vendor/mermaid.min.js"></script>
 <script src="../../../assets/site.js"></script>
 </body>
 </html>

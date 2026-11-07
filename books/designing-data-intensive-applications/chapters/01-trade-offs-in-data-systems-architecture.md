@@ -88,20 +88,11 @@ From the late 1980s, companies moved analytics off their OLTP systems into a sep
 3. expensive analytical queries would hurt other users’ performance;
 4. OLTP systems may sit in networks analysts may not access (security, compliance).
 
-```mermaid
-flowchart LR
-    subgraph OLTP["Operational systems"]
-      A[(Website DB)]
-      B[(Point of sale)]
-      C[(Inventory)]
-      S[SaaS APIs: CRM, email, payments]
-    end
-    A & B & C & S -- "extract (dump or stream)" --> T["transform + clean<br/>into an analysis schema"]
-    T -- load --> DW[(Data warehouse<br/>read-only copy)]
-    DW --> BI[Analysts / BI tools]
-```
+![Customers, warehouse workers and truck drivers use operational apps backed by sales, inventory and geo databases; data is extracted from each, transformed, and loaded into a data warehouse that a business analyst queries](../figures/01-01.png)
 
-*After Figure 1-1 (p. 8): extract–transform–load. Swapping the last two steps — load first, transform inside the warehouse — gives **ELT** (p. 7). Connectors such as Fivetran, Singer or Airbyte pull from SaaS APIs (p. 8).*
+*Figure 1-1 (p. 8): operational systems on top, analytical below; ETL is the bridge that copies and reshapes data between them.*
+
+Swapping the last two steps — load first, transform inside the warehouse — gives **ELT** (p. 7). Connectors such as Fivetran, Singer or Airbyte pull from SaaS APIs (p. 8).
 
 - **HTAP** (hybrid transactional/analytical processing) promises both in one system, but is often an OLTP and an analytical engine behind one interface; it suits apps that need both kinds of query on the same data, such as fraud detection — it doesn’t replace the warehouse, since an enterprise has many operational databases but usually one warehouse (pp. 8–9).
 - **Data lake**: a central repository of *files* in any format — records in Avro or Parquet, but also text, images, video, sensor readings, feature vectors, genomes — usually on cheap object storage. It serves data scientists whose work (feature engineering, NLP, computer vision) is awkward in SQL and who prefer Pandas, scikit-learn, R or Spark. Keeping the raw form lets each consumer transform it their own way: the **“sushi principle — raw data is better”** (pp. 9–10).
@@ -124,12 +115,9 @@ The distinction is about *how you use* a tool, not the tool itself; analytical s
 
 “Build or buy?” is a question of business priorities: do in-house what is a core competency or competitive advantage, leave routine things to a vendor — most companies don’t fabricate their own CPUs (p. 12).
 
-```mermaid
-flowchart LR
-    A["Bespoke software,<br/>written and run in-house"] --> B["Off-the-shelf software,<br/>self-hosted<br/>(on premises or IaaS VM)"] --> C["Cloud service / SaaS,<br/>built and operated by a vendor"]
-```
+![A spectrum from in-house software with in-house operations (more control, greater investment), through off-the-shelf software run in-house, to off-the-shelf software with outsourced operations (less control, lower investment)](../figures/01-02.png)
 
-*After Figure 1-2 (p. 12): who builds the software and who runs it. Deployment tooling such as Kubernetes is out of the book’s scope.*
+*Figure 1-2 (p. 12): who builds the software and who runs it; moving right trades control for investment. Deployment tooling such as Kubernetes is out of the book’s scope.*
 
 #### Pros and cons of cloud services (pp. 13–14)
 

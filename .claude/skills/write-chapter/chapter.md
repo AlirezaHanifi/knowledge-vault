@@ -32,6 +32,10 @@ pages: "{{first}}–{{last}}"
 
 {{Mechanisms, arguments and trade-offs, with page references (p. n).}}
 
+![{{What the figure shows, for someone who can't see it}}](../figures/{{NN-MM}}.png)
+
+*Figure {{N-M}} (p. {{n}}): {{what to look at, in the vault's words}}.*
+
 #### {{Subsection, when the section is long}} (pp. {{a–b}})
 
 {{…}}

@@ -94,19 +94,9 @@ They are called persistent because they always preserve their previous versions.
 
 The same depth applies to accessing elements (p. 181).
 
-```mermaid
-flowchart TB
-    NL["«Next» List"] --> L1["List 1<br/>0…49,999"]
-    NL --> NL2["«Next» List 2"]
-    OL[List] --> L1
-    OL --> L2[List 2]
-    L2 --> L21["List 2.1<br/>50,000…74,999"]
-    L2 --> L22["List 2.2<br/>75,000…99,999"]
-    NL2 --> L21
-    NL2 --> NL22["«Next» List 2.2<br/>75,000…99,999 (copied)"]
-```
+![A list of 100,000 elements as a tree of sublists; changing an element in 75,000–99,999 creates a new root, a new List 2 and a new List 2.2, which point back to the unchanged List 1 and List 2.1](../figures/09-03.png)
 
-*Simplified from figure 9.3 (p. 181), omitting the List 1 subtree's children: changing element 75,100 creates new nodes only along its path, and the rest is shared.*
+*Figure 9.3 (p. 181): changing element 75,100 creates new nodes only along its path; everything else is shared with the old list.*
 
 **Why 32, and not a wider or narrower tree** (pp. 181–182). Theo objects that with 32 slots each update copies 32 elements per level instead of 2. That is 16 times more work, which the five-fold drop in depth doesn't make up for. Joe's answer is CPU architecture. Modern CPUs read and write memory in cache lines, often 32 or 64 bytes. Copying one array of 32 takes "a single pair of cache accesses," while 16 arrays of 2 on different levels each need their own pair. So **update cost is dominated by the depth of the tree**, up to a point: with today's CPUs a branching factor of 64 would decrease update performance (p. 182).
 

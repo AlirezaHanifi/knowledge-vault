@@ -95,6 +95,8 @@ def inline(text: str, link) -> str:
 
 
 LIST_RE = re.compile(r"^(\s*)([-*]|\d+\.)\s+")
+FIGURE_RE = re.compile(r"^!\[([^\]]+)\]\(([^)\s]+)\)\s*$")
+CAPTION_RE = re.compile(r"^\*(Figure [^*]*?\((?:pp?\.) [^)]+\)):(.*)\*\s*$")
 TABLE_SEP = re.compile(r"^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$")
 
 
@@ -103,7 +105,7 @@ def indent_of(line: str) -> int:
 
 
 def is_block_start(line: str) -> bool:
-    return bool(line.startswith(("```", "#", ">", "|")) or LIST_RE.match(line) or line.strip() == "---")
+    return bool(line.startswith(("```", "#", ">", "|", "![")) or LIST_RE.match(line) or line.strip() == "---")
 
 
 def table_cells(line: str) -> list[str]:
@@ -141,6 +143,22 @@ def md(text: str, link=lambda u: u) -> str:
         if m:
             level, title = len(m.group(1)), m.group(2).strip()
             out.append(f'<h{level} id="{slugify(title)}">{inline(title, link)}</h{level}>')
+            i += 1
+            continue
+        m = FIGURE_RE.match(line)
+        if m:  # a book figure: the image line, then its italic caption line
+            alt, src = m.group(1), link(m.group(2))
+            j = i + 1
+            while j < n and not lines[j].strip():
+                j += 1
+            cap = ""
+            c = CAPTION_RE.match(lines[j]) if j < n else None
+            if c:
+                cap = (f'<figcaption><span class="fig-label">{inline(c.group(1), link)}:</span> '
+                       f'{inline(c.group(2).strip(), link)}</figcaption>')
+                i = j
+            out.append(f'<figure class="book-fig"><a href="{esc(src)}" title="Open the figure at full size">'
+                       f'<img src="{esc(src)}" alt="{esc(alt)}" loading="lazy"></a>{cap}</figure>')
             i += 1
             continue
         if line.startswith("|") and i + 1 < n and TABLE_SEP.match(lines[i + 1]):

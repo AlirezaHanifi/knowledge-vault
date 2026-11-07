@@ -49,12 +49,7 @@
 <p>Two limitations (p. 262):</p>
 <ul><li><strong>The entities are named <code>Entity1</code>, <code>Entity2</code>, …</strong>, because a JSON Schema has no way to name a schema.</li><li><strong>The extra constraints aren&#x27;t shown</strong>, such as the year range and the ISBN pattern, because they aren&#x27;t part of the data model.</li></ul></div></div></section>
 <section class="slide" id="125-automatic-generation-of-schema-based-unit-tests" aria-label="12.5 Automatic generation of schema-based unit tests"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>12.5 Automatic generation of schema-based unit tests</h2></header><div class="slide-body"><p>Once a function has schemas for its arguments and return value, a unit test is mechanical (p. 263):</p>
-<figure class="diagram"><pre class="mermaid">flowchart TB
-    G[Generate random data that conforms to the input schema] --&gt; E[Execute the function]
-    E --&gt; Q{Output conforms to the output schema?}
-    Q --&gt;|Yes| P[Test passes]
-    Q --&gt;|No| F[Test fails]</pre></figure>
-<p><em>Redrawn from figure 12.3 (p. 263).</em></p>
+<figure class="book-fig"><a href="../figures/12-03.png" title="Open the figure at full size"><img src="../figures/12-03.png" alt="Generate random data that conforms to the input schema, execute the function, then check whether the output conforms to the output schema: yes means the test passes, no means it fails" loading="lazy"></a><figcaption><span class="fig-label">Figure 12.3 (p. 263):</span> the schemas serve as both the input generator and the oracle, so no example has to be written by hand.</figcaption></figure>
 <p><strong>JSON Schema Faker</strong> generates conforming data. It gives a different UUID on each call (listing 12.19), and a long random catalog for the catalog schema (listing 12.20, pp. 263–265). From the odd ISBNs it produces, Joe sees that the regular expressions have bugs: &quot;I hate regular expressions!&quot; says Dave (p. 265).</p>
 <p>The test evolves over four listings (pp. 265–268):</p>
 <ol><li><strong>Call the function</strong> with generated arguments. There&#x27;s no explicit assertion, because the function&#x27;s own dev-mode return check throws (listings 12.21–12.22).</li><li><strong>Return true or false</strong>, catching the exception (listing 12.23).</li><li><strong>Make the query match:</strong> use the first letter of the first generated book&#x27;s title, so the search finds at least one book. Joe says random data seldom needs such tweaking (listing 12.24).</li><li><strong>Log the error</strong> when the test fails (listings 12.25–12.27).</li></ol>
@@ -86,7 +81,6 @@ python3 schema_based_tests.py</code></pre></div><h3>Connections</h3><ul><li><str
   <button class="btn primary" type="button" data-go="1" aria-label="Next slide"><span>Next</span> →</button>
 </nav>
 <script src="../../../assets/kit.js"></script>
-<script src="../../../assets/vendor/mermaid.min.js"></script>
 <script src="../../../assets/site.js"></script>
 </body>
 </html>

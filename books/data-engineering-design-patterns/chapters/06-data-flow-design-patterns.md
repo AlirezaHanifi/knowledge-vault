@@ -113,6 +113,10 @@ Branches that merge again at some point (p. 174).
 
 **Solution** (pp. 175–176): branches that all must succeed before a common child runs — 24 hourly partial aggregates, then a daily merge (Figure 6-3). In processing, merging means **UNION** (vertical: more rows, same columns) or **JOIN** (horizontal: more columns, fewer rows). Benefits: a **faster feedback loop** (24 small parallel jobs surface errors sooner than one day-long job) and **cheaper failures** (replay only the failed hour, not 23 good ones).
 
+![24 branches, each a readiness marker for one hour followed by that hour's partial aggregates, all feeding one final aggregates task](../figures/06-03.png)
+
+*Figure 6-3 (p. 175): the final task runs only when all 24 hourly branches have succeeded.*
+
 ```mermaid
 flowchart LR
     C[clear_context] --> S00[wait h00] --> L00[load h00] --> T[generate_trends]

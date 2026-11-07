@@ -127,30 +127,22 @@ According to DOP, the main sources of complexity in Theo's system, and in many t
 
 Looking only at entities and relations (figure 1.10, p. 14), `Member` takes part in five relations (p. 15):
 
+![The whole Library Management System class diagram: Library, Catalog, Librarian, Member, Book, Author, BookItem, BookLending and User joined by composition, association, inheritance and usage arrows](../figures/01-10.png)
+
+*Figure 1.10 (p. 14): even a small system's class diagram becomes a web of crossing relations.*
+
 - **Data relations:** `Library` has many `Member`s, and a `Member` has many `BookLending`s.
 - **Code relations:** `Member` extends `User`, `Librarian` uses `Member`, and `Member` uses `BookItem`.
 
 Split it into `MemberCode` (three relations) and `MemberData` (two relations), and the diagram falls into two independent parts, each easier to understand (pp. 15–16). Splitting *every* class (figure 1.13, p. 16) gives one subsystem of data entities only and one of code entities only, which can be understood separately and in any order. The book stresses that this isn't simpler by accident: it follows logically from separating code from data (p. 16).
 
-```mermaid
-flowchart LR
-    subgraph Mixed["Member: code and data mixed (fig. 1.11)"]
-        L1[Library] -->|has many| M[Member]
-        M -->|has many| BL1[BookLending]
-        M -->|extends| U1[User]
-        LB1[Librarian] -.->|uses| M
-        M -.->|uses| BI1[BookItem]
-    end
-    subgraph Split["Split into two entities (fig. 1.12)"]
-        L2[Library] -->|has many| MD[MemberData]
-        MD -->|has many| BL2[BookLending]
-        MC[MemberCode] -->|extends| U2[User]
-        LB2[Librarian] -.->|uses| MC
-        MC -.->|uses| BI2[BookItem]
-    end
-```
+![Member at the centre of five relations: Library has many Members, Member has many BookLendings, Member extends User, Librarian uses Member, and Member uses BookItem](../figures/01-11.png)
 
-*Redrawn from figures 1.11–1.12 (pp. 15–16): five relations on one entity become two on the data entity and three on the code entity.*
+*Figure 1.11 (p. 15): five relations meet on one entity because `Member` mixes code and data.*
+
+![After the split: Library owns MemberData, which owns BookLendings; Librarian uses MemberCode, which extends User and uses BookItem](../figures/01-12.png)
+
+*Figure 1.12 (p. 15): the same five relations become two on the data entity and three on the code entity.*
 
 > **Try it:** [Split code from data](../widgets/01-code-data-split.html) — take Theo's class diagram, split classes into code and data entities one at a time, and watch the relations per entity and the independent parts change.
 
@@ -182,16 +174,13 @@ Inheritance avoids duplication when all requirements are known up front: `Librar
 
 He tries to turn `User` into an interface and use composition over inheritance, but under deadline stress he can't deliver Super members. Nancy drops the feature for now (p. 24). The lesson Theo draws: **in OOP, prefer composition over class inheritance** (p. 24).
 
-```mermaid
-flowchart BT
-    M[Member] --> U[User]
-    UB["UserWithBookItemRight<br/>addBookItem"] --> U
-    L[Librarian] --> UB
-    V[VIPMember] --> M
-    V --> UB
-```
+![Class diagram: Member and UserWithBookItemRight both extend User, and VIPMember extends both Member and UserWithBookItemRight, while Librarian uses Member](../figures/01-16.png)
 
-*Redrawn from figure 1.16 (p. 22); arrows point to superclasses. `VIPMember` reaches `User` along two paths, a diamond. Figure 1.17 adds Super members and ends with three.*
+*Figure 1.16 (p. 22): `VIPMember` reaches `User` along two paths — a diamond from multiple inheritance.*
+
+![The diagram after Super members: VIPMember, SuperMember and Librarian on top, two right classes UserWithBookItemRight and UserWithBlockMemberRight, Member below them, and User at the bottom reached along several paths](../figures/01-17.png)
+
+*Figure 1.17 (p. 23): adding Super members brings the count of diamonds to three.*
 
 > **Try it:** [The tiny feature](../widgets/01-class-hierarchy.html) — add VIP and Super members to Theo's hierarchy, see where the methods have to move and count the diamonds, then compare with the same rights kept as functions over data.
 

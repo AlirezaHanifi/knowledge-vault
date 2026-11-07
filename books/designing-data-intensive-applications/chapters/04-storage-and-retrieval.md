@@ -63,7 +63,15 @@ db_get () { grep "^$1," database | sed -e "s/^$1,//" | tail -n 1; }
 
 **Step 1 — a hash index over the log** (Figure 4-1): an in-memory hash map from key to the byte offset of its latest value. Fast, but (pp. 118–119): old entries never free disk space; the map must be rebuilt by scanning the log on restart; all keys must fit in memory (on-disk hash maps perform poorly); range queries are inefficient.
 
+![An in-memory hash map with keys 12 and 42 pointing to byte offsets 0 and 60 in a log-structured file of JSON values on disk](../figures/04-01.png)
+
+*Figure 4-1 (p. 118): the map stores only where each key's latest value starts; one seek reads it.*
+
 **Step 2 — SSTables** (Sorted String Tables, Figure 4-2): key-value pairs **sorted by key**, each key once. Then a **sparse index** suffices — the first key of each few-KB block: to find `handiwork`, seek to block `handbag` (the next starts at `handsome`) and scan. Blocks can be **compressed**, saving disk and I/O bandwidth for a little CPU (p. 119).
+
+![A sparse index with a few keys and byte offsets (hammock, handbag, handsome, hangout) pointing into compressible blocks of a file of key-value pairs sorted by key](../figures/04-02.png)
+
+*Figure 4-2 (p. 119): because keys are sorted, one index entry per block suffices — look up the nearest key before and scan from there.*
 
 **Step 3 — the LSM-tree** (pp. 120–121):
 
@@ -71,6 +79,10 @@ db_get () { grep "^$1," database | sed -e "s/^$1,//" | tail -n 1; }
 2. When it exceeds a few MB, write it out as a new SSTable **segment**; keep accepting writes in a fresh memtable.
 3. Reads check the memtable, then segments **from newest to oldest**.
 4. In the background, **merge and compact** segments — like mergesort, keeping only the newest value per key, using little memory (Figure 4-3).
+
+![Three sorted segments with overlapping keys are merge-iterated into one merged segment that keeps each key once](../figures/04-03.png)
+
+*Figure 4-3 (p. 121): merging works like mergesort over sorted files; for a key in several segments, the newest value wins.*
 
 A separate unsorted **log** of every write (discarded after each flush) protects the memtable from crashes; a **tombstone** marks a deletion and is dropped once merged into the oldest segment (pp. 120–121). This is the algorithm of RocksDB, Cassandra, ScyllaDB and HBase, inspired by Bigtable (which coined *SSTable* and *memtable*), from the 1996 **Log-Structured Merge-tree** paper (p. 121). Segments are immutable — reads keep using old segments during a merge, unfinished files are simply deleted after a crash, checksums catch torn log records, and segments suit object storage (SlateDB, Delta Lake) (pp. 121–122).
 
@@ -107,6 +119,14 @@ Introduced in 1970 and “ubiquitous” within ten years, B-trees remain the sta
 - **Insert** (Figure 4-6): a full page **splits** — inserting 334 into full page 333–345 gives 333–337 and 337–345, with boundary 337 added to the parent; splits may cascade up to a **new root**. Depth stays **O(log n)**: three or four levels suffice for most databases; **four levels of 4 KiB pages with branching factor 500 hold up to 250 TB** (p. 127).
 - **Reliability** (pp. 127–128): a split overwrites several pages; a crash midway can leave an **orphan page**, and non-atomic page writes a **torn page**. Hence a **write-ahead log** written (and `fsync`ed) before pages change — journaling in filesystems. Pages are buffered in memory; the WAL keeps them durable.
 - **Variants** (p. 128): **copy-on-write** pages instead of a WAL (LMDB), also useful for snapshot isolation; abbreviated keys in interior pages (higher branching factor); leaf pages laid out sequentially on disk; sibling pointers between leaves for range scans.
+
+![Looking up key 251: the root page's references split the key range, the reference for 200–300 leads to a page splitting 200–300 further, and the one for 250–270 leads to a leaf holding 250 to 254](../figures/04-05.png)
+
+*Figure 4-5 (p. 126): each page narrows the key range; the lookup follows one reference per level.*
+
+![Before: a full leaf 333–345 under a parent with references for 310, 333 and 345. After adding 334: two leaves 333–335 and 337–342, and the parent gains key 337](../figures/04-06.png)
+
+*Figure 4-6 (p. 127): the full page splits on boundary key 337, and the parent gets a new key and reference.*
 
 > **Try it:** [B-tree pages, lookups and splits](../widgets/04-btree.html) — follow page references from the root, split a full page as in Figure 4-6, and crash mid-split with and without a WAL.
 
@@ -167,6 +187,10 @@ flowchart TB
 
 Fact tables may have trillions of rows and 100+ columns, yet a typical query touches **four or five** of them — Example 4-1 (fruit vs candy sales by weekday in 2024) needs only `date_key`, `product_sk` and `quantity` (pp. 136–137). Row-oriented storage must load and parse every 100-column row; **columnar** storage reads only the columns used (Figure 4-7). Every column keeps the **same row order**, so row 23 is entry 23 of each column. Real engines store columns per **block** of thousands to millions of rows, often one block per time range (p. 138). Used almost everywhere in analytics: Snowflake, DuckDB, Pinot, Druid; Parquet (with Dremel-style shredding for documents), ORC, Lance, Nimble; Arrow, Pandas/NumPy; InfluxDB IOx, TimescaleDB (pp. 137–138).
 
+![A fact_sales table of rows, and below it the same data laid out by column: one line per column listing its values in row order](../figures/04-07.png)
+
+*Figure 4-7 (p. 138): each column is stored separately in the same row order, so a query reads only the columns it names.*
+
 - **Compression — bitmaps and run-length encoding** (pp. 139–140): few distinct values (billions of sales, 100,000 products) → one bitmap per value, one bit per row; sparse bitmaps run-length encode; **roaring bitmaps** pick the more compact form. `IN (31, 68, 69)` = OR of three bitmaps; `product_sk = 30 AND store_sk = 3` = AND, valid because bit k is row k everywhere. Bitmaps even answer graph questions (followed by X and following Y). Not to be confused with **wide-column** (column-family) stores like Bigtable, Accumulo, HBase — those are row-oriented.
 - **Sort order** (pp. 140–141): sort whole rows (never columns independently) by keys chosen for common queries — e.g. `date_key` first (scan only last month), then `product_sk`. The first sort key compresses into a few KB even for billions of rows; later keys compress less.
 - **Writing** (p. 141): inserting into the middle of sorted, compressed columns is hopeless; instead buffer writes in a row-oriented sorted in-memory store and merge into new column files in bulk — LSM-style, immutable files that suit object storage. Queries combine both transparently (Snowflake, Vertica, Pinot, Druid).
@@ -215,6 +239,10 @@ Think of each term as a dimension (a document has 1 in dimension “red” if it
 | HNSW | Layers of proximity graphs; greedy search from a sparse top layer down to dense lower layers (Figure 4-11) | Approximate, fast |
 
 Faiss and pgvector implement both IVF and HNSW (p. 149).
+
+![HNSW: three stacked graph layers; a search starts at a sparse top layer, greedily moves toward the query vector, then drops to denser layers below](../figures/04-11.png)
+
+*Figure 4-11 (p. 149): each layer refines the position found in the sparser layer above.*
 
 ## Trade-offs at a glance
 

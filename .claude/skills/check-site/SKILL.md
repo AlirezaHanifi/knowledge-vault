@@ -24,6 +24,7 @@ Serve the repo (`python3 -m http.server 8765`, or the `vault` entry in `.claude/
 
 - **Console** is free of errors.
 - **Lesson:** step through every slide with <kbd>→</kbd>; diagrams render; each embedded widget loads and sizes itself; quizzes mark answers; the last slide links to the next chapter.
+- **Figures:** each loads, is legible at slide width, sits on its paper card in dark mode and opens full size on click.
 - **Widget:** play, step, reset and every control work on the page itself and inside the lesson.
 - **Phone width (375 px):** no horizontal page scroll; the lesson's *Contents* drawer opens and closes.
 - **Dark mode:** toggle the theme; text, diagrams and embedded widgets follow it.

@@ -33,11 +33,7 @@
 <section class="slide" id="introduction" aria-label="Introduction"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>Introduction</h2></header><div class="slide-body"><div class="table-wrap"><table class="data"><thead><tr><th>Theo&#x27;s objection at scale (pp. 138)</th><th>Where part 2 answers it</th></tr></thead><tbody><tr><td>Hard to know what kind of data you have</td><td>This chapter (validation); type-like help returns in chapter 12</td></tr><tr><td>Concurrency control isn&#x27;t thread-safe</td><td><a href="08-advanced-concurrency-control.html">8. Advanced concurrency control</a></td></tr><tr><td>Structural sharing slows down as data grows</td><td><a href="09-persistent-data-structures.html">9. Persistent data structures</a></td></tr><tr><td>Data will live in databases and services</td><td><a href="10-database-operations.html">10. Database operations</a>, <a href="11-web-services.html">11. Web services</a></td></tr></tbody></table></div>
 <p>The chapter focuses on validation at the system&#x27;s boundaries; validation as data flows <em>through</em> the system comes in part 3 (p. 141).</p></div></div></section>
 <section class="slide" id="71-data-validation-in-dop" aria-label="7.1 Data validation in DOP"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>7.1 Data validation in DOP</h2></header><div class="slide-body"><p>What Theo would miss most from OOP is the guarantee that an instantiated class has fields with the proper names and types; with maps it&#x27;s easy to make small mistakes (p. 142). Joe: in DOP the schema is separate from the representation, and the most important data to validate is data crossing the system&#x27;s boundaries. For a web server those are its communication with clients, databases and web services (figure 7.1, pp. 142–143).</p>
-<figure class="diagram"><pre class="mermaid">flowchart TB
-    C[&quot;Client (e.g., web browser)&quot;] &lt;--&gt;|&quot;data — boundary 1&quot;| W[Web server]
-    W &lt;--&gt;|&quot;data — boundary 2&quot;| D[Database]
-    W &lt;--&gt;|&quot;data — boundary 3&quot;| S[Web service]</pre></figure>
-<p><em>Redrawn from figure 7.1 (p. 142), with the three boundaries Theo names (p. 143).</em></p>
+<figure class="book-fig"><a href="../figures/07-01.png" title="Open the figure at full size"><img src="../figures/07-01.png" alt="A client such as a web browser exchanges data with a web server, which exchanges data with a web service and a database" loading="lazy"></a><figcaption><span class="fig-label">Figure 7.1 (p. 142):</span> every arrow is a boundary where data enters or leaves the system — the places Theo names for validation (p. 143).</figcaption></figure>
 <div class="table-wrap"><table class="data"><thead><tr><th>Kind of validation</th><th>Purpose</th><th>Environment (table 7.1, p. 143)</th></tr></thead><tbody><tr><td>Boundaries</td><td>Guardian</td><td>Production</td></tr><tr><td>Inside</td><td>Ease of development</td><td>Dev</td></tr></tbody></table></div>
 <p>At the boundaries the purpose is to keep invalid data from going in or out, and to display informative errors when it is encountered (p. 143).</p></div></div></section>
 <section class="slide" id="72-json-schema-in-a-nutshell" aria-label="7.2 JSON Schema in a nutshell"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>7.2 JSON Schema in a nutshell</h2></header><div class="slide-body"><p>A search request has a <code>title</code> string and a <code>fields</code> array of strings (listing 7.1, p. 144). Its schema is built step by step (pp. 144–147); the book uses JSON Schema version 2020-12:</p>
@@ -87,7 +83,6 @@ python3 mini_json_schema.py</code></pre></div><h3>Connections</h3><ul><li><stron
   <button class="btn primary" type="button" data-go="1" aria-label="Next slide"><span>Next</span> →</button>
 </nav>
 <script src="../../../assets/kit.js"></script>
-<script src="../../../assets/vendor/mermaid.min.js"></script>
 <script src="../../../assets/site.js"></script>
 </body>
 </html>

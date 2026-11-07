@@ -78,15 +78,9 @@ Works on the complete dataset each time — useful for bootstrapping a database 
 | **Consistency for readers**: drop-and-insert can expose partial or empty data while consumers read | Transactions; or a **single data exposition abstraction** — a view over hidden technical tables, switched atomically (Figure 2-1; see the Proxy pattern, Ch. 4) |
 | **No way back**: a full overwrite loses the previous version | Time travel (Delta Lake, Apache Iceberg, BigQuery), or versioned tables behind a view |
 
-```mermaid
-flowchart LR
-    L["Load run v42"] -->|COPY| T42[("devices_42")]
-    T41[("devices_41<br/>(kept for rollback)")]
-    V{{"VIEW devices"}} -. "CREATE OR REPLACE VIEW<br/>… FROM devices_42" .-> T42
-    C["Consumers"] --> V
-```
+![Top: Table_1 is exposed through the public view while Table_2 is being loaded. Bottom: after the load, the public view switches to Table_2](../figures/02-01.png)
 
-*After Figure 2-1 and Examples 2-3/2-4 (pp. 10–11): consumers only ever see the view, which switches to a complete table.*
+*Figure 2-1 (p. 10): consumers only ever query the view, which switches to a table once it is completely loaded (Examples 2-3/2-4, pp. 10–11).*
 
 **Examples** (pp. 10–11): `aws s3 sync s3://input-bucket s3://output-bucket --delete` (removes objects missing in the source); Apache Spark writing JSON as a Delta Lake table, which adds scaling plus transactions and versioning; Apache Airflow + PostgreSQL — `COPY devices_${version} …` into a versioned table, then `CREATE OR REPLACE VIEW devices AS SELECT * FROM devices_${version}`.
 
@@ -99,6 +93,10 @@ Full loads get costly for growing datasets; incremental patterns ingest smaller 
 **Problem.** Most visit events arrive from a streaming broker, but legacy producers still write some to a transactional database; bring only visits added since the last run into Bronze. Visits are immutable (p. 12).
 
 **Solution** — two implementations (Figure 2-2) (pp. 12–13):
+
+![Delta column implementation: the loader remembers the last ingestion time (10:00) and copies only rows 2 and 3, ingested later. Partition-based implementation: a run at 11:00 copies the 10:00 partition, not the one still being written](../figures/02-02.png)
+
+*Figure 2-2 (p. 13): track a delta column's high-water mark, or copy whole partitions once they're complete.*
 
 | | Delta column | Time-partitioned dataset |
 |---|---|---|
@@ -123,16 +121,9 @@ Full loads get costly for growing datasets; incremental patterns ingest smaller 
 
 **Solution.** Scheduling and query overhead rule out the Incremental Loader. **CDC** continuously reads modified rows straight from the database's **commit log** — an append-only record of every operation — and streams them to a broker; consumers may keep the full history or just the latest value per row. It also captures **hard deletes**, so producers needn't soft-delete (p. 17).
 
-```mermaid
-flowchart LR
-    App["Legacy producers"] -->|INSERT / UPDATE / DELETE| DB[("PostgreSQL")]
-    DB --> WAL["Commit log<br/>(logical replication, pgoutput)"]
-    WAL --> KC["Kafka Connect<br/>+ Debezium connector"]
-    KC --> T["Topic dedp.dedp_schema.events"]
-    T --> C1["Streaming consumers"]
-```
+![Tables A and B in a database are captured by Kafka Connect and written to one Kafka topic per table](../figures/02-03.png)
 
-*After Figure 2-3 and Example 2-10 (pp. 18–19).*
+*Figure 2-3 (p. 19): Debezium runs inside Kafka Connect, reads the database's commit log and publishes each table's changes to its own topic (Example 2-10, pp. 18–19).*
 
 **Consequences** (pp. 17–18):
 
@@ -237,6 +228,10 @@ When arrival frequency is unpredictable, shift from static to event-driven inges
 **Problem.** The backend team releases features at most once a week (Monday–Thursday); a daily refresh of the features reference dataset mostly reloads unchanged data. The team publishes a notification to a central message bus on every release (p. 33).
 
 **Solution.** Instead of polling schedules, three actions (Figure 2-4) (p. 34):
+
+![A notification handler reads events from a message queue and triggers either an event-driven job in the data orchestration layer or a job in the data processing layer](../figures/02-04.png)
+
+*Figure 2-4 (p. 34): the handler maps each event to the job it should start, instead of jobs polling on a schedule.*
 
 ```mermaid
 sequenceDiagram

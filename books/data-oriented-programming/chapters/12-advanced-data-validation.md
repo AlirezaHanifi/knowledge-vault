@@ -109,15 +109,9 @@ Two limitations (p. 262):
 
 Once a function has schemas for its arguments and return value, a unit test is mechanical (p. 263):
 
-```mermaid
-flowchart TB
-    G[Generate random data that conforms to the input schema] --> E[Execute the function]
-    E --> Q{Output conforms to the output schema?}
-    Q -->|Yes| P[Test passes]
-    Q -->|No| F[Test fails]
-```
+![Generate random data that conforms to the input schema, execute the function, then check whether the output conforms to the output schema: yes means the test passes, no means it fails](../figures/12-03.png)
 
-*Redrawn from figure 12.3 (p. 263).*
+*Figure 12.3 (p. 263): the schemas serve as both the input generator and the oracle, so no example has to be written by hand.*
 
 **JSON Schema Faker** generates conforming data. It gives a different UUID on each call (listing 12.19), and a long random catalog for the catalog schema (listing 12.20, pp. 263–265). From the odd ISBNs it produces, Joe sees that the regular expressions have bugs: "I hate regular expressions!" says Dave (p. 265).
 

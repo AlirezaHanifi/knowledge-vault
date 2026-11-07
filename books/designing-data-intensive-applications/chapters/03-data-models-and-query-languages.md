@@ -76,6 +76,10 @@ The translation between objects in code and tables, rows and columns is called t
 
 **Documents for one-to-many.** A résumé (LinkedIn profile, Example 3-1: user 251, Barack Obama, with positions, education and contact info) can be split across `users`, `positions`, `education` and `contact_info` tables (Figure 3-1) — or stored as one JSON document. The one-to-many relationships form a **tree** (Figure 3-2) that the JSON makes explicit, with better **locality**: one fetch instead of several queries or a messy multiway join. This suits “one-to-few”; thousands of comments on a celebrity’s post are better as separate rows (p. 71).
 
+![The profile of user 251 as a tree: first name, last name and headline; positions branching to jobs 1–3, each with title and organization; education branching to two entries with school, start and end](../figures/03-02.png)
+
+*Figure 3-2 (p. 71): one-to-many data forms a tree, which a single JSON document can hold in one piece.*
+
 #### Normalization, denormalization, and joins (pp. 72–75)
 
 Why store `region_id: "us:91"` rather than the text “Washington, DC, United States”? A standardized list gives consistent spelling, no ambiguity (DC or the state?), one place to update, localization, and better search (e.g. knowing Washington is on the East Coast) (p. 72).
@@ -103,32 +107,19 @@ Denormalized data is a form of **derived data** — you need a process (atomic t
 
 Many-to-many relationships are queried in both directions. Storing references on both sides is denormalized and can diverge; the normalized approach stores the relationship once and uses **secondary indexes** on both columns — and many document stores can index fields inside arrays (pp. 76–77).
 
+![Relational tables users, positions and organizations: position rows link user 251 to organizations 513 and 514 through an associative table](../figures/03-03.png)
+
+*Figure 3-3 (p. 76): the positions table joins people to organizations, so the relationship can be queried from either side.*
+
+![Two user documents, 251 and 467, each a tree of positions and education whose leaves reference shared organization and school entities outside the documents](../figures/03-04.png)
+
+*Figure 3-4 (p. 77): in the document model, each dotted document holds its own tree, and many-to-many links are references to entities outside it.*
+
 #### Stars and snowflakes: schemas for analytics (pp. 77–80)
 
-```mermaid
-erDiagram
-    fact_sales }o--|| dim_product : product_sk
-    fact_sales }o--|| dim_store : store_sk
-    fact_sales }o--|| dim_date : date_key
-    fact_sales }o--|| dim_customer : customer_sk
-    fact_sales {
-        int date_key
-        int product_sk
-        int store_sk
-        int customer_sk
-        decimal net_price
-        decimal discount_price
-    }
-    dim_product {
-        int product_sk
-        string sku
-        string description
-        string brand
-        string category
-    }
-```
+![A star schema: the fact_sales table in the middle, with foreign keys to dim_product, dim_store, dim_date, dim_customer and dim_promotion tables, each shown with sample rows](../figures/03-05.png)
 
-*A trimmed version of the grocery-retailer star schema in Figure 3-5 (p. 78); the vault drew only some columns.*
+*Figure 3-5 (p. 78): each sale is one fact row; its foreign keys point out to the dimension tables that describe who, what, where, when and how.*
 
 - The **fact table** holds one row per event (a purchase, a page view, a click) — potentially petabytes; columns are attributes (price, cost) or foreign keys into **dimension tables** describing the who, what, where, when, how and why (pp. 77–78).
 - Even dates are dimensions, so holidays can be encoded (p. 79).
@@ -174,16 +165,9 @@ db.observations.aggregate([
 
 When many-to-many relationships dominate, model data as **vertices** (nodes, entities) and **edges** (relationships, arcs) (p. 84): social graphs, the web graph (PageRank), road and rail networks (shortest paths). Graphs can be stored as **adjacency lists** (good for traversal) or **adjacency matrices** (good for ML), and can mix many types in one store — Facebook’s single graph of people, places, events, check-ins and comments; search engines’ knowledge graphs; Wikidata (p. 85).
 
-```mermaid
-flowchart LR
-    lucy((Lucy)) -- BORN_IN --> idaho[Idaho<br/>state] -- WITHIN --> usa[United States<br/>country] -- WITHIN --> na[North America<br/>continent]
-    alain((Alain)) -- BORN_IN --> stlo["Saint-Lô"] -- "WITHIN …" --> fr[France<br/>country] -- WITHIN --> eu[Europe<br/>continent]
-    lucy -- MARRIED --- alain
-    lucy -- LIVES_IN --> london[London] -- "WITHIN …" --> eu
-    alain -- LIVES_IN --> london
-```
+![A property graph: Lucy, born in Idaho, within the United States, within North America; Alain, born in Saint-Lô, within Manche, Normandy and France, within Europe; they are married and both live in London, England, United Kingdom](../figures/03-06.png)
 
-*The vault’s simplified sketch of the running example, Figure 3-6 (p. 86): Lucy from Idaho and Alain from Saint-Lô, married and living in London. The figure itself has more intermediate regions.*
+*Figure 3-6 (p. 86): vertices carry a type and properties; labelled edges (born_in, lives_in, within, married) let one query follow chains of any length.*
 
 #### Property graphs (pp. 86–88)
 
@@ -257,15 +241,9 @@ Designed for OLTP clients (mobile apps, web frontends) to request a JSON documen
 
 Write in one form, read in others (p. 101). The simplest, fastest, most expressive way to write is an **append-only log of immutable events**. In the book’s conference-management example (Figure 3-8) — individual and bulk bookings, invoices, reserved seats, cancellations, room changes — even “how many seats are left?” is hard. Each change is stored as an event, and **materialized views** (projections, read models) are updated from it: booking status, the organizer’s dashboard, badge printing (pp. 101–102).
 
-```mermaid
-flowchart LR
-    CMD[Command] --> V{Validate}
-    V -- "valid → fact" --> LOG[(Event log<br/>immutable, ordered)]
-    V -- invalid --> X[Rejected, nothing logged]
-    LOG --> MV1[(Booking status)]
-    LOG --> MV2[(Organizer dashboard)]
-    LOG --> MV3[(Badge printing)]
-```
+![An event log of conference events — conference created, registrations opened, seats reserved, booking payment confirmed, booking cancelled — from which two materialized views are derived: a customer's booking confirmation and an organizer's seats-booked dashboard](../figures/03-08.png)
+
+*Figure 3-8 (p. 102): the immutable event log is the source of truth; each view is computed from it and can be rebuilt or replaced.*
 
 - **Event sourcing**: events are the source of truth; **CQRS**: separate read-optimized representations derived from the write-optimized one. Both come from domain-driven design; the idea is old (state machine replication) (p. 102).
 - A **command** is validated first; only then does it become a fact in the log. Consumers may not reject events. Name events in the **past tense** (“the seats were booked”) (pp. 102–103).

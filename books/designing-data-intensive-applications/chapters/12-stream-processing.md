@@ -65,23 +65,11 @@ Unlike a pipe or TCP connection (one sender, one receiver), messaging lets many 
 
 **Brokers vs databases** (p. 492): brokers usually delete messages once delivered (not for long-term storage), assume short queues (throughput degrades when backlogs spill to disk), offer topic-pattern subscriptions instead of queries, and **notify** of new data instead of returning a point-in-time snapshot. Some participate in XA/JTA two-phase commit; databases can serve as queues but are hard to tune for it.
 
-```mermaid
-flowchart LR
-    subgraph LB["(a) Load balancing"]
-      direction LR
-      P1[Producer] --> T1[[Topic]]
-      T1 -- m1, m3 --> C1[Consumer 1]
-      T1 -- m2, m4 --> C2[Consumer 2]
-    end
-    subgraph FO["(b) Fan-out"]
-      direction LR
-      P2[Producer] --> T2[[Topic]]
-      T2 -- all --> D1[Consumer A]
-      T2 -- all --> D2[Consumer B]
-    end
-```
+![Two producers and two consumers through a broker over time: (a) load balancing — messages m1 to m5 are split between the consumers; (b) fan-out — both consumers receive every message](../figures/12-01.png)
 
-*After Figure 12-1 (pp. 492–493): load balancing (AMQP shared queue, JMS shared subscription) shares expensive work; fan-out (JMS topic subscriptions, AMQP exchange bindings) lets independent consumers “tune in”. Kafka **consumer groups** combine them: one consumer per group per message, every group gets every message.*
+*Figure 12-1 (p. 493): (a) consumers share the work; (b) every consumer gets its own copy.*
+
+Load balancing (AMQP shared queue, JMS shared subscription) shares expensive work; fan-out (JMS topic subscriptions, AMQP exchange bindings) lets independent consumers “tune in”. Kafka **consumer groups** combine them: one consumer per group per message, every group gets every message (pp. 492–493).
 
 **Acknowledgments and redelivery** (pp. 493–495): a consumer must **ack** a message before the broker deletes it; no ack (connection closed, timeout) → redeliver to another consumer — possibly a message already processed whose ack was lost (needs atomic commit or idempotence). Combined with load balancing, redelivery **reorders** messages (Figure 12-2: consumer 1 processes m4, m3, m5); avoid with a queue per consumer. A malformed message that crashes every consumer loops forever (blocking strongly ordered brokers); **dead letter queues** move it aside for an operator to drop, fix or handle — now also in Pulsar and Kafka Streams.
 
@@ -91,6 +79,10 @@ AMQP/JMS brokers inherited a *transient* mindset: receiving is destructive, so y
 
 - A producer **appends** to a log; consumers **read sequentially** (like `tail -f`). For throughput the log is **sharded**: a **topic** = a set of shards (Kafka’s **partitions**), each with monotonically increasing **offsets** and total order within it — none across partitions (Figure 12-3) (pp. 496–497).
 - **Apache Kafka** and **Amazon Kinesis Streams** work this way (Google Pub/Sub is similar underneath but JMS-style); disk-based yet millions of messages per second via sharding, fault-tolerant via replication (p. 497).
+
+![Topics A and B split into partitions of numbered messages; producer clients append to partition ends, and consumer clients in a group each read sequentially from their partitions, tracking an offset per partition](../figures/12-03.png)
+
+*Figure 12-3 (p. 496): a partition is an append-only file; a consumer's whole progress is one offset per partition.*
 
 | | AMQP/JMS-style broker | Log-based broker |
 |---|---|---|
@@ -114,26 +106,21 @@ Event sourcing makes an event stream the system of record; but even mutable data
 
 Real apps combine an OLTP database, a cache, a search index and a warehouse, each with its own copy. Full dumps (ETL) are slow, so some apps use **dual writes** — the application writes to each system itself. Two failure modes:
 
-```mermaid
-sequenceDiagram
-    participant C1 as Client 1 (set X = A)
-    participant DB as Database
-    participant SI as Search index
-    participant C2 as Client 2 (set X = B)
-    C1->>DB: X = A
-    C2->>DB: X = B
-    C2->>SI: X = B
-    C1->>SI: X = A
-    Note over DB,SI: Database ends with B, index with A — permanently,<br/>and no error was reported
-```
+![Client 1 sets X = A and client 2 sets X = B; the database applies A then B, but the search index receives them in the opposite order, ending with X = A while the database holds X = B](../figures/12-04.png)
 
-*After Figure 12-4 (p. 502).* Without version vectors you won’t even notice; and one write can fail while the other succeeds (an atomic-commit problem). There are two leaders and neither follows the other. Better: make the database the **only leader** and the index its **follower**.
+*Figure 12-4 (p. 502): with dual writes, the two systems can apply the same writes in different orders and silently disagree for good.*
+
+Without version vectors you won’t even notice; and one write can fail while the other succeeds (an atomic-commit problem). There are two leaders and neither follows the other. Better: make the database the **only leader** and the index its **follower**.
 
 > **Try it:** [Dual writes vs a change log](../widgets/13-dual-writes.html) — race two concurrent updates into a database and a search index, with and without a change log.
 
 #### Change data capture (pp. 503–508)
 
 Replication logs were long an internal detail, not an API. **CDC** observes every change written to a database and exposes it, ideally as a stream, so derived systems apply changes **in the database’s order** (Figure 12-5). CDC makes one database the leader and the others followers; a log-based broker transports changes without reordering (pp. 503–504).
+
+![Two clients write to the system-of-record database; change data capture appends each change to a log, and the search index and data warehouse each consume the log in order](../figures/12-05.png)
+
+*Figure 12-5 (p. 503): derived systems follow the database's log, so they all apply changes in the same order.*
 
 | Aspect | Detail |
 |---|---|
@@ -142,6 +129,10 @@ Replication logs were long an internal detail, not an API. **CDC** observes ever
 | **Initial snapshot** | Full logs are too big to keep; start from a consistent snapshot tied to a log offset — Debezium uses Netflix’s **DBLog** watermarking for incremental snapshots |
 | **Log compaction** | Keep only the latest value per key (tombstones delete) — size depends on current contents, not write history; rebuild a derived system from offset 0 of a compacted Kafka topic, no new snapshot needed |
 | Quorum databases | No single source of truth: Cassandra exposes per-node raw log segments for consumers to merge |
+
+![Two data file segments of cat-video view counters (mew, purr, yawn, scratch) with many updates per key are compacted and merged into one segment holding only each key's latest count](../figures/12-06.png)
+
+*Figure 12-6 (p. 505): compaction keeps the newest value per key, so the log's size depends on the number of keys, not of writes.*
 
 **CDC vs event sourcing** (pp. 507–508):
 
@@ -188,6 +179,10 @@ Batch jobs use the timestamps inside events (deterministic reruns); many stream 
 | Meaning | When it happened (timestamp in the event) | When the processor saw it |
 | Star Wars analogy | Episode number | The date you watched it (IV, V, VI came out first) |
 | Rate per second during a backlog after a redeploy | Steady (correct) | A false spike (Figure 12-8) |
+
+![A web server's steady request stream; the stream processor restarts and then works off its backlog, so the rate measured by processing time dips to zero and then spikes, while the actual request rate stays flat at 10](../figures/12-08.png)
+
+*Figure 12-8 (p. 520): windowing by processing time invents a dip and a spike that never happened.*
 
 Delays come from queueing, network faults, broker contention, consumer restarts and reprocessing; they reorder events (server B’s event arrives before A’s) (p. 519).
 

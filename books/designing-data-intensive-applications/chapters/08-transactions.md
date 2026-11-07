@@ -121,9 +121,17 @@ Implementation: **row-level write locks** held until commit; for reads, remember
 
 **Read skew** (a *nonrepeatable read*): Aaliyah has $500 in each of two accounts; a $100 transfer runs between her two reads and she sees $500 + $400 = **$900** (Figure 8-6). Harmless on refresh, but intolerable for **backups** (inconsistencies become permanent on restore) and **analytical queries or integrity checks** (pp. 293–294).
 
+![Aaliyah reads account 1 ($500) before a transfer and account 2 ($400) after it, so she sees $900 in total instead of $1,000](../figures/08-06.png)
+
+*Figure 8-6 (p. 294): each read is of committed data, yet together they show a state that never existed.*
+
 **Snapshot isolation** lets each transaction read a consistent snapshot as of its start — supported by PostgreSQL, MySQL/InnoDB, Oracle, SQL Server; the *highest* level in Oracle, TiDB and Aurora DSQL; common in BigQuery (p. 295). Writers still take write locks, but **readers never block writers, and writers never block readers** (p. 295).
 
 **MVCC** (multiversion concurrency control), as in PostgreSQL (Figure 8-7): each transaction gets an increasing **txid** (32-bit in PostgreSQL, so vacuum guards against wraparound). Each row version has `inserted_by` and `deleted_by`; an update is a delete plus an insert (txid 13 turns account 2’s $500 row into a deleted $500 row and a new $400 row); garbage collection removes versions nobody can see (pp. 295–297).
+
+![Transaction 12 reads account 1 and later account 2 while transaction 13 transfers $100; each row keeps versions tagged inserted-by and deleted-by, and transaction 12 keeps seeing the versions committed before it started](../figures/08-07.png)
+
+*Figure 8-7 (p. 296): an update writes a new version and marks the old one deleted by its txid; readers choose versions by txid.*
 
 ```mermaid
 flowchart TB
@@ -155,6 +163,10 @@ Two concurrent **read-modify-write** cycles: the later write **clobbers** the ea
 #### Write skew and phantoms (pp. 303–308)
 
 Aaliyah and Bryce are the two on-call doctors; both feel unwell and click “go off call” together. Each transaction checks “≥ 2 on call?” on its snapshot, sees 2, and removes *its own* record — both commit, and **nobody is on call** (Figure 8-8). This is **write skew**: two transactions read the same objects and update *different* ones — a generalization of lost updates. Atomic single-object ops and automatic lost-update detection don’t help (PostgreSQL RR, InnoDB RR, Oracle serializable and SQL Server snapshot all miss it); multi-object constraints are rarely supported; the fallback is `SELECT … FOR UPDATE` on the rows the decision depends on (pp. 303–305).
+
+![Aaliyah and Bryce each run a transaction that counts on-call doctors (2), then sets themselves off call; both commit, leaving nobody on call](../figures/08-08.png)
+
+*Figure 8-8 (p. 304): each check was true when made; the two writes touch different rows, so nothing conflicts — write skew.*
 
 More examples (pp. 305–306): **meeting-room** double booking (Example 8-2); a **multiplayer game** moving two pieces onto one square; **claiming a username** (a unique constraint fixes it); **double-spending** points or money.
 
@@ -229,22 +241,15 @@ Used inside databases and exposed to apps as **XA** (JTA) and WS-AtomicTransacti
 
 Two points of no return — a yes vote and the coordinator’s decision — make it atomic; the marriage-ceremony analogy: after “I do” you can’t back out, even if you faint before hearing the pronouncement (pp. 326–327).
 
-```mermaid
-sequenceDiagram
-    participant C as Coordinator
-    participant A as Participant A
-    participant B as Participant B
-    C->>A: prepare
-    C->>B: prepare
-    A-->>C: yes (promise)
-    B-->>C: yes (promise)
-    Note over C: write "commit" to log — the commit point
-    C->>A: commit
-    C->>B: commit
-    Note over A,B: If C crashes after the votes,<br/>A and B are in doubt and must wait
-```
+![The coordinator writes data to databases 1 and 2, sends prepare, receives Yes from both, then sends commit; locks are held from the writes until the commit is acknowledged](../figures/08-13.png)
+
+*Figure 8-13 (p. 325): phase 1 collects promises, phase 2 delivers the decision; participants hold their locks throughout.*
 
 **Coordinator failure** (pp. 327–328): before prepare, participants can abort; after voting yes they are **in doubt** (uncertain) — a timeout-and-abort could contradict a participant that already committed (Figure 8-14). Only the coordinator’s recovery, reading its log, resolves it (no commit record → abort). If that log is lost, an administrator must decide by hand. 2PC is a **blocking** protocol; **three-phase commit** assumes bounded delays and response times, which real systems lack; the practical fix is a **consensus-replicated coordinator** (Ch. 10).
+
+![After both databases vote Yes, the coordinator crashes; database 2 already committed, but database 1 never hears the decision and stays stuck in the prepared state](../figures/08-14.png)
+
+*Figure 8-14 (p. 328): a participant that voted yes must wait for the coordinator, holding its locks, however long that takes.*
 
 > **Try it:** [Two-phase commit and the in-doubt participant](../widgets/08-two-phase-commit.html) — step through prepare, votes and the commit point, then crash the coordinator.
 

@@ -75,15 +75,9 @@ The example is a counter of database accesses, logged every minute (p. 165).
 
 **How `swap` is thread-safe without locks.** It computes the next value, and before modifying the atom checks whether the value changed during the computation. If it did, `swap` tries again (pp. 167–168):
 
-```mermaid
-flowchart TB
-    A["Take snapshot<br/>snapshot = state"] --> B["Compute next state<br/>nextState = f(snapshot)"]
-    B --> C{"State changed?<br/>state == snapshot"}
-    C -->|Yes| A
-    C -->|No| D["Update state<br/>state = nextState"]
-```
+![Loop: take a snapshot of the state, compute the next state from it, check whether the state still equals the snapshot; if it changed, start again, otherwise set the state to the next state](../figures/08-02.png)
 
-*Redrawn from figure 8.2 (p. 168). The check and the update are one atomic compare-and-set.*
+*Figure 8.2 (p. 168): the check and the update are one atomic compare-and-set; a lost race only costs a retry.*
 
 `atomicCompareAndSet` atomically sets the state to a new value if, and only if, it still equals the provided old value, and returns whether it succeeded (p. 168). It is a compare-and-swap provided by the language and relying on the CPU. Java has `AtomicReference` in `java.util.concurrent.atomic`, Python has the `atomos` library, Ruby and C# have their own, and JavaScript doesn't need one, being single-threaded (table 8.2, pp. 168–169). Java's `Atom` stores its state in an `AtomicReference` and uses generics (listings 8.4–8.5, pp. 169–170).
 

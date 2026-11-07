@@ -75,6 +75,10 @@ flowchart TB
 
 **Solution** (pp. 306–308). For streaming (Figure 10-1):
 
+![Records per period over time: a continuous interruption drops the flow to zero and keeps it there, while an irregular interruption leaves sporadic small bursts](../figures/10-01.png)
+
+*Figure 10-1 (p. 307): a full stop is easy to spot; irregular trickles need a threshold over a time window.*
+
 | Delivery mode  | Detection                                                                                                                                  |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Continuous** | Alert when no data points arrive in a time unit, e.g. one minute                                                                           |
@@ -228,14 +232,9 @@ When a detected issue isn't your fault, you need to know whom to ask. Build a fa
 - **Column level, self-built:** walk the query execution plan. In `SELECT CONCAT(u.first_name, d.delivery_address) AS user_with_address FROM users u JOIN addresses d …`, `user_with_address` depends on `users.first_name` and `addresses.delivery_address` (Figure 10-6). OpenLineage supports Spark natively.
 - **Row level:** record which job produced each row, as an extra attribute or column (the data decoration patterns).
 
-```mermaid
-flowchart LR
-    U["users.first_name"] --> C["CONCAT"]
-    A["addresses.delivery_address"] --> C
-    C --> O["user_with_address"]
-```
+![The execution plan of a query that concatenates users.first_name and addresses.delivery_address into user_with_address, reduced to its column lineage: two source columns feeding one output column](../figures/10-06.png)
 
-*After Figure 10-6 (p. 326).*
+*Figure 10-6 (p. 326): column lineage is read off the query plan — which input columns each output column depends on.*
 
 **Consequences** (p. 327):
 

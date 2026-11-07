@@ -81,21 +81,9 @@ A system is a set of **Processes** and a set of **Values** (p. 132):
 
 Consensus is the foundation of **state machine replication**, which mechanically turns a process into a fault-tolerant group. It makes physical components behave like one logical component that survives the loss of one of them (Figure 10.1) (p. 133). The principle: identical deterministic processes, the same start state, the same inputs in the same order, give the same outputs and the same state. So **lockstep reduces to consensus on the log** (pp. 133–134).
 
-```mermaid
-flowchart LR
-    subgraph P1[Process 1]
-        C1[Consensus subsystem] -- "x := 0 · y := 1 · z := 2" --> S1[State machine replica 1]
-    end
-    subgraph P2[Process 2]
-        C2[Consensus subsystem] -- "x := 0 · y := 1 · z := 2" --> S2[State machine replica 2]
-    end
-    subgraph P3[Process 3]
-        C3[Consensus subsystem] -- "x := 0 · y := 1 · z := 2" --> S3[State machine replica 3]
-    end
-    C1 <--> C2 <--> C3
-```
+![Three processes, each with a consensus subsystem at the platform level feeding the same log x := 0, y := 1, z := 2 into a state machine replica at the application level; all three replicas end with x = 0, y = 1, z = 2](../figures/10-02.png)
 
-*After Figure 10.2:* a replicated key–value store. Consensus works at the platform level and the state machine at the application level, and all three replicas end with x = 0, y = 1, z = 2 (p. 134).
+*Figure 10.2 (p. 134): a replicated key–value store. The dashed line separates the platform level (consensus on the log) from the application level (applying it), and all three replicas reach the same state.*
 
 ### 10.4 The origin—and irony—of consensus
 
@@ -139,21 +127,17 @@ Raft manages replicated logs, the basis of state machine replication. A **leader
 
 Time is divided into monotonically increasing **terms**, a logical clock. Each term has an election phase (the *Request Vote* protocol) and a log-replication phase (the *Append Entries* protocol) (Figure 10.4). Per term, Raft elects a leader and delegates the log to it. The leader accepts entries, replicates them and decides when they may be applied (p. 138).
 
+![Five terms on a timeline, each starting with an election phase followed by a log-replication phase; term 3 has only an election](../figures/10-04.png)
+
+*Figure 10.4 (p. 138): a term with a failed election (term 3, a split vote) has no leader and so no log replication.*
+
 **Aha! moment, terms as fencing tokens** (pp. 138–139): Raft does *not* guarantee that only one node *believes* it's the leader. It guarantees that only one node can *act* as the leader. A stale leader has a lower term, and nodes reject messages with a term lower than their own.
 
 #### 10.6.3 Leader Election protocol (pp. 139–140)
 
-```mermaid
-stateDiagram-v2
-    [*] --> Follower: boot or recover
-    Follower --> Candidate: election timeout, so it increments its term
-    Candidate --> Candidate: split vote, so it increments its term and retries
-    Candidate --> Leader: votes from a quorum
-    Candidate --> Follower: learns of a newer term or leader
-    Leader --> Follower: sees a message with a higher term
-```
+![Node states: a follower that suspects leader failure increments its term and becomes a candidate; a candidate that times out increments its term and stays a candidate, and one that receives votes from a quorum becomes leader; a leader or candidate that sees a message with a higher term adopts it and becomes a follower](../figures/10-05.png)
 
-*After Figure 10.5.*
+*Figure 10.5 (p. 139): every transition is guarded by the term — moving up increments it, and seeing a higher one demotes the node.*
 
 - **Follower:** listens to the leader. Its election timer has a *random* timeout and resets on every message. On expiry, it suspects the leader has failed.
 - **Candidate:** increments its term, votes for itself and sends `RequestVote` to every other node. There are three outcomes: a **quorum vote** (it becomes leader), a **split vote** (a new election) or **demotion** (it learns of a new term and leader).
@@ -165,6 +149,10 @@ stateDiagram-v2
 2. **Append:** it appends the entry to its own log.
 3. **Propagate:** it sends `AppendEntries` to the other nodes.
 4. **Commit:** followers append and acknowledge. Once a quorum, *including the leader*, has acknowledged, the leader advances the **commit index** (Figure 10.6).
+
+![Message flow among a leader and two followers: (1) a request arrives at the leader, (2) the leader appends it, (3) it sends AppendEntries to both followers, the first follower appends and acks, and once that ack arrives the leader knows the entry is on a quorum, (4) commits and acks the client; the second follower's append and ack arrive later, greyed out](../figures/10-06.png)
+
+*Figure 10.6 (p. 140): the dashed line marks the moment of commit — one follower's ack plus the leader's own copy make a quorum of three, so the slow follower is not waited for.*
 
 #### 10.6.5 State machine safety (p. 141)
 
@@ -186,6 +174,10 @@ Each puzzle has a three-node cluster in term 3 (p. 141). The author prefers thin
 | **1** (Figure 10.7) | Logs of 8, 9 and 7 entries | Who leads term 3? | **Node 2**: the leader accepts and appends client requests first, so its log is the most advanced |
 | **2** (Figure 10.8) | Leader node 2 appended request 9 but didn't propagate it | Can request 9 be lost? | **Yes.** If node 2 loses leadership, the term-4 leader never heard of it. Safety isn't violated, because it wasn't committed |
 | **3** (Figure 10.9) | Node 2 propagated request 9 to node 1, which acknowledged; node 2 didn't get the acknowledgment and crashes | Can request 9 be lost? | **No.** Node 1 can't know whether node 2 committed and answered the client before crashing, so it must assume 9 is committed. Only node 1 has the most up-to-date log, so only it can be elected, and it replicates 9 to node 3 and commits it (Figure 10.10) |
+
+![Logs of three nodes before and after commit: entries 1–3 from term 1 are committed everywhere; in the precommit view the leader, node 2, holds entries up to 9 and node 1 up to 9, while the commit index still points at 5; in the postcommit view the leader's commit index has moved to 9. Node 1 is marked eligible in both](../figures/10-10.png)
+
+*Figure 10.10 (p. 144): whether node 2 crashed before or after advancing its commit index, node 1's log is the most up to date — so the next leader keeps entry 9 either way.*
 
 > **Try it:** [Raft's election restriction and the three puzzles](../widgets/10-raft-puzzles.html) — load the book's three puzzles (or build your own logs), see which nodes are eligible under the up-to-date rule and which quorums can elect them, crash the leader, and check whether request 9 survives.
 

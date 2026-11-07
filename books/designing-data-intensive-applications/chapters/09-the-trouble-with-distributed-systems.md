@@ -74,6 +74,10 @@ Shared-nothing machines communicate only over an **asynchronous packet network**
 
 The usual answer is a **timeout** — which still doesn’t tell you whether the request got through, and it may yet be delivered (p. 348).
 
+![Three ways a request can go unanswered: (a) the request is lost, (b) the service is unresponsive, (c) the service processes it but the response is lost](../figures/09-01.png)
+
+*Figure 9-1 (p. 348): from the client's side all three look the same — no response — so it can't tell what happened.*
+
 #### The limitations of TCP (pp. 348–349)
 
 TCP (and QUIC, SCTP, uTP) splits streams into packets, retransmits losses, reorders, checksums and does congestion/flow control. But it can’t tell whether the outbound packet or the ack was lost, can’t plug a cable back in, and eventually gives up with an error. Deduplication works only within one connection — reconnecting and resending can duplicate. A closed connection tells you nothing about how much the remote *application* processed; even a delivered packet only reached the remote kernel. **Only a positive response from the application confirms success** (p. 349).
@@ -158,6 +162,10 @@ A day may not have 86,400 seconds, clocks jump back, nodes disagree. Unlike a br
 
 - **Timestamps for ordering events** (pp. 362–364): Figure 9-3 — client A writes `x = 1` on node 1 (stamped **42.004 s**), node 3 gets it, client B increments to `x = 2` on node 3 (stamped **42.003 s**, under 3 ms of skew), and node 2 keeps `x = 1` under **last write wins**. Consequences: writes from a node with a lagging clock mysteriously vanish; LWW can’t tell sequential from concurrent writes; equal millisecond timestamps need random tiebreakers. A packet sent at 100 ms can arrive at 99 ms. Fixing it would need clock error far below network delay — impossible. Use **logical clocks** (Ch. 10).
 
+![Client A sets x = 1 on node 1 at 42.004; node 2, whose clock is behind, applies client B's later increment stamped 42.003; node 3 receives both and keeps x = 1 under last write wins](../figures/09-03.png)
+
+*Figure 9-3 (p. 363): B's write happened after A's, but a slower clock gives it an earlier timestamp, so last write wins silently discards it.*
+
 > **Try it:** [Clock skew and last write wins](../widgets/09-clock-skew.html) — replay Figure 9-3 and watch a causally later write lose to a slow clock.
 
 - **Clock readings have a confidence interval** (pp. 364–365): microsecond digits mean nothing if you only know the time ±100 ms; “95% confident it is between 10.3 and 10.5 s past the minute”. Uncertainty = drift since last sync + server uncertainty + round trip. `clock_gettime` hides it; **TrueTime** (Spanner) and **Amazon ClockBound** return `[earliest, latest]`.
@@ -194,22 +202,13 @@ Leases enforce “only one”: one leader per shard (no split brain), one writer
 
 A former holder that hasn’t noticed is a **zombie**; preventing damage is **fencing**. Shutting zombies down (STONITH — power off, cut network) doesn’t stop delayed requests, risks nodes shutting each other down, and may be too late (pp. 374–375). Robust fencing uses **fencing tokens** — numbers that increase with every grant (Figure 9-6):
 
-```mermaid
-sequenceDiagram
-    participant C1 as Client 1
-    participant L as Lock service
-    participant S as Storage
-    participant C2 as Client 2
-    C1->>L: acquire lease
-    L-->>C1: ok, token 33
-    Note over C1: long GC pause… lease expires
-    C2->>L: acquire lease
-    L-->>C2: ok, token 34
-    C2->>S: write (token 34)
-    S-->>C2: ok
-    C1->>S: write (token 33)
-    S-->>C1: rejected: token 33 < 34
-```
+![Client 1 gets a lease, then pauses for so long that the lease expires; client 2 gets the lease and writes; client 1 wakes up still believing it holds the lease, writes, and corrupts the file](../figures/09-04.png)
+
+*Figure 9-4 (p. 374): the paused client can't know its lease expired — checking before the write doesn't help, because the pause can come right after the check.*
+
+![The same scenario with fencing tokens: client 1 got token 33, client 2 got 34 and wrote with it; client 1's late write with 33 is rejected by storage as an old token](../figures/09-06.png)
+
+*Figure 9-6 (p. 375): storage remembers the highest token it has seen and refuses anything lower, so the zombie's write is harmless.*
 
 | System | Its fencing token (pp. 375–376) |
 |---|---|

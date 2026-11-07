@@ -81,15 +81,9 @@ SELECT posts.*, users.* FROM posts
 - Someone following a huge number of busy accounts: drop some writes and show a sample — they don’t read everything anyway.
 - A **celebrity** posting: dropping writes isn’t OK; store celebrity posts separately and **merge them in at read time**.
 
-```mermaid
-flowchart LR
-    P[New post] --> F{Fan-out on write}
-    F --> T1[(Timeline of follower 1)]
-    F --> T2[(Timeline of follower 2)]
-    F --> Tn[(… follower n)]
-    C[Celebrity post] -. "stored separately,<br/>merged at read time" .-> R[Read home timeline]
-    T1 --> R
-```
+![A user's new post is appended to the log of all posts and fanned out into each follower's precomputed home timeline, which followers read through the API](../figures/02-02.png)
+
+*Figure 2-2 (p. 36): fan-out on write — one post becomes one timeline write per follower, so reading a home timeline is a simple lookup.*
 
 ### Describing performance
 
@@ -99,6 +93,10 @@ flowchart LR
 | **Throughput** | Requests or data volume per second; hardware has a maximum | Posts/s, timeline writes/s |
 
 Response time is what users care about; throughput determines the resources needed and so the cost. A system is **scalable** if its maximum throughput can be raised significantly by adding resources (p. 38). Near maximum throughput, **queueing** makes response time rise sharply (Figure 2-3, p. 37).
+
+![Response time plotted against throughput: flat near the unloaded service time, then rising steeply as throughput approaches the maximum the hardware can handle](../figures/02-03.png)
+
+*Figure 2-3 (p. 37): close to capacity, queues build up and response time shoots up long before throughput reaches its limit.*
 
 #### When an overloaded system won’t recover (p. 38)
 
@@ -114,19 +112,11 @@ Long queues → clients time out and resend → even more load: a **retry storm*
 
 #### Latency and response time (pp. 38–39)
 
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant S as Service
-    Note over C: response time starts
-    C->>S: request (network latency)
-    Note over S: queueing delay (waiting for a CPU)
-    Note over S: service time (actively processing)
-    S->>C: response (network latency + any send-queue delay)
-    Note over C: response time ends
-```
+![A request's timeline from client to service and back: network latency on the way in, queueing delay, service time while processing, queueing, and network latency back; response time spans all of it](../figures/02-04.png)
 
-*The vault’s rendering of Figure 2-4 (p. 39).* **Latency** is the catch-all for time a request is *latent* — not being processed. Random delays come from context switches, packet loss and TCP retransmission, garbage-collection pauses, page faults, even vibrations in the rack (p. 39). With only a few cores, a few slow requests delay all those queued behind them — **head-of-line blocking** — which is why response time must be measured **on the client side** (p. 39).
+*Figure 2-4 (p. 39): service time is only the middle; the client's response time also includes both network trips and every wait in a queue.*
+
+**Latency** is the catch-all for time a request is *latent* — not being processed. Random delays come from context switches, packet loss and TCP retransmission, garbage-collection pauses, page faults, even vibrations in the rack (p. 39). With only a few cores, a few slow requests delay all those queued behind them — **head-of-line blocking** — which is why response time must be measured **on the client side** (p. 39).
 
 #### Average, median, and percentiles (pp. 40–41)
 
@@ -138,6 +128,10 @@ sequenceDiagram
 
 Variation in network delay is called **jitter** (p. 40). Amazon specifies internal services at **p999** because the slowest requests often belong to customers with the most data — the most valuable ones; optimizing p9999 was judged too expensive for too little benefit (pp. 40–41).
 
+![Bars for 100 requests' response times with horizontal lines for the median, mean, 95th and 99th percentiles; a few tall bars sit far above the rest](../figures/02-05.png)
+
+*Figure 2-5 (p. 40): the mean sits above the median, and the few slow outliers that set p95 and p99 are invisible in either.*
+
 **The user impact of response times** (p. 41) is surprisingly hard to quantify: Google 2006 (400 → 900 ms ⇒ 20% less traffic), Google 2009 (+400 ms ⇒ only 0.6% fewer searches), Bing 2009 (+2 s ⇒ 4.3% less ad revenue), an Akamai study confounded by fast-loading 404 pages, and Yahoo (20–30% more clicks on searches faster by ≥ 1.25 s, controlling for result quality).
 
 #### Use of response time metrics (pp. 41–42)
@@ -145,6 +139,10 @@ Variation in network delay is called **jitter** (p. 40). Amazon specifies intern
 - **Tail latency amplification**: when a request fans out to several backends in parallel, it waits for the slowest — so a small share of slow calls makes a large share of user requests slow (Figure 2-6).
 - **SLO** = target (e.g. median < 200 ms, p99 < 1 s, ≥ 99.9% non-error responses); **SLA** = contract saying what happens if the SLO is missed (e.g. refunds) (p. 42).
 - **Computing percentiles** over a rolling window: sort the window, or use approximations — HdrHistogram, t-digest, OpenHistogram, DDSketch. **Averaging percentiles is meaningless; add the histograms** (p. 42).
+
+![A web application calls seven backends in parallel; six answer in 76–143 ms but one takes 487 ms, so the end-user request takes as long as the slowest call](../figures/02-06.png)
+
+*Figure 2-6 (p. 42): one slow backend call makes the whole user request slow — tail latency amplification.*
 
 > **Try it:** [Percentiles and tail latency](../widgets/02-tail-latency.html) — shape a latency distribution, watch p99 pull away from the mean, then fan one page out to many backends.
 

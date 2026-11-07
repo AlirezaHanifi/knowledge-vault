@@ -60,6 +60,10 @@ The example is a streaming platform's `signup` (Listing 11.1): `await Payment.cr
 | t \| ⚡ ≡ prefix t | What we get: a crash leaves some prefix of the execution |
 | t \| ⚡ ≡ t or nothing | What we want: **failure transparency** |
 
+![Three states joined by atomic actions a and b, with a curved red arrow a • b spanning from the first state to the last](../figures/11-01.png)
+
+*Figure 11.1 (p. 146): each arrow alone is atomic, but a crash can stop the system in the middle state, so the long red arrow is not.*
+
 **Aha! moment, two flavors of atomicity** (pp. 146–147):
 
 | Flavor | Observably equivalent to… | Intermediate states visible to others? |
@@ -108,6 +112,10 @@ Duplicated events are only correct if actions are **idempotent** (p. 150).
 |---|---|---|
 | **Restart** | Run the process again from the beginning | Simple *if* steps are idempotent. Breaks **delays**: in Listing 11.4, the account is created and payment is collected after a one-week `setTimeout`, so a restart resets the week. Breaks **nondeterministic** steps: the time of day or a random number may differ on rerun |
 | **Resume** | Restart from the most recent **save point**: load state, run a step, save state (Figure 11.5) | Needs enough information captured between steps |
+
+![A process of two steps a and b: before each step a dashed arrow loads state from a store, after each step another saves state, and a dashed arc skips from the save after a to the load before b](../figures/11-05.png)
+
+*Figure 11.5 (p. 151): after a crash, execution resumes from the last save point, so a completed step is never repeated.*
 
 ### 11.5 Implementation of failure-transparent recovery
 

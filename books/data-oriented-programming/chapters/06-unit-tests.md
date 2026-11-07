@@ -62,22 +62,9 @@ The code under test is the search query from chapter 3 (listing 6.4, p. 113). It
 
 #### 6.2.1 The tree of function calls
 
-```mermaid
-flowchart TB
-    R[Library.searchBooksByTitleJSON] --> G1[_.get]
-    R --> JS[JSON.stringify]
-    R --> S[Catalog.searchBooksByTitle]
-    S --> G2[_.get]
-    S --> M1[_.map]
-    S --> F[_.filter]
-    S --> BI[Catalog.bookInfo]
-    BI --> G3[_.get]
-    BI --> AN[Catalog.authorNames]
-    AN --> G4[_.get]
-    AN --> M2[_.map]
-```
+![Call tree of Library.searchBooksByTitleJSON: it calls _.get, JSON.stringify and Catalog.searchBooksByTitle, which calls _.get, _.map, _.filter and Catalog.bookInfo, which in turn calls _.get and Catalog.authorNames](../figures/06-01.png)
 
-*Redrawn from figure 6.1 (p. 114). The leaves are functions outside the application's code base: Lodash and `JSON`.*
+*Figure 6.1 (p. 114): the leaves are functions outside the application's code base — Lodash and `JSON` — so testing starts one level up.*
 
 You expand the tree until you reach a function outside the application's code base, or one that calls nothing. `Catalog.bookInfo` is a child of `searchBooksByTitle` even though it's called inside an anonymous function (p. 114).
 
@@ -116,19 +103,9 @@ The test for `Catalog.searchBooksByTitle` is pleasanter: it returns data, so the
 
 ### 6.4 Unit tests for mutations
 
-```mermaid
-flowchart TB
-    A[System.addMember] --> G[SystemState.get]
-    A --> C[SystemState.commit]
-    A --> L[Library.addMember]
-    L --> g[_.get]
-    L --> s1[_.set]
-    L --> U[UserManagement.addMember]
-    U --> h[_.has]
-    U --> s2[_.set]
-```
+![Call tree of System.addMember: it calls SystemState.get, SystemState.commit and Library.addMember; Library.addMember calls _.get, _.set and UserManagement.addMember, which calls _.has and _.set](../figures/06-05.png)
 
-*Redrawn from figure 6.5 (p. 126).*
+*Figure 6.5 (p. 126): the mutation's tree mixes state handling (`SystemState`) with pure calculations below `Library.addMember`.*
 
 Of the application functions, the `SystemState` ones are generic and tested outside any particular mutation. That leaves three, and the real meat is in `UserManagement.addMember`; the other two are wrappers (p. 127). A mutation's test needs more effort than a query's, because a mutation computes a new *system state* from the current state and its arguments, while a query returns response data (figure 6.6, p. 127). The tests for `UserManagement.addMember` (pp. 127–130):
 

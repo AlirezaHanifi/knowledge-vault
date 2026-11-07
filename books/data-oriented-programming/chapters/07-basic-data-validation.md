@@ -60,14 +60,9 @@ The chapter focuses on validation at the system's boundaries; validation as data
 
 What Theo would miss most from OOP is the guarantee that an instantiated class has fields with the proper names and types; with maps it's easy to make small mistakes (p. 142). Joe: in DOP the schema is separate from the representation, and the most important data to validate is data crossing the system's boundaries. For a web server those are its communication with clients, databases and web services (figure 7.1, pp. 142–143).
 
-```mermaid
-flowchart TB
-    C["Client (e.g., web browser)"] <-->|"data — boundary 1"| W[Web server]
-    W <-->|"data — boundary 2"| D[Database]
-    W <-->|"data — boundary 3"| S[Web service]
-```
+![A client such as a web browser exchanges data with a web server, which exchanges data with a web service and a database](../figures/07-01.png)
 
-*Redrawn from figure 7.1 (p. 142), with the three boundaries Theo names (p. 143).*
+*Figure 7.1 (p. 142): every arrow is a boundary where data enters or leaves the system — the places Theo names for validation (p. 143).*
 
 | Kind of validation | Purpose | Environment (table 7.1, p. 143) |
 |---|---|---|

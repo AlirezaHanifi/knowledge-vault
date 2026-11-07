@@ -40,13 +40,7 @@
 <p>So the real benefit is the third one, extensibility (p. 277). The book adds that switch statements like these shouldn&#x27;t be used in production; they&#x27;re only a didactic step (p. 276). Theo asks Joe, who&#x27;s about to give a talk at a tech conference, and gets one hint: look at multimethods (p. 277).</p>
 <div class="callout vault"><p><strong>Vault note:</strong> the Java in listing 13.1 refers to <code>animal.name</code> inside each class, where only <code>name</code> (or <code>this.name</code>) is in scope, so it wouldn&#x27;t compile as printed (p. 274).</p></div></div></div></section>
 <section class="slide" id="132-multimethods-with-single-dispatch" aria-label="13.2 Multimethods with single dispatch"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>13.2 Multimethods with single dispatch</h2></header><div class="slide-body"><p>A multimethod has a <strong>dispatch function</strong> and <strong>a set of methods</strong> (p. 277). For <code>greet</code>, <code>greetDispatch</code> emits the animal&#x27;s type, and each value is handled by <code>greetDog</code>, <code>greetCat</code> or <code>greetCow</code> (figure 13.1, p. 278):</p>
-<figure class="diagram"><pre class="mermaid">flowchart LR
-    A[&quot;animal (type, name)&quot;] --&gt; D[&quot;greetDispatch: emit the animal type&quot;]
-    D --&gt;|&quot;&amp;quot;dog&amp;quot;&quot;| M1[greetDog]
-    D --&gt;|&quot;&amp;quot;cat&amp;quot;&quot;| M2[greetCat]
-    D --&gt;|&quot;&amp;quot;cow&amp;quot;&quot;| M3[greetCow]
-    A -.-&gt; M1 &amp; M2 &amp; M3</pre></figure>
-<p><em>Redrawn from figure 13.1 (p. 278). The dotted arrows show that the arguments also reach the methods.</em></p>
+<figure class="book-fig"><a href="../figures/13-01.png" title="Open the figure at full size"><img src="../figures/13-01.png" alt="An animal with type and name goes to greetDispatch, which emits the animal type; &quot;dog&quot;, &quot;cat&quot; or &quot;cow&quot; selects greetDog, greetCat or greetCow, and dashed arrows show the animal itself also reaching each method" loading="lazy"></a><figcaption><span class="fig-label">Figure 13.1 (p. 278):</span> the dispatch function only picks a method; the arguments go to the chosen method unchanged.</figcaption></figure>
 <p>The example uses the JavaScript <strong>arrows/multimethod</strong> library: <code>multi</code> creates a multimethod, <code>method</code> adds a method (p. 278).</p>
 <div class="table-wrap"><table class="data"><thead><tr><th>Step</th><th>Code</th><th>Listing</th></tr></thead><tbody><tr><td>Initialization</td><td><code>var greet = multi(greetDispatch);</code>, where <code>greetDispatch</code> validates <code>animal</code> in dev and returns <code>animal.type</code></td><td>13.6, pp. 278–279</td></tr><tr><td>Method declaration</td><td><code>greet = method(&quot;dog&quot;, greetDog)(greet);</code></td><td>13.7, p. 279</td></tr><tr><td>More methods</td><td>the same for <code>&quot;cat&quot;</code> and <code>&quot;cow&quot;</code></td><td>13.8–13.9, pp. 279–280</td></tr><tr><td>Call</td><td><code>greet(myDog)</code> → <code>&quot;Woof woof! My name is Fido&quot;</code></td><td>13.10, p. 280</td></tr><tr><td>Default</td><td><code>greet = method(greetDefault)(greet);</code> with no dispatch value; <code>greet(myHorse)</code> → <code>&quot;My name is Horace&quot;</code></td><td>13.11–13.12, p. 281</td></tr></tbody></table></div>
 <p>Points from the dialogue (pp. 279–281):</p>
@@ -90,7 +84,6 @@ python3 multimethods.py</code></pre></div><h3>Connections</h3><ul><li><strong>Th
   <button class="btn primary" type="button" data-go="1" aria-label="Next slide"><span>Next</span> →</button>
 </nav>
 <script src="../../../assets/kit.js"></script>
-<script src="../../../assets/vendor/mermaid.min.js"></script>
 <script src="../../../assets/site.js"></script>
 </body>
 </html>

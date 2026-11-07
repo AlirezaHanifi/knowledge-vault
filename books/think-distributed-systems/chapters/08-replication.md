@@ -115,6 +115,10 @@ The same partially synchronous model with Crash-Stop, Omission and Crash-Recover
 
 Only one component or the network takes a step at a time, so an update reaches replicas **one after another**. Figure 8.6 shows x₁, x₂ and x₃ becoming 2 in turn. Lag is an inherent aspect of replicated systems, not just a delay, and it is the source of many problems, including lost replication transparency (p. 112).
 
+![Four successive states of three replicas: all are 1, then x1 becomes 2, then x2, then x3](../figures/08-06.png)
+
+*Figure 8.6 (p. 112): every intermediate state is one in which replicas disagree.*
+
 | Lag | Cause (p. 113) |
 |---|---|
 | **Inherent** | The nature of distributed systems: unavoidable |
@@ -129,6 +133,14 @@ Only one component or the network takes a step at a time, so an update reaches r
 | **Quorum (hybrid)** | A majority has acknowledged | Foreground within the quorum, background outside it | Common in practice |
 
 Either way, replicas can be updated sequentially or in parallel (Figures 8.7–8.8).
+
+![Timelines of a client and three nodes: the client's request to node 1 stays open while node 1 replicates to node 2 and node 3, and the response returns only after both acknowledge](../figures/08-07.png)
+
+*Figure 8.7 (p. 113): synchronous — the client waits through the replication.*
+
+![The same timelines, but node 1 answers the client at once and replicates to node 2 and node 3 afterwards](../figures/08-08.png)
+
+*Figure 8.8 (p. 113): asynchronous — the client's answer comes before the replicas have the change.*
 
 #### 8.4.4 State-based vs. log-based replication (p. 114)
 
@@ -146,6 +158,10 @@ Log-based replication is "emerging as the industry favorite" (p. 114).
 #### 8.4.5 Single-leader, multileader, and leaderless systems (pp. 114–115)
 
 Leaders are authorized to accept and handle requests; followers may not process requests directly (Figure 8.9):
+
+![Three configurations of clients and nodes: single-leader, where two clients reach one black leader that feeds three followers; multileader, where clients reach either of two leaders, each feeding its followers; and leaderless, where every client talks to every node](../figures/08-09.png)
+
+*Figure 8.9 (p. 115): the black squares are the nodes allowed to accept writes — one, several, or (leaderless) every node.*
 
 | Configuration | Who accepts operations | Strength | Weakness |
 |---|---|---|---|

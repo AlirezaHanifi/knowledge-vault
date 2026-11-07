@@ -65,23 +65,9 @@ In the calculation phase you don't deal with state, so its code is stateless and
 
 Joe's question-by-question narrowing (pp. 76–77): only the `Catalog` is affected, not `UserManagement`; within it only `booksByIsbn`; within that only the *Watchmen* record; within that only `publicationYear`. So the immutable function builds a fresh `Library` that reuses the unchanged parts, never deep-copying them (figure 4.4, p. 78):
 
-```mermaid
-flowchart TB
-    NL["«Next» Library"] --> NC["«Next» Catalog"]
-    NL --> UM[UserManagement]
-    L[Library] --> C[Catalog]
-    L --> UM
-    NC --> NB["«Next» booksByIsbn"]
-    NC --> AU[authorsById]
-    C --> B[booksByIsbn]
-    C --> AU
-    NB --> NW["«Next» watchmen<br/>publicationYear: 1986"]
-    B --> W["watchmen<br/>publicationYear: 1987"]
-    NW --> T["title, authorIds, …"]
-    W --> T
-```
+![Structural sharing: a Next Library, Next Catalog, Next booksByIsbn and Next watchmen node are created along the path to the changed publicationYear, and they point to the unchanged UserManagement, authorsById and other fields of the old version](../figures/04-04.png)
 
-*Redrawn from figure 4.4 (p. 78). Four new maps are created along the path; `UserManagement`, `authorsById` and the book's other fields are shared.*
+*Figure 4.4 (p. 78): only the four maps on the path to the change are new; everything else is shared with the previous version.*
 
 **Adding a member** (figure 4.5 and listing 4.3, pp. 79–80) shares the `Catalog` and the librarians. The mutation differs from a query in two ways:
 
@@ -135,6 +121,10 @@ The drawback is that they are not native, so you convert between native and pers
 ### 4.5 The commit phase of a mutation
 
 `Library.addMember` returns a new library but doesn't change the current state (p. 83). The commit phase moves the system state forward to the version the calculation returned (figure 4.7, p. 84). It is implemented by two singleton, stateful, OOP-like classes: `System`, which implements the mutations, and `SystemState`, which manages the state (pp. 84–85). As Joe puts it, meditation taught him that every part of the universe has a role to play (p. 84).
+
+![Before commit, the system state points to a state with one member; addMember creates a state with two members; after commit the system state points to the new one](../figures/04-07.png)
+
+*Figure 4.7 (p. 84): committing is just moving one reference; both versions still exist.*
 
 ```js
 class System {

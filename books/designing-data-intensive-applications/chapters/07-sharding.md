@@ -44,29 +44,9 @@ When data or query load outgrows one machine, it is split into **shards** (parti
 
 A distributed database spreads data in two ways: **replication** (copies of the same data, Ch. 6) and **sharding** — splitting data too big, or written too fast, for one node into **shards** (partitions), each record belonging to exactly one. The two combine: each shard is replicated, and a node may lead some shards while following others (Figure 7-1) (pp. 251–252).
 
-```mermaid
-flowchart LR
-    subgraph N1["Node 1"]
-      direction TB
-      s1L["Shard 1 · leader"]
-      s2F["Shard 2 · follower"]
-    end
-    subgraph N2["Node 2"]
-      direction TB
-      s2L["Shard 2 · leader"]
-      s3F["Shard 3 · follower"]
-    end
-    subgraph N3["Node 3"]
-      direction TB
-      s3L["Shard 3 · leader"]
-      s1F["Shard 1 · follower"]
-    end
-    s1L -.-> s1F
-    s2L -.-> s2F
-    s3L -.-> s3F
-```
+![Four nodes each holding leader and follower replicas of shards 1–4; every shard's leader sits on one node and replication streams run to its followers on other nodes](../figures/07-01.png)
 
-*After Figure 7-1 (p. 252): each shard has one leader; dotted arrows are replication.*
+*Figure 7-1 (p. 252): each node leads some shards and follows others, so leadership — and write load — is spread across the cluster.*
 
 **Names for a shard** (p. 252): partition (Kafka), range (CockroachDB), region (HBase, TiDB), vBucket (Couchbase), vnode (Riak), token-range (Cassandra), tablet (Bigtable, YugabyteDB, ScyllaDB). In PostgreSQL, *partitioning* splits a table into files on one machine, unlike sharding across machines. “Shard” may come from *Ultima Online*’s shattered crystal, or a lost 1980s acronym. Nothing to do with **network partitions** (Ch. 9).
 
@@ -123,6 +103,14 @@ When nearby keys needn’t be together (e.g. tenant IDs), hash first. The hash n
 
 Data warehouses do the same with different words: BigQuery’s partition key + **cluster columns**, Snowflake’s micro-partitions + cluster keys, Delta Lake — clustering also helps compression and filtering (p. 262).
 
+![Keys 0–23 spread over three nodes by hash mod 3, then over four nodes by hash mod 4: almost every key ends up on a different node](../figures/07-03.png)
+
+*Figure 7-3 (p. 259): changing N in hash mod N moves most keys, which is why rebalancing schemes avoid it.*
+
+![The hash range 0–1024 split at random boundaries into ranges owned by nodes 0–2; adding node 3 takes over parts of several existing ranges](../figures/07-06.png)
+
+*Figure 7-6 (p. 262): with random boundaries and several ranges per node, a new node takes a share from each existing node.*
+
 > **Try it:** [Sharding and rebalancing](../widgets/07-sharding.html) — add a node under hash mod N, fixed shards and rendezvous hashing, and create and relieve hot spots.
 
 #### Skewed workloads and relieving hot spots (pp. 263–264)
@@ -149,13 +137,9 @@ Which node — IP and port — holds a key? Like service discovery, except any s
 
 Open problems (pp. 266–267): who decides the assignment (a single coordinator must itself fail over without split brain); how routers learn of changes; requests in flight during a shard’s cutover.
 
-```mermaid
-flowchart LR
-    C[Client] --> R{Routing tier}
-    R -- "key k → shard 7" --> N2[Node 2]
-    ZK[(Coordination service<br/>shard → node map)] -. "notify on change" .-> R
-    N1[Node 1] & N2 & N3[Node 3] -. "register" .-> ZK
-```
+![Three ways to route a request for "foo": (1) the client contacts any node, which forwards it; (2) a routing tier forwards it; (3) the client knows the assignment and contacts node 2 directly](../figures/07-07.png)
+
+*Figure 7-7 (p. 266): the hatched component is whatever must know which shard lives on which node.*
 
 | Coordination | Systems (pp. 267–268) |
 |---|---|
@@ -180,6 +164,14 @@ Secondary indexes search by value — all actions by user 123, articles containi
 | Good fit | Write-heavy | Read throughput > write throughput, short postings lists |
 
 Building your own secondary index in a key-value store means keeping it consistent yourself — race conditions and partial failures easily desynchronize it (p. 269).
+
+![Two shards, each with a primary key index of cars and a local secondary index on color and make; a query for red cars must ask both shards](../figures/07-09.png)
+
+*Figure 7-9 (p. 269): a local index covers only its shard's records, so a query by color is scattered to every shard.*
+
+![The same two shards with a global secondary index that is itself sharded by term: colors a–r on shard 0, s–z on shard 1; the query for red cars reads one index shard](../figures/07-10.png)
+
+*Figure 7-10 (p. 270): a global index sends the read to one place but makes a write update index shards elsewhere.*
 
 > **Try it:** [Local vs global secondary indexes](../widgets/07-secondary-indexes.html) — search the book's used-car listings and count the shards each read and write touches.
 

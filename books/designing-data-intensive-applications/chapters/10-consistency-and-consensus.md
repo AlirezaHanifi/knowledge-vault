@@ -63,23 +63,9 @@ Also called atomic, strong, immediate or external consistency: make a system **a
 
 Model one object as a **register** (a key, a row, a document); each operation is a bar from request to response, and the database applied it somewhere in between.
 
-```mermaid
-sequenceDiagram
-    participant A as Client A
-    participant DB as Linearizable register x
-    participant B as Client B
-    participant C as Client C
-    A->>DB: read x
-    DB-->>A: 0 (before the write began)
-    C->>DB: write x = 1
-    A->>DB: read x (concurrent with the write)
-    DB-->>A: 1 — the value has "flipped"
-    B->>DB: read x (starts after A's read returned)
-    DB-->>B: must be 1, even though C's write is still in flight
-    DB-->>C: ok
-```
+![Client C writes x = 1 while clients A and B read; reads before the write return 0, reads after it return 1, and reads overlapping it may return 0 or 1](../figures/10-02.png)
 
-*The vault’s rendering of the rules of Figures 10-2 and 10-3.*
+*Figure 10-2 (p. 404): a read concurrent with a write may return either value — Figure 10-3 adds that once any read returns the new value, every later read must too.*
 
 | Read relative to the write | Allowed results |
 |---|---|
@@ -89,6 +75,10 @@ sequenceDiagram
 | Begins after *any* read returned the new value | New value — the value flips **once**, atomically, never back |
 
 Figure 10-4 adds **CAS(x, v_old, v_new)**: marking the instant each operation took effect, the markers must join into a valid sequence that **only moves forward in time**. Requests may be applied in a different order than sent if they are concurrent; a read may return a value before its writer receives the ack; CAS detects concurrent changes. Linearizability can be tested from recorded timings (Knossos, Elle) but checking is expensive. It is the strongest common consistency model and includes read-after-write, monotonic reads and consistent prefix reads (p. 407).
+
+![Four clients' reads, writes and compare-and-sets on x, each with a marker at the instant it took effect; joining the markers gives one valid sequence, except one read that returns a stale 2, flagged with a warning sign](../figures/10-04.png)
+
+*Figure 10-4 (p. 406): linearizability means the effect markers form one sequence consistent with real time; the flagged read breaks it.*
 
 #### Linearizability versus serializability (pp. 407–408)
 
@@ -121,9 +111,17 @@ If you control the second channel you can use read-your-writes-style alternative
 
 Figure 10-6: n = 3, w = 3 writer updating x to 1; reader A (r = 2) gets 1 and 0 → returns 1; reader B, starting *after* A finished, gets 0 and 0. Fixable only with **synchronous read repair** before returning and writers reading a quorum’s latest timestamp before writing — Riak skips this for performance; Cassandra does the repair but uses clock timestamps. Linearizable **CAS** needs consensus regardless (pp. 412–413).
 
+![A writer sends x = 1 to three replicas with varying delays; reader A reads replicas 1 and 2 and gets 1 and 0; reader B, starting later, reads replicas 2 and 3 and gets 0 and 0](../figures/10-06.png)
+
+*Figure 10-6 (p. 413): a quorum is satisfied in both reads, yet B sees an older value than A — not linearizable.*
+
 #### The cost of linearizability (pp. 413–417)
 
 Two regions lose contact (Figure 10-7): multi-leader keeps both sides working and queues replication; with a single leader, clients in the follower region can make no writes or linearizable reads — an outage there (pp. 413–414). Generally, under a network fault, a linearizable system’s cut-off replicas must wait or error (“**CP**”); a system without linearizability can keep serving (“**AP**”) (pp. 414–415).
+
+![Two regions, each with an application, a database and clients, connected by a replication link that is interrupted](../figures/10-07.png)
+
+*Figure 10-7 (p. 414): during the interruption, a linearizable system must make one side's clients wait or fail; staying available means giving up linearizability.*
 
 | CAP — what it is | What it isn’t |
 |---|---|
@@ -155,6 +153,10 @@ A **logical clock** counts events instead of seconds. Requirements: compact uniq
 | **Vector clock** | One counter per node | Detects concurrency | Size: an integer per node |
 
 Lamport and hybrid clocks make good MVCC transaction IDs because snapshots then respect causality (p. 422).
+
+![Aaliyah, Bryce and Caleb exchange chat messages tagged with Lamport timestamps such as (1, "Aaliyah") and (2, "Bryce"); a reply always carries a higher counter than the message it answers](../figures/10-09.png)
+
+*Figure 10-9 (p. 421): ordering by (counter, node ID) gives a total order in which every reply comes after the message it replies to.*
 
 > **Try it:** [Wall clocks, Lamport clocks, vector clocks](../widgets/10-logical-clocks.html) — order the book's Aaliyah–Bryce–Caleb chat three ways.
 

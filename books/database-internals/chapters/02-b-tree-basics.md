@@ -108,6 +108,10 @@ Following a pointer within a block means fetching the whole block, so the layout
 
 Grouping binary tree nodes into pages (Figure 2-6) improves locality, because the next node is often in the page already fetched. Node and pointer overhead remains, though, and balancing randomly inserted keys means reorganizing pages and updating pointers (p. 33).
 
+![A binary tree whose nodes are grouped into dashed page boxes: the root and its two children share one page, and each lower subtree has its own page](../figures/02-06.png)
+
+*Figure 2-6 (p. 33): each dashed box is one disk page; a lookup reads a page and follows several pointers inside it before the next fetch.*
+
 ### Ubiquitous B-Trees
 
 The book compares a B-Tree to a library catalog room: pick the cabinet, then the shelf, the drawer and finally the card (p. 33). B-Tree nodes are drawn as rectangles with explicit pointer blocks, because each node splits its range into many subranges (Figures 2-7, 2-8, p. 34). Keys within a node are sorted, so each node can be searched with binary search. Finding one of 4 × 10⁹ items takes about **32 comparisons**, but only one seek per level (p. 34). B-Trees serve both **point queries** (`=`) and **range queries** (`<`, `>`, `≤`, `≥`) (p. 35).
@@ -122,6 +126,10 @@ Each node holds up to **N keys and N + 1 child pointers** (p. 35).
 | **Internal** | Connect the root with the leaves; usually several levels |
 | **Leaf** | Bottom level; no children |
 
+![Three levels of B-Tree nodes: one root node, a row of internal nodes, and a row of leaf nodes, each node a multi-key page with child pointers](../figures/02-09.png)
+
+*Figure 2-9 (p. 35): every node is one page; fanout is wide, so the tree stays only a few levels deep.*
+
 B-Trees organize fixed-size pages, so *node* and *page* are used interchangeably. **Occupancy** is the ratio of keys held to node capacity. High fanout amortizes balancing and lets keys and child pointers share one block or a few consecutive blocks. Splits and merges are triggered when nodes become full or nearly empty (p. 35).
 
 **B⁺-Trees** (p. 36): the B-Tree in the strict sense stores values at any level. A B⁺-Tree stores values *only in leaves*, and internal nodes hold separator keys. Every insert, update, delete and read therefore touches only leaves, and changes reach higher levels only through splits and merges. B⁺-Trees became the default; MySQL InnoDB calls its B⁺-Tree a "B-tree", and the book follows the same convention.
@@ -130,15 +138,9 @@ B-Trees organize fixed-size pages, so *node* and *page* are used interchangeably
 
 Keys in nodes are called **index entries**, **separator keys** or **divider cells**. They split the tree into **subtrees** (branches, subranges) (p. 36). The first pointer leads to keys smaller than the first key, the last pointer to keys greater than or equal to the last key, and pointer *i* to keys with **K₍ᵢ₋₁₎ ≤ Kₛ < Kᵢ** (Figure 2-10).
 
-```mermaid
-flowchart TB
-    N["[ 10 | 20 | 30 ]"] --> A["keys < 10"]
-    N --> B["10 ≤ keys < 20"]
-    N --> C["20 ≤ keys < 30"]
-    N --> D["keys ≥ 30"]
-```
+![A node with keys K1, K2, K3 and four pointers to subtrees holding Ks < K1, K1 ≤ Ks < K2, K2 ≤ Ks < K3 and Ks ≥ K3](../figures/02-10.png)
 
-*The vault's example of the invariant in Figure 2-10 (p. 36).*
+*Figure 2-10 (p. 36): N keys give N + 1 pointers, and each pointer owns the half-open range between its neighbouring keys.*
 
 Some variants add **sibling pointers**, usually at the leaf level and sometimes in both directions, so range scans and reverse iteration don't have to go back to the parent (p. 37). B-Trees are built **bottom-up**: more leaves lead to more internal nodes and a taller tree. Storage utilization can drop to 50% but is usually much higher (p. 37).
 
@@ -178,19 +180,9 @@ Splitting allocates a new node and moves half the elements to it: everything aft
 
 Figures 2-11 and 2-12 split a full leaf and a full nonleaf node while inserting **11**. Nonleaf splits always come from a split below, which adds the extra pointer to the new lower node. After the split, the new element goes to the old node if it's smaller than the promoted key, and to the new node otherwise (p. 40).
 
-```mermaid
-flowchart TB
-    subgraph Before["Before: insert 11 into a full leaf (N = 4)"]
-      L1["[ 5 | 7 | 9 | 12 ]"]
-    end
-    subgraph After["After the split"]
-      P["parent: … | 9 | …"] --> A1["[ 5 | 7 ]"]
-      P --> A2["[ 9 | 11 | 12 ]"]
-    end
-    Before --> After
-```
+![Before: a full leaf 10, 13, 15 under a parent holding 18. After inserting 11: leaves 10, 11 and 13, 15, with 13 promoted into the parent ahead of 18](../figures/02-11.png)
 
-*The vault's example of a leaf split. The keys are illustrative; the book's Figure 2-11 shows the same mechanics (pp. 39–40).*
+*Figure 2-11 (p. 40): the full leaf splits at its midpoint, 11 lands in the left half, and the new node's first key (13) is promoted; new and promoted keys are shaded.*
 
 The four steps (p. 41):
 
@@ -209,6 +201,10 @@ A delete locates the leaf and removes the key and value (p. 41). If neighbouring
 - **nonleaf nodes:** their combined pointers number at most N + 1.
 
 Usually the right sibling's elements move to the left node. Figure 2-13 shows a leaf merge while deleting 16 (p. 41). A nonleaf merge, shown in Figure 2-14 while deleting 10, **demotes** the parent's separator key into the merged node, and the parent loses a pointer. Merges can also propagate to the root (p. 42).
+
+![Before: leaves 15, 16 and 20, 25 under a parent holding 11 and 20. After deleting 16: one leaf 15, 20, 25, and the parent loses separator 20](../figures/02-13.png)
+
+*Figure 2-13 (p. 41): deleting 16 leaves two underfull siblings that fit in one node, so they merge and the parent drops a pointer.*
 
 The three steps, once the element is removed (p. 42):
 

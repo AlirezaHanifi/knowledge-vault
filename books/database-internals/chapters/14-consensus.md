@@ -135,6 +135,10 @@ Implementations usually **colocate** the roles in one process. Every proposal ha
 
 There are two phases: **voting** (propose), where proposers compete for leadership, and **replication**, where the winner distributes the value (p. 286). Votes can split between proposers, forcing a restart (p. 286).
 
+![A proposer sends Prepare(n) to acceptors, collects Promise(n, v), sends Accept!(n, v), and acceptors send Accepted(n, v) to the proposer and learners](../figures/14-03.png)
+
+*Figure 14-3 (p. 287): one round to win the right to propose, one to get the value accepted; learners hear the accepted value directly.*
+
 | Message | Acceptor rule (pp. 286–287) |
 |---|---|
 | **Prepare(n)** | If no higher-numbered Prepare has been answered, promise not to accept anything lower than n. If a proposal was already accepted, reply **Promise(m, v_accepted)**. If a higher Prepare was answered, tell the proposer. A later Prepare may be answered if its number is higher |
@@ -189,6 +193,10 @@ A single leader must be re-elected when it fails and can become a bottleneck. **
 - **Fast path:** the dependency lists agree, so commit. **Slow path:** they differ, so merge the dependencies, raise the sequence number and send **Accept** to ⌊f/2⌋ + 1 replicas before committing (pp. 294–295).
 - In Figure 14-8, P1 commits on the fast path; P5 learns about command 1 from P3 and runs Accept(2, {1}) (p. 295).
 
+![Five processes: P1's PreAccept(1, ∅) gets OK from P2 and P3 and commits; P5's PreAccept(2, ∅) meets a conflict reporting {1}, runs Accept(2, {1}) and then commits](../figures/14-08.png)
+
+*Figure 14-8 (p. 295): non-conflicting commands commit in one round; a discovered dependency costs P5 a second Accept round.*
+
 Commands **interfere** if their execution order matters. Replicas build a dependency graph and execute in reverse dependency order, which is rare for most workloads (p. 296). Sequence numbers combine a configuration **epoch**, a node-local counter and the replica ID. Stale proposals are nacked with the newer state (p. 296).
 
 #### Flexible Paxos
@@ -229,6 +237,10 @@ Terms (epochs) give a global partial order without synchronized clocks. A comman
 
 A follower **denies its vote** to a candidate whose log is less up to date: a lower last term, or a shorter log when the terms are equal. A leader therefore holds every committed entry. Because entries are replicated in order, comparing the last entries is enough (p. 302). The leader appends to its own log and sends to followers in parallel. Once enough followers acknowledge, the entry is **committed** (pp. 302–303). In Figure 14-11, x = 8 is appended, replicated to a majority, committed locally, and then the commit is propagated (p. 303). Committing an entry commits everything before it, and only the leader decides commitment (p. 303).
 
+![Logs of five processes with leader P1: entries 1 to 3 (x=3, x=7, x=2) are committed; P1 also has uncommitted entries 4 and 5, P4 has entry 4, and P3 and P5 lag behind](../figures/14-12.png)
+
+*Figure 14-12 (p. 304): an entry is committed once a majority holds it; committing entry 3 also commits everything before it.*
+
 #### Failure scenarios
 
 - **Split votes** are made unlikely by **randomized timers**: one candidate starts earlier and wins (p. 304).
@@ -256,19 +268,9 @@ Safety and liveness need at most (n − 1)/3 faulty replicas, so **n = 3f + 1**.
 
 - **Views:** the primary is replica **v mod N**, and the rest are backups. A client waits for **f + 1** matching replies (p. 306).
 
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant P as Primary
-    participant B as Backups (3f)
-    C->>P: request
-    P->>B: Pre-prepare(view, seq, payload, signed digest)
-    B->>B: Prepare(view, seq, digest) all-to-all, need 2f matching
-    B->>B: Commit, all-to-all, need 2f+1 matching
-    B-->>C: replies, client needs f+1 matching
-```
+![Client sends a request to P1; P1 sends pre-prepare to P2 and P3, while P4 is marked with a cross; replicas exchange prepare all-to-all, then commit all-to-all, then all reply to the client](../figures/14-13.png)
 
-*The vault's version of Figure 14-13 (pp. 306–308).*
+*Figure 14-13 (p. 308): pre-prepare carries the primary's signed digest; prepare needs 2f matching messages, commit 2f + 1, and the client waits for f + 1 matching replies (pp. 306–308).*
 
 - **Digests** keep prepare messages small; collision resistance and signatures make them trustworthy (p. 307).
 - **View change:** replicas that suspect the primary stop responding, except to checkpoint and view-change messages, and broadcast a view change. The new primary starts the view after **2f** view-change events (p. 308).

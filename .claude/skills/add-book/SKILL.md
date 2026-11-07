@@ -22,6 +22,8 @@ Everything about a book lives in `books/<slug>/`. This skill creates that folder
    python3 scripts/pdf.py text books/<slug>/book.pdf /tmp/book.txt   # for fact-checking later
    ```
 
+   `python3 scripts/pdf.py figures books/<slug> --offset N` lists the figure captions; chapters pick from them later (`add-figures`).
+
    No bookmarks? Transcribe the printed contents pages instead and say so in *Source*. Never use another edition's TOC or memory.
 3. **Create `books/<slug>/README.md`** from [`book.md`](book.md). Slug: full title in kebab-case, no edition unless two editions coexist. Fill only keys you verified; `short_title` is the name used in breadcrumbs. One *Chapters* row per chapter (number, linked title, printed pages). The chapter map is the book's own structure (parts, if any); any grouping of your own must be labelled as such.
 4. **Create one note per chapter** at `chapters/NN-title-slug.md` from the `write-chapter` skill's [template](../write-chapter/chapter.md): front matter, navigation line, and the verified outline pasted from step 2. Other sections are added when the chapter is written — never as empty placeholders.

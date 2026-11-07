@@ -51,6 +51,10 @@ Features change, so stored data changes. Relational databases have exactly one s
 
 For APIs: an old client calling a new service needs backward-compatible requests and forward-compatible responses; a new client calling an old service needs the reverse (p. 162). The classic trap (Figure 5-1): new code writes a record with a new field; old code reads it into a model object, updates it and writes it back — and the unknown field is silently lost unless it is preserved (pp. 162–163).
 
+![Old code reads a record with a photoURL field it doesn't know, decodes it into a model object, updates favoriteNumber and writes it back — and photoURL is gone](../figures/05-01.png)
+
+*Figure 5-1 (p. 163): the unknown field is dropped on the round trip through the old model object.*
+
 ### Formats for encoding data
 
 In memory, data lives in objects, structs, hash tables and trees linked by pointers; to write a file or send it over the network it must become a self-contained byte sequence. **Encoding** (serialization, marshaling) turns one into the other; **decoding** (parsing, deserialization, unmarshaling) reverses it. The book avoids “serialization”, which means something else for transactions (pp. 163–164). Zero-copy formats (Cap’n Proto, FlatBuffers) skip the step (p. 164).
@@ -105,6 +109,10 @@ message Person {
 
 Encoded fields carry **tag numbers** (1, 2, 3) instead of names. Integers are **variable-length**: 1337 takes two bytes (top bit = “more bytes follow”); −64…63 fit in one byte, −8,192…8,191 in two. `repeated` fields are simply the same tag appearing several times (p. 170). Evolution rules (p. 171):
 
+![The 33-byte Protocol Buffers encoding of the record, broken down field by field: each starts with a byte holding the field tag and type, then a length or a variable-length integer, then the value](../figures/05-03.png)
+
+*Figure 5-3 (p. 170): tags, not field names, identify each value — which is why tags can never change.*
+
 | Change | Effect |
 |---|---|
 | Rename a field | Fine — encoded data never mentions names |
@@ -127,15 +135,13 @@ record Person {
 
 The binary encoding is just values concatenated — a string is a length prefix plus UTF-8, an integer a varint — so decoding needs exactly the **writer’s schema** (p. 172). The application decodes with two schemas, resolving the **writer’s schema** into its own **reader’s schema** by field **name** (Figures 5-5, 5-6):
 
-```mermaid
-flowchart LR
-    W["Writer’s schema<br/>(version the encoder used)"] --> R{"Avro resolution<br/>match fields by name"}
-    D[(Encoded bytes)] --> R
-    RS["Reader’s schema<br/>(what the app expects)"] --> R
-    R -- "field only in writer" --> I[Ignored]
-    R -- "field only in reader" --> DF[Filled from the reader’s default]
-    R -- "field in both" --> V[Value decoded]
-```
+![The 32-byte Avro encoding of the same record: lengths and values back to back, with no tags or field names; a union branch byte marks the long for favoriteNumber](../figures/05-04.png)
+
+*Figure 5-4 (p. 173): nothing in the bytes says which field is which, so decoding needs the exact schema the writer used.*
+
+![The writer's schema for Person (userName, favoriteNumber, interests, photoURL) beside a reader's schema (userID, favoriteNumber, userName, interests); arrows match fields by name, regardless of order](../figures/05-06.png)
+
+*Figure 5-6 (p. 174): fields are matched by name; a field only the writer has is ignored, and one only the reader has takes its default.*
 
 **Evolution rules** (p. 175): forward compatibility = writer newer than reader; backward = writer older. **Add or remove only fields that have a default.** Adding without a default breaks backward compatibility; removing without one breaks forward compatibility. `null` is not a universal default — declare a union such as `union { null, long, string }`, with `null` first if it is the default. Type changes work if Avro can convert; renaming via reader **aliases** and adding a union branch are backward- but not forward-compatible.
 

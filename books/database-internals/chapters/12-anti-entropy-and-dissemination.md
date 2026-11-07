@@ -52,6 +52,10 @@ Here **entropy** means how far node states have diverged. **Anti-entropy** bring
 
 Broadcast suits small clusters. In large ones it gets **expensive** (many nodes) and **unreliable**, because it depends on one process that may not know every node and must be up at the same time as each recipient (p. 244). Relaxing the requirement means the coordinator delivers to everyone available, and anti-entropy fixes the rest (p. 244).
 
+![Three ways to spread data: (a) one node sends to all; (b) pairs of nodes exchange in both directions; (c) each node forwards to a few others in turn](../figures/12-01.png)
+
+*Figure 12-1 (p. 244): broadcast (a) relies on one sender, anti-entropy (b) on periodic pairwise sync, gossip (c) on peer-to-peer forwarding.*
+
 | Anti-entropy | Uses | Examples (p. 244) |
 |---|---|---|
 | **Foreground** | Piggybacks on read or write requests | Hinted handoff, read repair |
@@ -96,6 +100,10 @@ The catch: if {B, C} are partitioned off and a sloppy-quorum write goes to {A, D
 ### Merkle trees
 
 Read repair can't fix data that isn't being read, and comparing records pairwise is impractical (p. 247). **Merkle trees** build a compact tree of hashes: leaves hash **ranges of records** found by scanning the table, and each parent hashes its children (Figure 12-2) (pp. 247–248).
+
+![A Merkle tree: four data ranges at the bottom, hashes 3 to 6 of each range above them, hashes 1 and 2 of pairs above those, and a top hash of hashes 1 and 2](../figures/12-02.png)
+
+*Figure 12-2 (p. 248): equal top hashes mean equal data; a mismatch is chased down only the subtrees whose hashes differ.*
 
 - If the **roots** match, the replicas are in sync. Otherwise compare top-down to find the differing ranges, exchanging subtrees level by level or whole trees (pp. 247–248).
 - A data change recomputes the subtree above it (p. 248).
@@ -161,6 +169,11 @@ The middle ground is a **temporary fixed topology**: nodes sample peers and pick
 - **Eager push:** full messages go to a small subset of peers along a spanning tree.
 - **Lazy push:** only message IDs go to everyone else. A node that sees an unknown ID requests the message, which also **heals the tree**.
 - On failures the protocol falls back to gossip through the lazy links and repairs the overlay (Figure 12-5).
+
+![Six nodes joined by solid lines forming a broadcast tree, with dashed lines between other pairs as lazy gossip links](../figures/12-05.png)
+
+*Figure 12-5 (p. 253): updates travel eagerly along the solid tree; the dashed lazy links only exchange message IDs and take over when the tree breaks.*
+
 - Under constant load the tree tends to minimize latency, because the first nodes to respond join it (pp. 253–254).
 
 #### Partial views

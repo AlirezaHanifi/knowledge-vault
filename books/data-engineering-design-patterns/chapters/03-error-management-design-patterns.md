@@ -62,16 +62,9 @@ Data quality problems often cause fatal failures that stop the job; fail-fast is
 
 **Solution** (pp. 41–42): find the places your code can fail; guard them — **try-catch** in a mapping function, an **if-else** check after an error-safe transformation; attach the failure as metadata (see **Metadata Decorator**, Ch. 5); route failures to a dead-letter destination chosen for **resiliency** (no dead-letter for your dead-letter), **monitoring ease** (when errors start and how many) and **write performance**. Object stores and streaming brokers are good candidates. An optional **replay pipeline** brings fixed records back (Figure 3-1). Streaming writes failures one record at a time; batch writes the failing subset at once.
 
-```mermaid
-flowchart LR
-    S["Source<br/>(Kafka topic)"] --> J{"Processing<br/>try / catch"}
-    J -- "ok" --> O[("Main output")]
-    J -- "error + metadata" --> DL[("Dead-letter storage")]
-    DL --> M["Monitoring<br/>count · first seen"]
-    DL -. "optional replay" .-> J
-```
+![A data processing job writes good records to the main dataset and failed ones to dead-letter storage, which feeds monitoring and alerting and a data replay pipeline that writes back into the main dataset](../figures/03-01.png)
 
-*After Figure 3-1 (p. 42).*
+*Figure 3-1 (p. 42): bad records are parked, alerted on, and replayed once fixed, while the main flow continues.*
 
 **Consequences** (pp. 42–44):
 
@@ -94,6 +87,10 @@ Exactly-once delivery is rare in distributed systems; at-least-once is common. W
 **Problem.** A batch job exposes visit events, synced from streaming to an object store, directly to business users and must process each distinct record exactly once — but producers' automatic retries create duplicates (p. 47).
 
 **Solution** (pp. 47–48): pick the **deduplication attributes** that make a record unique, then the **scope**: for batch, the current dataset (an implicit global window — extending it to past datasets costs more compute); for streaming, a **time-based window** in which seen keys are kept in a **state store** (Figure 3-3). Batch uses `DISTINCT` or a `WINDOW` function with `row_number()`.
+
+![Inside a streaming job, the deduplication task (1) checks the state store whether a record was already processed, (2) gets true or false back, (3) passes only new records to the processing task, and (4) saves them as processed](../figures/03-03.png)
+
+*Figure 3-3 (p. 48): the state store remembers what was seen within the window; anything already there is dropped.*
 
 | State store (p. 48) | Where state lives | Trade-off |
 |---|---|---|
@@ -178,6 +175,10 @@ Spark actually rounds the watermark up to the window's upper bound; the table is
 - **Waste**: windows may have no late data — add a control task or use the dynamic version.
 - **Time requirement**: without time partitions you can't detect late data.
 
+![Sequential approaches: integrate late data then process the current execution, or the reverse; parallel approach: both branches run side by side](../figures/03-06.png)
+
+*Figure 3-6 (p. 60): late-data integration can run before, after, or alongside the current run — but always inside the main pipeline.*
+
 *Table 3-3 (p. 61): overlapped backfilling with a 4-day lookback*
 
 | Execution date | Executed dates |
@@ -213,6 +214,10 @@ Here 2024-12-18 is backfilled. Update the last processed time after successful p
 - **Concurrency**: parallel runs may schedule the same late partitions twice (Figure 3-9). Add an **Is processed** column (query adds `AND Is processed = false`); start each run by marking its partition as being processed; the backfill-generator marks what it picks; both tasks depend on their previous run succeeding; the final task resets the flag so new late data can replay. Backfills can then run as separate pipelines (Figure 3-10) — but if the generator task fails, later runs wait and need manual unblocking.
 - **Stateful pipelines and very late data**: an Incremental Sessionizer last run on 2024-10-20 that finds late data for 2024-09-21 must regenerate every run from 09-21 to 10-20 — so cap even a dynamic window.
 - **Scheduling complexity**: getting per-partition modification times may mean storage internals or your own tracking table.
+
+![Two variants of the dynamic integrator with an is-processed flag: backfilling integrated into the run, or isolated in a separately triggered backfill pipeline; each sets the flag, processes, then updates the last processed time and clears it](../figures/03-10.png)
+
+*Figure 3-10 (p. 67): marking partitions as being processed keeps concurrent runs from scheduling the same late partition twice.*
 
 **Examples** (pp. 68–70): Delta Lake's Scala `DeltaLog.getChanges(0)` yields added/removed files per version; map them to partitions and keep the latest version per partition, then select partitions whose last version > last processed version, not being processed, older than the current one. Write the result as a timestamped file per run; Airflow reads it to create backfill runs (`backfill_{event_time}_from_{partition}_{start}`). Key tasks use `depends_on_past=True` while the DAG allows `max_active_runs=5`.
 
