@@ -75,6 +75,10 @@ Deleting existing data before writing is the easiest approach but can be compute
 2. **Creates the idempotency environment**: create-then-`TRUNCATE`, or `DROP`-then-create.
 3. **Updates the single abstraction** (a view unioning the weekly tables); with `DROP`, optionally remove the table from the view first so readers don't hit errors.
 
+![One pipeline per week writes its own table, visits week 1 to week 52 of 2024, and a common view unions all 52 tables](../figures/04-01.png)
+
+*Figure 4-1 (p. 81): each week lives in its own table, so redoing a week means dropping one table rather than deleting rows.*
+
 ```mermaid
 flowchart LR
     D{"Execution day<br/>= Monday<br/>or 1 January?"} -- yes --> C["create_weekly_table<br/>(or TRUNCATE/DROP)"] --> V["recreate view visits<br/>= UNION of weeks"] --> L["load day into week table"]

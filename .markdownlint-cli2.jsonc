@@ -11,7 +11,9 @@
     // Collapsible answers, keys and footnote markers, all rendered by GitHub.
     "MD033": { "allowed_elements": ["details", "summary", "kbd", "sup"] },
     // Italic lines are table and figure captions, not headings.
-    "MD036": false
+    "MD036": false,
+    // Tables use compact `|---|---|` delimiter rows; newer markdownlint flags them (MD060).
+    "MD060": false
   },
   "globs": ["**/*.md"],
   "ignores": [".git", "node_modules"]

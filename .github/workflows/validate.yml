@@ -12,6 +12,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Check generated pages are up to date
+        run: python scripts/build.py && git diff --exit-code -- '*.html'
       - name: Validate vault structure, metadata, and links
         run: python scripts/validate.py
       - name: Lint Markdown

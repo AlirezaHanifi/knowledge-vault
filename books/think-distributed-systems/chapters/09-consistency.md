@@ -69,6 +69,10 @@ A **history** is the sequence of invocation and completion events ordered by rea
 
 Correctness is application-specific, so you could define your own model. In practice, a family of well-defined models has emerged. Figure 9.3 reproduces Jepsen's map:
 
+![Jepsen's map of consistency models as a hierarchy: strict serializable at the top, branching into serializable (above repeatable read, snapshot isolation, cursor stability, monotonic atomic view, read committed, read uncommitted) and linearizable (above sequential, causal, PRAM, writes follow reads, monotonic reads, monotonic writes, read your writes); colours mark unavailable, sticky available and total available models](../figures/09-03.png)
+
+*Figure 9.3 (p. 119): an arrow points from a weaker model to a stronger one that implies it; the colour (and the legend) gives each model's availability class, summarized in the table below.*
+
 | Availability class (from the Jepsen map) | Examples |
 |---|---|
 | **Unavailable**: some nodes must pause during some partitions | Strict serializable, serializable, linearizable, sequential, repeatable read, snapshot isolation |
@@ -117,6 +121,10 @@ Figure 9.8 shows a non-linearizable history (pp. 123–124):
 - Process B's increment completes, and *then* process A reads 1 from a lagging replica.
 - Linearizability would require 2, because A's read follows B's increment. The history exposes the replicas and their lag.
 
+![Processes A and B each increment a counter through replica 1 and replica 2; after B's increment completes, A reads from a replica that has not received it yet and gets OK(1), highlighted in red](../figures/09-08.png)
+
+*Figure 9.8 (p. 124): the shaded bars are the operations' durations; A's read starts after B's increment ends, so a correct answer would be 2.*
+
 **Aha! moment:** a *linearizable history* is a fact (an equivalent sequential history exists). A *linearizable system* is a guarantee (every possible history is linearizable) (p. 123). Implementing it is the subject of Chapter 10, on consensus (p. 124).
 
 > **Try it:** [Is this history linearizable?](../widgets/09-linearizability.html) — drag operations of three processes on a register along a timeline, and the checker searches for a sequential order that gives the same results and respects real time, or explains which pair of operations makes it impossible.
@@ -129,9 +137,9 @@ Figure 9.8 shows a non-linearizable history (pp. 123–124):
 
 In Figure 9.9, two replicas both hold {A} when a partition separates them:
 
-- Replica 1: remove(A), then add(B), giving {B}.
-- Replica 2: add(C), giving {A, C}.
-- After the partition heals, both become **{A, B, C}**.
+![Two replicas both start with A; during a partition replica 1 applies remove(A) and add(B), giving B, while replica 2 applies add(C), giving A and C; after the partition heals both hold A, B and C](../figures/09-09.png)
+
+*Figure 9.9 (p. 124): the merge keeps every added item, so the removed A comes back in **{A, B, C}**.*
 
 The conflict has to be resolved by the engineers. Amazon's priority is to keep added items over removed ones, so no added item vanishes, but removed items occasionally **resurrect**. The trade-off is availability against a surprise-free developer and user experience (p. 125).
 

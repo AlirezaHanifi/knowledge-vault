@@ -80,16 +80,9 @@ So the real benefit is the third one, extensibility (p. 277). The book adds that
 
 A multimethod has a **dispatch function** and **a set of methods** (p. 277). For `greet`, `greetDispatch` emits the animal's type, and each value is handled by `greetDog`, `greetCat` or `greetCow` (figure 13.1, p. 278):
 
-```mermaid
-flowchart LR
-    A["animal (type, name)"] --> D["greetDispatch: emit the animal type"]
-    D -->|"&quot;dog&quot;"| M1[greetDog]
-    D -->|"&quot;cat&quot;"| M2[greetCat]
-    D -->|"&quot;cow&quot;"| M3[greetCow]
-    A -.-> M1 & M2 & M3
-```
+![An animal with type and name goes to greetDispatch, which emits the animal type; "dog", "cat" or "cow" selects greetDog, greetCat or greetCow, and dashed arrows show the animal itself also reaching each method](../figures/13-01.png)
 
-*Redrawn from figure 13.1 (p. 278). The dotted arrows show that the arguments also reach the methods.*
+*Figure 13.1 (p. 278): the dispatch function only picks a method; the arguments go to the chosen method unchanged.*
 
 The example uses the JavaScript **arrows/multimethod** library: `multi` creates a multimethod, `method` adds a method (p. 278).
 

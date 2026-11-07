@@ -87,6 +87,14 @@ Distributed systems are described informally or formally, as action machines, st
 | **Same aspects, equivalent models** (Figure 1.2) | The network as a bus *plus* a buffer of in-flight messages (Figure 1.3), or the network as a bus with a buffer in each component (Figure 1.4). Both can express loss, duplication and reordering; the choice is preference |
 | **Different aspects** (Figure 1.5) | Lamport's TLA+ course: the *Transaction Commit* protocol (an abstraction of all distributed transaction protocols) ignores messages; *Two-Phase Commit* (one implementation) models them, so only it can represent lost, duplicated or reordered messages |
 
+![Six components with their states connected through a network that holds a single buffer of in-flight messages](../figures/01-03.png)
+
+*Figure 1.3 (p. 6): one model puts every in-flight message in the network's buffer…*
+
+![The same six components, but each component's state now includes its own buffer, and the network has none](../figures/01-04.png)
+
+*Figure 1.4 (p. 7): …the other gives each component a buffer. Both can lose, duplicate and reorder messages.*
+
 The sidebar on the blind men and the elephant makes the same point: when you meet a different model, ask *why* the author chose it before deciding it's wrong (p. 8).
 
 ### 1.4 Thinking about distributed systems
@@ -108,34 +116,15 @@ Lamport's definition, from "Proving the Correctness of Multiprocess Programs" (p
 - **Liveness:** something good eventually happens.
 - A system is correct if *every possible behavior* satisfies both (Figure 1.8).
 
+![Venn diagram inside the set of all possible behaviors: one set satisfies safety, another satisfies liveness, and their intersection is the correct behaviors](../figures/01-08.png)
+
+*Figure 1.8 (p. 10): correctness is the intersection; a behavior that is safe but stuck, or live but wrong, falls outside it.*
+
 The book's example is a distributed transaction that sets `b` at participant P1 and `a` at participant P2 (Listing 1.1). Each participant is *working*, *committed* or *aborted*, and each step moves one participant out of *working* (Figure 1.9) (pp. 10–11):
 
-```mermaid
-stateDiagram-v2
-    WW: P1 working · P2 working
-    CW: P1 committed · P2 working
-    WC: P1 working · P2 committed
-    WA: P1 working · P2 aborted
-    AW: P1 aborted · P2 working
-    CC: both committed ✓
-    AA: both aborted ✓
-    CA: P1 committed · P2 aborted ✗
-    AC: P1 aborted · P2 committed ✗
-    WW --> CW
-    WW --> WC
-    WW --> WA
-    WW --> AW
-    CW --> CC
-    WC --> CC
-    CW --> CA
-    WA --> CA
-    AW --> AC
-    WC --> AC
-    WA --> AA
-    AW --> AA
-```
+![The state space of two participants: from both working, four transitions lead to one participant committed or aborted, and from there to four end states; the working states are boxed as violating liveness, and the mixed committed/aborted states are boxed as violating safety](../figures/01-09.png)
 
-*The vault's redrawing of Figure 1.9.* Staying in *working* forever violates **liveness** ("can't stay here"). Reaching a mixed commit/abort state violates **safety** ("must not get here"). Together they say that both participants eventually reach the *same* decision (p. 11).
+*Figure 1.9 (p. 11): staying in “working” forever violates **liveness** ("can't stay here"); reaching a mixed commit/abort state violates **safety** ("must not get here"). Together they say both participants eventually reach the same decision.*
 
 The model deliberately ignores keys, values and locks: the author asserts that they're irrelevant here, and you may disagree without either of you being wrong (p. 12).
 

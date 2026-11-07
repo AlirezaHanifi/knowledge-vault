@@ -75,21 +75,9 @@ Users include MySQL (distributed transactions) and Kafka (producer-consumer inte
 
 There's a **coordinator** (leader), which holds state, collects votes and is the reference point, and **cohorts**, usually partitions over disjoint datasets. Everyone keeps a local log of each step (p. 260). The coordinator can be the node that received the request, chosen at random, elected, assigned manually or fixed, and the role can be transferred (p. 260).
 
-```mermaid
-sequenceDiagram
-    participant C as Coordinator
-    participant A as Cohort A
-    participant B as Cohort B
-    C->>A: Propose(tx)
-    C->>B: Propose(tx)
-    A-->>C: Yes (persisted)
-    B-->>C: Yes (persisted)
-    Note over C: all yes → decide Commit (log it)
-    C->>A: Commit
-    C->>B: Commit
-```
+![Coordinator and three cohorts: in the propose phase the coordinator sends Propose and collects votes; in the commit/abort phase it sends Commit and collects acknowledgments](../figures/13-01.png)
 
-*The vault's version of Figure 13-1 (pp. 260–261).*
+*Figure 13-1 (p. 261): two round trips — votes are persisted before the coordinator decides, and the decision is logged before it is sent.*
 
 | Phase | What happens (pp. 260–261) |
 |---|---|
@@ -115,6 +103,10 @@ MySQL, PostgreSQL and MongoDB use 2PC; MongoDB's documentation as of v3.6 descri
 
 3PC adds a step plus **timeouts on both sides**, so cohorts can commit or abort without the coordinator. It assumes a **synchronous** model with **no communication failures** (Skeen; Babaoglu and Toueg); the fine print assumes a highly reliable network without partitions (p. 259, note 1; p. 264).
 
+![Three round trips between coordinator and cohorts: propose and vote, prepare and acknowledge, commit and committed](../figures/13-05.png)
+
+*Figure 13-5 (p. 264): the extra prepare round means every cohort learns the decision before anyone commits, so cohorts can finish on timeout.*
+
 | Phase | What happens (pp. 264–265) |
 |---|---|
 | **Propose** | Send the value and collect votes. A coordinator crash with a timeout, or any "no", means abort |
@@ -131,15 +123,11 @@ Transitions are coordinated: nobody advances until everyone finishes the previou
 
 Have replicas agree on execution order and transaction boundaries **before** acquiring locks. Node failures then don't abort transactions, because other replicas run the same transactions (p. 266). 2PL and OCC have no deterministic order, so execution needs coordination. With deterministic order, all replicas get identical inputs and produce equivalent outputs (Thomson et al.; FaunaDB) (p. 266).
 
-```mermaid
-flowchart LR
-    T["client txns"] --> SEQ["Sequencer<br/>10 ms epochs → batches<br/>(replicated via Paxos or a leader)"]
-    SEQ --> SCH["Scheduler<br/>deterministic, parallel where safe"]
-    SCH --> W["Worker: 1 analyze sets → 2 read local, forward<br/>3 receive remote reads → 4 execute + persist"]
-    W --> ST[("Local storage")]
-```
+![Three partitions, each with a sequencer, scheduler, workers and storage; every sequencer sends batches to every scheduler, and workers in different partitions exchange reads](../figures/13-07.png)
 
-*The vault's diagram of Figure 13-7 and the steps on pp. 266–267.*
+*Figure 13-7 (p. 268): sequencers feed all schedulers the same ordered batches; workers share only the remote reads they need.*
+
+The sequencer collects transactions into 10 ms epochs and replicates the batches (via Paxos or a leader); the scheduler executes them deterministically, in parallel where safe; each worker (1) analyzes read and write sets, (2) reads local data and forwards it, (3) receives remote reads, and (4) executes and persists (pp. 266–267).
 
 - The **sequencer** is the entry point for all transactions and fixes a global input order. Time is split into **epochs**, about 10 ms batches in the paper, which also serve as replication units (pp. 266–267).
 - The **scheduler** executes parts of transactions in parallel while preserving the sequencer's serial order. Replicas never talk to the sequencer again (p. 267).
@@ -158,6 +146,10 @@ Spanner is often contrasted with Calvin. Calvin reaches consensus on *sequencers
 | **Snapshot read** | Consistent at a timestamp; records are versioned by commit time |
 
 **Architecture** (Figure 13-8, p. 269):
+
+![Three replica groups; one leader replica runs 2PC with a transaction manager and lock table above its Paxos, tablet and storage layers, and connects to the leaders of other groups](../figures/13-08.png)
+
+*Figure 13-8 (p. 269): Paxos replicates each group; leaders add the lock table and the 2PC transaction manager for cross-group transactions.*
 
 - A **spanserver** holds tablets, each with a Paxos state machine. Replica sets form **Paxos groups**, the unit of placement and replication, each with a long-lived leader (Multi-Paxos).
 - Writes go through the group leader; reads can be served by any up-to-date replica.

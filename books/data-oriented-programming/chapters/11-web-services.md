@@ -65,19 +65,9 @@ The steps of the data flow inside a web service (p. 222):
 
 Over the wire, the data format, often JSON, doesn't depend on the components' languages. Inside a program, traditional OOP breaks that idiom: to access a class member, a component must import the class definition. DOP components communicate with generic data collections, which need no knowledge of other components' internals, only the names of the fields (p. 223).
 
-```mermaid
-flowchart TB
-    WB[Web browser] -->|data| P1["(1) JSON parser"]
-    P1 -->|data| DM2["(2) Data manipulation — business logic"]
-    DM2 -->|data| S3["(3) JSON serializer"]
-    S3 -->|data| EXT[(Database · Web service)]
-    EXT -->|data| P4["(4) JSON parser"]
-    P4 -->|data| DM5["(5) Data manipulation — business logic"]
-    DM5 -->|data| S6["(6) JSON serializer"]
-    S6 -->|data| WB
-```
+![A web service between a web browser and a back end: JSON parser (1), data manipulation (2) and JSON serializer (3) on the way to another web service or the database, then JSON parser (4), data manipulation (5) and JSON serializer (6) on the way back](../figures/11-03.png)
 
-*Redrawn from figure 11.3 (p. 224), which Theo draws alone while Joe takes a call.*
+*Figure 11.3 (p. 224): Theo's drawing, made alone while Joe takes a call — data stays generic between every step, in both directions.*
 
 ### 11.3 Representing a client request as a map
 

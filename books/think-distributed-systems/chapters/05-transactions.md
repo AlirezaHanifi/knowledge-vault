@@ -72,6 +72,14 @@ Listing 5.1 is a `/transfer` endpoint (overdraft allowed). It runs `BEGIN; UPDAT
 | **Concurrency** (Figure 5.4) | Two transfers of −10 each read 50 and write 40: final 40 instead of 30, a race between read and write | Executes as though concurrency didn't exist: **correctness** |
 | **Failure** (Figure 5.5) | Crash after debiting the source (50 → 40) but before crediting the target: 40/50 instead of 40/60 | Executes as though failure didn't exist: **completeness** |
 
+![Two transactions t1 and t2, each subtracting 10: both read 50 and both write 40, so the balance ends at 40 instead of 30](../figures/05-04.png)
+
+*Figure 5.4 (p. 71): both reads happen before either write, so one update is lost.*
+
+![One transfer reads balance 50, writes 40, and crashes before the second write of 60; the balances end at 40 and 50](../figures/05-05.png)
+
+*Figure 5.5 (p. 71): the crash leaves half a transfer behind — the debit is applied, the credit is not.*
+
 ### 5.3 The model of transactions
 
 A **transaction** is a sequence of operations on a set of objects ending in **exactly one commit or exactly one abort**. It guarantees correctness and completeness, which come from the ACID principles (p. 72):
@@ -102,7 +110,13 @@ The fun fact: Jim Gray reported that Andreas Reuter coined "ACID" because his wi
 
 #### 5.3.1 Correctness (pp. 74–75)
 
-A transaction preserves consistency, written as a Hoare triple **{ C } tₓ { C }**. Consistency may be violated *during* the transaction, for example after the debit and before the credit (Figure 5.8). A serial history composes safely:
+A transaction preserves consistency, written as a Hoare triple **{ C } tₓ { C }**. Consistency may be violated *during* the transaction, for example after the debit and before the credit (Figure 5.8):
+
+![Four database states joined by the actions ⟨t, a1⟩, ⟨t, a2⟩ and ⟨t, a3⟩, each writing one of name1, name2, name3; the consistency predicate holds in the first and last states and may not hold in the two highlighted states between them](../figures/05-08.png)
+
+*Figure 5.8 (p. 75): only the endpoints of a transaction must be consistent; the states in between are visible to no one under serializability.*
+
+A serial history composes safely:
 
 > { C } t1 { C } ∧ { C } t2 { C } ⇒ { C } t1;t2 { C }
 

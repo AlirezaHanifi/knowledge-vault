@@ -74,7 +74,13 @@ The focus is processing, because processing embodies the application logic and i
 
 ### 4.2 The uncertainty principle of message delivery and processing
 
-A component sees only itself and "the rest of the system" (Figure 4.3) (p. 58). The sender therefore moves from certainty to uncertainty and must try to get back (p. 59):
+A component sees only itself and "the rest of the system" (Figure 4.3) (p. 58):
+
+![Component C1 and its state on one side, labelled "There is only me…"; the network, component C2 and its state grouped and greyed out as "…and the rest of the system"](../figures/04-03.png)
+
+*Figure 4.3 (p. 58): C1 cannot look inside the grey box, so it cannot tell a lost message from a slow network or a crashed C2.*
+
+The sender therefore moves from certainty to uncertainty and must try to get back (p. 59):
 
 | Moment | What the sender knows |
 |---|---|
@@ -135,6 +141,10 @@ Guaranteeing idempotence is hard. It's application-specific and end-to-end, like
 ### 4.6 Case study: Charging a credit card
 
 The example is booking an airline ticket, which must charge the card exactly once per purchase: not zero times, not twice (Figures 4.4–4.5) (p. 64). Without a response, the app may retry a bounded number of times and then tell the user, who can check for a confirmation email or refresh the *My Trips* tab (p. 65).
+
+![Request-response activity: the client sends a request, the server receives it, charges the credit card and sends a response, and the client receives it; dashed boxes mark a failure before processing around the request and a failure after processing around the response](../figures/04-05.png)
+
+*Figure 4.5 (p. 64): from the client's side the two failures look the same — no response — but only the second one has already charged the card.*
 
 | Approach | How it's equivalent | Caveat (p. 65) |
 |---|---|---|

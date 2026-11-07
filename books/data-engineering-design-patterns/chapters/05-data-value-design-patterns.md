@@ -73,6 +73,10 @@ Events describe time and place well but lack context — the last connection dat
 | **Type 2** | One table with validity dates | Row with an empty/open end date |
 | **Type 4** | Two tables: current values + full history | The current table |
 
+![SCD type 2 keeps all of a user's emails in one history table with from and to dates and an is_current flag; SCD type 4 keeps the current email in one table and past ones in a separate history table](../figures/05-01.png)
+
+*Figure 5-1 (p. 117): type 2 versions rows in place; type 4 splits current and historical values into two tables.*
+
 Enrichment is usually a SQL `JOIN`, or an HTTP call to an external API — which can also be **materialized** as a table in a pre-processing step (Figure 5-2). For idempotency, materialize the API data and use an SCD form so a replay sees the same dataset (p. 118).
 
 **Consequences** (p. 119): **late data and consistency** — a profile change followed by a visit may not be reflected; streaming pipelines can use the Dynamic Joiner, batch pipelines can wait via a **Readiness Marker**. **Idempotency** — if the provider has no time-based queries, bring the enrichment data into your own store with SCD.
@@ -95,18 +99,9 @@ A Spark stream-to-batch `left_outer` join of Kafka visits with a Delta Lake devi
 
 **Solution** (pp. 122–123): keys and join method as before, plus **time boundaries**. The two streams have different latencies, so each side keeps a **time-bounded buffer** — if users are one hour behind visits, visits are buffered an extra hour. A **GC watermark** removes buffered events that are too old (older than the slower stream's oldest event time), losing joins for very late records in exchange for bounded state (Figure 5-3). Frameworks implement the buffering for you.
 
-```mermaid
-sequenceDiagram
-    participant A as Stream A (visits, fast)
-    participant J as Join operator + buffers
-    participant B as Stream B (ads/users, slower)
-    A->>J: visit page=home @10:00 (no match yet → buffer)
-    A->>J: visit page=blog @10:01 (buffer)
-    B->>J: ad page=home @10:01 → match buffered visit
-    Note over J: GC watermark advances with the slower stream →<br/>buffered visits older than it are dropped, even if unmatched
-```
+![Two streams with different latencies: records from the fast stream A wait in a buffer until matching keys from the slower stream B arrive, and only then are joined pairs emitted](../figures/05-03.png)
 
-*The vault's sketch of Figure 5-3 (p. 123), using the visits-with-ads example of p. 124.*
+*Figure 5-3 (p. 123): buffering the faster side lets late-arriving matches still join, at the cost of state held in memory.*
 
 **Consequences** (pp. 123–124): **space vs exactness** — bigger buffers find more joins at more cost; no formula, depends on usual latency difference. **Late data** — events from areas with connectivity problems may arrive after the GC watermark moved on; integrate late data (Ch. 3).
 
@@ -160,6 +155,10 @@ Wrapper and Metadata Decorator differ only in semantics: metadata *describes* th
 Removing information can add value too (p. 133).
 
 #### Pattern: Distributed Aggregator (pp. 133–137)
+
+![Two compute nodes read input files whose keys are mixed; records are exchanged across the network so that each key ends up on one node: keys 1 and 2 on node 1, keys 3, 6 and 7 on node 2](../figures/05-05.png)
+
+*Figure 5-5 (p. 135): the shuffle moves every record to the node that owns its key, so each node can aggregate alone.*
 
 **Problem.** Build an **OLAP cube** of cleaned Silver visits — counts, average duration across user geography, devices, etc. — with daily and weekly views over daily event-time partitions (p. 133).
 
@@ -221,15 +220,9 @@ Sessions combine events of one activity — a starting point, events, an ending 
 
 Each run combines the input with the previous run's pending sessions per entity → a **new** session, a **restored** session with new data, or a restored one without new data (likely expiring). Then apply **initialization** (e.g. a home-page visit), **accumulation** (e.g. pages in order) and **finalization** (an event type, or inactivity — e.g. three hours) (Figure 5-6).
 
-```mermaid
-flowchart LR
-    IN[("Input partition<br/>hour h")] --> X{"Combine per user<br/>+ session logic"}
-    PEND[("Pending sessions<br/>from run h-1")] --> X
-    X -- "expired" --> DONE[("Completed sessions<br/>(public)")]
-    X -- "still open" --> PEND2[("Pending sessions<br/>for run h+1 (private)")]
-```
+![The sessionizer reads the input dataset and the pending sessions from the previous run, then creates, restores and terminates sessions; completed sessions go to the output, and sessions not yet complete go back to pending storage](../figures/05-06.png)
 
-*After Figure 5-6 (p. 143).*
+*Figure 5-6 (p. 143): three storage spaces — input, pending and output — carry open sessions from one hourly run to the next.*
 
 **Consequences** (pp. 144–145): **inactivity period** — longer includes more late data but costs more and delays sessions; partial sessions can be emitted but may change (a banking fraud session first “not at risk”, later “risky”) — flag them `is_completed: false`. **Data freshness** — batch insights are late; partial sessions help. **Late data and backfilling** — sessions are **forward dependent**: 09:00 affects 10:00 affects 11:00, so a backfill must replay all later partitions (cheap code, high cost) or detect affected entities (cheap, complex).
 
@@ -245,6 +238,10 @@ flowchart LR
 |---|---|
 | **Session windows** | A **gap duration** per key: a gap > 20 minutes between events starts a new window (Figure 5-8) |
 | **Arbitrary stateful processing** | Your own logic — static or per-key dynamic timers (Spark Structured Streaming, Flink, GCP Dataflow) |
+
+![Events at 10:00, 10:05 and 10:15 form one session; the next event at 10:45 comes 30 minutes later, more than the gap, so it starts a second session](../figures/05-08.png)
+
+*Figure 5-8 (p. 149): with a 20-minute gap, the 30-minute pause closes the first session.*
 
 **Consequences** (pp. 149–150): **at-least-once** — state is checkpointed irregularly, so restarts reprocess; don't build session keys from values that change between runs (e.g. real time). **Scaling** — state rebalancing pauses processing for moved keys. **Inactivity length** — the same cost/coverage balance. **Inactivity time** — expire state by **event time**; processing-time expiration can close sessions early after unexpected latency.
 

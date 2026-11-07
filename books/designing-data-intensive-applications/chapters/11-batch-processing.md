@@ -171,23 +171,19 @@ The log analysis maps directly: (1) read input files (Parquet, Avro…) as recor
 
 A **shuffle** is a distributed sort with sharded input *and* output — and despite the name, it produces **sorted** order, not randomness. Implemented by MapReduce, Spark, Flink, Daft, Dataflow, BigQuery (p. 470).
 
-```mermaid
-flowchart LR
-    I1[(Input shard m1)] --> M1[Map task 1]
-    I2[(Input shard m2)] --> M2[Map task 2]
-    M1 -- "file m1,r1 · sorted" --> R1[Reduce task r1]
-    M1 -- "file m1,r2 · sorted" --> R2[Reduce task r2]
-    M2 -- "file m2,r1 · sorted" --> R1
-    M2 -- "file m2,r2 · sorted" --> R2
-    R1 --> O1[(Output shard r1)]
-    R2 --> O2[(Output shard r2)]
-```
+![Three map tasks read input shards m1–m3 from HDFS and each write one sorted output file per reducer; three reduce tasks each copy their file from every mapper, merge them, reduce, and write r1–r3 back to HDFS](../figures/11-01.png)
 
-*After Figure 11-1: one map task per input shard; the job author picks the number of reducers. Each mapper writes one locally **sorted** file per reducer, choosing the file by hash of key (LSM-style sorted runs and merges). Reducers copy their file from every mapper and **merge** them, so equal keys become adjacent; outputs return to the DFS (pp. 470–471). BigQuery keeps shuffle data in memory and uses external sorting services (p. 471).*
+*Figure 11-1 (p. 470): every mapper sends one sorted file to every reducer — the shuffle — and each reducer merges what it receives.*
+
+One map task runs per input shard; the job author picks the number of reducers. Each mapper chooses the target file by hash of key (LSM-style sorted runs and merges); reducers copy their file from every mapper and **merge** them, so equal keys become adjacent; outputs return to the DFS (pp. 470–471). BigQuery keeps shuffle data in memory and uses external sorting services (p. 471).
 
 #### Joins and grouping (pp. 471–473)
 
 The book’s join: **activity events** (clickstream — the fact table) with a **user database** (a dimension), to see whether pages are more popular with younger or older users (Figure 11-2).
+
+![User activity events (user 105 clicked a button, user 296 viewed a profile, …) linked by user ID to rows of a user database with email and date of birth](../figures/11-02.png)
+
+*Figure 11-2 (p. 472): every event needs fields from the user it mentions — a join on user ID.*
 
 ```mermaid
 flowchart LR
@@ -198,6 +194,10 @@ flowchart LR
 ```
 
 This is a **sort-merge join** (Figure 11-3): sorted mapper output, merged per key; each reducer holds only **one user record** in memory and makes **no network requests** (p. 472).
+
+![Two mappers emit (user ID, URL) and (user ID, date of birth) pairs; even user IDs go to reducer partition 1 and odd ones to partition 2, where each user's birth date arrives first, followed by their URLs](../figures/11-03.png)
+
+*Figure 11-3 (p. 473): both inputs are keyed by user ID, so the reducer sees one user's record and all their events together.*
 
 > **Try it:** [Shuffle and sort-merge join](../widgets/11-sort-merge-join.html) — step a join of activity events and user records through map, shuffle, sort and reduce.
 

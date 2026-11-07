@@ -49,62 +49,9 @@ When designing the data you don't think about code, and the only relations are a
 
 A **positional collection** keeps its elements in order, like a list or an array, and is noted `[String]`. An **index** gives access by key, like a hash map, and is noted `{Book}`; in a data model, index keys are always strings (p. 46).
 
-```mermaid
-classDiagram
-    class Library {
-        name: String
-        address: String
-        catalog: Catalog
-        userManagement: UserManagement
-    }
-    class Catalog {
-        booksByIsbn: Book index
-        authorsById: Author index
-    }
-    class UserManagement {
-        librariansByEmail: Librarian index
-        membersByEmail: Member index
-    }
-    class Book {
-        title
-        publicationYear
-        isbn
-        authorIds: String list
-        bookItems: BookItem list
-    }
-    class Author {
-        id
-        name
-        bookIsbns: String list
-    }
-    class BookItem {
-        id
-        libId
-        purchaseDate
-        isLent
-    }
-    class Member {
-        email
-        encryptedPassword
-        isBlocked
-        bookLendings: BookLending list
-    }
-    class BookLending {
-        lendingDate
-        bookItemId
-        bookIsbn
-    }
-    Library *-- Catalog
-    Library *-- UserManagement
-    Catalog *-- Book
-    Catalog *-- Author
-    Book *-- BookItem
-    Book .. Author : indirect, via authorsById
-    UserManagement *-- Member
-    Member *-- BookLending
-```
+![Relation model of the library: Library holds Catalog and UserManagement; Catalog indexes Books and Authors; Books hold BookItems; UserManagement indexes Librarians and Members; Members hold BookLendings; dashed lines link records that refer to each other by ID](../figures/03-03.png)
 
-*Condensed from figure 3.3 (p. 47); `Librarian` (email, encryptedPassword) omitted. The book writes `{Book}` for an index and `[String]` for a positional collection.*
+*Figure 3.3 (p. 47): solid arrows are positional or indexed containment; dashed lines are references by ID. The book writes `{Book}` for an index and `[String]` for a positional collection.*
 
 Joe names the third kind of aggregation: what they had been calling an "entity" is, in computer science terms, a **record**. That is a collection of fields, possibly of different types (pp. 47–48). So a data entity diagram consists of records whose values are primitives, positional collections or indexes, and the relations between records are composition or association, each one-to-one, one-to-many or many-to-many (p. 48).
 
@@ -112,14 +59,9 @@ Joe names the third kind of aggregation: what they had been calling an "entity" 
 
 DOP has nothing special to say about collections, which can be linked lists, arrays, vectors or sets (the book uses arrays for now). Indexes are **homogeneous** string maps, where all values have the same type, as in OOP. The surprise is that **records are heterogeneous string maps**, whose values have different types (pp. 48–49). This holds for OOP and FP languages alike. It feels natural in JavaScript, Python and Ruby, and is a bit more cumbersome in Java and C# (p. 48).
 
-```mermaid
-flowchart LR
-    DR[Data representation] --> R[Record] --> HM[Heterogeneous map]
-    DR --> C[Collection] --> LL[Linked list] & AR[Array] & SE[Set] & VE[Vector]
-    DR --> I[Index] --> HO[Homogeneous map]
-```
+![Data representation splits into records (heterogeneous maps), collections (linked lists, arrays, sets, vectors) and indexes (homogeneous maps)](../figures/03-04.png)
 
-*Redrawn from figure 3.4 (p. 49).*
+*Figure 3.4 (p. 49): three building blocks — records, collections and indexes — are enough to represent the whole system's data.*
 
 Joe's favourite graphic novel, *Watchmen* by Alan Moore and Dave Gibbons (1987), with two copies at library `nyc-central-lib`, one of them out, becomes a JavaScript map literal (listings 3.1–3.2, pp. 50). In Java it uses the immutable `Map.of` and `List.of` factory methods (listing 3.3, p. 51).
 

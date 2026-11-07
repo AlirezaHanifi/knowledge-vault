@@ -35,19 +35,7 @@
 <ol><li>Generate the data input, <code>dataIn</code>.</li><li>Generate the expected output, <code>dataOut</code>.</li><li>Compare <code>f(dataIn)</code> with <code>dataOut</code>.</li></ol>
 <p>Comparing maps means comparing field by field, recursively. Theo can&#x27;t write recursive code in a coffee shop, but he doesn&#x27;t need to: because data is generic, <code>_.isEqual</code> compares maps and arrays recursively (listings 6.1–6.2, pp. 111–112).</p></div></div></section>
 <section class="slide" id="62-unit-tests-for-data-manipulation-code" aria-label="6.2 Unit tests for data manipulation code"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>6.2 Unit tests for data manipulation code</h2></header><div class="slide-body"><p>The code under test is the search query from chapter 3 (listing 6.4, p. 113). It has been slightly refactored: <code>authorNames</code> now takes <code>authorIds</code> rather than a book.</p></div></div></section>
-<section class="slide" id="621-the-tree-of-function-calls" aria-label="6.2.1 The tree of function calls"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">6.2 Unit tests for data manipulation code</p><h2>6.2.1 The tree of function calls</h2></header><div class="slide-body"><figure class="diagram"><pre class="mermaid">flowchart TB
-    R[Library.searchBooksByTitleJSON] --&gt; G1[_.get]
-    R --&gt; JS[JSON.stringify]
-    R --&gt; S[Catalog.searchBooksByTitle]
-    S --&gt; G2[_.get]
-    S --&gt; M1[_.map]
-    S --&gt; F[_.filter]
-    S --&gt; BI[Catalog.bookInfo]
-    BI --&gt; G3[_.get]
-    BI --&gt; AN[Catalog.authorNames]
-    AN --&gt; G4[_.get]
-    AN --&gt; M2[_.map]</pre></figure>
-<p><em>Redrawn from figure 6.1 (p. 114). The leaves are functions outside the application&#x27;s code base: Lodash and <code>JSON</code>.</em></p>
+<section class="slide" id="621-the-tree-of-function-calls" aria-label="6.2.1 The tree of function calls"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">6.2 Unit tests for data manipulation code</p><h2>6.2.1 The tree of function calls</h2></header><div class="slide-body"><figure class="book-fig"><a href="../figures/06-01.png" title="Open the figure at full size"><img src="../figures/06-01.png" alt="Call tree of Library.searchBooksByTitleJSON: it calls _.get, JSON.stringify and Catalog.searchBooksByTitle, which calls _.get, _.map, _.filter and Catalog.bookInfo, which in turn calls _.get and Catalog.authorNames" loading="lazy"></a><figcaption><span class="fig-label">Figure 6.1 (p. 114):</span> the leaves are functions outside the application&#x27;s code base — Lodash and <code>JSON</code> — so testing starts one level up.</figcaption></figure>
 <p>You expand the tree until you reach a function outside the application&#x27;s code base, or one that calls nothing. <code>Catalog.bookInfo</code> is a child of <code>searchBooksByTitle</code> even though it&#x27;s called inside an anonymous function (p. 114).</p></div></div></section>
 <section class="slide" id="622-unit-tests-for-functions-down-the-tree" aria-label="6.2.2 Unit tests for functions down the tree"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">6.2 Unit tests for data manipulation code</p><h2>6.2.2 Unit tests for functions down the tree</h2></header><div class="slide-body"><p>Start at the deepest application function, <code>Catalog.authorNames(catalogData, authorIds)</code> → <code>authorNames</code> (figure 6.2, p. 115). Theo&#x27;s table of cases (table 6.1, p. 116) uses a catalog with two authors and <code>authorIds</code> that are empty, have one ID or have two. More cases follow (listing 6.9, p. 118):</p>
 <ul><li><strong>Empty catalog data.</strong></li><li><strong>Unknown author IDs</strong>, which yield <code>undefined</code> in the output.</li></ul>
@@ -60,16 +48,7 @@
 <ul><li><code>{&quot;title&quot;:&quot;Watchmen&quot;,&quot;publicationYear&quot;:1987}</code> and <code>{&quot;publicationYear&quot;:1987,&quot;title&quot;:&quot;Watchmen&quot;}</code> are different strings that serialize the same data (listing 6.13).</li><li>So <strong>deserialize</strong>, generating the data whose serialization is the string, with the native <code>JSON.parse</code>, and compare with <code>_.isEqual</code> (listings 6.14–6.15).</li></ul>
 <p>The test for <code>Catalog.searchBooksByTitle</code> is pleasanter: it returns data, so there is nothing to parse, and its input needs no <code>libraryData</code> wrapper (pp. 124–125). Joe then asks for an all-lowercase query. <code>&quot;watchmen&quot;</code> fails, which is the point of unit tests: to find bugs. Theo fixes it by lowercasing both the query and the title before <code>includes</code> (listings 6.18–6.20, p. 125).</p></div></div></section>
 <section class="slide slide-widget" id="try-06-test-bench" aria-label="Test bench"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">Try it</p><h2>Test bench</h2></header><div class="slide-body"><div class="widget-frame"><iframe data-src="../widgets/06-test-bench.html#embed" title="Test bench"></iframe></div><p class="widget-open"><a href="../widgets/06-test-bench.html">Open full screen ↗</a> · the simulation is the vault’s own model of the mechanism the book describes.</p></div></div></section>
-<section class="slide" id="64-unit-tests-for-mutations" aria-label="6.4 Unit tests for mutations"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>6.4 Unit tests for mutations</h2></header><div class="slide-body"><figure class="diagram"><pre class="mermaid">flowchart TB
-    A[System.addMember] --&gt; G[SystemState.get]
-    A --&gt; C[SystemState.commit]
-    A --&gt; L[Library.addMember]
-    L --&gt; g[_.get]
-    L --&gt; s1[_.set]
-    L --&gt; U[UserManagement.addMember]
-    U --&gt; h[_.has]
-    U --&gt; s2[_.set]</pre></figure>
-<p><em>Redrawn from figure 6.5 (p. 126).</em></p>
+<section class="slide" id="64-unit-tests-for-mutations" aria-label="6.4 Unit tests for mutations"><div class="slide-inner"><header class="slide-head"><p class="eyebrow">From the book</p><h2>6.4 Unit tests for mutations</h2></header><div class="slide-body"><figure class="book-fig"><a href="../figures/06-05.png" title="Open the figure at full size"><img src="../figures/06-05.png" alt="Call tree of System.addMember: it calls SystemState.get, SystemState.commit and Library.addMember; Library.addMember calls _.get, _.set and UserManagement.addMember, which calls _.has and _.set" loading="lazy"></a><figcaption><span class="fig-label">Figure 6.5 (p. 126):</span> the mutation&#x27;s tree mixes state handling (<code>SystemState</code>) with pure calculations below <code>Library.addMember</code>.</figcaption></figure>
 <p>Of the application functions, the <code>SystemState</code> ones are generic and tested outside any particular mutation. That leaves three, and the real meat is in <code>UserManagement.addMember</code>; the other two are wrappers (p. 127). A mutation&#x27;s test needs more effort than a query&#x27;s, because a mutation computes a new <em>system state</em> from the current state and its arguments, while a query returns response data (figure 6.6, p. 127). The tests for <code>UserManagement.addMember</code> (pp. 127–130):</p>
 <div class="table-wrap"><table class="data"><thead><tr><th>Case</th><th>Before</th><th>Expected</th></tr></thead><tbody><tr><td>Empty state (listing 6.22)</td><td><code>{}</code></td><td><code>membersByEmail</code> with jessie</td></tr><tr><td>Existing members (listing 6.23)</td><td>franck</td><td>franck and jessie</td></tr><tr><td>Negative (listing 6.24)</td><td>jessie</td><td>exception &quot;Member already exists.&quot;, caught with try/catch and compared</td></tr></tbody></table></div>
 <p>Theo admits he always forgets negative cases because he&#x27;s an optimist (p. 129). <code>Library.addMember</code> gets only the existing-members case, since its callee is covered (listing 6.25, pp. 130–131).</p>
@@ -96,7 +75,6 @@
   <button class="btn primary" type="button" data-go="1" aria-label="Next slide"><span>Next</span> →</button>
 </nav>
 <script src="../../../assets/kit.js"></script>
-<script src="../../../assets/vendor/mermaid.min.js"></script>
 <script src="../../../assets/site.js"></script>
 </body>
 </html>

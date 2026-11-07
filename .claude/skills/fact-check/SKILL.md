@@ -20,7 +20,8 @@ The vault's first rule is never to fabricate book content. Fluent paraphrase is 
    `XX` means not found in that range: rephrase the search (synonyms with `|`, a shorter distinctive fragment), widen the range, or read the page.
 4. **Fix every miss:** correct the page, rewrite the claim to what the book says, move it under *Beyond the book* if it is outside knowledge, or remove it. Use `TODO(unverified)` only as a temporary marker — never leave one in finished work.
 5. **Quotations** must match word for word, stay under ~15 words, and carry a page.
-6. **Simulations and experiments:** check the `source-note` (pages, which figures/examples are the book's) and that example data the book defines (e.g. a record and its byte sizes) reproduces exactly.
+6. **Figures:** open each crop next to its caption; the label and printed page must be the book's (the validator checks them against `figures.tsv` and the page offset), and the caption's "what to look at" must match what the figure actually shows.
+7. **Simulations and experiments:** check the `source-note` (pages, which figures/examples are the book's) and that example data the book defines (e.g. a record and its byte sizes) reproduces exactly.
 
 ## Done when
 

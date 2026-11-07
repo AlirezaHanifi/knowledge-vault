@@ -54,19 +54,9 @@ DOP uses no locks: they hurt performance and, if you're not careful, deadlock (p
 | Calculation | Compute next state in isolation | Stateless | Specific |
 | Commit | Reconcile and update system state | Stateful | Common |
 
-```mermaid
-flowchart TB
-    subgraph Calculation
-        A[Capture system state] --> B[Compute next version]
-    end
-    B --> Q{Concurrent mutations?}
-    Q -->|No| U1[Update system state]
-    Q -->|Yes| C{Conflict?}
-    C -->|Yes| AB[Abort mutation]
-    C -->|No| R[Reconcile mutations] --> U2[Update system state]
-```
+![Activity diagram: a calculation phase captures the system state and computes the next version; the commit phase updates the state directly when there were no concurrent mutations, otherwise aborts on conflict or reconciles and then updates](../figures/05-01.png)
 
-*Redrawn from figure 5.1 (p. 94).*
+*Figure 5.1 (p. 94): only the commit phase needs to know about other mutations; the calculation phase is a pure function of the captured state.*
 
 ### 5.2 Reconciliation between concurrent mutations
 
@@ -81,6 +71,10 @@ When the commit phase starts there are three versions (figure 5.3, p. 95):
 | `next` | The version the calculation phase returned |
 
 If `current` is `previous`, fast-forward to `next`. Otherwise compare *fields* of the system hash map rather than lines: compute the diffs from `previous` to `next` and from `previous` to `current`. If they have no fields in common, apply the first diff to `current` (pp. 95–96, figure 5.4).
+
+![previous leads to current through diffPreviousCurrent and to next through diffPreviousNext; applying the other diff to each side yields the same merged state](../figures/05-04.png)
+
+*Figure 5.4 (p. 96): the two diffs start from the same `previous`, so when they touch different fields they can be applied in either order.*
 
 | DOP | Git (table 5.2, p. 96) |
 |---|---|

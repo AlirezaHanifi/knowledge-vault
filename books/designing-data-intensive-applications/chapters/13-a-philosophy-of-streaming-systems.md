@@ -136,13 +136,9 @@ Custom derivation code is where databases struggle: triggers, stored procedures 
 
 ### Observing derived state
 
-```mermaid
-flowchart LR
-    W[Writes] --> WP["Write path<br/>(eager: precompute)"] --> D[(Derived dataset<br/>index, view, cache)]
-    D --> RP["Read path<br/>(lazy: on request)"] --> R[Reads]
-```
+![On the write path, an application server sends a new document version through linguistic analysis into the search index; on the read path, a search query executor expands a user's query and reads posting lists from the same index](../figures/13-01.png)
 
-*After Figure 13-1 (pp. 555–556): the derived dataset is where write path and read path meet — eager vs lazy evaluation.*
+*Figure 13-1 (p. 556): the search index is where the write path (eager: precompute) meets the read path (lazy: on request).*
 
 #### Materialized views and caching (pp. 556–557)
 
@@ -194,17 +190,9 @@ Uniqueness (usernames, file paths, seats) and similar constraints (non-negative 
 
 **Multi-shard request processing** (pp. 568–570) — a payment with fees, without atomic commit (Figure 13-2):
 
-```mermaid
-flowchart LR
-    C["Client<br/>request ID r1"] -- "transfer" --> LS[[Source account shard]]
-    LS --> P["Source processor<br/>(state derived from log;<br/>seen request IDs)"]
-    P -- "enough funds?<br/>reserve, then emit (r1)" --> OUT[[Outgoing payment → source shard]]
-    P -- "(r1)" --> DST[[Incoming payment → destination shard]]
-    P -- "(r1)" --> FEE[[Incoming payment → fees shard]]
-    OUT --> P2["Source processor executes,<br/>ignoring duplicate r1"]
-    DST --> PD["Destination processor<br/>dedupes by r1"]
-    FEE --> PF["Fees processor<br/>dedupes by r1"]
-```
+![A user's payment request goes to the source account log; the source account event processor emits an outgoing payment back to its own log and incoming payments to the destination account log and the fees account log, each consumed by its own processor and state](../figures/13-02.png)
+
+*Figure 13-2 (p. 569): the source processor checks the balance and emits all three effects; each carries the request ID, so every processor can drop duplicates.*
 
 Requirements: per-account events processed in log order with at-least-once delivery, and deterministic processors. After a crash the source processor reprocesses the request, makes the same decision and emits the same events, which consumers dedupe. **Atomicity comes from appending the single request event**: once it is in the log, everything downstream eventually happens. Users subscribe for the outgoing (or “declined”) event (pp. 569–570).
 

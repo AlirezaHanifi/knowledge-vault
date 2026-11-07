@@ -59,19 +59,9 @@ Every B-Tree variant shares the tree structure, balancing through splits and mer
 
 Instead of complex latching, some databases **copy** a page whenever it's about to be modified, change the copy, and build a parallel tree hierarchy (p. 112). Readers keep using the old version, and writers to modified pages wait for earlier writers. When the new hierarchy is complete, the **topmost pointer is updated atomically**, and untouched pages are shared between versions (Figure 6-1) (p. 112).
 
-```mermaid
-flowchart TB
-    R1["root v1"] --> A["A"]
-    R1 --> B1["B v1"]
-    B1 --> L1["leaf v1"]
-    B1 --> L2["leaf (shared)"]
-    R2["root v2"] --> A
-    R2 --> B2["B v2 (copy)"]
-    B2 --> L1b["leaf v2 (copy)"]
-    B2 --> L2
-```
+![Old and new tree roots side by side: the new root, one copied internal node and one copied leaf are drawn in black, while every other node is shared with the old tree, drawn in grey](../figures/06-01.png)
 
-*The vault's sketch of Figure 6-1: an update copies only the path from the root to the modified leaf (p. 112).*
+*Figure 6-1 (p. 112): an update copies only the path from the root to the changed leaf; the new root points back into the old tree for everything untouched.*
 
 | Pros (p. 112) | Cons (p. 112) |
 |---|---|
@@ -114,6 +104,11 @@ MongoDB's default engine materializes nodes when they're paged in (pp. 114–115
 - **Reads** merge the update buffer with the on-disk contents.
 - On **flush**, the page goes through **reconciliation**, overwriting the original page, and is split if it's too big (p. 115).
 - Clean and dirty pages both have in-memory versions referencing a base image on disk; dirty pages also have an update buffer (Figure 6-3) (p. 115).
+
+![A clean page with an index and a dirty page with an index plus an update buffer, both pointing to page images on disk](../figures/06-03.png)
+
+*Figure 6-3 (p. 116): the dirty page keeps its changes in a separate update buffer on top of the same on-disk image.*
+
 - Page updates and structural changes run on a **background thread**, so readers and writers don't wait (p. 115).
 
 #### Lazy-Adaptive Tree
@@ -137,6 +132,10 @@ The book's example pulls every other element up one level (p. 118):
 | A3 | 11, 16, 24, 26, 30 | 11, 16, 24, 26, 30 |
 
 Search binary-searches the top level, then follows bridges to the approximate position on each level below (Figure 6-5) (p. 119).
+
+![Three sorted levels — 12 … 39, 16 … 35 and 11 … 30 — with shaded bridge elements copied from the level below, linking to positions in the next level](../figures/06-05.png)
+
+*Figure 6-5 (p. 119): shaded bridges are elements shared with the level below; following them skips a fresh binary search on every level.*
 
 #### Logarithmic runs
 

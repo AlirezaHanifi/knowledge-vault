@@ -76,18 +76,11 @@ The correctness of an atomic commit protocol (pp. 81–82):
 
 A **distributed (global) transaction** consists of two or more **nondistributed (local) transactions** (Figure 6.3) (p. 82). Each local transaction follows the state machine of Figure 6.4 (pp. 82–83):
 
-```mermaid
-stateDiagram-v2
-    [*] --> Working
-    Working --> Aborted: decides to abort (e.g. a constraint is violated)
-    Working --> Prepared: done, waits for the decision
-    Prepared --> Committed: commit request
-    Prepared --> Aborted: abort request
-    Committed --> [*]
-    Aborted --> [*]
-```
+![States of a local transaction: Working goes to Prepared or directly to Aborted; Prepared goes to Committed or Aborted](../figures/06-04.png)
 
-*After Figure 6.4.* A prepared transaction executes no more operations but hasn't yet decided. Committed and aborted are final and irreversible (p. 82). The global state is a **state vector** of the local states, plus the outstanding messages in the network. Figure 6.5 steps (working, working) → (prepared, working) → (prepared, prepared) → (committed, prepared) → (committed, committed) (p. 83).
+*Figure 6.4 (p. 83): Working can abort on its own; once Prepared, the transaction waits for someone else's decision.*
+
+A prepared transaction executes no more operations but hasn't yet decided. Committed and aborted are final and irreversible (p. 82). The global state is a **state vector** of the local states, plus the outstanding messages in the network. Figure 6.5 steps (working, working) → (prepared, working) → (prepared, prepared) → (committed, prepared) → (committed, committed) (p. 83).
 
 ### 6.3 Two-Phase Commit protocol
 
@@ -97,29 +90,9 @@ stateDiagram-v2
 
 The client begins a transaction on each RM and runs ordinary reads and writes. Then, instead of asking the RMs to commit, it asks the **TC** to commit, which starts 2PC (Figure 6.6):
 
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant TC as Transaction coordinator
-    participant R1 as RM1
-    participant R2 as RM2
-    C->>R1: begin t1 … reads and writes
-    C->>R2: begin t1 … reads and writes
-    C->>TC: commit t1
-    Note over TC: log ⟨Prepare, Timeout⟩
-    TC->>R1: prepare t1
-    TC->>R2: prepare t1
-    Note over R1,R2: log ⟨Vote-to-Commit⟩
-    R1-->>TC: vote to commit
-    R2-->>TC: vote to commit
-    Note over TC: all voted commit, log ⟨Commit⟩
-    TC->>R1: commit
-    TC->>R2: commit
-    Note over R1,R2: log ⟨Commit⟩ and commit
-    R1-->>TC: ack
-    R2-->>TC: ack
-    TC-->>C: ack
-```
+![Sequence diagram between client, transaction coordinator and two resource managers: the client begins t1 on both RMs, runs the usual transaction, then sends commit t1 to the coordinator; in the prepare phase the coordinator sends prepare and both RMs vote to commit; in the commit phase it sends commit, both RMs ack, and the coordinator acks the client](../figures/06-06.png)
+
+*Figure 6.6 (p. 84): the client hands the commit to the coordinator; each phase is one round trip to every RM. What each party logs at each step is in the table below.*
 
 | Phase | Step (pp. 84–85) |
 |---|---|
@@ -145,6 +118,10 @@ The system model is the partially synchronous one of Chapter 2 (p. 85).
 | ⟨Abort⟩ | "We already aborted" | **UNDO**, so no operation takes effect |
 
 **TC failure may block 2PC** (p. 86): an RM that has persisted ⟨Vote-to-Commit⟩ is stuck until the TC is repaired. In Figure 6.11, the TC fails during Commit *after* telling RM1 to commit. RM2 can neither commit nor abort, because it doesn't know what anyone else did.
+
+![The same 2PC sequence as before, with a cross on the transaction coordinator's line in the commit phase after it sent commit to resource manager 1 and before it sent commit to resource manager 2](../figures/06-11.png)
+
+*Figure 6.11 (p. 87): RM1 has committed; RM2 has voted and can only wait for a coordinator that is down.*
 
 > **Try it:** [2PC: recovery and blocking](../widgets/06-two-phase-commit.html) — run 2PC between a coordinator and two RMs, crash any of them at any step, watch each recovering RM apply the rule for its last log entry, then try the two "improvements": asking a peer, and timing out to abort.
 

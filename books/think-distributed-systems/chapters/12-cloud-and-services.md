@@ -115,6 +115,10 @@ Real serverless platforms don't release resources immediately. They keep them fo
 | **Cold** | Receive → **acquire** → process: acquisition sits between receiving and processing |
 | **Hot** | Receive → process: resources are already held |
 
+![A timeline: receive event, acquire resource, process event (the cold path), then receive event, process event (the hot path), and finally release resource](../figures/12-07.png)
+
+*Figure 12.7 (p. 161): only the first event pays for acquisition; events that arrive while resources are held skip it.*
+
 > **Try it:** [Cold path, hot path](../widgets/12-serverless-paths.html) — send bursts of events to a traditional (pre-provisioned) system and to a serverless one, change how long the serverless platform keeps resources after an event, and trade cold-path latency against resources held idle.
 
 ### 12.5 Service
@@ -144,6 +148,10 @@ The contract is **Get: ID → [ID]**: given a movie id, return a list of movie i
 | Figure 12.14 | Redundant load balancers and autoscalers | Those components' own load and failures |
 | Figure 12.15 | Autoscalers shared across groups, even across service boundaries | Correcting the false 1:1 picture |
 
+![A load balancer above two groups of recommendation processes, a primary group and a backup group, each managed by its own autoscaler](../figures/12-13.png)
+
+*Figure 12.13 (p. 164): the load balancer chooses between groups; the autoscalers change how many processes each group has.*
+
 The final implementation is a dynamic, ever-changing set of components, some dedicated to this service and some shared. **The contract is the only constant.** A consumer ignores all of this and asks "the rest of the system" for recommendations (p. 166).
 
 ```mermaid
@@ -157,7 +165,7 @@ flowchart TB
     AS2[Autoscaler] -.-> B1 & B2
 ```
 
-*The vault's summary of Figures 12.13–12.15.*
+*The vault's summary of Figures 12.13–12.15, with the retry path and data sources the figures leave out.*
 
 ### 12.6 Final thoughts
 

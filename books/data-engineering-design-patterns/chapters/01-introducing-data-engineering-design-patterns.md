@@ -95,19 +95,9 @@ Patterns are domain-independent, but each is introduced through a case study: a 
 | **Real-time layer** | Streaming jobs reading a streaming broker: business-facing jobs (real-time session aggregation) and technical enablers (synchronizing data to at-rest storage for ad hoc querying) |
 | **Data organization layer** | The **Medallion architecture**: Bronze, Silver and Gold layers |
 
-```mermaid
-flowchart LR
-    subgraph In["Ingestion"]
-      W["Blog visit events<br/>(online)"]
-      P["Data provider<br/>(offline, e.g. hourly)"]
-    end
-    W --> B["Streaming broker"] --> RT["Real-time jobs<br/>sessions · sync"]
-    RT --> BR
-    P --> BR["Bronze<br/>raw, unaltered"]
-    BR --> SI["Silver<br/>cleansed, enriched"] --> GO["Gold<br/>data marts, reference data"]
-```
+![The case study's blog analytics platform: data providers and an API gateway feed ingestion jobs and a raw data topic; stateful and synchronization jobs enrich the data using a reference dataset; results land in bronze, silver and gold layers of lakehouse storage, all under data orchestration and observability](../figures/01-01.png)
 
-*The vault's simplified drawing of Figure 1-1 (pp. 5–6).*
+*Figure 1-1 (p. 5): the numbered boxes mark the three parts the book singles out; every later chapter's examples live somewhere on this map.*
 
 The layers mirror the patterns' maturity: patterns that create business value mostly expose data in **Gold**, while the rest stay in Bronze or Silver. The figure deliberately omits technology so the focus stays on the patterns; each pattern's *Examples* section shows implementations (p. 6).
 

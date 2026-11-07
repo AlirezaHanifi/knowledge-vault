@@ -66,21 +66,11 @@ Other labels exist (key-value, relational, document, graph), but a full taxonomy
 
 There's no common blueprint, and in code, components that look independent are often coupled for performance or edge cases (p. 8). Figure 1-1 shows common themes from the literature. Database nodes are servers and application instances are clients.
 
-```mermaid
-flowchart TB
-    C["Client"] --> T["Transport subsystem<br/>(also talks to other nodes)"]
-    T --> QP["Query processor<br/>parse · interpret · validate · access control"]
-    QP --> OPT["Query optimizer<br/>statistics + data placement → execution plan"]
-    OPT --> EX["Execution engine<br/>local and remote operations"]
-    EX --> SE
-    subgraph SE["Storage engine"]
-      direction LR
-      TM["Transaction manager"] --- LM["Lock manager"]
-      AM["Access methods<br/>(heap files, B-Trees, LSM Trees)"] --- BM["Buffer manager"] --- RM["Recovery manager"]
-    end
-```
+![Layered DBMS: transport (cluster and client communication) feeds the query parser and optimizer, then local and remote execution, then the storage engine with transaction, lock, buffer and recovery managers around the access methods](../figures/01-01.png)
 
-*After Figure 1-1 (p. 9).*
+*Figure 1-1 (p. 9): a request flows top to bottom; the transport layer also links straight to remote execution, because other nodes send work too.*
+
+The **transport** subsystem takes client queries and also talks to other nodes. The **query processor** parses, interprets, validates and checks access control (p. 9).
 
 The **optimizer** removes impossible and redundant parts of a query. It then picks the cheapest **execution plan** (or query plan) based on internal statistics, such as index cardinality and approximate intersection size, and on data placement, meaning which nodes hold the data and what moving it costs (p. 9).
 
@@ -124,6 +114,10 @@ The book warns that an in-memory database is *not* just an on-disk database with
 
 A **field** is the intersection of a column and a row. A **row** is the set of values belonging to one record, usually identified by a key (p. 12). Tables can be partitioned **horizontally**, storing rows together, or **vertically**, storing columns together (Figure 1-2). Row stores include MySQL, PostgreSQL and most traditional relational databases. The pioneering open source column stores were **MonetDB** and **C-Store**, the predecessor of Vertica (p. 13).
 
+![The same Symbol, Date and Price table stored (a) column by column, one stack per column, and (b) row by row, one stack of whole records](../figures/01-02.png)
+
+*Figure 1-2 (p. 13): (a) column-oriented — each column's values sit together; (b) row-oriented — each record's fields sit together.*
+
 #### Row-oriented data layout
 
 The layout is close to the tabular view. The book's example is user records with ID, name, birth date and phone number (p. 13). Fields of one record are usually written and read together, which improves **spatial locality**. Disks are accessed block-wise, so a block holds all columns of its rows. That's ideal for fetching whole records, but costly for queries that read one field across many records, such as only phone numbers (pp. 13–14).
@@ -161,16 +155,9 @@ The canonical **Webtable** example from the Bigtable paper (pp. 15–17):
 - A column key is the family name plus a qualifier, for example `anchor:cnnsi.com`.
 - Each cell keeps several **versions by timestamp**.
 
-```mermaid
-flowchart LR
-    RK["row key<br/>com.cnn.www"] --> CF1["family: contents"]
-    RK --> CF2["family: anchor"]
-    CF1 --> V1["contents:html @t3, @t5, @t6"]
-    CF2 --> V2["anchor:cnnsi.com @t9"]
-    CF2 --> V3["anchor:my.look.ca @t8"]
-```
+![Webtable as a nested map: reversed-URL row keys hold a contents family with html versions at timestamps t3, t5, t6 and an anchor family with cells cnnsi.com at t9 and my.look.ca at t8](../figures/01-03.png)
 
-*After Figure 1-3 (p. 16): the conceptual nested map. Physically, each family is stored separately, and within a family the data for one key is stored together (Figure 1-4, p. 17).*
+*Figure 1-3 (p. 16): row key → column family → qualifier → timestamped versions. Physically each family is stored separately, and within a family one key's data is kept together (Figure 1-4, p. 17).*
 
 ### Data files and index files
 
@@ -194,6 +181,10 @@ When records live in a separate file, index entries hold enough to find them, su
 
 An index maps keys to the locations of records (heap files) or to primary keys (IOTs). The index on the primary file is the **primary index**, usually over the primary key. All others are **secondary**. They point either to the record or to its primary key, and they may hold several entries per search key (p. 19).
 
+![(a) An index-organized table keeps the records in the tree's leaves; (b) a separate index file whose leaves point into a data file](../figures/01-05.png)
+
+*Figure 1-5 (p. 19): (a) records in the index itself; (b) the index stores offsets into a separate data file (data segments shaded).*
+
 | | Clustered (clustering) | Nonclustered (unclustered) |
 |---|---|---|
 | Data order | Follows the key order | Doesn't follow the key order |
@@ -211,18 +202,11 @@ Should secondary indexes point at records directly or through the primary index?
 | Updates and relocations | Every index pointer must be updated | Only the primary index changes |
 | Suits | Read-mostly workloads with few indexes | Write-heavy workloads with many indexes; e.g. **MySQL InnoDB** |
 
-```mermaid
-flowchart LR
-    subgraph A["(a) Direct"]
-      S1["Secondary index"] --> D1[("Data record")]
-      P1["Primary index"] --> D1
-    end
-    subgraph B["(b) Indirection"]
-      S2["Secondary index"] --> P2["Primary index"] --> D2[("Data record")]
-    end
-```
+![(a) primary and secondary indexes both point straight into the data file; (b) the secondary index points to primary-index entries, which point to the data](../figures/01-06.png)
 
-*After Figure 1-6 (p. 21).* A hybrid stores both an offset and the primary key. It tries the offset first and, if it's stale, goes through the primary index and repairs the offset (p. 21).
+*Figure 1-6 (p. 21): (a) every index holds data offsets, so moving a record touches them all; (b) secondary entries go through the primary index.*
+
+A hybrid stores both an offset and the primary key. It tries the offset first and, if it's stale, goes through the primary index and repairs the offset (p. 21).
 
 ### Buffering, immutability, and ordering
 

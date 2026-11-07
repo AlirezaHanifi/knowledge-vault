@@ -207,6 +207,66 @@ def check_book(d: Path) -> None:
             f"but chapters/ has {len(chapter_files)} files")
 
 
+FIG_LINE_RE = re.compile(r"^!\[([^\]]*)\]\(\.\./figures/([^)\s]+)\)\s*$")
+FIG_CAPTION_RE = re.compile(r"^\*Figure ([\w.-]+) \(pp?\. (\d+)(?:[–-]\d+)?\): \S.*\*$")
+OFFSET_RE = re.compile(r"PDF page\s*[−-]\s*(\d+)")
+
+
+def check_figures(book: Path) -> None:
+    """Every figure image is recorded in figures.tsv (so it can be re-rendered from
+    the PDF) and embedded in a chapter as `![alt](../figures/F)` followed by an italic
+    `*Figure L (p. N): …*` caption whose label and printed page match the record."""
+    folder = book / "figures"
+    images = sorted(folder.glob("*.png")) if folder.exists() else []
+    tsv = folder / "figures.tsv"
+    rows: dict[str, list[str]] = {}
+    if tsv.exists():
+        for line in tsv.read_text(encoding="utf-8").splitlines()[1:]:
+            cells = line.split("\t")
+            if len(cells) != 4:
+                err(f"{rel(tsv)}: malformed row: {line!r}")
+                continue
+            rows[cells[0]] = cells
+            if not (folder / cells[0]).exists():
+                err(f"{rel(tsv)}: lists {cells[0]}, which does not exist")
+    elif images:
+        err(f"{rel(folder)}: figures.tsv is missing (render figures with scripts/pdf.py figure)")
+    for img in images:
+        if img.name not in rows:
+            err(f"{rel(img)}: not recorded in figures.tsv")
+    readme = (book / "README.md").read_text(encoding="utf-8") if (book / "README.md").exists() else ""
+    m = OFFSET_RE.search(parse_fm(readme).get("source_file", ""))
+    offset = int(m.group(1)) if m else (0 if "all references are PDF pages" in readme else None)
+    used: set[str] = set()
+    for ch in sorted(book.glob("chapters/*.md")):
+        lines = ch.read_text(encoding="utf-8").splitlines()
+        for no, line in enumerate(lines, 1):
+            if not line.startswith("!["):
+                continue
+            fm = FIG_LINE_RE.match(line)
+            if not fm:
+                err(f"{rel(ch)}:{no}: figure must be its own line: ![what it shows](../figures/FILE.png)")
+                continue
+            alt, file = fm.groups()
+            used.add(file)
+            if len(alt.split()) < 3 or alt.lower().startswith(("figure", "image", "diagram")):
+                err(f"{rel(ch)}:{no}: alt text must say what the figure shows, not name it")
+            nxt = next((l for l in lines[no:] if l.strip()), "")
+            cm = FIG_CAPTION_RE.match(nxt)
+            if not cm:
+                err(f"{rel(ch)}:{no}: figure needs a caption line: *Figure L (p. N): what to look at.*")
+                continue
+            row = rows.get(file)
+            if row and cm.group(1) != row[1]:
+                err(f"{rel(ch)}:{no}: caption says Figure {cm.group(1)}, figures.tsv says {row[1]}")
+            if row and offset is not None and int(cm.group(2)) != int(row[2]) - offset:
+                err(f"{rel(ch)}:{no}: caption page {cm.group(2)} != printed page "
+                    f"{int(row[2]) - offset} of the crop (PDF page {row[2]})")
+    for img in images:
+        if img.name not in used:
+            err(f"{rel(img)}: not used by any chapter")
+
+
 def main() -> int:
     md_files = [p for p in sorted(ROOT.rglob("*.md")) if not skipped(p)]
     html_files = [p for p in sorted(ROOT.rglob("*.html")) if not skipped(p)]
@@ -234,6 +294,10 @@ def main() -> int:
                 err(f"{rel(exp)}: experiment missing README.md")
             elif f"../lab/{exp.name}/README.md" not in notes:
                 err(f"{rel(exp)}: not linked from any chapter's Connections")
+
+    # Book figures: recorded crops, each used by a chapter with a proper caption.
+    for book in sorted(books_dir.glob("*/")) if books_dir.exists() else []:
+        check_figures(book)
 
     # Generated pages must match their sources.
     sys.path.insert(0, str(ROOT / "scripts"))

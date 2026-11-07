@@ -1,6 +1,6 @@
 # Knowledge Vault
 
-Technical books turned into interactive lessons. For each book there is one folder with faithful chapter notes (page-referenced, with diagrams), a slide-by-slide lesson generated from each note, hand-built simulations of the mechanisms the book describes, and small experiments you can run. Plain Markdown, dependency-free HTML and standard-library Python — nothing to install, works offline from disk.
+Technical books turned into interactive lessons. For each book there is one folder with faithful chapter notes (page-referenced, with the book's own figures and diagrams), a slide-by-slide lesson generated from each note, hand-built simulations of the mechanisms the book describes, and small experiments you can run. Plain Markdown, dependency-free HTML and standard-library Python — nothing to install, works offline from disk.
 
 **Start here: open [`index.html`](index.html) in a browser.**
 
@@ -26,6 +26,7 @@ books/<book>/
   book.pdf                    source PDF for fact-checking (gitignored)
   chapters/NN-*.md            chapter notes — the source of truth
   chapters/NN-*.html          interactive lesson for each note (generated)
+  figures/NN-MM.png           the book's own figures, cropped from the PDF (figures.tsv records each crop)
   widgets/NN-*.html           simulations, embedded in the lessons
   lab/NN-*/                   runnable experiments with expected output
 assets/                       shared design kit (kit.css/js), site styles, vendored Mermaid

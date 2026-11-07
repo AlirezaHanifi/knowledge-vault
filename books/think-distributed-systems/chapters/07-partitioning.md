@@ -59,14 +59,11 @@ The author's teenage encyclopedia was split into volumes, one per letter (Figure
 
 ### 7.2 Thinking in partitions
 
-```mermaid
-flowchart TB
-    L[Logical object]
-    L -- "partitioning:<br/>each physical object is a part" --> P1[Physical 1] & P2[Physical i] & P3[Physical n]
-    L -. "replication (Chapter 8):<br/>each physical object is the whole" .-> R[copies]
-```
+![A logical object above physical objects 1 to n; on the left, partitioning, where the physical objects each represent a part; on the right, marked "Next chapter", replication, where each represents the whole](../figures/07-02.png)
 
-*After Figure 7.2.* Partitions are distributed across components called **nodes**, which spreads demand and avoids one node's limits (p. 92).
+*Figure 7.2 (p. 92): the same picture covers both techniques; only what each physical object stands for changes.*
+
+Partitions are distributed across components called **nodes**, which spreads demand and avoids one node's limits (p. 92).
 
 Two aha! moments (pp. 92–93):
 
@@ -79,6 +76,10 @@ The rest of the chapter uses a **key–value store** (pp. 93–94):
 
 - In Figure 7.3, the dataset {x=1, y=2, z=3} is split into three partitions of one pair each, and each partition is replicated on three nodes.
 - Two relationships matter (Figure 7.4): **item → partition** and **partition → node**.
+
+![A table of data items x = 1, y = 2, z = 3 with their partitions P1, P2, P3 and nodes N1, N2, N3; arrows label the first link item to partition and the second partition to node](../figures/07-04.png)
+
+*Figure 7.4 (p. 94): two separate mappings — changing one (repartitioning) is independent of changing the other (rebalancing).*
 
 Examples of workload-dependent trade-offs (p. 94):
 
@@ -107,6 +108,10 @@ The aha! moment: *static* also covers slow or infrequent change. If changing the
 
 **Horizontal vs. vertical** is easiest to see with relational tables (Figure 7.6) (pp. 95–96):
 
+![A table with rows 1–4 and columns a and b, split horizontally into rows 1–2 and 3–4, and vertically into column a and column b](../figures/07-06.png)
+
+*Figure 7.6 (p. 96): horizontal partitions are groups of rows; vertical partitions are groups of columns.*
+
 | Kind | Splits by | Also called |
 |---|---|---|
 | **Horizontal** | Rows: e.g. rows 1–2 in one partition and rows 3–4 in another | **Sharding** |
@@ -125,6 +130,10 @@ An assignment strategy's fitness is measured by two things (p. 97):
 
 - **Variance**: how uniformly items are spread across partitions.
 - **Relocation**: how many items move when the number of partitions changes.
+
+![Left: an item goes through item-based assignment straight to one of three partitions. Right: an item goes through directory-based assignment, which consults an assignment table before choosing a partition](../figures/07-08.png)
+
+*Figure 7.8 (p. 97): the only difference is the lookup box — and that box is the state the directory-based strategy has to keep available.*
 
 | | **Item-based** (Listing 7.1) | **Directory-based** (Listing 7.2) |
 |---|---|---|
@@ -186,6 +195,10 @@ The aha! moment: the author prefers to think about algorithms by their **signatu
 |---|---|
 | Partitions = nodes (one each) | None: partitions and nodes are locked one-to-one |
 | **Overpartitioning** (partitions > nodes) | When demand drops, decommission nodes and reassign their orphaned partitions. When demand rises, add nodes and spread partitions across them |
+
+![Left: a dataset of three partitions mapped one-to-one onto three machines. Right: the same dataset as twelve smaller partitions spread four to a machine, mixed across three machines](../figures/07-10.png)
+
+*Figure 7.10 (p. 104): with more partitions than machines, a machine can be added or removed by moving whole partitions rather than splitting them.*
 
 The limit: the **number of partitions caps the number of nodes**. Once each node has one partition, adding more nodes doesn't help (p. 104).
 

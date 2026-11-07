@@ -108,17 +108,9 @@ The author knew of no implementation, probably because merges triggered by every
 
 **Multicomponent LSM Tree** (pp. 134–136): the *whole* memtable is flushed in one run, creating more and more tables, so a periodic **compaction** merges them (Figure 7-3).
 
-```mermaid
-flowchart LR
-    W["write"] --> WAL["WAL append"] --> MT["Current memtable<br/>reads + writes"]
-    MT -- "switch (atomic)" --> FM["Flushing memtable<br/>reads only"]
-    FM -- "sequential write" --> FT["Flush target<br/>not readable yet"]
-    FT --> T["Flushed tables<br/>readable"]
-    T --> C["Compacting tables"] --> CT["Compacted tables"]
-    FT -. "flush done → trim WAL" .-> WAL
-```
+![In memory, the current memtable takes reads and writes and is switched into a flushing memtable that only serves reads; on disk, the flush target becomes a flushed table, then compacting tables, then a compacted table, each readable except the flush target](../figures/07-04.png)
 
-*The vault's version of Figure 7-4 (pp. 135–136).*
+*Figure 7-4 (p. 136): the memtable switch is atomic; the flush target can't be read until it is complete, after which the write-ahead log up to that point can be trimmed (pp. 135–136).*
 
 A flush is triggered periodically or by size. The memtable switch must be atomic, the flushing memtable stays readable until the new table replaces it, and once the flush completes the corresponding WAL section can be trimmed (pp. 135–136).
 
@@ -161,6 +153,10 @@ Records for the same key are reconciled by metadata, typically **timestamps**. S
 #### Maintenance in LSM Trees
 
 **Compaction** picks several tables, merge-iterates and reconciles them, and writes a new table. Memory is bounded (only iterator heads are held), and reads and writes are sequential (p. 141). Compacting tables stay readable until the end, so there must be enough free disk space for the output. Concurrent compactions work on disjoint table sets, and a compaction can either merge tables or partition one into several (p. 141).
+
+![Four levels of tables, level 0 to level 3, each level holding more tables; dashed grey groups mark the tables of adjacent levels that are being compacted together](../figures/07-06.png)
+
+*Figure 7-6 (p. 142): leveled compaction merges a table with only the tables of the next level whose key ranges overlap it.*
 
 **Tombstones and compaction** (p. 141): a tombstone is kept until no record with the same key and a smaller timestamp can exist in any table. RocksDB keeps tombstones until the bottommost level. Cassandra keeps them until the **GC grace period** has passed, so that other replicas see them, because it is eventually consistent. Dropping tombstones early resurrects data.
 
@@ -207,6 +203,10 @@ The filter is a bit array plus *k* hash functions. Adding a key sets *k* bits. A
 
 The book's example: 16 bits, 3 hash functions (Figure 7-7, p. 148):
 
+![A 16-bit array; key1 and key2 above it each set three bits; key3 and key4 below each check three bits, one of which is 0 for key4](../figures/07-07.png)
+
+*Figure 7-7 (p. 148): a lookup checks the same three bit positions an insert set; any 0 means "definitely absent", all 1s means "maybe present".*
+
 | Key | Hash positions | Result |
 |---|---|---|
 | key1 (added) | 3, 5, 10 | bits set |
@@ -222,6 +222,11 @@ A **skiplist** (Pugh) is barely more complex than a singly linked list, with pro
 
 - Each node's **height** is chosen randomly at insert. Nodes of the same height form a level, each level has exponentially fewer nodes, and the maximum height is capped (p. 149).
 - **Lookup:** move forward on the highest level while the next key is smaller; otherwise drop down a level from the predecessor. The book searches for 7: head → 10 (too big) → down → 5 → 10 (too big) → down → 7 (Figure 7-8) (p. 149).
+
+![A skiplist with keys 3, 5, 7, 10, 15, 22, 25: every node is on the bottom level and some nodes have extra levels of forward pointers that skip over runs of nodes](../figures/07-08.png)
+
+*Figure 7-8 (p. 149): taller nodes act as express lanes; a search drops one level whenever the next key would overshoot.*
+
 - **Insert:** find the insertion point, pick a random height, link predecessors on each level. **Delete:** hand the removed node's forward pointers to its predecessors (p. 150).
 - **Concurrent** versions use a `fully_linked` flag set by CAS, plus reference counting or hazard pointers in unmanaged languages. They are deadlock-free because nodes are always accessed from higher levels (p. 150).
 - Users: Cassandra's secondary-index memtable and parts of WiredTiger (p. 150).
@@ -242,6 +247,10 @@ B-Tree pages, FD-Tree runs and SSTables all keep key order, by in-place updates,
 
 **Bitcask**, one of Riak's engines, uses no memtable: records go straight into **logfiles** (p. 153). The **keydir**, an in-memory hashmap, points to the latest record for each key and must be rebuilt from the logfiles at startup. Writes append the record and update the keydir. Reads follow one pointer, with no merging. Compaction rewrites only live records and updates the keydir (pp. 153–154).
 
+![A keydir with key1 to key5, each pointing to the latest record for its key across two data files; older versions of the same keys in the files are greyed out](../figures/07-11.png)
+
+*Figure 7-11 (p. 153): the in-memory keydir points only at each key's newest record; the greyed older versions are garbage for compaction.*
+
 | Pros (p. 154) | Cons (p. 154) |
 |---|---|
 | Simple; great point-query performance | All keys must fit in memory |
@@ -251,6 +260,10 @@ B-Tree pages, FD-Tree runs and SSTables all keep key order, by in-place updates,
 #### WiscKey
 
 **WiscKey** decouples sorting from garbage collection: **keys** live in a sorted LSM Tree, and **values** in unordered append-only **vLogs** (p. 154). That removes Bitcask's all-keys-in-memory and startup-rebuild problems. Keys are small, so compacting them is cheap, which suits workloads with few updates and deletes (p. 154).
+
+![Small index LSM trees whose leaves point into vLog files; live values are dark and stale values grey, scattered across the logs](../figures/07-12.png)
+
+*Figure 7-12 (p. 155): the sorted LSM trees hold only keys and pointers; values sit unsorted in the vLog, so compaction moves keys, not values.*
 
 - **Range scans** need random I/O into the vLog. WiscKey prefetches in parallel using SSD parallelism, but a whole page is still read for one record (p. 154).
 - **vLog GC** reads sequentially, rewrites live records and updates pointers, using head and tail pointers to bound the scan. The vLog has no liveness information, so GC must consult the key tree, which traditional LSM compaction doesn't need (p. 155).

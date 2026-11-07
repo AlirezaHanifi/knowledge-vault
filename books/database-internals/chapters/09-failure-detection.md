@@ -68,6 +68,10 @@ Excluding failed processes avoids wasted work and stops error propagation and ca
 
 Each process keeps a list of alive, dead and suspected peers with their last response times, and suspects a peer that doesn't respond for too long (p. 197). Delayed acknowledgments that arrive after the next ping can get a live process marked down (Figures 9-1, 9-2). Akka's **deadline failure detector** reports a failure if a heartbeat isn't registered within a fixed interval (p. 197). Downsides: precision depends on carefully chosen ping frequency and timeout, and the detector doesn't capture how *other* processes see the peer (p. 197).
 
+![P1 sends two Alive? pings to P2; the replies are delayed, so each Ack arrives only after the next ping has been sent](../figures/09-02.png)
+
+*Figure 9-2 (p. 197): when responses lag behind the ping interval, the detector must decide whether "late" means "dead".*
+
 #### Timeout-free failure detector
 
 Aguilera et al.'s **Heartbeat** algorithm only *counts* heartbeats, so it works under asynchronous assumptions (p. 197). It assumes fair paths between correct processes and that every process knows all the others (pp. 197–198).
@@ -81,26 +85,9 @@ Aguilera et al.'s **Heartbeat** algorithm only *counts* heartbeats, so it works 
 
 **SWIM** (Scalable Weakly Consistent Infection-style Process Group Membership) checks liveness from neighbours' perspectives, and each process needs to know only a subset of peers (p. 198).
 
-```mermaid
-sequenceDiagram
-    participant P1
-    participant P2
-    participant P3
-    participant P4
-    P1->>P2: ping
-    Note over P2: no response
-    par indirect probes
-        P1->>P3: ping-req(P2)
-        P3->>P2: ping
-        P2-->>P3: ack
-        P3-->>P1: ack (P2 alive)
-    and
-        P1->>P4: ping-req(P2)
-        P4->>P2: ping
-    end
-```
+![P1's ping to P2 is lost; P1 asks P3 and P4 to ping P2 on its behalf, P2 answers them, and their acks reach P1](../figures/09-03.png)
 
-*The vault's diagram of Figure 9-3 (pp. 198–199).*
+*Figure 9-3 (p. 199): when a direct ping fails, neighbours probe the suspect, so a single bad link doesn't cause a false suspicion.*
 
 This accounts for both direct and indirect reachability, spreads the decision across members, avoids broad broadcasts, and gathers information quickly because the probes run in parallel (p. 199).
 
@@ -132,6 +119,10 @@ A **gossip-style** failure detection service (van Renesse et al.) avoids relying
 - Worst-case bandwidth is capped and grows at most **linearly** with the number of processes (p. 200).
 
 Figure 9-4 (p. 201):
+
+![Three stages: P1, P2, P3 each keep a table of every peer's last heartbeat time; tables are exchanged and updated; when P3 fails, its entries stop advancing](../figures/09-04.png)
+
+*Figure 9-4 (p. 201): every process keeps the whole heartbeat table and merges its neighbours' copies, so a stale row reveals a failure.*
 
 1. All three processes communicate and update their timestamps.
 2. P3 can't reach P1, but its timestamp t6 still reaches P1 **through P2**.

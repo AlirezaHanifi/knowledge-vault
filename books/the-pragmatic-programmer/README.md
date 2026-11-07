@@ -134,3 +134,4 @@ These ideas recur across chapters; each row lists the chapters that discuss them
 - **Table of contents:** taken from the PDF's bookmark outline, which gives each chapter's topics.
 - **Structure:** front matter (foreword, the two prefaces), nine chapters of 53 topics, a postface, a bibliography and possible answers to the exercises.
 - **Coverage:** all ten chapters, including the postface, are covered.
+- **Figures:** this PDF carries no images — each figure is an empty box holding only its file name (e.g. `images/wc-pipeline.png`, PDF p. 257) — so the notes show none of the book's figures.

@@ -67,21 +67,9 @@ Theo knows he satisfied the customer more by luck than brains: had Nancy kept Su
 
 "It's data-oriented programming, so let's start with data" (p. 29). Data entities are the parts of the system that hold information. One way to find them is to highlight the nouns and noun phrases in the requirements (p. 29). Theo groups them into two (p. 30):
 
-```mermaid
-mindmap
-  root((Library data))
-    Catalog
-      Books
-      Authors
-      Book items
-      Book lendings
-    User management
-      Users
-      Members
-      Librarians
-```
+![A mind map: library data branches into catalog (books, authors, book items, book lendings) and user management (users, members, librarians)](../figures/02-03.png)
 
-*Redrawn from figure 2.3 (p. 30).*
+*Figure 2.3 (p. 30): data entities grouped by what they belong to, with no code attached.*
 
 Theo asks whether books and authors are an association or a composition; Joe says not to worry yet. The most precise view is a data entity diagram with different arrows for the two, which comes later (pp. 30–31).
 
@@ -110,16 +98,9 @@ Theo compares it to Python's `self` in method signatures (listing 2.2). Joe says
 - **`UserManagement`** functions receive `userManagementData` first: `blockMember`, `unblockMember`, `login`, `isLibrarian`.
 - **`Library`** functions receive `libraryData`, and pass `libraryData.catalog` and `libraryData.userManagement` on to the other two modules. For now Theo thinks of `libraryData` as a class with those two members (p. 36).
 
-```mermaid
-flowchart TB
-    LIB["Library<br/>searchBook(libraryData, searchQuery)<br/>getBookLendings(libraryData, userId)<br/>…"]
-    CAT["Catalog<br/>searchBook(catalogData, searchQuery)<br/>getBookLendings(catalogData, userId)<br/>…"]
-    UM["UserManagement<br/>isLibrarian(userManagementData, userId)<br/>login(userManagementData, loginInfo)<br/>…"]
-    LIB -.->|"uses (libraryData.catalog)"| CAT
-    LIB -.->|"uses (libraryData.userManagement)"| UM
-```
+![Three modules with stateless functions: Library (searchBook, addBookItem, blockMember, login, checkoutBook, returnBook, …) uses UserManagement and Catalog, each listing its own functions with explicit data arguments](../figures/02-07.png)
 
-*Condensed from figure 2.7 (p. 35). The only relation between modules is usage.*
+*Figure 2.7 (p. 35): every function receives the data it works on as an argument; the only relation between modules is usage.*
 
 ### 2.4 DOP systems are easy to understand
 

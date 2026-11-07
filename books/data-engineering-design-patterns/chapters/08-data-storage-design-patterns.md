@@ -78,6 +78,10 @@ Business keys (customer, partner, region) also work, and keys can be nested — 
 | **Skew** | In micro-batch streaming, the biggest partition sets the batch duration; a **backpressure buffer** defers the skewed partition's extra records to the next micro-batch (Figure 8-1), raising its latency but keeping others near real time |
 | **Mutability** | Changing the key moves all data; Iceberg supports partition evolution at the metadata layer — old files stay in the old layout |
 
+![A microbatch job reads input and writes output; extra rows it can't take in this batch are saved to a backpressure buffer and loaded first in the next microbatch](../figures/08-01.png)
+
+*Figure 8-1 (p. 237): the buffer caps each batch so one oversized partition doesn't stretch every batch.*
+
 **Partitioning vs sharding** (p. 237): sharding splits a dataset across machines — a special case of horizontal partitioning at the hardware layer.
 
 **Examples** (pp. 238–239): Spark adds `year`/`month`/`day`/`hour` columns from `change_date` and calls `.partitionBy('year','month','day','hour')`; a Java Kafka `RangePartitioner` sends keys `A` and `B` to partition 0 and everything else to 1, registered with `partitioner.class` — but keep it simple and usually stick to default partitioners; PostgreSQL `PARTITION BY RANGE(event_time)` with one `PARTITION OF` table per day.
@@ -90,15 +94,9 @@ The storage-oriented counterpart of Chapter 7's security pattern (p. 240).
 
 **Solution** (p. 240): classify attributes into groups, pick a join attribute (`visit_id`), and write each group to its own table or directory. Beyond saving storage, each part can have its own retention and access policies. Figure 8-2 contrasts moving a whole row (horizontal) with splitting it (vertical).
 
-```mermaid
-flowchart TB
-    R["visit row: visit_id · time · page · ip · browser"]
-    R -- "horizontal: whole row by key" --> H1[("partition 2024-05-05")]
-    R -- "vertical: split columns" --> V1[("visits: visit_id · time · page")]
-    R -- "vertical: split columns" --> V2[("technical: visit_id · ip · browser")]
-```
+![Horizontal partitioning moves whole visit rows into partitions by event time; vertical partitioning splits each row's columns into mutable attributes and immutable ones, keeping visit_id in both](../figures/08-02.png)
 
-*After Figure 8-2 (p. 241).*
+*Figure 8-2 (p. 241): horizontal splits rows by a key; vertical splits columns by how they change.*
 
 **Consequences** (p. 241): **domain split** — related attributes live apart, so document them; **querying** — rejoining is harder, so expose a view or a Dataset Materializer; **data producer** — producers must split rows and do several writes.
 
@@ -121,21 +119,9 @@ Partitioning is rudimentary and fails for high-cardinality attributes; these pat
 
 Bucketing was popularized by Apache Hive and is available in Spark and AWS Athena (p. 244).
 
-```mermaid
-flowchart LR
-    subgraph A["visits — bucketBy(4, user_id)"]
-      A0["b0"] & A1["b1"] & A2["b2"] & A3["b3"]
-    end
-    subgraph B["users — bucketBy(4, user_id)"]
-      B0["b0"] & B1["b1"] & B2["b2"] & B3["b3"]
-    end
-    A0 --- J0["join task 0"] --- B0
-    A1 --- J1["join task 1"] --- B1
-    A2 --- J2["join task 2"] --- B2
-    A3 --- J3["join task 3"] --- B3
-```
+![Two tables bucketed by the same letter column into three buckets each; the join task for bucket 1 reads bucket 1 of both tables, and likewise for buckets 2 and 3](../figures/08-03.png)
 
-*After Figure 8-3 (p. 244): no shuffle, because matching keys are already in matching buckets.*
+*Figure 8-3 (p. 244): no shuffle, because matching keys are already in matching buckets.*
 
 **Consequences** (p. 245): **mutability** — changing the column or bucket count requires a backfill; **bucket size** — sizing for today's volume gives big buckets later; sizing for predicted volume may be wrong and creates more buckets than needed meanwhile.
 
@@ -224,15 +210,9 @@ A **dimensional model** has one **fact** table (an observation: an order, a visi
 
 **Solution** (pp. 266–268): flatten joined values into one row, either as **regular columns** (**One Big Table** — Table 8-4: `visit_id 1, user_id 409, user_name user ABC, device_id 10000, device_full_name local computer, visit_time 2024-07-01T09:00:00Z, visited_page home.html`) or as **nested structures** (`STRUCT` columns). In dimensional models, the **star schema** keeps facts and dimensions but no nested dimensions (Figure 8-10). The patterns combine: build a normalized snowflake model, then a One Big Table from it for reading, kept in sync with Chapter 6's sequence patterns (Figure 8-11).
 
-```mermaid
-flowchart LR
-    S["Sources"] --> N["Snowflake schema builder<br/>(Normalizer)"] --> SN[("Snowflake schema<br/>consistent, private or exposed")]
-    SN --> D["One Big Table builder<br/>(Denormalizer)"] --> OBT[("One Big Table<br/>fast reads")]
-    SN -.-> AN["Data analyst"]
-    OBT --> AN
-```
+![Visits, devices and users feed a snowflake schema builder that produces a normalized website-visits schema; a One Big Table builder flattens it into a website-visits-with-context table for data analysts](../figures/08-11.png)
 
-*After Figure 8-11 (p. 268).*
+*Figure 8-11 (p. 268): the normalized snowflake stays the consistent source; the denormalized table is derived from it for analysts.*
 
 **Consequences** (pp. 268–269): **costly updates** — one change touches many rows; unless the table is a point-in-time **snapshot**, accept slower updates for faster reads. **Storage** — duplicated values, reduced by encodings like **dictionaries** (`{1: "long name…", 2: …}`), which can also answer existence checks without reading data. **One big antipattern** — a table mixing user details, past orders, the current visit and a favourite colour is a trash bag; if naming it needs many *and*s or *with*s, you've combined unrelated attributes.
 

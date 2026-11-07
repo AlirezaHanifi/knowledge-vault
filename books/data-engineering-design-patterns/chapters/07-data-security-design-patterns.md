@@ -63,15 +63,9 @@ Privacy regulations require deleting a user's personal data on request (p. 198).
 
 **Solution** (pp. 198–200). **Horizontal** partitioning groups whole records (e.g. by date, Ch. 8); **vertical** partitioning splits each row and writes the parts to different places — the two can be combined. Identify the columns to split and the attribute to rejoin them (e.g. `user_id`), then make ingestion write the changing attributes to one store and the immutable/personal ones to another (Figure 7-1), with plain `SELECT` projections (plus rules like deduplication). Removal touches far less data, and each store can have its own access and retention rules.
 
-```mermaid
-flowchart LR
-    E["Visit event<br/>visit_id · page · event_time<br/>user_id · login · birthday"] --> S{"split by columns"}
-    S --> V[("visits<br/>visit_id · page · event_time · user_id")]
-    S --> U[("user_context — one row per user<br/>user_id · login · birthday")]
-    R["Removal request<br/>user_id = X"] -. "delete 1 row" .-> U
-```
+![A vertical partitioner reads a visit event with event, user, address and click fields and splits it into an event record and a PII record, written to separate event data and PII data stores](../figures/07-01.png)
 
-*After Figure 7-1 (p. 199): `user_id` lets consumers rejoin the parts.*
+*Figure 7-1 (p. 199): personal attributes go to their own store; `user_id` lets consumers rejoin the parts.*
 
 **Consequences** (pp. 200–201):
 

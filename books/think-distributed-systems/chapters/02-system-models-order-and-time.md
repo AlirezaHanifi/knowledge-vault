@@ -68,12 +68,9 @@ The book's aha! moment compares a system model to a **board game**: the rules se
 
 #### Timing models (pp. 25–26)
 
-```mermaid
-flowchart LR
-    S["Synchronous<br/>(theoretical)"] --- P["Partially synchronous<br/>(practical)"] --- A["Asynchronous<br/>(theoretical)"]
-```
+![A spectrum from the synchronous system model through the partially synchronous model to the asynchronous model; the two ends are labelled theoretical and the middle, highlighted, practical](../figures/02-02.png)
 
-*After Figure 2.2.*
+*Figure 2.2 (p. 26): the two extremes are theoretical; real systems are partially synchronous.*
 
 | Model | Clocks | Event timing | Consequence |
 |---|---|---|---|
@@ -140,6 +137,10 @@ From Lamport's 1978 paper "Time, Clocks, and the Ordering of Events in a Distrib
 
 Happened-before is a **partial order**: for any two events, a → b, b → a, or a ∥ b (concurrent) (Table 2.2) (p. 33). It captures **causality** in the sense that a *potentially* influenced b, not that it actually did (p. 34).
 
+![Events a and b on component 1 and c on component 2; b sends a message received as c, and a dashed arrow from a to c marks the transitive relation](../figures/02-15.png)
+
+*Figure 2.15 (p. 34): a → b within a component and b → c across the message give a → c (the dashed arrow), though a never sent anything to c.*
+
 The aha! moment on **concurrency vs. parallelism** (pp. 34–35):
 
 - Concurrency is about *events* (moments) and parallelism about *operations* (spans), so treat an operation as a pair of begin and end events.
@@ -171,6 +172,10 @@ A **Lamport clock** is a counter kept by each component (p. 37):
 - Increment it on every internal or external step, and tag the event with its value.
 - On receiving a message, set the clock to the maximum of the current value and the received timestamp, plus 1. Figure 2.18 shows max(1, 3) + 1 = 4.
 - This gives causally related events strictly increasing values.
+
+![Two component timelines with Lamport timestamps: the first counts 1, 2, 3 and sends a message at 3; the second is at 1, receives it and jumps to max(1, 3) + 1 = 4, then 5](../figures/02-18.png)
+
+*Figure 2.18 (p. 38): on receipt the clock jumps past the sender's timestamp, so the receive event is always later than the send.*
 
 The author has never used Lamport clocks himself, but logical clocks hide in many places (pp. 37–38):
 

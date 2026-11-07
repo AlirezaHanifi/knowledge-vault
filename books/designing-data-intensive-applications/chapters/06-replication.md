@@ -70,6 +70,10 @@ With sharding, each shard has its own leader. Used by PostgreSQL, MySQL, Oracle 
 | Majority quorum (e.g. 3 of 5) | A majority | Basis of consensus systems (Ch. 10) | Latency of the median node |
 | Fully asynchronous | No follower | Leader keeps going even if all followers lag; common with many or distant followers | An **acknowledged write can be lost** if the leader dies |
 
+![User 1234 updates a picture URL on the leader; the leader waits for follower 1's OK before confirming, while follower 2 receives the change later and asynchronously](../figures/06-02.png)
+
+*Figure 6-2 (p. 200): follower 1 is synchronous, so the user's OK waits for it; follower 2 is asynchronous and may lag arbitrarily.*
+
 Replication is usually sub-second, but followers can fall minutes behind — during recovery, near capacity, or with network problems (pp. 200–201).
 
 #### Setting up new followers (pp. 201–203)
@@ -132,18 +136,13 @@ Mostly-read workloads tempt you to add many followers and spread reads — **rea
 | Data appears, then disappears on refresh (Figure 6-4) | **Monotonic reads**: no going back in time — stronger than eventual, weaker than strong consistency | Each user reads from one replica, chosen by hash of user ID (rerouted if it fails) |
 | An answer appears before its question — Mrs Cake answering Mr Poons (Figure 6-5) | **Consistent prefix reads**: writes are seen in the order they happened | Write causally related data to the same shard; or track causal dependencies |
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant L as Leader
-    participant F as Follower (lagging)
-    U->>L: write comment (v2)
-    L-->>U: ok
-    L--)F: replicate v2 (delayed)
-    U->>F: read comments
-    F-->>U: v1 — own comment missing ✗
-    Note over U,F: read-after-write violation
-```
+![User 1234 inserts a comment through the leader; the write reaches follower 1 quickly but follower 2 late, and the user's next read goes to follower 2, which returns no results](../figures/06-03.png)
+
+*Figure 6-3 (p. 210): reading from a lagging follower right after a write makes your own write seem to vanish.*
+
+![Mr. Poons asks a question and Mrs. Cake answers through different shards; the observer receives the answer through a faster follower before the question](../figures/06-05.png)
+
+*Figure 6-5 (p. 214): when shards replicate at different speeds, an observer can see an answer before its question.*
 
 **Cross-device** read-after-write needs centralized “last write” metadata, and different devices (home broadband vs cellular) may reach different **regions** — collections of **availability zones** (separate datacenters with their own power and cooling, linked by fast networks). Multi-zone survives a zone outage; surviving a regional outage needs multiple regions, with higher latency and cost (pp. 211–212).
 
@@ -170,22 +169,9 @@ Supported by MySQL, Oracle, SQL Server, YugabyteDB, and add-ons (Redis Enterpris
 
 **Topologies** (Figure 6-7):
 
-```mermaid
-flowchart LR
-    subgraph Circular
-      direction LR
-      a1((L1)) --> a2((L2)) --> a3((L3)) --> a1
-    end
-    subgraph Star
-      direction LR
-      r((root)) --> b1((L1)) & b2((L2)) & b3((L3))
-      b1 & b2 & b3 --> r
-    end
-    subgraph A2A["All-to-all"]
-      direction LR
-      c1((L1)) <--> c2((L2)) <--> c3((L3)) <--> c1
-    end
-```
+![Three multi-leader topologies: (a) circular, each leader forwarding to the next; (b) star, a central leader forwarding to the rest; (c) all-to-all, every leader sending to every other](../figures/06-07.png)
+
+*Figure 6-7 (p. 218): circular and star topologies forward writes through other nodes; all-to-all sends directly but can reorder writes.*
 
 In circular and star topologies writes are forwarded through other nodes, tagged with the IDs of nodes they passed to prevent loops — and one failed node can halt the flow. All-to-all is more fault-tolerant, but messages can **overtake** one another: leader 2 may receive B’s *update* before A’s *insert* of the same row (Figure 6-8). Timestamps can’t fix this; **version vectors** can — yet many systems don’t use them, so test what you rely on (pp. 218–220).
 
@@ -205,6 +191,10 @@ Pioneered by Lotus Notes in the 1980s; today Firestore, Realm, Ditto (proprietar
 #### Dealing with conflicting writes (pp. 222–229)
 
 Two users change a wiki title from A to B and A to C on different leaders (Figure 6-9). The writes are **concurrent** because neither was aware of the other — not because of wall-clock time.
+
+![User 1 sets the title to B on leader 1 while user 2 sets it to C on leader 2; each leader accepts, then the asynchronous replication of each change hits a conflict on the other leader](../figures/06-09.png)
+
+*Figure 6-9 (p. 223): both writes succeed locally; the conflict is only discovered later, when it can no longer be reported to the users.*
 
 | Strategy | How | Catch |
 |---|---|---|
@@ -232,6 +222,10 @@ Any replica accepts writes directly from clients (or via a **coordinator** that 
 #### Writing when a node is down (pp. 229–231)
 
 With three replicas and one down, the client writes to all three and succeeds once two acknowledge; reads also go to several replicas, and **version numbers** pick the newest response (Figure 6-12). No failover is needed. Missed writes are repaired by:
+
+![User 1234 writes to three replicas while replica 3 is offline; later user 2345 reads from all three, gets version 7 from replicas 1 and 2 and stale version 6 from replica 3, and writes the new value back to replica 3](../figures/06-12.png)
+
+*Figure 6-12 (p. 230): a majority write plus a majority read always overlap in one up-to-date replica, and the reader repairs the stale one.*
 
 | Mechanism | How | Covers |
 |---|---|---|
@@ -286,6 +280,10 @@ flowchart LR
 ```
 
 A write without a version is concurrent with everything and overwrites nothing. The book’s cart walkthrough (Figure 6-15): client 1 adds milk (v1); client 2 adds eggs unaware (v2, siblings [milk] and [eggs]); client 1 writes [milk, flour] based on v1 (v3 replaces [milk], keeps [eggs]); client 2 writes [eggs, milk, ham] based on v2 (v4 replaces [eggs]); client 1 writes [milk, flour, eggs, bacon] based on v3 (v5) — leaving siblings v4 and v5. Old versions are overwritten eventually and **no writes are lost** (pp. 240–241).
+
+![A graph of cart versions: from empty, one client adds milk, then flour, then bacon; the other adds eggs, then ham; arrows show which version each write was based on, ending with milk, flour, eggs, bacon and eggs, milk, ham](../figures/06-16.png)
+
+*Figure 6-16 (p. 242): each write names the version it built on, so the server can tell overwrites from concurrent siblings.*
 
 > **Try it:** [Concurrent writes: siblings vs last write wins](../widgets/06-concurrent-writes.html) — replay the book's shopping-cart example with version numbers, then with last write wins.
 

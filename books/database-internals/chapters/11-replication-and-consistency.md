@@ -130,6 +130,10 @@ The strongest **single-object, single-operation** model (p. 223).
 
 Figure 11-2: P1 runs `write(x, 1)`, P2 runs `write(x, 2)`, P3 runs three reads, and x starts as ∅ (p. 224):
 
+![Timelines: P1's write of 1 and P2's longer, overlapping write of 2; below, P3's three reads a, b, c may return ∅, 1 or 2, then 1 or 2, then only 2](../figures/11-02.png)
+
+*Figure 11-2 (p. 224): what a read may return depends on which writes it overlaps; once both writes finish, only 2 is valid.*
+
 | Read | Overlaps | May return |
 |---|---|---|
 | 1st | both writes in flight | ∅, 1 or 2 |
@@ -137,6 +141,10 @@ Figure 11-2: P1 runs `write(x, 1)`, P2 runs `write(x, 2)`, P3 runs three reads, 
 | 3rd | both done; write 2 ordered after write 1 | 2 |
 
 **Linearization point** (pp. 225–226): operations aren't instantaneous, but their effects appear so. After the point, every process sees the new value or a later one, so there are no stale reads, reads are monotonic, and values don't alternate. The operation's effects must become visible between t₁ (request issued) and t₂ (response received) (Figures 11-3, 11-4). Locks, atomic read/write or read-modify-write primitives implement the point (p. 225).
+
+![An operation's interval on a timeline, with a cross marking the linearization point that divides before from after](../figures/11-04.png)
+
+*Figure 11-4 (p. 226): the operation takes effect at one instant inside its interval; reads after it must see the new value.*
 
 > **Vault note:** the book's sidebar on CAS (p. 225). Compare-and-swap changes a value only if it's unchanged. Beware the **ABA problem**: if two other writes change A to B and back to A, a CAS expecting A still succeeds.
 
@@ -163,12 +171,21 @@ Operations are ordered as if run in *some* sequence that preserves each process'
 
 Figure 11-5 shows `write(x, 1)` happening before `write(x, 2)` in wall-clock time, yet both P3 and P4 observe 2 and then 1. Either order is valid as long as every reader sees the same one. Stale reads can come from replicas receiving the same order at different times (pp. 228–229). CPUs don't guarantee sequential consistency either and need **memory barriers** (fences) (p. 229).
 
+![P1 writes 1, later P2 writes 2; P3 and P4 each read 2 and then 1](../figures/11-05.png)
+
+*Figure 11-5 (p. 229): both readers see the writes in the same order — the reverse of real time — which sequential consistency allows.*
+
 #### Causal consistency
 
 Causally related operations are seen in the same order by everyone; concurrent ones may be seen in different orders (p. 229).
 
 - Without causality (Figure 11-6), P3 may see 1 then 2 while P4 sees 2 then 1 (p. 230).
 - With causality (Figure 11-7), a write carries its **dependencies**: `write(x, ∅, 1) → t1`, then `write(x, t1, 2)`. A write that arrives early is held until its dependencies arrive, so a **happened-before** relationship is established logically, without physical clocks (pp. 230–231).
+
+![P1's write(x, ∅, 1) returns t1; P2's later write(x, t1, 2) names t1 as its dependency](../figures/11-07.png)
+
+*Figure 11-7 (p. 230): the second write carries the timestamp of the one it depends on, so no replica can apply it first.*
+
 - The analogy is a forum thread: replies follow what they reply to, and threads can branch (p. 231).
 - Causal systems provide the **session guarantees** listed below (p. 231).
 - Implementation: logical clocks plus context metadata in every message. A server applies an operation only after all its predecessors and buffers anything that arrives too early (p. 231).

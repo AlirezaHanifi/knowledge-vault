@@ -114,6 +114,10 @@ Beyond databases: Delta Lake `CHECK`; Avro and Protobuf enforce types natively a
 
 **Solution** (pp. 285–288). Three enforcement modes (Figure 9-3):
 
+![Three modes: a data provider validates its schema with a registry service before writing; a provider writes and the output location rejects incompatible inserts; or a schema evolution query changes the table if the schema is compatible](../figures/09-03.png)
+
+*Figure 9-3 (p. 286): compatibility can be checked by an external registry, by the store on insert, or when the schema itself is evolved.*
+
 | Mode | How | Examples |
 |---|---|---|
 | **External service or library** | Producers and consumers talk to a registry that versions schemas and validates changes against a compatibility rule | Kafka **Schema Registry**; Avro `SchemaValidator` (no configurable rule) |

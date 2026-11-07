@@ -147,6 +147,10 @@ The page format therefore has to store variable-size records with minimal overhe
 - a delete nullifies or removes a pointer;
 - a fixed-size header holds page metadata (Figure 3-5).
 
+![A slotted page: a header, a pointer array at the top, and variable-size cells filling the rest, with dotted arrows from each pointer to its cell](../figures/03-05.png)
+
+*Figure 3-5 (p. 53): pointers sit in a small array at the start; cells can live anywhere in the page, so only the pointers need to move.*
+
 | Requirement | How slotted pages meet it (p. 54) |
 |---|---|
 | Minimal overhead | Only the pointer array of cell offsets |
@@ -190,6 +194,10 @@ Fixed fields come first, so their offsets are static. Cells store a **page ID**,
 
 Cells are appended toward the end of the page and offsets are kept at the start, so the two grow toward each other (Figure 3-6) (p. 56). Keys can arrive in any order. Logical order is kept by **sorting the offsets**, which enables binary search, and cells never move on insert, update or delete (p. 56).
 
+![Page layout from left to right: header, offsets, free space with arrows pointing inward from both sides, then cells; each offset points to a cell](../figures/03-06.png)
+
+*Figure 3-6 (p. 56): offsets grow rightward and cells grow leftward into the shared free space; the page is full when they meet.*
+
 The book's example (Figures 3-7 and 3-8, pp. 56–57):
 
 | Step | Cells, physical (insertion) order | Offsets, logical order |
@@ -197,11 +205,19 @@ The book's example (Figures 3-7 and 3-8, pp. 56–57):
 | Insert Tom, Leslie | Tom, Leslie | Leslie, Tom |
 | Insert Ron | Tom, Leslie, Ron | Leslie, **Ron**, Tom: pointers after the insertion point shift right |
 
+![Three offsets pointing to cells stored as Ron, Leslie, Tom from left to right; the offsets are ordered Leslie, Ron, Tom](../figures/03-08.png)
+
+*Figure 3-8 (p. 57): after Ron is appended, the cells are in arrival order but the offsets, read left to right, give the sorted order.*
+
 > **Try it:** [Slotted page](../widgets/03-slotted-page.html) — insert and delete variable-size records, watch offsets stay sorted while cells stay in insertion order, and compare first fit and best fit before forcing a defragmentation.
 
 ### Managing variable-size data
 
 A delete doesn't have to shift the remaining cells. The cell is marked deleted, and an in-memory **availability list** records the offset and size of the freed segment. Inserts check this list first (Figure 3-9) (p. 57). SQLite calls the free segments **freeblocks**: it keeps a pointer to the first one in the page header, plus the total number of free bytes, so it can tell quickly whether a cell would fit after defragmentation (p. 57).
+
+![A B-Tree page with occupied cells shaded and gaps between them; an availability list beside it holds pointers to the free gaps](../figures/03-09.png)
+
+*Figure 3-9 (p. 57): occupied cells are shaded; the availability list's dotted pointers lead to the freed segments an insert can reuse.*
 
 | Fit strategy | Behaviour (pp. 57–58) |
 |---|---|

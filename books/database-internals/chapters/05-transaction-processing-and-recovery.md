@@ -102,6 +102,10 @@ Databases use a two-level hierarchy of slow persistent storage and fast RAM (p. 
 - Pages are loaded into free slots out of order, so memory order doesn't match disk order (Figure 5-1, p. 81).
 - The page cache serves cached pages, buffers modifications, pages in on a miss when there's space, and otherwise evicts and flushes another page first (p. 82).
 
+![A B-Tree whose cached nodes are shaded; dotted lines map them to slots in a buffer pool column, which in turn map to pages in a disk column in a different order](../figures/05-01.png)
+
+*Figure 5-1 (p. 82): the tree's hot nodes live in buffer-pool slots, and slot order has nothing to do with page order on disk.*
+
 > **Vault note:** the book's sidebar on `O_DIRECT` (p. 82): many databases bypass the kernel page cache to manage buffers themselves. Linus Torvalds has criticized this because `O_DIRECT` isn't asynchronous and has no readahead. `fadvise` only gives hints, and `mmap` avoids syscalls at the cost of control over caching.
 
 #### Caching semantics
@@ -142,6 +146,14 @@ An eviction (page-replacement) policy tries to evict the pages least likely to b
 | **LFU / TinyLFU** | Order by usage frequency, with a compact frequency histogram; admission (LRU), probation and protected queues | Used in Caffeine (Java) |
 
 TinyLFU chooses which items to **promote for retention** rather than which to evict. An item enters probation only if its frequency beats the item it would evict, and moves on to protected with further accesses (p. 88). For a database under heavy load, recency may say little, which is why frequency matters (p. 87).
+
+![A clock face of page slots with counters 0 or 1; referenced pages are shaded and a hand points at the next slot to check](../figures/05-02.png)
+
+*Figure 5-2 (p. 87): the hand sweeps the circle — a 1 is cleared and skipped, a 0 is evicted.*
+
+![TinyLFU pipeline: an admission window, a frequency filter, a probation queue that can lead to eviction, and a protected queue that items move into and out of](../figures/05-03.png)
+
+*Figure 5-3 (p. 88): a newcomer must win the frequency comparison to enter probation; repeated hits promote it to protected.*
 
 > **Try it:** [Page replacement](../widgets/05-page-replacement.html) — replay the same page-reference string under FIFO, LRU, CLOCK and LFU, change the cache size, and watch hits, misses and the clock hand. Includes the classic sequence that shows Bélády's anomaly.
 
@@ -302,6 +314,10 @@ Locks bring contention and scalability problems (p. 100). **Two-phase locking (2
 
 A **deadlock**: T1 holds L1 and waits for L2, while T2 holds L2 and waits for L1 (Figure 5-6) (p. 101).
 
+![Two transactions in a cycle: T1 holds L1 and waits for L2; T2 holds L2 and waits for L1](../figures/05-06.png)
+
+*Figure 5-6 (p. 101): each waits for the lock the other holds — the cycle a waits-for graph detects.*
+
 | Approach | How (pp. 101–102) |
 |---|---|
 | Timeouts | Abort long-running transactions; limits concurrency |
@@ -349,6 +365,10 @@ Leaf pages change on insert, update and delete. Nonleaf pages and the tree struc
 - *Deletes:* release the parent if the child won't underflow.
 - This is optimistic: structural changes become rarer higher up the tree.
 - If the child page isn't cached, either latch the page while it loads, or release the parent and restart the descent after the load (Figure 5-9).
+
+![Three steps of an insert descending a B-Tree with lock icons: (a) the root is latched, (b) the child is latched and the root released, (c) the leaf is latched and the parent released](../figures/05-09.png)
+
+*Figure 5-9 (p. 106): at each step at most a parent and a child are latched; the parent is let go once the child is known to be safe.*
 
 > **Try it:** [Latch crabbing](../widgets/05-latch-crabbing.html) — descend a B-Tree for a read, an insert or a delete and see which latches are held at each step, and when a full child forces the parent's latch to be kept.
 

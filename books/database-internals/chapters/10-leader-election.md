@@ -68,21 +68,9 @@ Each process has a unique **rank**, and the highest-ranked live process becomes 
 
 Figure 10-1 (pp. 207–208):
 
-```mermaid
-sequenceDiagram
-    participant P3
-    participant P4
-    participant P5
-    participant P6 as P6 (crashed)
-    P3->>P4: Election
-    P3->>P5: Election
-    P3-xP6: Election
-    P4-->>P3: Alive
-    P5-->>P3: Alive
-    P3->>P5: you are the highest who replied
-    P5->>P3: Elected(5)
-    P5->>P4: Elected(5)
-```
+![Four stages over processes 1 to 6 with 6 crashed: (a) 3 sends election messages to 4, 5 and 6; (b) 4 and 5 answer; (c) 3 hands over to 5; (d) 5 announces itself to everyone](../figures/10-01.png)
+
+*Figure 10-1 (p. 208): 3 notices the failure, the highest live process (5) responds, and 5 broadcasts that it is the new leader.*
 
 | Problem | Cause and fix (p. 208) |
 |---|---|
@@ -109,6 +97,10 @@ Processes **invite** others to join their group instead of outranking them. Mult
 
 In Figure 10-4, 1 invites 2 and 3 invites 4; then 1 contacts 3, and 4 is told about the new leader; the merged group's leader is 1 (p. 210). Groups merge without starting new elections from scratch (p. 211).
 
+![(a) four single-process groups; 1 invites 2 and 3 invites 4; (b) the two groups' leaders 1 and 3 connect; (c) one group of all four with 1 as leader](../figures/10-04.png)
+
+*Figure 10-4 (p. 210): groups merge by invitation, and the merged group keeps one leader.*
+
 ### Ring algorithm
 
 The nodes form a ring and know their predecessors and successors (Chang and Roberts) (p. 211).
@@ -118,6 +110,10 @@ The nodes form a ring and know their predecessors and successors (Chang and Robe
 - When the message returns to the initiator, the highest-ranked node in the live set becomes leader, and a second trip around the ring announces it (p. 211).
 
 In Figure 10-5, 6 has failed and 3 starts the traversal. 5 can't reach 6, so it skips to 1. Since 5 has the highest rank, 3 sends a second round announcing it (pp. 211–212). A space-saving variant carries only the **current maximum** ID, which works because max is commutative (p. 212). A ring that splits into parts can elect a leader per part, so there's no safety guarantee here either (p. 212).
+
+![A ring of processes 1 to 6: (a) 3's election message goes around collecting live ranks, skipping crashed 6; (b) a second round; (c) 5, the highest rank, is announced around the ring](../figures/10-05.png)
+
+*Figure 10-5 (p. 212): the message collects live process ranks as it travels; the highest one wins and is announced in another pass.*
 
 ### Summary
 

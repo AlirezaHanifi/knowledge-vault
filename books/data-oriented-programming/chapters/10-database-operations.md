@@ -47,26 +47,9 @@ The chapter assumes basic SQL (`SELECT`, `AS`, `WHERE`, `INNER JOIN`) and says t
 
 On a bench by a lake, Theo sees a horse and a car in the clouds; Joe answers, "A cloud is a cloud" (p. 198). Theo's rough database model (figure 10.1, p. 199):
 
-```mermaid
-erDiagram
-    books {
-        VARCHAR isbn
-        VARCHAR title
-        INTEGER publication_year
-    }
-    authors {
-        VARCHAR id
-        VARCHAR name
-    }
-    book_authors {
-        VARCHAR book_isbn
-        VARCHAR author_id
-    }
-    books ||--o{ book_authors : "has"
-    authors ||--o{ book_authors : "writes"
-```
+![Tables books (isbn, title, publication_year) and authors (id, name), each in a one-to-many relation with book_authors (book_isbn, author_id)](../figures/10-01.png)
 
-*Redrawn from figure 10.1 (p. 199): a many-to-many relation through `book_authors`.*
+*Figure 10.1 (p. 199): a many-to-many relation between books and authors stored through the `book_authors` table.*
 
 The sample data (tables 10.1–10.3, p. 199):
 
@@ -76,14 +59,9 @@ The sample data (tables 10.1–10.3, p. 199):
 
 A `SELECT title, isbn, publication_year FROM books WHERE title LIKE '%habit%'` returns both books. As data, that is a list of two maps, described by a JSON Schema that requires the three fields (listings 10.1–10.4, pp. 200–201). Theo writes the schema with Joe's cheat sheet, since "the purpose of a gift is to be used by the one who receives it" (p. 201).
 
-```mermaid
-flowchart TB
-    DB[(Database)] --> DR[Database driver]
-    DR -->|"data (list of maps)"| DM[Data manipulation]
-    DM -->|data| JS[JSON serialize]
-```
+![Data flows from the database through the database driver as a list of maps, through data manipulation, to a JSON serializer](../figures/10-02.png)
 
-*Redrawn from figure 10.2 (p. 202). The data manipulation step uses generic functions.*
+*Figure 10.2 (p. 202): the driver already returns generic data, so no step needs a class for a row.*
 
 | Language | Driver to list of maps |
 |---|---|
@@ -132,14 +110,9 @@ Database columns are in snake case (`publication_year`); Joe wants `publicationY
 
 Sometimes rows must be restructured, for example aggregating fields from several rows into one map. PostgreSQL's JSON aggregation can do that in SQL, but reshaping in the application keeps the SQL simple, and the code is reusable for other entities (p. 211). Joining `books`, `book_authors` and `authors` for "habit" gives three rows for two books, because *7 Habits* has two authors (listing 10.17 and table 10.6, pp. 211–212). The target is two maps with `authorNames` lists (listing 10.19, p. 213).
 
-```mermaid
-flowchart TB
-    R["3 rows<br/>7 Habits · Sean Covey<br/>7 Habits · Stephen Covey<br/>Power of Habit · Charles Duhigg"]
-    R -->|"_.groupBy(rows, 'isbn')"| G["978-1982137274: 2 rows<br/>978-0812981605: 1 row"]
-    G -->|"_.values, then _.map aggregateField"| A["7 Habits · [Sean Covey, Stephen Covey]<br/>Power of Habit · [Charles Duhigg]"]
-```
+![Three rows (two for the same book with different authors) are grouped by isbn into two groups, then each group is aggregated into one book with an authorNames list](../figures/10-03.png)
 
-*Redrawn from figure 10.3 (p. 214).*
+*Figure 10.3 (p. 214): a SQL join returns one row per book–author pair; two generic steps, group and aggregate, turn them back into one map per book.*
 
 The steps (pp. 213–218):
 
