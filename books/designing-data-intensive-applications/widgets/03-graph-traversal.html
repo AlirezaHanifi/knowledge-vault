@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>یال‌ها را دنبال کنید</title>
+<meta name="description" content="یک کوئری گراف با طول متغیر را دور به دور جلو ببرید: گراف آدم‌ها و مکان‌های کتاب با Cypher، SQL، SPARQL و Datalog، بعد یک گراف انتقال پول که در آن یک cycle باعث انفجار UNION ALL می‌شود. برای فصل ۳ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .graph svg { width: 100%; height: auto; display: block; }
+  .graph .edge { stroke: var(--ink-3); stroke-width: 1.3; fill: none; }
+  .graph .edge.walk { stroke: var(--accent); stroke-width: 2.4; }
+  .graph .elabel { font-size: 10px; fill: var(--ink-3); }
+  .graph .node rect { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.2; }
+  .graph .node.person rect { fill: var(--surface-2); }
+  .graph .node.a rect { fill: color-mix(in srgb, var(--s1) 20%, var(--surface)); stroke: var(--s1); }
+  .graph .node.b rect { fill: color-mix(in srgb, var(--s2) 20%, var(--surface)); stroke: var(--s2); }
+  .graph .node.a.b rect { fill: color-mix(in srgb, var(--s4) 22%, var(--surface)); stroke: var(--s4); }
+  .graph .node.win rect { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 2.6; }
+  .graph .node.flag rect { stroke: var(--bad); stroke-width: 2.4; }
+  .graph .node .t { font-size: 9.5px; fill: var(--ink-3); }
+  .graph .node .n { font-size: 12.5px; font-weight: 650; fill: var(--ink); }
+  .graph .badge { font-size: 10.5px; font-weight: 700; fill: var(--ink); }
+  .graph .arrow { fill: var(--ink-3); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .8rem; color: var(--ink-2); margin-top: 8px; }
+  .legend b { font-family: var(--mono); }
+  pre.q { margin: 0; font-family: var(--mono); font-size: .76rem; line-height: 1.45; overflow-x: auto; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 0; }
+  pre.q span { display: block; padding: 0 10px; border-left: 3px solid transparent; }
+  pre.q span.hl { background: var(--accent-soft); border-left-color: var(--accent); }
+  .qhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 12px 0 6px; font-size: .82rem; color: var(--ink-3); }
+  .sets { display: grid; gap: 6px; font-size: .86rem; }
+  .sets div { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 6px; }
+  .sets code { font-size: .8rem; }
+  .phase { font-weight: 650; margin: 0 0 6px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .only-book, .only-tx { display: none; }
+  body.book .only-book, body.tx .only-tx { display: block; }
+</style>
+</head>
+<body class="book">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-data-models-and-query-languages.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">دنبال کردن edgeها</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۳ · مدل‌های داده و زبان‌های کوئری</div>
+  <h1>دنبال کردن edgeها</h1>
+  <p class="lede">کوئری گراف نمی‌داند چند join لازم دارد. هر بار یک دور جلو بروید و ببینید مجموعه‌ی vertexهای رسیده چطور بزرگ می‌شود تا وقتی چیز تازه‌ای پیدا نشود. هر چهار زبان یک چیز را می‌گویند؛ فقط مقدار تایپ فرق دارد.</p>
+  <p class="source-note">برای «مدل‌های داده‌ی گراف‌مانند» در صص. ۸۴–۹۸: گراف شکل ۳-۶ در ص. ۸۶، کوئری مثال‌های ۳-۵، ۳-۶، ۳-۱۰ و ۳-۱۲، و دورهای شکل ۳-۷ در ص. ۹۸. SQL کوتاه‌شده‌ی مثال ۳-۶ است که ۳۱ خط است. گراف انتقال پول و سقف hop آن مثال آزمایشی خود vault است. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel graph">
+        <svg id="svg" viewBox="0 0 720 440" role="img" aria-labelledby="svg-title"><title id="svg-title">گراف</title></svg>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="panel">
+        <div class="qhead"><span id="qname"></span><span id="qlines"></span></div>
+        <pre class="q" id="query"></pre>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <div id="dataset"></div>
+        <div class="only-book" style="margin-top:10px"><div id="lang"></div></div>
+        <div class="only-tx" style="margin-top:10px"><div id="union"></div><div id="hops" style="margin-top:8px"></div></div>
+        <div class="btns">
+          <button class="btn primary" type="button" id="step">یک دور جلو</button>
+          <button class="btn" type="button" id="all">اجرا تا آخر</button>
+          <button class="btn" type="button" id="reset">از اول</button>
+        </div>
+      </div>
+      <div class="panel" aria-live="polite">
+        <p class="phase" id="phase"></p>
+        <div class="sets" id="sets"></div>
+      </div>
+      <div class="panel">
+        <div class="stats">
+          <div class="stat"><span class="stat-label">دور</span><span class="stat-value" id="s-round">0</span></div>
+          <div class="stat"><span class="stat-label" id="s-rows-l">ردیف‌های تولیدشده</span><span class="stat-value" id="s-rows">0</span></div>
+        </div>
+      </div>
+      <div class="panel wide"><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>هر دور یعنی یک join بیشتر.</strong> ایالت Idaho یک edge از نوع WITHIN با United States فاصله دارد و Saint-Lô چهار edge با Europe. هیچ تعداد ثابتی از join هر دو را پوشش نمی‌دهد، پس کوئری آن‌قدر تکرار می‌شود تا یک دور چیزی اضافه نکند؛ صص. ۹۰–۹۱.</li>
+    <li><strong>همان دورها، چهار نگارش.</strong> وسط قدم زدن زبان را عوض کنید: <code>WITHIN*0..</code>، <code>:within*</code>، یک recursive CTE و قاعده‌ی ۲ در Datalog همه یعنی «این edge را صفر بار یا بیشتر دنبال کن»؛ صص. ۸۹–۹۷.</li>
+    <li><strong>جایی که SQL گاز می‌گیرد cycle است.</strong> در گراف انتقال، پول مسیر A → B → D → E → A را می‌رود. با <code>UNION</code> حساب‌های تکراری کنار گذاشته می‌شوند و کوئری خودش می‌ایستد؛ با <code>UNION ALL</code> هر مسیر یک ردیف تازه است و فقط سقف hop جلویش را می‌گیرد. ص. ۹۲ cycle را یکی از جزئیات اضافه می‌شمارد.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-data-models-and-query-languages.html#کوئری-گراف-در-sql"><small>درس</small>فصل ۳: کوئری گراف در SQL</a></li>
+    <li><a href="03-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۳ در طول یک pipeline داده</a></li>
+    <li><a href="03-join-fanout.html"><small>شبیه‌سازی</small>چرا جمع بزرگ‌تر می‌شود؟</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el, S = Kit.svg;
+  var W = 116, H = 38;
+
+  /* ---------- data ---------- */
+  var BOOK = {
+    nodes: [
+      { id: "na", t: "continent", n: "North America", x: 80, y: 34 },
+      { id: "us", t: "country", n: "United States", x: 80, y: 128 },
+      { id: "idaho", t: "state", n: "Idaho", x: 80, y: 222 },
+      { id: "uk", t: "country", n: "United Kingdom", x: 320, y: 128 },
+      { id: "eng", t: "country", n: "England", x: 320, y: 222 },
+      { id: "london", t: "city", n: "London", x: 320, y: 312 },
+      { id: "eu", t: "continent", n: "Europe", x: 470, y: 34 },
+      { id: "fr", t: "country", n: "France", x: 636, y: 128 },
+      { id: "norm", t: "région", n: "Normandy", x: 636, y: 222 },
+      { id: "manche", t: "département", n: "Manche", x: 636, y: 312 },
+      { id: "stlo", t: "city", n: "Saint-Lô", x: 636, y: 404 },
+      { id: "lucy", t: "person", n: "Lucy", x: 150, y: 404, person: true },
+      { id: "alain", t: "person", n: "Alain", x: 420, y: 404, person: true }
+    ],
+    edges: [
+      ["idaho", "us", "within"], ["us", "na", "within"], ["london", "eng", "within"], ["eng", "uk", "within"], ["uk", "eu", "within"],
+      ["stlo", "manche", "within"], ["manche", "norm", "within"], ["norm", "fr", "within"], ["fr", "eu", "within"],
+      ["lucy", "idaho", "born_in"], ["lucy", "london", "lives_in"], ["alain", "london", "lives_in"], ["alain", "stlo", "born_in"],
+      ["lucy", "alain", "married"]
+    ]
+  };
+  var TXG = {
+    nodes: [
+      { id: "A", t: "flagged", n: "A", x: 80, y: 220, flag: true },
+      { id: "B", t: "account", n: "B", x: 230, y: 120 }, { id: "C", t: "account", n: "C", x: 230, y: 320 },
+      { id: "D", t: "account", n: "D", x: 380, y: 220 }, { id: "E", t: "account", n: "E", x: 520, y: 220 },
+      { id: "F", t: "account", n: "F", x: 640, y: 110 }, { id: "G", t: "account", n: "G", x: 640, y: 250 },
+      { id: "H", t: "account", n: "H", x: 640, y: 390 }
+    ],
+    edges: [["A", "B"], ["A", "C"], ["B", "D"], ["C", "D"], ["D", "E"], ["E", "A"], ["E", "F"], ["F", "G"], ["G", "H"]]
+      .map(function (e) { return [e[0], e[1], "sent"]; })
+  };
+
+  var LANGS = {
+    cypher: { name: "زبان Cypher · مثال ۳-۵", lines: [
+      "MATCH",
+      "  (person) -[:BORN_IN]->  () -[:WITHIN*0..]-> (:Location {name:'United States'}),",
+      "  (person) -[:LIVES_IN]-> () -[:WITHIN*0..]-> (:Location {name:'Europe'})",
+      "RETURN person.name"],
+      hl: { seed: [1, 2], round: [1, 2], people: [1, 2], answer: [0, 3] } },
+    sql: { name: "زبان SQL · مثال ۳-۶، کوتاه‌شده", lines: [
+      "WITH RECURSIVE",
+      "  in_usa(vertex_id) AS (",
+      "      SELECT vertex_id FROM vertices",
+      "        WHERE label = 'Location' AND properties->>'name' = 'United States'",
+      "    UNION",
+      "      SELECT edges.tail_vertex FROM edges",
+      "        JOIN in_usa ON edges.head_vertex = in_usa.vertex_id",
+      "        WHERE edges.label = 'within'",
+      "  ),",
+      "  in_europe(vertex_id) AS ( …the same, starting from 'Europe'… ),",
+      "  born_in_usa(vertex_id) AS (",
+      "    SELECT edges.tail_vertex FROM edges",
+      "      JOIN in_usa ON edges.head_vertex = in_usa.vertex_id",
+      "      WHERE edges.label = 'born_in'",
+      "  ),",
+      "  lives_in_europe(vertex_id) AS ( …the same with in_europe and 'lives_in'… )",
+      "SELECT vertices.properties->>'name' FROM vertices",
+      "  JOIN born_in_usa     ON vertices.vertex_id = born_in_usa.vertex_id",
+      "  JOIN lives_in_europe ON vertices.vertex_id = lives_in_europe.vertex_id;"],
+      full: 31,
+      hl: { seed: [1, 2, 3, 9], round: [4, 5, 6, 7, 9], people: [10, 11, 12, 13, 15], answer: [16, 17, 18] } },
+    sparql: { name: "زبان SPARQL · مثال ۳-۱۰", lines: [
+      "PREFIX : <urn:example:>",
+      "SELECT ?personName WHERE {",
+      "  ?person :name ?personName.",
+      "  ?person :bornIn  / :within* / :name \"United States\".",
+      "  ?person :livesIn / :within* / :name \"Europe\".",
+      "}"],
+      hl: { seed: [3, 4], round: [3, 4], people: [3, 4], answer: [1, 2] } },
+    datalog: { name: "زبان Datalog · مثال ۳-۱۲", lines: [
+      "within_recursive(LocID, PlaceName) :- location(LocID, PlaceName, _).  /* Rule 1 */",
+      "within_recursive(LocID, PlaceName) :- within(LocID, ViaID),           /* Rule 2 */",
+      "                                      within_recursive(ViaID, PlaceName).",
+      "migrated(PName, BornIn, LivingIn)  :- person(PersonID, PName),        /* Rule 3 */",
+      "                                      born_in(PersonID, BornID),",
+      "                                      within_recursive(BornID, BornIn),",
+      "                                      lives_in(PersonID, LivingID),",
+      "                                      within_recursive(LivingID, LivingIn).",
+      "us_to_europe(Person) :- migrated(Person, \"United States\", \"Europe\"). /* Rule 4 */"],
+      hl: { seed: [0], round: [1, 2], people: [3, 4, 5, 6, 7], answer: [8] } }
+  };
+  var TXSQL = {
+    union: ["WITH RECURSIVE reach(account) AS (",
+      "    SELECT 'A'",
+      "  UNION                                   -- drops rows already seen",
+      "    SELECT t.to_account FROM transfers t",
+      "      JOIN reach r ON t.from_account = r.account",
+      ")",
+      "SELECT DISTINCT account FROM reach;"],
+    all: ["WITH RECURSIVE reach(account, hops) AS (",
+      "    SELECT 'A', 0",
+      "  UNION ALL                               -- keeps every path",
+      "    SELECT t.to_account, r.hops + 1 FROM transfers t",
+      "      JOIN reach r ON t.from_account = r.account",
+      "    WHERE r.hops < :max_hops              -- the only brake",
+      ")",
+      "SELECT account, count(*) AS paths FROM reach GROUP BY account;"]
+  };
+
+  /* ---------- state ---------- */
+  var dataset = "book", lang = "cypher", unionMode = "union", maxHops = 6;
+  var st;
+  var log = Kit.log(Kit.$("#log"), { max: 14 });
+
+  function byId(g, id) { return g.nodes.filter(function (n) { return n.id === id; })[0]; }
+  function name(id) { var g = dataset === "book" ? BOOK : TXG; return byId(g, id).n; }
+  function into(target, label) { // tails of edges with this label pointing into the set
+    var out = [];
+    BOOK.edges.forEach(function (e) { if (e[2] === label && target.indexOf(e[1]) >= 0 && out.indexOf(e[0]) < 0) out.push(e[0]); });
+    return out;
+  }
+
+  function reset() {
+    if (dataset === "book") st = { phase: "start", round: 0, a: [], b: [], born: [], lives: [], answer: [], rows: 0, walk: [] };
+    else st = { phase: "start", round: 0, frontier: [], rows: 0, paths: {}, reached: [], walk: [], done: false };
+    render();
+  }
+
+  /* one step; returns false when finished */
+  function step() {
+    if (dataset === "book") return stepBook();
+    return stepTx();
+  }
+
+  function stepBook() {
+    if (st.phase === "start") {
+      st.phase = "seed"; st.a = ["us"]; st.b = ["eu"]; st.rows = 2; st.walk = [];
+      log.add("شروع: vertexهایی با اسم United States و Europe پیدا می‌شوند؛ index روی name کمک می‌کند، ص. ۹۰.", "muted");
+      return true;
+    }
+    if (st.phase === "seed" || st.phase === "round") {
+      var na = into(st.a, "within").filter(function (v) { return st.a.indexOf(v) < 0; });
+      var nb = into(st.b, "within").filter(function (v) { return st.b.indexOf(v) < 0; });
+      st.round++;
+      st.walk = BOOK.edges.filter(function (e) { return e[2] === "within" && (na.indexOf(e[0]) >= 0 || nb.indexOf(e[0]) >= 0); });
+      if (!na.length && !nb.length) {
+        st.phase = "people";
+        log.add("دور " + st.round + ": مکان تازه‌ای نیست، پس recursion می‌ایستد.", "ok");
+        st.born = into(st.a, "born_in"); st.lives = into(st.b, "lives_in");
+        st.rows += st.born.length + st.lives.length;
+        st.walk = BOOK.edges.filter(function (e) { return (e[2] === "born_in" && st.a.indexOf(e[1]) >= 0) || (e[2] === "lives_in" && st.b.indexOf(e[1]) >= 0); });
+        log.add("دنبال کردن born_in به مجموعه‌ی US: " + st.born.map(name).join("، ") + ". دنبال کردن lives_in به مجموعه‌ی Europe: " + st.lives.map(name).join("، ") + ".", "muted");
+        return true;
+      }
+      st.phase = "round";
+      st.a = st.a.concat(na); st.b = st.b.concat(nb); st.rows += na.length + nb.length;
+      log.add("دور " + st.round + ": یک edge ورودی WITHIN دیگر این‌ها را اضافه می‌کند: " + na.concat(nb).map(name).join("، ") + ".", "muted");
+      return true;
+    }
+    if (st.phase === "people") {
+      st.phase = "answer"; st.walk = [];
+      st.answer = st.born.filter(function (p) { return st.lives.indexOf(p) >= 0; });
+      st.rows += st.answer.length;
+      log.add("اشتراک دو مجموعه‌ی آدم‌ها: " + st.answer.map(name).join("، ") + ". شخص Alain در Europe زندگی می‌کند اما در US به دنیا نیامده.", "ok");
+      return true;
+    }
+    return false;
+  }
+
+  function stepTx() {
+    if (st.done) return false;
+    if (st.phase === "start") {
+      st.phase = "round"; st.frontier = [{ acc: "A", hops: 0 }]; st.rows = 1; st.paths = { A: 1 }; st.reached = ["A"]; st.walk = [];
+      log.add("شروع: حساب flagشده‌ی A.", "muted");
+      return true;
+    }
+    if (st.round >= maxHops) {
+      st.done = true;
+      log.add("سقف hop یعنی " + maxHops + " رسید. " + (unionMode === "all" ? "بدون آن، cycle مسیر A → B → D → E → A تا ابد ردیف اضافه می‌کرد." : "اگر چیز تازه‌ای پیدا نمی‌شد، کوئری به‌هرحال همین‌جا می‌ایستاد."), unionMode === "all" ? "warn" : "muted");
+      return false;
+    }
+    st.round++;
+    var next = [], walk = [];
+    st.frontier.forEach(function (f) {
+      TXG.edges.forEach(function (e) {
+        if (e[0] !== f.acc) return;
+        if (unionMode === "union" && st.reached.indexOf(e[1]) >= 0) return;
+        if (unionMode === "union" && next.some(function (x) { return x.acc === e[1]; })) return;
+        next.push({ acc: e[1], hops: st.round });
+        if (walk.indexOf(e) < 0) walk.push(e);
+      });
+    });
+    st.walk = walk;
+    next.forEach(function (n) { st.paths[n.acc] = (st.paths[n.acc] || 0) + 1; if (st.reached.indexOf(n.acc) < 0) st.reached.push(n.acc); });
+    st.rows += next.length;
+    st.frontier = next;
+    if (!next.length) {
+      st.done = true;
+      log.add("دور " + st.round + ": ردیف تازه‌ای نیست، پس recursion بعد از " + st.rows + " ردیف خودش می‌ایستد.", "ok");
+      return false;
+    }
+    log.add("دور " + st.round + ": " + next.length + " ردیف تازه: " + next.map(function (n) { return n.acc; }).join("، ") + ".", unionMode === "all" && next.some(function (n) { return st.paths[n.acc] > 1; }) ? "warn" : "muted");
+    return true;
+  }
+
+  /* ---------- view ---------- */
+  function clip(a, b) { // point where the segment from a's centre to b leaves a's box
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var sx = dx ? (W / 2) / Math.abs(dx) : Infinity, sy = dy ? (H / 2) / Math.abs(dy) : Infinity;
+    var s = Math.min(sx, sy);
+    return { x: a.x + dx * s, y: a.y + dy * s };
+  }
+
+  function drawGraph() {
+    var g = dataset === "book" ? BOOK : TXG;
+    var svg = Kit.$("#svg");
+    while (svg.childNodes.length > 1) svg.removeChild(svg.lastChild);
+    Kit.$("#svg-title").textContent = dataset === "book" ? "شکل ۳-۶: Lucy و Alain، جاهایی که به دنیا آمده‌اند و زندگی می‌کنند، و edgeهای WITHIN بین مکان‌ها" : "انتقال پول بین حساب‌های A تا H، با cycle از A به B، D، E و دوباره A";
+    var defs = S("defs");
+    var m = S("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
+    m.appendChild(S("path", { d: "M0,0 L10,5 L0,10 z", class: "arrow" }));
+    defs.appendChild(m); svg.appendChild(defs);
+
+    g.edges.forEach(function (e) {
+      var a = byId(g, e[0]), b = byId(g, e[1]);
+      var walk = st.walk.indexOf(e) >= 0;
+      var path, lx, ly;
+      if (dataset === "tx" && e[0] === "E" && e[1] === "A") {
+        path = "M" + a.x + "," + (a.y - H / 2) + " C 470,30 150,30 " + b.x + "," + (b.y - H / 2);
+        lx = 310; ly = 48;
+      } else {
+        var p = clip(a, b), q = clip(b, a);
+        path = "M" + p.x + "," + p.y + " L" + q.x + "," + q.y;
+        lx = (p.x + q.x) / 2 + 4; ly = (p.y + q.y) / 2 - 4;
+      }
+      var attrs = { d: path, class: "edge" + (walk ? " walk" : "") };
+      if (e[2] !== "married") attrs["marker-end"] = "url(#arr)";
+      svg.appendChild(S("path", attrs));
+      if (dataset === "book") svg.appendChild(S("text", { x: lx, y: ly, class: "elabel" }, e[2]));
+    });
+
+    g.nodes.forEach(function (n) {
+      var cls = "node", badge = "";
+      if (dataset === "book") {
+        var inA = st.a.indexOf(n.id) >= 0, inB = st.b.indexOf(n.id) >= 0;
+        if (n.person) cls += " person";
+        if (inA || st.born.indexOf(n.id) >= 0) { cls += " a"; badge += "U"; }
+        if (inB || st.lives.indexOf(n.id) >= 0) { cls += " b"; badge += (badge ? "+" : "") + "E"; }
+        if (st.answer.indexOf(n.id) >= 0) { cls = "node person win"; badge = "✓ جواب"; }
+      } else {
+        if (n.flag) cls += " flag";
+        var k = st.paths[n.id] || 0;
+        if (k) { cls += k > 1 && unionMode === "all" ? " b" : " a"; badge = unionMode === "all" ? "×" + k : "رسیده"; }
+      }
+      var grp = S("g", { class: cls, transform: "translate(" + (n.x - W / 2) + "," + (n.y - H / 2) + ")" });
+      grp.appendChild(S("rect", { width: W, height: H, rx: 4 }));
+      grp.appendChild(S("text", { x: 7, y: 13, class: "t" }, n.t));
+      grp.appendChild(S("text", { x: 7, y: 30, class: "n" }, n.n));
+      if (badge) grp.appendChild(S("text", { x: W - 5, y: 13, class: "badge", "text-anchor": "end" }, badge));
+      svg.appendChild(grp);
+    });
+
+    Kit.$("#legend").innerHTML = dataset === "book"
+      ? "<span><b>U</b> مجموعه‌ی in_usa یا متولد US</span><span><b>E</b> مجموعه‌ی in_europe یا ساکن Europe</span><span><b>✓</b> جواب</span><span>edgeهای ضخیم: پیموده‌شده در این دور</span>"
+      : (unionMode === "all" ? "<span><b>×n</b> تعداد ردیف‌های این حساب تا این‌جا، یکی برای هر مسیر</span>" : "<span><b>رسیده</b> حسابی که از قبل در نتیجه هست</span>") + "<span>حاشیه‌ی قرمز: حساب flagشده</span><span>edgeهای ضخیم: پیموده‌شده در این دور</span>";
+  }
+
+  function phaseKey() {
+    if (st.phase === "start") return null;
+    return st.phase;
+  }
+
+  function drawQuery() {
+    var lines, hl = [], title, count;
+    if (dataset === "book") {
+      var L = LANGS[lang];
+      lines = L.lines; title = L.name;
+      var k = phaseKey(); if (k) hl = L.hl[k] || [];
+      count = (L.full || lines.length) + " خط" + (L.full ? " در کتاب" : "");
+    } else {
+      lines = TXSQL[unionMode]; title = "زبان SQL · نوشته‌ی خود vault"; count = lines.length + " خط";
+      if (st.phase !== "start") hl = st.round === 0 ? [0, 1] : [2, 3, 4].concat(unionMode === "all" ? [5] : []);
+    }
+    Kit.$("#qname").textContent = title; Kit.$("#qlines").textContent = count;
+    var pre = Kit.clear(Kit.$("#query"));
+    lines.forEach(function (l, i) { pre.appendChild(el("span", { class: hl.indexOf(i) >= 0 ? "hl" : "" }, l || " ")); });
+  }
+
+  function drawSets() {
+    var box = Kit.clear(Kit.$("#sets"));
+    function row(label, ids) { box.appendChild(el("div", null, el("span", null, label), el("code", null, ids.length ? ids.map(name).join(", ") : "—"))); }
+    var ph = Kit.$("#phase");
+    if (dataset === "book") {
+      ph.textContent = { start: "برای شروع، یک دور جلو بروید.", seed: "ساختن دو مجموعه‌ی اولیه‌ی مکان", round: "دور " + st.round + ": دنبال کردن edgeهای ورودی WITHIN", people: "عمل recursion تمام شد: پیدا کردن آدم‌ها", answer: "تمام شد: اشتراک" }[st.phase];
+      row("in_usa", st.a); row("in_europe", st.b); row("born_in_usa", st.born); row("lives_in_europe", st.lives); row("جواب", st.answer);
+      Kit.$("#s-rows-l").textContent = "ردیف‌های تولیدشده";
+    } else {
+      ph.textContent = st.phase === "start" ? "برای شروع، یک دور جلو بروید." : (st.done ? "بعد از " + st.round + " دور تمام شد" : "دور " + st.round + ": دنبال کردن انتقال‌های خروجی");
+      row("تازه در این دور", st.frontier.map(function (f) { return f.acc; }));
+      row("حساب‌های رسیده", st.reached);
+      Kit.$("#s-rows-l").textContent = unionMode === "all" ? "ردیف‌ها یا مسیرها" : "ردیف‌ها یا حساب‌ها";
+    }
+    Kit.$("#s-round").textContent = st.round;
+    Kit.$("#s-rows").textContent = st.rows;
+  }
+
+  function render() {
+    document.body.classList.toggle("book", dataset === "book"); document.body.classList.toggle("tx", dataset === "tx");
+    drawGraph(); drawQuery(); drawSets();
+    Kit.$("#step").disabled = dataset === "book" ? st.phase === "answer" : st.done;
+    Kit.$("#all").disabled = Kit.$("#step").disabled;
+  }
+
+  /* ---------- controls ---------- */
+  Kit.$("#dataset").appendChild(Kit.segmented({ label: "گراف", value: dataset,
+    options: [{ value: "book", label: "کتاب: آدم‌ها و مکان‌ها" }, { value: "tx", label: "در عمل: انتقال پول" }],
+    onChange: function (v) { dataset = v; log.clear(); reset(); log.add(v === "book" ? "چه کسی از US به Europe مهاجرت کرده؟ مثال ۳-۵" : "پول حساب flagشده‌ی A به کدام حساب‌ها می‌رسد؟", "muted"); } }).element);
+  Kit.$("#lang").appendChild(Kit.segmented({ label: "زبان کوئری", value: lang,
+    options: [{ value: "cypher", label: "Cypher" }, { value: "sql", label: "SQL" }, { value: "sparql", label: "SPARQL" }, { value: "datalog", label: "Datalog" }],
+    onChange: function (v) { lang = v; drawQuery(); } }).element);
+  Kit.$("#union").appendChild(Kit.segmented({ label: "Recursive CTE", value: unionMode,
+    options: [{ value: "union", label: "UNION" }, { value: "all", label: "UNION ALL و hop" }],
+    onChange: function (v) { unionMode = v; log.clear(); reset(); } }).element);
+  var hop = Kit.slider({ label: "سقف hop", min: 1, max: 8, value: maxHops, onInput: function (v) { maxHops = v; reset(); } });
+  Kit.$("#hops").appendChild(hop.element);
+
+  Kit.$("#step").addEventListener("click", function () { step(); render(); });
+  Kit.$("#all").addEventListener("click", function () { var n = 0; while (step() && n++ < 50) {} render(); });
+  Kit.$("#reset").addEventListener("click", function () { log.clear(); reset(); });
+
+  reset();
+  log.add("چه کسی از US به Europe مهاجرت کرده؟ مثال ۳-۵", "muted");
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "چرا کوئری US به Europe را نمی‌شود با تعداد ثابتی join نوشت؟",
+      options: ["زبان SQL هر کوئری را به سه join محدود می‌کند", "مکان هر آدم ممکن است هر تعداد edge از نوع WITHIN پایین‌تر از کشور یا قاره باشد", "جدول edges هیچ index ندارد", "داده‌ی گراف را نمی‌شود در جدول ذخیره کرد"],
+      answer: 1, explain: "محل تولد Lucy یک ایالت است و محل زندگی‌اش یک شهر؛ Saint-Lô چهار edge پایین‌تر از Europe است. تعداد joinها از قبل معلوم نیست (ص. ۹۰)." },
+    { q: "در گراف انتقال، recursive CTE از UNION ALL بدون سقف hop استفاده می‌کند. چه می‌شود؟",
+      options: ["بعد از یک بار دیدن هر حساب می‌ایستد", "فوراً خطا برمی‌گرداند", "دور cycle مسیر A → B → D → E → A می‌چرخد و هیچ‌وقت تمام نمی‌شود", "فقط حساب A را برمی‌گرداند"],
+      answer: 2, explain: "عملگر UNION ALL همه‌ی ردیف‌ها را نگه می‌دارد، پس هر دور زدن cycle ردیف تازه می‌سازد. UNION ردیف‌های تکراری را کنار می‌گذارد و recursion را تمام می‌کند؛ سقف hop ترمز دیگر است. این مثال خود vault است و ص. ۹۲ به cycle اشاره می‌کند." },
+    { q: "قاعده‌ی ۲ در Datalog با کدام بخش کوئری Cypher متناظر است؟",
+      options: ["عبارت RETURN person.name", "عبارت :WITHIN*0..، یعنی دنبال کردن edgeهای WITHIN به هر تعداد", "همان edge از نوع BORN_IN", "همان index روی name"],
+      answer: 1, explain: "قاعده‌ی ۲ مقدار within_recursive را از within و خودش derive می‌کند: هر بار اعمال یک edge از نوع WITHIN بیشتر، مثل شکل ۳-۷ (صص. ۹۷–۹۸)." }
+  ]);
+})();
+</script>
+</body>
+</html>

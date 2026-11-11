@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حذفی که هیچ‌وقت نمی‌رسد</title>
+<meta name="description" content="یک incremental loader را اجرا کنید که ردیف‌های تغییرکرده را به لایه‌ی خام اضافه می‌کند و وضعیت فعلی را از آن می‌سازد؛ بعد یک ردیف منبع را hard delete کنید و ببینید در downstream زنده می‌ماند. soft delete و key reconciliation را به عنوان راه‌حل امتحان کنید. برای فصل ۳ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .flow { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.25fr) auto minmax(0, 1fr); align-items: start; }
+  .flow > .arrow { align-self: center; color: var(--ink-3); font-size: 1.2rem; }
+  @media (max-width: 1100px) {
+    .flow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "src silver" "bronze bronze"; }
+    .flow > .arrow { display: none; }
+    #p-src { grid-area: src; } #p-silver { grid-area: silver; } #p-bronze { grid-area: bronze; }
+    .scroll { max-height: 200px; }
+  }
+  @media (max-width: 560px) { .flow { grid-template-columns: minmax(0, 1fr); grid-template-areas: "src" "silver" "bronze"; } }
+  table.data td, table.data th { white-space: nowrap; font-size: .85rem; padding: 5px 8px; }
+  table.data tr.ghost td { background: var(--bad-soft); }
+  table.data tr.gone td { color: var(--ink-3); text-decoration: line-through; }
+  table.data tr.new td { background: var(--accent-soft); }
+  table.data tr.tomb td { background: var(--warn-soft); }
+  .mini { font: inherit; font-size: .75rem; padding: 1px 7px; border-radius: 6px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .mini:disabled { opacity: .45; cursor: default; }
+  .badge-ghost { font-size: .7rem; font-weight: 700; color: var(--bad); }
+  .clock { font-variant-numeric: tabular-nums; font-weight: 650; }
+  .scroll { max-height: 320px; overflow: auto; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-data-models-and-query-languages.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">حذف در بار incremental</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۳ · مدل‌های داده و زبان‌های کوئری</div>
+  <h1>حذفی که هیچ‌وقت نمی‌رسد</h1>
+  <p class="lede">یک incremental loader ردیف‌هایی را که <code>update_date</code>شان از cursor جلوتر رفته کپی می‌کند و به لایه‌ی خام، یعنی Bronze، اضافه می‌کند. وضعیت فعلی، یعنی Silver، از همین log ساخته می‌شود: جدیدترین نسخه‌ی هر ردیف. updateها از این مسیر رد می‌شوند. اما ردیفی که در منبع حذف شده دیگر هیچ‌وقت تکان نمی‌خورد، پس loader هیچ‌وقت رفتنش را نمی‌بیند.</p>
+  <p class="source-note">برای «الگوی event sourcing و CQRS» در صص. ۱۰۱–۱۰۵: یک log، viewهایی که از آن derive و با replay دوباره ساخته می‌شوند، و فرق ثبت event با ثبت تغییر ردیف. جدول درخواست وام، ساعت ساعتی و سه حالت loader مدل خود vault از یک pipeline معمول ELT است. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="row">
+      <div id="mode"></div>
+      <span class="spacer"></span>
+      <span>ساعت <span class="clock" id="clock"></span></span>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" type="button" id="insert">+ درخواست جدید</button>
+      <button class="btn primary" type="button" id="load">▶ اجرای loader</button>
+      <button class="btn" type="button" id="recon" hidden>تطبیق کلیدها</button>
+      <span class="spacer"></span>
+      <button class="btn" type="button" id="reset">↺ از اول</button>
+    </div>
+    <p style="margin:10px 0 0;font-size:.85rem;color:var(--ink-3)">امتحان کنید: loader را اجرا کنید، ردیف #103 را در منبع با ✕ حذف کنید و loader را دوباره اجرا کنید. بعد منبع و Silver را مقایسه کنید. دکمه‌ی ↻ یک ردیف را update می‌کند؛ در Bronze ستون <em>kind</em> یکی از این‌هاست: row یعنی ردیف کپی‌شده، flag یعنی نشان حذف، و tomb یعنی tombstone تطبیق.</p>
+  </div>
+
+  <div class="flow" style="margin-top:14px">
+    <div class="panel" id="p-src">
+      <p class="panel-title">منبع · وضعیت فعلی</p>
+      <div class="table-wrap"><table class="data" id="src"></table></div>
+    </div>
+    <div class="arrow" aria-hidden="true">←</div>
+    <div class="panel" id="p-bronze">
+      <p class="panel-title">لایه‌ی Bronze · نسخه‌های append-only</p>
+      <div class="table-wrap scroll"><table class="data" id="bronze"></table></div>
+    </div>
+    <div class="arrow" aria-hidden="true">←</div>
+    <div class="panel" id="p-silver">
+      <p class="panel-title">لایه‌ی Silver · جدیدترین نسخه‌ی هر id</p>
+      <div class="table-wrap"><table class="data" id="silver"></table></div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:14px">
+    <div class="panel">
+      <div class="stats">
+        <div class="stat"><span class="stat-label">درخواست‌ها در منبع</span><span class="stat-value" id="n-src"></span></div>
+        <div class="stat"><span class="stat-label">درخواست‌ها در Silver</span><span class="stat-value" id="n-silver"></span></div>
+        <div class="stat"><span class="stat-label">ردیف‌های شبح</span><span class="stat-value" id="n-ghost"></span></div>
+        <div class="stat"><span class="stat-label">مقدار cursor در loader</span><span class="stat-value" id="cursor"></span></div>
+      </div>
+    </div>
+    <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
+  </div>
+
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>عمل update می‌رسد، delete نه.</strong> هر update مقدار <code>update_date</code> را از cursor جلوتر می‌برد؛ hard delete ردیفی باقی نمی‌گذارد که جلو برود. Silver آخرین نسخه‌ای را که دیده نگه می‌دارد و داشبوردها درخواستی را می‌شمارند که دیگر وجود ندارد.</li>
+    <li><strong>لایه‌ی Bronze log تغییر ردیف است، نه log رویداد.</strong> می‌تواند بگوید status از requested به approved رفت، اما نمی‌گوید چرا، و برای delete هیچ چیزی ندارد. یک event log رویداد «درخواست پس گرفته شد» را ثبت می‌کرد.</li>
+    <li><strong>روش soft delete</strong> حذف را به update تبدیل می‌کند، یعنی یک flag و یک <code>update_date</code> تازه، پس مسیر عادی آن را می‌برد. <strong>روش key reconciliation</strong> کلیدهای منبع را با کلیدهای Silver مقایسه می‌کند و برای هر کلید گم‌شده یک tombstone می‌نویسد: کندتر است اما تغییری در منبع لازم ندارد.</li>
+    <li><strong>لایه‌ی Silver از Bronze دوباره ساخته می‌شود</strong>، مثل viewای که از log دوباره replay می‌شود. درست کردن derivation ارزان است؛ بازیابی چیزی که log هیچ‌وقت ثبت نکرده نه.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-data-models-and-query-languages.html"><small>درس</small>فصل ۳: مدل‌های داده و زبان‌های کوئری</a></li>
+    <li><a href="03-event-sourcing.html"><small>شبیه‌سازی</small>الگوی event sourcing و CQRS</a></li>
+    <li><a href="03-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۳ در طول یک pipeline داده</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var STATUS = ["requested", "approved", "paid"];
+  var MODES = {
+    hard: "حالت hard delete · فقط incremental",
+    soft: "حالت soft delete در منبع",
+    recon: "حالت hard delete با key reconciliation"
+  };
+  var mode = "hard", t, src, bronze, cursor, nextId, lastLoaded;
+  var log = Kit.log(Kit.$("#log"), { max: 30 });
+
+  function hh(x) { return (x < 10 ? "0" : "") + x + ":00"; }
+  function tick() { t += 1; }
+
+  function reset() {
+    t = 8; nextId = 105; cursor = null; bronze = []; lastLoaded = {};
+    src = [101, 102, 103, 104].map(function (id, i) { return { id: id, status: STATUS[i % 2], upd: 7, deleted: false }; });
+    log.clear();
+    log.add("چهار درخواست وام در منبع هست. هنوز چیزی load نشده.", "muted");
+    render();
+  }
+
+  // Silver: newest Bronze version per id; tombstones and soft-deleted versions remove it.
+  function silver() {
+    var latest = {};
+    bronze.forEach(function (v) { if (!latest[v.id] || v.seq > latest[v.id].seq) latest[v.id] = v; });
+    return Object.keys(latest).map(function (k) { return latest[k]; })
+      .filter(function (v) { return v.op !== "tomb" && !v.deleted; })
+      .sort(function (a, b) { return a.id - b.id; });
+  }
+  function liveSrc() { return src.filter(function (r) { return !r.deleted; }); }
+  function ghosts() {
+    var ids = {}; liveSrc().forEach(function (r) { ids[r.id] = true; });
+    return silver().filter(function (v) { return !ids[v.id]; });
+  }
+
+  var seq = 0;
+  function runLoader() {
+    tick();
+    var before = cursor;
+    var changed = src.filter(function (r) { return cursor === null || r.upd > cursor; });
+    changed.forEach(function (r) {
+      bronze.push({ seq: ++seq, id: r.id, status: r.status, upd: r.upd, deleted: r.deleted, op: r.deleted ? "flag" : "row", at: t });
+      lastLoaded[r.id] = seq;
+    });
+    if (changed.length) cursor = Math.max.apply(null, changed.map(function (r) { return r.upd; }).concat([cursor || 0]));
+    log.add("اجرای loader در " + hh(t) + ": شرط WHERE update_date > " + (before === null ? "ندارد چون اجرای اول است و همه‌چیز را می‌برد" : hh(before)) + "؛ " + changed.length + " ردیف پیدا شد و به Bronze اضافه شد.",
+      changed.length ? "ok" : "muted");
+    var g = ghosts();
+    if (g.length) log.add("تعداد " + g.length + " ردیف شبح در Silver: #" + g.map(function (x) { return x.id; }).join("، #") + " دیگر در منبع وجود ندارد.", "bad");
+    render();
+  }
+
+  function reconcile() {
+    tick();
+    var g = ghosts();
+    g.forEach(function (v) { bronze.push({ seq: ++seq, id: v.id, status: v.status, upd: v.upd, deleted: true, op: "tomb", at: t }); });
+    log.add("تطبیق در " + hh(t) + ": همه‌ی کلیدهای منبع با Silver مقایسه شد و " + g.length + " tombstone نوشته شد.", g.length ? "ok" : "muted");
+    render();
+  }
+
+  function update(r) {
+    tick();
+    r.status = STATUS[(STATUS.indexOf(r.status) + 1) % STATUS.length]; r.upd = t;
+    log.add("منبع در " + hh(t) + ": ردیف #" + r.id + " ← " + r.status + "؛ update_date برابر " + hh(t) + ".", "muted");
+    render();
+  }
+  function del(r) {
+    tick();
+    if (mode === "soft") {
+      r.deleted = true; r.upd = t;
+      log.add("منبع در " + hh(t) + ": ردیف #" + r.id + " soft delete شد: flag روشن شد و update_date برابر " + hh(t) + " است.", "warn");
+    } else {
+      src = src.filter(function (x) { return x !== r; });
+      log.add("منبع در " + hh(t) + ": ردیف #" + r.id + " hard delete شد. ردیف به همین سادگی رفت.", "warn");
+    }
+    render();
+  }
+  function insert() {
+    tick();
+    src.push({ id: nextId++, status: "requested", upd: t, deleted: false });
+    log.add("منبع در " + hh(t) + ": درخواست جدید #" + (nextId - 1) + ".", "muted");
+    render();
+  }
+
+  function head(cols) { return el("thead", null, el("tr", null, cols.map(function (c) { return el("th", null, c); }))); }
+
+  function render() {
+    Kit.$("#clock").textContent = hh(t);
+    var s = Kit.clear(Kit.$("#src"));
+    s.appendChild(head(mode === "soft" ? ["id", "status", "del", "updated", ""] : ["id", "status", "updated", ""]));
+    s.appendChild(el("tbody", null, src.map(function (r) {
+      var cells = [el("td", null, "#" + r.id), el("td", null, r.status)];
+      if (mode === "soft") cells.push(el("td", null, r.deleted ? "بله" : "نه"));
+      cells.push(el("td", null, hh(r.upd)));
+      cells.push(el("td", null,
+        el("button", { type: "button", class: "mini", disabled: r.deleted, "aria-label": "به‌روزرسانی درخواست " + r.id, title: "به‌روزرسانی", onclick: function () { update(r); } }, "↻"), " ",
+        el("button", { type: "button", class: "mini", disabled: r.deleted, "aria-label": "حذف درخواست " + r.id, title: "حذف", onclick: function () { del(r); } }, "✕")));
+      return el("tr", { class: r.deleted ? "gone" : "" }, cells);
+    })));
+
+    var b = Kit.clear(Kit.$("#bronze"));
+    b.appendChild(head(["loaded", "id", "status", "updated", "kind"]));
+    b.appendChild(el("tbody", null, bronze.length ? bronze.slice().reverse().map(function (v) {
+      return el("tr", { class: v.op === "tomb" ? "tomb" : v.at === t ? "new" : "" },
+        el("td", null, hh(v.at)), el("td", null, "#" + v.id), el("td", null, v.status), el("td", null, hh(v.upd)), el("td", null, v.op));
+    }) : el("tr", null, el("td", { colspan: "5" }, "خالی است: loader را اجرا کنید."))));
+
+    var ids = {}; liveSrc().forEach(function (r) { ids[r.id] = true; });
+    var sv = silver(), sl = Kit.clear(Kit.$("#silver"));
+    sl.appendChild(head(["id", "status", ""]));
+    sl.appendChild(el("tbody", null, sv.length ? sv.map(function (v) {
+      var ghost = !ids[v.id];
+      return el("tr", { class: ghost ? "ghost" : "" }, el("td", null, "#" + v.id), el("td", null, v.status),
+        el("td", null, ghost ? el("span", { class: "badge-ghost" }, "✗ شبح") : ""));
+    }) : el("tr", null, el("td", { colspan: "3" }, "خالی است."))));
+
+    Kit.$("#n-src").textContent = liveSrc().length;
+    Kit.$("#n-silver").textContent = sv.length;
+    var g = ghosts().length, ng = Kit.$("#n-ghost");
+    ng.textContent = g; ng.className = "stat-value" + (g ? " bad" : "");
+    Kit.$("#cursor").textContent = cursor === null ? "–" : hh(cursor);
+    Kit.$("#recon").hidden = mode !== "recon";
+  }
+
+  var seg = Kit.segmented({ label: "حذف‌ها چطور مدیریت می‌شوند", value: mode,
+    options: Object.keys(MODES).map(function (k) { return { value: k, label: MODES[k] }; }),
+    onChange: function (v) { mode = v; reset(); log.add("حالت: " + MODES[v] + ".", "muted"); } });
+  Kit.$("#mode").appendChild(seg.element);
+  Kit.$("#load").addEventListener("click", runLoader);
+  Kit.$("#recon").addEventListener("click", reconcile);
+  Kit.$("#insert").addEventListener("click", insert);
+  Kit.$("#reset").addEventListener("click", reset);
+  reset();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "چرا incremental loader هیچ‌وقت hard delete را نمی‌گیرد؟",
+      options: ["retryهای loader آن را پنهان می‌کنند", "ردیف‌هایی را انتخاب می‌کند که update_dateشان از cursor جلو رفته، و ردیف حذف‌شده دیگر وجود ندارد که انتخاب شود", "لایه‌ی Bronze حذف‌ها را رد می‌کند", "لایه‌ی Silver حذف‌ها را فیلتر می‌کند"],
+      answer: 1, explain: "این loader تغییرهای ردیفی را کپی می‌کند که می‌بیند. ردیف حذف‌شده نسخه‌ی تازه‌ای باقی نمی‌گذارد، پس چیزی به log نمی‌رسد و viewای که از log ساخته می‌شود آخرین نسخه را نگه می‌دارد." },
+    { q: "سیستم event-sourced چه چیزی را ثبت می‌کند که این لایه‌ی Bronze نمی‌تواند؟",
+      options: ["مهر زمانی", "دلیل تغییر وضعیت: یک رویداد کسب‌وکاری در زمان گذشته مثل «درخواست پس گرفته شد»", "وضعیت فعلی", "کلید اصلی"],
+      answer: 1, explain: "رویدادها نیت را منتقل می‌کنند، نه انبوهی از تغییر ردیف (ص. ۱۰۳)؛ کپی در سطح ردیف وقتی ردیفی ناپدید می‌شود چیزی برای ثبت ندارد." }
+  ]);
+})();
+</script>
+</body>
+</html>

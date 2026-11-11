@@ -1,18 +1,20 @@
-# A minimal LSM-tree
+# یک LSM-tree کوچک
 
-A complete, small LSM storage engine (~200 lines): write-ahead log, memtable, SSTables written as sorted files with a sparse index (one entry per 16-key block), per-SSTable Bloom filters, size-tiered compaction, tombstones for deletes, and crash recovery by WAL replay. A skewed workload checks every read against a reference dict.
+یک storage engine کامل و کوچک LSM در حدود ۲۰۰ خط: write-ahead log، memtable، SSTableهایی که به شکل فایل مرتب با sparse index نوشته می‌شوند، یعنی یک ورودی برای هر بلوک ۱۶ کلیدی، Bloom filter برای هر SSTable، compaction از نوع size-tiered، tombstone برای حذف، و بازیابی بعد از crash با replay کردن WAL. یک workload نامتوازن هر خواندن را با یک dict مرجع مقایسه می‌کند.
 
-*Illustrates DDIA 2nd ed., “Log-Structured Storage”, pp. 118–125. The implementation is the vault’s own.*
+*این آزمایش بخش «ذخیره‌سازی log-structured» از ویراست دوم DDIA را نشان می‌دهد (صص. ۱۱۸–۱۲۵). پیاده‌سازی مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+با Python 3.10 یا جدیدتر، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 lsm.py
 ```
 
-## Expected output
+خروجی برنامه انگلیسی است، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را درست نشان نمی‌دهند.
+
+## خروجی مورد انتظار
 
 ```text
 Workload: 30,000 writes (5% deletes) over 5,000 keys, memtable limit 500
@@ -26,14 +28,14 @@ Workload: 30,000 writes (5% deletes) over 5,000 keys, memtable limit 500
 Crash: lost 245 memtable entries; replayed 258 WAL records; all 4901 keys correct after recovery: True
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Write amplification ≈ 4×: each logical write is written to the WAL, to an SSTable on flush, and again on every compaction that rewrites it.
-- Bloom filters cut SSTable reads per lookup by ~4× — most of the saving comes from keys that do not exist.
-- The measured false-positive rate (~1%) matches the textbook figure for 10 bits per key.
-- After a simulated crash the memtable is rebuilt from the WAL and every key reads back correctly.
+- مقدار write amplification حدود ۴ برابر است: هر نوشتن منطقی یک بار در WAL، یک بار در SSTable هنگام flush و دوباره در هر compactionی که بازنویسی‌اش می‌کند نوشته می‌شود.
+- فیلتر Bloom تعداد SSTableهایی را که هر جست‌وجو می‌خواند حدود ۴ برابر کم می‌کند؛ بیشتر این صرفه‌جویی از کلیدهایی می‌آید که وجود ندارند.
+- نرخ false positive اندازه‌گیری‌شده، حدود ۱٪، با عدد کتاب برای ۱۰ بیت به ازای هر کلید می‌خواند.
+- بعد از یک crash شبیه‌سازی‌شده، memtable از روی WAL دوباره ساخته می‌شود و همه‌ی کلیدها درست خوانده می‌شوند.
 
-## Related
+## پیوندها
 
-- Chapter note: [4. Storage and Retrieval](../../chapters/04-storage-and-retrieval.md) — “Log-Structured Storage”, pp. 118–125
-- Explore in the browser: [Inside an LSM-tree](../../widgets/04-lsm-tree.html)
+- یادداشت فصل: [فصل ۴: ذخیره‌سازی و بازیابی](../../chapters/04-storage-and-retrieval.md)، بخش «ذخیره‌سازی log-structured»، صص. ۱۱۸–۱۲۵
+- در مرورگر: [درون یک LSM-tree](../../widgets/04-lsm-tree.html)

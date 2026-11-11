@@ -3,58 +3,62 @@ book: designing-data-intensive-applications
 chapter: 2
 title: "Defining Nonfunctional Requirements"
 pages: "33–64"
+translated_title: "تعریف نیازمندی‌های غیرکارکردی"
+lang: fa
 ---
 
-# 2. Defining Nonfunctional Requirements
+# فصل ۲: تعریف نیازمندی‌های غیرکارکردی
 
-[← 1. Trade-Offs in Data Systems Architecture](01-trade-offs-in-data-systems-architecture.md) · [Book](../README.md) · [3. Data Models and Query Languages →](03-data-models-and-query-languages.md)
+[فصل ۱: بده‌بستان‌ها در معماری سیستم‌های داده →](01-trade-offs-in-data-systems-architecture.md) · [کتاب](../README.md) · [فصل ۳: مدل‌های داده و زبان‌های کوئری ←](03-data-models-and-query-languages.md)
 
-## Summary
+## خلاصه
 
-Beyond what an application does, it must be fast enough, keep working when parts break, cope with growth, and stay easy to change. The chapter makes these nonfunctional requirements precise — **performance, reliability, scalability, maintainability** — starting from a case study of social-network home timelines that shows how a read-heavy feature can be redesigned by moving work from reads to writes. It argues for measuring response time as a distribution (percentiles, not averages), distinguishes faults from failures, and treats scalability as the question "if load grows in a particular way, what are our options?" rather than a yes/no property.
+اپلیکیشن جدا از این‌که چه کاری انجام می‌دهد، باید به‌اندازه‌ی کافی سریع باشد، وقتی بخشی از آن خراب می‌شود به کار ادامه دهد، با رشد کنار بیاید و تغییر دادنش آسان بماند. این فصل این نیازمندی‌های غیرکارکردی را دقیق می‌کند: **performance، reliability، scalability و maintainability**. نقطه‌ی شروع، یک مطالعه‌ی موردی درباره‌ی home timeline در شبکه‌ی اجتماعی است که نشان می‌دهد قابلیتی با خواندن سنگین را چطور می‌شود با جابه‌جا کردن کار از زمان خواندن به زمان نوشتن دوباره طراحی کرد. کتاب استدلال می‌کند که response time را باید به شکل توزیع و با percentile اندازه گرفت، نه با میانگین؛ fault را از failure جدا می‌کند، و scalability را نه ویژگی بله‌یا‌خیر، بلکه این پرسش می‌داند: «اگر بار به شکل مشخصی رشد کند، چه گزینه‌هایی داریم؟»
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Moving work from read time to write time** (materializing timelines) can turn an infeasible read load into a manageable write load — at the cost of extra work per write and special cases such as celebrities (pp. 34–37).
-- **Response time is a distribution.** Use the median for the typical experience and high percentiles (p95, p99, p999) for the tail; averages hide outliers (pp. 40–41).
-- **Fan-out amplifies tails:** a request that waits on many backend calls is as slow as the slowest one (p. 41). Percentiles cannot be averaged; merge histograms instead (p. 42).
-- **A fault is a component deviating from spec; a failure is the whole system stopping service.** Fault tolerance prevents faults becoming failures; correlated software faults are harder than independent hardware faults (pp. 43–47).
-- **Humans cause many outages** — configuration changes chief among them — so design for mistakes and learn with blameless postmortems (pp. 47–49).
-- **Scalability means describing load and asking how performance changes as it grows.** Shared-nothing scale-out is common but not free; break work into independent parts (pp. 49–52).
-- **Maintainability = operability + simplicity + evolvability**, served by good abstractions (pp. 52–56).
+- **جابه‌جا کردن کار از زمان خواندن به زمان نوشتن**، یعنی materialize کردن timelineها، می‌تواند بار خواندنی را که شدنی نیست به بار نوشتنی قابل‌مدیریت تبدیل کند؛ هزینه‌اش کار بیشتر برای هر نوشتن و حالت‌های خاصی مثل سلبریتی‌هاست (pp. 34–37).
+- **مقدار response time یک توزیع است.** میانه را برای تجربه‌ی معمول و percentileهای بالا مثل p95، p99 و p999 را برای tail به کار ببرید؛ میانگین outlierها را پنهان می‌کند (pp. 40–41).
+- **پدیده‌ی fan-out، tail را بزرگ‌تر می‌کند:** درخواستی که منتظر چند فراخوانی backend است به‌اندازه‌ی کندترینشان کند است (p. 41). percentileها را نمی‌شود میانگین گرفت؛ به جایش histogramها را با هم merge کنید (p. 42).
+- **مفهوم fault یعنی یک جزء از مشخصاتش منحرف شود؛ failure یعنی کل سیستم از ارائه‌ی سرویس بازبماند.** fault tolerance جلوی تبدیل fault به failure را می‌گیرد؛ faultهای نرم‌افزاری همبسته از faultهای مستقل سخت‌افزاری سخت‌ترند (pp. 43–47).
+- **انسان‌ها عامل بسیاری از قطعی‌ها هستند**، و تغییر config بیش از همه؛ پس سیستم را برای خطا طراحی کنید و با postmortemهای بدون سرزنش یاد بگیرید (pp. 47–49).
+- **مفهوم scalability یعنی بار را توصیف کنید و بپرسید با رشدش کارایی چطور تغییر می‌کند.** scale-out از نوع shared-nothing رایج است ولی رایگان نیست؛ کار را به بخش‌های مستقل بشکنید (pp. 49–52).
+- **مفهوم maintainability یعنی operability و simplicity و evolvability**، و abstractionهای خوب به هر سه کمک می‌کنند (pp. 52–56).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، یعنی bookmarkهای PDF، با شماره‌ی صفحه‌های چاپی.*
 
-- Case Study: Social Network Home Timelines — p. 34
-  - Representing Users, Posts, and Follows — p. 34
-  - Materializing and Updating Timelines — p. 35
-- Describing Performance — p. 37
-  - Latency and Response Time — p. 38
-  - Average, Median, and Percentiles — p. 40
-  - Use of Response Time Metrics — p. 41
-- Reliability and Fault Tolerance — p. 43
-  - Fault Tolerance — p. 43
-  - Hardware and Software Faults — p. 44
-  - Humans and Reliability — p. 47
-- Scalability — p. 49
-  - Understanding Load — p. 50
-  - Shared-Memory, Shared-Disk, and Shared-Nothing Architectures — p. 51
-  - Principles for Scalability — p. 52
-- Maintainability — p. 52
-  - Operability: Making Life Easy for Operations — p. 53
-  - Simplicity: Managing Complexity — p. 54
-  - Evolvability: Making Change Easy — p. 55
-- Summary — p. 56
+- مطالعه‌ی موردی: home timeline در شبکه‌ی اجتماعی (p. 34)
+  - نمایش کاربرها، پست‌ها و دنبال کردن‌ها (p. 34)
+  - ساختن و به‌روز کردن timelineها (p. 35)
+- توصیف performance (p. 37)
+  - مفهوم latency و response time (p. 38)
+  - میانگین، میانه و percentileها (p. 40)
+  - استفاده از متریک‌های response time (p. 41)
+- مفهوم reliability و fault tolerance (p. 43)
+  - مفهوم fault tolerance (p. 43)
+  - انواع faultهای سخت‌افزاری و نرم‌افزاری (p. 44)
+  - انسان‌ها و reliability (p. 47)
+- مفهوم scalability (p. 49)
+  - شناختن بار (p. 50)
+  - معماری‌های shared-memory، shared-disk و shared-nothing (p. 51)
+  - اصول scalability (p. 52)
+- مفهوم maintainability (p. 52)
+  - اصل operability: آسان کردن کار تیم عملیات (p. 53)
+  - اصل simplicity: مدیریت پیچیدگی (p. 54)
+  - اصل evolvability: آسان کردن تغییر (p. 55)
+- جمع‌بندی (p. 56)
 
-## Notes
+## یادداشت‌ها
 
-**Functional requirements** say what the app does; **nonfunctional requirements** — fast, reliable, secure, compliant, maintainable — are often unwritten but just as important: an unbearably slow or unreliable app “might as well not exist” (p. 33). This chapter covers performance, reliability, scalability and maintainability.
+**نیازمندی‌های کارکردی** می‌گویند اپلیکیشن چه کاری انجام می‌دهد. **نیازمندی‌های غیرکارکردی**، یعنی سریع، قابل‌اعتماد، امن، مطابق قانون و قابل‌نگهداری بودن، اغلب جایی نوشته نمی‌شوند ولی همان‌قدر مهم‌اند: به تعبیر کتاب، اپلیکیشنی که به‌طرز غیرقابل‌تحملی کند یا ناپایدار باشد انگار اصلاً وجود ندارد (p. 33). این فصل چهار مورد را بررسی می‌کند: performance، reliability، scalability و maintainability.
 
-### Case study: social network home timelines
+> **Try it:** [فصل ۲ در طول یک pipeline داده](../widgets/02-pipeline-map.html): یکی از lensها را انتخاب کنید، مثلاً کار در زمان خواندن یا نوشتن یا faultها، و ببینید هر نیازمندی در هر مرحله‌ی pipeline چه معنایی دارد.
 
-An X/Twitter-style network (pp. 34–36). Assumptions: **500 million posts/day ≈ 5,800 posts/s**, spiking to **150,000/s**; the average user follows 200 and has 200 followers — but a few celebrities have over 100 million. Data lives in three relational tables: `users`, `posts`, `follows` (Figure 2-1).
+### مطالعه‌ی موردی: home timeline در شبکه‌ی اجتماعی
+
+یک شبکه‌ی اجتماعی شبیه X/Twitter (pp. 34–36). فرض‌ها: **۵۰۰ میلیون پست در روز، یعنی حدود ۵٬۸۰۰ پست در ثانیه**، با اوج‌هایی تا **۱۵۰٬۰۰۰ در ثانیه**. کاربر متوسط ۲۰۰ نفر را دنبال می‌کند و ۲۰۰ follower دارد، اما چند سلبریتی بیش از ۱۰۰ میلیون follower دارند. داده در سه جدول relational نگه داشته می‌شود: `users` و `posts` و `follows`؛ شکل ۲-۱ همین را نشان می‌دهد.
 
 ```sql
 SELECT posts.*, users.* FROM posts
@@ -65,210 +69,309 @@ SELECT posts.*, users.* FROM posts
   LIMIT 1000
 ```
 
-*The home-timeline query (p. 35).*
+*کوئری home timeline در کتاب (p. 35).*
 
-#### Two ways to serve the timeline (pp. 35–36)
+#### دو راه برای ساختن timeline (pp. 35–36)
 
 | | Query on read (polling) | Materialized timelines (fan-out on write) |
 |---|---|---|
-| How | Each online client re-runs the join every 5 s | On each post, insert it into every follower’s cached timeline — like a mailbox |
-| Load | 10 M online users → **2 M queries/s**, × 200 followees = **400 M lookups/s** | 5,800 posts/s × fan-out 200 ≈ **just over 1 M timeline writes/s** |
-| Reads | Expensive, worst for users following tens of thousands | Served from a cache; clients subscribe to new entries |
-| Spikes | Hit every reader | Enqueue deliveries; posts appear a bit later, reads stay fast |
+| روش | هر client آنلاین هر ۵ ثانیه join را دوباره اجرا می‌کند | با هر پست، آن را در timeline کش‌شده‌ی همه‌ی followerها درج کنید، مثل صندوق نامه |
+| بار | ۱۰ میلیون کاربر آنلاین ← **۲ میلیون کوئری در ثانیه**، ضرب در ۲۰۰ followee = **۴۰۰ میلیون lookup در ثانیه** | ۵٬۸۰۰ پست در ثانیه ضرب در fan-out ۲۰۰ ← **کمی بیش از ۱ میلیون نوشتن timeline در ثانیه** |
+| خواندن | گران؛ برای کسی که ده‌ها هزار نفر را دنبال می‌کند از همه بدتر | از cache خوانده می‌شود؛ clientها مشترک ورودی‌های تازه می‌شوند |
+| اوج‌ها | به همه‌ی خواننده‌ها ضربه می‌زند | تحویل‌ها در صف می‌روند؛ پست‌ها کمی دیرتر ظاهر می‌شوند و خواندن سریع می‌ماند |
 
-**Fan-out** is the factor by which one request multiplies into downstream requests. The timeline cache is a **materialized view** — precomputed query results that make reads cheap at the cost of more work on writes (p. 36). Extreme cases (p. 36):
+اصطلاح **fan-out** یعنی ضریبی که یک درخواست با آن به درخواست‌های downstream پخش می‌شود. cache مربوط به timeline یک **materialized view** است: نتیجه‌ی از پیش محاسبه‌شده‌ی کوئری که خواندن را ارزان می‌کند و در عوض کار نوشتن را بیشتر (p. 36). حالت‌های حدی (p. 36):
 
-- Someone following a huge number of busy accounts: drop some writes and show a sample — they don’t read everything anyway.
-- A **celebrity** posting: dropping writes isn’t OK; store celebrity posts separately and **merge them in at read time**.
+- کسی که تعداد خیلی زیادی حساب پرکار را دنبال می‌کند: بخشی از نوشتن‌ها را کنار بگذارید و نمونه‌ای نشان دهید؛ او که همه را نمی‌خواند.
+- پست گذاشتن یک **سلبریتی**: کنار گذاشتن نوشتن‌ها قابل قبول نیست؛ پست‌های سلبریتی‌ها را جدا ذخیره کنید و **هنگام خواندن با timeline merge کنید**.
 
-![A user's new post is appended to the log of all posts and fanned out into each follower's precomputed home timeline, which followers read through the API](../figures/02-02.png)
+![پست تازه‌ی یک کاربر به log همه‌ی پست‌ها اضافه می‌شود و به timeline از پیش محاسبه‌شده‌ی هر follower fan-out می‌شود؛ followerها timeline را از راه API می‌خوانند](../figures/02-02.png)
 
-*Figure 2-2 (p. 36): fan-out on write — one post becomes one timeline write per follower, so reading a home timeline is a simple lookup.*
+*Figure 2-2 (p. 36): در fan-out on write هر پست به ازای هر follower یک نوشتن در timeline می‌شود، پس خواندن home timeline یک lookup ساده است.*
 
-### Describing performance
+> **Try it:** [محاسبه هنگام خواندن یا هنگام نوشتن؟](../widgets/02-materialize.html): اول با عددهای خود کتاب polling و fan-out و حالت سلبریتی را مقایسه کنید، بعد همان حساب را روی داشبوردی که هر روز صدها بار باز می‌شود امتحان کنید.
 
-| Metric | Definition | In the case study |
+> **In practice:** جدول Gold همان cache مربوط به timeline در یک پلتفرم داده است: داشبوردی که روزی ۴۰۰ بار باز می‌شود نباید هر بار کل تراکنش‌ها را اسکن کند. نسخه‌ی داده‌ای «سلبریتی» هم اصلاحیه‌ای است که برای ماه‌های قدیمی می‌رسد و جدول افزایشی را بی‌صدا غلط می‌کند.
+
+### توصیف performance
+
+| معیار | تعریف | در مطالعه‌ی موردی |
 |---|---|---|
-| **Response time** | From the user’s request until they receive the answer (seconds, ms, µs) | Time to load the timeline; time until a post reaches followers |
-| **Throughput** | Requests or data volume per second; hardware has a maximum | Posts/s, timeline writes/s |
+| **Response time** | از درخواست کاربر تا رسیدن پاسخ به او، به ثانیه یا میلی‌ثانیه یا میکروثانیه | زمان load شدن timeline؛ زمان رسیدن پست به followerها |
+| **Throughput** | تعداد درخواست یا حجم داده در ثانیه؛ سخت‌افزار سقفی دارد | پست در ثانیه، نوشتن timeline در ثانیه |
 
-Response time is what users care about; throughput determines the resources needed and so the cost. A system is **scalable** if its maximum throughput can be raised significantly by adding resources (p. 38). Near maximum throughput, **queueing** makes response time rise sharply (Figure 2-3, p. 37).
+چیزی که برای کاربر مهم است response time است؛ throughput منابع لازم و در نتیجه هزینه را تعیین می‌کند. سیستمی **scalable** است که بشود throughput بیشینه‌اش را با اضافه کردن منابع به‌طور قابل‌توجهی بالا برد (p. 38). نزدیک throughput بیشینه، **صف‌ها** باعث می‌شوند response time تند بالا برود؛ شکل ۲-۳ را ببینید (p. 37).
 
-![Response time plotted against throughput: flat near the unloaded service time, then rising steeply as throughput approaches the maximum the hardware can handle](../figures/02-03.png)
+![نمودار response time بر حسب throughput: نزدیک زمان سرویس بدون بار تخت است و وقتی throughput به سقف سخت‌افزار نزدیک می‌شود تند بالا می‌رود](../figures/02-03.png)
 
-*Figure 2-3 (p. 37): close to capacity, queues build up and response time shoots up long before throughput reaches its limit.*
+*Figure 2-3 (p. 37): نزدیک ظرفیت، صف‌ها پر می‌شوند و response time خیلی پیش از رسیدن throughput به سقفش اوج می‌گیرد.*
 
-#### When an overloaded system won’t recover (p. 38)
+#### وقتی سیستمِ زیر بار سنگین دیگر برنمی‌گردد (p. 38)
 
-Long queues → clients time out and resend → even more load: a **retry storm**, which can leave the system overloaded even after load drops — a **metastable failure**. Defences:
+صف طولانی باعث می‌شود clientها time out شوند و درخواست را دوباره بفرستند، که بار را باز هم بیشتر می‌کند. این **retry storm** است و ممکن است سیستم حتی بعد از کم شدن بار هم در حالت overload بماند؛ اسمش **metastable failure** است.
 
-| Side | Technique |
+```mermaid
+flowchart LR
+    Q["Long queues"] --> T["Clients time out"]
+    T --> R["Clients retry"]
+    R --> L["Even more load"]
+    L --> Q
+```
+
+*طرح خود vault از حلقه‌ی retry storm (p. 38).*
+
+| سمت | روش دفاع |
 |---|---|
-| Client | **Exponential backoff** (increase and randomize the wait between retries); **circuit breaker** or **token bucket** to stop calling a failing service |
-| Server | **Load shedding** (reject requests early when near overload); **backpressure** (tell clients to slow down) |
-| Both | The choice of queueing and load-balancing algorithms |
+| Client | **Exponential backoff** برای بیشتر و تصادفی کردن فاصله‌ی retryها؛ **circuit breaker** یا **token bucket** برای قطع فراخوانی سرویسی که دارد شکست می‌خورد |
+| Server | **Load shedding** برای رد کردن زودهنگام درخواست‌ها نزدیک overload؛ **backpressure** برای این‌که clientها آرام‌تر بفرستند |
+| هر دو | انتخاب الگوریتم‌های صف و load balancing |
 
-> **Try it:** [Queueing, overload, and retry storms](../widgets/02-queueing.html) — push a server towards capacity, then add a load spike and client retries and watch it fail to recover.
+> **Try it:** [صف، اضافه‌بار و retry storm](../widgets/02-queueing.html): سرور را به سمت ظرفیتش هل بدهید، بعد یک اوج بار و retry سمت client اضافه کنید و ببینید چطور بازنمی‌گردد.
 
-#### Latency and response time (pp. 38–39)
+> **In practice:** در یک pipeline، «client» همان taskهای orchestrator هستند که به warehouse وصل می‌شوند و retry تنظیم‌شده دارند.
+>
+> **Your turn:** سرعت warehouse ده دقیقه پایین آمد و هر چهل DAG مربوط به loader دقیقه‌ای یک بار retry کردند. بعد از برگشتن سرعت هم هنوز همه‌چیز کند است. چه اتفاقی افتاده و چه چیزی را عوض می‌کنید؟
+>
+> *Answer:* این retry storm است: تلاش‌های دوباره بار را بالا نگه داشته‌اند و سیستم در حالت metastable گیر کرده است (p. 38). فاصله‌ی retry را نمایی و تصادفی کنید و تعداد taskهای همزمان را محدود کنید تا warehouse بتواند صفش را خالی کند.
 
-![A request's timeline from client to service and back: network latency on the way in, queueing delay, service time while processing, queueing, and network latency back; response time spans all of it](../figures/02-04.png)
+#### مفهوم latency و response time (pp. 38–39)
 
-*Figure 2-4 (p. 39): service time is only the middle; the client's response time also includes both network trips and every wait in a queue.*
+![زمان‌بندی یک درخواست از client تا سرویس و برگشت: latency شبکه در رفت، انتظار در صف، زمان سرویس در حین پردازش، صف دوباره و latency شبکه در برگشت؛ response time همه‌ی این‌ها را در بر می‌گیرد](../figures/02-04.png)
 
-**Latency** is the catch-all for time a request is *latent* — not being processed. Random delays come from context switches, packet loss and TCP retransmission, garbage-collection pauses, page faults, even vibrations in the rack (p. 39). With only a few cores, a few slow requests delay all those queued behind them — **head-of-line blocking** — which is why response time must be measured **on the client side** (p. 39).
+*Figure 2-4 (p. 39): زمان سرویس فقط بخش میانی است؛ response time سمت client هر دو مسیر شبکه و همه‌ی انتظارها در صف را هم شامل می‌شود.*
 
-#### Average, median, and percentiles (pp. 40–41)
+- واژه‌ی **latency** اسم کلی زمانی است که درخواست *معطل* است، یعنی پردازش نمی‌شود (p. 39).
+- مقدارهای تصادفی latency از این‌ها می‌آیند: context switch، از دست رفتن packet و ارسال دوباره‌ی TCP، توقف garbage collection، page fault، و حتی لرزش‌های rack (p. 39).
+- وقتی فقط چند هسته دارید، چند درخواست کند همه‌ی درخواست‌های پشت سرشان در صف را معطل می‌کنند: **head-of-line blocking**. به همین دلیل response time را باید **سمت client** اندازه گرفت (p. 39).
 
-| Statistic | Meaning | Use |
+> **In practice:** لاگ warehouse فقط زمان سرویس را نشان می‌دهد. proxy جلوی warehouse که برای هر نفر محدودیت دارد، صف خودش را اضافه می‌کند.
+>
+> **Your turn:** لاگ warehouse می‌گوید کوئری داشبورد ۰٫۸ ثانیه طول کشیده، اما کاربرها از load شش‌ثانیه‌ای صفحه شکایت دارند. بقیه‌ی زمان کجا رفته؟
+>
+> *Answer:* مقدار response time سمت کاربر، شبکه و هر انتظاری در صف را هم شامل می‌شود (p. 39): صف proxy، کوئری‌های دیگر همان داشبورد که جلوتر در صف‌اند و head-of-line blocking می‌سازند، و رندر شدن در مرورگر. زمان را همان‌جایی اندازه بگیرید که کاربر منتظر است.
+
+#### میانگین، میانه و percentileها (pp. 40–41)
+
+| آماره | معنی | کاربرد |
 |---|---|---|
-| Mean | Sum ÷ count | Estimating throughput limits — not “typical” experience |
-| Median (p50) | Half the requests are faster | How long users typically wait |
-| p95, p99, p999 | 95/99/99.9% are faster | The **tail**: how bad the outliers are |
+| Mean | جمع تقسیم بر تعداد | تخمین سقف throughput، نه تجربه‌ی «معمول» |
+| Median (p50) | نیمی از درخواست‌ها سریع‌ترند | معمولاً کاربر چقدر منتظر می‌ماند |
+| p95، p99، p999 | ۹۵ یا ۹۹ یا ۹۹٫۹ درصد سریع‌ترند | **tail**: outlierها چقدر بدند |
 
-Variation in network delay is called **jitter** (p. 40). Amazon specifies internal services at **p999** because the slowest requests often belong to customers with the most data — the most valuable ones; optimizing p9999 was judged too expensive for too little benefit (pp. 40–41).
+به نوسان latency شبکه **jitter** می‌گویند (p. 40). آمازون سرویس‌های داخلی‌اش را بر اساس **p999** تعریف می‌کند، چون کندترین درخواست‌ها اغلب مال مشتری‌هایی است که بیشترین داده را دارند، یعنی باارزش‌ترین مشتری‌ها؛ بهینه کردن p9999 برای فایده‌ی کمش زیادی گران ارزیابی شد (pp. 40–41).
 
-![Bars for 100 requests' response times with horizontal lines for the median, mean, 95th and 99th percentiles; a few tall bars sit far above the rest](../figures/02-05.png)
+![میله‌های response time برای ۱۰۰ درخواست با خط‌های افقی برای میانه، میانگین، صدک ۹۵ و ۹۹؛ چند میله‌ی بلند خیلی بالاتر از بقیه‌اند](../figures/02-05.png)
 
-*Figure 2-5 (p. 40): the mean sits above the median, and the few slow outliers that set p95 and p99 are invisible in either.*
+*Figure 2-5 (p. 40): میانگین بالاتر از میانه است، و چند درخواست کند که p95 و p99 را تعیین می‌کنند در هیچ‌کدام دیده نمی‌شوند.*
 
-**The user impact of response times** (p. 41) is surprisingly hard to quantify: Google 2006 (400 → 900 ms ⇒ 20% less traffic), Google 2009 (+400 ms ⇒ only 0.6% fewer searches), Bing 2009 (+2 s ⇒ 4.3% less ad revenue), an Akamai study confounded by fast-loading 404 pages, and Yahoo (20–30% more clicks on searches faster by ≥ 1.25 s, controlling for result quality).
+**اثر response time بر کاربر** (p. 41) به‌طرز غافلگیرکننده‌ای سخت اندازه‌گیری می‌شود:
 
-#### Use of response time metrics (pp. 41–42)
+| مطالعه | تغییر | نتیجه‌ی گزارش‌شده |
+|---|---|---|
+| Google، ۲۰۰۶ | از ۴۰۰ به ۹۰۰ میلی‌ثانیه | ۲۰٪ ترافیک کمتر |
+| Google، ۲۰۰۹ | ۴۰۰ میلی‌ثانیه بیشتر | فقط ۰٫۶٪ جست‌وجوی کمتر |
+| Bing، ۲۰۰۹ | ۲ ثانیه بیشتر | ۴٫۳٪ درآمد تبلیغات کمتر |
+| مطالعه‌ی Akamai | | صفحه‌های ۴۰۴ که سریع load می‌شدند نتیجه را مخدوش کردند |
+| Yahoo | جست‌وجوهای دست‌کم ۱٫۲۵ ثانیه سریع‌تر، با کنترل کیفیت نتایج | ۲۰ تا ۳۰ درصد کلیک بیشتر |
 
-- **Tail latency amplification**: when a request fans out to several backends in parallel, it waits for the slowest — so a small share of slow calls makes a large share of user requests slow (Figure 2-6).
-- **SLO** = target (e.g. median < 200 ms, p99 < 1 s, ≥ 99.9% non-error responses); **SLA** = contract saying what happens if the SLO is missed (e.g. refunds) (p. 42).
-- **Computing percentiles** over a rolling window: sort the window, or use approximations — HdrHistogram, t-digest, OpenHistogram, DDSketch. **Averaging percentiles is meaningless; add the histograms** (p. 42).
+> **In practice:** زمان تمام شدن pipeline شبانه هم یک توزیع است. بیشتر روزها ساعت ۶ صبح تمام می‌شود و چند روز در ماه ساعت ۹.
+>
+> **Your turn:** میانگین زمان تمام شدن ۶:۲۰ است. چه عددی به ذی‌نفعانی گزارش می‌دهید که ساعت ۸ جلسه دارند؟
+>
+> *Answer:* میانگین روزهای دیر را پنهان می‌کند (pp. 40–41). درصد روزهایی را که بعد از ۸ تمام شده‌اند، یا p95 زمان تمام شدن را گزارش کنید. همان چند روز دیر، روزهایی‌اند که مردم به خاطرشان شکایت می‌کنند.
 
-![A web application calls seven backends in parallel; six answer in 76–143 ms but one takes 487 ms, so the end-user request takes as long as the slowest call](../figures/02-06.png)
+#### استفاده از متریک‌های response time (pp. 41–42)
 
-*Figure 2-6 (p. 42): one slow backend call makes the whole user request slow — tail latency amplification.*
+- **پدیده‌ی tail latency amplification:** وقتی یک درخواست به‌صورت موازی به چند backend پخش می‌شود، باید منتظر کندترینشان بماند؛ پس سهم کوچکی از فراخوانی‌های کند، سهم بزرگی از درخواست‌های کاربر را کند می‌کند؛ شکل ۲-۶ همین را نشان می‌دهد.
+- هدف را **SLO** می‌نامند؛ مثلاً میانه زیر ۲۰۰ میلی‌ثانیه، p99 زیر ۱ ثانیه و دست‌کم ۹۹٫۹٪ پاسخ بدون خطا. **SLA** قراردادی است که می‌گوید اگر SLO برآورده نشد چه می‌شود، مثلاً بازپرداخت (p. 42).
+- **محاسبه‌ی percentile** روی یک پنجره‌ی متحرک: پنجره را مرتب کنید، یا از تقریب‌هایی مثل HdrHistogram، t-digest، OpenHistogram و DDSketch استفاده کنید. **میانگین گرفتن از percentileها بی‌معناست؛ histogramها را جمع کنید** (p. 42).
 
-> **Try it:** [Percentiles and tail latency](../widgets/02-tail-latency.html) — shape a latency distribution, watch p99 pull away from the mean, then fan one page out to many backends.
+![یک وب‌اپلیکیشن هفت backend را موازی صدا می‌زند؛ شش‌تا در ۷۶ تا ۱۴۳ میلی‌ثانیه جواب می‌دهند اما یکی ۴۸۷ میلی‌ثانیه طول می‌کشد، پس درخواست کاربر به‌اندازه‌ی کندترین فراخوانی طول می‌کشد](../figures/02-06.png)
 
-### Reliability and fault tolerance
+*Figure 2-6 (p. 42): یک فراخوانی کند backend کل درخواست کاربر را کند می‌کند؛ این tail latency amplification است.*
 
-Reliable ≈ **“continuing to work correctly, even when things go wrong”** — where *correctly* means the expected function, tolerance of user mistakes, good-enough performance, and no unauthorized access (p. 43).
+> **Try it:** [percentileها و tail latency](../widgets/02-tail-latency.html): یک توزیع latency بسازید، ببینید p99 چطور از میانگین فاصله می‌گیرد، بعد یک صفحه را به چند backend پخش کنید.
 
-| Term | Meaning (p. 43) |
+> **In practice:** داشبوردی با دوازده کاشی، منتظر کندترین کاشی‌اش می‌ماند؛ همان fan-out شکل ۲-۶.
+>
+> **Your turn:** برای هر روز p95 زمان کوئری داشبوردها را دارید. p95 کل ماه را چطور حساب می‌کنید؟
+>
+> *Answer:* از p95های روزانه میانگین نگیرید؛ این کار از نظر ریاضی بی‌معناست (p. 42). p95 را از داده‌ی خام کل ماه حساب کنید، یا histogramهای روزانه را با هم جمع کنید و percentile را از توزیع merge‌شده بخوانید.
+
+### مفهوم reliability و fault tolerance
+
+قابل‌اعتماد بودن تقریباً یعنی **«ادامه دادن به کار درست، حتی وقتی چیزها خراب می‌شوند»**. «درست» یعنی همان کارکرد مورد انتظار، تحمل اشتباه کاربر، کارایی کافی، و جلوگیری از دسترسی غیرمجاز (p. 43).
+
+| اصطلاح | معنی در کتاب (p. 43) |
 |---|---|
-| **Fault** | One part stops working correctly (a disk, a machine, an external service) |
-| **Failure** | The whole system stops providing the required service — it misses the SLO |
-| **Fault-tolerant** | Keeps providing the service despite *certain* faults (e.g. up to 2 disks, 1 of 3 nodes) |
-| **Single point of failure** | A part whose fault escalates into a system failure |
+| **Fault** | یک بخش درست کار نمی‌کند؛ مثلاً یک دیسک، یک ماشین یا یک سرویس بیرونی |
+| **Failure** | کل سیستم از ارائه‌ی سرویس لازم بازمی‌ماند؛ SLO برآورده نمی‌شود |
+| **Fault-tolerant** | با وجود faultهای *مشخصی* سرویس را ادامه می‌دهد؛ مثلاً خرابی تا ۲ دیسک یا ۱ node از ۳ |
+| **Single point of failure** | بخشی که fault آن به failure کل سیستم تبدیل می‌شود |
 
-Fault and failure are the same thing at different levels: a failed disk is only a fault for a system holding copies elsewhere (p. 43). In the case study, a fan-out machine crashing must be taken over without missing or duplicating posts — **exactly-once semantics**, Chapter 12 (p. 44). Deliberately killing processes — **fault injection**, **chaos engineering** — keeps the recovery paths exercised, since many critical bugs live in poor error handling. Prevention beats cure where no cure exists, as with security breaches (p. 44).
+- دو مفهوم fault و failure یک چیزند در دو سطح مختلف: دیسک خراب برای سیستمی که کپی داده را جای دیگری دارد فقط یک fault است (p. 43).
+- در مطالعه‌ی موردی، اگر ماشینی که fan-out را انجام می‌دهد crash کند، ماشین دیگری باید کار را بدون جا انداختن یا تکرار پست‌ها ادامه دهد: **exactly-once semantics**، فصل ۱۲ (p. 44).
+- کشتن عمدی processها، یعنی **fault injection** یا **chaos engineering**، مسیرهای بازیابی را تمرین‌شده نگه می‌دارد، چون بسیاری از باگ‌های حیاتی در مدیریت ضعیف خطا هستند (p. 44).
+- جایی که درمانی وجود ندارد، مثل نشت امنیتی، پیشگیری از درمان بهتر است (p. 44).
 
-#### Hardware and software faults (pp. 44–47)
+> **In practice:** وقتی warehouse دو replica دارد، خرابی یک node فقط یک fault است. failure وقتی است که داشبورد صبح آماده نباشد یا عدد غلط نشان دهد.
+>
+> **Your turn:** شب یکی از replicaهای warehouse از کار افتاد و هیچ داشبوردی خراب نشد. باید رخداد ثبت کنید؟
+>
+> *Answer:* این fault بوده که سیستم تحملش کرده، نه failure (p. 43). ثبتش کنید و replica را برگردانید، چون تا برگردد سیستم دیگر fault-tolerant نیست و replica باقی‌مانده single point of failure شده است.
 
-| Hardware fault | Rate cited by the book |
+#### انواع faultهای سخت‌افزاری و نرم‌افزاری (pp. 44–47)
+
+| Fault سخت‌افزاری | نرخی که کتاب نقل می‌کند |
 |---|---|
-| Magnetic hard drives | 2–5% fail per year → ~1 failure/day in a 10,000-disk cluster |
-| SSDs | 0.5–1% fail per year; uncorrectable errors ~once per drive per year |
-| CPU cores computing wrong results | ~1 in 1,000 machines |
-| RAM | >1% of machines/year hit an uncorrectable error even with ECC; access patterns can flip bits |
-| Whole datacenter | Power, misconfiguration, fire, flood, earthquake, solar storms — rare but catastrophic |
+| هارددیسک مغناطیسی | سالانه ۲ تا ۵ درصد خراب می‌شوند، یعنی حدود یک خرابی در روز در clusterی با ۱۰٬۰۰۰ دیسک |
+| SSD | سالانه ۰٫۵ تا ۱ درصد خراب می‌شوند؛ خطای اصلاح‌نشدنی حدود یک بار در سال برای هر درایو |
+| هسته‌ی CPU که نتیجه‌ی غلط حساب می‌کند | حدود ۱ در ۱٬۰۰۰ ماشین |
+| RAM | بیش از ۱٪ ماشین‌ها در سال، حتی با ECC، خطای اصلاح‌نشدنی می‌خورند؛ الگوهای دسترسی می‌توانند بیت را برگردانند |
+| کل دیتاسنتر | برق، config غلط، آتش، سیل، زلزله، طوفان خورشیدی: نادر اما فاجعه‌بار |
 
-**Redundancy** (RAID, dual power supplies, hot-swappable CPUs, batteries and generators) works best when faults are independent — and they are often correlated. Cloud systems therefore tolerate the loss of whole machines, racks or **availability zones** in software, which also enables **rolling upgrades** without downtime (pp. 45–46).
+مفهوم **redundancy**، مثل RAID، منبع تغذیه‌ی دوگانه، CPU قابل تعویض در حال کار، باتری و ژنراتور، وقتی بهتر کار می‌کند که faultها مستقل باشند، و اغلب همبسته‌اند. برای همین سیستم‌های cloud از دست رفتن کل ماشین، rack یا **availability zone** را در نرم‌افزار تحمل می‌کنند؛ همین امکان **rolling upgrade** بدون توقف را هم می‌دهد (pp. 45–46).
 
-**Software faults** are highly correlated because every node runs the same code (pp. 46–47):
+**انواع software fault** به‌شدت همبسته‌اند، چون همه‌ی nodeها همان کد را اجرا می‌کنند (pp. 46–47):
 
-- one bug fells every node at once — the **leap second of June 30, 2012** that hung many Java apps via a Linux kernel bug; SSDs whose firmware dies after exactly **32,768 hours**;
-- a runaway process exhausting CPU, memory, disk, bandwidth or threads;
-- a dependency that slows down, hangs or returns corrupted responses;
-- emergent behaviour between systems; **cascading failures**.
+- یک باگ همه‌ی nodeها را با هم زمین می‌زند: **leap second روز ۳۰ ژوئن ۲۰۱۲** که از راه یک باگ در kernel لینوکس بسیاری از اپلیکیشن‌های Java را هنگ کرد؛ SSDهایی که firmwareشان دقیقاً بعد از **۳۲٬۷۶۸ ساعت** از کار می‌افتد؛
+- یک process که از کنترل خارج می‌شود و CPU، حافظه، دیسک، پهنای باند یا threadها را تمام می‌کند؛
+- وابستگی‌ای که کند می‌شود، هنگ می‌کند یا پاسخ خراب برمی‌گرداند؛
+- رفتار پیش‌بینی‌نشده‌ی ناشی از تعامل سیستم‌ها؛ **cascading failure**.
 
-Such bugs lie dormant until an assumption about the environment stops being true. No quick fix — many small things: think about assumptions, test thoroughly, isolate processes, crash and restart, avoid retry-storm feedback loops, monitor production (p. 47).
+این باگ‌ها خاموش می‌مانند تا روزی که یک فرض درباره‌ی محیط دیگر درست نباشد. راه‌حل سریعی ندارند، فقط کارهای کوچک زیاد: درباره‌ی فرض‌ها فکر کنید، دقیق تست کنید، processها را از هم جدا کنید، بگذارید crash کنند و دوباره شروع شوند، از حلقه‌های بازخوردی مثل retry storm دوری کنید، و production را monitoring کنید (p. 47).
 
-#### Humans and reliability (pp. 47–49)
+> **In practice:** ارتقای نسخه‌ی کتابخانه‌ی loader، یا تغییر یک macro مشترک در SQL، همان باگ را هم‌زمان به همه‌ی جدول‌ها می‌برد.
+>
+> **Your turn:** بعد از ارتقای loader، timestampها در همه‌ی جدول‌ها با منطقه‌ی زمانی اشتباه load شدند. اگر دو container موازی برای loader داشتید جلویش گرفته می‌شد؟
+>
+> *Answer:* نه. این fault نرم‌افزاری همبسته است و هر کپی همان کد را اجرا می‌کند و همان اشتباه را می‌کند (pp. 46–47). چیزی که کمک می‌کند تست روی داده‌ی واقعی، rollout تدریجی جدول‌به‌جدول، مقایسه با منبع و امکان rollback سریع است.
 
-Configuration changes by operators were the **leading cause of outages** in one study; hardware played a role in only 10–25% (p. 47). “Human error” is a symptom of the sociotechnical system, not the cause. Helpful measures: testing (including property testing), quick rollback, gradual rollouts, monitoring and observability, interfaces that encourage the right thing — but organizations often choose features over resilience. **Blameless postmortems** let people share full details; be suspicious of simplistic answers in both directions (“Bob should have been more careful” vs “rewrite the backend in Haskell”) (pp. 47–48).
+#### انسان‌ها و reliability (pp. 47–49)
 
-**How important is reliability?** A few hours of outage may be tolerable; permanent loss or corruption (a parent’s photos of their children) is not. The **Post Office Horizon scandal** (1999–2019) — hundreds of sub-postmasters convicted because buggy accounting software showed shortfalls, enabled by a legal presumption that computers work correctly — shows the human cost. Cutting reliability for a prototype can be fine, if done consciously (pp. 48–49).
+- در یک مطالعه، تغییرات config توسط اپراتورها **عامل اصلی قطعی‌ها** بود و سخت‌افزار فقط در ۱۰ تا ۲۵ درصد نقش داشت (p. 47).
+- «خطای انسانی» نشانه‌ی سیستم اجتماعی‌فنی است، نه علت آن (p. 47).
+- اقدام‌های مفید: تست، از جمله property testing؛ rollback سریع، rollout تدریجی، monitoring و observability، و interfaceهایی که کار درست را تشویق می‌کنند. اما سازمان‌ها اغلب قابلیت تازه را به resilience ترجیح می‌دهند (pp. 47–48).
+- **گزارش‌های postmortem بدون سرزنش** به آدم‌ها اجازه می‌دهند جزئیات کامل را بگویند. به پاسخ‌های ساده‌انگارانه در هر دو جهت شک کنید: «Bob باید بیشتر دقت می‌کرد» یا «backend را با Haskell بازنویسی کنیم» (p. 48).
 
-### Scalability
+**مفهوم reliability چقدر مهم است؟** چند ساعت قطعی ممکن است قابل‌تحمل باشد؛ از دست رفتن یا خراب شدن دائمی داده، مثل عکس‌هایی که پدر یا مادری از بچه‌هایش دارد، نه. **رسوایی Post Office Horizon** از ۱۹۹۹ تا ۲۰۱۹ هزینه‌ی انسانی را نشان می‌دهد: صدها مسئول شعبه‌ی پست محکوم شدند، چون نرم‌افزار حسابداری پرباگ کسری نشان می‌داد، و این با پیش‌فرضی حقوقی ممکن شد که کامپیوتر درست کار می‌کند. کم گذاشتن از reliability برای یک prototype می‌تواند درست باشد، به شرط این‌که آگاهانه باشد (pp. 48–49).
 
-Scalability is a system’s ability to cope with increased load — not a label (“X is scalable”) but questions: if the system grows *in a particular way*, what are our options, how do we add resources, and when do we hit the current architecture’s limits? For an early startup, premature scaling work is wasted at best and an inflexible straitjacket at worst (pp. 49–50).
+> **In practice:** هر جدولی که loader load می‌کند با یک فایل YAML تعریف می‌شود. یعنی هر تغییر config یک تغییر در production است.
+>
+> **Your turn:** کسی ستونی را از YAML یک جدول حذف کرد و داشبورد صبح خالی بالا آمد. از این فصل چه درسی برمی‌دارید؟
+>
+> *Answer:* تغییر config عامل اصلی قطعی‌ها در مطالعه‌ی کتاب است (p. 47). فایل‌ها را مثل کد در Git و CI بررسی کنید، امکان rollback سریع داشته باشید، و یک بررسی schema drift بین لایه‌ها بگذارید. postmortem را بدون سرزنش بنویسید: پرسش این است که چرا سیستم اجازه داد این تغییر بی‌صدا به داشبورد برسد (p. 48).
 
-#### Understanding load (pp. 50–51)
+### مفهوم scalability
 
-Describe load with numbers that matter for your app — requests/s, GB of new data per day, checkouts per hour, peak simultaneous users — plus distributions such as read/write ratio, cache hit rate or followers per user. Then ask either *“load grows, resources fixed: what happens to performance?”* or *“load grows: how many resources keep performance unchanged?”* **Linear scalability** — twice the resources for twice the load — is good; costs usually grow faster (pp. 50–51).
+مفهوم scalability یعنی توانایی سیستم برای کنار آمدن با بار بیشتر. برچسبی مثل «X scalable است» نیست، بلکه مجموعه‌ای از پرسش است: اگر سیستم *به شکل مشخصی* رشد کند، چه گزینه‌هایی داریم، چطور منابع اضافه می‌کنیم، و کی به سقف معماری فعلی می‌رسیم؟ برای یک startup در روزهای اول، کار زودهنگام روی scale در بهترین حالت هدر می‌رود و در بدترین حالت قالبی انعطاف‌ناپذیر می‌شود (pp. 49–50).
 
-#### Shared-memory, shared-disk, and shared-nothing (pp. 51–52)
+#### شناختن بار (pp. 50–51)
 
-| Architecture | What is shared | Strength | Limit |
+- بار را با عددهایی توصیف کنید که برای اپلیکیشن شما مهم‌اند: درخواست در ثانیه، گیگابایت داده‌ی تازه در روز، تعداد خرید در ساعت، بیشترین تعداد کاربر همزمان (p. 50).
+- توزیع‌ها را هم اضافه کنید: نسبت خواندن به نوشتن، hit rate مربوط به cache، تعداد follower به ازای هر کاربر (p. 50).
+- بعد یکی از این دو پرسش را بپرسید: *«بار بیشتر شود و منابع ثابت بماند، کارایی چه می‌شود؟»* یا *«بار بیشتر شود، چقدر منبع لازم است تا کارایی ثابت بماند؟»* (p. 50).
+- مفهوم **linear scalability**، یعنی دو برابر منابع برای دو برابر بار، خوب است؛ هزینه‌ها معمولاً سریع‌تر از این رشد می‌کنند (p. 51).
+
+> **In practice:** جمله‌ی «warehouse کند است» توصیف بار نیست.
+>
+> **Your turn:** بار warehouse را با عدد توصیف کنید. چه چیزهایی را می‌شمارید؟
+>
+> *Answer:* چیزهایی که برای همین سیستم مهم است (p. 50): ردیف‌های loadشده در روز به تفکیک جدول، تعداد کوئری در ساعت اوج، بایت‌های اسکن‌شده به ازای هر کوئری، و تعداد کاربران همزمان داشبورد؛ به‌اضافه‌ی توزیع‌ها، مثل سهم کوئری‌هایی که کل تاریخچه را اسکن می‌کنند. بعد بپرسید اگر هر کدام دو برابر شود، چه چیزی اول می‌شکند.
+
+#### معماری‌های shared-memory، shared-disk و shared-nothing (pp. 51–52)
+
+| معماری | چه چیزی مشترک است | نقطه‌ی قوت | محدودیت |
 |---|---|---|---|
-| Shared-memory (**vertical scaling**, scaling up) | One machine’s RAM across threads | Simple | Cost grows faster than linearly; bottlenecks mean 2× hardware ≠ 2× load |
-| Shared-disk | Disk array (NAS/SAN) across machines | Traditional on-premises warehousing | Contention and locking overhead |
-| Shared-nothing (**horizontal scaling**, scaling out) | Nothing; coordination over a normal network | Potentially linear, best price/performance, elastic, multi-region fault tolerance | Explicit sharding (Ch. 7) and all the complexity of distribution (Ch. 9) |
+| Shared-memory، یعنی **vertical scaling** یا scaling up | RAM یک ماشین بین threadها | ساده | هزینه سریع‌تر از خطی رشد می‌کند؛ گلوگاه‌ها باعث می‌شوند ۲ برابر سخت‌افزار ۲ برابر بار نکشد |
+| Shared-disk | آرایه‌ی دیسک NAS یا SAN بین ماشین‌ها | data warehouse سنتی on-premises | رقابت سر منابع و سربار lock |
+| Shared-nothing، یعنی **horizontal scaling** یا scaling out | هیچ؛ هماهنگی از راه شبکه‌ی معمولی | بالقوه خطی، بهترین نسبت قیمت به performance، elastic، fault tolerance در چند region | sharding صریح در فصل ۷ و همه‌ی پیچیدگی سیستم توزیع‌شده در فصل ۹ |
 
-Cloud-native databases with a separate storage service resemble shared-disk, but the storage API is designed for the database rather than a filesystem or block device, avoiding the old scalability problems (p. 51).
+دیتابیس‌های cloud-native که سرویس ذخیره‌سازی جدا دارند شبیه shared-disk هستند، اما API ذخیره‌سازی‌شان برای دیتابیس طراحی شده، نه برای filesystem یا block device، و همین مشکلات قدیمی scale را دور می‌زند (p. 51).
 
-#### Principles for scalability (p. 52)
+#### اصول scalability (p. 52)
 
-- There is no **“magic scaling sauce”**: 100,000 requests/s of 1 kB and 3 requests/minute of 2 GB are both 100 MB/s, yet need very different designs.
-- Expect to rethink the architecture at every **order of magnitude**; don’t plan further ahead than that.
-- **Break the system into largely independent parts** — the idea behind microservices, sharding, stream processing and shared-nothing.
-- **Don’t over-complicate**: a single-machine database over a distributed one, manual scaling if load is predictable, 5 services rather than 50.
+- **«سس جادویی scale»** وجود ندارد: ۱۰۰٬۰۰۰ درخواست ۱ کیلوبایتی در ثانیه و ۳ درخواست ۲ گیگابایتی در دقیقه هر دو ۱۰۰ مگابایت در ثانیه‌اند، اما طراحی‌های کاملاً متفاوتی می‌خواهند.
+- انتظار داشته باشید با هر **مرتبه‌ی بزرگی** رشد، معماری را از نو بسنجید؛ بیشتر از آن جلوتر را برنامه‌ریزی نکنید.
+- **سیستم را به بخش‌های تا حد زیادی مستقل بشکنید**؛ این ایده‌ی پشت microservice، sharding، stream processing و shared-nothing است.
+- **بی‌جهت پیچیده‌اش نکنید**: دیتابیس تک‌ماشین را به توزیع‌شده، scale دستی را وقتی بار قابل پیش‌بینی است، و ۵ سرویس را به ۵۰ سرویس ترجیح دهید.
 
-### Maintainability
+> **In practice:** یک join در notebook روی ۵ گیگابایت داده کند است.
+>
+> **Your turn:** کسی پیشنهاد می‌دهد یک cluster مربوط به Spark راه بیندازید. موافقید؟
+>
+> *Answer:* معمولاً نه. ۵ گیگابایت روی یک ماشین جا می‌شود و قاعده‌ی کتاب این است که پیچیدگی اضافه نکنید و فقط برای مرتبه‌ی بزرگی بعدی برنامه بریزید (p. 52). اول کار را به warehouse بسپارید یا با DuckDB روی همان ماشین اجرا کنید؛ فصل ۱ هم همین را می‌گوید (p. 21).
 
-Most of software’s cost is maintenance — fixing bugs, keeping it running, investigating failures, porting, new use cases, repaying technical debt, new features. Legacy systems (mainframes, COBOL, lost institutional knowledge) make it as much a people problem as a technical one; every valuable system becomes legacy one day (pp. 52–53).
+### مفهوم maintainability
 
-| Principle | Goal | How data systems help |
+بیشتر هزینه‌ی نرم‌افزار نگهداری است: رفع باگ، سرپا نگه داشتن، بررسی خرابی‌ها، انتقال به پلتفرم دیگر، کاربردهای تازه، بازپرداخت technical debt و قابلیت‌های تازه. سیستم‌های legacy، با mainframe و COBOL و دانش سازمانی از دست‌رفته، این را به همان اندازه که فنی است مسئله‌ای انسانی می‌کنند؛ هر سیستم ارزشمندی یک روز legacy می‌شود (pp. 52–53).
+
+| اصل | هدف | سیستم‌های داده چطور کمک می‌کنند |
 |---|---|---|
-| **Operability** (pp. 53–54) | Easy for the organization to keep it running | Monitoring and observability; no dependence on single machines; documentation and a clear “if I do X, Y happens” model; good defaults that can be overridden; self-healing with manual control; predictable behaviour |
-| **Simplicity** (pp. 54–55) | Easy for new engineers to understand | Avoid the **big ball of mud**; essential vs accidental complexity (a shifting boundary); above all **abstraction** — e.g. SQL hiding storage structures, concurrency and crash recovery |
-| **Evolvability** (pp. 55–56) | Easy to change for unanticipated needs | Loose coupling, simplicity, good abstractions; minimize **irreversibility** (can you switch back after a database migration?) |
+| **Operability** (pp. 53–54) | سرپا نگه داشتن سیستم برای سازمان آسان باشد | monitoring و observability؛ وابسته نبودن به یک ماشین خاص؛ مستندات و مدل روشن «اگر X کنم، Y می‌شود»؛ پیش‌فرض‌های خوب که بشود عوضشان کرد؛ خودترمیمی همراه با کنترل دستی؛ رفتار قابل پیش‌بینی |
+| **Simplicity** (pp. 54–55) | مهندس تازه‌وارد بتواند سیستم را بفهمد | دوری از **big ball of mud**؛ تفکیک پیچیدگی ذاتی از عارضی، که مرزش جابه‌جا می‌شود؛ و بیش از همه **abstraction**، مثل SQL که ساختار storage، concurrency و بازیابی از crash را پنهان می‌کند |
+| **Evolvability** (pp. 55–56) | تغییر برای نیازهای پیش‌بینی‌نشده آسان باشد | coupling کم، سادگی، abstraction خوب؛ کم کردن **irreversibility**؛ مثلاً آیا بعد از مهاجرت دیتابیس می‌شود برگشت؟ |
 
-“Good operations can often work around the limitations of bad (or incomplete) software, but good software cannot run reliably with bad operations” (p. 53). Automation is a two-edged sword: the leftover manual cases are the hardest, and an automated system gone wrong is harder to debug (pp. 53–54). The book’s subject is general-purpose abstractions — transactions, indexes, event logs — on which application-level ones such as domain-driven design can be built (p. 55).
+- به تعبیر کتاب، عملیات خوب اغلب می‌تواند محدودیت‌های نرم‌افزار بد یا ناقص را دور بزند، اما نرم‌افزار خوب با عملیات بد قابل‌اعتماد اجرا نمی‌شود (p. 53).
+- خودکارسازی شمشیر دولبه است: حالت‌های دستی باقی‌مانده سخت‌ترین‌ها هستند و debug کردن سیستم خودکاری که خراب شده سخت‌تر است (pp. 53–54).
+- موضوع کتاب abstractionهای همه‌منظوره است، مثل transaction و index و event log، که abstractionهای سطح اپلیکیشن مثل domain-driven design را می‌شود رویشان ساخت (p. 55).
 
-## Trade-offs at a glance
+> **In practice:** ستون‌های جدول Gold قراردادی با داشبوردهاست؛ لایه‌ی Silver جایی است که پیچیدگی عارضی در آن جمع می‌شود.
+>
+> **Your turn:** باید ستونی از Gold را که سی داشبورد از آن استفاده می‌کنند تغییر نام بدهید. چطور این کار را قابل برگشت نگه می‌دارید؟
+>
+> *Answer:* اصل evolvability یعنی کم کردن irreversibility (p. 56). ستون تازه را کنار ستون قدیمی اضافه کنید، داشبوردها را یکی‌یکی منتقل کنید و ستون قدیمی را فقط وقتی حذف کنید که دیگر کسی آن را نمی‌خواند. اگر چیزی خراب شد، برگشت فقط یعنی برگرداندن یک داشبورد.
 
-| Timeline strategy | Read cost | Write cost | Breaks down when |
+## بده‌بستان‌ها در یک نگاه
+
+| راهبرد timeline | هزینه‌ی خواندن | هزینه‌ی نوشتن | کجا می‌شکند |
 |---|---|---|---|
-| Query at read time (join) | High: one query per timeline load | Low | Many timeline reads per second |
-| Materialize on write (fan-out) | Low: read a precomputed list | High: one write per follower | Celebrity accounts with millions of followers |
-| Hybrid | Low, plus a merge for celebrities | Bounded | — (the approach the book describes) |
+| کوئری با join در زمان خواندن | زیاد: یک کوئری برای هر بار load شدن timeline | کم | تعداد زیادی خواندن timeline در ثانیه |
+| Materialize با fan-out در زمان نوشتن | کم: خواندن یک فهرست از پیش محاسبه‌شده | زیاد: یک نوشتن برای هر follower | حساب‌های سلبریتی با میلیون‌ها follower |
+| ترکیبی، راهی که کتاب شرح می‌دهد | کم، به‌اضافه‌ی merge برای سلبریتی‌ها | محدود | تقریباً هیچ‌جا در این مقیاس |
 
-## Beyond the book
+## فراتر از کتاب
 
-- The 1 − (1 − p)<sup>k</sup> formula for the probability that a fan-out request hits at least one slow call is the standard way to quantify tail-latency amplification; Dean and Barroso's "The Tail at Scale" (CACM, 2013) popularized hedged and tied requests as mitigations.
-- Mergeable histogram formats (HdrHistogram, t-digest, DDSketch) are how monitoring systems implement "add the histograms".
+- فرمول 1 − (1 − p)<sup>k</sup> برای احتمال این‌که یک درخواست fan-out دست‌کم به یک فراخوانی کند بخورد، روش استاندارد اندازه‌گیری tail latency amplification است. مقاله‌ی «The Tail at Scale» از Dean و Barroso در CACM سال ۲۰۱۳ درخواست‌های hedged و tied را به‌عنوان راه مقابله رایج کرد.
+- فرمت‌های histogram قابل ادغام، مثل HdrHistogram، t-digest و DDSketch، همان راهی است که سیستم‌های monitoring «جمع کردن histogramها» را پیاده می‌کنند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Tail latency amplification](../lab/02-tail-latency/README.md) — fan-out simulation and the averaging-percentiles mistake.
-- **Related chapters:** [7. Sharding](07-sharding.md) (celebrity hot spots again), [9. The Trouble with Distributed Systems](09-the-trouble-with-distributed-systems.md) (faults in depth), [12. Stream Processing](12-stream-processing.md) (maintaining materialized views).
+- **Run it:** [تشدید tail latency](../lab/02-tail-latency/README.md): شبیه‌سازی fan-out و اشتباه میانگین گرفتن از percentileها.
+- **فصل‌های مرتبط:** [فصل ۷: مفهوم sharding](07-sharding.md) که hot spot سلبریتی‌ها را دوباره می‌بیند، [فصل ۹: دردسرهای سیستم‌های توزیع‌شده](09-the-trouble-with-distributed-systems.md) با جزئیات faultها، و [فصل ۱۲: پردازش stream](12-stream-processing.md) برای نگهداری materialized viewها.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها را خود vault از روی یادداشت‌های بالا نوشته است؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why does fan-out on write reduce total work in the timeline case study, even though each post now causes ~200 writes?**
-   - [ ] Because writes are cheaper than reads on every database
-   - [x] Because timelines are read far more often than posts are written, so precomputing them moves work from the frequent operation to the rare one
-   - [ ] Because each user follows only one other user
-   - [ ] Because the timeline cache never needs to be updated
+1. **چرا در مطالعه‌ی موردی، fan-out on write کل کار را کم می‌کند، با این‌که هر پست حالا حدود ۲۰۰ نوشتن می‌سازد؟**
+   - [ ] چون در هر دیتابیسی نوشتن از خواندن ارزان‌تر است
+   - [x] چون timelineها خیلی بیشتر از نوشته شدن پست‌ها خوانده می‌شوند، پس پیش‌محاسبه کار را از عمل پرتکرار به عمل کم‌تکرار منتقل می‌کند
+   - [ ] چون هر کاربر فقط یک کاربر دیگر را دنبال می‌کند
+   - [ ] چون cache مربوط به timeline هیچ‌وقت به‌روزرسانی لازم ندارد
 
-   *Answer:* Reading a home timeline by querying all followed accounts on every view is expensive, and views vastly outnumber posts. Materializing each user's timeline when a post is made makes reads cheap; the extra writes are a good trade (pp. 35–37).
+   *Answer:* خواندن home timeline با کوئری روی همه‌ی followeeها در هر بار مشاهده گران است و تعداد مشاهده‌ها خیلی بیشتر از تعداد پست‌هاست. materialize کردن timeline هر کاربر هنگام پست شدن، خواندن را ارزان می‌کند و نوشتن‌های اضافه بده‌بستان خوبی است (pp. 35–37).
 
-2. **Your p50 is excellent but p99 is poor. Which users are likely affected, and why might they matter most?**
+2. **مقدار p50 شما عالی است اما p99 ضعیف. احتمالاً کدام کاربران آسیب می‌بینند و چرا ممکن است مهم‌ترین‌ها باشند؟**
 
-   *Answer:* One in a hundred requests is slow, and some users hit the tail more often — often those with the most data, for example the customers who have made many purchases and are therefore among the most valuable (pp. 40–42).
+   *Answer:* یکی از هر صد درخواست کند است و بعضی کاربران بیشتر از بقیه به tail می‌خورند؛ اغلب همان‌هایی که بیشترین داده را دارند، مثل مشتری‌هایی که خرید زیادی کرده‌اند و برای همین جزو باارزش‌ترین‌ها هستند (pp. 40–42).
 
-3. **You have p99 latencies from ten servers. How should you get the p99 of the whole service?**
-   - [ ] Average the ten p99 values
-   - [ ] Take the largest of the ten p99 values
-   - [x] Combine the underlying histograms and compute the percentile from the combined distribution
-   - [ ] Take the median of the ten p99 values
+3. **از ده سرور p99 latency دارید. p99 کل سرویس را چطور به دست می‌آورید؟**
+   - [ ] از ده مقدار p99 میانگین بگیرید
+   - [ ] بزرگ‌ترین p99 را بردارید
+   - [x] همه‌ی histogramهای زیربنایی را merge کنید و percentile را از توزیع merge‌شده حساب کنید
+   - [ ] میانه‌ی ده مقدار p99 را بردارید
 
-   *Answer:* Averaging percentiles is mathematically meaningless; the right way to aggregate response-time data is to add the histograms (pp. 42–43).
+   *Answer:* میانگین گرفتن از percentileها از نظر ریاضی بی‌معناست؛ راه درست تجمیع داده‌ی response time جمع کردن histogramهاست (pp. 42–43).
 
-4. **Give an example of a correlated software fault, and explain why replication alone does not protect against it.**
+4. **یک نمونه از fault نرم‌افزاری همبسته بزنید و توضیح دهید چرا replication به‌تنهایی در برابرش محافظت نمی‌کند.**
 
-   *Answer:* A bug triggered by a particular input or date, a runaway process exhausting a shared resource, or a cascading failure: every replica runs the same software and fails in the same way at the same time, so copies don't help — unlike independent hardware faults (pp. 44–47).
+   *Answer:* باگی که با ورودی یا تاریخ خاصی فعال می‌شود، processی که منبعی مشترک را تمام می‌کند، یا cascading failure: هر replica همان نرم‌افزار را اجرا می‌کند و هم‌زمان به همان شکل شکست می‌خورد، پس کپی‌ها کمکی نمی‌کنند؛ برخلاف faultهای مستقل سخت‌افزاری (pp. 44–47).
 
-5. **Two systems both move 100 MB/s. Why might their architectures have nothing in common?**
+5. **دو سیستم هر دو ۱۰۰ مگابایت در ثانیه جابه‌جا می‌کنند. چرا ممکن است معماری‌شان هیچ شباهتی به هم نداشته باشد؟**
 
-   *Answer:* Load must be described by the parameters that matter for the system: 100,000 requests of 1 KB each per second is a very different problem from 3 requests of 2 GB each per minute, even though the throughput is the same (pp. 50–51).
+   *Answer:* بار را باید با پارامترهایی توصیف کرد که برای همان سیستم مهم‌اند: ۱۰۰٬۰۰۰ درخواست ۱ کیلوبایتی در ثانیه مسئله‌ای کاملاً متفاوت از ۳ درخواست ۲ گیگابایتی در دقیقه است، با این‌که throughput یکی است (pp. 50–51).
+
+6. **داشبوردی روزی ۴۰۰ بار باز می‌شود و هر بار ۵۰ میلیون تراکنش را اسکن می‌کند. هر شب یک جدول Gold ساخته می‌شود که همان عددها را از پیش حساب می‌کند. چه چیزی به دست می‌آورید و چه چیزی را از دست می‌دهید؟**
+
+   *Answer:* کار از ۴۰۰ اسکن کامل در روز به یک اسکن شبانه و ۴۰۰ خواندن کوچک می‌رسد: همان جابه‌جایی کار از خواندن به نوشتن در مطالعه‌ی timeline (pp. 35–36). در عوض داشبورد تا یک روز کهنه است، و جدول Gold داده‌ی derived است که هر وقت ورودی‌اش تغییر کند، از جمله با اصلاحیه برای ماه‌های قدیمی، باید دوباره ساخته شود (p. 36).

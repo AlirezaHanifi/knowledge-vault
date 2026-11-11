@@ -3,321 +3,359 @@ book: designing-data-intensive-applications
 chapter: 9
 title: "The Trouble with Distributed Systems"
 pages: "345–400"
+translated_title: "دردسرهای سیستم‌های توزیع‌شده"
+lang: fa
 ---
 
-# 9. The Trouble with Distributed Systems
+# فصل ۹: دردسرهای سیستم‌های توزیع‌شده
 
-[← 8. Transactions](08-transactions.md) · [Book](../README.md) · [10. Consistency and Consensus →](10-consistency-and-consensus.md)
+[فصل ۸: تراکنش‌ها →](08-transactions.md) · [کتاب](../README.md) · [فصل ۱۰: مفهوم consistency و consensus ←](10-consistency-and-consensus.md)
 
-## Summary
+## خلاصه
 
-This chapter is a deliberately pessimistic catalogue of what goes wrong once software runs on more than one machine. Networks lose and delay packets without telling you which; clocks drift, jump, and disagree; processes pause for arbitrary lengths of time and come back unaware. The defining characteristic of a distributed system is **partial failure**, and because no node can know the truth for certain, decisions must be made by **quorum**, protected against stale actors with **fencing tokens**, and reasoned about using explicit **system models**. It closes with how to gain confidence anyway: formal methods and randomized testing (fuzzing, deterministic simulation).
+این فصل عمداً فهرستی بدبینانه است از چیزهایی که وقتی نرم‌افزار روی بیش از یک ماشین اجرا می‌شود خراب می‌شوند. شبکه packetها را گم می‌کند و به تأخیر می‌اندازد و نمی‌گوید کدام را؛ ساعت‌ها drift می‌کنند، می‌پرند و با هم اختلاف دارند؛ processها برای مدت دلخواه متوقف می‌شوند و بی‌خبر برمی‌گردند. ویژگی اصلی سیستم توزیع‌شده **partial failure** است، و چون هیچ nodeی نمی‌تواند حقیقت را با اطمینان بداند، تصمیم‌ها باید با **quorum** گرفته شوند، با **fencing token** در برابر بازیگرهای کهنه محافظت شوند، و با **مدل‌های سیستم** صریح سنجیده شوند. فصل با راه‌های به دست آوردن اطمینان تمام می‌شود: روش‌های formal و تست تصادفی، یعنی fuzzing و deterministic simulation.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Partial failure is nondeterministic**: some parts work, some don't, and you may not even know whether an operation succeeded (pp. 346–347).
-- **Networks are asynchronous**: a missing response could mean a lost request, a dead node, a slow node, or a lost reply — indistinguishable. Timeouts are the only detector, and they can't be perfect (pp. 347–358).
-- **Unbounded delay is a choice**: telephone-style circuits give bounded latency but waste capacity; packet switching optimizes utilization at the cost of queueing (pp. 355–358).
-- **Time-of-day clocks are for timestamps, monotonic clocks for durations.** NTP sync is imprecise, so clock readings have a confidence interval; LWW conflict resolution by timestamp can silently drop writes (pp. 358–366).
-- **Processes pause** (GC, VM suspension, paging, I/O, SIGSTOP) — a node holding a lease may resume after it expired and act on stale beliefs (pp. 366–371).
-- **Truth is defined by the majority**; a node can't trust its own judgment. **Fencing tokens** make storage reject writes from a deposed lock holder (pp. 371–377).
-- **Assume crash-recovery faults with partially synchronous timing** as the realistic system model; Byzantine tolerance is mostly for adversarial settings (pp. 377–384).
-- **Model checking, TLA+, fuzzing, and deterministic simulation testing** find bugs that ordinary tests can't (pp. 384–388).
+- **مفهوم partial failure غیرقطعی است:** بعضی بخش‌ها کار می‌کنند و بعضی نه، و شاید حتی ندانید یک عملیات موفق شده یا نه (pp. 346–347).
+- **شبکه‌ها asynchronous هستند:** نیامدن پاسخ می‌تواند یعنی درخواست گم‌شده، node مرده، node کند یا پاسخ گم‌شده، و این‌ها از هم قابل تشخیص نیستند. timeout تنها ابزار تشخیص است و نمی‌تواند بی‌نقص باشد (pp. 347–358).
+- **مفهوم latency unbounded یک انتخاب است:** مدارهای تلفنی latency محدود می‌دهند اما ظرفیت را هدر می‌دهند؛ packet switching بهره‌وری را به قیمت صف‌ها بالا می‌برد (pp. 355–358).
+- **ساعت time-of-day برای timestamp است و ساعت monotonic برای مدت زمان.** synchronization با NTP دقیق نیست، پس خواندن ساعت یک بازه‌ی اطمینان دارد؛ حل conflict با LWW بر اساس timestamp می‌تواند بی‌صدا نوشتن‌ها را دور بریزد (pp. 358–366).
+- **مفهوم process pause** واقعی است، از GC و تعلیق VM تا paging، I/O و SIGSTOP؛ nodeی که lease دارد ممکن است بعد از انقضای آن برگردد و بر اساس باورهای کهنه کار کند (pp. 366–371).
+- **حقیقت را اکثریت تعیین می‌کند**؛ یک node نمی‌تواند به قضاوت خودش اعتماد کند. **مفهوم fencing token** باعث می‌شود storage نوشتن‌های صاحب قبلی قفل را رد کند (pp. 371–377).
+- **مدل واقع‌بینانه را crash-recovery با زمان‌بندی partially synchronous بگیرید**؛ تحمل Byzantine بیشتر برای محیط‌های خصمانه است (pp. 377–384).
+- **روش‌های model checking، TLA+، fuzzing و deterministic simulation testing** باگ‌هایی پیدا می‌کنند که تست‌های معمولی پیدا نمی‌کنند (pp. 384–388).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، یعنی bookmarkهای PDF، با شماره‌ی صفحه‌های چاپی.*
 
-- Faults and Partial Failures — p. 346
-- Unreliable Networks — p. 347
-  - The Limitations of TCP — p. 348
-  - Network Faults in Practice — p. 350
-  - Fault Detection — p. 351
-  - Timeouts and Unbounded Delays — p. 352
-  - Synchronous Versus Asynchronous Networks — p. 355
-- Unreliable Clocks — p. 358
-  - Monotonic Versus Time-of-Day Clocks — p. 359
-  - Clock Synchronization and Accuracy — p. 360
-  - Relying on Synchronized Clocks — p. 362
-  - Process Pauses — p. 366
-- Knowledge, Truth, and Lies — p. 371
-  - The Majority Rules — p. 372
-  - Distributed Locks and Leases — p. 373
-  - Byzantine Faults — p. 377
-  - System Model and Reality — p. 380
-  - Formal Methods and Randomized Testing — p. 384
-- Summary — p. 388
+- مفهوم fault و partial failure (p. 346)
+- شبکه‌های غیرقابل‌اعتماد (p. 347)
+  - محدودیت‌های TCP (p. 348)
+  - خرابی‌های شبکه در عمل (p. 350)
+  - تشخیص fault (p. 351)
+  - مفهوم timeout و latencyهای unbounded (p. 352)
+  - شبکه‌های synchronous و asynchronous (p. 355)
+- ساعت‌های غیرقابل‌اعتماد (p. 358)
+  - ساعت monotonic و ساعت time-of-day (p. 359)
+  - مفهوم synchronization و دقت ساعت (p. 360)
+  - تکیه بر ساعت‌های synchronous (p. 362)
+  - مفهوم process pause (p. 366)
+- دانش، حقیقت و دروغ (p. 371)
+  - حکم اکثریت (p. 372)
+  - قفل و lease توزیع‌شده (p. 373)
+  - مفهوم Byzantine fault (p. 377)
+  - مدل سیستم و واقعیت (p. 380)
+  - روش‌های formal و تست تصادفی (p. 384)
+- جمع‌بندی (p. 388)
 
-## Notes
+## یادداشت‌ها
 
-Reliability means focusing on what could go wrong, however unlikely — in a large enough system, one-in-a-million events happen every day. This chapter turns pessimism “up to the maximum” about networks, clocks and timing (p. 345).
+مفهوم reliability یعنی تمرکز روی هر چیزی که ممکن است خراب شود، هر قدر هم بعید؛ در سیستمی به اندازه‌ی کافی بزرگ، رویدادهای یک در میلیون هر روز رخ می‌دهند. این فصل بدبینی درباره‌ی شبکه، ساعت و زمان‌بندی را «تا آخرین درجه» بالا می‌برد (p. 345).
 
-### Faults and partial failures
+> **Try it:** [فصل ۹ در طول یک pipeline داده](../widgets/09-pipeline-map.html): از دیتابیس منبع تا داشبورد را با lensهای timeout، ساعت و صاحب قفل طی کنید.
 
-A single computer is deliberately designed to be either fully working or entirely broken: an internal fault crashes it (kernel panic) rather than returning wrong answers, presenting an idealized, deterministic model — even though in reality data is occasionally corrupted and CPUs occasionally miscompute (p. 346). Networked machines can’t hide reality: Coda Hale’s list of experiences includes long-lived partitions, PDU and switch failures, accidental power cycles of whole racks, datacenter-wide power failures, and a hypoglycemic driver smashing into a DC’s HVAC system (p. 346).
+### مفهوم fault و partial failure
 
-- **Partial failure**: some parts broken in unpredictable ways while others work fine — and **nondeterministic**: the same operation sometimes succeeds, sometimes fails, and you may not even know which (pp. 346–347).
-- Tolerating partial failures is also an opportunity — rolling upgrades, and a reliable system from unreliable parts. “Suspicion, pessimism, and paranoia pay off” (p. 347).
+یک کامپیوتر تنها عمداً طوری طراحی شده که یا کامل کار کند یا کامل خراب باشد: یک fault داخلی آن را crash می‌کند، مثلاً kernel panic، به جای این‌که جواب غلط بدهد؛ یعنی یک مدل ایده‌آل و قطعی نشان می‌دهد، هرچند در واقعیت گاهی داده خراب می‌شود و CPU گاهی اشتباه حساب می‌کند (p. 346). ماشین‌های متصل به شبکه نمی‌توانند واقعیت را پنهان کنند: فهرست تجربه‌های Coda Hale شامل partitionهای طولانی، خرابی PDU و switch، خاموش و روشن شدن تصادفی کل rackها، قطع برق کل datacenter و راننده‌ای با افت قند خون است که به سیستم HVAC یک datacenter کوبیده (p. 346).
 
-### Unreliable networks
+- **مفهوم partial failure** یعنی بعضی بخش‌ها به شکل غیرقابل پیش‌بینی خراب‌اند و بقیه درست کار می‌کنند؛ و **غیرقطعی** است: همان عملیات گاهی موفق می‌شود، گاهی شکست می‌خورد، و شاید حتی ندانید کدام (pp. 346–347).
+- تحمل partial failure یک فرصت هم هست: rolling upgrade، و یک سیستم قابل اعتماد از قطعه‌های غیرقابل‌اعتماد. به گفته‌ی کتاب، بدگمانی، بدبینی و پارانویا جواب می‌دهد (p. 347).
 
-Shared-nothing machines communicate only over an **asynchronous packet network**, which guarantees neither *when* nor *whether* a packet arrives. If a request gets no response (Figure 9-1), it’s impossible to tell which of these happened (pp. 347–348):
+### شبکه‌های غیرقابل‌اعتماد
 
-| What happened | Example cause |
+ماشین‌های shared-nothing فقط از راه یک **شبکه‌ی packet asynchronous** با هم حرف می‌زنند، که نه تضمین می‌کند packet *کی* برسد و نه *این‌که* برسد. اگر درخواستی پاسخ نگیرد، شکل ۹-۱، نمی‌شود فهمید کدام‌یک از این‌ها رخ داده (pp. 347–348):
+
+| چه شد | علت نمونه |
 |---|---|
-| Request lost | Unplugged cable |
-| Request queued, delivered later | Overloaded network or recipient |
-| Remote node failed | Crash, power-down |
-| Remote node temporarily unresponsive | Long GC pause |
-| Request processed, response lost | Misconfigured switch |
-| Request processed, response delayed | Overloaded network or your own machine |
+| درخواست گم شد | کابل جدا شده |
+| درخواست در صف ماند و بعداً رسید | شبکه یا گیرنده‌ی overloadشده |
+| مفهوم remote node خراب شد | crash یا خاموش شدن |
+| مفهوم remote node موقتاً پاسخ نمی‌دهد | توقف طولانی GC |
+| درخواست پردازش شد اما پاسخ گم شد | switch با config غلط |
+| درخواست پردازش شد اما پاسخ دیر رسید | شبکه یا ماشین خود شما overload شده |
 
-The usual answer is a **timeout** — which still doesn’t tell you whether the request got through, and it may yet be delivered (p. 348).
+پاسخ معمول یک **timeout** است؛ که باز هم نمی‌گوید درخواست رسیده یا نه، و ممکن است هنوز برسد (p. 348).
 
-![Three ways a request can go unanswered: (a) the request is lost, (b) the service is unresponsive, (c) the service processes it but the response is lost](../figures/09-01.png)
+![سه حالتی که یک درخواست بی‌پاسخ می‌ماند: الف) درخواست گم می‌شود، ب) سرویس پاسخ نمی‌دهد، ج) سرویس آن را پردازش می‌کند اما پاسخ گم می‌شود](../figures/09-01.png)
 
-*Figure 9-1 (p. 348): from the client's side all three look the same — no response — so it can't tell what happened.*
+*Figure 9-1 (p. 348): از دید client هر سه یکی‌اند، یعنی پاسخی نیامده، پس نمی‌تواند بفهمد چه شده.*
 
-#### The limitations of TCP (pp. 348–349)
+> **In practice:** loader در reference stack از replica منبع می‌خواند و Airflow برای هر task یک timeout دارد. وقتی timeout می‌رسد، Airflow task را می‌کشد و دوباره اجرا می‌کند.
+>
+> **Your turn:** کوئری loader روی منبع ده دقیقه بی‌جواب مانده و task با timeout کشته شده. آیا کوئری روی منبع اجرا شده؟ و retry چه خطری دارد؟
+>
+> *Answer:* معلوم نیست: شاید کوئری هنوز روی منبع در حال اجراست، شاید تمام شده و فقط ردیف‌ها نرسیده‌اند، شاید هرگز شروع نشده (pp. 347–348). retry یک کوئری سنگین دیگر روی همان منبع می‌فرستد، در حالی که اولی ممکن است هنوز زنده باشد، و اگر بخشی از ردیف‌ها پیش‌تر در staging نوشته شده باشند، با `append` تکراری می‌شوند. پس timeout باید با لغو کوئری سمت منبع همراه باشد، و Silver تکراری‌ها را با کلید حذف کند.
 
-TCP (and QUIC, SCTP, uTP) splits streams into packets, retransmits losses, reorders, checksums and does congestion/flow control. But it can’t tell whether the outbound packet or the ack was lost, can’t plug a cable back in, and eventually gives up with an error. Deduplication works only within one connection — reconnecting and resending can duplicate. A closed connection tells you nothing about how much the remote *application* processed; even a delivered packet only reached the remote kernel. **Only a positive response from the application confirms success** (p. 349).
+#### محدودیت‌های TCP (pp. 348–349)
 
-#### Network faults in practice (pp. 350–351)
+پروتکل TCP، و همین‌طور QUIC، SCTP و uTP، streamها را به packet می‌شکند، packetهای گم‌شده را دوباره می‌فرستد، ترتیب را درست می‌کند، checksum می‌زند و congestion control و flow control دارد. اما نمی‌تواند بفهمد packet رفت گم شده یا ack، نمی‌تواند کابل را دوباره وصل کند، و آخر کار با خطا کوتاه می‌آید. حذف تکراری‌ها فقط داخل یک connection کار می‌کند؛ وصل شدن دوباره و فرستادن دوباره می‌تواند تکراری بسازد. بسته شدن connection چیزی درباره‌ی این‌که *اپلیکیشن* طرف مقابل چقدر پردازش کرده نمی‌گوید؛ حتی packet تحویل‌شده فقط به kernel طرف مقابل رسیده. **فقط پاسخ مثبت از خود اپلیکیشن موفقیت را تأیید می‌کند** (p. 349).
 
-| Evidence | Detail |
+#### خرابی‌های شبکه در عمل (pp. 350–351)
+
+| شاهد | جزئیات |
 |---|---|
-| Medium-sized datacenter study | ~**12 network faults per month**: half isolated one machine, half an entire rack |
-| Component study | Redundant gear helps less than expected — it doesn’t prevent human misconfiguration |
-| Wide-area links | Cut by cows, beavers and **sharks** (rarer with better shielding), misconfiguration, scavenging, sabotage |
-| Delays | Cross-region round trips of **several minutes** at high percentiles; **over a minute** inside a datacenter during a switch-upgrade topology change |
-| Asymmetric faults | A↔B and B↔C work but A↔C doesn’t; a NIC that drops all inbound but sends outbound |
-| Aftermath | Brief interruptions can have long-lasting repercussions |
+| مطالعه‌ی یک datacenter متوسط | حدود **۱۲ خرابی شبکه در ماه**: نیمی یک ماشین را جدا کردند، نیمی کل یک rack را |
+| مطالعه‌ی قطعه‌ها | تجهیزات redundant کمتر از انتظار کمک می‌کنند؛ جلوی config غلط انسانی را نمی‌گیرند |
+| لینک‌های wide-area | بریده‌شده به دست گاو، سگ آبی و **کوسه**، که با عایق بهتر نادرتر شده، config غلط، دزدی کابل و خرابکاری |
+| latencyها | رفت‌وبرگشت بین regionها در percentileهای بالا تا **چند دقیقه**؛ و داخل یک datacenter **بیش از یک دقیقه** هنگام تغییر topology برای upgrade یک switch |
+| خرابی‌های نامتقارن | مسیر A↔B و B↔C کار می‌کند اما A↔C نه؛ یا NICی که همه‌ی ورودی‌ها را دور می‌ریزد اما خروجی می‌فرستد |
+| پیامدها | قطعی‌های کوتاه می‌توانند اثرهای طولانی بگذارند |
 
-A **network partition** (netsplit) is just one kind of interruption — unrelated to sharding. Untested handling can deadlock a cluster permanently or even delete all data. Tolerating faults isn’t mandatory — showing an error may be fine — but you must know how the software reacts and that it recovers; trigger faults deliberately (p. 351).
+یک **network partition**، یا netsplit، فقط یک نوع قطعی است و ربطی به sharding ندارد. رفتار تست‌نشده در برابرش می‌تواند یک cluster را برای همیشه در deadlock بگذارد یا حتی همه‌ی داده را پاک کند. تحمل fault اجباری نیست و نشان دادن خطا ممکن است کافی باشد، اما باید بدانید نرم‌افزار چه واکنشی نشان می‌دهد و این‌که بازیابی می‌شود؛ faultها را عمداً ایجاد کنید (p. 351).
 
-#### Fault detection (pp. 351–352)
+#### تشخیص fault (pp. 351–352)
 
-Load balancers must stop routing to dead nodes; leader-based databases must fail over. Explicit signals sometimes exist — a TCP RST/FIN when nothing listens on the port, a script announcing a crashed process (HBase), switch management interfaces, ICMP Destination Unreachable — but generally you must assume **no response at all**: retry, wait for a timeout, declare the node dead (pp. 351–352).
+مفهوم load balancer باید دیگر به nodeهای مرده درخواست نفرستد؛ دیتابیس‌های leader-based باید failover کنند. گاهی نشانه‌ی صریح وجود دارد: یک TCP RST یا FIN وقتی کسی روی port گوش نمی‌دهد، اسکریپتی که crash یک process را اعلام می‌کند، مثل HBase، interface مدیریتی switchها، یا ICMP Destination Unreachable؛ اما در حالت کلی باید فرض کنید **هیچ پاسخی نمی‌آید**: retry کنید، تا timeout صبر کنید، و node را مرده اعلام کنید (pp. 351–352).
 
-#### Timeouts and unbounded delays (pp. 352–355)
+#### مفهوم timeout و latencyهای unbounded (pp. 352–355)
 
-Long timeouts → long waits and error messages; short ones → live nodes declared dead, actions performed twice (e.g. an email sent by both the old and new node), extra load and possibly **cascading failure** where everyone declares everyone dead (p. 352). If every packet arrived within *d* or not at all, and a working node always answered within *r*, then **2d + r** would be a perfect timeout — but asynchronous networks have **unbounded delays** and servers can’t promise *r* (p. 353).
+مفهوم timeout طولانی یعنی انتظار طولانی و پیام خطا؛ timeout کوتاه یعنی nodeهای زنده مرده اعلام می‌شوند و کارها دو بار انجام می‌شوند، مثلاً ایمیلی که هم node قدیم می‌فرستد هم node جدید، به‌علاوه‌ی بار اضافه و شاید **cascading failure** که در آن همه همه را مرده اعلام می‌کنند (p. 352). اگر هر packet یا در زمان *d* برسد یا هرگز، و یک node سالم همیشه در زمان *r* جواب بدهد، **2d + r** یک timeout بی‌نقص بود؛ اما شبکه‌های asynchronous **latency unbounded** دارند و سرورها نمی‌توانند *r* را قول بدهند (p. 353).
 
-**Network congestion and queueing** — where the variability comes from (pp. 353–354):
+**مفهوم congestion و صف‌ها** منشأ این mutabilityاند (pp. 353–354):
 
-| Queue | Why packets wait |
+| صف | چرا packet منتظر می‌ماند |
 |---|---|
-| Switch | Several ports send to the same destination; a full queue drops packets (Figure 9-2) |
-| Destination OS | All CPU cores busy; the packet waits for the application |
-| Hypervisor | The VM is paused while another runs |
-| TCP sender | Congestion control limits the send rate |
-| TCP retransmission | The app sees loss only as delay |
+| مفهوم switch | چند port به یک مقصد می‌فرستند؛ صف پر packetها را دور می‌ریزد؛ شکل ۹-۲ |
+| سیستم‌عامل مقصد | همه‌ی coreهای CPU مشغول‌اند؛ packet منتظر اپلیکیشن می‌ماند |
+| مفهوم hypervisor | مفهوم VM متوقف است تا VM دیگری اجرا شود |
+| فرستنده‌ی TCP | مفهوم congestion control سرعت فرستادن را محدود می‌کند |
+| مفهوم retransmission در TCP | اپلیکیشن گم شدن را فقط به شکل latency می‌بیند |
 
-**UDP** avoids flow control and retransmission, so suits VoIP and video where late data is worthless (“Could you repeat that please?”) (p. 354). Delay variability grows near capacity and with **noisy neighbors** in shared clouds, so choose timeouts **experimentally** from measured round-trip distributions — or adapt them continuously like the **Phi Accrual** failure detector (Akka, Cassandra) or TCP retransmission timeouts (pp. 354–355).
+پروتکل **UDP** از flow control و retransmission پرهیز می‌کند، پس برای VoIP و ویدئو مناسب است که داده‌ی دیررسیده بی‌ارزش است و آدم فقط می‌گوید «می‌شود تکرار کنید؟» (p. 354). mutability latency نزدیک ظرفیت و با **noisy neighbor**ها در cloudهای مشترک بیشتر می‌شود، پس timeout را **به‌صورت تجربی** از توزیع اندازه‌گیری‌شده‌ی رفت‌وبرگشت انتخاب کنید؛ یا مثل failure detector با نام **Phi Accrual**، در Akka و Cassandra، یا timeoutهای retransmission در TCP، مدام تطبیقش دهید (pp. 354–355).
 
-> **Try it:** [How long before a node is dead?](../widgets/09-timeouts.html) — pick a failure-detection timeout and trade false suspicions against slow detection.
+> **Try it:** [یک node کی مرده است؟](../widgets/09-timeouts.html): یک timeout برای تشخیص خرابی انتخاب کنید و شک‌های نادرست را با تشخیص کند بسنجید.
 
-#### Synchronous versus asynchronous networks (pp. 355–358)
+> **In practice:** هر DAG در reference stack برای taskهایش یک execution timeout و تعدادی retry دارد، و همه‌ی DAGها از یک replica منبع می‌خوانند.
+>
+> **Your turn:** مدت اجرای task یک جدول بزرگ معمولاً ۴ دقیقه است و گاهی ۱۲ دقیقه. timeout را ۵ دقیقه بگذارید یا ۳۰ دقیقه؟
+>
+> *Answer:* هیچ‌کدام بدون اندازه‌گیری: timeout را از توزیع واقعی مدت اجرا، مثلاً یک percentile بالا به‌علاوه‌ی حاشیه، انتخاب کنید (pp. 354–355). پنج دقیقه اجراهای سالم را می‌کشد و retry آن‌ها بار بیشتری روی همان replica می‌گذارد که اجراها را کندتر و timeoutها را بیشتر می‌کند؛ یعنی شکلی کوچک از cascading failure (p. 352). سی دقیقه یعنی کوئری واقعاً گیرکرده دیر تشخیص داده می‌شود و داده‌ی Gold کهنه می‌ماند.
 
-| | Telephone circuit (ISDN) | Datacenter / internet |
+#### شبکه‌های synchronous و asynchronous (pp. 355–358)
+
+| | مدار تلفن، ISDN | datacenter و اینترنت |
 |---|---|---|
-| Switching | **Circuit**: bandwidth reserved along the whole route — 16 bits per frame at 4,000 frames/s, i.e. 16 bits every 250 µs | **Packet** (Ethernet, IP): packets opportunistically share links |
-| Delay | **Bounded**: no queueing | Unbounded: queueing |
-| Suited to | Constant-rate audio/video | **Bursty** traffic — pages, emails, files, where you can’t guess a bandwidth |
-| Resource sharing | Static partitioning: a wire with 10,000 call slots reserves your slot even if 9,999 are idle | Dynamic: maximizes utilization, so each byte is cheaper |
+| مفهوم switching | **مدار**: پهنای باند در کل مسیر رزرو می‌شود؛ ۱۶ بیت در هر frame با ۴٬۰۰۰ frame در ثانیه، یعنی ۱۶ بیت هر ۲۵۰ میکروثانیه | مفهوم **packet**، یعنی Ethernet و IP: packetها فرصت‌طلبانه لینک‌ها را شریک می‌شوند |
+| latency | **محدود**: صفی در کار نیست | unbounded: صف |
+| مناسب برای | صدا و ویدئو با نرخ ثابت | ترافیک **bursty**، یعنی صفحه، ایمیل و فایل، که نمی‌شود پهنای باندش را حدس زد |
+| اشتراک منابع | تقسیم ایستا: سیمی با ۱۰٬۰۰۰ جای تماس جای شما را رزرو نگه می‌دارد حتی اگر ۹٬۹۹۹ تا خالی باشند | پویا: بهره‌وری را بیشینه می‌کند، پس هر بایت ارزان‌تر است |
 
-The same trade-off applies to CPUs (run queues) and VMs on shared hosts. **Variable delays are a cost/benefit choice, not a law of nature** (pp. 356–357). Hybrids exist — ATM, InfiniBand’s link-level flow control, QoS prioritization and admission control, L4S, Linux traffic control; BGP peering resembles circuits at the network level — but none are enabled in multitenant clouds or across the internet, so there is no “correct” timeout (pp. 357–358).
+همین بده‌بستان در CPUها، یعنی run queue، و VMها روی hostهای مشترک هم هست. **latency متغیر یک انتخاب هزینه و فایده است، نه قانون طبیعت** (pp. 356–357). روش‌های ترکیبی هم هست: ATM، flow control لایه‌ی لینک در InfiniBand، اولویت‌بندی QoS و admission control، L4S و traffic control در Linux؛ peering در BGP در سطح شبکه به مدار شبیه است؛ اما هیچ‌کدام در cloudهای multitenant یا روی اینترنت فعال نیستند، پس timeout «درست» وجود ندارد (pp. 357–358).
 
-### Unreliable clocks
+### ساعت‌های غیرقابل‌اعتماد
 
-Applications ask about **durations** — has this request timed out? p99? queries per second? time on site? — and **points in time** — when was this published? when to send the reminder? when does this cache entry expire? when was this log line written? Messages take an unknown time to travel, and every machine has its own quartz clock, synchronized at best via **NTP** from servers fed by GPS (p. 358).
+اپلیکیشن‌ها درباره‌ی **مدت زمان** می‌پرسند: این درخواست timeout شده؟ p99 چقدر است؟ چند کوئری در ثانیه؟ کاربر چقدر در سایت ماند؟ و درباره‌ی **نقطه‌های زمانی**: این کی منتشر شد؟ یادآوری را کی بفرستیم؟ این entry در cache کی منقضی می‌شود؟ این خط log کی نوشته شد؟ پیام‌ها زمان نامعلومی در راه‌اند، و هر ماشین ساعت quartz خودش را دارد که در بهترین حالت با **NTP** از سرورهایی که از GPS تغذیه می‌شوند synchronous می‌شود (p. 358).
 
-#### Monotonic versus time-of-day clocks (pp. 359–360)
+#### ساعت monotonic و ساعت time-of-day (pp. 359–360)
 
-| | Time-of-day (wall-clock) | Monotonic |
+| | ساعت time-of-day، یا wall-clock | ساعت monotonic |
 |---|---|---|
-| API | `clock_gettime(CLOCK_REALTIME)`, `System.currentTimeMillis` — since the epoch (1 Jan 1970 UTC), ignoring leap seconds | `CLOCK_MONOTONIC` / `CLOCK_BOOTTIME`, `System.nanoTime` |
-| Can jump backward? | **Yes** — forcible NTP resets, leap seconds; DST unless using UTC; coarse resolution on old systems | No — guaranteed forward (multi-socket timers aside); NTP may **slew** its rate by up to 0.05% |
-| Comparable across machines? | Ideally yes | **No** — absolute value is meaningless |
-| Use for | Points in time | Durations, timeouts — fine in distributed systems |
+| مفهوم API | تابع `clock_gettime(CLOCK_REALTIME)` و `System.currentTimeMillis`، از epoch یعنی ۱ ژانویه‌ی ۱۹۷۰ UTC، بدون حساب leap second | تابع‌های `CLOCK_MONOTONIC` و `CLOCK_BOOTTIME` و `System.nanoTime` |
+| می‌تواند عقب بپرد؟ | **بله**: reset اجباری NTP، leap second؛ تغییر ساعت تابستانی اگر UTC نباشد؛ دقت پایین در سیستم‌های قدیمی | نه؛ تضمین می‌شود جلو برود، جز در timerهای چند-socketی؛ NTP ممکن است سرعتش را تا ۰٫۰۵٪ **slew** کند |
+| بین ماشین‌ها قابل مقایسه؟ | در حالت ایده‌آل بله | **نه**؛ مقدار مطلقش بی‌معناست |
+| کاربرد | نقطه‌های زمانی | مدت زمان و timeout؛ در سیستم‌های توزیع‌شده هم مشکلی ندارد |
 
-#### Clock synchronization and accuracy (pp. 360–362)
+#### مفهوم synchronization و دقت ساعت (pp. 360–362)
 
-| Problem | Detail |
+| مشکل | جزئیات |
 |---|---|
-| Quartz **drift** | Varies with temperature; Google assumes up to **200 ppm** → **6 ms** drift between 30-second syncs, **17 s** if synced daily |
-| Forced resets | Too far from NTP → refuse to sync or jump; apps see time go backward or leap forward |
-| Firewalled from NTP | Goes unnoticed while drift accumulates |
-| Network-limited | ~**35 ms** minimum error over the internet; spikes of ~1 s; NTP may give up |
-| Wrong NTP servers | Off by hours; clients query several and drop outliers — still trusting strangers |
-| **Leap seconds** | 59- or 61-second minutes have crashed large systems; **smearing** spreads the adjustment over a day; leap seconds end in **2035** |
-| VMs | Paused for tens of ms while other VMs run → clock jumps forward |
-| Devices you don’t control | Users set wrong dates, e.g. to cheat in games |
+| مفهوم **drift** در quartz | با دما تغییر می‌کند؛ Google تا **۲۰۰ ppm** فرض می‌کند، یعنی **۶ میلی‌ثانیه** drift بین synchronizationهای ۳۰ثانیه‌ای و **۱۷ ثانیه** اگر روزی یک بار synchronous شود |
+| مفهوم reset اجباری | اگر خیلی از NTP دور باشد، یا synchronous نمی‌شود یا می‌پرد؛ اپلیکیشن‌ها می‌بینند زمان عقب یا جلو پریده |
+| مسدود بودن NTP با firewall | دیده نمی‌شود و drift جمع می‌شود |
+| محدودیت شبکه | حداقل حدود **۳۵ میلی‌ثانیه** خطا روی اینترنت؛ spikeهایی تا حدود ۱ ثانیه؛ NTP ممکن است کوتاه بیاید |
+| سرورهای NTP اشتباه | چند ساعت اختلاف؛ clientها از چند سرور می‌پرسند و پرت‌ها را کنار می‌گذارند، ولی باز به غریبه‌ها اعتماد کرده‌اند |
+| مفهوم **leap second** | دقیقه‌های ۵۹ یا ۶۱ثانیه‌ای سیستم‌های بزرگ را crash کرده‌اند؛ **smearing** تنظیم را در طول یک روز پخش می‌کند؛ leap secondها در **۲۰۳۵** تمام می‌شوند |
+| مفهوم VM | ده‌ها میلی‌ثانیه متوقف می‌شود تا VMهای دیگر اجرا شوند، پس ساعت جلو می‌پرد |
+| دستگاه‌هایی که در اختیارتان نیست | کاربرها تاریخ را غلط تنظیم می‌کنند، مثلاً برای تقلب در بازی |
 
-With enough investment it can be good: **MiFID II** requires high-frequency trading clocks within **100 µs of UTC**, using GPS and/or atomic clocks, **PTP** and careful monitoring — though GPS can be jammed, e.g. near military facilities. Some clouds offer high-accuracy sync to VMs (pp. 361–362).
+با سرمایه‌گذاری کافی می‌تواند خوب باشد: **MiFID II** می‌خواهد ساعت‌های معاملات فرکانس بالا تا **۱۰۰ میکروثانیه از UTC** فاصله داشته باشند، با GPS یا ساعت اتمی، **PTP** و monitoring دقیق؛ هرچند GPS را می‌شود jam کرد، مثلاً نزدیک تأسیسات نظامی. بعضی cloudها synchronization دقیق به VMها می‌دهند (pp. 361–362).
 
-#### Relying on synchronized clocks (pp. 362–366)
+#### تکیه بر ساعت‌های synchronous (pp. 362–366)
 
-A day may not have 86,400 seconds, clocks jump back, nodes disagree. Unlike a broken CPU or NIC, a bad clock seems to work — causing **silent, subtle data loss**. If you rely on synchronized clocks, monitor offsets and evict nodes that drift too far (p. 362).
+ممکن است یک روز ۸۶٬۴۰۰ ثانیه نباشد، ساعت‌ها عقب می‌پرند، و nodeها با هم اختلاف دارند. برخلاف CPU یا NIC خراب، ساعت بد به نظر سالم می‌آید و **از دست رفتن بی‌صدا و ظریف داده** می‌سازد. اگر به ساعت‌های synchronous تکیه می‌کنید، اختلاف‌ها را monitoring کنید و nodeهایی را که زیادی drift دارند کنار بگذارید (p. 362).
 
-- **Timestamps for ordering events** (pp. 362–364): Figure 9-3 — client A writes `x = 1` on node 1 (stamped **42.004 s**), node 3 gets it, client B increments to `x = 2` on node 3 (stamped **42.003 s**, under 3 ms of skew), and node 2 keeps `x = 1` under **last write wins**. Consequences: writes from a node with a lagging clock mysteriously vanish; LWW can’t tell sequential from concurrent writes; equal millisecond timestamps need random tiebreakers. A packet sent at 100 ms can arrive at 99 ms. Fixing it would need clock error far below network delay — impossible. Use **logical clocks** (Ch. 10).
+- **مفهوم timestamp برای ترتیب رویدادها** (pp. 362–364): در شکل ۹-۳ client A روی node 1 مقدار `x = 1` را می‌نویسد، با برچسب **۴۲٫۰۰۴ ثانیه**؛ node 3 آن را می‌گیرد؛ client B روی node 3 مقدار را به `x = 2` افزایش می‌دهد، با برچسب **۴۲٫۰۰۳ ثانیه** و کمتر از ۳ میلی‌ثانیه skew؛ و node 2 با **last write wins** مقدار `x = 1` را نگه می‌دارد. پیامدها: نوشتن‌های nodeی که ساعتش عقب است به‌طرز مرموزی ناپدید می‌شوند؛ LWW نمی‌تواند نوشتن‌های پشت‌سرهم را از concurrent تشخیص بدهد؛ timestampهای برابر در میلی‌ثانیه tiebreaker تصادفی لازم دارند. packetی که در ۱۰۰ میلی‌ثانیه فرستاده شده ممکن است در ۹۹ میلی‌ثانیه برسد. درست کردنش خطای ساعت خیلی کمتر از latency شبکه لازم دارد که ناممکن است. از **logical clock** استفاده کنید؛ فصل ۱۰.
 
-![Client A sets x = 1 on node 1 at 42.004; node 2, whose clock is behind, applies client B's later increment stamped 42.003; node 3 receives both and keeps x = 1 under last write wins](../figures/09-03.png)
+![اول client A روی node 1 در ۴۲٫۰۰۴ مقدار x = 1 را می‌نویسد؛ node 2 که ساعتش عقب است افزایش بعدی client B را با برچسب ۴۲٫۰۰۳ اعمال می‌کند؛ node 3 هر دو را می‌گیرد و با last write wins مقدار x = 1 را نگه می‌دارد](../figures/09-03.png)
 
-*Figure 9-3 (p. 363): B's write happened after A's, but a slower clock gives it an earlier timestamp, so last write wins silently discards it.*
+*Figure 9-3 (p. 363): نوشتن B بعد از نوشتن A رخ داده، اما ساعت کندتر به آن timestamp زودتری داده، پس last write wins بی‌صدا دورش می‌ریزد.*
 
-> **Try it:** [Clock skew and last write wins](../widgets/09-clock-skew.html) — replay Figure 9-3 and watch a causally later write lose to a slow clock.
+> **Try it:** [مفهوم clock skew و last write wins](../widgets/09-clock-skew.html): شکل ۹-۳ را دوباره اجرا کنید و ببینید نوشتنی که از نظر علّی بعدی است به یک ساعت کند می‌بازد.
 
-- **Clock readings have a confidence interval** (pp. 364–365): microsecond digits mean nothing if you only know the time ±100 ms; “95% confident it is between 10.3 and 10.5 s past the minute”. Uncertainty = drift since last sync + server uncertainty + round trip. `clock_gettime` hides it; **TrueTime** (Spanner) and **Amazon ClockBound** return `[earliest, latest]`.
-- **Synchronized clocks for global snapshots** (pp. 365–366): distributed MVCC needs causally ordered transaction IDs, and a global counter is a bottleneck. If two intervals don’t overlap, their order is certain — so **Spanner waits out its confidence interval** before committing, keeping uncertainty small (~**7 ms**) with GPS receivers or atomic clocks in each datacenter; YugabyteDB can use ClockBound on AWS.
+- **خواندن ساعت یک بازه‌ی اطمینان دارد** (pp. 364–365): رقم‌های میکروثانیه بی‌معنی‌اند اگر زمان را فقط با ±۱۰۰ میلی‌ثانیه بدانید؛ مثلاً «با ۹۵٪ اطمینان بین ۱۰٫۳ و ۱۰٫۵ ثانیه از دقیقه گذشته». عدم قطعیت برابر است با drift از آخرین synchronization به‌علاوه‌ی عدم قطعیت سرور به‌علاوه‌ی رفت‌وبرگشت. `clock_gettime` آن را پنهان می‌کند؛ **TrueTime** در Spanner و **Amazon ClockBound** بازه‌ی `[earliest, latest]` برمی‌گردانند.
+- **ساعت synchronous برای snapshotهای سراسری** (pp. 365–366): MVCC توزیع‌شده شناسه‌های تراکنش با ترتیب علّی لازم دارد، و یک شمارنده‌ی سراسری گلوگاه است. اگر دو بازه هم‌پوشانی نداشته باشند، ترتیبشان قطعی است؛ پس **Spanner پیش از commit به اندازه‌ی بازه‌ی اطمینانش صبر می‌کند** و با گیرنده‌های GPS یا ساعت اتمی در هر datacenter عدم قطعیت را کوچک، حدود **۷ میلی‌ثانیه**، نگه می‌دارد؛ YugabyteDB روی AWS می‌تواند از ClockBound استفاده کند.
 
-#### Process pauses (pp. 366–371)
+> **In practice:** cursor روی `update_date` در reference stack با ساعت سرورهای اپلیکیشن منبع پر می‌شود، و Silver تکراری‌ها را با نگه داشتن ردیفی که `update_date` بزرگ‌تری دارد حذف می‌کند.
+>
+> **Your turn:** دو سرور اپلیکیشن در یک جدول منبع می‌نویسند و ساعت یکی دو ثانیه عقب است. loader cursor را تا `max(update_date)` جلو برده. چه ردیف‌هایی گم می‌شوند، و dedup در Silver چه اشتباهی می‌کند؟
+>
+> *Answer:* ردیفی که سرور عقب‌مانده درست بعد از اجرای loader commit می‌کند ممکن است timestampی کمتر از cursor داشته باشد و هیچ‌وقت خوانده نشود؛ و اگر همان ردیف را دو سرور پشت سر هم به‌روز کنند، Silver ممکن است نسخه‌ی قدیمی‌تر را نگه دارد چون timestamp بزرگ‌تری دارد؛ همان شکست بی‌صدای LWW (pp. 362–364). راه عملی: هر بار چند دقیقه پیش از cursor را دوباره بخوانید و بگذارید Silver تکراری‌ها را حذف کند، و برای ترتیب نسخه‌ها، اگر منبع یک شماره‌ی نسخه‌ی افزایشی دارد، به آن تکیه کنید نه به ساعت.
 
-A leader holding a **lease** (a lock with a timeout) renews it if fewer than 10 s remain, then processes a request. Two bugs: the expiry was set by *another machine’s* clock, and — even with a monotonic clock — a **15-second pause** between the check and `process(request)` means acting after the lease expired and someone else took over (pp. 366–367).
+#### مفهوم process pause (pp. 366–371)
 
-| Cause of a pause (pp. 367–369) | |
+یک leader که یک **lease**، یعنی قفلی با timeout، دارد، اگر کمتر از ۱۰ ثانیه مانده باشد آن را تمدید می‌کند و بعد یک درخواست را پردازش می‌کند. دو باگ: زمان انقضا را ساعت *ماشین دیگری* تعیین کرده، و حتی با ساعت monotonic، **یک توقف ۱۵ثانیه‌ای** بین بررسی و `process(request)` یعنی کار کردن بعد از انقضای lease، وقتی کس دیگری آن را گرفته (pp. 366–367).
+
+| علت توقف (pp. 367–369) | |
 |---|---|
-| Lock/queue contention | Worse with more cores |
-| **Garbage collection** | Stop-the-world pauses once lasted minutes |
-| VM suspend/resume, **live migration** | Arbitrary length |
-| Laptops and phones | Lid closed, app suspended |
-| Context switches; hypervisor **steal time** | Long run queues under load |
-| Synchronous disk I/O | Even implicit — Java’s lazy class loading; worse on network disks like EBS |
-| Swapping/paging | **Thrashing**; often disabled on servers |
-| `SIGSTOP` | Ctrl-Z, or sent by accident; resumes on `SIGCONT` |
+| رقابت روی قفل یا صف | با coreهای بیشتر بدتر می‌شود |
+| مفهوم **garbage collection** | توقف‌های stop-the-world زمانی چند دقیقه طول می‌کشیدند |
+| تعلیق و ادامه‌ی VM، **live migration** | با طول دلخواه |
+| لپ‌تاپ و گوشی | بستن درِ لپ‌تاپ، تعلیق اپ |
+| مفهوم context switch؛ **steal time** در hypervisor | صف‌های اجرای طولانی زیر بار |
+| مفهوم I/O هم‌زمان با دیسک | حتی ضمنی، مثل بارگذاری تنبل classها در Java؛ روی دیسک‌های شبکه‌ای مثل EBS بدتر |
+| مفهوم swapping و paging | **thrashing**؛ روی سرورها اغلب خاموش است |
+| سیگنال `SIGSTOP` | با Ctrl-Z یا تصادفی فرستاده می‌شود؛ با `SIGCONT` ادامه پیدا می‌کند |
 
-Single-machine thread-safety tools (mutexes, semaphores, atomics) don’t translate: there’s no shared memory. **Hard real-time** systems (airbags) need an RTOS, documented worst-case times and restricted allocation — expensive, and lower throughput; uneconomical for servers (pp. 369–370). **Limiting GC impact** (pp. 370–371): modern collectors (CMS, G1, ZGC, Epsilon, Shenandoah; Go’s concurrent collector) pause milliseconds; Swift (reference counting), Rust and Mojo avoid GC; object pools and off-heap memory; treat GC like a planned outage (drain requests first) or restart processes before long-lived garbage accumulates.
+ابزارهای thread-safety روی یک ماشین، یعنی mutex، semaphore و atomic، به سیستم توزیع‌شده منتقل نمی‌شوند: حافظه‌ی مشترکی وجود ندارد. سیستم‌های **hard real-time**، مثل کیسه‌ی هوا، یک RTOS، زمان‌های بدترین‌حالت مستند و تخصیص حافظه‌ی محدود لازم دارند؛ گران‌اند و throughput کمتری دارند، و برای سرورها صرفه ندارند (pp. 369–370). **محدود کردن اثر GC** (pp. 370–371): collectorهای امروزی، یعنی CMS، G1، ZGC، Epsilon و Shenandoah، و collector هم‌زمان Go، چند میلی‌ثانیه توقف دارند؛ Swift با reference counting، و Rust و Mojo از GC پرهیز می‌کنند؛ object pool و حافظه‌ی off-heap؛ با GC مثل یک قطعی برنامه‌ریزی‌شده رفتار کنید، یعنی اول درخواست‌ها را تخلیه کنید، یا processها را پیش از جمع شدن زباله‌ی طولانی‌عمر restart کنید.
 
-### Knowledge, truth, and lies
+### دانش، حقیقت و دروغ
 
-A node knows nothing for sure: it guesses from messages received or not. We state a **system model** — assumptions about behaviour — and design algorithms proven correct within it (pp. 371–372).
+یک node هیچ چیز را با اطمینان نمی‌داند: از روی پیام‌هایی که رسیده یا نرسیده حدس می‌زند. پس یک **مدل سیستم** می‌نویسیم، یعنی فرض‌هایی درباره‌ی رفتار، و الگوریتم‌هایی طراحی می‌کنیم که درستی‌شان داخل آن مدل اثبات شده (pp. 371–372).
 
-#### The majority rules (pp. 372–373)
+#### حکم اکثریت (pp. 372–373)
 
-Three nightmares: a node that receives but whose outgoing messages are dropped is “dragged to the graveyard, kicking and screaming *I’m not dead!*”; a semi-disconnected node notices but can’t stop it; a node paused for a minute “raises its head out of the coffin” unaware time passed. A node can’t trust its own judgment, so decisions — including declaring nodes dead — take a **quorum**, usually an **absolute majority**: it tolerates a minority of faults (1 of 3, 2 of 5), and two conflicting majorities can’t exist (pp. 372–373).
+سه کابوس: nodeی که پیام می‌گیرد اما پیام‌های خروجی‌اش دور ریخته می‌شوند، به تعبیر کتاب با فریاد «من نمرده‌ام!» به قبرستان کشیده می‌شود؛ nodeی که نیمه‌قطع است متوجه می‌شود اما نمی‌تواند جلویش را بگیرد؛ و nodeی که یک دقیقه متوقف بوده «سرش را از تابوت بیرون می‌آورد» و نمی‌داند زمان گذشته. یک node نمی‌تواند به قضاوت خودش اعتماد کند، پس تصمیم‌ها، از جمله مرده اعلام کردن nodeها، یک **quorum** لازم دارند، معمولاً **اکثریت مطلق**: اقلیتی از خرابی‌ها را تحمل می‌کند، ۱ از ۳ یا ۲ از ۵، و دو اکثریت متعارض نمی‌توانند وجود داشته باشند (pp. 372–373).
 
-#### Distributed locks and leases (pp. 373–377)
+#### قفل و lease توزیع‌شده (pp. 373–377)
 
-Leases enforce “only one”: one leader per shard (no split brain), one writer per object, one worker per input file. If two nodes believe they hold it, the last is merely wasteful; the first two corrupt data. Figure 9-4 (a real HBase bug): client 1’s lease expires during a pause, client 2 writes, client 1 resumes and writes too. Figure 9-5: no pause — client 1’s write is **delayed in the network** past its lease (pp. 373–374).
+مفهوم lease قاعده‌ی «فقط یکی» را اجرا می‌کند: یک leader برای هر shard، یعنی بدون split brain، یک نویسنده برای هر object، یک worker برای هر فایل ورودی. اگر دو node فکر کنند lease را دارند، در حالت آخر فقط هدر رفتن است؛ در دو حالت اول داده خراب می‌شود. شکل ۹-۴، یک باگ واقعی HBase: lease مربوط به client 1 وسط یک توقف منقضی می‌شود، client 2 می‌نویسد، client 1 ادامه می‌دهد و آن هم می‌نویسد. شکل ۹-۵: بدون توقف؛ نوشتن client 1 **در شبکه دیر می‌رسد**، بعد از انقضای lease (pp. 373–374).
 
-A former holder that hasn’t noticed is a **zombie**; preventing damage is **fencing**. Shutting zombies down (STONITH — power off, cut network) doesn’t stop delayed requests, risks nodes shutting each other down, and may be too late (pp. 374–375). Robust fencing uses **fencing tokens** — numbers that increase with every grant (Figure 9-6):
+صاحب قبلی‌ای که هنوز متوجه نشده یک **zombie** است؛ جلوگیری از آسیبش **fencing** نام دارد. خاموش کردن zombieها، یعنی STONITH با قطع برق یا شبکه، جلوی درخواست‌های دیررسیده را نمی‌گیرد، ممکن است nodeها همدیگر را خاموش کنند، و شاید دیر باشد (pp. 374–375). fencing مطمئن از **fencing token** استفاده می‌کند، یعنی عددهایی که با هر بار واگذاری بزرگ‌تر می‌شوند؛ شکل ۹-۶:
 
-![Client 1 gets a lease, then pauses for so long that the lease expires; client 2 gets the lease and writes; client 1 wakes up still believing it holds the lease, writes, and corrupts the file](../figures/09-04.png)
+![اول client 1 یک lease می‌گیرد، بعد آن‌قدر متوقف می‌ماند که lease منقضی می‌شود؛ client 2 آن را می‌گیرد و می‌نویسد؛ client 1 بیدار می‌شود و هنوز فکر می‌کند lease دارد، می‌نویسد و فایل را خراب می‌کند](../figures/09-04.png)
 
-*Figure 9-4 (p. 374): the paused client can't know its lease expired — checking before the write doesn't help, because the pause can come right after the check.*
+*Figure 9-4 (p. 374): آن client متوقف‌شده نمی‌تواند بفهمد lease منقضی شده؛ بررسی پیش از نوشتن کمکی نمی‌کند چون توقف می‌تواند درست بعد از بررسی بیاید.*
 
-![The same scenario with fencing tokens: client 1 got token 33, client 2 got 34 and wrote with it; client 1's late write with 33 is rejected by storage as an old token](../figures/09-06.png)
+![همان سناریو با fencing token: client 1 توکن ۳۳ گرفته، client 2 توکن ۳۴ گرفته و با آن نوشته؛ نوشتن دیررسیده‌ی client 1 با ۳۳ را storage به عنوان توکن قدیمی رد می‌کند](../figures/09-06.png)
 
-*Figure 9-6 (p. 375): storage remembers the highest token it has seen and refuses anything lower, so the zombie's write is harmless.*
+*Figure 9-6 (p. 375): سرویس storage بزرگ‌ترین توکنی را که دیده به خاطر می‌سپارد و هر چیز کمتر را رد می‌کند، پس نوشتن zombie بی‌خطر است.*
 
-| System | Its fencing token (pp. 375–376) |
+| سیستم | مفهوم fencing token در آن (pp. 375–376) |
 |---|---|
-| Chubby | Sequencers |
-| Kafka | Epoch numbers |
-| Paxos / Raft | Ballot number / term number |
-| ZooKeeper | `zxid` or node `cversion` |
-| etcd | Revision number + lease ID |
-| Hazelcast | `FencedLock` API |
+| سیستم Chubby | مفهوم sequencer |
+| سیستم Kafka | شماره‌ی epoch |
+| الگوریتم Paxos یا Raft | شماره‌ی ballot یا شماره‌ی term |
+| سیستم ZooKeeper | مقدار `zxid` یا `cversion` یک node |
+| سیستم etcd | شماره‌ی revision به‌علاوه‌ی lease ID |
+| سیستم Hazelcast | interface `FencedLock` |
 
-A new holder should write immediately to fence zombies off. Like optimistic concurrency control, but permanent. The resource must check tokens — or offer a conditional write (S3 conditional writes, Azure conditional headers, GCS request preconditions), in which case the lock service is somewhat redundant (pp. 375–376). **Across replicas**: in a leaderless LWW store, put the token in the most significant digits of the timestamp, so every write by holder 34 beats any by zombie 33, and read repair/anti-entropy clean up a zombie write that slipped onto one replica (Figure 9-7) (pp. 376–377).
+صاحب تازه باید فوراً بنویسد تا zombieها را بیرون کند. شبیه optimistic concurrency control است، اما دائمی. خود منبع باید توکن‌ها را بررسی کند، یا نوشتن شرطی بدهد، مثل conditional write در S3، headerهای شرطی Azure یا request precondition در GCS؛ که در این صورت سرویس قفل تا حدی زائد است (pp. 375–376). **بین replicaها:** در یک store بدون leader با LWW، توکن را در رقم‌های پرارزش timestamp بگذارید، تا هر نوشتن صاحب ۳۴ از هر نوشتن zombie ۳۳ ببرد، و read repair و anti-entropy نوشتن zombieای را که روی یک replica نشسته پاک کنند؛ شکل ۹-۷ (pp. 376–377).
 
-> **Try it:** [Leases, process pauses, and fencing tokens](../widgets/09-fencing.html) — pause a lease-holder until its lease expires, then turn on fencing tokens.
+> **Try it:** [مفهوم lease، process pause و fencing token](../widgets/09-fencing.html): صاحب lease را آن‌قدر متوقف کنید که lease منقضی شود، و بعد fencing token را روشن کنید.
 
-#### Byzantine faults (pp. 377–380)
+> **In practice:** بخش scheduler در Airflow از worker انتظار heartbeat دارد؛ اگر heartbeat برای مدتی نیاید، task را zombie اعلام می‌کند و دوباره اجرا می‌کند. این در واقع یک lease است.
+>
+> **Your turn:** یک worker وسط load یک جدول برای دو دقیقه متوقف می‌شود، مثلاً با تعلیق VM. Airflow task را دوباره روی worker دیگری اجرا می‌کند. worker اول بیدار می‌شود و کارش را تمام می‌کند. چه چیزی خراب می‌شود، و fencing اینجا چه شکلی دارد؟
+>
+> *Answer:* دو اجرا یک بازه را load می‌کنند و هر دو cursor را می‌نویسند؛ اجرای قدیم که دیرتر تمام شده ممکن است cursor را به مقدار کهنه‌اش برگرداند، و ردیف‌ها با `append` دو بار در Bronze بنشینند. این همان شکل ۹-۴ است (pp. 373–374). fencing یعنی هر اجرا یک شماره‌ی افزایشی بگیرد و ذخیره‌ی cursor یک نوشتن شرطی باشد: «فقط اگر شماره‌ی من از آخرین شماره‌ی ثبت‌شده کمتر نیست» (pp. 375–376). Silver هم باید تکراری‌ها را با کلید حذف کند.
 
-The book assumes nodes are **unreliable but honest**. Nodes that “lie” — contradictory votes, fake fencing tokens — are **Byzantine faults**; reaching consensus despite them is the **Byzantine Generals Problem**, a generalization of the two generals problem (the name chosen so as not to offend; “Albanian Generals” was advised against) (pp. 377–378).
+#### مفهوم Byzantine fault (pp. 377–380)
 
-| Byzantine fault tolerance matters | It usually doesn’t |
+کتاب فرض می‌کند nodeها **غیرقابل‌اعتماد اما صادق‌اند**. nodeهایی که «دروغ می‌گویند»، یعنی رأی متناقض یا fencing token جعلی، **Byzantine fault** دارند؛ رسیدن به consensus با وجود آن‌ها **مسئله‌ی ژنرال‌های بیزانسی** است، تعمیمی از مسئله‌ی دو ژنرال. به گفته‌ی کتاب این نام برای این انتخاب شد که کسی رنجیده نشود؛ از «ژنرال‌های آلبانیایی» منصرفشان کرده بودند (pp. 377–378).
+
+| جایی که Byzantine fault tolerance مهم است | جایی که معمولاً نیست |
 |---|---|
-| Aerospace: radiation corrupts memory; flight control must tolerate arbitrary behaviour | Datacenter nodes controlled by one organization, low radiation (orbital datacenters are being considered) |
-| Mutually untrusting parties: blockchains, peer-to-peer networks | Multitenancy — isolated by firewalls, VMs, access control |
-| | Web clients — handled by making the server the authority (validation, sanitization, escaping vs SQL injection and XSS) |
+| صنعت هوافضا: تشعشع حافظه را خراب می‌کند و کنترل پرواز باید رفتار دلخواه را تحمل کند | nodeهای datacenter که یک سازمان کنترلشان می‌کند، با تشعشع کم؛ datacenterهای مداری در دست بررسی‌اند |
+| طرف‌هایی که به هم اعتماد ندارند: blockchain و شبکه‌های peer-to-peer | مفهوم multitenancy، که با firewall، VM و access control جدا می‌شود |
+| | مرورگر کاربرها، که با مرجع قرار دادن سرور حل می‌شود: validation، sanitization و escaping در برابر SQL injection و XSS |
 
-BFT protocols are expensive; most need a **> ⅔ supermajority** of correct nodes, so against bugs you’d need four independent implementations; an attacker who compromises one node can usually compromise all — traditional security remains the defence (p. 379). **Weak forms of lying** are cheap to guard against: application-level checksums or TLS for packets that slip past TCP/UDP checksums; input sanitization and size limits; NTP clients polling several servers and excluding outliers (pp. 379–380).
+پروتکل‌های BFT گران‌اند؛ بیشترشان یک **ابَراکثریت بیش از ⅔** از nodeهای سالم لازم دارند، پس برای مقابله با باگ چهار پیاده‌سازی مستقل لازم است؛ و مهاجمی که یک node را بگیرد معمولاً می‌تواند همه را بگیرد، پس امنیت سنتی همچنان سپر اصلی است (p. 379). **شکل‌های ضعیف دروغ** را ارزان می‌شود مهار کرد: checksum در سطح اپلیکیشن یا TLS برای packetهایی که از checksum در TCP و UDP رد می‌شوند؛ sanitization ورودی و محدودیت اندازه؛ clientهای NTP که از چند سرور می‌پرسند و پرت‌ها را کنار می‌گذارند (pp. 379–380).
 
-#### System model and reality (pp. 380–384)
+#### مدل سیستم و واقعیت (pp. 380–384)
 
-| Timing model | Assumes | Realistic? |
+| مدل زمان‌بندی | فرض می‌کند | واقع‌بینانه؟ |
 |---|---|---|
-| Synchronous | Bounded delay, pauses and clock error | No |
-| **Partially synchronous** | Usually bounded, occasionally arbitrarily large | **Yes** |
-| Asynchronous | No timing assumptions — not even a clock | Very restrictive |
+| مدل synchronous | تأخیر، توقف و خطای ساعت محدود | نه |
+| مدل **partially synchronous** | معمولاً محدود، گاهی به‌دلخواه بزرگ | **بله** |
+| مدل asynchronous | هیچ فرض زمانی، حتی ساعت | خیلی محدودکننده |
 
-| Node-failure model | Assumes |
+| مدل خرابی node | فرض می‌کند |
 |---|---|
-| Crash-stop | A node fails only by crashing, forever |
-| **Crash-recovery** | Crashes and maybe returns later; stable storage survives, memory doesn’t |
-| Degraded performance | **Limping nodes / gray failure / fail-slow**: a NIC dropping to 1 Kb/s, GC thrashing, erratic SSDs, heat, loose connectors — or a deadlocked background thread |
-| Byzantine | Anything, including deception |
+| مدل crash-stop | یک node فقط با crash خراب می‌شود، برای همیشه |
+| مدل **crash-recovery** | یک node crash می‌کند و شاید بعداً برگردد؛ storage پایدار می‌ماند و حافظه نه |
+| کارایی افت‌کرده | مفهوم **limping node** یا **gray failure** یا **fail-slow**: NICی که به ۱ کیلوبیت در ثانیه می‌افتد، thrashing در GC، SSDهای بی‌ثبات، گرما، اتصال شل؛ یا یک thread پس‌زمینه‌ی گیرکرده در deadlock |
+| مدل Byzantine | هر چیزی، از جمله فریب |
 
-The most useful combination: **partially synchronous + crash-recovery** (p. 381). Correctness is stated as properties — e.g. fencing tokens need **uniqueness**, **monotonic sequence** and **availability** (p. 382):
+مفیدترین ترکیب: **partially synchronous به‌علاوه‌ی crash-recovery** (p. 381). درستی به شکل ویژگی‌ها بیان می‌شود؛ مثلاً fencing token به **یکتایی**، **ترتیب یکنوا** و **availability** نیاز دارد (p. 382):
 
-| | **Safety** — “nothing bad happens” | **Liveness** — “something good eventually happens” |
+| | مفهوم **safety**: «اتفاق بدی نمی‌افتد» | مفهوم **liveness**: «بالاخره اتفاق خوبی می‌افتد» |
 |---|---|---|
-| Violation | At a specific moment; can’t be undone | May not hold now, but can still become true |
-| Examples | Uniqueness, monotonic tokens | Availability; **eventual consistency** |
-| Requirement | Always — even if every node crashes | May carry caveats (majority up, network eventually heals) |
+| نقض | در لحظه‌ی مشخصی رخ می‌دهد و برنمی‌گردد | شاید الان برقرار نباشد، اما هنوز می‌تواند برقرار شود |
+| نمونه‌ها | یکتایی، توکن‌های یکنوا | مفهوم availability؛ **eventual consistency** |
+| الزام | همیشه، حتی اگر همه‌ی nodeها crash کنند | می‌تواند شرط داشته باشد، مثل بالا بودن اکثریت یا درمان شدن بالاخره‌ی شبکه |
 
-Real systems break model assumptions — disks wiped by hardware errors or misconfiguration, firmware that doesn’t see its drives, nodes with **amnesia** that break quorums — so code may need a last-resort `printf("Sucks to be you"); exit(666)`. Models are still invaluable for reasoning (pp. 383–384).
+سیستم‌های واقعی فرض‌های مدل را می‌شکنند: دیسک‌هایی که با خطای سخت‌افزاری یا config غلط پاک می‌شوند، firmwareی که درایوهایش را نمی‌بیند، nodeهایی با **فراموشی** که quorumها را می‌شکنند؛ پس کد ممکن است یک راه آخر لازم داشته باشد، مثل `printf("Sucks to be you"); exit(666)`. مدل‌ها باز هم برای استدلال بی‌قیمت‌اند (pp. 383–384).
 
-#### Formal methods and randomized testing (pp. 384–388)
+> **In practice:** warehouse در reference stack دو replica پشت یک SQL proxy دارد، و proxy هر کوئری را به یکی از آن‌ها می‌فرستد.
+>
+> **Your turn:** یکی از replicaها به خاطر یک دیسک بی‌ثبات کوئری‌ها را ده برابر کندتر جواب می‌دهد، اما health check ساده‌ی proxy را رد نمی‌کند. چرا این از crash بدتر است، و چه چیزی آن را آشکار می‌کند؟
+>
+> *Answer:* این یک limping node یا gray failure است: nodeی که crash کرده از گردش بیرون می‌رود، اما node کند همچنان سهم کوئری‌ها را می‌گیرد و نیمی از داشبوردها کند می‌شوند (p. 381). health check باید latency واقعی کوئری را بسنجد، نه فقط زنده بودن را؛ و مقایسه‌ی percentileهای latency دو replica، یعنی همان تمرکز روی tail latency در فصل ۲، این اختلاف را نشان می‌دهد.
 
-| Technique | What it checks | Notes |
+#### روش‌های formal و تست تصادفی (pp. 384–388)
+
+| روش | چه چیزی را بررسی می‌کند | نکته‌ها |
 |---|---|---|
-| **Model checking** (TLA+, Gallina, FizzBee) | A *specification* across all reachable states, within bounds | Used by CockroachDB, TiDB, Kafka; TLA+ found potential data loss in viewstamped replication’s prose description; specs can drift from code |
-| **Fault injection** | The real system under crashes, partitions, pauses, disk faults | Chaos engineering (Netflix’s Chaos Monkey); frameworks like **Jepsen** have found critical bugs in many systems |
-| **Deterministic simulation testing (DST)** | Your actual code, with network, I/O and clocks mocked so any failing run replays exactly | Application-level (FoundationDB’s Flow, TigerBeetle’s single event loop), runtime-level (FrostDB patching Go, Rust’s MadSim), machine-level (Antithesis hypervisor); runs faster than real time |
+| مفهوم **model checking**، با TLA+، Gallina یا FizzBee | یک *specification* در همه‌ی وضعیت‌های قابل دسترسی، داخل محدوده‌ها | در CockroachDB، TiDB و Kafka استفاده می‌شود؛ TLA+ در توصیف نثری viewstamped replication احتمال از دست رفتن داده را پیدا کرد؛ specification ممکن است از کد فاصله بگیرد |
+| مفهوم **fault injection** | سیستم واقعی زیر crash، partition، توقف و خرابی دیسک | مفهوم chaos engineering، مثل Chaos Monkey در Netflix؛ چارچوب‌هایی مثل **Jepsen** باگ‌های جدی در خیلی از سیستم‌ها پیدا کرده‌اند |
+| مفهوم **deterministic simulation testing**، یا DST | کد واقعی شما، با شبکه، I/O و ساعت mockشده تا هر اجرای شکست‌خورده دقیقاً تکرار شود | در سطح اپلیکیشن، مثل Flow در FoundationDB و event loop تنهای TigerBeetle؛ در سطح runtime، مثل FrostDB که Go را patch می‌کند و MadSim در Rust؛ در سطح ماشین، مثل hypervisor در Antithesis؛ سریع‌تر از زمان واقعی اجرا می‌شود |
 
-AWS, FoundationDB and TigerBeetle combine property-based testing, fuzzing and DST (p. 384). **The power of determinism** recurs throughout the book: event-sourcing replay, durable-execution workflows, and state machine replication (statement-based replication, serial stored procedures) — though hash-table iteration order and resource limits can still be nondeterministic (pp. 387–388).
+شرکت AWS و پروژه‌های FoundationDB و TigerBeetle property-based testing، fuzzing و DST را ترکیب می‌کنند (p. 384). **قدرت قطعیت** در سراسر کتاب تکرار می‌شود: replay در event sourcing، workflowهای durable execution، و state machine replication، یعنی statement-based replication و stored procedureهای serial؛ هرچند ترتیب پیمایش hash table و محدودیت منابع هنوز می‌توانند غیرقطعی باشند (pp. 387–388).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Problem | You can't… | Practical response |
+| مشکل | نمی‌توانید… | پاسخ عملی |
 |---|---|---|
-| Lost or delayed messages | Distinguish a dead node from a slow one | Timeouts (ideally adaptive), idempotent retries |
-| Clock skew and jumps | Order events across nodes by timestamp | Logical clocks; confidence intervals; commit-wait |
-| Process pauses | Assume a check is still valid when you act on it | Fencing tokens; leases checked by the resource |
-| No global knowledge | Trust a single node's view | Quorum decisions |
-| Unbounded behaviour | Prove correctness in a synchronous model | Partially synchronous, crash-recovery models + testing |
+| پیام گم‌شده یا دیررسیده | node مرده را از node کند تشخیص بدهید | مفهوم timeout، ترجیحاً تطبیقی، و retry با idempotence |
+| مفهوم clock skew و پرش ساعت | رویدادها را بین nodeها با timestamp مرتب کنید | مفهوم logical clock؛ بازه‌ی اطمینان؛ commit-wait |
+| مفهوم process pause | فرض کنید یک بررسی وقتی بر اساسش عمل می‌کنید هنوز معتبر است | مفهوم fencing token؛ lease که خود منبع بررسی‌اش می‌کند |
+| نبود دانش سراسری | به دید یک node تنها اعتماد کنید | تصمیم با quorum |
+| رفتار unbounded | درستی را در یک مدل synchronous اثبات کنید | مدل‌های partially synchronous و crash-recovery، به‌علاوه‌ی تست |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Peter Bailis and Kyle Kingsbury's "The Network is Reliable" (ACM Queue, 2014) collects the incident evidence summarized here.
-- Martin Kleppmann's 2016 essay "How to do distributed locking" argues the fencing-token point against Redlock in detail.
+- مقاله‌ی Peter Bailis و Kyle Kingsbury با عنوان «The Network is Reliable» در ACM Queue، سال ۲۰۱۴، شواهد حادثه‌هایی را که اینجا خلاصه شده جمع کرده.
+- جستار Martin Kleppmann در سال ۲۰۱۶ با عنوان «How to do distributed locking» نکته‌ی fencing token را در برابر Redlock با جزئیات استدلال می‌کند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Physical vs logical clocks](../lab/10-logical-clocks/README.md) — skewed clocks violating causality.
-- **Related chapters:** [6. Replication](06-replication.md) (failover, LWW), [8. Transactions](08-transactions.md), [10. Consistency and Consensus](10-consistency-and-consensus.md) (the solutions to these problems).
+- **Run it:** [ساعت فیزیکی در برابر logical clock](../lab/10-logical-clocks/README.md): ساعت‌های skewدار که ترتیب علّی را می‌شکنند.
+- **فصل‌های مرتبط:** [فصل ۶: مفهوم replication](06-replication.md) برای failover و LWW، [فصل ۸: تراکنش‌ها](08-transactions.md)، و [فصل ۱۰: مفهوم consistency و consensus](10-consistency-and-consensus.md) برای راه‌حل این مشکل‌ها.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها را خود vault از روی یادداشت‌های بالا نوشته است؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **You sent a request and the timeout fired. What do you know?**
-   - [ ] The request was lost
-   - [ ] The remote node crashed
-   - [x] Nothing for certain: the request, the processing, or the response may have been lost or delayed
-   - [ ] The request was processed but the response was lost
+1. **درخواستی فرستادید و timeout رسید. چه چیزی را می‌دانید؟**
+   - [ ] درخواست گم شده
+   - [ ] مفهوم remote node خراب شده
+   - [x] هیچ چیز را با اطمینان: ممکن است درخواست، پردازش یا پاسخ گم شده یا دیر شده باشد
+   - [ ] درخواست پردازش شده اما پاسخ گم شده
 
-   *Answer:* The request may be lost or queued, the remote node may have failed or paused, or it may have processed the request with the response lost or delayed. If it was processed, a retry performs the action twice (pp. 347–352).
+   *Answer:* ممکن است درخواست گم شده یا در صف مانده باشد، remote node خراب یا متوقف شده باشد، یا درخواست را پردازش کرده و پاسخ گم یا دیر شده باشد. اگر پردازش شده باشد، retry کار را دو بار انجام می‌دهد (pp. 347–352).
 
-2. **Why should timeouts never be measured with a time-of-day clock?**
+2. **چرا timeout را هیچ‌وقت نباید با ساعت time-of-day اندازه گرفت؟**
 
-   *Answer:* Time-of-day clocks can jump forward or backward (for example after NTP synchronization), so an elapsed time computed from them can be wrong or negative. Monotonic clocks are designed for measuring durations (pp. 359–360).
+   *Answer:* ساعت time-of-day می‌تواند جلو یا عقب بپرد، مثلاً بعد از synchronization با NTP، پس مدت زمانی که از آن حساب می‌شود ممکن است غلط یا منفی باشد. ساعت monotonic برای اندازه‌گیری مدت زمان طراحی شده (pp. 359–360).
 
-3. **How can last-write-wins with synchronized clocks silently lose a write that happened later in real time?**
+3. **چطور last write wins با ساعت‌های synchronous می‌تواند بی‌صدا نوشتنی را که در زمان واقعی بعدتر رخ داده گم کند؟**
 
-   *Answer:* If the node that made the later write has a clock that lags behind, its timestamp is lower and LWW discards it in favour of the earlier write — with no error reported (pp. 362–364).
+   *Answer:* اگر ساعت nodeی که نوشتن بعدی را انجام داده عقب باشد، timestampش کوچک‌تر است و LWW آن را به نفع نوشتن قبلی دور می‌ریزد، بی‌آن‌که خطایی گزارش شود (pp. 362–364).
 
-4. **A lease-holder checks its lease and then writes. What can go wrong in between, and how do fencing tokens stop it?**
+4. **صاحب یک lease آن را بررسی می‌کند و بعد می‌نویسد. در این فاصله چه چیزی می‌تواند خراب شود، و fencing token چطور جلویش را می‌گیرد؟**
 
-   *Answer:* The process can pause (e.g. for garbage collection) after checking; meanwhile the lease expires and another client acquires it. Fencing tokens increase with each grant and the storage service rejects writes carrying a token lower than one it has already seen (pp. 366–377).
+   *Answer:* یک process ممکن است بعد از بررسی متوقف شود، مثلاً برای garbage collection؛ در این مدت lease منقضی می‌شود و client دیگری آن را می‌گیرد. fencing token با هر واگذاری بزرگ‌تر می‌شود و سرویس storage نوشتن‌هایی را که توکنی کمتر از توکن دیده‌شده دارند رد می‌کند (pp. 366–377).
 
-5. **Which system model is the most realistic default?**
-   - [ ] Synchronous network, crash-stop nodes
-   - [x] Partially synchronous network, crash-recovery nodes
-   - [ ] Asynchronous network, Byzantine nodes
-   - [ ] Synchronous network, Byzantine nodes
+5. **کدام مدل سیستم واقع‌بینانه‌ترین پیش‌فرض است؟**
+   - [ ] شبکه‌ی synchronous، nodeهای crash-stop
+   - [x] شبکه‌ی partially synchronous، nodeهای crash-recovery
+   - [ ] شبکه‌ی asynchronous، nodeهای Byzantine
+   - [ ] شبکه‌ی synchronous، nodeهای Byzantine
 
-   *Answer:* Real networks behave well most of the time but occasionally have unbounded delays, and nodes can crash and come back with their durable state. Algorithms designed under this model hold up in practice (pp. 380–384).
+   *Answer:* شبکه‌های واقعی بیشتر وقت‌ها خوب رفتار می‌کنند اما گاهی latency unbounded دارند، و nodeها می‌توانند crash کنند و با وضعیت پایدارشان برگردند. الگوریتم‌هایی که با این مدل طراحی می‌شوند در عمل دوام می‌آورند (pp. 380–384).
+
+6. **دو اجرای یک DAG هم‌زمان cursor را می‌نویسند چون scheduler اولی را zombie اعلام کرده. چرا بررسی «آیا هنوز صاحب کار هستم؟» پیش از نوشتن کافی نیست؟**
+
+   *Answer:* چون توقف می‌تواند درست بعد از بررسی و پیش از نوشتن بیاید، یا نوشتن در شبکه دیر برسد؛ شکل‌های ۹-۴ و ۹-۵. فقط جایی که نوشتن را می‌پذیرد، با مقایسه‌ی یک توکن افزایشی، می‌تواند نوشتن کهنه را رد کند (pp. 373–376).

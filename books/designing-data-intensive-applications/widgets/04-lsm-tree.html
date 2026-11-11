@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LSM-Tree Explorer</title>
-<meta name="description" content="Write, flush, compact and read from a toy LSM-tree with a write-ahead log and Bloom filters. Illustrates DDIA 2nd ed., Chapter 4.">
+<title>درون یک LSM-tree</title>
+<meta name="description" content="در یک LSM-tree کوچک با write-ahead log و Bloom filter بنویسید، flush و compact کنید و بخوانید. برای فصل ۴ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .lsm { display: grid; gap: 12px; }
@@ -30,21 +30,21 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/04-storage-and-retrieval.html">Chapter 4</a><span aria-hidden="true">/</span>
-      <span aria-current="page">LSM-tree</span>
+      <a href="../chapters/04-storage-and-retrieval.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ساختار LSM-tree</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 4 · Storage and Retrieval</div>
-  <h1>Inside an LSM-tree</h1>
-  <p class="lede">Writes go to an in-memory sorted table and a write-ahead log. When the memtable fills up, it is written out as an immutable sorted file (SSTable). Reads check the newest data first; compaction merges old files so reads stay cheap and overwritten values get discarded.</p>
-  <p class="source-note">Illustrates “Log-Structured Storage” (pp. 118–125) and “Comparing B-Trees and LSM-Trees” (pp. 129–132). A deliberately tiny model: keys are single letters, Bloom filters have 24 bits and 2 hash functions, compaction merges all SSTables into one. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۴ · ذخیره‌سازی و بازیابی</div>
+  <h1>درون یک LSM-tree</h1>
+  <p class="lede">نوشتن‌ها به یک جدول مرتب در حافظه و یک write-ahead log می‌روند. وقتی memtable پر شد، به شکل یک فایل مرتب و تغییرناپذیر، یعنی SSTable، روی دیسک نوشته می‌شود. خواندن اول جدیدترین داده را می‌گردد؛ compaction فایل‌های قدیمی را merge می‌کند تا خواندن ارزان بماند و مقدارهای بازنویسی‌شده دور ریخته شوند.</p>
+  <p class="source-note">برای «ذخیره‌سازی log-structured» در صص. ۱۱۸–۱۲۵ و «مقایسه‌ی B-tree و LSM-tree» در صص. ۱۲۹–۱۳۲. مدلی عمداً کوچک: کلیدها یک حرف‌اند، هر Bloom filter ۲۴ بیت و ۲ تابع hash دارد و compaction همه‌ی SSTableها را در یکی merge می‌کند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
@@ -52,55 +52,55 @@
     </div>
     <div class="stack">
       <div class="panel ops">
-        <p class="panel-title">Operations</p>
+        <p class="panel-title">عملیات‌ها</p>
         <div class="row">
-          <label for="k">Key</label><input id="k" type="text" maxlength="1" value="m" autocomplete="off">
-          <label for="v">Value</label><input id="v" type="text" maxlength="4" value="1" autocomplete="off">
+          <label for="k">کلید</label><input id="k" type="text" maxlength="1" value="m" autocomplete="off">
+          <label for="v">مقدار</label><input id="v" type="text" maxlength="4" value="1" autocomplete="off">
         </div>
         <div class="row">
-          <button class="btn" type="button" id="put">Put</button>
-          <button class="btn" type="button" id="del">Delete</button>
-          <button class="btn" type="button" id="get">Get</button>
+          <button class="btn" type="button" id="put">نوشتن</button>
+          <button class="btn" type="button" id="del">حذف</button>
+          <button class="btn" type="button" id="get">خواندن</button>
         </div>
         <div class="row">
-          <button class="btn" type="button" id="flush">Flush memtable</button>
-          <button class="btn" type="button" id="compact">Compact</button>
-          <button class="btn danger" type="button" id="crash">Crash &amp; recover</button>
+          <button class="btn" type="button" id="flush">flush کردن memtable</button>
+          <button class="btn" type="button" id="compact">اجرای compaction</button>
+          <button class="btn danger" type="button" id="crash">crash و بازیابی</button>
         </div>
-        <label class="check"><input type="checkbox" id="auto" checked> Auto-compact at 4 SSTables</label>
+        <label class="check"><input type="checkbox" id="auto" checked> compaction خودکار با رسیدن به ۴ SSTable</label>
         <div id="cap"></div>
-        <p class="panel-title" style="margin-top:8px">Random workload</p>
+        <p class="panel-title" style="margin-top:8px">بار تصادفی</p>
         <div id="player"></div>
       </div>
       <div class="panel">
-        <p class="panel-title">Counters</p>
+        <p class="panel-title">شمارنده‌ها</p>
         <div class="stats" id="stats"></div>
       </div>
       <div class="panel">
-        <p class="panel-title">Event log</p>
+        <p class="panel-title">گزارش رویدادها</p>
         <ol id="log"></ol>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Writes are sequential appends.</strong> A put touches only memory and the log; disk files are never modified in place — only written whole and later deleted.</li>
-    <li><strong>Reads may probe several files.</strong> Get a key that was written long ago: the memtable and newer SSTables are checked first. The Bloom filter lets a read skip files that definitely lack the key — but watch for false positives (“maybe”, then not found).</li>
-    <li><strong>Deletes are writes.</strong> A tombstone shadows older values until compaction removes both.</li>
-    <li><strong>Compaction trades write work for read cost.</strong> Watch write amplification rise as the same keys are rewritten into new SSTables.</li>
-    <li><strong>The WAL is only for recovery.</strong> Crash the node: the memtable is rebuilt from the log; flushed SSTables are already durable.</li>
+    <li><strong>نوشتن یعنی append ترتیبی.</strong> هر put فقط به حافظه و log دست می‌زند؛ فایل‌های دیسک هیچ‌وقت در جا عوض نمی‌شوند، فقط یک‌جا نوشته و بعداً حذف می‌شوند.</li>
+    <li><strong>خواندن ممکن است چند فایل را بگردد.</strong> کلیدی را بخوانید که خیلی وقت پیش نوشته شده: اول memtable و SSTableهای جدیدتر گشته می‌شوند. Bloom filter اجازه می‌دهد از فایل‌هایی که قطعاً کلید را ندارند بگذرید؛ اما مراقب false positive باشید: «شاید» و بعد پیدا نشدن.</li>
+    <li><strong>حذف هم یک نوشتن است.</strong> هر tombstone مقدارهای قدیمی‌تر را می‌پوشاند تا compaction هر دو را حذف کند.</li>
+    <li><strong>عمل compaction کار نوشتن را با هزینه‌ی خواندن عوض می‌کند.</strong> ببینید write amplification چطور بالا می‌رود وقتی همان کلیدها در SSTableهای تازه دوباره نوشته می‌شوند.</li>
+    <li><strong>فایل WAL فقط برای بازیابی است.</strong> node را crash کنید: memtable از روی log دوباره ساخته می‌شود؛ SSTableهای flushشده از قبل durable هستند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/04-storage-and-retrieval.html"><small>Lesson</small>4. Storage and Retrieval</a></li>
-    <li><a href="../lab/04-lsm-tree/README.md"><small>Experiment</small>A runnable LSM-tree in Python</a></li>
+    <li><a href="../chapters/04-storage-and-retrieval.html"><small>درس</small>فصل ۴: ذخیره‌سازی و بازیابی</a></li>
+    <li><a href="../lab/04-lsm-tree/README.md"><small>آزمایش</small>یک LSM-tree اجراشدنی در Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -135,24 +135,24 @@
   function put(k, v, quiet) {
     S.mem[k] = v; S.wal.push(k + "=" + v);
     S.userBytes += size(k, v); S.diskBytes += size(k, v); // the WAL append
-    if (!quiet) log.add((v === TOMB ? "DELETE " + k : "PUT " + k + "=" + v) + " → memtable + WAL");
+    if (!quiet) log.add((v === TOMB ? "حذف " + k : "نوشتن " + k + "=" + v) + " ← memtable و WAL");
     if (Object.keys(S.mem).length >= capacity) flush();
   }
 
   function flush() {
     var keys = Object.keys(S.mem).sort();
-    if (!keys.length) { log.add("Flush: memtable is empty", "muted"); return; }
+    if (!keys.length) { log.add("عمل flush: memtable خالی است", "muted"); return; }
     var rows = keys.map(function (k) { return [k, S.mem[k]]; });
     var t = { id: S.nextId++, rows: rows, bloom: bloomFor(keys), born: S.seq++ };
     S.ssts.unshift(t);
     rows.forEach(function (kv) { S.diskBytes += size(kv[0], kv[1]); });
     S.mem = {}; S.wal = [];
-    log.add("Flush → SSTable #" + t.id + " (" + rows.length + " keys, sorted); WAL truncated", "ok");
+    log.add("عمل flush ← SSTable #" + t.id + " با " + rows.length + " کلید مرتب؛ WAL خالی شد", "ok");
     if (document.getElementById("auto").checked && S.ssts.length >= 4) compact();
   }
 
   function compact() {
-    if (S.ssts.length < 2) { log.add("Compact: need at least two SSTables", "muted"); return; }
+    if (S.ssts.length < 2) { log.add("عمل compaction: دست‌کم دو SSTable لازم است", "muted"); return; }
     var merged = {}, dropped = 0, input = 0;
     // Oldest first, so newer values overwrite older ones (the merge step of a k-way merge).
     S.ssts.slice().reverse().forEach(function (t) {
@@ -165,7 +165,7 @@
     var t = { id: S.nextId++, rows: rows, bloom: bloomFor(rows.map(function (kv) { return kv[0]; })), born: S.seq++ };
     rows.forEach(function (kv) { S.diskBytes += size(kv[0], kv[1]); });
     S.ssts = [t];
-    log.add("Compact " + ids + " → #" + t.id + ": " + input + " entries in, " + rows.length + " out (" + dropped + " overwritten, " + tombs + " tombstones purged)", "ok");
+    log.add("عمل compaction روی " + ids + " ← #" + t.id + ": " + input + " ورودی، " + rows.length + " خروجی؛ " + dropped + " بازنویسی‌شده و " + tombs + " tombstone پاک شد", "ok");
   }
 
   function get(k) {
@@ -174,7 +174,7 @@
     if (k in S.mem) {
       highlight.tiers.mem = "hit";
       S.lastProbe = 0;
-      log.add("GET " + k + " → memtable: " + (S.mem[k] === TOMB ? "deleted" : S.mem[k]), "ok");
+      log.add("خواندن " + k + " ← memtable: " + (S.mem[k] === TOMB ? "حذف‌شده" : S.mem[k]), "ok");
       return;
     }
     highlight.tiers.mem = "probe";
@@ -186,27 +186,27 @@
       var row = t.rows.filter(function (kv) { return kv[0] === k; })[0];
       if (row) {
         highlight.tiers[t.id] = "hit"; S.lastProbe = probes;
-        log.add("GET " + k + " → SSTable #" + t.id + ": " + (row[1] === TOMB ? "deleted (tombstone)" : row[1]) + " · " + probes + " file read(s)", "ok");
+        log.add("خواندن " + k + " ← SSTable #" + t.id + ": " + (row[1] === TOMB ? "حذف‌شده با tombstone" : row[1]) + " · خواندن " + probes + " فایل", "ok");
         return;
       }
       highlight.tiers[t.id] = "probe";
-      log.add("Bloom filter of #" + t.id + " said “maybe” for " + k + " — false positive", "warn");
+      log.add("فیلتر Bloom در #" + t.id + " برای " + k + " گفت «شاید»؛ false positive بود", "warn");
     }
     S.lastProbe = probes;
-    log.add("GET " + k + " → not found · " + probes + " file read(s)", probes ? "warn" : "muted");
+    log.add("خواندن " + k + " ← پیدا نشد · خواندن " + probes + " فایل", probes ? "warn" : "muted");
   }
 
   function crash() {
     var lost = Object.keys(S.mem).length;
     var wal = S.wal.slice();
     S.mem = {};
-    log.add("CRASH: memtable lost (" + lost + " keys in memory)", "bad");
+    log.add("وقوع crash: memtable با " + lost + " کلید در حافظه از دست رفت", "bad");
     wal.forEach(function (line) { var i = line.indexOf("="); S.mem[line.slice(0, i)] = line.slice(i + 1); });
-    log.add("Recovery: replayed " + wal.length + " WAL record(s) → memtable restored", "ok");
+    log.add("بازیابی: " + wal.length + " رکورد WAL دوباره اجرا شد ← memtable برگشت", "ok");
   }
 
   function chips(rows, extra) {
-    if (!rows.length) return el("span", { class: "empty" }, "empty");
+    if (!rows.length) return el("span", { class: "empty" }, "خالی");
     return rows.map(function (kv) {
       var cls = "chip" + (kv[1] === TOMB ? " tomb" : "") + (highlight && highlight.key === kv[0] && extra === "hit" ? " found" : "");
       return el("span", { class: cls }, kv[0] + "=" + (kv[1] === TOMB ? "✝" : kv[1]));
@@ -218,28 +218,28 @@
     var memRows = Object.keys(S.mem).sort().map(function (k) { return [k, S.mem[k]]; });
     var hm = highlight && highlight.tiers.mem;
     root.appendChild(el("div", { class: "tier mem" + (hm ? " " + hm : "") },
-      el("div", { class: "tier-head" }, el("span", null, "Memtable (in memory, sorted)"),
-        el("span", { class: "hint" }, memRows.length + " / " + capacity + " keys")),
+      el("div", { class: "tier-head" }, el("span", null, "جدول memtable؛ در حافظه، مرتب"),
+        el("span", { class: "hint" }, memRows.length + " از " + capacity + " کلید")),
       chips(memRows, hm)));
     root.appendChild(el("div", { class: "tier disk" },
-      el("div", { class: "tier-head" }, el("span", null, "Write-ahead log (on disk, append-only)"),
-        el("span", { class: "hint" }, "for crash recovery only")),
-      S.wal.length ? S.wal.map(function (l) { return el("span", { class: "chip" }, l.replace(TOMB, "✝")); }) : el("span", { class: "empty" }, "empty")));
-    if (!S.ssts.length) root.appendChild(el("p", { class: "empty" }, "No SSTables yet — fill the memtable or press Flush."));
+      el("div", { class: "tier-head" }, el("span", null, "فایل write-ahead log؛ روی دیسک، فقط append"),
+        el("span", { class: "hint" }, "فقط برای بازیابی بعد از crash")),
+      S.wal.length ? S.wal.map(function (l) { return el("span", { class: "chip" }, l.replace(TOMB, "✝")); }) : el("span", { class: "empty" }, "خالی")));
+    if (!S.ssts.length) root.appendChild(el("p", { class: "empty" }, "هنوز SSTableی نیست؛ memtable را پر کنید یا flush بزنید."));
     S.ssts.forEach(function (t, i) {
       var h = highlight && highlight.tiers[t.id];
       var q = highlight ? hashes(highlight.key) : [];
       root.appendChild(el("div", { class: "tier disk" + (h ? " " + h : "") },
         el("div", { class: "tier-head" },
-          el("span", null, "SSTable #" + t.id + (i === 0 ? " · newest" : i === S.ssts.length - 1 ? " · oldest" : "")),
-          el("span", { class: "hint" }, h === "skip" ? "skipped: Bloom filter says no" : h === "probe" ? "read, key absent" : h === "hit" ? "found here" : t.rows.length + " keys")),
+          el("span", null, "جدول SSTable #" + t.id + (i === 0 ? " · جدیدترین" : i === S.ssts.length - 1 ? " · قدیمی‌ترین" : "")),
+          el("span", { class: "hint" }, h === "skip" ? "رد شد: Bloom filter می‌گوید نیست" : h === "probe" ? "خوانده شد، کلید نبود" : h === "hit" ? "این‌جا پیدا شد" : t.rows.length + " کلید")),
         chips(t.rows, h),
-        el("div", { class: "bloom", title: "Bloom filter bits", "aria-label": "Bloom filter: " + t.bloom.filter(Boolean).length + " of " + BITS + " bits set" },
+        el("div", { class: "bloom", title: "بیت‌های Bloom filter", "aria-label": "فیلتر Bloom: " + t.bloom.filter(Boolean).length + " بیت روشن از " + BITS },
           t.bloom.map(function (on, b) { return el("i", { class: (on ? "on" : "") + (q.indexOf(b) >= 0 ? " q" : "") }); }))));
     });
     var wa = S.userBytes ? S.diskBytes / S.userBytes : 0;
     var st = Kit.clear(document.getElementById("stats"));
-    [["SSTables", S.ssts.length], ["Last read", S.lastProbe + " file(s)"], ["Write amp.", wa ? wa.toFixed(2) + "×" : "–"]].forEach(function (x) {
+    [["تعداد SSTable", S.ssts.length], ["آخرین خواندن", S.lastProbe + " فایل"], ["write amplification", wa ? wa.toFixed(2) + "×" : "–"]].forEach(function (x) {
       st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value" }, x[1])));
     });
   }
@@ -247,22 +247,22 @@
   function key() { var k = document.getElementById("k").value.trim().toLowerCase(); return /^[a-z]$/.test(k) ? k : null; }
   function act(fn) { return function () { highlight = null; fn(); render(); }; }
   document.getElementById("put").addEventListener("click", act(function () {
-    var k = key(); if (!k) return log.add("Key must be a single letter a–z", "bad");
+    var k = key(); if (!k) return log.add("کلید باید یک حرف از a تا z باشد", "bad");
     put(k, document.getElementById("v").value.trim() || "1");
   }));
   document.getElementById("del").addEventListener("click", act(function () {
-    var k = key(); if (!k) return log.add("Key must be a single letter a–z", "bad");
+    var k = key(); if (!k) return log.add("کلید باید یک حرف از a تا z باشد", "bad");
     put(k, TOMB);
   }));
   document.getElementById("get").addEventListener("click", function () {
-    var k = key(); if (!k) { log.add("Key must be a single letter a–z", "bad"); return; }
+    var k = key(); if (!k) { log.add("کلید باید یک حرف از a تا z باشد", "bad"); return; }
     get(k); render();
   });
   document.getElementById("flush").addEventListener("click", act(flush));
   document.getElementById("compact").addEventListener("click", act(compact));
   document.getElementById("crash").addEventListener("click", act(crash));
 
-  document.getElementById("cap").appendChild(Kit.slider({ label: "Memtable capacity", min: 2, max: 8, value: capacity, unit: " keys",
+  document.getElementById("cap").appendChild(Kit.slider({ label: "ظرفیت memtable", min: 2, max: 8, value: capacity, unit: " کلید",
     onInput: function (v) { capacity = v; render(); } }).element);
 
   // Random workload: mostly puts over a skewed key space, some gets and deletes.
@@ -276,25 +276,25 @@
     render();
   }
   Kit.player({ mount: document.getElementById("player"), step: step, interval: 900,
-    reset: function () { fresh(); log.clear(); log.add("Reset: empty tree", "muted"); render(); } });
+    reset: function () { fresh(); log.clear(); log.add("از اول: درخت خالی", "muted"); render(); } });
 
   fresh();
   ["c", "a", "t", "s"].forEach(function (k, i) { put(k, String(i + 1), true); });
   ["d", "o", "g"].forEach(function (k, i) { put(k, String(i + 5), true); });
   put("a", "9", true);
-  log.add("Seeded: 8 writes, one SSTable flushed; “a” was overwritten in the memtable", "muted");
+  log.add("شروع: ۸ نوشتن، یک SSTable flush شد؛ کلید «a» در memtable بازنویسی شد", "muted");
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why can an SSTable be read with a sparse index rather than an index entry per key?",
-      options: ["Because keys inside an SSTable are sorted", "Because SSTables are small", "Because of the Bloom filter"],
-      answer: 0, explain: "Sorted keys mean you only need the offset of some keys; a lookup scans forward from the nearest preceding one." },
-    { q: "A Bloom filter for an SSTable answers “no”. What do you know?",
-      options: ["The key is definitely not in that SSTable", "The key is probably not in that SSTable", "The key was deleted"],
-      answer: 0, explain: "Bloom filters have no false negatives; a “no” lets the read skip the file. “Maybe” can be a false positive." },
-    { q: "Why are deletes written as tombstones instead of removing the key?",
-      options: ["SSTables are immutable, so older files may still contain the key", "Tombstones are faster to write", "To keep the WAL small"],
-      answer: 0, explain: "Older SSTables still hold the old value; the tombstone shadows it until compaction discards both." }
+    { q: "چرا یک SSTable را می‌شود با sparse index خواند، به جای یک ورودی index برای هر کلید؟",
+      options: ["چون کلیدهای داخل SSTable مرتب‌اند", "چون SSTableها کوچک‌اند", "به خاطر Bloom filter"],
+      answer: 0, explain: "کلیدهای مرتب یعنی offset چند کلید کافی است؛ جست‌وجو از نزدیک‌ترین کلید قبلی رو به جلو اسکن می‌کند (ص. ۱۱۹)." },
+    { q: "فیلتر Bloom یک SSTable جواب «نه» می‌دهد. چه می‌دانید؟",
+      options: ["کلید قطعاً در آن SSTable نیست", "کلید احتمالاً در آن SSTable نیست", "کلید حذف شده"],
+      answer: 0, explain: "فیلتر Bloom هیچ false negative ندارد؛ جواب «نه» اجازه می‌دهد خواندن از فایل بگذرد. «شاید» ممکن است false positive باشد (صص. ۱۲۲–۱۲۳)." },
+    { q: "چرا حذف به شکل tombstone نوشته می‌شود، به جای پاک کردن کلید؟",
+      options: ["چون SSTableها تغییرناپذیرند و فایل‌های قدیمی‌تر ممکن است هنوز کلید را داشته باشند", "چون نوشتن tombstone سریع‌تر است", "برای کوچک نگه داشتن WAL"],
+      answer: 0, explain: "SSTableهای قدیمی‌تر هنوز مقدار قدیمی را دارند؛ tombstone آن را می‌پوشاند تا compaction هر دو را دور بریزد (صص. ۱۲۰–۱۲۱)." }
   ]);
 })();
 </script>

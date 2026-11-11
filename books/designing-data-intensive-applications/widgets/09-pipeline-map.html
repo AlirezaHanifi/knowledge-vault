@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۹ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را طی کنید و ببینید هر مرحله کجا به timeout، کجا به ساعت ماشین‌ها و کجا به این‌که «فقط یک اجرا صاحب کار است» تکیه می‌کند. برای فصل ۹ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-the-trouble-with-distributed-systems.html">فصل ۹</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۹ · دردسرهای سیستم‌های توزیع‌شده</div>
+  <h1>فصل ۹ در طول یک pipeline داده</h1>
+  <p class="lede">هر مرحله‌ی pipeline با ماشین دیگری از راه شبکه حرف می‌زند، زمان را از ساعت یک ماشین می‌خواند، یا فرض می‌کند فقط یک اجرا مشغول است. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید کجا یک timeout چیزی نمی‌گوید، کجا ساعت کج ردیف‌ها را گم می‌کند و کجا یک zombie داده را خراب می‌کند.</p>
+  <p class="source-note">کل فصل را (صص. ۳۴۵–۴۰۰) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens شبکه:</strong> مرحله‌هایی که داده را بین دو سیستم جابه‌جا می‌کنند، یعنی loader و نوشتن در Bronze، تنها جاهایی‌اند که timeout چیزی درباره‌ی نتیجه نمی‌گوید.</li>
+    <li><strong>با lens ساعت:</strong> هر جا ترتیب ردیف‌ها از update_date می‌آید، cursor و dedup، به ساعت سرورهای منبع تکیه کرده‌اید؛ شماره‌ی نسخه‌ی افزایشی قابل اعتمادتر است.</li>
+    <li><strong>با lens صاحب کار:</strong> فرض «فقط یک اجرا» را خود Airflow نمی‌تواند تضمین کند؛ نوشتن شرطی cursor و dedup در Silver همان fencing هستند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
+    <li><a href="09-timeouts.html"><small>شبیه‌سازی</small>یک node کی مرده است؟</a></li>
+    <li><a href="09-clock-skew.html"><small>شبیه‌سازی</small>مفهوم clock skew و last write wins</a></li>
+    <li><a href="09-fencing.html"><small>شبیه‌سازی</small>مفهوم lease و fencing token</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/09-the-trouble-with-distributed-systems.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    net: {
+      label: "شبکه و timeout", axis: ["پاسخ روشن", "نمی‌دانیم چه شد"],
+      cells: {
+        source: { tag: "کوئری بی‌جواب", level: 3, pages: "صص. ۳۴۷–۳۴۸", slide: "شبکههای-غیرقابلاعتماد",
+          text: "وقتی کوئری loader جواب نمی‌دهد، معلوم نیست منبع کند است، کوئری گیر کرده یا پاسخ در راه مانده." },
+        loader: { tag: "timeout و retry", level: 4, pages: "صص. ۳۵۲–۳۵۵", slide: "مفهوم-timeout-و-latencyهای-unbounded",
+          text: "مفهوم execution timeout در Airflow task را می‌کشد و retry می‌کند؛ شاید کوئری اول هنوز روی منبع زنده باشد و بخشی از ردیف‌ها پیش‌تر نوشته شده باشند." },
+        bronze: { tag: "نوشتن تأییدنشده", level: 3, pages: "ص. ۳۴۹", slide: "محدودیتهای-tcp",
+          text: "اگر connection وسط insert قطع شود، loader نمی‌داند warehouse چقدر از batch را نوشته؛ فقط پاسخ موفق خود warehouse تأیید است." },
+        silver: { tag: "داخل warehouse", level: 1, pages: "ص. ۳۴۶", slide: "مفهوم-fault-و-partial-failure",
+          text: "ساختن Silver یک کوئری داخل همان warehouse است؛ یا کامل شکست می‌خورد یا کامل تمام می‌شود و دوباره اجرا می‌شود." },
+        gold: { tag: "داخل warehouse", level: 1, pages: "ص. ۳۴۶", slide: "مفهوم-fault-و-partial-failure",
+          text: "مثل Silver؛ خطر شبکه کم است چون داده از warehouse بیرون نمی‌رود." },
+        nb: { tag: "کوئری طولانی", level: 2, pages: "ص. ۳۵۲", slide: "مفهوم-timeout-و-latencyهای-unbounded",
+          text: "مفهوم notebook ممکن است کوئری را رها کند در حالی که warehouse هنوز روی آن کار می‌کند؛ اجرای دوباره بار را دو برابر می‌کند." },
+        serve: { tag: "مفهوم timeout در API", level: 3, pages: "صص. ۳۵۴–۳۵۵", slide: "مفهوم-timeout-و-latencyهای-unbounded",
+          text: "مفهوم client در API پیش‌بینی باید timeout را از توزیع واقعی latency بگیرد؛ چون پیش‌بینی فقط خواندن است، retry آن بی‌خطر است." }
+      }
+    },
+    clock: {
+      label: "ساعت ماشین‌ها", axis: ["به ساعت تکیه نمی‌کند", "ساعت کج داده را خراب می‌کند"],
+      cells: {
+        source: { tag: "مقدار update_date", level: 3, pages: "ص. ۳۶۲", slide: "تکیه-بر-ساعتهای-synchronous",
+          text: "مقدار update_date را ساعت time-of-day سرورهای اپلیکیشن پر می‌کند؛ چند سرور با ساعت‌های متفاوت یعنی ترتیب این ستون قابل اعتماد نیست." },
+        loader: { tag: "مفهوم cursor زمانی", level: 4, pages: "صص. ۳۶۲–۳۶۴", slide: "تکیه-بر-ساعتهای-synchronous",
+          text: "ردیفی از سرور عقب‌مانده ممکن است timestampی کمتر از cursor بگیرد و هیچ‌وقت خوانده نشود؛ بازخوانی چند دقیقه پیش از cursor راه رایج است." },
+        bronze: { tag: "زمان load", level: 1, pages: "ص. ۳۵۹", slide: "ساعت-monotonic-و-ساعت-time-of-day",
+          text: "ستون زمان load با ساعت یک ماشین پر می‌شود؛ برای برچسب زدن خوب است، برای ترتیب دادن دقیق رویدادهای منبع نه." },
+        silver: { tag: "dedup با بیشترین زمان", level: 4, pages: "صص. ۳۶۲–۳۶۴", slide: "تکیه-بر-ساعتهای-synchronous",
+          text: "نگه داشتن ردیفی که update_date بزرگ‌تری دارد همان last write wins است؛ با ساعت کج، نسخه‌ی قدیمی‌تر می‌برد و هیچ خطایی دیده نمی‌شود." },
+        gold: { tag: "مرز روز و ماه", level: 2, pages: "ص. ۳۶۲", slide: "تکیه-بر-ساعتهای-synchronous",
+          text: "جمع روزانه به منطقه‌ی زمانی و ساعت منبع حساس است؛ ردیفی چند ثانیه دیرتر برچسب بخورد به روز بعد می‌رود." },
+        nb: { tag: "اندازه‌گیری مدت", level: 1, pages: "صص. ۳۵۹–۳۶۰", slide: "ساعت-monotonic-و-ساعت-time-of-day",
+          text: "مدت اجرای کد را با ساعت monotonic، مثل time.monotonic در Python، بسنجید؛ ساعت time-of-day ممکن است وسط کار بپرد." },
+        serve: { tag: "عدد freshness", level: 3, pages: "صص. ۳۶۴–۳۶۵", slide: "تکیه-بر-ساعتهای-synchronous",
+          text: "اختلاف «الان» در warehouse با بیشترین update_date دو ساعت دو ماشین را مقایسه می‌کند؛ عدد منفی یا عجیب از clock skew است." }
+      }
+    },
+    lease: {
+      label: "صاحب کار و zombie", axis: ["یک صاحب امن", "دو صاحب هم‌زمان"],
+      cells: {
+        source: { tag: "مفهوم failover منبع", level: 3, pages: "صص. ۳۷۲–۳۷۳", slide: "حکم-اکثریت",
+          text: "اگر leader قدیم منبع بعد از failover فکر کند هنوز leader است، split brain پیش می‌آید؛ تصمیم باید با quorum گرفته شود." },
+        loader: { tag: "مفهوم zombie task", level: 4, pages: "صص. ۳۷۳–۳۷۴", slide: "قفل-و-lease-توزیعشده",
+          text: "اگر worker متوقف شود و heartbeatش نرسد، Airflow task را دوباره اجرا می‌کند؛ worker اول بیدار می‌شود و آن هم cursor را می‌نویسد." },
+        bronze: { tag: "دو اجرا، یک بازه", level: 3, pages: "ص. ۳۷۴", slide: "قفل-و-lease-توزیعشده",
+          text: "با append، دو اجرای هم‌زمان هر دو ردیف‌ها را اضافه می‌کنند؛ خرابی‌ای نیست اما تکراری می‌سازد که Silver باید حذف کند." },
+        silver: { tag: "حذف تکراری با کلید", level: 1, pages: "ص. ۳۷۵", slide: "قفل-و-lease-توزیعشده",
+          text: "حذف تکراری با کلید باعث می‌شود نوشتن دوباره‌ی zombie اثری نگذارد؛ شکلی از دفاع در خود منبع داده." },
+        gold: { tag: "بازسازی هم‌زمان", level: 2, pages: "ص. ۳۷۵", slide: "قفل-و-lease-توزیعشده",
+          text: "دو بازسازی هم‌زمان هر کدام جدول را جایگزین می‌کنند؛ اگر اجرای قدیم دیرتر تمام شود، نتیجه‌ی کهنه‌اش می‌ماند." },
+        nb: { tag: "کار شخصی", level: 0, pages: "ص. ۳۷۳", slide: "قفل-و-lease-توزیعشده",
+          text: "هر تحلیل‌گر در جدول خودش می‌نویسد؛ صاحب مشترکی وجود ندارد." },
+        serve: { tag: "فقط خواندن", level: 0, pages: "ص. ۳۷۳", slide: "قفل-و-lease-توزیعشده",
+          text: "داشبوردها و API چیزی نمی‌نویسند، پس دو صاحب هم‌زمان مشکلی نمی‌سازند." }
+      }
+    }
+};
+
+  var lens = "net", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "task مربوط به loader با timeout کشته شد. درباره‌ی کوئری روی منبع چه می‌دانید؟",
+      options: ["کوئری لغو شده", "کوئری تمام شده", "هیچ چیز با اطمینان؛ شاید هنوز در حال اجراست، شاید تمام شده و پاسخ نرسیده", "کوئری هرگز شروع نشده"],
+      answer: 2, explain: "مفهوم timeout فقط می‌گوید پاسخی در زمان مقرر نیامد؛ درخواست، پردازش یا پاسخ ممکن است گم یا دیر شده باشد (صص. ۳۴۷–۳۴۸)." },
+    { q: "چرا حذف تکراری در Silver با نگه داشتن بزرگ‌ترین update_date ممکن است نسخه‌ی قدیمی را نگه دارد؟",
+      options: ["چون ClickHouse ترتیب را عوض می‌کند", "چون این همان last write wins است و ساعت سروری که نسخه‌ی تازه‌تر را نوشته ممکن است عقب باشد", "چون update_date همیشه null است", "چون dedup فقط روی Gold کار می‌کند"],
+      answer: 1, explain: "ساعت کج timestamp کوچک‌تری به نوشتن بعدی می‌دهد و LWW بی‌صدا آن را دور می‌ریزد (صص. ۳۶۲–۳۶۴)." }
+  ]);
+})();
+</script>
+</body>
+</html>

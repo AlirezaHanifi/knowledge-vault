@@ -1,18 +1,20 @@
-# Tail latency amplification
+# تشدید tail latency
 
-Simulates a backend whose calls are occasionally slow, then pages that fan out to *k* parallel calls. Shows that page latency is governed by the slowest call (tail latency amplification, Figure 2-6) and that averaging per-server percentiles gives a meaningless number, while merging the distributions gives the real one.
+یک backend را شبیه‌سازی می‌کند که فراخوانی‌هایش گاهی کند می‌شوند، و بعد صفحه‌هایی که برای ساخته شدن *k* فراخوانی موازی می‌فرستند. نشان می‌دهد که latency صفحه را کندترین فراخوانی تعیین می‌کند (tail latency amplification، شکل ۲-۶) و این‌که میانگین گرفتن از percentileهای سرورها عدد بی‌معنایی می‌دهد، در حالی که merge توزیع‌ها عدد واقعی را به دست می‌دهد.
 
-*Illustrates DDIA 2nd ed., “Use of Response Time Metrics”, pp. 41–43. The implementation is the vault’s own.*
+*این آزمایش بخش «استفاده از متریک‌های response time» از ویراست دوم DDIA را نشان می‌دهد (صص. ۴۱–۴۳). پیاده‌سازی مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+با Python 3.10 یا جدیدتر، فقط کتابخانه‌ی استاندارد و قطعی (با seed):
 
 ```sh
 python3 tail_latency.py
 ```
 
-## Expected output
+خروجی برنامه انگلیسی است، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را درست نشان نمی‌دهند.
+
+## خروجی مورد انتظار
 
 ```text
 1. One backend service (ms)
@@ -32,14 +34,14 @@ python3 tail_latency.py
    p99 of the merged distribution:       352.9 ms
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- The backend p99 (~330 ms) is 16× its median; the mean (~26 ms) hides this entirely.
-- At *k* = 100, the *median* page already contains a slow call — the backend’s p99 has become the user’s p50.
-- The measured share of slow pages tracks the analytic 1 − (1 − p)<sup>k</sup>.
-- One unhealthy server out of ten: the average of p99s (≈115 ms) understates the fleet’s true p99 (≈350 ms) by 3×.
+- مقدار p99 در backend (حدود ۳۳۰ میلی‌ثانیه) ۱۶ برابر میانه است؛ میانگین (حدود ۲۶ میلی‌ثانیه) این را کاملاً پنهان می‌کند.
+- در *k* = ۱۰۰، حتی صفحه‌ی *میانه* هم یک فراخوانی کند دارد: p99 در backend به p50 کاربر تبدیل شده است.
+- سهم اندازه‌گیری‌شده‌ی صفحه‌های کند از فرمول تحلیلی `1 − (1 − p)^k` followerی می‌کند.
+- اگر از ده سرور یکی ناسالم باشد، میانگین p99ها (حدود ۱۱۵ میلی‌ثانیه) p99 واقعی کل سرورها (حدود ۳۵۰ میلی‌ثانیه) را ۳ برابر کمتر نشان می‌دهد.
 
-## Related
+## پیوندها
 
-- Chapter note: [2. Defining Nonfunctional Requirements](../../chapters/02-defining-nonfunctional-requirements.md) — “Use of Response Time Metrics”, pp. 41–43
-- Explore in the browser: [Percentiles and tail latency](../../widgets/02-tail-latency.html)
+- یادداشت فصل: [فصل ۲: تعریف نیازمندی‌های غیرکارکردی](../../chapters/02-defining-nonfunctional-requirements.md)، بخش «استفاده از متریک‌های response time»، صص. ۴۱–۴۳
+- همین را در مرورگر امتحان کنید: [percentileها و tail latency](../../widgets/02-tail-latency.html)

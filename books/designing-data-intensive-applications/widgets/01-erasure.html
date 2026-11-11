@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>پاک کردن داده‌ی یک مشتری</title>
+<meta name="description" content="مشتری‌ای درخواست پاک شدن داده می‌دهد. داده‌اش را از system of record پاک کنید، داده‌ی derived را دوباره بسازید و هر کپی‌ای را که زنده می‌ماند پیدا کنید: append-only log، جدول‌های derived، یک snapshot خروجی‌گرفته و داده‌ی آموزش مدل. برای فصل ۱ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .copies { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+  .copy { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 10px 12px; display: grid; gap: 6px; align-content: start; }
+  .copy.has { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 7%, var(--surface)); }
+  .copy.clean { border-color: var(--ok); }
+  .copy .kind { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .copy .name { font-weight: 650; }
+  .copy .from { font-size: .8rem; color: var(--ink-3); }
+  .copy .state { font-size: .85rem; font-weight: 650; }
+  .copy.has .state { color: var(--bad); }
+  .copy.clean .state { color: var(--ok); }
+  .copy .note { font-size: .8rem; color: var(--ink-2); line-height: 1.5; }
+  .copy .btn { justify-self: start; }
+  .predict { display: grid; gap: 6px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/01-trade-offs-in-data-systems-architecture.html">فصل ۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">پاک کردن داده‌ی یک مشتری</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۱ · بده‌بستان‌ها در معماری سیستم‌های داده</div>
+  <h1>پاک کردن داده‌ی یک مشتری</h1>
+  <p class="lede">مشتری‌ای درخواست پاک شدن داده‌اش را می‌دهد. حذف ردیفش از system of record ساده‌ترین بخش کار است: کپی‌هایش در یک append-only log، در داده‌ی derivedی که از روی همان log ساخته می‌شود، و در snapshotهایی که هیچ rebuildی به آن‌ها نمی‌رسد زنده‌اند. همه را پیدا کنید، بعد rebuild کنید و ببینید چیزی برنمی‌گردد.</p>
+  <p class="source-note">برای بخش‌های «مفهوم system of record و derived data» (صص. ۱۰–۱۲) و «سیستم‌های داده، قانون و جامعه» (صص. ۲۴–۲۵): داده‌ی derived از روی منبعش دوباره ساخته می‌شود، و حق پاک شدن با logهای immutable و مجموعه‌داده‌های derived مثل داده‌ی آموزش ML برخورد می‌کند. نمای <em>کتاب</em> همان نوع سیستم‌هایی است که فصل نام می‌برد؛ نمای <em>در عمل</em> آن‌ها را روی reference stack خود vault می‌برد. کپی‌ها، پیوندها و قاعده‌های rebuild ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="row">
+      <div id="mode"></div>
+      <span class="spacer"></span>
+      <button class="btn primary" type="button" id="rebuild">▶ rebuild داده‌ی derived</button>
+      <button class="btn" type="button" id="reset">↺ از اول</button>
+    </div>
+    <div class="predict" id="predict-box">
+      <p style="margin:0;font-size:.9rem"><strong>اول پیش‌بینی کنید:</strong> فقط system of record پاک می‌شود و بعد همه‌ی داده‌ی derived دوباره ساخته می‌شود. چند کپی از این آدم باقی می‌ماند؟</p>
+      <div id="predict"></div>
+    </div>
+  </div>
+
+  <div class="copies" id="copies" style="margin-top:14px" role="group" aria-label="جاهایی که کپی دارند"></div>
+
+  <div class="grid-2" style="margin-top:14px">
+    <div class="panel">
+      <div class="stats">
+        <div class="stat"><span class="stat-label">کپی‌های فعلی</span><span class="stat-value" id="n-now"></span></div>
+        <div class="stat"><span class="stat-label">بعد از rebuild بعدی</span><span class="stat-value" id="n-after"></span></div>
+        <div class="stat"><span class="stat-label">حذف‌ها تا این‌جا</span><span class="stat-value" id="n-del"></span></div>
+      </div>
+      <p id="verdict" style="margin:10px 0 0" aria-live="polite"></p>
+    </div>
+    <div class="panel"><p class="panel-title">چه اتفاقی افتاد</p><ol id="log"></ol></div>
+  </div>
+
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>هر rebuild آدم را برمی‌گرداند.</strong> کپی derivedی که جدا پاک شده، در rebuild بعدی برمی‌گردد اگر ورودی‌اش هنوز آن آدم را داشته باشد. اول از ریشه پاک کنید، بعد rebuild.</li>
+    <li><strong>ریشه همان log است و log append-only است.</strong> هر rebuild از آن شروع می‌شود، پس پاک کردن یعنی بازنویسی تاریخچه‌ای که قرار بود هیچ‌وقت تغییر نکند؛ همان پرسش کتاب که چطور از وسط یک log immutable حذف کنیم (ص. ۲۴).</li>
+    <li><strong>هیچ rebuildی snapshotها را نمی‌بیند.</strong> فایل خروجی یا training setی که یک بار کپی شده را هیچ چیز به‌روز نمی‌کند. باید دستی پیدا و پاکش کرد، و این بخشی از هزینه‌ی واقعی نگهداری داده است (ص. ۲۵).</li>
+    <li><strong>کمتر جمع کردن از بعداً پاک کردن ارزان‌تر است.</strong> هر ستونی که کپی نشود و هر کپی‌ای که بعد از هدفش نماند، یک جای کمتر برای گشتن است؛ همان data minimization (ص. ۲۵).</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/01-trade-offs-in-data-systems-architecture.html"><small>درس</small>فصل ۱: بده‌بستان‌ها در معماری سیستم‌های داده</a></li>
+    <li><a href="01-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۱ در طول یک pipeline داده</a></li>
+    <li><a href="03-incremental-delete.html"><small>شبیه‌سازی</small>حذفی که هیچ‌وقت نمی‌رسد</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+
+  // kind: record | log | derived (rebuilt from `from`) | snapshot (copied once; nothing rebuilds it)
+  var WORLDS = {
+    book: [
+      { id: "db", name: "دیتابیس اصلی", kind: "record", note: "همان system of record: ردیف معتبر (ص. ۱۰)." },
+      { id: "log", name: "event log append-only", kind: "log", from: "db", note: "هر تغییری که تا حالا شده، بدون بازنویسی (ص. ۲۴)." },
+      { id: "idx", name: "search index", kind: "derived", from: "log", note: "داده‌ی derived: با پردازش دوباره‌ی log ساخته می‌شود (ص. ۱۱)." },
+      { id: "cache", name: "cache", kind: "derived", from: "db", note: "داده‌ی derived: از روی دیتابیس دوباره پر می‌شود (ص. ۱۱)." },
+      { id: "train", name: "داده‌ی آموزش ML", kind: "derived", from: "log", note: "مجموعه‌داده‌ی derivedی که کتاب صریحاً نام می‌برد (ص. ۲۴)." },
+      { id: "backup", name: "backup دیشب", kind: "snapshot", note: "کپی‌ای که یک بار گرفته شده. هیچ چیز آن را دوباره نمی‌سازد؛ باید منقضی یا پاک شود." }
+    ],
+    practice: [
+      { id: "src", name: "دیتابیس منبع", kind: "record", note: "همان system of record محصول. تیم داده فقط از یک replica می‌خواند." },
+      { id: "bronze", name: "Bronze", kind: "log", from: "src", note: "کپی append-only هر نسخه از ردیف که loader دیده است. hard delete در منبع هیچ‌وقت به آن نمی‌رسد." },
+      { id: "silver", name: "Silver", kind: "derived", from: "bronze", note: "تازه‌ترین نسخه‌ی هر ردیف، که SQL از روی Bronze دوباره می‌سازد." },
+      { id: "gold", name: "Gold: خرج هر segment", kind: "derived", from: "silver", note: "داده‌ی تجمیعی. کسی را شناسایی نمی‌کند، اما ردیف‌های این آدم تا rebuild بعدی هنوز در آن شمرده می‌شوند." },
+      { id: "csv", name: "خروجی CSV یک تحلیلگر", kind: "snapshot", note: "ماه پیش از یک notebook دانلود شده. هیچ pipelineی از وجودش خبر ندارد." },
+      { id: "feat", name: "training set مدل", kind: "derived", from: "silver", note: "featureهایی که با retrain مدل از روی Silver دوباره ساخته می‌شوند." }
+    ]
+  };
+
+  var mode = "book", world, deletes, log = Kit.log(Kit.$("#log"), { max: 30 });
+
+  function byId(id) { return world.filter(function (c) { return c.id === id; })[0]; }
+
+  function reset() {
+    world = WORLDS[mode].map(function (c) { return Object.assign({ has: true }, c); });
+    deletes = 0;
+    log.clear();
+    log.add("مشتری ۴۱۷ درخواست پاک شدن داده‌اش را داده است. همه‌ی جاهای زیر یک کپی دارند.", "muted");
+    render();
+  }
+
+  // Rebuild derived copies in dependency order: a derived copy holds the person iff its input does.
+  function rebuilt(cs) {
+    var out = cs.map(function (c) { return Object.assign({}, c); });
+    var get = function (id) { return out.filter(function (c) { return c.id === id; })[0]; };
+    out.forEach(function (c) { if (c.kind === "derived") c.has = get(c.from).has; });
+    return out;
+  }
+  function count(cs) { return cs.filter(function (c) { return c.has; }).length; }
+
+  function rebuild() {
+    var before = world.map(function (c) { return c.has; });
+    world = rebuilt(world);
+    var back = world.filter(function (c, i) { return c.has && !before[i]; });
+    log.add("داده‌ی derived از روی ورودی‌هایش دوباره ساخته شد. " + count(world) + " کپی باقی مانده است.", count(world) ? "warn" : "ok");
+    back.forEach(function (c) { log.add(c.name + ": این آدم برگشت، چون ورودی‌اش، یعنی " + byId(c.from).name + "، هنوز او را دارد.", "bad"); });
+    render();
+  }
+
+  function del(c) {
+    c.has = false; deletes += 1;
+    var msg = "مشتری ۴۱۷ از " + c.name + " پاک شد.";
+    if (c.kind === "log") msg += " یعنی تاریخچه‌ای بازنویسی شد که log برای تغییر نکردن ساخته شده بود.";
+    if (c.kind === "record" && mode === "practice") msg += " loader افزایشی هیچ‌وقت این حذف را نمی‌بیند.";
+    log.add(msg, c.kind === "log" ? "warn" : "muted");
+    render();
+  }
+
+  function render() {
+    var box = Kit.clear(Kit.$("#copies"));
+    world.forEach(function (c) {
+      var kindLabel = { record: "system of record", log: "append-only log", derived: "داده‌ی derived", snapshot: "snapshot" }[c.kind];
+      box.appendChild(el("div", { class: "copy " + (c.has ? "has" : "clean") },
+        el("span", { class: "kind" }, kindLabel),
+        el("span", { class: "name" }, c.name),
+        c.from ? el("span", { class: "from" }, "ساخته از: " + byId(c.from).name) : el("span", { class: "from" }, c.kind === "snapshot" ? "یک بار کپی شده" : "اول این‌جا نوشته می‌شود"),
+        el("span", { class: "state" }, c.has ? "✕ داده‌ی ۴۱۷ را دارد" : "✓ پاک شد"),
+        el("span", { class: "note" }, c.note),
+        el("button", { type: "button", class: "btn", disabled: !c.has, onclick: function () { del(c); } }, "این‌جا پاک کن")));
+    });
+    var now = count(world), after = count(rebuilt(world));
+    Kit.$("#n-now").textContent = now;
+    Kit.$("#n-after").textContent = after;
+    Kit.$("#n-del").textContent = deletes;
+    var v = Kit.$("#verdict");
+    if (after === 0 && now === 0) v.textContent = "✓ همه‌جا پاک شد و هیچ rebuildی این آدم را برنمی‌گرداند.";
+    else if (after === 0) v.textContent = "همه‌ی ریشه‌ها پاک‌اند: یک rebuild کپی‌های derived باقی‌مانده را هم پاک می‌کند.";
+    else v.textContent = "هنوز تمام نشده: " + after + " کپی از یک rebuild جان سالم به در می‌برند.";
+  }
+
+  var seg = Kit.segmented({ label: "نما", value: mode,
+    options: [{ value: "book", label: "کتاب" }, { value: "practice", label: "در عمل" }],
+    onChange: function (v) { mode = v; reset(); } });
+  Kit.$("#mode").appendChild(seg.element);
+
+  var predict = Kit.segmented({ label: "کپی‌های باقی‌مانده", value: "",
+    options: [{ value: "0", label: "0" }, { value: "1", label: "1" }, { value: "2", label: "2" }, { value: "3+", label: "3 یا بیشتر" }],
+    onChange: function (v) {
+      var fresh = WORLDS[mode].map(function (c) { return Object.assign({}, c, { has: c.kind !== "record" }); });
+      var left = count(rebuilt(fresh));
+      log.add("پیش‌بینی شما: " + (v === "3+" ? "3 یا بیشتر" : v) + ". پاک کردن فقط record و rebuild، " + left + " کپی باقی می‌گذارد: log، هر چه از روی آن ساخته می‌شود، و snapshot. پایین امتحانش کنید.", (v === "3+" && left >= 3) ? "ok" : "warn");
+    } });
+  Kit.$("#predict").appendChild(predict.element);
+
+  Kit.$("#rebuild").addEventListener("click", rebuild);
+  Kit.$("#reset").addEventListener("click", reset);
+  reset();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "این آدم را فقط از Silver پاک می‌کنید و بعد job شبانه Silver را دوباره می‌سازد. چه می‌شود؟",
+      options: ["پاک‌شده می‌ماند", "برمی‌گردد: Silver داده‌ی derived است و از روی Bronze ساخته می‌شود که هنوز او را دارد", "rebuild شکست می‌خورد", "Gold خودکار پاکش می‌کند"],
+      answer: 1, explain: "داده‌ی derived از روی ورودی‌اش دوباره ساخته می‌شود (صص. ۱۰–۱۱)، پس حذف باید از ریشه‌ای شروع شود که rebuild از آن می‌خواند." },
+    { q: "هیچ rebuildی به کدام کپی دست نمی‌زند؟",
+      options: ["search index", "cache", "snapshotی که یک بار گرفته شده، مثل یک CSV یا backup", "Silver"],
+      answer: 2, explain: "snapshot ورودی‌ای ندارد که به‌روزش کند. باید پیدا و پاک شود یا با یک retention rule منقضی شود؛ این کار بخشی از هزینه‌ی نگهداری داده است (ص. ۲۵)." },
+    { q: "چرا کتاب append-only logها را برای حق پاک شدن سخت می‌داند؟",
+      options: ["خواندنشان کند است", "طوری طراحی شده‌اند که تاریخچه هیچ‌وقت بازنویسی یا حذف نشود، اما حذف باید به آن‌ها برسد چون همه‌چیز از روی آن‌ها ساخته می‌شود", "نمی‌توانند داده‌ی شخصی نگه دارند", "GDPR داشتن log را ممنوع می‌کند"],
+      answer: 1, explain: "این‌که داده را از وسط یک append-only log چطور پاک کنیم، پرسش خود کتاب است (ص. ۲۴)." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,18 +1,20 @@
-# Concurrent writes and version vectors
+# نوشتن‌های concurrent و version vector
 
-Part 1 replays the book’s shopping-cart example (Figures 6-15 and 6-16) using the single-replica algorithm the book describes: the server versions each key, keeps every value not yet overwritten as a sibling, and clients merge siblings before writing. Part 2 generalizes to version vectors across two replicas.
+بخش اول مثال سبد خرید کتاب را، در شکل‌های ۶-۱۵ و ۶-۱۶، با الگوریتم تک‌replica که کتاب توصیف می‌کند دوباره اجرا می‌کند: سرور برای هر کلید نسخه نگه می‌دارد، هر مقداری را که هنوز بازنویسی نشده به شکل sibling نگه می‌دارد، و clientها پیش از نوشتن siblingها را merge می‌کنند. بخش دوم همین را با version vector به دو replica تعمیم می‌دهد.
 
-*Illustrates DDIA 2nd ed., “Detecting Concurrent Writes”, pp. 237–243. The implementation is the vault’s own.*
+*این آزمایش بخش «تشخیص نوشتن‌های concurrent» از ویراست دوم DDIA را نشان می‌دهد (صص. ۲۳۷–۲۴۳). پیاده‌سازی مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+با Python 3.10 یا جدیدتر، فقط کتابخانه‌ی استاندارد، و قطعی:
 
 ```sh
 python3 cart.py
 ```
 
-## Expected output
+خروجی برنامه انگلیسی است، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را درست نشان نمی‌دهند.
+
+## خروجی مورد انتظار
 
 ```text
 Part 1 - one replica, two clients (the book's shopping cart)
@@ -33,13 +35,13 @@ Part 2 - two replicas, version vectors
   replicate to B: applied; B holds [eggs, flour, milk]
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Each write overwrites exactly the siblings its client had seen and keeps the concurrent ones — the server never needs to understand the values.
-- Merging siblings by set union loses no items (removals would need tombstones — see the chapter note).
-- Version vectors detect that two writes on different replicas are concurrent, keep both, and let a later merged write supersede them.
+- هر نوشتن دقیقاً siblingهایی را بازنویسی می‌کند که client آن‌ها را دیده بود و siblingهای هم‌زمان را نگه می‌دارد؛ سرور هیچ‌وقت لازم ندارد مقدارها را بفهمد.
+- عمل merge کردن siblingها با اجتماع مجموعه‌ها هیچ آیتمی را گم نمی‌کند؛ برای حذف کردن tombstone لازم است، که در یادداشت فصل آمده.
+- مفهوم version vector تشخیص می‌دهد دو نوشتن روی replicaهای مختلف concurrent هستند، هر دو را نگه می‌دارد، و اجازه می‌دهد یک نوشتن merge‌شده‌ی بعدی جای هر دو را بگیرد.
 
-## Related
+## پیوندها
 
-- Chapter note: [6. Replication](../../chapters/06-replication.md) — “Detecting Concurrent Writes”, pp. 237–243
-- Explore in the browser: [Replication lag and quorums](../../widgets/06-replication.html)
+- یادداشت فصل: [فصل ۶: مفهوم replication](../../chapters/06-replication.md)، بخش «تشخیص نوشتن‌های concurrent»، صص. ۲۳۷–۲۴۳
+- در مرورگر: [نوشتن‌های concurrent](../../widgets/06-concurrent-writes.html) و [مفهوم replication lag و quorum](../../widgets/06-replication.html)

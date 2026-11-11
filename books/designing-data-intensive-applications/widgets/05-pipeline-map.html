@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۵ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را طی کنید و ببینید داده در هر مرحله با چه encodingی جابه‌جا می‌شود، چه کسی schema را می‌داند و retry کجا امن است. برای فصل ۵ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/05-encoding-and-evolution.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۵ · قالب‌های encoding و تکامل</div>
+  <h1>فصل ۵ در طول یک pipeline داده</h1>
+  <p class="lede">داده در هر مرحله‌ی pipeline یک بار encode و یک بار decode می‌شود، و نویسنده و خواننده همیشه هم‌نسخه نیستند. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید schema کجا همراه داده است، کجا سازگاری می‌شکند و کجا retry کار را تکرار می‌کند.</p>
+  <p class="source-note">کل فصل را (صص. ۱۶۱–۱۹۶) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens قالب و schema:</strong> schema در loader همراه داده می‌شود و تا Gold می‌ماند؛ دو سر pipeline، یعنی خروجی‌های notebook و پاسخ JSON، جایی‌اند که خواننده باید type را حدس بزند.</li>
+    <li><strong>با lens سازگاری:</strong> پرخطرترین تغییرها در دو مرز سازمانی‌اند: تیم منبع که بدون خبر schema را عوض می‌کند، و clientهایی که هم‌زمان با API به‌روز نمی‌شوند.</li>
+    <li><strong>با lens تکرار با retry:</strong> loader تنها جایی است که retry کار را تکرار می‌کند؛ Silver با dedup آن را خنثی می‌کند، پس امنیت کل pipeline به یک مرحله‌ی بعدی وابسته است.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/05-encoding-and-evolution.html"><small>درس</small>فصل ۵: قالب‌های encoding و تکامل</a></li>
+    <li><a href="05-encodings.html"><small>شبیه‌سازی</small>یک رکورد، چهار encoding</a></li>
+    <li><a href="05-schema-evolution.html"><small>شبیه‌سازی</small>writer's schema و reader's schema</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/05-encoding-and-evolution.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    format: {
+      label: "قالب و schema", axis: ["schema همراه داده", "schema در ذهن خواننده"],
+      cells: {
+        source: { tag: "پروتکل باینری دیتابیس", level: 1, pages: "ص. ۱۷۷", slide: "مزیتهای-schema",
+          text: "driver دیتابیس ردیف‌ها را با پروتکل باینری اختصاصی خود دیتابیس می‌گیرد؛ schema در catalog دیتابیس است و type هر ستون معلوم است." },
+        loader: { tag: "فایل Parquet با schema داخلی", level: 0, pages: "صص. ۱۷۵–۱۷۷", slide: "قالب-avro",
+          text: "loader schema را از ستون‌های منبع می‌سازد و یک بار داخل هر فایل Parquet می‌نویسد، شبیه object container file در Avro و schemaهای پویای کتاب." },
+        bronze: { tag: "ستون‌های تایپ‌دار", level: 1, pages: "صص. ۱۷۹–۱۸۰", slide: "جریان-داده-از-طریق-دیتابیس",
+          text: "جدول Bronze schema دارد، اما ردیف‌های سال‌ها پیش با شکل قدیم منبع نوشته شده‌اند: داده بیشتر از کد عمر می‌کند." },
+        silver: { tag: "قرارداد در SQL", level: 2, pages: "ص. ۱۷۷", slide: "مزیتهای-schema",
+          text: "کوئری SQL در Silver schema خروجی را تعریف می‌کند و در Git نسخه می‌خورد؛ schema همان مستنداتی است که همیشه به‌روز است." },
+        gold: { tag: "جدول پهن تایپ‌دار", level: 1, pages: "ص. ۱۷۷", slide: "مزیتهای-schema",
+          text: "ستون‌های Gold type مشخص دارند و داشبورد بدون حدس زدن می‌خواندشان." },
+        nb: { tag: "خروجی CSV یا pickle", level: 4, pages: "صص. ۱۶۴–۱۶۶", slide: "قالبهای-مخصوص-یک-زبان",
+          text: "خروجی‌های notebook اغلب CSV بدون schema یا pickle مخصوص Python است: هر دو خواننده را مجبور می‌کنند type را حدس بزند یا به همان زبان ببندد." },
+        serve: { tag: "پاسخ JSON", level: 3, pages: "صص. ۱۶۵–۱۶۷", slide: "قالب-json-و-xml-و-نسخههای-باینریشان",
+          text: "API پیش‌بینی JSON برمی‌گرداند؛ بدون JSON Schema یا OpenAPI، type عددها و شناسه‌های بزرگ به حدس client بستگی دارد." }
+      }
+    },
+    compat: {
+      label: "سازگاری", axis: ["تغییر بی‌خطر", "تغییر پرخطر"],
+      cells: {
+        source: { tag: "تیم منبع ستون عوض می‌کند", level: 4, pages: "صص. ۱۶۱–۱۶۳", slide: "introduction",
+          text: "تیم صاحب منبع بدون خبر دادن ستون اضافه می‌کند یا تغییر نام می‌دهد؛ هر مرحله‌ی بعدی کد قدیمی است که داده‌ی جدیدتر را می‌خواند." },
+        loader: { tag: "فهرست صریح ستون", level: 3, pages: "صص. ۱۶۲–۱۶۳", slide: "introduction",
+          text: "loader فقط ستون‌های YAML را می‌برد: forward compatible است چون نمی‌شکند، اما ستون تازه را بی‌صدا جا می‌گذارد، همان تله‌ی شکل ۵-۱." },
+        bronze: { tag: "ستون nullable تازه", level: 1, pages: "ص. ۱۷۹", slide: "جریان-داده-از-طریق-دیتابیس",
+          text: "اضافه کردن ستون nullable سازگار backward است: ردیف‌های قدیم null می‌گیرند و هیچ چیز بازنویسی نمی‌شود." },
+        silver: { tag: "خواندن هر دو شکل", level: 2, pages: "ص. ۱۷۹", slide: "جریان-داده-از-طریق-دیتابیس",
+          text: "کوئری Silver باید هم ردیف‌های قدیم و هم ردیف‌های جدید Bronze را بفهمد؛ migration تنبل در زمان خواندن." },
+        gold: { tag: "ستون‌هایی که داشبورد می‌شناسد", level: 2, pages: "ص. ۱۶۲", slide: "introduction",
+          text: "حذف یا تغییر نام یک ستون Gold داشبوردهای قدیمی را می‌شکند؛ اضافه کردن ستون بی‌خطر است." },
+        nb: { tag: "تحلیل یک‌باره", level: 1, pages: "ص. ۱۶۴", slide: "قالبهای-مخصوص-یک-زبان",
+          text: "تحلیل‌های notebook عمر کوتاهی دارند و کمتر کسی بعداً خروجی‌شان را می‌خواند." },
+        serve: { tag: "clientهای قدیم زنده‌اند", level: 4, pages: "ص. ۱۸۶", slide: "جریان-داده-از-طریق-سرویس-rest-و-rpc",
+          text: "اپ‌ها هم‌زمان با API به‌روز نمی‌شوند: درخواست‌ها backward compatibility و پاسخ‌ها forward compatibility لازم دارند، و یک category تازه در پاسخ می‌تواند client قدیم را بشکند." }
+      }
+    },
+    retry: {
+      label: "تکرار با retry", axis: ["retry بی‌خطر", "retry کار را تکرار می‌کند"],
+      cells: {
+        source: { tag: "فقط خواندن", level: 0, pages: "ص. ۱۸۴", slide: "جریان-داده-از-طریق-سرویس-rest-و-rpc",
+          text: "خواندن از replica را می‌شود هر چند بار تکرار کرد؛ هیچ چیز عوض نمی‌شود." },
+        loader: { tag: "append در retry", level: 4, pages: "صص. ۱۸۴ و ۱۸۹", slide: "مفهوم-durable-execution-و-workflow",
+          text: "اگر load نیمه‌کاره شکست بخورد و Airflow آن را retry کند، با write_disposition: append نیمه‌ی اول دو بار نوشته می‌شود." },
+        bronze: { tag: "تکراری‌ها می‌مانند", level: 3, pages: "ص. ۱۸۹", slide: "مفهوم-durable-execution-و-workflow",
+          text: "جدول Bronze تکراری‌های retry را نگه می‌دارد؛ بی‌خطر بودن به مرحله‌ی بعد سپرده شده." },
+        silver: { tag: "dedup با آخرین نسخه", level: 1, pages: "ص. ۱۸۹", slide: "مفهوم-durable-execution-و-workflow",
+          text: "جدول Silver برای هر id جدیدترین نسخه را انتخاب می‌کند؛ ساخت دوباره‌اش idempotent است و تکراری‌های Bronze را خنثی می‌کند." },
+        gold: { tag: "بازسازی کامل", level: 1, pages: "ص. ۱۸۸", slide: "مفهوم-durable-execution-و-workflow",
+          text: "جدول Gold هر بار از Silver دوباره ساخته می‌شود؛ اجرای دوباره همان نتیجه را می‌دهد." },
+        nb: { tag: "اجرای دوباره‌ی cellها", level: 2, pages: "ص. ۱۸۹", slide: "مفهوم-durable-execution-و-workflow",
+          text: "اجرای دوباره‌ی یک cell که به جدولی append می‌کند همان مشکل loader را دارد؛ cellهای خوانشی بی‌خطرند." },
+        serve: { tag: "timeout و retry در client", level: 3, pages: "صص. ۱۸۳–۱۸۴", slide: "جریان-داده-از-طریق-سرویس-rest-و-rpc",
+          text: "client بعد از timeout نمی‌داند پیش‌بینی انجام شده یا نه؛ پیش‌بینی خوانشی است و retryاش بی‌خطر، اما هر endpoint که چیزی ثبت کند request id لازم دارد." }
+      }
+    }
+};
+
+  var lens = "format", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "تیم منبع ستون phone را به mobile تغییر نام می‌دهد و loader فهرست صریح ستون دارد. چه اتفاقی می‌افتد؟",
+      options: ["loader ستون تازه را خودکار اضافه می‌کند", "ستون mobile load نمی‌شود و phone یا خطا می‌دهد یا null می‌شود", "warehouse تغییر نام را از روی field tag تشخیص می‌دهد", "هیچ؛ Parquet تغییر نام را مدیریت می‌کند"],
+      answer: 1, explain: "تطبیق با اسم ستون است، مثل Avro؛ اسم تازه برای loader ناشناخته است و نادیده گرفته می‌شود، همان تله‌ی شکل ۵-۱ (صص. ۱۶۲–۱۶۳ و ۱۷۴)." },
+    { q: "چرا retry شدن task مربوط به load در Airflow با write_disposition: append ممکن است ردیف تکراری بسازد؟",
+      options: ["چون Airflow هر task را دو بار اجرا می‌کند", "چون retry فقط وقتی بی‌خطر است که کار idempotent باشد و append نیست", "چون Parquet تکراری‌ها را نگه می‌دارد", "چون durable execution نتیجه‌ها را log می‌کند"],
+      answer: 1, explain: "اجرای دوباره‌ی یک کار غیر idempotent کار را تکرار می‌کند؛ Airflow نتیجه‌ی قدم‌های نیمه‌تمام را log نمی‌کند (صص. ۱۸۴ و ۱۸۸–۱۸۹)." }
+  ]);
+})();
+</script>
+</body>
+</html>

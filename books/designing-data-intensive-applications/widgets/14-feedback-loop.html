@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Credit-Score Feedback Loop</title>
-<meta name="description" content="Give 300 workers random misfortunes, let employers screen applicants by credit score, and watch a temporary setback turn into a self-reinforcing spiral of joblessness. Illustrates DDIA Chapter 14.">
+<title>مفهوم feedback loop امتیاز اعتباری</title>
+<meta name="description" content="به ۳۰۰ کارگر بدشانسی‌های تصادفی بدهید، بگذارید کارفرماها متقاضی‌ها را با امتیاز اعتباری غربال کنند، و ببینید یک عقب‌گرد موقت چطور به مارپیچ خودتقویت‌کننده‌ی بیکاری تبدیل می‌شود. برای فصل ۱۴ DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .charts { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
@@ -15,74 +15,74 @@
   .dots i.out { background: var(--warn); }
   .dots i.trap { background: var(--bad); }
   .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .76rem; color: var(--ink-2); margin-top: 6px; }
-  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 4px; vertical-align: -1px; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/14-doing-the-right-thing.html">Chapter 14</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Feedback loop</span>
+      <a href="../chapters/14-doing-the-right-thing.html">فصل ۱۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم feedback loop</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 14 · Doing the Right Thing</div>
-  <h1>A credit-score feedback loop</h1>
-  <p class="lede">A good worker hits a misfortune outside their control, misses payments, and their credit score drops. If employers screen applicants by credit score, the drop makes a new job harder to find — and joblessness pushes the score lower still. Compare the same population with and without that screening.</p>
-  <p class="source-note">Illustrates “Feedback Loops” (pp. 588–589) and “Responsibility and Accountability” (pp. 587–588). Everything numeric here — 300 workers, monthly steps, shock rate, score changes, hiring odds — is the vault’s own toy model, not data from the book. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۴ · کار درست را انجام دادن</div>
+  <h1>مفهوم feedback loop امتیاز اعتباری</h1>
+  <p class="lede">کارگری خوب به بدشانسی‌ای بیرون از کنترلش برمی‌خورد، قسط‌هایش عقب می‌افتد و امتیاز اعتباری‌اش پایین می‌آید. اگر کارفرماها متقاضی‌ها را با امتیاز اعتباری غربال کنند، این افت پیدا کردن کار تازه را سخت‌تر می‌کند و بیکاری امتیاز را باز هم پایین‌تر می‌برد. همین جمعیت را با این غربال و بدون آن مقایسه کنید.</p>
+  <p class="source-note">برای بخش‌های «مفهوم feedback loop» در صص. ۵۸۸–۵۸۹ و «مسئولیت و پاسخ‌گویی» در صص. ۵۸۷–۵۸۸. همه‌ی عددهای اینجا، یعنی ۳۰۰ کارگر، قدم‌های ماهانه، نرخ بدشانسی، تغییر امتیاز و شانس استخدام، مدل اسباب‌بازی خود vault است، نه داده‌ای از کتاب. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
-      <div class="charts">
+      <div class="charts" dir="ltr">
         <figure>
-          <figcaption>Share without work, month by month</figcaption>
-          <svg id="unemp" role="img" aria-label="Unemployment over time, with and without credit screening"></svg>
+          <figcaption dir="rtl">سهم بیکارها، ماه به ماه</figcaption>
+          <svg id="unemp" role="img" aria-label="بیکاری در طول زمان، با غربال اعتباری و بدون آن"></svg>
         </figure>
         <figure>
-          <figcaption>Share out of work for 12+ months (trapped)</figcaption>
-          <svg id="trap" role="img" aria-label="Long-term unemployment over time"></svg>
+          <figcaption dir="rtl">سهم کسانی که ۱۲ ماه یا بیشتر بیکارند، یعنی گرفتارشده‌ها</figcaption>
+          <svg id="trap" role="img" aria-label="بیکاری بلندمدت در طول زمان"></svg>
         </figure>
       </div>
-      <p class="panel-title" style="margin-top:12px">The 300 workers at the end of the run (with screening as set)</p>
+      <p class="panel-title" style="margin-top:12px">همان ۳۰۰ کارگر در پایان اجرا، با غربال طبق تنظیم فعلی</p>
       <div class="dots" id="dots" aria-hidden="true"></div>
-      <div class="legend"><span><i style="background:var(--ok)"></i>employed</span><span><i style="background:var(--warn)"></i>out of work</span><span><i style="background:var(--bad)"></i>out of work 12+ months</span></div>
+      <div class="legend"><span><i style="background:var(--ok)"></i>شاغل</span><span><i style="background:var(--warn)"></i>بیکار</span><span><i style="background:var(--bad)"></i>بیکار ۱۲ ماه یا بیشتر</span></div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">The system</p>
-        <label class="check"><input type="checkbox" id="screen" checked> Employers reject applicants with low credit scores</label>
+        <p class="panel-title">سیستم</p>
+        <label class="check"><input type="checkbox" id="screen" checked> کارفرماها متقاضی‌های با امتیاز اعتباری پایین را رد می‌کنند</label>
         <div id="sliders" style="margin-top:10px"></div>
       </div>
       <div class="panel wide">
-        <p class="panel-title">After 10 years</p>
+        <p class="panel-title">بعد از ۱۰ سال</p>
         <div class="stats" id="stats"></div>
         <p class="field-hint" id="verdict" aria-live="polite" style="margin:8px 0 0"></p>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Same people, same luck.</strong> Both runs use identical misfortunes; only the screening differs — yet long-term exclusion appears only with it.</li>
-    <li><strong>A spiral, not a verdict.</strong> Trapped workers weren’t worse workers; their score fell because they lost a job, and then kept them from the next one.</li>
-    <li><strong>Systems thinking.</strong> Looking only at the scoring model, each rejection seems “prudent”; the harm shows up only when you model the people responding to it (p. 589).</li>
-    <li><strong>Tune the screen.</strong> A stricter threshold or harsher score drops deepen the trap; recovery while unemployed is impossible in this model, as in the book’s story.</li>
+    <li><strong>همان آدم‌ها، همان شانس.</strong> هر دو اجرا بدشانسی‌های یکسانی دارند و فقط غربال فرق می‌کند؛ اما طرد بلندمدت فقط با غربال ظاهر می‌شود.</li>
+    <li><strong>یک مارپیچ، نه یک حکم.</strong> کارگرهای گرفتار کارگرهای بدتری نبودند؛ امتیازشان افتاد چون کارشان را از دست دادند، و بعد همان امتیاز آن‌ها را از کار بعدی محروم کرد.</li>
+    <li><strong>تفکر سیستمی.</strong> اگر فقط به مدل امتیازدهی نگاه کنید، هر رد کردنی «محتاطانه» به نظر می‌رسد؛ آسیب فقط وقتی پیدا می‌شود که آدم‌هایی را هم که به آن واکنش نشان می‌دهند مدل کنید (ص. ۵۸۹).</li>
+    <li><strong>غربال را تنظیم کنید.</strong> آستانه‌ی سخت‌گیرانه‌تر یا افت تندتر امتیاز تله را عمیق‌تر می‌کند؛ در این مدل، مثل داستان کتاب، بهبود امتیاز در دوران بیکاری ناممکن است.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/14-doing-the-right-thing.html"><small>Lesson</small>14. Doing the Right Thing</a></li>
+    <li><a href="../chapters/14-doing-the-right-thing.html"><small>درس</small>فصل ۱۴: کار درست را انجام دادن</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -123,8 +123,8 @@
     var on = run(true), off = run(false), cur = screen ? on : off;
     var yMax = Math.max(10, Math.ceil(Math.max.apply(null, on.unemp.concat(off.unemp).map(function (p) { return p[1]; })) / 5) * 5);
     var opts = function (a, b) {
-      return { width: 360, height: 200, xMax: 10, yMax: yMax, xLabel: "years", yFormat: function (v) { return v + "%"; },
-        series: [{ points: a, cls: "bad", label: "with screening" }, { points: b, cls: "s1 dashed", label: "without" }] };
+      return { width: 360, height: 200, xMax: 10, yMax: yMax, xLabel: "سال", yFormat: function (v) { return v + "%"; },
+        series: [{ points: a, cls: "bad", label: "با غربال" }, { points: b, cls: "s1 dashed", label: "بدون غربال" }] };
     };
     Kit.lineChart(document.getElementById("unemp"), opts(on.unemp, off.unemp));
     Kit.lineChart(document.getElementById("trap"), opts(on.trapped, off.trapped));
@@ -134,32 +134,32 @@
 
     var last = function (s) { return s[s.length - 1][1]; };
     var stats = Kit.clear(document.getElementById("stats"));
-    [["Out of work", last(cur.unemp).toFixed(0) + "%", ""], ["Trapped 12+ mo", last(cur.trapped).toFixed(0) + "%", last(cur.trapped) > 2 ? "bad" : "ok"],
-     ["Without screening", last(off.trapped).toFixed(0) + "% trapped", ""]].forEach(function (x) {
+    [["بیکار", last(cur.unemp).toFixed(0) + "%", ""], ["گرفتار ۱۲+ ماه", last(cur.trapped).toFixed(0) + "%", last(cur.trapped) > 2 ? "bad" : "ok"],
+     ["بدون غربال", last(off.trapped).toFixed(0) + "% گرفتار", ""]].forEach(function (x) {
       stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
     });
     document.getElementById("verdict").textContent = screen
-      ? "Identical misfortunes; screening by credit score turns " + last(on.trapped).toFixed(0) + "% of workers into long-term unemployed, versus " + last(off.trapped).toFixed(0) + "% without it."
-      : "Without screening, people recover from the same misfortunes — joblessness stays short.";
+      ? "بدشانسی‌های یکسان؛ غربال با امتیاز اعتباری " + last(on.trapped).toFixed(0) + "% کارگرها را بیکار بلندمدت می‌کند، در برابر " + last(off.trapped).toFixed(0) + "% بدون آن."
+      : "بدون غربال، آدم‌ها از همان بدشانسی‌ها بیرون می‌آیند و بیکاری کوتاه می‌ماند.";
   }
 
   var sl = document.getElementById("sliders");
-  sl.appendChild(Kit.slider({ label: "Misfortune per month", min: 0.5, max: 4, step: 0.5, value: cfg.shock, unit: "%", onInput: function (v) { cfg.shock = v; render(); } }).element);
-  sl.appendChild(Kit.slider({ label: "Score needed to be hired", min: 450, max: 700, step: 10, value: cfg.threshold, onInput: function (v) { cfg.threshold = v; render(); } }).element);
-  sl.appendChild(Kit.slider({ label: "Score lost per month out of work", min: 5, max: 50, step: 5, value: cfg.drop, onInput: function (v) { cfg.drop = v; render(); } }).element);
+  sl.appendChild(Kit.slider({ label: "بدشانسی در هر ماه", min: 0.5, max: 4, step: 0.5, value: cfg.shock, unit: "%", onInput: function (v) { cfg.shock = v; render(); } }).element);
+  sl.appendChild(Kit.slider({ label: "امتیاز لازم برای استخدام", min: 450, max: 700, step: 10, value: cfg.threshold, onInput: function (v) { cfg.threshold = v; render(); } }).element);
+  sl.appendChild(Kit.slider({ label: "امتیاز ازدست‌رفته در هر ماه بیکاری", min: 5, max: 50, step: 5, value: cfg.drop, onInput: function (v) { cfg.drop = v; render(); } }).element);
   document.getElementById("screen").addEventListener("change", render);
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "In the book’s example, what makes the credit-score loop self-reinforcing?",
-      options: ["Workers become less skilled", "Joblessness worsens the score, and the score is used to decide hiring", "Credit agencies deliberately punish the unemployed"],
-      answer: 1, explain: "A misfortune lowers the score, which blocks hiring, which pushes people toward poverty and lowers the score further (pp. 588–589)." },
-    { q: "What approach does the book suggest for anticipating such loops?",
-      options: ["More training data", "Systems thinking — considering the whole system, including the people interacting with it", "Removing protected attributes"],
-      answer: 1, explain: "Many consequences can be predicted by thinking about the entire system, not just its computerized parts (p. 589)." },
-    { q: "How does ML-based scoring differ from a traditional credit score, per the book?",
-      options: ["It asks who is similar to you and how such people behaved", "It only uses your own borrowing history", "It is easier to appeal"],
-      answer: 0, explain: "Predictive analytics stereotypes by similarity, using wider and more opaque inputs (pp. 587–588)." }
+    { q: "در مثال کتاب، چه چیزی حلقه‌ی امتیاز اعتباری را خودتقویت‌کننده می‌کند؟",
+      options: ["کارگرها مهارتشان را از دست می‌دهند", "بیکاری امتیاز را بدتر می‌کند، و همان امتیاز برای تصمیم استخدام به کار می‌رود", "مؤسسه‌های اعتباری عمداً بیکارها را تنبیه می‌کنند"],
+      answer: 1, explain: "بدشانسی امتیاز را پایین می‌آورد، امتیاز پایین جلوی استخدام را می‌گیرد، بیکاری آدم را به سمت فقر می‌برد و امتیاز باز هم پایین‌تر می‌رود (صص. ۵۸۸–۵۸۹)." },
+    { q: "کتاب برای پیش‌بینی چنین حلقه‌هایی چه رویکردی پیشنهاد می‌کند؟",
+      options: ["داده‌ی آموزشی بیشتر", "تفکر سیستمی؛ در نظر گرفتن کل سیستم، همراه با آدم‌هایی که با آن سروکار دارند", "حذف ویژگی‌های محافظت‌شده"],
+      answer: 1, explain: "خیلی از پیامدها را می‌شود با فکر کردن به کل سیستم، نه فقط بخش‌های کامپیوتری‌اش، پیش‌بینی کرد (ص. ۵۸۹)." },
+    { q: "به گفته‌ی کتاب، امتیازدهی مبتنی بر ML چه فرقی با امتیاز اعتباری سنتی دارد؟",
+      options: ["می‌پرسد چه کسانی شبیه شما هستند و آدم‌هایی مثل شما چطور رفتار کرده‌اند", "فقط از سابقه‌ی وام‌گیری خود شما استفاده می‌کند", "اعتراض به آن آسان‌تر است"],
+      answer: 0, explain: "مفهوم predictive analytics بر اساس شباهت کلیشه می‌سازد و از ورودی‌های گسترده‌تر و مبهم‌تر استفاده می‌کند (صص. ۵۸۷–۵۸۸)." }
   ]);
 })();
 </script>

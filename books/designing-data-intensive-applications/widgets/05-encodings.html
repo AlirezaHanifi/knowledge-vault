@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>One Record, Four Encodings</title>
-<meta name="description" content="The book's example record byte by byte in JSON, MessagePack, Protocol Buffers and Avro — hover any byte to see what it encodes and why the sizes are 81, 66, 33 and 32 bytes. Illustrates DDIA 2nd ed., Chapter 5.">
+<title>یک رکورد، چهار encoding</title>
+<meta name="description" content="رکورد نمونه‌ی کتاب، بایت به بایت، در JSON، MessagePack، Protocol Buffers و Avro؛ روی هر بایت بروید تا ببینید چه چیزی را encode می‌کند و چرا اندازه‌ها ۸۱، ۶۶، ۳۳ و ۳۲ بایت‌اند. برای فصل ۵ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .bytes { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -23,9 +23,9 @@
   .byte.sel { outline: 2px solid var(--accent); outline-offset: 1px; }
   .byte.same { background: var(--accent-soft); }
   .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .8rem; color: var(--ink-2); margin-top: 10px; }
-  .legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 4px; border: 1px solid var(--line); }
+  .legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: middle; margin-inline-end: 4px; border: 1px solid var(--line); }
   .bars { display: grid; gap: 8px; }
-  .bar-row { display: grid; grid-template-columns: 120px 1fr 64px; gap: 8px; align-items: center; font-size: .85rem; }
+  .bar-row { display: grid; grid-template-columns: 120px 1fr 72px; gap: 8px; align-items: center; font-size: .85rem; }
   .bar-track { height: 14px; background: var(--surface-2); border-radius: 7px; overflow: hidden; }
   .bar-fill { height: 100%; background: var(--accent); border-radius: 7px; }
   .bar-row.on { font-weight: 700; }
@@ -36,68 +36,68 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-encoding-and-evolution.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Encodings</span>
+      <a href="../chapters/05-encoding-and-evolution.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">قالب‌های encoding</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Encoding and Evolution</div>
-  <h1>One record, four encodings</h1>
-  <p class="lede">The same three-field record, encoded four ways. Textual JSON spells out every field name; MessagePack makes it binary but keeps the names; Protocol Buffers replaces names with tag numbers; Avro drops identifiers altogether and relies on the schema. Select a byte to see what it means.</p>
-  <p class="source-note">Illustrates “JSON, XML, and Binary Variants”, “Protocol Buffers” and “Avro” (pp. 165–177), using the book’s example record and its sizes (81, 66, 33 and 32 bytes). The encoders are the vault’s own minimal implementations of the wire formats; the companion lab experiment reproduces the same sizes in Python.</p>
+  <div class="eyebrow">فصل ۵ · قالب‌های encoding و تکامل</div>
+  <h1>یک رکورد، چهار encoding</h1>
+  <p class="lede">یک رکورد سه‌فیلدی، با چهار encoding. قالب متنی JSON اسم همه‌ی فیلدها را می‌نویسد؛ MessagePack باینری‌اش می‌کند اما اسم‌ها را نگه می‌دارد؛ Protocol Buffers به جای اسم شماره‌ی tag می‌گذارد؛ و Avro هیچ شناسه‌ای نمی‌نویسد و به schema تکیه می‌کند. یک بایت را انتخاب کنید تا معنایش را ببینید.</p>
+  <p class="source-note">برای بخش‌های «قالب JSON و XML و نسخه‌های باینری‌شان»، «قالب Protocol Buffers» و «قالب Avro» در صص. ۱۶۵–۱۷۷، با رکورد نمونه‌ی کتاب و اندازه‌هایش: ۸۱، ۶۶، ۳۳ و ۳۲ بایت. encoderها پیاده‌سازی کوچک خود vault از این wire formatها هستند؛ آزمایش همراه در lab همین اندازه‌ها را در Python بازتولید می‌کند.</p>
 
   <div class="sim">
     <div class="panel">
       <div class="row" style="margin-bottom:12px"><div id="fmt"></div></div>
-      <div class="bytes" id="bytes" role="list" aria-label="Encoded bytes"></div>
+      <div class="bytes" id="bytes" lang="en" dir="ltr" role="list" aria-label="بایت‌های encodeشده"></div>
       <div class="legend">
         <span><i style="border-bottom:3px solid var(--s1)"></i>userName</span>
         <span><i style="border-bottom:3px solid var(--s2)"></i>favoriteNumber</span>
         <span><i style="border-bottom:3px solid var(--s3)"></i>interests</span>
-        <span><i style="background:var(--warn-soft)"></i>field name</span>
-        <span><i style="background:var(--surface-2)"></i>type, tag or length</span>
-        <span><i></i>value data</span>
+        <span><i style="background:var(--warn-soft)"></i>اسم فیلد</span>
+        <span><i style="background:var(--surface-2)"></i>type، tag یا طول</span>
+        <span><i></i>داده‌ی مقدار</span>
       </div>
     </div>
     <div class="stack">
       <div class="panel detail" aria-live="polite">
-        <p class="panel-title">Selected byte</p>
-        <div id="detail"><p style="color:var(--ink-3);margin:0">Hover or focus a byte.</p></div>
+        <p class="panel-title">بایت انتخاب‌شده</p>
+        <div id="detail"><p style="color:var(--ink-3);margin:0">روی یک بایت بروید یا focus کنید.</p></div>
       </div>
       <div class="panel">
-        <p class="panel-title">Size of the same record</p>
+        <p class="panel-title">اندازه‌ی همین رکورد</p>
         <div class="bars" id="bars"></div>
       </div>
       <div class="panel">
-        <p class="panel-title">The record</p>
+        <p class="panel-title">رکورد</p>
         <pre class="schema" id="schema"></pre>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Field names dominate JSON and MessagePack.</strong> Count the highlighted bytes: “favoriteNumber” alone costs 14–16 bytes every time a record is written.</li>
-    <li><strong>Protocol Buffers sends a tag, not a name.</strong> One byte packs the tag number and wire type, so renaming a field in the schema changes nothing on the wire — but changing a tag breaks every stored record.</li>
-    <li><strong>Avro sends only values.</strong> Without the writer’s schema you can’t even tell where one field ends and the next begins; the reader resolves the writer’s schema against its own.</li>
-    <li><strong>Numbers become variable-length.</strong> 1337 takes two bytes as a varint; small numbers take one.</li>
+    <li><strong>اسم فیلدها بیشتر حجم JSON و MessagePack را می‌گیرند.</strong> بایت‌های رنگی را بشمارید: فقط «favoriteNumber» در هر رکورد ۱۴ تا ۱۶ بایت خرج دارد.</li>
+    <li><strong>قالب Protocol Buffers به جای اسم tag می‌فرستد.</strong> یک بایت شماره‌ی tag و wire type را با هم دارد، پس تغییر نام فیلد در schema هیچ چیز را روی سیم عوض نمی‌کند؛ اما تغییر tag همه‌ی رکوردهای ذخیره‌شده را می‌شکند.</li>
+    <li><strong>قالب Avro فقط مقدارها را می‌فرستد.</strong> بدون writer's schema حتی نمی‌شود فهمید یک فیلد کجا تمام می‌شود و بعدی کجا شروع؛ خواننده writer's schema را با schema خودش تطبیق می‌دهد.</li>
+    <li><strong>عددها طول متغیر پیدا می‌کنند.</strong> عدد ۱۳۳۷ به شکل varint دو بایت می‌گیرد و عددهای کوچک یک بایت.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-encoding-and-evolution.html"><small>Lesson</small>5. Encoding and Evolution</a></li>
-    <li><a href="../lab/05-schema-evolution/README.md"><small>Experiment</small>Binary encodings and schema evolution</a></li>
+    <li><a href="../chapters/05-encoding-and-evolution.html"><small>درس</small>فصل ۵: قالب‌های encoding و تکامل</a></li>
+    <li><a href="../lab/05-schema-evolution/README.md"><small>آزمایش</small>encodingهای باینری و تکامل schema</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -110,7 +110,7 @@
 
   // Each encoder returns [{b: byte, f: fieldIndex|-1, kind: "meta"|"name"|"data", note}]
   function utf8(s) { return Array.prototype.map.call(unescape(encodeURIComponent(s)), function (c) { return c.charCodeAt(0); }); }
-  function chars(s, f, kind, what) { return utf8(s).map(function (b, i) { return { b: b, f: f, kind: kind, note: what + ": '" + s[i] + "'" }; }); }
+  function chars(s, f, kind, what) { return utf8(s).map(function (b, i) { return { b: b, f: f, kind: kind, note: what + ": «" + s[i] + "»" }; }); }
   function varint(n) { var out = []; do { var b = n & 0x7f; n = Math.floor(n / 128); out.push(n ? b | 0x80 : b); } while (n); return out; }
   function zz(n) { return n >= 0 ? n * 2 : -n * 2 - 1; }
   function bytes(arr, f, kind, note) { return arr.map(function (b, i) { return { b: b, f: f, kind: kind, note: typeof note === "function" ? note(i, arr.length) : note }; }); }
@@ -125,40 +125,40 @@
       var inName = marks.some(function (m) { return i >= m.at && i < m.at + m.len; });
       var ch = s[i], kind = inName ? "name" : /[{}\[\]:,"]/.test(ch) ? "meta" : "data";
       out.push({ b: s.charCodeAt(i), f: /[{}]/.test(ch) && (i === 0 || i === s.length - 1) ? -1 : field, kind: kind,
-        note: inName ? "Field name, spelled out in text: '" + ch + "'" : kind === "meta" ? "Punctuation '" + ch + "' — JSON syntax" : "Value as text: '" + ch + "'" });
+        note: inName ? "اسم فیلد، به شکل متن: «" + ch + "»" : kind === "meta" ? "علامت «" + ch + "» در نحو JSON" : "مقدار به شکل متن: «" + ch + "»" });
     }
     return out;
   }
   function msgpack() {
-    function str(s, f, kind, what) { return bytes([0xa0 | s.length], f, "meta", "fixstr header: a string of " + s.length + " bytes follows").concat(chars(s, f, kind, what)); }
-    var out = bytes([0x83], -1, "meta", "fixmap header: an object with 3 entries");
-    out = out.concat(str("userName", 0, "name", "Field name"), str("Martin", 0, "data", "Value"));
-    out = out.concat(str("favoriteNumber", 1, "name", "Field name"),
-      bytes([0xcd], 1, "meta", "uint16 header: a 2-byte unsigned integer follows"),
-      bytes([0x05, 0x39], 1, "data", "1337 as a big-endian 16-bit integer (0x0539)"));
-    out = out.concat(str("interests", 2, "name", "Field name"), bytes([0x92], 2, "meta", "fixarray header: an array of 2 items"),
-      str("daydreaming", 2, "data", "Array item"), str("hacking", 2, "data", "Array item"));
+    function str(s, f, kind, what) { return bytes([0xa0 | s.length], f, "meta", "header نوع fixstr: یک رشته‌ی " + s.length + " بایتی می‌آید").concat(chars(s, f, kind, what)); }
+    var out = bytes([0x83], -1, "meta", "header نوع fixmap: یک object با ۳ ورودی");
+    out = out.concat(str("userName", 0, "name", "اسم فیلد"), str("Martin", 0, "data", "مقدار"));
+    out = out.concat(str("favoriteNumber", 1, "name", "اسم فیلد"),
+      bytes([0xcd], 1, "meta", "header نوع uint16: یک عدد صحیح بدون علامت ۲ بایتی می‌آید"),
+      bytes([0x05, 0x39], 1, "data", "عدد ۱۳۳۷ به شکل عدد صحیح ۱۶ بیتی big-endian، یعنی 0x0539"));
+    out = out.concat(str("interests", 2, "name", "اسم فیلد"), bytes([0x92], 2, "meta", "header نوع fixarray: یک آرایه با ۲ عضو"),
+      str("daydreaming", 2, "data", "عضو آرایه"), str("hacking", 2, "data", "عضو آرایه"));
     return out;
   }
   function protobuf() {
-    function key(tag, wire, f) { return bytes([tag << 3 | wire], f, "meta", "Field tag " + tag + ", wire type " + wire + (wire === 2 ? " (length-delimited)" : " (varint)") + " — no field name"); }
-    function lstr(s, f, tag) { return key(tag, 2, f).concat(bytes([s.length], f, "meta", "Length: " + s.length + " bytes"), chars(s, f, "data", "Value")); }
+    function key(tag, wire, f) { return bytes([tag << 3 | wire], f, "meta", "شماره‌ی tag " + tag + "، wire type " + wire + (wire === 2 ? " یعنی length-delimited" : " یعنی varint") + "؛ بدون اسم فیلد"); }
+    function lstr(s, f, tag) { return key(tag, 2, f).concat(bytes([s.length], f, "meta", "طول: " + s.length + " بایت"), chars(s, f, "data", "مقدار")); }
     return lstr("Martin", 0, 1)
-      .concat(key(2, 0, 1), bytes(varint(1337), 1, "data", function (i) { return "1337 as a varint, byte " + (i + 1) + " of 2 (7 bits per byte, top bit = more bytes follow)"; }))
+      .concat(key(2, 0, 1), bytes(varint(1337), 1, "data", function (i) { return "عدد ۱۳۳۷ به شکل varint، بایت " + (i + 1) + " از ۲؛ هر بایت ۷ بیت دارد و بیت بالایی یعنی بایت‌های بیشتری می‌آید"; }))
       .concat(lstr("daydreaming", 2, 3), lstr("hacking", 2, 3));
   }
   function avro() {
-    function astr(s, f, what) { return bytes(varint(zz(s.length)), f, "meta", "Length " + s.length + " (zigzag varint " + zz(s.length) + ")").concat(chars(s, f, "data", what)); }
-    return astr("Martin", 0, "userName value")
-      .concat(bytes([zz(1)], 1, "meta", "Union branch 1 of [null, long] — the value is not null"),
-        bytes(varint(zz(1337)), 1, "data", function (i) { return "1337 as a zigzag varint (" + zz(1337) + "), byte " + (i + 1) + " of 2"; }))
-      .concat(bytes([zz(2)], 2, "meta", "Array block of 2 items (zigzag 4)"), astr("daydreaming", 2, "Array item"), astr("hacking", 2, "Array item"),
-        bytes([0], 2, "meta", "Block count 0: end of array"));
+    function astr(s, f, what) { return bytes(varint(zz(s.length)), f, "meta", "طول " + s.length + "، به شکل zigzag varint برابر " + zz(s.length)).concat(chars(s, f, "data", what)); }
+    return astr("Martin", 0, "مقدار userName")
+      .concat(bytes([zz(1)], 1, "meta", "شاخه‌ی ۱ از union یعنی [null, long]؛ مقدار null نیست"),
+        bytes(varint(zz(1337)), 1, "data", function (i) { return "عدد ۱۳۳۷ به شکل zigzag varint برابر " + zz(1337) + "، بایت " + (i + 1) + " از ۲"; }))
+      .concat(bytes([zz(2)], 2, "meta", "بلوک آرایه با ۲ عضو، یعنی zigzag برابر ۴"), astr("daydreaming", 2, "عضو آرایه"), astr("hacking", 2, "عضو آرایه"),
+        bytes([0], 2, "meta", "تعداد بلوک ۰: پایان آرایه"));
   }
 
   var FORMATS = [
     { id: "json", label: "JSON", enc: json, schema: JSON.stringify(RECORD, null, 2) },
-    { id: "msgpack", label: "MessagePack", enc: msgpack, schema: "No schema: like JSON, but binary.\nField names are still in every record." },
+    { id: "msgpack", label: "MessagePack", enc: msgpack, schema: "بدون schema: مثل JSON، اما باینری.\nاسم فیلدها در هر رکورد هست.", prose: true },
     { id: "protobuf", label: "Protocol Buffers", enc: protobuf, schema: "message Person {\n  string user_name = 1;\n  int64 favorite_number = 2;\n  repeated string interests = 3;\n}" },
     { id: "avro", label: "Avro", enc: avro, schema: "record Person {\n  string userName;\n  union { null, long } favoriteNumber = null;\n  array<string> interests;\n}" }
   ];
@@ -172,9 +172,9 @@
     });
     var d = data[i];
     Kit.clear(Kit.$("#detail")).appendChild(el("div", null,
-      el("p", { style: "margin:0 0 6px" }, el("span", { class: "badge accent" }, "byte " + (i + 1) + " of " + data.length), " ",
+      el("p", { style: "margin:0 0 6px" }, el("span", { class: "badge accent" }, "بایت " + (i + 1) + " از " + data.length), " ",
         el("code", null, "0x" + ("0" + d.b.toString(16)).slice(-2)), " ", el("code", null, d.b.toString(2).padStart(8, "0"))),
-      el("p", { style: "margin:0 0 4px;font-weight:600" }, d.f >= 0 ? FIELDS[d.f] : "record"),
+      el("p", { style: "margin:0 0 4px;font-weight:600" }, d.f >= 0 ? FIELDS[d.f] : "کل رکورد"),
       el("p", { style: "margin:0;color:var(--ink-2);font-size:.9rem" }, d.note)));
   }
   function render() {
@@ -182,36 +182,38 @@
     data.forEach(function (d, i) {
       var ch = d.b >= 32 && d.b < 127 ? String.fromCharCode(d.b) : "·";
       var b = el("button", { type: "button", role: "listitem", class: "byte f" + (d.f < 0 ? 3 : d.f) + " " + d.kind,
-        "aria-label": "Byte " + (i + 1) + ": " + d.note }, ("0" + d.b.toString(16)).slice(-2), el("small", null, ch));
+        "aria-label": "بایت " + (i + 1) + ": " + d.note }, ("0" + d.b.toString(16)).slice(-2), el("small", null, ch));
       b.addEventListener("mouseenter", function () { show(i, data); });
       b.addEventListener("focus", function () { show(i, data); });
       b.addEventListener("click", function () { show(i, data); });
       box.appendChild(b);
     });
     Kit.$("#schema").textContent = current.schema;
+    Kit.$("#schema").dir = current.prose ? "rtl" : "ltr";
+    Kit.$("#schema").style.fontFamily = current.prose ? "var(--font)" : "";
     var bars = Kit.clear(Kit.$("#bars"));
     FORMATS.forEach(function (f) {
       bars.appendChild(el("div", { class: "bar-row" + (f === current ? " on" : "") },
         el("span", null, f.label), el("span", { class: "bar-track" }, el("span", { class: "bar-fill", style: "display:block;width:" + (sizes[f.id] / sizes.json * 100) + "%" })),
-        el("span", { class: "mono" }, sizes[f.id] + " B")));
+        el("span", null, sizes[f.id] + " بایت")));
     });
     Kit.clear(Kit.$("#detail")).appendChild(el("p", { style: "color:var(--ink-3);margin:0" },
-      current.label + ": " + data.length + " bytes, of which " + data.filter(function (d) { return d.kind === "name"; }).length + " spell out field names. Hover or focus a byte."));
+      "قالب " + current.label + ": " + data.length + " بایت، که " + data.filter(function (d) { return d.kind === "name"; }).length + " تا از آن‌ها اسم فیلد است. روی یک بایت بروید یا focus کنید."));
   }
 
-  var seg = Kit.segmented({ label: "Encoding", value: "json",
+  var seg = Kit.segmented({ label: "قالب encoding", value: "json",
     options: FORMATS.map(function (f) { return { value: f.id, label: f.label }; }),
     onChange: function (v) { current = FORMATS.filter(function (f) { return f.id === v; })[0]; render(); } });
   Kit.$("#fmt").appendChild(seg.element);
   render();
 
   Kit.quiz(Kit.$("#quiz"), [
-    { q: "Why is MessagePack only slightly smaller than JSON for this record?",
-      options: ["It compresses badly", "It still stores every field name in every record", "It encodes numbers as text", "It adds a schema to each record"],
-      answer: 1, explain: "Binary JSON variants keep the data model of JSON, field names included; the book’s example shrinks only from 81 to 66 bytes (pp. 168–169)." },
-    { q: "Avro’s encoding contains no tags and no names. How does a reader find the fields?",
-      options: ["It guesses from the byte values", "It uses the writer’s schema, resolved against its own reader’s schema", "Every Avro record starts with a header listing the fields", "Fields are always strings separated by a delimiter"],
-      answer: 1, explain: "The reader must know the exact schema the data was written with, and matches fields by name between writer’s and reader’s schemas (pp. 172–176)." }
+    { q: "چرا MessagePack برای این رکورد فقط کمی از JSON کوچک‌تر است؟",
+      options: ["چون بد فشرده می‌کند", "چون هنوز اسم همه‌ی فیلدها را در هر رکورد نگه می‌دارد", "چون عددها را به شکل متن encode می‌کند", "چون به هر رکورد یک schema اضافه می‌کند"],
+      answer: 1, explain: "نسخه‌های باینری JSON مدل داده‌ی JSON را، با اسم فیلدها، نگه می‌دارند؛ مثال کتاب فقط از ۸۱ به ۶۶ بایت کوچک می‌شود (صص. ۱۶۷–۱۶۹)." },
+    { q: "قالب Avro نه tag دارد و نه اسم. خواننده فیلدها را چطور پیدا می‌کند؟",
+      options: ["از روی مقدار بایت‌ها حدس می‌زند", "از writer's schema استفاده می‌کند و آن را با reader's schema خودش تطبیق می‌دهد", "هر رکورد Avro با یک header شامل فهرست فیلدها شروع می‌شود", "فیلدها همیشه رشته‌هایی با جداکننده‌اند"],
+      answer: 1, explain: "خواننده باید دقیقاً schemaی را بداند که داده با آن نوشته شده، و فیلدها را با اسم بین writer's schema و reader's schema جفت می‌کند (صص. ۱۷۲–۱۷۶)." }
   ]);
 })();
 </script>

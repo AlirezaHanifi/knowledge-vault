@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۲ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را مرحله‌به‌مرحله طی کنید و ببینید performance، reliability، scalability و maintainability در هر مرحله چه معنایی دارند. برای فصل ۲ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-defining-nonfunctional-requirements.html">فصل ۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۲ · تعریف نیازمندی‌های غیرکارکردی</div>
+  <h1>فصل ۲ در طول یک pipeline داده</h1>
+  <p class="lede">performance، reliability، scalability و maintainability یک تنظیم واحد برای کل پلتفرم نیستند. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید هر نیازمندی آن‌جا چه معنایی دارد.</p>
+  <p class="source-note">کل فصل را (صص. ۳۳–۶۴) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens کار خواندن یا نوشتن:</strong> هرچه جلوتر بروید کار از زمان خواندن به زمان نوشتن می‌رود. Gold و داشبوردها همان cache مربوط به home timeline در یک پلتفرم داده‌اند (صص. ۳۵–۳۶).</li>
+    <li><strong>با lens response time:</strong> فقط دو سر pipeline کاربر منتظر دارند. در میانه معیار، تازگی و throughput است و هر دو را باید به شکل توزیع دید (صص. ۳۸–۴۱).</li>
+    <li><strong>با lens faultها:</strong> fault ماشین را replicaها جذب می‌کنند؛ باگ در SQL مشترک به همه‌ی کپی‌ها با هم می‌خورد. faultهای خطرناک همبسته و بی‌صدا هستند (صص. ۴۴–۴۸).</li>
+    <li><strong>با lens maintainability:</strong> مرحله‌های ساده آن‌هایی‌اند که یک قاعده‌ی یکسان دارند؛ پیچیدگی در Silver جمع می‌شود، جایی که تست بیشترین فایده را دارد (صص. ۵۲–۵۶).</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-defining-nonfunctional-requirements.html"><small>درس</small>فصل ۲: تعریف نیازمندی‌های غیرکارکردی</a></li>
+    <li><a href="02-materialize.html"><small>شبیه‌سازی</small>محاسبه هنگام خواندن یا هنگام نوشتن؟</a></li>
+    <li><a href="02-tail-latency.html"><small>شبیه‌سازی</small>percentileها و tail latency</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/02-defining-nonfunctional-requirements.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    work: {
+      label: "کار خواندن یا نوشتن", axis: ["کار در زمان خواندن", "کار در زمان نوشتن"],
+      cells: {
+        source: { tag: "normalized: join هنگام خواندن", level: 0, pages: "ص. ۳۵", slide: "مطالعهی-موردی-home-timeline-در-شبکهی-اجتماعی",
+          text: "مثل جدول‌های users و posts و follows کتاب: هر واقعیت یک بار، و هر صفحه‌ای که چند تا از آن‌ها را لازم دارد هنگام خواندن join می‌زند." },
+        loader: { tag: "کپی زمان‌بندی‌شده", level: 2, pages: "ص. ۳۶", slide: "دو-راه-برای-ساختن-timeline",
+          text: "هر تغییر را ساعتی یک بار جابه‌جا می‌کند تا هیچ چیزی در ادامه دوباره از منبع نپرسد. اوج بار در منبع فقط batch بعدی را بزرگ‌تر می‌کند، همان‌طور که fan-out در صف timelineها را کمی دیر می‌کند." },
+        bronze: { tag: "خام، کم‌خوانده", level: 1, pages: "ص. ۳۶", slide: "دو-راه-برای-ساختن-timeline",
+          text: "برای هر تغییر یک بار نوشته می‌شود و فقط وقتی Silver دوباره ساخته می‌شود خوانده می‌شود. هیچ داشبوردی نباید مستقیم رویش باشد." },
+        silver: { tag: "یک بار deduplicate", level: 3, pages: "ص. ۳۶", slide: "دو-راه-برای-ساختن-timeline",
+          text: "تازه‌ترین نسخه‌ی هر ردیف هنگام رسیدن داده حساب می‌شود، تا هیچ خواننده‌ای مجبور به deduplicate دوباره نباشد." },
+        gold: { tag: "جواب‌های materialized", level: 4, pages: "ص. ۳۶", slide: "دو-راه-برای-ساختن-timeline",
+          text: "تجمیع‌هایی که بعد از هر load از پیش حساب می‌شوند: یک materialized view، مثل cache مربوط به home timeline. خواندن ارزان می‌شود و هر load گران‌تر." },
+        nb: { tag: "محاسبه هنگام پرسیدن", level: 0, pages: "ص. ۳۵", slide: "دو-راه-برای-ساختن-timeline",
+          text: "پرسش تحلیلگر با یک کوئری در زمان خواندن جواب می‌گیرد. برای پرسشی که یک بار پرسیده می‌شود درست است و برای پرسشی که داشبورد روزی ۴۰۰ بار می‌پرسد نه." },
+        serve: { tag: "خواندن نتیجه‌ی آماده", level: 4, pages: "ص. ۳۶", slide: "دو-راه-برای-ساختن-timeline",
+          text: "داشبوردها Gold را می‌خوانند و API یک مدل آموزش‌دیده را. هر بار باز شدن یک lookup است، نه محاسبه‌ی دوباره." }
+      }
+    },
+    latency: {
+      label: "response time", axis: ["چند دقیقه هم اشکالی ندارد", "هر میلی‌ثانیه مهم است"],
+      cells: {
+        source: { tag: "کاربران منتظرش هستند", level: 4, pages: "صص. ۳۸–۴۱", slide: "میانگین-میانه-و-percentileها",
+          text: "SLO خود محصول این‌جاست. کار تیم داده این است که در tail آن نباشد: از replica بخواند، هیچ‌وقت از primary." },
+        loader: { tag: "تازگی، نه latency", level: 0, pages: "ص. ۳۸", slide: "توصیف-performance",
+          text: "مهم این است که تازه‌ترین ردیف کی به warehouse می‌رسد و throughput هر batch چقدر است. دیر تمام شدن هر اجرا را به شکل توزیع ببینید، نه یک عدد." },
+        bronze: { tag: "throughput بارگذاری دسته‌ای", level: 1, pages: "ص. ۳۸", slide: "توصیف-performance",
+          text: "ردیف درج‌شده در ثانیه. نزدیک سقف warehouse، صف‌ها هر کوئری دیگر را هم کندتر می‌کنند." },
+        silver: { tag: "مدت اجرای job", level: 1, pages: "ص. ۳۸", slide: "توصیف-performance",
+          text: "transformی که هر هفته طولانی‌تر می‌شود روند باری است که باید پیش از جا ماندن از صبح رسمش کرد." },
+        gold: { tag: "p95 کوئری داشبوردها", level: 3, pages: "صص. ۴۰–۴۱", slide: "میانگین-میانه-و-percentileها",
+          text: "کوئری‌های داشبورد را با percentile اندازه بگیرید. کندترین‌ها اغلب مال بزرگ‌ترین مشتری‌ها یا بازه‌های تاریخی پهن‌اند." },
+        nb: { tag: "تعاملی و صبور", level: 2, pages: "ص. ۴۱", slide: "میانگین-میانه-و-percentileها",
+          text: "چند ثانیه کند به نظر می‌رسد، اما کسی به خاطرش از دست نمی‌رود." },
+        serve: { tag: "SLO روی p99 و fan-out", level: 4, pages: "صص. ۴۱–۴۲", slide: "استفاده-از-متریکهای-response-time",
+          text: "داشبورد منتظر کندترین کاشی‌اش می‌ماند، همان‌طور که درخواست منتظر کندترین backend: tail latency amplification. API یک هدف p99 لازم دارد که سمت client اندازه گرفته شود." }
+      }
+    },
+    faults: {
+      label: "faultها", axis: ["fault همان fault می‌ماند", "fault به failure تبدیل می‌شود"],
+      cells: {
+        source: { tag: "lag در replica، قطعی", level: 2, pages: "ص. ۴۳", slide: "مفهوم-reliability-و-fault-tolerance",
+          text: "replica عقب می‌افتد یا از کار می‌افتد: برای تیم داده یک fault است و اگر loader صبر و retry کند، کاربران چیزی نمی‌بینند." },
+        loader: { tag: "timeout و تغییر config", level: 3, pages: "صص. ۳۸ و ۴۷", slide: "انسانها-و-reliability",
+          text: "retry با exponential backoff به جای retry storm. برای هر جدول یک فایل YAML: تغییر config در کتاب عامل اصلی قطعی‌هاست، پس مثل کد بررسی‌اش کنید." },
+        bronze: { tag: "یک node ممکن است بمیرد", level: 1, pages: "صص. ۴۵–۴۶", slide: "انواع-faultهای-سختافزاری-و-نرمافزاری",
+          text: "دو replica: از دست رفتن یک ماشین faultی است که warehouse تحملش می‌کند." },
+        silver: { tag: "یک باگ، همه‌ی جدول‌ها", level: 4, pages: "صص. ۴۶–۴۷", slide: "انواع-faultهای-سختافزاری-و-نرمافزاری",
+          text: "تغییر غلط در SQL یک software fault همبسته است: هر replica همان جواب غلط را حساب می‌کند. replication کمکی نمی‌کند؛ تست و rebuild از روی Bronze کمک می‌کند." },
+        gold: { tag: "عدد غلط بی‌صدا", level: 4, pages: "صص. ۴۳ و ۴۸", slide: "انسانها-و-reliability",
+          text: "جمع غلط بی‌سروصدا گمراه می‌کند، مثل نرم‌افزار حسابداری در مثال Horizon کتاب. Gold را با منبع reconcile کنید." },
+        nb: { tag: "محدود به یک نفر", level: 0, pages: "ص. ۴۳", slide: "مفهوم-reliability-و-fault-tolerance",
+          text: "notebook خراب فقط روی یک نفر اثر دارد." },
+        serve: { tag: "single point of failure؟", level: 3, pages: "ص. ۴۳", slide: "مفهوم-reliability-و-fault-tolerance",
+          text: "اگر API پیش‌بینی فقط یک instance داشته باشد، fault آن failure همان قابلیت محصول است." }
+      }
+    },
+    maint: {
+      label: "maintainability", axis: ["تغییرش سخت است", "تغییرش آسان است"],
+      cells: {
+        source: { tag: "تغییرش دست ما نیست", level: 0, pages: "صص. ۵۵–۵۶", slide: "مفهوم-maintainability",
+          text: "تیم خودش را با schema منبع تطبیق می‌دهد؛ نمی‌تواند آن را evolve کند." },
+        loader: { tag: "برای هر جدول یک فایل", level: 4, pages: "صص. ۵۳–۵۵", slide: "مفهوم-maintainability",
+          text: "operability و simplicity: جدول تازه یعنی یک فایل YAML تازه، و loader برای همه یکسان رفتار می‌کند." },
+        bronze: { tag: "هم‌شکل منبع", level: 4, pages: "ص. ۵۴", slide: "مفهوم-maintainability",
+          text: "هیچ زرنگی‌ای ندارد، پس چیزی برای فهمیدن هم ندارد: هیچ accidental complexityای." },
+        silver: { tag: "جایی که پیچیدگی رشد می‌کند", level: 1, pages: "صص. ۵۴–۵۵", slide: "مفهوم-maintainability",
+          text: "قاعده‌های dedup، joinها و حالت‌های خاص این‌جا جمع می‌شوند. بدون تست به همان big ball of mud کتاب تبدیل می‌شود." },
+        gold: { tag: "یک قرارداد", level: 2, pages: "صص. ۵۵–۵۶", slide: "مفهوم-maintainability",
+          text: "داشبوردها به ستون‌هایش وابسته‌اند. تغییر نام یک ستون یک migration است؛ برگشت‌پذیر نگهش دارید." },
+        nb: { tag: "دورریختنی", level: 3, pages: "ص. ۴۹", slide: "انسانها-و-reliability",
+          text: "کم گذاشتن در یک prototype اشکالی ندارد، به شرط این‌که آگاهانه باشد." },
+        serve: { tag: "نسخه‌دار در Git", level: 4, pages: "صص. ۴۷ و ۵۶", slide: "انسانها-و-reliability",
+          text: "داشبوردها و releaseهای API را می‌شود سریع rollback کرد: یکی از راه‌های کتاب در برابر خطای انسانی و راهی برای کم کردن irreversibility." }
+      }
+    }
+  };
+
+  var lens = "work", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "داشبوردی روزی ۴۰۰ بار باز می‌شود و هر بار یک ماه تراکنش را اسکن می‌کند. کدام تغییر همان ایده‌ی timeline کتاب است؟",
+      options: ["replica بیشتر اضافه کنید", "تجمیع داشبورد را در هر load یک بار در یک جدول Gold از پیش حساب کنید تا هر بار باز شدن نتیجه‌ی کوچکی بخواند", "از زمان کوئری‌ها میانگین بگیرید", "کوئری را در notebook اجرا کنید"],
+      answer: 1, explain: "materialize کردن کار را از عمل پرتکرار یعنی خواندن به عمل کم‌تکرار یعنی نوشتن می‌برد، مثل cache مربوط به home timeline (صص. ۳۵–۳۶)." },
+    { q: "تغییری در یک مدل Silver باعث می‌شود همه‌ی replicaها یک جمع غلط را حساب کنند. این چه نوع faultی است؟",
+      options: ["یک fault سخت‌افزاری مستقل", "یک software fault همبسته که replication کمکی به آن نمی‌کند", "یک network partition", "head-of-line blocking"],
+      answer: 1, explain: "software faultها همبسته‌اند، چون همه‌ی nodeها همان کد را اجرا می‌کنند (صص. ۴۶–۴۷)." }
+  ]);
+})();
+</script>
+</body>
+</html>

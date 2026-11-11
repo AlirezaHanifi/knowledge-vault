@@ -1,18 +1,20 @@
-# How much data moves when a node joins
+# وقتی یک node اضافه می‌شود چقدر داده جابه‌جا می‌شود
 
-Assigns 20,000 keys to nodes four ways — hash mod N, a fixed number of shards, a consistent-hashing ring with virtual nodes, and rendezvous hashing — and measures the share of keys that move when the cluster grows from N−1 to N nodes, plus the resulting load imbalance.
+این آزمایش ۲۰٬۰۰۰ کلید را به چهار روش به nodeها تخصیص می‌دهد: hash mod N، تعداد ثابت shard، یک حلقه‌ی consistent hashing با virtual node، و rendezvous hashing. بعد اندازه می‌گیرد وقتی cluster از N−1 به N node می‌رسد چه سهمی از کلیدها جابه‌جا می‌شوند، و عدم توازن بار حاصل چقدر است.
 
-*Illustrates DDIA 2nd ed., “Sharding by Hash of Key”, pp. 258–263. The implementation is the vault’s own.*
+*این آزمایش بخش «مفهوم sharding بر اساس hash کلید» از ویراست دوم DDIA را نشان می‌دهد (صص. ۲۵۸–۲۶۳). پیاده‌سازی مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+با Python 3.10 یا جدیدتر، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 rebalance.py
 ```
 
-## Expected output
+خروجی برنامه انگلیسی است، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را درست نشان نمی‌دهند.
+
+## خروجی مورد انتظار
 
 ```text
 Share of 20,000 keys that move when going from N-1 to N nodes (ideal: 1/N)
@@ -34,13 +36,13 @@ Load imbalance at N = 10 (busiest node / mean)
   rendezvous         1.05x
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Hash mod N moves (N−1)/N of the keys — almost everything — on each addition.
-- Fixed shards and rendezvous hashing move ≈ 1/N, the minimum needed to give the new node a fair share.
-- The ring with 64 virtual nodes is close to 1/N but noticeably less balanced; balance improves with more virtual nodes.
+- روش hash mod N با هر افزودن، (N−1)/N کلیدها را جابه‌جا می‌کند؛ یعنی تقریباً همه‌چیز را.
+- تعداد ثابت shard و rendezvous hashing حدود 1/N را جابه‌جا می‌کنند، یعنی کمترین مقداری که برای دادن سهم منصفانه به node تازه لازم است.
+- حلقه با ۶۴ virtual node به 1/N نزدیک است اما توازنش به‌طور محسوسی کمتر است؛ با virtual nodeهای بیشتر توازن بهتر می‌شود.
 
-## Related
+## پیوندها
 
-- Chapter note: [7. Sharding](../../chapters/07-sharding.md) — “Sharding by Hash of Key”, pp. 258–263
-- Explore in the browser: [Sharding and rebalancing](../../widgets/07-sharding.html)
+- یادداشت فصل: [فصل ۷: مفهوم sharding](../../chapters/07-sharding.md)، بخش «مفهوم sharding بر اساس hash کلید»، صص. ۲۵۸–۲۶۳
+- در مرورگر: [مفهوم sharding و rebalancing](../../widgets/07-sharding.html)

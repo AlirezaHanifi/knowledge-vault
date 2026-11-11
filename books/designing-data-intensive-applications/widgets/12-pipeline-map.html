@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۱۲ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی batch معمولی را با چشم stream ببینید: کجا مثل یک log رفتار می‌کند، کجا event time و processing time قاطی می‌شوند و کجا exactly-once فقط با idempotence ممکن است. برای فصل ۱۲ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/12-stream-processing.html">فصل ۱۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۱۲ · پردازش stream</div>
+  <h1>فصل ۱۲ در طول یک pipeline داده</h1>
+  <p class="lede">این pipeline هر بار یک برش از داده‌ی unbounded را پردازش می‌کند، و همان مسئله‌های stream را در مقیاس کوچک‌تر دارد. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید کجا یک log قابل replay دارید، کجا زمان رویداد از زمان پردازش جدا می‌شود و کجا پردازش دوباره اثر تکراری می‌گذارد.</p>
+  <p class="source-note">کل فصل را (صص. ۴۸۷–۵۳۸) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens log:</strong> جدول Bronze نقش log را بازی می‌کند و Silver نقش log compaction را؛ کاستی اصلی نبود CDC در ورودی است.</li>
+    <li><strong>با lens زمان:</strong> هر جا گروه‌بندی بر اساس زمان load باشد، همان افت و spikeهای processing time را می‌سازد؛ event time را از منبع نگه دارید.</li>
+    <li><strong>با lens exactly-once:</strong> loader فقط at-least-once است؛ effectively-once را dedup در Silver می‌سازد، و اثرهای بیرونی، مثل هشدار، باید جدا dedup شوند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/12-stream-processing.html"><small>درس</small>فصل ۱۲: پردازش stream</a></li>
+    <li><a href="12-log-offsets.html"><small>شبیه‌سازی</small>مفهوم partitioned log و consumer offset</a></li>
+    <li><a href="12-stream-time.html"><small>شبیه‌سازی</small>مفهوم event time و processing time</a></li>
+    <li><a href="12-windows.html"><small>شبیه‌سازی</small>انواع window</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/12-stream-processing.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    log: {
+      label: "مفهوم log و replay", axis: ["مثل log قابل replay", "فقط وضعیت فعلی"],
+      cells: {
+        source: { tag: "وضعیت فعلی", level: 3, pages: "صص. ۵۰۰–۵۰۱", slide: "دیتابیس-و-stream",
+          text: "جدول‌های منبع فقط آخرین وضعیت را دارند؛ log داخلی دیتابیس هست، اما بدون CDC در دسترس pipeline نیست." },
+        loader: { tag: "مفهوم cursor در برابر CDC", level: 3, pages: "صص. ۵۰۳–۵۰۴", slide: "مفهوم-change-data-capture",
+          text: "مفهوم cursor روی update_date حذف‌ها و تغییرهای میانی بین دو اجرا را نمی‌بیند؛ CDC هر تغییر را به ترتیب دیتابیس می‌دهد." },
+        bronze: { tag: "مثل یک log", level: 0, pages: "صص. ۴۹۵–۵۰۰", slide: "مفهوم-message-broker-مبتنی-بر-log",
+          text: "جدول Bronze فقط append می‌شود و نگه داشته می‌شود؛ مثل یک log، هر consumer تازه می‌تواند از هر نقطه دوباره بخواند." },
+        silver: { tag: "مثل log compaction", level: 1, pages: "صص. ۵۰۵–۵۰۶", slide: "مفهوم-change-data-capture",
+          text: "نگه داشتن آخرین نسخه‌ی هر کلید از Bronze همان log compaction است: وضعیت فعلی از روی log." },
+        gold: { tag: "مفهوم materialized view", level: 1, pages: "صص. ۵۱۰–۵۱۱", slide: "مفهوم-state-stream-و-immutability",
+          text: "هر جدول Gold یک view مشتق‌شده از همان log است؛ view تازه را می‌شود کنار قبلی ساخت به جای migration پرخطر." },
+        nb: { tag: "خواندن از Silver", level: 2, pages: "ص. ۵۱۰", slide: "مفهوم-state-stream-و-immutability",
+          text: "تحلیل‌گر معمولاً وضعیت فعلی را در Silver می‌بیند؛ برای تاریخچه‌ی تغییرها باید به Bronze برگردد." },
+        serve: { tag: "فقط آخرین وضعیت", level: 2, pages: "ص. ۵۰۹", slide: "مفهوم-state-stream-و-immutability",
+          text: "داشبوردها انتگرال stream را نشان می‌دهند، یعنی وضعیت؛ رویدادهای پشت آن در لایه‌های پایین مانده‌اند." }
+      }
+    },
+    time: {
+      label: "زمان رویداد", axis: ["بر اساس event time", "بر اساس processing time"],
+      cells: {
+        source: { tag: "زمان رویداد در ردیف", level: 1, pages: "ص. ۵۱۹", slide: "استدلال-دربارهی-زمان",
+          text: "ستون‌هایی مثل زمان تراکنش همان event time هستند؛ update_date زمان آخرین تغییر است، نه زمان رویداد." },
+        loader: { tag: "زمان load", level: 3, pages: "صص. ۵۱۹–۵۲۰", slide: "استدلال-دربارهی-زمان",
+          text: "زمان load همان processing time است؛ بعد از latency یا load دوباره، شمارش بر اساس آن افت و spike ساختگی می‌سازد." },
+        bronze: { tag: "دو ستون زمان", level: 1, pages: "ص. ۵۲۱", slide: "استدلال-دربارهی-زمان",
+          text: "نگه داشتن هم زمان رویداد و هم زمان load، مثل سه timestamp پیشنهادی کتاب، اجازه می‌دهد latency را اندازه بگیرید." },
+        silver: { tag: "join وابسته به زمان", level: 3, pages: "صص. ۵۲۵–۵۲۶", slide: "مفهوم-stream-join",
+          text: "مفهوم join رویداد با جدول امروزِ مشتری، وضعیت امروز را به رویداد دیروز می‌چسباند؛ slowly changing dimension راه درست است." },
+        gold: { tag: "مفهوم tumbling window روزانه", level: 3, pages: "صص. ۵۲۰–۵۲۲", slide: "استدلال-دربارهی-زمان",
+          text: "جمع روزانه یک tumbling window است؛ ردیف‌های late یا نادیده گرفته می‌شوند یا با ساختن دوباره‌ی چند روز اخیر اصلاح می‌شوند." },
+        nb: { tag: "انتخاب ستون زمان", level: 2, pages: "ص. ۵۱۹", slide: "استدلال-دربارهی-زمان",
+          text: "اگر تحلیل‌گر بر اساس زمان load گروه کند، همان مصنوعات processing time را می‌بیند." },
+        serve: { tag: "عدد امروز", level: 3, pages: "صص. ۵۲۰–۵۲۱", slide: "استدلال-دربارهی-زمان",
+          text: "عدد «امروز» در داشبورد کامل نیست؛ late eventها هنوز می‌رسند و فردا عدد عوض می‌شود." }
+      }
+    },
+    once: {
+      label: "مفهوم exactly-once", axis: ["اثر یک‌باره", "اثر تکراری"],
+      cells: {
+        source: { tag: "فقط خواندن", level: 0, pages: "ص. ۵۲۶", slide: "تحمل-fault",
+          text: "خواندن دوباره از منبع اثری ندارد." },
+        loader: { tag: "مفهوم at-least-once", level: 4, pages: "صص. ۴۹۸–۴۹۹", slide: "مفهوم-message-broker-مبتنی-بر-log",
+          text: "نوشتن و بعد ذخیره‌ی cursor یعنی crash بین این دو همان ردیف‌ها را دوباره می‌آورد؛ مثل consumerی که از آخرین offset ثبت‌شده ادامه می‌دهد." },
+        bronze: { tag: "تکراری‌ها", level: 3, pages: "ص. ۵۲۷", slide: "تحمل-fault",
+          text: "با append، تکراری‌ها در Bronze می‌مانند؛ Bronze خودش effectively-once نیست." },
+        silver: { tag: "مفهوم idempotence", level: 1, pages: "صص. ۵۲۸–۵۲۹", slide: "تحمل-fault",
+          text: "حذف تکراری با کلید و نسخه اثر پردازش دوباره را خنثی می‌کند؛ همان idempotence که exactly-once را effectively-once می‌کند." },
+        gold: { tag: "بازسازی کامل", level: 1, pages: "صص. ۵۲۶–۵۲۷", slide: "تحمل-fault",
+          text: "ساختن دوباره از Silver خروجی قبلی را جایگزین می‌کند؛ مثل batch، خروجی نیمه‌کاره دور ریخته می‌شود." },
+        nb: { tag: "سلول‌های تکراری", level: 2, pages: "ص. ۵۲۷", slide: "تحمل-fault",
+          text: "اجرای دوباره‌ی سلولی که در جدول می‌نویسد، اگر idempotent نباشد، تکراری می‌سازد." },
+        serve: { tag: "اثر جانبی بیرونی", level: 3, pages: "ص. ۵۲۷", slide: "تحمل-fault",
+          text: "هشدار یا ایمیلی که از روی Gold فرستاده می‌شود با هر اجرای دوباره تکرار می‌شود، مگر آن هم با یک شناسه dedup شود." }
+      }
+    }
+};
+
+  var lens = "log", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "شمارش روزانه بر اساس زمان load در Bronze بعد از یک load دوباره spike نشان می‌دهد. چرا؟",
+      options: ["چون Bronze خراب است", "چون زمان load همان processing time است و رویدادهای چند روز در یک روز شمرده شده‌اند", "چون ClickHouse کند است", "مفهوم clock skew"],
+      answer: 1, explain: "مثل شکل ۱۲-۸: window بر اساس processing time افت و spike ساختگی می‌سازد؛ با event time بشمرید (صص. ۵۱۹–۵۲۰)." },
+    { q: "مفهوم loader اول در Bronze می‌نویسد و بعد cursor را ذخیره می‌کند. چه تضمینی دارید؟",
+      options: ["مفهوم at-most-once", "مفهوم at-least-once", "مفهوم exactly-once", "هیچ"],
+      answer: 1, explain: "مفهوم crash بین نوشتن و ذخیره‌ی cursor یعنی تکرار؛ dedup در Silver آن را effectively-once می‌کند (صص. ۴۹۸–۴۹۹ و ۵۲۸–۵۲۹)." }
+  ]);
+})();
+</script>
+</body>
+</html>

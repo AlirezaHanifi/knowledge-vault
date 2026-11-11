@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>محاسبه هنگام خواندن یا نوشتن</title>
+<meta name="description" content="جواب دادن به هر خواندن با یک کوئری را با از پیش محاسبه کردن جواب هنگام نوشتن مقایسه کنید: اول با عددهای home timeline کتاب، بعد روی داشبوردی در warehouse با rebuild کامل، بارگذاری افزایشی و اصلاحیه‌های late. برای فصل ۲ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bars { display: grid; gap: 14px; }
+  .bar-row { display: grid; gap: 4px; }
+  .bar-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: .9rem; }
+  .bar-head b { font-weight: 650; }
+  .bar-head .val { font-size: .85rem; }
+  .track { display: flex; height: 22px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+  .seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; color: var(--accent-ink); white-space: nowrap; overflow: hidden; }
+  .seg.read { background: var(--s1); }
+  .seg.write { background: var(--s3); }
+  .bar-note { font-size: .82rem; color: var(--ink-2); }
+  .scale { font-size: .78rem; color: var(--ink-3); margin-top: 6px; }
+  .key { display: flex; gap: 14px; font-size: .82rem; color: var(--ink-2); margin-bottom: 10px; flex-wrap: wrap; }
+  .key i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-inline-end: 5px; }
+  .best { color: var(--ok); font-weight: 700; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-defining-nonfunctional-requirements.html">فصل ۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">محاسبه هنگام خواندن یا نوشتن</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۲ · تعریف نیازمندی‌های غیرکارکردی</div>
+  <h1>محاسبه هنگام خواندن یا هنگام نوشتن؟</h1>
+  <p class="lede">هر جوابی بالاخره جایی حساب می‌شود: وقتی کسی می‌پرسد، با یک کوئری در زمان خواندن، یا وقتی داده عوض می‌شود، با یک نتیجه‌ی materialized. sliderها را جابه‌جا کنید و ببینید کار به کجا می‌رود و کدام حالت خاص هر طراحی را می‌شکند.</p>
+  <p class="source-note">برای «Case Study: Social Network Home Timelines» (صص. ۳۴–۳۷): polling با join در برابر fan-out on write به timelineهای materialized، و حالت سلبریتی. نمای <em>کتاب</em> عددهای خود کتاب را به کار می‌برد (صص. ۳۴–۳۶)؛ نمای <em>در عمل</em> همان حساب را روی داشبوردی در warehouse با اندازه‌های فرضی خود vault انجام می‌دهد. میله‌ها log scale دارند. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim" style="margin-top:20px">
+    <div class="panel">
+      <div class="key" aria-hidden="true"><span><i style="background:var(--s1)"></i>کار در زمان خواندن</span><span><i style="background:var(--s3)"></i>کار در زمان نوشتن</span></div>
+      <div class="bars" id="bars" aria-live="polite"></div>
+      <p class="scale" id="scale"></p>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <div id="mode"></div>
+        <div id="controls" style="margin-top:12px;display:grid;gap:12px"></div>
+      </div>
+      <div class="panel"><p class="panel-title">چه چیزی عوض شد</p><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>خواندن‌ها از نوشتن‌ها خیلی بیشترند، پس کار را به نوشتن ببرید.</strong> polling صدها میلیون lookup در ثانیه می‌خواهد و fan-out حدود یک میلیون نوشتن. داشبوردی که روزی ۴۰۰ بار خوانده می‌شود همین شکل را دارد (صص. ۳۵–۳۶).</li>
+    <li><strong>نتیجه‌ی از پیش محاسبه‌شده یک materialized view است.</strong> داده‌ی derived است: خواندنش ارزان است، هر نوشتن کار بیشتری می‌برد، و با تغییر ورودی‌هایش باید به‌روز شود (ص. ۳۶).</li>
+    <li><strong>هر طراحی outlier خودش را دارد.</strong> پست یک سلبریتی صد میلیون نوشتن در timelineها می‌شود؛ اصلاحیه‌ای برای یک ماه قدیمی یعنی حساب دوباره‌ی همان ماه. جواب کتاب یک طراحی ترکیبی است: حالت معمول را از پیش حساب کنید و outlier را هنگام خواندن merge کنید (ص. ۳۶).</li>
+    <li><strong>بهایش تازگی داده است.</strong> fan-out در صف، پست‌ها را کمی دیرتر نشان می‌دهد؛ جدول شبانه تا یک روز کهنه است. تصمیم بگیرید خواننده‌ها کدام کهنگی را می‌پذیرند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-defining-nonfunctional-requirements.html"><small>درس</small>فصل ۲: تعریف نیازمندی‌های غیرکارکردی</a></li>
+    <li><a href="02-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۲ در طول یک pipeline داده</a></li>
+    <li><a href="02-queueing.html"><small>شبیه‌سازی</small>صف، overload و retry storm</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var log = Kit.log(Kit.$("#log"), { max: 20 });
+  var mode = "book";
+  var s = {};
+
+  function fmt(n) {
+    if (n >= 1e9) return (n / 1e9).toFixed(n >= 1e10 ? 0 : 1) + " B";
+    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + " M";
+    if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + " k";
+    return String(Math.round(n));
+  }
+
+  // Each design: work at read time and at write time (same unit), a freshness note, a breaking case.
+  var MODES = {
+    book: {
+      unit: "lookup یا نوشتن ردیف در ثانیه",
+      controls: [
+        { key: "online", label: "کاربران آنلاین، با polling هر ۵ ثانیه", min: 1, max: 20, step: 1, value: 10, f: function (v) { return v + " M"; } },
+        { key: "follows", label: "تعداد followeeهای هر کاربر و followerهای هر پست", min: 50, max: 1000, step: 50, value: 200, f: String },
+        { key: "posts", label: "پست در ثانیه", min: 1000, max: 150000, step: 100, value: 5800, f: function (v) { return v.toLocaleString("en-US"); } },
+        { key: "celeb", label: "سلبریتی‌ای با ۱۰۰ میلیون follower هر ثانیه پست می‌گذارد", toggle: true, value: false }
+      ],
+      designs: function (s) {
+        var polls = s.online * 1e6 / 5;
+        var celebW = s.celeb ? 100e6 : 0;
+        var hybridRead = s.celeb ? polls : 0; // every timeline read merges celebrity posts in
+        return [
+          { name: "کوئری هنگام خواندن: polling با join", read: polls * s.follows, write: s.posts,
+            note: fmt(polls) + " کوئری timeline در ثانیه، که هر کدام پست‌های " + s.follows + " حساب را lookup می‌کند. همیشه تازه." },
+          { name: "fan-out on write: timelineهای materialized", read: polls, write: s.posts * s.follows + celebW,
+            note: "هر پست در timeline " + s.follows + " follower نوشته می‌شود" + (s.celeb ? "؛ یک پست سلبریتی ۱۰۰ میلیون نوشتن اضافه می‌کند" : "") + ". هر خواندن یک lookup در cache است. وقتی تحویل‌ها در صف بمانند پست‌ها کمی دیرتر می‌رسند." },
+          { name: "ترکیبی، راه کتاب: fan-out و merge سلبریتی‌ها هنگام خواندن", read: polls + hybridRead, write: s.posts * s.follows,
+            note: s.celeb ? "پست سلبریتی یک بار ذخیره و هنگام خواندن هر timeline merge می‌شود: یک lookup اضافه برای هر خواندن به جای ۱۰۰ میلیون نوشتن." : "وقتی هیچ سلبریتی‌ای پست نمی‌گذارد، طراحی ترکیبی همان fan-out on write است." }
+        ];
+      }
+    },
+    practice: {
+      unit: "ردیف خوانده یا نوشته‌شده در روز",
+      controls: [
+        { key: "views", label: "تعداد باز شدن داشبورد در روز", min: 10, max: 5000, step: 10, value: 400, f: String },
+        { key: "rows", label: "تراکنش‌های Silver؛ داشبورد ۲۴ ماه را پوشش می‌دهد", min: 1, max: 200, step: 1, value: 50, f: function (v) { return v + " M ردیف"; } },
+        { key: "fresh", label: "تراکنش تازه در روز", min: 10, max: 2000, step: 10, value: 200, f: function (v) { return v + " k ردیف"; } },
+        { key: "late", label: "هر روز برای ۳ ماه قدیمی اصلاحیه می‌رسد", toggle: true, value: false }
+      ],
+      designs: function (s) {
+        var rows = s.rows * 1e6, fresh = s.fresh * 1e3, gold = 12 * 24; // 12 categories × 24 months
+        var month = rows / 24;
+        return [
+          { name: "کوئری هنگام خواندن: یک view روی Silver", read: s.views * rows, write: 0,
+            note: "هر بار باز شدن، هر " + fmt(rows) + " ردیف را اسکن می‌کند تا " + gold + " عدد برگرداند. همیشه تازه، همیشه گران." },
+          { name: "rebuild کامل شبانه‌ی یک جدول Gold", read: s.views * gold, write: rows + gold,
+            note: "شبی یک اسکن، و بعد هر بار باز شدن " + gold + " ردیف می‌خواند. تا یک روز کهنه است، اما اصلاحیه‌ها همیشه دیده می‌شوند." },
+          { name: "افزایشی: فقط ردیف‌های تازه تجمیع می‌شوند", read: s.views * gold, write: fresh + gold + (s.late ? 3 * month : 0),
+            note: s.late ? "اصلاحیه‌های ماه‌های قدیمی یعنی آن ماه‌ها را هم باید دوباره حساب کرد: " + fmt(3 * month) + " ردیف اضافه. اگر نکنید Gold بی‌صدا غلط می‌شود." : "فقط " + fmt(fresh) + " ردیف تازه‌ی همان روز تجمیع می‌شود. ارزان‌ترین راه، تا وقتی ماه‌های قدیمی هیچ‌وقت عوض نشوند." }
+        ];
+      }
+    }
+  };
+
+  function controls() {
+    var box = Kit.clear(Kit.$("#controls"));
+    s = {};
+    MODES[mode].controls.forEach(function (c) {
+      s[c.key] = c.value;
+      if (c.toggle) {
+        var id = "t-" + c.key;
+        var input = el("input", { type: "checkbox", id: id, onchange: function () {
+          s[c.key] = input.checked; log.add((input.checked ? "روشن: " : "خاموش: ") + c.label + ".", input.checked ? "warn" : "muted"); render(); } });
+        box.appendChild(el("label", { for: id, style: "display:flex;gap:8px;align-items:baseline;font-size:.9rem" }, input, c.label));
+      } else {
+        box.appendChild(Kit.slider({ label: c.label, min: c.min, max: c.max, step: c.step, value: c.value, format: c.f,
+          onInput: function (v) { s[c.key] = v; render(); } }).element);
+      }
+    });
+  }
+
+  function render() {
+    var M = MODES[mode], ds = M.designs(s);
+    var max = Math.max.apply(null, ds.map(function (d) { return d.read + d.write; }));
+    var top = Math.log10(max * 1.2), floor = 2; // log scale from 100
+    function w(v) { return v <= 100 ? 0 : (Math.log10(v) - floor) / (top - floor) * 100; }
+    var best = ds.reduce(function (b, d, i) { return (d.read + d.write) < (ds[b].read + ds[b].write) ? i : b; }, 0);
+    var box = Kit.clear(Kit.$("#bars"));
+    ds.forEach(function (d, i) {
+      var total = d.read + d.write, tw = w(total);
+      var rw = total ? tw * d.read / total : 0, ww = tw - rw;
+      box.appendChild(el("div", { class: "bar-row" },
+        el("div", { class: "bar-head" }, el("b", null, d.name, i === best ? el("span", { class: "best" }, "  ✓ کمترین کار") : null),
+          el("span", { class: "val" }, "جمع " + fmt(total) + " · خواندن " + fmt(d.read) + " · نوشتن " + fmt(d.write))),
+        el("div", { class: "track", role: "img", "aria-label": d.name + ": " + fmt(d.read) + " در زمان خواندن، " + fmt(d.write) + " در زمان نوشتن" },
+          el("div", { class: "seg read", style: "width:" + rw + "%" }, rw > 12 ? "خواندن" : ""),
+          el("div", { class: "seg write", style: "width:" + ww + "%" }, ww > 12 ? "نوشتن" : "")),
+        el("p", { class: "bar-note" }, d.note)));
+    });
+    Kit.$("#scale").textContent = "واحد: " + M.unit + ". مقیاس لگاریتمی است: هر گام هم‌عرض یعنی ×۱۰، پس عددها را بخوانید، نه طول میله‌ها را.";
+  }
+
+  var BOOK_MSG = "عددهای کتاب: ۱۰ میلیون کاربر آنلاین، ۲۰۰ followee، ۵٬۸۰۰ پست در ثانیه (صص. ۳۴–۳۶).";
+  var seg = Kit.segmented({ label: "نما", value: mode,
+    options: [{ value: "book", label: "کتاب: home timeline" }, { value: "practice", label: "در عمل: یک داشبورد" }],
+    onChange: function (v) { mode = v; log.clear(); log.add(v === "book" ? BOOK_MSG : "داشبورد خرج هر دسته در هر ماه، روی ۲۴ ماه تراکنش.", "muted"); controls(); render(); } });
+  Kit.$("#mode").appendChild(seg.element);
+  log.add(BOOK_MSG, "muted");
+  controls();
+  render();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "با عددهای کتاب، چرا fan-out on write کل کار را کمتر می‌کند، با این‌که هر پست ۲۰۰ نوشتن می‌شود؟",
+      options: ["نوشتن همیشه از خواندن ارزان‌تر است", "timelineها خیلی بیشتر از نوشته شدن پست‌ها خوانده می‌شوند، پس کار به عمل کم‌تکرارتر منتقل می‌شود", "followerها هیچ‌وقت timelineشان را نمی‌خوانند", "cache به‌روزرسانی لازم ندارد"],
+      answer: 1, explain: "polling حدود ۴۰۰ میلیون lookup در ثانیه می‌خواهد و fan-out کمی بیش از ۱ میلیون نوشتن در ثانیه (صص. ۳۵–۳۶)." },
+    { q: "در نمای «در عمل» برای ماه‌های قدیمی اصلاحیه می‌رسد. چه چیزی جدول Gold افزایشی را درست نگه می‌دارد؟",
+      options: ["هیچ چیز؛ جدول‌های افزایشی همیشه درست‌اند", "ماه‌های اصلاح‌شده هم دوباره حساب شوند، مثل merge جداگانه‌ی حالت سلبریتی", "داشبورد میانگین نشان دهد", "یک replica دوم اضافه شود"],
+      answer: 1, explain: "نتیجه‌ی از پیش محاسبه‌شده با هر تغییر ورودی‌اش باید به‌روز شود (ص. ۳۶). outlier مسیر خودش را لازم دارد، همان‌طور که سلبریتی‌ها در طراحی ترکیبی." }
+  ]);
+})();
+</script>
+</body>
+</html>

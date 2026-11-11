@@ -1,18 +1,20 @@
-# Binary encodings and schema evolution
+# فرمت‌های encoding باینری و تکامل schema
 
-Minimal encoders for the Protocol Buffers wire format (field tags + wire types + varints) and the Avro binary format (no tags; zigzag varints; reader/writer schema resolution). Encodes the book’s example record (Example 5-2) and reproduces the sizes the book reports — 81 bytes of JSON, 33 bytes of Protocol Buffers, 32 bytes of Avro — then demonstrates forward and backward compatibility.
+دو encoder کوچک: یکی برای wire format در Protocol Buffers، یعنی field tag و wire type و varint، و یکی برای قالب باینری Avro، که tag ندارد، zigzag varint دارد و writer's schema را با reader's schema تطبیق می‌دهد. رکورد نمونه‌ی کتاب در مثال ۵-۲ را encode می‌کند و اندازه‌هایی را که کتاب گزارش می‌دهد بازتولید می‌کند، یعنی ۸۱ بایت JSON، ۳۳ بایت Protocol Buffers و ۳۲ بایت Avro، و بعد forward و backward compatibility را نشان می‌دهد.
 
-*Illustrates DDIA 2nd ed., “Protocol Buffers” and “Avro”, pp. 169–177. The implementation is the vault’s own.*
+*این آزمایش بخش‌های «قالب Protocol Buffers» و «قالب Avro» از ویراست دوم DDIA را نشان می‌دهد (صص. ۱۶۹–۱۷۷). پیاده‌سازی مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+با Python 3.10 یا جدیدتر، فقط کتابخانه‌ی استاندارد، و قطعی:
 
 ```sh
 python3 encoding.py
 ```
 
-## Expected output
+خروجی برنامه انگلیسی است، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را درست نشان نمی‌دهند.
+
+## خروجی مورد انتظار
 
 ```text
 Encoded size of the book's example record (Example 5-2):
@@ -30,12 +32,13 @@ Avro: compatibility through writer/reader schema resolution
   adding a field WITHOUT a default breaks backward compatibility: reader requires field 'email' with no default
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Byte-for-byte: `0a 06 4d 61 72 74 69 6e` is tag 1, wire type 2, length 6, “Martin”.
-- Protocol Buffers achieves forward compatibility because an old reader can skip an unknown tag — the wire type says how many bytes to skip.
-- Avro has no tags at all; compatibility comes from resolving the writer’s schema against the reader’s by field name, which is why an added field needs a default.
+- بایت به بایت: دنباله‌ی `0a 06 4d 61 72 74 69 6e` یعنی tag شماره‌ی ۱، wire type شماره‌ی ۲، طول ۶ و «Martin».
+- قالب Protocol Buffers به forward compatibility می‌رسد چون خواننده‌ی قدیم می‌تواند از tag ناشناخته بگذرد؛ wire type می‌گوید چند بایت را باید رد کند.
+- قالب Avro اصلاً tag ندارد؛ سازگاری از تطبیق writer's schema با reader's schema بر اساس اسم فیلد می‌آید، و برای همین فیلد تازه default لازم دارد.
 
-## Related
+## پیوندها
 
-- Chapter note: [5. Encoding and Evolution](../../chapters/05-encoding-and-evolution.md) — “Protocol Buffers” and “Avro”, pp. 169–177
+- یادداشت فصل: [فصل ۵: قالب‌های encoding و تکامل](../../chapters/05-encoding-and-evolution.md)، بخش‌های «قالب Protocol Buffers» و «قالب Avro»، صص. ۱۶۹–۱۷۷
+- در مرورگر: [یک رکورد، چهار encoding](../../widgets/05-encodings.html) و [writer's schema و reader's schema](../../widgets/05-schema-evolution.html)

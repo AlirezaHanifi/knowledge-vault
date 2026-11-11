@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Percentiles and Tail Latency</title>
-<meta name="description" content="Explore why response-time percentiles beat averages, and how fan-out amplifies tail latency. Illustrates DDIA 2nd ed., Chapter 2.">
+<title>percentileها و tail latency</title>
+<meta name="description" content="ببینید چرا percentileهای response time از میانگین بهترند و fan-out چطور tail latency را بزرگ می‌کند. برای فصل ۲ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .hist-bar { fill: var(--accent); opacity: .55; }
@@ -19,63 +19,63 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/02-defining-nonfunctional-requirements.html">Chapter 2</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Tail latency</span>
+      <a href="../chapters/02-defining-nonfunctional-requirements.html">فصل ۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم tail latency</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 2 · Defining Nonfunctional Requirements</div>
-  <h1>Percentiles and tail latency</h1>
-  <p class="lede">Response time is a distribution, not a number. The average hides the slow requests that users actually notice, and when one user request fans out to many backend calls, a rare slow call becomes a common slow page.</p>
-  <p class="source-note">Illustrates “Average, Median, and Percentiles” and “Use of Response Time Metrics” (pp. 40–43) and Figure 2-6 (p. 41). The latency model and numbers below are the vault’s own illustration, not data from the book.</p>
+  <div class="eyebrow">فصل ۲ · تعریف نیازمندی‌های غیرکارکردی</div>
+  <h1>مفهوم percentile و tail latency</h1>
+  <p class="lede">مقدار response time یک توزیع است، نه یک عدد. میانگین همان درخواست‌های کندی را پنهان می‌کند که کاربر واقعاً حس می‌کند؛ و وقتی یک درخواست کاربر به چندین فراخوانی backend پخش می‌شود، یک فراخوانی کندِ نادر به یک صفحه‌ی کندِ رایج تبدیل می‌شود.</p>
+  <p class="source-note">برای «میانگین، میانه و percentileها» و «استفاده از متریک‌های response time» در صص. ۴۰–۴۳ و شکل ۲-۶ در ص. ۴۱. مدل latency و عددهای پایین مثال خود vault است، نه داده‌ی کتاب.</p>
 
-  <h2>1 · One service, many requests</h2>
+  <h2>۱ · یک سرویس، درخواست‌های زیاد</h2>
   <div class="sim">
     <div class="panel">
-      <p class="panel-title">Response-time histogram (2,000 requests)</p>
-      <div class="stage" id="hist" role="img" aria-label="Histogram of response times with percentile markers"></div>
+      <p class="panel-title">هیستوگرام response time برای ۲٬۰۰۰ درخواست</p>
+      <div class="stage" id="hist" role="img" aria-label="هیستوگرام response time با نشانگرهای percentile"></div>
       <div class="stats" id="stats" style="margin-top:12px"></div>
     </div>
     <div class="panel" id="hist-controls">
-      <p class="panel-title">Workload</p>
+      <p class="panel-title">بار</p>
     </div>
   </div>
 
-  <h2>2 · Fan-out amplifies the tail</h2>
-  <p>A page that needs <em>k</em> backend calls in parallel is as slow as its slowest call. If each call is slow with probability <em>p</em>, the page is slow with probability <span class="mono">1 − (1 − p)<sup>k</sup></span>.</p>
+  <h2>۲ · پدیده‌ی fan-out دنباله را بزرگ می‌کند</h2>
+  <p>صفحه‌ای که <em>k</em> فراخوانی موازی backend لازم دارد به اندازه‌ی کندترین فراخوانی‌اش کند است. اگر هر فراخوانی با احتمال <em>p</em> کند باشد، صفحه با احتمال <span class="mono">1 − (1 − p)<sup>k</sup></span> کند است.</p>
   <div class="sim">
     <div class="panel">
-      <p class="panel-title">Share of user requests that hit at least one slow call</p>
-      <div class="stage" id="curve" role="img" aria-label="Curve of slow-request probability against number of backend calls"></div>
+      <p class="panel-title">سهم درخواست‌های کاربر که دست‌کم به یک فراخوانی کند می‌خورند</p>
+      <div class="stage" id="curve" role="img" aria-label="منحنی احتمال درخواست کند بر حسب تعداد فراخوانی‌های backend"></div>
       <div class="stats" id="fan-stats" style="margin-top:12px"></div>
     </div>
     <div class="panel" id="fan-controls">
-      <p class="panel-title">Fan-out</p>
+      <p class="panel-title">مقدار fan-out</p>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li>Raise the slow-event probability: the <strong>mean</strong> moves a little, the <strong>median</strong> barely moves, but <strong>p99</strong> jumps — the percentile tells you what your unluckiest users experience.</li>
-    <li>With 1% slow backend calls and 100 calls per page, well over half of page loads are slow. Backend p99 becomes roughly user-facing p50.</li>
-    <li>This is why high percentiles of <em>backend</em> services matter so much, and why averaging percentiles across machines is meaningless — you need to merge histograms.</li>
+    <li>احتمال رخداد کند را بالا ببرید: <strong>میانگین</strong> کمی جابه‌جا می‌شود، <strong>میانه</strong> تقریباً تکان نمی‌خورد، اما <strong>p99</strong> می‌پرد؛ percentile می‌گوید بدشانس‌ترین کاربرها چه تجربه‌ای دارند.</li>
+    <li>با ۱٪ فراخوانی کند و ۱۰۰ فراخوانی در هر صفحه، خیلی بیشتر از نیمی از بارگذاری‌های صفحه کند است. مقدار p99 در backend تقریباً p50 کاربر می‌شود.</li>
+    <li>برای همین percentileهای بالای سرویس‌های <em>backend</em> این‌قدر مهم‌اند، و میانگین گرفتن از percentileهای چند ماشین بی‌معناست: باید هیستوگرام‌ها را merge کرد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/02-defining-nonfunctional-requirements.html"><small>Lesson</small>2. Defining Nonfunctional Requirements</a></li>
-    <li><a href="../lab/02-tail-latency/README.md"><small>Experiment</small>Tail latency amplification in Python</a></li>
+    <li><a href="../chapters/02-defining-nonfunctional-requirements.html"><small>درس</small>فصل ۲: تعریف نیازمندی‌های غیرکارکردی</a></li>
+    <li><a href="../lab/02-tail-latency/README.md"><small>آزمایش</small>بزرگ شدن tail latency در Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keyboard: sliders are native range inputs.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · صفحه‌کلید: اسلایدرها range input بومی‌اند.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -104,7 +104,7 @@
     var mean = data.reduce(function (a, b) { return a + b; }, 0) / N;
     var p = function (q) { return Kit.percentile(data, q); };
     var marks = [
-      { label: "mean", v: mean, color: "var(--ink-3)", dash: "4 3" },
+      { label: "میانگین", v: mean, color: "var(--ink-3)", dash: "4 3" },
       { label: "p50", v: p(0.5), color: "var(--s3)" },
       { label: "p95", v: p(0.95), color: "var(--s5)" },
       { label: "p99", v: p(0.99), color: "var(--s2)" },
@@ -153,7 +153,7 @@
       s.appendChild(svg("text", { x: L - 6, y: y(v) + 4, "text-anchor": "end", "font-size": 11, class: "muted" }, Math.round(v * 100) + "%"));
     });
     [1, 25, 50, 75, 100].forEach(function (k) {
-      s.appendChild(svg("text", { x: x(k), y: H - 10, "text-anchor": "middle", "font-size": 11, class: "muted" }, k + (k === 100 ? " calls" : "")));
+      s.appendChild(svg("text", { x: x(k), y: H - 10, "text-anchor": "middle", "font-size": 11, class: "muted" }, k + (k === 100 ? " فراخوانی" : "")));
     });
     var d = "", ref = "M" + x(1) + " " + y(state.pCall) + " L" + x(KMAX) + " " + y(state.pCall);
     for (var k = 1; k <= KMAX; k++) d += (k === 1 ? "M" : " L") + x(k).toFixed(1) + " " + y(1 - Math.pow(1 - state.pCall, k)).toFixed(1);
@@ -161,7 +161,7 @@
     s.appendChild(svg("path", { class: "curve", d: d }));
     var cur = 1 - Math.pow(1 - state.pCall, state.k);
     s.appendChild(svg("circle", { class: "dot", cx: x(state.k), cy: y(cur), r: 5 }));
-    s.appendChild(svg("text", { x: Math.min(x(state.k) + 8, W - 120), y: Math.max(y(cur) - 8, 24), "font-size": 12 }, Kit.pct(cur) + " slow"));
+    s.appendChild(svg("text", { x: Math.min(x(state.k) + 8, W - 120), y: Math.max(y(cur) - 8, 24), "font-size": 12 }, Kit.pct(cur) + " کند"));
     Kit.clear(document.getElementById("curve")).appendChild(s);
 
     // Simulate end-user latency percentiles under this fan-out.
@@ -176,42 +176,42 @@
     }
     users.sort(function (a, b) { return a - b; });
     var st = Kit.clear(document.getElementById("fan-stats"));
-    [["slow pages", Kit.pct(cur), cur > .5 ? "bad" : cur > .1 ? "warn" : "ok"],
-     ["user p50", Kit.fmtMs(Kit.percentile(users, .5)), ""],
-     ["user p99", Kit.fmtMs(Kit.percentile(users, .99)), ""]].forEach(function (row) {
+    [["صفحه‌ی کند", Kit.pct(cur), cur > .5 ? "bad" : cur > .1 ? "warn" : "ok"],
+     ["مقدار p50 کاربر", Kit.fmtMs(Kit.percentile(users, .5)), ""],
+     ["مقدار p99 کاربر", Kit.fmtMs(Kit.percentile(users, .99)), ""]].forEach(function (row) {
       st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, row[0]),
         el("span", { class: "stat-value " + row[2] }, row[1])));
     });
   }
 
   var hc = document.getElementById("hist-controls");
-  hc.appendChild(Kit.slider({ label: "Typical (median) latency", min: 20, max: 200, step: 5, value: state.base, unit: " ms",
+  hc.appendChild(Kit.slider({ label: "مقدار latency معمول، یعنی میانه", min: 20, max: 200, step: 5, value: state.base, unit: " ms",
     onInput: function (v) { state.base = v; drawHist(); } }).element);
-  hc.appendChild(Kit.slider({ label: "Requests hit by a slow event", min: 0, max: 0.2, step: 0.005, value: state.pSlow,
-    format: function (v) { return Kit.pct(v); }, hint: "GC pause, retransmission, queueing…",
+  hc.appendChild(Kit.slider({ label: "درخواست‌هایی که به رخداد کند می‌خورند", min: 0, max: 0.2, step: 0.005, value: state.pSlow,
+    format: function (v) { return Kit.pct(v); }, hint: "مکث GC، ارسال دوباره، صف…",
     onInput: function (v) { state.pSlow = v; drawHist(); } }).element);
-  hc.appendChild(Kit.slider({ label: "Extra delay of a slow event", min: 100, max: 3000, step: 50, value: state.slowExtra, unit: " ms",
+  hc.appendChild(Kit.slider({ label: "latency اضافه‌ی رخداد کند", min: 100, max: 3000, step: 50, value: state.slowExtra, unit: " ms",
     onInput: function (v) { state.slowExtra = v; drawHist(); } }).element);
 
   var fc = document.getElementById("fan-controls");
-  fc.appendChild(Kit.slider({ label: "Backend calls per page (k)", min: 1, max: 100, value: state.k,
+  fc.appendChild(Kit.slider({ label: "فراخوانی backend در هر صفحه، k", min: 1, max: 100, value: state.k,
     onInput: function (v) { state.k = v; drawCurve(); } }).element);
-  fc.appendChild(Kit.slider({ label: "Slow backend calls (p)", min: 0.001, max: 0.05, step: 0.001, value: state.pCall,
-    format: function (v) { return Kit.pct(v); }, hint: "e.g. 1% = the backend's p99",
+  fc.appendChild(Kit.slider({ label: "فراخوانی‌های کند backend، p", min: 0.001, max: 0.05, step: 0.001, value: state.pCall,
+    format: function (v) { return Kit.pct(v); }, hint: "مثلاً ۱٪ یعنی p99 در backend",
     onInput: function (v) { state.pCall = v; drawCurve(); } }).element);
 
   drawHist(); drawCurve();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Your service's mean response time is 120 ms. What can you conclude about the slowest 1% of requests?",
-      options: ["They take at most about 240 ms", "Nothing — the mean says little about the tail", "They take exactly 120 ms on average"],
-      answer: 1, explain: "A few very slow requests barely move the mean; only the high percentiles describe them." },
-    { q: "Each of 50 parallel backend calls has a 1% chance of being slow. Roughly what share of pages is slow?",
-      options: ["About 1%", "About 10%", "About 40%"],
-      answer: 2, explain: "1 − 0.99^50 ≈ 0.39. The slowest call determines the page's response time." },
-    { q: "Ten servers each report their own p99. How do you get the p99 of the whole fleet?",
-      options: ["Average the ten p99 values", "Take the maximum p99", "Merge the underlying histograms and recompute"],
-      answer: 2, explain: "Percentiles don't average. Combine the distributions (e.g. mergeable histograms) and read the percentile from the result." }
+    { q: "میانگین response time سرویس شما ۱۲۰ میلی‌ثانیه است. درباره‌ی کندترین ۱٪ درخواست‌ها چه می‌توان گفت؟",
+      options: ["حداکثر حدود ۲۴۰ میلی‌ثانیه طول می‌کشند", "هیچ؛ میانگین درباره‌ی دنباله چیز زیادی نمی‌گوید", "به‌طور میانگین دقیقاً ۱۲۰ میلی‌ثانیه طول می‌کشند"],
+      answer: 1, explain: "چند درخواست خیلی کند میانگین را تقریباً تکان نمی‌دهند؛ فقط percentileهای بالا آن‌ها را توصیف می‌کنند." },
+    { q: "هر کدام از ۵۰ فراخوانی موازی backend با احتمال ۱٪ کند است. تقریباً چه سهمی از صفحه‌ها کند است؟",
+      options: ["حدود ۱٪", "حدود ۱۰٪", "حدود ۴۰٪"],
+      answer: 2, explain: "حاصل ۱ − ۰٫۹۹ به توان ۵۰ حدود ۰٫۳۹ است. کندترین فراخوانی response time صفحه را تعیین می‌کند." },
+    { q: "ده سرور هر کدام p99 خودشان را گزارش می‌کنند. مقدار p99 کل ناوگان را چطور به دست می‌آورید؟",
+      options: ["از ده مقدار p99 میانگین می‌گیرید", "بیشترین p99 را برمی‌دارید", "هیستوگرام‌های زیرین را merge می‌کنید و دوباره حساب می‌کنید"],
+      answer: 2, explain: "از percentileها نمی‌شود میانگین گرفت. توزیع‌ها را ترکیب کنید؛ مثلاً با هیستوگرام‌های merge‌پذیر، و percentile را از نتیجه بخوانید." }
   ]);
 })();
 </script>

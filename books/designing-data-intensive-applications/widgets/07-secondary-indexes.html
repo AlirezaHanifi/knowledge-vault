@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Local vs Global Secondary Indexes</title>
-<meta name="description" content="Search the book's used-car listings by colour and make with local (document-partitioned) and global (term-partitioned) secondary indexes, and count the shards each read and write touches. Illustrates DDIA Chapter 7.">
+<title>مقایسه‌ی local و global secondary index</title>
+<meta name="description" content="در آگهی‌های ماشین دست‌دوم کتاب بر اساس رنگ و سازنده با local secondary index و global secondary index جست‌وجو کنید و بشمارید هر خواندن و نوشتن به چند shard دست می‌زند. برای فصل ۷ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .shards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
@@ -18,28 +18,28 @@
   .idx { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--line); font-family: var(--mono); font-size: .72rem; color: var(--ink-2); }
   .idx div { padding: 1px 0; }
   .idx .hit { color: var(--ok); font-weight: 700; }
-  .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; vertical-align: 0; margin-right: 2px; border: 1px solid var(--line-strong); }
+  .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; vertical-align: 0; margin-inline-end: 2px; border: 1px solid var(--line-strong); }
   .sub { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/07-sharding.html">Chapter 7</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Secondary indexes</span>
+      <a href="../chapters/07-sharding.html">فصل ۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم secondary index</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 7 · Sharding</div>
-  <h1>Local vs global secondary indexes</h1>
-  <p class="lede">Car listings are sharded by ID. To find red cars you need a secondary index on colour — and it does not map neatly onto the shards. A local index lives beside each shard’s data (cheap writes, every read asks every shard); a global index is sharded by the indexed term (targeted reads, writes may touch other shards).</p>
-  <p class="source-note">Illustrates “Sharding and Secondary Indexes”, “Local Secondary Indexes” and “Global Secondary Indexes” (pp. 268–271, Figures 7-9 and 7-10): IDs 0–499 in shard 0 and 500–999 in shard 1, and a global index split at a–r / s–z for colour and a–f / h–z for make. A third shard and the particular cars are the vault’s own. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۷ · مفهوم sharding</div>
+  <h1>مقایسه‌ی local و global secondary index</h1>
+  <p class="lede">آگهی‌های ماشین بر اساس ID shard شده‌اند. برای پیدا کردن ماشین‌های قرمز یک secondary index روی رنگ لازم است، که تمیز روی shardها نمی‌نشیند. local index کنار داده‌ی هر shard است: نوشتن ارزان، و هر خواندن از همه‌ی shardها می‌پرسد. global index بر اساس خود term shard می‌شود: خواندن هدفمند، و نوشتن ممکن است به shardهای دیگر برسد.</p>
+  <p class="source-note">برای بخش «مفهوم sharding و secondary index» و زیربخش‌های local و global در صص. ۲۶۸–۲۷۱، با شکل‌های ۷-۹ و ۷-۱۰: IDهای ۰ تا ۴۹۹ در shard ۰ و ۵۰۰ تا ۹۹۹ در shard ۱، و global indexی که برای رنگ در a–r و s–z و برای سازنده در a–f و h–z تقسیم شده. shard سوم و خود ماشین‌ها مال vault هستند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
@@ -48,41 +48,41 @@
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Index type</p>
+        <p class="panel-title">نوع index</p>
         <div id="kind"></div>
-        <p class="panel-title" style="margin-top:14px">Query</p>
-        <div class="field"><span class="field-head">color =</span><div id="color"></div></div>
-        <div class="field" style="margin-top:8px"><span class="field-head">AND make =</span><div id="make"></div></div>
+        <p class="panel-title" style="margin-top:14px">کوئری</p>
+        <div class="field"><span class="field-head">رنگ برابر با</span><div id="color"></div></div>
+        <div class="field" style="margin-top:8px"><span class="field-head">و سازنده برابر با</span><div id="make"></div></div>
         <div class="row" style="margin-top:12px">
-          <button class="btn primary" type="button" id="search">Search</button>
-          <button class="btn" type="button" id="add">Add a random listing</button>
+          <button class="btn primary" type="button" id="search">جست‌وجو</button>
+          <button class="btn" type="button" id="add">افزودن یک آگهی تصادفی</button>
         </div>
       </div>
       <div class="panel wide">
-        <p class="panel-title">Cost of the last operation</p>
+        <p class="panel-title">هزینه‌ی آخرین عملیات</p>
         <div class="stats" id="stats"></div>
         <p class="field-hint" id="explain" aria-live="polite" style="margin:8px 0 0"></p>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Local: scatter/gather reads.</strong> Red cars can be on any shard, so a search for all of them asks every shard and combines the results — prone to tail latency, and adding shards doesn’t add query throughput.</li>
-    <li><strong>Local: writes stay on one shard.</strong> Adding a listing only touches the shard that holds its ID.</li>
-    <li><strong>Global: one shard per term.</strong> color = red reads one index shard for the postings list — but fetching the records themselves still goes to the shards holding those IDs.</li>
-    <li><strong>Global: AND across terms and multi-shard writes.</strong> colour and make may live on different index shards; the postings lists must be shipped and intersected, and one new listing can update several index shards.</li>
+    <li><strong>در local، خواندن scatter/gather است.</strong> ماشین‌های قرمز ممکن است روی هر shardی باشند، پس جست‌وجوی همه‌شان از همه‌ی shardها می‌پرسد و نتیجه‌ها را ترکیب می‌کند؛ در معرض tail latency است، و اضافه کردن shard throughput کوئری را بالا نمی‌برد.</li>
+    <li><strong>در local، نوشتن روی یک shard می‌ماند.</strong> افزودن یک آگهی فقط به shardی دست می‌زند که ID آن را دارد.</li>
+    <li><strong>در global، هر term یک shard دارد.</strong> شرط رنگ قرمز برای postings list فقط از یک index shard می‌خواند؛ اما گرفتن خود رکوردها هنوز به shardهایی می‌رود که آن IDها را دارند.</li>
+    <li><strong>در global، شرط AND بین termها و نوشتن چند-shardی هزینه دارد.</strong> رنگ و سازنده ممکن است روی index shardهای مختلف باشند؛ postings listها باید جابه‌جا و intersect شوند، و یک آگهی تازه ممکن است چند index shard را به‌روز کند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/07-sharding.html"><small>Lesson</small>7. Sharding</a></li>
-    <li><a href="07-sharding.html"><small>Simulation</small>Sharding and rebalancing</a></li>
+    <li><a href="../chapters/07-sharding.html"><small>درس</small>فصل ۷: مفهوم sharding</a></li>
+    <li><a href="07-sharding.html"><small>شبیه‌سازی</small>مفهوم sharding و rebalancing</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -114,7 +114,7 @@
     var touched = [], explain;
     if (kind === "local") {
       touched = [0, 1, 2];
-      explain = "Local index: no shard knows where the other shards’ matches are, so the query goes to all " + NSHARDS + " shards and the results are merged.";
+      explain = "در local index هیچ shardی نمی‌داند نتیجه‌های shardهای دیگر کجاست، پس کوئری به هر " + NSHARDS + " shard می‌رود و نتیجه‌ها merge می‌شوند.";
       last = { op: "read", touched: touched, index: touched, data: touched, msgs: NSHARDS, hits: hits };
     } else {
       var terms = [];
@@ -122,9 +122,9 @@
       if (q.make) terms.push(["make", q.make]);
       var idx = []; terms.forEach(function (t) { var s = termShard(t[0], t[1]); if (idx.indexOf(s) < 0) idx.push(s); });
       var data = []; hits.forEach(function (id) { var s = dataShard(id); if (data.indexOf(s) < 0) data.push(s); });
-      explain = "Global index: " + terms.map(function (t) { return t[0] + ":" + t[1] + " lives on index shard " + termShard(t[0], t[1]); }).join(", ") + "." +
-        (terms.length > 1 && idx.length > 1 ? " The two postings lists sit on different shards and must be sent over the network to be intersected." : "") +
-        (hits.length ? " Fetching the " + hits.length + " record(s) then reads shard(s) " + data.join(", ") + "." : "");
+      explain = "در global index، " + terms.map(function (t) { return "term " + t[0] + ":" + t[1] + " روی index shard " + termShard(t[0], t[1]) + " است"; }).join(" و ") + "." +
+        (terms.length > 1 && idx.length > 1 ? " دو postings list روی shardهای مختلف‌اند و باید روی شبکه فرستاده شوند تا intersect شوند." : "") +
+        (hits.length ? " بعد گرفتن " + hits.length + " رکورد از shard " + data.join(" و ") + " می‌خواند." : "");
       last = { op: "read", index: idx, data: data, msgs: idx.length + data.length, hits: hits };
     }
     last.explain = explain;
@@ -141,27 +141,27 @@
     var all = [ds]; idx.forEach(function (s) { if (all.indexOf(s) < 0) all.push(s); });
     last = { op: "write", index: idx, data: [ds], msgs: all.length, hits: [],
       explain: kind === "local"
-        ? "Car " + id + " (" + car.color + " " + car.make + ") goes to shard " + ds + ", which also updates its own local index: one shard."
-        : "Car " + id + " goes to shard " + ds + "; its index entries color:" + car.color + " and make:" + car.make + " live on index shard(s) " + idx.join(", ") + ". " +
-          (all.length > 1 ? "That is " + all.length + " shards to keep in sync — the book suggests a distributed transaction, or accepts that the index lags (as DynamoDB’s does)." : "This time everything happens to land on one shard.") };
+        ? "ماشین " + id + " با رنگ " + car.color + " و سازنده‌ی " + car.make + " به shard " + ds + " می‌رود، که local index خودش را هم به‌روز می‌کند: فقط یک shard."
+        : "ماشین " + id + " به shard " + ds + " می‌رود؛ ورودی‌های index آن، یعنی color:" + car.color + " و make:" + car.make + "، روی index shard " + idx.join(" و ") + " هستند. " +
+          (all.length > 1 ? "یعنی " + all.length + " shard که باید هماهنگ بمانند؛ کتاب تراکنش توزیع‌شده را پیشنهاد می‌کند، یا می‌پذیرد که index عقب بماند، مثل DynamoDB." : "این بار همه‌چیز تصادفاً روی یک shard افتاد.") };
     render();
   }
 
   function render() {
     var wrap = Kit.clear(document.getElementById("shards"));
-    document.getElementById("shard-title").textContent = kind === "local" ? "Each shard: its records + a local index of only those records" : "Each shard: its records + one slice of the global index (by term)";
+    document.getElementById("shard-title").textContent = kind === "local" ? "هر shard: رکوردهای خودش و یک local index فقط از همان رکوردها" : "هر shard: رکوردهای خودش و یک برش از global index بر اساس term";
     for (var s = 0; s < NSHARDS; s++) {
       var mine = cars.filter(function (c) { return dataShard(c.id) === s; });
       var cls = "shard";
       if (last && last.op === "read" && (last.index.indexOf(s) >= 0 || last.data.indexOf(s) >= 0)) cls += " touched";
       if (last && last.op === "write" && (last.index.indexOf(s) >= 0 || last.data.indexOf(s) >= 0)) cls += " wtouched";
       var box = Kit.el("div", { class: cls },
-        Kit.el("h3", null, Kit.el("span", null, "Shard " + s), Kit.el("span", { class: "sub" }, "IDs " + s * 500 + "–" + (s * 500 + 499))));
+        Kit.el("h3", null, Kit.el("span", null, "shard " + s), Kit.el("span", { class: "sub" }, "IDهای " + s * 500 + " تا " + (s * 500 + 499))));
       mine.forEach(function (c) {
-        box.appendChild(Kit.el("div", { class: "rec" + (last && last.hits.indexOf(c.id) >= 0 ? " hit" : "") + (c.fresh ? " new" : "") },
+        box.appendChild(Kit.el("div", { class: "rec" + (last && last.hits.indexOf(c.id) >= 0 ? " hit" : "") + (c.fresh ? " new" : ""), lang: "en", dir: "ltr" },
           Kit.el("span", null, "#" + c.id), Kit.el("span", null, Kit.el("i", { class: "swatch", style: "background:" + SW[c.color] }), c.color), Kit.el("span", null, c.make)));
       });
-      var idx = Kit.el("div", { class: "idx" });
+      var idx = Kit.el("div", { class: "idx", lang: "en", dir: "ltr" });
       var entries = [];
       if (kind === "local") {
         COLORS.forEach(function (col) { var ids = mine.filter(function (c) { return c.color === col; }).map(function (c) { return c.id; }); if (ids.length) entries.push(["color:" + col, ids]); });
@@ -170,7 +170,7 @@
         COLORS.forEach(function (col) { if (termShard("color", col) === s) entries.push(["color:" + col, cars.filter(function (c) { return c.color === col; }).map(function (c) { return c.id; })]); });
         MAKES.forEach(function (m) { if (termShard("make", m) === s) entries.push(["make:" + m, cars.filter(function (c) { return c.make === m; }).map(function (c) { return c.id; })]); });
       }
-      if (!entries.length) idx.appendChild(Kit.el("div", { class: "sub" }, "no index entries"));
+      if (!entries.length) idx.appendChild(Kit.el("div", { class: "sub", lang: "fa", dir: "rtl" }, "هیچ ورودی index ندارد"));
       entries.forEach(function (e) {
         var hot = last && last.op === "read" && (e[0] === "color:" + q.color || e[0] === "make:" + q.make);
         idx.appendChild(Kit.el("div", { class: hot ? "hit" : null }, e[0] + " → [" + e[1].join(", ") + "]"));
@@ -179,32 +179,32 @@
       wrap.appendChild(box);
     }
     var stats = Kit.clear(document.getElementById("stats"));
-    var rows = last ? [["Operation", last.op], ["Shard requests", last.msgs], ["Matches", last.op === "read" ? last.hits.length : "–"]] : [["Operation", "–"]];
+    var rows = last ? [["عملیات", last.op === "read" ? "خواندن" : "نوشتن"], ["درخواست به shardها", last.msgs], ["نتیجه‌ها", last.op === "read" ? last.hits.length : "–"]] : [["عملیات", "–"]];
     rows.forEach(function (x) { stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value" }, String(x[1])))); });
-    document.getElementById("explain").textContent = last ? last.explain : "Search, or add a listing.";
+    document.getElementById("explain").textContent = last ? last.explain : "جست‌وجو کنید، یا یک آگهی اضافه کنید.";
   }
 
-  document.getElementById("kind").appendChild(Kit.segmented({ label: "Index type", value: kind,
-    options: [{ value: "local", label: "Local (document-partitioned)" }, { value: "global", label: "Global (term-partitioned)" }],
+  document.getElementById("kind").appendChild(Kit.segmented({ label: "نوع index", value: kind,
+    options: [{ value: "local", label: "مدل local یا document-partitioned" }, { value: "global", label: "مدل global یا term-partitioned" }],
     onChange: function (v) { kind = v; last = null; render(); } }).element);
-  document.getElementById("color").appendChild(Kit.segmented({ label: "Colour", value: q.color,
-    options: [{ value: "", label: "any" }].concat(COLORS.map(function (c) { return { value: c, label: c }; })), onChange: function (v) { q.color = v; } }).element);
-  document.getElementById("make").appendChild(Kit.segmented({ label: "Make", value: q.make,
-    options: [{ value: "", label: "any" }].concat(MAKES.map(function (m) { return { value: m, label: m }; })), onChange: function (v) { q.make = v; } }).element);
+  document.getElementById("color").appendChild(Kit.segmented({ label: "رنگ", value: q.color,
+    options: [{ value: "", label: "هر رنگی" }].concat(COLORS.map(function (c) { return { value: c, label: c }; })), onChange: function (v) { q.color = v; } }).element);
+  document.getElementById("make").appendChild(Kit.segmented({ label: "سازنده", value: q.make,
+    options: [{ value: "", label: "هر سازنده‌ای" }].concat(MAKES.map(function (m) { return { value: m, label: m }; })), onChange: function (v) { q.make = v; } }).element);
   document.getElementById("search").addEventListener("click", search);
   document.getElementById("add").addEventListener("click", add);
   seed(); render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "With local secondary indexes, how is “all red cars” answered?",
-      options: ["From the one shard that holds color:red", "By sending the query to every shard and combining the results", "From a cache"],
-      answer: 1, explain: "Matching records may be on any shard, so all shards must be asked (p. 269)." },
-    { q: "Why are writes harder with a global secondary index?",
-      options: ["Records are bigger", "One record’s index terms may live on several other shards that must be updated too", "Global indexes are not sharded"],
-      answer: 1, explain: "Every term in a document might be on a different index shard (p. 271)." },
-    { q: "When is a global index a good fit, according to the book?",
-      options: ["When writes vastly outnumber reads", "When reads outnumber writes and postings lists are not too long", "Never"],
-      answer: 1, explain: "Global indexes are useful if read throughput is higher than write throughput and postings lists are short (p. 271)." }
+    { q: "با local secondary index، به «همه‌ی ماشین‌های قرمز» چطور جواب داده می‌شود؟",
+      options: ["از تنها shardی که color:red را دارد", "با فرستادن کوئری به همه‌ی shardها و ترکیب نتیجه‌ها", "از یک cache"],
+      answer: 1, explain: "رکوردهای مطابق ممکن است روی هر shardی باشند، پس باید از همه‌ی shardها پرسید (ص. ۲۶۹)." },
+    { q: "چرا نوشتن با global secondary index سخت‌تر است؟",
+      options: ["چون رکوردها بزرگ‌ترند", "چون termهای index یک رکورد ممکن است روی چند shard دیگر باشند که آن‌ها هم باید به‌روز شوند", "چون global indexها shard نمی‌شوند"],
+      answer: 1, explain: "هر term در یک سند ممکن است روی index shard متفاوتی باشد (ص. ۲۷۱)." },
+    { q: "به گفته‌ی کتاب، global index کی مناسب است؟",
+      options: ["وقتی نوشتن‌ها خیلی بیشتر از خواندن‌ها هستند", "وقتی خواندن‌ها بیشتر از نوشتن‌ها هستند و postings listها خیلی طولانی نیستند", "هیچ‌وقت"],
+      answer: 1, explain: "اگر throughput خواندن از نوشتن بیشتر باشد و postings listها کوتاه باشند، global index مفید است (ص. ۲۷۱)." }
   ]);
 })();
 </script>

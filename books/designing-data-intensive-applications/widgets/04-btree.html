@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>B-Tree Page Splits</title>
-<meta name="description" content="Insert and look up keys in a small B-tree: follow page references from the root, watch full pages split and the tree grow a level, and crash in the middle of a split with and without a write-ahead log. Illustrates DDIA Chapter 4.">
+<title>split در pageهای B-tree</title>
+<meta name="description" content="در یک B-tree کوچک کلید درج و جست‌وجو کنید: ارجاع pageها را از ریشه دنبال کنید، split شدن pageهای پر و یک سطح بلندتر شدن درخت را ببینید، و وسط split با write-ahead log و بدون آن crash کنید. برای فصل ۴ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .tree { display: grid; gap: 22px; padding: 6px 0; }
   .level { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .level-name { font-size: .72rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; text-align: center; margin-bottom: -14px; }
+  .level-name { font-size: .72rem; color: var(--ink-3); text-align: center; margin-bottom: -14px; direction: rtl; }
   .page-box { display: inline-flex; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); font-family: var(--mono); font-size: .78rem; min-height: 30px; }
   .page-box .k { padding: 5px 6px; border-right: 1px solid var(--line); min-width: 30px; text-align: center; }
   .page-box .k:last-child { border-right: 0; }
@@ -21,7 +21,7 @@
   .page-box.orphan { border-style: dashed; border-color: var(--bad); }
   .page-box .hit { background: var(--ok-soft); font-weight: 700; }
   .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .78rem; color: var(--ink-2); margin-top: 14px; }
-  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 2px solid; margin-right: 5px; vertical-align: -2px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 2px solid; margin-inline-end: 5px; vertical-align: -2px; }
   .legend .lp { border-color: var(--accent); } .legend .lw { border-color: var(--s2); } .legend .lo { border-color: var(--bad); border-style: dashed; }
   .orphans { margin-top: 14px; }
 </style>
@@ -29,68 +29,68 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/04-storage-and-retrieval.html">Chapter 4</a><span aria-hidden="true">/</span>
-      <span aria-current="page">B-tree</span>
+      <a href="../chapters/04-storage-and-retrieval.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ساختار B-tree</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 4 · Storage and Retrieval</div>
-  <h1>B-tree pages, lookups and splits</h1>
-  <p class="lede">A B-tree breaks the database into fixed-size pages and overwrites them in place. A lookup follows page references from the root down to a leaf; an insert into a full page splits it in two and updates the parent — sometimes all the way up, which is how the tree grows a new root.</p>
-  <p class="source-note">Illustrates “B-Trees” and “Making B-trees reliable” (pp. 125–128, Figures 4-5 and 4-6). Pages here hold at most 4 keys, so the branching factor is 5 instead of the several hundred of a real database; leaves hold keys only, and deletes are left out. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۴ · ذخیره‌سازی و بازیابی</div>
+  <h1>pageها، جست‌وجو و split در B-tree</h1>
+  <p class="lede">ساختار B-tree دیتابیس را به pageهای اندازه‌ثابت می‌شکند و آن‌ها را در جا بازنویسی می‌کند. جست‌وجو ارجاع pageها را از ریشه تا یک leaf دنبال می‌کند؛ درج در یک page پر آن را دو تکه می‌کند و والد را به‌روز می‌کند، گاهی تا بالای درخت، و درخت همین‌طور ریشه‌ی تازه می‌گیرد.</p>
+  <p class="source-note">برای «ساختار B-tree» و «قابل‌اعتماد کردن B-treeها» در صص. ۱۲۵–۱۲۸ و شکل‌های ۴-۵ و ۴-۶. هر page این‌جا حداکثر ۴ کلید دارد، پس branching factor برابر ۵ است، نه چند صد مثل دیتابیس واقعی؛ leafها فقط کلید دارند و حذف کنار گذاشته شده. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
-      <div class="tree" id="tree" aria-label="B-tree pages by level"></div>
-      <div class="orphans" id="orphans"></div>
-      <div class="legend"><span><i class="lp"></i>pages read by the last operation</span><span><i class="lw"></i>pages written by the last operation</span><span><i class="lo"></i>orphan page (unreachable)</span></div>
+      <div class="tree" id="tree" dir="ltr" aria-label="pageهای B-tree به تفکیک سطح"></div>
+      <div class="orphans" id="orphans" dir="ltr"></div>
+      <div class="legend"><span><i class="lp"></i>pageهای خوانده‌شده در آخرین عملیات</span><span><i class="lw"></i>pageهای نوشته‌شده در آخرین عملیات</span><span><i class="lo"></i>صفحه‌ی orphan؛ دسترس‌ناپذیر</span></div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Operations</p>
+        <p class="panel-title">عملیات‌ها</p>
         <div class="row">
-          <label for="key">Key</label><input id="key" type="number" min="1" max="999" value="334" style="width:90px">
-          <button class="btn primary" type="button" id="ins">Insert</button>
-          <button class="btn" type="button" id="get">Look up</button>
+          <label for="key">کلید</label><input id="key" type="number" min="1" max="999" value="334" style="width:90px">
+          <button class="btn primary" type="button" id="ins">درج</button>
+          <button class="btn" type="button" id="get">جست‌وجو</button>
         </div>
         <div class="row" style="margin-top:10px">
-          <button class="btn" type="button" id="rand">Insert 5 random keys</button>
-          <button class="btn" type="button" id="reset">↺ Reset</button>
+          <button class="btn" type="button" id="rand">درج ۵ کلید تصادفی</button>
+          <button class="btn" type="button" id="reset">↺ از اول</button>
         </div>
-        <label class="check" style="margin-top:12px"><input type="checkbox" id="crash"> Crash in the middle of the next split</label>
-        <label class="check" style="margin-top:6px"><input type="checkbox" id="wal" checked> Write-ahead log</label>
+        <label class="check" style="margin-top:12px"><input type="checkbox" id="crash"> وسط split بعدی crash کن</label>
+        <label class="check" style="margin-top:6px"><input type="checkbox" id="wal" checked> فایل write-ahead log</label>
       </div>
       <div class="panel">
-        <p class="panel-title">Counters</p>
+        <p class="panel-title">شمارنده‌ها</p>
         <div class="stats" id="stats"></div>
       </div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Lookups read one page per level.</strong> The depth grows only when the root splits, so it stays logarithmic in the number of keys — the book’s four levels of 4 KiB pages with branching factor 500 hold up to 250 TB.</li>
-    <li><strong>Most inserts write one page.</strong> A split writes the two halves plus the parent; occasionally a cascade rewrites a page on every level.</li>
-    <li><strong>A split overwrites several pages.</strong> Crash halfway without a WAL: the left half is on disk but the parent never learned about the right half, so its keys are orphaned. With the WAL, recovery replays the insert.</li>
-    <li><strong>Contrast with the LSM-tree.</strong> Here pages are modified in place; an LSM-tree only appends and later deletes whole files.</li>
+    <li><strong>جست‌وجو در هر سطح یک page می‌خواند.</strong> عمق فقط وقتی بیشتر می‌شود که ریشه split شود، پس نسبت به تعداد کلیدها لگاریتمی می‌ماند؛ به گفته‌ی کتاب، چهار سطح page چهار کیلوبایتی با branching factor ۵۰۰ تا ۲۵۰ ترابایت جا می‌دهد.</li>
+    <li><strong>بیشتر درج‌ها یک page می‌نویسند.</strong> هر split دو نیمه و والد را می‌نویسد؛ گاهی یک زنجیره در هر سطح یک page را بازنویسی می‌کند.</li>
+    <li><strong>هر split چند page را بازنویسی می‌کند.</strong> بدون WAL وسط کار crash کنید: نیمه‌ی چپ روی دیسک است اما والد هیچ‌وقت از نیمه‌ی راست باخبر نشده، پس کلیدهایش orphan می‌شوند. با WAL، بازیابی درج را دوباره اجرا می‌کند.</li>
+    <li><strong>مقایسه با LSM-tree.</strong> این‌جا pageها در جا عوض می‌شوند؛ LSM-tree فقط append می‌کند و بعداً فایل‌های کامل را حذف می‌کند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/04-storage-and-retrieval.html"><small>Lesson</small>4. Storage and Retrieval</a></li>
-    <li><a href="04-lsm-tree.html"><small>Simulation</small>Inside an LSM-tree</a></li>
+    <li><a href="../chapters/04-storage-and-retrieval.html"><small>درس</small>فصل ۴: ذخیره‌سازی و بازیابی</a></li>
+    <li><a href="04-lsm-tree.html"><small>شبیه‌سازی</small>درون یک LSM-tree</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -133,7 +133,7 @@
     read = []; written = []; hitKey = key;
     var before = clone(root), beforeNext = nextId;
     var res = insertInto(root, key);
-    if (res === "dup") { if (!quiet) log.add("Key " + key + " is already in the tree", "muted"); return; }
+    if (res === "dup") { if (!quiet) log.add("کلید " + key + " از قبل در درخت هست", "muted"); return; }
     if (res) { root = page(false, [res.boundary], [root, res.right]); written.push(root.id); }
     var split = written.length > 1;
     if (split && document.getElementById("crash").checked) {
@@ -142,7 +142,7 @@
       return;
     }
     totalWrites += new Set(written).size; ops++;
-    if (!quiet) log.add("Insert " + key + ": read " + read.length + " page(s), wrote " + new Set(written).size + (split ? " — page split" + (res ? ", new root" : "") : ""), split ? "warn" : "ok");
+    if (!quiet) log.add("درج " + key + ": خواندن " + read.length + " page و نوشتن " + new Set(written).size + " page" + (split ? "؛ split شد" + (res ? " و ریشه‌ی تازه ساخته شد" : "") : ""), split ? "warn" : "ok");
     render();
   }
 
@@ -151,7 +151,7 @@
     var wal = document.getElementById("wal").checked;
     if (wal) {
       totalWrites += new Set(written).size; ops++;
-      log.add("Crash during the split for " + key + ". Recovery replays the insert from the write-ahead log: the tree is consistent.", "ok");
+      log.add("وسط split برای " + key + " crash شد. بازیابی درج را از write-ahead log دوباره اجرا می‌کند: درخت سازگار است.", "ok");
       render(); return;
     }
     var afterLeafId = read[read.length - 1];
@@ -162,7 +162,7 @@
     leaf.keys = leftKeys;
     orphans.push({ id: rightPage ? rightPage.id : nextId++, keys: rightPage ? rightPage.keys.slice() : [] });
     written = [afterLeafId]; read = [];
-    log.add("Crash during the split for " + key + " with no WAL: the left half overwrote the old page, but the parent never got a reference to the right half. Keys " + orphans[orphans.length - 1].keys.join(", ") + " are now unreachable.", "bad");
+    log.add("وسط split برای " + key + " بدون WAL crash شد: نیمه‌ی چپ page قدیمی را بازنویسی کرد، اما والد هیچ‌وقت ارجاعی به نیمه‌ی راست نگرفت. کلیدهای " + orphans[orphans.length - 1].keys.join("، ") + " حالا دسترس‌ناپذیرند.", "bad");
     render();
   }
   function findPage(n, id) { if (n.id === id) return n; for (var i = 0; i < n.children.length; i++) { var f = findPage(n.children[i], id); if (f) return f; } return null; }
@@ -180,7 +180,7 @@
     for (;;) { read.push(n.id); if (n.leaf) break; n = n.children[childIndex(n, key)]; }
     var found = n.keys.indexOf(key) >= 0;
     var lost = orphans.some(function (o) { return o.keys.indexOf(key) >= 0; });
-    log.add("Look up " + key + ": " + read.length + " page read(s) → " + (found ? "found" : lost ? "not found (it is in an orphan page)" : "not found"), found ? "ok" : lost ? "bad" : "muted");
+    log.add("جست‌وجوی " + key + ": خواندن " + read.length + " page ← " + (found ? "پیدا شد" : lost ? "پیدا نشد، چون در یک page orphan است" : "پیدا نشد"), found ? "ok" : lost ? "bad" : "muted");
     render();
   }
 
@@ -189,24 +189,24 @@
 
   function box(n, extra) {
     var cls = "page-box" + (read.indexOf(n.id) >= 0 ? " path" : "") + (written.indexOf(n.id) >= 0 ? " written" : "") + (extra || "");
-    var cells = [Kit.el("span", { class: "pid", title: "page number" }, "p" + n.id)];
+    var cells = [Kit.el("span", { class: "pid", title: "شماره‌ی page" }, "p" + n.id)];
     n.keys.forEach(function (k) { cells.push(Kit.el("span", { class: "k" + (n.leaf && k === hitKey ? " hit" : "") }, String(k))); });
     for (var i = n.keys.length; i < MAX; i++) cells.push(Kit.el("span", { class: "k free" }, "·"));
-    return Kit.el("span", { class: cls, "aria-label": "page " + n.id + (n.leaf ? " leaf" : "") + " keys " + n.keys.join(", ") }, cells);
+    return Kit.el("span", { class: cls, "aria-label": "صفحه‌ی " + n.id + (n.leaf ? "، leaf" : "") + "، کلیدها " + n.keys.join("، ") }, cells);
   }
 
   function render() {
     var tree = Kit.clear(document.getElementById("tree"));
     var lv = levels();
     lv.forEach(function (row, i) {
-      tree.appendChild(Kit.el("div", { class: "level-name" }, i === 0 ? "root" : i === lv.length - 1 ? "leaf pages" : "level " + (i + 1)));
+      tree.appendChild(Kit.el("div", { class: "level-name" }, i === 0 ? "ریشه" : i === lv.length - 1 ? "صفحه‌های leaf" : "سطح " + (i + 1)));
       tree.appendChild(Kit.el("div", { class: "level" }, row.map(function (n) { return box(n); })));
     });
     var o = Kit.clear(document.getElementById("orphans"));
     if (orphans.length) o.appendChild(Kit.el("div", { class: "level" }, orphans.map(function (p) { return box({ id: p.id, leaf: true, keys: p.keys, children: [] }, " orphan"); })));
     var stats = Kit.clear(document.getElementById("stats"));
-    [["Depth", lv.length], ["Pages", lv.reduce(function (a, r) { return a + r.length; }, 0)], ["Keys", count(root)],
-     ["Writes / insert", ops ? (totalWrites / ops).toFixed(2) : "–"]].forEach(function (s) {
+    [["عمق", lv.length], ["تعداد page", lv.reduce(function (a, r) { return a + r.length; }, 0)], ["تعداد کلید", count(root)],
+     ["نوشتن به ازای درج", ops ? (totalWrites / ops).toFixed(2) : "–"]].forEach(function (s) {
       stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value" }, String(s[1]))));
     });
   }
@@ -218,7 +218,7 @@
                                          page(true, [333, 337, 340, 345]), page(true, [400, 410, 470])]);
     log.clear();
     read = []; written = []; hitKey = null;
-    log.add("Start: two levels, 14 keys. Insert 334 to split the full page 333–345, as in Figure 4-6.", "muted");
+    log.add("شروع: دو سطح و ۱۴ کلید. ۳۳۴ را درج کنید تا page پر ۳۳۳ تا ۳۴۵ مثل شکل ۴-۶ split شود.", "muted");
     render();
   }
 
@@ -232,15 +232,15 @@
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why does a lookup in a B-tree with millions of keys read only a handful of pages?",
-      options: ["Pages are cached", "Each level narrows the key range by the branching factor, so depth is O(log n)", "Keys are hashed"],
-      answer: 1, explain: "With a branching factor of several hundred, three or four levels are enough for most databases (p. 127)." },
-    { q: "What does a page split write?",
-      options: ["Only the new page", "The two half-full pages and the updated parent (possibly more parents up to the root)", "A new SSTable"],
-      answer: 1, explain: "The parent must reference both halves; if it is full, it splits as well, up to a new root (p. 127)." },
-    { q: "Why do B-trees need a write-ahead log?",
-      options: ["To make reads faster", "Because a split overwrites several pages, and a crash part-way through could leave an orphan page", "To compress pages"],
-      answer: 1, explain: "Every modification goes to the append-only WAL first, so recovery can restore a consistent tree (p. 128)." }
+    { q: "چرا جست‌وجو در B-treeای با میلیون‌ها کلید فقط چند page می‌خواند؟",
+      options: ["چون pageها cache شده‌اند", "هر سطح بازه‌ی کلید را به اندازه‌ی branching factor تنگ‌تر می‌کند، پس عمق O(log n) است", "چون کلیدها hash شده‌اند"],
+      answer: 1, explain: "با branching factor چند صد، سه یا چهار سطح برای بیشتر دیتابیس‌ها کافی است (ص. ۱۲۷)." },
+    { q: "هر split چه چیزهایی را می‌نویسد؟",
+      options: ["فقط page تازه را", "دو page نیمه‌پر و والد به‌روزشده را، و شاید والدهای بیشتری تا ریشه", "یک SSTable تازه"],
+      answer: 1, explain: "والد باید به هر دو نیمه ارجاع بدهد؛ اگر پر باشد، خودش هم split می‌شود، تا یک ریشه‌ی تازه (ص. ۱۲۷)." },
+    { q: "چرا B-tree به write-ahead log نیاز دارد؟",
+      options: ["برای سریع‌تر کردن خواندن", "چون split چند page را بازنویسی می‌کند و crash در وسط کار ممکن است یک page orphan جا بگذارد", "برای فشرده کردن pageها"],
+      answer: 1, explain: "هر تغییر اول به WAL، که append-only است، می‌رود، پس بازیابی می‌تواند درخت سازگاری برگرداند (ص. ۱۲۸)." }
   ]);
 })();
 </script>

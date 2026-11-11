@@ -1,18 +1,20 @@
-# Physical clocks, Lamport clocks, hybrid logical clocks
+# ساعت فیزیکی، Lamport clock و hybrid logical clock
 
-Three nodes whose time-of-day clocks are skewed by up to ±40 ms exchange chat messages, many of which reply to earlier ones. Each message is stamped three ways and we count replies that a timestamp sort would place before the message they answer.
+سه node که ساعت‌های time-of-day آن‌ها تا ±۴۰ میلی‌ثانیه skew دارند پیام‌های چت رد و بدل می‌کنند، و خیلی از پیام‌ها پاسخ پیام‌های قبلی‌اند. هر پیام به سه روش برچسب می‌خورد و ما پاسخ‌هایی را می‌شماریم که مرتب کردن بر اساس timestamp آن‌ها را پیش از پیامی که جوابش را می‌دهند می‌گذارد.
 
-*Illustrates DDIA 2nd ed., “Logical Clocks”, pp. 420–423. The implementation is the vault’s own.*
+*این آزمایش بخش «مفهوم logical clock» از ویراست دوم DDIA را نشان می‌دهد (صص. ۴۲۰–۴۲۳). پیاده‌سازی مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+با Python 3.10 یا جدیدتر، فقط کتابخانه‌ی استاندارد، و قطعی (با seed ثابت):
 
 ```sh
 python3 clocks.py
 ```
 
-## Expected output
+خروجی برنامه انگلیسی است، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را درست نشان نمی‌دهند.
+
+## خروجی مورد انتظار
 
 ```text
 300 messages, 192 of them replies; clock skew {'Aaliyah': 40, 'Bryce': -35, 'Caleb': 0}
@@ -27,12 +29,12 @@ Example violation with physical clocks:
   reply   by Bryce    true time 1151  physical 1116  lamport 7  hlc 1118.1
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Physical timestamps put ~20% of replies before their parent — a clock running 35 ms slow is enough.
-- Lamport timestamps never violate causality, but are counters unrelated to wall-clock time.
-- Hybrid logical clocks also never violate causality, and stay within the clock skew of real time.
+- مفهوم timestamp فیزیکی حدود ۲۰٪ پاسخ‌ها را پیش از پیام اصلی‌شان می‌گذارد؛ ساعتی که ۳۵ میلی‌ثانیه کند باشد کافی است.
+- مفهوم Lamport timestamp هرگز ترتیب علّی را نقض نمی‌کند، اما شمارنده‌ای است که ربطی به ساعت دیواری ندارد.
+- مفهوم hybrid logical clock هم هرگز ترتیب علّی را نقض نمی‌کند و فاصله‌اش از زمان واقعی در حد همان clock skew می‌ماند.
 
-## Related
+## پیوندها
 
-- Chapter note: [10. Consistency and Consensus](../../chapters/10-consistency-and-consensus.md) — “Logical Clocks”, pp. 420–423
+- یادداشت فصل: [فصل ۱۰: مفهوم consistency و consensus](../../chapters/10-consistency-and-consensus.md)، بخش «مفهوم logical clock»، صص. ۴۲۰–۴۲۳

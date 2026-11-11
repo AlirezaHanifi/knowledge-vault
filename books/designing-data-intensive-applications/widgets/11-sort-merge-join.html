@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shuffle and Sort-Merge Join</title>
-<meta name="description" content="Step a batch join through map, shuffle, sort and reduce: activity events meet user records by user ID, and a secondary sort keeps reducer memory to one record. Illustrates DDIA 2nd ed., Chapter 11.">
+<title>مفهوم shuffle و sort-merge join</title>
+<meta name="description" content="یک join در batch را قدم به قدم از map، shuffle، sort و reduce عبور دهید: رویدادهای فعالیت با user ID به رکوردهای کاربر می‌رسند، و secondary sort حافظه‌ی reducer را به یک رکورد محدود می‌کند. برای فصل ۱۱ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .pipeline { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -15,9 +15,9 @@
   .box { border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); padding: 6px; margin-bottom: 8px; }
   .box-title { font-size: .75rem; font-weight: 600; color: var(--ink-2); margin-bottom: 4px; display: flex; justify-content: space-between; gap: 6px; }
   .rec { display: block; font-family: var(--mono); font-size: .74rem; padding: 2px 6px; margin: 2px 0; border-radius: 4px; border: 1px solid var(--line); background: var(--surface-2); overflow-wrap: anywhere; }
-  .rec.user { border-left: 4px solid var(--s2); }
-  .rec.event { border-left: 4px solid var(--s1); }
-  .rec.out { border-left: 4px solid var(--s3); }
+  .rec.user { border-inline-start: 4px solid var(--s2); }
+  .rec.event { border-inline-start: 4px solid var(--s1); }
+  .rec.out { border-inline-start: 4px solid var(--s3); }
   .rec.hold { outline: 2px solid var(--warn); }
   .rec.cur { background: var(--accent-soft); }
   .k { font-weight: 700; }
@@ -26,63 +26,63 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/11-batch-processing.html">Chapter 11</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Sort-merge join</span>
+      <a href="../chapters/11-batch-processing.html">فصل ۱۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم sort-merge join</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 11 · Batch Processing</div>
-  <h1>Shuffle and sort-merge join</h1>
-  <p class="lede">To analyse page views by age, a batch job joins activity events with the user database. Mappers key every record by user ID; the shuffle routes each key to one reducer and sorts it; the reducer then sees one user’s record next to that user’s events — no lookups, no network requests.</p>
-  <p class="source-note">Illustrates “Shuffling Data” and “Joins and Grouping” (pp. 469–473), after Figures 11-1 to 11-3. The records, the two reducers and the hash function (user number mod 2) are the vault’s own toy choices; implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۱ · پردازش batch</div>
+  <h1>مفهوم shuffle و sort-merge join</h1>
+  <p class="lede">برای تحلیل بازدید صفحه‌ها بر اساس سن، یک کار batch رویدادهای فعالیت را با دیتابیس کاربر join می‌کند. mapperها به هر رکورد کلید user ID می‌دهند؛ shuffle هر کلید را به یک reducer می‌فرستد و مرتبش می‌کند؛ بعد reducer رکورد یک کاربر را کنار رویدادهای همان کاربر می‌بیند؛ بدون جست‌وجو و بدون درخواست شبکه.</p>
+  <p class="source-note">برای بخش‌های «مفهوم shuffle» و «مفهوم join و grouping» در صص. ۴۶۹–۴۷۳، با الهام از شکل‌های ۱۱-۱ تا ۱۱-۳. رکوردها، دو reducer و تابع hash، یعنی شماره‌ی کاربر به module ۲، انتخاب‌های اسباب‌بازی خود vault هستند؛ پیاده‌سازی مال خود vault است.</p>
 
   <div class="panel" style="margin-top:20px">
     <div class="row" style="margin-bottom:12px">
       <div id="player"></div>
       <span class="spacer"></span>
-      <label class="check"><input type="checkbox" id="secondary" checked> Secondary sort (user record first)</label>
+      <label class="check"><input type="checkbox" id="secondary" checked> مفهوم secondary sort؛ رکورد کاربر اول</label>
     </div>
     <div class="pipeline" id="pipeline"></div>
   </div>
 
   <div class="grid-2" style="margin-top:16px">
     <div class="panel">
-      <p class="panel-title">Reducer memory</p>
+      <p class="panel-title">حافظه‌ی reducer</p>
       <div class="grid-3">
-        <div class="stat"><span class="stat-label">Stage</span><span class="stat-value" id="stage">inputs</span></div>
-        <div class="stat"><span class="stat-label">Held now (both reducers)</span><span class="stat-value" id="held">0</span></div>
-        <div class="stat"><span class="stat-label">Peak (both reducers)</span><span class="stat-value" id="peak">0</span></div>
+        <div class="stat"><span class="stat-label">مرحله</span><span class="stat-value" id="stage">ورودی‌ها</span></div>
+        <div class="stat"><span class="stat-label">نگه‌داشته‌شده الان، هر دو reducer</span><span class="stat-value" id="held">0</span></div>
+        <div class="stat"><span class="stat-label">بیشینه، هر دو reducer</span><span class="stat-value" id="peak">0</span></div>
       </div>
     </div>
     <div class="panel">
-      <p class="panel-title">Event log</p>
+      <p class="panel-title">گزارش رویدادها</p>
       <ol id="log"></ol>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>The shuffle is a distributed sort.</strong> Each mapper splits its output by hash of the key, one partition per reducer; each reducer merges the sorted partitions it fetches from every mapper.</li>
-    <li><strong>All records with the same key meet in one place.</strong> That is what makes the join local: the reducer needs no database lookups.</li>
-    <li><strong>The secondary sort keeps memory constant.</strong> With the user record first, the reducer holds one record at a time. Turn it off and the reducer must buffer a user’s events until the user record turns up.</li>
-    <li><strong>Inputs are never modified.</strong> If a reducer failed, it could rerun on the same sorted partitions.</li>
+    <li><strong>مفهوم shuffle یک sort توزیع‌شده است.</strong> هر mapper خروجی‌اش را با hash کلید تقسیم می‌کند، یک بخش برای هر reducer؛ هر reducer بخش‌های مرتبی را که از هر mapper می‌گیرد merge می‌کند.</li>
+    <li><strong>همه‌ی رکوردهای یک کلید در یک جا به هم می‌رسند.</strong> همین join را محلی می‌کند: reducer هیچ جست‌وجویی در دیتابیس لازم ندارد.</li>
+    <li><strong>مفهوم secondary sort حافظه را ثابت نگه می‌دارد.</strong> وقتی رکورد کاربر اول باشد، reducer هر بار یک رکورد نگه می‌دارد. خاموشش کنید تا reducer مجبور شود رویدادهای یک کاربر را تا رسیدن رکورد کاربر buffer کند.</li>
+    <li><strong>ورودی‌ها هرگز تغییر نمی‌کنند.</strong> اگر یک reducer شکست بخورد، می‌تواند روی همان بخش‌های مرتب دوباره اجرا شود.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/11-batch-processing.html"><small>Lesson</small>11. Batch Processing</a></li>
-    <li><a href="04-lsm-tree.html"><small>Simulation</small>Inside an LSM-tree — merging sorted files</a></li>
+    <li><a href="../chapters/11-batch-processing.html"><small>درس</small>فصل ۱۱: پردازش batch</a></li>
+    <li><a href="04-lsm-tree.html"><small>شبیه‌سازی</small>درون یک LSM-tree: merge فایل‌های مرتب</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -96,11 +96,11 @@
     { id: 2, url: "/blog" }, { id: 3, url: "/docs" }, { id: 4, url: "/blog" }, { id: 1, url: "/blog" }
   ];
   var R = 2;
-  var STAGES = ["inputs", "map", "shuffle", "sort", "reduce"];
+  var STAGES = ["ورودی‌ها", "map", "shuffle", "sort", "reduce"];
   var secondary = true, stage = 0, cursor = 0, held = [], peak = 0, outputs = [[], []], current = [null, null];
   var log = Kit.log(Kit.$("#log"));
 
-  function rec(kind, text, extra) { return el("span", { class: "rec " + kind + (extra ? " " + extra : "") }, text); }
+  function rec(kind, text, extra) { return el("span", { class: "rec " + kind + (extra ? " " + extra : ""), lang: "en", dir: "ltr" }, text); }
   function userRec(u, extra) { return rec("user", "user " + u.id + " · born " + u.dob, extra); }
   function evRec(e, extra) { return rec("event", "user " + e.id + " · viewed " + e.url, extra); }
   function keyed(r) { return r.kind === "user" ? "(" + r.id + ", user: " + r.dob + ")" : "(" + r.id + ", view: " + r.url + ")"; }
@@ -130,18 +130,18 @@
     var p = Kit.clear(Kit.$("#pipeline"));
     var m = mapped();
     // 1. inputs / map output
-    var c1 = el("div", { class: "col" + (stage <= 1 ? " active" : "") }, el("h3", null, stage >= 1 ? "Map output (key, value)" : "Inputs"));
-    c1.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "Mapper A · activity events"),
+    var c1 = el("div", { class: "col" + (stage <= 1 ? " active" : "") }, el("h3", null, stage >= 1 ? "خروجی map؛ کلید و مقدار" : "ورودی‌ها"));
+    c1.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "مفهوم mapper A · رویدادهای فعالیت"),
       m.A.map(function (r) { return stage >= 1 ? rec("event", keyed(r)) : evRec(r); })));
-    c1.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "Mapper B · user database"),
+    c1.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "مفهوم mapper B · دیتابیس کاربر"),
       m.B.map(function (r) { return stage >= 1 ? rec("user", keyed(r)) : userRec({ id: r.id, dob: r.dob }); })));
     p.appendChild(c1);
     // 2-3. reducers' input
     var c2 = el("div", { class: "col" + (stage === 2 || stage === 3 ? " active" : "") },
-      el("h3", null, stage >= 3 ? "Sorted by key" : "Shuffled to reducers"));
+      el("h3", null, stage >= 3 ? "مرتب‌شده با کلید" : "فرستاده به reducerها"));
     for (var r = 0; r < R; r++) {
       var list = stage >= 3 ? sorted(r) : stage >= 2 ? fetched(r) : [];
-      c2.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "Reducer " + r, el("span", { class: "muted" }, "user # mod 2 = " + r)),
+      c2.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "مفهوم reducer " + r, el("span", { class: "muted", lang: "en", dir: "ltr" }, "user # mod 2 = " + r)),
         list.length ? list.map(function (x, i) {
           var extra = (stage === 4 && i === current[r]) ? "cur" : "";
           if (stage === 4 && held.some(function (h) { return h.r === r && h.x === x; })) extra += " hold";
@@ -150,13 +150,13 @@
     }
     p.appendChild(c2);
     // 4. reduce
-    var c3 = el("div", { class: "col" + (stage === 4 ? " active" : "") }, el("h3", null, "Reduce: join"));
+    var c3 = el("div", { class: "col" + (stage === 4 ? " active" : "") }, el("h3", null, "مرحله‌ی reduce: join"));
     c3.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-2);margin:0" },
-      secondary ? "For each key: remember the user record (it comes first), then annotate every event with it."
-                : "Events can arrive before their user record, so they must be buffered until it shows up."));
+      secondary ? "برای هر کلید: رکورد کاربر را، که اول می‌آید، به خاطر بسپار و بعد هر رویداد را با آن تکمیل کن."
+                : "رویدادها ممکن است پیش از رکورد کاربرشان برسند، پس باید تا رسیدن آن buffer شوند."));
     p.appendChild(c3);
-    var c4 = el("div", { class: "col" }, el("h3", null, "Output: view + date of birth"));
-    for (r = 0; r < R; r++) c4.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "Output shard " + r),
+    var c4 = el("div", { class: "col" }, el("h3", null, "خروجی: بازدید و تاریخ تولد"));
+    for (r = 0; r < R; r++) c4.appendChild(el("div", { class: "box" }, el("div", { class: "box-title" }, "بخش خروجی " + r),
       outputs[r].length ? outputs[r].map(function (o) { return rec("out", o); }) : el("span", { class: "muted", style: "font-size:.8rem" }, "—")));
     p.appendChild(c4);
     Kit.$("#stage").textContent = STAGES[stage];
@@ -183,13 +183,13 @@
       var waiting = held.filter(function (h) { return h.r === r && h.x.kind === "event" && h.x.id === x.id; });
       waiting.forEach(function (h) { outputs[r].push(h.x.url + " · born " + x.dob); });
       held = held.filter(function (h) { return waiting.indexOf(h) < 0; });
-      log.add("Reducer " + r + ": user " + x.id + " record" + (waiting.length ? " — releases " + waiting.length + " buffered event(s)" : ""), waiting.length ? "warn" : "muted");
+      log.add("مفهوم reducer " + r + ": رکورد کاربر " + x.id + (waiting.length ? "؛ " + waiting.length + " رویداد bufferشده آزاد می‌شود" : ""), waiting.length ? "warn" : "muted");
     } else if (userOf[r].id === x.id) {
       outputs[r].push(x.url + " · born " + userOf[r].dob);
-      log.add("Reducer " + r + ": joined user " + x.id + " → " + x.url, "ok");
+      log.add("مفهوم reducer " + r + ": کاربر " + x.id + " با " + x.url + " join شد", "ok");
     } else {
       held.push({ r: r, x: x });
-      log.add("Reducer " + r + ": event for user " + x.id + " before its user record — buffered", "warn");
+      log.add("مفهوم reducer " + r + ": رویداد کاربر " + x.id + " پیش از رکورد کاربر رسید؛ buffer شد", "warn");
     }
     peak = Math.max(peak, held.length);
   }
@@ -197,10 +197,10 @@
   function step() {
     if (stage < 4) {
       stage++;
-      if (stage === 1) log.add("Map: each record becomes (user ID, value)", "muted");
-      if (stage === 2) log.add("Shuffle: partition by user ID mod 2, fetch from every mapper", "muted");
-      if (stage === 3) log.add("Sort: each reducer merges its partitions by key" + (secondary ? ", user record first" : ""), "muted");
-      if (stage === 4) { startReduce(); log.add("Reduce: walk the sorted records", "muted"); }
+      if (stage === 1) log.add("مرحله‌ی map: هر رکورد به (user ID, value) تبدیل می‌شود", "muted");
+      if (stage === 2) log.add("مرحله‌ی shuffle: بخش‌بندی با user ID به module ۲ و گرفتن از هر mapper", "muted");
+      if (stage === 3) log.add("مرحله‌ی sort: هر reducer بخش‌هایش را با کلید merge می‌کند" + (secondary ? "، رکورد کاربر اول" : ""), "muted");
+      if (stage === 4) { startReduce(); log.add("مرحله‌ی reduce: پیمایش رکوردهای مرتب", "muted"); }
       render();
       return true;
     }
@@ -208,7 +208,7 @@
     reduceOne();
     render();
     if (queue.length) return true;
-    log.add("Done: " + (outputs[0].length + outputs[1].length) + " joined records; peak memory " + peak + " record(s)", "ok");
+    log.add("تمام: " + (outputs[0].length + outputs[1].length) + " رکورد join‌شده؛ بیشینه‌ی حافظه " + peak + " رکورد", "ok");
     return false;
   }
   function reset() {
@@ -221,12 +221,12 @@
   reset();
 
   Kit.quiz(Kit.$("#quiz"), [
-    { q: "Why does the reducer need no network requests to perform the join?",
-      options: ["It caches the whole user database", "The shuffle has already brought every record with the same user ID to the same reducer", "Mappers perform the join", "Events contain the date of birth"],
-      answer: 1, explain: "Partitioning by key plus sorting puts each user’s record next to that user’s events, so the reducer joins them locally (pp. 471–473)." },
-    { q: "What does the secondary sort guarantee?",
-      options: ["Events are sorted by URL", "The user record arrives before that user’s events, so only one record has to be kept in memory", "Each reducer receives the same number of records", "Output files are sorted by date of birth"],
-      answer: 1, explain: "Ordering within each key so the user record comes first lets the reducer stream through the events holding just that record (p. 472)." }
+    { q: "چرا reducer برای انجام join هیچ درخواست شبکه‌ای لازم ندارد؟",
+      options: ["چون کل دیتابیس کاربر را cache کرده", "چون shuffle پیش‌تر همه‌ی رکوردهای یک user ID را به همان reducer آورده", "چون mapperها join را انجام می‌دهند", "چون رویدادها تاریخ تولد را دارند"],
+      answer: 1, explain: "بخش‌بندی با کلید به‌علاوه‌ی sort رکورد هر کاربر را کنار رویدادهای او می‌گذارد، پس reducer آن‌ها را محلی join می‌کند (صص. ۴۷۱–۴۷۳)." },
+    { q: "مفهوم secondary sort چه چیزی را تضمین می‌کند؟",
+      options: ["رویدادها بر اساس URL مرتب‌اند", "رکورد کاربر پیش از رویدادهای همان کاربر می‌رسد، پس فقط یک رکورد باید در حافظه بماند", "هر reducer تعداد برابری رکورد می‌گیرد", "فایل‌های خروجی بر اساس تاریخ تولد مرتب‌اند"],
+      answer: 1, explain: "مرتب کردن داخل هر کلید طوری که رکورد کاربر اول بیاید اجازه می‌دهد reducer رویدادها را پشت سر هم بخواند و فقط همان رکورد را نگه دارد (ص. ۴۷۲)." }
   ]);
 })();
 </script>

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Normalize or Denormalize</title>
-<meta name="description" content="Store a region once and reference it by ID, or copy its name into every profile? Rename a region, read profiles, and watch the costs move between the write path and the read path. Illustrates DDIA 2nd ed., Chapter 3.">
+<title>مفهوم normalize یا denormalize</title>
+<meta name="description" content="یک منطقه را یک بار ذخیره کنیم و با ID به آن ارجاع بدهیم، یا اسمش را در هر profile کپی کنیم؟ منطقه را تغییر نام بدهید، profileها را بخوانید و ببینید هزینه چطور بین write path و read path جابه‌جا می‌شود. برای فصل ۳ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .tables { display: grid; gap: 12px; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
@@ -20,67 +20,67 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/03-data-models-and-query-languages.html">Chapter 3</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Normalization</span>
+      <a href="../chapters/03-data-models-and-query-languages.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم normalization</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 3 · Data Models and Query Languages</div>
-  <h1>Normalize or denormalize?</h1>
-  <p class="lede">A profile says where a person lives. You can store the region once and give every profile its ID (normalized), or copy the region’s name into every profile (denormalized). One makes reads do a join; the other makes a rename touch many rows — and risks copies that disagree.</p>
-  <p class="source-note">Illustrates “Normalization, Denormalization, and Joins” (pp. 72–75), which uses the region “Washington, DC, United States” as its example. The profiles, the second region and the cost model (one row read or written = one unit) are the vault’s own simplifications.</p>
+  <div class="eyebrow">فصل ۳ · مدل‌های داده و زبان‌های کوئری</div>
+  <h1>داده را normalize کنیم یا denormalize؟</h1>
+  <p class="lede">هر profile می‌گوید آدم کجا زندگی می‌کند. می‌شود منطقه را یک بار ذخیره کرد و ID آن را به هر profile داد، یعنی normalized؛ یا اسم منطقه را در هر profile کپی کرد، یعنی denormalized. اولی خواندن را مجبور به join می‌کند؛ دومی تغییر نام را به ردیف‌های زیادی می‌کشاند و خطر کپی‌های ناهم‌خوان را دارد.</p>
+  <p class="source-note">برای «مفهوم normalization، denormalization و join» در صص. ۷۲–۷۵ که منطقه‌ی «Washington, DC, United States» را مثال می‌زند. profileها، منطقه‌ی دوم و مدل هزینه، یعنی هر ردیف خوانده یا نوشته‌شده برابر یک واحد، ساده‌سازی‌های خود vault است.</p>
 
   <div class="panel" style="margin-top:20px">
     <div class="row" style="margin-bottom:12px">
       <div id="mode"></div>
       <span class="spacer"></span>
-      <button class="btn" type="button" id="read">Read a profile</button>
-      <button class="btn primary" type="button" id="rename">Rename the region</button>
-      <button class="btn" type="button" id="reset">↺ Reset</button>
+      <button class="btn" type="button" id="read">خواندن یک profile</button>
+      <button class="btn primary" type="button" id="rename">تغییر نام منطقه</button>
+      <button class="btn" type="button" id="reset">↺ از اول</button>
     </div>
     <div class="tables" id="tables"></div>
   </div>
 
   <div class="grid-2" style="margin-top:16px">
     <div class="panel">
-      <p class="panel-title">Cost so far</p>
+      <p class="panel-title">هزینه تا این‌جا</p>
       <div class="cost">
-        <div class="stat"><span class="stat-label">Rows read</span><span class="stat-value" id="reads">0</span></div>
-        <div class="stat"><span class="stat-label">Rows written</span><span class="stat-value" id="writes">0</span></div>
-        <div class="stat"><span class="stat-label">Copies still stale</span><span class="stat-value" id="stale">0</span></div>
+        <div class="stat"><span class="stat-label">ردیف خوانده‌شده</span><span class="stat-value" id="reads">0</span></div>
+        <div class="stat"><span class="stat-label">ردیف نوشته‌شده</span><span class="stat-value" id="writes">0</span></div>
+        <div class="stat"><span class="stat-label">کپی‌های هنوز کهنه</span><span class="stat-value" id="stale">0</span></div>
       </div>
       <ol id="log" style="margin-top:12px"></ol>
     </div>
     <div class="panel mix">
-      <p class="panel-title">Which wins for a workload?</p>
+      <p class="panel-title">برای یک بار مشخص کدام می‌برد؟</p>
       <div id="ratio"></div>
       <div id="sharing"></div>
       <div class="callout verdict-box" id="verdict"></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Normalized: one fact, one place.</strong> A rename is a single write, and every profile sees it at once — but each profile read needs a second lookup (a join).</li>
-    <li><strong>Denormalized: reads are self-contained</strong>, but a rename must update every copy. Step through it: until the last row is written, readers can see two spellings of the same region.</li>
-    <li><strong>The right choice depends on the workload.</strong> Frequent reads and rare changes favour copying; frequent changes favour referencing. Many systems keep normalized data as the system of record and maintain denormalized views derived from it.</li>
+    <li><strong>حالت normalized: هر واقعیت یک جا.</strong> تغییر نام فقط یک write است و همه‌ی profileها فوراً آن را می‌بینند؛ اما خواندن هر profile یک lookup دوم، یعنی join، لازم دارد.</li>
+    <li><strong>حالت denormalized: خواندن خودکفاست</strong>، اما تغییر نام باید همه‌ی کپی‌ها را به‌روز کند. قدم‌به‌قدم جلو بروید: تا آخرین ردیف نوشته نشده، خواننده‌ها ممکن است دو املای مختلف از یک منطقه ببینند.</li>
+    <li><strong>انتخاب درست به بار بستگی دارد.</strong> خواندن زیاد و تغییر کم به نفع کپی است؛ تغییر زیاد به نفع ارجاع. خیلی از سیستم‌ها داده‌ی normalized را system of record نگه می‌دارند و viewهای denormalized را از آن derive می‌کنند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/03-data-models-and-query-languages.html"><small>Lesson</small>3. Data Models and Query Languages</a></li>
-    <li><a href="02-tail-latency.html"><small>Simulation</small>Percentiles and tail latency</a></li>
+    <li><a href="../chapters/03-data-models-and-query-languages.html"><small>درس</small>فصل ۳: مدل‌های داده و زبان‌های کوئری</a></li>
+    <li><a href="02-tail-latency.html"><small>شبیه‌سازی</small>percentileها و tail latency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -117,14 +117,14 @@
         el("table", { class: "data" }, el("thead", null, el("tr", null, el("th", null, "id"), el("th", null, "name"))),
           el("tbody", null, regions.map(function (r) { return el("tr", { class: highlight["r" + r.id] || "" }, el("td", { class: "num" }, r.id), el("td", null, r.name)); })))));
     } else {
-      t.appendChild(el("div", { class: "callout" }, "No regions table: each profile carries its own copy of the region name."));
+      t.appendChild(el("div", { class: "callout" }, "جدول regions وجود ندارد: هر profile کپی خودش از اسم منطقه را دارد."));
     }
     Kit.$("#reads").textContent = reads;
     Kit.$("#writes").textContent = writes;
     var s = stale();
     var st = Kit.$("#stale");
     st.textContent = s; st.className = "stat-value" + (s ? " bad" : "");
-    Kit.$("#rename").textContent = renaming ? "Write next copy ›" : "Rename the region";
+    Kit.$("#rename").textContent = renaming ? "نوشتن کپی بعدی ‹" : "تغییر نام منطقه";
     Kit.$("#read").disabled = false;
   }
 
@@ -134,10 +134,10 @@
     if (mode === "norm") {
       var r = regions[p.region_id - 1];
       highlight["r" + r.id] = "read"; reads += 2;
-      log.add("Read " + p.name + ": profile row + join to regions → " + r.name, "muted");
+      log.add("خواندن " + p.name + ": ردیف profile و join به regions ← " + r.name, "muted");
     } else {
       reads += 1;
-      log.add("Read " + p.name + ": one row → " + p.region, stale() ? "warn" : "muted");
+      log.add("خواندن " + p.name + ": یک ردیف ← " + p.region, stale() ? "warn" : "muted");
     }
     render();
   });
@@ -146,24 +146,24 @@
     if (mode === "norm") {
       var target = regions[0].name === OLD ? NEW : OLD;
       regions[0].name = target; writes += 1; highlight.r1 = "touch";
-      log.add("Rename: 1 row written in regions → every profile sees “" + target + "”", "ok");
+      log.add("تغییر نام: ۱ ردیف در regions نوشته شد؛ همه‌ی profileها «" + target + "» را می‌بینند", "ok");
       render(); return;
     }
     if (!renaming) {
       var from = profiles.filter(function (p) { return p.region_id === 1; })[0].region;
       renaming = { from: from, to: from === OLD ? NEW : OLD, queue: profiles.filter(function (p) { return p.region_id === 1; }) };
-      log.add("Rename started: " + renaming.queue.length + " copies to update", "warn");
+      log.add("تغییر نام شروع شد: " + renaming.queue.length + " کپی باید به‌روز شود", "warn");
     }
     var p = renaming.queue.shift();
     p.region = renaming.to; writes += 1; highlight["p" + p.id] = "touch";
-    log.add("Wrote copy in " + p.name + "’s row" + (renaming.queue.length ? " — " + renaming.queue.length + " still say the old name" : " — done"), renaming.queue.length ? "warn" : "ok");
+    log.add("کپی در ردیف " + p.name + " نوشته شد" + (renaming.queue.length ? "؛ " + renaming.queue.length + " ردیف هنوز اسم قدیمی را دارند" : "؛ تمام شد"), renaming.queue.length ? "warn" : "ok");
     if (!renaming.queue.length) renaming = null;
     render();
   });
   Kit.$("#reset").addEventListener("click", reset);
 
-  var seg = Kit.segmented({ label: "Storage layout", value: mode,
-    options: [{ value: "norm", label: "Normalized (region ID)" }, { value: "denorm", label: "Denormalized (copied name)" }],
+  var seg = Kit.segmented({ label: "چیدمان ذخیره‌سازی", value: mode,
+    options: [{ value: "norm", label: "حالت normalized با region ID" }, { value: "denorm", label: "حالت denormalized با اسم کپی‌شده" }],
     onChange: function (v) { mode = v; reset(); } });
   Kit.$("#mode").appendChild(seg.element);
 
@@ -174,23 +174,23 @@
     var norm = r * 2 + w * 1, den = r * 1 + w * share;
     var box = Kit.$("#verdict");
     box.className = "callout verdict-box " + (den < norm ? "ok" : "warn");
-    box.textContent = "Per 1,000 operations: normalized ≈ " + Math.round(norm) + " row operations, denormalized ≈ " + Math.round(den) +
-      ". " + (den < norm ? "Copying wins: reads dominate." : "Referencing wins: renames are too frequent or too widely shared.");
+    box.textContent = "در هر ۱٬۰۰۰ عملیات: حالت normalized حدود " + Math.round(norm) + " عملیات ردیفی، حالت denormalized حدود " + Math.round(den) +
+      ". " + (den < norm ? "کپی می‌برد: خواندن غالب است." : "ارجاع می‌برد: تغییر نام‌ها زیادند یا هر منطقه بین profileهای زیادی مشترک است.");
   }
-  var s1 = Kit.slider({ label: "Reads among operations", min: 50, max: 99, value: ratio, unit: "%", onInput: function (v) { ratio = v; verdict(); } });
-  var s2 = Kit.slider({ label: "Profiles sharing a region", min: 1, max: 100, value: share, hint: "How many copies a rename must update when denormalized.", onInput: function (v) { share = v; verdict(); } });
+  var s1 = Kit.slider({ label: "سهم خواندن از عملیات", min: 50, max: 99, value: ratio, unit: "%", onInput: function (v) { ratio = v; verdict(); } });
+  var s2 = Kit.slider({ label: "تعداد profileهای هم‌منطقه", min: 1, max: 100, value: share, hint: "در حالت denormalized، تغییر نام باید چند کپی را به‌روز کند.", onInput: function (v) { share = v; verdict(); } });
   Kit.$("#ratio").appendChild(s1.element);
   Kit.$("#sharing").appendChild(s2.element);
   verdict();
   reset();
 
   Kit.quiz(Kit.$("#quiz"), [
-    { q: "Which is an advantage of storing a region ID rather than the region’s name in each profile?",
-      options: ["Reads never need a join", "The name is stored once, so it is spelled consistently and can be changed in one place", "It uses a document database", "Profiles become independent of each other"],
-      answer: 1, explain: "Normalization stores each fact once and refers to it by ID: consistent spelling, easy updates, and support for localization and search (pp. 72–74)." },
-    { q: "What is the main cost of denormalization?",
-      options: ["Reads need more joins", "Writes must update every copy, and copies can become inconsistent", "It prevents caching", "It requires a schema"],
-      answer: 1, explain: "Denormalized data is faster to read but more expensive to keep up to date, and is a form of derived data (pp. 74–75)." }
+    { q: "کدام مزیتِ ذخیره‌ی region ID به جای اسم منطقه در هر profile است؟",
+      options: ["خواندن هیچ‌وقت join لازم ندارد", "اسم فقط یک بار ذخیره می‌شود، پس املایش یکدست است و در یک جا عوض می‌شود", "از document database استفاده می‌کند", "profileها از هم مستقل می‌شوند"],
+      answer: 1, explain: "مفهوم normalization هر واقعیت را یک بار ذخیره می‌کند و با ID به آن ارجاع می‌دهد: املای یکدست، به‌روزرسانی آسان و پشتیبانی از localization و جست‌وجو (صص. ۷۲–۷۴)." },
+    { q: "هزینه‌ی اصلی denormalization چیست؟",
+      options: ["خواندن join بیشتری لازم دارد", "هر write باید همه‌ی کپی‌ها را به‌روز کند و کپی‌ها ممکن است ناهم‌خوان شوند", "جلوی cache را می‌گیرد", "حتماً schema لازم دارد"],
+      answer: 1, explain: "داده‌ی denormalized سریع‌تر خوانده می‌شود اما به‌روز نگه داشتنش گران‌تر است، و خودش نوعی derived data است (صص. ۷۴–۷۵)." }
   ]);
 })();
 </script>

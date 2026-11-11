@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Timeouts and Failure Detection</title>
-<meta name="description" content="Choose a timeout for declaring a node dead: watch heartbeat delays vary with network queueing and process pauses, and trade false suspicions against slow detection of a real crash. Illustrates DDIA Chapter 9.">
+<title>مفهوم timeout و تشخیص خرابی</title>
+<meta name="description" content="یک timeout برای مرده اعلام کردن یک node انتخاب کنید: ببینید latency heartbeatها با صف‌های شبکه و process pause چطور تغییر می‌کند، و شک‌های نادرست را با تشخیص کند یک crash واقعی بسنجید. برای فصل ۹ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .twocol { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); align-items: start; }
@@ -16,69 +16,69 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/09-the-trouble-with-distributed-systems.html">Chapter 9</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Timeouts</span>
+      <a href="../chapters/09-the-trouble-with-distributed-systems.html">فصل ۹</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم timeout</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 9 · The Trouble with Distributed Systems</div>
-  <h1>How long before a node is dead?</h1>
-  <p class="lede">A monitor hears a heartbeat from a node every 100 ms. Silence might mean the node crashed — or only that a packet sat in a queue or the process paused for garbage collection. The timeout decides: too short and live nodes are declared dead, too long and a real crash goes unnoticed.</p>
-  <p class="source-note">Illustrates “Fault Detection”, “Timeouts and Unbounded Delays” and “Network congestion and queueing” (pp. 351–355): unbounded delays, the 2d + r bound that real networks don’t give you, and automatically adjusted timeouts such as the Phi Accrual detector. Heartbeats, delay distribution and the crash at 50 s are the vault’s own model. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۹ · دردسرهای سیستم‌های توزیع‌شده</div>
+  <h1>یک node کی مرده است؟</h1>
+  <p class="lede">یک ناظر هر ۱۰۰ میلی‌ثانیه یک heartbeat از یک node می‌شنود. سکوت ممکن است یعنی node crash کرده؛ یا فقط یک packet در صف مانده یا process برای garbage collection متوقف شده. تصمیم با timeout است: اگر کوتاه باشد nodeهای زنده مرده اعلام می‌شوند، اگر بلند باشد یک crash واقعی دیده نمی‌شود.</p>
+  <p class="source-note">برای بخش‌های «تشخیص fault» و «مفهوم timeout و latencyهای unbounded»، از جمله congestion و صف‌ها، در صص. ۳۵۱–۳۵۵: latencyهای بی‌کران، کران 2d + r که شبکه‌های واقعی نمی‌دهند، و timeoutهای خودتنظیم مثل Phi Accrual. heartbeatها، توزیع latency و crash در ثانیه‌ی ۵۰ مدل خود vault هستند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
-      <div class="twocol">
+      <div class="twocol" dir="ltr">
         <figure class="full">
-          <figcaption>Time since the previous heartbeat, as seen by the monitor (60 s; the node crashes at 50 s)</figcaption>
-          <svg id="gaps" role="img" aria-label="Gaps between heartbeats over time with the timeout line"></svg>
+          <figcaption dir="rtl">فاصله از heartbeat قبلی از دید ناظر؛ ۶۰ ثانیه، و node در ثانیه‌ی ۵۰ crash می‌کند</figcaption>
+          <svg id="gaps" role="img" aria-label="فاصله‌ی heartbeatها در طول زمان با خط timeout"></svg>
         </figure>
         <figure>
-          <figcaption>False “dead” verdicts per minute vs timeout</figcaption>
-          <svg id="fp" role="img" aria-label="False suspicions fall as the timeout grows"></svg>
+          <figcaption dir="rtl">حکم‌های نادرست «مرده» در دقیقه بر حسب timeout</figcaption>
+          <svg id="fp" role="img" aria-label="با بزرگ شدن timeout شک‌های نادرست کم می‌شوند"></svg>
         </figure>
         <figure>
-          <figcaption>Time to detect the real crash vs timeout</figcaption>
-          <svg id="det" role="img" aria-label="Detection delay grows with the timeout"></svg>
+          <figcaption dir="rtl">زمان تشخیص crash واقعی بر حسب timeout</figcaption>
+          <svg id="det" role="img" aria-label="latency تشخیص با timeout بیشتر می‌شود"></svg>
         </figure>
       </div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Network and node</p>
+        <p class="panel-title">شبکه و node</p>
         <div id="sliders"></div>
       </div>
       <div class="panel wide">
-        <p class="panel-title">With this timeout</p>
+        <p class="panel-title">با این timeout</p>
         <div class="stats" id="stats"></div>
         <p class="field-hint" id="verdict" aria-live="polite" style="margin:8px 0 0"></p>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>No safe value.</strong> Every timeout trades the two charts against each other; you can only move along the curve.</li>
-    <li><strong>Pauses and queueing dominate.</strong> Raise the pause rate or the queueing delay: the gaps get a long tail and short timeouts start declaring a live node dead.</li>
-    <li><strong>A false “dead” is costly.</strong> The node may still be doing work while another takes over (an action can run twice), and moving its load can tip an overloaded system into cascading failure (p. 352).</li>
-    <li><strong>Measure, then adapt.</strong> The book suggests choosing timeouts experimentally from observed round-trip times, or adjusting them automatically as Phi Accrual does (p. 355).</li>
+    <li><strong>هیچ مقدار امنی نیست.</strong> هر timeout دو نمودار را با هم معامله می‌کند؛ فقط می‌توانید روی منحنی جابه‌جا شوید.</li>
+    <li><strong>توقف‌ها و صف‌ها تعیین‌کننده‌اند.</strong> نرخ توقف یا latency صف را بالا ببرید: فاصله‌ها دنباله‌ی بلندی پیدا می‌کنند و timeoutهای کوتاه node زنده را مرده اعلام می‌کنند.</li>
+    <li><strong>حکم نادرست «مرده» گران است.</strong> ممکن است node هنوز مشغول کار باشد در حالی که دیگری جایش را گرفته، پس یک کار دو بار اجرا می‌شود؛ و جابه‌جا کردن بارش می‌تواند سیستمی پربار را به cascading failure بکشاند (ص. ۳۵۲).</li>
+    <li><strong>اول اندازه بگیرید، بعد تطبیق بدهید.</strong> کتاب پیشنهاد می‌کند timeout را به‌صورت تجربی از زمان‌های رفت‌وبرگشت مشاهده‌شده انتخاب کنید، یا مثل Phi Accrual خودکار تنظیمش کنید (ص. ۳۵۵).</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>Lesson</small>9. The Trouble with Distributed Systems</a></li>
-    <li><a href="09-fencing.html"><small>Simulation</small>Leases, process pauses, and fencing tokens</a></li>
+    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
+    <li><a href="09-fencing.html"><small>شبیه‌سازی</small>مفهوم lease، process pause و fencing token</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -113,8 +113,8 @@
     var yMax = Math.max(400, Math.ceil(Math.max(gmax, cfg.timeout) / 200) * 200);
     var mapped = pts.map(function (p) { return [p[0], Math.min(p[1], yMax)]; });
     var c = Kit.lineChart(document.getElementById("gaps"), {
-      width: 740, height: 190, xMax: END / 1000, yMax: yMax, xLabel: "time (s)", yFormat: Kit.fmtMs, xTicks: 6,
-      bands: [{ from: CRASH / 1000, to: Math.min(END, CRASH + e.detect) / 1000, label: "dead, not yet noticed" }],
+      width: 740, height: 190, xMax: END / 1000, yMax: yMax, xLabel: "زمان (s)", yFormat: Kit.fmtMs, xTicks: 6,
+      bands: [{ from: CRASH / 1000, to: Math.min(END, CRASH + e.detect) / 1000, label: "مرده، هنوز دیده نشده" }],
       series: [{ points: mapped, cls: "s1" }, { points: [[0, cfg.timeout], [END / 1000, cfg.timeout]], cls: "bad dashed", label: "timeout" }]
     });
     var svgEl = document.getElementById("gaps");
@@ -132,31 +132,31 @@
       series: [{ points: det, cls: "s4", dots: true }], marks: [{ x: cfg.timeout }] });
 
     var stats = Kit.clear(document.getElementById("stats"));
-    [["False “dead” / min", (e.falseDead * 60000 / CRASH).toFixed(1), e.falseDead ? "bad" : "ok"], ["Crash detected after", Kit.fmtMs(e.detect), e.detect > 1000 ? "warn" : ""],
-     ["Longest gap", Kit.fmtMs(gmax), ""]].forEach(function (x) {
+    [["«مرده»ی نادرست در دقیقه", (e.falseDead * 60000 / CRASH).toFixed(1), e.falseDead ? "bad" : "ok"], ["مفهوم crash تشخیص داده شد بعد از", Kit.fmtMs(e.detect), e.detect > 1000 ? "warn" : ""],
+     ["بلندترین فاصله", Kit.fmtMs(gmax), ""]].forEach(function (x) {
       stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
     });
     document.getElementById("verdict").textContent = e.falseDead
-      ? "The live node was declared dead " + e.falseDead + " time(s) before it actually crashed."
-      : "No false alarms in this run — but the real crash takes " + Kit.fmtMs(e.detect) + " to notice.";
+      ? "مفهوم node زنده پیش از crash واقعی " + e.falseDead + " بار مرده اعلام شد."
+      : "در این اجرا هشدار نادرستی نبود؛ اما تشخیص crash واقعی " + Kit.fmtMs(e.detect) + " طول می‌کشد.";
   }
 
   var sl = document.getElementById("sliders");
-  sl.appendChild(Kit.slider({ label: "Timeout", min: 120, max: 2000, step: 20, value: cfg.timeout, format: Kit.fmtMs, onInput: function (v) { cfg.timeout = v; render(); } }).element);
-  sl.appendChild(Kit.slider({ label: "Mean queueing delay", min: 1, max: 100, value: cfg.queue, unit: " ms", onInput: function (v) { cfg.queue = v; render(); } }).element);
-  sl.appendChild(Kit.slider({ label: "Process pauses (GC)", min: 0, max: 6, step: 0.5, value: cfg.pauses, unit: " per min", hint: "Each pause lasts 0.2–1.2 s.", onInput: function (v) { cfg.pauses = v; render(); } }).element);
+  sl.appendChild(Kit.slider({ label: "مقدار timeout", min: 120, max: 2000, step: 20, value: cfg.timeout, format: Kit.fmtMs, onInput: function (v) { cfg.timeout = v; render(); } }).element);
+  sl.appendChild(Kit.slider({ label: "میانگین latency صف", min: 1, max: 100, value: cfg.queue, unit: " ms", onInput: function (v) { cfg.queue = v; render(); } }).element);
+  sl.appendChild(Kit.slider({ label: "توقف process با GC", min: 0, max: 6, step: 0.5, value: cfg.pauses, unit: " در دقیقه", hint: "هر توقف ۰٫۲ تا ۱٫۲ ثانیه طول می‌کشد.", onInput: function (v) { cfg.pauses = v; render(); } }).element);
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why can’t you just use a timeout of 2d + r?",
-      options: ["It is too long", "Real networks and servers have no upper bound d on delay or r on response time", "Clocks are inaccurate"],
-      answer: 1, explain: "Asynchronous networks have unbounded delays and most servers cannot guarantee a maximum response time (p. 353)." },
-    { q: "What usually causes most of the variability in packet delay?",
-      options: ["The speed of light", "Queueing — at switches, in the OS, in the hypervisor, in TCP", "Packet size"],
-      answer: 1, explain: "Like traffic congestion on roads, delay variability is mostly queueing (p. 353)." },
-    { q: "Why is declaring a node dead too early dangerous?",
-      options: ["It isn’t; it is just wasteful", "The node may still be acting, so work can run twice, and shifting its load can cause cascading failure", "It deletes the node’s data"],
-      answer: 1, explain: "See p. 352: duplicated actions and extra load on the remaining nodes." }
+    { q: "چرا نمی‌شود به‌سادگی timeout را 2d + r گذاشت؟",
+      options: ["چون خیلی طولانی است", "چون شبکه‌ها و سرورهای واقعی هیچ کران بالایی، d برای latency و r برای پاسخ، ندارند", "چون ساعت‌ها دقیق نیستند"],
+      answer: 1, explain: "شبکه‌های asynchronous latency unbounded دارند و بیشتر سرورها نمی‌توانند بیشینه‌ی زمان پاسخ را تضمین کنند (ص. ۳۵۳)." },
+    { q: "بیشتر mutability latency packetها معمولاً از کجا می‌آید؟",
+      options: ["سرعت نور", "صف؛ در switch، سیستم‌عامل، hypervisor و TCP", "اندازه‌ی packet"],
+      answer: 1, explain: "مثل ترافیک جاده‌ها، mutability latency بیشتر از صف است (ص. ۳۵۳)." },
+    { q: "چرا مرده اعلام کردن زودهنگام یک node خطرناک است؟",
+      options: ["خطرناک نیست؛ فقط هدر رفتن است", "چون ممکن است node هنوز کار کند، پس کار دو بار اجرا می‌شود، و جابه‌جا کردن بارش می‌تواند cascading failure بسازد", "چون داده‌ی node را پاک می‌کند"],
+      answer: 1, explain: "کارهای تکراری و بار اضافه روی nodeهای باقی‌مانده (ص. ۳۵۲)." }
   ]);
 })();
 </script>

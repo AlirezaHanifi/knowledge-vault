@@ -1,18 +1,20 @@
-# Event-time windows and stragglers
+# مفهوم window بر اساس event time و late event
 
-Counts 3,000 events in one-minute tumbling windows. Events normally arrive after ~2 s, 3% come from offline devices minutes later, and the consumer is down for one minute and then catches up. Compares processing-time windows with event-time windows closed after a 5 s or 60 s grace period, dropping stragglers or publishing corrections.
+این آزمایش ۳٬۰۰۰ رویداد را در tumbling windowهای یک‌دقیقه‌ای می‌شمارد. رویدادها معمولاً حدود ۲ ثانیه بعد می‌رسند، ۳ درصدشان از دستگاه‌های آفلاین چند دقیقه بعد می‌آیند، و consumer یک دقیقه از کار می‌افتد و بعد عقب‌ماندگی را جبران می‌کند. windowهای processing time با windowهای event time مقایسه می‌شوند که بعد از مهلت ۵ یا ۶۰ ثانیه بسته می‌شوند و late eventها را یا دور می‌ریزند یا برایشان اصلاحیه منتشر می‌کنند.
 
-*Illustrates DDIA 2nd ed., “Reasoning About Time”, pp. 518–523. The implementation is the vault’s own.*
+*این آزمایش بخش «استدلال درباره‌ی زمان» از ویراست دوم DDIA را نشان می‌دهد (صص. ۵۱۸–۵۲۳). پیاده‌سازی مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+با Python 3.10 یا جدیدتر، فقط کتابخانه‌ی استاندارد، و قطعی (با seed ثابت):
 
 ```sh
 python3 windows.py
 ```
 
-## Expected output
+خروجی برنامه انگلیسی است، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را درست نشان نمی‌دهند.
+
+## خروجی مورد انتظار
 
 ```text
 Per-minute counts (3,000 events; 3% from offline devices; consumer down 300-360 s)
@@ -33,13 +35,13 @@ Total absolute error   processing time: 692   event time, 5 s grace: 137 (137 dr
 Waiting longer reduces dropped stragglers but delays every result by the grace period.
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Processing-time windows show minute 5 as empty and minute 6 as double — an artefact of the outage, not of user behaviour (Figure 12-8).
-- A longer grace period drops fewer stragglers but delays every result.
-- Publishing corrections converges on the true counts, at the price of results that change after first being emitted.
+- در windowهای processing time دقیقه‌ی ۵ خالی و دقیقه‌ی ۶ دوبرابر است؛ این اثر قطعی consumer است، نه رفتار کاربران (شکل ۱۲-۸).
+- مهلت طولانی‌تر late eventها کمتری دور می‌ریزد، اما همه‌ی نتیجه‌ها را دیرتر می‌کند.
+- انتشار اصلاحیه به شمارش‌های واقعی می‌رسد، به این قیمت که نتیجه‌ها بعد از اولین انتشار عوض می‌شوند.
 
-## Related
+## پیوندها
 
-- Chapter note: [12. Stream Processing](../../chapters/12-stream-processing.md) — “Reasoning About Time”, pp. 518–523
-- Explore in the browser: [Event time and stragglers](../../widgets/12-stream-time.html)
+- یادداشت فصل: [فصل ۱۲: پردازش stream](../../chapters/12-stream-processing.md)، بخش «استدلال درباره‌ی زمان»، صص. ۵۱۸–۵۲۳
+- در مرورگر امتحان کنید: [مفهوم event time و late event](../../widgets/12-stream-time.html)

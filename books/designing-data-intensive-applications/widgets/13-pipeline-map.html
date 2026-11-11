@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۱۳ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را مثل یک دیتابیس unbundled ببینید: منبع حقیقت کجاست، مرز مسیر نوشتن و خواندن کجا افتاده و integrity کجا در خطر است. برای فصل ۱۳ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/13-a-philosophy-of-streaming-systems.html">فصل ۱۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۱۳ · فلسفه‌ی سیستم‌های streaming</div>
+  <h1>فصل ۱۳ در طول یک pipeline داده</h1>
+  <p class="lede">از نگاه این فصل، کل این pipeline یک دیتابیس بزرگ است: دیتابیس منبع system of record است و هر لایه‌ی بعدی یک view مشتق‌شده. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید کجا می‌شود همه چیز را دوباره ساخت، کار کجا از پیش انجام می‌شود و کجا تکرار یا گم شدن داده بی‌صدا می‌ماند.</p>
+  <p class="source-note">کل فصل را (صص. ۵۳۹–۵۸۴) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens منبع حقیقت:</strong> همه چیز جز دیتابیس منبع مشتق‌شده است؛ پس اصلاح دستی در هر لایه‌ی دیگر با ساختن بعدی پاک می‌شود.</li>
+    <li><strong>با lens مرز نوشتن و خواندن:</strong> هر لایه کار بیشتری را از پیش انجام می‌دهد؛ Gold یک materialized view است و notebook جای پرسش‌هایی است که از پیش معلوم نیستند.</li>
+    <li><strong>با lens integrity:</strong> مفهوم retry و حذف‌های نادیده خطرهای دائمی‌اند؛ dedup در Silver و تطبیق سرتاسری با منبع جلویشان را می‌گیرند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/13-a-philosophy-of-streaming-systems.html"><small>درس</small>فصل ۱۳: فلسفه‌ی سیستم‌های streaming</a></li>
+    <li><a href="13-dual-writes.html"><small>شبیه‌سازی</small>مفهوم dual write در برابر change log</a></li>
+    <li><a href="13-request-ids.html"><small>شبیه‌سازی</small>مفهوم exactly-once سرتاسری</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/13-a-philosophy-of-streaming-systems.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    truth: {
+      label: "منبع حقیقت", axis: ["مشتق‌شده و قابل بازسازی", "تنها نسخه"],
+      cells: {
+        source: { tag: "مفهوم system of record", level: 4, pages: "صص. ۵۴۰–۵۴۱", slide: "استدلال-دربارهی-dataflowها",
+          text: "دیتابیس منبع تنها جایی است که داده اول نوشته می‌شود؛ هر اصلاحی باید اینجا یا در منطق مشتق‌سازی انجام شود." },
+        loader: { tag: "کپی، نه منبع", level: 2, pages: "ص. ۵۴۱", slide: "استدلال-دربارهی-dataflowها",
+          text: "مفهوم loader فقط تغییرها را می‌برد؛ اگر چیزی را نبیند، مثل حذف‌ها، هیچ لایه‌ی downstreamی آن را نخواهد داشت." },
+        bronze: { tag: "تاریخچه‌ی خام", level: 1, pages: "صص. ۵۴۵–۵۴۶", slide: "پردازش-batch-و-stream",
+          text: "جدول Bronze نقش event log را دارد: هر view تازه را می‌شود از آن دوباره پردازش کرد." },
+        silver: { tag: "مفهوم derived view", level: 0, pages: "صص. ۵۴۴–۵۴۵", slide: "پردازش-batch-و-stream",
+          text: "مفهوم Silver تابعی قطعی از Bronze است؛ پاک کردن و ساختن دوباره‌اش همان نتیجه را می‌دهد." },
+        gold: { tag: "مفهوم derived view", level: 0, pages: "صص. ۵۴۵–۵۴۶", slide: "پردازش-batch-و-stream",
+          text: "تغییر ساختار Gold یعنی ساختن جدول تازه کنار قدیمی و انتقال کم‌کم خواننده‌ها، مثل ریل سوم." },
+        nb: { tag: "نوشتن دستی", level: 3, pages: "صص. ۵۴۰–۵۴۱", slide: "استدلال-دربارهی-dataflowها",
+          text: "اصلاح دستی یک جدول مشتق‌شده از notebook همان dual write است و با ساختن بعدی پاک می‌شود." },
+        serve: { tag: "مفهوم cache روی دستگاه", level: 1, pages: "صص. ۵۵۷–۵۵۸", slide: "بردن-مسیر-نوشتن-تا-کاربر",
+          text: "داشبورد باز در مرورگر هم یک cache کهنه از state سرور است، تا وقتی دوباره بخواند." }
+      }
+    },
+    path: {
+      label: "مرز نوشتن و خواندن", axis: ["کار از پیش، روی مسیر نوشتن", "کار هنگام خواندن"],
+      cells: {
+        source: { tag: "مفهوم OLTP", level: 2, pages: "ص. ۵۵۶", slide: "مشاهدهی-state-مشتقشده",
+          text: "منبع برای نوشتن و خواندن‌های نقطه‌ای ساخته شده، نه برای تحلیل؛ کوئری تحلیلی مستقیم روی آن همه‌ی کار را به خواندن می‌برد." },
+        loader: { tag: "شروع مسیر نوشتن", level: 1, pages: "ص. ۵۵۶", slide: "مشاهدهی-state-مشتقشده",
+          text: "مفهوم loader اولین قدم مسیر نوشتن است؛ هر لایه‌ی بعدی کار بیشتری را از پیش انجام می‌دهد." },
+        bronze: { tag: "خام", level: 3, pages: "صص. ۵۵۶–۵۵۷", slide: "مفهوم-materialized-view-و-cache",
+          text: "کوئری روی Bronze یعنی تکراری‌ها و نسخه‌ها را هر بار هنگام خواندن حذف کنید؛ مثل جست‌وجو بدون index." },
+        silver: { tag: "مثل index", level: 2, pages: "ص. ۵۵۶", slide: "مشاهدهی-state-مشتقشده",
+          text: "مفهوم Silver داده را تمیز و join‌شده از پیش آماده می‌کند، اما aggregation هنوز هنگام خواندن انجام می‌شود." },
+        gold: { tag: "مفهوم materialized view", level: 0, pages: "صص. ۵۵۶–۵۵۷", slide: "مفهوم-materialized-view-و-cache",
+          text: "مفهوم Gold جواب پرسش‌های رایج را از پیش حساب می‌کند؛ خواندن ارزان، اما فقط به تازگی آخرین ساختن." },
+        nb: { tag: "کار هنگام خواندن", level: 3, pages: "ص. ۵۵۷", slide: "مفهوم-materialized-view-و-cache",
+          text: "مفهوم notebook پرسش‌های تازه را هنگام خواندن از Silver جواب می‌دهد؛ برای پرسش‌هایی که از پیش معلوم نیستند درست است." },
+        serve: { tag: "خواندن Gold", level: 1, pages: "صص. ۵۵۸–۵۵۹", slide: "بردن-مسیر-نوشتن-تا-کاربر",
+          text: "داشبورد poll می‌کند؛ مسیر نوشتن تا کاربر نمی‌رسد مگر تغییرها push شوند." }
+      }
+    },
+    integ: {
+      label: "مفهوم integrity", axis: ["محافظت‌شده", "خطر تکرار یا گم شدن"],
+      cells: {
+        source: { tag: "تراکنش‌های منبع", level: 0, pages: "ص. ۵۶۱", slide: "هدفگیری-درستی",
+          text: "منبع با تراکنش‌های خودش integrity را نگه می‌دارد؛ از اینجا به بعد مسئولیت با pipeline است." },
+        loader: { tag: "حذف‌های نادیده", level: 3, pages: "صص. ۵۷۱–۵۷۲", slide: "مفهوم-timeliness-و-integrity",
+          text: "حذفی که loader نمی‌بیند تا ابد در لایه‌های پایین می‌ماند؛ نقض integrity، نه timeliness." },
+        bronze: { tag: "مفهوم retry", level: 3, pages: "صص. ۵۶۳–۵۶۴", slide: "استدلال-end-to-end-برای-دیتابیسها",
+          text: "مفهوم retry یک task در Airflow درج تازه‌ای است؛ تراکنش دیتابیس جلوی تکرارش را نمی‌گیرد." },
+        silver: { tag: "حذف تکراری", level: 1, pages: "صص. ۵۶۴–۵۶۶", slide: "استدلال-end-to-end-برای-دیتابیسها",
+          text: "حذف تکراری با کلید در Silver همان request ID سرتاسری است؛ اثر retryها را خنثی می‌کند." },
+        gold: { tag: "مفهوم reconciliation", level: 2, pages: "صص. ۵۷۷–۵۷۸", slide: "اعتماد-کن-اما-وارسی-کن",
+          text: "مقایسه‌ی جمع Gold با Silver و منبع خرابی‌های هر قدم میانی را می‌گیرد؛ بررسی سرتاسری." },
+        nb: { tag: "نسخه‌ی محلی", level: 2, pages: "ص. ۵۷۷", slide: "اعتماد-کن-اما-وارسی-کن",
+          text: "عددی که در یک notebook حساب و جایی کپی شده، دیگر از منبع قابل بازسازی و وارسی نیست." },
+        serve: { tag: "تازگی، نه درستی", level: 2, pages: "صص. ۵۷۱–۵۷۲", slide: "مفهوم-timeliness-و-integrity",
+          text: "داشبورد کهنه نقض timeliness است و خودش درست می‌شود؛ عدد غلط نقض integrity است و نمی‌شود." }
+      }
+    }
+};
+
+  var lens = "truth", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "یک تحلیل‌گر عددی را مستقیم در جدول Gold اصلاح می‌کند. چرا این اصلاح دوام نمی‌آورد؟",
+      options: ["چون ClickHouse آن را رد می‌کند", "چون Gold مشتق‌شده است و ساختن بعدی آن را از Silver بازنویسی می‌کند", "چون Metabase cache دارد", "دوام می‌آورد"],
+      answer: 1, explain: "نوشتن مستقیم در یک سیستم مشتق‌شده همان dual write است؛ اصلاح باید در منبع یا منطق مشتق‌سازی انجام شود (صص. ۵۴۰–۵۴۱)." },
+    { q: "جمع ماهانه‌ی Gold با Silver یکی نیست. این نقض چیست؟",
+      options: ["مفهوم timeliness؛ صبر کنید", "مفهوم integrity؛ علت را پیدا کنید و دوباره بسازید", "مشکل شبکه", "مشکل نمایش"],
+      answer: 1, explain: "نقض integrity خودبه‌خود درست نمی‌شود و بررسی و تعمیر صریح لازم دارد (صص. ۵۷۱–۵۷۲)." }
+  ]);
+})();
+</script>
+</body>
+</html>

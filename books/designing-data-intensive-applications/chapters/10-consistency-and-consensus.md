@@ -3,194 +3,210 @@ book: designing-data-intensive-applications
 chapter: 10
 title: "Consistency and Consensus"
 pages: "401–450"
+translated_title: "مفهوم consistency و consensus"
+lang: fa
 ---
 
-# 10. Consistency and Consensus
+# فصل ۱۰: مفهوم consistency و consensus
 
-[← 9. The Trouble with Distributed Systems](09-the-trouble-with-distributed-systems.md) · [Book](../README.md) · [11. Batch Processing →](11-batch-processing.md)
+[فصل ۹: دردسرهای سیستم‌های توزیع‌شده →](09-the-trouble-with-distributed-systems.md) · [کتاب](../README.md) · [فصل ۱۱: پردازش batch ←](11-batch-processing.md)
 
-## Summary
+## خلاصه
 
-After Chapter 9's catalogue of problems, this chapter — almost completely rewritten for the second edition — presents the abstractions that solve them. **Linearizability** makes a replicated system behave as if there were a single copy of the data with atomic operations; it is easy to reason about but costly, especially across regions. **ID generators and logical clocks** show the spectrum of ordering guarantees: Lamport clocks and hybrid logical clocks order events consistently with causality, while only a linearizable ID generator orders them consistently with real time. **Consensus** lets a group of nodes agree on a single sequence of operations despite faults; many problems — compare-and-set, locks and leases, uniqueness constraints, shared logs, atomic commit, fetch-and-add — turn out to be equivalent to it. In practice consensus means single-leader replication with safe, automatic failover (Raft, Paxos, Zab), usually consumed via coordination services such as ZooKeeper and etcd.
+بعد از فهرست مشکل‌های فصل ۹، این فصل، که در ویراست دوم تقریباً کامل از نو نوشته شده، abstractionهایی را معرفی می‌کند که آن مشکل‌ها را حل می‌کنند. **مفهوم linearizability** باعث می‌شود یک سیستم replicateشده طوری رفتار کند که انگار فقط یک نسخه از داده با عملیات atomic وجود دارد؛ استدلال درباره‌اش آسان است اما گران است، به‌خصوص بین regionها. **مولدهای ID و logical clockها** طیف تضمین‌های ترتیب را نشان می‌دهند: Lamport clock و hybrid logical clock رویدادها را سازگار با ترتیب علّی مرتب می‌کنند، و فقط یک مولد ID با linearizability آن‌ها را سازگار با زمان واقعی مرتب می‌کند. **مفهوم consensus** اجازه می‌دهد گروهی از nodeها با وجود fault روی یک دنباله‌ی واحد از عملیات توافق کنند؛ معلوم می‌شود خیلی از مسئله‌ها، یعنی compare-and-set، قفل و lease، constraint یکتایی، log مشترک، atomic commit و fetch-and-add، با آن هم‌ارزند. در عمل consensus یعنی single-leader replication با failover خودکار و امن، یعنی Raft، Paxos و Zab، که معمولاً از راه coordination serviceهایی مثل ZooKeeper و etcd مصرف می‌شود.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Linearizability = recency guarantee on a single object**: once any read has returned a new value, all later reads must return it too (pp. 402–407).
-- **Linearizability ≠ serializability**: one is about single-object recency, the other about transactions' isolation; *strict serializability* combines both (pp. 407–408).
-- **Use it for**: leader election and locks, uniqueness constraints, and cross-channel timing dependencies (pp. 408–411).
-- **Which replication is linearizable**: single-leader potentially, consensus likely, multi-leader no, leaderless probably not — even with quorums (pp. 411–413).
-- **The cost**: a network interruption forces a choice between linearizability and availability; CAP is of mostly historical interest, and latency is the everyday cost (pp. 413–417).
-- **Logical clocks order events causally but don't give linearizability**; a linearizable ID generator needs a single (replicated) node or bounded clock uncertainty (pp. 417–425).
-- **Consensus is "single-leader replication done right"**: epochs (terms) make leaders unique per epoch; every write and linearizable read needs a quorum (pp. 425–437).
-- **Coordination services** (ZooKeeper, etcd, Consul) package consensus as locks, leases, failure detection, and change notifications (pp. 437–440).
+- **مفهوم linearizability یعنی تضمین تازگی روی یک object:** وقتی یک خواندن مقدار تازه را برگرداند، همه‌ی خواندن‌های بعدی هم باید آن را برگردانند (pp. 402–407).
+- **مفهوم linearizability با serializability یکی نیست:** اولی درباره‌ی تازگی یک object است و دومی درباره‌ی isolation تراکنش‌ها؛ *strict serializability* هر دو را با هم دارد (pp. 407–408).
+- **کاربردهایش:** انتخاب leader و قفل، constraint یکتایی، و وابستگی‌های زمانی بین کانال‌ها (pp. 408–411).
+- **کدام replication linearizable است:** مدل single-leader بالقوه بله، consensus به احتمال زیاد بله، multi-leader نه، و leaderless احتمالاً نه، حتی با quorum (pp. 411–413).
+- **هزینه:** یک قطعی شبکه انتخاب بین linearizability و availability را تحمیل می‌کند؛ CAP بیشتر ارزش تاریخی دارد و هزینه‌ی هرروزه latency است (pp. 413–417).
+- **مفهوم logical clock رویدادها را علّی مرتب می‌کند اما linearizability نمی‌دهد**؛ مولد ID با linearizability یک node تنها، البته replicateشده، یا عدم قطعیت محدود ساعت لازم دارد (pp. 417–425).
+- **مفهوم consensus یعنی «single-leader replication که درست انجام شده»:** مفهوم epoch، یا term، leader را در هر epoch یکتا می‌کند؛ هر نوشتن و هر خواندن linearizable یک quorum لازم دارد (pp. 425–437).
+- **مفهوم coordination service**، یعنی ZooKeeper، etcd و Consul، consensus را به شکل قفل، lease، تشخیص خرابی و اعلان تغییر بسته‌بندی می‌کند (pp. 437–440).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، یعنی bookmarkهای PDF، با شماره‌ی صفحه‌های چاپی.*
 
-- Linearizability — p. 402
-  - What Makes a System Linearizable? — p. 404
-  - Relying on Linearizability — p. 408
-  - Implementing Linearizable Systems — p. 411
-  - The Cost of Linearizability — p. 413
-- ID Generators and Logical Clocks — p. 417
-  - Logical Clocks — p. 420
-  - Linearizable ID Generators — p. 423
-- Consensus — p. 425
-  - The Many Faces of Consensus — p. 427
-  - Consensus in Practice — p. 433
-  - Coordination Services — p. 437
-- Summary — p. 440
+- مفهوم linearizability (p. 402)
+  - چه چیزی یک سیستم را linearizable می‌کند؟ (p. 404)
+  - تکیه بر linearizability (p. 408)
+  - پیاده‌سازی سیستم‌های linearizable (p. 411)
+  - هزینه‌ی linearizability (p. 413)
+- مولدهای ID و logical clockها (p. 417)
+  - مفهوم logical clock (p. 420)
+  - مولدهای ID با linearizability (p. 423)
+- مفهوم consensus (p. 425)
+  - چهره‌های گوناگون consensus (p. 427)
+  - مفهوم consensus در عمل (p. 433)
+  - مفهوم coordination service (p. 437)
+- جمع‌بندی (p. 440)
 
-## Notes
+## یادداشت‌ها
 
-Replication tolerates faults but invites inconsistency. Two philosophies (pp. 401–402):
+مفهوم replication fault را تحمل می‌کند اما ناسازگاری را دعوت می‌کند. دو فلسفه (pp. 401–402):
 
-| | Eventual consistency | Strong consistency |
+| | مفهوم eventual consistency | مفهوم strong consistency |
 |---|---|---|
-| Who handles replication | Visible to the app, which resolves inconsistencies and conflicts | Hidden: the system behaves like a single node |
-| Typical replication | Multi-leader, leaderless | Single-leader + consensus |
-| Cost | Hard for applications | Performance; some faults cause outages |
-| Unavoidable when | Users edit offline (sync engines) | — appropriate with fast, reliable networks |
+| چه کسی با replication سروکار دارد | برای اپلیکیشن دیده می‌شود و خودش ناسازگاری‌ها و conflictها را حل می‌کند | پنهان است: سیستم مثل یک node تنها رفتار می‌کند |
+| مدل replication معمول | مدل multi-leader و leaderless | مدل single-leader به‌علاوه‌ی consensus |
+| هزینه | برای اپلیکیشن سخت | کارایی؛ بعضی faultها قطعی می‌سازند |
+| اجتناب‌ناپذیر وقتی | کاربرها آفلاین ویرایش می‌کنند، یعنی sync engineها | با شبکه‌های سریع و قابل اعتماد مناسب است |
 
-This chapter makes “strong consistency” precise (linearizability), connects it to ID generation, and shows how consensus achieves it fault-tolerantly — using intuitions rather than proofs; serious work needs the theory (p. 402).
+این فصل «strong consistency» را دقیق می‌کند، یعنی linearizability، آن را به ساختن ID وصل می‌کند، و نشان می‌دهد consensus چطور با تحمل fault به آن می‌رسد؛ با شهود به جای اثبات؛ کار جدی به نظریه نیاز دارد (p. 402).
 
-### Linearizability
+> **Try it:** [فصل ۱۰ در طول یک pipeline داده](../widgets/10-pipeline-map.html): از دیتابیس منبع تا داشبورد را با lensهای تازگی، ترتیب و هماهنگی طی کنید.
 
-Also called atomic, strong, immediate or external consistency: make a system **appear as if there were only one copy of the data, and all operations on it are atomic** — a **recency guarantee**: once a write completes, every read sees it (pp. 402–403). Figure 10-1: Aaliyah reloads and announces the final score; Bryce, reloading *after* hearing her, hits a lagging replica and sees the game still on — a violation, because his request started after hers completed (pp. 403–404).
+### مفهوم linearizability
 
-#### What makes a system linearizable? (pp. 404–407)
+اسم‌های دیگرش atomic consistency، strong consistency، immediate consistency و external consistency است: سیستم را طوری نشان بده که **انگار فقط یک نسخه از داده هست و همه‌ی عملیات روی آن atomic‌اند**؛ یعنی یک **تضمین تازگی**: وقتی یک نوشتن تمام شد، هر خواندنی آن را می‌بیند (pp. 402–403). در شکل ۱۰-۱ Aaliyah صفحه را تازه می‌کند و نتیجه‌ی نهایی بازی را اعلام می‌کند؛ Bryce که *بعد از* شنیدن حرف او صفحه را تازه می‌کند، به یک replica عقب‌مانده می‌خورد و می‌بیند بازی هنوز ادامه دارد؛ این نقض است، چون درخواست او بعد از تمام شدن درخواست Aaliyah شروع شده (pp. 403–404).
 
-Model one object as a **register** (a key, a row, a document); each operation is a bar from request to response, and the database applied it somewhere in between.
+#### چه چیزی یک سیستم را linearizable می‌کند؟ (pp. 404–407)
 
-![Client C writes x = 1 while clients A and B read; reads before the write return 0, reads after it return 1, and reads overlapping it may return 0 or 1](../figures/10-02.png)
+یک object را به شکل یک **register** مدل کنید، یعنی یک کلید، یک ردیف یا یک document؛ هر عملیات یک میله از درخواست تا پاسخ است، و دیتابیس آن را جایی در این میان اعمال کرده.
 
-*Figure 10-2 (p. 404): a read concurrent with a write may return either value — Figure 10-3 adds that once any read returns the new value, every later read must too.*
+![اول client C مقدار x = 1 را می‌نویسد در حالی که clientهای A و B می‌خوانند؛ خواندن‌های پیش از نوشتن ۰ برمی‌گردانند، خواندن‌های بعد از آن ۱، و خواندن‌هایی که با آن هم‌پوشانی دارند ممکن است ۰ یا ۱ برگردانند](../figures/10-02.png)
 
-| Read relative to the write | Allowed results |
+*Figure 10-2 (p. 404): خواندنی که با یک نوشتن هم‌زمان است ممکن است هر کدام از دو مقدار را برگرداند؛ شکل ۱۰-۳ اضافه می‌کند که وقتی یک خواندن مقدار تازه را برگرداند، هر خواندن بعدی هم باید همان را برگرداند.*
+
+| خواندن نسبت به نوشتن | نتیجه‌های مجاز |
 |---|---|
-| Finished before the write began | Old value |
-| Began after the write completed | New value |
-| Overlaps the write | Old **or** new — but… |
-| Begins after *any* read returned the new value | New value — the value flips **once**, atomically, never back |
+| پیش از شروع نوشتن تمام شده | مقدار قدیم |
+| بعد از پایان نوشتن شروع شده | مقدار تازه |
+| با نوشتن هم‌پوشانی دارد | مقدار قدیم **یا** تازه؛ اما… |
+| بعد از این‌که *هر* خواندنی مقدار تازه را برگرداند شروع شده | مقدار تازه؛ مقدار فقط **یک بار** و به‌شکل atomic عوض می‌شود و هرگز برنمی‌گردد |
 
-Figure 10-4 adds **CAS(x, v_old, v_new)**: marking the instant each operation took effect, the markers must join into a valid sequence that **only moves forward in time**. Requests may be applied in a different order than sent if they are concurrent; a read may return a value before its writer receives the ack; CAS detects concurrent changes. Linearizability can be tested from recorded timings (Knossos, Elle) but checking is expensive. It is the strongest common consistency model and includes read-after-write, monotonic reads and consistent prefix reads (p. 407).
+شکل ۱۰-۴ عملیات **CAS(x, v_old, v_new)** را اضافه می‌کند: اگر لحظه‌ی اثر کردن هر عملیات را علامت بزنید، علامت‌ها باید به یک دنباله‌ی معتبر وصل شوند که **فقط در زمان جلو می‌رود**. درخواست‌های concurrent ممکن است به ترتیبی غیر از ترتیب فرستادن اعمال شوند؛ یک خواندن ممکن است مقداری را پیش از رسیدن ack به نویسنده‌اش برگرداند؛ CAS تغییرهای concurrent را تشخیص می‌دهد. linearizability را می‌شود از زمان‌بندی‌های ثبت‌شده تست کرد، با Knossos و Elle، اما بررسی‌اش گران است. قوی‌ترین مدل consistency رایج است و read-after-write، monotonic reads و consistent prefix reads را در خود دارد (p. 407).
 
-![Four clients' reads, writes and compare-and-sets on x, each with a marker at the instant it took effect; joining the markers gives one valid sequence, except one read that returns a stale 2, flagged with a warning sign](../figures/10-04.png)
+![خواندن‌ها، نوشتن‌ها و compare-and-setهای چهار client روی x، هر کدام با علامتی در لحظه‌ی اثر کردن؛ وصل کردن علامت‌ها یک دنباله‌ی معتبر می‌سازد، جز یک خواندن که مقدار کهنه‌ی ۲ را برمی‌گرداند و با علامت هشدار مشخص شده](../figures/10-04.png)
 
-*Figure 10-4 (p. 406): linearizability means the effect markers form one sequence consistent with real time; the flagged read breaks it.*
+*Figure 10-4 (p. 406): مفهوم linearizability یعنی علامت‌های اثر یک دنباله‌ی سازگار با زمان واقعی بسازند؛ خواندن علامت‌خورده آن را می‌شکند.*
 
-#### Linearizability versus serializability (pp. 407–408)
+#### مقایسه‌ی linearizability و serializability (pp. 407–408)
 
-| | Serializability | Linearizability |
+| | مفهوم serializability | مفهوم linearizability |
 |---|---|---|
-| Applies to | Transactions over multiple objects | Single objects (registers) |
-| Guarantees | Same as *some* serial order — which may differ from real time; stale reads allowed | **Recency**: an operation that starts after another finished sees at least its effects |
-| Prevents write skew? | Yes | No — no grouping into transactions |
+| موضوعش | تراکنش‌ها روی چند object | یک object، یعنی register |
+| تضمین | معادل *یک* ترتیب serial، که ممکن است با زمان واقعی فرق کند؛ خواندن کهنه مجاز است | **تازگی**: عملیاتی که بعد از پایان دیگری شروع می‌شود دست‌کم اثرهای آن را می‌بیند |
+| جلوی write skew را می‌گیرد؟ | بله | نه؛ چیزی را در تراکنش گروه نمی‌کند |
 
-Both together = **strict serializability** (strong one-copy serializability, strong-1SR). Single-node databases are typically linearizable; SSI-based distributed databases are subtler: **CockroachDB** gives serializability plus some recency, not strict serializability; **Spanner** and **FoundationDB** are strictly serializable. Isolation level and consistency model can be chosen independently; sequential consistency is yet another thing (p. 408).
+هر دو با هم یعنی **strict serializability**، یا strong one-copy serializability و strong-1SR. دیتابیس‌های تک‌node معمولاً linearizable‌اند؛ دیتابیس‌های توزیع‌شده‌ی مبتنی بر SSI ظریف‌ترند: **CockroachDB** serializability به‌علاوه‌ی کمی تازگی می‌دهد، نه strict serializability؛ **Spanner** و **FoundationDB** strictly serializable‌اند. سطح isolation و مدل consistency را می‌شود مستقل از هم انتخاب کرد؛ sequential consistency هم چیز دیگری است (p. 408).
 
-#### Relying on linearizability (pp. 408–411)
+#### تکیه بر linearizability (pp. 408–411)
 
-| Use | Why it needs linearizability |
+| کاربرد | چرا linearizability لازم دارد |
 |---|---|
-| **Locking and leader election** | Two nodes must never hold the lease at once (split brain). ZooKeeper, etcd (consensus) + recipes like Apache Curator. ZooKeeper writes are linearizable but reads may be stale; etcd v3 reads are linearizable by default. Oracle RAC takes a linearizable lock per disk page over a dedicated interconnect |
-| **Constraints and uniqueness** | A username, a file path, a seat, a non-negative balance, stock levels — one up-to-date value all nodes agree on; like acquiring a lock or a CAS. Loose treatment is sometimes fine (overbooking with compensation). Hard uniqueness needs it; foreign-key and attribute constraints don’t |
-| **Cross-channel timing dependencies** | Figure 10-5: the web server stores an uploaded video, then queues a transcoding job; if the queue outruns the storage’s replication, the transcoder reads an old file or nothing — permanently inconsistent. Push notifications followed by a fetch from a lagging replica: same race |
+| **قفل و انتخاب leader** | هرگز نباید دو node هم‌زمان lease داشته باشند، یعنی split brain. ZooKeeper و etcd با consensus، به‌علاوه‌ی دستورالعمل‌هایی مثل Apache Curator. نوشتن‌های ZooKeeper linearizable‌اند اما خواندن‌ها ممکن است کهنه باشند؛ خواندن‌های etcd v3 به‌طور پیش‌فرض linearizable‌اند. Oracle RAC برای هر صفحه‌ی دیسک یک قفل linearizable روی یک interconnect اختصاصی می‌گیرد |
+| **مفهوم constraint و یکتایی** | یک username، مسیر فایل، صندلی، موجودی غیرمنفی یا سطح انبار؛ یک مقدار به‌روز که همه‌ی nodeها رویش توافق دارند؛ مثل گرفتن قفل یا CAS. گاهی رفتار شل کافی است، مثل overbooking با جبران. یکتایی سخت آن را لازم دارد؛ constraintهای foreign key و ویژگی‌ها نه |
+| **وابستگی زمانی بین کانال‌ها** | در شکل ۱۰-۵ وب‌سرور یک ویدئوی آپلودشده را ذخیره می‌کند و بعد یک کار transcoding در صف می‌گذارد؛ اگر صف از replication storage جلو بزند، transcoder فایل قدیمی یا هیچ چیز را می‌خواند و ناسازگاری دائمی می‌شود. push notification و بعد خواندن از یک replica عقب‌مانده هم همین race را دارد |
 
-If you control the second channel you can use read-your-writes-style alternatives, at the cost of complexity (p. 411).
+اگر کانال دوم را در اختیار دارید، می‌توانید به قیمت پیچیدگی از جایگزین‌هایی شبیه read-your-writes استفاده کنید (p. 411).
 
-#### Implementing linearizable systems (pp. 411–413)
+> **In practice:** وقتی DAG مربوط به یک جدول Gold تمام می‌شود، در reference stack ممکن است پیامی بفرستد که گزارش آماده است، و تحلیل‌گر داشبورد را از راه SQL proxy باز می‌کند که کوئری را به یکی از دو replica می‌فرستد.
+>
+> **Your turn:** تحلیل‌گر پیام «گزارش آماده است» را می‌بیند، داشبورد را باز می‌کند و عددهای دیروز را می‌بیند. چه شده، و راه درست چیست؟
+>
+> *Answer:* این وابستگی زمانی بین کانال‌هاست، مثل شکل ۱۰-۵: پیام از کانالی آمده که از replication بین دو replica جلو زده، و proxy کوئری را به replicaی فرستاده که هنوز داده‌ی تازه را ندارد (pp. 409–411). یا پیش از فرستادن پیام صبر کنید تا هر دو replica داده را داشته باشند، مثلاً با بررسی یک نسخه یا تعداد ردیف روی هر دو، یا داشبوردهای حساس را به همان replicaای بفرستید که load رویش نوشته.
 
-| Replication method | Linearizable? | Why |
+#### پیاده‌سازی سیستم‌های linearizable (pp. 411–413)
+
+| روش replication | آیا linearizable است؟ | چرا |
 |---|---|---|
-| Single-leader | **Potentially** | All reads/writes on the leader — if it really is the leader (a *delusional* leader breaks it); async failover can lose committed writes. Per-shard leaders are fine (single-object guarantee) |
-| Consensus algorithms | **Likely** | Single-leader with safe election (ZooKeeper’s Zab, etcd’s Raft) — unless reads skip the leadership check |
-| Multi-leader | **No** | Concurrent writes on several nodes, replicated asynchronously |
-| Leaderless | **Probably not** | LWW on clock timestamps (Cassandra, ScyllaDB) almost certainly isn’t; even w + r > n can fail (Figure 10-6) |
+| مدل single-leader | **بالقوه** | همه‌ی خواندن‌ها و نوشتن‌ها روی leader، اگر واقعاً leader باشد؛ leaderی که *توهم* leader بودن دارد آن را می‌شکند؛ failover asynchronous ممکن است نوشتن‌های commitشده را گم کند. leader جدا برای هر shard اشکالی ندارد، چون تضمین تک-objectی است |
+| الگوریتم‌های consensus | **به احتمال زیاد** | مدل single-leader با انتخاب امن، یعنی Zab در ZooKeeper و Raft در etcd؛ مگر این‌که خواندن‌ها بررسی leader بودن را دور بزنند |
+| مدل multi-leader | **نه** | نوشتن‌های concurrent روی چند node، که asynchronous replicate می‌شوند |
+| مدل leaderless | **احتمالاً نه** | مدل LWW با timestamp ساعت، مثل Cassandra و ScyllaDB، تقریباً قطعاً نیست؛ حتی w + r > n هم ممکن است شکست بخورد؛ شکل ۱۰-۶ |
 
-Figure 10-6: n = 3, w = 3 writer updating x to 1; reader A (r = 2) gets 1 and 0 → returns 1; reader B, starting *after* A finished, gets 0 and 0. Fixable only with **synchronous read repair** before returning and writers reading a quorum’s latest timestamp before writing — Riak skips this for performance; Cassandra does the repair but uses clock timestamps. Linearizable **CAS** needs consensus regardless (pp. 412–413).
+در شکل ۱۰-۶ با n = 3 و w = 3، یک نویسنده x را به ۱ تغییر می‌دهد؛ خواننده‌ی A با r = 2 مقدارهای ۱ و ۰ را می‌گیرد و ۱ برمی‌گرداند؛ خواننده‌ی B که *بعد از* پایان کار A شروع کرده، ۰ و ۰ می‌گیرد. فقط با **read repair هم‌زمان** پیش از برگرداندن نتیجه، و خواندن آخرین timestamp یک quorum به دست نویسنده‌ها پیش از نوشتن، درست می‌شود؛ Riak برای کارایی این را انجام نمی‌دهد؛ Cassandra repair را انجام می‌دهد اما از timestamp ساعت استفاده می‌کند. **مفهوم CAS** با linearizability در هر صورت consensus لازم دارد (pp. 412–413).
 
-![A writer sends x = 1 to three replicas with varying delays; reader A reads replicas 1 and 2 and gets 1 and 0; reader B, starting later, reads replicas 2 and 3 and gets 0 and 0](../figures/10-06.png)
+![یک نویسنده x = 1 را با latencyهای متفاوت به سه replica می‌فرستد؛ خواننده‌ی A از replicaهای ۱ و ۲ می‌خواند و ۱ و ۰ می‌گیرد؛ خواننده‌ی B که دیرتر شروع کرده از replicaهای ۲ و ۳ می‌خواند و ۰ و ۰ می‌گیرد](../figures/10-06.png)
 
-*Figure 10-6 (p. 413): a quorum is satisfied in both reads, yet B sees an older value than A — not linearizable.*
+*Figure 10-6 (p. 413): شرط quorum در هر دو خواندن برقرار است، اما B مقداری قدیمی‌تر از A می‌بیند؛ linearizable نیست.*
 
-#### The cost of linearizability (pp. 413–417)
+#### هزینه‌ی linearizability (pp. 413–417)
 
-Two regions lose contact (Figure 10-7): multi-leader keeps both sides working and queues replication; with a single leader, clients in the follower region can make no writes or linearizable reads — an outage there (pp. 413–414). Generally, under a network fault, a linearizable system’s cut-off replicas must wait or error (“**CP**”); a system without linearizability can keep serving (“**AP**”) (pp. 414–415).
+دو region ارتباطشان قطع می‌شود، شکل ۱۰-۷: مدل multi-leader هر دو طرف را کارا نگه می‌دارد و replication را در صف می‌گذارد؛ با یک leader، clientهای region مربوط به follower نه می‌توانند بنویسند و نه خواندن linearizable انجام دهند؛ یعنی قطعی در آن‌جا (pp. 413–414). در حالت کلی، زیر یک خرابی شبکه، replicaهای جدامانده‌ی یک سیستم linearizable باید صبر کنند یا خطا بدهند، یعنی «**CP**»؛ سیستمی بدون linearizability می‌تواند به سرویس دادن ادامه دهد، یعنی «**AP**» (pp. 414–415).
 
-![Two regions, each with an application, a database and clients, connected by a replication link that is interrupted](../figures/10-07.png)
+![دو region، هر کدام با یک اپلیکیشن، یک دیتابیس و clientها، که با یک لینک replication به هم وصل‌اند و آن لینک قطع شده](../figures/10-07.png)
 
-*Figure 10-7 (p. 414): during the interruption, a linearizable system must make one side's clients wait or fail; staying available means giving up linearizability.*
+*Figure 10-7 (p. 414): در طول قطعی، یک سیستم linearizable باید clientهای یک طرف را منتظر بگذارد یا خطا بدهد؛ در دسترس ماندن یعنی کنار گذاشتن linearizability.*
 
-| CAP — what it is | What it isn’t |
+| مفهوم CAP چیست | چه نیست |
 |---|---|
-| Brewer’s 2000 rule of thumb that pushed engineers towards shared-nothing designs and helped trigger NoSQL; the trade-off was known since the 1970s | “Pick two of three” — partitions aren’t a choice; better: *either consistent or available when partitioned* |
-| Formally: one consistency model (linearizability), one fault (network partitions — **under 8% of incidents** per Google data) | Useful for design: says nothing of delays, dead nodes; its “availability” differs from common usage; many systems are neither CP nor AP |
-| Generalized by **PACELC**: if Partitioned choose A or C, Else choose Latency or Consistency | Current: superseded by more precise results — “best not to dwell on it” |
+| قاعده‌ی سرانگشتی Brewer در سال ۲۰۰۰ که مهندس‌ها را به طراحی shared-nothing هل داد و به راه افتادن NoSQL کمک کرد؛ این بده‌بستان از دهه‌ی ۱۹۷۰ شناخته شده بود | «دو تا از سه تا را انتخاب کن»؛ partition انتخابی نیست؛ بهتر: *وقتی partition هست، یا consistent یا available* |
+| به‌طور رسمی: یک مدل consistency، یعنی linearizability، و یک نوع fault، یعنی network partition، که طبق داده‌های Google **کمتر از ۸٪ حادثه‌ها**ست | برای طراحی مفید است: درباره‌ی latency و node مرده چیزی نمی‌گوید؛ «availability» آن با کاربرد رایج فرق دارد؛ خیلی از سیستم‌ها نه CP‌اند نه AP |
+| مدل **PACELC** آن را تعمیم می‌دهد: اگر Partition، بین A و C؛ وگرنه، Else، بین Latency و Consistency | امروز: نتیجه‌های دقیق‌تر جایش را گرفته‌اند؛ به تعبیر کتاب بهتر است رویش نمانیم |
 
-**The real cost is latency, all the time** (pp. 416–417): even **RAM on a multi-core CPU isn’t linearizable** — per-core caches and store buffers mean another core may read stale data without a memory barrier, dropped for performance, not fault tolerance. Attiya and Welch proved linearizable reads and writes take time **proportional to the uncertainty of network delay**; no faster algorithm exists, so latency-sensitive systems choose weaker models (Ch. 13).
+**هزینه‌ی واقعی latency است، همیشه** (pp. 416–417): حتی **حافظه‌ی RAM روی یک CPU چند-coreی linearizable نیست**؛ cacheهای هر core و store bufferها یعنی core دیگری بدون memory barrier ممکن است داده‌ی کهنه بخواند؛ و این برای کارایی کنار گذاشته شده، نه برای تحمل fault. Attiya و Welch اثبات کردند خواندن و نوشتن linearizable زمانی **متناسب با عدم قطعیت latency شبکه** می‌گیرد؛ الگوریتم سریع‌تری وجود ندارد، پس سیستم‌های حساس به latency مدل‌های ضعیف‌تر را انتخاب می‌کنند؛ فصل ۱۳.
 
-### ID generators and logical clocks
+### مولدهای ID و logical clockها
 
-A single-node **autoincrementing ID** is compact (64 bits) and ordered — Figure 10-8’s chat: Aaliyah’s question gets ID 1, Bryce’s answer ID 3; concurrent messages (Aaliyah’s and Caleb’s) just need unique IDs. It is a linearizable **fetch-and-add** — but a single point of failure, slow from other regions, and a possible bottleneck (pp. 417–418).
+یک **ID خودافزاینده** روی یک node فشرده، ۶۴ بیت، و مرتب است؛ در چت شکل ۱۰-۸، پرسش Aaliyah شناسه‌ی ۱ و پاسخ Bryce شناسه‌ی ۳ می‌گیرد؛ پیام‌های concurrent، یعنی پیام Aaliyah و Caleb، فقط شناسه‌ی یکتا لازم دارند. این یک **fetch-and-add** با linearizability است؛ اما نقطه‌ی شکست تنهاست، از regionهای دیگر کند است و ممکن است گلوگاه شود (pp. 417–418).
 
-| Distributed ID scheme (pp. 418–419) | Unique | Ordered by creation? |
+| روش ID توزیع‌شده (pp. 418–419) | یکتا | به ترتیب ساخت مرتب؟ |
 |---|---|---|
-| Sharded assignment (odd/even, shard bits) | Yes, compact | No — IDs 16 and 17 from different nodes say nothing about order |
-| Preallocated blocks (1–1,000, 1,001–2,000) | Yes | No |
-| Random UUID v4 (128 bits) | Probabilistically | No — random |
-| Wall-clock timestamp + uniqueness bits (UUIDv7, X’s Snowflake, ULID, Hazelcast Flake ID, MongoDB ObjectID) | Probabilistically | Only approximately — clock skew and jumps; not linearizable |
+| تقسیم بین shardها، مثل فرد و زوج یا بیت‌های shard | بله، فشرده | نه؛ شناسه‌های ۱۶ و ۱۷ از دو node چیزی درباره‌ی ترتیب نمی‌گویند |
+| بلوک‌های ازپیش‌تخصیص‌یافته، مثل ۱ تا ۱٬۰۰۰ و ۱٬۰۰۱ تا ۲٬۰۰۰ | بله | نه |
+| مدل UUID v4 تصادفی، ۱۲۸ بیت | به احتمال | نه؛ تصادفی |
+| مفهوم timestamp ساعت به‌علاوه‌ی بیت‌های یکتایی، مثل UUIDv7، Snowflake در X، ULID، Flake ID در Hazelcast و ObjectID در MongoDB | به احتمال | فقط تقریبی؛ clock skew و پرش ساعت؛ linearizable نیست |
 
-#### Logical clocks (pp. 420–423)
+#### مفهوم logical clock (pp. 420–423)
 
-A **logical clock** counts events instead of seconds. Requirements: compact unique timestamps, a **total order**, and **consistency with causality** (A happened before B ⇒ ts(A) < ts(B)). A single-node counter qualifies; the schemes above don’t (p. 420).
+یک **logical clock** رویدادها را می‌شمارد نه ثانیه‌ها را. الزام‌ها: timestampهای فشرده و یکتا، یک **ترتیب کامل**، و **سازگاری با ترتیب علّی**؛ یعنی اگر A پیش از B رخ داده، ts(A) < ts(B). یک شمارنده‌ی تک‌node این را دارد؛ روش‌های بالا نه (p. 420).
 
-| Clock | How | Gives | Lacks |
+| ساعت | چطور | چه می‌دهد | چه ندارد |
 |---|---|---|---|
-| **Lamport timestamp** (1978) | (counter, node ID); increment per event; on seeing a larger counter, jump to it | Total order consistent with causality — (1, Aaliyah) < (1, Caleb) < (2, Bryce) (Figure 10-9) | Linearizability; any link to physical time; nodes that never talk drift apart |
-| **Hybrid logical clock** | Physical time units, but jump forward to larger timestamps seen and always increment | Close to real time, monotonic despite clock jumps, causal — used by CockroachDB | Distinguishing concurrent events |
-| **Vector clock** | One counter per node | Detects concurrency | Size: an integer per node |
+| **مفهوم Lamport timestamp**، ۱۹۷۸ | زوج (counter, node ID)؛ با هر رویداد یکی زیاد می‌شود؛ با دیدن counter بزرگ‌تر به آن می‌پرد | ترتیب کامل سازگار با ترتیب علّی؛ (1, Aaliyah) < (1, Caleb) < (2, Bryce)؛ شکل ۱۰-۹ | مفهوم linearizability؛ هیچ پیوندی با زمان فیزیکی؛ nodeهایی که هرگز با هم حرف نمی‌زنند از هم دور می‌شوند |
+| **مفهوم hybrid logical clock** | واحدهای زمان فیزیکی، اما به timestampهای بزرگ‌ترِ دیده‌شده می‌پرد و همیشه زیاد می‌شود | نزدیک به زمان واقعی، با وجود پرش ساعت یکنوا، و علّی؛ در CockroachDB استفاده می‌شود | تشخیص رویدادهای concurrent |
+| **مفهوم vector clock** | یک counter برای هر node | تشخیص concurrency | اندازه: یک عدد صحیح برای هر node |
 
-Lamport and hybrid clocks make good MVCC transaction IDs because snapshots then respect causality (p. 422).
+مفهوم Lamport clock و hybrid clock شناسه‌ی تراکنش خوبی برای MVCC می‌سازند، چون آن‌وقت snapshotها ترتیب علّی را رعایت می‌کنند (p. 422).
 
-![Aaliyah, Bryce and Caleb exchange chat messages tagged with Lamport timestamps such as (1, "Aaliyah") and (2, "Bryce"); a reply always carries a higher counter than the message it answers](../figures/10-09.png)
+![سه کاربر Aaliyah، Bryce و Caleb پیام‌های چت با Lamport timestampهایی مثل (1, "Aaliyah") و (2, "Bryce") رد و بدل می‌کنند؛ پاسخ همیشه counter بزرگ‌تری از پیامی دارد که به آن جواب می‌دهد](../figures/10-09.png)
 
-*Figure 10-9 (p. 421): ordering by (counter, node ID) gives a total order in which every reply comes after the message it replies to.*
+*Figure 10-9 (p. 421): مرتب کردن با (counter, node ID) یک ترتیب کامل می‌دهد که در آن هر پاسخ بعد از پیامی است که به آن جواب داده.*
 
-> **Try it:** [Wall clocks, Lamport clocks, vector clocks](../widgets/10-logical-clocks.html) — order the book's Aaliyah–Bryce–Caleb chat three ways.
+> **Try it:** [ساعت دیواری، Lamport clock و vector clock](../widgets/10-logical-clocks.html): چت Aaliyah و Bryce و Caleb کتاب را به سه روش مرتب کنید.
 
-#### Linearizable ID generators (pp. 423–425)
+> **In practice:** بخش loader در reference stack ممکن است برای هر ردیف Bronze یک شناسه‌ی load بسازد، و Silver گاهی «آخرین» نسخه‌ی هر ردیف را لازم دارد.
+>
+> **Your turn:** تیم پیشنهاد می‌کند برای پیدا کردن آخرین نسخه، ردیف‌ها را بر اساس یک شناسه‌ی شبیه UUIDv7 که loader روی دو worker می‌سازد مرتب کنند. مشکل چیست؟
+>
+> *Answer:* شناسه‌های مبتنی بر timestamp یکتا هستند اما ترتیبشان فقط تقریبی است: دو worker ساعت‌های متفاوت دارند، پس شناسه‌ی بزرگ‌تر لزوماً یعنی بعدتر نیست (pp. 418–419). برای یکتایی از آن استفاده کنید؛ برای ترتیب نسخه‌ها به چیزی تکیه کنید که منبع با ترتیب علّی می‌سازد، مثل شماره‌ی نسخه‌ی افزایشی روی همان ردیف، یا position در log مربوط به CDC.
 
-Linearizability needs more than causality: if A completed before B began, B’s ID is higher **even if they never communicated**. Figure 10-10: user A sets their account private on a laptop, then uploads a photo from their phone; accounts and photos live in different databases with Lamport/hybrid clocks, the photo gets a *lower* timestamp, and a snapshot read between the two shows the embarrassing photo to a stranger. Fixes: check permissions before writing (easily forgotten), track timestamps per device (hard across devices), or — simplest — a linearizable ID generator (pp. 423–424).
+#### مولدهای ID با linearizability (pp. 423–425)
 
-| Implementation | How | Trade-off |
+مفهوم linearizability بیش از ترتیب علّی لازم دارد: اگر A پیش از شروع B تمام شده، ID مربوط به B بزرگ‌تر است **حتی اگر هرگز با هم حرف نزده باشند**. شکل ۱۰-۱۰: کاربر A روی لپ‌تاپ حسابش را خصوصی می‌کند، بعد با گوشی عکسی آپلود می‌کند؛ حساب‌ها و عکس‌ها در دو دیتابیس با Lamport یا hybrid clock زندگی می‌کنند، عکس timestamp *کوچک‌تری* می‌گیرد، و یک خواندن snapshot بین این دو، عکس شرم‌آور را به یک غریبه نشان می‌دهد. راه‌حل‌ها: بررسی مجوز پیش از نوشتن، که آسان فراموش می‌شود؛ دنبال کردن timestampها برای هر دستگاه، که بین دستگاه‌ها سخت است؛ یا ساده‌ترین: یک مولد ID با linearizability (pp. 423–424).
+
+| پیاده‌سازی | چطور | بده‌بستان |
 |---|---|---|
-| Single node | Atomically increment, persist, replicate (single-leader) — TiDB/TiKV’s **timestamp oracle**, after Google’s Percolator; hand out persisted **batches** (IDs may be skipped, never duplicated or reordered) | Can’t shard or spread across regions — all requests go to one region; but simple and high-throughput |
-| Synchronized clocks with uncertainty (Spanner’s TrueTime) | Wait out the uncertainty interval | No communication, even across regions; needs tightly synchronized clock hardware |
+| یک node | افزایش atomic، ذخیره‌ی پایدار و replication با single-leader؛ **timestamp oracle** در TiDB و TiKV، برگرفته از Percolator در Google؛ واگذاری **batch**های ذخیره‌شده، که ممکن است IDهایی جا بیفتند اما هرگز تکراری یا جابه‌جا نمی‌شوند | نمی‌شود shard کرد یا بین regionها پخش کرد؛ همه‌ی درخواست‌ها به یک region می‌روند؛ اما ساده و پرthroughput است |
+| ساعت‌های synchronous با عدم قطعیت، یعنی TrueTime در Spanner | صبر به اندازه‌ی بازه‌ی عدم قطعیت | بدون ارتباط، حتی بین regionها؛ سخت‌افزار ساعت دقیقاً synchronous لازم دارد |
 
-**Constraints need more than clocks** (p. 425): pick the lowest timestamp to win a username or lock — but a node can only know it is lowest by hearing from **every** node that might have issued one; one unreachable node halts everything. Fault-tolerant locks and leases need **consensus**.
+**مفهوم constraint بیش از ساعت لازم دارد** (p. 425): کمترین timestamp را برنده‌ی یک username یا قفل بگیرید؛ اما یک node فقط وقتی می‌تواند بداند کمترین است که از **همه‌ی** nodeهایی که ممکن است timestamp داده باشند خبر بگیرد؛ یک node دست‌نیافتنی همه‌چیز را متوقف می‌کند. قفل و lease با تحمل fault **مفهوم consensus** لازم دارند.
 
-### Consensus
+### مفهوم consensus
 
-Easy on one node, hard with fault tolerance: failing over a linearizable leader without split brain (and fencing a paused one), a crash-proof fetch-and-add counter, a fault-tolerant CAS (pp. 425–426). All are **consensus**: getting nodes to agree on a value. Best-known algorithms: **Viewstamped Replication, Paxos, Raft, Zab** — all non-Byzantine; Byzantine-tolerant variants assume fewer than one-third faulty nodes (blockchains) (p. 426).
+روی یک node آسان است و با تحمل fault سخت: failover یک leader linearizable بدون split brain، و fence کردن leader متوقف‌شده؛ یک شمارنده‌ی fetch-and-add مقاوم در برابر crash؛ یک CAS با تحمل fault (pp. 425–426). همه‌ی این‌ها **consensus** هستند: توافق nodeها روی یک مقدار. شناخته‌شده‌ترین الگوریتم‌ها: **Viewstamped Replication، Paxos، Raft و Zab**؛ همه غیر-Byzantine؛ نسخه‌های مقاوم در برابر Byzantine فرض می‌کنند کمتر از یک‌سوم nodeها خراب‌اند، مثل blockchainها (p. 426).
 
-**The FLP result** (Fischer, Lynch, Paterson): no deterministic algorithm can *guarantee termination* in the asynchronous model if a node may crash. With timeouts — even sometimes wrong — or randomness, consensus is solvable; in practice it works (p. 426).
+**نتیجه‌ی FLP**، از Fischer و Lynch و Paterson: هیچ الگوریتم قطعی‌ای در مدل asynchronous نمی‌تواند *پایان یافتن* را تضمین کند اگر ممکن باشد یک node crash کند. با timeout، حتی اگر گاهی اشتباه باشد، یا با تصادف، consensus حل‌شدنی است؛ در عمل کار می‌کند (p. 426).
 
-#### Single-value consensus (pp. 427–429)
+#### مفهوم consensus روی یک مقدار (pp. 427–429)
 
-| Property | Meaning | Kind |
+| ویژگی | معنی | نوع |
 |---|---|---|
-| **Uniform agreement** | No two nodes decide differently | Safety |
-| **Integrity** | No changing your mind | Safety |
-| **Validity** | The decided value was proposed (rules out “always null”) | Safety |
-| **Termination** | Every non-crashed node eventually decides — even if a crashed node is “buried under 30 feet of mud” | Liveness |
+| **مفهوم uniform agreement** | هیچ دو nodeی تصمیم متفاوت نمی‌گیرند | مفهوم safety |
+| **مفهوم integrity** | تصمیمی را عوض نمی‌کنید | مفهوم safety |
+| **مفهوم validity** | مقدار تصمیم‌گرفته‌شده پیشنهاد شده بوده؛ «همیشه null» را رد می‌کند | مفهوم safety |
+| **مفهوم termination** | هر node سالم بالاخره تصمیم می‌گیرد؛ حتی اگر یک node خراب، به تعبیر کتاب، زیر ده متر گل مدفون شده باشد | مفهوم liveness |
 
-A hard-coded “dictator” satisfies the first three but not termination when it dies. Termination requires a **majority** working; safety holds even if most nodes fail — an outage can stop progress but never cause inconsistent decisions (pp. 428–429).
+یک «دیکتاتور» سخت‌کدشده سه تای اول را برآورده می‌کند اما وقتی بمیرد termination را نه. termination یک **اکثریت** سالم لازم دارد؛ safety حتی اگر بیشتر nodeها خراب شوند برقرار است؛ یک قطعی می‌تواند پیشرفت را متوقف کند اما هرگز تصمیم ناسازگار نمی‌سازد (pp. 428–429).
 
-#### The many faces of consensus (pp. 427–433)
+#### چهره‌های گوناگون consensus (pp. 427–433)
 
-These problems are **equivalent** — a solution to one converts to any other:
+این مسئله‌ها **هم‌ارز**ند؛ راه‌حل یکی به هر کدام از بقیه تبدیل می‌شود:
 
 ```mermaid
 flowchart LR
@@ -200,16 +216,16 @@ flowchart LR
     C -. "only for 2 nodes<br/>(consensus number 2)" .- FAA["Fetch-and-add<br/>(ID generator)"]
 ```
 
-- **CAS ⇄ consensus** (p. 429): set a register to null; every proposer CASes null → its value; the stored value is decided. Conversely, run consensus on concurrent CAS proposals. Object stores’ conditional writes are distributed CAS.
-- **Shared log ⇄ consensus** (pp. 429–431): a log with **eventual append, reliable delivery, append-only, agreement, validity** — implemented by **total order broadcast** (atomic broadcast). Decide whatever appears first; conversely run one consensus instance per log slot. Single-leader replication without failover fails liveness.
-- **Fetch-and-add** (pp. 431–432): implementable from CAS; but as consensus, losers can’t learn who won if the winner crashes — it solves consensus only for two nodes: **consensus number 2**, versus **∞** for CAS and shared logs.
-- **Atomic commitment** (pp. 432–433): uniform agreement, integrity, validity (commit only if all voted commit), **nontriviality** (all yes + no timeouts ⇒ commit), termination. Build it from consensus by broadcasting votes and proposing commit/abort; build consensus from it via transactions doing single-node CAS on a quorum.
+- **هم‌ارزی CAS و consensus** (p. 429): یک register را null کنید؛ هر proposer با CAS آن را از null به مقدار خودش تغییر می‌دهد؛ مقدار ذخیره‌شده تصمیم است. برعکس، روی پیشنهادهای CAS هم‌زمان consensus اجرا کنید. نوشتن‌های شرطی object storeها CAS توزیع‌شده‌اند.
+- **هم‌ارزی log مشترک و consensus** (pp. 429–431): یک log با **eventual append، reliable delivery، append-only، agreement و validity**، که با **total order broadcast**، یا atomic broadcast، پیاده می‌شود. هر چیزی را که اول ظاهر شود تصمیم بگیرید؛ برعکس، برای هر خانه‌ی log یک نمونه‌ی consensus اجرا کنید. single-leader replication بدون failover در liveness شکست می‌خورد.
+- **مفهوم fetch-and-add** (pp. 431–432): با CAS پیاده‌شدنی است؛ اما به‌عنوان consensus، بازنده‌ها اگر برنده crash کند نمی‌توانند بفهمند چه کسی برده؛ فقط برای دو node consensus را حل می‌کند: **consensus number 2**، در برابر **∞** برای CAS و log مشترک.
+- **مفهوم atomic commitment** (pp. 432–433): uniform agreement، integrity، validity، یعنی commit فقط اگر همه رأی commit داده باشند، **nontriviality**، یعنی همه yes و بدون timeout پس commit، و termination. از consensus می‌سازیدش با broadcast کردن رأی‌ها و پیشنهاد commit یا abort؛ و consensus را از آن می‌سازید با تراکنش‌هایی که CAS تک‌node روی یک quorum انجام می‌دهند.
 
-#### Consensus in practice (pp. 433–437)
+#### مفهوم consensus در عمل (pp. 433–437)
 
-Most systems provide **shared logs**: Raft, VR and Zab directly; Paxos decides one value but is used as **Multi-Paxos** (p. 433). A shared log gives **state machine replication** (and event sourcing), serializable transactions via deterministic stored procedures, per-seat consensus (first entry for each seat), counters and fencing tokens (ZooKeeper’s `zxid`). Sharded strongly consistent databases keep a log per shard, limiting cross-shard guarantees (pp. 433–434).
+بیشتر سیستم‌ها **log مشترک** می‌دهند: Raft، VR و Zab مستقیم؛ Paxos یک مقدار را تصمیم می‌گیرد اما به شکل **Multi-Paxos** استفاده می‌شود (p. 433). یک log مشترک **state machine replication** می‌دهد، و event sourcing، تراکنش‌های serializable با stored procedureهای قطعی، consensus برای هر صندلی، یعنی اولین entry برای هر صندلی، شمارنده‌ها و fencing tokenها، مثل `zxid` در ZooKeeper. دیتابیس‌های shardشده‌ی strongly consistent برای هر shard یک log نگه می‌دارند، که تضمین‌های بین shardها را محدود می‌کند (pp. 433–434).
 
-**From single-leader replication to consensus** (pp. 434–435): manual failover fails termination; automatic failover seems to need consensus to elect the leader that solves consensus. The way out: guarantee a unique leader **per epoch** — *ballot* number (Paxos), *view* number (VR), **term** (Raft). A node that times out starts an election with a higher epoch; higher epochs win.
+**از single-leader replication تا consensus** (pp. 434–435): failover دستی در termination شکست می‌خورد؛ failover خودکار انگار برای انتخاب leaderی که consensus را حل می‌کند خودش consensus لازم دارد. راه خروج: تضمین یک leader یکتا **در هر epoch**؛ شماره‌ی *ballot* در Paxos، شماره‌ی *view* در VR، و **term** در Raft. nodeی که timeout می‌خورد انتخاباتی با epoch بزرگ‌تر شروع می‌کند؛ epochهای بزرگ‌تر برنده‌اند.
 
 ```mermaid
 flowchart LR
@@ -217,90 +233,100 @@ flowchart LR
     L --> P["Vote 2 · propose next log entry<br/>(quorum accepts; no higher epoch seen)"] --> A[Entry appended, client told]
 ```
 
-The two quorums must **overlap**, so a successful proposal vote proves no newer leader exists. Unlike 2PC: anyone can start an election, and only a quorum (not every participant) must answer (p. 435).
+دو quorum باید **هم‌پوشانی** داشته باشند، پس یک رأی‌گیری موفق برای پیشنهاد ثابت می‌کند leader تازه‌تری وجود ندارد. برخلاف 2PC: هر کسی می‌تواند انتخابات را شروع کند، و فقط یک quorum، نه همه‌ی participantها، باید جواب بدهد (p. 435).
 
-| Subtlety (pp. 435–437) | |
+| نکته‌ی ظریف (pp. 435–437) | |
 |---|---|
-| Durability | Each entry is synchronously replicated to a quorum before the client is told |
-| New leader’s log | Raft: only a node at least as up to date as a majority may lead; Paxos: any node, after catching up |
-| **Weakening for availability** | Kafka’s **unclean leader election** lets a stale replica lead — faster recovery, but consensus theory no longer applies |
-| Linearizable reads | Must also be confirmed by a quorum (etcd) |
-| Membership | Reconfiguration extensions add/remove nodes and move regions |
+| مفهوم durability | هر entry پیش از خبر دادن به client به‌صورت synchronous به یک quorum replicate می‌شود |
+| مفهوم log برای leader تازه | در Raft فقط nodeی که دست‌کم به اندازه‌ی یک اکثریت به‌روز است می‌تواند leader شود؛ در Paxos هر nodeی، بعد از به‌روز شدن |
+| **تضعیف برای availability** | مفهوم **unclean leader election** در Kafka اجازه می‌دهد یک replica کهنه leader شود؛ بازیابی سریع‌تر، اما نظریه‌ی consensus دیگر صدق نمی‌کند |
+| خواندن‌های linearizable | باید آن‌ها هم با یک quorum تأیید شوند، مثل etcd |
+| عضویت | افزونه‌های reconfiguration nodeها را اضافه و حذف می‌کنند و regionها را جابه‌جا می‌کنند |
 
-**Pros and cons** (p. 437): consensus is **“single-leader replication done right”** — automatic failover with no lost commits and no split brain; any auto-failover without a proven algorithm is likely unsafe. Costs: a strict majority (3 nodes tolerate 1 failure, 5 tolerate 2); every operation talks to a quorum, so adding nodes *slows* it; the minority side of a partition is blocked; timeouts are hard to tune across regions (too short → endless elections); edge cases — one flaky link can make Raft leadership bounce forever, hence Raft’s **pre-vote** phase; leaderless **EPaxos** is more robust to slow nodes.
+**مزایا و معایب** (p. 437): consensus یعنی **«single-leader replication که درست انجام شده»**؛ failover خودکار بدون گم شدن commitها و بدون split brain؛ هر failover خودکاری بدون یک الگوریتم اثبات‌شده احتمالاً ناامن است. هزینه‌ها: یک اکثریت سخت؛ ۳ node یک خرابی را تحمل می‌کنند و ۵ node دو خرابی را؛ هر عملیات با یک quorum حرف می‌زند، پس اضافه کردن node آن را *کندتر* می‌کند؛ سمت اقلیت یک partition مسدود است؛ تنظیم timeout بین regionها سخت است، و timeout کوتاه یعنی انتخابات بی‌پایان؛ حالت‌های لبه، مثلاً یک لینک بی‌ثبات می‌تواند leader بودن در Raft را برای همیشه دست‌به‌دست کند، برای همین Raft فاز **pre-vote** دارد؛ و **EPaxos** بدون leader در برابر nodeهای کند مقاوم‌تر است.
 
-> **Try it:** [Consensus: elect a leader, replicate a log](../widgets/10-consensus.html) — a five-node Raft-style cluster: terms, votes, majority commits, crashes and partitions.
+> **Try it:** [مفهوم consensus: انتخاب leader و replicate کردن log](../widgets/10-consensus.html): یک cluster پنج‌nodeی به سبک Raft با termها، رأی‌ها، commit با اکثریت، crash و partition.
 
-### Coordination services
+> **In practice:** دو replica مربوط به ClickHouse در reference stack برای هماهنگ کردن replication جدول‌ها به یک coordination service تکیه می‌کنند؛ ClickHouse برای این کار ClickHouse Keeper یا ZooKeeper را به کار می‌برد، که با consensus کار می‌کنند.
+>
+> **Your turn:** کسی پیشنهاد می‌کند برای صرفه‌جویی، coordination service را به جای سه node روی دو node اجرا کنید، «چون فقط دو replica داریم». چرا بد است؟
+>
+> *Answer:* مفهوم consensus اکثریت سخت لازم دارد: اکثریت دو node یعنی هر دو، پس دو node هیچ خرابی‌ای را تحمل نمی‌کنند و از یک node تنها هم شکننده‌ترند؛ سه node یک خرابی را تحمل می‌کنند (p. 437). تعداد nodeهای coordination ربطی به تعداد replicaهای داده ندارد؛ یک سرویس ثابت سه یا پنج‌nodeی consensus را برای کل سیستم «برون‌سپاری» می‌کند (pp. 439–440).
 
-**ZooKeeper, etcd and Consul** look like key-value stores but coordinate *other* systems — Kubernetes on etcd; Spark and Flink HA on ZooKeeper. Small in-memory data (still durably written), replicated by consensus; modeled on Google’s **Chubby** (pp. 437–438).
+### مفهوم coordination service
 
-| Feature | How | Needs consensus? |
+سیستم‌های **ZooKeeper، etcd و Consul** شبیه key-value store به نظر می‌آیند اما سیستم‌های *دیگر* را هماهنگ می‌کنند؛ Kubernetes روی etcd؛ HA در Spark و Flink روی ZooKeeper. داده‌ی کوچک در حافظه، که همچنان پایدار نوشته می‌شود، و با consensus replicate می‌شود؛ الگویشان **Chubby** در Google است (pp. 437–438).
+
+| قابلیت | چطور | به consensus نیاز دارد؟ |
 |---|---|---|
-| Locks and leases | Fault-tolerant CAS | Yes |
-| Fencing | Monotonic IDs per log entry — `zxid`/`cversion` (ZooKeeper), revision (etcd) | Yes |
-| Failure detection | Long-lived sessions with heartbeats; leases released when a session times out — **ephemeral nodes** | No |
-| Change notifications | Watch keys: learn of joins and failures without polling | No |
-| Configuration | Store settings, notify on change (polling a file or URL also works) | No |
+| قفل و lease | مفهوم CAS با تحمل fault | بله |
+| مفهوم fencing | شناسه‌های یکنوا برای هر entry در log؛ `zxid` و `cversion` در ZooKeeper، revision در etcd | بله |
+| تشخیص خرابی | sessionهای طولانی با heartbeat؛ leaseها با timeout شدن session آزاد می‌شوند؛ **ephemeral node** | نه |
+| اعلان تغییر | نظارت روی کلیدها: خبر پیوستن و خرابی بدون polling | نه |
+| config | ذخیره‌ی تنظیمات و اعلان هنگام تغییر؛ polling یک فایل یا URL هم کار می‌کند | نه |
 
-**Allocating work** (pp. 439–440): choose a leader/primary (databases, job schedulers) and assign shards to nodes as nodes join and fail — via atomic ops, ephemeral nodes and notifications, ideally with libraries like Apache Curator. A fixed 3–5 node service “outsources” consensus for a system of thousands of shards. Data should change slowly (“10.1.1.23 leads shard 7” — minutes to hours); fast-changing state belongs in a database or Apache BookKeeper.
+**تقسیم کار** (pp. 439–440): انتخاب یک leader یا primary، مثلاً برای دیتابیس‌ها و job schedulerها، و واگذاری shardها به nodeها با پیوستن و خرابی nodeها؛ با عملیات atomic، ephemeral node و اعلان، و ترجیحاً با کتابخانه‌هایی مثل Apache Curator. یک سرویس ثابت ۳ تا ۵ nodeی consensus را برای سیستمی با هزاران shard «برون‌سپاری» می‌کند. داده باید آهسته تغییر کند، مثل «10.1.1.23 leader مربوط به shard 7 است» که در حد دقیقه تا ساعت عوض می‌شود؛ state پرتغییر جایش در یک دیتابیس یا Apache BookKeeper است.
 
-**Service discovery** (p. 440): convenient with failure detection and notifications, but consensus is overkill — discovery must be fast and available more than linearizable, so cache it (TTLs, DNS layers). ZooKeeper **observers** replicate the log without voting: stale but available reads and more read throughput.
+**مفهوم service discovery** (p. 440): با تشخیص خرابی و اعلان راحت است، اما consensus برایش زیادی است؛ discovery باید بیشتر سریع و در دسترس باشد تا linearizable، پس cacheاش کنید، با TTL و لایه‌های DNS. **مفهوم observer** در ZooKeeper log را بدون رأی دادن replicate می‌کند: خواندن‌های کهنه اما در دسترس، و throughput خواندن بیشتر.
 
-**When not to use consensus** (p. 443): if strong consistency isn’t needed, leaderless or multi-leader replication — with logical clocks — gives better availability and performance.
+**کی از consensus استفاده نکنیم** (p. 443): اگر strong consistency لازم نیست، replication بدون leader یا multi-leader، همراه با logical clock، availability و کارایی بهتری می‌دهد.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Ordering mechanism | Total order | Consistent with causality | Linearizable | Fault-tolerant without a single node |
+| سازوکار ترتیب | ترتیب کامل | سازگار با ترتیب علّی | مفهوم linearizable | تحمل fault بدون یک node تنها |
 |---|---|---|---|---|
-| Random UUIDs | No (random) | No | No | Yes |
-| Timestamp-based IDs (Snowflake, UUIDv7) | Yes | Only if clocks are well synced | No | Yes |
-| Lamport / hybrid logical clocks | Yes | Yes | No | Yes |
-| Single-node counter (timestamp oracle) | Yes | Yes | Yes | Needs replication of the counter node |
-| Consensus (shared log) | Yes | Yes | Yes | Yes (with a majority up) |
+| مفهوم UUID تصادفی | نه، تصادفی | نه | نه | بله |
+| شناسه‌های مبتنی بر timestamp، مثل Snowflake و UUIDv7 | بله | فقط اگر ساعت‌ها خوب synchronous باشند | نه | بله |
+| مفهوم Lamport clock یا hybrid logical clock | بله | بله | نه | بله |
+| شمارنده‌ی تک‌node، یعنی timestamp oracle | بله | بله | بله | باید خود node شمارنده replicate شود |
+| مفهوم consensus، یعنی log مشترک | بله | بله | بله | بله، با بالا بودن اکثریت |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Linearizability checkers such as Knossos, Elle, and Porcupine (all cited in the chapter's references) are what Jepsen-style tests use to decide whether a recorded history is linearizable.
-- The Raft paper (Ongaro & Ousterhout, 2014) and its visualization at raft.github.io are the best next step after the vault's [consensus explorable](../widgets/10-consensus.html). The explorable deliberately omits pre-vote, so you can watch partitioned nodes inflate their term and force the healthy leader to step down when the partition heals.
+- بررسی‌کننده‌های linearizability مثل Knossos، Elle و Porcupine، که همه در مرجع‌های فصل آمده‌اند، همان چیزی‌اند که تست‌های سبک Jepsen برای تصمیم درباره‌ی linearizable بودن یک تاریخچه‌ی ثبت‌شده به کار می‌برند.
+- مقاله‌ی Raft از Ongaro و Ousterhout در سال ۲۰۱۴ و مصورسازی آن در raft.github.io بهترین قدم بعدی بعد از [شبیه‌سازی consensus](../widgets/10-consensus.html) در vault است. این شبیه‌سازی عمداً pre-vote را ندارد، تا ببینید nodeهای جدامانده term خودشان را بالا می‌برند و وقتی partition درمان می‌شود leader سالم را وادار به کناره‌گیری می‌کنند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Physical, Lamport, and hybrid logical clocks](../lab/10-logical-clocks/README.md).
-- **Related chapters:** [6. Replication](06-replication.md), [8. Transactions](08-transactions.md), [9. The Trouble with Distributed Systems](09-the-trouble-with-distributed-systems.md), [12. Stream Processing](12-stream-processing.md) (log-based brokers as shared logs), [13. A Philosophy of Streaming Systems](13-a-philosophy-of-streaming-systems.md) (avoiding coordination).
+- **Run it:** [ساعت فیزیکی، Lamport clock و hybrid logical clock](../lab/10-logical-clocks/README.md).
+- **فصل‌های مرتبط:** [فصل ۶: مفهوم replication](06-replication.md)، [فصل ۸: تراکنش‌ها](08-transactions.md)، [فصل ۹: دردسرهای سیستم‌های توزیع‌شده](09-the-trouble-with-distributed-systems.md)، [فصل ۱۲: پردازش stream](12-stream-processing.md) برای brokerهای مبتنی بر log به شکل log مشترک، و [فصل ۱۳: فلسفه‌ی سیستم‌های streaming](13-a-philosophy-of-streaming-systems.md) برای پرهیز از هماهنگی.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها را خود vault از روی یادداشت‌های بالا نوشته است؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Bryce's refresh returned a stale score after Aaliyah's had returned the final one. What does that violate?**
-   - [ ] Eventual consistency
-   - [x] Linearizability: once any read has returned a new value, every later read must return it too
-   - [ ] Read-after-write consistency
-   - [ ] Snapshot isolation
+1. **تازه کردن صفحه برای Bryce نتیجه‌ی کهنه‌ای برگرداند، بعد از این‌که برای Aaliyah نتیجه‌ی نهایی را برگردانده بود. این چه چیزی را نقض می‌کند؟**
+   - [ ] مفهوم eventual consistency
+   - [x] مفهوم linearizability: وقتی یک خواندن مقدار تازه را برگرداند، هر خواندن بعدی هم باید آن را برگرداند
+   - [ ] مفهوم read-after-write consistency
+   - [ ] مفهوم snapshot isolation
 
-   *Answer:* Bryce's read started after Aaliyah's read had completed, so in a linearizable system it would have to see at least as recent a value. Without an outside channel (Aaliyah telling him the score), nobody would notice the violation (pp. 402–404).
+   *Answer:* خواندن Bryce بعد از پایان خواندن Aaliyah شروع شد، پس در یک سیستم linearizable باید مقداری دست‌کم به همان تازگی می‌دید. بدون یک کانال بیرونی، یعنی این‌که Aaliyah نتیجه را به او بگوید، کسی متوجه این نقض نمی‌شد (pp. 402–404).
 
-2. **Why is a quorum-based leaderless system with w + r > n still not necessarily linearizable?**
+2. **چرا یک سیستم leaderless مبتنی بر quorum با w + r > n باز هم لزوماً linearizable نیست؟**
 
-   *Answer:* With variable network delays, one reader can see the new value from a replica that has it while a later reader's quorum does not yet include it. Clock-based last-write-wins conflict resolution adds another way to violate it (pp. 412–413).
+   *Answer:* با latencyهای متغیر شبکه، یک خواننده ممکن است مقدار تازه را از replicaی ببیند که آن را دارد، در حالی که quorum خواننده‌ی بعدی هنوز آن را ندارد. حل conflict با last write wins بر اساس ساعت راه دیگری برای نقضش اضافه می‌کند (pp. 412–413).
 
-3. **Why aren't Lamport timestamps enough to enforce a uniqueness constraint?**
+3. **چرا Lamport timestamp برای اجرای یک constraint یکتایی کافی نیست؟**
 
-   *Answer:* They give a total order consistent with causality, but only after the fact: a node deciding whether to accept a username now cannot know whether another node has issued a request with a lower timestamp that it hasn't heard about (pp. 420–425).
+   *Answer:* یک ترتیب کامل سازگار با ترتیب علّی می‌دهد، اما فقط بعد از واقعه: nodeی که همین الان باید درباره‌ی پذیرفتن یک username تصمیم بگیرد نمی‌تواند بداند node دیگری درخواستی با timestamp کوچک‌تر صادر کرده که هنوز خبرش نرسیده (pp. 420–425).
 
-4. **Explain how a shared log can implement a linearizable compare-and-set.**
+4. **توضیح دهید یک log مشترک چطور می‌تواند یک compare-and-set با linearizability پیاده کند.**
 
-   *Answer:* Append the operation to the log, then read the log up to your entry. Every node sees the same entries in the same order, so the first claim in the log wins and the others can detect that they lost (pp. 427–433).
+   *Answer:* عملیات را به log اضافه کنید، بعد log را تا entry خودتان بخوانید. هر node همان entryها را به همان ترتیب می‌بیند، پس اولین ادعا در log برنده است و بقیه می‌توانند تشخیص بدهند که باخته‌اند (pp. 427–433).
 
-5. **Why does a consensus leader need confirmation from a quorum before appending?**
-   - [ ] To get the entry's timestamp
-   - [x] Because a newer leader might have been elected without it knowing, and only a quorum can confirm there isn't one
-   - [ ] Because followers store the log, not the leader
-   - [ ] To compress the entry
+5. **چرا یک leader در consensus پیش از append کردن تأیید یک quorum را لازم دارد؟**
+   - [ ] برای گرفتن timestamp مربوط به entry
+   - [x] چون ممکن است بی‌خبر از او leader تازه‌تری انتخاب شده باشد، و فقط یک quorum می‌تواند تأیید کند که نشده
+   - [ ] چون followerها log را نگه می‌دارند، نه leader
+   - [ ] برای فشرده کردن entry
 
-   *Answer:* A leader can't trust its own belief that it is still the leader; any two quorums overlap, so a newer leader's election would be visible to at least one node in the quorum (pp. 433–437).
+   *Answer:* یک leader نمی‌تواند به باور خودش که هنوز leader است اعتماد کند؛ هر دو quorum هم‌پوشانی دارند، پس انتخاب یک leader تازه‌تر دست‌کم برای یک node در quorum دیده می‌شد (pp. 433–437).
 
-6. **When would you deliberately not use consensus?**
+6. **کی عمداً از consensus استفاده نمی‌کنید؟**
 
-   *Answer:* When availability during network problems or low latency across regions matters more than strict guarantees — e.g. leaderless or multi-leader systems — since consensus needs a majority and round trips for every decision (pp. 413–417, 433–437).
+   *Answer:* وقتی availability در مشکلات شبکه یا latency کم بین regionها از تضمین‌های سخت مهم‌تر است؛ مثلاً در سیستم‌های leaderless یا multi-leader؛ چون consensus برای هر تصمیم یک اکثریت و رفت‌وبرگشت لازم دارد (pp. 413–417, 433–437).
+
+7. **سرویس coordination مربوط به یک warehouse دو replicaای روی دو node اجرا می‌شود. چند خرابی را تحمل می‌کند؟**
+
+   *Answer:* هیچ: اکثریت دو node یعنی هر دو، پس خرابی هر کدام انتخاب leader و نوشتن را متوقف می‌کند. برای تحمل یک خرابی سه node لازم است (p. 437).

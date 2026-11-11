@@ -3,100 +3,116 @@ book: designing-data-intensive-applications
 chapter: 5
 title: "Encoding and Evolution"
 pages: "161–196"
+translated_title: "قالب‌های encoding و تکامل"
+lang: fa
 ---
 
-# 5. Encoding and Evolution
+# فصل ۵: قالب‌های encoding و تکامل
 
-[← 4. Storage and Retrieval](04-storage-and-retrieval.md) · [Book](../README.md) · [6. Replication →](06-replication.md)
+[فصل ۴: ذخیره‌سازی و بازیابی →](04-storage-and-retrieval.md) · [کتاب](../README.md) · [فصل ۶: مفهوم replication ←](06-replication.md)
 
-## Summary
+## خلاصه
 
-Applications change, and during rolling upgrades old and new code run side by side, reading data the other wrote. The chapter examines how data is encoded into bytes — language-specific formats, JSON/XML/CSV, and schema-driven binary formats (Protocol Buffers, Avro) — through the lens of **backward compatibility** (new code reads old data) and **forward compatibility** (old code reads new data). It then follows encoded data through the main **modes of dataflow**: databases, service calls (REST and RPC), durable execution and workflow engines, and event-driven architectures with message brokers and actors.
+اپلیکیشن‌ها عوض می‌شوند، و در rolling upgrade کد قدیم و جدید کنار هم اجرا می‌شوند و داده‌ای را می‌خوانند که دیگری نوشته. این فصل بررسی می‌کند داده چطور به بایت encode می‌شود: قالب‌های مخصوص یک زبان، JSON و XML و CSV، و قالب‌های باینری مبتنی بر schema مثل Protocol Buffers و Avro؛ و همه را از زاویه‌ی **backward compatibility**، یعنی کد جدید داده‌ی قدیم را بخواند، و **forward compatibility**، یعنی کد قدیم داده‌ی جدید را بخواند، می‌سنجد. بعد داده‌ی encodeشده را در **حالت‌های اصلی dataflow** دنبال می‌کند: دیتابیس، فراخوانی سرویس با REST و RPC، durable execution و workflow engine، و معماری event-driven با message broker و actor.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Two compatibility directions**: backward (new code, old data) is usually easy; forward (old code, new data) requires old code to ignore what it doesn't understand — and not destroy it (pp. 162–163).
-- **Language-specific serialization** (Java Serializable, pickle) ties you to one language, has poor versioning, and can be a security hole when decoding untrusted bytes (p. 164).
-- **Textual formats are ambiguous about types**: numbers (integers above 2<sup>53</sup> in JavaScript), binary strings (Base64), and optional schemas (pp. 165–168).
-- **Protocol Buffers rely on field tags**: names can change, tags can't; new fields must be optional; unknown tags are skipped (pp. 169–171).
-- **Avro has no tags**: the reader resolves the writer's schema against its own by field name; added or removed fields need defaults; the writer's schema must be known (embedded, versioned, or negotiated) (pp. 172–177).
-- **Schemas are valuable documentation and enable code generation and compatibility checks** (p. 177).
-- **Durable execution** (e.g. Temporal) makes multi-step workflows survive crashes by logging and replaying — but requires deterministic, idempotent code (pp. 187–189).
+- **سازگاری دو جهت دارد:** backward، یعنی کد جدید و داده‌ی قدیم، معمولاً آسان است؛ forward، یعنی کد قدیم و داده‌ی جدید، لازم دارد کد قدیم چیزی را که نمی‌فهمد نادیده بگیرد و خرابش نکند (pp. 162–163).
+- **روش serialization مخصوص یک زبان**، مثل Serializable در Java و pickle در Python، شما را به یک زبان می‌بندد، versioning ضعیفی دارد و decode کردن بایت‌های نامطمئن با آن می‌تواند حفره‌ی امنیتی باشد (p. 164).
+- **قالب‌های متنی درباره‌ی type مبهم‌اند:** عددها، مثلاً عدد صحیح بالای 2<sup>53</sup> در JavaScript، رشته‌های باینری با Base64، و schemaهای اختیاری (pp. 165–168).
+- **قالب Protocol Buffers به field tag تکیه می‌کند:** اسم‌ها عوض می‌شوند، tagها نه؛ فیلد تازه باید اختیاری باشد؛ tagهای ناشناخته رد می‌شوند (pp. 169–171).
+- **قالب Avro هیچ tagی ندارد:** خواننده writer's schema را با schema خودش بر اساس اسم فیلد تطبیق می‌دهد؛ فیلدی که اضافه یا حذف می‌شود default لازم دارد؛ و writer's schema باید معلوم باشد، یعنی داخل فایل، با شماره‌ی نسخه یا با مذاکره (pp. 172–177).
+- **هر schema مستندات ارزشمندی است** و code generation و بررسی سازگاری را ممکن می‌کند (p. 177).
+- **مفهوم durable execution**، مثلاً در Temporal، workflowهای چندمرحله‌ای را با log کردن و replay در برابر crash مقاوم می‌کند؛ اما کد باید deterministic و idempotent باشد (pp. 187–189).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، یعنی bookmarkهای PDF، با شماره‌ی صفحه‌های چاپی.*
 
-- Formats for Encoding Data — p. 163
-  - Language-Specific Formats — p. 164
-  - JSON, XML, and Binary Variants — p. 165
-  - Protocol Buffers — p. 169
-  - Avro — p. 172
-  - The Merits of Schemas — p. 177
-- Modes of Dataflow — p. 178
-  - Dataflow Through Databases — p. 178
-  - Dataflow Through Services: REST and RPC — p. 180
-  - Durable Execution and Workflows — p. 187
-  - Event-Driven Architectures — p. 189
-- Summary — p. 191
+- قالب‌های encoding داده (p. 163)
+  - قالب‌های مخصوص یک زبان (p. 164)
+  - قالب JSON و XML و نسخه‌های باینری‌شان (p. 165)
+  - قالب Protocol Buffers (p. 169)
+  - قالب Avro (p. 172)
+  - مزیت‌های schema (p. 177)
+- حالت‌های dataflow (p. 178)
+  - جریان داده از طریق دیتابیس (p. 178)
+  - جریان داده از طریق سرویس: REST و RPC (p. 180)
+  - مفهوم durable execution و workflow (p. 187)
+  - معماری event-driven (p. 189)
+- جمع‌بندی (p. 191)
 
-## Notes
+## یادداشت‌ها
 
-Features change, so stored data changes. Relational databases have exactly one schema in force at a time (changed by migrations); schema-on-read databases may hold a mixture of old and new formats (p. 161). Code changes can’t happen everywhere at once — servers roll out in **rolling upgrades** (staged rollouts), and users install client updates whenever they like — so old and new code and data coexist (pp. 161–162):
+قابلیت‌ها عوض می‌شوند، پس داده‌ی ذخیره‌شده هم عوض می‌شود. دیتابیس‌های relational در هر لحظه دقیقاً یک schema دارند که با migration عوض می‌شود؛ دیتابیس‌های schema-on-read ممکن است ترکیبی از قالب‌های قدیم و جدید را نگه دارند (p. 161). تغییر کد نمی‌تواند همه‌جا هم‌زمان اتفاق بیفتد: سرورها با **rolling upgrade**، یعنی staged rollout، به‌روز می‌شوند و کاربرها آپدیت client را هر وقت بخواهند نصب می‌کنند؛ پس کد و داده‌ی قدیم و جدید کنار هم زندگی می‌کنند (pp. 161–162):
 
-| Direction | Means | Difficulty |
+| جهت | یعنی | سختی |
 |---|---|---|
-| **Backward compatibility** | Newer code reads data written by older code | Usually easy: you know the old format |
-| **Forward compatibility** | Older code reads data written by newer code | Harder: old code must ignore — and keep — what it doesn’t understand |
+| **backward compatibility** | کد جدیدتر داده‌ای را می‌خواند که کد قدیمی‌تر نوشته | معمولاً آسان: قالب قدیم را می‌شناسید |
+| **forward compatibility** | کد قدیمی‌تر داده‌ای را می‌خواند که کد جدیدتر نوشته | سخت‌تر: کد قدیم باید چیزی را که نمی‌فهمد نادیده بگیرد و نگه دارد |
 
-For APIs: an old client calling a new service needs backward-compatible requests and forward-compatible responses; a new client calling an old service needs the reverse (p. 162). The classic trap (Figure 5-1): new code writes a record with a new field; old code reads it into a model object, updates it and writes it back — and the unknown field is silently lost unless it is preserved (pp. 162–163).
+برای APIها: client قدیمی که سرویس جدید را صدا می‌زند درخواست backward-compatible و پاسخ forward-compatible لازم دارد؛ client جدیدی که سرویس قدیمی را صدا می‌زند برعکس (p. 162). تله‌ی کلاسیک، شکل ۵-۱: کد جدید رکوردی با یک فیلد تازه می‌نویسد؛ کد قدیم آن را در یک model object می‌خواند، به‌روزش می‌کند و برمی‌گرداند؛ و فیلد ناشناخته بی‌صدا از دست می‌رود، مگر این‌که حفظ شود (pp. 162–163).
 
-![Old code reads a record with a photoURL field it doesn't know, decodes it into a model object, updates favoriteNumber and writes it back — and photoURL is gone](../figures/05-01.png)
+![کد قدیم رکوردی با فیلد photoURL را می‌خواند که آن را نمی‌شناسد، به یک model object decode می‌کند، favoriteNumber را به‌روز می‌کند و برمی‌گرداند؛ و photoURL از دست رفته است](../figures/05-01.png)
 
-*Figure 5-1 (p. 163): the unknown field is dropped on the round trip through the old model object.*
+*Figure 5-1 (p. 163): فیلد ناشناخته در رفت‌وبرگشت از model object قدیمی می‌افتد.*
 
-### Formats for encoding data
+> **Try it:** [فصل ۵ در طول یک pipeline داده](../widgets/05-pipeline-map.html): از دیتابیس منبع تا داشبورد را با lensهای قالب، سازگاری و retry طی کنید و ببینید داده در هر مرحله با چه encodingی جابه‌جا می‌شود.
 
-In memory, data lives in objects, structs, hash tables and trees linked by pointers; to write a file or send it over the network it must become a self-contained byte sequence. **Encoding** (serialization, marshaling) turns one into the other; **decoding** (parsing, deserialization, unmarshaling) reverses it. The book avoids “serialization”, which means something else for transactions (pp. 163–164). Zero-copy formats (Cap’n Proto, FlatBuffers) skip the step (p. 164).
+> **In practice:** loader در reference stack برای هر جدول یک فهرست صریح ستون در YAML دارد. وقتی تیم صاحب منبع ستونی اضافه می‌کند، loader همان کد قدیمی شکل ۵-۱ است: ستون تازه را نمی‌شناسد و بی‌صدا کنارش می‌گذارد.
+>
+> **Your turn:** تیم منبع ستون `phone` را به `mobile` تغییر نام می‌دهد. در Bronze چه می‌بینید، و چه چیزی باید زودتر خبرتان کند؟
+>
+> *Answer:* ستون `phone` دیگر در منبع نیست، پس loader یا خطا می‌دهد یا از این به بعد null می‌نویسد، و `mobile` اصلاً load نمی‌شود: داده‌ی تازه گم می‌شود، مثل فیلد ناشناخته در شکل ۵-۱ (pp. 162–163). یک بررسی schema drift که ستون‌های منبع را با فهرست YAML مقایسه کند باید پیش از اولین load غلط هشدار بدهد.
 
-#### Language-specific formats (pp. 164–165)
+### قالب‌های encoding داده
 
-Java’s `Serializable`, Python’s `pickle`, Ruby’s `Marshal`, Kryo: convenient, but tied to one language, a **security hole** (decoding can instantiate arbitrary classes → remote code execution), careless about versioning and often slow and bloated. Use them only for very transient purposes.
+داده در حافظه به شکل object، struct، hash table و درخت‌هایی است که با pointer به هم وصل‌اند؛ برای نوشتن در فایل یا فرستادن روی شبکه باید به یک دنباله‌ی بایت خودبسنده تبدیل شود. **encoding**، یا serialization و marshaling، یکی را به دیگری تبدیل می‌کند و **decoding**، یا parsing و deserialization و unmarshaling، برعکس. کتاب از واژه‌ی «serialization» پرهیز می‌کند، چون در تراکنش‌ها معنای دیگری دارد (pp. 163–164). قالب‌های zero-copy، مثل Cap’n Proto و FlatBuffers، این قدم را حذف می‌کنند (p. 164).
 
-#### JSON, XML, and binary variants (pp. 165–169)
+#### قالب‌های مخصوص یک زبان (pp. 164–165)
 
-| Problem | Detail |
+قالب‌هایی مثل `Serializable` در Java، `pickle` در Python، `Marshal` در Ruby و Kryo راحت‌اند، اما به یک زبان بسته‌اند، یک **حفره‌ی امنیتی** هستند چون decode کردن می‌تواند کلاس دلخواه بسازد و به remote code execution برسد، به versioning بی‌اعتنا هستند و اغلب کند و حجیم. فقط برای کارهای خیلی موقت از آن‌ها استفاده کنید.
+
+#### قالب JSON و XML و نسخه‌های باینری‌شان (pp. 165–169)
+
+| مشکل | جزئیات |
 |---|---|
-| Verbosity | XML is often criticized as verbose and complicated |
-| Numbers | XML/CSV can’t tell numbers from digit strings; JSON has no int/float distinction or precision. Integers above 2<sup>53</sup> break in JavaScript — X’s API sends 64-bit post IDs twice, as a number and as a string |
-| Binary data | No byte strings; Base64 works but is hacky and **~33% larger** |
-| Schemas | XML Schema and JSON Schema are powerful but complicated; without them, decoding logic is hard-coded |
-| CSV | No schema at all; vague escaping (commas, newlines) despite a spec |
+| پرحرفی | XML را اغلب پرحرف و پیچیده می‌دانند |
+| عددها | XML و CSV عدد را از رشته‌ی رقمی تشخیص نمی‌دهند؛ JSON بین int و float فرقی نمی‌گذارد و دقت را مشخص نمی‌کند. عدد صحیح بالای 2<sup>53</sup> در JavaScript خراب می‌شود؛ API شبکه‌ی X شناسه‌های ۶۴ بیتی پست‌ها را دو بار می‌فرستد، یک بار عدد و یک بار رشته |
+| داده‌ی باینری | رشته‌ی بایتی ندارند؛ Base64 کار می‌کند اما وصله‌پینه است و **حدود ۳۳٪ بزرگ‌تر** |
+| schema | XML Schema و JSON Schema قدرتمند اما پیچیده‌اند؛ بدونشان منطق decode در کد سخت‌کد می‌شود |
+| CSV | هیچ schemaی ندارد؛ escape کردن ویرگول و خط تازه با وجود یک spec مبهم است |
 
-They remain fine for **data interchange between organizations**: agreeing on anything is the hard part (p. 166).
+این قالب‌ها برای **تبادل داده بین سازمان‌ها** همچنان خوب‌اند: سخت‌ترین بخش، توافق روی هر چیزی است (p. 166).
 
-**JSON Schema** (pp. 166–167) is everywhere — OpenAPI, Confluent’s Schema Registry and Apicurio, PostgreSQL’s `pg_jsonschema`, MongoDB’s `$jsonSchema`. It adds validation (a port between 1 and 65,535) and an **open content model** by default (`additionalProperties: true`), so a schema mostly says what *isn’t* allowed. Closed models, `patternProperties` (e.g. integer-keyed maps, Example 5-1), conditionals and remote references make it powerful — and hard to evolve compatibly.
+**قالب JSON Schema** (pp. 166–167) همه‌جا هست: OpenAPI، Schema Registry در Confluent و Apicurio، `pg_jsonschema` در PostgreSQL و `$jsonSchema` در MongoDB. validation اضافه می‌کند، مثلاً port بین ۱ و ۶۵٬۵۳۵، و پیش‌فرض یک **open content model** دارد، یعنی `additionalProperties: true`؛ پس schema بیشتر می‌گوید چه چیزی *مجاز نیست*. مدل‌های بسته، `patternProperties`، مثلاً mapهایی با کلید عددی در مثال ۵-۱، شرط‌ها و ارجاع‌های راه دور آن را قدرتمند می‌کنند، و تکامل سازگارش را سخت.
 
-**Binary JSON/XML** — MessagePack, CBOR, BSON, BJSON, UBJSON, BISON, Hessian, Smile; WBXML, Fast Infoset — stay niche. Without a schema they must still include every field name (p. 167).
+**نسخه‌های باینری JSON و XML**، یعنی MessagePack، CBOR، BSON، BJSON، UBJSON، BISON، Hessian و Smile، و WBXML و Fast Infoset، کاربرد محدودی دارند. بدون schema هنوز باید اسم همه‌ی فیلدها را داخل داده بنویسند (p. 167).
 
-#### The book’s running record (pp. 167–177)
+> **In practice:** وقتی یک API یا partner شناسه‌ی تراکنش را به شکل عدد JSON می‌فرستد، هر خواننده‌ای که عدد را double تفسیر کند، مثل JavaScript، شناسه‌های بزرگ را گرد می‌کند.
+>
+> **Your turn:** در یک گزارش، دو تراکنش مختلف با یک شناسه دیده می‌شوند و join روی این شناسه ردیف اضافه می‌دهد. شناسه‌ها ۱۸ رقمی‌اند. احتمالاً چه شده و راه درست چیست؟
+>
+> *Answer:* شناسه‌های بالای 2<sup>53</sup> در یک خواننده‌ی JavaScript یا هر تبدیل به float دقتشان را از دست داده‌اند و به یک عدد گرد شده‌اند (p. 165). شناسه را به شکل رشته منتقل و ذخیره کنید، همان کاری که API شبکه‌ی X با فرستادن نسخه‌ی رشته‌ای می‌کند.
+
+#### رکورد نمونه‌ی کتاب (pp. 167–177)
 
 ```json
 { "userName": "Martin", "favoriteNumber": 1337, "interests": ["daydreaming", "hacking"] }
 ```
 
-| Encoding | Bytes | What identifies a field | Schema needed? |
+| encoding | بایت | چه چیزی فیلد را مشخص می‌کند | schema لازم است؟ |
 |---|---|---|---|
-| JSON (no whitespace) | **81** | Field name as text | No |
-| MessagePack | **66** | Field name, length-prefixed (`0x83` = object with 3 fields, `0xa8` = 8-byte string “userName”) | No |
-| Protocol Buffers | **33** | Tag number + wire type packed in one byte | Yes |
-| Avro | **32** | Nothing — values in schema order | Yes, writer’s *and* reader’s |
+| JSON بدون فاصله | **۸۱** | اسم فیلد به شکل متن | نه |
+| MessagePack | **۶۶** | اسم فیلد با پیشوند طول؛ `0x83` یعنی object با ۳ فیلد و `0xa8` یعنی رشته‌ی ۸ بایتی «userName» | نه |
+| Protocol Buffers | **۳۳** | شماره‌ی tag و wire type در یک بایت | بله |
+| Avro | **۳۲** | هیچ چیز؛ مقدارها به ترتیب schema | بله، هم writer's و هم reader's |
 
-> **Try it:** [One record, four encodings](../widgets/05-encodings.html) — the book's example record byte by byte in JSON, MessagePack, Protocol Buffers and Avro.
+> **Try it:** [یک رکورد، چهار encoding](../widgets/05-encodings.html): رکورد نمونه‌ی کتاب، بایت به بایت، در JSON، MessagePack، Protocol Buffers و Avro.
 
-#### Protocol Buffers (pp. 169–171)
+#### قالب Protocol Buffers (pp. 169–171)
 
-Google’s format (Apache Thrift, from Facebook, is similar). A schema in its IDL, with code generation for many languages:
+قالب Google است؛ Apache Thrift، از Facebook، شبیه آن است. یک schema به زبان IDL خودش، با code generation برای زبان‌های زیاد:
 
 ```protobuf
 syntax = "proto3";
@@ -107,23 +123,23 @@ message Person {
 }
 ```
 
-Encoded fields carry **tag numbers** (1, 2, 3) instead of names. Integers are **variable-length**: 1337 takes two bytes (top bit = “more bytes follow”); −64…63 fit in one byte, −8,192…8,191 in two. `repeated` fields are simply the same tag appearing several times (p. 170). Evolution rules (p. 171):
+فیلدهای encodeشده به جای اسم، **شماره‌ی tag**، یعنی ۱ و ۲ و ۳، دارند. عددهای صحیح **طول متغیر** دارند: ۱۳۳۷ دو بایت می‌گیرد، چون بیت بالایی یعنی «بایت‌های بیشتری می‌آید»؛ بازه‌ی −۶۴ تا ۶۳ در یک بایت جا می‌شود و −۸٬۱۹۲ تا ۸٬۱۹۱ در دو بایت. فیلدهای `repeated` همان tag است که چند بار تکرار می‌شود (p. 170). قاعده‌های تکامل (p. 171):
 
-![The 33-byte Protocol Buffers encoding of the record, broken down field by field: each starts with a byte holding the field tag and type, then a length or a variable-length integer, then the value](../figures/05-03.png)
+![encryption ۳۳ بایتی رکورد در Protocol Buffers، فیلد به فیلد: هر فیلد با یک بایت شامل tag و type شروع می‌شود، بعد طول یا یک عدد صحیح با طول متغیر، و بعد مقدار](../figures/05-03.png)
 
-*Figure 5-3 (p. 170): tags, not field names, identify each value — which is why tags can never change.*
+*Figure 5-3 (p. 170): هر مقدار را tag مشخص می‌کند، نه اسم فیلد؛ برای همین tag هیچ‌وقت نباید عوض شود.*
 
-| Change | Effect |
+| تغییر | اثر |
 |---|---|
-| Rename a field | Fine — encoded data never mentions names |
-| Change a tag | Never — all existing data becomes invalid |
-| Add a field with a new tag | Old code skips the unknown tag (type annotation says how many bytes) and can preserve it → **forward compatible**; new code reading old data gets a default (empty string, 0) → **backward compatible** |
-| Remove a field | Reverse concerns; never reuse its tag (mark it **reserved**) |
-| Change a type, e.g. 32 → 64-bit int | New code reads old data fine; old code reading a large new value **truncates** it |
+| تغییر نام فیلد | بی‌اشکال؛ داده‌ی encodeشده هیچ‌وقت اسم‌ها را ندارد |
+| تغییر tag | هرگز؛ همه‌ی داده‌ی موجود نامعتبر می‌شود |
+| اضافه کردن فیلد با tag تازه | کد قدیم tag ناشناخته را رد می‌کند، چون type annotation می‌گوید چند بایت است، و می‌تواند آن را نگه دارد؛ یعنی **forward compatible**. کد جدید با خواندن داده‌ی قدیم مقدار default می‌گیرد، مثل رشته‌ی خالی یا ۰؛ یعنی **backward compatible** |
+| حذف فیلد | نگرانی‌ها برعکس است؛ tag آن را هرگز دوباره به کار نبرید و **reserved** علامتش بزنید |
+| تغییر type، مثلاً int سی‌ودو بیتی به شصت‌وچهار بیتی | کد جدید داده‌ی قدیم را درست می‌خواند؛ کد قدیم مقدار بزرگ تازه را **truncate** می‌کند |
 
-#### Avro (pp. 172–177)
+#### قالب Avro (pp. 172–177)
 
-Started in 2009 as a Hadoop subproject because Protocol Buffers fit Hadoop poorly; two schema languages, Avro IDL for humans and JSON for machines:
+در ۲۰۰۹ به عنوان زیرپروژه‌ی Hadoop شروع شد، چون Protocol Buffers به Hadoop خوب نمی‌خورد؛ دو زبان schema دارد، Avro IDL برای انسان و JSON برای ماشین:
 
 ```text
 record Person {
@@ -133,37 +149,43 @@ record Person {
 }
 ```
 
-The binary encoding is just values concatenated — a string is a length prefix plus UTF-8, an integer a varint — so decoding needs exactly the **writer’s schema** (p. 172). The application decodes with two schemas, resolving the **writer’s schema** into its own **reader’s schema** by field **name** (Figures 5-5, 5-6):
+مفهوم encoding باینری فقط مقدارهای پشت سر هم است؛ هر رشته یک پیشوند طول و UTF-8 است و هر عدد صحیح یک varint؛ پس decode کردن دقیقاً **writer's schema** را لازم دارد (p. 172). اپلیکیشن با دو schema decode می‌کند و **writer's schema** را با **reader's schema** خودش بر اساس **اسم** فیلد تطبیق می‌دهد (شکل‌های ۵-۵ و ۵-۶):
 
-![The 32-byte Avro encoding of the same record: lengths and values back to back, with no tags or field names; a union branch byte marks the long for favoriteNumber](../figures/05-04.png)
+![encryption ۳۲ بایتی همان رکورد در Avro: طول‌ها و مقدارها پشت سر هم، بدون tag یا اسم فیلد؛ یک بایت شاخه‌ی union مقدار long در favoriteNumber را مشخص می‌کند](../figures/05-04.png)
 
-*Figure 5-4 (p. 173): nothing in the bytes says which field is which, so decoding needs the exact schema the writer used.*
+*Figure 5-4 (p. 173): هیچ چیز در بایت‌ها نمی‌گوید کدام فیلد کدام است، پس decode کردن همان schemaی را لازم دارد که نویسنده به کار برده.*
 
-![The writer's schema for Person (userName, favoriteNumber, interests, photoURL) beside a reader's schema (userID, favoriteNumber, userName, interests); arrows match fields by name, regardless of order](../figures/05-06.png)
+![schema نویسنده برای Person، یعنی userName، favoriteNumber، interests و photoURL، کنار schema خواننده، یعنی userID، favoriteNumber، userName و interests؛ فلش‌ها فیلدها را بر اساس اسم و بدون توجه به ترتیب تطبیق می‌دهند](../figures/05-06.png)
 
-*Figure 5-6 (p. 174): fields are matched by name; a field only the writer has is ignored, and one only the reader has takes its default.*
+*Figure 5-6 (p. 174): فیلدها با اسم تطبیق داده می‌شوند؛ فیلدی که فقط نویسنده دارد نادیده گرفته می‌شود و فیلدی که فقط خواننده دارد default می‌گیرد.*
 
-**Evolution rules** (p. 175): forward compatibility = writer newer than reader; backward = writer older. **Add or remove only fields that have a default.** Adding without a default breaks backward compatibility; removing without one breaks forward compatibility. `null` is not a universal default — declare a union such as `union { null, long, string }`, with `null` first if it is the default. Type changes work if Avro can convert; renaming via reader **aliases** and adding a union branch are backward- but not forward-compatible.
+**قاعده‌های تکامل** (p. 175): forward compatibility یعنی نویسنده جدیدتر از خواننده؛ backward یعنی نویسنده قدیمی‌تر. **فقط فیلدهایی را اضافه یا حذف کنید که default دارند.** اضافه کردن بدون default backward compatibility را می‌شکند؛ حذف بدون default forward compatibility را. `null` یک default همگانی نیست؛ یک union تعریف کنید، مثل `union { null, long, string }`، و اگر null پیش‌فرض است اول بیاید. تغییر type اگر Avro بتواند تبدیل کند کار می‌کند؛ تغییر نام با **alias** خواننده و اضافه کردن شاخه به union سازگار backward هستند اما forward نه.
 
-> **Try it:** [Writer’s schema, reader’s schema](../widgets/05-schema-evolution.html) — add, remove and rename fields in the book's Avro schema and see which direction of compatibility breaks.
+> **Try it:** [writer's schema و reader's schema](../widgets/05-schema-evolution.html): در schema نمونه‌ی Avro کتاب فیلد اضافه، حذف و تغییر نام بدهید و ببینید کدام جهت سازگاری می‌شکند.
 
-**Where does the reader get the writer’s schema?** (pp. 175–176)
+**خواننده writer's schema را از کجا می‌آورد؟** (pp. 175–176)
 
-| Context | Answer |
+| موقعیت | جواب |
 |---|---|
-| Large file of records with one schema | Write the schema once at the start (Avro **object container files**) |
-| Database with records written over time | A version number per record + a table of schema versions (Confluent’s schema registry for Kafka, LinkedIn’s Espresso) |
-| Network connection | Negotiate the version at connection setup (Avro RPC) |
+| فایل بزرگی از رکوردها با یک schema | schema را یک بار اول فایل بنویسید؛ همان **object container file** در Avro |
+| دیتابیسی که رکوردهایش در طول زمان نوشته شده‌اند | یک شماره‌ی نسخه برای هر رکورد و یک جدول از نسخه‌های schema؛ مثل schema registry در Confluent برای Kafka و Espresso در LinkedIn |
+| اتصال شبکه | مذاکره روی نسخه هنگام برقراری اتصال؛ مثل Avro RPC |
 
-A version database doubles as documentation and a compatibility check; the version can be a counter or a hash of the schema (p. 176). **Dynamically generated schemas** are Avro’s edge: dump a relational database by generating one record schema per table, one field per column — and regenerate when columns change, since fields match by name. With Protocol Buffers someone would have to assign and never reuse tag numbers by hand (pp. 176–177).
+پایگاه نسخه‌ها هم مستندات است و هم بررسی سازگاری؛ نسخه می‌تواند یک شمارنده یا hash خود schema باشد (p. 176). **schemaهای پویا** نقطه‌ی قوت Avro هستند: برای dump یک دیتابیس relational می‌شود برای هر جدول یک record schema و برای هر ستون یک فیلد ساخت، و با تغییر ستون‌ها دوباره تولیدش کرد، چون فیلدها با اسم تطبیق داده می‌شوند. با Protocol Buffers کسی باید tagها را دستی تخصیص بدهد و هیچ‌وقت دوباره به کار نبرد (pp. 176–177).
 
-#### The merits of schemas (pp. 177–178)
+> **In practice:** فایل‌های Parquet در staging هم schema را یک بار داخل خود فایل نگه می‌دارند، شبیه object container file در Avro؛ و loader schema هر جدول را از روی ستون‌های منبع می‌سازد، شبیه schemaهای پویای کتاب.
+>
+> **Your turn:** چرا warehouse می‌تواند یک فایل Parquet را بدون این‌که کسی ستون‌هایش را بگوید load کند، اما یک فایل CSV را نه؟
+>
+> *Answer:* فایل Parquet schema نویسنده را همراه خودش دارد، همان راه‌حل «schema را یک بار اول فایل بنویسید» (p. 175)، پس خواننده می‌داند هر ستون چه type و اسمی دارد. CSV هیچ schemaی ندارد (p. 166) و خواننده باید type هر ستون را حدس بزند.
 
-Protocol Buffers and Avro schemas are simple compared with XML/JSON Schema, so many languages support them. The ideas are old: **ASN.1** (1984), whose DER encoding still encodes X.509 certificates, uses tag numbers too — but is complex and badly documented. Database wire protocols are proprietary binary encodings decoded by ODBC/JDBC drivers. Schema-driven binary encodings give: compactness (no field names), always-up-to-date documentation, compatibility checks before deployment, and code generation with compile-time type checking — schema-on-read flexibility with better guarantees. Keep the number of concurrent schema versions small (p. 178).
+#### مزیت‌های schema (pp. 177–178)
 
-### Modes of dataflow
+زبان‌های schema در Protocol Buffers و Avro در مقایسه با XML Schema و JSON Schema ساده‌اند، پس زبان‌های زیادی پشتیبانی‌شان می‌کنند. ایده‌ها قدیمی‌اند: **ASN.1** از ۱۹۸۴، که encoding نوع DER آن هنوز گواهی‌های X.509 را encode می‌کند، هم از شماره‌ی tag استفاده می‌کند؛ اما پیچیده و بد مستندشده است. پروتکل‌های شبکه‌ی دیتابیس‌ها encodingهای باینری اختصاصی‌اند که driverهای ODBC و JDBC decodeشان می‌کنند. encodingهای باینری مبتنی بر schema این‌ها را می‌دهند: فشردگی، چون اسم فیلد ندارند؛ مستنداتی که همیشه به‌روز است؛ بررسی سازگاری پیش از deploy؛ و code generation با بررسی type در زمان compile؛ یعنی انعطاف schema-on-read با تضمین‌های بهتر. تعداد نسخه‌های هم‌زمان schema را کم نگه دارید (p. 178).
 
-Compatibility is a relationship between the process that encodes and the one that decodes (p. 178).
+### حالت‌های dataflow
+
+سازگاری رابطه‌ای است بین processی که encode می‌کند و processی که decode می‌کند (p. 178).
 
 ```mermaid
 flowchart LR
@@ -178,111 +200,137 @@ flowchart LR
     end
 ```
 
-#### Dataflow through databases (pp. 178–180)
+#### جریان داده از طریق دیتابیس (pp. 178–180)
 
-Writing to a database is “sending a message to your future self” — backward compatibility is essential. With many processes and rolling upgrades, newer code may write what older code reads, so **forward compatibility** is needed too (pp. 178–179).
+نوشتن در دیتابیس یعنی «فرستادن پیام برای خود آینده‌تان»؛ backward compatibility ضروری است. با processهای زیاد و rolling upgrade، کد جدیدتر ممکن است چیزی بنویسد که کد قدیمی‌تر می‌خواند، پس **forward compatibility** هم لازم است (pp. 178–179).
 
-- **Data outlives code**: one database holds values written 5 ms and 5 years ago in their original encodings. Rewriting everything is expensive, so databases migrate lazily — LSM compaction rewrites into the latest format; adding a nullable column fills nulls on read. Complex changes (single- to multi-valued, moving data to another table) still need rewrites, and compatibility across them is a research problem (p. 179).
-- **Archival storage**: snapshots and warehouse loads are written once in the latest schema — a good fit for Avro container files or columnar Parquet (pp. 179–180).
+- **داده از کد بیشتر عمر می‌کند:** یک دیتابیس مقدارهایی دارد که ۵ میلی‌ثانیه پیش و ۵ سال پیش نوشته شده‌اند، هر کدام با encoding اصلی خودش. بازنویسی همه‌چیز گران است، پس دیتابیس‌ها migration را تنبلانه انجام می‌دهند: compaction در LSM داده را در آخرین قالب بازنویسی می‌کند؛ ستون nullable تازه در زمان خواندن null برمی‌گرداند. تغییرهای پیچیده، مثل تبدیل یک‌مقداری به چندمقداری یا انتقال داده به جدول دیگر، هنوز بازنویسی لازم دارند و سازگاری در آن‌ها مسئله‌ای پژوهشی است (p. 179).
+- **ذخیره‌سازی آرشیوی:** snapshot و loadهای warehouse یک بار و با آخرین schema نوشته می‌شوند؛ جای خوبی برای container fileهای Avro یا Parquet ستونی (pp. 179–180).
 
-#### Dataflow through services: REST and RPC (pp. 180–186)
+> **In practice:** لایه‌ی Bronze دقیقاً همین «داده بیشتر از کد عمر می‌کند» است: ردیف‌هایی که سه سال پیش با شکل قدیم منبع load شده‌اند کنار ردیف‌های دیروز می‌نشینند و هیچ‌کس دوباره نمی‌نویسدشان.
+>
+> **Your turn:** منبع از یک سال پیش به جای `full_name` دو ستون `first_name` و `last_name` دارد. کوئری Silver باید با ردیف‌های Bronze چه کند؟
+>
+> *Answer:* هر دو شکل را بخواند: برای ردیف‌های قدیم `full_name` را بشکند یا برای ردیف‌های جدید دو ستون را به هم بچسباند، مثلاً با `coalesce`. این همان migration تنبل کتاب است، که به جای بازنویسی همه‌ی داده، اختلاف را در زمان خواندن حل می‌کند (p. 179).
 
-Servers expose an API — a **service** — that, unlike a database, allows only inputs and outputs fixed by business logic, an encapsulation that lets each team deploy and evolve its service independently (pp. 180–181). **Web services** use HTTP: apps calling a backend over the internet, services calling services in one organization, and organizations calling each other (payments, OAuth) (p. 181). **REST** builds on HTTP: simple formats, URLs for resources, HTTP caching, authentication and content negotiation. IDLs describe APIs — **OpenAPI** (Swagger) for JSON, **Protocol Buffers** for gRPC — and frameworks (Spring Boot, FastAPI, gRPC) handle routing, metrics, caching and auth, generating client SDKs, docs and compatibility checks (pp. 181–183).
+#### جریان داده از طریق سرویس: REST و RPC (pp. 180–186)
 
-**The problems with RPC** (pp. 183–184). EJB and RMI (Java only), DCOM (Microsoft only), CORBA (complex, no compatibility), SOAP/WS-* (complexity) all chased **location transparency** — making a remote call look like a local one — which is fundamentally flawed:
+سرورها یک API، یعنی یک **سرویس**، در اختیار می‌گذارند که برخلاف دیتابیس فقط ورودی‌ها و خروجی‌هایی را که منطق کسب‌وکار تعیین کرده می‌پذیرد؛ همین encapsulation به هر تیم اجازه می‌دهد سرویسش را مستقل deploy و تکامل بدهد (pp. 180–181). **web service**ها از HTTP استفاده می‌کنند: اپ‌هایی که روی اینترنت backend را صدا می‌زنند، سرویس‌هایی که داخل یک سازمان همدیگر را صدا می‌زنند، و سازمان‌هایی که همدیگر را صدا می‌زنند؛ مثل پرداخت و OAuth (p. 181). سبک **REST** روی HTTP ساخته می‌شود: قالب‌های ساده، URL برای منابع، و cache و احراز هویت و content negotiation در HTTP. IDLها APIها را توصیف می‌کنند، **OpenAPI** یا Swagger برای JSON و **Protocol Buffers** برای gRPC، و frameworkهایی مثل Spring Boot، FastAPI و gRPC مسیریابی، metric، cache و احراز هویت را مدیریت می‌کنند و SDK برای client، مستندات و بررسی سازگاری تولید می‌کنند (pp. 181–183).
 
-| Local function call | Network request |
+**مشکل‌های RPC** (pp. 183–184). EJB و RMI فقط برای Java، DCOM فقط برای Microsoft، CORBA پیچیده و بدون سازگاری، و SOAP و WS-* با پیچیدگی‌شان همه دنبال **location transparency** بودند، یعنی این‌که فراخوانی راه دور شبیه فراخوانی محلی به نظر برسد؛ ایده‌ای که از پایه معیوب است:
+
+| فراخوانی تابع محلی | درخواست شبکه |
 |---|---|
-| Predictable; fails only for reasons you control | Lost requests or responses, slow or unavailable machines |
-| Returns, throws, or never returns | Can also **time out** with no idea what happened |
-| Calling twice is your choice | Retrying may repeat the action unless it is **idempotent** |
-| Roughly constant time | Much slower, wildly variable latency |
-| Pass pointers | Encode every parameter into bytes |
-| One language | Translate types across languages (recall 2<sup>53</sup>) |
+| قابل پیش‌بینی؛ فقط به دلیل‌هایی شکست می‌خورد که در کنترل شماست | درخواست یا پاسخ گم می‌شود، ماشین کند یا در دسترس نیست |
+| برمی‌گردد، exception می‌دهد، یا هیچ‌وقت برنمی‌گردد | ممکن است **time out** شود و ندانید چه شد |
+| دو بار صدا زدن انتخاب خودتان است | retry ممکن است کار را تکرار کند، مگر **idempotent** باشد |
+| زمان تقریباً ثابت | خیلی کندتر، با latency بسیار متغیر |
+| pointer پاس می‌دهید | هر پارامتر باید به بایت encode شود |
+| یک زبان | ترجمه‌ی typeها بین زبان‌ها؛ مسئله‌ی 2<sup>53</sup> را به یاد بیاورید |
 
-REST’s appeal is partly that it treats state transfer as distinct from a function call (p. 184).
+جذابیت REST تا حدی از این است که انتقال state را چیزی متفاوت از فراخوانی تابع می‌بیند (p. 184).
 
-**Load balancers, service discovery, and service meshes** (pp. 184–186):
+**مفهوم load balancer، service discovery و service mesh** (pp. 184–186):
 
-| Option | How it finds/balances instances | Trade-off |
+| گزینه | نمونه‌ها را چطور پیدا و بار را پخش می‌کند | بده‌بستان |
 |---|---|---|
-| Hardware load balancer | Datacenter appliance in front of servers | Special equipment |
-| Software load balancer (NGINX, HAProxy) | Same, as an ordinary application | Simple deployments |
-| DNS | Several IPs per name | Caching → stale addresses when instances move |
-| Service discovery (etcd, ZooKeeper) | Instances register and heartbeat; clients look up endpoints and metadata | Suits dynamic environments; smarter client balancing |
-| Service mesh (Istio, Linkerd) | Sidecar or in-process balancers on both ends | Complex, but handles TLS and gives rich observability; common with Kubernetes |
+| load balancer سخت‌افزاری | دستگاهی در datacenter جلوی سرورها | تجهیزات خاص |
+| load balancer نرم‌افزاری، مثل NGINX و HAProxy | همان کار، به شکل یک اپلیکیشن معمولی | deploy ساده |
+| DNS | چند IP برای یک اسم | cache شدن یعنی آدرس‌های کهنه وقتی نمونه‌ها جابه‌جا می‌شوند |
+| service discovery، مثل etcd و ZooKeeper | نمونه‌ها ثبت می‌شوند و heartbeat می‌فرستند؛ clientها endpoint و metadata را پیدا می‌کنند | به محیط‌های پویا می‌خورد؛ پخش بار هوشمندتر سمت client |
+| service mesh، مثل Istio و Linkerd | load balancer در sidecar یا داخل process در هر دو سر | پیچیده، اما TLS را مدیریت می‌کند و observability غنی می‌دهد؛ با Kubernetes رایج است |
 
-**Evolution for RPC** (p. 186): assume servers upgrade before clients → requests need backward compatibility, responses forward compatibility. gRPC and Avro RPC inherit their encodings’ rules; REST APIs may add optional request parameters and new response fields. Across organizations, clients can’t be forced to upgrade, so old API versions live on — versioned in the URL, the `Accept` header, or per API key on the server.
+**تکامل در RPC** (p. 186): فرض کنید سرورها پیش از clientها به‌روز می‌شوند؛ پس درخواست‌ها backward compatibility و پاسخ‌ها forward compatibility لازم دارند. gRPC و Avro RPC قاعده‌های encoding خودشان را به ارث می‌برند؛ REST API می‌تواند پارامتر اختیاری تازه به درخواست و فیلد تازه به پاسخ اضافه کند. بین سازمان‌ها نمی‌شود clientها را مجبور به به‌روزرسانی کرد، پس نسخه‌های قدیم API زنده می‌مانند؛ نسخه در URL، در header `Accept`، یا برای هر API key روی سرور نگه داشته می‌شود.
 
-#### Durable execution and workflows (pp. 187–189)
+> **In practice:** API پیش‌بینی reference stack یک سرویس REST کوچک است که اپ‌ها صدایش می‌زنند. clientها همیشه هم‌زمان با سرویس به‌روز نمی‌شوند.
+>
+> **Your turn:** مدل تازه یک category جدید به اسم `subscriptions` برمی‌گرداند. اپ نسخه‌ی قدیم فقط categoryهای قبلی را می‌شناسد. چه کاری پاسخ را forward-compatible نگه می‌دارد؟
+>
+> *Answer:* پاسخ از سرور جدید به client قدیم می‌رود، پس باید forward-compatible باشد (p. 186): client قدیم باید با مقدار ناشناخته کنار بیاید، مثلاً آن را «سایر» نشان بدهد، و سرور تا وقتی clientهای قدیم زنده‌اند مقدار تازه را پشت یک نسخه‌ی تازه‌ی API نگه دارد.
 
-A payment touches fraud detection, the card network and the bank: a **workflow** of **tasks** (Temporal calls them *activities*; others *durable functions*), defined in code, a DSL or BPEL/BPMN (Figure 5-7). A **workflow engine** — orchestrator (schedules, triggers on time or events) plus executors — decides where and when tasks run and how failures are retried (pp. 187–188).
+#### مفهوم durable execution و workflow (pp. 187–189)
 
-| Kind of engine | Examples |
+هر پرداخت با تشخیص تقلب، شبکه‌ی کارت و بانک سروکار دارد: یک **workflow** از **task**ها، که Temporal به آن‌ها *activity* و بقیه *durable function* می‌گویند، و در کد، یک DSL یا BPEL و BPMN تعریف می‌شود (شکل ۵-۷). یک **workflow engine**، یعنی یک orchestrator که زمان‌بندی می‌کند و با زمان یا رویداد شروع می‌کند به همراه executorها، تصمیم می‌گیرد taskها کجا و کی اجرا شوند و شکست‌ها چطور retry شوند (pp. 187–188).
+
+| نوع engine | نمونه‌ها |
 |---|---|
-| ETL / data orchestration | Airflow, Dagster, Prefect |
-| Graphical (BPMN) for non-engineers | Camunda, Orkes |
-| **Durable execution** | Temporal, Restate |
+| ETL و هماهنگی داده | Airflow، Dagster، Prefect |
+| گرافیکی با BPMN برای غیرمهندس‌ها | Camunda، Orkes |
+| **مفهوم durable execution** | Temporal، Restate |
 
-Durable execution gives **exactly-once semantics for a workflow**: every RPC and state change is logged to durable storage (like a WAL); after a failure the task re-runs, but logged calls return their recorded results instead of executing again (p. 188). Catches (p. 189): external services still need idempotent APIs with unique IDs; replays expect the same calls in the same order, so reordering code is dangerous — deploy new versions alongside old ones; code must be **deterministic** — use the framework’s random and clock functions (Temporal’s Workflow Check helps).
+مفهوم durable execution برای یک workflow **exactly-once semantics** می‌دهد: هر RPC و تغییر state در یک storage پایدار log می‌شود، شبیه WAL؛ بعد از شکست task دوباره اجرا می‌شود، اما فراخوانی‌های logشده به جای اجرای دوباره نتیجه‌ی ثبت‌شده‌شان را برمی‌گردانند (p. 188). نکته‌ها (p. 189): سرویس‌های بیرونی هنوز API idempotent با شناسه‌ی یکتا لازم دارند؛ replay همان فراخوانی‌ها را با همان ترتیب انتظار دارد، پس جابه‌جا کردن کد خطرناک است و نسخه‌های تازه باید کنار نسخه‌های قدیم deploy شوند؛ و کد باید **deterministic** باشد، یعنی از تابع‌های random و ساعت خود framework استفاده کند؛ Workflow Check در Temporal کمک می‌کند.
 
-#### Event-driven architectures (pp. 189–191)
+> **In practice:** ابزار Airflow در reference stack برای هر جدول یک DAG دارد و taskهای شکست‌خورده را retry می‌کند؛ اما durable execution نیست: هیچ log‌ای از نتیجه‌ی قدم‌های قبلی را دوباره استفاده نمی‌کند. loader هم با `write_disposition: append` می‌نویسد.
+>
+> **Your turn:** task مربوط به load بعد از درج نیمی از ردیف‌ها در Bronze شکست می‌خورد و Airflow آن را retry می‌کند. چه اتفاقی می‌افتد و چه چیزی آن را بی‌خطر می‌کند؟
+>
+> *Answer:* retry دوباره append می‌کند، پس نیمه‌ی اول دو بار در Bronze است؛ retry فقط وقتی بی‌خطر است که کار idempotent باشد (pp. 184, 189). در این stack، Silver با انتخاب جدیدترین نسخه‌ی هر id تکراری‌ها را حذف می‌کند؛ راه دیگر این است که هر load پارتیشن هدفش را اول پاک کند و بعد بنویسد، تا اجرای دوباره همان نتیجه را بدهد.
 
-Events/messages go through a **message broker** (event broker, message queue, message-oriented middleware) and the sender usually doesn’t wait. A broker buffers when recipients are down or overloaded, redelivers to crashed consumers, removes the need for service discovery, fans one message out to many recipients, and decouples senders from recipients; request/response can be layered on top with a reply channel (pp. 189–190).
+#### معماری event-driven (pp. 189–191)
 
-- From TIBCO, IBM WebSphere and webMethods to RabbitMQ, ActiveMQ, HornetQ, NATS, Redpanda and Kafka; in the cloud Kinesis, Azure Service Bus, Google Pub/Sub (p. 190).
-- Two patterns: a **queue** (one consumer gets each message) and a **topic** (every subscriber gets it) (p. 190).
-- Messages are opaque bytes plus metadata: use Protocol Buffers, Avro or JSON with a **schema registry**, or describe them with **AsyncAPI**. Many brokers delete consumed messages; event sourcing needs indefinite retention. Consumers republishing messages must **preserve unknown fields** (pp. 190–191).
+رویدادها یا پیام‌ها از یک **message broker**، که به آن event broker، message queue یا message-oriented middleware هم می‌گویند، عبور می‌کنند و فرستنده معمولاً منتظر نمی‌ماند. broker وقتی گیرنده‌ها خاموش یا پربارند پیام را buffer می‌کند، به consumerهای crashکرده دوباره تحویل می‌دهد، نیاز به service discovery را حذف می‌کند، یک پیام را به گیرنده‌های زیاد پخش می‌کند و فرستنده را از گیرنده جدا می‌کند؛ request و response را هم می‌شود با یک reply channel رویش ساخت (pp. 189–190).
 
-**Distributed actor frameworks** (Akka, Orleans, Erlang/OTP): each actor owns local state and processes one asynchronous message at a time — no threads, locks or races. Location transparency works better here because actors already assume messages can be lost; rolling upgrades still need compatible encodings (p. 191).
+- از TIBCO، IBM WebSphere و webMethods تا RabbitMQ، ActiveMQ، HornetQ، NATS، Redpanda و Kafka؛ و در cloud سرویس‌های Kinesis، Azure Service Bus و Google Pub/Sub (p. 190).
+- دو الگو: **queue**، که هر پیام را یک consumer می‌گیرد، و **topic**، که هر subscriber آن را می‌گیرد (p. 190).
+- پیام‌ها بایت‌های مبهم به همراه metadata هستند: از Protocol Buffers، Avro یا JSON با یک **schema registry** استفاده کنید، یا با **AsyncAPI** توصیفشان کنید. خیلی از brokerها پیام مصرف‌شده را پاک می‌کنند؛ event sourcing نگهداری نامحدود لازم دارد. consumerهایی که پیام را دوباره منتشر می‌کنند باید **فیلدهای ناشناخته را حفظ کنند** (pp. 190–191).
 
-## Trade-offs at a glance
+**چارچوب‌های distributed actor**، مثل Akka، Orleans و Erlang/OTP: هر actor state محلی خودش را دارد و هر بار یک پیام asynchronous را پردازش می‌کند؛ بدون thread، lock یا race. location transparency این‌جا بهتر کار می‌کند، چون actorها از اول فرض می‌کنند پیام ممکن است گم شود؛ rolling upgrade همچنان encoding سازگار لازم دارد (p. 191).
 
-| Format | Size (book's example) | Schema | Forward compat. via | Backward compat. via |
+## بده‌بستان‌ها در یک نگاه
+
+| قالب | اندازه در مثال کتاب | schema | forward compatibility با | backward compatibility با |
 |---|---|---|---|---|
-| JSON | 81 bytes | Optional (JSON Schema) | Readers ignoring unknown fields | Readers tolerating missing fields |
-| MessagePack | 66 bytes | None | As JSON | As JSON |
-| Protocol Buffers | 33 bytes | Required (`.proto`) | Skipping unknown tags | New fields optional; tags never reused |
-| Avro | 32 bytes | Required; writer's schema needed | Reader ignores writer-only fields | Defaults for reader-only fields |
+| JSON | ۸۱ بایت | اختیاری، با JSON Schema | نادیده گرفتن فیلدهای ناشناخته توسط خواننده | تحمل فیلدهای غایب توسط خواننده |
+| MessagePack | ۶۶ بایت | ندارد | مثل JSON | مثل JSON |
+| Protocol Buffers | ۳۳ بایت | لازم، در `.proto` | رد کردن tagهای ناشناخته | فیلدهای تازه اختیاری؛ tag هرگز دوباره به کار نمی‌رود |
+| Avro | ۳۲ بایت | لازم؛ writer's schema هم لازم است | خواننده فیلدهای فقط‌نویسنده را نادیده می‌گیرد | default برای فیلدهای فقط‌خواننده |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Protocol Buffers 3 initially removed field presence for scalars and later reintroduced `optional`; "required" fields are widely considered a mistake because they make removal impossible.
-- Consumer-driven contract testing (e.g. Pact) is a practical complement to schema registries for REST APIs.
+- نسخه‌ی ۳ از Protocol Buffers اول field presence را برای scalarها حذف کرد و بعد `optional` را برگرداند؛ فیلدهای «required» را عموماً اشتباه می‌دانند، چون حذفشان را ناممکن می‌کنند.
+- روش consumer-driven contract testing، مثلاً با Pact، مکمل عملی schema registry برای REST APIهاست.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Binary encodings and schema evolution](../lab/05-schema-evolution/README.md) — reproduces the 81/33/32-byte figures and demonstrates both compatibility directions.
-- **Related chapters:** [3. Data Models](03-data-models-and-query-languages.md) (schema-on-read), [8. Transactions](08-transactions.md) (exactly-once), [12. Stream Processing](12-stream-processing.md) (brokers and event logs).
+- **Run it:** [encodingهای باینری و تکامل schema](../lab/05-schema-evolution/README.md): عددهای ۸۱ و ۳۳ و ۳۲ بایت را بازتولید می‌کند و هر دو جهت سازگاری را نشان می‌دهد.
+- **فصل‌های مرتبط:** [فصل ۳: مدل‌های داده و زبان‌های کوئری](03-data-models-and-query-languages.md) برای schema-on-read، [فصل ۸: تراکنش‌ها](08-transactions.md) برای exactly-once، و [فصل ۱۲: پردازش stream](12-stream-processing.md) برای broker و event log.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها را خود vault از روی یادداشت‌های بالا نوشته است؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why must an old version of a service preserve fields it doesn't understand when it reads, modifies and writes back a record?**
+1. **چرا نسخه‌ی قدیمی یک سرویس باید فیلدهایی را که نمی‌فهمد حفظ کند، وقتی رکوردی را می‌خواند، تغییر می‌دهد و برمی‌گرداند؟**
 
-   *Answer:* During a rolling upgrade, newer code may have added a field. If old code decodes the record into objects that drop unknown fields and then writes it back, the new field's data is silently lost (pp. 178–180).
+   *Answer:* در rolling upgrade ممکن است کد جدیدتر یک فیلد اضافه کرده باشد. اگر کد قدیم رکورد را به objectهایی decode کند که فیلدهای ناشناخته را می‌اندازند و بعد آن را برگرداند، داده‌ی فیلد تازه بی‌صدا از دست می‌رود (pp. 178–180).
 
-2. **In Protocol Buffers, what can you change freely, and what never?**
-   - [ ] Field types freely; names never
-   - [x] Field names freely; tag numbers never
-   - [ ] Tag numbers freely; names never
-   - [ ] Nothing — any change breaks old readers
+2. **در Protocol Buffers چه چیزی را آزادانه می‌شود عوض کرد و چه چیزی را هرگز؟**
+   - [ ] نوع فیلد را آزادانه؛ اسم را هرگز
+   - [x] اسم فیلد را آزادانه؛ شماره‌ی tag را هرگز
+   - [ ] شماره‌ی tag را آزادانه؛ اسم را هرگز
+   - [ ] هیچ چیز را؛ هر تغییری خواننده‌های قدیم را می‌شکند
 
-   *Answer:* The encoded data contains only tag numbers, never field names, so renaming is harmless; changing a tag would make all existing data unreadable. New fields get new tag numbers (pp. 169–172).
+   *Answer:* داده‌ی encodeشده فقط شماره‌ی tag دارد، هرگز اسم فیلد؛ پس تغییر نام بی‌ضرر است و تغییر tag همه‌ی داده‌ی موجود را ناخوانا می‌کند. فیلدهای تازه tag تازه می‌گیرند (pp. 169–172).
 
-3. **Avro encodes no field identifiers at all. How does a reader decode data written with an older schema?**
+3. **قالب Avro هیچ شناسه‌ی فیلدی encode نمی‌کند. خواننده چطور داده‌ای را decode می‌کند که با schema قدیمی‌تری نوشته شده؟**
 
-   *Answer:* The reader needs the exact writer's schema; the Avro library resolves the writer's schema against the reader's schema, matching fields by name, ignoring fields the reader lacks and filling in defaults for fields the writer lacked (pp. 172–176).
+   *Answer:* خواننده دقیقاً writer's schema را لازم دارد؛ کتابخانه‌ی Avro آن را با reader's schema تطبیق می‌دهد، فیلدها را با اسم جفت می‌کند، فیلدهایی را که خواننده ندارد نادیده می‌گیرد و برای فیلدهایی که نویسنده نداشته default می‌گذارد (pp. 172–176).
 
-4. **What makes RPC's "location transparency" a leaky abstraction?**
+4. **چه چیزی location transparency در RPC را یک abstraction نشت‌دار می‌کند؟**
 
-   *Answer:* A network request is unlike a local call: it can be lost or time out with an unknown outcome, latency is variable, retries may execute an action twice, and parameters must be encoded (pp. 182–184).
+   *Answer:* درخواست شبکه شبیه فراخوانی محلی نیست: ممکن است گم یا time out شود و نتیجه‌اش نامعلوم بماند، latency متغیر است، retry ممکن است کاری را دو بار انجام دهد، و پارامترها باید encode شوند (pp. 182–184).
 
-5. **Why must code run under durable execution be deterministic?**
-   - [ ] Because the framework compiles it ahead of time
-   - [x] Because after a failure the framework replays the code and must reach the same steps to reuse their logged results
-   - [ ] Because workflows cannot call external services
-   - [ ] Because determinism makes the code run faster
+5. **چرا کدی که زیر durable execution اجرا می‌شود باید deterministic باشد؟**
+   - [ ] چون framework آن را از پیش compile می‌کند
+   - [x] چون بعد از شکست، framework کد را replay می‌کند و باید به همان قدم‌ها برسد تا نتیجه‌های logشده‌شان را دوباره استفاده کند
+   - [ ] چون workflowها نمی‌توانند سرویس بیرونی صدا بزنند
+   - [ ] چون determinism کد را سریع‌تر می‌کند
 
-   *Answer:* Durable execution logs each step's result and, after a crash, re-runs the workflow, substituting logged results. If the code took a different path on replay (random numbers, clock reads, changed code), the log would no longer match (pp. 187–189).
+   *Answer:* durable execution نتیجه‌ی هر قدم را log می‌کند و بعد از crash workflow را دوباره اجرا می‌کند و نتیجه‌های logشده را جایگزین می‌کند. اگر کد در replay مسیر دیگری برود، مثلاً به خاطر عدد تصادفی، خواندن ساعت یا کد تغییرکرده، log دیگر جور درنمی‌آید (pp. 187–189).
+
+6. **مفهوم loader با یک فهرست صریح ستون کار می‌کند و تیم منبع ستونی اضافه می‌کند. این از نظر جهت سازگاری چه وضعی است؟**
+   - [ ] شکست backward compatibility؛ loader جدید است و داده قدیم
+   - [x] مفهوم loader کد قدیمی است که داده‌ی جدیدتر را می‌خواند؛ forward compatibility برقرار است چون فیلد ناشناخته را نادیده می‌گیرد، اما داده‌ی آن فیلد از دست می‌رود
+   - [ ] هیچ مسئله‌ای نیست، چون warehouse ستون را خودش اضافه می‌کند
+   - [ ] شکست هر دو جهت
+
+   *Answer:* کد قدیم داده‌ای را می‌خواند که کد جدیدتر نوشته، یعنی forward compatibility (p. 162). نادیده گرفتن فیلد ناشناخته جلوی شکستن را می‌گیرد، اما همان تله‌ی شکل ۵-۱ است: داده‌ی تازه بی‌صدا گم می‌شود، مگر کسی ستون را اضافه کند (pp. 162–163).

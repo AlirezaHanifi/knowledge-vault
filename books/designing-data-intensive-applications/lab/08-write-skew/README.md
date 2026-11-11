@@ -1,18 +1,20 @@
-# Write skew under snapshot isolation and SSI
+# مفهوم write skew در snapshot isolation و SSI
 
-A small MVCC engine with snapshot reads, first-committer-wins write conflicts, and a simplified serializable-snapshot-isolation check. Replays the book’s on-call doctors example, then 1,000 random interleavings of the same two transactions.
+یک موتور MVCC کوچک با خواندن از snapshot، قاعده‌ی first-committer-wins برای تعارض نوشتن‌ها، و نسخه‌ی ساده‌شده‌ای از بررسی serializable snapshot isolation. اول مثال پزشک‌های on-call کتاب را دوباره اجرا می‌کند و بعد ۱٬۰۰۰ ترتیب تصادفی از همان دو تراکنش را.
 
-*Illustrates DDIA 2nd ed., “Write Skew and Phantoms” and “Serializable Snapshot Isolation”, pp. 303–323. The implementation is the vault’s own.*
+*این آزمایش بخش‌های «مفهوم write skew و phantom» و «مفهوم serializable snapshot isolation» از ویراست دوم DDIA را نشان می‌دهد (صص. ۳۰۳–۳۲۳). پیاده‌سازی مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+با Python 3.10 یا جدیدتر، فقط کتابخانه‌ی استاندارد، و قطعی (با seed ثابت):
 
 ```sh
 python3 mvcc.py
 ```
 
-## Expected output
+خروجی برنامه انگلیسی است، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را درست نشان نمی‌دهند.
+
+## خروجی مورد انتظار
 
 ```text
 Snapshot isolation, the book's interleaving:
@@ -38,13 +40,13 @@ Serializable (SSI), the book's interleaving:
   Serializable (SSI)   nobody on call in    0 runs;  843 aborts (retry needed)
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Under snapshot isolation the two transactions write different rows, so nothing conflicts and both commit — leaving nobody on call.
-- The SSI check aborts precisely the interleavings that would have violated the invariant (843 of 843) and none of the safe ones.
-- Every abort is a retry the application must perform — the cost of optimistic concurrency control.
+- در snapshot isolation دو تراکنش ردیف‌های متفاوتی می‌نویسند، پس تعارضی پیش نمی‌آید و هر دو commit می‌شوند؛ نتیجه این است که هیچ پزشکی on-call نمی‌ماند.
+- بررسی SSI دقیقاً همان ترتیب‌هایی را abort می‌کند که قاعده را می‌شکستند (۸۴۳ از ۸۴۳) و هیچ‌کدام از ترتیب‌های امن را نه.
+- هر abort یعنی یک retry که خود برنامه باید انجامش دهد؛ این هزینه‌ی کنترل concurrency خوش‌بینانه است.
 
-## Related
+## پیوندها
 
-- Chapter note: [8. Transactions](../../chapters/08-transactions.md) — “Write Skew and Phantoms” and “Serializable Snapshot Isolation”, pp. 303–323
-- Explore in the browser: [Isolation levels stepper](../../widgets/08-isolation.html)
+- یادداشت فصل: [فصل ۸: تراکنش‌ها](../../chapters/08-transactions.md)، بخش‌های «مفهوم write skew و phantom» و «مفهوم serializable snapshot isolation»، صص. ۳۰۳–۳۲۳
+- در مرورگر: [گام‌به‌گام سطح‌های isolation](../../widgets/08-isolation.html)

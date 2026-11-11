@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۴ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را طی کنید و ببینید هر مرحله کدام storage engine را به کار می‌گیرد: B-tree یا LSM، ردیف یا ستون، index دقیق یا sparse. برای فصل ۴ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-storage-and-retrieval.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۴ · ذخیره‌سازی و بازیابی</div>
+  <h1>فصل ۴ در طول یک pipeline داده</h1>
+  <p class="lede">هر مرحله‌ی pipeline روی یک storage engine متفاوت نشسته است. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید داده کجا در جا بازنویسی می‌شود، کجا append و merge می‌شود، و کجا ستون‌به‌ستون خوانده می‌شود.</p>
+  <p class="source-note">کل فصل را (صص. ۱۱۵–۱۶۰) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens مسیر نوشتن:</strong> فقط دیتابیس منبع در جا بازنویسی می‌کند؛ از loader به بعد همه‌چیز append می‌شود و در پس‌زمینه merge می‌شود. ایده‌ی LSM-tree در کل warehouse تکرار شده.</li>
+    <li><strong>با lens چیدمان:</strong> داده در loader از ردیف به ستون می‌چرخد و تا داشبورد ستونی می‌ماند. هر <code>SELECT *</code> این مزیت را دور می‌ریزد.</li>
+    <li><strong>با lens نوع index:</strong> هرچه به راست بروید index کم‌پشت‌تر می‌شود؛ warehouse به ترتیب sort و sparse index تکیه می‌کند، نه به یک ورودی برای هر ردیف.</li>
+    <li><strong>با lens write amplification:</strong> گران‌ترین نوشتن‌ها مال بازسازی‌های کامل Silver و Gold است، نه خود load؛ این‌جا جایی است که به‌روزرسانی incremental بیشترین صرفه‌جویی را دارد.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-storage-and-retrieval.html"><small>درس</small>فصل ۴: ذخیره‌سازی و بازیابی</a></li>
+    <li><a href="04-lsm-tree.html"><small>شبیه‌سازی</small>درون یک LSM-tree</a></li>
+    <li><a href="04-column-bitmaps.html"><small>شبیه‌سازی</small>ذخیره‌سازی ستونی و bitmap index</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/04-storage-and-retrieval.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    write: {
+      label: "مسیر نوشتن", axis: ["بازنویسی در جا", "append و merge"],
+      cells: {
+        source: { tag: "pageهای B-tree در جا", level: 0, pages: "صص. ۱۲۵–۱۲۸", slide: "ساختار-b-tree",
+          text: "دیتابیس منبع یک row store است: هر update یک page اندازه‌ثابت را بازنویسی می‌کند و WAL آن را در برابر crash محافظت می‌کند." },
+        loader: { tag: "فایل‌های تازه در staging", level: 3, pages: "صص. ۱۲۱–۱۲۲", slide: "ذخیرهسازی-log-structured",
+          text: "هر اجرا فایل‌های Parquet تازه می‌نویسد و هیچ فایلی را عوض نمی‌کند: فایل تغییرناپذیر، مثل segment، که به object storage می‌خورد." },
+        bronze: { tag: "part تازه و merge در پس‌زمینه", level: 4, pages: "صص. ۱۲۰–۱۲۴", slide: "ذخیرهسازی-log-structured",
+          text: "هر bulk insert یک part مرتب و immutable می‌سازد و merge در پس‌زمینه partها را یکی می‌کند: یک LSM-tree، با compaction به جای بازنویسی page." },
+        silver: { tag: "بازسازی با INSERT … SELECT", level: 4, pages: "صص. ۱۲۰–۱۲۱", slide: "ذخیرهسازی-log-structured",
+          text: "جدول Silver با نوشتن partهای تازه دوباره ساخته می‌شود؛ نسخه‌ی قبلی تا merge بعدی روی دیسک می‌ماند، مثل مقداری که tombstone آن را پوشانده." },
+        gold: { tag: "materialized view بازسازی‌شده", level: 4, pages: "صص. ۱۴۳–۱۴۴", slide: "مفهوم-materialized-view-و-data-cube",
+          text: "جدول Gold یک materialized view است که بعد از هر load از Silver دوباره نوشته می‌شود." },
+        nb: { tag: "DataFrame در حافظه", level: 1, pages: "صص. ۱۳۳–۱۳۴", slide: "مفهوم-secondary-index-مقدار-داخل-index-و-حافظه",
+          text: "داده در حافظه‌ی notebook است و در جا عوض می‌شود؛ سریع است چون لازم نیست برای دیسک encode شود، و با بسته شدن kernel از دست می‌رود." },
+        serve: { tag: "index برداری در هر deploy", level: 3, pages: "صص. ۱۴۸–۱۴۹", slide: "مفهوم-vector-embedding",
+          text: "API پیش‌بینی index برداری‌اش را هنگام deploy از نو می‌سازد؛ داشبوردها چیزی نمی‌نویسند." }
+      }
+    },
+    layout: {
+      label: "چیدمان", axis: ["ردیف به ردیف", "ستون به ستون"],
+      cells: {
+        source: { tag: "ردیف کامل کنار هم", level: 0, pages: "ص. ۱۳۶", slide: "ذخیرهسازی-column-oriented",
+          text: "همه‌ی ستون‌های یک ردیف کنار هم‌اند: خواندن یک مشتری با همه‌ی فیلدهایش ارزان است، اسکن یک ستون برای همه‌ی مشتری‌ها گران." },
+        loader: { tag: "ردیف می‌خواند، ستون می‌نویسد", level: 3, pages: "صص. ۱۳۷–۱۳۸", slide: "ذخیرهسازی-column-oriented",
+          text: "ردیف‌ها را از replica می‌خواند و به شکل Parquet، یعنی ستونی و فشرده، در staging می‌نویسد." },
+        bronze: { tag: "ستونی، فشرده", level: 4, pages: "صص. ۱۳۸–۱۴۰", slide: "ذخیرهسازی-column-oriented",
+          text: "هر ستون جدا و با ترتیب ردیف یکسان ذخیره می‌شود؛ ستون‌های کم‌تنوع مثل status با run-length encoding تقریباً هیچ جا نمی‌گیرند." },
+        silver: { tag: "ستونی، مرتب بر اساس ORDER BY", level: 4, pages: "صص. ۱۴۰–۱۴۱", slide: "ذخیرهسازی-column-oriented",
+          text: "ترتیب sort کل ردیف را جابه‌جا می‌کند؛ اولین کلید بهترین فشرده‌سازی و بیشترین پرش از بلوک‌ها را می‌دهد." },
+        gold: { tag: "جدول پهن، چند ستون خوانده", level: 4, pages: "صص. ۱۳۶–۱۳۷", slide: "ذخیرهسازی-column-oriented",
+          text: "جدول Gold صدها ستون دارد و هر داشبورد چند تا را می‌خواند؛ دقیقاً حالتی که ذخیره‌سازی ستونی برایش ساخته شده." },
+        nb: { tag: "ستونی در حافظه", level: 3, pages: "ص. ۱۳۸", slide: "ذخیرهسازی-column-oriented",
+          text: "ساختار DataFrame در pandas و Arrow هم ستونی است؛ عملیات روی یک ستون کامل vectorized اجرا می‌شود." },
+        serve: { tag: "ردیف‌های کوچک نتیجه", level: 1, pages: "ص. ۱۴۳", slide: "مفهوم-materialized-view-و-data-cube",
+          text: "داشبورد چند ردیف نتیجه نشان می‌دهد و API یک آبجکت JSON برمی‌گرداند؛ این‌جا چیدمان دیگر اهمیتی ندارد." }
+      }
+    },
+    index: {
+      label: "نوع index", axis: ["یک ورودی برای هر ردیف", "sparse یا تقریبی"],
+      cells: {
+        source: { tag: "B-tree روی کلیدها", level: 0, pages: "صص. ۱۲۶ و ۱۳۲", slide: "ساختار-b-tree",
+          text: "primary key و secondary indexها برای هر ردیف یک ورودی دارند؛ پیدا کردن یک ردیف چند page خواندن است." },
+        loader: { tag: "range scan روی update_date", level: 0, pages: "ص. ۱۳۲", slide: "مفهوم-secondary-index-مقدار-داخل-index-و-حافظه",
+          text: "شرط cursor فقط وقتی ارزان است که روی update_date یک secondary index باشد؛ وگرنه هر اجرا کل جدول را اسکن می‌کند." },
+        bronze: { tag: "sparse primary index", level: 3, pages: "ص. ۱۱۹", slide: "ذخیرهسازی-log-structured",
+          text: "یک ورودی برای هر چند هزار ردیف، مثل sparse index شکل ۴-۲: نزدیک‌ترین کلید را پیدا کن و بلوک را اسکن کن." },
+        silver: { tag: "sparse و skip index", level: 3, pages: "صص. ۱۲۲–۱۲۳", slide: "ذخیرهسازی-log-structured",
+          text: "روی ستون‌هایی که در ORDER BY نیستند، skip indexهایی مثل Bloom filter می‌گویند کدام بلوک قطعاً مقدار را ندارد." },
+        gold: { tag: "فقط sort key", level: 3, pages: "صص. ۱۴۰–۱۴۱", slide: "ذخیرهسازی-column-oriented",
+          text: "جدول‌های کوچک Gold بیشتر به ترتیب sort تکیه می‌کنند تا index؛ اسکن چند ستون به‌هرحال ارزان است." },
+        nb: { tag: "بدون index", level: 2, pages: "ص. ۱۱۷", slide: "ذخیرهسازی-و-indexing-برای-oltp",
+          text: "یک DataFrame در حافظه index ندارد؛ هر فیلتر اسکن کامل است، که برای چند میلیون ردیف هم معمولاً اشکالی ندارد." },
+        serve: { tag: "approximate nearest neighbour", level: 4, pages: "صص. ۱۴۸–۱۴۹", slide: "مفهوم-vector-embedding",
+          text: "برای embedding متن merchant، یک index تقریبی مثل HNSW سریع است و گاهی نزدیک‌ترین همسایه‌ی واقعی را از دست می‌دهد." }
+      }
+    },
+    amp: {
+      label: "write amplification", axis: ["هر بایت یک بار", "هر بایت چند بار"],
+      cells: {
+        source: { tag: "WAL و page", level: 2, pages: "ص. ۱۳۰", slide: "مقایسهی-b-tree-و-lsm-tree",
+          text: "هر نوشتن دست‌کم دو بار روی دیسک می‌رود: یک بار در WAL و یک بار در page، و گاهی یک page کامل برای چند بایت." },
+        loader: { tag: "یک بار در staging", level: 1, pages: "ص. ۱۳۰", slide: "مقایسهی-b-tree-و-lsm-tree",
+          text: "هر ردیف تغییرکرده یک بار در Parquet نوشته می‌شود؛ staging تا load بعدی می‌ماند و بعد دور ریخته می‌شود." },
+        bronze: { tag: "merge پشت merge", level: 3, pages: "صص. ۱۳۰–۱۳۱", slide: "مقایسهی-b-tree-و-lsm-tree",
+          text: "هر merge partها را دوباره می‌نویسد؛ insertهای کوچک و زیاد یعنی mergeهای بیشتر و amplification بالاتر." },
+        silver: { tag: "بازسازی کامل", level: 4, pages: "صص. ۱۳۰–۱۳۱", slide: "مقایسهی-b-tree-و-lsm-tree",
+          text: "اگر Silver هر بار کامل از Bronze ساخته شود، هر اجرا همه‌ی ردیف‌ها را دوباره می‌نویسد، حتی اگر فقط چند ردیف عوض شده باشند. به‌روزرسانی incremental این را کم می‌کند." },
+        gold: { tag: "بازسازی بعد از هر load", level: 4, pages: "ص. ۱۴۴", slide: "مفهوم-materialized-view-و-data-cube",
+          text: "هر materialized view با تغییر ورودی‌هایش دوباره نوشته می‌شود؛ خواندن ارزان، نوشتن گران." },
+        nb: { tag: "نوشتن روی دیسک ندارد", level: 0, pages: "ص. ۱۳۳", slide: "مفهوم-secondary-index-مقدار-داخل-index-و-حافظه",
+          text: "همه‌چیز در حافظه است و چیزی روی دیسک نوشته نمی‌شود، مگر کسی خروجی را ذخیره کند." },
+        serve: { tag: "فقط خواندن", level: 0, pages: "ص. ۱۴۴", slide: "مفهوم-materialized-view-و-data-cube",
+          text: "داشبوردها و API فقط می‌خوانند؛ هزینه‌ی نوشتن پیش‌تر، در Gold و در ساخت index، پرداخت شده." }
+      }
+    }
+};
+
+  var lens = "write", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "چرا warehouse ستونی برای ستون‌هایی که در ORDER BY نیستند به skip index مثل Bloom filter تکیه می‌کند؟",
+      options: ["چون B-tree در warehouse ممنوع است", "چون Bloom filter می‌گوید کدام بلوک قطعاً مقدار را ندارد، پس می‌شود بدون خواندنش از آن گذشت", "چون Bloom filter مقدار دقیق را برمی‌گرداند", "چون ستون‌ها sort نمی‌شوند"],
+      answer: 1, explain: "اگر یکی از بیت‌ها صفر باشد کلید قطعاً نیست و فایل یا بلوک رد می‌شود؛ false positive فقط یک خواندن هدر می‌دهد (صص. ۱۲۲–۱۲۳)." },
+    { q: "loader را از bulk insert ساعتی به insert چندثانیه‌ای عوض کرده‌اند و merge عقب افتاده. از دید فصل ۴ چه اتفاقی افتاده؟",
+      options: ["indexها پاک شده‌اند", "هر insert یک segment کوچک تازه است و compaction از نوشتن عقب مانده", "جدول به row store تبدیل شده", "Bloom filterها خراب شده‌اند"],
+      answer: 1, explain: "segmentهای کوچکِ زیاد یعنی compaction بیشتر و خواندن‌هایی که فایل‌های بیشتری را می‌گردند؛ وقتی نوشتن از compaction جلو بزند، engine باید backpressure اعمال کند (صص. ۱۲۱–۱۲۴ و ۱۳۱)." }
+  ]);
+})();
+</script>
+</body>
+</html>
