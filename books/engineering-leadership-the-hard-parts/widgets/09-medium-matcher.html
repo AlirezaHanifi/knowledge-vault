@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medium Matcher</title>
+<meta name="description" content="Pick a channel for each message — video, audio, chat, email, in person, documentation or a diagram — and compare with the strengths the book gives each medium. Illustrates Engineering Leadership: The Hard Parts, Chapter 9.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.msg { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
+  .msg .badge { grid-column: 1 / -1; justify-self: start; white-space: normal; } .msg select { max-width: 14em; }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-collaborative-technical-practices-and-decision-making.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Medium matcher</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 9 · Collaborative Technical Practices and Decision Making</div>
+  <h1>Medium matcher</h1>
+  <p class="lede">Different information flows best through different channels. For each message, pick the medium you’d use. The book rarely names a single right answer, so several choices can match — and for what matters most, the answer is to <strong>multicast</strong>.</p>
+  <p class="source-note">Illustrates “Mediums and modalities” through “Documentation”, pp. 180–187. Each medium’s strengths and the examples are the book’s; turning them into a matching exercise, and which media count as a match, are the vault’s.</p>
+
+  <div class="sim stack">
+    <div class="panel" id="msgs"></div>
+    <div class="panel"><p class="panel-title">Score</p><div class="stats" id="stats"></div></div>
+    <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>Video is for emotion, relationships and complex discussion — and broadly terrible for detailed technical work unless structured. Avoid slides.</li>
+    <li>Audio is underused: a two-minute voice note carries both a technical concern and a supportive tone.</li>
+    <li>Email still wins where you need formality, a paper trail or to cross organizational boundaries — but a thread of ten or more emails wants another medium.</li>
+    <li>Spamming is the same message through the same medium again and again. Multicasting — email, chat, the doc and a call — is how an important message actually lands.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/09-collaborative-technical-practices-and-decision-making.html"><small>Lesson</small>9. Collaborative Technical Practices and Decision Making</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var log = Kit.log(document.getElementById("log"));
+  var M = { video: "Video call", audio: "Audio message", chat: "Chat thread", email: "Email", person: "In person", docs: "Documentation", visual: "Shared diagram", multi: "Several media (multicast)" };
+  var X = [
+    ["Explore options for a new system design with the team", ["visual", "person", "video"], "Visual collaboration tools and whiteboarding suit architecture; in-person whiteboarding still outperforms digital for fluid ideation (pp. 180, 185)."],
+    ["Explain, with a supportive tone, why a teammate’s approach in a pull request may cause problems", ["audio", "video", "person"], "The book suggests asynchronous voice notes for significant review feedback — tone survives where text comments fail (p. 182)."],
+    ["Coordinate today’s release with three teammates", ["chat"], "Day-to-day coordination fits persistent chat with organized threads (p. 180)."],
+    ["Send a considered technical proposal to a partner company", ["email"], "Email shines for formality, a paper trail and reaching across organizational boundaries (p. 184)."],
+    ["Help two engineers on different continents get to know each other", ["video", "person"], "Video builds relationships — the book’s example is virtual coffee, no agenda (p. 182)."],
+    ["Negotiate an API contract between two teams", ["docs"], "Contract negotiations work best in structured documents that track changes and discussion (p. 180)."],
+    ["Tell the team how to set up the app locally", ["docs"], "Procedural documentation — clear steps with examples — kept close to the code (p. 186)."],
+    ["Share a quick weekly status update", ["chat", "email", "docs", "audio"], "Asynchronous tools are usually better for status; save video for real-time interaction (p. 182)."],
+    ["Announce a major change in priorities", ["multi"], "Multicast it: email, a chat update, the doc and a call — that isn’t spam, it’s how everyone actually hears it (p. 181)."]
+  ];
+  var got = {}, box = document.getElementById("msgs");
+  X.forEach(function (x, i) {
+    var id = "m" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "no medium chosen");
+    sel.appendChild(Kit.el("option", { value: "" }, "Choose a medium…")); Object.keys(M).forEach(function (k) { sel.appendChild(Kit.el("option", { value: k }, M[k])); });
+    sel.addEventListener("change", function () {
+      if (!sel.value) return; var ok = x[1].indexOf(sel.value) >= 0; got[i] = ok;
+      b.className = "badge " + (ok ? "ok" : "warn"); b.textContent = (ok ? "✓ " : "The book points to " + x[1].map(function (k) { return M[k].toLowerCase(); }).join(" or ") + ". ") + x[2];
+      log.add(x[0] + " → " + M[sel.value] + (ok ? " ✓" : ""), ok ? "ok" : "warn"); score();
+    });
+    box.appendChild(Kit.el("div", { class: "msg" }, Kit.el("label", { for: id }, x[0]), sel, b));
+  });
+  function score() {
+    var n = Object.keys(got).length, c = Object.keys(got).filter(function (k) { return got[k]; }).length, st = Kit.clear(document.getElementById("stats"));
+    [["Answered", n + " of " + X.length], ["Matches the book", String(c), n && c === n ? "ok" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
+  }
+  score();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What separates multicasting from spamming?", options: ["The number of recipients", "Multicasting uses several media; spamming repeats the same medium", "Nothing"], answer: 1, explain: "p. 181." },
+    { q: "Your email thread is past ten replies. What does the book suggest?", options: ["Reply all once more", "Move the conversation to a more suitable medium", "Add more people"], answer: 1, explain: "p. 185." },
+    { q: "What do the authors say about slides in video calls?", options: ["Always use them", "Avoid them — they kill what interaction video offers", "Only for status updates"], answer: 1, explain: "p. 182." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

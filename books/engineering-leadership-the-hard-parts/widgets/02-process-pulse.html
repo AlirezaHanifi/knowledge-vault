@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Process Pulse</title>
+<meta name="description" content="Run the book&#x27;s two-minute Process Pulse survey on three simulated teams, find the one pattern that slows the most people, and try one of the book&#x27;s two-week experiments. Illustrates Engineering Leadership: The Hard Parts, Chapter 2.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>#pattern, #exp { max-width: 100%; }
+  .bar { display: grid; grid-template-columns: minmax(9em, 15em) 1fr 2.5em; gap: 8px; align-items: center; font-size: .86rem; margin: 3px 0; }
+  .bar .track { background: var(--surface-2); border-radius: 4px; height: 14px; overflow: hidden; } .bar .fill { background: var(--accent); height: 100%; }
+  .bar .fill.before { background: var(--line-strong); } .bar .n { font-variant-numeric: tabular-nums; text-align: right; }
+  .q { margin: 10px 0 2px; font-weight: 600; font-size: .9rem; } .quote { font-size: .88rem; margin: 4px 0; padding-left: 10px; border-left: 3px solid var(--line-strong); }
+  @media (max-width: 520px) { .bar { grid-template-columns: 1fr 2.5em; } .bar .track { grid-column: 1 / -1; grid-row: 2; } }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-understanding-your-role.html">Chapter 2</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Process pulse</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 2 · Understanding Your Role</div>
+  <h1>Process pulse</h1>
+  <p class="lede">Most leaders guess at process problems. The book’s <strong>Process Pulse</strong> asks the people who live with the process instead. Read a simulated team’s answers, pick the <em>single</em> pattern that slows the most people, run one two-week experiment, and rerun the pulse.</p>
+  <p class="source-note">Illustrates “Exercise: The Process Pulse Survey”, pp. 29–31. The six questions, the patterns to look for and the four experiments are the book’s; the three teams, their answers and how they respond to an experiment are the vault’s invented model.</p>
+
+  <div class="sim stack">
+    <div id="team"></div>
+    <div class="panel"><p class="panel-title" id="restitle">Survey results — 10 anonymous responses</p><div id="results"></div></div>
+    <div class="panel"><p class="panel-title">Open answers (Q5, Q6)</p><div id="open"></div></div>
+    <div class="panel stack">
+      <p class="panel-title">Iterate: one pattern, one experiment</p>
+      <div><label for="pattern">Which single pattern slows the most people the most often?</label><br><select id="pattern"></select></div>
+      <div><label for="exp">Two-week experiment</label><br><select id="exp"></select></div>
+      <div class="row"><button class="btn" id="rerun" type="button">Rerun the pulse after two weeks</button><button class="btn" id="reset" type="button">Reset</button></div>
+      <div id="verdict" class="callout" aria-live="polite">Read the results, then choose a pattern and an experiment.</div>
+    </div>
+    <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>Read the results for <strong>patterns, not complaints</strong>: waiting on approvals, inventing workarounds, struggling to find focus time.</li>
+    <li>The open answers often carry the real story — the unspoken rules and backdoor processes behind the numbers.</li>
+    <li>Fix <strong>one</strong> thing. Trying to fix everything at once is how nothing changes; an experiment aimed at the wrong pattern barely moves the pulse.</li>
+    <li>Rerunning the survey and sharing what you learned is what turns feedback into trust.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/02-understanding-your-role.html"><small>Lesson</small>2. Understanding Your Role</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var log = Kit.log(document.getElementById("log"));
+  var Q = [
+    ["Q1. Uninterrupted 2+ hours this week", ["Most days", "A few times", "Once or twice", "Not at all"]],
+    ["Q2. Unofficial ways to get things done", ["Never", "Occasionally", "Regularly — it’s faster", "Always — the only way"]],
+    ["Q3. What you wait for most", ["Reviews or approvals", "Other people’s work", "Access or permissions", "Decisions from above", "Information or clarification", "Nothing significant"]],
+    ["Q4. How quickly you get the go-ahead", ["Immediately", "Same day", "One or two days", "A week or more"]]
+  ];
+  var P = { approvals: "Waiting on reviews and approvals", focus: "No time for focused work", deploy: "Workarounds around a slow deployment" };
+  var E = { sameday: "Approve routine changes the same day", focus: "Protect two-hour focus blocks each morning", fast: "Create a fast lane for small, low-risk requests", deploy: "Simplify deployment steps to remove waiting" };
+  var T = {
+    a: { label: "Team A", friction: "approvals", fixes: ["sameday", "fast"],
+      before: [[3, 4, 2, 1], [3, 4, 2, 1], [6, 1, 1, 1, 1, 0], [0, 1, 4, 5]], after: [[3, 5, 1, 1], [5, 4, 1, 0], [2, 2, 1, 1, 1, 3], [2, 5, 3, 0]],
+      open: ["“Open a PR, then chase reviewers in DMs.”", "“Small config changes wait three days for sign-off.”", "“I’d let us merge typo fixes without two approvals.”"] },
+    b: { label: "Team B", friction: "focus", fixes: ["focus"],
+      before: [[0, 2, 4, 4], [5, 4, 1, 0], [1, 1, 0, 1, 3, 4], [3, 5, 2, 0]], after: [[4, 4, 2, 0], [5, 4, 1, 0], [1, 1, 0, 1, 2, 5], [3, 5, 2, 0]],
+      open: ["“Answer Slack fast or people assume you’re slacking.”", "“Every morning is meetings; I code after 5 p.m.”", "“I’d put all our meetings on two afternoons.”"] },
+    c: { label: "Team C", friction: "deploy", fixes: ["deploy"],
+      before: [[2, 5, 2, 1], [0, 2, 5, 3], [2, 4, 2, 0, 1, 1], [1, 4, 4, 1]], after: [[3, 5, 1, 1], [3, 5, 2, 0], [2, 1, 1, 0, 1, 5], [2, 5, 3, 0]],
+      open: ["“Ask Priya to deploy for you — she skips the checklist.”", "“The 14-step deploy runbook is optional, really.”", "“I’d make deploying one command.”"] }
+  };
+  var st = { team: "a", shown: "before" };
+  var pat = document.getElementById("pattern"), exp = document.getElementById("exp");
+  pat.appendChild(Kit.el("option", { value: "" }, "Choose a pattern…")); Object.keys(P).forEach(function (k) { pat.appendChild(Kit.el("option", { value: k }, P[k])); });
+  exp.appendChild(Kit.el("option", { value: "" }, "Choose an experiment…")); Object.keys(E).forEach(function (k) { exp.appendChild(Kit.el("option", { value: k }, E[k])); });
+  function render() {
+    var t = T[st.team], res = Kit.clear(document.getElementById("results"));
+    document.getElementById("restitle").textContent = "Survey results — 10 anonymous responses" + (st.shown === "after" ? " (after two weeks; grey bars are before)" : "");
+    var data = st.shown === "after" ? st.after : t.before;
+    Q.forEach(function (q, qi) {
+      res.appendChild(Kit.el("p", { class: "q" }, q[0]));
+      q[1].forEach(function (o, oi) {
+        var n = data[qi][oi], b = t.before[qi][oi], tr = Kit.el("div", { class: "track", role: "img", "aria-label": o + ": " + n + " of 10" + (st.shown === "after" ? ", was " + b : "") }, Kit.el("div", { class: "fill", style: "width:" + n * 10 + "%" }));
+        if (st.shown === "after") tr.appendChild(Kit.el("div", { class: "fill before", style: "width:" + b * 10 + "%;height:4px" }));
+        res.appendChild(Kit.el("div", { class: "bar" }, Kit.el("span", null, o), tr, Kit.el("span", { class: "n" }, String(n))));
+      });
+    });
+    var op = Kit.clear(document.getElementById("open"));
+    t.open.forEach(function (s) { op.appendChild(Kit.el("p", { class: "quote" }, s)); });
+  }
+  document.getElementById("team").appendChild(Kit.segmented({ label: "Simulated team", value: "a", options: Object.keys(T).map(function (k) { return { value: k, label: T[k].label }; }), onChange: function (v) { st.team = v; reset(); log.add("Surveyed " + T[v].label, "muted"); } }).element);
+  function reset() { st.shown = "before"; pat.value = ""; exp.value = ""; var v = document.getElementById("verdict"); v.className = "callout"; v.textContent = "Read the results, then choose a pattern and an experiment."; render(); }
+  document.getElementById("reset").addEventListener("click", function () { reset(); log.add("Reset " + T[st.team].label, "muted"); });
+  document.getElementById("rerun").addEventListener("click", function () {
+    var t = T[st.team], v = document.getElementById("verdict");
+    if (!pat.value || !exp.value) { v.className = "callout warn"; v.textContent = "Choose one pattern and one experiment first — the book’s rule is to focus on one thing."; return; }
+    var rightPat = pat.value === t.friction, rightExp = t.fixes.indexOf(exp.value) >= 0;
+    if (rightExp) { st.after = t.after; } else { st.after = t.before.map(function (r) { return r.slice(); }); }
+    st.shown = "after"; render();
+    v.className = "callout " + (rightExp ? "ok" : "bad");
+    v.textContent = (rightPat ? "You read the pattern correctly. " : "The answers point elsewhere: " + P[t.friction].toLowerCase() + ". ") +
+      (rightExp ? "“" + E[exp.value] + "” targets it, and the rerun shows the shift. Share what you learned and pick the next pattern." : "“" + E[exp.value] + "” doesn’t touch this team’s friction, so the pulse barely moves. Acknowledge what didn’t work and try again.");
+    log.add(t.label + ": " + E[exp.value] + " → " + (rightExp ? "pulse improved" : "no real change"), rightExp ? "ok" : "bad");
+  });
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How should you read the survey’s results?", options: ["As complaints to rebut", "As signals of friction — patterns in waiting, workarounds and focus time", "As individual performance data"], answer: 1, explain: "Listen first, then look for patterns (p. 30)." },
+    { q: "How many problems should the first experiment target?", options: ["All of them", "The single pattern that slows the most people the most often", "Whatever is easiest"], answer: 1, explain: "Most leaders fix everything at once and nothing changes (p. 30)." },
+    { q: "When do you measure the experiment’s effect?", options: ["Rerun the pulse after two weeks", "At the annual engagement survey", "Never — trust your gut"], answer: 0, explain: "p. 31." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

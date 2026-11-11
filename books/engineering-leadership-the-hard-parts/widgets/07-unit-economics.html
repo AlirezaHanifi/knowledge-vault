@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit Economics</title>
+<meta name="description" content="Set infrastructure spend, customers, price, other direct costs and customer lifetime, and watch COGS per customer, gross margin and lifetime value move. Illustrates Engineering Leadership: The Hard Parts, Chapter 7.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style></style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-budgeting-costs-and-vendors.html">Chapter 7</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Unit economics</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 7 · Budgeting, Costs, and Vendors</div>
+  <h1>Unit economics</h1>
+  <p class="lede">Unit economics turn a technical decision into a business one. Start from the book’s example — <strong>$50,000 a month of infrastructure for 1,000 customers is $50 each</strong> — then try its two levers: a feature that saves $10,000 a month, and a DevOps hire who cuts infrastructure cost by 25%.</p>
+  <p class="source-note">Illustrates “Understanding the income side” and “Cost management”, pp. 125–126. The definitions and example figures are the book’s; the default price ($500 a month) and other direct costs ($100 a customer) are the vault’s, chosen so that the book’s 70% margin and its “$10,000 a month = 2% of margin” both hold.</p>
+
+  <div class="sim stack">
+    <div class="panel stack" id="controls"></div>
+    <div class="row"><button class="btn" id="fa" type="button">Feature A: cut infrastructure by $10,000 a month</button><button class="btn" id="dv" type="button">DevOps hire: cut infrastructure by 25%</button><button class="btn" id="rs" type="button">Reset to the book’s example</button></div>
+    <div class="panel"><p class="panel-title">Per customer, per month</p><div class="stats" id="stats"></div></div>
+    <div id="verdict" class="callout" aria-live="polite"></div>
+    <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>COGS includes every direct cost of serving a customer — infrastructure, third-party fees, support — not just the cloud bill.</li>
+    <li>Cutting infrastructure moves gross margin by its share of revenue: here $10,000 of $500,000 monthly revenue is two points.</li>
+    <li>Lifetime value is where reliability shows up in money: a customer who churns two months early takes two months of revenue with them.</li>
+    <li>The vault’s defaults are illustrative. Plug in your own numbers — the point is to talk about engineering work in these terms.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-budgeting-costs-and-vendors.html"><small>Lesson</small>7. Budgeting, Costs, and Vendors</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var log = Kit.log(document.getElementById("log"));
+  var D = { infra: 50000, cust: 1000, price: 500, other: 100, life: 12 }, s = JSON.parse(JSON.stringify(D)), base = null, ctl = {};
+  var money = function (v) { return "$" + Math.round(v).toLocaleString("en-US"); };
+  [["infra", "Infrastructure spend per month", 5000, 150000, 1000, money, "Cloud and hosting (the book: $50,000 for 1,000 customers)"],
+   ["cust", "Customers", 100, 5000, 50, function (v) { return v.toLocaleString("en-US"); }, null],
+   ["price", "Price per customer per month", 100, 2000, 50, money, null],
+   ["other", "Other direct costs per customer per month", 0, 400, 10, money, "Third-party fees, support"],
+   ["life", "Average customer lifetime", 1, 36, 1, function (v) { return v + " months"; }, "The book’s example: churning at 10 months instead of 12"]
+  ].forEach(function (c) {
+    ctl[c[0]] = Kit.slider({ label: c[1], min: c[2], max: c[3], step: c[4], value: s[c[0]], format: c[5], hint: c[6], onInput: function (v) { s[c[0]] = v; render(); } });
+    document.getElementById("controls").appendChild(ctl[c[0]].element);
+  });
+  function calc() { var ic = s.infra / s.cust, cogs = ic + s.other, gm = (s.price - cogs) / s.price; return { ic: ic, cogs: cogs, gm: gm, ltv: s.price * s.life, early: s.price * 2, rev: s.price * s.cust }; }
+  function render() {
+    var r = calc(), st = Kit.clear(document.getElementById("stats"));
+    [["Infrastructure COGS", money(r.ic)], ["Total COGS", money(r.cogs)], ["Gross margin", Math.round(r.gm * 1000) / 10 + "%", r.gm >= 0.8 ? "ok" : r.gm < 0.5 ? "bad" : ""],
+     ["Lifetime value", money(r.ltv)], ["LTV lost churning 2 months early", money(r.early), "warn"], ["Monthly revenue (all customers)", money(r.rev)]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
+    var v = document.getElementById("verdict");
+    if (base !== null) { var d = (r.gm - base.gm) * 100; v.className = "callout " + (d > 0 ? "ok" : ""); v.textContent = base.label + ": gross margin " + (Math.round(base.gm * 1000) / 10) + "% → " + (Math.round(r.gm * 1000) / 10) + "% (" + (d >= 0 ? "+" : "") + d.toFixed(1) + " points)."; }
+    else { v.className = "callout"; v.textContent = "Gross margin = (revenue − COGS) ÷ revenue. Try one of the book’s levers above."; }
+  }
+  function lever(label, f) { base = calc(); base.label = label; s.infra = Math.max(0, f(s.infra)); ctl.infra.set(s.infra); log.add(label + " → infrastructure " + money(s.infra) + " a month", "ok"); render(); }
+  document.getElementById("fa").addEventListener("click", function () { lever("Feature A", function (x) { return x - 10000; }); });
+  document.getElementById("dv").addEventListener("click", function () { lever("DevOps hire", function (x) { return x * 0.75; }); });
+  document.getElementById("rs").addEventListener("click", function () { s = JSON.parse(JSON.stringify(D)); base = null; Object.keys(ctl).forEach(function (k) { ctl[k].set(s[k]); }); log.add("Reset to the book’s example", "muted"); render(); });
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "$50,000 a month of infrastructure serves 1,000 customers. What is infrastructure COGS per customer?", options: ["$5", "$50", "$500"], answer: 1, explain: "p. 125." },
+    { q: "How is gross margin calculated?", options: ["Revenue ÷ COGS", "(Revenue − COGS) ÷ revenue", "Revenue − salaries"], answer: 1, explain: "p. 125." },
+    { q: "A $1,000-a-month customer churns at 10 months instead of 12. How much LTV is lost?", options: ["$200", "$2,000", "$12,000"], answer: 1, explain: "p. 125." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

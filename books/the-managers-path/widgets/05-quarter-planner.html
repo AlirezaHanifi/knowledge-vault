@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarter Capacity Planner</title>
+<meta name="description" content="Size a team, pick a quarter, set the sustaining share, and see which projects fit once estimates are doubled and the 10-week rule applies. Illustrates The Manager&#x27;s Path, Chapter 5.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.bars { width: 100%; display: block; } .bars rect.cap { fill: var(--surface-2); stroke: var(--line-strong); } .bars rect.sus { fill: var(--s3); }
+  .bars rect.fit { fill: var(--s1); } .bars rect.over { fill: var(--bad); } .bars text { font-size: 12px; }
+  .plist label.check { margin: 4px 0; }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/05-managing-a-team.html">Chapter 5</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Quarter planner</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 5 · Managing a Team</div>
+  <h1>Quarter capacity planner</h1>
+  <p class="lede">Plan with rules of thumb: about <strong>10 productive weeks per engineer per quarter</strong>, <strong>20% for sustaining engineering</strong>, and <strong>double your quick estimates</strong>. Then see what actually fits.</p>
+  <p class="source-note">Illustrates “Project Management Rules of Thumb” (pp. 93–95). The project list and its estimates are invented, and so is the size of the quarter-to-quarter difference: the book says only that Q1 tends to be most productive and Q4 least. Implementation is the vault’s own.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Engineer-weeks this quarter</p><svg class="bars" id="bars" viewBox="0 0 520 120" role="img"></svg>
+        <p class="field-hint">Green: sustaining work · blue: projects that fit · red: projects that don’t.</p>
+        <div class="table-wrap"><table class="data" id="tbl"><caption class="sr-only">Projects in priority order</caption></table></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">Controls</p><div id="team"></div><div id="q" style="margin-top:10px"></div><div id="sus" style="margin-top:10px"></div>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="dbl" checked> Double the quick estimates</label></div>
+      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li><strong>Thirteen calendar weeks are about ten productive ones</strong>: vacations, meetings, review season, outages and onboarding take the rest.</li>
+    <li><strong>Untick “double” and everything fits</strong> — on paper. Quick estimates are optimistic, which is why the book doubles them.</li>
+    <li><strong>Setting sustaining work to 0%</strong> frees a project’s worth of time this quarter, and the book warns that scheduling features to 100% slows features down.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/05-managing-a-team.html"><small>Lesson</small>5. Managing a Team</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var Q = { Q1: 10.5, Q2: 10, Q3: 10, Q4: 9 };
+  var P = [["Checkout redesign", 10], ["Search filters", 6], ["Mobile login fix", 2], ["Reporting export", 5], ["Partner API", 8], ["Admin tooling", 4]];
+  var cfg = { n: 5, q: "Q2", sus: 20, dbl: true }, prev = null;
+  function render() {
+    var cap = cfg.n * Q[cfg.q], sus = cap * cfg.sus / 100, left = cap - sus, used = 0, fits = 0, rows = [];
+    P.forEach(function (p) { var e = p[1] * (cfg.dbl ? 2 : 1), ok = used + e <= left; if (ok) { used += e; fits++; } rows.push([p[0], p[1], e, ok]); });
+    var g = Kit.clear(document.getElementById("bars")), total = Math.max(cap, sus + rows.reduce(function (a, r) { return a + r[2]; }, 0)), X = function (v) { return 10 + v / total * 500; };
+    g.appendChild(Kit.svg("rect", { class: "cap", x: X(0), y: 20, width: X(cap) - X(0), height: 30 }));
+    g.appendChild(Kit.svg("text", { x: X(0), y: 14 }, "Capacity: " + cap.toFixed(1) + " engineer-weeks"));
+    g.appendChild(Kit.svg("rect", { class: "sus", x: X(0), y: 60, width: X(sus) - X(0), height: 24 }));
+    var x = sus, xf = sus; rows.forEach(function (r) { if (r[3]) { g.appendChild(Kit.svg("rect", { class: "fit", x: X(xf), y: 60, width: X(xf + r[2]) - X(xf) - 1, height: 24 })); xf += r[2]; } });
+    x = xf; rows.forEach(function (r) { if (!r[3]) { g.appendChild(Kit.svg("rect", { class: "over", x: X(x), y: 90, width: X(x + r[2]) - X(x) - 1, height: 18 })); x += r[2]; } });
+    g.setAttribute("aria-label", cap.toFixed(1) + " engineer-weeks: " + sus.toFixed(1) + " sustaining, " + fits + " of " + P.length + " projects fit");
+    var t = Kit.clear(document.getElementById("tbl"));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "Project (priority order)"), Kit.el("th", { class: "num" }, "Quick estimate"), Kit.el("th", { class: "num" }, "Planned"), Kit.el("th", null, "This quarter?"))));
+    var tb = Kit.el("tbody"); rows.forEach(function (r) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, r[0]), Kit.el("td", { class: "num" }, r[1] + " wk"), Kit.el("td", { class: "num" }, r[2] + " wk"), Kit.el("td", null, Kit.el("span", { class: "badge " + (r[3] ? "ok" : "bad") }, r[3] ? "✓ fits" : "✗ next quarter")))); }); t.appendChild(tb);
+    var v = document.getElementById("verdict"); v.className = "callout " + (fits === P.length ? (cfg.dbl && cfg.sus >= 20 ? "ok" : "warn") : "warn");
+    v.textContent = fits + " of " + P.length + " projects fit. " + (!cfg.dbl ? "Undoubled quick estimates are optimistic: expect slips. " : "") + (cfg.sus < 20 ? "Less than 20% sustaining: debt and outages will eat into features." : "");
+    if (prev !== null && prev !== fits) log.add(fits + " projects fit (" + cfg.n + " engineers, " + cfg.q + ", " + cfg.sus + "% sustaining" + (cfg.dbl ? ", doubled" : "") + ")", fits > prev ? "ok" : "warn"); prev = fits;
+    stats([["Capacity", cap.toFixed(1) + " wk"], ["Sustaining", sus.toFixed(1) + " wk"], ["Planned for projects", used + " wk"], ["Projects that fit", fits + " / " + P.length, fits === P.length ? "ok" : "warn"]]);
+  }
+  document.getElementById("team").appendChild(Kit.slider({ label: "Engineers", min: 2, max: 10, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; render(); } }).element);
+  document.getElementById("q").appendChild(Kit.segmented({ label: "Quarter", value: cfg.q, options: ["Q1", "Q2", "Q3", "Q4"].map(function (k) { return { value: k, label: k + " (" + Q[k] + " wk)" }; }), onChange: function (v) { cfg.q = v; render(); } }).element);
+  document.getElementById("sus").appendChild(Kit.slider({ label: "Sustaining engineering", min: 0, max: 40, step: 5, value: cfg.sus, unit: "%", onInput: function (v) { cfg.sus = v; render(); } }).element);
+  document.getElementById("dbl").addEventListener("change", function (e) { cfg.dbl = e.target.checked; render(); });
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "How many productive weeks per engineer does the book plan for in a quarter?", options: ["13", "About 10", "6"], answer: 1, explain: "p. 94." },
+    { q: "What share of time does the book reserve for sustaining engineering?", options: ["0%", "20%", "50%"], answer: 1, explain: "Testing, debugging, cleanup and migrations (p. 94)." },
+    { q: "What do you do with an off-the-cuff estimate?", options: ["Use it as is", "Double it", "Halve it"], answer: 1, explain: "And for longer tasks, double it and insist on planning time (p. 95)." }
+  ]);
+
+})();
+</script>
+</body>
+</html>

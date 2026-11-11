@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Capability Check</title>
+<meta name="description" content="Rate a team on the book&#x27;s seven observable capabilities, using its own strong and weak examples, and see which one or two to build first. Illustrates Engineering Leadership: The Hard Parts, Chapter 4.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>.cap { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 10px; background: var(--surface); }
+  .cap h3 { margin: 0 0 6px; font-size: .95rem; } .ex { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: .84rem; margin-bottom: 8px; }
+  .ex div { padding: 6px 8px; border-radius: 6px; background: var(--surface-2); } .ex b { display: block; font-size: .78rem; color: var(--ink-3); }
+  @media (max-width: 560px) { .ex { grid-template-columns: 1fr; } }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+      <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-building-cohesive-teams.html">Chapter 4</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Team capabilities</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">Chapter 4 · Building Cohesive Teams</div>
+  <h1>Team capability check</h1>
+  <p class="lede">A capability framework does for teams what a ladder does for individuals: it shows what “better” looks like. Rate a team you know on the book’s <strong>seven capabilities</strong> — each with the book’s own strong and weak example — and the check suggests the one or two to work on first.</p>
+  <p class="source-note">Illustrates “Capabilities as a Team-Level Tool” and “What Great Teams Do”, pp. 67–71. The capabilities and examples are the book’s; the three-step rating and the “weakest first” suggestion are the vault’s simplification of its assess → pick a few → grow loop.</p>
+
+  <div class="sim stack">
+    <div id="caps" class="stack"></div>
+    <div class="panel"><p class="panel-title">Profile</p><div class="stats" id="stats"></div><div id="verdict" class="callout" aria-live="polite" style="margin-top:10px"></div></div>
+    <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+  </div>
+
+  <h2>What to notice</h2>
+  <ul class="notice-list">
+    <li>The examples are <strong>observable</strong>: you can see a team flag a dependency two weeks out, or learn of an outage from a customer’s post. That keeps the assessment a conversation, not a grade.</li>
+    <li>You don’t need all seven on day one. Assess, pick one or two, build them, then reassess.</li>
+    <li>Several weak examples are really trust problems — going silent for three weeks, blaming another team’s API — so improving one capability often lifts others.</li>
+  </ul>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">Related</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/04-building-cohesive-teams.html"><small>Lesson</small>4. Building Cohesive Teams</a></li>
+  </ul>
+  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var log = Kit.log(document.getElementById("log"));
+  var C = [
+    ["Turn ambiguity into action", "Asks focused questions — is “improve onboarding” about first-session drop-off or day-seven activation? — and proposes a direction", "Spins for weeks building something “important-ish”"],
+    ["Communicate relentlessly", "Shares status early, flags risks in standup, asks for help with context", "Goes silent for three weeks, then “actually, we’re behind”"],
+    ["Manage dependencies without drama", "Sees a dependency two weeks out, raises it in planning, derisks or rescopes", "“We can’t ship because Team X didn’t deliver their API”"],
+    ["Execute with discipline, not heroics", "Paced to 70% load and shipping every two weeks; discusses scope trade-offs", "“We need to double our headcount to hit our commitments”"],
+    ["See risk coming", "Monitors flag an issue at 2:00 a.m.; on-call follows the runbook; fixed in 40 minutes", "Learns of the outage from a customer’s social media post"],
+    ["Invest in team health", "Buddies and 90-day plans for new hires; permission to say “I’m at capacity”", "Two weeks to run the app locally; normalized burnout"],
+    ["Connect effort to outcomes", "“Onboarding improvements reduced drop-off by 12%…”", "“We shipped five features this sprint”"]
+  ];
+  var L = { 0: "Weak", 1: "Developing", 2: "Strong" }, r = C.map(function () { return 1; }), wrap = document.getElementById("caps");
+  C.forEach(function (c, i) {
+    var box = Kit.el("div", { class: "cap" }, Kit.el("h3", null, (i + 1) + ". " + c[0]),
+      Kit.el("div", { class: "ex" }, Kit.el("div", null, Kit.el("b", null, "Strong team"), c[1]), Kit.el("div", null, Kit.el("b", null, "Weak team"), c[2])));
+    box.appendChild(Kit.segmented({ label: "Rating for " + c[0], value: "1", options: [{ value: "0", label: "Weak" }, { value: "1", label: "Developing" }, { value: "2", label: "Strong" }],
+      onChange: function (v) { r[i] = +v; log.add(c[0] + ": " + L[v], v === "2" ? "ok" : v === "0" ? "bad" : "muted"); render(); } }).element);
+    wrap.appendChild(box);
+  });
+  function render() {
+    var st = Kit.clear(document.getElementById("stats")), cnt = [0, 0, 0]; r.forEach(function (x) { cnt[x]++; });
+    [["Strong", cnt[2], "ok"], ["Developing", cnt[1], ""], ["Weak", cnt[0], cnt[0] ? "bad" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1])))); });
+    var min = Math.min.apply(null, r), pick = []; r.forEach(function (x, i) { if (x === min && pick.length < 2) pick.push(i); });
+    var v = document.getElementById("verdict");
+    if (min === 2) { v.className = "callout ok"; v.textContent = "Strong across all seven. Reassess as the team grows — what worked for 5 may not work for 20."; return; }
+    var many = r.filter(function (x) { return x === min; }).length;
+    v.className = "callout " + (min === 0 ? "warn" : "");
+    v.textContent = "Work on first: " + pick.map(function (i) { return C[i][0]; }).join(" and ") + ". Path to grow: " + pick.map(function (i) { return C[i][1]; }).join("; ") + "." +
+      (many > 2 ? " (" + many + " capabilities share the lowest rating — the book’s advice is still one or two at a time; choose the ones hurting delivery most.)" : "");
+  }
+  render();
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "What is a team capability framework for?", options: ["Grading teams for bonuses", "Defining what “better” looks like for a team — guidance, not evaluation", "Replacing individual career ladders"], answer: 1, explain: "pp. 67–68." },
+    { q: "Which sentence signals a team that executes with discipline?", options: ["“We need to double our headcount to hit our commitments”", "“We’re paced to 70% load and shipping every two weeks… let’s discuss scope trade-offs”", "“We shipped five features this sprint”"], answer: 1, explain: "p. 70." },
+    { q: "How many capabilities should you start building?", options: ["All seven at once", "One or two", "None until the team is stable"], answer: 1, explain: "p. 71." }
+  ]);
+
+})();
+</script>
+</body>
+</html>
