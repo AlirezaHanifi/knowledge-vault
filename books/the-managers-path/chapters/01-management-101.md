@@ -3,147 +3,161 @@ book: the-managers-path
 chapter: 1
 title: "Management 101"
 pages: "1–10"
+translated_title: "مدیریت از پایه"
+lang: fa
 ---
 
-# 1. Management 101
+# فصل ۱: مدیریت از پایه
 
-[Book](../README.md) · [2. Mentoring →](02-mentoring.md)
+[کتاب](../README.md) · [فصل ۲: منتورینگ ←](02-mentoring.md)
 
-## Summary
+## خلاصه
 
-Everyone meets management from the receiving end first, and that experience becomes the foundation of their own management philosophy. The chapter sets out what a good manager should give you — regular 1-1s, quick feedback, help with training, promotion and career growth — and then turns the question around: how to *be managed*. Knowing what you want, advocating for yourself, giving your manager some slack and choosing managers deliberately are the first steps to owning your career, and the habits a future manager will later expect from their own reports (pp. 1–10).
+همه اول از سمت گیرنده با مدیریت روبه‌رو می‌شوند و همان تجربه پایه‌ی فلسفه‌ی مدیریتی خودشان می‌شود. این فصل اول می‌گوید یک مدیر خوب چه چیزی باید به شما بدهد؛ جلسه‌ی ۱-۱ منظم، بازخورد سریع، کمک برای آموزش و ارتقا و رشد شغلی، و بعد پرسش را برمی‌گرداند: چطور *مدیریت شویم*. دانستن این‌که چه می‌خواهید، پیگیری کردنش، کمی کوتاه آمدن با مدیرتان و انتخاب آگاهانه‌ی مدیر، اولین قدم‌های مالکیت مسیر شغلی‌اند و همان عادت‌هایی‌اند که خودتان روزی از آدم‌های تیمتان انتظار خواهید داشت (pp. 1–10).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **"Benign neglect" is not the best you can hope for.** Good managers care about you as a person, teach you, give feedback, help you focus, and want you to take their job someday (pp. 1–2).
-- **1-1s build human connection and give you private time with your manager.** They should be predictable, and for an individual contributor they are not status meetings; bring an agenda yourself (pp. 2–3).
-- **Feedback should come quickly, praise in public and criticism in private.** The only thing worse than behavioural feedback is none at all, or only at review time (pp. 3–4).
-- **Your manager is your link to training and promotion**, but you must ask for what you need: specific areas to focus on, stretch projects, resources (pp. 4–6).
-- **You are responsible for yourself.** Only you can work out what you want and go after it; your manager can't read your mind (pp. 7–8).
-- **Give your manager a break, and bring solutions rather than problems**; if you resent every manager you've had, ask whether the cause is you (pp. 8–9).
-- **Choose managers as carefully as jobs.** A strong manager knows how to play the game at the company — not the same thing as a friend, or a great engineer (p. 9).
+- **«بی‌توجهی خوش‌خیم» بهترین چیزی نیست که می‌شود امید داشت.** مدیر خوب شما را به‌عنوان یک آدم مهم می‌داند، یادتان می‌دهد، بازخورد می‌دهد، کمک می‌کند تمرکز کنید و می‌خواهد روزی جای خودش را بگیرید (pp. 1–2).
+- **جلسه‌ی ۱-۱ ارتباط انسانی می‌سازد و وقت خصوصی با مدیر به شما می‌دهد.** باید قابل‌پیش‌بینی باشد و برای یک individual contributor جلسه‌ی گزارش وضعیت نیست؛ خودتان دستور جلسه بیاورید (pp. 2–3).
+- **بازخورد باید زود برسد، تعریف جلوی جمع و انتقاد در خلوت.** تنها چیزی که از بازخورد درباره‌ی رفتار بدتر است، نبودنش است یا رسیدنش فقط سر ارزیابی دوره‌ای (pp. 3–4).
+- **مدیرتان حلقه‌ی وصل شما به آموزش و ارتقاست**، ولی باید چیزی را که لازم دارید بخواهید: حوزه‌های مشخص برای تمرکز، پروژه‌های کشش‌دار، منابع (pp. 4–6).
+- **مسئول خودتان، خودتانید.** فقط خودتان می‌توانید بفهمید چه می‌خواهید و دنبالش بروید؛ مدیرتان ذهن‌تان را نمی‌خواند (pp. 7–8).
+- **به مدیرتان هم فرصت بدهید و به‌جای مسئله، راه‌حل ببرید**؛ اگر از هر مدیری که داشته‌اید دل‌چرکین‌اید، بپرسید نکند ریشه‌اش خودتان باشید (pp. 8–9).
+- **مدیرها را به همان دقت شغل‌ها انتخاب کنید.** مدیر قوی بلد است در شرکت چطور بازی کند؛ این با دوست بودن یا مهندس درجه‌یک بودن یکی نیست (p. 9).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- What to Expect from a Manager — p. 1
-  - One-on-One Meetings — p. 2
-  - Feedback and Workplace Guidance — p. 3
-  - Training and Career Growth — p. 5
-- How to Be Managed — p. 7
-  - Spend Time Thinking About What You Want — p. 7
-  - You Are Responsible for Yourself — p. 8
-  - Give Your Manager a Break — p. 8
-  - Choose Your Managers Wisely — p. 9
-- Assessing Your Own Experience — p. 9
+- از یک مدیر چه انتظاری داشته باشیم — p. 1
+  - جلسه‌های یک‌به‌یک — p. 2
+  - بازخورد و راهنمایی در محیط کار — p. 3
+  - آموزش و رشد شغلی — p. 5
+- چطور مدیریت شویم — p. 7
+  - برای این‌که بدانید چه می‌خواهید وقت بگذارید — p. 7
+  - مسئول خودتان، خودتانید — p. 8
+  - به مدیرتان فرصت بدهید — p. 8
+  - مدیرهایتان را عاقلانه انتخاب کنید — p. 9
+- سنجیدن تجربه‌ی خودتان — p. 9
 
-## Notes
+## یادداشت‌ها
 
-The chapter opens with a question: do you even know what a good manager looks like (p. 1)? Some people have never had one. The book lists the alternatives people put up with (pp. 1–2):
+فصل با یک پرسش باز می‌شود: اصلاً می‌دانید مدیر خوب چه شکلی است (p. 1)؟ بعضی‌ها هیچ‌وقت یکی‌شان را نداشته‌اند. کتاب گزینه‌هایی را فهرست می‌کند که آدم‌ها تحمل می‌کنند (pp. 1–2):
 
-| Manager | What it feels like |
+| مدیر | چه حسی دارد |
 |---|---|
-| **Benign neglect** | You know what to work on and are left alone; one person met their manager twice in six months, once to be promoted |
-| **Neglectful** | Ignores you when you need help, never gives feedback, then says you're not meeting expectations |
-| **Micromanager** | Questions every detail and lets you decide nothing |
-| **Abusive** | Neglects you until they want to yell at you |
-| **Good** | Cares about you as a person, teaches skills, gives feedback, helps you navigate hard situations and focus on what matters |
+| **بی‌توجهی خوش‌خیم** | می‌دانید باید روی چه کار کنید و کاری به کارتان ندارند؛ یک نفر در شش ماه دو بار مدیرش را دیده بود، یک‌بارش برای ارتقا |
+| **بی‌توجه** | وقتی کمک لازم دارید نادیده‌تان می‌گیرد، هیچ بازخوردی نمی‌دهد و بعد می‌گوید انتظارها را برآورده نمی‌کنید |
+| **ذره‌بین‌به‌دست** | هر جزئیاتی را زیر سؤال می‌برد و هیچ تصمیمی را به شما نمی‌سپارد |
+| **بدرفتار** | تا وقتی بخواهد سرتان داد بزند نادیده‌تان می‌گیرد |
+| **خوب** | شما را به‌عنوان یک آدم مهم می‌داند، مهارت یاد می‌دهد، بازخورد می‌دهد و کمک می‌کند از موقعیت‌های سخت رد شوید و روی چیزهای مهم تمرکز کنید |
 
-Learning what to expect lets you ask for what you need (p. 2).
+وقتی یاد بگیرید چه انتظاری داشته باشید، می‌توانید چیزی را که لازم دارید بخواهید (p. 2).
 
-### What to Expect from a Manager
+### از یک مدیر چه انتظاری داشته باشیم
 
-#### One-on-One Meetings (pp. 2–3)
+#### جلسه‌های یک‌به‌یک (pp. 2–3)
 
-1-1s serve two purposes (pp. 2–3):
+جلسه‌ی ۱-۱ دو کار می‌کند (pp. 2–3):
 
-1. **Human connection.** Letting your manager into your life a little makes it easier to ask for time off or help when something stressful happens. Being an introvert is no excuse for not treating colleagues as people: the bedrock of strong teams is human connection, which leads to trust, and trust requires being willing to be vulnerable.
-2. **A regular, private opportunity to discuss whatever needs discussing.** That needs predictable scheduling; it is not the manager's job to control the whole agenda.
+1. **ارتباط انسانی.** وقتی کمی مدیرتان را به زندگی‌تان راه بدهید، درخواست مرخصی یا کمک در روزهای پرفشار آسان‌تر می‌شود. درون‌گرا بودن بهانه‌ی رفتار نکردن با همکارها مثل آدم نیست: سنگ‌بنای تیم‌های قوی ارتباط انسانی است، که به اعتماد می‌رسد، و اعتماد یعنی حاضر باشید آسیب‌پذیر باشید.
+2. **فرصتی منظم و خصوصی برای حرف زدن درباره‌ی هر چیزی که باید.** این یعنی زمان‌بندی قابل‌پیش‌بینی؛ و کنترل کل دستور جلسه کار مدیر نیست.
 
-Frequency can vary — every few weeks is fine — as long as they aren't eliminated. **For most people, good 1-1s are not status meetings**: a manager reporting to senior management may use them for critical or early-stage projects, but for an individual contributor a status 1-1 is repetitive. Move status to email or chat and bring your own topics. If your manager keeps cancelling, push for a more stable time, or confirm the day before with what you want to discuss (p. 3).
+فاصله‌شان می‌تواند فرق کند و هر چند هفته یک‌بار هم خوب است، به شرطی که حذف نشوند. **برای بیشتر آدم‌ها، جلسه‌ی ۱-۱ خوب جلسه‌ی گزارش وضعیت نیست**: مدیری که به مدیریت ارشد گزارش می‌دهد شاید برای پروژه‌های حساس یا تازه از آن استفاده کند، ولی برای یک individual contributor جلسه‌ی وضعیت تکراری می‌شود. گزارش را به ایمیل یا چت ببرید و موضوع‌های خودتان را بیاورید. اگر مدیرتان مدام جلسه را لغو می‌کند، برای وقتی باثبات‌تر پافشاری کنید یا روز قبلش با فهرست چیزهایی که می‌خواهید بگویید آن را تأیید کنید (p. 3).
 
-#### Feedback and Workplace Guidance (pp. 3–5)
+#### بازخورد و راهنمایی در محیط کار (pp. 3–5)
 
-You will screw up, and a good manager tells you quickly (p. 3). Getting it is better than not getting it, or getting it only at review time: the sooner you know a bad habit, the easier it is to fix (p. 4).
+خراب‌کاری خواهید کرد و مدیر خوب زود به شما می‌گوید (p. 3). گرفتن بازخورد بهتر از نگرفتنش است یا گرفتنش فقط سر ارزیابی دوره‌ای: هر چه زودتر بفهمید عادت بدی دارید، اصلاحش آسان‌تر است (p. 4).
 
-- **Praise in public, criticize in private.** Public praise shows everyone what good behaviour looks like; if you dislike it, tell your manager. Being pulled aside right after a meeting isn't necessarily a sign of disaster — quick feedback beats convenient feedback (p. 4).
-- **Ask for other feedback too:** on presentations, design docs and other non-code work. Asking for advice also shows respect (p. 4).
-- **Your manager should be your number one ally**: ask what to focus on for promotion, and bring conflicts with teammates to them. Nothing happens if you don't say something (p. 4).
-- **Purpose:** good managers explain how even unglamorous work fits the team's goals (pp. 4–5).
-- **Seniority changes feedback:** less personal feedback and more team- or strategy-level input, so drive your own 1-1s even more (p. 5).
+- **تعریف جلوی جمع، انتقاد در خلوت.** تعریف علنی به همه نشان می‌دهد رفتار خوب چه شکلی است؛ اگر خوشتان نمی‌آید به مدیرتان بگویید. این‌که درست بعد از یک جلسه کنار کشیده شوید لزوماً نشانه‌ی فاجعه نیست؛ بازخورد سریع از بازخورد در زمان مناسب بهتر است (p. 4).
+- **بازخوردهای دیگر را هم بخواهید:** درباره‌ی ارائه‌ها، design docها و کارهای غیرکدی. خواستن نظر، احترام هم نشان می‌دهد (p. 4).
+- **مدیرتان باید هم‌پیمان شماره‌ یک شما باشد**: بپرسید برای ارتقا روی چه تمرکز کنید و اختلاف‌هایتان با هم‌تیمی‌ها را پیش او ببرید. اگر چیزی نگویید هیچ اتفاقی نمی‌افتد (p. 4).
+- **هدف:** مدیرهای خوب توضیح می‌دهند حتی کار بی‌زرق‌وبرق چطور به هدف‌های تیم وصل می‌شود (pp. 4–5).
+- **ارشدتر که شوید بازخورد عوض می‌شود:** بازخورد شخصی کمتر می‌شود و حرف‌ها بیشتر در سطح تیم و استراتژی می‌مانند، پس باید جلسه‌های ۱-۱ را بیشتر خودتان پیش ببرید (p. 5).
 
-#### Training and Career Growth (pp. 5–6)
+#### آموزش و رشد شغلی (pp. 5–6)
 
-Your manager is your liaison to the company's bureaucracy: conferences, classes, books, experts elsewhere in the company. But expect to work out what training you want yourself, especially technical training (p. 5). The manager also shapes promotion and compensation, guiding a promotion packet through a committee or advocating directly. Ask for specific areas to focus on; managers can't guarantee promotions, and at senior levels you may have to propose the achievements that qualify you (pp. 5–6).
+مدیرتان رابط شما با دیوان‌سالاری شرکت است: کنفرانس، کلاس، کتاب، آدم‌های خبره در جاهای دیگر شرکت. ولی انتظار داشته باشید خودتان بفهمید چه آموزشی می‌خواهید، به‌خصوص آموزش فنی (p. 5). مدیر به ارتقا و حقوق هم شکل می‌دهد، چه با بردن پرونده‌ی ارتقا در کمیته و چه با پیگیری مستقیم. حوزه‌های مشخصی را بخواهید که رویشان تمرکز کنید؛ مدیرها نمی‌توانند ارتقا را تضمین کنند و در levelهای ارشد شاید خودتان مجبور شوید دستاوردهایی را پیشنهاد بدهید که شما را واجد شرایط می‌کنند (pp. 5–6).
 
-> **Ask the CTO: Big Ambitions** (pp. 6–7). To become a CTO someday: first learn how to work — testing, project and product management, collaboration — in a place that offers mentorship; find the best managers and mentors and watch them; spend years getting really good at writing code; build a network of peers, who "will turn into their future jobs"; and know that most CTOs lead small companies, often as technical cofounders, so work somewhere whose alumni found companies.
+> **کادر Ask the CTO: جاه‌طلبی‌های بزرگ** (pp. 6–7). برای این‌که روزی CTO شوید: اول کار کردن را یاد بگیرید، یعنی تست، مدیریت پروژه و محصول و همکاری، آن هم جایی که منتور دارد؛ بهترین مدیرها و منتورها را پیدا کنید و تماشایشان کنید؛ سال‌ها وقت بگذارید تا در نوشتن کد واقعاً خوب شوید؛ شبکه‌ای از هم‌ترازها بسازید، آدم‌هایی که «به شغل‌های آینده‌شان تبدیل می‌شوند»؛ و بدانید بیشتر CTOها شرکت‌های کوچک را می‌گردانند و اغلب هم‌بنیان‌گذار فنی‌اند، پس جایی کار کنید که آدم‌های سابقش شرکت می‌زنند.
 
-### How to Be Managed
+> **In practice:** ۱-۱ در تیم داده جای خوبی برای حرف‌هایی است که در standup گفته نمی‌شوند: خستگی از on-call یا پروژه‌ای که کسی نمی‌خواهد.
+>
+> **Your turn:** در ۱-۱ این هفته چه چیزی را مطرح می‌کنید که در standup نگفته‌اید؟
+>
+> *Answer:* پاسخ شخصی است؛ نمونه: «سه شب پشت سر هم alert ClickHouse بیدارم کرد و فکر می‌کنم آستانه غلط است». کتاب ۱-۱ را هم برای ارتباط انسانی و هم برای حرف زدن درباره‌ی مشکل‌ها پیش از بزرگ شدنشان می‌داند (pp. 2–3).
 
-Being managed well is not quite managing up: it is owning your experience at work rather than letting your manager set the whole tone (p. 7).
+### چطور مدیریت شویم
 
-| Habit | What it means (pp. 7–9) |
+خوب مدیریت شدن دقیقاً همان managing up نیست: یعنی مالکیت تجربه‌ی خودتان در کار، به‌جای این‌که بگذارید مدیرتان کل فضا را تعیین کند (p. 7).
+
+| عادت | یعنی چه (pp. 7–9) |
 |---|---|
-| **Spend time thinking about what you want** | Your manager can show opportunities but can't read your mind. Career uncertainty recurs — the author expects it every 5 to 10 years — and once you get the job you wanted, the enjoyment eventually fades |
-| **You are responsible for yourself** | Bring agendas; ask for projects, raises and promotions; seek and graciously accept feedback; set your own boundaries for work–life balance. Asking isn't comfortable, but it's the fastest way forward |
-| **Give your manager a break** | Managers are stressed and imperfect; their job is to do what's best for the company and team, not to make you happy. The only person you can change is yourself. Resent one manager — move; resent every manager — look at yourself. Bring solutions, not problems, and ask for advice |
-| **Choose your managers wisely** | Weigh the manager alongside the job, company and pay. Strong managers know how to play the game, get you promoted and keep helping after you leave. A great engineer may be a good mentor-manager early in your career but a poor advocate later |
+| **برای این‌که بدانید چه می‌خواهید وقت بگذارید** | مدیرتان می‌تواند فرصت‌ها را نشان بدهد ولی ذهن‌تان را نمی‌خواند. سردرگمی شغلی برمی‌گردد؛ نویسنده هر ۵ تا ۱۰ سال انتظارش را دارد، و وقتی هم به شغلی که می‌خواستید برسید، لذتش بالاخره ته می‌کشد |
+| **مسئول خودتان، خودتانید** | دستور جلسه بیاورید؛ پروژه و افزایش حقوق و ارتقا بخواهید؛ بازخورد بگیرید و با رویِ باز بپذیریدش؛ مرزهای خودتان را برای تعادل کار و زندگی بگذارید. خواستن راحت نیست، ولی سریع‌ترین راه جلو رفتن است |
+| **به مدیرتان فرصت بدهید** | مدیرها پرفشار و ناکامل‌اند؛ کارشان این است که بهترین کار را برای شرکت و تیم بکنند، نه این‌که شما را خوشحال کنند. تنها آدمی که می‌توانید عوضش کنید خودتانید. از یک مدیر دل‌چرکین‌اید، جابه‌جا شوید؛ از همه‌ی مدیرها دل‌چرکین‌اید، به خودتان نگاه کنید. راه‌حل ببرید، نه مسئله، و نظر بخواهید |
+| **مدیرهایتان را عاقلانه انتخاب کنید** | مدیر را هم‌وزن شغل و شرکت و حقوق بسنجید. مدیرهای قوی بلدند بازی را ببرند، شما را ارتقا می‌دهند و بعد از رفتنتان هم کمک می‌کنند. مهندس درجه‌یک شاید اوایل مسیر منتور-مدیر خوبی باشد ولی بعدتر پیگیر خوبی نباشد |
 
-### Assessing Your Own Experience
+> **In practice:** مالکیت تجربه‌ی کاری‌تان یعنی خودتان بگویید کدام بخش platform را می‌خواهید یاد بگیرید.
+>
+> **Your turn:** می‌خواهید Kubernetes و Argo CD را عمیق‌تر یاد بگیرید ولی همه‌ی کارتان SQL است. چه می‌کنید؟
+>
+> *Answer:* مشخص بخواهید: «ticket بعدی deploy را من برمی‌دارم» یا «در incident بعدی platform با on-call pair می‌شوم». کتاب می‌گوید منتظر نمانید مدیر کل فضا را تعیین کند؛ مالک تجربه‌ی خودتان باشید (pp. 7–9).
 
-Each chapter ends with questions for reflection (pp. 9–10): Have you had a good manager, and what did they do? How often do you meet 1-1, and do you bring topics? Could you tell your manager about a major life event? Have you had feedback — good, bad, any? Has your manager helped you set goals this year?
+### سنجیدن تجربه‌ی خودتان
 
-## Trade-offs at a glance
+هر فصل با چند پرسش برای تأمل تمام می‌شود (pp. 9–10): مدیر خوبی داشته‌اید و چه کار می‌کرد؟ هر چند وقت یک‌بار ۱-۱ دارید و موضوع می‌برید؟ می‌توانستید اتفاق مهمی از زندگی‌تان را به مدیرتان بگویید؟ بازخورد گرفته‌اید، خوب یا بد یا اصلاً؟ مدیرتان امسال کمک کرده هدف بگذارید؟
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Benign neglect | Autonomy | No feedback, no advocate, surprises at review time |
-| Micromanagement | Manager's control | No decisions of your own; no growth |
-| 1-1 as status meeting | Easy to run | Repeats what writing could carry; crowds out real topics |
-| Praise in public | Shows what good looks like | Uncomfortable for some — tell your manager |
-| Asking for what you want | Fastest way forward | Uncomfortable; might reveal a poor manager |
-| Manager you like vs. strong manager | Comfort, technical respect | May not advocate or navigate politics for you |
+| بی‌توجهی خوش‌خیم | استقلال | بی‌بازخوردی، نبودِ پیگیر، غافلگیری سر ارزیابی |
+| مدیریت ذره‌بینی | کنترل مدیر | هیچ تصمیمی از خودتان ندارید؛ رشدی هم نیست |
+| جلسه‌ی ۱-۱ به‌عنوان گزارش وضعیت | اداره‌اش آسان است | چیزی را تکرار می‌کند که نوشتن هم می‌توانست برساند؛ جای موضوع‌های واقعی را می‌گیرد |
+| تعریف جلوی جمع | نشان می‌دهد خوب چه شکلی است | برای بعضی‌ها معذب‌کننده است؛ به مدیرتان بگویید |
+| خواستن چیزی که می‌خواهید | سریع‌ترین راه جلو رفتن | معذب‌کننده است؛ شاید ضعف مدیرتان را هم رو کند |
+| مدیری که دوستش دارید در برابر مدیر قوی | راحتی، احترام فنی | شاید پیگیر شما نباشد و در سیاست شرکت راه را بازتان نکند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Radical candor.** Kim Scott's *Radical Candor* (2017) frames the feedback advice here — care personally while challenging directly — as a 2×2 that also names the "ruinous empathy" of managers who withhold criticism.
-- **Managing up.** The book separates being managed from managing up (p. 7); Lara Hogan's *Resilient Management* (2019) offers templates — "manager README" documents and 1-1 question lists — that many teams use to make these expectations explicit on both sides.
+- **رک‌گویی رادیکال.** کتاب *Radical Candor* از Kim Scott در سال ۲۰۱۷ همین توصیه‌ی بازخورد را قالب می‌دهد، یعنی دلسوزی شخصی همراه با به‌چالش‌کشیدن مستقیم، و آن را در یک ماتریس ۲×۲ می‌گذارد که اسم «ruinous empathy» را هم روی مدیرهایی می‌گذارد که انتقاد را نگه می‌دارند.
+- **مدیریت رو به بالا.** کتاب خودِ مدیریت‌شدن را از managing up جدا می‌کند (p. 7)؛ کتاب *Resilient Management* از Lara Hogan در سال ۲۰۱۹ الگوهایی می‌دهد، مثل سند «manager README» و فهرست پرسش‌های ۱-۱، که تیم‌های زیادی با آن‌ها این انتظارها را برای هر دو طرف صریح می‌کنند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. Mentoring](02-mentoring.md) (the first taste of being responsible for someone), [4. Managing People](04-managing-people.md) (the same 1-1s, feedback and career growth, from the manager's side), [7. Managing Managers](07-managing-managers.md) (judging whether a manager is doing these things).
+- **فصل‌های مرتبط:** [فصل ۲: منتورینگ](02-mentoring.md) که اولین مزه‌ی مسئول بودن در برابر یک نفر دیگر است، [فصل ۴: مدیریت آدم‌ها](04-managing-people.md) که همین ۱-۱ و بازخورد و رشد شغلی را از سمت مدیر می‌بیند، و [فصل ۷: مدیریت مدیرها](07-managing-managers.md) که می‌سنجد یک مدیر این کارها را می‌کند یا نه.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What are the two purposes of a 1-1?**
+1. **جلسه‌ی ۱-۱ چه دو هدفی دارد؟**
 
-   *Answer:* Creating human connection between you and your manager, and giving you a regular, private opportunity to discuss whatever needs discussing (pp. 2–3).
+   *Answer:* ساختن ارتباط انسانی بین شما و مدیرتان، و دادن فرصتی منظم و خصوصی برای حرف زدن درباره‌ی هر چیزی که باید (pp. 2–3).
 
-2. **You're an individual contributor and your 1-1 is a dull status report. What does the book suggest?**
-   - [ ] Cancel 1-1s altogether
-   - [x] Send status by email or chat and bring topics of your own
-   - [ ] Ask your manager to run the agenda
+2. **یک individual contributor هستید و جلسه‌ی ۱-۱تان یک گزارش وضعیت خسته‌کننده است. کتاب چه پیشنهاد می‌دهد؟**
+   - [ ] جلسه‌های ۱-۱ را کلاً لغو کنید
+   - [x] وضعیت را با ایمیل یا چت بفرستید و موضوع‌های خودتان را بیاورید
+   - [ ] از مدیرتان بخواهید دستور جلسه را او بچیند
 
-   *Answer:* For most people good 1-1s aren't status meetings; free the time and come with an agenda (p. 3).
+   *Answer:* برای بیشتر آدم‌ها جلسه‌ی ۱-۱ خوب جلسه‌ی گزارش وضعیت نیست؛ آن وقت را آزاد کنید و با دستور جلسه بیایید (p. 3).
 
-3. **Your manager pulls you aside right after a meeting to criticize something you said. Is that a bad sign?**
+3. **مدیرتان درست بعد از یک جلسه کنارتان می‌کشد تا از چیزی که گفته‌اید انتقاد کند. نشانه‌ی بدی است؟**
 
-   *Answer:* Not necessarily: good managers know quick feedback is more valuable than waiting for a convenient moment. Ideally praise is public and criticism private (p. 4).
+   *Answer:* لزوماً نه: مدیرهای خوب می‌دانند بازخورد سریع از صبر کردن برای لحظه‌ی مناسب ارزشمندتر است. در حالت ایده‌آل تعریف جلوی جمع است و انتقاد در خلوت (p. 4).
 
-4. **Who is responsible for working out what training and promotion you want?**
-   - [x] You are; the manager helps find resources and knows what the system looks for
-   - [ ] The manager, who should assign it
-   - [ ] The company's training arm
+4. **مسئول تشخیص این‌که چه آموزش و چه ارتقایی می‌خواهید کیست؟**
+   - [x] خودتان؛ مدیر کمک می‌کند منابع پیدا شوند و می‌داند سیستم دنبال چیست
+   - [ ] مدیر، که باید تکلیفش را روشن کند
+   - [ ] واحد آموزش شرکت
 
-   *Answer:* Expect to figure out your own training needs and to ask for specific promotion goals; at senior levels you may have to propose the achievements yourself (pp. 5–6, 8).
+   *Answer:* انتظار داشته باشید نیاز آموزشی‌تان را خودتان بفهمید و هدف‌های مشخص ارتقا بخواهید؛ در levelهای ارشد شاید مجبور شوید خودتان دستاوردها را پیشنهاد بدهید (pp. 5–6, 8).
 
-5. **What should you conclude if you resent every manager you've worked for?**
+5. **اگر از هر مدیری که داشته‌اید دل‌چرکین باشید، چه نتیجه‌ای باید بگیرید؟**
 
-   *Answer:* Consider whether the cause is them or you — perhaps you'd be happier in a job without a manager (p. 9).
+   *Answer:* بسنجید ریشه‌اش آن‌هایند یا خودتان؛ شاید در شغلی بدون مدیر راضی‌تر باشید (p. 9).
 
-6. **Why might a manager you like, or a brilliant engineer, still be the wrong manager for you?**
+6. **چرا مدیری که دوستش دارید، یا مهندسی درخشان، باز هم ممکن است مدیر درستی برای شما نباشد؟**
 
-   *Answer:* Strong managers know how to play the game at their company and have networks; a great engineer may be a good mentor-manager early on but a poor advocate for someone more senior (p. 9).
+   *Answer:* مدیرهای قوی بلدند در شرکتشان بازی را ببرند و شبکه دارند؛ مهندس درجه‌یک شاید اوایل مسیر منتور-مدیر خوبی باشد ولی برای آدم ارشدتر پیگیر خوبی نباشد (p. 9).

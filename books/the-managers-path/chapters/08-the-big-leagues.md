@@ -3,133 +3,141 @@ book: the-managers-path
 chapter: 8
 title: "The Big Leagues"
 pages: "159–189"
+translated_title: "لیگ بزرگ‌ها"
+lang: fa
 ---
 
-# 8. The Big Leagues
+# فصل ۸: لیگ بزرگ‌ها
 
-[← 7. Managing Managers](07-managing-managers.md) · [Book](../README.md) · [9. Bootstrapping Culture →](09-bootstrapping-culture.md)
+[فصل ۷: مدیریت مدیرها →](07-managing-managers.md) · [کتاب](../README.md) · [فصل ۹: ساختن فرهنگ از صفر ←](09-bootstrapping-culture.md)
 
-## Summary
+## خلاصه
 
-Senior technology leadership differs wildly between a 70-person startup engineering team and a Fortune 500 division, so the chapter offers models rather than rules. It breaks senior leadership into common roles — R&D, technology strategy, organization, execution, external face, infrastructure, business executive — and shows how companies combine them into CTOs and VPs of Engineering. It defines the CTO as the strategic technical executive the company needs at its current stage, a business-and-management job first. The rest is about operating at the top: changing priorities without whiplash, writing a technology strategy (the author's own path to CTO), delivering bad news, working with peers in other functions, managing "the echo" of your every word, replacing a culture of fear with trust, and setting the "True North" standard for your function (pp. 159–189).
+رهبری ارشد فناوری در یک تیم مهندسی ۷۰ نفره‌ی استارتاپی با یک بخش از شرکتی در فهرست Fortune 500 زمین تا آسمان فرق دارد، پس این فصل به‌جای قاعده، مدل می‌دهد. رهبری ارشد را به نقش‌های رایجش می‌شکند، یعنی تحقیق و توسعه، استراتژی فناوری، سازمان، اجرا، چهره‌ی بیرونی، زیرساخت و مدیر اجرایی کسب‌وکار، و نشان می‌دهد شرکت‌ها چطور این‌ها را در قالب CTO و VP of Engineering ترکیب می‌کنند. CTO را مدیر اجرایی فنیِ استراتژیکی تعریف می‌کند که شرکت در مرحله‌ی فعلی‌اش لازم دارد؛ پیش از هر چیز شغلی در کسب‌وکار و مدیریت. بقیه‌ی فصل درباره‌ی کار کردن در بالاترین سطح است: عوض کردن اولویت‌ها بدون ضربه زدن به تیم، نوشتن استراتژی فناوری که راه خود نویسنده به CTO شدن بود، رساندن خبر بد، کار با هم‌ترازها در کارکردهای دیگر، مدیریت «پژواک» هر کلمه‌تان، جایگزین کردن فرهنگ ترس با اعتماد، و گذاشتن استاندارد «True North» برای کارکردتان (pp. 159–189).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Your first job is to be a leader:** make hard decisions with imperfect information, plan for possible futures, play politics productively, disagree and commit, hold people accountable (pp. 159–160).
-- **Grove's four tasks shape senior days:** information gathering and sharing, nudging, decision making, and role modeling (pp. 160–161).
-- **Senior roles are combinations of building blocks;** a VP of Engineering usually has the "ground game" of execution and organization, a CTO the strategy (pp. 162–166).
-- **The CTO is the strategic technical executive the company needs now** — not the best engineer, not the top of the technical ladder; give up management and you give up the power to shape strategy (pp. 166–168).
-- **Changing priorities means explicitly cutting work in flight**, communicating at least three times, and keeping the CEO informed about what's happening and why (pp. 169–172).
-- **Technology strategy "enables the many potential futures of the business":** research, combine, draft — and fit the board's communication style (pp. 172–174).
-- **At the top, you're watched:** your peers are your first team, disagreements stay in the room, you detach socially, and your behaviour is copied — so replace fear with relatedness, apologies and curiosity (pp. 178–185).
-- **Set True North** for your function: the standards — such as production readiness — your teams internalize and weigh risks against (pp. 185–187).
+- **اولین کار شما رهبر بودن است:** تصمیم سخت با اطلاعات ناقص، برنامه‌ریزی برای آینده‌های ممکن، سیاست‌ورزی سازنده، مخالفت و بعد تعهد به اجرا، و پاسخ‌گو نگه داشتن آدم‌ها (pp. 159–160).
+- **چهار کار Grove به روزهای ارشد شکل می‌دهند:** جمع کردن و به اشتراک گذاشتن اطلاعات، تلنگر زدن، تصمیم گرفتن و الگو بودن (pp. 160–161).
+- **نقش‌های ارشد ترکیبی از بلوک‌های سازنده‌اند؛** یک VP of Engineering معمولاً «بازی زمینی» اجرا و سازمان را دارد و یک CTO استراتژی را (pp. 162–166).
+- **نقش CTO یعنی مدیر اجرایی فنیِ استراتژیکی که شرکت همین حالا لازم دارد**، نه بهترین مهندس و نه بالاترین پله‌ی نردبان فنی؛ اگر مدیریت را رها کنید، قدرت شکل دادن به استراتژی را رها کرده‌اید (pp. 166–168).
+- **عوض کردن اولویت یعنی کار در جریان را صریحاً قطع کنید**، دست‌کم سه بار اعلامش کنید، و CEO را در جریان بگذارید که چه خبر است و چرا (pp. 169–172).
+- **استراتژی فناوری «آینده‌های بالقوه‌ی زیاد کسب‌وکار را ممکن می‌کند»:** تحقیق کنید، ترکیب کنید، پیش‌نویس بنویسید، و با سبک ارتباطی هیئت‌مدیره جورش کنید (pp. 172–174).
+- **در بالا، زیر نگاه‌ها هستید:** هم‌ترازهایتان تیم اولتانند، اختلاف‌ها از اتاق بیرون نمی‌روند، از نظر اجتماعی فاصله می‌گیرید و رفتارتان تقلید می‌شود، پس ترس را با حس تعلق و عذرخواهی و کنجکاوی عوض کنید (pp. 178–185).
+- **برای کارکردتان True North بگذارید:** استانداردهایی مثل آمادگی برای production که تیم‌ها درونی می‌کنند و ریسک‌ها را با آن می‌سنجند (pp. 185–187).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Models for Thinking About Tech Senior Leadership — p. 162
-- What’s a VP of Engineering? — p. 164
-- What’s a CTO? — p. 166
-- Changing Priorities — p. 169
-- Setting the Strategy — p. 172
-  - Do a Lot of Research — p. 172
-  - Combine Your Research and Your Ideas — p. 173
-  - Draft a Strategy — p. 173
-  - Consider Your Board’s Communication Style — p. 173
-- Challenging Situations: Delivering Bad News — p. 174
-- Senior Peers in Other Functions — p. 178
-- The Echo — p. 180
-- Ruling with Fear, Guiding with Trust — p. 182
-  - Correcting a Culture of Fear — p. 183
-- True North — p. 185
-- Recommended Reading — p. 187
-- Assessing Your Own Experience — p. 188
+- مدل‌هایی برای فکر کردن به رهبری ارشد فناوری — p. 162
+- نقش VP of Engineering چیست؟ — p. 164
+- نقش CTO چیست؟ — p. 166
+- عوض شدن اولویت‌ها — p. 169
+- تعیین استراتژی — p. 172
+  - کلی تحقیق کنید — p. 172
+  - تحقیق و ایده‌هایتان را ترکیب کنید — p. 173
+  - استراتژی را پیش‌نویس کنید — p. 173
+  - سبک ارتباطی هیئت‌مدیره را در نظر بگیرید — p. 173
+- موقعیت‌های دشوار: رساندن خبر بد — p. 174
+- هم‌ترازهای ارشد در کارکردهای دیگر — p. 178
+- پژواک — p. 180
+- حکومت با ترس، هدایت با اعتماد — p. 182
+  - اصلاح فرهنگ ترس — p. 183
+- شمال حقیقی — p. 185
+- خواندنی‌های پیشنهادی — p. 187
+- سنجیدن تجربه‌ی خودتان — p. 188
 
-## Notes
+## یادداشت‌ها
 
-Running a 70-person startup engineering organization is not the same job as running thousands at a Fortune 500 company (p. 159). As *technology* senior leaders, we bring a willingness to embrace and drive change, but must also build an organization that can follow through on it (p. 159). The company looks to you for what to do, where to go, how to act and what to value; people join because they believe in you (p. 159).
+گرداندن سازمان مهندسی ۷۰ نفره‌ی یک استارتاپ همان شغلِ گرداندن هزاران نفر در شرکتی از فهرست Fortune 500 نیست (p. 159). ما به‌عنوان رهبران ارشد *فناوری* آمادگی پذیرفتن و پیش بردن تغییر را می‌آوریم، ولی باید سازمانی هم بسازیم که بتواند تا تهش برود (p. 159). شرکت از شما می‌پرسد چه باید کرد، کجا باید رفت، چطور باید رفتار کرد و به چه چیزی باید ارزش داد؛ آدم‌ها می‌آیند چون به شما باور دارند (p. 159).
 
-What a senior leader can do (p. 160): make hard decisions without perfect information and face the consequences; understand the current business and see its possible futures; plan months and years ahead; understand how structure affects teams; play politics productively; work well with peers outside engineering; **disagree with a decision and commit to deliver it**; hold individuals and organizations accountable.
+رهبر ارشد چه می‌تواند بکند (p. 160): تصمیم‌های سخت را بدون اطلاعات کامل بگیرد و پای پیامدشان بایستد؛ کسب‌وکار امروز را بفهمد و آینده‌های ممکنش را ببیند؛ ماه‌ها و سال‌ها جلوتر را برنامه بریزد؛ بفهمد ساختار چطور روی تیم‌ها اثر می‌گذارد؛ سیاست را سازنده بازی کند؛ با هم‌ترازهای بیرون از مهندسی خوب کار کند؛ **با یک تصمیم مخالف باشد و به تحویلش متعهد شود**؛ و افراد و سازمان‌ها را پاسخ‌گو نگه دارد.
 
-Andy Grove's *High Output Management* splits management into four tasks that shape every senior day (pp. 160–161):
+کتاب *High Output Management* از Andy Grove مدیریت را به چهار کار می‌شکند که به هر روزِ یک آدم ارشد شکل می‌دهند (pp. 160–161):
 
-| Task | What it means |
+| کار | یعنی چه |
 |---|---|
-| **Information gathering and sharing** | Meetings, email, 1-1s; synthesize lots of information fast, pick out what's critical, pass it on in a form others understand |
-| **Nudging** | Remind people of commitments with questions, not orders — a large team can't be forcefully steered |
-| **Decision making** | Set direction from conflicting views and incomplete information; one of the most draining parts of the job |
-| **Role modeling** | Show the company's values; show up for your commitments, even when you don't feel like it |
+| **جمع کردن و به اشتراک گذاشتن اطلاعات** | جلسه و ایمیل و ۱-۱؛ حجم زیادی اطلاعات را سریع جمع‌بندی کنید، حیاتی‌ها را بیرون بکشید و به شکلی منتقلشان کنید که بقیه بفهمند |
+| **تلنگر زدن** | تعهدها را با پرسش به آدم‌ها یادآوری کنید، نه با دستور؛ تیم بزرگ را نمی‌شود با زور هدایت کرد |
+| **تصمیم گرفتن** | از دل نظرهای متضاد و اطلاعات ناقص جهت تعیین کنید؛ یکی از فرساینده‌ترین بخش‌های شغل |
+| **الگو بودن** | ارزش‌های شرکت را نشان بدهید؛ سر تعهدهایتان حاضر شوید، حتی وقتی حالش را ندارید |
 
-> **What Is My Job?** (James Turnbull, pp. 161–162). Impostor syndrome from a nontraditional background and a desire to be "right" made him argue languages on technical merit — just another engineer in the room. His job was not to be the smartest person but to help the team make and sustainably implement the best decisions, bringing in strategy and nontechnical implications.
+> **کادر What Is My Job?** (یادداشت James Turnbull، pp. 161–162). سندرم ایمپاستر به‌خاطر پیشینه‌ی غیرمعمول، به‌علاوه‌ی میل به «درست بودن»، او را وامی‌داشت سر برتری فنی زبان‌ها بحث کند؛ یعنی فقط یک مهندس دیگر در اتاق. کارش این نبود که باهوش‌ترین آدم باشد، بلکه این بود که کمک کند تیم بهترین تصمیم‌ها را بگیرد و پایدار پیاده‌شان کند، با آوردن استراتژی و پیامدهای غیرفنی به بحث.
 
-### Models for Thinking About Tech Senior Leadership
+### مدل‌هایی برای فکر کردن به رهبری ارشد فناوری
 
-Rather than defining every title, the author lists the roles senior leaders play; some people play several, some companies need only a few, and all of them break down at very large companies (p. 162).
+نویسنده به‌جای تعریف کردن هر عنوان، نقش‌هایی را فهرست می‌کند که رهبران ارشد بازی می‌کنند؛ بعضی‌ها چند نقش را با هم دارند، بعضی شرکت‌ها فقط چندتا را لازم دارند، و همه‌شان در شرکت‌های خیلی بزرگ از هم می‌پاشند (p. 162).
 
-| Role | Focus (pp. 162–163) |
+| نقش | تمرکز (pp. 162–163) |
 |---|---|
-| **Research and development (R&D)** | Experimentation, research, new technology; may own technology strategy or just find new ideas |
-| **Technology strategy / visionary** | How technology grows the business; predicts technology's evolution in the industry; often also runs product |
-| **Organization** | Structure and people: staffing plans, org structure, project staffing |
-| **Execution** | Making things actually get done: aligning roadmaps, planning, prioritizing, breaking roadblocks, resolving conflicts |
-| **Face of technology, external** | Sales meetings for software sold to businesses; conference talks; the engineering brand for hiring |
-| **Infrastructure and technical operations** | All infrastructure and its operation — cost-, security- or scaling-focused depending on stage |
-| **Business executive** | The business first: the industry and other functions; balances internal development against growth; owns high-level prioritization |
+| **تحقیق و توسعه** | آزمایشگری، پژوهش، فناوری تازه؛ ممکن است صاحب استراتژی فناوری باشد یا فقط ایده‌های تازه پیدا کند |
+| **استراتژی فناوری و چشم‌انداز** | این‌که فناوری چطور کسب‌وکار را بزرگ می‌کند؛ تکامل فناوری در صنعت را پیش‌بینی می‌کند؛ اغلب product را هم می‌گرداند |
+| **سازمان** | ساختار و آدم‌ها: برنامه‌ی نیرو، ساختار سازمانی، چیدن آدم‌ها روی پروژه‌ها |
+| **اجرا** | این‌که کارها واقعاً انجام شوند: هم‌سو کردن نقشه‌های راه، برنامه‌ریزی، اولویت‌بندی، برداشتن سد و حل تعارض |
+| **چهره‌ی بیرونی فناوری** | جلسه‌های فروش برای نرم‌افزاری که به کسب‌وکارها فروخته می‌شود؛ سخنرانی کنفرانس؛ برند مهندسی برای استخدام |
+| **زیرساخت و عملیات فنی** | همه‌ی زیرساخت و گرداندنش، که بسته به مرحله تمرکزش روی هزینه یا امنیت یا scaling است |
+| **مدیر اجرایی کسب‌وکار** | اول کسب‌وکار: صنعت و کارکردهای دیگر؛ تعادل بین توسعه‌ی داخلی و رشد؛ صاحب اولویت‌بندی سطح بالا |
 
-Combinations the author has seen (pp. 163–164):
+ترکیب‌هایی که نویسنده دیده (pp. 163–164):
 
-| Combination | Typical title |
+| ترکیب | عنوان معمول |
 |---|---|
-| Business executive + technology strategy + organization + execution | CTO or Head of Engineering (VP/SVP) |
-| R&D + technology strategy + external face | CTO, Chief Scientist, Chief Architect, sometimes Chief Product Officer — usually selling a software product |
-| Organization + execution + business executive | VP of Engineering, General Manager |
-| Infrastructure + organization + execution | CTO/CIO, possibly VP of Technical Operations |
-| Technology strategy + business executive + execution | Head of Product / Chief Product Officer, sometimes CTO |
-| R&D + business executive | CTO or Chief Scientist, cofounder |
-| Organization + execution | VP of Engineering, sometimes Chief of Staff |
+| مدیر اجرایی کسب‌وکار + استراتژی فناوری + سازمان + اجرا | CTO یا Head of Engineering در سطح VP/SVP |
+| تحقیق و توسعه + استراتژی فناوری + چهره‌ی بیرونی | CTO، Chief Scientist، Chief Architect و گاهی Chief Product Officer؛ معمولاً در فروش یک محصول نرم‌افزاری |
+| سازمان + اجرا + مدیر اجرایی کسب‌وکار | VP of Engineering، General Manager |
+| زیرساخت + سازمان + اجرا | CTO یا CIO و شاید VP of Technical Operations |
+| استراتژی فناوری + مدیر اجرایی کسب‌وکار + اجرا | Head of Product یا Chief Product Officer و گاهی CTO |
+| تحقیق و توسعه + مدیر اجرایی کسب‌وکار | CTO یا Chief Scientist، هم‌بنیان‌گذار |
+| سازمان + اجرا | VP of Engineering و گاهی Chief of Staff |
 
-Most strong CTOs keep a strategic function — business, technology, or both (p. 164).
+بیشتر CTOهای قوی یک کارکرد استراتژیک را نگه می‌دارند، چه کسب‌وکاری، چه فناورانه، چه هر دو (p. 164).
 
-> **Try it:** [Which senior role is this?](../widgets/08-leadership-roles.html) — tick the building blocks a job involves and see which of the book's combinations and titles match.
+> **Try it:** [این کدام نقش ارشد است؟](../widgets/08-leadership-roles.html)؛ بلوک‌های سازنده‌ای را که یک شغل در بر می‌گیرد تیک بزنید و ببینید با کدام ترکیب و عنوان کتاب می‌خواند.
 
-### What's a VP of Engineering?
+### نقش VP of Engineering چیست؟
 
-The VP is usually the top of the *management* ladder, so an experienced manager of people, projects, teams and departments. In larger companies there may be several, acting as mini-CTOs for divisions while directors take on the organizational management (p. 164). In a company with one (pp. 165–166):
+نقش VP معمولاً بالاترین پله‌ی نردبان *مدیریتی* است، پس مدیری باتجربه در آدم‌ها و پروژه‌ها و تیم‌ها و دپارتمان‌ها. در شرکت‌های بزرگ‌تر ممکن است چند نفر باشند که برای هر بخش مثل CTOهای کوچک عمل می‌کنند و directorها مدیریت سازمانی را برمی‌دارند (p. 164). در شرکتی که فقط یکی دارد (pp. 165–166):
 
-- **A good "ground game":** handles processes and details, tracks many initiatives, drops into the details to make things happen; pushes execution while the CTO focuses on strategy.
-- **Management:** aligns the roadmap to the hiring plan, runs hiring with recruiting, coaches the engineering managers and arranges training with HR.
-- **Organizational strategy:** helps teams set goals that deliver business results, closely with product; keeps the roadmap realistic; negotiates deliverables.
-- **Hard to hire:** usually hired from outside, must win trust quickly — yet engineers distrust people without technical credibility, and senior managers rarely want a hard technical interview for an organizational job.
+- **بازی زمینیِ خوب:** processها و جزئیات را می‌گرداند، طرح‌های زیادی را دنبال می‌کند و برای به سرانجام رساندن کار وارد جزئیات می‌شود؛ اجرا را هل می‌دهد در حالی که CTO روی استراتژی تمرکز دارد.
+- **مدیریت:** نقشه‌ی راه را با برنامه‌ی استخدام هم‌تراز می‌کند، استخدام را با واحد recruiting می‌گرداند، مدیرهای مهندسی را کوچ می‌کند و با HR آموزش ترتیب می‌دهد.
+- **استراتژی سازمانی:** کمک می‌کند تیم‌ها هدف‌هایی بگذارند که نتیجه‌ی کسب‌وکاری بدهند، تنگاتنگ با product؛ نقشه‌ی راه را واقع‌بینانه نگه می‌دارد و سر تحویل‌دادنی‌ها مذاکره می‌کند.
+- **استخدامش سخت است:** معمولاً از بیرون می‌آید و باید زود اعتماد بسازد، در حالی که مهندس‌ها به آدم بدون اعتبار فنی بی‌اعتمادند و مدیرهای ارشد هم کمتر حاضرند برای شغلی سازمانی مصاحبه‌ی فنی سخت بدهند.
 
-People who excel are capable engineers who care deeply about their teams, prefer to stay out of the spotlight, tie happiness to accomplishment, and handle complex detailed work without being overwhelmed (pp. 165–166).
+کسانی که در این نقش می‌درخشند مهندس‌های توانمندی‌اند که عمیقاً به تیمشان اهمیت می‌دهند، ترجیح می‌دهند زیر نور نباشند، خوشحالی‌شان به تحقق کار گره خورده و حجم کار پیچیده و پرجزئیات غرقشان نمی‌کند (pp. 165–166).
 
-### What's a CTO?
+### نقش CTO چیست؟
 
-The least well-defined role. Start with what it isn't: **not an engineering role, not the top of the technical ladder, not the natural goal of engineers, and not necessarily the best engineer** (p. 166). CTOs are cofounders, early engineers, hires or promotions; some run people and process, others architecture, product or the external face; some have no reports (p. 166).
+کم‌تعریف‌شده‌ترین نقش. از این شروع کنید که چه نیست: **نقش مهندسی نیست، بالاترین پله‌ی نردبان فنی نیست، هدف طبیعی مهندس‌ها نیست و لزوماً بهترین مهندس هم نیست** (p. 166). CTOها گاهی هم‌بنیان‌گذارند، گاهی مهندس‌های اولیه، گاهی استخدام بیرونی و گاهی ارتقایافته؛ بعضی آدم‌ها و process را می‌گردانند، بعضی معماری یا محصول یا چهره‌ی بیرونی را، و بعضی اصلاً زیردست ندارند (p. 166).
 
-The author's definition: **the strategic technical executive the company needs in its current stage of evolution** — *strategic* thinks long-term about the business's future; *executive* makes that operational by breaking down problems and directing people (pp. 166–167).
+تعریف نویسنده: **مدیر اجرایی فنیِ استراتژیکی که شرکت در مرحله‌ی فعلی تکاملش لازم دارد**؛ *استراتژیک* یعنی بلندمدت به آینده‌ی کسب‌وکار فکر می‌کند و *مدیر اجرایی* یعنی آن را با شکستن مسئله‌ها و هدایت آدم‌ها عملیاتی می‌کند (pp. 166–167).
 
-- **An executive first, a technologist second:** needs a seat at the executive table and must shape business strategy through technology — new lines of business, or technology that anticipates the roadmap's futures — focusing on the biggest technical opportunities and risks (p. 167).
-- **Management is power.** Other executives will treat technology as an execution arm for their ideas; the CTO protects its own needs and ideas. CTOs who hand all management to VPs — sometimes with the VPs not even reporting to them — lose influence. At a previous employer, area "CTOs" without teams were respected but lacked strategic influence: "at best at the mercy of your influence… and at worst a figurehead" (pp. 167–168).
+- **اول مدیر اجرایی است و بعد فناور:** به صندلی‌ای سر میز مدیران اجرایی نیاز دارد و باید با فناوری به استراتژی کسب‌وکار شکل بدهد، چه با خط‌های تازه‌ی کسب‌وکار و چه با فناوری‌ای که آینده‌های نقشه‌ی راه را پیش‌بینی می‌کند، و روی بزرگ‌ترین فرصت‌ها و ریسک‌های فنی تمرکز کند (p. 167).
+- **مدیریت یعنی قدرت.** مدیران اجرایی دیگر فناوری را بازوی اجرای ایده‌های خودشان می‌بینند؛ CTO از نیازها و ایده‌های خود فناوری دفاع می‌کند. CTOهایی که همه‌ی مدیریت را به VPها می‌سپارند، و گاهی آن VPها حتی به آن‌ها گزارش نمی‌دهند، نفوذشان را از دست می‌دهند. در یکی از شرکت‌های قبلی، «CTO»های حوزه‌ای که تیم نداشتند محترم بودند ولی نفوذ استراتژیک نداشتند: «در بهترین حالت دست‌بسته‌ی نفوذتان… و در بدترین حالت یک نماد تشریفاتی» (pp. 167–168).
 
-CTO is a business strategy job first and a management job; if you don't care about the business or won't take ultimate responsibility for a large team attacking it, it isn't for you (p. 168).
+نقش CTO اول شغلی در استراتژی کسب‌وکار است و بعد شغلی مدیریتی؛ اگر کسب‌وکار برایتان مهم نیست یا حاضر نیستید مسئولیت نهایی تیمی بزرگ را که به آن حمله می‌برد بپذیرید، این نقش مال شما نیست (p. 168).
 
-> **Ask the CTO: Where Do I Fit?** (pp. 168–169). Might you cofound a company; oversee architecture and its evolution grounded in the business; speak, sell and recruit senior people; manage senior ICs? Perhaps CTO. Enjoy managing people, making processes efficient, prioritizing, org structure, partnering with product — and prefer a roadmap meeting to an architecture review? Perhaps VP of Engineering. The fastest route to CTO is technical cofounder (only while you grow together); to VP, management experience at a larger company then a growing startup. Her VP's advice: wanting the title is like wanting to be married — the company and people matter.
+> **کادر Ask the CTO: من کجای این تصویرم؟** (pp. 168–169). ممکن است شرکتی را هم‌بنیان بگذارید؟ بر معماری و تکاملش با ریشه در کسب‌وکار نظارت کنید؟ سخنرانی و فروش و جذب آدم‌های ارشد را دوست دارید؟ individual contributorهای ارشد را مدیریت می‌کنید؟ شاید CTO. از مدیریت آدم‌ها و کارآمد کردن process و اولویت‌بندی و ساختار سازمانی و شراکت با product لذت می‌برید و جلسه‌ی نقشه‌ی راه را به بازبینی معماری ترجیح می‌دهید؟ شاید VP of Engineering. سریع‌ترین راه به CTO شدن، هم‌بنیان‌گذار فنی بودن است، البته فقط تا وقتی با هم رشد کنید؛ و به VP شدن، تجربه‌ی مدیریت در شرکتی بزرگ‌تر و بعد یک استارتاپ در حال رشد. توصیه‌ی VP خودش: خواستن عنوان مثل خواستنِ ازدواج است؛ شرکت و آدم‌ها مهم‌اند.
 
-### Changing Priorities
+### عوض شدن اولویت‌ها
 
-The CEO wakes with a revelation about a new product line; leadership agrees; but in-flight projects linger, until the question arrives: why aren't you working on the top priority (pp. 169–170)? Leaders far from day-to-day schedules forget teams have priority lists mapped weeks or months ahead (p. 170).
+مدیرعامل با مکاشفه‌ای درباره‌ی خط محصول تازه از خواب بیدار می‌شود؛ تیم رهبری موافقت می‌کند؛ ولی پروژه‌های در جریان همچنان کش می‌آیند تا پرسش برسد: چرا روی اولویت اول کار نمی‌کنید (pp. 169–170)؟ رهبرانی که از زمان‌بندی روزمره دورند فراموش می‌کنند تیم‌ها فهرست اولویتی دارند که هفته‌ها یا ماه‌ها جلوتر چیده شده (p. 170).
 
-- **If you ask your teams this, ask yourself first** whether you knew and communicated the priority clearly and urgently — and **explicitly killed or postponed work in flight** to make room. Saying "top priority" is not the same as making the schedule trade-offs (p. 170).
-- **Being asked means your view of reality and the CEO's are misaligned.** If the team must finish stabilizing a system or a long project first, say so with value, status and timeline — but expect to compromise (pp. 170–171).
-- **Ask teams for the list of affected projects** to send upward, and ask the initiative's originator for its goals to combine with work in flight (p. 171).
-- **Say it at least three times:** most people need to hear something three times. Tell your leadership, hold an all-hands, send email; anticipate questions; sell the change. Upward too: your boss may need to hear something three times before acting — and you may find yourself doing the same (p. 171).
-- **Large organizations change slowly**; keep a founder CEO informed about what's happening and why, with concrete steps (pp. 171–172).
+- **اگر همین را از تیم‌هایتان می‌پرسید، اول از خودتان بپرسید** که آیا اولویت را روشن و فوری می‌دانستید و اعلام کردید، و آیا **کار در جریان را صریحاً کشتید یا عقب انداختید** تا جا باز شود. گفتن «اولویت اول» همان معامله کردن در زمان‌بندی نیست (p. 170).
+- **این‌که چنین پرسشی از شما بشود یعنی تصویر شما از واقعیت با تصویر مدیرعامل هم‌تراز نیست.** اگر تیم باید اول تثبیت یک سیستم یا پروژه‌ای طولانی را تمام کند، با ارزش و وضعیت و زمان‌بندی بگویید، ولی انتظار داشته باشید کوتاه بیایید (pp. 170–171).
+- **از تیم‌ها فهرست پروژه‌های اثرپذیر را بخواهید** تا بالا بفرستید، و از صاحب طرح تازه هدف‌هایش را بخواهید تا با کار در جریان ترکیب کنید (p. 171).
+- **دست‌کم سه بار بگوییدش:** بیشتر آدم‌ها باید چیزی را سه بار بشنوند. به تیم رهبری بگویید، جلسه‌ی همگانی بگذارید، ایمیل بفرستید؛ پرسش‌ها را پیش‌بینی کنید؛ تغییر را بفروشید. رو به بالا هم همین است: شاید رئیستان باید چیزی را سه بار بشنود تا کاری بکند، و شاید خودتان را هم در همین کار ببینید (p. 171).
+- **سازمان‌های بزرگ کند عوض می‌شوند**؛ مدیرعامل بنیان‌گذار را با قدم‌های مشخص در جریان بگذارید که چه خبر است و چرا (pp. 171–172).
 
-### Setting the Strategy
+> **In practice:** وقتی اولویت سازمان عوض می‌شود، backlog تیم داده پر از کار نیمه‌تمامی است که دیگر کسی نمی‌خواهد.
+>
+> **Your turn:** اولویت تازه آمده. با DAGها و جدول‌هایی که برای اولویت قدیمی ساخته شده‌اند چه می‌کنید؟
+>
+> *Answer:* صریحاً متوقفشان کنید و بایگانی کنید، و آن‌چه نگه می‌دارید مالک داشته باشد؛ وگرنه هزینه‌ی نگهداری و on-call می‌ماند. کتاب می‌گوید پروژه‌های در جریان کش می‌آیند مگر کسی صریحاً تمامشان کند (pp. 169–171).
 
-In the summer of 2014, as SVP of Engineering at Rent the Runway, the author was told she'd be put up for CTO if she presented a technology strategy to the board — and the CEO sent back every attempt until it met her standard. With help from the CEO, an executive CTO coach, peers and senior engineers, she went from a vague idea of strategy to one covering architecture and team structure that influenced how the company structured itself (p. 172).
+### تعیین استراتژی
+
+تابستان ۲۰۱۴، وقتی SVP of Engineering در Rent the Runway بود، به او گفتند اگر استراتژی فناوری را به هیئت‌مدیره ارائه کند نامزد CTO شدن می‌شود، و مدیرعامل هر تلاشش را برگرداند تا به استانداردش رسید. با کمک مدیرعامل و یک کوچ اجرایی در سطح CTO و هم‌ترازها و مهندس‌های ارشد، از تصوری مبهم از استراتژی به استراتژی‌ای رسید که معماری و ساختار تیم را پوشش می‌داد و روی شکل‌گیری خود شرکت اثر گذاشت (p. 172).
 
 ```mermaid
 flowchart LR
@@ -138,141 +146,147 @@ flowchart LR
     D --> B["Fit the board's style<br/>a dense deck they read<br/>before the meeting"]
 ```
 
-*The vault's drawing of the four steps (pp. 172–174).*
+*تصویر vault از چهار قدم (pp. 172–174).*
 
-- Her rejected first draft was almost all system and architecture detail with little beyond 6 to 12 months, and ignored business drivers; her sparse speaker's deck didn't suit a board that read dense decks beforehand (pp. 173–174).
-- **Technology strategy "enables the many potential futures of the business"**: architecture, team structure and the business's direction — not deciding the product, but enabling the roadmap (p. 174).
-- The hardest parts were getting started and guessing about the future with imperfect information; afterward she could lead forward rather than reactively, and show engineers a platform vision, not just a product roadmap (p. 174).
+- پیش‌نویس اول که رد شد تقریباً همه‌اش جزئیات سیستم و معماری بود، چیز کمی فراتر از ۶ تا ۱۲ ماه داشت و محرک‌های کسب‌وکار را نادیده می‌گرفت؛ و اسلایدهای کم‌متنِ مخصوص سخنرانی به هیئت‌مدیره‌ای نمی‌خورد که اسلایدهای پرمتن را پیش از جلسه می‌خواند (pp. 173–174).
+- **استراتژی فناوری «آینده‌های بالقوه‌ی زیاد کسب‌وکار را ممکن می‌کند»:** معماری و ساختار تیم و جهت کسب‌وکار؛ محصول را تعیین نمی‌کند، نقشه‌ی راه را ممکن می‌کند (p. 174).
+- سخت‌ترین بخش‌ها شروع کردن و حدس زدن آینده با اطلاعات ناقص بود؛ بعد از آن می‌توانست به‌جای واکنشی بودن رو به جلو رهبری کند و به مهندس‌ها چشم‌اندازی از platform نشان بدهد، نه فقط نقشه‌ی راه محصول (p. 174).
 
-### Challenging Situations: Delivering Bad News
+### موقعیت‌های دشوار: رساندن خبر بد
 
-Layoffs, a disbanded team, an unpopular policy — you're the messenger (pp. 174–175).
+تعدیل نیرو، منحل شدن یک تیم، سیاستی نامحبوب: شما پیام‌آورید (pp. 174–175).
 
-| Do / don't | Why (pp. 175–176) |
+| بکنید / نکنید | چرا (pp. 175–176) |
 |---|---|
-| **Don't blast an impersonal message** to a large group | Email and chat — especially with comments — breed misunderstanding; the second-worst is everyone in one room, where one or two angry people rile the rest |
-| **Do talk to individuals** as much as possible | Start with those likely to react most; give space to react and ask; make clear these are the marching orders. For a whole organization, brief managers with talking points first |
-| **Don't deliver a message you can't stand behind** | Get another executive, HR or a trusted lieutenant to help — you must handle decisions you disagree with maturely, but not alone |
-| **Do be honest about likely outcomes** | Layoffs aren't fun but the company must survive; a disbanded team had real accomplishments and gains new opportunities |
-| **Do think how you'd like to be told** | As when you resign: face-to-face first, perhaps a farewell — sad changes can be marked with grace |
+| **پیام بی‌روح را برای گروه بزرگ نفرستید** | ایمیل و چت، به‌خصوص با امکان نظر دادن، سوءتفاهم می‌سازند؛ بدترین گزینه‌ی بعدی جمع کردن همه در یک اتاق است، جایی که یکی دو نفر عصبانی بقیه را هم می‌شورانند |
+| **تا جای ممکن با تک‌تک آدم‌ها حرف بزنید** | از کسانی شروع کنید که احتمالاً بیشترین واکنش را دارند؛ فضا بدهید واکنش نشان بدهند و بپرسند؛ روشن کنید که این تصمیم گرفته شده است. برای یک سازمان کامل، اول به مدیرها با نکته‌های کلیدی توضیح بدهید |
+| **پیامی را نرسانید که نمی‌توانید پایش بایستید** | از مدیر اجرایی دیگری یا HR یا معاون مورد اعتمادتان کمک بگیرید؛ باید با تصمیم‌هایی که با آن‌ها مخالفید بالغانه برخورد کنید، ولی نه به‌تنهایی |
+| **درباره‌ی نتیجه‌های محتمل صادق باشید** | تعدیل نیرو خوشایند نیست ولی شرکت باید زنده بماند؛ تیمی که منحل می‌شود دستاوردهای واقعی داشته و فرصت‌های تازه‌ای پیدا می‌کند |
+| **فکر کنید خودتان دوست داشتید چطور بشنوید** | مثل وقتی استعفا می‌دهید: اول رودررو و شاید یک خداحافظی؛ تغییرهای غم‌انگیز را هم می‌شود با وقار بدرقه کرد |
 
-> **Ask the CTO: I Have a Nontechnical Boss** (pp. 176–178). From reporting to her CEO: drop jargon and excess detail; run your own 1-1s with prepared topics (and befriend the executive assistant); bring solutions, not problems — and get management coaching elsewhere, without shying away from bad news; ask for advice, which shows respect; repeat important issues ("three times is often the magic number"); be supportive; and find coaching, training and outside peers — "you no longer have a manager; you have a boss."
+> **کادر Ask the CTO: رئیس من غیرفنی است** (pp. 176–178). از تجربه‌ی گزارش دادن به مدیرعامل: اصطلاح‌های تخصصی و جزئیات اضافه را کنار بگذارید؛ جلسه‌های ۱-۱ خودتان را با موضوع‌های آماده بگردانید و با دستیار اجرایی رفیق شوید؛ راه‌حل ببرید، نه مسئله، و کوچینگ مدیریتی را جای دیگری بگیرید، البته بدون پنهان کردن خبر بد؛ نظر بخواهید، که نشانه‌ی احترام است؛ مسئله‌های مهم را تکرار کنید، چون «سه بار اغلب عدد جادویی است»؛ پشتیبان باشید؛ و کوچ و آموزش و هم‌ترازهای بیرونی پیدا کنید، چون «دیگر مدیر ندارید؛ رئیس دارید».
 
-### Senior Peers in Other Functions
+> **In practice:** incident داده‌ای که عدد غلطی به مدیریت رسانده هم خبر بد است.
+>
+> **Your turn:** گزارش ماهانه‌ای که منتشر شده عدد غلط داشته. خبر را چطور می‌رسانید؟
+>
+> *Answer:* زود، مستقیم و با جزئیات: چه عددی، از کِی، علت، و چه کار کرده‌اید که تکرار نشود؛ نه با یک پیام کوتاه در کانال عمومی. کتاب می‌گوید پیام بی‌روح را برای گروه بزرگ نفرستید (pp. 174–176).
 
-Senior leaders must practise first-team focus most of all: the business first, their department second. With few or no engineers among your peers, it can feel isolating (p. 178). Working well with them (pp. 178–180):
+### هم‌ترازهای ارشد در کارکردهای دیگر
 
-- **Let them own their areas**, as they let you own yours. Disagreement with how they run things that doesn't affect your team is like a friend dating someone you don't love: stay out unless asked, and be kind.
-- **Disagree one-on-one or in leadership meetings** — ask the CFO when numbers don't add up, and defend your own roadmap there.
-- **Trust their intentions.** Patrick Lencioni's *The Five Dysfunctions of a Team* names absence of trust as fundamental: assume peers are trying to do their best, not manipulating you. Expect clashes between analytical and intuitive people, and between agility and long-term planning.
-- **Respect and translate.** Peers who aren't analytically driven are not stupid; jargon to people who don't need it makes *us* look stupid.
-- **The cone of silence.** Leadership-team disagreements don't exist outside it; once decided, present a united front. Fall in line or quit — openly disagreeing with peers makes everything worse.
+رهبران ارشد بیش از همه باید تیم‌اول‌محوری را تمرین کنند: اول کسب‌وکار، بعد دپارتمان خودشان. وقتی بین هم‌ترازهایتان مهندس کم است یا نیست، می‌تواند حس انزوا بدهد (p. 178). خوب کار کردن با آن‌ها (pp. 178–180):
 
-### The Echo
+- **بگذارید صاحب حوزه‌ی خودشان باشند**، همان‌طور که آن‌ها می‌گذارند شما صاحب حوزه‌تان باشید. مخالفت با شیوه‌ی کار کردنشان وقتی به تیم شما ربطی ندارد، مثل دوستی است که با کسی دوست شده که شما نمی‌پسندید: تا نپرسیده‌اند دخالت نکنید و مهربان باشید.
+- **اختلاف را خصوصی یا در جلسه‌ی رهبری مطرح کنید**؛ وقتی عددها جور نیستند از CFO بپرسید و همان‌جا از نقشه‌ی راه خودتان دفاع کنید.
+- **به نیتشان اعتماد کنید.** کتاب *The Five Dysfunctions of a Team* از Patrick Lencioni نبود اعتماد را بنیادی‌ترین ناکارکردی می‌داند: فرض کنید هم‌ترازها بهترین کارشان را می‌کنند، نه این‌که دارند دستکاری‌تان می‌کنند. انتظار برخورد بین آدم‌های تحلیلی و شهودی و بین چابکی و برنامه‌ریزی بلندمدت را داشته باشید.
+- **احترام بگذارید و ترجمه کنید.** هم‌ترازی که تحلیلی نیست احمق نیست؛ اصطلاح تخصصی گفتن به کسی که لازمش ندارد *ما* را احمق نشان می‌دهد.
+- **حباب سکوت.** اختلاف‌های تیم رهبری بیرون از آن اتاق وجود ندارند؛ وقتی تصمیم گرفته شد، جبهه‌ی واحد نشان بدهید. یا همراه شوید یا بروید؛ مخالفت علنی با هم‌ترازها همه چیز را بدتر می‌کند.
 
-As the senior-most person, you're watched more closely than ever; people seek your approval and avoid your criticism (p. 180). Your first team is your peers; your organization is your second (p. 180).
+### پژواک
 
-- **Detach socially:** have the drink, then leave; closing the bar with your organization goes badly. Close friendships with reports lead to favouritism, real or perceived (p. 180).
-- **Your words carry weight.** A throwaway comment can redirect someone's whole focus; a "buddy" image blurs thinking aloud and instructions. You suck the oxygen out of a room, and one brainstorm in a meeting you drop into can redirect a project (pp. 180–181).
-- **Your behaviour is copied** — as Apple employees invoked "Steve." If you yell, yelling is OK; if you apologize for mistakes, mistakes are OK; your questions become everyone's; the roles you value attract the ambitious (p. 181).
-- **Don't share your stress downward.** Worries your team can't act on undermine their confidence; transparency that helped at lower levels can damage stability here (p. 181).
-- **Care about people more, not less** — families, hobbies — or you'll start treating them as cogs, and they can tell (pp. 181–182).
+به‌عنوان ارشدترین آدم، بیش از همیشه زیر نگاه‌اید؛ آدم‌ها دنبال تأیید شمایند و از انتقادتان فرار می‌کنند (p. 180). تیم اول شما هم‌ترازهایتان‌اند و سازمانتان تیم دوم (p. 180).
 
-### Ruling with Fear, Guiding with Trust
+- **از نظر اجتماعی فاصله بگیرید:** یک نوشیدنی بخورید و بروید؛ بستن بار همراه سازمانتان بد تمام می‌شود. دوستی نزدیک با زیردست‌ها به جانب‌داری می‌انجامد، واقعی یا در ذهن بقیه (p. 180).
+- **حرفتان وزن دارد.** یک جمله‌ی گذری می‌تواند کل تمرکز کسی را عوض کند؛ تصویر «رفیق» مرز بین بلند فکر کردن و دستور دادن را محو می‌کند. اکسیژن اتاق را می‌کشید و یک ایده‌پردازی در جلسه‌ای که سرزده می‌روید می‌تواند مسیر یک پروژه را عوض کند (pp. 180–181).
+- **رفتارتان تقلید می‌شود**، همان‌طور که کارکنان Apple به «Steve» استناد می‌کردند. اگر داد بزنید، داد زدن مجاز می‌شود؛ اگر بابت اشتباه‌هایتان عذرخواهی کنید، اشتباه کردن مجاز می‌شود؛ پرسش‌های شما پرسش همه می‌شوند؛ و نقش‌هایی که برایشان ارزش قائلید جاه‌طلب‌ها را جذب می‌کنند (p. 181).
+- **فشار و استرستان را رو به پایین پخش نکنید.** نگرانی‌هایی که تیم کاری درباره‌شان نمی‌تواند بکند اعتمادبه‌نفسشان را می‌برد؛ شفافیتی که در levelهای پایین‌تر کمک می‌کرد، این‌جا می‌تواند به ثبات آسیب بزند (p. 181).
+- **به آدم‌ها بیشتر اهمیت بدهید، نه کمتر**، به خانواده و سرگرمی‌شان، وگرنه کم‌کم آن‌ها را چرخ‌دنده می‌بینید و خودشان هم می‌فهمند (pp. 181–182).
 
-"Camille" — technical, charismatic, decisive, short-tempered — makes people afraid; they take fewer risks and hide mistakes. "Michael" stays calm, gets curious and asks questions. The story is true: it's the author's own, and her first review as a senior leader said people feared being publicly reprimanded in front of peers, creating "a vicious cycle of you not trusting them and them making mistakes" (pp. 182–183). Fear comes from valuing correctness and rules, a taste for hierarchy, and backgrounds where open conflict is normal — engineering's tolerance for sparring included; as leader, people who once fought back now feel threatened (p. 183).
+### حکومت با ترس، هدایت با اعتماد
 
-**Correcting a culture of fear** (pp. 183–185):
+«کادر Camille» فنی و جذاب و قاطع و کم‌حوصله است و آدم‌ها از او می‌ترسند؛ کمتر ریسک می‌کنند و اشتباه‌هایشان را پنهان می‌کنند. «Michael» آرام می‌ماند، کنجکاو می‌شود و پرسش می‌پرسد. داستان واقعی است: مال خود نویسنده است، و در اولین ارزیابی‌اش به‌عنوان رهبر ارشد نوشته بودند آدم‌ها می‌ترسند جلوی هم‌ترازها علنی توبیخ شوند و همین «چرخه‌ی معیوبی می‌سازد از این‌که شما به آن‌ها اعتماد نمی‌کنید و آن‌ها اشتباه می‌کنند» (pp. 182–183). ترس از ارزش دادن به درستی و قاعده، از ذائقه‌ی سلسله‌مراتبی، و از پیشینه‌هایی می‌آید که تعارض علنی در آن‌ها عادی است، از جمله تحمل مهندسی در برابر کل‌کل؛ وقتی رهبر شوید، آدم‌هایی که قبلاً جواب می‌دادند حالا حس خطر می‌کنند (p. 183).
 
-| Practice | How |
+**اصلاح فرهنگ ترس** (pp. 183–185):
+
+| کار | چطور |
 |---|---|
-| **Practise relatedness** | Too much efficiency and no small talk made her impersonal. Belonging and safety let people take risks |
-| **Apologize** | Honestly and briefly — "I'm sorry, I should not have yelled at you" — taking responsibility without excuses; it makes the team stronger |
-| **Get curious** | Not every disagreement undermines your authority; attacking makes people hide information, questioning opens them up |
-| **Hold people accountable without making them bad** | Between responsibility and consequences come measures of success, capabilities and feedback. Did you set them up to succeed? |
+| **حس تعلق را تمرین کنید** | کارآمدی بیش از حد و نبود گپ‌وگفت او را بی‌روح کرده بود. تعلق و امنیت است که به آدم‌ها اجازه‌ی ریسک کردن می‌دهد |
+| **عذرخواهی کنید** | صادقانه و کوتاه: «متأسفم، نباید سرت داد می‌زدم»، با پذیرش مسئولیت و بدون بهانه؛ تیم را قوی‌تر می‌کند |
+| **کنجکاو شوید** | هر مخالفتی اقتدارتان را زیر سؤال نمی‌برد؛ حمله کردن آدم‌ها را وامی‌دارد اطلاعات را پنهان کنند و پرسیدن بازشان می‌کند |
+| **پاسخ‌گو نگهشان دارید بدون این‌که بدشان کنید** | بین مسئولیت و پیامد، سنجه‌های موفقیت و توانمندی‌ها و بازخورد می‌نشینند. شما زمینه‌ی موفقیتشان را فراهم کرده بودید؟ |
 
-A culture of fear survives best when things are otherwise going well — growth and interesting problems mask it — and people with options leave when any of that changes (p. 185).
+فرهنگ ترس وقتی بیشترین دوام را دارد که بقیه‌ی چیزها خوب پیش می‌روند، چون رشد و مسئله‌های جذاب پنهانش می‌کنند، و آدم‌هایی که گزینه دارند به‌محض تغییر هر کدام از این‌ها می‌روند (p. 185).
 
-### True North
+### شمال حقیقی
 
-The senior leader of each function sets the baseline of what excellence looks like there: its **True North** (p. 185).
+رهبر ارشد هر کارکرد، خط پایه‌ی این‌که سرآمدی در آن حوزه چه شکلی است را تعیین می‌کند: همان **True North** (p. 185).
 
-| Function | True North (pp. 185–186) |
+| کارکرد | شمال حقیقی (pp. 185–186) |
 |---|---|
-| **Product** | Users and their needs first; measure and experiment; push back on projects that don't serve stated goals |
-| **Finance** | The numbers: costs and value; no accidental overspending; warn when budgets are at risk |
-| **Technology** | Production readiness: honour agreed review, operational oversight and testing policies; ship nothing you don't believe is ready for users; build systems you're proud of |
+| **محصول** | اول کاربرها و نیازشان؛ اندازه بگیرید و آزمایش کنید؛ روبه‌روی پروژه‌هایی که به هدف‌های اعلام‌شده خدمت نمی‌کنند بایستید |
+| **مالی** | خود عددها: هزینه و ارزش؛ خرج اضافیِ ناخواسته نباید پیش بیاید؛ وقتی بودجه در خطر است هشدار بدهید |
+| **فناوری** | آمادگی برای production: به سیاست‌های توافق‌شده‌ی review و نظارت عملیاتی و تست پایبند باشید؛ چیزی را که باور ندارید برای کاربر آماده است تحویل ندهید؛ سیستم‌هایی بسازید که به آن‌ها افتخار کنید |
 
-It is a lens for risk analysis, not a ban on risk. Single points of failure, known bugs, inability to take high load, data loss, undertested code and slow performance can all be acceptable somewhere — but must always be considered (p. 186). It's an underlying pull that teams internalize so they can follow it without nudging; different functions' True Norths create a **healthy tension** that forces everyone to reckon with all the risks (p. 186). As a commerce CTO, the author set True North for production readiness, scaling, design, architecture, testing and language choice, delegating mobile and UI standards to senior staff (pp. 186–187). Fast judgement calls rely on instincts honed by staying technical early and long enough (p. 187).
+این یک عدسی برای تحلیل ریسک است، نه ممنوعیت ریسک. نقطه‌ی تکیِ شکست، باگ شناخته‌شده، ناتوانی در تحمل بار زیاد، از دست رفتن داده، کد کم‌تست و performance کند، همه جایی می‌توانند قابل‌قبول باشند، ولی همیشه باید در نظر گرفته شوند (p. 186). این کششی زیرین است که تیم‌ها درونی‌اش می‌کنند تا بدون تلنگر دنبالش بروند؛ و شمال حقیقیِ متفاوت کارکردها **کششی سالم** می‌سازد که همه را وادار می‌کند با همه‌ی ریسک‌ها تسویه‌حساب کنند (p. 186). نویسنده به‌عنوان CTO یک شرکت تجارت الکترونیک، شمال حقیقی را برای آمادگی production و scaling و طراحی و معماری و تست و انتخاب زبان تعیین کرد و استانداردهای موبایل و UI را به آدم‌های ارشد سپرد (pp. 186–187). قضاوت‌های سریع به حس‌هایی تکیه دارند که با فنی ماندنِ زودهنگام و به‌اندازه‌ی کافی طولانی تیز شده‌اند (p. 187).
 
-**Recommended reading** (p. 187): Arbinger Institute, *Leadership and Self-Deception*; Brené Brown, *Daring Greatly*; Peter Drucker, *The Effective Executive*; Marshall Goldsmith and Mark Reiter, *What Got You Here Won't Get You There*; Andy Grove, *High Output Management*; L. David Marquet, *Turn the Ship Around!*
+**خواندنی‌های پیشنهادی** (p. 187): مؤسسه‌ی Arbinger، *Leadership and Self-Deception*؛ Brené Brown، *Daring Greatly*؛ Peter Drucker، *The Effective Executive*؛ Marshall Goldsmith و Mark Reiter، *What Got You Here Won't Get You There*؛ Andy Grove، *High Output Management*؛ L. David Marquet، *Turn the Ship Around!*
 
-### Assessing Your Own Experience
+### سنجیدن تجربه‌ی خودتان
 
-Questions for reflection (pp. 188–189): do you have a professional coach and a peer network outside the company? Which senior leaders do you admire, and why? How did your last priority change go? Do you understand where the business is going and the technology strategy to get there? Could your team tell which executives you dislike? Can you support decisions you disagreed with? Would you be happy to see people emulate you daily? What principles should your senior engineers or managers use to evaluate work?
+پرسش‌هایی برای تأمل (pp. 188–189): کوچ حرفه‌ای و شبکه‌ی هم‌ترازِ بیرون از شرکت دارید؟ کدام رهبران ارشد را تحسین می‌کنید و چرا؟ آخرین تغییر اولویتتان چطور پیش رفت؟ می‌دانید کسب‌وکار به کجا می‌رود و استراتژی فناوری برای رسیدن به آن چیست؟ تیمتان می‌تواند بفهمد از کدام مدیران اجرایی خوشتان نمی‌آید؟ می‌توانید از تصمیم‌هایی که با آن‌ها مخالف بودید پشتیبانی کنید؟ خوشحال می‌شدید آدم‌ها هر روز از شما تقلید کنند؟ مهندس‌ها یا مدیرهای ارشدتان باید با چه اصولی کار را بسنجند؟
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| CTO keeps management | Power over strategy and staffing | Time away from pure technology |
-| CTO without reports | Freedom for technology | Influence only; risk of figurehead |
-| Announce a new priority | Speed | Nothing changes unless work in flight is cut |
-| Bad news by email or all-hands | Fast, simultaneous | Impersonal; misunderstandings; contagious anger |
-| Bad news one-on-one | Space to react; trust | Time; news may leak |
-| Cone of silence | United front | Must let go when you lose an argument |
-| Socializing heavily with reports | Closeness | Favouritism; blurred instructions |
-| Sharp, sparring style | Fast, "correct" decisions | Culture of fear; hidden mistakes; attrition |
-| One function's True North alone | Clear standard | Ignores other functions' risks — tension is healthy |
+| CTOای که مدیریت را نگه می‌دارد | قدرت بر استراتژی و چیدن نیرو | وقت کمتر برای خود فناوری |
+| CTOای بدون زیردست | آزادی برای فناوری | فقط نفوذ؛ خطر تبدیل شدن به نماد تشریفاتی |
+| اعلام اولویت تازه | سرعت | تا کار در جریان قطع نشود هیچ چیز عوض نمی‌شود |
+| خبر بد با ایمیل یا جلسه‌ی همگانی | سریع و هم‌زمان | بی‌روح؛ سوءتفاهم؛ عصبانیت مسری |
+| خبر بد به شکل تک‌نفره | فضا برای واکنش؛ اعتماد | وقت؛ خبر ممکن است درز کند |
+| حباب سکوت | جبهه‌ی واحد | وقتی بحث را می‌بازید باید رها کنید |
+| معاشرت زیاد با زیردست‌ها | نزدیکی | جانب‌داری؛ مرز محوشده‌ی دستور و گپ |
+| سبک تند و کل‌کلی | تصمیم‌های سریع و «درست» | فرهنگ ترس؛ اشتباه‌های پنهان؛ ریزش نیرو |
+| شمال حقیقیِ یک کارکرد به‌تنهایی | استاندارد روشن | ریسک کارکردهای دیگر را نمی‌بیند؛ این کشش سالم است |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **"Disagree and commit"** (p. 160) is a phrase associated with Intel under Andy Grove and later Amazon's leadership principles.
-- **Will Larson's** *An Elegant Puzzle* (2019) and *The Engineering Executive's Primer* (2024) later covered several of these topics — strategy writing, the first 90 days as an executive, working with the CEO and peers — at greater length.
-- **Engineering Leadership: The Hard Parts.** The second book in this vault, co-written by James Turnbull — whose sidebar appears on pp. 161–162 here — picks up senior leadership in chaotic organizations; its Chapter 8 also discusses CTO and VP of Engineering roles.
+- **عبارت «disagree and commit»** (p. 160) با Intel در دوران Andy Grove و بعدتر با اصول رهبری Amazon گره خورده است.
+- **کتاب‌های Will Larson.** *An Elegant Puzzle* در سال ۲۰۱۹ و *The Engineering Executive's Primer* در سال ۲۰۲۴ بعدتر چند تا از همین موضوع‌ها را مفصل‌تر گفتند: نوشتن استراتژی، ۹۰ روز اول در نقش مدیر اجرایی، و کار با مدیرعامل و هم‌ترازها.
+- **کتاب Engineering Leadership: The Hard Parts.** کتاب دوم این vault که James Turnbull هم‌نویسنده‌اش است، همان کسی که یادداشتش در صص. ۱۶۱–۱۶۲ همین فصل آمده، رهبری ارشد در سازمان‌های آشفته را پی می‌گیرد؛ فصل ۸ آن هم درباره‌ی نقش‌های CTO و VP of Engineering است.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [6. Managing Multiple Teams](06-managing-multiple-teams.md) (first-team focus, saying no), [7. Managing Managers](07-managing-managers.md) (roadmap uncertainty, technical relevance), [9. Bootstrapping Culture](09-bootstrapping-culture.md) (values and culture you set from the top), [5. Managing a Team](05-managing-a-team.md) (being kind, not nice).
+- **فصل‌های مرتبط:** [فصل ۶: مدیریت چند تیم](06-managing-multiple-teams.md) که تیم‌اول‌محوری و نه گفتن را می‌گوید، [فصل ۷: مدیریت مدیرها](07-managing-managers.md) که بلاتکلیفی نقشه‌ی راه و مرتبط ماندن فنی را دارد، [فصل ۹: ساختن فرهنگ از صفر](09-bootstrapping-culture.md) که ارزش‌ها و فرهنگی را می‌گوید که از بالا تعیین می‌کنید، و [فصل ۵: مدیریت یک تیم](05-managing-a-team.md) که مهربان بودن به‌جای خوش‌برخورد بودن را می‌گوید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What are Andy Grove's four categories of management tasks?**
+1. **چهار دسته‌ی کار مدیریتی از نگاه Andy Grove کدام‌اند؟**
 
-   *Answer:* Information gathering or sharing, nudging, decision making, and role modeling (pp. 160–161).
+   *Answer:* جمع کردن یا به اشتراک گذاشتن اطلاعات، تلنگر زدن، تصمیم گرفتن و الگو بودن (pp. 160–161).
 
-2. **Which description best fits the book's definition of a CTO?**
-   - [ ] The best engineer in the company
-   - [ ] The top of the technical career ladder
-   - [x] The strategic technical executive the company needs at its current stage
+2. **کدام توصیف با تعریف کتاب از CTO می‌خواند؟**
+   - [ ] بهترین مهندس شرکت
+   - [ ] بالاترین پله‌ی نردبان شغلی فنی
+   - [x] مدیر اجرایی فنیِ استراتژیکی که شرکت در مرحله‌ی فعلی‌اش لازم دارد
 
    *Answer:* pp. 166–167.
 
-3. **Why does the author warn CTOs against giving up all management responsibility?**
+3. **چرا نویسنده به CTOها هشدار می‌دهد همه‌ی مسئولیت مدیریتی را رها نکنند؟**
 
-   *Answer:* Management is the power to allocate people to what matters; without it a CTO relies purely on influence — at best at others' mercy, at worst a figurehead (pp. 167–168).
+   *Answer:* مدیریت همان قدرت تخصیص آدم‌ها به کارهای مهم است؛ بدون آن، CTO فقط به نفوذ تکیه می‌کند، یعنی در بهترین حالت دست‌بسته‌ی دیگران و در بدترین حالت یک نماد تشریفاتی (pp. 167–168).
 
-4. **The CEO asks why your teams aren't working on the new top priority. What is the likely real problem?**
+4. **مدیرعامل می‌پرسد چرا تیم‌هایتان روی اولویت اول تازه کار نمی‌کنند. مشکل واقعی احتمالاً چیست؟**
 
-   *Answer:* The priority wasn't communicated clearly and urgently, and nobody explicitly killed or postponed work in flight to make room; your view of reality and the CEO's are misaligned (p. 170).
+   *Answer:* اولویت روشن و فوری اعلام نشده و کسی کار در جریان را صریحاً نکشته یا عقب نینداخته تا جا باز شود؛ تصویر شما از واقعیت با تصویر مدیرعامل هم‌تراز نیست (p. 170).
 
-5. **How should you deliver bad news to a large team?**
-   - [ ] One email so everyone hears at once
-   - [ ] One all-hands meeting
-   - [x] Individually where possible, starting with those most affected, with managers briefed first
+5. **خبر بد را به یک تیم بزرگ چطور باید رساند؟**
+   - [ ] یک ایمیل تا همه هم‌زمان بشنوند
+   - [ ] یک جلسه‌ی همگانی
+   - [x] تا جای ممکن تک‌نفره، با شروع از اثرپذیرترین آدم‌ها و با توضیح قبلی به مدیرها
 
    *Answer:* p. 175.
 
-6. **What is "the cone of silence"?**
+6. **«حباب سکوت» چیست؟**
 
-   *Answer:* Disagreements within the leadership team stay there; once a decision is made, leaders commit and present a united front (p. 180).
+   *Answer:* اختلاف‌های داخل تیم رهبری همان‌جا می‌مانند؛ وقتی تصمیم گرفته شد، رهبرها متعهد می‌شوند و جبهه‌ی واحد نشان می‌دهند (p. 180).
 
-7. **Name two ways to correct a culture of fear.**
+7. **دو راه اصلاح فرهنگ ترس بگویید.**
 
-   *Answer:* Practise relatedness, apologize briefly and honestly, get curious instead of attacking, and hold people accountable without making them "bad" (pp. 183–185).
+   *Answer:* تمرین حس تعلق، عذرخواهی کوتاه و صادقانه، کنجکاو شدن به‌جای حمله کردن، و پاسخ‌گو نگه داشتن آدم‌ها بدون «بد» کردنشان (pp. 183–185).
 
-8. **What is True North for a technical leader?**
+8. **شمال حقیقی برای یک رهبر فنی چیست؟**
 
-   *Answer:* The production-readiness standard — honouring agreed policies for review, operational oversight and testing, and shipping only what you believe is ready — against which risks like single points of failure are weighed (pp. 185–186).
+   *Answer:* استاندارد آمادگی برای production، یعنی پایبندی به سیاست‌های توافق‌شده‌ی review و نظارت عملیاتی و تست و تحویل دادن فقط چیزی که باور دارید آماده است، که ریسک‌هایی مثل نقطه‌ی تکیِ شکست با آن سنجیده می‌شوند (pp. 185–186).

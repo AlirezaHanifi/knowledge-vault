@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Delegate or Do It Yourself?</title>
-<meta name="description" content="Sort the book&#x27;s own example tasks into Table 6-1&#x27;s urgency/importance quadrants and Table 6-2&#x27;s complexity/frequency quadrants, and see what each placement tells you to do. Illustrates The Manager&#x27;s Path, Chapter 6.">
+<title>واگذار کنم یا خودم انجام بدهم؟</title>
+<meta name="description" content="کارهای نمونه‌ی خود کتاب را در چهارخانه‌های فوریت و اهمیت جدول ۶-۱ و چهارخانه‌های پیچیدگی و تکرار جدول ۶-۲ بچینید و ببینید هر جایگاه چه می‌گوید. برای فصل ۶ کتاب The Manager's Path.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>.quad { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; } .quad .cell { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; min-height: 88px; background: var(--surface); }
   .quad .cell h3 { margin: 0 0 2px; font-size: .86rem; } .quad .cell .act { font-size: .78rem; color: var(--ink-3); margin-bottom: 4px; }
@@ -14,47 +14,47 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/06-managing-multiple-teams.html">Chapter 6</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Delegation matrix</span>
+      <a href="../chapters/06-managing-multiple-teams.html">فصل ۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ماتریس واگذاری</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 6 · Managing Multiple Teams</div>
-  <h1>Delegate or do it yourself?</h1>
-  <p class="lede">Two small tables carry much of this chapter. <strong>Table 6-1</strong> separates importance from urgency; <strong>Table 6-2</strong> decides what to delegate by how complex and how frequent a task is. Sort the book’s own examples and check them against its answers.</p>
-  <p class="source-note">Illustrates “Managing Your Time: What’s Important, Anyway?” (Table 6-1, pp. 103–106) and “Decisions and Delegation” (Table 6-2, pp. 108–109). The tasks are the book’s examples; the sorting exercise is the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۶ · مدیریت چند تیم</div>
+  <h1>واگذار کنم یا خودم انجام بدهم؟</h1>
+  <p class="lede">دو جدول کوچک بخش بزرگی از این فصل را حمل می‌کنند. <strong>جدول ۶-۱</strong> اهمیت را از فوریت جدا می‌کند و <strong>جدول ۶-۲</strong> با پیچیدگی و تکرار تصمیم می‌گیرد چه چیزی واگذار شود. نمونه‌های خود کتاب را بچینید و با پاسخ‌هایش بسنجید.</p>
+  <p class="source-note">این شبیه‌سازی بخش «مدیریت وقتتان: اصلاً چه چیزی مهم است؟» (جدول ۶-۱، صص. ۱۰۳–۱۰۶) و «تصمیم‌ها و واگذاری» (جدول ۶-۲، صص. ۱۰۸–۱۰۹) را نشان می‌دهد. کارها نمونه‌های خود کتاب‌اند؛ تمرین چیدن مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="tabs" id="tabs">
-    <div role="tablist" aria-label="Which table">
-      <button role="tab" id="t1" aria-controls="p1" aria-selected="true" type="button">Table 6-1 · Your time</button>
-      <button role="tab" id="t2" aria-controls="p2" aria-selected="false" type="button">Table 6-2 · Delegation</button>
+    <div role="tablist" aria-label="کدام جدول">
+      <button role="tab" id="t1" aria-controls="p1" aria-selected="true" type="button">جدول ۶-۱ · وقت شما</button>
+      <button role="tab" id="t2" aria-controls="p2" aria-selected="false" type="button">جدول ۶-۲ · واگذاری</button>
     </div>
     <div role="tabpanel" id="p1" aria-labelledby="t1"></div>
     <div role="tabpanel" id="p2" aria-labelledby="t2" hidden></div>
   </div>
-  <div class="panel" style="margin-top:12px"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+  <div class="panel" style="margin-top:12px"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Important but not urgent</strong> is the quadrant that slips: preparing for meetings, hiring plans, a conflict with another team’s manager. At this level you’re trusted to handle it before it becomes urgent for your boss.</li>
-    <li><strong>Simple and infrequent work is yours</strong> — explaining it would take longer than doing it, even if it feels beneath you.</li>
-    <li><strong>Complex, frequent work is the biggest chance to grow your team</strong>: teach the tasks only you know how to do, or you’ll be hard to promote.</li>
+    <li><strong>مهم ولی غیرفوری</strong> همان چهارخانه‌ای است که از دست می‌رود: آماده شدن برای جلسه‌ها، برنامه‌ی استخدام، و اختلاف با مدیر تیمی دیگر. در این level به شما اعتماد می‌شود که پیش از فوری شدنشان برای رئیستان، رتق‌وفتقشان کنید.</li>
+    <li><strong>کار ساده و کم‌تکرار مال خودتان است</strong>؛ توضیح دادنش از انجام دادنش بیشتر طول می‌کشد، حتی اگر حس کنید در شأنتان نیست.</li>
+    <li><strong>کار پیچیده و پرتکرار بزرگ‌ترین فرصت پروراندن تیم است</strong>: کارهایی را که فقط خودتان بلدید یاد بدهید، وگرنه ارتقا گرفتنتان سخت می‌شود.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/06-managing-multiple-teams.html"><small>Lesson</small>6. Managing Multiple Teams</a></li>
+    <li><a href="../chapters/06-managing-multiple-teams.html"><small>درس</small>فصل ۶: مدیریت چند تیم</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -64,47 +64,47 @@
 
   var log = Kit.log(document.getElementById("log"));
   var T = [
-    { mount: "p1", title: "Table 6-1. Prioritizing your time (p. 104)", cols: ["Not urgent", "Urgent"], rows: ["Important", "Unimportant"],
-      cells: [["Strategic: make time", "Obvious work"], ["Obvious avoid", "Tempting distractions"]],
-      tasks: [["A production outage", 0, 1, "p. 104"], ["Performance reviews due tomorrow", 0, 1, "p. 104"], ["An offer before a candidate’s competing offer expires", 0, 1, "p. 104"],
-              ["Preparing for a meeting so it runs well", 0, 0, "p. 104"], ["Writing job descriptions and a hiring plan", 0, 0, "p. 105"], ["Talking to a manager on another team about a conflict", 0, 0, "p. 105"],
-              ["An unread-email red dot", 1, 1, "Email feels urgent but is the worst channel for urgent information (p. 104)"]] },
-    { mount: "p2", title: "Table 6-2. Deciding when to delegate or do it yourself (p. 108)", cols: ["Frequent", "Infrequent"], rows: ["Simple", "Complex"],
-      cells: [["Delegate", "Do it yourself"], ["Delegate (carefully)", "Delegate for training purposes"]],
-      tasks: [["Running the daily standup", 0, 0, "p. 108"], ["Writing the weekly progress summary", 0, 0, "p. 108"], ["Booking the occasional conference ticket", 0, 1, "p. 108"],
-              ["Running the quarterly report script", 0, 1, "p. 108"], ["Performance reviews and hiring plans", 1, 1, "pp. 108–109"], ["Project planning and systems design", 1, 0, "p. 109"],
-              ["Being the key person in an outage", 1, 0, "p. 109"]] }
+    { mount: "p1", title: "جدول ۶-۱. اولویت دادن به وقتتان (ص. ۱۰۴)", cols: ["غیرفوری", "فوری"], rows: ["مهم", "غیرمهم"],
+      cells: [["استراتژیک: برایش وقت باز کنید", "کار بدیهی"], ["پرهیز بدیهی", "حواس‌پرتی وسوسه‌انگیز"]],
+      tasks: [["قطعی سرویس در production", 0, 1, "ص. ۱۰۴"], ["ارزیابی‌های عملکرد که فردا موعدشان است", 0, 1, "ص. ۱۰۴"], ["پیشنهاد کاری پیش از منقضی شدن پیشنهاد رقیب", 0, 1, "ص. ۱۰۴"],
+              ["آماده شدن برای یک جلسه تا خوب پیش برود", 0, 0, "ص. ۱۰۴"], ["نوشتن شرح شغل و برنامه‌ی استخدام", 0, 0, "ص. ۱۰۵"], ["حرف زدن با مدیر تیمی دیگر درباره‌ی یک اختلاف", 0, 0, "ص. ۱۰۵"],
+              ["نقطه‌ی قرمز ایمیل‌های خوانده‌نشده", 1, 1, "ایمیل حس فوریت می‌دهد ولی بدترین کانال برای اطلاعات فوری است (ص. ۱۰۴)"]] },
+    { mount: "p2", title: "جدول ۶-۲. تصمیم به واگذاری یا انجام دادن خودتان (ص. ۱۰۸)", cols: ["پرتکرار", "کم‌تکرار"], rows: ["ساده", "پیچیده"],
+      cells: [["واگذار کنید", "خودتان انجام بدهید"], ["واگذار کنید، با احتیاط", "برای تمرین واگذار کنید"]],
+      tasks: [["گرداندن standup روزانه", 0, 0, "ص. ۱۰۸"], ["نوشتن خلاصه‌ی پیشرفت هفتگی", 0, 0, "ص. ۱۰۸"], ["گرفتن گاه‌به‌گاه بلیت یک کنفرانس", 0, 1, "ص. ۱۰۸"],
+              ["اجرای اسکریپت گزارش فصلی", 0, 1, "ص. ۱۰۸"], ["ارزیابی عملکرد و برنامه‌ی استخدام", 1, 1, "صص. ۱۰۸–۱۰۹"], ["برنامه‌ریزی پروژه و طراحی سیستم", 1, 0, "ص. ۱۰۹"],
+              ["آدم کلیدی بودن وسط یک قطعی", 1, 0, "ص. ۱۰۹"]] }
   ];
   T.forEach(function (t) {
     var p = document.getElementById(t.mount), sel = [], marks = [];
     p.appendChild(Kit.el("p", { class: "panel-title", style: "margin-top:12px" }, t.title));
     var grid = Kit.el("div", { class: "quad", role: "group", "aria-label": t.title }), lists = [];
-    t.rows.forEach(function (r, ri) { t.cols.forEach(function (c, ci) { var ul = Kit.el("ul", { style: "margin:0;padding-left:1.1em;font-size:.82rem" }); lists.push(ul);
-      grid.appendChild(Kit.el("div", { class: "cell" }, Kit.el("h3", null, r + " · " + c), Kit.el("div", { class: "act" }, "→ " + t.cells[ri][ci]), ul)); }); });
-    var opts = [Kit.el("option", { value: "" }, "Choose a quadrant…")];
+    t.rows.forEach(function (r, ri) { t.cols.forEach(function (c, ci) { var ul = Kit.el("ul", { style: "margin:0;padding-right:1.1em;font-size:.82rem" }); lists.push(ul);
+      grid.appendChild(Kit.el("div", { class: "cell" }, Kit.el("h3", null, r + " · " + c), Kit.el("div", { class: "act" }, "← " + t.cells[ri][ci]), ul)); }); });
+    var opts = [Kit.el("option", { value: "" }, "یک چهارخانه انتخاب کنید…")];
     t.rows.forEach(function (r, ri) { t.cols.forEach(function (c, ci) { opts.push(Kit.el("option", { value: ri + "," + ci }, r + " · " + c)); }); });
     var list = Kit.el("div", { style: "margin-top:12px" });
     t.tasks.forEach(function (k, i) {
-      var id = t.mount + "-s" + i, s = Kit.el("select", { id: id }, opts.map(function (o) { return o.cloneNode(true); })), b = Kit.el("span", { class: "badge", "aria-live": "polite" }, "not sorted");
+      var id = t.mount + "-s" + i, s = Kit.el("select", { id: id }, opts.map(function (o) { return o.cloneNode(true); })), b = Kit.el("span", { class: "badge", "aria-live": "polite" }, "چیده نشده");
       s.addEventListener("change", function () {
-        if (!s.value) { b.className = "badge"; b.textContent = "not sorted"; draw(); return; }
+        if (!s.value) { b.className = "badge"; b.textContent = "چیده نشده"; draw(); return; }
         var v = s.value.split(",").map(Number), ok = v[0] === k[1] && v[1] === k[2];
         b.className = "badge " + (ok ? "ok" : "bad");
-        b.textContent = ok ? "✓ " + t.cells[k[1]][k[2]] + " — " + k[3] : "✗ the book puts it under " + t.rows[k[1]] + " · " + t.cols[k[2]];
-        log.add(k[0] + ": " + (ok ? "matches the book" : "the book says " + t.cells[k[1]][k[2]]), ok ? "ok" : "bad"); draw();
+        b.textContent = ok ? "✓ " + t.cells[k[1]][k[2]] + " — " + k[3] : "✗ کتاب آن را زیر " + t.rows[k[1]] + " · " + t.cols[k[2]] + " می‌گذارد";
+        log.add(k[0] + ": " + (ok ? "با کتاب می‌خواند" : "کتاب می‌گوید " + t.cells[k[1]][k[2]]), ok ? "ok" : "bad"); draw();
       });
       sel.push(s); list.appendChild(Kit.el("div", { class: "task" }, Kit.el("label", { for: id }, k[0]), s, b));
     });
-    var reveal = Kit.el("button", { class: "btn", type: "button" }, "Show the book’s answers");
+    var reveal = Kit.el("button", { class: "btn", type: "button" }, "دیدن پاسخ‌های کتاب");
     reveal.addEventListener("click", function () { t.tasks.forEach(function (k, i) { sel[i].value = k[1] + "," + k[2]; sel[i].dispatchEvent(new Event("change")); }); });
     function draw() { lists.forEach(function (ul) { Kit.clear(ul); }); sel.forEach(function (s, i) { if (!s.value) return; var v = s.value.split(",").map(Number); lists[v[0] * 2 + v[1]].appendChild(Kit.el("li", null, t.tasks[i][0])); }); }
     p.appendChild(grid); p.appendChild(list); p.appendChild(Kit.el("div", { class: "row", style: "margin-top:10px" }, reveal));
   });
   Kit.tabs(document.getElementById("tabs"));
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Which quadrant does the book say you must make time for?", options: ["Important and urgent", "Important but not urgent", "Unimportant but urgent"], answer: 1, explain: "“Strategic: make time” (p. 104)." },
-    { q: "A task is simple but you do it only once a quarter. What does Table 6-2 say?", options: ["Delegate", "Do it yourself", "Delegate for training purposes"], answer: 1, explain: "Explaining it takes longer than doing it (p. 108)." },
-    { q: "Why delegate complex, frequent tasks such as systems design?", options: ["They are boring", "They are the biggest opportunity to grow your team, and your teams must run without you", "Managers aren’t allowed to do them"], answer: 1, explain: "p. 109." }
+    { q: "کتاب می‌گوید باید برای کدام چهارخانه وقت باز کنید؟", options: ["مهم و فوری", "مهم ولی غیرفوری", "غیرمهم ولی فوری"], answer: 1, explain: "«استراتژیک: برایش وقت باز کنید» (ص. ۱۰۴)." },
+    { q: "کاری ساده است ولی فقط فصلی یک‌بار انجامش می‌دهید. جدول ۶-۲ چه می‌گوید؟", options: ["واگذار کنید", "خودتان انجام بدهید", "برای تمرین واگذار کنید"], answer: 1, explain: "توضیح دادنش از انجام دادنش بیشتر طول می‌کشد (ص. ۱۰۸)." },
+    { q: "چرا کارهای پیچیده و پرتکرار مثل طراحی سیستم را واگذار کنیم؟", options: ["کسل‌کننده‌اند", "بزرگ‌ترین فرصت پروراندن تیم‌اند، و تیم‌هایتان باید بدون شما بچرخند", "مدیرها اجازه ندارند انجامشان بدهند"], answer: 1, explain: "ص. ۱۰۹." }
   ]);
 
 })();

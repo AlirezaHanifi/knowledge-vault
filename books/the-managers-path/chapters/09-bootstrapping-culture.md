@@ -3,229 +3,243 @@ book: the-managers-path
 chapter: 9
 title: "Bootstrapping Culture"
 pages: "191–216"
+translated_title: "ساختن فرهنگ از صفر"
+lang: fa
 ---
 
-# 9. Bootstrapping Culture
+# فصل ۹: ساختن فرهنگ از صفر
 
-[← 8. The Big Leagues](08-the-big-leagues.md) · [Book](../README.md) · [10. Conclusion →](10-conclusion.md)
+[فصل ۸: لیگ بزرگ‌ها →](08-the-big-leagues.md) · [کتاب](../README.md) · [فصل ۱۰: جمع‌بندی ←](10-conclusion.md)
 
-## Summary
+## خلاصه
 
-A senior engineering leader sets the culture of their function, and treating culture as infrastructure — something you tend deliberately — is the chapter's theme. Startups resist "structure" and "process"; the author reframes them as *learning* and *transparency*. Drawing on Jo Freeman's "The Tyranny of Structurelessness," she argues that unstructured teams work only under narrow conditions and otherwise run on hidden hierarchies, so structure should grow with the company's people, age, infrastructure and risk tolerance — guided by failures rather than copied successes (Gall's law). The rest is practical: defining and applying core values, writing a career ladder (after a first one that flopped), building cross-functional teams, and adding engineering processes — code review, postmortems, architecture review — as risk management that depersonalizes decisions (pp. 191–216).
+رهبر ارشد مهندسی فرهنگ کارکرد خودش را تعیین می‌کند، و درون‌مایه‌ی این فصل همین است که فرهنگ را مثل زیرساخت ببینیم؛ چیزی که عامدانه به آن می‌رسید. استارتاپ‌ها در برابر «ساختار» و «process» مقاومت می‌کنند؛ نویسنده همان‌ها را *یادگیری* و *شفافیت* بازتعریف می‌کند. با تکیه بر مقاله‌ی «The Tyranny of Structurelessness» از Jo Freeman استدلال می‌کند که تیم‌های بی‌ساختار فقط در شرایطی باریک کار می‌کنند و در بقیه‌ی حالت‌ها روی سلسله‌مراتب‌های پنهان می‌چرخند، پس ساختار باید همراه با آدم‌ها و سن و زیرساخت و تحمل ریسک شرکت رشد کند، آن هم به راهنمایی شکست‌ها، نه کپی کردن موفقیت‌ها؛ قانون Gall. بقیه‌ی فصل عملی است: تعریف و به‌کار بستن ارزش‌های بنیادین، نوشتن نردبان شغلی بعد از نردبان اولی که شکست خورد، ساختن تیم‌های بین‌کارکردی، و افزودن processهای مهندسی مثل code review و postmortem و بازبینی معماری به‌عنوان مدیریت ریسکی که تصمیم‌ها را از آدم‌ها جدا می‌کند (pp. 191–216).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Talk about learning and transparency, not structure and process:** we encode lessons from success and failure so the organization scales (p. 191).
-- **Structurelessness hides power.** Freeman's unstructured group works only if it is task-oriented, small and homogeneous, highly communicative and low in specialization — a description of many early startups (pp. 193–194).
-- **Size structure to the vessel** — race car, airliner, spaceship — by people, age, existing infrastructure and risk tolerance; let failures, not successes, show where to add or remove it (pp. 195–198).
-- **Culture is the unspoken shared rules of a community**; real values ("people who value innovation, data…") include more people than credentials ("MIT graduates") and work better than friendship tests for fit (pp. 198–202).
-- **A borrowed career ladder can flop.** Write it with the team, in detail, with long-form descriptions, salary bands matched to the number of levels, a breakpoint level, keystone promotions and split tracks (pp. 202–208).
-- **Cross-functional teams** turned "us versus them" into "us" at Rent the Runway — Conway's law favours product communication over technical elegance; keep 20% for engineering work (pp. 208–211).
-- **Process is risk management:** heavy process only for rare or hidden-risk activities; code review, blameless postmortems and architecture review depersonalize decisions (pp. 211–216).
+- **به‌جای ساختار و process، از یادگیری و شفافیت حرف بزنید:** درس‌های موفقیت و شکست را رمزگذاری می‌کنیم تا سازمان مقیاس بگیرد (p. 191).
+- **بی‌ساختاری قدرت را پنهان می‌کند.** گروه بی‌ساختار Freeman فقط وقتی کار می‌کند که کارمحور و کوچک و هم‌گون باشد، ارتباطش زیاد باشد و تخصصی‌شدن مهارت‌ها کم باشد؛ یعنی توصیف خیلی از استارتاپ‌های اولیه (pp. 193–194).
+- **ساختار را به اندازه‌ی وسیله بدوزید**، یعنی ماشین مسابقه، هواپیمای مسافربری یا سفینه، بر پایه‌ی تعداد آدم‌ها و سن و زیرساخت موجود و تحمل ریسک؛ و بگذارید شکست‌ها، نه موفقیت‌ها، نشان بدهند کجا ساختار اضافه یا کم شود (pp. 195–198).
+- **فرهنگ همان قاعده‌های مشترک و نانوشته‌ی یک جامعه است**؛ ارزش‌های واقعی، مثل «آدم‌هایی که برای نوآوری و داده ارزش قائل‌اند»، آدم‌های بیشتری را در بر می‌گیرند تا مدرک، مثل «فارغ‌التحصیل‌های MIT»، و از آزمون رفاقت برای سنجش تناسب بهتر کار می‌کنند (pp. 198–202).
+- **نردبان شغلیِ قرضی می‌تواند شکست بخورد.** آن را با خود تیم بنویسید، با جزئیات، با توصیف‌های بلند، با بازه‌های حقوقی متناسب با تعداد levelها، با یک level نقطه‌ی توقف، با ارتقاهای کلیدی و با مسیرهای جدا (pp. 202–208).
+- **تیم‌های بین‌کارکردی** در Rent the Runway «ما در برابر آن‌ها» را به «ما» تبدیل کردند؛ قانون Conway ارتباط محصولی را بر ظرافت فنی مقدم می‌کند؛ ۲۰٪ را برای کار مهندسی نگه دارید (pp. 208–211).
+- **مفهوم process یعنی مدیریت ریسک:** process سنگین فقط برای کار نادر یا کاری که ریسکش پنهان است؛ code review و postmortem بدون سرزنش و بازبینی معماری تصمیم‌ها را از آدم‌ها جدا می‌کنند (pp. 211–216).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Assessing Your Role — p. 195
-- Creating Your Culture — p. 198
-- Applying Core Values — p. 200
-- Creating Cultural Policy — p. 202
-- Writing a Career Ladder — p. 204
-- Cross-Functional Teams — p. 208
-  - Structuring Cross-Functional Teams — p. 210
-- Developing Engineering Processes — p. 211
-- Practical Advice: Depersonalize Decision Making — p. 213
-  - Code Review — p. 213
-  - The Outage Postmortem — p. 214
-  - Architecture Review — p. 215
-- Assessing Your Own Experience — p. 216
+- سنجیدن نقش خودتان — p. 195
+- ساختن فرهنگتان — p. 198
+- به کار بستن ارزش‌های بنیادین — p. 200
+- ساختن سیاست فرهنگی — p. 202
+- نوشتن نردبان شغلی — p. 204
+- تیم‌های بین‌کارکردی — p. 208
+  - ساختاربندی تیم‌های بین‌کارکردی — p. 210
+- پروراندن processهای مهندسی — p. 211
+- توصیه‌ی عملی: تصمیم‌گیری را از آدم‌ها جدا کنید — p. 213
+  - بازبینی کد — p. 213
+  - بخش postmortem یک قطعی — p. 214
+  - بازبینی معماری — p. 215
+- سنجیدن تجربه‌ی خودتان — p. 216
 
-## Notes
+## یادداشت‌ها
 
-A common failing of first-time CTOs is underestimating the importance of being deliberate about engineering culture; attend to it like any infrastructure you rely on (p. 191). At Rent the Runway the author introduced structure to a classic "scrappy startup" team, where structure sounded "slow" and "innovation-crushing" (p. 191). Her reframing: **learning instead of structure, transparency instead of process** — we build systems to learn from successes and mistakes and share those lessons transparently, which makes organizations stable and scalable (p. 191). Approach it scientifically: have a theory and test it (p. 192).
+یکی از خطاهای رایج CTOهای بار اولی، دست‌کم گرفتن اهمیت عامدانه بودن در فرهنگ مهندسی است؛ مثل هر زیرساخت دیگری که به آن تکیه می‌کنید به آن برسید (p. 191). نویسنده در Rent the Runway ساختار را به تیمی کلاسیکِ «استارتاپی و دست‌به‌آچار» آورد، جایی که ساختار یعنی «کند» و «خفه‌کننده‌ی نوآوری» (p. 191). بازتعریف او: **یادگیری به‌جای ساختار، شفافیت به‌جای process**؛ سیستم می‌سازیم تا از موفقیت‌ها و اشتباه‌ها یاد بگیریم و آن درس‌ها را شفاف به اشتراک بگذاریم، و همین است که سازمان را باثبات و مقیاس‌پذیر می‌کند (p. 191). علمی به آن نگاه کنید: نظریه‌ای داشته باشید و آزمونش کنید (p. 192).
 
-Early startups attract people who trade high uncertainty and risk for freedom; almost everything is undecided, from frameworks to vacation policy and even company values. The key behaviour is **decisiveness**: pick a strategy and run; you need a solution that gets you to the next milestone, not a perfect one. "Deciding not to decide," such as having no titles, is popular and harmless at a few people (pp. 192–193).
+استارتاپ‌های اولیه آدم‌هایی را جذب می‌کنند که بلاتکلیفی و ریسک بالا را با آزادی معامله می‌کنند؛ تقریباً هیچ چیز تعیین‌نشده نیست، از frameworkها تا سیاست مرخصی و حتی ارزش‌های شرکت. رفتار کلیدی **قاطعیت** است: یک استراتژی بردارید و بدوید؛ به راه‌حلی نیاز دارید که شما را به milestone بعدی برساند، نه به راه‌حل بی‌نقص. «تصمیم گرفتن به تصمیم نگرفتن»، مثل نداشتن عنوان شغلی، در چند نفر محبوب و بی‌خطر است (pp. 192–193).
 
-**"The Tyranny of Structurelessness."** Jo Freeman's essay on early feminist collectives applies to startups: pretending to lack structure creates hidden power structures. She lists when an unstructured group can work (pp. 193–194):
+**مقاله‌ی «The Tyranny of Structurelessness».** یادداشت Jo Freeman درباره‌ی جمع‌های فمینیستی اولیه به استارتاپ‌ها هم می‌خورد: وانمود کردن به نداشتن ساختار، ساختار قدرتی پنهان می‌سازد. او فهرست می‌کند کِی یک گروه بی‌ساختار می‌تواند کار کند (pp. 193–194):
 
-| Freeman's condition | In a typical early startup (p. 194) |
+| شرط Freeman | در یک استارتاپ اولیه‌ی معمول (p. 194) |
 |---|---|
-| **Task-oriented** — the task structures the group | Engineering as the execution arm of the product or founder |
-| **Relatively small and homogeneous** — a common language | "Full stack" engineers hired from the team's own networks |
-| **High degree of communication** — practical only at about five people, or 10–15 as overlapping subgroups, since interactions grow geometrically | A colocated team |
-| **Low skill specialization** — everything can be done by more than one person | Interchangeable generalists |
+| **کارمحور**، یعنی خود کار به گروه ساختار می‌دهد | مهندسی به‌عنوان بازوی اجرای محصول یا بنیان‌گذار |
+| **نسبتاً کوچک و هم‌گون**، با زبان مشترک | مهندس‌های «full stack» که از شبکه‌ی خود تیم استخدام شده‌اند |
+| **ارتباط زیاد**، که عملاً فقط در حدود پنج نفر شدنی است، یا ۱۰ تا ۱۵ نفر در زیرگروه‌های هم‌پوشان، چون تعامل‌ها هندسی رشد می‌کنند | تیمی که یک‌جا می‌نشیند |
+| **تخصصی‌شدن کم مهارت**، یعنی هر کاری را بیش از یک نفر می‌تواند بکند | آدم‌های همه‌فن‌حریفِ جایگزین‌پذیر |
 
-Such a team is either less self-directed than it believes or run by hidden hierarchies — often both (p. 194). The same goes for code: work done task by task by interchangeable people produces spaghetti code, and refactoring means drawing out structure. **Structure is how we scale, diversify and take on complex long-term work** — in software, teams and processes alike (pp. 194–195).
+چنین تیمی یا کمتر از آنچه فکر می‌کند خودگردان است یا با سلسله‌مراتب‌های پنهان اداره می‌شود، و اغلب هر دو (p. 194). همین درباره‌ی کد هم صدق می‌کند: کاری که وظیفه‌به‌وظیفه توسط آدم‌های جایگزین‌پذیر انجام شود کد اسپاگتی می‌سازد، و refactoring یعنی بیرون کشیدن ساختار. **ساختار همان چیزی است که با آن مقیاس می‌گیریم، متنوع می‌شویم و کار پیچیده‌ی بلندمدت برمی‌داریم**، چه در نرم‌افزار، چه در تیم‌ها، چه در processها (pp. 194–195).
 
-Structure can come too early — a five-person reporting chain, or meetings about which toilet paper to stock — but in small companies it more often comes **too late**: one person who decides everything and changes his mind is fine with three people and costly with 50 (p. 195). A friend's analogy: an early startup is a race car (close to the ground, quick turns, you only crash yourself), then a commercial flight, then a spaceship (slow to turn, course set long in advance, but carrying many people far) (p. 195).
+ساختار می‌تواند زود بیاید، مثل زنجیره‌ی گزارش‌دهی پنج‌نفره یا جلسه درباره‌ی این‌که چه دستمال کاغذی بخریم، ولی در شرکت‌های کوچک بیشتر **دیر** می‌آید: یک نفر که همه چیز را تصمیم می‌گیرد و نظرش عوض می‌شود با سه نفر مشکلی نیست و با ۵۰ نفر گران تمام می‌شود (p. 195). قیاس یکی از دوستانش: استارتاپ اولیه ماشین مسابقه است، نزدیک زمین و با پیچ‌های سریع و فقط خودتان تصادف می‌کنید؛ بعد پرواز تجاری می‌شود؛ و بعد سفینه، که کند می‌چرخد و مسیرش خیلی زودتر تعیین شده ولی آدم‌های زیادی را دور می‌برد (p. 195).
 
-### Assessing Your Role
+### سنجیدن نقش خودتان
 
-Recognize the size of the vessel you're steering (pp. 195–196):
+بفهمید وسیله‌ای که هدایتش می‌کنید چقدر بزرگ است (pp. 195–196):
 
-| Factor | Effect on structure |
+| عامل | اثرش بر ساختار |
 |---|---|
-| **People** | More people need more thoughtful structure; leaders wanting control need more of it. Modern companies structure goal setting rather than top-down decisions — which still needs structure |
-| **Age** | Older companies have entrenched habits, but are more likely to survive |
-| **Size of existing infrastructure** | Few business rules, little code or physical infrastructure (stores, warehouses, inventory) → less structure; more of them → more clarity needed |
-| **Risk tolerance** | Regulation and what's at stake; more people depending on you means less appetite for risk even without regulators |
+| **آدم‌ها** | آدم بیشتر ساختار سنجیده‌تری می‌خواهد؛ رهبرهایی که کنترل می‌خواهند ساختار بیشتری لازم دارند. شرکت‌های امروزی به‌جای تصمیم از بالا به پایین، هدف‌گذاری را ساختارمند می‌کنند، که باز هم ساختار می‌خواهد |
+| **سن** | شرکت‌های قدیمی‌تر عادت‌های ریشه‌دار دارند، ولی احتمال زنده ماندنشان بیشتر است |
+| **اندازه‌ی زیرساخت موجود** | قاعده‌های کسب‌وکاری کم و کد یا زیرساخت فیزیکی کم، مثل فروشگاه و انبار و موجودی، یعنی ساختار کمتر؛ زیاد بودنشان یعنی نیاز به روشنی بیشتر |
+| **تحمل ریسک** | مقررات و اندازه‌ی چیزی که در خطر است؛ وقتی آدم‌های بیشتری به شما وابسته‌اند، حتی بدون نهاد ناظر هم اشتهای ریسکتان کم می‌شود |
 
-**Gall's law** (John Gall, *Systemantics*): a complex system that works evolved from a simple system that worked; one designed from scratch never works (p. 196).
+**قانون Gall** از John Gall در *Systemantics*: هر سیستم پیچیده‌ای که کار می‌کند، از سیستم ساده‌ای تکامل یافته که کار می‌کرد؛ سیستمی که از صفر طراحی شود هیچ‌وقت کار نمی‌کند (p. 196).
 
-- **Let failure guide evolution.** One person quitting for lack of a career path may not justify a ladder; several quitting or declining offers might. Examine all aspects of reality behind each failure, weigh its frequency and cost, and change structure — adding *or removing* it — at the level where the failure occurs (p. 197).
-- **Success is a poor teacher.** We blame failure on bad luck and credit success to ourselves; success tempts us with "one weird trick." Know the improvement you want and the context that made it work (p. 197).
-- **Learning isn't free.** Investing in structure for efficiency pays off when the company will be around; if future time is worth less than present time, you won't bother (pp. 197–198).
-- **Don't cling to old structure either.** Technology changes the risks — in SaaS, shipping a bug is less risky than falling behind on features, so infrequent releases are now the risky choice (p. 198).
-- **Failures from too little structure:** every new hire slowed for months by no onboarding; people leaving with no growth path; the third outage from someone dropping a critical table directly in the database (p. 198).
+- **بگذارید شکست تکامل را هدایت کند.** رفتن یک نفر به‌خاطر نبود مسیر شغلی شاید ساختن نردبان را توجیه نکند؛ رفتن یا رد کردن پیشنهاد توسط چند نفر شاید بکند. همه‌ی وجوه واقعیتِ پشت هر شکست را بررسی کنید، تکرار و هزینه‌اش را بسنجید، و ساختار را در همان سطحی که شکست رخ داده عوض کنید، چه با اضافه کردن و چه با *برداشتن* (p. 197).
+- **موفقیت معلم بدی است.** شکست را به بدشانسی نسبت می‌دهیم و موفقیت را به خودمان؛ موفقیت ما را با «یک ترفند عجیب» وسوسه می‌کند. بدانید دنبال چه بهبودی هستید و چه زمینه‌ای آن را جواب داده بود (p. 197).
+- **یادگیری مجانی نیست.** سرمایه‌گذاری روی ساختار برای کارآمدی وقتی جواب می‌دهد که شرکت قرار باشد بماند؛ اگر زمان آینده از زمان حال کم‌ارزش‌تر باشد، سراغش نمی‌روید (pp. 197–198).
+- **به ساختار قدیمی هم نچسبید.** فناوری ریسک‌ها را عوض می‌کند؛ در SaaS، تحویل دادن یک باگ کم‌ریسک‌تر از عقب افتادن در featureهاست، پس حالا release کم‌تکرار همان انتخاب پرریسک است (p. 198).
+- **شکست‌هایی که از کمبود ساختار می‌آیند:** هر تازه‌واردی که به‌خاطر نبود onboarding ماه‌ها کند می‌شود؛ آدم‌هایی که بدون مسیر رشد می‌روند؛ سومین قطعی به‌خاطر کسی که جدولی حیاتی را مستقیم در دیتابیس انداخته (p. 198).
 
-### Creating Your Culture
+### ساختن فرهنگتان
 
-"Culture is how things get done, without people having to think about it" (Frederic Laloux, quoted p. 198). **Culture is the generally unspoken shared rules of a community** — like handshakes or how you address people of different standing. People also decide by contracts or data, but where the group's needs must override the individual's, under uncertainty, **cultural values are the glue** (p. 199).
+«فرهنگ یعنی کارها چطور انجام می‌شوند، بی‌آن‌که آدم‌ها لازم باشد به آن فکر کنند» (Frederic Laloux، نقل‌شده در p. 198). **فرهنگ همان قاعده‌های مشترکِ عموماً نانوشته‌ی یک جامعه است**، مثل دست دادن یا شیوه‌ی خطاب کردن آدم‌هایی با جایگاه‌های مختلف. آدم‌ها با قرارداد یا داده هم تصمیم می‌گیرند، ولی جایی که نیاز گروه باید بر نیاز فرد بچربد و اوضاع نامعلوم است، **ارزش‌های فرهنگی چسب کارند** (p. 199).
 
-- A healthy culture won't fall out automatically; in reality culture is formed by early employees in a race for survival, often as a post hoc justification. Not everyone fits every company (p. 199).
-- **Real values can reduce discrimination.** "Engineers who graduated from MIT" is not a culture; "people who value technology innovation, hard work, intellect, scientific process, and data" might be — and admits far more people who share real principles (p. 199).
-- **You're measured against the founders' values** whether you realize it or not. People who embody all of them do well naturally; others feel friction. For executives, the overlap between your values and the company's largely determines how easy the fit will be (p. 200).
+- فرهنگ سالم خودبه‌خود در نمی‌آید؛ در عمل فرهنگ را کارمندهای اولیه وسط مسابقه‌ی بقا می‌سازند و اغلب بعداً برایش توجیه می‌تراشند. هر کسی به هر شرکتی نمی‌خورد (p. 199).
+- **ارزش‌های واقعی می‌توانند تبعیض را کم کنند.** «مهندس‌هایی که از MIT فارغ‌التحصیل شده‌اند» فرهنگ نیست؛ «آدم‌هایی که برای نوآوری فناورانه و کار سخت و هوش و روش علمی و داده ارزش قائل‌اند» شاید باشد، و آدم‌های خیلی بیشتری را می‌پذیرد که واقعاً اصول مشترکی دارند (p. 199).
+- **چه بدانید چه ندانید با ارزش‌های بنیان‌گذارها سنجیده می‌شوید.** آدم‌هایی که همه‌ی آن ارزش‌ها را در خودشان دارند طبیعی جلو می‌روند؛ بقیه اصطکاک حس می‌کنند. برای مدیران اجرایی، هم‌پوشانی ارزش‌های شما با ارزش‌های شرکت تا حد زیادی تعیین می‌کند این تناسب چقدر آسان خواهد بود (p. 200).
 
-### Applying Core Values
+### به کار بستن ارزش‌های بنیادین
 
-| Step | How (pp. 200–202) |
+| قدم | چطور (pp. 200–202) |
 |---|---|
-| **Define your culture** | Map company values onto your team and add your own: the Rent the Runway tech team explicitly valued diversity (what you can do and could do, not checkboxes) and layered a learning culture on top. Subteams will differ |
-| **Reinforce it by rewarding it** | Value stories at all-hands — shoutouts for "keeping it dope." Push past shyness about praise. Use performance reviews to call out values in action, and to see who embodies them |
-| **Spot values conflicts** | Someone who pushes work onto others, under "roll up your sleeves"; a constant naysayer, under "happiness and positivity is a choice" (a real Rent the Runway value the author had to learn). Coaching with values names otherwise vague friction |
-| **Use values in interviews** | Ask interviewers to look for matches and collisions with specific values — not "would I like being stuck in an airport with this person?" Friendship tests correlate with schooling, race, class and gender, so are almost certainly discriminatory. Be specific: an independence-loving engineer on a team that collaborates on everything; "the most analytical argument wins" in a company that values empathy and intuition |
+| **فرهنگتان را تعریف کنید** | ارزش‌های شرکت را روی تیمتان نگاشت کنید و ارزش‌های خودتان را اضافه کنید: تیم فنی Rent the Runway صریحاً برای تنوع ارزش قائل بود، یعنی آنچه می‌توانید و می‌توانستید بکنید، نه تیک زدن خانه‌ها، و رویش فرهنگ یادگیری را سوار کرد. زیرتیم‌ها با هم فرق خواهند داشت |
+| **با پاداش دادن تقویتش کنید** | در جلسه‌های همگانی داستان ارزش‌ها را بگویید، با تقدیر از کسانی که «کار را درست نگه داشته‌اند». خجالت از تعریف کردن را کنار بگذارید. در ارزیابی عملکرد ارزش‌های در عمل را نام ببرید و ببینید چه کسی آن‌ها را در خودش دارد |
+| **تعارض ارزش‌ها را ببینید** | کسی که کارش را به دیگران هل می‌دهد، زیر ارزش «آستین بالا زدن»؛ یا کسی که همیشه مخالف است، زیر ارزش «خوشحالی و مثبت بودن یک انتخاب است»، که ارزش واقعی Rent the Runway بود و نویسنده باید یادش می‌گرفت. کوچینگ با زبان ارزش‌ها به اصطکاکی که وگرنه مبهم می‌ماند اسم می‌دهد |
+| **در مصاحبه از ارزش‌ها استفاده کنید** | از مصاحبه‌کننده‌ها بخواهید دنبال هم‌خوانی و برخورد با ارزش‌های مشخص بگردند، نه دنبال این‌که «دوست داشتم با این آدم در فرودگاه گیر بیفتم؟» آزمون رفاقت با مدرسه و نژاد و طبقه و جنسیت هم‌بسته است، پس تقریباً به‌طور قطع تبعیض‌آمیز است. مشخص باشید: مهندسی که استقلال را دوست دارد در تیمی که سر همه چیز با هم کار می‌کند؛ یا «تحلیلی‌ترین استدلال برنده است» در شرکتی که برای همدلی و شهود ارزش قائل است |
 
-Write the values down and use the list to evaluate candidates, praise people and shape reviews (p. 202).
+ارزش‌ها را بنویسید و از همان فهرست برای سنجیدن نامزدها و تعریف کردن از آدم‌ها و شکل دادن به ارزیابی‌ها استفاده کنید (p. 202).
 
-### Creating Cultural Policy
+### ساختن سیاست فرهنگی
 
-Policies (career paths, pay scales, incident management) are increasingly shared publicly, but copying a starting point isn't enough (p. 202). The author's first career ladder was prompted by failure: an HR salary review revealed **no salary structure** — pay reflected previous salaries and negotiating skill — and no clarity on what "senior" meant for hiring (pp. 202–203).
+سیاست‌ها، مثل مسیر شغلی و بازه‌های حقوقی و مدیریت حادثه، بیش از پیش عمومی منتشر می‌شوند، ولی کپی کردن یک نقطه‌ی شروع کافی نیست (p. 202). اولین نردبان شغلی نویسنده را یک شکست رقم زد: بازبینی حقوقیِ HR نشان داد **هیچ ساختار حقوقی‌ای وجود ندارد**، چون حقوق‌ها بازتاب حقوق قبلی و مهارت چانه‌زنی بودند، و روشن نبود «ارشد» در استخدام یعنی چه (pp. 202–203).
 
-| What she did | What happened (pp. 203–204) |
+| چه کرد | چه شد (pp. 203–204) |
 |---|---|
-| Borrowed a friend's ladder: eight levels, four categories (technical skills, getting stuff done, impact, communication and leadership), a sentence or two per cell | Too thin, especially at the earliest levels |
-| Rolled it out his way: "it's about fairness, don't obsess over your level," plus John Allspaw's "On Being a Senior Engineer" | **A flop.** Vague details made people obsess *more* and argue for higher levels |
-| — | Why: his team shared a background at one large tech company; hers came from startups, finance and big tech, with no shared habits. **What works for one company doesn't translate, even between similar ones** |
+| نردبان یکی از دوستانش را قرض گرفت: هشت level، چهار دسته، یعنی مهارت فنی و به سرانجام رساندن کار و اثرگذاری و ارتباط و رهبری، با یکی دو جمله برای هر خانه | خیلی رقیق بود، به‌خصوص در levelهای اول |
+| همان‌طور که او گفته بود ارائه‌اش کرد: «موضوع انصاف است، روی level خودتان وسواس نداشته باشید»، به‌علاوه‌ی یادداشت «On Being a Senior Engineer» از John Allspaw | **شکست خورد.** جزئیات مبهم باعث شد آدم‌ها *بیشتر* وسواس بگیرند و برای level بالاتر چانه بزنند |
+| — | چرا: تیم آن دوست پیشینه‌ی مشترکی در یک شرکت بزرگ فناوری داشت؛ تیم او از استارتاپ و صنعت مالی و شرکت‌های بزرگ آمده بود و عادت مشترکی نداشت. **چیزی که برای یک شرکت کار می‌کند ترجمه نمی‌شود، حتی بین شرکت‌های شبیه هم** |
 
-### Writing a Career Ladder
+### نوشتن نردبان شغلی
 
-> **Try it:** [Levels and salary bands](../widgets/09-salary-bands.html) — choose few wide overlapping levels or many narrow ones, starting from the book's example bands, and see how promotion pace, overlap and pay spread change.
+> **Try it:** [levelها و بازه‌های حقوقی](../widgets/09-salary-bands.html)؛ از روی بازه‌های نمونه‌ی کتاب شروع کنید و بین levelهای کم و پهن و هم‌پوشان یا levelهای زیاد و باریک انتخاب کنید و ببینید سرعت ارتقا و هم‌پوشانی و پراکندگی حقوق چطور عوض می‌شوند.
 
-| Guideline | Detail (pp. 204–208) |
+| رهنمود | جزئیات (pp. 204–208) |
 |---|---|
-| **Solicit participation** | Senior managers and engineers flagged what they didn't understand and proposed rewrites; senior ICs wrote the IC expectations |
-| **Look for examples** | More ladders from friends, the best details from bigger companies with strong technical reputations — useful for describing very senior scope |
-| **Be detailed** | Inspiring but matched to your company: a director of a 50-person startup team doesn't run a division. Include what you'd look for when hiring or promoting at a level |
-| **Long-form and summary** | A spreadsheet to see how attributes grow level by level, and a long form that reads like a review of someone performing well at each level |
-| **Relate it to salary** | Each level has a band; few levels require wide bands to cover different performers and frequent early-career raises |
-| **Many early levels, narrow bands** | Promote people every year for their first two or three years; narrow bands keep pay at a level close together and help avoid bias (paying men more than women) — but adjacent levels are hard to tell apart |
-| **Few levels, wide overlapping bands** | Clearer distinctions; overlap lets strong people be paid well without promotion and lets borderline hires come in low. Example: software engineer $50–100K, senior $80–150K, so a strong engineer may out-earn a senior |
-| **Consider breakpoint levels** | The lowest level where someone can stay forever without underperforming — often senior engineer. Levels can get harder beyond it; expect people to cluster there |
-| **Recognize achievement** | Make some keystone promotions shared and celebrated — senior, staff, principal; director, VP — spaced apart, so there's something bigger than the next raise |
-| **Split management and technical tracks** | Usually above senior engineer. Don't expect equal numbers: management is volume-driven, senior technical roles depend on technical complexity and scope |
-| **People skills as a mid-career requirement** | Require management or mentorship (usually as tech lead) before promotion past the split — senior ICs still manage projects and mentor |
-| **Years of experience** | Not a hard rule, but keystone levels reflect maturity: a staff engineer needs a track record of completing and supporting long-running work |
-| **Evolve it** | A living document. Hers, written from an infrastructure background, needed tweaks for frontend developers |
+| **مشارکت بخواهید** | مدیرها و مهندس‌های ارشد چیزهایی را که نمی‌فهمیدند علامت زدند و بازنویسی پیشنهاد دادند؛ individual contributorهای ارشد انتظارهای مسیر فنی را خودشان نوشتند |
+| **دنبال نمونه بگردید** | نردبان‌های بیشتری از دوستان، و بهترین جزئیات از شرکت‌های بزرگ‌تر با اعتبار فنی قوی، که برای توصیف دامنه‌ی خیلی ارشد به کار می‌آیند |
+| **باجزئیات باشید** | الهام‌بخش ولی جور با شرکت خودتان: director یک تیم ۵۰ نفره‌ی استارتاپی یک بخش کامل را نمی‌گرداند. بنویسید در استخدام یا ارتقا برای هر level دنبال چه می‌گردید |
+| **هم شکل بلند، هم خلاصه** | یک spreadsheet تا ببینید ویژگی‌ها level به level چطور رشد می‌کنند، و یک متن بلند که مثل ارزیابی کسی خوانده شود که در آن level خوب کار می‌کند |
+| **به حقوق وصلش کنید** | هر level یک بازه دارد؛ وقتی levelها کم‌اند بازه‌ها باید پهن باشند تا آدم‌هایی با عملکرد متفاوت و افزایش‌های پرتکرار اول مسیر را پوشش بدهند |
+| **levelهای اولیه‌ی زیاد با بازه‌های باریک** | در دو سه سال اول هر سال آدم‌ها را ارتقا بدهید؛ بازه‌ی باریک حقوق هم‌levelها را نزدیک هم نگه می‌دارد و به دوری از سوگیری کمک می‌کند، مثل بیشتر دادن به مردها نسبت به زن‌ها، ولی تشخیص levelهای مجاور سخت می‌شود |
+| **levelهای کم با بازه‌های پهن و هم‌پوشان** | تمایزها روشن‌ترند؛ هم‌پوشانی اجازه می‌دهد آدم قوی بدون ارتقا حقوق خوبی بگیرد و استخدام‌های مرزی پایین‌تر وارد شوند. نمونه: software engineer با ۵۰ تا ۱۰۰ هزار دلار و senior با ۸۰ تا ۱۵۰ هزار، پس مهندس قوی ممکن است از یک senior بیشتر بگیرد |
+| **به levelهای نقطه‌ی توقف فکر کنید** | پایین‌ترین levelی که آدم می‌تواند تا ابد در آن بماند بی‌آن‌که عملکردش پایین حساب شود، که اغلب senior engineer است. بعد از آن levelها سخت‌تر می‌شوند؛ انتظار داشته باشید آدم‌ها همان‌جا جمع شوند |
+| **دستاورد را به رسمیت بشناسید** | بعضی ارتقاها را کلیدی و جشن‌گرفتنی کنید، مثل senior و staff و principal یا director و VP، و با فاصله از هم، تا چیزی بزرگ‌تر از افزایش حقوق بعدی هم در کار باشد |
+| **مسیر مدیریتی و فنی را جدا کنید** | معمولاً بالاتر از senior engineer. انتظار تعداد برابر نداشته باشید: مدیریت با حجم تعیین می‌شود و نقش‌های فنی ارشد به پیچیدگی و دامنه‌ی فنی بسته‌اند |
+| **مهارت انسانی به‌عنوان شرط میانه‌ی مسیر** | پیش از ارتقا به بالاتر از نقطه‌ی انشعاب، مدیریت یا منتورینگ، که معمولاً در قالب tech lead است، را الزامی کنید؛ individual contributorهای ارشد هم باز پروژه مدیریت می‌کنند و منتور می‌شوند |
+| **سال‌های تجربه** | قاعده‌ی سفت نیست، ولی levelهای کلیدی بلوغ را بازتاب می‌دهند: یک staff engineer باید کارنامه‌ای از تمام کردن و پشتیبانی کردن کار بلندمدت داشته باشد |
+| **تکاملش بدهید** | سندی زنده است. نردبان او که از پیشینه‌ی زیرساخت آمده بود، برای برنامه‌نویس‌های frontend به اصلاح نیاز داشت |
 
-### Cross-Functional Teams
+> **In practice:** نردبان شغلی تیم داده باید کار platform را هم دیدنی کند، نه فقط داشبورد و مدل.
+>
+> **Your turn:** چه رفتاری در level ارشد مهندسی داده باید دیده شود؟
+>
+> *Answer:* نمونه: طراحی تغییرات برگشت‌ناپذیر مثل `ORDER BY` و نگهداری داده، کم کردن بار on-call تیم، و منتورینگ. نردبان شغلی معیار ارتقا را از سلیقه‌ی مدیر جدا می‌کند (pp. 204–208).
 
-Who you work with and report to is obvious at very small and very large companies; growing companies must answer it, probably repeatedly (p. 208). At Rent the Runway, engineering began as storefront and warehouse, then frontend and backend during a rewrite from a PHP monolith to Java and Ruby microservices (pp. 208–209). An experiment changed that: a feature showing customers' own photos in dresses, with their usual size, height, weight and "shape," built by a **cross-functional team** — frontend and backend engineers, a product manager, designers, a data analyst and a customer service representative. It shipped a good feature fairly quickly, and replaced "us versus them" between functions with "us"; product engineering then moved entirely to such teams ("pods," "squads," "pillars") (p. 209).
+### تیم‌های بین‌کارکردی
 
-**Conway's law** — organizations produce designs that copy their communication structures — explains it: cross-functional teams favour the communication that drives product development. They won't produce the most efficient technology, so decide where to take those system-design hits (pp. 209–210).
+در شرکت‌های خیلی کوچک و خیلی بزرگ روشن است با چه کسی کار می‌کنید و به چه کسی گزارش می‌دهید؛ شرکت‌های در حال رشد باید جوابش را پیدا کنند، احتمالاً چند بار (p. 208). در Rent the Runway مهندسی اول به ویترین فروشگاه و انبار تقسیم شده بود، و بعد وسط بازنویسی از یک monolith با PHP به microserviceهای Java و Ruby، به frontend و backend (pp. 208–209). یک آزمایش این را عوض کرد: featureای که عکس‌های خود مشتری‌ها را در لباس‌ها نشان می‌داد، همراه با سایز و قد و وزن و «فرم» معمولشان، که یک **تیم بین‌کارکردی** ساختش؛ مهندس‌های frontend و backend، یک product manager، طراح‌ها، یک تحلیل‌گر داده و یک نماینده‌ی پشتیبانی مشتری. featureای خوب را نسبتاً سریع تحویل داد و «ما در برابر آن‌ها» بین کارکردها را با «ما» جایگزین کرد؛ بعد از آن کل مهندسی محصول به همین تیم‌ها رفت که اسم‌هایی مثل pod و squad و pillar داشتند (p. 209).
 
-**Structuring cross-functional teams** (pp. 210–211):
+**قانون Conway**، یعنی سازمان‌ها طرح‌هایی تولید می‌کنند که ساختار ارتباطی خودشان را کپی می‌کنند، توضیحش می‌دهد: تیم‌های بین‌کارکردی به ارتباطی وزن می‌دهند که توسعه‌ی محصول را جلو می‌برد. کارآمدترین فناوری را تولید نمی‌کنند، پس تصمیم بگیرید این ضربه‌ها به طراحی سیستم را کجا بپذیرید (pp. 209–210).
 
-- **Management lines didn't change:** engineers reported to engineering managers, product managers to the head of product; the pod decided who worked on what day to day.
-- **A small infrastructure organization** kept core systems and specialists (web platform, mobile, data engineering) out of product work.
-- **Reserve 20% of engineering time** in pods for on-call, interviewing and sustaining engineering.
-- Large companies do this too — banks attach technology teams to business units, with central infrastructure.
-- **Values shift:** in technology-focused structures the leaders are the best engineers by technical measures; in product-focused ones, those with product sense, speed and cross-functional communication. Choose by what matters most, and in senior management focus on what the company values most and hire for the other.
+**ساختاربندی تیم‌های بین‌کارکردی** (pp. 210–211):
 
-### Developing Engineering Processes
+- **خط‌های مدیریتی عوض نشدند:** مهندس‌ها به مدیرهای مهندسی گزارش می‌دادند و product managerها به مسئول محصول؛ خودِ pod تصمیم می‌گرفت روزبه‌روز چه کسی روی چه کاری باشد.
+- **یک سازمان زیرساخت کوچک** سیستم‌های اصلی و متخصص‌ها، یعنی web platform و موبایل و data engineering، را بیرون از کار محصول نگه داشت.
+- **۲۰٪ وقت مهندسی** در podها برای on-call و مصاحبه و کار نگه‌دارنده کنار گذاشته شد.
+- شرکت‌های بزرگ هم همین کار را می‌کنند؛ بانک‌ها تیم‌های فناوری را به واحدهای کسب‌وکار می‌چسبانند و زیرساخت مرکزی دارند.
+- **ارزش‌ها جابه‌جا می‌شوند:** در ساختارهای فناوری‌محور رهبرها بهترین مهندس‌ها بر پایه‌ی سنجه‌های فنی‌اند؛ در ساختارهای محصول‌محور، آدم‌هایی با حس محصول و سرعت و ارتباط بین‌کارکردی. بر پایه‌ی آنچه بیشتر اهمیت دارد انتخاب کنید، و در مدیریت ارشد روی چیزی تمرکز کنید که شرکت بیشتر برایش ارزش قائل است و برای آن یکی استخدام کنید.
 
-The author recalls being upset when people broke the build by skipping tests, and resenting a central bureaucracy that imposed code review, ticketing and tracking all at once without explanation (p. 211). Process is where structure meets the road: none, and teams can't scale; the wrong one, and they slow down. Balance it against your team's size and risk tolerance (p. 211).
+### پروراندن processهای مهندسی
 
-> **Ask the CTO: Engineering Process** (pp. 212–213). A fast-growing startup has no code reviews, half-used Trello and architecture decided by whoever's working on it; engineers want reviews for all changes, and someone has quietly written a new system in Scala in a Ruby shop. **Think of process as risk management:** a proxy for how hard or rare something should be. Complicated process — long, or needing busy people's sign-off, or a very high bar — belongs only on rare activities or ones whose risks aren't obvious. Don't make frequent, low-risk, obvious-risk activities slow (keep code review light), and look for hidden risks to draw into the open. Like a good political idea, a good process "works well in half-baked form" — valuable even when imperfectly followed, mostly by socializing change and risk.
+نویسنده یادش می‌آید وقتی آدم‌ها با رد کردن تست‌ها build را می‌شکستند چقدر ناراحت می‌شد، و از دیوان‌سالاری مرکزی‌ای که بدون توضیح یک‌جا code review و ticketing و پیگیری را تحمیل کرد دلخور بود (p. 211). process همان‌جایی است که ساختار به زمین می‌رسد: بی‌process تیم‌ها مقیاس نمی‌گیرند و با process اشتباه کند می‌شوند. آن را با اندازه‌ی تیم و تحمل ریسکتان متعادل کنید (p. 211).
 
-### Practical Advice: Depersonalize Decision Making
+> **کادر Ask the CTO: process مهندسی** (pp. 212–213). استارتاپی در حال رشد سریع که code review ندارد، Trello را نصفه‌نیمه به کار می‌برد و معماری را هر کسی که روی کار است تصمیم می‌گیرد؛ مهندس‌ها برای همه‌ی تغییرها review می‌خواهند و یک نفر هم بی‌سروصدا سیستمی تازه را در شرکتی Ruby با Scala نوشته. **process را مدیریت ریسک بدانید:** نماینده‌ای از این‌که کاری چقدر باید سخت یا نادر باشد. process پیچیده، یعنی طولانی یا نیازمند تأیید آدم‌های پرمشغله یا با سد بسیار بلند، فقط به کارهای نادر یا کارهایی می‌خورد که ریسکشان بدیهی نیست. کارهای پرتکرار و کم‌ریسک یا با ریسک آشکار را کند نکنید، مثلاً code review را سبک نگه دارید، و دنبال ریسک‌های پنهان بگردید تا رو شوند. مثل ایده‌ی سیاسی خوب، process خوب هم «حتی نیم‌پز هم جواب می‌دهد»؛ یعنی حتی وقتی ناقص دنبال شود ارزشمند است، بیشتر از راه عادی کردن تغییر و ریسک.
 
-Three processes to consider as the team grows, each with behavioural expectations as well as technical details (p. 213):
+> **In practice:** process در تیم داده، مثل code review، on-call و incident review، باید دلیلش روشن باشد.
+>
+> **Your turn:** می‌خواهید incident review را اجباری کنید. چطور معرفی‌اش می‌کنید که دیوان‌سالاری به نظر نرسد؟
+>
+> *Answer:* با توضیح این‌که چه مشکلی را حل می‌کند، یک قالب کوتاه، و اجرای اولش با تیم؛ و بعد از چند ماه بپرسید ارزش داشته یا نه. کتاب از تحمیل process بدون توضیح هشدار می‌دهد (pp. 211–213).
 
-| Process | Best practices (pp. 213–216) |
+### توصیه‌ی عملی: تصمیم‌گیری را از آدم‌ها جدا کنید
+
+سه process که همراه با رشد تیم باید به آن‌ها فکر کنید، که هر کدام علاوه بر جزئیات فنی، انتظارهای رفتاری هم دارند (p. 213):
+
+| process | شیوه‌های خوب (pp. 213–216) |
 |---|---|
-| **Code review** | **Be clear about expectations:** tests catch bugs, reviews mostly don't — except missing docs or related changes and inadequate tests; review is largely socialization. **Use a linter for style** so formatting isn't debated (nitpicking can become bullying). **Watch the review backlog** — some companies cap outstanding requests per person |
-| **The outage postmortem** (a "learning review") | **Resist blame** — it makes people afraid of mistakes. **Understand the context:** missing tests, tools that would have helped; patterns. **Be realistic about takeaways:** a laundry list gets nothing done; pick the one or two high-risk, likely ones and say what you're letting go |
-| **Architecture review** (new languages, frameworks, storage, developer tooling) | Ask: how many people can use it; are there production standards; how will it roll out and be taught; what are the operational considerations? **Be specific** about what needs review — not routine feature design. **The value is in preparing** — when people can meet the requirements, the "why" is usually obvious. **Choose the board wisely:** those affected, not static gurus; nothing is more demoralizing than a veto from an unrelated area |
+| **بازبینی کد** | **درباره‌ی انتظارها شفاف باشید:** تست باگ‌ها را می‌گیرد و review معمولاً نه، مگر مستندات یا تغییرهای مرتبط جاافتاده و تست ناکافی؛ review بیشتر اجتماعی‌سازی است. **برای سبک از linter استفاده کنید** تا سر قالب‌بندی بحث نشود، چون مو‌شکافی می‌تواند به زورگویی تبدیل شود. **صف review را بپایید**؛ بعضی شرکت‌ها برای هر نفر سقفی روی درخواست‌های باز می‌گذارند |
+| **postmortem یک قطعی**، یا همان «بازبینی یادگیری» | **در برابر سرزنش مقاومت کنید**، چون آدم‌ها را از اشتباه کردن می‌ترساند. **زمینه را بفهمید:** تست‌های نبوده، ابزارهایی که کمک می‌کردند، و الگوها. **درباره‌ی نتیجه‌ها واقع‌بین باشید:** فهرست بلندبالا هیچ‌وقت انجام نمی‌شود؛ یکی دو مورد پرریسک و محتمل را بردارید و بگویید از بقیه می‌گذرید |
+| **بازبینی معماری** برای زبان و framework و ذخیره‌سازی و ابزار توسعه‌ی تازه | بپرسید چند نفر می‌توانند از آن استفاده کنند؛ استاندارد production دارد؛ چطور منتشر و آموزش داده می‌شود؛ ملاحظه‌های عملیاتی‌اش چیست؟ **مشخص باشید** که چه چیزی بازبینی لازم دارد، نه طراحی featureهای معمول. **ارزشش در آماده شدن است**؛ وقتی آدم‌ها می‌توانند الزام‌ها را برآورده کنند، «چرا»یش معمولاً بدیهی می‌شود. **اعضای هیئت بازبینی را عاقلانه انتخاب کنید:** کسانی که اثر می‌پذیرند، نه گوروهای ثابت؛ هیچ چیز از وتوی کسی که به آن حوزه ربطی ندارد دلسردکننده‌تر نیست |
 
-### Assessing Your Own Experience
+### سنجیدن تجربه‌ی خودتان
 
-Questions for reflection (p. 216): which policies and practices have you written down, and when did you revisit them? What are your values and how do you recognize them? Does your ladder reflect today's team and tomorrow's? Which risks most concern you, and how can you mitigate them without unnecessary bureaucracy?
+پرسش‌هایی برای تأمل (p. 216): کدام سیاست‌ها و شیوه‌ها را نوشته‌اید و آخرین بار کِی مرورشان کردید؟ ارزش‌هایتان چیست‌اند و چطور تشخیصشان می‌دهید؟ نردبانتان تیم امروز و فردا را بازتاب می‌دهد؟ کدام ریسک‌ها بیشتر نگرانتان می‌کنند و چطور می‌شود بدون دیوان‌سالاری اضافه کمشان کرد؟
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Structurelessness | Speed and freedom while small and homogeneous | Hidden hierarchies; breaks with growth and diversity |
-| Structure too early | Order | Slows a group that should focus elsewhere |
-| Structure too late | Freedom for longer | Confusion and wasted effort; costly changes of mind |
-| Learning from failure | Structure at the right level | Must examine your own contribution |
-| Copying successes | Fast start | Wrong context; silver-bullet thinking |
-| Many levels, narrow bands | Frequent promotions, fair pay at each level | Levels hard to distinguish |
-| Few levels, wide overlapping bands | Clear distinctions; retention flexibility | Pay varies widely within a level |
-| Cross-functional pods | Product focus; "us" instead of "us vs. them" | Less efficient technology; specialists elsewhere |
-| Heavy process | Safety for rare, risky changes | Slows common, low-risk work |
-| Blameless postmortems | People report and learn from mistakes | Requires discipline after a stressful outage |
+| بی‌ساختاری | سرعت و آزادی تا وقتی کوچک و هم‌گونید | سلسله‌مراتب پنهان؛ با رشد و تنوع از هم می‌پاشد |
+| ساختار خیلی زود | نظم | گروهی را کند می‌کند که باید جای دیگری تمرکز کند |
+| ساختار خیلی دیر | آزادی طولانی‌تر | سردرگمی و تلاش هدررفته؛ نظرعوض‌کردن‌های گران |
+| یاد گرفتن از شکست | ساختار در سطح درست | باید سهم خودتان را هم بررسی کنید |
+| کپی کردن موفقیت‌ها | شروع سریع | زمینه‌ی اشتباه؛ فکر کردن به راه‌حل جادویی |
+| levelهای زیاد با بازه‌های باریک | ارتقای پرتکرار، حقوق منصفانه در هر level | تشخیص levelها از هم سخت می‌شود |
+| levelهای کم با بازه‌های پهن و هم‌پوشان | تمایزهای روشن؛ انعطاف برای نگه‌داشت نیرو | حقوق داخل یک level خیلی فرق می‌کند |
+| تیم‌های بین‌کارکردی | تمرکز روی محصول؛ «ما» به‌جای «ما در برابر آن‌ها» | فناوری کم‌کارآمدتر؛ متخصص‌ها جای دیگرند |
+| process سنگین | امنیت برای تغییرهای نادر و پرریسک | کار رایج و کم‌ریسک را کند می‌کند |
+| postmortem بدون سرزنش | آدم‌ها اشتباه را گزارش می‌دهند و از آن یاد می‌گیرند | بعد از یک قطعی پرفشار، نظم می‌خواهد |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Jo Freeman's essay** "The Tyranny of Structurelessness" was written in 1970 and published in the early 1970s; the book quotes its four conditions at length (pp. 193–194).
-- **Public career ladders.** Since 2017 many companies have published their ladders (collected at sites such as progression.fyi), easing the "start from scratch" problem the book describes (p. 202) — while its lesson that a borrowed ladder may not fit still applies.
-- **Blameless postmortems** were popularized in web operations by John Allspaw's 2012 Etsy post "Blameless PostMortems and a Just Culture"; Allspaw's "On Being a Senior Engineer" is the post the author shared with her team (p. 203).
-- **Team Topologies** (Skelton and Pais, 2019) later built on Conway's law with "stream-aligned" teams — close to the book's pods — and platform teams like its infrastructure group.
+- **مقاله‌ی Jo Freeman** با عنوان «The Tyranny of Structurelessness» در سال ۱۹۷۰ نوشته و اوایل دهه‌ی ۱۹۷۰ منتشر شد؛ کتاب چهار شرط آن را مفصل نقل می‌کند (pp. 193–194).
+- **نردبان‌های شغلی عمومی.** از سال ۲۰۱۷ به بعد خیلی از شرکت‌ها نردبانشان را منتشر کرده‌اند، که در سایت‌هایی مثل progression.fyi جمع شده‌اند و مشکل «از صفر شروع کردن» را که کتاب می‌گوید آسان‌تر می‌کنند (p. 202)، هرچند درس کتاب درباره‌ی نخوردن نردبان قرضی هنوز سر جایش است.
+- **مفهوم postmortem بدون سرزنش** را John Allspaw در سال ۲۰۱۲ با یادداشت «Blameless PostMortems and a Just Culture» در Etsy در عملیات وب همه‌گیر کرد؛ یادداشت «On Being a Senior Engineer» از همان Allspaw هم چیزی است که نویسنده با تیمش به اشتراک گذاشت (p. 203).
+- **کتاب Team Topologies** از Skelton و Pais در سال ۲۰۱۹ بعدتر روی قانون Conway ساخت و تیم‌های «stream-aligned» را معرفی کرد، که به همان podهای کتاب نزدیک‌اند، به‌همراه تیم‌های platform شبیه گروه زیرساخت آن.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [3. Tech Lead](03-tech-lead.md) (the tech lead as responsibilities on the ladder; the process czar), [4. Managing People](04-managing-people.md) (promotions and up-or-out levels), [6. Managing Multiple Teams](06-managing-multiple-teams.md) (purpose-driven teams built on company values), [7. Managing Managers](07-managing-managers.md) (hiring managers for culture fit), [8. The Big Leagues](08-the-big-leagues.md) (True North and role modeling).
+- **فصل‌های مرتبط:** [فصل ۳: نقش tech lead](03-tech-lead.md) که tech lead را مجموعه‌ای از مسئولیت‌ها روی نردبان می‌بیند و process czar را می‌گوید، [فصل ۴: مدیریت آدم‌ها](04-managing-people.md) که ارتقا و levelهای «بالا برو یا برو» را دارد، [فصل ۶: مدیریت چند تیم](06-managing-multiple-teams.md) که تیم‌های هدف‌محورِ ساخته‌شده روی ارزش‌های شرکت را می‌گوید، [فصل ۷: مدیریت مدیرها](07-managing-managers.md) که استخدام مدیر با تناسب فرهنگی را دارد، و [فصل ۸: لیگ بزرگ‌ها](08-the-big-leagues.md) که شمال حقیقی و الگو بودن را می‌گوید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **How does the author reframe "structure" and "process" for skeptics?**
+1. **نویسنده «ساختار» و «process» را برای آدم‌های بدبین چطور بازتعریف می‌کند؟**
 
-   *Answer:* As learning and transparency: we set up systems to learn from successes and mistakes and share those lessons, which is how organizations become stable and scalable (p. 191).
+   *Answer:* به‌عنوان یادگیری و شفافیت: سیستم می‌سازیم تا از موفقیت‌ها و اشتباه‌ها یاد بگیریم و آن درس‌ها را به اشتراک بگذاریم، و سازمان‌ها این‌طور باثبات و مقیاس‌پذیر می‌شوند (p. 191).
 
-2. **Which is one of Freeman's conditions for an unstructured group to work?**
-   - [ ] It is large and diverse
-   - [x] It has a low degree of skill specialization, so no one is indispensable
-   - [ ] It has a strong leader
+2. **کدام‌یک از شرط‌های Freeman برای کار کردن یک گروه بی‌ساختار است؟**
+   - [ ] بزرگ و متنوع باشد
+   - [x] تخصصی‌شدن مهارت‌هایش کم باشد، پس هیچ‌کس جایگزین‌ناپذیر نیست
+   - [ ] رهبری قوی داشته باشد
 
-   *Answer:* The four conditions are task orientation, small size and homogeneity, high communication, and low skill specialization (pp. 193–194).
+   *Answer:* چهار شرط عبارت‌اند از کارمحوری، کوچکی و هم‌گونی، ارتباط زیاد، و تخصصی‌شدن کم مهارت (pp. 193–194).
 
-3. **Why should failure rather than success guide changes to structure?**
+3. **چرا باید شکست، و نه موفقیت، تغییر ساختار را هدایت کند؟**
 
-   *Answer:* We tend to blame failure on bad luck until our own role is undeniable, so we're less likely to overstructure from it; success tempts us with silver bullets whose context we don't understand (p. 197).
+   *Answer:* ما شکست را تا وقتی نقش خودمان انکارناپذیر نشده به بدشانسی نسبت می‌دهیم، پس کمتر از روی آن ساختار اضافی می‌سازیم؛ موفقیت ما را با راه‌حل‌های جادویی وسوسه می‌کند که زمینه‌شان را نمی‌فهمیم (p. 197).
 
-4. **Why is "engineers who graduated from MIT" not a culture?**
+4. **چرا «مهندس‌هایی که از MIT فارغ‌التحصیل شده‌اند» فرهنگ نیست؟**
 
-   *Answer:* It admits a very narrow subset of people without guaranteeing shared values; a set of real values ("innovation, hard work, intellect, scientific process, data") admits more people who actually share principles (p. 199).
+   *Answer:* زیرمجموعه‌ی خیلی باریکی از آدم‌ها را می‌پذیرد بی‌آن‌که ارزش مشترکی را تضمین کند؛ مجموعه‌ای از ارزش‌های واقعی، مثل نوآوری و کار سخت و هوش و روش علمی و داده، آدم‌های بیشتری را می‌پذیرد که واقعاً اصول مشترکی دارند (p. 199).
 
-5. **Why did the author's first, lightweight career ladder fail?**
-   - [ ] It had too many levels
-   - [x] It was too vague for a team with diverse backgrounds, so people obsessed over levels and argued for promotion
-   - [ ] HR rejected it
+5. **چرا نردبان شغلی اول و سبک نویسنده شکست خورد؟**
+   - [ ] تعداد levelهایش خیلی زیاد بود
+   - [x] برای تیمی با پیشینه‌های متنوع خیلی مبهم بود، پس آدم‌ها روی level وسواس گرفتند و برای ارتقا چانه زدند
+   - [ ] واحد HR ردش کرد
 
-   *Answer:* Her friend's team shared a background at one large company; hers didn't, and needed detail (pp. 203–204).
+   *Answer:* تیم دوستش پیشینه‌ی مشترکی در یک شرکت بزرگ داشت؛ تیم او نداشت و به جزئیات نیاز داشت (pp. 203–204).
 
-6. **What is a breakpoint level?**
+6. **ساختار level نقطه‌ی توقف چیست؟**
 
-   *Answer:* The lowest level where someone can stay indefinitely without underperforming — often senior engineer; below it are "up or out" levels (p. 206).
+   *Answer:* پایین‌ترین levelی که آدم می‌تواند تا هر وقت بخواهد در آن بماند بی‌آن‌که عملکردش پایین حساب شود، که اغلب senior engineer است؛ زیر آن levelهای «بالا برو یا برو» هستند (p. 206).
 
-7. **How should heavy process be allocated, if process is risk management?**
+7. **اگر process مدیریت ریسک است، process سنگین را به چه چیزی باید اختصاص داد؟**
 
-   *Answer:* Only to rare activities or ones with non-obvious risks; frequent, low-risk or obviously risky work should stay quick (e.g. light code review), while hidden risks are drawn into the open (p. 212).
+   *Answer:* فقط به کارهای نادر یا کارهایی که ریسکشان بدیهی نیست؛ کار پرتکرار و کم‌ریسک یا با ریسک آشکار باید سریع بماند، مثل code review سبک، و ریسک‌های پنهان باید رو شوند (p. 212).
 
-8. **Name two practices for a useful postmortem.**
+8. **دو شیوه برای postmortem مفید بگویید.**
 
-   *Answer:* Resist blame; understand the context and contributing factors; be realistic about takeaways — pick the one or two highest-risk items and acknowledge the rest you're letting go (p. 214).
+   *Answer:* در برابر سرزنش مقاومت کنید؛ زمینه و عامل‌های دخیل را بفهمید؛ درباره‌ی نتیجه‌ها واقع‌بین باشید، یعنی یکی دو مورد پرریسک‌تر را بردارید و بپذیرید که از بقیه می‌گذرید (p. 214).

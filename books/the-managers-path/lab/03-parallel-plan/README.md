@@ -1,18 +1,20 @@
-# Parallel plan: the cost of waiting for the API
+# برنامه‌ی موازی: هزینه‌ی انتظار برای API
 
-A small launch — design an API, build it, build the frontend, integrate, test and launch — is scheduled twice. In the first plan the frontend waits for the real API. In the second, the team spends a day agreeing the JSON format first, so the frontend codes against dummy objects while the API is built, and integration is shorter. The script prints each plan's most likely length and critical path, then repeats both with uncertain task durations.
+یک launch کوچک، یعنی طراحی API و ساختنش و ساختن frontend و یکپارچه‌سازی و تست و انتشار، دو بار زمان‌بندی می‌شود. در برنامه‌ی اول، frontend منتظر API واقعی می‌ماند. در برنامه‌ی دوم تیم یک روز وقت می‌گذارد تا سر قالب JSON توافق کند، پس frontend همزمان با ساخته شدن API روی objectهای ساختگی کد می‌زند و یکپارچه‌سازی کوتاه‌تر می‌شود. اسکریپت طول محتمل و مسیر بحرانی هر برنامه را چاپ می‌کند و بعد هر دو را با مدت‌های نامطمئن تکرار می‌کند.
 
-*Illustrates The Manager's Path, “The Main Roles of a Tech Lead”, p. 32. The implementation is the vault’s own: the tasks, durations and uncertainty are invented, and durations are drawn from a seeded triangular distribution.*
+*این آزمایش بخش «نقش‌های اصلی یک tech lead» از کتاب The Manager's Path را نشان می‌دهد، ص. ۳۲. پیاده‌سازی مال خود vault است: کارها و مدت‌ها و بلاتکلیفی ساختگی‌اند و مدت‌ها از یک توزیع مثلثی با seed ثابت کشیده می‌شوند.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 parallel_plan.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Most likely durations (working days)
@@ -27,12 +29,12 @@ Wait for the API               27.2      30.9
 Agree JSON contract first      19.8      22.5
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Waiting puts the frontend on the critical path: its seven days are added to the API's eight.
-- With an agreed contract, the frontend drops off the critical path; the API alone sets the pace, and a day of agreement buys about a week.
-- The gap holds when durations are uncertain, and the plan's 90th percentile improves as much as its median. The numbers depend entirely on the invented tasks; the shape of the argument is the book's.
+- انتظار کشیدن، frontend را روی مسیر بحرانی می‌نشاند: هفت روزش به هشت روز API اضافه می‌شود.
+- با قرارداد توافق‌شده، frontend از مسیر بحرانی بیرون می‌افتد و تنها API سرعت را تعیین می‌کند؛ یک روز توافق حدود یک هفته می‌خرد.
+- این فاصله وقتی مدت‌ها نامطمئن‌اند هم می‌ماند، و صدک نودم برنامه به‌اندازه‌ی میانه‌اش بهتر می‌شود. عددها کاملاً به کارهای ساختگی وابسته‌اند؛ شکل استدلال مال کتاب است.
 
-## Related
+## پیوندها
 
-- Chapter note: [3. Tech Lead](../../chapters/03-tech-lead.md) — “The Main Roles of a Tech Lead”, p. 32
+- یادداشت فصل: [فصل ۳: نقش tech lead](../../chapters/03-tech-lead.md)، بخش «نقش‌های اصلی یک tech lead»، ص. ۳۲

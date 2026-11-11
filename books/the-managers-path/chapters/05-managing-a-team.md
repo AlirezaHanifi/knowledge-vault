@@ -3,224 +3,238 @@ book: the-managers-path
 chapter: 5
 title: "Managing a Team"
 pages: "75–97"
+translated_title: "مدیریت یک تیم"
+lang: fa
 ---
 
-# 5. Managing a Team
+# فصل ۵: مدیریت یک تیم
 
-[← 4. Managing People](04-managing-people.md) · [Book](../README.md) · [6. Managing Multiple Teams →](06-managing-multiple-teams.md)
+[فصل ۴: مدیریت آدم‌ها →](04-managing-people.md) · [کتاب](../README.md) · [فصل ۶: مدیریت چند تیم ←](06-managing-multiple-teams.md)
 
-## Summary
+## خلاصه
 
-Managing a team is more than managing its individuals: the job changes, and it is a new set of skills rather than a continuation of senior engineering. This chapter turns from people tasks back to the technical, strategic and leadership parts of running one team. It argues for staying a little in the code, gives a first-aid kit for dysfunctional teams (not shipping, people drama, overwork, collaboration problems), questions the manager-as-shield, and lays out how to drive good decisions with data, product sense and retrospectives. Conflict avoidance gets a list of dos and don'ts, toxic team members — the brilliant jerk, the noncommunicator, the person who lacks respect — get direct treatment, and the chapter closes with rules of thumb for planning a team's quarter (pp. 75–97).
+مدیریت یک تیم چیزی بیش از مدیریت تک‌تک آدم‌های آن است: خود شغل عوض می‌شود و مجموعه‌ی تازه‌ای از مهارت‌هاست، نه ادامه‌ی مهندسی ارشد. این فصل از کارهای انسانی برمی‌گردد به بخش‌های فنی و استراتژیک و رهبری در گرداندن یک تیم. استدلال می‌کند که باید کمی در کد بمانید، جعبه‌ی کمک‌های اولیه‌ای برای تیم‌های ناکارکرد می‌دهد، یعنی تحویل ندادن، درام میان آدم‌ها، کار بیش از حد و مشکل‌های همکاری، نقش مدیر-سپر را زیر سؤال می‌برد و نشان می‌دهد چطور با داده و حس محصول و retrospective تصمیم‌های خوب را پیش ببرید. برای فرار از تعارض فهرستی از بکن‌ها و نکن‌ها می‌دهد، با آدم‌های سمی تیم، یعنی نابغه‌ی بدرفتار، آدم بی‌ارتباط و کسی که احترام نمی‌گذارد، رک برخورد می‌کند و با قاعده‌های سرانگشتی برنامه‌ریزی یک فصل کاری تمام می‌شود (pp. 75–97).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Stay technical enough to feel the bottlenecks.** Small features and bug fixes reveal slow builds, painful deploys and on-call misery, and keep your judgement and credibility (pp. 77–78).
-- **Debug the basic dysfunctions:** teams that don't ship (often infrequent releases hiding pain), people drama, overwork (dedicate 20% of planning to sustainability), and collaboration problems (pp. 79–81).
-- **Shield the team from drama, not from context.** People need to know *why* goals exist; denying outside events breeds gossip; and you're not their parent (pp. 83–84).
-- **You're accountable for decisions you only guide:** bring data, flex product muscles, look two steps ahead, review outcomes, and run retrospectives (pp. 84–86).
-- **Tame conflict instead of avoiding it.** Don't hide behind votes; depersonalize decisions with clear processes; address issues early; be kind, not nice (pp. 86–89).
-- **Toxic people destroy psychological safety.** Openly refuse to tolerate the brilliant jerk's behaviour, address the noncommunicator's fear, and ask the disrespectful person whether they want to be on the team (pp. 89–92).
-- **Plan with rules of thumb:** about 10 productive weeks per engineer per quarter, 20% for sustaining work, say no near deadlines by cutting scope, double quick estimates, and shield the team from estimate requests (pp. 93–95).
+- **آن‌قدر فنی بمانید که گلوگاه‌ها را حس کنید.** featureهای کوچک و رفع باگ، build کند و deploy دردناک و on-call زجرآور را رو می‌کنند و قضاوت و اعتبار شما را حفظ می‌کنند (pp. 77–78).
+- **ناکارکردی‌های پایه را debug کنید:** تیمی که تحویل نمی‌دهد و اغلب releaseهای کم‌تکرارش درد را پنهان می‌کنند، درام میان آدم‌ها، کار بیش از حد که ۲۰٪ هر برنامه‌ریزی را باید به پایداری بدهید، و مشکل‌های همکاری (pp. 79–81).
+- **تیم را از درام سپر کنید، نه از زمینه.** آدم‌ها باید بدانند هدف‌ها *چرا* وجود دارند؛ انکار اتفاق‌های بیرونی شایعه می‌سازد؛ و شما پدر و مادرشان نیستید (pp. 83–84).
+- **پاسخ‌گوی تصمیم‌هایی هستید که فقط هدایتشان می‌کنید:** داده بیاورید، عضله‌ی محصول‌تان را به کار بیندازید، دو قدم جلوتر را ببینید، نتیجه‌ها را مرور کنید و retrospective بگذارید (pp. 84–86).
+- **تعارض را رام کنید، نه این‌که از آن فرار کنید.** پشت رأی‌گیری پنهان نشوید؛ تصمیم‌ها را با processهای روشن از آدم‌ها جدا کنید؛ مسئله‌ها را زود مطرح کنید؛ مهربان باشید، نه خوش‌برخورد (pp. 86–89).
+- **آدم‌های سمی امنیت روانی را نابود می‌کنند.** علنی بگویید رفتار نابغه‌ی بدرفتار را تحمل نمی‌کنید، ترسِ پشت رفتار آدم بی‌ارتباط را درمان کنید، و از کسی که احترام نمی‌گذارد بپرسید اصلاً می‌خواهد در این تیم باشد یا نه (pp. 89–92).
+- **با قاعده‌های سرانگشتی برنامه بریزید:** حدود ۱۰ هفته‌ی مفید برای هر مهندس در هر فصل، ۲۰٪ برای کار نگه‌دارنده، نزدیک ضرب‌الاجل با کم کردن دامنه نه بگویید، تخمین‌های سرانگشتی را دو برابر کنید، و تیم را از سیل درخواست تخمین حفظ کنید (pp. 93–95).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Staying Technical — p. 77
-- Debugging Dysfunctional Teams: The Basics — p. 79
-  - Not Shipping — p. 79
-  - People Drama — p. 80
-  - Unhappiness Due to Overwork — p. 80
-  - Collaboration Problems — p. 81
-- The Shield — p. 83
-- How to Drive Good Decisions — p. 84
-  - Create a Data-Driven Team Culture — p. 84
-  - Flex Your Own Product Muscles — p. 85
-  - Look into the Future — p. 85
-  - Review the Outcome of Your Decisions and Projects — p. 85
-  - Run Retrospectives for the Processes and Day-to-Day — p. 85
-- Good Manager, Bad Manager: Conflict Avoider, Conflict Tamer — p. 86
-  - The Dos and Don’ts of Managing Conflict — p. 87
-- Challenging Situations: Team Cohesion Destroyers — p. 89
-  - The Brilliant Jerk — p. 90
-  - The Noncommunicator — p. 91
-  - The Employee Who Lacks Respect — p. 92
-- Advanced Project Management — p. 93
-  - Project Management Rules of Thumb — p. 93
-- Assessing Your Own Experience — p. 96
+- فنی ماندن — p. 77
+- دیباگ کردن تیم‌های ناکارکرد: مبانی — p. 79
+  - تحویل ندادن — p. 79
+  - درام میان آدم‌ها — p. 80
+  - نارضایتی از کار بیش از حد — p. 80
+  - مشکل‌های همکاری — p. 81
+- سپر — p. 83
+- چطور تصمیم‌های خوب را پیش ببریم — p. 84
+  - فرهنگ تیمی داده‌محور بسازید — p. 84
+  - عضله‌ی محصول خودتان را به کار بیندازید — p. 85
+  - به آینده نگاه کنید — p. 85
+  - نتیجه‌ی تصمیم‌ها و پروژه‌هایتان را مرور کنید — p. 85
+  - برای processها و کار روزمره retrospective بگذارید — p. 85
+- مدیر خوب، مدیر بد: فراری از تعارض، رام‌کننده‌ی تعارض — p. 86
+  - بکن‌ها و نکن‌های مدیریت تعارض — p. 87
+- موقعیت‌های دشوار: ویران‌کننده‌های انسجام تیم — p. 89
+  - نابغه‌ی بدرفتار — p. 90
+  - آدم بی‌ارتباط — p. 91
+  - کارمندی که احترام نمی‌گذارد — p. 92
+- مدیریت پیشرفته‌ی پروژه — p. 93
+  - قاعده‌های سرانگشتی مدیریت پروژه — p. 93
+- سنجیدن تجربه‌ی خودتان — p. 96
 
-## Notes
+## یادداشت‌ها
 
-At every step beyond this one the job is different, and the hardest thing to prepare for is doing totally different things (p. 75). The author's job description for an **engineering lead** (pp. 75–76):
+در هر پله‌ی بعد از این، شغل چیز دیگری است و سخت‌ترین چیز برای آماده شدن همین است که کارهای کاملاً متفاوتی می‌کنید (p. 75). شرح شغل **engineering lead** از نگاه نویسنده (pp. 75–76):
 
-- Spends less time coding, but still ships bug fixes and small features without blocking the team; mostly clears bottlenecks and roadblocks.
-- Identifies the highest-value projects and keeps the team focused on them, partnering with the product lead on scope.
-- Plans headcount and recruits.
-- Manages people with skills different from their own, with frequent feedback — not only at review time.
-- Leads the technical roadmap for the product group ("pillar"): timeline, scope and risk; identifies strategic technical debt, weighs its cost and benefit, and proposes when to pay it down.
+- وقت کمتری کد می‌زند، ولی باز هم رفع باگ و featureهای کوچک را بدون سد شدن جلوی تیم تحویل می‌دهد؛ بیشتر گلوگاه‌ها و سدها را برمی‌دارد.
+- پرارزش‌ترین پروژه‌ها را مشخص می‌کند و تیم را رویشان متمرکز نگه می‌دارد و سر دامنه با product lead شریک می‌شود.
+- برای تعداد نیرو برنامه می‌ریزد و استخدام می‌کند.
+- آدم‌هایی را مدیریت می‌کند که مهارتشان با مهارت خودش فرق دارد، با بازخورد پرتکرار، نه فقط سر ارزیابی.
+- نقشه‌ی راه فنی گروه محصول را رهبری می‌کند: زمان‌بندی، دامنه و ریسک؛ بدهی فنی استراتژیک را مشخص می‌کند، هزینه و فایده‌اش را می‌سنجد و پیشنهاد می‌دهد کِی صافش کنند.
 
-> **Becoming a People Manager** (bethanye Blount, pp. 76–77). Made a manager in a company that had resisted managers, she managed engineers far more senior than she was and couldn't lead by knowing the most. One helped with ongoing feedback; the other transferred away, then returned months later. Being a good manager isn't about having the most technical knowledge; supporting people mattered more.
+> **کادر Becoming a People Manager** (یادداشت bethanye Blount، pp. 76–77). در شرکتی که در برابر داشتن مدیر مقاومت می‌کرد مدیر شد و باید مهندس‌هایی به‌مراتب ارشدتر از خودش را مدیریت می‌کرد، پس نمی‌توانست با بیشتر دانستن رهبری کند. یکی از آن‌ها با بازخورد پیوسته کمکش کرد؛ آن یکی به جای دیگری رفت و ماه‌ها بعد برگشت. مدیر خوب بودن به داشتن بیشترین دانش فنی نیست؛ پشتیبانی از آدم‌ها مهم‌تر بود.
 
-### Staying Technical
+### فنی ماندن
 
-Engineering management is a technical discipline: even when you stop writing code you guide technical decisions, hold architects and senior staff accountable, and check decisions pass the "technical smell test" in the context of the team and business. Without technical credibility you face an uphill battle and limited options (p. 77).
+مدیریت مهندسی یک رشته‌ی فنی است: حتی وقتی دیگر کد نمی‌نویسید، تصمیم‌های فنی را هدایت می‌کنید، معمارها و آدم‌های ارشد را پاسخ‌گو نگه می‌دارید و وارسی می‌کنید که تصمیم‌ها در زمینه‌ی تیم و کسب‌وکار «بو نمی‌دهند». بدون اعتبار فنی، سربالایی سختی پیش رو دارید و گزینه‌هایتان محدود می‌شود (p. 77).
 
-Why write small code at this level (p. 78)?
+چرا در این level هم کد کوچک بنویسید (p. 78)؟
 
-- **You feel the bottlenecks.** A slow build, long deploys or a nightmare on-call show up when an experienced engineer struggles with trivial tasks — imagine how your team feels. Technical debt is easier to spot and prioritize after slogging through the code.
-- **You can judge what's possible.** When the product manager has a crazy idea you can evaluate it (beware overconfidence), and find the shortest path through the systems.
+- **گلوگاه‌ها را حس می‌کنید.** وقتی یک مهندس باتجربه با کاری بدیهی دست‌وپا می‌زند، معلوم می‌شود build کند است یا deploy طولانی یا on-call کابوس؛ حالا فکر کنید تیم چه حالی دارد. بعد از کلنجار با کد، دیدن و اولویت دادن به بدهی فنی آسان‌تر است.
+- **می‌توانید بسنجید چه چیزی شدنی است.** وقتی product manager ایده‌ی عجیبی دارد می‌توانید ارزیابی‌اش کنید، البته مراقب اعتمادبه‌نفس بیش از حد باشید، و کوتاه‌ترین مسیر را بین سیستم‌ها پیدا کنید.
 
-Some companies split the tracks so cleanly that new managers get large teams at once and code only on nights and weekends. There, stay technical until you've mastered what you want to learn, then decide: stopping too early may cap you at middle management (p. 78).
+بعضی شرکت‌ها دو مسیر را چنان تمیز جدا می‌کنند که مدیرهای تازه یک‌دفعه تیم‌های بزرگ می‌گیرند و فقط شب‌ها و آخر هفته‌ها کد می‌زنند. آن‌جا تا وقتی بر چیزی که می‌خواهید مسلط نشده‌اید فنی بمانید و بعد تصمیم بگیرید: زود ایستادن ممکن است شما را در مدیریت میانی متوقف کند (p. 78).
 
-### Debugging Dysfunctional Teams: The Basics
+### دیباگ کردن تیم‌های ناکارکرد: مبانی
 
-Missed deliverables, unhappy people, quitting, a frustrated product manager, low energy — something is wrong, but what (p. 79)?
+تحویل‌های از دست رفته، آدم‌های ناراضی، استعفا، product manager کلافه و انرژی پایین: چیزی خراب است، ولی چه (p. 79)؟
 
-| Dysfunction | What's going on | What to do (pp. 79–81) |
+| ناکارکردی | چه خبر است | چه کنید (pp. 79–81) |
 |---|---|---|
-| **Not shipping** | Even research teams have deliverables; humans feel good setting and meeting small goals. Infrequent releases (weekly or less) hide poor release tooling, manual testing, oversized features and developers who can't break work down | Balance pushing and holding back; roll up your sleeves on the slipping part; remove the bottlenecks. The author's team went from painful hours-long weekly releases to daily ones — releases had been a **point of resource contention**, and morale improved immediately |
-| **People drama** | The "brilliant asshole" kept too long; or someone who stirs drama, dwells on the negative, gossips, plays us-against-them | Be brave and act quickly. Your manager may find the brilliant jerk even harder to tackle, seeing only output; a team move may help. Give the negative person clear examples and quick corrective feedback — or help them leave on good terms |
-| **Unhappiness due to overwork** | Usually has fixable roots | If production instability causes it, slow the roadmap and measure alerts, downtime and incidents; **dedicate 20% of every planning session to "sustainability" work.** In a time-critical crunch, be a cheerleader — help with the work, order dinner, promise a break — then learn from it: cut features, push back on unrealistic dates |
-| **Collaboration problems** | Friction with product, design or other teams drags everyone down | Regular touchbases with peers; gather actionable feedback; never undermine peers in front of your team. Within the team, create time together that isn't about work — even introverts want relatedness |
+| **تحویل ندادن** | حتی تیم‌های پژوهشی هم تحویل‌دادنی دارند؛ آدم‌ها از گذاشتن هدف‌های کوچک و رسیدن به آن‌ها حال خوبی می‌گیرند. releaseهای کم‌تکرار، یعنی هفتگی یا کمتر، ابزار ضعیف release و تست دستی و featureهای بزرگ و برنامه‌نویس‌هایی را پنهان می‌کنند که کار را نمی‌شکنند | بین هل دادن و عقب کشیدن تعادل برقرار کنید؛ آستین بالا بزنید و همان تکه‌ای را که عقب افتاده بگیرید؛ گلوگاه‌ها را بردارید. تیم نویسنده از releaseهای هفتگیِ چندساعته‌ی دردناک به release روزانه رسید؛ release **منبعی کمیاب بود که سرش رقابت می‌شد** و روحیه بلافاصله بهتر شد |
+| **درام میان آدم‌ها** | «نابغه‌ی عوضی» را زیاد نگه داشته‌اید؛ یا کسی درام می‌سازد، روی چیزهای منفی می‌چرخد، غیبت می‌کند و ما-در-برابر-آن‌ها راه می‌اندازد | شجاع باشید و سریع عمل کنید. شاید مدیرتان مقابله با نابغه‌ی بدرفتار را از شما هم سخت‌تر ببیند، چون فقط خروجی را می‌بیند؛ جابه‌جایی به تیم دیگر گاهی کمک می‌کند. به آدم منفی مثال‌های روشن و بازخورد اصلاحی سریع بدهید، یا کمکش کنید با رابطه‌ی خوب برود |
+| **نارضایتی از کار بیش از حد** | معمولاً ریشه‌های قابل‌رفع دارد | اگر بی‌ثباتی production دلیلش است، نقشه‌ی راه را کند کنید و alertها و downtime و حادثه‌ها را اندازه بگیرید؛ **۲۰٪ هر جلسه‌ی برنامه‌ریزی را به کار «پایداری» بدهید.** در فشار زمانیِ واقعی، مشوق تیم باشید؛ در کار کمک کنید، شام سفارش بدهید، قول استراحت بدهید، و بعد از آن یاد بگیرید: feature کم کنید و روی تاریخ‌های غیرواقعی پافشاری نکنید |
+| **مشکل‌های همکاری** | اصطکاک با product و design یا تیم‌های دیگر همه را زمین‌گیر می‌کند | با هم‌ترازها جلسه‌های منظم بگذارید؛ بازخورد عمل‌شدنی جمع کنید؛ هیچ‌وقت جلوی تیمتان زیر پای هم‌ترازها را خالی نکنید. داخل تیم هم وقتی بگذارید که درباره‌ی کار نباشد؛ حتی درون‌گراها هم حس تعلق می‌خواهند |
 
-> **Run it:** [Release cadence and contention](../lab/05-release-cadence/README.md) simulates the same stream of changes shipped weekly and daily, and counts how often a broken change blocks everyone else's.
+> **Run it:** آزمایش [ریتم release و رقابت بر سرش](../lab/05-release-cadence/README.md) همان جریان تغییرها را یک‌بار هفتگی و یک‌بار روزانه تحویل می‌دهد و می‌شمارد چند بار یک تغییر خراب جلوی بقیه را می‌گیرد.
 
-> **Ask the CTO: Managing a Former Peer** (pp. 82–83). Acknowledge the awkwardness and ask for honest help; be a little vulnerable. Use your new power to override technical decisions very cautiously, and don't micromanage former peers, who are sensitive to you being "rewarded." Let go of old work — hand former peers control of technical areas you owned and give juniors new challenges; first-line managers write small features and fixes, not deep new systems. Pick your battles: they may even try to undermine you.
+> **کادر Ask the CTO: مدیریت کسی که تا دیروز هم‌ترازتان بود** (pp. 82–83). معذب بودن وضعیت را به زبان بیاورید و صادقانه کمک بخواهید؛ کمی آسیب‌پذیر باشید. از قدرت تازه‌تان برای نقض تصمیم‌های فنی خیلی با احتیاط استفاده کنید و روی هم‌ترازهای سابق ذره‌بین نگذارید، چون نسبت به «پاداش گرفتن» شما حساس‌اند. کار قدیمی را رها کنید؛ کنترل حوزه‌های فنی‌ای را که مال شما بود به هم‌ترازهای سابق بدهید و به تازه‌کارها چالش‌های تازه. مدیرهای خط اول feature و رفع باگ کوچک می‌نویسند، نه سیستم‌های تازه‌ی عمیق. نبردهایتان را انتخاب کنید: ممکن است حتی بخواهند زیر پایتان را خالی کنند.
 
-### The Shield
+> **In practice:** تیم داده‌ای که تحویل نمی‌دهد اغلب گرفتار کار پنهان است: incident، درخواست موردی و نگهداری.
+>
+> **Your turn:** تیم سه هفته است هیچ پروژه‌ای را تمام نکرده. اول کجا را نگاه می‌کنید؟
+>
+> *Answer:* کار واقعی را در GitLab و ticketها: چند درصد زمان صرف on-call و درخواست موردی شده. کتاب «تحویل ندادن» را یکی از ناکارکردی‌ها می‌داند و پیشنهادش اول دیدن کار واقعی و بعد کم کردن موانع است (pp. 79–81).
 
-The advice to be a shield — a "bullshit umbrella" — is half right (pp. 83–84):
+### سپر
 
-| Shielding helps | Shielding hurts |
+این توصیه که سپر باشید، یک جور «چتر در برابر مزخرفات»، نیمی‌اش درست است (pp. 83–84):
+
+| سپر بودن کمک می‌کند | سپر بودن آسیب می‌زند |
 |---|---|
-| Teams exposed to irrelevant toxic drama get distracted and stressed; engineering doesn't need customer-service politics. Help people focus on what they can change | **People need context, not just goals:** if a system that isn't ready means operational problems in November, the team deserves to know — context is how they decide where to spend energy |
-| Workplace drama is usually an ego-entertaining drain | **Denying outside events** (layoffs elsewhere that the team hears about secondhand) creates the feeling something bad is being hidden. Share it plainly and with low emotion |
-| | **You're a shield, not a parent.** Treating the team as fragile children makes you take their mistakes and disagreements personally; they are adults owed respect |
+| تیمی که در معرض درام سمیِ بی‌ربط باشد حواسش پرت و پرفشار می‌شود؛ مهندسی به سیاست‌بازی واحد پشتیبانی مشتری نیاز ندارد. کمک کنید آدم‌ها روی چیزی تمرکز کنند که می‌توانند عوضش کنند | **آدم‌ها به زمینه نیاز دارند، نه فقط هدف:** اگر آماده نبودن یک سیستم یعنی مشکل عملیاتی در آبان، تیم حق دارد بداند؛ زمینه همان چیزی است که با آن تصمیم می‌گیرند انرژی‌شان را کجا بگذارند |
+| درام محیط کار معمولاً سرگرمیِ ایگو و فرسایش انرژی است | **انکار اتفاق‌های بیرونی**، مثل تعدیل نیرو در جای دیگر شرکت که تیم از دهان دیگران می‌شنود، این حس را می‌سازد که چیز بدی پنهان می‌شود. ساده و بی‌هیجان بگوییدش |
+| | **سپرید، نه پدر و مادر.** وقتی تیم را بچه‌هایی شکننده ببینید، اشتباه‌ها و اختلاف‌هایشان را به دل می‌گیرید؛ آن‌ها آدم بالغ‌اند و احترام حقشان است |
 
-### How to Drive Good Decisions
+> **In practice:** lead تیم داده می‌تواند تیم را از سیل درخواست‌های داشبورد محافظت کند، ولی نه کاملاً.
+>
+> **Your turn:** چرا پنهان کردن کامل اولویت‌های کسب‌وکار از تیم آسیب می‌زند؟
+>
+> *Answer:* تیم نمی‌فهمد چرا یک جدول از دیگری مهم‌تر است و تصمیم‌های فنی‌اش از نیاز جدا می‌شود. کتاب سپر بودن را نیمه‌درست می‌داند: از درام بی‌ربط محافظت کنید، ولی زمینه را پنهان نکنید (pp. 83–84).
 
-The product manager owns the roadmap and the tech lead the technical details, but **you are accountable for the team's progress through both** — judged on decisions you can only guide (p. 84).
+### چطور تصمیم‌های خوب را پیش ببریم
 
-| Practice | How (pp. 84–86) |
+نقشه‌ی راه مال product manager است و جزئیات فنی مال tech lead، ولی **شما پاسخ‌گوی پیشرفت تیم در هر دوتایید**؛ با تصمیم‌هایی سنجیده می‌شوید که فقط می‌توانید هدایتشان کنید (p. 84).
+
+| کار | چطور (pp. 84–86) |
 |---|---|
-| **Create a data-driven team culture** | Add team productivity (time to complete features) and quality data (time on outages, bugs found in QA or after release) to the business data your product head already uses |
-| **Flex your own product muscles** | Whoever depends on your work — external users, other engineers, a support team — is your customer. Customer empathy gives engineers context and shows where engineering effort matters most |
-| **Look into the future** | Think two steps ahead: technical projects often win support by enabling features (rewriting checkout to add Apple Pay; a framework that streams changes over WebSockets). Ask product what's coming; follow technology |
-| **Review the outcome of decisions and projects** | Did the team move faster after the rewrite? Did customers behave as predicted? What did the A/B tests teach? |
-| **Run retrospectives** | Regularly, agile or not, on requirements, code quality and day-to-day — more subjective than metrics but arguably more valuable, because it is what the team itself notices |
+| **فرهنگ تیمی داده‌محور بسازید** | کنار داده‌های کسب‌وکار که مسئول محصول پیش از این به کار می‌برد، داده‌ی بهره‌وری تیم، یعنی زمان تمام شدن featureها، و داده‌ی کیفیت، یعنی زمان صرف‌شده روی قطعی و باگ‌های پیداشده در QA یا بعد از release، را هم بیاورید |
+| **عضله‌ی محصول خودتان را به کار بیندازید** | هر کسی که به کار شما وابسته است، چه کاربر بیرونی، چه مهندس‌های دیگر، چه تیم پشتیبانی، مشتری شماست. همدلی با مشتری به مهندس‌ها زمینه می‌دهد و نشان می‌دهد تلاش مهندسی کجا بیشترین اثر را دارد |
+| **به آینده نگاه کنید** | دو قدم جلوتر را ببینید: پروژه‌های فنی اغلب وقتی حمایت می‌گیرند که featureای را ممکن کنند؛ مثلاً بازنویسی checkout برای افزودن Apple Pay، یا frameworkای که تغییرها را روی WebSocket استریم می‌کند. از product بپرسید چه چیزی در راه است؛ فناوری را دنبال کنید |
+| **نتیجه‌ی تصمیم‌ها و پروژه‌ها را مرور کنید** | بعد از بازنویسی، تیم سریع‌تر شد؟ مشتری‌ها همان‌طور که پیش‌بینی شده بود رفتار کردند؟ تست‌های A/B چه یاد دادند؟ |
+| **جلسه‌ی retrospective بگذارید** | منظم، چه agile باشید چه نه، درباره‌ی نیازمندی‌ها و کیفیت کد و کار روزمره؛ از metricها ذهنی‌تر است ولی شاید ارزشمندتر، چون چیزی است که خود تیم می‌بیند |
 
-### Good Manager, Bad Manager: Conflict Avoider, Conflict Tamer
+### مدیر خوب، مدیر بد: فراری از تعارض، رام‌کننده‌ی تعارض
 
-Two overworked teams, each with a "Charles" on a pet project (pp. 86–87):
+دو تیم پرکار که هر کدام یک «Charles» روی پروژه‌ی دلخواهش دارند (pp. 86–87):
 
-| Jason, the conflict avoider | Lydia, the conflict tamer |
+| Jason، فراری از تعارض | Lydia، رام‌کننده‌ی تعارض |
 |---|---|
-| Asks the team to vote on which projects to drop; they vote out Charles's project — a surprise only to Charles, whom Jason never told | Tells Charles in a 1-1 that priorities changed and the team needs him on the rewrite — an unpleasant conversation she owns |
-| Never says no to other teams, never asks for more people; the team can't prioritize and nurses grudges | Pushes for more people, explains why the team took the project, structures technical disagreements with options and feedback |
-| Seen as cool but impossible to get decisions from; nobody feels secure | Seen as tough but fair; the team gets through disagreements and collaborates well |
+| از تیم می‌خواهد رأی بدهند کدام پروژه‌ها حذف شوند؛ آن‌ها پروژه‌ی Charles را حذف می‌کنند، که فقط برای خود Charles غافلگیری است، چون Jason هیچ‌وقت به او نگفته بود | در یک ۱-۱ به Charles می‌گوید اولویت‌ها عوض شده و تیم او را روی بازنویسی لازم دارد؛ گفت‌وگویی ناخوشایند که خودش مسئولیتش را می‌پذیرد |
+| هیچ‌وقت به تیم‌های دیگر نه نمی‌گوید و نیروی بیشتر نمی‌خواهد؛ تیم نمی‌تواند اولویت بدهد و کینه به دل می‌گیرد | برای نیروی بیشتر پافشاری می‌کند، توضیح می‌دهد چرا تیم آن پروژه را برداشته، و به اختلاف‌های فنی با گزینه‌ها و بازخورد ساختار می‌دهد |
+| باحال به نظر می‌رسد ولی گرفتن تصمیم از او ناممکن است؛ هیچ‌کس حس امنیت ندارد | سخت‌گیر ولی منصف دیده می‌شود؛ تیم از دل اختلاف‌ها رد می‌شود و خوب همکاری می‌کند |
 
-Constant bickering is painful, but **artificial harmony** is worse: create a safe environment for disagreement rather than pretend it doesn't exist (p. 87).
+کلنجار دائم دردناک است، ولی **هماهنگی ساختگی** بدتر است: به‌جای وانمود کردن به این‌که اختلافی نیست، فضای امنی برای مخالفت بسازید (p. 87).
 
-**The dos and don'ts of managing conflict** (pp. 87–89):
+**بکن‌ها و نکن‌های مدیریت تعارض** (pp. 87–89):
 
-| Don't | Do |
+| نکنید | بکنید |
 |---|---|
-| **Rely exclusively on consensus or voting.** It assumes impartiality, equal stakes and equal knowledge, which teams rarely have — and it can be cruel. Don't stage votes to deliver bad news you should deliver yourself | **Set up clear processes to depersonalize decisions:** shared goals, risks and questions; a named decision owner; who is consulted and who is informed |
-| **Turn a blind eye to simmering issues.** Major problems shouldn't surface first in a review — or first through several peers' feedback, which means you weren't paying attention | **Address issues without courting drama.** Is it ongoing? Have you seen it? Do many people struggle with it? Is there a power dynamic or bias? You're not the team's therapist |
-| **Take it out on other teams.** Avoiders often turn bully toward outsiders after cross-team incidents, venting the accountability they won't demand at home | **Be kind, not nice.** Nice is polite-society smoothness; kind is telling someone they aren't ready for promotion, with what to do about it, or that their behaviour disrupts meetings |
-| **Be afraid** — of deciding, seeming demanding, people quitting or disliking you | **Get curious** about your motives: am I pushing this decision to the team because they're best placed, or because I fear an unpopular call? |
+| **فقط به اجماع یا رأی‌گیری تکیه نکنید.** رأی‌گیری فرض می‌گیرد همه بی‌طرف‌اند و منافع و دانش برابر دارند، که تیم‌ها به‌ندرت دارند، و می‌تواند بی‌رحمانه باشد. برای رساندن خبر بدی که خودتان باید بدهید رأی‌گیری صحنه‌سازی نکنید | **processهای روشنی بگذارید که تصمیم را از آدم‌ها جدا کنند:** هدف‌ها و ریسک‌ها و پرسش‌های مشترک؛ یک صاحب تصمیم مشخص؛ و این‌که با چه کسی مشورت می‌شود و چه کسی در جریان قرار می‌گیرد |
+| **مسئله‌های در حال جوشیدن را ندیده نگیرید.** مشکل بزرگ نباید اولین بار در ارزیابی رو شود، یا اولین بار از دل بازخورد چند هم‌تراز، که یعنی حواستان نبوده | **مسئله‌ها را بدون دامن زدن به درام مطرح کنید.** ادامه‌دار است؟ خودتان دیده‌اید؟ آدم‌های زیادی با آن مشکل دارند؟ رابطه‌ی قدرت یا سوگیری در کار است؟ شما تراپیست تیم نیستید |
+| **تلافی‌اش را سر تیم‌های دیگر درنیاورید.** فراری‌ها از تعارض اغلب بعد از حادثه‌های بین‌تیمی با بیرونی‌ها زورگو می‌شوند و همان پاسخ‌گویی‌ای را که داخل تیم نمی‌خواهند، بیرون فریاد می‌زنند | **مهربان باشید، نه خوش‌برخورد.** خوش‌برخوردی نرمیِ آداب اجتماعی است؛ مهربانی یعنی به کسی بگویید آماده‌ی ارتقا نیست و بگویید برای آن چه کند، یا بگویید رفتارش جلسه‌ها را به هم می‌ریزد |
+| **نترسید**، نه از تصمیم گرفتن، نه از سخت‌گیر دیده شدن، نه از استعفا یا بدآمدن آدم‌ها | **درباره‌ی انگیزه‌هایتان کنجکاو شوید:** این تصمیم را به تیم می‌سپارم چون بهترین جایگاه را دارند، یا چون از تصمیم نامحبوب می‌ترسم؟ |
 
-### Challenging Situations: Team Cohesion Destroyers
+### موقعیت‌های دشوار: ویران‌کننده‌های انسجام تیم
 
-A test of a happy team — do they stay for evening pizza? — is flawed (obligations aren't disengagement), but gelled teams do joke, get coffee and feel friendly (pp. 89–90). **The real goal is psychological safety**: willingness to take risks and make mistakes in front of each other. Build it by getting to know people — the birthday party, the ski trip, the marathon training — which fosters relatedness. "Culture fit" can mask discrimination but comes from a wise place: friendly teams gel faster and do better (p. 90). Toxic people make everyone around them less effective, so deal with them quickly (p. 90).
+این سنجه که تیم خوشحال است یا نه، یعنی برای پیتزای شب می‌مانند یا نه، ایراد دارد، چون تعهدهای بیرونی به معنی بی‌انگیزگی نیستند، ولی تیم‌های جوش‌خورده واقعاً شوخی می‌کنند، با هم قهوه می‌خورند و حس رفاقت دارند (pp. 89–90). **هدف واقعی امنیت روانی است**: این‌که حاضر باشید جلوی هم ریسک کنید و اشتباه کنید. با شناختن آدم‌ها بسازیدش؛ جشن تولد، سفر اسکی، تمرین ماراتن، که همه حس تعلق می‌سازند. «culture fit» می‌تواند پوشش تبعیض شود، ولی از جای عاقلانه‌ای می‌آید: تیم‌های رفیق سریع‌تر جوش می‌خورند و بهتر کار می‌کنند (p. 90). آدم‌های سمی همه‌ی اطرافیانشان را کم‌اثرتر می‌کنند، پس سریع با آن‌ها تعیین تکلیف کنید (p. 90).
 
-| Type | Behaviour | What to do (pp. 90–92) |
+| تیپ | رفتار | چه کنید (pp. 90–92) |
 |---|---|---|
-| **The brilliant jerk** | Outsized results, ego-driven; bullies with intellect, cuts down dissent, ignores those deemed unequal. Clings to brilliance like a life raft | Best of all, don't hire one; firing takes rare confidence, but at least don't promote them. Expect a fight over all feedback. **Openly refuse to tolerate bad behaviour** — here criticism may be public, neutral and in the moment ("Please do not speak to people that way; it is disrespectful") — but only for behaviour harmful to the group. Priorities: protect the team, then each individual, then yourself |
-| **The noncommunicator** | Hides information, works in secret to unveil perfect work, reverts others' commits or does their tickets, avoids code and design review | Nip it in the bud, making clear it misses expectations. Look for the root: fear of being found lacking, wanting more responsibility, a harsh culture, or a team excluding someone different — then fix the team or move the person |
-| **The employee who lacks respect** | Doesn't respect you, or their teammates | Ask whether they want to be on your team. Yes — lay out expectations clearly and calmly. No — move them or help them leave. Pull off the Band-Aid: the rest of the team will wonder whether they're right |
+| **نابغه‌ی بدرفتار** | نتیجه‌ی چشمگیر، با ایگوی بزرگ؛ با هوشش زورگویی می‌کند، مخالف را خرد می‌کند و کسانی را که هم‌تراز خودش نمی‌داند نادیده می‌گیرد. به نبوغش مثل قایق نجات چسبیده | از همه بهتر این است که اصلاً استخدامش نکنید؛ اخراجش اعتمادبه‌نفس کمیابی می‌خواهد، ولی دست‌کم ارتقایش ندهید. سر هر بازخوردی منتظر جنگ باشید. **علنی بگویید رفتار بد را تحمل نمی‌کنید**؛ این‌جا انتقاد می‌تواند علنی و خنثی و در لحظه باشد، مثل «لطفاً با آدم‌ها این‌طور حرف نزن؛ بی‌احترامی است»، ولی فقط برای رفتاری که به گروه آسیب می‌زند. اولویت‌ها: اول تیم، بعد تک‌تک آدم‌ها، بعد خودتان |
+| **آدم بی‌ارتباط** | اطلاعات را پنهان می‌کند، مخفیانه کار می‌کند تا کار بی‌نقص را رو کند، commitهای دیگران را برمی‌گرداند یا ticketهایشان را انجام می‌دهد و از code review و design review فرار می‌کند | جلویش را همان اول بگیرید و روشن کنید که انتظارها را برآورده نمی‌کند. دنبال ریشه بگردید: ترس از این‌که ناکافی دیده شود، میل به مسئولیت بیشتر، فرهنگ خشن، یا تیمی که کسی را که فرق دارد بیرون می‌گذارد؛ و بعد تیم را درست کنید یا آدم را جابه‌جا |
+| **کارمندی که احترام نمی‌گذارد** | به شما یا به هم‌تیمی‌هایش احترام نمی‌گذارد | بپرسید اصلاً می‌خواهد در تیم شما باشد. بله: انتظارها را روشن و آرام بگذارید. نه: جابه‌جایش کنید یا کمکش کنید برود. چسب زخم را یک‌دفعه بکَنید، چون بقیه‌ی تیم از خودشان می‌پرسند نکند حق با او باشد |
 
-### Advanced Project Management
+### مدیریت پیشرفته‌ی پروژه
 
-The organization will expect off-the-cuff estimates and concrete plans: whether your team can take a project, how big it is, how many people you'd need (p. 93). You don't own the agile day-to-day; you own the accomplishments measured in months, not weeks (p. 93).
+سازمان از شما تخمین سرانگشتی و برنامه‌ی مشخص می‌خواهد: این‌که تیمتان می‌تواند پروژه‌ای را بردارد یا نه، چقدر بزرگ است و چند نفر لازم دارید (p. 93). کار روزمره‌ی agile مال شما نیست؛ دستاوردهایی که با ماه اندازه می‌شوند مال شمایند، نه با هفته (p. 93).
 
-| Rule of thumb | Detail (pp. 93–95) |
+| قاعده‌ی سرانگشتی | جزئیات (pp. 93–95) |
 |---|---|
-| **None of this replaces agile** | Agile planning smooths the day-to-day; the manager plans the larger picture |
-| **10 productive engineering weeks per engineer per quarter** | Of about 13 weeks, vacations, meetings, review season, outages and onboarding take the rest. Q1 tends to be most productive, Q4 least |
-| **Budget 20% for sustaining engineering** | Testing, debugging, legacy cleanup, version migrations. It chips away at mid-size legacy code each quarter or absorbs delays; scheduling features to 100% slows features down |
-| **Near deadlines, it's your job to say no** | The only way to hit a date is to cut scope: say no to engineers who want prerequisite work (hack now, or the right implementation?) and to product on must-haves, giving options and their costs |
-| **Double quick estimates; plan longer ones** | Off-the-cuff: guess and double it. For more than a couple of weeks, double it *and* say you need planning time — long tasks can take far more than twice the guess |
-| **Be selective about what you bring to the team to estimate** | You absorb uncertainty. Don't be a telephone relaying every request — nor a black hole; set up a team process for new features and complaints |
+| **هیچ‌کدام جای agile را نمی‌گیرد** | برنامه‌ریزی agile کار روزمره را صاف می‌کند؛ مدیر تصویر بزرگ‌تر را برنامه می‌ریزد |
+| **۱۰ هفته‌ی مهندسیِ مفید برای هر مهندس در هر فصل** | از حدود ۱۳ هفته، مرخصی و جلسه و فصل ارزیابی و قطعی و onboarding بقیه‌اش را می‌برند. فصل اول معمولاً پربارترین است و فصل چهارم کم‌بارترین |
+| **۲۰٪ را برای کار نگه‌دارنده کنار بگذارید** | تست، debug، تمیزکاری کد قدیمی و مهاجرت نسخه‌ها. هر فصل تکه‌ای از کد قدیمیِ متوسط را می‌تراشد یا تأخیرها را جذب می‌کند؛ زمان‌بندی کردن featureها تا ۱۰۰٪ ظرفیت، خودِ featureها را کند می‌کند |
+| **نزدیک ضرب‌الاجل، نه گفتن کار شماست** | تنها راه رسیدن به تاریخ، کم کردن دامنه است: به مهندس‌هایی که کار پیش‌نیاز می‌خواهند نه بگویید، یعنی الان سرهم‌بندی یا پیاده‌سازی درست؟ و به product سر چیزهای «حتماً لازم» نه بگویید، با دادن گزینه‌ها و هزینه‌هایشان |
+| **تخمین سرانگشتی را دو برابر کنید؛ برای تخمین بلندتر برنامه بریزید** | سرانگشتی: حدس بزنید و دو برابرش کنید. برای بیش از چند هفته، دو برابرش کنید *و* بگویید وقت برنامه‌ریزی می‌خواهید، چون کارهای طولانی می‌توانند خیلی بیش از دو برابر حدس طول بکشند |
+| **در انتخاب چیزی که برای تخمین پیش تیم می‌برید گزینشی باشید** | شما بلاتکلیفی را جذب می‌کنید. مثل تلفنی نباشید که هر درخواستی را منتقل می‌کند، و البته سیاه‌چاله هم نباشید؛ برای featureها و شکایت‌های تازه یک process تیمی بگذارید |
 
-> **Try it:** [Quarter capacity planner](../widgets/05-quarter-planner.html) — size a team, pick a quarter, set the sustaining share, and see which projects fit once estimates are doubled and the 10-week rule applies.
+> **Try it:** [برنامه‌ریز ظرفیت یک فصل](../widgets/05-quarter-planner.html)؛ اندازه‌ی تیم و فصل و سهم کار نگه‌دارنده را بگذارید و ببینید وقتی تخمین‌ها دو برابر می‌شوند و قاعده‌ی ۱۰ هفته اعمال می‌شود، کدام پروژه‌ها جا می‌شوند.
 
-> **Ask the CTO: Joining a Small Team** (pp. 95–96). As a new manager of five engineers with new code: get walked through the architecture, testing and release; do the developer onboarding; read code reviews; ship at least a couple of features in your first 60 days — pair, get reviewed, do a release, take a support rotation. Management onboarding goes slower, but you gain understanding and technical credibility.
+> **کادر Ask the CTO: پیوستن به یک تیم کوچک** (pp. 95–96). به‌عنوان مدیر تازه‌ی پنج مهندس با کدی که نمی‌شناسید: بخواهید معماری و تست و release را برایتان مرور کنند؛ onboarding برنامه‌نویس‌ها را انجام بدهید؛ code reviewها را بخوانید؛ در ۶۰ روز اول دست‌کم دو تا feature تحویل بدهید، pair کنید، review بگیرید، یک release انجام بدهید و یک شیفت پشتیبانی بردارید. onboarding مدیریتی کندتر پیش می‌رود، ولی فهم و اعتبار فنی به دست می‌آورید.
 
-### Assessing Your Own Experience
+### سنجیدن تجربه‌ی خودتان
 
-Questions for reflection (pp. 96–97): what did you stop doing to make time for the new job? How well do you know the team's day-to-day pain? When did you last write a feature or pair? Who causes most of the negativity, and what's your plan? How does the team make decisions, and which do you own? When did you last review a finished project against its goals, or cut scope — and how did you choose?
+پرسش‌هایی برای تأمل (pp. 96–97): برای باز کردن وقت برای شغل تازه چه کاری را کنار گذاشتید؟ چقدر از دردهای روزمره‌ی تیم خبر دارید؟ آخرین بار کِی featureای نوشتید یا pair کردید؟ بیشتر منفی‌بافی از کجاست و برنامه‌تان چیست؟ تیم چطور تصمیم می‌گیرد و کدام تصمیم‌ها مال شماست؟ آخرین بار کِی پروژه‌ی تمام‌شده‌ای را با هدف‌هایش سنجیدید، یا دامنه‌ای را کم کردید، و چطور انتخاب کردید؟
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Manager keeps coding small things | Feels bottlenecks; credibility | Time; must not block the team |
-| Manager stops coding early | Time for management | Technical obsolescence; capped career |
-| Weekly releases | Fewer release events | Hidden pain, contention, broken last-minute changes |
-| Daily releases | Small batches; less contention | Needs automation and tooling investment |
-| Full shield | Focus | No context for decisions; rumours |
-| Voting on decisions | Looks democratic | Unequal knowledge and stakes; cruelty; avoided accountability |
-| Depersonalized decision process | Fair, predictable decisions | Setup effort; a named owner must decide |
-| Features at 100% of schedule | Looks productive | Features slow down; no buffer |
-| 20% sustaining work | Systems stay easy to change; slack | Fewer features this quarter |
+| مدیری که کارهای کوچک را کد می‌زند | گلوگاه‌ها را حس می‌کند؛ اعتبار | وقت؛ و نباید جلوی تیم سد شود |
+| مدیری که زود کد زدن را کنار می‌گذارد | وقت برای مدیریت | کهنه شدن فنی؛ سقف خوردن مسیر شغلی |
+| release هفتگی | رویدادهای release کمتر | درد پنهان، رقابت بر سر منبع، تغییرهای خرابِ لحظه‌ی آخر |
+| release روزانه | دسته‌های کوچک؛ رقابت کمتر | سرمایه‌گذاری روی automation و ابزار می‌خواهد |
+| سپر کامل | تمرکز | زمینه‌ای برای تصمیم نمی‌ماند؛ شایعه |
+| رأی‌گیری برای تصمیم | دموکراتیک به نظر می‌رسد | دانش و منافع نابرابر؛ بی‌رحمی؛ فرار از پاسخ‌گویی |
+| process تصمیم‌گیریِ جدا از آدم‌ها | تصمیم‌های منصفانه و قابل‌پیش‌بینی | زحمت راه‌اندازی؛ یک صاحب مشخص باید تصمیم بگیرد |
+| زمان‌بندی feature تا ۱۰۰٪ ظرفیت | پربازده به نظر می‌رسد | featureها کند می‌شوند؛ حاشیه‌ی امنی نمی‌ماند |
+| ۲۰٪ کار نگه‌دارنده | سیستم‌ها آسان‌تغییر می‌مانند؛ فضای تنفس | feature کمتر در این فصل |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Psychological safety** is Amy Edmondson's term (*Administrative Science Quarterly*, 1999); Google's Project Aristotle study of its own teams (2015) found it the most important factor in team effectiveness.
-- **Small batches.** The book's release story matches a central finding of the DORA research (Forsgren, Humble and Kim, *Accelerate*, 2018): frequent deploys of small changes go with lower change failure rates. The [lab](../lab/05-release-cadence/README.md) is a toy model of why batch size matters, with invented failure rates.
-- **RACI.** "Who should be consulted and who needs to be informed" (p. 87) echoes the RACI matrix — Responsible, Accountable, Consulted, Informed — used to assign decision ownership.
+- **امنیت روانی** اصطلاح Amy Edmondson است، در *Administrative Science Quarterly* سال ۱۹۹۹؛ پژوهش Project Aristotle در Google در سال ۲۰۱۵ روی تیم‌های خودش نشان داد مهم‌ترین عامل اثربخشی تیم همین است.
+- **دسته‌های کوچک.** داستان release در کتاب با یافته‌ی مرکزی پژوهش DORA می‌خواند (Forsgren و Humble و Kim، *Accelerate*، ۲۰۱۸): deployهای پرتکرارِ تغییرهای کوچک با نرخ خرابی کمتر همراه‌اند. [این آزمایش](../lab/05-release-cadence/README.md) مدلی اسباب‌بازی از اهمیت اندازه‌ی دسته است، با نرخ‌های خرابیِ ساختگی.
+- **ماتریس RACI.** عبارت «با چه کسی مشورت شود و چه کسی در جریان قرار گیرد» (p. 87) یادآور ماتریس RACI است، یعنی Responsible و Accountable و Consulted و Informed، که برای تعیین صاحب تصمیم به کار می‌رود.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Release cadence and contention](../lab/05-release-cadence/README.md) — the same changes shipped weekly and daily: batch sizes, blocked releases and waiting time.
-- **Related chapters:** [3. Tech Lead](03-tech-lead.md) (project management basics), [4. Managing People](04-managing-people.md) (feedback, firing), [6. Managing Multiple Teams](06-managing-multiple-teams.md) (staying technical when you can't code; release frequency as a health measure), [9. Bootstrapping Culture](09-bootstrapping-culture.md) (depersonalizing decisions through process).
+- **Run it:** [ریتم release و رقابت بر سرش](../lab/05-release-cadence/README.md)؛ همان تغییرها یک‌بار هفتگی و یک‌بار روزانه: اندازه‌ی دسته‌ها، releaseهای مسدودشده و زمان انتظار.
+- **فصل‌های مرتبط:** [فصل ۳: نقش tech lead](03-tech-lead.md) که مبانی مدیریت پروژه را دارد، [فصل ۴: مدیریت آدم‌ها](04-managing-people.md) که بازخورد و اخراج را می‌گوید، [فصل ۶: مدیریت چند تیم](06-managing-multiple-teams.md) که فنی ماندن بدون کد زدن و تکرار release را به‌عنوان سنجه‌ی سلامت می‌بیند، و [فصل ۹: ساختن فرهنگ از صفر](09-bootstrapping-culture.md) که جدا کردن تصمیم از آدم‌ها را با process می‌گوید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **Why should an engineering lead still write small features and bug fixes?**
+1. **چرا یک engineering lead باید باز هم featureهای کوچک و رفع باگ بنویسد؟**
 
-   *Answer:* To feel the bottlenecks — slow builds, painful deploys, bad on-call — and spot technical debt, and to judge what the systems can do when product proposes something (p. 78).
+   *Answer:* تا گلوگاه‌ها را حس کند، یعنی build کند و deploy دردناک و on-call بد، و بدهی فنی را ببیند، و وقتی product چیزی پیشنهاد می‌دهد بتواند بسنجد سیستم‌ها از پسش برمی‌آیند یا نه (p. 78).
 
-2. **How did moving from weekly to daily releases improve morale on the author's team?**
-   - [ ] It cut the number of tests
-   - [x] Releases were a scarce resource people contended for; making them plentiful removed the conflict
-   - [ ] It let the team skip code review
+2. **رفتن از release هفتگی به روزانه چطور روحیه‌ی تیم نویسنده را بهتر کرد؟**
+   - [ ] تعداد تست‌ها را کم کرد
+   - [x] زمان release منبعی کمیاب بود که آدم‌ها سرش رقابت می‌کردند؛ فراوان شدنش تعارض را برداشت
+   - [ ] به تیم اجازه داد code review را رد کند
 
    *Answer:* pp. 79–80.
 
-3. **What is wrong with being a total shield?**
+3. **سپر کامل بودن چه ایرادی دارد؟**
 
-   *Answer:* People need context for their goals to make good decisions; denying outside events breeds gossip; and shielding can slide into parenting adults (pp. 83–84).
+   *Answer:* آدم‌ها برای تصمیم‌های خوب به زمینه‌ی هدف‌هایشان نیاز دارند؛ انکار اتفاق‌های بیرونی غیبت می‌سازد؛ و سپر بودن می‌تواند به والد بودن برای آدم‌های بالغ بلغزد (pp. 83–84).
 
-4. **Why was Jason's team vote on Charles's project a mistake?**
+4. **چرا رأی‌گیری تیم Jason درباره‌ی پروژه‌ی Charles اشتباه بود؟**
 
-   *Answer:* Voting assumes equal stakes and knowledge and can be cruel; he used it to avoid delivering bad news himself, and Charles had never been told (pp. 86–87).
+   *Answer:* رأی‌گیری منافع و دانش برابر را فرض می‌گیرد و می‌تواند بی‌رحمانه باشد؛ او از آن استفاده کرد تا خودش خبر بد را ندهد، و Charles هیچ‌وقت در جریان نبود (pp. 86–87).
 
-5. **When is public criticism appropriate with a brilliant jerk?**
+5. **کِی انتقاد علنی از نابغه‌ی بدرفتار بجاست؟**
 
-   *Answer:* When the behaviour visibly harms the team and you don't want the culture to mimic it — delivered neutrally and in the moment; behaviour that only undermines you personally belongs in private (p. 91).
+   *Answer:* وقتی رفتار آشکارا به تیم آسیب می‌زند و نمی‌خواهید فرهنگ تقلیدش کند؛ آن‌هم خنثی و در لحظه. رفتاری که فقط زیر پای خود شما را خالی می‌کند، جایش در خلوت است (p. 91).
 
-6. **How many productive weeks per engineer should you plan for in a quarter, and how much sustaining work?**
-   - [ ] 13 weeks, 0%
-   - [x] About 10 weeks, with 20% for sustaining engineering
-   - [ ] 8 weeks, 50%
+6. **در یک فصل برای هر مهندس چند هفته‌ی مفید باید برنامه بریزید و چقدر کار نگه‌دارنده؟**
+   - [ ] ۱۳ هفته، ۰٪
+   - [x] حدود ۱۰ هفته، با ۲۰٪ برای کار نگه‌دارنده
+   - [ ] ۸ هفته، ۵۰٪
 
    *Answer:* p. 94.
 
-7. **What is the doubling rule, and when isn't it enough?**
+7. **قاعده‌ی دو برابر کردن چیست و کِی کافی نیست؟**
 
-   *Answer:* For off-the-cuff estimates, take your guess and double it; for projects longer than a couple of weeks, double it but insist on planning time, because long tasks can take far more than twice the guess (p. 95).
+   *Answer:* برای تخمین سرانگشتی، حدستان را دو برابر کنید؛ برای پروژه‌های بیش از چند هفته دو برابرش کنید ولی روی وقت برنامه‌ریزی پافشاری کنید، چون کارهای طولانی می‌توانند خیلی بیش از دو برابر حدس طول بکشند (p. 95).

@@ -3,149 +3,151 @@ book: the-managers-path
 chapter: 7
 title: "Managing Managers"
 pages: "125–157"
+translated_title: "مدیریت مدیرها"
+lang: fa
 ---
 
-# 7. Managing Managers
+# فصل ۷: مدیریت مدیرها
 
-[← 6. Managing Multiple Teams](06-managing-multiple-teams.md) · [Book](../README.md) · [8. The Big Leagues →](08-the-big-leagues.md)
+[فصل ۶: مدیریت چند تیم →](06-managing-multiple-teams.md) · [کتاب](../README.md) · [فصل ۸: لیگ بزرگ‌ها ←](08-the-big-leagues.md)
 
-## Summary
+## خلاصه
 
-Managing managers looks like managing multiple teams at a larger magnitude, but it adds a new layer of abstraction: you are two levels from the work, depending on unreliable witnesses for problems you can't see. The chapter is about seeing through that layer — skip-level meetings instead of an open door, holding managers accountable for their teams even when the causes look external, coaching new managers and aligning experienced ones, hiring managers for skills and culture, and debugging organizations the way you'd debug a system. It closes with managing expectations about schedules, keeping teams steady through roadmap changes, and what "staying technically relevant" means when you no longer code: overseeing technical investment by asking informed questions (pp. 125–157).
+مدیریت مدیرها شبیه مدیریت چند تیم در مقیاسی بزرگ‌تر به نظر می‌رسد، ولی یک لایه‌ی انتزاع تازه اضافه می‌کند: دو پله از خود کار فاصله دارید و برای مشکل‌هایی که نمی‌بینید به شاهدهای نامطمئن تکیه می‌کنید. این فصل درباره‌ی دیدن از پس همین لایه است: جلسه‌های skip-level به‌جای سیاست در باز، پاسخ‌گو نگه داشتن مدیرها در برابر تیمشان حتی وقتی ریشه‌ی مشکل بیرونی به نظر می‌رسد، کوچ کردن مدیرهای تازه و هم‌سو کردن مدیرهای باتجربه، استخدام مدیر بر پایه‌ی مهارت و فرهنگ، و debug کردن سازمان همان‌طور که یک سیستم را debug می‌کنید. در پایان درباره‌ی مدیریت انتظارها از زمان‌بندی، نگه داشتن ثبات تیم‌ها وسط تغییر نقشه‌ی راه، و معنای «مرتبط ماندن فنی» وقتی دیگر کد نمی‌زنید حرف می‌زند: سرپرستی سرمایه‌گذاری فنی با پرسیدن پرسش‌های آگاهانه (pp. 125–157).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Chase your discomfort and follow up on the little things** — recruiting, coaching, quarterly goals, postmortems — until you learn which you can stop following (p. 126).
-- **An open-door policy doesn't surface problems.** Hold skip-level meetings — quarterly 1-1s while the organization is small, or team lunches — to catch managers who manage up well (pp. 127–131).
-- **Managers are accountable for their team's health and productivity**, even with an unstable roadmap, an errant tech lead or constant firefighting; your part is to help once they bring the problem (pp. 131–133).
-- **Watch for the people pleaser** — team-facing or external-facing — who says yes to everyone, hides problems, and sets the team up to fail (pp. 133–136).
-- **New managers need real coaching**: watch for overwork (not letting go of old work) and control freaks; experienced managers need culture fit and room to shape strategy (pp. 136–140).
-- **Hire managers like engineers — for skills and culture:** role-played 1-1s with future reports, debugging a team, a management philosophy, technical depth, and thorough reference checks (pp. 140–144).
-- **Debug organizations like systems:** hypothesis, data, observation (mindful that observing changes the team), questions about goals, team dynamics, help, curiosity (pp. 145–148).
-- **Share estimates proactively, cut scope near the end, and stay technical by guiding investment** — read code, attend postmortems, ask informed questions, make specific requests rather than relaying (pp. 149–156).
+- **دنبال حس ناخوشایندتان بروید و کارهای کوچک را پیگیری کنید**، مثل استخدام و کوچینگ و هدف‌های فصلی و postmortem، تا یاد بگیرید پیگیری کدامشان را می‌شود کنار گذاشت (p. 126).
+- **سیاست در باز مشکل‌ها را رو نمی‌کند.** جلسه‌ی skip-level بگذارید، یعنی ۱-۱ فصلی تا وقتی سازمان کوچک است، یا ناهار تیمی، تا مدیرهایی را بگیرید که خوب رو به بالا گزارش می‌دهند (pp. 127–131).
+- **مدیرها در برابر سلامت و بهره‌وری تیمشان پاسخ‌گویند**، حتی با نقشه‌ی راه بی‌ثبات و tech lead سرگردان و آتش‌نشانی دائم؛ سهم شما کمک کردن است، وقتی مسئله را پیش شما آوردند (pp. 131–133).
+- **مراقب آدم خوشایندکننده باشید**، چه رو به تیم و چه رو به بیرون، که به همه بله می‌گوید، مشکل‌ها را پنهان می‌کند و تیم را به شکست می‌کشاند (pp. 133–136).
+- **مدیرهای تازه به کوچینگ واقعی نیاز دارند**: مراقب کار بیش از حد باشید، که از رها نکردن کار قبلی می‌آید، و مراقب آدم‌های کنترل‌گر؛ مدیرهای باتجربه به تناسب فرهنگی و فضا برای شکل دادن به استراتژی نیاز دارند (pp. 136–140).
+- **مدیرها را مثل مهندس‌ها استخدام کنید، برای مهارت و فرهنگ:** جلسه‌ی ۱-۱ نقش‌بازی‌شده با آدم‌هایی که زیردستش می‌شوند، debug کردن یک تیم، یک فلسفه‌ی مدیریتی، عمق فنی و بررسی دقیق مراجع (pp. 140–144).
+- **سازمان را مثل سیستم debug کنید:** فرضیه، داده، مشاهده با این آگاهی که مشاهده تیم را عوض می‌کند، پرسش درباره‌ی هدف‌ها، پویایی تیم، کمک کردن و کنجکاوی (pp. 145–148).
+- **تخمین‌ها را بی‌آن‌که بپرسند به اشتراک بگذارید، نزدیک پایان دامنه را کم کنید، و با هدایت سرمایه‌گذاری فنی فنی بمانید:** کد بخوانید، به postmortemها بروید، پرسش آگاهانه بپرسید و به‌جای پیام‌رسانی، درخواست مشخص بدهید (pp. 149–156).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Skip-Level Meetings — p. 128
-- Manager Accountability — p. 131
-- Good Manager, Bad Manager: The People Pleaser — p. 133
-- Managing New Managers — p. 136
-- Managing Experienced Managers — p. 138
-- Hiring Managers — p. 140
-- Debugging Dysfunctional Organizations — p. 145
-  - Have a Hypothesis — p. 146
-  - Check the Data — p. 146
-  - Observe the Team — p. 146
-  - Ask Questions — p. 147
-  - Check the Team Dynamics — p. 148
-  - Jump In to Help — p. 148
-  - Be Curious — p. 148
-- Setting Expectations and Delivering on Schedule — p. 149
-- Challenging Situations: Roadmap Uncertainty — p. 151
-  - Strategies for Handling Roadmap Uncertainty — p. 151
-- Staying Technically Relevant — p. 153
-  - Oversee Technical Investment — p. 154
-  - Ask Informed Questions — p. 154
-  - Analyze and Explain Engineering and Business Tradeoffs — p. 154
-  - Make Specific Requests — p. 154
-  - Use Your Experience as a Gut Check — p. 155
-- Assessing Your Own Experience — p. 156
+- جلسه‌های skip-level — p. 128
+- پاسخ‌گویی مدیر — p. 131
+- مدیر خوب، مدیر بد: آدم خوشایندکننده — p. 133
+- مدیریت مدیرهای تازه — p. 136
+- مدیریت مدیرهای باتجربه — p. 138
+- استخدام مدیر — p. 140
+- دیباگ کردن سازمان‌های ناکارکرد — p. 145
+  - فرضیه داشته باشید — p. 146
+  - داده‌ها را وارسی کنید — p. 146
+  - تیم را مشاهده کنید — p. 146
+  - پرسش بپرسید — p. 147
+  - پویایی تیم را وارسی کنید — p. 148
+  - برای کمک وسط بپرید — p. 148
+  - کنجکاو باشید — p. 148
+- تنظیم انتظارها و تحویل سر وقت — p. 149
+- موقعیت‌های دشوار: بلاتکلیفی نقشه‌ی راه — p. 151
+  - راهبردهایی برای کنار آمدن با بلاتکلیفی نقشه‌ی راه — p. 151
+- مرتبط ماندن فنی — p. 153
+  - بر سرمایه‌گذاری فنی نظارت کنید — p. 154
+  - پرسش آگاهانه بپرسید — p. 154
+  - بده‌بستان‌های مهندسی و کسب‌وکار را تحلیل و تبیین کنید — p. 154
+  - درخواست مشخص بدهید — p. 154
+  - از تجربه‌تان به‌عنوان محک درونی استفاده کنید — p. 155
+- سنجیدن تجربه‌ی خودتان — p. 156
 
-## Notes
+## یادداشت‌ها
 
-The difference from managing multiple teams is one of magnitude: more teams, more projects, and often functions you've never run — an engineering manager who now also has operations (p. 125). The author once asked her coach how to manage managers without it taking all her time, and how to help with problems she wasn't in the room to see, "with unreliable witnesses" (p. 125).
+تفاوتش با مدیریت چند تیم در مقیاس است: تیم بیشتر، پروژه‌ی بیشتر، و اغلب کارکردهایی که هیچ‌وقت نگردانده‌اید؛ مدیر مهندسی‌ای که حالا عملیات هم دارد (p. 125). نویسنده یک‌بار از کوچش پرسید چطور مدیرها را مدیریت کند بی‌آن‌که همه‌ی وقتش را بگیرد، و چطور به مشکل‌هایی کمک کند که خودش در اتاقشان نبوده، «با شاهدهای نامطمئن» (p. 125).
 
-- **Practise your instincts by following up on what merely seems off.** For a team outside your expertise, letting it roll until there's a problem means you'll find the problem too late (p. 126).
-- **People who manage one team well can fall apart here**, retreating to the comfortable: playing individual contributor, or playing project manager instead of training their managers (p. 126).
-- **Follow up on all the little things until you know which you can stop following:** Is recruiting happening? Are managers coaching? Are quarterly goals written — and did you review them? Did the postmortem happen, and did you read it (p. 126)?
+- **با پیگیری چیزهایی که فقط کمی ناجور به نظر می‌رسند، حستان را تمرین بدهید.** برای تیمی بیرون از تخصصتان، رها کردن کار تا وقتی مشکلی پیش بیاید یعنی مشکل را خیلی دیر پیدا می‌کنید (p. 126).
+- **کسانی که یک تیم را خوب می‌گردانند ممکن است این‌جا از هم بپاشند** و به منطقه‌ی امن عقب بنشینند؛ یا نقش individual contributor بازی می‌کنند یا به‌جای تربیت مدیرهایشان نقش project manager (p. 126).
+- **همه‌ی کارهای کوچک را پیگیری کنید تا بفهمید پیگیری کدامشان را می‌شود کنار گذاشت:** استخدام جلو می‌رود؟ مدیرها کوچینگ می‌کنند؟ هدف‌های فصلی نوشته شده‌اند و خودتان مرورشان کرده‌اید؟ postmortem برگزار شد و خواندیدش (p. 126)؟
 
-This is the entry to senior leadership, not more of the same (p. 126).
+این دروازه‌ی ورود به رهبری ارشد است، نه ادامه‌ی همان چیزی که بود (p. 126).
 
-> **Ask the CTO: The Fallacy of the Open-Door Policy** (pp. 127–128). Office hours and "my door is always open" rarely bring problems in: it takes a brave engineer to tell their boss — let alone their boss's boss — about a problem they may not even be able to articulate. The risk grows with distance, culminating in the clueless executive who relies on office hours and wonders why talent leaves. Some people are great at managing up and hiding problems. Being blindsided reflects on you; make room for real conversation in 1-1s and proactively hold skip-levels.
+> **کادر Ask the CTO: مغالطه‌ی سیاست در باز** (pp. 127–128). ساعت‌های ملاقات و «در اتاق من همیشه باز است» به‌ندرت مشکلی را به داخل می‌آورند: مهندس شجاعی لازم است که به رئیسش، چه برسد به رئیسِ رئیسش، از مشکلی بگوید که شاید حتی نتواند صورت‌بندی‌اش کند. ریسک با فاصله بیشتر می‌شود و سرش به مدیر ارشد بی‌خبری می‌رسد که به ساعت ملاقات تکیه می‌کند و تعجب می‌کند چرا استعدادها می‌روند. بعضی‌ها در مدیریت رو به بالا و پنهان کردن مشکل عالی‌اند. غافلگیر شدن به پای خودتان نوشته می‌شود؛ در جلسه‌های ۱-۱ جا برای گفت‌وگوی واقعی باز کنید و خودتان پیش‌دستانه skip-level بگذارید.
 
-### Skip-Level Meetings
+### جلسه‌های skip-level
 
-A skip-level is a meeting with the people who report to your reports; its purpose is perspective on the health and focus of your teams (p. 128).
+جلسه‌ی skip-level جلسه با آدم‌هایی است که به زیردست‌های شما گزارش می‌دهند؛ هدفش به دست آوردن چشم‌اندازی از سلامت و تمرکز تیم‌هاست (p. 128).
 
-| Form | How | Gains and limits (pp. 128–130) |
+| شکل | چطور | چه می‌دهد و کجا کم می‌آورد (pp. 128–130) |
 |---|---|---|
-| **Quarterly skip-level 1-1s** | A short meeting with each person, for their benefit, with prompts: best/worst of the project; who's doing well; feedback on their manager; product changes; missed opportunities; how the organization is doing; strategy they don't understand; what keeps them from their best work; how happy they are; how to make work more fun | A personal relationship with everyone, so people don't become "resources." **Doesn't scale:** 60 people in a quarter of about 60 working days is one a day; at 1,000 people you'd do nothing else in a 40-hour week |
-| **Skip-level team lunches** | Buy lunch for a whole team a couple of times a quarter. Group prompts: what can I provide? Is the team working poorly with any other team? Any questions about the larger organization? | Familiarity and group dynamics, but no individual coaching, and people won't criticize their manager in front of others. Familiarity made people more willing to use office hours |
+| **جلسه‌ی ۱-۱ فصلی skip-level** | جلسه‌ای کوتاه با هر نفر، به نفع خودش، با پرسش‌های آماده: بهترین و بدترین چیز پروژه؛ چه کسی خوب کار می‌کند؛ بازخورد درباره‌ی مدیرش؛ تغییرهای محصول؛ فرصت‌های از دست رفته؛ سازمان چطور پیش می‌رود؛ کدام بخش استراتژی را نمی‌فهمد؛ چه چیزی نمی‌گذارد بهترین کارش را بکند؛ چقدر راضی است؛ و چطور کار جذاب‌تر شود | رابطه‌ای شخصی با همه، تا آدم‌ها به «منبع» تبدیل نشوند. **مقیاس نمی‌گیرد:** ۶۰ نفر در فصلی با حدود ۶۰ روز کاری یعنی روزی یکی؛ با ۱۰۰۰ نفر در هفته‌ی ۴۰ ساعته کار دیگری نمی‌توانید بکنید |
+| **ناهار تیمی skip-level** | فصلی دو بار برای یک تیم کامل ناهار بخرید. پرسش‌های گروهی: چه چیزی می‌توانم برایتان فراهم کنم؟ تیم با تیم دیگری بد کار می‌کند؟ درباره‌ی سازمان بزرگ‌تر پرسشی هست؟ | صمیمیت و دیدن پویایی گروه، ولی بدون کوچینگ فردی، و آدم‌ها جلوی بقیه از مدیرشان انتقاد نمی‌کنند. همین صمیمیت باعث شد آدم‌ها راحت‌تر از ساعت‌های ملاقات استفاده کنند |
 
-The point, beyond trust and engagement, is to detect where you're **being "managed up" well, to the team's detriment** — those people reach you first, so you're predisposed to back them (p. 130). You're always trading expensive, deep engagements against cheap, shallow ones. And don't assume a team you used to manage will keep telling you things: teams change, and nobody brings you problems about their manager (pp. 130–131).
+فایده‌اش فراتر از اعتماد و مشارکت این است که بفهمید کجا دارند **خوب «رو به بالا مدیریتتان می‌کنند»، به زیان تیم**؛ همان آدم‌ها اول به شما می‌رسند، پس پیشاپیش متمایلید پشتشان بایستید (p. 130). همیشه بین تعامل‌های عمیق و گران و تعامل‌های سطحی و ارزان معامله می‌کنید. و فرض نکنید تیمی که قبلاً مدیرش بودید باز هم همه چیز را به شما می‌گوید: تیم‌ها عوض می‌شوند و کسی مشکل مدیرش را پیش شما نمی‌آورد (pp. 130–131).
 
-> **Run it:** the [skip-level load](../lab/07-skip-level-load/README.md) experiment reproduces the book's arithmetic — one skip-level 1-1 per person per quarter — for organizations of 15 to 1,000 people, and compares team lunches.
+> **Run it:** آزمایش [بار جلسه‌های skip-level](../lab/07-skip-level-load/README.md) همان حساب‌وکتاب کتاب را بازمی‌سازد، یعنی فصلی یک ۱-۱ برای هر نفر، برای سازمان‌های ۱۵ تا ۱۰۰۰ نفره، و با ناهار تیمی مقایسه‌اش می‌کند.
 
-### Manager Accountability
+### پاسخ‌گویی مدیر
 
-The universal goal: your managers should **make your life easier**, freeing you for the bigger picture. But some do it by hiding problems and telling you what you want to hear, so you must hold them accountable — one of the biggest things to learn at this level, and hard because responsibility on complex teams is split among tech leads, product managers and other teams (p. 131).
+هدف همگانی: مدیرهایتان باید **زندگی شما را آسان‌تر کنند** و وقتتان را برای تصویر بزرگ‌تر باز کنند. ولی بعضی‌ها این کار را با پنهان کردن مشکل و گفتن چیزی می‌کنند که دوست دارید بشنوید، پس باید پاسخ‌گو نگهشان دارید؛ یکی از بزرگ‌ترین چیزهایی که در این level باید یاد بگیرید، و سخت است چون در تیم‌های پیچیده مسئولیت بین tech leadها و product managerها و تیم‌های دیگر پخش است (p. 131).
 
-| Scenario (pp. 131–132) | Is the manager accountable? | What they should do — and your part (pp. 132–133) |
+| وضعیت (pp. 131–132) | مدیر پاسخ‌گوست؟ | او باید چه کند و سهم شما چیست (pp. 132–133) |
 |---|---|---|
-| **Unstable product roadmap** — low productivity, unstable systems, attrition, goals that keep changing, everything urgent | **Yes** | Show product the cost of the churn and refocus; escalate to you if that fails. They may need your clout to push back |
-| **Errant tech lead** — down a rabbit hole redesigning a core system, design doc barely started, work piling up | **Yes** | Bring the tech lead out, make the design process transparent, bring in senior people from other teams. You may help find those partners |
-| **Full-time firefighting** — inherited legacy systems constantly broken, plus support requests from other teams, and no news on the migration roadmap | **Yes** | Plan to remove the causes of the fires; triage and refuse some support; ask for people if needed. You approve headcount or shift support elsewhere |
+| **نقشه‌ی راه محصولِ بی‌ثبات**، یعنی بهره‌وری پایین، سیستم‌های بی‌ثبات، ریزش نیرو، هدف‌هایی که مدام عوض می‌شوند و همه چیز فوری است | **بله** | هزینه‌ی این آشفتگی را به product نشان بدهد و تمرکز را برگرداند؛ اگر نشد به شما ارجاع بدهد. شاید برای پافشاری به وزن شما نیاز داشته باشد |
+| **tech lead سرگردان** که در لانه‌ی خرگوشِ بازطراحی یک سیستم اصلی رفته، design doc به‌زور شروع شده و کارها روی هم تل‌انبار شده‌اند | **بله** | tech lead را بیرون بکشد، process طراحی را شفاف کند و آدم‌های ارشد تیم‌های دیگر را بیاورد. شاید شما در پیدا کردن آن آدم‌ها کمک کنید |
+| **آتش‌نشانی تمام‌وقت** با سیستم‌های قدیمیِ به‌ارث‌رسیده که مدام خراب‌اند، به‌علاوه‌ی درخواست پشتیبانی از تیم‌های دیگر و بی‌خبری از نقشه‌ی راه مهاجرت | **بله** | برای برداشتن علت آتش‌سوزی‌ها برنامه بریزد؛ triage کند و بعضی درخواست‌های پشتیبانی را رد کند؛ و اگر لازم است نیرو بخواهد. تأیید تعداد نیرو یا جابه‌جا کردن پشتیبانی با شماست |
 
-Making your life easier means bringing you clear problems before they become raging fires (pp. 132–133). Managers need coaching like anyone: know them as people and make time for feedback in 1-1s, since they'll make you look good or bad (p. 133).
+آسان‌تر کردن زندگی شما یعنی مسئله‌های روشن را پیش از تبدیل شدن به آتش‌سوزی مهارناپذیر پیش شما بیاورند (pp. 132–133). مدیرها هم مثل هر کسی کوچینگ لازم دارند: آن‌ها را به‌عنوان آدم بشناسید و در ۱-۱ برای بازخورد وقت بگذارید، چون شما را خوب یا بد جلوه می‌دهند (p. 133).
 
-### Good Manager, Bad Manager: The People Pleaser
+### مدیر خوب، مدیر بد: آدم خوشایندکننده
 
 | Marcus | Maria |
 |---|---|
-| Everyone's best friend, endless 1-1s with anyone, promises to fix every problem — and never does. The colleague you complained about still got promoted; product still railroads the team | Brusque, distant unless you report to her, impatient with gossip. But the roadmap has fewer, sensible objectives, meetings run better, the difficult colleague got feedback — and she goes home at a reasonable hour |
+| بهترین دوست همه، با ۱-۱های بی‌پایان برای هر کسی، و قول رفع هر مشکلی، که هیچ‌وقت عملی نمی‌شود. همان همکاری که از او شکایت کردید باز ارتقا گرفت و product هنوز تیم را می‌راند | تندوتیز، و اگر زیردستش نباشید فاصله‌دار، و بی‌حوصله در برابر غیبت. ولی نقشه‌ی راه هدف‌های کمتر و معقول‌تری دارد، جلسه‌ها بهتر می‌گذرند، آن همکار دشوار بازخورد گرفته، و خودش هم سر ساعت معقولی می‌رود خانه |
 
-The people pleaser can't bear to make people unhappy, so says yes to everything and burns out (p. 133). **Signs** (p. 134): the team loves them as a person but is frustrated with them as a manager; they prefer smooth and mistake-free to excellent; their bad mood shows and shakes the team; they never push back but have many unfinished tasks and excuses; they overpromise and underdeliver without learning; contradictory messages to team and partners; they know every problem and address none.
+آدم خوشایندکننده طاقت ناراحت کردن کسی را ندارد، پس به همه چیز بله می‌گوید و می‌سوزد (p. 133). **نشانه‌ها** (p. 134): تیم او را به‌عنوان آدم دوست دارد ولی از او به‌عنوان مدیر کلافه است؛ بی‌دردسر و بی‌اشتباه را به درخشان ترجیح می‌دهد؛ حال بدش پیداست و تیم را می‌لرزاند؛ هیچ‌وقت پافشاری نمی‌کند ولی کارهای نیمه‌تمام و بهانه‌های زیادی دارد؛ بیش از توان قول می‌دهد و کمتر تحویل می‌دهد و درس نمی‌گیرد؛ به تیم و به شریک‌ها پیام‌های متناقض می‌دهد؛ همه‌ی مشکل‌ها را می‌داند و به هیچ‌کدام نمی‌پردازد.
 
-| Team pleaser | External pleaser |
+| خوشایندکننده‌ی تیم | خوشایندکننده‌ی بیرون |
 |---|---|
-| A therapist who engages with emotions; the most open people get most of the time; inspires loyalty but **amplifies drama** and makes promises they can't keep, leaving a bitter team (pp. 134–135) | Pleases the boss and partners, **overcommits the team**, hides problems upward, and — surprisingly — gives little praise or feedback internally, avoiding hard conversations. A blind spot for their own manager (pp. 134–135) |
+| تراپیستی که با احساس‌ها درگیر می‌شود؛ گشاده‌ترین آدم‌ها بیشترین وقتش را می‌گیرند؛ وفاداری می‌سازد ولی **درام را تشدید می‌کند** و قول‌هایی می‌دهد که از پسشان برنمی‌آید و تیمی تلخ‌کام به جا می‌گذارد (pp. 134–135) | رئیس و شریک‌ها را راضی می‌کند، **بیش از توان تیم تعهد می‌دهد**، مشکل‌ها را رو به بالا پنهان می‌کند، و جالب این‌که داخل تیم کم تعریف و بازخورد می‌دهد و از گفت‌وگوی سخت فرار می‌کند. نقطه‌کوری برای مدیر خودش (pp. 134–135) |
 
-Neither creates safety: their fear of failure makes healthy failure hard (p. 135). What helps (pp. 135–136): make saying no safer and externalize decisions — strong partners who own the roadmap, agile planning owned by the team, promotion processes that go beyond the manager's discretion. Show them the behaviour and its costs, while honouring the selfless value behind it.
+هیچ‌کدام امنیت نمی‌سازند: ترسشان از شکست، شکست سالم را سخت می‌کند (p. 135). چه چیزی کمک می‌کند (pp. 135–136): نه گفتن را امن‌تر کنید و تصمیم‌ها را بیرونی کنید؛ شریک‌های قوی‌ای که صاحب نقشه‌ی راه‌اند، برنامه‌ریزی agile که مال خود تیم است، و processهای ارتقا که فراتر از صلاح‌دید مدیر می‌روند. رفتار و هزینه‌هایش را نشانشان بدهید، در حالی که ارزش از‌خودگذشته‌ی پشتش را هم به رسمیت می‌شناسید.
 
-### Managing New Managers
+### مدیریت مدیرهای تازه
 
-Management is a career change; first-time managers don't know what they don't know (p. 136). Time spent with them is an up-front cost with long-term dividends — ask how their 1-1s are going, or just remind them to hold them (p. 136).
+مدیریت تغییر مسیر شغلی است؛ مدیرهای بار اولی نمی‌دانند چه چیزی را نمی‌دانند (p. 136). وقتی که با آن‌ها می‌گذرانید هزینه‌ای از پیش است با سود بلندمدت؛ بپرسید جلسه‌های ۱-۱شان چطور پیش می‌رود، یا دست‌کم یادآوری کنید که برگزارشان کنند (p. 136).
 
-| Warning sign | What it means (pp. 136–138) |
+| نشانه‌ی هشدار | یعنی چه (pp. 136–138) |
 |---|---|
-| **Not managing** | Slipping on management details; people quit for lack of a career path — ultimately your responsibility. Use frequent skip-levels and say you will |
-| **Overwork** | Not handing off old responsibilities — doing two jobs. Expect and help them to let go |
-| **Control freak** | Taking the job as authority: domineers, makes every decision, assigns specific work; fights peers in product; hides what they're doing from you (skipping your 1-1s, evading questions). Different from the micromanager, who demands detail |
-| **Helplessness about delivery** | Not realizing they now own the team's performance. Coach them through planning at first and state that you'll hold them accountable |
+| **مدیریت نکردن** | از جزئیات مدیریتی جا می‌مانند؛ آدم‌ها به‌خاطر نبود مسیر شغلی می‌روند، که در نهایت مسئولیتش با شماست. skip-levelهای پرتکرار بگذارید و بگویید که می‌گذارید |
+| **کار بیش از حد** | مسئولیت‌های قبلی را تحویل نداده‌اند و دو شغل را با هم می‌کنند. انتظارش را داشته باشید و کمک کنید رها کنند |
+| **کنترل‌گر** | شغل را اقتدار می‌بینند: سلطه‌جو می‌شوند، هر تصمیمی را خودشان می‌گیرند، کار مشخص تعیین می‌کنند، با هم‌ترازها در product درمی‌افتند، و کارشان را از شما پنهان می‌کنند، مثلاً با رد کردن ۱-۱ شما و طفره رفتن از پرسش‌ها. با مدیر ذره‌بین‌به‌دست فرق دارد، چون او جزئیات می‌خواهد |
+| **درماندگی درباره‌ی تحویل** | نفهمیده‌اند که حالا صاحب عملکرد تیم‌اند. اولش در برنامه‌ریزی کوچشان کنید و بگویید که پاسخ‌گو نگهشان می‌دارید |
 
-Making the wrong person a manager is a mistake; **keeping them there once you know is a critical error.** Small first steps (mentoring, tiny teams) help but don't reveal everything — control freaks often wait for the title. Expect to give strong corrective feedback in the first six months, and send new managers to internal or external training (p. 138).
+مدیر کردن آدم اشتباه یک اشتباه است؛ **نگه داشتنش وقتی فهمیده‌اید، خطای حیاتی است.** قدم‌های کوچک اول، مثل منتورینگ و تیم‌های خیلی کوچک، کمک می‌کنند ولی همه چیز را رو نمی‌کنند؛ آدم‌های کنترل‌گر اغلب منتظر عنوان می‌مانند. انتظار داشته باشید در شش ماه اول بازخورد اصلاحی قوی بدهید، و مدیرهای تازه را به آموزش داخلی یا بیرونی بفرستید (p. 138).
 
-### Managing Experienced Managers
+### مدیریت مدیرهای باتجربه
 
-The right experienced manager knows what needs doing and does it — but management is very culture-specific (pp. 138–139).
+مدیر باتجربه‌ی درست می‌داند چه باید بکند و می‌کند، ولی مدیریت خیلی به فرهنگ وابسته است (pp. 138–139).
 
-- **Culture fit over domain expertise.** Managers create subcultures. An enterprise warehouse-software expert used to shipping every six months with remote teams may not suit an agile, on-site logistics startup; industry knowledge is easier to acquire than a new way of working (p. 139).
-- **Work out differences actively.** Learn from them, but give your own feedback; make sure they embody the values you want — transparency, exploration (pp. 139–140).
-- **Inspire through scope.** Coach on strategy and direction rather than basics, delegate to them, treat them as advisers on organizational direction, and help grow their networks (p. 140).
+- **تناسب فرهنگی بر تخصص حوزه مقدم است.** مدیرها خرده‌فرهنگ می‌سازند. خبره‌ی نرم‌افزار انبار سازمانی که عادت دارد هر شش ماه با تیم‌های دور تحویل بدهد، شاید به استارتاپ چابکِ لجستیکِ حضوری نخورد؛ دانش صنعت آسان‌تر از شیوه‌ی تازه‌ی کار کردن به دست می‌آید (p. 139).
+- **تفاوت‌ها را فعالانه حل کنید.** از آن‌ها یاد بگیرید، ولی بازخورد خودتان را هم بدهید؛ مطمئن شوید ارزش‌هایی را که می‌خواهید، مثل شفافیت و کاوشگری، در خودشان دارند (pp. 139–140).
+- **با دامنه الهام بدهید.** به‌جای مبانی، درباره‌ی استراتژی و جهت‌گیری کوچشان کنید، به آن‌ها واگذار کنید، مشاور جهت‌گیری سازمان بدانیدشان و کمک کنید شبکه‌شان را بزرگ کنند (p. 140).
 
-### Hiring Managers
+### استخدام مدیر
 
-Ten engineers with under 3 years' experience and nobody willing or ready to manage them: time to hire a manager (p. 140). As with engineers, check skills and culture fit. Managers can talk a good game more easily — but engineers who code well in interviews also sometimes ship nothing, so separate the fear of a bad hire from what the interview can tell you (pp. 140–141).
+ده مهندس با کمتر از ۳ سال تجربه و هیچ‌کس که بخواهد یا آماده‌ی مدیریتشان باشد: وقت استخدام مدیر است (p. 140). مثل مهندس‌ها، مهارت و تناسب فرهنگی را بسنجید. مدیرها راحت‌تر می‌توانند خوب حرف بزنند، ولی مهندس‌هایی هم که در مصاحبه خوب کد می‌زنند گاهی چیزی تحویل نمی‌دهند، پس ترس از استخدام بد را از چیزی که مصاحبه واقعاً می‌گوید جدا کنید (pp. 140–141).
 
-| Evaluate | How (pp. 141–142) |
+| چه چیزی را بسنجید | چطور (pp. 141–142) |
 |---|---|
-| **1-1s** | Role-play: future reports bring real current or recent problems; a good manager asks the right questions and suggests next steps. Also role-play an underperformer or a negative review |
-| **Debugging teams** | A project that was behind and what she did; an employee thinking of quitting; coaching strugglers and growing stars |
-| **Management philosophy** | An experienced manager with none is a red flag: what is the job, how does she stay hands-on and delegate? |
-| **Presenting** (senior roles) | Commanding a room, structuring thoughts — but don't overvalue it; many excellent managers dislike speaking to strangers |
-| **Technical skills** | Enough for credibility: a shortened technical interview for coding managers; design and architecture trade-offs, or mediating an engineering debate, for others |
-| **Culture fit** | Hierarchy vs. informality; consensus vs. acting alone; servant leadership vs. marching orders. A misfit fails and is fired, or the team quits first. New-culture hires can drive deliberate change, with attrition |
-| **References** | Always — even for people you've worked with: how they succeed and fail, would you work for them again, what you love and what drives you crazy |
+| **جلسه‌ی ۱-۱** | نقش‌بازی کنید: آدم‌هایی که زیردستش می‌شوند مسئله‌ی واقعیِ حالا یا همین نزدیکی را می‌آورند؛ مدیر خوب پرسش‌های درست می‌پرسد و قدم بعد را پیشنهاد می‌دهد. نقش کسی با عملکرد پایین یا ارزیابی منفی را هم بازی کنید |
+| **دیباگ کردن تیم** | پروژه‌ای که عقب بود و او چه کرد؛ کارمندی که به رفتن فکر می‌کرد؛ کوچ کردن آدم‌های گیرکرده و پروراندن ستاره‌ها |
+| **فلسفه‌ی مدیریتی** | مدیر باتجربه‌ای که فلسفه‌ای ندارد پرچم قرمز است: این شغل چیست، چطور دست در کار می‌ماند و چطور واگذار می‌کند؟ |
+| **ارائه دادن**، برای نقش‌های ارشد | تسلط بر اتاق و ساختار دادن به فکر، ولی بیش از حد به آن وزن ندهید؛ خیلی از مدیرهای درخشان از حرف زدن با غریبه‌ها خوششان نمی‌آید |
+| **مهارت فنی** | به‌اندازه‌ی اعتبار داشتن: مصاحبه‌ی فنی کوتاه‌شده برای مدیری که کد می‌زند؛ بده‌بستان‌های طراحی و معماری، یا میانجی‌گری در یک بحث مهندسی، برای بقیه |
+| **تناسب فرهنگی** | سلسله‌مراتب در برابر بی‌تکلفی؛ اجماع در برابر تصمیم تنها؛ رهبری خدمتگزار در برابر دستور دادن. آدم ناهم‌خوان شکست می‌خورد و اخراج می‌شود، یا تیم زودتر می‌رود. استخدام از فرهنگ دیگر می‌تواند تغییر عامدانه بیاورد، به قیمت ریزش نیرو |
+| **مراجع** | همیشه، حتی برای کسی که با او کار کرده‌اید: چطور موفق می‌شود و چطور شکست می‌خورد، دوباره برایش کار می‌کردید، چه چیزش را دوست دارید و چه چیزش دیوانه‌تان می‌کند |
 
-Andy Grove's *High Output Management*: new hires act in self-interest until they know their colleagues, then shift to group interest, and cultural values guide decisions in uncertain situations — so managers who already share the company's values make the shift faster (p. 143).
+کتاب *High Output Management* از Andy Grove: آدم‌های تازه تا وقتی همکارهایشان را نشناخته‌اند به نفع خودشان عمل می‌کنند و بعد به نفع گروه می‌چرخند، و ارزش‌های فرهنگی در موقعیت‌های مبهم راهنمای تصمیم‌اند، پس مدیرهایی که از قبل ارزش‌های شرکت را دارند سریع‌تر می‌چرخند (p. 143).
 
-> **Ask the CTO: Managing Outside Your Skill Set** (pp. 144–145). Taking on operations and QA isn't a small leap: you don't know which details to watch, and a manager can go the wrong way for a long time, especially on long projects. Be curious — ask the manager to teach you as if they were your mentor — and spend *more* time in the unfamiliar areas at first, or guilt and aversion will keep you from facing their problems.
+> **کادر Ask the CTO: مدیریت بیرون از مهارت خودتان** (pp. 144–145). برداشتن عملیات و QA جهش کوچکی نیست: نمی‌دانید کدام جزئیات را باید بپایید و یک مدیر می‌تواند مدت‌ها راه اشتباه برود، به‌خصوص در پروژه‌های بلند. کنجکاو باشید و از مدیر بخواهید طوری یادتان بدهد که انگار منتور شماست، و اولش وقت *بیشتری* در حوزه‌های ناآشنا بگذارید، وگرنه حس گناه و بیزاری نمی‌گذارد با مشکل‌هایشان روبه‌رو شوید.
 
-### Debugging Dysfunctional Organizations
+### دیباگ کردن سازمان‌های ناکارکرد
 
-The best engineering managers are often great debuggers: relentless about *why*. The poor debugger adds a log line, can't reproduce the concurrency bug, and declares it fixed (p. 145). Teams are complex black boxes interacting with other black boxes (pp. 145–146). Example: a team that feels slow (p. 146).
+بهترین مدیرهای مهندسی اغلب debuggerهای خوبی‌اند: سمج در پرسیدن *چرا*. debugger ضعیف یک خط log اضافه می‌کند، باگ concurrency را بازتولید نمی‌کند و اعلام می‌کند که درست شد (p. 145). تیم‌ها جعبه‌های سیاه پیچیده‌ای‌اند که با جعبه‌های سیاه دیگر تعامل می‌کنند (pp. 145–146). نمونه: تیمی که حس می‌کند کند است (p. 146).
 
 ```mermaid
 flowchart LR
@@ -157,115 +159,127 @@ flowchart LR
     J --> C["Be curious<br/>patterns for next time"]
 ```
 
-*The vault's drawing of the book's seven steps (pp. 146–148).*
+*تصویر vault از هفت قدم کتاب (pp. 146–148).*
 
-- **Have a hypothesis** about how the team got into this state, ideally reproducible; team problems are like performance issues — things slow down sometimes, people are happy but attrition is high (p. 146).
-- **Check the data**, as you'd read logs: incidents eating time, sick people, style wars in code review, vague or badly sized tickets, joyless chat, too many meetings, a manager not doing 1-1s. Not smoking guns, but pointers (p. 146).
-- **Observe the team.** Boring meetings, with the manager or product lead talking most, suggest poor planning, no real say in direction, or a lack of healthy conflict. But like Schrödinger's box — or a log statement that hides a race — **your presence changes what you observe** (pp. 146–147).
-- **Ask questions.** Can they state their goals and why? Did they help set them? A team doing only engineering-sponsored projects probably doesn't value the product work (p. 147).
-- **Check the team dynamics:** people who never talk and work solo aren't a team — fine if performing, a clue if not (p. 148).
-- **Jump in to help**, as you'd help in a complex outage — it teaches the manager and can reveal deeper problems, like missing business leadership (p. 148).
-- **Be curious.** Without asking why, you rely on charm and luck — and can't learn from mistakes (p. 148).
+- **فرضیه داشته باشید** درباره‌ی این‌که تیم چطور به این حال افتاده، در حالت ایده‌آل فرضیه‌ای بازتولیدپذیر؛ مشکل‌های تیمی مثل مشکل‌های performance‌اند؛ گاهی کند می‌شود، آدم‌ها راضی‌اند ولی ریزش بالاست (p. 146).
+- **داده‌ها را وارسی کنید**، همان‌طور که log می‌خوانید: حادثه‌هایی که وقت می‌خورند، آدم‌های مریض، جنگ سر سبک کد در review، ticketهای مبهم یا بدقواره، چت بی‌روح، جلسه‌ی زیاد، مدیری که ۱-۱ نمی‌گذارد. این‌ها مدرک قطعی نیستند ولی راهنمایند (p. 146).
+- **تیم را مشاهده کنید.** جلسه‌های کسل‌کننده که بیشترش را مدیر یا product lead حرف می‌زند، یعنی برنامه‌ریزی ضعیف است، یا تیم واقعاً در جهت‌گیری حرفی ندارد، یا تعارض سالم نیست. ولی مثل جعبه‌ی Schrödinger، یا مثل خط logی که یک race را پنهان می‌کند، **حضور شما همان چیزی را عوض می‌کند که مشاهده می‌کنید** (pp. 146–147).
+- **پرسش بپرسید.** می‌توانند هدف‌هایشان و دلیلشان را بگویند؟ در تعیینشان کمک کرده‌اند؟ تیمی که فقط پروژه‌های پیشنهادیِ مهندسی را انجام می‌دهد، احتمالاً برای کار محصول ارزشی قائل نیست (p. 147).
+- **پویایی تیم را وارسی کنید:** آدم‌هایی که هیچ‌وقت حرف نمی‌زنند و تنها کار می‌کنند تیم نیستند؛ اگر عملکرد خوب است اشکالی ندارد، و اگر نه سرنخ است (p. 148).
+- **برای کمک وسط بپرید**، همان‌طور که در یک قطعی پیچیده کمک می‌کنید؛ هم به مدیر یاد می‌دهد و هم می‌تواند مشکل‌های عمیق‌تری مثل نبود رهبری کسب‌وکار را رو کند (p. 148).
+- **کنجکاو باشید.** بدون پرسیدن چرا، به جذابیت شخصی و شانس تکیه می‌کنید و از اشتباه‌ها هم یاد نمی‌گیرید (p. 148).
 
-### Setting Expectations and Delivering on Schedule
+> **In practice:** debug کردن سازمان مثل debug کردن pipeline است: علت را پیدا کنید، نه نشانه را.
+>
+> **Your turn:** تیم داده و تیم backend مدام درباره‌ی تغییر schema منبع دعوا دارند. «چرا» را تا کجا می‌پرسید؟
+>
+> *Answer:* تا جایی که ریشه پیدا شود، مثلاً نبود یک data contract یا نبود هشدار پیش از تغییر schema؛ بعد آن را در سیستم درست کنید، مثلاً با schema contract در dlt و یک check در CI تیم backend. کتاب بهترین مدیرها را debuggerهای سمج در پرسیدن «چرا» می‌داند (p. 145).
 
-"Why is this taking so long?" gets harder to answer two levels from the details (p. 149). It's fair when a project is far over plan, but is often asked when leadership disliked, or never asked for, the estimate (p. 149).
+### تنظیم انتظارها و تحویل سر وقت
 
-- **Be aggressive about sharing estimates and their updates**, unasked, for critical projects or anything over a few weeks (p. 149).
-- **Estimate anyway.** Engineers resist estimating beyond a two-week sprint, reasonably if estimates must be accurate and requirements keep changing — but estimates escalate complexity, not every project's requirements churn, and up-front work cuts unknowns. Businesses need to plan costs; teams learn their systems' complexity. Learn from misses (pp. 149–150).
-- **When blamed anyway**, patiently restate the schedule and show empathy for the stressed person; offer help (p. 150).
-- **Cut scope near the end**, playing tiebreaker and taking the fall for cutting a favourite idea — and cut product features too, not only technical quality, which just slows the team after launch (p. 150).
+پاسخ دادن به «چرا این‌قدر طول می‌کشد؟» از دو پله بالاتر از جزئیات سخت‌تر است (p. 149). وقتی پروژه خیلی از برنامه عقب است پرسش منصفانه‌ای است، ولی اغلب وقتی پرسیده می‌شود که رهبری از تخمین خوشش نیامده یا اصلاً تخمینی نخواسته بوده (p. 149).
 
-### Challenging Situations: Roadmap Uncertainty
+- **در اشتراک‌گذاری تخمین‌ها و به‌روزرسانی‌هایشان پیش‌دستی کنید**، بی‌آن‌که بپرسند، برای پروژه‌های حیاتی یا هر چیزی بیش از چند هفته (p. 149).
+- **به‌هر‌حال تخمین بزنید.** مهندس‌ها در برابر تخمین فراتر از sprint دوهفته‌ای مقاومت می‌کنند، و اگر قرار باشد تخمین دقیق باشد و نیازمندی‌ها مدام عوض شوند حق هم دارند، ولی تخمین پیچیدگی را رو می‌کند، نیازمندی هر پروژه‌ای آشفته نمی‌شود، و کار اولیه ناشناخته‌ها را کم می‌کند. کسب‌وکار باید هزینه‌ها را برنامه‌ریزی کند و تیم‌ها پیچیدگی سیستم‌هایشان را یاد می‌گیرند. از تخمین‌های غلط درس بگیرید (pp. 149–150).
+- **وقتی باز هم سرزنش می‌شوید**، با حوصله زمان‌بندی را دوباره بگویید و با آدم پرفشار همدلی کنید؛ کمک پیشنهاد بدهید (p. 150).
+- **نزدیک پایان دامنه را کم کنید** و در نقش رأی تعیین‌کننده، بار حذف کردن ایده‌ی محبوبی را به دوش بکشید، و featureهای محصول را هم کم کنید، نه فقط کیفیت فنی را، که فقط بعد از launch تیم را کند می‌کند (p. 150).
 
-Shifting strategy is where middle management feels worst: you can't push back much, you break promises to the team, and they feel like cogs. Meanwhile technical debt never appears on product's roadmap (p. 151).
+> **In practice:** «چرا این داشبورد این‌قدر طول می‌کشد؟» در تیم داده پرسش هر هفته است.
+>
+> **Your turn:** چطور پیش از این‌که پرسیده شود، انتظار را تنظیم می‌کنید؟
+>
+> *Answer:* کار پنهان را دیدنی کنید: dependencyها، دسترسی به منبع و کیفیت داده را در برآورد بگویید و پیشرفت را منظم گزارش دهید. کتاب می‌گوید پاسخ به این پرسش از دو پله بالاتر سخت‌تر است و بهتر است زودتر از آن جلو بیفتید (pp. 149–150).
 
-| Strategy | Detail (pp. 151–153) |
+### موقعیت‌های دشوار: بلاتکلیفی نقشه‌ی راه
+
+تغییر استراتژی همان جایی است که مدیریت میانی بدترین حالش را دارد: نمی‌توانید زیاد پافشاری کنید، قول‌هایتان به تیم می‌شکند و آن‌ها حس چرخ‌دنده بودن می‌کنند. در همین حال بدهی فنی هیچ‌وقت روی نقشه‌ی راه product پیدایش نمی‌شود (p. 151).
+
+| راهبرد | جزئیات (pp. 151–153) |
 |---|---|
-| **Be realistic about change** | If the startup replans every summer, don't promise continuity past it |
-| **Break big projects into smaller deliverables** | Get some results even if the grand vision dies; re-examine with product what's most valuable now |
-| **Don't overpromise future technical projects** | "Later" hasn't been written; schedule important work now, or accept it will compete with everything else |
-| **Dedicate 20% to sustaining engineering** | Refactoring, bugs, process, cleanup, support — every planning session. Not enough for big rewrites, which need their own planning |
-| **Know how important engineering projects really are** | Ask: how big, how important, can you articulate its value, what would success mean? Treat big technical work like product initiatives, with data and what becomes possible. Work on a rarely changed system that enables nothing probably isn't worth it |
+| **درباره‌ی تغییر واقع‌بین باشید** | اگر استارتاپ هر تابستان برنامه را از نو می‌چیند، تداوم فراتر از تابستان را قول ندهید |
+| **پروژه‌های بزرگ را به تحویل‌دادنی‌های کوچک بشکنید** | حتی اگر چشم‌انداز بزرگ بمیرد، چیزی به دست می‌آورید؛ با product دوباره بسنجید حالا چه چیزی بیشترین ارزش را دارد |
+| **برای پروژه‌های فنی آینده بیش از توان قول ندهید** | «بعداً» هنوز نوشته نشده؛ کار مهم را همین حالا زمان‌بندی کنید، یا بپذیرید که با همه چیز رقابت خواهد کرد |
+| **۲۰٪ را به کار نگه‌دارنده بدهید** | refactoring، باگ، process، تمیزکاری و پشتیبانی، در هر جلسه‌ی برنامه‌ریزی. برای بازنویسی‌های بزرگ کافی نیست؛ آن‌ها برنامه‌ریزی خودشان را می‌خواهند |
+| **بدانید پروژه‌های مهندسی واقعاً چقدر مهم‌اند** | بپرسید چقدر بزرگ است، چقدر مهم است، می‌توانید ارزشش را بیان کنید، و موفقیتش یعنی چه؟ کار فنی بزرگ را مثل طرح‌های محصول ببینید، با داده و با گفتن این‌که چه چیزی را ممکن می‌کند. کار روی سیستمی که کم عوض می‌شود و چیزی را ممکن نمی‌کند احتمالاً نمی‌ارزد |
 
-When projects or teams change anyway, push for time to finish in-flight work and for engineering involvement in planning the new work; explain the reasons even if you disagree; stay calm. Faced with waves, "you can let them pull you under or you can learn how to surf" (p. 153).
+وقتی پروژه‌ها یا تیم‌ها به‌هر‌حال عوض شدند، برای وقت تمام کردن کار در جریان و برای حضور مهندسی در برنامه‌ریزی کار تازه پافشاری کنید؛ دلیل‌ها را حتی وقتی مخالفید توضیح بدهید؛ و آرام بمانید. روبه‌روی موج، «می‌توانید بگذارید زیر آب بکشدتان یا می‌توانید موج‌سواری یاد بگیرید» (p. 153).
 
-### Staying Technically Relevant
+### مرتبط ماندن فنی
 
-What does technical relevance do for you? Start from your technical responsibility (pp. 153–155):
+مرتبط ماندن فنی به چه دردتان می‌خورد؟ از مسئولیت فنی‌تان شروع کنید (pp. 153–155):
 
-| Responsibility | What it means |
+| مسئولیت | یعنی چه |
 |---|---|
-| **Oversee technical investment** | Development time is limited; match proposed projects to product and customer needs across the whole portfolio |
-| **Ask informed questions** | You don't find every project; you ask what surprises current projects uncovered, who wants more engineers and why, which slow teams refuse help, why this project now |
-| **Analyze and explain trade-offs** | Flag technically hard features and business-risky technical ideas; explain R&D uncertainty to nontechnical partners |
-| **Make specific requests** | Filter infeasible ideas and map new initiatives onto ongoing work. The VP offers more engineers to improve search for active-user growth; search is being rewritten, so instead you have the team expose the new API early so product can run its tests. Managers who just **relay** requests up and down add no value |
-| **Use your experience as a gut check** | Poor technical investment reflects on you; don't neglect technical instincts for people work |
+| **نظارت بر سرمایه‌گذاری فنی** | وقت توسعه محدود است؛ پروژه‌های پیشنهادی را در کل سبد با نیاز محصول و مشتری جور کنید |
+| **پرسیدن پرسش آگاهانه** | همه‌ی پروژه‌ها را خودتان پیدا نمی‌کنید؛ می‌پرسید پروژه‌های جاری چه غافلگیری‌هایی رو کرده‌اند، چه کسی مهندس بیشتر می‌خواهد و چرا، کدام تیم کند است و کمک را رد می‌کند، و چرا این پروژه همین حالا |
+| **تحلیل و تبیین بده‌بستان‌ها** | featureهای فنیِ سخت و ایده‌های فنیِ پرریسک برای کسب‌وکار را علامت بزنید؛ بلاتکلیفی تحقیق و توسعه را برای شریک‌های غیرفنی توضیح بدهید |
+| **دادن درخواست مشخص** | ایده‌های نشدنی را فیلتر کنید و طرح‌های تازه را روی کار جاری نگاشت کنید. مثلاً VP برای رشد کاربر فعال مهندس بیشتری برای بهبود search پیشنهاد می‌دهد؛ search در حال بازنویسی است، پس به‌جایش می‌خواهید تیم API تازه را زود در دسترس بگذارد تا product تست‌هایش را اجرا کند. مدیری که فقط درخواست‌ها را بالا و پایین **منتقل** می‌کند ارزشی اضافه نمی‌کند |
+| **استفاده از تجربه به‌عنوان محک درونی** | سرمایه‌گذاری فنی بد به پای شما نوشته می‌شود؛ به‌خاطر کار انسانی، حس فنی‌تان را زمین نگذارید |
 
-How to invest your time (pp. 155–156): read the code and pull requests; pick an unknown area and have an engineer teach and pair with you; **attend postmortems**, where neglected standards, poor communication and harmful tooling show most clearly; follow industry practice in developing, testing, deploying and monitoring; keep a network of technical peers for the real story behind talks and sales pitches; never stop learning.
+وقتتان را چطور خرج کنید (pp. 155–156): کد و pull requestها را بخوانید؛ حوزه‌ای ناآشنا را انتخاب کنید و از یک مهندس بخواهید یادتان بدهد و با شما pair کند؛ **به postmortemها بروید**، که استانداردهای زمین‌مانده و ارتباط ضعیف و ابزار آسیب‌زا آن‌جا بیش از هر جایی دیده می‌شوند؛ شیوه‌های صنعت در توسعه و تست و deploy و monitoring را دنبال کنید؛ شبکه‌ای از هم‌ترازهای فنی نگه دارید تا داستان واقعی پشت سخنرانی‌ها و ارائه‌های فروش را بشنوید؛ و هیچ‌وقت یاد گرفتن را متوقف نکنید.
 
-### Assessing Your Own Experience
+### سنجیدن تجربه‌ی خودتان
 
-Questions for reflection (pp. 156–157): how do you reach your skip-levels, and how much information do you seek rather than receive? Write your own job description for your managers and compare it with the company's. Which areas outside your comfort zone do you check? What does your smoothest team's manager do differently? How do you interview managers — values, philosophy, the team, references? Is your organization's mandate understood?
+پرسش‌هایی برای تأمل (pp. 156–157): چطور به آدم‌های skip-levelتان می‌رسید و چقدر از اطلاعات را خودتان می‌جویید به‌جای این‌که دریافت کنید؟ شرح شغل مدیرهایتان را خودتان بنویسید و با نسخه‌ی شرکت مقایسه کنید. کدام حوزه‌های بیرون از منطقه‌ی امنتان را وارسی می‌کنید؟ مدیر روان‌ترین تیمتان چه کار متفاوتی می‌کند؟ مدیرها را چطور مصاحبه می‌کنید، یعنی ارزش‌ها و فلسفه و تیم و مراجع؟ مأموریت سازمانتان فهمیده شده؟
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Open-door policy | Feels accessible | Problems rarely arrive; managing-up hides them |
-| Skip-level 1-1s | Depth, personal relationships | Linear in headcount; impossible at hundreds |
-| Skip-level lunches | Scale, team dynamics | No individual coaching; people won't criticize their manager |
-| Let unfamiliar teams roll | Your time; trust | Problems found far too late |
-| Domain expert manager | Product knowledge | Culture and process mismatch |
-| Culture-fit manager | Teams that work together | May need to learn the domain |
-| Deep observation of a team | Direct evidence | Changes the behaviour you're observing |
-| Relaying requests | Simple | Adds no value; distracts the team |
-| Cutting only technical quality | Ships on time | Slows the team after launch |
+| سیاست در باز | حس در دسترس بودن | مشکل‌ها به‌ندرت می‌رسند؛ مدیریت رو به بالا پنهانشان می‌کند |
+| جلسه‌ی ۱-۱ skip-level | عمق، رابطه‌ی شخصی | با تعداد نیرو خطی بالا می‌رود؛ در صدها نفر ناممکن است |
+| ناهار skip-level | مقیاس، دیدن پویایی تیم | بدون کوچینگ فردی؛ کسی جلوی جمع از مدیرش انتقاد نمی‌کند |
+| رها کردن تیم‌های ناآشنا | وقت شما؛ اعتماد | مشکل‌ها خیلی دیر پیدا می‌شوند |
+| مدیر خبره‌ی حوزه | دانش محصول | ناهم‌خوانی فرهنگ و process |
+| مدیر هم‌خوان با فرهنگ | تیم‌هایی که با هم کار می‌کنند | شاید لازم باشد حوزه را یاد بگیرد |
+| مشاهده‌ی عمیق یک تیم | شاهد دست‌اول | رفتاری را که مشاهده می‌کنید عوض می‌کند |
+| منتقل کردن درخواست‌ها | ساده است | ارزشی اضافه نمی‌کند؛ حواس تیم را پرت می‌کند |
+| کم کردن فقط کیفیت فنی | سر وقت تحویل می‌دهید | بعد از launch تیم را کند می‌کند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **The observer effect.** The book's Schrödinger analogy (p. 147) parallels the Hawthorne effect in organizational research: people change their behaviour when they know they're being studied.
-- **Span of control.** The skip-level arithmetic is one reason organizations add layers as they grow; Andy Grove's *High Output Management*, which the book cites on culture (p. 143), also discusses managerial leverage and how many reports a manager can handle.
+- **اثر مشاهده‌گر.** قیاس Schrödinger در کتاب (p. 147) هم‌تراز اثر Hawthorne در پژوهش سازمانی است: آدم‌ها وقتی بدانند مطالعه می‌شوند رفتارشان را عوض می‌کنند.
+- **گستره‌ی کنترل.** حساب‌وکتاب skip-level یکی از دلیل‌هایی است که سازمان‌ها با رشد لایه اضافه می‌کنند؛ کتاب *High Output Management* از Andy Grove، که کتاب درباره‌ی فرهنگ به آن ارجاع می‌دهد (p. 143)، درباره‌ی اهرم مدیریتی و تعداد زیردست‌های قابل‌مدیریت هم حرف می‌زند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Skip-level load](../lab/07-skip-level-load/README.md) — hours a week spent on quarterly skip-level 1-1s and on team lunches, by organization size.
-- **Related chapters:** [4. Managing People](04-managing-people.md) (1-1s, micromanagement), [5. Managing a Team](05-managing-a-team.md) (debugging teams; 20% sustainability), [6. Managing Multiple Teams](06-managing-multiple-teams.md) (warning signs, delegation), [8. The Big Leagues](08-the-big-leagues.md) (strategy and bad news at the top), [9. Bootstrapping Culture](09-bootstrapping-culture.md) (screening for culture fit).
+- **Run it:** [بار جلسه‌های skip-level](../lab/07-skip-level-load/README.md)؛ ساعت‌های هفتگیِ صرف‌شده برای ۱-۱های فصلی skip-level و برای ناهارهای تیمی، به تفکیک اندازه‌ی سازمان.
+- **فصل‌های مرتبط:** [فصل ۴: مدیریت آدم‌ها](04-managing-people.md) که ۱-۱ و مدیریت ذره‌بینی را می‌گوید، [فصل ۵: مدیریت یک تیم](05-managing-a-team.md) که دیباگ کردن تیم و ۲۰٪ پایداری را دارد، [فصل ۶: مدیریت چند تیم](06-managing-multiple-teams.md) که نشانه‌های هشدار و واگذاری را می‌گوید، [فصل ۸: لیگ بزرگ‌ها](08-the-big-leagues.md) که استراتژی و خبر بد در بالاترین سطح را دارد، و [فصل ۹: ساختن فرهنگ از صفر](09-bootstrapping-culture.md) که غربال کردن تناسب فرهنگی را می‌گوید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **Why doesn't an open-door policy bring problems to a senior manager?**
+1. **چرا سیاست در باز مشکل‌ها را به مدیر ارشد نمی‌رساند؟**
 
-   *Answer:* It takes a very brave engineer to tell their boss's boss about a problem they may not even be able to explain; the risk grows with distance, and people who manage up well hide problems (p. 127).
+   *Answer:* مهندس خیلی شجاعی لازم است که به رئیسِ رئیسش از مشکلی بگوید که شاید حتی نتواند توضیحش بدهد؛ ریسک با فاصله بیشتر می‌شود و کسانی که خوب رو به بالا مدیریت می‌کنند مشکل‌ها را پنهان می‌کنند (p. 127).
 
-2. **Why don't skip-level 1-1s scale?**
-   - [ ] People won't attend them
-   - [x] With one per person per quarter, 60 people already means one a day; at 1,000 people they'd fill a 40-hour week
-   - [ ] They duplicate the managers' 1-1s
+2. **چرا جلسه‌های ۱-۱ skip-level مقیاس نمی‌گیرند؟**
+   - [ ] آدم‌ها در آن‌ها شرکت نمی‌کنند
+   - [x] با فصلی یکی برای هر نفر، ۶۰ نفر یعنی روزی یکی؛ با ۱۰۰۰ نفر کل هفته‌ی ۴۰ ساعته پر می‌شود
+   - [ ] جلسه‌های ۱-۱ مدیرها را تکرار می‌کنند
 
    *Answer:* p. 129.
 
-3. **The product team keeps changing a team's goals and the team is struggling. Is the team's manager accountable?**
+3. **تیم product مدام هدف‌های یک تیم را عوض می‌کند و تیم به زحمت افتاده. مدیر آن تیم پاسخ‌گوست؟**
 
-   *Answer:* Yes. The manager is accountable for the team's health and productivity: they should show product the cost and refocus, and come to you if that fails (pp. 131–132).
+   *Answer:* بله. مدیر در برابر سلامت و بهره‌وری تیمش پاسخ‌گوست: باید هزینه را به product نشان بدهد و تمرکز را برگرداند، و اگر نشد پیش شما بیاید (pp. 131–132).
 
-4. **Name two signs of a people-pleaser manager.**
+4. **دو نشانه‌ی مدیر خوشایندکننده بگویید.**
 
-   *Answer:* Any two of: team loves them but is frustrated with them as a manager; prefers smooth over excellent; never pushes back yet leaves tasks unfinished with excuses; overpromises and underdelivers; contradictory messages; knows every problem and addresses none (p. 134).
+   *Answer:* هر دو مورد از این‌ها: تیم او را دوست دارد ولی از او به‌عنوان مدیر کلافه است؛ بی‌دردسر را به درخشان ترجیح می‌دهد؛ هیچ‌وقت پافشاری نمی‌کند ولی کارهای نیمه‌تمام و بهانه دارد؛ بیش از توان قول می‌دهد و کمتر تحویل می‌دهد؛ پیام‌های متناقض می‌دهد؛ همه‌ی مشکل‌ها را می‌داند و به هیچ‌کدام نمی‌پردازد (p. 134).
 
-5. **What is the danger of observing a slow team closely?**
-   - [ ] It wastes your time
-   - [x] Your presence changes the team's behaviour and can hide the problem, like a log statement that masks a race
-   - [ ] The manager will feel undermined
+5. **خطر مشاهده‌ی نزدیک یک تیم کند چیست؟**
+   - [ ] وقتتان را هدر می‌دهد
+   - [x] حضور شما رفتار تیم را عوض می‌کند و می‌تواند مشکل را پنهان کند، مثل خط logی که یک race را می‌پوشاند
+   - [ ] مدیر حس می‌کند زیر پایش را خالی کرده‌اید
 
    *Answer:* pp. 146–147.
 
-6. **What is wrong with cutting only technical quality to make a deadline?**
+6. **کم کردن فقط کیفیت فنی برای رسیدن به ضرب‌الاجل چه ایرادی دارد؟**
 
-   *Answer:* It slows the team down after launch; look at product features as well as technical nice-to-haves (p. 150).
+   *Answer:* بعد از launch تیم را کند می‌کند؛ کنار چیزهای فنیِ خوب‌است‌باشد، featureهای محصول را هم ببینید (p. 150).
 
-7. **How does a technically relevant director respond to a VP's offer of more engineers to improve search during a rewrite?**
+7. **یک director مرتبط از نظر فنی، به پیشنهاد VP برای افزودن مهندس به بهبود search وسط بازنویسی چطور پاسخ می‌دهد؟**
 
-   *Answer:* By making a specific request: adding people won't help a system mid-rewrite, so prioritize exposing the new API early so product can run its tests — rather than relaying the request (p. 155).
+   *Answer:* با یک درخواست مشخص: اضافه کردن آدم به سیستمی که وسط بازنویسی است کمکی نمی‌کند، پس اولویت را می‌گذارد روی زود در دسترس گذاشتن API تازه تا product تست‌هایش را اجرا کند، به‌جای این‌که فقط درخواست را منتقل کند (p. 155).

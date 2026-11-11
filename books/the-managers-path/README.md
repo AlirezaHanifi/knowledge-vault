@@ -12,101 +12,102 @@ toc_source: "Book PDF bookmarks (O'Reilly, First Edition, April 2017)"
 toc_verified: "2026-11-07"
 source_file: "book.pdf (kept locally, gitignored; 243 PDF pages; printed page = PDF page − 16)"
 cover: "cover.jpg"
+lang: fa
 ---
 
 # The Manager's Path
 
-**Open [`index.html`](index.html) in a browser** for the interactive version: one slide-by-slide lesson per chapter, with embedded simulations and self-checks. Everything here also reads fine on GitHub.
+**نسخه‌ی تعاملی را با باز کردن [`index.html`](index.html) در مرورگر ببینید**: برای هر فصل یک درس اسلاید‌به‌اسلاید، با شبیه‌سازی‌های جاسازی‌شده و خودسنجی. همین متن روی GitHub هم خوب خوانده می‌شود.
 
-## About
+## درباره‌ی کتاب
 
-*The Manager's Path: A Guide for Tech Leaders Navigating Growth and Change* follows the career of an engineering manager level by level, from being managed to running a technology organization. Each chapter covers one step up in management complexity — mentor, tech lead, manager of people, of a team, of multiple teams, of managers, and senior leadership — so readers can start at the chapter that matches their job and come back as it changes (Introduction, pp. xi–xiv). Chapter 9, on culture, is the "wildcard" that applies at every level.
+کتاب *The Manager's Path: A Guide for Tech Leaders Navigating Growth and Change* مسیر شغلی یک مدیر مهندسی را پله به پله دنبال می‌کند: از جایی که خودتان مدیر دارید تا جایی که یک سازمان فنی را می‌گردانید. هر فصل یک پله بالاتر در پیچیدگی مدیریت است؛ منتور، tech lead، مدیر آدم‌ها، مدیر یک تیم، مدیر چند تیم، مدیر مدیرها و رهبری ارشد. برای همین می‌توانید از همان فصلی شروع کنید که با شغل امروزتان می‌خواند و وقتی شغلتان عوض شد برگردید (مقدمه، صص. xi–xiv). فصل ۹ درباره‌ی فرهنگ است و حکم کارت آزاد را دارد: در هر پله‌ای به کار می‌آید.
 
-Recurring boxes give the book its texture: **Ask the CTO** answers common questions, **Good Manager, Bad Manager** contrasts behaviours (the alpha geek, the process czar, the micromanager), and **Challenging Situations** walks through hard conversations. Each chapter ends with questions for *Assessing Your Own Experience*. The author began the book while CTO at Rent the Runway, and its examples come from there and from her earlier jobs.
+جعبه‌های تکرارشونده به کتاب بافت می‌دهند: **Ask the CTO** به پرسش‌های رایج پاسخ می‌دهد، **Good Manager, Bad Manager** رفتارها را رو‌به‌رو می‌گذارد؛ مثلاً alpha geek، process czar و مدیر ذره‌بین‌به‌دست، و **Challenging Situations** گفت‌وگوهای سخت را قدم به قدم می‌برد. هر فصل با چند پرسش زیر عنوان *Assessing Your Own Experience* تمام می‌شود. نویسنده نوشتن کتاب را وقتی CTO شرکت Rent the Runway بود شروع کرد و مثال‌ها از همان‌جا و از شغل‌های پیشینش می‌آیند.
 
-## What's in this folder
+## محتوای این پوشه
 
-| Path | What it is |
+| مسیر | چیست |
 |---|---|
-| [`chapters/NN-*.md`](chapters/01-management-101.md) | Chapter notes, **the source of truth**. Each `.md` has a generated `.html` lesson next to it |
-| [`widgets/`](widgets/02-intern-project.html) | Hand-built simulations, embedded in the lessons; each also opens on its own |
-| [`lab/`](lab/03-parallel-plan/README.md) | Runnable Python experiments with expected output |
-| `index.html` | The book hub, generated from this README and the chapters |
+| [`chapters/NN-*.md`](chapters/01-management-101.md) | یادداشت فصل‌ها، **منبع اصلی**. کنار هر `.md` یک درس `.html` ساخته می‌شود |
+| [`widgets/`](widgets/02-intern-project.html) | شبیه‌سازی‌های دست‌ساز که در درس‌ها جاسازی شده‌اند؛ هر کدام جداگانه هم باز می‌شوند |
+| [`lab/`](lab/03-parallel-plan/README.md) | آزمایش‌های اجراشدنی Python با خروجی مورد انتظار |
+| `index.html` | صفحه‌ی کتاب که از همین README و فصل‌ها ساخته می‌شود |
 
-## How the book fits together
+## کتاب چطور به هم وصل است
 
-The chapters climb the management ladder; the last two step back to culture and to managing yourself.
+فصل‌ها نردبان مدیریت را بالا می‌روند؛ دو فصل آخر یک قدم عقب می‌ایستند و به فرهنگ و به مدیریت خودتان می‌پردازند.
 
 ```mermaid
 flowchart TB
-    C1["1 · Management 101<br/>being managed"] --> C2["2 · Mentoring"] --> C3["3 · Tech Lead"]
-    C3 --> C4["4 · Managing People"] --> C5["5 · Managing a Team"]
-    C5 --> C6["6 · Managing Multiple Teams"] --> C7["7 · Managing Managers"] --> C8["8 · The Big Leagues"]
-    C9["9 · Bootstrapping Culture"] -.-> C5 & C6 & C7 & C8
-    C8 --> C10["10 · Conclusion<br/>manage yourself"]
+    C1["فصل ۱: مدیریت از پایه<br/>وقتی خودتان مدیر دارید"] --> C2["فصل ۲: منتورینگ"] --> C3["فصل ۳: نقش tech lead"]
+    C3 --> C4["فصل ۴: مدیریت آدم‌ها"] --> C5["فصل ۵: مدیریت یک تیم"]
+    C5 --> C6["فصل ۶: مدیریت چند تیم"] --> C7["فصل ۷: مدیریت مدیرها"] --> C8["فصل ۸: لیگ بزرگ‌ها"]
+    C9["فصل ۹: ساختن فرهنگ از صفر"] -.-> C5 & C6 & C7 & C8
+    C8 --> C10["فصل ۱۰: جمع‌بندی<br/>مدیریت خودتان"]
 ```
 
-*The ladder order is the book's; the dotted links are the vault's reading of where Chapter 9 applies.*
+*ترتیب نردبان مال کتاب است؛ خط‌چین‌ها خوانش vault است از جاهایی که فصل ۹ به کار می‌آید.*
 
-Some threads run through the whole book:
+چند رشته در کل کتاب کشیده شده‌اند:
 
-- **1-1s and feedback** start as something you receive (1), become your main tool with people (4), and turn into skip-levels as you move away from the work (7).
-- **Staying technical** shifts from writing code (3, 5) to code reviews and debugging (6) to setting technical standards and True North (8).
-- **Delegation** grows from the tech lead's balance (3) through the delegation table (6) to managing managers you can't micromanage (7).
-- **Culture and fear**: the alpha geek's culture of fear (2), team culture (5, 6), the senior leader's influence (8), and deliberate culture-building (9).
+- **جلسه‌ی ۱-۱ و بازخورد** اول چیزی است که می‌گیرید (۱)، بعد ابزار اصلی‌تان با آدم‌ها می‌شود (۴) و وقتی از کار روزمره دور می‌شوید به skip-level تبدیل می‌شود (۷).
+- **فنی ماندن** از نوشتن کد (۳، ۵) به code review و debug (۶) و بعد به تعیین استانداردهای فنی و True North می‌رسد (۸).
+- **واگذاری کار** از تعادل tech lead (۳) شروع می‌شود، از جدول واگذاری (۶) می‌گذرد و به مدیرهایی می‌رسد که نمی‌توانید ذره‌بین رویشان بگذارید (۷).
+- **فرهنگ و ترس**: فرهنگ ترسی که alpha geek می‌سازد (۲)، فرهنگ تیم (۵، ۶)، نفوذ رهبر ارشد (۸) و فرهنگ‌سازی عامدانه (۹).
 
-## Chapters
+## فصل‌ها
 
-| # | Chapter | Pages |
+| # | فصل | صفحه‌ها |
 |---:|---|---|
-| 1 | [Management 101](chapters/01-management-101.md) | 1–10 |
-| 2 | [Mentoring](chapters/02-mentoring.md) | 11–26 |
-| 3 | [Tech Lead](chapters/03-tech-lead.md) | 27–48 |
-| 4 | [Managing People](chapters/04-managing-people.md) | 49–74 |
-| 5 | [Managing a Team](chapters/05-managing-a-team.md) | 75–97 |
-| 6 | [Managing Multiple Teams](chapters/06-managing-multiple-teams.md) | 99–123 |
-| 7 | [Managing Managers](chapters/07-managing-managers.md) | 125–157 |
-| 8 | [The Big Leagues](chapters/08-the-big-leagues.md) | 159–189 |
-| 9 | [Bootstrapping Culture](chapters/09-bootstrapping-culture.md) | 191–216 |
-| 10 | [Conclusion](chapters/10-conclusion.md) | 217–218 |
+| ۱ | [مدیریت از پایه](chapters/01-management-101.md) | ۱–۱۰ |
+| ۲ | [منتورینگ](chapters/02-mentoring.md) | ۱۱–۲۶ |
+| ۳ | [نقش tech lead](chapters/03-tech-lead.md) | ۲۷–۴۸ |
+| ۴ | [مدیریت آدم‌ها](chapters/04-managing-people.md) | ۴۹–۷۴ |
+| ۵ | [مدیریت یک تیم](chapters/05-managing-a-team.md) | ۷۵–۹۷ |
+| ۶ | [مدیریت چند تیم](chapters/06-managing-multiple-teams.md) | ۹۹–۱۲۳ |
+| ۷ | [مدیریت مدیرها](chapters/07-managing-managers.md) | ۱۲۵–۱۵۷ |
+| ۸ | [لیگ بزرگ‌ها](chapters/08-the-big-leagues.md) | ۱۵۹–۱۸۹ |
+| ۹ | [ساختن فرهنگ از صفر](chapters/09-bootstrapping-culture.md) | ۱۹۱–۲۱۶ |
+| ۱۰ | [جمع‌بندی](chapters/10-conclusion.md) | ۲۱۷–۲۱۸ |
 
-Page ranges are printed pages. Front matter (acknowledgments and the introduction) takes pp. ix–xiv; the book ends with an index (p. 219).
+شماره‌ها صفحه‌ی چاپی‌اند. مطالب ابتدای کتاب، یعنی قدردانی و مقدمه، صص. ix–xiv را می‌گیرند و کتاب با یک نمایه در ص. ۲۱۹ تمام می‌شود.
 
-## Key concepts
+## مفهوم‌های کلیدی
 
-These ideas recur across chapters; each row lists the chapters that discuss them. The definitions are the vault's summaries of the book's explanations.
+این ایده‌ها در چند فصل تکرار می‌شوند و هر ردیف فصل‌هایی را که به آن می‌پردازند فهرست می‌کند. تعریف‌ها خلاصه‌ی vault از توضیح کتاب‌اند.
 
-| Concept | Definition | Chapters |
+| مفهوم | تعریف | فصل‌ها |
 |---|---|---|
-| 1-1 meetings | Regular private meetings between manager and report: for human connection, feedback and coaching, not status updates. | [1](chapters/01-management-101.md) · [4](chapters/04-managing-people.md) · [7](chapters/07-managing-managers.md) |
-| Continuous feedback | Small, frequent praise and correction, so reviews hold no surprises. | [1](chapters/01-management-101.md) · [4](chapters/04-managing-people.md) |
-| Alpha geek | The engineer who must be the smartest in the room; creates a culture of fear, not excellence. | [2](chapters/02-mentoring.md) · [8](chapters/08-the-big-leagues.md) |
-| Tech lead | A set of responsibilities, not a level: balancing your own technical work with what the team needs. | [3](chapters/03-tech-lead.md) · [9](chapters/09-bootstrapping-culture.md) |
-| Process czar | The lead who believes the right process will solve every problem; the alternative is process fitted to the team. | [3](chapters/03-tech-lead.md) · [9](chapters/09-bootstrapping-culture.md) |
-| Micromanagement | Controlling the details of delegated work; the delegator instead sets goals and checks in at the right depth. | [4](chapters/04-managing-people.md) · [6](chapters/06-managing-multiple-teams.md) · [7](chapters/07-managing-managers.md) |
-| Sustaining engineering | About 20% of planned time reserved for testing, cleanup, migrations and on-call, so features don't slow down. | [5](chapters/05-managing-a-team.md) · [9](chapters/09-bootstrapping-culture.md) |
-| Importance vs. urgency | Table 6-1: urgency is felt, importance must be judged; make time for the important but not urgent. | [6](chapters/06-managing-multiple-teams.md) |
-| Delegation by complexity and frequency | Table 6-2: delegate simple frequent work, do simple rare work, teach complex work to grow the team. | [6](chapters/06-managing-multiple-teams.md) · [7](chapters/07-managing-managers.md) |
-| Skip-level meetings | Meetings with your reports' reports — quarterly 1-1s or team lunches — to see past managers who manage up well. | [7](chapters/07-managing-managers.md) |
-| First team | A leader's first team is their peers across the company, not the people who report to them. | [6](chapters/06-managing-multiple-teams.md) · [8](chapters/08-the-big-leagues.md) |
-| True North | The standards a senior leader sets — such as production readiness — that teams internalize and weigh risks against. | [8](chapters/08-the-big-leagues.md) |
-| Career ladder | Levels with written expectations and salary bands, written with the team and evolved as it grows. | [8](chapters/08-the-big-leagues.md) · [9](chapters/09-bootstrapping-culture.md) |
-| Process as risk management | Heavy process only for rare or hidden-risk work; code review, blameless postmortems and architecture review depersonalize decisions. | [9](chapters/09-bootstrapping-culture.md) |
+| جلسه‌ی ۱-۱ | جلسه‌ی خصوصی و منظم مدیر با هر نفر: برای ارتباط انسانی، بازخورد و کوچینگ، نه گزارش وضعیت. | [۱](chapters/01-management-101.md) · [۴](chapters/04-managing-people.md) · [۷](chapters/07-managing-managers.md) |
+| بازخورد پیوسته | تعریف و تذکرِ کوچک و پرتکرار، تا در ارزیابی دوره‌ای هیچ غافلگیری‌ای نماند. | [۱](chapters/01-management-101.md) · [۴](chapters/04-managing-people.md) |
+| alpha geek | مهندسی که باید باهوش‌ترین آدم اتاق باشد؛ فرهنگ ترس می‌سازد، نه فرهنگ سرآمدی. | [۲](chapters/02-mentoring.md) · [۸](chapters/08-the-big-leagues.md) |
+| tech lead | مجموعه‌ای از مسئولیت‌هاست، نه یک level: تعادل بین کار فنی خودتان و چیزی که تیم لازم دارد. | [۳](chapters/03-tech-lead.md) · [۹](chapters/09-bootstrapping-culture.md) |
+| process czar | سرپرستی که باور دارد process درست هر مشکلی را حل می‌کند؛ جایگزینش، process دوخته‌شده به تن تیم است. | [۳](chapters/03-tech-lead.md) · [۹](chapters/09-bootstrapping-culture.md) |
+| مدیریت ذره‌بینی | کنترل جزئیات کاری که واگذار کرده‌اید؛ به‌جایش هدف بگذارید و در عمق درست سر بزنید. | [۴](chapters/04-managing-people.md) · [۶](chapters/06-managing-multiple-teams.md) · [۷](chapters/07-managing-managers.md) |
+| کار نگه‌دارنده | حدود ۲۰٪ از زمان برنامه‌ریزی‌شده که برای تست، تمیزکاری، مهاجرت و on-call کنار گذاشته می‌شود تا ساخت feature کند نشود. | [۵](chapters/05-managing-a-team.md) · [۹](chapters/09-bootstrapping-culture.md) |
+| مهم در برابر فوری | جدول ۶-۱: فوریت حس می‌شود ولی اهمیت را باید تشخیص داد؛ برای کار مهمِ غیرفوری وقت بگذارید. | [۶](chapters/06-managing-multiple-teams.md) |
+| واگذاری بر پایه‌ی پیچیدگی و تکرار | جدول ۶-۲: کار ساده‌ی پرتکرار را واگذار کنید، کار ساده‌ی نادر را خودتان بکنید و کار پیچیده را یاد بدهید تا تیم رشد کند. | [۶](chapters/06-managing-multiple-teams.md) · [۷](chapters/07-managing-managers.md) |
+| جلسه‌ی skip-level | جلسه با آدم‌های زیردست مدیرهایتان، به شکل ۱-۱ فصلی یا ناهار تیمی، تا فراتر از مدیرهایی را ببینید که خوب گزارش می‌دهند. | [۷](chapters/07-managing-managers.md) |
+| تیم اولِ شما | تیم اول هر رهبر، هم‌ترازهایش در کل شرکت‌اند، نه آدم‌هایی که به او گزارش می‌دهند. | [۶](chapters/06-managing-multiple-teams.md) · [۸](chapters/08-the-big-leagues.md) |
+| True North | استانداردهایی که رهبر ارشد می‌گذارد؛ مثلاً آمادگی برای production، تا تیم‌ها درونی‌شان کنند و ریسک‌ها را با آن بسنجند. | [۸](chapters/08-the-big-leagues.md) |
+| نردبان شغلی | levelها با انتظارهای نوشته‌شده و بازه‌های حقوقی، که با خود تیم نوشته می‌شوند و همراه رشدش عوض می‌شوند. | [۸](chapters/08-the-big-leagues.md) · [۹](chapters/09-bootstrapping-culture.md) |
+| process به‌مثابه مدیریت ریسک | process سنگین فقط برای کار نادر یا کاری که ریسکش پنهان است؛ code review، postmortem بدون سرزنش و بازبینی معماری تصمیم‌ها را از آدم‌ها جدا می‌کنند. | [۹](chapters/09-bootstrapping-culture.md) |
 
-## How these notes work
+## این یادداشت‌ها چطور نوشته شده‌اند
 
-- **Everything above *Beyond the book* in a chapter note restates the book**, with page references. Supplementary material, meaning outside sources and the vault's interpretation, lives under *Beyond the book* or in `> **Vault note:**` callouts.
-- **Page numbers are printed pages** (PDF page − 16).
-- The book's recurring boxes — Ask the CTO, Good Manager/Bad Manager, Challenging Situations and guest essays — appear as callouts or rows with their pages.
-- Section outlines are the book's own table of contents, taken from the PDF's bookmarks.
-- Mermaid diagrams are the vault's own summaries; captions say so.
-- *Check yourself* questions and answers are the vault's, written from the notes; the answers cite pages.
-- Simulations and experiments are the vault's own implementations of situations the book describes — the intern project, the tech lead's calendar, the quarter plan, the delegation tables, skip-level arithmetic, the career ladder. Each says which pages it illustrates and what it invents.
+- **هر چیزی که در یادداشت یک فصل بالای *فراتر از کتاب* است، خود کتاب را بازگو می‌کند**، با ارجاع به صفحه. مطالب مکمل، یعنی منابع بیرونی و خوانش vault، زیر *فراتر از کتاب* یا در کادرهای `> **Vault note:**` می‌آیند.
+- **شماره‌ی صفحه‌ها صفحه‌ی چاپی‌اند** (صفحه‌ی PDF منهای ۱۶).
+- جعبه‌های تکرارشونده‌ی کتاب، یعنی Ask the CTO، Good Manager/Bad Manager، Challenging Situations و یادداشت‌های مهمان، به شکل کادر یا ردیف جدول با شماره‌ی صفحه‌شان می‌آیند.
+- فهرست بخش‌ها همان فهرست مطالب خود کتاب است که از bookmarkهای PDF برداشته شده.
+- نمودارهای Mermaid جمع‌بندی خود vault هستند و زیرنویس‌شان همین را می‌گوید.
+- پرسش‌های *خودتان را بسنجید* و پاسخ‌هایشان مال vault است و از روی همین یادداشت‌ها نوشته شده؛ پاسخ‌ها به صفحه ارجاع می‌دهند.
+- شبیه‌سازی‌ها و آزمایش‌ها پیاده‌سازی خود vault از موقعیت‌هایی‌اند که کتاب شرح می‌دهد: پروژه‌ی کارآموز، تقویم tech lead، برنامه‌ی یک فصل، جدول‌های واگذاری، حساب‌وکتاب skip-level و نردبان شغلی. هر کدام می‌گویند کدام صفحه‌ها را نشان می‌دهند و چه چیزی را خودشان ساخته‌اند.
 
-## Source
+## منبع
 
-- **Primary source:** the publisher's PDF of the First Edition, April 2017 (first release 2017-03-08), © 2017 Camille Fournier, O'Reilly Media (243 PDF pages). The PDF is kept outside version control (see `.gitignore`).
-- **Table of contents:** taken from the PDF's bookmark outline; printed page numbers come from the page footers.
-- **Structure:** front matter (acknowledgments, introduction), ten chapters and an index.
-- **Coverage:** all ten chapters are covered.
-- **Figures:** the book has no figures, only two tables (Tables 6-1 and 6-2, Chapter 6), which the notes reproduce as Markdown tables.
+- **منبع اصلی:** نسخه‌ی PDF ناشر از ویراست اول، آوریل ۲۰۱۷ (انتشار اول در ۲۰۱۷-۰۳-۰۸)، © ۲۰۱۷ Camille Fournier، O'Reilly Media، با ۲۴۳ صفحه‌ی PDF. این PDF بیرون از version control نگه داشته می‌شود؛ `.gitignore` را ببینید.
+- **فهرست مطالب:** از bookmarkهای PDF برداشته شده و شماره‌ی صفحه‌های چاپی از پانویس صفحه‌ها می‌آیند.
+- **ساختار:** مطالب ابتدای کتاب شامل قدردانی و مقدمه، ده فصل، و یک نمایه.
+- **پوشش:** هر ده فصل پوشش داده شده‌اند.
+- **شکل‌ها:** کتاب شکلی ندارد و فقط دو جدول دارد، یعنی جدول‌های ۶-۱ و ۶-۲ در فصل ۶، که یادداشت‌ها آن‌ها را به شکل جدول Markdown بازسازی می‌کنند.
