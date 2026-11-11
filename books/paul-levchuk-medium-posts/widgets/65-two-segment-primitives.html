@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بنیان‌های دوبخشی</title>
+<meta name="description" content="یک مدل دوبخشی retention و CAC را بگذارید و نرخ بازماندگان و نیمه‌عمر دم و شدت پرتگاه و سهم دم و سقف LTV و فاصله تا سقف و payback را بخوانید. برای نوشته‌های ۴ و ۵ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/65-retention-curve-hides-more-than-it-shows.html">نوشته‌ی ۶۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">بنیان‌های دوبخشی</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۶۵ · وقتی منحنی retention بیشتر از آنچه نشان می‌دهد پنهان می‌کند</div>
+  <h1>بنیان‌های دوبخشی</h1>
+  <p class="lede">کف روز اول و churn پرتگاه و دم و طول پرتگاه را ویرایش کنید و بعد <strong>به CAC فشار بیاورید</strong>: بنیان‌ها و روز payback به‌روز می‌شوند، و فاصله تا سقف نشان می‌دهد این cohort چقدر به جایی نزدیک است که اصلاً payback ندارد.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌های «When Your Retention Curve Hides More Than It Shows» و «Two Cohorts, Same Payback Period, Very Different Investments» را نشان می‌دهد (بخش‌های «What each primitive tells you about one cohort» و «A worked example: scaling decision»). cohort نمونه از مقدارهای برازش‌شده‌ی نوشته استفاده می‌کند، یعنی d₁ برابر ۰٫۴۳۸ و c₁ برابر ۰٫۱۲۴ و c₂ برابر ۰٫۰۲۱. برای cohortهای اول و دوم، نوشته بنیان‌ها را می‌گوید ولی پارامترهای خام را نه، پس vault مقدارهای c₁ و c₂ را از شدت پرتگاه و نیمه‌عمر دم گزارش‌شده و d₁ را از نرخ بازماندگان بازسازی می‌کند؛ روزهای payback حاصل تا چند روز به ۶۱ و ۶۵ نوشته نزدیک‌اند و فاصله تا سقف تا یکی دو واحد به ۴۸٪ و ۸۳٪ آن؛ سهم دم cohort اول حدود ۸۸٪ درمی‌آید در برابر ۹۴٪ نوشته. payback خود cohort نمونه این‌جا حدود ۹۸ روز است در برابر ۹۳ روز نوشته، که تفاوت قرارداد در جمع زدن روزهای پرتگاه است. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">ارزش تجمعی هر کاربر جذب‌شده در برابر CAC</p>
+        <svg class="plot" id="chart" role="img" aria-label="حاشیه‌ی تجمعی هر کاربر جذب‌شده در برابر CAC"></svg>
+        <p class="field-hint">منحنی: حاشیه‌ی تجمعی. خط افقی: مقدار CAC. محل تقاطعشان روز payback است.</p></div>
+      <div class="panel"><p class="panel-title">بنیان‌ها</p><div class="stats" id="prims"></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">cohort</p><div id="preset"></div></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>دو cohort تقریباً در یک روز برمی‌گردند</strong> ولی سقف و فاصله تا سقفشان زمین تا آسمان فرق دارد.</li>
+    <li><strong>بالا بردن CAC</strong> به فاصله‌ی cohort اول خیلی بیشتر از دومی می‌زند؛ بعد از سقف، روز payback «هیچ‌وقت» را نشان می‌دهد.</li>
+    <li><strong>جابه‌جا کردن k</strong> نرخ بازماندگان و شدت پرتگاه را جابه‌جا می‌کند، و برای همین باید پیش از مقایسه‌ی cohortها ثابت باشد.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/65-retention-curve-hides-more-than-it-shows.html"><small>درس</small>نوشته‌ی ۶۵: وقتی منحنی retention بیشتر از آنچه نشان می‌دهد پنهان می‌کند</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function money(x, d) { var s = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); return (x < 0 ? "−$" : "$") + s; }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
+
+  var log = Kit.log(document.getElementById("log"));
+  var M = 0.5, BASE_CAC = 5;
+  var PRE = {
+    run: { label: "cohort نمونه‌ی نوشته‌ی ۶۵", d1: 0.438, c1: 0.124, c2: 0.021, k: 7 },
+    a: { label: "cohort اول: حجمی", d1: 0.53, c1: 0.1495, c2: 0.0115, k: 7 },
+    b: { label: "cohort دوم: بادوام", d1: 0.576, c1: 0.21, c2: 0.0025, k: 7 }
+  };
+  var cfg = Object.assign({ cac: 1 }, PRE.run), sl = {}, last = null;
+  function R(t) { if (t === 0) return 1; if (t === 1) return cfg.d1; if (t <= cfg.k) return cfg.d1 * Math.pow(1 - cfg.c1, t - 1); return cfg.d1 * Math.pow(1 - cfg.c1, cfg.k - 1) * Math.pow(1 - cfg.c2, t - cfg.k); }
+  function calc() {
+    var cac = BASE_CAC * cfg.cac, cum = 0, pay = null, pts = [[0, 0]], lc = 0;
+    for (var t = 1; t <= 720; t++) { cum += M * R(t); if (t <= cfg.k) lc = cum; if (pay === null && cum >= cac) pay = t; if (t % 12 === 0 || t === 1) pts.push([t, cum]); }
+    var surv = R(cfg.k), lt = M * R(cfg.k) * (1 - cfg.c2) / cfg.c2, ceil = lc + lt;
+    return { cac: cac, pay: pay, pts: pts, surv: surv, hl: Math.log(2) / -Math.log(1 - cfg.c2), ci: cfg.c1 / cfg.c2, ts: lt / ceil, ceil: ceil, head: 1 - cac / ceil };
+  }
+  function render() {
+    var C = calc(), ok = C.head > 0;
+    Kit.lineChart(document.getElementById("chart"), { width: 520, height: 220, xMax: 720, yMax: Math.max(12, Math.min(40, C.ceil * 1.1)), xLabel: "روز", yLabel: "حاشیه‌ی تجمعی، دلار", xTicks: 6, yTicks: 5,
+      series: [{ points: C.pts, cls: "s1", label: "حاشیه‌ی تجمعی" }, { points: [[0, C.cac], [720, C.cac]], cls: ok ? "s2" : "bad", label: "CAC" }], marks: C.pay ? [{ x: C.pay, label: "payback" }] : [] });
+    stats("prims", [["نرخ بازماندگان", pct(C.surv, 1)], ["نیمه‌عمر دم", C.hl.toFixed(0) + " روز، یعنی " + (C.hl / 30).toFixed(1) + " ماه"], ["شدت پرتگاه", C.ci.toFixed(1) + " برابر"], ["سهم دم", pct(C.ts, 0)], ["سقف LTV", money(C.ceil, 2)], ["فاصله تا سقف", pct(C.head, 0), C.head > 0.4 ? "ok" : C.head > 0.15 ? "warn" : "bad"], ["روز payback", C.pay === null ? "هیچ‌وقت" : String(C.pay), C.pay === null ? "bad" : ""]]);
+    var v = document.getElementById("verdict"); v.className = "callout " + (C.head > 0.4 ? "ok" : C.head > 0.15 ? "warn" : "bad");
+    v.textContent = C.head > 0.4 ? "فاصله‌ی راحت؛ قاعده‌ی سرانگشتی نوشته: بالای ۴۰٪، که روی cohortهای تمیز کالیبره شده." : C.head > 0 ? "فاصله‌ی باریک: بالا رفتن CAC سریع می‌خوردش؛ بزرگ نکنید." : "مقدار CAC روی سقف LTV یا بالاتر از آن است: payback وجود ندارد.";
+    var st = C.head > 0.4 ? "ok" : C.head > 0.15 ? "thin" : "none"; if (last && st !== last) log.add("فاصله تا سقف حالا " + pct(C.head, 0) + " است.", st === "ok" ? "ok" : st === "thin" ? "warn" : "bad"); last = st;
+  }
+  var ctl = document.getElementById("ctl");
+  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  add("d1", { label: "مقدار d₁: retention روز اول", min: 0.2, max: 0.8, step: 0.005, format: function (v) { return v.toFixed(3); } });
+  add("c1", { label: "مقدار c₁: churn روزانه‌ی پرتگاه", min: 0.02, max: 0.4, step: 0.005, format: function (v) { return v.toFixed(3); } });
+  add("c2", { label: "مقدار c₂: churn روزانه‌ی دم", min: 0.001, max: 0.06, step: 0.0005, format: function (v) { return v.toFixed(4); } });
+  add("k", { label: "مقدار k: طول پرتگاه", min: 3, max: 14, step: 1, unit: " روز", hint: "یک قرارداد است؛ cohortها را فقط با k یکسان مقایسه کنید" });
+  add("cac", { label: "فشار روی CAC، ضریبی از پایه‌ی پنج دلار", min: 0.5, max: 6, step: 0.1, format: function (v) { return v.toFixed(1) + "× = $" + (5 * v).toFixed(2); } });
+  document.getElementById("preset").appendChild(Kit.segmented({ label: "cohort", value: "run", options: Object.keys(PRE).map(function (k) { return { value: k, label: PRE[k].label }; }),
+    onChange: function (k) { ["d1", "c1", "c2", "k"].forEach(function (f) { cfg[f] = PRE[k][f]; sl[f].set(PRE[k][f]); }); render(); log.add("بار شد: " + PRE[k].label, "muted"); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "دو cohort حجمی و بادوام را با CAC پایه بار کنید. بیشترین تفاوت در چیست؟",
+    "options": [
+      "دوره‌ی payback",
+      "نیمه‌عمر دم و فاصله تا سقف",
+      "سهم دم"
+    ],
+    "answer": 1,
+    "explain": "دوره‌ی payback هر دو نزدیک ۶۰ روز است؛ نیمه‌عمر ۶۰ در برابر ۲۷۷ روز و فاصله تا سقف حدود ۴۸ در برابر ۸۳ درصد است (بخش «What each primitive tells you in this comparison»)."
+  },
+  {
+    "q": "مقدار CAC را روی cohort حجمی دو برابر کنید. چه می‌شود؟",
+    "options": [
+      "دوره‌ی payback دو برابر می‌شود و فاصله می‌ماند",
+      "فاصله تا سقف به چند درصد یا کمتر می‌افتد",
+      "هیچ؛ payback عوض نمی‌شود"
+    ],
+    "answer": 1,
+    "explain": "سقف آن نزدیک ۹٫۵ تا ۱۰ دلار است، پس CAC ده دلاری تقریباً هیچ فضایی نمی‌گذارد (بخش «A worked example»)."
+  },
+  {
+    "q": "چرا پیش از مقایسه‌ی دو cohort باید k را ثابت کرد؟",
+    "options": [
+      "برازش را سریع‌تر می‌کند",
+      "مقدار c₁ و نرخ بازماندگان و شدت پرتگاه، همه به جایی بستگی دارند که مرز پرتگاه را می‌کشید",
+      "مقدار k از داده اندازه‌گیری می‌شود"
+    ],
+    "answer": 1,
+    "explain": "عوض کردن k از ۳ به ۱۴، مقدار c₁ را بیش از سه برابر عوض می‌کند (بخش «Gotcha 1»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

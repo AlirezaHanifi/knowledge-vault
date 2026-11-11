@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>دروازه، جمع، برهم‌کنش</title>
+<meta name="description" content="سه قاعده برای سه حرکت شکل‌گیری streak: روشنی به‌عنوان دروازه، نیروهای کوچک به‌عنوان جمع، و قفل شدن به‌عنوان برهم‌کنش. برای نوشته‌های ۷ و ۹ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/70-getting-in-building-it-locking-in.html">نوشته‌ی ۷۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">دروازه، جمع، برهم‌کنش</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۷۰ · ورود، ساختن، قفل شدن</div>
+  <h1>دروازه، جمع، برهم‌کنش</h1>
+  <p class="lede">روشنی را جابه‌جا کنید، نیروهای کوچک را خاموش کنید و دست‌یافتنی بودن و روزهای نگه‌داشته‌شده و تازگی را تغییر بدهید، تا ببینید شکل‌گیری روی <strong>یک دروازه و یک جمع و یک برهم‌کنش</strong> می‌چرخد، نه روی یک سربالایی صاف.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌های «Why Duolingo Streaks Work, in Four Questions» و «Duolingo: Getting In, Building It, Locking In» را نشان می‌دهد (بخش‌های «Getting in»، «Building it» و «Locking in»). نمودارهای نوشته شبیه‌سازی مدل خود نویسنده‌اند و vault آن مدل را ندارد: شکل‌های تابعی این‌جا، یعنی یک دروازه‌ی smoothstep و جمع با وزن برابر و یک جمله‌ی اشباع‌شونده برای تکرار و تازگیِ نمایی، به‌همراه آن ۵ نیرو، فرض‌های vault هستند که برای نشان دادن همان شکل‌هایی انتخاب شده‌اند که نوشته می‌گوید. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">ورود: دروازه در برابر صیقل</p>
+        <svg class="plot" id="c1" role="img" aria-label="کشش streak در برابر روشنی، یک‌بار با دروازه و یک‌بار با صیقل جمعی ساده"></svg>
+        <p class="field-hint">آبی: دروازه، یعنی روشنی بقیه‌ی نیروها را ضرب می‌کند. نارنجی: صیقل، یعنی روشنی فقط جمع می‌شود. نشان خط‌چین: تنظیم فعلی شما.</p></div>
+      <div class="panel"><p class="panel-title">ساختن: یک جمع</p><div id="forces"></div>
+        <p class="field-hint" id="sumnote"></p></div>
+      <div class="panel"><p class="panel-title">قفل شدن: یک برهم‌کنش</p>
+        <svg class="plot" id="c3" role="img" aria-label="احتمال قفل شدن عادت در برابر روزهای نگه‌داشته‌شده"></svg>
+        <p class="field-hint">احتمال قفل شدن برابر است با دست‌یافتنی بودن ضرب در تکرار، که حدود یک هفته اشباع می‌شود، ضرب در تازگی.</p></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
+        <div id="fchk" class="field-hint" style="margin-top:6px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازنشانی</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>زیر دروازه</strong> اضافه کردن نیرو هیچ چیزی را عوض نمی‌کند؛ بالای آن، خط صیقل و خط دروازه به هم می‌رسند.</li>
+    <li><strong>در جمع</strong> هر نیرو به همان اندازه‌ی کم می‌ارزد، پس برداشتن هر کدام هزینه‌ی مشابهی دارد؛ feature قهرمانی در کار نیست.</li>
+    <li><strong>قفل شدن یک ضرب است</strong>: هر عاملی را نزدیک صفر بگذارید، چه دست‌یافتنی بودن چه روزها چه تازگی، و احتمال فرو می‌ریزد، هر قدر هم بقیه قوی باشند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/70-getting-in-building-it-locking-in.html"><small>درس</small>نوشته‌ی ۷۰: ورود، ساختن، قفل شدن</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
+
+  var log = Kit.log(document.getElementById("log"));
+  var FORCES = ["حس پیشرفت", "یادآوری به‌موقع", "معنای streak", "عددی که دیده می‌شود", "برد کوچک داخل درس"];
+  var DEF = { clarity: 0.8, att: 0.7, days: 7, newness: 0 }, cfg = Object.assign({}, DEF), on = [true, true, true, true, true], sl = {};
+  function gate(c) { var x = Math.max(0, Math.min(1, (c - 0.3) / 0.4)); return x * x * (3 - 2 * x); }
+  function nForces() { return on.filter(Boolean).length; }
+  function rep(d) { return 1 - Math.exp(-d / 3.5); }
+  function fresh(n) { return Math.exp(-n / 14); }
+  function lock(att, d, n) { return Math.max(0, Math.min(1, att)) * rep(d) * fresh(n); }
+  function pull() { return gate(cfg.clarity) * nForces() / 5; }
+  function chart1() {
+    var pts = function (f) { var a = []; for (var c = 0; c <= 1.0001; c += 0.05) a.push([c, f(c)]); return a; };
+    Kit.lineChart(document.getElementById("c1"), { width: 520, height: 200, xMax: 1, yMax: 1, xLabel: "روشنی", yLabel: "کشش streak", xTicks: 5, yTicks: 4,
+      series: [ { points: pts(function (c) { return gate(c) * nForces() / 5; }), cls: "s1", label: "دروازه" }, { points: pts(function (c) { return c * nForces() / 5; }), cls: "s2", label: "صیقل" } ],
+      marks: [{ x: cfg.clarity, label: "اکنون" }] });
+  }
+  function chart3() {
+    var a = []; for (var d = 0; d <= 14; d += 0.5) a.push([d, lock(cfg.att, d, cfg.newness)]);
+    Kit.lineChart(document.getElementById("c3"), { width: 520, height: 200, xMax: 14, yMax: 1, xLabel: "روزهای نگه‌داشته‌شده", yLabel: "احتمال قفل شدن", xTicks: 7, yTicks: 4,
+      series: [{ points: a, cls: "s3", label: "قفل شدن" }], marks: [{ x: cfg.days, label: "اکنون" }] });
+  }
+  function render() {
+    chart1(); chart3();
+    var p = pull(), l = lock(cfg.att, cfg.days, cfg.newness), l2 = lock(Math.min(1, cfg.att + 0.2), cfg.days, cfg.newness), l1w = lock(cfg.att + 0.2, 7, 0) - lock(cfg.att, 7, 0), l10 = lock(cfg.att + 0.2, 7, 63) - lock(cfg.att, 7, 63);
+    document.getElementById("sumnote").textContent = nForces() + " نیرو از ۵ نیروی کوچک روشن است: کشش برابر " + pct(p, 0) + " بیشینه. وقتی روشنی بالاست، برداشتن یکی " + (gate(cfg.clarity) * 20).toFixed(0) + " واحد هزینه دارد؛ و روشنیِ زیر ۰٫۳ کل جمع را صفر می‌کند.";
+    stats("stats", [["کشش streak", pct(p, 0), p < 0.3 ? "bad" : "ok"], ["احتمال قفل شدن", pct(l, 0), l < 0.3 ? "bad" : "ok"], ["۰٫۲ دست‌یافتنی بودن بیشتر، مثل یک freeze رایگان", "+" + ((l2 - l) * 100).toFixed(1) + " واحد"], ["همان freeze در هفته‌ی اول در برابر هفته‌ی دهم", "+" + (l1w * 100).toFixed(0) + " در برابر +" + (l10 * 100).toFixed(1) + " واحد"]]);
+  }
+  var ctl = document.getElementById("ctl");
+  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  add("clarity", { label: "روشنی: کاربر streak را می‌فهمد؟", min: 0, max: 1, step: 0.05, format: function (v) { return v.toFixed(2); }, hint: "آستانه‌ی دروازه حدود ۰٫۳ تا ۰٫۷، که شکلش مال vault است" });
+  add("att", { label: "دست‌یافتنی بودن", min: 0, max: 1, step: 0.05, format: function (v) { return v.toFixed(2); } });
+  add("days", { label: "روزهای نگه‌داشته‌شده تا حالا", min: 0, max: 14, step: 1, unit: " روز", hint: "زانو نزدیک یک هفته؛ نوشته این را از گفته‌های عمومی Duolingo قرض گرفته" });
+  add("newness", { label: "روزهای گذشته از شروع این تلاش، یعنی تازگی", min: 0, max: 63, step: 1, unit: " روز", hint: "تازگی با گذشت زمان محو می‌شود" });
+  var fc = document.getElementById("forces");
+  FORCES.forEach(function (name, i) {
+    var id = "force" + i, cb = Kit.el("input", { type: "checkbox", id: id, checked: "checked" });
+    cb.addEventListener("change", function () { on[i] = cb.checked; log.add(name + (cb.checked ? " برگشت." : " برداشته شد.") + " کشش حالا " + pct(pull(), 0) + " است.", cb.checked ? "ok" : "warn"); render(); });
+    fc.appendChild(Kit.el("label", { for: id, style: "display:flex;gap:8px;align-items:center;margin:4px 0" }, cb, name));
+  });
+  document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; sl[k].set(DEF[k]); }); fc.querySelectorAll("input").forEach(function (c, i) { c.checked = true; on[i] = true; }); render(); log.add("بازنشانی شد.", "muted"); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "روشنی را با روشن بودن هر پنج نیرو روی ۰٫۲ بگذارید. کشش streak چقدر است؟",
+    "options": [
+      "حدود ۴۰٪",
+      "حدود ۸۰٪",
+      "صفر"
+    ],
+    "answer": 2,
+    "explain": "زیر آستانه‌ی دروازه، بقیه‌ی نیروها به سمت صفر ضرب می‌شوند (بخش «Getting in»)."
+  },
+  {
+    "q": "کدام‌یک لازم دارد چند چیز هم‌زمان برقرار باشند؟",
+    "options": [
+      "ورود",
+      "ساختن",
+      "قفل شدن"
+    ],
+    "answer": 2,
+    "explain": "قفل شدن برهم‌کنش دست‌یافتنی بودن و تکرار و تازگی است (بخش «Locking in»)."
+  },
+  {
+    "q": "چرا یک freeze رایگان در هفته‌ی اول بیشتر از هفته‌ی دهم می‌ارزد؟",
+    "options": [
+      "کاربرها به‌مرور از freeze کمتر خوششان می‌آید",
+      "داخل پنجره‌ی شکل‌گیری می‌افتد، جایی که تازگی هنوز بالاست",
+      "مدت freezeها تمام می‌شود"
+    ],
+    "answer": 1,
+    "explain": "همان کمک، اوایل در ضریب تازگی بزرگ‌تری ضرب می‌شود (بخش «Locking in»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

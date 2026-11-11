@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>گذارهای Lness هفته به هفته</title>
+<meta name="description" content="سطح درگیری ثابت نیست: کاربران هر هفته شتاب می‌گیرند، کند می‌شوند یا می‌روند، و معمولاً کندشده‌ها از شتاب‌گرفته‌ها بیشترند. برای نوشته‌ی ۲۵ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 9rem 1fr 5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 0 0 auto; background: var(--s1); border-radius: 3px; }
+  .bar-fill.s2 { background: var(--s2); } .bar-fill.s3 { background: var(--s3); } .bar-fill.s4 { background: var(--s4); }
+  .bar-fill.bad { background: var(--bad); } .bar-fill.ok { background: var(--ok); } .bar-fill.warn { background: var(--warn); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; height: auto; display: block; }
+  svg.plot text { font-size: 10px; fill: var(--muted); }
+  svg.plot .grid { stroke: var(--line); stroke-width: 1; }
+  svg.plot .thr { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: .55; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/25-stickiness-insights-part-2.html">نوشته‌ی ۲۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">گذارهای Lness هفته به هفته</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۲۵ · بینش‌های stickiness، بخش دوم</div>
+  <h1>گذارهای Lness هفته به هفته</h1>
+  <p class="lede">cohort هفته‌ی ۲۰۲۲-۱۹ با ۲٬۹۰۲ کاربر شروع می‌شود. ماتریس گذار را تغییر دهید و ببینید cohort در چهار هفته‌ی بعد چه می‌شود؛ <strong>نسبت شتاب‌گرفته‌ها به کندشده‌ها</strong> مسیر را تعیین می‌کند.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «Stickiness insights, part 2» را نشان می‌دهد (بخش‌های «ساختن ماتریس گذار» و «از L1 و L2 چه می‌شود»). شمار شروع، یعنی ۲٬۳۸۶ کاربر L1 و ۳۸۸ کاربر L2 و ۱۲۸ کاربر L3+، و دو سطر L1 و L2 از نوشته است؛ سطر L3+ و تکرار همان ماتریس در هفته‌های بعد فرض vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">ماتریس گذار یک‌هفته‌ای، درصد هر سطر</p><div id="matrix"></div></div>
+      <div class="panel"><p class="panel-title">cohort در چهار هفته‌ی بعد</p><div id="weeks"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازگشت به عددهای نوشته</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>سطر L1 را ببینید</strong>: از ۲٬۳۸۶ کاربر ۲٬۱۸۹ نفر هفته‌ی بعد برنمی‌گردند و ۱۳۵ نفر در L1 می‌مانند.</li>
+    <li><strong>شتاب‌گیری را بالا ببرید</strong>: کاربران فعال هفته‌ی چهارم سریع‌تر از هر اهرم دیگری زیاد می‌شوند.</li>
+    <li><strong>کندشده‌ها همان کسانی‌اند که کمک می‌خواهند</strong>؛ پیش از ریزش، در ستون کندشده دیده می‌شوند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/25-stickiness-insights-part-2.html"><small>درس</small>نوشته‌ی ۲۵: بینش‌های stickiness، بخش دوم</a></li>
+    <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var FA = function (s) { return Kit.digits(String(s)); };
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "٪"; }
+  function table(head, rows) {
+    var t = Kit.el("table", { class: "data" });
+    t.appendChild(Kit.el("tr", null, head.map(function (h, i) { return Kit.el("th", { class: i ? "num" : "" }, h); })));
+    rows.forEach(function (r) { t.appendChild(Kit.el("tr", null, r.map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, c); }))); });
+    return t;
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var ctl = document.getElementById("ctl"), sl = {};
+  function add(key, o, cfg, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  function resetTo(DEF, cfg, render) { document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; if (sl[k]) sl[k].set(DEF[k]); }); render(); log.add("به عددهای نوشته برگشت.", "muted"); }); }
+
+  // Rows: from L1, L2, L3+ → [churn, L1, L2, L3+]. L1 and L2 rows from the post; L3+ row assumed.
+  var BASE = { L1: [2189, 135, 41, 21], L2: [310, 55, 14, 9], L3: [70, 25, 13, 20] };
+  var START = [2386, 388, 128], DEF = { acc: 1, dec: 1 }, cfg = Object.assign({}, DEF), last = null;
+  function rows() {
+    var R = {};
+    ["L1", "L2", "L3"].forEach(function (k, i) {
+      var r = BASE[k].slice(), tot = r.reduce(function (a, b) { return a + b; }, 0);
+      r = r.map(function (x) { return x / tot; });
+      for (var j = 1; j <= 3; j++) { var to = j - 1; if (to > i) r[j] *= cfg.acc; if (to < i) r[j] *= cfg.dec; }
+      var act = r[1] + r[2] + r[3]; r[0] = Math.max(0, 1 - act);
+      if (act > 1) { r = r.map(function (x, j) { return j ? x / act : 0; }); }
+      R[k] = r;
+    });
+    return R;
+  }
+  function render() {
+    var R = rows(), names = ["L1", "L2", "L3+"];
+    Kit.clear(document.getElementById("matrix")).appendChild(table(["از ↓ به ←", "ریزش", "L1", "L2", "L3+"], ["L1", "L2", "L3"].map(function (k, i) { return [names[i]].concat(R[k].map(function (x) { return pct(x, 1); })); })));
+    var v = START.slice(), w = Kit.clear(document.getElementById("weeks")), acc = 0, dec = 0;
+    ["L1", "L2", "L3"].forEach(function (k, i) { for (var j = 1; j <= 3; j++) { var n = START[i] * R[k][j]; if (j - 1 > i) acc += n; if (j - 1 < i) dec += n; } });
+    var series = [];
+    for (var t = 1; t <= 4; t++) {
+      var nv = [0, 0, 0];
+      ["L1", "L2", "L3"].forEach(function (k, i) { for (var j = 1; j <= 3; j++) nv[j - 1] += v[i] * R[k][j]; });
+      v = nv; var tot = v[0] + v[1] + v[2]; series.push(tot);
+      w.appendChild(bar("هفته‌ی " + FA(t) + " پس از ثبت‌نام", tot / 2902 * 4, FA(Math.round(tot)) + " نفر", "s1"));
+    }
+    var key = Math.round(series[3]); if (last !== null && key !== last) log.add("کاربران فعال هفته‌ی چهارم: " + FA(key) + " نفر.", "muted"); last = key;
+    stats([["کاربران cohort", "۲٬۹۰۲"], ["شتاب‌گرفته‌ها در هفته‌ی اول", FA(Math.round(acc))], ["کندشده‌ها در هفته‌ی اول", FA(Math.round(dec)), dec > acc ? "warn" : "ok"], ["فعال در هفته‌ی چهارم", FA(Math.round(series[3])) + "، یعنی " + pct(series[3] / 2902)]]);
+  }
+  add("acc", { label: "ضریب شتاب‌گیری، رفتن به Lness بالاتر", min: 0, max: 4, step: 0.25, format: function (v) { return FA(v.toFixed(2)) + "×"; } }, cfg, render);
+  add("dec", { label: "ضریب کند شدن، رفتن به Lness پایین‌تر", min: 0, max: 2, step: 0.25, format: function (v) { return FA(v.toFixed(2)) + "×"; }, hint: "ضریب یک یعنی همان سطرهای نوشته؛ هر چه از شتاب و کند شدن بماند ریزش است" }, cfg, render);
+  resetTo(DEF, cfg, render);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "در سطر L1 نوشته، چند نفر از ۲٬۳۸۶ کاربر هفته‌ی بعد برنگشتند؟",
+    "options": [
+      "۲٬۱۸۹",
+      "۱۳۵",
+      "۴۱"
+    ],
+    "answer": 0,
+    "explain": "۱۳۵ نفر در L1 ماندند و ۴۱ نفر به L2 رفتند (بخش «از L1 و L2 چه می‌شود»)."
+  },
+  {
+    "q": "معمولاً کدام بیشتر است: شتاب‌گرفته‌ها یا کندشده‌ها؟",
+    "options": [
+      "کندشده‌ها",
+      "شتاب‌گرفته‌ها",
+      "همیشه برابرند"
+    ],
+    "answer": 0,
+    "explain": "نویسنده این را «بسیار جالب و مهم» می‌داند (بخش «درصد سطرها»)."
+  },
+  {
+    "q": "به چه دلیل Lness ثبت‌نام فقط یک متریک جانشین است؟",
+    "options": [
+      "چون Lness هر هفته عوض می‌شود و مسیر کاربر را نمی‌گوید",
+      "چون Lness را نمی‌شود برای هر کاربر حساب کرد",
+      "چون Lness با retention رابطه ندارد"
+    ],
+    "answer": 0,
+    "explain": "ماتریس گذار نشان می‌دهد سطح درگیری ثابت نیست (بخش «چه می‌آموزیم»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

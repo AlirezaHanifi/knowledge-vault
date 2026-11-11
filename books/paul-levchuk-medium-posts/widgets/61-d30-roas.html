@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D30 در برابر D180</title>
+<meta name="description" content="سهم Churner و CPI و دقت کلاسیفایر را عوض کنید و ROAS در D30 و D180 را برای bidding ساده و pipeline کیفیت مقایسه کنید. برای نوشته‌ی ۶۱ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/61-d30-roas-is-the-wrong-metric-here-is-what-to-use-instead.html">نوشته‌ی 61</a><span aria-hidden="true">/</span>
+      <span aria-current="page">D30 در برابر D180</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۶۱ · D30 ROAS معیار درستی نیست</div>
+  <h1>D30 در برابر D180</h1>
+  <p class="lede">ROAS را در دو افق ببینید: Churner در <strong>D30</strong> کارا به نظر می‌رسد و Whale هنوز بیشتر ارزشش را آزاد نکرده.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «D30 ROAS Is the Wrong Metric» را نشان می‌دهد (بخش‌های «You do not know who you just acquired» و «D30 lies. D180 tells the truth»). ارزش‌های Whale و Churner از نوشته‌اند و مقدار D30 برای Grinder تقریبی و مال خود vault است. داده‌ها و پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">ROAS دو سیاست در دو افق</p><div id="roas"></div>
+        <p class="field-hint">میله‌ها تا ۸ برابر مقیاس شده‌اند.</p></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>pipeline در D30</strong> هم بهتر است، ولی فاصله در D180 بزرگ‌تر می‌شود.</li>
+    <li><strong>سهم Churner</strong> flat را بیشتر از pipeline پایین می‌کشد.</li>
+    <li><strong>CPI</strong> هر دو سیاست را یکسان مقیاس می‌کند و فاصله را عوض نمی‌کند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/61-d30-roas-is-the-wrong-metric-here-is-what-to-use-instead.html"><small>درس</small>نوشته‌ی 61: D30 ROAS معیار درستی نیست</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var ctl = document.getElementById("ctl");
+  var last = null;
+  function add(cfg, key, o, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; var s = Kit.slider(o); ctl.appendChild(s.element); return s; }
+
+  var cfg = { cpi: 15, churner: 61, acc: 87 };
+  var W = { share: 0.09, d30: 25, d180: 120 }, G = { d30: 8, d180: 17 }, C = { d30: 0.2, d180: 0.2 };
+  function render() {
+    var ch = cfg.churner / 100, w = W.share, g = Math.max(0, 1 - ch - w), a = cfg.acc / 100;
+    function ltv(h, mw, mg, mc) { return mw * W[h] + mg * G[h] + mc * C[h]; }
+    var f30 = ltv("d30", w, g, ch), f180 = ltv("d180", w, g, ch);
+    var accW = w * a, accG = g * a, accC = ch * (1 - a), acc = accW + accG + accC;
+    var p30 = ltv("d30", accW, accG, accC) / acc, p180 = ltv("d180", accW, accG, accC) / acc;
+    var cpi = cfg.cpi;
+    var out = Kit.clear(document.getElementById("roas"));
+    [["flat · D30", f30 / cpi, ""], ["pipeline · D30", p30 / cpi, "hot"], ["flat · D180", f180 / cpi, ""], ["pipeline · D180", p180 / cpi, "hot"]].forEach(function (r) { out.appendChild(bar(r[0], r[1] / 8, r[1].toFixed(2) + "×", r[2])); });
+    stats("stats", [["سهم Churner در installها", cfg.churner + "٪"], ["ارزش D180 هر install، flat", f180.toFixed(1) + " دلار"], ["ارزش D180 هر install، pipeline", p180.toFixed(1) + " دلار", "ok"], ["سهم installهای پذیرفته‌شده", (acc * 100).toFixed(0) + "٪"]]);
+    var key = cfg.churner + "/" + cfg.acc + "/" + cfg.cpi; if (last && key !== last) log.add("D30 تفاوت flat و pipeline را " + (p30 / f30).toFixed(1) + " برابر نشان می‌دهد، ولی D180 آن را " + (p180 / f180).toFixed(1) + " برابر.", "ok"); last = key;
+  }
+  add(cfg, "cpi", { label: "CPI", min: 4, max: 30, step: 1, unit: " دلار" }, render);
+  add(cfg, "churner", { label: "سهم Churner در installها", min: 20, max: 85, step: 1, unit: "٪", hint: "Whale حدود ۹٪ ثابت است و بقیه Grinder" }, render);
+  add(cfg, "acc", { label: "دقت کلاسیفایر", min: 50, max: 99, step: 1, unit: "٪", hint: "سهم غیر-Churnerهایی که پذیرفته می‌شوند؛ به همان نسبت Churner هم از فیلتر رد می‌شود" }, render);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "سهم Churner را بالا ببرید. کدام ROAS کمتر گمراه‌کننده است؟",
+    "options": [
+      "D30 چون سریع است",
+      "D180 چون ارزش کامل Whale و Grinder را می‌بیند",
+      "هر دو یکسان‌اند"
+    ],
+    "answer": 1,
+    "explain": "Whale تا D30 فقط بخش کوچکی از ارزش خود را آزاد کرده است (بخش «D30 lies. D180 tells the truth»)."
+  },
+  {
+    "q": "دقت کلاسیفایر را پایین بیاورید. فاصله‌ی pipeline و flat چه می‌شود؟",
+    "options": [
+      "کمتر می‌شود چون Churnerهای بیشتری پذیرفته می‌شوند",
+      "بیشتر می‌شود",
+      "تغییر نمی‌کند"
+    ],
+    "answer": 0,
+    "explain": "کلاسیفایر ضعیف‌تر یعنی فیلتر کم‌اثرتر، و در تولید دقت کمتر از شبیه‌سازی است (بخش «The pipeline is reactive»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

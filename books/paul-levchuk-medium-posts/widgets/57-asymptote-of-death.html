@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asymptote of Death</title>
+<meta name="description" content="CAC و قیمت و churn را عوض کنید و ببینید درآمد تجمعی هر کاربر زیر CAC صاف می‌شود یا نه. برای نوشته‌ی ۵۷ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/57-when-ltv-can-lie-to-you-asymptote-of-death.html">نوشته‌ی 57</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Asymptote of Death</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۵۷ · Asymptote of Death</div>
+  <h1>Asymptote of Death</h1>
+  <p class="lede">درآمد تجمعی هر کاربر را با churn ماهانه ببینید: اگر سقف <strong>قیمت ÷ churn</strong> زیر CAC بماند، payback هرگز رخ نمی‌دهد.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «When LTV Can Lie to You» را نشان می‌دهد (بخش‌های «Fantasy vs Reality» و «Asymptote of Death»). داده‌ها و پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">درآمد تجمعی هر کاربر در ۳۶ ماه: خط‌چین خاکستری ساده، خط پررنگ واقعی، خط‌چین قرمز CAC</p><div id="chart"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>سقف</strong> فقط به قیمت و churn بستگی دارد، نه به CAC.</li>
+    <li><strong>payback ساده</strong> همیشه یک عدد می‌دهد، حتی وقتی واقعی هرگز نمی‌رسد.</li>
+    <li>با churn ۲۰٪ و قیمت ۱۰ دلار، CAC بالای ۵۰ دلار یعنی هیچ‌وقت سود.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/57-when-ltv-can-lie-to-you-asymptote-of-death.html"><small>درس</small>نوشته‌ی 57: Asymptote of Death</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var ctl = document.getElementById("ctl");
+  var last = null;
+  function add(cfg, key, o, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; var s = Kit.slider(o); ctl.appendChild(s.element); return s; }
+
+  var cfg = { cac: 50, price: 10, churn: 20 };
+  function render() {
+    var c = cfg.churn / 100, N = 36, cum = [0], real = 0, naive = 0, pbR = null, pbN = null, i;
+    for (i = 1; i <= N; i++) { real += cfg.price * Math.pow(1 - c, i - 1); naive += cfg.price; cum.push(real); if (pbR === null && real >= cfg.cac) pbR = i; if (pbN === null && naive >= cfg.cac) pbN = i; }
+    var ceil = cfg.price / c, W = 520, H = 220, P = 34, mx = Math.max(cfg.cac * 1.4, ceil * 1.1, cfg.price * N * 0.0 + cfg.cac * 1.2);
+    function X(m) { return P + (W - 2 * P) * m / N; } function Y(v) { return H - P - (H - 2 * P) * Math.min(v, mx) / mx; }
+    var g = Kit.clear(document.getElementById("chart")), s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H, class: "plot", role: "img", "aria-label": "درآمد تجمعی ساده و واقعی در برابر CAC" });
+    function line(pts, col, dash) { s.appendChild(Kit.svg("polyline", { points: pts.map(function (p) { return X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }).join(" "), fill: "none", stroke: col, "stroke-width": 2.5, "stroke-dasharray": dash || "" })); }
+    s.appendChild(Kit.svg("line", { x1: P, y1: Y(cfg.cac), x2: W - P, y2: Y(cfg.cac), stroke: "var(--bad)", "stroke-width": 1.5, "stroke-dasharray": "5 4" }));
+    var nv = [], rl = []; for (i = 0; i <= N; i++) { nv.push([i, cfg.price * i]); rl.push([i, cum[i]]); }
+    line(nv, "var(--muted)", "2 3"); line(rl, "var(--s2)");
+    s.appendChild(Kit.svg("line", { x1: P, y1: H - P, x2: W - P, y2: H - P, stroke: "var(--line)" }));
+    g.appendChild(s);
+    stats("stats", [["payback ساده", pbN === null ? "هرگز" : pbN + " ماه"], ["payback واقعی", pbR === null ? "هرگز" : pbR + " ماه", pbR === null ? "bad" : "ok"], ["سقف درآمد هر کاربر", ceil.toFixed(2) + " دلار"], ["حاشیه روی هر مشتری", (ceil - cfg.cac).toFixed(2) + " دلار", ceil >= cfg.cac ? "ok" : "bad"]]);
+    var key = pbR === null ? "x" : "ok"; if (last && key !== last) log.add(pbR === null ? "منحنی زیر CAC صاف می‌شود: payback هرگز رخ نمی‌دهد." : "سقف از CAC گذشت و payback ممکن شد.", pbR === null ? "bad" : "ok"); last = key;
+  }
+  add(cfg, "cac", { label: "CAC", min: 10, max: 120, step: 5, unit: " دلار" }, render);
+  add(cfg, "price", { label: "قیمت ماهانه", min: 4, max: 30, step: 1, unit: " دلار" }, render);
+  add(cfg, "churn", { label: "churn ماهانه", min: 5, max: 40, step: 1, unit: "٪", hint: "سقف ریاضی برابر قیمت تقسیم بر churn است" }, render);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "churn را روی ۲۰٪ و قیمت را روی ۱۰ دلار نگه دارید و CAC را ۵۰ کنید. چه می‌شود؟",
+    "options": [
+      "payback واقعی در ماه ۵ می‌رسد",
+      "منحنی درست زیر CAC صاف می‌شود و payback هرگز نمی‌رسد",
+      "درآمد خطی رشد می‌کند"
+    ],
+    "answer": 1,
+    "explain": "سقف ۱۰ ÷ ۰٫۲ = ۵۰ دلار در حد است و در عمل کمی زیر ۵۰ می‌ماند (بخش «Asymptote of Death»)."
+  },
+  {
+    "q": "چه چیزی سقف درآمد هر کاربر را بالا می‌برد؟",
+    "options": [
+      "فقط کاهش CAC",
+      "کاهش churn یا افزایش قیمت",
+      "افزایش بودجه‌ی تبلیغات"
+    ],
+    "answer": 1,
+    "explain": "سقف برابر قیمت تقسیم بر churn است؛ CAC سقف را عوض نمی‌کند، فقط خط مقایسه را (بخش «The quality check»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

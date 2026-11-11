@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ترتیب و پرسش</title>
+<meta name="description" content="روی یک جدول کوچک churn ترتیب شکافتن و پرسش را عوض کنید: داستان درخت متریک عوض می‌شود و رتبه‌بندی IV/WOE نه. برای نوشته‌ی ۶۲ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/62-stop-decomposing-metric-tree.html">نوشته‌ی ۶۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ترتیب و پرسش</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۶۲ · درخت متریک را تکه‌تکه نکنید</div>
+  <h1>ترتیب و پرسش</h1>
+  <p class="lede">یک SaaS اسباب‌بازی که کانال Partner آن از هم پاشیده. عوض کنید که <strong>درخت اول کدام بُعد را می‌شکافد</strong> و چه چیزی می‌پرسید، و داستان درخت را با رتبه‌بندی IV که به ترتیب کاری ندارد مقایسه کنید.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «Stop Decomposing Metric Tree» را نشان می‌دهد (بخش‌های «Method A»، «Method B» و «The Plot Twist»). داده‌ی این جدول اسباب‌بازی مال خود vault است و در روح همان نوشته ساخته شده، یعنی حدود ۵٬۹۰۰ مشتری و سه منطقه و کانال‌هایی با churn پنج و هشت و بیست‌و‌دو درصد و ARPU ده‌برابری Enterprise نسبت به SMB و منطقه‌ی EMEA که پر از Partner و Enterprise است؛ عددهایش با عددهای نوشته فرق دارند. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">درخت: اول بر پایه‌ی <span id="firstname"></span></p><div id="tree"></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">معیار IV برای هر بُعد، بدون نیاز به ترتیب</p><div id="iv"></div>
+        <p class="field-hint" id="ivnote"></p></div>
+      <div class="panel"><p class="panel-title">معیار WOE هر دسته در بُعد برنده</p><div id="woe"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>داستان درخت از اولین شکاف پیروی می‌کند</strong>: اگر اول منطقه را بشکافید تقصیر گردن EMEA می‌افتد و اگر اول کانال را، گردن Partner.</li>
+    <li><strong>میله‌های IV با ترتیب شکافتن تکان نمی‌خورند</strong>، فقط با خود پرسش.</li>
+    <li><strong>برای پول، برنده می‌تواند عوض شود</strong> و به segment برسد، چون Enterprise پول را متمرکز می‌کند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/62-stop-decomposing-metric-tree.html"><small>درس</small>نوشته‌ی ۶۲: درخت متریک را تکه‌تکه نکنید</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
+
+  var log = Kit.log(document.getElementById("log"));
+  var REG = [ { n: "NA", N: 2400 }, { n: "EMEA", N: 2200 }, { n: "APAC", N: 1300 } ];
+  var CHS = ["Organic", "Paid", "Partner"], RATE = { Organic: 0.05, Paid: 0.08, Partner: 0.22 };
+  var MIX = { NA: [0.50, 0.35, 0.15], EMEA: [0.30, 0.25, 0.45], APAC: [0.50, 0.30, 0.20] };
+  var SEGS = ["SMB", "Mid-Market", "Enterprise"], ARPU = { SMB: 40, "Mid-Market": 120, Enterprise: 450 };
+  var DNAME = { Region: "منطقه", Channel: "کانال", Segment: "segment" };
+  var cells = [];
+  REG.forEach(function (r) { CHS.forEach(function (c, ci) {
+    var seg = (r.n === "EMEA" && c === "Partner") ? [0.45, 0.35, 0.20] : [0.72, 0.24, 0.04];
+    SEGS.forEach(function (s, si) { var n = r.N * MIX[r.n][ci] * seg[si]; cells.push({ Region: r.n, Channel: c, Segment: s, n: n, ch: n * RATE[c], mrr: n * RATE[c] * ARPU[s] }); });
+  }); });
+  var DIMS = { Region: REG.map(function (r) { return r.n; }), Channel: CHS, Segment: SEGS };
+  var cfg = { first: "Region", target: "rate" }, last = null;
+  function by(dim) { var o = {}; DIMS[dim].forEach(function (k) { o[k] = { n: 0, ch: 0, mrr: 0 }; }); cells.forEach(function (c) { var g = o[c[dim]]; g.n += c.n; g.ch += c.ch; g.mrr += c.mrr; }); return o; }
+  function totals() { var t = { n: 0, ch: 0, mrr: 0 }; cells.forEach(function (c) { t.n += c.n; t.ch += c.ch; t.mrr += c.mrr; }); return t; }
+  function woe(dim) {
+    var g = by(dim), T = totals(), rows = [], iv = 0;
+    DIMS[dim].forEach(function (k) {
+      var a, b; if (cfg.target === "rate") { a = (g[k].n - g[k].ch) / (T.n - T.ch); b = g[k].ch / T.ch; } else { a = g[k].mrr / T.mrr; b = g[k].n / T.n; }
+      var w = Math.log(a / b);
+      var contrib = (a - b) * w;
+      rows.push({ k: k, woe: w, iv: contrib }); iv += contrib;
+    });
+    return { rows: rows, iv: iv };
+  }
+  function render() {
+    document.getElementById("firstname").textContent = DNAME[cfg.first];
+    var T = totals(), g = by(cfg.first), tree = Kit.clear(document.getElementById("tree")), top = null;
+    DIMS[cfg.first].forEach(function (k) {
+      var share = cfg.target === "rate" ? g[k].ch / T.ch : g[k].mrr / T.mrr, rate = cfg.target === "rate" ? g[k].ch / g[k].n : g[k].mrr / g[k].n;
+      if (!top || share > top.share) top = { k: k, share: share, rate: rate };
+      tree.appendChild(bar(k, share, pct(share, 0) + " از " + (cfg.target === "rate" ? "churn" : "MRR از‌دست‌رفته"), ""));
+    });
+    var v = document.getElementById("verdict"); v.className = "callout warn";
+    v.textContent = "داستان درخت: در بُعد " + DNAME[cfg.first] + "، دسته‌ی «" + top.k + "» سهم " + pct(top.share, 0) + " از " + (cfg.target === "rate" ? "مشتری‌های churn کرده" : "MRR از‌دست‌رفته") + " را حمل می‌کند، یعنی مشکلِ " + DNAME[cfg.first] + " است. اولین شکاف را عوض کنید تا داستان عوض شود.";
+    var ivs = Object.keys(DIMS).map(function (d) { var r = woe(d); return { d: d, iv: r.iv, rows: r.rows }; }).sort(function (a, b) { return b.iv - a.iv; });
+    var ivb = Kit.clear(document.getElementById("iv")), mx = ivs[0].iv || 1;
+    ivs.forEach(function (x, i) { ivb.appendChild(bar(DNAME[x.d], x.iv / mx, x.iv.toFixed(3), i === 0 ? "hot" : "")); });
+    document.getElementById("ivnote").textContent = cfg.target === "rate" ? "هدف: مشتری‌های churn کرده، یعنی سهم رویداد در برابر سهم غیررویداد." : "هدف: MRR از‌دست‌رفته، یعنی سهم ارزش در برابر سهم تعداد مشتری.";
+    var wb = Kit.clear(document.getElementById("woe")), wm = Math.max.apply(null, ivs[0].rows.map(function (r) { return Math.abs(r.woe); })) || 1;
+    ivs[0].rows.forEach(function (r) { wb.appendChild(bar(DNAME[ivs[0].d] + ": " + r.k, Math.abs(r.woe) / wm, (r.woe >= 0 ? "+" : "−") + Math.abs(r.woe).toFixed(2), (cfg.target === "rate" ? r.woe < 0 : r.woe > 0) ? "neg" : "pos")); });
+    stats("stats", [["درخت تقصیر را می‌اندازد گردن", DNAME[cfg.first] + ": " + top.k], ["برنده‌ی IV", DNAME[ivs[0].d], "ok"], ["درخت با IV می‌خواند؟", cfg.first === ivs[0].d ? "بله" : "نه", cfg.first === ivs[0].d ? "ok" : "bad"]]);
+    var key = cfg.first + "/" + cfg.target + "/" + ivs[0].d; if (last && key !== last) log.add("درخت تقصیر را گردن " + top.k + " می‌اندازد، در بُعد " + DNAME[cfg.first] + "؛ معیار IV بُعد " + DNAME[ivs[0].d] + " را اول می‌آورد.", cfg.first === ivs[0].d ? "ok" : "warn"); last = key;
+  }
+  var ctl = document.getElementById("ctl");
+  ctl.appendChild(Kit.segmented({ label: "اول بر پایه‌ی چه چیزی بشکافد", value: cfg.first, options: Object.keys(DIMS).map(function (d) { return { value: d, label: DNAME[d] }; }), onChange: function (v) { cfg.first = v; render(); } }).element);
+  ctl.appendChild(Kit.segmented({ label: "پرسش", value: cfg.target, options: [{ value: "rate", label: "چه کسی churn می‌کند؟" }, { value: "mrr", label: "پول کجا از دست می‌رود؟" }], onChange: function (v) { cfg.target = v; render(); } }).element);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "گزینه‌ی «اول بر پایه‌ی چه چیزی بشکافد» را بین منطقه و کانال عوض کنید. چه چیزی تغییر می‌کند؟",
+    "options": [
+      "رتبه‌بندی IV",
+      "داستان درخت، در حالی که رتبه‌بندی IV سر جایش می‌ماند",
+      "هیچ چیز"
+    ],
+    "answer": 1,
+    "explain": "معیار IV بُعدها را مستقل از هر ترتیبی امتیاز می‌دهد (بخش «Method B»)."
+  },
+  {
+    "q": "پرسش را به «پول کجا از دست می‌رود؟» عوض کنید. سر بُعد برنده چه می‌آید؟",
+    "options": [
+      "می‌تواند عوض شود: پول جایی متمرکز می‌شود که ARPU بالاست",
+      "هیچ‌وقت عوض نمی‌شود",
+      "همیشه منطقه برنده است"
+    ],
+    "answer": 0,
+    "explain": "نوشته می‌بیند برای نرخ، کانال برنده است و برای پول، segment (بخش «The Plot Twist»)."
+  },
+  {
+    "q": "اگر مخرج را به MRR فعال عوض کنیم چه می‌شود؟",
+    "options": [
+      "هیچ",
+      "پرسش عوض می‌شود، پس رتبه‌بندی هم می‌تواند عوض شود",
+      "معیار WOE حذف می‌شود"
+    ],
+    "answer": 1,
+    "explain": "مخرج همان مبنای سهم منصفانه را تعریف می‌کند (بخش «The Denominator Changes the Question»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

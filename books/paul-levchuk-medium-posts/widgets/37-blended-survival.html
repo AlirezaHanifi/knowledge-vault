@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بقای آمیخته در برابر بقای cohort</title>
+<meta name="description" content="همه‌ی cohortها یک‌جور رفتار می‌کنند، ولی میانگین آمیخته‌ی یک ماه cohortهای قدیم و جدید را با هم می‌گیرد و بقا را تقریباً دو برابر نشان می‌دهد. برای نوشته‌ی ۳۷ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 9rem 1fr 5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 0 0 auto; background: var(--s1); border-radius: 3px; }
+  .bar-fill.s2 { background: var(--s2); } .bar-fill.s3 { background: var(--s3); } .bar-fill.s4 { background: var(--s4); }
+  .bar-fill.bad { background: var(--bad); } .bar-fill.ok { background: var(--ok); } .bar-fill.warn { background: var(--warn); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; height: auto; display: block; }
+  svg.plot text { font-size: 10px; fill: var(--muted); }
+  svg.plot .grid { stroke: var(--line); stroke-width: 1; }
+  svg.plot .thr { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: .55; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/37-blended-retention-vs-cohort-retention.html">نوشته‌ی ۳۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">بقای آمیخته در برابر بقای cohort</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۳۷ · retention مخلوط در برابر retention هر cohort</div>
+  <h1>بقای آمیخته در برابر بقای cohort</h1>
+  <p class="lede">دوازده cohort ماهانه، همه با <strong>یک منحنی بقای یکسان</strong>. نرخ بقای آمیخته‌ی دسامبر را با بقای واقعی یک cohort در ۱۱ دوره مقایسه کنید و ببینید رشد جذب چطور فاصله را بزرگ‌تر می‌کند.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «Blended retention vs Cohort retention» را نشان می‌دهد (بخش‌های «نرخ retention آمیخته چیست» و «چرا retention آمیخته نمی‌خواهید»). منحنی بقا، یعنی ۰٫۶۷ و ۰٫۵۰ و ۰٫۳۹ تا ۰٫۱۶۲، و ۱٬۰۰۰ کاربر در هر cohort از جدول خود نوشته است؛ اسلایدر رشد جذب مال vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">cohortهای ژانویه تا نوامبر در دسامبر</p><div id="cohorts"></div></div>
+      <div class="panel"><p class="panel-title">دو عدد برای دسامبر</p><div id="cmp"></div><div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازگشت به عددهای نوشته</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با جذب ثابت، بقای آمیخته‌ی دسامبر ۰٫۳۱ است</strong>، تقریباً دو برابر بقای واقعی ۰٫۱۶ در ۱۱ دوره.</li>
+    <li><strong>رشد جذب را بالا ببرید</strong>: cohortهای جوان سهم بیشتری می‌گیرند و عدد آمیخته باز هم خوش‌بینانه‌تر می‌شود.</li>
+    <li><strong>رفتار هیچ cohortی عوض نشده</strong>؛ هر حرکتی در عدد آمیخته فقط ترکیب سنی کاربران است.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/37-blended-retention-vs-cohort-retention.html"><small>درس</small>نوشته‌ی ۳۷: retention مخلوط در برابر retention هر cohort</a></li>
+    <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var FA = function (s) { return Kit.digits(String(s)); };
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "٪"; }
+  function table(head, rows) {
+    var t = Kit.el("table", { class: "data" });
+    t.appendChild(Kit.el("tr", null, head.map(function (h, i) { return Kit.el("th", { class: i ? "num" : "" }, h); })));
+    rows.forEach(function (r) { t.appendChild(Kit.el("tr", null, r.map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, c); }))); });
+    return t;
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var ctl = document.getElementById("ctl"), sl = {};
+  function add(key, o, cfg, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  function resetTo(DEF, cfg, render) { document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; if (sl[k]) sl[k].set(DEF[k]); }); render(); log.add("به عددهای نوشته برگشت.", "muted"); }); }
+
+  var S = [1, 0.67, 0.50, 0.39, 0.33, 0.29, 0.26, 0.2366, 0.2153, 0.1959, 0.1783, 0.1622];
+  var M = ["ژانویه", "فوریه", "مارس", "آوریل", "مه", "ژوئن", "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر"];
+  var DEF = { g: 0 }, cfg = Object.assign({}, DEF), last = null;
+  function render() {
+    var g = cfg.g / 100, tot = 0, kept = 0, rows = [], c = Kit.clear(document.getElementById("cohorts"));
+    for (var i = 0; i < 11; i++) { var size = 1000 * Math.pow(1 + g, i), age = 11 - i, k = size * S[age]; tot += size; kept += k; rows.push([M[i], FA(Math.round(size)), FA(age), S[age].toFixed(3)]); }
+    c.appendChild(table(["cohort ۲۳", "اندازه", "سن در دسامبر", "بقا"], rows.map(function (r) { return r.map(FA); })));
+    var blend = kept / tot, real = S[11], cmp = Kit.clear(document.getElementById("cmp"));
+    cmp.appendChild(bar("بقای آمیخته‌ی دسامبر", blend / 0.6, FA(blend.toFixed(3)), "warn"));
+    cmp.appendChild(bar("بقای واقعی cohort در ۱۱ دوره", real / 0.6, FA(real.toFixed(3)), "s1"));
+    var ratio = blend / real, v = document.getElementById("verdict"); v.className = "callout warn";
+    v.textContent = "عدد آمیخته " + FA(ratio.toFixed(2)) + " برابر بقای واقعی است، با اینکه همه‌ی cohortها دقیقاً یک‌جور رفتار می‌کنند.";
+    var key = Math.round(ratio * 10); if (last !== null && key !== last) log.add("نسبت آمیخته به واقعی حالا " + FA(ratio.toFixed(2)) + " است.", ratio > 2 ? "warn" : "muted"); last = key;
+    stats([["کاربران cohortهای ژانویه تا نوامبر", FA(Math.round(tot))], ["مانده در دسامبر", FA(Math.round(kept))], ["نسبت آمیخته به واقعی", FA(ratio.toFixed(2)) + "×", "warn"]]);
+  }
+  add("g", { label: "رشد ماهانه‌ی جذب", min: -10, max: 25, step: 1, format: function (v) { return (v >= 0 ? "+" : "−") + FA(Math.abs(v)) + "٪"; }, hint: "صفر یعنی ۱٬۰۰۰ کاربر در هر ماه، همان جدول نوشته" }, cfg, render);
+  resetTo(DEF, cfg, render);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "با جذب ثابت، بقای آمیخته‌ی دسامبر چقدر است؟",
+    "options": [
+      "حدود ۰٫۳۱",
+      "حدود ۰٫۱۶",
+      "حدود ۰٫۶۷"
+    ],
+    "answer": 0,
+    "explain": "تقریباً دو برابر بقای واقعی ۰٫۱۶ در ۱۱ دوره (بخش «چرا retention آمیخته نمی‌خواهید»)."
+  },
+  {
+    "q": "رشد جذب را منفی کنید. فاصله چه می‌شود؟",
+    "options": [
+      "کوچک‌تر می‌شود چون cohortهای قدیمی سهم بیشتری دارند",
+      "بزرگ‌تر می‌شود",
+      "تغییری نمی‌کند"
+    ],
+    "answer": 0,
+    "explain": "عدد آمیخته میانگین وزنی بقای سن‌های مختلف است و وزن‌ها از اندازه‌ی cohortها می‌آیند."
+  },
+  {
+    "q": "چرا این عدد «آمیخته» نام دارد؟",
+    "options": [
+      "چون کاربرانی با lifetime متفاوت را در یک عدد می‌آمیزد",
+      "چون کاربران رایگان و پولی را می‌آمیزد",
+      "چون دو کانال را می‌آمیزد"
+    ],
+    "answer": 0,
+    "explain": "این همان تعریف نوشته است (بخش «نرخ retention آمیخته چیست»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

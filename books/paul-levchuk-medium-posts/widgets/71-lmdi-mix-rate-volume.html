@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mix و rate و حجم</title>
+<meta name="description" content="تغییر MRR از‌دست‌رفته را با LMDI به اثرهای حجم و mix و rate و ARPU بشکنید و با داشبوردهای منطقه‌اول و کانال‌اول مقایسه کنید. برای نوشته‌ی ۷۱ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/71-split-a-churn-spike-lmdi.html">نوشته‌ی ۷۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">mix و rate و حجم</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۷۱ · چطور جهش churn را به mix و rate بشکنیم</div>
+  <h1>mix و rate و حجم</h1>
+  <p class="lede">پایه‌ی Partner یا نرخ churn را عوض کنید و ببینید <strong>تغییر MRR از‌دست‌رفته دقیقاً</strong> به حجم و mix و rate و ARPU شکسته می‌شود، در حالی که دو داشبورد پشت‌سرهم هر کدام تقصیر را گردن بُعدی می‌اندازند که اول آمده.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «How to Split a Churn Spike into Mix and Rate» را نشان می‌دهد (بخش‌های «Running the decomposition» و «The Verdict»). عددهای سه‌ماهه‌ی اول و دوم از نمونه‌ی کارشده‌ی خود نوشته‌اند؛ دو برش NA، یعنی ۱۰۰ و ۹۰۰ مشتری بدون تغییر، را vault مشتق کرده تا جمع‌ها با تغییر ۱۰٬۰۰۰ دلاری و ۹٬۲۵۰ دلار EMEA نوشته بخوانند. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">چهار اثر، دقیق و بدون باقی‌مانده</p><div class="stats" id="eff"></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">هر داشبورد درباره‌ی این تغییر چه می‌گوید</p><div id="dash"></div></div>
+      <div class="panel"><p class="panel-title">جدول برش‌ها، یعنی ردِ حسابرسی</p><div class="table-wrap" id="slices"></div></div>
+      <div class="panel"><p class="panel-title">تجمیع‌ها: جمع ساده‌ی ردیف برش‌ها</p><div class="table-wrap" id="roll"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها، مقدارهای سه‌ماهه‌ی دوم</p><div id="ctl"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازگشت به عددهای نوشته</button></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>اثرها همیشه با تغییر واقعی جمع می‌شوند</strong>، هر طور هم اسلایدرها را جابه‌جا کنید: همان بی‌باقی‌مانده بودن LMDI.</li>
+    <li><strong>منطقه‌اول و کانال‌اول با هم نمی‌خوانند</strong> و حتی می‌توانند از ۱۰۰٪ تغییر هم بگذرند؛ هیچ‌کدامشان تفکیک mix و rate نیستند.</li>
+    <li><strong>سهم mix منفی روی برشی که اندازه‌اش ثابت مانده</strong>، یعنی ردیف‌های NA، رقیق شدنی است که با حجم مثبت جبران می‌شود، نه یک باگ.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/71-split-a-churn-spike-lmdi.html"><small>درس</small>نوشته‌ی ۷۱: چطور جهش churn را به mix و rate بشکنیم</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  function money(x, d) { var s = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); return (x < 0 ? "−$" : "$") + s; }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
+
+  var log = Kit.log(document.getElementById("log"));
+  var DEF = { epN: 400, rate: 20, edN: 800 }, cfg = Object.assign({}, DEF), sl = {}, last = null;
+  var ENAME = { vol: "حجم", mix: "mix", rate: "rate", arpu: "ARPU" };
+  function slices() {
+    return [
+      { name: "EMEA Partner", reg: "EMEA", ch: "Partner", n0: 100, n1: cfg.epN, r0: 0.15, r1: cfg.rate / 100, a0: 150, a1: 150 },
+      { name: "EMEA Direct", reg: "EMEA", ch: "Direct", n0: 900, n1: cfg.edN, r0: 0.05, r1: 0.05, a0: 100, a1: 100 },
+      { name: "NA Partner", reg: "NA", ch: "Partner", n0: 100, n1: 100, r0: 0.15, r1: cfg.rate / 100, a0: 150, a1: 150 },
+      { name: "NA Direct", reg: "NA", ch: "Direct", n0: 900, n1: 900, r0: 0.05, r1: 0.05, a0: 100, a1: 100 }
+    ];
+  }
+  function lmdi(S) {
+    var N0 = 0, N1 = 0; S.forEach(function (s) { N0 += s.n0; N1 += s.n1; });
+    var tot = { vol: 0, mix: 0, rate: 0, arpu: 0, d: 0 };
+    S.forEach(function (s) {
+      s.y0 = s.n0 * s.r0 * s.a0; s.y1 = s.n1 * s.r1 * s.a1;
+      s.w = Math.abs(s.y1 - s.y0) < 1e-9 ? s.y0 : (s.y1 - s.y0) / (Math.log(s.y1) - Math.log(s.y0));
+      s.vol = s.w * Math.log(N1 / N0);
+      s.mix = s.w * Math.log((s.n1 / N1) / (s.n0 / N0));
+      s.rate = s.w * Math.log(s.r1 / s.r0);
+      s.arpu = s.w * Math.log(s.a1 / s.a0);
+      s.d = s.y1 - s.y0;
+      ["vol", "mix", "rate", "arpu", "d"].forEach(function (k) { tot[k] += s[k]; });
+    });
+    return tot;
+  }
+  function table(head, rows) {
+    var t = Kit.el("table", { class: "data" });
+    t.appendChild(Kit.el("tr", null, head.map(function (h, i) { return Kit.el("th", { class: i ? "num" : "" }, h); })));
+    rows.forEach(function (r) { t.appendChild(Kit.el("tr", null, r.map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, c); }))); });
+    return t;
+  }
+  function render() {
+    var S = slices(), T = lmdi(S), dm = function (x) { return (x >= 0 ? "+" : "") + money(x, 2); };
+    stats("eff", [["حجم", dm(T.vol)], ["mix", dm(T.mix), T.mix > 0 ? "warn" : ""], ["rate", dm(T.rate)], ["ARPU", dm(T.arpu)], ["جمع اثرها", money(T.vol + T.mix + T.rate + T.arpu, 2), "ok"], ["تغییر واقعی", money(T.d, 2), "ok"]]);
+    var big = ["vol", "mix", "rate", "arpu"].sort(function (a, b) { return Math.abs(T[b]) - Math.abs(T[a]); })[0];
+    var lines = { rate: "اثر rate غالب است: اجرا را درست کنید، یعنی onboarding و کیفیت سرنخ و تعهدهای خدمت فروشنده‌ها.", mix: "اثر mix غالب است: راهبرد جذب؛ کانال‌ها را متعادل کنید و تقصیر را گردن منطقه نیندازید.", vol: "اثر حجم غالب است: برنامه‌ریزی ظرفیت.", arpu: "اثر ARPU غالب است: قیمت‌گذاری و پلکان‌ها." };
+    var v = document.getElementById("verdict"); v.className = "callout " + (big === "rate" ? "bad" : "warn"); v.textContent = lines[big];
+    if (last && big !== last) log.add("اثر غالب حالا " + ENAME[big] + " است.", "warn"); last = big;
+    function share(key) { var s = {}; S.forEach(function (x) { s[x[key]] = (s[x[key]] || 0) + x.d; }); return s; }
+    var reg = share("reg"), ch = share("ch"), dash = Kit.clear(document.getElementById("dash"));
+    function topOf(o) { var k = Object.keys(o).sort(function (a, b) { return o[b] - o[a]; })[0]; return [k, o[k] / T.d]; }
+    var r = topOf(reg), c = topOf(ch);
+    dash.appendChild(bar("منطقه اول: " + r[0], Math.min(1, Math.max(0, r[1])), pct(r[1], 1), "hot"));
+    dash.appendChild(bar("کانال اول: " + c[0], Math.min(1, Math.max(0, c[1])), pct(c[1], 1), "hot"));
+    dash.appendChild(Kit.el("p", { class: "field-hint" }, "هر نگاه پشت‌سرهم بیشتر تغییر را به بُعدی می‌دهد که اول آمده؛ اثرهای بالا می‌گویند چه سهمی از آن حجم و mix و rate است."));
+    Kit.clear(document.getElementById("slices")).appendChild(table(["برش", "مشتری‌ها، سه‌ماهه‌ی اول ← دوم", "نرخ، اول ← دوم", "Δ MRR", "حجم", "mix", "rate"],
+      S.map(function (s) { return [s.name, s.n0 + " ← " + s.n1, pct(s.r0, 0) + " ← " + pct(s.r1, 0), dm(s.d), dm(s.vol), dm(s.mix), dm(s.rate)]; })));
+    function roll(key) { var o = {}; S.forEach(function (s) { var k = s[key]; o[k] = o[k] || { d: 0, vol: 0, mix: 0, rate: 0 }; ["d", "vol", "mix", "rate"].forEach(function (f) { o[k][f] += s[f]; }); }); return o; }
+    var rr = roll("reg"), cc = roll("ch"), rows = [];
+    Object.keys(rr).forEach(function (k) { rows.push(["منطقه‌ی " + k, dm(rr[k].d), dm(rr[k].vol), dm(rr[k].mix), dm(rr[k].rate)]); });
+    Object.keys(cc).forEach(function (k) { rows.push(["کانال " + k, dm(cc[k].d), dm(cc[k].vol), dm(cc[k].mix), dm(cc[k].rate)]); });
+    Kit.clear(document.getElementById("roll")).appendChild(table(["تجمیع", "Δ MRR", "حجم", "mix", "rate"], rows));
+  }
+  var ctl = document.getElementById("ctl");
+  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  add("epN", { label: "مشتری‌های EMEA Partner، که در سه‌ماهه‌ی اول ۱۰۰ بود", min: 100, max: 800, step: 25, hint: "بازاریابی پایه‌ی فروشنده‌ها را بزرگ می‌کند" });
+  add("edN", { label: "مشتری‌های EMEA Direct، که در سه‌ماهه‌ی اول ۹۰۰ بود", min: 500, max: 1000, step: 25 });
+  add("rate", { label: "نرخ churn کانال Partner در سه‌ماهه‌ی دوم، که در اولی ۱۵٪ بود", min: 15, max: 30, step: 1, unit: "٪", hint: "به EMEA Partner و NA Partner یکسان اعمال می‌شود" });
+  document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; sl[k].set(DEF[k]); }); render(); log.add("به عددهای سه‌ماهه‌ی دوم نوشته برگشت.", "muted"); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "با عددهای خود نوشته، کدام اثر بزرگ‌ترین است؟",
+    "options": [
+      "اثر rate",
+      "اثر mix",
+      "اثر حجم"
+    ],
+    "answer": 1,
+    "explain": "سهم mix حدود ۵٬۹۳۷ دلار از ۱۰٬۰۰۰ دلار است، rate حدود ۲٬۴۲۶ و حجم حدود ۱٬۶۳۷ (بخش «The Verdict»)."
+  },
+  {
+    "q": "مشتری‌های EMEA Partner را روی ۱۰۰ و EMEA Direct را روی ۹۰۰ بگذارید، یعنی پایه‌های سه‌ماهه‌ی اول، و نرخ Partner را روی ۲۰٪ نگه دارید. چه چیزی غالب می‌شود؟",
+    "options": [
+      "اثر mix",
+      "اثر rate",
+      "اثر حجم"
+    ],
+    "answer": 1,
+    "explain": "وقتی پایه‌ها به سطح سه‌ماهه‌ی اول برگردند فقط نرخ تکان خورده، پس rate غالب است و راه‌حل عملیاتی است."
+  },
+  {
+    "q": "چرا این چهار اثر هیچ‌وقت باقی‌مانده نمی‌گذارند؟",
+    "options": [
+      "گرد می‌شوند تا جور دربیایند",
+      "وزن‌های لگاریتمی برهم‌کنش را پیوسته در خودشان می‌گیرند",
+      "داده فقط چهار برش دارد"
+    ],
+    "answer": 1,
+    "explain": "همان وزن میانگین لگاریتمی است که جمله‌ی برهم‌کنش را حذف می‌کند (بخش «Step 4»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

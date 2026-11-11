@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>جهت اثر: Information Gain یا MCC</title>
+<meta name="description" content="معیار Information Gain همیشه مثبت است و جهت را نمی‌گوید؛ ضریب MCC همان جدول چهارخانه را می‌گیرد و علامت هم دارد. برای نوشته‌ی ۱۱ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 9rem 1fr 5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 0 0 auto; background: var(--s1); border-radius: 3px; }
+  .bar-fill.s2 { background: var(--s2); } .bar-fill.s3 { background: var(--s3); } .bar-fill.s4 { background: var(--s4); }
+  .bar-fill.bad { background: var(--bad); } .bar-fill.ok { background: var(--ok); } .bar-fill.warn { background: var(--warn); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; height: auto; display: block; }
+  svg.plot text { font-size: 10px; fill: var(--muted); }
+  svg.plot .grid { stroke: var(--line); stroke-width: 1; }
+  svg.plot .thr { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: .55; }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/11-product-feature-retention-deep-dive-mcc-coefficient.html">نوشته‌ی ۱۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">جهت اثر: Information Gain یا MCC</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۱۱ · غواصی در retention فیچر: ضریب MCC</div>
+  <h1>جهت اثر: Information Gain یا MCC</h1>
+  <p class="lede">سه عدد بدهید: چه سهمی از کاربران از feature استفاده کرده‌اند، retention آن‌ها و retention بقیه. <strong>Information Gain</strong> و <strong>MCC</strong> از یک جدول چهارخانه می‌آیند، ولی فقط یکی می‌گوید feature کمک می‌کند یا آسیب می‌زند.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «Product feature retention deep dive — MCC coefficient» را نشان می‌دهد (بخش‌های «ضعف Information Gain» و «ضریب MCC»). دو retention ۷٫۹٪ و ۲۰٫۷٪ برای feature18 از نوشته است؛ سهم ۸۷٪ را vault از شمار کاربران در نوشته‌ی ۱۳ و نوشته‌ی ۱۰ ساخته، پس IG این‌جا ۰٫۰۱۳ می‌شود و نه دقیقاً ۰٫۰۱۴۰ نوشته.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">جدول چهارخانه‌ی استفاده و بازگشت</p><div id="grid4"></div></div>
+      <div class="panel"><p class="panel-title">دو معیار کنار هم</p><div id="meters"></div><div class="callout" id="verdict" style="margin-top:10px"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازگشت به عددهای نوشته</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>دو retention را جابه‌جا کنید</strong>: Information Gain عوض نمی‌شود، MCC علامتش برمی‌گردد.</li>
+    <li><strong>وقتی retention کاربران و غیرکاربران نزدیک‌اند</strong>، هر دو معیار نزدیک صفرند، هرچقدر هم feature محبوب باشد؛ همان feature41 نوشته‌ی ۱۰.</li>
+    <li><strong>علامت MCC منفی است</strong> وقتی retention کاربران feature از میانگین وزنی کل پایین‌تر باشد؛ نوشته همین را در پایان می‌گوید.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/11-product-feature-retention-deep-dive-mcc-coefficient.html"><small>درس</small>نوشته‌ی ۱۱: غواصی در retention فیچر: ضریب MCC</a></li>
+    <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var FA = function (s) { return Kit.digits(String(s)); };
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "٪"; }
+  function table(head, rows) {
+    var t = Kit.el("table", { class: "data" });
+    t.appendChild(Kit.el("tr", null, head.map(function (h, i) { return Kit.el("th", { class: i ? "num" : "" }, h); })));
+    rows.forEach(function (r) { t.appendChild(Kit.el("tr", null, r.map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, c); }))); });
+    return t;
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var ctl = document.getElementById("ctl"), sl = {};
+  function add(key, o, cfg, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  function resetTo(DEF, cfg, render) { document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; if (sl[k]) sl[k].set(DEF[k]); }); render(); log.add("به عددهای نوشته برگشت.", "muted"); }); }
+
+  var DEF = { share: 87, ru: 7.9, rn: 20.7 }, cfg = Object.assign({}, DEF), lastSign = null;
+  function H(p) { return p <= 0 || p >= 1 ? 0 : -(p * Math.log2(p) + (1 - p) * Math.log2(1 - p)); }
+  function render() {
+    var s = cfg.share / 100, ru = cfg.ru / 100, rn = cfg.rn / 100, N = 10000;
+    var tp = s * ru, fp = s * (1 - ru), fn = (1 - s) * rn, tn = (1 - s) * (1 - rn), r = tp + fn;
+    var ig = H(r) - (s * H(ru) + (1 - s) * H(rn));
+    var den = Math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)), mcc = den ? (tp * tn - fp * fn) / den : 0;
+    Kit.clear(document.getElementById("grid4")).appendChild(table(["", "برگشت", "برنگشت"], [
+      ["استفاده کرد", FA(Math.round(tp * N)), FA(Math.round(fp * N))],
+      ["استفاده نکرد", FA(Math.round(fn * N)), FA(Math.round(tn * N))]]));
+    var m = Kit.clear(document.getElementById("meters"));
+    m.appendChild(bar("Information Gain", Math.min(1, ig / 0.03), ig.toFixed(4), "s1"));
+    m.appendChild(bar("ضریب MCC، اندازه", Math.min(1, Math.abs(mcc) / 0.3), (mcc < 0 ? "−" : "+") + Math.abs(mcc).toFixed(4), mcc < 0 ? "bad" : "ok"));
+    var v = document.getElementById("verdict"), neg = mcc < -0.005, pos = mcc > 0.005;
+    v.className = "callout " + (neg ? "warn" : pos ? "ok" : "");
+    v.textContent = neg ? "استفاده از این feature با برنگشتن همراه است. Information Gain همان را «اطلاعات زیاد» می‌خواند و جهتی نمی‌گوید." : pos ? "استفاده با برگشتن همراه است و MCC مثبت این را نشان می‌دهد." : "رابطه تقریباً صفر است: کاربران و غیرکاربران یک‌جور برمی‌گردند.";
+    var sign = neg ? -1 : pos ? 1 : 0; if (lastSign !== null && sign !== lastSign) log.add(sign < 0 ? "علامت MCC منفی شد؛ Information Gain هنوز مثبت است." : sign > 0 ? "علامت MCC مثبت شد." : "MCC به صفر رسید.", sign < 0 ? "warn" : "ok"); lastSign = sign;
+    stats([["retention کل محصول", pct(r)], ["میانگین وزنی در برابر کاربران feature", ru < r ? "کمتر از میانگین" : "بیشتر از میانگین", ru < r ? "warn" : "ok"], ["Information Gain", ig.toFixed(4)], ["ضریب MCC", (mcc < 0 ? "−" : "") + Math.abs(mcc).toFixed(4)]]);
+  }
+  add("share", { label: "سهم کاربرانی که از feature استفاده کرده‌اند", min: 1, max: 99, step: 1, unit: "٪" }, cfg, render);
+  add("ru", { label: "retention کاربرانِ feature", min: 1, max: 60, step: 0.1, unit: "٪" }, cfg, render);
+  add("rn", { label: "retention کسانی که استفاده نکرده‌اند", min: 1, max: 60, step: 0.1, unit: "٪" }, cfg, render);
+  var pre = Kit.segmented({ label: "نمونه‌ها", value: "f18", options: [{ value: "f18", label: "feature18" }, { value: "f41", label: "feature41" }, { value: "flip", label: "وارونه‌ی feature18" }], onChange: function (k) {
+    var P = { f18: [87, 7.9, 20.7], f41: [95, 9.8, 10.0], flip: [87, 20.7, 7.9] }[k];
+    ["share", "ru", "rn"].forEach(function (key, i) { cfg[key] = P[i]; sl[key].set(P[i]); }); render(); log.add("نمونه‌ی " + k.replace("f", "feature") + " بار شد.", "muted"); } });
+  ctl.insertBefore(pre.element, ctl.firstChild);
+  resetTo(DEF, cfg, render);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "نمونه‌ی «وارونه‌ی feature18» را بزنید. Information Gain چه می‌شود؟",
+    "options": [
+      "تغییر نمی‌کند",
+      "منفی می‌شود",
+      "صفر می‌شود"
+    ],
+    "answer": 0,
+    "explain": "Information Gain همیشه مثبت است و جهت را نمی‌بیند (بخش «ضعف Information Gain»)."
+  },
+  {
+    "q": "چرا featureهای خیلی محبوب اغلب MCC منفی دارند؟",
+    "options": [
+      "چون معمولاً set-up‌اند و در بالای قیف، جایی که قصد کاربر کم است، استفاده می‌شوند",
+      "چون MCC به محبوبیت حساس نیست",
+      "چون کاربران محبوب زودتر churn می‌کنند"
+    ],
+    "answer": 0,
+    "explain": "این بینش اصلی نوشته است (بخش «نقش featureهای محبوب و اثر منفی»)."
+  },
+  {
+    "q": "در feature41 با ۹۵٪ کاربر و retention ۹٫۸٪ در برابر ۱۰٫۰٪، دو معیار چه می‌گویند؟",
+    "options": [
+      "هر دو نزدیک صفرند",
+      "IG بزرگ است و MCC صفر",
+      "MCC قوی و مثبت است"
+    ],
+    "answer": 0,
+    "explain": "وقتی کاربر و غیرکاربر یک‌جور برمی‌گردند، feature اطلاعاتی درباره‌ی retention نمی‌دهد."
+  }
+]);
+})();
+</script>
+</body>
+</html>

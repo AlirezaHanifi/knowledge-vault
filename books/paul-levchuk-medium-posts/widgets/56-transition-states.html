@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>گذار وضعیت‌ها</title>
+<meta name="description" content="با یک ماتریس گذار هفت‌وضعیتی از هزار ثبت‌نام جدید پیش‌بینی بگیرید. برای نوشته‌ی ۵۶ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/56-user-transition-states-diagram.html">نوشته‌ی 56</a><span aria-hidden="true">/</span>
+      <span aria-current="page">گذار وضعیت‌ها</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۵۶ · نمودار گذار وضعیت‌های کاربر</div>
+  <h1>گذار وضعیت‌ها</h1>
+  <p class="lede">یک <strong>ماتریس گذار</strong> هفت‌وضعیتی را چند ماه جلو ببرید و ببینید احتمال یک گذار چطور تعداد کاربران پولی را عوض می‌کند.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «User transition states diagram» را نشان می‌دهد (بخش‌های «Transition Problem/Opportunity Size» و «From Diagram to Transition Matrix»). احتمال‌های این جدول اسباب‌بازی مال خود vault است و غیر از حلقه‌های ۹۷٪ و ۸۸٪ و گذار ۱۵٪ و ۱۰٪ از نوشته نیامده‌اند. داده‌ها و پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">از ۱۰۰۰ ثبت‌نام جدید در هر وضعیت چند نفر می‌مانند</p><div id="states"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>مجموع هر ردیف ۱۰۰٪ است</strong> و کاربر همیشه جایی می‌رود.</li>
+    <li><strong>کاهش یک گذار</strong> به حلقه‌ی همان وضعیت می‌رود.</li>
+    <li><strong>وضعیت‌های ازدست‌رفته</strong> تقریباً جذب‌کننده‌اند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/56-user-transition-states-diagram.html"><small>درس</small>نوشته‌ی 56: نمودار گذار وضعیت‌های کاربر</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  var log = Kit.log(document.getElementById("log"));
+  var ctl = document.getElementById("ctl");
+  var last = null;
+  function add(cfg, key, o, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; var s = Kit.slider(o); ctl.appendChild(s.element); return s; }
+
+  var S = ["NS","AF","IF","AP","IP","CF","CP"];
+  var NAME = { NS: "ثبت‌نام جدید", AF: "رایگان فعال", IF: "رایگان غیرفعال", AP: "پولی فعال", IP: "پولی غیرفعال", CF: "رایگان ازدست‌رفته", CP: "پولی ازدست‌رفته" };
+  var cfg = { aftoif: 15, months: 6 };
+  function matrix() {
+    var p = cfg.aftoif / 100;
+    return { NS: { AF: 0.6, CF: 0.4 }, AF: { AF: 0.95 - p, AP: 0.05, IF: p }, IF: { AF: 0.10, AP: 0.02, CF: 0.10, IF: 0.78 },
+      AP: { AP: 0.80, IP: 0.08, AF: 0.06, IF: 0.06 }, IP: { AP: 0.10, IF: 0.20, CP: 0.10, IP: 0.60 }, CF: { CF: 0.97, AF: 0.03 }, CP: { CP: 0.88, AP: 0.05, AF: 0.07 } };
+  }
+  function render() {
+    var M = matrix(), v = { NS: 1000, AF: 0, IF: 0, AP: 0, IP: 0, CF: 0, CP: 0 }, m, k, j;
+    for (m = 0; m < cfg.months; m++) { var nx = { NS: 0, AF: 0, IF: 0, AP: 0, IP: 0, CF: 0, CP: 0 }; for (k in M) for (j in M[k]) nx[j] += v[k] * M[k][j]; v = nx; }
+    var box = Kit.clear(document.getElementById("states"));
+    S.forEach(function (k) { box.appendChild(bar(k + " · " + NAME[k], v[k] / 1000, Math.round(v[k]) + " نفر", k === "AP" || k === "IP" ? "pos" : (k === "CF" || k === "CP" ? "neg" : ""))); });
+    var paying = v.AP + v.IP;
+    stats("stats", [["کاربران پولی (فعال و غیرفعال)", Math.round(paying) + " از ۱۰۰۰"], ["پولی فعال", Math.round(v.AP)], ["ازدست‌رفته‌ها", Math.round(v.CF + v.CP), "bad"]]);
+    var key = cfg.aftoif + "/" + cfg.months; if (last && key !== last) log.add("پس از " + cfg.months + " ماه حدود " + Math.round(paying) + " کاربر پولی از ۱۰۰۰ ثبت‌نام باقی می‌ماند.", "ok"); last = key;
+  }
+  add(cfg, "aftoif", { label: "احتمال گذار رایگان فعال به رایگان غیرفعال", min: 5, max: 30, step: 1, unit: "٪", hint: "بقیه‌ی احتمال به حلقه‌ی خودش می‌رود، پس مجموع همیشه ۱۰۰٪ است" }, render);
+  add(cfg, "months", { label: "افق پیش‌بینی", min: 1, max: 24, step: 1, unit: " ماه" }, render);
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "احتمال رایگان فعال به رایگان غیرفعال را از ۱۵٪ به ۱۰٪ ببرید. چه تغییر می‌کند؟",
+    "options": [
+      "هیچ چیز",
+      "کاربران پولی بیشتری در افق شش‌ماهه می‌مانند",
+      "فقط وضعیت‌های پولی کم می‌شوند"
+    ],
+    "answer": 1,
+    "explain": "کاهش این گذار به حلقه‌ی AF می‌رود و کاربران بیشتری به خرید می‌رسند (بخش «From Diagram to Transition Matrix»)."
+  },
+  {
+    "q": "چرا وضعیت‌های ازدست‌رفته بزرگ می‌شوند ولی هرگز خالی نمی‌شوند؟",
+    "options": [
+      "چون حلقه‌ی خودشان ۹۷٪ و ۸۸٪ است",
+      "چون win-back وجود ندارد",
+      "چون ماتریس خطا دارد"
+    ],
+    "answer": 0,
+    "explain": "احتمال ماندن در CF و CP بالاست، پس کاربر ازدست‌رفته معمولاً برنمی‌گردد (بخش «Transition Problem/Opportunity Size»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>
