@@ -1,18 +1,18 @@
-# Quorum overlap and stale reads
+# همپوشانی quorum و خواندن کهنه
 
-When does a read miss the latest write? This experiment runs 20,000 write-then-read steps against N replicas. Each write is acknowledged by W live replicas and reaches the others asynchronously after a few steps. Each read asks R live replicas and keeps the newest version. Replicas are down independently 5% of the time, and an operation fails when too few replicas are up.
+کِی یک خواندن تازه‌ترین نوشتن را از دست می‌دهد؟ این آزمایش ۲۰٬۰۰۰ گام نوشتن-سپس-خواندن را روی N نسخه‌ی replica اجرا می‌کند. هر نوشتنی را W نسخه‌ی زنده تأیید می‌کند و چند گام دیرتر synchronous‌نشده به بقیه می‌رسد. هر خواندنی از R نسخه‌ی زنده می‌پرسد و تازه‌ترین نگارش را نگه می‌دارد. نسخه‌ها مستقل و ۵ درصد وقت‌ها از کار افتاده‌اند، و عملیاتی که نسخه‌های زنده‌اش کم باشد شکست می‌خورد.
 
-*Illustrates Database Internals, “Tunable Consistency”, pp. 235–236: with R + W > N, the read and write sets always share at least one replica. The failure rate, propagation delay and workload are the vault's (seeded); so is the implementation.*
+*تصویری از «consistency کوک‌شدنی» کتاب Database Internals، صص. ۲۳۵–۲۳۶: با R + W > N، آن دو مجموعه‌ی خواندن و نوشتن همیشه دست‌کم یک نسخه را شریکند. نرخ شکست و latency پخش و بار کاری مال vault است، با seed؛ و پیاده‌سازی هم.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 quorum_staleness.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 20,000 write+read steps, each replica down with probability 5% per step,
@@ -30,13 +30,13 @@ async propagation to the other replicas after ~3 steps on average
  5  2  4    yes        0.00%               0.01%              2.21%
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Every configuration with R + W > N has zero stale reads: some replica in the read set always holds the latest acknowledged write.
-- Without overlap, stale reads are common. Their rate depends on how fast asynchronous propagation catches up.
-- Overlap costs availability. W = 3 (or R = 3) of 3 fails whenever any replica is down, about 14% of steps here. Majorities, 2 of 3 or 3 of 5, keep both low.
-- W = 2, R = 4 with N = 5 shows the trade-off between read and write cost: writes stay cheap while reads still overlap.
+- هر چیدمانی با R + W > N صفر خواندن کهنه دارد: نسخه‌ای در مجموعه‌ی خواندن همیشه تازه‌ترین نوشتن تأییدشده را نگه داشته.
+- بی همپوشانی، خواندن کهنه فراوان است. نرخش به این بسته است که پخش synchronous‌نشده چه تند خودش را می‌رساند.
+- همپوشانی به availability خرج می‌دهد. مقدار W = 3 یا R = 3 از ۳ هر وقت نسخه‌ای از کار بیفتد شکست می‌خورد، اینجا حدود ۱۴ درصد گام‌ها. اکثریت‌ها، ۲ از ۳ یا ۳ از ۵، هر دو را پایین نگه می‌دارند.
+- چیدمان W = 2 و R = 4 با N = 5 بده‌بستان میان خرج خواندن و نوشتن را نشان می‌دهد: نوشتن ارزان می‌ماند در حالی که خواندن هنوز همپوشانی دارد.
 
-## Related
+## مرتبط
 
-- Chapter note: [11. Replication and Consistency](../../chapters/11-replication-and-consistency.md) — “Tunable Consistency”, pp. 235–236
+- یادداشت فصل: [فصل ۱۱: replication و consistency](../../chapters/11-replication-and-consistency.md) — «consistency کوک‌شدنی»، صص. ۲۳۵–۲۳۶

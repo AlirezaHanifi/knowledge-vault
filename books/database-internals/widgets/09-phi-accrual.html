@@ -1,13 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Phi-Accrual Failure Detector</title>
-<meta name="description" content="Feed a monitored node heartbeats with adjustable jitter, pause or kill it, and watch the phi-accrual suspicion level climb against a threshold, next to a fixed-deadline detector on the same heartbeat stream. Illustrates Database Internals, Chapter 9.">
+<title>failure detector φ-accrual</title>
+<meta name="description" content="به نودی پاییده‌شده با jitter تنظیم‌پذیر heartbeat بدهید، نگهش دارید یا بکشیدش، و ببینید سطح گمان φ-accrual در برابر آستانه‌ای بالا می‌رود، کنار detectorی مهلت‌ثابت روی همان جریان heartbeat. تصویری از فصل ۹ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .chart svg { width: 100%; height: auto; display: block; }
+  .chart { direction: ltr; }
   .chart .phi { fill: none; stroke: var(--accent); stroke-width: 2; }
   .chart .thr { stroke: var(--bad); stroke-dasharray: 5 4; }
   .chart .dl { stroke: var(--warn); stroke-dasharray: 2 3; }
@@ -21,10 +22,10 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/09-failure-detection.html">Chapter 9</a><span aria-hidden="true">/</span>
+      <a href="../chapters/09-failure-detection.html">فصل ۹</a><span aria-hidden="true">/</span>
       <span aria-current="page">φ-accrual</span>
     </nav>
     <span data-kit-theme></span>
@@ -32,42 +33,42 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 9 · Failure Detection</div>
-  <h1>φ-accrual vs a fixed deadline</h1>
-  <p class="lede">A <strong>deadline</strong> detector suspects a node after a fixed silence. The <strong>φ-accrual</strong> detector keeps a sliding window of recent heartbeat inter-arrival times, estimates their mean and variance, and turns the time since the last heartbeat into a suspicion level <strong>φ</strong>: how likely we are to be wrong if we declare the node dead now. A node is suspected when φ crosses a threshold, so the detector adapts to how noisy the network is.</p>
-  <p class="source-note">Illustrates “Phi-Accrual Failure Detector” (pp. 199–200) and the deadline detector (p. 197). The normal-distribution model of inter-arrival times is the book’s; the formula used, φ = −log₁₀(1 − F(Δt)), follows Hayashibara et al. The 1-second heartbeat interval, the 100-sample window, the pauses and the defaults are the vault’s (seeded). Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۹ · تشخیص شکست</div>
+  <h1>مقایسه‌ی φ-accrual با مهلتی ثابت</h1>
+  <p class="lede">detector <strong>مهلتی</strong> پس از سکوتی ثابت به نودی گمان می‌برد. detector <strong>φ-accrual</strong> پنجره‌ای لغزان از زمان‌های میان‌رسیدن heartbeatهای تازه نگه می‌دارد، میانگین و واریانسشان را تخمین می‌زند، و زمان از آخرین heartbeat را به سطح گمان <strong>φ</strong> تبدیل می‌کند: اگر همین حالا نود را مرده اعلام کنیم احتمال خطا چقدر است. نودی وقتی گمان‌برده می‌شود که φ از آستانه‌ای رد شود، پس detector با پرنوفه بودن شبکه وفق می‌یابد.</p>
+  <p class="source-note">تصویری از «failure detector φ-accrual» (صص. ۱۹۹–۲۰۰) و detector مهلتی (ص. ۱۹۷). مدل توزیع نرمال زمان‌های میان‌رسیدن مال کتاب است؛ و فرمول به‌کار‌رفته، یعنی φ = −log₁₀(1 − F(Δt))، از هایاشیبارا و همکاران پی می‌گیرد. بازه‌ی heartbeat یک ثانیه و پنجره‌ی صد نمونه و آن نگه داشتن‌ها و پیش‌فرض‌ها مال vault است، با seed. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel"><div class="chart" id="chart" role="img"></div>
-        <p class="field-hint">Blue line: φ over the last 20 s. Dashed red: φ threshold. Green ticks: heartbeats received. Amber dotted line: the deadline detector's silence limit, drawn on the φ scale at the φ the deadline corresponds to now.</p>
+        <p class="field-hint">خط آبی: مقدار φ در بیست ثانیه‌ی آخر. خط‌چین سرخ: آستانه‌ی φ. تیک‌های سبز: heartbeatهای گرفته‌شده. خط نقطه‌چین کهربایی: حد سکوت detector مهلتی، که روی مقیاس φ در همان φیی کشیده می‌شود که آن مهلت همین حالا با آن متناظر است.</p>
         <div class="det"><div class="callout" id="d-phi"></div><div class="callout" id="d-dl"></div></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="sl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="pause">GC pause 2.5 s</button><button class="btn small danger" type="button" id="kill">Kill node</button><button class="btn small" type="button" id="revive">Revive</button></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="sl"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="pause">ایست GC به اندازه‌ی ۲٫۵ ثانیه</button><button class="btn small danger" type="button" id="kill">نود را بکش</button><button class="btn small" type="button" id="revive">زنده کن</button></div>
         <div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Raise the jitter.</strong> With noisy heartbeats the deadline detector starts raising false suspicions, while φ’s threshold stretches with the larger variance.</li>
-    <li><strong>A GC pause</strong> is a live node going silent: both detectors may suspect it, and both recover when heartbeats resume.</li>
-    <li><strong>Kill the node</strong> and compare detection times: a low φ threshold or a short deadline detects faster but suspects more live nodes.</li>
-    <li><strong>φ is a scale, not a verdict.</strong> φ = 1 means about a 10% chance of being wrong, φ = 2 about 1%, φ = 3 about 0.1%; applications choose their own threshold.</li>
+    <li><strong>jitter را بالا ببرید.</strong> با heartbeatهای پرنوفه detector مهلتی گمان‌های کاذب می‌سازد، در حالی که آستانه‌ی φ با واریانس بزرگ‌تر کشیده می‌شود.</li>
+    <li><strong>ایست GC</strong> نودی زنده است که سکوت می‌کند: هر دو detector می‌توانند به آن گمان ببرند، و هر دو همین که heartbeatها از سر گرفته شوند بازیابی می‌شوند.</li>
+    <li><strong>نود را بکشید</strong> و زمان تشخیص را مقایسه کنید: آستانه‌ی φ پایین یا مهلت کوتاه زودتر تشخیص می‌دهد ولی به نودهای زنده‌ی بیشتری گمان می‌برد.</li>
+    <li><strong>مقدار φ یک مقیاس است و نه حکم.</strong> φ = 1 یعنی تقریباً ۱۰٪ احتمال خطا، φ = 2 تقریباً ۱٪، و φ = 3 تقریباً ۰٫۱٪؛ و برنامه‌ها آستانه‌ی خودشان را برمی‌دارند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/09-failure-detection.html"><small>Lesson</small>9. Failure Detection</a></li>
+    <li><a href="../chapters/09-failure-detection.html"><small>درس</small>فصل ۹: تشخیص شکست</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -94,7 +95,7 @@ function stats(rows) {
   }
   function reset() {
     r = Kit.rng(13); now = 0; last = 0; gaps = []; hist = []; dead = false; pauseUntil = 0; falsePhi = falseDl = 0; sPhi = sDl = false; killedAt = null; detPhi = detDl = null;
-    nextHb = 1000 + gauss(); log.clear(); log.add("Heartbeats every ~1 s with " + cfg.jitter + " ms jitter (standard deviation).", "muted"); render();
+    nextHb = 1000 + gauss(); log.clear(); log.add("heartbeat هر یک ثانیه با " + cfg.jitter + " میلی‌ثانیه jitter، یعنی انحراف معیار.", "muted"); render();
   }
   function gauss() { var u = 1 - r.next(), v = r.next(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) * cfg.jitter; }
   function step() {
@@ -104,10 +105,10 @@ function stats(rows) {
       nextHb = Math.max(now + TICK, nextHb + 1000 + gauss());
     }
     var silence = now - last, p = phi(silence), nPhi = p >= cfg.thr, nDl = last > 0 && silence > cfg.dl, alive = !dead;
-    if (nPhi && !sPhi) { log.add("φ = " + p.toFixed(1) + " ≥ " + cfg.thr + ": φ detector suspects the node" + (alive ? " (false suspicion)" : ""), alive ? "warn" : "bad"); if (alive) falsePhi++; else if (detPhi === null) detPhi = now - killedAt; }
-    if (nDl && !sDl) { log.add("Silent for " + silence + " ms > " + cfg.dl + " ms: deadline detector suspects the node" + (alive ? " (false suspicion)" : ""), alive ? "warn" : "bad"); if (alive) falseDl++; else if (detDl === null) detDl = now - killedAt; }
-    if (!nPhi && sPhi) log.add("φ detector: node trusted again", "ok");
-    if (!nDl && sDl) log.add("Deadline detector: node trusted again", "ok");
+    if (nPhi && !sPhi) { log.add("φ = " + p.toFixed(1) + " ≥ " + cfg.thr + ": detector φ به نود گمان می‌برد" + (alive ? "؛ گمانی کاذب" : ""), alive ? "warn" : "bad"); if (alive) falsePhi++; else if (detPhi === null) detPhi = now - killedAt; }
+    if (nDl && !sDl) { log.add("به اندازه‌ی " + silence + " میلی‌ثانیه ساکت، بیشتر از " + cfg.dl + " میلی‌ثانیه: detector مهلتی به نود گمان می‌برد" + (alive ? "؛ گمانی کاذب" : ""), alive ? "warn" : "bad"); if (alive) falseDl++; else if (detDl === null) detDl = now - killedAt; }
+    if (!nPhi && sPhi) log.add("detector φ: بازهم به نود اعتماد می‌شود", "ok");
+    if (!nDl && sDl) log.add("detector مهلتی: بازهم به نود اعتماد می‌شود", "ok");
     sPhi = nPhi; sDl = nDl;
     hist.push({ t: now, phi: p }); while (hist.length && hist[0].t < now - 20000) hist.shift();
     render(); return true;
@@ -125,32 +126,32 @@ function stats(rows) {
     s.appendChild(Kit.svg("text", { x: W - 60, y: H - 2 }, (now / 1000).toFixed(1) + " s"));
     var c = Kit.clear(document.getElementById("chart")); c.appendChild(s);
     var p = phi(now - last);
-    c.setAttribute("aria-label", "phi is " + p.toFixed(1) + ", threshold " + cfg.thr);
-    function box(id, title, susp, detail) { var b = document.getElementById(id); b.className = "callout " + (susp ? (dead ? "bad" : "warn") : "ok"); Kit.clear(b).appendChild(Kit.el("strong", null, title + ": " + (susp ? "suspected" : "trusted"))); b.appendChild(Kit.el("div", { class: "field-hint" }, detail)); }
-    box("d-phi", "φ detector", sPhi, "φ = " + p.toFixed(2) + " (threshold " + cfg.thr + ")");
-    box("d-dl", "Deadline detector", sDl, "silent " + (now - last) + " ms (limit " + cfg.dl + " ms)");
-    stats([["Node", dead ? "dead" : now < pauseUntil ? "paused" : "alive", dead ? "bad" : now < pauseUntil ? "warn" : "ok"], ["False suspicions φ / deadline", falsePhi + " / " + falseDl, falsePhi + falseDl ? "warn" : ""], ["Detection time φ / deadline", (detPhi === null ? "–" : detPhi + " ms") + " / " + (detDl === null ? "–" : detDl + " ms")]]);
+    c.setAttribute("aria-label", "مقدار φ برابر " + p.toFixed(1) + " است، با آستانه‌ی " + cfg.thr);
+    function box(id, title, susp, detail) { var b = document.getElementById(id); b.className = "callout " + (susp ? (dead ? "bad" : "warn") : "ok"); Kit.clear(b).appendChild(Kit.el("strong", null, title + ": " + (susp ? "گمان‌برده" : "مورد اعتماد"))); b.appendChild(Kit.el("div", { class: "field-hint" }, detail)); }
+    box("d-phi", "detector φ", sPhi, "φ = " + p.toFixed(2) + " با آستانه‌ی " + cfg.thr);
+    box("d-dl", "detector مهلتی", sDl, "به اندازه‌ی " + (now - last) + " میلی‌ثانیه ساکت، با حد " + cfg.dl + " میلی‌ثانیه");
+    stats([["نود", dead ? "مرده" : now < pauseUntil ? "ایستاده" : "زنده", dead ? "bad" : now < pauseUntil ? "warn" : "ok"], ["گمان کاذب φ و مهلتی", falsePhi + " / " + falseDl, falsePhi + falseDl ? "warn" : ""], ["زمان تشخیص φ و مهلتی", (detPhi === null ? "–" : detPhi + " میلی‌ثانیه") + " / " + (detDl === null ? "–" : detDl + " میلی‌ثانیه")]]);
   }
   var sl = document.getElementById("sl");
-  sl.appendChild(Kit.slider({ label: "Heartbeat jitter (std dev)", min: 0, max: 500, step: 25, value: cfg.jitter, unit: " ms", onInput: function (v) { cfg.jitter = v; } }).element);
-  sl.appendChild(Kit.slider({ label: "φ threshold", min: 1, max: 12, step: 1, value: cfg.thr, onInput: function (v) { cfg.thr = v; } }).element);
-  sl.appendChild(Kit.slider({ label: "Deadline", min: 1100, max: 4000, step: 100, value: cfg.dl, unit: " ms", onInput: function (v) { cfg.dl = v; } }).element);
-  document.getElementById("pause").addEventListener("click", function () { pauseUntil = now + 2500; log.add("Node pauses for 2.5 s (it is alive, just silent)", "warn"); });
-  document.getElementById("kill").addEventListener("click", function () { if (!dead) { dead = true; killedAt = now; detPhi = detDl = null; log.add("Node crashes", "bad"); } });
-  document.getElementById("revive").addEventListener("click", function () { if (dead) { dead = false; nextHb = now + TICK; log.add("Node restarts", "ok"); } });
+  sl.appendChild(Kit.slider({ label: "jitter مربوط به heartbeat، یعنی انحراف معیار", min: 0, max: 500, step: 25, value: cfg.jitter, unit: " میلی‌ثانیه", onInput: function (v) { cfg.jitter = v; } }).element);
+  sl.appendChild(Kit.slider({ label: "آستانه‌ی φ", min: 1, max: 12, step: 1, value: cfg.thr, onInput: function (v) { cfg.thr = v; } }).element);
+  sl.appendChild(Kit.slider({ label: "مهلت", min: 1100, max: 4000, step: 100, value: cfg.dl, unit: " میلی‌ثانیه", onInput: function (v) { cfg.dl = v; } }).element);
+  document.getElementById("pause").addEventListener("click", function () { pauseUntil = now + 2500; log.add("نود ۲٫۵ ثانیه می‌ایستد؛ زنده است، تنها ساکت", "warn"); });
+  document.getElementById("kill").addEventListener("click", function () { if (!dead) { dead = true; killedAt = now; detPhi = detDl = null; log.add("نود از کار افتاد", "bad"); } });
+  document.getElementById("revive").addEventListener("click", function () { if (dead) { dead = false; nextHb = now + TICK; log.add("نود دوباره راه افتاد", "ok"); } });
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 60 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What does φ measure?",
-      options: ["Packet loss", "How likely we are to be wrong if we declare the node dead now, given recent inter-arrival times", "The network round-trip time"], answer: 1,
-      explain: "A continuous suspicion level instead of a binary verdict (pp. 199–200)." },
-    { q: "Heartbeats become much noisier. What happens to φ for the same silence?",
-      options: ["It rises", "It falls, because a long gap is less surprising when the variance is larger", "It doesn't change"], answer: 1,
-      explain: "The detector adapts to network conditions (p. 199)." },
-    { q: "What is the main weakness of a fixed-deadline detector?",
-      options: ["It needs the mean and variance", "It depends on tuning and on one process's view of the network", "It can never detect crashes"], answer: 1,
-      explain: "p. 197." }
+    { q: "مقدار φ چه چیزی را اندازه می‌گیرد؟",
+      options: ["گم شدن بسته", "این‌که اگر همین حالا نود را مرده اعلام کنیم، با توجه به زمان‌های میان‌رسیدن تازه، احتمال خطا چقدر است", "زمان رفت‌و‌برگشت شبکه"], answer: 1,
+      explain: "سطح گمانی پیوسته به‌جای حکمی دوگانی (صص. ۱۹۹–۲۰۰)." },
+    { q: "heartbeatها خیلی پرنوفه‌تر می‌شوند. سر φ برای همان سکوت چه می‌آید؟",
+      options: ["بالا می‌رود", "می‌افتد، چون شکافی بلند وقتی واریانس بزرگ‌تر است کم‌تر غافلگیرکننده است", "عوض نمی‌شود"], answer: 1,
+      explain: "detector با شرایط شبکه وفق می‌یابد (ص. ۱۹۹)." },
+    { q: "ضعف اصلی detector مهلت‌ثابت چیست؟",
+      options: ["میانگین و واریانس لازم دارد", "به تنظیم و به نمای یک process از شبکه وابسته است", "هیچ‌وقت نمی‌تواند از کار افتادن را تشخیص بدهد"], answer: 1,
+      explain: "ص. ۱۹۷." }
   ]);
 })();
 </script>

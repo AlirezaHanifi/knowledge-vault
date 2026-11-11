@@ -3,202 +3,216 @@ book: database-internals
 chapter: 9
 title: "Failure Detection"
 pages: "195–203"
+translated_title: "تشخیص شکست"
+lang: fa
 ---
 
-# 9. Failure Detection
+# فصل ۹: تشخیص شکست
 
-[← 8. Introduction and Overview](08-introduction-and-overview.md) · [Book](../README.md) · [10. Leader Election →](10-leader-election.md)
+[فصل ۸: مقدمه و نمای کلی →](08-introduction-and-overview.md) · [کتاب](../README.md) · [فصل ۱۰: انتخاب leader ←](10-leader-election.md)
 
-## Summary
+## خلاصه
 
-A failed process that keeps getting contacted raises latency and lowers availability, so failures must be detected in time (p. 195). Without timing assumptions, though, a crashed process can't be told apart from a slow one: this is FLP again (p. 195). A **failure detector** is a local subsystem that identifies failed or unreachable processes, so they can be excluded to guarantee **liveness** while preserving **safety** (p. 195). Every detector trades **false positives** (live processes suspected) against **false negatives** (dead processes given the benefit of the doubt), and **efficiency** against **accuracy**. No detector can be both accurate and efficient (pp. 195–196).
+یک process شکسته که همین‌طور با آن تماس گرفته می‌شود latency را بالا و availability را پایین می‌برد، پس شکست‌ها باید به‌هنگام تشخیص داده شوند (p. 195). ولی بی فرض زمان‌بندی، processی از کار افتاده از کندی تشخیص‌دادنی نیست: این بازهم قضیه‌ی FLP است (p. 195). **failure detector** زیرسیستمی محلی است که processهای شکسته یا دست‌نیافتنی را شناسایی می‌کند، تا بیرون گذاشته شوند و **liveness** تضمین شود و در همان حال **ایمنی** نگه داشته (p. 195). هر detectorی **مثبت کاذب**، یعنی گمان بردن به processهای زنده، را با **منفی کاذب**، یعنی به processهای مرده بها دادن، و **کارایی** را با **دقت** بده‌بستان می‌کند. هیچ detectorی نمی‌تواند هم دقیق باشد و هم کارا (pp. 195–196).
 
-The chapter surveys several approaches:
+فصل چند رویکرد را مرور می‌کند:
 
-| Detector | Idea |
+| detector | ایده |
 |---|---|
-| **Pings and heartbeats** with a deadline (Akka) | Mark a peer suspected after a fixed silence |
-| **Heartbeat** (Aguilera et al.) | Timeout-free; counts heartbeats propagated along paths |
-| **SWIM** outsourced heartbeats | Ask random peers to probe on your behalf |
-| **φ-accrual** (Cassandra, Akka) | A continuous suspicion level computed from the distribution of past arrival times |
-| **Gossip-style** | Replicated heartbeat tables |
-| **FUSE** | Turns any single failure into a *group* failure by going silent |
+| **ping و heartbeat** با مهلت، که Akka است | پس از سکوتی ثابت همتایی را گمان‌برده علامت بزن |
+| **Heartbeat** از آگیلرا و همکاران | بی timeout؛ heartbeatهایی را می‌شمارد که روی مسیرها پخش شده‌اند |
+| **heartbeat برون‌سپاری‌شده‌ی SWIM** | از همتاهای تصادفی بخواه به‌جای تو کاوش کنند |
+| **φ-accrual** که Cassandra و Akka است | سطح گمان پیوسته‌ای که از توزیع زمان‌های رسیدن گذشته حساب می‌شود |
+| **از جنس gossip** | جدول‌های heartbeat تکرارشده |
+| **FUSE** | هر شکست تنهایی را با سکوت کردن به شکست *گروهی* تبدیل می‌کند |
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Liveness:** something good eventually happens, e.g. a failure gets detected. **Safety:** nothing bad happens, e.g. only dead processes are marked dead (pp. 195–196).
-- **Completeness:** every nonfaulty member eventually notices the failure. **Efficiency:** how fast. **Accuracy:** how precisely (p. 196).
-- **Fixed deadlines depend on tuning** and only reflect one process's view of the network (p. 197).
-- **Indirect probes beat direct ones.** SWIM's outsourced pings and gossip tables keep a live node "alive" even when one direct link is broken (pp. 198–201).
-- **φ-accrual adapts to the network.** It isn't up/down: it's a suspicion level computed from the mean and variance of recent inter-arrival times (pp. 199–200).
-- **Consensus is solvable even with a failure detector that makes infinitely many mistakes** (Chandra and Toueg) (p. 202).
+- **مفهوم liveness:** در غایت چیز خوبی رخ می‌دهد، مثلاً شکستی تشخیص داده می‌شود. **ایمنی:** چیز بدی رخ نمی‌دهد، مثلاً تنها processهای مرده مرده علامت می‌خورند (pp. 195–196).
+- **تمامیت:** هر عضو نشکسته‌ای در غایت آن شکست را می‌بیند. **کارایی:** چقدر زود. **دقت:** چقدر دقیق (p. 196).
+- **مهلت‌های ثابت به تنظیم وابسته‌اند** و تنها نمای یک process از شبکه را بازتاب می‌دهند (p. 197).
+- **کاوش غیرمستقیم از مستقیم بهتر است.** ping برون‌سپاری‌شده‌ی SWIM و جدول‌های gossip نودی زنده را «زنده» نگه می‌دارند حتی وقتی یک پیوند مستقیم شکسته باشد (pp. 198–201).
+- **روش φ-accrual با شبکه وفق می‌یابد.** سرپا یا خواب نیست: سطح گمانی است که از میانگین و واریانس زمان‌های میان‌رسیدن تازه حساب می‌شود (pp. 199–200).
+- **مفهوم consensus حتی با failure detectorی که بی‌نهایت بار خطا کند حل‌شدنی است**، از چاندرا و توگ (p. 202).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Heartbeats and Pings — p. 196
-  - Timeout-Free Failure Detector — p. 197
-  - Outsourced Heartbeats — p. 198
-- Phi-Accural Failure Detector — p. 199
-- Gossip and Failure Detection — p. 200
-- Reversing Failure Detection Problem Statement — p. 201
-- Summary — p. 202
+- بخش heartbeat و ping — ص. ۱۹۶
+  - بخش failure detector بی timeout — ص. ۱۹۷
+  - بخش heartbeat برون‌سپاری‌شده — ص. ۱۹۸
+- بخش failure detector φ-accrual — ص. ۱۹۹
+- بخش gossip و تشخیص شکست — ص. ۲۰۰
+- برگرداندن صورت مسئله‌ی تشخیص شکست — ص. ۲۰۱
+- خلاصه — ص. ۲۰۲
 
-## Notes
+## یادداشت‌ها
 
-**Dead**, **failed** and **crashed** describe a process that has stopped completely. **Unresponsive**, **faulty** and **slow** describe *suspected* processes, which may or may not be dead (p. 195). Failures happen at the link level (lost or slow messages) or at the process level (crashes or slowness), and slowness isn't always distinguishable from failure (p. 195).
+واژه‌های **مرده** و **شکسته** و **از کار افتاده** processی را وصف می‌کنند که تماماً ایستاده. واژه‌های **بی‌پاسخ** و **عیب‌دار** و **کند** processهای *گمان‌برده* را وصف می‌کنند، که ممکن است مرده باشند یا نه (p. 195). شکست‌ها در سطح پیوند، یعنی پیام گم‌شده یا کند، یا در سطح پردازه، یعنی از کار افتادن یا کندی، رخ می‌دهند، و کندی همیشه از شکست تشخیص‌دادنی نیست (p. 195).
 
-| Property | Meaning (pp. 195–196) |
+| خاصیت | معنا (pp. 195–196) |
 |---|---|
-| **Liveness** | An intended event must occur: if a process fails, it *will* be detected |
-| **Safety** | Unintended events won't occur: a process marked dead *was* dead |
-| **Completeness** | Every nonfaulty member eventually notices the failure; the algorithm makes progress |
-| **Efficiency** | How fast failures are identified |
-| **Accuracy** | No false accusations and no missed failures |
+| **liveness** | رویدادی خواسته باید رخ بدهد: اگر processی بشکند، تشخیص داده *خواهد شد* |
+| **ایمنی** | رویدادهای ناخواسته رخ نمی‌دهند: processی که مرده علامت خورده واقعاً مرده *بود* |
+| **تمامیت** | هر عضو نشکسته‌ای در غایت آن شکست را می‌بیند؛ الگوریتم پیشرفت می‌کند |
+| **کارایی** | شکست‌ها چقدر زود شناسایی می‌شوند |
+| **دقت** | بی اتهام کاذب و بی شکست از دست رفته |
 
-Excluding failed processes avoids wasted work and stops error propagation and cascading failures, but excluding a live suspect reduces availability (p. 196). Efficiency and accuracy behave like a tunable parameter, and detectors are allowed to make mistakes (Chandra and Toueg). Failure detectors underpin consensus and atomic broadcast. The chapter assumes **no Byzantine failures** (p. 196).
+بیرون گذاشتن processهای شکسته از کار حرام‌شده می‌پرهیزد و جلو پخش خطا و شکست آبشاری را می‌گیرد، ولی بیرون گذاشتن گمان‌برده‌ای زنده availability را کم می‌کند (p. 196). کارایی و دقت مثل پارامتری تنظیم‌پذیر رفتار می‌کنند، و detectorها مجازند خطا کنند، از چاندرا و توگ. detectorهای شکست زیر consensus و پخش اتمی را می‌گیرند. فصل فرض می‌گیرد **هیچ شکست Byzantineی** نیست (p. 196).
 
-### Heartbeats and pings
+### پروتکل heartbeat و ping
 
-| Mechanism | Who initiates (p. 196) |
+| مکانیزم | چه کسی شروع می‌کند (p. 196) |
 |---|---|
-| **Ping** | The monitor sends a message and expects a response within a time period |
-| **Heartbeat** | The monitored process notifies its peers that it's alive |
+| **ping** | پاینده پیامی می‌فرستد و درون دوره‌ای زمانی چشم پاسخ دارد |
+| **heartbeat** | process پاییده‌شده به همتاهایش خبر می‌دهد که زنده است |
 
-Each process keeps a list of alive, dead and suspected peers with their last response times, and suspects a peer that doesn't respond for too long (p. 197). Delayed acknowledgments that arrive after the next ping can get a live process marked down (Figures 9-1, 9-2). Akka's **deadline failure detector** reports a failure if a heartbeat isn't registered within a fixed interval (p. 197). Downsides: precision depends on carefully chosen ping frequency and timeout, and the detector doesn't capture how *other* processes see the peer (p. 197).
+هر processی فهرستی از همتاهای زنده و مرده و گمان‌برده را با زمان آخرین پاسخشان نگه می‌دارد، و به همتایی که زیادی پاسخ نمی‌دهد گمان می‌برد (p. 197). تأییدهای معطلی که پس از ping بعدی برسند می‌توانند processی زنده را خوابیده علامت بزنند (شکل‌های ۹-۱ و ۹-۲). **failure detector مهلتی** در Akka اگر heartbeatی درون بازه‌ای ثابت ثبت نشود شکست گزارش می‌دهد (p. 197). بدی‌ها: دقت به فراوانی ping و timeoutی که با دقت برداشته شده وابسته است، و detector نمی‌گیرد که processهای *دیگر* آن همتا را چطور می‌بینند (p. 197).
 
-![P1 sends two Alive? pings to P2; the replies are delayed, so each Ack arrives only after the next ping has been sent](../figures/09-02.png)
+![process P1 دو ping «زنده‌ای؟» به P2 می‌فرستد؛ پاسخ‌ها معطل می‌شوند، پس هر Ack تنها پس از فرستادن ping بعدی می‌رسد](../figures/09-02.png)
 
-*Figure 9-2 (p. 197): when responses lag behind the ping interval, the detector must decide whether "late" means "dead".*
+*Figure 9-2 (p. 197): وقتی پاسخ‌ها از بازه‌ی ping عقب بمانند، detector باید تصمیم بگیرد که «دیر» یعنی «مرده» یا نه.*
 
-#### Timeout-free failure detector
+#### نقش failure detector بدون timeout
 
-Aguilera et al.'s **Heartbeat** algorithm only *counts* heartbeats, so it works under asynchronous assumptions (p. 197). It assumes fair paths between correct processes and that every process knows all the others (pp. 197–198).
+الگوریتم **Heartbeat** آگیلرا و همکاران تنها heartbeatها را *می‌شمارد*، پس زیر فرض‌های asynchronous کار می‌کند (p. 197). مسیرهای منصفانه میان processهای درست را فرض می‌گیرد و این‌که هر processی بقیه را می‌شناسد (pp. 197–198).
 
-- A heartbeat message carries the **path** it has travelled plus a unique ID.
-- A receiver increments the counters of every process on the path, appends itself, and forwards the message to processes not yet on it. Propagation stops once every known process appears in the path (p. 198).
-- Because heartbeats take many routes, a process can correctly be marked alive even when the direct link to it is faulty (p. 198).
-- The counters form a global, normalized view, but choosing a threshold to interpret them is tricky. A bad threshold still produces false suspicions (p. 198).
+- پیام heartbeat آن **مسیری** را که پیموده به‌علاوه‌ی شناسه‌ای یکتا حمل می‌کند.
+- گیرنده‌ای شمارنده‌ی هر processی روی آن مسیر را می‌افزاید، خودش را می‌چسباند، و پیام را به processهایی می‌فرستد که هنوز روی آن نیستند. پخش شدن همین که هر process شناخته‌ای در مسیر پیدا شود می‌ایستد (p. 198).
+- چون heartbeatها مسیرهای زیادی را می‌گیرند، processی می‌تواند درست زنده علامت بخورد حتی وقتی پیوند مستقیم به آن عیب‌دار باشد (p. 198).
+- شمارنده‌ها نمایی جهانی و بهنجار می‌سازند، ولی برداشتن آستانه‌ای برای تفسیرشان دشوار است. آستانه‌ی بد باز هم گمان‌های کاذب می‌سازد (p. 198).
 
-#### Outsourced heartbeats
+#### پروتکل heartbeat برون‌سپاری‌شده
 
-**SWIM** (Scalable Weakly Consistent Infection-style Process Group Membership) checks liveness from neighbours' perspectives, and each process needs to know only a subset of peers (p. 198).
+روش **SWIM**، که Scalable Weakly Consistent Infection-style Process Group Membership است، زنده بودن را از دید همسایه‌ها می‌سنجد، و هر processی لازم است تنها زیرمجموعه‌ای از همتاها را بشناسد (p. 198).
 
-![P1's ping to P2 is lost; P1 asks P3 and P4 to ping P2 on its behalf, P2 answers them, and their acks reach P1](../figures/09-03.png)
+![ping process P1 به P2 گم می‌شود؛ P1 از P3 و P4 می‌خواهد به‌جایش P2 را ping کنند، P2 به‌شان پاسخ می‌دهد، و تأییدشان به P1 می‌رسد](../figures/09-03.png)
 
-*Figure 9-3 (p. 199): when a direct ping fails, neighbours probe the suspect, so a single bad link doesn't cause a false suspicion.*
+*Figure 9-3 (p. 199): وقتی ping مستقیم باز بماند، همسایه‌ها آن گمان‌برده را کاوش می‌کنند، پس یک پیوند بد گمانی کاذب نمی‌سازد.*
 
-This accounts for both direct and indirect reachability, spreads the decision across members, avoids broad broadcasts, and gathers information quickly because the probes run in parallel (p. 199).
+این هم دست‌یافتنی بودن مستقیم و هم غیرمستقیم را به حساب می‌آورد، تصمیم را بین اعضا پخش می‌کند، از پخش فراگیر می‌پرهیزد، و زود اطلاع جمع می‌کند چون کاوش‌ها موازی اجرا می‌شوند (p. 199).
 
-### Phi-accrual failure detector
+> **In practice:** Prometheus هر target را scrape می‌کند و metric `up` همان ping است؛ liveness probe در Kubernetes همان heartbeat.
+>
+> **Your turn:** alert «loader down» روی `up == 0` در یک scrape تنها هر چند روز یک بار بی‌دلیل fire می‌شود. چه می‌کنید؟
+>
+> *Answer:* یک scrape گم‌شده دلیل شکست نیست؛ `for: 5m` بگذارید تا چند نمونه‌ی پشت‌سرهم لازم باشد. timeout کوتاه تشخیص را سریع ولی false positive را زیاد می‌کند؛ این بده‌بستان دقت و سرعت محور failure detection است (pp. 196–199).
 
-Instead of a binary up/down, the **φ-accrual** detector (Hayashibara et al., 2004) uses a **continuous** scale of crash likelihood (p. 199).
+### failure detector φ-accrual
 
-- It keeps a **sliding window** of recent heartbeat arrival times, assumed to be normally distributed, and estimates their **mean and variance** (pp. 199–200).
-- From these it computes how likely a heartbeat is to arrive *t* time units after the last one, and from that **φ**, the suspicion level: how likely we are to be wrong if we declare the node dead now (p. 200).
-- When φ reaches a **threshold**, the node is marked down. The scale adapts to changing network conditions (p. 199).
+نقش detector **φ-accrual** از هایاشیبارا و همکاران در ۲۰۰۴، به‌جای سرپا یا خواب دوگانی، مقیاسی **پیوسته** از احتمال از کار افتادن به کار می‌برد (p. 199).
 
-| Subsystem | Role (pp. 199–200) |
+- یک **پنجره‌ی لغزان** از زمان‌های رسیدن heartbeatهای تازه نگه می‌دارد، که نرمال‌توزیع فرض می‌شوند، و **میانگین و واریانس**شان را تخمین می‌زند (pp. 199–200).
+- از این‌ها حساب می‌کند که احتمال رسیدن heartbeatی *t* یکای زمانی پس از آخری چقدر است، و از آن **φ** را، یعنی سطح گمان: اگر همین حالا نود را مرده اعلام کنیم احتمال خطا چقدر است (p. 200).
+- وقتی φ به **آستانه**ای برسد، نود خوابیده علامت می‌خورد. مقیاس با شرایط متغیر شبکه وفق می‌یابد (p. 199).
+
+| زیرسیستم | نقش (pp. 199–200) |
 |---|---|
-| **Monitoring** | Collect liveness samples via pings, heartbeats or request-response sampling |
-| **Interpretation** | Decide whether to suspect the process |
-| **Action** | A callback when it's suspected |
+| **پاییدن** | با ping یا heartbeat یا نمونه‌گیری درخواست‌پاسخ نمونه‌های زنده بودن را جمع کن |
+| **تفسیر** | تصمیم بگیر که به آن process گمان ببری یا نه |
+| **کنش** | callbackی وقتی گمان‌برده شود |
 
-It comes from the Japan Advanced Institute of Science and Technology and is used in Cassandra and Akka, alongside Akka's deadline detector (p. 200).
+از مؤسسه‌ی پیشرفته‌ی علم و فناوری ژاپن می‌آید و در Cassandra و Akka به کار می‌رود، در کنار detector مهلتی Akka (p. 200).
 
-> **Try it:** [φ-accrual failure detector](../widgets/09-phi-accrual.html) — feed a node heartbeats with adjustable jitter, pause or kill it, and watch φ climb against a threshold, next to a fixed-deadline detector on the same stream.
+> **Try it:** [failure detector φ-accrual](../widgets/09-phi-accrual.html)؛ به نودی با jitter تنظیم‌پذیر heartbeat بدهید، نگهش دارید یا بکشیدش، و ببینید φ در برابر آستانه‌ای بالا می‌رود، کنار detectorی مهلت‌ثابت روی همان جریان.
 
-### Gossip and failure detection
+> **In practice:** jobهای ما فاصله‌ی اجرای متفاوتی دارند: بعضی ساعتی، بعضی شبانه.
+>
+> **Your turn:** چرا alert بر اساس «مدت سکوت نسبت به فاصله‌ی معمول هر job» بهتر از یک آستانه‌ی ثابت است؟
+>
+> *Answer:* job ساعتی و job شبانه سکوت عادی متفاوتی دارند؛ آستانه‌ی ثابت یا برای یکی دیر است یا برای دیگری پرسروصدا. φ-accrual از تاریخچه‌ی فاصله‌ها توزیع می‌سازد و به‌جای بله یا نه، سطح شک می‌دهد (pp. 199–200).
 
-A **gossip-style** failure detection service (van Renesse et al.) avoids relying on a single node's view (p. 200).
+### پروتکل gossip و تشخیص شکست
 
-- Each member keeps a list of members, their **heartbeat counters** and the local timestamp of each counter's last increase.
-- Periodically, a member increments its own counter and sends its list to a **random neighbour**, which merges it with its own (p. 200).
-- A member whose counter hasn't increased for long enough is considered failed. Choose that timeout carefully to keep false positives down (p. 200).
-- Worst-case bandwidth is capped and grows at most **linearly** with the number of processes (p. 200).
+سرویس تشخیص شکست **از جنس gossip** از ون رنسه و همکاران از تکیه به نمای یک نود می‌پرهیزد (p. 200).
 
-Figure 9-4 (p. 201):
+- هر عضوی فهرستی از اعضا و **شمارنده‌های heartbeat**شان و timestamp محلی آخرین افزایش هر شمارنده‌ای را نگه می‌دارد.
+- دوره‌ای، عضوی شمارنده‌ی خودش را می‌افزاید و فهرستش را به **همسایه‌ای تصادفی** می‌فرستد، که با مال خودش merge می‌کند (p. 200).
+- عضوی که شمارنده‌اش به‌قدر کافی نرفته باشد شکسته شمرده می‌شود. آن timeout را با دقت بردارید تا مثبت کاذب کم بماند (p. 200).
+- پهنای باند بدترین حالت سقف‌دار است و دست‌بالا **خطی** با شمار processها رشد می‌کند (p. 200).
 
-![Three stages: P1, P2, P3 each keep a table of every peer's last heartbeat time; tables are exchanged and updated; when P3 fails, its entries stop advancing](../figures/09-04.png)
+شکل ۹-۴ (p. 201):
 
-*Figure 9-4 (p. 201): every process keeps the whole heartbeat table and merges its neighbours' copies, so a stale row reveals a failure.*
+![سه مرحله: processهای P1 و P2 و P3 هر یک جدولی از زمان آخرین heartbeat هر همتایی نگه می‌دارند؛ جدول‌ها رد و بدل و به‌روز می‌شوند؛ وقتی P3 بشکند، entry‌هایش از جلو رفتن می‌ایستند](../figures/09-04.png)
 
-1. All three processes communicate and update their timestamps.
-2. P3 can't reach P1, but its timestamp t6 still reaches P1 **through P2**.
-3. P3 crashes, stops sending updates and is detected as failed.
+*Figure 9-4 (p. 201): هر processی کل جدول heartbeat را نگه می‌دارد و کپی‌های همسایه‌هایش را merge می‌کند، پس ردیفی کهنه شکستی را آشکار می‌کند.*
 
-The view aggregates many nodes, so decisions are reliable. Gossip costs more messages but spreads information more reliably (p. 201).
+۱. هر سه process حرف می‌زنند و timestampهایشان را به‌روز می‌کنند.
+۲. مفهوم process P3 نمی‌تواند به P1 برسد، ولی timestampش یعنی t6 باز هم **از راه P2** به P1 می‌رسد.
+۳. مفهوم process P3 از کار می‌افتد، فرستادن به‌روزرسانی را بس می‌کند و شکسته تشخیص داده می‌شود.
 
-### Reversing the failure detection problem statement
+آن نما نودهای زیادی را تجمیع می‌کند، پس تصمیم‌ها قابل اطمینان‌اند. gossip پیام بیشتری خرج دارد ولی اطلاع را قابل اطمینان‌تر پخش می‌کند (p. 201).
 
-**FUSE** (failure notification service) focuses on cheap, reliable failure *propagation*, even across partitions (p. 201). Active processes are arranged in **groups**. When a member can't get a response, because of a crash, partition or link failure, the member that pinged it **stops responding to pings itself**, so the silence spreads until the whole group detects the failure (Figure 9-5) (pp. 201–202).
+### برگرداندن صورت مسئله‌ی تشخیص شکست
 
-| Step (p. 202) | State |
+**سیستم FUSE**، که سرویس خبر دادن شکست است، روی *پخش* ارزان و قابل اطمینان شکست تمرکز می‌کند، حتی از پارتیشن‌ها رد شده (p. 201). processهای فعال در **گروه** چیده می‌شوند. وقتی عضوی نتواند پاسخی بگیرد، به‌خاطر از کار افتادن یا پارتیشن یا شکست پیوند، آن عضوی که pingش کرده **خودش پاسخ دادن به ping را بس می‌کند**، پس سکوت پخش می‌شود تا کل گروه آن شکست را تشخیص بدهد (شکل ۹-۵) (pp. 201–202).
+
+| قدم (p. 202) | حالت |
 |---|---|
-| a | All alive and communicating |
-| b | P2 crashes and stops answering pings |
-| c | P4 detects it and goes silent too |
-| d | P1 and P3 see the silence; the failure propagates to the whole group |
+| الف | همه زنده‌اند و حرف می‌زنند |
+| ب | process P2 از کار می‌افتد و پاسخ دادن به ping را بس می‌کند |
+| ج | process P4 تشخیصش می‌دهد و خودش هم سکوت می‌کند |
+| د | processهای P1 و P3 آن سکوت را می‌بینند؛ شکست به کل گروه پخش می‌شود |
 
-Every member is guaranteed to learn of the group failure. On the downside, a link failure isolating one process also becomes a group failure, which may or may not be desirable (p. 202).
+تضمین می‌شود که هر عضوی از شکست گروه خبردار شود. در سوی بد، شکست پیوندی که processی را منزوی کند هم شکستی گروهی می‌شود، که ممکن است دلخواه باشد یا نه (p. 202).
 
-### Summary
+### خلاصه
 
-FLP says consensus can't be guaranteed asynchronously, and failure detectors augment the model by trading accuracy for completeness. Chandra and Toueg showed consensus is solvable even with a detector that makes infinitely many mistakes (p. 202). The approaches differ: direct communication, broadcast or gossip, or quiescence (silence) as the propagation mechanism, using hard deadlines or continuous scales (pp. 202–203).
+قضیه‌ی FLP می‌گوید consensus asynchronous تضمین‌شدنی نیست، و detectorهای شکست مدل را تقویت می‌کنند و دقت را با تمامیت بده‌بستان. چاندرا و توگ نشان دادند که consensus حتی با detectorی که بی‌نهایت بار خطا کند حل‌شدنی است (p. 202). رویکردها فرق دارند: ارتباط مستقیم، یا پخش یا gossip، یا سکون یعنی سکوت به‌شکل مکانیزم پخش، با مهلت سخت یا مقیاس پیوسته (pp. 202–203).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Detector | Timeouts? | View | Strength | Weakness |
+| detector | timeout؟ | نما | قوت | ضعف |
 |---|---|---|---|---|
-| Deadline (ping/heartbeat) | Fixed | One process | Simple | Tuning; one perspective |
-| Heartbeat (path counting) | None | Global counters | Works asynchronously; survives a bad link | Threshold hard to choose |
-| SWIM outsourced pings | Yes | Random subset | Indirect reachability; no broadcast | Extra probe round |
-| φ-accrual | Adaptive | One process + statistics | Adapts to jitter; tunable φ | Assumes a distribution |
-| Gossip heartbeat table | Yes | Aggregated | Reliable; survives link failures | More messages |
-| FUSE | Yes | Group | Everyone learns of failures | One link failure becomes a group failure |
+| مهلتی با ping یا heartbeat | ثابت | یک process | ساده | تنظیم؛ یک زاویه |
+| Heartbeat با شمردن مسیر | ندارد | شمارنده‌های جهانی | asynchronous کار می‌کند؛ از پیوند بد جان به در می‌برد | برداشتن آستانه سخت است |
+| ping برون‌سپاری‌شده‌ی SWIM | بله | زیرمجموعه‌ی تصادفی | دست‌یافتنی بودن غیرمستقیم؛ بی پخش فراگیر | یک دور کاوش اضافه |
+| φ-accrual | وفق‌پذیر | یک process به‌علاوه‌ی آمار | با jitter وفق می‌یابد؛ φ تنظیم‌پذیر | توزیعی را فرض می‌گیرد |
+| جدول heartbeat با gossip | بله | تجمیع‌شده | قابل اطمینان؛ از شکست پیوند جان به در می‌برد | پیام بیشتر |
+| FUSE | بله | گروه | همه از شکست‌ها خبردار می‌شوند | یک شکست پیوند شکستی گروهی می‌شود |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **The φ formula.** With mean μ and standard deviation σ of inter-arrival times and Δ the time since the last heartbeat, φ(Δ) = −log₁₀(1 − F(Δ)), where F is the normal CDF. φ = 1 means about a 10% chance of a mistake if you suspect now, φ = 2 about 1%, φ = 3 about 0.1%. Cassandra's default `phi_convict_threshold` is 8. The widget computes exactly this.
-- **SWIM's suspicion sub-protocol** (and HashiCorp's Lifeguard extensions used in Consul and Serf) adds a "suspect" state that other members can refute before declaring death. This cuts false positives from a temporarily slow prober.
-- **Kubernetes node leases** are a deadline detector in the book's sense: a kubelet renews its Lease object every 10 s by default, and the node controller marks the node *Unknown* after `node-monitor-grace-period`.
+- **فرمول φ.** با میانگین μ و انحراف معیار σ زمان‌های میان‌رسیدن و Δ یعنی زمان از آخرین heartbeat، داریم φ(Δ) = −log₁₀(1 − F(Δ))، که F تابع توزیع تجمعی نرمال است. مقدار φ = 1 یعنی تقریباً ۱۰٪ احتمال خطا اگر همین حالا گمان ببرید، φ = 2 تقریباً ۱٪، و φ = 3 تقریباً ۰٫۱٪. پیش‌فرض `phi_convict_threshold` در Cassandra هشت است. آن widget دقیقاً همین را حساب می‌کند.
+- **زیرپروتکل گمان SWIM**، و افزونه‌های Lifeguard شرکت HashiCorp که در Consul و Serf به کار می‌روند، حالتی «گمان‌برده» می‌افزاید که اعضای دیگر می‌توانند پیش از اعلام مرگ ردش کنند. این مثبت کاذب از کاوشگری موقت کند را می‌برد.
+- **پروتکل lease نود در Kubernetes** به معنای کتاب detectorی مهلتی است: هر kubeletی پیش‌فرض هر ۱۰ ثانیه object به نام Leaseش را تمدید می‌کند، و کنترلر نود پس از `node-monitor-grace-period` نود را *Unknown* علامت می‌زند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [8. Introduction and Overview](08-introduction-and-overview.md) (FLP, synchrony), [10. Leader Election](10-leader-election.md) (detectors trigger elections), [12. Anti-Entropy and Dissemination](12-anti-entropy-and-dissemination.md) (gossip), [14. Consensus](14-consensus.md) (failure detectors in Paxos and Raft).
+- **فصل‌های مرتبط:** [فصل ۸: مقدمه و نمای کلی](08-introduction-and-overview.md) که قضیه‌ی FLP و concurrency را دارد، [فصل ۱۰: انتخاب leader](10-leader-election.md) که در آن detectorها انتخاب را برمی‌انگیزند، [فصل ۱۲: anti-entropy و پخش](12-anti-entropy-and-dissemination.md) که gossip را دارد، و [فصل ۱۴: consensus](14-consensus.md) که detectorهای شکست در Paxos و Raft را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **A failure detector marks a live but slow process as dead. Which property did it violate?**
-   - [ ] Liveness
-   - [x] Safety (accuracy)
-   - [ ] Completeness
+1. **مفهوم failure detectorی processی زنده ولی کند را مرده علامت می‌زند. کدام خاصیت را نقض کرد؟**
+   - [ ] liveness
+   - [x] ایمنی، یعنی دقت
+   - [ ] تمامیت
 
-   *Answer:* Safety requires that a process marked dead was actually dead. Mistakes like this are false positives (pp. 195–196).
+   *Answer:* ایمنی می‌خواهد که processی که مرده علامت خورده واقعاً مرده بوده باشد. خطاهایی مثل این مثبت کاذب‌اند (pp. 195–196).
 
-2. **What are the two main weaknesses of a fixed-deadline detector?**
+2. **دو ضعف اصلی detector مهلت‌ثابت چیست؟**
 
-   *Answer:* Its precision depends on the chosen ping frequency and timeout, and it reflects only one process's view, not how others see the peer (p. 197).
+   *Answer:* دقتش به فراوانی ping و timeoutی که برداشته شده وابسته است، و تنها نمای یک process را بازتاب می‌دهد و نه این‌که بقیه آن همتا را چطور می‌بینند (p. 197).
 
-3. **How can the timeout-free Heartbeat algorithm mark a process alive even when the direct link to it is broken?**
+3. **الگوریتم Heartbeat بی timeout چطور می‌تواند processی را زنده علامت بزند حتی وقتی پیوند مستقیم به آن شکسته باشد؟**
 
-   *Answer:* Heartbeats travel along many paths, and each receiver increments the counters of every process on the path. Liveness information arrives indirectly (p. 198).
+   *Answer:* heartbeatها روی مسیرهای زیادی سفر می‌کنند، و هر گیرنده‌ای شمارنده‌ی هر processی روی مسیر را می‌افزاید. اطلاع زنده بودن غیرمستقیم می‌رسد (p. 198).
 
-4. **In SWIM, what does P1 do when P2 doesn't answer a ping?**
+4. **در SWIM، وقتی P2 به pingی پاسخ ندهد process P1 چه می‌کند؟**
 
-   *Answer:* It asks several random members to ping P2 on its behalf. If P2 answers any of them, they forward the acknowledgment to P1 (pp. 198–199).
+   *Answer:* از چند عضو تصادفی می‌خواهد به‌جایش P2 را ping کنند. اگر P2 به هر یک پاسخ بدهد، تأیید را به P1 می‌فرستند (pp. 198–199).
 
-5. **What does the φ-accrual detector estimate from its sliding window?**
+5. **نقش detector φ-accrual از پنجره‌ی لغزانش چه چیزی را تخمین می‌زند؟**
 
-   *Answer:* The mean and variance of heartbeat inter-arrival times. From these it computes the probability of a heartbeat arriving after the current silence, giving the suspicion level φ (pp. 199–200).
+   *Answer:* میانگین و واریانس زمان‌های میان‌رسیدن heartbeat. از این‌ها احتمال رسیدن heartbeatی پس از سکوت جاری را حساب می‌کند، که سطح گمان یعنی φ را می‌دهد (pp. 199–200).
 
-6. **How does FUSE propagate a failure?**
+6. **روش FUSE شکستی را چطور پخش می‌کند؟**
 
-   *Answer:* Through silence. A member that can't reach another stops answering pings itself, so the failure spreads until the whole group knows (pp. 201–202).
+   *Answer:* با سکوت. عضوی که نتواند به دیگری برسد خودش پاسخ دادن به ping را بس می‌کند، پس شکست پخش می‌شود تا کل گروه بداند (pp. 201–202).
 
-7. **What did Chandra and Toueg show about failure detectors and consensus?**
+7. **چاندرا و توگ درباره‌ی detectorهای شکست و consensus چه نشان دادند؟**
 
-   *Answer:* Consensus can be solved even with a failure detector that makes an infinite number of mistakes (p. 202).
+   *Answer:* consensus حتی با failure detectorی که شمار بی‌نهایتی خطا کند حل‌شدنی است (p. 202).

@@ -1,18 +1,18 @@
-# Consistent hashing vs mod N
+# روش consistent hashing در برابر mod N
 
-How much data moves when a node joins? This experiment assigns 100,000 keys to 10 nodes, adds an 11th, and counts the keys that change owner. It compares three schemes: `hash mod N`, a consistent-hashing ring with one position per node, and a ring with 100 virtual nodes per node. It also reports how evenly the keys are spread afterwards.
+وقتی nodeی می‌پیوندد چقدر داده جابه‌جا می‌شود؟ این آزمایش ۱۰۰٬۰۰۰ کلید را به ۱۰ node می‌سپارد، node یازدهمی می‌افزاید، و کلیدهایی را که مالکشان عوض می‌شود می‌شمارد. سه شیوه را می‌سنجد: `hash mod N`، حلقه‌ای consistent hashing با یک جایگاه برای هر گره، و حلقه‌ای با ۱۰۰ node مجازی برای هر node. گزارش می‌دهد که پس از آن کلیدها چه یکنواخت پهن شده‌اند.
 
-*Illustrates Database Internals, “Database Partitioning” and “Consistent Hashing”, pp. 270–271: mod N remaps most keys when N changes, while a ring moves about K/n. Virtual nodes are the vault's addition, to show load balance. The hash choice, key names and implementation are the vault's.*
+*تصویری از «پارتیشن‌بندی پایگاه داده» و «روش consistent hashing» کتاب Database Internals، صص. ۲۷۰–۲۷۱: شیوه‌ی mod N وقتی N عوض شود بیشتر کلیدها را از نو می‌سپارد، در حالی که حلقه حدود K/n را جابه‌جا می‌کند. nodeهای مجازی افزوده‌ی vault است، تا توازن بار را نشان دهد. گزینش hash و نام کلیدها و پیاده‌سازی مال vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 consistent_hashing.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 100,000 keys, 10 nodes -> 11 nodes; ideal movement K/n = 9,090 keys
@@ -23,13 +23,13 @@ ring, 1 token per node           1,162    1.2%           3.12     0.82
 ring, 100 vnodes per node        9,515    9.5%           1.15     0.09
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- `hash mod N` moves about 91% of the keys, nearly everything, as p. 271 warns.
-- A ring with one token per node moves only the keys the new node takes over. Here that's just 1.2%, but the load is very uneven, with the busiest node holding three times the mean.
-- With 100 virtual nodes per node, about 9.5% of keys move, close to the ideal K/n = 9.1%, and the load evens out.
-- Load CV is the coefficient of variation of keys per node. Lower means more even.
+- شیوه‌ی `hash mod N` حدود ۹۱ درصد کلیدها را جابه‌جا می‌کند، تقریباً همه را، همان‌طور که ص. ۲۷۱ هشدار می‌دهد.
+- حلقه‌ای با یک token برای هر node تنها کلیدهایی را جابه‌جا می‌کند که node تازه به دست می‌گیرد. اینجا همین ۱٫۲ درصد است، ولی بار خیلی نایکنواخت است و شلوغ‌ترین node سه برابر میانگین را نگه داشته.
+- با ۱۰۰ node مجازی برای هر گره، حدود ۹٫۵ درصد کلیدها جابه‌جا می‌شوند، نزدیک به آرمان K/n یعنی ۹٫۱ درصد، و بار یکنواخت می‌شود.
+- مقدار load CV ضریب تغییرات کلیدهای هر node است. پایین‌تر یعنی یکنواخت‌تر.
 
-## Related
+## مرتبط
 
-- Chapter note: [13. Distributed Transactions](../../chapters/13-distributed-transactions.md) — “Database Partitioning”, pp. 270–271
+- یادداشت فصل: [فصل ۱۳: تراکنش توزیع‌شده](../../chapters/13-distributed-transactions.md) — «پارتیشن‌بندی پایگاه داده»، صص. ۲۷۰–۲۷۱

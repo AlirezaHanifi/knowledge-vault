@@ -3,398 +3,412 @@ book: database-internals
 chapter: 7
 title: "Log-Structured Storage"
 pages: "129–163"
+translated_title: "ذخیره‌سازی log-structured"
+lang: fa
 ---
 
-# 7. Log-Structured Storage
+# فصل ۷: ذخیره‌سازی log-structured
 
-[← 6. B-Tree Variants](06-b-tree-variants.md) · [Book](../README.md) · [8. Introduction and Overview (Part II) →](08-introduction-and-overview.md)
+[فصل ۶: گونه‌های B-Tree →](06-b-tree-variants.md) · [کتاب](../README.md) · [فصل ۸: مقدمه و نمای کلی بخش دو ←](08-introduction-and-overview.md)
 
-## Summary
+## خلاصه
 
-The chapter opens with Pat Helland's line that accountants don't use erasers: corrections are new records, and the bottom line is derived by going through them all (p. 129). **Immutable** storage works the same way. Files are written once, new records are appended, and the final value is reconstructed from several files. Mutable structures, by contrast, update records in place (p. 129).
+فصل با این جمله‌ی پت هلند باز می‌شود که حساب‌دارها پاک‌کن به کار نمی‌برند: تصحیح‌ها رکوردهای تازه‌اند، و خط آخر از گذشتن از همه‌شان در می‌آید (p. 129). ذخیره‌سازی **immutable** همان‌طور کار می‌کند. فایل‌ها یک بار نوشته می‌شوند، رکوردهای تازه افزوده، و مقدار نهایی از چند فایل دوباره ساخته می‌شود. ساختارهای تغییرپذیر، در مقابل، رکوردها را سر جا به‌روز می‌کنند (p. 129).
 
-**The trade-off** (p. 130): in-place structures such as B-Trees are optimized for reads; append-only structures for writes. B-Tree I/O is mostly random, nodes split and merge, space is reserved, and a single-cell change rewrites a whole page.
+**بده‌بستان** (p. 130): ساختارهای سر‌جا مثل B-Tree برای خواندن بهینه‌اند؛ و ساختارهای append-only برای نوشتن. I/O مربوط به B-Tree بیشتر تصادفی است، نودها می‌شکنند و merge می‌شوند، فضا نگه داشته می‌شود، و عوض شدن یک cell کل صفحه‌ای را دوباره می‌نویسد.
 
-**LSM Trees** (O'Neil et al., 1996) (pp. 130–143):
+**سیستم LSM Tree**ها، از اونیل و همکاران در ۱۹۹۶ (pp. 130–143):
 
-- **Writes** go to an in-memory, mutable **memtable** backed by a WAL and are flushed as immutable, sorted disk tables. Deletes become **tombstones**.
-- **Reads** merge every component with a priority-queue **merge-iteration** and **reconcile** same-key records by timestamp.
-- **Compaction** (leveled, size-tiered, time-window) keeps the number of tables down.
+- **نوشتن**ها به یک **memtable** in-memoryی و mutable می‌روند که WALی پشتش است و به‌شکل جدول‌های دیسکی مرتب و immutable flush می‌شوند. حذف‌ها **tombstone** می‌شوند.
+- **خواندن**ها هر مؤلفه‌ای را با **merge‌پیمایی** صف‌اولویتی merge می‌کنند و رکوردهای هم‌کلید را بر حسب timestamp **آشتی** می‌دهند.
+- **عمل compaction**، که سطحی یا size-tiered یا پنجره‌زمانی است، شمار جدول‌ها را کم نگه می‌دارد.
 
-**Costs and building blocks** (pp. 143–152):
+**هزینه‌ها و قطعه‌های سازنده** (pp. 143–152):
 
-- The trade-off between **read, write and space amplification** is captured by the **RUM Conjecture**.
-- Implementation pieces: **SSTables**, **Bloom filters**, **skiplists**, page-cache access with unaligned records, and compression with an offset table.
+- بده‌بستان میان **تقویت خواندن و نوشتن و فضا** را **حدس RUM** می‌گیرد.
+- تکه‌های پیاده‌سازی: **SSTable** و **فیلتر Bloom** و **skiplist** و دسترسی page cache با رکوردهای ناهم‌تراز و فشرده‌سازی با جدول offset.
 
-**Variants and layering** (pp. 152–162):
+**گونه‌ها و لایه‌بندی** (pp. 152–162):
 
-- **Unordered** stores: **Bitcask** (in-memory keydir) and **WiscKey** (sorted keys, values in a vLog).
-- Concurrency rules for memtable switches, flush finalization and WAL truncation.
-- The problems of **log stacking** (FTL, filesystem and database each keeping a log) and how coordination (**LLAMA**) or bypassing layers (**Open-Channel SSDs**) helps.
+- انباره‌های **بی‌ترتیب**: **Bitcask** با keydir in-memory‌ای، و **WiscKey** با کلیدهای مرتب و مقدارها در vLogی.
+- قاعده‌های concurrency برای عوض کردن memtable و نهایی کردن flush و بریدن WAL.
+- مسئله‌های **روی‌هم چیدن log**، که در آن FTL و فایل‌سیستم و دیتابیس هر یک logی نگه می‌دارند، و این‌که هم‌آهنگی یعنی **LLAMA** یا رد شدن از لایه‌ها یعنی **Open-Channel SSD** چطور کمک می‌کند.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **LSM writes never look up old data.** Inserts and updates are upserts, and conflicts are resolved at read time (pp. 131, 140).
-- **Immutable files are dense and sequential.** No space is reserved, and readers need no segment locking (p. 131).
-- **Deleting from the memtable can resurrect old values.** Deletes must be explicit tombstones, or range tombstones for key ranges (pp. 136–137).
-- **Merge-iteration uses O(N) memory for N sources.** A min-heap of iterator heads; same-key records from different sources meet in the heap and are reconciled (pp. 137–140).
-- **Tombstones survive compaction until nothing older can exist.** RocksDB keeps them to the bottommost level; Cassandra until the GC grace period (p. 141).
-- **Leveled compaction keeps key ranges disjoint** from level 1 on, with sizes growing exponentially. Size-tiered compaction groups tables by size and can starve higher levels (pp. 142–143).
-- **RUM: you can optimize two of read, update and memory overheads, never all three** (p. 144).
-- **A Bloom filter says "maybe" or "definitely not".** It never gives false negatives, and its size can be set exactly because an LSM table's key count is known up front (pp. 147–148).
-- **Stacked logs duplicate work.** FTL, filesystem and database logs each garbage-collect and fragment, so keep partitions and writes aligned (pp. 157–160).
+- **نوشتن‌های LSM هیچ‌وقت داده‌ی قدیم را جست‌و‌جو نمی‌کنند.** درج و به‌روزرسانی upsert‌اند، و تعارض‌ها سر خواندن حل می‌شوند (pp. 131, 140).
+- **فایل‌های immutable چگال و ترتیبی‌اند.** هیچ فضایی نگه داشته نمی‌شود، و خواننده‌ها قفل قطعه لازم ندارند (p. 131).
+- **حذف از memtable می‌تواند مقدارهای قدیم را رستاخیز کند.** حذف‌ها باید tombstone صریح باشند، یا tombstone بازه‌ای برای بازه‌ای از کلید (pp. 136–137).
+- **عمل merge‌پیمایی برای N منبع از مرتبه‌ی O(N) حافظه به کار می‌برد.** یک min-heap از سر پیمایش‌گرها؛ رکوردهای هم‌کلید از منبع‌های مختلف در heap به هم می‌رسند و آشتی داده می‌شوند (pp. 137–140).
+- **همه‌ی tombstoneها از compaction جان به در می‌برند تا وقتی که چیزی قدیمی‌تر نتواند وجود داشته باشد.** سیستم RocksDB تا پایین‌ترین سطح نگهشان می‌دارد؛ و Cassandra تا دوره‌ی مهلت GC (p. 141).
+- **عمل compaction سطحی بازه‌های کلید را از سطح ۱ به بعد ناهم‌پوشان نگه می‌دارد**، با اندازه‌هایی که نمایی رشد می‌کنند. compaction size-tiered جدول‌ها را بر حسب اندازه گروه می‌کند و می‌تواند سطح‌های بالاتر را گرسنه بگذارد (pp. 142–143).
+- **حدس RUM: می‌شود دو تا از سرریزهای خواندن و به‌روزرسانی و حافظه را بهینه کرد، و هیچ‌وقت هر سه را** (p. 144).
+- **فیلتر Bloom «شاید» یا «قطعاً نه» می‌گوید.** هیچ‌وقت منفی کاذب نمی‌دهد، و اندازه‌اش دقیق تنظیم‌شدنی است چون شمار کلیدهای جدول LSM از پیش معلوم است (pp. 147–148).
+- **همه‌ی logهای روی‌هم‌چیده کار را تکرار می‌کنند.** logهای FTL و فایل‌سیستم و دیتابیس هر یک زباله می‌روبند و تکه‌تکه می‌کنند، پس پارتیشن‌ها و نوشتن‌ها را هم‌تراز نگه دارید (pp. 157–160).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- LSM Trees — p. 130
-  - LSM Tree Structure — p. 132
-  - Updates and Deletes — p. 136
-  - LSM Tree Lookups — p. 137
-  - Merge-Iteration — p. 137
-  - Reconciliation — p. 140
-  - Maintenance in LSM Trees — p. 141
-- Read, Write, and Space Amplification — p. 143
-  - RUM Conjecture — p. 144
-- Implementation Details — p. 145
-  - Sorted String Tables — p. 145
-  - Bloom Filters — p. 146
-  - Skiplist — p. 148
-  - Disk Access — p. 150
-  - Compression — p. 151
-- Unordered LSM Storage — p. 152
-  - Bitcask — p. 153
-  - WiscKey — p. 154
-- Concurrency in LSM Trees — p. 155
-- Log Stacking — p. 157
-  - Flash Translation Layer — p. 157
-  - Filesystem Logging — p. 159
-- LLAMA and Mindful Stacking — p. 160
-  - Open-Channel SSDs — p. 161
-- Summary — p. 162
+- بخش LSM Tree — ص. ۱۳۰
+  - ساختار LSM Tree — ص. ۱۳۲
+  - به‌روزرسانی و حذف — ص. ۱۳۶
+  - جست‌و‌جو در LSM Tree — ص. ۱۳۷
+  - بخش merge‌پیمایی — ص. ۱۳۷
+  - آشتی‌دهی — ص. ۱۴۰
+  - نگهداشت در LSM Tree — ص. ۱۴۱
+- تقویت خواندن و نوشتن و فضا — ص. ۱۴۳
+  - حدس RUM — ص. ۱۴۴
+- جزئیات پیاده‌سازی — ص. ۱۴۵
+  - بخش Sorted String Table — ص. ۱۴۵
+  - فیلتر Bloom — ص. ۱۴۶
+  - بخش skiplist — ص. ۱۴۸
+  - دسترسی به دیسک — ص. ۱۵۰
+  - فشرده‌سازی — ص. ۱۵۱
+- ذخیره‌سازی LSM بی‌ترتیب — ص. ۱۵۲
+  - بخش Bitcask — ص. ۱۵۳
+  - بخش WiscKey — ص. ۱۵۴
+- بخش concurrency در LSM Tree — ص. ۱۵۵
+- روی‌هم چیدن log — ص. ۱۵۷
+  - بخش Flash Translation Layer — ص. ۱۵۷
+  - بخش log فایل‌سیستم — ص. ۱۵۹
+- بخش LLAMA و چیدن هشیارانه — ص. ۱۶۰
+  - بخش Open-Channel SSD — ص. ۱۶۱
+- خلاصه — ص. ۱۶۲
 
-## Notes
+## یادداشت‌ها
 
-Immutable structures are safe because once built they never change, so all references can be read concurrently (p. 129). Internally, immutable files may hold many copies of a record; on access, copies are reconciled and the most recent is returned (p. 129).
+ساختارهای immutable ایمن‌اند چون همین که ساخته شوند هیچ‌وقت عوض نمی‌شوند، پس همه‌ی ارجاع‌ها هم‌زمان خواندنی‌اند (p. 129). درونی، فایل‌های immutable می‌توانند کپی‌های زیادی از رکوردی داشته باشند؛ سر دسترسی، کپی‌ها آشتی داده می‌شوند و تازه‌ترین برگردانده (p. 129).
 
-### LSM Trees
+### LSM Tree
 
-Buffering can be applied in two ways: to *postpone* writes to disk pages (FD-Trees, WiredTiger) or to make writes *sequential*. LSM Trees do the second (p. 130). An LSM Tree is a B-Tree-like disk structure with fully occupied nodes, optimized for sequential access, and named after log-structured filesystems (p. 130). It's common for LSM Trees to use B-Trees *internally* to index their immutable files (p. 131). "Merge" refers to the merge-sort-like combination of contents, during maintenance and during reads (p. 131).
+ساختار buffer کردن دو‌طور به کار بستنی است: برای *عقب انداختن* نوشتن به صفحه‌های دیسک، مثل FD-Tree و WiredTiger، یا برای *ترتیبی* کردن نوشتن‌ها. LSM Treeها دومی را می‌کنند (p. 130). LSM Tree ساختاری دیسکی از جنس B-Tree با نودهای تماماً اشغال‌شده است، که برای دسترسی ترتیبی بهینه است، و نامش از فایل‌سیستم‌های log-structured می‌آید (p. 130). رایج است که LSM Treeها *درونی* B-Tree به کار ببرند تا فایل‌های immutableشان را index کنند (p. 131). واژه‌ی «merge» به ترکیب محتوا از جنس merge-sort برمی‌گردد، در نگهداشت و در خواندن (p. 131).
 
-| Property | Why (pp. 131–132) |
+| خاصیت | چرا (pp. 131–132) |
 |---|---|
-| Sequential writes | Files written in one pass, append-only. ISAM pre-allocates in one pass, but later accesses are still random |
-| Higher density | No space reserved for future writes or growing records |
-| Fast writes | No need to locate records; duplicates allowed and resolved on read. Suits write-heavy workloads |
-| Simple concurrency | Reads and writes don't intersect; only the structures *managing* the table views need guarding |
-| Housekeeping | The number of files grows, so tables are merged to keep reads touching few files |
+| نوشتن ترتیبی | فایل‌ها در یک گذر نوشته می‌شوند، append-only. روش ISAM در یک گذر پیش‌تخصیص می‌دهد، ولی دسترسی‌های بعدی باز هم تصادفی‌اند |
+| چگالی بالاتر | هیچ فضایی برای نوشتن‌های آینده یا رکوردهای رونده نگه داشته نمی‌شود |
+| نوشتن سریع | لازم نیست رکوردها پیدا شوند؛ تکراری مجاز است و سر خواندن حل می‌شود. به بارهای پرنوشتن می‌خورد |
+| concurrency ساده | خواندن و نوشتن با هم اشتراک ندارند؛ تنها ساختارهایی که نماهای جدول را *می‌گردانند* پاییدن لازم دارند |
+| خانه‌داری | شمار فایل‌ها رشد می‌کند، پس جدول‌ها merge می‌شوند تا خواندن‌ها به فایل کمی دست بزنند |
 
-#### LSM Tree structure
+#### ساختار LSM Tree
 
-The book starts with *ordered* LSM Trees, whose files hold sorted records (p. 132).
+کتاب از LSM Treeهای *مرتب* شروع می‌کند، که فایل‌هایشان رکوردهای مرتب دارند (p. 132).
 
-- The **memtable** is mutable. It buffers records, serves reads and writes, and is flushed at a size threshold. Its updates cost no disk I/O.
-- A separate **WAL** provides durability: records are appended to the log and committed in memory *before* the client gets an acknowledgment (p. 132).
-- **Disk-resident components** ("tables" in this chapter) are only read, never modified (p. 132).
+- **ساختار memtable** mutable است. رکوردها را buffer می‌کند، خواندن و نوشتن را سرویس می‌دهد، و سر آستانه‌ای از اندازه flush می‌شود. به‌روزرسانی‌هایش هیچ I/O دیسکی خرج ندارند.
+- یک **WAL** جدا پایایی می‌دهد: رکوردها به log افزوده و در حافظه commit می‌شوند *پیش از* آن‌که کلاینت تأییدی بگیرد (p. 132).
+- **مؤلفه‌های دیسک‌مقیم**، که در این فصل «جدول» نامیده می‌شوند، تنها خوانده می‌شوند و هیچ‌وقت عوض نه (p. 132).
 
-**Two-component LSM Tree** (pp. 132–134): one disk component organized as a B-Tree with 100% occupancy and read-only pages. Memory subtrees are flushed *in parts*: each one is merged with the matching disk subtree into a new segment, which replaces both (Figures 7-1, 7-2). The merge advances iterators over the two sorted sources in lockstep. Three rules apply:
+**سیستم LSM Tree دو‌مؤلفه‌ای** (pp. 132–134): یک مؤلفه‌ی دیسکی که به‌شکل B-Treeی با اشغال صد‌درصدی و صفحه‌های read-only سازمان یافته. زیردرخت‌های حافظه *بخش‌بخش* flush می‌شوند: هر یک با زیردرخت دیسکی متناظرش در قطعه‌ای تازه merge می‌شود، که جای هر دو را می‌گیرد (شکل‌های ۷-۱ و ۷-۲). آن merge iteratorها را روی دو منبع مرتب هم‌قدم جلو می‌برد. سه قاعده به کار می‌آیند:
 
-1. once a flush starts, new writes go to a new memtable;
-2. during the flush, both the disk subtree and the flushing memory subtree stay readable;
-3. publishing the merged result and discarding the old parts happen atomically.
+۱. همین که flushی شروع شود، نوشتن‌های تازه به memtableی تازه می‌روند؛
+۲. در میانه‌ی flush، هم زیردرخت دیسکی و هم زیردرخت حافظه‌ای که flush می‌شود خواندنی می‌مانند؛
+۳. منتشر کردن نتیجه‌ی merge‌شده و انداختن بخش‌های قدیم اتمی رخ می‌دهند.
 
-The author knew of no implementation, probably because merges triggered by every flush cause heavy write amplification (p. 134).
+نویسنده از هیچ پیاده‌سازی‌ای خبر نداشت، احتمالاً چون mergeهایی که هر flushی برمی‌انگیزدشان تقویت نوشتن سنگینی می‌سازند (p. 134).
 
-**Multicomponent LSM Tree** (pp. 134–136): the *whole* memtable is flushed in one run, creating more and more tables, so a periodic **compaction** merges them (Figure 7-3).
+**سیستم LSM Tree چند‌مؤلفه‌ای** (pp. 134–136): *کل* memtable در یک دور flush می‌شود، که جدول‌های بیشتر و بیشتری می‌سازد، پس **compaction**ی دوره‌ای mergeشان می‌کند (شکل ۷-۳).
 
-![In memory, the current memtable takes reads and writes and is switched into a flushing memtable that only serves reads; on disk, the flush target becomes a flushed table, then compacting tables, then a compacted table, each readable except the flush target](../figures/07-04.png)
+![در حافظه، memtable جاری خواندن و نوشتن می‌گیرد و به memtableی در حال flush عوض می‌شود که تنها خواندن سرویس می‌دهد؛ روی دیسک، هدف flush به جدولی flush‌شده می‌شود، بعد جدول‌های در حال compaction، بعد جدولی compact‌شده، که هر کدام جز هدف flush خواندنی‌اند](../figures/07-04.png)
 
-*Figure 7-4 (p. 136): the memtable switch is atomic; the flush target can't be read until it is complete, after which the write-ahead log up to that point can be trimmed (pp. 135–136).*
+*Figure 7-4 (p. 136): عوض شدن memtable اتمی است؛ هدف flush تا کامل شدنش خواندنی نیست، و پس از آن write-ahead log تا آن نقطه بریدنی است (pp. 135–136).*
 
-A flush is triggered periodically or by size. The memtable switch must be atomic, the flushing memtable stays readable until the new table replaces it, and once the flush completes the corresponding WAL section can be trimmed (pp. 135–136).
+یک flush دوره‌ای یا بر حسب اندازه برانگیخته می‌شود. عوض شدن memtable باید اتمی باشد، آن memtableی که flush می‌شود تا جایگزین شدنش با جدول تازه خواندنی می‌ماند، و همین که flush تمام شود بخش متناظر WAL بریدنی است (pp. 135–136).
 
-#### Updates and deletes
+#### به‌روزرسانی و حذف
 
-Removing a record from the memtable isn't enough: the disk table may still hold `k1 → v1`, which would be **resurrected** (p. 136). Deletes are written as **tombstones** (also called *dormant certificates*), and reconciliation filters out the values they shadow (p. 137).
+برداشتن رکوردی از memtable کافی نیست: جدول دیسکی می‌تواند باز هم `k1 → v1` را داشته باشد، که **رستاخیز** می‌شد (p. 136). حذف‌ها به‌شکل **tombstone** نوشته می‌شوند، که *گواهی خفته* هم نامیده می‌شوند، و آشتی‌دهی مقدارهایی را که سایه می‌اندازند فیلتر می‌کند (p. 137).
 
-| Disk table | Memtable | Read of k1 |
+| جدول دیسکی | memtable | خواندن k1 |
 |---|---|---|
 | k1 → v1 | k1 → v2 | v2 |
-| k1 → v1 | ∅ (v2 just removed) | **v1, resurrected** ✗ |
-| k1 → v1 | k1 → ⟂ tombstone | absent ✓ |
+| k1 → v1 | ∅ یعنی v2 همین حالا برداشته شد | **v1 که رستاخیز کرده** ✗ |
+| k1 → v1 | k1 → ⟂ یعنی tombstone | نیست ✓ |
 
-*Restates the example on pp. 136–137.*
+*نمونه‌ی صص. ۱۳۶–۱۳۷ را بازمی‌گوید.*
 
-**Predicate deletes** append a delete entry with a predicate, e.g. `DELETE FROM table WHERE key ≥ "k2" AND key < "k4"`. Cassandra calls these **range tombstones**. Overlapping ranges and table boundaries need careful resolution rules (p. 137).
+**حذف گزاره‌ای** entryی حذف با گزاره‌ای می‌افزاید، مثلاً `DELETE FROM table WHERE key ≥ "k2" AND key < "k4"`. سیستم Cassandra این‌ها را **tombstone بازه‌ای** می‌نامد. بازه‌های هم‌پوشان و مرزهای جدول قاعده‌های حل دقیقی لازم دارند (p. 137).
 
-#### LSM Tree lookups and merge-iteration
+#### جست‌و‌جو در LSM Tree و merge‌پیمایی
 
-A read usually touches several components, which are merged with a **multiway merge-sort** (p. 137). A min-heap holds the head of each iterator. Pop the smallest element, then refill from the iterator it came from, unless that iterator is exhausted (pp. 138–140). Since each iterator holds at most one record per key, duplicate keys in the queue must come from different sources (p. 138).
+خواندنی معمولاً به چند مؤلفه دست می‌زند، که با **merge-sort چند‌راهه** merge می‌شوند (p. 137). یک min-heap سر هر iteratorی را دارد. کوچک‌ترین عنصر را pop کنید، بعد از همان iteratorی که از آن آمده پر، مگر آن iterator ته کشیده باشد (pp. 138–140). چون هر iteratorی حداکثر یک رکورد برای هر کلیدی دارد، کلیدهای تکراری در آن صف باید از منبع‌های مختلف بیایند (p. 138).
 
-The book's walk-through (pp. 139–140):
+گذر گام‌به‌گام کتاب (pp. 139–140):
 
-| Step | Iterator 1 | Iterator 2 | Queue | Output |
+| قدم | iterator ۱ | iterator ۲ | صف | خروجی |
 |---|---|---|---|---|
-| Start | k2:v1, k4:v2 | k1:v3, k2:v4, k3:v5 | — | — |
-| Fill | k4:v2 | k2:v4, k3:v5 | k1:v3, k2:v1 | — |
-| Pop k1, refill from 2 | k4:v2 | k3:v5 | k2:v1, k2:v4 | k1:v3 |
-| Two k2s: reconcile; refill both | — | — | k3:v5, k4:v2 | k1:v3, k2:v4 |
-| Drain | — | — | — | k1:v3, k2:v4, k3:v5, k4:v2 |
+| آغاز | k2:v1، k4:v2 | k1:v3، k2:v4، k3:v5 | — | — |
+| پر کردن | k4:v2 | k2:v4، k3:v5 | k1:v3، k2:v1 | — |
+| pop کردن k1 و پر کردن از ۲ | k4:v2 | k3:v5 | k2:v1، k2:v4 | k1:v3 |
+| دو k2: آشتی؛ و پر کردن هر دو | — | — | k3:v5، k4:v2 | k1:v3، k2:v4 |
+| تخلیه | — | — | — | k1:v3، k2:v4، k3:v5، k4:v2 |
 
-Complexity matches merging sorted collections: O(N) memory for N iterators and O(log N) per step (p. 140).
+پیچیدگی با merge کردن مجموعه‌های مرتب می‌خواند: از مرتبه‌ی O(N) حافظه برای N iterator و O(log N) برای هر قدمی (p. 140).
 
-#### Reconciliation
+#### آشتی‌دهی
 
-Records for the same key are reconciled by metadata, typically **timestamps**. Shadowed records are neither returned nor written during compaction. Inserts and updates are indistinguishable, so LSM writes are **upserts** by default (p. 140).
+رکوردهای یک کلید با metadata آشتی داده می‌شوند، که معمولاً **timestamp** است. رکوردهای سایه‌خورده نه برگردانده و نه در compaction نوشته می‌شوند. درج و به‌روزرسانی تشخیص‌ناپذیرند، پس نوشتن‌های LSM پیش‌فرض **upsert** هستند (p. 140).
 
-> **Try it:** [LSM merge and compaction](../widgets/07-lsm-compaction.html) — write, overwrite and delete keys, flush memtables to SSTables, step a merge-iteration through its priority queue, and compare leveled and size-tiered compaction by tables per read and bytes rewritten.
+> **Try it:** [merge و compaction در LSM](../widgets/07-lsm-compaction.html)؛ کلید بنویسید و روی‌نویسی و حذف کنید، memtableها را به SSTable فلاش کنید، merge‌پیمایی را قدم‌به‌قدم از صف اولویتش بگذرانید، و compaction سطحی و size-tiered را بر حسب جدول برای هر خواندنی و بایت‌های دوباره‌نوشته‌شده مقایسه.
 
-#### Maintenance in LSM Trees
+#### نگهداشت در LSM Tree
 
-**Compaction** picks several tables, merge-iterates and reconciles them, and writes a new table. Memory is bounded (only iterator heads are held), and reads and writes are sequential (p. 141). Compacting tables stay readable until the end, so there must be enough free disk space for the output. Concurrent compactions work on disjoint table sets, and a compaction can either merge tables or partition one into several (p. 141).
+**عمل compaction** چند جدولی را برمی‌دارد، merge‌پیمایی و آشتی‌شان می‌دهد، و جدولی تازه می‌نویسد. حافظه bounded است، چون تنها سر iteratorها نگه داشته می‌شوند، و خواندن و نوشتن ترتیبی‌اند (p. 141). جدول‌هایی که compact می‌شوند تا پایان خواندنی می‌مانند، پس باید فضای آزاد دیسکی کافی برای خروجی باشد. compactionهای هم‌زمان روی مجموعه‌های ناهم‌پوشان از جدول کار می‌کنند، و compactionی می‌تواند جدول‌ها را merge کند یا یکی را به چندتا پارتیشن (p. 141).
 
-![Four levels of tables, level 0 to level 3, each level holding more tables; dashed grey groups mark the tables of adjacent levels that are being compacted together](../figures/07-06.png)
+![چهار سطح از جدول، از سطح ۰ تا سطح ۳، که هر سطحی جدول بیشتری دارد؛ گروه‌های خاکستری خط‌چین آن جدول‌هایی از سطح‌های مجاور را علامت می‌زنند که با هم compact می‌شوند](../figures/07-06.png)
 
-*Figure 7-6 (p. 142): leveled compaction merges a table with only the tables of the next level whose key ranges overlap it.*
+*Figure 7-6 (p. 142): compaction سطحی جدولی را تنها با آن جدول‌هایی از سطح بعد merge می‌کند که بازه‌ی کلیدشان با آن هم‌پوشان است.*
 
-**Tombstones and compaction** (p. 141): a tombstone is kept until no record with the same key and a smaller timestamp can exist in any table. RocksDB keeps tombstones until the bottommost level. Cassandra keeps them until the **GC grace period** has passed, so that other replicas see them, because it is eventually consistent. Dropping tombstones early resurrects data.
+**همه‌ی tombstoneها و compaction** (p. 141): tombstoneی نگه داشته می‌شود تا وقتی که هیچ رکوردی با همان کلید و timestampی کوچک‌تر نتواند در هیچ جدولی وجود داشته باشد. سیستم RocksDB tombstoneها را تا پایین‌ترین سطح نگه می‌دارد. سیستم Cassandra تا گذشتن **دوره‌ی مهلت GC** نگهشان می‌دارد، تا replicaهای دیگر ببینندشان، چون سازگار غایی است. انداختن زود tombstoneها داده را رستاخیز می‌کند.
 
-| Strategy | How it works | Notes (pp. 142–143) |
+| راهبرد | چطور کار می‌کند | یادداشت (pp. 142–143) |
 |---|---|---|
-| **Leveled** (RocksDB) | L0 tables come from flushes and may overlap. When there are too many, they are merged into L1. From L1 on, ranges *don't overlap*; a full level merges into the overlapping tables of the next | Sizes grow exponentially per level; fresh data in low indices, old data migrates up; reads skip tables by range metadata. "Bottommost" = highest index |
-| **Size-tiered** | Tables grouped by size; compacting similar-sized tables promotes the result to the tier of its size | **Table starvation**: if compacted outputs stay small, for example because tombstones shadowed records, higher levels are never compacted and must be forced |
-| **Time-window** (Cassandra) | Groups by write timestamp | Drops whole files of an expired time range without rewriting them; for time series with TTLs |
+| **سطحی** که RocksDB است | جدول‌های L0 از flush می‌آیند و می‌توانند هم‌پوشان باشند. وقتی زیادی باشند، در L1 merge می‌شوند. از L1 به بعد، بازه‌ها *هم‌پوشان نیستند*؛ سطحی پر در آن جدول‌های هم‌پوشان سطح بعد merge می‌شود | اندازه‌ها برای هر سطحی نمایی رشد می‌کنند؛ داده‌ی تازه در indexهای کم، و داده‌ی قدیم رو‌به‌بالا کوچ می‌کند؛ خواندن‌ها با metadata بازه از جدول‌ها می‌پرند. «پایین‌ترین» یعنی بالاترین index |
+| **size-tiered** | جدول‌ها بر حسب اندازه گروه می‌شوند؛ compact کردن جدول‌های هم‌اندازه نتیجه را به لایه‌ی اندازه‌اش ارتقا می‌دهد | **گرسنگی جدول**: اگر خروجی‌های compact‌شده کوچک بمانند، مثلاً چون tombstoneها روی رکوردها سایه انداخته بودند، سطح‌های بالاتر هیچ‌وقت compact نمی‌شوند و باید واداشته شوند |
+| **پنجره‌زمانی** که Cassandra است | بر حسب timestamp نوشتن گروه می‌کند | کل فایل‌های بازه‌ی زمانی منقضی را بی نوشتن دوباره می‌اندازد؛ برای سری‌زمانی با TTL |
 
-### Read, write and space amplification
+> **In practice:** MergeTree خویشاوند LSM Tree است: هر insert یک part مرتب تازه می‌سازد و merge پس‌زمینه partها را ترکیب می‌کند، ولی memtable ندارد و هر insert مستقیم یک part روی دیسک است.
+>
+> **Your turn:** چرا ردیفی که با `ReplacingMergeTree` «جایگزین» شده، در کوئری بدون `FINAL` هنوز دیده می‌شود؟
+>
+> *Answer:* جایگزینی فقط هنگام merge رخ می‌دهد، مثل reconciliation رکوردهای یک کلید در LSM Tree که هنگام خواندن یا compaction انجام می‌شود. تا merge نشده، هر دو نسخه در partهای جدا هستند و کوئری باید خودش reconcile کند، با `FINAL` یا `argMax` (pp. 130–143).
 
-Reclaiming duplicate space quickly means rewriting tables continuously, which raises **write amplification**. Rewriting less raises **read amplification** (reconciling on read) and **space amplification** (redundant copies kept longer) (pp. 143–144).
+### تقویت خواندن و نوشتن و فضا
 
-| Amplification | Source in immutable storage (p. 144) |
+بازپس گرفتن زود فضای تکراری یعنی نوشتن دوباره‌ی پیوسته‌ی جدول‌ها، که **تقویت نوشتن** را بالا می‌برد. نوشتن دوباره‌ی کم‌تر **تقویت خواندن**، یعنی آشتی سر خواندن، و **تقویت فضا**، یعنی نگه داشتن طولانی‌تر کپی‌های زائد، را بالا می‌برد (pp. 143–144).
+
+| تقویت | سرچشمه در ذخیره‌سازی immutable (p. 144) |
 |---|---|
-| **Read** | Several tables addressed per read |
-| **Write** | Continuous rewrites by compaction |
-| **Space** | Multiple records per key |
+| **خواندن** | چند جدول برای هر خواندنی نشانی می‌شوند |
+| **نوشتن** | نوشتن دوباره‌ی پیوسته با compaction |
+| **فضا** | چند رکورد برای هر کلیدی |
 
-> **Vault note:** the book warns that comparing B-Tree and LSM write amplification directly can mislead. In B-Trees it comes from writebacks and repeated updates to the same node; in LSM Trees, from data migrating between files during compaction (p. 144).
+> **Vault note:** کتاب هشدار می‌دهد که مقایسه‌ی مستقیم تقویت نوشتن B-Tree و LSM می‌تواند گمراه کند. در B-Tree از نوشتن پس به دیسک و به‌روزرسانی پیاپی همان نود می‌آید؛ و در LSM Tree از کوچ کردن داده میان فایل‌ها در compaction (p. 144).
 
-#### RUM Conjecture
+#### حدس RUM
 
-The **RUM Conjecture** (Read, Update, Memory overheads) says that reducing two of them inevitably worsens the third (p. 144).
+**حدس RUM**، یعنی سرریزهای Read و Update و Memory، می‌گوید که کم کردن دو تای آن‌ها ناگزیر سومی را بدتر می‌کند (p. 144).
 
-- **B-Trees** are read-optimized. Writes must locate the record, repeated writes to a page rewrite it, and reserved space adds overhead.
-- **LSM Trees** don't locate records on write or reserve space, but redundant records cost space, and by default reads touch several tables (pp. 144–145).
+- **ساختار B-Tree**ها خواندن‌بهینه‌اند. نوشتن‌ها باید رکورد را پیدا کنند، نوشتن‌های پیاپی روی صفحه‌ای دوباره‌اش می‌نویسند، و فضای نگه‌داشته سرریز می‌افزاید.
+- **سیستم LSM Tree**ها سر نوشتن رکورد را پیدا نمی‌کنند و فضایی نگه نمی‌دارند، ولی رکوردهای زائد فضا خرج دارند، و پیش‌فرض خواندن‌ها به چند جدول دست می‌زنند (pp. 144–145).
 
-The model ignores latency, access patterns, complexity, maintenance, hardware, consistency and replication, so it's a first approximation (p. 145).
+مدل latency و الگوی دسترسی و پیچیدگی و نگهداشت و سخت‌افزار و consistency و replication را نادیده می‌گیرد، پس تقریبی اول است (p. 145).
 
-### Implementation details
+> **In practice:** merge پس‌زمینه‌ی ClickHouse CPU و دیسک می‌خورد، و وسوسه‌ی کم کردنش همیشه هست.
+>
+> **Your turn:** تیم می‌خواهد merge را محدود کند تا CPU آزاد شود. چه چیزی بدتر می‌شود؟
+>
+> *Answer:* partهای بیشتر یعنی هر کوئری فایل‌های بیشتری باز می‌کند، فضا بیشتر خرج می‌شود و تکراری‌های `ReplacingMergeTree` دیرتر یکی می‌شوند. حدس RUM همین است: نمی‌شود overhead خواندن، به‌روزرسانی و فضا را هم‌زمان کم کرد (pp. 143–144).
 
-#### Sorted String Tables
+### جزئیات پیاده‌سازی
 
-Disk tables are often **SSTables**: records sorted by key, with an **index file** (a B-Tree for logarithmic lookups or a hashtable for constant-time ones) and a **data file** of concatenated key-value pairs (p. 145). A hash index still allows range scans: the hash finds the first key, and the rest is read sequentially (p. 145). Cells are written sequentially and never modified, data offsets must be known when the index is built, and compaction reads data files sequentially without the index (p. 146).
+#### Sorted String Table
 
-**SSTable-Attached Secondary Indexes (SASI)** in Cassandra create a secondary index *per SSTable*, during flush or compaction. A separate in-memory structure indexes the memtable (p. 146).
+جدول‌های دیسکی اغلب **SSTable**‌اند: رکوردهایی مرتب بر حسب کلید، با یک **فایل index**، که B-Treeی برای جست‌و‌جوی لگاریتمی یا hashtableی برای جست‌و‌جوی زمان‌ثابت است، و یک **فایل داده** از زوج‌های کلید‌مقدار هم‌چسبانده (p. 145). index از جنس hash باز هم اسکن بازه‌ای را مجاز می‌کند: آن hash کلید اول را پیدا می‌کند، و بقیه ترتیبی خوانده می‌شود (p. 145). cellها ترتیبی نوشته می‌شوند و هیچ‌وقت عوض نه، offsetهای داده باید سر ساختن index معلوم باشند، و compaction فایل‌های داده را ترتیبی و بی index می‌خواند (p. 146).
 
-#### Bloom filters
+**ساختار SSTable-Attached Secondary Indexes** که SASI است، در Cassandra، *برای هر SSTableی* یک index ثانویه می‌سازد، در flush یا compaction. ساختاری in-memoryی و جدا آن memtable را index می‌کند (p. 146).
 
-Key-range metadata (min and max key) shows only whether a key *could* be in a table (pp. 146–147). A **Bloom filter** (Bloom, 1970) answers set membership with **false positives but no false negatives** (p. 147). Cassandra and RocksDB both use them, and tables whose filter says "no" are skipped.
+#### فیلتر Bloom
 
-The filter is a bit array plus *k* hash functions. Adding a key sets *k* bits. A lookup is positive only if all *k* bits are set; a single 0 bit means definitely absent (p. 147). A larger array and more hash functions lower the false-positive rate but cost memory and CPU. Because LSM tables are immutable, their key count is known in advance and the filter can be sized exactly (pp. 147–148).
+مفهوم metadata بازه‌ی کلید، یعنی کلید کمینه و بیشینه، تنها نشان می‌دهد که کلیدی *می‌تواند* در جدولی باشد (pp. 146–147). **فیلتر Bloom**، از بلوم در ۱۹۷۰، عضویت در مجموعه را با **مثبت کاذب ولی بی منفی کاذب** پاسخ می‌دهد (p. 147). سیستم‌های Cassandra و RocksDB هر دو به کارشان می‌برند، و جدول‌هایی که فیلترشان «نه» بگوید رد می‌شوند.
 
-The book's example: 16 bits, 3 hash functions (Figure 7-7, p. 148):
+فیلتر آرایه‌ای از بیت به‌علاوه‌ی *k* تابع hash است. افزودن کلیدی *k* بیت را می‌نشاند. جست‌و‌جویی تنها وقتی مثبت است که هر *k* بیت نشسته باشند؛ یک بیت ۰ تنها یعنی قطعاً نیست (p. 147). آرایه‌ی بزرگ‌تر و تابع hash بیشتر نرخ مثبت کاذب را پایین می‌آورند ولی حافظه و CPU خرج دارند. چون جدول‌های LSM تغییرناپذیرند، شمار کلیدهایشان از پیش معلوم است و فیلتر دقیق اندازه‌شدنی (pp. 147–148).
 
-![A 16-bit array; key1 and key2 above it each set three bits; key3 and key4 below each check three bits, one of which is 0 for key4](../figures/07-07.png)
+نمونه‌ی کتاب: ۱۶ بیت و ۳ تابع hash (شکل ۷-۷، ص. ۱۴۸):
 
-*Figure 7-7 (p. 148): a lookup checks the same three bit positions an insert set; any 0 means "definitely absent", all 1s means "maybe present".*
+![آرایه‌ای ۱۶ بیتی؛ key1 و key2 بالایش هر یک سه بیت می‌نشانند؛ key3 و key4 پایینش هر یک سه بیت را می‌سنجند، که یکی از آن‌ها برای key4 صفر است](../figures/07-07.png)
 
-| Key | Hash positions | Result |
+*Figure 7-7 (p. 148): جست‌و‌جویی همان سه جای بیتی را می‌سنجد که درجی نشانده بود؛ هر ۰ یعنی «قطعاً نیست»، و همه‌ی ۱ها یعنی «شاید هست».*
+
+| کلید | جاهای hash | نتیجه |
 |---|---|---|
-| key1 (added) | 3, 5, 10 | bits set |
-| key2 (added) | 5, 8, 14 | bits set |
-| key3 (lookup) | 3, 10, 14 | all set → **false positive** |
-| key4 (lookup) | 5, 9, 15 | 9 and 15 unset → **definitely absent** |
+| key1 که افزوده شد | ۳ و ۵ و ۱۰ | بیت‌ها نشستند |
+| key2 که افزوده شد | ۵ و ۸ و ۱۴ | بیت‌ها نشستند |
+| key3 در جست‌و‌جو | ۳ و ۱۰ و ۱۴ | همه نشسته ← **مثبت کاذب** |
+| key4 در جست‌و‌جو | ۵ و ۹ و ۱۵ | نُه و ۱۵ نانشسته ← **قطعاً نیست** |
 
-> **Vault note:** the book's sidebar on probabilistic structures (p. 147): Bloom filters for membership, HyperLogLog for cardinality and Count-Min Sketch for frequency trade exactness for space.
+> **Vault note:** کادر کناری کتاب درباره‌ی ساختارهای احتمالاتی (p. 147): فیلتر Bloom برای عضویت و HyperLogLog برای cardinality و Count-Min Sketch برای فراوانی، که دقت را با فضا بده‌بستان می‌کنند.
 
-#### Skiplist
+#### skiplist
 
-A **skiplist** (Pugh) is barely more complex than a singly linked list, with probabilistic guarantees close to search trees'. It balances probabilistically, with no rotations or relocations. It's less cache-friendly than in-memory B-Trees because its nodes are small and scattered; unrolled linked lists help (pp. 148–149).
+**ساختار skiplist** از پیو به‌زور از فهرستی پیوندی یک‌سویه پیچیده‌تر است، با تضمین‌هایی احتمالاتی نزدیک به درخت‌های جست‌و‌جو. احتمالاتی متوازن می‌شود، بی چرخش یا جابه‌جایی. از B-Treeهای in-memoryی کم‌تر cache‌دوست است چون نودهایش کوچک و پراکنده‌اند؛ فهرست‌های پیوندی باز‌شده کمک می‌کنند (pp. 148–149).
 
-- Each node's **height** is chosen randomly at insert. Nodes of the same height form a level, each level has exponentially fewer nodes, and the maximum height is capped (p. 149).
-- **Lookup:** move forward on the highest level while the next key is smaller; otherwise drop down a level from the predecessor. The book searches for 7: head → 10 (too big) → down → 5 → 10 (too big) → down → 7 (Figure 7-8) (p. 149).
+- **ارتفاع** هر نودی سر درج تصادفی برداشته می‌شود. نودهای هم‌ارتفاع سطحی می‌سازند، هر سطحی نمایی نود کم‌تری دارد، و بیشینه ارتفاع سقف‌دار است (p. 149).
+- **جست‌و‌جو:** روی بالاترین سطح جلو برو تا وقتی کلید بعدی کوچک‌تر است؛ وگرنه از پیشین یک سطح پایین بیا. کتاب ۷ را می‌جوید: سر → ۱۰ که زیادی بزرگ است → پایین → ۵ → ۱۰ که زیادی بزرگ است → پایین → ۷ (شکل ۷-۸) (p. 149).
 
-![A skiplist with keys 3, 5, 7, 10, 15, 22, 25: every node is on the bottom level and some nodes have extra levels of forward pointers that skip over runs of nodes](../figures/07-08.png)
+![skiplistی با کلیدهای ۳ و ۵ و ۷ و ۱۰ و ۱۵ و ۲۲ و ۲۵: هر نودی روی سطح پایین است و برخی نودها سطح‌های اضافه‌ای از اشاره‌گر جلو دارند که از دسته‌ای نود می‌پرند](../figures/07-08.png)
 
-*Figure 7-8 (p. 149): taller nodes act as express lanes; a search drops one level whenever the next key would overshoot.*
+*Figure 7-8 (p. 149): نودهای بلندتر مثل خط‌های تند عمل می‌کنند؛ جست‌و‌جو هر جا کلید بعدی زیادی جلو بزند یک سطح پایین می‌آید.*
 
-- **Insert:** find the insertion point, pick a random height, link predecessors on each level. **Delete:** hand the removed node's forward pointers to its predecessors (p. 150).
-- **Concurrent** versions use a `fully_linked` flag set by CAS, plus reference counting or hazard pointers in unmanaged languages. They are deadlock-free because nodes are always accessed from higher levels (p. 150).
-- Users: Cassandra's secondary-index memtable and parts of WiredTiger (p. 150).
+- **درج:** نقطه‌ی درج را پیدا کن، ارتفاعی تصادفی بردار، پیشین‌ها را در هر سطحی پیوند بده. **حذف:** اشاره‌گرهای جلوی نود برداشته‌شده را به پیشین‌هایش بسپار (p. 150).
+- گونه‌های **هم‌زمان** یک flag به نام `fully_linked` به کار می‌برند که با CAS نشانده می‌شود، به‌علاوه‌ی شمارش ارجاع یا اشاره‌گرهای خطر در زبان‌های نامدیریت‌شده. بی‌بن‌بست‌اند چون نودها همیشه از سطح‌های بالاتر دسترسی می‌شوند (p. 150).
+- به‌کار‌برندگان: memtable مربوط به index ثانویه در Cassandra و بخش‌هایی از WiredTiger (p. 150).
 
-#### Disk access
+#### دسترسی به دیسک
 
-Page-cache techniques such as eviction and pinning still apply. The differences: in-memory contents are **immutable** and need no latches; **reference counting** keeps pages in use from being evicted and files in use from being deleted by compaction; and records need not be page-aligned, so they may be addressed by absolute offsets and may span pages (Figure 7-9) (p. 150).
+تکنیک‌های page cache مثل بیرون انداختن و pin کردن باز هم به کار می‌آیند. تفاوت‌ها: محتوای in-memoryی **immutable** است و latch لازم ندارد؛ **شمارش ارجاع** جلو بیرون انداخته شدن صفحه‌های در حال استفاده و حذف شدن فایل‌های در حال استفاده به دست compaction را می‌گیرد؛ و رکوردها لازم نیست صفحه‌هم‌تراز باشند، پس می‌توانند با offset مطلق نشانی شوند و از صفحه‌ها رد (شکل ۷-۹) (p. 150).
 
-#### Compression
+#### فشرده‌سازی
 
-Tables are immutable and written in one pass, but compressed pages aren't page-aligned, and zero-padding them would cancel the benefit (p. 151). An **indirection layer** stores each compressed page's offset and size. It's written to a separate file segment during flush and compaction and looked up on read (Figure 7-10) (pp. 151–152).
+جدول‌ها تغییرناپذیرند و در یک گذر نوشته می‌شوند، ولی صفحه‌های فشرده صفحه‌هم‌تراز نیستند، و صفر‌پر کردنشان سود را خنثی می‌کند (p. 151). یک **لایه‌ی واسطه** offset و اندازه‌ی هر صفحه‌ی فشرده را ذخیره می‌کند. در flush و compaction به قطعه‌ای جدا از فایل نوشته و سر خواندن جست‌و‌جو می‌شود (شکل ۷-۱۰) (pp. 151–152).
 
-### Unordered LSM storage
+### ذخیره‌سازی LSM بی‌ترتیب
 
-B-Tree pages, FD-Tree runs and SSTables all keep key order, by in-place updates, merges or in-memory sorting respectively. Unordered stores keep insertion order, usually need no separate log, and make writes cheaper (p. 152).
+صفحه‌های B-Tree و دورهای FD-Tree و SSTableها همه ترتیب کلید را نگه می‌دارند، به‌ترتیب با به‌روزرسانی سر جا و merge و مرتب کردن in-memoryی. انباره‌های بی‌ترتیب ترتیب درج را نگه می‌دارند، معمولاً logی جدا لازم ندارند، و نوشتن را ارزان‌تر می‌کنند (p. 152).
 
 #### Bitcask
 
-**Bitcask**, one of Riak's engines, uses no memtable: records go straight into **logfiles** (p. 153). The **keydir**, an in-memory hashmap, points to the latest record for each key and must be rebuilt from the logfiles at startup. Writes append the record and update the keydir. Reads follow one pointer, with no merging. Compaction rewrites only live records and updates the keydir (pp. 153–154).
+**سیستم Bitcask**، که یکی از موتورهای Riak است، هیچ memtable به کار نمی‌برد: رکوردها یک‌راست به **logfile** می‌روند (p. 153). **keydir**، که hashmapی in-memoryی است، به تازه‌ترین رکورد هر کلیدی اشاره می‌کند و سر راه افتادن باید از logfileها دوباره ساخته شود. نوشتن‌ها رکورد را می‌افزایند و keydir را به‌روز. خواندن‌ها یک اشاره‌گر را پی می‌گیرند، بی mergeی. compaction تنها رکوردهای زنده را دوباره می‌نویسد و keydir را به‌روز می‌کند (pp. 153–154).
 
-![A keydir with key1 to key5, each pointing to the latest record for its key across two data files; older versions of the same keys in the files are greyed out](../figures/07-11.png)
+![keydirی با key1 تا key5، که هر یک به تازه‌ترین رکورد کلیدش در دو فایل داده اشاره می‌کند؛ نسخه‌های قدیمی‌تر همان کلیدها در فایل‌ها خاکستری شده‌اند](../figures/07-11.png)
 
-*Figure 7-11 (p. 153): the in-memory keydir points only at each key's newest record; the greyed older versions are garbage for compaction.*
+*Figure 7-11 (p. 153): آن keydir in-memoryی تنها به تازه‌ترین رکورد هر کلیدی اشاره می‌کند؛ نسخه‌های قدیمی‌تر خاکستری‌شده زباله‌ی compaction‌اند.*
 
-| Pros (p. 154) | Cons (p. 154) |
+| خوبی‌ها (p. 154) | بدی‌ها (p. 154) |
 |---|---|
-| Simple; great point-query performance | All keys must fit in memory |
-| No separate WAL, so less space overhead and write amplification | Keydir rebuilt at startup |
-| | **No range scans** |
+| ساده؛ کارایی عالی برای query نقطه‌ای | همه‌ی کلیدها باید در حافظه جا شوند |
+| هیچ WAL جدایی ندارد، پس سرریز فضا و تقویت نوشتن کم‌تر | keydir سر راه افتادن دوباره ساخته می‌شود |
+| | **اسکن بازه‌ای ندارد** |
 
 #### WiscKey
 
-**WiscKey** decouples sorting from garbage collection: **keys** live in a sorted LSM Tree, and **values** in unordered append-only **vLogs** (p. 154). That removes Bitcask's all-keys-in-memory and startup-rebuild problems. Keys are small, so compacting them is cheap, which suits workloads with few updates and deletes (p. 154).
+**سیستم WiscKey** مرتب کردن را از garbage collectorی جدا می‌کند: **کلید**ها در LSM Treeی مرتب زندگی می‌کنند، و **مقدار**ها در **vLog**های بی‌ترتیب و append-only (p. 154). این مسئله‌های همه‌کلید‌در‌حافظه و ساختن دوباره سر راه افتادن Bitcask را برمی‌دارد. کلیدها کوچک‌اند، پس compact کردنشان ارزان است، که به بارهایی با به‌روزرسانی و حذف کم می‌خورد (p. 154).
 
-![Small index LSM trees whose leaves point into vLog files; live values are dark and stale values grey, scattered across the logs](../figures/07-12.png)
+![درخت‌های LSM کوچک index که برگ‌هایشان به فایل‌های vLog اشاره می‌کنند؛ مقدارهای زنده تیره و مقدارهای کهنه خاکستری‌اند و در logها پراکنده](../figures/07-12.png)
 
-*Figure 7-12 (p. 155): the sorted LSM trees hold only keys and pointers; values sit unsorted in the vLog, so compaction moves keys, not values.*
+*Figure 7-12 (p. 155): آن درخت‌های LSM مرتب تنها کلید و اشاره‌گر دارند؛ مقدارها نامرتب در vLog می‌نشینند، پس compaction کلیدها را جابه‌جا می‌کند و نه مقدارها را.*
 
-- **Range scans** need random I/O into the vLog. WiscKey prefetches in parallel using SSD parallelism, but a whole page is still read for one record (p. 154).
-- **vLog GC** reads sequentially, rewrites live records and updates pointers, using head and tail pointers to bound the scan. The vLog has no liveness information, so GC must consult the key tree, which traditional LSM compaction doesn't need (p. 155).
+- **اسکن بازه‌ای** I/O تصادفی در vLog لازم دارد. روش WiscKey با بهره‌گیری از موازی بودن SSD موازی prefetch می‌کند، ولی باز هم برای یک رکورد کل صفحه‌ای خوانده می‌شود (p. 154).
+- **مفهوم garbage collectorی vLog** ترتیبی می‌خواند، رکوردهای زنده را دوباره می‌نویسد و اشاره‌گرها را به‌روز، و با اشاره‌گر سر و دم اسکن را کران می‌زند. آن vLog اطلاعی درباره‌ی زنده بودن ندارد، پس GC باید درخت کلید را بپرسد، که compaction سنتی LSM لازم ندارد (p. 155).
 
-### Concurrency in LSM Trees
+### مفهوم concurrency در LSM Tree
 
-The main concurrency challenges are switching **table views**, the sets of memory and disk tables that change during flushes and compactions, and synchronizing the log (p. 155). During a flush (p. 156):
+چالش‌های اصلی concurrency عبارتند از عوض کردن **نماهای جدول**، یعنی آن مجموعه‌های جدول حافظه‌ای و دیسکی که در flush و compaction عوض می‌شوند، و هم‌گام کردن log (p. 155). در میانه‌ی flushی (p. 156):
 
-- the new memtable becomes readable and writable;
-- the old memtable stays readable;
-- the old memtable is written to disk;
-- discarding the flushed memtable and publishing its disk table happen atomically;
-- the WAL segment covering the flushed memtable is discarded.
+- ساختار memtable تازه خواندنی و نوشتنی می‌شود؛
+- ساختار memtable قدیم خواندنی می‌ماند؛
+- ساختار memtable قدیم به دیسک نوشته می‌شود؛
+- انداختن memtable فلاش‌شده و منتشر کردن جدول دیسکی‌اش اتمی رخ می‌دهند؛
+- و بخش WALی که memtable فلاش‌شده را می‌پوشاند انداخته می‌شود.
 
-Cassandra uses **operation order barriers**: a flush waits for every write already accepted (p. 156).
+سیستم Cassandra **سد ترتیب عملیات** به کار می‌برد: flushی منتظر هر نوشتنی می‌ماند که از قبل پذیرفته شده (p. 156).
 
-| Synchronization point | Risk if done wrong (pp. 156–157) |
+| نقطه‌ی synchronization | ریسک اگر غلط انجام شود (pp. 156–157) |
 |---|---|
-| **Memtable switch** | Writes to the old memtable may land in a part already flushed: data loss |
-| **Flush finalization** | Removing the old memtable before its table is ready: incomplete reads |
-| **WAL truncation** | Truncating before the flush completes and then crashing: data loss |
+| **عوض کردن memtable** | نوشتن‌ها به memtable قدیم می‌توانند در بخشی بنشینند که از قبل flush شده: گم شدن داده |
+| **نهایی کردن flush** | برداشتن memtable قدیم پیش از آماده شدن جدولش: خواندن‌های ناتمام |
+| **بریدن WAL** | بریدن پیش از تمام شدن flush و بعد از کار افتادن: گم شدن داده |
 
-Compaction swaps tables more simply, but old tables must stay readable until the new one is complete, and no table may take part in two concurrent compactions (p. 156).
+عمل compaction جدول‌ها را ساده‌تر عوض می‌کند، ولی جدول‌های قدیم تا کامل شدن تازه باید خواندنی بمانند، و هیچ جدولی مجاز نیست در دو compaction هم‌زمان شرکت کند (p. 156).
 
-### Log stacking
+### روی‌هم چیدن log
 
-Many filesystems and SSDs are log-structured too, buffering writes and appending full segments. LSM Trees and SSDs are a natural match (p. 157). Stacking several log-structured systems, though, can bring back the problems LSS was meant to solve: write amplification, fragmentation and poor performance (p. 157).
+خیلی از فایل‌سیستم‌ها و SSDها هم log-structured‌اند، و نوشتن‌ها را buffer و قطعه‌های کامل را افزوده می‌کنند. LSM Treeها و SSDها جفت طبیعی‌اند (p. 157). ولی روی هم چیدن چند سیستم log-structured می‌تواند همان مسئله‌هایی را برگرداند که LSS برای حلشان بود: تقویت نوشتن و تکه‌تکه شدن و کارایی ضعیف (p. 157).
 
-#### Flash translation layer
+#### Flash Translation Layer
 
-SSDs batch small random writes into physical pages, and pages can be programmed only after being erased (program/erase cycles). Erasing works per **block** of typically 64–512 pages (p. 157). The FTL maps logical to physical pages and tracks their state (live, discarded, empty). When free pages run out, it **relocates live pages** out of a block and erases it (Figures 7-13, 7-14) (pp. 157–158). It also performs **wear leveling**, because cells survive only a limited number of program/erase cycles (p. 158).
+همه‌ی SSDها نوشتن‌های کوچک و تصادفی را در صفحه‌های فیزیکی دسته می‌کنند، و صفحه‌ها تنها پس از پاک شدن program‌شدنی‌اند، یعنی چرخه‌های program و erase. پاک کردن برای هر **بلوک**ی کار می‌کند که معمولاً ۶۴ تا ۵۱۲ صفحه است (p. 157). لایه‌ی FTL صفحه‌های منطقی را به فیزیکی map می‌کند و حالتشان را پی می‌گیرد، یعنی زنده و انداخته و خالی. وقتی صفحه‌ی آزاد ته بکشد، **صفحه‌های زنده را جابه‌جا می‌کند** و بلوک را پاک (شکل‌های ۷-۱۳ و ۷-۱۴) (pp. 157–158). همچنین **هم‌ترازی فرسایش** می‌کند، چون cellها تنها شمار محدودی چرخه‌ی program و erase را جان به در می‌برند (p. 158).
 
-#### Filesystem logging
+#### مفهوم log فایل‌سیستم
 
-Each layer keeps its own books, and the layer below doesn't expose enough information to avoid duplicating work (p. 159).
+هر لایه‌ای دفتر خودش را نگه می‌دارد، و لایه‌ی پایین‌تر آن‌قدر اطلاع عرضه نمی‌کند که از تکرار کار پرهیز شود (p. 159).
 
-- **Redundant logging and differing GC patterns** between the application and filesystem logs.
-- **Misaligned segments:** discarding a higher-level segment fragments and relocates its neighbours (Figure 7-15).
-- **Interleaved streams:** separate sequential streams, such as the log and data records, don't stay sequential at the hardware level (Figure 7-16) (pp. 159–160).
+- **مفهوم log زائد و الگوهای GC مختلف** میان logهای برنامه و فایل‌سیستم.
+- **قطعه‌های ناهم‌تراز:** انداختن قطعه‌ای سطح‌بالاتر همسایه‌هایش را تکه‌تکه و جابه‌جا می‌کند (شکل ۷-۱۵).
+- **جریان‌های لابه‌لا:** جریان‌های ترتیبی جدا، مثل log و رکوردهای داده، در سطح سخت‌افزار ترتیبی نمی‌مانند (شکل ۷-۱۶) (pp. 159–160).
 
-Mitigations: some vendors recommend a separate device for the log, but aligning partitions to the hardware and writes to the page size matters more (p. 160).
+کاهش‌ها: برخی فروشنده‌ها دستگاهی جدا برای log پیشنهاد می‌دهند، ولی هم‌تراز کردن پارتیشن‌ها با سخت‌افزار و نوشتن‌ها با اندازه‌ی صفحه بیشتر مهم است (p. 160).
 
-### LLAMA and mindful stacking
+### سیستم LLAMA و چیدن هشیارانه
 
-Bw-Trees run on **LLAMA** (latch-free, log-structured, access-method aware), which handles garbage collection and page management for the tree (p. 160). Delta nodes are buffered in **4 MB flush buffers** and flushed when full. GC reclaims dead base and delta nodes and relocates live ones (p. 161). Because LLAMA is *aware* of Bw-Tree semantics, it can:
+همه‌ی Bw-Treeها روی **LLAMA** اجرا می‌شوند، که بی‌latch و log-structured و روش‌دسترسی‌آگاه است، و garbage collectorی و مدیریت صفحه را برای درخت رسیدگی می‌کند (p. 160). نودهای دلتا در **bufferهای flush ۴ مگابایتی** buffer می‌شوند و وقتی پر شوند فلاش. garbage collectorی نودهای پایه و دلتای مرده را بازپس می‌گیرد و زنده‌ها را جابه‌جا (p. 161). چون LLAMA از معناشناسی Bw-Tree *آگاه* است، می‌تواند:
 
-- write several deltas of one logical node contiguously;
-- cancel updates that negate each other, for example persisting only the delete of an insert-then-delete;
-- consolidate a node into a single base page *during GC*. This saves space and read latency; a GC that only copied the deltas would save neither, and a tree that consolidated by itself would still leave the old versions for the LSS to collect (p. 161).
+- چند دلتای یک نود منطقی را پیوسته بنویسد؛
+- به‌روزرسانی‌هایی را که هم را نقض می‌کنند لغو کند، مثلاً تنها حذف یک درج‌و‌بعد‌حذف را پایا کند؛
+- نودی را *در میانه‌ی GC* در یک صفحه‌ی پایه merge کند. این فضا و latency خواندن را صرفه‌جویی می‌کند؛ GCیی که تنها دلتاها را کپی می‌کرد هیچ‌کدام را صرفه‌جویی نمی‌کرد، و درختی که خودش merge می‌کرد باز هم نسخه‌های قدیم را برای جمع کردن به LSS می‌گذاشت (p. 161).
 
-Stacking can pay off when layers expose the right information (p. 161).
+روی هم چیدن وقتی به‌صرفه است که لایه‌ها اطلاع درست را عرضه کنند (p. 161).
 
-#### Open-Channel SSDs
+#### Open-Channel SSD
 
-The alternative is to skip the layers: **Open-Channel SSDs** expose the drive's internals and scheduling, removing at least two logs (filesystem and FTL) and giving control over wear leveling, GC, placement and scheduling (p. 161). Examples (pp. 161–162):
+جایگزین این است که از لایه‌ها بپرید: **Open-Channel SSD**ها درون و زمان‌بندی درایو را عرضه می‌کنند، که دست‌کم دو log، یعنی فایل‌سیستم و FTL، را برمی‌دارد و کنترل روی هم‌ترازی فرسایش و GC و جای‌دهی و زمان‌بندی می‌دهد (p. 161). نمونه‌ها (pp. 161–162):
 
-- **LOCS**, an LSM key-value store on Open-Channel SSDs;
-- **LightNVM** in the Linux kernel;
-- **Software Defined Flash (SDF)**, with asymmetric I/O where the write unit equals the erase block, and each channel exposed as a separate block device.
+- **سیستم LOCS**، که انباره‌ی key-value از جنس LSM روی Open-Channel SSD است؛
+- **سیستم LightNVM** در هسته‌ی لینوکس؛
+- **سیستم Software Defined Flash** که SDF است، با I/O نامتقارن که در آن یکای نوشتن برابر بلوک پاک‌شدنی است، و هر channelی به‌شکل دستگاه بلوکی جدایی عرضه می‌شود.
 
-The parallel is `O_DIRECT`: more control, more manual work (p. 162).
+موازی‌اش `O_DIRECT` است: کنترل بیشتر، کار دستی بیشتر (p. 162).
 
-### Summary
+### خلاصه
 
-Log-structured storage is everywhere, in FTLs, filesystems and databases. It batches small random writes in memory and garbage-collects removed segments. LSM Trees bring these ideas to indexes: writes are batched and flushed, and compaction cleans up shadowed records. Stack layers carefully, or bypass them (p. 162).
+ذخیره‌سازی log-structured همه‌جا هست، در FTL و فایل‌سیستم و دیتابیس. نوشتن‌های کوچک و تصادفی را در حافظه دسته می‌کند و قطعه‌های برداشته را garbage collectorی. LSM Treeها این ایده‌ها را به indexها می‌آورند: نوشتن‌ها دسته و فلاش می‌شوند، و compaction رکوردهای سایه‌خورده را تمیز می‌کند. لایه‌ها را با دقت روی هم بچینید، یا از آن‌ها بپرید (p. 162).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| | B-Tree | LSM Tree (leveled) | LSM Tree (size-tiered) | Bitcask | WiscKey |
+| | B-Tree | LSM Tree سطحی | LSM Tree size-tiered | Bitcask | WiscKey |
 |---|---|---|---|---|---|
-| Write path | Locate + rewrite page | Memtable + WAL, sequential flush | Same | Append + hashmap | Append value; key into LSM |
-| Read path | One page per level | Memtable + few tables (disjoint ranges) + Bloom filters | More tables per read | One pointer | Key LSM + one value read |
-| Write amplification | Page rewrites | Higher (rewrites per level) | Lower | Low (GC only) | Low (small keys compacted) |
-| Space amplification | Reserved space | Lower | Higher (duplicates linger) | Until GC | Until vLog GC |
-| Range scans | ✓ | ✓ | ✓ | ✗ | ✓ but random I/O |
+| مسیر نوشتن | پیدا کردن و نوشتن دوباره‌ی صفحه | memtable و WAL، با flush ترتیبی | همان | افزودن و hashmap | افزودن مقدار؛ کلید به LSM |
+| مسیر خواندن | یک صفحه برای هر سطحی | memtable و چند جدول با بازه‌های ناهم‌پوشان و فیلترهای Bloom | جدول بیشتری برای هر خواندنی | یک اشاره‌گر | LSM کلید و یک خواندن مقدار |
+| تقویت نوشتن | نوشتن دوباره‌ی صفحه | بالاتر، از نوشتن دوباره برای هر سطحی | پایین‌تر | کم، تنها GC | کم، چون کلیدهای کوچک compact می‌شوند |
+| تقویت فضا | فضای نگه‌داشته | پایین‌تر | بالاتر، چون تکراری‌ها می‌پایند | تا GC | تا GC مربوط به vLog |
+| اسکن بازه‌ای | ✓ | ✓ | ✓ | ✗ | ✓ ولی با I/O تصادفی |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **The false-positive formula.** For *m* bits, *n* keys and *k* hash functions, p ≈ (1 − e^(−kn/m))^k, minimized at k = (m/n)·ln 2. At 10 bits per key that's about 1%. The [Bloom filter lab](../lab/07-bloom-filter/README.md) measures this on real hashes.
-- **Leveled compaction's write amplification** is roughly the size ratio between levels (fanout, often 10) times the number of levels, which is why RocksDB exposes `max_bytes_for_level_multiplier`. Size-tiered compaction rewrites each byte about once per tier but can temporarily need twice the disk space.
-- **RocksDB's BlobDB** follows WiscKey's key-value separation, and **Badger** (Go) is built directly on the WiscKey paper.
-- For the same ideas from an application developer's angle, see [DDIA Ch. 4](../../designing-data-intensive-applications/chapters/04-storage-and-retrieval.md).
+- **فرمول مثبت کاذب.** برای *m* بیت و *n* کلید و *k* تابع hash، داریم p ≈ (1 − e^(−kn/m))^k، که در k = (m/n)·ln 2 کمینه می‌شود. با ده بیت برای هر کلیدی تقریباً ۱٪ است. [آزمایش فیلتر Bloom](../lab/07-bloom-filter/README.md) این را روی hashهای واقعی اندازه می‌گیرد.
+- **تقویت نوشتن compaction سطحی** تقریباً برابر نسبت اندازه‌ی میان سطح‌ها، یعنی fanout که اغلب ده است، ضربدر شمار سطح‌هاست، که از همین‌جاست که RocksDB پارامتر `max_bytes_for_level_multiplier` را عرضه می‌کند. compaction size-tiered هر بایتی را تقریباً یک بار برای هر لایه‌ای دوباره می‌نویسد ولی می‌تواند موقت دو برابر فضای دیسک لازم داشته باشد.
+- **سیستم BlobDB در RocksDB** از جدایی کلید و مقدار WiscKey پی می‌گیرد، و **Badger** در Go یک‌راست روی مقاله‌ی WiscKey بنا شده.
+- برای همین ایده‌ها از زاویه‌ی توسعه‌دهنده‌ی برنامه، [فصل ۴ کتاب DDIA](../../designing-data-intensive-applications/chapters/04-storage-and-retrieval.md) را ببینید.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Bloom filter false positives](../lab/07-bloom-filter/README.md) — builds Bloom filters at several bits-per-key and hash counts, measures the false-positive rate on absent keys, and compares it with the formula.
-- **Related chapters:** [2. B-Tree Basics](02-b-tree-basics.md) (SSD internals), [5. Transaction Processing and Recovery](05-transaction-processing-and-recovery.md) (WAL, page cache), [6. B-Tree Variants](06-b-tree-variants.md) (FD-Trees, Bw-Trees), [12. Anti-Entropy and Dissemination](12-anti-entropy-and-dissemination.md) (tombstones and replicas).
+- **Run it:** [مثبت کاذب فیلتر Bloom](../lab/07-bloom-filter/README.md)؛ فیلترهای Bloom را در چند بیت‌برای‌هر‌کلید و شمار hash می‌سازد، نرخ مثبت کاذب را روی کلیدهای غایب اندازه می‌گیرد، و با فرمول مقایسه.
+- **فصل‌های مرتبط:** [فصل ۲: پایه‌های B-Tree](02-b-tree-basics.md) که درون SSD را دارد، [فصل ۵: پردازش تراکنش و بازیابی](05-transaction-processing-and-recovery.md) که WAL و page cache را دارد، [فصل ۶: گونه‌های B-Tree](06-b-tree-variants.md) که FD-Tree و Bw-Tree را دارد، و [فصل ۱۲: anti-entropy و پخش](12-anti-entropy-and-dissemination.md) که tombstone و replica را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why can't an LSM Tree implement a delete by removing the key from the memtable?**
+1. **چرا LSM Tree نمی‌تواند حذفی را با برداشتن کلید از memtable پیاده کند؟**
 
-   *Answer:* An older disk table may still hold a value for the key, which would be resurrected. A tombstone must shadow it (pp. 136–137).
+   *Answer:* جدول دیسکی قدیمی‌تری می‌تواند باز هم مقداری برای آن کلید داشته باشد، که رستاخیز می‌شد. tombstoneی باید سایه‌اش بیندازد (pp. 136–137).
 
-2. **In merge-iteration over N sources, how much memory is needed and why?**
+2. **در merge‌پیمایی روی N منبع، چقدر حافظه لازم است و چرا؟**
 
-   *Answer:* O(N): the priority queue holds only the current head of each iterator, because all sources are sorted (pp. 138–140).
+   *Answer:* از مرتبه‌ی O(N): آن صف اولویت تنها سر جاری هر iteratorی را دارد، چون همه‌ی منبع‌ها مرتب‌اند (pp. 138–140).
 
-3. **Two records for k2 sit in the merge queue. What do we know about them?**
-   - [ ] They come from the same table
-   - [x] They come from different sources and must be reconciled, e.g. by timestamp
-   - [ ] One of them is always a tombstone
+3. **دو رکورد برای k2 در صف merge می‌نشینند. درباره‌شان چه می‌دانیم؟**
+   - [ ] از همان جدول می‌آیند
+   - [x] از منبع‌های مختلف می‌آیند و باید آشتی داده شوند، مثلاً بر حسب timestamp
+   - [ ] یکی‌شان همیشه tombstone است
 
-   *Answer:* Each iterator holds at most one record per key, so duplicates in the queue must come from different sources (pp. 138, 140).
+   *Answer:* هر iteratorی حداکثر یک رکورد برای هر کلیدی دارد، پس تکراری‌های آن صف باید از منبع‌های مختلف بیایند (pp. 138, 140).
 
-4. **When may compaction drop a tombstone?**
+4. **عمل compaction کِی مجاز است tombstoneی را بیندازد؟**
 
-   *Answer:* Only when no older record for that key can exist in any other table. RocksDB waits until the bottommost level; Cassandra waits for the GC grace period so replicas see it (p. 141).
+   *Answer:* تنها وقتی هیچ رکورد قدیمی‌تری برای آن کلید در هیچ جدول دیگری نتواند وجود داشته باشد. سیستم RocksDB تا پایین‌ترین سطح منتظر می‌ماند؛ و Cassandra تا دوره‌ی مهلت GC تا replicaها ببینندش (p. 141).
 
-5. **What is table starvation in size-tiered compaction?**
+5. **گرسنگی جدول در compaction size-tiered چیست؟**
 
-   *Answer:* Compacted outputs stay small, for example because tombstones shadowed most records, so higher tiers never get enough tables to compact and their tombstones are never applied. Compaction must be forced (p. 143).
+   *Answer:* خروجی‌های compact‌شده کوچک می‌مانند، مثلاً چون tombstoneها روی بیشتر رکوردها سایه انداخته بودند، پس لایه‌های بالاتر هیچ‌وقت جدول کافی برای compact شدن نمی‌گیرند و tombstoneهایشان هیچ‌وقت اعمال نمی‌شود. compaction باید واداشته شود (p. 143).
 
-6. **What does the RUM Conjecture state?**
+6. **حدس RUM چه می‌گوید؟**
 
-   *Answer:* Read, update and memory overheads can't all be minimized: reducing two worsens the third (p. 144).
+   *Answer:* سرریزهای خواندن و به‌روزرسانی و حافظه نمی‌توانند هر سه کمینه شوند: کم کردن دو تا سومی را بدتر می‌کند (p. 144).
 
-7. **A Bloom filter with 16 bits has bits 3, 5, 8, 10 and 14 set. A lookup hashes to 5, 9 and 15. What's the answer?**
+7. **فیلتر Bloomی با ۱۶ بیت، بیت‌های ۳ و ۵ و ۸ و ۱۰ و ۱۴ را نشسته دارد. جست‌و‌جویی به ۵ و ۹ و ۱۵ hash می‌شود. پاسخ چیست؟**
 
-   *Answer:* Definitely absent, because bits 9 and 15 are unset. Bloom filters have no false negatives (p. 148).
+   *Answer:* قطعاً نیست، چون بیت‌های ۹ و ۱۵ نانشسته‌اند. فیلترهای Bloom منفی کاذب ندارند (p. 148).
 
-8. **What does WiscKey change compared with Bitcask, and what does it cost?**
+8. **سیستم WiscKey در مقایسه با Bitcask چه چیزی را عوض می‌کند، و چه خرجی دارد؟**
 
-   *Answer:* It keeps keys in a sorted LSM Tree instead of an in-memory hashmap, so range scans work and nothing has to be rebuilt at startup. Range scans then need random I/O into the vLog, and GC must consult the key tree to tell which values are live (pp. 154–155).
+   *Answer:* کلیدها را به‌جای hashmapی in-memoryی در LSM Treeی مرتب نگه می‌دارد، پس اسکن بازه‌ای کار می‌کند و چیزی لازم نیست سر راه افتادن دوباره ساخته شود. آن‌وقت اسکن بازه‌ای I/O تصادفی در vLog لازم دارد، و GC باید درخت کلید را بپرسد تا بگوید کدام مقدارها زنده‌اند (pp. 154–155).
 
-9. **Why is truncating the WAL before a memtable flush completes dangerous?**
+9. **چرا بریدن WAL پیش از تمام شدن flush یک memtable خطرناک است؟**
 
-   *Answer:* If the node crashes, the truncated operations can't be replayed and the memtable's data is lost (pp. 156–157).
+   *Answer:* اگر نود از کار بیفتد، عملیات بریده‌شده replay‌شدنی نیستند و داده‌ی آن memtable گم می‌شود (pp. 156–157).
 
-10. **What makes LLAMA "mindful" stacking?**
+10. **چه چیزی LLAMA را چیدنی «هشیارانه» می‌کند؟**
 
-    *Answer:* It knows Bw-Tree semantics, so during garbage collection it can consolidate a node's deltas into one base page and cancel opposing updates, instead of just copying deltas around (p. 161).
+    *Answer:* معناشناسی Bw-Tree را می‌داند، پس در garbage collectorی می‌تواند دلتاهای نودی را در یک صفحه‌ی پایه merge کند و به‌روزرسانی‌های مقابل را لغو، به‌جای این‌که تنها دلتاها را این‌طرف و آن‌طرف کپی کند (p. 161).

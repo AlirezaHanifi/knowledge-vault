@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bw-Tree Delta Chains</title>
-<meta name="description" content="Prepend delta records to logical pages through a mapping table, race two writers&#x27; compare-and-swap on the same page, watch read cost grow with chain length, and consolidate chains past a threshold. Illustrates Database Internals, Chapter 6.">
+<title>زنجیره‌های دلتای Bw-Tree</title>
+<meta name="description" content="از راه جدول mapping به صفحه‌های منطقی رکورد دلتا پیش‌بیفزایید، compare-and-swap دو نویسنده را روی همان صفحه مسابقه بدهید، ببینید هزینه‌ی خواندن با طول زنجیره رشد می‌کند، و زنجیره‌ها را از آستانه‌ای رد شده merge کنید. تصویری از فصل ۶ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   table.map { border-collapse: collapse; font-family: var(--mono); font-size: .82rem; width: 100%; }
-  table.map td, table.map th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: middle; }
-  .chain { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  table.map td, table.map th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; vertical-align: middle; }
+  .chain { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; direction: ltr; }
   .dn { font-family: var(--mono); font-size: .74rem; padding: 3px 6px; border-radius: var(--radius-sm); border: 1px solid var(--accent); background: var(--accent-soft); }
   .dn.del { border-color: var(--bad); background: var(--bad-soft); }
   .dn.base { border-color: var(--line-strong); background: var(--surface-2); }
@@ -21,10 +21,10 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/06-b-tree-variants.html">Chapter 6</a><span aria-hidden="true">/</span>
+      <a href="../chapters/06-b-tree-variants.html">فصل ۶</a><span aria-hidden="true">/</span>
       <span aria-current="page">Bw-Tree</span>
     </nav>
     <span data-kit-theme></span>
@@ -32,41 +32,41 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 6 · B-Tree Variants</div>
-  <h1>Bw-Tree: delta chains and compare-and-swap</h1>
-  <p class="lede">A Bw-Tree never updates a node in place. Each change is a <strong>delta record</strong> prepended to the node’s chain. Nodes are found by <strong>logical ID</strong> through an in-memory <strong>mapping table</strong>, and a writer installs its delta with a single <strong>compare-and-swap</strong> on that table entry. If another writer got there first, the CAS fails and it retries. Readers walk the chain from the newest delta down to the base node, so long chains are <strong>consolidated</strong> into a new base.</p>
-  <p class="source-note">Illustrates “Update Chains”, “Taming Concurrency with Compare-and-Swap” and “Consolidation and Garbage Collection” (pp. 120–124, Figure 6-7). The pages, keys, addresses and default threshold are the vault’s. SMOs (split and merge deltas) and epoch-based reclamation are left out. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۶ · گونه‌های B-Tree</div>
+  <h1>Bw-Tree: زنجیره‌ی دلتا و compare-and-swap</h1>
+  <p class="lede">Bw-Tree هیچ‌وقت نودی را سر جا به‌روز نمی‌کند. هر تغییری یک <strong>رکورد دلتا</strong> است که به زنجیره‌ی آن نود پیش‌افزوده می‌شود. نودها با <strong>ID منطقی</strong> از راه <strong>جدول mapping</strong>ی in-memoryی پیدا می‌شوند، و نویسنده‌ای دلتایش را با یک <strong>compare-and-swap</strong> تنها روی آن entry جدول نصب می‌کند. اگر نویسنده‌ای دیگر اول رسیده باشد، آن CAS باز می‌ماند و دوباره می‌کوشد. خواننده‌ها زنجیره را از تازه‌ترین دلتا تا نود پایه راه می‌روند، پس زنجیره‌های بلند در پایه‌ای تازه <strong>merge</strong> می‌شوند.</p>
+  <p class="source-note">تصویری از «زنجیره‌ی به‌روزرسانی» و «رام کردن concurrency با compare-and-swap» و «merge و garbage collectorی» (صص. ۱۲۰–۱۲۴، شکل ۶-۷). صفحه‌ها و کلیدها و نشانی‌ها و آستانه‌ی پیش‌فرض مال vault است. SMOها، یعنی دلتاهای شکست و merge، و بازپس‌گیری دوره‌محور جا مانده‌اند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Mapping table → chains (newest delta first)</p><div class="table-wrap"><table class="map" id="map"></table></div>
-        <p class="field-hint">Δ+ marks an insert delta, Δ− a delete delta, and the grey box is the base node. The outlined delta was installed last.</p></div>
+      <div class="panel"><p class="panel-title">جدول mapping ← زنجیره‌ها، با تازه‌ترین دلتا اول</p><div class="table-wrap"><table class="map" id="map"></table></div>
+        <p class="field-hint">علامت Δ+ دلتای درج است و Δ− دلتای حذف، و آن کادر خاکستری نود پایه. آن دلتای خط‌دور آخر از همه نصب شد.</p></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="pg"></div><div id="th" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="ins">Insert a key</button><button class="btn small danger" type="button" id="del">Delete a key</button><button class="btn small" type="button" id="read">Read a key</button></div>
-        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="race">Race two writers</button><button class="btn small" type="button" id="cons">Consolidate</button><button class="btn small" type="button" id="reset">↺ Reset</button></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="pg"></div><div id="th" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="ins">کلیدی درج کن</button><button class="btn small danger" type="button" id="del">کلیدی حذف کن</button><button class="btn small" type="button" id="read">کلیدی بخوان</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="race">دو نویسنده را مسابقه بده</button><button class="btn small" type="button" id="cons">merge کن</button><button class="btn small" type="button" id="reset">↺ از نو</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Writes never block.</strong> A writer reads the page’s current address, builds a delta pointing at it, and swaps the mapping-table entry only if it still holds that address.</li>
-    <li><strong>A lost race costs a retry, not a wait.</strong> In the race, writer B’s CAS fails because A changed the address first; B rebuilds its delta on top of A’s and succeeds.</li>
-    <li><strong>Reads pay for chain length.</strong> A read visits every delta until it finds the key, then the base; the cost grows until consolidation resets it.</li>
-    <li><strong>Consolidation is just another CAS.</strong> The merged base node is written to a new address and installed in the mapping table; the old chain is garbage once no reader holds it.</li>
+    <li><strong>نوشتن‌ها هیچ‌وقت بند نمی‌آیند.</strong> نویسنده‌ای نشانی جاری صفحه را می‌خواند، دلتایی می‌سازد که به آن اشاره می‌کند، و entry جدول mapping را تنها وقتی عوض می‌کند که باز هم همان نشانی را داشته باشد.</li>
+    <li><strong>باختن مسابقه کوشش دوباره خرج دارد و نه انتظار.</strong> در آن مسابقه، CAS نویسنده‌ی B باز می‌ماند چون A اول نشانی را عوض کرد؛ و B دلتایش را روی مال A بازمی‌سازد و موفق می‌شود.</li>
+    <li><strong>خواندن بهای طول زنجیره را می‌دهد.</strong> خواندنی هر دلتایی را تا پیدا شدن کلید می‌بیند، بعد پایه را؛ و هزینه رشد می‌کند تا merge صفرش کند.</li>
+    <li><strong>merge تنها CASی دیگر است.</strong> نود پایه‌ی merge‌شده در نشانی تازه‌ای نوشته و در جدول mapping نصب می‌شود؛ و زنجیره‌ی قدیم همین که خواننده‌ای نگهش ندارد زباله است.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/06-b-tree-variants.html"><small>Lesson</small>6. B-Tree Variants</a></li>
+    <li><a href="../chapters/06-b-tree-variants.html"><small>درس</small>فصل ۶: گونه‌های B-Tree</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -87,35 +87,35 @@ function stats(rows) {
   function reset() {
     r = Kit.rng(9); addr = 0xa000; ok = fail = cons = 0; lastCost = "–"; lastNew = null;
     pages = { P1: { node: { base: true, keys: [10, 20, 30], addr: nextAddr() } }, P2: { node: { base: true, keys: [40, 50], addr: nextAddr() } }, P3: { node: { base: true, keys: [70, 80, 90], addr: nextAddr() } } };
-    log.clear(); log.add("Three logical pages, each mapped to a base node.", "muted"); render();
+    log.clear(); log.add("سه صفحه‌ی منطقی، که هر یک به نودی پایه map شده.", "muted"); render();
   }
   function chain(n) { var out = []; while (n) { out.push(n); n = n.next; } return out; }
   function view(n) { var ch = chain(n).reverse(), keys = ch[0].keys.slice(); ch.slice(1).forEach(function (d) { var i = keys.indexOf(d.key); if (d.del) { if (i >= 0) keys.splice(i, 1); } else if (i < 0) keys.push(d.key); }); return keys.sort(function (a, b) { return a - b; }); }
   function range() { return { P1: [1, 39], P2: [40, 69], P3: [70, 99] }[sel]; }
   function cas(pid, expect, node, who) {
     var p = pages[pid];
-    if (p.node.addr !== expect) { fail++; log.add((who ? who + ": " : "") + "CAS(" + pid + ", " + expect + " → " + node.addr + ") fails: entry is now " + p.node.addr, "bad"); return false; }
-    p.node = node; ok++; lastNew = node; log.add((who ? who + ": " : "") + "CAS(" + pid + ", " + expect + " → " + node.addr + ") succeeds", "ok"); return true;
+    if (p.node.addr !== expect) { fail++; log.add((who ? "نویسنده‌ی " + who + ": " : "") + "CAS(" + pid + ", " + expect + " → " + node.addr + ") باز می‌ماند: آن entry حالا " + p.node.addr + " است", "bad"); return false; }
+    p.node = node; ok++; lastNew = node; log.add((who ? "نویسنده‌ی " + who + ": " : "") + "CAS(" + pid + ", " + expect + " → " + node.addr + ") موفق می‌شود", "ok"); return true;
   }
   function delta(del) {
     var rg = range(), keys = view(pages[sel].node), key;
-    if (del) { if (!keys.length) { log.add(sel + " is empty", "muted"); return; } key = keys[r.int(keys.length)]; }
+    if (del) { if (!keys.length) { log.add("صفحه‌ی " + sel + " خالی است", "muted"); return; } key = keys[r.int(keys.length)]; }
     else { do { key = rg[0] + r.int(rg[1] - rg[0] + 1); } while (keys.indexOf(key) >= 0); }
     var cur = pages[sel].node.addr, d = { key: key, del: del, next: pages[sel].node, addr: nextAddr() };
-    log.add("Writer reads " + sel + " → " + cur + ", builds Δ " + (del ? "delete " : "insert ") + key, "muted");
+    log.add("نویسنده صفحه‌ی " + sel + " را می‌خواند ← " + cur + "، و Δی " + (del ? "حذف " : "درج ") + key + " می‌سازد", "muted");
     cas(sel, cur, d); maybeConsolidate(); render();
   }
   function read() {
     var keys = view(pages[sel].node), rg = range(), key = keys.length && r.chance(0.7) ? keys[r.int(keys.length)] : rg[0] + r.int(rg[1] - rg[0] + 1);
     var n = pages[sel].node, hops = 0, found = null;
     while (n) { hops++; if (!n.base && n.key === key) { found = !n.del; break; } if (n.base) { found = n.keys.indexOf(key) >= 0; break; } n = n.next; }
-    lastCost = hops; log.add("Read " + key + " in " + sel + ": " + (found ? "found" : "absent") + " after visiting " + hops + " node" + (hops > 1 ? "s" : ""), hops > thr ? "warn" : "ok"); render();
+    lastCost = hops; log.add("خواندن " + key + " در " + sel + ": " + (found ? "پیدا شد" : "نیست") + " پس از دیدن " + hops + " نود", hops > thr ? "warn" : "ok"); render();
   }
   function consolidate(auto) {
     var p = pages[sel], cur = p.node.addr, len = chain(p.node).length - 1;
-    if (!len) { log.add(sel + " has no deltas to consolidate", "muted"); return; }
+    if (!len) { log.add("صفحه‌ی " + sel + " دلتایی برای merge ندارد", "muted"); return; }
     var base = { base: true, keys: view(p.node), addr: nextAddr() };
-    log.add((auto ? "Chain of " + len + " deltas exceeds the threshold: " : "") + "consolidate " + sel + " into a new base", "warn");
+    log.add((auto ? "زنجیره‌ی " + len + " دلتایی از آستانه می‌زند: " : "") + "merge " + sel + " در پایه‌ای تازه", "warn");
     if (cas(sel, cur, base)) cons++;
   }
   function maybeConsolidate() { if (chain(pages[sel].node).length - 1 > thr) consolidate(true); }
@@ -124,15 +124,15 @@ function stats(rows) {
     do { a = rg[0] + r.int(rg[1] - rg[0] + 1); } while (keys.indexOf(a) >= 0);
     do { b = rg[0] + r.int(rg[1] - rg[0] + 1); } while (keys.indexOf(b) >= 0 || b === a);
     var seen = pages[sel].node.addr, head = pages[sel].node;
-    log.add("Writers A and B both read " + sel + " → " + seen, "muted");
+    log.add("نویسنده‌های A و B هر دو صفحه‌ی " + sel + " را می‌خوانند ← " + seen, "muted");
     var da = { key: a, next: head, addr: nextAddr() }, db = { key: b, next: head, addr: nextAddr() };
     cas(sel, seen, da, "A");
-    if (!cas(sel, seen, db, "B")) { var again = pages[sel].node.addr; db = { key: b, next: pages[sel].node, addr: nextAddr() }; log.add("B: re-reads " + sel + " → " + again + " and rebuilds Δ insert " + b + " on top of A's delta", "muted"); cas(sel, again, db, "B"); }
+    if (!cas(sel, seen, db, "B")) { var again = pages[sel].node.addr; db = { key: b, next: pages[sel].node, addr: nextAddr() }; log.add("نویسنده‌ی B صفحه‌ی " + sel + " را دوباره می‌خواند ← " + again + " و Δی درج " + b + " را روی دلتای A بازمی‌سازد", "muted"); cas(sel, again, db, "B"); }
     maybeConsolidate(); render();
   }
   function render() {
     var t = Kit.clear(document.getElementById("map"));
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", { scope: "col" }, "ID"), Kit.el("th", { scope: "col" }, "Address"), Kit.el("th", { scope: "col" }, "Chain"))));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", { scope: "col" }, "ID"), Kit.el("th", { scope: "col" }, "نشانی"), Kit.el("th", { scope: "col" }, "زنجیره"))));
     var tb = Kit.el("tbody");
     Object.keys(pages).forEach(function (pid) {
       var ch = Kit.el("div", { class: "chain" });
@@ -144,10 +144,10 @@ function stats(rows) {
     });
     t.appendChild(tb);
     var len = chain(pages[sel].node).length - 1;
-    stats([["Chain length (" + sel + ")", len, len >= thr ? "warn" : ""], ["Last read cost", lastCost], ["CAS ok / failed", ok + " / " + fail, fail ? "warn" : ""], ["Consolidations", cons]]);
+    stats([["طول زنجیره‌ی " + sel, len, len >= thr ? "warn" : ""], ["هزینه‌ی آخرین خواندن", lastCost], ["CAS موفق و باز‌مانده", ok + " / " + fail, fail ? "warn" : ""], ["mergeها", cons]]);
   }
-  document.getElementById("pg").appendChild(Kit.segmented({ label: "Logical page", value: sel, options: ["P1", "P2", "P3"].map(function (x) { return { value: x, label: x }; }), onChange: function (v) { sel = v; render(); } }).element);
-  document.getElementById("th").appendChild(Kit.slider({ label: "Consolidation threshold", min: 2, max: 10, step: 1, value: thr, unit: " deltas", onInput: function (v) { thr = v; render(); } }).element);
+  document.getElementById("pg").appendChild(Kit.segmented({ label: "صفحه‌ی منطقی", value: sel, options: ["P1", "P2", "P3"].map(function (x) { return { value: x, label: x }; }), onChange: function (v) { sel = v; render(); } }).element);
+  document.getElementById("th").appendChild(Kit.slider({ label: "آستانه‌ی merge", min: 2, max: 10, step: 1, value: thr, unit: " دلتا", onInput: function (v) { thr = v; render(); } }).element);
   document.getElementById("ins").addEventListener("click", function () { delta(false); });
   document.getElementById("del").addEventListener("click", function () { delta(true); });
   document.getElementById("read").addEventListener("click", read);
@@ -157,15 +157,15 @@ function stats(rows) {
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why do Bw-Tree nodes have logical IDs?",
-      options: ["To compress keys", "So a new delta only changes one mapping-table entry instead of every parent pointer", "To sort pages on disk"], answer: 1,
-      explain: "The mapping table maps logical IDs to physical locations and replaces latches (p. 121)." },
-    { q: "Two writers prepend to the same page. What happens to the loser?",
-      options: ["It waits on a latch", "Its CAS fails because the address changed; it rebuilds its delta on the new head and retries", "Its update is lost"], answer: 1,
-      explain: "p. 122." },
-    { q: "Why are chains consolidated?",
-      options: ["Reads must walk every delta to the base, so long chains slow them down", "Deltas cannot be persisted", "CAS stops working on long chains"], answer: 0,
-      explain: "Past a configurable threshold, base and deltas are merged into a new base (p. 123)." }
+    { q: "چرا نودهای Bw-Tree ID منطقی دارند؟",
+      options: ["برای فشرده کردن کلیدها", "تا دلتایی تازه تنها یک entry جدول mapping را عوض کند و نه هر اشاره‌گر پدری", "برای مرتب کردن صفحه‌ها روی دیسک"], answer: 1,
+      explain: "جدول mapping IDهای منطقی را به جاهای فیزیکی map می‌کند و جای latchها را می‌گیرد (ص. ۱۲۱)." },
+    { q: "دو نویسنده به همان صفحه پیش‌می‌افزایند. سر آن بازنده چه می‌آید؟",
+      options: ["روی latchی منتظر می‌ماند", "CASش باز می‌ماند چون نشانی عوض شده؛ دلتایش را روی سر تازه بازمی‌سازد و دوباره می‌کوشد", "به‌روزرسانی‌اش گم می‌شود"], answer: 1,
+      explain: "ص. ۱۲۲." },
+    { q: "چرا زنجیره‌ها merge می‌شوند؟",
+      options: ["خواندن باید هر دلتایی را تا پایه راه برود، پس زنجیره‌های بلند کندش می‌کنند", "دلتاها پایا‌شدنی نیستند", "CAS روی زنجیره‌های بلند کار نمی‌کند"], answer: 0,
+      explain: "از آستانه‌ای تنظیم‌پذیر که بگذرد، پایه و دلتاها در پایه‌ای تازه merge می‌شوند (ص. ۱۲۳)." }
   ]);
 })();
 </script>

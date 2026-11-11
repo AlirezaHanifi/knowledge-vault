@@ -3,142 +3,150 @@ book: database-internals
 chapter: 8
 title: "Introduction and Overview"
 pages: "171–194"
+translated_title: "مقدمه و نمای کلی"
+lang: fa
 ---
 
-# 8. Introduction and Overview
+# فصل ۸: مقدمه و نمای کلی
 
-[← 7. Log-Structured Storage](07-log-structured-storage.md) · [Book](../README.md) · [9. Failure Detection →](09-failure-detection.md)
+[فصل ۷: ذخیره‌سازی log-structured →](07-log-structured-storage.md) · [کتاب](../README.md) · [فصل ۹: تشخیص شکست ←](09-failure-detection.md)
 
-## Summary
+## خلاصه
 
-Part II turns from storage engines to **distributed systems**. Its opener (pp. 167–169) defines the vocabulary used throughout:
+بخش دو از موتورهای ذخیره‌سازی به **سیستم‌های توزیع‌شده** می‌چرخد. آغازش (pp. 167–169) واژگانی را تعریف می‌کند که در سراسرش به کار می‌رود:
 
-- **participants** (processes, nodes, replicas), each with local state;
-- **links** for message passing;
-- **clocks**, either logical (monotonic counters) or physical ("wall clocks");
-- **distributed algorithms**, which describe local steps and interactions despite unreliable links and processes.
+- **شرکت‌کننده**ها، یعنی process و نود و replica، که هر یک حالت محلی دارند؛
+- **پیوند**ها برای رد و بدل پیام؛
+- **ساعت**ها، که یا منطقی‌اند، یعنی شمارنده‌ی یکنوا، یا فیزیکی، یعنی «ساعت دیواری»؛
+- و **الگوریتم‌های توزیع‌شده**، که قدم‌های محلی و تعامل‌ها را به‌رغم پیوندها و processهای نامطمئن وصف می‌کنند.
 
-Their purposes are coordination, cooperation, dissemination and consensus (p. 169).
+هدفشان هم‌آهنگی و هم‌کاری و پخش و consensus است (p. 169).
 
-This chapter then builds the foundations (pp. 171–194):
+بعد این فصل پایه‌ها را می‌سازد (pp. 171–194):
 
-- Even two threads updating one variable have **four possible outcomes** (Figure 8-1), so we need **consistency models**.
-- The **fallacies of distributed computing** and the assumptions behind them: processing, clocks, state consistency, local versus remote calls, failures, partitions and **cascading failures** (pp. 174–181).
-- **Links**, built up from **fair-loss** through acknowledgments and **stubborn** retransmits to the **perfect link**, with sequence numbers, a reorder buffer and deduplication (pp. 182–186).
-- Why **exactly-once *delivery*** is really exactly-once *processing* (pp. 186–187).
-- Two impossibility results: the **Two Generals' Problem** (pp. 187–189) and **FLP** (pp. 189–190).
-- **Synchrony** models (asynchronous, synchronous, partially synchronous) and **failure models** (crash-stop, crash-recovery, omission, arbitrary or Byzantine) (pp. 190–193).
+- حتی دو thread که یک متغیر را به‌روز می‌کنند **چهار برآمد ممکن** دارند (شکل ۸-۱)، پس به **consistency model** نیاز داریم.
+- **مغلطه‌های محاسبات توزیع‌شده** و فرض‌های پشتشان: پردازش، ساعت، consistency حالت، فراخوانی محلی در برابر دور، شکست، پارتیشن و **شکست‌های آبشاری** (pp. 174–181).
+- **پیوند**ها، که از **گم‌شدن منصفانه** از راه تأیید و بازفرست **لجباز** تا **پیوند بی‌عیب** بنا می‌شوند، با شماره‌ی ترتیب و buffer مرتب کردن دوباره و تکراری‌زدایی (pp. 182–186).
+- این‌که چرا **تحویل exactly-once** واقعاً *پردازش* exactly-once است (pp. 186–187).
+- دو نتیجه‌ی ناممکنی: **مسئله‌ی دو ژنرال** (pp. 187–189) و **FLP** (pp. 189–190).
+- مدل‌های **concurrency**، یعنی asynchronous و هم‌زمان و نیمه‌هم‌زمان، و **مدل‌های شکست**، یعنی crash-stop و crash-recovery و omission و دل‌بخواهی یا Byzantine (pp. 190–193).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Concurrency is the first distributed-systems problem,** even before leaving a single node: `x = 1` with an adder (+2) and a multiplier (×2) can end at 2, 3, 4 or 6 (pp. 171–172).
-- **A timeout can't tell you why a node didn't reply.** It might be overloaded, crashed, slow, or the network might be at fault (p. 173).
-- **Bigger queues don't raise throughput.** They add latency. **Backpressure** slows down producers (pp. 175–176).
-- **Don't use timestamps for ordering** unless you have high-precision time sources (Spanner's TrueTime returns uncertainty bounds) (pp. 176–177).
-- **Retries are safe only for idempotent operations,** so deduplicate instead (pp. 184–185).
-- **A perfect link = fair-loss link + acknowledgments + retransmits + sequence numbers + dedup.** It gives reliable delivery, no duplication and no creation. TCP gives this only within one session (pp. 185–186).
-- **Exactly-once means processing once and ignoring duplicates.** A reliable link can't avoid sending some messages more than once (p. 187).
-- **FLP:** in a fully asynchronous system, no deterministic consensus protocol can tolerate the crash of even one process within bounded time. Real systems escape through partial synchrony (pp. 189–191).
+- **مفهوم concurrency نخستین مسئله‌ی سیستم‌های توزیع‌شده است**، حتی پیش از ترک کردن نودی تنها: با `x = 1` و یک افزاینده با (+۲) و یک ضرب‌کننده با (×۲) می‌شود در ۲ یا ۳ یا ۴ یا ۶ تمام کرد (pp. 171–172).
+- **هیچ timeoutی نمی‌تواند بگوید چرا نودی پاسخ نداد.** شاید بیش‌بار باشد یا از کار افتاده یا کند، یا شاید شبکه خطاکار باشد (p. 173).
+- **صف‌های بزرگ‌تر throughput را بالا نمی‌برند.** latency می‌افزایند. **فشار برگشتی** تولید‌کننده‌ها را کند می‌کند (pp. 175–176).
+- **برای ترتیب از timestamp به کار نبرید**، مگر منبع زمان دقتی بالا داشته باشید، که TrueTime در Spanner کران عدم قطعیت برمی‌گرداند (pp. 176–177).
+- **کوشش دوباره تنها برای عملیات idempotent ایمن است**، پس در عوض تکراری‌زدایی کنید (pp. 184–185).
+- **پیوند بی‌عیب برابر پیوند fair-loss به‌علاوه‌ی تأیید و بازفرست و شماره‌ی ترتیب و تکراری‌زدایی است.** تحویل قابل اطمینان و بی تکرار و بی ساختن می‌دهد. پروتکل TCP این را تنها درون یک session می‌دهد (pp. 185–186).
+- **مفهوم exactly-once یعنی یک بار پردازش کردن و نادیده گرفتن تکراری‌ها.** پیوندی قابل اطمینان نمی‌تواند از فرستادن برخی پیام‌ها بیشتر از یک بار بپرهیزد (p. 187).
+- **قضیه‌ی FLP:** در سیستمی تماماً ناهم‌زمان، هیچ پروتکل consensus قطعی‌ای نمی‌تواند از کار افتادن حتی یک process را درون زمانی bounded تحمل کند. سیستم‌های واقعی از راه concurrency جزئی فرار می‌کنند (pp. 189–191).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Concurrent Execution — p. 171
-  - Shared State in a Distributed System — p. 173
-- Fallacies of Distributed Computing — p. 174
-  - Processing — p. 175
-  - Clocks and Time — p. 176
-  - State Consistency — p. 177
-  - Local and Remote Execution — p. 178
-  - Need to Handle Failures — p. 178
-  - Network Partitions and Partial Failures — p. 179
-  - Cascading Failures — p. 180
-- Distributed Systems Abstractions — p. 181
-  - Links — p. 182
-- Two Generals’ Problem — p. 187
-- FLP Impossibility — p. 189
-- System Synchrony — p. 190
-- Failure Models — p. 191
-  - Crash Faults — p. 191
-  - Omission Faults — p. 192
-  - Arbitrary Faults — p. 193
-  - Handling Failures — p. 193
-  - Summary — p. 193
+- اجرای هم‌زمان — ص. ۱۷۱
+  - بخش shared state در سیستمی توزیع‌شده — ص. ۱۷۳
+- مغلطه‌های محاسبات توزیع‌شده — ص. ۱۷۴
+  - پردازش — ص. ۱۷۵
+  - ساعت و زمان — ص. ۱۷۶
+  - بخش consistency حالت — ص. ۱۷۷
+  - اجرای محلی و دور — ص. ۱۷۸
+  - نیاز به رسیدگی به شکست — ص. ۱۷۸
+  - پارتیشن شبکه و شکست جزئی — ص. ۱۷۹
+  - شکست آبشاری — ص. ۱۸۰
+- انتزاع‌های سیستم‌های توزیع‌شده — ص. ۱۸۱
+  - پیوند — ص. ۱۸۲
+- مسئله‌ی دو ژنرال — ص. ۱۸۷
+- ناممکنی FLP — ص. ۱۸۹
+- بخش concurrency سیستم — ص. ۱۹۰
+- مدل‌های شکست — ص. ۱۹۱
+  - خطای از کار افتادن — ص. ۱۹۱
+  - خطای omission — ص. ۱۹۲
+  - خطای دل‌بخواهی — ص. ۱۹۳
+  - رسیدگی به شکست — ص. ۱۹۳
+  - خلاصه — ص. ۱۹۳
 
-## Notes
+## یادداشت‌ها
 
-Part II opens with Lamport's quip that a computer you didn't know existed can make yours unusable (p. 167). Vertical scaling is expensive and hard to maintain, so systems scale **horizontally**, running on many networked machines that act as one logical entity (p. 167). Most research in the field starts from the fact that nothing is entirely reliable: links delay, reorder and drop messages, and processes pause, slow down, crash or go out of control (p. 168). CPUs are tiny distributed systems themselves, but their primitives can't be reused directly because remote communication is expensive and unreliable (p. 168).
+بخش دو با این شوخی Lamport باز می‌شود که کامپیوتری که از وجودش خبر نداشتید می‌تواند مال شما را به‌کار‌نیامدنی کند (p. 167). مقیاس دادن عمودی گران و نگهداشتش سخت است، پس سیستم‌ها **افقی** مقیاس می‌گیرند، و روی ماشین‌های شبکه‌شده‌ی زیادی اجرا می‌شوند که مثل یک هستی منطقی عمل می‌کنند (p. 167). بیشتر پژوهش این حوزه از این واقعیت شروع می‌کند که هیچ چیزی تماماً قابل اطمینان نیست: پیوندها پیام را معطل و بی‌ترتیب و گم می‌کنند، و processها می‌ایستند و کند می‌شوند و از کار می‌افتند یا از کنترل در می‌روند (p. 168). پردازنده‌ها خودشان سیستم‌های توزیع‌شده‌ی ریزی‌اند، ولی اولیه‌هایشان یک‌راست بازاستفاده‌شدنی نیستند چون ارتباط دور گران و نامطمئن است (p. 168).
 
-### Concurrent execution
+### اجرای هم‌زمان
 
-A single thread running `i = 1; i += 2; i *= 2` always produces 6. With two threads sharing `x`, the outcome depends on the interleaving (Figure 8-1, p. 172):
+یک thread تنها که `i = 1; i += 2; i *= 2` را اجرا کند همیشه ۶ می‌دهد. با دو thread که `x` را مشترک دارند، برآمد به لابه‌لا رفتن بستگی دارد (شکل ۸-۱، ص. ۱۷۲):
 
-![Four interleavings of an adder thread and a multiplier thread over x = 1, ending with x = 2, 3, 4 and 6](../figures/08-01.png)
+![چهار لابه‌لا رفتن thread افزاینده و thread ضرب‌کننده روی x = 1، که با x برابر ۲ و ۳ و ۴ و ۶ تمام می‌شوند](../figures/08-01.png)
 
-*Figure 8-1 (p. 172): the same two threads give four results depending on which read sees which write.*
+*Figure 8-1 (p. 172): همان دو thread بسته به این‌که کدام خواندنی کدام نوشتنی را ببیند چهار نتیجه می‌دهند.*
 
-| Case | Interleaving | Result |
+| حالت | لابه‌لا رفتن | نتیجه |
 |---|---|---|
-| a | Both read 1; adder writes 3; multiplier overwrites with 2 | **2** |
-| b | Both read 1; multiplier writes 2; adder overwrites with 3 | **3** |
-| c | Multiplier finishes first (1 × 2), then adder (+2) | **4** |
-| d | Adder finishes first (1 + 2), then multiplier (× 2) | **6** |
+| الف | هر دو ۱ را می‌خوانند؛ افزاینده ۳ می‌نویسد؛ ضرب‌کننده با ۲ روی‌نویسی می‌کند | **۲** |
+| ب | هر دو ۱ را می‌خوانند؛ ضرب‌کننده ۲ می‌نویسد؛ افزاینده با ۳ روی‌نویسی می‌کند | **۳** |
+| ج | ضرب‌کننده اول تمام می‌کند با ۱ × ۲، بعد افزاینده با (+۲) | **۴** |
+| د | افزاینده اول تمام می‌کند با ۱ + ۲، بعد ضرب‌کننده با (× ۲) | **۶** |
 
-**Consistency models** define which execution histories are allowed, constraining or relaxing the set of possible states (p. 172). Concurrent systems may share memory; distributed systems have local state and **message passing** (pp. 172–173).
+**مفهوم consistency modelها** تعریف می‌کنند که کدام تاریخ‌های اجرا مجازند، و مجموعه‌ی حالت‌های ممکن را مقید یا شل می‌کنند (p. 172). سیستم‌های هم‌زمان می‌توانند حافظه را مشترک داشته باشند؛ و سیستم‌های توزیع‌شده حالت محلی و **رد و بدل پیام** دارند (pp. 172–173).
 
-> **Vault note:** the book's sidebar on concurrent versus parallel (p. 173). Concurrent steps overlap in time; parallel steps run simultaneously on several processors. Joe Armstrong's analogy: concurrency is two queues for one coffee machine, parallelism is two queues for two machines.
+> **Vault note:** کادر کناری کتاب درباره‌ی هم‌زمان در برابر موازی (p. 173). قدم‌های هم‌زمان در زمان هم‌پوشان‌اند؛ و قدم‌های موازی هم‌هنگام روی چند پردازنده اجرا می‌شوند. قیاس جو آرمسترانگ: concurrency دو صف برای یک دستگاه قهوه است، و موازی بودن دو صف برای دو دستگاه.
 
-#### Shared state in a distributed system
+#### ساختار shared state در سیستمی توزیع‌شده
 
-Putting a single database at the centre doesn't keep processes in sync. Every access is a message, so the question becomes what a *long* wait means, which requires stating the system's **synchrony** (p. 173). A silent database could be overloaded, unavailable or slow, or the network could be failing, so a **failure model** is needed too (p. 173). **Fault tolerance** starts with removing the single point of failure by adding a backup, which raises the next problem: keeping the copies in sync (pp. 173–174).
+گذاشتن دیتابیسی تنها در مرکز processها را هم‌گام نگه نمی‌دارد. هر دسترسی‌ای پیامی است، پس پرسش این می‌شود که انتظار *طولانی* چه معنایی دارد، که مشخص کردن **concurrency** سیستم را لازم دارد (p. 173). دیتابیسی خاموش می‌توانست بیش‌بار یا نادسترس‌پذیر یا کند باشد، یا شبکه می‌توانست بشکند، پس **مدل شکست** هم لازم است (p. 173). **fault tolerance** با برداشتن نقطه‌ی شکست تنها و افزودن پشتیبانی شروع می‌شود، که مسئله‌ی بعدی را بالا می‌آورد: هم‌گام نگه داشتن کپی‌ها (pp. 173–174).
 
-### Fallacies of distributed computing
+### مغلطه‌های محاسبات توزیع‌شده
 
-Connections fail, responses get lost, and remote calls are never free (p. 174). Peter Deutsch's 1994 list also includes network security, adversaries, topology changes, transport cost and the assumption of a single authority over the network (p. 175). The book adds more assumptions that bite in practice:
+اتصال‌ها می‌شکنند، پاسخ‌ها گم می‌شوند، و فراخوانی دور هیچ‌وقت مجانی نیست (p. 174). فهرست ۱۹۹۴ پیتر دویچ امنیت شبکه و دشمن و تغییر توپولوژی و هزینه‌ی انتقال و فرض تنها بودن یک مرجع روی شبکه را هم دارد (p. 175). کتاب فرض‌های بیشتری می‌افزاید که در عمل گاز می‌گیرند:
 
-| Assumption | Reality (pp. 175–179) |
+| فرض | واقعیت (pp. 175–179) |
 |---|---|
-| **Processing is instantaneous** | Remote work takes time; messages wait in queues; nodes differ in hardware and versions; a parallel fan-out is as slow as its slowest server |
-| **Queues are infinite** | Bigger queues only add latency. **Backpressure** slows producers and is often bolted on afterwards rather than designed in |
-| **Clocks are in sync** | Drift matters; don't order by timestamps without special time sources. Know whether a clock is **monotonic** |
-| **State is consistent** | Eventually consistent systems diverge and repair. Cassandra had bugs from schema changes and ring views that propagated at different times |
-| **Local = remote** | Hiding a remote call behind a local API hides latency, consistency, paging and reconciliation (Waldo et al.) |
-| **Nodes are up** | Maintenance, OOM kills, bugs and hardware fail. Heartbeats and failure detectors form *hypotheses* about liveness |
+| **پردازش لحظه‌ای است** | کار دور زمان می‌برد؛ پیام‌ها در صف منتظر می‌مانند؛ نودها در سخت‌افزار و نسخه فرق دارند؛ یک پخش موازی همان‌قدر کند است که کندترین سرورش |
+| **صف‌ها بی‌پایان‌اند** | صف‌های بزرگ‌تر تنها latency می‌افزایند. **فشار برگشتی** تولید‌کننده‌ها را کند می‌کند و اغلب بعدتر پیچ‌و‌مهره می‌شود و نه در طرح |
+| **ساعت‌ها هم‌گام‌اند** | رانش مهم است؛ بی منبع‌های زمان ویژه با timestamp مرتب نکنید. بدانید که ساعتی **یکنوا** هست یا نه |
+| **حالت سازگار است** | سیستم‌های سازگار غایی واگرا می‌شوند و تعمیر. سیستم Cassandra از تغییر schema و نماهای حلقه که با زمان‌های مختلف پخش می‌شدند اشکال داشت |
+| **محلی برابر دور است** | پنهان کردن فراخوانی دور پشت APIی محلی latency و consistency و صفحه‌بندی و آشتی‌دهی را پنهان می‌کند، از والدو و همکاران |
+| **نودها سرپایند** | نگهداشت و کشته شدن با OOM و اشکال و سخت‌افزار می‌شکنند. heartbeat و failure detector *فرضیه*هایی درباره‌ی زنده بودن می‌سازند |
 
-Process-local queues serve three goals (p. 176):
+صف‌های process‌محلی سه هدف را سرویس می‌دهند (p. 176):
 
-- **decoupling** receipt from processing;
-- **pipelining** stages;
-- **absorbing short bursts**, which adds latency but beats failing and retrying.
+- **جدا کردن** گرفتن از پردازش؛
+- **مفهوم pipeline کردن** مرحله‌ها؛
+- **جذب رگبارهای کوتاه**، که latency می‌افزاید ولی از شکستن و دوباره‌کوشی بهتر است.
 
-Size queues by measured processing and wait times for stable loads, and for bursts when load is unpredictable (p. 176).
+برای بارهای پایدار، اندازه‌ی صف را از زمان پردازش و انتظار اندازه‌گرفته بردارید، و برای رگبار وقتی بار پیش‌بینی‌ناپذیر است (p. 176).
 
-#### Network partitions and partial failures
+#### پارتیشن شبکه و شکست جزئی
 
-A **network partition** is when servers can't communicate. Gilbert and Lynch distinguish two participants being unable to talk from whole *groups* being isolated and proceeding independently, which can produce conflicting results (p. 179). Links can also fail **asymmetrically**, delivering in one direction only (p. 179). Design for partial failures, for example when data was replicated but no acknowledgment arrived. The best way to design for failures is to **test** for them: inject partitions, bit rot, latency and clock skew (pp. 179–180).
+**پارتیشن شبکه** وقتی است که سرورها نمی‌توانند حرف بزنند. گیلبرت و لینچ این را که دو شرکت‌کننده نمی‌توانند حرف بزنند از این جدا می‌کنند که کل *گروه*ها منزوی می‌شوند و مستقل پیش می‌روند، که می‌تواند نتیجه‌های متعارض بسازد (p. 179). پیوندها می‌توانند **نامتقارن** هم بشکنند، و تنها در یک جهت تحویل بدهند (p. 179). برای شکست جزئی طراحی کنید، مثلاً وقتی داده تکرار شده بود ولی تأییدی نرسید. بهترین راه طراحی برای شکست **آزمودن** آن است: پارتیشن و پوسیدن بیت و latency و کجی ساعت تزریق کنید (pp. 179–180).
 
-> **Vault note:** the book's tool list (p. 180): Toxiproxy (network faults), Chaos Monkey (random production shutdowns), CharybdeFS (filesystem errors) and CrashMonkey (filesystem consistency testing).
+> **Vault note:** فهرست ابزارهای کتاب (p. 180): Toxiproxy برای خطای شبکه، Chaos Monkey برای خواباندن تصادفی در production، CharybdeFS برای خطای فایل‌سیستم و CrashMonkey برای آزمودن consistency فایل‌سیستم.
 
-#### Cascading failures
+#### شکست آبشاری
 
-An overloaded node that tips over shifts its load onto the others. Even good intentions can cascade: peers flooding a node that has just come back with missed updates can bring it down again (p. 180).
+نودی بیش‌بار که از پا بیفتد بارش را به بقیه جابه‌جا می‌کند. حتی نیت خوب هم می‌تواند آبشار شود: همتاهایی که نودی را که همین حالا برگشته با به‌روزرسانی‌های از قلم افتاده سیل می‌کنند می‌توانند بازهم بخوابانندش (p. 180).
 
-| Defence | What it does (pp. 180–181) |
+| دفاع | چه می‌کند (pp. 180–181) |
 |---|---|
-| **Circuit breaker** | Detects failures, steers calls away from a failing service and gives it time to recover |
-| **Backoff** | Waits longer and longer between one client's retries |
-| **Jitter** | Adds randomness so clients don't all retry at the same moment |
-| **Checksums and validation** | Stop corrupted data from replicating over good copies |
-| **Coordination** | A coordinator plans execution from available resources and past load, avoiding hotspots |
+| **circuit breaker** | شکست‌ها را تشخیص می‌دهد، فراخوانی‌ها را از سرویسی که می‌شکند دور می‌کند و وقت می‌دهد تا بازیابی شود |
+| **عقب‌نشینی** | میان کوشش‌های دوباره‌ی یک کلاینت بیشتر و بیشتر منتظر می‌ماند |
+| **jitter** | تصادفی بودن می‌افزاید تا کلاینت‌ها همه در یک لحظه دوباره نکوشند |
+| **checksum و اعتبارسنجی** | جلو تکرار شدن داده‌ی خراب روی کپی‌های خوب را می‌گیرند |
+| **هم‌آهنگی** | یک coordinator اجرا را از منبع‌های موجود و بار گذشته برنامه‌ریزی می‌کند، و از نقطه‌ی داغ می‌پرهیزد |
 
-### Distributed systems abstractions
+> **In practice:** Kubernetes شبکه را ساده نشان می‌دهد ولی قابل اطمینانش نمی‌کند: pod loader و ClickHouse روی شبکه حرف می‌زنند.
+>
+> **Your turn:** insert loader به ClickHouse با timeout تمام می‌شود. ردیف‌ها نوشته شده‌اند؟
+>
+> *Answer:* نمی‌دانید: ممکن است insert رسیده و پاسخ گم شده باشد. retry فقط وقتی امن است که insert idempotent باشد، مثلاً با deduplication بلوک در جدول‌های Replicated یا `insert_deduplication_token`. timeout فرق شکست درخواست و شکست پاسخ را نمی‌گوید (pp. 174–181).
 
-A shared vocabulary avoids ambiguity (pp. 181–182).
+### انتزاع‌های سیستم‌های توزیع‌شده
 
-#### Links
+واژگان مشترک از ابهام می‌پرهیزد (pp. 181–182).
 
-Each layer adds a guarantee (pp. 182–186):
+#### پیوند
+
+هر لایه‌ای تضمینی می‌افزاید (pp. 182–186):
 
 ```mermaid
 flowchart LR
@@ -147,125 +155,131 @@ flowchart LR
     SL --> PL["Perfect link<br/>reliable delivery · no duplication · no creation<br/>(like TCP, per session)"]
 ```
 
-- **Fair-loss link** (pp. 182–183). A sent message is either not yet delivered, irrecoverably lost or delivered, and the sender can't tell which. Properties:
-  - *fair loss*: retransmitting infinitely often to a correct receiver eventually gets the message delivered;
-  - *finite duplication*;
-  - *no creation*.
-- **Acknowledgments** (pp. 183–184). M(n) carries a unique, monotonically increasing number, and the receiver replies ACK(n). An ACK can be lost too. Once received, it proves delivery. Any unique identifier works; hashes need collision handling.
-- **Stubborn link** (p. 184). Resend after a timeout T, indefinitely, so a message can't be irrecoverably lost. That's impractical without acknowledgments.
-- **The problem with retransmits** (pp. 184–185). Until the ACK arrives, the message may have been processed, may be about to be processed, may be lost, or the receiver may have crashed. Resending can create **duplicates**, which are harmless only for **idempotent** operations. Shutting down a server is idempotent; charging a credit card isn't. Since not everything is idempotent, **deduplicate** instead.
-- **Message order** (p. 185). The receiver tracks two counters:
-  - **n_consecutive**, the highest sequence number up to which every message has arrived;
-  - **n_processed**, the highest number put back in order and processed, which is used for dedup.
+- **پیوند fair-loss** (pp. 182–183). پیامی که فرستاده شده یا هنوز تحویل نشده یا جبران‌ناپذیر گم شده یا تحویل شده، و فرستنده نمی‌تواند بگوید کدام. خاصیت‌ها:
+  - *گم‌شدن منصفانه*: بازفرست بی‌نهایت‌بار به گیرنده‌ای درست در غایت پیام را تحویل‌شده می‌کند؛
+  - *تکرار متناهی*؛
+  - *بی ساختن*.
+- **تأیید** (pp. 183–184). پیام M(n) عددی یکتا و یکنوا‌افزایشی حمل می‌کند، و گیرنده ACK(n) پاسخ می‌دهد. تأییدی هم می‌تواند گم شود. همین که گرفته شود، تحویل را اثبات می‌کند. هر شناسه‌ی یکتایی کار می‌کند؛ hashها رسیدگی به برخورد لازم دارند.
+- **پیوند لجباز** (p. 184). پس از timeout T دوباره بفرست، بی‌پایان، تا پیامی نتواند جبران‌ناپذیر گم شود. این بی تأیید ناعملی است.
+- **مسئله‌ی بازفرست** (pp. 184–185). تا رسیدن تأیید، شاید پیام پردازش شده باشد، شاید قرار است پردازش شود، شاید گم شده، یا شاید گیرنده از کار افتاده. فرستادن دوباره می‌تواند **تکراری** بسازد، که تنها برای عملیات **idempotent** بی‌آزار است. خواباندن سروری idempotent است؛ و شارژ کردن کارت اعتباری نه. چون همه چیز idempotent نیست، در عوض **تکراری‌زدایی** کنید.
+- **ترتیب پیام** (p. 185). گیرنده دو شمارنده را پی می‌گیرد:
+  - **مفهوم n_consecutive**، یعنی بالاترین شماره‌ی ترتیبی که تا آن هر پیامی رسیده؛
+  - **مفهوم n_processed**، یعنی بالاترین شماره‌ای که سر جا برگردانده و پردازش شده، که برای تکراری‌زدایی به کار می‌رود.
 
-  Out-of-order messages wait in a **reorder buffer**: receiving 5 after 3 means holding 5 until 4 arrives. Anything ≤ n_consecutive that arrives again can be discarded.
-- **Perfect link** (p. 186): reliable delivery, no duplication, no creation. TCP resembles it, but with grouped and selective acknowledgments, flow and congestion control, and only within a single session.
+  پیام‌های بی‌ترتیب در **buffer مرتب کردن دوباره** منتظر می‌مانند: گرفتن ۵ پس از ۳ یعنی نگه داشتن ۵ تا رسیدن ۴. هر چیزی ≤ n_consecutive که بازهم برسد انداختنی است.
+- **پیوند بی‌عیب** (p. 186): تحویل قابل اطمینان، بی تکرار، بی ساختن. پروتکل TCP به آن می‌ماند، ولی با تأییدهای گروهی و گزینشی و کنترل جریان و شلوغی، و تنها درون یک session.
 
-> **Try it:** [From fair-loss to perfect links](../widgets/08-perfect-link.html) — send numbered messages over a lossy, reordering, duplicating link, then switch on acknowledgments, retransmits, the reorder buffer and dedup one at a time, and watch n_consecutive and n_processed.
+> **Try it:** [از fair-loss تا پیوند بی‌عیب](../widgets/08-perfect-link.html)؛ پیام‌های شماره‌دار را روی پیوندی بفرستید که گم و بی‌ترتیب و تکراری می‌کند، بعد تأیید و بازفرست و buffer مرتب کردن دوباره و تکراری‌زدایی را یکی‌یکی روشن کنید، و n_consecutive و n_processed را ببینید.
 
-#### Exactly-once delivery
+#### تحویل exactly-once
 
-The book quotes Mathias Verraes' joke that exactly-once delivery is one of the two hard problems, and lists it twice (p. 186). Real systems use **at-least-once** delivery (retry until acknowledged) or **at-most-once** (send without confirmation) (p. 186). TCP dedups packets within a session. If the connection breaks after processing but before the ACK arrives, though, the application may resend (pp. 186–187). What matters is **exactly-once processing**. True exactly-once would require **common knowledge**: everyone knows a fact, and everyone knows that everyone knows it. That's impossible in theory, as the next section shows, so systems create the illusion by **processing once and ignoring duplicates** (p. 187).
+کتاب این شوخی ماتیاس وراس را نقل می‌کند که تحویل exactly-once یکی از آن دو مسئله‌ی سخت است، و دو بار فهرستش می‌کند (p. 186). سیستم‌های واقعی تحویل **حداقل‌یک‌بار**، یعنی دوباره بکوش تا تأیید شود، یا **at-most-once**، یعنی بی تأیید بفرست، به کار می‌برند (p. 186). پروتکل TCP بسته‌ها را درون یک session تکراری‌زدایی می‌کند. ولی اگر اتصال پس از پردازش و پیش از رسیدن تأیید بشکند، برنامه می‌تواند دوباره بفرستد (pp. 186–187). آن چیزی که مهم است **پردازش exactly-once** است. exactly-once واقعی **دانش مشترک** لازم می‌داشت: همه واقعیتی را می‌دانند، و همه می‌دانند که همه می‌دانند. در نظر ناممکن است، چنان‌که بخش بعد نشان می‌دهد، پس سیستم‌ها آن توهم را با **یک بار پردازش کردن و نادیده گرفتن تکراری‌ها** می‌سازند (p. 187).
 
-### Two Generals' Problem
+### مسئله‌ی دو ژنرال
 
-Two armies attack a city from opposite sides and win only if they attack together. They communicate through messengers who may be captured (p. 188). General A sends MSG(N). B doesn't know if A received its ACK(MSG(N)), so B needs ACK(ACK(MSG(N))), and so on: they are always **one ACK away** from certainty (Figure 8-4) (pp. 188–189). Communication here is fully asynchronous, with no time bound (p. 189). Lesson: agreement is impossible over an asynchronous link that can fail. Perfect links concern transport only; they don't guarantee perfect delivery or that participants stay alive (p. 187).
+دو ارتش از دو سوی مقابل به شهری حمله می‌کنند و تنها وقتی می‌برند که با هم حمله کنند. از راه قاصدهایی حرف می‌زنند که می‌توانند اسیر شوند (p. 188). ژنرال A پیام MSG(N) را می‌فرستد. ژنرال B نمی‌داند که A تأییدش یعنی ACK(MSG(N)) را گرفته یا نه، پس B به ACK(ACK(MSG(N))) نیاز دارد، و همین‌طور: همیشه **یک تأیید دور** از قطعیت‌اند (شکل ۸-۴) (pp. 188–189). ارتباط این‌جا تماماً asynchronous است، بی کران زمانی (p. 189). درس: توافق روی پیوندی asynchronous که می‌تواند بشکند ناممکن است. پیوندهای بی‌عیب تنها به انتقال می‌پردازند؛ تحویل بی‌عیب یا زنده ماندن شرکت‌کننده‌ها را تضمین نمی‌کنند (p. 187).
 
-### FLP Impossibility
+### ناممکنی FLP
 
-Fischer, Lynch and Paterson (1985) consider processes that start with initial values and must agree on one (p. 189). A correct **consensus** protocol needs (p. 189):
+فیشر و لینچ و پترسون در ۱۹۸۵ processهایی را در نظر می‌گیرند که با مقدارهای آغازین شروع می‌کنند و باید روی یکی توافق کنند (p. 189). پروتکل **consensus** درست این‌ها را لازم دارد (p. 189):
 
-| Property | Meaning |
+| خاصیت | معنا |
 |---|---|
-| **Agreement** | Every process decides the same value |
-| **Validity** | The decided value was proposed by a participant; nontrivial, not a fixed default |
-| **Termination** | Every nonfaulty process eventually decides |
+| **توافق** | هر processی همان مقدار را تصمیم می‌گیرد |
+| **اعتبار** | مقدار تصمیم‌شده را شرکت‌کننده‌ای پیشنهاد داده؛ ناـبدیهی است و نه پیش‌فرضی ثابت |
+| **پایان** | هر process نشکسته‌ای در غایت تصمیم می‌گیرد |
 
-In a **fully asynchronous** model there are no timeouts, and a crashed process is indistinguishable from a slow one. FLP shows that **no deterministic protocol guarantees consensus in bounded time if even one process may crash unannounced** (p. 189). That doesn't make consensus impossible in practice: it only can't *always* be reached in bounded time asynchronously, and real systems have some synchrony (p. 190).
+در مدلی **تماماً asynchronous** timeoutی نیست، و processی از کار افتاده از کندی تشخیص‌ناپذیر است. قضیه‌ی FLP نشان می‌دهد که **هیچ پروتکل قطعی‌ای consensus را در زمانی bounded تضمین نمی‌کند اگر حتی یک process بتواند بی خبر دادن از کار بیفتد** (p. 189). این consensus را در عمل ناممکن نمی‌کند: تنها یعنی asynchronous *همیشه* در زمانی bounded نمی‌شود به آن رسید، و سیستم‌های واقعی کمی concurrency دارند (p. 190).
 
-### System synchrony
+### مفهوم concurrency سیستم
 
-| Model | Assumptions (pp. 190–191) | Consequence |
+| مدل | فرض‌ها (pp. 190–191) | پیامد |
 |---|---|---|
-| **Asynchronous** | Unknown relative speeds; no bound on delivery time or order | Failures can't be reliably detected; FLP applies |
-| **Synchronous** | Comparable process speeds, bounded delays, bounded clock difference | Timeouts work, enabling leader election, consensus and failure detection, but timing violations cause failures: two Raft leaders, a live process suspected dead |
-| **Partially synchronous** (Dwork et al.) | Bounds hold most of the time, but aren't exact | The practical middle ground |
+| **asynchronous** | سرعت‌های نسبی نامعلوم؛ بی کران بر زمان یا ترتیب تحویل | شکست‌ها قابل اطمینان تشخیص‌دادنی نیستند؛ قضیه‌ی FLP به کار می‌آید |
+| **هم‌زمان** | سرعت processهای مقایسه‌پذیر، latencyهای کران‌دار، تفاوت ساعت bounded | timeout کار می‌کند، که انتخاب leader و consensus و تشخیص شکست را ممکن می‌کند، ولی نقض زمان‌بندی شکست می‌سازد: دو leader در Raft، یا processی زنده که مرده گمان می‌رود |
+| **نیمه‌هم‌زمان** از دورک و همکاران | کران‌ها بیشتر وقت‌ها برقرارند، ولی دقیق نیستند | همان میانه‌ی عملی |
 
-Synchrony affects performance, scalability and even solvability (p. 191).
+مفهوم concurrency روی کارایی و مقیاس‌پذیری و حتی حل‌شدنی بودن اثر می‌گذارد (p. 191).
 
-### Failure models
+### مدل‌های شکست
 
-A **failure model** states exactly how processes may fail, and algorithms are designed around it (p. 191).
+**مدل شکست** دقیقاً می‌گوید processها چطور مجازند بشکنند، و الگوریتم‌ها گردش طراحی می‌شوند (p. 191).
 
-| Model | Behaviour (pp. 191–193) |
+| مدل | رفتار (pp. 191–193) |
 |---|---|
-| **Crash-stop** | The process stops executing steps and sending messages, and stays stopped *as far as the algorithm is concerned*. It may recover and join a later round, but can't rejoin the current one; a new identity doesn't make it crash-recovery |
-| **Crash-recovery** | The process stops and later resumes. Requires durable state and a recovery protocol, and the algorithm must handle every recovery state. Others can't tell it from an unreachable process, so it's a special case of omission |
-| **Omission** | Steps are skipped, invisible, or messages aren't sent or received: partitions, switch failures, congestion, full queues, a lost message the sender wrongly assumes was delivered. A very slow node looks *forgetful*. A crash = omitting all messages |
-| **Arbitrary (Byzantine)** | The process keeps executing but contradicts the algorithm, for example deciding a value nobody proposed. Caused by bugs, mixed versions or malicious actors. Relevant to aerospace (cross-validation) and cryptocurrencies |
+| **crash-stop** | process از برداشتن قدم و فرستادن پیام می‌ایستد، و *تا جایی که به الگوریتم مربوط است* ایستاده می‌ماند. می‌تواند بازیابی شود و به دوری بعدی بپیوندد، ولی نمی‌تواند به دور جاری دوباره بپیوندد؛ و هویتی تازه آن را crash-recovery نمی‌کند |
+| **crash-recovery** | process می‌ایستد و بعدتر از سر می‌گیرد. حالت پایا و پروتکل بازیابی لازم دارد، و الگوریتم باید به هر حالت بازیابی‌ای رسیدگی کند. بقیه نمی‌توانند آن را از processی دست‌نیافتنی تشخیص بدهند، پس حالتی ویژه از omission است |
+| **omission** | قدم‌ها جا می‌افتند، یا نادیدنی‌اند، یا پیام‌ها فرستاده یا گرفته نمی‌شوند: پارتیشن و شکست switch و شلوغی و صف پر و پیامی گم‌شده که فرستنده غلط فرض می‌گیرد تحویل شده. نودی خیلی کند *فراموش‌کار* به نظر می‌رسد. از کار افتادن برابر omission همه‌ی پیام‌هاست |
+| **دل‌بخواهی یعنی Byzantine** | process همین‌طور اجرا می‌کند ولی الگوریتم را نقض، مثلاً مقداری را تصمیم می‌گیرد که هیچ‌کس پیشنهادش نداده. از اشکال و نسخه‌های قاطی یا بازیگر بدخواه می‌آید. به هوافضا با اعتبارسنجی متقابل و رمزارزها مربوط است |
 
-#### Handling failures
+#### رسیدگی به شکست
 
-Failures are **masked** with process groups and redundancy, at the cost of slower fallback paths. Many failures are prevented in software with reviews, testing, timeouts, retries and locally ordered steps (p. 193). Most algorithms in the book assume **crash failures** and rely on redundancy (p. 193).
+شکست‌ها با گروه process و redundancy **پوشانده** می‌شوند، به بهای مسیرهای جانشین کندتر. خیلی از شکست‌ها در نرم‌افزار با بازبینی و آزمودن و timeout و کوشش دوباره و قدم‌های محلی‌مرتب جلوگیری می‌شوند (p. 193). بیشتر الگوریتم‌های کتاب **شکست از کار افتادن** را فرض می‌گیرند و به redundancy تکیه می‌کنند (p. 193).
 
-## Trade-offs at a glance
+> **In practice:** pod loader crash-stop نیست: Kubernetes آن را restart می‌کند، پس مدل درستش crash-recovery است.
+>
+> **Your turn:** چرا این تفاوت در طراحی loader مهم است؟
+>
+> *Answer:* در crash-recovery، process برمی‌گردد ولی state درون حافظه‌اش را از دست داده؛ پس cursor و هر state دیگری باید جایی durable باشد، نه در حافظه‌ی pod، و کار نیمه‌تمام باید بی‌خطر تکرارشدنی باشد (pp. 191–193).
 
-| Delivery semantics | Sender behaviour | Risk | Needed for "exactly once" |
+## بده‌بستان‌ها در یک نگاه
+
+| معناشناسی تحویل | رفتار فرستنده | ریسک | برای «دقیقاً یک بار» چه لازم است |
 |---|---|---|---|
-| At-most-once | Send, never retry | Loss | — |
-| At-least-once | Retry until ACK | Duplicates | Idempotence or dedup at the receiver |
-| "Exactly-once" | At-least-once + dedup | Dedup state must survive crashes | Common knowledge is impossible; process once |
+| at-most-once | بفرست، هیچ‌وقت دوباره نکوش | گم شدن | — |
+| حداقل‌یک‌بار | تا تأیید دوباره بکوش | تکراری | idempotence یا تکراری‌زدایی در گیرنده |
+| «exactly-once» | حداقل‌یک‌بار به‌علاوه‌ی تکراری‌زدایی | حالت تکراری‌زدایی باید از از کار افتادن جان به در ببرد | دانش مشترک ناممکن است؛ یک بار پردازش کنید |
 
-| Failure model | Easiest to tolerate → hardest |
+| مدل شکست | آسان‌ترین تا سخت‌ترین برای تحمل |
 |---|---|
-| Crash-stop → crash-recovery → omission → Byzantine | Each one is more general than the last |
+| crash-stop ← crash-recovery ← omission ← Byzantine | هر یک از آن یکی پیشین کلی‌تر است |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Deutsch's eight fallacies**, commonly listed as: the network is reliable; latency is zero; bandwidth is infinite; the network is secure; topology doesn't change; there is one administrator; transport cost is zero; the network is homogeneous. The book paraphrases most of them (pp. 174–175).
-- **Exponential backoff with "full jitter"** (sleep = random(0, min(cap, base·2ⁿ))), popularized by AWS, spreads retries best among the common variants. It's the backoff-plus-jitter pattern from p. 181.
-- **Idempotency keys**, a client-generated unique ID per request stored with the result, are how payment APIs turn the at-least-once delivery the book describes into exactly-once *processing*.
-- [DDIA Ch. 9](../../designing-data-intensive-applications/chapters/09-the-trouble-with-distributed-systems.md) covers the same failure modes from the application side, with more on process pauses and clock confidence intervals.
+- **هشت مغلطه‌ی دویچ**، که معمولاً این‌طور فهرست می‌شوند: شبکه قابل اطمینان است؛ latency صفر است؛ پهنای باند بی‌نهایت است؛ شبکه ایمن است؛ توپولوژی عوض نمی‌شود؛ یک مدیر هست؛ هزینه‌ی انتقال صفر است؛ شبکه همگن است. کتاب بیشترشان را به بیان دیگر می‌گوید (pp. 174–175).
+- **عقب‌نشینی نمایی با «jitter کامل»**، یعنی sleep = random(0, min(cap, base·2ⁿ))، که AWS همه‌گیرش کرد، کوشش‌های دوباره را از میان گونه‌های رایج بهتر پخش می‌کند. همان الگوی عقب‌نشینی‌به‌علاوه‌ی‌jitter ص. ۱۸۱ است.
+- **کلیدهای idempotency**، یعنی شناسه‌ای یکتا که کلاینت برای هر درخواستی می‌سازد و با نتیجه ذخیره می‌شود، همان راهی است که APIهای پرداخت با آن تحویل حداقل‌یک‌باری را که کتاب وصف می‌کند به *پردازش* exactly-once تبدیل می‌کنند.
+- [فصل ۹ کتاب DDIA](../../designing-data-intensive-applications/chapters/09-the-trouble-with-distributed-systems.md) همان حالت‌های شکست را از سمت برنامه می‌پوشاند، با بیشتر درباره‌ی ایستادن process و بازه‌ی اطمینان ساعت.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [9. Failure Detection](09-failure-detection.md) (turning timeouts into suspicion), [11. Replication and Consistency](11-replication-and-consistency.md) (consistency models, CAP), [14. Consensus](14-consensus.md) (how Paxos and Raft live with FLP), [5. Transaction Processing and Recovery](05-transaction-processing-and-recovery.md) (concurrency on one node).
+- **فصل‌های مرتبط:** [فصل ۹: تشخیص شکست](09-failure-detection.md) که timeout را به گمان بردن تبدیل می‌کند، [فصل ۱۱: replication و consistency](11-replication-and-consistency.md) که consistency model و CAP را دارد، [فصل ۱۴: consensus](14-consensus.md) که چطور Paxos و Raft با قضیه‌ی FLP زندگی می‌کنند را دارد، و [فصل ۵: پردازش تراکنش و بازیابی](05-transaction-processing-and-recovery.md) که concurrency روی یک نود را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Two threads run `x += 2` and `x *= 2` on x = 1 without synchronization. Which results are possible?**
+1. **دو thread `x += 2` و `x *= 2` را روی x = 1 بی synchronization اجرا می‌کنند. کدام نتیجه‌ها ممکن‌اند؟**
 
-   *Answer:* 2, 3, 4 and 6, depending on which reads and writes interleave (Figure 8-1, p. 172).
+   *Answer:* دو و ۳ و ۴ و ۶، بسته به این‌که کدام خواندن‌ها و نوشتن‌ها لابه‌لای هم بروند (شکل ۸-۱، ص. ۱۷۲).
 
-2. **Why doesn't a larger queue increase throughput?**
+2. **چرا صفی بزرگ‌تر throughput را بالا نمی‌برد؟**
 
-   *Answer:* It doesn't change the processing rate; messages just wait longer. Backpressure, which slows producers, addresses overload instead (pp. 175–176).
+   *Answer:* نرخ پردازش را عوض نمی‌کند؛ پیام‌ها تنها بیشتر منتظر می‌مانند. فشار برگشتی، که تولید‌کننده‌ها را کند می‌کند، در عوض به بیش‌باری می‌پردازد (pp. 175–176).
 
-3. **What properties does a fair-loss link have?**
-   - [x] Fair loss, finite duplication, no creation
-   - [ ] Reliable delivery, no duplication, no creation
-   - [ ] FIFO order and exactly-once delivery
+3. **پیوند fair-loss چه خاصیت‌هایی دارد؟**
+   - [x] گم‌شدن منصفانه، تکرار متناهی، بی ساختن
+   - [ ] تحویل قابل اطمینان، بی تکرار، بی ساختن
+   - [ ] ترتیب FIFO و تحویل exactly-once
 
-   *Answer:* That's the UDP-like base. Reliable delivery and no duplication are the perfect link's guarantees (pp. 182–183, 186).
+   *Answer:* آن پایه‌ی از جنس UDP است. تحویل قابل اطمینان و بی تکرار تضمین‌های پیوند بی‌عیب‌اند (pp. 182–183, 186).
 
-4. **A receiver has n_consecutive = 3 and receives message 5. What does it do?**
+4. **گیرنده‌ای n_consecutive = 3 دارد و پیام ۵ را می‌گیرد. چه می‌کند؟**
 
-   *Answer:* It puts 5 in the reorder buffer until 4 arrives. A repeat of any message ≤ 3 can be discarded as a duplicate (p. 185).
+   *Answer:* پیام ۵ را در buffer مرتب کردن دوباره می‌گذارد تا ۴ برسد. تکرار هر پیامی ≤ ۳ به‌شکل تکراری انداختنی است (p. 185).
 
-5. **Why is "exactly-once delivery" really about processing?**
+5. **چرا «تحویل exactly-once» واقعاً درباره‌ی پردازش است؟**
 
-   *Answer:* A reliable link can't avoid sending some messages more than once. What can be guaranteed is processing each message once and ignoring duplicates. True agreement on whether it was persisted would need common knowledge, which is impossible (pp. 186–187).
+   *Answer:* پیوندی قابل اطمینان نمی‌تواند از فرستادن برخی پیام‌ها بیشتر از یک بار بپرهیزد. آن چیزی که تضمین‌شدنی است یک بار پردازش کردن هر پیامی و نادیده گرفتن تکراری‌ها است. توافق واقعی روی پایا شدنش دانش مشترک لازم می‌داشت، که ناممکن است (pp. 186–187).
 
-6. **What does FLP prove, and what does it *not* prove?**
+6. **قضیه‌ی FLP چه چیزی را اثبات می‌کند، و چه چیزی را اثبات *نمی‌کند*؟**
 
-   *Answer:* In a fully asynchronous system, no deterministic consensus protocol is guaranteed to terminate in bounded time if even one process may crash. It does *not* say consensus is impossible in practice: partially synchronous systems reach it (pp. 189–190).
+   *Answer:* در سیستمی تماماً ناهم‌زمان، هیچ پروتکل consensus قطعی‌ای تضمین نمی‌شود در زمانی bounded تمام شود اگر حتی یک process بتواند از کار بیفتد. *نمی‌گوید* که consensus در عمل ناممکن است: سیستم‌های نیمه‌هم‌زمان به آن می‌رسند (pp. 189–190).
 
-7. **Why can crash-recovery be seen as a special case of omission failure?**
+7. **چرا crash-recovery حالتی ویژه از شکست omission دیدنی است؟**
 
-   *Answer:* To other processes, a node that crashed and recovered looks the same as one that was unreachable and missed messages (p. 192).
+   *Answer:* از دید processهای دیگر، نودی که از کار افتاده و بازیابی شده همان‌قدر شبیه نودی است که دست‌نیافتنی بود و پیام‌ها را از قلم انداخت (p. 192).
 
-8. **Which two defences keep many clients from overwhelming a recovering server with retries?**
+8. **کدام دو دفاع جلو این را می‌گیرند که کلاینت‌های زیادی سروری در حال بازیابی را با کوشش دوباره زیر بار ببرند؟**
 
-   *Answer:* Backoff, which spaces out each client's retries, and jitter, which randomizes them so clients don't retry together (p. 181).
+   *Answer:* عقب‌نشینی، که کوشش‌های دوباره‌ی هر کلاینتی را فاصله می‌دهد، و jitter، که تصادفی‌شان می‌کند تا کلاینت‌ها با هم دوباره نکوشند (p. 181).

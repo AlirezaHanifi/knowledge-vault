@@ -1,13 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>B⁺-Tree Splits and Merges</title>
-<meta name="description" content="Insert and delete keys in a B+-Tree with a chosen node capacity and watch splits promote separator keys, merges demote them, and the tree grow or shrink a level. Illustrates Database Internals, Chapters 2 and 4.">
+<title>شکستن و merge در B⁺-Tree</title>
+<meta name="description" content="در B+-Treeی با گنجایش نودی که برمی‌دارید کلید درج و حذف کنید و ببینید شکستن‌ها کلید جداکننده بالا می‌برند، mergeها پایین می‌آورند، و درخت سطحی می‌گیرد یا می‌بازد. تصویری از فصل ۲ و فصل ۴ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .tree svg { min-width: 520px; }
+  .tree { direction: ltr; }
   .tree .node rect { fill: var(--surface); stroke: var(--line-strong); }
   .tree .node.hot rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
   .tree .node.leaf rect { fill: var(--surface-2); }
@@ -22,10 +23,10 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/02-b-tree-basics.html">Chapter 2</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-b-tree-basics.html">فصل ۲</a><span aria-hidden="true">/</span>
       <span aria-current="page">B⁺-Tree</span>
     </nav>
     <span data-kit-theme></span>
@@ -33,44 +34,44 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 2 · B-Tree Basics</div>
-  <h1>B⁺-Tree splits and merges</h1>
-  <p class="lede">A B⁺-Tree keeps values only in its leaves; internal nodes hold <strong>separator keys</strong>. Insert into a full leaf and it <strong>splits</strong>: half its keys move to a new sibling, and the first key of that sibling is copied up into the parent, which may split in turn. Delete from a leaf until it underflows and it borrows from a sibling or <strong>merges</strong> with one, pulling a separator down. The tree grows and shrinks a level only at the root.</p>
-  <p class="source-note">Illustrates “B-Tree Node Splits” and “B-Tree Node Merges” (pp. 39–42) and, with ascending inserts, right-only appends (Ch. 4). The capacity, the underflow threshold (half the capacity, rounded down) and the redistribution step are the vault’s choices; the keys are random but seeded. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۲ · پایه‌های B-Tree</div>
+  <h1>شکستن و merge در B⁺-Tree</h1>
+  <p class="lede">B⁺-Tree مقدارها را تنها در برگ‌هایش نگه می‌دارد؛ و نودهای درونی <strong>کلید جداکننده</strong> دارند. در برگی پر درج کنید و <strong>می‌شکند</strong>: نصف کلیدهایش به siblingی تازه جابه‌جا می‌شوند، و کلید اول آن sibling در پدر کپی می‌شود، که می‌تواند به‌نوبت بشکند. از برگی آن‌قدر حذف کنید که underflow کند و از siblingی قرض می‌گیرد یا با یکی <strong>merge</strong> می‌شود، و جداکننده‌ای را پایین می‌کشد. درخت تنها در ریشه سطحی می‌گیرد و می‌بازد.</p>
+  <p class="source-note">تصویری از «شکستن نود B-Tree» و «merge کردن نود B-Tree» (صص. ۳۹–۴۲) و، با درج صعودی، افزودن تنها‌راست از فصل ۴. گنجایش و آستانه‌ی کم‌ریز، یعنی نصف گنجایش که به پایین گرد شده، و قدم پخش دوباره انتخاب‌های vault است؛ کلیدها تصادفی‌اند ولی seed‌دار. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><div class="stage tree" id="tree" role="img" aria-label="B+-Tree diagram"></div>
-        <p class="field-hint">Highlighted nodes changed in the last operation. Dashed arrows are sibling links between leaves.</p></div>
+      <div class="panel"><div class="stage tree" id="tree" role="img" aria-label="نمودار B+-Tree"></div>
+        <p class="field-hint">نودهای برجسته در آخرین عملیات عوض شده‌اند. فلش‌های خط‌چین پیوند sibling میان برگ‌ها هستند.</p></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="cap"></div><div id="order" style="margin-top:10px"></div>
-        <div class="keyrow"><label class="field" style="margin:0">Key <input id="key" type="number" min="1" max="999" value="42"></label>
-          <button class="btn small" type="button" id="ins">Insert</button><button class="btn small danger" type="button" id="del">Delete</button></div>
-        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="delr">Delete a random key</button></div>
-        <p class="field-hint">Play inserts keys one at a time in the chosen order.</p>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="cap"></div><div id="order" style="margin-top:10px"></div>
+        <div class="keyrow"><label class="field" style="margin:0">کلید <input id="key" type="number" min="1" max="999" value="42"></label>
+          <button class="btn small" type="button" id="ins">درج</button><button class="btn small danger" type="button" id="del">حذف</button></div>
+        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="delr">کلیدی تصادفی را حذف کن</button></div>
+        <p class="field-hint">پخش کلیدها را یکی‌یکی به ترتیبی که برداشته‌اید درج می‌کند.</p>
         <div id="player" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Splits copy a key up.</strong> In a leaf split, the new right sibling’s first key becomes the separator in the parent; in an internal split, the middle key moves up and appears only once.</li>
-    <li><strong>The tree grows at the top.</strong> Height only increases when the root splits, so all leaves stay at the same depth.</li>
-    <li><strong>Ascending inserts fill the right edge.</strong> With sorted keys every split happens on the rightmost leaf, and every node left behind is only half full. This is why some engines special-case right-only appends.</li>
-    <li><strong>Delete can borrow before it merges.</strong> An underflowing node first takes a key from a sibling with spare keys; only if neither can spare one do the two merge and the parent loses a separator.</li>
+    <li><strong>شکستن کلیدی را بالا کپی می‌کند.</strong> در شکستن برگی، کلید اول آن sibling راست تازه جداکننده‌ی پدر می‌شود؛ و در شکستن درونی، کلید میانی بالا می‌رود و تنها یک بار پیدا می‌شود.</li>
+    <li><strong>درخت از بالا رشد می‌کند.</strong> ارتفاع تنها وقتی زیاد می‌شود که ریشه بشکند، پس همه‌ی برگ‌ها در همان عمق می‌مانند.</li>
+    <li><strong>درج صعودی لبه‌ی راست را پر می‌کند.</strong> با کلیدهای مرتب هر شکستنی روی راست‌ترین برگ رخ می‌دهد، و هر نودی که جا می‌ماند تنها نیمه‌پر است. از همین‌جاست که برخی موتورها افزودن تنها‌راست را حالتی ویژه می‌گیرند.</li>
+    <li><strong>حذف می‌تواند پیش از merge قرض بگیرد.</strong> نودی که underflow می‌کند اول از siblingی با کلید اضافه کلیدی می‌گیرد؛ تنها اگر هیچ‌کدام کلیدی اضافه نداشته باشند آن دو merge می‌شوند و پدر جداکننده‌ای می‌بازد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/02-b-tree-basics.html"><small>Lesson</small>2. B-Tree Basics</a></li>
+    <li><a href="../chapters/02-b-tree-basics.html"><small>درس</small>فصل ۲: پایه‌های B-Tree</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -95,7 +96,7 @@ function stats(rows) {
     seq = [];
     if (cfg.order === "ascending") { for (var i = 1; i <= 40; i++) seq.push(i * 5); }
     else { var pool = []; for (var j = 1; j <= 99; j++) pool.push(j); while (seq.length < 40) seq.push(pool.splice(r.int(pool.length), 1)[0]); }
-    log.clear(); log.add("Empty tree, node capacity " + cfg.cap + " keys. Next keys: " + seq.slice(0, 8).join(", ") + " …", "muted");
+    log.clear(); log.add("درخت خالی، با گنجایش نود " + cfg.cap + " کلید. کلیدهای بعدی: " + seq.slice(0, 8).join("، ") + " …", "muted");
     render();
   }
 
@@ -106,7 +107,7 @@ function stats(rows) {
       if (node.keys.length <= cfg.cap) return null;
       var mid = Math.ceil(node.keys.length / 2), right = leaf(node.keys.slice(mid));
       node.keys = node.keys.slice(0, mid); hot.push(right); splits++;
-      log.add("Leaf overflows: split into [" + node.keys.join(" ") + "] and [" + right.keys.join(" ") + "], copy " + right.keys[0] + " up", "warn");
+      log.add("برگ سرریز می‌کند: به [" + node.keys.join(" ") + "] و [" + right.keys.join(" ") + "] می‌شکند، و " + right.keys[0] + " بالا کپی می‌شود", "warn");
       return { sep: right.keys[0], right: right };
     }
     var i = 0; while (i < node.keys.length && key >= node.keys[i]) i++;
@@ -117,15 +118,15 @@ function stats(rows) {
     var m = Math.floor(node.keys.length / 2), up = node.keys[m];
     var rn = { leaf: false, keys: node.keys.slice(m + 1), children: node.children.slice(m + 1) };
     node.keys = node.keys.slice(0, m); node.children = node.children.slice(0, m + 1); hot.push(rn); splits++;
-    log.add("Internal node overflows: split, move " + up + " up", "warn");
+    log.add("نود درونی سرریز می‌کند: می‌شکند و " + up + " بالا می‌رود", "warn");
     return { sep: up, right: rn };
   }
   function insert(key) {
     hot = [];
     var res = insertRec(root, key);
-    if (res && res.dup) { log.add(key + " is already in the tree", "muted"); return; }
-    if (res) { root = { leaf: false, keys: [res.sep], children: [root, res.right] }; hot.push(root); log.add("Root split: the tree grows to " + height() + " levels", "bad"); }
-    log.add("Insert " + key, "ok");
+    if (res && res.dup) { log.add("کلید " + key + " از قبل در درخت است", "muted"); return; }
+    if (res) { root = { leaf: false, keys: [res.sep], children: [root, res.right] }; hot.push(root); log.add("ریشه شکست: درخت به " + height() + " سطح رشد می‌کند", "bad"); }
+    log.add("درج " + key, "ok");
   }
 
   function deleteRec(node, key) {
@@ -141,26 +142,26 @@ function stats(rows) {
     if (L && L.keys.length > minKeys()) {
       if (c.leaf) { c.keys.unshift(L.keys.pop()); node.keys[i - 1] = c.keys[0]; }
       else { c.keys.unshift(node.keys[i - 1]); node.keys[i - 1] = L.keys.pop(); c.children.unshift(L.children.pop()); }
-      borrows++; hot.push(L, node); log.add("Underflow: borrow a key from the left sibling", "warn"); return true;
+      borrows++; hot.push(L, node); log.add("underflow: کلیدی از sibling چپ قرض گرفته می‌شود", "warn"); return true;
     }
     if (R && R.keys.length > minKeys()) {
       if (c.leaf) { c.keys.push(R.keys.shift()); node.keys[i] = R.keys[0]; }
       else { c.keys.push(node.keys[i]); node.keys[i] = R.keys.shift(); c.children.push(R.children.shift()); }
-      borrows++; hot.push(R, node); log.add("Underflow: borrow a key from the right sibling", "warn"); return true;
+      borrows++; hot.push(R, node); log.add("underflow: کلیدی از sibling راست قرض گرفته می‌شود", "warn"); return true;
     }
     var li = L ? i - 1 : i, a = node.children[li], b = node.children[li + 1];
     if (!b) return true;
     if (a.leaf) a.keys = a.keys.concat(b.keys);
     else { a.keys = a.keys.concat([node.keys[li]], b.keys); a.children = a.children.concat(b.children); }
-    log.add("Underflow: merge with a sibling, separator " + node.keys[li] + " removed from the parent", "warn");
+    log.add("underflow: با siblingی merge می‌شود، و جداکننده‌ی " + node.keys[li] + " از پدر برداشته می‌شود", "warn");
     node.keys.splice(li, 1); node.children.splice(li + 1, 1); merges++; hot.push(a, node);
     return true;
   }
   function remove(key) {
     hot = [];
-    if (!deleteRec(root, key)) { log.add(key + " is not in the tree", "muted"); return; }
-    log.add("Delete " + key, "ok");
-    if (!root.leaf && root.keys.length === 0) { root = root.children[0]; hot.push(root); log.add("Root is empty: the tree shrinks to " + height() + " level" + (height() > 1 ? "s" : ""), "bad"); }
+    if (!deleteRec(root, key)) { log.add("کلید " + key + " در درخت نیست", "muted"); return; }
+    log.add("حذف " + key, "ok");
+    if (!root.leaf && root.keys.length === 0) { root = root.children[0]; hot.push(root); log.add("ریشه خالی است: درخت به " + height() + " سطح آب می‌رود", "bad"); }
   }
 
   function height() { var h = 1, n = root; while (!n.leaf) { n = n.children[0]; h++; } return h; }
@@ -197,14 +198,14 @@ function stats(rows) {
       s.appendChild(g);
     }); });
     var mount = Kit.clear(document.getElementById("tree")); mount.appendChild(s);
-    mount.setAttribute("aria-label", "B+-Tree with " + ls.length + " levels; leaves: " + leaves.map(function (l) { return "[" + l.keys.join(" ") + "]"; }).join(" "));
+    mount.setAttribute("aria-label", "B+-Treeی با " + ls.length + " سطح؛ برگ‌ها: " + leaves.map(function (l) { return "[" + l.keys.join(" ") + "]"; }).join(" "));
     var ks = allKeys(), occ = leaves.reduce(function (a, l) { return a + l.keys.length; }, 0) / (leaves.length * cfg.cap);
-    stats([["Keys", ks.length], ["Height", ls.length], ["Leaves", leaves.length], ["Leaf fill", Kit.pct(occ, 0), occ < 0.6 ? "warn" : ""], ["Splits", splits], ["Merges / borrows", merges + " / " + borrows]]);
+    stats([["کلیدها", ks.length], ["ارتفاع", ls.length], ["برگ‌ها", leaves.length], ["پر شدن برگ", Kit.pct(occ, 0), occ < 0.6 ? "warn" : ""], ["شکستن‌ها", splits], ["merge و قرض", merges + " / " + borrows]]);
   }
 
   function step() { if (pos >= seq.length) return false; insert(seq[pos++]); render(); return pos < seq.length; }
-  document.getElementById("cap").appendChild(Kit.slider({ label: "Node capacity", min: 2, max: 6, step: 1, value: cfg.cap, unit: " keys", onInput: function (v) { cfg.cap = v; reset(); } }).element);
-  document.getElementById("order").appendChild(Kit.segmented({ label: "Insert order", value: cfg.order, options: [{ value: "random", label: "Random" }, { value: "ascending", label: "Ascending" }], onChange: function (v) { cfg.order = v; reset(); } }).element);
+  document.getElementById("cap").appendChild(Kit.slider({ label: "گنجایش نود", min: 2, max: 6, step: 1, value: cfg.cap, unit: " کلید", onInput: function (v) { cfg.cap = v; reset(); } }).element);
+  document.getElementById("order").appendChild(Kit.segmented({ label: "ترتیب درج", value: cfg.order, options: [{ value: "random", label: "تصادفی" }, { value: "ascending", label: "صعودی" }], onChange: function (v) { cfg.order = v; reset(); } }).element);
   function keyVal() { var v = parseInt(document.getElementById("key").value, 10); return isNaN(v) ? null : v; }
   document.getElementById("ins").addEventListener("click", function () { var k = keyVal(); if (k !== null) { insert(k); render(); } });
   document.getElementById("del").addEventListener("click", function () { var k = keyVal(); if (k !== null) { remove(k); render(); } });
@@ -213,15 +214,15 @@ function stats(rows) {
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "A leaf split in a B⁺-Tree promotes which key?",
-      options: ["The largest key of the left node, removed from the leaf", "The first key of the new right node, copied into the parent", "The median key, moved out of the leaves"], answer: 1,
-      explain: "In a B⁺-Tree values stay in leaves, so the separator is a copy (pp. 39–40)." },
-    { q: "When does the tree gain a level?",
-      options: ["Whenever any node splits", "Only when the root splits", "When a leaf is full"], answer: 1,
-      explain: "Splits propagate upwards; only a root split adds a level, so all leaves stay at the same depth (p. 39)." },
-    { q: "What happens to the parent when two siblings merge?",
-      options: ["It gains a key", "It loses a separator key and a child pointer, and may underflow itself", "Nothing"], answer: 1,
-      explain: "Merges can propagate to the root (pp. 41–42)." }
+    { q: "شکستن برگی در B⁺-Tree کدام کلید را بالا می‌برد؟",
+      options: ["بزرگ‌ترین کلید نود چپ، که از برگ برداشته می‌شود", "کلید اول نود راست تازه، که در پدر کپی می‌شود", "کلید میانه، که از برگ‌ها بیرون می‌رود"], answer: 1,
+      explain: "در B⁺-Tree مقدارها در برگ‌ها می‌مانند، پس آن جداکننده یک کپی است (صص. ۳۹–۴۰)." },
+    { q: "درخت کِی سطحی می‌گیرد؟",
+      options: ["هر وقت نودی بشکند", "تنها وقتی ریشه بشکند", "وقتی برگی پر باشد"], answer: 1,
+      explain: "شکستن‌ها رو‌به‌بالا پخش می‌شوند؛ تنها شکستن ریشه سطحی می‌افزاید، پس همه‌ی برگ‌ها در همان عمق می‌مانند (ص. ۳۹)." },
+    { q: "وقتی دو sibling merge شوند سر پدر چه می‌آید؟",
+      options: ["کلیدی می‌گیرد", "کلید جداکننده‌ای و اشاره‌گر فرزندی می‌بازد، و می‌تواند خودش underflow کند", "هیچ"], answer: 1,
+      explain: "mergeها می‌توانند تا ریشه پخش شوند (صص. ۴۱–۴۲)." }
   ]);
 })();
 </script>

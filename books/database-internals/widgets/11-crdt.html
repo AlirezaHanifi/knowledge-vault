@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CRDT Counters and Sets</title>
-<meta name="description" content="Partition three replicas, increment, decrement, add and remove on each side, then heal the partition and watch G-Counter, PN-Counter and two-phase-set states merge to the same value regardless of merge order. Illustrates Database Internals, Chapter 11.">
+<title>شمارنده‌ها و مجموعه‌های CRDT</title>
+<meta name="description" content="سه replica را پارتیشن کنید، در هر سو بیفزایید و بکاهید و اضافه و برداشته کنید، بعد پارتیشن را ترمیم کنید و ببینید حالت‌های G-Counter و PN-Counter و مجموعه‌ی دو‌فازی بی توجه به ترتیب merge به همان مقدار merge می‌شوند. تصویری از فصل ۱۱ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .reps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -12,60 +12,60 @@
   .rp h3 { margin: 0 0 6px; font-size: .9rem; display: flex; justify-content: space-between; }
   .rp .kv { display: block; margin-bottom: 4px; }
   .rp .val { font-weight: 600; color: var(--ink); }
-  .split { border-left: 3px dashed var(--bad); }
-  @media (max-width: 560px) { .reps { grid-template-columns: 1fr; } .split { border-left: 0; border-top: 3px dashed var(--bad); } }
+  .split { border-right: 3px dashed var(--bad); }
+  @media (max-width: 560px) { .reps { grid-template-columns: 1fr; } .split { border-right: 0; border-top: 3px dashed var(--bad); } }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/11-replication-and-consistency.html">Chapter 11</a><span aria-hidden="true">/</span>
-      <span aria-current="page">CRDTs</span>
+      <a href="../chapters/11-replication-and-consistency.html">فصل ۱۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">CRDT</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 11 · Replication and Consistency</div>
-  <h1>CRDTs: counters and sets that always merge</h1>
-  <p class="lede">A <strong>conflict-free replicated data type</strong> lets replicas accept updates independently, even during a partition, and still converge. Their merge is commutative, associative and idempotent. A <strong>G-Counter</strong> keeps one slot per replica, merges by element-wise maximum and reads as the sum. A <strong>PN-Counter</strong> pairs two G-Counters, one for increments and one for decrements. A <strong>two-phase set</strong> keeps an add-set and a remove-set, and a removed element can never come back.</p>
-  <p class="source-note">Illustrates “Strong Eventual Consistency” and “Conflict-Free Replicated Data Types” (pp. 238–240), including the G-Counter example of Table 11-1. The replicas, elements and partition are the vault’s. Merges are state-based (whole states exchanged), the form the book’s counter examples use. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۱ · replication و consistency</div>
+  <h1>CRDT: شمارنده و مجموعه‌ای که همیشه merge می‌شود</h1>
+  <p class="lede"><strong>نوع داده‌ی تکرارشده‌ی بی‌تعارض</strong> می‌گذارد replicaها مستقل به‌روزرسانی بپذیرند، حتی در میانه‌ی پارتیشنی، و باز هم هم‌گرا شوند. merge آن‌ها commutative و associative و idempotent است. <strong>G-Counter</strong> یک خانه برای هر replicaیی نگه می‌دارد، با بیشینه‌ی عنصر‌به‌عنصر merge می‌کند و به‌شکل جمع خوانده می‌شود. <strong>PN-Counter</strong> دو G-Counter را جفت می‌کند، یکی برای افزودن و یکی برای کاستن. <strong>مجموعه‌ی دو‌فازی</strong> یک مجموعه‌ی افزودن و یک مجموعه‌ی برداشتن نگه می‌دارد، و عنصری برداشته‌شده هیچ‌وقت نمی‌تواند برگردد.</p>
+  <p class="source-note">تصویری از «eventual consistency قوی» و «نوع داده‌های تکرارشده‌ی بی‌تعارض» (صص. ۲۳۸–۲۴۰)، از جمله نمونه‌ی G-Counter در جدول ۱۱-۱. replicaها و عنصرها و آن پارتیشن مال vault است. mergeها حالت‌محورند، یعنی کل حالت رد و بدل می‌شود، همان شکلی که نمونه‌های شمارنده‌ی کتاب به کار می‌برند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel"><div class="reps" id="reps"></div><div class="callout" id="conv" style="margin-top:12px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="who"></div><div id="elem" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="inc">Increment</button><button class="btn small" type="button" id="dec">Decrement</button></div>
-        <div class="row" style="margin-top:8px"><button class="btn small primary" type="button" id="add">Add element</button><button class="btn small danger" type="button" id="rem">Remove element</button></div>
-        <div class="row" style="margin-top:8px"><label class="field" style="margin:0"><input type="checkbox" id="part" checked> Partition {A, B} | {C}</label></div>
-        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="sync">Exchange states (random order)</button><button class="btn small" type="button" id="reset">↺ Reset</button></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="who"></div><div id="elem" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="inc">افزودن</button><button class="btn small" type="button" id="dec">کاستن</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn small primary" type="button" id="add">اضافه کردن عنصر</button><button class="btn small danger" type="button" id="rem">برداشتن عنصر</button></div>
+        <div class="row" style="margin-top:8px"><label class="field" style="margin:0"><input type="checkbox" id="part" checked> پارتیشن {A, B} و {C}</label></div>
+        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="sync">رد و بدل حالت‌ها به ترتیب تصادفی</button><button class="btn small" type="button" id="reset">↺ از نو</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>No update is lost.</strong> Increments made on both sides of the partition all survive the merge, because each replica only ever writes its own slot.</li>
-    <li><strong>Order doesn’t matter.</strong> States are exchanged in a random order each time, and the result is always the same: max and union are commutative and idempotent.</li>
-    <li><strong>A G-Counter can’t go down.</strong> Decrements only change the PN-Counter, whose value is the sum of P minus the sum of N.</li>
-    <li><strong>Two-phase sets remember removals.</strong> Remove an element on one side and add it again on the other: after the merge it stays removed, because the remove-set wins.</li>
+    <li><strong>هیچ به‌روزرسانی‌ای گم نمی‌شود.</strong> افزودن‌هایی که در هر دو سوی پارتیشن شده همه از merge جان به در می‌برند، چون هر replicaیی تنها خانه‌ی خودش را می‌نویسد.</li>
+    <li><strong>ترتیب مهم نیست.</strong> حالت‌ها هر بار به ترتیبی تصادفی رد و بدل می‌شوند، و نتیجه همیشه همان است: max و اجتماع commutative و idempotent‌اند.</li>
+    <li><strong>G-Counter نمی‌تواند پایین برود.</strong> کاستن تنها PN-Counter را عوض می‌کند، که مقدارش جمع P منهای جمع N است.</li>
+    <li><strong>مجموعه‌های دو‌فازی برداشتن‌ها را یاد می‌سپارند.</strong> عنصری را در یک سو بردارید و در آن یکی بازهم اضافه کنید: پس از merge برداشته می‌ماند، چون مجموعه‌ی برداشتن می‌برد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/11-replication-and-consistency.html"><small>Lesson</small>11. Replication and Consistency</a></li>
+    <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,7 +83,7 @@ function stats(rows) {
   var log = Kit.log(document.getElementById("log"));
   var NAMES = ["A", "B", "C"], ELEMS = ["apple", "fig", "pear"], who = 0, elem = "apple", part = true, R, rr, syncs;
   function fresh() { return { g: [0, 0, 0], p: [0, 0, 0], n: [0, 0, 0], add: {}, rem: {} }; }
-  function reset() { R = [fresh(), fresh(), fresh()]; rr = Kit.rng(8); syncs = 0; log.clear(); log.add("Three replicas, partitioned into {A, B} and {C}.", "muted"); render(); }
+  function reset() { R = [fresh(), fresh(), fresh()]; rr = Kit.rng(8); syncs = 0; log.clear(); log.add("سه replica، که به {A, B} و {C} پارتیشن شده‌اند.", "muted"); render(); }
   function side(i) { return part ? (i < 2 ? 0 : 1) : 0; }
   function merge(a, b) {
     for (var k = 0; k < 3; k++) { a.g[k] = Math.max(a.g[k], b.g[k]); a.p[k] = Math.max(a.p[k], b.p[k]); a.n[k] = Math.max(a.n[k], b.n[k]); }
@@ -93,7 +93,7 @@ function stats(rows) {
     var pairs = []; for (var i = 0; i < 3; i++) for (var j = 0; j < 3; j++) if (i !== j && side(i) === side(j)) pairs.push([i, j]);
     for (var k = pairs.length - 1; k > 0; k--) { var x = rr.int(k + 1), t = pairs[k]; pairs[k] = pairs[x]; pairs[x] = t; }
     pairs.forEach(function (pr) { merge(R[pr[1]], R[pr[0]]); });
-    syncs++; log.add("Exchange states: " + (pairs.map(function (pr) { return NAMES[pr[0]] + "→" + NAMES[pr[1]]; }).join(", ") || "nothing reachable"), "ok"); render();
+    syncs++; log.add("رد و بدل حالت‌ها: " + (pairs.map(function (pr) { return NAMES[pr[0]] + "→" + NAMES[pr[1]]; }).join("، ") || "چیزی دست‌یافتنی نیست"), "ok"); render();
   }
   function sum(v) { return v[0] + v[1] + v[2]; }
   function setVal(s) { return ELEMS.filter(function (e) { return s.add[e] && !s.rem[e]; }); }
@@ -101,38 +101,38 @@ function stats(rows) {
     var m = Kit.clear(document.getElementById("reps"));
     R.forEach(function (s, i) {
       m.appendChild(Kit.el("div", { class: "rp" + (part && i === 2 ? " split" : "") },
-        Kit.el("h3", null, Kit.el("span", null, "Replica " + NAMES[i]), Kit.el("span", { class: "badge" + (i === who ? " accent" : "") }, i === who ? "acting" : "")),
+        Kit.el("h3", null, Kit.el("span", null, "replica " + NAMES[i]), Kit.el("span", { class: "badge" + (i === who ? " accent" : "") }, i === who ? "کنش‌گر" : "")),
         Kit.el("span", { class: "kv" }, "G-Counter [" + s.g.join(", ") + "] = ", Kit.el("span", { class: "val" }, sum(s.g))),
-        Kit.el("span", { class: "kv" }, "PN P [" + s.p.join(", ") + "] N [" + s.n.join(", ") + "] = ", Kit.el("span", { class: "val" }, sum(s.p) - sum(s.n))),
-        Kit.el("span", { class: "kv" }, "2P-set add {" + Object.keys(s.add).join(", ") + "} rem {" + Object.keys(s.rem).join(", ") + "}"),
-        Kit.el("span", { class: "kv" }, "value {", Kit.el("span", { class: "val" }, setVal(s).join(", ")), "}")));
+        Kit.el("span", { class: "kv" }, "PN با P [" + s.p.join(", ") + "] و N [" + s.n.join(", ") + "] = ", Kit.el("span", { class: "val" }, sum(s.p) - sum(s.n))),
+        Kit.el("span", { class: "kv" }, "مجموعه‌ی دو‌فازی؛ افزودن {" + Object.keys(s.add).join(", ") + "} برداشتن {" + Object.keys(s.rem).join(", ") + "}"),
+        Kit.el("span", { class: "kv" }, "مقدار {", Kit.el("span", { class: "val" }, setVal(s).join(", ")), "}")));
     });
     var key = function (s) { return [sum(s.g), sum(s.p) - sum(s.n), setVal(s).join(",")].join("|"); }, same = key(R[0]) === key(R[1]) && key(R[1]) === key(R[2]);
     var c = document.getElementById("conv"); c.className = "callout " + (same ? "ok" : "warn");
-    c.textContent = same ? "✓ All three replicas show the same values." : "✗ Replicas disagree; exchange states (and heal the partition) to converge.";
-    stats([["Partition", part ? "on" : "healed", part ? "warn" : "ok"], ["State exchanges", syncs], ["Converged", same ? "yes" : "no", same ? "ok" : "warn"]]);
+    c.textContent = same ? "✓ هر سه replica همان مقدارها را نشان می‌دهند." : "✗ replicaها اختلاف دارند؛ حالت‌ها را رد و بدل کنید، و پارتیشن را ترمیم، تا هم‌گرا شوند.";
+    stats([["پارتیشن", part ? "روشن" : "ترمیم‌شده", part ? "warn" : "ok"], ["رد و بدل حالت", syncs], ["هم‌گرا", same ? "بله" : "نه", same ? "ok" : "warn"]]);
   }
-  document.getElementById("who").appendChild(Kit.segmented({ label: "Acting replica", value: "0", options: NAMES.map(function (n, i) { return { value: String(i), label: n }; }), onChange: function (v) { who = +v; render(); } }).element);
-  document.getElementById("elem").appendChild(Kit.segmented({ label: "Element", value: elem, options: ELEMS.map(function (e) { return { value: e, label: e }; }), onChange: function (v) { elem = v; } }).element);
-  document.getElementById("inc").addEventListener("click", function () { R[who].g[who]++; R[who].p[who]++; log.add(NAMES[who] + ": increment (own slot only)", "ok"); render(); });
-  document.getElementById("dec").addEventListener("click", function () { R[who].n[who]++; log.add(NAMES[who] + ": decrement, PN-Counter only; a G-Counter can't decrement", "warn"); render(); });
-  document.getElementById("add").addEventListener("click", function () { if (R[who].rem[elem]) log.add(NAMES[who] + ": add " + elem + " has no effect, it is in the remove-set", "warn"); else { R[who].add[elem] = true; log.add(NAMES[who] + ": add " + elem, "ok"); } render(); });
-  document.getElementById("rem").addEventListener("click", function () { if (!R[who].add[elem]) log.add(NAMES[who] + ": can't remove " + elem + ", it was never added here", "muted"); else { R[who].rem[elem] = true; log.add(NAMES[who] + ": remove " + elem + " (forever)", "warn"); } render(); });
-  document.getElementById("part").addEventListener("change", function (e) { part = e.target.checked; log.add(part ? "Partition {A, B} | {C}" : "Partition healed", part ? "warn" : "ok"); render(); });
+  document.getElementById("who").appendChild(Kit.segmented({ label: "replica کنش‌گر", value: "0", options: NAMES.map(function (n, i) { return { value: String(i), label: n }; }), onChange: function (v) { who = +v; render(); } }).element);
+  document.getElementById("elem").appendChild(Kit.segmented({ label: "عنصر", value: elem, options: ELEMS.map(function (e) { return { value: e, label: e }; }), onChange: function (v) { elem = v; } }).element);
+  document.getElementById("inc").addEventListener("click", function () { R[who].g[who]++; R[who].p[who]++; log.add("replica " + NAMES[who] + ": افزودن، تنها در خانه‌ی خودش", "ok"); render(); });
+  document.getElementById("dec").addEventListener("click", function () { R[who].n[who]++; log.add("replica " + NAMES[who] + ": کاستن، تنها در PN-Counter؛ G-Counter نمی‌تواند بکاهد", "warn"); render(); });
+  document.getElementById("add").addEventListener("click", function () { if (R[who].rem[elem]) log.add("replica " + NAMES[who] + ": اضافه کردن " + elem + " اثری ندارد، چون در مجموعه‌ی برداشتن است", "warn"); else { R[who].add[elem] = true; log.add("replica " + NAMES[who] + ": اضافه کردن " + elem, "ok"); } render(); });
+  document.getElementById("rem").addEventListener("click", function () { if (!R[who].add[elem]) log.add("replica " + NAMES[who] + ": نمی‌شود " + elem + " را برداشت، چون این‌جا هیچ‌وقت اضافه نشده", "muted"); else { R[who].rem[elem] = true; log.add("replica " + NAMES[who] + ": برداشتن " + elem + " برای همیشه", "warn"); } render(); });
+  document.getElementById("part").addEventListener("change", function (e) { part = e.target.checked; log.add(part ? "پارتیشن {A, B} و {C}" : "پارتیشن ترمیم شد", part ? "warn" : "ok"); render(); });
   document.getElementById("sync").addEventListener("click", sync);
   document.getElementById("reset").addEventListener("click", reset);
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How is a G-Counter's value computed after merging [1, 0, 0] and [0, 0, 1]?",
-      options: ["max = 1", "element-wise max [1, 0, 1], then sum = 2", "average"], answer: 1,
-      explain: "Table 11-1 (p. 239)." },
-    { q: "Why can't a single G-Counter support decrements?",
-      options: ["Merging takes the maximum, so a lowered slot would be overwritten by the old higher value", "It has no slots", "Decrements need timestamps"], answer: 0,
-      explain: "PN-Counters keep a separate vector for decrements (pp. 239–240)." },
-    { q: "An element is removed on one replica and re-added on another. After merging a two-phase set, is it present?",
-      options: ["Yes", "No: once in the remove-set it stays removed", "Depends on merge order"], answer: 1,
-      explain: "Value = add-set minus remove-set (p. 240)." }
+    { q: "مقدار G-Counter پس از merge کردن [1, 0, 0] و [0, 0, 1] چطور حساب می‌شود؟",
+      options: ["max برابر ۱", "بیشینه‌ی عنصر‌به‌عنصر [1, 0, 1]، بعد جمع برابر ۲", "میانگین"], answer: 1,
+      explain: "جدول ۱۱-۱ (ص. ۲۳۹)." },
+    { q: "چرا یک G-Counter تنها نمی‌تواند از کاستن پشتیبانی کند؟",
+      options: ["merge بیشینه را برمی‌دارد، پس خانه‌ای که پایین آمده با مقدار بالاتر قدیم روی‌نویسی می‌شد", "خانه‌ای ندارد", "کاستن timestamp لازم دارد"], answer: 0,
+      explain: "PN-Counterها برداری جدا برای کاستن نگه می‌دارند (صص. ۲۳۹–۲۴۰)." },
+    { q: "عنصری روی یک replica برداشته و روی دیگری بازهم اضافه می‌شود. پس از merge مجموعه‌ی دو‌فازی، آن عنصر حاضر است؟",
+      options: ["بله", "نه: همین که در مجموعه‌ی برداشتن باشد برداشته می‌ماند", "به ترتیب merge بستگی دارد"], answer: 1,
+      explain: "مقدار برابر مجموعه‌ی افزودن منهای مجموعه‌ی برداشتن است (ص. ۲۴۰)." }
   ]);
 })();
 </script>

@@ -3,166 +3,180 @@ book: database-internals
 chapter: 6
 title: "B-Tree Variants"
 pages: "111–128"
+translated_title: "گونه‌های B-Tree"
+lang: fa
 ---
 
-# 6. B-Tree Variants
+# فصل ۶: گونه‌های B-Tree
 
-[← 5. Transaction Processing and Recovery](05-transaction-processing-and-recovery.md) · [Book](../README.md) · [7. Log-Structured Storage →](07-log-structured-storage.md)
+[فصل ۵: پردازش تراکنش و بازیابی →](05-transaction-processing-and-recovery.md) · [کتاب](../README.md) · [فصل ۷: ذخیره‌سازی log-structured ←](07-log-structured-storage.md)
 
-## Summary
+## خلاصه
 
-Every B-Tree variant shares the tree structure, balancing through splits and merges, and the lookup and delete algorithms. They differ in concurrency, page representation, sibling links and maintenance (p. 111). The chapter covers five approaches to the original design's problems on modern hardware: **write amplification** from page rewrites, **space amplification** from reserved space, and latching complexity (pp. 111, 127).
+هر گونه‌ای از B-Tree ساختار درخت و متوازن شدن با شکستن و merge و الگوریتم‌های جست‌و‌جو و حذف را مشترک دارد. در concurrency و نمایش صفحه و پیوند sibling و نگهداشت فرق دارند (p. 111). فصل پنج رویکرد به مسئله‌های طرح اصلی روی سخت‌افزار امروزی را می‌پوشاند: **تقویت نوشتن** از نوشتن دوباره‌ی صفحه، **تقویت فضا** از فضای نگه‌داشته، و پیچیدگی latch (pp. 111, 127).
 
-| Variant | Idea |
+| گونه | ایده |
 |---|---|
-| **Copy-on-write** (LMDB) | Immutable pages: copy the root-to-leaf path, then swap the root pointer atomically. Readers need no latches |
-| **Lazy B-Trees** (WiredTiger, LA-Tree) | Buffer updates in memory per node or per subtree; reconcile later |
-| **FD-Tree** | A small mutable head B-Tree plus immutable, logarithmically sized sorted runs connected by **fractional cascading** |
-| **Bw-Tree** | Logical nodes made of a base node plus a chain of **delta nodes**, addressed through an in-memory **mapping table** updated with compare-and-swap; latch-free |
-| **Cache-oblivious B-Tree** | **van Emde Boas layout** plus a **packed array**: asymptotically optimal for any memory hierarchy without tuning |
+| **copy-on-write** که LMDB است | صفحه‌های immutable: مسیر ریشه‌تا‌برگ را کپی کن، بعد اشاره‌گر ریشه را اتمی عوض. خواننده‌ها latch لازم ندارند |
+| **B-Treeهای تنبل** که WiredTiger و LA-Tree هستند | به‌روزرسانی‌ها را در حافظه برای هر نودی یا هر زیردرختی buffer کن؛ بعدتر آشتی بده |
+| **FD-Tree** | B-Treeی سری کوچک و mutable به‌علاوه‌ی دورهای مرتب و immutable با اندازه‌های لگاریتمی که با **آبشار کسری** به هم وصل‌اند |
+| **Bw-Tree** | نودهای منطقی که از نودی پایه به‌علاوه‌ی زنجیره‌ای از **نود دلتا** ساخته شده‌اند، و از راه **جدول mapping** in-memoryی نشانی می‌شوند که با compare-and-swap به‌روز می‌شود؛ بی‌latch |
+| **B-Tree غافل از cache** | **چیدمان فان امده بواس** به‌علاوه‌ی **آرایه‌ی بسته‌بندی‌شده**: مجانب بهینه برای هر سلسله‌مراتب حافظه‌ای، بی تنظیم |
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Copy-on-write trades space and CPU for simplicity.** Readers never block, nothing is ever seen half-written, and a crash can't corrupt pages because the root pointer flips only at the end (p. 112).
-- **LMDB needs no page cache, WAL, checkpointing or compaction.** It serves reads straight from the memory map and keeps just two root versions (p. 113).
-- **There are three ways to represent a node in memory:** raw bytes cast to structs, materialized native objects (simpler concurrency, double memory), or wrapper objects over the buffer (pp. 113–114).
-- **WiredTiger keeps different formats in memory and on disk.** Updates go to skiplist update buffers, which are **reconciled** with the page on flush, and background threads do splits and merges (pp. 114–115).
-- **Fractional cascading turns k binary searches into one.** Every Nth element of a lower level is pulled up as a bridge, so each later search starts near the right spot (pp. 118–119).
-- **A Bw-Tree update is a CAS on the mapping table.** Concurrent readers see either the old chain or the new one; of two competing writers, one retries (pp. 121–122).
-- **Bw-Tree splits and merges are multistep SMOs.** Any thread that finds one half-done must help finish it. Freed nodes are reclaimed with **epoch-based reclamation** (pp. 122–124).
+- **الگوریتم copy-on-write فضا و CPU را با سادگی بده‌بستان می‌کند.** خواننده‌ها هیچ‌وقت بند نمی‌آیند، هیچ چیزی نیمه‌نوشته دیده نمی‌شود، و از کار افتادنی نمی‌تواند صفحه‌ها را خراب کند چون اشاره‌گر ریشه تنها در پایان برمی‌گردد (p. 112).
+- **سیستم LMDB نه page cache لازم دارد و نه WAL و نه checkpoint و نه compaction.** خواندن‌ها را یک‌راست از mapping حافظه سرویس می‌دهد و تنها دو نسخه‌ی ریشه نگه می‌دارد (p. 113).
+- **سه راه برای نمایش نودی در حافظه هست:** بایت خام که به structها cast می‌شود، objectهای بومی و مادی‌شده، که concurrencyاش ساده‌تر است و حافظه‌اش دو برابر، یا objectهای پوششی روی buffer (pp. 113–114).
+- **سیستم WiredTiger قالب‌های مختلفی در حافظه و روی دیسک نگه می‌دارد.** به‌روزرسانی‌ها به bufferهای به‌روزرسانی از جنس skiplist می‌روند، که سر flush با صفحه **آشتی** می‌شوند، و threadهای پس‌زمینه شکستن و merge می‌کنند (pp. 114–115).
+- **آبشار کسری k جست‌و‌جوی دوگانی را به یکی تبدیل می‌کند.** هر عنصر Nام سطح پایین‌تری به‌شکل پل بالا کشیده می‌شود، پس هر جست‌و‌جوی بعدی نزدیک جای درست شروع می‌کند (pp. 118–119).
+- **به‌روزرسانی Bw-Tree یک CAS روی جدول mapping است.** خواننده‌های هم‌زمان یا زنجیره‌ی قدیم را می‌بینند یا تازه را؛ و از دو نویسنده‌ی رقیب، یکی دوباره می‌کوشد (pp. 121–122).
+- **شکستن و merge در Bw-Tree همان SMOهای چند‌قدمی‌اند.** هر threadی که یکی‌شان را نیمه‌کاره ببیند باید به تمام شدنش کمک کند. نودهای آزادشده با **بازپس‌گیری دوره‌محور** بازپس گرفته می‌شوند (pp. 122–124).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Copy-on-Write — p. 112
-  - Implementing Copy-on-Write: LMDB — p. 113
-- Abstracting Node Updates — p. 113
-- Lazy B-Trees — p. 114
-  - WiredTiger — p. 114
-  - Lazy-Adaptive Tree — p. 116
-- FD-Trees — p. 117
-  - Fractional Cascading — p. 118
-  - Logarithmic Runs — p. 119
-- Bw-Trees — p. 120
-  - Update Chains — p. 121
-  - Taming Concurrency with Compare-and-Swap — p. 121
-  - Structural Modification Operations — p. 122
-  - Consolidation and Garbage Collection — p. 123
-- Cache-Oblivious B-Trees — p. 124
-  - van Emde Boas Layout — p. 125
-- Summary — p. 127
+- بخش copy-on-write — ص. ۱۱۲
+  - پیاده کردن copy-on-write: سیستم LMDB — ص. ۱۱۳
+- انتزاعی کردن به‌روزرسانی نود — ص. ۱۱۳
+- بخش B-Treeهای تنبل — ص. ۱۱۴
+  - سیستم WiredTiger — ص. ۱۱۴
+  - درخت تنبل‌وفق‌پذیر — ص. ۱۱۶
+- بخش FD-Tree — ص. ۱۱۷
+  - آبشار کسری — ص. ۱۱۸
+  - دورهای لگاریتمی — ص. ۱۱۹
+- بخش Bw-Tree — ص. ۱۲۰
+  - زنجیره‌ی به‌روزرسانی — ص. ۱۲۱
+  - رام کردن concurrency با compare-and-swap — ص. ۱۲۱
+  - عملیات تغییر ساختاری — ص. ۱۲۲
+  - بخش merge و garbage collectorی — ص. ۱۲۳
+- بخش B-Treeهای غافل از cache — ص. ۱۲۴
+  - چیدمان فان امده بواس — ص. ۱۲۵
+- خلاصه — ص. ۱۲۷
 
-## Notes
+## یادداشت‌ها
 
-### Copy-on-write
+### copy-on-write
 
-Instead of complex latching, some databases **copy** a page whenever it's about to be modified, change the copy, and build a parallel tree hierarchy (p. 112). Readers keep using the old version, and writers to modified pages wait for earlier writers. When the new hierarchy is complete, the **topmost pointer is updated atomically**, and untouched pages are shared between versions (Figure 6-1) (p. 112).
+برخی دیتابیس‌ها به‌جای latch‌گذاری پیچیده، هر صفحه‌ای را که قرار است عوض شود **کپی** می‌کنند، کپی را عوض می‌کنند، و سلسله‌مراتبی موازی از درخت می‌سازند (p. 112). خواننده‌ها همین‌طور نسخه‌ی قدیم را به کار می‌برند، و نویسنده‌های صفحه‌های عوض‌شده منتظر نویسنده‌های پیشین می‌مانند. وقتی سلسله‌مراتب تازه کامل شود، **بالاترین اشاره‌گر اتمی به‌روز می‌شود**، و صفحه‌های دست‌نخورده میان نسخه‌ها مشترک‌اند (شکل ۶-۱) (p. 112).
 
-![Old and new tree roots side by side: the new root, one copied internal node and one copied leaf are drawn in black, while every other node is shared with the old tree, drawn in grey](../figures/06-01.png)
+![ریشه‌های قدیم و تازه‌ی درخت کنار هم: ریشه‌ی تازه و یک نود درونی کپی‌شده و یک برگ کپی‌شده سیاه کشیده شده‌اند، در حالی که هر نود دیگری با درخت قدیم مشترک است و خاکستری](../figures/06-01.png)
 
-*Figure 6-1 (p. 112): an update copies only the path from the root to the changed leaf; the new root points back into the old tree for everything untouched.*
+*Figure 6-1 (p. 112): به‌روزرسانی تنها مسیر ریشه تا برگ عوض‌شده را کپی می‌کند؛ ریشه‌ی تازه برای هر چیز دست‌نخورده‌ای به درخت قدیم پس اشاره می‌کند.*
 
-| Pros (p. 112) | Cons (p. 112) |
+| خوبی‌ها (p. 112) | بدی‌ها (p. 112) |
 |---|---|
-| Readers need no synchronization; pages are immutable | Extra space (old versions, briefly) |
-| Readers don't block writers | CPU time to copy whole pages |
-| No operation sees an incomplete page | |
-| A crash can't corrupt pages | |
+| خواننده‌ها synchronization لازم ندارند؛ صفحه‌ها تغییرناپذیرند | فضای اضافه، یعنی نسخه‌های قدیم، کوتاه‌مدت |
+| خواننده‌ها نویسنده‌ها را بند نمی‌آورند | زمان CPU برای کپی کردن کل صفحه‌ها |
+| هیچ عملیاتی صفحه‌ای ناتمام نمی‌بیند | |
+| از کار افتادنی نمی‌تواند صفحه‌ها را خراب کند | |
 
-B-Trees are shallow, so the simplicity often wins (p. 112).
+همه‌ی B-Treeها کم‌عمق‌اند، پس اغلب سادگی می‌برد (p. 112).
 
-#### Implementing copy-on-write: LMDB
+#### پیاده کردن copy-on-write: سیستم LMDB
 
-The **Lightning Memory-Mapped Database**, the key-value store of the OpenLDAP project, needs no page cache, WAL, checkpointing or compaction (p. 113).
+**سیستم Lightning Memory-Mapped Database**، که انباره‌ی key-value پروژه‌ی OpenLDAP است، نه page cache لازم دارد و نه WAL و نه checkpoint و نه compaction (p. 113).
 
-- It's a **single-level store**: reads and writes go directly through the memory map, without materialization or copying into buffers.
-- An update copies every branch node on the root-to-leaf path; nodes the change doesn't reach stay intact.
-- It keeps **two root versions**: the latest, and the one new changes will be committed to. Old pages are reclaimed once the reads referencing them finish.
-- It has no sibling pointers, because of its append-only design, so sequential scans climb back up to the parent.
-- The structure is inherently **multiversioned**, so readers run without locks (p. 113).
+- انباره‌ای **تک‌سطحی** است: خواندن و نوشتن یک‌راست از راه mapping حافظه می‌روند، بی مادی‌سازی یا کپی در bufferها.
+- به‌روزرسانی هر نود شاخه‌ای را روی مسیر ریشه‌تا‌برگ کپی می‌کند؛ نودهایی که تغییر به‌شان نمی‌رسد دست‌نخورده می‌مانند.
+- **دو نسخه‌ی ریشه** نگه می‌دارد: تازه‌ترین، و آن یکی که تغییرهای تازه به آن commit می‌شوند. صفحه‌های قدیم همین که خواندن‌هایی که به‌شان ارجاع می‌دهند تمام شوند بازپس گرفته می‌شوند.
+- اشاره‌گر sibling ندارد، به‌خاطر طرح append-only‌اش، پس اسکن ترتیبی به پدر بالا می‌رود.
+- ساختار ذاتاً **چند‌نسخه‌ای** است، پس خواننده‌ها بی قفل اجرا می‌شوند (p. 113).
 
-### Abstracting node updates
+> **In practice:** partهای MergeTree هم copy-on-write‌اند: هیچ partی سر جایش عوض نمی‌شود و هر تغییر part تازه‌ای می‌نویسد.
+>
+> **Your turn:** چرا `ALTER TABLE … UPDATE` برای چند ردیف در ClickHouse می‌تواند گیگابایت‌ها بنویسد؟
+>
+> *Answer:* چون partها immutable‌اند، mutation ستون‌های عوض‌شده‌ی همه‌ی partهایی را که آن ردیف‌ها را دارند از نو می‌نویسد، نه فقط ردیف‌ها را. این هزینه‌ی copy-on-write است: خواننده‌ها هیچ‌وقت بند نمی‌آیند، ولی نوشتن کپی می‌کند (pp. 112–113).
 
-| Representation | Notes (pp. 113–114) |
+### انتزاعی کردن به‌روزرسانی نود
+
+| نمایش | یادداشت (pp. 113–114) |
 |---|---|
-| Raw bytes behind native pointers and casts | Unmanaged languages; points into page-cache memory or an mmap |
-| **Materialized native objects** | Simpler concurrency, because raw pages are managed separately; twice the memory (raw and native copies) |
-| **Wrapper objects** over the backing buffer | Common in managed languages; changes are applied to the buffer immediately |
+| بایت خام پشت اشاره‌گرهای بومی و castها | زبان‌های نامدیریت‌شده؛ به حافظه‌ی page cache یا mmapی اشاره می‌کند |
+| **objectهای بومی مادی‌شده** | concurrency ساده‌تر، چون صفحه‌های خام جدا گردانده می‌شوند؛ دو برابر حافظه، یعنی کپی خام و بومی |
+| **objectهای پوششی** روی buffer پشتیبان | در زبان‌های مدیریت‌شده رایج است؛ تغییرها فوری روی buffer اعمال می‌شوند |
 
-Keeping on-disk pages, cached pages and in-memory objects separate lets them have different life cycles. For example, operations can be buffered and reconciled with the disk version during reads (p. 114).
+جدا نگه داشتن صفحه‌های دیسکی و صفحه‌های cache‌شده و objectهای in-memoryی می‌گذارد چرخه‌ی زندگی مختلفی داشته باشند. مثلاً عملیات buffer‌شدنی‌اند و در خواندن با نسخه‌ی دیسکی آشتی‌شدنی (p. 114).
 
-### Lazy B-Trees
+### درخت‌های B-Tree تنبل
 
-The book's own name (note 2, p. 114) for algorithms that buffer updates in lighter, concurrency-friendly in-memory structures and propagate them later (p. 114).
+نام خود کتاب، یادداشت ۲، ص. ۱۱۴، برای الگوریتم‌هایی که به‌روزرسانی‌ها را در ساختارهای in-memoryی سبک‌تر و concurrency‌دوست buffer می‌کنند و بعدتر پخششان (p. 114).
 
-#### WiredTiger
+#### سیستم WiredTiger
 
-MongoDB's default engine materializes nodes when they're paged in (pp. 114–115):
+موتور پیش‌فرض MongoDB نودها را وقتی page in شوند مادی می‌کند (pp. 114–115):
 
-- A **clean page** is just an index built from the on-disk image. Updates go to an **update buffer** implemented as a **skiplist**, with search-tree complexity but better concurrency (p. 115).
-- **Reads** merge the update buffer with the on-disk contents.
-- On **flush**, the page goes through **reconciliation**, overwriting the original page, and is split if it's too big (p. 115).
-- Clean and dirty pages both have in-memory versions referencing a base image on disk; dirty pages also have an update buffer (Figure 6-3) (p. 115).
+- **صفحه‌ی تمیز** تنها indexی است که از تصویر دیسکی ساخته شده. به‌روزرسانی‌ها به یک **buffer به‌روزرسانی** می‌روند که به‌شکل **skiplist** پیاده شده، با پیچیدگی درخت جست‌و‌جو ولی concurrency بهتر (p. 115).
+- **خواندن**ها buffer به‌روزرسانی را با محتوای دیسکی merge می‌کنند.
+- سر **flush**، صفحه از **آشتی‌دهی** می‌گذرد، که روی صفحه‌ی اصلی می‌نویسد، و اگر زیادی بزرگ باشد شکسته می‌شود (p. 115).
+- صفحه‌های تمیز و کثیف هر دو نسخه‌ی in-memoryی دارند که به تصویری پایه روی دیسک ارجاع می‌دهد؛ و صفحه‌های کثیف buffer به‌روزرسانی هم دارند (شکل ۶-۳) (p. 115).
 
-![A clean page with an index and a dirty page with an index plus an update buffer, both pointing to page images on disk](../figures/06-03.png)
+![صفحه‌ای تمیز با indexی و صفحه‌ای کثیف با indexی به‌علاوه‌ی buffer به‌روزرسانی، که هر دو به تصویرهای صفحه روی دیسک اشاره می‌کنند](../figures/06-03.png)
 
-*Figure 6-3 (p. 116): the dirty page keeps its changes in a separate update buffer on top of the same on-disk image.*
+*Figure 6-3 (p. 116): صفحه‌ی کثیف تغییرهایش را در buffer به‌روزرسانی جدایی روی همان تصویر دیسکی نگه می‌دارد.*
 
-- Page updates and structural changes run on a **background thread**, so readers and writers don't wait (p. 115).
+- به‌روزرسانی صفحه و تغییرهای ساختاری روی **thread پس‌زمینه** اجرا می‌شوند، پس خواننده‌ها و نویسنده‌ها منتظر نمی‌مانند (p. 115).
 
-#### Lazy-Adaptive Tree
+#### درخت تنبل‌وفق‌پذیر
 
-The **LA-Tree** attaches an update buffer to each **subtree** rather than each node (p. 116). An insert goes into the root's buffer. When that buffer fills, it is emptied into the buffers one level down, recursively, until updates reach the leaves. There they're applied in one batch, so splits and merges propagate in batches too (Figure 6-4) (pp. 116–117). Both lazy designs need extra lookups in the in-memory buffers and reconciliation with stale disk data (p. 117).
+**ساختار LA-Tree** به‌جای هر نودی به هر **زیردرخت**ی buffer به‌روزرسانی می‌چسباند (p. 116). درجی به buffer ریشه می‌رود. وقتی آن buffer پر شود، در bufferهای یک سطح پایین‌تر خالی می‌شود، و بازگشتی، تا به‌روزرسانی‌ها به برگ‌ها برسند. آن‌جا در یک دسته اعمال می‌شوند، پس شکستن و merge هم دسته‌دسته پخش می‌شوند (شکل ۶-۴) (pp. 116–117). هر دو طرح تنبل جست‌و‌جوی اضافه در bufferهای in-memoryی و آشتی با داده‌ی کهنه‌ی دیسکی لازم دارند (p. 117).
 
-### FD-Trees
+> **In practice:** async insert در ClickHouse همان ایده‌ی buffer کردن به‌روزرسانی‌هاست: نوشتن‌های کوچک در حافظه جمع می‌شوند تا درشت‌تر روی دیسک بروند.
+>
+> **Your turn:** async insert را با `wait_for_async_insert=0` روشن کرده‌اید و loader بلافاصله بعد از insert شمار ردیف را چک می‌کند و کمتر می‌بیند. چرا؟
+>
+> *Answer:* داده هنوز در buffer است و flush نشده؛ مثل درخت تنبل، به‌روزرسانی‌ها جمع می‌شوند تا ارزان‌تر نوشته شوند، و خواندنی که buffer را نبیند داده‌ی تازه را نمی‌بیند. یا منتظر تأیید بمانید یا چک را بعد از flush بگذارید (pp. 114–117).
 
-Buffering avoids many small random writes: HDDs pay for head positioning, and SSDs pay extra garbage collection (p. 117). B-Tree maintenance is full of random writes, from leaf writes and splits and merges propagating to parents. An alternative is to **append** all updates and merge them later, the idea that also inspired LSM Trees (p. 117). The **Flash Disk Tree** (FD-Tree) has a small mutable **head tree**, the only place random writes happen, and several **immutable sorted runs**. When the head fills up, it is written to a run, and runs that exceed a threshold are merged into the next level (p. 118).
+### FD-Tree
 
-#### Fractional cascading
+ساختار buffer کردن از خیلی نوشتن‌های کوچک و تصادفی می‌پرهیزد: HDDها بهای جای‌دهی هد را می‌دهند، و SSDها garbage collectorی اضافه (p. 117). نگهداشت B-Tree پر از نوشتن تصادفی است، از نوشتن برگ و شکستن و mergeی که به پدرها پخش می‌شود. جایگزینی این است که همه‌ی به‌روزرسانی‌ها **افزوده** شوند و بعدتر merge، همان ایده‌ای که به LSM Treeها هم الهام داد (p. 117). **Flash Disk Tree** که FD-Tree است یک **درخت سر** کوچک و mutable دارد، که تنها جایی است که نوشتن تصادفی رخ می‌دهد، و چند **دور مرتب immutable**. وقتی سر پر شود، در دوری نوشته می‌شود، و دورهایی که از آستانه‌ای بزنند در سطح بعدی merge می‌شوند (p. 118).
 
-Searching a cascade of sorted arrays costs log *n* in the first array, but later searches can start from the closest match on the previous level (p. 118). Mapping every element to the next level costs too many pointers, while mapping only shared elements leaves big gaps, so **every Nth element** of a lower level is pulled up to build **bridges**, which the FD-Tree paper calls *fences* (pp. 118–119).
+#### آبشار کسری
 
-The book's example pulls every other element up one level (p. 118):
+جست‌و‌جوی آبشاری از آرایه‌های مرتب در آرایه‌ی اول log *n* خرج دارد، ولی جست‌و‌جوهای بعدی می‌توانند از نزدیک‌ترین خوردنی سطح پیشین شروع کنند (p. 118). mapping هر عنصری به سطح بعد اشاره‌گر زیادی خرج دارد، در حالی که mapping تنها عنصرهای مشترک شکاف‌های بزرگی می‌گذارد، پس **هر عنصر Nام** سطح پایین‌تری بالا کشیده می‌شود تا **پل** ساخته شود، که مقاله‌ی FD-Tree اسمشان را *fence* می‌گذارد (pp. 118–119).
 
-| Array | Before | After bridging |
+نمونه‌ی کتاب هر عنصر دومی را یک سطح بالا می‌کشد (p. 118):
+
+| آرایه | پیش | پس از پل زدن |
 |---|---|---|
-| A1 | 12, 24, 32, 34, 39 | 12, 24, **25**, **30**, 32, 34, 39 |
-| A2 | 22, 25, 28, 30, 35 | **16**, 22, 25, **26**, 28, 30, 35 |
-| A3 | 11, 16, 24, 26, 30 | 11, 16, 24, 26, 30 |
+| A1 | ۱۲، ۲۴، ۳۲، ۳۴، ۳۹ | ۱۲، ۲۴، **۲۵**، **۳۰**، ۳۲، ۳۴، ۳۹ |
+| A2 | ۲۲، ۲۵، ۲۸، ۳۰، ۳۵ | **۱۶**، ۲۲، ۲۵، **۲۶**، ۲۸، ۳۰، ۳۵ |
+| A3 | ۱۱، ۱۶، ۲۴، ۲۶، ۳۰ | ۱۱، ۱۶، ۲۴، ۲۶، ۳۰ |
 
-Search binary-searches the top level, then follows bridges to the approximate position on each level below (Figure 6-5) (p. 119).
+جست‌و‌جو سطح بالا را دوگانی می‌جوید، بعد پل‌ها را تا جای تقریبی در هر سطح پایین‌تری پی می‌گیرد (شکل ۶-۵) (p. 119).
 
-![Three sorted levels — 12 … 39, 16 … 35 and 11 … 30 — with shaded bridge elements copied from the level below, linking to positions in the next level](../figures/06-05.png)
+![سه سطح مرتب، یعنی ۱۲ تا ۳۹ و ۱۶ تا ۳۵ و ۱۱ تا ۳۰، با عنصرهای پل سایه‌خورده که از سطح پایین‌تر کپی شده‌اند و به جاهایی در سطح بعد پیوند می‌خورند](../figures/06-05.png)
 
-*Figure 6-5 (p. 119): shaded bridges are elements shared with the level below; following them skips a fresh binary search on every level.*
+*Figure 6-5 (p. 119): پل‌های سایه‌خورده عنصرهایی‌اند که با سطح پایین‌تر مشترک‌اند؛ پی گرفتنشان از جست‌و‌جوی دوگانی تازه در هر سطحی می‌پرد.*
 
-#### Logarithmic runs
+#### دورهای لگاریتمی
 
-Runs are immutable sorted arrays whose sizes grow by a factor of *k*. Each level is created by merging the level above with the current one (p. 119):
+دورها آرایه‌های مرتب تغییرناپذیرند که اندازه‌شان با ضریب *k* رشد می‌کند. هر سطحی با merge کردن سطح بالا با سطح جاری ساخته می‌شود (p. 119):
 
-- When the head tree fills, its leaves become the first run. On the next fill, they're merged with that run and replace it.
-- A lower run is created, or replaced by a merge, when the run above reaches its threshold. This resembles LSM compaction (Figure 6-6).
-- Head elements of lower-level pages are propagated upward as pointers, so a lower-level search continues from the closest match above (pp. 119–120).
-- Deletes insert **tombstones** (*filter entries*) that shadow lower-level records. They're dropped when they reach the lowest level (p. 120).
+- وقتی درخت سر پر شود، برگ‌هایش دور اول می‌شوند. سر پر شدن بعدی، با آن دور merge می‌شوند و جایش را می‌گیرند.
+- دوری پایین‌تر وقتی ساخته می‌شود، یا با mergeی جایش عوض، که دور بالایی به آستانه‌اش برسد. این به compaction مربوط به LSM می‌ماند (شکل ۶-۶).
+- عنصرهای سر صفحه‌های سطح پایین‌تر به‌شکل اشاره‌گر رو‌به‌بالا پخش می‌شوند، پس جست‌و‌جوی سطح پایین‌تر از نزدیک‌ترین خوردنی بالا ادامه می‌دهد (pp. 119–120).
+- حذف‌ها **tombstone** درج می‌کنند، که *entry فیلتر* نامیده می‌شوند و روی رکوردهای سطح پایین‌تر سایه می‌اندازند. وقتی به پایین‌ترین سطح برسند انداخته می‌شوند (p. 120).
 
-### Bw-Trees
+### Bw-Tree
 
-In-place B-Trees have three problems (p. 120):
+همه‌ی B-Treeهای سر‌جا سه مسئله دارند (p. 120):
 
-1. **Write amplification:** each update may rewrite the on-disk page.
-2. **Space amplification:** space is reserved for updates, and empty bytes are transferred with useful ones.
-3. **Concurrency complexity:** latches.
+۱. **تقویت نوشتن:** هر به‌روزرسانی‌ای می‌تواند صفحه‌ی دیسکی را دوباره بنویسد.
+۲. **تقویت فضا:** فضایی برای به‌روزرسانی نگه داشته می‌شود، و بایت‌های خالی با بایت‌های به‌درد‌بخور منتقل می‌شوند.
+۳. **پیچیدگی concurrency:** latchها.
 
-Buffering helps with the first two but not the third. The **Bw-Tree** ("Buzzword-Tree") batches updates in append-only storage, links nodes into chains, and installs pointers with a single **compare-and-swap**, which makes the tree **lock-free** (p. 120).
+ساختار buffer کردن به دو تای اول کمک می‌کند ولی به سومی نه. **Bw-Tree**، یعنی «Buzzword-Tree»، به‌روزرسانی‌ها را در ذخیره‌سازی append-only دسته می‌کند، نودها را در زنجیره پیوند می‌دهد، و اشاره‌گرها را با یک **compare-and-swap** تنها نصب، که درخت را **بی‌قفل** می‌کند (p. 120).
 
-#### Update chains
+#### زنجیره‌ی به‌روزرسانی
 
-A base node is written separately from its modifications. **Delta nodes** (inserts, updates, which are indistinguishable from inserts, and deletes) form a linked list from the newest delta, through older ones, to the base node (p. 121). Nothing is modified in place, so no space has to be reserved, nodes needn't be fixed-size or contiguous, and base and delta nodes can be stored contiguously even though they aren't page-aligned. The cost: a read must walk the chain and apply every delta to the base, similar to LA-Trees replaying buffered updates (p. 121).
+نودی پایه جدا از تغییرهایش نوشته می‌شود. **نودهای دلتا**، یعنی درج و به‌روزرسانی که از درج تشخیص‌ناپذیر است و حذف، فهرستی پیوندی از تازه‌ترین دلتا، از راه قدیمی‌ترها، تا نود پایه می‌سازند (p. 121). هیچ چیزی سر جا عوض نمی‌شود، پس لازم نیست فضایی نگه داشته شود، نودها لازم نیست fixed-size یا پیوسته باشند، و نودهای پایه و دلتا پیوسته ذخیره‌شدنی‌اند هرچند صفحه‌هم‌تراز نیستند. هزینه‌اش: خواندنی باید روی زنجیره راه برود و هر دلتایی را روی پایه اعمال کند، شبیه replay به‌روزرسانی‌های buffer‌شده در LA-Treeها (p. 121).
 
-#### Taming concurrency with compare-and-swap
+#### رام کردن concurrency با compare-and-swap
 
-Updating parents with a pointer to each new delta would be too costly, so nodes have **logical IDs**, and an in-memory **mapping table** maps them to physical locations. The table also replaces latches: writes CAS the physical pointer (Figure 6-7) (p. 121).
+به‌روز کردن پدرها با اشاره‌گری به هر دلتای تازه زیادی گران می‌بود، پس نودها **ID منطقی** دارند، و **جدول mapping**ی in-memoryی آن‌ها را به جاهای فیزیکی map می‌کند. آن جدول جای latchها را هم می‌گیرد: نوشتن‌ها اشاره‌گر فیزیکی را CAS می‌کنند (شکل ۶-۷) (p. 121).
 
 ```mermaid
 sequenceDiagram
@@ -177,104 +191,104 @@ sequenceDiagram
     Note over W,M: A competing writer's CAS fails and it retries
 ```
 
-*The vault's diagram of the three update steps on p. 122.*
+*نمودار vault از آن سه قدم به‌روزرسانی در ص. ۱۲۲.*
 
-> **Try it:** [Bw-Tree delta chains](../widgets/06-bw-tree.html) — prepend deltas to logical pages through the mapping table, race two writers' CAS on the same page, watch read cost grow with chain length, and consolidate past a threshold.
+> **Try it:** [زنجیره‌های دلتای Bw-Tree](../widgets/06-bw-tree.html)؛ از راه جدول mapping به صفحه‌های منطقی دلتا پیش‌بیفزایید، CAS دو نویسنده را روی همان صفحه مسابقه بدهید، ببینید هزینه‌ی خواندن با طول زنجیره رشد می‌کند، و از آستانه‌ای رد شوید تا merge شود.
 
-#### Structural modification operations
+#### عملیات تغییر ساختاری
 
-Bw-Tree nodes still overflow and underflow, so they need **SMOs**. Their semantics match B-Tree splits and merges, but the implementation differs (p. 122).
+نودهای Bw-Tree باز هم سرریز و underflow می‌کنند، پس **SMO** لازم دارند. معناشناسی‌شان با شکستن و merge در B-Tree می‌خواند، ولی پیاده‌سازی فرق دارد (p. 122).
 
-| SMO | Steps (pp. 122–123) |
+| SMO | قدم‌ها (pp. 122–123) |
 |---|---|
-| **Split** | Consolidate the node and create a new page for the elements right of the split point. (1) Append a **split delta** holding the separator key and a link to the new sibling. (2) **Parent update**: add the new child to the parent. Until then the state resembles a B-link half-split |
-| **Merge** | (1) Append a **remove delta** to the right sibling. (2) Append a **merge delta** to the left sibling, pointing at the right sibling's contents. (3) **Parent update**: remove the link to the right sibling |
+| **شکستن** | نود را merge کن و صفحه‌ای تازه برای عنصرهای راست نقطه‌ی شکست بساز. (۱) یک **دلتای شکست** بیفزا که کلید جداکننده و پیوندی به sibling تازه را دارد. (۲) **به‌روزرسانی پدر**: فرزند تازه را به پدر بیفزا. تا آن وقت حالت به نیم‌شکست B-link می‌ماند |
+| **merge** | (۱) یک **دلتای برداشتن** به sibling راست بیفزا. (۲) یک **دلتای merge** به sibling چپ بیفزا، که به محتوای sibling راست اشاره می‌کند. (۳) **به‌روزرسانی پدر**: پیوند به sibling راست را بردار |
 
-- The parent update is only an optimization: everything stays reachable without it (p. 123).
-- Because the tree is latch-free, any thread may meet an incomplete SMO and must **help finish it** before continuing (p. 123).
-- Concurrent SMOs need an **abort delta** on the parent, which acts like a write lock: any thread trying to append to it aborts (p. 123).
-- The tree grows when the root splits into two children under a new root (p. 123).
+- به‌روزرسانی پدر تنها بهینه‌سازی است: بی آن هم همه چیز دست‌یافتنی می‌ماند (p. 123).
+- چون درخت بی‌latch است، هر threadی می‌تواند با SMOی ناتمام روبه‌رو شود و باید پیش از ادامه **به تمام شدنش کمک کند** (p. 123).
+- همه‌ی SMOهای هم‌زمان یک **دلتای abort** روی پدر لازم دارند، که مثل قفل نوشتن عمل می‌کند: هر threadی که بکوشد به آن بیفزاید abort می‌شود (p. 123).
+- درخت وقتی رشد می‌کند که ریشه به دو فرزند زیر ریشه‌ای تازه بشکند (p. 123).
 
-#### Consolidation and garbage collection
+#### عمل merge و garbage collection
 
-Longer chains make reads slower. Past a configurable threshold, a node is **consolidated**: base and deltas are merged into a new base, written to a new location, and the mapping table is updated. Ch. 7 covers this under LLAMA (p. 123). Old pieces can't be freed immediately because readers hold no latches, so **epoch-based reclamation** keeps nodes removed during an epoch until every reader that started in that epoch or earlier has finished (p. 124).
+زنجیره‌های بلندتر خواندن را کندتر می‌کنند. از آستانه‌ای تنظیم‌پذیر که بگذرد، نودی **merge** می‌شود: پایه و دلتاها در پایه‌ای تازه merge می‌شوند، در جایی تازه نوشته، و جدول mapping به‌روز. فصل ۷ این را زیر LLAMA می‌پوشاند (p. 123). تکه‌های قدیم فوری آزاد‌شدنی نیستند چون خواننده‌ها latchی ندارند، پس **بازپس‌گیری دوره‌محور** نودهایی را که در دوره‌ای برداشته شده‌اند نگه می‌دارد تا هر خواننده‌ای که در آن دوره یا پیش‌تر شروع کرده تمام کند (p. 124).
 
-Benefits: lower write amplification, nonblocking access and cache friendliness. Sled, an experimental engine, implements a modified version, and CMU's in-memory **OpenBw-Tree** comes with an implementation guide (p. 124).
+سودها: تقویت نوشتن کم‌تر، دسترسی بی‌بند‌آمدن و cache‌دوستی. موتور آزمایشی Sled گونه‌ای تغییریافته را پیاده می‌کند، و **OpenBw-Tree** in-memoryی از CMU با راهنمای پیاده‌سازی می‌آید (p. 124).
 
-### Cache-oblivious B-Trees
+### درخت‌های B-Tree غافل از cache
 
-Block size, node size and cache-line alignment all affect performance. **Cache-oblivious** structures are asymptotically optimal *without knowing* those sizes and work unmodified on different machines (p. 124). B-Trees so far assume a **two-level** model, page cache and disk, transferring whole blocks; that's **cache-aware** (pp. 124–125). Cache-oblivious algorithms are reasoned about in the two-level model but keep the number of transfers within a constant factor for any pair of adjacent levels, by working at the highest cache level as much as possible (p. 125).
+اندازه‌ی بلوک و اندازه‌ی نود و هم‌ترازی خط cache همه روی کارایی اثر می‌گذارند. ساختارهای **غافل از cache** مجانب بهینه‌اند *بی دانستن* آن اندازه‌ها و روی ماشین‌های مختلف بی تغییر کار می‌کنند (p. 124). B-Treeها تا این‌جا مدلی **دو‌سطحی** را فرض می‌گیرند، یعنی page cache و دیسک، که کل بلوک‌ها را منتقل می‌کند؛ این **cache‌آگاه** است (pp. 124–125). درباره‌ی الگوریتم‌های غافل از cache در همان مدل دو‌سطحی استدلال می‌شود ولی شمار انتقال‌ها را برای هر زوج سطح مجاوری درون ضریبی ثابت نگه می‌دارند، با کار کردن تا جای ممکن در بالاترین سطح cache (p. 125).
 
-#### van Emde Boas layout
+#### چیدمان فان امده بواس
 
-A cache-oblivious B-Tree consists of a **static B-Tree** and a **packed array** (p. 125).
+یک B-Tree غافل از cache از یک **درخت ایستای B-Tree** و یک **آرایه‌ی بسته‌بندی‌شده** ساخته شده (p. 125).
 
-| Part | How (pp. 125–126) |
+| بخش | چطور (pp. 125–126) |
 |---|---|
-| Static tree, **van Emde Boas layout** | Split the tree at the middle level of its edges, then split each subtree recursively, giving subtrees of size √N. Every recursive subtree is stored in one contiguous block (Figure 6-8) |
-| **Packed array** | Contiguous segments with gaps reserved for inserts, spaced by a density threshold. Items move only to open a gap. The array is rebuilt when too dense or too sparse (Figure 6-9) |
+| درخت ایستا، با **چیدمان فان امده بواس** | درخت را در سطح میانی یال‌هایش بشکن، بعد هر زیردرختی را بازگشتی، که زیردرخت‌هایی به اندازه‌ی √N می‌دهد. هر زیردرخت بازگشتی در یک بلوک پیوسته ذخیره می‌شود (شکل ۶-۸) |
+| **آرایه‌ی بسته‌بندی‌شده** | قطعه‌های پیوسته با شکاف‌هایی که برای درج نگه داشته شده‌اند، با فاصله‌ای که آستانه‌ی چگالی می‌دهد. قلم‌ها تنها برای باز کردن شکافی جابه‌جا می‌شوند. آرایه وقتی زیادی چگال یا زیادی تنک باشد دوباره ساخته می‌شود (شکل ۶-۹) |
 
-The static tree indexes the packed array and must be updated when elements move (p. 126). The author knew of no nonacademic implementation. Possible reasons: paging and eviction still hurt when caching is abstracted away, and in block transfers the complexity equals the cache-aware tree's. That may change with byte-addressable nonvolatile memory (p. 126).
+درخت ایستا آرایه‌ی بسته‌بندی‌شده را index می‌کند و وقتی عنصرها جابه‌جا شوند باید به‌روز شود (p. 126). نویسنده از هیچ پیاده‌سازی ناـدانشگاهی‌ای خبر نداشت. دلیل‌های ممکن: صفحه‌بندی و بیرون انداختن وقتی cache انتزاعی شود باز هم صدمه می‌زنند، و در انتقال بلوک پیچیدگی با درخت cache‌آگاه برابر است. شاید با حافظه‌ی ناپایای بایت‌نشانی عوض شود (p. 126).
 
-### Summary
+### خلاصه
 
-The original B-Tree suited spinning disks but is less efficient on SSDs, with high write amplification and space overhead (p. 127):
+ساختار B-Tree اصلی به دیسک‌های گردان می‌خورد ولی روی SSDها کم‌کاراتر است، با تقویت نوشتن بالا و سرریز فضا (p. 127):
 
-- **Lazy B-Trees** buffer updates to reduce write amplification.
-- **FD-Trees** use immutable runs and limit the mutable part to reduce space amplification.
-- **Bw-Trees** store nodes and deltas immutably in a log-structured store, reconcile rarely, and need no latches, because the virtual pointers live in memory (p. 127).
+- **درخت‌های B-Tree تنبل** به‌روزرسانی‌ها را buffer می‌کنند تا تقویت نوشتن کم شود.
+- **ساختار FD-Tree**ها دورهای immutable به کار می‌برند و بخش mutable را حد می‌زنند تا تقویت فضا کم شود.
+- **ساختار Bw-Tree**ها نودها و دلتاها را immutable در انباره‌ای log-structured ذخیره می‌کنند، کم آشتی می‌دهند، و latch لازم ندارند، چون اشاره‌گرهای مجازی در حافظه زندگی می‌کنند (p. 127).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| | Write amplification | Space amplification | Concurrency | Read cost |
+| | تقویت نوشتن | تقویت فضا | concurrency | هزینه‌ی خواندن |
 |---|---|---|---|---|
-| Classic in-place B-Tree | High (page rewrites) | Reserved space | Latches | One page per level |
-| Copy-on-write | Path copy per write | Old versions briefly | Readers lock-free | One page per level |
-| Lazy B-Tree | Lower (batched) | Same as B-Tree | Background SMOs | Merge buffer + page |
-| FD-Tree | Low (appends, merges) | Low (immutable runs) | — | Search head + runs via bridges |
-| Bw-Tree | Low (deltas) | None reserved | Latch-free CAS | Walk the delta chain |
+| B-Tree کلاسیک و سر‌جا | بالا، از نوشتن دوباره‌ی صفحه | فضای نگه‌داشته | latch | یک صفحه برای هر سطحی |
+| copy-on-write | کپی مسیر برای هر نوشتنی | نسخه‌های قدیم کوتاه‌مدت | خواننده‌ها بی‌قفل | یک صفحه برای هر سطحی |
+| B-Tree تنبل | کم‌تر، چون دسته‌ای | مثل B-Tree | SMOهای پس‌زمینه | merge کردن buffer و صفحه |
+| FD-Tree | کم، از افزودن و merge | کم، از دورهای immutable | — | جست‌و‌جوی سر و دورها از راه پل‌ها |
+| Bw-Tree | کم، از دلتاها | چیزی نگه داشته نمی‌شود | CAS بی‌latch | راه رفتن روی زنجیره‌ی دلتا |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Copy-on-write file systems** (ZFS, Btrfs) use the same root-pointer flip as LMDB for crash consistency. The "uberblock" (ZFS) or superblock is the atomic switch, and old roots double as cheap snapshots.
-- **Epoch-based reclamation** is a general lock-free memory technique, used for example in the Rust `crossbeam-epoch` crate, which Sled built on. It solves the same problem as hazard pointers with less per-read overhead.
-- The **B^ε-tree** (used in TokuDB and PerconaFT) generalizes the LA-Tree's per-subtree buffers: each internal node reserves part of its space for a message buffer, trading a little read cost for much cheaper writes.
+- **فایل‌سیستم‌های copy-on-write** مثل ZFS و Btrfs همان برگرداندن اشاره‌گر ریشه‌ی LMDB را برای consistency در از کار افتادن به کار می‌برند. «uberblock» در ZFS یا superblock همان کلید اتمی است، و ریشه‌های قدیم snapshotهای ارزانی هم می‌شوند.
+- **بازپس‌گیری دوره‌محور** تکنیکی کلی برای حافظه‌ی بی‌قفل است، که مثلاً در crate به نام `crossbeam-epoch` در Rust به کار می‌رود، که Sled رویش بنا شد. همان مسئله‌ی اشاره‌گرهای خطر را با سرریز کم‌تر برای هر خواندنی حل می‌کند.
+- **ساختار B^ε-tree**، که TokuDB و PerconaFT به کارش می‌برند، bufferهای به‌تفکیک زیردرخت LA-Tree را تعمیم می‌دهد: هر نود درونی بخشی از فضایش را برای bufferی از پیام نگه می‌دارد، و کمی هزینه‌ی خواندن را با نوشتن خیلی ارزان‌تر بده‌بستان می‌کند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [4. Implementing B-Trees](04-implementing-b-trees.md) (overflow pages, rebalancing), [5. Transaction Processing and Recovery](05-transaction-processing-and-recovery.md) (latches, B-link half-splits, MVCC), [7. Log-Structured Storage](07-log-structured-storage.md) (LSM Trees, LLAMA and mindful stacking underneath Bw-Trees).
+- **فصل‌های مرتبط:** [فصل ۴: پیاده کردن B-Tree](04-implementing-b-trees.md) که صفحه‌ی سرریز و متوازن کردن دوباره را دارد، [فصل ۵: پردازش تراکنش و بازیابی](05-transaction-processing-and-recovery.md) که latch و نیم‌شکست B-link و MVCC را دارد، و [فصل ۷: ذخیره‌سازی log-structured](07-log-structured-storage.md) که LSM Tree و LLAMA و چیدن هشیارانه زیر Bw-Treeها را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why can't a crash leave a copy-on-write B-Tree corrupted?**
+1. **چرا از کار افتادنی نمی‌تواند B-Treeی copy-on-write را خراب بگذارد؟**
 
-   *Answer:* All modifications go to copies, and the topmost pointer is switched only after every page has been written (p. 112).
+   *Answer:* همه‌ی تغییرها به کپی‌ها می‌روند، و بالاترین اشاره‌گر تنها پس از نوشته شدن هر صفحه‌ای عوض می‌شود (p. 112).
 
-2. **Which components does LMDB *not* need, and why?**
+2. **سیستم LMDB کدام مؤلفه‌ها را لازم *ندارد*، و چرا؟**
 
-   *Answer:* A page cache, a WAL, checkpointing and compaction. It's a single-level, copy-on-write store served directly from the memory map, keeping two root versions (p. 113).
+   *Answer:* نه page cache و نه WAL و نه checkpoint و نه compaction. انباره‌ای تک‌سطحی و copy-on-write است که یک‌راست از mapping حافظه سرویس می‌دهد و دو نسخه‌ی ریشه نگه می‌دارد (p. 113).
 
-3. **How does a WiredTiger read return the latest data for a dirty page?**
+3. **خواندنی در WiredTiger چطور تازه‌ترین داده‌ی صفحه‌ای کثیف را برمی‌گرداند؟**
 
-   *Answer:* It merges the page's skiplist update buffer with the on-disk page contents (p. 115).
+   *Answer:* buffer به‌روزرسانی از جنس skiplist آن صفحه را با محتوای دیسکی صفحه merge می‌کند (p. 115).
 
-4. **What problem does fractional cascading solve in an FD-Tree?**
-   - [ ] Write amplification in the head tree
-   - [x] The cost of searching several sorted runs one after another
-   - [ ] Tombstone garbage collection
+4. **آبشار کسری در FD-Tree چه مسئله‌ای را حل می‌کند؟**
+   - [ ] تقویت نوشتن در درخت سر
+   - [x] هزینه‌ی جست‌و‌جوی چند دور مرتب پشت‌سر‌هم
+   - [ ] پاک‌سازی tombstoneها با garbage collector
 
-   *Answer:* Bridges pulled up from lower levels let each subsequent search start near the right position instead of doing a full binary search (pp. 118–119).
+   *Answer:* پل‌هایی که از سطح‌های پایین‌تر بالا کشیده شده‌اند می‌گذارند هر جست‌و‌جوی بعدی به‌جای جست‌و‌جوی دوگانی کامل نزدیک جای درست شروع کند (pp. 118–119).
 
-5. **Two threads try to prepend a delta to the same Bw-Tree node at once. What happens?**
+5. **دو thread هم‌زمان می‌کوشند به همان نود Bw-Tree دلتایی پیش‌بیفزایند. چه می‌شود؟**
 
-   *Answer:* Both CAS the mapping table entry. Exactly one succeeds; the other's CAS fails and it retries. Readers are ordered before or after the swap without blocking (p. 122).
+   *Answer:* هر دو entry جدول mapping را CAS می‌کنند. دقیقاً یکی موفق می‌شود؛ و CAS آن یکی باز می‌ماند و دوباره می‌کوشد. خواننده‌ها بی بند آمدن پیش یا پس از آن عوض شدن مرتب می‌شوند (p. 122).
 
-6. **Why must a Bw-Tree thread that finds a half-finished split complete it?**
+6. **چرا threadی در Bw-Tree که شکستنی نیمه‌کاره ببیند باید تمامش کند؟**
 
-   *Answer:* The tree is latch-free, so no thread owns the SMO. Cooperative completion keeps the structure progressing, and later threads can then use the parent pointer directly (p. 123).
+   *Answer:* درخت بی‌latch است، پس هیچ threadی مالک آن SMO نیست. تمام کردن هم‌کارانه ساختار را در حال پیشرفت نگه می‌دارد، و آن‌وقت threadهای بعدی می‌توانند اشاره‌گر پدر را یک‌راست به کار ببرند (p. 123).
 
-7. **When may the memory of a consolidated Bw-Tree node be freed?**
+7. **حافظه‌ی نود merge‌شده‌ی Bw-Tree کِی آزاد‌شدنی است؟**
 
-   *Answer:* Under epoch-based reclamation: once every reader that started during the same epoch or earlier has finished, because later readers couldn't have reached it (p. 124).
+   *Answer:* زیر بازپس‌گیری دوره‌محور: همین که هر خواننده‌ای که در همان دوره یا پیش‌تر شروع کرده تمام کند، چون خواننده‌های بعدی نمی‌توانستند به آن برسند (p. 124).

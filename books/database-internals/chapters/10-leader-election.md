@@ -3,181 +3,195 @@ book: database-internals
 chapter: 10
 title: "Leader Election"
 pages: "205–213"
+translated_title: "انتخاب leader"
+lang: fa
 ---
 
-# 10. Leader Election
+# فصل ۱۰: انتخاب leader
 
-[← 9. Failure Detection](09-failure-detection.md) · [Book](../README.md) · [11. Replication and Consistency →](11-replication-and-consistency.md)
+[فصل ۹: تشخیص شکست →](09-failure-detection.md) · [کتاب](../README.md) · [فصل ۱۱: replication و consistency ←](11-replication-and-consistency.md)
 
-## Summary
+## خلاصه
 
-Contacting every participant at every step is expensive, especially in large or geographically distributed networks. Many algorithms therefore rely on a **leader** (coordinator) to drive or coordinate execution (p. 205). Any process can become leader. It usually stays leader until it crashes, and then a new **election** picks a replacement (p. 205).
+تماس گرفتن با هر شرکت‌کننده‌ای در هر قدمی گران است، به‌ویژه در شبکه‌های بزرگ یا جغرافیایی‌توزیع‌شده. پس خیلی از الگوریتم‌ها به یک **leader**، که coordinator است، تکیه می‌کنند تا اجرا را براند یا هم‌آهنگ کند (p. 205). هر processی می‌تواند leader شود. معمولاً تا از کار افتادنش leader می‌ماند، و بعد **انتخاب**ی تازه جانشینی برمی‌دارد (p. 205).
 
-- **Liveness:** there's a leader most of the time, and elections eventually finish.
-- **Safety:** at most one leader at a time, with no **split brain**. Many election algorithms violate this in practice (p. 205).
+- **مفهوم liveness:** بیشتر وقت‌ها leaderی هست، و انتخاب‌ها در غایت تمام می‌شوند.
+- **ایمنی:** در هر زمانی حداکثر یک leader، بی **split brain**. خیلی از الگوریتم‌های انتخاب در عمل این را نقض می‌کنند (p. 205).
 
-The chapter covers several algorithms:
+فصل چند الگوریتم را می‌پوشاند:
 
-- **Bully** (monarchial election): the highest rank wins.
-- Two bully optimizations: **next-in-line failover** lists and the **candidate/ordinary** split with a tiebreaker δ.
-- The **invitation** algorithm, which *merges groups* instead of outranking.
-- The **ring** algorithm, which collects the live set around the ring.
+- **الگوریتم Bully** که انتخابی پادشاهی است: بالاترین رتبه می‌برد.
+- دو بهینه‌سازی Bully: فهرست‌های **failover نفر بعدی** و جدایی **نامزد و عادی** با تساوی‌شکن δ.
+- الگوریتم **دعوت**، که به‌جای رتبه زدن *گروه‌ها را merge می‌کند*.
+- الگوریتم **حلقه**، که مجموعه‌ی زنده‌ها را گرد حلقه جمع می‌کند.
 
-Its conclusion: every one of them is prone to split brain without a cluster-wide **majority**, and electing a leader *is* a consensus problem. Multi-Paxos and Raft let leaders conflict briefly and resolve the conflicts safely (pp. 207–213).
+نتیجه‌گیری‌اش: هر یک از آن‌ها بی **اکثریت** cluster‌سراسری به split brain گرایش دارد، و انتخاب leader *خودش* مسئله‌ای از جنس consensus است. الگوریتم‌های Multi-Paxos و Raft می‌گذارند leaderها کوتاه‌مدت تعارض کنند و تعارض‌ها را ایمن حل (pp. 207–213).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Election must be deterministic:** exactly one leader emerges, and every participant learns who (p. 206).
-- **Leader election isn't distributed locking.** Lock holders needn't be known, and a lock that favours some processes starves others. A leader must be *known*, and long-lived leaders are *preferred* (p. 206).
-- **A leader can become a bottleneck.** Partition the data and give each replica set its own leader, as Spanner does (p. 206).
-- **The bully algorithm splits brains under partitions** and can re-elect an unstable high-ranked node again and again. Spread host-quality metrics to avoid that (p. 208).
-- **Failover lists and candidate sets cut messages;** a per-node delay δ breaks ties between simultaneous elections (pp. 208–209).
-- **The ring algorithm can carry just the current maximum,** because max is commutative (p. 212).
-- **Allowing several leaders temporarily is a performance optimization.** Safety comes from detecting and resolving conflicts, through Paxos quorums or Raft terms (p. 213).
+- **انتخاب باید قطعی باشد:** دقیقاً یک leader بیرون می‌آید، و هر شرکت‌کننده‌ای می‌فهمد چه کسی (p. 206).
+- **انتخاب leader قفل توزیع‌شده نیست.** لازم نیست دارنده‌های قفل معلوم باشند، و قفلی که برخی processها را ترجیح بدهد بقیه را گرسنه می‌گذارد. leader باید *معلوم* باشد، و leaderهای دیرزیست *ترجیح داده می‌شوند* (p. 206).
+- **نقش leader می‌تواند گلوگاه شود.** داده را پارتیشن کنید و به هر مجموعه‌ی replicaیی leader خودش را بدهید، چنان‌که Spanner می‌کند (p. 206).
+- **الگوریتم Bully زیر پارتیشن split brain می‌سازد** و می‌تواند نودی ناپایدار و رتبه‌بالا را بار‌به‌بار دوباره انتخاب کند. برای پرهیز، سنجه‌های کیفیت میزبان را پخش کنید (p. 208).
+- **فهرست‌های failover و مجموعه‌های نامزد پیام را می‌برند**؛ و latency δ برای هر نودی تساوی میان انتخاب‌های هم‌هنگام را می‌شکند (pp. 208–209).
+- **الگوریتم حلقه می‌تواند تنها بیشینه‌ی جاری را حمل کند**، چون max commutative است (p. 212).
+- **مجاز کردن چند leader به‌طور موقت بهینه‌سازی کارایی است.** ایمنی از تشخیص و حل تعارض می‌آید، با quorumهای Paxos یا termهای Raft (p. 213).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Bully Algorithm — p. 207
-- Next-In-Line Failover — p. 208
-- Candidate/Ordinary Optimization — p. 209
-- Invitation Algorithm — p. 210
-- Ring Algorithm — p. 211
-- Summary — p. 212
+- الگوریتم Bully — ص. ۲۰۷
+- بخش failover نفر بعدی — ص. ۲۰۸
+- بهینه‌سازی نامزد و عادی — ص. ۲۰۹
+- الگوریتم دعوت — ص. ۲۱۰
+- الگوریتم حلقه — ص. ۲۱۱
+- خلاصه — ص. ۲۱۲
 
-## Notes
+## یادداشت‌ها
 
-Leaders are used, for example, to establish a **total order** of messages in a broadcast: the leader holds global state, receives messages and disseminates them. They also coordinate reorganization after failures, at initialization and on important state changes (p. 205). Elections are triggered at initialization and when the leader crashes or stops communicating (p. 206). A stable leader avoids state synchronization between peers, cuts messages, and drives execution from one place (p. 206). ZAB, Multi-Paxos and Raft use temporary leaders with their own algorithm-specific election, failure detection and conflict resolution (p. 206).
+همه‌ی leaderها مثلاً برای برپا کردن **ترتیب کلی** پیام‌ها در پخشی به کار می‌روند: leader حالت جهانی را دارد، پیام‌ها را می‌گیرد و پخششان می‌کند. همچنین سازمان دوباره را پس از شکست و سر راه‌اندازی و سر تغییرهای مهم حالت هم‌آهنگ می‌کنند (p. 205). انتخاب‌ها سر راه‌اندازی و وقتی leader از کار بیفتد یا حرف زدن را بس کند برانگیخته می‌شوند (p. 206). leaderی پایدار از synchronization حالت میان همتاها می‌پرهیزد، پیام را می‌برد، و اجرا را از یک جا می‌راند (p. 206). الگوریتم‌های ZAB و Multi-Paxos و Raft leaderهای موقت با انتخاب و تشخیص شکست و حل تعارض الگوریتم‌ویژه‌ی خودشان به کار می‌برند (p. 206).
 
-| | Leader election | Distributed lock |
+| | انتخاب leader | قفل توزیع‌شده |
 |---|---|---|
-| Must others know the holder? | Yes; the new leader announces itself | No |
-| Preference for some process | Fine; long-lived leaders preferred | Starves the others, violating liveness |
-| Holder keeps the role | Until it stops or crashes | Must eventually release |
+| بقیه باید دارنده را بدانند؟ | بله؛ leader تازه خودش را اعلام می‌کند | نه |
+| ترجیح برخی processها | اشکالی ندارد؛ leaderهای دیرزیست ترجیح داده می‌شوند | بقیه را گرسنه می‌گذارد، که liveness را نقض می‌کند |
+| دارنده نقش را نگه می‌دارد | تا بس کند یا از کار بیفتد | باید در غایت رهایش کند |
 
-*From p. 206.*
+*از ص. ۲۰۶.*
 
-### Bully algorithm
+### الگوریتم Bully
 
-Each process has a unique **rank**, and the highest-ranked live process becomes leader (Garcia-Molina). The name comes from the top node "bullying" the others into accepting it; it's also called **monarchial** election (p. 207). The book describes the compact modified version (Kordafshari et al., note 1) (p. 207):
+هر processی **رتبه**ای یکتا دارد، و بالاترین‌رتبه‌ی زنده leader می‌شود، از گارسیا-مولینا. نام از این می‌آید که نود سر بقیه را «زورگویانه» وا می‌دارد قبولش کنند؛ انتخاب **پادشاهی** هم نامیده می‌شود (p. 207). کتاب گونه‌ی تغییریافته‌ی جمع‌و‌جور را وصف می‌کند، از کردافشاری و همکاران، یادداشت ۱ (p. 207):
 
-1. Send **Election** messages to every process with a higher ID.
-2. Wait for responses. If no higher-ranked process responds, go to step 3. Otherwise notify the highest-ranked process that responded and let it do step 3.
-3. Assume no higher-ranked process is alive and announce yourself to all lower-ranked processes.
+1. پیام‌های **Election** را به هر processی با ID بالاتر بفرست.
+2. منتظر پاسخ بمان. اگر هیچ process رتبه‌بالاتری پاسخ ندهد، به قدم ۳ برو. وگرنه به بالاترین‌رتبه‌ای که پاسخ داده خبر بده و بگذار او قدم ۳ را بکند.
+3. فرض بگیر هیچ process رتبه‌بالاتری زنده نیست و خودت را به همه‌ی processهای رتبه‌پایین‌تر اعلام کن.
 
-Figure 10-1 (pp. 207–208):
+شکل ۱۰-۱ (pp. 207–208):
 
-![Four stages over processes 1 to 6 with 6 crashed: (a) 3 sends election messages to 4, 5 and 6; (b) 4 and 5 answer; (c) 3 hands over to 5; (d) 5 announces itself to everyone](../figures/10-01.png)
+![چهار مرحله روی processهای ۱ تا ۶ که ۶ از کار افتاده: (الف) process ۳ پیام انتخاب به ۴ و ۵ و ۶ می‌فرستد؛ (ب) processهای ۴ و ۵ پاسخ می‌دهند؛ (ج) process ۳ به ۵ تحویل می‌دهد؛ (د) process ۵ خودش را به همه اعلام می‌کند](../figures/10-01.png)
 
-*Figure 10-1 (p. 208): 3 notices the failure, the highest live process (5) responds, and 5 broadcasts that it is the new leader.*
+*Figure 10-1 (p. 208): process ۳ آن شکست را می‌بیند، بالاترین process زنده یعنی ۵ پاسخ می‌دهد، و ۵ پخش می‌کند که leader تازه است.*
 
-| Problem | Cause and fix (p. 208) |
+| مسئله | علت و درمان (p. 208) |
 |---|---|
-| **Split brain** | A partition splits the nodes into groups, and each group elects a leader |
-| **Endless re-election** | An unstable high-ranked node wins, fails, wins again… Fix: distribute host-quality metrics and consider them during the election |
+| **split brain** | پارتیشنی نودها را به گروه می‌شکند، و هر گروهی leaderی انتخاب می‌کند |
+| **انتخاب دوباره‌ی بی‌پایان** | نودی ناپایدار و رتبه‌بالا می‌برد، می‌شکند، بازهم می‌برد… درمان: سنجه‌های کیفیت میزبان را پخش کنید و در انتخاب در نظر بگیرید |
 
-> **Try it:** [Bully election](../widgets/10-bully-election.html) — crash the leader, pick who notices, and step through Election, Alive and Elected messages. Toggle next-in-line failover to see the shortcut, or partition the cluster to produce a split brain.
+> **Try it:** [انتخاب Bully](../widgets/10-bully-election.html)؛ leader را از کار بیندازید، بردارید که چه کسی می‌بیند، و پیام‌های Election و Alive و Elected را قدم‌به‌قدم بگذرانید. failover نفر بعدی را روشن کنید تا آن کوتاه‌راه را ببینید، یا cluster را پارتیشن کنید تا split brain بسازید.
 
-### Next-in-line failover
+> **In practice:** در stack ما چند جزء برای «فقط یک نمونه کار کند» به هماهنگی نیاز دارند: scheduler در Airflow، controllerهای Kubernetes، Argo CD.
+>
+> **Your turn:** دو scheduler در Airflow اجرا می‌کنید. چه چیزی نمی‌گذارد یک task دو بار برنامه‌ریزی شود؟
+>
+> *Answer:* Airflow leader انتخاب نمی‌کند؛ هر scheduler با `SELECT … FOR UPDATE SKIP LOCKED` ردیف‌ها را در دیتابیس metadata قفل می‌کند و دیتابیس نقش coordinator را دارد. انتخاب leader راه دیگری است که هماهنگی هر عمل را به یک بار انتخاب تبدیل می‌کند، به بهای خطر split brain (p. 207).
 
-Each leader publishes a list of **failover** nodes (Gholipour et al.) (p. 208). A process that detects the leader's failure contacts the highest-ranked **alternative** on that list. If it's alive, it becomes leader without a full election round. If the detecting process is itself the top alternative, it announces itself straight away (p. 208). In Figure 10-2, leader 6 with alternatives {5, 4} crashes; 3 contacts 5; 5 replies that it's alive, which stops 3 from contacting others; and 5 announces its leadership (pp. 208–209).
+### عمل failover نفر بعدی
 
-### Candidate/ordinary optimization
+هر leaderی فهرستی از نودهای **failover** منتشر می‌کند، از غلی‌پور و همکاران (p. 208). processی که شکست leader را تشخیص بدهد با بالاترین‌رتبه‌ی **جانشین** در آن فهرست تماس می‌گیرد. اگر زنده باشد، بی دور انتخاب کامل leader می‌شود. اگر خود process detector سر‌جانشین باشد، فوری خودش را اعلام می‌کند (p. 208). در شکل ۱۰-۲، leader یعنی ۶ با جانشین‌های {5, 4} از کار می‌افتد؛ process ۳ با ۵ تماس می‌گیرد؛ process ۵ پاسخ می‌دهد که زنده است، که جلو تماس گرفتن ۳ با بقیه را می‌گیرد؛ و ۵ leadershipاش را اعلام می‌کند (pp. 208–209).
 
-The nodes are split into **candidates**, which may lead, and **ordinary** nodes (Murshed and Allen) (p. 209). An ordinary process starts the election by contacting the candidates, picks the highest-ranked live one and announces the result. Simultaneous elections are avoided with a **tiebreaker δ**: a process-specific delay, usually longer than a message round trip, that is lower for higher-priority nodes, so one node starts first (p. 209). In Figure 10-3, ordinary process 4 notices that 6 has failed, contacts the candidates, and announces leader **2** (pp. 209–210).
+> **In practice:** controllerهای Kubernetes leader را با یک Lease انتخاب می‌کنند که مدت دارد و باید مدام تمدید شود.
+>
+> **Your turn:** چرا lease مدت‌دار است، و چه خطری باز هم می‌ماند؟
+>
+> *Answer:* اگر leader بمیرد و lease را رها نکند، lease منقضی می‌شود و نمونه‌ی دیگری جایش را می‌گیرد. ولی leader قدیمی که فقط کند شده ممکن است هنوز خودش را leader بداند؛ پس هر نوشتن باید با fencing یا بررسی lease همراه باشد (pp. 208–212).
 
-### Invitation algorithm
+### بهینه‌سازی نامزد و عادی
 
-Processes **invite** others to join their group instead of outranking them. Multiple leaders exist by design, one per group (p. 210).
+نودها به **نامزد**، که می‌توانند leadership کنند، و نودهای **عادی** جدا می‌شوند، از مرشد و آلن (p. 209). processی عادی انتخاب را با تماس گرفتن با نامزدها شروع می‌کند، بالاترین‌رتبه‌ی زنده را برمی‌دارد و نتیجه را اعلام. انتخاب‌های هم‌هنگام با **تساوی‌شکن δ** پرهیز می‌شوند: latencyی process‌ویژه، که معمولاً از یک رفت‌و‌برگشت پیام بلندتر است، و برای نودهای اولویت‌بالاتر کم‌تر، تا یک نود اول شروع کند (p. 209). در شکل ۱۰-۳، process عادی ۴ می‌بیند که ۶ شکسته، با نامزدها تماس می‌گیرد، و leader یعنی **۲** را اعلام می‌کند (pp. 209–210).
 
-- Each process starts as the leader of a group of one.
-- A leader invites peers outside its group. If the peer is a leader too, the two groups merge. Otherwise the peer replies with its leader's ID, so the two leaders can merge directly (p. 210).
-- It doesn't matter which leader ends up in charge. Picking the leader of the **larger** group minimizes messages, because only the smaller group needs to be told (p. 211).
+### الگوریتم دعوت
 
-In Figure 10-4, 1 invites 2 and 3 invites 4; then 1 contacts 3, and 4 is told about the new leader; the merged group's leader is 1 (p. 210). Groups merge without starting new elections from scratch (p. 211).
+همه‌ی processها به‌جای رتبه زدن بقیه را به پیوستن به گروهشان **دعوت** می‌کنند. چند leader بنا به طرح وجود دارند، یکی برای هر گروهی (p. 210).
 
-![(a) four single-process groups; 1 invites 2 and 3 invites 4; (b) the two groups' leaders 1 and 3 connect; (c) one group of all four with 1 as leader](../figures/10-04.png)
+- هر processی به‌شکل leader گروهی یک‌نفره شروع می‌کند.
+- یک leader همتاهای بیرون گروهش را دعوت می‌کند. اگر آن همتا هم leader باشد، آن دو گروه merge می‌شوند. وگرنه همتا با ID مربوط به leaderش پاسخ می‌دهد، تا آن دو leader بتوانند یک‌راست merge کنند (p. 210).
+- مهم نیست کدام leader آخر سر مسئول می‌شود. برداشتن leader گروه **بزرگ‌تر** پیام را کمینه می‌کند، چون تنها به گروه کوچک‌تر لازم است گفته شود (p. 211).
 
-*Figure 10-4 (p. 210): groups merge by invitation, and the merged group keeps one leader.*
+در شکل ۱۰-۴، process ۱ به ۲ دعوت می‌دهد و ۳ به ۴؛ بعد ۱ با ۳ تماس می‌گیرد، و به ۴ از leader تازه گفته می‌شود؛ leader گروه merge‌شده ۱ است (p. 210). گروه‌ها بی شروع کردن انتخاب‌های تازه از صفر merge می‌شوند (p. 211).
 
-### Ring algorithm
+![(الف) چهار گروه تک‌پردازه‌ای؛ process ۱ به ۲ دعوت می‌دهد و ۳ به ۴؛ (ب) leaderهای آن دو گروه یعنی ۱ و ۳ وصل می‌شوند؛ (ج) یک گروه از هر چهار با ۱ به‌شکل leader](../figures/10-04.png)
 
-The nodes form a ring and know their predecessors and successors (Chang and Roberts) (p. 211).
+*Figure 10-4 (p. 210): گروه‌ها با دعوت merge می‌شوند، و گروه merge‌شده یک leader نگه می‌دارد.*
 
-- The node that detects the failure sends an election message to its successor, **skipping** unreachable nodes until one responds.
-- Each node adds itself to the **live set** before passing the message on, much like the timeout-free detector appends to its path (p. 211).
-- When the message returns to the initiator, the highest-ranked node in the live set becomes leader, and a second trip around the ring announces it (p. 211).
+### الگوریتم حلقه
 
-In Figure 10-5, 6 has failed and 3 starts the traversal. 5 can't reach 6, so it skips to 1. Since 5 has the highest rank, 3 sends a second round announcing it (pp. 211–212). A space-saving variant carries only the **current maximum** ID, which works because max is commutative (p. 212). A ring that splits into parts can elect a leader per part, so there's no safety guarantee here either (p. 212).
+نودها حلقه‌ای می‌سازند و پیشین‌ها و پسین‌هایشان را می‌شناسند، از چنگ و رابرتس (p. 211).
 
-![A ring of processes 1 to 6: (a) 3's election message goes around collecting live ranks, skipping crashed 6; (b) a second round; (c) 5, the highest rank, is announced around the ring](../figures/10-05.png)
+- نودی که شکست را تشخیص بدهد پیامی انتخاب به پسینش می‌فرستد، و از نودهای دست‌نیافتنی **می‌پرد** تا یکی پاسخ بدهد.
+- هر نودی پیش از دادن پیام به بعدی خودش را به **مجموعه‌ی زنده** می‌افزاید، شبیه آن detector بی timeout که به مسیرش می‌چسباند (p. 211).
+- وقتی پیام به آغازگر برگردد، بالاترین‌رتبه‌ی مجموعه‌ی زنده leader می‌شود، و سفری دوم گرد حلقه اعلامش می‌کند (p. 211).
 
-*Figure 10-5 (p. 212): the message collects live process ranks as it travels; the highest one wins and is announced in another pass.*
+در شکل ۱۰-۵، process ۶ شکسته و ۳ پیمایش را شروع می‌کند. process ۵ نمی‌تواند به ۶ برسد، پس به ۱ می‌پرد. چون ۵ بالاترین رتبه را دارد، ۳ دور دومی می‌فرستد و اعلامش می‌کند (pp. 211–212). گونه‌ای فضا‌صرفه‌جو تنها **بیشینه‌ی جاری** از ID را حمل می‌کند، که کار می‌کند چون max commutative است (p. 212). حلقه‌ای که به بخش‌ها بشکند می‌تواند برای هر بخشی leaderی انتخاب کند، پس این‌جا هم تضمین ایمنی‌ای نیست (p. 212).
 
-### Summary
+![حلقه‌ای از processهای ۱ تا ۶: (الف) پیام انتخاب process ۳ گرد حلقه می‌رود و رتبه‌های زنده را جمع می‌کند و از ۶ که از کار افتاده می‌پرد؛ (ب) دوری دوم؛ (ج) process ۵ که بالاترین رتبه است گرد حلقه اعلام می‌شود](../figures/10-05.png)
 
-A designated leader reduces coordination overhead. Elections are costly but rare, and per-partition leaders, or different leaders for different actions, avoid the bottleneck (p. 212). **Every algorithm in this chapter is prone to split brain**; avoiding it requires a cluster-wide **majority** of votes (p. 212).
+*Figure 10-5 (p. 212): آن پیام سر راه رتبه‌ی processهای زنده را جمع می‌کند؛ بالاترین می‌برد و در گذری دیگر اعلام می‌شود.*
 
-Is leader election the same as consensus? Agreeing on a leader's identity *is* consensus, and with it you could agree on anything (Abraham and Malkhi) (pp. 212–213). The leader may change without a process noticing, so election must be combined with **failure detection**. The *stable leader election* algorithm, for example, uses rounds with a unique stable leader and timeouts, so a leader keeps its role while it's alive and reachable (p. 213).
+### خلاصه
 
-| Algorithm | How conflicting leaders are resolved (p. 213) |
+یک leader برگزیده سرریز هم‌آهنگی را کم می‌کند. انتخاب‌ها گران‌اند ولی کمیاب، و leader برای هر پارتیشنی، یا leaderهای مختلف برای کنش‌های مختلف، از گلوگاه می‌پرهیزند (p. 212). **هر الگوریتمی در این فصل به split brain گرایش دارد**؛ و پرهیز از آن **اکثریت** رأی cluster‌سراسری لازم دارد (p. 212).
+
+آیا انتخاب leader همان consensus است؟ توافق روی هویت leaderی *خودش* consensus است، و با آن می‌شد روی هر چیزی توافق کرد، از ابراهام و مالکی (pp. 212–213). leader می‌تواند بی آن‌که processی ببیند عوض شود، پس انتخاب باید با **تشخیص شکست** ترکیب شود. مثلاً الگوریتم *انتخاب leader پایدار* دورهایی با leader پایدار یکتا و timeout به کار می‌برد، تا leaderی تا زنده و دست‌یافتنی است نقشش را نگه دارد (p. 213).
+
+| الگوریتم | leaderهای متعارض چطور حل می‌شوند (p. 213) |
 |---|---|
-| **Multi-Paxos** | Only one of two conflicting proposers can proceed; a second quorum keeps both values from being accepted |
-| **Raft** | A leader that discovers its term is out of date steps down to the newer term |
+| **Multi-Paxos** | از دو proposer متعارض تنها یکی می‌تواند پیش برود؛ quorumی دوم جلو پذیرفته شدن هر دو مقدار را می‌گیرد |
+| **Raft** | leaderی که بفهمد termش کهنه است به term تازه‌تر پایین می‌آید |
 
-A leader ensures **liveness**. Temporarily giving up safety by allowing several leaders is a **performance optimization**, since safety is restored by detecting and resolving conflicts. Ch. 14 continues the topic (p. 213).
+نقش leader **liveness** را تأمین می‌کند. موقت وا دادن ایمنی با مجاز کردن چند leader **بهینه‌سازی کارایی** است، چون ایمنی با تشخیص و حل تعارض بازگردانده می‌شود. فصل ۱۴ موضوع را ادامه می‌دهد (p. 213).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Algorithm | Messages | Picks | Weakness |
+| الگوریتم | پیام | چه کسی را برمی‌دارد | ضعف |
 |---|---|---|---|
-| Bully | Up to O(n²) in the worst case | Highest live rank | Split brain; re-electing unstable top nodes |
-| Next-in-line failover | Few if the alternative is alive | Leader-designated alternative | Stale list if alternatives died |
-| Candidate/ordinary | Only candidates contacted | Highest live candidate | Needs a tuned δ |
-| Invitation | Merge messages | Leader of a merged group | Several leaders by design |
-| Ring | 2 traversals, O(n) each | Highest in the live set | Partitioned ring elects several |
+| Bully | در بدترین حالت تا مرتبه‌ی O(n²) | بالاترین رتبه‌ی زنده | split brain؛ انتخاب دوباره‌ی نودهای سر ناپایدار |
+| failover نفر بعدی | کم، اگر جانشین زنده باشد | جانشینی که leader تعیین کرده | فهرست کهنه اگر جانشین‌ها مرده باشند |
+| نامزد و عادی | تنها با نامزدها تماس گرفته می‌شود | بالاترین نامزد زنده | δ تنظیم‌شده لازم دارد |
+| دعوت | پیام‌های merge | leader گروهی merge‌شده | چند leader بنا به طرح |
+| حلقه | ۲ پیمایش، هر یک از مرتبه‌ی O(n) | بالاترین در مجموعه‌ی زنده | حلقه‌ی پارتیشن‌شده چندتا انتخاب می‌کند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **The bully algorithm's message count.** If the lowest-ranked of *n* processes starts the election, every process may start its own round, giving O(n²) messages in the worst case. If the second-highest notices, it takes only O(n). The widget counts messages per scenario.
-- **Leases and fencing tokens.** In practice, split brain is contained by giving the leader a time-bounded *lease* and stamping its writes with a monotonically increasing *fencing token* (an epoch or term), so storage rejects writes from a deposed leader. Raft terms and ZooKeeper's zxid epochs play this role. See also [DDIA Ch. 9](../../designing-data-intensive-applications/chapters/09-the-trouble-with-distributed-systems.md).
+- **شمار پیام الگوریتم Bully.** اگر پایین‌ترین‌رتبه از *n* process انتخاب را شروع کند، هر processی می‌تواند دور خودش را شروع کند، که در بدترین حالت پیام از مرتبه‌ی O(n²) می‌دهد. اگر دومین‌بالاترین ببیند، تنها O(n) می‌برد. آن widget پیام هر صحنه‌ای را می‌شمارد.
+- **پروتکل lease و توکن حصار.** در عمل، split brain با دادن *lease*ی زمان‌کران‌دار به leader و مُهر زدن نوشتن‌هایش با *توکن حصار* یکنوا‌افزایشی، یعنی یک دوره یا term، مهار می‌شود، تا ذخیره‌سازی نوشتن‌های leader برکنارشده را رد کند. termهای Raft و دوره‌های zxid در ZooKeeper همین نقش را بازی می‌کنند. [فصل ۹ کتاب DDIA](../../designing-data-intensive-applications/chapters/09-the-trouble-with-distributed-systems.md) را هم ببینید.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [9. Failure Detection](09-failure-detection.md) (what triggers an election), [14. Consensus](14-consensus.md) (Multi-Paxos, Raft and ZAB elections), [13. Distributed Transactions](13-distributed-transactions.md) (per-partition leaders in Spanner).
+- **فصل‌های مرتبط:** [فصل ۹: تشخیص شکست](09-failure-detection.md) که آن چیزی را دارد که انتخابی را برمی‌انگیزد، [فصل ۱۴: consensus](14-consensus.md) که انتخاب‌های Multi-Paxos و Raft و ZAB را دارد، و [فصل ۱۳: تراکنش توزیع‌شده](13-distributed-transactions.md) که leader برای هر پارتیشنی در Spanner را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why must a leader announce itself when a lock holder doesn't need to?**
+1. **چرا leader باید خودش را اعلام کند در حالی که دارنده‌ی قفلی لازم ندارد؟**
 
-   *Answer:* A leader has special duties and must be known to all participants. For a lock, it only matters that it is eventually released (p. 206).
+   *Answer:* leader وظیفه‌های ویژه دارد و باید برای همه‌ی شرکت‌کننده‌ها معلوم باشد. برای قفل، تنها مهم است که در غایت رها شود (p. 206).
 
-2. **In the modified bully algorithm, process 3 sends Election to 4, 5 and 6; 4 and 5 reply Alive. What happens next?**
+2. **در الگوریتم Bully تغییریافته، process ۳ پیام Election را به ۴ و ۵ و ۶ می‌فرستد؛ processهای ۴ و ۵ پاسخ Alive می‌دهند. بعد چه می‌شود؟**
 
-   *Answer:* 3 notifies 5, the highest-ranked process that responded, and 5 broadcasts Elected to the lower-ranked processes (pp. 207–208).
+   *Answer:* process ۳ به ۵ خبر می‌دهد، که بالاترین‌رتبه‌ای است که پاسخ داده، و ۵ پیام Elected را به processهای رتبه‌پایین‌تر پخش می‌کند (pp. 207–208).
 
-3. **Which problem does a network partition cause for the bully algorithm?**
-   - [ ] Endless re-election
-   - [x] Split brain: each side elects its own leader
-   - [ ] Message duplication
+3. **پارتیشن شبکه برای الگوریتم Bully چه مسئله‌ای می‌سازد؟**
+   - [ ] انتخاب دوباره‌ی بی‌پایان
+   - [x] مفهوم split brain: هر سویی leader خودش را انتخاب می‌کند
+   - [ ] تکرار پیام
 
-   *Answer:* The algorithm has no majority requirement, so each isolated group elects its own highest-ranked node (p. 208).
+   *Answer:* الگوریتم هیچ نیازمندی اکثریتی ندارد، پس هر گروه منزوی بالاترین‌رتبه‌ی خودش را انتخاب می‌کند (p. 208).
 
-4. **How does next-in-line failover shorten an election?**
+4. **روش failover نفر بعدی انتخابی را چطور کوتاه می‌کند؟**
 
-   *Answer:* The failed leader had published a list of alternatives. The detecting process contacts the highest-ranked one, which takes over without a full election round if it's alive (p. 208).
+   *Answer:* آن leader شکسته فهرستی از جانشین‌ها منتشر کرده بود. process detector با بالاترین‌رتبه تماس می‌گیرد، که اگر زنده باشد بی دور انتخاب کامل تحویل می‌گیرد (p. 208).
 
-5. **What is δ in the candidate/ordinary algorithm?**
+5. **مقدار δ در الگوریتم نامزد و عادی چیست؟**
 
-   *Answer:* A process-specific tiebreaker delay, usually longer than a round trip and lower for higher-priority nodes, so one node starts its election before the others (p. 209).
+   *Answer:* latencyی تساوی‌شکن و process‌ویژه، که معمولاً از یک رفت‌و‌برگشت بلندتر است و برای نودهای اولویت‌بالاتر کم‌تر، تا یک نود انتخابش را پیش از بقیه شروع کند (p. 209).
 
-6. **Why can the ring algorithm carry just one ID instead of the live set?**
+6. **چرا الگوریتم حلقه می‌تواند به‌جای مجموعه‌ی زنده تنها یک ID را حمل کند؟**
 
-   *Answer:* It only needs the maximum, and max is commutative, so each node can compare and pass on the larger ID (p. 212).
+   *Answer:* تنها بیشینه را لازم دارد، و max commutative است، پس هر نودی می‌تواند مقایسه کند و ID بزرگ‌تر را بدهد (p. 212).
 
-7. **How does Raft resolve the existence of two leaders?**
+7. **الگوریتم Raft وجود دو leader را چطور حل می‌کند؟**
 
-   *Answer:* A leader that discovers its term is out of date learns there's a newer leader and updates to the newer term (p. 213).
+   *Answer:* leaderی که بفهمد termش کهنه است می‌فهمد leaderی تازه‌تر هست و به term تازه‌تر به‌روز می‌شود (p. 213).

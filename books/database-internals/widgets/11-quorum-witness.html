@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quorums and Witness Replicas</title>
-<meta name="description" content="Set N, W and R, turn some replicas into witnesses, fail nodes, and issue writes and reads to see which succeed, whether a read is guaranteed to see the latest write, and when a witness is temporarily upgraded to hold data. Illustrates Database Internals, Chapter 11.">
+<title>quorum و replicaهای شاهد</title>
+<meta name="description" content="مقدار N و W و R را بگذارید، برخی replicaها را شاهد کنید، نودها را بشکنید، و نوشتن و خواندن بدهید تا ببینید کدام موفق می‌شوند، خواندنی تضمین می‌شود تازه‌ترین نوشتن را ببیند یا نه، و شاهدی کِی موقت ارتقا می‌یابد تا داده را داشته باشد. تصویری از فصل ۱۱ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .nodes { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -19,52 +19,52 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/11-replication-and-consistency.html">Chapter 11</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Quorums &amp; witnesses</span>
+      <a href="../chapters/11-replication-and-consistency.html">فصل ۱۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">quorum و شاهدها</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 11 · Replication and Consistency</div>
-  <h1>Quorums and witness replicas</h1>
-  <p class="lede">With <strong>N</strong> replicas, a write needs <strong>W</strong> acknowledgments and a read <strong>R</strong> responses. If <strong>R + W &gt; N</strong>, every read set overlaps every write set, so some node in the read set has the latest write. A <strong>witness</strong> replica normally records only the fact that a write happened. When a copy replica is down, a witness takes the record temporarily.</p>
-  <p class="source-note">Illustrates “Tunable Consistency”, “Quorums” and “Witness Replicas” (pp. 235–237). The book’s condition for witnesses to keep the availability of full copies is majority quorums with at least one copy replica in every quorum; the widget checks both. Which live nodes a request reaches is the vault’s choice (copies first for writes, seeded random for reads). Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۱ · replication و consistency</div>
+  <h1>quorum و replicaهای شاهد</h1>
+  <p class="lede">با <strong>N</strong> replica، نوشتنی <strong>W</strong> تأیید و خواندنی <strong>R</strong> پاسخ لازم دارد. اگر <strong>R + W &gt; N</strong>، هر مجموعه‌ی خواندنی با هر مجموعه‌ی نوشتنی هم‌پوشان است، پس نودی در مجموعه‌ی خواندن تازه‌ترین نوشتن را دارد. replica <strong>شاهد</strong> معمولاً تنها این واقعیت را ثبت می‌کند که نوشتنی رخ داده. وقتی replica کپی خواب باشد، شاهدی آن رکورد را موقت برمی‌دارد.</p>
+  <p class="source-note">تصویری از «consistency قابل تنظیم» و «quorum» و «replicaهای شاهد» (صص. ۲۳۵–۲۳۷). شرط کتاب برای این‌که شاهدها availability کپی‌های کامل را نگه دارند quorumهای اکثریت با دست‌کم یک replica کپی در هر quorumی است؛ و widget هر دو را می‌سنجد. این‌که درخواستی به کدام نودهای زنده می‌رسد انتخاب vault است، یعنی برای نوشتن اول کپی‌ها و برای خواندن تصادفی با seed. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel"><div class="nodes" id="nodes"></div>
-        <p class="field-hint">Click a node to fail or recover it. c = copy replica, w = witness (dotted). Blue outline: nodes in the last request’s quorum.</p>
+        <p class="field-hint">روی نودی کلیک کنید تا بشکند یا بازیابی شود. حرف c یعنی replica کپی و w یعنی شاهد، که نقطه‌چین است. خط‌دور آبی: نودهای quorum آخرین درخواست.</p>
         <div class="checks" id="checks"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="sl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="wr">Write next version</button><button class="btn small" type="button" id="rd">Read</button><button class="btn small" type="button" id="rep">Repair</button></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="sl"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="wr">نسخه‌ی بعدی را بنویس</button><button class="btn small" type="button" id="rd">خواندن</button><button class="btn small" type="button" id="rep">تعمیر</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>R + W &gt; N is about overlap, not majorities.</strong> W = 1, R = N also overlaps, but then every replica must be up for a read.</li>
-    <li><strong>Witnesses save storage, not availability.</strong> With majorities and at least one copy in every quorum, n copies plus m witnesses tolerate as many failures as n + m copies.</li>
-    <li><strong>Fail a copy and write.</strong> A witness in the write quorum temporarily stores the record; <em>Repair</em> brings the copy back up to date and the witness drops it again.</li>
-    <li><strong>Too many witnesses break the guarantee.</strong> If a quorum could consist of witnesses only, a read might know a newer version exists but find no node holding its data.</li>
+    <li><strong>شرط R + W &gt; N درباره‌ی هم‌پوشانی است و نه اکثریت.</strong> حالت W = 1 و R = N هم هم‌پوشان است، ولی آن‌وقت برای خواندنی هر replicaیی باید سرپا باشد.</li>
+    <li><strong>شاهدها ذخیره‌سازی را صرفه‌جویی می‌کنند و نه availability را.</strong> با اکثریت و دست‌کم یک کپی در هر quorumی، n کپی به‌علاوه‌ی m شاهد همان‌قدر شکست را تحمل می‌کنند که n + m کپی.</li>
+    <li><strong>کپی‌ای را بشکنید و بنویسید.</strong> شاهدی در quorum نوشتن رکورد را موقت ذخیره می‌کند؛ و <em>تعمیر</em> آن کپی را به‌روز می‌کند و شاهد بازهم می‌اندازدش.</li>
+    <li><strong>شاهد زیادی آن تضمین را می‌شکند.</strong> اگر quorumی بتواند تنها از شاهد ساخته شود، خواندنی می‌تواند بداند نسخه‌ای تازه‌تر هست ولی هیچ نودی را که داده‌اش را دارد پیدا نکند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/11-replication-and-consistency.html"><small>Lesson</small>11. Replication and Consistency</a></li>
+    <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,60 +83,60 @@ function stats(rows) {
   var cfg = { n: 3, w: 2, r: 2, wit: 1 }, nodes, ver, lastQ, rr;
   function build() {
     nodes = []; for (var i = 0; i < cfg.n; i++) nodes.push({ id: i + 1, wit: i >= cfg.n - cfg.wit, up: true, v: 0, data: 0 });
-    ver = 0; lastQ = []; rr = Kit.rng(4); log.clear(); log.add("N = " + cfg.n + " (" + (cfg.n - cfg.wit) + " copies, " + cfg.wit + " witness" + (cfg.wit === 1 ? "" : "es") + "), W = " + cfg.w + ", R = " + cfg.r, "muted"); render();
+    ver = 0; lastQ = []; rr = Kit.rng(4); log.clear(); log.add("N = " + cfg.n + " با " + (cfg.n - cfg.wit) + " کپی و " + cfg.wit + " شاهد، W = " + cfg.w + "، R = " + cfg.r, "muted"); render();
   }
   function live() { return nodes.filter(function (x) { return x.up; }); }
   function write() {
-    var L = live(); if (L.length < cfg.w) { log.add("Write v" + (ver + 1) + " fails: only " + L.length + " nodes up, W = " + cfg.w, "bad"); lastQ = []; render(); return; }
+    var L = live(); if (L.length < cfg.w) { log.add("نوشتن v" + (ver + 1) + " باز می‌ماند: تنها " + L.length + " نود سرپاست و W = " + cfg.w, "bad"); lastQ = []; render(); return; }
     var copies = L.filter(function (x) { return !x.wit; }), wits = L.filter(function (x) { return x.wit; });
     var q = copies.concat(wits).slice(0, cfg.w);
-    if (!q.some(function (x) { return !x.wit; })) { log.add("Write v" + (ver + 1) + " fails: the only reachable quorum has no copy replica", "bad"); lastQ = []; render(); return; }
+    if (!q.some(function (x) { return !x.wit; })) { log.add("نوشتن v" + (ver + 1) + " باز می‌ماند: تنها quorum دست‌یافتنی هیچ replica کپی‌ای ندارد", "bad"); lastQ = []; render(); return; }
     ver++; var downCopies = nodes.filter(function (x) { return !x.wit && !x.up; }).length;
     q.forEach(function (x) { x.v = ver; if (!x.wit || downCopies) x.data = ver; });
     lastQ = q; var up = q.filter(function (x) { return x.wit && x.data === ver; });
-    log.add("Write v" + ver + " acknowledged by " + q.map(function (x) { return x.id + (x.wit ? "w" : "c"); }).join(", ") + (up.length ? "; a copy is down, so witness " + up.map(function (x) { return x.id; }).join(", ") + " stores the record temporarily" : ""), "ok");
+    log.add("نوشتن v" + ver + " را " + q.map(function (x) { return x.id + (x.wit ? "w" : "c"); }).join("، ") + " تأیید کردند" + (up.length ? "؛ کپی‌ای خواب است، پس شاهد " + up.map(function (x) { return x.id; }).join("، ") + " رکورد را موقت ذخیره می‌کند" : ""), "ok");
     render();
   }
   function read() {
-    var L = live(); if (L.length < cfg.r) { log.add("Read fails: only " + L.length + " nodes up, R = " + cfg.r, "bad"); lastQ = []; render(); return; }
+    var L = live(); if (L.length < cfg.r) { log.add("خواندن باز می‌ماند: تنها " + L.length + " نود سرپاست و R = " + cfg.r, "bad"); lastQ = []; render(); return; }
     var pool = L.slice(), q = []; while (q.length < cfg.r) q.push(pool.splice(rr.int(pool.length), 1)[0]);
     lastQ = q;
     var known = Math.max.apply(null, q.map(function (x) { return x.v; })), have = Math.max.apply(null, q.map(function (x) { return x.data; }));
-    var msg = "Read from " + q.map(function (x) { return x.id + (x.wit ? "w" : "c"); }).join(", ") + ": ";
-    if (have === ver) log.add(msg + "returns v" + have + " (latest)", "ok");
-    else if (known === ver) log.add(msg + "a witness knows v" + ver + " exists, but no node in this quorum holds its data", "warn");
-    else log.add(msg + "returns v" + have + ", stale (latest is v" + ver + ")", "bad");
+    var msg = "خواندن از " + q.map(function (x) { return x.id + (x.wit ? "w" : "c"); }).join("، ") + ": ";
+    if (have === ver) log.add(msg + "نسخه‌ی v" + have + " را برمی‌گرداند، که تازه‌ترین است", "ok");
+    else if (known === ver) log.add(msg + "شاهدی می‌داند که v" + ver + " وجود دارد، ولی هیچ نودی در این quorum داده‌اش را ندارد", "warn");
+    else log.add(msg + "نسخه‌ی v" + have + " را برمی‌گرداند، که کهنه است؛ تازه‌ترین v" + ver + " است", "bad");
     render();
   }
   function repair() {
     var src = nodes.filter(function (x) { return x.data === ver; }).length;
-    if (!src) { log.add("Nothing to repair from", "muted"); return; }
+    if (!src) { log.add("چیزی برای تعمیر از آن نیست", "muted"); return; }
     nodes.forEach(function (x) { if (x.up && !x.wit) { x.data = ver; x.v = ver; } });
     var copiesOk = nodes.filter(function (x) { return !x.wit; }).every(function (x) { return x.data === ver; });
     if (copiesOk) nodes.forEach(function (x) { if (x.wit) x.data = 0; });
-    log.add("Repair: live copies brought to v" + ver + (copiesOk ? "; witnesses drop their temporary data" : "; a copy is still down, witnesses keep the record"), "ok"); lastQ = []; render();
+    log.add("تعمیر: کپی‌های زنده به v" + ver + " رسیدند" + (copiesOk ? "؛ شاهدها داده‌ی موقتشان را می‌اندازند" : "؛ کپی‌ای باز هم خواب است، پس شاهدها رکورد را نگه می‌دارند"), "ok"); lastQ = []; render();
   }
   function render() {
     var m = Kit.clear(document.getElementById("nodes"));
     nodes.forEach(function (x) {
-      m.appendChild(Kit.el("button", { type: "button", class: "nd" + (x.wit ? " w" : "") + (x.up ? "" : " down") + (lastQ.indexOf(x) >= 0 ? " inq" : ""), "aria-pressed": String(!x.up), onclick: function () { x.up = !x.up; log.add("Node " + x.id + (x.up ? " recovers" : " fails"), x.up ? "ok" : "warn"); render(); } },
-        Kit.el("div", { class: "nm" }, x.id + (x.wit ? "w" : "c") + (x.up ? "" : " · down")),
-        Kit.el("div", { class: "kv" }, x.wit ? "knows v" + x.v + (x.data ? ", holds v" + x.data : "") : "holds v" + x.data)));
+      m.appendChild(Kit.el("button", { type: "button", class: "nd" + (x.wit ? " w" : "") + (x.up ? "" : " down") + (lastQ.indexOf(x) >= 0 ? " inq" : ""), "aria-pressed": String(!x.up), onclick: function () { x.up = !x.up; log.add("نود " + x.id + (x.up ? " بازیابی شد" : " شکست"), x.up ? "ok" : "warn"); render(); } },
+        Kit.el("div", { class: "nm" }, x.id + (x.wit ? "w" : "c") + (x.up ? "" : " · خواب")),
+        Kit.el("div", { class: "kv" }, x.wit ? "می‌داند v" + x.v + (x.data ? "، دارد v" + x.data : "") : "دارد v" + x.data)));
     });
     var c = Kit.clear(document.getElementById("checks")), maj = Math.floor(cfg.n / 2) + 1;
     function check(ok, text) { c.appendChild(Kit.el("div", { class: "callout " + (ok ? "ok" : "warn") }, (ok ? "✓ " : "✗ ") + text)); }
-    check(cfg.r + cfg.w > cfg.n, "R + W = " + (cfg.r + cfg.w) + (cfg.r + cfg.w > cfg.n ? " > " : " ≤ ") + "N = " + cfg.n + ": reads " + (cfg.r + cfg.w > cfg.n ? "always" : "don't always") + " overlap the latest write");
-    check(cfg.w > cfg.wit && cfg.r > cfg.wit, "Every quorum contains a copy replica (W and R larger than the " + cfg.wit + " witness" + (cfg.wit === 1 ? "" : "es") + ")");
-    check(cfg.w >= maj && cfg.r >= maj, "Majority quorums (⌊N/2⌋ + 1 = " + maj + ")");
+    check(cfg.r + cfg.w > cfg.n, "R + W = " + (cfg.r + cfg.w) + (cfg.r + cfg.w > cfg.n ? " > " : " ≤ ") + "N = " + cfg.n + ": خواندن‌ها " + (cfg.r + cfg.w > cfg.n ? "همیشه" : "همیشه نه") + " با تازه‌ترین نوشتن هم‌پوشان‌اند");
+    check(cfg.w > cfg.wit && cfg.r > cfg.wit, "هر quorumی replica کپی‌ای دارد، چون W و R از " + cfg.wit + " شاهد بزرگ‌ترند");
+    check(cfg.w >= maj && cfg.r >= maj, "quorumهای اکثریت، یعنی ⌊N/2⌋ + 1 = " + maj);
     var L = live().length;
-    stats([["Nodes up", L + " / " + cfg.n, L < cfg.n ? "warn" : ""], ["Writes possible", L >= cfg.w ? "yes" : "no", L >= cfg.w ? "ok" : "bad"], ["Reads possible", L >= cfg.r ? "yes" : "no", L >= cfg.r ? "ok" : "bad"], ["Latest version", "v" + ver]]);
+    stats([["نودهای سرپا", L + " / " + cfg.n, L < cfg.n ? "warn" : ""], ["نوشتن ممکن است", L >= cfg.w ? "بله" : "نه", L >= cfg.w ? "ok" : "bad"], ["خواندن ممکن است", L >= cfg.r ? "بله" : "نه", L >= cfg.r ? "ok" : "bad"], ["تازه‌ترین نسخه", "v" + ver]]);
   }
   var sl = document.getElementById("sl"), sN, sW, sR, sWit;
   function clamp() { cfg.w = Math.min(cfg.w, cfg.n); cfg.r = Math.min(cfg.r, cfg.n); cfg.wit = Math.min(cfg.wit, cfg.n - 1); sW.input.max = sR.input.max = cfg.n; sWit.input.max = cfg.n - 1; sW.set(cfg.w); sR.set(cfg.r); sWit.set(cfg.wit); }
-  sN = Kit.slider({ label: "N replicas", min: 3, max: 7, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; clamp(); build(); } });
+  sN = Kit.slider({ label: "تعداد N مربوط به replica", min: 3, max: 7, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; clamp(); build(); } });
   sW = Kit.slider({ label: "W", min: 1, max: cfg.n, step: 1, value: cfg.w, onInput: function (v) { cfg.w = v; build(); } });
   sR = Kit.slider({ label: "R", min: 1, max: cfg.n, step: 1, value: cfg.r, onInput: function (v) { cfg.r = v; build(); } });
-  sWit = Kit.slider({ label: "Witnesses", min: 0, max: cfg.n - 1, step: 1, value: cfg.wit, onInput: function (v) { cfg.wit = v; build(); } });
+  sWit = Kit.slider({ label: "شاهدها", min: 0, max: cfg.n - 1, step: 1, value: cfg.wit, onInput: function (v) { cfg.wit = v; build(); } });
   [sN, sW, sR, sWit].forEach(function (s) { sl.appendChild(s.element); });
   document.getElementById("wr").addEventListener("click", write);
   document.getElementById("rd").addEventListener("click", read);
@@ -144,15 +144,15 @@ function stats(rows) {
   build();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "N = 3, W = 2, R = 2. How many failures can reads and writes tolerate?",
-      options: ["None", "One", "Two"], answer: 1,
-      explain: "p. 235." },
-    { q: "What does a witness replica normally store?",
-      options: ["A full copy", "Only the fact that a write happened, until a copy fails and it holds the record temporarily", "Nothing"], answer: 1,
-      explain: "pp. 236–237." },
-    { q: "With [1c, 2c, 3w], a write arrives while 2c is down. What happens?",
-      options: ["The write fails", "It is stored on 1c and temporarily on 3w; 2c is repaired later and 3w drops its copy", "Only 1c stores it"], answer: 1,
-      explain: "The book's example (p. 237)." }
+    { q: "با N = 3 و W = 2 و R = 2، خواندن و نوشتن چند شکست را تحمل می‌کنند؟",
+      options: ["هیچ", "یکی", "دو"], answer: 1,
+      explain: "ص. ۲۳۵." },
+    { q: "replica شاهد معمولاً چه چیزی ذخیره می‌کند؟",
+      options: ["یک کپی کامل", "تنها این واقعیت که نوشتنی رخ داده، تا وقتی کپی‌ای بشکند و او رکورد را موقت داشته باشد", "هیچ"], answer: 1,
+      explain: "صص. ۲۳۶–۲۳۷." },
+    { q: "با [1c, 2c, 3w]، نوشتنی در حالی می‌رسد که 2c خواب است. چه می‌شود؟",
+      options: ["نوشتن باز می‌ماند", "روی 1c و موقت روی 3w ذخیره می‌شود؛ بعدتر 2c تعمیر می‌شود و 3w کپی‌اش را می‌اندازد", "تنها 1c ذخیره‌اش می‌کند"], answer: 1,
+      explain: "نمونه‌ی کتاب (ص. ۲۳۷)." }
   ]);
 })();
 </script>

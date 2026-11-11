@@ -3,138 +3,140 @@ book: database-internals
 chapter: 4
 title: "Implementing B-Trees"
 pages: "61–77"
+translated_title: "پیاده کردن B-Tree"
+lang: fa
 ---
 
-# 4. Implementing B-Trees
+# فصل ۴: پیاده کردن B-Tree
 
-[← 3. File Formats](03-file-formats.md) · [Book](../README.md) · [5. Transaction Processing and Recovery →](05-transaction-processing-and-recovery.md)
+[فصل ۳: قالب فایل →](03-file-formats.md) · [کتاب](../README.md) · [فصل ۵: پردازش تراکنش و بازیابی ←](05-transaction-processing-and-recovery.md)
 
-## Summary
+## خلاصه
 
-This chapter connects the textbook B-Tree with real engines. It covers three groups of topics (p. 61):
+این فصل B-Tree کتاب درسی را به موتورهای واقعی وصل می‌کند. سه گروه موضوع را می‌پوشاند (p. 61):
 
-1. **Organization:** the **page header**, **magic numbers**, **sibling links**, the **rightmost pointer** (stored separately because it isn't paired with a key), **high keys** (as in PostgreSQL's B-link trees), and **overflow pages** for payloads that don't fit (pp. 61–67).
-2. **Root-to-leaf traversal:** **binary search through indirection pointers**, and remembering the path either with **parent pointers** or with a stack of **breadcrumbs**, so that splits and merges can propagate upward (pp. 67–70).
-3. **Optimizations and maintenance:**
-   - **rebalancing** between siblings (B*-Trees split two nodes into three, each two-thirds full);
-   - **right-only appends** for monotonically increasing keys (PostgreSQL's *fastpath*, SQLite's *quickbalance*);
-   - **bulk loading** sorted data bottom-up;
-   - page-wise or data-only **compression**;
-   - **vacuum**, which defragments pages and returns freed pages to a freelist (pp. 70–76).
+1. **سازمان:** **header صفحه**، **magic number**، **پیوند sibling**، **اشاره‌گر راست‌ترین** که جدا ذخیره می‌شود چون با کلیدی جفت نیست، **کلید سقف** چنان‌که در درخت‌های B-link در PostgreSQL، و **صفحه‌ی سرریز** برای باری که جا نمی‌شود (pp. 61–67).
+2. **پیمایش ریشه‌تا‌برگ:** **جست‌و‌جوی دوگانی از راه اشاره‌گرهای واسطه**، و یاد سپردن مسیر یا با **اشاره‌گر پدر** یا با پشته‌ای از **خرده‌نان**، تا شکستن و merge رو‌به‌بالا پخش شوند (pp. 67–70).
+3. **بهینه‌سازی و نگهداشت:**
+   - **متوازن کردن دوباره** میان خواهر‌و‌برادرها، که B*-Treeها دو نود را به سه می‌شکنند و هر یک دو‌سوم پر؛
+   - **افزودن تنها‌راست** برای کلیدهای یکنوا‌افزایشی، یعنی *fastpath* در PostgreSQL و *quickbalance* در SQLite؛
+   - **بار‌گذاری انبوه** داده‌ی مرتب از پایین به بالا؛
+   - **فشرده‌سازی** صفحه‌به‌صفحه یا فقط‌داده؛
+   - و **vacuum**، که صفحه‌ها را یکپارچه می‌کند و صفحه‌های آزادشده را به freelistی برمی‌گرداند (pp. 70–76).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **The page header carries navigation metadata:** flags, cell count, lower and upper free-space offsets, and engine-specific fields (p. 61).
-- **A magic number is a cheap sanity check.** Random bytes are very unlikely to match it, so a match suggests the page is correctly located and aligned (p. 62).
-- **Sibling links save trips to the parent** but must be updated on every split and merge, possibly requiring extra locking (pp. 62–63).
-- **A node has N keys but N + 1 pointers.** Engines either store the unpaired rightmost pointer separately (SQLite keeps it in the header) or pair it with a **high key** (B-link trees) (pp. 63–64).
-- **Overflow pages keep fixed-size pages workable.** At most `max_payload_size` = node size / fanout bytes are stored inline; the rest goes to linked overflow pages (pp. 65–66).
-- **Breadcrumbs make propagation cheap.** A stack of the nodes and cell indices visited on the way down lets a split walk back up; PostgreSQL calls it `BTStack` (p. 69).
-- **Sorted input avoids splits entirely.** Bulk loading writes leaves page by page and builds parents bottom-up; immutable trees can fill every page completely (p. 72).
-- **Deletes only drop cell offsets.** Fragmentation then accumulates until **vacuum** rewrites the page and persists the freelist (pp. 75–76).
+- **بخش header صفحه metadata پیمایش را حمل می‌کند:** flagها، شمار cell، offsetهای پایین و بالای فضای آزاد، و فیلدهای موتور‌ویژه (p. 61).
+- **ساختار magic number سنجشی ارزان برای عقل سلیم است.** احتمال خواندن بایت‌های تصادفی با آن خیلی کم است، پس خواندنشان می‌رساند که صفحه درست جا گرفته و هم‌تراز است (p. 62).
+- **پیوندهای sibling سفرهای به پدر را صرفه‌جویی می‌کنند** ولی سر هر شکستن و mergeی باید به‌روز شوند، و شاید قفل‌گذاری اضافه لازم داشته باشند (pp. 62–63).
+- **نودی N کلید دارد ولی N + 1 اشاره‌گر.** موتورها یا آن اشاره‌گر راست‌ترین جفت‌نشده را جدا ذخیره می‌کنند، که SQLite در header نگهش می‌دارد، یا با یک **کلید سقف** جفتش می‌کنند، که درخت B-link است (pp. 63–64).
+- **صفحه‌های سرریز صفحه‌های fixed-size را کار‌راه‌انداز نگه می‌دارند.** حداکثر `max_payload_size` که برابر اندازه‌ی نود تقسیم بر fanout است درون‌خط ذخیره می‌شود؛ و بقیه به صفحه‌های سرریز پیوندخورده می‌رود (pp. 65–66).
+- **خرده‌نان‌ها پخش را ارزان می‌کنند.** پشته‌ای از نودها و index cellهایی که سر راه پایین دیده شده‌اند می‌گذارد شکستنی پس بالا بیاید؛ PostgreSQL اسمش را `BTStack` می‌گذارد (p. 69).
+- **ورودی مرتب تماماً از شکستن می‌پرهیزد.** بار‌گذاری انبوه برگ‌ها را صفحه‌به‌صفحه می‌نویسد و پدرها را از پایین به بالا می‌سازد؛ درخت‌های immutable می‌توانند هر صفحه‌ای را کامل پر کنند (p. 72).
+- **حذف‌ها تنها offsetهای cell را می‌اندازند.** آن‌وقت تکه‌تکه شدن انبار می‌شود تا **vacuum** صفحه را دوباره بنویسد و freelist را پایا کند (pp. 75–76).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Page Header — p. 61
-  - Magic Numbers — p. 62
-  - Sibling Links — p. 62
-  - Rightmost Pointers — p. 63
-  - Node High Keys — p. 64
-  - Overflow Pages — p. 65
-- Binary Search — p. 67
-  - Binary Search with Indirection Pointers — p. 67
-- Propagating Splits and Merges — p. 68
-  - Breadcrumbs — p. 69
-- Rebalancing — p. 70
-- Right-Only Appends — p. 71
-  - Bulk Loading — p. 72
-- Compression — p. 73
-- Vacuum and Maintenance — p. 74
-  - Fragmentation Caused by Updates and Deletes — p. 75
-  - Page Defragmentation — p. 76
-- Summary — p. 76
+- بخش header صفحه — ص. ۶۱
+  - بخش magic number — ص. ۶۲
+  - پیوند sibling — ص. ۶۲
+  - اشاره‌گر راست‌ترین — ص. ۶۳
+  - کلید سقف نود — ص. ۶۴
+  - صفحه‌ی سرریز — ص. ۶۵
+- جست‌و‌جوی دوگانی — ص. ۶۷
+  - جست‌و‌جوی دوگانی با اشاره‌گرهای واسطه — ص. ۶۷
+- پخش کردن شکستن و merge — ص. ۶۸
+  - خرده‌نان — ص. ۶۹
+- متوازن کردن دوباره — ص. ۷۰
+- افزودن تنها‌راست — ص. ۷۱
+  - بار‌گذاری انبوه — ص. ۷۲
+- فشرده‌سازی — ص. ۷۳
+- بخش vacuum و نگهداشت — ص. ۷۴
+  - تکه‌تکه شدن از به‌روزرسانی و حذف — ص. ۷۵
+  - یکپارچه‌سازی صفحه — ص. ۷۶
+- خلاصه — ص. ۷۶
 
-## Notes
+## یادداشت‌ها
 
-The previous chapter's principles apply to both in-place and append-only structures. This one is specific to B-Trees (p. 61).
+قاعده‌های فصل پیش به ساختارهای سر‌جا و append-only هر دو به کار می‌آیند. این فصل ویژه‌ی B-Tree است (p. 61).
 
-### Page header
+### بخش header صفحه
 
-The header holds information used for navigation, maintenance and optimization: flags describing contents and layout, the number of cells, the **lower and upper offsets** bounding the free space (where new offsets and cells are appended), and more (p. 61).
+ساختار header اطلاعی را دارد که برای پیمایش و نگهداشت و بهینه‌سازی به کار می‌رود: flagهایی که محتوا و چیدمان را وصف می‌کنند، شمار cellها، **offsetهای پایین و بالا** که فضای آزاد را کران می‌زنند، یعنی جایی که offsetها و cellهای تازه افزوده می‌شوند، و بیشتر (p. 61).
 
-| Engine | Stored in the page header (p. 61) |
+| موتور | چه چیزی در header صفحه ذخیره می‌شود (p. 61) |
 |---|---|
-| PostgreSQL | Page size, layout version |
-| MySQL InnoDB | Number of heap records, level, others |
-| SQLite | Number of cells, rightmost pointer |
+| PostgreSQL | اندازه‌ی صفحه، نسخه‌ی چیدمان |
+| InnoDB در MySQL | شمار رکوردهای heap، سطح، و بقیه |
+| SQLite | شمار cellها، اشاره‌گر راست‌ترین |
 
-#### Magic numbers
+#### magic number
 
-A **magic number** is a multibyte constant in the file or page header. It marks a block as a page, identifies its kind or names its version (p. 62). It's used for validation: write `50 41 47 45` (hex for `PAGE`) and compare those four bytes on read. A random offset is very unlikely to match, so a match means the offset is probably correct (p. 62).
+**ساختار magic number** ثابتی چند‌بایتی در header فایل یا صفحه است. بلوکی را به‌شکل صفحه علامت می‌زند، گونه‌اش را شناسایی می‌کند یا نسخه‌اش را نام می‌برد (p. 62). برای اعتبارسنجی به کار می‌رود: `50 41 47 45` را بنویسید، که hex برای `PAGE` است، و سر خواندن آن چهار بایت را مقایسه کنید. احتمال خواندن offsetی تصادفی با آن خیلی کم است، پس خواندنشان یعنی offset احتمالاً درست است (p. 62).
 
-#### Sibling links
+#### پیوند sibling
 
-Some engines store forward and backward links to sibling pages, so a neighbour can be found without climbing back to the parent. Without them, the climb may go all the way to the root, because a parent only addresses its own children (Figure 4-1) (p. 62). The price: when a non-rightmost node splits, its right sibling's backward pointer has to be redirected to the new node. Because that change happens in a *different* node, it may need extra locking. B-link trees exploit sibling links for concurrency (Ch. 6, p. 107) (pp. 62–63).
+برخی موتورها پیوندهای جلو و عقب به صفحه‌های sibling ذخیره می‌کنند، تا همسایه‌ای بی بالا رفتن به پدر پیدا شود. بی آن‌ها، بالا رفتن می‌تواند تا ریشه برود، چون هر پدری تنها فرزندهای خودش را نشانی می‌دهد (شکل ۴-۱) (p. 62). بهایش: وقتی نودی غیر‌راست‌ترین بشکند، اشاره‌گر عقب sibling راستش باید به نود تازه برگردانده شود. چون آن تغییر در نودی *دیگر* رخ می‌دهد، می‌تواند قفل‌گذاری اضافه لازم داشته باشد. درخت‌های B-link از پیوندهای sibling برای concurrency بهره می‌گیرند، فصل ۶، ص. ۱۰۷ (pp. 62–63).
 
-![Two copies of a three-level tree: (a) reaching the right-hand leaf from its left neighbour means climbing to the parent and down again; (b) a direct link joins neighbouring nodes on the same level](../figures/04-01.png)
+![دو کپی از درختی سه‌سطحی: (الف) رسیدن به برگ راست از همسایه‌ی چپش یعنی بالا رفتن به پدر و پایین آمدن دوباره؛ (ب) پیوندی مستقیم نودهای همسایه در همان سطح را به هم وصل می‌کند](../figures/04-01.png)
 
-*Figure 4-1 (p. 62): (a) without sibling links the path to a neighbour goes through the parent; (b) with them it is one hop.*
+*Figure 4-1 (p. 62): (الف) بی پیوند sibling مسیر به همسایه از پدر رد می‌شود؛ (ب) با آن‌ها یک پرش است.*
 
-#### Rightmost pointers
+#### اشاره‌گر راست‌ترین
 
-There is always one more child pointer than keys, which is where the "+1" comes from (p. 63). Many implementations pair each separator key with a child pointer and store the last pointer separately (Figure 4-2). SQLite keeps it in the header (p. 63). When the rightmost child splits, the cell appended to the parent holds the promoted key and points to the *split* node, while the pointer to the *new* node replaces the old rightmost pointer (Figure 4-3; SQLite's `balance_deeper`) (pp. 63–64).
+همیشه یک اشاره‌گر فرزند بیشتر از کلیدها هست، که آن «+1» از همین‌جاست (p. 63). خیلی از پیاده‌سازی‌ها هر کلید جداکننده‌ای را با یک اشاره‌گر فرزند جفت می‌کنند و اشاره‌گر آخر را جدا ذخیره (شکل ۴-۲). سیستم SQLite در header نگهش می‌دارد (p. 63). وقتی راست‌ترین فرزند بشکند، آن cellی که به پدر افزوده می‌شود کلید بالا‌برده‌شده را دارد و به نود *شکسته* اشاره می‌کند، در حالی که اشاره‌گر به نود *تازه* جای اشاره‌گر راست‌ترین قدیم را می‌گیرد، شکل ۴-۳؛ و `balance_deeper` در SQLite (pp. 63–64).
 
-#### Node high keys
+#### کلید سقف نود
 
-Alternatively, the rightmost pointer is stored with a **high key**, the highest key that can be present in the node's subtree. PostgreSQL does this; the structure is called a **B-link tree** (p. 64). Keys in subtree *i* satisfy K₍ᵢ₋₁₎ ≤ Kₛ < Kᵢ, with an implicit K₀ = −∞. B-link trees add an explicit K₍N+1₎ as the upper bound (Figure 4-4) (p. 64).
+به‌جایش، اشاره‌گر راست‌ترین با یک **کلید سقف** ذخیره می‌شود، یعنی بالاترین کلیدی که در زیردرخت آن نود می‌تواند حاضر باشد. PostgreSQL همین را می‌کند؛ آن ساختار **درخت B-link** نامیده می‌شود (p. 64). کلیدهای زیردرخت *i* شرط K₍ᵢ₋₁₎ ≤ Kₛ < Kᵢ را برمی‌آورند، با K₀ = −∞ ضمنی. درخت‌های B-link یک K₍N+1₎ صریح به‌شکل کران بالا می‌افزایند (شکل ۴-۴) (p. 64).
 
-| | Without a high key | With a high key |
+| | بی کلید سقف | با کلید سقف |
 |---|---|---|
-| Last subtree's upper bound | Virtual +∞ | Stored high key |
-| Pointer storage | Rightmost pointer is a special case | Pointers stored pairwise with keys, fewer edge cases |
+| کران بالای زیردرخت آخر | ∞+ مجازی | کلید سقف ذخیره‌شده |
+| ذخیره‌ی اشاره‌گر | اشاره‌گر راست‌ترین حالتی ویژه است | اشاره‌گرها زوجی با کلیدها ذخیره می‌شوند، با حالت‌های حاشیه‌ای کم‌تر |
 
-*Restates Figures 4-4 and 4-5 (pp. 64–65).*
+*شکل‌های ۴-۴ و ۴-۵ را بازمی‌گوید (pp. 64–65).*
 
-#### Overflow pages
+#### صفحه‌ی سرریز
 
-Node size and fanout are fixed, but no single value suits every workload: large variable-size values fit only a few per page, and tiny ones waste reserved space (p. 65). A node can still have room by B-Tree rules while its page is physically full, and resizing a page would mean copying it, which is impractical (p. 65).
+اندازه‌ی نود و fanout ثابت‌اند، ولی هیچ مقدار تنهایی به هر بار کاری نمی‌خورد: مقدارهای بزرگ و variable-size تنها چندتا در هر صفحه‌ای جا می‌شوند، و ریزها فضای نگه‌داشته را حرام می‌کنند (p. 65). نودی می‌تواند بنا به قاعده‌های B-Tree باز هم جا داشته باشد در حالی که صفحه‌اش فیزیکی پر است، و تغییر اندازه‌ی صفحه یعنی کپی کردنش، که ناعملی است (p. 65).
 
-Nodes therefore grow in page-size increments: a 4 KB **overflow page** is linked from the **primary page** (p. 65). Most implementations store at most `max_payload_size` = node size / fanout bytes inline and spill the rest to overflow pages, so the primary page can never run completely out of space (p. 65).
+پس نودها به گام‌های به اندازه‌ی صفحه رشد می‌کنند: **صفحه‌ی سرریز** ۴ کیلوبایتی از **صفحه‌ی اصلی** پیوند می‌خورد (p. 65). بیشتر پیاده‌سازی‌ها حداکثر `max_payload_size`، که برابر اندازه‌ی نود تقسیم بر fanout است، را درون‌خط ذخیره می‌کنند و بقیه را به صفحه‌های سرریز می‌ریزند، پس صفحه‌ی اصلی هیچ‌وقت تماماً از فضا در نمی‌ماند (p. 65).
 
-![A primary page holding the start of Payload1 and load2, linked to an overflow page holding "Payload1 continued" and "load2 continued"](../figures/04-06.png)
+![صفحه‌ای اصلی که آغاز Payload1 و load2 را دارد، و به صفحه‌ی سرریزی پیوند خورده که «Payload1 continued» و «load2 continued» را دارد](../figures/04-06.png)
 
-*Figure 4-6 (p. 66): each record keeps its first bytes in the primary page and continues in the linked overflow page.*
+*Figure 4-6 (p. 66): هر رکوردی بایت‌های اولش را در صفحه‌ی اصلی نگه می‌دارد و در صفحه‌ی سرریز پیوندخورده ادامه می‌دهد.*
 
-- If the node already has an overflow page with room, the extra bytes go there; otherwise a new one is allocated (p. 66).
-- The first overflow page's ID goes in the primary page's header. Further overflow pages are chained through their own headers, so finding an overflow part may mean walking several pages (p. 66).
-- Overflow pages fragment too and need the same bookkeeping (p. 66).
-- **Keys** have high cardinality, so most comparisons can be decided on the trimmed key prefix in the primary page. **Values** in overflow pages are fetched only to return them, which is infrequent. If every record is oversize, consider dedicated blob storage (pp. 66–67).
+- اگر نود از قبل صفحه‌ی سرریزی با جا داشته باشد، بایت‌های اضافه آن‌جا می‌روند؛ وگرنه تازه‌ای تخصیص می‌شود (p. 66).
+- مفهوم ID نخستین صفحه‌ی سرریز در header صفحه‌ی اصلی می‌رود. صفحه‌های سرریز بعدی از راه headerهای خودشان زنجیر می‌شوند، پس یافتن بخشی از سرریز می‌تواند یعنی راه رفتن روی چند صفحه (p. 66).
+- صفحه‌های سرریز هم تکه‌تکه می‌شوند و همان حساب‌داری را لازم دارند (p. 66).
+- **کلید**ها cardinality بالا دارند، پس بیشتر مقایسه‌ها را می‌شود روی پیشوند بریده‌ی کلید در صفحه‌ی اصلی تصمیم گرفت. **مقدار**های صفحه‌های سرریز تنها برای برگرداندنشان گرفته می‌شوند، که کم‌تکرار است. اگر هر رکوردی بیش‌اندازه باشد، ذخیره‌سازی اختصاصی blob را بسنجید (pp. 66–67).
 
-### Binary search
+### جست‌و‌جوی دوگانی
 
-Binary search only works on sorted data, which is why the sorted-key invariant matters (p. 67). It returns a non-negative position when the key is found and a negative value when it isn't. The negative value encodes the **insertion point**, the index of the first element greater than the key (p. 67). On higher levels most searches don't find an exact match: what matters is the first key greater than the searched one, whose child pointer is followed (p. 67).
+جست‌و‌جوی دوگانی تنها روی داده‌ی مرتب کار می‌کند، که از همین‌جاست که ناوردای کلید مرتب مهم است (p. 67). وقتی کلید پیدا شود جایی نامنفی برمی‌گرداند و وقتی پیدا نشود مقداری منفی. آن مقدار منفی **نقطه‌ی درج** را کد می‌کند، یعنی index نخستین عنصر بزرگ‌تر از کلید (p. 67). در سطح‌های بالاتر بیشتر جست‌و‌جوها خوردنی دقیق پیدا نمی‌کنند: آن چیزی که مهم است نخستین کلید بزرگ‌تر از کلید جست‌و‌جو‌شده است، که اشاره‌گر فرزندش پی گرفته می‌شود (p. 67).
 
-#### Binary search with indirection pointers
+#### جست‌و‌جوی دوگانی با اشاره‌گرهای واسطه
 
-Cells are in insertion order and only the offsets are sorted. Each probe therefore picks the middle *offset*, follows it to its cell, compares that cell's key, and recurses left or right (Figure 4-7) (pp. 67–68).
+همه‌ی cellها به ترتیب درج‌اند و تنها offsetها مرتب. پس هر کاوشی *offset* میانی را برمی‌دارد، تا cellش پی‌اش می‌گیرد، کلید آن cell را مقایسه می‌کند، و چپ یا راست بازگشتی می‌شود (شکل ۴-۷) (pp. 67–68).
 
-![A row of sorted cell pointers above unsorted cells; binary-search probes jump between pointers and follow each one down to its cell, ending at the shaded target](../figures/04-07.png)
+![ردیفی از اشاره‌گرهای مرتب cell بالای cellهای نامرتب؛ کاوش‌های جست‌و‌جوی دوگانی بین اشاره‌گرها می‌پرند و هر کدام را تا cellش پایین پی می‌گیرند، و در هدف سایه‌خورده تمام می‌شوند](../figures/04-07.png)
 
-*Figure 4-7 (p. 68): the search halves the pointer array, not the cells; every probe dereferences a pointer to read the key it compares.*
+*Figure 4-7 (p. 68): جست‌و‌جو آرایه‌ی اشاره‌گر را نصف می‌کند و نه cellها را؛ هر کاوشی اشاره‌گری را از‌ارجاع‌در‌می‌آورد تا کلیدی را که مقایسه می‌کند بخواند.*
 
-### Propagating splits and merges
+### پخش کردن شکستن و merge
 
-Splits and merges have to be able to walk back to the root (p. 68). Nodes may store **parent pointers**. They don't even need to be persisted, because a child is always paged in from its parent. They do have to be updated whenever a separator key and page ID move between nodes: during parent splits, merges and rebalancing (p. 68). WiredTiger traverses leaves through parent pointers rather than sibling pointers to avoid deadlocks (p. 68).
+شکستن و merge باید بتوانند تا ریشه پس راه بروند (p. 68). نودها می‌توانند **اشاره‌گر پدر** ذخیره کنند. لازم هم نیست پایا شوند، چون هر فرزندی همیشه از پدرش به حافظه می‌آید. ولی هر جا کلید جداکننده‌ای و ID صفحه‌ای میان نودها جابه‌جا شود باید به‌روز شوند: در شکستن پدر و merge و متوازن کردن دوباره (p. 68). سیستم WiredTiger برگ‌ها را از راه اشاره‌گر پدر پیمایش می‌کند و نه اشاره‌گر خواهر‌و‌برادر، تا از deadlock بپرهیزد (p. 68).
 
-#### Breadcrumbs
+#### خرده‌نان
 
-Instead of maintaining parent pointers, record the path on the way down. Whether an insert or delete will split or merge isn't known until the leaf is reached, so the path is always collected (p. 69). **Breadcrumbs** are references to the visited nodes plus the index of each child pointer followed, kept on an in-memory stack. PostgreSQL's stack is `BTStack` (p. 69).
+به‌جای نگهداشتن اشاره‌گر پدر، مسیر را سر راه پایین ثبت کنید. تا رسیدن به برگ معلوم نیست که درجی یا حذفی خواهد شکست یا merge، پس مسیر همیشه جمع می‌شود (p. 69). **خرده‌نان**ها ارجاع به نودهای دیده‌شده به‌علاوه‌ی index هر اشاره‌گر فرزندی‌اند که پی گرفته شده، که روی پشته‌ای in-memoryی نگه داشته می‌شوند. پشته‌ی PostgreSQL همان `BTStack` است (p. 69).
 
-![A descent through nodes 13|51, 23|31 and 31|37 to a leaf; a breadcrumbs stack beside it records each visited node with the index of the pointer followed: 1, 2, 2](../figures/04-08.png)
+![پایین رفتنی از نودهای 13|51 و 23|31 و 31|37 به برگی؛ پشته‌ی خرده‌نان کنارش هر نود دیده‌شده را با index اشاره‌گری که پی گرفته شده ثبت می‌کند: ۱ و ۲ و ۲](../figures/04-08.png)
 
-*Figure 4-8 (p. 70): on the way down, each visited node and the index of the pointer taken are pushed; a split pops them to find exactly where the promoted key goes.*
+*Figure 4-8 (p. 70): سر راه پایین، هر نود دیده‌شده و index اشاره‌گری که برداشته شده push می‌شوند؛ شکستنی popشان می‌کند تا دقیقاً پیدا کند کلید بالا‌برده‌شده کجا می‌رود.*
 
 ```mermaid
 flowchart TB
@@ -148,118 +150,130 @@ flowchart TB
     G -- yes --> H["New root: height + 1"] --> Z
 ```
 
-*The vault's flowchart of the process around Figure 4-8 (pp. 69–70).*
+*نمودار جریان vault از فرایند گرد شکل ۴-۸ (pp. 69–70).*
 
-### Rebalancing
+### متوازن کردن دوباره
 
-Some engines postpone splits and merges by moving elements between siblings, which raises occupancy and can reduce height, at a higher maintenance cost (p. 70). On overflow, elements move to a sibling instead of splitting. On a delete, elements are borrowed from a neighbour so the node stays at least half full [Graefe 2011] (p. 70).
+برخی موتورها شکستن و merge را با جابه‌جا کردن عنصرها میان siblingها عقب می‌اندازند، که اشغال را بالا می‌برد و می‌تواند ارتفاع را کم کند، به بهای نگهداشت بالاتر (p. 70). سر سرریز، عنصرها به‌جای شکستن به siblingی جابه‌جا می‌شوند. سر حذف، عنصرها از همسایه‌ای قرض گرفته می‌شوند تا نود دست‌کم نیمه‌پر بماند، از گریفه در ۲۰۱۱ (p. 70).
 
-**B\*-Trees** keep redistributing until both siblings are full, then split **two nodes into three**, each two-thirds full. SQLite uses this variant (pp. 70–71). Higher occupancy means a lower tree and fewer pages per search. Rebalancing changes the siblings' min/max boundaries, so the parent's keys and pointers have to be updated (Figure 4-9) (p. 71). SQLite's `balance-siblings` is close to this. Because rebalancing is isolated, it can be added later as an optimization (p. 71).
+**ساختار B\*-Tree**ها همین‌طور پخش دوباره می‌کنند تا هر دو sibling پر شوند، بعد **دو نود را به سه** می‌شکنند، که هر یک دو‌سوم پر است. سیستم SQLite همین گونه را به کار می‌برد (pp. 70–71). اشغال بالاتر یعنی درختی کوتاه‌تر و صفحه‌ی کم‌تر برای هر جست‌و‌جویی. متوازن کردن دوباره مرزهای کمینه و بیشینه‌ی siblingها را عوض می‌کند، پس کلیدها و اشاره‌گرهای پدر باید به‌روز شوند (شکل ۴-۹) (p. 71). عبارت `balance-siblings` در SQLite به همین نزدیک است. چون متوازن کردن دوباره منزوی است، می‌شود بعدتر به‌شکل بهینه‌سازی افزودش (p. 71).
 
-![Before balancing: a left leaf with 10, 13, 16 and a right leaf with 18 under a parent holding 10 and 18. After: the left leaf holds 10, 13 and the right 16, 18, and the parent separator becomes 16](../figures/04-09.png)
+![پیش از متوازن کردن: برگ چپی با ۱۰ و ۱۳ و ۱۶ و برگ راستی با ۱۸، زیر پدری که ۱۰ و ۱۸ را دارد. پس از آن: برگ چپ ۱۰ و ۱۳ را دارد و راست ۱۶ و ۱۸، و جداکننده‌ی پدر ۱۶ می‌شود](../figures/04-09.png)
 
-*Figure 4-9 (p. 71): 16 moves from the fuller node to the emptier sibling, so the parent's separator changes from 18 to 16 — no split, no new node.*
+*Figure 4-9 (p. 71): عدد ۱۶ از نود پرتر به sibling خالی‌تر جابه‌جا می‌شود، پس جداکننده‌ی پدر از ۱۸ به ۱۶ عوض می‌شود؛ بی شکستن، بی نود تازه.*
 
-### Right-only appends
+### افزودن تنها‌راست
 
-With auto-incremented primary keys, every insert lands in the **rightmost leaf**, so splits happen mostly on the rightmost node of each level, and nonleaf pages fragment less (p. 71).
+با کلیدهای اولیه‌ی خود‌افزا، هر درجی در **راست‌ترین برگ** می‌نشیند، پس شکستن‌ها بیشتر روی راست‌ترین نود هر سطحی رخ می‌دهند، و صفحه‌های غیربرگ کم‌تر تکه‌تکه می‌شوند (p. 71).
 
-| Engine | Optimization (pp. 71–72) |
+| موتور | بهینه‌سازی (pp. 71–72) |
 |---|---|
-| PostgreSQL **fastpath** | If the key is strictly greater than the first key in the rightmost page and that page has room, insert into the cached rightmost leaf and skip the read path |
-| SQLite **quickbalance** | If the far-right target node is full, allocate a new rightmost node and add its pointer to the parent instead of splitting. The new page starts nearly empty but will likely fill quickly |
+| **fastpath** در PostgreSQL | اگر کلید اکیداً از کلید اول راست‌ترین صفحه بزرگ‌تر باشد و آن صفحه جا داشته باشد، در راست‌ترین برگ cache‌شده درج کن و از مسیر خواندن بپر |
+| **quickbalance** در SQLite | اگر نود هدف در دور‌راست پر باشد، به‌جای شکستن نودی راست‌ترین تازه تخصیص بده و اشاره‌گرش را به پدر بیفزا. صفحه‌ی تازه تقریباً خالی شروع می‌کند ولی احتمالاً زود پر می‌شود |
 
-#### Bulk loading
+#### بار‌گذاری انبوه
 
-Sorted input, or a rebuild for defragmentation, takes this idea further: every item goes at the rightmost position, so splits and merges can be avoided altogether (p. 72). Write leaves **page-wise**, push each leaf's first key to its parent, and build higher levels with the normal algorithm, in which all splits happen on the rightmost node (p. 72). Because the entire leaf level can be written before any parent, all child pointers are at hand. Only the parents of the leaf currently being filled stay in memory, and nothing is split or merged on disk (p. 72). **Immutable B-Trees** are built the same way, but every page can be filled completely because no space has to be reserved for future changes (p. 72).
+ورودی مرتب، یا ساختن دوباره برای یکپارچه‌سازی، این ایده را جلوتر می‌برد: هر قلمی در راست‌ترین جا می‌رود، پس شکستن و merge تماماً پرهیزشدنی‌اند (p. 72). برگ‌ها را **صفحه‌به‌صفحه** بنویسید، کلید اول هر برگی را به پدرش بالا ببرید، و سطح‌های بالاتر را با الگوریتم عادی بسازید، که در آن همه‌ی شکستن‌ها روی راست‌ترین نود رخ می‌دهند (p. 72). چون کل سطح برگ پیش از هر پدری نوشتنی است، همه‌ی اشاره‌گرهای فرزند دم دست‌اند. تنها پدرهای آن برگی که همین حالا پر می‌شود در حافظه می‌مانند، و روی دیسک چیزی شکسته یا merge نمی‌شود (p. 72). **B-Treeهای immutable** همان‌طور ساخته می‌شوند، ولی هر صفحه‌ای کامل پر‌شدنی است چون لازم نیست برای تغییرهای آینده فضایی نگه داشته شود (p. 72).
 
-> **Try it:** [B⁺-Tree splits and merges](../widgets/02-bplus-tree.html) — switch the insert order to *ascending* to see right-only appends: splits happen only on the right edge, and every left node stays half full.
+> **Try it:** [شکستن و merge در B⁺-Tree](../widgets/02-bplus-tree.html)؛ ترتیب درج را به *صعودی* عوض کنید تا افزودن تنها‌راست را ببینید: شکستن‌ها تنها روی لبه‌ی راست رخ می‌دهند، و هر نود چپی نیمه‌پر می‌ماند.
 
-### Compression
+### فشرده‌سازی
 
-The trade-off is access speed against compression ratio: a better ratio fetches more data per access but costs CPU and RAM (p. 73).
+بده‌بستان سرعت دسترسی در برابر نسبت فشرده‌سازی است: نسبت بهتر برای هر دسترسی داده‌ی بیشتری می‌گیرد ولی CPU و حافظه‌ی RAM خرج می‌کند (p. 73).
 
-| Granularity | Trade-off (pp. 73–74) |
+| granularity | بده‌بستان (pp. 73–74) |
 |---|---|
-| Whole file | Best ratio, but any update recompresses the file, and reaching one page means decompressing the file or a section of it |
-| **Per page** | Fits fixed-size pages and couples with loading and flushing. A compressed page may fill only part of a disk block, so extra bytes or an extra block get read (Figure 4-10) |
-| Data only (row-wise or column-wise) | Decouples compression from page management |
+| کل فایل | بهترین نسبت، ولی هر به‌روزرسانی فایل را دوباره فشرده می‌کند، و رسیدن به یک صفحه یعنی فشرده‌گشایی فایل یا بخشی از آن |
+| **هر صفحه‌ای** | به صفحه‌های fixed-size می‌خورد و به بار کردن و flush node می‌خورد. صفحه‌ای فشرده می‌تواند تنها بخشی از بلوک دیسک را پر کند، پس بایت‌های اضافه یا بلوکی اضافه خوانده می‌شود (شکل ۴-۱۰) |
+| فقط داده، ردیفی یا ستونی | فشرده‌سازی را از مدیریت صفحه جدا می‌کند |
 
-Engines usually make compression pluggable (Snappy, zlib, lz4, …). Libraries are compared on memory overhead, compression speed, decompression speed and ratio, as in the Squash Compression Benchmark (p. 74).
+موتورها معمولاً فشرده‌سازی را قابل جا‌گذاری می‌کنند، مثل Snappy و zlib و lz4. کتابخانه‌ها بر حسب سرریز حافظه و سرعت فشرده‌سازی و سرعت فشرده‌گشایی و نسبت مقایسه می‌شوند، چنان‌که در Squash Compression Benchmark (p. 74).
 
-### Vacuum and maintenance
+> **In practice:** ClickHouse هر ستون را جدا با LZ4 یا ZSTD فشرده می‌کند و هر چه مقدارهای ستون تکراری‌تر و مرتب‌تر، نسبت بهتر.
+>
+> **Your turn:** کدام ستون Silver بهتر فشرده می‌شود، `merchant_category` یا `transaction_id`، و چرا؟
+>
+> *Answer:* ستون دسته با مقدارهای تکراری زیاد، که با `LowCardinality` و قرار گرفتن در `ORDER BY` حتی بهتر می‌شود؛ شناسه‌ی یکتا تقریباً فشرده نمی‌شود. کتاب بده‌بستان را سرعت دسترسی در برابر نسبت فشرده‌سازی می‌داند (p. 73).
 
-Background processes maintain integrity, reclaim space and keep pages in order, so foreground operations don't pay for cleanup (p. 74). A slotted page can have enough *logical* free space but not enough *contiguous* space (Figure 4-11) (p. 74). Records reachable by following pointers from the root are **live** (addressable). Unreachable ones are **garbage**. Garbage is usually not zero-filled, because it will be overwritten anyway (p. 75).
+### عمل vacuum و نگهداشت
 
-#### Fragmentation caused by updates and deletes
+همه‌ی processهای پس‌زمینه تمامیت را نگه می‌دارند، فضا را بازپس می‌گیرند و صفحه‌ها را مرتب، تا عملیات پیش‌زمینه بهای تمیزکاری را ندهد (p. 74). slotted pageی می‌تواند فضای آزاد *منطقی* کافی داشته باشد ولی فضای *پیوسته*ی کافی نه (شکل ۴-۱۱) (p. 74). رکوردهایی که با پی گرفتن اشاره‌گرها از ریشه دست‌یافتنی‌اند **زنده**، یعنی نشانی‌پذیر، هستند. دست‌نیافتنی‌ها **زباله**اند. زباله معمولاً صفر‌پر نمی‌شود، چون هر طور که باشد روی‌نویسی می‌شود (p. 75).
 
-- **Deletes** on a leaf remove only the cell's offset; the cell itself becomes unaddressable and stays put (p. 75).
-- **Splits** just trim offsets. The unreferenced cells are overwritten later or collected by vacuum (p. 75).
-- **MVCC** engines deliberately keep removed and updated cells for concurrent transactions. Some track **ghost records** that are collected once every transaction that might have seen them has finished (p. 75).
-- **Inserts** leave tuples in insertion order. That has little impact, but naturally sorted tuples help cache prefetching (p. 75).
-- **Updates** mostly affect leaves and rarely change structure beyond creating overflow pages. A leaf update avoids rewriting the page, so several versions of a cell may sit in the page with only one addressable (p. 76).
+#### تکه‌تکه شدن از به‌روزرسانی و حذف
 
-#### Page defragmentation
+- **حذف** روی برگی تنها offset آن cell را برمی‌دارد؛ خود آن cell نانشانی‌پذیر می‌شود و سر جا می‌ماند (p. 75).
+- **شکستن** تنها offsetها را می‌برد. cellهای بی‌ارجاع بعدتر روی‌نویسی یا با vacuum جمع می‌شوند (p. 75).
+- موتورهای **MVCC** cellهای برداشته و به‌روز‌شده را عمداً برای تراکنش‌های هم‌زمان نگه می‌دارند. برخی **رکوردهای شبح** را پی می‌گیرند که همین که هر تراکنشی که می‌توانست دیده باشدشان تمام شود جمع می‌شوند (p. 75).
+- **درج** tupleها را به ترتیب درج می‌گذارد. این اثر کمی دارد، ولی tupleهای طبیعتاً مرتب به prefetch مربوط به cache کمک می‌کنند (p. 75).
+- **به‌روزرسانی** بیشتر به برگ‌ها اثر می‌گذارد و کم ساختار را فراتر از ساختن صفحه‌ی سرریز عوض می‌کند. به‌روزرسانی برگی از نوشتن دوباره‌ی صفحه می‌پرهیزد، پس چند نسخه از یک cell می‌توانند در صفحه بنشینند و تنها یکی نشانی‌پذیر باشد (p. 76).
 
-**Compaction**, **vacuum** or **maintenance** can run synchronously, when a write finds too little physical space and wants to avoid creating an overflow page. Usually, though, it is an asynchronous process that walks pages, collects garbage, and rewrites live cells in logical order, possibly relocating pages within the file (p. 76). Freed in-memory pages go back to the page cache. Freed on-disk page IDs go on the **freelist**, which must be persisted so free space isn't leaked across crashes (p. 76). SQLite keeps trunk pages of free-page addresses in a linked list (note 3, p. 76).
+#### یکپارچه‌سازی صفحه
 
-### Summary
+**عمل compaction** یا **vacuum** یا **نگهداشت** می‌تواند هم‌زمان اجرا شود، وقتی نوشتنی فضای فیزیکی زیادی کم پیدا کند و بخواهد از ساختن صفحه‌ی سرریز بپرهیزد. ولی معمولاً processی asynchronous است که روی صفحه‌ها راه می‌رود، زباله جمع می‌کند، و cellهای زنده را به ترتیب منطقی دوباره می‌نویسد، و شاید صفحه‌ها را درون فایل جابه‌جا کند (p. 76). صفحه‌های in-memoryی آزادشده به page cache برمی‌گردند. IDهای صفحه‌ی آزادشده‌ی دیسکی به **freelist** می‌روند، که باید پایا شود تا فضای آزاد در از کار افتادن‌ها چکه نکند (p. 76). سیستم SQLite صفحه‌های تنه‌ای از نشانی صفحه‌های آزاد را در فهرستی پیوندی نگه می‌دارد، یادداشت ۳، ص. ۷۶.
 
-Page headers, rightmost pointers, high keys and overflow pages organize nodes. Binary search through indirection pointers, plus parent pointers or breadcrumbs, support traversal. Rebalancing, right-only appends, bulk loading and garbage collection optimize and maintain the tree (pp. 76–77).
+> **In practice:** دیتابیس‌های منبع با به‌روزرسانی زیاد نسخه‌های مرده جمع می‌کنند و vacuum آن‌ها را پاک می‌کند؛ کوئری‌های loader روی replica هم در این کار نقش دارند.
+>
+> **Your turn:** DBAها می‌گویند کوئری طولانی روی replica، vacuum را روی primary عقب انداخته است. ربطش به loader چیست؟
+>
+> *Answer:* با `hot_standby_feedback`، کوئری طولانی روی replica نمی‌گذارد primary نسخه‌های مرده‌ای را که آن کوئری هنوز می‌بیند پاک کند؛ پس loader باید کوئری‌های کوتاه و incremental بزند، نه اسکن‌های چندساعته. vacuum کاری پس‌زمینه است که فضای نسخه‌های مرده را پس می‌گیرد و تکه‌تکه شدن را کم می‌کند (pp. 74–76).
 
-## Trade-offs at a glance
+### خلاصه
 
-| Technique | Benefit | Cost |
+بخش header صفحه و اشاره‌گر راست‌ترین و کلید سقف و صفحه‌ی سرریز نودها را سازمان می‌دهند. جست‌و‌جوی دوگانی از راه اشاره‌گرهای واسطه، به‌علاوه‌ی اشاره‌گر پدر یا خرده‌نان، پیمایش را پشتیبانی می‌کنند. متوازن کردن دوباره و افزودن تنها‌راست و بار‌گذاری انبوه و garbage collectorی درخت را بهینه و نگهداری می‌کنند (pp. 76–77).
+
+## بده‌بستان‌ها در یک نگاه
+
+| تکنیک | سود | هزینه |
 |---|---|---|
-| Sibling links | Range scans without returning to the parent | Updated on every split and merge; extra locking |
-| High keys (B-link) | Uniform cells; explicit subtree bounds | One extra key per node |
-| Overflow pages | Variable-size payloads in fixed pages | Chains to traverse; fragmentation to manage |
-| Parent pointers | Upward traversal without state | Updated whenever separators move |
-| Breadcrumbs | No persisted parent links | In-memory stack per operation; indices may go stale |
-| Rebalancing / B*-Trees | Higher occupancy, lower tree | More complex logic |
-| Bulk loading | No splits or merges; full pages possible | Requires sorted input |
-| Page compression | Smaller I/O | CPU; block padding |
+| پیوند sibling | اسکن بازه‌ای بی برگشتن به پدر | سر هر شکستن و mergeی به‌روز می‌شود؛ قفل‌گذاری اضافه |
+| کلید سقف یعنی B-link | cellهای یکدست؛ کران‌های صریح زیردرخت | یک کلید اضافه برای هر نودی |
+| صفحه‌ی سرریز | بار variable-size در صفحه‌های ثابت | زنجیره‌هایی برای پیمایش؛ تکه‌تکه شدنی برای گرداندن |
+| اشاره‌گر پدر | پیمایش رو‌به‌بالا بی حالت | هر جا جداکننده‌ها جابه‌جا شوند به‌روز می‌شود |
+| خرده‌نان | پیوند پدر پایا‌شده لازم ندارد | پشته‌ای in-memoryی برای هر عملیاتی؛ indexها می‌توانند کهنه شوند |
+| متوازن کردن دوباره یا B*-Tree | اشغال بالاتر، درخت کوتاه‌تر | منطق پیچیده‌تر |
+| بار‌گذاری انبوه | بی شکستن و merge؛ صفحه‌های کامل ممکن است | ورودی مرتب لازم دارد |
+| فشرده‌سازی صفحه | I/O کوچک‌تر | CPU؛ padding بلوک |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Fill factor.** PostgreSQL's `fillfactor` storage parameter is a direct control over the space-for-future-inserts trade-off. B-tree indexes default to 90%, and a `CREATE INDEX` on existing rows is a bulk load in the book's sense: it sorts the tuples and writes leaves left to right.
-- **Why random UUID keys hurt.** Random primary keys spread inserts over all leaves, which causes splits everywhere, roughly half-full pages and a much larger working set. Time-ordered identifiers (UUIDv7, ULID) restore the right-only append pattern the book describes. The widget's *ascending* versus *random* insert orders show the occupancy difference.
+- **ضریب پر شدن.** پارامتر ذخیره‌سازی `fillfactor` در PostgreSQL کنترلی مستقیم روی بده‌بستان فضا‌برای‌درج‌های‌آینده است. indexهای B-tree پیش‌فرض ۹۰٪‌اند، و `CREATE INDEX` روی ردیف‌های موجود به معنای کتاب بار‌گذاری انبوه است: tupleها را مرتب می‌کند و برگ‌ها را از چپ به راست می‌نویسد.
+- **چرا کلیدهای UUID تصادفی صدمه می‌زنند.** کلیدهای اولیه‌ی تصادفی درج‌ها را روی همه‌ی برگ‌ها پخش می‌کنند، که همه‌جا شکستن می‌سازد، صفحه‌هایی تقریباً نیمه‌پر و مجموعه‌ی کاری خیلی بزرگ‌تر. شناسه‌های زمان‌مرتب، مثل UUIDv7 و ULID، همان الگوی افزودن تنها‌راست کتاب را برمی‌گردانند. ترتیب درج *صعودی* در برابر *تصادفی* در آن widget تفاوت اشغال را نشان می‌دهد.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [3. File Formats](03-file-formats.md) (slotted pages, cells), [5. Transaction Processing and Recovery](05-transaction-processing-and-recovery.md) (page cache, MVCC), [6. B-Tree Variants](06-b-tree-variants.md) (B-link trees, copy-on-write, Bw-Trees), [7. Log-Structured Storage](07-log-structured-storage.md) (immutable structures built from sorted runs).
+- **فصل‌های مرتبط:** [فصل ۳: قالب فایل](03-file-formats.md) که slotted page و cell را دارد، [فصل ۵: پردازش تراکنش و بازیابی](05-transaction-processing-and-recovery.md) که page cache و MVCC را دارد، [فصل ۶: گونه‌های B-Tree](06-b-tree-variants.md) که درخت B-link و copy-on-write و Bw-Tree را دارد، و [فصل ۷: ذخیره‌سازی log-structured](07-log-structured-storage.md) که ساختارهای immutability را دارد که از دور‌های مرتب ساخته می‌شوند.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **What does a magic number in a page header help detect?**
+1. **ساختار magic number در header صفحه به تشخیص چه چیزی کمک می‌کند؟**
 
-   *Answer:* A page that is misaligned or read from the wrong offset. A random byte sequence is very unlikely to equal the constant, for example `50 41 47 45` (`PAGE`) (p. 62).
+   *Answer:* صفحه‌ای که ناهم‌تراز است یا از offset غلطی خوانده شده. احتمال برابر شدن دنباله‌ای تصادفی از بایت با آن ثابت خیلی کم است، مثلاً `50 41 47 45` که `PAGE` است (p. 62).
 
-2. **Why might sibling links need extra locking during a split?**
+2. **چرا پیوندهای sibling سر شکستنی می‌توانند قفل‌گذاری اضافه لازم داشته باشند؟**
 
-   *Answer:* The right sibling's backward pointer has to be redirected to the new node, and that update happens in a node other than the one being split (pp. 62–63).
+   *Answer:* اشاره‌گر عقب sibling راست باید به نود تازه برگردانده شود، و آن به‌روزرسانی در نودی غیر از آن یکی که می‌شکند رخ می‌دهد (pp. 62–63).
 
-3. **What is a node's high key?**
-   - [ ] Its largest current key
-   - [x] The upper bound of keys that may appear in its subtree
-   - [ ] The key promoted on the last split
+3. **کلید سقف یک نود چیست؟**
+   - [ ] بزرگ‌ترین کلید جاری‌اش
+   - [x] کران بالای کلیدهایی که می‌توانند در زیردرختش پیدا شوند
+   - [ ] کلیدی که سر آخرین شکستن بالا برده شد
 
-   *Answer:* B-link trees store K₍N+1₎ explicitly instead of an implicit +∞, so pointers can be stored pairwise (p. 64).
+   *Answer:* درخت‌های B-link به‌جای ∞+ ضمنی مقدار K₍N+1₎ را صریح ذخیره می‌کنند، پس اشاره‌گرها زوجی ذخیره‌شدنی‌اند (p. 64).
 
-4. **How do overflow pages ensure that a primary page never runs out of space?**
+4. **صفحه‌های سرریز چطور تأمین می‌کنند که صفحه‌ی اصلی هیچ‌وقت از فضا در نمی‌ماند؟**
 
-   *Answer:* Each cell stores at most `max_payload_size` = node size / fanout bytes inline and spills the rest, so the page always has room for its N entries (p. 65).
+   *Answer:* هر cellی حداکثر `max_payload_size`، که برابر اندازه‌ی نود تقسیم بر fanout است، را درون‌خط ذخیره می‌کند و بقیه را می‌ریزد، پس صفحه همیشه برای N entryش جا دارد (p. 65).
 
-5. **What do breadcrumbs contain, and when are they used?**
+5. **خرده‌نان‌ها چه چیزی دارند، و کِی به کار می‌روند؟**
 
-   *Answer:* A stack of the nodes visited and the indices of the child pointers followed. They're popped to find each parent and its insertion point when a split or merge propagates upward (p. 69).
+   *Answer:* پشته‌ای از نودهای دیده‌شده و index اشاره‌گرهای فرزندی که پی گرفته شده. وقتی شکستن یا mergeی رو‌به‌بالا پخش شود pop می‌شوند تا هر پدری و نقطه‌ی درجش پیدا شود (p. 69).
 
-6. **How does a B\*-Tree split differ from a regular split?**
+6. **شکستن در B\*-Tree با شکستن عادی چه تفاوتی دارد؟**
 
-   *Answer:* It redistributes between siblings until both are full, then splits two nodes into three, each two-thirds full, instead of one node into two half-full ones (pp. 70–71).
+   *Answer:* میان siblingها پخش دوباره می‌کند تا هر دو پر شوند، بعد دو نود را به سه می‌شکند که هر یک دو‌سوم پر است، به‌جای یک نود به دو نود نیمه‌پر (pp. 70–71).
 
-7. **Why can an immutable B-Tree have better occupancy than a bulk-loaded mutable one?**
+7. **چرا B-Treeی immutable می‌تواند اشغال بهتری از یکی mutable و بار‌گذاری‌انبوه‌شده داشته باشد؟**
 
-   *Answer:* It never changes, so it needs no reserved space for later inserts, and every page can be filled completely (p. 72).
+   *Answer:* هیچ‌وقت عوض نمی‌شود، پس فضای نگه‌داشته برای درج‌های بعدی لازم ندارد، و هر صفحه‌ای کامل پر‌شدنی است (p. 72).
