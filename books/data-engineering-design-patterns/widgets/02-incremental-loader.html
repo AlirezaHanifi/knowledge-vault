@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Incremental Loading and Backfills</title>
-<meta name="description" content="Run hourly incremental loads with an unbounded delta column, a bounded delta column or time partitions, then hard-delete rows and backfill old hours to see what each implementation reads and misses. Illustrates Data Engineering Design Patterns, Chapter 2.">
+<title>بار‌گذاری افزایشی و backfill</title>
+<meta name="description" content="بار‌گذاری افزایشی ساعتی را با delta column بی‌کران، delta column bounded یا پارتیشن زمانی اجرا کنید، بعد ردیف‌ها را سخت حذف کنید و ساعت‌های قدیمی را backfill تا ببینید هر پیاده‌سازی چه می‌خواند و چه چیزی را از دست می‌دهد. تصویری از فصل ۲ کتاب Data Engineering Design Patterns.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .grid-h { display: grid; grid-template-columns: 74px repeat(var(--n), minmax(0, 1fr)); gap: 3px; align-items: start; font-size: .72rem; }
@@ -25,69 +25,69 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/02-data-ingestion-design-patterns.html">Chapter 2</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Incremental Loader</span>
+      <a href="../chapters/02-data-ingestion-design-patterns.html">فصل ۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">الگوی Incremental Loader</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 2 · Data Ingestion Design Patterns</div>
-  <h1>Incremental loading and backfills</h1>
-  <p class="lede">An Incremental Loader brings in only what is new since the last run. It finds new rows with a <strong>delta column</strong> such as ingestion time, or by reading the <strong>partition</strong> for the execution hour. Both look the same in normal runs. They differ when rows are deleted and when you backfill.</p>
-  <p class="source-note">Illustrates “Pattern: Incremental Loader” (pp. 12–16). The book describes the delta-column and time-partitioned implementations, hard deletes vs soft deletes, and how an unbounded delta-column backfill turns into a full load unless the ingestion window is bounded. The source rows are generated (seeded, 2–5 per hour). Delta-column runs append new rows and apply soft-delete flags. A partition run copies its partition, deletions included, as <code>aws s3 sync … --delete</code> does in the book. Implementation is the vault's own.</p>
+  <div class="eyebrow">فصل ۲ · الگوهای طراحی ورود داده</div>
+  <h1>بار‌گذاری افزایشی و backfill</h1>
+  <p class="lede">الگوی Incremental Loader فقط چیزی را می‌آورد که از اجرای قبلی تازه است. ردیف‌های تازه را با یک <strong>delta column</strong> پیدا می‌کند، مثل زمان ورود، یا با خواندن <strong>پارتیشن</strong> ساعت اجرا. هر دو در اجراهای معمولی یکسان به نظر می‌آیند. تفاوتشان وقتی در می‌آید که ردیفی حذف شود یا backfill کنید.</p>
+  <p class="source-note">تصویری از «الگو: Incremental Loader» (صص. ۱۲–۱۶). کتاب پیاده‌سازی delta column و پارتیشن زمانی را توضیح می‌دهد، و حذف سخت در برابر حذف نرم، و این که backfill با delta column unbounded چطور به یک بار‌گذاری کامل تبدیل می‌شود، مگر پنجره‌ی ورود bounded باشد. ردیف‌های منبع ساخته می‌شوند، یعنی با seed و دو تا پنج ردیف در ساعت. اجراهای delta column ردیف‌های تازه را اضافه و پرچم‌های حذف نرم را اعمال می‌کنند. یک اجرای پارتیشن، پارتیشن خودش را کپی می‌کند، با حذف‌ها، همان‌طور که `aws s3 sync … --delete` در کتاب می‌کند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel">
         <div class="grid-h" id="grid"></div>
-        <div class="legend"><span><span class="row-sq" style="display:inline-block"></span> row</span><span><span class="row-sq del" style="display:inline-block">×</span> hard-deleted in source</span><span><span class="row-sq soft" style="display:inline-block">d</span> soft-deleted (flag)</span><span><span class="row-sq stale" style="display:inline-block">!</span> still in Bronze but gone from source</span><span style="color:var(--accent)">▭ read by the last run</span></div>
-        <div class="tbl"><table class="data"><thead><tr><th>Run</th><th>Reads</th><th class="num">Rows read</th></tr></thead><tbody id="runs"></tbody></table></div>
+        <div class="legend"><span><span class="row-sq" style="display:inline-block"></span> ردیف</span><span><span class="row-sq del" style="display:inline-block">×</span> سخت‌حذف‌شده در منبع</span><span><span class="row-sq soft" style="display:inline-block">d</span> نرم‌حذف‌شده با پرچم</span><span><span class="row-sq stale" style="display:inline-block">!</span> باز هم در Bronze ولی رفته از منبع</span><span style="color:var(--accent)">▭ خوانده‌شده در آخرین اجرا</span></div>
+        <div class="tbl"><table class="data"><thead><tr><th>اجرا</th><th>چه می‌خواند</th><th class="num">ردیف خوانده‌شده</th></tr></thead><tbody id="runs"></tbody></table></div>
       </div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Implementation</p>
+        <p class="panel-title">پیاده‌سازی</p>
         <div id="mode"></div>
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="soft"> Producer uses soft deletes (UPDATE … is_deleted = true)</label>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="soft"> تأمین‌کننده حذف نرم می‌کند، یعنی UPDATE … is_deleted = true</label>
         <pre class="sql" id="sql"></pre>
         <div class="row" style="margin-top:10px">
-          <button class="btn primary" type="button" id="run">Run next hour</button>
-          <button class="btn" type="button" id="del">Delete a row</button>
+          <button class="btn primary" type="button" id="run">اجرای ساعت بعدی</button>
+          <button class="btn" type="button" id="del">حذف یک ردیف</button>
         </div>
         <div class="row" style="margin-top:8px">
-          <label for="bf" class="sr-only">Hour to backfill</label>
+          <label for="bf" class="sr-only">ساعتی که backfill شود</label>
           <select id="bf"></select>
-          <button class="btn" type="button" id="backfill">Backfill hour</button>
-          <button class="btn" type="button" id="reset">↺ Reset</button>
+          <button class="btn" type="button" id="backfill">backfill ساعت</button>
+          <button class="btn" type="button" id="reset">↺ از نو</button>
         </div>
       </div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Hard deletes are invisible to a delta column.</strong> Run a few hours, delete a row, then run again. Bronze keeps the row because nothing new carries the deletion. Turn on soft deletes and the deletion arrives as an update.</li>
-    <li><strong>An unbounded backfill is a full load.</strong> After eight hours, backfill hour 1 with the unbounded delta column. It reads everything from hour 1 up to now. The bounded window reads one hour.</li>
-    <li><strong>Partitions are naturally bounded.</strong> A partition run reads exactly its hour. Syncing that partition also brings in deletions made inside it.</li>
+    <li><strong>حذف سخت برای یک delta column نامرئی است.</strong> چند ساعت اجرا کنید، یک ردیف را حذف کنید، و باز اجرا کنید. لایه‌ی Bronze ردیف را نگه می‌دارد چون هیچ چیز تازه‌ای حذف را حمل نمی‌کند. حذف نرم را روشن کنید و حذف به‌عنوان یک به‌روزرسانی می‌رسد.</li>
+    <li><strong>backfill unbounded همان بار‌گذاری کامل است.</strong> بعد از هشت ساعت، ساعت ۱ را با delta column unbounded backfill کنید. از ساعت ۱ تا حالا همه چیز را می‌خواند. پنجره‌ی bounded یک ساعت می‌خواند.</li>
+    <li><strong>پارتیشن‌ها طبیعتاً کران‌دارند.</strong> یک اجرای پارتیشن دقیقاً ساعت خودش را می‌خواند. synchronous کردن آن پارتیشن حذف‌های داخلش را هم می‌آورد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/02-data-ingestion-design-patterns.html"><small>Lesson</small>2. Data Ingestion Design Patterns</a></li>
-    <li><a href="../lab/02-incremental-window/README.md"><small>Experiment</small>Bounded vs unbounded incremental backfills</a></li>
-    <li><a href="02-compactor.html"><small>Simulation</small>Small files and compaction</a></li>
+    <li><a href="../chapters/02-data-ingestion-design-patterns.html"><small>درس</small>فصل ۲: الگوهای طراحی ورود داده</a></li>
+    <li><a href="../lab/02-incremental-window/README.md"><small>آزمایش</small>backfill افزایشی bounded در برابر unbounded</a></li>
+    <li><a href="02-compactor.html"><small>شبیه‌سازی</small>فایل‌های کوچک و compaction</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -97,16 +97,16 @@
   var HOURS = 10, log = Kit.log(document.getElementById("log"));
   var cfg = { mode: "unbounded", soft: false }, s, r;
   var MODES = {
-    unbounded: { label: "Delta column", sql: "SELECT * FROM visits\nWHERE ingestion_time >= :run_hour_start" },
-    bounded: { label: "Bounded delta", sql: "SELECT * FROM visits\nWHERE ingestion_time BETWEEN :run_hour_start\n  AND :run_hour_start + INTERVAL '1 HOUR'" },
-    partition: { label: "Partitions", sql: "aws s3 sync s3://input/hour=:h \\\n  s3://bronze/hour=:h --delete" }
+    unbounded: { label: "delta column", sql: "SELECT * FROM visits\nWHERE ingestion_time >= :run_hour_start" },
+    bounded: { label: "delta bounded", sql: "SELECT * FROM visits\nWHERE ingestion_time BETWEEN :run_hour_start\n  AND :run_hour_start + INTERVAL '1 HOUR'" },
+    partition: { label: "پارتیشن", sql: "aws s3 sync s3://input/hour=:h \\\n  s3://bronze/hour=:h --delete" }
   };
 
   function reset() {
     r = Kit.rng(2);
     s = { now: 0, src: [], bronze: {}, runs: [], lastRead: null, nextId: 1 };
     for (var h = 0; h < HOURS; h++) { var n = 2 + r.int(4); for (var i = 0; i < n; i++) s.src.push({ id: s.nextId++, h: h, ing: h, del: false, soft: false }); }
-    log.clear(); log.add("Source table ready. Bronze is empty; the clock is at hour 0.", "muted");
+    log.clear(); log.add("جدول منبع آماده است. لایه‌ی Bronze خالی است و ساعت روی صفر.", "muted");
     render();
   }
 
@@ -124,45 +124,45 @@
         if (b.h === h && !read.some(function (x) { return x.id === b.id; })) { delete s.bronze[id]; removed++; }
       });
     }
-    var range = cfg.mode === "partition" ? "partition hour=" + h : "ingestion_time in [" + lo + ", " + hi + ")";
+    var range = cfg.mode === "partition" ? "پارتیشن hour=" + h : "مقدار ingestion_time در بازه‌ی [" + lo + ", " + hi + ")";
     s.runs.push({ label: label, range: range, n: read.length });
     s.lastRead = { lo: cfg.mode === "partition" ? h : lo, hi: cfg.mode === "partition" ? h + 1 : hi, part: cfg.mode === "partition" };
-    log.add(label + ": reads " + range + " → " + read.length + " rows" + (removed ? ", removes " + removed + " deleted row(s) from Bronze" : ""), read.length > 8 ? "warn" : "ok");
+    log.add(label + ": می‌خواند " + range + " ← " + read.length + " ردیف" + (removed ? "، و " + removed + " ردیف حذف‌شده را از Bronze برمی‌دارد" : ""), read.length > 8 ? "warn" : "ok");
   }
 
   function runNext() {
-    if (s.now >= HOURS) { log.add("No more hours to run.", "muted"); return; }
+    if (s.now >= HOURS) { log.add("ساعت دیگری برای اجرا نمانده.", "muted"); return; }
     s.now++;
-    load(s.now - 1, "Run hour " + (s.now - 1));
+    load(s.now - 1, "اجرای ساعت " + (s.now - 1));
     render();
   }
   function del() {
     var cands = s.src.filter(function (x) { return !x.del && !x.soft && s.bronze[x.id]; });
-    if (!cands.length) { log.add("Run some hours first: only ingested rows are worth deleting here.", "muted"); return; }
+    if (!cands.length) { log.add("اول چند ساعت اجرا کنید: این‌جا فقط ردیف‌های وارد‌شده ارزش حذف دارند.", "muted"); return; }
     var row = cands[r.int(cands.length)];
     if (cfg.soft) {
       row.soft = true; row.ing = s.now;
-      log.add("Producer soft-deletes row " + row.id + " (hour " + row.h + "): is_deleted = true, ingestion_time = " + s.now, "warn");
+      log.add("تأمین‌کننده ردیف " + row.id + " از ساعت " + row.h + " را نرم حذف می‌کند: is_deleted = true و ingestion_time = " + s.now, "warn");
     } else {
       row.del = true;
-      log.add("Producer hard-deletes row " + row.id + " (hour " + row.h + ") with DELETE", "warn");
+      log.add("تأمین‌کننده ردیف " + row.id + " از ساعت " + row.h + " را با DELETE سخت حذف می‌کند", "warn");
     }
     render();
   }
   function backfill() {
     var h = parseInt(document.getElementById("bf").value, 10);
-    if (isNaN(h) || h >= s.now) { log.add("You can only backfill an hour that has already run.", "muted"); return; }
-    load(h, "Backfill hour " + h);
+    if (isNaN(h) || h >= s.now) { log.add("فقط ساعتی را می‌توانید backfill کنید که از قبل اجرا شده.", "muted"); return; }
+    load(h, "backfill ساعت " + h);
     render();
   }
 
   function render() {
     var g = Kit.clear(document.getElementById("grid"));
     g.style.setProperty("--n", HOURS);
-    g.appendChild(Kit.el("div", { class: "lab" }, "hour"));
+    g.appendChild(Kit.el("div", { class: "lab" }, "ساعت"));
     for (var h = 0; h < HOURS; h++) g.appendChild(Kit.el("div", { class: "hcol" }, String(h) + (h === s.now ? "◂" : "")));
     function inRead(h) { return s.lastRead && h >= s.lastRead.lo && h < s.lastRead.hi; }
-    [["Source", false], ["Bronze", true]].forEach(function (def) {
+    [["منبع", false], ["Bronze", true]].forEach(function (def) {
       g.appendChild(Kit.el("div", { class: "lab" }, def[0]));
       for (var h = 0; h < HOURS; h++) {
         var cell = Kit.el("div", { class: "cell" + (!def[1] && inRead(h) ? " read" : "") });
@@ -170,14 +170,14 @@
           s.src.forEach(function (row) {
             var at = cfg.mode === "partition" ? row.h : row.ing;
             if (at !== h || row.h >= s.now) return;
-            cell.appendChild(Kit.el("span", { class: "row-sq" + (row.del ? " del" : row.soft ? " soft" : ""), title: "row " + row.id + (row.del ? " (deleted)" : row.soft ? " (soft-deleted)" : "") }, row.del ? "×" : row.soft ? "d" : ""));
+            cell.appendChild(Kit.el("span", { class: "row-sq" + (row.del ? " del" : row.soft ? " soft" : ""), title: "ردیف " + row.id + (row.del ? " — حذف‌شده" : row.soft ? " — نرم‌حذف‌شده" : "") }, row.del ? "×" : row.soft ? "d" : ""));
           });
         } else {
           Object.keys(s.bronze).forEach(function (id) {
             var b = s.bronze[id]; if (b.h !== h) return;
             var srcRow = s.src.filter(function (x) { return x.id === b.id; })[0];
             var stale = srcRow && srcRow.del;
-            cell.appendChild(Kit.el("span", { class: "row-sq" + (stale ? " stale" : b.soft ? " soft" : ""), title: "row " + b.id + (stale ? " — deleted in source" : b.soft ? " — flagged deleted" : "") }, stale ? "!" : b.soft ? "d" : ""));
+            cell.appendChild(Kit.el("span", { class: "row-sq" + (stale ? " stale" : b.soft ? " soft" : ""), title: "ردیف " + b.id + (stale ? " — در منبع حذف شده" : b.soft ? " — پرچم حذف خورده" : "") }, stale ? "!" : b.soft ? "d" : ""));
           });
         }
         g.appendChild(cell);
@@ -188,19 +188,19 @@
     var stale = Object.keys(s.bronze).filter(function (id) { var sr = s.src.filter(function (x) { return x.id === +id; })[0]; return sr && sr.del; }).length;
     var last = s.runs.length ? s.runs[s.runs.length - 1].n : 0;
     var st = Kit.clear(document.getElementById("stats"));
-    [["Clock (hour)", s.now, ""], ["Rows in Bronze", Object.keys(s.bronze).length, ""], ["Rows read, last run", last, last > 8 ? "warn" : ""], ["Deleted rows still in Bronze", stale, stale ? "bad" : "ok"]].forEach(function (x) {
+    [["ساعت فعلی", s.now, ""], ["ردیف در Bronze", Object.keys(s.bronze).length, ""], ["ردیف خوانده‌شده در آخرین اجرا", last, last > 8 ? "warn" : ""], ["ردیف حذف‌شده‌ی مانده در Bronze", stale, stale ? "bad" : "ok"]].forEach(function (x) {
       st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
     });
     document.getElementById("sql").textContent = MODES[cfg.mode].sql;
     var bf = Kit.clear(document.getElementById("bf"));
-    for (var k = 0; k < s.now; k++) bf.appendChild(Kit.el("option", { value: k }, "hour " + k));
-    if (!s.now) bf.appendChild(Kit.el("option", { value: "" }, "no hours yet"));
+    for (var k = 0; k < s.now; k++) bf.appendChild(Kit.el("option", { value: k }, "ساعت " + k));
+    if (!s.now) bf.appendChild(Kit.el("option", { value: "" }, "هنوز ساعتی نیست"));
   }
 
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Implementation", value: cfg.mode,
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "پیاده‌سازی", value: cfg.mode,
     options: Object.keys(MODES).map(function (k) { return { value: k, label: MODES[k].label }; }),
     onChange: function (v) { cfg.mode = v; reset(); } }).element);
-  document.getElementById("soft").addEventListener("change", function (e) { cfg.soft = e.target.checked; log.add(cfg.soft ? "Producer switches to soft deletes." : "Producer uses hard deletes.", "muted"); });
+  document.getElementById("soft").addEventListener("change", function (e) { cfg.soft = e.target.checked; log.add(cfg.soft ? "تأمین‌کننده به حذف نرم سوئیچ می‌کند." : "تأمین‌کننده حذف سخت می‌کند.", "muted"); });
   document.getElementById("run").addEventListener("click", runNext);
   document.getElementById("del").addEventListener("click", del);
   document.getElementById("backfill").addEventListener("click", backfill);
@@ -208,15 +208,15 @@
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "A producer runs DELETE on a row your delta-column loader already ingested. What does the next run see?",
-      options: ["A tombstone for that row", "Nothing: the row just disappears from the input", "The full table again"], answer: 1,
-      explain: "A delta column catches inserts and updates, not physical deletes. Use soft deletes or insert-only tables (pp. 13–14)." },
-    { q: "Two months in, you backfill the first day of an unbounded delta-column job. How much does it read?",
-      options: ["One day", "Everything from that day until now", "Nothing, because the state is already ahead"], answer: 1,
-      explain: "The backfill effectively becomes a full load. Bound the window, e.g. BETWEEN t AND t + 1 hour (p. 14)." },
-    { q: "Why is event time a risky delta column?",
-      options: ["It's not indexed", "Late data for an event time that was already processed gets skipped", "It changes on every update"], answer: 1,
-      explain: "Ingestion time is safer because it only moves forward (p. 12)." }
+    { q: "تأمین‌کننده روی ردیفی که loader با delta column از قبل وارد کرده DELETE می‌زند. اجرای بعدی چه می‌بیند؟",
+      options: ["یک tombstone برای آن ردیف", "هیچ چیز؛ ردیف فقط از ورودی غیب می‌شود", "باز هم کل جدول را"], answer: 1,
+      explain: "یک delta column درج و به‌روزرسانی را می‌گیرد و حذف فیزیکی را نه. از حذف نرم یا جدول‌های فقط‌درج استفاده کنید (صص. ۱۳–۱۴)." },
+    { q: "دو ماه بعد، اولین روز یک job با delta column unbounded را backfill می‌کنید. چقدر می‌خواند؟",
+      options: ["یک روز", "همه چیز را از آن روز تا حالا", "هیچ چیز، چون حالت از قبل جلوتر است"], answer: 1,
+      explain: "این backfill در عمل به بار‌گذاری کامل تبدیل می‌شود. پنجره را bounded کنید، مثلاً BETWEEN t AND t + 1 hour (ص. ۱۴)." },
+    { q: "چرا زمان رویداد delta columnی پرخطر است؟",
+      options: ["index نمی‌خورد", "late data برای زمان رویدادی که از قبل پردازش شده از قلم می‌افتد", "سر هر به‌روزرسانی عوض می‌شود"], answer: 1,
+      explain: "زمان ورود امن‌تر است چون فقط جلو می‌رود (ص. ۱۲)." }
   ]);
 })();
 </script>

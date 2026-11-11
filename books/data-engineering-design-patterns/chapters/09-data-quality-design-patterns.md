@@ -3,44 +3,46 @@ book: data-engineering-design-patterns
 chapter: 9
 title: "Data Quality Design Patterns"
 pages: "273–303"
+translated_title: "الگوهای طراحی کیفیت داده"
+lang: fa
 ---
 
-# 9. Data Quality Design Patterns
+# فصل ۹: الگوهای طراحی کیفیت داده
 
-[← 8. Data Storage Design Patterns](08-data-storage-design-patterns.md) · [Book](../README.md) · [10. Data Observability Design Patterns →](10-data-observability-design-patterns.md)
+[فصل ۸: الگوهای طراحی ذخیره‌سازی داده →](08-data-storage-design-patterns.md) · [کتاب](../README.md) · [فصل ۱۰: الگوهای طراحی observability داده ←](10-data-observability-design-patterns.md)
 
-## Summary
+## خلاصه
 
-Trust is a key property of a dataset, and poor quality — incompleteness, inaccuracy, inconsistency — destroys it (p. 273). The chapter's six patterns fall into three groups. **Quality enforcement** keeps bad data from being exposed: **Audit-Write-Audit-Publish** (AWAP) adds audit steps on the input and on the transformed output before publishing, and the **Constraints Enforcer** delegates type, nullability, value and integrity rules to the database or format. **Schema consistency**: the **Schema Compatibility Enforcer** blocks breaking schema changes (backward, forward or full compatibility, transitive or not), and the **Schema Migrator** makes renames, type changes and removals possible through a grace period during which old and new fields coexist. **Quality observation** keeps the rules relevant as data evolves: the **Offline Observer** profiles datasets in a separate, nonblocking job, and the **Online Observer** puts observation inside the pipeline so issues surface right after generation.
+اعتماد ویژگی کلیدی یک مجموعه‌داده است، و کیفیت بد، یعنی ناقص بودن و نادقیق بودن و ناسازگاری، نابودش می‌کند (p. 273). شش الگوی این فصل در سه گروه‌اند. **اعمال کیفیت** نمی‌گذارد داده‌ی بد نشان داده شود: الگوی **Audit-Write-Audit-Publish** یا همان AWAP، مرحله‌های audit روی ورودی و روی خروجی تبدیل‌شده را پیش از انتشار اضافه می‌کند، و **Constraints Enforcer** قاعده‌های نوع و تهی‌پذیری و مقدار و یکپارچگی را به دیتابیس یا فرمت می‌سپارد. **schema compatibility**: الگوی **Schema Compatibility Enforcer** تغییرهای شکننده‌ی schema را می‌بندد، با backward compatibility یا رو‌به‌جلو یا کامل، transitive یا non-transitive، و **Schema Migrator** تغییر نام و تغییر نوع و حذف را با یک دوره‌ی مهلت ممکن می‌کند که در آن فیلد قدیم و تازه با هم زندگی می‌کنند. **مشاهده‌ی کیفیت** قاعده‌ها را با تکامل داده به‌جا نگه می‌دارد: الگوی **Offline Observer** مجموعه‌داده‌ها را در jobی جدا و نابازدارنده profile می‌کند، و **Online Observer** مشاهده را داخل pipeline می‌گذارد تا مسئله‌ها همان بعد از ساخته شدن بیرون بیایند.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Audit both sides**: a cheap audit of the input (format, size, schema from the first line) and a data-level audit of the output; put an expensive check where it's most exhaustive (pp. 275–276).
-- **A failed audit needn't fail the pipeline**: dispatch invalid rows, or publish with an annotation (nonblocking audit) (pp. 276–277).
-- **An “issue” may not be an issue** — a viral post legitimately multiplies traffic; some audit failures should only alert (p. 278).
-- **Database constraints are declarative but all-or-nothing**, often stopping at the first error, and they serve producers' view of quality, not every consumer's (pp. 282–283).
-- **Transitive compatibility checks against every past version**, not just the previous one: v0 → v1 (add `amount` with a default) → v2 (make it required) is fine nontransitively but breaks transitively (pp. 287–288).
-- **Rename = add, coexist, then remove**: never `RENAME COLUMN` in place under live consumers (pp. 291–292).
-- **Observation is not auditing**: observers never block; offline is late but cheap, online is timely but can slow or break the pipeline (pp. 294–300).
+- **هر دو سمت را audit کنید**: یک audit ارزان روی ورودی، یعنی فرمت و اندازه و schema از خط اول، و یک audit سطح داده روی خروجی؛ بررسی گران را جایی بگذارید که جامع‌ترین است (pp. 275–276).
+- **شکست audit لازم نیست pipeline را شکست بدهد**: ردیف‌های نامعتبر را به جای دیگری بفرستید، یا با یک یادداشت منتشر کنید، یعنی audit نابازدارنده (pp. 276–277).
+- **یک «مسئله» ممکن است مسئله نباشد**: یک پست وایرال واقعاً ترافیک را چند برابر می‌کند، پس بعضی شکست‌های audit فقط باید هشدار بدهند (p. 278).
+- **قید دیتابیس اعلانی است ولی همه‌یا‌هیچ**، اغلب روی اولین خطا می‌ایستد، و نگاه تأمین‌کننده به کیفیت را می‌دهد و نه نگاه هر consumer (pp. 282–283).
+- **سازگاری transitive با همه‌ی نسخه‌های گذشته بررسی می‌شود**، نه فقط قبلی: مسیر v0 به v1 با افزودن `amount` پیش‌فرض‌دار و بعد v2 با الزامی کردنش، non-transitive خوب است ولی transitive می‌شکند (pp. 287–288).
+- **تغییر نام یعنی افزودن و با هم زندگی کردن و بعد حذف**: هیچ‌وقت زیر پای consumerهای زنده `RENAME COLUMN` در جا نکنید (pp. 291–292).
+- **مشاهده همان audit نیست**: مشاهده‌گرها هیچ‌وقت نمی‌بندند؛ آفلاین دیر ولی ارزان است و آنلاین به‌موقع ولی می‌تواند pipeline را کند یا بشکند (pp. 294–300).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Quality Enforcement — p. 274
-  - Pattern: Audit-Write-Audit-Publish — p. 274
-  - Pattern: Constraints Enforcer — p. 281
-- Schema Consistency — p. 284
-  - Pattern: Schema Compatibility Enforcer — p. 284
-  - Pattern: Schema Migrator — p. 290
-- Quality Observation — p. 293
-  - Pattern: Offline Observer — p. 293
-  - Pattern: Online Observer — p. 298
-- Summary — p. 302
+- اعمال کیفیت — p. 274
+  - الگو: Audit-Write-Audit-Publish — p. 274
+  - الگو: Constraints Enforcer — p. 281
+- schema compatibility — p. 284
+  - الگو: Schema Compatibility Enforcer — p. 284
+  - الگو: Schema Migrator — p. 290
+- مشاهده‌ی کیفیت — p. 293
+  - الگو: Offline Observer — p. 293
+  - الگو: Online Observer — p. 298
+- خلاصه — p. 302
 
-## Notes
+## یادداشت‌ها
 
-Exchanging data is a mutual transaction: the goal is a happy producer and a happy consumer (p. 273). Enforcement prevents exposing bad data; schema patterns stop producers' schema changes from breaking pipelines; observation keeps today's rules valid for tomorrow's data (p. 273).
+تبادل داده تراکنشی دو‌طرفه است: هدف، تأمین‌کننده‌ی خوشحال و consumer خوشحال است (p. 273). اعمال، جلوی نشان دادن داده‌ی بد را می‌گیرد؛ الگوهای schema نمی‌گذارند تغییر schema تأمین‌کننده pipelineها را بشکند؛ و مشاهده، قاعده‌های امروز را برای داده‌ی فردا معتبر نگه می‌دارد (p. 273).
 
 ```mermaid
 flowchart LR
@@ -49,13 +51,13 @@ flowchart LR
     O -. "new or updated rules" .-> E
 ```
 
-### Quality enforcement
+### اعمال کیفیت
 
-#### Pattern: Audit-Write-Audit-Publish (pp. 274–281)
+#### الگو: Audit-Write-Audit-Publish (pp. 274–281)
 
-**Problem.** Unique visitors in a daily statistics job dropped by 50% for a week; the product team launched a marketing campaign — then you found the aggregation was wrong. Prevent it happening again (p. 274).
+**مسئله.** بازدیدکننده‌های یکتا در یک job آمار روزانه یک هفته ۵۰٪ افت کردند؛ تیم محصول یک کمپین بازاریابی راه انداخته بود، و بعد فهمیدید تجمیع غلط بوده. نگذارید باز اتفاق بیفتد (p. 274).
 
-**Solution** (pp. 274–277). AWAP extends **Write-Audit-Publish** (WAP), presented by Michelle Ufford at DataWorks Summit 2017 (“Whoops, the Numbers Are Wrong! Scaling Data Quality @ Netflix”), with a lightweight audit of the input (p. 274). Like unit-test assertions applied to real data flows:
+**راه‌حل** (pp. 274–277): الگوی AWAP، الگوی **Write-Audit-Publish** یا همان WAP را، که Michelle Ufford در DataWorks Summit سال ۲۰۱۷ با عنوان «Whoops, the Numbers Are Wrong! Scaling Data Quality @ Netflix» معرفی کرد، با یک audit سبک روی ورودی گسترش می‌دهد (p. 274). مثل assertionهای unit test که روی جریان داده‌ی واقعی اعمال شوند:
 
 ```mermaid
 flowchart LR
@@ -66,129 +68,141 @@ flowchart LR
     A2 -- fail --> X
 ```
 
-*After Figure 9-1 (p. 275).*
+*بر پایه‌ی شکل ۹-۱ (p. 275).*
 
-| Audit | Typical checks | Example |
+| audit | بررسی‌های معمول | نمونه |
 |---|---|---|
-| **Input** | Fast: file format, file or table size, schema | Check a CSV has columns `a`, `b`, `c` from its first line — avoid reading the whole dataset twice |
-| **Output** | Data-level, like unit tests on real data | Transformed columns are never `NULL` |
+| **ورودی** | تند: فرمت فایل، اندازه‌ی فایل یا جدول، schema | بررسی این که یک CSV از خط اولش ستون‌های `a` و `b` و `c` را دارد، تا کل مجموعه‌داده دو بار خوانده نشود |
+| **خروجی** | سطح داده، مثل unit test روی داده‌ی واقعی | ستون‌های تبدیل‌شده هیچ‌وقت `NULL` نیستند |
 
-Similar-looking checks aren't redundant: a `NULL` check on the input tests the provider; on the output, it tests your transformation. If volume forces a choice, put the check where it's **most exhaustive** — the output catches nulls from both (pp. 275–276). Unit tests stay the first line of defence; audits extend them to real, evolving data (p. 276). Checks can be record-level or dataset-level (volume, distinctness, null proportion). Outcomes besides failure (pp. 276–277):
+بررسی‌های به‌ظاهر شبیه، تکراری نیستند: بررسی `NULL` روی ورودی تأمین‌کننده را می‌سنجد و روی خروجی تبدیل خودتان را. اگر حجم مجبورتان کرد انتخاب کنید، بررسی را جایی بگذارید که **جامع‌ترین** است، یعنی خروجی که تهی‌های هر دو سمت را می‌گیرد (pp. 275–276). unit testها همان خط اول دفاع می‌مانند و auditها آن‌ها را به داده‌ی واقعی و در حال تکامل می‌کشانند (p. 276). بررسی‌ها می‌توانند در سطح رکورد یا در سطح مجموعه‌داده باشند، مثل حجم و تمایز و نسبت تهی. پیامدهای غیر از شکست (pp. 276–277):
 
-| Outcome | Behaviour |
+| پیامد | رفتار |
 |---|---|
-| **Fail** | Stop the pipeline |
-| **Data dispatching** | Promote valid rows; store invalid ones separately — like a Dead-Letter, but driven by explicit controls, not runtime errors |
-| **Nonblocking audit** | Publish anyway, annotated with a data summary of issues so consumers judge trust |
+| **شکست** | pipeline را متوقف کنید |
+| **فرستادن داده** | ردیف‌های معتبر را ارتقا بدهید و نامعتبرها را جدا ذخیره کنید؛ مثل Dead-Letter، ولی از کنترل‌های صریح می‌آید و نه خطای زمان اجرا |
+| **audit نابازدارنده** | باز هم منتشر کنید، با یک خلاصه‌ی داده از مسئله‌ها، تا consumerها خودشان اعتماد را بسنجند |
 
-In **streaming** (Figure 9-2), either **window-based** (audit processing-time windows inside the job) or **staging-based** (write to staging; a separate audit job promotes). The input audit usually disappears — the exhaustiveness rule again (p. 277).
+در **streaming** (شکل ۹-۲)، یا **پنجره‌محور است**، یعنی audit پنجره‌های زمان پردازش داخل job، یا **staging‌محور**، یعنی نوشتن در staging و بعد یک job audit جدا که ارتقا می‌دهد. audit ورودی معمولاً از بین می‌رود، باز هم به‌خاطر قاعده‌ی جامع بودن (p. 277).
 
-**Consequences** (pp. 277–278): **compute cost** (metadata checks cheap, row checks expensive); **rules coverage** — today's rules may not cover tomorrow's data, so don't treat audited pipelines as 100% reliable (see the observers); **streaming latency** — e.g. waiting for a window to assess null distribution; **an issue may not be an issue** — being quoted on social media raises volume legitimately, so some failures should just alert.
+**پیامدها** (pp. 277–278): **هزینه‌ی محاسبه**، یعنی بررسی metadata ارزان است و بررسی ردیف گران؛ **پوشش قاعده‌ها**، یعنی قاعده‌های امروز ممکن است داده‌ی فردا را نپوشانند، پس pipelineهای audit‌شده را صد درصد قابل‌اعتماد نگیرید، مشاهده‌گرها را ببینید؛ **تأخیر streaming**، مثل انتظار برای یک پنجره تا توزیع تهی سنجیده شود؛ و **یک مسئله ممکن است مسئله نباشد**، یعنی نقل شدن در شبکه‌های اجتماعی واقعاً حجم را بالا می‌برد، پس بعضی شکست‌ها فقط باید هشدار بدهند.
 
-**Examples** (pp. 278–280): an Airflow DAG `next_partition_sensor >> audit_file_to_load >> transform_file >> audit_transformed_file >> load_flattened_visits_to_final_table`; the input audit checks minimum size, minimum line count and invalid JSON lines and **reports all errors at once**; the output audit uses pandas `isnull().any()` over required columns (the CSV has no constraints — otherwise use the Constraints Enforcer). Streaming: Spark writes to a Delta staging table every 15 seconds (`maxOffsetsPerTrigger` 50); a second stream reads staging (`maxBytesPerTrigger` 20000000), adds `is_valid`, and every 30 seconds writes to the output or errors table.
+**نمونه‌ها** (pp. 278–280): یک DAG در Airflow به شکل `next_partition_sensor >> audit_file_to_load >> transform_file >> audit_transformed_file >> load_flattened_visits_to_final_table`؛ audit ورودی کمینه‌ی اندازه و کمینه‌ی شمار خط و خط‌های JSON نامعتبر را بررسی می‌کند و **همه‌ی خطاها را یک‌جا خبر می‌دهد**؛ audit خروجی از `isnull().any()` در pandas روی ستون‌های الزامی استفاده می‌کند، چون CSV قید ندارد، وگرنه Constraints Enforcer را به کار ببرید. در streaming: Spark هر پانزده ثانیه در یک جدول staging دلتا می‌نویسد، با `maxOffsetsPerTrigger` برابر ۵۰؛ و stream دومی staging را می‌خواند، با `maxBytesPerTrigger` برابر ۲۰۰۰۰۰۰۰، ستون `is_valid` اضافه می‌کند، و هر سی ثانیه در جدول خروجی یا خطا می‌نویسد.
 
-#### Pattern: Constraints Enforcer (pp. 281–284)
+#### الگو: Constraints Enforcer (pp. 281–284)
 
-**Problem.** A months-old batch job starts writing random `NULL`s in required fields; the job is complex enough already — make the load fail on quality errors without adding validation code (p. 281).
+**مسئله.** یک job batch چند‌ماهه شروع می‌کند مقدار `NULL` تصادفی در فیلدهای الزامی بنویسد؛ job به‌اندازه‌ی کافی پیچیده است، پس بار‌گذاری را بی اضافه کردن کد اعتبارسنجی سر خطای کیفیت شکست بدهید (p. 281).
 
-**Solution** (pp. 281–282): identify attributes needing rules (business- or law-driven, e.g. an order's amount and billing address), then declare constraints:
+**راه‌حل** (pp. 281–282): ویژگی‌هایی را که قاعده می‌خواهند بشناسید، که از کسب‌وکار یا قانون می‌آیند، مثل مبلغ و آدرس صورت‌حساب یک سفارش، و بعد قیدها را اعلان کنید:
 
-| Constraint | Meaning | Example |
+| قید | معنا | نمونه |
 |---|---|---|
-| **Type** | Every value has the same type; the backbone of schema consistency | `event_time TIMESTAMP` |
-| **Nullability** | Never or possibly missing; also tells consumers to filter | `NOT NULL` |
-| **Value** | Allowed values or expressions | `x <= NOW()`, `x BETWEEN 1901 AND 2000` |
-| **Integrity** | References must exist (normalized models) | A visit's page must exist in `pages` |
+| **نوع** | هر مقدار همان نوع را دارد؛ ستون فقرات schema compatibility | `event_time TIMESTAMP` |
+| **تهی‌پذیری** | هیچ‌وقت یا شاید غایب؛ به consumerها هم می‌گوید فیلتر کنند | `NOT NULL` |
+| **مقدار** | مقدارها یا عبارت‌های مجاز | `x <= NOW()`، `x BETWEEN 1901 AND 2000` |
+| **یکپارچگی** | ارجاع‌ها باید وجود داشته باشند، در مدل‌های نرمال | صفحه‌ی یک بازدید باید در `pages` باشد |
 
-Beyond databases: Delta Lake `CHECK`; Avro and Protobuf enforce types natively and values via extensions. Constraints are **informative** for consumers and **interactive** for producers (p. 282).
+جز دیتابیس‌ها: `CHECK` در Delta Lake؛ و Avro و Protobuf نوع را بومی و مقدار را با افزونه اعمال می‌کنند. قیدها برای consumerها **خبری** و برای تأمین‌کننده‌ها **تعاملی**اند (p. 282).
 
-**Consequences** (pp. 282–283): **all-or-nothing** — one bad row rejects the whole insert, and databases often stop at the first error, so producers iterate (validating producer-side recovers the full list but loses the benefits); **data producer shift** — consumers may need stricter rules than the constraints; **coverage** — table formats may lack integrity constraints; AWAP rules are limited only by your language.
+**پیامدها** (pp. 282–283): **همه‌یا‌هیچ**، یعنی یک ردیف بد کل درج را رد می‌کند و دیتابیس‌ها اغلب روی اولین خطا می‌ایستند، پس تأمین‌کننده‌ها باید تکرار کنند؛ اعتبارسنجی سمت تأمین‌کننده فهرست کامل را برمی‌گرداند ولی سودهایش را از دست می‌دهد. **جابه‌جایی به producer داده**، یعنی consumerها ممکن است قاعده‌های سخت‌گیرانه‌تر از قیدها بخواهند. **پوشش**، یعنی table formatها ممکن است قید یکپارچگی نداشته باشند، در حالی که قاعده‌های AWAP فقط به زبان شما محدودند.
 
-**Examples** (pp. 283–284): Delta `visit_id STRING NOT NULL`, `event_time TIMESTAMP NOT NULL`, plus `CHECK (event_time < NOW() + INTERVAL "1 SECOND")`; violations raise `DELTA_VIOLATE_CONSTRAINT_WITH_VALUES` or `DELTA_NOT_NULL_CONSTRAINT_VIOLATED` and nothing from the transaction is written. Protobuf + **protovalidate**: `visit_id` `min_len = 5`, `event_time` `lt_now`, required fields, and a CEL rule that `page` must not end with `html`; `validate(…)` raises `ValidationError: invalid Visit`.
+**نمونه‌ها** (pp. 283–284): در Delta، `visit_id STRING NOT NULL` و `event_time TIMESTAMP NOT NULL` به‌علاوه‌ی `CHECK (event_time < NOW() + INTERVAL "1 SECOND")`؛ نقض‌ها خطای `DELTA_VIOLATE_CONSTRAINT_WITH_VALUES` یا `DELTA_NOT_NULL_CONSTRAINT_VIOLATED` می‌دهند و هیچ چیزی از آن تراکنش نوشته نمی‌شود. با Protobuf و **protovalidate**: برای `visit_id` مقدار `min_len = 5`، برای `event_time` قید `lt_now`، فیلدهای الزامی، و یک قاعده‌ی CEL که `page` نباید به `html` تمام شود؛ متد `validate(…)` خطای `ValidationError: invalid Visit` می‌دهد.
 
-### Schema consistency
+> **In practice:** data-quality gateهایی که بین لایه‌ها برنامه‌ریزی شده‌اند همان Audit-Write-Audit-Publish‌اند.
+>
+> **Your turn:** چک uniqueness روی Silver بعد از publish اجرا می‌شود و داشبوردها نیم ساعت عدد دوبل نشان می‌دهند. ترتیب درست چیست؟
+>
+> *Answer:* در جدول staging بنویسید، audit کنید و فقط اگر قبول شد با `EXCHANGE TABLES` یا `REPLACE PARTITION` publish کنید؛ consumer هیچ‌وقت داده‌ی audit‌نشده نمی‌بیند (pp. 274–281).
 
-#### Pattern: Schema Compatibility Enforcer (pp. 284–290)
+### schema compatibility
 
-**Problem.** Your Stateful Sessionizer job failed many times last month: a new upstream team removed fields they thought obsolete. Make them unable to ship breaking changes (p. 285).
+#### الگو: Schema Compatibility Enforcer (pp. 284–290)
 
-**Solution** (pp. 285–288). Three enforcement modes (Figure 9-3):
+**مسئله.** job از جنس Stateful Sessionizer شما ماه پیش چند بار شکست خورد: تیم upstreamی تازه‌ای فیلدهایی را که به نظرشان منسوخ بودند برداشت. کاری کنید نتوانند تغییر شکننده release کنند (p. 285).
 
-![Three modes: a data provider validates its schema with a registry service before writing; a provider writes and the output location rejects incompatible inserts; or a schema evolution query changes the table if the schema is compatible](../figures/09-03.png)
+**راه‌حل** (pp. 285–288): سه حالت اعمال (شکل ۹-۳).
 
-*Figure 9-3 (p. 286): compatibility can be checked by an external registry, by the store on insert, or when the schema itself is evolved.*
+![سه حالت: یک data provider schema خودش را پیش از نوشتن با یک سرویس registry اعتبارسنجی می‌کند؛ یا تأمین‌کننده می‌نویسد و مکان خروجی درج‌های ناسازگار را رد می‌کند؛ یا یک کوئری تکامل schema جدول را عوض می‌کند اگر schema سازگار باشد](../figures/09-03.png)
 
-| Mode | How | Examples |
+*Figure 9-3 (p. 286): سازگاری را یک registry بیرونی، یا خود ذخیره‌سازی سر درج، یا سر تکامل خود schema می‌تواند بررسی کند.*
+
+| حالت | چطور | نمونه |
 |---|---|---|
-| **External service or library** | Producers and consumers talk to a registry that versions schemas and validates changes against a compatibility rule | Kafka **Schema Registry**; Avro `SchemaValidator` (no configurable rule) |
-| **Implicit with inserts** | Table constraints reject nonconforming writes; no explicit mode | Table formats, relational databases |
-| **Event-driven for DDL** | Event triggers run before `DROP COLUMN`/`RENAME COLUMN` and can roll back; or simply don't grant `ALTER TABLE` | PostgreSQL, SQL Server |
+| **سرویس یا کتابخانه‌ی بیرونی** | تأمین‌کننده‌ها و consumerها با registryی حرف می‌زنند که schemaها را نسخه‌دار می‌کند و تغییرها را با یک قاعده‌ی سازگاری اعتبارسنجی | **Schema Registry** در Kafka؛ و `SchemaValidator` در Avro که قاعده‌ی تنظیم‌شدنی ندارد |
+| **ضمنی با درج** | قیدهای جدول نوشتن‌های نامنطبق را رد می‌کنند؛ حالت صریحی نیست | table formatها، دیتابیس‌های رابطه‌ای |
+| **رویداد‌محور برای DDL** | event triggerها پیش از `DROP COLUMN` و `RENAME COLUMN` اجرا می‌شوند و می‌توانند برگردانند؛ یا به‌سادگی `ALTER TABLE` را ندهید | PostgreSQL، SQL Server |
 
-Compatibility modes (the book omits *None*, which enforces nothing) (pp. 286–287):
+حالت‌های سازگاری، که کتاب حالت *None* را که هیچ چیزی اعمال نمی‌کند نیاورده (pp. 286–287):
 
-| Mode | Consumers can… | Allowed changes (Table 9-1) |
+| حالت | consumerها می‌توانند… | تغییرهای مجاز (جدول ۹-۱) |
 |---|---|---|
-| **Backward** | with the **new** schema, read **old** data | Delete field, add optional field |
-| **Forward** | with the **old** schema, read **new** data | Add field, delete optional field |
-| **Full** | both | Add optional field, delete optional field |
+| **رو‌به‌عقب** | با schema **تازه**، داده‌ی **قدیم** را بخوانند | حذف فیلد، افزودن فیلد اختیاری |
+| **رو‌به‌جلو** | با schema **قدیم**، داده‌ی **تازه** را بخوانند | افزودن فیلد، حذف فیلد اختیاری |
+| **کامل** | هر دو | افزودن فیلد اختیاری، حذف فیلد اختیاری |
 
-**Nontransitive** modes compare consecutive versions; **transitive** modes compare against all past (or future) versions — the allowed actions are the same, but the scope differs (p. 287). The book's example (pp. 287–288):
+حالت‌های **non-transitive** نسخه‌های پشت سر هم را مقایسه می‌کنند و حالت‌های **transitive** با همه‌ی نسخه‌های گذشته یا آینده؛ کارهای مجاز همان‌اند ولی دامنه فرق می‌کند (p. 287). نمونه‌ی کتاب (pp. 287–288):
 
-| Version | Order schema |
+| نسخه | schema سفارش |
 |---|---|
 | v0 | `order_id LONG REQUIRED` |
-| v1 | + `amount DOUBLE DEFAULT 0.0` (optional, backward compatible) |
-| v2 | `amount DOUBLE REQUIRED` (default removed at the product team's request) |
+| v1 | به‌علاوه‌ی `amount DOUBLE DEFAULT 0.0`، یعنی اختیاری و سازگار رو‌به‌عقب |
+| v2 | `amount DOUBLE REQUIRED`، که پیش‌فرض به درخواست تیم محصول برداشته شده |
 
-v2 reading v1 data works — the default fills missing amounts — so it's **nontransitively** backward compatible; v2 can't read v0 data, so it **breaks transitive** backward compatibility.
+خواندن داده‌ی v1 با v2 کار می‌کند، چون پیش‌فرض مبلغ‌های غایب را پر می‌کند، پس **non-transitive** سازگار رو‌به‌عقب است؛ ولی v2 نمی‌تواند داده‌ی v0 را بخواند، پس backward compatibility **transitive را می‌شکند**.
 
-> **Try it:** [Schema compatibility checker](../widgets/09-schema-compatibility.html) — evolve the book's Order schema, pick a compatibility mode, and see which version pairs a reader can still handle.
+> **Try it:** [بررسی‌کننده‌ی schema compatibility](../widgets/09-schema-compatibility.html)؛ schema سفارش کتاب را تکامل بدهید، یک حالت سازگاری انتخاب کنید، و ببینید خواننده کدام جفت نسخه را باز هم می‌تواند بخواند.
 
-**Consequences** (p. 288): **interaction overhead** — producers validate against the latest version; **harder evolution** — a rename may become “add a new field, deprecate the old” (the Schema Migrator).
+**پیامدها** (p. 288): **سرریز تعامل**، یعنی تأمین‌کننده‌ها با جدید‌ترین نسخه اعتبارسنجی می‌کنند؛ **تکامل سخت‌تر**، یعنی یک تغییر نام می‌تواند بشود «فیلد تازه اضافه کن و قدیمی را منسوخ اعلام کن»، یعنی همان Schema Migrator.
 
-**Examples** (pp. 288–290): a forward-compatible Avro `Visit` schema (`visit_id` string, `event_time` int) in Schema Registry; producing without `visit_id` fails with HTTP **409** `READER_FIELD_MISSING_DEFAULT_VALUE` — the old schema's field has no default and is missing. Delta Lake's implicit enforcement rejects a write adding `ad_id` with “A schema mismatch detected when writing to the Delta table”.
+**نمونه‌ها** (pp. 288–290): یک schema سازگار رو‌به‌جلو به نام `Visit` در Avro با `visit_id` رشته‌ای و `event_time` عددی در Schema Registry؛ تولید بی `visit_id` با کد HTTP **۴۰۹** و `READER_FIELD_MISSING_DEFAULT_VALUE` شکست می‌خورد، چون فیلد schema قدیمی پیش‌فرض ندارد و غایب است. اعمال ضمنی Delta Lake نوشتنی را که `ad_id` اضافه می‌کند با «A schema mismatch detected when writing to the Delta table» رد می‌کند.
 
-#### Pattern: Schema Migrator (pp. 290–293)
+#### الگو: Schema Migrator (pp. 290–293)
 
-**Problem.** Being consumer-friendly, you kept adding fields; visit events now have up to **60** attributes, scattered. Consumers want related ones grouped (e.g. `login`, email and age under `user`) without a sudden breaking change (p. 290).
+**مسئله.** از بس هوای consumer را داشتید فیلد اضافه کردید؛ رویدادهای بازدید حالا تا **۶۰** ویژگی دارند که پراکنده‌اند. consumerها می‌خواهند مرتبط‌ها گروه شوند، مثل `login` و ایمیل و سن زیر `user`، بی یک تغییر شکننده‌ی ناگهانی (p. 290).
 
-**Solution** (pp. 290–291). Requires **nontransitive** compatibility — transitive modes would forbid any rename or removal (p. 290). Three evolutions:
+**راه‌حل** (pp. 290–291): به سازگاری **non-transitive** نیاز دارد، چون حالت‌های transitive هر تغییر نام یا حذفی را ممنوع می‌کنند (p. 290). سه تکامل:
 
-| Evolution | Steps |
+| تکامل | مرحله‌ها |
 |---|---|
-| **Rename** / **type change** | Add the new field → agree a transition period → send both → after the deadline, a version with only the new field |
-| **Removal** | Easy only with a 100% guarantee no one uses it; otherwise find a substitute or cancel. Agree a removal period, then drop it |
+| **تغییر نام** یا **تغییر نوع** | فیلد تازه را اضافه کنید، روی یک دوره‌ی گذار توافق کنید، هر دو را بفرستید، و بعد از مهلت، نسخه‌ای با فقط فیلد تازه |
+| **حذف** | فقط با تضمین صد درصدی این که کسی به کارش نمی‌برد آسان است؛ وگرنه جانشینی پیدا کنید یا لغوش کنید. روی دوره‌ی حذف توافق کنید و بعد بیندازیدش |
 
-Use the **Fine-Grained Tracker** (Ch. 10) to find who uses an attribute (p. 291).
+برای یافتن این که چه کسی یک ویژگی را به کار می‌برد از **Fine-Grained Tracker** در فصل ۱۰ استفاده کنید (p. 291).
 
 ```mermaid
 flowchart LR
     V1["v1: from_page"] --> V2["v2: from_page + referral<br/>(grace period, both populated)"] --> V3["v3: referral only<br/>(after consumers migrate)"]
 ```
 
-**Consequences** (pp. 291–292): **size impact** — duplicated fields cost storage, network and I/O. Protobuf's best practices warn against hundreds of fields: each, even unpopulated, takes at least **65 bytes** and builders can hit Java compilation limits; Delta Lake collects statistics on the first **32** columns by default. **Impossible removal** when a consumer has no alternative.
+**پیامدها** (pp. 291–292): **اثر اندازه**، یعنی فیلدهای تکراری ذخیره‌سازی و شبکه و I/O خرج می‌کنند. بهترین‌روش‌های Protobuf نسبت به صدها فیلد هشدار می‌دهند: هر فیلد حتی پرنشده دست‌کم **۶۵ بایت** می‌گیرد و builderها می‌توانند به سقف کامپایل Java بخورند؛ و Delta Lake پیش‌فرض برای **۳۲** ستون اول آمار جمع می‌کند. **حذف ناممکن**، وقتی consumerی جایگزینی ندارد.
 
-**Examples** (pp. 292–293): a consumer runs `INSERT INTO dedp.connected_users_visits SELECT … from_page FROM dedp.visits …`; `ALTER TABLE dedp.visits RENAME COLUMN from_page TO referral` breaks it with `ERROR: column "from_page" does not exist`. Instead `ALTER TABLE dedp.visits ADD COLUMN referral …` and drop `from_page` once consumers adapt. Protobuf renames are safe on the wire (only tags are encoded), type changes may not be (p. 293).
+**نمونه‌ها** (pp. 292–293): یک consumer `INSERT INTO dedp.connected_users_visits SELECT … from_page FROM dedp.visits …` را اجرا می‌کند؛ و `ALTER TABLE dedp.visits RENAME COLUMN from_page TO referral` با `ERROR: column "from_page" does not exist` می‌شکندش. در عوض `ALTER TABLE dedp.visits ADD COLUMN referral …` و بعد از سازگار شدن consumerها `from_page` را بیندازید. تغییر نام در Protobuf روی سیم امن است، چون فقط tagها encode می‌شوند، ولی تغییر نوع ممکن است نباشد (p. 293).
 
-### Quality observation
+> **In practice:** schema منبع‌ها را تیم‌های دیگر عوض می‌کنند؛ schema drift یکی از چک‌های برنامه‌ریزی‌شده‌ی stack است.
+>
+> **Your turn:** تیم منبع A نوع ستون `status` را از عدد به متن عوض کرده است. loader با dlt چه می‌کند و چه باید بکند؟
+>
+> *Answer:* با تنظیم پیش‌فرض، dlt ستونی variant مثل `status__v_text` می‌سازد و ستون قدیمی دیگر پر نمی‌شود، بی‌آن‌که کسی خبردار شود. بهتر است schema contract آن جدول `freeze` باشد تا تغییر نوع بار را fail کند و alert بدهد؛ این Schema Compatibility Enforcer است (pp. 284–290).
 
-Datasets change; rules valid today may not be tomorrow (p. 293).
+### مشاهده‌ی کیفیت
 
-#### Pattern: Offline Observer (pp. 293–298)
+مجموعه‌داده‌ها عوض می‌شوند؛ قاعده‌های معتبر امروز ممکن است فردا معتبر نباشند (p. 293).
 
-**Problem.** A new, well-enforced pipeline has few issues, but you know the upstream will evolve. Monitor value distributions and nulls per column without blocking the pipeline (p. 293).
+#### الگو: Offline Observer (pp. 293–298)
 
-**Solution** (pp. 293–294): a separate **data observability job** analyzes processed records and feeds the monitoring layer — distributions, nulls in nullable fields, new unprocessed input fields — possibly on its own schedule (e.g. nightly, to avoid contention). **Observability vs auditing**: an audit blocks; observability only detects (p. 294).
+**مسئله.** یک pipeline تازه و خوب‌اعمال‌شده مسئله‌های کمی دارد، ولی می‌دانید upstream تکامل پیدا می‌کند. توزیع مقدارها و تهی‌های هر ستون را بی بستن pipeline بپایید (p. 293).
 
-**Consequences** (p. 294): **time accuracy** — insight may arrive after consumers have used bad data; **compute resources** — observing hourly data once a day processes 24 hours at once; sampling helps but may miss observations.
+**راه‌حل** (pp. 293–294): یک **job observability داده**ی جدا، رکوردهای پردازش‌شده را تحلیل می‌کند و به لایه‌ی monitoring می‌خوراند، یعنی توزیع‌ها و تهی‌ها در فیلدهای تهی‌پذیر و فیلدهای ورودی پردازش‌نشده‌ی تازه، و می‌تواند زمان‌بندی خودش را داشته باشد، مثلاً شبانه، تا رقابت نشود. **تفاوت observability و audit**: یک audit می‌بندد و observability فقط تشخیص می‌دهد (p. 294).
 
-**Examples** (pp. 294–298): an Airflow DAG `wait_for_new_data >> record_new_observation_state >> insert_new_observations`. The state step records the first and last row IDs after the previous run's `last_row_id` (for idempotent, consistent scope); the observation step counts all rows and invalid fields between them. In streaming, a Spark job's `foreachBatch` runs the same query, writes a **ydata-profiling** HTML report (`ProfileReport(…, minimal=True)`, Figure 9-4), and computes **lag** per partition as the topic's last offset minus the producer job's last checkpointed offset.
+**پیامدها** (p. 294): **دقت زمانی**، یعنی بینش ممکن است بعد از آن بیاید که consumerها داده‌ی بد را به کار برده‌اند؛ **منابع محاسبه**، یعنی مشاهده‌ی داده‌ی ساعتی یک‌بار در روز، بیست‌و‌چهار ساعت را یک‌جا پردازش می‌کند؛ نمونه‌برداری کمک می‌کند ولی ممکن است مشاهده‌هایی را از دست بدهد.
 
-#### Pattern: Online Observer (pp. 298–302)
+**نمونه‌ها** (pp. 294–298): یک DAG در Airflow به شکل `wait_for_new_data >> record_new_observation_state >> insert_new_observations`. مرحله‌ی حالت، شناسه‌ی اولین و آخرین ردیف بعد از `last_row_id` اجرای قبلی را ثبت می‌کند، برای دامنه‌ی idempotent و سازگار؛ و مرحله‌ی مشاهده همه‌ی ردیف‌ها و فیلدهای نامعتبر بینشان را می‌شمارد. در streaming، `foreachBatch` یک job در Spark همان کوئری را اجرا می‌کند، یک گزارش HTML از **ydata-profiling** می‌نویسد، یعنی `ProfileReport(…, minimal=True)` (شکل ۹-۴)، و **lag** هر پارتیشن را به‌عنوان آخرین offset آن topic منهای آخرین offset checkpoint‌شده‌ی job producer حساب می‌کند.
 
-**Problem.** Analysts found an unexpected zip code format from an upstream regression; your weekly Offline Observer saw it, but only after users did (p. 298).
+#### الگو: Online Observer (pp. 298–302)
 
-**Solution** (pp. 298–299): make observation part of the data generation pipeline, so insight is available right after generation. In batch, place it after the Transform stage as a **Parallel Split** or a **Local Sequencer** step (Figure 9-5). In streaming, the observation logic lives inside the job — its errors or memory issues can affect the whole job; sampling reduces the risk at the cost of insight (Figure 9-6). Observability also covers technical metadata (CPU, memory, disk) (p. 300).
+**مسئله.** تحلیل‌گرها فرمت غیرمنتظره‌ای از کد پستی را پیدا کردند که از یک پس‌رفت upstreamی می‌آمد؛ Offline Observer هفتگی شما دیدش، ولی فقط بعد از کاربرها (p. 298).
+
+**راه‌حل** (pp. 298–299): مشاهده را بخشی از pipeline ساخت داده کنید، تا بینش همان بعد از ساخته شدن در دسترس باشد. در batch، بعد از مرحله‌ی Transform بگذاریدش، به‌عنوان یک **Parallel Split** یا یک مرحله‌ی **Local Sequencer** (شکل ۹-۵). در streaming، منطق مشاهده داخل خود job می‌نشیند و خطا یا مسئله‌ی حافظه‌اش می‌تواند روی کل job اثر بگذارد؛ نمونه‌برداری خطر را کم می‌کند به قیمت بینش (شکل ۹-۶). observability متادیتای فنی را هم می‌پوشاند، یعنی CPU و حافظه و دیسک (p. 300).
 
 ```mermaid
 flowchart LR
@@ -197,70 +211,76 @@ flowchart LR
     L --> OS["Observe (local sequencer)<br/>sees what consumers see, adds delay"]
 ```
 
-*After Figure 9-5 (p. 299).*
+*بر پایه‌ی شکل ۹-۵ (p. 299).*
 
-**Consequences** (p. 300): **extra delays** with a Local Sequencer; with a **Parallel Split**, the observer may see a partially valid dataset — e.g. date times in an unexpected format go missing in the database, but the observer, reading the transformed data, doesn't notice. Prefer observing what's exposed to consumers.
+**پیامدها** (p. 300): **تأخیر اضافه** با Local Sequencer؛ و با **Parallel Split** مشاهده‌گر ممکن است مجموعه‌داده‌ای نیمه‌معتبر ببیند، مثلاً زمان‌هایی با فرمت غیرمنتظره که در دیتابیس غایب می‌شوند، ولی مشاهده‌گر که داده‌ی تبدیل‌شده را می‌خواند متوجه نمی‌شود. ترجیح بدهید همان چیزی را مشاهده کنید که به consumerها نشان داده می‌شود.
 
-**Examples** (pp. 300–302): the Airflow pipeline now includes `copy_new_visits >> record_new_observation_state >> insert_new_observations`, plus a final no-op task with trigger rule `all_done` so observation failures don't fail the pipeline. In streaming, the reader adds partition and offset columns; Spark **accumulators** collect max offsets per partition and invalid-field counts in one pass, aggregated on the driver when `.value` is read — avoiding reading the input twice.
+**نمونه‌ها** (pp. 300–302): pipeline در Airflow حالا `copy_new_visits >> record_new_observation_state >> insert_new_observations` را هم دارد، به‌علاوه‌ی یک task پایانی بی‌کار با trigger rule برابر `all_done`، تا شکست مشاهده pipeline را شکست ندهد. در streaming، خواننده ستون‌های پارتیشن و offset را اضافه می‌کند؛ و **accumulator**های Spark بیشینه‌ی offset هر پارتیشن و شمار فیلدهای نامعتبر را در یک گذر جمع می‌کنند، که سر خواندن `.value` روی driver تجمیع می‌شوند و نمی‌گذارند ورودی دو بار خوانده شود.
 
-### Summary
+> **In practice:** freshness و volume را می‌شود داخل pipeline سنجید یا با jobی جدا از آن.
+>
+> **Your turn:** هر کدام را با Prometheus چطور می‌سازید؟
+>
+> *Answer:* داخل pipeline: loader بعد از هر load شمار ردیف و `max(update_date)` را به‌شکل metric export می‌کند و Grafana رویش alert دارد. جدا از pipeline: jobی مستقل هر ساعت آمار جدول‌ها را حساب می‌کند. اولی سریع‌تر است، دومی مستقل است و job از کار افتاده را هم می‌بیند (pp. 293–302).
 
-Enforcement at the pipeline (AWAP), database (Constraints Enforcer) and schema (Schema Compatibility Enforcer) levels prevents publishing data that breaks known rules — but only known rules; observation (offline or online, trading time for accuracy) keeps the rules up to date (pp. 302–303).
+### خلاصه
 
-## Trade-offs at a glance
+اعمال در سطح pipeline با AWAP و در سطح دیتابیس با Constraints Enforcer و در سطح schema با Schema Compatibility Enforcer، جلوی انتشار داده‌ای را می‌گیرد که قاعده‌های شناخته‌شده را می‌شکند، ولی فقط قاعده‌های شناخته‌شده؛ و مشاهده، آفلاین یا آنلاین که زمان را با دقت معامله می‌کند، قاعده‌ها را به‌روز نگه می‌دارد (pp. 302–303).
+
+## بده‌بستان‌ها در یک نگاه
 
 | | AWAP | Constraints Enforcer |
 |---|---|---|
-| Where rules live | Your pipeline code | Database / format |
-| Flexibility | Any logic | Limited to supported constraints |
-| Error reporting | All errors at once (if coded so) | Often first error, all-or-nothing |
-| Outcomes | Fail, dispatch, annotate | Reject |
+| قاعده‌ها کجا می‌نشینند | در کد pipeline خودتان | در دیتابیس یا فرمت |
+| انعطاف | هر منطقی | محدود به قیدهای پشتیبانی‌شده |
+| خبر دادن خطا | همه‌ی خطاها یک‌جا، اگر این‌طور کدش کنید | اغلب اولین خطا، همه‌یا‌هیچ |
+| پیامدها | شکست، فرستادن، یادداشت | رد کردن |
 
 | | Offline Observer | Online Observer |
 |---|---|---|
-| Blocks pipeline | No | No (but can fail or slow it) |
-| Timeliness | Late | Right after generation |
-| Production impact | None | Extra step or shared resources |
+| pipeline را می‌بندد | نه | نه، ولی می‌تواند شکستش بدهد یا کندش کند |
+| به‌موقع بودن | دیر | همان بعد از ساخته شدن |
+| اثر روی تولید | ندارد | مرحله‌ی اضافه یا منابع مشترک |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Open-source tools such as Great Expectations, Soda and dbt tests implement audit steps declaratively; the book's examples write them by hand to show the mechanism.
-- Confluent Schema Registry's documented modes are exactly the book's list — `BACKWARD`, `BACKWARD_TRANSITIVE`, `FORWARD`, `FORWARD_TRANSITIVE`, `FULL`, `FULL_TRANSITIVE` — plus `NONE`; its default is `BACKWARD`.
+- ابزارهای open source مثل Great Expectations و Soda و testهای dbt مرحله‌های audit را اعلانی پیاده می‌کنند؛ نمونه‌های کتاب دستی نوشته شده‌اند تا سازوکار را نشان بدهند.
+- حالت‌های مستندشده‌ی Confluent Schema Registry دقیقاً همان فهرست کتاب‌اند، یعنی `BACKWARD` و `BACKWARD_TRANSITIVE` و `FORWARD` و `FORWARD_TRANSITIVE` و `FULL` و `FULL_TRANSITIVE`، به‌علاوه‌ی `NONE`؛ و پیش‌فرضش `BACKWARD` است.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [3. Error Management](03-error-management-design-patterns.md) (Dead-Letter vs data dispatching), [5. Data Value](05-data-value-design-patterns.md) (Stateful Sessionizer), [6. Data Flow](06-data-flow-design-patterns.md) (Parallel Split, Local Sequencer), [8. Data Storage](08-data-storage-design-patterns.md) (Normalizer and integrity constraints), [10. Data Observability](10-data-observability-design-patterns.md) (Fine-Grained Tracker, Flow Interruption Detector).
+- **فصل‌های مرتبط:** [فصل ۳: مدیریت خطا](03-error-management-design-patterns.md) که Dead-Letter را در برابر فرستادن داده دارد، [فصل ۵: ارزش داده](05-data-value-design-patterns.md) که Stateful Sessionizer را دارد، [فصل ۶: جریان داده](06-data-flow-design-patterns.md) که Parallel Split و Local Sequencer را دارد، [فصل ۸: ذخیره‌سازی داده](08-data-storage-design-patterns.md) که Normalizer و قیدهای یکپارچگی را دارد، و [فصل ۱۰: observability داده](10-data-observability-design-patterns.md) که Fine-Grained Tracker و Flow Interruption Detector را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **You can afford one `NULL` check. Where should it go, and why?**
+1. **فقط یک بررسی `NULL` را می‌توانید بپردازید. کجا باید برود و چرا؟**
 
-   *Answer:* In the output audit — it's the most exhaustive place, catching nulls from the provider and from your transformation (p. 276).
+   *Answer:* در audit خروجی، چون جامع‌ترین جاست و تهی‌هایی را که از تأمین‌کننده می‌آیند و تهی‌هایی را که تبدیل خودتان می‌سازد هر دو می‌گیرد (p. 276).
 
-2. **Some rows fail the output audit but most are valid. Which outcome publishes the valid ones?**
-   - [ ] Fail the pipeline
-   - [x] Data dispatching
-   - [ ] Nonblocking audit
+2. **بعضی ردیف‌ها در audit خروجی شکست می‌خورند ولی بیشترشان معتبرند. کدام پیامد، معتبرها را منتشر می‌کند؟**
+   - [ ] شکست دادن pipeline
+   - [x] فرستادن داده
+   - [ ] مفهوم audit نابازدارنده
 
-   *Answer:* Dispatching promotes valid rows and keeps invalid ones aside; a nonblocking audit publishes everything with an annotation (p. 276).
+   *Answer:* فرستادن داده ردیف‌های معتبر را ارتقا می‌دهد و نامعتبرها را کنار می‌گذارد؛ audit نابازدارنده همه چیز را با یک یادداشت منتشر می‌کند (p. 276).
 
-3. **A producer's batch has three invalid rows with different problems. Why might fixing them take several round-trips with a constrained database?**
+3. **دسته‌ای از یک تأمین‌کننده سه ردیف نامعتبر با مسئله‌های مختلف دارد. چرا اصلاحشان با دیتابیسی قید‌دار می‌تواند چند رفت‌و‌برگشت ببرد؟**
 
-   *Answer:* Constraints are all-or-nothing and databases often stop at the first error, so each attempt reveals one problem (p. 282).
+   *Answer:* قیدها همه‌یا‌هیچ‌اند و دیتابیس‌ها اغلب روی اولین خطا می‌ایستند، پس هر تلاش یک مسئله را آشکار می‌کند (p. 282).
 
-4. **Order v0 has `order_id`; v1 adds `amount` with default 0.0; v2 makes `amount` required. Which backward mode rejects v2?**
-   - [ ] Backward nontransitive
-   - [x] Backward transitive
-   - [ ] Neither
+4. **نسخه‌ی v0 سفارش `order_id` دارد؛ v1 فیلد `amount` را با پیش‌فرض ۰٫۰ اضافه می‌کند؛ v2 آن را الزامی می‌کند. کدام حالت رو‌به‌عقب v2 را رد می‌کند؟**
+   - [ ] رو‌به‌عقب non-transitive
+   - [x] رو‌به‌عقب transitive
+   - [ ] هیچ‌کدام
 
-   *Answer:* v2 can read v1 data (defaults fill gaps) but not v0 data, which has no amount — only the transitive check compares with v0 (pp. 287–288).
+   *Answer:* نسخه‌ی v2 می‌تواند داده‌ی v1 را بخواند، چون پیش‌فرض‌ها جاها را پر می‌کنند، ولی داده‌ی v0 را نه، که مبلغ ندارد؛ و فقط بررسی transitive با v0 مقایسه می‌کند (pp. 287–288).
 
-5. **Why does the Schema Migrator require nontransitive compatibility?**
+5. **چرا Schema Migrator به سازگاری non-transitive نیاز دارد؟**
 
-   *Answer:* Transitive modes guarantee compatibility with all versions, so no rename or removal could ever complete (p. 290).
+   *Answer:* حالت‌های transitive سازگاری با همه‌ی نسخه‌ها را تضمین می‌کنند، پس هیچ تغییر نام یا حذفی هیچ‌وقت نمی‌توانست کامل شود (p. 290).
 
-6. **What's the risk of running the Online Observer as a parallel split next to the load step?**
+6. **خطر اجرای Online Observer به‌عنوان یک parallel split کنار مرحله‌ی بار‌گذاری چیست؟**
 
-   *Answer:* It observes the transformed data, not what consumers get — e.g. date times dropped by the database during loading go unnoticed (p. 300).
+   *Answer:* داده‌ی تبدیل‌شده را مشاهده می‌کند و نه آن چیزی که به consumer می‌رسد؛ مثلاً زمان‌هایی که دیتابیس سر بار‌گذاری می‌اندازد دیده نمی‌شوند (p. 300).

@@ -1,21 +1,23 @@
-# Skew and lag detectors
+# تشخیص نامتوازنی و lag
 
-This experiment has two parts.
+این آزمایش دو بخش دارد.
 
-1. **Skew Detector.** Eight days of input volumes, where day 4 delivers only a third of the data and nobody fixes it. Each day is checked with the book's 50% tolerance, first against the previous day and then against the last successful run.
-2. **Lag Detector.** The book's seven partition lags, summarized with the average, P90 (two definitions) and MAX.
+۱. **الگوی Skew Detector.** هشت روز حجم ورودی، که روز چهارم فقط یک‌سوم داده را تحویل می‌دهد و کسی درستش نمی‌کند. هر روز با همان تحمل پنجاه درصدی کتاب بررسی می‌شود، اول در برابر روز قبل و بعد در برابر آخرین اجرای موفق.
+۲. **الگوی Lag Detector.** همان هفت lag پارتیشن کتاب، که با میانگین و P90 با دو تعریف و MAX خلاصه می‌شوند.
 
-*Illustrates Data Engineering Design Patterns, “Pattern: Skew Detector” (pp. 310–313; the fatality loop is on p. 312) and “Pattern: Lag Detector” (pp. 314–315; the lags 10, 5, 30, 2, 3, 5 and 3 s are the book's). The daily volumes are synthetic; the implementation is the vault’s own.*
+*این آزمایش «الگو: Skew Detector» از کتاب Data Engineering Design Patterns را نشان می‌دهد، صص. ۳۱۰–۳۱۳ که حلقه‌ی مرگ در ص. ۳۱۲ است، و «الگو: Lag Detector»، صص. ۳۱۴–۳۱۵ که lagهای ۱۰ و ۵ و ۳۰ و ۲ و ۳ و ۵ و ۳ ثانیه‌ای مال خود کتاب‌اند. حجم‌های روزانه ساختگی‌اند و پیاده‌سازی مال خود vault.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 skew_and_lag.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Skew check against the previous day (tolerance 50%)
@@ -49,11 +51,11 @@ Partition lags (s): [10, 5, 30, 2, 3, 5, 3]
   MAX:                            30
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- **The fatality loop.** Against the previous day, the healthy day 5 fails as well: it is more than three times bigger than the broken day 4. Against the last successful run (day 3), it passes.
-- **The average trap.** The average lag (8.3 s, which the book rounds to 8) hides the 30-second partition. The book's P90 of 18 s comes from linear interpolation. A nearest-rank P90 over only seven values is the maximum, 30 s.
+- **حلقه‌ی مرگ.** در برابر روز قبل، روز پنجمِ سالم هم شکست می‌خورد: از روز چهارم که خراب بود بیشتر از سه برابر بزرگ‌تر است. در برابر آخرین اجرای موفق که روز سوم است، قبول می‌شود.
+- **تله‌ی میانگین.** میانگین lag که ۸٫۳ ثانیه است و کتاب به ۸ گردش می‌کند، پارتیشن سی‌ثانیه‌ای را پنهان می‌کند. مقدار P90 برابر ۱۸ ثانیه در کتاب از درون‌یابی خطی می‌آید. مقدار P90 با رتبه‌ی نزدیک‌ترین، روی فقط هفت مقدار، همان بیشینه یعنی سی ثانیه است.
 
-## Related
+## پیوندها
 
-- Chapter note: [10. Data Observability Design Patterns](../../chapters/10-data-observability-design-patterns.md) — “Pattern: Skew Detector” and “Pattern: Lag Detector”, pp. 310–317
+- یادداشت فصل: [فصل ۱۰: الگوهای طراحی observability داده](../../chapters/10-data-observability-design-patterns.md) — «الگو: Skew Detector» و «الگو: Lag Detector»، صص. ۳۱۰–۳۱۷

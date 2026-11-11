@@ -3,59 +3,61 @@ book: data-engineering-design-patterns
 chapter: 1
 title: "Introducing Data Engineering Design Patterns"
 pages: "1–6"
+translated_title: "معرفی الگوهای طراحی مهندسی داده"
+lang: fa
 ---
 
-# 1. Introducing Data Engineering Design Patterns
+# فصل ۱: معرفی الگوهای طراحی مهندسی داده
 
-[Book](../README.md) · [2. Data Ingestion Design Patterns →](02-data-ingestion-design-patterns.md)
+[کتاب](../README.md) · [فصل ۲: الگوهای طراحی ورود داده ←](02-data-ingestion-design-patterns.md)
 
-## Summary
+## خلاصه
 
-The opening chapter defines a **design pattern** through a recipe analogy — a predefined, customizable template that answers a specific problem, can be reused, has consequences, and gives a shared vocabulary — and maps each part of the analogy onto a data engineering example, the **Dead-Letter** pattern. It argues that the Gang of Four's software patterns are not enough for data work, which also has to deal with failures, backfilling, idempotency and correctness. It then lays out the book's nine pattern chapters along a typical data flow, from ingestion to observability, and introduces the case study used throughout: a **blog analytics platform** with online and offline ingestion, a real-time layer, and a data organization layer based on the **Medallion architecture** (Bronze, Silver, Gold).
+فصل اول **الگوی طراحی** را با قیاس دستور پخت تعریف می‌کند، یعنی قالبی از پیش تعریف‌شده و قابل‌سفارشی‌سازی که به مسئله‌ای مشخص پاسخ می‌دهد، دوباره به کار می‌آید، پیامد دارد و واژگان مشترک می‌سازد، و بعد هر تکه‌ی این قیاس را روی یک نمونه‌ی مهندسی داده، یعنی الگوی **Dead-Letter**، map می‌کند. استدلال می‌کند که الگوهای نرم‌افزاری Gang of Four برای کار داده کافی نیستند، چون کار داده با شکست و backfill و idempotency و درستی داده هم سر و کار دارد. بعد نه فصل الگویی کتاب را در امتداد یک جریان داده‌ی معمول، از ورود داده تا observability، می‌چیند و مطالعه‌ی موردیِ سرتاسر کتاب را معرفی می‌کند: یک **platform تحلیل وبلاگ** با ورود داده‌ی برخط و غیربرخط، یک لایه‌ی بلادرنگ، و یک لایه‌ی سازمان‌دهی داده بر پایه‌ی **معماری medallion**، یعنی Bronze و Silver و Gold.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **A pattern is a predefined, customizable template for a problem in context**: it is reusable, has consequences, and gives teams a common language (pp. 1–2).
-- **Patterns are not to be followed blindly**: even the Dead-Letter pattern adds code and complexity you must be ready to accept (p. 2).
-- **Software patterns aren't enough for data engineering**: data work also needs failure management, backfilling, idempotency and data correctness (p. 3).
-- **The book follows the data flow**: ingestion → error management → idempotency → data value → data flow → security → storage → quality → observability (pp. 3–4).
-- **The case study is a blog analytics platform** whose datasets live in Bronze (raw), Silver (cleansed, enriched) or Gold (consumer-ready) layers (pp. 5–6).
+- **الگو قالبی از پیش تعریف‌شده و قابل‌سفارشی‌سازی برای مسئله‌ای در یک زمینه است**: دوباره به کار می‌آید، پیامد دارد، و به تیم‌ها زبان مشترک می‌دهد (pp. 1–2).
+- **الگوها را کورکورانه دنبال نکنید**: حتی الگوی Dead-Letter هم کد و پیچیدگی اضافه می‌کند که باید آماده‌ی پذیرشش باشید (p. 2).
+- **الگوهای نرم‌افزاری برای مهندسی داده کافی نیستند**: کار داده به مدیریت شکست و backfill و idempotency و درستی داده هم نیاز دارد (p. 3).
+- **کتاب جریان داده را دنبال می‌کند**: ورود داده ← مدیریت خطا ← idempotency ← ارزش داده ← جریان داده ← امنیت ← ذخیره‌سازی ← کیفیت ← observability (pp. 3–4).
+- **مطالعه‌ی موردی یک platform تحلیل وبلاگ است** که مجموعه‌داده‌هایش در لایه‌های Bronze برای خام، Silver برای تمیزشده و غنی‌شده، و Gold برای آماده‌ی consumer زندگی می‌کنند (pp. 5–6).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- What Are Design Patterns? — p. 1
-- Yet More Design Patterns? — p. 3
-- Common Data Engineering Patterns — p. 3
-- Case Study Used in This Book — p. 5
-- Summary — p. 6
+- الگوهای طراحی چیست‌اند؟ — p. 1
+- باز هم الگوی طراحی؟ — p. 3
+- الگوهای رایج مهندسی داده — p. 3
+- مطالعه‌ی موردی این کتاب — p. 5
+- خلاصه — p. 6
 
-## Notes
+## یادداشت‌ها
 
-The author notes that design patterns are well established in software engineering but have only recently begun to gain traction in data engineering, so the chapter starts by defining them (p. 1).
+نویسنده می‌گوید الگوهای طراحی در مهندسی نرم‌افزار جاافتاده‌اند ولی تازه در مهندسی داده دارند جا باز می‌کنند، پس فصل با تعریف کردنشان شروع می‌شود (p. 1).
 
-### What are design patterns?
+### الگوهای طراحی چیست‌اند؟
 
-A recipe — the author's example is **flan** — is a good picture of a design pattern: *a predefined and customizable template for solving a problem* (p. 1). Each part of the analogy has a data engineering counterpart (pp. 1–2):
+یک دستور پخت، که نمونه‌ی نویسنده **فلان** است، تصویر خوبی از الگوی طراحی می‌دهد: *قالبی از پیش تعریف‌شده و قابل‌سفارشی‌سازی برای حل یک مسئله* (p. 1). هر تکه‌ی این قیاس همتایی در مهندسی داده دارد (pp. 1–2):
 
-| Property of a pattern | Flan recipe | Data engineering example |
+| ویژگی یک الگو | دستور پخت فلان | نمونه‌ی مهندسی داده |
 |---|---|---|
-| **Predefined template**, customizable | Ingredients and steps; brown sugar instead of white | Wrap the risky transformation in try-catch and write bad records elsewhere — or just count them |
-| **Contextualization** — answers a specific problem | Share a dessert with family, or sell it for a living | A continuous job on semi-structured data must not stop because of one malformed record |
-| **Reusability** | Reuse the recipe that worked before | Apply the same logic in a different context, e.g. an ELT pipeline transforming inside a warehouse |
-| **Consequences** | Flan every day leaves less time for sport | Extra logic adds complexity to the codebase |
-| **Saves time + common vocabulary** | “Flan” is easier to search for than “caramel custard” | The pattern has a name: **dead-lettering** (Chapter 3) |
+| **قالب از پیش تعریف‌شده** و قابل‌سفارشی‌سازی | مواد و مرحله‌ها؛ شکر قهوه‌ای به‌جای سفید | تبدیل پرریسک را در try-catch بپیچید و رکوردهای خراب را جای دیگری بنویسید، یا فقط بشماریدشان |
+| **زمینه‌مندی**، یعنی به مسئله‌ای مشخص پاسخ می‌دهد | شیرینی را با خانواده قسمت کنید، یا برای امرار معاش بفروشیدش | jobی پیوسته روی داده‌ی نیمه‌ساختاریافته نباید به‌خاطر یک رکورد خراب بایستد |
+| **قابل‌استفاده‌ی دوباره** | همان دستوری را که قبلاً جواب داده دوباره به کار ببرید | همان منطق را در زمینه‌ای دیگر به کار ببرید؛ مثلاً pipeline نوع ELT که تبدیل را داخل انبار انجام می‌دهد |
+| **پیامدها** | هر روز فلان خوردن وقت کمتری برای ورزش می‌گذارد | منطق اضافه، پیچیدگی کد را بیشتر می‌کند |
+| **صرفه‌جویی وقت و واژگان مشترک** | جست‌وجوی «فلان» از «کاستارد کاراملی» آسان‌تر است | الگو اسم دارد: **dead-lettering** (فصل ۳) |
 
-The example's name is the **Dead-Letter** pattern, one of the error management patterns of Chapter 3. A pattern represents a holistic picture of a solution, and its name simplifies discussions with teammates (p. 2).
+اسم این نمونه الگوی **Dead-Letter** است، یکی از الگوهای مدیریت خطا در فصل ۳. الگو تصویری کل‌نگر از یک راه‌حل است و اسمش گفت‌وگو با هم‌تیمی‌ها را ساده می‌کند (p. 2).
 
-### Yet more design patterns?
+### باز هم الگوی طراحی؟
 
-The Gang of Four patterns — 23 patterns from *Design Patterns: Elements of Reusable Object-Oriented Software* (Gamma et al., 1994) — keep a codebase maintainable and recognizable; Singleton, for instance, avoids allocating unnecessary objects. Maintainable code matters in data projects too, but it isn't enough: data engineering also needs patterns for **failure management, backfilling, idempotency and data correctness** (p. 3).
+الگوهای Gang of Four، یعنی ۲۳ الگو از کتاب *Design Patterns: Elements of Reusable Object-Oriented Software* نوشته‌ی Gamma و همکاران در سال ۱۹۹۴، کد را قابل‌نگه‌داری و آشنا نگه می‌دارند؛ مثلاً Singleton از ساختن objectهای بی‌مورد جلوگیری می‌کند. کد قابل‌نگه‌داری در پروژه‌های داده هم مهم است، ولی کافی نیست: مهندسی داده به الگوهایی برای **مدیریت شکست و backfill و idempotency و درستی داده** هم نیاز دارد (p. 3).
 
-### Common data engineering patterns
+### الگوهای رایج مهندسی داده
 
-The book follows a typical data flow, from ingestion to exposition with monitoring and alerting (pp. 3–4):
+کتاب یک جریان داده‌ی معمول را دنبال می‌کند، از ورود داده تا نمایش، همراه با monitoring و هشدار (pp. 3–4):
 
 ```mermaid
 flowchart LR
@@ -69,70 +71,82 @@ flowchart LR
     Q --> O["10 · Observability<br/>alerting"]
 ```
 
-*The chapter sequence as the book presents it (pp. 3–4).*
+*ترتیب فصل‌ها همان‌طور که کتاب ارائه‌اش می‌دهد (pp. 3–4).*
 
-| Chapter | Why it comes there (pp. 3–4) |
+| فصل | چرا همان‌جا می‌آید (pp. 3–4) |
 |---|---|
-| 2 · Data ingestion | Bringing data in is always the first technical step — without it there is nothing to work on |
-| 3 · Error management | Errors come from code but also from providers who break their engagements, e.g. omit required fields |
-| 4 · Idempotency | Errors lead to automatic or manual retries; idempotency makes repeated runs produce unique outputs |
-| 5 · Data value | Summarize or combine datasets to create value for business users |
-| 6 · Data flow | How the pipeline generating value interacts with other data components |
-| 7 · Data security | Store data securely and meet privacy requirements |
-| 8 · Data storage | Use storage techniques to reduce processing latency |
-| 9 · Data quality | Data is irrelevant if you don't remove quality issues — or don't even know about them |
-| 10 · Data observability | Monitoring metrics that alert you when something bad happens or is about to |
+| ۲ · ورود داده | وارد کردن داده همیشه اولین قدم فنی است؛ بدون آن چیزی برای کار کردن نیست |
+| ۳ · مدیریت خطا | خطاها هم از کد می‌آیند و هم از تأمین‌کننده‌هایی که تعهدشان را می‌شکنند، مثلاً فیلدهای لازم را نمی‌فرستند |
+| ۴ · ویژگی idempotency | خطا به تلاش دوباره‌ی خودکار یا دستی می‌انجامد؛ idempotency باعث می‌شود اجراهای مکرر خروجی یکتا بدهند |
+| ۵ · ارزش داده | مجموعه‌داده‌ها را خلاصه یا ترکیب کنید تا برای کاربرهای کسب‌وکار ارزش بسازید |
+| ۶ · جریان داده | این‌که pipelineِ ارزش‌ساز چطور با بقیه‌ی مؤلفه‌های داده تعامل می‌کند |
+| ۷ · امنیت داده | داده را امن ذخیره کنید و الزام‌های حریم خصوصی را برآورده کنید |
+| ۸ · ذخیره‌سازی داده | با تکنیک‌های ذخیره‌سازی تأخیر پردازش را کم کنید |
+| ۹ · کیفیت داده | داده بی‌ربط است اگر مسئله‌های کیفیت را برندارید، یا اصلاً از آن‌ها خبر نداشته باشید |
+| ۱۰ · observability داده | monitoring متریک‌هایی که وقتی چیز بدی می‌افتد یا نزدیک است بیفتد هشدار می‌دهند |
 
-**Backfilling** is the book's single term for any task that processes past data, whether it was processed before or not; strictly, reprocessing and backfilling differ, as explained in the book's GitHub glossary (p. 4).
+کتاب **backfill** را اصطلاح واحدی برای هر کاری می‌داند که داده‌ی گذشته را پردازش می‌کند، چه قبلاً پردازش شده باشد چه نه؛ به‌طور دقیق، پردازش دوباره و backfill فرق دارند، همان‌طور که واژه‌نامه‌ی GitHub کتاب توضیح می‌دهد (p. 4).
 
-### Case study used in this book
+> **In practice:** هر دسته‌ی الگوی کتاب در reference stack جایی دارد: loader با dlt همان ingestion است، لایه‌های Bronze و Silver و Gold همان data value، و alertهای Grafana همان observability.
+>
+> **Your turn:** همکار تازه‌ای می‌پرسد «وقتی Airflow خودش retry دارد، چرا باید به idempotency فکر کنیم؟» چه جوابی می‌دهید؟
+>
+> *Answer:* یک retry فقط کار را دوباره اجرا می‌کند؛ اگر نوشتن idempotent نباشد، هر retry ردیف تکراری به Bronze می‌افزاید. برای همین کتاب مدیریت خطا و idempotency را دو دسته‌ی جدا می‌گذارد که با هم کار می‌کنند (pp. 3–4).
 
-Patterns are domain-independent, but each is introduced through a case study: a **blog data analytics platform** (Figure 1-1) with three important parts (pp. 5–6):
+### مطالعه‌ی موردی این کتاب
 
-| Part | What it holds |
+الگوها مستقل از دامنه‌اند، ولی هر کدام از دل یک مطالعه‌ی موردی معرفی می‌شوند: یک **platform تحلیل داده‌ی وبلاگ** (شکل ۱-۱) با سه بخش مهم (pp. 5–6):
+
+| بخش | چه چیزی دارد |
 |---|---|
-| **Online and offline ingestion** | Online: events from users interacting with hosted blogs. Offline (“Data provider”): static external or internal datasets, such as referential data, produced less regularly (e.g. once an hour) |
-| **Real-time layer** | Streaming jobs reading a streaming broker: business-facing jobs (real-time session aggregation) and technical enablers (synchronizing data to at-rest storage for ad hoc querying) |
-| **Data organization layer** | The **Medallion architecture**: Bronze, Silver and Gold layers |
+| **ورود داده‌ی برخط و غیربرخط** | برخط: رویدادهای کاربرهایی که با وبلاگ‌های میزبانی‌شده کار می‌کنند. غیربرخط، یعنی «data provider»: مجموعه‌داده‌های ایستای بیرونی یا داخلی، مثل داده‌ی مرجع، که کم‌تکرارتر تولید می‌شوند؛ مثلاً ساعتی یک‌بار |
+| **لایه‌ی بلادرنگ** | jobهای streaming که از یک broker می‌خوانند: jobهای رو به کسب‌وکار مثل تجمیع بلادرنگ session، و توانمندسازهای فنی مثل synchronous کردن داده با ذخیره‌سازی ساکن برای کوئری موردی |
+| **لایه‌ی سازمان‌دهی داده** | همان **معماری medallion**: لایه‌های Bronze و Silver و Gold |
 
-![The case study's blog analytics platform: data providers and an API gateway feed ingestion jobs and a raw data topic; stateful and synchronization jobs enrich the data using a reference dataset; results land in bronze, silver and gold layers of lakehouse storage, all under data orchestration and observability](../figures/01-01.png)
+![platform تحلیل وبلاگ در مطالعه‌ی موردی: تأمین‌کننده‌های داده و یک API gateway به jobهای ورود داده و یک topic داده‌ی خام خوراک می‌دهند؛ jobهای stateful و synchronization با یک مجموعه‌داده‌ی مرجع داده را غنی می‌کنند؛ و نتیجه‌ها در لایه‌های bronze و silver و gold ذخیره‌سازی lakehouse می‌نشینند، همه زیر هماهنگ‌سازی و observability داده](../figures/01-01.png)
 
-*Figure 1-1 (p. 5): the numbered boxes mark the three parts the book singles out; every later chapter's examples live somewhere on this map.*
+*Figure 1-1 (p. 5): کادرهای شماره‌دار همان سه بخشی را نشان می‌دهند که کتاب جدا می‌کند؛ نمونه‌های هر فصل بعدی جایی روی همین نقشه زندگی می‌کنند.*
 
-The layers mirror the patterns' maturity: patterns that create business value mostly expose data in **Gold**, while the rest stay in Bronze or Silver. The figure deliberately omits technology so the focus stays on the patterns; each pattern's *Examples* section shows implementations (p. 6).
+لایه‌ها بلوغ الگوها را آینه می‌کنند: الگوهایی که ارزش کسب‌وکاری می‌سازند بیشتر داده را در **Gold** در معرض دید می‌گذارند و بقیه در Bronze یا Silver می‌مانند. شکل عمداً فناوری را نمی‌گوید تا تمرکز روی خود الگوها بماند؛ بخش «نمونه‌ها»ی هر الگو پیاده‌سازی‌ها را نشان می‌دهد (p. 6).
 
-## Beyond the book
+> **In practice:** مطالعه‌ی موردی کتاب همان معماری medallion را دارد که warehouse ما دارد؛ فرقش این است که در stack ما هر سه لایه جدول‌های ClickHouse‌اند و transformationها SQL داخل warehouse.
+>
+> **Your turn:** یک داشبورد Metabase عدد اشتباه نشان می‌دهد. از کدام لایه شروع به گشتن می‌کنید؟
+>
+> *Answer:* از Silver به عقب: اگر Silver درست است، اشکال در منطق Gold است؛ اگر نه، Bronze را با منبع مقایسه کنید. چون Bronze کپی خام است، هر لایه‌ی بالاتر را می‌شود با اجرای دوباره‌ی SQL از نو ساخت (pp. 5–6).
 
-- The Medallion architecture is described in Chapter 4 of *Delta Lake: The Definitive Guide* (Lee et al., O'Reilly, 2024), which the author cites (p. 6); the layer names come from Databricks, where the term originated.
-- Each pattern in the following chapters is presented the same way — problem, solution, consequences, examples — which is how the vault's notes for chapters 2–10 are organized too.
+## فراتر از کتاب
 
-## Connections
+- معماری medallion در فصل ۴ کتاب *Delta Lake: The Definitive Guide* از Lee و همکاران، O'Reilly سال ۲۰۲۴، شرح داده شده که نویسنده به آن ارجاع می‌دهد (p. 6)؛ نام لایه‌ها از Databricks می‌آید که این اصطلاح از آن‌جا درآمده.
+- هر الگو در فصل‌های بعدی به همان شکل ارائه می‌شود، یعنی مسئله و راه‌حل و پیامدها و نمونه‌ها، و یادداشت‌های vault برای فصل‌های ۲ تا ۱۰ هم همین‌طور سازمان یافته‌اند.
 
-- **Related chapters:** [2. Data Ingestion](02-data-ingestion-design-patterns.md) (the first step of the flow), [3. Error Management](03-error-management-design-patterns.md) (the Dead-Letter pattern used as this chapter's example), [4. Idempotency](04-idempotency-design-patterns.md) (backfilling).
+## پیوندها
 
-## Check yourself
+- **فصل‌های مرتبط:** [فصل ۲: ورود داده](02-data-ingestion-design-patterns.md) که اولین قدم جریان است، [فصل ۳: مدیریت خطا](03-error-management-design-patterns.md) که الگوی Dead-Letter نمونه‌ی همین فصل از آن‌جاست، و [فصل ۴: ویژگی idempotency](04-idempotency-design-patterns.md) که backfill را می‌گوید.
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+## خودتان را بسنجید
 
-1. **In the recipe analogy, what corresponds to a pattern's “consequences”?**
-   - [ ] The ingredients list
-   - [x] Eating flan every day leaves less time for sport — just as dead-lettering adds complexity to the codebase
-   - [ ] The fact that “flan” is easier to search for than “caramel custard”
-   - [ ] Swapping white sugar for brown
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-   *Answer:* Consequences are the side effects you accept by applying a pattern; for the Dead-Letter pattern, extra logic and complexity (pp. 1–2).
+1. **در قیاس دستور پخت، چه چیزی با «پیامدها»ی یک الگو متناظر است؟**
+   - [ ] فهرست مواد
+   - [x] این‌که هر روز فلان خوردن وقت کمتری برای ورزش می‌گذارد، همان‌طور که dead-lettering پیچیدگی به کد اضافه می‌کند
+   - [ ] این‌که جست‌وجوی «فلان» از «کاستارد کاراملی» آسان‌تر است
+   - [ ] عوض کردن شکر سفید با قهوه‌ای
 
-2. **Why aren't the Gang of Four patterns enough for data engineering?**
+   *Answer:* پیامدها همان اثرهای جانبی‌اند که با به کار بردن یک الگو می‌پذیرید؛ برای الگوی Dead-Letter یعنی منطق اضافه و پیچیدگی (pp. 1–2).
 
-   *Answer:* They keep code maintainable, but data projects also face data-specific problems — failure management, backfilling, idempotency and data correctness — that code-level patterns don't address (p. 3).
+2. **چرا الگوهای Gang of Four برای مهندسی داده کافی نیستند؟**
 
-3. **Which Medallion layer do the patterns that create business value mostly expose data in?**
-   - [ ] Bronze
-   - [ ] Silver
-   - [x] Gold
+   *Answer:* کد را قابل‌نگه‌داری نگه می‌دارند، ولی پروژه‌های داده با مسئله‌های خاص داده هم روبه‌رویند، یعنی مدیریت شکست و backfill و idempotency و درستی داده، که الگوهای سطح کد به آن‌ها نمی‌پردازند (p. 3).
 
-   *Answer:* Gold exposes data in the format final users expect (data marts, reference datasets); other patterns stay behind in Bronze or Silver (p. 6).
+3. **الگوهایی که ارزش کسب‌وکاری می‌سازند بیشتر داده را در کدام لایه‌ی medallion در معرض دید می‌گذارند؟**
+   - [ ] لایه‌ی Bronze
+   - [ ] لایه‌ی Silver
+   - [x] لایه‌ی Gold
 
-4. **What does the book mean by “backfilling”?**
+   *Answer:* لایه‌ی Gold داده را در قالبی که کاربر نهایی انتظار دارد در معرض دید می‌گذارد، مثل data mart و مجموعه‌داده‌ی مرجع؛ بقیه‌ی الگوها در Bronze یا Silver می‌مانند (p. 6).
 
-   *Answer:* Any task that processes past data, whether that data was already processed or not — the book deliberately uses the one term even though reprocessing and backfilling technically differ (p. 4).
+4. **کتاب از «backfill» چه منظوری دارد؟**
+
+   *Answer:* هر کاری که داده‌ی گذشته را پردازش می‌کند، چه آن داده قبلاً پردازش شده باشد چه نه؛ کتاب عمداً همین یک اصطلاح را به کار می‌برد، هرچند پردازش دوباره و backfill از نظر فنی فرق دارند (p. 4).

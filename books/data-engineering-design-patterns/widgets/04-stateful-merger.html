@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Merger vs Stateful Merger</title>
-<meta name="description" content="Replay the book's A/B/C/M/N/O increments with a plain MERGE and with a state table that restores the right version before backfilling, and compare what consumers see during the replay. Illustrates Data Engineering Design Patterns, Chapter 4.">
+<title>مقایسه‌ی Merger و Stateful Merger</title>
+<meta name="description" content="incrementهای A و B و C و M و N و O کتاب را یک‌بار با MERGE ساده و یک‌بار با جدول حالتی اجرا کنید که پیش از backfill نسخه‌ی درست را برمی‌گرداند، و ببینید consumer در زمان اجرای دوباره چه می‌بیند. تصویری از فصل ۴ کتاب Data Engineering Design Patterns.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .cols { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
@@ -22,67 +22,67 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/04-idempotency-design-patterns.html">Chapter 4</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Stateful Merger</span>
+      <a href="../chapters/04-idempotency-design-patterns.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">الگوی Stateful Merger</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 4 · Idempotency Design Patterns</div>
-  <h1>Merger vs Stateful Merger</h1>
-  <p class="lede">A <code>MERGE</code> upserts each increment into the latest table. That is idempotent for a single rerun. During a backfill, though, the replay starts from <em>today's</em> table, so consumers see rows that didn't exist yet at the replayed time. The Stateful Merger records which table version each run produced. Before a backfill it restores the version of the previous run.</p>
-  <p class="source-note">Illustrates “Pattern: Merger” and “Pattern: Stateful Merger” (pp. 89–100). The increments and expected outputs are those of Tables 4-1 and 4-2 (p. 92): A at 07:00; A–U and B at 08:00; B–D and C at 09:00; M, N and O at 10:00. U is an update and D a soft delete. The restore rule follows pp. 95–96: no previous version → truncate; previous version = latest → normal run; otherwise restore. As in Tables 4-4 and 4-5, only MERGE commits get version numbers, so restores aren't counted. Implementation is the vault's own.</p>
+  <div class="eyebrow">فصل ۴ · الگوهای طراحی idempotency</div>
+  <h1>مقایسه‌ی Merger و Stateful Merger</h1>
+  <p class="lede">دستور <code>MERGE</code> هر increment را در جدید‌ترین جدول درج‌و‌به‌روز می‌کند. این برای یک اجرای دوباره‌ی تک idempotent است. ولی در زمان backfill، اجرای دوباره از جدول <em>امروز</em> شروع می‌شود، پس consumerها ردیف‌هایی را می‌بینند که در زمان اجرای دوباره‌شده هنوز وجود نداشتند. الگوی Stateful Merger ثبت می‌کند که هر اجرا کدام نسخه‌ی جدول را ساخته. پیش از backfill، نسخه‌ی اجرای قبلی را برمی‌گرداند.</p>
+  <p class="source-note">تصویری از «الگو: Merger» و «الگو: Stateful Merger» (صص. ۸۹–۱۰۰). incrementها و خروجی‌های انتظاری همان جدول‌های ۴-۱ و ۴-۲ است (ص. ۹۲): ردیف A در ۰۷:۰۰؛ A–U و B در ۰۸:۰۰؛ B–D و C در ۰۹:۰۰؛ و M و N و O در ۱۰:۰۰. حرف U به‌معنای به‌روزرسانی و D به‌معنای حذف نرم است. قاعده‌ی برگرداندن از صص. ۹۵–۹۶ می‌آید: نسخه‌ی قبلی نیست ← truncate؛ نسخه‌ی قبلی برابر جدید‌ترین ← اجرای معمولی؛ وگرنه برگرداندن. مثل جدول‌های ۴-۴ و ۴-۵، فقط commitهای MERGE شماره‌ی نسخه می‌گیرند، پس برگرداندن‌ها شمرده نمی‌شوند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel">
         <div class="cols">
-          <div><h3>Output table now</h3><div class="chips" id="now"></div></div>
-          <div><h3>Correct for this execution time</h3><div class="chips" id="truth"></div></div>
+          <div><h3>جدول خروجی در این لحظه</h3><div class="chips" id="now"></div></div>
+          <div><h3>درست برای این زمان اجرا</h3><div class="chips" id="truth"></div></div>
         </div>
         <div class="verdict" id="verdict"></div>
-        <h3 style="font-size:.8rem;margin:14px 0 6px;color:var(--ink-2)">Runs (what consumers saw after each)</h3>
-        <div class="tbl"><table class="data"><thead><tr><th>Run</th><th>New rows</th><th>Restore step</th><th>Output rows</th><th>Version</th></tr></thead><tbody id="runs"></tbody></table></div>
+        <h3 style="font-size:.8rem;margin:14px 0 6px;color:var(--ink-2)">اجراها، یعنی آن چیزی که consumerها بعد از هر کدام دیدند</h3>
+        <div class="tbl"><table class="data"><thead><tr><th>اجرا</th><th>ردیف‌های تازه</th><th>مرحله‌ی برگرداندن</th><th>ردیف‌های خروجی</th><th>نسخه</th></tr></thead><tbody id="runs"></tbody></table></div>
       </div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Controls</p>
+        <p class="panel-title">کنترل‌ها</p>
         <div id="mode"></div>
         <div class="row" style="margin-top:10px">
-          <label for="from" class="sr-only">Backfill from</label>
-          <select id="from"><option value="0">Backfill from 07:00</option><option value="1" selected>Backfill from 08:00</option><option value="2">Backfill from 09:00</option><option value="3">Backfill from 10:00</option></select>
-          <button class="btn" type="button" id="bf">Queue backfill</button>
+          <label for="from" class="sr-only">backfill از</label>
+          <select id="from"><option value="0">backfill از ۰۷:۰۰</option><option value="1" selected>backfill از ۰۸:۰۰</option><option value="2">backfill از ۰۹:۰۰</option><option value="3">backfill از ۱۰:۰۰</option></select>
+          <button class="btn" type="button" id="bf">صف کردن backfill</button>
         </div>
         <div id="player" style="margin-top:12px"></div>
         <p class="field-hint" id="queue" style="margin-top:8px"></p>
       </div>
-      <div class="panel"><p class="panel-title">State table (execution → version)</p><div class="tbl" style="max-height:130px"><table class="data"><tbody id="state"></tbody></table></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">جدول حالت، یعنی زمان اجرا به نسخه</p><div class="tbl" style="max-height:130px"><table class="data"><tbody id="state"></tbody></table></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Run the four hours, then backfill from 08:00 with the plain Merger.</strong> After the 08:00 rerun the table holds A–U, B, C, M, N and O, as in Table 4-2. C, M, N and O didn't exist at 08:00.</li>
-    <li><strong>Switch to the Stateful Merger and repeat.</strong> The 08:00 rerun finds version 1 for 07:00, which differs from the latest version, 4. It restores version 1 first, so consumers see exactly Table 4-1's rows.</li>
-    <li><strong>Backfill from 07:00.</strong> There is no earlier run, so the table is truncated before the merge (p. 96).</li>
-    <li><strong>The rest of the replay needs no restores.</strong> Each later run finds that its predecessor's new version is the latest one.</li>
+    <li><strong>چهار ساعت را اجرا کنید و بعد با Merger ساده از ۰۸:۰۰ backfill کنید.</strong> بعد از اجرای دوباره‌ی ۰۸:۰۰، جدول ردیف‌های A–U و B و C و M و N و O را دارد، همان‌طور که در جدول ۴-۲ هست. ردیف‌های C و M و N و O در ۰۸:۰۰ وجود نداشتند.</li>
+    <li><strong>به Stateful Merger سوئیچ کنید و تکرار کنید.</strong> اجرای دوباره‌ی ۰۸:۰۰ برای ۰۷:۰۰ نسخه‌ی ۱ را پیدا می‌کند، که با جدید‌ترین نسخه که ۴ است فرق دارد. اول نسخه‌ی ۱ را برمی‌گرداند، پس consumerها دقیقاً ردیف‌های جدول ۴-۱ را می‌بینند.</li>
+    <li><strong>از ۰۷:۰۰ backfill کنید.</strong> اجرای قبل‌تری نیست، پس جدول پیش از merge، truncate می‌شود (ص. ۹۶).</li>
+    <li><strong>بقیه‌ی اجرای دوباره به برگرداندن نیاز ندارد.</strong> هر اجرای بعدی می‌بیند نسخه‌ی تازه‌ی قبلی‌اش همان جدید‌ترین است.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/04-idempotency-design-patterns.html"><small>Lesson</small>4. Idempotency Design Patterns</a></li>
+    <li><a href="../chapters/04-idempotency-design-patterns.html"><small>درس</small>فصل ۴: الگوهای طراحی idempotency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -105,18 +105,18 @@
 
   function reset() {
     s = { table: {}, versions: [{}], state: {}, queue: [0, 1, 2, 3], runs: [], last: null, phase: "normal" };
-    log.clear(); log.add((cfg.mode === "merger" ? "Merger" : "Stateful Merger") + ": four hourly runs are queued.", "muted");
+    log.clear(); log.add("الگوی " + (cfg.mode === "merger" ? "Merger" : "Stateful Merger") + ": چهار اجرای ساعتی در صف است.", "muted");
     render();
   }
 
   function step() {
-    if (!s.queue.length) { log.add("Queue empty. Queue a backfill to replay hours.", "muted"); return false; }
+    if (!s.queue.length) { log.add("صف خالی است. یک backfill صف کنید تا ساعت‌ها دوباره اجرا شوند.", "muted"); return false; }
     var i = s.queue.shift(), inc = INC[i], restore = "—", latest = s.versions.length - 1;
     if (cfg.mode === "stateful") {
       var prev = i === 0 ? undefined : s.state[INC[i - 1].t];
-      if (prev === undefined) { s.table = {}; restore = "no previous version → TRUNCATE"; log.add(inc.t + ": no version for the previous execution → truncate", "warn"); }
-      else if (prev === latest) { restore = "prev " + prev + " = latest " + latest + " → none"; }
-      else { s.table = Object.assign({}, s.versions[prev]); restore = "prev " + prev + " ≠ latest " + latest + " → RESTORE " + prev; log.add(inc.t + ": previous execution's version " + prev + " ≠ latest " + latest + " → restore to version " + prev, "warn"); }
+      if (prev === undefined) { s.table = {}; restore = "نسخه‌ی قبلی نیست ← TRUNCATE"; log.add("زمان " + inc.t + ": برای اجرای قبلی نسخه‌ای نیست ← truncate", "warn"); }
+      else if (prev === latest) { restore = "قبلی " + prev + " برابر جدید‌ترین " + latest + " ← ندارد"; }
+      else { s.table = Object.assign({}, s.versions[prev]); restore = "قبلی " + prev + " ≠ جدید‌ترین " + latest + " ← RESTORE " + prev; log.add("زمان " + inc.t + ": نسخه‌ی اجرای قبلی که " + prev + " است با جدید‌ترین که " + latest + " است فرق دارد ← برگشت به نسخه‌ی " + prev, "warn"); }
     }
     s.table = apply(s.table, inc);
     s.versions.push(Object.assign({}, s.table));
@@ -125,7 +125,7 @@
     var ok = rows(s.table).join() === rows(truth(i)).join();
     s.runs.push({ t: inc.t, nr: newRows(inc), restore: restore, out: rows(s.table).join(", "), v: v, ok: ok, i: i });
     s.last = i;
-    log.add(inc.t + ": MERGE " + newRows(inc) + " → version " + v + ". Consumers see " + rows(s.table).join(", ") + (ok ? "" : " — wrong for " + inc.t), ok ? "ok" : "bad");
+    log.add("زمان " + inc.t + ": دستور MERGE روی " + newRows(inc) + " ← نسخه‌ی " + v + ". consumerها می‌بینند: " + rows(s.table).join(", ") + (ok ? "" : " — برای " + inc.t + " غلط است"), ok ? "ok" : "bad");
     render();
     return s.queue.length > 0;
   }
@@ -134,8 +134,8 @@
     function chips(mount, t, ref) {
       var m = Kit.clear(document.getElementById(mount));
       rows(t).forEach(function (rw) { var extra = ref && rows(ref).indexOf(rw) < 0; m.appendChild(Kit.el("span", { class: "rk" + (extra ? " bad" : "") }, rw + (extra ? " ✕" : ""))); });
-      if (ref) rows(ref).forEach(function (rw) { if (rows(t).indexOf(rw) < 0) m.appendChild(Kit.el("span", { class: "rk miss" }, rw + " missing")); });
-      if (!rows(t).length && !(ref && rows(ref).length)) m.appendChild(Kit.el("span", { class: "field-hint" }, "empty"));
+      if (ref) rows(ref).forEach(function (rw) { if (rows(t).indexOf(rw) < 0) m.appendChild(Kit.el("span", { class: "rk miss" }, rw + " غایب")); });
+      if (!rows(t).length && !(ref && rows(ref).length)) m.appendChild(Kit.el("span", { class: "field-hint" }, "خالی"));
     }
     var tr = s.last === null ? {} : truth(s.last);
     chips("now", s.table, s.last === null ? null : tr);
@@ -143,7 +143,7 @@
     var vd = Kit.clear(document.getElementById("verdict"));
     if (s.last !== null) {
       var ok = rows(s.table).join() === rows(tr).join();
-      vd.appendChild(Kit.el("div", { class: "callout " + (ok ? "ok" : "bad") }, ok ? "After the " + INC[s.last].t + " run, consumers see the correct rows." : "After the " + INC[s.last].t + " run, consumers see rows that are wrong for " + INC[s.last].t + " (✕ = shouldn't exist yet)."));
+      vd.appendChild(Kit.el("div", { class: "callout " + (ok ? "ok" : "bad") }, ok ? "بعد از اجرای " + INC[s.last].t + "، consumerها ردیف‌های درست را می‌بینند." : "بعد از اجرای " + INC[s.last].t + "، consumerها ردیف‌هایی را می‌بینند که برای " + INC[s.last].t + " غلط‌اند؛ علامت ✕ یعنی هنوز نباید وجود داشته باشد."));
     }
     var rb = Kit.clear(document.getElementById("runs"));
     s.runs.forEach(function (x, k) {
@@ -151,32 +151,32 @@
         Kit.el("td", null, Kit.el("span", { style: x.ok ? "" : "color:var(--bad)" }, x.out + (x.ok ? "" : " ✕"))), Kit.el("td", null, String(x.v))));
     });
     var sb = Kit.clear(document.getElementById("state"));
-    if (cfg.mode !== "stateful") sb.appendChild(Kit.el("tr", null, Kit.el("td", null, "The plain Merger keeps no state.")));
-    else INC.forEach(function (inc) { if (s.state[inc.t] !== undefined) sb.appendChild(Kit.el("tr", null, Kit.el("td", null, inc.t), Kit.el("td", null, "version " + s.state[inc.t]))); });
-    document.getElementById("queue").textContent = s.queue.length ? "Queued: " + s.queue.map(function (i) { return INC[i].t; }).join(" → ") : "Nothing queued.";
+    if (cfg.mode !== "stateful") sb.appendChild(Kit.el("tr", null, Kit.el("td", null, "الگوی Merger ساده هیچ حالتی نگه نمی‌دارد.")));
+    else INC.forEach(function (inc) { if (s.state[inc.t] !== undefined) sb.appendChild(Kit.el("tr", null, Kit.el("td", null, inc.t), Kit.el("td", null, "نسخه‌ی " + s.state[inc.t]))); });
+    document.getElementById("queue").textContent = s.queue.length ? "در صف: " + s.queue.map(function (i) { return INC[i].t; }).join(" ← ") : "چیزی در صف نیست.";
   }
 
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Pattern", value: cfg.mode,
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "الگو", value: cfg.mode,
     options: [{ value: "merger", label: "Merger" }, { value: "stateful", label: "Stateful Merger" }],
     onChange: function (v) { cfg.mode = v; reset(); } }).element);
   document.getElementById("bf").addEventListener("click", function () {
     var from = parseInt(document.getElementById("from").value, 10);
     for (var i = from; i < INC.length; i++) s.queue.push(i);
-    log.add("Backfill queued from " + INC[from].t + ".", "muted"); render();
+    log.add("کار backfill از " + INC[from].t + " صف شد.", "muted"); render();
   });
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1200 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why does a plain MERGE backfill from 08:00 show C, M, N and O at 08:00?",
-      options: ["MERGE duplicates rows", "The replay starts from the latest table, not the table as it was at 08:00", "The 08:00 increment contains them"], answer: 1,
-      explain: "Table 4-2 shows exactly this (p. 92)." },
-    { q: "Rerunning 2024-10-07: the state table has version 2 for 10-06, and the latest version is 4. What happens?",
-      options: ["A normal merge", "Truncate, then merge", "Restore to version 2, then merge"], answer: 2,
-      explain: "The versions differ, so this is a backfill (pp. 95–96)." },
-    { q: "A compaction runs between two merges. Why is restoring “the previous run's version” then wrong?",
-      options: ["Compaction deletes the state table", "It would drop the compaction commit. Restore the current run's version − 1 instead", "Restores can't follow a compaction"], answer: 1,
-      explain: "No-data commits create versions too (pp. 98–99)." }
+    { q: "چرا backfill با MERGE ساده از ۰۸:۰۰، ردیف‌های C و M و N و O را در ۰۸:۰۰ نشان می‌دهد؟",
+      options: ["دستور MERGE ردیف‌ها را تکرار می‌کند", "اجرای دوباره از جدید‌ترین جدول شروع می‌شود و نه از جدول آن‌طور که در ۰۸:۰۰ بود", "خود increment ساعت ۰۸:۰۰ آن‌ها را دارد"], answer: 1,
+      explain: "جدول ۴-۲ دقیقاً همین را نشان می‌دهد (ص. ۹۲)." },
+    { q: "اجرای دوباره‌ی ۲۰۲۴-۱۰-۰۷: جدول حالت برای ۱۰-۰۶ نسخه‌ی ۲ را دارد و جدید‌ترین نسخه ۴ است. چه می‌شود؟",
+      options: ["یک merge معمولی", "اول truncate و بعد merge", "برگشت به نسخه‌ی ۲ و بعد merge"], answer: 2,
+      explain: "نسخه‌ها فرق دارند، پس این یک backfill است (صص. ۹۵–۹۶)." },
+    { q: "یک compaction بین دو merge اجرا می‌شود. چرا برگرداندن به «نسخه‌ی اجرای قبلی» آن‌وقت غلط است؟",
+      options: ["عملیات compaction جدول حالت را حذف می‌کند", "ردیف commit مربوط به compaction را می‌اندازد؛ به‌جایش نسخه‌ی اجرای فعلی منهای یک را برگردانید", "برگرداندن بعد از compaction ممکن نیست"], answer: 1,
+      explain: "commitهای بی‌داده هم نسخه می‌سازند (صص. ۹۸–۹۹)." }
   ]);
 })();
 </script>

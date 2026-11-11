@@ -1,18 +1,20 @@
-# Bounded vs unbounded incremental backfills
+# عمل backfill افزایشی bounded در برابر unbounded
 
-A delta-column Incremental Loader that reads `ingestion_time >= start` behaves like a bounded one in normal runs, because nothing newer exists yet. When you replay an old run, though, it reads everything from that run up to now. This experiment builds two months of hourly data and compares how much each implementation reads when single runs, or a whole week, are backfilled.
+یک Incremental Loader با delta column که `ingestion_time >= start` را می‌خواند، در اجراهای معمولی مثل نسخه‌ی bounded رفتار می‌کند، چون چیز تازه‌تری هنوز وجود ندارد. ولی وقتی اجرای قدیمی‌ای را دوباره اجرا کنید، همه چیز را از آن اجرا تا حالا می‌خواند. این آزمایش دو ماه داده‌ی ساعتی می‌سازد و مقایسه می‌کند هر پیاده‌سازی سر backfill یک اجرای تک یا یک هفته‌ی کامل چقدر می‌خواند.
 
-*Illustrates Data Engineering Design Patterns, “Pattern: Incremental Loader”, pp. 12–16 (the bounded window `BETWEEN ingestion_time AND ingestion_time + INTERVAL '1 HOUR'` is on p. 14). The workload is synthetic; the implementation is the vault’s own.*
+*این آزمایش «الگو: Incremental Loader» از کتاب Data Engineering Design Patterns را نشان می‌دهد، صص. ۱۲–۱۶؛ پنجره‌ی bounded `BETWEEN ingestion_time AND ingestion_time + INTERVAL '1 HOUR'` در ص. ۱۴ است. بار کاری ساختگی است و پیاده‌سازی مال خود vault.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 incremental_window.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Source: 1,444,469 rows over 1440 hourly partitions (60 days)
@@ -33,13 +35,13 @@ Replaying the last 7 days (168 runs, one after another)
 Bounded runs read disjoint hours, so the 168 replays can also run in parallel.
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Replaying a run from 59 days ago with the unbounded loader reads almost the whole table. The backfill has become a full load, as the book warns.
-- The bounded loader reads one hour whatever the run's age, so its compute is predictable.
-- Replaying a week sequentially costs about 85 times more without the bound, because every replay reads the hours of all later replays again.
+- اجرای دوباره‌ی اجرایی از ۵۹ روز پیش با loader unbounded تقریباً کل جدول را می‌خواند. این backfill به بار‌گذاری کامل تبدیل شده، همان‌طور که کتاب هشدار می‌دهد.
+- نسخه‌ی bounded هر سنی که اجرا داشته باشد یک ساعت می‌خواند، پس محاسبه‌اش پیش‌بینی‌پذیر است.
+- اجرای دوباره‌ی یک هفته‌ی پشت‌سرهم بی کران تقریباً ۸۵ برابر گران‌تر است، چون هر اجرای دوباره، ساعت‌های همه‌ی اجراهای دوباره‌ی بعدی را هم می‌خواند.
 
-## Related
+## پیوندها
 
-- Chapter note: [2. Data Ingestion Design Patterns](../../chapters/02-data-ingestion-design-patterns.md) — “Pattern: Incremental Loader”, pp. 12–16
-- Explore in the browser: [Incremental loading and backfills](../../widgets/02-incremental-loader.html)
+- یادداشت فصل: [فصل ۲: الگوهای طراحی ورود داده](../../chapters/02-data-ingestion-design-patterns.md) — «الگو: Incremental Loader»، صص. ۱۲–۱۶
+- در مرورگر ببینید: [بار‌گذاری افزایشی و backfill](../../widgets/02-incremental-loader.html)

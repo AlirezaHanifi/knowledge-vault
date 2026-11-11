@@ -3,59 +3,61 @@ book: data-engineering-design-patterns
 chapter: 10
 title: "Data Observability Design Patterns"
 pages: "305–329"
+translated_title: "الگوهای طراحی observability داده"
+lang: fa
 ---
 
-# 10. Data Observability Design Patterns
+# فصل ۱۰: الگوهای طراحی observability داده
 
-[← 9. Data Quality Design Patterns](09-data-quality-design-patterns.md) · [Book](../README.md)
+[فصل ۹: الگوهای طراحی کیفیت داده →](09-data-quality-design-patterns.md) · [کتاب](../README.md)
 
-## Summary
+## خلاصه
 
-Data quality patterns focus on the data itself and miss problems around it. An AWAP job that never runs because an upstream flow stopped detects nothing (p. 305). Observability patterns add monitoring and alerting, built on two pillars: **detection** and **tracking**.
+الگوهای کیفیت داده روی خود داده تمرکز دارند و مسئله‌های دور و برش را نمی‌بینند. یک job از جنس AWAP که هیچ‌وقت اجرا نمی‌شود، چون جریانی upstreamی ایستاده، هیچ چیزی را تشخیص نمی‌دهد (p. 305). الگوهای observability، monitoring و هشدار اضافه می‌کنند و روی دو ستون ساخته می‌شوند: **تشخیص** و **ردیابی**.
 
-**Data detectors** check the data:
+**الگوهای detector داده** خود داده را بررسی می‌کنند:
 
-- The **Flow Interruption Detector** alerts when data stops arriving. It can watch for no data per time unit, an over-long gap without data, or stale metadata, data or storage.
-- The **Skew Detector** compares volumes between runs, or the spread across partitions (`STDDEV/AVG`), so a pipeline doesn't process a half-empty dataset.
+- الگوی **Flow Interruption Detector** وقتی داده دیگر نمی‌رسد هشدار می‌دهد. می‌تواند بی‌داده بودن هر واحد زمان، یا فاصله‌ی بیش از اندازه بی داده، یا کهنگی metadata یا داده یا ذخیره‌سازی را بپاید.
+- الگوی **Skew Detector** حجم را بین اجراها مقایسه می‌کند، یا پخش شدن بین پارتیشن‌ها را با `STDDEV/AVG`، تا pipeline مجموعه‌داده‌ی نیمه‌خالی پردازش نکند.
 
-**Time detectors** check latency:
+**الگوهای detector زمان** تأخیر را بررسی می‌کنند:
 
-- The **Lag Detector** measures how far a consumer trails its producer, aggregated with MAX and percentiles — never the average.
-- The **SLA Misses Detector** checks execution time against a limit, in processing time and, separately, in event time.
+- الگوی **Lag Detector** می‌سنجد consumer چقدر از تأمین‌کننده‌اش عقب است، با تجمیع MAX و صدک‌ها و هیچ‌وقت میانگین.
+- الگوی **SLA Misses Detector** زمان اجرا را با یک سقف بررسی می‌کند، در زمان پردازش و جدا در زمان رویداد.
 
-**Data lineage** shows who depends on whom:
+**مفهوم lineage داده** نشان می‌دهد چه کسی به چه کسی وابسته است:
 
-- The **Dataset Tracker** builds a family tree of tables, topics and pipelines, either managed (Unity Catalog, Dataplex) or self-built (OpenLineage, Marquez).
-- The **Fine-Grained Tracker** goes down to columns (from the execution plan) and rows (lineage headers).
+- الگوی **Dataset Tracker** شجره‌نامه‌ای از جدول‌ها و topicها و pipelineها می‌سازد، یا مدیریت‌شده با Unity Catalog و Dataplex، یا خود‌ساخته با OpenLineage و Marquez.
+- الگوی **Fine-Grained Tracker** تا سطح ستون، از نقشه‌ی اجرا، و ردیف، با headerهای lineage، پایین می‌رود.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **A job that runs without failing can still deliver nothing.** Detect missing data instead of waiting for consumers to complain (p. 306).
-- **Irregular flows need windowed detection.** Alerting on every empty minute causes false positives and alarm fatigue (pp. 306–307).
-- **Not every new file is new data.** Compaction creates files without adding records, and schema changes update the modification time (pp. 308–309).
-- **A day-to-day skew check can lock itself in a loop.** After one bad day, the next good day looks three times too big. Compare with the last *successful* run instead (p. 312).
-- **Averages hide lag.** For partition lags of 10, 5, 30, 2, 3, 5 and 3 seconds, the average is 8 s but P90 is 18 s (p. 315).
-- **Lag and SLA are complementary.** A throttled consumer can meet its SLA while lag grows, and a daily batch job can have no lag yet miss its SLA (p. 318).
-- **Lineage tells you whom to ask.** Managed lineage only sees its own ecosystem, and custom code is opaque to column lineage (pp. 324, 327).
+- **یک job که بی شکست اجرا می‌شود باز هم می‌تواند هیچ چیزی تحویل ندهد.** داده‌ی غایب را تشخیص بدهید و منتظر شکایت consumerها نمانید (p. 306).
+- **جریان‌های نامنظم به تشخیص پنجره‌ای نیاز دارند.** هشدار دادن سر هر دقیقه‌ی خالی، مثبت کاذب و خستگی از هشدار می‌سازد (pp. 306–307).
+- **هر فایل تازه داده‌ی تازه نیست.** عملیات compaction بی اضافه کردن رکورد فایل می‌سازد، و تغییر schema زمان تغییر را به‌روز می‌کند (pp. 308–309).
+- **بررسی نامتوازنی روز‌به‌روز می‌تواند خودش را در حلقه حبس کند.** بعد از یک روز بد، روز خوب بعدی سه برابر بزرگ‌تر از لازم به نظر می‌آید. به‌جایش با آخرین اجرای *موفق* مقایسه کنید (p. 312).
+- **میانگین lag را پنهان می‌کند.** برای lagهای ۱۰ و ۵ و ۳۰ و ۲ و ۳ و ۵ و ۳ ثانیه‌ای پارتیشن‌ها، میانگین ۸ ثانیه است ولی P90 برابر ۱۸ ثانیه (p. 315).
+- **مقدار lag و SLA مکمل هم‌اند.** consumerی که خودش را throttle می‌کند می‌تواند SLA را رعایت کند در حالی که lag بزرگ می‌شود، و یک job batch روزانه می‌تواند lag نداشته باشد ولی SLA را از دست بدهد (p. 318).
+- **ساختار lineage می‌گوید از چه کسی بپرسید.** lineage مدیریت‌شده فقط بوم‌سازگان خودش را می‌بیند، و کد سفارشی برای lineage ستونی مات است (pp. 324, 327).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Data Detectors — p. 306
-  - Pattern: Flow Interruption Detector — p. 306
-  - Pattern: Skew Detector — p. 310
-- Time Detectors — p. 314
-  - Pattern: Lag Detector — p. 314
-  - Pattern: SLA Misses Detector — p. 317
-- Data Lineage — p. 321
-  - Pattern: Dataset Tracker — p. 321
-  - Pattern: Fine-Grained Tracker — p. 325
-- Summary — p. 328
+- بخش detectorهای داده — p. 306
+  - الگو: Flow Interruption Detector — p. 306
+  - الگو: Skew Detector — p. 310
+- بخش detectorهای زمان — p. 314
+  - الگو: Lag Detector — p. 314
+  - الگو: SLA Misses Detector — p. 317
+- ردگیری lineage داده — p. 321
+  - الگو: Dataset Tracker — p. 321
+  - الگو: Fine-Grained Tracker — p. 325
+- خلاصه — p. 328
 
-## Notes
+## یادداشت‌ها
 
-Observability may sound like “things the operations team should do”, but data engineers need it too (pp. 305–306). **Detection** spots problems with data or time, such as a stopped flow or a batch job that runs too long. **Tracking** maps the relationships among datasets, columns and processing jobs, which in large organizations often span teams (p. 305).
+واژه‌ی observability شاید مثل «کارهایی که تیم operations باید بکند» به گوش بیاید، ولی مهندس‌های داده هم به آن نیاز دارند (pp. 305–306). **تشخیص** مسئله‌های داده یا زمان را می‌بیند، مثل جریانی ایستاده یا job batchی که زیادی طول می‌کشد. **ردیابی** رابطه‌های بین مجموعه‌داده‌ها و ستون‌ها و jobهای پردازش را نقشه می‌کند، که در سازمان‌های بزرگ اغلب از چند تیم رد می‌شوند (p. 305).
 
 ```mermaid
 flowchart TB
@@ -67,62 +69,63 @@ flowchart TB
     TR --> FG["Fine-Grained Tracker<br/>columns · rows"]
 ```
 
-### Data detectors
+### الگوهای detector داده
 
-#### Pattern: Flow Interruption Detector (pp. 306–310)
+#### الگو: Flow Interruption Detector (pp. 306–310)
 
-**Problem.** A streaming job syncs data to an object store that feeds many teams' batch jobs. After seven months it kept processing records but stopped writing them. It didn't fail, and you only found out when a consumer complained (p. 306).
+**مسئله.** یک job streaming داده را با یک ذخیره‌سازی object synchronous می‌کند که به jobهای batch تیم‌های زیادی می‌خوراند. بعد از هفت ماه، رکوردها را پردازش می‌کرد ولی نوشتنشان را قطع کرده بود. شکست نخورد، و فقط وقتی فهمیدید که consumerی شکایت کرد (p. 306).
 
-**Solution** (pp. 306–308). For streaming (Figure 10-1):
+**راه‌حل** (pp. 306–308): برای streaming (شکل ۱۰-۱):
 
-![Records per period over time: a continuous interruption drops the flow to zero and keeps it there, while an irregular interruption leaves sporadic small bursts](../figures/10-01.png)
+![رکورد در هر دوره در طول زمان: یک قطعی پیوسته جریان را به صفر می‌برد و همان‌جا نگه می‌دارد، در حالی که قطعی نامنظم فوران‌های کوچک پراکنده می‌گذارد](../figures/10-01.png)
 
-*Figure 10-1 (p. 307): a full stop is easy to spot; irregular trickles need a threshold over a time window.*
+*Figure 10-1 (p. 307): ایست کامل آسان دیده می‌شود، ولی چکه‌های نامنظم به یک آستانه روی یک پنجره‌ی زمانی نیاز دارند.*
 
-| Delivery mode  | Detection                                                                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Continuous** | Alert when no data points arrive in a time unit, e.g. one minute                                                                           |
-| **Irregular**  | Alert when a no-data period exceeds the accepted window, e.g. five minutes. Per-minute alerts would give false positives and alarm fatigue |
+| حالت تحویل | تشخیص |
+|---|---|
+| **پیوسته** | وقتی در یک واحد زمان، مثلاً یک دقیقه، هیچ نقطه‌داده‌ای نیامد هشدار بدهید |
+| **نامنظم** | وقتی دوره‌ی بی‌داده از پنجره‌ی پذیرفته‌شده، مثلاً پنج دقیقه، بیشتر شد هشدار بدهید. هشدار دقیقه‌به‌دقیقه مثبت کاذب و خستگی از هشدار می‌داد |
 
-For batch pipelines and data at rest, check freshness at one of three layers:
+برای pipelineهای batch و داده‌ی در حال سکون، تازگی را در یکی از سه لایه بررسی کنید:
 
-| Layer        | How                                                                                                                    | Note                          |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| **Metadata** | Last modification time against a threshold, e.g. an hourly table unchanged for more than one hour                      | Cheapest                      |
-| **Data**     | A modification-time column, or row counts per period; unchanged counts over two consecutive hours mean an interruption | Needs storage for past counts |
-| **Storage**  | Time of the last file written                                                                                          | Works with any file format    |
+| لایه | چطور | نکته |
+|---|---|---|
+| **metadata** | زمان آخرین تغییر در برابر یک آستانه، مثلاً جدولی ساعتی که بیشتر از یک ساعت دست‌نخورده مانده | ارزان‌ترین |
+| **داده** | یک ستون زمان تغییر، یا شمار ردیف در هر دوره؛ شمار دست‌نخورده در دو ساعت پشت سر هم یعنی قطعی | ذخیره‌سازی برای شمارش‌های گذشته می‌خواهد |
+| **ذخیره‌سازی** | زمان آخرین فایل نوشته‌شده | با هر فرمت فایلی کار می‌کند |
 
-**Consequences** (pp. 308–309):
+**پیامدها** (pp. 308–309):
 
-- **Threshold.** “At least one record per minute” is easy to set but unrealistic for high-volume flows. Thresholds learned from past volume give false positives when, say, a marketing campaign changes activity.
-- **Metadata.** It may not exist, and modification times also change with schema evolution, which adds no records.
-- **Storage false positives.** Compaction writes new files without new data.
+- **آستانه.** شرط «دست‌کم یک رکورد در دقیقه» آسان گذاشته می‌شود ولی برای جریان‌های پرحجم واقع‌بینانه نیست. آستانه‌هایی که از حجم گذشته یاد گرفته می‌شوند وقتی مثلاً یک کمپین بازاریابی فعالیت را عوض می‌کند مثبت کاذب می‌دهند.
+- **مفهوم metadata.** ممکن است نباشد، و زمان تغییر با تکامل schema هم عوض می‌شود که هیچ رکوردی اضافه نمی‌کند.
+- **مثبت کاذب ذخیره‌سازی.** عملیات compaction فایل تازه می‌نویسد بی داده‌ی تازه.
 
-**Examples** (pp. 309–310):
+**نمونه‌ها** (pp. 309–310):
 
-- **Kafka with Prometheus and Grafana.** Compute `sum without(instance)(rate(kafka_server_brokertopicmetrics_messagesin_total{topic="visits"}[1m]))`, then alert in Grafana when the last five values are zero.
-- **PostgreSQL.** With `track_commit_timestamp` on, alert on `NOW() - MAX(pg_xact_commit_timestamp(xmin))`.
-- **Producer-pushed metric.** A Delta Lake writer pushes a `visits_last_update_time` gauge to the Prometheus Pushgateway after each write.
+- **سیستم Kafka با Prometheus و Grafana.** عبارت `sum without(instance)(rate(kafka_server_brokertopicmetrics_messagesin_total{topic="visits"}[1m]))` را حساب کنید و بعد در Grafana وقتی پنج مقدار آخر صفرند هشدار بدهید.
+- **سیستم PostgreSQL.** با روشن بودن `track_commit_timestamp`، روی `NOW() - MAX(pg_xact_commit_timestamp(xmin))` هشدار بدهید.
+- **مفهوم metric فرستاده‌ی producer.** یک writer در Delta Lake بعد از هر نوشتن یک gauge به نام `visits_last_update_time` به Prometheus Pushgateway می‌فرستد.
 
-#### Pattern: Skew Detector (pp. 310–313)
+#### الگو: Skew Detector (pp. 310–313)
 
-**Problem.** With flow interruptions now detected, consumers complain again. Your job ran correctly but on a half-empty dataset, because the provider had generation issues (p. 310).
+**مسئله.** حالا که قطعی جریان تشخیص داده می‌شود، consumerها باز شکایت می‌کنند. job شما درست اجرا شد ولی روی مجموعه‌داده‌ای نیمه‌خالی، چون تأمین‌کننده مسئله‌ی تولید داشت (p. 310).
 
-**Solution** (pp. 310–311). In this book, skew also means **different data volumes in consecutive executions**, not only unbalanced tasks. It takes three steps:
+**راه‌حل** (pp. 310–311): در این کتاب، نامتوازنی به‌معنای **حجم‌های مختلف داده در اجراهای پشت سر هم** هم هست، نه فقط taskهای نامتوازن. سه مرحله می‌برد:
 
-1. Choose the **comparison window**, e.g. today vs yesterday.
-2. Set a **tolerance threshold**. At 50%, the job accepts between 50% less and 50% more data. Base it on observed variation or ask business users.
-3. Calculate the skew in one of two ways:
-   - **Window-to-window** percentage difference, for batch jobs or for processing-time and event-time windows in streaming.
-   - **Ratio of standard deviation**, `STDDEV(x)/AVG(x)`, for partitioned stores such as a Kafka topic or a PostgreSQL table.
+۱. **پنجره‌ی مقایسه** را انتخاب کنید، مثلاً امروز در برابر دیروز.
+۲. یک **آستانه‌ی تحمل** بگذارید. روی پنجاه درصد، job بین پنجاه درصد کمتر و پنجاه درصد بیشتر داده را می‌پذیرد. بر پایه‌ی تغییر مشاهده‌شده بگذاریدش یا از کاربرهای کسب‌وکار بپرسید.
+۳. نامتوازنی را به یکی از دو شکل حساب کنید:
 
-The Skew Detector fits in AWAP's first audit step, where it blocks partial datasets (p. 311).
+- اختلاف درصدی **پنجره به پنجره**، برای jobهای batch یا برای پنجره‌های زمان پردازش و زمان رویداد در streaming.
+- **نسبت انحراف معیار**، یعنی `STDDEV(x)/AVG(x)`، برای ذخیره‌سازی‌های پارتیشن‌بندی‌شده مثل یک topic کافکا یا یک جدول PostgreSQL.
 
-**Consequences** (pp. 311–312):
+الگوی Skew Detector در مرحله‌ی audit اول AWAP جا می‌گیرد، جایی که مجموعه‌داده‌های جزئی را می‌بندد (p. 311).
 
-- **Seasonality.** Campaigns and seasons change volume. Use business knowledge to write the formula and add exceptions.
-- **Communication.** Sync with other departments to anticipate false positives.
-- **Fatality loop.** One day's data is three times smaller and fails the check. If it isn't fixed by the next day, the next valid dataset looks three times too large. Ask the producer to fix it, or compare with the dataset of the **most recent successful run** (two days ago in this example).
+**پیامدها** (pp. 311–312):
+
+- **فصلی بودن.** کمپین‌ها و فصل‌ها حجم را عوض می‌کنند. با دانش کسب‌وکار فرمول را بنویسید و استثنا اضافه کنید.
+- **ارتباط.** با دپارتمان‌های دیگر هماهنگ شوید تا مثبت کاذب را پیش‌بینی کنید.
+- **حلقه‌ی مرگ.** داده‌ی یک روز سه برابر کوچک‌تر است و بررسی را شکست می‌دهد. اگر تا روز بعد درست نشود، مجموعه‌داده‌ی معتبر بعدی سه برابر بزرگ‌تر از لازم به نظر می‌آید. از تأمین‌کننده بخواهید درستش کند، یا با مجموعه‌داده‌ی **آخرین اجرای موفق** مقایسه کنید، که در این نمونه دو روز پیش است.
 
 ```mermaid
 flowchart LR
@@ -131,59 +134,65 @@ flowchart LR
     D2 --> D3b["Day 3 vs last success (Day 1) ✓<br/>ratio 1.0"]
 ```
 
-*The vault's illustration of the book's example (p. 312). The volumes are made up; the book only says “three times smaller”.*
+*تصویر vault از نمونه‌ی کتاب (p. 312). حجم‌ها ساختگی‌اند و کتاب فقط می‌گوید «سه برابر کوچک‌تر».*
 
-> **Run it:** the vault's [skew and lag detector experiment](../lab/10-skew-and-lag/README.md) replays a bad day with both baselines and computes the book's average-vs-P90 lag example.
+> **Run it:** [آزمایش detector نامتوازنی و lag](../lab/10-skew-and-lag/README.md) در vault یک روز بد را با هر دو مبنا دوباره اجرا می‌کند و نمونه‌ی میانگین در برابر P90 کتاب را حساب می‌کند.
 
-**Examples** (pp. 312–313):
+**نمونه‌ها** (pp. 312–313):
 
-- **PostgreSQL partitions.** `(STDDEV(n_live_tup) / AVG(n_live_tup)) * 100` from `pg_stat_user_tables` over the `visits_all_range_%` partitions.
-- **Kafka in Prometheus.** `stddev(sum(kafka_log_size{topic='visits'}) by (partition)) / avg(kafka_log_size{topic='visits'}) * 100`.
-- **Airflow.** After a Readiness Marker sensor, `compare_volumes` divides the current file size by the previous run's and fails if the ratio is `> 1.5` or `< 0.5`.
+- **پارتیشن‌های PostgreSQL.** عبارت `(STDDEV(n_live_tup) / AVG(n_live_tup)) * 100` از `pg_stat_user_tables` روی پارتیشن‌های `visits_all_range_%`.
+- **سیستم Kafka در Prometheus.** عبارت `stddev(sum(kafka_log_size{topic='visits'}) by (partition)) / avg(kafka_log_size{topic='visits'}) * 100`.
+- **سیستم Airflow.** بعد از sensor یک Readiness Marker، task به نام `compare_volumes` اندازه‌ی فایل فعلی را بر اجرای قبلی تقسیم می‌کند و اگر نسبت از ۱٫۵ بیشتر یا از ۰٫۵ کمتر بود شکست می‌خورد.
 
-### Time detectors
+> **In practice:** alert روی «صفر ردیف» کافی نیست: منبعی که نیمه‌کاره بار شده صفر نمی‌شود.
+>
+> **Your turn:** چه metricی در Prometheus می‌گذارید تا هم قطع جریان و هم skew را ببیند؟
+>
+> *Answer:* شمار ردیف هر load به تفکیک جدول. alert اول وقتی چند اجرای پشت‌سرهم صفر باشند؛ alert دوم وقتی شمار با همان ساعت هفته‌های قبل خیلی فرق کند، مثلاً کمتر از نصف. دومی همان Skew Detector است که آستانه را نسبت به اجراهای قبلی می‌گذارد (pp. 306–313).
 
-#### Pattern: Lag Detector (pp. 314–317)
+### الگوهای detector زمان
 
-**Problem.** A week ago a streaming job started receiving 30% more data. You missed the announcement, and a consumer now complains about slower delivery. Before scaling, measure how fast the consumer keeps up (p. 314).
+#### الگو: Lag Detector (pp. 314–317)
 
-**Solution** (pp. 314–315). Pick a **lag unit**: a Kafka record position or append time, a Delta Lake commit number, or a partition timestamp. Then compute `lag = last_available_unit − last_processed_unit`. Partitioned stores give one lag per partition, so aggregate them:
+**مسئله.** یک هفته پیش یک job streaming شروع کرد سی درصد داده‌ی بیشتر بگیرد. اعلامش را ندیدید و حالا consumerی از تحویل کندتر شکایت دارد. پیش از مقیاس دادن، بسنجید consumer چقدر تند عقب نمی‌افتد (p. 314).
 
-- **MAX** shows the worst partition.
-- **Percentiles (P90, P95)** show how most partitions do. A P90 of 10 s means 90% of partitions lag 10 s at most.
-- Combining both covers overall latency and the worst case.
+**راه‌حل** (pp. 314–315): یک **واحد lag** انتخاب کنید، مثل موقعیت یا append time یک رکورد کافکا، یا شمار commit در Delta Lake، یا timestamp یک پارتیشن. بعد `lag = last_available_unit − last_processed_unit` را حساب کنید. ذخیره‌سازی‌های پارتیشن‌بندی‌شده برای هر پارتیشن یک lag می‌دهند، پس تجمیعشان کنید:
 
-**The average trap** (p. 315):
+- مقدار **MAX** بدترین پارتیشن را نشان می‌دهد.
+- **صدک‌ها** مثل P90 و P95 نشان می‌دهند بیشتر پارتیشن‌ها چطورند. مقدار P90 برابر ده ثانیه یعنی نود درصد پارتیشن‌ها حداکثر ده ثانیه عقب‌اند.
+- ترکیب هر دو، هم تأخیر کلی را می‌پوشاند و هم بدترین حالت را.
 
-| Partition lags (s)    | Average | P90 |
-| --------------------- | ------- | --- |
-| 10, 5, 30, 2, 3, 5, 3 | 8       | 18  |
+**تله‌ی میانگین** (p. 315):
 
-**Consequences** (p. 315): **data skew**. A bad MAX may come from one overloaded partition rather than a slow consumer. Fix it by distributing data better when writing.
+| lag پارتیشن‌ها، به ثانیه | میانگین | P90 |
+|---|---|---|
+| ۱۰، ۵، ۳۰، ۲، ۳، ۵، ۳ | ۸ | ۱۸ |
 
-**Examples** (pp. 315–317):
+**پیامدها** (p. 315): **نامتوازنی داده**. مقدار MAX بد می‌تواند از یک پارتیشن پربار بیاید و نه از consumerی کند. با توزیع بهتر داده سر نوشتن درستش کنید.
 
-- **Kafka.** A Spark `StreamingQueryListener.onQueryProgress` compares each micro-batch's `endOffset` per partition with the topic's latest offsets. It pushes a `visits_reader_lag` gauge labelled by partition.
-- **Delta Lake.** A scheduled `trigger(availableNow=True)` job reports `lastProgress[…]["endOffset"]["reservoirVersion"]` as `visits_reader_version`. The producer reports `MAX(version)` from `DESCRIBE HISTORY`, and the alert fires on the difference.
+**نمونه‌ها** (pp. 315–317):
 
-#### Pattern: SLA Misses Detector (pp. 317–321)
+- **سیستم Kafka.** یک `StreamingQueryListener.onQueryProgress` در Spark مقدار `endOffset` هر micro-batch را برای هر پارتیشن با جدید‌ترین offsetهای topic مقایسه می‌کند. یک gauge به نام `visits_reader_lag` با برچسب پارتیشن می‌فرستد.
+- **سیستم Delta Lake.** یک job زمان‌بندی‌شده با `trigger(availableNow=True)` مقدار `lastProgress[…]["endOffset"]["reservoirVersion"]` را به‌عنوان `visits_reader_version` خبر می‌دهد. تأمین‌کننده `MAX(version)` را از `DESCRIBE HISTORY` خبر می‌دهد و هشدار روی اختلافشان راه می‌افتد.
 
-**Problem.** A batch job scheduled at 6:00 a.m. must finish within **40 minutes**, because critical downstream pipelines publish statistics before 8:00 a.m. You need notifications when it runs longer (p. 317).
+#### الگو: SLA Misses Detector (pp. 317–321)
 
-**Solution** (p. 318). Compare processing time with the maximum allowed:
+**مسئله.** یک job batch که ساعت ۶ صبح زمان‌بندی شده باید ظرف **چهل دقیقه** تمام شود، چون pipelineهای حیاتی downstream آمار را پیش از ۸ صبح منتشر می‌کنند. وقتی طولانی‌تر اجرا شد باید خبر بگیرید (p. 317).
 
-- **Batch:** end time minus start time.
-- **Micro-batch or windowed streaming:** the same calculation per iteration.
-- **Per-record streaming:** write time minus read time for each record, aggregated with MAX or percentiles and collected with an Online or Offline Observer.
+**راه‌حل** (p. 318): زمان پردازش را با بیشینه‌ی مجاز مقایسه کنید:
 
-Lag and SLA misses don't always occur together:
+- **مفهوم batch:** زمان پایان منهای زمان شروع.
+- **مفهوم micro-batch یا streaming پنجره‌ای:** همان محاسبه برای هر تکرار.
+- **مفهوم streaming رکورد‌به‌رکورد:** زمان نوشتن منهای زمان خواندن هر رکورد، با تجمیع MAX یا صدک‌ها و جمع شدن با Online یا Offline Observer.
 
-| Situation                                                   | Lag           | SLA    |
-| ----------------------------------------------------------- | ------------- | ------ |
-| Consumer throttles throughput while one partition is skewed | Keeps growing | Met    |
-| Daily batch job that runs too long                          | None at start | Missed |
+مقدار lag و از دست رفتن SLA همیشه با هم نمی‌آیند:
 
-**Consequences** (p. 319): **late data and event time**. An event-time SLA (write time minus generation time) can break because a producer buffered data offline, which isn't your fault. A processing-time SLA (write time minus read time) is unaffected. Monitor the two separately (Figure 10-2).
+| موقعیت | lag | SLA |
+|---|---|---|
+| consumer throughput را throttle می‌کند در حالی که یک پارتیشن نامتوازن است | مدام بزرگ می‌شود | رعایت می‌شود |
+| job batch روزانه‌ای که زیادی طول می‌کشد | در شروع ندارد | از دست می‌رود |
+
+**پیامدها** (p. 319): **late data و زمان رویداد**. یک SLA زمان‌رویدادی، یعنی زمان نوشتن منهای زمان ساخته شدن، می‌تواند بشکند چون تأمین‌کننده‌ای آفلاین داده را بافر کرده، که تقصیر شما نیست. یک SLA زمان‌پردازشی، یعنی زمان نوشتن منهای زمان خواندن، اثر نمی‌گیرد. این دو را جدا بپایید (شکل ۱۰-۲).
 
 ```mermaid
 flowchart LR
@@ -192,127 +201,139 @@ flowchart LR
     R -. "processing-time SLA = write − read" .-> W
 ```
 
-*After Figure 10-2 (p. 319).*
+*بر پایه‌ی شکل ۱۰-۲ (p. 319).*
 
-**Examples** (pp. 319–321):
+**نمونه‌ها** (pp. 319–321):
 
-- **Airflow.** `@task(sla=datetime.timedelta(seconds=10))`. In Airflow **2.10.2** the SLA counts from the *pipeline's* start, not the task's: for an 8:00 run, `processing_task_2` is late if it starts after 08:00:10. An SLA refactor (AIP-57) is planned for Airflow 3.1.
-- **Two Flink jobs.** The first adds `start_processing_time_unix_ms` to each record. The second subtracts it from the Kafka `append_time` metadata and emits percentiles over one-minute tumbling event-time windows.
+- **سیستم Airflow.** دکوراتور `@task(sla=datetime.timedelta(seconds=10))`. در Airflow نسخه‌ی **۲٫۱۰٫۲**، مقدار SLA از شروع *pipeline* شمرده می‌شود و نه از شروع task: برای اجرای ۸:۰۰، `processing_task_2` اگر بعد از ۰۸:۰۰:۱۰ شروع شود دیر است. بازسازی SLA با AIP-57 برای Airflow نسخه‌ی ۳٫۱ برنامه‌ریزی شده.
+- **دو job در Flink.** اولی به هر رکورد `start_processing_time_unix_ms` اضافه می‌کند. دومی آن را از metadata به نام `append_time` در Kafka کم می‌کند و صدک‌ها را روی پنجره‌های tumbling یک‌دقیقه‌ای زمان رویداد منتشر می‌کند.
 
-### Data lineage
+> **In practice:** freshness در stack ما همان lag است: `now() - max(update_date)` در هر جدول Bronze.
+>
+> **Your turn:** SLA داشبورد مدیریت «داده تا ساعت ۹ صبح» است. alert را روی چه می‌گذارید؟
+>
+> *Answer:* روی SLA miss، پیش از نقض: اگر DAG تا ۸:۳۰ تمام نشده، alert بدهد. lag را هم جدا داشته باشید تا بفهمید داده‌ی منبع دیر است یا pipeline؛ کتاب این دو را دو الگوی جدا می‌داند (pp. 314–321).
 
-When a detected issue isn't your fault, you need to know whom to ask. Build a family tree of your datasets (p. 321).
+### ردگیری lineage داده
 
-#### Pattern: Dataset Tracker (pp. 321–325)
+وقتی مسئله‌ی تشخیص‌داده‌شده تقصیر شما نیست، باید بدانید از چه کسی بپرسید. شجره‌نامه‌ای از مجموعه‌داده‌هایتان بسازید (p. 321).
 
-**Problem.** Your batch job keeps failing because one field's type changed over time. Your provider doesn't generate that dataset either; it processes another team's data. Find which team introduces the inconsistency (p. 321).
+#### الگو: Dataset Tracker (pp. 321–325)
 
-**Solution** (pp. 321–323). Build a dependency tree of tables, folders, topics and queues, annotated with their owning teams (Figure 10-3, which resembles a data mesh organization). There are two implementations:
+**مسئله.** job batch شما مدام شکست می‌خورد چون نوع یک فیلد در طول زمان عوض شده. تأمین‌کننده‌ی شما هم آن مجموعه‌داده را نمی‌سازد و داده‌ی تیم دیگری را پردازش می‌کند. پیدا کنید کدام تیم ناسازگاری را وارد می‌کند (p. 321).
 
-|       | Fully managed                                                                                     | Self-built                                                                                                                                                                                           |
-| ----- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| How   | The service analyzes jobs, tables and dashboards for you                                          | Report each query's, task's or pipeline's inputs and outputs to a lineage service, then visualize them (Figure 10-4)                                                                                 |
-| Where | Databricks Unity Catalog; GCP **Dataplex** for BigQuery and Dataproc                              | **Orchestration layer** (e.g. Airflow with OpenLineage detects dependencies automatically) or **database layer** (parse executed queries such as `SELECT … FROM orders o JOIN users u …` into trees) |
-| Limit | Only supported jobs; Dataplex covers BigQuery loading jobs but not BigQuery Data Transfer Service | More effort                                                                                                                                                                                          |
+**راه‌حل** (pp. 321–323): درختی از وابستگی جدول‌ها و پوشه‌ها و topicها و صف‌ها بسازید، با یادداشت تیم مالکشان (شکل ۱۰-۳، که به سازمانی data mesh شبیه است). دو پیاده‌سازی هست:
 
-**Consequences** (p. 324): **vendor lock**, since managed lineage sees only its own services and gives a partial view elsewhere. **Custom work**, since orchestrators infer inputs and outputs only for built-in task types.
+| | کامل مدیریت‌شده | خود‌ساخته |
+|---|---|---|
+| چطور | سرویس، jobها و جدول‌ها و داشبوردها را برایتان تحلیل می‌کند | ورودی و خروجی هر کوئری و task و pipeline را به یک سرویس lineage خبر بدهید و بعد تجسمشان کنید (شکل ۱۰-۴) |
+| کجا | Databricks Unity Catalog؛ و **Dataplex** در GCP برای BigQuery و Dataproc | **لایه‌ی زمان‌بندی**، مثل Airflow با OpenLineage که وابستگی‌ها را خودکار تشخیص می‌دهد، یا **لایه‌ی دیتابیس**، یعنی تجزیه‌ی کوئری‌های اجراشده مثل `SELECT … FROM orders o JOIN users u …` به درخت |
+| محدودیت | فقط jobهای پشتیبانی‌شده؛ Dataplex، jobهای بار‌گذاری BigQuery را می‌پوشاند ولی BigQuery Data Transfer Service را نه | تلاش بیشتر |
 
-**Examples** (pp. 324–325):
+**پیامدها** (p. 324): **گیر افتادن در vendor**، چون lineage مدیریت‌شده فقط سرویس‌های خودش را می‌بیند و جای دیگر نمای جزئی می‌دهد. **کار سفارشی**، چون schedulerها ورودی و خروجی را فقط برای نوع taskهای آماده استنتاج می‌کنند.
 
-- **Airflow.** Set `OPENLINEAGE_URL=http://localhost:5000` and install `apache-airflow-providers-openlineage`. Operators such as `PostgresOperator` then report lineage automatically, viewable in the **Marquez** UI (Figure 10-5).
-- **Spark.** `spark.extraListeners = io.openlineage.spark.agent.OpenLineageSparkListener`, with HTTP transport, namespace `visits` and package `openlineage-spark_2.12:1.21.1`.
+**نمونه‌ها** (pp. 324–325):
 
-#### Pattern: Fine-Grained Tracker (pp. 325–328)
+- **سیستم Airflow.** مقدار `OPENLINEAGE_URL=http://localhost:5000` را بگذارید و `apache-airflow-providers-openlineage` را نصب کنید. operatorهایی مثل `PostgresOperator` آن‌وقت lineage را خودکار خبر می‌دهند، که در interface **Marquez** دیدنی است (شکل ۱۰-۵).
+- **سیستم Spark.** تنظیم `spark.extraListeners = io.openlineage.spark.agent.OpenLineageSparkListener` با transport از جنس HTTP و namespace به نام `visits` و بسته‌ی `openlineage-spark_2.12:1.21.1`.
 
-**Problem.** A denormalized table has grown past **30** columns in three years, and new team members keep asking which upstream columns feed each one (p. 325).
+#### الگو: Fine-Grained Tracker (pp. 325–328)
 
-**Solution** (pp. 325–326):
+**مسئله.** یک جدول غیر‌نرمال در سه سال از **سی** ستون گذشته، و اعضای تازه‌ی تیم مدام می‌پرسند کدام ستون‌های upstreamی به هر کدام می‌خورانند (p. 325).
 
-- **Column level, managed:** Databricks Unity Catalog's `system.access.column_lineage` table and Azure **Purview**.
-- **Column level, self-built:** walk the query execution plan. In `SELECT CONCAT(u.first_name, d.delivery_address) AS user_with_address FROM users u JOIN addresses d …`, `user_with_address` depends on `users.first_name` and `addresses.delivery_address` (Figure 10-6). OpenLineage supports Spark natively.
-- **Row level:** record which job produced each row, as an extra attribute or column (the data decoration patterns).
+**راه‌حل** (pp. 325–326):
 
-![The execution plan of a query that concatenates users.first_name and addresses.delivery_address into user_with_address, reduced to its column lineage: two source columns feeding one output column](../figures/10-06.png)
+- **سطح ستون، مدیریت‌شده:** جدول `system.access.column_lineage` در Databricks Unity Catalog و **Purview** در Azure.
+- **سطح ستون، خود‌ساخته:** روی نقشه‌ی اجرای کوئری قدم بزنید. در `SELECT CONCAT(u.first_name, d.delivery_address) AS user_with_address FROM users u JOIN addresses d …`، ستون `user_with_address` به `users.first_name` و `addresses.delivery_address` وابسته است (شکل ۱۰-۶). ابزار OpenLineage از Spark بومی پشتیبانی می‌کند.
+- **سطح ردیف:** ثبت کنید هر ردیف را کدام job ساخته، به‌عنوان یک ویژگی یا ستون اضافه، یعنی همان الگوهای تزئین داده.
 
-*Figure 10-6 (p. 326): column lineage is read off the query plan — which input columns each output column depends on.*
+![نقشه‌ی اجرای کوئری‌ای که users.first_name و addresses.delivery_address را در user_with_address به هم می‌چسباند، تا lineage ستونی‌اش خلاصه شده: دو ستون منبع که به یک ستون خروجی می‌خورانند](../figures/10-06.png)
 
-**Consequences** (p. 327):
+*Figure 10-6 (p. 326): ساختار lineage ستونی از نقشه‌ی کوئری خوانده می‌شود، یعنی هر ستون خروجی به کدام ستون‌های ورودی وابسته است.*
 
-- **Custom code.** Programmatic mapping functions are opaque boxes to lineage tools.
-- **Row-level visualization.** Classical lineage tools don't show row-level lineage, so it needs its own query layer.
-- **Evolution management.** Column lineage must track how transformations change over time.
+**پیامدها** (p. 327):
 
-**Examples** (pp. 327–328): `visits_decorator_job` writes Kafka headers `job_version`, `job_name` and `batch_version`. `visits_reducer_job` writes the same headers plus `parent_lineage`, which holds the upstream headers as JSON, so any row can be traced back to its source.
+- **کد سفارشی.** توابع mapping برنامه‌نویسی‌شده برای ابزارهای lineage جعبه‌های مات‌اند.
+- **تجسم سطح ردیف.** ابزارهای کلاسیک lineage سطح ردیف را نشان نمی‌دهند، پس لایه‌ی کوئری خودش را می‌خواهد.
+- **مدیریت تکامل.** lineage ستونی باید دنبال کند که تبدیل‌ها در طول زمان چطور عوض می‌شوند.
 
-### Summary
+**نمونه‌ها** (pp. 327–328): job به نام `visits_decorator_job` در header های کافکا `job_version` و `job_name` و `batch_version` را می‌نویسد. job به نام `visits_reducer_job` همان headerها را به‌علاوه‌ی `parent_lineage` می‌نویسد، که headerهای upstreamی را به‌عنوان JSON دارد، پس هر ردیفی را می‌شود تا منبعش ردیابی کرد.
 
-The chapter's patterns are:
+> **In practice:** trace در OpenTelemetry یک run را دنبال می‌کند و lineage یک جدول را؛ هر دو برای پیدا کردن ریشه‌ی خطا لازم‌اند.
+>
+> **Your turn:** ستونی در Gold غلط است. چطور می‌فهمید از کدام جدول Bronze آمده؟
+>
+> *Answer:* با lineage در سطح dataset: اگر DAGها inlet و outlet خود را اعلام کنند، Airflow با OpenLineage گراف جدول‌ها را می‌سازد، و dbt هم این گراف را از `ref()` درمی‌آورد. Dataset Tracker کتاب برای همین پرسش است (pp. 321–325).
 
-- the Flow Interruption Detector, for data continuity;
-- the Skew Detector, for completeness, especially in batch jobs with homogeneous volumes;
-- the Lag Detector, for streaming jobs that fall behind;
-- the SLA Misses Detector, for per-task time limits;
-- the Dataset Tracker, for the global dependency graph;
-- the Fine-Grained Tracker, for column and row details (pp. 328–329).
+### خلاصه
 
-The book then closes with an Afterword (p. 331) and an appendix summarizing all patterns (p. 333).
+الگوهای این فصل این‌هایند:
 
-## Trade-offs at a glance
+- الگوی Flow Interruption Detector، برای پیوستگی داده؛
+- الگوی Skew Detector، برای کامل بودن، به‌خصوص در jobهای batch با حجم‌های همگون؛
+- الگوی Lag Detector، برای jobهای streaming که عقب می‌افتند؛
+- الگوی SLA Misses Detector، برای سقف زمان هر task؛
+- الگوی Dataset Tracker، برای گراف سراسری وابستگی؛
+- الگوی Fine-Grained Tracker، برای جزئیات ستون و ردیف (pp. 328–329).
 
-| Pattern                    | Detects                                  | Main pitfall                                        |
-| -------------------------- | ---------------------------------------- | --------------------------------------------------- |
-| Flow Interruption Detector | No new data                              | Thresholds; metadata and compaction false positives |
-| Skew Detector              | Unexpected volume or partition imbalance | Seasonality; fatality loop                          |
-| Lag Detector               | Consumer behind producer                 | Skewed partitions inflate MAX; averages hide lag    |
-| SLA Misses Detector        | Runs or records too slow                 | Late data in event-time SLAs                        |
-| Dataset Tracker            | Who produces and consumes what           | Vendor lock; custom tasks                           |
-| Fine-Grained Tracker       | Column and row origins                   | Opaque custom code; row lineage needs its own layer |
+کتاب بعد با یک پس‌گفتار (p. 331) و یک پیوست که همه‌ی الگوها را خلاصه می‌کند (p. 333) تمام می‌شود.
 
-## Beyond the book
+## بده‌بستان‌ها در یک نگاه
 
-- The book's P90 of 18 s comes from linear interpolation between the sorted values. A nearest-rank percentile over seven values gives 30 s instead. Either way, it's far above the 8-second average. The lab below prints both.
-- OpenLineage is a Linux Foundation (LF AI & Data) project, and Marquez is its reference implementation.
+| الگو | چه چیزی را تشخیص می‌دهد | دام اصلی |
+|---|---|---|
+| Flow Interruption Detector | نبود داده‌ی تازه | آستانه‌ها؛ مثبت کاذب metadata و compaction |
+| Skew Detector | حجم غیرمنتظره یا نامتوازنی پارتیشن | فصلی بودن؛ حلقه‌ی مرگ |
+| Lag Detector | عقب بودن consumer از تأمین‌کننده | پارتیشن نامتوازن MAX را باد می‌کند؛ میانگین lag را پنهان می‌کند |
+| SLA Misses Detector | اجرا یا رکورد زیادی کند | late data در SLAهای زمان‌رویدادی |
+| Dataset Tracker | چه کسی چه چیزی را می‌سازد و مصرف می‌کند | گیر افتادن در vendor؛ taskهای سفارشی |
+| Fine-Grained Tracker | خاستگاه ستون و ردیف | کد سفارشی مات؛ lineage ردیفی لایه‌ی خودش را می‌خواهد |
 
-## Connections
+## فراتر از کتاب
 
-- **Run it:** [Skew and lag detectors](../lab/10-skew-and-lag/README.md) shows the fatality loop with a previous-day baseline and its fix with a last-successful baseline, plus average vs percentile lag.
-- **Related chapters:**
-  - [2. Data Ingestion](02-data-ingestion-design-patterns.md): Readiness Marker, Compactor.
-  - [5. Data Value](05-data-value-design-patterns.md): data decoration patterns.
-  - [7. Data Security](07-data-security-design-patterns.md): Vertical Partitioner query complexity.
-  - [8. Data Storage](08-data-storage-design-patterns.md): Denormalizer, Horizontal Partitioner skew.
-  - [9. Data Quality](09-data-quality-design-patterns.md): AWAP, Online and Offline Observer, Schema Migrator.
+- مقدار P90 برابر ۱۸ ثانیه در کتاب از درون‌یابی خطی بین مقدارهای مرتب‌شده می‌آید. صدک با رتبه‌ی نزدیک‌ترین، روی هفت مقدار، به‌جایش ۳۰ ثانیه می‌دهد. هر طور که باشد، خیلی بالاتر از میانگین هشت‌ثانیه‌ای است. آزمایش پایین هر دو را چاپ می‌کند.
+- پروژه‌ی OpenLineage زیر Linux Foundation است، یعنی LF AI & Data، و Marquez پیاده‌سازی مرجعش.
 
-## Check yourself
+## پیوندها
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+- **Run it:** [detectorهای نامتوازنی و lag](../lab/10-skew-and-lag/README.md) حلقه‌ی مرگ را با مبنای روز قبل و اصلاحش را با مبنای آخرین اجرای موفق نشان می‌دهد، به‌علاوه‌ی lag میانگین در برابر صدکی.
+- **فصل‌های مرتبط:**
+  - [فصل ۲: ورود داده](02-data-ingestion-design-patterns.md): الگوهای Readiness Marker و Compactor.
+  - [فصل ۵: ارزش داده](05-data-value-design-patterns.md): الگوهای تزئین داده.
+  - [فصل ۷: امنیت داده](07-data-security-design-patterns.md): پیچیدگی کوئری در Vertical Partitioner.
+  - [فصل ۸: ذخیره‌سازی داده](08-data-storage-design-patterns.md): الگوی Denormalizer و نامتوازنی Horizontal Partitioner.
+  - [فصل ۹: کیفیت داده](09-data-quality-design-patterns.md): الگوهای AWAP و Online و Offline Observer و Schema Migrator.
 
-1. **Data arrives in bursts with normal gaps of up to five minutes. What detection mode fits?**
-   - [ ] Alert on any minute without records
-   - [x] Alert when a no-data window exceeds the accepted duration
-   - [ ] Alert on file modification time only
+## خودتان را بسنجید
 
-   *Answer:* Irregular delivery needs windowed detection. Per-minute alerts would cause false positives and alarm fatigue (pp. 306–307).
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-2. **Why can a storage-based flow detector be fooled by compaction?**
+1. **داده در فوران می‌آید و فاصله‌های معمولی تا پنج دقیقه دارد. کدام حالت تشخیص می‌خورد؟**
+   - [ ] هشدار سر هر دقیقه‌ی بی‌رکورد
+   - [x] هشدار وقتی پنجره‌ی بی‌داده از مدت پذیرفته‌شده بیشتر شود
+   - [ ] هشدار فقط روی زمان تغییر فایل
 
-   *Answer:* Compaction writes new files by merging existing blocks. The storage shows activity, but no new data arrived (p. 309).
+   *Answer:* تحویل نامنظم به تشخیص پنجره‌ای نیاز دارد. هشدار دقیقه‌به‌دقیقه مثبت کاذب و خستگی از هشدار می‌ساخت (pp. 306–307).
 
-3. **Day 2's input is three times smaller and fails the skew check. Nobody fixes it. What happens on Day 3, and how do you avoid it?**
+2. **چرا detector جریان ذخیره‌سازی‌محور را compaction می‌تواند گول بزند؟**
 
-   *Answer:* Compared with Day 2, Day 3's normal volume looks three times too large and fails as well: a fatality loop. Compare with the most recent successful run instead (p. 312).
+   *Answer:* عملیات compaction با merge بلوک‌های موجود فایل تازه می‌نویسد. ذخیره‌سازی فعالیت نشان می‌دهد، ولی داده‌ی تازه‌ای نرسیده (p. 309).
 
-4. **Partition lags are 10, 5, 30, 2, 3, 5 and 3 seconds. Which summary is most misleading?**
-   - [x] The average (8 s)
-   - [ ] P90 (18 s)
-   - [ ] MAX (30 s)
+3. **ورودی روز دوم سه برابر کوچک‌تر است و بررسی نامتوازنی را شکست می‌دهد. کسی درستش نمی‌کند. روز سوم چه می‌شود و چطور از آن بپرهیزیم؟**
 
-   *Answer:* The average hides the slow partitions. Percentiles are more relevant for lag (p. 315).
+   *Answer:* در مقایسه با روز دوم، حجم معمولی روز سوم سه برابر بزرگ‌تر از لازم به نظر می‌آید و آن هم شکست می‌خورد، یعنی حلقه‌ی مرگ. به‌جایش با آخرین اجرای موفق مقایسه کنید (p. 312).
 
-5. **A consumer throttles to a fixed volume per run while one partition is skewed. Which detector notices?**
+4. **مقدار lag پارتیشن‌ها ۱۰ و ۵ و ۳۰ و ۲ و ۳ و ۵ و ۳ ثانیه است. کدام خلاصه گمراه‌کننده‌ترین است؟**
+   - [x] میانگین، یعنی ۸ ثانیه
+   - [ ] مقدار P90، یعنی ۱۸ ثانیه
+   - [ ] مقدار MAX، یعنی ۳۰ ثانیه
 
-   *Answer:* The Lag Detector, because lag keeps growing. The SLA Misses Detector sees runs finish on time (p. 318).
+   *Answer:* میانگین پارتیشن‌های کند را پنهان می‌کند. صدک‌ها برای lag مربوط‌ترند (p. 315).
 
-6. **Why separate processing-time and event-time SLAs?**
+5. **یک consumer خودش را روی حجم ثابتی در هر اجرا throttle می‌کند در حالی که یک پارتیشن نامتوازن است. کدام detector می‌فهمد؟**
 
-   *Answer:* Late data from a disconnected producer can break an event-time SLA through no fault of your job, while the processing-time SLA measures only your job's speed (p. 319).
+   *Answer:* الگوی Lag Detector، چون lag مدام بزرگ می‌شود. الگوی SLA Misses Detector می‌بیند اجراها سر وقت تمام می‌شوند (p. 318).
+
+6. **چرا SLA زمان پردازش و زمان رویداد را جدا کنیم؟**
+
+   *Answer:* late data از تأمین‌کننده‌ای قطع‌شده می‌تواند SLA زمان‌رویدادی را بی هیچ تقصیری از job شما بشکند، در حالی که SLA زمان‌پردازشی فقط سرعت job خودتان را می‌سنجد (p. 319).

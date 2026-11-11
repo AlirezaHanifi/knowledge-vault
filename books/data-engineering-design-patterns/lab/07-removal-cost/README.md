@@ -1,18 +1,20 @@
-# Cost of a personal-data removal
+# هزینه‌ی حذف داده‌ی شخصی
 
-When a user asks to be forgotten, how much has to be rewritten? This experiment builds a synthetic visits dataset with 90 daily partitions of 4 files each, plus one heavy user with the book's 2,000 visits. It compares two approaches. The **In-Place Overwriter** rewrites every file that holds one of the user's rows. With the **Vertical Partitioner**, the user's personal attributes are stored once in a separate user-context table. It then compares processing 100 removal requests one at a time with batching them into one run.
+وقتی کاربری می‌خواهد فراموش شود، چقدر باید بازنویسی شود؟ این آزمایش یک مجموعه‌داده‌ی ساختگی بازدید با نود پارتیشن روزانه و چهار فایل در هر پارتیشن می‌سازد، به‌علاوه‌ی یک کاربر سنگین با همان دو هزار بازدید کتاب. دو روش را مقایسه می‌کند. الگوی **In-Place Overwriter** هر فایلی را که یکی از ردیف‌های آن کاربر را دارد بازنویسی می‌کند. با **Vertical Partitioner**، ویژگی‌های شخصی کاربر یک‌بار در جدول جدای user context ذخیره می‌شوند. بعد مقایسه می‌کند که صد درخواست حذف را یکی‌یکی پردازش کنید یا در یک اجرا دسته کنید.
 
-*Illustrates Data Engineering Design Patterns, “Pattern: Vertical Partitioner” and “Pattern: In-Place Overwriter”, pp. 198–207. The cost consequence, 2,000 records against one and batching removal requests, is on p. 205. The data layout is synthetic; the implementation is the vault’s own.*
+*این آزمایش «الگو: Vertical Partitioner» و «الگو: In-Place Overwriter» از کتاب Data Engineering Design Patterns را نشان می‌دهد، صص. ۱۹۸–۲۰۷. پیامد هزینه، یعنی دو هزار رکورد در برابر یکی و دسته کردن درخواست‌های حذف، در ص. ۲۰۵ است. چیدمان داده ساختگی است و پیاده‌سازی مال خود vault.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 removal_cost.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Visits dataset: 296,580 rows in 360 files (90 days x 4 files)
@@ -30,13 +32,13 @@ A median user (25 visits) still makes the In-Place Overwriter rewrite 25 files (
   batched into one run:   296,580 rows rewritten (10.8x less)
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- The heavy user's 2,000 visits are spread over every file, so the In-Place Overwriter rewrites the entire dataset to delete them.
-- The Vertical Partitioner deletes one row and rewrites one small file. The visits table keeps only `user_id`, which no longer links to anything personal.
-- Even a median user touches dozens of files, because visits are spread across days.
-- Batching removal requests, as the book recommends, rewrites each file once instead of once per request.
+- دو هزار بازدید کاربر سنگین روی هر فایلی پخش شده، پس In-Place Overwriter برای حذفشان کل مجموعه‌داده را بازنویسی می‌کند.
+- الگوی Vertical Partitioner یک ردیف حذف و یک فایل کوچک بازنویسی می‌کند. جدول بازدیدها فقط `user_id` را نگه می‌دارد، که دیگر به هیچ چیز شخصی وصل نیست.
+- حتی کاربری میانه هم به ده‌ها فایل می‌خورد، چون بازدیدها بین روزها پخش‌اند.
+- دسته کردن درخواست‌های حذف، همان‌طور که کتاب توصیه می‌کند، هر فایل را یک‌بار بازنویسی می‌کند و نه یک‌بار برای هر درخواست.
 
-## Related
+## پیوندها
 
-- Chapter note: [7. Data Security Design Patterns](../../chapters/07-data-security-design-patterns.md) — “Data Removal”, pp. 198–207
+- یادداشت فصل: [فصل ۷: الگوهای طراحی امنیت داده](../../chapters/07-data-security-design-patterns.md) — «حذف داده»، صص. ۱۹۸–۲۰۷

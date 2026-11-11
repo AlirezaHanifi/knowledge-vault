@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watermarks and Late Data</title>
-<meta name="description" content="Replay the book's Table 3-1 and Table 3-2 event streams, change the allowed lateness and the window size, and see which events are ignored and when windows are emitted. Illustrates Data Engineering Design Patterns, Chapter 3.">
+<title>watermark و late data</title>
+<meta name="description" content="streamهای رویداد جدول ۳-۱ و ۳-۲ کتاب را دوباره اجرا کنید، تأخیر مجاز و اندازه‌ی پنجره را عوض کنید، و ببینید کدام رویدادها نادیده گرفته می‌شوند و پنجره‌ها کِی منتشر. تصویری از فصل ۳ کتاب Data Engineering Design Patterns.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   svg.tl { width: 100%; height: auto; display: block; }
@@ -29,59 +29,59 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/03-error-management-design-patterns.html">Chapter 3</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Watermarks</span>
+      <a href="../chapters/03-error-management-design-patterns.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مقدار watermark</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 3 · Error Management Design Patterns</div>
-  <h1>Watermarks and late data</h1>
-  <p class="lede">A streaming job can't wait forever for stragglers. It tracks the maximum event time it has seen and subtracts an allowed lateness to get the <strong>watermark</strong>. Events older than the watermark are late and are ignored, and a window is emitted once the watermark passes its end. The watermark never moves back.</p>
-  <p class="source-note">Illustrates “Pattern: Late Data Detector” (pp. 51–57). It replays Table 3-1 (two micro-batches, 30-minute lateness, p. 54) and Table 3-2 (five events of 2023-06-30, 1-hour lateness, 10-minute windows, p. 56). Each step processes one micro-batch: events are checked against the watermark from <em>before</em> the batch, and the watermark is then updated. Windows on the Table 3-1 stream are the vault's addition. Like the book's table, it ignores Spark's rounding of the watermark to window bounds. Implementation is the vault's own.</p>
+  <div class="eyebrow">فصل ۳ · الگوهای طراحی مدیریت خطا</div>
+  <h1>مقدار watermark و late data</h1>
+  <p class="lede">یک job streaming نمی‌تواند تا ابد منتظر عقب‌مانده‌ها بماند. بیشینه‌ی زمان رویدادی را که دیده دنبال می‌کند و یک تأخیر مجاز از آن کم می‌کند تا <strong>watermark</strong> در بیاید. رویدادهای قدیمی‌تر از watermark lateاند و نادیده گرفته می‌شوند، و یک پنجره همین که watermark از پایانش بگذرد منتشر می‌شود. مقدار watermark هیچ‌وقت به عقب نمی‌رود.</p>
+  <p class="source-note">تصویری از «الگو: Late Data Detector» (صص. ۵۱–۵۷). جدول ۳-۱ را دوباره اجرا می‌کند، یعنی دو micro-batch با تأخیر سی‌دقیقه‌ای (ص. ۵۴)، و جدول ۳-۲ را، یعنی پنج رویداد ۲۰۲۳-۰۶-۳۰ با تأخیر یک‌ساعته و پنجره‌های ده‌دقیقه‌ای (ص. ۵۶). هر مرحله یک micro-batch را پردازش می‌کند: رویدادها با watermark <em>پیش از</em> آن دسته بررسی می‌شوند و بعد watermark به‌روز. پنجره‌ها روی stream جدول ۳-۱ افزوده‌ی vault است. مثل جدول کتاب، گرد کردن watermark به کران‌های پنجره در Spark نادیده گرفته شده. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel">
-        <svg class="tl" id="tl" role="img" aria-label="Event-time timeline with events, windows and the watermark"></svg>
-        <div class="legend"><span>● on-time event</span><span style="color:var(--bad)">✕ late, ignored</span><span style="color:var(--accent)">▭ … buffered window</span><span style="color:var(--ok)">▭ ✓ emitted window</span><span style="color:var(--warn)">│ watermark</span></div>
-        <div class="tbl"><table class="data"><thead><tr><th>Batch</th><th>Event times</th><th>Watermark in → out</th><th>Ignored</th><th>Emitted windows</th></tr></thead><tbody id="rows"></tbody></table></div>
+        <svg class="tl" id="tl" role="img" aria-label="خط زمان رویداد با رویدادها و پنجره‌ها و watermark"></svg>
+        <div class="legend"><span>● رویداد به‌موقع</span><span style="color:var(--bad)">✕ late و نادیده‌گرفته‌شده</span><span style="color:var(--accent)">▭ … پنجره‌ی بافرشده</span><span style="color:var(--ok)">▭ ✓ پنجره‌ی منتشرشده</span><span style="color:var(--warn)">│ مقدار watermark</span></div>
+        <div class="tbl"><table class="data"><thead><tr><th>دسته</th><th>زمان رویدادها</th><th>watermark ورودی ← خروجی</th><th>نادیده‌گرفته‌شده</th><th>پنجره‌های منتشرشده</th></tr></thead><tbody id="rows"></tbody></table></div>
       </div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Controls</p>
+        <p class="panel-title">کنترل‌ها</p>
         <div id="scen"></div>
         <div id="sliders" style="margin-top:10px"></div>
         <div id="player" style="margin-top:12px"></div>
       </div>
-      <div class="panel"><p class="panel-title">State</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">حالت</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Lateness is relative to the watermark, not the clock.</strong> In Table 3-1, 9:20 and 9:31 are dropped because the first batch already pushed the watermark to 9:36.</li>
-    <li><strong>The watermark only moves forward.</strong> A batch whose MAX event time is low produces a smaller candidate, which is discarded (p. 54).</li>
-    <li><strong>Windows wait for the watermark.</strong> In Table 3-2 nothing is emitted until 04:31 moves the watermark to 03:31. Then both 03:00 windows close at once.</li>
-    <li><strong>Raise the allowed lateness to 2 hours.</strong> 01:50 is now accepted, but every window is held in state longer.</li>
+    <li><strong>late بودن نسبت به watermark است و نه نسبت به ساعت.</strong> در جدول ۳-۱، رویدادهای ۹:۲۰ و ۹:۳۱ دور انداخته می‌شوند چون دسته‌ی اول از قبل watermark را به ۹:۳۶ برده.</li>
+    <li><strong>مقدار watermark فقط جلو می‌رود.</strong> دسته‌ای که بیشینه‌ی زمان رویدادش پایین است نامزد کوچک‌تری می‌سازد که دور انداخته می‌شود (ص. ۵۴).</li>
+    <li><strong>پنجره‌ها منتظر watermark می‌مانند.</strong> در جدول ۳-۲ هیچ چیز منتشر نمی‌شود تا ۰۴:۳۱ مقدار watermark را به ۰۳:۳۱ ببرد. آن‌وقت هر دو پنجره‌ی ۰۳:۰۰ یک‌جا بسته می‌شوند.</li>
+    <li><strong>تأخیر مجاز را به دو ساعت ببرید.</strong> رویداد ۰۱:۵۰ حالا پذیرفته می‌شود، ولی هر پنجره بیشتر در حالت نگه داشته می‌شود.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/03-error-management-design-patterns.html"><small>Lesson</small>3. Error Management Design Patterns</a></li>
-    <li><a href="../lab/03-dedup-window/README.md"><small>Experiment</small>Deduplication window vs missed duplicates</a></li>
+    <li><a href="../chapters/03-error-management-design-patterns.html"><small>درس</small>فصل ۳: الگوهای طراحی مدیریت خطا</a></li>
+    <li><a href="../lab/03-dedup-window/README.md"><small>آزمایش</small>پنجره‌ی تکراری‌زدایی در برابر تکراری‌های از‌دست‌رفته</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -92,24 +92,24 @@
   function hm(h, m) { return h * 60 + m; }
   function fmt(t) { if (t === null) return "–"; var h = Math.floor(t / 60), m = t % 60; return h + ":" + (m < 10 ? "0" : "") + m; }
   var SCEN = {
-    t31: { label: "Table 3-1", lateness: 30, win: 10, batches: [[hm(10, 0), hm(10, 5), hm(10, 6)], [hm(9, 20), hm(9, 31), hm(10, 7)]], lo: hm(9, 10), hi: hm(10, 20),
-      intro: "Table 3-1: allowed lateness 30 min. Two micro-batches." },
-    t32: { label: "Table 3-2", lateness: 60, win: 10, batches: [[hm(3, 15)], [hm(3, 0)], [hm(1, 50)], [hm(3, 11)], [hm(4, 31)]], lo: hm(1, 40), hi: hm(4, 50),
-      intro: "Table 3-2: allowed lateness 1 hour, 10-minute windows, one event per batch." }
+    t31: { label: "جدول ۳-۱", lateness: 30, win: 10, batches: [[hm(10, 0), hm(10, 5), hm(10, 6)], [hm(9, 20), hm(9, 31), hm(10, 7)]], lo: hm(9, 10), hi: hm(10, 20),
+      intro: "جدول ۳-۱: تأخیر مجاز سی دقیقه، با دو micro-batch." },
+    t32: { label: "جدول ۳-۲", lateness: 60, win: 10, batches: [[hm(3, 15)], [hm(3, 0)], [hm(1, 50)], [hm(3, 11)], [hm(4, 31)]], lo: hm(1, 40), hi: hm(4, 50),
+      intro: "جدول ۳-۲: تأخیر مجاز یک ساعت، پنجره‌های ده‌دقیقه‌ای، یک رویداد در هر دسته." }
   };
   var cfg = { scen: "t32", lateness: 60, win: 10 }, s;
 
   function reset() {
     var sc = SCEN[cfg.scen];
     s = { i: 0, wm: null, maxEv: null, events: [], windows: {}, rows: [], ignored: 0 };
-    log.clear(); log.add(sc.intro + " Lateness now " + cfg.lateness + " min, windows " + cfg.win + " min.", "muted");
+    log.clear(); log.add(sc.intro + " تأخیر حالا " + cfg.lateness + " دقیقه و پنجره " + cfg.win + " دقیقه است.", "muted");
     render();
   }
   function winStart(t) { return Math.floor(t / cfg.win) * cfg.win; }
 
   function step() {
     var sc = SCEN[cfg.scen];
-    if (s.i >= sc.batches.length) { log.add("End of stream.", "muted"); return false; }
+    if (s.i >= sc.batches.length) { log.add("پایان stream.", "muted"); return false; }
     var batch = sc.batches[s.i], wmIn = s.wm, ignored = [], accepted = [];
     batch.forEach(function (t) {
       if (wmIn !== null && t < wmIn) { ignored.push(t); s.events.push({ t: t, late: true }); }
@@ -129,11 +129,11 @@
       if (w.state === "buf" && s.wm !== null && w.start + cfg.win <= s.wm) { w.state = "out"; emitted.push(w); }
     });
     s.ignored += ignored.length;
-    s.rows.push({ n: s.i + 1, ev: batch.map(fmt).join(", "), wm: (wmIn === null ? "–" : fmt(wmIn)) + " → " + fmt(wmOut) + (cand !== null && wmIn !== null && cand < wmIn ? " (candidate " + fmt(cand) + " discarded)" : ""),
+    s.rows.push({ n: s.i + 1, ev: batch.map(fmt).join(", "), wm: (wmIn === null ? "–" : fmt(wmIn)) + " → " + fmt(wmOut) + (cand !== null && wmIn !== null && cand < wmIn ? " (نامزد " + fmt(cand) + " دور انداخته شد)" : ""),
       ign: ignored.length ? ignored.map(fmt).join(", ") : "–", out: emitted.length ? emitted.map(function (w) { return fmt(w.start) + "–" + fmt(w.start + cfg.win); }).join(", ") : "–" });
-    log.add("Batch " + (s.i + 1) + " [" + batch.map(fmt).join(", ") + "]: watermark " + (wmIn === null ? "unset" : fmt(wmIn)) + " → " + fmt(wmOut), "");
-    ignored.forEach(function (t) { log.add("  " + fmt(t) + " is before the watermark " + fmt(wmIn) + " → ignored", "bad"); });
-    emitted.forEach(function (w) { log.add("  window " + fmt(w.start) + "–" + fmt(w.start + cfg.win) + " closed and emitted (" + w.n + " events)", "ok"); });
+    log.add("دسته‌ی " + (s.i + 1) + " با [" + batch.map(fmt).join(", ") + "]: مقدار watermark از " + (wmIn === null ? "تنظیم‌نشده" : fmt(wmIn)) + " به " + fmt(wmOut), "");
+    ignored.forEach(function (t) { log.add("  زمان " + fmt(t) + " پیش از watermark " + fmt(wmIn) + " است ← نادیده گرفته شد", "bad"); });
+    emitted.forEach(function (w) { log.add("  پنجره‌ی " + fmt(w.start) + "–" + fmt(w.start + cfg.win) + " بسته و منتشر شد، با " + w.n + " رویداد", "ok"); });
     s.i++;
     render();
     return s.i < sc.batches.length;
@@ -166,11 +166,11 @@
     if (s.i < sc.batches.length) sc.batches[s.i].forEach(function (t) {
       root.appendChild(Kit.svg("circle", { class: "ev next", cx: X(t), cy: 190, r: 5 }));
     });
-    if (s.i < sc.batches.length) root.appendChild(Kit.svg("text", { class: "tick", x: L, y: 194 }, "next batch ○"));
+    if (s.i < sc.batches.length) root.appendChild(Kit.svg("text", { class: "tick", x: L, y: 194 }, "دسته‌ی بعدی ○"));
     if (s.wm !== null) {
       var wx = Math.max(L, Math.min(W - R, X(s.wm)));
       root.appendChild(Kit.svg("line", { class: "wm", x1: wx, x2: wx, y1: 18, y2: 150 }));
-      root.appendChild(Kit.svg("text", { class: "wmt", x: wx + 4, y: 28 }, "watermark " + fmt(s.wm) + (X(s.wm) < L ? " (off left)" : "")));
+      root.appendChild(Kit.svg("text", { class: "wmt", x: wx + 4, y: 28 }, "مقدار watermark " + fmt(s.wm) + (X(s.wm) < L ? " (بیرون از نمودار)" : "")));
     }
     var rows = Kit.clear(document.getElementById("rows"));
     s.rows.forEach(function (r, i) {
@@ -179,15 +179,15 @@
     var buf = 0, out = 0;
     Object.keys(s.windows).forEach(function (k) { if (s.windows[k].state === "buf") buf++; else out++; });
     var st = Kit.clear(document.getElementById("stats"));
-    [["Watermark", fmt(s.wm), "warn"], ["Ignored events", s.ignored, s.ignored ? "bad" : ""], ["Buffered windows", buf, ""], ["Emitted windows", out, "ok"]].forEach(function (x) {
+    [["مقدار watermark", fmt(s.wm), "warn"], ["رویداد نادیده‌گرفته‌شده", s.ignored, s.ignored ? "bad" : ""], ["پنجره‌ی بافرشده", buf, ""], ["پنجره‌ی منتشرشده", out, "ok"]].forEach(function (x) {
       st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
     });
   }
 
-  var lat = Kit.slider({ label: "Allowed lateness", min: 0, max: 150, step: 5, value: cfg.lateness, unit: " min", onInput: function (v) { cfg.lateness = v; reset(); } });
-  var win = Kit.slider({ label: "Window size", min: 5, max: 30, step: 5, value: cfg.win, unit: " min", onInput: function (v) { cfg.win = v; reset(); } });
-  document.getElementById("scen").appendChild(Kit.segmented({ label: "Event stream", value: cfg.scen,
-    options: [{ value: "t31", label: "Table 3-1" }, { value: "t32", label: "Table 3-2" }],
+  var lat = Kit.slider({ label: "تأخیر مجاز", min: 0, max: 150, step: 5, value: cfg.lateness, unit: " دقیقه", onInput: function (v) { cfg.lateness = v; reset(); } });
+  var win = Kit.slider({ label: "اندازه‌ی پنجره", min: 5, max: 30, step: 5, value: cfg.win, unit: " دقیقه", onInput: function (v) { cfg.win = v; reset(); } });
+  document.getElementById("scen").appendChild(Kit.segmented({ label: "stream رویداد", value: cfg.scen,
+    options: [{ value: "t31", label: "جدول ۳-۱" }, { value: "t32", label: "جدول ۳-۲" }],
     onChange: function (v) { cfg.scen = v; cfg.lateness = SCEN[v].lateness; cfg.win = SCEN[v].win; lat.set(cfg.lateness); win.set(cfg.win); reset(); } }).element);
   document.getElementById("sliders").appendChild(lat.element);
   document.getElementById("sliders").appendChild(win.element);
@@ -195,12 +195,12 @@
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "The watermark is 9:36. A batch's MAX event time is 10:00 and the allowed lateness is 30 minutes. What's the new watermark?",
-      options: ["9:30", "9:36", "10:00"], answer: 1, explain: "The candidate 9:30 is lower than 9:36, and the watermark never moves back (p. 54)." },
-    { q: "Why do per-partition trackers use MAX event time rather than MIN?",
-      options: ["MAX is cheaper", "A MIN could get stuck in the past and never advance", "MIN would drop more events"], answer: 1, explain: "Progress must be monotonically increasing (pp. 51–54)." },
-    { q: "In Table 3-2, why is 01:50 ignored while 03:00, which also arrives after 03:15, is kept?",
-      options: ["03:00 is in the same window as 03:15", "01:50 is earlier than the 02:15 watermark; 03:00 isn't", "Spark only keeps the first event per window"], answer: 1, explain: "Lateness is measured against the watermark (03:15 − 1 h = 02:15) (p. 56)." }
+    { q: "مقدار watermark ۹:۳۶ است. بیشینه‌ی زمان رویداد یک دسته ۱۰:۰۰ است و تأخیر مجاز سی دقیقه. watermark تازه چه می‌شود؟",
+      options: ["۹:۳۰", "۹:۳۶", "۱۰:۰۰"], answer: 1, explain: "نامزد ۹:۳۰ از ۹:۳۶ پایین‌تر است، و watermark هیچ‌وقت به عقب نمی‌رود (ص. ۵۴)." },
+    { q: "چرا دنبال کردن در هر پارتیشن با بیشینه‌ی زمان رویداد است و نه کمینه؟",
+      options: ["بیشینه ارزان‌تر است", "کمینه می‌تواند در گذشته گیر کند و هیچ‌وقت جلو نرود", "کمینه رویدادهای بیشتری را دور می‌ریخت"], answer: 1, explain: "پیشرفت باید یکنواخت صعودی باشد (صص. ۵۱–۵۴)." },
+    { q: "در جدول ۳-۲ چرا ۰۱:۵۰ نادیده گرفته می‌شود ولی ۰۳:۰۰ که آن هم بعد از ۰۳:۱۵ می‌رسد نگه داشته می‌شود؟",
+      options: ["زمان ۰۳:۰۰ در همان پنجره‌ی ۰۳:۱۵ است", "زمان ۰۱:۵۰ از watermark برابر ۰۲:۱۵ قدیمی‌تر است و ۰۳:۰۰ نه", "ابزار Spark فقط اولین رویداد هر پنجره را نگه می‌دارد"], answer: 1, explain: "late بودن نسبت به watermark سنجیده می‌شود، یعنی ۰۳:۱۵ منهای یک ساعت که ۰۲:۱۵ است (ص. ۵۶)." }
   ]);
 })();
 </script>
