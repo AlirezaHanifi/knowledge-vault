@@ -3,85 +3,87 @@ book: data-engineering-design-patterns
 chapter: 5
 title: "Data Value Design Patterns"
 pages: "115–164"
+translated_title: "الگوهای طراحی ارزش داده"
+lang: fa
 ---
 
-# 5. Data Value Design Patterns
+# فصل ۵: الگوهای طراحی ارزش داده
 
-[← 4. Idempotency Design Patterns](04-idempotency-design-patterns.md) · [Book](../README.md) · [6. Data Flow Design Patterns →](06-data-flow-design-patterns.md)
+[فصل ۴: الگوهای طراحی idempotency →](04-idempotency-design-patterns.md) · [کتاب](../README.md) · [فصل ۶: الگوهای طراحی جریان داده ←](06-data-flow-design-patterns.md)
 
-## Summary
+## خلاصه
 
-Raw data in storage isn't yet an asset: a browser visit event knows the browser version and language, but nothing that connects visitors to each other. The chapter's ten patterns add value either by **adding information** or by **reducing it** to something understandable. **Static Joiner** and **Dynamic Joiner** enrich data from slowly changing reference data (with SCD types 2/4 for time correctness) or from another stream (with time-bounded buffers and a GC watermark). **Wrapper** and **Metadata Decorator** annotate records with computed or technical attributes, visibly or hidden in the metadata layer. **Distributed Aggregator** and **Local Aggregator** summarize data with or without a shuffle. **Incremental Sessionizer** and **Stateful Sessionizer** build sessions in batch (with pending-session storage) or streaming (with a state store). Finally, **Bin Pack Orderer** and **FIFO Orderer** keep data in order — the first even on bulk APIs with partial commits.
+داده‌ی خام در ذخیره‌سازی هنوز دارایی نیست: یک رویداد بازدید مرورگر، نسخه و زبان مرورگر را می‌داند ولی هیچ چیزی که بازدیدکننده‌ها را به هم وصل کند. ده الگوی این فصل یا با **افزودن اطلاعات** ارزش می‌سازند یا با **کم کردن** آن به چیزی فهمیدنی. الگوهای **Static Joiner** و **Dynamic Joiner** داده را از داده‌ی مرجعِ کند‌تغییر غنی می‌کنند، با SCD نوع ۲ یا ۴ برای درستی زمانی، یا از stream دیگری، با بافرهای bounded زمانی و یک GC watermark. الگوهای **Wrapper** و **Metadata Decorator** رکوردها را با ویژگی‌های محاسبه‌شده یا فنی حاشیه‌نویسی می‌کنند، یا پیدا یا پنهان در لایه‌ی metadata. الگوهای **Distributed Aggregator** و **Local Aggregator** داده را با shuffle یا بی آن خلاصه می‌کنند. الگوهای **Incremental Sessionizer** و **Stateful Sessionizer** در batch، با ذخیره‌سازی sessionهای معلق، یا در streaming، با یک state store، session می‌سازند. و دست آخر **Bin Pack Orderer** و **FIFO Orderer** داده را به‌ترتیب نگه می‌دارند، که اولی حتی روی APIهای bulk با commit جزئی.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Joins with reference data need time**: use SCD type 2 or 4 and an immutable execution time (not `NOW()`) so backfills join the same version; materialize API data for idempotency (pp. 116–120).
-- **Stream-to-stream joins need buffers and a GC watermark**: the faster stream waits for the slower one; how long you buffer trades memory against missed joins (pp. 122–124).
-- **Wrapper vs Metadata Decorator is about audience**: wrapped values are for consumers; metadata (job version, batch) is data about data and stays hidden (pp. 125–132).
-- **Shuffle is the latency troublemaker**: partial aggregation before it, salting for skew, and a shuffle service for scaling help; a Local Aggregator avoids it entirely when data is already partitioned by the grouping key (pp. 133–141).
-- **Sessions are forward dependent**: backfilling the 09:00 partition means regenerating every later one; inactivity periods trade late-data coverage for resources (pp. 142–145).
-- **Partial commits break ordering**: bulk writes of 10:00, 10:10, 10:20 may store only 10:20; a Bin Pack Orderer puts at most one record per entity in each bulk request (pp. 153–157).
-- **FIFO isn't exactly once**: a successful send followed by a failed ack resends on restart (pp. 159–160).
+- **پیوند با داده‌ی مرجع به زمان نیاز دارد**: از SCD نوع ۲ یا ۴ و یک زمان اجرای immutable استفاده کنید و نه `NOW()`، تا backfill به همان نسخه پیوند بزند؛ داده‌ی API را برای idempotency materialize کنید (pp. 116–120).
+- **پیوند stream به stream به بافر و GC watermark نیاز دارد**: stream سریع‌تر منتظر کندتر می‌ماند، و طول بافر، حافظه را با پیوندهای از‌دست‌رفته معامله می‌کند (pp. 122–124).
+- **تفاوت Wrapper و Metadata Decorator در مخاطب است**: مقدارهای بسته‌بندی‌شده برای consumer‌اند، در حالی که metadata، مثل نسخه‌ی job و batch، داده درباره‌ی داده است و پنهان می‌ماند (pp. 125–132).
+- **عملیات shuffle دردسرساز اصلی تأخیر است**: تجمیع جزئی پیش از آن، salting برای نامتوازنی، و یک shuffle service برای مقیاس‌پذیری کمک می‌کنند؛ و Local Aggregator وقتی داده از قبل با کلید گروه‌بندی پارتیشن‌بندی شده کل shuffle را برمی‌دارد (pp. 133–141).
+- **همه‌ی sessionها وابسته به جلو‌اند**: backfill پارتیشن ۹:۰۰ یعنی ساختن دوباره‌ی همه‌ی پارتیشن‌های بعدی، و طول دوره‌ی بی‌فعالیتی، پوشش late data را با منابع معامله می‌کند (pp. 142–145).
+- **عمل commit جزئی ترتیب را می‌شکند**: نوشتن bulk رکوردهای ۱۰:۰۰ و ۱۰:۱۰ و ۱۰:۲۰ ممکن است فقط ۱۰:۲۰ را ذخیره کند؛ الگوی Bin Pack Orderer در هر درخواست bulk حداکثر یک رکورد از هر موجودیت می‌گذارد (pp. 153–157).
+- **روش FIFO همان exactly-once نیست**: فرستادن موفق و بعد ack ناموفق، سر راه‌اندازی دوباره دوباره می‌فرستد (pp. 159–160).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Data Enrichment — p. 116
-  - Pattern: Static Joiner — p. 116
-  - Pattern: Dynamic Joiner — p. 121
-- Data Decoration — p. 125
-  - Pattern: Wrapper — p. 125
-  - Pattern: Metadata Decorator — p. 129
-- Data Aggregation — p. 133
-  - Pattern: Distributed Aggregator — p. 133
-  - Pattern: Local Aggregator — p. 137
-- Sessionization — p. 141
-  - Pattern: Incremental Sessionizer — p. 141
-  - Pattern: Stateful Sessionizer — p. 147
-- Data Ordering — p. 153
-  - Pattern: Bin Pack Orderer — p. 153
-  - Pattern: FIFO Orderer — p. 158
-- Summary — p. 162
+- غنی‌سازی داده — p. 116
+  - الگو: Static Joiner — p. 116
+  - الگو: Dynamic Joiner — p. 121
+- تزئین داده — p. 125
+  - الگو: Wrapper — p. 125
+  - الگو: Metadata Decorator — p. 129
+- تجمیع داده — p. 133
+  - الگو: Distributed Aggregator — p. 133
+  - الگو: Local Aggregator — p. 137
+- ساختن session — p. 141
+  - الگو: Incremental Sessionizer — p. 141
+  - الگو: Stateful Sessionizer — p. 147
+- ترتیب داده — p. 153
+  - الگو: Bin Pack Orderer — p. 153
+  - الگو: FIFO Orderer — p. 158
+- خلاصه — p. 162
 
-## Notes
+## یادداشت‌ها
 
-Data sitting in storage is “not a real asset” until it is made useful. Visit events produced by browsers carry technical details (browser version, language, OS) but no relationships, so a question like “what do visitors of a given browser have in common?” needs extra work (p. 115). The chapter adds value by combining datasets or computing attributes (enrichment, decoration), summarizing (aggregation, sessionization), and ordering (p. 115).
+داده‌ای که در ذخیره‌سازی نشسته تا به‌کار نیاید «دارایی واقعی نیست». رویدادهای بازدیدی که مرورگرها می‌سازند جزئیات فنی دارند، مثل نسخه و زبان مرورگر و OS، ولی هیچ رابطه‌ای، پس پرسشی مثل «بازدیدکننده‌های یک مرورگر معین چه چیز مشترکی دارند؟» کار اضافه می‌خواهد (p. 115). این فصل با ترکیب مجموعه‌داده‌ها و محاسبه‌ی ویژگی‌ها، یعنی غنی‌سازی و تزئین، و با خلاصه کردن، یعنی تجمیع و ساختن session، و با ترتیب دادن ارزش می‌سازد (p. 115).
 
-| Goal | Patterns |
+| هدف | الگوها |
 |---|---|
-| Add context | Static Joiner, Dynamic Joiner |
-| Annotate records | Wrapper, Metadata Decorator |
-| Summarize | Distributed Aggregator, Local Aggregator |
-| Group activity | Incremental Sessionizer, Stateful Sessionizer |
-| Preserve order | Bin Pack Orderer, FIFO Orderer |
+| افزودن زمینه | Static Joiner، Dynamic Joiner |
+| حاشیه‌نویسی رکورد | Wrapper، Metadata Decorator |
+| خلاصه کردن | Distributed Aggregator، Local Aggregator |
+| گروه کردن فعالیت | Incremental Sessionizer، Stateful Sessionizer |
+| نگه داشتن ترتیب | Bin Pack Orderer، FIFO Orderer |
 
-*The vault's map of the chapter's five families, following the book's summary (p. 162).*
+*نقشه‌ی vault از پنج خانواده‌ی این فصل، بر پایه‌ی خلاصه‌ی خود کتاب (p. 162).*
 
-### Data enrichment
+### غنی‌سازی داده
 
-Events describe time and place well but lack context — the last connection date or a profile score of the user (p. 116).
+رویدادها زمان و مکان را خوب توصیف می‌کنند ولی زمینه ندارند، مثل تاریخ آخرین اتصال یا امتیاز profile کاربر (p. 116).
 
-#### Pattern: Static Joiner (pp. 116–121)
+#### الگو: Static Joiner (pp. 116–121)
 
-**Problem.** Stakeholders want to relate a user's registration date to daily activity, but visits lack user context, which lives only in a static user reference dataset (p. 116).
+**مسئله.** ذی‌نفع‌ها می‌خواهند تاریخ ثبت‌نام کاربر را به فعالیت روزانه‌اش ربط بدهند، ولی بازدیدها زمینه‌ی کاربر ندارند و این زمینه فقط در یک مجموعه‌داده‌ی مرجعِ ایستای کاربر هست (p. 116).
 
-**Solution** (pp. 116–118): join on shared keys (e.g. `user_id`) — works even for streaming pipelines. If the reference data changes over time, add **time constraints** via **slowly changing dimensions (SCD)**:
+**راه‌حل** (pp. 116–118): روی کلیدهای مشترک پیوند بزنید، مثل `user_id`، که حتی برای pipelineهای streaming هم کار می‌کند. اگر داده‌ی مرجع در زمان عوض می‌شود، با **slowly changing dimension**، یعنی SCD، **قید زمانی** اضافه کنید:
 
-| SCD type (p. 117) | Storage | Current value |
+| نوع SCD (p. 117) | ذخیره‌سازی | مقدار فعلی |
 |---|---|---|
-| **Type 2** | One table with validity dates | Row with an empty/open end date |
-| **Type 4** | Two tables: current values + full history | The current table |
+| **نوع ۲** | یک جدول با تاریخ‌های اعتبار | ردیفی که تاریخ پایانش خالی یا باز است |
+| **نوع ۴** | دو جدول، یعنی مقدارهای فعلی به‌علاوه‌ی کل تاریخچه | جدول فعلی |
 
-![SCD type 2 keeps all of a user's emails in one history table with from and to dates and an is_current flag; SCD type 4 keeps the current email in one table and past ones in a separate history table](../figures/05-01.png)
+![در SCD نوع ۲ همه‌ی ایمیل‌های یک کاربر در یک جدول تاریخچه با تاریخ از و تا و یک پرچم is_current می‌مانند؛ در SCD نوع ۴ ایمیل فعلی در یک جدول و قبلی‌ها در جدول تاریخچه‌ی جدا می‌مانند](../figures/05-01.png)
 
-*Figure 5-1 (p. 117): type 2 versions rows in place; type 4 splits current and historical values into two tables.*
+*Figure 5-1 (p. 117): نوع ۲ ردیف‌ها را در جای خودشان نسخه‌دار می‌کند و نوع ۴ مقدار فعلی و تاریخی را در دو جدول جدا می‌کند.*
 
-Enrichment is usually a SQL `JOIN`, or an HTTP call to an external API — which can also be **materialized** as a table in a pre-processing step (Figure 5-2). For idempotency, materialize the API data and use an SCD form so a replay sees the same dataset (p. 118).
+غنی‌سازی معمولاً یک `JOIN` در SQL است، یا یک فراخوانی HTTP به یک API بیرونی، که می‌شود در یک مرحله‌ی پیش‌پردازش به‌عنوان جدول **materialize** هم بشود (شکل ۵-۲). برای idempotency داده‌ی API را materialize کنید و شکلی از SCD به کار ببرید تا اجرای دوباره همان مجموعه‌داده را ببیند (p. 118).
 
-**Consequences** (p. 119): **late data and consistency** — a profile change followed by a visit may not be reflected; streaming pipelines can use the Dynamic Joiner, batch pipelines can wait via a **Readiness Marker**. **Idempotency** — if the provider has no time-based queries, bring the enrichment data into your own store with SCD.
+**پیامدها** (p. 119): **late data و سازگاری**، یعنی تغییر یک profile که بعدش بازدیدی بیاید ممکن است بازتاب پیدا نکند؛ pipelineهای streaming می‌توانند Dynamic Joiner را به کار ببرند و pipelineهای batch می‌توانند با **Readiness Marker** منتظر بمانند. **ویژگی idempotency**، یعنی اگر تأمین‌کننده کوئری زمان‌محور ندارد، داده‌ی غنی‌سازی را با SCD به ذخیره‌سازی خودتان بیاورید.
 
-**Examples** (pp. 119–121):
+**نمونه‌ها** (pp. 119–121):
 
 ```sql
 SELECT v.visit_id, v.event_time, v.page, u.id, u.login, u.email
@@ -89,80 +91,86 @@ FROM dedp.visits v JOIN dedp.users u ON u.id = v.user_id
 AND NOW() BETWEEN start_date AND end_date;
 ```
 
-*Example 5-2 (p. 120): `users` has `start_date` and `end_date` (default `'9999-12-31'`). Replace `NOW()` with the orchestrator's execution time for idempotency.*
+*نمونه‌ی ۵-۲ (p. 120): جدول `users` ستون‌های `start_date` و `end_date` دارد که پیش‌فرضش `'9999-12-31'` است. برای idempotency، `NOW()` را با زمان اجرای scheduler عوض کنید.*
 
-A Spark stream-to-batch `left_outer` join of Kafka visits with a Delta Lake devices table (insert-only, so no time condition) — the static side has its own lifecycle, so you can miss joins, or join against an *empty* table during a full rewrite if it were raw JSON/CSV; a table format's atomicity prevents that (pp. 120–121). For APIs, use **bulk** calls: a writer buffers 100 records and requests geolocation for the unique, not-yet-mapped IPs at once (p. 121).
+یک پیوند `left_outer` از stream به batch در Spark، بین بازدیدهای Kafka و جدول devices در Delta Lake، که فقط درج‌شدنی است و شرط زمانی ندارد؛ سمت ایستا چرخه‌ی عمر خودش را دارد، پس می‌شود پیوندهایی را از دست داد، یا اگر JSON یا CSV خام بود، در میانه‌ی بازنویسی کامل به جدولی *خالی* پیوند زد، که اتمی بودن یک table format جلویش را می‌گیرد (pp. 120–121). برای APIها از فراخوانی **bulk** استفاده کنید: یک writer صد رکورد را بافر می‌کند و موقعیت جغرافیایی IPهای یکتا و mapping‌نشده را یک‌جا می‌خواهد (p. 121).
 
-#### Pattern: Dynamic Joiner (pp. 121–125)
+#### الگو: Dynamic Joiner (pp. 121–125)
 
-**Problem.** With thousands of new users a week, profile changes are frequent and the static join gives stale results; user changes now arrive on the broker via CDC (p. 122).
+**مسئله.** با هزاران کاربر تازه در هفته، تغییر profile زیاد می‌شود و پیوند ایستا نتیجه‌ی کهنه می‌دهد؛ تغییرهای کاربر حالا با CDC روی broker می‌آیند (p. 122).
 
-**Solution** (pp. 122–123): keys and join method as before, plus **time boundaries**. The two streams have different latencies, so each side keeps a **time-bounded buffer** — if users are one hour behind visits, visits are buffered an extra hour. A **GC watermark** removes buffered events that are too old (older than the slower stream's oldest event time), losing joins for very late records in exchange for bounded state (Figure 5-3). Frameworks implement the buffering for you.
+**راه‌حل** (pp. 122–123): کلیدها و روش پیوند مثل قبل، به‌علاوه‌ی **مرزهای زمانی**. دو stream تأخیرهای مختلف دارند، پس هر سمت یک **بافر bounded زمانی** نگه می‌دارد؛ اگر کاربرها یک ساعت از بازدیدها عقب‌ترند، بازدیدها یک ساعت بیشتر بافر می‌شوند. یک **GC watermark** رویدادهای بافرشده‌ای را که خیلی قدیمی‌اند برمی‌دارد، یعنی قدیمی‌تر از قدیمی‌ترین زمان رویداد stream کندتر، و پیوند رکوردهای خیلی late را در عوض حالت bounded از دست می‌دهد (شکل ۵-۳). خود frameworkها بافر کردن را برایتان پیاده می‌کنند.
 
-![Two streams with different latencies: records from the fast stream A wait in a buffer until matching keys from the slower stream B arrive, and only then are joined pairs emitted](../figures/05-03.png)
+![دو stream با تأخیرهای مختلف: رکوردهای stream سریع A در یک بافر منتظر می‌مانند تا کلیدهای متناظر از stream کندتر B بیایند، و فقط بعد از آن زوج‌های پیوند‌خورده منتشر می‌شوند](../figures/05-03.png)
 
-*Figure 5-3 (p. 123): buffering the faster side lets late-arriving matches still join, at the cost of state held in memory.*
+*Figure 5-3 (p. 123): بافر کردن سمت سریع‌تر می‌گذارد تطابق‌های late باز هم پیوند بخورند، به قیمت حالتی که در حافظه می‌ماند.*
 
-**Consequences** (pp. 123–124): **space vs exactness** — bigger buffers find more joins at more cost; no formula, depends on usual latency difference. **Late data** — events from areas with connectivity problems may arrive after the GC watermark moved on; integrate late data (Ch. 3).
+**پیامدها** (pp. 123–124): **فضا در برابر دقت**، یعنی بافر بزرگ‌تر پیوندهای بیشتری پیدا می‌کند با هزینه‌ی بیشتر؛ فرمولی نیست و به اختلاف تأخیر معمولتان بستگی دارد. **late data**، یعنی رویدادهای مناطقی که مشکل اتصال دارند ممکن است بعد از جلو رفتن GC watermark بیایند، پس late data را وارد کنید، فصل ۳ را ببینید.
 
-**Examples** (pp. 124–125): Spark — visits and ads each `withWatermark(…, '10 minutes')`, joined `left_outer` on `page = visit_page AND display_time BETWEEN event_time AND event_time + INTERVAL 2 minutes` (business rule: an ad shows at most 2 minutes after the visit). Flink **temporal table joins** (Java only): watermarks of 5 minutes on both topics, a `TemporalTableFunction` on `update_time` keyed by `ad_page`, and `joinLateral` to get the latest ad with `update_time <= event_time`.
+**نمونه‌ها** (pp. 124–125): در Spark، بازدیدها و تبلیغ‌ها هر کدام `withWatermark(…, '10 minutes')` می‌گیرند و با `left_outer` روی `page = visit_page AND display_time BETWEEN event_time AND event_time + INTERVAL 2 minutes` پیوند می‌خورند، که قاعده‌ی کسب‌وکار است، یعنی تبلیغ حداکثر دو دقیقه بعد از بازدید نشان داده می‌شود. پیوندهای **temporal table** در Flink که فقط در Java هستند: watermark پنج‌دقیقه‌ای روی هر دو topic، یک `TemporalTableFunction` روی `update_time` با کلید `ad_page`، و `joinLateral` برای گرفتن آخرین تبلیغ با شرط `update_time <= event_time`.
 
-### Data decoration
+> **In practice:** join کردن تراکنش با merchant در Silver همان Static Joiner است، با همان خطر: join با نسخه‌ی اشتباه داده‌ی مرجع.
+>
+> **Your turn:** merchantی دسته‌اش را عوض کرده و گزارش ماه‌های قبل یک‌شبه عوض شده است. چرا؟
+>
+> *Answer:* join با جدول merchant فعلی انجام شده، نه با نسخه‌ای که در زمان تراکنش معتبر بود. یا تاریخچه‌ی merchant را با ستون‌های اعتبار نگه دارید و روی بازه join کنید، یا دسته را هنگام ساخت Silver روی ردیف تراکنش ثابت کنید (pp. 116–121).
 
-Enriched data is still raw; decoration prepares it to be understood (p. 125).
+### تزئین داده
 
-#### Pattern: Wrapper (pp. 125–129)
+داده‌ی غنی‌شده باز هم خام است؛ تزئین آماده‌اش می‌کند تا فهمیده شود (p. 125).
 
-**Problem.** Visits from different providers have different schemas; a streaming job must extract fields into one place for consumers while keeping the original structure for debugging, clearly separated from computed values (pp. 125–126).
+#### الگو: Wrapper (pp. 125–129)
 
-**Solution** (pp. 126–127): wrap the original record in an **envelope** holding raw attributes plus computed ones (from the data or the execution context, e.g. processing time, job version). Works for Avro, Protobuf, JSON and tables (Figure 5-4):
+**مسئله.** بازدیدهای تأمین‌کننده‌های مختلف schemaهای مختلفی دارند؛ یک job streaming باید فیلدها را برای consumerها یک‌جا بیرون بکشد و ساختار اصلی را هم برای debug نگه دارد، به‌روشنی جدا از مقدارهای محاسبه‌شده (pp. 125–126).
 
-| Implementation | Layout | Note |
+**راه‌حل** (pp. 126–127): رکورد اصلی را در یک **پاکت** بپیچید که ویژگی‌های خام را به‌علاوه‌ی محاسبه‌شده‌ها دارد، که از خود داده می‌آیند یا از context اجرا، مثل زمان پردازش و نسخه‌ی job. برای Avro و Protobuf و JSON و جدول‌ها کار می‌کند (شکل ۵-۴):
+
+| پیاده‌سازی | چیدمان | نکته |
 |---|---|---|
-| 1 | Original columns flat; computed nested | Denormalized — faster reads |
-| 2 | Computed flat; original nested | Denormalized |
-| 3 | All columns flat, same level | Book calls this normalized — slower reads, logical isolation, original structure unchanged |
-| 4 | Two tables joined by a unique key | Separate datasets |
+| ۱ | ستون‌های اصلی تخت و محاسبه‌شده‌ها تو‌در‌تو | غیر‌نرمال؛ خواندن سریع‌تر |
+| ۲ | محاسبه‌شده‌ها تخت و اصلی‌ها تو‌در‌تو | غیر‌نرمال |
+| ۳ | همه‌ی ستون‌ها تخت و در یک سطح | کتاب این را نرمال می‌نامد؛ خواندن کندتر، جداسازی منطقی، ساختار اصلی دست‌نخورده |
+| ۴ | دو جدول که با یک کلید یکتا پیوند می‌خورند | مجموعه‌داده‌های جدا |
 
-In a table, the envelope is simply the row (p. 127). All need schema management (Ch. 9).
+در یک جدول، پاکت همان ردیف است (p. 127). همه‌شان مدیریت schema می‌خواهند، فصل ۹ را ببینید.
 
-**Consequences** (pp. 127–128): **domain split** — user fields end up in both *raw* and *computed*, so keep wrapping in early layers (Silver), not in user-facing Gold. **Size** — decorations travel with every record; columnar **projection** (Redshift, BigQuery) reads only needed columns.
+**پیامدها** (pp. 127–128): **شکستن دامنه**، یعنی فیلدهای کاربر هم در *خام* و هم در *محاسبه‌شده* در می‌آیند، پس بسته‌بندی را در لایه‌های اول نگه دارید، یعنی Silver، و نه در Gold که روبه‌روی کاربر است. **اندازه**، یعنی تزئین‌ها با هر رکورد سفر می‌کنند؛ **projection** ستونی در Redshift و BigQuery فقط ستون‌های لازم را می‌خواند.
 
-**Examples** (pp. 128–129): PySpark adds a `processing_context` struct (`job_version`, `batch_version`) and writes `to_json(struct(raw_data, processing_context))`; SQL `NAMED_STRUCT('is_connected', …, 'page_referral_key', CONCAT_WS('-', page, context.referral)) AS decorated`; or promote computed columns and push the original into `STRUCT(visit_id, event_time, user_id, page, context) AS raw`.
+**نمونه‌ها** (pp. 128–129): در PySpark، افزودن یک struct به نام `processing_context` با `job_version` و `batch_version` و نوشتن `to_json(struct(raw_data, processing_context))`؛ در SQL، `NAMED_STRUCT('is_connected', …, 'page_referral_key', CONCAT_WS('-', page, context.referral)) AS decorated`؛ یا بالا آوردن ستون‌های محاسبه‌شده و فرو بردن اصلی‌ها در `STRUCT(visit_id, event_time, user_id, page, context) AS raw`.
 
-#### Pattern: Metadata Decorator (pp. 129–133)
+#### الگو: Metadata Decorator (pp. 129–133)
 
-**Problem.** Streaming jobs ship almost weekly; you want the job version on each record for maintenance, but not in what end users see (pp. 129–130).
+**مسئله.** jobهای streaming تقریباً هر هفته release می‌شوند؛ نسخه‌ی job را برای نگه‌داری روی هر رکورد می‌خواهید، ولی نه در آن چیزی که کاربر نهایی می‌بیند (pp. 129–130).
 
-**Solution** (pp. 130–131): put the technical context in the **metadata layer**:
+**راه‌حل** (pp. 130–131): context فنی را در **لایه‌ی metadata** بگذارید:
 
-| Store | How |
+| ذخیره‌سازی | چطور |
 |---|---|
-| Apache Kafka | Record **headers** (key-value pairs besides key and value) |
-| Object stores | **Tags** on files (when metadata applies to all rows in a file) |
-| Tables / databases | A hidden `processing_context` column exposed through a view or column permissions (Table 5-1), or a separate technical table referenced by `processing_context_id` (Tables 5-2/5-3) |
+| ابزار Apache Kafka | **header**های رکورد، یعنی زوج‌های کلید‌مقدار کنار کلید و مقدار |
+| ذخیره‌سازی object | **tag** روی فایل، وقتی metadata به همه‌ی ردیف‌های یک فایل می‌خورد |
+| جدول و دیتابیس | یک ستون پنهان `processing_context` که با view یا مجوز ستونی نشان داده می‌شود (جدول ۵-۱)، یا جدول فنی جدایی که با `processing_context_id` ارجاع می‌شود (جدول‌های ۵-۲ و ۵-۳) |
 
-*Table 5-1 (p. 130):* `event_id = 1`, `event_time = 2023-06-10T10:00:59Z`, `processing_context = {"job_version": "v1.0.3", "processing_time": "2023-06-10T10:02:00Z"}`.
+*جدول ۵-۱ (p. 130):* مقدار `event_id = 1`، `event_time = 2023-06-10T10:00:59Z`، و `processing_context = {"job_version": "v1.0.3", "processing_time": "2023-06-10T10:02:00Z"}`.
 
-Wrapper and Metadata Decorator differ only in semantics: metadata *describes* the data and isn't for business users (p. 131).
+تفاوت Wrapper و Metadata Decorator فقط معنایی است: metadata داده را *توصیف* می‌کند و برای کاربر کسب‌وکار نیست (p. 131).
 
-**Consequences** (p. 131): **implementation** — Amazon Kinesis Data Streams has no headers; tables need extra columns or tables. **Data** — never put business attributes (shipment addresses, invoice amounts) in metadata, where consumers won't look.
+**پیامدها** (p. 131): **پیاده‌سازی**، یعنی Amazon Kinesis Data Streams header ندارد و جدول‌ها به ستون یا جدول اضافه نیاز دارند. **داده**، یعنی هیچ‌وقت ویژگی کسب‌وکار، مثل آدرس ارسال یا مبلغ فاکتور، را در metadata نگذارید که consumerها دنبالش نمی‌گردند.
 
-**Examples** (pp. 132–133): Spark adds a `headers` array of `(key, value)` structs (`job_version`, `batch_version`) and writes to Kafka with `includeHeaders`; a `dedp.visits_context` table (`execution_date_time`, `loading_time`, `code_version`, `loading_attempt` = Airflow `try_number`) whose key is written into each weekly visits table.
+**نمونه‌ها** (pp. 132–133): در Spark، افزودن آرایه‌ی `headers` از structهای کلید و مقدار، یعنی `job_version` و `batch_version`، و نوشتن در Kafka با `includeHeaders`؛ و یک جدول `dedp.visits_context` با ستون‌های `execution_date_time` و `loading_time` و `code_version` و `loading_attempt` که همان `try_number` در Airflow است، و کلیدش در هر جدول هفتگی بازدید نوشته می‌شود.
 
-### Data aggregation
+### تجمیع داده
 
-Removing information can add value too (p. 133).
+برداشتن اطلاعات هم می‌تواند ارزش بسازد (p. 133).
 
-#### Pattern: Distributed Aggregator (pp. 133–137)
+#### الگو: Distributed Aggregator (pp. 133–137)
 
-![Two compute nodes read input files whose keys are mixed; records are exchanged across the network so that each key ends up on one node: keys 1 and 2 on node 1, keys 3, 6 and 7 on node 2](../figures/05-05.png)
+![دو نود محاسبه فایل‌های ورودی‌ای را می‌خوانند که کلیدهایشان قاطی‌اند؛ رکوردها روی شبکه جابه‌جا می‌شوند تا هر کلید روی یک نود بنشیند: کلیدهای ۱ و ۲ روی نود ۱ و کلیدهای ۳ و ۶ و ۷ روی نود ۲](../figures/05-05.png)
 
-*Figure 5-5 (p. 135): the shuffle moves every record to the node that owns its key, so each node can aggregate alone.*
+*Figure 5-5 (p. 135): عملیات shuffle هر رکورد را به نودی می‌برد که مالک کلیدش است، تا هر نود بتواند تنها تجمیع کند.*
 
-**Problem.** Build an **OLAP cube** of cleaned Silver visits — counts, average duration across user geography, devices, etc. — with daily and weekly views over daily event-time partitions (p. 133).
+**مسئله.** ساختن یک **OLAP cube** از بازدیدهای تمیز‌شده‌ی Silver، یعنی شمارش و میانگین مدت در طول جغرافیای کاربر و دستگاه و چیزهای دیگر، با نمای روزانه و هفتگی روی پارتیشن‌های روزانه‌ی زمان رویداد (p. 133).
 
-**Solution** (pp. 133–135): a **cluster** of machines that individually can't hold the data; group-by then reduce, same API as locally. Under the hood, a **shuffle** exchanges records over the network so related rows meet on one node (Figure 5-5) — often the first latency problem. **Partial aggregation** before the shuffle (e.g. local counts per key, then summing numbers) makes exchanges smaller. This is the **MapReduce** model (2004), from disk-based Hadoop MapReduce to memory-first Apache Spark (p. 134).
+**راه‌حل** (pp. 133–135): یک **cluster** از ماشین‌هایی که هیچ‌کدام به‌تنهایی داده را جا نمی‌دهند؛ گروه‌بندی و بعد کاهش، با همان API محلی. زیر پوسته، یک **shuffle** رکوردها را روی شبکه جابه‌جا می‌کند تا ردیف‌های مرتبط روی یک نود جمع شوند (شکل ۵-۵)، که اغلب اولین مسئله‌ی تأخیر است. **تجمیع جزئی** پیش از shuffle، مثلاً شمارش محلی هر کلید و بعد جمع زدن عددها، جابه‌جایی را کوچک‌تر می‌کند. این همان مدل **MapReduce** از سال ۲۰۰۴ است، از Hadoop MapReduce دیسک‌محور تا Apache Spark که اول حافظه را می‌بیند (p. 134).
 
 ```mermaid
 flowchart LR
@@ -180,195 +188,201 @@ flowchart LR
     N2 -- "shuffle C" --> R2
 ```
 
-*The vault's drawing of Figure 5-5 with the partial count optimization described on p. 134.*
+*طرح vault از شکل ۵-۵ با بهینه‌سازی شمارش جزئی که در ص. ۱۳۴ آمده.*
 
-**Consequences** (pp. 135–136):
+**پیامدها** (pp. 135–136):
 
-| Issue | Detail | Mitigation |
+| مسئله | جزئیات | راه کاهش |
 |---|---|---|
-| **Extra network exchange** | Input read (storage and compute rarely colocated) + the shuffle | Local Aggregator, when possible |
-| **Data skew** | One key with far more rows costs most to move and process | **Salting**: `groupBy('group_key', 'salt')` then `groupBy('group_key')` with `salt = (rand()*3).cast("int")`; Spark **Adaptive Query Execution** |
-| **Scaling** | Nodes holding shuffle data can't be released while the job runs | A **shuffle service** — Spark External Shuffle Service, GCP Dataflow Shuffle |
+| **جابه‌جایی اضافه روی شبکه** | خواندن ورودی، چون ذخیره‌سازی و محاسبه کم هم‌مکان‌اند، به‌علاوه‌ی خود shuffle | الگوی Local Aggregator، وقتی شدنی است |
+| **نامتوازنی داده** | یک کلید با ردیف‌های خیلی بیشتر، گران‌ترین کلید برای جابه‌جایی و پردازش است | روش **salting**، یعنی `groupBy('group_key', 'salt')` و بعد `groupBy('group_key')` با `salt = (rand()*3).cast("int")`؛ و **Adaptive Query Execution** در Spark |
+| **مقیاس‌پذیری** | نودهایی که داده‌ی shuffle را دارند تا job تمام نشود آزاد نمی‌شوند | یک **shuffle service**، مثل Spark External Shuffle Service و GCP Dataflow Shuffle |
 
-**Examples** (pp. 136–137): Spark joins JSON visits with a PostgreSQL devices table read via JDBC; `explain()` shows `Exchange hashpartitioning` nodes under a `SortMergeJoin`, with local filtering first. BigQuery can join tables with GCS files declared as **external tables** (also Redshift, Azure Synapse, Snowflake).
+**نمونه‌ها** (pp. 136–137): در Spark، پیوند بازدیدهای JSON با جدول devices در PostgreSQL که با JDBC خوانده می‌شود؛ متد `explain()` نودهای `Exchange hashpartitioning` را زیر یک `SortMergeJoin` نشان می‌دهد، با فیلتر محلی در اول. سرویس BigQuery می‌تواند جدول‌ها را با فایل‌های GCS که به‌عنوان **external table** اعلان شده‌اند پیوند بزند، و Redshift و Azure Synapse و Snowflake هم همین‌طور.
 
-#### Pattern: Local Aggregator (pp. 137–141)
+#### الگو: Local Aggregator (pp. 137–141)
 
-**Problem.** A streaming job windows visits from a partitioned broker whose partition count never changes; you want to drop the shuffle the framework adds automatically (pp. 137–138).
+**مسئله.** یک job streaming بازدیدهای یک broker پارتیشن‌بندی‌شده را پنجره‌بندی می‌کند که شمار پارتیشن‌هایش هیچ‌وقت عوض نمی‌شود؛ می‌خواهید shuffleی را که framework خودکار اضافه می‌کند بردارید (pp. 137–138).
 
-**Solution** (pp. 138–139): if all records for a grouping key are already in the same input partition — a **static per-record partitioning key** and an **immutable partition count**, guaranteed by the producer — aggregate locally with only the input read. Tasks are also isolated, so slow ones don't hold others back. Kafka Streams `groupByKey`; Spark has no hint, but `mapPartitions`/`foreachPartition` allow local aggregation, and it skips the shuffle for datasets bucketed by the same key into the same number of buckets (**Bucket** pattern, Ch. 8). Small datasets can be aggregated in one node's memory.
+**راه‌حل** (pp. 138–139): اگر همه‌ی رکوردهای یک کلید گروه‌بندی از قبل در همان پارتیشن ورودی‌اند، یعنی **کلید پارتیشن‌بندی ایستا** برای هر رکورد و **شمار پارتیشن immutable** که producer تضمینش می‌کند، محلی تجمیع کنید و فقط ورودی را بخوانید. taskها هم جدا می‌مانند، پس کندها بقیه را عقب نمی‌اندازند. در Kafka Streams `groupByKey`؛ در Spark راهنمایی‌ای نیست، ولی `mapPartitions` و `foreachPartition` تجمیع محلی را ممکن می‌کنند، و برای مجموعه‌داده‌هایی که با همان کلید و به همان تعداد bucket شده‌اند shuffle را رد می‌کند، یعنی الگوی **Bucket** در فصل ۸. مجموعه‌داده‌های کوچک را می‌شود در حافظه‌ی یک نود تجمیع کرد.
 
-**Consequences** (p. 139): **scaling** — changing partitions splits a key across groups; repartitioning means rewriting the whole dataset, or in streaming a stop-the-world switch. **Grouping keys** — one partitioning serves one grouping (change type vs user ID needs a Distributed Aggregator for one of them).
+**پیامدها** (p. 139): **مقیاس‌پذیری**، یعنی عوض کردن پارتیشن‌ها یک کلید را بین گروه‌ها می‌شکند و پارتیشن‌بندی دوباره یعنی بازنویسی کل مجموعه‌داده، یا در streaming یک تعویضِ همه‌چیز‌ایست. **کلیدهای گروه‌بندی**، یعنی یک پارتیشن‌بندی به یک گروه‌بندی می‌خورد، پس گروه‌بندی بر حسب نوع تغییر در برابر شناسه‌ی کاربر یعنی یکی‌شان به Distributed Aggregator نیاز دارد.
 
-**Examples** (pp. 139–141): Kafka Streams `stream("visits").groupByKey().aggregate(…)` → `visits-aggregated`, using each record's key without network exchange; Spark `sortWithinPartitions(['visit_id', 'event_time'])` + `foreachPartition` with a `KafkaWriter` that emits a visit's pages when `visit_id` changes; Redshift `DISTSTYLE ALL` (copy `users` to every node) and `DISTSTYLE KEY, DISTKEY(visit_id)` (colocate rows by key).
+**نمونه‌ها** (pp. 139–141): در Kafka Streams، `stream("visits").groupByKey().aggregate(…)` که در `visits-aggregated` می‌نویسد و کلید هر رکورد را بی جابه‌جایی شبکه به کار می‌برد؛ در Spark، `sortWithinPartitions(['visit_id', 'event_time'])` به‌علاوه‌ی `foreachPartition` با یک `KafkaWriter` که وقتی `visit_id` عوض می‌شود صفحه‌های آن بازدید را منتشر می‌کند؛ و در Redshift، `DISTSTYLE ALL` که `users` را روی هر نود کپی می‌کند و `DISTSTYLE KEY, DISTKEY(visit_id)` که ردیف‌ها را بر حسب کلید هم‌مکان می‌کند.
 
-### Sessionization
+> **In practice:** warehouse ما دو replica دارد و هیچ shardی ندارد، پس هر تجمیعی روی یک ماشین انجام می‌شود.
+>
+> **Your turn:** چرا `GROUP BY customer_id` روی Silver در ClickHouse ما shuffleی ندارد ولی در Spark دارد؟
+>
+> *Answer:* هر replica کل داده را دارد و تجمیع local است؛ در Spark داده بین executorها پخش است و ردیف‌های یک کلید باید با shuffle کنار هم بیایند، که هزینه‌ی اصلی Distributed Aggregator است (pp. 133–141).
 
-Sessions combine events of one activity — a starting point, events, an ending point — like watching videos or working out (p. 141).
+### ساختن session
 
-#### Pattern: Incremental Sessionizer (pp. 141–147)
+یک session رویدادهای یک فعالیت را با هم می‌آورد، یعنی یک نقطه‌ی شروع و رویدادها و یک نقطه‌ی پایان، مثل تماشای ویدئو یا ورزش کردن (p. 141).
 
-**Problem.** Visits land in **hourly partitions**; sessions start at the first visit and end after **two hours** without activity. A session lasts from minutes to **three hours**, so it can span up to three partitions (pp. 141–142).
+#### الگو: Incremental Sessionizer (pp. 141–147)
 
-**Solution** (pp. 142–144): three storage spaces and three session states.
+**مسئله.** بازدیدها در **پارتیشن‌های ساعتی** می‌نشینند؛ session با اولین بازدید شروع می‌شود و بعد از **دو ساعت** بی‌فعالیتی تمام. یک session از چند دقیقه تا **سه ساعت** طول می‌کشد، پس می‌تواند تا سه پارتیشن را بگیرد (pp. 141–142).
 
-| Storage | Visibility | Content |
+**راه‌حل** (pp. 142–144): سه فضای ذخیره‌سازی و سه حالت session.
+
+| ذخیره‌سازی | دیده شدن | محتوا |
 |---|---|---|
-| Input dataset | — | Hourly visits |
-| **Completed sessions** | Public | Finished sessions (ongoing ones flagged, e.g. `is_final = false`) |
-| **Pending sessions** | Private | Sessions that continue into the next run; may hold technical fields (execution ID) |
+| مجموعه‌داده‌ی ورودی | — | بازدیدهای ساعتی |
+| **sessionهای کامل‌شده** | عمومی | sessionهای تمام‌شده، که در جریان‌ها پرچم می‌خورند؛ مثلاً `is_final = false` |
+| **sessionهای معلق** | خصوصی | sessionهایی که به اجرای بعدی ادامه می‌دهند؛ می‌توانند فیلد فنی داشته باشند، مثل شناسه‌ی اجرا |
 
-Each run combines the input with the previous run's pending sessions per entity → a **new** session, a **restored** session with new data, or a restored one without new data (likely expiring). Then apply **initialization** (e.g. a home-page visit), **accumulation** (e.g. pages in order) and **finalization** (an event type, or inactivity — e.g. three hours) (Figure 5-6).
+هر اجرا ورودی را با sessionهای معلق اجرای قبلی برای هر موجودیت ترکیب می‌کند، و نتیجه یا session **تازه** است، یا session **برگردانده‌شده** با داده‌ی تازه، یا برگردانده‌شده بی داده‌ی تازه که احتمالاً منقضی می‌شود. بعد **مقدمه‌چینی** را اعمال کنید، مثل بازدید از صفحه‌ی خانه، و **تجمع** را، مثل صفحه‌ها به‌ترتیب، و **نهایی‌سازی** را، یعنی یک نوع رویداد یا بی‌فعالیتی؛ مثلاً سه ساعت (شکل ۵-۶).
 
-![The sessionizer reads the input dataset and the pending sessions from the previous run, then creates, restores and terminates sessions; completed sessions go to the output, and sessions not yet complete go back to pending storage](../figures/05-06.png)
+![sessionizer مجموعه‌داده‌ی ورودی و sessionهای معلق اجرای قبلی را می‌خواند و بعد session می‌سازد و برمی‌گرداند و تمام می‌کند؛ sessionهای کامل‌شده به خروجی می‌روند و آن‌ها که هنوز کامل نیستند به ذخیره‌سازی معلق برمی‌گردند](../figures/05-06.png)
 
-*Figure 5-6 (p. 143): three storage spaces — input, pending and output — carry open sessions from one hourly run to the next.*
+*Figure 5-6 (p. 143): سه فضای ذخیره‌سازی، یعنی ورودی و معلق و خروجی، sessionهای باز را از یک اجرای ساعتی به اجرای بعدی می‌برند.*
 
-**Consequences** (pp. 144–145): **inactivity period** — longer includes more late data but costs more and delays sessions; partial sessions can be emitted but may change (a banking fraud session first “not at risk”, later “risky”) — flag them `is_completed: false`. **Data freshness** — batch insights are late; partial sessions help. **Late data and backfilling** — sessions are **forward dependent**: 09:00 affects 10:00 affects 11:00, so a backfill must replay all later partitions (cheap code, high cost) or detect affected entities (cheap, complex).
+**پیامدها** (pp. 144–145): **دوره‌ی بی‌فعالیتی**، یعنی دوره‌ی بلندتر late data بیشتری را می‌گیرد ولی گران‌تر است و sessionها را عقب می‌اندازد؛ sessionهای جزئی را می‌شود منتشر کرد ولی ممکن است عوض شوند، مثل session تقلب بانکی که اول «بی‌خطر» است و بعد «پرخطر»، پس با `is_completed: false` پرچمشان بزنید. **تازگی داده**، یعنی بینش batch دیر می‌رسد و sessionهای جزئی کمک می‌کنند. **late data و backfill**، یعنی sessionها **وابسته به جلو**اند: ۹:۰۰ روی ۱۰:۰۰ اثر دارد و ۱۰:۰۰ روی ۱۱:۰۰، پس backfill باید همه‌ی پارتیشن‌های بعدی را دوباره اجرا کند، که کدش ارزان و هزینه‌اش بالاست، یا موجودیت‌های اثرپذیر را تشخیص بدهد، که ارزان و پیچیده است.
 
-**Examples** (pp. 145–146): Airflow first deletes `sessions` and `pending_sessions` rows with `execution_time_id >= '{{ ds }}'`, loads the hour into a temporary table, then a `FULL OUTER JOIN` of new visits with pending sessions from `{{ prev_ds }}` uses `COALESCE`, `LEAST(start_time)`, `GREATEST(last_visit_time)`, `ARRAY_CAT(pages)` and sets `expiration_batch_id` to `ds + 2` when there's new data; rows with `expiration_batch_id = ds` go to `sessions`, the rest to `pending_sessions`.
+**نمونه‌ها** (pp. 145–146): در Airflow اول ردیف‌های `sessions` و `pending_sessions` با `execution_time_id >= '{{ ds }}'` حذف می‌شوند، آن ساعت در یک جدول موقت بار می‌شود، و بعد یک `FULL OUTER JOIN` بین بازدیدهای تازه و sessionهای معلق `{{ prev_ds }}` از `COALESCE` و `LEAST(start_time)` و `GREATEST(last_visit_time)` و `ARRAY_CAT(pages)` استفاده می‌کند و وقتی داده‌ی تازه هست `expiration_batch_id` را `ds + 2` می‌گذارد؛ ردیف‌هایی که `expiration_batch_id = ds` دارند به `sessions` می‌روند و بقیه به `pending_sessions`.
 
-#### Pattern: Stateful Sessionizer (pp. 147–153)
+#### الگو: Stateful Sessionizer (pp. 147–153)
 
-**Problem.** Hourly partitions cap freshness at one hour; visits are on the broker within seconds — produce sessions in near real time (p. 147).
+**مسئله.** پارتیشن‌های ساعتی سقف تازگی را یک ساعت می‌کنند، در حالی که بازدیدها ظرف چند ثانیه روی broker‌اند؛ sessionها را تقریباً بی‌درنگ بسازید (p. 147).
 
-**Solution** (pp. 147–149): a stateful streaming job whose **state store** plays the role of pending-session storage — fast in memory, regularly synchronized to fault-tolerant storage (Figure 5-7). Same workflow: create or resume, combine, emit completed (or partial) sessions and save the rest. Two abstractions:
+**راه‌حل** (pp. 147–149): یک job streaming stateful که **state store**ش نقش ذخیره‌سازی session معلق را بازی می‌کند، یعنی سریع در حافظه و synchronous‌شده‌ی منظم با ذخیره‌سازی تاب‌آور (شکل ۵-۷). گردش‌کار همان است، یعنی ساختن یا از سر گرفتن، ترکیب، منتشر کردن sessionهای کامل یا جزئی، و ذخیره‌ی بقیه. دو انتزاع:
 
-| Abstraction | How sessions end |
+| انتزاع | session چطور تمام می‌شود |
 |---|---|
-| **Session windows** | A **gap duration** per key: a gap > 20 minutes between events starts a new window (Figure 5-8) |
-| **Arbitrary stateful processing** | Your own logic — static or per-key dynamic timers (Spark Structured Streaming, Flink, GCP Dataflow) |
+| **session window** | یک **gap duration** برای هر کلید، یعنی فاصله‌ی بیشتر از بیست دقیقه بین رویدادها پنجره‌ی تازه‌ای شروع می‌کند (شکل ۵-۸) |
+| **پردازش stateful دلخواه** | منطق خودتان، با timer ایستا یا پویا برای هر کلید، در Spark Structured Streaming و Flink و GCP Dataflow |
 
-![Events at 10:00, 10:05 and 10:15 form one session; the next event at 10:45 comes 30 minutes later, more than the gap, so it starts a second session](../figures/05-08.png)
+![رویدادهای ۱۰:۰۰ و ۱۰:۰۵ و ۱۰:۱۵ یک session می‌سازند؛ رویداد بعدی در ۱۰:۴۵ یعنی سی دقیقه بعد می‌آید که از gap بیشتر است، پس session دومی شروع می‌کند](../figures/05-08.png)
 
-*Figure 5-8 (p. 149): with a 20-minute gap, the 30-minute pause closes the first session.*
+*Figure 5-8 (p. 149): با gap بیست‌دقیقه‌ای، توقف سی‌دقیقه‌ای session اول را می‌بندد.*
 
-**Consequences** (pp. 149–150): **at-least-once** — state is checkpointed irregularly, so restarts reprocess; don't build session keys from values that change between runs (e.g. real time). **Scaling** — state rebalancing pauses processing for moved keys. **Inactivity length** — the same cost/coverage balance. **Inactivity time** — expire state by **event time**; processing-time expiration can close sessions early after unexpected latency.
+**پیامدها** (pp. 149–150): **دست‌کم یک‌بار**، یعنی حالت نامنظم checkpoint می‌شود پس راه‌اندازی دوباره، دوباره پردازش می‌کند؛ کلید session را از مقدارهایی نسازید که بین اجراها عوض می‌شوند، مثل زمان واقعی. **مقیاس‌پذیری**، یعنی متوازن کردن دوباره‌ی حالت، پردازش کلیدهای جابه‌جا‌شده را متوقف می‌کند. **طول بی‌فعالیتی**، یعنی همان توازن هزینه و پوشش. **زمان بی‌فعالیتی**، یعنی حالت را با **زمان رویداد** منقضی کنید؛ انقضا با زمان پردازش می‌تواند بعد از تأخیری غیرمنتظره، sessionها را زود ببندد.
 
-**Examples** (pp. 150–153): Spark `withWatermark('event_time', '1 minute').groupBy('visit_id').applyInPandasWithState(…, outputMode="update", timeoutConf="EventTimeTimeout")`; on timeout emit and `remove()` the state, otherwise append visits and `setTimeoutTimestamp(base_watermark + 10 minutes)`, using the max event time only while the watermark is still 0. Watermark-based expiration closes sessions sooner than event-time-based:
+**نمونه‌ها** (pp. 150–153): در Spark، `withWatermark('event_time', '1 minute').groupBy('visit_id').applyInPandasWithState(…, outputMode="update", timeoutConf="EventTimeTimeout")`؛ سر timeout منتشر و `remove()` کنید و وگرنه بازدیدها را اضافه و `setTimeoutTimestamp(base_watermark + 10 minutes)` کنید، و بیشینه‌ی زمان رویداد را فقط تا وقتی به کار ببرید که watermark هنوز صفر است. انقضای watermark‌محور sessionها را زودتر از انقضای زمان‌رویداد‌محور می‌بندد:
 
-*Table 5-4 (p. 152): 1-minute watermark, 10-minute state expiration*
+*جدول ۵-۴ (p. 152): watermark یک‌دقیقه‌ای، انقضای حالت ده‌دقیقه‌ای*
 
-| State key | Event time | Expiration (watermark-based) | Expiration (event-time-based) | New watermark |
+| کلید حالت | زمان رویداد | انقضا، watermark‌محور | انقضا، زمان‌رویداد‌محور | watermark تازه |
 |---|---|---|---|---|
-| A | 10:00 | 10:10 | 10:10 | 09:59 |
-| A | 10:01 | 10:09 | 10:11 | 10:00 |
-| A | 10:08 | 10:10 | 10:18 | 10:07 |
-| B | 10:15 | 10:17 | 10:25 | 10:14 |
+| A | ۱۰:۰۰ | ۱۰:۱۰ | ۱۰:۱۰ | ۰۹:۵۹ |
+| A | ۱۰:۰۱ | ۱۰:۰۹ | ۱۰:۱۱ | ۱۰:۰۰ |
+| A | ۱۰:۰۸ | ۱۰:۱۰ | ۱۰:۱۸ | ۱۰:۰۷ |
+| B | ۱۰:۱۵ | ۱۰:۱۷ | ۱۰:۲۵ | ۱۰:۱۴ |
 
-With watermark-based expiration, A (expiring 10:10) is emitted as soon as B's first record moves the watermark to 10:14; with event-time expiration it waits (10:18 > 10:14). Flink's alternative: `key_by(VisitIdSelector()).window(EventTimeSessionWindows.with_gap(Time.minutes(10))).allowed_lateness(15 minutes)` (pp. 152–153).
+با انقضای watermark‌محور، کلید A که انقضایش ۱۰:۱۰ است همین که اولین رکورد B، مقدار watermark را به ۱۰:۱۴ می‌برد منتشر می‌شود؛ با انقضای زمان‌رویداد‌محور منتظر می‌ماند، چون ۱۰:۱۸ از ۱۰:۱۴ بزرگ‌تر است. جایگزین Flink این است: `key_by(VisitIdSelector()).window(EventTimeSessionWindows.with_gap(Time.minutes(10))).allowed_lateness(15 minutes)` (pp. 152–153).
 
-### Data ordering
+### ترتیب داده
 
-Chronology matters: a car-fleet tracker without ordering would show cars jumping over buildings or swimming across rivers (p. 153).
+گاه‌شماری مهم است: یک ردیاب ناوگان خودرو بی ترتیب، ماشین‌ها را نشان می‌دهد که از روی ساختمان می‌پرند یا از رودخانه شنا می‌کنند (p. 153).
 
-#### Pattern: Bin Pack Orderer (pp. 153–158)
+#### الگو: Bin Pack Orderer (pp. 153–158)
 
-**Problem.** Visit events from external websites embedding your pages must be exposed through an API. One job for all partners builds a 10-minute processing-time window of per-minute aggregates and flushes them per partner, per minute, in event-time order — into a broker with **partial commit** semantics (p. 154).
+**مسئله.** رویدادهای بازدید از سایت‌های بیرونی که صفحه‌های شما را embed می‌کنند باید با یک API نشان داده شوند. یک job برای همه‌ی شریک‌ها، یک پنجره‌ی ده‌دقیقه‌ای زمان پردازش از تجمیع‌های دقیقه‌ای می‌سازد و برای هر شریک و هر دقیقه، به‌ترتیب زمان رویداد، در یک broker با معنای **commit جزئی** تخلیه‌شان می‌کند (p. 154).
 
-**Partial commits** (p. 154): besides success and failure, a bulk write can partially succeed. Writing 10:00, 10:10, 10:20, if only 10:20 lands, retrying the other two breaks the order. Found in Kinesis `PutRecords`, DynamoDB `BatchWriteItem`, Elasticsearch bulk.
+**عمل commit جزئی** (p. 154): جز موفقیت و شکست، نوشتن bulk می‌تواند جزئی موفق شود. در نوشتن ۱۰:۰۰ و ۱۰:۱۰ و ۱۰:۲۰، اگر فقط ۱۰:۲۰ بنشیند، تلاش دوباره برای آن دوی دیگر ترتیب را می‌شکند. در `PutRecords` در Kinesis و `BatchWriteItem` در DynamoDB و bulk در Elasticsearch هست.
 
-**Solution** (pp. 155–156): sending records one by one works but costs a request per record. Instead (Figure 5-9):
+**راه‌حل** (pp. 155–156): فرستادن رکوردها یکی‌یکی کار می‌کند ولی برای هر رکورد یک درخواست خرج می‌کند. در عوض (شکل ۵-۹):
 
-1. **Sort** by grouping key and event time.
-2. **Pack** into bins so each bin holds **at most one record per key** (the 1st record of every key in bin 1, the 2nd in bin 2, …).
-3. **Emit bins sequentially**; a retry stays inside its bin and can't reorder a key; the next bin waits until the current one is fully written.
+۱. بر حسب کلید گروه‌بندی و زمان رویداد **مرتب** کنید.
+۲. در binها **بسته‌بندی** کنید، به‌طوری که هر bin **حداکثر یک رکورد از هر کلید** داشته باشد، یعنی رکورد اول هر کلید در bin یک و دومش در bin دو و همین‌طور.
+۳. همه‌ی binها را **پشت سر هم منتشر کنید**؛ تلاش دوباره داخل bin خودش می‌ماند و نمی‌تواند یک کلید را بی‌ترتیب کند، و bin بعدی تا کامل نوشته شدن bin فعلی منتظر می‌ماند.
 
-> **Try it:** [Bin packing vs partial commits](../widgets/05-bin-pack-orderer.html) — send the same events with naive bulk requests and with bins, inject partial failures, and see which keys end up out of order.
+> **Try it:** [بسته‌بندی bin در برابر commit جزئی](../widgets/05-bin-pack-orderer.html)؛ همان رویدادها را یک‌بار با درخواست bulk ساده و یک‌بار با bin بفرستید، شکست جزئی تزریق کنید، و ببینید کدام کلیدها بی‌ترتیب در می‌آیند.
 
-**Consequences** (p. 157): **retries** of the *whole* pipeline still resend emitted bins and break ordering; **complexity** — custom sort and bin creation vs a plain sort.
+**پیامدها** (p. 157): **تلاش دوباره**ی *کل* pipeline باز هم binهای منتشرشده را دوباره می‌فرستد و ترتیب را می‌شکند؛ و **پیچیدگی**، یعنی مرتب‌سازی و ساخت bin سفارشی در برابر یک مرتب‌سازی ساده.
 
-**Examples** (pp. 157–158): Spark `sortWithinPartitions(['visit_id', 'event_time']).foreachPartition(…)` with a writer that resets the bin index to 0 when `visit_id` changes and appends each row to `delivery_groups[index]`, then delivers group by group to Kinesis.
+**نمونه‌ها** (pp. 157–158): در Spark، `sortWithinPartitions(['visit_id', 'event_time']).foreachPartition(…)` با writerی که وقتی `visit_id` عوض می‌شود شماره‌ی bin را صفر می‌کند و هر ردیف را به `delivery_groups[index]` اضافه می‌کند، و بعد گروه‌به‌گروه به Kinesis تحویل می‌دهد.
 
-#### Pattern: FIFO Orderer (pp. 158–162)
+#### الگو: FIFO Orderer (pp. 158–162)
 
-**Problem.** A streaming job must forward a subset of visit events, in processing order, as soon as possible — no buffering (p. 158).
+**مسئله.** یک job streaming باید زیرمجموعه‌ای از رویدادهای بازدید را به‌ترتیب پردازش و در اولین فرصت جلو بفرستد، بی هیچ بافری (p. 158).
 
-**Solution** (p. 158): send each record and wait for the **acknowledgment** before the next — with a single-record API (Kinesis `PutRecord`, Kafka `send()` + synchronous `flush()`), or a bulk API with concurrency 1 on **full-commit** stores. In Kafka, `max.in.flight.requests.per.connection = 1`, or the **idempotent producer**, which keeps order with up to **five** in-flight requests. In-flight requests boost throughput but can reorder: if the second of two succeeds and the first is retried (p. 159).
+**راه‌حل** (p. 158): هر رکورد را بفرستید و پیش از بعدی منتظر **acknowledgment** بمانید، با یک API تک‌رکوردی مثل `PutRecord` در Kinesis و `send()` به‌علاوه‌ی `flush()` synchronous در Kafka، یا یک API bulk با concurrency یک روی ذخیره‌سازی‌های **full-commit**. در Kafka، `max.in.flight.requests.per.connection = 1`، یا **producer idempotent** که ترتیب را تا **پنج** درخواست در پرواز نگه می‌دارد. درخواست‌های در پرواز throughput را بالا می‌برند ولی می‌توانند ترتیب را عوض کنند: اگر از دو درخواست، دومی موفق شود و اولی تلاش دوباره بخورد (p. 159).
 
-**Consequences** (pp. 159–160): **I/O overhead and latency** — one request per record; multithreading helps if each entity's records go to the same thread. **FIFO isn't exactly once** — `producer.send(message)` then `consumer.ack(message)`: if the ack fails after a successful send, the restart resends; use Chapter 4's patterns.
+**پیامدها** (pp. 159–160): **سرریز I/O و تأخیر**، یعنی برای هر رکورد یک درخواست؛ چند‌ریسمانی کمک می‌کند اگر رکوردهای هر موجودیت به همان thread بروند. **روش FIFO همان exactly-once نیست**، یعنی `producer.send(message)` و بعد `consumer.ack(message)`: اگر ack بعد از فرستادن موفق شکست بخورد، راه‌اندازی دوباره، دوباره می‌فرستد، پس الگوهای فصل ۴ را به کار ببرید.
 
-**Examples** (pp. 160–162):
+**نمونه‌ها** (pp. 160–162):
 
-| Store | Configuration |
+| ذخیره‌سازی | تنظیم |
 |---|---|
-| Kafka, individual | `produce()` + `flush()` |
-| Kafka, bulk | `max.in.flight.requests.per.connection: 1`, `queue.buffering.max.ms: 1000` |
-| Kafka, idempotent | `max.in.flight.requests.per.connection: 5`, `enable.idempotence: True`, `queue.buffering.max.ms: 2000` (KIP-98) |
-| Kinesis | `put_record` with `SequenceNumberForOrdering` = previous sequence number (otherwise only rough order) |
-| GCP Pub/Sub | `ordering_key` — FIFO per key, single producer, single region |
+| Kafka، تک‌رکوردی | `produce()` به‌علاوه‌ی `flush()` |
+| Kafka، bulk | `max.in.flight.requests.per.connection: 1`، `queue.buffering.max.ms: 1000` |
+| Kafka، idempotent | `max.in.flight.requests.per.connection: 5`، `enable.idempotence: True`، `queue.buffering.max.ms: 2000` بر پایه‌ی KIP-98 |
+| Kinesis | `put_record` با `SequenceNumberForOrdering` برابر شماره‌ی ترتیب قبلی؛ وگرنه فقط ترتیب تقریبی |
+| GCP Pub/Sub | `ordering_key`، یعنی FIFO برای هر کلید، با یک producer و یک region |
 
-### Summary
+### خلاصه
 
-Value comes from adding information (enrichment — even across batch and streaming; decoration — visible wrappers or hidden metadata) or reducing it (aggregation, sessionization), and from preserving order (Bin Pack Orderer for partial commits, FIFO Orderer for simplicity). The next chapter connects these pipelines (pp. 162–163).
+ارزش از افزودن اطلاعات می‌آید، یعنی غنی‌سازی که حتی بین batch و streaming کار می‌کند و تزئین که با wrapper پیدا یا با metadata پنهان است، یا از کم کردن آن، یعنی تجمیع و ساختن session، و از نگه داشتن ترتیب، یعنی Bin Pack Orderer برای commit جزئی و FIFO Orderer برای سادگی. فصل بعدی این pipelineها را به هم وصل می‌کند (pp. 162–163).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
 | | Static Joiner | Dynamic Joiner |
 |---|---|---|
-| Enrichment side | At rest (reference, API) | In motion (stream) |
-| Time handling | SCD validity dates | Buffers + GC watermark |
-| Main risk | Stale/late reference data; idempotency | Missed joins for late data; memory |
+| سمت غنی‌سازی | در حال سکون، یعنی مرجع و API | در حرکت، یعنی stream |
+| برخورد با زمان | تاریخ‌های اعتبار SCD | بافر به‌علاوه‌ی GC watermark |
+| خطر اصلی | داده‌ی مرجع کهنه یا دیررس؛ idempotency | پیوند از‌دست‌رفته برای داده‌ی دیررس؛ حافظه |
 
 | | Distributed Aggregator | Local Aggregator |
 |---|---|---|
-| Network | Input read + shuffle | Input read only |
-| Requirements | None | Fixed partitions keyed by the grouping key |
-| Scaling | Easy (shuffle service) | Hard (reorganize data) |
+| شبکه | خواندن ورودی به‌علاوه‌ی shuffle | فقط خواندن ورودی |
+| نیازمندی | ندارد | پارتیشن ثابت با کلید همان گروه‌بندی |
+| مقیاس‌پذیری | آسان، با shuffle service | سخت، با سازمان دادن دوباره‌ی داده |
 
 | | Incremental Sessionizer | Stateful Sessionizer |
 |---|---|---|
-| Layer | Batch | Streaming |
-| Pending state | Private table | State store |
-| Freshness | Partition interval (e.g. 1 hour) | Seconds |
+| لایه | batch | streaming |
+| حالت معلق | جدول خصوصی | state store |
+| تازگی | بازه‌ی پارتیشن؛ مثلاً یک ساعت | چند ثانیه |
 
 | | Bin Pack Orderer | FIFO Orderer |
 |---|---|---|
-| Requests | Bulk, one record per key per bin | One per record (or bulk with concurrency 1) |
-| Works with partial commits | Yes | Only with single-record API |
-| Complexity | Custom sort + bins | Simple |
+| درخواست | bulk، با یک رکورد از هر کلید در هر bin | یکی برای هر رکورد، یا bulk با concurrency یک |
+| با commit جزئی کار می‌کند | بله | فقط با API تک‌رکوردی |
+| پیچیدگی | مرتب‌سازی و bin سفارشی | ساده |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Ralph Kimball's dimensional modeling literature is where SCD types 1–7 are defined; the book uses only types 2 and 4.
-- Salting trades one skewed group for several smaller ones plus a second aggregation — it only works for aggregations that can be combined (sums, counts, min/max), not, say, an exact median.
+- ادبیات مدل‌سازی ابعادی Ralph Kimball جایی است که SCD نوع ۱ تا ۷ تعریف شده‌اند؛ کتاب فقط نوع ۲ و ۴ را به کار می‌برد.
+- روش salting یک گروه نامتوازن را با چند گروه کوچک‌تر به‌علاوه‌ی یک تجمیع دوم معامله می‌کند، پس فقط برای تجمیع‌هایی کار می‌کند که ترکیب‌شدنی‌اند، یعنی جمع و شمارش و کمینه و بیشینه، و نه مثلاً میانه‌ی دقیق.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. Data Ingestion](02-data-ingestion-design-patterns.md) (CDC, Readiness Marker, Incremental Loader), [3. Error Management](03-error-management-design-patterns.md) (watermarks, state stores, Dead-Letter metadata), [4. Idempotency](04-idempotency-design-patterns.md) (exactly-once delivery, Keyed Idempotency), [8. Data Storage](08-data-storage-design-patterns.md) (Bucket, Denormalizer).
+- **فصل‌های مرتبط:** [فصل ۲: ورود داده](02-data-ingestion-design-patterns.md) که CDC و Readiness Marker و Incremental Loader را دارد، [فصل ۳: مدیریت خطا](03-error-management-design-patterns.md) که watermark و state store و metadata الگوی Dead-Letter را دارد، [فصل ۴: ویژگی idempotency](04-idempotency-design-patterns.md) که تحویل exactly-once و Keyed Idempotency را دارد، و [فصل ۸: ذخیره‌سازی داده](08-data-storage-design-patterns.md) که Bucket و Denormalizer را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why replace `NOW()` with the orchestrator's execution time in an SCD type 2 join?**
+1. **چرا در پیوندی با SCD نوع ۲ باید `NOW()` را با زمان اجرای scheduler عوض کرد؟**
 
-   *Answer:* The execution time is immutable for a run, so a backfill joins the same user version as the original run — the join becomes idempotent (p. 120).
+   *Answer:* زمان اجرا برای یک اجرا immutable است، پس backfill به همان نسخه‌ی کاربری پیوند می‌زند که اجرای اصلی زده بود و پیوند idempotent می‌شود (p. 120).
 
-2. **In a stream-to-stream join, what does the GC watermark trade?**
-   - [ ] Throughput for ordering
-   - [x] Buffer size (resources) against joins lost for records that arrive too late
-   - [ ] Exactly-once for at-least-once
-   - [ ] Shuffle cost for latency
+2. **در پیوند stream به stream، مقدار GC watermark چه چیزی را معامله می‌کند؟**
+   - [ ] مقدار throughput را با ترتیب
+   - [x] اندازه‌ی بافر، یعنی منابع، را با پیوندهایی که برای رکوردهای خیلی late از دست می‌روند
+   - [ ] تحویل exactly-once را با at-least-once
+   - [ ] هزینه‌ی shuffle را با تأخیر
 
-   *Answer:* Keeping buffered events forever would need unbounded resources; the GC watermark drops old ones, so very late matches are missed (pp. 122–124).
+   *Answer:* نگه داشتن همیشگی رویدادهای بافرشده منابع unbounded می‌خواهد؛ مقدار GC watermark قدیمی‌ها را دور می‌ریزد، پس تطابق‌های خیلی late از دست می‌روند (pp. 122–124).
 
-3. **When should technical context like a job version go into a Metadata Decorator rather than a Wrapper?**
+3. **کِی context فنی مثل نسخه‌ی job باید در Metadata Decorator بیاید و نه در Wrapper؟**
 
-   *Answer:* When it describes the data rather than being business information — consumers don't care which job version produced a record, so hide it in headers, tags or hidden columns (pp. 129–131).
+   *Answer:* وقتی داده را توصیف می‌کند و خودش اطلاعات کسب‌وکار نیست؛ consumerها کاری با این ندارند که کدام نسخه‌ی job رکورد را ساخته، پس در header یا tag یا ستون پنهان قایمش کنید (pp. 129–131).
 
-4. **What makes a Local Aggregator possible, and what does it cost?**
+4. **چه چیزی Local Aggregator را ممکن می‌کند و چه هزینه‌ای دارد؟**
 
-   *Answer:* All records of a grouping key must already be in one input partition (static partitioning key, fixed partition count). It removes the shuffle but makes scaling and multiple grouping keys hard (pp. 138–139).
+   *Answer:* همه‌ی رکوردهای یک کلید گروه‌بندی باید از قبل در یک پارتیشن ورودی باشند، یعنی کلید پارتیشن‌بندی ایستا و شمار پارتیشن ثابت. عملیات shuffle را برمی‌دارد ولی مقیاس‌پذیری و چند کلید گروه‌بندی را سخت می‌کند (pp. 138–139).
 
-5. **A bulk API may partially commit. Events for key K are 10:00, 10:10, 10:20. How does a Bin Pack Orderer keep K in order?**
-   - [ ] It sends all three in one request and retries the whole request
-   - [x] It puts each in a different bin and sends bin 2 only after bin 1 is fully written
-   - [ ] It sorts them in reverse order
-   - [ ] It relies on the broker to reorder
+5. **یک API bulk می‌تواند جزئی commit کند. رویدادهای کلید K در ۱۰:۰۰ و ۱۰:۱۰ و ۱۰:۲۰ هستند. الگوی Bin Pack Orderer چطور ترتیب K را نگه می‌دارد؟**
+   - [ ] هر سه را در یک درخواست می‌فرستد و کل درخواست را تلاش دوباره می‌کند
+   - [x] هر کدام را در bin جدایی می‌گذارد و bin دو را فقط بعد از نوشته شدن کامل bin یک می‌فرستد
+   - [ ] آن‌ها را به‌ترتیب معکوس مرتب می‌کند
+   - [ ] به broker تکیه می‌کند که ترتیب را درست کند
 
-   *Answer:* With at most one record per key per bin, a partial failure only affects one record of K, retried before the next bin is sent (pp. 155–156).
+   *Answer:* با حداکثر یک رکورد از هر کلید در هر bin، شکست جزئی فقط روی یک رکورد از K اثر دارد که پیش از فرستادن bin بعدی تلاش دوباره می‌خورد (pp. 155–156).
 
-6. **Why are sessions called forward dependent?**
+6. **چرا به sessionها وابسته به جلو می‌گویند؟**
 
-   *Answer:* The session state built for one partition feeds the next (09:00 → 10:00 → 11:00), so late data or a backfill in one partition forces regeneration of all later ones (pp. 144–145).
+   *Answer:* حالت sessionی که برای یک پارتیشن ساخته می‌شود به پارتیشن بعدی خورانده می‌شود، یعنی ۹:۰۰ به ۱۰:۰۰ به ۱۱:۰۰، پس late data یا backfill در یک پارتیشن، ساختن دوباره‌ی همه‌ی بعدی‌ها را اجبار می‌کند (pp. 144–145).

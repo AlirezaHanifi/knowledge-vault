@@ -3,46 +3,48 @@ book: data-engineering-design-patterns
 chapter: 4
 title: "Idempotency Design Patterns"
 pages: "79–114"
+translated_title: "الگوهای طراحی idempotency"
+lang: fa
 ---
 
-# 4. Idempotency Design Patterns
+# فصل ۴: الگوهای طراحی idempotency
 
-[← 3. Error Management Design Patterns](03-error-management-design-patterns.md) · [Book](../README.md) · [5. Data Value Design Patterns →](05-data-value-design-patterns.md)
+[فصل ۳: الگوهای طراحی مدیریت خطا →](03-error-management-design-patterns.md) · [کتاب](../README.md) · [فصل ۵: الگوهای طراحی ارزش داده ←](05-data-value-design-patterns.md)
 
-## Summary
+## خلاصه
 
-Automatic retries are great engineering and a data consistency hazard: a retried task can replay writes that already succeeded, creating duplicates — the *best* case, since the worst is duplicates nobody can recognize. Idempotency, like `absolute(-1) == absolute(absolute(-1))`, means any number of runs gives the same output, or at least clearly identifiable duplicates. The chapter's seven patterns come in four families. **Overwriting**: the **Fast Metadata Cleaner** replaces slow `DELETE`s with `TRUNCATE`/`DROP` on physically separate tables behind a view, and **Data Overwrite** replaces data files with `INSERT OVERWRITE` or a save mode. **Updates**: the **Merger** applies incremental changes with `MERGE`, and the **Stateful Merger** adds a version state table so backfills restore the table first. **Database**: **Keyed Idempotency** derives keys from immutable attributes such as append time, and the **Transactional Writer** exposes only committed data. **Immutable dataset**: the **Proxy** writes each version once and exposes the latest through a view or manifest.
+تلاش دوباره‌ی خودکار هم مهندسی خوبی است و هم خطری برای سازگاری داده: taskی که دوباره اجرا می‌شود می‌تواند نوشتن‌هایی را که از قبل موفق بوده‌اند تکرار کند و تکراری بسازد، که بهترین حالت است؛ بدترین حالت تکراری‌هایی است که کسی نمی‌شناسدشان. ویژگی idempotency، مثل `absolute(-1) == absolute(absolute(-1))`، یعنی هر تعداد اجرا همان خروجی را بدهد، یا دست‌کم تکراری‌هایی بدهد که به‌روشنی شناختنی‌اند. هفت الگوی این فصل در چهار خانواده‌اند. **بازنویسی**: الگوی **Fast Metadata Cleaner** که `DELETE`های کند را با `TRUNCATE` و `DROP` روی جدول‌های فیزیکی جدا و پشت یک view عوض می‌کند، و **Data Overwrite** که فایل‌های داده را با `INSERT OVERWRITE` یا یک save mode جابه‌جا می‌کند. **به‌روزرسانی**: **Merger** که تغییرهای افزایشی را با `MERGE` اعمال می‌کند، و **Stateful Merger** که یک جدول حالت نسخه اضافه می‌کند تا backfill اول جدول را برگرداند. **دیتابیس**: **Keyed Idempotency** که کلیدها را از ویژگی‌های immutable مثل append time می‌سازد، و **Transactional Writer** که فقط داده‌ی commit‌شده را نشان می‌دهد. **مجموعه‌داده‌ی immutable**: **Proxy** که هر نسخه را یک‌بار می‌نویسد و آخرینش را با یک view یا manifest نشان می‌دهد.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Duplicates are the best case of a retried write**; idempotent processing makes repeated runs produce consistent output or recognizable duplicates (pp. 79–80).
-- **Metadata operations beat `DELETE`**: split the dataset into tables (e.g. 52 weekly ones) behind a view, and the partitioning becomes your idempotency *and* backfill granularity (pp. 80–85).
-- **`MERGE` needs immutable keys and soft deletes** — and the `is_deleted` check belongs on the `INSERT` branch too, or the first run inserts deleted rows (pp. 89–91).
-- **A plain Merger isn't consistent during backfills**: replaying from 08:00 starts from the latest table, so consumers briefly see rows that didn't exist then (p. 92).
-- **The Stateful Merger restores the table version created by the previous run**, from a state table of execution time → table version — limited by vacuum retention and confused by no-data commits like compaction (pp. 94–100).
-- **Keys from event time aren't idempotent**: late data changes the first visit time; use the broker's **append time** (Kafka) or approximate arrival timestamp (Kinesis) (pp. 101–102).
-- **Transactions make a run all-or-nothing, not idempotent across runs**: a backfill opens a new transaction and writes the records again (pp. 107–108).
+- **تکراری بهترین حالتِ یک نوشتن تکرارشده است**؛ پردازش idempotent باعث می‌شود اجراهای تکراری خروجی سازگار بدهند یا تکراری‌های شناختنی (pp. 79–80).
+- **عملیات metadata از `DELETE` بهترند**: مجموعه‌داده را به جدول‌هایی بشکنید، مثلاً ۵۲ جدول هفتگی پشت یک view، و آن‌وقت پارتیشن‌بندی هم granularity idempotency شما می‌شود و هم granularity backfill (pp. 80–85).
+- **دستور `MERGE` به کلید immutable و حذف نرم نیاز دارد**، و شرط `is_deleted` باید در شاخه‌ی `INSERT` هم بیاید، وگرنه اجرای اول ردیف‌های حذف‌شده را درج می‌کند (pp. 89–91).
+- **الگوی Merger ساده در زمان backfill سازگار نیست**: اجرای دوباره از ۸:۰۰ از جدید‌ترین حالت جدول شروع می‌شود، پس consumerها کوتاه‌مدت ردیف‌هایی را می‌بینند که آن موقع وجود نداشتند (p. 92).
+- **الگوی Stateful Merger نسخه‌ای را برمی‌گرداند که اجرای قبلی ساخته بود**، از جدول حالتی که زمان اجرا را به نسخه‌ی جدول map می‌کند؛ محدودیتش نگه‌داری vacuum است و commitهای بی‌داده مثل compaction گیجش می‌کنند (pp. 94–100).
+- **کلیدهای ساخته‌شده از زمان رویداد idempotent نیستند**: late data اولین زمان بازدید را عوض می‌کند؛ از **append time** در Kafka یا approximate arrival timestamp در Kinesis استفاده کنید (pp. 101–102).
+- **تراکنش هر اجرا را همه‌یا‌هیچ می‌کند، نه idempotent بین اجراها**: backfill تراکنش تازه‌ای باز می‌کند و همان رکوردها را دوباره می‌نویسد (pp. 107–108).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Overwriting — p. 80
-  - Pattern: Fast Metadata Cleaner — p. 80
-  - Pattern: Data Overwrite — p. 86
-- Updates — p. 89
-  - Pattern: Merger — p. 89
-  - Pattern: Stateful Merger — p. 94
-- Database — p. 100
-  - Pattern: Keyed Idempotency — p. 100
-  - Pattern: Transactional Writer — p. 105
-- Immutable Dataset — p. 110
-  - Pattern: Proxy — p. 110
-- Summary — p. 113
+- بازنویسی — p. 80
+  - الگو: Fast Metadata Cleaner — p. 80
+  - الگو: Data Overwrite — p. 86
+- به‌روزرسانی — p. 89
+  - الگو: Merger — p. 89
+  - الگو: Stateful Merger — p. 94
+- دیتابیس — p. 100
+  - الگو: Keyed Idempotency — p. 100
+  - الگو: Transactional Writer — p. 105
+- مجموعه‌داده‌ی immutable — p. 110
+  - الگو: Proxy — p. 110
+- خلاصه — p. 113
 
-## Notes
+## یادداشت‌ها
 
-Error management patterns handle most issues, not all: automatic retries of a task or job can replay writes that already succeeded. Duplicates you can remove on the consumer side are the best case; duplicates you can't even recognize are the nightmare (p. 79). Idempotency, defined with the absolute function, means any number of runs gives consistent output without duplicates — or with clearly identifiable ones, since a messaging system without transactional producers can still duplicate on retry (pp. 79–80). The author credits Maxime Beauchemin's 2018 article “Functional Data Engineering: A Modern Paradigm for Batch Data Processing” with popularizing idempotency (p. 80).
+الگوهای مدیریت خطا بیشتر مسئله‌ها را حل می‌کنند، نه همه‌شان: تلاش دوباره‌ی خودکار یک task یا job می‌تواند نوشتن‌هایی را که از قبل موفق بوده‌اند تکرار کند. تکراری‌هایی که consumer می‌تواند پاکشان کند بهترین حالت‌اند؛ تکراری‌هایی که حتی شناختنی نیستند کابوس‌اند (p. 79). ویژگی idempotency که با تابع absolute تعریف می‌شود، یعنی هر تعداد اجرا خروجی سازگار و بدون تکراری بدهد، یا با تکراری‌های به‌روشنی شناختنی، چون سیستم پیام‌رسانی بدون producer تراکنشی باز هم می‌تواند سر تلاش دوباره تکراری بسازد (pp. 79–80). نویسنده رایج شدن این مفهوم را به مقاله‌ی سال ۲۰۱۸ از Maxime Beauchemin به نام *Functional Data Engineering: A Modern Paradigm for Batch Data Processing* نسبت می‌دهد (p. 80).
 
 ```mermaid
 flowchart TD
@@ -59,25 +61,25 @@ flowchart TD
     Q -->|"Must never modify written data"| P["Proxy<br/>write-once tables + view"]
 ```
 
-*The vault's decision map of the chapter's patterns, following the book's summary (pp. 113–114).*
+*نقشه‌ی تصمیم vault از الگوهای این فصل، بر پایه‌ی خلاصه‌ی خود کتاب (pp. 113–114).*
 
-### Overwriting
+### بازنویسی
 
-Deleting existing data before writing is the easiest approach but can be compute-intensive on big datasets; data- or metadata-based solutions exist (p. 80).
+حذف داده‌ی موجود پیش از نوشتن ساده‌ترین روش است ولی روی مجموعه‌داده‌های بزرگ می‌تواند محاسبه‌بر باشد؛ راه‌حل‌هایی در سطح داده یا metadata هست (p. 80).
 
-#### Pattern: Fast Metadata Cleaner (pp. 80–86)
+#### الگو: Fast Metadata Cleaner (pp. 80–86)
 
-**Problem.** A daily batch processes **500 GB to 1.5 TB** of visits; for idempotency it first `DELETE`s rows from the previous run, then `INSERT`s. After three weeks, the growing table makes `DELETE` very slow (p. 80).
+**مسئله.** یک batch روزانه بین **۵۰۰ گیگابایت و ۱٫۵ ترابایت** بازدید پردازش می‌کند؛ برای idempotency اول ردیف‌های اجرای قبلی را `DELETE` و بعد `INSERT` می‌کند. بعد از سه هفته، بزرگ شدن جدول `DELETE` را خیلی کند می‌کند (p. 80).
 
-**Solution** (pp. 81–83). `DELETE` is a two-step action — find the rows, then rewrite the affected files. `TRUNCATE TABLE` and `DROP TABLE` are **metadata operations** (no table scan). Treat the dataset as many physically separate tables forming one logical unit behind a view — e.g. **52 weekly tables** composing a yearly visits dataset (Figure 4-1). The partitioning defines the **idempotency granularity** (here one week). The orchestration then:
+**راه‌حل** (pp. 81–83): دستور `DELETE` دو مرحله است، یعنی پیدا کردن ردیف‌ها و بعد بازنویسی فایل‌های اثرپذیر. دستورهای `TRUNCATE TABLE` و `DROP TABLE` **عملیات metadata**اند و جدول را پیمایش نمی‌کنند. مجموعه‌داده را چند جدول فیزیکی جدا ببینید که پشت یک view یک واحد منطقی می‌سازند؛ مثلاً **۵۲ جدول هفتگی** که مجموعه‌داده‌ی سالانه‌ی بازدید را می‌سازند (شکل ۴-۱). پارتیشن‌بندی **granularity idempotency** را تعیین می‌کند، این‌جا یک هفته. بعد زمان‌بندی این‌طور می‌شود:
 
-1. **Decides** from the execution date whether to start a new granularity (e.g. **Exclusive Choice**, Ch. 6: Monday → initialization branch).
-2. **Creates the idempotency environment**: create-then-`TRUNCATE`, or `DROP`-then-create.
-3. **Updates the single abstraction** (a view unioning the weekly tables); with `DROP`, optionally remove the table from the view first so readers don't hit errors.
+۱. از تاریخ اجرا **تصمیم می‌گیرد** که granularity تازه‌ای شروع شود یا نه؛ مثلاً **Exclusive Choice** از فصل ۶، یعنی دوشنبه‌ها شاخه‌ی مقدمه‌چینی.
+۲. **محیط idempotency را می‌سازد**: ساختن و بعد `TRUNCATE`، یا `DROP` و بعد ساختن.
+۳. **انتزاع یکتا را به‌روز می‌کند**، یعنی viewی که جدول‌های هفتگی را union می‌کند؛ با `DROP` بهتر است جدول اول از view برداشته شود تا خواننده‌ها به خطا نخورند.
 
-![One pipeline per week writes its own table, visits week 1 to week 52 of 2024, and a common view unions all 52 tables](../figures/04-01.png)
+![برای هر هفته یک pipeline جدول خودش را می‌نویسد، از بازدیدهای هفته‌ی ۱ تا هفته‌ی ۵۲ سال ۲۰۲۴، و یک view مشترک همه‌ی ۵۲ جدول را union می‌کند](../figures/04-01.png)
 
-*Figure 4-1 (p. 81): each week lives in its own table, so redoing a week means dropping one table rather than deleting rows.*
+*Figure 4-1 (p. 81): هر هفته در جدول خودش می‌نشیند، پس انجام دوباره‌ی یک هفته یعنی حذف یک جدول و نه حذف ردیف‌ها.*
 
 ```mermaid
 flowchart LR
@@ -85,52 +87,58 @@ flowchart LR
     D -- no --> L
 ```
 
-*After Figure 4-2 and Examples 4-1/4-2 (pp. 83, 85).* For fully loaded tables, re-create the table at each load (Figure 4-3) or use Data Overwrite (p. 83).
+*بر پایه‌ی شکل ۴-۲ و نمونه‌های ۴-۱ و ۴-۲ (pp. 83, 85).* برای جدول‌هایی که کامل بار می‌شوند، جدول را در هر بار‌گذاری از نو بسازید (شکل ۴-۳) یا از Data Overwrite استفاده کنید (p. 83).
 
-**Consequences** (pp. 84–85):
+**پیامدها** (pp. 84–85):
 
 | | |
 |---|---|
-| **Granularity = backfill boundary** | Backfilling one day of a weekly table means rerunning from the table-creation task for the whole week (other days only need their load step). No fine-grained backfills per provider, user or customer |
-| **Metadata limits** | BigQuery: 4,000 partitions; Redshift: 200,000 tables — reached quickly across pipelines. Add a **freezing** step that merges immutable weekly tables into monthly or yearly ones |
-| **Support** | Needs metadata operations: warehouses, lakehouses, relational databases — hard on plain object stores |
-| **Data exposition** | Users want one entry point — a view or similar logical structure |
-| **Schema evolution** | A new *optional* field needs a separate pipeline to alter existing tables; a new *required* field can come with reprocessing |
+| **granularity همان مرز backfill است** | backfill یک روز از جدولی هفتگی یعنی اجرای دوباره از task ساخت جدول برای کل آن هفته، در حالی که روزهای دیگر فقط مرحله‌ی بار‌گذاری را می‌خواهند. backfill دانه‌ریز برای هر تأمین‌کننده یا کاربر یا مشتری شدنی نیست |
+| **محدودیت metadata** | سقف BigQuery چهار هزار پارتیشن و سقف Redshift دویست هزار جدول است، که بین pipelineها زود پر می‌شود. یک مرحله‌ی **فریز کردن** اضافه کنید که جدول‌های هفتگی immutable را در جدول‌های ماهانه یا سالانه merge کند |
+| **پشتیبانی** | به عملیات metadata نیاز دارد، یعنی warehouse و lakehouse و دیتابیس رابطه‌ای؛ روی ذخیره‌سازی object ساده سخت است |
+| **نمایش داده** | کاربرها یک نقطه‌ی ورود می‌خواهند، یعنی یک view یا ساختار منطقی مشابه |
+| **تکامل schema** | فیلد *اختیاری* تازه به pipeline جداگانه‌ای نیاز دارد که جدول‌های موجود را تغییر دهد؛ فیلد *الزامی* تازه می‌تواند همراه پردازش دوباره بیاید |
 
-**Examples** (pp. 85–86): an Airflow `BranchPythonOperator` returning `create_weekly_table` when `day_of_week == 1 or day_of_year == 1`, else a dummy task; a `PostgresOperator` creates the week-suffixed table and a custom `PostgresViewManagerOperator` refreshes the `visits` view.
+**نمونه‌ها** (pp. 85–86): یک `BranchPythonOperator` در Airflow که وقتی `day_of_week == 1 or day_of_year == 1` نام `create_weekly_table` را برمی‌گرداند و وگرنه یک task خالی؛ یک `PostgresOperator` جدولِ پسوند‌خورده با شماره‌ی هفته را می‌سازد و یک `PostgresViewManagerOperator` سفارشی view به نام `visits` را تازه می‌کند.
 
-#### Pattern: Data Overwrite (pp. 86–88)
+#### الگو: Data Overwrite (pp. 86–88)
 
-**Problem.** A daily job on event-time-partitioned visits in an object store creates duplicates on every backfill; there's no metadata layer for the Fast Metadata Cleaner (p. 86).
+**مسئله.** یک job روزانه روی بازدیدهای پارتیشن‌بندی‌شده با زمان رویداد در ذخیره‌سازی object، سر هر backfill تکراری می‌سازد؛ لایه‌ی metadataیی هم برای Fast Metadata Cleaner در کار نیست (p. 86).
 
-**Solution** (pp. 86–87):
+**راه‌حل** (pp. 86–87):
 
-| Layer | How |
+| لایه | چطور |
 |---|---|
-| Processing framework | Spark save mode, Flink write mode; Delta Lake `replaceWhere` for **selective** overwrite |
-| SQL | `DELETE FROM` + `INSERT INTO` (can target rows); `INSERT OVERWRITE` (concise, whole table/partition only); load commands with overwrite, e.g. BigQuery `LOAD DATA OVERWRITE`, or `TRUNCATE` first |
+| framework پردازش | save mode در Spark، write mode در Flink، و `replaceWhere` در Delta Lake برای بازنویسی **گزینشی** |
+| دستور SQL | `DELETE FROM` به‌علاوه‌ی `INSERT INTO` که می‌تواند ردیف‌ها را هدف بگیرد؛ `INSERT OVERWRITE` که کوتاه است ولی فقط کل جدول یا پارتیشن را می‌گیرد؛ و دستورهای بار‌گذاری با بازنویسی، مثل `LOAD DATA OVERWRITE` در BigQuery، یا اول `TRUNCATE` |
 
-`INSERT` can take a `SELECT` instead of explicit values: `INSERT INTO visits (id, v_time) SELECT visit_id, visit_time FROM visits_raw` (p. 87). With **time travel** stores (table file formats, BigQuery, Snowflake) overwritten blocks remain until the retention period ends or a vacuum runs (p. 87).
+دستور `INSERT` می‌تواند به‌جای مقدارهای صریح یک `SELECT` بگیرد: `INSERT INTO visits (id, v_time) SELECT visit_id, visit_time FROM visits_raw` (p. 87). در ذخیره‌سازی‌های دارای **time travel**، یعنی table file formatها و BigQuery و Snowflake، بلوک‌های بازنویسی‌شده تا پایان دوره‌ی نگه‌داری یا اجرای vacuum می‌مانند (p. 87).
 
-**Consequences** (pp. 87–88): **data overhead** — big unpartitioned datasets get slower to overwrite every day (partition them, Ch. 8); **vacuum need** — deleted blocks stay on disk in table formats and relational databases.
+**پیامدها** (pp. 87–88): **سرریز داده**، یعنی مجموعه‌داده‌های بزرگ و پارتیشن‌بندی‌نشده هر روز کندتر بازنویسی می‌شوند، پس پارتیشن‌بندی‌شان کنید، فصل ۸ را ببینید؛ و **نیاز به vacuum**، چون در table formatها و دیتابیس‌های رابطه‌ای بلوک‌های حذف‌شده روی دیسک می‌مانند.
 
-**Examples** (p. 88): `INSERT OVERWRITE INTO devices SELECT * FROM devices_staging WHERE state = 'valid';` (Databricks, Snowflake); `bq load dedp.devices gs://devices/in_20240101.csv ./info_schema.json --replace=true` (shortcut for `WRITE_TRUNCATE`); PySpark `.write.mode('overwrite')` — not transactional by itself unless the format is, as with table formats where the delete is a new commit.
+**نمونه‌ها** (p. 88): دستور `INSERT OVERWRITE INTO devices SELECT * FROM devices_staging WHERE state = 'valid';` در Databricks و Snowflake؛ فرمان `bq load dedp.devices gs://devices/in_20240101.csv ./info_schema.json --replace=true` که میان‌بر `WRITE_TRUNCATE` است؛ و `.write.mode('overwrite')` در PySpark، که خودش تراکنشی نیست مگر فرمت تراکنشی باشد، مثل table formatها که حذف در آن‌ها یک commit تازه است.
 
-### Updates
+> **In practice:** در ClickHouse ارزان‌ترین بازنویسی idempotent جایگزین کردن یک partition است، نه `DELETE`.
+>
+> **Your turn:** باید Gold ماه گذشته را دوباره بسازید. چرا `REPLACE PARTITION` از `DELETE` و بعد `INSERT` بهتر است؟
+>
+> *Answer:* جایگزینی partition عملی روی metadata و اتمی است: اگر job وسط کار بمیرد، خواننده‌ها یا نسخه‌ی قبلی را می‌بینند یا نسخه‌ی تازه را. `DELETE` در ClickHouse یک mutation سنگین است و بین حذف و insert پنجره‌ای خالی می‌سازد؛ کتاب هم عملیات metadata را بر `DELETE` ترجیح می‌دهد (pp. 80–88).
 
-Incremental datasets — where each delivery holds only new or changed records — can't simply be replaced (p. 89).
+### به‌روزرسانی
 
-#### Pattern: Merger (pp. 89–94)
+مجموعه‌داده‌های افزایشی، که هر تحویلشان فقط رکوردهای تازه یا تغییریافته را دارد، به‌سادگی جابه‌جا نمی‌شوند (p. 89).
 
-**Problem.** A batch pipeline must apply CDC changes from Kafka to a Delta Lake table that exactly reflects the source at a given moment, with no duplicates (p. 89).
+#### الگو: Merger (pp. 89–94)
 
-**Solution** (pp. 89–91): choose the attributes that identify a record (user ID; or visit ID + visit time), then use **`MERGE`** (aka **UPSERT**), defining:
+**مسئله.** یک pipeline batch باید تغییرهای CDC از Kafka را روی جدولی در Delta Lake اعمال کند که دقیقاً منبع را در لحظه‌ای معین بازتاب بدهد، بدون تکراری (p. 89).
 
-| Case | Action |
+**راه‌حل** (pp. 89–91): ویژگی‌هایی را انتخاب کنید که رکورد را می‌شناسانند، مثل شناسه‌ی کاربر، یا شناسه‌ی بازدید به‌علاوه‌ی زمان بازدید، و بعد از **`MERGE`** استفاده کنید، که **UPSERT** هم نامیده می‌شود، و این‌ها را تعریف کنید:
+
+| حالت | کار |
 |---|---|
-| Insert | New record → add |
-| Update | Present in both → apply the new version |
-| Delete | `MERGE` can't see a missing row → only **soft deletes** work (an `is_deleted` attribute) |
+| درج | رکورد تازه، یعنی اضافه شود |
+| به‌روزرسانی | در هر دو هست، یعنی نسخه‌ی تازه اعمال شود |
+| حذف | دستور `MERGE` ردیف نبوده را نمی‌بیند، پس فقط **حذف نرم** کار می‌کند، یعنی یک ویژگی `is_deleted` |
 
 ```sql
 MERGE INTO dedp.devices_output AS target
@@ -142,57 +150,57 @@ WHEN NOT MATCHED AND input.is_deleted = false THEN
   INSERT (full_name, version, type) VALUES (input.full_name, input.version, input.type)
 ```
 
-*Example 4-6 (p. 90).* Without `is_deleted = false` on the insert branch, a first run inserts already-deleted records that later runs never remove (Figure 4-4, pp. 90–91).
+*نمونه‌ی ۴-۶ (p. 90).* بدون شرط `is_deleted = false` در شاخه‌ی درج، اجرای اول رکوردهای از‌پیش‌حذف‌شده را درج می‌کند و اجراهای بعدی هیچ‌وقت برنمی‌دارندشان (شکل ۴-۴، صص. ۹۰–۹۱).
 
-**Consequences** (pp. 91–93):
+**پیامدها** (pp. 91–93):
 
-- **Uniqueness**: without immutable identifying attributes, a backfill inserts instead of updating → duplicates.
-- **I/O**: a data-level operation, though modern stores skip irrelevant files using metadata.
-- **Incremental datasets with backfilling**: the replay starts from the *latest* table, not the table as it was.
+- **یکتایی**: بدون ویژگی‌های شناسانده‌ی تغییرناپذیر، backfill درج می‌کند نه به‌روزرسانی، و نتیجه تکراری است.
+- **عملیات I/O**: در سطح داده است، گرچه ذخیره‌سازی‌های امروزی با metadata از فایل‌های بی‌ربط می‌پرند.
+- **مجموعه‌داده‌ی افزایشی به‌علاوه‌ی backfill**: اجرای دوباره از *جدید‌ترین* حالت جدول شروع می‌شود، نه از جدول آن‌طور که بود.
 
-*Table 4-1 (p. 92): normal runs (U = update, D = delete)*
+*جدول ۴-۱ (p. 92): اجراهای معمولی، که U یعنی به‌روزرسانی و D یعنی حذف*
 
-| Ingestion time | New rows | Output table rows |
+| زمان ورود | ردیف‌های تازه | ردیف‌های جدول خروجی |
 |---|---|---|
-| 07:00 | A | A |
-| 08:00 | A–U, B | A–U, B |
-| 09:00 | B–D, C | A–U, C |
-| 10:00 | M, N, O | A–U, C, M, N, O |
+| ۰۷:۰۰ | A | A |
+| ۰۸:۰۰ | A–U، B | A–U، B |
+| ۰۹:۰۰ | B–D، C | A–U، C |
+| ۱۰:۰۰ | M، N، O | A–U، C، M، N، O |
 
-*Table 4-2 (p. 92): replaying from 08:00*
+*جدول ۴-۲ (p. 92): اجرای دوباره از ۸:۰۰*
 
-| Ingestion time | New rows | Current rows | Output table rows |
+| زمان ورود | ردیف‌های تازه | ردیف‌های فعلی | ردیف‌های جدول خروجی |
 |---|---|---|---|
-| 08:00 | A–U, B | A–U, C, M, N, O | A–U, B, C, M, N, O |
-| 09:00 | B–D, C | A–U, B, C, M, N, O | A–U, C, M, N, O |
-| 10:00 | M, N, O | A–U, C, M, N, O | A–U, C, M, N, O |
+| ۰۸:۰۰ | A–U، B | A–U، C، M، N، O | A–U، B، C، M، N، O |
+| ۰۹:۰۰ | B–D، C | A–U، B، C، M، N، O | A–U، C، M، N، O |
+| ۱۰:۰۰ | M، N، O | A–U، C، M، N، O | A–U، C، M، N، O |
 
-During the backfill, consumers see C, M, N and O at 08:00 although they didn't exist yet — a restore step is needed (the Stateful Merger). For **provider mistakes** you needn't replay: ask for a corrected increment and merge it, as long as row identity is unchanged (p. 93).
+در طول backfill، consumerها ردیف‌های C و M و N و O را در ۸:۰۰ می‌بینند، در حالی که آن موقع هنوز وجود نداشتند؛ به یک مرحله‌ی برگرداندن نیاز است، یعنی همان Stateful Merger. برای **اشتباه تأمین‌کننده** لازم نیست اجرای دوباره کنید: یک increment اصلاح‌شده بخواهید و merge کنید، تا وقتی شناسه‌ی ردیف‌ها عوض نشده (p. 93).
 
-**Examples** (pp. 93–94): PostgreSQL `CREATE TEMPORARY TABLE changed_devices (LIKE dedp.devices)` (the `LIKE` avoids re-declaring the schema), `COPY … FROM '/data_to_load/dataset.csv'`, then `MERGE … WHEN MATCHED THEN UPDATE … WHEN NOT MATCHED THEN INSERT`.
+**نمونه‌ها** (pp. 93–94): در PostgreSQL دستور `CREATE TEMPORARY TABLE changed_devices (LIKE dedp.devices)`، که `LIKE` نمی‌گذارد schema را دوباره اعلان کنید، بعد `COPY … FROM '/data_to_load/dataset.csv'`، و بعد `MERGE … WHEN MATCHED THEN UPDATE … WHEN NOT MATCHED THEN INSERT`.
 
-> **Try it:** [Merger vs Stateful Merger backfill](../widgets/04-stateful-merger.html) — replay the book's A/B/C/M/N/O increments with and without the version state table and compare what consumers see.
+> **Try it:** [مقایسه‌ی Merger و Stateful Merger در backfill](../widgets/04-stateful-merger.html)؛ incrementهای A و B و C و M و N و O کتاب را با جدول حالت نسخه و بی آن اجرا کنید و ببینید consumer چه می‌بیند.
 
-#### Pattern: Stateful Merger (pp. 94–100)
+#### الگو: Stateful Merger (pp. 94–100)
 
-**Problem.** A week after setting up the Merger between two Delta tables you find an issue; users want the table restored to its last valid version *before* backfilling (p. 94).
+**مسئله.** یک هفته بعد از راه‌اندازی Merger بین دو جدول Delta مسئله‌ای پیدا می‌کنید؛ کاربرها می‌خواهند جدول *پیش از* backfill به آخرین نسخه‌ی معتبرش برگردد (p. 94).
 
-**Solution** (pp. 94–96): add a **state table** mapping each execution time to the table version its `MERGE` created, a **restore** step at the start, and a state-update step at the end (Figure 4-5). Restore only when backfilling (from orchestrator context, or detected):
+**راه‌حل** (pp. 94–96): یک **جدول حالت** اضافه کنید که هر زمان اجرا را به نسخه‌ای از جدول map می‌کند که `MERGE` آن اجرا ساخته، به‌علاوه‌ی یک مرحله‌ی **برگرداندن** در شروع و یک مرحله‌ی به‌روزرسانی حالت در پایان (شکل ۴-۵). فقط هنگام backfill برگردانید، که از context scheduler می‌آید یا تشخیص داده می‌شود:
 
-1. No version for the previous execution → first run or first execution being backfilled → `TRUNCATE`, then merge.
-2. Previous execution's version **=** current table version → normal run.
-3. **≠** → backfill: restore the table to the previous execution's version, then merge.
+۱. برای اجرای قبلی نسخه‌ای نیست، یعنی اجرای اول است یا اولین اجرایی است که backfill می‌شود، پس `TRUNCATE` و بعد merge.
+۲. نسخه‌ی اجرای قبلی **برابر** نسخه‌ی فعلی جدول است، یعنی اجرای معمولی.
+۳. **نابرابر** است، یعنی backfill: جدول را به نسخه‌ی اجرای قبلی برگردانید و بعد merge کنید.
 
-*Tables 4-4 and 4-5 (pp. 95–96):*
+*جدول‌های ۴-۴ و ۴-۵ (pp. 95–96):*
 
-| Execution time | Version | After backfilling 2024-10-07 |
+| زمان اجرا | نسخه | بعد از backfill تاریخ ۲۰۲۴-۱۰-۰۷ |
 |---|---|---|
-| 2024-10-05 | 1 | 1 |
-| 2024-10-06 | 2 | 2 |
-| 2024-10-07 | 3 | **5** |
-| 2024-10-08 | 4 | 4 |
+| ۲۰۲۴-۱۰-۰۵ | ۱ | ۱ |
+| ۲۰۲۴-۱۰-۰۶ | ۲ | ۲ |
+| ۲۰۲۴-۱۰-۰۷ | ۳ | **۵** |
+| ۲۰۲۴-۱۰-۰۸ | ۴ | ۴ |
 
-Running 10-09 normally: the 10-08 version (4) equals the latest → merge. Rerunning 10-05: no 10-04 version → truncate. Rerunning 10-07: the 10-06 version (2) ≠ latest (4) → restore to 2, merge, record version 5; rerunning 10-08 then finds 10-07's version (5) = latest → normal run (p. 96).
+اجرای معمولی ۱۰-۰۹: نسخه‌ی ۱۰-۰۸ که ۴ است با جدید‌ترین نسخه برابر است، پس merge. اجرای دوباره‌ی ۱۰-۰۵: نسخه‌ای برای ۱۰-۰۴ نیست، پس truncate. اجرای دوباره‌ی ۱۰-۰۷: نسخه‌ی ۱۰-۰۶ که ۲ است با جدید‌ترین نسخه که ۴ است برابر نیست، پس برگرداندن به ۲ و merge و ثبت نسخه‌ی ۵؛ و بعد اجرای دوباره‌ی ۱۰-۰۸ می‌بیند نسخه‌ی ۱۰-۰۷ که ۵ است همان جدید‌ترین است، پس اجرای معمولی (p. 96).
 
 ```mermaid
 sequenceDiagram
@@ -208,131 +216,143 @@ sequenceDiagram
     O->>S: upsert (10-07 → 5)
 ```
 
-*The vault's sequence for the backfill case of Tables 4-4/4-5 (pp. 95–96).*
+*ترتیب vault برای حالت backfill در جدول‌های ۴-۴ و ۴-۵ (pp. 95–96).*
 
-**Consequences** (pp. 96–99):
+**پیامدها** (pp. 96–99):
 
-- **Versioned stores** needed. Without them (Figure 4-6), keep a raw `devices_history` table with an execution-time column; if rows exist with `execution_time > '{{ ts }}'`, delete those `>=` the current time, rebuild the table from history with the **Windowed Deduplicator**, then load and merge.
-- **Vacuum**: old versions disappear after retention; extend retention (more storage) or accept a backfill horizon.
-- **No-data commits** such as **compaction** create versions too; restoring the previous run's version would drop them. With versions increasing by 1, restore `version_for_current_execution_time - 1` instead (Figure 4-7: backfilling 10-07, whose version is 9, restores 8 — the compacted version).
+- **ذخیره‌سازی نسخه‌دار** لازم است. بی آن (شکل ۴-۶)، یک جدول خام `devices_history` با ستون زمان اجرا نگه دارید؛ اگر ردیفی با `execution_time > '{{ ts }}'` بود، ردیف‌های `>=` زمان فعلی را حذف کنید، جدول را با **Windowed Deduplicator** از history از نو بسازید، و بعد بار‌گذاری و merge کنید.
+- **عملیات vacuum**: نسخه‌های قدیمی بعد از دوره‌ی نگه‌داری از بین می‌روند؛ دوره را بکشید که یعنی ذخیره‌سازی بیشتر، یا افق backfill را بپذیرید.
+- **همه‌ی commitهای بی‌داده** مثل **compaction** هم نسخه می‌سازند، و برگرداندن به نسخه‌ی اجرای قبلی آن‌ها را دور می‌ریزد. وقتی نسخه‌ها یکی‌یکی بالا می‌روند، به‌جایش `version_for_current_execution_time - 1` را برگردانید (شکل ۴-۷: برای backfill تاریخ ۱۰-۰۷ که نسخه‌اش ۹ است، نسخه‌ی ۸ یعنی نسخه‌ی compact‌شده برمی‌گردد).
 
-**Examples** (pp. 99–100): a `versions(execution_time STRING, delta_table_version INT)` table; `DESCRIBE HISTORY default.devices` filtered to `operation = "MERGE"` for the last merge version; `TRUNCATE` if no previous version, else `DeltaTable.forName(…).restoreToVersion(…)`; after the merge, upsert the new version into `versions` with a Delta `merge` (`whenMatchedUpdateAll().whenNotMatchedInsertAll()`).
+**نمونه‌ها** (pp. 99–100): یک جدول `versions(execution_time STRING, delta_table_version INT)`؛ دستور `DESCRIBE HISTORY default.devices` که با `operation = "MERGE"` فیلتر شده تا آخرین نسخه‌ی merge را بدهد؛ `TRUNCATE` اگر نسخه‌ی قبلی نبود و وگرنه `DeltaTable.forName(…).restoreToVersion(…)`؛ و بعد از merge، درج‌و‌به‌روزرسانی نسخه‌ی تازه در `versions` با `merge` دلتا، یعنی `whenMatchedUpdateAll().whenNotMatchedInsertAll()`.
 
-### Database
+> **In practice:** ساختن «تازه‌ترین نسخه‌ی هر ردیف» در Silver همان Merger کتاب است.
+>
+> **Your turn:** چرا insert دوباره‌ی همان ردیف‌ها در `ReplacingMergeTree(update_date)` بعد از یک retry نتیجه را عوض نمی‌کند؟
+>
+> *Answer:* چون ردیف‌های با کلید و نسخه‌ی یکسان در merge یکی می‌شوند و خواندن با `FINAL` فقط یکی را برمی‌گرداند؛ merge بر اساس کلید، نوشتن را idempotent می‌کند، به شرط این‌که کلید از خود داده بیاید (pp. 89–94).
 
-When orchestration-based approaches are too much work, rely on the database (p. 100).
+### دیتابیس
 
-#### Pattern: Keyed Idempotency (pp. 100–105)
+وقتی روش‌های مبتنی بر scheduler کار زیادی می‌برند، به دیتابیس تکیه کنید (p. 100).
 
-**Problem.** A streaming job buffers visits per user in a time window and writes updated sessions to a key-value store; retries must not create duplicates (p. 100).
+#### الگو: Keyed Idempotency (pp. 100–105)
 
-**Solution** (pp. 101–102): make **key generation** idempotent from **immutable** properties. User ID alone would overwrite earlier sessions; user ID + first *visit (event) time* breaks when late data arrives after a restart — a late 09:55 record changes the session ID (Figure 4-8). Use the **append time** — when the broker physically stored the record (Kafka *append time*, Kinesis *approximate arrival timestamp*; in data at rest: added/ingestion/insertion time). The key then stays stable and partial results share the final ID. A window ordered by ingestion time ascending isn't affected by new rows:
+**مسئله.** یک job streaming بازدیدهای هر کاربر را در پنجره‌ای زمانی بافر می‌کند و sessionهای به‌روز‌شده را در یک ذخیره‌سازی key-value می‌نویسد؛ تلاش دوباره نباید تکراری بسازد (p. 100).
+
+**راه‌حل** (pp. 101–102): **ساخت کلید** را از ویژگی‌های **immutable** idempotent کنید. شناسه‌ی کاربر به‌تنهایی sessionهای قبلی را بازنویسی می‌کند، و شناسه‌ی کاربر به‌علاوه‌ی اولین زمان *بازدید*، یعنی زمان رویداد، وقتی late data بعد از راه‌اندازی دوباره می‌آید می‌شکند، چون رکورد late ۹:۵۵ شناسه‌ی session را عوض می‌کند (شکل ۴-۸). از **append time** استفاده کنید، یعنی زمانی که broker رکورد را فیزیکی ذخیره کرده، که در Kafka *append time* است و در Kinesis *approximate arrival timestamp*، و در داده‌ی در حال سکون زمان اضافه شدن یا ورود یا درج. آن‌وقت کلید پایدار می‌ماند و نتیجه‌های جزئی همان شناسه‌ی نهایی را دارند. پنجره‌ای که با زمان ورود صعودی مرتب شده از ردیف‌های تازه اثر نمی‌گیرد:
 
 ```sql
 SELECT ... OVER (PARTITION BY user_id ORDER BY ingestion_time ASC, visit_time ASC)
 ```
 
-The same works for files, partitions or tables named after the execution time — a run on 20/11/2024 always writes `20_11_2024` (p. 102).
+همین برای فایل‌ها و پارتیشن‌ها و جدول‌هایی کار می‌کند که اسمشان از زمان اجرا می‌آید، یعنی اجرای ۲۰/۱۱/۲۰۲۴ همیشه در `20_11_2024` می‌نویسد (p. 102).
 
-**Consequences** (pp. 102–103): **database-dependent** — natural for key-based NoSQL (Cassandra, ScyllaDB, HBase); relational databases reject duplicate primary keys, so writes become `MERGE`; Kafka keeps keyed duplicates until asynchronous compaction runs. **Mutable source** — compaction can delete the first event used for the key, yielding a new key on restart (arguably correct, since the data changed).
+**پیامدها** (pp. 102–103): **وابسته به دیتابیس**، یعنی برای NoSQLهای کلید‌محور مثل Cassandra و ScyllaDB و HBase طبیعی است؛ دیتابیس‌های رابطه‌ای کلید اصلی تکراری را رد می‌کنند، پس نوشتن تبدیل به `MERGE` می‌شود؛ و Kafka تکراری‌های هم‌کلید را تا اجرای compaction asynchronous نگه می‌دارد. **منبع mutable**، یعنی compaction می‌تواند اولین رویدادی را که کلید از آن ساخته شده حذف کند، و سر راه‌اندازی دوباره کلید تازه‌ای در بیاید، که می‌شود گفت درست است چون داده عوض شده.
 
-**Examples** (pp. 103–105): a ScyllaDB `sessions` table with `PRIMARY KEY(session_id, user_id)`; Spark reads Kafka's `timestamp` as `append_time`, watermarks `event_time` by 10 seconds, groups by user, and in a stateful mapping function (`GroupState`) keeps the minimum append time in state — `session_id = hash(str(min_append_time))` on timeout (50-second expiration). Kafka's append time is increasing, so the first one stays the minimum. For Kinesis, read `approximateArrivalTimestamp AS append_time`. A producer-set timestamp is less reliable than the broker's — check `log.message.timestamp.type` (p. 105).
+**نمونه‌ها** (pp. 103–105): یک جدول `sessions` در ScyllaDB با `PRIMARY KEY(session_id, user_id)`؛ در Spark، خواندن `timestamp` از Kafka به‌عنوان `append_time`، watermark ده‌ثانیه‌ای روی `event_time`، گروه‌بندی بر حسب کاربر، و در تابع mapping stateful با `GroupState` نگه داشتن کمینه‌ی append time در حالت، و سر timeout محاسبه‌ی `session_id = hash(str(min_append_time))` با انقضای پنجاه‌ثانیه‌ای. مقدار append time در Kafka صعودی است، پس اولینش کمینه می‌ماند. برای Kinesis `approximateArrivalTimestamp AS append_time` خوانده می‌شود. زمانی که producer می‌گذارد از زمان broker کم‌اعتمادتر است؛ مقدار `log.message.timestamp.type` را ببینید (p. 105).
 
-#### Pattern: Transactional Writer (pp. 105–110)
+#### الگو: Transactional Writer (pp. 105–110)
 
-**Problem.** A batch job on spare cloud capacity saves **60%** of infrastructure costs, but when the provider reclaims a node, tasks rerun elsewhere and consumers see duplicates and incomplete records (pp. 105–106).
+**مسئله.** یک job batch روی ظرفیت مازاد cloud، **۶۰٪** از هزینه‌ی زیرساخت را صرفه‌جویی می‌کند، ولی وقتی تأمین‌کننده نودی را پس می‌گیرد، taskها جای دیگری دوباره اجرا می‌شوند و consumerها تکراری و رکورد ناقص می‌بینند (pp. 105–106).
 
-**Solution** (pp. 106–107): begin a transaction (explicitly — `START TRANSACTION`/`BEGIN` — or implicitly), write privately, then **commit** (or **roll back**) so data becomes visible all at once (Figure 4-9). In warehouses (BigQuery, Redshift, Snowflake), transactions are declarative and managed by the store. In distributed ETL jobs:
+**راه‌حل** (pp. 106–107): تراکنشی باز کنید، صریح با `START TRANSACTION` یا `BEGIN` یا به‌طور ضمنی، خصوصی بنویسید، و بعد **commit** یا **rollback** کنید تا داده یک‌جا دیده شود (شکل ۴-۹). در warehouseها، یعنی BigQuery و Redshift و Snowflake، تراکنش اعلانی است و ذخیره‌سازی مدیریتش می‌کند. در jobهای ETL توزیع‌شده:
 
-| Scope | Behaviour |
+| دامنه | رفتار |
 |---|---|
-| **Local** (per task) | Fine until a job retry rewrites already-committed tasks |
-| **Whole job** | Open before tasks, commit when all finish — stronger, harder (Spark + Delta commit by writing a commit-log entry; if that fails, data files must be moved aside) |
+| **محلی**، برای هر task | خوب است تا وقتی تلاش دوباره‌ی کل job، taskهای commit‌شده را بازنویسی کند |
+| **کل job** | پیش از taskها باز می‌شود و وقتی همه تمام شدند commit؛ قوی‌تر و سخت‌تر است. در Spark و Delta، commit با نوشتن یک ورودی در commit log انجام می‌شود و اگر شکست بخورد باید فایل‌های داده را کنار گذاشت |
 
-Readers using **read uncommitted** can still see uncommitted rows — dirty reads (p. 107). Supported by table formats (Delta Lake, Iceberg, Hudi), Kafka, Redshift, BigQuery, PostgreSQL, MySQL, Oracle, SQL Server; Spark and Flink cover table formats, but Kafka transactional producers are only available from Flink (pp. 107–108).
+خواننده‌هایی که **read uncommitted** دارند باز هم می‌توانند ردیف‌های commit‌نشده را ببینند، یعنی خواندن کثیف (p. 107). این الگو را table formatها، یعنی Delta Lake و Iceberg و Hudi، و Kafka و Redshift و BigQuery و PostgreSQL و MySQL و Oracle و SQL Server پشتیبانی می‌کنند؛ Spark و Flink table formatها را پوشش می‌دهند، ولی producer تراکنشی Kafka فقط از Flink در دسترس است (pp. 107–108).
 
-**Consequences** (p. 108): **commit step** — extra open/commit steps and conflict resolution; transactional files become visible only at commit, so consumers wait for the slowest task. **Distributed processing** — support is partial (no Kafka transactions in Spark). **Idempotency scope** — limited to one transaction; restarts with task-local transactions and backfills write the same records again.
+**پیامدها** (p. 108): **مرحله‌ی commit**، یعنی مرحله‌های اضافی باز کردن و commit و حل تضاد؛ و فایل‌های تراکنشی فقط سر commit دیده می‌شوند، پس consumerها منتظر کندترین task می‌مانند. **پردازش توزیع‌شده**، یعنی پشتیبانی ناقص است و در Spark تراکنش Kafka نیست. **دامنه‌ی idempotency**، یعنی محدود به یک تراکنش است، و راه‌اندازی دوباره با تراکنش‌های محلی task و همچنین backfill همان رکوردها را دوباره می‌نویسند.
 
-**Examples** (pp. 108–110): two `COPY` + `MERGE` blocks followed by one `COMMIT` — the second file has values too long for a column, so the first merge succeeds but **neither** commits. Kafka transactions work similarly: a special message starts the transaction and a metadata event confirms it. Flink's `KafkaSink` with `DeliveryGuarantee.EXACTLY_ONCE` and `transaction.timeout.ms` of one minute — exactly-once relies on checkpoints, so if a checkpoint takes longer than the timeout, the transaction expires and can't commit.
+**نمونه‌ها** (pp. 108–110): دو بلوک `COPY` و `MERGE` و بعد یک `COMMIT`؛ فایل دوم مقدارهایی دارد که برای ستون بلندند، پس merge اول موفق می‌شود ولی **هیچ‌کدام** commit نمی‌شوند. تراکنش‌های Kafka هم شبیه‌اند: یک پیام ویژه تراکنش را شروع می‌کند و یک رویداد metadata تأییدش می‌کند. در Flink، `KafkaSink` با `DeliveryGuarantee.EXACTLY_ONCE` و `transaction.timeout.ms` یک‌دقیقه‌ای؛ تحویل exactly-once به checkpoint تکیه دارد، پس اگر checkpoint بیشتر از timeout طول بکشد، تراکنش منقضی می‌شود و نمی‌تواند commit شود.
 
-### Immutable dataset
+> **In practice:** jobی که خروجی API پیش‌بینی را در جدولی می‌نویسد، با هر بار اجرای دوباره ممکن است ردیف دوبل بسازد.
+>
+> **Your turn:** job شبانه‌ای که دسته‌ی خرج هر تراکنش را از API می‌گیرد دو بار اجرا شده است. چطور جلوی ردیف دوبل را می‌گیرید؟
+>
+> *Answer:* کلید ردیف را از ورودی بسازید، یعنی `transaction_id` و نسخه‌ی مدل، نه زمان اجرا؛ اجرای دوباره همان کلید را می‌نویسد و جدول آن را یکی می‌کند. این همان Keyed Idempotency است (pp. 100–105).
 
-What if you can't delete or update existing data? (p. 110).
+### مجموعه‌داده‌ی immutable
 
-#### Pattern: Proxy (pp. 110–113)
+اگر نتوانید داده‌ی موجود را حذف یا به‌روز کنید چه (p. 110)؟
 
-Named after the saying “We can solve any problem by introducing an extra level of indirection” (p. 110).
+#### الگو: Proxy (pp. 110–113)
 
-**Problem.** A job regenerates a full dataset each run and has been overwriting it; legal now requires keeping every past version while still exposing only the latest from one place (p. 110).
+نامش از این گفته می‌آید که «هر مسئله‌ای را می‌شود با یک لایه‌ی اضافه‌ی غیرمستقیم حل کرد» (p. 110).
 
-**Solution** (pp. 110–112), three implementations (Figure 4-10):
+**مسئله.** یک job در هر اجرا کل مجموعه‌داده را از نو می‌سازد و تا حالا بازنویسی‌اش می‌کرده؛ قانون حالا می‌خواهد همه‌ی نسخه‌های گذشته نگه داشته شوند، در حالی که فقط آخرینش از یک‌جا نشان داده شود (p. 110).
 
-| Implementation | Write-once guarantee | Access point |
+**راه‌حل** (pp. 110–112)، سه پیاده‌سازی (شکل ۴-۱۰):
+
+| پیاده‌سازی | تضمین یک‌بار‌نوشتن | نقطه‌ی دسترسی |
 |---|---|---|
-| Timestamped/versioned tables | Remove write permissions after creation; on object stores, **WORM** locks — S3 Object Lock, Azure Blob immutability policies, GCP object holds or bucket locks | A passthrough **view** (warehouses, relational DBs; OpenSearch aliases, Cassandra, ScyllaDB, MongoDB) |
-| Files without views | Same | A **manifest** file listing locations — created by a separate task, so a manifest failure doesn't force reprocessing |
-| Natively versioned stores (Delta Lake, Iceberg, BigQuery) | Every overwrite is a new version; old data kept for time travel (BigQuery: 7 days, not configurable) | The table itself |
+| جدول‌های زمان‌دار یا نسخه‌دار | بعد از ساختن، مجوز نوشتن را بردارید؛ روی ذخیره‌سازی object قفل‌های **WORM**، یعنی S3 Object Lock و سیاست‌های immutability Azure Blob و holdهای object یا قفل bucket در GCP | یک **view** عبوری در warehouseها و دیتابیس‌های رابطه‌ای، و aliasها در OpenSearch و Cassandra و ScyllaDB و MongoDB |
+| فایل بدون view | همان | یک فایل **manifest** که مکان‌ها را فهرست می‌کند و taskی جدا می‌سازدش، پس شکست manifest پردازش دوباره را اجبار نمی‌کند |
+| ذخیره‌سازی‌های بومی نسخه‌دار، یعنی Delta Lake و Iceberg و BigQuery | هر بازنویسی یک نسخه‌ی تازه است و داده‌ی قدیمی برای time travel می‌ماند؛ در BigQuery هفت روز و تنظیم‌نشدنی | خود جدول |
 
-**Consequences** (p. 112): **database support** (manifests make reading more cumbersome); **immutability configuration** — orchestration alone isn't enough; enforce it in the store (locks, revoked write permissions), maybe with the infrastructure team.
+**پیامدها** (p. 112): **پشتیبانی دیتابیس**، چون manifest خواندن را دست‌و‌پاگیرتر می‌کند؛ و **تنظیم immutability**، چون زمان‌بندی به‌تنهایی کافی نیست و باید در ذخیره‌سازی اعمالش کنید، با قفل یا برداشتن مجوز نوشتن، شاید همراه تیم زیرساخت.
 
-**Examples** (pp. 112–113): Airflow `load_data_to_internal_table >> refresh_view`; `CREATE OR REPLACE VIEW dedp.devices AS SELECT * FROM {{ devices_internal_table }}`, where the table name is suffixed with the DAG run's start time (`%Y%m%d_%H%M%S`) so a rerun writes a new table. The loading user should only be able to *create* tables.
+**نمونه‌ها** (pp. 112–113): در Airflow `load_data_to_internal_table >> refresh_view`؛ و `CREATE OR REPLACE VIEW dedp.devices AS SELECT * FROM {{ devices_internal_table }}`، که نام جدول با زمان شروع اجرای DAG به شکل `%Y%m%d_%H%M%S` پسوند می‌گیرد، پس اجرای دوباره جدول تازه‌ای می‌نویسد. کاربرِ بار‌گذاری باید فقط اجازه‌ی *ساختن* جدول داشته باشد.
 
-### Summary
+### خلاصه
 
-Error management protects the processing layer; idempotency completes the cycle. Overwrite when you have the whole dataset, merge when you have increments, rely on keys or transactions when there's no orchestrator (e.g. streaming), and use a Proxy when data must be written once (pp. 113–114).
+مدیریت خطا از لایه‌ی پردازش محافظت می‌کند و idempotency چرخه را کامل می‌کند. وقتی کل مجموعه‌داده را دارید بازنویسی کنید، وقتی increment دارید merge کنید، وقتی زمان‌بندی در کار نیست، مثل streaming، به کلید یا تراکنش تکیه کنید، و وقتی داده باید یک‌بار نوشته شود از Proxy استفاده کنید (pp. 113–114).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Pattern | Works on | Idempotency granularity | Main cost |
+| الگو | کجا کار می‌کند | granularity idempotency | هزینه‌ی اصلی |
 |---|---|---|---|
-| Fast Metadata Cleaner | Tables/partitions with metadata ops | One table (e.g. a week) | Coarse backfills, quotas, view management |
-| Data Overwrite | Any store | Overwritten dataset/partition | Slower as data grows; vacuum |
-| Merger | Incremental changes | Record key | Inconsistent during backfills; needs soft deletes |
-| Stateful Merger | Versioned tables | Run (table version) | State table, retention horizon, no-data commits |
-| Keyed Idempotency | Key-based stores | Record key | Needs immutable key attributes |
-| Transactional Writer | Transactional stores | One transaction | Commit latency; not across runs |
-| Proxy | Write-once storage | Whole dataset version | View/manifest support; enforcing immutability |
+| Fast Metadata Cleaner | جدول و پارتیشن با عملیات metadata | یک جدول؛ مثلاً یک هفته | backfill درشت، سهمیه، مدیریت view |
+| Data Overwrite | هر ذخیره‌سازی | مجموعه‌داده یا پارتیشن بازنویسی‌شده | کندتر شدن با رشد داده؛ vacuum |
+| Merger | تغییرهای افزایشی | کلید رکورد | ناسازگاری در زمان backfill؛ نیاز به حذف نرم |
+| Stateful Merger | جدول‌های نسخه‌دار | یک اجرا، یعنی نسخه‌ی جدول | جدول حالت، افق نگه‌داری، commitهای بی‌داده |
+| Keyed Idempotency | ذخیره‌سازی کلید‌محور | کلید رکورد | نیاز به ویژگی‌های کلید immutable |
+| Transactional Writer | ذخیره‌سازی تراکنشی | یک تراکنش | تأخیر commit؛ بین اجراها کار نمی‌کند |
+| Proxy | ذخیره‌سازی یک‌بار‌نوشتنی | یک نسخه از کل مجموعه‌داده | پشتیبانی view یا manifest؛ اعمال immutability |
 
-## Beyond the book
+## فراتر از کتاب
 
-- DDIA's chapter on stream processing describes the same idea as Keyed Idempotency under the name *idempotent writes with deterministic IDs*, and the Transactional Writer's “exactly once” is what Kafka calls *exactly-once semantics* via transactional producers plus `read_committed` consumers.
-- The vault's [Stateful Merger widget](../widgets/04-stateful-merger.html) uses Table 4-1's data; its version numbers beyond the book's tables are the vault's.
+- فصل پردازش stream در کتاب DDIA همین ایده‌ی Keyed Idempotency را با نام *idempotent writes with deterministic IDs* توضیح می‌دهد، و «exactly-once»ی که Transactional Writer می‌دهد همان است که Kafka به آن *exactly-once semantics* می‌گوید، یعنی producer تراکنشی به‌علاوه‌ی consumer `read_committed`.
+- [ویجت Stateful Merger](../widgets/04-stateful-merger.html) در vault داده‌ی جدول ۴-۱ را به کار می‌برد؛ شماره‌ی نسخه‌هایش بیرون از جدول‌های کتاب، مال خود vault است.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. Data Ingestion](02-data-ingestion-design-patterns.md) (Full Loader's view switch, CDC feeding the Merger, Compactor creating no-data versions), [3. Error Management](03-error-management-design-patterns.md) (retries, Windowed Deduplicator), [6. Data Flow](06-data-flow-design-patterns.md) (Exclusive Choice), [8. Data Storage](08-data-storage-design-patterns.md) (partitioning, Manifest).
+- **فصل‌های مرتبط:** [فصل ۲: ورود داده](02-data-ingestion-design-patterns.md) که عوض شدن view در Full Loader و خوراک دادن CDC به Merger و نسخه‌های بی‌داده‌ی Compactor را دارد، [فصل ۳: مدیریت خطا](03-error-management-design-patterns.md) که تلاش دوباره و Windowed Deduplicator را دارد، [فصل ۶: جریان داده](06-data-flow-design-patterns.md) که Exclusive Choice را دارد، و [فصل ۸: ذخیره‌سازی داده](08-data-storage-design-patterns.md) که پارتیشن‌بندی و Manifest را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why is `TRUNCATE TABLE` faster than `DELETE FROM` although both empty a table?**
+1. **چرا `TRUNCATE TABLE` از `DELETE FROM` سریع‌تر است، در حالی که هر دو جدول را خالی می‌کنند؟**
 
-   *Answer:* `DELETE` must identify rows and rewrite the affected files; `TRUNCATE` is a metadata operation with no table scan (pp. 80–81).
+   *Answer:* دستور `DELETE` باید ردیف‌ها را بشناسد و فایل‌های اثرپذیر را بازنویسی کند، در حالی که `TRUNCATE` عملیاتی در metadata است و جدول را پیمایش نمی‌کند (pp. 80–81).
 
-2. **Your visits live in weekly tables cleaned with the Fast Metadata Cleaner. One Wednesday's data was wrong. What must you rerun?**
-   - [ ] Only Wednesday's load
-   - [x] The week's table creation, then the loads of every day of that week (only Wednesday needs full reprocessing)
-   - [ ] The whole year
-   - [ ] Nothing — `MERGE` will fix it
+2. **بازدیدهایتان در جدول‌های هفتگی‌ای است که با Fast Metadata Cleaner پاک می‌شوند. داده‌ی یک چهارشنبه غلط بوده. چه چیزی را باید دوباره اجرا کنید؟**
+   - [ ] فقط بار‌گذاری چهارشنبه را
+   - [x] ساخت جدول آن هفته را و بعد بار‌گذاری همه‌ی روزهای آن هفته را، که فقط چهارشنبه پردازش دوباره‌ی کامل می‌خواهد
+   - [ ] کل سال را
+   - [ ] هیچ چیز را؛ دستور `MERGE` خودش درستش می‌کند
 
-   *Answer:* The idempotency granularity is also the backfill boundary; recreating the weekly table wipes the other days, whose load steps must be replayed (p. 84).
+   *Answer:* granularity idempotency همان مرز backfill هم هست؛ ساختن دوباره‌ی جدول هفتگی روزهای دیگر را پاک می‌کند و مرحله‌ی بار‌گذاری‌شان باید تکرار شود (p. 84).
 
-3. **Why does Example 4-6 check `is_deleted = false` in the `WHEN NOT MATCHED` branch?**
+3. **چرا نمونه‌ی ۴-۶ در شاخه‌ی `WHEN NOT MATCHED` شرط `is_deleted = false` را می‌گذارد؟**
 
-   *Answer:* Otherwise, on the first run, records already marked deleted would be inserted and never removed afterwards (pp. 90–91).
+   *Answer:* وگرنه در اجرای اول، رکوردهایی که از قبل حذف علامت خورده‌اند درج می‌شوند و بعد از آن هیچ‌وقت برداشته نمی‌شوند (pp. 90–91).
 
-4. **The state table shows 10-06 → 2 and the table's latest MERGE version is 4. You rerun 10-07. What does the Stateful Merger do?**
-   - [ ] Truncates the table
-   - [ ] Merges directly (normal run)
-   - [x] Restores the table to version 2, merges, and records the new version for 10-07
+4. **جدول حالت می‌گوید ۱۰-۰۶ به ۲ و جدید‌ترین نسخه‌ی merge جدول ۴ است. اجرای ۱۰-۰۷ را دوباره راه می‌اندازید. الگوی Stateful Merger چه می‌کند؟**
+   - [ ] جدول را truncate می‌کند
+   - [ ] مستقیم merge می‌کند، یعنی اجرای معمولی
+   - [x] جدول را به نسخه‌ی ۲ برمی‌گرداند، merge می‌کند، و نسخه‌ی تازه را برای ۱۰-۰۷ ثبت می‌کند
 
-   *Answer:* Different versions signal a backfill; restoring to the previous run's version recreates the table as it was before 10-07 (pp. 95–96).
+   *Answer:* نابرابر بودن نسخه‌ها نشانه‌ی backfill است؛ برگرداندن به نسخه‌ی اجرای قبلی جدول را همان‌طور که پیش از ۱۰-۰۷ بود از نو می‌سازد (pp. 95–96).
 
-5. **Why is the user ID + first visit time a fragile session key, and what is better?**
+5. **چرا شناسه‌ی کاربر به‌علاوه‌ی اولین زمان بازدید کلید شکننده‌ای برای session است، و چه چیزی بهتر است؟**
 
-   *Answer:* Event time is mutable across runs: late data (e.g. a late 09:55 visit) after a restart changes the first visit time and thus the key. The broker's append time can't change, so keys stay stable (pp. 101–102).
+   *Answer:* زمان رویداد بین اجراها mutable است: داده‌ی دیررس، مثلاً بازدید late ۹:۵۵، بعد از راه‌اندازی دوباره اولین زمان بازدید و در نتیجه کلید را عوض می‌کند. مقدار append time در broker نمی‌تواند عوض شود، پس کلیدها پایدار می‌مانند (pp. 101–102).
 
-6. **Does a Transactional Writer make backfills idempotent?**
+6. **آیا Transactional Writer کاری می‌کند که backfill هم idempotent باشد؟**
 
-   *Answer:* No. It guarantees all-or-nothing visibility for one run; a backfill opens a new transaction and inserts the records again — idempotency is limited to the transaction (pp. 107–108).
+   *Answer:* نه. فقط برای یک اجرا دیده شدن همه‌یا‌هیچ را تضمین می‌کند؛ backfill تراکنش تازه‌ای باز می‌کند و رکوردها را دوباره درج می‌کند، پس idempotency محدود به همان تراکنش است (pp. 107–108).

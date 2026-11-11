@@ -3,94 +3,96 @@ book: data-engineering-design-patterns
 chapter: 7
 title: "Data Security Design Patterns"
 pages: "197–232"
+translated_title: "الگوهای طراحی امنیت داده"
+lang: fa
 ---
 
-# 7. Data Security Design Patterns
+# فصل ۷: الگوهای طراحی امنیت داده
 
-[← 6. Data Flow Design Patterns](06-data-flow-design-patterns.md) · [Book](../README.md) · [8. Data Storage Design Patterns →](08-data-storage-design-patterns.md)
+[فصل ۶: الگوهای طراحی جریان داده →](06-data-flow-design-patterns.md) · [کتاب](../README.md) · [فصل ۸: الگوهای طراحی ذخیره‌سازی داده ←](08-data-storage-design-patterns.md)
 
-## Summary
+## خلاصه
 
-Valuable datasets attract envy, including from malicious actors, so data engineers must also think about security. The chapter covers four aspects with nine patterns. **Data removal** for privacy laws (GDPR, CCPA): the **Vertical Partitioner** stores personal, immutable attributes once so a deletion touches one row, while the **In-Place Overwriter** rewrites existing data (via a staging area, or Kafka tombstones). **Access control**: the **Fine-Grained Accessor for Tables** restricts columns and rows (GRANT, policy tags, masking, row policies), and the **Fine-Grained Accessor for Resources** applies least privilege to cloud resources (resource- or identity-based policies). **Data protection**: the **Encryptor** protects data at rest and in transit, the **Anonymizer** removes, perturbs or synthesizes sensitive values, and the **Pseudo-Anonymizer** masks, tokenizes, hashes or encrypts them while keeping some usefulness. **Connectivity**: the **Secrets Pointer** references credentials stored in a secrets manager, and the **Secretless Connector** removes credentials altogether through IAM identities or certificates.
+مجموعه‌داده‌ی ارزشمند حسادت می‌آورد، از جمله از سمت بازیگرهای بدخواه، پس مهندس داده باید به امنیت هم فکر کند. این فصل چهار جنبه را با نُه الگو می‌پوشاند. **حذف داده** برای قانون‌های حریم خصوصی، یعنی GDPR و CCPA: الگوی **Vertical Partitioner** ویژگی‌های شخصی و immutable را یک‌بار ذخیره می‌کند تا حذف به یک ردیف بخورد، در حالی که **In-Place Overwriter** داده‌ی موجود را بازنویسی می‌کند، با یک ناحیه‌ی staging یا با tombstoneهای Kafka. **کنترل دسترسی**: الگوی **Fine-Grained Accessor for Tables** ستون‌ها و ردیف‌ها را محدود می‌کند، با GRANT و policy tag و masking و سیاست ردیفی، و **Fine-Grained Accessor for Resources** کمینه‌ی اختیار را روی منابع cloud اعمال می‌کند، با سیاست منبع‌محور یا هویت‌محور. **محافظت از داده**: الگوی **Encryptor** داده‌ی در حال سکون و در حال انتقال را محافظت می‌کند، **Anonymizer** مقدارهای حساس را برمی‌دارد یا آشفته یا مصنوعی می‌کند، و **Pseudo-Anonymizer** آن‌ها را mask یا tokenize یا hash یا رمز می‌کند و کمی سودمندی را نگه می‌دارد. **اتصال**: الگوی **Secrets Pointer** به credentialهایی ارجاع می‌دهد که در یک secrets manager‌اند، و **Secretless Connector** با هویت IAM یا گواهی، credential را کاملاً برمی‌دارد.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Store personal data once to delete it cheaply**: with a Vertical Partitioner, removing a user with 2,000 records means deleting one row, not rewriting 2,000 (pp. 198–200, 205).
-- **Deleting isn't erasing**: table formats keep old versions until `VACUUM`; Kafka needs tombstones plus compaction — and compaction only suits topics with one record per key (pp. 202–205).
-- **Overwrite via a staging area**: a retried or failed removal job must never leave the public dataset half-written (pp. 204, 206).
-- **Fine-grained access works at column and row level** in warehouses, and at resource, prefix, tag or condition level in the cloud — but many tiny policies hit maintenance limits and quotas (pp. 207–214).
-- **Encryption can lock you out too**: losing the key loses the data, hence soft-deleted keys with a restore window (pp. 217–218).
-- **Pseudo-anonymized data can be re-identified when combined with other datasets**; anonymized data can't — but loses more information (pp. 223–224).
-- **Credentials should be references or nothing at all**: secrets managers centralize them; IAM roles and certificates avoid them — but caching, logs and rotation still need care (pp. 226–230).
+- **داده‌ی شخصی را یک‌بار ذخیره کنید تا حذفش ارزان شود**: با Vertical Partitioner، برداشتن کاربری با دو هزار رکورد یعنی حذف یک ردیف، نه بازنویسی دو هزار رکورد (pp. 198–200, 205).
+- **حذف کردن همان پاک کردن نیست**: table formatها نسخه‌های قدیمی را تا `VACUUM` نگه می‌دارند، و Kafka به tombstone و compaction نیاز دارد، که compaction فقط به topicهایی می‌خورد که یک رکورد در هر کلید دارند (pp. 202–205).
+- **با ناحیه‌ی staging بازنویسی کنید**: job حذفی که تلاش دوباره خورده یا شکست خورده هیچ‌وقت نباید مجموعه‌داده‌ی عمومی را نیمه‌نوشته بگذارد (pp. 204, 206).
+- **دسترسی دانه‌ریز در سطح ستون و ردیف** در warehouseها کار می‌کند، و در سطح منبع و prefix و tag و شرط در cloud، ولی سیاست‌های ریز و زیاد به سقف نگه‌داری و سهمیه می‌خورند (pp. 207–214).
+- **عمل encryption می‌تواند خودتان را هم بیرون بگذارد**: گم شدن کلید یعنی گم شدن داده، و از همین‌جاست کلیدهای حذف‌نرم‌شده با پنجره‌ی برگرداندن (pp. 217–218).
+- **داده‌ی pseudo-anonymized در ترکیب با مجموعه‌داده‌های دیگر می‌تواند دوباره شناسایی شود**، در حالی که داده‌ی anonymized نمی‌تواند، ولی اطلاعات بیشتری از دست می‌دهد (pp. 223–224).
+- **مقدار credential باید ارجاع باشد یا اصلاً نباشد**: secrets managerها متمرکزش می‌کنند، و نقش‌های IAM و گواهی‌ها کاملاً برمی‌دارندش، ولی cache و log و چرخش باز هم دقت می‌خواهند (pp. 226–230).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Data Removal — p. 198
-  - Pattern: Vertical Partitioner — p. 198
-  - Pattern: In-Place Overwriter — p. 203
-- Access Control — p. 207
-  - Pattern: Fine-Grained Accessor for Tables — p. 207
-  - Pattern: Fine-Grained Accessor for Resources — p. 211
-- Data Protection — p. 215
-  - Pattern: Encryptor — p. 215
-  - Pattern: Anonymizer — p. 219
-  - Pattern: Pseudo-Anonymizer — p. 222
-- Connectivity — p. 226
-  - Pattern: Secrets Pointer — p. 226
-  - Pattern: Secretless Connector — p. 228
-- Summary — p. 231
+- حذف داده — p. 198
+  - الگو: Vertical Partitioner — p. 198
+  - الگو: In-Place Overwriter — p. 203
+- کنترل دسترسی — p. 207
+  - الگو: Fine-Grained Accessor for Tables — p. 207
+  - الگو: Fine-Grained Accessor for Resources — p. 211
+- محافظت از داده — p. 215
+  - الگو: Encryptor — p. 215
+  - الگو: Anonymizer — p. 219
+  - الگو: Pseudo-Anonymizer — p. 222
+- اتصال — p. 226
+  - الگو: Secrets Pointer — p. 226
+  - الگو: Secretless Connector — p. 228
+- خلاصه — p. 231
 
-## Notes
+## یادداشت‌ها
 
-Datasets are business assets coveted by other market actors, malicious ones included (p. 197). Security here has four sides: **compliance** with privacy laws such as the GDPR (Europe) and CCPA (US); **access control** — an open dataset can be overwritten by another team by accident; **data protection** — even with access to a location, encryption still requires the key; and **connections** — credentials in a Git repository raise the risk of leaks (p. 197).
+مجموعه‌داده‌ها دارایی کسب‌وکارند و بازیگرهای دیگر بازار به چشمشان دارند، بدخواه‌ها هم (p. 197). امنیت این‌جا چهار سمت دارد: **انطباق** با قانون‌های حریم خصوصی مثل GDPR در اروپا و CCPA در آمریکا؛ **کنترل دسترسی**، چون مجموعه‌داده‌ی باز را تیم دیگری می‌تواند تصادفی بازنویسی کند؛ **محافظت از داده**، چون حتی با دسترسی به یک مکان، encryption باز هم کلید می‌خواهد؛ و **اتصال**، چون مقدار credential در یک repository گیت خطر لو رفتن را بالا می‌برد (p. 197).
 
-| Aspect | Patterns |
+| جنبه | الگوها |
 |---|---|
-| Data removal (right to be forgotten) | Vertical Partitioner, In-Place Overwriter |
-| Access control | Fine-Grained Accessor for Tables, for Resources |
-| Data protection | Encryptor, Anonymizer, Pseudo-Anonymizer |
-| Connectivity | Secrets Pointer, Secretless Connector |
+| حذف داده، یعنی حق فراموش شدن | Vertical Partitioner، In-Place Overwriter |
+| کنترل دسترسی | Fine-Grained Accessor برای جدول و برای منابع |
+| محافظت از داده | Encryptor، Anonymizer، Pseudo-Anonymizer |
+| اتصال | Secrets Pointer، Secretless Connector |
 
-### Data removal
+### حذف داده
 
-Privacy regulations require deleting a user's personal data on request (p. 198).
+قاعده‌های حریم خصوصی می‌خواهند که داده‌ی شخصی کاربر سر درخواستش حذف شود (p. 198).
 
-#### Pattern: Vertical Partitioner (pp. 198–203)
+#### الگو: Vertical Partitioner (pp. 198–203)
 
-**Problem.** Peers reviewing your personal-data removal design point out that immutable columns — birthday, personal ID number — are repeated in every record. Store each immutable property once so a removal has less to delete (p. 198).
+**مسئله.** همکارهایی که طراحی حذف داده‌ی شخصی شما را بررسی می‌کنند اشاره می‌کنند که ستون‌های تغییرناپذیر، مثل تاریخ تولد و شماره‌ی شناسایی شخصی، در هر رکورد تکرار شده‌اند. هر ویژگی immutable را یک‌بار ذخیره کنید تا حذف چیز کمتری برای حذف داشته باشد (p. 198).
 
-**Solution** (pp. 198–200). **Horizontal** partitioning groups whole records (e.g. by date, Ch. 8); **vertical** partitioning splits each row and writes the parts to different places — the two can be combined. Identify the columns to split and the attribute to rejoin them (e.g. `user_id`), then make ingestion write the changing attributes to one store and the immutable/personal ones to another (Figure 7-1), with plain `SELECT` projections (plus rules like deduplication). Removal touches far less data, and each store can have its own access and retention rules.
+**راه‌حل** (pp. 198–200): پارتیشن‌بندی **افقی** کل رکوردها را گروه می‌کند، مثلاً بر حسب تاریخ، فصل ۸ را ببینید؛ پارتیشن‌بندی **عمودی** هر ردیف را می‌شکند و بخش‌ها را در جاهای مختلف می‌نویسد، و این دو ترکیب‌شدنی‌اند. ستون‌هایی را که باید جدا شوند و ویژگی‌ای را که دوباره به هم می‌رساندشان بشناسید، مثل `user_id`، و بعد ورود داده را طوری کنید که ویژگی‌های mutable را در یک ذخیره‌سازی و immutableها و شخصی‌ها را در دیگری بنویسد (شکل ۷-۱)، با projectionهای ساده‌ی `SELECT` به‌علاوه‌ی قاعده‌هایی مثل تکراری‌زدایی. حذف به داده‌ی خیلی کمتری می‌خورد، و هر ذخیره‌سازی می‌تواند قاعده‌ی دسترسی و نگه‌داری خودش را داشته باشد.
 
-![A vertical partitioner reads a visit event with event, user, address and click fields and splits it into an event record and a PII record, written to separate event data and PII data stores](../figures/07-01.png)
+![یک vertical partitioner یک رویداد بازدید را با فیلدهای رویداد و کاربر و آدرس و کلیک می‌خواند و به یک رکورد رویداد و یک رکورد PII می‌شکند، که در ذخیره‌سازی‌های جدای داده‌ی رویداد و داده‌ی PII نوشته می‌شوند](../figures/07-01.png)
 
-*Figure 7-1 (p. 199): personal attributes go to their own store; `user_id` lets consumers rejoin the parts.*
+*Figure 7-1 (p. 199): ویژگی‌های شخصی به ذخیره‌سازی خودشان می‌روند و `user_id` می‌گذارد consumerها بخش‌ها را دوباره به هم برسانند.*
 
-**Consequences** (pp. 200–201):
+**پیامدها** (pp. 200–201):
 
 | | |
 |---|---|
-| **Query performance** | A kind of normalization: readers must join, adding network traffic |
-| **Query complexity** | Mitigate with a view, a data catalog, or lineage (Dataset Tracker, Ch. 10) |
-| **Polyglot persistence** | The same record in a search engine and a key-value store means splitting — and removing — in each; one job splits, dedicated consumers write to each store (Figure 7-2) |
-| **Raw data** | The pattern applies from the first transformation; unsplit raw data needs another strategy, e.g. a short retention period (which limits backfills) |
+| **performance کوئری** | گونه‌ای از نرمال‌سازی است: خواننده‌ها باید پیوند بزنند، که ترافیک شبکه اضافه می‌کند |
+| **پیچیدگی کوئری** | با یک view یا یک data catalog یا lineage کمش کنید، یعنی Dataset Tracker در فصل ۱۰ |
+| **durableی چند‌زبانی** | همان رکورد در یک search engine و یک ذخیره‌سازی key-value یعنی شکستن و حذف در هر دو؛ یک job می‌شکند و consumerهای اختصاصی در هر ذخیره‌سازی می‌نویسند (شکل ۷-۲) |
+| **داده‌ی خام** | الگو از اولین تبدیل به کار می‌آید؛ داده‌ی خام نشکسته راهبرد دیگری می‌خواهد، مثل دوره‌ی نگه‌داری کوتاه، که backfill را محدود می‌کند |
 
-**Examples** (pp. 201–203): Spark `foreachBatch` persists the batch, writes visits with `context.user` dropped to one Kafka topic (key `visit_id`) and the user attributes to another (key `user_id`); a second job `MERGE`s deduplicated user contexts into a Delta table. Removal: `DeltaTable.delete('user_id = "…"')` **plus `VACUUM`**, or old versions still expose the user. In Kafka, send a **tombstone** — the key with a `NULL` value — to a topic with `cleanup.policy` compaction; this works for `user_context` (one record per key) but not for visits, where compaction would keep only the last visit per key.
+**نمونه‌ها** (pp. 201–203): در Spark، `foreachBatch` دسته را durable می‌کند، بازدیدها را با حذف `context.user` در یک topic کافکا با کلید `visit_id` و ویژگی‌های کاربر را در topic دیگری با کلید `user_id` می‌نویسد؛ و job دومی contextهای تکراری‌زدایی‌شده‌ی کاربر را با `MERGE` در یک جدول Delta می‌برد. حذف: `DeltaTable.delete('user_id = "…"')` **به‌علاوه‌ی `VACUUM`**، وگرنه نسخه‌های قدیمی باز هم کاربر را نشان می‌دهند. در Kafka یک **tombstone** بفرستید، یعنی کلید با مقدار `NULL`، به topicی که `cleanup.policy` آن compaction است؛ این برای `user_context` کار می‌کند که یک رکورد در هر کلید دارد، ولی برای بازدیدها نه، که compaction فقط آخرین بازدید هر کلید را نگه می‌داشت.
 
-#### Pattern: In-Place Overwriter (pp. 203–207)
+#### الگو: In-Place Overwriter (pp. 203–207)
 
-**Problem.** A legacy system holds terabytes in time-based horizontal partitions with no personal-data strategy, but must now honour removal requests; there's no budget to refactor (p. 203).
+**مسئله.** یک سیستم قدیمی چند ترابایت را در پارتیشن‌های افقی زمان‌محور دارد و هیچ راهبردی برای داده‌ی شخصی ندارد، ولی حالا باید به درخواست حذف جواب بدهد؛ بودجه‌ای هم برای بازسازی نیست (p. 203).
 
-**Solution** (pp. 203–205):
+**راه‌حل** (pp. 203–205):
 
-| Storage | How to remove |
+| ذخیره‌سازی | چطور حذف شود |
 |---|---|
-| Supports in-place deletes | `DELETE … WHERE`, then a cleaning step for time-travel formats (Iceberg, Delta Lake) |
-| Raw files (JSON, CSV) | Rewrite the whole dataset without the user's rows — into a **staging area**, then a promotion job replaces the public data (Figure 7-3) |
-| Compacted Kafka topic with keyed records | Read the topic and send each removed entity's key with a null payload |
+| حذف در جا را پشتیبانی می‌کند | دستور `DELETE … WHERE` و بعد یک مرحله‌ی پاک‌سازی برای فرمت‌های time travel، مثل Iceberg و Delta Lake |
+| فایل‌های خام، یعنی JSON و CSV | کل مجموعه‌داده بی ردیف‌های آن کاربر در یک **ناحیه‌ی staging** بازنویسی می‌شود و بعد یک job ارتقا، داده‌ی عمومی را عوض می‌کند (شکل ۷-۳) |
+| topic کافکای compact‌شده با رکوردهای کلید‌دار | topic را بخوانید و کلید هر موجودیت حذف‌شده را با payload تهی بفرستید |
 
-Table formats handle deletes either with **deletion vectors** (a small side file listing removed rows, filtered at read time) or by rewriting files without them (writer-heavy) (p. 204). If retention is shorter than the legal removal delay, expiry might count as removal — check with your CDO and legal department (p. 205).
+مفهوم table formatها حذف را یا با **deletion vector** انجام می‌دهند، یعنی یک فایل کنارِ کوچک که ردیف‌های برداشته‌شده را فهرست می‌کند و سر خواندن فیلتر می‌شود، یا با بازنویسی فایل‌ها بی آن ردیف‌ها، که نوشتن‌بر است (p. 204). اگر دوره‌ی نگه‌داری از مهلت قانونی حذف کوتاه‌تر باشد، شاید انقضا به‌عنوان حذف حساب شود؛ با CDO و دپارتمان حقوقی‌تان بررسی کنید (p. 205).
 
 ```mermaid
 flowchart LR
@@ -99,62 +101,74 @@ flowchart LR
     ST --> PR["Promotion job<br/>replace public data"] --> P
 ```
 
-*After Figure 7-3 (p. 204): a failed or retried removal job never corrupts the public dataset.*
+*بر پایه‌ی شکل ۷-۳ (p. 204): job حذفی که شکست خورده یا تلاش دوباره خورده هیچ‌وقت مجموعه‌داده‌ی عمومی را خراب نمی‌کند.*
 
-**Consequences** (p. 205): **I/O overhead** — reading and rewriting can nearly double storage over time; Parquet statistics (also used by Delta Lake and Iceberg) let engines skip blocks without the user. **Cost** — one removed entity with **2,000** records means rewriting 2,000 records vs one with the Vertical Partitioner; batch removal requests into one run.
+**پیامدها** (p. 205): **سرریز I/O**، یعنی خواندن و بازنویسی می‌تواند ذخیره‌سازی را با گذر زمان تقریباً دو برابر کند؛ آمارهای Parquet، که Delta Lake و Iceberg هم به کارشان می‌برند، می‌گذارند موتورها از بلوک‌های بی آن کاربر بپرند. **هزینه**، یعنی یک موجودیت حذف‌شده با **دو هزار** رکورد یعنی بازنویسی دو هزار رکورد در برابر یک رکورد با Vertical Partitioner؛ درخواست‌های حذف را در یک اجرا دسته کنید.
 
-**Examples** (pp. 206–207): PySpark reads raw text, extracts only `user_id` with `from_json`, filters out the user and writes text to staging; then `aws s3 rm ${BUCKET}/output --recursive` and `aws s3 mv ${BUCKET}/staging ${BUCKET}/output --recursive` (object-store renames are copy-and-delete, not transactional). Since the original is overwritten, a buggy removal can't be rolled back — use the **Proxy** pattern or object-store versioning (S3, Azure Storage, GCS) (p. 207).
+**نمونه‌ها** (pp. 206–207): در PySpark، متن خام خوانده می‌شود، فقط `user_id` با `from_json` بیرون کشیده می‌شود، آن کاربر فیلتر می‌شود و متن در staging نوشته؛ و بعد `aws s3 rm ${BUCKET}/output --recursive` و `aws s3 mv ${BUCKET}/staging ${BUCKET}/output --recursive`، چون تغییر نام در ذخیره‌سازی object همان کپی و حذف است و تراکنشی نیست. چون اصل بازنویسی می‌شود، حذفی باگ‌دار را نمی‌شود برگرداند، پس الگوی **Proxy** یا نسخه‌دار کردن ذخیره‌سازی object را به کار ببرید، یعنی S3 و Azure Storage و GCS (p. 207).
 
-> **Run it:** the vault's [data removal cost experiment](../lab/07-removal-cost/README.md) counts rows and bytes rewritten by both patterns.
+> **Run it:** [آزمایش هزینه‌ی حذف داده](../lab/07-removal-cost/README.md) در vault می‌شمارد هر دو الگو چند ردیف و چند بایت بازنویسی می‌کنند.
 
-### Access control
+> **In practice:** داده‌ی شخصی در stack ما hash می‌شود، ولی درخواست حذف هنوز ممکن است و جدول تراکنش‌ها بزرگ‌ترین جدول warehouse است.
+>
+> **Your turn:** چرا نگه داشتن ستون‌های شخصی در جدولی جدا با کلید `customer_id` درخواست حذف را ارزان‌تر می‌کند؟
+>
+> *Answer:* حذف به‌جای mutation روی همه‌ی partitionهای جدول بزرگ، فقط چند ردیف از جدولی کوچک را پاک می‌کند، و بقیه‌ی داده بدون آن ستون‌ها دیگر شخصی نیست. این همان Vertical Partitioner است (pp. 198–203).
 
-Beyond compliance, only authorized users should reach the most critical data — data can be your biggest competitive asset (p. 207).
+### کنترل دسترسی
 
-#### Pattern: Fine-Grained Accessor for Tables (pp. 207–211)
+جز انطباق، فقط کاربرهای مجاز باید به حیاتی‌ترین داده برسند، چون داده می‌تواند بزرگ‌ترین دارایی رقابتی‌تان باشد (p. 207).
 
-**Problem.** After moving HDFS/Hive workloads to a cloud warehouse, users and groups control table access, but stakeholders also want some users unable to read certain columns and rows (p. 207).
+#### الگو: Fine-Grained Accessor for Tables (pp. 207–211)
 
-**Solution** (pp. 207–209):
+**مسئله.** بعد از بردن بارهای HDFS و Hive به یک warehouse در cloud، کاربرها و گروه‌ها دسترسی جدول را کنترل می‌کنند، ولی ذی‌نفع‌ها می‌خواهند بعضی کاربرها نتوانند ستون‌ها و ردیف‌های معینی را بخوانند (p. 207).
 
-| Level | Implementation | Systems |
+**راه‌حل** (pp. 207–209):
+
+| سطح | پیاده‌سازی | سیستم‌ها |
 |---|---|---|
-| Column | `GRANT SELECT(col_A, col_B) ON my_table TO some_user;` | Amazon Redshift, PostgreSQL |
-| Column | Policy tags in Data Catalog + Fine-Grained Reader role | GCP BigQuery |
-| Column | **Masking** — the column is visible but its content hidden (`ip STRING MASK ip_mask`, showing the IP only to members of `engineers`) | Databricks Unity Catalog, Snowflake |
-| Row | Dynamic conditions added to queries: ROW FILTER (Databricks), Row-Level Security (Redshift), row access policies (BigQuery, Snowflake) | — |
-| Row (fallback) | A view: `… FROM blogs WHERE blog_author = current_user` | Any |
+| ستون | `GRANT SELECT(col_A, col_B) ON my_table TO some_user;` | Amazon Redshift، PostgreSQL |
+| ستون | policy tag در Data Catalog به‌علاوه‌ی نقش Fine-Grained Reader | GCP BigQuery |
+| ستون | **masking**، یعنی ستون دیده می‌شود ولی محتوایش پنهان است، مثل `ip STRING MASK ip_mask` که IP را فقط به اعضای `engineers` نشان می‌دهد | Databricks Unity Catalog، Snowflake |
+| ردیف | شرط‌های پویایی که به کوئری اضافه می‌شوند: ROW FILTER در Databricks، Row-Level Security در Redshift، و row access policy در BigQuery و Snowflake | — |
+| ردیف، جایگزین | یک view: `… FROM blogs WHERE blog_author = current_user` | هر کدام |
 
-**Consequences** (p. 209): **row-level limits** — conditions mostly use session attributes (user, group, IP); **data types** — nested fields must be unnested or exposed via the **Dataset Materializer** (Ch. 8); **query overhead** — materialize per-group tables or views, at the cost of duplication and governance.
+**پیامدها** (p. 209): **محدودیت سطح ردیف**، یعنی شرط‌ها بیشتر ویژگی‌های session را به کار می‌برند، مثل کاربر و گروه و IP؛ **نوع داده**، یعنی فیلدهای تو‌در‌تو باید باز شوند یا با **Dataset Materializer** نشان داده شوند، فصل ۸ را ببینید؛ **سرریز کوئری**، یعنی جدول یا view برای هر گروه materialize کنید، به قیمت تکرار و governance.
 
-**Examples** (pp. 209–210): PostgreSQL `GRANT SELECT(id, login, registered_datetime) ON dedp.users TO user_a` (`SELECT *` then fails with “permission denied”); `ALTER TABLE dedp.users ENABLE ROW LEVEL SECURITY; CREATE POLICY user_row_access ON dedp.users USING (login = current_user);`; DynamoDB IAM condition `dynamodb:LeadingKeys` = `${www.amazon.com:user_id}`, so users only read items whose key starts with their ID.
+**نمونه‌ها** (pp. 209–210): در PostgreSQL، `GRANT SELECT(id, login, registered_datetime) ON dedp.users TO user_a` که بعدش `SELECT *` با خطای «permission denied» شکست می‌خورد؛ `ALTER TABLE dedp.users ENABLE ROW LEVEL SECURITY; CREATE POLICY user_row_access ON dedp.users USING (login = current_user);`؛ و در DynamoDB شرط IAM روی `dynamodb:LeadingKeys` برابر `${www.amazon.com:user_id}`، پس کاربرها فقط آیتم‌هایی را می‌خوانند که کلیدشان با شناسه‌ی خودشان شروع می‌شود.
 
-#### Pattern: Fine-Grained Accessor for Resources (pp. 211–215)
+#### الگو: Fine-Grained Accessor for Resources (pp. 211–215)
 
-**Problem.** An audit finds a job that could overwrite every dataset in the object store; the auditor recommends **least privilege** (the book calls it the *at-least privilege* principle): each component gets only the permissions it needs (p. 211).
+**مسئله.** یک audit jobی پیدا می‌کند که می‌توانسته هر مجموعه‌داده‌ای در ذخیره‌سازی object را بازنویسی کند؛ auditor **کمینه‌ی اختیار** را توصیه می‌کند، که کتاب اصل *at-least privilege* می‌نامدش: هر مؤلفه فقط مجوزهایی را بگیرد که لازم دارد (p. 211).
 
-**Solution** (pp. 211–213), two strategies (Figure 7-4):
+**راه‌حل** (pp. 211–213)، دو راهبرد (شکل ۷-۴):
 
-| | Resource-based | Identity-based |
+| | منبع‌محور | هویت‌محور |
 |---|---|---|
-| Where permissions live | On the resource | On the user or role |
-| Example | GCS bucket IAM policy granting `roles/storage.admin` to one user (Terraform) | An AWS IAM role assumed by EMR (`sts:AssumeRole`) with `kinesis:Get*/Describe*/List*/Put*` on the `visits` stream |
+| مجوزها کجا می‌نشینند | روی خود منبع | روی کاربر یا نقش |
+| نمونه | سیاست IAM یک bucket در GCS که `roles/storage.admin` را به یک کاربر می‌دهد، با Terraform | یک نقش IAM در AWS که EMR با `sts:AssumeRole` برمی‌داردش، با `kinesis:Get*/Describe*/List*/Put*` روی stream به نام `visits` |
 
-Permissions can target one resource, a prefix, or **runtime conditions** — e.g. S3 `s3:PutObject` allowed only when `aws:TagKeys` match the user ID (tag-based access) (p. 213).
+مجوزها می‌توانند یک منبع یا یک prefix یا **شرط‌های زمان اجرا** را هدف بگیرند؛ مثلاً `s3:PutObject` در S3 فقط وقتی اجازه داشته باشد که `aws:TagKeys` با شناسه‌ی کاربر بخورد، یعنی دسترسی tag‌محور (p. 213).
 
-**Consequences** (p. 214): **security by the book** — many tiny policies are hard to maintain; a wildcard like `visits*` simplifies but may grant access to future resources — agree it with security. **Complexity** — avoid mixing both strategies. **Quotas** — AWS IAM: **1,500** custom policies by default; GCP: **300** custom roles per project.
+**پیامدها** (p. 214): **امنیت کتابی**، یعنی سیاست‌های ریز و زیاد سخت نگه داشته می‌شوند؛ یک wildcard مثل `visits*` ساده‌اش می‌کند ولی ممکن است به منابع آینده هم دسترسی بدهد، پس با امنیت توافق کنید. **پیچیدگی**، یعنی از قاطی کردن دو راهبرد بپرهیزید. **سهمیه**، یعنی AWS IAM پیش‌فرض **۱۵۰۰** سیاست سفارشی می‌دهد و GCP **۳۰۰** نقش سفارشی برای هر پروژه.
 
-**Examples** (pp. 214–215): `aws s3 ls s3://dedp-visits-301JQN/` fails with `AccessDenied`; fix it identity-based with a role allowing `s3:Get*`/`s3:List*` on the bucket and its objects, or resource-based with `aws s3api put-bucket-policy` naming the `visits-s3-reader` principal.
+**نمونه‌ها** (pp. 214–215): فرمان `aws s3 ls s3://dedp-visits-301JQN/` با `AccessDenied` شکست می‌خورد؛ هویت‌محور با نقشی که `s3:Get*` و `s3:List*` را روی bucket و objectهایش می‌دهد درستش کنید، یا منبع‌محور با `aws s3api put-bucket-policy` که principal به نام `visits-s3-reader` را نام می‌برد.
 
-### Data protection
+> **In practice:** در stack ما Authentik هویت را می‌دهد و SQL proxy دسترسی هر نفر به warehouse را؛ گروه‌های Authentik باید به roleهای ClickHouse و Metabase map شوند تا دسترسی یک جا تعریف شود.
+>
+> **Your turn:** تحلیلگری تیم را ترک می‌کند. دسترسی‌اش را کجا می‌بندید و چه چیزی ممکن است جا بماند؟
+>
+> *Answer:* در Authentik: کاربر غیرفعال می‌شود و هر ابزاری که پشت SSO است بسته می‌شود. آن‌چه جا می‌ماند credentialهای بیرون از SSO است، مثلاً token شخصی GitLab یا userی مستقیم در ClickHouse؛ برای همین دسترسی را به role و گروه بدهید، نه به آدم (pp. 207–215).
 
-Logical access controls aren't enough; the data itself must be protected against unexpected use (p. 215).
+### محافظت از داده
 
-#### Pattern: Encryptor (pp. 215–219)
+کنترل‌های دسترسی منطقی کافی نیستند؛ خود داده هم باید در برابر استفاده‌ی غیرمنتظره محافظت شود (p. 215).
 
-**Problem.** Stakeholders fear someone could intercept data between brokers and jobs, or physically steal it from servers (pp. 215–216).
+#### الگو: Encryptor (pp. 215–219)
 
-**Solution** (pp. 216–217). **At rest**: client-side encryption (the producer encrypts and manages keys) or **server-side** (the store does everything, with keys in AWS/GCP **KMS** or Azure **Key Vault**). Reading encrypted data (Figure 7-5):
+**مسئله.** ذی‌نفع‌ها می‌ترسند کسی داده را بین brokerها و jobها شنود کند، یا فیزیکی از سرورها بدزدد (pp. 215–216).
+
+**راه‌حل** (pp. 216–217): **در حال سکون**، یا encryption سمت client که producer رمز می‌کند و کلیدها را مدیریت، یا **سمت سرور** که ذخیره‌سازی همه کار را می‌کند و کلیدها در **KMS** از AWS و GCP یا **Key Vault** از Azure می‌نشینند. خواندن داده‌ی رمزشده (شکل ۷-۵):
 
 ```mermaid
 sequenceDiagram
@@ -168,151 +182,157 @@ sequenceDiagram
     D-->>C: 4. decrypted records
 ```
 
-*After Figure 7-5 (pp. 216–217).* **In transit**: enable secure communication in the client SDK and require a protocol version on the service (p. 217).
+*بر پایه‌ی شکل ۷-۵ (pp. 216–217).* **در حال انتقال**: ارتباط امن را در SDK سمت client روشن کنید و روی سرویس یک نسخه‌ی پروتکل را الزامی کنید (p. 217).
 
-**Consequences** (pp. 217–218): **CPU overhead** for every read and write; **data loss risk** if the key is lost — providers soft-delete keys with a grace period; **protocol updates** — TLS 1.0 and 1.1 were deprecated (RFC 8996), so services must be upgraded.
+**پیامدها** (pp. 217–218): **سرریز CPU** در هر خواندن و نوشتن؛ **خطر از دست رفتن داده** اگر کلید گم شود، که تأمین‌کننده‌ها کلیدها را با دوره‌ی مهلت حذف نرم می‌کنند؛ و **به‌روزرسانی پروتکل**، یعنی TLS نسخه‌ی ۱٫۰ و ۱٫۱ منسوخ شده‌اند (RFC 8996)، پس سرویس‌ها باید ارتقا پیدا کنند.
 
-**Examples** (pp. 218–219): Terraform KMS module with `key_usage = "ENCRYPT_DECRYPT"`, `deletion_window_in_days = 14` (the restore window) and a grant (`Encrypt`, `Decrypt`, `GenerateDataKey`) to an IAM role; `aws_s3_bucket_server_side_encryption_configuration` with `sse_algorithm = "aws:kms"`; Azure Event Hubs `minimum_tls_version = "1.2"`.
+**نمونه‌ها** (pp. 218–219): یک ماژول KMS در Terraform با `key_usage = "ENCRYPT_DECRYPT"` و `deletion_window_in_days = 14` که پنجره‌ی برگرداندن است و یک grant با `Encrypt` و `Decrypt` و `GenerateDataKey` به یک نقش IAM؛ `aws_s3_bucket_server_side_encryption_configuration` با `sse_algorithm = "aws:kms"`؛ و در Azure Event Hubs `minimum_tls_version = "1.2"`.
 
-#### Pattern: Anonymizer (pp. 219–222)
+#### الگو: Anonymizer (pp. 219–222)
 
-**Problem.** An external analytics company will analyze customer behaviour, but some users didn't consent to sharing PII with third parties (p. 219). The same applies to PHI (protected health information) and IP (intellectual property) data (p. 220).
+**مسئله.** یک شرکت تحلیلی بیرونی رفتار مشتری‌ها را تحلیل خواهد کرد، ولی بعضی کاربرها به اشتراک PII با طرف سوم رضایت نداده‌اند (p. 219). همین برای داده‌ی PHI، یعنی اطلاعات سلامت محافظت‌شده، و IP، یعنی مالکیت فکری، هم برقرار است (p. 220).
 
-**Solution** (pp. 220–221): make rows anonymous, so the consumer can't identify the user:
+**راه‌حل** (pp. 220–221): ردیف‌ها را ناشناس کنید تا consumer نتواند کاربر را بشناسد:
 
-| Method | Example |
+| روش | نمونه |
 |---|---|
-| **Data removal** | Drop the columns |
-| **Data perturbation** | Add noise — IP `123.456.789.012` → `1823.456.7809.012` |
-| **Synthetic data replacement** | A (probably ML) generator produces realistic substitutes — `Portugal` → `Croatia` |
+| **حذف داده** | ستون‌ها را بیندازید |
+| **آشفتگی داده** | نوفه اضافه کنید؛ مثلاً IP `123.456.789.012` می‌شود `1823.456.7809.012` |
+| **جابه‌جایی با داده‌ی مصنوعی** | یک تولیدکننده، احتمالاً ML، جانشین‌های واقع‌نما می‌سازد؛ مثلاً `Portugal` می‌شود `Croatia` |
 
-**Consequences** (p. 221): **information loss** — analysts and data scientists can't use those columns, which can mean false models and insights.
+**پیامدها** (p. 221): **از دست رفتن اطلاعات**، یعنی تحلیل‌گرها و data scientistها نمی‌توانند آن ستون‌ها را به کار ببرند، که می‌تواند یعنی مدل و بینش غلط.
 
-**Examples** (pp. 221–222): PySpark `users.drop('birthday').withColumn('email', replace_email(users.email))`, where a pandas UDF uses the **Faker** library to generate random emails.
+**نمونه‌ها** (pp. 221–222): در PySpark، `users.drop('birthday').withColumn('email', replace_email(users.email))`، که در آن یک UDF از جنس pandas با کتابخانه‌ی **Faker** ایمیل تصادفی می‌سازد.
 
-#### Pattern: Pseudo-Anonymizer (pp. 222–226)
+#### الگو: Pseudo-Anonymizer (pp. 222–226)
 
-**Problem.** The analytics partner can't answer most questions from the dataset with removed columns; they want real PII hidden but in a more usable form (p. 222).
+**مسئله.** شریک تحلیلی با مجموعه‌داده‌ی ستون‌حذف‌شده نمی‌تواند بیشتر پرسش‌ها را جواب بدهد؛ می‌خواهد PII واقعی پنهان باشد ولی به شکلی به‌کار‌آمدنی‌تر (p. 222).
 
-**Solution** (pp. 222–223):
+**راه‌حل** (pp. 222–223):
 
-| Method | How | Reversible? |
+| روش | چطور | برگشت‌پذیر؟ |
 |---|---|---|
-| **Data masking** | `999-55-1040` → `XXX-XX-1040` or `9XX-5X-1XXX` | No — several users may share a mask |
-| **Tokenization** | Fictive values; mapping kept in a secured **token vault** | Yes, with vault access |
-| **Hashing** | SHA-256 + Base64 of `contact@waitingforcode.com` | No |
-| **Encryption** | Column- or row-level keys | Yes, with the key |
+| **masking داده** | مقدار `999-55-1040` می‌شود `XXX-XX-1040` یا `9XX-5X-1XXX` | نه؛ چند کاربر می‌توانند یک mask داشته باشند |
+| **tokenization** | مقدارهای خیالی، با mappingی که در یک **token vault** امن می‌ماند | بله، با دسترسی به vault |
+| **hashing** | الگوریتم SHA-256 و Base64 روی `contact@waitingforcode.com` | نه |
+| **encryption** | کلید در سطح ستون یا ردیف | بله، با کلید |
 
-**Anonymization vs pseudo-anonymization** (p. 223): pseudo-anonymized data can become identifiable when **combined with other datasets**; anonymized data can't.
+**تفاوت anonymization و pseudo-anonymization** (p. 223): داده‌ی pseudo-anonymized در **ترکیب با مجموعه‌داده‌های دیگر** می‌تواند شناسایی‌پذیر شود، در حالی که داده‌ی anonymized نمی‌تواند.
 
-**Consequences** (pp. 223–224): **false sense of security** — the book's example: a food-preferences table (user 1000 likes carrot, broccoli, potato; dislikes chips, chocolate bar) joined with a registration table showing country `S*n M****o` and role `C******h P*******r i******r` points to San Marino and the inventor of the (imaginary) Cheetach Processor framework — John Doe (Tables 7-1, 7-2). Generalizing to “Europe” and “Software engineer” would prevent it. **Information loss** — `999-55-1040` and `999-13-1040` both mask to `XXX-XX-1040`; **generalization** turns numbers into text ranges (type loss).
+**پیامدها** (pp. 223–224): **حس دروغین امنیت**؛ نمونه‌ی کتاب: یک جدول سلیقه‌ی غذایی، که کاربر ۱۰۰۰ هویج و بروکلی و سیب‌زمینی دوست دارد و چیپس و شکلات را نه، که با جدول ثبت‌نام پیوند می‌خورد و در آن کشور `S*n M****o` و نقش `C******h P*******r i******r` است، به سان‌مارینو و مخترع framework خیالی Cheetach Processor اشاره می‌کند، یعنی John Doe (جدول‌های ۷-۱ و ۷-۲). تعمیم دادن به «اروپا» و «مهندس نرم‌افزار» جلویش را می‌گرفت. **از دست رفتن اطلاعات**، یعنی `999-55-1040` و `999-13-1040` هر دو به `XXX-XX-1040` تبدیل می‌شوند؛ و **تعمیم** عددها را به بازه‌ی متنی تبدیل می‌کند، یعنی از دست رفتن نوع.
 
-**Examples** (pp. 224–225): `mapInPandas` maps countries to areas (Poland/France/Spain → `eu`, the USA → `na`) and masks SSNs to `f'{ssn[0]}***-{ssn[5]}***-{ssn[10]}***'`; a separate `withColumn` turns `salary` into ranges `0-50000`, `50000-60000`, `60000+` because the type changes.
+**نمونه‌ها** (pp. 224–225): متد `mapInPandas` کشورها را به ناحیه map می‌کند، یعنی Poland و France و Spain به `eu` و USA به `na`، و شماره‌های SSN را به `f'{ssn[0]}***-{ssn[5]}***-{ssn[10]}***'` تبدیل می‌کند؛ و یک `withColumn` جدا، `salary` را به بازه‌های `0-50000` و `50000-60000` و `60000+` تبدیل می‌کند، چون نوعش عوض می‌شود.
 
-*Example 7-26 (p. 225): after pseudo-anonymization*
+*نمونه‌ی ۷-۲۶ (p. 225): بعد از pseudo-anonymization*
 
 | user_id | country | ssn | salary |
 |---|---|---|---|
-| 1 | eu | 0\*\*\*-0\*\*\*-1\*\*\* | 0-50000 |
-| 2 | eu | 0\*\*\*-0\*\*\*-1\*\*\* | 50000-60000 |
-| 3 | na | 1\*\*\*-0\*\*\*-3\*\*\* | 60000+ |
-| 4 | eu | 8\*\*\*-1\*\*\*-9\*\*\* | 50000-60000 |
+| ۱ | eu | `0***-0***-1***` | 0-50000 |
+| ۲ | eu | `0***-0***-1***` | 50000-60000 |
+| ۳ | na | `1***-0***-3***` | 60000+ |
+| ۴ | eu | `8***-1***-9***` | 50000-60000 |
 
-> **Vault note:** a salary of exactly 50000 falls in the first branch of the `CASE` (`BETWEEN 0 AND 50000`), which is why user 1 lands in `0-50000` — inclusive `BETWEEN` bounds on both sides make adjacent ranges overlap.
+> **Vault note:** حقوق دقیقاً برابر پنجاه هزار در شاخه‌ی اول `CASE` می‌افتد، یعنی `BETWEEN 0 AND 50000`، و از همین‌جاست که کاربر ۱ در `0-50000` می‌نشیند؛ کران‌های دو‌طرفه‌شاملِ `BETWEEN` بازه‌های همسایه را هم‌پوشان می‌کنند.
 
-### Connectivity
+### اتصال
 
-Data flows within and across systems; access must be secure too (p. 226).
+داده داخل سیستم‌ها و بین آن‌ها جریان دارد و دسترسی هم باید امن باشد (p. 226).
 
-#### Pattern: Secrets Pointer (pp. 226–228)
+#### الگو: Secrets Pointer (pp. 226–228)
 
-**Problem.** A real-time pipeline enriches visits through an external geolocation API that only supports login/password. Your team once leaked credentials for a request-billed API, raising the bill; don't store them in code again (p. 226).
+**مسئله.** یک pipeline بی‌درنگ بازدیدها را با یک API موقعیت جغرافیایی بیرونی غنی می‌کند که فقط نام کاربری و گذرواژه می‌گیرد. تیم شما یک‌بار credential یک API درخواست‌محاسب را لو داده و صورت‌حساب بالا رفته؛ دیگر در کد ذخیره‌شان نکنید (p. 226).
 
-**Solution** (pp. 226–227): keep credentials in a **secrets manager** (Google Cloud Secret Manager, AWS Secrets Manager) and reference them by **name**; consumers fetch values at runtime and may cache them. Benefits: one place to monitor and rotate. Protection is two-level: access to the secrets manager (fine-grained access patterns), then the credentials' own validity.
+**راه‌حل** (pp. 226–227): مقدار credential را در یک **secrets manager** نگه دارید، مثل Google Cloud Secret Manager و AWS Secrets Manager، و با **نام** ارجاعش بدهید؛ consumerها مقدارها را سر اجرا می‌گیرند و می‌توانند cache کنند. سودش: یک‌جا برای monitoring و چرخش. محافظت دو‌سطحی است، یعنی اول دسترسی به secrets manager با همان الگوهای دسترسی دانه‌ریز، و بعد اعتبار خود credential.
 
-**Consequences** (p. 227): **cache invalidation** (Phil Karlton's “two hard things”) — cached credentials may be stale; simplest is to let the job fail and reload on restart (with idempotent writes), or refresh asynchronously (risky mid-write). **Logs** can still leak secrets. **A secret remains secret** — someone (an admin, or IaC generating random values) still creates them.
+**پیامدها** (p. 227): **بی‌اعتبار کردن cache**، که یکی از «دو چیز سخت» Phil Karlton است، یعنی credential cache‌شده می‌تواند کهنه باشد؛ ساده‌ترین کار این است که بگذارید job شکست بخورد و سر راه‌اندازی دوباره بار شود، با نوشتن idempotent، یا asynchronous تازه‌اش کنید، که در میانه‌ی نوشتن پرخطر است. **logها** باز هم می‌توانند secret را لو بدهند. **secret باز هم secret می‌ماند**، یعنی کسی، مثل یک admin یا IaCی که مقدار تصادفی می‌سازد، باز هم باید بسازدشان.
 
-**Examples** (p. 228): `boto3` `secretsmanager_client.get_secret_value(SecretId='user')` and `'pwd'`, passed to Spark's JDBC reader. With IaC generating secrets per environment under the same names, code needs no per-environment config files.
+**نمونه‌ها** (p. 228): در `boto3`، `secretsmanager_client.get_secret_value(SecretId='user')` و همان برای `'pwd'`، که به خواننده‌ی JDBC در Spark داده می‌شود. وقتی IaC برای هر محیط secret با همان نام‌ها می‌سازد، کد به فایل تنظیم جدا برای هر محیط نیاز ندارد.
 
-#### Pattern: Secretless Connector (pp. 228–231)
+#### الگو: Secretless Connector (pp. 228–231)
 
-**Problem.** A small team adopting a new processing service finds only API-key examples and wants access to cloud resources without any credentials in code (p. 228).
+**مسئله.** تیم کوچکی که سرویس پردازش تازه‌ای را به کار می‌گیرد فقط نمونه‌های کلید API پیدا می‌کند و می‌خواهد بی هیچ credentialی در کد به منابع cloud دسترسی داشته باشد (p. 228).
 
-**Solution** (pp. 229–230):
+**راه‌حل** (pp. 229–230):
 
-| Implementation | How |
+| پیاده‌سازی | چطور |
 |---|---|
-| **IAM-based** | Policies grant users, groups or roles (including application users like scheduled jobs) actions on resources; the service asks IAM whether the caller is allowed (Figure 7-6) |
-| **Certificate-based** | A **certificate authority** validates certificates during connection |
+| **IAM‌محور** | سیاست‌ها به کاربر و گروه و نقش، از جمله کاربرهای برنامه‌ای مثل jobهای زمان‌بندی‌شده، کارهایی را روی منابع می‌دهند، و سرویس از IAM می‌پرسد که صدازننده اجازه دارد یا نه (شکل ۷-۶) |
+| **گواهی‌محور** | یک **certificate authority** گواهی‌ها را سر اتصال اعتبارسنجی می‌کند |
 
-**Consequences** (p. 230): **workless impression** — you still configure identities, e.g. AWS assume-role permissions to get temporary credentials from **STS**. **Rotation** of certificates or keys: issue new ones, accept old and new until consumers confirm, then drop the old.
+**پیامدها** (p. 230): **برداشت بی‌کار بودن**، یعنی باز هم هویت‌ها را تنظیم می‌کنید، مثل مجوزهای assume-role در AWS برای گرفتن credential موقت از **STS**. **چرخش** گواهی یا کلید: تازه‌ها را صادر کنید، قدیمی و تازه را هر دو بپذیرید تا consumerها تأیید کنند، و بعد قدیمی را بیندازید.
 
-**Examples** (pp. 230–231): Spark → PostgreSQL with `ssl: true`, `sslmode: verify-full` (host name must match the certificate) and `sslrootcert`, no password; GCP — a `google_service_account`, a `google_storage_bucket_iam_binding` with `roles/storage.objectViewer` on `visits`, and a `google_dataflow_job` running as that service account.
+**نمونه‌ها** (pp. 230–231): از Spark به PostgreSQL با `ssl: true` و `sslmode: verify-full`، که نام host باید با گواهی بخورد، و `sslrootcert`، بی گذرواژه؛ و در GCP یک `google_service_account` و یک `google_storage_bucket_iam_binding` با `roles/storage.objectViewer` روی `visits` و یک `google_dataflow_job` که با همان service account اجرا می‌شود.
 
-### Summary
+> **In practice:** credential دیتابیس‌های منبع نباید در YAML loader یا repo deployment باشد.
+>
+> **Your turn:** Argo CD همه‌چیز را از Git می‌خواند. password منبع A کجا باید باشد؟
+>
+> *Answer:* در یک secret store، و manifest فقط به آن اشاره کند، مثلاً Kubernetes Secretی که External Secrets یا Sealed Secrets پرش می‌کند. این Secrets Pointer کتاب است: کد فقط pointer را می‌شناسد، نه خود secret را (pp. 226–228).
 
-Data removal (Vertical Partitioner — cheap deletes; In-Place Overwriter — universal but expensive), fine-grained access for tables and cloud resources, protection by encryption, anonymization and pseudo-anonymization, and connectivity via secret references or no secrets at all (pp. 231–232).
+### خلاصه
 
-## Trade-offs at a glance
+حذف داده، که Vertical Partitioner حذف ارزان می‌دهد و In-Place Overwriter همه‌جا‌کار ولی گران است؛ دسترسی دانه‌ریز برای جدول‌ها و منابع cloud؛ محافظت با encryption و anonymization و pseudo-anonymization؛ و اتصال با ارجاع به secret یا بی هیچ secretی (pp. 231–232).
+
+## بده‌بستان‌ها در یک نگاه
 
 | | Vertical Partitioner | In-Place Overwriter |
 |---|---|---|
-| Rows touched per removed user | One | Every record of the user |
-| Up-front work | Redesign ingestion | None |
-| Reads | Joins needed | Unchanged |
+| ردیف‌های دست‌خورده برای هر کاربر حذف‌شده | یکی | همه‌ی رکوردهای آن کاربر |
+| کار اولیه | طراحی دوباره‌ی ورود داده | ندارد |
+| خواندن | پیوند لازم است | دست‌نخورده |
 
 | | Anonymizer | Pseudo-Anonymizer |
 |---|---|---|
-| Re-identification by joining | Not possible | Possible |
-| Usefulness for analysis | Low | Higher |
-| Reversible | No | Tokenization and encryption: yes |
+| شناسایی دوباره با پیوند | ناممکن | ممکن |
+| سودمندی برای تحلیل | کم | بیشتر |
+| برگشت‌پذیر | نه | در tokenization و encryption: بله |
 
 | | Secrets Pointer | Secretless Connector |
 |---|---|---|
-| Credentials exist | Yes, in a secrets manager | No (IAM identity) or certificates |
-| Main risks | Stale cache, logs | Configuration, certificate rotation |
+| مقدار credential وجود دارد | بله، در یک secrets manager | نه، با هویت IAM یا گواهی |
+| خطر اصلی | cache کهنه، log | تنظیم، چرخش گواهی |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Re-identification by linking “anonymous” datasets is well documented: Latanya Sweeney showed in 2000 that ZIP code, birth date and sex alone identify most Americans — the real-world version of the book's San Marino example.
-- The book's “at-least privilege” is usually called the **principle of least privilege** (Saltzer and Schroeder, 1975).
+- شناسایی دوباره با پیوند زدن مجموعه‌داده‌های «ناشناس» خوب مستند است: Latanya Sweeney در سال ۲۰۰۰ نشان داد کد پستی و تاریخ تولد و جنسیت به‌تنهایی بیشتر آمریکایی‌ها را می‌شناسانند، که نسخه‌ی واقعی نمونه‌ی سان‌مارینوی کتاب است.
+- آن چیزی که کتاب *at-least privilege* می‌نامد، معمولاً **principle of least privilege** نامیده می‌شود (Saltzer و Schroeder، سال ۱۹۷۵).
 
-## Connections
+## پیوندها
 
-- **Run it:** [Cost of a personal-data removal](../lab/07-removal-cost/README.md) — rows and bytes rewritten by the Vertical Partitioner vs the In-Place Overwriter.
-- **Related chapters:** [2. Data Ingestion](02-data-ingestion-design-patterns.md) (Transformation Replicator uses the Anonymizer; Compactor and VACUUM), [4. Idempotency](04-idempotency-design-patterns.md) (Proxy for rollback), [8. Data Storage](08-data-storage-design-patterns.md) (horizontal and vertical partitioning, Dataset Materializer), [10. Data Observability](10-data-observability-design-patterns.md) (Dataset Tracker).
+- **Run it:** [هزینه‌ی حذف داده‌ی شخصی](../lab/07-removal-cost/README.md)؛ ردیف‌ها و بایت‌هایی که Vertical Partitioner در برابر In-Place Overwriter بازنویسی می‌کنند.
+- **فصل‌های مرتبط:** [فصل ۲: ورود داده](02-data-ingestion-design-patterns.md) که Transformation Replicator از Anonymizer استفاده می‌کند و Compactor و VACUUM را دارد، [فصل ۴: ویژگی idempotency](04-idempotency-design-patterns.md) که Proxy را برای برگرداندن دارد، [فصل ۸: ذخیره‌سازی داده](08-data-storage-design-patterns.md) که پارتیشن‌بندی افقی و عمودی و Dataset Materializer را دارد، و [فصل ۱۰: observability داده](10-data-observability-design-patterns.md) که Dataset Tracker را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **A user has 2,000 visit records. How many records must be deleted with each removal pattern?**
+1. **کاربری دو هزار رکورد بازدید دارد. با هر الگوی حذف، چند رکورد باید حذف شود؟**
 
-   *Answer:* With the Vertical Partitioner, one row in the personal-data store; with the In-Place Overwriter, all 2,000 records must be rewritten (p. 205).
+   *Answer:* با Vertical Partitioner یک ردیف در ذخیره‌سازی داده‌ی شخصی، و با In-Place Overwriter همه‌ی دو هزار رکورد باید بازنویسی شوند (p. 205).
 
-2. **You `DELETE` a user from a Delta Lake table. Is the data gone?**
-   - [ ] Yes, immediately
-   - [x] Not until `VACUUM` removes the old files beyond the retention period
-   - [ ] Only if the table is partitioned by user
+2. **کاربری را از یک جدول Delta Lake با `DELETE` برمی‌دارید. داده رفته؟**
+   - [ ] بله، همان لحظه
+   - [x] نه تا وقتی `VACUUM` فایل‌های قدیمی فراتر از دوره‌ی نگه‌داری را بردارد
+   - [ ] فقط اگر جدول بر حسب کاربر پارتیشن‌بندی شده باشد
 
-   *Answer:* Time travel keeps previous versions readable until vacuumed (p. 202).
+   *Answer:* امکان time travel نسخه‌های قبلی را تا vacuum شدن خواندنی نگه می‌دارد (p. 202).
 
-3. **Why write the rewritten dataset to a staging area first?**
+3. **چرا مجموعه‌داده‌ی بازنویسی‌شده را اول در ناحیه‌ی staging بنویسیم؟**
 
-   *Answer:* A failed or retried job writing directly to the final location could leave partial data or lose data; staging keeps results private until complete, and only then a promotion job replaces the public dataset (pp. 204, 206).
+   *Answer:* jobی که شکست خورده یا تلاش دوباره خورده و مستقیم در مکان نهایی می‌نویسد می‌تواند داده‌ی جزئی بگذارد یا داده از بین ببرد؛ staging نتیجه را تا کامل شدن خصوصی نگه می‌دارد و فقط بعدش یک job ارتقا مجموعه‌داده‌ی عمومی را عوض می‌کند (pp. 204, 206).
 
-4. **Why is a Kafka tombstone fine for the `user_context` topic but not for the visits topic?**
+4. **چرا tombstone کافکا برای topic به نام `user_context` خوب است ولی برای topic بازدیدها نه؟**
 
-   *Answer:* Compaction keeps only the latest record per key. `user_context` has one record per user, but visits share keys across many events, so compaction would leave only the last visit (pp. 202–203).
+   *Answer:* عملیات compaction فقط آخرین رکورد هر کلید را نگه می‌دارد. موضوع `user_context` یک رکورد در هر کاربر دارد، ولی بازدیدها کلیدها را بین رویدادهای زیادی شریک‌اند، پس compaction فقط آخرین بازدید را می‌گذاشت (pp. 202–203).
 
-5. **Which method lets an authorized party recover original values?**
-   - [ ] Data masking
-   - [ ] Hashing
-   - [x] Tokenization (with vault access)
-   - [ ] Synthetic data replacement
+5. **کدام روش می‌گذارد طرف مجاز مقدارهای اصلی را برگرداند؟**
+   - [ ] روش masking داده
+   - [ ] روش hashing
+   - [x] روش tokenization، با دسترسی به vault
+   - [ ] جابه‌جایی با داده‌ی مصنوعی
 
-   *Answer:* Tokenization stores the mapping in a token vault; encryption is also reversible with the key. Masking and hashing aren't (pp. 222–223).
+   *Answer:* روش tokenization mapping را در یک token vault نگه می‌دارد، و encryption هم با کلید برگشت‌پذیر است. روش masking و hashing نیستند (pp. 222–223).
 
-6. **Why can a pseudo-anonymized dataset still identify someone?**
+6. **چرا یک مجموعه‌داده‌ی pseudo-anonymized باز هم می‌تواند کسی را بشناساند؟**
 
-   *Answer:* Combined with other datasets, partially masked values (e.g. `S*n M****o`, a masked job title) can narrow down to one person; anonymization generalizes or removes them instead (pp. 223–224).
+   *Answer:* در ترکیب با مجموعه‌داده‌های دیگر، مقدارهای نیمه‌mask‌شده، مثل `S*n M****o` و عنوان شغلی mask‌شده، می‌توانند به یک نفر برسند؛ روش anonymization در عوض تعمیمشان می‌دهد یا برمی‌داردشان (pp. 223–224).

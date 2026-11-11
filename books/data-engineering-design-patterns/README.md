@@ -12,103 +12,104 @@ toc_source: "Book PDF bookmarks (O'Reilly, first edition)"
 toc_verified: "2026-11-05"
 source_file: "book.pdf (kept locally, gitignored; 375 PDF pages; printed page = PDF page − 18)"
 cover: "cover.jpg"
+lang: fa
 ---
 
 # Data Engineering Design Patterns
 
-**Open [`index.html`](index.html) in a browser** for the interactive version: one slide-by-slide lesson per chapter with embedded simulations and self-checks. Everything here also reads fine on GitHub.
+**نسخه‌ی تعاملی را با باز کردن [`index.html`](index.html) در مرورگر ببینید**: برای هر فصل یک درس اسلاید‌به‌اسلاید، با شبیه‌سازی‌های جاسازی‌شده و خودسنجی. همین متن روی GitHub هم خوب خوانده می‌شود.
 
-## About
+## درباره‌ی کتاب
 
-A catalogue of about 70 reusable solutions to recurring data engineering problems — subtitled *Recipes for Solving the Most Common Data Engineering Problems*. Each pattern follows the same shape: a **problem**, a **solution**, its **consequences** and runnable **examples** (mostly Apache Spark, Delta Lake, Apache Kafka, Apache Airflow, PostgreSQL and the major clouds). The chapters follow data through a platform: ingestion, error management, idempotency, adding value, orchestrating flows, security, storage, quality and observability. A blog analytics platform serves as the running case study.
+فهرستی از حدود ۷۰ راه‌حل قابل‌استفاده‌ی دوباره برای مسئله‌های تکرارشونده‌ی مهندسی داده، با عنوان فرعی *Recipes for Solving the Most Common Data Engineering Problems*. هر الگو همان شکل ثابت را دارد: یک **مسئله**، یک **راه‌حل**، **پیامدها**یش و **نمونه‌ها**ی اجراشدنی، که بیشترشان با Apache Spark و Delta Lake و Apache Kafka و Apache Airflow و PostgreSQL و cloudهای بزرگ‌اند. فصل‌ها داده را در یک platform دنبال می‌کنند: ورود داده، مدیریت خطا، idempotency، ارزش افزودن، هماهنگ کردن جریان‌ها، امنیت، ذخیره‌سازی، کیفیت و observability. یک platform تحلیل وبلاگ هم مطالعه‌ی موردیِ جاری کتاب است.
 
-## What's in this folder
+## محتوای این پوشه
 
-| Path | What it is |
+| مسیر | چیست |
 |---|---|
-| [`chapters/NN-*.md`](chapters/01-introducing-data-engineering-design-patterns.md) | Chapter notes — **the source of truth**. Each `.md` has a generated `.html` lesson next to it. |
-| [`widgets/`](widgets/03-watermark.html) | Hand-built simulations, embedded in the lessons (open any of them on its own too) |
-| [`lab/`](lab/02-incremental-window/README.md) | Runnable Python experiments with expected output |
-| `index.html` | The book hub — generated from this README and the chapters |
+| [`chapters/NN-*.md`](chapters/01-introducing-data-engineering-design-patterns.md) | یادداشت فصل‌ها، **منبع اصلی**. کنار هر `.md` یک درس `.html` ساخته می‌شود |
+| [`widgets/`](widgets/03-watermark.html) | شبیه‌سازی‌های دست‌ساز که در درس‌ها جاسازی شده‌اند؛ هر کدام جداگانه هم باز می‌شوند |
+| [`lab/`](lab/02-incremental-window/README.md) | آزمایش‌های اجراشدنی Python با خروجی مورد انتظار |
+| `index.html` | صفحه‌ی کتاب که از همین README و فصل‌ها ساخته می‌شود |
 
-## How the book fits together
+## کتاب چطور به هم وصل است
 
-The book has no part divisions. Chapter 1 orders the pattern chapters along a typical data flow, and this map follows that order. The grouping into three stages is **the vault's own**.
+کتاب بخش‌بندی ندارد. فصل ۱ فصل‌های الگو را در امتداد یک جریان داده‌ی معمول می‌چیند و این نقشه همان ترتیب را دنبال می‌کند. گروه‌بندی به سه مرحله **مال خود vault** است.
 
 ```mermaid
 flowchart TB
-    C1["1 · Introducing design patterns"] --> G1
-    subgraph G1["Getting data in, safely"]
-      direction LR
-      C2["2 · Ingestion"] --> C3["3 · Error management"] --> C4["4 · Idempotency"]
+    C1["فصل ۱: معرفی الگوهای طراحی"] --> G1
+    subgraph G1["وارد کردن داده، با ایمنی"]
+      direction RL
+      C2["فصل ۲: ورود داده"] --> C3["فصل ۳: مدیریت خطا"] --> C4["فصل ۴: ویژگی idempotency"]
     end
-    subgraph G2["Making data useful"]
-      direction LR
-      C5["5 · Data value"] --> C6["6 · Data flow"]
+    subgraph G2["مفید کردن داده"]
+      direction RL
+      C5["فصل ۵: ارزش داده"] --> C6["فصل ۶: جریان داده"]
     end
-    subgraph G3["Keeping data trustworthy"]
-      direction LR
-      C7["7 · Security"] --> C8["8 · Storage"] --> C9["9 · Quality"] --> C10["10 · Observability"]
+    subgraph G3["قابل‌اعتماد نگه داشتن داده"]
+      direction RL
+      C7["فصل ۷: امنیت"] --> C8["فصل ۸: ذخیره‌سازی"] --> C9["فصل ۹: کیفیت"] --> C10["فصل ۱۰: observability"]
     end
     G1 --> G2 --> G3
 ```
 
-Some threads run across the groups:
+چند رشته در همه‌ی گروه‌ها کشیده شده‌اند:
 
-- Partitioning (8) underpins the Fast Metadata Cleaner (4) and incremental loading (2).
-- The Dead-Letter (3) returns as data dispatching in AWAP (9).
-- The Vertical Partitioner appears for removal (7) and for storage (8).
-- The Readiness Marker (2) gates the Skew Detector (10).
-- The Fine-Grained Tracker (10) supports the Schema Migrator (9).
+- پارتیشن‌بندی (۸) زیربنای Fast Metadata Cleaner (۴) و بارگذاری افزایشی (۲) است.
+- الگوی Dead-Letter (۳) در قالب توزیع داده در AWAP (۹) برمی‌گردد.
+- الگوی Vertical Partitioner هم برای حذف (۷) و هم برای ذخیره‌سازی (۸) می‌آید.
+- الگوی Readiness Marker (۲) دروازه‌ی Skew Detector (۱۰) است.
+- الگوی Fine-Grained Tracker (۱۰) از Schema Migrator (۹) پشتیبانی می‌کند.
 
-## Chapters
+## فصل‌ها
 
-| # | Chapter | Pages |
+| # | فصل | صفحه‌ها |
 |---:|---|---|
-| 1 | [Introducing Data Engineering Design Patterns](chapters/01-introducing-data-engineering-design-patterns.md) | 1–6 |
-| 2 | [Data Ingestion Design Patterns](chapters/02-data-ingestion-design-patterns.md) | 7–38 |
-| 3 | [Error Management Design Patterns](chapters/03-error-management-design-patterns.md) | 39–78 |
-| 4 | [Idempotency Design Patterns](chapters/04-idempotency-design-patterns.md) | 79–114 |
-| 5 | [Data Value Design Patterns](chapters/05-data-value-design-patterns.md) | 115–164 |
-| 6 | [Data Flow Design Patterns](chapters/06-data-flow-design-patterns.md) | 165–196 |
-| 7 | [Data Security Design Patterns](chapters/07-data-security-design-patterns.md) | 197–232 |
-| 8 | [Data Storage Design Patterns](chapters/08-data-storage-design-patterns.md) | 233–272 |
-| 9 | [Data Quality Design Patterns](chapters/09-data-quality-design-patterns.md) | 273–304 |
-| 10 | [Data Observability Design Patterns](chapters/10-data-observability-design-patterns.md) | 305–330 |
+| ۱ | [معرفی الگوهای طراحی مهندسی داده](chapters/01-introducing-data-engineering-design-patterns.md) | ۱–۶ |
+| ۲ | [الگوهای طراحی ورود داده](chapters/02-data-ingestion-design-patterns.md) | ۷–۳۸ |
+| ۳ | [الگوهای طراحی مدیریت خطا](chapters/03-error-management-design-patterns.md) | ۳۹–۷۸ |
+| ۴ | [الگوهای طراحی idempotency](chapters/04-idempotency-design-patterns.md) | ۷۹–۱۱۴ |
+| ۵ | [الگوهای طراحی ارزش داده](chapters/05-data-value-design-patterns.md) | ۱۱۵–۱۶۴ |
+| ۶ | [الگوهای طراحی جریان داده](chapters/06-data-flow-design-patterns.md) | ۱۶۵–۱۹۶ |
+| ۷ | [الگوهای طراحی امنیت داده](chapters/07-data-security-design-patterns.md) | ۱۹۷–۲۳۲ |
+| ۸ | [الگوهای طراحی ذخیره‌سازی داده](chapters/08-data-storage-design-patterns.md) | ۲۳۳–۲۷۲ |
+| ۹ | [الگوهای طراحی کیفیت داده](chapters/09-data-quality-design-patterns.md) | ۲۷۳–۳۰۴ |
+| ۱۰ | [الگوهای طراحی observability داده](chapters/10-data-observability-design-patterns.md) | ۳۰۵–۳۳۰ |
 
-Page ranges are printed pages. The book also has an Afterword (p. 331) and an appendix, *Summary of Patterns* (p. 333), which lists every pattern's use case and gotchas.
+شماره‌ها صفحه‌ی چاپی‌اند. کتاب یک مؤخره در ص. ۳۳۱ و یک پیوست با عنوان *Summary of Patterns* در ص. ۳۳۳ هم دارد که کاربرد و دام‌های هر الگو را فهرست می‌کند.
 
-## Key concepts
+## مفهوم‌های کلیدی
 
-These ideas recur across chapters; each row lists the chapters that discuss it. Definitions are the vault's summaries of the book's explanations.
+این ایده‌ها در چند فصل تکرار می‌شوند و هر ردیف فصل‌هایی را که به آن می‌پردازند فهرست می‌کند. تعریف‌ها خلاصه‌ی vault از توضیح کتاب‌اند.
 
-| Concept | Definition | Chapters |
+| مفهوم | تعریف | فصل‌ها |
 |---|---|---|
-| Backfilling | Reprocessing past data, for example after fixing a bug or adding a consumer. Many patterns are judged by what they do when old runs are replayed. | [2](chapters/02-data-ingestion-design-patterns.md) · [4](chapters/04-idempotency-design-patterns.md) · [6](chapters/06-data-flow-design-patterns.md) |
-| Dead-letter storage | A separate place for records that fail processing, so the pipeline keeps going and the failures can be inspected and replayed. | [1](chapters/01-introducing-data-engineering-design-patterns.md) · [3](chapters/03-error-management-design-patterns.md) · [9](chapters/09-data-quality-design-patterns.md) |
-| Idempotency | Getting the same result however many times a job runs for the same input, whether through overwrites, merges, keys, transactions or proxies. | [3](chapters/03-error-management-design-patterns.md) · [4](chapters/04-idempotency-design-patterns.md) · [7](chapters/07-data-security-design-patterns.md) · [8](chapters/08-data-storage-design-patterns.md) |
-| Late data | Events that arrive after the system expected them, measured against a watermark. Late events can be dropped, integrated statically or integrated dynamically. | [3](chapters/03-error-management-design-patterns.md) · [5](chapters/05-data-value-design-patterns.md) · [10](chapters/10-data-observability-design-patterns.md) |
-| Medallion architecture | Organizing data in Bronze (raw), Silver (cleaned, enriched) and Gold (business-ready) layers. The case study uses it throughout. | [1](chapters/01-introducing-data-engineering-design-patterns.md) · [2](chapters/02-data-ingestion-design-patterns.md) · [5](chapters/05-data-value-design-patterns.md) |
-| Partitioning | Splitting a dataset into separate storage locations by rows (horizontal) or columns (vertical), so readers and cleaners touch only what they need. | [2](chapters/02-data-ingestion-design-patterns.md) · [4](chapters/04-idempotency-design-patterns.md) · [7](chapters/07-data-security-design-patterns.md) · [8](chapters/08-data-storage-design-patterns.md) |
-| Personal data (PII) | Information that identifies a person, which privacy laws let users have removed and which must be protected or (pseudo-)anonymized before it is shared. | [2](chapters/02-data-ingestion-design-patterns.md) · [7](chapters/07-data-security-design-patterns.md) |
-| Schema evolution | Changes to a dataset's structure over time. Compatibility rules and grace periods keep consumers working through those changes. | [9](chapters/09-data-quality-design-patterns.md) · [10](chapters/10-data-observability-design-patterns.md) |
-| Shuffle | Moving data across the network so that records with the same key meet in one task, as aggregations and joins require. It is often the costliest step. | [5](chapters/05-data-value-design-patterns.md) · [8](chapters/08-data-storage-design-patterns.md) |
-| Slowly changing dimension | A way of keeping the history of reference data that changes over time, so facts join with the version valid at their time. | [5](chapters/05-data-value-design-patterns.md) · [8](chapters/08-data-storage-design-patterns.md) |
-| Small files problem | Many tiny files cost more in listing and metadata than they hold in data. Compaction, partition choice and manifests address it. | [2](chapters/02-data-ingestion-design-patterns.md) · [8](chapters/08-data-storage-design-patterns.md) · [10](chapters/10-data-observability-design-patterns.md) |
-| Table file formats | Delta Lake, Apache Iceberg and Apache Hudi: Parquet files plus a commit log that adds transactions, time travel, statistics and file manifests. | [2](chapters/02-data-ingestion-design-patterns.md) · [4](chapters/04-idempotency-design-patterns.md) · [7](chapters/07-data-security-design-patterns.md) · [8](chapters/08-data-storage-design-patterns.md) |
-| Watermark | A pipeline's estimate of how far event time has progressed. It decides when windows close and which events count as late. | [3](chapters/03-error-management-design-patterns.md) · [5](chapters/05-data-value-design-patterns.md) |
+| backfill کردن | پردازش دوباره‌ی داده‌ی گذشته، مثلاً بعد از رفع یک باگ یا اضافه شدن یک consumer. خیلی از الگوها با رفتارشان هنگام اجرای دوباره‌ی runهای قدیمی سنجیده می‌شوند. | [۲](chapters/02-data-ingestion-design-patterns.md) · [۴](chapters/04-idempotency-design-patterns.md) · [۶](chapters/06-data-flow-design-patterns.md) |
+| ذخیره‌سازی dead-letter | جایی جدا برای رکوردهایی که پردازششان شکست می‌خورد، تا pipeline ادامه بدهد و بشود شکست‌ها را بررسی و دوباره اجرا کرد. | [۱](chapters/01-introducing-data-engineering-design-patterns.md) · [۳](chapters/03-error-management-design-patterns.md) · [۹](chapters/09-data-quality-design-patterns.md) |
+| ویژگی idempotency | گرفتن نتیجه‌ی یکسان هر چند بار که یک job روی همان ورودی اجرا شود، چه با بازنویسی، چه merge، چه کلید، چه تراکنش، چه proxy. | [۳](chapters/03-error-management-design-patterns.md) · [۴](chapters/04-idempotency-design-patterns.md) · [۷](chapters/07-data-security-design-patterns.md) · [۸](chapters/08-data-storage-design-patterns.md) |
+| late data | رویدادهایی که دیرتر از انتظار سیستم می‌رسند و با watermark سنجیده می‌شوند. late event را می‌شود دور انداخت یا ایستا یا پویا وارد کرد. | [۳](chapters/03-error-management-design-patterns.md) · [۵](chapters/05-data-value-design-patterns.md) · [۱۰](chapters/10-data-observability-design-patterns.md) |
+| معماری medallion | سازمان دادن داده در لایه‌های Bronze برای خام، Silver برای تمیز و غنی‌شده، و Gold برای آماده‌ی کسب‌وکار. مطالعه‌ی موردی کتاب از اول تا آخر همین را به کار می‌برد. | [۱](chapters/01-introducing-data-engineering-design-patterns.md) · [۲](chapters/02-data-ingestion-design-patterns.md) · [۵](chapters/05-data-value-design-patterns.md) |
+| پارتیشن‌بندی | شکستن یک مجموعه‌داده به جایگاه‌های ذخیره‌سازی جدا، چه بر پایه‌ی ردیف که افقی است و چه بر پایه‌ی ستون که عمودی است، تا خواننده‌ها و پاک‌کننده‌ها فقط به چیزی دست بزنند که لازم دارند. | [۲](chapters/02-data-ingestion-design-patterns.md) · [۴](chapters/04-idempotency-design-patterns.md) · [۷](chapters/07-data-security-design-patterns.md) · [۸](chapters/08-data-storage-design-patterns.md) |
+| داده‌ی شخصی یا PII | اطلاعاتی که یک آدم را می‌شناساند، که قانون‌های حریم خصوصی به کاربر اجازه می‌دهند حذفش کند و پیش از به اشتراک گذاشتن باید محافظت یا ناشناس شود. | [۲](chapters/02-data-ingestion-design-patterns.md) · [۷](chapters/07-data-security-design-patterns.md) |
+| تکامل schema | تغییر ساختار یک مجموعه‌داده در طول زمان. قاعده‌های سازگاری و دوره‌های مهلت، consumerها را در دل این تغییرها سر پا نگه می‌دارند. | [۹](chapters/09-data-quality-design-patterns.md) · [۱۰](chapters/10-data-observability-design-patterns.md) |
+| shuffle | جابه‌جا کردن داده روی شبکه تا رکوردهای با کلید یکسان در یک task کنار هم بیایند، همان چیزی که aggregation و join لازم دارند. اغلب گران‌ترین مرحله است. | [۵](chapters/05-data-value-design-patterns.md) · [۸](chapters/08-data-storage-design-patterns.md) |
+| بُعد کندتغییر | راهی برای نگه داشتن تاریخچه‌ی داده‌ی مرجعی که در طول زمان عوض می‌شود، تا factها با همان نسخه‌ای join شوند که در زمانشان معتبر بوده. | [۵](chapters/05-data-value-design-patterns.md) · [۸](chapters/08-data-storage-design-patterns.md) |
+| مسئله‌ی فایل‌های کوچک | فایل‌های ریز زیاد، در فهرست کردن و metadata بیشتر از خود داده هزینه می‌برند. فشرده‌سازی و انتخاب پارتیشن و manifest به آن می‌پردازند. | [۲](chapters/02-data-ingestion-design-patterns.md) · [۸](chapters/08-data-storage-design-patterns.md) · [۱۰](chapters/10-data-observability-design-patterns.md) |
+| قالب‌های فایل جدولی | ابزارهای Delta Lake و Apache Iceberg و Apache Hudi: فایل‌های Parquet به‌علاوه‌ی یک log از commitها که تراکنش و سفر در زمان و آمار و manifest فایل‌ها را اضافه می‌کند. | [۲](chapters/02-data-ingestion-design-patterns.md) · [۴](chapters/04-idempotency-design-patterns.md) · [۷](chapters/07-data-security-design-patterns.md) · [۸](chapters/08-data-storage-design-patterns.md) |
+| watermark | تخمین pipeline از این‌که زمان رویداد تا کجا جلو رفته. تعیین می‌کند پنجره‌ها کِی بسته می‌شوند و کدام رویدادها late حساب می‌شوند. | [۳](chapters/03-error-management-design-patterns.md) · [۵](chapters/05-data-value-design-patterns.md) |
 
-## How these notes work
+## این یادداشت‌ها چطور نوشته شده‌اند
 
-- **Everything above *Beyond the book* in a chapter note restates the book**, with printed page references. Supplementary material — outside sources, the vault's interpretation — lives under *Beyond the book* or in `> **Vault note:**` callouts.
-- Pattern sections keep the book's own shape: **Problem → Solution → Consequences → Examples**. Code examples are summarized rather than reproduced; the book's full code is in its GitHub repository.
-- Section outlines are the book's own nested table of contents, generated from the PDF's bookmarks.
-- *Check yourself* questions and answers are the vault's, written from the notes; answers cite pages.
-- Simulations and experiments are the vault's own implementations of mechanisms the book describes; each says which pages it illustrates and what it simplifies.
+- **هر چیزی که در یادداشت یک فصل بالای *فراتر از کتاب* است، خود کتاب را بازگو می‌کند**، با ارجاع به صفحه‌ی چاپی. مطالب مکمل، یعنی منابع بیرونی و خوانش vault، زیر *فراتر از کتاب* یا در کادرهای `> **Vault note:**` می‌آیند.
+- بخش‌های الگو همان شکل خود کتاب را نگه می‌دارند: **مسئله ← راه‌حل ← پیامدها ← نمونه‌ها**. نمونه‌های کد خلاصه می‌شوند نه بازتولید؛ کد کامل کتاب در repository GitHub آن است.
+- فهرست بخش‌ها همان فهرست مطالب تودرتوی خود کتاب است که از bookmarkهای PDF ساخته شده.
+- پرسش‌های *خودتان را بسنجید* و پاسخ‌هایشان مال vault است و از روی همین یادداشت‌ها نوشته شده؛ پاسخ‌ها به صفحه ارجاع می‌دهند.
+- شبیه‌سازی‌ها و آزمایش‌ها پیاده‌سازی خود vault از سازوکارهایی‌اند که کتاب شرح می‌دهد؛ هر کدام می‌گویند کدام صفحه‌ها را نشان می‌دهند و چه چیزی را ساده کرده‌اند.
 
-## Source
+## منبع
 
-- **Primary source:** the publisher's PDF of the first edition, April 2025 (375 PDF pages). The printed page number is the PDF page number minus 18. The PDF is kept outside version control (see `.gitignore`).
-- **Table of contents:** taken from the PDF's bookmark outline, which gives each chapter's sections and patterns with page numbers.
-- **Structure:** a preface, 10 chapters, an Afterword, an appendix (*Summary of Patterns*) and an index. There are no part divisions.
-- **Coverage:** all 10 chapters are covered.
+- **منبع اصلی:** نسخه‌ی PDF ناشر از ویراست اول، آوریل ۲۰۲۵، با ۳۷۵ صفحه‌ی PDF. شماره‌ی صفحه‌ی چاپی برابر شماره‌ی صفحه‌ی PDF منهای ۱۸ است. این PDF بیرون از version control نگه داشته می‌شود؛ `.gitignore` را ببینید.
+- **فهرست مطالب:** از bookmarkهای PDF برداشته شده، که بخش‌ها و الگوهای هر فصل را با شماره‌ی صفحه می‌دهد.
+- **ساختار:** یک پیش‌گفتار، ۱۰ فصل، یک مؤخره، یک پیوست با عنوان *Summary of Patterns*، و یک index. بخش‌بندی ندارد.
+- **پوشش:** هر ۱۰ فصل پوشش داده شده‌اند.

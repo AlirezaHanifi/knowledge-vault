@@ -3,235 +3,261 @@ book: data-engineering-design-patterns
 chapter: 2
 title: "Data Ingestion Design Patterns"
 pages: "7–38"
+translated_title: "الگوهای طراحی ورود داده"
+lang: fa
 ---
 
-# 2. Data Ingestion Design Patterns
+# فصل ۲: الگوهای طراحی ورود داده
 
-[← 1. Introducing Data Engineering Design Patterns](01-introducing-data-engineering-design-patterns.md) · [Book](../README.md) · [3. Error Management Design Patterns →](03-error-management-design-patterns.md)
+[فصل ۱: معرفی الگوهای طراحی مهندسی داده →](01-introducing-data-engineering-design-patterns.md) · [کتاب](../README.md) · [فصل ۳: الگوهای طراحی مدیریت خطا ←](03-error-management-design-patterns.md)
 
-## Summary
+## خلاصه
 
-Data systems rarely generate data; they acquire it from producers whose constraints they must adapt to, and mistakes here surface days later as incomplete or broken datasets. The chapter gives eight patterns. **Full Loader** and **Incremental Loader** bring in a whole dataset or only its new part (by a *delta column* or by *time partitions*); **Change Data Capture** streams every change — hard deletes included — from the database commit log with low latency. **Passthrough Replicator** and **Transformation Replicator** copy data between environments, as is or with sensitive fields removed. **Compactor** fixes the small-files problem, **Readiness Marker** tells consumers when a dataset is complete, and **External Trigger** replaces polling schedules with event-driven ingestion. Each comes with its consequences: consistency during overwrites, backfill volumes, setup complexity, metadata, cost, and lack of enforcement.
+سیستم‌های داده به‌ندرت خودشان داده تولید می‌کنند؛ آن را از producerهایی می‌گیرند که باید با قیدهایشان کنار بیایند، و اشتباه در همین‌جا روزها بعد به شکل مجموعه‌داده‌ی ناقص یا خراب رو می‌شود. این فصل هشت الگو می‌دهد. الگوهای **Full Loader** و **Incremental Loader** یا کل مجموعه‌داده را می‌آورند یا فقط بخش تازه‌اش را، چه با یک *ستون delta* و چه با *پارتیشن‌های زمانی*؛ و **Change Data Capture** هر تغییری را، از جمله حذف فیزیکی، با تأخیر کم از log مربوط به commit دیتابیس استریم می‌کند. الگوهای **Passthrough Replicator** و **Transformation Replicator** داده را بین محیط‌ها کپی می‌کنند، یا همان‌طور که هست یا با حذف فیلدهای حساس. الگوی **Compactor** مسئله‌ی فایل‌های کوچک را حل می‌کند، **Readiness Marker** به consumerها می‌گوید مجموعه‌داده کِی کامل است، و **External Trigger** جای زمان‌بندی‌های polling را با ورود داده‌ی رویدادمحور می‌گیرد. هر کدام پیامدهای خودشان را دارند: سازگاری هنگام بازنویسی، حجم backfill، پیچیدگی راه‌اندازی، metadata، هزینه، و نبود ضمانت اجرا.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Full loads need a consistent switch**: drop-and-insert exposes partial data, so use transactions or a view over versioned tables — which also keeps old versions for rollback (pp. 8–11).
-- **Bound incremental windows** (`delta_column BETWEEN t AND t + 1 hour`) so a backfill doesn't turn into a full load, and so backfills can run concurrently (p. 14).
-- **Delta-column loads miss hard deletes**; soft deletes, insert-only tables or **CDC** fix that — CDC reads the commit log, sees deletes, and gets latency down to seconds (pp. 13–18).
-- **CDC turns data at rest into data in motion**: a JOIN without a match may just mean the other stream is late (p. 18).
-- **Replicate simply, push from the owner, and keep metadata** (Delta logs, Kafka headers and order); strip PII with a transformation step driven by governance tags (pp. 20–26).
-- **Compaction trades cost for read performance** and needs a separate `VACUUM` that limits time travel (pp. 27–30).
-- **Readiness markers and triggers are conventions**: a `_SUCCESS` flag or the next partition can't be enforced; event-driven triggers should carry context and keep failed events (pp. 30–36).
+- **بارگذاری کامل به یک جابه‌جایی سازگار نیاز دارد**: حذف‌و‌درج داده‌ی ناقص را رو می‌کند، پس از تراکنش یا یک view روی جدول‌های نسخه‌دار استفاده کنید، که نسخه‌های قدیمی را هم برای rollback نگه می‌دارد (pp. 8–11).
+- **پنجره‌های افزایشی را bounded کنید**، مثل `delta_column BETWEEN t AND t + 1 hour`، تا backfill به بارگذاری کامل تبدیل نشود و backfillها بتوانند هم‌زمان اجرا شوند (p. 14).
+- **بارگذاری با ستون delta حذف‌های فیزیکی را نمی‌بیند؛** حذف نرم یا جدول‌های فقط-درج یا **CDC** این را درست می‌کنند؛ CDC خود log مربوط به commit را می‌خواند، حذف‌ها را می‌بیند و تأخیر را به چند ثانیه می‌رساند (pp. 13–18).
+- **روش CDC داده‌ی ساکن را به داده‌ی در حرکت تبدیل می‌کند**: JOINی که جور درنمی‌آید شاید فقط یعنی آن یکی stream عقب است (p. 18).
+- **ساده replication کنید، از سمت صاحب داده push کنید، و metadata را نگه دارید**، یعنی logهای Delta و header و ترتیب Kafka؛ و PII را با یک مرحله‌ی تبدیل که برچسب‌های حاکمیتی می‌رانندش بردارید (pp. 20–26).
+- **فشرده‌سازی هزینه را با performance خواندن معامله می‌کند** و به `VACUUM` جداگانه‌ای نیاز دارد که سفر در زمان را محدود می‌کند (pp. 27–30).
+- **نشانگر آمادگی و trigger قرارداد‌ند**: پرچم `_SUCCESS` یا پارتیشن بعدی را نمی‌شود اجباری کرد؛ triggerهای رویدادمحور باید زمینه را حمل کنند و رویدادهای شکست‌خورده را نگه دارند (pp. 30–36).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Full Load — p. 8
-  - Pattern: Full Loader — p. 8
-- Incremental Load — p. 12
-  - Pattern: Incremental Loader — p. 12
-  - Pattern: Change Data Capture — p. 16
-- Replication — p. 20
-  - Pattern: Passthrough Replicator — p. 20
-  - Pattern: Transformation Replicator — p. 24
-- Data Compaction — p. 27
-  - Pattern: Compactor — p. 27
-- Data Readiness — p. 30
-  - Pattern: Readiness Marker — p. 30
-- Event Driven — p. 33
-  - Pattern: External Trigger — p. 33
-- Summary — p. 37
+- بارگذاری کامل — p. 8
+  - الگو: Full Loader — p. 8
+- بارگذاری افزایشی — p. 12
+  - الگو: Incremental Loader — p. 12
+  - الگو: Change Data Capture — p. 16
+- replication — p. 20
+  - الگو: Passthrough Replicator — p. 20
+  - الگو: Transformation Replicator — p. 24
+- فشرده‌سازی داده — p. 27
+  - الگو: Compactor — p. 27
+- آمادگی داده — p. 30
+  - الگو: Readiness Marker — p. 30
+- رویدادمحور — p. 33
+  - الگو: External Trigger — p. 33
+- خلاصه — p. 37
 
-## Notes
+## یادداشت‌ها
 
-Data producers may be other pipelines in your team, other teams, or other organizations, each with its own technical and business constraints. Get ingestion wrong and consumers complain days later about incomplete datasets, inefficient organization, or broken data needing restoration and backfilling (p. 7). The chapter covers loading (full, incremental), replication (as is, transformed), and the technical side of ingestion: when to start (readiness), the small-files problem (compaction), and unpredictable arrivals (external trigger) (pp. 7–8).
+همه‌ی producerهای داده می‌توانند pipelineهای دیگر تیم خودتان باشند، تیم‌های دیگر، یا سازمان‌های دیگر، که هر کدام قیدهای فنی و کسب‌وکاری خودشان را دارند. اگر ورود داده را خراب کنید، consumerها روزها بعد از مجموعه‌داده‌ی ناقص یا سازمان‌دهی ناکارآمد یا داده‌ی خرابی شکایت می‌کنند که به بازیابی و backfill نیاز دارد (p. 7). این فصل بارگذاری، یعنی کامل و افزایشی، و تکثیر، یعنی همان‌طور که هست یا تبدیل‌شده، و سمت فنی ورود داده را پوشش می‌دهد: کِی شروع کنیم که همان آمادگی است، مسئله‌ی فایل‌های کوچک که فشرده‌سازی است، و رسیدن‌های پیش‌بینی‌ناپذیر که trigger بیرونی است (pp. 7–8).
 
-| Pattern | Problem it solves | Core mechanism |
+| الگو | چه مسئله‌ای را حل می‌کند | سازوکار اصلی |
 |---|---|---|
-| Full Loader | Small, slowly changing dataset with no “last updated” attribute | Extract-load (or ETL) the whole dataset each run |
-| Incremental Loader | Continuously growing dataset | Delta column or time partitions |
-| Change Data Capture | Low latency, physical deletes | Stream the database commit log |
-| Passthrough Replicator | Same data in another environment | Copy as is (code or infrastructure) |
-| Transformation Replicator | Replicate, minus PII | Read → remove/alter fields → write |
-| Compactor | Too many small files | Merge files; clean old ones |
-| Readiness Marker | Consumers read incomplete data | Flag file or next-partition convention |
-| External Trigger | Unpredictable arrivals | Subscribe → react → trigger |
+| Full Loader | مجموعه‌داده‌ی کوچک و کندتغییر بدون ویژگی «آخرین به‌روزرسانی» | هر اجرا کل مجموعه‌داده را extract و load کنید، یا ETL |
+| Incremental Loader | مجموعه‌داده‌ای که پیوسته بزرگ می‌شود | ستون delta یا پارتیشن‌های زمانی |
+| Change Data Capture | تأخیر کم، حذف‌های فیزیکی | استریم کردن log مربوط به commit دیتابیس |
+| Passthrough Replicator | همان داده در محیطی دیگر | کپی همان‌طور که هست، در کد یا زیرساخت |
+| Transformation Replicator | تکثیر، منهای PII | خواندن ← حذف یا تغییر فیلدها ← نوشتن |
+| Compactor | فایل‌های کوچک زیاد | merge فایل‌ها؛ پاک کردن قدیمی‌ها |
+| Readiness Marker | consumerها داده‌ی ناقص می‌خوانند | فایل پرچم یا قرارداد پارتیشن بعدی |
+| External Trigger | رسیدن‌های پیش‌بینی‌ناپذیر | اشتراک ← واکنش ← trigger |
 
-*The vault's summary table of the chapter's patterns.*
+*جدول جمع‌بندی vault از الگوهای این فصل.*
 
-### Full load
+### بارگذاری کامل
 
-Works on the complete dataset each time — useful for bootstrapping a database or generating a reference dataset (p. 8).
+هر بار روی کل مجموعه‌داده کار می‌کند؛ برای راه‌اندازی اولیه‌ی یک دیتابیس یا ساختن یک مجموعه‌داده‌ی مرجع به کار می‌آید (p. 8).
 
-#### Pattern: Full Loader (pp. 8–11)
+#### الگو: Full Loader (pp. 8–11)
 
-**Problem.** A Silver-layer job needs device information from an external provider: it changes only a few times a week, never exceeds one million rows, and has no attribute to detect changed rows (p. 8).
+**مسئله.** یک job در لایه‌ی Silver به اطلاعات دستگاه از یک تأمین‌کننده‌ی بیرونی نیاز دارد: هفته‌ای چند بار عوض می‌شود، هیچ‌وقت از یک میلیون ردیف بیشتر نمی‌شود، و ویژگی‌ای برای تشخیص ردیف‌های تغییرکرده ندارد (p. 8).
 
-**Solution.** Two steps, **extract and load (EL)**, using native export/import commands — ideal for homogeneous stores. EL jobs are also called **passthrough jobs**. Between heterogeneous stores, add a thin transformation and it becomes **ETL** (pp. 8–9).
+**راه‌حل.** دو مرحله، یعنی **extract و load**، با دستورهای بومی export و import؛ ایده‌آل برای انبارهای هم‌جنس. jobهای EL را **passthrough job** هم می‌نامند. بین انبارهای ناهم‌جنس یک تبدیل نازک اضافه کنید و همان **ETL** می‌شود (pp. 8–9).
 
-**Consequences** (pp. 9–10):
+**پیامدها** (pp. 9–10):
 
-| Risk | Mitigation |
+| ریسک | راه کاهش |
 |---|---|
-| **Data volume**: a dataset that doubles overnight slows down or breaks a job on static hardware | Auto-scaling in the processing layer |
-| **Consistency for readers**: drop-and-insert can expose partial or empty data while consumers read | Transactions; or a **single data exposition abstraction** — a view over hidden technical tables, switched atomically (Figure 2-1; see the Proxy pattern, Ch. 4) |
-| **No way back**: a full overwrite loses the previous version | Time travel (Delta Lake, Apache Iceberg, BigQuery), or versioned tables behind a view |
+| **حجم داده**: مجموعه‌داده‌ای که یک‌شبه دو برابر شود روی سخت‌افزار ثابت job را کند می‌کند یا می‌شکند | مقیاس‌گیری خودکار در لایه‌ی پردازش |
+| **سازگاری برای خواننده‌ها**: حذف‌و‌درج می‌تواند وسط خواندن consumerها داده‌ی ناقص یا خالی نشان بدهد | تراکنش؛ یا یک **انتزاع واحد نمایش داده**، یعنی یک view روی جدول‌های فنیِ پنهان که اتمی جابه‌جا می‌شود (شکل ۲-۱؛ الگوی Proxy در فصل ۴ را ببینید) |
+| **راه برگشتی نیست**: بازنویسی کامل نسخه‌ی قبلی را از بین می‌برد | سفر در زمان در Delta Lake و Apache Iceberg و BigQuery، یا جدول‌های نسخه‌دار پشت یک view |
 
-![Top: Table_1 is exposed through the public view while Table_2 is being loaded. Bottom: after the load, the public view switches to Table_2](../figures/02-01.png)
+![بالا: جدول اول از راه view عمومی در معرض دید است در حالی که جدول دوم در حال بارگذاری است. پایین: بعد از بارگذاری، view عمومی به جدول دوم سوییچ می‌کند](../figures/02-01.png)
 
-*Figure 2-1 (p. 10): consumers only ever query the view, which switches to a table once it is completely loaded (Examples 2-3/2-4, pp. 10–11).*
+*Figure 2-1 (p. 10): consumerها همیشه فقط view را کوئری می‌زنند، و view وقتی به یک جدول سوییچ می‌کند که کاملاً بارگذاری شده باشد (نمونه‌های ۲-۳ و ۲-۴، صص. ۱۰–۱۱).*
 
-**Examples** (pp. 10–11): `aws s3 sync s3://input-bucket s3://output-bucket --delete` (removes objects missing in the source); Apache Spark writing JSON as a Delta Lake table, which adds scaling plus transactions and versioning; Apache Airflow + PostgreSQL — `COPY devices_${version} …` into a versioned table, then `CREATE OR REPLACE VIEW devices AS SELECT * FROM devices_${version}`.
+**نمونه‌ها** (pp. 10–11): دستور `aws s3 sync s3://input-bucket s3://output-bucket --delete` که objectهای نبوده در مبدأ را حذف می‌کند؛ Apache Spark که JSON را به شکل جدول Delta Lake می‌نویسد و مقیاس‌گیری به‌علاوه‌ی تراکنش و نسخه‌بندی اضافه می‌کند؛ و Apache Airflow با PostgreSQL، یعنی `COPY devices_${version} …` در یک جدول نسخه‌دار و بعد `CREATE OR REPLACE VIEW devices AS SELECT * FROM devices_${version}`.
 
-### Incremental load
+> **In practice:** جدول‌های کوچک مرجع، مثل فهرست merchantها یا دسته‌های خرج، با full load ساده‌ترند تا با incremental cursor.
+>
+> **Your turn:** یک full load هر شب جدول Bronze را `TRUNCATE` و دوباره پر می‌کند و داشبوردی در همان چند دقیقه صفر نشان می‌دهد. در ClickHouse چه می‌کنید؟
+>
+> *Answer:* در جدولی تازه بنویسید و بعد با `EXCHANGE TABLES` یا یک view به آن سوئیچ کنید، تا خواننده‌ها همیشه نسخه‌ای کامل ببینند؛ همان ایده‌ی کتاب که consumerها فقط view را کوئری می‌زنند (pp. 8–11).
 
-Full loads get costly for growing datasets; incremental patterns ingest smaller parts of a physically or logically divided dataset, often more frequently (p. 12).
+### بارگذاری افزایشی
 
-#### Pattern: Incremental Loader (pp. 12–16)
+بارگذاری کامل برای مجموعه‌داده‌های در حال رشد گران می‌شود؛ الگوهای افزایشی بخش‌های کوچک‌تری از مجموعه‌داده‌ای را که فیزیکی یا منطقی تقسیم شده وارد می‌کنند، و اغلب پرتکرارتر (p. 12).
 
-**Problem.** Most visit events arrive from a streaming broker, but legacy producers still write some to a transactional database; bring only visits added since the last run into Bronze. Visits are immutable (p. 12).
+#### الگو: Incremental Loader (pp. 12–16)
 
-**Solution** — two implementations (Figure 2-2) (pp. 12–13):
+**مسئله.** بیشتر رویدادهای بازدید از یک broker استریم می‌رسند، ولی producerهای قدیمی هنوز بعضی‌شان را در یک دیتابیس تراکنشی می‌نویسند؛ فقط بازدیدهای اضافه‌شده از اجرای قبلی را به Bronze بیاورید. بازدیدها تغییرناپذیرند (p. 12).
 
-![Delta column implementation: the loader remembers the last ingestion time (10:00) and copies only rows 2 and 3, ingested later. Partition-based implementation: a run at 11:00 copies the 10:00 partition, not the one still being written](../figures/02-02.png)
+**راه‌حل**، با دو پیاده‌سازی (شکل ۲-۲) (pp. 12–13):
 
-*Figure 2-2 (p. 13): track a delta column's high-water mark, or copy whole partitions once they're complete.*
+![پیاده‌سازی با ستون delta: loader آخرین زمان ورود داده را که ۱۰:۰۰ است به یاد می‌آورد و فقط ردیف‌های ۲ و ۳ را که دیرتر وارد شده‌اند کپی می‌کند. پیاده‌سازی مبتنی بر پارتیشن: اجرایی در ۱۱:۰۰ پارتیشن ۱۰:۰۰ را کپی می‌کند، نه پارتیشنی را که هنوز در حال نوشته شدن است](../figures/02-02.png)
 
-| | Delta column | Time-partitioned dataset |
+*Figure 2-2 (p. 13): یا بیشینه‌ی رسیده‌ی یک ستون delta را دنبال کنید، یا پارتیشن‌های کامل‌شده را یک‌جا کپی کنید.*
+
+| | ستون delta | مجموعه‌داده‌ی پارتیشن‌بندی‌شده‌ی زمانی |
 |---|---|---|
-| How new data is found | A column such as **ingestion time** | The partition for the execution date (a run at 11:00 takes the previous hour) |
-| State to remember | The last ingested value | None — derived from the execution date |
-| Readiness | — | Wait for the partition, e.g. with a **Readiness Marker** |
+| داده‌ی تازه چطور پیدا می‌شود | ستونی مثل **زمان ورود داده** | پارتیشن مربوط به تاریخ اجرا؛ اجرایی در ۱۱:۰۰ ساعت قبل را برمی‌دارد |
+| چه حالتی باید یادتان بماند | آخرین مقدار واردشده | هیچ؛ از تاریخ اجرا مشتق می‌شود |
+| آمادگی | — | منتظر پارتیشن بمانید، مثلاً با یک **Readiness Marker** |
 
-> **Vault note:** the book warns that using **event time** as the delta column is risky: late data for an already-processed event time is silently skipped (p. 12).
+> **Vault note:** کتاب هشدار می‌دهد که به کار بردن **زمان رویداد** به‌عنوان ستون delta پرریسک است: late data برای زمان رویدادی که قبلاً پردازش شده بی‌صدا از قلم می‌افتد (p. 12).
 
-**Consequences** (pp. 13–14):
+**پیامدها** (pp. 13–14):
 
-- **Hard deletes**: a delta column catches updates but not deletes — a deleted row simply disappears from the input. Fix with **soft deletes** (UPDATE instead of DELETE), or **insert-only (append-only) tables** that shift reconstruction of modified/deleted rows onto consumers.
-- **Backfilling**: after two months of data, a backfill on an unbounded delta-column job becomes a *full load*. **Limit the ingestion window**: `delta_column BETWEEN ingestion_time AND ingestion_time + INTERVAL '1 HOUR'` gives predictable compute and lets several backfills run simultaneously. Partition-based jobs that take one partition at a time don't have this problem.
+- **حذف‌های فیزیکی**: ستون delta به‌روزرسانی‌ها را می‌گیرد ولی حذف‌ها را نه؛ ردیف حذف‌شده صرفاً از ورودی غیب می‌شود. راه‌حلش **حذف نرم** است، یعنی UPDATE به‌جای DELETE، یا **جدول‌های فقط-درج** که بازسازی ردیف‌های تغییرکرده یا حذف‌شده را به دوش consumerها می‌اندازند.
+- **عمل backfill کردن**: بعد از دو ماه داده، backfill روی jobی با ستون delta و بدون کران به *بارگذاری کامل* تبدیل می‌شود. **پنجره‌ی ورود داده را محدود کنید**: `delta_column BETWEEN ingestion_time AND ingestion_time + INTERVAL '1 HOUR'` محاسبه‌ی قابل‌پیش‌بینی می‌دهد و اجازه می‌دهد چند backfill هم‌زمان بروند. jobهای مبتنی بر پارتیشن که هر بار یک پارتیشن می‌گیرند این مسئله را ندارند.
 
-**Examples** (pp. 14–16): `aws s3 sync s3://input/date=2024-01-01 s3://output/date=2024-01-01 --delete` (omit the prefix on the right and the layout is flattened); an Airflow DAG `FileSensor` (mode `reschedule`) → `SparkKubernetesOperator` → `SparkKubernetesSensor`, where the job's input/output paths use the immutable `{{ ds }}` macro, which makes backfills simple; the delta-column variant drops the sensor and filters `ingestion_time BETWEEN date_from AND date_to`. Airflow also has partition sensors for AWS Glue, BigQuery and Databricks.
+**نمونه‌ها** (pp. 14–16): دستور `aws s3 sync s3://input/date=2024-01-01 s3://output/date=2024-01-01 --delete`، که اگر پیشوند سمت راست را بردارید چیدمان تخت می‌شود؛ یک DAG در Airflow با `FileSensor` در حالت `reschedule` و بعد `SparkKubernetesOperator` و `SparkKubernetesSensor`، که مسیرهای ورودی و خروجی job از ماکرو immutable `{{ ds }}` استفاده می‌کنند و backfill را ساده می‌کنند؛ و گونه‌ی ستون delta که sensor را برمی‌دارد و `ingestion_time BETWEEN date_from AND date_to` را فیلتر می‌کند. Airflow برای AWS Glue و BigQuery و Databricks هم sensor پارتیشن دارد.
 
-> **Try it:** [Incremental loading and backfills](../widgets/02-incremental-loader.html) — run hourly loads with a delta column or partitions, then delete rows, backfill, and see what each implementation ingests.
+> **Try it:** [بارگذاری افزایشی و backfillها](../widgets/02-incremental-loader.html)؛ بارگذاری‌های ساعتی را با ستون delta یا با پارتیشن اجرا کنید، بعد ردیف حذف کنید و backfill بزنید و ببینید هر پیاده‌سازی چه چیزی وارد می‌کند.
 
-#### Pattern: Change Data Capture (pp. 16–20)
+#### الگو: Change Data Capture (pp. 16–20)
 
-**Problem.** The legacy visits must now reach the streaming broker within **30 seconds** of each change, available to everyone on a central topic (p. 16).
+**مسئله.** بازدیدهای قدیمی حالا باید ظرف **۳۰ ثانیه** از هر تغییر به broker استریم برسند و روی یک topic مرکزی در دسترس همه باشند (p. 16).
 
-**Solution.** Scheduling and query overhead rule out the Incremental Loader. **CDC** continuously reads modified rows straight from the database's **commit log** — an append-only record of every operation — and streams them to a broker; consumers may keep the full history or just the latest value per row. It also captures **hard deletes**, so producers needn't soft-delete (p. 17).
+**راه‌حل.** سربار زمان‌بندی و کوئری، Incremental Loader را کنار می‌گذارد. روش **CDC** پیوسته ردیف‌های تغییرکرده را مستقیم از **log مربوط به commit** دیتابیس می‌خواند، یعنی رکوردی فقط-افزودنی از هر عملیات، و به یک broker استریمشان می‌کند؛ consumerها می‌توانند کل تاریخچه را نگه دارند یا فقط آخرین مقدار هر ردیف را. **حذف‌های فیزیکی** را هم می‌گیرد، پس producerها لازم نیست حذف نرم بکنند (p. 17).
 
-![Tables A and B in a database are captured by Kafka Connect and written to one Kafka topic per table](../figures/02-03.png)
+![جدول‌های A و B در یک دیتابیس با Kafka Connect گرفته می‌شوند و برای هر جدول در یک topic جدای Kafka نوشته می‌شوند](../figures/02-03.png)
 
-*Figure 2-3 (p. 19): Debezium runs inside Kafka Connect, reads the database's commit log and publishes each table's changes to its own topic (Example 2-10, pp. 18–19).*
+*Figure 2-3 (p. 19): ابزار Debezium داخل Kafka Connect اجرا می‌شود، log مربوط به commit دیتابیس را می‌خواند و تغییرهای هر جدول را در topic خودش منتشر می‌کند (نمونه‌ی ۲-۱۰، صص. ۱۸–۱۹).*
 
-**Consequences** (pp. 17–18):
+**پیامدها** (pp. 17–18):
 
 | | |
 |---|---|
-| **Complexity** | Unlike the loaders, may need the operations team, e.g. to enable the commit log |
-| **Data scope** | Some clients only see changes made after they start; combine with another pattern for history |
-| **Payload** | Extra metadata — operation type, modification time, column types — that consumers may need to ignore |
-| **Data semantics** | Data at rest becomes **data in motion**: a stream-stream JOIN with no match may succeed later, because one stream can lag the other |
+| **پیچیدگی** | برخلاف loaderها شاید به تیم عملیات نیاز داشته باشد، مثلاً برای فعال کردن log مربوط به commit |
+| **دامنه‌ی داده** | بعضی کلاینت‌ها فقط تغییرهای بعد از شروع خودشان را می‌بینند؛ برای تاریخچه با الگوی دیگری ترکیبش کنید |
+| **محتوای پیام** | metadata اضافه، مثل نوع عملیات و زمان تغییر و نوع ستون‌ها، که consumerها شاید لازم باشد نادیده بگیرند |
+| **معنای داده** | داده‌ی ساکن به **داده‌ی در حرکت** تبدیل می‌شود: JOIN بین دو stream که جور درنمی‌آید شاید بعداً جور دربیاید، چون یک stream می‌تواند از آن یکی عقب باشد |
 
-**Examples** (pp. 18–20): **Debezium** (also available as Embedded Engine and Debezium Server) on Kafka Connect — a JSON config with connection settings, `schema.include.list` and `topic.prefix` writes `dedp_schema.events` changes to `dedp.dedp_schema.events`; PostgreSQL needs logical replication with the `pgoutput` plug-in and a privileged user. **Delta Lake's change data feed (CDF)** is simpler: enable `enableChangeDataFeed` (session or table property), throttle with `maxFilesPerTrigger`/`maxBytesPerTrigger`, start from a `startingVersion`; rows carry `_change_type`, `_commit_version`, `_commit_timestamp`, and updates appear as `update_preimage` and `update_postimage`.
+**نمونه‌ها** (pp. 18–20): ابزار **Debezium**، که به شکل Embedded Engine و Debezium Server هم هست، روی Kafka Connect؛ یک config JSON با تنظیم‌های اتصال و `schema.include.list` و `topic.prefix` تغییرهای `dedp_schema.events` را به `dedp.dedp_schema.events` می‌نویسد؛ و PostgreSQL به replication منطقی با افزونه‌ی `pgoutput` و کاربری با دسترسی بالا نیاز دارد. قابلیت **change data feed** در Delta Lake ساده‌تر است: `enableChangeDataFeed` را به‌عنوان ویژگی session یا جدول فعال کنید، با `maxFilesPerTrigger` یا `maxBytesPerTrigger` گلویش را تنگ کنید، و از یک `startingVersion` شروع کنید؛ ردیف‌ها `_change_type` و `_commit_version` و `_commit_timestamp` دارند و به‌روزرسانی‌ها به شکل `update_preimage` و `update_postimage` می‌آیند.
 
-### Replication
+> **In practice:** loader ما با dlt همان Incremental Loader کتاب است، با cursor روی `update_date`؛ ردیفی که در منبع hard delete شود هیچ‌وقت cursor را جلو نمی‌برد و Bronze از حذفش خبردار نمی‌شود.
+>
+> **Your turn:** تیم منبع A می‌خواهد حذف‌ها هم به Bronze برسند. soft delete در منبع را پیشنهاد می‌کنید یا Change Data Capture را؟
+>
+> *Answer:* اگر صاحب منبع می‌تواند ستون `deleted_at` بیفزاید، همان cursor فعلی کافی است و ارزان‌تر است. وگرنه CDC، که commit log دیتابیس را می‌خواند، حذف‌ها را هم می‌بیند ولی به دسترسی به log و یک ابزار CDC نیاز دارد (pp. 12–20).
 
-Copy data as is from one place to another — in an ideal world; in reality you often have to alter it, e.g. for regulatory compliance (p. 20). **Replication vs loading:** replication moves data between the *same type* of storage and ideally preserves metadata (primary keys, event positions); loading has no such homogeneity constraint (p. 20).
+### replication
 
-#### Pattern: Passthrough Replicator (pp. 20–23)
+داده را همان‌طور که هست از جایی به جایی کپی کنید، البته در دنیای ایده‌آل؛ در واقعیت اغلب باید عوضش کنید، مثلاً برای انطباق با مقررات (p. 20). **replication در برابر بارگذاری:** replication داده را بین ذخیره‌سازی‌های *هم‌نوع* جابه‌جا می‌کند و در حالت ایده‌آل metadata مثل کلید اصلی و موقعیت رویداد را نگه می‌دارد؛ بارگذاری چنین قید هم‌جنسی ندارد (p. 20).
 
-**Problem.** A device reference dataset is loaded daily in production from a third-party API that is **not idempotent** (the same call returns different results through the day). Development and staging need *the same data* as production, so replaying the pipeline won't do (pp. 20–21).
+#### الگو: Passthrough Replicator (pp. 20–23)
 
-**Solution.** At the **compute level**, an EL job copying files or rows as is — any transformation risks quality issues such as string-to-date conversion or rounding. At the **infrastructure level**, a replication policy where the storage provider copies records for you (p. 21).
+**مسئله.** یک مجموعه‌داده‌ی مرجع دستگاه‌ها هر روز در production از یک API طرف سوم بارگذاری می‌شود که **idempotent نیست**، یعنی همان فراخوانی در طول روز نتیجه‌های متفاوتی می‌دهد. محیط توسعه و staging به *همان داده‌ی* production نیاز دارند، پس اجرای دوباره‌ی pipeline جواب نمی‌دهد (pp. 20–21).
 
-**Consequences** (pp. 21–22):
+**راه‌حل.** در **سطح محاسبات**، یک job نوع EL که فایل‌ها یا ردیف‌ها را همان‌طور که هستند کپی می‌کند؛ هر تبدیلی ریسک مسئله‌ی کیفیت دارد، مثل تبدیل رشته به تاریخ یا گرد کردن. در **سطح زیرساخت**، یک سیاست replication که در آن تأمین‌کننده‌ی ذخیره‌سازی رکوردها را برایتان کپی می‌کند (p. 21).
 
-- **Keep it simple**: prefer the database's copy command; for JSON use the raw text API rather than the JSON API; avoid distributed frameworks if file count or names must be preserved.
-- **Security and isolation**: use **push**, not pull — the environment owning the data copies it, controlling frequency and throughput. Even then a replicator can, say, take the subnet's last IP address and block other jobs.
-- **PII**: use the Transformation Replicator instead.
-- **Latency**: infrastructure replication adds latency — check the cloud provider's SLA.
-- **Metadata**: copying only the Parquet files of a Delta table isn't enough; for Kafka, keep headers and per-partition order.
+**پیامدها** (pp. 21–22):
 
-**Examples** (pp. 22–23): Spark `read.text` → `write.text` for JSON lines (doesn't preserve file count); a Kafka-to-Kafka stream that selects `key, value, partition, headers, offset`, then `sortWithinPartitions('offset')` and writes with `includeHeaders` inside `foreachBatch`; infrastructure options — **MirrorMaker** for Kafka, and an `aws_s3_bucket_replication_configuration` Terraform resource from a production to a staging bucket.
+- **ساده نگهش دارید**: دستور کپی خود دیتابیس را ترجیح بدهید؛ برای JSON به‌جای API مخصوص JSON از API متن خام استفاده کنید؛ و اگر تعداد یا نام فایل‌ها باید حفظ شود از frameworkهای توزیع‌شده پرهیز کنید.
+- **امنیت و جداسازی**: از **push** استفاده کنید نه pull؛ یعنی محیطی که صاحب داده است کپی را انجام بدهد و تکرار و توان عبور را کنترل کند. حتی آن‌وقت هم یک replicator می‌تواند مثلاً آخرین نشانی IP زیرشبکه را بگیرد و جلوی jobهای دیگر را بگیرد.
+- **مفهوم PII**: به‌جایش از Transformation Replicator استفاده کنید.
+- **تأخیر**: replication در سطح زیرساخت تأخیر اضافه می‌کند؛ تعهد خدمت تأمین‌کننده‌ی cloud را وارسی کنید.
+- **مفهوم metadata**: کپی کردن فقط فایل‌های Parquet یک جدول Delta کافی نیست؛ برای Kafka هم headerها و ترتیب هر پارتیشن را نگه دارید.
 
-#### Pattern: Transformation Replicator (pp. 24–26)
+**نمونه‌ها** (pp. 22–23): در Spark از `read.text` به `write.text` برای خط‌های JSON، که تعداد فایل‌ها را حفظ نمی‌کند؛ یک stream از Kafka به Kafka که `key, value, partition, headers, offset` را انتخاب می‌کند و بعد `sortWithinPartitions('offset')` می‌زند و داخل `foreachBatch` با `includeHeaders` می‌نویسد؛ و گزینه‌های زیرساختی مثل **MirrorMaker** برای Kafka و یک منبع Terraform از نوع `aws_s3_bucket_replication_configuration` از یک bucket در production به یکی در staging.
 
-**Problem.** Test a new job version against real production data (the provider's quality issues can't be simulated), but the dataset contains PII not allowed outside production (p. 24).
+#### الگو: Transformation Replicator (pp. 24–26)
 
-**Solution.** Read → **transform** → write, where the transformation is a custom mapping function (Spark, Flink) or a SQL `SELECT`, replacing sensitive attributes (e.g. with the **Anonymizer** pattern, Ch. 7) or removing them (p. 24).
+**مسئله.** نسخه‌ی تازه‌ی یک job را با داده‌ی واقعی production بسنجید، چون مسئله‌های کیفیت تأمین‌کننده را نمی‌شود شبیه‌سازی کرد، ولی مجموعه‌داده PII دارد که اجازه ندارد از production بیرون برود (p. 24).
 
-**Consequences** (p. 25): custom logic raises the risk of breaking the data — e.g. a datetime format the framework doesn't parse silently drops timestamp columns; keep it simple by reading such columns as strings. **Desynchronization**: new PII fields can appear or be reclassified; tag sensitive fields in a **data catalog** or **data contract** and drive the transformation from them.
+**راه‌حل.** خواندن، بعد **تبدیل**، بعد نوشتن، که تبدیل یک تابع mapping سفارشی در Spark یا Flink است یا یک `SELECT` در SQL، و ویژگی‌های حساس را جایگزین می‌کند، مثلاً با الگوی **Anonymizer** در فصل ۷، یا برشان می‌دارد (p. 24).
 
-**Examples** (pp. 25–26):
+**پیامدها** (p. 25): منطق سفارشی خطر خراب کردن داده را بالا می‌برد؛ مثلاً قالبی از datetime که framework نمی‌تواند تجزیه‌اش کند بی‌صدا ستون‌های زمان را می‌اندازد؛ ساده نگهش دارید و چنین ستون‌هایی را به شکل رشته بخوانید. **asynchronousی**: فیلدهای PII تازه می‌توانند ظاهر شوند یا دوباره دسته‌بندی شوند؛ فیلدهای حساس را در یک **کاتالوگ داده** یا **قرارداد داده** برچسب بزنید و تبدیل را از روی همان‌ها بسازید.
 
-| Technique | Example |
+**نمونه‌ها** (pp. 25–26):
+
+| تکنیک | نمونه |
 |---|---|
-| Drop columns in SQL | `SELECT * EXCEPT (ip, latitude, longitude)` (Databricks, BigQuery) |
-| Drop columns in code | PySpark `.drop('ip', 'latitude', 'longitude')` |
-| Column-level access | `GRANT SELECT (visit_id, event_time, user_id) ON TABLE visits TO user_a` (Redshift) — see Fine-Grained Accessor |
-| Column transformation | `SUBSTRING(full_name, 2, LENGTH(full_name))` |
-| Row-level mapping | Scala `Dataset.as[Device].map(...)` rewriting `full_name` and `version` for versions starting with `1.` |
+| حذف ستون در SQL | `SELECT * EXCEPT (ip, latitude, longitude)` در Databricks و BigQuery |
+| حذف ستون در کد | در PySpark با `.drop('ip', 'latitude', 'longitude')` |
+| دسترسی در سطح ستون | `GRANT SELECT (visit_id, event_time, user_id) ON TABLE visits TO user_a` در Redshift؛ الگوی Fine-Grained Accessor را ببینید |
+| تبدیل ستون | `SUBSTRING(full_name, 2, LENGTH(full_name))` |
+| mapping در سطح ردیف | در Scala با `Dataset.as[Device].map(...)` که `full_name` و `version` را برای نسخه‌هایی که با `1.` شروع می‌شوند بازنویسی می‌کند |
 
-### Data compaction
+### فشرده‌سازی داده
 
-As a dataset grows, metadata operations like listing files can take longer than the transformations themselves (p. 27).
+همراه با بزرگ شدن مجموعه‌داده، عملیات metadata مثل فهرست کردن فایل‌ها می‌تواند بیشتر از خود تبدیل‌ها طول بکشد (p. 27).
 
-#### Pattern: Compactor (pp. 27–30)
+#### الگو: Compactor (pp. 27–30)
 
-**Problem.** A real-time passthrough job syncs broker events to an object store, making data available to batch jobs within 10 minutes. After three months, batch jobs spend **70%** of their time listing files and only **30%** processing — costly on pay-as-you-go services (p. 27).
+**مسئله.** یک job بلادرنگِ passthrough رویدادهای broker را با ذخیره‌سازی object synchronous می‌کند تا داده ظرف ۱۰ دقیقه برای jobهای batch در دسترس باشد. بعد از سه ماه، jobهای batch **۷۰٪** وقتشان را صرف فهرست کردن فایل‌ها می‌کنند و فقط **۳۰٪** را صرف پردازش، که روی سرویس‌های پرداخت‌به‌اندازه‌ی‌مصرف گران تمام می‌شود (p. 27).
 
-**Solution.** Combine many small files into fewer bigger ones (p. 27):
+**راه‌حل.** فایل‌های کوچک زیاد را در فایل‌های بزرگ‌تر و کمتر ترکیب کنید (p. 27):
 
-| Store | Compaction |
+| انبار | فشرده‌سازی |
 |---|---|
-| Delta Lake | `OPTIMIZE` — a transactional job writing merged files as a new commit |
-| Apache Iceberg | Rewrite data files action |
-| Apache Hudi (merge-on-read) | Merges row-format change files into the columnar base files (pp. 27–28) |
-| Apache Kafka | Log compaction keeps only the latest record per key — it *overwrites* data (p. 28) |
-| PostgreSQL | `VACUUM` reclaims space from dead tuples (p. 29) |
+| Delta Lake | دستور `OPTIMIZE`، یعنی یک job تراکنشی که فایل‌های merge‌شده را به‌عنوان یک commit تازه می‌نویسد |
+| Apache Iceberg | اقدام بازنویسی فایل‌های داده |
+| Apache Hudi در حالت merge-on-read | فایل‌های تغییرِ ردیفی را در فایل‌های پایه‌ی ستونی merge می‌کند (pp. 27–28) |
+| Apache Kafka | فشرده‌سازی log فقط آخرین رکورد هر کلید را نگه می‌دارد و داده را *بازنویسی* می‌کند (p. 28) |
+| PostgreSQL | دستور `VACUUM` فضای tupleهای مرده را پس می‌گیرد (p. 29) |
 
-**Consequences** (pp. 28–29):
+**پیامدها** (pp. 28–29):
 
-- **Cost vs performance**: compaction is a compute-heavy job — rare runs (daily, off-hours, outside the ingestion pipeline) are cheaper but leave consumers reading uncompacted data; sometimes compacting inside ingestion is worth slower ingestion.
-- **Consistency**: rewriting data in place is safe with ACID table formats (Delta Lake, Iceberg), hard with raw JSON/CSV.
-- **Cleaning**: source files may remain; `VACUUM` reclaims them, but you can no longer restore versions built on deleted files.
+- **هزینه در برابر performance**: فشرده‌سازی jobی سنگین از نظر محاسباتی است؛ اجرای کم‌تکرار، مثلاً روزانه در ساعت‌های خلوت و بیرون از pipeline ورود داده، ارزان‌تر است ولی consumerها داده‌ی فشرده‌نشده می‌خوانند؛ گاهی فشرده‌سازی داخل خود ورود داده به قیمت کندتر شدنش می‌ارزد.
+- **سازگاری**: بازنویسی داده در جای خودش با قالب‌های جدولی ACID مثل Delta Lake و Iceberg امن است و با JSON یا CSV خام سخت.
+- **پاک‌سازی**: فایل‌های مبدأ ممکن است بمانند؛ `VACUUM` پسشان می‌گیرد، ولی بعدش دیگر نمی‌توانید نسخه‌هایی را که روی فایل‌های حذف‌شده ساخته شده‌اند بازیابی کنید.
 
-**Examples** (pp. 29–30): `DeltaTable.forPath(...).optimize().executeCompaction()` reorganizes only the files present when it starts, so it doesn't conflict with readers or writers; `vacuum()` only removes files older than the retention threshold, so it never deletes uncommitted files being written. Kafka compaction is configured with `log.cleanup.policy` and the min/max compaction lag, and is **nondeterministic** — you can't count on seeing one record per key.
+**نمونه‌ها** (pp. 29–30): دستور `DeltaTable.forPath(...).optimize().executeCompaction()` فقط فایل‌هایی را که هنگام شروعش بوده‌اند سازمان می‌دهد، پس با خواننده‌ها و نویسنده‌ها تداخل نمی‌کند؛ و `vacuum()` فقط فایل‌های قدیمی‌تر از آستانه‌ی نگه‌داری را برمی‌دارد، پس هیچ‌وقت فایل‌های commit‌نشده‌ی در حال نوشته شدن را حذف نمی‌کند. فشرده‌سازی Kafka با `log.cleanup.policy` و کمینه و بیشینه‌ی تأخیر فشرده‌سازی تنظیم می‌شود و **قطعی نیست**؛ نمی‌توانید روی دیدن یک رکورد به ازای هر کلید حساب کنید.
 
-> **Try it:** [Small files and compaction](../widgets/02-compactor.html) — stream micro-batches into a table, watch listing overhead grow, and compare compaction schedules and vacuum.
+> **Try it:** [فایل‌های کوچک و فشرده‌سازی](../widgets/02-compactor.html)؛ دسته‌های کوچک را در یک جدول استریم کنید، رشد سربار فهرست کردن را ببینید و زمان‌بندی‌های فشرده‌سازی و vacuum را مقایسه کنید.
 
-### Data readiness
+> **In practice:** در ClickHouse کار Compactor را merge پس‌زمینه‌ی MergeTree انجام می‌دهد: هر insert یک part تازه می‌سازد و موتور partهای کوچک را به هم merge می‌کند.
+>
+> **Your turn:** loader برای هر جدول insertهای تک‌ردیفی زیادی می‌فرستد و Grafana هشدار «too many parts» می‌دهد. چه می‌کنید؟
+>
+> *Answer:* insertها را درشت‌تر کنید: هر بار یک batch کامل از فایل Parquet staging، یا async insert در ClickHouse. استدلال کتاب همین است: فایل‌های کوچک زیاد هزینه‌ی metadata و خواندن را بالا می‌برند و باید compact شوند (pp. 27–30).
 
-“When should I start the ingestion process?” (p. 30).
+### آمادگی داده
 
-#### Pattern: Readiness Marker (pp. 30–33)
+«کِی باید process ورود داده را شروع کنم؟» (p. 30).
 
-**Problem.** An hourly batch job prepares an enriched Silver dataset used by other teams for ML models and BI dashboards; they complain about incomplete data and want a signal (p. 30).
+#### الگو: Readiness Marker (pp. 30–33)
 
-**Solution.** Pipelines owned by different teams can't trigger each other, so the producer marks the dataset ready (pp. 30–31):
+**مسئله.** یک job batch ساعتی یک مجموعه‌داده‌ی غنی‌شده‌ی Silver آماده می‌کند که تیم‌های دیگر برای مدل‌های ML و داشبوردهای BI به کارش می‌برند؛ آن‌ها از داده‌ی ناقص شکایت دارند و یک سیگنال می‌خواهند (p. 30).
 
-- **Flag file** written after successful generation — natively Spark's `_SUCCESS` for raw formats, or a new Delta Lake commit; otherwise a final orchestration task.
-- **Convention for partitions**: with hourly partitions, partition 10 is complete when the job starts writing partition 11.
+**راه‌حل.** pipelineهایی که صاحب‌های متفاوتی دارند نمی‌توانند هم را trigger کنند، پس producer آماده بودن مجموعه‌داده را علامت می‌زند (pp. 30–31):
 
-**Consequences** (p. 31): it's **pull**-based and implicit, so there's **no enforcement** — agree the conventions with consumers and explain the risks. **Late data** breaks the partition convention: late events for 9:00 added to an already-closed partition won't be seen by consumers who processed it; treat closed partitions as immutable or share mutability rules (see Late Data, Ch. 3).
+- **فایل پرچم** که بعد از تولید موفق نوشته می‌شود، به‌طور بومی همان `_SUCCESS` در Spark برای قالب‌های خام، یا یک commit تازه در Delta Lake؛ وگرنه یک task پایانی در هماهنگ‌سازی.
+- **قرارداد برای پارتیشن‌ها**: با پارتیشن‌های ساعتی، پارتیشن ۱۰ وقتی کامل است که job شروع کند به نوشتن در پارتیشن ۱۱.
 
-**Examples** (pp. 31–33): Spark writes data first and `_SUCCESS` last; an Airflow `FileSensor` on `…/_SUCCESS` with `mode='reschedule'` frees the worker slot between checks; an Airflow pipeline `delete_dataset() >> generate_dataset() >> create_readiness_file()` writes a `COMPLETED` marker — **always the last step**.
+**پیامدها** (p. 31): مبتنی بر **pull** و ضمنی است، پس **ضمانت اجرا ندارد**؛ قراردادها را با consumerها توافق کنید و ریسک‌ها را توضیح بدهید. **late data** قرارداد پارتیشن را می‌شکند: late eventها برای ساعت ۹:۰۰ که به پارتیشن بسته‌شده اضافه می‌شوند، به چشم consumerهایی که پردازشش کرده‌اند نمی‌آیند؛ پارتیشن‌های بسته را immutable بدانید یا قاعده‌های mutability را اعلام کنید؛ بخش late data در فصل ۳ را ببینید.
 
-### Event driven
+**نمونه‌ها** (pp. 31–33): Spark اول داده را می‌نویسد و `_SUCCESS` را آخر از همه؛ یک `FileSensor` در Airflow روی `…/_SUCCESS` با `mode='reschedule'` بین وارسی‌ها جایگاه worker را آزاد می‌کند؛ و یک pipeline در Airflow به شکل `delete_dataset() >> generate_dataset() >> create_readiness_file()` یک نشانگر `COMPLETED` می‌نویسد، که **همیشه آخرین مرحله است**.
 
-When arrival frequency is unpredictable, shift from static to event-driven ingestion (p. 33).
+> **In practice:** منبع B را partner یک بار در شب پر می‌کند؛ DAGی که ساعت ثابتی اجرا شود ممکن است batch نیمه‌کاره را بخواند.
+>
+> **Your turn:** چه چیزی می‌گذارید تا DAG آن جدول فقط بعد از کامل شدن batch partner اجرا شود؟
+>
+> *Answer:* یک readiness marker، مثلاً جدولی کوچک که partner آخرین batch کامل را در آن ثبت می‌کند، و یک sensor در Airflow که منتظرش می‌ماند. consumer به‌جای ساعت به نشانه‌ی کامل بودن تکیه می‌کند (pp. 30–33).
 
-#### Pattern: External Trigger (pp. 33–36)
+### رویدادمحور
 
-**Problem.** The backend team releases features at most once a week (Monday–Thursday); a daily refresh of the features reference dataset mostly reloads unchanged data. The team publishes a notification to a central message bus on every release (p. 33).
+وقتی تکرار رسیدن داده پیش‌بینی‌پذیر نیست، از ورود داده‌ی ایستا به رویدادمحور بروید (p. 33).
 
-**Solution.** Instead of polling schedules, three actions (Figure 2-4) (p. 34):
+#### الگو: External Trigger (pp. 33–36)
 
-![A notification handler reads events from a message queue and triggers either an event-driven job in the data orchestration layer or a job in the data processing layer](../figures/02-04.png)
+**مسئله.** تیم backend حداکثر هفته‌ای یک‌بار و بین دوشنبه تا پنجشنبه feature منتشر می‌کند؛ تازه‌سازی روزانه‌ی مجموعه‌داده‌ی مرجع featureها بیشتر وقت‌ها همان داده‌ی دست‌نخورده را دوباره بار می‌کند. آن تیم سر هر انتشار یک اعلان روی یک message bus مرکزی منتشر می‌کند (p. 33).
 
-*Figure 2-4 (p. 34): the handler maps each event to the job it should start, instead of jobs polling on a schedule.*
+**راه‌حل.** به‌جای زمان‌بندی‌های polling، سه اقدام (شکل ۲-۴) (p. 34):
+
+![یک handler اعلان، رویدادها را از یک صف پیام می‌خواند و یا یک job رویدادمحور را در لایه‌ی هماهنگ‌سازی داده trigger می‌کند یا یک job را در لایه‌ی پردازش داده](../figures/02-04.png)
+
+*Figure 2-4 (p. 34): این handler هر رویداد را به jobی map می‌کند که باید شروع شود، به‌جای این‌که jobها روی زمان‌بندی polling کنند.*
 
 ```mermaid
 sequenceDiagram
@@ -246,80 +272,80 @@ sequenceDiagram
     O-->>H: 200 OK (else raise → failed-event destination)
 ```
 
-*The vault's sequence for Figure 2-4 and Examples 2-27/2-28 (pp. 34–36).*
+*دنباله‌ی vault برای شکل ۲-۴ و نمونه‌های ۲-۲۷ و ۲-۲۸ (pp. 34–36).*
 
-Without a job to trigger, the handler can ingest directly — event-driven ingestion (p. 33).
+اگر jobی برای trigger کردن نباشد، خود handler می‌تواند مستقیم داده را وارد کند، یعنی ورود داده‌ی رویدادمحور (p. 33).
 
-**Consequences** (pp. 34–35):
+**پیامدها** (pp. 34–35):
 
-- **Push vs pull**: a pull-based trigger is a long-running job mostly pulling zero messages; prefer push, where each notification starts a short-lived consumer.
-- **Execution context**: don't just “ping” the orchestrator; pass the trigger version, notification envelope, processing and event time for troubleshooting.
-- **Error management**: never lose events — design the trigger for failure (e.g. Dead-Letter, Ch. 3).
+- **الگوی push در برابر pull**: triggerی مبتنی بر pull یک job طولانی‌عمر است که بیشتر وقت‌ها صفر پیام می‌گیرد؛ push را ترجیح بدهید، که در آن هر اعلان یک consumer کوتاه‌عمر را شروع می‌کند.
+- **زمینه‌ی اجرا**: فقط coordinator را «تلنگر» نزنید؛ نسخه‌ی trigger و پاکت اعلان و زمان پردازش و زمان رویداد را برای عیب‌یابی بفرستید.
+- **مدیریت خطا**: هیچ رویدادی را از دست ندهید؛ trigger را برای شکست طراحی کنید، مثلاً با Dead-Letter در فصل ۳.
 
-**Examples** (pp. 35–36): an Airflow DAG with `schedule_interval=None` (only explicit triggers) and `max_active_runs=5`; an AWS Lambda handler posting to `/api/v1/dags/devices-loader/dagRuns` with the event, trigger metadata, file to load and `dag_run_id`, raising on non-200. Lambda's **failed-event destinations** provide resiliency. The hardcoded credentials are for readability only — see Chapter 7's patterns.
+**نمونه‌ها** (pp. 35–36): یک DAG در Airflow با `schedule_interval=None`، یعنی فقط trigger صریح، و `max_active_runs=5`؛ و یک handler در AWS Lambda که به `/api/v1/dags/devices-loader/dagRuns` درخواست می‌فرستد، با رویداد و metadata مربوط به trigger و فایلی که باید بار شود و `dag_run_id`، و اگر پاسخ ۲۰۰ نبود خطا می‌دهد. قابلیت **failed-event destination** در Lambda تاب‌آوری می‌دهد. اطلاعات اتصال سفت‌شده در کد فقط برای خوانایی‌اند؛ الگوهای فصل ۷ را ببینید.
 
-### Summary
+### خلاصه
 
-Even moving data from A to B has pitfalls: without a Readiness Marker you ingest incomplete data; without a Compactor a lakehouse slows to a crawl on API calls. These patterns also serve the extract step of business ETL/ELT jobs (p. 37).
+حتی جابه‌جا کردن داده از A به B هم دام دارد: بدون Readiness Marker داده‌ی ناقص وارد می‌کنید و بدون Compactor یک lakehouse روی فراخوانی‌های API به خزیدن می‌افتد. این الگوها به مرحله‌ی extract در jobهای ETL و ELT کسب‌وکاری هم می‌آیند (p. 37).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
 | | Full Loader | Incremental Loader | Change Data Capture |
 |---|---|---|---|
-| Data moved per run | Everything | New rows/partitions | Every change, continuously |
-| Latency | Schedule | Schedule (+ query overhead) | Seconds |
-| Hard deletes | Handled (full overwrite) | Missed (delta column) | Captured |
-| Who can set it up | A data engineer | A data engineer | Often needs ops (commit log) |
-| Main risk | Consistency during overwrite, volume growth | Backfill volume, late data | Complexity, streaming semantics |
+| داده‌ی جابه‌جاشده در هر اجرا | همه چیز | ردیف‌ها یا پارتیشن‌های تازه | هر تغییری، پیوسته |
+| تأخیر | زمان‌بندی | زمان‌بندی، به‌علاوه‌ی سربار کوئری | چند ثانیه |
+| حذف فیزیکی | پوشش داده می‌شود، چون بازنویسی کامل است | با ستون delta از دست می‌رود | گرفته می‌شود |
+| چه کسی می‌تواند راهش بیندازد | یک مهندس داده | یک مهندس داده | اغلب به عملیات نیاز دارد، برای log مربوط به commit |
+| ریسک اصلی | سازگاری هنگام بازنویسی، رشد حجم | حجم backfill، late data | پیچیدگی، معنای streaming |
 
 | | Readiness Marker | External Trigger |
 |---|---|---|
-| Semantics | Pull: consumer checks | Push: producer notifies |
-| Best for | Regular schedules | Unpredictable arrivals |
-| Risk | Not enforceable; late data | Lost events; missing context |
+| معنا | pull: consumer وارسی می‌کند | push: producer خبر می‌دهد |
+| بهترین کاربرد | زمان‌بندی‌های منظم | رسیدن‌های پیش‌بینی‌ناپذیر |
+| ریسک | ضمانت اجرا ندارد؛ late data | از دست رفتن رویداد؛ نبود زمینه |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Kafka's log compaction keeps the latest value per key, which is what makes a compacted topic usable as a changelog for a table — the same idea DDIA calls the stream-table duality.
-- The vault's [incremental-window experiment](../lab/02-incremental-window/README.md) measures how much a backfill reads with and without the bounded window from p. 14.
+- فشرده‌سازی log در Kafka آخرین مقدار هر کلید را نگه می‌دارد، و همین باعث می‌شود یک topic فشرده‌شده به‌عنوان changelog یک جدول قابل‌استفاده باشد؛ همان ایده‌ای که DDIA دوگانگی stream و جدول می‌نامدش.
+- [آزمایش پنجره‌ی افزایشی](../lab/02-incremental-window/README.md) در vault اندازه می‌گیرد یک backfill با و بدون پنجره‌ی bounded ص. ۱۴ چقدر می‌خواند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Bounded vs unbounded incremental backfills](../lab/02-incremental-window/README.md) — rows read per run when replaying past executions.
-- **Related chapters:** [3. Error Management](03-error-management-design-patterns.md) (late data, dead-lettering failed triggers), [4. Idempotency](04-idempotency-design-patterns.md) (Proxy pattern behind the view switch), [7. Data Security](07-data-security-design-patterns.md) (Anonymizer, Fine-Grained Accessor, secrets), [8. Data Storage](08-data-storage-design-patterns.md) (partitioning).
+- **Run it:** [backfill افزایشی با کران و بدون کران](../lab/02-incremental-window/README.md)؛ تعداد ردیف‌های خوانده‌شده در هر اجرا هنگام اجرای دوباره‌ی اجراهای گذشته.
+- **فصل‌های مرتبط:** [فصل ۳: مدیریت خطا](03-error-management-design-patterns.md) که late data و dead-letter کردن triggerهای شکست‌خورده را می‌گوید، [فصل ۴: ویژگی idempotency](04-idempotency-design-patterns.md) که الگوی Proxy پشت جابه‌جایی view را دارد، [فصل ۷: امنیت داده](07-data-security-design-patterns.md) که Anonymizer و Fine-Grained Accessor و راز‌ها را می‌گوید، و [فصل ۸: ذخیره‌سازی داده](08-data-storage-design-patterns.md) که پارتیشن‌بندی را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why is a drop-and-insert full load dangerous for consumers, and what are the two mitigations?**
+1. **چرا بارگذاری کامل به شیوه‌ی حذف‌و‌درج برای consumerها خطرناک است و دو راه کاهشش چیست؟**
 
-   *Answer:* While it runs, readers can see partial or no data. Use transactions, or a single data exposition abstraction — a view switched atomically to a fully loaded versioned table, which also preserves the previous version (pp. 9–11).
+   *Answer:* تا وقتی اجرا می‌شود، خواننده‌ها می‌توانند داده‌ی ناقص یا هیچ داده‌ای نبینند. از تراکنش استفاده کنید، یا از یک انتزاع واحد نمایش داده، یعنی viewی که اتمی به یک جدول نسخه‌دارِ کاملاً بارگذاری‌شده سوییچ می‌کند و نسخه‌ی قبلی را هم نگه می‌دارد (pp. 9–11).
 
-2. **A delta-column incremental loader is asked to backfill two months. What happens without a bounded window?**
-   - [ ] It ingests nothing, because the delta column was already processed
-   - [x] It effectively becomes a full load and needs far more resources
-   - [ ] It ingests only the latest hour
-   - [ ] It fails because delta columns can't be replayed
+2. **از یک loader افزایشی با ستون delta خواسته می‌شود دو ماه را backfill کند. بدون پنجره‌ی bounded چه می‌شود؟**
+   - [ ] هیچ چیز وارد نمی‌کند، چون ستون delta قبلاً پردازش شده
+   - [x] عملاً به بارگذاری کامل تبدیل می‌شود و به منابع خیلی بیشتری نیاز دارد
+   - [ ] فقط آخرین ساعت را وارد می‌کند
+   - [ ] شکست می‌خورد، چون ستون delta قابل‌اجرای دوباره نیست
 
-   *Answer:* Without an upper bound, each rerun reads everything after its start time. Limiting each run to `[t, t + 1 hour]` keeps volume predictable and allows concurrent backfills (p. 14).
+   *Answer:* بدون کران بالا، هر اجرای دوباره همه چیز بعد از زمان شروعش را می‌خواند. محدود کردن هر اجرا به بازه‌ی یک‌ساعته حجم را قابل‌پیش‌بینی می‌کند و اجازه‌ی backfill هم‌زمان می‌دهد (p. 14).
 
-3. **Which pattern captures hard deletes without asking producers to change anything?**
-   - [ ] Incremental Loader with a delta column
+3. **کدام الگو حذف‌های فیزیکی را می‌گیرد بی‌آن‌که از producerها چیزی بخواهد؟**
+   - [ ] سیستم Incremental Loader با ستون delta
    - [x] Change Data Capture
    - [ ] Readiness Marker
    - [ ] Passthrough Replicator
 
-   *Answer:* CDC reads the commit log, which records deletes too; a delta column can't see a row that no longer exists (pp. 13, 17).
+   *Answer:* روش CDC همان log مربوط به commit را می‌خواند که حذف‌ها را هم ثبت می‌کند؛ ستون delta نمی‌تواند ردیفی را ببیند که دیگر وجود ندارد (pp. 13, 17).
 
-4. **Why should a Passthrough Replicator use push rather than pull?**
+4. **چرا Passthrough Replicator باید به‌جای pull از push استفاده کند؟**
 
-   *Answer:* So the environment owning the dataset (production) controls the replication's frequency and throughput, reducing the risk that a buggy job destabilizes production (pp. 21–22).
+   *Answer:* تا محیطی که صاحب مجموعه‌داده است، یعنی production، تکرار و توان عبور replication را کنترل کند و ریسک بی‌ثبات شدن production با یک job باگ‌دار کم شود (pp. 21–22).
 
-5. **Compaction ran, but listing is still slow. What is missing, and what does it cost?**
+5. **فشرده‌سازی اجرا شد ولی فهرست کردن هنوز کند است. چه چیزی کم است و هزینه‌اش چیست؟**
 
-   *Answer:* A cleaning step (e.g. `VACUUM`) to remove the already-compacted small files; once removed, you can't restore table versions built on them (pp. 28–29).
+   *Answer:* یک مرحله‌ی پاک‌سازی، مثل `VACUUM`، برای برداشتن فایل‌های کوچکِ از‌قبل‌فشرده‌شده؛ و بعد از برداشتنشان دیگر نمی‌توانید نسخه‌های جدولی را که رویشان ساخته شده‌اند بازیابی کنید (pp. 28–29).
 
-6. **Why can't a consumer rely on the “next partition exists” convention if partitions are by event time?**
+6. **چرا consumer نمی‌تواند به قرارداد «پارتیشن بعدی وجود دارد» تکیه کند وقتی پارتیشن‌ها بر پایه‌ی زمان رویدادند؟**
 
-   *Answer:* Late events may be added to a partition after consumers treated it as closed; partitions should be immutable once closed, or the mutability rules must be shared (p. 31).
+   *Answer:* late eventها می‌توانند بعد از این‌که consumerها پارتیشنی را بسته فرض کرده‌اند به آن اضافه شوند؛ پارتیشن‌ها باید بعد از بسته شدن immutable باشند، یا قاعده‌های mutability باید اعلام شوند (p. 31).

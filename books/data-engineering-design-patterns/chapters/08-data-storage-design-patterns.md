@@ -3,48 +3,50 @@ book: data-engineering-design-patterns
 chapter: 8
 title: "Data Storage Design Patterns"
 pages: "233–271"
+translated_title: "الگوهای طراحی ذخیره‌سازی داده"
+lang: fa
 ---
 
-# 8. Data Storage Design Patterns
+# فصل ۸: الگوهای طراحی ذخیره‌سازی داده
 
-[← 7. Data Security Design Patterns](07-data-security-design-patterns.md) · [Book](../README.md) · [9. Data Quality Design Patterns →](09-data-quality-design-patterns.md)
+[فصل ۷: الگوهای طراحی امنیت داده →](07-data-security-design-patterns.md) · [کتاب](../README.md) · [فصل ۹: الگوهای طراحی کیفیت داده ←](09-data-quality-design-patterns.md)
 
-## Summary
+## خلاصه
 
-There are two ways to make queries and jobs faster: add compute (quick, but reactive and costly), or organize data wisely in advance — the subject of this chapter's nine patterns (pp. 233–234). **Partitioning**: the **Horizontal Partitioner** puts whole rows into physically isolated locations by a low-cardinality key such as event time; the **Vertical Partitioner** splits each row's attributes into separate places. **Records organization** handles high-cardinality columns: the **Bucket** pattern colocates groups of keys by `hash(key) % buckets` (enabling bucket pruning and shuffle-free joins), and the **Sorter** orders data — lexicographically or along a Z-order curve — so readers can skip blocks. **Read performance**: the **Metadata Enhancer** keeps statistics (Parquet footers, commit logs, table stats) to filter before reading; the **Dataset Materializer** precomputes costly queries as materialized views or tables; the **Manifest** records file lists so readers don't have to list object stores. **Data representation**: the **Normalizer** (normal forms, snowflake schema) favours consistency at the price of joins; the **Denormalizer** (One Big Table, star schema) removes joins but duplicates data.
+دو راه برای تندتر کردن کوئری‌ها و jobها هست: محاسبه اضافه کنید، که سریع است ولی واکنشی و پرهزینه، یا داده را از قبل عاقلانه سازمان بدهید، که موضوع نُه الگوی این فصل است (pp. 233–234). **پارتیشن‌بندی**: الگوی **Horizontal Partitioner** کل ردیف‌ها را با کلیدی کم‌کاردینالیتی مثل زمان رویداد در مکان‌های فیزیکی جدا می‌گذارد، و **Vertical Partitioner** ویژگی‌های هر ردیف را در جاهای جدا می‌شکند. **سازمان رکوردها** به ستون‌های پرکاردینالیتی می‌پردازد: الگوی **Bucket** گروه‌های کلید را با `hash(key) % buckets` هم‌مکان می‌کند، که bucket pruning و پیوند بی shuffle را ممکن می‌کند، و **Sorter** داده را مرتب می‌کند، واژه‌نامه‌ای یا روی خم Z-order، تا خواننده‌ها بتوانند از بلوک‌ها بپرند. **performance خواندن**: الگوی **Metadata Enhancer** آمار نگه می‌دارد، در footerهای Parquet و commit log و آمار جدول، تا پیش از خواندن فیلتر شود؛ **Dataset Materializer** کوئری‌های گران را از پیش به‌عنوان materialized view یا جدول حساب می‌کند؛ و **Manifest** فهرست فایل‌ها را ثبت می‌کند تا خواننده‌ها لازم نباشد ذخیره‌سازی object را فهرست کنند. **نمایش داده**: الگوی **Normalizer**، یعنی normal formها و snowflake schema، سازگاری را به قیمت پیوند ترجیح می‌دهد، و **Denormalizer**، یعنی One Big Table و star schema، پیوندها را برمی‌دارد ولی داده را تکرار می‌کند.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Partition by low-cardinality attributes**: one million users per day as partition keys means one million partitions, slow listing and small files (p. 236).
-- **Partitioning is static**: changing the key means moving all data; Iceberg's partition evolution only applies to new records (p. 237).
-- **For high cardinality, bucket instead**: `hash(key) % N` groups keys, enabling bucket pruning and joins without shuffle between identically bucketed tables (pp. 243–244).
-- **Lexicographic sort keys only help prefix queries**; Z-order curves help several columns at once — the book's figure reads 9 blocks lexicographically vs 7 with Z-order (pp. 248–250).
-- **Statistics let engines skip data before reading it**, but they cost write time and can be stale (pp. 251–253).
-- **Materialize repeated costly queries**, and refresh incrementally (Incremental Loader + Merger) where possible (pp. 254–257).
-- **Normalize for consistency, denormalize for reads** — or both: a normalized model as the private source, a denormalized table on top (pp. 260–268).
+- **با ویژگی‌های کم‌کاردینالیتی پارتیشن‌بندی کنید**: یک میلیون کاربر در روز به‌عنوان کلید پارتیشن یعنی یک میلیون پارتیشن و فهرست کردن کند و فایل‌های کوچک (p. 236).
+- **پارتیشن‌بندی ایستاست**: عوض کردن کلید یعنی جابه‌جا کردن همه‌ی داده، و partition evolution در Iceberg فقط به رکوردهای تازه می‌خورد (p. 237).
+- **برای کاردینالیتی بالا به‌جایش bucket کنید**: `hash(key) % N` کلیدها را گروه می‌کند و bucket pruning و پیوند بی shuffle بین جدول‌های هم‌bucket را ممکن می‌کند (pp. 243–244).
+- **کلید مرتب‌سازی واژه‌نامه‌ای فقط به کوئری‌های prefix کمک می‌کند**، در حالی که خم Z-order به چند ستون با هم کمک می‌کند؛ در شکل کتاب، واژه‌نامه‌ای نُه بلوک می‌خواند و Z-order هفت بلوک (pp. 248–250).
+- **آمار می‌گذارد موتورها پیش از خواندن از داده بپرند**، ولی زمان نوشتن خرج می‌کند و می‌تواند کهنه شود (pp. 251–253).
+- **کوئری‌های گرانِ تکرارشده را materialize کنید** و جایی که می‌شود افزایشی تازه‌شان کنید، یعنی Incremental Loader به‌علاوه‌ی Merger (pp. 254–257).
+- **برای سازگاری نرمال کنید و برای خواندن غیر‌نرمال**، یا هر دو: یک مدل نرمال به‌عنوان منبع خصوصی و یک جدول غیر‌نرمال رویش (pp. 260–268).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Partitioning — p. 234
-  - Pattern: Horizontal Partitioner — p. 234
-  - Pattern: Vertical Partitioner — p. 240
-- Records Organization — p. 243
-  - Pattern: Bucket — p. 243
-  - Pattern: Sorter — p. 246
-- Read Performance Optimization — p. 251
-  - Pattern: Metadata Enhancer — p. 251
-  - Pattern: Dataset Materializer — p. 254
-  - Pattern: Manifest — p. 257
-- Data Representation — p. 260
-  - Pattern: Normalizer — p. 260
-  - Pattern: Denormalizer — p. 266
-- Summary — p. 271
+- پارتیشن‌بندی — p. 234
+  - الگو: Horizontal Partitioner — p. 234
+  - الگو: Vertical Partitioner — p. 240
+- سازمان رکوردها — p. 243
+  - الگو: Bucket — p. 243
+  - الگو: Sorter — p. 246
+- بهینه‌سازی performance خواندن — p. 251
+  - الگو: Metadata Enhancer — p. 251
+  - الگو: Dataset Materializer — p. 254
+  - الگو: Manifest — p. 257
+- نمایش داده — p. 260
+  - الگو: Normalizer — p. 260
+  - الگو: Denormalizer — p. 266
+- خلاصه — p. 271
 
-## Notes
+## یادداشت‌ها
 
-Waiting more than two minutes — or ten — for a query is common in big data; the faster a job runs, the earlier and (hopefully) cheaper the answer (p. 233). Adding compute is quick but often a reaction under pressure; the alternative is preemptive data organization (p. 233).
+انتظار بیشتر از دو دقیقه، یا ده دقیقه، برای یک کوئری در big data رایج است؛ هر چه job تندتر اجرا شود، پاسخ زودتر و امیدوارانه ارزان‌تر می‌آید (p. 233). اضافه کردن محاسبه سریع است ولی اغلب واکنشی زیر فشار؛ جایگزینش سازمان دادن پیشگیرانه‌ی داده است (p. 233).
 
 ```mermaid
 flowchart LR
@@ -53,228 +55,246 @@ flowchart LR
     C --> D["Representation<br/>(normalize vs denormalize)"]
 ```
 
-### Partitioning
+### پارتیشن‌بندی
 
-The first layout question: how to divide the dataset so it's easy to access — horizontally or vertically (p. 234).
+اولین پرسش چیدمان: مجموعه‌داده را چطور تقسیم کنیم که دسترسی به آن آسان باشد، افقی یا عمودی (p. 234)؟
 
-#### Pattern: Horizontal Partitioner (pp. 234–239)
+#### الگو: Horizontal Partitioner (pp. 234–239)
 
-**Problem.** A batch job computing rolling aggregates over the past four days slows down as data grows; filtering out older records takes longer. More compute helped but raised costs (p. 234).
+**مسئله.** یک job batch که تجمیع غلتان چهار روز گذشته را حساب می‌کند با رشد داده کند می‌شود؛ فیلتر کردن رکوردهای قدیمی‌تر بیشتر طول می‌کشد. محاسبه‌ی بیشتر کمک کرد ولی هزینه را بالا برد (p. 234).
 
-**Solution** (pp. 234–236). Choose a **partitioning attribute** (a **distribution key**); each value gets a physically isolated storage space. Time is the classic choice, taken from either:
+**راه‌حل** (pp. 234–236): یک **ویژگی پارتیشن‌بندی** انتخاب کنید، که **کلید توزیع** هم نامیده می‌شود؛ هر مقدارش یک فضای ذخیره‌سازی فیزیکی جدا می‌گیرد. زمان انتخاب کلاسیک است، که از یکی از این دو می‌آید:
 
-| Source of time | Effect |
+| منبع زمان | اثر |
 |---|---|
-| **Job execution context** | Every record of a run lands in the run date's partition (e.g. 2024-12-31) |
-| **The dataset** (event time) | Because of late data, one run may write several partitions |
+| **context اجرای job** | هر رکورد یک اجرا در پارتیشن تاریخ همان اجرا می‌نشیند؛ مثلاً ۲۰۲۴-۱۲-۳۱ |
+| **خود مجموعه‌داده**، یعنی زمان رویداد | به‌خاطر داده‌ی دیررس، یک اجرا می‌تواند چند پارتیشن بنویسد |
 
-Business keys (customer, partner, region) also work, and keys can be nested — e.g. `visits/2024/05/05/france|india|poland|usa` (Example 8-1). Partitions are either **declarative** (`CREATE TABLE … PARTITIONED BY` in Databricks or BigQuery — producers needn't know) or **producer-defined** (Spark `partitionBy`, a custom Kafka partitioner) (p. 235). Some stores keep partition metadata: BigQuery `INFORMATION_SCHEMA.PARTITIONS`, Databricks `DESCRIBE TABLE EXTENDED`, Iceberg's `partitions` view (p. 236). Partitioning also underpins idempotency (Fast Metadata Cleaner, Ch. 4).
+کلیدهای کسب‌وکار هم کار می‌کنند، مثل مشتری و شریک و منطقه، و کلیدها می‌توانند تو‌در‌تو باشند، مثل `visits/2024/05/05/france|india|poland|usa` (نمونه‌ی ۸-۱). پارتیشن‌ها یا **اعلانی**اند، مثل `CREATE TABLE … PARTITIONED BY` در Databricks و BigQuery، که producer لازم نیست بداند، یا **تعریف‌شده‌ی producer**، مثل `partitionBy` در Spark و یک partitioner سفارشی در Kafka (p. 235). بعضی ذخیره‌سازی‌ها metadata پارتیشن را نگه می‌دارند: `INFORMATION_SCHEMA.PARTITIONS` در BigQuery، `DESCRIBE TABLE EXTENDED` در Databricks، و view به نام `partitions` در Iceberg (p. 236). پارتیشن‌بندی زیربنای idempotency هم هست، یعنی Fast Metadata Cleaner در فصل ۴.
 
-**Consequences** (pp. 236–237):
+**پیامدها** (pp. 236–237):
 
 | | |
 |---|---|
-| **Granularity and metadata overhead** | Partitioning a site with one million daily users by username creates one million partitions — slow listings, many small files. Use low-cardinality attributes (event time to the hour or day); for IoT device IDs use **Bucket** |
-| **Skew** | In micro-batch streaming, the biggest partition sets the batch duration; a **backpressure buffer** defers the skewed partition's extra records to the next micro-batch (Figure 8-1), raising its latency but keeping others near real time |
-| **Mutability** | Changing the key moves all data; Iceberg supports partition evolution at the metadata layer — old files stay in the old layout |
+| **granularity و سرریز metadata** | پارتیشن‌بندی سایتی با یک میلیون کاربر روزانه بر حسب نام کاربری، یک میلیون پارتیشن می‌سازد، یعنی فهرست کردن کند و فایل‌های کوچک زیاد. ویژگی‌های کم‌کاردینالیتی به کار ببرید، مثل زمان رویداد در سطح ساعت یا روز؛ و برای شناسه‌ی دستگاه‌های IoT از **Bucket** استفاده کنید |
+| **نامتوازنی** | در streaming micro-batch، بزرگ‌ترین پارتیشن مدت دسته را تعیین می‌کند؛ یک **بافر backpressure** رکوردهای اضافه‌ی پارتیشن نامتوازن را به micro-batch بعدی می‌اندازد (شکل ۸-۱)، که تأخیر آن را بالا می‌برد ولی بقیه را نزدیک بی‌درنگ نگه می‌دارد |
+| **mutability** | عوض کردن کلید همه‌ی داده را جابه‌جا می‌کند؛ Iceberg از partition evolution در لایه‌ی metadata پشتیبانی می‌کند و فایل‌های قدیمی در چیدمان قدیمی می‌مانند |
 
-![A microbatch job reads input and writes output; extra rows it can't take in this batch are saved to a backpressure buffer and loaded first in the next microbatch](../figures/08-01.png)
+![یک job از جنس microbatch ورودی را می‌خواند و خروجی می‌نویسد؛ ردیف‌های اضافه‌ای که در این دسته جا نمی‌دهد در یک بافر backpressure ذخیره می‌شوند و در microbatch بعدی اول بار می‌شوند](../figures/08-01.png)
 
-*Figure 8-1 (p. 237): the buffer caps each batch so one oversized partition doesn't stretch every batch.*
+*Figure 8-1 (p. 237): بافر سقف هر دسته را نگه می‌دارد تا یک پارتیشن بیش‌از‌اندازه بزرگ هر دسته را نکشد.*
 
-**Partitioning vs sharding** (p. 237): sharding splits a dataset across machines — a special case of horizontal partitioning at the hardware layer.
+**پارتیشن‌بندی در برابر sharding** (p. 237): روش sharding یک مجموعه‌داده را بین ماشین‌ها می‌شکند، یعنی حالت ویژه‌ای از پارتیشن‌بندی افقی در لایه‌ی سخت‌افزار.
 
-**Examples** (pp. 238–239): Spark adds `year`/`month`/`day`/`hour` columns from `change_date` and calls `.partitionBy('year','month','day','hour')`; a Java Kafka `RangePartitioner` sends keys `A` and `B` to partition 0 and everything else to 1, registered with `partitioner.class` — but keep it simple and usually stick to default partitioners; PostgreSQL `PARTITION BY RANGE(event_time)` with one `PARTITION OF` table per day.
+**نمونه‌ها** (pp. 238–239): در Spark، ستون‌های `year` و `month` و `day` و `hour` از `change_date` اضافه می‌شوند و `.partitionBy('year','month','day','hour')` صدا زده می‌شود؛ یک `RangePartitioner` در Kafka با Java که کلیدهای `A` و `B` را به پارتیشن ۰ و بقیه را به ۱ می‌فرستد و با `partitioner.class` ثبت می‌شود، ولی ساده نگهش دارید و معمولاً به partitionerهای پیش‌فرض بچسبید؛ و در PostgreSQL `PARTITION BY RANGE(event_time)` با یک جدول `PARTITION OF` برای هر روز.
 
-#### Pattern: Vertical Partitioner (pp. 240–242)
+#### الگو: Vertical Partitioner (pp. 240–242)
 
-The storage-oriented counterpart of Chapter 7's security pattern (p. 240).
+همتای ذخیره‌سازی‌محور الگوی امنیتی فصل ۷ (p. 240).
 
-**Problem.** Visits carry mutable attributes (visit time, page) and immutable ones (IP address); store the immutable information only once per visit (p. 240).
+**مسئله.** بازدیدها ویژگی‌های mutable دارند، مثل زمان بازدید و صفحه، و تغییرناپذیر، مثل آدرس IP؛ اطلاعات immutable را برای هر بازدید فقط یک‌بار ذخیره کنید (p. 240).
 
-**Solution** (p. 240): classify attributes into groups, pick a join attribute (`visit_id`), and write each group to its own table or directory. Beyond saving storage, each part can have its own retention and access policies. Figure 8-2 contrasts moving a whole row (horizontal) with splitting it (vertical).
+**راه‌حل** (p. 240): ویژگی‌ها را گروه‌بندی کنید، یک ویژگی پیوند انتخاب کنید، مثل `visit_id`، و هر گروه را در جدول یا پوشه‌ی خودش بنویسید. جز صرفه‌جویی ذخیره‌سازی، هر بخش می‌تواند سیاست نگه‌داری و دسترسی خودش را داشته باشد. شکل ۸-۲ جابه‌جا کردن کل یک ردیف، یعنی افقی، را با شکستنش، یعنی عمودی، مقایسه می‌کند.
 
-![Horizontal partitioning moves whole visit rows into partitions by event time; vertical partitioning splits each row's columns into mutable attributes and immutable ones, keeping visit_id in both](../figures/08-02.png)
+![پارتیشن‌بندی افقی کل ردیف‌های بازدید را بر حسب زمان رویداد به پارتیشن‌ها می‌برد؛ پارتیشن‌بندی عمودی ستون‌های هر ردیف را به ویژگی‌های mutable و immutable می‌شکند و visit_id را در هر دو نگه می‌دارد](../figures/08-02.png)
 
-*Figure 8-2 (p. 241): horizontal splits rows by a key; vertical splits columns by how they change.*
+*Figure 8-2 (p. 241): افقی ردیف‌ها را با یک کلید می‌شکند و عمودی ستون‌ها را بر حسب شکل تغییرشان.*
 
-**Consequences** (p. 241): **domain split** — related attributes live apart, so document them; **querying** — rejoining is harder, so expose a view or a Dataset Materializer; **data producer** — producers must split rows and do several writes.
+**پیامدها** (p. 241): **شکستن دامنه**، یعنی ویژگی‌های مرتبط جدا می‌نشینند، پس مستندشان کنید؛ **کوئری زدن**، یعنی به هم رساندن دوباره سخت‌تر است، پس یک view یا Dataset Materializer نشان بدهید؛ **producer داده**، یعنی producerها باید ردیف‌ها را بشکنند و چند بار بنویسند.
 
-**Examples** (pp. 241–242): Spark `persist()`s the input (to avoid reading it twice), writes visits with `user_id` and the `context.user`/`context.technical` fields dropped, and writes deduplicated user and technical contexts to separate Delta tables; PostgreSQL uses `INSERT INTO … SELECT DISTINCT` or a `CREATE TABLE … AS SELECT` (**CTAS**).
+**نمونه‌ها** (pp. 241–242): در Spark، ورودی `persist()` می‌شود تا دو بار خوانده نشود، بازدیدها با `user_id` و با انداختن فیلدهای `context.user` و `context.technical` نوشته می‌شوند، و contextهای تکراری‌زدایی‌شده‌ی کاربر و فنی در جدول‌های جدای Delta می‌روند؛ در PostgreSQL از `INSERT INTO … SELECT DISTINCT` یا یک `CREATE TABLE … AS SELECT`، یعنی **CTAS**، استفاده می‌شود.
 
-### Records organization
+> **In practice:** `PARTITION BY toYYYYMM(posting_date)` در جدول‌های warehouse همان Horizontal Partitioner است.
+>
+> **Your turn:** کسی برای جدولی با چند هزار ردیف در روز partition روزانه پیشنهاد می‌دهد. چرا نه؟
+>
+> *Answer:* هر partition دست‌کم یک part جدا دارد؛ partition ریز یعنی هزاران part کوچک، merge کم‌اثر و فشار روی metadata. partition باید با حجم و الگوی کوئری جور باشد، نه ریزتر (pp. 234–240).
 
-Partitioning is rudimentary and fails for high-cardinality attributes; these patterns colocate records more cleverly (p. 243).
+### سازمان رکوردها
 
-#### Pattern: Bucket (pp. 243–245)
+پارتیشن‌بندی ابتدایی است و برای ویژگی‌های پرکاردینالیتی شکست می‌خورد؛ این الگوها رکوردها را زیرکانه‌تر هم‌مکان می‌کنند (p. 243).
 
-**Problem.** 80% of queries filter on a business attribute whose cardinality is too high for partitioning — it would hit the store's metadata limits (p. 243).
+#### الگو: Bucket (pp. 243–245)
 
-**Solution** (pp. 243–244). Pick **bucket columns** (a secondary grouping inside partitions) and a **number of buckets**; each key goes to `hash(key) % buckets`. More buckets → smaller buckets. Two optimizations follow:
+**مسئله.** هشتاد درصد کوئری‌ها روی یک ویژگی کسب‌وکار فیلتر می‌کنند که کاردینالیتی‌اش برای پارتیشن‌بندی زیادی بالاست و به سقف metadata ذخیره‌سازی می‌خورد (p. 243).
 
-| Optimization | How |
+**راه‌حل** (pp. 243–244): **ستون‌های bucket** را انتخاب کنید، که گروه‌بندی ثانویه‌ای داخل پارتیشن‌هاست، و **شمار bucketها** را؛ هر کلید به `hash(key) % buckets` می‌رود. bucket بیشتر یعنی bucketهای کوچک‌تر. دو بهینه‌سازی از پی‌اش می‌آید:
+
+| بهینه‌سازی | چطور |
 |---|---|
-| **Bucket pruning** | A predicate on the bucket column lets the engine compute the bucket and skip all others |
-| **Shuffle elimination** | Joining two tables with *identical* bucketing loads matching buckets into the same join task, without the network exchange of the Distributed Aggregator (Figure 8-3) |
+| **bucket pruning** | شرطی روی ستون bucket می‌گذارد موتور، bucket را حساب کند و از همه‌ی بقیه بپرد |
+| **حذف shuffle** | پیوند دو جدول با bucketبندی *یکسان*، bucketهای متناظر را در همان task پیوند بار می‌کند، بی جابه‌جایی شبکه‌ای Distributed Aggregator (شکل ۸-۳) |
 
-Bucketing was popularized by Apache Hive and is available in Spark and AWS Athena (p. 244).
+روش bucketing را Apache Hive رایج کرد و در Spark و AWS Athena در دسترس است (p. 244).
 
-![Two tables bucketed by the same letter column into three buckets each; the join task for bucket 1 reads bucket 1 of both tables, and likewise for buckets 2 and 3](../figures/08-03.png)
+![دو جدول که هر کدام با همان ستون حرفی به سه bucket تقسیم شده‌اند؛ task پیوند برای bucket ۱، bucket ۱ هر دو جدول را می‌خواند و همین‌طور برای bucketهای ۲ و ۳](../figures/08-03.png)
 
-*Figure 8-3 (p. 244): no shuffle, because matching keys are already in matching buckets.*
+*Figure 8-3 (p. 244): هیچ shuffleی نیست، چون کلیدهای متناظر از قبل در bucketهای متناظرند.*
 
-**Consequences** (p. 245): **mutability** — changing the column or bucket count requires a backfill; **bucket size** — sizing for today's volume gives big buckets later; sizing for predicted volume may be wrong and creates more buckets than needed meanwhile.
+**پیامدها** (p. 245): **mutability**، یعنی عوض کردن ستون یا شمار bucket به backfill نیاز دارد؛ **اندازه‌ی bucket**، یعنی اندازه‌گیری برای حجم امروز، بعداً bucketهای بزرگ می‌دهد، و اندازه‌گیری برای حجم پیش‌بینی‌شده ممکن است غلط باشد و تا آن موقع bucketهای بیشتری از لازم بسازد.
 
-**Examples** (p. 245): Athena applies bucketing logically to data already on S3 (so `INSERT INTO` a bucketed table errors): `CLUSTERED BY (user_id) INTO 50 BUCKETS` with `'bucketing_format' = 'spark'`; Spark writes with `bucketBy(50, 'user_id').saveAsTable(…)`.
+**نمونه‌ها** (p. 245): سرویس Athena، bucketing را منطقی روی داده‌ای که از قبل در S3 است اعمال می‌کند، پس `INSERT INTO` در جدولی bucket‌شده خطا می‌دهد: `CLUSTERED BY (user_id) INTO 50 BUCKETS` با `'bucketing_format' = 'spark'`؛ و Spark با `bucketBy(50, 'user_id').saveAsTable(…)` می‌نویسد.
 
-> **Try it:** [Bucket pruning and Z-order skipping](../widgets/08-data-skipping.html) — hash keys into buckets, then sort a two-column dataset lexicographically or by Z-order and count the blocks a range query must read.
+> **Try it:** [bucket pruning و پریدن با Z-order](../widgets/08-data-skipping.html)؛ کلیدها را در bucketها hash کنید، بعد یک مجموعه‌داده‌ی دو‌ستونی را واژه‌نامه‌ای یا با Z-order مرتب کنید و بشمارید یک کوئری بازه‌ای چند بلوک باید بخواند.
 
-#### Pattern: Sorter (pp. 246–251)
+#### الگو: Sorter (pp. 246–251)
 
-**Problem.** Weekly tables (for the Fast Metadata Cleaner) eased maintenance but not query time; most queries filter or sort by event time (p. 246).
+**مسئله.** جدول‌های هفتگی، که برای Fast Metadata Cleaner بودند، نگه‌داری را آسان کردند ولی زمان کوئری را نه؛ بیشتر کوئری‌ها بر حسب زمان رویداد فیلتر یا مرتب می‌کنند (p. 246).
 
-**Solution** (pp. 246–249): declare the sort column(s) at table creation; the database stores rows in that order, and queries on the sort columns skip irrelevant blocks via per-block metadata (min/max ranges, Figure 8-4). **Curved sorts** such as **Z-order** colocate rows in multidimensional space instead of lexicographic order; Iceberg and Delta Lake implement it natively. In Figure 8-5, for a predicate over columns x and y, the lexicographic layout reads **nine** blocks and Z-order only **seven** (p. 248). Redshift has Z-curve-based **interleaved sort keys**; BigQuery and Snowflake offer classical sorting via **clustered tables** (p. 249). Z-order is often called *clustering*, but it really sorts data on disk, so the book classifies it as a Sorter (p. 249).
+**راه‌حل** (pp. 246–249): ستون یا ستون‌های مرتب‌سازی را سر ساختن جدول اعلان کنید؛ دیتابیس ردیف‌ها را به آن ترتیب ذخیره می‌کند، و کوئری روی ستون‌های مرتب‌سازی با metadata هر بلوک، یعنی بازه‌ی کمینه و بیشینه، از بلوک‌های بی‌ربط می‌پرد (شکل ۸-۴). **مرتب‌سازی‌های خم‌دار** مثل **Z-order** ردیف‌ها را در فضای چند‌بعدی هم‌مکان می‌کنند و نه به‌ترتیب واژه‌نامه‌ای؛ Iceberg و Delta Lake بومی پیاده‌اش کرده‌اند. در شکل ۸-۵، برای شرطی روی ستون‌های x و y، چیدمان واژه‌نامه‌ای **نُه** بلوک می‌خواند و Z-order فقط **هفت** (p. 248). سرویس Redshift **interleaved sort key** دارد که بر پایه‌ی خم Z است؛ و BigQuery و Snowflake مرتب‌سازی کلاسیک را با **clustered table** می‌دهند (p. 249). روش Z-order را اغلب *clustering* می‌نامند، ولی در واقع داده را روی دیسک مرتب می‌کند، پس کتاب آن را Sorter رده‌بندی می‌کند (p. 249).
 
-**Consequences** (pp. 249–250):
+**پیامدها** (pp. 249–250):
 
 | | |
 |---|---|
-| **Unsorted segments** | New writes may leave unsorted blocks; schedule sorting inside the writer (slower writes) or separately |
-| **Composite sort keys** | Lexicographically, queries must reference the preceding sort columns: with key (`visit_time`, `page`), filtering only on `page` scans most blocks (Figure 8-6) |
-| **Mutability** | Changing sort keys may re-sort the whole table |
+| **بخش‌های نامرتب** | نوشتن‌های تازه می‌توانند بلوک‌های نامرتب بگذارند؛ مرتب‌سازی را داخل writer زمان‌بندی کنید، که نوشتن را کند می‌کند، یا جدا |
+| **کلید مرتب‌سازی ترکیبی** | در حالت واژه‌نامه‌ای، کوئری‌ها باید به ستون‌های مرتب‌سازی پیش از آن ارجاع بدهند: با کلید `visit_time` و `page`، فیلتر فقط روی `page` بیشتر بلوک‌ها را پیمایش می‌کند (شکل ۸-۶) |
+| **mutability** | عوض کردن کلید مرتب‌سازی می‌تواند کل جدول را از نو مرتب کند |
 
-**Examples** (p. 250): BigQuery `PARTITION BY DATE(event_time) CLUSTER BY visit_id, page` — good for both columns, weak for `page` alone; Delta Lake `DeltaTable.forPath(…).optimize().executeZOrderBy(['visit_id', 'page'])` compacts files with a curved distribution.
+**نمونه‌ها** (p. 250): در BigQuery، `PARTITION BY DATE(event_time) CLUSTER BY visit_id, page` که برای هر دو ستون خوب است و برای `page` به‌تنهایی ضعیف؛ و در Delta Lake، `DeltaTable.forPath(…).optimize().executeZOrderBy(['visit_id', 'page'])` که فایل‌ها را با توزیع خم‌دار compact می‌کند.
 
-### Read performance optimization
+> **In practice:** کلید `ORDER BY` در MergeTree همان Sorter است: ردیف‌ها داخل هر part مرتب‌اند و index sparse روی همین ترتیب کار می‌کند.
+>
+> **Your turn:** بیشتر کوئری‌های Gold با `customer_id` فیلتر می‌کنند ولی جدول با `posting_date` مرتب است. چه عوض می‌کنید و هزینه‌اش چیست؟
+>
+> *Answer:* `ORDER BY (customer_id, posting_date)`، تا index بلوک‌های یک مشتری را پیدا کند. هزینه‌اش: کوئری‌هایی که فقط بازه‌ی زمانی می‌خواهند کندتر می‌شوند و عوض کردن کلید یعنی بازسازی جدول؛ هر ترتیبی فقط به نفع یک الگوی دسترسی است (pp. 246–251).
 
-#### Pattern: Metadata Enhancer (pp. 251–254)
+### بهینه‌سازی performance خواندن
 
-**Problem.** A JSON dataset partitioned by event time works for batch jobs, but new analysts querying small subsets on a pay-as-you-go service load whole partitions and only then filter (p. 251).
+#### الگو: Metadata Enhancer (pp. 251–254)
 
-**Solution** (pp. 251–253): collect and persist **statistics** so engines can filter before loading. In columnar formats like **Parquet**, each file's **footer** holds per-column statistics (min, max, …) computed at write time (Figure 8-7); a query `WHERE age > 50` checks footers and opens only matching files — footers still have to be read, but that's far cheaper. Delta Lake, Iceberg and Hudi inherit this and add commit-log metadata (row counts, per-column min/max, null counts), making counts and filters on nonexistent values fast. Relational databases and warehouses keep table statistics for the query planner.
+**مسئله.** یک مجموعه‌داده‌ی JSON که با زمان رویداد پارتیشن‌بندی شده برای jobهای batch کار می‌کند، ولی تحلیل‌گرهای تازه که زیرمجموعه‌های کوچکی را روی سرویسی به‌اندازه‌ی‌مصرف کوئری می‌زنند، کل پارتیشن‌ها را بار می‌کنند و فقط بعدش فیلتر (p. 251).
 
-**Consequences** (p. 253): **overhead** — writers compute statistics; databases must keep them current; **out-of-date statistics** — automatic updates trigger on thresholds (e.g. rows modified), so small changes accumulate; refresh with `ANALYZE TABLE`, at a temporary read cost.
+**راه‌حل** (pp. 251–253): **آمار** جمع و durable کنید تا موتورها بتوانند پیش از بار کردن فیلتر کنند. در فرمت‌های ستونی مثل **Parquet**، **footer** هر فایل آمار هر ستون را دارد، مثل کمینه و بیشینه، که سر نوشتن حساب شده (شکل ۸-۷)؛ کوئری `WHERE age > 50` footerها را بررسی می‌کند و فقط فایل‌های متناظر را باز، و footerها باز هم باید خوانده شوند ولی خیلی ارزان‌ترند. Delta Lake و Iceberg و Hudi این را به ارث می‌برند و metadata در commit log اضافه می‌کنند، مثل شمار ردیف و کمینه و بیشینه‌ی هر ستون و شمار تهی، که شمارش و فیلتر روی مقدارهای ناموجود را سریع می‌کند. دیتابیس‌های رابطه‌ای و warehouseها آمار جدول را برای planner کوئری نگه می‌دارند.
 
-**Examples** (pp. 253–254): Spark `write.parquet(…)`; inspect with `hangxie/parquet-tools` `meta`, showing for the `Id` column `NumValues: 5000`, `NullCount: 0`, `MinValue`/`MaxValue` and `SNAPPY` compression; a Delta commit log's `add` entry with `stats` — `numRecords: 6100`, `minValues`, `maxValues`, `nullCount`.
+**پیامدها** (p. 253): **سرریز**، یعنی writerها آمار را حساب می‌کنند و دیتابیس‌ها باید به‌روزشان نگه دارند؛ **آمار کهنه**، یعنی به‌روزرسانی خودکار سر آستانه‌هایی راه می‌افتد، مثل شمار ردیف‌های تغییریافته، پس تغییرهای کوچک جمع می‌شوند؛ با `ANALYZE TABLE` تازه‌شان کنید، به قیمت موقت خواندن.
 
-#### Pattern: Dataset Materializer (pp. 254–257)
+**نمونه‌ها** (pp. 253–254): در Spark، `write.parquet(…)`؛ با `meta` در `hangxie/parquet-tools` نگاهش کنید که برای ستون `Id` مقدارهای `NumValues: 5000` و `NullCount: 0` و `MinValue` و `MaxValue` و فشرده‌سازی `SNAPPY` را نشان می‌دهد؛ و یک ورودی `add` در commit log دلتا با `stats`، یعنی `numRecords: 6100` و `minValues` و `maxValues` و `nullCount`.
 
-**Problem.** A view unions several partitioned tables to expose three weeks of data, but it reruns the query every time; consumers complain about latency (pp. 254–255).
+#### الگو: Dataset Materializer (pp. 254–257)
 
-**Solution** (p. 255): materialize the result — as a **materialized view** or a **table**:
+**مسئله.** یک view چند جدول پارتیشن‌بندی‌شده را union می‌کند تا سه هفته داده نشان بدهد، ولی هر بار کوئری را از نو اجرا می‌کند؛ consumerها از تأخیر شکایت دارند (pp. 254–255).
 
-| | Materialized view | Table |
+**راه‌حل** (p. 255): نتیجه را materialize کنید، به‌عنوان **materialized view** یا **جدول**:
+
+| | materialized view | جدول |
 |---|---|---|
-| Refresh | Manual, or automatic (Redshift `AUTO REFRESH YES`; BigQuery, Databricks, Snowflake) — timing depends on workload, so less predictable | Your responsibility |
-| Storage optimizations | Limited | Partitions, buckets, sorting available |
+| تازه کردن | دستی، یا خودکار با `AUTO REFRESH YES` در Redshift و در BigQuery و Databricks و Snowflake؛ زمان‌بندی‌اش به بار بستگی دارد پس کم‌پیش‌بینی‌پذیرتر است | به عهده‌ی شماست |
+| بهینه‌سازی ذخیره‌سازی | محدود | پارتیشن و bucket و مرتب‌سازی در دسترس‌اند |
 
-**Consequences** (pp. 255–256): **refresh cost** — rerunning a costly query competes with other users; use **incremental refresh** (supported by Databricks and BigQuery for some SQL operations, sometimes falling back to full); **data access** — a user denied one source table must be denied the view (or use a Fine-Grained Accessor); **storage overhead** — materialize only some parts.
+**پیامدها** (pp. 255–256): **هزینه‌ی تازه کردن**، یعنی اجرای دوباره‌ی یک کوئری گران با کاربرهای دیگر رقابت می‌کند، پس **تازه کردن افزایشی** را به کار ببرید، که Databricks و BigQuery برای بعضی عملیات SQL پشتیبانی می‌کنند و گاهی به کامل برمی‌گردند؛ **دسترسی داده**، یعنی کاربری که از یک جدول منبع محروم شده باید از view هم محروم شود، یا از Fine-Grained Accessor استفاده کنید؛ **سرریز ذخیره‌سازی**، یعنی فقط بعضی بخش‌ها را materialize کنید.
 
-**Examples** (pp. 256–257): BigQuery `CREATE MATERIALIZED VIEW … OPTIONS (enable_refresh = true, refresh_interval_minutes = 15)` — refreshes should run within **five minutes** of a change but may be delayed without capacity; PostgreSQL `REFRESH MATERIALIZED VIEW dedp.windowed_visits WITH DATA`; an incremental version combining **Incremental Loader and Merger**: `MERGE INTO dedp.visits_counter` from a `COUNT(*)` of rows with `insertion_time` after the previous run, `UPDATE SET count = count + input.visits` or `INSERT`.
+**نمونه‌ها** (pp. 256–257): در BigQuery، `CREATE MATERIALIZED VIEW … OPTIONS (enable_refresh = true, refresh_interval_minutes = 15)`، که تازه کردن باید ظرف **پنج دقیقه** از یک تغییر اجرا شود ولی بی ظرفیت می‌تواند عقب بیفتد؛ در PostgreSQL، `REFRESH MATERIALIZED VIEW dedp.windowed_visits WITH DATA`؛ و یک نسخه‌ی افزایشی که **Incremental Loader و Merger** را ترکیب می‌کند: `MERGE INTO dedp.visits_counter` از یک `COUNT(*)` روی ردیف‌هایی که `insertion_time` آن‌ها بعد از اجرای قبلی است، با `UPDATE SET count = count + input.visits` یا `INSERT`.
 
-#### Pattern: Manifest (pp. 257–259)
+#### الگو: Manifest (pp. 257–259)
 
-**Problem.** A fast Parquet dataset is exposed to analysts through a warehouse layer, but the slowest step is listing files in the object store (p. 257).
+**مسئله.** یک مجموعه‌داده‌ی تند Parquet با لایه‌ی warehouse به تحلیل‌گرها نشان داده می‌شود، ولی کندترین مرحله فهرست کردن فایل‌ها در ذخیره‌سازی object است (p. 257).
 
-**Solution** (pp. 257–258): list once — or never, if the producer records file names. Delta Lake, Iceberg and Hudi write each transaction's files to the **commit log**, which acts as a manifest. Manual manifests help when many readers share a dataset (e.g. Fan-Out patterns). For writing: Redshift `COPY` accepts a manifest per load — useful for idempotency — and GCP Storage Transfer Service copies files from manifest listings.
+**راه‌حل** (pp. 257–258): یک‌بار فهرست کنید، یا هیچ‌بار اگر producer نام فایل‌ها را ثبت کند. Delta Lake و Iceberg و Hudi فایل‌های هر تراکنش را در **commit log** می‌نویسند که نقش manifest را بازی می‌کند. manifest دستی وقتی کمک می‌کند که خواننده‌های زیادی یک مجموعه‌داده را شریک‌اند، مثل الگوهای Fan-Out. برای نوشتن: دستور `COPY` در Redshift برای هر بار‌گذاری یک manifest می‌گیرد، که برای idempotency به کار می‌آید، و GCP Storage Transfer Service فایل‌ها را از فهرست manifest کپی می‌کند.
 
-**Consequences** (p. 258): **complexity** — an extra, simple step, better than repeated slow listings; **size** — streaming producers or many small files can produce **multi-gigabyte** manifests; early Spark Structured Streaming jobs sometimes couldn't restart because their manifests were too big (fixed in SPARK-27188).
+**پیامدها** (p. 258): **پیچیدگی**، یعنی یک مرحله‌ی اضافه‌ی ساده که از فهرست کردن کند و تکراری بهتر است؛ **اندازه**، یعنی producerهای streaming یا فایل‌های کوچک زیاد می‌توانند manifestهای **چند‌گیگابایتی** بسازند؛ jobهای اولیه‌ی Spark Structured Streaming گاهی نمی‌توانستند دوباره راه بیفتند چون manifestشان زیادی بزرگ بود، که در SPARK-27188 درست شد.
 
-**Examples** (p. 259): Delta `generate('symlink_format_manifest')` and a BigQuery external table with `file_set_spec_type = 'NEW_LINE_DELIMITED_MANIFEST'`; Redshift `COPY customer FROM 's3://devices/manifest_20250601_1031' … MANIFEST` with two `"mandatory": true` entries — reusable on every replay of that run.
+**نمونه‌ها** (p. 259): در Delta، `generate('symlink_format_manifest')` و یک جدول بیرونی در BigQuery با `file_set_spec_type = 'NEW_LINE_DELIMITED_MANIFEST'`؛ و در Redshift، `COPY customer FROM 's3://devices/manifest_20250601_1031' … MANIFEST` با دو ورودی `"mandatory": true`، که در هر اجرای دوباره‌ی آن اجرا به کار می‌آید.
 
-### Data representation
+### نمایش داده
 
-Which attributes are stored together, and therefore which tables exist (p. 260).
+کدام ویژگی‌ها با هم ذخیره می‌شوند، و در نتیجه کدام جدول‌ها وجود دارند (p. 260).
 
-#### Pattern: Normalizer (pp. 260–266)
+#### الگو: Normalizer (pp. 260–266)
 
-**Problem.** The visits table repeats immutable device and OS attributes in every row: more storage, slow updates (p. 260).
+**مسئله.** جدول بازدیدها ویژگی‌های immutable دستگاه و OS را در هر ردیف تکرار می‌کند، یعنی ذخیره‌سازی بیشتر و به‌روزرسانی کند (p. 260).
 
-**Solution** (pp. 260–263). Shared design steps: define business entities (visits, devices, browsers, referrals), describe their attributes, define relationships. Two implementations: **normal forms** (transactional workloads) and the **snowflake schema** (analytics).
+**راه‌حل** (pp. 260–263): مرحله‌های طراحی مشترک: موجودیت‌های کسب‌وکار را تعریف کنید، مثل بازدید و دستگاه و مرورگر و ارجاع؛ ویژگی‌هایشان را توصیف کنید؛ و رابطه‌ها را تعریف. دو پیاده‌سازی: **normal form**ها برای بارهای تراکنشی، و **snowflake schema** برای تحلیل.
 
-| Normal form | Rule | Broken example (book's tables) | Fix |
+| normal form | قاعده | نمونه‌ی شکسته، از جدول‌های کتاب | اصلاح |
 |---|---|---|---|
-| **1NF** | Atomic, nonrepeating values; a primary key | `Puzzle Tour` with a list of comments (Table 8-1) | A `games_comments` table |
-| **2NF** | Non-key columns depend on the *whole* key | Key (name, platform); *platform language* depends only on platform — iOS→Swift, Android→Kotlin (Table 8-2) | A platforms table |
-| **3NF** | No transitive dependencies | *Studio country* depends on studio, not game — Studio A→Italy, Studio B→Portugal (Table 8-3) | A studios table |
+| **1NF** | مقدارهای اتمی و ناتکراری، با یک کلید اصلی | ردیف `Puzzle Tour` با فهرستی از نظرها (جدول ۸-۱) | یک جدول `games_comments` |
+| **2NF** | ستون‌های غیرکلیدی به *کل* کلید وابسته باشند | کلید نام و platform؛ *زبان platform* فقط به platform وابسته است، یعنی iOS به Swift و Android به Kotlin (جدول ۸-۲) | یک جدول platform |
+| **3NF** | وابستگی transitive نباشد | *کشور استودیو* به استودیو وابسته است و نه به بازی، یعنی استودیو A به ایتالیا و استودیو B به پرتغال (جدول ۸-۳) | یک جدول استودیو |
 
-A **dimensional model** has one **fact** table (an observation: an order, a visit) and **dimension** tables (context). In the **snowflake** model, dimensions are themselves described by subdimensions — a date dimension split into months and quarters (Figure 8-8) (pp. 262–263). The goal: consistency first — an update is reflected everywhere at once.
+یک **مدل ابعادی** یک جدول **fact** دارد، یعنی یک مشاهده مثل سفارش یا بازدید، و جدول‌های **dimension** که زمینه‌اند. در مدل **snowflake**، خود dimensionها با subdimensionها توصیف می‌شوند، مثل یک dimension تاریخ که به ماه و فصل شکسته می‌شود (شکل ۸-۸) (pp. 262–263). هدف: اول سازگاری، یعنی یک به‌روزرسانی همه‌جا یک‌جا بازتاب پیدا کند.
 
-**Consequences** (p. 264): **query cost** — many joins, costly across a network; colocate small tables with big ones or **broadcast** them (Spark `spark.sql.autoBroadcastJoinThreshold`); **archival** — dimensions change over time (prices), handled with SCDs (Static Joiner, Ch. 5).
+**پیامدها** (p. 264): **هزینه‌ی کوئری**، یعنی پیوندهای زیاد، که روی شبکه گران‌اند؛ جدول‌های کوچک را با بزرگ‌ها هم‌مکان کنید یا **broadcast**شان کنید، مثل `spark.sql.autoBroadcastJoinThreshold` در Spark؛ **بایگانی**، یعنی dimensionها با زمان عوض می‌شوند، مثل قیمت، که با SCDها اداره می‌شود، یعنی Static Joiner در فصل ۵.
 
-**Examples** (pp. 264–266): Figure 8-9's normalized visit — browsers and devices in their own tables (shared across visits, not dependent on one), contexts outside `visits` to avoid repeating groups — needs a long chain of left-outer joins in Spark (Example 8-23); the snowflake version still joins pages→categories and dates→months→quarters (Example 8-24).
+**نمونه‌ها** (pp. 264–266): بازدید نرمال‌شده‌ی شکل ۸-۹، که مرورگرها و دستگاه‌ها جدول خودشان را دارند، چون بین بازدیدها مشترک‌اند و به یکی وابسته نیستند، و contextها بیرون `visits` می‌مانند تا گروه‌ها تکرار نشوند، به زنجیر بلندی از پیوندهای left-outer در Spark نیاز دارد (نمونه‌ی ۸-۲۳)؛ و نسخه‌ی snowflake باز هم صفحه‌ها را به دسته‌ها و تاریخ‌ها را به ماه‌ها و فصل‌ها پیوند می‌زند (نمونه‌ی ۸-۲۴).
 
-#### Pattern: Denormalizer (pp. 266–271)
+#### الگو: Denormalizer (pp. 266–271)
 
-**Problem.** A company's relational analytics model slowed as the product succeeded; 80% of queries join all **eight** tables (p. 266).
+**مسئله.** مدل تحلیلی رابطه‌ای یک شرکت با موفقیت محصول کند شد؛ هشتاد درصد کوئری‌ها همه‌ی **هشت** جدول را پیوند می‌زنند (p. 266).
 
-**Solution** (pp. 266–268): flatten joined values into one row, either as **regular columns** (**One Big Table** — Table 8-4: `visit_id 1, user_id 409, user_name user ABC, device_id 10000, device_full_name local computer, visit_time 2024-07-01T09:00:00Z, visited_page home.html`) or as **nested structures** (`STRUCT` columns). In dimensional models, the **star schema** keeps facts and dimensions but no nested dimensions (Figure 8-10). The patterns combine: build a normalized snowflake model, then a One Big Table from it for reading, kept in sync with Chapter 6's sequence patterns (Figure 8-11).
+**راه‌حل** (pp. 266–268): مقدارهای پیوند‌خورده را در یک ردیف تخت کنید، یا به‌عنوان **ستون معمولی**، یعنی **One Big Table**؛ در جدول ۸-۴: `visit_id 1, user_id 409, user_name user ABC, device_id 10000, device_full_name local computer, visit_time 2024-07-01T09:00:00Z, visited_page home.html`؛ یا به‌عنوان **ساختار تو‌در‌تو**، یعنی ستون‌های `STRUCT`. در مدل‌های ابعادی، **star schema** fact و dimension را نگه می‌دارد ولی dimension تو‌در‌تو ندارد (شکل ۸-۱۰). این الگوها ترکیب می‌شوند: یک مدل نرمال snowflake بسازید و بعد یک One Big Table رویش برای خواندن، که با الگوهای ترتیب فصل ۶ synchronous می‌ماند (شکل ۸-۱۱).
 
-![Visits, devices and users feed a snowflake schema builder that produces a normalized website-visits schema; a One Big Table builder flattens it into a website-visits-with-context table for data analysts](../figures/08-11.png)
+![بازدیدها و دستگاه‌ها و کاربرها به سازنده‌ی snowflake schema خورانده می‌شوند که یک schema نرمال بازدید سایت می‌سازد؛ یک سازنده‌ی One Big Table آن را به جدول بازدیدهای سایت با context تخت می‌کند، برای تحلیل‌گرهای داده](../figures/08-11.png)
 
-*Figure 8-11 (p. 268): the normalized snowflake stays the consistent source; the denormalized table is derived from it for analysts.*
+*Figure 8-11 (p. 268): مدل نرمال snowflake منبع سازگار می‌ماند و جدول غیر‌نرمال برای تحلیل‌گرها از آن ساخته می‌شود.*
 
-**Consequences** (pp. 268–269): **costly updates** — one change touches many rows; unless the table is a point-in-time **snapshot**, accept slower updates for faster reads. **Storage** — duplicated values, reduced by encodings like **dictionaries** (`{1: "long name…", 2: …}`), which can also answer existence checks without reading data. **One big antipattern** — a table mixing user details, past orders, the current visit and a favourite colour is a trash bag; if naming it needs many *and*s or *with*s, you've combined unrelated attributes.
+**پیامدها** (pp. 268–269): **به‌روزرسانی گران**، یعنی یک تغییر به ردیف‌های زیادی می‌خورد؛ مگر جدول یک **snapshot** از یک لحظه باشد، به‌روزرسانی کندتر را برای خواندن تندتر بپذیرید. **ذخیره‌سازی**، یعنی مقدارهای تکراری، که با encodingهایی مثل **dictionary** کم می‌شوند، یعنی `{1: "long name…", 2: …}`، که می‌تواند بررسی وجود را هم بی خواندن داده جواب بدهد. **یک آنتی‌الگوی بزرگ**، یعنی جدولی که جزئیات کاربر و سفارش‌های گذشته و بازدید فعلی و رنگ مورد علاقه را قاطی می‌کند کیسه‌ی آشغال است؛ اگر نام گذاشتن رویش به «و»ها و «همراه»های زیادی نیاز دارد، ویژگی‌های بی‌ربط را با هم آورده‌اید.
 
-**Examples** (pp. 269–271): One Big Table is written once with all joins and then read with a plain `load` (Example 8-25); the star schema writes dimension tables (with `dropDuplicates`) and a fact table with `HASH(page)` and `HASH(TO_DATE(event_time))` as dimension keys — readers then need two joins (Example 8-26).
+**نمونه‌ها** (pp. 269–271): الگوی One Big Table یک‌بار با همه‌ی پیوندها نوشته می‌شود و بعد با یک `load` ساده خوانده (نمونه‌ی ۸-۲۵)؛ و star schema جدول‌های dimension را با `dropDuplicates` و یک جدول fact را با `HASH(page)` و `HASH(TO_DATE(event_time))` به‌عنوان کلیدهای dimension می‌نویسد، پس خواننده‌ها به دو پیوند نیاز دارند (نمونه‌ی ۸-۲۶).
 
-### Summary
+> **In practice:** منبع‌ها normalized‌اند و Gold عمداً denormalized است: یک جدول پهن برای هر داشبورد.
+>
+> **Your turn:** یک جدول Gold پهن ۴۰ ستون دارد و همه‌ی داشبوردها از آن می‌خوانند. وقتی نام یک merchant عوض شود چه می‌شود؟
+>
+> *Answer:* نام قدیمی در ردیف‌های قبلی می‌ماند تا Gold دوباره ساخته شود. این هزینه‌ی Denormalizer است: خواندن ارزان و به‌روزرسانی گران؛ پس Gold را طوری بسازید که بازسازی کاملش ارزان باشد (pp. 266–271).
 
-Horizontal partitioning suits low-cardinality values, vertical partitioning splits attributes; Bucket and Sorter handle high cardinality and skipping; Metadata Enhancer, Dataset Materializer and Manifest speed up reads; Normalizer and Denormalizer trade consistency for joins (p. 271). Even optimized storage won't make people use data of poor quality — the next chapter (p. 271).
+### خلاصه
 
-## Trade-offs at a glance
+پارتیشن‌بندی افقی به مقدارهای کم‌کاردینالیتی می‌خورد و پارتیشن‌بندی عمودی ویژگی‌ها را می‌شکند؛ Bucket و Sorter به کاردینالیتی بالا و پریدن می‌پردازند؛ Metadata Enhancer و Dataset Materializer و Manifest خواندن را تند می‌کنند؛ و Normalizer و Denormalizer سازگاری را با پیوند معامله می‌کنند (p. 271). حتی ذخیره‌سازی بهینه هم نمی‌تواند کاری کند که مردم داده‌ی بی‌کیفیت را به کار ببرند، که موضوع فصل بعدی است (p. 271).
 
-| Pattern | Best for | Main cost |
+## بده‌بستان‌ها در یک نگاه
+
+| الگو | بهترین برای | هزینه‌ی اصلی |
 |---|---|---|
-| Horizontal Partitioner | Low-cardinality filters (time, region) | Static key; skew; too many partitions |
-| Vertical Partitioner | Separating immutable from mutable attributes | Joins; producers write several times |
-| Bucket | High-cardinality filters and joins | Fixed bucket count; backfill to change |
-| Sorter | Range filters, ordering | Write-time sorting; prefix-only for lexicographic keys |
-| Metadata Enhancer | Skipping files and blocks | Write overhead; stale stats |
-| Dataset Materializer | Repeated costly queries | Refresh cost; storage; access rules |
-| Manifest | Avoiding object-store listings | Manifest size |
-| Normalizer | Consistency, cheap updates | Many joins |
-| Denormalizer | Fast reads | Costly updates, storage, OBT antipattern |
+| Horizontal Partitioner | فیلتر کم‌کاردینالیتی، مثل زمان و منطقه | کلید ایستا؛ نامتوازنی؛ پارتیشن زیادی |
+| Vertical Partitioner | جدا کردن ویژگی immutable از mutable | پیوند؛ چند بار نوشتن producer |
+| Bucket | فیلتر و پیوند پرکاردینالیتی | شمار ثابت bucket؛ backfill برای تغییرش |
+| Sorter | فیلتر بازه‌ای و ترتیب | مرتب‌سازی سر نوشتن؛ فقط prefix برای کلید واژه‌نامه‌ای |
+| Metadata Enhancer | پریدن از فایل و بلوک | سرریز نوشتن؛ آمار کهنه |
+| Dataset Materializer | کوئری گرانِ تکرارشده | هزینه‌ی تازه کردن؛ ذخیره‌سازی؛ قاعده‌های دسترسی |
+| Manifest | پرهیز از فهرست کردن ذخیره‌سازی object | اندازه‌ی manifest |
+| Normalizer | سازگاری و به‌روزرسانی ارزان | پیوندهای زیاد |
+| Denormalizer | خواندن تند | به‌روزرسانی گران، ذخیره‌سازی، آنتی‌الگوی OBT |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Z-order (Morton order) interleaves the bits of each column's value; other space-filling curves such as the Hilbert curve preserve locality even better — Delta Lake's liquid clustering, for example, uses Hilbert curves.
-- The normal forms go back to E. F. Codd's relational model (1970–71); the book stops at 3NF, but BCNF, 4NF and 5NF exist.
+- روش Z-order، که Morton order هم نامیده می‌شود، بیت‌های مقدار هر ستون را در هم می‌بافد؛ خم‌های پرکننده‌ی فضای دیگر مثل خم Hilbert محلیت را حتی بهتر نگه می‌دارند، و مثلاً liquid clustering در Delta Lake از خم Hilbert استفاده می‌کند.
+- ساختار normal formها به مدل رابطه‌ای E. F. Codd برمی‌گردد (سال‌های ۱۹۷۰ تا ۱۹۷۱)؛ کتاب تا 3NF می‌رود، ولی BCNF و 4NF و 5NF هم وجود دارند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. Data Ingestion](02-data-ingestion-design-patterns.md) (Compactor and the small files problem; Incremental Loader), [4. Idempotency](04-idempotency-design-patterns.md) (Fast Metadata Cleaner, Merger), [5. Data Value](05-data-value-design-patterns.md) (Static Joiner and SCDs, Distributed Aggregator), [6. Data Flow](06-data-flow-design-patterns.md) (Fan-Out, sequence patterns), [7. Data Security](07-data-security-design-patterns.md) (Vertical Partitioner for removal, Fine-Grained Accessor).
+- **فصل‌های مرتبط:** [فصل ۲: ورود داده](02-data-ingestion-design-patterns.md) که Compactor و مسئله‌ی فایل‌های کوچک و Incremental Loader را دارد، [فصل ۴: ویژگی idempotency](04-idempotency-design-patterns.md) که Fast Metadata Cleaner و Merger را دارد، [فصل ۵: ارزش داده](05-data-value-design-patterns.md) که Static Joiner و SCDها و Distributed Aggregator را دارد، [فصل ۶: جریان داده](06-data-flow-design-patterns.md) که Fan-Out و الگوهای ترتیب را دارد، و [فصل ۷: امنیت داده](07-data-security-design-patterns.md) که Vertical Partitioner برای حذف و Fine-Grained Accessor را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why is partitioning visits by username a bad idea?**
+1. **چرا پارتیشن‌بندی بازدیدها بر حسب نام کاربری ایده‌ی بدی است؟**
 
-   *Answer:* High cardinality — one million daily users would create a million partitions, slow listings and many small files. Use a low-cardinality key or the Bucket pattern (p. 236).
+   *Answer:* کاردینالیتی بالاست؛ یک میلیون کاربر روزانه، یک میلیون پارتیشن و فهرست کردن کند و فایل‌های کوچک زیاد می‌ساخت. از کلیدی کم‌کاردینالیتی یا الگوی Bucket استفاده کنید (p. 236).
 
-2. **Two tables are bucketed by `user_id`, one into 50 buckets and one into 64. Can a join avoid the shuffle?**
-   - [ ] Yes, bucketing always avoids shuffles
-   - [x] No — shuffle elimination needs identical bucketing on both sides
-   - [ ] Only if both are also partitioned by date
+2. **دو جدول بر حسب `user_id` bucket شده‌اند، یکی در ۵۰ bucket و دیگری در ۶۴. پیوندشان می‌تواند از shuffle بپرهیزد؟**
+   - [ ] بله، روش bucketing همیشه از shuffle می‌پرهیزد
+   - [x] نه؛ حذف shuffle به bucketبندی یکسان در هر دو سمت نیاز دارد
+   - [ ] فقط اگر هر دو بر حسب تاریخ هم پارتیشن‌بندی شده باشند
 
-   *Answer:* Matching keys land in matching buckets only with the same configuration (p. 244).
+   *Answer:* کلیدهای متناظر فقط با همان تنظیم در bucketهای متناظر می‌نشینند (p. 244).
 
-3. **A table is sorted lexicographically by (`visit_time`, `page`). Which query benefits least?**
-   - [ ] `WHERE visit_time BETWEEN …`
-   - [ ] `WHERE visit_time = … AND page = …`
-   - [x] `WHERE page = …`
+3. **جدولی واژه‌نامه‌ای بر حسب `visit_time` و `page` مرتب شده. کدام کوئری کمترین سود را می‌برد؟**
+   - [ ] کوئری `WHERE visit_time BETWEEN …`
+   - [ ] کوئری `WHERE visit_time = … AND page = …`
+   - [x] کوئری `WHERE page = …`
 
-   *Answer:* Without the preceding sort column, the engine iterates over most blocks; Z-order mitigates this (pp. 249–250).
+   *Answer:* بی ستون مرتب‌سازی پیش از آن، موتور روی بیشتر بلوک‌ها می‌گردد؛ روش Z-order کمش می‌کند (pp. 249–250).
 
-4. **What does Iceberg's partition evolution do to existing files?**
+4. **قابلیت partition evolution در Iceberg با فایل‌های موجود چه می‌کند؟**
 
-   *Answer:* Nothing — it changes the schema at the metadata layer; old records keep the old layout, new records use the new one (p. 237).
+   *Answer:* هیچ؛ schema را در لایه‌ی metadata عوض می‌کند، پس رکوردهای قدیمی چیدمان قدیمی را نگه می‌دارند و رکوردهای تازه چیدمان تازه را (p. 237).
 
-5. **How can a manifest make Redshift `COPY` idempotent?**
+5. **یک manifest چطور می‌تواند `COPY` در Redshift را idempotent کند؟**
 
-   *Answer:* Create the manifest before loading and tie it to the job run; any replay reuses the same file list (p. 259).
+   *Answer:* فایل manifest را پیش از بار‌گذاری بسازید و به آن اجرای job ببندید؛ هر اجرای دوباره همان فهرست فایل را به کار می‌برد (p. 259).
 
-6. **How do you tell when a One Big Table has become an antipattern?**
+6. **از کجا بفهمیم یک One Big Table به آنتی‌الگو تبدیل شده؟**
 
-   *Answer:* It mixes unrelated domain attributes; if naming it needs many conjunctions like *and* or *with*, too much is combined (p. 269).
+   *Answer:* وقتی ویژگی‌های بی‌ربط دامنه را قاطی می‌کند؛ اگر نام گذاشتن رویش به ربط‌های زیادی مثل «و» یا «همراه» نیاز دارد، بیش از اندازه با هم آمده است (p. 269).

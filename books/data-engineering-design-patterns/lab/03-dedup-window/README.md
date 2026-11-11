@@ -1,18 +1,20 @@
-# Deduplication window vs missed duplicates
+# پنجره‌ی تکراری‌زدایی در برابر تکراری‌های از‌دست‌رفته
 
-A streaming Windowed Deduplicator remembers the keys it has seen for a fixed time window. This experiment replays a stream of 200,000 events in which 5% are retried by the producer. Most retries return within seconds and a few after several minutes. It measures how many duplicates get through, and how many keys the state store holds, for windows from 5 seconds to 15 minutes.
+یک Windowed Deduplicator در streaming، کلیدهایی را که برای یک پنجره‌ی زمانی ثابت دیده به یاد می‌آورد. این آزمایش streamی از دویست هزار رویداد را اجرا می‌کند که ۵٪شان را تأمین‌کننده تلاش دوباره می‌فرستد. بیشتر تلاش‌های دوباره ظرف چند ثانیه برمی‌گردند و چندتایی بعد از چند دقیقه. اندازه می‌گیرد چند تکراری رد می‌شوند و state store چند کلید نگه می‌دارد، برای پنجره‌های پنج ثانیه تا پانزده دقیقه.
 
-*Illustrates Data Engineering Design Patterns, “Pattern: Windowed Deduplicator”, pp. 46–50, and its space-vs-time consequence (p. 49). The retry delays are synthetic; the implementation is the vault’s own.*
+*این آزمایش «الگو: Windowed Deduplicator» از کتاب Data Engineering Design Patterns را نشان می‌دهد، صص. ۴۶–۵۰، و پیامد فضا در برابر زمانش را، ص. ۴۹. تأخیرهای تلاش دوباره ساختگی‌اند و پیاده‌سازی مال خود vault.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 dedup_window.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Stream: 200,000 events, 9,978 producer retries (5.0%)
@@ -26,13 +28,13 @@ Stream: 200,000 events, 9,978 producer retries (5.0%)
   15 min                   0      0.0%               45,001
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Missed duplicates fall quickly at first: a 30-second window already catches almost every fast retry.
-- The last few duplicates are expensive. Catching the slow retries needs a 15-minute window and about 170 times the state of a 5-second one.
-- State grows linearly with the window, because every key is remembered for the whole window. This is the book's space-vs-time trade-off.
+- تکراری‌های از‌دست‌رفته اول تند پایین می‌آیند: یک پنجره‌ی سی‌ثانیه‌ای از قبل تقریباً هر تلاش دوباره‌ی تند را می‌گیرد.
+- چند تکراری آخر گران‌اند. گرفتن تلاش‌های دوباره‌ی کند به پنجره‌ی پانزده‌دقیقه‌ای و تقریباً ۱۷۰ برابر حالتِ پنجره‌ی پنج‌ثانیه‌ای نیاز دارد.
+- حالت خطی با پنجره بزرگ می‌شود، چون هر کلید برای کل پنجره به یاد می‌ماند. این همان بده‌بستان فضا در برابر زمان کتاب است.
 
-## Related
+## پیوندها
 
-- Chapter note: [3. Error Management Design Patterns](../../chapters/03-error-management-design-patterns.md) — “Pattern: Windowed Deduplicator”, pp. 46–50
-- Explore in the browser: [Watermarks and late data](../../widgets/03-watermark.html)
+- یادداشت فصل: [فصل ۳: الگوهای طراحی مدیریت خطا](../../chapters/03-error-management-design-patterns.md) — «الگو: Windowed Deduplicator»، صص. ۴۶–۵۰
+- در مرورگر ببینید: [watermark و late data](../../widgets/03-watermark.html)

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bin Packing vs Partial Commits</title>
-<meta name="description" content="Deliver per-partner aggregates in event-time order to a broker with partial-commit semantics, one record at a time, in naive bulk requests, or in bins with at most one record per key, and see which keys end up out of order. Illustrates Data Engineering Design Patterns, Chapter 5.">
+<title>بسته‌بندی bin در برابر commit جزئی</title>
+<meta name="description" content="تجمیع هر شریک را به‌ترتیب زمان رویداد به brokerی با معنای commit جزئی تحویل بدهید، یکی‌یکی یا با درخواست bulk ساده یا با binهایی که حداکثر یک رکورد از هر کلید دارند، و ببینید کدام کلیدها بی‌ترتیب در می‌آیند. تصویری از فصل ۵ کتاب Data Engineering Design Patterns.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .lanes { display: grid; gap: 8px; }
@@ -25,21 +25,21 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-data-value-design-patterns.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Bin Pack Orderer</span>
+      <a href="../chapters/05-data-value-design-patterns.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">الگوی Bin Pack Orderer</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Data Value Design Patterns</div>
-  <h1>Bin packing vs partial commits</h1>
-  <p class="lede">Some bulk APIs can <strong>partially commit</strong>: part of a request lands and the rest fails. If 10:20 lands and 10:00 and 10:10 are retried, the consumer reads them out of order. The Bin Pack Orderer sorts records and packs them so that each bin holds at most one record per key. It sends bins one after another and finishes each bin's retries before starting the next.</p>
-  <p class="source-note">Illustrates “Pattern: Bin Pack Orderer” (pp. 153–158). The partial-commit example (10:00, 10:10, 10:20) is from p. 154, and bin construction follows Figure 5-9. The partners, their records and the per-record failure chance are the vault's (seeded). Every failed record is retried in the next request. Implementation is the vault's own.</p>
+  <div class="eyebrow">فصل ۵ · الگوهای طراحی ارزش داده</div>
+  <h1>بسته‌بندی bin در برابر commit جزئی</h1>
+  <p class="lede">بعضی APIهای bulk می‌توانند <strong>جزئی commit</strong> کنند، یعنی بخشی از درخواست می‌نشیند و بقیه شکست می‌خورد. اگر ۱۰:۲۰ بنشیند و ۱۰:۰۰ و ۱۰:۱۰ تلاش دوباره بخورند، consumer بی‌ترتیب می‌خواندشان. الگوی Bin Pack Orderer رکوردها را مرتب و طوری بسته‌بندی می‌کند که هر bin حداکثر یک رکورد از هر کلید داشته باشد. binها را پشت سر هم می‌فرستد و تلاش‌های دوباره‌ی هر bin را پیش از شروع bin بعدی تمام می‌کند.</p>
+  <p class="source-note">تصویری از «الگو: Bin Pack Orderer» (صص. ۱۵۳–۱۵۸). نمونه‌ی commit جزئی، یعنی ۱۰:۰۰ و ۱۰:۱۰ و ۱۰:۲۰، از ص. ۱۵۴ می‌آید، و ساختن bin از شکل ۵-۹. شریک‌ها و رکوردهایشان و شانس شکست هر رکورد مال خود vault است و با seed. هر رکورد شکست‌خورده در درخواست بعدی تلاش دوباره می‌خورد. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
@@ -50,39 +50,39 @@
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Controls</p>
+        <p class="panel-title">کنترل‌ها</p>
         <div id="mode"></div>
         <div id="sliders" style="margin-top:10px"></div>
         <div id="player" style="margin-top:12px"></div>
       </div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Naive bulk requests reorder keys.</strong> Whenever an early record fails and a later one of the same key succeeds, the retry lands after it.</li>
-    <li><strong>Bins can't reorder.</strong> A bin never holds two records of the same key, and bin <em>k+1</em> waits until bin <em>k</em> is fully written.</li>
-    <li><strong>Compare the request counts.</strong> One record per request is also ordered, but it costs a request per record. Bins need about as many requests as the longest key has records, plus retries.</li>
-    <li><strong>Set the failure chance to 0.</strong> All three strategies are then correct, and bulk wins. Ordering only breaks under partial failures.</li>
+    <li><strong>درخواست bulk ساده ترتیب کلیدها را به هم می‌زند.</strong> هر وقت رکوردی زودتر شکست بخورد و رکورد بعدی همان کلید موفق شود، تلاش دوباره بعد از آن می‌نشیند.</li>
+    <li><strong>binها نمی‌توانند ترتیب را به هم بزنند.</strong> هیچ binی دو رکورد از یک کلید ندارد، و bin <em>k+1</em> تا کامل نوشته شدن bin <em>k</em> منتظر می‌ماند.</li>
+    <li><strong>شمار درخواست‌ها را مقایسه کنید.</strong> یکی‌یکی فرستادن هم مرتب است، ولی برای هر رکورد یک درخواست خرج می‌کند. binها تقریباً به اندازه‌ی شمار رکوردهای بلندترین کلید درخواست می‌خواهند، به‌علاوه‌ی تلاش‌های دوباره.</li>
+    <li><strong>شانس شکست را صفر بگذارید.</strong> آن‌وقت هر سه راهبرد درست‌اند و bulk برنده است. ترتیب فقط زیر شکست جزئی می‌شکند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-data-value-design-patterns.html"><small>Lesson</small>5. Data Value Design Patterns</a></li>
+    <li><a href="../chapters/05-data-value-design-patterns.html"><small>درس</small>فصل ۵: الگوهای طراحی ارزش داده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var DATA = { "partner A": ["10:00", "10:10", "10:20"], "partner B": ["10:00", "10:10"], "partner C": ["10:00", "10:10", "10:20", "10:30"], "partner D": ["10:20"] };
+  var DATA = { "شریک A": ["10:00", "10:10", "10:20"], "شریک B": ["10:00", "10:10"], "شریک C": ["10:00", "10:10", "10:20", "10:30"], "شریک D": ["10:20"] };
   var KEYS = Object.keys(DATA), log = Kit.log(document.getElementById("log"));
   var cfg = { mode: "bulk", fail: 30 }, s, r;
 
@@ -95,14 +95,14 @@
     all.forEach(function (x) { (bins[x.i] = bins[x.i] || []).push(x); });
     s = { all: all, bins: bins, bin: 0, pending: cfg.mode === "bins" ? bins[0].slice() : all.slice(), out: {}, req: 0, last: [] };
     KEYS.forEach(function (k) { s.out[k] = []; });
-    log.clear(); log.add(cfg.mode === "bins" ? "Records sorted by key and event time, then packed into " + bins.length + " bins." : cfg.mode === "one" ? "One record per request, retried until it lands." : "One bulk request with all " + all.length + " records; failures are retried in the next request.", "muted");
+    log.clear(); log.add(cfg.mode === "bins" ? "رکوردها بر حسب کلید و زمان رویداد مرتب و بعد در " + bins.length + " bin بسته‌بندی شدند." : cfg.mode === "one" ? "یک رکورد در هر درخواست، با تلاش دوباره تا نشستنش." : "یک درخواست bulk با همه‌ی " + all.length + " رکورد؛ شکست‌ها در درخواست بعدی تلاش دوباره می‌خورند.", "muted");
     render();
   }
   function done() { return KEYS.every(function (k) { return s.out[k].length === DATA[k].length; }); }
 
   function step() {
     if (done()) return false;
-    if (!s.pending.length && cfg.mode === "bins") { s.bin++; s.pending = s.bins[s.bin].slice(); log.add("Bin " + (s.bin + 1) + " starts.", "muted"); }
+    if (!s.pending.length && cfg.mode === "bins") { s.bin++; s.pending = s.bins[s.bin].slice(); log.add("bin شماره‌ی " + (s.bin + 1) + " شروع می‌شود.", "muted"); }
     var batch = cfg.mode === "one" ? [s.pending[0]] : s.pending.slice();
     s.req++;
     var failed = [], ok = [];
@@ -110,11 +110,11 @@
     ok.forEach(function (x) { s.out[x.k].push(x); });
     s.pending = s.pending.filter(function (x) { return failed.indexOf(x) >= 0 || batch.indexOf(x) < 0; });
     s.last = batch;
-    var msg = "Request " + s.req + ": sends " + batch.length + ", " + ok.length + " land" + (failed.length ? ", " + failed.length + " fail (" + failed.map(function (x) { return x.k.slice(-1) + "@" + x.t; }).join(", ") + ")" : "");
+    var msg = "درخواست " + s.req + ": تعداد " + batch.length + " رکورد می‌فرستد، " + ok.length + " می‌نشیند" + (failed.length ? "، و " + failed.length + " شکست می‌خورد: " + failed.map(function (x) { return x.k.slice(-1) + "@" + x.t; }).join(", ") : "");
     var broke = ok.filter(function (x) { var o = s.out[x.k]; return o.length > 1 && o[o.length - 2].i > x.i; });
     log.add(msg, failed.length ? "warn" : "ok");
-    broke.forEach(function (x) { log.add("  " + x.k + " " + x.t + " lands after a later record: out of order", "bad"); });
-    if (cfg.mode === "bins" && !s.pending.length && s.bin < s.bins.length - 1) log.add("  bin " + (s.bin + 1) + " fully written", "ok");
+    broke.forEach(function (x) { log.add("  رکورد " + x.t + " از " + x.k + " بعد از رکوردی تازه‌تر نشست: بی‌ترتیب", "bad"); });
+    if (cfg.mode === "bins" && !s.pending.length && s.bin < s.bins.length - 1) log.add("  bin شماره‌ی " + (s.bin + 1) + " کامل نوشته شد", "ok");
     render();
     return !done();
   }
@@ -123,14 +123,14 @@
     var lanes = Kit.clear(document.getElementById("lanes"));
     var ooo = 0;
     KEYS.forEach(function (k) {
-      var recs = Kit.el("div", { class: "recs", "aria-label": k + " delivered records" });
+      var recs = Kit.el("div", { class: "recs", "aria-label": "رکوردهای تحویل‌شده‌ی " + k });
       var maxI = -1, bad = false;
       s.out[k].forEach(function (x) { var o = x.i < maxI; if (o) bad = true; maxI = Math.max(maxI, x.i); recs.appendChild(Kit.el("span", { class: "rec" + (o ? " ooo" : "") }, x.t + (o ? " ✕" : ""))); });
       s.pending.forEach(function (x) { if (x.k === k) recs.appendChild(Kit.el("span", { class: "rec pend" }, x.t + " …")); });
       if (bad) ooo++;
       var full = s.out[k].length === DATA[k].length;
       lanes.appendChild(Kit.el("div", { class: "lane" }, Kit.el("span", { class: "k" }, k), recs,
-        Kit.el("span", { class: bad ? "bad-l" : "ok-l" }, bad ? "out of order" : full ? "in order ✓" : "")));
+        Kit.el("span", { class: bad ? "bad-l" : "ok-l" }, bad ? "بی‌ترتیب" : full ? "مرتب ✓" : "")));
     });
     var bins = Kit.clear(document.getElementById("bins"));
     if (cfg.mode === "bins") s.bins.forEach(function (b, i) {
@@ -138,28 +138,28 @@
     });
     var st = Kit.clear(document.getElementById("stats"));
     var delivered = KEYS.reduce(function (a, k) { return a + s.out[k].length; }, 0);
-    [["Requests", s.req, ""], ["Delivered", delivered + " / " + s.all.length, ""], ["Keys out of order", ooo, ooo ? "bad" : "ok"]].forEach(function (x) {
+    [["درخواست", s.req, ""], ["تحویل‌شده", delivered + " / " + s.all.length, ""], ["کلید بی‌ترتیب", ooo, ooo ? "bad" : "ok"]].forEach(function (x) {
       st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
     });
   }
 
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Delivery strategy", value: cfg.mode,
-    options: [{ value: "one", label: "One by one" }, { value: "bulk", label: "Naive bulk" }, { value: "bins", label: "Bins" }],
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "راهبرد تحویل", value: cfg.mode,
+    options: [{ value: "one", label: "یکی‌یکی" }, { value: "bulk", label: "bulk ساده" }, { value: "bins", label: "با bin" }],
     onChange: function (v) { cfg.mode = v; reset(); } }).element);
-  document.getElementById("sliders").appendChild(Kit.slider({ label: "Chance a record fails in a request", min: 0, max: 60, step: 5, value: cfg.fail, unit: "%", onInput: function (v) { cfg.fail = v; reset(); } }).element);
+  document.getElementById("sliders").appendChild(Kit.slider({ label: "شانس شکست هر رکورد در یک درخواست", min: 0, max: 60, step: 5, value: cfg.fail, unit: "٪", onInput: function (v) { cfg.fail = v; reset(); } }).element);
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What does each bin contain?",
-      options: ["All records of one key", "At most one record per key, so the k-th record of every key goes into bin k", "A fixed number of random records"], answer: 1,
-      explain: "Records are sorted by key and event time, then packed (Figure 5-9, pp. 155–156)." },
-    { q: "Why can a retry inside a bin never break the order?",
-      options: ["The broker sorts records", "A bin has no two records of the same key, and the next bin waits until this one is fully written", "Retries are sent first"], answer: 1,
-      explain: "pp. 155–156." },
-    { q: "Which failure can still break ordering with bins?",
-      options: ["A partial commit inside a bin", "A retry of the whole pipeline, which resends bins that were already emitted", "None"], answer: 1,
-      explain: "The book lists retries of the whole job as a consequence (p. 157)." }
+    { q: "هر bin چه چیزی دارد؟",
+      options: ["همه‌ی رکوردهای یک کلید", "حداکثر یک رکورد از هر کلید، پس رکورد k‌ام هر کلید در bin شماره‌ی k می‌رود", "شمار ثابتی از رکوردهای تصادفی"], answer: 1,
+      explain: "رکوردها بر حسب کلید و زمان رویداد مرتب و بعد بسته‌بندی می‌شوند (شکل ۵-۹، صص. ۱۵۵–۱۵۶)." },
+    { q: "چرا تلاش دوباره داخل یک bin هیچ‌وقت نمی‌تواند ترتیب را بشکند؟",
+      options: ["ابزار broker رکوردها را مرتب می‌کند", "یک bin دو رکورد از یک کلید ندارد، و bin بعدی تا کامل نوشته شدن این یکی منتظر می‌ماند", "تلاش‌های دوباره اول فرستاده می‌شوند"], answer: 1,
+      explain: "صص. ۱۵۵–۱۵۶." },
+    { q: "کدام شکست باز هم می‌تواند با binها ترتیب را بشکند؟",
+      options: ["یک commit جزئی داخل یک bin", "تلاش دوباره‌ی کل pipeline، که binهای از قبل منتشرشده را دوباره می‌فرستد", "هیچ‌کدام"], answer: 1,
+      explain: "کتاب تلاش دوباره‌ی کل job را به‌عنوان یک پیامد می‌آورد (ص. ۱۵۷)." }
   ]);
 })();
 </script>

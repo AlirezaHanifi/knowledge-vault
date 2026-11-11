@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Schema Compatibility Checker</title>
-<meta name="description" content="Evolve the book's Order and Visit schemas, pick backward, forward or full compatibility, transitive or not, and see which reader versions can read which writer versions and which changes a registry rejects. Illustrates Data Engineering Design Patterns, Chapter 9.">
+<title>بررسی‌کننده‌ی schema compatibility</title>
+<meta name="description" content="schemaهای Order و Visit کتاب را تکامل بدهید، backward compatibility یا رو‌به‌جلو یا کامل را transitive یا non-transitive انتخاب کنید، و ببینید کدام نسخه‌ی خواننده کدام نسخه‌ی نویسنده را می‌خواند و registry چه تغییری را رد می‌کند. تصویری از فصل ۹ کتاب Data Engineering Design Patterns.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .vers { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
@@ -24,71 +24,71 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/09-data-quality-design-patterns.html">Chapter 9</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Schema compatibility</span>
+      <a href="../chapters/09-data-quality-design-patterns.html">فصل ۹</a><span aria-hidden="true">/</span>
+      <span aria-current="page">schema compatibility</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 9 · Data Quality Design Patterns</div>
-  <h1>Schema compatibility checker</h1>
-  <p class="lede">A schema registry accepts a new version only if readers can still handle it. <strong>Backward</strong> compatibility means a new reader can read old data. <strong>Forward</strong> means an old reader can read new data. <strong>Full</strong> means both. <strong>Transitive</strong> modes check against every earlier version, not just the previous one.</p>
-  <p class="source-note">Illustrates “Pattern: Schema Compatibility Enforcer” (pp. 284–290). The presets are the book's Order v0 → v1 → v2 (pp. 287–288) and its forward-compatible Visit schema with a producer that drops <code>visit_id</code> (p. 289). The reading rule is Avro-like: a reader's field that's missing from the data needs a default, and extra fields in the data are ignored. Types never change here. Implementation is the vault's own.</p>
+  <div class="eyebrow">فصل ۹ · الگوهای طراحی کیفیت داده</div>
+  <h1>بررسی‌کننده‌ی schema compatibility</h1>
+  <p class="lede">یک schema registry نسخه‌ی تازه را فقط وقتی می‌پذیرد که خواننده‌ها باز هم بتوانند از پسش بر بیایند. سازگاری <strong>رو‌به‌عقب</strong> یعنی خواننده‌ی تازه می‌تواند داده‌ی قدیمی را بخواند. <strong>رو‌به‌جلو</strong> یعنی خواننده‌ی قدیمی می‌تواند داده‌ی تازه را بخواند. <strong>کامل</strong> یعنی هر دو. حالت‌های <strong>transitive</strong> با هر نسخه‌ی قبل‌تر بررسی می‌شوند و نه فقط با قبلی.</p>
+  <p class="source-note">تصویری از «الگو: Schema Compatibility Enforcer» (صص. ۲۸۴–۲۹۰). حالت‌های آماده همان Order کتاب از v0 به v1 به v2 است (صص. ۲۸۷–۲۸۸) و schema سازگار رو‌به‌جلوی Visit با producerی که <code>visit_id</code> را می‌اندازد (ص. ۲۸۹). قاعده‌ی خواندن شبیه Avro است: فیلدی از خواننده که در داده نیست پیش‌فرض می‌خواهد، و فیلدهای اضافه در داده نادیده گرفته می‌شوند. نوع‌ها این‌جا هیچ‌وقت عوض نمی‌شوند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel">
         <div class="vers" id="vers"></div>
-        <table class="mx" id="mx" aria-label="Which reader version can read which writer version"></table>
+        <table class="mx" id="mx" aria-label="کدام نسخه‌ی خواننده کدام نسخه‌ی نویسنده را می‌خواند"></table>
         <pre class="err" id="err" hidden></pre>
       </div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Controls</p>
+        <p class="panel-title">کنترل‌ها</p>
         <div id="preset"></div>
         <div id="mode" style="margin-top:10px"></div>
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="trans"> Transitive</label>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="trans"> transitive</label>
         <div class="evolve">
-          <label class="sr-only" for="chg">Change</label>
+          <label class="sr-only" for="chg">تغییر</label>
           <select id="chg">
-            <option value="addopt">Add optional field</option>
-            <option value="addreq">Add required field</option>
-            <option value="del">Delete field</option>
-            <option value="req">Remove a field's default</option>
-            <option value="opt">Give a field a default</option>
+            <option value="addopt">افزودن فیلد اختیاری</option>
+            <option value="addreq">افزودن فیلد الزامی</option>
+            <option value="del">حذف فیلد</option>
+            <option value="req">برداشتن پیش‌فرض یک فیلد</option>
+            <option value="opt">دادن پیش‌فرض به یک فیلد</option>
           </select>
-          <label class="sr-only" for="fld">Field</label>
+          <label class="sr-only" for="fld">فیلد</label>
           <select id="fld"></select>
-          <button class="btn primary" type="button" id="reg">Register new version</button>
-          <button class="btn" type="button" id="reset">↺ Reset</button>
+          <button class="btn primary" type="button" id="reg">ثبت نسخه‌ی تازه</button>
+          <button class="btn" type="button" id="reset">↺ از نو</button>
         </div>
       </div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Order preset, backward mode.</strong> v2 can read v1 data, where the default fills <code>amount</code>, but not v0 data. Tick <em>Transitive</em> and v2 is rejected (pp. 287–288).</li>
-    <li><strong>Visit preset, forward mode.</strong> An old reader needs <code>visit_id</code>, which has no default, so registering the version without it fails with <code>READER_FIELD_MISSING_DEFAULT_VALUE</code> (p. 289).</li>
-    <li><strong>Mirror-image rules.</strong> Backward allows deleting fields and adding optional ones. Forward allows adding fields and deleting optional ones (Table 9-1).</li>
-    <li><strong>A rename is a delete plus an add.</strong> Under full compatibility it needs the Schema Migrator's grace period.</li>
+    <li><strong>حالت آماده‌ی Order با backward compatibility.</strong> نسخه‌ی v2 می‌تواند داده‌ی v1 را بخواند، چون پیش‌فرض، <code>amount</code> را پر می‌کند، ولی داده‌ی v0 را نه. گزینه‌ی <em>transitive</em> را بزنید و v2 رد می‌شود (صص. ۲۸۷–۲۸۸).</li>
+    <li><strong>حالت آماده‌ی Visit با forward compatibility.</strong> خواننده‌ی قدیمی به <code>visit_id</code> نیاز دارد که پیش‌فرض ندارد، پس ثبت نسخه‌ای بی آن با <code>READER_FIELD_MISSING_DEFAULT_VALUE</code> شکست می‌خورد (ص. ۲۸۹).</li>
+    <li><strong>قاعده‌های آینه‌ای.</strong> رو‌به‌عقب اجازه‌ی حذف فیلد و افزودن فیلد اختیاری می‌دهد. رو‌به‌جلو اجازه‌ی افزودن فیلد و حذف فیلد اختیاری (جدول ۹-۱).</li>
+    <li><strong>تغییر نام یعنی یک حذف به‌علاوه‌ی یک افزودن.</strong> زیر سازگاری کامل به دوره‌ی مهلت Schema Migrator نیاز دارد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/09-data-quality-design-patterns.html"><small>Lesson</small>9. Data Quality Design Patterns</a></li>
+    <li><a href="../chapters/09-data-quality-design-patterns.html"><small>درس</small>فصل ۹: الگوهای طراحی کیفیت داده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -98,9 +98,9 @@
   var log = Kit.log(document.getElementById("log"));
   var PRESETS = {
     order: { mode: "backward", vers: [[{ n: "order_id", t: "LONG", d: false }], [{ n: "order_id", t: "LONG", d: false }, { n: "amount", t: "DOUBLE", d: true }]],
-      next: { chg: "req", fld: "amount" }, intro: "Order v0 and v1 registered (backward). Try removing amount's default to create v2." },
+      next: { chg: "req", fld: "amount" }, intro: "نسخه‌های v0 و v1 از Order ثبت شده‌اند، با backward compatibility. برداشتن پیش‌فرض amount را امتحان کنید تا v2 بسازید." },
     visit: { mode: "forward", vers: [[{ n: "visit_id", t: "string", d: false }, { n: "event_time", t: "int", d: false }]],
-      next: { chg: "del", fld: "visit_id" }, intro: "Visit v0 registered (forward). Try deleting visit_id." }
+      next: { chg: "del", fld: "visit_id" }, intro: "نسخه‌ی v0 از Visit ثبت شده، با forward compatibility. حذف visit_id را امتحان کنید." }
   };
   var cfg = { preset: "order", mode: "backward", trans: false }, s, modeCtl;
 
@@ -112,8 +112,8 @@
     var against = cfg.trans ? vers : vers.slice(-1), probs = [];
     against.forEach(function (old) {
       var i = vers.indexOf(old);
-      if (cfg.mode !== "forward") { var m = canRead(cand, old); if (m) probs.push("new reader can't read v" + i + " data: field '" + m + "' has no default and is missing from v" + i); }
-      if (cfg.mode !== "backward") { var m2 = canRead(old, cand); if (m2) probs.push("v" + i + " reader can't read new data: the field '" + m2 + "' in v" + i + " has no default and is missing in the new schema"); }
+      if (cfg.mode !== "forward") { var m = canRead(cand, old); if (m) probs.push("خواننده‌ی تازه نمی‌تواند داده‌ی v" + i + " را بخواند: فیلد '" + m + "' پیش‌فرض ندارد و در v" + i + " نیست"); }
+      if (cfg.mode !== "backward") { var m2 = canRead(old, cand); if (m2) probs.push("خواننده‌ی v" + i + " نمی‌تواند داده‌ی تازه را بخواند: فیلد '" + m2 + "' در v" + i + " پیش‌فرض ندارد و در schema تازه نیست"); }
     });
     return probs;
   }
@@ -130,23 +130,23 @@
   function register() {
     var chg = document.getElementById("chg").value, fld = document.getElementById("fld").value;
     var cand = s.vers[s.vers.length - 1].map(function (f) { return Object.assign({}, f); }), what;
-    if (chg === "addopt" || chg === "addreq") { var n = cfg.preset === "order" ? ["currency", "customer_id", "note"][Math.min(2, s.nf - 1)] : ["page", "user_id", "referral"][Math.min(2, s.nf - 1)]; s.nf++; cand.push({ n: n, t: "STRING", d: chg === "addopt" }); what = "add " + (chg === "addopt" ? "optional" : "required") + " field " + n; }
+    if (chg === "addopt" || chg === "addreq") { var n = cfg.preset === "order" ? ["currency", "customer_id", "note"][Math.min(2, s.nf - 1)] : ["page", "user_id", "referral"][Math.min(2, s.nf - 1)]; s.nf++; cand.push({ n: n, t: "STRING", d: chg === "addopt" }); what = "افزودن فیلد " + (chg === "addopt" ? "اختیاری" : "الزامی") + " " + n; }
     else {
       var f = cand.filter(function (x) { return x.n === fld; })[0];
       if (!f) return;
-      if (chg === "del") { cand = cand.filter(function (x) { return x !== f; }); what = "delete " + fld; }
-      else if (chg === "req") { if (!f.d) { log.add(fld + " already has no default.", "muted"); return; } f.d = false; what = "remove the default of " + fld; }
-      else { if (f.d) { log.add(fld + " already has a default.", "muted"); return; } f.d = true; what = "give " + fld + " a default"; }
+      if (chg === "del") { cand = cand.filter(function (x) { return x !== f; }); what = "حذف " + fld; }
+      else if (chg === "req") { if (!f.d) { log.add("فیلد " + fld + " از قبل پیش‌فرض ندارد.", "muted"); return; } f.d = false; what = "برداشتن پیش‌فرض " + fld; }
+      else { if (f.d) { log.add("فیلد " + fld + " از قبل پیش‌فرض دارد.", "muted"); return; } f.d = true; what = "دادن پیش‌فرض به " + fld; }
     }
     var probs = check(cand, s.vers), err = document.getElementById("err");
     if (probs.length) {
       s.rejected = cand;
       err.hidden = false;
       err.textContent = "409 Schema being registered is incompatible with an earlier schema (" + cfg.mode + (cfg.trans ? " transitive" : "") + "):\n- " + probs.join("\n- ");
-      log.add("Rejected: " + what, "bad");
+      log.add("رد شد: " + what, "bad");
     } else {
       s.vers.push(cand); s.rejected = null; err.hidden = true;
-      log.add("Registered v" + (s.vers.length - 1) + ": " + what, "ok");
+      log.add("ثبت شد، نسخه‌ی v" + (s.vers.length - 1) + ": " + what, "ok");
     }
     render();
   }
@@ -157,17 +157,17 @@
       vb.appendChild(Kit.el("div", { class: "ver " + (cls || "") }, Kit.el("b", null, label), v.map(function (f) { return Kit.el("div", null, f.n + " " + f.t + (f.d ? " DEFAULT" : " REQUIRED")); })));
     }
     s.vers.forEach(function (v, i) { card(v, "v" + i, ""); });
-    if (s.rejected) card(s.rejected, "rejected candidate", "rej");
+    if (s.rejected) card(s.rejected, "نامزد رد‌شده", "rej");
     var mx = Kit.clear(document.getElementById("mx"));
-    var head = Kit.el("tr", null, Kit.el("th", null, "reader ↓ / data →"));
-    s.vers.forEach(function (_, i) { head.appendChild(Kit.el("th", null, "v" + i + " data")); });
+    var head = Kit.el("tr", null, Kit.el("th", null, "خواننده ↓ / داده →"));
+    s.vers.forEach(function (_, i) { head.appendChild(Kit.el("th", null, "داده‌ی v" + i)); });
     mx.appendChild(head);
     s.vers.forEach(function (rv, i) {
-      var tr = Kit.el("tr", null, Kit.el("th", null, "v" + i + " reader"));
+      var tr = Kit.el("tr", null, Kit.el("th", null, "خواننده‌ی v" + i));
       s.vers.forEach(function (wv, j) {
         if (i === j) { tr.appendChild(Kit.el("td", { class: "self" }, "—")); return; }
         var m = canRead(rv, wv);
-        tr.appendChild(Kit.el("td", { class: m ? "no" : "ok", title: m ? "missing " + m : "" }, m ? "✕ " + m : "✓"));
+        tr.appendChild(Kit.el("td", { class: m ? "no" : "ok", title: m ? "غایب: " + m : "" }, m ? "✕ " + m : "✓"));
       });
       mx.appendChild(tr);
     });
@@ -175,32 +175,32 @@
     s.vers[s.vers.length - 1].forEach(function (f) { fs.appendChild(Kit.el("option", { value: f.n }, f.n)); });
   }
 
-  document.getElementById("preset").appendChild(Kit.segmented({ label: "Schema", value: cfg.preset,
-    options: [{ value: "order", label: "Order (pp. 287–288)" }, { value: "visit", label: "Visit (p. 289)" }],
+  document.getElementById("preset").appendChild(Kit.segmented({ label: "schema", value: cfg.preset,
+    options: [{ value: "order", label: "Order، صص. ۲۸۷–۲۸۸" }, { value: "visit", label: "Visit، ص. ۲۸۹" }],
     onChange: function (v) { cfg.preset = v; cfg.mode = PRESETS[v].mode; rebuildMode(); reset(); } }).element);
   function rebuildMode() {
     var m = Kit.clear(document.getElementById("mode"));
-    modeCtl = Kit.segmented({ label: "Compatibility mode", value: cfg.mode,
-      options: [{ value: "backward", label: "Backward" }, { value: "forward", label: "Forward" }, { value: "full", label: "Full" }],
-      onChange: function (v) { cfg.mode = v; log.add("Mode: " + v + (cfg.trans ? " transitive" : ""), "muted"); } });
+    modeCtl = Kit.segmented({ label: "حالت سازگاری", value: cfg.mode,
+      options: [{ value: "backward", label: "رو‌به‌عقب" }, { value: "forward", label: "رو‌به‌جلو" }, { value: "full", label: "کامل" }],
+      onChange: function (v) { cfg.mode = v; log.add("حالت: " + ({ backward: "رو‌به‌عقب", forward: "رو‌به‌جلو", full: "کامل" })[v] + (cfg.trans ? " transitive" : " non-transitive"), "muted"); } });
     m.appendChild(modeCtl.element);
   }
   rebuildMode();
-  document.getElementById("trans").addEventListener("change", function (e) { cfg.trans = e.target.checked; log.add(cfg.trans ? "Transitive: check against all earlier versions." : "Nontransitive: check against the previous version only.", "muted"); });
+  document.getElementById("trans").addEventListener("change", function (e) { cfg.trans = e.target.checked; log.add(cfg.trans ? "transitive: با همه‌ی نسخه‌های قبل‌تر بررسی می‌شود." : "non-transitive: فقط با نسخه‌ی قبلی بررسی می‌شود.", "muted"); });
   document.getElementById("reg").addEventListener("click", register);
   document.getElementById("reset").addEventListener("click", reset);
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Under backward compatibility, which change is allowed?",
-      options: ["Adding a required field", "Adding an optional field", "Removing a field's default"], answer: 1,
-      explain: "A new reader reading old data needs a default for any field the old data lacks (Table 9-1, p. 287)." },
-    { q: "v1 added amount with a default, and v2 makes it required. Which mode rejects v2?",
-      options: ["Backward nontransitive", "Backward transitive", "Neither"], answer: 1,
-      explain: "v2 can read v1 data but not v0 data, which has no amount (pp. 287–288)." },
-    { q: "Why does the Schema Migrator need nontransitive compatibility?",
-      options: ["Transitive modes are slower", "Under a transitive mode, no rename or removal could ever complete", "It doesn't"], answer: 1,
-      explain: "p. 290." }
+    { q: "زیر سازگاری رو‌به‌عقب، کدام تغییر مجاز است؟",
+      options: ["افزودن یک فیلد الزامی", "افزودن یک فیلد اختیاری", "برداشتن پیش‌فرض یک فیلد"], answer: 1,
+      explain: "خواننده‌ی تازه‌ای که داده‌ی قدیمی را می‌خواند برای هر فیلدی که در داده‌ی قدیمی نیست پیش‌فرض می‌خواهد (جدول ۹-۱، ص. ۲۸۷)." },
+    { q: "نسخه‌ی v1 فیلد amount را با پیش‌فرض اضافه کرد و v2 الزامی‌اش می‌کند. کدام حالت v2 را رد می‌کند؟",
+      options: ["رو‌به‌عقب non-transitive", "رو‌به‌عقب transitive", "هیچ‌کدام"], answer: 1,
+      explain: "نسخه‌ی v2 داده‌ی v1 را می‌خواند ولی داده‌ی v0 را نه، که amount ندارد (صص. ۲۸۷–۲۸۸)." },
+    { q: "چرا Schema Migrator به سازگاری non-transitive نیاز دارد؟",
+      options: ["حالت‌های transitive کندترند", "زیر یک حالت گذرا، هیچ تغییر نام یا حذفی هیچ‌وقت کامل نمی‌شود", "نیاز ندارد"], answer: 1,
+      explain: "ص. ۲۹۰." }
   ]);
 })();
 </script>

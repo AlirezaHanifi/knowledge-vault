@@ -3,47 +3,49 @@ book: data-engineering-design-patterns
 chapter: 6
 title: "Data Flow Design Patterns"
 pages: "165–196"
+translated_title: "الگوهای طراحی جریان داده"
+lang: fa
 ---
 
-# 6. Data Flow Design Patterns
+# فصل ۶: الگوهای طراحی جریان داده
 
-[← 5. Data Value Design Patterns](05-data-value-design-patterns.md) · [Book](../README.md) · [7. Data Security Design Patterns →](07-data-security-design-patterns.md)
+[فصل ۵: الگوهای طراحی ارزش داده →](05-data-value-design-patterns.md) · [کتاب](../README.md) · [فصل ۷: الگوهای طراحی امنیت داده ←](07-data-security-design-patterns.md)
 
-## Summary
+## خلاصه
 
-Value you create stays local until it flows to other teams — and their datasets flow back to you. Data flow patterns design and coordinate the steps that produce a dataset, at two levels: **data orchestration** (one or many pipelines, crossing team boundaries) and **data processing** (organizing business logic inside a job). The chapter's eight patterns come in four pairs. **Sequence**: the **Local Sequencer** splits a big job into restartable steps, the **Isolated Sequencer** links pipelines owned by different teams through data (readiness markers) or tasks (direct triggers). **Fan-in**: the **Aligned Fan-In** waits for all parents (e.g. 24 hourly branches → one daily aggregate), the **Unaligned Fan-In** proceeds anyway and flags partial data. **Fan-out**: the **Parallel Split** runs several branches from one parent, the **Exclusive Choice** picks one. **Orchestration**: the **Single Runner** forbids concurrent runs (needed for incremental logic), the **Concurrent Runner** allows them for independent datasets.
+ارزشی که می‌سازید تا به تیم‌های دیگر نرسد محلی می‌ماند، و مجموعه‌داده‌های آن‌ها هم به شما برمی‌گردند. الگوهای جریان داده، مرحله‌هایی را که یک مجموعه‌داده را می‌سازند طراحی و هماهنگ می‌کنند، در دو سطح: **زمان‌بندی داده**، یعنی یک یا چند pipeline که از مرز تیم‌ها رد می‌شوند، و **پردازش داده**، یعنی سازمان دادن منطق کسب‌وکار داخل یک job. هشت الگوی این فصل چهار جفت‌اند. **ترتیب**: الگوی **Local Sequencer** یک job بزرگ را به مرحله‌های راه‌اندازی‌دوباره‌پذیر می‌شکند، و **Isolated Sequencer** pipelineهای تیم‌های مختلف را از راه داده، یعنی readiness marker، یا از راه task، یعنی trigger مستقیم، به هم وصل می‌کند. **Fan-in**: الگوی **Aligned Fan-In** منتظر همه‌ی پدرها می‌ماند، مثلاً ۲۴ شاخه‌ی ساعتی که به یک تجمیع روزانه می‌رسند، و **Unaligned Fan-In** باز هم جلو می‌رود و داده‌ی جزئی را پرچم می‌زند. **Fan-out**: الگوی **Parallel Split** چند شاخه را از یک پدر اجرا می‌کند و **Exclusive Choice** یکی را انتخاب. **زمان‌بندی**: الگوی **Single Runner** اجرای هم‌زمان را ممنوع می‌کند، که منطق افزایشی به آن نیاز دارد، و **Concurrent Runner** برای مجموعه‌داده‌های مستقل اجازه‌اش می‌دهد.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Draw boundaries where you would want to restart**: an expensive step (like paid API calls) shouldn't rerun because a later step failed; keep transactionally linked operations together (pp. 167–168).
-- **Data-based dependencies are loose, task-based ones tight**: a readiness marker lets the consumer change freely; a direct trigger breaks when the consumer renames a task and couples schedules (pp. 171–172).
-- **Fan-in gives faster feedback and cheaper fixes**: 24 hourly jobs report errors sooner and only the failed hour needs replaying — at the cost of load spikes, scheduling skew and overhead (pp. 176–177).
-- **If you publish partial data, say so**: a completeness table, tags or an `is_approximate` flag (12 of 24 hours = 50%) (pp. 180–181).
-- **Parallel branches must share the parent's work, not repeat it**: persist the intermediate dataset; split jobs whose branches need different hardware (pp. 183–186).
-- **Branches multiply complexity**: prefer conditions evaluated in the orchestrator (visible) and on metadata (cheap) (pp. 187–191).
-- **A Single Runner is slow to backfill and accumulates latency** when runs take longer than the schedule (30 min → 1.5 h on an hourly flow); a Concurrent Runner risks starvation and shared state (pp. 192–194).
+- **مرزها را جایی بکشید که می‌خواهید از آن‌جا دوباره راه بیندازید**: مرحله‌ی گران، مثل فراخوانی API پولی، نباید به‌خاطر شکست مرحله‌ی بعدی دوباره اجرا شود؛ عملیاتی که تراکنشی به هم وصل‌اند با هم بمانند (pp. 167–168).
+- **وابستگی داده‌محور شل است و task‌محور تنگ**: یک readiness marker می‌گذارد consumer آزاد عوض شود، در حالی که trigger مستقیم با تغییر نام یک task در سمت consumer می‌شکند و زمان‌بندی‌ها را جفت می‌کند (pp. 171–172).
+- **الگوی fan-in بازخورد سریع‌تر و اصلاح ارزان‌تر می‌دهد**: ۲۴ job ساعتی خطا را زودتر خبر می‌دهند و فقط ساعت شکست‌خورده دوباره اجرا می‌شود، به قیمت spike بار و انحراف زمان‌بندی و سرریز (pp. 176–177).
+- **اگر داده‌ی جزئی منتشر می‌کنید، بگویید**: یک جدول کامل بودن، یا tag، یا پرچم `is_approximate`؛ مثلاً ۱۲ ساعت از ۲۴ ساعت یعنی ۵۰٪ (pp. 180–181).
+- **شاخه‌های موازی باید کار پدر را شریک شوند، نه تکرارش کنند**: مجموعه‌داده‌ی میانی را durable کنید، و jobهایی را که شاخه‌هایشان سخت‌افزار مختلف می‌خواهند بشکنید (pp. 183–186).
+- **شاخه، پیچیدگی را چند برابر می‌کند**: شرط‌هایی را ترجیح بدهید که در scheduler ارزیابی می‌شوند، یعنی پیدا، و روی metadata، یعنی ارزان (pp. 187–191).
+- **الگوی Single Runner در backfill کند است و تأخیر جمع می‌کند** وقتی اجراها از زمان‌بندی طولانی‌تر شوند، مثل نیم ساعت که روی جریانی ساعتی یک ساعت و نیم می‌شود؛ و Concurrent Runner خطر گرسنگی و shared state دارد (pp. 192–194).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Sequence — p. 166
-  - Pattern: Local Sequencer — p. 166
-  - Pattern: Isolated Sequencer — p. 170
-- Fan-In — p. 174
-  - Pattern: Aligned Fan-In — p. 175
-  - Pattern: Unaligned Fan-In — p. 178
-- Fan-Out — p. 182
-  - Pattern: Parallel Split — p. 182
-  - Pattern: Exclusive Choice — p. 186
-- Orchestration — p. 191
-  - Pattern: Single Runner — p. 191
-  - Pattern: Concurrent Runner — p. 193
-- Summary — p. 195
+- ترتیب — p. 166
+  - الگو: Local Sequencer — p. 166
+  - الگو: Isolated Sequencer — p. 170
+- الگوی Fan-In — p. 174
+  - الگو: Aligned Fan-In — p. 175
+  - الگو: Unaligned Fan-In — p. 178
+- الگوی Fan-Out — p. 182
+  - الگو: Parallel Split — p. 182
+  - الگو: Exclusive Choice — p. 186
+- زمان‌بندی — p. 191
+  - الگو: Single Runner — p. 191
+  - الگو: Concurrent Runner — p. 193
+- خلاصه — p. 195
 
-## Notes
+## یادداشت‌ها
 
-Sharing your datasets with other teams — and using theirs — multiplies value, but needs its own rules: chaining tasks, parallel or exclusive branches, and dependencies between physically separate pipelines (p. 165). The patterns work at the **data orchestration** level (pipelines, cross-team collaboration) and the **data processing** level (organizing job logic) (p. 165).
+به اشتراک گذاشتن مجموعه‌داده‌هایتان با تیم‌های دیگر و به کار بردن مال آن‌ها، ارزش را چند برابر می‌کند، ولی قاعده‌های خودش را می‌خواهد: زنجیر کردن taskها، شاخه‌های موازی یا انحصاری، و وابستگی بین pipelineهای فیزیکی جدا (p. 165). این الگوها در سطح **زمان‌بندی داده**، یعنی pipelineها و همکاری بین تیم‌ها، و سطح **پردازش داده**، یعنی سازمان دادن منطق job، کار می‌کنند (p. 165).
 
 ```mermaid
 flowchart LR
@@ -64,58 +66,64 @@ flowchart LR
     end
 ```
 
-*The vault's sketch of the three flow shapes; orchestration patterns control how many runs execute at once.*
+*طرح vault از سه شکل جریان؛ الگوهای زمان‌بندی تعیین می‌کنند چند اجرا با هم بروند.*
 
-### Sequence
+### ترتیب
 
-Sequencing affects complexity, performance and maintenance: a job writing to several databases as one unit must rerun entirely to reload just one of them (p. 166).
+ترتیب دادن روی پیچیدگی و performance و نگه‌داری اثر دارد: jobی که در چند دیتابیس به‌عنوان یک واحد می‌نویسد، برای بار کردن دوباره‌ی فقط یکی‌شان باید کامل دوباره اجرا شود (p. 166).
 
-#### Pattern: Local Sequencer (pp. 166–170)
+#### الگو: Local Sequencer (pp. 166–170)
 
-**Problem.** An old analytics job grew from dozens to hundreds of lines with three times more transformations; it fails often and always restarts from the beginning. Simplify it without dropping business logic (p. 166).
+**مسئله.** یک job تحلیلی قدیمی از چند ده خط به چند صد خط رسیده و سه برابر تبدیل بیشتری دارد؛ زیاد شکست می‌خورد و همیشه از اول راه می‌افتد. ساده‌اش کنید بی آن که منطق کسب‌وکار را بیندازید (p. 166).
 
-**Solution** (pp. 166–167): decompose it into smaller steps run sequentially, ordered by **dataset dependencies** (if B needs A's data, B runs after A) — e.g. a **Readiness Marker** task followed by a **Full Loader** task, either as two orchestrated tasks or one processing task (Figure 6-1). Three criteria decide where the sequence lives:
+**راه‌حل** (pp. 166–167): به مرحله‌های کوچک‌تری تجزیه‌اش کنید که پشت سر هم اجرا می‌شوند و با **وابستگی مجموعه‌داده** مرتب شده‌اند، یعنی اگر B به داده‌ی A نیاز دارد بعد از A برود؛ مثلاً یک task از جنس **Readiness Marker** و بعدش یک task از جنس **Full Loader**، که یا دو task زمان‌بندی‌شده‌اند یا یک task پردازش (شکل ۶-۱). سه معیار تعیین می‌کند ترتیب کجا بنشیند:
 
-| Criterion | Signal |
+| معیار | نشانه |
 |---|---|
-| **Separation of concerns** | Struggling to name a task, or a too-long name, means it does too much |
-| **Maintainability** | Retries and backfills recompute everything before the failure — e.g. a readiness check calling **10 paid APIs** rerun after three failures |
-| **Implementation effort** | Orchestrators offer ready-made operators (SQL, API calls); one big task reinvents them |
+| **جداسازی دغدغه‌ها** | سختی در نام گذاشتن روی یک task، یا نامی خیلی بلند، یعنی کار زیادی می‌کند |
+| **نگه‌داشتنی بودن** | تلاش دوباره و backfill هر چیزی را که پیش از شکست بود دوباره حساب می‌کنند؛ مثلاً یک بررسی آمادگی که **ده API پولی** را صدا می‌زند و بعد از سه شکست دوباره اجرا می‌شود |
+| **تلاش پیاده‌سازی** | schedulerها operatorهای آماده می‌دهند، مثل SQL و فراخوانی API؛ یک task بزرگ همه‌شان را از نو می‌سازد |
 
-**Consequences** (p. 168): **boundaries** — too coarse or too fine hurts execution time and scheduler capacity. Think in **restart boundaries**: Readiness Marker and Full Loader should fail independently (the marker needn't rerun if loading fails, assuming immutable source data). Inside a job, cut between the most compute-expensive operations. Keep **transactional units** together — e.g. the Dynamic Late Data Integrator's processing and its state-table update.
+**پیامدها** (p. 168): **مرزها**، یعنی مرز خیلی درشت یا خیلی ریز به زمان اجرا و ظرفیت scheduler آسیب می‌زند. به **مرز راه‌اندازی دوباره** فکر کنید: Readiness Marker و Full Loader باید جدا شکست بخورند، یعنی اگر بار‌گذاری شکست خورد لازم نیست marker دوباره اجرا شود، به شرط آن که داده‌ی منبع immutable باشد. داخل یک job، بین گران‌ترین عملیات محاسبه‌ای ببرید. **واحدهای تراکنشی** را با هم نگه دارید، مثل پردازش Dynamic Late Data Integrator و به‌روزرسانی جدول حالتش.
 
-**Examples** (pp. 168–170): Airflow `input_data_sensor >> load_data_to_table >> expose_new_table` (a task runs only after its parent succeeds); AWS EMR steps with `ActionOnFailure=TERMINATE_CLUSTER` so a failure doesn't expose partial data as success; PySpark variables chained from read to write. A plain **CRON** expression is still fine for isolated jobs without dependencies (p. 170).
+**نمونه‌ها** (pp. 168–170): در Airflow، `input_data_sensor >> load_data_to_table >> expose_new_table`، که هر task فقط بعد از موفقیت پدرش اجرا می‌شود؛ مرحله‌های AWS EMR با `ActionOnFailure=TERMINATE_CLUSTER` تا شکست، داده‌ی جزئی را به‌عنوان موفقیت نشان ندهد؛ و متغیرهای PySpark که از خواندن تا نوشتن زنجیر می‌شوند. یک عبارت ساده‌ی **CRON** هم برای jobهای منفرد بی‌وابستگی باز هم خوب است (p. 170).
 
-#### Pattern: Isolated Sequencer (pp. 170–174)
+#### الگو: Isolated Sequencer (pp. 170–174)
 
-**Problem.** Your team cleans and enriches datasets; the data visualization team will build its own dashboard transformations. You provide the dataset, they own the rest (p. 170).
+**مسئله.** تیم شما مجموعه‌داده‌ها را تمیز و غنی می‌کند و تیم تجسم داده می‌خواهد تبدیل‌های داشبورد خودش را بسازد. شما مجموعه‌داده را می‌دهید و بقیه مال آن‌ها است (p. 170).
 
-**Solution** (pp. 170–171): split pipelines at **provider/consumer (team) boundaries**; within one team, split only if one pipeline would become unreadable (otherwise use the Local Sequencer). Then pick a trigger (Figure 6-2):
+**راه‌حل** (pp. 170–171): pipelineها را روی **مرز تأمین‌کننده و consumer**، یعنی مرز تیم، بشکنید؛ داخل یک تیم فقط وقتی بشکنید که یک pipeline نخواندنی می‌شود، و وگرنه Local Sequencer را به کار ببرید. بعد یک trigger انتخاب کنید (شکل ۶-۲):
 
-| | **Data-based** | **Task-based** |
+| | **داده‌محور** | **task‌محور** |
 |---|---|---|
-| Mechanism | Producer writes data + a readiness marker; consumer waits for it | Producer directly triggers the consumer's pipeline |
-| Coupling | Loose — only the marker contract | Tight — a renamed consumer task breaks the producer |
-| Who can change | Consumer may switch datasets without telling the producer | Consumer can't opt out; removing it can fail the producer |
-| Good for | Shared datasets | No shared dataset, e.g. the consumer sends user notifications |
+| سازوکار | تأمین‌کننده داده و یک readiness marker می‌نویسد و consumer منتظرش می‌ماند | تأمین‌کننده مستقیم pipeline consumer را trigger می‌کند |
+| coupling | شل؛ فقط قرارداد marker | تنگ؛ نام تازه‌ی یک task در سمت consumer تأمین‌کننده را می‌شکند |
+| چه کسی می‌تواند عوض کند | consumer می‌تواند بی خبر دادن مجموعه‌داده را عوض کند | consumer نمی‌تواند بیرون بزند و برداشتنش می‌تواند تأمین‌کننده را شکست بدهد |
+| خوب برای | مجموعه‌داده‌ی مشترک | جایی که مجموعه‌داده‌ی مشترکی نیست؛ مثلاً consumerی که به کاربرها اطلاع می‌دهد |
 
-**Consequences** (pp. 172–173): **scheduling** — task-based triggering works best with identical schedules; otherwise one side must skip runs. **Communication** — checking the other side's conditions is costly or impossible (security may block incoming connections); the resilient fix is organizational: teams know their inputs and outputs and announce breaking changes.
+**پیامدها** (pp. 172–173): **زمان‌بندی**، یعنی trigger کردن task‌محور با زمان‌بندی‌های یکسان بهتر کار می‌کند و وگرنه یک طرف باید از اجراها بپرد. **ارتباط**، یعنی بررسی شرط‌های طرف دیگر گران یا ناممکن است، چون امنیت ممکن است اتصال ورودی را ببندد؛ راه‌حل تاب‌آور سازمانی است، یعنی تیم‌ها ورودی و خروجی خودشان را بشناسند و تغییرهای شکننده را اعلام کنند.
 
-**Examples** (pp. 173–174): data-based — `devices_loader` copies a file to `…/{ds_nodash}/dataset.csv` and `devices_aggregator` waits with a `FileSensor` on the same path (the dependency is implicit); task-based — an `ExternalTaskMarker` in the producer and an `ExternalTaskSensor` (`allowed_states=['success']`, `failed_states=['failed', 'skipped']`) in the consumer, where the marker also propagates producer backfills. **Data lineage** tools show who consumes what (Chapter 10; **OpenLineage**).
+**نمونه‌ها** (pp. 173–174): داده‌محور، یعنی `devices_loader` یک فایل را به `…/{ds_nodash}/dataset.csv` کپی می‌کند و `devices_aggregator` با یک `FileSensor` روی همان مسیر منتظر می‌ماند، پس وابستگی ضمنی است؛ task‌محور، یعنی یک `ExternalTaskMarker` در تأمین‌کننده و یک `ExternalTaskSensor` با `allowed_states=['success']` و `failed_states=['failed', 'skipped']` در مصرف‌کننده، که marker، backfillهای تأمین‌کننده را هم منتشر می‌کند. ابزارهای **data lineage** نشان می‌دهند چه کسی چه چیزی را مصرف می‌کند، فصل ۱۰ و **OpenLineage** را ببینید.
 
-### Fan-in
+> **In practice:** DAG هر جدول در Airflow همان Local Sequencer است: extract، بعد PII، بعد staging، بعد Bronze.
+>
+> **Your turn:** چرا hash کردن PII را task جدا می‌کنید و نه بخشی از task بار؟
+>
+> *Answer:* task جدا یعنی retry یا backfill فقط همان قدم را اجرا می‌کند و جای شکست روشن است؛ هزینه‌اش overhead و وابستگی بیشتر است. این همان بده‌بستان کتاب بین یک job بزرگ و چند job کوچک است (pp. 166–170).
 
-Branches that merge again at some point (p. 174).
+### الگوی Fan-in
 
-#### Pattern: Aligned Fan-In (pp. 175–178)
+شاخه‌هایی که جایی باز به هم می‌رسند (p. 174).
 
-**Problem.** A daily aggregate of blog visits is built from hourly partitions; consumers only want the full day, but you'd like to use the hourly partitioning to avoid one huge job (p. 175).
+#### الگو: Aligned Fan-In (pp. 175–178)
 
-**Solution** (pp. 175–176): branches that all must succeed before a common child runs — 24 hourly partial aggregates, then a daily merge (Figure 6-3). In processing, merging means **UNION** (vertical: more rows, same columns) or **JOIN** (horizontal: more columns, fewer rows). Benefits: a **faster feedback loop** (24 small parallel jobs surface errors sooner than one day-long job) and **cheaper failures** (replay only the failed hour, not 23 good ones).
+**مسئله.** یک تجمیع روزانه از بازدیدهای وبلاگ از پارتیشن‌های ساعتی ساخته می‌شود؛ consumerها فقط کل روز را می‌خواهند، ولی شما می‌خواهید از پارتیشن‌بندی ساعتی استفاده کنید تا یک job غول‌آسا نسازید (p. 175).
 
-![24 branches, each a readiness marker for one hour followed by that hour's partial aggregates, all feeding one final aggregates task](../figures/06-03.png)
+**راه‌حل** (pp. 175–176): شاخه‌هایی که همه‌شان باید پیش از اجرای فرزند مشترک موفق شوند، یعنی ۲۴ تجمیع جزئی ساعتی و بعد یک merge روزانه (شکل ۶-۳). در پردازش، merge یعنی **UNION**، که عمودی است و ردیف بیشتر با همان ستون‌ها، یا **JOIN**، که افقی است و ستون بیشتر با ردیف کمتر. سودش: **حلقه‌ی بازخورد سریع‌تر**، چون ۲۴ job کوچک موازی خطا را زودتر از یک job یک‌روزه بیرون می‌کشند، و **شکست ارزان‌تر**، چون فقط ساعت شکست‌خورده دوباره اجرا می‌شود و نه ۲۳ ساعت سالم.
 
-*Figure 6-3 (p. 175): the final task runs only when all 24 hourly branches have succeeded.*
+![بیست‌و‌چهار شاخه، که هر کدام یک readiness marker برای یک ساعت و بعدش تجمیع‌های جزئی همان ساعت‌اند، و همه به یک task تجمیع نهایی خورانده می‌شوند](../figures/06-03.png)
+
+*Figure 6-3 (p. 175): task نهایی فقط وقتی اجرا می‌شود که همه‌ی ۲۴ شاخه‌ی ساعتی موفق شده باشند.*
 
 ```mermaid
 flowchart LR
@@ -124,123 +132,135 @@ flowchart LR
     C --> S23["wait h23 …"] --> L23["load h23 …"] --> T
 ```
 
-*After Example 6-6 (p. 177).*
+*بر پایه‌ی نمونه‌ی ۶-۶ (p. 177).*
 
-**Consequences** (pp. 176–177): **infrastructure spikes** (24 concurrent jobs — limit concurrency, or run each branch hourly and aggregate in the day's last run); **scheduling skew** (the child waits for the slowest parent); **scheduling overhead** for very granular pipelines; **complexity** — ask “what belongs to one unit of execution?” and “what should be backfilled individually?”
+**پیامدها** (pp. 176–177): **spike زیرساخت**، یعنی ۲۴ job هم‌زمان، پس concurrency را محدود کنید یا هر شاخه را ساعتی اجرا کنید و در آخرین اجرای روز تجمیع کنید؛ **انحراف زمان‌بندی**، یعنی فرزند منتظر کندترین پدر می‌ماند؛ **سرریز زمان‌بندی** برای pipelineهای خیلی دانه‌ریز؛ و **پیچیدگی**، پس بپرسید «چه چیزی به یک واحد اجرا تعلق دارد؟» و «چه چیزی باید جدا backfill شود؟»
 
-**Examples** (pp. 177–178): Airflow creates 24 sensor → loader branches in a `for` loop between `clear_context` and `generate_trends` (or list static tasks: `[load_data_1, load_data_2] >> process_data`). SQL `UNION` is **position-based** — `SELECT a, b, c … UNION SELECT c, b, a …` silently pairs a with c; PySpark's `unionByName` matches columns by name.
+**نمونه‌ها** (pp. 177–178): در Airflow، ۲۴ شاخه‌ی sensor و loader در یک حلقه‌ی `for` بین `clear_context` و `generate_trends` ساخته می‌شوند، یا taskهای ایستا فهرست می‌شوند، مثل `[load_data_1, load_data_2] >> process_data`. دستور `UNION` در SQL **موقعیت‌محور** است، یعنی `SELECT a, b, c … UNION SELECT c, b, a …` بی‌صدا a را با c جفت می‌کند؛ متد `unionByName` در PySpark ستون‌ها را با نام تطبیق می‌دهد.
 
-#### Pattern: Unaligned Fan-In (pp. 178–182)
+#### الگو: Unaligned Fan-In (pp. 178–182)
 
-**Problem.** When an hour fails, no daily aggregate is produced; the team agrees it's better to publish partial data and fill gaps later (pp. 178–179).
+**مسئله.** وقتی یک ساعت شکست می‌خورد، هیچ تجمیع روزانه‌ای ساخته نمی‌شود؛ تیم توافق می‌کند که بهتر است داده‌ی جزئی منتشر شود و جاهای خالی بعداً پر شوند (pp. 178–179).
 
-**Solution** (p. 179): relax the parents' success condition — run the child when some parents succeed (partial input), or schedule a fallback/error-management task when they fail. In Airflow, set the task's **trigger rule**; elsewhere evaluate parents' outcomes explicitly.
+**راه‌حل** (p. 179): شرط موفقیت پدرها را شل کنید، یعنی فرزند را وقتی اجرا کنید که بعضی پدرها موفق شده‌اند، یا سر شکستشان یک task جایگزین یا مدیریت خطا زمان‌بندی کنید. در Airflow **trigger rule** آن task را بگذارید، و جاهای دیگر نتیجه‌ی پدرها را صریح ارزیابی کنید.
 
-**Consequences** (pp. 179–180): **readability** — success and failure branches side by side confuse readers (Figure 6-4); prefer built-in failure handlers (Airflow `on_failure_callback`, AWS Step Functions `Catch`). **Partial data** — tell consumers: a completeness table (12 of 24 parents = 50%, 6 = 25%), object tags, notifications — or keep incomplete output private until 100%.
+**پیامدها** (pp. 179–180): **خواندنی بودن**، یعنی شاخه‌های موفقیت و شکست کنار هم خواننده را گیج می‌کنند (شکل ۶-۴)، پس handlerهای شکست آماده را ترجیح بدهید، مثل `on_failure_callback` در Airflow و `Catch` در AWS Step Functions. **داده‌ی جزئی**، یعنی به consumerها بگویید، با یک جدول کامل بودن، مثلاً ۱۲ پدر از ۲۴ که ۵۰٪ است و ۶ پدر که ۲۵٪، یا tag روی object، یا اطلاع دادن، یا خروجی ناقص را تا رسیدن به صد درصد خصوصی نگه دارید.
 
-**Examples** (pp. 181–182): Airflow `trigger_rule=TriggerRule.ALL_DONE` on `generate_cube` (invisible in the graph!) plus an `is_approximate` column set when `COUNT(DISTINCT execution_time_hour_id)` for the day ≠ 24, computed in a `GROUP BY CUBE(…)` insert. **AWS Step Functions**: a partitions-detector Lambda, a `Map` task running a processor Lambda per partition (returns a boolean), and a table-creator Lambda that sets `is_partial` if any result is `False`.
+**نمونه‌ها** (pp. 181–182): در Airflow، `trigger_rule=TriggerRule.ALL_DONE` روی `generate_cube`، که در گراف دیده نمی‌شود، به‌علاوه‌ی یک ستون `is_approximate` که وقتی `COUNT(DISTINCT execution_time_hour_id)` آن روز برابر ۲۴ نیست گذاشته می‌شود و در یک درج با `GROUP BY CUBE(…)` حساب می‌شود. در **AWS Step Functions**: یک Lambda تشخیص پارتیشن، یک task از جنس `Map` که برای هر پارتیشن یک Lambda پردازش اجرا می‌کند و بولی برمی‌گرداند، و یک Lambda سازنده‌ی جدول که اگر هر نتیجه‌ای `False` بود `is_partial` را می‌گذارد.
 
-### Fan-out
+> **In practice:** Silverی که دو منبع را join می‌کند fan-in است و باید منتظر هر دو DAG بماند.
+>
+> **Your turn:** DAG منبع B دیر تمام می‌شود و Silver با داده‌ی دیروز B ساخته می‌شود. چه وابستگی‌ای کم است؟
+>
+> *Answer:* Silver باید منتظر کامل شدن هر دو منبع برای همان روز بماند، با Dataset یا sensor در Airflow، نه با ساعت؛ این Aligned Fan-In کتاب است (pp. 175–178).
 
-One task feeding several — e.g. one dataset used by analytics and data science teams (p. 182).
+### الگوی Fan-out
 
-#### Pattern: Parallel Split (pp. 182–186)
+یک task که به چندتا خورانده می‌شود، مثل یک مجموعه‌داده که تیم تحلیل و تیم data science به کارش می‌برند (p. 182).
 
-**Problem.** You're replacing an undocumented legacy C# framework with a Python library after reverse engineering it; until consumers switch, the processed dataset must be written to both the old and new places (p. 183).
+#### الگو: Parallel Split (pp. 182–186)
 
-**Solution** (p. 183): one parent, parallel children. In orchestration it's just the flow DSL. In processing: compute common parts **once** (temporary table, Spark `.persist()`), keep shared variables read-only or safely mergeable, and give time-sensitive branches dedicated resources or auto-scaling.
+**مسئله.** یک framework قدیمی و بی‌مستند C# را بعد از مهندسی معکوس با یک کتابخانه‌ی Python عوض می‌کنید؛ تا وقتی consumerها جابه‌جا نشده‌اند، مجموعه‌داده‌ی پردازش‌شده باید هم در جای قدیم و هم در جای تازه نوشته شود (p. 183).
 
-**Consequences** (pp. 183–184): **blocked execution** — with runs that depend on the previous run succeeding, every run waits for the slowest branch, and a failure blocks the next ones; move slow branches to their own pipeline (Isolated Sequencer). **Hardware** — CPU-heavy and memory-heavy branches can't share one job's infrastructure; materialize the intermediate dataset and start separate jobs (Figure 6-5).
+**راه‌حل** (p. 183): یک پدر و فرزندهای موازی. در زمان‌بندی، فقط همان DSL جریان است. در پردازش: بخش‌های مشترک را **یک‌بار** حساب کنید، با جدول موقت یا `.persist()` در Spark؛ متغیرهای مشترک را read-only یا امن برای merge نگه دارید؛ و به شاخه‌های زمان‌حساس منابع اختصاصی یا auto-scaling بدهید.
 
-**Examples** (pp. 184–186): Airflow — one `file_sensor` followed by Delta and CSV `SparkKubernetesOperator`/`Sensor` pairs; PySpark — `input_dataset.persist(StorageLevel.MEMORY_ONLY)` then two writes (memory-and-disk if RAM is short). To avoid duplicate writes on retry, Delta Lake's **`txnAppId` + `txnVersion`** options make repeated writes with the same values no-ops.
+**پیامدها** (pp. 183–184): **اجرای بسته‌شده**، یعنی وقتی هر اجرا به موفقیت اجرای قبلی وابسته است، هر اجرا منتظر کندترین شاخه می‌ماند و یک شکست بعدی‌ها را می‌بندد؛ شاخه‌های کند را به pipeline خودشان ببرید، یعنی Isolated Sequencer. **سخت‌افزار**، یعنی شاخه‌ی CPU‌بر و شاخه‌ی حافظه‌بر نمی‌توانند زیرساخت یک job را شریک شوند؛ مجموعه‌داده‌ی میانی را materialize کنید و jobهای جدا راه بیندازید (شکل ۶-۵).
 
-#### Pattern: Exclusive Choice (pp. 186–191)
+**نمونه‌ها** (pp. 184–186): در Airflow، یک `file_sensor` و بعدش جفت‌های `SparkKubernetesOperator` و `Sensor` برای Delta و CSV؛ در PySpark، `input_dataset.persist(StorageLevel.MEMORY_ONLY)` و بعد دو نوشتن، که اگر RAM کم بود حافظه‌و‌دیسک. برای پرهیز از نوشتن تکراری سر تلاش دوباره، گزینه‌های **`txnAppId` و `txnVersion`** در Delta Lake نوشتن‌های تکراری با همان مقدارها را بی‌اثر می‌کنند.
 
-**Problem.** After the migration, the new job must run from **January 1, 2024**, but backfills of earlier days must still use the old job — in the same pipeline, to keep its history (p. 186).
+#### الگو: Exclusive Choice (pp. 186–191)
 
-**Solution** (pp. 186–187): add a **condition evaluator** before the branches — Airflow branch operators, AWS Step Functions and Azure Data Factory (*if condition* activity) (Figure 6-6) — or plain `if`/`switch` in the job.
+**مسئله.** بعد از مهاجرت، job تازه باید از **اول ژانویه‌ی ۲۰۲۴** اجرا شود، ولی backfill روزهای قبل‌تر باز هم باید job قدیم را به کار ببرد، در همان pipeline، تا تاریخچه‌اش حفظ شود (p. 186).
 
-**Consequences** (pp. 187–188): **complexity factory** — many branches that split and merge become unreadable; explain the pipeline to an imaginary newcomer (**rubber duck debugging**). **Hidden logic** — branches inside a job are forgotten over time; evaluate the condition in the orchestrator and call different entry points (`python job_for_condition_a.py` vs `job_for_default.py`). **Heavy conditions** — prefer metadata-based conditions; if you must read data, do it once and incrementally.
+**راه‌حل** (pp. 186–187): پیش از شاخه‌ها یک **ارزیاب شرط** بگذارید، یعنی branch operatorهای Airflow و AWS Step Functions و Azure Data Factory با فعالیت *if condition* (شکل ۶-۶)، یا `if` و `switch` ساده داخل job.
 
-**Examples** (pp. 188–191): Airflow `BranchPythonOperator` returning `load_job_trigger_delta` for execution dates on or after the migration date (`pendulum.datetime(2024, 2, 3)` in the code) and `load_job_trigger_csv` before; alternatively separate pipelines with `start_date`/`end_date`. In PySpark, an `--output_type` argument drives an `OutputGenerationFactory` (the **Factory** software pattern) that returns the right Spark session and writer — dedicated writer classes would remove the repeated conditions. Or branch on the input's schema: three or more fields → the new table location (a fast metadata check).
+**پیامدها** (pp. 187–188): **کارخانه‌ی پیچیدگی**، یعنی شاخه‌های زیادی که می‌شکنند و باز به هم می‌رسند نخواندنی می‌شوند، پس pipeline را برای یک تازه‌وارد خیالی توضیح بدهید، یعنی **rubber duck debugging**. **منطق پنهان**، یعنی شاخه‌های داخل یک job با گذر زمان فراموش می‌شوند، پس شرط را در scheduler ارزیابی کنید و نقطه‌های ورود مختلف را صدا بزنید، مثل `python job_for_condition_a.py` در برابر `job_for_default.py`. **شرط سنگین**، یعنی شرط‌های metadata‌محور را ترجیح بدهید، و اگر باید داده بخوانید، یک‌بار و افزایشی بخوانید.
 
-### Orchestration
+**نمونه‌ها** (pp. 188–191): در Airflow، یک `BranchPythonOperator` که برای تاریخ‌های اجرای تاریخ مهاجرت و بعدش نام `load_job_trigger_delta` را برمی‌گرداند، که در کد `pendulum.datetime(2024, 2, 3)` است، و پیش از آن `load_job_trigger_csv`؛ یا به‌جایش pipelineهای جدا با `start_date` و `end_date`. در PySpark، یک آرگومان `--output_type` یک `OutputGenerationFactory` را می‌راند، که همان الگوی نرم‌افزاری **Factory** است و session و writer درست Spark را برمی‌گرداند؛ کلاس‌های writer اختصاصی شرط‌های تکراری را برمی‌داشتند. یا روی schema ورودی شاخه بزنید، یعنی سه فیلد یا بیشتر به مکان جدول تازه برود، که بررسی metadataیی سریعی است.
 
-Pipelines become dynamic components running tasks (p. 191).
+### زمان‌بندی
 
-#### Pattern: Single Runner (pp. 191–193)
+همه‌ی pipelineها می‌شوند مؤلفه‌هایی پویا که task اجرا می‌کنند (p. 191).
 
-**Problem.** A POC Incremental Sessionizer ran manually; for release it needs orchestration (p. 191).
+#### الگو: Single Runner (pp. 191–193)
 
-**Solution** (pp. 191–192): incremental logic is sequential, so allow **one run at a time** — a concurrency setting of 1 (Airflow, Azure Data Factory), or a readiness marker waiting on the previous run (which still lets future runs pile up waiting).
+**مسئله.** یک Incremental Sessionizer آزمایشی دستی اجرا می‌شده؛ برای release به زمان‌بندی نیاز دارد (p. 191).
 
-**Consequences** (p. 192): **backfilling** is slow and can't be parallelized without wrong results — skip unneeded steps (e.g. only reload a generated dataset). **Latency** — if an hourly flow's 30-minute runs grow to 1.5 hours, delays accumulate for you and all consumers; add compute or optimize.
+**راه‌حل** (pp. 191–192): منطق افزایشی پشت‌سرهم است، پس **یک اجرا در هر لحظه** را اجازه بدهید، یعنی تنظیم concurrency روی یک در Airflow و Azure Data Factory، یا یک readiness marker که منتظر اجرای قبلی می‌ماند، که باز هم می‌گذارد اجراهای آینده منتظر تلنبار شوند.
 
-**Examples** (pp. 192–193): Airflow `max_active_runs=1` with `depends_on_past=True` (a task waits for its own previous run to succeed); AWS EMR `StepConcurrencyLevel`; Azure Data Factory *Concurrency* — extra runs are queued (up to 100) and a full queue returns HTTP **429** “Too many requests”.
+**پیامدها** (p. 192): **کار backfill** کند است و بی نتیجه‌ی غلط موازی نمی‌شود؛ از مرحله‌های لازم‌نبوده بپرید، مثلاً فقط مجموعه‌داده‌ی ساخته‌شده را دوباره بار کنید. **تأخیر**، یعنی اگر اجراهای نیم‌ساعته‌ی یک جریان ساعتی یک ساعت و نیم شوند، تأخیر برای شما و همه‌ی consumerها جمع می‌شود؛ محاسبه اضافه کنید یا بهینه کنید.
 
-> **Try it:** [Single vs concurrent runner](../widgets/06-runners.html) — schedule hourly runs, stretch their duration, and compare how delay accumulates with one or several concurrent runs.
+**نمونه‌ها** (pp. 192–193): در Airflow، `max_active_runs=1` به‌علاوه‌ی `depends_on_past=True`، که هر task منتظر موفقیت اجرای قبلی خودش می‌ماند؛ در AWS EMR، `StepConcurrencyLevel`؛ و در Azure Data Factory تنظیم *Concurrency*، که اجراهای اضافه تا صد تا صف می‌شوند و صف پر، کد HTTP **۴۲۹** با پیام «Too many requests» می‌دهد.
 
-#### Pattern: Concurrent Runner (pp. 193–195)
+> **Try it:** [مقایسه‌ی اجرای یکتا و هم‌زمان](../widgets/06-runners.html)؛ اجراهای ساعتی را زمان‌بندی کنید، مدتشان را بکشید، و ببینید تأخیر با یک اجرا یا چند اجرای هم‌زمان چطور جمع می‌شود.
 
-**Problem.** Ingestion runs every 30 minutes to an hour, sometimes longer, and under a Single Runner every later delivery is delayed — though the datasets are independent (p. 193).
+#### الگو: Concurrent Runner (pp. 193–195)
 
-**Solution** (pp. 193–194): allow concurrency > 1, balanced against other pipelines; the orchestrator starts the next run while running instances are below the limit.
+**مسئله.** ورود داده هر نیم ساعت تا یک ساعت و گاهی بیشتر اجرا می‌شود، و زیر Single Runner هر تحویل بعدی عقب می‌افتد، در حالی که مجموعه‌داده‌ها مستقل‌اند (p. 193).
 
-**Consequences** (p. 194): **resource starvation** in multitenant orchestrators when many pipelines backfill concurrently — use **workload management** (capacity per group); serverless orchestrators scale further (AWS Step Functions: up to **10,000** parallel child workflow executions). **Shared state** — concurrent runs of e.g. the Dynamic Late Data Integrator may trigger a backfill several times or not at all.
+**راه‌حل** (pp. 193–194): concurrency بیشتر از یک را اجازه بدهید، متوازن با pipelineهای دیگر؛ scheduler اجرای بعدی را وقتی شروع می‌کند که نمونه‌های در حال اجرا زیر سقف باشند.
 
-**Examples** (pp. 194–195): Airflow `max_active_runs=5` with `depends_on_past=False` (set it per task if some tasks depend on their previous runs). Azure Data Factory supports concurrency and trigger dependencies but not task-level dependencies on past runs.
+**پیامدها** (p. 194): **گرسنگی منابع** در schedulerهای چند‌مستأجری وقتی pipelineهای زیادی با هم backfill می‌کنند؛ از **workload management** استفاده کنید، یعنی ظرفیت برای هر گروه. schedulerهای serverless بیشتر مقیاس می‌گیرند؛ AWS Step Functions تا **ده هزار** اجرای موازی گردش‌کار فرزند می‌دهد. **shared state**، یعنی اجراهای هم‌زمان مثلاً Dynamic Late Data Integrator ممکن است یک backfill را چند بار trigger کنند یا هیچ‌بار.
 
-### Summary
+**نمونه‌ها** (pp. 194–195): در Airflow، `max_active_runs=5` به‌علاوه‌ی `depends_on_past=False`، که اگر بعضی taskها به اجراهای قبلی خودشان وابسته‌اند برای هر task جدا بگذاریدش. سرویس Azure Data Factory concurrency و وابستگی trigger را پشتیبانی می‌کند ولی وابستگی سطح task به اجراهای گذشته را نه.
 
-Sequences (local or isolated) define readable, maintainable boundaries; fan-in merges branches (aligned or tolerating failures); fan-out creates them (parallel or exclusive); runners control concurrency — single for incremental logic, concurrent for independent runs and fast backfills (p. 195).
+> **In practice:** هم DAGهای Airflow و هم CronJobهای Kubernetes اجازه می‌دهند دو اجرای یک job هم‌زمان راه بیفتند.
+>
+> **Your turn:** یک backfill دستی با `kubectl create job` هم‌زمان با اجرای ساعتی همان جدول شروع می‌شود و Bronze تکراری می‌گیرد. کدام تنظیم جلویش را می‌گیرد؟
+>
+> *Answer:* job را single runner کنید: `max_active_runs=1` روی DAG و `concurrencyPolicy: Forbid` روی CronJob، و backfill را هم از همان DAG اجرا کنید نه از کنارش. کتاب Single Runner را برای jobهایی می‌گذارد که state مشترک می‌نویسند (pp. 191–195).
 
-## Trade-offs at a glance
+### خلاصه
 
-| Pair | Option A | Option B |
+ترتیب‌ها، محلی یا جدا، مرزهای خواندنی و نگه‌داشتنی تعریف می‌کنند؛ fan-in شاخه‌ها را به هم می‌رساند، هم‌تراز یا تحمل‌کننده‌ی شکست؛ fan-out شاخه می‌سازد، موازی یا انحصاری؛ و runnerها concurrency را کنترل می‌کنند، یکتا برای منطق افزایشی و هم‌زمان برای اجراهای مستقل و backfill سریع (p. 195).
+
+## بده‌بستان‌ها در یک نگاه
+
+| جفت | گزینه‌ی الف | گزینه‌ی ب |
 |---|---|---|
-| Sequence | **Local**: one pipeline, restartable steps | **Isolated**: team-owned pipelines; data- or task-based links |
-| Fan-in | **Aligned**: complete data, waits for slowest | **Unaligned**: partial data sooner; must be flagged |
-| Fan-out | **Parallel Split**: all branches, shared parent work | **Exclusive Choice**: one branch, condition evaluator |
-| Runner | **Single**: correct for incremental logic; slow backfills | **Concurrent**: fast; starvation and shared-state risks |
+| ترتیب | **محلی**: یک pipeline با مرحله‌های راه‌اندازی‌دوباره‌پذیر | **جدا**: pipelineهای مالکِ تیم، با پیوند داده‌محور یا task‌محور |
+| الگوی Fan-in | **هم‌تراز**: داده‌ی کامل، با انتظار برای کندترین | **ناهم‌تراز**: داده‌ی جزئی زودتر؛ باید پرچم بخورد |
+| الگوی Fan-out | **Parallel Split**: همه‌ی شاخه‌ها، با کار مشترک پدر | **Exclusive Choice**: یک شاخه، با ارزیاب شرط |
+| runner | **یکتا**: برای منطق افزایشی درست است؛ backfill کند | **هم‌زمان**: سریع؛ با خطر گرسنگی و shared state |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Several names here — *Parallel Split*, *Exclusive Choice*, and the merge variants — echo the classic Workflow Patterns catalogue (van der Aalst et al., 2003), which defined control-flow patterns for business process systems long before data orchestrators.
-- The [runner widget](../widgets/06-runners.html) uses the book's 30-minute and 1.5-hour durations on an hourly schedule; its queueing model is the vault's.
+- چند نام این‌جا، یعنی *Parallel Split* و *Exclusive Choice* و گونه‌های merge، پژواک فهرست کلاسیک Workflow Patterns است (van der Aalst و همکاران، سال ۲۰۰۳)، که الگوهای جریان کنترل را برای سیستم‌های فرایند کسب‌وکار، خیلی پیش از schedulerهای داده تعریف کرد.
+- [ویجت runner](../widgets/06-runners.html) مدت‌های نیم‌ساعته و یک‌ساعت‌و‌نیمه‌ی کتاب را روی زمان‌بندی ساعتی به کار می‌برد؛ مدل صفش مال خود vault است.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. Data Ingestion](02-data-ingestion-design-patterns.md) (Readiness Marker, External Trigger), [3. Error Management](03-error-management-design-patterns.md) (Dynamic Late Data Integrator and concurrency), [4. Idempotency](04-idempotency-design-patterns.md) (Fast Metadata Cleaner's Exclusive Choice), [5. Data Value](05-data-value-design-patterns.md) (Incremental Sessionizer needs a Single Runner), [10. Data Observability](10-data-observability-design-patterns.md) (lineage).
+- **فصل‌های مرتبط:** [فصل ۲: ورود داده](02-data-ingestion-design-patterns.md) که Readiness Marker و External Trigger را دارد، [فصل ۳: مدیریت خطا](03-error-management-design-patterns.md) که Dynamic Late Data Integrator و concurrency را دارد، [فصل ۴: ویژگی idempotency](04-idempotency-design-patterns.md) که Exclusive Choice در Fast Metadata Cleaner را دارد، [فصل ۵: ارزش داده](05-data-value-design-patterns.md) که Incremental Sessionizer به Single Runner نیاز دارد، و [فصل ۱۰: observability داده](10-data-observability-design-patterns.md) که lineage را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **A readiness check calls 10 paid APIs before a load. Why make them separate tasks?**
+1. **یک بررسی آمادگی پیش از بار‌گذاری، ده API پولی را صدا می‌زند. چرا باید taskهای جدا باشند؟**
 
-   *Answer:* If the load fails and is retried or backfilled as part of one task, the paid API calls run again each time; separate tasks give separate restart boundaries (pp. 167–168).
+   *Answer:* اگر بار‌گذاری شکست بخورد و به‌عنوان بخشی از یک task تلاش دوباره یا backfill شود، فراخوانی‌های پولی هر بار دوباره اجرا می‌شوند؛ taskهای جدا مرزهای راه‌اندازی دوباره‌ی جدا می‌دهند (pp. 167–168).
 
-2. **The consumer team renames a task. Which inter-pipeline strategy breaks?**
-   - [ ] Data-based (readiness marker)
-   - [x] Task-based (direct trigger)
-   - [ ] Neither
+2. **تیم consumer نام یک task را عوض می‌کند. کدام راهبرد بین pipelineها می‌شکند؟**
+   - [ ] داده‌محور، یعنی readiness marker
+   - [x] راهبرد task‌محور، یعنی trigger مستقیم
+   - [ ] هیچ‌کدام
 
-   *Answer:* In the task-based strategy the producer triggers a specific consumer task; if it no longer exists, the producer's pipeline fails (p. 171).
+   *Answer:* در راهبرد task‌محور، تأمین‌کننده یک task معین از consumer را trigger می‌کند؛ اگر دیگر نباشد، pipeline تأمین‌کننده شکست می‌خورد (p. 171).
 
-3. **Why can 24 hourly branches be better than one daily job, and what do they cost?**
+3. **چرا ۲۴ شاخه‌ی ساعتی می‌توانند از یک job روزانه بهتر باشند، و چه هزینه‌ای دارند؟**
 
-   *Answer:* Errors surface sooner and only the failed hour must be replayed; but they cause infrastructure spikes, scheduling skew (waiting for the slowest) and scheduling overhead (pp. 176–177).
+   *Answer:* خطاها زودتر بیرون می‌آیند و فقط ساعت شکست‌خورده باید دوباره اجرا شود، ولی spike زیرساخت و انحراف زمان‌بندی، یعنی انتظار برای کندترین، و سرریز زمان‌بندی می‌سازند (pp. 176–177).
 
-4. **You set `TriggerRule.ALL_DONE` on the daily task. What else should you add?**
+4. **قاعده‌ی `TriggerRule.ALL_DONE` را روی task روزانه گذاشته‌اید. چه چیز دیگری باید اضافه کنید؟**
 
-   *Answer:* A way for consumers to know the result may be partial — e.g. an `is_approximate` flag when fewer than 24 hours were processed, or a completeness table — since the rule itself is invisible in the graph (pp. 180–181).
+   *Answer:* راهی که consumerها بفهمند نتیجه ممکن است جزئی باشد، مثل پرچم `is_approximate` وقتی کمتر از ۲۴ ساعت پردازش شده، یا یک جدول کامل بودن، چون خود قاعده در گراف دیده نمی‌شود (pp. 180–181).
 
-5. **Which runner does an Incremental Sessionizer need?**
-   - [x] Single Runner
-   - [ ] Concurrent Runner
+5. **الگوی Incremental Sessionizer به کدام runner نیاز دارد؟**
+   - [x] الگوی Single Runner
+   - [ ] الگوی Concurrent Runner
 
-   *Answer:* Each run depends on the previous run's pending sessions, so concurrent runs would produce wrong results (pp. 191–192).
+   *Answer:* هر اجرا به sessionهای معلق اجرای قبلی وابسته است، پس اجراهای هم‌زمان نتیجه‌ی غلط می‌دهند (pp. 191–192).
 
-6. **An hourly pipeline under a Single Runner now takes 1.5 hours per run. What happens?**
+6. **یک pipeline ساعتی زیر Single Runner حالا برای هر اجرا یک ساعت و نیم می‌برد. چه می‌شود؟**
 
-   *Answer:* Each run starts later than the previous, so data gets increasingly delayed for you and every downstream consumer until you add compute or optimize (p. 192).
+   *Answer:* هر اجرا دیرتر از قبلی شروع می‌شود، پس داده برای شما و هر consumer downstream بیشتر و بیشتر عقب می‌افتد، تا وقتی محاسبه اضافه کنید یا بهینه کنید (p. 192).
