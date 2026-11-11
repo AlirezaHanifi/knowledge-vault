@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Happened-Before and Lamport Clocks</title>
-<meta name="description" content="Build a space-time diagram of three components with local events and messages, pick any two events to see whether one happened before the other or they are concurrent, and check Lamport clock consistency. Illustrates Think Distributed Systems, Chapter 2.">
+<title>پیش‌از‌رخ‌دادن و ساعت‌های Lamport</title>
+<meta name="description" content="نمودار فضا‌زمان سه مؤلفه را با رویداد محلی و پیام بسازید، هر دو رویدادی را بردارید تا ببینید یکی پیش از دیگری رخ داده یا هم‌زمان‌اند، و consistency ساعت Lamport را بسنجید. تصویری از فصل ۲ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  svg.st { width: 100%; height: auto; display: block; }
+  svg.st { width: 100%; height: auto; display: block; direction: ltr; }
   svg.st .lane { stroke: var(--line-strong); stroke-width: 2; }
   svg.st .ev { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
   svg.st .ev.sel { fill: var(--accent); }
@@ -22,52 +22,52 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/02-system-models-order-and-time.html">Chapter 2</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Happened-before</span>
+      <a href="../chapters/02-system-models-order-and-time.html">فصل ۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">پیش‌از‌رخ‌دادن</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 2 · System models, order, and time</div>
-  <h1>Happened-before and Lamport clocks</h1>
-  <p class="lede">Event a <strong>happened before</strong> b if they’re on the same component and a came first, if a is a send and b the matching receive, or by transitivity. Otherwise they’re <strong>concurrent</strong>. A <strong>Lamport clock</strong> increments on every step and, on receive, jumps to max(own, received) + 1, which guarantees <em>clock consistency</em>: a → b ⇒ C(a) &lt; C(b).</p>
-  <p class="source-note">Illustrates “The happened-before relationship” and “Logical time and logical clocks” (pp. 32–38, Figures 2.13–2.15 and 2.18). The starting scenario and the use of vector timestamps to decide happened-before are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۲ · مدل سیستم، ترتیب و زمان</div>
+  <h1>پیش‌از‌رخ‌دادن و ساعت‌های Lamport</h1>
+  <p class="lede">رویداد a <strong>پیش از</strong> b رخ داده اگر روی همان مؤلفه باشند و a اول آمده باشد، یا اگر a فرستادن باشد و b همان گرفتن، یا بنا به ترایایی. وگرنه <strong>هم‌زمان</strong>اند. <strong>ساعت Lamport</strong> سر هر قدمی می‌افزاید و، سر گرفتن، به max(خودی، گرفته‌شده) + 1 می‌پرد، که <em>consistency ساعت</em> را تضمین می‌کند: از a → b نتیجه می‌شود C(a) &lt; C(b).</p>
+  <p class="source-note">تصویری از «رابطه‌ی پیش‌از‌رخ‌دادن» و «زمان منطقی و ساعت‌های منطقی» (صص. ۳۲–۳۸، شکل‌های ۲.۱۳ تا ۲.۱۵ و ۲.۱۸). صحنه‌ی آغازین و به کار بردن timestampهای برداری برای تصمیم درباره‌ی پیش‌از‌رخ‌دادن مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel"><div id="diag"></div>
-        <div class="pick"><label>Event a<select id="ea"></select></label><label>Event b<select id="eb"></select></label></div>
+        <div class="pick"><label>رویداد a<select id="ea"></select></label><label>رویداد b<select id="eb"></select></label></div>
         <div class="callout" id="rel" style="margin-top:10px" aria-live="polite"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><p class="field-hint">Add steps one at a time. A send leaves a message in flight until you deliver it.</p>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><p class="field-hint">قدم‌ها را یکی‌یکی بیفزایید. فرستادن پیامی را در پرواز می‌گذارد تا تحویلش بدهید.</p>
         <div class="btns" id="locals"></div><div class="btns" id="sends"></div><div class="btns" id="delivers"></div>
-        <div class="btns"><button class="btn small" id="reset">Reset to the example</button><button class="btn small" id="empty">Empty diagram</button></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+        <div class="btns"><button class="btn small" id="reset">برگشت به نمونه</button><button class="btn small" id="empty">نمودار خالی</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Happened-before is a partial order.</strong> Two events on different components with no chain of messages between them are concurrent, even if one was drawn further left.</li>
-    <li><strong>Clock consistency holds in one direction only.</strong> Whenever a → b, C(a) &lt; C(b). But C(a) &lt; C(b) can also hold for concurrent events, so a Lamport timestamp alone can’t tell you that a happened before b.</li>
-    <li><strong>The receive rule</strong> max(own, received) + 1 is what pulls a lagging component’s clock forward, as in Figure 2.18.</li>
+    <li><strong>پیش‌از‌رخ‌دادن ترتیبی جزئی است.</strong> دو رویداد روی مؤلفه‌های مختلف که زنجیره‌ای از پیام بینشان نیست هم‌زمان‌اند، حتی اگر یکی چپ‌تر کشیده شده باشد.</li>
+    <li><strong>consistency ساعت تنها در یک جهت برقرار است.</strong> هر جا a → b باشد، C(a) &lt; C(b). ولی C(a) &lt; C(b) برای رویدادهای هم‌زمان هم می‌تواند برقرار باشد، پس timestamp Lamport تنها نمی‌تواند بگوید a پیش از b رخ داده.</li>
+    <li><strong>قاعده‌ی گرفتن</strong>، یعنی max(خودی، گرفته‌شده) + 1، همان چیزی است که ساعت مؤلفه‌ی عقب‌مانده را جلو می‌کشد، چنان‌که در شکل ۲.۱۸.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/02-system-models-order-and-time.html"><small>Lesson</small>2. System models, order, and time</a></li>
+    <li><a href="../chapters/02-system-models-order-and-time.html"><small>درس</small>فصل ۲: مدل سیستم، ترتیب و زمان</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -84,6 +84,7 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log"));
   var N = 3, ev, pend, clk, vc, cnt;
+  var KIND = { local: "محلی", send: "فرستادن", recv: "گرفتن" };
   function mk(c, kind, extra) {
     cnt[c]++; var e = { id: "c" + (c + 1) + "." + cnt[c], c: c, kind: kind, x: ev.length };
     if (kind === "recv") { clk[c] = Math.max(clk[c], extra.ts) + 1; vc[c] = vc[c].map(function (v, i) { return Math.max(v, extra.vc[i]); }); }
@@ -91,19 +92,19 @@ function stats(rows) {
     vc[c][c]++; e.ts = clk[c]; e.vc = vc[c].slice(); e.from = extra && extra.from; ev.push(e); return e;
   }
   function blank() { ev = []; pend = []; clk = [0, 0, 0]; vc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; cnt = [0, 0, 0]; }
-  function local(c) { var e = mk(c, "local"); log.add(e.id + ": local step on C" + (c + 1) + ", C = " + e.ts, "muted"); render(); }
-  function send(c, d) { var e = mk(c, "send"); pend.push({ from: e, to: d }); log.add(e.id + ": C" + (c + 1) + " sends to C" + (d + 1) + " with timestamp " + e.ts, "muted"); render(); }
-  function deliver(i) { var m = pend.splice(i, 1)[0]; var before = clk[m.to]; var e = mk(m.to, "recv", { ts: m.from.ts, vc: m.from.vc, from: m.from }); log.add(e.id + ": C" + (m.to + 1) + " receives from " + m.from.id + ": max(" + before + ", " + m.from.ts + ") + 1 = " + e.ts, "ok"); render(); }
+  function local(c) { var e = mk(c, "local"); log.add(e.id + ": قدم محلی روی C" + (c + 1) + "، C = " + e.ts, "muted"); render(); }
+  function send(c, d) { var e = mk(c, "send"); pend.push({ from: e, to: d }); log.add(e.id + ": مؤلفه‌ی C" + (c + 1) + " به C" + (d + 1) + " با timestamp " + e.ts + " می‌فرستد", "muted"); render(); }
+  function deliver(i) { var m = pend.splice(i, 1)[0]; var before = clk[m.to]; var e = mk(m.to, "recv", { ts: m.from.ts, vc: m.from.vc, from: m.from }); log.add(e.id + ": مؤلفه‌ی C" + (m.to + 1) + " از " + m.from.id + " می‌گیرد: max(" + before + ", " + m.from.ts + ") + 1 = " + e.ts, "ok"); render(); }
   function example() {
     blank(); log.clear();
     mk(0, "local"); var s1 = mk(0, "send"); mk(1, "local"); mk(2, "local"); mk(2, "local");
     var s2 = mk(2, "send"); mk(1, "recv", { ts: s1.ts, vc: s1.vc, from: s1 }); mk(0, "recv", { ts: s2.ts, vc: s2.vc, from: s2 }); mk(1, "local");
-    log.add("Example loaded: 9 events on three components.", "muted"); render();
+    log.add("نمونه بار شد: ۹ رویداد روی سه مؤلفه.", "muted"); render();
   }
   function hb(a, b) { return a.vc.every(function (v, i) { return v <= b.vc[i]; }) && a.vc.some(function (v, i) { return v < b.vc[i]; }); }
   function render() {
     var W = 560, H = 190, lanes = [40, 100, 160], xs = function (e) { return 60 + e.x * Math.min(52, (W - 90) / Math.max(1, ev.length)); };
-    var s = Kit.svg("svg", { class: "st", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Space-time diagram with " + ev.length + " events" });
+    var s = Kit.svg("svg", { class: "st", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "نمودار فضا‌زمان با " + ev.length + " رویداد" });
     var defs = Kit.svg("defs"); var mkr = Kit.svg("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" });
     mkr.appendChild(Kit.svg("path", { d: "M0,0 L10,5 L0,10 z", fill: "currentColor", style: "color: var(--accent)" })); defs.appendChild(mkr); s.appendChild(defs);
     lanes.forEach(function (y, i) { s.appendChild(Kit.svg("line", { class: "lane", x1: 40, x2: W - 10, y1: y, y2: y })); var t = Kit.svg("text", { x: 4, y: y + 4 }); t.textContent = "C" + (i + 1); s.appendChild(t); });
@@ -115,46 +116,46 @@ function stats(rows) {
       var t = Kit.svg("text", { x: xs(e) - 10, y: lanes[e.c] - 10 }); t.textContent = e.id.split(".")[1] + ":" + e.ts; s.appendChild(t);
     });
     var d = Kit.clear(document.getElementById("diag")); d.appendChild(s);
-    d.appendChild(Kit.el("p", { class: "field-hint" }, "Labels show event number : Lamport timestamp. Dashed arrows are messages still in flight."));
+    d.appendChild(Kit.el("p", { class: "field-hint" }, "برچسب‌ها شماره‌ی رویداد و timestamp Lamport را نشان می‌دهند. فلش‌های خط‌چین پیام‌هایی‌اند که هنوز در پروازند."));
     ["ea", "eb"].forEach(function (id, j) {
       var sel = document.getElementById(id), cur = sel.value; Kit.clear(sel);
-      ev.forEach(function (e) { sel.appendChild(Kit.el("option", { value: e.id }, e.id + " (" + e.kind + ", C = " + e.ts + ")")); });
+      ev.forEach(function (e) { sel.appendChild(Kit.el("option", { value: e.id }, e.id + " (" + KIND[e.kind] + "، C = " + e.ts + ")")); });
       if (ev.some(function (e) { return e.id === cur; })) sel.value = cur; else if (ev.length) sel.value = ev[j === 0 ? 0 : ev.length - 1].id;
     });
     a = document.getElementById("ea").value; b = document.getElementById("eb").value;
     var A = ev.filter(function (e) { return e.id === a; })[0], Bv = ev.filter(function (e) { return e.id === b; })[0], rel = document.getElementById("rel");
     if (A && Bv && A !== Bv) {
-      var r = hb(A, Bv) ? a + " → " + b : hb(Bv, A) ? b + " → " + a : a + " ∥ " + b + " (concurrent)";
+      var r = hb(A, Bv) ? a + " → " + b : hb(Bv, A) ? b + " → " + a : a + " ∥ " + b + " (هم‌زمان)";
       var conc = !hb(A, Bv) && !hb(Bv, A), order = A.ts < Bv.ts ? "C(" + a + ") = " + A.ts + " < C(" + b + ") = " + Bv.ts : A.ts > Bv.ts ? "C(" + a + ") = " + A.ts + " > C(" + b + ") = " + Bv.ts : "C(" + a + ") = C(" + b + ") = " + A.ts;
       rel.className = "callout " + (conc ? "warn" : "ok");
-      rel.textContent = r + ". " + order + "." + (conc && A.ts !== Bv.ts ? " The timestamps are ordered although the events are concurrent: the converse of clock consistency doesn't hold." : conc ? "" : " Consistent: the earlier event has the smaller timestamp.");
-    } else { rel.className = "callout"; rel.textContent = "Pick two different events."; }
+      rel.textContent = r + ". " + order + "." + (conc && A.ts !== Bv.ts ? " این timestampها مرتب‌اند هرچند رویدادها هم‌زمان‌اند: عکس consistency ساعت برقرار نیست." : conc ? "" : " سازگار: رویداد پیشین timestamp کوچک‌تر را دارد.");
+    } else { rel.className = "callout"; rel.textContent = "دو رویداد مختلف بردارید."; }
     var lc = Kit.clear(document.getElementById("locals")), sd = Kit.clear(document.getElementById("sends")), dl = Kit.clear(document.getElementById("delivers"));
     for (var c = 0; c < N; c++) {
       (function (c) {
-        var b1 = Kit.el("button", { class: "btn small" }, "C" + (c + 1) + " local"); b1.addEventListener("click", function () { local(c); }); lc.appendChild(b1);
+        var b1 = Kit.el("button", { class: "btn small" }, "C" + (c + 1) + " محلی"); b1.addEventListener("click", function () { local(c); }); lc.appendChild(b1);
         for (var dd = 0; dd < N; dd++) if (dd !== c) (function (dd) { var b2 = Kit.el("button", { class: "btn small" }, "C" + (c + 1) + " → C" + (dd + 1)); b2.addEventListener("click", function () { send(c, dd); }); sd.appendChild(b2); })(dd);
       })(c);
     }
-    pend.forEach(function (m, i) { var b3 = Kit.el("button", { class: "btn small primary" }, "Deliver " + m.from.id + " to C" + (m.to + 1)); b3.addEventListener("click", function () { deliver(i); }); dl.appendChild(b3); });
+    pend.forEach(function (m, i) { var b3 = Kit.el("button", { class: "btn small primary" }, "تحویل " + m.from.id + " به C" + (m.to + 1)); b3.addEventListener("click", function () { deliver(i); }); dl.appendChild(b3); });
     var pairs = 0, concPairs = 0; for (var i = 0; i < ev.length; i++) for (var j = i + 1; j < ev.length; j++) { pairs++; if (!hb(ev[i], ev[j]) && !hb(ev[j], ev[i])) concPairs++; }
-    stats([["Events", ev.length], ["Messages in flight", pend.length], ["Concurrent pairs", concPairs + " of " + pairs], ["Clocks C1 / C2 / C3", clk.join(" / ")]]);
+    stats([["رویدادها", ev.length], ["پیام‌های در پرواز", pend.length], ["زوج‌های هم‌زمان", concPairs + " از " + pairs], ["ساعت‌های C1 و C2 و C3", clk.join(" / ")]]);
   }
   document.getElementById("ea").addEventListener("change", render); document.getElementById("eb").addEventListener("change", render);
   document.getElementById("reset").addEventListener("click", example);
-  document.getElementById("empty").addEventListener("click", function () { blank(); log.clear(); log.add("Empty diagram.", "muted"); render(); });
+  document.getElementById("empty").addEventListener("click", function () { blank(); log.clear(); log.add("نمودار خالی.", "muted"); render(); });
   example();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "a is a send on C1 and b is the matching receive on C2. Then…",
+    { q: "رویداد a فرستادنی روی C1 است و b همان گرفتن روی C2. آن‌وقت …",
       options: ["a ∥ b", "a → b", "b → a"], answer: 1,
-      explain: "The intercomponent rule (p. 33)." },
-    { q: "C(a) < C(b) for Lamport timestamps. What can you conclude?",
-      options: ["a → b", "b did not happen before a", "a ∥ b"], answer: 1,
-      explain: "If b → a, then C(b) < C(a). So b didn't happen before a, but a may be concurrent with b (p. 35)." },
-    { q: "A component with clock 1 receives a message stamped 3. Its new clock is…",
-      options: ["2", "3", "4"], answer: 2,
-      explain: "max(1, 3) + 1 = 4 (Figure 2.18, p. 38)." }
+      explain: "قاعده‌ی بین‌مؤلفه‌ای (ص. ۳۳)." },
+    { q: "برای timestampهای Lamport داریم C(a) < C(b). چه نتیجه‌ای می‌گیرید؟",
+      options: ["a → b", "رویداد b پیش از a رخ نداده", "a ∥ b"], answer: 1,
+      explain: "اگر b → a بود، آن‌وقت C(b) < C(a). پس b پیش از a رخ نداده، ولی شاید a با b هم‌زمان باشد (ص. ۳۵)." },
+    { q: "مؤلفه‌ای با ساعت ۱ پیامی مُهرخورده‌ی ۳ می‌گیرد. ساعت تازه‌اش … است",
+      options: ["۲", "۳", "۴"], answer: 2,
+      explain: "داریم max(1, 3) + 1 = 4 (شکل ۲.۱۸، ص. ۳۸)." }
   ]);
 })();
 </script>

@@ -1,18 +1,18 @@
-# Raft election timeouts
+# مدت‌های انتخاب Raft
 
-Why does Raft randomize election timeouts? Each simulated term, every follower draws a timeout between 150 ms and 150 ms + *spread*. A follower becomes a candidate when its timer fires, unless a `RequestVote` from an earlier candidate reached it first; then it votes for the first candidate it heard from. A candidate wins with a quorum; otherwise the vote is split and a new term starts. The script runs 5,000 elections per row for 3- and 5-node clusters and up to 50 rounds each.
+چرا Raft مدت‌های انتخاب را تصادفی می‌کند؟ در هر term شبیه‌سازی‌شده، هر followerی مدتی بین ۱۵۰ میلی‌ثانیه و ۱۵۰ میلی‌ثانیه به‌علاوه‌ی *گستره* برمی‌دارد. هر followerی وقتی تایمرش شلیک کند نامزد می‌شود، مگر `RequestVote`ی از نامزدی پیشین اول به آن رسیده باشد؛ آن‌وقت به نخستین نامزدی که از آن شنیده رأی می‌دهد. نامزدی با quorumی می‌برد؛ وگرنه رأی شقه است و term تازه‌ای شروع می‌شود. اسکریپت برای هر ردیفی پنج هزار انتخاب را در clusterهای سه و پنج نودی و تا پنجاه دور برای هر کدام اجرا می‌کند.
 
-*Illustrates Think Distributed Systems, “Leader Election protocol”, pp. 139–140 (random timeouts, split votes, new elections). The 150 ms base, the spreads, the 5–15 ms message delay and the one-vote-per-term simplification are the vault's (seeded); the Raft paper suggests timeouts of 150–300 ms.*
+*تصویری از «پروتکل Leader Election» کتاب Think Distributed Systems، صص. ۱۳۹–۱۴۰، یعنی مدت‌های تصادفی و رأی شقه و انتخاب تازه. پایه‌ی ۱۵۰ میلی‌ثانیه و آن گستره‌ها و latency پیام ۵ تا ۱۵ میلی‌ثانیه و ساده‌سازی یک‌رأی‌برای‌هر‌term مال vault است، با seed؛ مقاله‌ی Raft مدت‌های ۱۵۰ تا ۳۰۰ میلی‌ثانیه پیشنهاد می‌دهد.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 raft_election_timeouts.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 5,000 elections per row; timeouts uniform in [150, 150 + spread] ms; one-way delay 5-15 ms
@@ -35,13 +35,13 @@ nodes   spread  split in round 1  elected in 50  mean rounds*  worst*
 * among elections that produced a leader within 50 rounds
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- When the spread is smaller than the message delay, every follower times out before hearing from anyone. Everyone votes for themselves, and no leader is ever elected.
-- A spread of a few message delays is enough: at 25 ms most elections succeed in the first round, and at 150 ms about 99% do.
-- Five nodes split more often than three at the same spread, because more nodes can time out within one message delay of each other.
-- Randomization is a liveness heuristic only. Safety never depends on it, which is the practical answer to FLP.
+- وقتی گستره از latency پیام کوچک‌تر باشد، وقت هر followerی پیش از شنیدن از هر کسی سر می‌رود. همه به خودشان رأی می‌دهند، و هیچ‌وقت leaderی انتخاب نمی‌شود.
+- گستره‌ای به اندازه‌ی چند latency پیام کافی است: در ۲۵ میلی‌ثانیه بیشتر انتخاب‌ها در دور اول موفق می‌شوند، و در ۱۵۰ میلی‌ثانیه تقریباً ۹۹٪.
+- پنج نود در همان گستره بیشتر از سه تا شقه می‌شوند، چون نودهای بیشتری می‌توانند وقتشان درون یک latency پیام از هم سر برود.
+- تصادفی کردن تنها اکتشافی برای liveness است. ایمنی هیچ‌وقت به آن وابسته نیست، که همان پاسخ عملی به قضیه‌ی FLP است.
 
-## Related
+## مرتبط
 
-- Chapter note: [10. Distributed consensus](../../chapters/10-distributed-consensus.md) — “Leader Election protocol”, pp. 139–140
+- یادداشت فصل: [فصل ۱۰: consensus توزیع‌شده](../../chapters/10-distributed-consensus.md) — «پروتکل Leader Election»، صص. ۱۳۹–۱۴۰

@@ -3,121 +3,129 @@ book: think-distributed-systems
 chapter: 11
 title: "Durable executions"
 pages: "145–155"
+translated_title: "اجرای پایا"
+lang: fa
 ---
 
-# 11. Durable executions
+# فصل ۱۱: اجرای پایا
 
-[← 10. Distributed consensus](10-distributed-consensus.md) · [Book](../README.md) · [12. Cloud and services →](12-cloud-and-services.md)
+[فصل ۱۰: consensus توزیع‌شده →](10-distributed-consensus.md) · [کتاب](../README.md) · [فصل ۱۲: cloud و سرویس‌ها ←](12-cloud-and-services.md)
 
-## Summary
+## خلاصه
 
-**Durable executions** are to distributed systems what transactions are to databases: an abstraction that hides the possibility of failure (p. 145). The problem is **partial execution**. A signup function that charges a card and then creates an account can crash in between, leaving the user charged and locked out, because **failure atomicity doesn't compose**: a sequence of two atomic actions isn't atomic (pp. 145–148).
+**اجرای پایا** برای سیستم‌های توزیع‌شده همان است که تراکنش برای دیتابیس‌ها: انتزاعی که احتمال شکست را پنهان می‌کند (p. 145). مسئله **اجرای جزئی** است. تابع ثبت‌نامی که کارتی را شارژ می‌کند و بعد حسابی می‌سازد می‌تواند میان این دو از کار بیفتد، و کاربر را شارژشده و بی‌راه بگذارد، چون **اتمی بودن در برابر شکست ترکیب نمی‌شود**: دنباله‌ای از دو کنش اتمی اتمی نیست (pp. 145–148).
 
-The chapter separates *definitions* (failure-aware or failure-agnostic) from *executions* (failure-free, failure-tolerant or failure-transparent) (p. 147). It models processes as sequences of atomic steps and executions as traces that may crash (p. 148). It defines **failure-transparent recovery** relative to an application-chosen **equivalence function**: identity, duplicating the last event, duplicating the last n events, or a full restart (pp. 149–150). It compares **restart** and **resume** (pp. 150–151), then two implementations:
+فصل *تعریف*ها، یعنی شکست‌آگاه یا شکست‌ناآگاه، را از *اجرا*ها، یعنی بی‌شکست یا شکست‌تحمل یا شکست‌شفاف، جدا می‌کند (p. 147). processها را به‌شکل دنباله‌ای از قدم‌های اتمی و اجراها را به‌شکل ردهایی که می‌توانند از کار بیفتند مدل می‌کند (p. 148). **بازیابی failure-transparent** را نسبت به **تابع هم‌ارزی**ی که برنامه برمی‌دارد تعریف می‌کند: همانی، تکرار آخرین رویداد، تکرار n رویداد آخر، یا شروع دوباره‌ی کامل (pp. 149–150). **شروع دوباره** و **ادامه** را مقایسه می‌کند (pp. 150–151)، و بعد دو پیاده‌سازی:
 
-- **Sagas**, at the application level: failure-aware state machines (pp. 152–153).
-- **Durable execution**, at the platform level: failure-agnostic code run by a runtime that either replays a **log** of step results or restores a saved **continuation** (pp. 153–155).
+- **الگوی Saga**ها، در سطح برنامه: ماشین‌های حالت شکست‌آگاه (pp. 152–153).
+- **اجرای پایا**، در سطح پلتفرم: کدی شکست‌ناآگاه که runtimeی اجرایش می‌کند و یا **log**ی از نتیجه‌ی قدم‌ها را replay می‌کند یا **continuation** ذخیره‌شده‌ای را بازمی‌گرداند (pp. 153–155).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Failure atomicity doesn't compose:** t | ⚡ ≡ a prefix of t. The goal is t | ⚡ ≡ t, or nothing (p. 146).
-- **Two flavors of atomicity.** *Concurrency* atomicity: observably equivalent to uninterrupted, with intermediate states hidden (databases call this isolation). *Failure* atomicity: all or nothing, but intermediate states may be visible. Failure atomicity is what correctness usually requires (pp. 146–147).
-- **Definition vs. execution.** Failure-aware and failure-agnostic describe *code*; failure-free, failure-tolerant and failure-transparent describe *running code* (p. 147).
-- **Short-running vs. long-running** (from the Sagas paper) is about *logical* time: one step versus several, not seconds versus days (p. 149).
-- **Failure-transparent recovery:** a failed, recovered and continued execution is *equivalent* to a failure-free one. Transient and intermittent failures can't stop it from completing; permanent failures can (p. 149).
-- **Equivalence is chosen by the application.** Identity amounts to exactly-once processing, which isn't always achievable, so practical choices allow duplicating the last event or the last n events, up to a full restart. Duplicates require **idempotent** steps (pp. 149–150).
-- **Restart** is simple but breaks delays (it resets a one-week timer) and nondeterminism (the time, random numbers). **Resume** continues from the last save point (pp. 150–151).
-- **Sagas** make the code failure-aware and obscure the business logic. **Log-based durable execution** needs determinism and a growing log. **State-based durable execution** needs serializable continuations, which few runtimes support (pp. 152–155).
+- **اتمی بودن در برابر شکست ترکیب نمی‌شود:** داریم t | ⚡ ≡ پیشوندی از t. هدف t | ⚡ ≡ t است، یا هیچ (p. 146).
+- **دو مزه از اتمی بودن.** اتمی بودن در برابر *concurrency*: به‌شکل مشاهده‌پذیر هم‌ارز با بی‌وقفه بودن، با حالت‌های میانی پنهان، که دیتابیس‌ها اسمش را isolation می‌گذارند. اتمی بودن در برابر *شکست*: همه یا هیچ، ولی حالت‌های میانی می‌توانند دیده شوند. درستی معمولاً اتمی بودن در برابر شکست را می‌خواهد (pp. 146–147).
+- **تعریف در برابر اجرا.** شکست‌آگاه و شکست‌ناآگاه *کد* را وصف می‌کنند؛ و بی‌شکست و شکست‌تحمل و failure-transparent *کد در حال اجرا* را (p. 147).
+- **کوتاه‌اجرا در برابر بلند‌اجرا**، از مقاله‌ی Sagas، درباره‌ی زمان *منطقی* است: یک قدم در برابر چند قدم، نه ثانیه در برابر روز (p. 149).
+- **بازیابی failure-transparent:** اجرایی که شکسته و بازیابی و ادامه داده شده *هم‌ارز* اجرایی بی‌شکست است. شکست‌های transient و متناوب نمی‌توانند جلو تمام شدنش را بگیرند؛ و شکست‌های دائم می‌توانند (p. 149).
+- **هم‌ارزی را برنامه برمی‌دارد.** همانی به پردازش exactly-once می‌رسد، که همیشه دست‌یافتنی نیست، پس گزینه‌های عملی تکرار آخرین رویداد یا n رویداد آخر را مجاز می‌کنند، تا شروع دوباره‌ی کامل. تکراری‌ها قدم‌های **idempotent** لازم دارند (pp. 149–150).
+- **شروع دوباره** ساده است ولی latencyها را می‌شکند، یعنی تایمر یک‌هفته‌ای را صفر می‌کند، و ناقطعیت را، یعنی زمان و عددهای تصادفی. **ادامه** از آخرین نقطه‌ی ذخیره پی می‌گیرد (pp. 150–151).
+- **الگوی Saga**ها کد را شکست‌آگاه می‌کنند و منطق کسب‌و‌کار را می‌پوشانند. **اجرای پایای log‌محور** قطعیت و لاگی رونده لازم دارد. **اجرای پایای state-based** continuationهای serializable لازم دارد، که runtimeهای کمی پشتیبانی‌شان می‌کنند (pp. 152–155).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 11.1 The pitfalls of partial executions — p. 145
-- 11.2 System model — p. 147
-  - 11.2.1 Process definition — p. 148
-  - 11.2.2 Process execution — p. 148
-- 11.3 The concept of failure-transparent recovery — p. 149
-- 11.4 Strategies of failure-transparent recovery — p. 150
-  - 11.4.1 Restart — p. 150
-  - 11.4.2 Resume — p. 151
-- 11.5 Implementation of failure-transparent recovery — p. 152
-  - 11.5.1 Application-level implementation: Sagas — p. 152
-  - 11.5.2 Platform-level implementation: Durable execution — p. 153
+- ۱۱.۱ دام‌های اجرای جزئی — ص. ۱۴۵
+- ۱۱.۲ مدل سیستم — ص. ۱۴۷
+  - ۱۱.۲.۱ تعریف process — ص. ۱۴۸
+  - ۱۱.۲.۲ اجرای process — ص. ۱۴۸
+- ۱۱.۳ مفهوم بازیابی failure-transparent — ص. ۱۴۹
+- ۱۱.۴ راهبردهای بازیابی failure-transparent — ص. ۱۵۰
+  - ۱۱.۴.۱ شروع دوباره — ص. ۱۵۰
+  - ۱۱.۴.۲ ادامه — ص. ۱۵۱
+- ۱۱.۵ پیاده‌سازی بازیابی failure-transparent — ص. ۱۵۲
+  - ۱۱.۵.۱ پیاده‌سازی در سطح برنامه: Sagaها — ص. ۱۵۲
+  - ۱۱.۵.۲ پیاده‌سازی در سطح پلتفرم: اجرای پایا — ص. ۱۵۳
 
-## Notes
+## یادداشت‌ها
 
-### 11.1 The pitfalls of partial executions
+### ۱۱.۱ دام‌های اجرای جزئی
 
-The chapter opens with an epigraph from "An Equational Theory for Transactions" (Black, Cremet, Guerraoui and Odersky): under partial failure, even basic rules of reasoning about computation fail (p. 145).
+فصل با سرلوحه‌ای از مقاله‌ی «An Equational Theory for Transactions»، از بلک و کرمه و گروائویی و اودرسکی، باز می‌شود: زیر شکست جزئی، حتی قاعده‌های پایه‌ی استدلال درباره‌ی محاسبه هم باز می‌مانند (p. 145).
 
-The example is a streaming platform's `signup` (Listing 11.1): `await Payment.create(…)`, then `await Account.create(…)`. It handles only the happy path. A crash between the two calls charges the user without granting access (pp. 145–146).
+نمونه، تابع `signup` یک پلتفرم استریم است (فهرست ۱۱.۱): اول `await Payment.create(…)`، بعد `await Account.create(…)`. تنها مسیر خوش را رسیدگی می‌کند. از کار افتادنی میان این دو فراخوانی کاربر را شارژ می‌کند بی آن‌که دسترسی بدهد (pp. 145–146).
 
-| Notation | Meaning (p. 146) |
+| نماد | معنا (p. 146) |
 |---|---|
-| a, b | Two atomic actions |
-| a•b | Their sequential composition, which is **not** atomic (Figure 11.1) |
-| t \| ⚡ ≡ prefix t | What we get: a crash leaves some prefix of the execution |
-| t \| ⚡ ≡ t or nothing | What we want: **failure transparency** |
+| a، b | دو کنش اتمی |
+| a•b | ترکیب ترتیبی‌شان، که اتمی **نیست** (شکل ۱۱.۱) |
+| t \| ⚡ ≡ prefix t | آن چیزی که می‌گیریم: از کار افتادن پیشوندی از اجرا را می‌گذارد |
+| t \| ⚡ ≡ t یا هیچ | آن چیزی که می‌خواهیم: **شفافیت در برابر شکست** |
 
-![Three states joined by atomic actions a and b, with a curved red arrow a • b spanning from the first state to the last](../figures/11-01.png)
+![سه حالت که کنش‌های اتمی a و b به هم وصلشان کرده‌اند، با فلشی خمیده و سرخ به نام a • b که از حالت اول تا آخری کشیده شده](../figures/11-01.png)
 
-*Figure 11.1 (p. 146): each arrow alone is atomic, but a crash can stop the system in the middle state, so the long red arrow is not.*
+*Figure 11.1 (p. 146): هر فلشی تنها اتمی است، ولی از کار افتادنی می‌تواند سیستم را در حالت میانی بخواباند، پس آن فلش سرخ بلند اتمی نیست.*
 
-**Aha! moment, two flavors of atomicity** (pp. 146–147):
+**لحظه‌ی آها!، دو مزه از اتمی بودن** (pp. 146–147):
 
-| Flavor | Observably equivalent to… | Intermediate states visible to others? |
+| مزه | به‌شکل مشاهده‌پذیر هم‌ارز با… | حالت‌های میانی برای دیگران دیدنی‌اند؟ |
 |---|---|---|
-| **Concurrency** atomicity | Running uninterrupted (databases call this *isolation*) | No |
-| **Failure** atomicity | All or nothing | Yes |
+| اتمی بودن در برابر **concurrency** | اجرای بی‌وقفه، که دیتابیس‌ها اسمش را *isolation* می‌گذارند | نه |
+| اتمی بودن در برابر **شکست** | همه یا هیچ | بله |
 
-The chapter uses *atomic* to mean failure-atomic. A process moves from a correct state through an incorrect intermediate state (charged, no account) to a correct one. Failure atomicity guarantees the process never *stops* in that middle state (p. 147).
+فصل واژه‌ی *اتمی* را به معنای اتمی در برابر شکست به کار می‌برد. process از حالتی درست، از راه حالتی میانی و نادرست، یعنی شارژشده و بی‌حساب، به حالتی درست می‌رود. اتمی بودن در برابر شکست تضمین می‌کند که process هیچ‌وقت در آن حالت میانی *نمی‌ایستد* (p. 147).
 
-### 11.2 System model
+> **In practice:** DAG در Airflow اجرای چندمرحله‌ای است: load، hash، staging، Bronze، Silver، Gold؛ و هر مرحله ممکن است وسط کار بمیرد.
+>
+> **Your turn:** task ساختن Silver بعد از نوشتن نیمی از ردیف‌ها kill شد و retry می‌شود. چه چیزی باید درست باشد تا نتیجه درست بماند؟
+>
+> *Answer:* task باید یا اتمی باشد، مثلاً ساختن در جدول staging و `EXCHANGE`، یا idempotent، مثلاً بازنویسی partition. وگرنه retry نیمه‌ی اول را تکراری می‌کند. اجرای جزئی حالت میانی‌ای باقی می‌گذارد که retry ساده نمی‌بیند (pp. 145–147).
 
-The section opens with a Dijkstra epigraph: the programmer's real subject is the *execution* their definition controls (p. 147). We often blur definition (the code) and execution (the running code); Figure 11.2 separates them (p. 147):
+### ۱۱.۲ مدل سیستم
 
-| | Definition (static, development) | Execution (dynamic, operations) |
+بخش با سرلوحه‌ای از دایکسترا باز می‌شود: موضوع واقعی برنامه‌نویس همان *اجرا*یی است که تعریفش کنترلش می‌کند (p. 147). ما اغلب تعریف، یعنی کد، و اجرا، یعنی کد در حال اجرا، را قاطی می‌کنیم؛ شکل ۱۱.۲ جدایشان می‌کند (p. 147):
+
+| | تعریف که ایستا و زمان توسعه است | اجرا که پویا و زمان عملیات است |
 |---|---|---|
-| Terms | Failure-**aware**, failure-**agnostic** | Failure-**free**, failure-**tolerant**, failure-**transparent** |
+| اصطلاح‌ها | شکست‌**آگاه**، شکست‌**ناآگاه** | **بی‌شکست**، **شکست‌تحمل**، **failure-transparent** |
 
-#### 11.2.1–11.2.2 Process definition and execution (p. 148)
+#### ۱۱.۲.۱ و ۱۱.۲.۲ تعریف و اجرای process (p. 148)
 
-- **Definition:** P = A • P′ | ε. Either perform the atomic action A and then behave like P′, or terminate successfully (ε).
-- **Execution:** a trace t in which each step A is an observable event a. The model assumes **Crash-Stop** failures. For P = A • B • ε, the possible traces are × (crashed before a), a • × (crashed after a) and a • b • ✓ (success).
-- A single-step process inherits its step's failure atomicity (Figure 11.3). A multi-step process doesn't: **failure atomicity doesn't compose** (Figure 11.4).
+- **تعریف:** داریم P = A • P′ | ε. یا کنش اتمی A را انجام بده و بعد مثل P′ رفتار کن، یا موفق تمام کن، یعنی ε.
+- **اجرا:** ردی مثل t که در آن هر قدم A رویدادی مشاهده‌پذیر مثل a است. مدل شکست‌های **Crash-Stop** را فرض می‌گیرد. برای P = A • B • ε، ردهای ممکن × هستند، یعنی پیش از a از کار افتاد، و a • ×، یعنی پس از a از کار افتاد، و a • b • ✓، یعنی موفقیت.
+- مفهوم process یک‌قدمی اتمی بودن قدمش را به ارث می‌برد (شکل ۱۱.۳). process چند‌قدمی نه: **اتمی بودن در برابر شکست ترکیب نمی‌شود** (شکل ۱۱.۴).
 
-**Aha! moment** (p. 149): in "Sagas", Garcia-Molina and Salem define *short-running* (short-lived) as one step and *long-running* (long-lived) as several. This is about **logical time**, delineated by steps, not physical time.
+**لحظه‌ی آها!** (p. 149): در مقاله‌ی «Sagas»، گارسیا-مولینا و سالم *کوتاه‌اجرا* را یک قدم و *بلند‌اجرا* را چند قدم تعریف می‌کنند. این درباره‌ی **زمان منطقی** است، که قدم‌ها مرزش می‌زنند، نه زمان فیزیکی.
 
-### 11.3 The concept of failure-transparent recovery
+### ۱۱.۳ مفهوم بازیابی failure-transparent
 
-Recovery is **failure-transparent** if a failure-free execution produces a sequence of events *equivalent* to that of a failed, recovered and continued execution. Transient and intermittent failures can't prevent completion; permanent failures can (p. 149). The chapter covers only **forward** recovery; compensation is in Chapter 3 (p. 149).
+بازیابی **failure-transparent** است اگر اجرایی بی‌شکست دنباله‌ای از رویداد بسازد که *هم‌ارز* دنباله‌ی اجرایی شکسته و بازیابی و ادامه داده شده باشد. شکست‌های transient و متناوب نمی‌توانند جلو تمام شدن را بگیرند؛ و شکست‌های دائم می‌توانند (p. 149). فصل تنها بازیابی **روبه‌جلو** را می‌پوشاند؛ و جبران در فصل ۳ است (p. 149).
 
-Equivalence is decided by an application-specific **equivalence function** (p. 149). For `alphabet()`, which prints a to f, one letter per step (Listing 11.2), P = A•B•C•D•E•F•ε and the failure-free trace is a•b•c•d•e•f•✓ (pp. 149–150). With a crash 💥 after c:
+هم‌ارزی را **تابع هم‌ارزی**ی برنامه‌ویژه تصمیم می‌گیرد (p. 149). برای `alphabet()`، که a تا f را چاپ می‌کند و هر قدم یک حرف (فهرست ۱۱.۲)، داریم P = A•B•C•D•E•F•ε و رد بی‌شکست a•b•c•d•e•f•✓ است (pp. 149–150). با از کار افتادنی 💥 پس از c:
 
-| Equivalence function | Recovered trace (p. 150) | Note |
+| تابع هم‌ارزی | رد بازیابی‌شده (p. 150) | یادداشت |
 |---|---|---|
-| **Identity** | a•b•c💥d•e•f•✓ | Ideal, but amounts to exactly-once processing, which isn't always achievable |
-| **Valid to duplicate the last event** | a•b•c💥c•d•e•f•✓ | Apt and popular |
-| **Valid to duplicate the last n events** | a•b•c💥b•c•d•e•f•✓ | Here n = 2 |
-| **Restart** (the extreme case) | a•b•c💥a•b•c•d•e•f•✓ | Duplicates everything done so far |
+| **همانی** | a•b•c💥d•e•f•✓ | آرمانی، ولی به پردازش exactly-once می‌رسد، که همیشه دست‌یافتنی نیست |
+| **تکرار آخرین رویداد مجاز است** | a•b•c💥c•d•e•f•✓ | برازنده و همه‌گیر |
+| **تکرار n رویداد آخر مجاز است** | a•b•c💥b•c•d•e•f•✓ | این‌جا n = 2 |
+| **شروع دوباره** که حالت حدی است | a•b•c💥a•b•c•d•e•f•✓ | هر چه تا این‌جا شده را تکرار می‌کند |
 
-> **Vault note:** the book's text refers back to "chapter 6" for exactly-once processing and idempotence (pp. 150–151); both are covered in [Chapter 4](04-message-delivery-and-processing.md).
+> **Vault note:** متن کتاب برای پردازش exactly-once و idempotence به «فصل ۶» پس‌ارجاع می‌دهد (pp. 150–151)؛ هر دو در [فصل ۴](04-message-delivery-and-processing.md) پوشش داده شده‌اند.
 
-### 11.4 Strategies of failure-transparent recovery
+### ۱۱.۴ راهبردهای بازیابی failure-transparent
 
-Duplicated events are only correct if actions are **idempotent** (p. 150).
+رویدادهای تکراری تنها وقتی درست‌اند که کنش‌ها **idempotent** باشند (p. 150).
 
-| Strategy | How | Limits (pp. 150–151) |
+| راهبرد | چطور | حدها (pp. 150–151) |
 |---|---|---|
-| **Restart** | Run the process again from the beginning | Simple *if* steps are idempotent. Breaks **delays**: in Listing 11.4, the account is created and payment is collected after a one-week `setTimeout`, so a restart resets the week. Breaks **nondeterministic** steps: the time of day or a random number may differ on rerun |
-| **Resume** | Restart from the most recent **save point**: load state, run a step, save state (Figure 11.5) | Needs enough information captured between steps |
+| **شروع دوباره** | process را از اول دوباره اجرا کن | ساده است *اگر* قدم‌ها idempotent باشند. **latency**ها را می‌شکند: در فهرست ۱۱.۴، حساب ساخته می‌شود و پرداخت پس از یک `setTimeout` یک‌هفته‌ای وصول می‌شود، پس شروع دوباره آن هفته را صفر می‌کند. قدم‌های **ناقطعی** را می‌شکند: شاید ساعت روز یا عددی تصادفی سر اجرای دوباره فرق کند |
+| **ادامه** | از تازه‌ترین **نقطه‌ی ذخیره** دوباره شروع کن: حالت را بار کن، قدمی بردار، حالت را ذخیره کن (شکل ۱۱.۵) | به اطلاع کافی که بین قدم‌ها گرفته شده نیاز دارد |
 
-![A process of two steps a and b: before each step a dashed arrow loads state from a store, after each step another saves state, and a dashed arc skips from the save after a to the load before b](../figures/11-05.png)
+![processی از دو قدم a و b: پیش از هر قدمی فلشی خط‌چین حالت را از انباره بار می‌کند، و پس از هر قدمی یکی دیگر حالت را ذخیره می‌کند، و کمانی خط‌چین از ذخیره‌ی پس از a به بار کردن پیش از b می‌پرد](../figures/11-05.png)
 
-*Figure 11.5 (p. 151): after a crash, execution resumes from the last save point, so a completed step is never repeated.*
+*Figure 11.5 (p. 151): پس از از کار افتادن، اجرا از آخرین نقطه‌ی ذخیره پی گرفته می‌شود، پس قدمی که تمام شده هیچ‌وقت دوباره نمی‌شود.*
 
-### 11.5 Implementation of failure-transparent recovery
+### ۱۱.۵ پیاده‌سازی بازیابی failure-transparent
 
 ```mermaid
 flowchart TB
@@ -131,86 +139,92 @@ flowchart TB
     AL -- escalation --> PL
 ```
 
-*A simplified reading of Figure 11.6, the failure-handling ladder (p. 152):* failure-aware levels handle failures explicitly; failure-oblivious levels above a containment point never see them.
+*خوانشی ساده‌شده از شکل ۱۱.۶، یعنی نردبان رسیدگی به شکست (p. 152):* سطح‌های شکست‌آگاه شکست‌ها را صریح رسیدگی می‌کنند؛ و سطح‌های شکست‌نابین بالای نقطه‌ی مهار هیچ‌وقت نمی‌بینندشان.
 
-#### 11.5.1 Application-level implementation: Sagas (pp. 152–153)
+#### ۱۱.۵.۱ پیاده‌سازی در سطح برنامه: Sagaها (pp. 152–153)
 
-**Sagas** are failure-*aware* definitions that yield failure-transparent executions. A common implementation is a **state machine** whose state and next-step trigger are persisted after every step, enabling *eventual* execution (Listing 11.5):
+**الگوی Saga**ها تعریف‌هایی شکست‌*آگاه*اند که اجرایی failure-transparent می‌دهند. پیاده‌سازی رایجشان **state machine**ی است که حالت و برانگیزنده‌ی قدم بعدش پس از هر قدمی پایا می‌شوند، که اجرای *غایی* را ممکن می‌کند (فهرست ۱۱.۵):
 
-- state `createAccount` runs `AccountCreate()` and returns `{label: 'createPayment', account}`;
-- state `createPayment` runs `PaymentCreate()` and returns `{label: 'done', payment}`.
+- حالت `createAccount` تابع `AccountCreate()` را اجرا می‌کند و `{label: 'createPayment', account}` برمی‌گرداند؛
+- و حالت `createPayment` تابع `PaymentCreate()` را اجرا می‌کند و `{label: 'done', payment}` برمی‌گرداند.
 
-In the author's opinion this **obscures the core business logic**, making it harder to understand and maintain (p. 153).
+به نظر نویسنده این **منطق مغزی کسب‌و‌کار را می‌پوشاند**، و فهمیدن و نگهداشتش را سخت‌تر می‌کند (p. 153).
 
-#### 11.5.2 Platform-level implementation: Durable execution (pp. 153–155)
+#### ۱۱.۵.۲ پیاده‌سازی در سطح پلتفرم: اجرای پایا (pp. 153–155)
 
-**Durable executions** are failure-*agnostic* definitions that yield failure-transparent executions. In Listing 11.6, `signup` is a generator (a coroutine) that *yields* each step as a function, and a runtime executes them. There are two strategies:
+**اجرای پایا** تعریف‌هایی شکست‌*ناآگاه*اند که اجرایی failure-transparent می‌دهند. در فهرست ۱۱.۶، تابع `signup` یک generator است، یعنی coroutine، که هر قدمی را به‌شکل تابعی *yield* می‌کند، و runtimeی اجرایشان می‌کند. دو راهبرد هست:
 
-| | **Log-based** (Listing 11.7) | **State-based** (Listing 11.8) |
+| | **log‌محور** (فهرست ۱۱.۷) | **state-based** (فهرست ۱۱.۸) |
 |---|---|---|
-| Records after each step | The step's **output**, in a durable log | The execution's **state**, more precisely its continuation |
-| On recovery | Restart the coroutine and **replay**: for each step already in the log, feed the logged result back instead of executing, fast-forwarding to the failure point | **Load** the saved continuation and continue, without replay |
-| Requires | **Deterministic** execution, so replay follows the same path as the log | **Serializable continuations**, a language or runtime feature |
-| Drawback | The log grows with every step | Most runtimes lack it today; early examples are Grain and Unison |
-| Support needed | None special: simple to implement | Native support, a compiler extension or libraries |
+| پس از هر قدمی چه ثبت می‌کند | **خروجی** قدم، در لاگی پایا | **حالت** اجرا، و دقیق‌تر continuationش |
+| سر بازیابی | coroutine را دوباره شروع کن و **replay** کن: برای هر قدمی که از قبل در لاگ است، به‌جای اجرا نتیجه‌ی لاگ‌شده را برگردان، و تا نقطه‌ی شکست جلو برو | continuation ذخیره‌شده را **بار** کن و ادامه بده، بی replay |
+| چه لازم دارد | اجرای **قطعی**، تا replay همان مسیر لاگ را پی بگیرد | **continuationهای serializable**، که امکانی در زبان یا runtime است |
+| اشکال | لاگ با هر قدمی رشد می‌کند | امروز بیشتر runtimeها ندارندش؛ نمونه‌های اولیه Grain و Unison‌اند |
+| چه پشتیبانی لازم است | هیچ چیز خاصی: پیاده‌سازی‌اش ساده است | پشتیبانی بومی، افزونه‌ای بر compiler، یا کتابخانه |
 
 (pp. 153–155)
 
-> **Try it:** [Restart, resume and replay](../widgets/11-durable-execution.html) — run the book's `alphabet()` process, crash it after any step, and recover it by restart, by resuming from a save point, or by log-based replay; compare the resulting event sequences with each equivalence function, then add a nondeterministic step and watch replay diverge.
+> **Try it:** [شروع دوباره، ادامه و replay](../widgets/11-durable-execution.html)؛ process `alphabet()` کتاب را اجرا کنید، پس از هر قدمی از کارش بیندازید، و با شروع دوباره یا ادامه از نقطه‌ی ذخیره یا replay log‌محور بازیابی‌اش کنید؛ دنباله‌ی رویدادهای حاصل را با هر تابع هم‌ارزی مقایسه کنید، بعد قدمی ناقطعی بیفزایید و ببینید replay واگرا می‌شود.
 
-## Trade-offs at a glance
+> **In practice:** Airflow نوعی durable execution در سطح task است: state هر task در دیتابیس metadata ذخیره می‌شود و DAG از task شکست‌خورده ادامه می‌یابد، نه از اول.
+>
+> **Your turn:** چرا یک task بزرگ که همه‌ی لایه‌ها را می‌سازد بدتر از شش task کوچک است؟
+>
+> *Answer:* Airflow فقط مرز taskها را checkpoint می‌کند؛ task بزرگ با هر شکست از اول اجرا می‌شود. taskهای کوچک‌تر و idempotent یعنی بازیابی از نزدیک‌ترین نقطه، همان‌طور که در Saga هر گام جدا ثبت می‌شود (pp. 152–155).
 
-| Approach | Definition stays… | Recovery cost | Requires | Breaks on |
+## بده‌بستان‌ها در یک نگاه
+
+| رویکرد | تعریف … می‌ماند | هزینه‌ی بازیابی | چه لازم دارد | کجا می‌شکند |
 |---|---|---|---|---|
-| Naive code (Listing 11.1) | Failure-agnostic | — | — | Any crash between steps: partial execution |
-| Restart | Failure-agnostic | Re-run every step | Idempotent steps | Delays, nondeterminism |
-| Resume from save points | Failure-aware (save and load) | Re-run the last step | Captured state | Forgetting to save |
-| Saga (state machine) | **Failure-aware** | Re-run the current state's step | Persisted state, idempotent steps | Readability |
-| Durable execution, log-based | **Failure-agnostic** | Replay the log, run the rest | Determinism | Nondeterministic code; very long logs |
-| Durable execution, state-based | **Failure-agnostic** | None: continue | Serializable continuations | Runtimes without support |
+| کد ساده‌دل (فهرست ۱۱.۱) | شکست‌ناآگاه | — | — | هر از کار افتادنی بین قدم‌ها: اجرای جزئی |
+| شروع دوباره | شکست‌ناآگاه | هر قدمی دوباره اجرا می‌شود | قدم‌های idempotent | تأخیرها، ناقطعیت |
+| ادامه از نقطه‌های ذخیره | شکست‌آگاه، یعنی ذخیره و بار کردن | آخرین قدم دوباره اجرا می‌شود | حالتی که گرفته شده | از یاد بردن ذخیره |
+| Saga که state machine است | **شکست‌آگاه** | قدم حالت جاری دوباره اجرا می‌شود | حالت پایا، قدم‌های idempotent | خوانایی |
+| اجرای پایای log‌محور | **شکست‌ناآگاه** | لاگ را replay کن، بقیه را اجرا | قطعیت | کد ناقطعی؛ لاگ‌های خیلی بلند |
+| اجرای پایای state-based | **شکست‌ناآگاه** | هیچ: ادامه بده | continuationهای serializable | runtimeهای بی پشتیبانی |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Workflow engines in practice.** Temporal, Restate, AWS Step Functions and Azure Durable Functions are durable-execution platforms. Temporal and Durable Functions are log-based: they replay workflow code against an event history, which is why their workflow code must be deterministic and why they provide APIs for time, randomness and side effects that record their results. This is the vault's context; the chapter names no products besides Grain and Unison.
-- **Sagas with compensation.** The original Sagas paper pairs each step with a compensating action for *backward* recovery, the "correct but less desirable" outcome of [Chapter 3](03-failure-tolerance.md). The book's chapter only covers forward recovery (p. 149).
-- **Replay with a test.** The [durable-execution lab](../lab/11-durable-replay/README.md) implements Listing 11.7's log-based runtime with Python generators, injects a crash after every step and checks that each recovered execution matches the failure-free trace under the "duplicate the last event" equivalence. It also shows that a nondeterministic step breaks replay.
+- **موتورهای workflow در عمل.** پلتفرم‌های Temporal و Restate و AWS Step Functions و Azure Durable Functions پلتفرم‌های اجرای پایا هستند. Temporal و Durable Functions لاگ‌محورند: کد workflow را روی تاریخی از رویداد replay می‌کنند، که از همین‌جاست که کد workflowشان باید قطعی باشد و از همین‌جاست که API می‌دهند تا زمان و تصادفی بودن و اثرهای جانبی نتیجه‌شان را ثبت کنند. این بافتار مال vault است؛ فصل جز Grain و Unison نام محصولی نمی‌برد.
+- **همه‌ی Sagaها با جبران.** مقاله‌ی اصلی Sagas هر قدمی را با کنشی جبرانی برای بازیابی *روبه‌عقب* جفت می‌کند، که همان برآمد «درست ولی کم‌دلخواه‌تر» [فصل ۳](03-failure-tolerance.md) است. این فصل کتاب تنها بازیابی روبه‌جلو را می‌پوشاند (p. 149).
+- **عمل replay با یک آزمون.** [آزمایش اجرای پایا](../lab/11-durable-replay/README.md) runtime لاگ‌محور فهرست ۱۱.۷ را با generatorهای Python پیاده می‌کند، پس از هر قدمی از کار افتادنی تزریق می‌کند و می‌سنجد که هر اجرای بازیابی‌شده زیر هم‌ارزی «تکرار آخرین رویداد» با رد بی‌شکست می‌خواند. همچنین نشان می‌دهد قدمی ناقطعی replay را می‌شکند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [3. Failure tolerance](03-failure-tolerance.md) (total vs. partial application, forward vs. backward recovery), [4. Message delivery and processing](04-message-delivery-and-processing.md) (exactly-once semantics and idempotence), [5. Transactions](05-transactions.md) (the abstraction durable executions imitate), [6. Distributed transactions](06-distributed-transactions.md) (atomicity across systems with 2PC instead), [8. Replication](08-replication.md) (state-based vs. log-based, again).
-- **Run it:** [Log-based durable execution](../lab/11-durable-replay/README.md) — a generator-based runtime with a durable log; crashes after every step, recovers by replay, and compares traces with and without a nondeterministic step.
+- **فصل‌های مرتبط:** [فصل ۳: تحمل شکست](03-failure-tolerance.md) که اعمال کلی در برابر جزئی و بازیابی روبه‌جلو در برابر روبه‌عقب را دارد، [فصل ۴: تحویل و پردازش پیام](04-message-delivery-and-processing.md) که معناشناسی exactly-once و idempotence را دارد، [فصل ۵: تراکنش](05-transactions.md) که همان انتزاعی است که اجرای پایا تقلیدش می‌کند، [فصل ۶: تراکنش توزیع‌شده](06-distributed-transactions.md) که اتمی بودن بین سیستم‌ها را در عوض با 2PC دارد، و [فصل ۸: replication](08-replication.md) که بازهم state-based در برابر log‌محور را دارد.
+- **Run it:** [اجرای پایای log‌محور](../lab/11-durable-replay/README.md)؛ runtimeی generator‌محور با لاگی پایا؛ پس از هر قدمی از کار می‌افتد، با replay بازیابی می‌شود، و ردها را با و بی قدمی ناقطعی مقایسه می‌کند.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **What goes wrong with Listing 11.1, and what general principle does it show?**
+1. **در فهرست ۱۱.۱ چه چیزی خراب می‌شود، و چه قاعده‌ی کلی‌ای را نشان می‌دهد؟**
 
-   *Answer:* A crash after charging and before creating the account leaves the user charged without access. The sequential composition of atomic actions isn't atomic: failure atomicity doesn't compose (pp. 146–148).
+   *Answer:* از کار افتادنی پس از شارژ و پیش از ساختن حساب کاربر را شارژشده و بی دسترسی می‌گذارد. ترکیب ترتیبی کنش‌های اتمی اتمی نیست: اتمی بودن در برابر شکست ترکیب نمی‌شود (pp. 146–148).
 
-2. **Which terms describe definitions, and which describe executions?**
+2. **کدام اصطلاح‌ها تعریف‌ها را وصف می‌کنند، و کدام‌ها اجراها را؟**
 
-   *Answer:* Definitions: failure-aware, failure-agnostic. Executions: failure-free, failure-tolerant, failure-transparent (p. 147).
+   *Answer:* تعریف‌ها: شکست‌آگاه، شکست‌ناآگاه. اجراها: بی‌شکست، شکست‌تحمل، failure-transparent (p. 147).
 
-3. **What does "long-running" mean in the Sagas sense?**
+3. **«بلند‌اجرا» به معنای Sagas چه معنایی دارد؟**
 
-   *Answer:* An execution with more than one step. It's a statement about logical time, not physical duration (p. 149).
+   *Answer:* اجرایی با بیشتر از یک قدم. گزاره‌ای درباره‌ی زمان منطقی است، نه مدت فیزیکی (p. 149).
 
-4. **After a crash following step c, which recovered trace matches "valid to duplicate the last event"?**
+4. **پس از از کار افتادنی در پی قدم c، کدام رد بازیابی‌شده با «تکرار آخرین رویداد مجاز است» می‌خواند؟**
    - [ ] a•b•c💥d•e•f•✓
    - [x] a•b•c💥c•d•e•f•✓
    - [ ] a•b•c💥a•b•c•d•e•f•✓
 
-   *Answer:* The last event, c, appears twice. The first option is identity; the third is restart (p. 150).
+   *Answer:* آخرین رویداد، یعنی c، دو بار می‌آید. گزینه‌ی اول همانی است؛ و سومی شروع دوباره (p. 150).
 
-5. **Name two situations where restart is the wrong recovery strategy.**
+5. **دو وضعیتی را نام ببرید که در آن شروع دوباره راهبرد بازیابی نادرستی است.**
 
-   *Answer:* A delayed step (restarting resets the one-week delay before payment) and nondeterministic steps such as reading the time or generating random numbers (p. 151).
+   *Answer:* قدمی تأخیردار، که شروع دوباره آن latency یک‌هفته‌ای پیش از پرداخت را صفر می‌کند، و قدم‌های ناقطعی مثل خواندن زمان یا ساختن عدد تصادفی (p. 151).
 
-6. **Why does the author prefer durable execution to sagas?**
+6. **چرا نویسنده اجرای پایا را به Sagaها ترجیح می‌دهد؟**
 
-   *Answer:* Sagas make the definition failure-aware, which obscures the business logic. Durable executions keep the code failure-agnostic (pp. 152–153).
+   *Answer:* Sagaها تعریف را شکست‌آگاه می‌کنند، که منطق کسب‌و‌کار را می‌پوشاند. اجرای پایا کد را شکست‌ناآگاه نگه می‌دارد (pp. 152–153).
 
-7. **What does each durable-execution strategy require?**
+7. **هر راهبرد اجرای پایا چه لازم دارد؟**
 
-   *Answer:* Log-based needs deterministic execution, and its log keeps growing. State-based needs serializable continuations, which most runtimes don't yet provide (pp. 154–155).
+   *Answer:* لاگ‌محور اجرای قطعی لازم دارد، و لاگش همین‌طور رشد می‌کند. state-based continuationهای serializable لازم دارد، که بیشتر runtimeها هنوز نمی‌دهندشان (pp. 154–155).

@@ -3,259 +3,273 @@ book: think-distributed-systems
 chapter: 7
 title: "Partitioning"
 pages: "90–105"
+translated_title: "پارتیشن‌بندی"
+lang: fa
 ---
 
-# 7. Partitioning
+# فصل ۷: پارتیشن‌بندی
 
-[← 6. Distributed transactions](06-distributed-transactions.md) · [Book](../README.md) · [8. Replication →](08-replication.md)
+[فصل ۶: تراکنش توزیع‌شده →](06-distributed-transactions.md) · [کتاب](../README.md) · [فصل ۸: replication ←](08-replication.md)
 
-## Summary
+## خلاصه
 
-Partitioning and replication are the two essential techniques for scalability and reliability. **Partitioning overcomes the scalability limits of a single component**; replication (Chapter 8) overcomes its reliability limits (p. 90). The chapter starts from an encyclopedia split alphabetically into volumes, which already shows uneven distribution, uneven demand and cross-references (pp. 90–91). It then defines partitioning as one logical object represented by several **disjoint** physical objects (p. 92).
+پارتیشن‌بندی و replication دو تکنیک ضروری مقیاس‌پذیری و قابلیت اطمینان‌اند. **پارتیشن‌بندی از سقف مقیاس‌پذیری یک مؤلفه‌ی تنها رد می‌شود**؛ و replication در فصل ۸ از سقف قابلیت اطمینانش (p. 90). فصل از دانش‌نامه‌ای شروع می‌کند که الفبایی به جلد شکسته شده، و همین از قبل توزیع ناهموار و تقاضای ناهموار و ارجاع متقابل را نشان می‌دهد (pp. 90–91). بعد پارتیشن‌بندی را این‌طور تعریف می‌کند: یک object منطقی که چند object فیزیکی **مجزا** نمایشش می‌دهند (p. 92).
 
-It separates **partitioning** (item → partition) from **balancing** (partition → node) (pp. 93–94). It classifies partitioning as **static or dynamic** (a fixed or variable number of partitions) and **horizontal or vertical** (rows or columns) (pp. 94–97). It contrasts **item-based** assignment (stateless, coarse-grained) with **directory-based** assignment (stateful, fine-grained) (pp. 97–99). The author then runs an experiment: 235,976 dictionary words assigned to five partitions. **Range** partitioning is skewed, **hash** partitioning is even, and both relocate most items when going from 5 to 6 partitions. **Consistent hashing** relocates only about n/m (pp. 99–103). The chapter closes with **overpartitioning**, which gives balancing flexibility up to a limit (pp. 103–104).
+**پارتیشن‌بندی**، یعنی قلم به پارتیشن، را از **متوازن کردن**، یعنی پارتیشن به نود، جدا می‌کند (pp. 93–94). پارتیشن‌بندی را **ایستا یا پویا**، یعنی شمار ثابت یا متغیر پارتیشن، و **افقی یا عمودی**، یعنی ردیف یا ستون، رده‌بندی می‌کند (pp. 94–97). تخصیص **قلم‌محور**، یعنی stateless و دانه‌درشت، را با تخصیص **دایرکتوری‌محور**، یعنی stateful و دانه‌ریز، مقایسه می‌کند (pp. 97–99). بعد نویسنده آزمایشی اجرا می‌کند: ۲۳۵۹۷۶ کلمه‌ی دیکشنری که به پنج پارتیشن تخصیص داده می‌شوند. پارتیشن‌بندی **بازه‌ای** نامتوازن است، پارتیشن‌بندی **hash** هموار، و هر دو سر رفتن از پنج به شش پارتیشن بیشتر قلم‌ها را جابه‌جا می‌کنند. **consistent hashing** فقط حدود n/m را جابه‌جا می‌کند (pp. 99–103). فصل با **over-partitioning** تمام می‌شود، که تا جایی انعطاف متوازن کردن می‌دهد (pp. 103–104).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Partitioning: one logical object, many disjoint physical objects.** Replication: many physical objects that each represent the *whole* (p. 92).
-- **A distributed system is partitioned by definition.** Each component and its local state is a partition. Partitioning is about growing beyond *any* single-resource limit: data volume (intrinsic) or request volume (extrinsic) (p. 92).
-- **Big data is relative:** anything that doesn't fit on one node (pp. 92–93).
-- **Partitioning ≠ balancing.** Partitioning assigns items to partitions; balancing assigns partitions to nodes (pp. 93–94, 103).
-- **The right strategy depends on the workload.** Partitioning X by user skews toward celebrities; partitioning IoT data by date sends all writes to one partition. Partitioning is rarely one-and-done (p. 94).
-- **Static vs. dynamic** refers to the *number of partitions*. Static is simple but not elastic; dynamic is elastic but complex (p. 95).
-- **Assignment fitness = variance + relocation.** Hashing minimizes variance; neither range nor modulo hashing minimizes relocation (Table 7.2). Consistent hashing does both (pp. 97, 102–103).
-- **Overpartitioning** (more partitions than nodes) lets you add or remove nodes by moving whole partitions, but the number of partitions caps the number of nodes (p. 104).
+- **پارتیشن‌بندی: یک object منطقی و چند object فیزیکی مجزا.** روش replication: چند object فیزیکی که هر کدام *کل* را نمایش می‌دهند (p. 92).
+- **یک سیستم توزیع‌شده طبق تعریف پارتیشن‌بندی‌شده است.** هر مؤلفه و حالت محلی‌اش یک پارتیشن است. پارتیشن‌بندی درباره‌ی رد شدن از سقف *هر* منبع تنهاست: حجم داده که خاصیتی ذاتی است، یا حجم درخواست که خاصیتی بیرونی (p. 92).
+- **مفهوم big data نسبی است:** هر چیزی که روی یک نود جا نمی‌شود (pp. 92–93).
+- **پارتیشن‌بندی با متوازن کردن فرق دارد.** پارتیشن‌بندی قلم‌ها را به پارتیشن‌ها تخصیص می‌دهد؛ و متوازن کردن پارتیشن‌ها را به نودها (pp. 93–94, 103).
+- **راهبرد درست به بار بستگی دارد.** پارتیشن‌بندی X بر حسب کاربر به سمت سلبریتی‌ها نامتوازن می‌شود؛ و پارتیشن‌بندی داده‌ی IoT بر حسب تاریخ همه‌ی نوشتن‌ها را به یک پارتیشن می‌فرستد. پارتیشن‌بندی کم یک‌بار‌و‌تمام است (p. 94).
+- **ایستا در برابر پویا** به *شمار پارتیشن‌ها* برمی‌گردد. ایستا ساده است ولی کشسان نه؛ پویا کشسان است ولی پیچیده (p. 95).
+- **برازندگی تخصیص برابر واریانس به‌علاوه‌ی جابه‌جایی است.** hash کردن واریانس را کمینه می‌کند؛ و نه بازه و نه hash moduleی جابه‌جایی را کمینه نمی‌کنند (جدول ۷.۲). consistent hashing هر دو را می‌کند (pp. 97, 102–103).
+- **مفهوم over-partitioning**، یعنی پارتیشن بیشتر از نود، می‌گذارد با جابه‌جا کردن کل پارتیشن‌ها نود اضافه یا کم کنید، ولی شمار پارتیشن‌ها سقف شمار نودهاست (p. 104).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 7.1 Encyclopedias and volumes — p. 90
-- 7.2 Thinking in partitions — p. 92
-- 7.3 The mechanics of partitioning and balancing — p. 93
-- 7.4 (Re)partitioning — p. 94
-  - 7.4.1 Types of partitioning — p. 94
-  - 7.4.2 Data item to partition assignment strategies — p. 97
-- 7.5 Common item-based assignment strategies — p. 99
-  - 7.5.1 Range partitioning — p. 100
-  - 7.5.2 Hash partitioning — p. 100
-- 7.6 Repartitioning — p. 101
-  - 7.6.1 Range partitioning — p. 101
-  - 7.6.2 Hash partitioning — p. 102
-- 7.7 Consistent hashing — p. 103
-- 7.8 (Re)balancing and overpartitioning — p. 103
+- ۷.۱ دانش‌نامه‌ها و جلدها — ص. ۹۰
+- ۷.۲ فکر کردن در پارتیشن‌ها — ص. ۹۲
+- ۷.۳ مکانیک پارتیشن‌بندی و متوازن کردن — ص. ۹۳
+- ۷.۴ پارتیشن‌بندی و پارتیشن‌بندی دوباره — ص. ۹۴
+  - ۷.۴.۱ گونه‌های پارتیشن‌بندی — ص. ۹۴
+  - ۷.۴.۲ راهبردهای تخصیص قلم داده به پارتیشن — ص. ۹۷
+- ۷.۵ راهبردهای رایج تخصیص قلم‌محور — ص. ۹۹
+  - ۷.۵.۱ پارتیشن‌بندی بازه‌ای — ص. ۱۰۰
+  - ۷.۵.۲ پارتیشن‌بندی hash — ص. ۱۰۰
+- ۷.۶ پارتیشن‌بندی دوباره — ص. ۱۰۱
+  - ۷.۶.۱ پارتیشن‌بندی بازه‌ای — ص. ۱۰۱
+  - ۷.۶.۲ پارتیشن‌بندی hash — ص. ۱۰۲
+- ۷.۷ consistent hashing — ص. ۱۰۳
+- ۷.۸ متوازن کردن و over-partitioning — ص. ۱۰۳
 
-## Notes
+## یادداشت‌ها
 
-### 7.1 Encyclopedias and volumes
+### ۷.۱ دانش‌نامه‌ها و جلدها
 
-The author's teenage encyclopedia was split into volumes, one per letter (Figure 7.1). The encyclopedia is the **logical** object and the volumes are **physical** objects holding disjoint subsets (pp. 90–91). Random placement would make lookup a full scan, so producer and consumer agree on a rule: an entry goes in, and is fetched from, the volume for its first letter (p. 91).
+دانش‌نامه‌ی نوجوانی نویسنده به جلدها شکسته شده بود، یکی برای هر حرف (شکل ۷.۱). دانش‌نامه object **منطقی** است و جلدها objectهای **فیزیکی**اند که زیرمجموعه‌های مجزا را نگه می‌دارند (pp. 90–91). جای دادن تصادفی، جست‌و‌جو را به پیمایش کامل تبدیل می‌کرد، پس producer و consumer روی قاعده‌ای توافق می‌کنند: هر entry به جلد حرف اولش می‌رود و از همان‌جا گرفته می‌شود (p. 91).
 
-| Challenge | Encyclopedia | Software system (p. 91) |
+| چالش | دانش‌نامه | سیستم نرم‌افزاری (p. 91) |
 |---|---|---|
-| **Uneven distribution** | Volume E is bulky, volume X slim | Some partitions hold far more items |
-| **Uneven demand** | You reach for E more often than X | Hot partitions |
-| **Cross-references** | *Partitioning* (under P) refers to *replication* (under R): two volumes | Operations that span partitions |
+| **توزیع ناهموار** | جلد E کلفت است و جلد X نازک | بعضی پارتیشن‌ها قلم‌های خیلی بیشتری دارند |
+| **تقاضای ناهموار** | بیشتر از X سراغ E می‌روید | پارتیشن‌های داغ |
+| **ارجاع متقابل** | *پارتیشن‌بندی* زیر P به *replication* زیر R ارجاع می‌دهد: دو جلد | عملیاتی که از پارتیشن‌ها رد می‌شوند |
 
-### 7.2 Thinking in partitions
+### ۷.۲ فکر کردن در پارتیشن‌ها
 
-![A logical object above physical objects 1 to n; on the left, partitioning, where the physical objects each represent a part; on the right, marked "Next chapter", replication, where each represents the whole](../figures/07-02.png)
+![یک object منطقی بالای objectهای فیزیکی ۱ تا n؛ در چپ پارتیشن‌بندی، که هر object فیزیکی بخشی را نمایش می‌دهد؛ در راست که «فصل بعد» علامت خورده، replication، که هر کدام کل را نمایش می‌دهد](../figures/07-02.png)
 
-*Figure 7.2 (p. 92): the same picture covers both techniques; only what each physical object stands for changes.*
+*Figure 7.2 (p. 92): همین یک تصویر هر دو تکنیک را می‌پوشاند؛ فقط آن چیزی که هر object فیزیکی نمایندگی‌اش می‌کند عوض می‌شود.*
 
-Partitions are distributed across components called **nodes**, which spreads demand and avoids one node's limits (p. 92).
+پارتیشن‌ها بین مؤلفه‌هایی پخش می‌شوند که **نود** نامیده می‌شوند، که تقاضا را پخش می‌کند و از سقف یک نود می‌پرهیزد (p. 92).
 
-Two aha! moments (pp. 92–93):
+دو لحظه‌ی آها! (pp. 92–93):
 
-- **A distributed system is inherently partitioned.** Each component with its exclusive local state *is* a partition. Partitioning is not only about data volume, an intrinsic property, but about any single-resource limit, such as request volume, an extrinsic property.
-- **Big data is relative.** Pragmatically, it's "anything that doesn't fit on one node". If a node is a single key–value register, two pairs are big data. A Raspberry Pi and a MacBook Pro have different thresholds.
+- **یک سیستم توزیع‌شده ذاتاً پارتیشن‌بندی‌شده است.** هر مؤلفه با حالت محلی انحصاری‌اش *خودش* یک پارتیشن است. پارتیشن‌بندی فقط درباره‌ی حجم داده، که خاصیتی ذاتی است، نیست، بلکه درباره‌ی سقف هر منبع تنهاست، مثل حجم درخواست که خاصیتی بیرونی است.
+- **مفهوم big data نسبی است.** عملی، «هر چیزی که روی یک نود جا نمی‌شود». اگر یک نود یک register تک کلید‌مقدار باشد، دو زوج big data است. یک Raspberry Pi و یک MacBook Pro آستانه‌های مختلفی دارند.
 
-### 7.3 The mechanics of partitioning and balancing
+### ۷.۳ مکانیک پارتیشن‌بندی و متوازن کردن
 
-The rest of the chapter uses a **key–value store** (pp. 93–94):
+بقیه‌ی فصل یک **ذخیره‌سازی key-value** را به کار می‌برد (pp. 93–94):
 
-- In Figure 7.3, the dataset {x=1, y=2, z=3} is split into three partitions of one pair each, and each partition is replicated on three nodes.
-- Two relationships matter (Figure 7.4): **item → partition** and **partition → node**.
+- در شکل ۷.۳، مجموعه‌داده‌ی {x=1, y=2, z=3} به سه پارتیشن با یک زوج در هر کدام شکسته می‌شود، و هر پارتیشن روی سه نود تکرار می‌شود.
+- دو رابطه مهم‌اند (شکل ۷.۴): **قلم به پارتیشن** و **پارتیشن به نود**.
 
-![A table of data items x = 1, y = 2, z = 3 with their partitions P1, P2, P3 and nodes N1, N2, N3; arrows label the first link item to partition and the second partition to node](../figures/07-04.png)
+![جدولی از قلم‌های داده x = 1 و y = 2 و z = 3 با پارتیشن‌هایشان P1 و P2 و P3 و نودهای N1 و N2 و N3؛ فلش‌ها پیوند اول را قلم به پارتیشن و دومی را پارتیشن به نود برچسب می‌زنند](../figures/07-04.png)
 
-*Figure 7.4 (p. 94): two separate mappings — changing one (repartitioning) is independent of changing the other (rebalancing).*
+*Figure 7.4 (p. 94): دو mapping جدا — عوض کردن یکی، یعنی پارتیشن‌بندی دوباره، از عوض کردن دیگری، یعنی متوازن کردن دوباره، مستقل است.*
 
-Examples of workload-dependent trade-offs (p. 94):
+نمونه‌هایی از بده‌بستان‌های وابسته به بار (p. 94):
 
-| Application | Partition by… | Good | Bad |
+| برنامه | پارتیشن‌بندی بر حسب… | خوب | بد |
 |---|---|---|---|
-| Social media (X) | User | Balanced for the average user | Skewed for celebrities and influencers |
-| IoT sensors | Date | Every day holds the same amount of data | All writes go to one partition |
+| شبکه‌ی اجتماعی X | کاربر | برای کاربر متوسط متوازن است | برای سلبریتی‌ها و اثرگذارها نامتوازن |
+| حسگرهای IoT | تاریخ | هر روزی همان مقدار داده را دارد | همه‌ی نوشتن‌ها به یک پارتیشن می‌روند |
 
-Alternatives include sensor type, measurement type and region. Requirements change, so the strategy must adapt, often by moving data between partitions *while still serving requests* (p. 94).
+جایگزین‌ها شامل نوع حسگر و نوع اندازه‌گیری و منطقه‌اند. نیازمندی‌ها عوض می‌شوند، پس راهبرد باید سازگار شود، و اغلب با جابه‌جا کردن داده بین پارتیشن‌ها *در حالی که باز هم به درخواست‌ها سرویس می‌دهد* (p. 94).
 
-### 7.4 (Re)partitioning
+### ۷.۴ پارتیشن‌بندی و پارتیشن‌بندی دوباره
 
-**Partitioning** assigns data items to partitions; **repartitioning** reassigns them, for example when the number of partitions changes (Figure 7.5) (p. 94).
+**پارتیشن‌بندی** قلم‌های داده را به پارتیشن‌ها تخصیص می‌دهد؛ و **پارتیشن‌بندی دوباره** دوباره تخصیصشان می‌دهد، مثلاً وقتی شمار پارتیشن‌ها عوض می‌شود (شکل ۷.۵) (p. 94).
 
-#### 7.4.1 Types of partitioning (pp. 94–97)
+#### ۷.۴.۱ گونه‌های پارتیشن‌بندی (pp. 94–97)
 
-**Static vs. dynamic** concerns only the *number of partitions*, not the number of nodes (Table 7.1) (p. 95):
+**ایستا در برابر پویا** فقط به *شمار پارتیشن‌ها* می‌پردازد و نه شمار نودها (جدول ۷.۱) (p. 95):
 
-| | Static | Dynamic |
+| | ایستا | پویا |
 |---|---|---|
-| Number of partitions | Fixed; changing it is an **offline administrative** operation | Variable; changing it is a **normal online** operation |
-| Elastic | ✗ | ✓ |
-| Complexity | Low | High |
+| شمار پارتیشن‌ها | ثابت؛ عوض کردنش عملیاتی **آفلاین و مدیریتی** است | متغیر؛ عوض کردنش عملیاتی **عادی و آنلاین** است |
+| کشسان | ✗ | ✓ |
+| پیچیدگی | کم | زیاد |
 
-The aha! moment: *static* also covers slow or infrequent change. If changing the partition count is administration rather than normal operation (with planned migrations, rollbacks and possible downtime), it's static (p. 95).
+لحظه‌ی آها!: *ایستا* تغییر کند یا کم‌تکرار را هم می‌پوشاند. اگر عوض کردن شمار پارتیشن‌ها به‌جای عملیات عادی کاری مدیریتی باشد، با مهاجرت‌های برنامه‌ریزی‌شده و برگشت و احتمال از دسترس خارج شدن، آن‌وقت ایستاست (p. 95).
 
-**Horizontal vs. vertical** is easiest to see with relational tables (Figure 7.6) (pp. 95–96):
+**افقی در برابر عمودی** را با جدول‌های رابطه‌ای راحت‌تر می‌شود دید (شکل ۷.۶) (pp. 95–96):
 
-![A table with rows 1–4 and columns a and b, split horizontally into rows 1–2 and 3–4, and vertically into column a and column b](../figures/07-06.png)
+![جدولی با ردیف‌های ۱ تا ۴ و ستون‌های a و b، که افقی به ردیف‌های ۱ و ۲ و ۳ و ۴ شکسته شده، و عمودی به ستون a و ستون b](../figures/07-06.png)
 
-*Figure 7.6 (p. 96): horizontal partitions are groups of rows; vertical partitions are groups of columns.*
+*Figure 7.6 (p. 96): پارتیشن‌های افقی گروه‌هایی از ردیف‌اند؛ و پارتیشن‌های عمودی گروه‌هایی از ستون.*
 
-| Kind | Splits by | Also called |
+| گونه | بر حسب چه می‌شکند | همچنین نامیده می‌شود |
 |---|---|---|
-| **Horizontal** | Rows: e.g. rows 1–2 in one partition and rows 3–4 in another | **Sharding** |
-| **Vertical** | Columns: e.g. column a and column b | — |
+| **افقی** | ردیف: مثلاً ردیف‌های ۱ و ۲ در یک پارتیشن و ۳ و ۴ در دیگری | **sharding** |
+| **عمودی** | ستون: مثلاً ستون a و ستون b | — |
 
-You can combine them (Figure 7.7) (pp. 96–97):
+می‌توانید ترکیبشان کنید (شکل ۷.۷) (pp. 96–97):
 
-1. Split user data vertically by type: text profile data in a relational database, profile pictures in a file store.
-2. Split each part horizontally across several databases or several file stores.
+۱. داده‌ی کاربر را عمودی بر حسب نوع بشکنید: داده‌ی متنی profile در یک دیتابیس رابطه‌ای و عکس profile در یک ذخیره‌سازی فایل.
+۲. هر بخش را افقی بین چند دیتابیس یا چند ذخیره‌سازی فایل بشکنید.
 
-Each aspect then scales independently.
+آن‌وقت هر جنبه مستقل مقیاس می‌گیرد.
 
-#### 7.4.2 Data item to partition assignment strategies (pp. 97–99)
+#### ۷.۴.۲ راهبردهای تخصیص قلم داده به پارتیشن (pp. 97–99)
 
-An assignment strategy's fitness is measured by two things (p. 97):
+برازندگی یک راهبرد تخصیص با دو چیز سنجیده می‌شود (p. 97):
 
-- **Variance**: how uniformly items are spread across partitions.
-- **Relocation**: how many items move when the number of partitions changes.
+- **واریانس**: قلم‌ها چقدر یکنواخت بین پارتیشن‌ها پخش می‌شوند.
+- **جابه‌جایی**: وقتی شمار پارتیشن‌ها عوض می‌شود چند قلم جابه‌جا می‌شوند.
 
-![Left: an item goes through item-based assignment straight to one of three partitions. Right: an item goes through directory-based assignment, which consults an assignment table before choosing a partition](../figures/07-08.png)
+![چپ: یک قلم از تخصیص قلم‌محور یک‌راست به یکی از سه پارتیشن می‌رود. راست: یک قلم از تخصیص دایرکتوری‌محور می‌رود، که پیش از انتخاب پارتیشن به یک جدول تخصیص سر می‌زند](../figures/07-08.png)
 
-*Figure 7.8 (p. 97): the only difference is the lookup box — and that box is the state the directory-based strategy has to keep available.*
+*Figure 7.8 (p. 97): تنها تفاوت همان جعبه‌ی جست‌و‌جوست — و آن جعبه همان حالتی است که راهبرد دایرکتوری‌محور باید در دسترس نگهش دارد.*
 
-| | **Item-based** (Listing 7.1) | **Directory-based** (Listing 7.2) |
+| | **قلم‌محور** (فهرست ۷.۱) | **دایرکتوری‌محور** (فهرست ۷.۲) |
 |---|---|---|
-| Partition is a function of… | The item alone (its key, or a hash of the key), e.g. `key % 5` | The item *and* a directory or lookup table |
-| State | **Stateless**, simple to develop and operate | **Stateful**, more complex |
-| Control | **Coarse-grained**: balances items, but can't place a given item somewhere, so two hot items may collide | **Fine-grained**: any item can go in any partition |
-| Risk | No simple workaround for hot-item collisions | The directory can become the bottleneck for scalability and reliability, which defeats the purpose |
+| پارتیشن تابعی است از… | فقط خود قلم، یعنی کلیدش یا hash کلیدش، مثل `key % 5` | قلم *و* یک دایرکتوری یا جدول جست‌و‌جو |
+| حالت | **stateless**، توسعه و گرداندنش ساده | **stateful**، پیچیده‌تر |
+| کنترل | **دانه‌درشت**: قلم‌ها را متوازن می‌کند ولی نمی‌تواند قلم معینی را جایی بگذارد، پس دو قلم داغ می‌توانند برخورد کنند | **دانه‌ریز**: هر قلمی می‌تواند در هر پارتیشنی برود |
+| خطر | برای برخورد قلم‌های داغ راه‌حل ساده‌ای نیست | دایرکتوری می‌تواند گلوگاه مقیاس‌پذیری و قابلیت اطمینان شود، که هدف را از بین می‌برد |
 
 (pp. 97–99)
 
-### 7.5 Common item-based assignment strategies
+> **In practice:** `PARTITION BY` در ClickHouse پارتیشن‌بندی برای مدیریت است، نه برای توزیع: هر partition واحد حذف، جایگزینی و TTL است.
+>
+> **Your turn:** جدول Silver با `PARTITION BY toDate(event_time)` ساخته شده و ClickHouse خطای «too many parts» می‌دهد. چه چیزی را اشتباه گرفته‌اید؟
+>
+> *Answer:* partition روزانه با چندسال داده یعنی هزاران partition و هر insert که چند روز را لمس کند چند part می‌سازد. partition ماهانه، یعنی `toYYYYMM`، معمولاً بس است؛ کلید پارتیشن باید با نحوه‌ی رسیدن و حذف داده بخواند، نه با فیلتر کوئری‌ها که کار `ORDER BY` است (pp. 94–99).
 
-**The experiment** (Listing 7.3): assign every word in `/usr/share/dict/words` (235,976 words on the author's machine) to five partitions. The ideal is just under 47,200 per partition (p. 99).
+### ۷.۵ راهبردهای رایج تخصیص قلم‌محور
 
-| Partition | Range by first letter (Listing 7.4: a–e, f–j, k–o, p–t, u–z) | `hash(key) % 5` (Listing 7.5) |
+**آزمایش** (فهرست ۷.۳): هر کلمه در `/usr/share/dict/words`، یعنی ۲۳۵۹۷۶ کلمه روی ماشین نویسنده، را به پنج پارتیشن تخصیص بدهید. حالت آرمانی کمی زیر ۴۷۲۰۰ در هر پارتیشن است (p. 99).
+
+| پارتیشن | بازه بر حسب حرف اول (فهرست ۷.۴: a–e و f–j و k–o و p–t و u–z) | عبارت `hash(key) % 5` (فهرست ۷.۵) |
 |---|---|---|
-| 0 | 67,730 | 47,219 |
-| 1 | 33,203 | 47,187 |
-| 2 | 35,829 | 47,362 |
-| 3 | 73,432 | 47,175 |
-| 4 | 25,782 | 47,033 |
+| ۰ | ۶۷۷۳۰ | ۴۷۲۱۹ |
+| ۱ | ۳۳۲۰۳ | ۴۷۱۸۷ |
+| ۲ | ۳۵۸۲۹ | ۴۷۳۶۲ |
+| ۳ | ۷۳۴۳۲ | ۴۷۱۷۵ |
+| ۴ | ۲۵۷۸۲ | ۴۷۰۳۳ |
 
-Range partitioning has obvious hotspots in partitions 0 and 3; hashing is well balanced (pp. 100–101).
+پارتیشن‌بندی بازه‌ای در پارتیشن‌های ۰ و ۳ نقطه‌ی داغ آشکار دارد؛ و hash کردن خوب متوازن است (pp. 100–101).
 
-### 7.6 Repartitioning
+### ۷.۶ پارتیشن‌بندی دوباره
 
-Next, change 5 partitions to 6 and count the items that stay and the items that move (Listing 7.6) (p. 101). The number of partitions has an outsize effect on item-based placement:
+بعد، پنج پارتیشن را به شش عوض کنید و قلم‌هایی که می‌مانند و قلم‌هایی که جابه‌جا می‌شوند را بشمارید (فهرست ۷.۶) (p. 101). شمار پارتیشن‌ها روی جای‌دهی قلم‌محور اثری بزرگ دارد:
 
-| Strategy | Stay | Relocate |
+| راهبرد | می‌مانند | جابه‌جا می‌شوند |
 |---|---|---|
-| **Range** (Listing 7.7: a–d, e–h, i–l, m–p, q–t, u–z) | 114,790 (48.6%) | 121,186 (51.4%) |
-| **Hash** `% 5` → `% 6` (Listing 7.8) | 39,443 (16.7%) | 196,533 (83.3%) |
+| **بازه** (فهرست ۷.۷: a–d و e–h و i–l و m–p و q–t و u–z) | ۱۱۴۷۹۰ که ۴۸٫۶٪ است | ۱۲۱۱۸۶ که ۵۱٫۴٪ است |
+| **hash** از `% 5` به `% 6` (فهرست ۷.۸) | ۳۹۴۴۳ که ۱۶٫۷٪ است | ۱۹۶۵۳۳ که ۸۳٫۳٪ است |
 
 (pp. 101–102)
 
-**Table 7.2** (p. 102):
+**جدول ۷.۲** (p. 102):
 
-| | Key range | Hashing |
+| | بازه‌ی کلید | hash کردن |
 |---|---|---|
-| Minimal variance | ✗ | ✓ |
-| Minimal relocation | ✗ | ✗ |
+| کمینه واریانس | ✗ | ✓ |
+| کمینه جابه‌جایی | ✗ | ✗ |
 
-### 7.7 Consistent hashing
+### ۷.۷ consistent hashing
 
-Consistent hashing aims for **both** minimal variance and minimal relocation: with n items and m partitions, only about **n/m** items move on average (p. 103). Using the `uhashring` Python package (Listing 7.9), the author got (p. 103):
+روش consistent hashing هدفش **هر دو** است، یعنی کمینه واریانس و کمینه جابه‌جایی: با n قلم و m پارتیشن، به‌طور میانگین فقط حدود **n/m** قلم جابه‌جا می‌شوند (p. 103). با بسته‌ی `uhashring` در Python (فهرست ۷.۹)، نویسنده این‌ها را گرفت (p. 103):
 
-- a distribution of 49,084 / 47,753 / 48,172 / 47,144 / 43,823 across five partitions;
-- 192,243 items staying (81.5%) and 43,733 relocating (18.5%) when going to six.
+- توزیعی برابر ۴۹۰۸۴ و ۴۷۷۵۳ و ۴۸۱۷۲ و ۴۷۱۴۴ و ۴۳۸۲۳ بین پنج پارتیشن؛
+- و سر رفتن به شش، ۱۹۲۲۴۳ قلم که می‌مانند، یعنی ۸۱٫۵٪، و ۴۳۷۳۳ که جابه‌جا می‌شوند، یعنی ۱۸٫۵٪.
 
-The aha! moment: the author prefers to think about algorithms by their **signatures and effects**, top-down, rather than their implementation. At the system level, what matters is what consistent hashing *does*, not how (p. 103).
+لحظه‌ی آها!: نویسنده ترجیح می‌دهد به الگوریتم‌ها با **امضا و اثرشان** و بالا‌به‌پایین فکر کند و نه با پیاده‌سازی‌شان. در سطح سیستم، آن چیزی که مهم است این است که consistent hashing چه *می‌کند*، نه چطور (p. 103).
 
-> **Try it:** [Partitioning and balancing](../widgets/07-partitioning.html) — assign keys to partitions by range, by hash modulo and by consistent hashing; change the partition count from 5 to 6 to compare variance and relocation, then balance partitions onto nodes and see where overpartitioning runs out.
+> **Try it:** [پارتیشن‌بندی و متوازن کردن](../widgets/07-partitioning.html)؛ کلیدها را با بازه و hash moduleی و consistent hashing به پارتیشن‌ها تخصیص بدهید؛ شمار پارتیشن را از پنج به شش عوض کنید تا واریانس و جابه‌جایی را مقایسه کنید، و بعد پارتیشن‌ها را روی نودها متوازن کنید و ببینید over-partitioning کجا تمام می‌شود.
 
-### 7.8 (Re)balancing and overpartitioning
+### ۷.۸ متوازن کردن و over-partitioning
 
-**Balancing** assigns partitions to nodes; **rebalancing** reassigns them, for example when demand changes (Figure 7.9) (pp. 103–104).
+**متوازن کردن** پارتیشن‌ها را به نودها تخصیص می‌دهد؛ و **متوازن کردن دوباره** دوباره تخصیصشان می‌دهد، مثلاً وقتی تقاضا عوض می‌شود (شکل ۷.۹) (pp. 103–104).
 
-| Setup | Flexibility (Figure 7.10) (p. 104) |
+| چیدمان | انعطاف (شکل ۷.۱۰) (p. 104) |
 |---|---|
-| Partitions = nodes (one each) | None: partitions and nodes are locked one-to-one |
-| **Overpartitioning** (partitions > nodes) | When demand drops, decommission nodes and reassign their orphaned partitions. When demand rises, add nodes and spread partitions across them |
+| پارتیشن برابر نود، یکی برای هر کدام | ندارد: پارتیشن‌ها و نودها یک‌به‌یک قفل‌اند |
+| **over-partitioning**، یعنی پارتیشن بیشتر از نود | وقتی تقاضا می‌افتد، نودها را از رده خارج کنید و پارتیشن‌های یتیمشان را دوباره تخصیص بدهید. وقتی تقاضا بالا می‌رود، نود اضافه کنید و پارتیشن‌ها را بینشان پخش |
 
-![Left: a dataset of three partitions mapped one-to-one onto three machines. Right: the same dataset as twelve smaller partitions spread four to a machine, mixed across three machines](../figures/07-10.png)
+![چپ: مجموعه‌داده‌ای از سه پارتیشن که یک‌به‌یک روی سه ماشین map شده. راست: همان مجموعه‌داده به‌شکل دوازده پارتیشن کوچک‌تر که چهارتا در هر ماشین پخش شده‌اند و بین سه ماشین قاطی](../figures/07-10.png)
 
-*Figure 7.10 (p. 104): with more partitions than machines, a machine can be added or removed by moving whole partitions rather than splitting them.*
+*Figure 7.10 (p. 104): با پارتیشن بیشتر از ماشین، می‌شود ماشینی را با جابه‌جا کردن کل پارتیشن‌ها و نه شکستنشان اضافه یا کم کرد.*
 
-The limit: the **number of partitions caps the number of nodes**. Once each node has one partition, adding more nodes doesn't help (p. 104).
+محدودیت: **شمار پارتیشن‌ها سقف شمار نودهاست**. همین که هر نود یک پارتیشن داشت، نود اضافه کردن کمکی نمی‌کند (p. 104).
 
-## Trade-offs at a glance
+> **In practice:** Airflow pool و `max_active_tasks` دارد و Kubernetes podها را روی nodeها پخش می‌کند: همان مسئله‌ی متوازن کردن.
+>
+> **Your turn:** backfill یک‌ساله با یک task برای هر روز ۳۶۵ task می‌سازد. چرا این بهتر از ۱۲ task ماهانه است، و چه چیزی را باید محدود کنید؟
+>
+> *Answer:* taskهای کوچک‌تر، مثل over-partitioning، را می‌شود متوازن‌تر پخش کرد و شکست یکی فقط یک روز را تکرار می‌کند. ولی pool را محدود کنید تا ۳۶۵ task هم‌زمان به ClickHouse یا دیتابیس منبع هجوم نبرند (pp. 103–104).
 
-| Strategy | Variance | Relocation on 5 → 6 | State | Control |
+## بده‌بستان‌ها در یک نگاه
+
+| راهبرد | واریانس | جابه‌جایی سر پنج به شش | حالت | کنترل |
 |---|---|---|---|---|
-| Range (first letter) | High: 25,782 to 73,432 per partition | 51.4% | Stateless | Coarse |
-| Hash modulo | Low | 83.3% | Stateless | Coarse |
-| Consistent hashing | Low | 18.5% (ideal ≈ 1/6) | Stateless | Coarse |
-| Directory | Whatever you choose | Whatever you choose | Stateful; can bottleneck | Fine |
-| Static partition count | — | Offline only | Simple | — |
-| Dynamic partition count | — | Online | Complex | — |
-| Overpartitioning | — | Moves whole partitions | Simple | Capped by partition count |
+| بازه بر حسب حرف اول | بالا: از ۲۵۷۸۲ تا ۷۳۴۳۲ در هر پارتیشن | ۵۱٫۴٪ | stateless | درشت |
+| hash moduleی | پایین | ۸۳٫۳٪ | stateless | درشت |
+| consistent hashing | پایین | ۱۸٫۵٪، با آرمان تقریبی یک‌ششم | stateless | درشت |
+| دایرکتوری | هر چه انتخاب کنید | هر چه انتخاب کنید | حالت‌دار؛ می‌تواند گلوگاه شود | ریز |
+| شمار پارتیشن ایستا | — | فقط آفلاین | ساده | — |
+| شمار پارتیشن پویا | — | آنلاین | پیچیده | — |
+| over-partitioning | — | کل پارتیشن‌ها را جابه‌جا می‌کند | ساده | سقفش شمار پارتیشن است |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Reproducing the experiment.** Python's built-in `hash()` of a string is randomized per process unless `PYTHONHASHSEED` is set, so the book's exact counts vary from run to run. Your words file will also differ. The [assignment-strategies lab](../lab/07-assignment-strategies/README.md) reruns the experiment deterministically with a stable hash and a seeded synthetic word list, so the proportions (not the exact counts) can be compared with the book's.
-- **Why n/m?** When a sixth partition joins a ring, it takes over about 1/6 of the key space, and only keys in those arcs move: 1/6 ≈ 16.7%, close to the author's 18.5%. Modulo hashing keeps an item only when h mod 5 = h mod 6, which holds for roughly 1/6 of hash values, hence the 16.7% that stay.
-- **Fixed partitions plus a directory.** Many systems (Elasticsearch, Riak, Kafka's partitions) combine the chapter's ideas: a *static*, overpartitioned key → partition hash, plus a small *directory* for partition → node. Rebalancing then moves whole partitions. [DDIA Ch. 7](../../designing-data-intensive-applications/chapters/07-sharding.md) compares this with dynamic splitting; [Database Internals Ch. 13](../../database-internals/chapters/13-distributed-transactions.md) has a consistent-hashing lab with virtual nodes.
+- **بازتولید آزمایش.** تابع `hash()` درون‌ساخت Python روی یک رشته در هر process تصادفی است مگر `PYTHONHASHSEED` گذاشته شود، پس شمارش‌های دقیق کتاب از اجرا به اجرا فرق می‌کنند. فایل کلمه‌های شما هم فرق می‌کند. [آزمایش راهبردهای تخصیص](../lab/07-assignment-strategies/README.md) آزمایش را قطعی با یک hash پایدار و فهرست کلمه‌ی ساختگی seed‌دار دوباره اجرا می‌کند، تا نسبت‌ها، و نه شمارش‌های دقیق، با کتاب مقایسه‌شدنی باشند.
+- **چرا n/m؟** وقتی پارتیشن ششمی به حلقه می‌پیوندد، حدود یک‌ششم فضای کلید را تحویل می‌گیرد، و فقط کلیدهای همان کمان‌ها جابه‌جا می‌شوند: یک‌ششم تقریباً ۱۶٫۷٪ است، نزدیک ۱۸٫۵٪ نویسنده. hash moduleی قلمی را فقط وقتی نگه می‌دارد که h module ۵ برابر h module ۶ باشد، که برای تقریباً یک‌ششم مقدارهای hash برقرار است، و از همین‌جاست آن ۱۶٫۷٪ که می‌مانند.
+- **پارتیشن ثابت به‌علاوه‌ی دایرکتوری.** خیلی از سیستم‌ها، مثل Elasticsearch و Riak و پارتیشن‌های Kafka، ایده‌های فصل را ترکیب می‌کنند: یک hash *ایستا* و بیش‌پارتیشن‌شده از کلید به پارتیشن، به‌علاوه‌ی یک *دایرکتوری* کوچک برای پارتیشن به نود. آن‌وقت متوازن کردن دوباره کل پارتیشن‌ها را جابه‌جا می‌کند. [فصل ۷ کتاب DDIA](../../designing-data-intensive-applications/chapters/07-sharding.md) این را با شکستن پویا مقایسه می‌کند؛ و [فصل ۱۳ کتاب Database Internals](../../database-internals/chapters/13-distributed-transactions.md) آزمایش consistent hashing با نودهای مجازی دارد.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. Thinking in distributed systems](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) (components with exclusive local state), [8. Replication](08-replication.md) (the other half of scalability and reliability), [6. Distributed transactions](06-distributed-transactions.md) (what you need when an operation spans partitions), [12. Cloud and services](12-cloud-and-services.md) (scaling services).
-- **Run it:** [Range, hash and consistent hashing](../lab/07-assignment-strategies/README.md) — reproduces the shape of Listings 7.3–7.9: per-partition counts for range and hash placement, and the share of items that stay when five partitions become six, including a consistent-hashing ring.
+- **فصل‌های مرتبط:** [فصل ۱: فکر کردن در سیستم‌های توزیع‌شده](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) که مؤلفه‌هایی با حالت محلی انحصاری را دارد، [فصل ۸: replication](08-replication.md) که نیمه‌ی دیگر مقیاس‌پذیری و قابلیت اطمینان است، [فصل ۶: تراکنش توزیع‌شده](06-distributed-transactions.md) که آن چیزی را دارد که وقتی عملیاتی از پارتیشن‌ها رد می‌شود لازم دارید، و [فصل ۱۲: cloud و سرویس‌ها](12-cloud-and-services.md) که مقیاس دادن سرویس‌ها را دارد.
+- **Run it:** [بازه و hash و consistent hashing](../lab/07-assignment-strategies/README.md)؛ شکل فهرست‌های ۷.۳ تا ۷.۹ را بازتولید می‌کند: شمارش هر پارتیشن برای جای‌دهی بازه‌ای و hash، و سهم قلم‌هایی که وقتی پنج پارتیشن شش می‌شوند می‌مانند، از جمله یک حلقه‌ی consistent hashing.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **How does partitioning differ from replication in terms of physical objects?**
+1. **پارتیشن‌بندی از نظر objectهای فیزیکی با replication چه تفاوتی دارد؟**
 
-   *Answer:* In partitioning, each physical object represents a disjoint *part* of the logical object. In replication, each represents the *whole* (p. 92).
+   *Answer:* در پارتیشن‌بندی، هر object فیزیکی *بخشی* مجزا از object منطقی را نمایش می‌دهد. در replication، هر کدام *کل* را نمایش می‌دهد (p. 92).
 
-2. **What's the difference between partitioning and balancing?**
+2. **تفاوت پارتیشن‌بندی و متوازن کردن چیست؟**
 
-   *Answer:* Partitioning assigns data items to partitions; balancing assigns partitions to nodes (pp. 93–94, 103).
+   *Answer:* پارتیشن‌بندی قلم‌های داده را به پارتیشن‌ها تخصیص می‌دهد؛ و متوازن کردن پارتیشن‌ها را به نودها (pp. 93–94, 103).
 
-3. **Static partitioning means…**
-   - [ ] the number of nodes is fixed
-   - [x] the number of partitions is fixed, and changing it is an offline administrative operation
-   - [ ] items never move
+3. **پارتیشن‌بندی ایستا یعنی…**
+   - [ ] شمار نودها ثابت است
+   - [x] شمار پارتیشن‌ها ثابت است، و عوض کردنش عملیاتی آفلاین و مدیریتی است
+   - [ ] قلم‌ها هیچ‌وقت جابه‌جا نمی‌شوند
 
-   *Answer:* Static and dynamic refer only to the number of partitions (p. 95).
+   *Answer:* ایستا و پویا فقط به شمار پارتیشن‌ها برمی‌گردند (p. 95).
 
-4. **Why can directory-based assignment defeat the purpose of partitioning?**
+4. **چرا تخصیص دایرکتوری‌محور می‌تواند هدف پارتیشن‌بندی را از بین ببرد؟**
 
-   *Answer:* The directory is a stateful component that every lookup depends on, so it can become the scalability and reliability bottleneck (p. 99).
+   *Answer:* دایرکتوری مؤلفه‌ای stateful است که هر جست‌و‌جویی به آن وابسته است، پس می‌تواند گلوگاه مقیاس‌پذیری و قابلیت اطمینان شود (p. 99).
 
-5. **In the book's experiment, which strategy had the lowest variance, and which relocated the most items going from 5 to 6 partitions?**
+5. **در آزمایش کتاب، کدام راهبرد کمترین واریانس را داشت، و کدام سر رفتن از پنج به شش پارتیشن بیشترین قلم را جابه‌جا کرد؟**
 
-   *Answer:* Hash partitioning had the lowest variance, and it also relocated the most: 83.3%, against 51.4% for range (pp. 100–102).
+   *Answer:* پارتیشن‌بندی hash کمترین واریانس را داشت، و بیشترین جابه‌جایی را هم: ۸۳٫۳٪، در برابر ۵۱٫۴٪ برای بازه (pp. 100–102).
 
-6. **What does consistent hashing promise?**
+6. **روش consistent hashing چه قولی می‌دهد؟**
 
-   *Answer:* Minimal variance *and* minimal relocation: only about n/m of n items move when there are m partitions. The author measured 18.5% (p. 103).
+   *Answer:* کمینه واریانس *و* کمینه جابه‌جایی: با m پارتیشن، فقط حدود n/m از n قلم جابه‌جا می‌شوند. نویسنده ۱۸٫۵٪ اندازه گرفت (p. 103).
 
-7. **What limits overpartitioning?**
+7. **چه چیزی over-partitioning را محدود می‌کند؟**
 
-   *Answer:* The number of partitions determines the maximum number of nodes. Once every node has one partition, adding nodes doesn't help (p. 104).
+   *Answer:* شمار پارتیشن‌ها بیشینه‌ی شمار نودها را تعیین می‌کند. همین که هر نودی یک پارتیشن داشت، نود اضافه کردن کمکی نمی‌کند (p. 104).

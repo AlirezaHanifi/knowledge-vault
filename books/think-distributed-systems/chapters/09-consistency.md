@@ -3,203 +3,211 @@ book: think-distributed-systems
 chapter: 9
 title: "Consistency"
 pages: "117–130"
+translated_title: "consistency"
+lang: fa
 ---
 
-# 9. Consistency
+# فصل ۹: consistency
 
-[← 8. Replication](08-replication.md) · [Book](../README.md) · [10. Distributed consensus →](10-distributed-consensus.md)
+[فصل ۸: replication →](08-replication.md) · [کتاب](../README.md) · [فصل ۱۰: consensus توزیع‌شده ←](10-distributed-consensus.md)
 
-## Summary
+## خلاصه
 
-In databases, consistency means application-level validity. In distributed systems, where components fail and messages are delayed, reordered or lost, it has many meanings (p. 117). The chapter models a system as sequential **processes** whose **operations** have an invocation and a completion. A **history** is the real-time sequence of those events, and a **consistency model** is a predicate that sorts histories into valid and invalid (pp. 117–118). Stronger models (subsets) give a better developer experience; weaker models (supersets) give better availability and latency (pp. 119–121).
+در دیتابیس‌ها، consistency یعنی درستی در سطح برنامه. در سیستم‌های توزیع‌شده، که مؤلفه‌ها می‌شکنند و پیام‌ها معطل یا بی‌ترتیب یا گم می‌شوند، معناهای زیادی دارد (p. 117). فصل سیستم را به‌شکل **process**‌هایی ترتیبی مدل می‌کند که **عملیات**شان یک فراخوانی و یک تمام شدن دارد. **تاریخ** همان دنباله‌ی real-time این رویدادهاست، و **consistency model** گزاره‌ای است که تاریخ‌ها را به معتبر و نامعتبر دسته می‌کند (pp. 117–118). مدل‌های قوی‌تر، یعنی زیرمجموعه‌ها، تجربه‌ی توسعه‌دهنده‌ی بهتری می‌دهند؛ و مدل‌های ضعیف‌تر، یعنی ابرمجموعه‌ها، availability و latency بهتری (pp. 119–121).
 
-The chapter then covers the two ends of the spectrum:
+بعد فصل دو سر طیف را می‌پوشاند:
 
-- **Linearizability** is a *recency* guarantee: every operation appears to take effect at a single point between its invocation and completion, so a replicated system behaves like a single copy. It's defined per object type, illustrated with queues, stacks and an increment-only counter (pp. 121–124).
-- **Eventual consistency** is a *convergence* guarantee, illustrated with Amazon's shopping cart. It comes in basic and strong variants and is implemented by application-specific or algorithmic (CRDT) reconciliation (pp. 124–126).
+- **مفهوم linearizability** تضمین *تازگی* است: هر عملیاتی چنان به نظر می‌رسد که در یک نقطه بین فراخوانی و تمام شدنش اثر می‌کند، پس سیستمی تکرارشده مثل یک کپی تنها رفتار می‌کند. به‌تفکیک نوع object تعریف می‌شود، و با queue و stack و شمارنده‌ای که فقط می‌افزاید نشان داده می‌شود (pp. 121–124).
+- **مفهوم eventual consistency** تضمین *هم‌گرایی* است، و با سبد خرید Amazon نشان داده می‌شود. گونه‌ی پایه و قوی دارد، و با آشتی‌دهی برنامه‌ویژه یا الگوریتمی، یعنی CRDT، پیاده می‌شود (pp. 124–126).
 
-The chapter ends with **CAP**: Brewer's conjecture versus Gilbert and Lynch's theorem, their proof, and the critique that the theorem is precise but impractical (pp. 126–129).
+فصل با **CAP** تمام می‌شود: حدس Brewer در برابر قضیه‌ی Gilbert و Lynch، اثباتشان، و آن نقد که قضیه دقیق است ولی ناعملی (pp. 126–129).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **An operation is an invocation–completion pair**, and processes are strictly sequential. A **history** orders these events in real time (pp. 117–118).
-- **A consistency model is a set of histories.** A system is consistent *with respect to a model* if all its possible histories are valid. Systems don't "violate consistency"; they violate a specific model (pp. 118–119).
-- **Stronger = fewer valid histories.** Stronger models need more coordination, which costs availability and latency but improves the developer experience (pp. 119–121).
-- **Linearizability:** a sequential history with the same results exists, *and* it respects the real-time order of non-overlapping operations. It's a real-time guarantee about single operations on single objects, defined per object type (pp. 121–123).
-- **A linearizable history is a fact; a linearizable system is a guarantee** that every possible history is linearizable (p. 123).
-- **Eventual consistency:** basic = eventual delivery + weak convergence (once updates stop); strong = eventual delivery + strong convergence (the same updates give the same state) (p. 125).
-- **CRDTs:** operation-based (commutative) CRDTs need no lost operations, effectively-once application and a commutative apply. State-based (convergent) CRDTs need an associative, commutative, idempotent merge (p. 126).
-- **CAP isn't "pick two".** Partitions are inevitable, so the real choice is between consistency and availability *during* a partition (p. 127). The conjecture is intuitive but unproven; the theorem is proven but narrow (p. 129).
+- **عملیات زوجی از فراخوانی و تمام شدن است**، و processها اکیداً ترتیبی‌اند. **تاریخ** این رویدادها را در زمان واقعی مرتب می‌کند (pp. 117–118).
+- **مفهوم consistency model مجموعه‌ای از تاریخ‌هاست.** سیستم *نسبت به یک مدل* سازگار است اگر همه‌ی تاریخ‌های ممکنش معتبر باشند. سیستم‌ها «consistency را نقض نمی‌کنند»؛ یک مدل معین را نقض می‌کنند (pp. 118–119).
+- **قوی‌تر یعنی تاریخ‌های معتبر کم‌تر.** مدل‌های قوی‌تر هم‌آهنگی بیشتری لازم دارند، که به بهای availability و latency تمام می‌شود ولی تجربه‌ی توسعه‌دهنده را بهتر می‌کند (pp. 119–121).
+- **مفهوم linearizability:** تاریخی ترتیبی با همان نتیجه‌ها وجود دارد، *و* ترتیب real-time عملیاتی که هم‌پوشان نیستند را محترم می‌شمارد. تضمینی real-time درباره‌ی عملیات تنها روی objectهای تنهاست، و به‌تفکیک نوع object تعریف می‌شود (pp. 121–123).
+- **تاریخ linearizable یک واقعیت است؛ و سیستم linearizable یک تضمین** که هر تاریخ ممکنی linearizable است (p. 123).
+- **مفهوم eventual consistency:** پایه برابر تحویل غایی به‌علاوه‌ی هم‌گرایی ضعیف است، یعنی همین که به‌روزرسانی‌ها بس شوند؛ و قوی برابر تحویل غایی به‌علاوه‌ی هم‌گرایی قوی، یعنی همان به‌روزرسانی‌ها همان حالت را می‌دهند (p. 125).
+- **همه‌ی CRDTها:** CRDTهای عملیات‌محور، یعنی جابه‌جایی‌پذیر، لازم دارند که هیچ عملیاتی گم نشود، هر کدام عملاً یک بار اعمال شود، و اعمال commutative باشد. CRDTهای حالت‌محور، یعنی هم‌گرا، یک merge associative و commutative و idempotent لازم دارند (p. 126).
+- **مفهوم CAP «دو تا را بردار» نیست.** پارتیشن ناگزیر است، پس انتخاب واقعی بین consistency و availability *در میانه‌ی* یک پارتیشن است (p. 127). حدس شهودی است ولی اثبات‌نشده؛ و قضیه اثبات‌شده است ولی تنگ (p. 129).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 9.1 Consistency models — p. 117
-  - 9.1.1 Common consistency models — p. 119
-  - 9.1.2 Virtues and limitations — p. 119
-- 9.2 Linearizability — p. 121
-  - 9.2.1 Queue and stack — p. 122
-  - 9.2.2 Formal definition of linearizability — p. 123
-- 9.3 Eventual consistency — p. 124
-  - 9.3.1 The shopping cart — p. 124
-  - 9.3.2 Variants of eventual consistency — p. 125
-  - 9.3.3 Implementation — p. 125
-- 9.4 Consistency, availability, and partition tolerance — p. 126
-  - 9.4.1 History — p. 126
-  - 9.4.2 Conjecture vs. theorem — p. 127
-  - 9.4.3 CAP theorem — p. 128
+- ۹.۱ consistency modelها — ص. ۱۱۷
+  - ۹.۱.۱ مدل‌های رایج consistency — ص. ۱۱۹
+  - ۹.۱.۲ فضیلت‌ها و محدودیت‌ها — ص. ۱۱۹
+- ۹.۲ linearizability — ص. ۱۲۱
+  - ۹.۲.۱ queue و stack — ص. ۱۲۲
+  - ۹.۲.۲ تعریف صوری linearizability — ص. ۱۲۳
+- ۹.۳ eventual consistency — ص. ۱۲۴
+  - ۹.۳.۱ سبد خرید — ص. ۱۲۴
+  - ۹.۳.۲ گونه‌های eventual consistency — ص. ۱۲۵
+  - ۹.۳.۳ پیاده‌سازی — ص. ۱۲۵
+- ۹.۴ consistency و availability و partition tolerance — ص. ۱۲۶
+  - ۹.۴.۱ تاریخچه — ص. ۱۲۶
+  - ۹.۴.۲ حدس در برابر قضیه — ص. ۱۲۷
+  - ۹.۴.۳ قضیه‌ی CAP — ص. ۱۲۸
 
-## Notes
+## یادداشت‌ها
 
-### 9.1 Consistency models
+### ۹.۱ consistency modelها
 
-The chapter reasons about a system as concurrent **processes** operating on **objects** (pp. 117–118):
+فصل درباره‌ی سیستم به‌شکل **process**‌هایی هم‌زمان استدلال می‌کند که روی **object**ها کار می‌کنند (pp. 117–118):
 
-- A process is a sequence of operations on objects.
-- An object's *type* defines its possible values and operations.
-- An operation isn't instantaneous: **Operation = Invocation • Completion**.
-- Processes are **strictly sequential**: each invokes one operation and waits for its response before the next (Figure 9.1).
+- مفهوم process دنباله‌ای از عملیات روی objectهاست.
+- *نوع* یک object مقدارها و عملیات ممکنش را تعریف می‌کند.
+- عملیات لحظه‌ای نیست: **عملیات برابر فراخوانی • تمام شدن** است.
+- همه‌ی processها **اکیداً ترتیبی**اند: هر کدام یک عملیات فرا می‌خواند و پیش از بعدی منتظر پاسخش می‌ماند (شکل ۹.۱).
 
-A **history** is the sequence of invocation and completion events ordered by real time, for example H = [I•A.1, I•B.1, C•A.1, I•A.2, C•B.1, C•A.2] (p. 118). A **consistency model** is a set of histories, a predicate that classifies a history as good (valid) or bad (invalid) (Figure 9.2). A system is consistent *with respect to a model* if every possible history of the system is valid under it (p. 118).
+**تاریخ** دنباله‌ی رویدادهای فراخوانی و تمام شدن است که به زمان واقعی مرتب شده‌اند، مثلاً H = [I•A.1, I•B.1, C•A.1, I•A.2, C•B.1, C•A.2] (p. 118). **consistency model** مجموعه‌ای از تاریخ‌هاست، گزاره‌ای که یک تاریخ را خوب، یعنی معتبر، یا بد، یعنی نامعتبر، رده‌بندی می‌کند (شکل ۹.۲). سیستم *نسبت به یک مدل* سازگار است اگر هر تاریخ ممکن سیستم زیر آن معتبر باشد (p. 118).
 
-**Aha! moment:** "violating consistency" is a misconception. A system can only fail to meet the guarantees of a *specific* model (pp. 118–119).
+**لحظه‌ی آها!:** «نقض consistency» بدفهمی است. سیستم فقط می‌تواند از برآوردن تضمین‌های یک مدل *معین* باز بماند (pp. 118–119).
 
-#### 9.1.1 Common consistency models (p. 119)
+#### ۹.۱.۱ مدل‌های رایج consistency (p. 119)
 
-Correctness is application-specific, so you could define your own model. In practice, a family of well-defined models has emerged. Figure 9.3 reproduces Jepsen's map:
+درستی برنامه‌ویژه است، پس می‌توانید مدل خودتان را تعریف کنید. در عمل، خانواده‌ای از مدل‌های خوش‌تعریف سر در آورده‌اند. شکل ۹.۳ نقشه‌ی Jepsen را بازتولید می‌کند:
 
-![Jepsen's map of consistency models as a hierarchy: strict serializable at the top, branching into serializable (above repeatable read, snapshot isolation, cursor stability, monotonic atomic view, read committed, read uncommitted) and linearizable (above sequential, causal, PRAM, writes follow reads, monotonic reads, monotonic writes, read your writes); colours mark unavailable, sticky available and total available models](../figures/09-03.png)
+![نقشه‌ی Jepsen از consistency modelها به‌شکل سلسله‌مراتب: در بالا strict serializable، که به serializable، که بالای repeatable read و snapshot isolation و cursor stability و monotonic atomic view و read committed و read uncommitted است، و به linearizable، که بالای sequential و causal و PRAM و writes follow reads و monotonic reads و monotonic writes و read your writes است، شاخه می‌زند؛ رنگ‌ها مدل‌های unavailable و sticky available و total available را علامت می‌زنند](../figures/09-03.png)
 
-*Figure 9.3 (p. 119): an arrow points from a weaker model to a stronger one that implies it; the colour (and the legend) gives each model's availability class, summarized in the table below.*
+*Figure 9.3 (p. 119): فلشی از مدلی ضعیف‌تر به مدلی قوی‌تر که آن را در بر دارد اشاره می‌کند؛ و رنگ، و راهنما، رده‌ی availability هر مدل را می‌دهد، که در جدول زیر خلاصه شده.*
 
-| Availability class (from the Jepsen map) | Examples |
+| رده‌ی دسترس‌پذیری، از نقشه‌ی Jepsen | نمونه‌ها |
 |---|---|
-| **Unavailable**: some nodes must pause during some partitions | Strict serializable, serializable, linearizable, sequential, repeatable read, snapshot isolation |
-| **Sticky available**: available on nonfaulty nodes if each client keeps talking to the same node | Causal, PRAM, read your writes |
-| **Total available**: available on nonfaulty nodes even during a partition | Read committed, read uncommitted, monotonic reads, monotonic writes, writes follow reads, monotonic atomic view |
+| **unavailable**: در برخی پارتیشن‌ها برخی نودها باید بایستند | strict serializable، serializable، linearizable، sequential، repeatable read، snapshot isolation |
+| **sticky available**: روی نودهای سالم در دسترس است اگر هر کلاینتی با همان نود حرف بزند | causal، PRAM، read your writes |
+| **total available**: روی نودهای سالم حتی در میانه‌ی پارتیشن در دسترس است | read committed، read uncommitted، monotonic reads، monotonic writes، writes follow reads، monotonic atomic view |
 
-#### 9.1.2 Virtues and limitations (pp. 119–121)
+#### ۹.۱.۲ فضیلت‌ها و محدودیت‌ها (pp. 119–121)
 
-Two models may be disjoint, overlapping, or one a subset of the other (Figure 9.4). **Subsets, with fewer valid histories, are stronger; supersets are weaker** (p. 119). Products expose the spectrum. Azure Cosmos DB, for example, offers Strong, Bounded staleness, Session, Consistent prefix and Eventual consistency, with availability, latency and throughput improving toward Eventual (Figure 9.5) (p. 120).
+دو مدل می‌توانند جدا از هم باشند، یا هم‌پوشان، یا یکی زیرمجموعه‌ی دیگری (شکل ۹.۴). **زیرمجموعه‌ها، با تاریخ‌های معتبر کم‌تر، قوی‌ترند؛ و ابرمجموعه‌ها ضعیف‌تر** (p. 119). محصول‌ها طیف را عرضه می‌کنند. مثلاً Azure Cosmos DB گزینه‌های Strong و Bounded staleness و Session و Consistent prefix و Eventual را می‌دهد، که availability و latency و throughput به‌سمت Eventual بهتر می‌شوند (شکل ۹.۵) (p. 120).
 
-| Direction | Gain | Lose |
+| جهت | چه می‌برید | چه می‌بازید |
 |---|---|---|
-| **Stronger** | **Developer experience**: more of distribution's effects are hidden | Availability and latency, because of more coordination |
-| **Weaker** | Availability, latency | Developer experience: more of distribution's effects are exposed |
+| **قوی‌تر** | **تجربه‌ی توسعه‌دهنده**: بیشترِ اثرهای توزیع پنهان می‌شوند | availability و تأخیر، به‌خاطر هم‌آهنگی بیشتر |
+| **ضعیف‌تر** | دسترس‌پذیری، latency | تجربه‌ی توسعه‌دهنده: بیشترِ اثرهای توزیع آشکار می‌شوند |
 
-(Figure 9.6) (pp. 120–121)
+(شکل ۹.۶) (pp. 120–121)
 
-A good developer experience leaves no room for unwanted surprises (p. 121). In Figure 9.7, process A writes x = 10, gets OK, then reads x and gets 0. Whether that's correct depends on the model:
+تجربه‌ی توسعه‌دهنده‌ی خوب جایی برای غافلگیری ناخواسته نمی‌گذارد (p. 121). در شکل ۹.۷، process A مقدار x = 10 را می‌نویسد، تأیید می‌گیرد، بعد x را می‌خواند و ۰ می‌گیرد. درست بودن این به مدل بستگی دارد:
 
-- If reads must return the *most recent* value, it's incorrect. That expectation is **linearizability**.
-- If reads may return *any previous* value, it's correct. That expectation is **eventual consistency**.
+- اگر خواندن باید *تازه‌ترین* مقدار را برگرداند، نادرست است. آن انتظار همان **linearizability** است.
+- اگر خواندن مجاز است *هر مقدار پیشینی* را برگرداند، درست است. آن انتظار همان **eventual consistency** است.
 
-### 9.2 Linearizability
+### ۹.۲ linearizability
 
-**Linearizability**, also called **atomic consistency**, is one of the strongest models. It's a **recency guarantee**: once an operation completes, every later operation sees its effects (p. 121). It was introduced for shared objects on multiprocessors, and applies equally to replicated distributed systems. It makes a replicated system behave like a non-replicated one, giving **replication transparency** (p. 121). It is a *real-time* guarantee about *single operations* on *single objects*, defined *per object type* (pp. 121–122).
+**مفهوم linearizability**، که **consistency atomic** هم نامیده می‌شود، یکی از قوی‌ترین مدل‌هاست. **تضمین تازگی** است: همین که عملیاتی تمام شد، هر عملیات بعدی اثرهایش را می‌بیند (p. 121). برای objectهای مشترک روی چندپردازنده‌ها معرفی شد، و به همان اندازه برای سیستم‌های توزیع‌شده‌ی تکرارشده به کار می‌آید. سیستمی تکرارشده را وا می‌دارد مثل سیستمی تکرارنشده رفتار کند، که **شفافیت replication** می‌دهد (p. 121). تضمینی *real-time* درباره‌ی *عملیات تنها* روی *objectهای تنها* است، که *به‌تفکیک نوع object* تعریف می‌شود (pp. 121–122).
 
-#### 9.2.1 Queue and stack (p. 122)
+#### ۹.۲.۱ queue و stack (p. 122)
 
-Correct behavior is first defined for a single process and a single object (Tables 9.1–9.2). Linearizability extends that to many processes and many copies:
+رفتار درست اول برای یک process تنها و یک object تنها تعریف می‌شود (جدول‌های ۹.۱ و ۹.۲). linearizability آن را به چند process و چند کپی گسترش می‌دهد:
 
-| Trace | Queue (FIFO) | Stack (FILO) |
+| رد | queue که FIFO است | stack که FILO است |
 |---|---|---|
-| insert(a), insert(b), remove → a, remove → b | ✓ valid | ✗ invalid |
-| insert(a), insert(b), remove → b, remove → a | ✗ invalid | ✓ valid |
+| insert(a)، insert(b)، remove → a، remove → b | ✓ معتبر | ✗ نامعتبر |
+| insert(a)، insert(b)، remove → b، remove → a | ✗ نامعتبر | ✓ معتبر |
 
-#### 9.2.2 Formal definition of linearizability (pp. 123–124)
+#### ۹.۲.۲ تعریف صوری linearizability (pp. 123–124)
 
-A history is **sequential** if every invocation is immediately followed by its completion, and **concurrent** otherwise, when operations interleave (Table 9.3). A history H is **linearizable** if (p. 123):
+تاریخ **ترتیبی** است اگر پس از هر فراخوانی فوری تمام شدنش بیاید، و در غیر این صورت **هم‌زمان**، یعنی وقتی عملیات لابه‌لای هم می‌روند (جدول ۹.۳). تاریخ H **linearizable** است اگر (p. 123):
 
-1. **Sequential equivalence:** there's a sequential history H′ that gives the same results as H.
-2. **Real-time ordering:** H′ respects the real-time order of non-concurrent operations in H. An operation invoked after another one completed must see its effects.
+1. **هم‌ارزی ترتیبی:** تاریخی ترتیبی مثل H′ هست که همان نتیجه‌های H را می‌دهد.
+2. **ترتیب real-time:** تاریخ H′ ترتیب real-time عملیات asynchronous در H را محترم می‌شمارد. عملیاتی که پس از تمام شدن عملیاتی دیگر فرا خوانده شده باید اثرهایش را ببیند.
 
-Figure 9.8 shows a non-linearizable history (pp. 123–124):
+شکل ۹.۸ تاریخی ناـخطی‌پذیر را نشان می‌دهد (pp. 123–124):
 
-- A replicated increment-only counter starts at 0.
-- Process B's increment completes, and *then* process A reads 1 from a lagging replica.
-- Linearizability would require 2, because A's read follows B's increment. The history exposes the replicas and their lag.
+- شمارنده‌ای تکرارشده که فقط می‌افزاید از ۰ شروع می‌کند.
+- افزودن process B تمام می‌شود، و *بعد* process A مقدار ۱ را از replicaیی عقب‌مانده می‌خواند.
+- مفهوم linearizability ۲ را می‌خواست، چون خواندن A پس از افزودن B می‌آید. تاریخ، replicaها و latencyشان را آشکار می‌کند.
 
-![Processes A and B each increment a counter through replica 1 and replica 2; after B's increment completes, A reads from a replica that has not received it yet and gets OK(1), highlighted in red](../figures/09-08.png)
+![processهای A و B هر یک شمارنده‌ای را از راه replica ۱ و replica ۲ می‌افزایند؛ پس از تمام شدن افزودن B، process A از replicaیی می‌خواند که آن را هنوز نگرفته و OK(1) می‌گیرد، که سرخ برجسته شده](../figures/09-08.png)
 
-*Figure 9.8 (p. 124): the shaded bars are the operations' durations; A's read starts after B's increment ends, so a correct answer would be 2.*
+*Figure 9.8 (p. 124): میله‌های سایه‌دار مدت عملیات‌اند؛ خواندن A پس از پایان افزودن B شروع می‌شود، پس پاسخ درست ۲ بود.*
 
-**Aha! moment:** a *linearizable history* is a fact (an equivalent sequential history exists). A *linearizable system* is a guarantee (every possible history is linearizable) (p. 123). Implementing it is the subject of Chapter 10, on consensus (p. 124).
+**لحظه‌ی آها!:** *تاریخ linearizable* یک واقعیت است، یعنی تاریخی ترتیبی و هم‌ارز وجود دارد. *سیستم linearizable* یک تضمین است، یعنی هر تاریخ ممکنی linearizable است (p. 123). پیاده کردنش موضوع فصل ۱۰ است، درباره‌ی consensus (p. 124).
 
-> **Try it:** [Is this history linearizable?](../widgets/09-linearizability.html) — drag operations of three processes on a register along a timeline, and the checker searches for a sequential order that gives the same results and respects real time, or explains which pair of operations makes it impossible.
+> **Try it:** [آیا این تاریخ linearizable است؟](../widgets/09-linearizability.html)؛ عملیات سه process روی یک register را روی خط زمان بکشید، و سنجنده ترتیبی ترتیبی می‌جوید که همان نتیجه‌ها را بدهد و زمان واقعی را محترم بشمارد، یا توضیح می‌دهد کدام زوج عملیات ناممکنش می‌کند.
 
-### 9.3 Eventual consistency
+### ۹.۳ eventual consistency
 
-**Eventual consistency** is one of the weakest models. It's a **convergence guarantee**: eventually, all nodes are in the same state. Werner Vogels of AWS popularized the term for Amazon's DynamoDB (p. 124).
+**مفهوم eventual consistency** یکی از ضعیف‌ترین مدل‌هاست. **تضمین هم‌گرایی** است: در غایت، همه‌ی نودها در همان حالت‌اند. ورنر وگلز از AWS این اصطلاح را برای DynamoDB شرکت Amazon همه‌گیر کرد (p. 124).
 
-#### 9.3.1 The shopping cart (pp. 124–125)
+#### ۹.۳.۱ سبد خرید (pp. 124–125)
 
-In Figure 9.9, two replicas both hold {A} when a partition separates them:
+در شکل ۹.۹، دو replica هر دو {A} را دارند که پارتیشنی از هم جداشان می‌کند:
 
-![Two replicas both start with A; during a partition replica 1 applies remove(A) and add(B), giving B, while replica 2 applies add(C), giving A and C; after the partition heals both hold A, B and C](../figures/09-09.png)
+![دو replica هر دو با A شروع می‌کنند؛ در میانه‌ی پارتیشن، replica ۱ عملیات remove(A) و add(B) را اعمال می‌کند و B می‌دهد، و replica ۲ عملیات add(C) را اعمال می‌کند و A و C می‌دهد؛ پس از ترمیم پارتیشن هر دو A و B و C را دارند](../figures/09-09.png)
 
-*Figure 9.9 (p. 124): the merge keeps every added item, so the removed A comes back in **{A, B, C}**.*
+*Figure 9.9 (p. 124): این merge هر قلم افزوده‌ای را نگه می‌دارد، پس آن A حذف‌شده در **{A, B, C}** برمی‌گردد.*
 
-The conflict has to be resolved by the engineers. Amazon's priority is to keep added items over removed ones, so no added item vanishes, but removed items occasionally **resurrect**. The trade-off is availability against a surprise-free developer and user experience (p. 125).
+تعارض را باید مهندس‌ها حل کنند. اولویت Amazon نگه داشتن قلم‌های افزوده بر حذف‌شده‌هاست، پس هیچ قلم افزوده‌ای ناپدید نمی‌شود، ولی قلم‌های حذف‌شده هر از گاهی **رستاخیز** می‌کنند. بده‌بستان، availability در برابر تجربه‌ی بی‌غافلگیری توسعه‌دهنده و کاربر است (p. 125).
 
-> **Try it:** [The eventually consistent shopping cart](../widgets/09-shopping-cart.html) — partition two cart replicas, add and remove items on each side, heal the partition, and compare reconciliation rules: Amazon's "adds win" (Figure 9.9), last write wins, and a grow-only set.
+> **Try it:** [سبد خرید سازگار غایی](../widgets/09-shopping-cart.html)؛ دو replica سبد را پارتیشن کنید، در هر سو قلم بیفزایید و بردارید، پارتیشن را ترمیم کنید، و قاعده‌های آشتی‌دهی را مقایسه کنید: «افزودن می‌برد» Amazon از شکل ۹.۹، آخرین نوشتن می‌برد، و مجموعه‌ی فقط‌رشدی.
 
-#### 9.3.2 Variants of eventual consistency (p. 125)
+#### ۹.۳.۲ گونه‌های eventual consistency (p. 125)
 
-| Variant | Guarantees |
+| گونه | تضمین‌ها |
 |---|---|
-| **Basic** | **Eventual delivery**: an update to one nonfaulty replica eventually reaches every nonfaulty replica. **Weak convergence**: once updates stop, all replicas eventually converge. Says nothing about reads before convergence or about continuous updates |
-| **Strong** | **Eventual delivery** plus **strong convergence**: any two replicas that have received the same set of updates are in the same state |
+| **پایه** | **تحویل غایی**: به‌روزرسانی به یک replica سالم در غایت به هر replica سالمی می‌رسد. **هم‌گرایی ضعیف**: همین که به‌روزرسانی‌ها بس شوند، همه‌ی replicaها در غایت هم‌گرا می‌شوند. درباره‌ی خواندن پیش از هم‌گرایی یا درباره‌ی به‌روزرسانی پیوسته چیزی نمی‌گوید |
+| **قوی** | **تحویل غایی** به‌علاوه‌ی **هم‌گرایی قوی**: هر دو replicaیی که همان مجموعه‌ی به‌روزرسانی را گرفته‌اند در همان حالت‌اند |
 
-#### 9.3.3 Implementation (pp. 125–126)
+#### ۹.۳.۳ پیاده‌سازی (pp. 125–126)
 
-Any replica can be modified at any time, even while disconnected, so conflicts need reconciliation:
+هر replicaیی می‌تواند هر وقتی عوض شود، حتی وقتی قطع است، پس تعارض‌ها آشتی‌دهی لازم دارند:
 
-| Approach | How |
+| رویکرد | چطور |
 |---|---|
-| **Application-specific** | The application decides; in the cart, additions win over removals (p. 125) |
-| **Algorithmic: CRDTs** | Data structures that allow independent concurrent updates on replicas while guaranteeing convergence (p. 126) |
+| **برنامه‌ویژه** | برنامه تصمیم می‌گیرد؛ در سبد، افزودن بر برداشتن می‌برد (p. 125) |
+| **الگوریتمی: CRDTها** | ساختار داده‌هایی که به‌روزرسانی هم‌زمان و مستقل روی replicaها را مجاز می‌کنند و در همان حال هم‌گرایی را تضمین (p. 126) |
 
-| CRDT kind | Replicates | Convergence requires (p. 126) |
+| گونه‌ی CRDT | چه چیزی را تکرار می‌کند | هم‌گرایی چه لازم دارد (p. 126) |
 |---|---|---|
-| **Operation-based** (commutative) | Individual operations | No lost operations, each applied effectively once, and a commutative apply function |
-| **State-based** (convergent) | The entire state | An associative, commutative, idempotent merge |
+| **عملیات‌محور** که commutative است | عملیات تک‌تک | هیچ عملیات گم‌شده‌ای نباشد، هر کدام عملاً یک بار اعمال شود، و تابع اعمال commutative باشد |
+| **state-based** که هم‌گرا است | کل حالت | یک merge associative و commutative و idempotent |
 
-Table 9.4 shows the **grow-only set** both ways: apply `add x` with set := set ∪ {x}, or merge set := set ∪ set′. Riak, among others, uses CRDT principles (p. 126).
+جدول ۹.۴ **مجموعه‌ی فقط‌رشدی** را به هر دو شکل نشان می‌دهد: عملیات `add x` را با set := set ∪ {x} اعمال کنید، یا با set := set ∪ set′ آن را merge کنید. از جمله Riak اصول CRDT را به کار می‌برد (p. 126).
 
-### 9.4 Consistency, availability, and partition tolerance
+> **In practice:** داشبوردهای Metabase روی یکی از دو replica بار می‌شوند، که هر کدام ممکن است چند ثانیه عقب باشد.
+>
+> **Your turn:** کاربری داشبورد را دو بار refresh می‌کند و عدد امروز یک بار ۱۰۲۰ و یک بار ۱۰۱۸ است. باگ است؟
+>
+> *Answer:* نه لزوماً: دو refresh به دو replica با پیشرفت متفاوت رفته‌اند و هر دو بالاخره هم‌گرا می‌شوند. این eventual consistency بدون monotonic reads است؛ اگر مهم است، Metabase را به یک replica sticky کنید یا load balancer را با `load_balancing=in_order` تنظیم کنید (pp. 124–126).
 
-CAP is possibly the best-known and most misunderstood principle in distributed systems (p. 126).
+### ۹.۴ consistency و availability و partition tolerance
 
-#### 9.4.1 History (pp. 126–127)
+قاعده‌ی CAP شاید شناخته‌ترین و بدفهمیده‌ترین قاعده‌ی سیستم‌های توزیع‌شده باشد (p. 126).
 
-| | Who and when | Status |
+#### ۹.۴.۱ تاریخچه (pp. 126–127)
+
+| | چه کسی و چه وقت | وضعیت |
 |---|---|---|
-| **CAP conjecture** | Eric Brewer, PODC 2000 keynote "Towards Robust Distributed Systems" | Presented as a theorem, but with no proof: an attempt to *formulate* the C–A conflict |
-| **CAP theorem** | Seth Gilbert and Nancy Lynch, 2002 | A formal proof: an attempt to *formalize* it |
+| **حدس CAP** | اریک بروئر، سخنرانی کلیدی PODC در سال ۲۰۰۰ با نام «Towards Robust Distributed Systems» | به‌شکل قضیه عرضه شد، ولی بی اثبات: کوششی برای *صورت‌بندی* تعارض C و A |
+| **قضیه‌ی CAP** | ست گیلبرت و نانسی لینچ در ۲۰۰۲ | اثباتی صوری: کوششی برای *صوری کردن* آن |
 
-**Aha! moment:** "pick two out of three" implies partitions are optional, but they're inevitable. So tolerating partitions is non-negotiable, and when one occurs you choose consistency *or* availability. CAP divides the world into **CP and AP** systems (p. 127).
+**لحظه‌ی آها!:** «دو تا از سه تا را بردار» می‌رساند که پارتیشن اختیاری است، ولی ناگزیر است. پس partition tolerance مذاکره‌پذیر نیست، و وقتی یکی رخ بدهد consistency *یا* availability را برمی‌دارید. قاعده‌ی CAP دنیا را به سیستم‌های **CP و AP** بخش می‌کند (p. 127).
 
-#### 9.4.2 Conjecture vs. theorem (pp. 127–128)
+#### ۹.۴.۲ حدس در برابر قضیه (pp. 127–128)
 
-Both treat consistency as a safety property and availability as a liveness property (p. 127):
+هر دو consistency را خاصیتی ایمنی و availability را خاصیتی liveness می‌گیرند (p. 127):
 
-- **Consistency:** every read receives either a success that reflects the most recent write, or a failure.
-- **Availability:** every read eventually receives a success, which need not reflect the most recent write.
-- **Partition:** the network splits into segments, and messages between segments are lost.
+- **مفهوم consistency:** هر خواندنی یا موفقیتی می‌گیرد که تازه‌ترین نوشتن را بازتاب می‌دهد، یا یک شکست.
+- **مفهوم availability:** هر خواندنی در غایت موفقیتی می‌گیرد، که لازم نیست تازه‌ترین نوشتن را بازتاب بدهد.
+- **پارتیشن:** شبکه به بخش‌هایی می‌شکند، و پیام‌های بین بخش‌ها گم می‌شوند.
 
-| | Conjecture | Theorem |
+| | حدس | قضیه |
 |---|---|---|
-| **Consistency** | Single-copy serializability | Linearizability of a read/write register |
-| **Availability** | *Some* node responds *timely* | *Any* node responds *eventually* |
-| **Partitioning** | Temporary | Permanent |
+| **consistency** | serializability تک‌کپی | linearizability یک register خواندن و نوشتن |
+| **availability** | *نودی* به‌هنگام پاسخ می‌دهد | *هر نودی* در غایت پاسخ می‌دهد |
+| **پارتیشن‌بندی** | موقت | دائم |
 
-(Table 9.5) (p. 128)
+(جدول ۹.۵) (p. 128)
 
-#### 9.4.3 CAP theorem (pp. 128–129)
+#### ۹.۴.۳ قضیه‌ی CAP (pp. 128–129)
 
-The model: nodes C, N1 and N2, with no clocks, communicating over an asynchronous network. N1 and N2 both start with v0, and a **permanent partition** separates N1 from N2, while C can reach both (Figure 9.10) (p. 128). The proof is by contradiction:
+مدل: نودهای C و N1 و N2، بی ساعت، که روی شبکه‌ای asynchronous حرف می‌زنند. نودهای N1 و N2 هر دو با v0 شروع می‌کنند، و **پارتیشنی دائم** نود N1 را از N2 جدا می‌کند، در حالی که C به هر دو می‌رسد (شکل ۹.۱۰) (p. 128). اثبات برهان خلف است:
 
 ```mermaid
 sequenceDiagram
@@ -214,70 +222,76 @@ sequenceDiagram
     Note over C: consistency violated, so no algorithm is both C and A here
 ```
 
-*The vault's drawing of the proof on pp. 128–129.* With a permanent partition no information crosses at all, so even the weakest consistency is impossible. Kleppmann's "A Critique of the CAP Theorem" formalizes CAP more carefully (p. 129).
+*ترسیم vault از اثبات در صص. ۱۲۸–۱۲۹.* با پارتیشنی دائم هیچ اطلاعی رد نمی‌شود، پس حتی ضعیف‌ترین consistency هم ناممکن است. مقاله‌ی «A Critique of the CAP Theorem» کلپمان قاعده‌ی CAP را دقیق‌تر صوری می‌کند (p. 129).
 
-**Critique** (p. 129):
+**نقد** (p. 129):
 
-- Brewer's version is intuitive and practical, but not a theorem. Gilbert and Lynch's is a theorem, but neither intuitive nor practical.
-- CAP taught the community to think about inherent trade-offs, but it's also misused to shut down conversations where it doesn't apply.
-- Kleppmann's blog post "Please stop calling databases CP or AP" asks to retire CAP in favor of more precise terminology.
+- روایت بروئر شهودی و عملی است، ولی قضیه نیست. روایت گیلبرت و لینچ قضیه است، ولی نه شهودی و نه عملی.
+- قاعده‌ی CAP به جامعه فکر کردن درباره‌ی بده‌بستان‌های ذاتی را آموخت، ولی برای بستن گفت‌و‌گوهایی که به آن ربطی ندارند هم بدجا به کار می‌رود.
+- نوشته‌ی وبلاگی کلپمان با نام «Please stop calling databases CP or AP» می‌خواهد قاعده‌ی CAP بازنشسته شود و اصطلاح‌های دقیق‌تر جایش بنشینند.
 
-## Trade-offs at a glance
+> **In practice:** CAP فقط وقتی معنی دارد که شبکه بین replicaها قطع شود؛ بقیه‌ی وقت‌ها بده‌بستان latency است.
+>
+> **Your turn:** ارتباط دو replica با Keeper قطع شده. ClickHouse کدام طرف CAP را انتخاب می‌کند؟
+>
+> *Answer:* برای نوشتن، consistency: جدول‌های Replicated بدون Keeper read-only می‌شوند. برای خواندن، availability: هر replica داده‌ی محلی‌اش را برمی‌گرداند حتی اگر کهنه باشد. CAP یک انتخاب کلی برای سیستم نیست؛ هر عمل می‌تواند انتخاب خودش را داشته باشد (pp. 126–129).
 
-| Model | Guarantee | Coordination | Available during partitions? |
+## بده‌بستان‌ها در یک نگاه
+
+| مدل | تضمین | هم‌آهنگی | در میانه‌ی پارتیشن در دسترس؟ |
 |---|---|---|---|
-| Linearizable | Recency: a single copy in real time | High (consensus, Chapter 10) | No: some nodes must pause |
-| Sequential | A single order, but not real time | High | No |
-| Causal | Causally related operations in order | Medium | Sticky available |
-| Read your writes, monotonic reads | Per-client guarantees | Low | Sticky or total available |
-| Eventual (basic) | Convergence after updates stop | None at write time | Yes |
-| Strong eventual (CRDTs) | Same updates ⇒ same state | None at write time | Yes, but the data type must have a convergent merge |
+| linearizable | تازگی: یک کپی تنها در زمان واقعی | زیاد، یعنی consensus از فصل ۱۰ | نه: برخی نودها باید بایستند |
+| sequential | یک ترتیب تنها، ولی نه زمان واقعی | زیاد | نه |
+| causal | عملیات علّیت‌دار به ترتیب | متوسط | sticky available |
+| read your writes و monotonic reads | تضمین‌های به‌تفکیک کلاینت | کم | sticky یا total available |
+| غایی پایه | هم‌گرایی پس از بس شدن به‌روزرسانی‌ها | سر نوشتن هیچ | بله |
+| غایی قوی با CRDT | همان به‌روزرسانی‌ها ⇒ همان حالت | سر نوشتن هیچ | بله، ولی نوع داده باید merge هم‌گرا داشته باشد |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Checking linearizability is expensive.** Deciding whether a history is linearizable is NP-complete in general (Gibbons and Korach, 1997). Tools such as Jepsen's Knossos and Porcupine search the space of orderings with pruning. The [widget](../widgets/09-linearizability.html) brute-forces a handful of operations, which is the same idea at toy scale.
-- **PACELC.** Abadi's extension of CAP says: if there is a partition (P), choose availability (A) or consistency (C); else (E), choose latency (L) or consistency (C). That's closer to the book's Figure 9.6 trade-off, which applies even without partitions.
-- **Linearizability vs. serializability.** Serializability (Chapter 5) concerns multi-object transactions with *some* serial order. Linearizability concerns single objects in *real-time* order. *Strict serializability* is both. [DDIA Ch. 10](../../designing-data-intensive-applications/chapters/10-consistency-and-consensus.md) draws the same distinction.
+- **سنجیدن linearizability گران است.** تصمیم گرفتن درباره‌ی linearizable بودن یک تاریخ در حالت کلی NP-complete است، از گیبونز و کوراک در ۱۹۹۷. ابزارهایی مثل Knossos از Jepsen و Porcupine فضای ترتیب‌ها را با هرس کردن می‌جویند. [این widget](../widgets/09-linearizability.html) چند عملیات انگشت‌شمار را سرسختی می‌جوید، که همان ایده در مقیاس اسباب‌بازی است.
+- **قاعده‌ی PACELC.** گسترش ابادی بر CAP می‌گوید: اگر پارتیشنی هست، یعنی P، availability یا سازگاری، یعنی A یا C، را بردارید؛ و وگرنه، یعنی E، latency یا سازگاری، یعنی L یا C. این به بده‌بستان شکل ۹.۶ کتاب نزدیک‌تر است، که حتی بی پارتیشن هم برقرار است.
+- **مفهوم linearizability در برابر serializability.** قاعده‌ی serializability از فصل ۵ به تراکنش‌های چند‌objectی با *یک* ترتیب سری می‌پردازد. linearizability به objectهای تنها در ترتیب *real-time*. *strict serializability* هر دو است. [فصل ۱۰ کتاب DDIA](../../designing-data-intensive-applications/chapters/10-consistency-and-consensus.md) همان تمایز را می‌کشد.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [5. Transactions](05-transactions.md) (serializability, consistency as a predicate on histories), [8. Replication](08-replication.md) (replication lag and transparency), [10. Distributed consensus](10-distributed-consensus.md) (how to implement linearizability), [3. Failure tolerance](03-failure-tolerance.md) (masking failure tolerance and CAP).
+- **فصل‌های مرتبط:** [فصل ۵: تراکنش](05-transactions.md) که serializability و consistency به‌شکل گزاره‌ای روی تاریخ‌ها را دارد، [فصل ۸: replication](08-replication.md) که latency و شفافیت replication را دارد، [فصل ۱۰: consensus توزیع‌شده](10-distributed-consensus.md) که پیاده کردن linearizability را دارد، و [فصل ۳: تحمل شکست](03-failure-tolerance.md) که تحمل شکست پوشاننده و CAP را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **What is a consistency model, formally?**
+1. **مدل سازگاری، صوری، چیست؟**
 
-   *Answer:* A set of histories, or equivalently a predicate on histories that classifies each as valid or invalid. A system is consistent with respect to the model if all its possible histories are valid (p. 118).
+   *Answer:* مجموعه‌ای از تاریخ‌ها، یا هم‌ارزش گزاره‌ای روی تاریخ‌ها که هر کدام را معتبر یا نامعتبر رده‌بندی می‌کند. سیستم نسبت به مدل سازگار است اگر همه‌ی تاریخ‌های ممکنش معتبر باشند (p. 118).
 
-2. **What does it mean for model A to be stronger than model B?**
+2. **قوی‌تر بودن مدل A از مدل B چه معنایی دارد؟**
 
-   *Answer:* A's valid histories are a subset of B's: it allows fewer histories (p. 119).
+   *Answer:* تاریخ‌های معتبر A زیرمجموعه‌ی تاریخ‌های B هستند: تاریخ‌های کم‌تری را مجاز می‌کند (p. 119).
 
-3. **What are the two conditions for a history to be linearizable?**
+3. **دو شرط linearizable بودن یک تاریخ چیست؟**
 
-   *Answer:* Sequential equivalence (some sequential history gives the same results) and real-time ordering (that history respects the order of non-overlapping operations) (p. 123).
+   *Answer:* هم‌ارزی ترتیبی، یعنی تاریخی ترتیبی همان نتیجه‌ها را می‌دهد، و ترتیب زمان‌واقعی، یعنی آن تاریخ ترتیب عملیاتی که هم‌پوشان نیستند را محترم می‌شمارد (p. 123).
 
-4. **In Figure 9.8, why isn't the history linearizable?**
+4. **در شکل ۹.۸، چرا تاریخ linearizable نیست؟**
 
-   *Answer:* A's read starts after B's increment completed, so it must return 2. It returned 1 from a lagging replica (pp. 123–124).
+   *Answer:* خواندن A پس از تمام شدن افزودن B شروع می‌شود، پس باید ۲ برگرداند. از replicaیی عقب‌مانده ۱ برگرداند (pp. 123–124).
 
-5. **What distinguishes strong eventual consistency from basic eventual consistency?**
-   - [ ] Strong eventual consistency is linearizable
-   - [x] Any two replicas that received the same set of updates are in the same state
-   - [ ] Updates are delivered immediately
+5. **چه چیزی eventual consistency قوی را از eventual consistency پایه جدا می‌کند؟**
+   - [ ] مفهوم eventual consistency قوی linearizable است
+   - [x] هر دو replicaیی که همان مجموعه‌ی به‌روزرسانی را گرفته‌اند در همان حالت‌اند
+   - [ ] به‌روزرسانی‌ها فوری تحویل می‌شوند
 
-   *Answer:* Strong convergence replaces weak convergence (p. 125).
+   *Answer:* هم‌گرایی قوی جای هم‌گرایی ضعیف را می‌گیرد (p. 125).
 
-6. **What must the merge function of a state-based CRDT be?**
+6. **تابع merge یک CRDT state-based باید چه باشد؟**
 
-   *Answer:* Associative, commutative and idempotent (p. 126).
+   *Answer:* associative و commutative و idempotent (p. 126).
 
-7. **Why is "pick two out of three" a misreading of CAP?**
+7. **چرا «دو تا از سه تا را بردار» بدخوانی CAP است؟**
 
-   *Answer:* It treats partitions as optional. They're inevitable, so the real choice is between consistency and availability when a partition happens (p. 127).
+   *Answer:* پارتیشن را اختیاری می‌گیرد. پارتیشن ناگزیر است، پس انتخاب واقعی بین consistency و availability در زمان رخ دادن پارتیشن است (p. 127).
 
-8. **How do the conjecture and the theorem define availability?**
+8. **حدس و قضیه availability را چطور تعریف می‌کنند؟**
 
-   *Answer:* The conjecture: some node responds in a timely way. The theorem: any node responds eventually (p. 128).
+   *Answer:* حدس: نودی به‌هنگام پاسخ می‌دهد. قضیه: هر نودی در غایت پاسخ می‌دهد (p. 128).

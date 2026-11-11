@@ -1,18 +1,18 @@
-# Log-based durable execution
+# اجرای پایای log‌محور
 
-How does log-based durable execution recover a process, and what breaks it? The script implements a tiny runtime. A process is a generator that yields steps; the runtime runs each step, records its result in a durable log, and sends the result back into the generator. After a crash, it starts the generator again and replays: steps already in the log are not re-executed, and their logged results are fed back instead. The book's `alphabet()` process is crashed after every step, just before the step's result is logged. The run is repeated with a version that branches on the clock outside a step.
+اجرای پایای log‌محور processی را چطور بازیابی می‌کند، و چه چیزی می‌شکندش؟ اسکریپت runtimeی خُرد پیاده می‌کند. process generatorی است که قدم‌ها را yield می‌کند؛ runtime هر قدمی را اجرا می‌کند، نتیجه‌اش را در logی پایا ثبت می‌کند، و نتیجه را به generator پس می‌فرستد. پس از از کار افتادنی، generator را دوباره شروع می‌کند و replay می‌کند: قدم‌هایی که از قبل در log هستند بازهم اجرا نمی‌شوند، و در عوض نتیجه‌ی لاگ‌شده‌شان برگردانده می‌شود. process `alphabet()` کتاب پس از هر قدمی و درست پیش از لاگ شدن نتیجه‌ی آن قدم از کار می‌افتد. اجرا با نسخه‌ای که بیرون یک قدم روی ساعت شاخه می‌زند دوباره تکرار می‌شود.
 
-*Illustrates Think Distributed Systems, Listings 11.2 and 11.6–11.7, pp. 149–155: log-based recovery replays from the log and requires deterministic execution. The crash model, the restart comparison and the clock-reading variant are the vault's.*
+*تصویری از فهرست‌های ۱۱.۲ و ۱۱.۶ و ۱۱.۷ کتاب Think Distributed Systems، صص. ۱۴۹–۱۵۵: بازیابی log‌محور از log replay می‌کند و اجرای قطعی لازم دارد. مدل از کار افتادن و مقایسه با شروع دوباره و آن گونه‌ی ساعت‌خوان مال vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 durable_replay.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 Failure-free: a•b•c•d•e•f•✓
@@ -36,13 +36,13 @@ The clock reads 0 on the first run and 1 on recovery (branch outside a step)
  6  a•b•c•d•e•f•💥  ✗ replay diverged: log has step 4 = d, code yielded D   a•b•c•d•e•f•💥•a•b•c•D•e•f•✓
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Replay repeats exactly one event, the step that ran but wasn't logged: “valid to duplicate the last event”. Restart repeats everything done so far.
-- Crashing after step k ran but before it was logged repeats step k. Had the crash come after logging, replay would repeat nothing.
-- With a clock read outside a step, the rerun takes the other branch. If the crash came after step 4 was logged, replay notices that the code no longer matches the log and stops.
-- If the crash came earlier, replay doesn't notice, and the trace contains a step from each branch (d before the crash, D after) or the new branch only. Restart's traces mix branches the same way. Determinism is the programmer's job.
+- عمل replay دقیقاً یک رویداد را تکرار می‌کند، یعنی همان قدمی که اجرا شد ولی لاگ نشده بود: «تکرار آخرین رویداد مجاز است». شروع دوباره هر چه تا این‌جا شده را تکرار می‌کند.
+- از کار افتادن پس از اجرای قدم k و پیش از لاگ شدنش قدم k را تکرار می‌کند. اگر از کار افتادن پس از لاگ شدن می‌آمد، replay چیزی را تکرار نمی‌کرد.
+- با خواندن ساعت بیرون یک قدم، اجرای دوباره آن شاخه‌ی دیگر را برمی‌دارد. اگر از کار افتادن پس از لاگ شدن قدم ۴ می‌آمد، replay می‌دید که کد دیگر با log نمی‌خواند و می‌ایستاد.
+- اگر از کار افتادن زودتر بیاید، replay نمی‌بیندش، و رد قدمی از هر شاخه دارد، یعنی d پیش از از کار افتادن و D پس از آن، یا تنها شاخه‌ی تازه را. ردهای شروع دوباره هم همان‌طور شاخه‌ها را قاطی می‌کنند. قطعیت کار برنامه‌نویس است.
 
-## Related
+## مرتبط
 
-- Chapter note: [11. Durable executions](../../chapters/11-durable-executions.md) — “Durable execution”, pp. 153–155
+- یادداشت فصل: [فصل ۱۱: اجرای پایا](../../chapters/11-durable-executions.md) — «اجرای پایا»، صص. ۱۵۳–۱۵۵

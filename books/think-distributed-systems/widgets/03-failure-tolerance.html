@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Masking, Nonmasking, Fail-Safe</title>
-<meta name="description" content="Inject failures into the book&#x27;s one-variable process (Listing 3.1) and into a FIFO queue that is nonmasking or fail-safe, and see which of safety and liveness each gives up while the failure lasts. Illustrates Think Distributed Systems, Chapter 3.">
+<title>پوشاننده و ناپوشاننده و شکست‌ایمن</title>
+<meta name="description" content="به process تک‌متغیری کتاب، از فهرست ۳.۱، و به queueی FIFO که ناپوشاننده یا شکست‌ایمن است شکست تزریق کنید، و ببینید هر کدام تا وقتی شکست پاست کدام یک از ایمنی و liveness را وا می‌دهد. تصویری از فصل ۳ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .xs { display: flex; gap: 8px; } .xs .cell { flex: 1; text-align: center; padding: 10px 0; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-2); font-family: var(--mono); }
@@ -16,52 +16,52 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/03-failure-tolerance.html">Chapter 3</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Masking, nonmasking, fail-safe</span>
+      <a href="../chapters/03-failure-tolerance.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">پوشاننده و ناپوشاننده و شکست‌ایمن</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 3 · Failure tolerance</div>
-  <h1>Masking, nonmasking and fail-safe failure tolerance</h1>
-  <p class="lede">Failure tolerance is classified by what survives a failure. <strong>Masking</strong> keeps safety and liveness. <strong>Nonmasking</strong> keeps liveness only: it keeps going but may make mistakes. <strong>Fail-safe</strong> keeps safety only: it makes no mistakes but may stop.</p>
-  <p class="source-note">Illustrates “Types of failure tolerance” (pp. 42–44, Table 3.1, Listing 3.1, Figure 3.2). The queue’s failure window, the eight messages and the masking queue (modelled as a replica that takes over the stuck message) are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۳ · تحمل شکست</div>
+  <h1>تحمل شکست پوشاننده و ناپوشاننده و شکست‌ایمن</h1>
+  <p class="lede">تحمل شکست را بر حسب آن چیزی رده می‌کنند که از شکست جان به در می‌برد. <strong>پوشاننده</strong> ایمنی و liveness را نگه می‌دارد. <strong>ناپوشاننده</strong> تنها liveness را: راه می‌رود ولی می‌تواند خطا کند. <strong>شکست‌ایمن</strong> تنها ایمنی را: خطا نمی‌کند ولی می‌تواند بایستد.</p>
+  <p class="source-note">تصویری از «گونه‌های تحمل شکست» (صص. ۴۲–۴۴، جدول ۳.۱، فهرست ۳.۱، شکل ۳.۲). پنجره‌ی شکست آن queue و آن هشت پیام و queue پوشاننده، که به‌شکل replicaیی مدل شده که پیام گیر‌کرده را تحویل می‌گیرد، مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Listing 3.1: process P with x ∈ {0, 1, 2, 3}</p><div class="xs" id="xs"></div>
-        <div class="btns"><button class="btn small" id="norm">Normal transition</button><button class="btn small danger" id="fail">Failure transition (x := 0)</button><button class="btn small danger" id="intol">Jump to x = 3</button><button class="btn small" id="xreset">Reset x = 1</button></div>
+      <div class="panel"><p class="panel-title">فهرست ۳.۱: process P با x ∈ {0, 1, 2, 3}</p><div class="xs" id="xs"></div>
+        <div class="btns"><button class="btn small" id="norm">گذار عادی</button><button class="btn small danger" id="fail">گذار شکست، یعنی x := 0</button><button class="btn small danger" id="intol">پریدن به x = 3</button><button class="btn small" id="xreset">برگشت به x = 1</button></div>
         <div class="callout" id="xv" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">A FIFO queue during a failure</p>
+      <div class="panel"><p class="panel-title">queueی FIFO در میانه‌ی شکست</p>
         <div class="q" id="sent"></div><div class="q" id="deliv"></div><div class="callout" id="qv" style="margin-top:8px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="qmode"></div><p class="field-hint">During steps 3–6, the node holding message 3 is down. Messages keep arriving.</p><div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="qmode"></div><p class="field-hint">در قدم‌های ۳ تا ۶، آن نودی که پیام ۳ را دارد از کار افتاده. پیام‌ها همین‌طور می‌رسند.</p><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Listing 3.1 is nonmasking.</strong> At x = 0 safety (x ∈ {1, 2}) is violated, but the repair transition 0 → 1 keeps it live, and both legal values keep recurring.</li>
-    <li><strong>x = 3 is intolerable.</strong> No transition leaves it, so nothing guarantees a return to a legal or illegal state.</li>
-    <li><strong>The nonmasking queue</strong> keeps delivering and delivers message 3 out of order once the node recovers. <strong>The fail-safe queue</strong> delivers nothing during the failure, then catches up in order. <strong>Masking</strong> hides the failure entirely, at the price of another copy of every message.</li>
+    <li><strong>فهرست ۳.۱ ناپوشاننده است.</strong> در x = 0 ایمنی، یعنی x ∈ {1, 2}، نقض می‌شود، ولی گذار تعمیر ۰ ← ۱ آن را زنده نگه می‌دارد، و هر دو مقدار قانونی همین‌طور بازمی‌گردند.</li>
+    <li><strong>مقدار x = 3 تحمل‌ناشدنی است.</strong> هیچ گذاری ترکش نمی‌کند، پس هیچ چیزی برگشت به حالتی قانونی یا ناقانونی را تضمین نمی‌کند.</li>
+    <li><strong>queue ناپوشاننده</strong> همین‌طور تحویل می‌دهد و همین که نود بازیابی شود پیام ۳ را بی‌ترتیب تحویل می‌دهد. <strong>queue شکست‌ایمن</strong> در میانه‌ی شکست هیچ تحویل نمی‌دهد، و بعد به ترتیب جبران می‌کند. <strong>پوشاننده</strong> شکست را تماماً پنهان می‌کند، به بهای کپی دیگری از هر پیام.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/03-failure-tolerance.html"><small>Lesson</small>3. Failure tolerance</a></li>
+    <li><a href="../chapters/03-failure-tolerance.html"><small>درس</small>فصل ۳: تحمل شکست</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -81,19 +81,19 @@ function stats(rows) {
   function legal(v) { return v === 1 || v === 2; }
   function renderX() {
     var xs = Kit.clear(document.getElementById("xs"));
-    [0, 1, 2, 3].forEach(function (v) { xs.appendChild(Kit.el("div", { class: "cell " + (legal(v) ? "legal" : v === 0 ? "illegal" : "intol") + (v === x ? " cur" : ""), "aria-label": "x = " + v + (v === x ? " (current)" : "") }, "x=" + v, Kit.el("br"), Kit.el("small", null, legal(v) ? "legal" : v === 0 ? "illegal" : "intolerable"))); });
+    [0, 1, 2, 3].forEach(function (v) { xs.appendChild(Kit.el("div", { class: "cell " + (legal(v) ? "legal" : v === 0 ? "illegal" : "intol") + (v === x ? " cur" : ""), "aria-label": "x = " + v + (v === x ? " (جاری)" : "") }, "x=" + v, Kit.el("br"), Kit.el("small", null, legal(v) ? "قانونی" : v === 0 ? "ناقانونی" : "تحمل‌ناشدنی"))); });
     var c = document.getElementById("xv");
-    if (legal(x)) { c.className = "callout ok"; c.textContent = "Safe and live: x = " + x + "."; }
-    else if (x === 0) { c.className = "callout warn"; c.textContent = "Not safe, but still live: the repair transition x = 0 → x := 1 will fire. Nonmasking."; }
-    else { c.className = "callout bad"; c.textContent = "Intolerable: no transition leaves x = 3, so nothing can be guaranteed."; }
+    if (legal(x)) { c.className = "callout ok"; c.textContent = "ایمن و زنده: x = " + x + "."; }
+    else if (x === 0) { c.className = "callout warn"; c.textContent = "ایمن نیست، ولی باز هم زنده: گذار تعمیر x = 0 → x := 1 شلیک می‌شود. ناپوشاننده."; }
+    else { c.className = "callout bad"; c.textContent = "تحمل‌ناشدنی: هیچ گذاری x = 3 را ترک نمی‌کند، پس هیچ چیزی تضمین‌شدنی نیست."; }
     document.getElementById("norm").disabled = x === 3; document.getElementById("fail").disabled = x === 0 || x === 3;
   }
-  document.getElementById("norm").addEventListener("click", function () { var o = x; x = x === 1 ? 2 : x === 2 ? 1 : 1; log.add((o === 0 ? "Repair transition" : "Normal transition") + ": x " + o + " → " + x, o === 0 ? "ok" : "muted"); renderX(); });
-  document.getElementById("fail").addEventListener("click", function () { log.add("Failure transition: x " + x + " → 0", "warn"); x = 0; renderX(); });
-  document.getElementById("intol").addEventListener("click", function () { log.add("x = 3: intolerable state", "bad"); x = 3; renderX(); });
-  document.getElementById("xreset").addEventListener("click", function () { x = 1; log.add("x reset to 1", "muted"); renderX(); });
+  document.getElementById("norm").addEventListener("click", function () { var o = x; x = x === 1 ? 2 : x === 2 ? 1 : 1; log.add((o === 0 ? "گذار تعمیر" : "گذار عادی") + ": x " + o + " → " + x, o === 0 ? "ok" : "muted"); renderX(); });
+  document.getElementById("fail").addEventListener("click", function () { log.add("گذار شکست: x " + x + " → 0", "warn"); x = 0; renderX(); });
+  document.getElementById("intol").addEventListener("click", function () { log.add("x = 3: حالت تحمل‌ناشدنی", "bad"); x = 3; renderX(); });
+  document.getElementById("xreset").addEventListener("click", function () { x = 1; log.add("مقدار x به ۱ برگشت", "muted"); renderX(); });
   var DOWN = [3, 6];
-  function resetQ() { t = 0; deliv = []; stalled = 0; log.add("Queue reset: " + ({ nonmask: "nonmasking", failsafe: "fail-safe", mask: "masking" })[mode], "muted"); renderQ(); }
+  function resetQ() { t = 0; deliv = []; stalled = 0; log.add("queue از نو: " + ({ nonmask: "ناپوشاننده", failsafe: "شکست‌ایمن", mask: "پوشاننده" })[mode], "muted"); renderQ(); }
   function stepQ() {
     t++; var down = t >= DOWN[0] && t <= DOWN[1];
     var avail = function (m) { return m <= t && (m !== 3 || !down || mode === "mask"); };
@@ -101,37 +101,37 @@ function stats(rows) {
     var pick = null;
     if (mode === "failsafe") { if (pending.length && avail(pending[0])) pick = pending[0]; }
     else pick = pending.filter(avail)[0] || null;
-    if (pick !== null) { deliv.push(pick); log.add("t=" + t + (down ? " (node down)" : "") + ": deliver message " + pick, isOOO(pick) ? "bad" : "ok"); }
-    else if (pending.length) { stalled++; log.add("t=" + t + ": " + (mode === "failsafe" ? "stop: message " + pending[0] + " is unavailable, and delivering a later one would break FIFO order" : "nothing deliverable"), "warn"); }
-    else log.add("t=" + t + ": idle", "muted");
+    if (pick !== null) { deliv.push(pick); log.add("t=" + t + (down ? "؛ نود از کار افتاده" : "") + ": تحویل پیام " + pick, isOOO(pick) ? "bad" : "ok"); }
+    else if (pending.length) { stalled++; log.add("t=" + t + ": " + (mode === "failsafe" ? "ایستادن: پیام " + pending[0] + " در دسترس نیست، و تحویل یکی از بعدی‌ها ترتیب FIFO را می‌شکند" : "چیزی تحویل‌شدنی نیست"), "warn"); }
+    else log.add("t=" + t + ": بی‌کار", "muted");
     renderQ(); return t < 14;
   }
   function isOOO(m) { return deliv.some(function (d) { return d > m; }); }
   function renderQ() {
     var down = t >= DOWN[0] && t <= DOWN[1];
-    document.getElementById("sent").textContent = "Enqueued: " + (t ? Array.from({ length: Math.min(t, 8) }, function (_, i) { return i + 1; }).join(" ") : "–") + (down ? "   ⚡ node with message 3 is down" : "");
-    var d = Kit.clear(document.getElementById("deliv")); d.appendChild(document.createTextNode("Delivered: "));
-    deliv.forEach(function (m, i) { var oo = deliv.slice(0, i).some(function (p) { return p > m; }); d.appendChild(Kit.el("span", { class: oo ? "oo" : "" }, m + (oo ? "(out of order)" : ""))); d.appendChild(document.createTextNode(" ")); });
+    document.getElementById("sent").textContent = "در صف: " + (t ? Array.from({ length: Math.min(t, 8) }, function (_, i) { return i + 1; }).join(" ") : "–") + (down ? "   ⚡ نود دارنده‌ی پیام ۳ از کار افتاده" : "");
+    var d = Kit.clear(document.getElementById("deliv")); d.appendChild(document.createTextNode("تحویل‌شده: "));
+    deliv.forEach(function (m, i) { var oo = deliv.slice(0, i).some(function (p) { return p > m; }); d.appendChild(Kit.el("span", { class: oo ? "oo" : "" }, m + (oo ? "(بی‌ترتیب)" : ""))); d.appendChild(document.createTextNode(" ")); });
     var ooo = deliv.filter(function (m, i) { return deliv.slice(0, i).some(function (p) { return p > m; }); }).length;
     var v = document.getElementById("qv"), safe = ooo === 0, live = stalled === 0;
     v.className = "callout " + (safe && live ? "ok" : safe || live ? "warn" : "bad");
-    v.textContent = (safe ? "Safe (FIFO kept)" : "Not safe: " + ooo + " message out of order") + " · " + (live ? "live (never stopped)" : "stopped for " + stalled + " step" + (stalled > 1 ? "s" : ""));
-    stats([["Time", t], ["Delivered", deliv.length + " / 8"], ["Out of order", ooo, ooo ? "bad" : "ok"], ["Stalled steps", stalled, stalled ? "warn" : "ok"]]);
+    v.textContent = (safe ? "ایمن؛ ترتیب FIFO نگه داشته شد" : "ایمن نیست: " + ooo + " پیام بی‌ترتیب") + " · " + (live ? "زنده؛ هیچ‌وقت نایستاد" : "برای " + stalled + " قدم ایستاد");
+    stats([["زمان", t], ["تحویل‌شده", deliv.length + " / 8"], ["بی‌ترتیب", ooo, ooo ? "bad" : "ok"], ["قدم‌های ایستاده", stalled, stalled ? "warn" : "ok"]]);
   }
-  document.getElementById("qmode").appendChild(Kit.segmented({ label: "Queue", value: mode, options: [{ value: "nonmask", label: "Nonmasking" }, { value: "failsafe", label: "Fail-safe" }, { value: "mask", label: "Masking" }], onChange: function (v) { mode = v; resetQ(); } }).element);
+  document.getElementById("qmode").appendChild(Kit.segmented({ label: "queue", value: mode, options: [{ value: "nonmask", label: "ناپوشاننده" }, { value: "failsafe", label: "شکست‌ایمن" }, { value: "mask", label: "پوشاننده" }], onChange: function (v) { mode = v; resetQ(); } }).element);
   Kit.player({ mount: document.getElementById("player"), step: stepQ, reset: resetQ, interval: 700 });
   renderX(); resetQ();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "A system stays live but may violate safety during a failure. It is…",
-      options: ["masking", "nonmasking", "fail-safe"], answer: 1,
-      explain: "Table 3.1 (p. 42)." },
-    { q: "Why is Listing 3.1 nonmasking?",
-      options: ["x never becomes 0", "At x = 0 safety fails, but the repair transition keeps it live", "x = 3 is reachable"], answer: 1,
-      explain: "p. 44." },
-    { q: "The fail-safe queue during the failure…",
-      options: ["delivers out of order", "stops delivering", "loses messages"], answer: 1,
-      explain: "It refuses to deliver out of order, so it gives up liveness (p. 43)." }
+    { q: "سیستمی در میانه‌ی شکست زنده می‌ماند ولی می‌تواند ایمنی را نقض کند. این سیستم … است",
+      options: ["پوشاننده", "ناپوشاننده", "شکست‌ایمن"], answer: 1,
+      explain: "جدول ۳.۱ (ص. ۴۲)." },
+    { q: "چرا فهرست ۳.۱ ناپوشاننده است؟",
+      options: ["مقدار x هیچ‌وقت ۰ نمی‌شود", "در x = 0 ایمنی باز می‌ماند، ولی گذار تعمیر آن را زنده نگه می‌دارد", "مقدار x = 3 دست‌یافتنی است"], answer: 1,
+      explain: "ص. ۴۴." },
+    { q: "queue شکست‌ایمن در میانه‌ی شکست …",
+      options: ["بی‌ترتیب تحویل می‌دهد", "تحویل دادن را بس می‌کند", "پیام گم می‌کند"], answer: 1,
+      explain: "تحویل بی‌ترتیب را رد می‌کند، پس liveness را وا می‌دهد (ص. ۴۳)." }
   ]);
 })();
 </script>

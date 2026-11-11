@@ -1,18 +1,18 @@
-# Majority-voted redundancy
+# مفهوم redundancy با رأی اکثریت
 
-When does triple redundancy beat a single component? Each trial evaluates one gate, and three gates whose outputs a majority gate combines. Every component is right with probability p, independently. The script compares a single gate, three gates with a perfect voter (which should match the formula 3p² − 2p³), three gates with one unreliable voter, and three gates with three unreliable voters whose outputs are combined by majority, for p from 0.4 to 0.999.
+مفهوم redundancy سه‌گانه کِی از مؤلفه‌ای تنها بهتر است؟ هر کوششی یک gate را می‌سنجد، و سه gate که خروجی‌هایشان را یک gate اکثریت ترکیب می‌کند. هر مؤلفه‌ای با احتمال p و مستقل درست است. اسکریپت یک gate تنها، سه gate با voter بی‌عیب که باید با فرمول 3p² − 2p³ بخواند، سه gate با یک voter نامطمئن، و سه gate با سه voter نامطمئن که خروجی‌هایشان را اکثریت ترکیب می‌کند را برای p از ۰٫۴ تا ۰٫۹۹۹ مقایسه می‌کند.
 
-*Illustrates Think Distributed Systems, “Redundancy”, pp. 107–108 and Figure 8.1: redundancy is duplication plus coordination, and the majority gate is replicated too. The independent-failure model, the formula and the trial counts are the vault's.*
+*تصویری از «redundancy» کتاب Think Distributed Systems، صص. ۱۰۷–۱۰۸ و شکل ۸.۱: redundancy برابر replication به‌علاوه‌ی هم‌آهنگی است، و آن gate اکثریت هم تکرار می‌شود. مدل شکست مستقل و آن فرمول و شمار کوشش‌ها مال vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 majority_redundancy.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 200,000 trials per row; a component is right with probability p
@@ -27,13 +27,13 @@ python3 majority_redundancy.py
  0.999    0.9990    1.0000              1.0000        0.9990         1.0000
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- With a perfect voter, the measured reliability matches 3p² − 2p³ to three decimals.
-- Redundancy only pays off when components are good: at p = 0.4 three gates do worse than one (0.35 against 0.40), at p = 0.5 they're equal, and above that they win.
-- One unreliable voter throws the gain away. It is a new single point of failure and caps the system at about p.
-- Replicating the voter recovers most of the gain: at p = 0.99, 0.9994 against 0.9896 with one voter. (At p = 0.4 wrong voters flip wrong majorities back, a quirk of this simple model.)
+- با voter بی‌عیب، قابلیت اطمینان اندازه‌گرفته تا سه رقم اعشار با 3p² − 2p³ می‌خواند.
+- مفهوم redundancy تنها وقتی به‌صرفه است که مؤلفه‌ها خوب باشند: در p = 0.4 سه gate از یکی بدتر کار می‌کنند، یعنی ۰٫۳۵ در برابر ۰٫۴۰، در p = 0.5 برابرند، و بالاتر از آن می‌برند.
+- یک voter نامطمئن آن سود را دور می‌ریزد. نقطه‌ی شکست تنهای تازه‌ای است و سیستم را تقریباً سر p سقف می‌زند.
+- تکرار کردن voter بیشتر آن سود را برمی‌گرداند: در p = 0.99، مقدار ۰٫۹۹۹۴ در برابر ۰٫۹۸۹۶ با یک voter. در p = 0.4 voterهای غلط اکثریت‌های غلط را برمی‌گردانند، که عجیبی همین مدل ساده است.
 
-## Related
+## مرتبط
 
-- Chapter note: [8. Replication](../../chapters/08-replication.md) — “Redundancy”, pp. 107–108
+- یادداشت فصل: [فصل ۸: replication](../../chapters/08-replication.md) — «redundancy»، صص. ۱۰۷–۱۰۸

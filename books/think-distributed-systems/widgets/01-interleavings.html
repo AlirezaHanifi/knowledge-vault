@@ -1,68 +1,68 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Interleavings and Race Conditions</title>
-<meta name="description" content="Two processes each read, update and write a shared counter. Enumerate all 20 interleavings of their actions, see which give a result no serial order gives, or build an interleaving step by step. Illustrates Think Distributed Systems, Chapters 1 and 5.">
+<title>لابه‌لا رفتن و شرط مسابقه</title>
+<meta name="description" content="دو process هر یک شمارنده‌ای مشترک را می‌خوانند و به‌روز می‌کنند و می‌نویسند. همه‌ی بیست لابه‌لا رفتن کنش‌هایشان را برشمارید، ببینید کدام نتیجه‌ای می‌دهند که هیچ ترتیب سری‌ای نمی‌دهد، یا لابه‌لا رفتنی را قدم‌به‌قدم بسازید. تصویری از فصل ۱ و فصل ۵ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   table.il { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .8rem; }
   table.il td, table.il th { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: left; }
   table.il tr.bad td { background: var(--bad-soft); } table.il tr.ok td { background: var(--ok-soft); }
-  .seq { font-family: var(--mono); font-size: .9rem; margin: 6px 0; min-height: 1.6em; }
+  .seq { font-family: var(--mono); font-size: .9rem; margin: 6px 0; min-height: 1.6em; direction: ltr; text-align: left; }
   .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html">Chapter 1</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Interleavings</span>
+      <a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html">فصل ۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">لابه‌لا رفتن</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 1 · Thinking in distributed systems</div>
-  <h1>Interleavings and race conditions</h1>
-  <p class="lede">A process is a sequence of atomic actions. Two concurrent processes P and Q can run in any <strong>interleaving</strong> of their actions; (P | Q) is the set of all of them. A <strong>race condition</strong> exists when some of those interleavings are considered incorrect. The process pair is <strong>serializable</strong> if every interleaving has the same effect as P·Q or Q·P.</p>
-  <p class="source-note">Illustrates “Thinking above the code” (pp. 21–22, Figures 1.19–1.20) and the lost update of Figure 5.4 (p. 71). The read–update–write counter and the ×2 variant are the vault’s choice of actions. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱ · فکر کردن در سیستم‌های توزیع‌شده</div>
+  <h1>لابه‌لا رفتن و شرط مسابقه</h1>
+  <p class="lede">process دنباله‌ای از کنش اتمی است. دو process هم‌زمان P و Q می‌توانند در هر <strong>لابه‌لا رفتن</strong>ی از کنش‌هایشان اجرا شوند؛ و (P | Q) مجموعه‌ی همه‌ی آن‌هاست. <strong>شرط مسابقه</strong> وقتی هست که برخی از آن لابه‌لا رفتن‌ها نادرست شمرده شوند. آن زوج process <strong>serializable</strong> است اگر هر لابه‌لا رفتنی همان اثر P·Q یا Q·P را داشته باشد.</p>
+  <p class="source-note">تصویری از «فکر کردن بالای کد» (صص. ۲۱–۲۲، شکل‌های ۱.۱۹ و ۱.۲۰) و به‌روزرسانی گم‌شده‌ی شکل ۵.۴ (ص. ۷۱). شمارنده‌ی خواندن و به‌روزرسانی و نوشتن و آن گونه‌ی ×۲ انتخاب خود vault از کنش‌هاست. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Build an interleaving</p>
+      <div class="panel"><p class="panel-title">لابه‌لا رفتنی بسازید</p>
         <div class="seq" id="seq" aria-live="polite"></div><div class="kv" id="regs"></div>
-        <div class="btns"><button class="btn small" id="stepP">Next action of P</button><button class="btn small" id="stepQ">Next action of Q</button><button class="btn small" id="clr">Start over</button></div>
+        <div class="btns"><button class="btn small" id="stepP">کنش بعدی P</button><button class="btn small" id="stepQ">کنش بعدی Q</button><button class="btn small" id="clr">از نو</button></div>
         <div class="callout" id="res" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">All interleavings</p><div class="table-wrap" style="max-height:420px;overflow:auto"><table class="il" id="all"></table></div></div>
+      <div class="panel"><p class="panel-title">همه‌ی لابه‌لا رفتن‌ها</p><div class="table-wrap" style="max-height:420px;overflow:auto"><table class="il" id="all"></table></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="qop"></div><div id="atomic" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="qop"></div><div id="atomic" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>With read, update and write as separate actions</strong>, only the two serial interleavings give the serial result. In the other 18, one process reads before the other writes, and one update is lost.</li>
-    <li><strong>Making the update one atomic action</strong> leaves only two interleavings, P·Q and Q·P, so there’s no race.</li>
-    <li><strong>With +1 and ×2</strong> the two serial orders give different results (4 and 3). Both are correct under serializability; anything else is not.</li>
+    <li><strong>وقتی خواندن و به‌روزرسانی و نوشتن کنش‌های جدا باشند</strong>، تنها همان دو لابه‌لا رفتن سری نتیجه‌ی سری را می‌دهند. در آن ۱۸ تای دیگر، یک process پیش از نوشتن آن یکی می‌خواند، و یک به‌روزرسانی گم می‌شود.</li>
+    <li><strong>اتمی کردن به‌روزرسانی در یک کنش</strong> تنها دو لابه‌لا رفتن می‌گذارد، یعنی P·Q و Q·P، پس مسابقه‌ای نیست.</li>
+    <li><strong>با +۱ و ×۲</strong> آن دو ترتیب سری نتیجه‌های مختلفی می‌دهند، یعنی ۴ و ۳. هر دو زیر serializable بودن درست‌اند؛ و هر چیز دیگری نه.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html"><small>Lesson</small>1. Thinking in distributed systems</a></li>
+    <li><a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html"><small>درس</small>فصل ۱: فکر کردن در سیستم‌های توزیع‌شده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -101,45 +101,45 @@ function stats(rows) {
   function serials() { var P = acts("P"), Q = acts("Q"); return [run(P.concat(Q)).x, run(Q.concat(P)).x]; }
   function renderAll() {
     var P = acts("P"), Q = acts("Q"), all = interleavings(P, Q), ser = serials(), t = Kit.clear(document.getElementById("all")), bad = 0;
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["#", "Interleaving", "x", "Verdict"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["#", "لابه‌لا رفتن", "x", "حکم"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
     var tb = Kit.el("tbody");
     all.forEach(function (seq, i) {
       var x = run(seq).x, ok = ser.indexOf(x) >= 0; if (!ok) bad++;
-      tb.appendChild(Kit.el("tr", { class: ok ? "ok" : "bad" }, Kit.el("td", null, String(i + 1)), Kit.el("td", null, seq.map(function (a) { return a.label; }).join(" · ")), Kit.el("td", null, String(x)), Kit.el("td", null, ok ? "✓ = serial" : "✗ race")));
+      tb.appendChild(Kit.el("tr", { class: ok ? "ok" : "bad" }, Kit.el("td", null, String(i + 1)), Kit.el("td", null, seq.map(function (a) { return a.label; }).join(" · ")), Kit.el("td", null, String(x)), Kit.el("td", null, ok ? "✓ برابر سری" : "✗ مسابقه")));
     });
     t.appendChild(tb);
-    stats([["x initially", X0], ["Serial results (P·Q, Q·P)", ser[0] + ", " + ser[1]], ["Interleavings", all.length], ["Incorrect", bad, bad ? "bad" : "ok"]]);
+    stats([["x در آغاز", X0], ["نتیجه‌های سری، یعنی P·Q و Q·P", ser[0] + ", " + ser[1]], ["لابه‌لا رفتن‌ها", all.length], ["نادرست", bad, bad ? "bad" : "ok"]]);
   }
-  function resetBuild() { built = []; pc = { P: 0, Q: 0 }; log.clear(); log.add("x = " + X0 + ". P adds 1; Q " + (cfg.q === "inc" ? "adds 1" : "doubles") + ".", "muted"); renderBuild(); }
-  function stepOf(p) { var a = acts(p); if (pc[p] >= a.length) return; built.push(a[pc[p]++]); var r = run(built); log.add(built[built.length - 1].label + "  →  x = " + r.x + ", P's register = " + r.reg.P + ", Q's register = " + r.reg.Q, "muted"); renderBuild(); }
+  function resetBuild() { built = []; pc = { P: 0, Q: 0 }; log.clear(); log.add("x = " + X0 + ". process P یک می‌افزاید؛ و process Q " + (cfg.q === "inc" ? "یک می‌افزاید" : "دو برابر می‌کند") + ".", "muted"); renderBuild(); }
+  function stepOf(p) { var a = acts(p); if (pc[p] >= a.length) return; built.push(a[pc[p]++]); var r = run(built); log.add(built[built.length - 1].label + "  →  x = " + r.x + "، register process P = " + r.reg.P + "، register process Q = " + r.reg.Q, "muted"); renderBuild(); }
   function renderBuild() {
     var r = run(built), n = acts("P").length;
-    document.getElementById("seq").textContent = built.length ? built.map(function (a) { return a.label; }).join(" · ") : "(no actions yet)";
+    document.getElementById("seq").textContent = built.length ? built.map(function (a) { return a.label; }).join(" · ") : "(هنوز هیچ کنشی نیست)";
     var kv = Kit.clear(document.getElementById("regs"));
-    [["shared x", r.x], ["P's register", r.reg.P === null ? "–" : r.reg.P], ["Q's register", r.reg.Q === null ? "–" : r.reg.Q]].forEach(function (x) { kv.appendChild(Kit.el("div", null, Kit.el("span", null, x[0] + ": "), Kit.el("strong", null, String(x[1])))); });
+    [["x مشترک", r.x], ["register process P", r.reg.P === null ? "–" : r.reg.P], ["register process Q", r.reg.Q === null ? "–" : r.reg.Q]].forEach(function (x) { kv.appendChild(Kit.el("div", null, Kit.el("span", null, x[0] + ": "), Kit.el("strong", null, String(x[1])))); });
     document.getElementById("stepP").disabled = pc.P >= n; document.getElementById("stepQ").disabled = pc.Q >= n;
     var res = document.getElementById("res"), ser = serials();
-    if (pc.P >= n && pc.Q >= n) { var ok = ser.indexOf(r.x) >= 0; res.className = "callout " + (ok ? "ok" : "bad"); res.textContent = ok ? "x = " + r.x + ": same effect as a serial order." : "x = " + r.x + ": no serial order gives this. An update was lost."; }
-    else { res.className = "callout"; res.textContent = "Interleave the actions of P and Q in any order."; }
+    if (pc.P >= n && pc.Q >= n) { var ok = ser.indexOf(r.x) >= 0; res.className = "callout " + (ok ? "ok" : "bad"); res.textContent = ok ? "x = " + r.x + ": همان اثر یک ترتیب سری." : "x = " + r.x + ": هیچ ترتیب سری‌ای این را نمی‌دهد. یک به‌روزرسانی گم شد."; }
+    else { res.className = "callout"; res.textContent = "کنش‌های P و Q را به هر ترتیبی لابه‌لای هم ببرید."; }
   }
   function reset() { renderAll(); resetBuild(); }
-  document.getElementById("qop").appendChild(Kit.segmented({ label: "Q's update", value: cfg.q, options: [{ value: "inc", label: "+1 (like P)" }, { value: "dbl", label: "×2" }], onChange: function (v) { cfg.q = v; reset(); } }).element);
-  document.getElementById("atomic").appendChild(Kit.segmented({ label: "Read–update–write is", value: cfg.atomic, options: [{ value: "no", label: "three actions" }, { value: "yes", label: "one atomic action" }], onChange: function (v) { cfg.atomic = v; reset(); } }).element);
+  document.getElementById("qop").appendChild(Kit.segmented({ label: "به‌روزرسانی Q", value: cfg.q, options: [{ value: "inc", label: "+۱ مثل P" }, { value: "dbl", label: "×۲" }], onChange: function (v) { cfg.q = v; reset(); } }).element);
+  document.getElementById("atomic").appendChild(Kit.segmented({ label: "خواندن و به‌روزرسانی و نوشتن … است", value: cfg.atomic, options: [{ value: "no", label: "سه کنش" }, { value: "yes", label: "یک کنش اتمی" }], onChange: function (v) { cfg.atomic = v; reset(); } }).element);
   document.getElementById("stepP").addEventListener("click", function () { stepOf("P"); });
   document.getElementById("stepQ").addEventListener("click", function () { stepOf("Q"); });
   document.getElementById("clr").addEventListener("click", resetBuild);
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How many interleavings do two processes of three actions each have?",
-      options: ["6", "9", "20"], answer: 2,
-      explain: "C(6, 3) = 20. That growth is why reasoning over (P | Q) is hard." },
-    { q: "When does (P | Q) contain a race condition, in the book's definition?",
-      options: ["When P and Q share memory", "When some subset of the interleavings is considered incorrect", "When P and Q run in parallel"], answer: 1,
-      explain: "p. 21." },
-    { q: "With P = +1 and Q = ×2 starting from x = 1, which result is NOT serializable?",
-      options: ["3", "4", "2"], answer: 2,
-      explain: "P·Q gives 4 and Q·P gives 3. A result of 2 needs a lost update (p. 22)." }
+    { q: "دو process که هر یک سه کنش دارند چند لابه‌لا رفتن دارند؟",
+      options: ["۶", "۹", "۲۰"], answer: 2,
+      explain: "داریم C(6, 3) = 20. همین رشد است که استدلال روی (P | Q) را سخت می‌کند." },
+    { q: "به تعریف کتاب، (P | Q) کِی شرط مسابقه دارد؟",
+      options: ["وقتی P و Q حافظه را مشترک دارند", "وقتی زیرمجموعه‌ای از لابه‌لا رفتن‌ها نادرست شمرده شود", "وقتی P و Q موازی اجرا شوند"], answer: 1,
+      explain: "ص. ۲۱." },
+    { q: "با P برابر +۱ و Q برابر ×۲ از x = 1، کدام نتیجه serializable نیست؟",
+      options: ["۳", "۴", "۲"], answer: 2,
+      explain: "ترکیب P·Q چهار می‌دهد و Q·P سه. نتیجه‌ی ۲ به‌روزرسانی گم‌شده لازم دارد (ص. ۲۲)." }
   ]);
 })();
 </script>

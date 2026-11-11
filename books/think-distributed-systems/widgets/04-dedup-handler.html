@@ -1,63 +1,63 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Deduplicating a Retried Request</title>
-<meta name="description" content="Pick a receiver-side handler (track then process, process then track, or transactional), crash the receiver at a chosen point, let the sender retry, and count how many times the balance transfer actually happened. Illustrates Think Distributed Systems, Chapter 4.">
+<title>تکراری‌زدایی از درخواستی دوباره‌کوشیده</title>
+<meta name="description" content="یک handler سمت گیرنده بردارید، یعنی ثبت و بعد پردازش، یا پردازش و بعد ثبت، یا تراکنشی، گیرنده را در نقطه‌ای که می‌خواهید از کار بیندازید، بگذارید فرستنده دوباره بکوشد، و بشمارید انتقال موجودی واقعاً چند بار رخ داد. تصویری از فصل ۴ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  pre.code { font-family: var(--mono); font-size: .8rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; white-space: pre-wrap; }
+  pre.code { font-family: var(--mono); font-size: .8rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; white-space: pre-wrap; direction: ltr; text-align: left; }
   pre.code .hl { background: var(--accent-soft); display: inline-block; width: 100%; } pre.code .cr { background: var(--bad-soft); display: inline-block; width: 100%; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/04-message-delivery-and-processing.html">Chapter 4</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Deduplicating a retry</span>
+      <a href="../chapters/04-message-delivery-and-processing.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">تکراری‌زدایی از کوشش دوباره</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 4 · Message delivery and processing</div>
-  <h1>Deduplicating a retried request</h1>
-  <p class="lede">The sender retries until it gets a response, so the receiver must expect duplicates. The receiver keeps a durable set of requests it has seen. Where the handler records the request, relative to processing it, decides what a crash in between does: the book’s two failed attempts give <strong>at-most-once</strong> or <strong>at-least-once</strong> processing, and only recording and processing in <strong>one transaction</strong> gives exactly-once processing semantics.</p>
-  <p class="source-note">Illustrates “Silence and chatter”, “Exactly-once processing semantics” and “Idempotence” (pp. 60–64, the two failed attempts and Listing 4.3). The crash points, the lost-response option and the single retry are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۴ · تحویل و پردازش پیام</div>
+  <h1>تکراری‌زدایی از درخواستی دوباره‌کوشیده</h1>
+  <p class="lede">فرستنده تا گرفتن پاسخ دوباره می‌کوشد، پس گیرنده باید چشم تکراری داشته باشد. گیرنده مجموعه‌ای پایا از درخواست‌هایی که دیده نگه می‌دارد. این‌که handler درخواست را کجا، نسبت به پردازشش، ثبت می‌کند تعیین می‌کند که از کار افتادنی در میانه چه می‌کند: آن دو کوشش ناکام کتاب پردازش <strong>at-most-once</strong> یا <strong>حداقل‌یک‌بار</strong> می‌دهند، و تنها ثبت و پردازش در <strong>یک تراکنش</strong> معناشناسی پردازش exactly-once می‌دهد.</p>
+  <p class="source-note">تصویری از «سکوت و وراجی» و «معناشناسی پردازش exactly-once» و «idempotence» (صص. ۶۰–۶۴، آن دو کوشش ناکام و فهرست ۴.۳). نقطه‌های از کار افتادن و گزینه‌ی پاسخ گم‌شده و آن یک کوشش دوباره مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Receiver's handler</p><pre class="code" id="code"></pre>
+      <div class="panel"><p class="panel-title">handler گیرنده</p><pre class="code" id="code"></pre>
         <div class="kv" id="state" style="margin-top:8px"></div><div class="callout" id="out" style="margin-top:10px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="handler"></div><div id="crash" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="handler"></div><div id="crash" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Track, then process.</strong> A crash between the two lines leaves the request marked as received but never processed. The retry is skipped: <strong>at most once</strong>.</li>
-    <li><strong>Process, then track.</strong> A crash between the two lines leaves the transfer done but unmarked. The retry runs it again: <strong>at least once</strong>.</li>
-    <li><strong>Transactional.</strong> The transfer and the record commit together or not at all, so a crash rolls both back and the retry runs exactly one effective transfer.</li>
-    <li><strong>A lost response</strong> looks the same to the sender as a crash. Every handler then sees a duplicate, and only the record of the request stops it from transferring twice.</li>
+    <li><strong>ثبت، و بعد پردازش.</strong> از کار افتادنی میان آن دو خط، درخواست را گرفته‌شده علامت‌خورده می‌گذارد ولی هیچ‌وقت پردازش‌نشده. کوشش دوباره رد می‌شود: <strong>حداکثر یک بار</strong>.</li>
+    <li><strong>پردازش، و بعد ثبت.</strong> از کار افتادنی میان آن دو خط، انتقال را انجام‌شده ولی علامت‌نخورده می‌گذارد. کوشش دوباره بازهم اجرایش می‌کند: <strong>حداقل یک بار</strong>.</li>
+    <li><strong>تراکنشی.</strong> انتقال و آن ثبت با هم commit می‌شوند یا هیچ، پس از کار افتادنی هر دو را برمی‌گرداند و کوشش دوباره دقیقاً یک انتقال مؤثر اجرا می‌کند.</li>
+    <li><strong>پاسخ گم‌شده</strong> از دید فرستنده همان‌قدر شبیه از کار افتادن است. آن‌وقت هر handlerی تکراری می‌بیند، و تنها آن ثبت درخواست است که جلو دو بار انتقال دادن را می‌گیرد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/04-message-delivery-and-processing.html"><small>Lesson</small>4. Message delivery and processing</a></li>
+    <li><a href="../chapters/04-message-delivery-and-processing.html"><small>درس</small>فصل ۴: تحویل و پردازش پیام</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -79,34 +79,34 @@ function stats(rows) {
     proc: ["on message request do", "  if request in received then return response", "  process(request)  // transfer $10", "  received := received + request", "  return response", "end"],
     tx: ["on message request do", "  if request in received then return response", "  begin transaction", "  process(request)  // transfer $10", "  received := received + request", "  commit transaction", "  return response", "end"]
   };
-  function reset() { k = 0; S = { received: false, txReceived: false, transfers: 0, txTransfers: 0, inTx: false, attempt: 0, phase: "send", crashed: false, responded: false, done: false }; hl = -1; log.clear(); log.add("Sender sends request r: transfer $10. It retries if it gets no response.", "muted"); render(); }
+  function reset() { k = 0; S = { received: false, txReceived: false, transfers: 0, txTransfers: 0, inTx: false, attempt: 0, phase: "send", crashed: false, responded: false, done: false }; hl = -1; log.clear(); log.add("فرستنده درخواست r را می‌فرستد: انتقال ۱۰ دلار. اگر پاسخی نگیرد دوباره می‌کوشد.", "muted"); render(); }
   function L() { return CODE[cfg.h]; }
   function step() {
     if (S.done) return false;
     var c = L();
-    if (S.phase === "send") { S.attempt++; S.phase = "run"; hl = 0; S.pc = 1; log.add("Attempt " + S.attempt + ": the receiver gets request r", "muted"); render(); return true; }
+    if (S.phase === "send") { S.attempt++; S.phase = "run"; hl = 0; S.pc = 1; log.add("کوشش " + S.attempt + ": گیرنده درخواست r را می‌گیرد", "muted"); render(); return true; }
     if (S.phase === "run") {
       var line = c[S.pc]; hl = S.pc;
       var crashHere = cfg.crash === "between" && S.attempt === 1 && ((cfg.h === "track" && S.pc === 3) || (cfg.h === "proc" && S.pc === 3) || (cfg.h === "tx" && S.pc === 4));
       if (crashHere) {
-        S.phase = "crash"; log.add("⚡ Receiver crashes before: " + line.trim(), "bad");
-        if (cfg.h === "tx") { S.txTransfers = 0; S.inTx = false; log.add("Recovery rolls back the uncommitted transaction: the transfer is undone", "warn"); }
+        S.phase = "crash"; log.add("⚡ گیرنده پیش از این خط از کار می‌افتد: " + line.trim(), "bad");
+        if (cfg.h === "tx") { S.txTransfers = 0; S.inTx = false; log.add("بازیابی آن تراکنش commit‌نشده را برمی‌گرداند: انتقال واگردانده می‌شود", "warn"); }
         render(); return true;
       }
       if (/if request in received/.test(line)) {
-        if (S.received) { log.add("r is already in received: skip processing" + (/response/.test(line) ? " and return the saved response" : ""), S.transfers ? "ok" : "bad"); S.phase = "respond"; render(); return true; }
-        log.add("r not seen before: continue", "muted");
-      } else if (/begin/.test(line)) { S.inTx = true; log.add("Begin transaction", "muted"); }
-      else if (/process/.test(line)) { if (cfg.h === "tx") S.txTransfers++; else S.transfers++; log.add("Transfer $10 executed" + (cfg.h === "tx" ? " (inside the transaction)" : ""), "muted"); }
-      else if (/received :=|received =/.test(line)) { if (cfg.h === "tx") S.txReceived = true; else S.received = true; log.add("r recorded in received" + (cfg.h === "tx" ? " (inside the transaction)" : ""), "muted"); }
-      else if (/commit/.test(line)) { S.inTx = false; S.transfers += S.txTransfers; S.txTransfers = 0; S.received = S.received || S.txReceived; log.add("Commit: transfer and record become durable together", "ok"); }
+        if (S.received) { log.add("درخواست r از قبل در received است: پردازش رد می‌شود" + (/response/.test(line) ? " و پاسخ ذخیره‌شده برمی‌گردد" : ""), S.transfers ? "ok" : "bad"); S.phase = "respond"; render(); return true; }
+        log.add("درخواست r پیش‌تر دیده نشده: ادامه", "muted");
+      } else if (/begin/.test(line)) { S.inTx = true; log.add("شروع تراکنش", "muted"); }
+      else if (/process/.test(line)) { if (cfg.h === "tx") S.txTransfers++; else S.transfers++; log.add("انتقال ۱۰ دلار اجرا شد" + (cfg.h === "tx" ? "؛ درون تراکنش" : ""), "muted"); }
+      else if (/received :=|received =/.test(line)) { if (cfg.h === "tx") S.txReceived = true; else S.received = true; log.add("درخواست r در received ثبت شد" + (cfg.h === "tx" ? "؛ درون تراکنش" : ""), "muted"); }
+      else if (/commit/.test(line)) { S.inTx = false; S.transfers += S.txTransfers; S.txTransfers = 0; S.received = S.received || S.txReceived; log.add("commit: انتقال و ثبت با هم پایا می‌شوند", "ok"); }
       else if (/return response/.test(line)) { S.phase = "respond"; render(); return true; }
       S.pc++; render(); return true;
     }
-    if (S.phase === "crash") { S.phase = "send"; hl = -1; log.add("Sender times out without a response and retries", "warn"); render(); return true; }
+    if (S.phase === "crash") { S.phase = "send"; hl = -1; log.add("وقت فرستنده بی پاسخ سر می‌رود و دوباره می‌کوشد", "warn"); render(); return true; }
     if (S.phase === "respond") {
-      if (cfg.crash === "response" && S.attempt === 1) { S.phase = "send"; hl = -1; log.add("⚡ The response is lost in the network; the sender times out and retries", "bad"); render(); return true; }
-      S.done = true; hl = -1; log.add("Sender receives a response and stops", "ok"); render(); return false;
+      if (cfg.crash === "response" && S.attempt === 1) { S.phase = "send"; hl = -1; log.add("⚡ پاسخ در شبکه گم می‌شود؛ وقت فرستنده سر می‌رود و دوباره می‌کوشد", "bad"); render(); return true; }
+      S.done = true; hl = -1; log.add("فرستنده پاسخی می‌گیرد و بس می‌کند", "ok"); render(); return false;
     }
   }
   function render() {
@@ -114,29 +114,29 @@ function stats(rows) {
     L().forEach(function (ln, i) { pre.appendChild(Kit.el("span", { class: i === hl ? (S.phase === "crash" ? "cr" : "hl") : "" }, ln)); pre.appendChild(document.createTextNode("\n")); });
     var kv = Kit.clear(document.getElementById("state"));
     var tr = S.transfers + S.txTransfers;
-    [["Attempts by the sender", S.attempt], ["Transfers executed (durable)", S.transfers], ["r in received", S.received ? "yes" : "no"]].forEach(function (x) { kv.appendChild(Kit.el("div", null, Kit.el("span", null, x[0] + ": "), Kit.el("strong", null, String(x[1])))); });
+    [["کوشش‌های فرستنده", S.attempt], ["انتقال‌های اجرا‌شده و پایا", S.transfers], ["درخواست r در received", S.received ? "بله" : "نه"]].forEach(function (x) { kv.appendChild(Kit.el("div", null, Kit.el("span", null, x[0] + ": "), Kit.el("strong", null, String(x[1])))); });
     var o = document.getElementById("out");
-    if (!S.done) { o.className = "callout"; o.textContent = "Step through the request, the crash and the retry."; }
-    else if (S.transfers === 1) { o.className = "callout ok"; o.textContent = "Exactly one transfer: equivalent to processing once."; }
-    else if (S.transfers === 0) { o.className = "callout bad"; o.textContent = "No transfer happened although the sender got a response: at-most-once processing."; }
-    else { o.className = "callout bad"; o.textContent = S.transfers + " transfers: at-least-once processing, and the money moved twice."; }
-    stats([["Handler", ({ track: "track → process", proc: "process → track", tx: "transactional" })[cfg.h]], ["Transfers", S.transfers, S.done ? (S.transfers === 1 ? "ok" : "bad") : ""]]);
+    if (!S.done) { o.className = "callout"; o.textContent = "درخواست و از کار افتادن و کوشش دوباره را قدم‌به‌قدم بگذرانید."; }
+    else if (S.transfers === 1) { o.className = "callout ok"; o.textContent = "دقیقاً یک انتقال: هم‌ارز یک بار پردازش شدن."; }
+    else if (S.transfers === 0) { o.className = "callout bad"; o.textContent = "هیچ انتقالی رخ نداد هرچند فرستنده پاسخی گرفت: پردازش at-most-once."; }
+    else { o.className = "callout bad"; o.textContent = S.transfers + " انتقال: پردازش حداقل‌یک‌بار، و پول دو بار جابه‌جا شد."; }
+    stats([["handler", ({ track: "ثبت ← پردازش", proc: "پردازش ← ثبت", tx: "تراکنشی" })[cfg.h]], ["انتقال‌ها", S.transfers, S.done ? (S.transfers === 1 ? "ok" : "bad") : ""]]);
   }
-  document.getElementById("handler").appendChild(Kit.segmented({ label: "Handler", value: cfg.h, options: [{ value: "track", label: "Track, then process" }, { value: "proc", label: "Process, then track" }, { value: "tx", label: "Transactional" }], onChange: function (v) { cfg.h = v; reset(); } }).element);
-  document.getElementById("crash").appendChild(Kit.segmented({ label: "Failure on attempt 1", value: cfg.crash, options: [{ value: "none", label: "None" }, { value: "between", label: "Crash between the steps" }, { value: "response", label: "Response lost" }], onChange: function (v) { cfg.crash = v; reset(); } }).element);
+  document.getElementById("handler").appendChild(Kit.segmented({ label: "handler", value: cfg.h, options: [{ value: "track", label: "ثبت، و بعد پردازش" }, { value: "proc", label: "پردازش، و بعد ثبت" }, { value: "tx", label: "تراکنشی" }], onChange: function (v) { cfg.h = v; reset(); } }).element);
+  document.getElementById("crash").appendChild(Kit.segmented({ label: "شکست در کوشش ۱", value: cfg.crash, options: [{ value: "none", label: "هیچ" }, { value: "between", label: "از کار افتادن میان قدم‌ها" }, { value: "response", label: "پاسخ گم‌شده" }], onChange: function (v) { cfg.crash = v; reset(); } }).element);
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Process-then-track crashes after processing. The retry is…",
-      options: ["skipped", "processed again: at-least-once", "processed exactly once"], answer: 1,
-      explain: "p. 62." },
-    { q: "What makes the transactional handler safe?",
-      options: ["It's faster", "Processing and recording commit together, so a crash undoes both", "It never crashes"], answer: 1,
-      explain: "Listing 4.3 (pp. 63–64)." },
-    { q: "Why must the sender keep retrying for exactly-once processing semantics?",
-      options: ["To create load", "The guarantee needs at-least-once delivery and processing", "Retries are free"], answer: 1,
-      explain: "p. 62." }
+    { q: "handler پردازش‌و‌بعد‌ثبت پس از پردازش از کار می‌افتد. کوشش دوباره …",
+      options: ["رد می‌شود", "بازهم پردازش می‌شود: حداقل یک بار", "دقیقاً یک بار پردازش می‌شود"], answer: 1,
+      explain: "ص. ۶۲." },
+    { q: "چه چیزی handler تراکنشی را ایمن می‌کند؟",
+      options: ["سریع‌تر است", "پردازش و ثبت با هم commit می‌شوند، پس از کار افتادنی هر دو را واگردان می‌کند", "هیچ‌وقت از کار نمی‌افتد"], answer: 1,
+      explain: "فهرست ۴.۳ (صص. ۶۳–۶۴)." },
+    { q: "چرا فرستنده برای معناشناسی پردازش exactly-once باید همین‌طور دوباره بکوشد؟",
+      options: ["برای بار ساختن", "آن تضمین تحویل و پردازش حداقل‌یک‌بار لازم دارد", "کوشش دوباره مجانی است"], answer: 1,
+      explain: "ص. ۶۲." }
   ]);
 })();
 </script>

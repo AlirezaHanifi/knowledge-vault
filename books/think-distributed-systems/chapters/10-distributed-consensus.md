@@ -3,236 +3,250 @@ book: think-distributed-systems
 chapter: 10
 title: "Distributed consensus"
 pages: "131–144"
+translated_title: "consensus توزیع‌شده"
+lang: fa
 ---
 
-# 10. Distributed consensus
+# فصل ۱۰: consensus توزیع‌شده
 
-[← 9. Consistency](09-consistency.md) · [Book](../README.md) · [11. Durable executions →](11-durable-executions.md)
+[فصل ۹: consistency →](09-consistency.md) · [کتاب](../README.md) · [فصل ۱۱: اجرای پایا ←](11-durable-executions.md)
 
-## Summary
+## خلاصه
 
-**Distributed consensus** lets a group of redundant processes advance in lockstep and act as one, so some can compensate for the failure of others. Failing to agree is often catastrophic: did the transaction commit, which operation came first, who holds the lock (p. 131)? Consensus is trivial without failures and notoriously hard with them. Consensus algorithms *guarantee* safety and *aim* for liveness, which FLP shows can't be guaranteed in an asynchronous system without clocks (p. 132).
+**مفهوم consensus توزیع‌شده** می‌گذارد گروهی از processهای افزونه هم‌قدم پیش بروند و مثل یکی عمل کنند، تا برخی شکست برخی دیگر را جبران کنند. باز ماندن از توافق اغلب فاجعه‌بار است: آیا تراکنش commit شد، کدام عملیات اول آمد، قفل دست کیست (p. 131)؟ consensus بی شکست پیش‌پا‌افتاده است و با شکست به‌نام‌بدی سخت. الگوریتم‌های consensus ایمنی را *تضمین* می‌کنند و liveness را *هدف* می‌گیرند، که قضیه‌ی FLP نشان می‌دهد در سیستمی asynchronous و بی ساعت تضمین‌شدنی نیست (p. 132).
 
-The chapter specifies consensus as validity, integrity and agreement (safety) plus termination (liveness) (pp. 132–133). It explains why consensus matters: **state machine replication** turns a process into a fault-tolerant group (pp. 133–134). It tells the irony of its origin: Lamport set out to prove consensus impossible and produced Paxos, while Viewstamped Replication arguably came first (pp. 134–135). It explains how algorithms combine a **leader** with **quorums** (N = 2f + 1) (pp. 135–136). It then describes **Raft** in detail: the log and commit index, terms as fencing tokens, leader election, log replication, and the up-to-date-log rule behind **state machine safety** (pp. 136–141). It ends with three Raft puzzles (pp. 141–144).
+فصل consensus را به‌شکل اعتبار و تمامیت و توافق، یعنی ایمنی، به‌علاوه‌ی پایان، یعنی زنده‌بودن، مشخص می‌کند (pp. 132–133). توضیح می‌دهد چرا consensus مهم است: **replication state machine** یک process را به گروهی شکست‌تحمل تبدیل می‌کند (pp. 133–134). کنایه‌ی خاستگاهش را می‌گوید: Lamport راه افتاد ناممکن بودن consensus را اثبات کند و Paxos را درآورد، در حالی که Viewstamped Replication جای بحث دارد که اول آمده (pp. 134–135). توضیح می‌دهد الگوریتم‌ها چطور یک **leader** را با **quorum**ها، یعنی N = 2f + 1، ترکیب می‌کنند (pp. 135–136). بعد **Raft** را مشروح وصف می‌کند: log و شاخص commit، termها به‌شکل توکن حصار، انتخاب leader، replication لاگ، و قاعده‌ی لاگ به‌روز که پشت **ایمنی state machine** است (pp. 136–141). با سه معمای Raft تمام می‌شود (pp. 141–144).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Consensus = safety (validity, integrity, agreement) + liveness (termination).** Agreement and integrity capture the intuition: everyone decides the same value and nobody goes back on their word (pp. 132–133).
-- **FLP:** in an asynchronous system without clocks, consensus can't be guaranteed even if only one node can fail. The result is about *liveness*, and consensus is possible in more constrained models, such as asynchronous systems with clocks (p. 132).
-- **State machine replication:** identical deterministic processes that start in the same state and get the same inputs in the same order end in the same state. Lockstep reduces to **consensus on the log** (pp. 133–134).
-- **Quorums:** Q > N/2, so any two quorums intersect, which prevents split brain. Tolerating f failures needs N = 2f + 1 (p. 136).
-- **Leader + quorum:** a leader, elected by a quorum, proposes values and commits once a quorum acknowledges them. Multi-Paxos, Raft and Viewstamped Replication all work this way (p. 136).
-- **Terms are a logical clock and a fencing token.** Raft doesn't prevent two nodes from *believing* they lead; it prevents more than one from *acting* as leader, because messages with lower terms are rejected (pp. 138–139).
-- **State machine safety:** no two processes ever apply different entries at the same index. Raft ensures it by electing only candidates whose log is at least as up to date (higher last term, or the same term and longer) (p. 141).
-- **Puzzle 3:** an uncommitted entry acknowledged by a follower must *not* be lost. That follower can't know whether the leader committed it before crashing (pp. 142–144).
+- **مفهوم consensus برابر ایمنی، یعنی اعتبار و تمامیت و توافق، به‌علاوه‌ی زنده‌بودن، یعنی پایان، است.** توافق و تمامیت شهود را می‌گیرند: همه همان مقدار را تصمیم می‌گیرند و هیچ‌کس حرفش را پس نمی‌گیرد (pp. 132–133).
+- **قضیه‌ی FLP:** در سیستمی asynchronous و بی ساعت، consensus تضمین‌شدنی نیست، حتی اگر فقط یک نود بتواند بشکند. نتیجه درباره‌ی *liveness* است، و consensus در مدل‌های مقیدتر ممکن است، مثل سیستم‌های asynchronous با ساعت (p. 132).
+- **مفهوم replication state machine:** processهای قطعی یکسان که از همان حالت شروع می‌کنند و همان ورودی‌ها را به همان ترتیب می‌گیرند در همان حالت تمام می‌کنند. هم‌قدمی به **consensus روی لاگ** فرو می‌کاهد (pp. 133–134).
+- **همه‌ی quorumها:** شرط Q > N/2 برقرار است، پس هر دو quorumی اشتراک دارند، که از split brain جلو می‌گیرد. تحمل f شکست به N = 2f + 1 نیاز دارد (p. 136).
+- **نقش leader به‌علاوه‌ی quorum:** یک leader که quorumی انتخابش کرده مقدار پیشنهاد می‌دهد و همین که quorumی تأییدشان کرد commit می‌کند. الگوریتم‌های Multi-Paxos و Raft و Viewstamped Replication همه همین‌طور کار می‌کنند (p. 136).
+- **همه‌ی termها هم ساعت منطقی‌اند و هم توکن حصار.** الگوریتم Raft جلو این را نمی‌گیرد که دو نود *باور* کنند leaderاند؛ جلو این را می‌گیرد که بیشتر از یکی مثل leader *عمل* کند، چون پیام‌هایی با term پایین‌تر رد می‌شوند (pp. 138–139).
+- **ایمنی state machine:** هیچ دو processی هیچ‌وقت entryهای مختلف را در همان شاخص اعمال نمی‌کنند. الگوریتم Raft با انتخاب تنها نامزدهایی که لاگشان دست‌کم همان‌قدر به‌روز است این را تأمین می‌کند، یعنی term آخر بالاتر، یا همان term و بلندتر (p. 141).
+- **معمای ۳:** entryی commit‌نشده که followerی تأییدش کرده *نباید* گم شود. آن follower نمی‌تواند بداند که leader پیش از از کار افتادن commitش کرده یا نه (pp. 142–144).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 10.1 The challenge of reaching agreement — p. 132
-- 10.2 System model — p. 132
-- 10.3 State machine replication — p. 133
-- 10.4 The origin—and irony—of consensus — p. 134
-- 10.5 Implementing consensus — p. 135
-  - 10.5.1 Leader-based consensus — p. 135
-  - 10.5.2 Quorum-based consensus — p. 136
-  - 10.5.3 Combining leader and quorum — p. 136
-- 10.6 Raft — p. 136
-  - 10.6.1 The log — p. 137
-  - 10.6.2 Terms — p. 138
-  - 10.6.3 Leader Election protocol — p. 139
-  - 10.6.4 Log Replication protocol — p. 140
-  - 10.6.5 State machine safety — p. 141
-- 10.7 Raft puzzles — p. 141
-  - 10.7.1 Puzzle 1 — p. 141
-  - 10.7.2 Puzzle 2 — p. 142
-  - 10.7.3 Puzzle 3 — p. 142
+- ۱۰.۱ چالش رسیدن به توافق — ص. ۱۳۲
+- ۱۰.۲ مدل سیستم — ص. ۱۳۲
+- ۱۰.۳ replication state machine — ص. ۱۳۳
+- ۱۰.۴ خاستگاه consensus و کنایه‌اش — ص. ۱۳۴
+- ۱۰.۵ پیاده کردن consensus — ص. ۱۳۵
+  - ۱۰.۵.۱ consensus بر پایه‌ی leader — ص. ۱۳۵
+  - ۱۰.۵.۲ consensus بر پایه‌ی quorum — ص. ۱۳۶
+  - ۱۰.۵.۳ ترکیب leader و quorum — ص. ۱۳۶
+- ۱۰.۶ الگوریتم Raft — ص. ۱۳۶
+  - ۱۰.۶.۱ لاگ — ص. ۱۳۷
+  - ۱۰.۶.۲ termها — ص. ۱۳۸
+  - ۱۰.۶.۳ پروتکل Leader Election — ص. ۱۳۹
+  - ۱۰.۶.۴ پروتکل Log Replication — ص. ۱۴۰
+  - ۱۰.۶.۵ ایمنی state machine — ص. ۱۴۱
+- ۱۰.۷ معماهای Raft — ص. ۱۴۱
+  - ۱۰.۷.۱ معمای ۱ — ص. ۱۴۱
+  - ۱۰.۷.۲ معمای ۲ — ص. ۱۴۲
+  - ۱۰.۷.۳ معمای ۳ — ص. ۱۴۲
 
-## Notes
+## یادداشت‌ها
 
-### 10.1 The challenge of reaching agreement
+### ۱۰.۱ چالش رسیدن به توافق
 
-Consensus asks concurrent **processes** that communicate over a network to agree on a **single value** (p. 132). It's trivial when components never fail and the network delivers exactly once and in order. It's hard when components fail and the network reorders, delays, loses or duplicates messages (p. 132).
+مفهوم consensus از **process**‌هایی هم‌زمان که روی شبکه حرف می‌زنند می‌خواهد روی **یک مقدار تنها** توافق کنند (p. 132). وقتی مؤلفه‌ها هیچ‌وقت نمی‌شکنند و شبکه دقیقاً یک بار و به ترتیب تحویل می‌دهد پیش‌پا‌افتاده است. وقتی مؤلفه‌ها می‌شکنند و شبکه پیام‌ها را بی‌ترتیب یا معطل یا گم یا تکراری می‌کند سخت است (p. 132).
 
-Atomic commitment was a consensus problem: 2PC's coordinator failure could block the protocol, keeping safety but sacrificing liveness (p. 132).
+پروتکل commitment اتمی مسئله‌ای از جنس consensus بود: شکست coordinator در 2PC می‌توانست پروتکل را بند بیاورد، که ایمنی را نگه می‌داشت ولی liveness را قربانی می‌کرد (p. 132).
 
-> **Vault note:** the book's text refers to atomic commitment as Chapter 8 (p. 132); it is covered in [Chapter 6](06-distributed-transactions.md).
+> **Vault note:** متن کتاب به commitment اتمی به‌شکل فصل ۸ ارجاع می‌دهد (p. 132)؛ در [فصل ۶](06-distributed-transactions.md) پوشش داده شده.
 
-Consensus algorithms guarantee safety and aim for (without guaranteeing) liveness: no *single* component failure can halt the system (p. 132).
+الگوریتم‌های consensus ایمنی را تضمین می‌کنند و liveness را هدف می‌گیرند، بی تضمینش: هیچ شکست *تنهای* مؤلفه‌ای نمی‌تواند سیستم را بخواباند (p. 132).
 
-**Aha! moment, the impossibility theorem** (p. 132): Fischer, Lynch and Paterson showed that in an asynchronous system without clocks, consensus can't be guaranteed in all circumstances, even with a single faulty node. The theorem is about liveness. Consensus is possible in more constrained models, for example asynchronous systems *with* clocks.
+**لحظه‌ی آها!، قضیه‌ی ناممکنی** (p. 132): فیشر و لینچ و پترسون نشان دادند که در سیستمی asynchronous و بی ساعت، consensus در همه‌ی اوضاع تضمین‌شدنی نیست، حتی با یک نود عیب‌دار. قضیه درباره‌ی liveness است. consensus در مدل‌های مقیدتر ممکن است، مثلاً سیستم‌های asynchronous *با* ساعت.
 
-### 10.2 System model
+### ۱۰.۲ مدل سیستم
 
-A system is a set of **Processes** and a set of **Values** (p. 132):
+سیستم مجموعه‌ای از **process** و مجموعه‌ای از **مقدار** است (p. 132):
 
-- A process may fail by **crashing** (it simply halts).
-- A process may **Propose(p, v)** and **Decide(p, v)**.
+- مفهوم process می‌تواند با **از کار افتادن** بشکند، یعنی همین‌طور می‌ایستد.
+- مفهوم process می‌تواند **Propose(p, v)** و **Decide(p, v)** کند.
 
-| Property | Kind | Formal statement (p. 133) | In words |
+| خاصیت | گونه | گزاره‌ی صوری (p. 133) | به حرف |
 |---|---|---|---|
-| **Validity** | Safety | Decide(p, v) ⇒ ∃ q: Propose(q, v) | Only proposed values are decided |
-| **Integrity** | Safety | Decide(p, v) ∧ Decide(p, v′) ⇒ v = v′ | A decision is permanent |
-| **Agreement** | Safety | Decide(p, v) ∧ Decide(q, v′) ⇒ v = v′ | No two correct processes decide differently |
-| **Termination** | Liveness | ∀ alive p, ∃ v: ◇□ Decide(p, v) | Every nonfailed process eventually decides |
+| **اعتبار** | ایمنی | Decide(p, v) ⇒ ∃ q: Propose(q, v) | فقط مقدارهای پیشنهادشده تصمیم می‌شوند |
+| **تمامیت** | ایمنی | Decide(p, v) ∧ Decide(p, v′) ⇒ v = v′ | تصمیم دائمی است |
+| **توافق** | ایمنی | Decide(p, v) ∧ Decide(q, v′) ⇒ v = v′ | هیچ دو process درستی مختلف تصمیم نمی‌گیرند |
+| **پایان** | liveness | ∀ alive p, ∃ v: ◇□ Decide(p, v) | هر process نشکسته‌ای در غایت تصمیم می‌گیرد |
 
-### 10.3 State machine replication
+### ۱۰.۳ replication state machine
 
-Consensus is the foundation of **state machine replication**, which mechanically turns a process into a fault-tolerant group. It makes physical components behave like one logical component that survives the loss of one of them (Figure 10.1) (p. 133). The principle: identical deterministic processes, the same start state, the same inputs in the same order, give the same outputs and the same state. So **lockstep reduces to consensus on the log** (pp. 133–134).
+مفهوم consensus پایه‌ی **replication state machine** است، که مکانیکی یک process را به گروهی شکست‌تحمل تبدیل می‌کند. مؤلفه‌های فیزیکی را وا می‌دارد مثل یک مؤلفه‌ی منطقی رفتار کنند که از دست رفتن یکی‌شان را از سر می‌گذراند (شکل ۱۰.۱) (p. 133). قاعده: processهای قطعی یکسان، همان حالت آغاز، همان ورودی‌ها به همان ترتیب، همان خروجی‌ها و همان حالت را می‌دهند. پس **هم‌قدمی به consensus روی لاگ فرو می‌کاهد** (pp. 133–134).
 
-![Three processes, each with a consensus subsystem at the platform level feeding the same log x := 0, y := 1, z := 2 into a state machine replica at the application level; all three replicas end with x = 0, y = 1, z = 2](../figures/10-02.png)
+![سه پردازه، که هر یک زیرسیستمی consensus در سطح پلتفرم دارد که همان لاگ x := 0 و y := 1 و z := 2 را به یک replica state machine در سطح برنامه می‌خوراند؛ هر سه replica با x = 0 و y = 1 و z = 2 تمام می‌کنند](../figures/10-02.png)
 
-*Figure 10.2 (p. 134): a replicated key–value store. The dashed line separates the platform level (consensus on the log) from the application level (applying it), and all three replicas reach the same state.*
+*Figure 10.2 (p. 134): یک ذخیره‌سازی key-value تکرارشده. خط‌چین سطح پلتفرم، یعنی consensus روی لاگ، را از سطح برنامه، یعنی اعمال کردنش، جدا می‌کند، و هر سه replica به همان حالت می‌رسند.*
 
-### 10.4 The origin—and irony—of consensus
+> **In practice:** Argo CD همین ایده را در مقیاس cluster به کار می‌برد: git log ورودی است و cluster state machineی که آن را اعمال می‌کند.
+>
+> **Your turn:** چرا rollback در GitOps با `git revert` و نه با `kubectl` دستی انجام می‌شود؟
+>
+> *Answer:* اگر هر نسخه‌ی cluster تابع log باشد، فقط با تغییر log تکرارپذیر و قابل بازبینی می‌ماند؛ `kubectl` دستی state را از log جدا می‌کند و Argo CD آن را دوباره به حالت git برمی‌گرداند. replication state machine می‌گوید ورودی‌های یکسان به ترتیب یکسان، state یکسان می‌دهند (pp. 133–134).
 
-| Algorithm | Story (pp. 134–135) |
+### ۱۰.۴ خاستگاه consensus و کنایه‌اش
+
+| الگوریتم | ماجرا (pp. 134–135) |
 |---|---|
-| **Paxos** (Lamport, 1989) | Lamport, the 2013 Turing Award winner, set out to prove fault-tolerant consensus *impossible* and instead devised what is often considered the first fault-tolerant consensus algorithm. It treats consensus as a **single decision**: a set of write-once registers (the replicas) all get the same value |
-| **Multi-Paxos** | Extends Paxos to a **series** of decisions, which makes it suitable for state machine replication |
-| **Viewstamped Replication** (Oki and Liskov, 1988) | Less famous and never uses the word *consensus*, but solves the same problem, so it can be regarded as the first published consensus algorithm |
+| **Paxos** از Lamport در ۱۹۸۹ | لمپورت، برنده‌ی جایزه‌ی تورینگ ۲۰۱۳، راه افتاد *ناممکن* بودن consensus شکست‌تحمل را اثبات کند و در عوض چیزی را ساخت که اغلب نخستین الگوریتم consensus شکست‌تحمل شمرده می‌شود. consensus را **تصمیمی تنها** می‌گیرد: مجموعه‌ای از registerهای یک‌بار‌نوشتنی، یعنی replicaها، همه همان مقدار را می‌گیرند |
+| **Multi-Paxos** | الگوریتم Paxos را به **رشته‌ای** از تصمیم گسترش می‌دهد، که برای replication state machine مناسبش می‌کند |
+| **Viewstamped Replication** از اوکی و لیسکوف در ۱۹۸۸ | کم‌نام‌تر است و هیچ‌وقت واژه‌ی *consensus* را به کار نمی‌برد، ولی همان مسئله را حل می‌کند، پس می‌شود نخستین الگوریتم consensus منتشرشده‌اش شمرد |
 
-### 10.5 Implementing consensus
+### ۱۰.۵ پیاده کردن consensus
 
-Multi-Paxos, Raft and Viewstamped Replication combine a **leader** with a **quorum** (p. 135).
+الگوریتم‌های Multi-Paxos و Raft و Viewstamped Replication یک **leader** را با یک **quorum** ترکیب می‌کنند (p. 135).
 
-| Approach | Works when… | Breaks when… (pp. 135–136) |
+| رویکرد | کِی کار می‌کند… | کِی می‌شکند… (pp. 135–136) |
 |---|---|---|
-| **Leader only** (a *Benevolent Dictator for Life*, who decides everything and broadcasts it) | Nothing fails and messages are reliable | The BDFL fails (no decisions at all), or a decision message is lost (inconsistency) |
-| **Quorum** (a decision counts once a majority acknowledges it) | A majority is up | — |
-| **Leader elected by a quorum, which commits after a quorum acknowledges** | Combines decisiveness with reliability | — |
+| **فقط leader**، یعنی یک *Benevolent Dictator for Life*، که همه چیز را تصمیم می‌گیرد و پخشش می‌کند | وقتی چیزی نمی‌شکند و پیام‌ها قابل اطمینان‌اند | وقتی آن BDFL می‌شکند، یعنی هیچ تصمیمی نمی‌ماند، یا پیام تصمیمی گم می‌شود، یعنی ناسازگاری |
+| **quorum**، یعنی تصمیم همین که اکثریتی تأییدش کرد به حساب می‌آید | وقتی اکثریتی سرپاست | — |
+| **leaderی که quorumی انتخابش کرده و پس از تأیید quorum commit می‌کند** | قاطعیت را با قابلیت اطمینان ترکیب می‌کند | — |
 
-#### 10.5.2 Quorum-based consensus (p. 136)
+#### ۱۰.۵.۲ consensus بر پایه‌ی quorum (p. 136)
 
-- A **quorum** is a subset of processes with |Q| > N/2, so **any two quorums intersect** in at least one process.
-- To tolerate f failures you need f + 1 nonfailed processes, so **N = 2f + 1**.
-- The intersection prevents **split brain**: at least one node knows about the decisions of both quorums and acts as a single point of coordination.
+- **مفهوم quorum** زیرمجموعه‌ای از processها با |Q| > N/2 است، پس **هر دو quorumی اشتراک دارند** و دست‌کم در یک process.
+- برای تحمل f شکست به f + 1 process نشکسته نیاز دارید، پس **N = 2f + 1**.
+- اشتراک جلو **split brain** را می‌گیرد: دست‌کم یک نود از تصمیم‌های هر دو quorum خبر دارد و مثل نقطه‌ی هم‌آهنگی تنها عمل می‌کند.
 
-For {p1, p2, p3} (Table 10.2), the quorums are {p1, p2, p3}, {p1, p2}, {p1, p3} and {p2, p3}. The singletons {p3}, {p2} and {p1} are not quorums.
+برای {p1, p2, p3} (جدول ۱۰.۲)، quorumها {p1, p2, p3} و {p1, p2} و {p1, p3} و {p2, p3} هستند. مجموعه‌های یکانی {p3} و {p2} و {p1} quorum نیستند.
 
-### 10.6 Raft
+### ۱۰.۶ الگوریتم Raft
 
-Raft manages replicated logs, the basis of state machine replication. A **leader** decides the *order* of entries, and a **quorum** decides their *inclusion*, or commitment (pp. 136–137). Raft is designed for understandability but remains complex. The book follows the original paper, and variants may behave differently (p. 137).
+الگوریتم Raft لاگ‌های تکرارشده را می‌گرداند، که پایه‌ی replication state machineاند. یک **leader** *ترتیب* entryها را تصمیم می‌گیرد، و یک **quorum** *گنجیدن*شان، یعنی commit شدنشان، را (pp. 136–137). الگوریتم Raft برای فهم‌پذیری طراحی شده ولی باز هم پیچیده است. کتاب از مقاله‌ی اصلی پی می‌گیرد، و شاید گونه‌های دیگر طور دیگری رفتار کنند (p. 137).
 
-#### 10.6.1 The log (pp. 137–138)
+#### ۱۰.۶.۱ لاگ (pp. 137–138)
 
-- Two logs are **consistent** if one is a subsequence of the other *up to the commit index*: the highest index known to be replicated on a quorum, and therefore committed.
-- Log consistency is a prerequisite for **state machine safety**: committed entries are never lost and may be applied to the application's state machine. Entries past the commit index *could* be lost (Figure 10.3).
-- Raft uses the logs themselves to guarantee this: in an election, only the candidates with the most up-to-date logs are eligible.
+- دو لاگ **سازگار**اند اگر یکی زیردنباله‌ی دیگری باشد، *تا commit index*: بالاترین شاخصی که معلوم است روی quorumی تکرار شده، و بنابراین commit شده.
+- مفهوم consistency لاگ پیش‌شرط **ایمنی state machine** است: entryهای commit‌شده هیچ‌وقت گم نمی‌شوند و مجازند روی state machine برنامه اعمال شوند. entryهای آن‌سوی commit index *می‌توانند* گم شوند (شکل ۱۰.۳).
+- الگوریتم Raft خود لاگ‌ها را به کار می‌برد تا این را تضمین کند: در یک انتخاب، تنها نامزدهایی که به‌روزترین لاگ را دارند واجد شرط‌اند.
 
-**Aha! moment:** Raft has two layers. The **platform level** runs election, replication and commitment, then hands each committed entry to the **application level**, which applies it to its own state machine (pp. 137–138).
+**لحظه‌ی آها!:** الگوریتم Raft دو لایه دارد. **سطح پلتفرم** انتخاب و replication و commit را می‌گرداند، بعد هر entry commit‌شده را به **سطح برنامه** می‌دهد، که آن را روی state machine خودش اعمال می‌کند (pp. 137–138).
 
-#### 10.6.2 Terms (pp. 138–139)
+#### ۱۰.۶.۲ termها (pp. 138–139)
 
-Time is divided into monotonically increasing **terms**, a logical clock. Each term has an election phase (the *Request Vote* protocol) and a log-replication phase (the *Append Entries* protocol) (Figure 10.4). Per term, Raft elects a leader and delegates the log to it. The leader accepts entries, replicates them and decides when they may be applied (p. 138).
+زمان به **term**هایی یکنوا‌افزایشی بخش می‌شود، که ساعتی منطقی‌اند. هر term یک فاز انتخاب، یعنی پروتکل *Request Vote*، و یک فاز replication لاگ، یعنی پروتکل *Append Entries*، دارد (شکل ۱۰.۴). الگوریتم Raft به‌تفکیک term یک leader انتخاب می‌کند و لاگ را به آن می‌سپارد. آن leader entry می‌پذیرد، تکرارشان می‌کند و تصمیم می‌گیرد کِی مجازند اعمال شوند (p. 138).
 
-![Five terms on a timeline, each starting with an election phase followed by a log-replication phase; term 3 has only an election](../figures/10-04.png)
+![پنج term روی خط زمان، که هر یک با فاز انتخاب شروع می‌شود و پس از آن فاز replication لاگ می‌آید؛ term ۳ تنها انتخاب دارد](../figures/10-04.png)
 
-*Figure 10.4 (p. 138): a term with a failed election (term 3, a split vote) has no leader and so no log replication.*
+*Figure 10.4 (p. 138): termی با انتخاب شکست‌خورده، یعنی term ۳ با رأی شقه، هیچ leaderی ندارد و بنابراین هیچ replication لاگی.*
 
-**Aha! moment, terms as fencing tokens** (pp. 138–139): Raft does *not* guarantee that only one node *believes* it's the leader. It guarantees that only one node can *act* as the leader. A stale leader has a lower term, and nodes reject messages with a term lower than their own.
+**لحظه‌ی آها!، termها به‌شکل توکن حصار** (pp. 138–139): الگوریتم Raft تضمین *نمی‌کند* که تنها یک نود *باور* کند leader است. تضمین می‌کند که تنها یک نود می‌تواند مثل leader *عمل* کند. leader کهنه term پایین‌تری دارد، و نودها پیام‌هایی با termی پایین‌تر از خودشان را رد می‌کنند.
 
-#### 10.6.3 Leader Election protocol (pp. 139–140)
+#### ۱۰.۶.۳ پروتکل Leader Election (pp. 139–140)
 
-![Node states: a follower that suspects leader failure increments its term and becomes a candidate; a candidate that times out increments its term and stays a candidate, and one that receives votes from a quorum becomes leader; a leader or candidate that sees a message with a higher term adopts it and becomes a follower](../figures/10-05.png)
+![حالت‌های نود: followerی که به شکست leader گمان می‌برد term خود را می‌افزاید و نامزد می‌شود؛ نامزدی که وقتش سر برود term خود را می‌افزاید و نامزد می‌ماند، و آن یکی که از quorumی رأی می‌گیرد leader می‌شود؛ leader یا نامزدی که پیامی با term بالاتر ببیند آن را می‌پذیرد و follower می‌شود](../figures/10-05.png)
 
-*Figure 10.5 (p. 139): every transition is guarded by the term — moving up increments it, and seeing a higher one demotes the node.*
+*Figure 10.5 (p. 139): هر گذاری با term پاس داده می‌شود؛ بالا رفتن آن را می‌افزاید، و دیدن termی بالاتر نود را پایین می‌آورد.*
 
-- **Follower:** listens to the leader. Its election timer has a *random* timeout and resets on every message. On expiry, it suspects the leader has failed.
-- **Candidate:** increments its term, votes for itself and sends `RequestVote` to every other node. There are three outcomes: a **quorum vote** (it becomes leader), a **split vote** (a new election) or **demotion** (it learns of a new term and leader).
-- **Leader:** steps down to follower when it learns of a newer term and leader.
+- **نقش follower:** به leader گوش می‌دهد. تایمر انتخابش مدتی *تصادفی* دارد و با هر پیامی صفر می‌شود. سر رفتنش گمان می‌برد که leader شکسته.
+- **نامزد:** term خود را می‌افزاید، به خودش رأی می‌دهد و `RequestVote` را به هر نود دیگری می‌فرستد. سه برآمد دارد: **رأی quorum**، که leader می‌شود، **رأی شقه**، که انتخابی تازه است، یا **پایین آمدن**، که از term و leader تازه‌ای خبردار می‌شود.
+- **نقش leader:** وقتی از term و leader تازه‌تری خبردار شود به follower پایین می‌آید.
 
-#### 10.6.4 Log Replication protocol (p. 140)
+#### ۱۰.۶.۴ پروتکل Log Replication (p. 140)
 
-1. **Accept:** the leader accepts an entry from a client.
-2. **Append:** it appends the entry to its own log.
-3. **Propagate:** it sends `AppendEntries` to the other nodes.
-4. **Commit:** followers append and acknowledge. Once a quorum, *including the leader*, has acknowledged, the leader advances the **commit index** (Figure 10.6).
+۱. **پذیرفتن:** آن leader entryی را از کلاینتی می‌پذیرد.
+۲. **افزودن:** entry را به لاگ خودش می‌افزاید.
+۳. **رساندن:** پیام `AppendEntries` را به نودهای دیگر می‌فرستد.
+۴. **عمل commit:** followerها می‌افزایند و تأیید می‌کنند. همین که quorumی، *با احتساب leader*، تأیید کرد، آن leader **commit index** را جلو می‌برد (شکل ۱۰.۶).
 
-![Message flow among a leader and two followers: (1) a request arrives at the leader, (2) the leader appends it, (3) it sends AppendEntries to both followers, the first follower appends and acks, and once that ack arrives the leader knows the entry is on a quorum, (4) commits and acks the client; the second follower's append and ack arrive later, greyed out](../figures/10-06.png)
+![جریان پیام میان یک leader و دو follower: (۱) درخواستی به leader می‌رسد، (۲) آن leader می‌افزایدش، (۳) پیام AppendEntries را به هر دو follower می‌فرستد، follower اول می‌افزاید و تأیید می‌کند، و همین که آن تأیید برسد leader می‌داند entry روی quorumی هست، (۴) commit می‌کند و به کلاینت تأیید می‌دهد؛ افزودن و تأیید follower دوم دیرتر می‌رسند و خاکستری شده‌اند](../figures/10-06.png)
 
-*Figure 10.6 (p. 140): the dashed line marks the moment of commit — one follower's ack plus the leader's own copy make a quorum of three, so the slow follower is not waited for.*
+*Figure 10.6 (p. 140): خط‌چین لحظه‌ی commit را علامت می‌زند؛ تأیید یک follower به‌علاوه‌ی کپی خود leader quorumی از سه می‌سازد، پس منتظر follower کند نمی‌مانند.*
 
-#### 10.6.5 State machine safety (p. 141)
+#### ۱۰.۶.۵ ایمنی state machine (p. 141)
 
-If a process has applied the entry at index i, no process will ever apply a *different* entry at index i. Raft enforces this by electing only a candidate with the most **up-to-date** log:
+اگر processی entry شاخص i را اعمال کرده باشد، هیچ processی هیچ‌وقت entry *دیگری* را در شاخص i اعمال نمی‌کند. الگوریتم Raft این را با انتخاب تنها نامزدی که **به‌روزترین** لاگ را دارد اجبار می‌کند:
 
-| Compare the last entries' … | More up to date |
+| entryهای آخر را بر حسب … مقایسه کنید | به‌روزتر |
 |---|---|
-| Terms differ | The log whose last entry has the **later term** |
-| Terms equal | The **longer** log |
+| termها فرق دارند | لاگی که entry آخرش **term دیرتر** دارد |
+| termها برابرند | لاگ **بلندتر** |
 
-So if a quorum holds an entry, no candidate without it can win, because the voting quorum intersects the quorum that holds it. A committed entry is therefore present in every future leader's log (p. 141).
+پس اگر quorumی entryی را داشته باشد، هیچ نامزدی که آن را ندارد نمی‌تواند ببرد، چون quorum voter با آن quorumی که entry را دارد اشتراک دارد. بنابراین entryی commit‌شده در لاگ هر leader آینده‌ای هست (p. 141).
 
-### 10.7 Raft puzzles
+> **In practice:** etcd در Kubernetes و Keeper در ClickHouse هر دو Raft اجرا می‌کنند؛ اگر quorum از دست برود، Argo CD نمی‌تواند deploy کند و warehouse نوشتن نمی‌پذیرد.
+>
+> **Your turn:** چرا Keeper را روی سه node جدا اجرا می‌کنید و نه روی همان دو node ClickHouse؟
+>
+> *Answer:* Raft برای انتخاب leader و commit هر entry اکثریت می‌خواهد: سه node یک شکست را تحمل می‌کند، دو node هیچ. اگر Keeper با ClickHouse روی یک node باشد، شکست node هم یک replica و هم یک عضو quorum را می‌برد (pp. 136–141).
 
-Each puzzle has a three-node cluster in term 3 (p. 141). The author prefers thinking in systems: many behaviors are *implicit consequences* of an algorithm interacting with the system, which is the point of Puzzle 3 (p. 141).
+### ۱۰.۷ معماهای Raft
 
-| Puzzle | Situation | Question | Answer (pp. 141–144) |
+هر معما clusterی سه‌نودی در term ۳ دارد (p. 141). نویسنده فکر کردن در سیستم‌ها را ترجیح می‌دهد: خیلی از رفتارها *پیامدهای ضمنی* برخورد یک الگوریتم با سیستم‌اند، که نکته‌ی معمای ۳ است (p. 141).
+
+| معما | اوضاع | پرسش | پاسخ (pp. 141–144) |
 |---|---|---|---|
-| **1** (Figure 10.7) | Logs of 8, 9 and 7 entries | Who leads term 3? | **Node 2**: the leader accepts and appends client requests first, so its log is the most advanced |
-| **2** (Figure 10.8) | Leader node 2 appended request 9 but didn't propagate it | Can request 9 be lost? | **Yes.** If node 2 loses leadership, the term-4 leader never heard of it. Safety isn't violated, because it wasn't committed |
-| **3** (Figure 10.9) | Node 2 propagated request 9 to node 1, which acknowledged; node 2 didn't get the acknowledgment and crashes | Can request 9 be lost? | **No.** Node 1 can't know whether node 2 committed and answered the client before crashing, so it must assume 9 is committed. Only node 1 has the most up-to-date log, so only it can be elected, and it replicates 9 to node 3 and commits it (Figure 10.10) |
+| **۱** (شکل ۱۰.۷) | لاگ‌هایی با ۸ و ۹ و ۷ entry | چه کسی term ۳ را leadership می‌کند؟ | **نود ۲**: آن leader درخواست‌های کلاینت را اول می‌پذیرد و می‌افزاید، پس لاگش از همه جلوتر است |
+| **۲** (شکل ۱۰.۸) | نود ۲ که leader است درخواست ۹ را افزوده ولی نرساندهش | آیا درخواست ۹ می‌تواند گم شود؟ | **بله.** اگر نود ۲ leadership را ببازد، leader term ۴ هیچ‌وقت از آن خبر نداشته. ایمنی نقض نمی‌شود، چون commit نشده بود |
+| **۳** (شکل ۱۰.۹) | نود ۲ درخواست ۹ را به نود ۱ رساند، که تأیید کرد؛ نود ۲ آن تأیید را نگرفت و از کار می‌افتد | آیا درخواست ۹ می‌تواند گم شود؟ | **نه.** نود ۱ نمی‌تواند بداند که نود ۲ پیش از از کار افتادن commit کرد و به کلاینت پاسخ داد یا نه، پس باید فرض بگیرد ۹ commit شده. تنها نود ۱ به‌روزترین لاگ را دارد، پس تنها خودش می‌تواند انتخاب شود، و entry ۹ را به نود ۳ تکرار و commitش می‌کند (شکل ۱۰.۱۰) |
 
-![Logs of three nodes before and after commit: entries 1–3 from term 1 are committed everywhere; in the precommit view the leader, node 2, holds entries up to 9 and node 1 up to 9, while the commit index still points at 5; in the postcommit view the leader's commit index has moved to 9. Node 1 is marked eligible in both](../figures/10-10.png)
+![لاگ‌های سه نود پیش و پس از commit: entryهای ۱ تا ۳ از term ۱ همه‌جا commit شده‌اند؛ در نمای پیش‌از‌commit، آن leader که نود ۲ است entryها را تا ۹ دارد و نود ۱ تا ۹، در حالی که commit index هنوز به ۵ اشاره می‌کند؛ در نمای پس‌از‌commit، commit index آن leader به ۹ جابه‌جا شده. نود ۱ در هر دو واجد شرط علامت خورده](../figures/10-10.png)
 
-*Figure 10.10 (p. 144): whether node 2 crashed before or after advancing its commit index, node 1's log is the most up to date — so the next leader keeps entry 9 either way.*
+*Figure 10.10 (p. 144): نود ۲ پیش یا پس از جلو بردن commit indexش از کار افتاده باشد، لاگ نود ۱ به‌روزترین است؛ پس leader بعدی entry ۹ را هر طور که باشد نگه می‌دارد.*
 
-> **Try it:** [Raft's election restriction and the three puzzles](../widgets/10-raft-puzzles.html) — load the book's three puzzles (or build your own logs), see which nodes are eligible under the up-to-date rule and which quorums can elect them, crash the leader, and check whether request 9 survives.
+> **Try it:** [محدودیت انتخاب Raft و آن سه معما](../widgets/10-raft-puzzles.html)؛ سه معمای کتاب را بار کنید، یا لاگ خودتان را بسازید، ببینید کدام نودها زیر قاعده‌ی به‌روز بودن واجد شرط‌اند و کدام quorumها می‌توانند انتخابشان کنند، leader را از کار بیندازید، و بسنجید که درخواست ۹ جان به در می‌برد یا نه.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌خرد | چه هزینه‌ای دارد |
 |---|---|---|
-| Single leader (BDFL) | Simple; decisions are totally ordered | No progress when it fails; lost decisions break consistency |
-| Quorum of 2f + 1 | Tolerates f crashes; quorums intersect | A majority round trip per decision; no progress without a majority |
-| Leader + quorum (Raft, Multi-Paxos, VR) | Ordering by the leader, safety by quorums | Leader elections stall progress; random timeouts are a liveness heuristic (FLP) |
-| Larger cluster | Tolerates more failures | Bigger quorums, so slower commits |
-| Electing only up-to-date logs | Committed entries are never lost | Some nodes can't be elected; uncommitted entries may still be kept or lost |
+| leader تنها که BDFL است | ساده؛ تصمیم‌ها تماماً مرتب‌اند | وقتی بشکند پیشرفتی نمی‌ماند؛ تصمیم‌های گم‌شده consistency را می‌شکنند |
+| quorum از 2f + 1 | تحمل f از کار افتادن؛ quorumها اشتراک دارند | یک رفت‌و‌برگشت اکثریت برای هر تصمیم؛ بی اکثریت پیشرفتی نیست |
+| leader به‌علاوه‌ی quorum، یعنی Raft و Multi-Paxos و VR | ترتیب از leader، ایمنی از quorumها | انتخاب leader پیشرفت را معطل می‌کند؛ مدت‌های تصادفی اکتشافی برای liveness‌اند، از قضیه‌ی FLP |
+| cluster بزرگ‌تر | شکست‌های بیشتری را تحمل می‌کند | quorumهای بزرگ‌تر، پس commitهای کندتر |
+| انتخاب تنها لاگ‌های به‌روز | entryهای commit‌شده هیچ‌وقت گم نمی‌شوند | برخی نودها نمی‌توانند انتخاب شوند؛ entryهای commit‌نشده شاید باز هم بمانند یا گم شوند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Why random election timeouts?** If every follower timed out at once, each would vote for itself and split the vote every term. Randomizing the timeout, which the Raft paper suggests drawing from 150–300 ms, usually lets one candidate start first and win. It's a practical answer to FLP: liveness depends on timing, safety never does. The [election-timeout lab](../lab/10-raft-election-timeouts/README.md) measures how often split votes happen as the timeout range narrows.
-- **Committing entries from earlier terms.** The real Raft paper adds a rule the book doesn't cover: a leader only counts replicas for entries of its *own* term, and earlier-term entries become committed indirectly. Without this, an entry stored on a majority could still be overwritten (Figure 8 of the Raft paper).
-- **Paxos in this vault.** [Database Internals Ch. 14](../../database-internals/chapters/14-consensus.md) steps through single-decree Paxos and Flexible Paxos quorums; [DDIA Ch. 10](../../designing-data-intensive-applications/chapters/10-consistency-and-consensus.md) runs a Raft-style cluster with partitions.
+- **چرا مدت انتخاب تصادفی است؟** اگر وقت هر followerی یک‌جا سر برود، هر کدام به خودش رأی می‌دهد و هر termی رأی را شقه می‌کند. تصادفی کردن مدت، که مقاله‌ی Raft پیشنهاد می‌دهد از ۱۵۰ تا ۳۰۰ میلی‌ثانیه برداشته شود، معمولاً می‌گذارد یک نامزد اول شروع کند و ببرد. پاسخی عملی به قضیه‌ی FLP است: liveness به زمان‌بندی وابسته است و ایمنی هیچ‌وقت. [آزمایش مدت انتخاب](../lab/10-raft-election-timeouts/README.md) اندازه می‌گیرد که با تنگ‌تر شدن بازه‌ی مدت، رأی شقه چند بار رخ می‌دهد.
+- **عمل commit کردن entryهای termهای پیشین.** مقاله‌ی واقعی Raft قاعده‌ای می‌افزاید که کتاب پوششش نمی‌دهد: leader تنها برای entryهای term *خودش* replicaها را می‌شمارد، و entryهای termهای پیشین به‌طور غیرمستقیم commit می‌شوند. بی این، entryی که روی اکثریتی ذخیره شده باز هم می‌توانست روی‌نویسی شود، از شکل ۸ مقاله‌ی Raft.
+- **الگوریتم Paxos در این vault.** [فصل ۱۴ کتاب Database Internals](../../database-internals/chapters/14-consensus.md) قدم‌به‌قدم از Paxos تک‌فرمانی و quorumهای Flexible Paxos می‌گذرد؛ و [فصل ۱۰ کتاب DDIA](../../designing-data-intensive-applications/chapters/10-consistency-and-consensus.md) clusterی از جنس Raft را با پارتیشن می‌گرداند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. System models, order, and time](02-system-models-order-and-time.md) (partial synchrony and logical clocks), [3. Failure tolerance](03-failure-tolerance.md) (detection for safety, mitigation for liveness, as with quorums), [6. Distributed transactions](06-distributed-transactions.md) (atomic commitment as consensus), [8. Replication](08-replication.md) (log-based, single-leader replication), [9. Consistency](09-consistency.md) (consensus implements linearizability).
-- **Run it:** [Raft election timeouts](../lab/10-raft-election-timeouts/README.md) — simulates leader elections with randomized timeouts in clusters of 3 and 5 and counts split votes and rounds to elect a leader.
+- **فصل‌های مرتبط:** [فصل ۲: مدل سیستم، ترتیب و زمان](02-system-models-order-and-time.md) که concurrency جزئی و ساعت‌های منطقی را دارد، [فصل ۳: تحمل شکست](03-failure-tolerance.md) که تشخیص برای ایمنی و کاهش برای liveness را دارد، چنان‌که با quorumها، [فصل ۶: تراکنش توزیع‌شده](06-distributed-transactions.md) که commitment اتمی را به‌شکل consensus دارد، [فصل ۸: replication](08-replication.md) که replication لاگ‌محور و تک‌leader را دارد، و [فصل ۹: consistency](09-consistency.md) که در آن consensus linearizability را پیاده می‌کند.
+- **Run it:** [مدت‌های انتخاب Raft](../lab/10-raft-election-timeouts/README.md)؛ انتخاب leader را با مدت‌های تصادفی در clusterهای سه و پنج نودی شبیه‌سازی می‌کند و رأی‌های شقه و دورهای لازم برای انتخاب leader را می‌شمارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Name the three safety properties and the liveness property of consensus.**
+1. **سه خاصیت ایمنی و خاصیت liveness consensus را نام ببرید.**
 
-   *Answer:* Validity, integrity and agreement (safety); termination (liveness) (pp. 132–133).
+   *Answer:* اعتبار و تمامیت و توافق که ایمنی‌اند؛ و پایان که liveness است (pp. 132–133).
 
-2. **What does FLP rule out, and what doesn't it rule out?**
+2. **قضیه‌ی FLP چه چیزی را رد می‌کند، و چه چیزی را رد نمی‌کند؟**
 
-   *Answer:* Guaranteed consensus in an asynchronous system without clocks with even one possible crash, which is a liveness limit. It doesn't rule out consensus in more constrained models, such as asynchronous systems with clocks (p. 132).
+   *Answer:* consensus تضمین‌شده در سیستمی asynchronous و بی ساعت با حتی یک از کار افتادن ممکن را، که حدی بر liveness است. consensus در مدل‌های مقیدتر، مثل سیستم‌های asynchronous با ساعت، را رد نمی‌کند (p. 132).
 
-3. **Why does state machine replication reduce to consensus on a log?**
+3. **چرا replication state machine به consensus روی یک لاگ فرو می‌کاهد؟**
 
-   *Answer:* Identical deterministic processes that receive the same inputs in the same order reach the same state, so agreeing on the input log is all that's needed (pp. 133–134).
+   *Answer:* processهای قطعی یکسان که همان ورودی‌ها را به همان ترتیب می‌گیرند به همان حالت می‌رسند، پس توافق روی لاگ ورودی همه‌ی آن چیزی است که لازم است (pp. 133–134).
 
-4. **How many processes do you need to tolerate 2 failures, and why?**
-   - [ ] 3
-   - [ ] 4
-   - [x] 5
+4. **برای تحمل ۲ شکست به چند process نیاز دارید، و چرا؟**
+   - [ ] ۳
+   - [ ] ۴
+   - [x] ۵
 
-   *Answer:* N = 2f + 1 = 5. A quorum of f + 1 = 3 must remain, and two quorums must intersect (p. 136).
+   *Answer:* داریم N = 2f + 1 = 5. باید quorumی از f + 1 = 3 بماند، و دو quorum باید اشتراک داشته باشند (p. 136).
 
-5. **In what sense does Raft guarantee "one leader"?**
+5. **الگوریتم Raft به چه معنایی «یک leader» را تضمین می‌کند؟**
 
-   *Answer:* Two nodes may both believe they're the leader, but only the one with the current term can act. Messages from a lower term are rejected, so the term is a fencing token (pp. 138–139).
+   *Answer:* شاید دو نود هر دو باور کنند leaderاند، ولی تنها آن یکی که term جاری را دارد می‌تواند عمل کند. پیام‌های termی پایین‌تر رد می‌شوند، پس term توکن حصار است (pp. 138–139).
 
-6. **Node A's log ends with an entry from term 3 at index 7; node B's ends with term 2 at index 9. Which is more up to date?**
+6. **لاگ نود A با entryی از term ۳ در شاخص ۷ تمام می‌شود؛ و لاگ نود B با term ۲ در شاخص ۹. کدام به‌روزتر است؟**
 
-   *Answer:* A. When the last terms differ, the later term wins, regardless of length (p. 141).
+   *Answer:* نود A. وقتی termهای آخر فرق دارند، term دیرتر می‌برد، بی توجه به طول (p. 141).
 
-7. **In Puzzle 3, why must request 9 survive even though it wasn't committed when the leader crashed?**
+7. **در معمای ۳، چرا درخواست ۹ باید جان به در ببرد، هرچند وقتی leader از کار افتاد commit نشده بود؟**
 
-   *Answer:* Node 1 acknowledged it and can't know whether the leader committed it and replied to the client. Node 1 is also the only node eligible to become leader, so it keeps 9 and commits it (pp. 142–144).
+   *Answer:* نود ۱ تأییدش کرد و نمی‌تواند بداند که leader commitش کرد و به کلاینت پاسخ داد یا نه. نود ۱ تنها نودی است که واجد شرط leader شدن است، پس entry ۹ را نگه می‌دارد و commitش می‌کند (pp. 142–144).

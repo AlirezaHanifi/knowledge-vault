@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Partitioning and Balancing</title>
-<meta name="description" content="Assign 20,000 synthetic words to partitions by first-letter range, by hash modulo and by consistent hashing; change the partition count from 5 to 6 to compare variance and relocation; then balance partitions onto nodes and see where overpartitioning runs out. Illustrates Think Distributed Systems, Chapter 7.">
+<title>پارتیشن‌بندی و متوازن کردن</title>
+<meta name="description" content="بیست هزار کلمه‌ی ساختگی را با بازه‌ی حرف اول و با hash moduleی و با consistent hashing به پارتیشن‌ها تخصیص بدهید؛ شمار پارتیشن را از پنج به شش عوض کنید تا واریانس و جابه‌جایی را مقایسه کنید؛ بعد پارتیشن‌ها را روی نودها متوازن کنید و ببینید over-partitioning کجا تمام می‌شود. تصویری از فصل ۷ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .bars { display: grid; gap: 4px; } .bar { display: grid; grid-template-columns: 5.5em 1fr 4.5em; gap: 6px; align-items: center; font-size: .8rem; font-family: var(--mono); }
@@ -16,52 +16,52 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/07-partitioning.html">Chapter 7</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Partitioning and balancing</span>
+      <a href="../chapters/07-partitioning.html">فصل ۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">پارتیشن‌بندی و متوازن کردن</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 7 · Partitioning</div>
-  <h1>Partitioning and balancing</h1>
-  <p class="lede"><strong>Partitioning</strong> assigns items to partitions; <strong>balancing</strong> assigns partitions to nodes. An assignment strategy is judged by <strong>variance</strong> (how evenly items spread) and <strong>relocation</strong> (how many items move when the number of partitions changes). The book’s experiment found range partitioning uneven, hashing even but disruptive, and consistent hashing good at both.</p>
-  <p class="source-note">Illustrates “Common item-based assignment strategies”, “Repartitioning”, “Consistent hashing” and “(Re)balancing and overpartitioning” (pp. 97–104, Listings 7.3–7.9, Tables 7.2, Figures 7.9–7.10). The book used /usr/share/dict/words; this page generates 20,000 words with an approximate English first-letter distribution, so the counts differ from the book’s but the pattern is the same. The FNV-1a hash and 100 virtual nodes per partition are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۷ · پارتیشن‌بندی</div>
+  <h1>پارتیشن‌بندی و متوازن کردن</h1>
+  <p class="lede"><strong>پارتیشن‌بندی</strong> قلم‌ها را به پارتیشن‌ها تخصیص می‌دهد؛ و <strong>متوازن کردن</strong> پارتیشن‌ها را به نودها. راهبرد تخصیص را با <strong>واریانس</strong>، یعنی این‌که قلم‌ها چقدر یکنواخت پخش می‌شوند، و <strong>جابه‌جایی</strong>، یعنی این‌که وقتی شمار پارتیشن‌ها عوض می‌شود چند قلم جابه‌جا می‌شوند، می‌سنجند. آزمایش کتاب پارتیشن‌بندی بازه‌ای را نامتوازن یافت، hash کردن را متوازن ولی آشوب‌گر، و consistent hashing را در هر دو خوب.</p>
+  <p class="source-note">تصویری از «راهبردهای رایج تخصیص قلم‌محور» و «پارتیشن‌بندی دوباره» و «consistent hashing» و «متوازن کردن و over-partitioning» (صص. ۹۷–۱۰۴، فهرست‌های ۷.۳ تا ۷.۹، جدول ۷.۲، شکل‌های ۷.۹ و ۷.۱۰). کتاب فایل <code>/usr/share/dict/words</code> را به کار برد؛ این صفحه بیست هزار کلمه با توزیع تقریبی حرف اول انگلیسی می‌سازد، پس شمارش‌ها با کتاب فرق دارند ولی الگو همان است. تابع hash یعنی FNV-1a و صد نود مجازی برای هر پارتیشن مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title" id="ptitle">Items per partition</p><div class="bars" id="bars"></div>
+      <div class="panel"><p class="panel-title" id="ptitle">قلم‌ها به‌تفکیک پارتیشن</p><div class="bars" id="bars"></div>
         <div class="callout" id="move" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Balancing partitions onto nodes</p><div id="bal"></div><div class="bars" id="nodes" style="margin-top:8px"></div>
+      <div class="panel"><p class="panel-title">متوازن کردن پارتیشن‌ها روی نودها</p><div id="bal"></div><div class="bars" id="nodes" style="margin-top:8px"></div>
         <div class="callout" id="balv" style="margin-top:10px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="strat"></div><div id="np" style="margin-top:10px"></div><div id="psl" style="margin-top:14px"></div><div id="nsl"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="strat"></div><div id="np" style="margin-top:10px"></div><div id="psl" style="margin-top:14px"></div><div id="nsl"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Range by first letter</strong> follows the language: partitions holding a–e and p–t are hotspots, as in the book’s Listing 7.4.</li>
-    <li><strong>hash mod n</strong> is almost perfectly even, but going from 5 to 6 partitions keeps an item in place only when h mod 5 = h mod 6, so about 5 in 6 items move.</li>
-    <li><strong>Consistent hashing</strong> moves only the arcs the new partition takes over, roughly 1/6 of the items, while staying nearly even.</li>
-    <li><strong>Overpartitioning</strong> lets nodes come and go by moving whole partitions, but once there are as many nodes as partitions, more nodes stay idle.</li>
+    <li><strong>بازه بر حسب حرف اول</strong> از زبان پی می‌گیرد: پارتیشن‌هایی که a–e و p–t را دارند نقطه‌ی داغ‌اند، چنان‌که در فهرست ۷.۴ کتاب.</li>
+    <li><strong>عبارت hash mod n</strong> تقریباً بی‌عیب متوازن است، ولی رفتن از پنج به شش پارتیشن قلمی را تنها وقتی سر جایش نگه می‌دارد که h module ۵ برابر h module ۶ باشد، پس تقریباً پنج‌ششم قلم‌ها جابه‌جا می‌شوند.</li>
+    <li><strong>consistent hashing</strong> تنها همان کمان‌هایی را جابه‌جا می‌کند که پارتیشن تازه تحویل می‌گیرد، یعنی تقریباً یک‌ششم قلم‌ها، و در همان حال تقریباً متوازن می‌ماند.</li>
+    <li><strong>over-partitioning</strong> می‌گذارد نودها با جابه‌جا کردن کل پارتیشن‌ها بیایند و بروند، ولی همین که نودها به شمار پارتیشن‌ها رسیدند، نودهای بیشتر بی‌کار می‌مانند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/07-partitioning.html"><small>Lesson</small>7. Partitioning</a></li>
+    <li><a href="../chapters/07-partitioning.html"><small>درس</small>فصل ۷: پارتیشن‌بندی</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -102,47 +102,47 @@ function stats(rows) {
     var b = Kit.clear(el), max = Math.max.apply(null, counts.concat([ideal * 1.6]));
     counts.forEach(function (c, i) {
       var tr = Kit.el("div", { class: "track" }, Kit.el("div", { class: "fill" + (c > ideal * 1.25 ? " hot" : ""), style: "width:" + (100 * c / max) + "%" }), Kit.el("div", { class: "ideal", style: "left:" + (100 * ideal / max) + "%" }));
-      b.appendChild(Kit.el("div", { class: "bar", role: "img", "aria-label": label(i) + ": " + c + (c > ideal * 1.25 ? ", hotspot" : "") }, Kit.el("span", null, label(i)), tr, Kit.el("span", null, String(c))));
+      b.appendChild(Kit.el("div", { class: "bar", role: "img", "aria-label": label(i) + ": " + c + (c > ideal * 1.25 ? "، نقطه‌ی داغ" : "") }, Kit.el("span", null, label(i)), tr, Kit.el("span", null, String(c))));
     });
   }
   function render() {
     var n = cfg.n, counts = new Array(n).fill(0), same = 0;
     for (var i = 0; i < words.length; i++) { var a = place(i, n); counts[a]++; if (place(i, 5) === place(i, 6)) same++; }
     var ideal = words.length / n;
-    document.getElementById("ptitle").textContent = "Items per partition (" + n + " partitions; dashed line = ideal " + Math.round(ideal) + ")";
+    document.getElementById("ptitle").textContent = "قلم‌ها به‌تفکیک پارتیشن؛ " + n + " پارتیشن، و خط‌چین آرمان " + Math.round(ideal) + " است";
     bars(document.getElementById("bars"), counts, function (i) { return cfg.s === "range" ? RANGES[n][i][0] + "–" + RANGES[n][i].slice(-1) : "P" + i; }, ideal);
     var sd = Math.sqrt(counts.reduce(function (a, c) { return a + (c - ideal) * (c - ideal); }, 0) / n);
     var stay = same / words.length, mv = document.getElementById("move");
     mv.className = "callout " + (stay > 0.75 ? "ok" : stay > 0.4 ? "warn" : "bad");
-    mv.textContent = "Going from 5 to 6 partitions: " + same + " items stay (" + Kit.pct(stay, 1) + "), " + (words.length - same) + " relocate (" + Kit.pct(1 - stay, 1) + ").";
+    mv.textContent = "رفتن از پنج به شش پارتیشن: " + same + " قلم می‌مانند (" + Kit.pct(stay, 1) + ")، و " + (words.length - same) + " قلم جابه‌جا می‌شوند (" + Kit.pct(1 - stay, 1) + ").";
     var P = cfg.P, N = cfg.N, per = new Array(N).fill(0); for (var p = 0; p < P; p++) per[p % N]++;
     var load = per.map(function (x) { return x * (words.length / P); }).map(Math.round);
-    bars(document.getElementById("nodes"), load, function (i) { return "Node " + (i + 1); }, words.length / N);
+    bars(document.getElementById("nodes"), load, function (i) { return "نود " + (i + 1); }, words.length / N);
     var idle = per.filter(function (x) { return x === 0; }).length, bv = document.getElementById("balv");
     var maxL = Math.max.apply(null, per), minL = Math.min.apply(null, per);
     var moved = Math.floor(P / (N + 1));
-    if (idle) { bv.className = "callout bad"; bv.textContent = idle + " of " + N + " nodes hold no partition: the " + P + " partitions cap the cluster at " + P + " useful nodes."; }
-    else if (maxL !== minL) { bv.className = "callout warn"; bv.textContent = "Nodes hold " + minL + "–" + maxL + " partitions each: " + P + " partitions don't divide evenly over " + N + " nodes."; }
-    else { bv.className = "callout ok"; bv.textContent = "Every node holds " + maxL + " partition" + (maxL > 1 ? "s" : "") + ". Adding a node means moving about " + moved + " whole partitions to it."; }
-    stats([["Strategy", ({ range: "range (first letter)", hash: "hash mod n", ch: "consistent hashing" })[cfg.s]], ["Std. deviation per partition", Math.round(sd), sd > ideal * 0.15 ? "bad" : "ok"], ["Stay on 5 → 6", Kit.pct(stay, 1), stay > 0.75 ? "ok" : "bad"], ["Partitions / nodes", P + " / " + N]]);
+    if (idle) { bv.className = "callout bad"; bv.textContent = idle + " نود از " + N + " نود هیچ پارتیشنی ندارند: آن " + P + " پارتیشن cluster را سر " + P + " نود سودمند سقف می‌زنند."; }
+    else if (maxL !== minL) { bv.className = "callout warn"; bv.textContent = "هر نودی " + minL + " تا " + maxL + " پارتیشن دارد: " + P + " پارتیشن بر " + N + " نود یکنواخت بخش نمی‌شود."; }
+    else { bv.className = "callout ok"; bv.textContent = "هر نودی " + maxL + " پارتیشن دارد. افزودن نودی یعنی جابه‌جا کردن تقریباً " + moved + " پارتیشن کامل به آن."; }
+    stats([["راهبرد", ({ range: "بازه بر حسب حرف اول", hash: "hash mod n", ch: "consistent hashing" })[cfg.s]], ["انحراف معیار هر پارتیشن", Math.round(sd), sd > ideal * 0.15 ? "bad" : "ok"], ["ماندن سر پنج به شش", Kit.pct(stay, 1), stay > 0.75 ? "ok" : "bad"], ["پارتیشن و نود", P + " / " + N]]);
   }
-  document.getElementById("strat").appendChild(Kit.segmented({ label: "Assignment", value: cfg.s, options: [{ value: "range", label: "Range" }, { value: "hash", label: "Hash mod n" }, { value: "ch", label: "Consistent hashing" }], onChange: function (v) { cfg.s = v; log.add("Strategy: " + v, "muted"); render(); } }).element);
-  document.getElementById("np").appendChild(Kit.segmented({ label: "Partitions shown", value: "5", options: [{ value: "5", label: "5" }, { value: "6", label: "6" }], onChange: function (v) { cfg.n = +v; log.add("Showing " + v + " partitions", "muted"); render(); } }).element);
-  document.getElementById("psl").appendChild(Kit.slider({ label: "Partitions (for balancing)", min: 2, max: 24, step: 1, value: cfg.P, onInput: function (v) { cfg.P = v; render(); } }).element);
-  document.getElementById("nsl").appendChild(Kit.slider({ label: "Nodes", min: 1, max: 24, step: 1, value: cfg.N, onInput: function (v) { cfg.N = v; render(); } }).element);
-  log.add("20,000 synthetic words generated (seed 42).", "muted");
+  document.getElementById("strat").appendChild(Kit.segmented({ label: "تخصیص", value: cfg.s, options: [{ value: "range", label: "بازه" }, { value: "hash", label: "hash mod n" }, { value: "ch", label: "consistent hashing" }], onChange: function (v) { cfg.s = v; log.add("راهبرد: " + ({ range: "بازه", hash: "hash mod n", ch: "consistent hashing" })[v], "muted"); render(); } }).element);
+  document.getElementById("np").appendChild(Kit.segmented({ label: "پارتیشن‌های نشان‌داده‌شده", value: "5", options: [{ value: "5", label: "۵" }, { value: "6", label: "۶" }], onChange: function (v) { cfg.n = +v; log.add("نمایش " + v + " پارتیشن", "muted"); render(); } }).element);
+  document.getElementById("psl").appendChild(Kit.slider({ label: "پارتیشن‌ها، برای متوازن کردن", min: 2, max: 24, step: 1, value: cfg.P, onInput: function (v) { cfg.P = v; render(); } }).element);
+  document.getElementById("nsl").appendChild(Kit.slider({ label: "نودها", min: 1, max: 24, step: 1, value: cfg.N, onInput: function (v) { cfg.N = v; render(); } }).element);
+  log.add("بیست هزار کلمه‌ی ساختگی ساخته شد، با seed ۴۲.", "muted");
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Which strategy minimizes variance but relocates most items when partitions change?",
-      options: ["Range partitioning", "Hash modulo", "Consistent hashing"], answer: 1,
-      explain: "Table 7.2 (p. 102): 83.3% relocated in the book's run." },
-    { q: "With consistent hashing, about how many of n items move when there are m partitions?",
-      options: ["n/m", "n/2", "all of them"], answer: 0,
-      explain: "p. 103." },
-    { q: "What limits overpartitioning?",
-      options: ["The number of items", "The number of partitions caps the number of useful nodes", "The hash function"], answer: 1,
-      explain: "p. 104." }
+    { q: "کدام راهبرد واریانس را کمینه می‌کند ولی سر عوض شدن پارتیشن‌ها بیشترین قلم را جابه‌جا می‌کند؟",
+      options: ["پارتیشن‌بندی بازه‌ای", "hash moduleی", "consistent hashing"], answer: 1,
+      explain: "جدول ۷.۲ (ص. ۱۰۲): در اجرای کتاب ۸۳٫۳٪ جابه‌جا شدند." },
+    { q: "با consistent hashing، از n قلم تقریباً چند تا وقتی m پارتیشن هست جابه‌جا می‌شوند؟",
+      options: ["n/m", "n/2", "همه‌شان"], answer: 0,
+      explain: "ص. ۱۰۳." },
+    { q: "چه چیزی over-partitioning را محدود می‌کند؟",
+      options: ["شمار قلم‌ها", "شمار پارتیشن‌ها شمار نودهای سودمند را سقف می‌زند", "تابع hash"], answer: 1,
+      explain: "ص. ۱۰۴." }
   ]);
 })();
 </script>

@@ -3,231 +3,245 @@ book: think-distributed-systems
 chapter: 8
 title: "Replication"
 pages: "106–116"
+translated_title: "replication"
+lang: fa
 ---
 
-# 8. Replication
+# فصل ۸: replication
 
-[← 7. Partitioning](07-partitioning.md) · [Book](../README.md) · [9. Consistency →](09-consistency.md)
+[فصل ۷: پارتیشن‌بندی →](07-partitioning.md) · [کتاب](../README.md) · [فصل ۹: consistency ←](09-consistency.md)
 
-## Summary
+## خلاصه
 
-Durability means a committed transaction can't **go back on its word**, and business processes depend on such promises. A merchant ships goods because the payment processor promised to collect payment (p. 106). In a model with perfect components, no promise is ever broken. In a practical model, a failed component may be unable to keep its promises, so we add **redundancy** to remove the single point of failure (pp. 106–107).
+پایایی یعنی تراکنشی که commit شده نمی‌تواند **حرفش را پس بگیرد**، و فرایندهای کسب‌و‌کار به چنین قول‌هایی وابسته‌اند. فروشنده کالا را می‌فرستد چون پردازشگر پرداخت قول داده پول را وصول کند (p. 106). در مدلی با مؤلفه‌های بی‌عیب، هیچ قولی زیر پا نمی‌رود. در مدلی عملی، مؤلفه‌ای که شکسته ممکن است نتواند سر قولش بماند، پس **redundancy** اضافه می‌کنیم تا نقطه‌ی شکست تنها را برداریم (pp. 106–107).
 
-The chapter defines redundancy as **duplication plus coordination**, and distinguishes **static** from **dynamic** redundancy (p. 107). Its "Hello World" is a logic gate replicated three times behind majority gates (p. 108). A philosophical detour through William Kent's question "what is one thing?" (how many copies of SICP a library has) frames replication as a matter of identity and equivalence (pp. 109–110). The chapter then defines **replication** and **replication transparency** (p. 110), and covers the mechanics for a replicated key–value store:
+فصل redundancy را **replication به‌علاوه‌ی هم‌آهنگی** تعریف می‌کند، و redundancy **ایستا** را از **پویا** جدا می‌کند (p. 107). «Hello World»ش یک gate منطقی است که سه بار تکرار شده و پشت gateهای اکثریت نشسته (p. 108). گشتی فلسفی در پرسش ویلیام کنت، یعنی «یک چیز چیست؟» و این‌که کتابخانه چند نسخه از SICP دارد، replication را مسئله‌ی هویت و هم‌ارزی قاب می‌گیرد (pp. 109–110). بعد فصل **replication** و **شفافیت replication** را تعریف می‌کند (p. 110)، و مکانیک یک ذخیره‌سازی key-value تکرارشده را می‌پوشاند:
 
-- a point-to-point network model where message loss is a **network partition** (pp. 111–112);
-- inherent and imposed **replication lag** (pp. 112–113);
-- **synchronous, asynchronous and quorum** replication (pp. 113–114);
-- **state-based vs. log-based** replication (p. 114);
-- **single-leader, multileader and leaderless** systems, with conflict resolution and a warning about reading from followers (pp. 114–115).
+- مدل شبکه‌ی نقطه‌به‌نقطه که در آن گم شدن پیام **پارتیشن شبکه** است (pp. 111–112)؛
+- مفهوم latency ذاتی و تحمیلی **replication** (pp. 112–113)؛
+- مفهوم replication **هم‌زمان و asynchronous و quorum** (pp. 113–114)؛
+- مفهوم replication **state-based در برابر log‌محور** (p. 114)؛
+- و سیستم‌های **تک‌leader و چند‌leader و بی‌leader**، با حل تعارض و هشداری درباره‌ی خواندن از followerها (pp. 114–115).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Redundancy = duplication + coordination.** A pile of copies isn't a system; something, from round-robin load balancing to consensus, must coordinate them (pp. 107–108).
-- **Static redundancy** keeps the same components and interactions for the system's lifetime, mostly in hardware. **Dynamic redundancy** changes them, mostly in software (p. 107).
-- **Redundancy is for reliability; partitioning is for scalability.** Replication can help scalability through load distribution, but sometimes it hurts it (p. 107).
-- **Triple modular redundancy:** three gates and a majority vote R = (a ∧ b) ∨ (b ∧ c) ∨ (a ∧ c) tolerate one failure. The majority gate is replicated too, so it isn't the new single point of failure (p. 108).
-- **"One thing" depends on your notion of equivalence.** Ten copies of SICP across three editions are 10, 8 or 2 "books" depending on what you count as the same (pp. 109–110).
-- **Replication lag is inherent**, because only one step happens at a time. **Imposed** lag comes on top, from partitions and failures (pp. 112–113).
-- **Synchronous** replication couples completion to every replica's acknowledgment. **Asynchronous** completes after the first node. **Quorum** replication waits for a majority in the foreground and replicates to the rest in the background (pp. 113–114).
-- **"Leaders for writes, followers for reads" ignores replication lag.** For the most recent data, read from the leader (p. 115).
+- **مفهوم redundancy برابر replication به‌علاوه‌ی هم‌آهنگی است.** پشته‌ای از کپی سیستم نیست؛ چیزی، از توزیع بار round-robin تا consensus، باید هم‌آهنگشان کند (pp. 107–108).
+- **مفهوم redundancy ایستا** همان مؤلفه‌ها و همان تعامل‌ها را برای کل عمر سیستم نگه می‌دارد، و بیشتر در سخت‌افزار. **redundancy پویا** عوضشان می‌کند، و بیشتر در نرم‌افزار (p. 107).
+- **مفهوم redundancy برای قابلیت اطمینان است و پارتیشن‌بندی برای مقیاس‌پذیری.** replication می‌تواند با توزیع بار به مقیاس‌پذیری کمک کند، ولی گاهی به آن صدمه می‌زند (p. 107).
+- **مفهوم redundancy سه‌گانه‌ی پودمانی:** سه gate و یک رأی اکثریت، یعنی R = (a ∧ b) ∨ (b ∧ c) ∨ (a ∧ c)، یک شکست را تحمل می‌کنند. gate اکثریت هم تکرار می‌شود تا نقطه‌ی شکست تنهای تازه نشود (p. 108).
+- **«یک چیز» به مفهوم هم‌ارزی شما بستگی دارد.** ده نسخه‌ی SICP در سه ویراست، بسته به این‌که چه چیزی را یکی به حساب بیاورید، ۱۰ یا ۸ یا ۲ «کتاب»اند (pp. 109–110).
+- **مفهوم latency replication ذاتی است**، چون در هر لحظه فقط یک قدم برداشته می‌شود. latency **تحمیلی** روی آن سوار می‌شود، از پارتیشن‌ها و شکست‌ها (pp. 112–113).
+- **مفهوم replication هم‌زمان** تمام شدن را به تأیید هر replica node می‌زند. **asynchronous** پس از نود اول تمام می‌شود. **quorum** در پیش‌زمینه منتظر اکثریت می‌ماند و بقیه را در پس‌زمینه تکرار می‌کند (pp. 113–114).
+- **«نقش leader برای نوشتن، follower برای خواندن» latency replication را نادیده می‌گیرد.** برای تازه‌ترین داده، از leader بخوانید (p. 115).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 8.1 Redundancy — p. 107
-- 8.2 Thinking about replication and consistency — p. 109
-- 8.3 Replication — p. 110
-- 8.4 The mechanics of replication — p. 111
-  - 8.4.1 System model — p. 111
-  - 8.4.2 Replication lag — p. 112
-  - 8.4.3 Synchronous vs. asynchronous replication — p. 113
-  - 8.4.4 State-based vs. log-based replication — p. 114
-  - 8.4.5 Single-leader, multileader, and leaderless systems — p. 114
+- ۸.۱ redundancy — ص. ۱۰۷
+- ۸.۲ فکر کردن درباره‌ی replication و consistency — ص. ۱۰۹
+- ۸.۳ replication — ص. ۱۱۰
+- ۸.۴ مکانیک replication — ص. ۱۱۱
+  - ۸.۴.۱ مدل سیستم — ص. ۱۱۱
+  - ۸.۴.۲ latency replication — ص. ۱۱۲
+  - ۸.۴.۳ replication هم‌زمان در برابر asynchronous — ص. ۱۱۳
+  - ۸.۴.۴ replication state-based در برابر log‌محور — ص. ۱۱۴
+  - ۸.۴.۵ سیستم‌های تک‌leader و چند‌leader و بی‌leader — ص. ۱۱۴
 
-## Notes
+## یادداشت‌ها
 
-Durability (Chapter 5) is a promise, and promises are what processes build on. If a payment processor backtracks after an acknowledgment, the merchant has shipped goods without payment (p. 106). In a theoretical model without failures, backtracking can't happen. With Crash-Stop or Crash-Recovery failures it can, unless we add redundancy (pp. 106–107).
+پایایی، از فصل ۵، یک قول است، و قول‌ها همان چیزی‌اند که فرایندها رویشان ساخته می‌شوند. اگر پردازشگر پرداخت پس از یک تأیید عقب بکشد، فروشنده کالا را بی پول فرستاده (p. 106). در مدلی نظری بدون شکست، عقب کشیدن نمی‌تواند رخ بدهد. با شکست Crash-Stop یا Crash-Recovery می‌تواند، مگر redundancy اضافه کنیم (pp. 106–107).
 
-### 8.1 Redundancy
+### ۸.۱ redundancy
 
-**Redundancy** is the duplication and coordination of subsystems, so that a higher duplication factor increases reliability and/or scalability (p. 107).
+**مفهوم redundancy** replication و هم‌آهنگی زیرسیستم‌هاست، چنان که ضریب replication بالاتر قابلیت اطمینان یا مقیاس‌پذیری یا هر دو را بالا می‌برد (p. 107).
 
-| Type | Components and interactions | Typical in (p. 107) |
+| گونه | مؤلفه‌ها و تعامل‌ها | معمولاً در (p. 107) |
 |---|---|---|
-| **Static redundancy** | Unchanged for the system's lifetime | Hardware |
-| **Dynamic redundancy** | Change during the system's lifetime | Software |
+| **redundancy ایستا** | برای کل عمر سیستم بی‌تغییر | سخت‌افزار |
+| **redundancy پویا** | در طول عمر سیستم عوض می‌شوند | نرم‌افزار |
 
-Two aha! moments (pp. 107–108):
+دو لحظه‌ی آها! (pp. 107–108):
 
-- **Redundancy and scalability.** Replication distributes *data*; load partitioning, such as round-robin load balancing across replicas, distributes *load*. Redundancy can also *decrease* scalability, as later chapters show, so the author attributes scalability to partitioning.
-- **Duplication and coordination.** Mental models usually include the copies but rarely the coordination that composes them into a coherent system.
+- **مفهوم redundancy و مقیاس‌پذیری.** replication *داده* را پخش می‌کند؛ و پارتیشن‌بندی بار، مثل توزیع بار round-robin بین replicaها، *بار* را. redundancy هم می‌تواند مقیاس‌پذیری را *کم* کند، که فصل‌های بعد نشانش می‌دهند، پس نویسنده مقیاس‌پذیری را به پارتیشن‌بندی نسبت می‌دهد.
+- **مفهوم replication و هم‌آهنگی.** مدل‌های ذهنی معمولاً کپی‌ها را دارند ولی کم‌تر آن هم‌آهنگی را که از آن‌ها سیستمی منسجم می‌سازد.
 
-**The redundant logic gate** (Figure 8.1) (p. 108):
+**مفهوم gate منطقی افزونه** (شکل ۸.۱) (p. 108):
 
-- A gate computes y = f(x₁, …, xₙ). If it fails, the system fails: it's a single point of failure.
-- Replicate it three times (a, b, c) and coordinate with a **majority gate**: R = (a ∧ b) ∨ (b ∧ c) ∨ (a ∧ c), which is true if at least two inputs are true.
-- Replicate the majority gate as well, so it doesn't become the new single point of failure.
-- The group behaves like the original gate but tolerates one failed component.
+- یک gate مقدار y = f(x₁, …, xₙ) را حساب می‌کند. اگر بشکند، سیستم می‌شکند: نقطه‌ی شکست تنهاست.
+- سه بار تکرارش کنید، یعنی a و b و c، و با یک **gate اکثریت** هم‌آهنگش کنید: R = (a ∧ b) ∨ (b ∧ c) ∨ (a ∧ c)، که اگر دست‌کم دو ورودی درست باشند درست است.
+- مفهوم gate اکثریت را هم تکرار کنید، تا نقطه‌ی شکست تنهای تازه نشود.
+- گروه مثل gate اصلی رفتار می‌کند ولی یک مؤلفه‌ی شکسته را تحمل می‌کند.
 
-**Replication**, having multiple instances of the same thing, is the most common implementation of duplication (p. 108).
+**مفهوم replication**، یعنی چند نمونه از یک چیز داشتن، رایج‌ترین پیاده‌سازی replication است (p. 108).
 
-> **Try it:** [Majority-voted redundancy](../widgets/08-majority-gate.html) — feed inputs through one gate or three replicated gates with majority voters, fail any of them (stuck at 0, stuck at 1 or flipped), and see when the output is still right; then compare the measured reliability with the formula.
+> **Try it:** [redundancy با رأی اکثریت](../widgets/08-majority-gate.html)؛ ورودی‌ها را از یک gate یا از سه gate تکرارشده با voterهای اکثریت بگذرانید، هر کدام را بشکنید، یعنی گیر‌کرده روی ۰ یا گیر‌کرده روی ۱ یا برگشته، و ببینید خروجی کجا باز هم درست است؛ بعد قابلیت اطمینان اندازه‌گرفته را با فرمول مقایسه کنید.
 
-### 8.2 Thinking about replication and consistency
+> **In practice:** redundancy فقط داده نیست: Airflow دو scheduler، Grafana دو replica و Alertmanager دو نمونه دارد.
+>
+> **Your turn:** دو replica از ClickHouse روی یک node در Kubernetes اجرا می‌شوند. redundancy دارید؟
+>
+> *Answer:* نه برای شکست node: هر دو با هم می‌افتند. pod anti-affinity یا topology spread بگذارید تا روی nodeهای جدا باشند. redundancy فقط وقتی کار می‌کند که شکست نسخه‌ها مستقل باشد (pp. 107–109).
 
-William Kent's *Data and Reality* asks **what is "one thing"?** (p. 109). The author's version (Table 8.1, Figure 8.2) (pp. 109–110):
+### ۸.۲ فکر کردن درباره‌ی replication و consistency
 
-- A library holds ten copies of *Structure and Interpretation of Computer Programs*: 3 first edition (1984), 5 second edition (1996) and 2 JavaScript edition (2022). The first two use Scheme.
+کتاب *Data and Reality* ویلیام کنت می‌پرسد **«یک چیز» چیست؟** (p. 109). روایت نویسنده (جدول ۸.۱، شکل ۸.۲) (pp. 109–110):
 
-| You consider equivalent… | Copies in stock |
+- کتابخانه‌ای ده نسخه از *Structure and Interpretation of Computer Programs* دارد: ۳ از ویراست اول در ۱۹۸۴، ۵ از ویراست دوم در ۱۹۹۶ و ۲ از ویراست JavaScript در ۲۰۲۲. دو ویراست اول Scheme به کار می‌برند.
+
+| چیزهایی که هم‌ارز می‌گیرید… | نسخه‌های موجود |
 |---|---|
-| Any edition | 10 |
-| Only the Scheme editions | 8 |
-| Only the JavaScript edition | 2 |
+| هر ویراستی | ۱۰ |
+| فقط ویراست‌های Scheme | ۸ |
+| فقط ویراست JavaScript | ۲ |
 
-Replication and consistency are about whether physical items *represent* the logical item. That means **identity and equivalence**, oneness and sameness, and the ambiguity is intrinsic to distributed systems (p. 110).
+مفهوم replication و consistency درباره‌ی این‌اند که آیا قلم‌های فیزیکی قلم منطقی را *نمایش می‌دهند*. یعنی **هویت و هم‌ارزی**، یکی بودن و همان بودن، و این ابهام ذاتی سیستم‌های توزیع‌شده است (p. 110).
 
-### 8.3 Replication
+### ۸.۳ replication
 
-**Replication** represents one logical object by multiple *identical* physical objects, called **replicas**, to get past the reliability limits of a single object (Figure 8.3) (p. 110). **Replication transparency** is the system's ability to hide that there are many objects and give the illusion of one. Discussing it means balancing what to conceal and what to reveal, and trading consistency, availability and latency (p. 110).
+**مفهوم replication** یک object منطقی را با چند object فیزیکی *یکسان* نمایش می‌دهد، که **replica** نامیده می‌شوند، تا از سقف قابلیت اطمینان یک object تنها رد شود (شکل ۸.۳) (p. 110). **شفافیت replication** توانایی سیستم است در پنهان کردن این‌که objectها چند تا هستند و دادن توهم یکی بودن. حرف زدن درباره‌اش یعنی سنجیدن این‌که چه چیزی را پنهان و چه چیزی را آشکار کنیم، و بده‌بستان consistency و availability و latency (p. 110).
 
-### 8.4 The mechanics of replication
+### ۸.۴ مکانیک replication
 
-Stateless components can be replicated too, such as redundant logic gates or load-balanced stateless services. It's so straightforward that we rarely call it replication. The chapter focuses on **stateful** components, which hold most of the complexity (p. 111). It uses a replicated key–value store (Figure 8.4), ignores partitioning, and assumes the whole dataset fits on one node (p. 111).
+مؤلفه‌های stateless هم می‌توانند تکرار شوند، مثل gateهای منطقی افزونه یا سرویس‌های stateless پشت توزیع بار. آن‌قدر سرراست است که کم اسمش را replication می‌گذاریم. فصل روی مؤلفه‌های **stateful** تمرکز می‌کند، که بیشتر پیچیدگی را دارند (p. 111). یک ذخیره‌سازی key-value تکرارشده را به کار می‌برد (شکل ۸.۴)، پارتیشن‌بندی را نادیده می‌گیرد، و فرض می‌کند کل مجموعه‌داده روی یک نود جا می‌شود (p. 111).
 
-Complexity comes from **change**: a static object is easy to replicate (p. 111). The aha! moment is that not all change is equal. Suppose you only care whether a counter exceeds 10 (p. 111):
+پیچیدگی از **تغییر** می‌آید: تکرار کردن یک object ایستا آسان است (p. 111). لحظه‌ی آها! این است که همه‌ی تغییرها یکسان نیستند. فرض کنید فقط برایتان مهم است که یک شمارنده از ۱۰ گذشته یا نه (p. 111):
 
-| Counter supports | Does a new change invalidate "it's above 10"? |
+| شمارنده چه چیزی را پشتیبانی می‌کند | آیا تغییری تازه «از ۱۰ بالاتر است» را باطل می‌کند؟ |
 |---|---|
-| Increment and reset | Yes: a reset takes it back to 0 |
-| Increment only | No: once above 10, it stays above 10. This is **monotonicity** |
+| افزودن و reset | بله: یک reset آن را به ۰ برمی‌گرداند |
+| فقط افزودن | نه: همین که از ۱۰ گذشت، بالاتر می‌ماند. این **یکنوایی** است |
 
-#### 8.4.1 System model (pp. 111–112)
+#### ۸.۴.۱ مدل سیستم (pp. 111–112)
 
-The same partially synchronous model with Crash-Stop, Omission and Crash-Recovery failures. Two differences from earlier chapters:
+همان مدل نیمه‌هم‌زمان با شکست‌های Crash-Stop و Omission و Crash-Recovery. دو تفاوت با فصل‌های پیش:
 
-- The network is modelled as **point-to-point links** between components instead of a central hub, which makes **network partitions** easy to picture.
-- Message loss is attributed to a partition: a temporary, intermittent or permanent failure of one or more links. Figure 8.5 has one client, three replicas, and a partition between replica 1 and replica 2.
+- شبکه به‌جای یک hub مرکزی به‌شکل **پیوندهای نقطه‌به‌نقطه** بین مؤلفه‌ها مدل می‌شود، که تصویر کردن **پارتیشن شبکه** را آسان می‌کند.
+- گم شدن پیام به یک پارتیشن نسبت داده می‌شود: شکست موقت یا متناوب یا دائم یک یا چند پیوند. شکل ۸.۵ یک کلاینت و سه replica دارد، و پارتیشنی بین replica ۱ و replica ۲.
 
-#### 8.4.2 Replication lag (pp. 112–113)
+#### ۸.۴.۲ latency replication (pp. 112–113)
 
-Only one component or the network takes a step at a time, so an update reaches replicas **one after another**. Figure 8.6 shows x₁, x₂ and x₃ becoming 2 in turn. Lag is an inherent aspect of replicated systems, not just a delay, and it is the source of many problems, including lost replication transparency (p. 112).
+در هر لحظه فقط یک مؤلفه یا شبکه قدمی برمی‌دارد، پس یک به‌روزرسانی **یکی پس از دیگری** به replicaها می‌رسد. شکل ۸.۶ نشان می‌دهد که x₁ و x₂ و x₃ به‌نوبت ۲ می‌شوند. latency جنبه‌ای ذاتی از سیستم‌های تکرارشده است و نه فقط یک معطلی، و سرچشمه‌ی خیلی از مسئله‌هاست، از جمله از دست رفتن شفافیت replication (p. 112).
 
-![Four successive states of three replicas: all are 1, then x1 becomes 2, then x2, then x3](../figures/08-06.png)
+![چهار حالت پشت‌سر‌هم از سه replica: اول همه ۱ هستند، بعد x1 دو می‌شود، بعد x2، بعد x3](../figures/08-06.png)
 
-*Figure 8.6 (p. 112): every intermediate state is one in which replicas disagree.*
+*Figure 8.6 (p. 112): هر حالت میانی حالتی است که در آن replicaها با هم اختلاف دارند.*
 
-| Lag | Cause (p. 113) |
+| latency | علت (p. 113) |
 |---|---|
-| **Inherent** | The nature of distributed systems: unavoidable |
-| **Imposed** | Network partitions and component failures: additional |
+| **ذاتی** | سرشت سیستم‌های توزیع‌شده: ناگزیر |
+| **تحمیلی** | پارتیشن‌های شبکه و شکست مؤلفه‌ها: اضافه |
 
-#### 8.4.3 Synchronous vs. asynchronous replication (pp. 113–114)
+#### ۸.۴.۳ replication هم‌زمان در برابر asynchronous (pp. 113–114)
 
-| Mode | An operation is complete when… | Replication runs | Effect |
+| حالت | یک عملیات کِی تمام است… | replication کجا اجرا می‌شود | اثر |
 |---|---|---|---|
-| **Synchronous** (Figure 8.7) | Every other node has acknowledged | In the foreground | Immediate consistency; latency and availability depend on every node |
-| **Asynchronous** (Figure 8.8) | The initial node has processed it | In the background | Better latency and availability, at a cost in consistency |
-| **Quorum (hybrid)** | A majority has acknowledged | Foreground within the quorum, background outside it | Common in practice |
+| **هم‌زمان** (شکل ۸.۷) | وقتی هر نود دیگری تأیید کرده باشد | در پیش‌زمینه | consistency فوری؛ latency و availability به هر نودی وابسته‌اند |
+| **asynchronous** (شکل ۸.۸) | وقتی نود آغازگر پردازشش کرده باشد | در پس‌زمینه | latency و availability بهتر، به بهای consistency |
+| **quorum که دوگانه است** | وقتی اکثریتی تأیید کرده باشد | درون quorum پیش‌زمینه، و بیرونش پس‌زمینه | در عمل رایج |
 
-Either way, replicas can be updated sequentially or in parallel (Figures 8.7–8.8).
+هر طور که باشد، replicaها می‌توانند پشت‌سر‌هم یا موازی به‌روز شوند (شکل‌های ۸.۷ و ۸.۸).
 
-![Timelines of a client and three nodes: the client's request to node 1 stays open while node 1 replicates to node 2 and node 3, and the response returns only after both acknowledge](../figures/08-07.png)
+![خط‌های زمان یک کلاینت و سه نود: درخواست کلاینت به نود ۱ باز می‌ماند در حالی که نود ۱ به نود ۲ و نود ۳ تکرار می‌کند، و پاسخ تنها پس از تأیید هر دو برمی‌گردد](../figures/08-07.png)
 
-*Figure 8.7 (p. 113): synchronous — the client waits through the replication.*
+*Figure 8.7 (p. 113): هم‌زمان؛ کلاینت تا پایان replication منتظر می‌ماند.*
 
-![The same timelines, but node 1 answers the client at once and replicates to node 2 and node 3 afterwards](../figures/08-08.png)
+![همان خط‌های زمان، ولی نود ۱ فوری به کلاینت پاسخ می‌دهد و پس از آن به نود ۲ و نود ۳ تکرار می‌کند](../figures/08-08.png)
 
-*Figure 8.8 (p. 113): asynchronous — the client's answer comes before the replicas have the change.*
+*Figure 8.8 (p. 113): ناهم‌زمان؛ پاسخ کلاینت پیش از آن می‌آید که replicaها تغییر را داشته باشند.*
 
-#### 8.4.4 State-based vs. log-based replication (p. 114)
+#### ۸.۴.۴ replication state-based در برابر log‌محور (p. 114)
 
-Assume a **deterministic state machine**, `step : State → Operation → State`: replicas that start in the same state and apply the same operations in the same order reach the same state. Then there are two options. For a counter starting at 0 with `increment-by(2)` then `increment-by(3)`:
+یک **state machine قطعی** فرض بگیرید، یعنی `step : State → Operation → State`: replicaهایی که از یک حالت شروع می‌کنند و همان عملیات را به همان ترتیب اعمال می‌کنند به همان حالت می‌رسند. آن‌وقت دو گزینه دارید. برای شمارنده‌ای که از ۰ شروع می‌شود و `increment-by(2)` و بعد `increment-by(3)` می‌گیرد:
 
-| Replicate… | Messages on the wire |
+| چه چیزی را تکرار کنیم… | پیام‌هایی که روی سیم می‌روند |
 |---|---|
-| **State** (or a diff of it) | `counter = 2`, `counter = 5` |
-| **Log** (the operations) | `increment-by(2)`, `increment-by(3)` |
+| **حالت** یا تفاوتش | `counter = 2`، `counter = 5` |
+| **log** یعنی خود عملیات | `increment-by(2)`، `increment-by(3)` |
 
-Log-based replication is "emerging as the industry favorite" (p. 114).
+مفهوم replication لاگ‌محور «در حال سر در آوردن به‌عنوان محبوب صنعت» است (p. 114).
 
-> **Try it:** [Replicating a counter](../widgets/08-replication-modes.html) — issue `increment-by(n)` operations to a leader with two followers, switch between synchronous, asynchronous and quorum acknowledgment and between state-based and log-based messages, then cut a link to turn inherent lag into imposed lag.
+> **Try it:** [تکرار کردن یک شمارنده](../widgets/08-replication-modes.html)؛ عملیات `increment-by(n)` را به یک leader با دو follower بدهید، بین تأیید هم‌زمان و asynchronous و quorum و بین پیام‌های state-based و log‌محور جابه‌جا شوید، بعد پیوندی را قطع کنید تا latency ذاتی تحمیلی شود.
 
-#### 8.4.5 Single-leader, multileader, and leaderless systems (pp. 114–115)
+#### ۸.۴.۵ سیستم‌های تک‌leader و چند‌leader و بی‌leader (pp. 114–115)
 
-Leaders are authorized to accept and handle requests; followers may not process requests directly (Figure 8.9):
+همه‌ی leaderها مجازند درخواست بپذیرند و رسیدگی کنند؛ و followerها شاید نتوانند درخواست را یک‌راست پردازش کنند (شکل ۸.۹):
 
-![Three configurations of clients and nodes: single-leader, where two clients reach one black leader that feeds three followers; multileader, where clients reach either of two leaders, each feeding its followers; and leaderless, where every client talks to every node](../figures/08-09.png)
+![سه چیدمان از کلاینت‌ها و نودها: تک‌leader، که دو کلاینت به یک leader سیاه می‌رسند که سه follower را خورانده؛ چند‌leader، که کلاینت‌ها به هر یک از دو leader می‌رسند و هر کدام followerهای خودش را می‌خوراند؛ و بی‌leader، که هر کلاینتی با هر نودی حرف می‌زند](../figures/08-09.png)
 
-*Figure 8.9 (p. 115): the black squares are the nodes allowed to accept writes — one, several, or (leaderless) every node.*
+*Figure 8.9 (p. 115): مربع‌های سیاه همان نودهایی‌اند که مجازند نوشتن بپذیرند؛ یکی، یا چندتا، یا در بی‌leader هر نودی.*
 
-| Configuration | Who accepts operations | Strength | Weakness |
+| چیدمان | چه کسی عملیات می‌پذیرد | قوت | ضعف |
 |---|---|---|---|
-| **Single-leader** | One leader, which propagates changes to followers | A chain of command | The leader is a single point of failure, almost negating the point of replication |
-| **Multileader** | Any of several leaders | No single point of failure | Concurrent operations conflict, so conflict resolution is needed |
-| **Leaderless** | Any node | No leader at all | Conflict resolution is needed |
+| **تک‌leader** | یک leader، که تغییرها را به followerها می‌رساند | زنجیره‌ی فرمان | leader نقطه‌ی شکست تنهاست، که تقریباً هدف replication را نقض می‌کند |
+| **چند‌leader** | هر یک از چند leader | نقطه‌ی شکست تنهایی ندارد | عملیات هم‌زمان تعارض می‌کنند، پس حل تعارض لازم است |
+| **بی‌leader** | هر نودی | هیچ leaderی ندارد | حل تعارض لازم است |
 
-Conflict resolution ranges from timestamp-based **last write wins** to **CRDTs**, and neither is simple in practice. Last write wins can unexpectedly overwrite a write from the client's point of view (p. 115).
+حل تعارض از **آخرین نوشتن می‌برد** بر پایه‌ی timestamp تا **CRDT** را در بر می‌گیرد، و هیچ‌کدام در عمل ساده نیست. آخرین نوشتن می‌برد می‌تواند از دید کلاینت نوشتنی را به‌طور غیرمنتظره روی‌نویسی کند (p. 115).
 
-**Aha! moment: are leaders for writes and followers for reads?** That's a common configuration, but it neglects replication lag. Followers may not have the latest data, so for the most up-to-date reads, go to the leader (p. 115).
+**لحظه‌ی آها!: آیا leaderها برای نوشتن‌اند و followerها برای خواندن؟** چیدمانی رایج است، ولی latency replication را نادیده می‌گیرد. شاید followerها تازه‌ترین داده را نداشته باشند، پس برای به‌روزترین خواندن سراغ leader بروید (p. 115).
 
-## Trade-offs at a glance
+> **In practice:** replication در ClickHouse asynchronous و multi-leader است: insert به هر replica می‌رود و بقیه از Keeper می‌فهمند چه partی را fetch کنند.
+>
+> **Your turn:** insert به replica A موفق شد و A پیش از آن‌که B part را بگیرد دیسکش را از دست داد. داده کجاست؟
+>
+> *Answer:* از دست رفته، مگر insert با `insert_quorum=2` نوشته شده باشد. replication asynchronous یعنی تأیید به کاربر پیش از رسیدن داده به replica دوم؛ latency کمتر به بهای پنجره‌ای که در آن داده فقط یک نسخه دارد (pp. 111–116).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌خرد | چه هزینه‌ای دارد |
 |---|---|---|
-| Synchronous replication | Immediate consistency | Latency, and availability limited by the slowest or failed replica |
-| Asynchronous replication | Latency, availability | Lag: stale reads, and lost writes if the leader fails |
-| Quorum replication | Tolerates a minority of slow or failed replicas | A majority round trip per write |
-| State-based | Simple; tolerates lost or duplicated messages if the full state is sent | Large messages; overwrites concurrent changes |
-| Log-based | Small messages; the full history | Needs every operation once, in order (Chapter 4) |
-| Single-leader | No write conflicts | Single point of failure (Chapter 10 replaces leaders safely) |
-| Multileader or leaderless | Write availability | Conflict resolution: LWW loses writes; CRDTs constrain the data model |
-| Reads from followers | Read scalability | Stale data |
+| replication هم‌زمان | consistency فوری | تأخیر، و availability محدود به کندترین یا شکسته‌ترین replica |
+| replication asynchronous | تأخیر، availability | عقب‌ماندگی: خواندن کهنه، و از دست رفتن نوشتن اگر leader بشکند |
+| replication quorum | اقلیتی از replicaهای کند یا شکسته را تحمل می‌کند | یک رفت‌و‌برگشت اکثریت برای هر نوشتن |
+| state-based | ساده؛ اگر کل حالت فرستاده شود پیام گم‌شده یا تکراری را تحمل می‌کند | پیام‌های بزرگ؛ تغییرهای هم‌زمان را روی‌نویسی می‌کند |
+| log‌محور | پیام‌های کوچک؛ کل تاریخ | هر عملیات را دقیقاً یک بار و به ترتیب لازم دارد، از فصل ۴ |
+| تک‌leader | تعارض نوشتن ندارد | نقطه‌ی شکست تنها؛ فصل ۱۰ leaderها را ایمن عوض می‌کند |
+| چند‌leader یا بی‌leader | availability نوشتن | حل تعارض: آخرین نوشتن می‌برد نوشتن را می‌بازد، و CRDT مدل داده را محدود می‌کند |
+| خواندن از followerها | مقیاس‌پذیری خواندن | داده‌ی کهنه |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Reliability of triple modular redundancy.** If each gate works with probability p, independently, the majority of three works with probability 3p² − 2p³ (ignoring the voter). That's better than a single gate only when p > 0.5, and by p = 0.99 the probability of failure drops from 1% to about 0.03%. The [majority-redundancy lab](../lab/08-majority-redundancy/README.md) checks the formula by simulation, including with a single, unreplicated voter.
-- **State-based vs. operation-based CRDTs** mirror §8.4.4. State-based CRDTs ship states that merge with a join (commutative, associative, idempotent), which tolerates duplicated and reordered messages. Operation-based CRDTs ship operations and need reliable causal delivery. [Database Internals Ch. 11](../../database-internals/chapters/11-replication-and-consistency.md) has a CRDT simulation.
-- **Lag anomalies by name.** Reading from followers produces specific anomalies: read-your-writes violations, non-monotonic reads and causality violations. [DDIA Ch. 6](../../designing-data-intensive-applications/chapters/06-replication.md) names them, and its replication simulation shows each one.
+- **قابلیت اطمینان redundancy سه‌گانه‌ی پودمانی.** اگر هر gate با احتمال p و مستقل کار کند، اکثریت سه‌تا با احتمال 3p² − 2p³ کار می‌کند، با نادیده گرفتن voter. این فقط وقتی از یک gate تنها بهتر است که p > 0.5 باشد، و در p = 0.99 احتمال شکست از ۱٪ به حدود ۰٫۰۳٪ می‌افتد. [آزمایش redundancy اکثریتی](../lab/08-majority-redundancy/README.md) فرمول را با شبیه‌سازی می‌سنجد، از جمله با یک voter تنها و تکرار‌نشده.
+- **همه‌ی CRDTهای state-based در برابر عملیات‌محور** آینه‌ی بخش ۸.۴.۴‌اند. CRDTهای state-based حالت می‌فرستند که با یک join جوش می‌خورد، یعنی commutative و associative و idempotent، که پیام تکراری و بی‌ترتیب را تحمل می‌کند. CRDTهای عملیات‌محور عملیات می‌فرستند و تحویل علّی قابل اطمینان لازم دارند. [فصل ۱۱ کتاب Database Internals](../../database-internals/chapters/11-replication-and-consistency.md) یک شبیه‌سازی CRDT دارد.
+- **ناهنجاری‌های تأخیر، با نامشان.** خواندن از followerها ناهنجاری‌های معینی می‌سازد: نقض خواندن نوشته‌های خود، خواندن ناـیکنوا و نقض علیت. [فصل ۶ کتاب DDIA](../../designing-data-intensive-applications/chapters/06-replication.md) نامشان را می‌برد، و شبیه‌سازی replicationش هر کدام را نشان می‌دهد.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [5. Transactions](05-transactions.md) (durability as a promise), [7. Partitioning](07-partitioning.md) (the other half: parts vs. wholes), [9. Consistency](09-consistency.md) (what replicas are allowed to show), [10. Distributed consensus](10-distributed-consensus.md) (replacing a failed leader safely), [2. System models, order, and time](02-system-models-order-and-time.md) (the failure model).
-- **Run it:** [Majority-voted redundancy](../lab/08-majority-redundancy/README.md) — simulates single gates and triple modular redundancy at different per-gate reliabilities and compares the measured system reliability with 3p² − 2p³.
+- **فصل‌های مرتبط:** [فصل ۵: تراکنش](05-transactions.md) که پایایی را به‌شکل یک قول دارد، [فصل ۷: پارتیشن‌بندی](07-partitioning.md) که نیمه‌ی دیگر است، یعنی بخش‌ها در برابر کل‌ها، [فصل ۹: consistency](09-consistency.md) که آن چیزی را دارد که replicaها مجازند نشان بدهند، [فصل ۱۰: consensus توزیع‌شده](10-distributed-consensus.md) که عوض کردن ایمن leader شکسته را دارد، و [فصل ۲: مدل سیستم، ترتیب و زمان](02-system-models-order-and-time.md) که مدل شکست را دارد.
+- **Run it:** [redundancy با رأی اکثریت](../lab/08-majority-redundancy/README.md)؛ gateهای تنها و redundancy سه‌گانه‌ی پودمانی را در قابلیت اطمینان‌های مختلف هر gate شبیه‌سازی می‌کند و قابلیت اطمینان اندازه‌گرفته‌ی سیستم را با 3p² − 2p³ مقایسه می‌کند.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why does the book insist on "duplication *and* coordination"?**
+1. **چرا کتاب روی «replication *و* هم‌آهنگی» پا می‌فشارد؟**
 
-   *Answer:* A collection of copies isn't a system. Something must compose them into a coherent whole, from round-robin load balancing to a consensus protocol (p. 108).
+   *Answer:* مجموعه‌ای از کپی سیستم نیست. چیزی باید از آن‌ها کلی منسجم بسازد، از توزیع بار round-robin تا یک پروتکل consensus (p. 108).
 
-2. **How do static and dynamic redundancy differ?**
+2. **مفهوم redundancy ایستا و پویا چه تفاوتی دارند؟**
 
-   *Answer:* In static redundancy, the components and their interactions don't change during the system's lifetime (mostly hardware). In dynamic redundancy they do (mostly software) (p. 107).
+   *Answer:* در redundancy ایستا، مؤلفه‌ها و تعامل‌هایشان در طول عمر سیستم عوض نمی‌شوند، که بیشتر سخت‌افزار است. در redundancy پویا عوض می‌شوند، که بیشتر نرم‌افزار است (p. 107).
 
-3. **In the redundant gate design, why is the majority gate replicated too?**
+3. **در طرح gate افزونه، چرا gate اکثریت هم تکرار می‌شود؟**
 
-   *Answer:* Otherwise the single majority gate would become the new single point of failure (p. 108).
+   *Answer:* وگرنه آن gate اکثریت تنها نقطه‌ی شکست تنهای تازه می‌شد (p. 108).
 
-4. **What makes a counter that only increments "monotonic" with respect to "is it above 10"?**
+4. **چه چیزی شمارنده‌ای را که فقط می‌افزاید نسبت به «آیا از ۱۰ بالاتر است» یکنوا می‌کند؟**
 
-   *Answer:* Once it's above 10, no later change can invalidate that knowledge. A reset operation could (p. 111).
+   *Answer:* همین که از ۱۰ بالاتر رفت، هیچ تغییر بعدی نمی‌تواند آن دانش را باطل کند. یک عملیات reset می‌توانست (p. 111).
 
-5. **Which replication mode completes an operation as soon as the first node has processed it?**
-   - [ ] Synchronous
-   - [x] Asynchronous
-   - [ ] Quorum
+5. **کدام حالت replication عملیات را به‌محض پردازش شدن در نود اول تمام می‌کند؟**
+   - [ ] هم‌زمان
+   - [x] asynchronous
+   - [ ] quorum
 
-   *Answer:* Asynchronous replication runs in the background (p. 113).
+   *Answer:* replication asynchronous در پس‌زمینه اجرا می‌شود (p. 113).
 
-6. **What does each approach send for `increment-by(2)` then `increment-by(3)`, starting from 0?**
+6. **هر رویکرد برای `increment-by(2)` و بعد `increment-by(3)` از ۰ چه می‌فرستد؟**
 
-   *Answer:* State-based sends `counter = 2` and `counter = 5`. Log-based sends `increment-by(2)` and `increment-by(3)` (p. 114).
+   *Answer:* state-based `counter = 2` و `counter = 5` را می‌فرستد. log‌محور `increment-by(2)` و `increment-by(3)` را (p. 114).
 
-7. **What's wrong with "leaders handle writes, followers handle reads"?**
+7. **«همه‌ی leaderها نوشتن را رسیدگی می‌کنند و followerها خواندن را» چه اشکالی دارد؟**
 
-   *Answer:* It ignores replication lag. Followers may return stale data, so up-to-date reads must go to the leader (p. 115).
+   *Answer:* latency replication را نادیده می‌گیرد. شاید followerها داده‌ی کهنه برگردانند، پس خواندن به‌روز باید سراغ leader برود (p. 115).

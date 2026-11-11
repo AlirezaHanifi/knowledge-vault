@@ -3,248 +3,262 @@ book: think-distributed-systems
 chapter: 3
 title: "Failure tolerance"
 pages: "40–54"
+translated_title: "تحمل شکست"
+lang: fa
 ---
 
-# 3. Failure tolerance
+# فصل ۳: تحمل شکست
 
-[← 2. System models, order, and time](02-system-models-order-and-time.md) · [Book](../README.md) · [4. Message delivery and processing →](04-message-delivery-and-processing.md)
+[فصل ۲: مدل سیستم، ترتیب و زمان →](02-system-models-order-and-time.md) · [کتاب](../README.md) · [فصل ۴: تحویل و پردازش پیام ←](04-message-delivery-and-processing.md)
 
-## Summary
+## خلاصه
 
-**Failure tolerance** is the guarantee that a system behaves in a well-defined way even when failures occur (p. 40). The chapter treats the topic first in theory and then in practice.
+**تحمل شکست** تضمین این است که سیستم حتی وقتی شکست می‌افتد به شکلی خوب‌تعریف‌شده رفتار می‌کند (p. 40). فصل موضوع را اول در نظریه و بعد در عمل می‌گیرد.
 
-In theory, a failure is an unwanted but possible state transition from a legal to an illegal state. Failure tolerance is classified by which of safety and liveness survives the failure: **masking**, **nonmasking** or **fail-safe** (pp. 41–44).
+در نظریه، شکست گذاری ناخواسته ولی ممکن از حالتی قانونی به حالتی غیرقانونی است. تحمل شکست بر حسب این که کدام یک از ایمنی و liveness از شکست جان سالم می‌برد رده‌بندی می‌شود: **masking** یا **nonmasking** یا **fail-safe** (pp. 41–44).
 
-In practice, the chapter uses **service orchestration**: a process of steps, each a request to a service provider, where partial application is undesirable (pp. 44–46). Failure handling is **detection**, which ensures safety, plus **mitigation**, which ensures liveness (p. 46). Failures are classified spatially as **application-level or platform-level** and temporally as **transient, intermittent or permanent** (pp. 47–50). Detectors can't be both complete and accurate in a partially synchronous system (pp. 50–51). Mitigation is **backward recovery** (compensation) or **forward recovery** (retries) (p. 52). The chapter ends with an escalating strategy: retry immediately, retry with backoff, suspend and repair, and finally hand the failure to the application, and to humans if compensation fails too (pp. 52–53).
+در عمل، فصل از **ارکستراسیون سرویس** استفاده می‌کند: فرایندی از مرحله‌ها که هر کدام درخواستی به یک تأمین‌کننده‌ی سرویس است، و اعمال جزئی نامطلوب است (pp. 44–46). مدیریت شکست یعنی **تشخیص**، که ایمنی را تضمین می‌کند، به‌علاوه‌ی **کاهش**، که liveness را تضمین (p. 46). شکست‌ها مکانی به **سطح برنامه یا سطح بستر** رده‌بندی می‌شوند و زمانی به **transient و گاه‌به‌گاه و دائمی** (pp. 47–50). detectorها در سیستمی partially synchronous نمی‌توانند هم کامل باشند و هم دقیق (pp. 50–51). کاهش یا **بازیابی رو‌به‌عقب** است، یعنی جبران، یا **بازیابی رو‌به‌جلو**، یعنی تلاش دوباره (p. 52). فصل با راهبردی پله‌پله تمام می‌شود: تلاش دوباره‌ی فوری، تلاش دوباره با backoff، معلق کردن و تعمیر، و دست آخر دادن شکست به برنامه، و به آدم‌ها اگر جبران هم شکست بخورد (pp. 52–53).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **A system state is legal, illegal or intolerable.** Normal transitions keep or restore legality; failure transitions make the system illegal. Recovery is the path back to a legal state. Intolerable states are out of scope by definition (pp. 41–42).
-- **Masking** keeps safety and liveness, **nonmasking** keeps liveness only, **fail-safe** keeps safety only, and a system that keeps neither isn't failure-tolerant (Table 3.1) (pp. 42–43).
-- **A process must apply totally or not at all.** Recovery must be observably equivalent to total application (forward) or to no application (backward). Completeness is to distributed systems what ACID is to databases (p. 45).
-- **Detection ensures safety; mitigation ensures liveness.** A consensus node that can't reach its quorum stops answering (safety), and starts again when it rejoins (liveness) (p. 46).
-- **Handle a failure at the lowest layer that can handle it correctly and completely** (the end-to-end argument). `InsufficientFunds` is application-level; `CouldNotConnect` is platform-level (p. 48).
-- **The temporal classes are conditional probabilities:** transient P(F2 | F1) = P(F2); intermittent P(F2 | F1) > P(F2); permanent P(F2 | F1) = 1. The first two autorepair; permanent failures need manual repair (pp. 48–50).
-- **The witness of a crash is a timeout.** Under partial synchrony and an unreliable network, no detector is both complete (no misses) and accurate (no mistakes) (p. 51).
-- **Escalate.** Retry immediately, then with backoff, then suspend, repair and resume. Only then treat the failure as application-level. If compensation fails, the human layer takes over (pp. 52–53).
+- **حالت سیستم یا قانونی است یا غیرقانونی یا تحمل‌ناپذیر.** گذارهای عادی قانونی بودن را نگه می‌دارند یا برمی‌گردانند؛ گذارهای شکست سیستم را غیرقانونی می‌کنند. بازیابی مسیر برگشت به حالتی قانونی است. حالت‌های تحمل‌ناپذیر طبق تعریف بیرون از دامنه‌اند (pp. 41–42).
+- **روش masking** ایمنی و liveness را نگه می‌دارد، **nonmasking** فقط liveness را، **fail-safe** فقط ایمنی را، و سیستمی که هیچ‌کدام را نگه ندارد تحمل‌کننده‌ی شکست نیست (جدول ۳.۱) (pp. 42–43).
+- **یک فرایند باید کامل اعمال شود یا اصلاً نشود.** بازیابی باید به‌چشم با اعمال کامل هم‌ارز باشد، یعنی رو‌به‌جلو، یا با هیچ اعمالی، یعنی رو‌به‌عقب. کامل بودن برای سیستم‌های توزیع‌شده همان است که ACID برای دیتابیس‌هاست (p. 45).
+- **تشخیص ایمنی را تضمین می‌کند و کاهش liveness را.** نود consensusی که به quorumش نمی‌رسد جواب دادن را متوقف می‌کند، یعنی ایمنی، و وقتی دوباره بپیوندد از سر می‌گیرد، یعنی liveness (p. 46).
+- **شکست را در پایین‌ترین لایه‌ای مدیریت کنید که می‌تواند درست و کامل مدیریتش کند**، یعنی استدلال سر‌تا‌سری. خطای `InsufficientFunds` سطح برنامه است و `CouldNotConnect` سطح بستر (p. 48).
+- **رده‌های زمانی احتمال شرطی‌اند:** transient یعنی P(F2 | F1) = P(F2)؛ گاه‌به‌گاه یعنی P(F2 | F1) > P(F2)؛ دائمی یعنی P(F2 | F1) = 1. دوتای اول خود‌تعمیر‌اند و شکست دائمی به تعمیر دستی نیاز دارد (pp. 48–50).
+- **شاهد یک crash یک timeout است.** زیر partially synchronousی و روی شبکه‌ای نامطمئن، هیچ detectorی هم کامل است، یعنی چیزی را از دست نمی‌دهد، و هم دقیق، یعنی اشتباه نمی‌کند (p. 51).
+- **پله‌پله بالا بروید.** تلاش دوباره‌ی فوری، بعد با backoff، بعد معلق کردن و تعمیر و از سر گرفتن. و فقط بعدش شکست را سطح برنامه ببینید. اگر جبران شکست بخورد، لایه‌ی انسانی تحویل می‌گیرد (pp. 52–53).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 3.1 In theory — p. 41
-- 3.2 Types of failure tolerance — p. 42
-  - 3.2.1 Masking failure tolerance — p. 42
-  - 3.2.2 Nonmasking failure tolerance — p. 42
-  - 3.2.3 Fail-safe failure tolerance — p. 43
-  - 3.2.4 None of the above — p. 43
-- 3.3 In practice — p. 44
-  - 3.3.1 System model — p. 44
-  - 3.3.2 Failure handling — p. 46
-  - 3.3.3 Failure classification — p. 47
-  - 3.3.4 Failure detection — p. 50
-  - 3.3.5 Failure mitigation — p. 52
-  - 3.3.6 Putting everything together — p. 52
+- ۳.۱ در نظریه — ص. ۴۱
+- ۳.۲ گونه‌های تحمل شکست — ص. ۴۲
+  - ۳.۲.۱ تحمل شکست masking — ص. ۴۲
+  - ۳.۲.۲ تحمل شکست nonmasking — ص. ۴۲
+  - ۳.۲.۳ تحمل شکست fail-safe — ص. ۴۳
+  - ۳.۲.۴ هیچ‌کدام از بالایی‌ها — ص. ۴۳
+- ۳.۳ در عمل — ص. ۴۴
+  - ۳.۳.۱ مدل سیستم — ص. ۴۴
+  - ۳.۳.۲ مدیریت شکست — ص. ۴۶
+  - ۳.۳.۳ رده‌بندی شکست — ص. ۴۷
+  - ۳.۳.۴ تشخیص شکست — ص. ۵۰
+  - ۳.۳.۵ کاهش شکست — ص. ۵۲
+  - ۳.۳.۶ کنار هم گذاشتن همه چیز — ص. ۵۲
 
-## Notes
+## یادداشت‌ها
 
-The book uses *failure* rather than fault or error, and *failure tolerance* rather than fault tolerance, because the three terms have no universally accepted distinction (p. 41).
+کتاب واژه‌ی *شکست* را به‌جای عیب یا خطا به کار می‌برد، و *تحمل شکست* را به‌جای تحمل عیب، چون این سه واژه تمایزی جهان‌پذیرفته ندارند (p. 41).
 
-### 3.1 In theory
+### ۳.۱ در نظریه
 
-Informally, a **failure** is an unwanted but possible state transition from a good state to a bad one (p. 41). Formally (Figure 3.1):
+غیررسمی، **شکست** گذاری ناخواسته ولی ممکن از حالتی خوب به حالتی بد است (p. 41). رسمی (شکل ۳.۱):
 
-![Nested regions: legal states inside illegal states inside intolerable states; numbered dots show 1 a normal transition between legal states, 2 a failure transition from legal to illegal, 3 normal transitions from illegal back to legal, and 4 a failure transition between illegal states](../figures/03-01.png)
+![ناحیه‌های تو‌در‌تو: حالت‌های قانونی داخل حالت‌های غیرقانونی داخل حالت‌های تحمل‌ناپذیر؛ نقطه‌های شماره‌دار نشان می‌دهند ۱ گذار عادی بین حالت‌های قانونی، ۲ گذار شکست از قانونی به غیرقانونی، ۳ گذارهای عادی از غیرقانونی به قانونی، و ۴ گذار شکست بین حالت‌های غیرقانونی](../figures/03-01.png)
 
-*Figure 3.1 (p. 41): transitions 2 and 3 are the ones that matter — a failure takes the system out of the legal region, and recovery is the sequence of normal transitions that brings it back (p. 42).*
+*Figure 3.1 (p. 41): گذارهای ۲ و ۳ آن‌هایی‌اند که مهم‌اند؛ شکست سیستم را از ناحیه‌ی قانونی بیرون می‌برد، و بازیابی دنباله‌ی گذارهای عادی است که برش می‌گرداند (p. 42).*
 
-Intolerable states are excluded from discussions of failure-tolerant computing, because by definition we don't try to tolerate them. The book's example is the earth being hit by a meteor (p. 42).
+حالت‌های تحمل‌ناپذیر از بحث محاسبات تحمل‌کننده‌ی شکست کنار گذاشته می‌شوند، چون طبق تعریف نمی‌کوشیم تحملشان کنیم. نمونه‌ی کتاب برخورد شهاب‌سنگ به زمین است (p. 42).
 
-### 3.2 Types of failure tolerance
+### ۳.۲ گونه‌های تحمل شکست
 
-Without failures, a system guarantees both safety and liveness. With failures, we may have to compromise (Table 3.1) (p. 42):
+بی شکست، سیستم هم ایمنی و هم liveness را تضمین می‌کند. با شکست، ممکن است مجبور به مصالحه شویم (جدول ۳.۱) (p. 42):
 
-| | **Safe** | **Not safe** |
+| | **ایمن** | **ناایمن** |
 |---|---|---|
-| **Live** | **Masking**: failure transparency, the most desirable and possibly too costly or impossible, as with CAP (Chapter 9) | **Nonmasking**: may make mistakes, but keeps making progress |
-| **Not live** | **Fail-safe**: makes no mistakes, but may stop | **None of the above**: not failure-tolerant, arguably unacceptable |
+| **زنده** | **masking**: شفافیت شکست، مطلوب‌ترین و شاید زیادی گران یا ناممکن، مثل CAP در فصل ۹ | **nonmasking**: می‌تواند خطا کند، ولی پیشرفت را ادامه می‌دهد |
+| **نازنده** | **fail-safe**: خطا نمی‌کند، ولی می‌تواند بایستد | **هیچ‌کدام از بالایی‌ها**: تحمل‌کننده‌ی شکست نیست، و می‌شود گفت پذیرفتنی هم نیست |
 
-The book's FIFO queue example (pp. 42–43):
+نمونه‌ی صف FIFO کتاب (pp. 42–43):
 
-- A **nonmasking** queue keeps delivering messages during a failure, possibly out of order.
-- A **fail-safe** queue stops delivering to avoid delivering out of order.
+- صفی **nonmasking** در طول شکست به تحویل پیام ادامه می‌دهد، احتمالاً بی‌ترتیب.
+- صفی **fail-safe** تحویل را متوقف می‌کند تا بی‌ترتیب تحویل ندهد.
 
-The one-variable example (Listing 3.1, Figure 3.2) (pp. 43–44):
+نمونه‌ی تک‌متغیری (فهرست ۳.۱، شکل ۳.۲) (pp. 43–44):
 
-- Process P has x ∈ {0, 1, 2, 3}, starting at 1.
-- Normal transitions alternate 1 ↔ 2. A repair transition takes 0 → 1. A failure transition takes any x ≠ 0 to 0.
-- Safety: x is 1 or 2. Liveness: x will eventually be 1, and eventually be 2.
-- When x = 0 the system is not safe but still live, so it is **nonmasking** failure-tolerant.
-- x = 3 is intolerable: nothing guarantees the system ever leaves it.
+- مفهوم process P مقدار x را در مجموعه‌ی {۰، ۱، ۲، ۳} دارد و از ۱ شروع می‌کند.
+- گذارهای عادی بین ۱ و ۲ یکی‌در‌میان می‌روند. یک گذار تعمیر، ۰ را به ۱ می‌برد. و یک گذار شکست، هر x ناصفری را به ۰.
+- ایمنی: مقدار x یا ۱ است یا ۲. liveness: مقدار x سرانجام ۱ می‌شود و سرانجام ۲.
+- وقتی x برابر ۰ است، سیستم ایمن نیست ولی باز هم زنده است، پس تحمل شکستش **nonmasking** است.
+- مقدار x برابر ۳ تحمل‌ناپذیر است: هیچ چیز تضمین نمی‌کند سیستم هیچ‌وقت از آن بیرون بیاید.
 
-> **Try it:** [Masking, nonmasking, fail-safe](../widgets/03-failure-tolerance.html) — inject failures into Listing 3.1's process and into the book's FIFO queue, switch the queue between nonmasking and fail-safe, and watch which property (safety or liveness) each one gives up while the failure lasts.
+> **Try it:** [masking و nonmasking و fail-safe](../widgets/03-failure-tolerance.html)؛ در process فهرست ۳.۱ و در صف FIFO کتاب شکست تزریق کنید، صف را بین nonmasking و fail-safe جابه‌جا کنید، و ببینید تا وقتی شکست هست هر کدام کدام خاصیت، یعنی ایمنی یا زنده‌بودن، را رها می‌کند.
 
-### 3.3 In practice
+> **In practice:** پیش از هر طراحی بپرسید وقتی یک جزء می‌افتد، کدام ویژگی‌ها باید بمانند: safety، liveness، یا هر دو.
+>
+> **Your turn:** وقتی ClickHouse در دسترس نیست، loader باید چه کند: fail شود یا داده را جایی نگه دارد و بعداً بنویسد؟
+>
+> *Answer:* Parquet در staging همین نقش را دارد: loader تمام می‌شود و کار ClickHouse بعداً تکرار می‌شود، پس liveness حفظ می‌شود بی‌آن‌که safety قربانی شود. اگر staging هم نباشد، fail شدن، یعنی تحمل fail-safe، بهتر از نوشتن نیمه‌کاره است (pp. 42–44).
 
-Retries are covered in depth in Chapter 4 (p. 44).
+### ۳.۳ در عمل
 
-#### 3.3.1 System model (pp. 44–46)
+تلاش دوباره عمیق در فصل ۴ پوشانده می‌شود (p. 44).
 
-**Service orchestration** (Figure 3.3): a service consumer runs a **process**, a sequence of steps, each a request–response exchange with a service provider (Figure 3.4).
+#### ۳.۳.۱ مدل سیستم (pp. 44–46)
 
-| Outcome | Meaning |
+**ارکستراسیون سرویس** (شکل ۳.۳): یک consumer سرویس یک **فرایند** را اجرا می‌کند، یعنی دنباله‌ای از مرحله‌ها که هر کدام تبادل درخواست و پاسخ با یک تأمین‌کننده‌ی سرویس است (شکل ۳.۴).
+
+| پیامد | معنا |
 |---|---|
-| **Total application** | Every step succeeds: correct state → correct state |
-| **Partial application** | A failure stops it partway: correct state → possibly incorrect state |
+| **اعمال کامل** | هر مرحله موفق می‌شود: حالت درست به حالت درست |
+| **اعمال جزئی** | شکستی وسط راه متوقفش می‌کند: حالت درست به حالتی که ممکن است نادرست باشد |
 
-On failure, the process must end up either (p. 45):
+سر شکست، فرایند باید دست آخر یکی از این دو باشد (p. 45):
 
-- **correct and desirable**: observably equivalent to total application (forward recovery), or
-- **correct but less desirable**: observably equivalent to no application (backward recovery).
+- **درست و مطلوب**: به‌چشم هم‌ارز با اعمال کامل، یعنی بازیابی رو‌به‌جلو، یا
+- **درست ولی کم‌مطلوب‌تر**: به‌چشم هم‌ارز با هیچ اعمالی، یعنی بازیابی رو‌به‌عقب.
 
-The running example is an e-commerce checkout with a *Charge credit card* step. The card must be charged exactly once if checkout succeeds and not at all if it fails, and never if goods aren't shipped or tickets aren't issued (Figure 3.5) (p. 46).
+نمونه‌ی جاری، پرداخت یک فروشگاه اینترنتی با مرحله‌ی *شارژ کارت اعتباری* است. کارت باید اگر پرداخت موفق شود exactly-once شارژ شود و اگر شکست بخورد اصلاً نه، و هیچ‌وقت اگر کالا ارسال نشود یا بلیت صادر نشود (شکل ۳.۵) (p. 46).
 
-#### 3.3.2 Failure handling (p. 46)
-
-```mermaid
-flowchart LR
-    H[Failure handling] --> D[Failure detection] --> S([ensures safety])
-    H --> M[Failure mitigation] --> L([ensures liveness])
-```
-
-*After Figure 3.6.* The aha! moment: detecting a failure and *inhibiting dangerous actions* preserves safety, while mitigating it restores liveness. Consensus algorithms such as Paxos, Raft and Viewstamped Replication show both. A node that can't take part in the quorum refrains from answering (detection, safety), and resumes once it rejoins (mitigation, liveness) (p. 46).
-
-#### 3.3.3 Failure classification (pp. 47–50)
-
-Two orthogonal dimensions (Figure 3.7):
-
-**Spatial: where the failure is handled** (pp. 47–48).
-
-- *Thinking in layers* (Figure 3.9): higher layers make downcalls to lower ones, and lower layers occasionally make upcalls through registered callbacks.
-- From any layer's point of view, that layer is the **application** and everything below it is the **platform**. Things are characterized by the role they play in context (an idea the book credits to Eugenia Cheng).
-- The **end-to-end argument**: handle a failure in the lowest layer (viewed from the top down) that can detect and mitigate it correctly and completely (Figure 3.10).
-
-| Failure | Level | Why (p. 48) |
-|---|---|---|
-| `InsufficientFunds` | **Application** | Meaningless to the platform; only the application can resolve it |
-| `CouldNotConnect` | **Platform** | The platform can mitigate it correctly and completely by reconnecting |
-
-**Temporal: when it recurs** (pp. 48–50), using `CouldNotConnect` as the example:
-
-| Class | Definition | Repair | Cause in the example |
-|---|---|---|---|
-| **Transient** (come and go) | P(F2 \| F1) = P(F2) | Autorepair, quickly | A router restart |
-| **Intermittent** (linger) | P(F2 \| F1) > P(F2) | Autorepair, after a delay | An outdated routing table |
-| **Permanent** (here to stay) | P(F2 \| F1) = 1 | Manual | An expired certificate, so an operator must install a new one |
-
-#### 3.3.4 Failure detection (pp. 50–52)
-
-Most texts follow Chandra and Toueg: each process has a local failure-detector module that keeps a list of processes it *suspects* have crashed (p. 50). The author casts a wider net. A failure detector is a **witness**, a predicate that confirms an unwanted transition into an illegal state, and is often built into the algorithm itself (p. 50).
-
-- Application- and platform-level failures are often detected simply from a step's return code: `InsufficientFunds` or `CouldNotConnect` (p. 51).
-- *Complete unavailability* needs message exchange at set intervals (p. 51):
-  - **Pull**: the observer sends requests and expects a response within a time window.
-  - **Push**: the observed component sends **heartbeats**.
-- The witness of a crash is a **timeout**. It's certain only in a synchronous system over a reliable network. Otherwise, a missing message may just be delayed or lost (p. 51).
-
-| Property | Means | Violated by |
-|---|---|---|
-| **Complete** | Every actual failure is eventually detected | Misses (false negatives) |
-| **Accurate** | Every detected failure is an actual failure | Mistakes (false positives) |
-
-In a partially synchronous or asynchronous system over an unreliable network, a detector **can't be both** (p. 51).
-
-*Who supervises the supervisor?* Erlang/OTP supervision trees are the best-known answer, but eventually you reach intolerable territory and human intervention (pp. 51–52).
-
-#### 3.3.5 Failure mitigation (p. 52)
-
-| Technique | Moves the system to a state equivalent to… | Repair the cause? | Typical level and form |
-|---|---|---|---|
-| **Backward recovery** | the initial legal state | Usually not needed: we don't push past the failure | Application level: **compensation** |
-| **Forward recovery** | the final legal state | Required: we push past the failure | Platform level: **retries** |
-
-#### 3.3.6 Putting everything together (pp. 52–53)
-
-The ideal strategy for an orchestrated process (Figure 3.16):
-
-![A failure passes through a chain of assumptions: platform-level transient with autorepair (retry), platform-level intermittent with autorepair (retry), platform-level permanent with manual repair (repair and retry), and finally application-level; any successful retry leads to success, and the last failure leads to failure](../figures/03-16.png)
-
-*Figure 3.16 (p. 53): each failed retry escalates to a more pessimistic assumption about the failure.*
+#### ۳.۳.۲ مدیریت شکست (p. 46)
 
 ```mermaid
 flowchart LR
-    F([failure]) --> Q{"unambiguously<br/>application-level?"}
-    Q -- yes --> APP["application: backward recovery<br/>(compensate completed steps)"]
-    Q -- no --> R1["assume transient:<br/>immediate retry"]
-    R1 -- fails --> R2["assume intermittent:<br/>retries with backoff"]
-    R2 -- fails --> R3["assume permanent:<br/>suspend, repair, resume and retry"]
-    R3 -- fails --> APP
-    R1 & R2 & R3 -- succeeds --> OK([success])
-    APP -- "compensation fails<br/>(refund fails)" --> HUM["human layer:<br/>operators, or a mailed refund check"]
+    H[مدیریت شکست] --> D[تشخیص شکست] --> S([ایمنی را تضمین می‌کند])
+    H --> M[کاهش شکست] --> L([liveness را تضمین می‌کند])
 ```
 
-*The vault's flow, adding the application-level path (p. 52) and the "Be vigilant" note (p. 53) to Figure 3.16.*
+*بر پایه‌ی شکل ۳.۶.* لحظه‌ی آها!: تشخیص یک شکست و *بازداشتن از کنش‌های خطرناک* ایمنی را حفظ می‌کند، و کاهشش liveness را برمی‌گرداند. الگوریتم‌های consensus مثل Paxos و Raft و Viewstamped Replication هر دو را نشان می‌دهند. نودی که نمی‌تواند در quorum شرکت کند از جواب دادن خودداری می‌کند، یعنی تشخیص و ایمنی، و همین که دوباره بپیوندد از سر می‌گیرد، یعنی کاهش و liveness (p. 46).
 
-> **Try it:** [Escalating failure handling](../widgets/03-escalation.html) — run the checkout's *Charge credit card* step against transient, intermittent and permanent `CouldNotConnect` failures and an `InsufficientFunds` failure, and watch the strategy escalate from immediate retry to backoff, to suspend and repair, to compensation.
+#### ۳.۳.۳ رده‌بندی شکست (pp. 47–50)
 
-## Trade-offs at a glance
+دو بعد متعامد (شکل ۳.۷):
 
-| Choice | Buys | Costs |
+**مکانی: شکست کجا مدیریت می‌شود** (pp. 47–48).
+
+- *فکر کردن در لایه‌ها* (شکل ۳.۹): لایه‌های بالاتر به پایین‌تر‌ها فراخوانی رو‌به‌پایین می‌زنند، و لایه‌های پایین‌تر گاهی از راه callbackهای ثبت‌شده فراخوانی رو‌به‌بالا می‌زنند.
+- از نگاه هر لایه‌ای، آن لایه **برنامه** است و هر چیزی زیرش **بستر**. چیزها با نقشی که در زمینه بازی می‌کنند مشخص می‌شوند؛ ایده‌ای که کتاب به Eugenia Cheng نسبت می‌دهد.
+- **استدلال سر‌تا‌سری**: شکست را در پایین‌ترین لایه، از نگاه بالا به پایین، مدیریت کنید که بتواند درست و کامل تشخیصش بدهد و کاهشش بدهد (شکل ۳.۱۰).
+
+| شکست | سطح | چرا (p. 48) |
 |---|---|---|
-| Masking tolerance | Failure transparency | Expensive, and sometimes impossible (CAP) |
-| Nonmasking tolerance | Progress during failure | Possible mistakes, such as out-of-order delivery |
-| Fail-safe tolerance | No mistakes | Stalls during failure |
-| Short timeout | Fast, complete detection | Inaccurate: false suspicions |
-| Long timeout | Accurate detection | Slow detection: misses for longer |
-| Backward recovery | No need to fix the cause | The process doesn't complete, and compensation can fail too |
-| Forward recovery | The process completes | The cause must be repaired; retries need idempotence (Chapter 4) |
+| خطای `InsufficientFunds` | **برنامه** | برای بستر بی‌معناست؛ فقط برنامه می‌تواند حلش کند |
+| خطای `CouldNotConnect` | **بستر** | بستر می‌تواند با اتصال دوباره درست و کامل کاهشش بدهد |
 
-## Beyond the book
+**زمانی: کِی تکرار می‌شود** (pp. 48–50)، با `CouldNotConnect` به‌عنوان نمونه:
 
-- **How much backoff?** The book stops at "retries with a backoff strategy" (p. 53). A common choice is capped exponential backoff with jitter: wait a random time in [0, min(cap, base·2ⁿ)] so that many clients retrying together don't synchronize. The [retry-strategies lab](../lab/03-retry-strategies/README.md) compares immediate, fixed and exponential retries against the three temporal failure classes.
-- **Fault, error, failure.** The book drops the classic distinction, which runs from fault (cause) to error (incorrect internal state) to failure (observable deviation) in Avizienis, Laprie and colleagues' dependability taxonomy. Other books, including [DDIA Ch. 2](../../designing-data-intensive-applications/chapters/02-defining-nonfunctional-requirements.md), use that distinction, so translate when comparing.
-- **The φ-accrual detector** replaces the binary timeout with a continuous suspicion level, so each application picks its own completeness/accuracy trade-off. [Database Internals Ch. 9](../../database-internals/chapters/09-failure-detection.md) has a simulation, and [DDIA Ch. 9](../../designing-data-intensive-applications/chapters/09-the-trouble-with-distributed-systems.md) one for choosing a timeout.
+| رده | تعریف | تعمیر | علت در نمونه |
+|---|---|---|---|
+| **transient**، یعنی می‌آید و می‌رود | P(F2 \| F1) = P(F2) | خود‌تعمیر، تند | راه‌اندازی دوباره‌ی یک router |
+| **گاه‌به‌گاه**، یعنی می‌ماند | P(F2 \| F1) > P(F2) | خود‌تعمیر، بعد از latencyی | جدول مسیریابی از‌رده‌خارج |
+| **دائمی**، یعنی durable است | P(F2 \| F1) = 1 | دستی | گواهی منقضی، پس اپراتور باید تازه‌ای نصب کند |
 
-## Connections
+#### ۳.۳.۴ تشخیص شکست (pp. 50–52)
 
-- **Related chapters:** [1. Thinking in distributed systems](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) (safety and liveness), [2. System models, order, and time](02-system-models-order-and-time.md) (failure models), [4. Message delivery and processing](04-message-delivery-and-processing.md) (retries and idempotence), [6. Distributed transactions](06-distributed-transactions.md) (compensation in sagas), [11. Durable executions](11-durable-executions.md) (resuming processes after failure).
-- **Run it:** [Retry strategies vs. failure classes](../lab/03-retry-strategies/README.md) — simulates transient, intermittent and permanent failures and measures success rate, attempts and time to success for each retry strategy.
+بیشتر متن‌ها Chandra و Toueg را دنبال می‌کنند: هر process ماژول failure detector محلی دارد که فهرستی از processهایی را نگه می‌دارد که *مظنون* به crash کردن‌اند (p. 50). نویسنده تور پهن‌تری می‌اندازد. یک failure detector یک **شاهد** است، یعنی محمولی که گذاری ناخواسته به حالتی غیرقانونی را تأیید می‌کند، و اغلب داخل خود الگوریتم ساخته شده (p. 50).
 
-## Check yourself
+- شکست‌های سطح برنامه و سطح بستر اغلب فقط از کد بازگشتی یک مرحله تشخیص داده می‌شوند: `InsufficientFunds` یا `CouldNotConnect` (p. 51).
+- *در دسترس نبودن کامل* به تبادل پیام در بازه‌های معین نیاز دارد (p. 51):
+  - **کشیدن**: ناظر درخواست می‌فرستد و ظرف پنجره‌ای زمانی پاسخ می‌خواهد.
+  - **هل دادن**: مؤلفه‌ی مشاهده‌شده **heartbeat** می‌فرستد.
+- شاهد یک crash یک **timeout** است. فقط در سیستمی synchronous روی شبکه‌ای مطمئن قطعی است. وگرنه، پیام غایب ممکن است فقط latency خورده یا گم شده باشد (p. 51).
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+| خاصیت | یعنی | با چه چیزی نقض می‌شود |
+|---|---|---|
+| **کامل** | هر شکست واقعی سرانجام تشخیص داده می‌شود | از دست دادن، یعنی منفی کاذب |
+| **دقیق** | هر شکست تشخیص‌داده‌شده شکستی واقعی است | اشتباه، یعنی مثبت کاذب |
 
-1. **What is failure recovery in the book's formal model?**
+در سیستمی partially synchronous یا asynchronous روی شبکه‌ای نامطمئن، detector **نمی‌تواند هر دو باشد** (p. 51).
 
-   *Answer:* The sequence of normal transitions that takes the system from an illegal state back to a legal state (pp. 41–42).
+*چه کسی ناظر را نظارت می‌کند؟* درخت‌های supervision در Erlang/OTP شناخته‌شده‌ترین پاسخ‌اند، ولی سرانجام به قلمرو تحمل‌ناپذیر و دخالت انسانی می‌رسید (pp. 51–52).
 
-2. **A queue keeps delivering during a failure but may deliver out of order. Which kind of failure tolerance is that?**
-   - [ ] Masking
-   - [x] Nonmasking
-   - [ ] Fail-safe
+#### ۳.۳.۵ کاهش شکست (p. 52)
 
-   *Answer:* It stays live but not safe, so it's nonmasking. A fail-safe queue would stop delivering instead (pp. 42–43).
+| تکنیک | سیستم را به حالتی می‌برد هم‌ارز با… | علت تعمیر شود؟ | سطح و شکل معمول |
+|---|---|---|---|
+| **بازیابی رو‌به‌عقب** | حالت قانونی اولیه | معمولاً لازم نیست: از شکست رد نمی‌شویم | سطح برنامه: **جبران** |
+| **بازیابی رو‌به‌جلو** | حالت قانونی نهایی | لازم است: از شکست رد می‌شویم | سطح بستر: **تلاش دوباره** |
 
-3. **Why is Listing 3.1's process nonmasking failure-tolerant?**
+#### ۳.۳.۶ کنار هم گذاشتن همه چیز (pp. 52–53)
 
-   *Answer:* At x = 0 it violates safety (x must be 1 or 2), but the repair transition x = 0 → x := 1 keeps it live (p. 44).
+راهبرد آرمانی برای یک فرایند ارکستر‌شده (شکل ۳.۱۶):
 
-4. **Which of failure detection and failure mitigation ensures safety, and which ensures liveness?**
+![شکستی از زنجیره‌ای از فرض‌ها رد می‌شود: سطح بستر و transient با خود‌تعمیر یعنی تلاش دوباره، سطح بستر و گاه‌به‌گاه با خود‌تعمیر یعنی تلاش دوباره، سطح بستر و دائمی با تعمیر دستی یعنی تعمیر و تلاش دوباره، و دست آخر سطح برنامه؛ هر تلاش دوباره‌ی موفق به موفقیت می‌رسد و آخرین شکست به شکست](../figures/03-16.png)
 
-   *Answer:* Detection is the basis for safety: detect the failure and inhibit dangerous actions. Mitigation is the basis for liveness: resume progress (p. 46).
+*Figure 3.16 (p. 53): هر تلاش دوباره‌ی شکست‌خورده به فرضی بدبینانه‌تر درباره‌ی شکست بالا می‌رود.*
 
-5. **Why is `CouldNotConnect` a platform-level failure but `InsufficientFunds` an application-level one?**
+```mermaid
+flowchart LR
+    F([شکست]) --> Q{"بی‌ابهام<br/>سطح برنامه است؟"}
+    Q -- بله --> APP["برنامه: بازیابی رو‌به‌عقب<br/>با جبران مرحله‌های کامل‌شده"]
+    Q -- نه --> R1["فرض transient:<br/>تلاش دوباره‌ی فوری"]
+    R1 -- "شکست می‌خورد" --> R2["فرض گاه‌به‌گاه:<br/>تلاش دوباره با backoff"]
+    R2 -- "شکست می‌خورد" --> R3["فرض دائمی:<br/>معلق کردن و تعمیر و از سر گرفتن و تلاش دوباره"]
+    R3 -- "شکست می‌خورد" --> APP
+    R1 & R2 & R3 -- "موفق می‌شود" --> OK([موفقیت])
+    APP -- "جبران شکست می‌خورد،<br/>یعنی بازگشت وجه نمی‌شود" --> HUM["لایه‌ی انسانی:<br/>اپراتورها، یا چک بازگشت وجه با پست"]
+```
 
-   *Answer:* By the end-to-end argument, a failure belongs to the lowest layer that can handle it correctly and completely. Reconnecting can fix the first at the platform level; only the application can interpret and resolve the second (p. 48).
+*جریان vault، که مسیر سطح برنامه (p. 52) و یادداشت «هوشیار باشید» (p. 53) را به شکل ۳.۱۶ اضافه می‌کند.*
 
-6. **Express transient, intermittent and permanent failures as probabilities.**
+> **Try it:** [مدیریت پله‌پله‌ی شکست](../widgets/03-escalation.html)؛ مرحله‌ی *شارژ کارت اعتباری* پرداخت را در برابر شکست‌های `CouldNotConnect` transient و گاه‌به‌گاه و دائمی و یک شکست `InsufficientFunds` اجرا کنید، و ببینید راهبرد از تلاش دوباره‌ی فوری به backoff و بعد معلق کردن و تعمیر و بعد جبران بالا می‌رود.
 
-   *Answer:* Transient: P(F2 | F1) = P(F2). Intermittent: P(F2 | F1) > P(F2). Permanent: P(F2 | F1) = 1 (pp. 49–50).
+> **In practice:** retry در Airflow و restart در Kubernetes هر دو mitigation شکست‌اند، ولی فقط برای شکست‌های transient.
+>
+> **Your turn:** task در Airflow با `retries=3` روی خطای «column not found» سه بار دیگر اجرا می‌شود و هر بار fail. این شکست را چطور رده‌بندی می‌کنید و چه باید کرد؟
+>
+> *Answer:* این شکست persistent است، نه transient: retry کمکی نمی‌کند و فقط alert را دیر می‌اندازد. خطاهای schema را non-retryable کنید، مثلاً با `AirflowFailException`، و retry را برای timeout شبکه نگه دارید. کتاب رده‌بندی شکست را پیش‌شرط انتخاب mitigation می‌داند (pp. 47–52).
 
-7. **Why can't a failure detector be both complete and accurate in a partially synchronous system?**
+## بده‌بستان‌ها در یک نگاه
 
-   *Answer:* A missing heartbeat might mean a crash, a delay or a lost message, and the detector can't tell which (p. 51).
+| انتخاب | چه می‌دهد | چه می‌گیرد |
+|---|---|---|
+| تحمل masking | شفافیت شکست | گران است و گاهی ناممکن، یعنی CAP |
+| تحمل nonmasking | پیشرفت در طول شکست | خطای ممکن، مثل تحویل بی‌ترتیب |
+| تحمل fail-safe | هیچ خطایی | در طول شکست می‌ایستد |
+| timeout کوتاه | تشخیص تند و کامل | نادقیق: شک‌های کاذب |
+| timeout بلند | تشخیص دقیق | تشخیص کند: بیشتر از دست می‌دهد |
+| بازیابی رو‌به‌عقب | لازم نیست علت درست شود | فرایند کامل نمی‌شود، و جبران هم می‌تواند شکست بخورد |
+| بازیابی رو‌به‌جلو | فرایند کامل می‌شود | علت باید تعمیر شود؛ تلاش دوباره به idempotence نیاز دارد، فصل ۴ |
 
-8. **What happens if backward recovery itself fails, for example a refund fails?**
+## فراتر از کتاب
 
-   *Answer:* The failure is escalated to the human layer. In the worst case, someone mails the customer a refund check (p. 53).
+- **چقدر backoff؟** کتاب سر «تلاش دوباره با راهبرد backoff» می‌ایستد (p. 53). انتخاب رایج، backoff نمایی سقف‌دار با jitter است: زمانی تصادفی در بازه‌ی [۰، کمینه‌ی سقف و base ضرب‌در ۲ به توان n] صبر کنید تا clientهای زیادی که با هم تلاش دوباره می‌کنند هم‌گام نشوند. [آزمایش راهبردهای تلاش دوباره](../lab/03-retry-strategies/README.md) تلاش دوباره‌ی فوری و ثابت و نمایی را در برابر سه رده‌ی زمانی شکست مقایسه می‌کند.
+- **عیب و خطا و شکست.** کتاب تمایز کلاسیک را می‌اندازد، که از عیب به‌عنوان علت تا خطا به‌عنوان حالت درونی نادرست تا شکست به‌عنوان انحراف مشاهده‌شدنی در رده‌بندی اتکا‌پذیری Avizienis و Laprie و همکاران می‌رود. کتاب‌های دیگر، از جمله [فصل ۲ کتاب DDIA](../../designing-data-intensive-applications/chapters/02-defining-nonfunctional-requirements.md)، همان تمایز را به کار می‌برند، پس سر مقایسه ترجمه‌شان کنید.
+- **نقش detector φ-accrual** timeout دودویی را با سطحی پیوسته از شک عوض می‌کند، پس هر برنامه‌ای بده‌بستان کامل بودن و دقت خودش را انتخاب می‌کند. [فصل ۹ کتاب Database Internals](../../database-internals/chapters/09-failure-detection.md) شبیه‌سازی‌اش را دارد، و [فصل ۹ کتاب DDIA](../../designing-data-intensive-applications/chapters/09-the-trouble-with-distributed-systems.md) یکی برای انتخاب timeout.
+
+## پیوندها
+
+- **فصل‌های مرتبط:** [فصل ۱: فکر کردن در سیستم‌های توزیع‌شده](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) که ایمنی و liveness را دارد، [فصل ۲: مدل سیستم، ترتیب و زمان](02-system-models-order-and-time.md) که مدل‌های شکست را دارد، [فصل ۴: تحویل و پردازش پیام](04-message-delivery-and-processing.md) که تلاش دوباره و idempotence را دارد، [فصل ۶: تراکنش توزیع‌شده](06-distributed-transactions.md) که جبران در saga را دارد، و [فصل ۱۱: اجراهای durable](11-durable-executions.md) که از سر گرفتن فرایندها بعد از شکست را دارد.
+- **Run it:** [راهبردهای تلاش دوباره در برابر رده‌های شکست](../lab/03-retry-strategies/README.md)؛ شکست‌های transient و گاه‌به‌گاه و دائمی را شبیه‌سازی می‌کند و نرخ موفقیت و شمار تلاش و زمان تا موفقیت را برای هر راهبرد تلاش دوباره اندازه می‌گیرد.
+
+## خودتان را بسنجید
+
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
+
+1. **در مدل رسمی کتاب، بازیابی شکست چیست؟**
+
+   *Answer:* دنباله‌ی گذارهای عادی که سیستم را از حالتی غیرقانونی به حالتی قانونی برمی‌گرداند (pp. 41–42).
+
+2. **صفی در طول شکست به تحویل ادامه می‌دهد ولی می‌تواند بی‌ترتیب تحویل بدهد. این کدام گونه تحمل شکست است؟**
+   - [ ] masking
+   - [x] nonmasking
+   - [ ] fail-safe
+
+   *Answer:* زنده می‌ماند ولی ایمن نه، پس nonmasking است. صفی fail-safe به‌جایش تحویل را متوقف می‌کرد (pp. 42–43).
+
+3. **چرا تحمل شکست process فهرست ۳.۱ از جنس nonmasking است؟**
+
+   *Answer:* در x برابر ۰ ایمنی را نقض می‌کند، چون x باید ۱ یا ۲ باشد، ولی گذار تعمیر از x = 0 به x := 1 زنده نگهش می‌دارد (p. 44).
+
+4. **از تشخیص شکست و کاهش شکست، کدام ایمنی را تضمین می‌کند و کدام liveness را؟**
+
+   *Answer:* تشخیص پایه‌ی ایمنی است: شکست را تشخیص بدهید و کنش‌های خطرناک را بازدارید. کاهش پایه‌ی liveness است: پیشرفت را از سر بگیرید (p. 46).
+
+5. **چرا `CouldNotConnect` شکستی سطح بستر است ولی `InsufficientFunds` سطح برنامه؟**
+
+   *Answer:* بر پایه‌ی استدلال سر‌تا‌سری، شکست به پایین‌ترین لایه‌ای تعلق دارد که می‌تواند درست و کامل مدیریتش کند. اتصال دوباره می‌تواند اولی را در سطح بستر درست کند؛ و فقط برنامه می‌تواند دومی را تفسیر و حل کند (p. 48).
+
+6. **شکست‌های transient و گاه‌به‌گاه و دائمی را به‌عنوان احتمال بیان کنید.**
+
+   *Answer:* transient: P(F2 | F1) = P(F2). گاه‌به‌گاه: P(F2 | F1) > P(F2). دائمی: P(F2 | F1) = 1 (pp. 49–50).
+
+7. **چرا یک failure detector در سیستمی partially synchronous نمی‌تواند هم کامل باشد و هم دقیق؟**
+
+   *Answer:* یک heartbeat غایب می‌تواند یعنی crash یا latency یا پیام گم‌شده، و detector نمی‌تواند بگوید کدام (p. 51).
+
+8. **اگر خود بازیابی رو‌به‌عقب شکست بخورد، مثلاً بازگشت وجه شکست بخورد، چه می‌شود؟**
+
+   *Answer:* شکست به لایه‌ی انسانی بالا می‌رود. در بدترین حالت، کسی چک بازگشت وجه را با پست برای مشتری می‌فرستد (p. 53).
