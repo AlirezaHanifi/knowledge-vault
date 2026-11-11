@@ -1,18 +1,18 @@
-# A persistent vector in Python
+# یک vector persistent به Python
 
-A list stored as a tree of tuples whose nodes hold up to *b* elements or children. Updating one element copies only the path from the root to that leaf. The script counts the nodes and slots copied per update for branching factors 2 to 64, prints the book's depth bounds, and measures the memory kept by 1,001 versions, all against copying a 100,000-element list.
+فهرستی ذخیره‌شده به‌شکل درختی از tuple که node‌هایش دست‌بالا *b* عضو یا فرزند دارند. به‌روز کردن یک عضو تنها مسیر از ریشه تا آن برگ را کپی می‌کند. اسکریپت nodeها و خانه‌های کپی‌شده در هر به‌روزرسانی را برای ضریب شاخه‌های ۲ تا ۶۴ می‌شمارد، کران‌های عمق کتاب را چاپ می‌کند، و حافظه‌ای را که ۱٬۰۰۱ version نگه می‌دارد می‌سنجد، همه در برابر کپی کردن فهرستی ۱۰۰٬۰۰۰عضوی.
 
-*Illustrates Data-Oriented Programming, chapter 9, section 9.2, pp. 178–183: path copying, depth log₂ N versus log₃₂ N, and the 10-billion-element bound. The implementation is the vault's: a fixed-size vector without the tail optimizations of production libraries (seeded).*
+*تصویری از فصل ۹ کتاب Data-Oriented Programming، بخش ۹.۲، صص. ۱۷۸–۱۸۳: کپی مسیر، عمق log₂ N در برابر log₃₂ N، و آن کران ده‌میلیاردی. پیاده‌سازی مال vault است: vectorی با اندازه‌ی ثابت بی بهینه‌سازی‌های دُم که کتابخانه‌های production دارند، با seed.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 persistent_vector.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 Updating one element of a 100,000-element list
@@ -38,13 +38,13 @@ Memory kept by 1,001 versions (1,000 random single-element updates), N = 100,000
  path copy, b=32        202,539           1.96x
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- The depth falls from 17 levels at *b* = 2 to 4 at *b* = 32. That's the log₂ versus log₃₂ the book computes, rounded up.
-- Slots copied per update grow with *b* (34 at *b* = 2, 100 at *b* = 32), against 100,000 for a full copy. The book picks 32 for the CPU: one 32-slot array is a pair of cache accesses, cheaper than chasing 17 nodes.
-- The book's numbers: log₃₂ of ten billion is 6.64, which it calls effectively constant.
-- A thousand versions keep about twice the slots of one version at *b* = 32, and a thousand times as many with full copies.
+- آن عمق از ۱۷ سطح در *b* = ۲ به ۴ سطح در *b* = ۳۲ می‌افتد. همان log₂ در برابر log₃₂ است که کتاب حساب می‌کند، رو به بالا گرد‌شده.
+- خانه‌های کپی‌شده در هر به‌روزرسانی با *b* رشد می‌کنند، یعنی ۳۴ در *b* = ۲ و ۱۰۰ در *b* = ۳۲، در برابر ۱۰۰٬۰۰۰ برای کپی کامل. کتاب ۳۲ را برای CPU برمی‌گزیند: یک آرایه‌ی ۳۲خانه‌ای جفتی دسترسی cache است، ارزان‌تر از دواندن میان ۱۷ node.
+- عددهای کتاب: مقدار log₃₂ از ده میلیارد همان ۶٫۶۴ است، که عملاً ثابتش می‌نامد.
+- هزار version در *b* = ۳۲ حدود دو برابر خانه‌های یک version را نگه می‌دارند، و با کپی کامل هزار برابر را.
 
-## Related
+## مرتبط
 
-- Chapter note: [9. Persistent data structures](../../chapters/09-persistent-data-structures.md) — section 9.2, pp. 178–183
+- یادداشت فصل: [فصل ۹: ساختارهای داده‌ی persistent](../../chapters/09-persistent-data-structures.md) — بخش ۹.۲، صص. ۱۷۸–۱۸۳

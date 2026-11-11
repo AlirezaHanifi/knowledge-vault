@@ -1,63 +1,64 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Phone-Call Deadlock</title>
-<meta name="description" content="Let Theo and Joe each pick up their own line and then dial the other at nearly the same time, see the deadlock, then replay the same conversation as text messages through an atom. Illustrates Data-Oriented Programming, chapter 8.">
+<title>deadlock تلفنی</title>
+<meta name="description" content="بگذارید تئو و جو هر کدام خط خودش را بردارد و بعد تقریباً هم‌زمان شماره‌ی آن یکی را بگیرد، آن deadlock را ببینید، بعد همان گفت‌وگو را به‌شکل پیامک از راه atomی replay کنید. تصویری از فصل ۸ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>.lane { display: grid; grid-template-columns: 70px 1fr; gap: 6px; align-items: center; margin: 6px 0; font-family: var(--mono); font-size: .82rem; }
   .bar { height: 26px; border: 1px solid var(--line); border-radius: 4px; position: relative; background: var(--surface-2); overflow: hidden; }
-  .seg { position: absolute; top: 0; bottom: 0; font-size: .7rem; display: flex; align-items: center; padding-left: 3px; white-space: nowrap; overflow: hidden; }
-  .seg.hold { background: var(--warn-soft); border-right: 1px solid var(--warn); } .seg.wait { background: var(--bad-soft); } .seg.talk { background: var(--ok-soft); } .seg.msg { background: var(--accent-soft); border-right: 1px solid var(--accent); }
+  .seg { position: absolute; top: 0; bottom: 0; font-size: .7rem; display: flex; align-items: center; padding-right: 3px; white-space: nowrap; overflow: hidden; }
+  .seg.hold { background: var(--warn-soft); border-left: 1px solid var(--warn); } .seg.wait { background: var(--bad-soft); } .seg.talk { background: var(--ok-soft); } .seg.msg { background: var(--accent-soft); border-left: 1px solid var(--accent); }
+  .bar { direction: ltr; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/08-advanced-concurrency-control.html">Chapter 8</a><span aria-hidden="true">/</span>
-      <span aria-current="page">The phone-call deadlock</span>
+      <a href="../chapters/08-advanced-concurrency-control.html">فصل ۸</a><span aria-hidden="true">/</span>
+      <span aria-current="page">deadlock تلفنی</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 8 · Advanced concurrency control</div>
-  <h1>The phone-call deadlock</h1>
-  <p class="lede">All weekend, Theo and Joe call each other at exactly the same times, and the line is always busy. Each holds one resource, his own line, and waits for the other’s. “Mutexes are like phone calls, and atoms are like text messages”: a message never waits for the other side.</p>
-  <p class="source-note">Illustrates the busy-line story and Theo’s closing analogy (pp. 164, 174). Modeling each line as a lock, the timing and the retry policy are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۸ · کنترل پیشرفته‌ی concurrency</div>
+  <h1>آن deadlock تلفنی</h1>
+  <p class="lede">تمام آخر هفته، تئو و جو درست در همان لحظه‌ها به هم تلفن می‌زنند، و خط همیشه اشغال است. هر کدام یک منبع، یعنی خط خودش، را نگه داشته و برای آن یکی منتظر است. «mutexها مانند تلفن زدن‌اند و atomها مانند پیامک»: پیامی هیچ‌وقت برای آن سو منتظر نمی‌ماند.</p>
+  <p class="source-note">تصویری از داستان خط اشغال و همانندی پایانی تئو (صص. ۱۶۴ و ۱۷۴). مدل کردن هر خط به‌شکل قفل و آن زمان‌ها و سیاست تلاش دوباره مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Timeline (minutes)</p><div id="lanes"></div><div class="callout" id="verdict" style="margin-top:8px"></div></div>
+      <div class="panel"><p class="panel-title">خط زمان، به دقیقه</p><div id="lanes"></div><div class="callout" id="verdict" style="margin-top:8px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div id="gap" style="margin-top:10px"></div><div id="hold"></div>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="giveup" checked> Hang up after waiting 5 minutes, then try again</label></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div><div id="gap" style="margin-top:10px"></div><div id="hold"></div>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="giveup" checked> پس از ۵ دقیقه انتظار گوشی را بگذارد، بعد باز تلاش کند</label></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>A deadlock needs each side to hold one resource and wait for the other</strong>: here, each caller’s own line. Starting a few minutes apart avoids it; starting together repeats it, all weekend.</li>
-    <li><strong>Hanging up and retrying</strong> breaks the deadlock only if the two retries drift apart. With identical habits they collide again, which is the book’s busy weekend.</li>
-    <li><strong>Text messages are swaps into an atom</strong>: each sender appends to the conversation without holding anything, so nobody ever waits and both messages arrive.</li>
+    <li><strong>هر deadlockی می‌خواهد که هر سو یک منبع را نگه دارد و برای آن یکی منتظر بماند</strong>: این‌جا، خط خود هر تماس‌گیرنده. چند دقیقه فاصله سر آغاز از آن می‌پرهیزد؛ و آغاز هم‌زمان تمام آخر هفته تکرارش می‌کند.</li>
+    <li><strong>گذاشتن گوشی و تلاش دوباره</strong> آن deadlock را تنها وقتی می‌شکند که آن دو تلاش دوباره از هم دور بیفتند. با عادت‌های یکسان باز به هم می‌خورند، که همان آخر هفته‌ی اشغال کتاب است.</li>
+    <li><strong>پیامک‌ها همان swap به atomی‌اند</strong>: هر فرستنده‌ای بی نگه داشتن هیچ چیزی به آن گفت‌وگو می‌افزاید، پس هیچ‌کس هیچ‌وقت منتظر نمی‌ماند و هر دو پیام می‌رسند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/08-advanced-concurrency-control.html"><small>Lesson</small>8. Advanced concurrency control</a></li>
+    <li><a href="../chapters/08-advanced-concurrency-control.html"><small>درس</small>فصل ۸: کنترل پیشرفته‌ی concurrency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -74,41 +75,41 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log")), mode = "phone", cfg = { gap: 0, hold: 2 };
   function simulate() { var T = 60, ev = { Theo: [], Joe: [] }, talk = null, tries = 0;
-    if (mode === "text") { ev.Theo.push(["msg", 0, 1, "swap: append msg"]); ev.Joe.push(["msg", cfg.gap, cfg.gap + 1, "swap: append msg"]); return { ev: ev, talk: Math.max(1, cfg.gap + 1), tries: 2, deadlocks: 0 }; }
+    if (mode === "text") { ev.Theo.push(["msg", 0, 1, "swap: افزودن پیام"]); ev.Joe.push(["msg", cfg.gap, cfg.gap + 1, "swap: افزودن پیام"]); return { ev: ev, talk: Math.max(1, cfg.gap + 1), tries: 2, deadlocks: 0 }; }
     var start = { Theo: 0, Joe: cfg.gap }, deadlocks = 0, giveup = document.getElementById("giveup").checked;
     for (var round = 0; round < 6 && talk === null; round++) { tries++;
       var a = start.Theo, b = start.Joe, aDial = a + cfg.hold, bDial = b + cfg.hold;
       // A caller holds his own line from start until dialing; if the other line is held then, he waits
-      if (aDial <= b) { ev.Theo.push(["hold", a, aDial, "picks up"]); ev.Theo.push(["talk", aDial, aDial + 8, "talking"]); ev.Joe.push(["talk", aDial, aDial + 8, "answers"]); talk = aDial; break; }
-      if (bDial <= a) { ev.Joe.push(["hold", b, bDial, "picks up"]); ev.Joe.push(["talk", bDial, bDial + 8, "talking"]); ev.Theo.push(["talk", bDial, bDial + 8, "answers"]); talk = bDial; break; }
+      if (aDial <= b) { ev.Theo.push(["hold", a, aDial, "گوشی را برمی‌دارد"]); ev.Theo.push(["talk", aDial, aDial + 8, "گفت‌وگو"]); ev.Joe.push(["talk", aDial, aDial + 8, "پاسخ می‌دهد"]); talk = aDial; break; }
+      if (bDial <= a) { ev.Joe.push(["hold", b, bDial, "گوشی را برمی‌دارد"]); ev.Joe.push(["talk", bDial, bDial + 8, "گفت‌وگو"]); ev.Theo.push(["talk", bDial, bDial + 8, "پاسخ می‌دهد"]); talk = bDial; break; }
       deadlocks++; var end = giveup ? Math.max(aDial, bDial) + 5 : T;
-      ev.Theo.push(["hold", a, aDial, "picks up"]); ev.Theo.push(["wait", aDial, end, "busy…"]); ev.Joe.push(["hold", b, bDial, "picks up"]); ev.Joe.push(["wait", bDial, end, "busy…"]);
+      ev.Theo.push(["hold", a, aDial, "گوشی را برمی‌دارد"]); ev.Theo.push(["wait", aDial, end, "اشغال…"]); ev.Joe.push(["hold", b, bDial, "گوشی را برمی‌دارد"]); ev.Joe.push(["wait", bDial, end, "اشغال…"]);
       if (!giveup) break; start = { Theo: end + 2, Joe: end + 2 + cfg.gap }; }
     return { ev: ev, talk: talk, tries: tries, deadlocks: deadlocks }; }
   function render(quiet) { var r = simulate(), L = Kit.clear(document.getElementById("lanes")), T = 60;
-    ["Theo", "Joe"].forEach(function (who) { var bar = Kit.el("div", { class: "bar", role: "img", "aria-label": who + ": " + r.ev[who].map(function (e) { return e[3] + " " + e[1] + "–" + Math.min(T, e[2]); }).join(", ") });
+    [["Theo", "تئو"], ["Joe", "جو"]].forEach(function (pair) { var who = pair[0], fa = pair[1]; var bar = Kit.el("div", { class: "bar", role: "img", "aria-label": fa + ": " + r.ev[who].map(function (e) { return e[3] + " " + e[1] + "–" + Math.min(T, e[2]); }).join(", ") });
       r.ev[who].forEach(function (e) { var l = Math.min(T, e[1]), w = Math.min(T, e[2]) - l; if (w <= 0) return; bar.appendChild(Kit.el("div", { class: "seg " + e[0], style: "left:" + (l / T * 100) + "%;width:" + (w / T * 100) + "%" }, e[3])); });
-      L.appendChild(Kit.el("div", { class: "lane" }, Kit.el("span", null, who), bar)); });
+      L.appendChild(Kit.el("div", { class: "lane" }, Kit.el("span", null, fa), bar)); });
     var v = document.getElementById("verdict"); v.className = "callout " + (r.talk === null ? "bad" : r.deadlocks ? "warn" : "ok");
-    v.textContent = mode === "text" ? "Both messages are in the conversation; nobody held a line or waited." : r.talk === null ? r.deadlocks + " deadlock(s): each holds his own line and waits for the other. No conversation in the hour." : r.deadlocks ? "Connected at minute " + r.talk + " after " + r.deadlocks + " deadlock(s)." : "Connected at minute " + r.talk + ": one called while the other was still free.";
+    v.textContent = mode === "text" ? "هر دو پیام در آن گفت‌وگو هستند؛ هیچ‌کس خطی را نگه نداشت و منتظر نماند." : r.talk === null ? r.deadlocks + " بار deadlock: هر کدام خط خودش را نگه می‌دارد و برای آن یکی منتظر است. در این یک ساعت هیچ گفت‌وگویی نشد." : r.deadlocks ? "در دقیقه‌ی " + r.talk + " وصل شدند، پس از " + r.deadlocks + " بار deadlock." : "در دقیقه‌ی " + r.talk + " وصل شدند: یکی زنگ زد در حالی که آن یکی هنوز آزاد بود.";
     if (!quiet) log.add(v.textContent, r.talk === null ? "bad" : "ok");
-    stats([["Attempts", r.tries], ["Deadlocks", r.deadlocks, r.deadlocks ? "bad" : "ok"], ["Connected at", r.talk === null ? "never" : "min " + r.talk]]); }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Medium", value: mode, options: [{ value: "phone", label: "Phone calls (mutex)" }, { value: "text", label: "Text messages (atom)" }], onChange: function (m) { mode = m; render(); } }).element);
-  document.getElementById("gap").appendChild(Kit.slider({ label: "Joe starts after Theo (min)", min: 0, max: 10, value: 0, onInput: function (v) { cfg.gap = v; render(); } }).element);
-  document.getElementById("hold").appendChild(Kit.slider({ label: "Time from pick-up to dialing (min)", min: 1, max: 5, value: 2, onInput: function (v) { cfg.hold = v; render(); } }).element);
+    stats([["تلاش‌ها", r.tries], ["deadlockها", r.deadlocks, r.deadlocks ? "bad" : "ok"], ["وصل شدن در", r.talk === null ? "هیچ‌وقت" : "دقیقه‌ی " + r.talk]]); }
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "رسانه", value: mode, options: [{ value: "phone", label: "تلفن زدن، mutex" }, { value: "text", label: "پیامک، atom" }], onChange: function (m) { mode = m; render(); } }).element);
+  document.getElementById("gap").appendChild(Kit.slider({ label: "جو چند دقیقه پس از تئو آغاز می‌کند", min: 0, max: 10, value: 0, onInput: function (v) { cfg.gap = v; render(); } }).element);
+  document.getElementById("hold").appendChild(Kit.slider({ label: "دقیقه از برداشتن گوشی تا گرفتن شماره", min: 1, max: 5, value: 2, onInput: function (v) { cfg.hold = v; render(); } }).element);
   document.getElementById("giveup").addEventListener("change", function () { render(); });
   render(true);
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why was the line always busy all weekend?",
-      options: ["The phones were broken", "Theo and Joe called each other at exactly the same times", "Joe was traveling"], answer: 1,
-      explain: "p. 164." },
-    { q: "In Theo's analogy, what are atoms like?",
-      options: ["Phone calls", "Text messages", "Voicemail"], answer: 1,
-      explain: "p. 174." },
-    { q: "Which earlier deadlock does Theo recall from the previous year?",
-      options: ["Two locks not released in the proper order", "An infinite loop", "A full disk"], answer: 0,
-      explain: "p. 165." }
+    { q: "چرا تمام آخر هفته خط همیشه اشغال بود؟",
+      options: ["تلفن‌ها خراب بودند", "تئو و جو درست در همان لحظه‌ها به هم تلفن می‌زدند", "جو در سفر بود"], answer: 1,
+      explain: "ص. ۱۶۴." },
+    { q: "در همانندی تئو، atomها مانند چه‌اند؟",
+      options: ["تلفن زدن", "پیامک", "پیام‌گیر صوتی"], answer: 1,
+      explain: "ص. ۱۷۴." },
+    { q: "تئو کدام deadlock پیشین را از سال پیش یاد می‌آورد؟",
+      options: ["دو قفل که به ترتیب درست رها نشدند", "حلقه‌ای بی‌پایان", "دیسکی پر"], answer: 0,
+      explain: "ص. ۱۶۵." }
   ]);
 })();
 </script>

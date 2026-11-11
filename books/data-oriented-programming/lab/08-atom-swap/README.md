@@ -1,18 +1,18 @@
-# Atoms in a seeded scheduler
+# ساختار atom در زمان‌بندی با seed
 
-Threads increment a shared counter of database accesses, as in the chapter's example. Each increment is split into steps, and a seeded scheduler interleaves the steps of all threads, so every strategy runs on reproducible interleavings. With no protection, the counter is read then written. With a mutex, a thread locks, reads, writes and unlocks. With an atom, it takes a snapshot, computes, and compare-and-sets, retrying on failure.
+رشته‌ها شمارنده‌ای شریک از دسترسی‌های پایگاه داده را می‌افزایند، مانند مثال این فصل. هر افزودنی به قدم‌ها شکسته می‌شود، و زمان‌بندی با seed قدم‌های همه‌ی رشته‌ها را درهم می‌بافد، پس هر راهبردی روی درهم‌رفتن‌های بازتولیدپذیر اجرا می‌شود. بی هیچ پناهی، آن شمارنده خوانده و بعد نوشته می‌شود. با mutex، رشته‌ای قفل و خوانده و نوشته و باز می‌کند. با atom، عکسی می‌گیرد، حساب می‌کند، و compare-and-set، و سر شکست از نو تلاش.
 
-*Illustrates Data-Oriented Programming, chapter 8, sections 8.1–8.2, pp. 164–170 (listings 8.1–8.3, figure 8.2). The step model and the scheduler are the vault's (seeded). A blocked thread that the scheduler picks counts one wait.*
+*تصویری از فصل ۸ کتاب Data-Oriented Programming، بخش‌های ۸.۱ و ۸.۲، صص. ۱۶۴–۱۷۰ (listingهای ۸.۱ تا ۸.۳، شکل ۸.۲). مدل قدم‌ها و آن scheduler مال vault است، با seed. رشته‌ای بندآمده که scheduler برمی‌گزیندش یک انتظار به شمار می‌آید.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 atom_swap.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 Each thread increments the counter 1,000 times; 5 seeded interleavings per row (sum shown)
@@ -39,13 +39,13 @@ extra steps in f  CAS retries  retries per update  lost
               20       10,668                2.67     0
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Without protection, updates are lost as soon as there are two threads, and more with eight.
-- The mutex and the atom never lose an update. The mutex pays in waits, the atom in compare-and-set retries.
-- Retries grow as the update function gets slower, since the window for another thread to commit widens. Yet every swap finishes: in this race between threads there is always a winner (p. 170).
-- The counts are model steps, not time. On real hardware a failed compare-and-set is cheap, and a blocked thread is descheduled rather than spinning.
+- بی پناه، همین که دو رشته باشد به‌روزرسانی گم می‌شود، و با هشت رشته بیشتر.
+- مفهوم mutex و atom هیچ‌وقت به‌روزرسانی گم نمی‌کنند. mutex با انتظار می‌پردازد و atom با تلاش دوباره‌ی compare-and-set.
+- تلاش‌های دوباره با کندتر شدن تابع به‌روزکننده رشد می‌کنند، چون پنجره‌ی commit کردن رشته‌ای دیگر پهن‌تر می‌شود. با این حال هر swapی تمام می‌کند: در این مسابقه‌ی میان رشته‌ها همیشه برنده‌ای هست (ص. ۱۷۰).
+- آن شمارش‌ها قدم‌های مدلند، نه زمان. روی سخت‌افزار واقعی compare-and-set شکست‌خورده ارزان است، و رشته‌ای بندآمده به‌جای چرخیدن از زمان‌بندی بیرون می‌رود.
 
-## Related
+## مرتبط
 
-- Chapter note: [8. Advanced concurrency control](../../chapters/08-advanced-concurrency-control.md) — sections 8.1–8.2, pp. 164–170
+- یادداشت فصل: [فصل ۸: کنترل پیشرفته‌ی concurrency](../../chapters/08-advanced-concurrency-control.md) — بخش‌های ۸.۱ و ۸.۲، صص. ۱۶۴–۱۷۰

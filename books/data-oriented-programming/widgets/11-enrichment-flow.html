@@ -1,64 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Enrichment Flow</title>
-<meta name="description" content="Choose the fields a client requests and step through the chapter 11 search endpoint: validate the request, query the database, fetch and double-filter each Open Library record, and join the two arrays by ISBN.">
+<title>جریان غنی کردن</title>
+<meta name="description" content="فیلدهایی را که clientی می‌خواهد برگزینید و قدم‌به‌قدم از endpoint جست‌وجوی فصل ۱۱ بگذرید: اعتبارسنجی درخواست، پرسش از پایگاه داده، آوردن و دوبار صافی کردن هر رکورد Open Library، و join کردن آن دو آرایه با ISBN.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
   textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; } ol.flow li { margin: 4px 0; } ol.flow li.cur { font-weight: 600; } ol.flow li.done { color: var(--ink-2); }
+  #fields code { direction: ltr; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/11-web-services.html">Chapter 11</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Enrichment flow</span>
+      <a href="../chapters/11-web-services.html">فصل ۱۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">جریان غنی کردن</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 11 · Web services</div>
-  <h1>Enrichment flow</h1>
-  <p class="lede">The enriched search endpoint passes data through seven steps, and every step takes and returns <strong>generic data</strong>: a parsed request, database rows, parsed Open Library responses, filtered with <code>_.pick</code> twice and joined by ISBN with <code>_.keyBy</code> and <code>_.merge</code>.</p>
-  <p class="source-note">Illustrates sections 11.4–11.6 (listings 11.8–11.25, pp. 227–243): the seven steps on p. 234, double field filtering with Nancy’s <code>relevantFields</code> (listing 11.9) and <code>joinArrays</code>. The Open Library records are a mock: 7 Habits follows listing 11.6, The Power of Habit is the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۱ · سرویس‌های وب</div>
+  <h1>جریان غنی کردن</h1>
+  <p class="lede">آن endpoint جست‌وجوی غنی‌شده داده را از هفت قدم می‌گذراند، و هر قدمی <strong>داده‌ی عمومی</strong> می‌گیرد و برمی‌گرداند: درخواستی بازشده، ردیف‌های پایگاه داده، پاسخ‌های بازشده‌ی Open Library که دو بار با <code>_.pick</code> صافی شده‌اند و با <code>_.keyBy</code> و <code>_.merge</code> با ISBN join شده‌اند.</p>
+  <p class="source-note">تصویری از بخش‌های ۱۱.۴ تا ۱۱.۶ (listingهای ۱۱.۸ تا ۱۱.۲۵، صص. ۲۲۷–۲۴۳): آن هفت قدم در ص. ۲۳۴، صافی دوباره‌ی فیلد با <code>relevantFields</code> نانسی در listing ۱۱.۹، و تابع <code>joinArrays</code>. رکوردهای Open Library ساختگی‌اند: کتاب 7 Habits از listing ۱۱.۶ پی می‌گیرد و The Power of Habit مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">The data flow (p. 234)</p><ol class="flow" id="flow"></ol></div>
-      <div class="panel"><p class="panel-title" id="st">Data</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
+      <div class="panel"><p class="panel-title">جریان داده (ص. ۲۳۴)</p><ol class="flow" id="flow"></ol></div>
+      <div class="panel"><p class="panel-title" id="st">داده</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><p class="panel-title">Requested fields</p><div id="fields"></div>
-        <label class="field-head" for="title" style="margin-top:8px">Title query</label><input id="title" value="habit" style="width:100%">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><p class="panel-title">فیلدهای خواسته</p><div id="fields"></div>
+        <label class="field-head" for="title" style="margin-top:8px">پرسش عنوان</label><input id="title" value="habit" style="width:100%;direction:ltr;text-align:left">
         <div id="pl" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Double filtering</strong>: Nancy’s allowed fields first, then the client’s request. A field must pass both to reach the response.</li>
-    <li><strong>Look closely at <code>relevantFields</code></strong>: it lists <code>publisher</code>, while the API returns <code>publishers</code>, so publishers never get through as printed. Request it and see.</li>
-    <li><strong>The join doesn’t assume order</strong>: both arrays are keyed by ISBN and merged, so the database’s availability and Open Library’s details meet in one flat map per book.</li>
+    <li><strong>صافی دوباره</strong>: نخست فیلدهای روای نانسی، بعد درخواست client. فیلدی باید از هر دو رد شود تا به آن پاسخ برسد.</li>
+    <li><strong>به <code>relevantFields</code> دقیق نگاه کنید</strong>: مقدار <code>publisher</code> را فهرست می‌کند، در حالی که آن API مقدار <code>publishers</code> را برمی‌گرداند، پس همان‌طور که چاپ شده ناشران هیچ‌وقت رد نمی‌شوند. بخواهیدش و ببینید.</li>
+    <li><strong>آن join ترتیبی فرض نمی‌گیرد</strong>: هر دو آرایه با ISBN کلید می‌خورند و درهم می‌آمیزند، پس در دسترس بودن از پایگاه داده و ریزکاری‌های Open Library در یک map تخت برای هر کتاب به هم می‌رسند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/11-web-services.html"><small>Lesson</small>11. Web services</a></li>
-    <li><a href="../lab/11-join-arrays/README.md"><small>Experiment</small>Joining arrays in Python</a></li>
+    <li><a href="../chapters/11-web-services.html"><small>درس</small>فصل ۱۱: سرویس‌های وب</a></li>
+    <li><a href="../lab/11-join-arrays/README.md"><small>آزمایش</small>join کردن آرایه‌ها به Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -125,7 +126,7 @@ function stats(rows) {
     "978-0812981605": { title: "The Power of Habit", subtitle: "Why We Do What We Do in Life and Business", subjects: ["Social aspects", "Habit", "Change (Psychology)"], isbn_13: ["9780812981605"], publishers: ["Random House"], revision: 3 } };
   var reqSchema = { type: "object", required: ["title", "fields"], properties: { title: { type: "string" }, fields: { type: "array", items: { enum: ENUM } } } };
   var olSchema = { allOf: [{ type: "object", required: ["title"] }, { anyOf: [{ type: "object", required: ["isbn_13"] }, { type: "object", required: ["isbn_10"] }] }] };
-  var STEPS = ["Receive the request", "Extract the query and the fields", "Retrieve matching books from the database", "Fetch Open Library information for each ISBN", "Extract the required fields (double _.pick)", "Combine with joinArrays by ISBN", "Send the response"];
+  var STEPS = ["گرفتن درخواست", "بیرون کشیدن پرسش و فیلدها", "آوردن کتاب‌های خورنده از پایگاه داده", "آوردن خبر Open Library برای هر ISBN", "بیرون کشیدن فیلدهای لازم با دو _.pick", "کنار هم گذاشتن با joinArrays بر پایه‌ی ISBN", "فرستادن پاسخ"];
   var chosen = { title: true, weight: false, number_of_pages: true, subtitle: true, publishers: false, subjects: false };
   function pick(m, ks) { var r = {}; ks.forEach(function (k) { if (k in m) r[k] = m[k]; }); return r; }
   function compute() { var req = { title: document.getElementById("title").value, fields: Object.keys(chosen).filter(function (k) { return chosen[k]; }) };
@@ -137,29 +138,29 @@ function stats(rows) {
   function render() { var c = compute(), ol = Kit.clear(document.getElementById("flow"));
     STEPS.forEach(function (s, i) { ol.appendChild(Kit.el("li", { class: i === stage ? "cur" : i < stage ? "done" : "" }, (i < stage ? "✓ " : "") + s)); });
     var out = [c.req, { title: c.req.title, fields: c.fields, valid: !c.errs.length }, c.db, c.raw, c.filtered, c.joined, JSON.stringify(c.joined)][stage];
-    document.getElementById("st").textContent = "Step " + (stage + 1) + ": " + STEPS[stage];
+    document.getElementById("st").textContent = "قدم " + (stage + 1) + ": " + STEPS[stage];
     document.getElementById("out").textContent = typeof out === "string" ? out : JSON.stringify(out, null, 2);
     var v = document.getElementById("verdict"), lostPub = chosen.publishers;
     v.className = "callout " + (c.errs.length ? "bad" : stage === 4 && lostPub ? "warn" : "ok");
-    v.textContent = c.errs.length ? "Invalid request: " + errorsText(c.errs) : stage === 3 ? "Each response validated against the Books API schema: " + c.rawErr.filter(function (n) { return !n; }).length + "/" + c.raw.length + " valid." : stage === 4 && lostPub ? "“publishers” was requested but relevantFields lists “publisher”: it is filtered out." : stage === 5 ? c.db.length + " database rows joined with " + c.filtered.length + " Open Library records, by ISBN." : "Step through the endpoint.";
-    stats([["Requested fields", c.fields.length], ["Matching books", c.db.length], ["Fields kept per book", c.filtered.length ? Object.keys(c.filtered[0]).length - 1 : 0]]); }
+    v.textContent = c.errs.length ? "درخواست نامعتبر: " + errorsText(c.errs) : stage === 3 ? "هر پاسخی با طرح Books API اعتبارسنجی شد: " + c.rawErr.filter(function (n) { return !n; }).length + " از " + c.raw.length + " معتبر." : stage === 4 && lostPub ? "فیلد «publishers» خواسته شد ولی relevantFields مقدار «publisher» را فهرست می‌کند: صافی می‌شود." : stage === 5 ? c.db.length + " ردیف پایگاه داده با " + c.filtered.length + " رکورد Open Library، بر پایه‌ی ISBN، join شد." : "قدم‌به‌قدم از آن endpoint بگذرید.";
+    stats([["فیلدهای خواسته", c.fields.length], ["کتاب‌های خورنده", c.db.length], ["فیلدهای نگه‌داشته برای هر کتاب", c.filtered.length ? Object.keys(c.filtered[0]).length - 1 : 0]]); }
   var fbox = document.getElementById("fields"); Object.keys(chosen).forEach(function (k) { var id = "f-" + k, cb = Kit.el("input", { type: "checkbox", id: id }); cb.checked = chosen[k];
-    cb.addEventListener("change", function () { chosen[k] = cb.checked; render(); log.add((cb.checked ? "Requests " : "Drops ") + k, "muted"); });
+    cb.addEventListener("change", function () { chosen[k] = cb.checked; render(); log.add("فیلد " + k + (cb.checked ? " خواسته شد" : " انداخته شد"), "muted"); });
     fbox.appendChild(Kit.el("label", { for: id, style: "display:flex;gap:6px" }, cb, Kit.el("code", null, k))); });
   document.getElementById("title").addEventListener("input", function () { render(); });
-  Kit.player({ mount: document.getElementById("pl"), interval: 1200, step: function () { if (stage >= 6) return false; stage++; log.add("Step " + (stage + 1) + ": " + STEPS[stage], "muted"); render(); return stage < 6; }, reset: function () { stage = 0; render(); } });
+  Kit.player({ mount: document.getElementById("pl"), interval: 1200, step: function () { if (stage >= 6) return false; stage++; log.add("قدم " + (stage + 1) + ": " + STEPS[stage], "muted"); render(); return stage < 6; }, reset: function () { stage = 0; render(); } });
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What is double field filtering?",
-      options: ["Filtering twice for safety", "Keeping Nancy's allowed fields, then the fields the client requested", "Filtering the database and the API"], answer: 1,
-      explain: "pp. 229–231." },
-    { q: "Why does joinArrays key both arrays by ISBN?",
-      options: ["The two arrays may list books in different orders", "For speed only", "To remove duplicates"], answer: 0,
-      explain: "pp. 236–237." },
-    { q: "Which Lodash function is like groupBy but keeps one element per key?",
+    { q: "صافی دوباره‌ی فیلد چیست؟",
+      options: ["دو بار صافی کردن برای ایمنی", "نگه داشتن فیلدهای روای نانسی، بعد فیلدهایی که client خواسته", "صافی کردن پایگاه داده و آن API"], answer: 1,
+      explain: "صص. ۲۲۹–۲۳۱." },
+    { q: "چرا joinArrays هر دو آرایه را با ISBN کلید می‌زند؟",
+      options: ["آن دو آرایه شاید کتاب‌ها را به ترتیب‌های مختلف بیاورند", "تنها برای تندی", "برای برداشتن دوباره‌ها"], answer: 0,
+      explain: "صص. ۲۳۶–۲۳۷." },
+    { q: "کدام تابع Lodash مانند groupBy است ولی برای هر کلیدی یک عضو نگه می‌دارد؟",
       options: ["_.keyBy", "_.pick", "_.at"], answer: 0,
-      explain: "p. 237." }
+      explain: "ص. ۲۳۷." }
   ]);
 })();
 </script>

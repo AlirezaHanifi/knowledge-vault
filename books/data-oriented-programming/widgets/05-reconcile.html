@@ -1,63 +1,63 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reconcile Two Mutations</title>
-<meta name="description" content="Start two mutations from the same tiny library, commit one, then the other, and watch the commit phase fast-forward, three-way merge or abort by comparing the information paths of two diffs. Illustrates Data-Oriented Programming, chapter 5.">
+<title>reconciliation دادن دو mutation</title>
+<meta name="description" content="دو mutation را از همان یک کتابخانه‌ی ناچیز آغاز کنید، یکی را commit کنید، بعد آن یکی را، و ببینید فاز commit با سنجیدن مسیرهای خبر دو diff چطور تند پیش می‌رود یا سه‌سویه درهم می‌آمیزد یا abort می‌کند. تصویری از فصل ۵ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-basic-concurrency-control.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Reconcile two mutations</span>
+      <a href="../chapters/05-basic-concurrency-control.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">reconciliation دادن دو mutation</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Basic concurrency control</div>
-  <h1>Reconcile two mutations</h1>
-  <p class="lede">Two mutations start from the same <code>previous</code> version. The first to commit simply <strong>fast-forwards</strong>. The second finds that <code>current</code> has moved: the commit diffs <code>previous→next</code> and <code>previous→current</code>, and if the two diffs touch no common information path it <strong>merges</strong>; otherwise it <strong>aborts</strong>.</p>
-  <p class="source-note">Illustrates sections 5.2 and 5.4–5.5 (pp. 94–108): the tiny Watchmen library of listing 5.6, the two mutations of listing 5.7, the diff and information paths of listings 5.4–5.12, and <code>reconcile</code> of listing 5.16, with its merge condition corrected as the chapter note explains. The other mutations are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۵ · کنترل پایه‌ی concurrency</div>
+  <h1>reconciliation دادن دو mutation</h1>
+  <p class="lede">دو mutation از همان یک version <code>previous</code> آغاز می‌شوند. نخستینی که commit کند تنها <strong>تند پیش می‌رود</strong>. دومی می‌بیند که <code>current</code> تکان خورده: آن commit دو diff از <code>previous→next</code> و <code>previous→current</code> می‌گیرد، و اگر آن دو diff هیچ مسیر خبر مشترکی را دست نزنند <strong>درهم می‌آمیزد</strong>؛ وگرنه <strong>abort می‌کند</strong>.</p>
+  <p class="source-note">تصویری از بخش‌های ۵.۲ و ۵.۴ و ۵.۵ (صص. ۹۴–۱۰۸): کتابخانه‌ی ناچیز Watchmen از listing ۵.۶، آن دو mutation از listing ۵.۷، آن diff و مسیرهای خبر از listingهای ۵.۴ تا ۵.۱۲، و تابع <code>reconcile</code> از listing ۵.۱۶ با شرط درهم‌آمیزی تصحیح‌شده‌اش، آن‌طور که یادداشت فصل می‌گوید. mutationهای دیگر مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">Mutation A</p><select id="ma" style="width:100%"></select><pre class="code" id="pa"></pre></div>
-        <div class="panel"><p class="panel-title">Mutation B</p><select id="mb" style="width:100%"></select><pre class="code" id="pb"></pre></div></div>
-      <div class="panel"><p class="panel-title">System state</p><pre class="code" id="state"></pre><div class="callout" id="verdict"></div></div>
+      <div class="grid-2"><div class="panel"><p class="panel-title">mutation A</p><select id="ma" style="width:100%"></select><pre class="code" id="pa"></pre></div>
+        <div class="panel"><p class="panel-title">mutation B</p><select id="mb" style="width:100%"></select><pre class="code" id="pb"></pre></div></div>
+      <div class="panel"><p class="panel-title">مقدار state سیستم</p><pre class="code" id="state"></pre><div class="callout" id="verdict"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><button class="btn primary" id="ca" type="button">Commit A</button> <button class="btn primary" id="cb" type="button">Commit B</button>
-        <button class="btn" id="book" type="button" style="margin-top:8px">Book’s example (listing 5.7)</button> <button class="btn" id="rs" type="button" style="margin-top:8px">↺ Reset</button></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><button class="btn primary" id="ca" type="button">commit کردن A</button> <button class="btn primary" id="cb" type="button">commit کردن B</button>
+        <button class="btn" id="book" type="button" style="margin-top:8px">مثال کتاب، listing ۵.۷</button> <button class="btn" id="rs" type="button" style="margin-top:8px">↺ از نو</button></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>The first commit is always a fast-forward</strong>: <code>current</code> is still <code>previous</code>, compared by reference, which is safe and fast with immutable data.</li>
-    <li><strong>The book’s example merges</strong>: the publication year and the title and author name live at different paths, so both mutations survive.</li>
-    <li><strong>Two mutations on the same path abort</strong> the second one, such as two members borrowing the same copy. DOP doesn’t ask anyone to resolve the conflict; the mutation is simply not committed.</li>
+    <li><strong>commit نخست همیشه پیشروی تند است</strong>: مقدار <code>current</code> هنوز همان <code>previous</code> است، سنجیده با ارجاع، که با داده‌ی immutable ایمن و تند است.</li>
+    <li><strong>مثال کتاب درهم می‌آمیزد</strong>: آن سال نشر و آن عنوان و نام نویسنده در مسیرهای مختلف می‌نشینند، پس هر دو mutation زنده می‌مانند.</li>
+    <li><strong>دو mutation روی همان یک مسیر</strong> دومی را abort می‌کنند، مانند دو عضو که همان یک نسخه را قرض می‌گیرند. روش DOP از کسی نمی‌خواهد آن ناسازی را حل کند؛ آن mutation تنها commit نمی‌شود.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-basic-concurrency-control.html"><small>Lesson</small>5. Basic concurrency control</a></li>
-    <li><a href="../lab/05-three-way-merge/README.md"><small>Experiment</small>Three-way merge in Python</a></li>
+    <li><a href="../chapters/05-basic-concurrency-control.html"><small>درس</small>فصل ۵: کنترل پایه‌ی concurrency</a></li>
+    <li><a href="../lab/05-three-way-merge/README.md"><small>آزمایش</small>three-way merge به Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -77,11 +77,11 @@ function stats(rows) {
     authorsById: { "alan-moore": { name: "Alan Moore", bookIsbns: ["978-1779501127"] }, "dave-gibbons": { name: "Dave Gibbons", bookIsbns: ["978-1779501127"] } } },
     lendings: { "book-item-1": null } }; }
   var W = ["catalog", "booksByIsbn", "978-1779501127"];
-  var MUT = [["Set the publication year to 1986", [[W.concat("publicationYear"), 1986]]],
-    ["Rename: “The Watchmen” and “David Chester Gibbons”", [[W.concat("title"), "The Watchmen"], [["catalog", "authorsById", "dave-gibbons", "name"], "David Chester Gibbons"]]],
-    ["Set the publication year to 1988", [[W.concat("publicationYear"), 1988]]],
-    ["Samantha borrows book-item-1", [[["lendings", "book-item-1"], "samantha@gmail.com"]]],
-    ["Isabel borrows book-item-1", [[["lendings", "book-item-1"], "isabel@gmail.com"]]]];
+  var MUT = [["گذاشتن سال نشر روی ۱۹۸۶", [[W.concat("publicationYear"), 1986]]],
+    ["نام‌عوض کردن: «The Watchmen» و «David Chester Gibbons»", [[W.concat("title"), "The Watchmen"], [["catalog", "authorsById", "dave-gibbons", "name"], "David Chester Gibbons"]]],
+    ["گذاشتن سال نشر روی ۱۹۸۸", [[W.concat("publicationYear"), 1988]]],
+    ["قرض گرفتن book-item-1 از سوی سامانتا", [[["lendings", "book-item-1"], "samantha@gmail.com"]]],
+    ["قرض گرفتن book-item-1 از سوی ایزابل", [[["lendings", "book-item-1"], "isabel@gmail.com"]]]];
   function isObj(x) { return x !== null && typeof x === "object"; }
   function setIn(m, p, v) { if (!p.length) return v; var r = Object.assign({}, m); r[p[0]] = setIn(m[p[0]], p.slice(1), v); return r; }
   function apply(m, sets) { return sets.reduce(function (a, s) { return setIn(a, s[0], s[1]); }, m); }
@@ -92,37 +92,37 @@ function stats(rows) {
   function reset() { previous = base(); current = previous; nexts = {}; committed = {}; outcome = null; merges = aborts = 0; compute(); render(); }
   function compute() { nexts.a = apply(previous, MUT[document.getElementById("ma").value][1]); nexts.b = apply(previous, MUT[document.getElementById("mb").value][1]); }
   function commit(k) { if (committed[k]) return; var next = nexts[k], label = k.toUpperCase();
-    if (current === previous) { current = next; outcome = ["ok", "Commit " + label + ": current is previous (same reference), so fast-forward to next."]; }
+    if (current === previous) { current = next; outcome = ["ok", "commit کردن " + label + ": مقدار current همان previous است، یعنی ارجاعی یکسان، پس تند به next پیش می‌رود."]; }
     else { var dn = diff(previous, next), dc = diff(previous, current), pn = paths(dn).map(JSON.stringify), pc = paths(dc).map(JSON.stringify);
       var common = pn.filter(function (p) { return pc.indexOf(p) >= 0; });
-      if (!common.length) { current = merge(current, dn); merges++; outcome = ["ok", "Commit " + label + ": current moved. Paths of previous→next " + pn.join(", ") + " and previous→current " + pc.join(", ") + " are disjoint: three-way merge."]; }
-      else { aborts++; outcome = ["bad", "Commit " + label + ": both diffs touch " + common.join(", ") + ". Conflicting concurrent mutations: abort."]; } }
+      if (!common.length) { current = merge(current, dn); merges++; outcome = ["ok", "commit کردن " + label + ": مقدار current تکان خورده. مسیرهای previous→next یعنی " + pn.join(", ") + " و مسیرهای previous→current یعنی " + pc.join(", ") + " جدا از همند: three-way merge."]; }
+      else { aborts++; outcome = ["bad", "commit کردن " + label + ": هر دو diff به " + common.join(", ") + " دست می‌زنند. mutationهای concurrent ناساز: abort."]; } }
     committed[k] = true; log.add(outcome[1], outcome[0]); render(); }
   function render() {
     ["a", "b"].forEach(function (k) { var d = diff(previous, nexts[k]); document.getElementById("p" + k).textContent = "diff(previous, next" + k.toUpperCase() + ")\n" + JSON.stringify(d, null, 1) + "\npaths: " + paths(d).map(JSON.stringify).join("\n       ");
       document.getElementById("c" + k).disabled = !!committed[k]; document.getElementById("m" + k).disabled = !!(committed.a || committed.b); });
     var b = current.catalog.booksByIsbn["978-1779501127"];
     document.getElementById("state").textContent = "current === previous: " + (current === previous) + "\ntitle: " + JSON.stringify(b.title) + "\npublicationYear: " + b.publicationYear + "\ndave-gibbons name: " + JSON.stringify(current.catalog.authorsById["dave-gibbons"].name) + "\nbook-item-1 lent to: " + JSON.stringify(current.lendings["book-item-1"]);
-    var v = document.getElementById("verdict"); v.className = "callout " + (outcome ? outcome[0] : ""); v.textContent = outcome ? outcome[1] : "Both mutations computed their next version from the same previous. Commit one.";
-    stats([["Commits", Object.keys(committed).length - aborts], ["Fast-forwards", Object.keys(committed).length ? 1 : 0], ["Merges", merges, merges ? "ok" : ""], ["Aborts", aborts, aborts ? "bad" : ""]]); }
+    var v = document.getElementById("verdict"); v.className = "callout " + (outcome ? outcome[0] : ""); v.textContent = outcome ? outcome[1] : "هر دو mutation version پسینشان را از همان یک previous حساب کردند. یکی را commit کنید.";
+    stats([["commitها", Object.keys(committed).length - aborts], ["پیشروی‌های تند", Object.keys(committed).length ? 1 : 0], ["درهم‌آمیزی‌ها", merges, merges ? "ok" : ""], ["abortها", aborts, aborts ? "bad" : ""]]); }
   ["ma", "mb"].forEach(function (id, i) { var s = document.getElementById(id); MUT.forEach(function (m, j) { s.appendChild(Kit.el("option", { value: j }, m[0])); }); s.value = i;
     s.addEventListener("change", function () { compute(); render(); }); });
   document.getElementById("ca").addEventListener("click", function () { commit("a"); });
   document.getElementById("cb").addEventListener("click", function () { commit("b"); });
-  document.getElementById("book").addEventListener("click", function () { document.getElementById("ma").value = 1; document.getElementById("mb").value = 0; reset(); commit("a"); log.add("Listing 5.7: current = A (title and name); next = B (year). Now commit B.", "muted"); });
-  document.getElementById("rs").addEventListener("click", function () { reset(); log.add("Both mutations start again from previous.", "muted"); });
+  document.getElementById("book").addEventListener("click", function () { document.getElementById("ma").value = 1; document.getElementById("mb").value = 0; reset(); commit("a"); log.add("نمونه‌ی listing ۵.۷: مقدار current همان A است با عنوان و نام؛ و next همان B با سال. حالا B را commit کنید.", "muted"); });
+  document.getElementById("rs").addEventListener("click", function () { reset(); log.add("هر دو mutation باز از previous آغاز می‌کنند.", "muted"); });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "When does the commit phase simply fast-forward?",
-      options: ["When the diffs are disjoint", "When current is previous, compared by reference", "Always"], answer: 1,
-      explain: "Listing 5.16, p. 107." },
-    { q: "Which two diffs does the three-way merge compare?",
-      options: ["previous→next and previous→current", "current→next and next→previous", "Only previous→next"], answer: 0,
-      explain: "pp. 95–96." },
-    { q: "What does DOP do when the two diffs share an information path?",
-      options: ["Asks the user", "Aborts the mutation", "Keeps the later value"], answer: 1,
-      explain: "pp. 95, 107." }
+    { q: "فاز commit کِی تنها تند پیش می‌رود؟",
+      options: ["وقتی آن diffها جدا از همند", "وقتی current همان previous است، سنجیده با ارجاع", "همیشه"], answer: 1,
+      explain: "listing ۵.۱۶، ص. ۱۰۷." },
+    { q: "three-way merge کدام دو diff را می‌سنجد؟",
+      options: ["از previous→next و previous→current", "از current→next و next→previous", "تنها از previous→next"], answer: 0,
+      explain: "صص. ۹۵–۹۶." },
+    { q: "روش DOP وقتی آن دو diff مسیر خبری را شریک باشند چه می‌کند؟",
+      options: ["از کاربر می‌پرسد", "آن mutation را abort می‌کند", "مقدار دیرتر را نگه می‌دارد"], answer: 1,
+      explain: "صص. ۹۵ و ۱۰۷." }
   ]);
 })();
 </script>

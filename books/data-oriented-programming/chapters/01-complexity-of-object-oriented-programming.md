@@ -2,223 +2,237 @@
 book: data-oriented-programming
 chapter: 1
 title: "Complexity of object-oriented programming"
+translated_title: "پیچیدگی برنامه‌نویسی object-oriented"
 pages: "3–25"
+lang: fa
 ---
 
-# 1. Complexity of object-oriented programming
+# ۱. پیچیدگی برنامه‌نویسی object-oriented
 
-[Book](../README.md) · [2. Separation between code and data →](02-separation-between-code-and-data.md)
+[کتاب](../README.md) · [۲. جدایی کد از داده →](02-separation-between-code-and-data.md)
 
-## Summary
+## خلاصه
 
-Theo, a senior tech lead at the agency Albatross, designs Klafim's library management prototype the classic object-oriented way. He draws a UML class diagram of nine classes and walks Dave, a junior developer, through it (pp. 4–12). The author then challenges the design. The design isn't wrong; the trouble is a tendency of OOP itself to make systems **hard to understand**, which is what "complexity" means throughout the book (p. 13). The chapter traces that complexity to four aspects of OOP (table 1.1, p. 14):
+تئو، سرپرست فنی ارشد در آژانس Albatross، نمونه‌ی اولیه‌ی سیستم مدیریت کتابخانه‌ی Klafim را به شیوه‌ی کلاسیک object-oriented طراحی می‌کند. نمودار کلاس UML از نه کلاس می‌کشد و دیو، برنامه‌نویسی جوان، را از آن می‌گذراند (pp. 4–12). بعد نویسنده همان طرح را به چالش می‌کشد. طرح غلط نیست؛ دردسر گرایشی در خود OOP است که سیستم‌ها را **دشوارفهم** می‌کند، و «پیچیدگی» در سراسر کتاب همین معنا را دارد (p. 13). فصل این پیچیدگی را به چهار وجه OOP رد می‌زند (جدول ۱.۱، ص. ۱۴):
 
-- **Code and data are mixed**, so classes take part in many relations.
-- **Objects are mutable**, so reading code takes extra thinking, and multi-threaded code needs explicit synchronization.
-- **Data is locked in objects**, so serialization isn't trivial.
-- **Code is locked in classes**, so class hierarchies get complex.
+- **کد و داده قاطی‌اند**، پس کلاس‌ها در رابطه‌های زیادی شریک می‌شوند.
+- **شیءها تغییرپذیرند**، پس خواندن کد فکر بیشتری می‌خواهد، و کد multi-threaded هم‌آهنگی صریح.
+- **داده در شیءها قفل است**، پس سریالی کردن بدیهی نیست.
+- **کد در کلاس‌ها قفل است**، پس سلسله‌مراتب کلاس‌ها پیچیده می‌شود.
 
-Two "tiny" late features, VIP members and Super members, turn Theo's hierarchy into three "Deadly Diamonds of Death," and he misses the deadline (pp. 20–24).
+دو ویژگی «ناچیز» دیررس، یعنی عضوهای VIP و عضوهای Super، سلسله‌مراتب تئو را به سه «الماس مرگ‌آور مرگ» می‌کشانند، و او مهلت را از دست می‌دهد (pp. 20–24).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Complexity means hard to understand.** The definition comes from Moseley and Marks's paper "Out of the Tar Pit" (2006). It is relative, not absolute, and has nothing to do with resource consumption (p. 13).
-- **The book isn't a critique of OOP.** DOP is compatible with both OOP and FP, and appendix A shows DOP principles applied in both styles (pp. 4, 13).
-- **Mixing code and data multiplies relations.** `Member` alone takes part in five relations; splitting every class into a code entity and a data entity leaves two independent subsystems (pp. 14–16).
-- **When data is mutable, code is unpredictable.** Reading `this.isBlocked` twice can give two answers in a multi-threaded environment, or with asynchronous code in JavaScript (pp. 16–18).
-- **Data locked in members makes serialization costly.** Every JSON endpoint needs its own query and result classes, because there is no simple generic way to access the data (pp. 18–20).
-- **Code locked in classes makes hierarchies brittle.** Reusing `addBookItem` for VIP members forces a new base class and multiple inheritance (pp. 20–24).
+- **پیچیدگی یعنی دشوارفهم.** این تعریف از مقاله‌ی «Out of the Tar Pit» موزلی و مارکس (۲۰۰۶) می‌آید. نسبی است، نه مطلق، و هیچ ربطی به مصرف منابع ندارد (p. 13).
+- **کتاب نقدی بر OOP نیست.** روش DOP با هر دو OOP و FP سازگار است، و پیوست A اصل‌های DOP را در هر دو سبک پیاده نشان می‌دهد (pp. 4, 13).
+- **قاطی کردن کد و داده رابطه‌ها را چند برابر می‌کند.** کلاس `Member` تنها در پنج رابطه شریک است؛ و شکستن هر کلاسی به یک entity کد و یک entity داده دو زیرسیستم مستقل به دست می‌دهد (pp. 14–16).
+- **وقتی داده mutable است، کد پیش‌بینی‌ناپذیر است.** دو بار خواندن `this.isBlocked` در محیطی چندرشته‌ای، یا با کد asynchronous در JavaScript، می‌تواند دو پاسخ بدهد (pp. 16–18).
+- **داده‌ی قفل‌شده در عضوها سریالی کردن را گران می‌کند.** هر endpoint از JSON کلاس‌های پرسش و نتیجه‌ی خودش را می‌خواهد، چون راه عمومی ساده‌ای برای دسترسی به داده نیست (pp. 18–20).
+- **کد قفل‌شده در کلاس‌ها سلسله‌مراتب را شکننده می‌کند.** به کار بردن دوباره‌ی `addBookItem` برای عضوهای VIP کلاس پایه‌ی تازه و وراثت چندگانه را به زور می‌آورد (pp. 20–24).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 1.1 OOP design: Classic or classical? — p. 4
-  - 1.1.1 The design phase — p. 4
-  - 1.1.2 UML 101 — p. 6
-  - 1.1.3 Explaining each piece of the class diagram — p. 9
-  - 1.1.4 The implementation phase — p. 12
-- 1.2 Sources of complexity — p. 13
-  - 1.2.1 Many relations between classes — p. 14
-  - 1.2.2 Unpredictable code behavior — p. 16
-  - 1.2.3 Not trivial data serialization — p. 18
-  - 1.2.4 Complex class hierarchies — p. 20
-- Summary — p. 24
+- ۱.۱ طراحی OOP: کلاسیک یا کلاسیکال؟ — ص. ۴
+  - ۱.۱.۱ فاز طراحی — ص. ۴
+  - ۱.۱.۲ مقدمات UML — ص. ۶
+  - ۱.۱.۳ توضیح هر تکه‌ی نمودار کلاس — ص. ۹
+  - ۱.۱.۴ فاز پیاده‌سازی — ص. ۱۲
+- ۱.۲ سرچشمه‌های پیچیدگی — ص. ۱۳
+  - ۱.۲.۱ رابطه‌های زیاد میان کلاس‌ها — ص. ۱۴
+  - ۱.۲.۲ رفتار پیش‌بینی‌ناپذیر کد — ص. ۱۶
+  - ۱.۲.۳ سریالی کردن داده که بدیهی نیست — ص. ۱۸
+  - ۱.۲.۴ سلسله‌مراتب پیچیده‌ی کلاس — ص. ۲۰
+- خلاصه — ص. ۲۴
 
-## Notes
+## یادداشت‌ها
 
-The book is a story. In the part 1 opener (pp. 1–2), Nancy, an entrepreneur, meets Theo at a coffee shop near the San Francisco Zoo. Her startup Klafim is a social network for books that lets users borrow books from local libraries, and the one piece of custom software it needs is a "Global Library Management System." She writes the prototype's requirements on a napkin, and Theo commits to deliver in two weeks.
+این کتاب داستانی است. در سرآغاز بخش ۱ (pp. 1–2)، نانسی، کارآفرینی، تئو را در کافه‌ای نزدیک باغ‌وحش سان‌فرانسیسکو می‌بیند. استارتاپ او Klafim شبکه‌ای اجتماعی برای کتاب‌هاست که می‌گذارد کاربران از کتابخانه‌های محلی کتاب قرض بگیرند، و تنها نرم‌افزار سفارشی‌ای که می‌خواهد یک «سیستم جهانی مدیریت کتابخانه» است. نیازمندی‌های نمونه‌ی اولیه را روی دستمالی می‌نویسد، و تئو قول می‌دهد در دو هفته تحویل دهد.
 
-| Klafim prototype requirement (pp. 2, 4) |
+| نیازمندی نمونه‌ی اولیه‌ی Klafim (pp. 2, 4) |
 |---|
-| Two kinds of users: library members and librarians |
-| Users log in with email and password |
-| Members can borrow books |
-| Members and librarians can search books by title or by author |
-| Librarians can block and unblock members (e.g., when they are late returning a book) |
-| Librarians can list the books currently lent to a member |
-| A book can have several copies |
-| A book belongs to a physical library |
+| دو گونه کاربر: عضوهای کتابخانه و کتابدارها |
+| کاربران با ایمیل و گذرواژه وارد می‌شوند |
+| عضوها می‌توانند کتاب قرض بگیرند |
+| عضوها و کتابدارها می‌توانند کتاب را با عنوان یا نویسنده بجویند |
+| کتابدارها می‌توانند عضوها را ببندند و باز کنند؛ مثلاً وقتی در برگرداندن کتابی دیر می‌کنند |
+| کتابدارها می‌توانند کتاب‌هایی را که همین حالا به عضوی قرض داده شده فهرست کنند |
+| هر کتابی می‌تواند چند نسخه داشته باشد |
+| هر کتابی به کتابخانه‌ای فیزیکی تعلق دارد |
 
-### 1.1 OOP design: Classic or classical?
+### ۱.۱ طراحی OOP: کلاسیک یا کلاسیکال؟
 
-Theo works at Albatross, a consulting company whose Startup department has lost its customers' trust. Management moved him there from the Enterprise department to close deals and deliver on time (p. 4).
+تئو در Albatross کار می‌کند، شرکتی مشاوره که بخش استارتاپش اعتماد مشتریانش را از دست داده. مدیریت او را از بخش Enterprise به آن‌جا کوچاند تا قرارداد ببندد و سر وقت تحویل دهد (p. 4).
 
-#### 1.1.1 The design phase
+#### ۱.۱.۱ فاز طراحی
 
-For an object-oriented programmer, every business entity is an object made from a class (p. 4). Theo identifies the main classes (p. 5):
+برای برنامه‌نویسی object-oriented، هر entity کسب‌وکار شیئی است ساخته از کلاسی (p. 4). تئو کلاس‌های اصلی را می‌یابد (p. 5):
 
-| Class | Role |
+| کلاس | نقش |
 |---|---|
-| `Library` | The central part of the design |
-| `Book` | A book |
-| `BookItem` | One copy of a book |
-| `BookLending` | Created when a book is lent |
-| `Member` | A library member |
-| `Librarian` | A librarian |
-| `User` | Base class of `Librarian` and `Member` |
-| `Catalog` | Contains a list of books |
-| `Author` | A book author |
+| `Library` | بخش مرکزی طرح |
+| `Book` | یک کتاب |
+| `BookItem` | یک نسخه از کتابی |
+| `BookLending` | وقتی کتابی قرض داده می‌شود ساخته می‌شود |
+| `Member` | عضوی از کتابخانه |
+| `Librarian` | کتابداری |
+| `User` | کلاس پایه‌ی `Librarian` و `Member` |
+| `Catalog` | فهرستی از کتاب‌ها را دارد |
+| `Author` | نویسنده‌ی کتابی |
 
-The relations are the hard part; after about two hours he has figure 1.1 (p. 6). The author notes that the design is deliberately naive: experienced OOP developers would use design patterns for a better one, but it is rich enough to start coding and to show the complexity of a typical OOP system (p. 5).
+رابطه‌ها بخش سخت کارند؛ و پس از حدود دو ساعت شکل ۱.۱ را دارد (p. 6). نویسنده می‌گوید طرح به‌عمد ساده‌لوحانه است: برنامه‌نویسان کارکشته‌ی OOP با الگوهای طراحی طرح بهتری می‌ساختند، ولی همین قدر غنی است که کدنویسی را آغاز کند و پیچیدگی سیستمی معمول از OOP را نشان دهد (p. 5).
 
-#### 1.1.2 UML 101
+#### ۱.۱.۲ مقدمات UML
 
-Theo explains the four kinds of arrows to Dave (pp. 6–9):
+تئو چهار گونه پیکان را به دیو توضیح می‌دهد (pp. 6–9):
 
-| Relation | Meaning | UML symbol |
+| رابطه | معنا | نماد UML |
 |---|---|---|
-| Composition | When one object dies, the other dies too (`Library` owns its `Catalog` one-to-one, and its `Member`s one-to-many) | Plain diamond at one edge, optional star at the other |
-| Association | Each object has an independent life cycle (`Book` and `Author`, many-to-many) | Empty diamond and a star at both edges |
-| Usage | A class uses a method of another class (`Librarian::blockMember` calls `Member::block`) | Dashed arrow |
-| Inheritance | A class derives from another (`Member` from `User`) | Plain arrow with an empty triangle, pointing at the superclass |
+| ترکیب | وقتی یک شیء می‌میرد، آن یکی هم می‌میرد؛ کلاس `Library` یک‌به‌یک مالک `Catalog` خودش است، و یک‌به‌چند مالک `Member`هایش | الماسی ساده در یک لبه، ستاره‌ای اختیاری در آن یکی |
+| تداعی | هر شیئی چرخه‌ی زندگی مستقلی دارد؛ `Book` و `Author`، چندبه‌چند | الماسی تهی و ستاره‌ای در هر دو لبه |
+| کاربرد | کلاسی متدی از کلاس دیگری را به کار می‌برد؛ `Librarian::blockMember` متد `Member::block` را صدا می‌زند | پیکانی خط‌چین |
+| وراثت | کلاسی از دیگری مشتق می‌شود؛ `Member` از `User` | پیکانی ساده با مثلثی تهی، رو به ابرکلاس |
 
-#### 1.1.3 Explaining each piece of the class diagram
+#### ۱.۱.۳ توضیح هر تکه‌ی نمودار کلاس
 
-The roles of the classes (pp. 9–12):
+نقش کلاس‌ها (pp. 9–12):
 
-- **`Library`** does nothing on its own: it delegates everything to the objects it owns, which are many `Member`s, many `Librarian`s and one `Catalog`. (The book uses *code* and *behavior* interchangeably.)
-- **`User`** has an `id`, `email` and `password`, with no security yet, and can `login`.
-- **`Member`** adds no data to `User`. It can `checkout`, `returnBook`, `block`, `unblock` and answer `isBlocked`. It owns many `BookLending`s and uses `BookItem` to implement `checkout`.
-- **`Librarian`** adds no data either. It can block and unblock a `Member`, list a member's lendings and add book items. It uses `Member`, `BookItem` and `BookLending`.
-- **`Catalog`** can `search` books and `addBookItem`, using `Librarian`. It owns many `Book`s.
-- **`Book`** has an `id` and a `title`. It is associated with many `Author`s and owns many `BookItem`s.
-- **`BookItem`** has an `id` and a `libId`, the ID of its physical library. It owns a `BookLending` for each time it is lent, and can be checked out.
+- کلاس **`Library`** خودش هیچ نمی‌کند: همه را به شیءهایی که مالکشان است وامی‌گذارد، یعنی `Member`های زیاد و `Librarian`های زیاد و یک `Catalog`. کتاب *کد* و *رفتار* را جابه‌جا به کار می‌برد.
+- کلاس **`User`** یک `id` و `email` و `password` دارد، هنوز بی هیچ امنیتی، و می‌تواند `login` کند.
+- کلاس **`Member`** هیچ داده‌ای به `User` نمی‌افزاید. می‌تواند `checkout` و `returnBook` و `block` و `unblock` کند و به `isBlocked` پاسخ دهد. مالک `BookLending`های زیادی است و برای پیاده کردن `checkout` از `BookItem` کار می‌کشد.
+- کلاس **`Librarian`** هم داده‌ای نمی‌افزاید. می‌تواند عضوی را ببندد و باز کند، قرض‌های عضوی را فهرست کند و نسخه‌ی کتاب بیفزاید. از `Member` و `BookItem` و `BookLending` کار می‌کشد.
+- کلاس **`Catalog`** می‌تواند کتاب‌ها را `search` و `addBookItem` کند، با کار کشیدن از `Librarian`. مالک `Book`های زیادی است.
+- کلاس **`Book`** یک `id` و یک `title` دارد. با `Author`های زیادی تداعی می‌شود و مالک `BookItem`های زیادی است.
+- کلاس **`BookItem`** یک `id` و یک `libId` دارد، یعنی شناسه‌ی کتابخانه‌ی فیزیکی‌اش. برای هر بار قرض دادن مالک یک `BookLending` است، و می‌شود برداشتش کرد.
 
-#### 1.1.4 The implementation phase
+#### ۱.۱.۴ فاز پیاده‌سازی
 
-Dave is impressed that people write down their design in such detail; Theo says it saves him a lot of time when coding (p. 12).
+دیو حیرت می‌کند که مردم طرحشان را این‌قدر ریز می‌نویسند؛ و تئو می‌گوید سر کدنویسی وقت زیادی برایش صرفه می‌کند (p. 12).
 
-### 1.2 Sources of complexity
+> **In practice:** پیش از کد زدن یک pipeline تازه، معمولاً یک نمودار از entityها و رابطه‌هایشان می‌کشیم.
+>
+> **Your turn:** در نمودار طراحی یک pipeline، چه چیزی باید جدا از کد بماند؟
+>
+> *Answer:* شکل داده در هر لایه، یعنی ستون‌ها و نوع‌هایشان در Bronze، Silver و Gold، از تابع‌هایی که لایه‌ها را می‌سازند. کتاب نشان می‌دهد نمودار کلاس OOP این دو را در یک جعبه می‌گذارد و همین پیچیدگی بعدی را می‌سازد (pp. 4–12).
 
-The design may look clear on paper, but the author claims it makes the system hard to understand. That comes from the paradigm, not from Theo's choice of classes (p. 13). "Complexity" here is the kind that makes systems hard to understand, as defined in "Out of the Tar Pit" (Moseley and Marks, 2006), not resource consumption, and "simple" means easy to understand. Both are relative: you can say system A is more complex than system B (p. 13).
+### ۱.۲ سرچشمه‌های پیچیدگی
 
-According to DOP, the main sources of complexity in Theo's system, and in many traditional OOP systems, are four (p. 13). This resembles functional programming's critique of OOP, but DOP's data approach to reducing complexity differs from FP's (p. 13).
+طرح روی کاغذ شاید روشن بنماید، ولی نویسنده می‌گوید سیستم را دشوارفهم می‌کند. این از همان الگو می‌آید، نه از گزینش کلاس‌های تئو (p. 13). «پیچیدگی» این‌جا همان گونه‌ای است که سیستم‌ها را دشوارفهم می‌کند، همان‌طور که در «Out of the Tar Pit» موزلی و مارکس (۲۰۰۶) تعریف شده، نه مصرف منابع، و «ساده» یعنی آسان‌فهم. هر دو نسبی‌اند: می‌شود گفت سیستم A از سیستم B پیچیده‌تر است (p. 13).
 
-| Aspect | Impact on complexity (table 1.1, p. 14) |
+بنا بر DOP، سرچشمه‌های اصلی پیچیدگی در سیستم تئو، و در بسیاری از سیستم‌های سنتی OOP، چهارند (p. 13). این به نقد برنامه‌نویسی تابعی از OOP می‌ماند، ولی رویکرد داده‌ای DOP به کم کردن پیچیدگی با رویکرد FP تفاوت دارد (p. 13).
+
+| وجه | اثر بر پیچیدگی (جدول ۱.۱، ص. ۱۴) |
 |---|---|
-| Code and data are mixed | Classes tend to be involved in many relations |
-| Objects are mutable | Extra thinking is needed when reading code |
-| Objects are mutable | Explicit synchronization is required in multi-threaded environments |
-| Data is locked in objects | Data serialization is not trivial |
-| Code is locked in classes | Class hierarchies are complex |
+| کد و داده قاطی‌اند | کلاس‌ها گرایش دارند در رابطه‌های زیادی درگیر شوند |
+| شیءها تغییرپذیرند | سر خواندن کد فکر بیشتری لازم است |
+| شیءها تغییرپذیرند | در محیط‌های multi-threaded هم‌آهنگی صریح لازم است |
+| داده در شیءها قفل است | سریالی کردن داده بدیهی نیست |
+| کد در کلاس‌ها قفل است | سلسله‌مراتب کلاس پیچیده است |
 
-#### 1.2.1 Many relations between classes
+#### ۱.۲.۱ رابطه‌های زیاد میان کلاس‌ها
 
-Looking only at entities and relations (figure 1.10, p. 14), `Member` takes part in five relations (p. 15):
+اگر تنها به entityها و رابطه‌ها نگاه کنیم (شکل ۱.۱۰، ص. ۱۴)، کلاس `Member` در پنج رابطه شریک است (p. 15):
 
-![The whole Library Management System class diagram: Library, Catalog, Librarian, Member, Book, Author, BookItem, BookLending and User joined by composition, association, inheritance and usage arrows](../figures/01-10.png)
+![نمودار کلاس کل سیستم مدیریت کتابخانه: کلاس‌های Library و Catalog و Librarian و Member و Book و Author و BookItem و BookLending و User که پیکان‌های ترکیب و تداعی و وراثت و کاربرد به هم وصلشان کرده](../figures/01-10.png)
 
-*Figure 1.10 (p. 14): even a small system's class diagram becomes a web of crossing relations.*
+*Figure 1.10 (p. 14): نمودار کلاس حتی سیستمی کوچک هم به تاری از رابطه‌های درهم‌رفته بدل می‌شود.*
 
-- **Data relations:** `Library` has many `Member`s, and a `Member` has many `BookLending`s.
-- **Code relations:** `Member` extends `User`, `Librarian` uses `Member`, and `Member` uses `BookItem`.
+- **رابطه‌های داده:** کلاس `Library` چند `Member` دارد، و هر `Member` چند `BookLending`.
+- **رابطه‌های کد:** کلاس `Member` از `User` می‌آید، کلاس `Librarian` از `Member` کار می‌کشد، و `Member` از `BookItem`.
 
-Split it into `MemberCode` (three relations) and `MemberData` (two relations), and the diagram falls into two independent parts, each easier to understand (pp. 15–16). Splitting *every* class (figure 1.13, p. 16) gives one subsystem of data entities only and one of code entities only, which can be understood separately and in any order. The book stresses that this isn't simpler by accident: it follows logically from separating code from data (p. 16).
+اگر آن را به `MemberCode` با سه رابطه و `MemberData` با دو رابطه بشکنیم، نمودار به دو بخش مستقل می‌افتد که هر کدام آسان‌فهم‌ترند (pp. 15–16). شکستن *هر* کلاسی (شکل ۱.۱۳، ص. ۱۶) یک زیرسیستم تنها از entityهای داده و یکی تنها از entityهای کد می‌دهد، که می‌شود جدا و به هر ترتیبی فهمیدشان. کتاب تأکید می‌کند که این تصادفی ساده‌تر نشده: منطقی از جدا کردن کد از داده پی می‌گیرد (p. 16).
 
-![Member at the centre of five relations: Library has many Members, Member has many BookLendings, Member extends User, Librarian uses Member, and Member uses BookItem](../figures/01-11.png)
+![کلاس Member در میانه‌ی پنج رابطه: کلاس Library چند Member دارد، هر Member چند BookLending، کلاس Member از User می‌آید، کلاس Librarian از Member کار می‌کشد، و Member از BookItem](../figures/01-11.png)
 
-*Figure 1.11 (p. 15): five relations meet on one entity because `Member` mixes code and data.*
+*Figure 1.11 (p. 15): پنج رابطه روی یک entity به هم می‌رسند، چون `Member` کد و داده را قاطی می‌کند.*
 
-![After the split: Library owns MemberData, which owns BookLendings; Librarian uses MemberCode, which extends User and uses BookItem](../figures/01-12.png)
+![پس از شکستن: کلاس Library مالک MemberData است که مالک BookLendingهاست؛ و Librarian از MemberCode کار می‌کشد که از User می‌آید و از BookItem کار می‌کشد](../figures/01-12.png)
 
-*Figure 1.12 (p. 15): the same five relations become two on the data entity and three on the code entity.*
+*Figure 1.12 (p. 15): همان پنج رابطه دو تا روی entity داده و سه تا روی entity کد می‌شوند.*
 
-> **Try it:** [Split code from data](../widgets/01-code-data-split.html) — take Theo's class diagram, split classes into code and data entities one at a time, and watch the relations per entity and the independent parts change.
+> **Try it:** [جدا کردن کد از داده](../widgets/01-code-data-split.html) — نمودار کلاس تئو را بردارید، کلاس‌ها را یکی‌یکی به entity کد و داده بشکنید، و ببینید رابطه‌های هر entity و بخش‌های مستقل چطور عوض می‌شوند.
 
-#### 1.2.2 Unpredictable code behavior
+#### ۱.۲.۲ رفتار پیش‌بینی‌ناپذیر کد
 
-Two versions of `displayBlockedStatusTwice` (listings 1.1 and 1.2, p. 17):
+دو version از `displayBlockedStatusTwice` (listingهای ۱.۱ و ۱.۲، ص. ۱۷):
 
-- **Listing 1.1** copies `this.isBlocked` into a local variable and prints it twice. If the first print is `true`, so is the second.
-- **Listing 1.2** prints `this.isBlocked` twice. In a single-threaded environment both print `true`. In a multi-threaded one it is unpredictable, because a context switch between the two calls can change the object, for example when a librarian unblocks the member. The same can happen in single-threaded JavaScript when asynchronous code modifies the data (appendix A, Principle #3).
+- **مفهوم version listing ۱.۱** مقدار `this.isBlocked` را در متغیری محلی کپی و دو بار چاپ می‌کند. اگر چاپ نخست `true` باشد، آن دومی هم.
+- **مفهوم version listing ۱.۲** مقدار `this.isBlocked` را دو بار چاپ می‌کند. در محیطی single-threaded هر دو `true` چاپ می‌کنند. در محیطی multi-threaded پیش‌بینی‌ناپذیر است، چون عوض شدن زمینه میان آن دو صدا زدن می‌تواند شیء را عوض کند؛ مثلاً وقتی کتابداری عضو را باز می‌کند. همین می‌تواند در JavaScript single-threaded رخ دهد وقتی کدی asynchronous داده را دست‌کاری کند (پیوست A، اصل ۳).
 
-The difference is that the first reads a primitive value, while the second reads a member of a mutable object. **When data is mutable, code is unpredictable** (p. 17). OOP can protect such code with mutexes, at the cost of a performance hit and a risk of deadlocks. DOP instead treats all data, primitives and collections alike, as immutable values (p. 18).
+تفاوت این است که آن نخستی مقداری بدوی می‌خواند، در حالی که آن دومی عضوی از شیئی mutable را. **وقتی داده mutable است، کد پیش‌بینی‌ناپذیر است** (p. 17). روش OOP می‌تواند چنین کدی را با mutex پناه دهد، به بهای ضربه‌ای به کارایی و خطر deadlock. روش DOP در عوض همه‌ی داده را، بدوی و مجموعه یکسان، مقداری immutable می‌گیرد (p. 18).
 
-#### 1.2.3 Not trivial data serialization
+#### ۱.۲.۳ سریالی کردن داده که بدیهی نیست
 
-In a dream, Nancy asks Theo for a REST API with JSON. A `/search` endpoint takes `{"searchCriteria": "author", "query": "albert"}` and returns books with their authors' full names (listings 1.3–1.4, p. 18). In OOP that means three classes (p. 19):
+در خوابی، نانسی از تئو یک REST API با JSON می‌خواهد. یک endpoint `/search` مقدار `{"searchCriteria": "author", "query": "albert"}` را می‌گیرد و کتاب‌ها را با نام کامل نویسنده‌هایشان برمی‌گرداند (listingهای ۱.۳ و ۱.۴، ص. ۱۸). در OOP این یعنی سه کلاس (p. 19):
 
-- `SearchController` handles the query.
-- `SearchQuery` converts the JSON string into data.
-- `SearchResult` converts the results back into a JSON string.
+- کلاس `SearchController` پرسش را می‌چرخاند.
+- کلاس `SearchQuery` رشته‌ی JSON را به داده بدل می‌کند.
+- کلاس `SearchResult` نتیجه‌ها را به رشته‌ی JSON برمی‌گرداند.
 
-An `/add-book-item` endpoint needs three more classes, rewriting the same (de)serialization code, and so on for every endpoint (pp. 19–20). Yet serializing any query comes down to going over the data fields and concatenating names and values. It is hard in OOP because data follows a rigid shape defined in classes; **data is locked in members**, with no simple generic access (p. 20). Most OOP languages ease JSON conversion a little, but only through reflection, which is complex, or through verbosity (p. 20).
+یک endpoint `/add-book-item` سه کلاس دیگر می‌خواهد، با نوشتن دوباره‌ی همان کد سریالی کردن و برگرداندن، و همین‌طور برای هر endpointی (pp. 19–20). با این حال سریالی کردن هر پرسشی به گذر از فیلدهای داده و به‌هم‌چسبانی نام‌ها و مقدارها می‌رسد. در OOP سخت است چون داده از شکلی سخت پی می‌گیرد که در کلاس‌ها تعریف شده؛ **داده در عضوها قفل است**، بی هیچ دسترسی عمومی ساده (p. 20). بیشتر زبان‌های OOP بدل کردن به JSON را کمی آسان می‌کنند، ولی تنها با reflection که پیچیده است، یا با پرگویی (p. 20).
 
-#### 1.2.4 Complex class hierarchies
+#### ۱.۲.۴ سلسله‌مراتب پیچیده‌ی کلاس
 
-Inheritance avoids duplication when all requirements are known up front: `Librarian` and `Member` both inherit `login` from `User` (p. 20). Late requirements are another story (pp. 20–24):
+وراثت وقتی همه‌ی نیازمندی‌ها از پیش دانسته باشد از دوباره‌گویی پرهیز می‌کند: هر دو `Librarian` و `Member` متد `login` را از `User` به ارث می‌برند (p. 20). نیازمندی‌های late داستان دیگری است (pp. 20–24):
 
-1. **VIP members** may add book items themselves. The code that does this is locked in `Librarian::addBookItem`, and `VIPMember` can't derive from `Librarian`, because VIP members may not block members or list lendings. Theo's fix (figure 1.16) adds a base class `UserWithBookItemRight` that holds `addBookItem`, and makes both `Librarian` and `VIPMember` extend it. `VIPMember` also extends `Member`, which creates a diamond, because both bases extend `User`.
-2. **Super members** may list the books lent to other members. Theo's plan (figure 1.17) adds `UserWithBlockMemberRight` and `SuperMember` and ends with three "Deadly Diamonds of Death." That is the ambiguity when class D inherits from B and C, which both inherit from A.
+1. **عضوهای VIP** می‌توانند خودشان نسخه‌ی کتاب بیفزایند. کدی که این را می‌کند در `Librarian::addBookItem` قفل است، و `VIPMember` نمی‌تواند از `Librarian` مشتق شود، چون عضوهای VIP نباید عضوها را ببندند یا قرض‌ها را فهرست کنند. چاره‌ی تئو (شکل ۱.۱۶) کلاس پایه‌ی `UserWithBookItemRight` را می‌افزاید که `addBookItem` را دارد، و هر دو `Librarian` و `VIPMember` را از آن می‌آورد. کلاس `VIPMember` از `Member` هم می‌آید، که الماسی می‌سازد، چون هر دو پایه از `User` می‌آیند.
+2. **عضوهای Super** می‌توانند کتاب‌های قرض‌داده به عضوهای دیگر را فهرست کنند. نقشه‌ی تئو (شکل ۱.۱۷) کلاس‌های `UserWithBlockMemberRight` و `SuperMember` را می‌افزاید و به سه «الماس مرگ‌آور مرگ» می‌رسد. آن همان دوپهلویی است وقتی کلاس D از B و C می‌آید که هر دو از A می‌آیند.
 
-He tries to turn `User` into an interface and use composition over inheritance, but under deadline stress he can't deliver Super members. Nancy drops the feature for now (p. 24). The lesson Theo draws: **in OOP, prefer composition over class inheritance** (p. 24).
+او می‌کوشد `User` را به interface بدل کند و ترکیب را جای وراثت بگذارد، ولی زیر فشار مهلت نمی‌تواند عضوهای Super را تحویل دهد. نانسی آن ویژگی را فعلاً می‌اندازد (p. 24). درسی که تئو می‌گیرد: **در OOP، ترکیب را بر وراثت کلاس ترجیح دهید** (p. 24).
 
-![Class diagram: Member and UserWithBookItemRight both extend User, and VIPMember extends both Member and UserWithBookItemRight, while Librarian uses Member](../figures/01-16.png)
+![نمودار کلاس: کلاس‌های Member و UserWithBookItemRight هر دو از User می‌آیند، و VIPMember از هر دو Member و UserWithBookItemRight، در حالی که Librarian از Member کار می‌کشد](../figures/01-16.png)
 
-*Figure 1.16 (p. 22): `VIPMember` reaches `User` along two paths — a diamond from multiple inheritance.*
+*Figure 1.16 (p. 22): کلاس `VIPMember` از دو مسیر به `User` می‌رسد؛ الماسی از وراثت چندگانه.*
 
-![The diagram after Super members: VIPMember, SuperMember and Librarian on top, two right classes UserWithBookItemRight and UserWithBlockMemberRight, Member below them, and User at the bottom reached along several paths](../figures/01-17.png)
+![نمودار پس از عضوهای Super: کلاس‌های VIPMember و SuperMember و Librarian در بالا، دو کلاس حق UserWithBookItemRight و UserWithBlockMemberRight، کلاس Member زیر آن‌ها، و User در پایین که از چند مسیر به آن می‌رسند](../figures/01-17.png)
 
-*Figure 1.17 (p. 23): adding Super members brings the count of diamonds to three.*
+*Figure 1.17 (p. 23): افزودن عضوهای Super شمار الماس‌ها را به سه می‌رساند.*
 
-> **Try it:** [The tiny feature](../widgets/01-class-hierarchy.html) — add VIP and Super members to Theo's hierarchy, see where the methods have to move and count the diamonds, then compare with the same rights kept as functions over data.
+> **Try it:** [آن ویژگی ناچیز](../widgets/01-class-hierarchy.html) — عضوهای VIP و Super را به سلسله‌مراتب تئو بیفزایید، ببینید متدها کجا باید بروند و الماس‌ها را بشمارید، بعد با همان حق‌ها که تابع‌هایی روی داده نگه داشته شده‌اند بسنجید.
 
-## Trade-offs at a glance
+> **In practice:** کد DAGها و loaderها در Python است و وسوسه‌ی ساختن کلاس‌های تودرتو برای هر منبع و هر جدول همیشه هست.
+>
+> **Your turn:** هر منبع یک کلاس `SourceExtractor` با وراثت از `BaseExtractor` دارد و افزودن یک فیلد به یک منبع سه کلاس را عوض می‌کند. نشانه‌ی کدام سرچشمه‌ی پیچیدگی است؟
+>
+> *Answer:* رابطه‌های زیاد میان کلاس‌ها و سلسله‌مراتب پیچیده: داده و رفتار در هم بافته‌اند. اگر config هر منبع یک dict ساده و extract یک تابع عمومی باشد، افزودن فیلد فقط داده را عوض می‌کند (pp. 13–24).
 
-| OOP trait (table 1.1) | What it costs | What the book proposes (previewed) |
+## بده‌بستان‌ها در یک نگاه
+
+| خوی OOP (جدول ۱.۱) | چه خرج می‌دهد | کتاب چه پیش می‌گذارد، پیش‌نمایش |
 |---|---|---|
-| Code and data mixed in classes | Entities with many relations; one tangled diagram | Two independent subsystems, code and data (ch. 2) |
-| Mutable objects | Code you must re-think when reading; locks, performance hits, deadlocks | Immutable values for all data (ch. 3–5) |
-| Data locked in members | A class per JSON shape; reflection or verbosity | Generic data access (ch. 3, 11) |
-| Code locked in classes | Brittle hierarchies, diamonds under late requirements | Code as functions that are not tied to a class (ch. 2, 13) |
-| Design patterns | Mitigate complexity "to some degree" (p. 25) | Not ruled out: DOP is compatible with OOP (p. 13) |
+| کد و داده قاطی در کلاس‌ها | entityهایی با رابطه‌های زیاد؛ یک نمودار درهم‌رفته | دو زیرسیستم مستقل، کد و داده (فصل ۲) |
+| شیءهای mutable | کدی که سر خواندن باید بازاندیشی‌اش کنید؛ قفل و ضربه به کارایی و deadlock | مقدارهای immutable برای همه‌ی داده (فصل‌های ۳–۵) |
+| داده‌ی قفل‌شده در عضوها | کلاسی برای هر شکل JSON؛ یا reflection یا پرگویی | دسترسی عمومی به داده (فصل‌های ۳ و ۱۱) |
+| کد قفل‌شده در کلاس‌ها | سلسله‌مراتب شکننده، و الماس زیر نیازمندی‌های late | کد به‌شکل تابع‌هایی که به کلاسی بسته نیستند (فصل‌های ۲ و ۱۳) |
+| الگوهای طراحی | پیچیدگی را «تا اندازه‌ای» کم می‌کنند (p. 25) | رد نشده‌اند: روش DOP با OOP سازگار است (p. 13) |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **"Out of the Tar Pit."** Moseley and Marks's paper splits complexity into *essential* complexity, inherent in the problem, and *accidental* complexity, which comes from how we solve it. They name mutable state as a primary cause of the accidental kind. The book borrows the paper's definition of complexity as being hard to understand (p. 13); the essential/accidental split is the paper's, not this chapter's.
-- **Composition over inheritance** is the advice of the "Gang of Four" *Design Patterns* book (1994), whose introduction says to favour object composition over class inheritance. Theo reaches it too late (p. 24).
-- **The diamond problem** is handled differently by different languages. C++ has virtual inheritance; Java allows a class to extend only one class but implement many interfaces; Python linearizes base classes with its method resolution order (MRO). The book's point is that a model built only from classes forces this question at all.
-- **The same features without a hierarchy.** Chapter 2 (pp. 39–41) adds Super and VIP members by adding `isSuperMember` and `isVIPMember` checks to stateless functions, with no design change. The widget's comparison mode follows that; the per-step counts it shows are the vault's tally, not the book's.
+- **مقاله‌ی «Out of the Tar Pit».** مقاله‌ی موزلی و مارکس پیچیدگی را به پیچیدگی *ذاتی* که در خود مسئله است و پیچیدگی *تصادفی* که از شیوه‌ی حل ما می‌آید می‌شکند. آن‌ها state mutable را سرچشمه‌ی اصلی گونه‌ی تصادفی می‌نامند. کتاب تعریف مقاله از پیچیدگی به‌شکل دشوارفهمی را قرض می‌گیرد (p. 13)؛ و شکستن ذاتی و تصادفی مال مقاله است، نه این فصل.
+- **ترجیح ترکیب بر وراثت** پند کتاب *Design Patterns* از «گروه چهار» (۱۹۹۴) است، که دیباچه‌اش می‌گوید ترکیب شیء را بر وراثت کلاس ترجیح دهید. تئو خیلی دیر به آن می‌رسد (p. 24).
+- **مسئله‌ی الماس** را زبان‌های مختلف فرق‌دار می‌چرخانند. زبان C++ وراثت مجازی دارد؛ زبان Java می‌گذارد کلاسی تنها از یک کلاس بیاید ولی interfaceهای زیادی را پیاده کند؛ و زبان Python کلاس‌های پایه را با method resolution order خودش خطی می‌کند. حرف کتاب این است که مدلی ساخته تنها از کلاس، این پرسش را از اساس به زور می‌آورد.
+- **همان ویژگی‌ها بی سلسله‌مراتب.** فصل ۲ (pp. 39–41) عضوهای Super و VIP را با افزودن سنجش `isSuperMember` و `isVIPMember` به تابع‌های بی‌state می‌افزاید، بی هیچ تغییر طرح. حالت سنجش widget از همان پی می‌گیرد؛ و شمارش‌های هر قدمش که نشان می‌دهد جمع‌بندی vault است، نه کتاب.
 
-## Connections
+## پیوندها
 
-- **Next:** [2. Separation between code and data](02-separation-between-code-and-data.md) applies the split from 1.2.1 to the Klafim system.
-- **Mutable data and unpredictable code** return in [4. State management](04-state-management.md) and [5. Basic concurrency control](05-basic-concurrency-control.md).
-- **Generic data access and JSON** return in [3. Basic data manipulation](03-basic-data-manipulation.md) and [11. Web services](11-web-services.md).
-- **Code locked in classes** returns as polymorphism without objects in [13. Polymorphism](13-polymorphism.md).
+- **پسین:** [۲. جدایی کد از داده](02-separation-between-code-and-data.md) همان شکستن بخش ۱.۲.۱ را روی سیستم Klafim پیاده می‌کند.
+- **داده‌ی mutable و کد پیش‌بینی‌ناپذیر** در [۴. مدیریت state](04-state-management.md) و [۵. کنترل پایه‌ی concurrency](05-basic-concurrency-control.md) برمی‌گردند.
+- **دسترسی عمومی به داده و JSON** در [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md) و [۱۱. سرویس‌های وب](11-web-services.md) برمی‌گردند.
+- **کد قفل‌شده در کلاس‌ها** به‌شکل polymorphism بی شیء در [۱۳. polymorphism](13-polymorphism.md) برمی‌گردد.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. What does "complexity" mean in this book, and where does the definition come from?
-   <details><summary>Answer</summary>Hard to understand, as defined in "Out of the Tar Pit" by Moseley and Marks (2006). It has nothing to do with the resources a program consumes, and it is relative rather than absolute (p. 13).</details>
-2. Name the four aspects of OOP that the book blames for complexity, and the impact of each.
-   <details><summary>Answer</summary>Code and data mixed (many relations); objects mutable (extra thinking when reading, explicit synchronization with threads); data locked in objects (non-trivial serialization); code locked in classes (complex hierarchies). Table 1.1, p. 14.</details>
-3. How many relations does `Member` take part in, and what happens when you split it into `MemberCode` and `MemberData`?
-   <details><summary>Answer</summary>Five: two data relations (`Library` has many `Member`s; `Member` has many `BookLending`s) and three code relations (extends `User`; used by `Librarian`; uses `BookItem`). The split leaves two relations on the data entity and three on the code entity, in two independent parts (pp. 15–16).</details>
-4. Why can listing 1.2 print `true` and then `false`, when listing 1.1 can't?
-   <details><summary>Answer</summary>Listing 1.1 reads a primitive value copied into a local variable. Listing 1.2 reads a member of a mutable object twice; another thread, or asynchronous code in JavaScript, can change it between the two reads (p. 17).</details>
-5. Why couldn't Theo simply reuse `Librarian::addBookItem` for VIP members?
-   <details><summary>Answer</summary>The code is locked in the `Librarian` class. `VIPMember` can't derive from `Librarian`, since VIP members must not block members or list lendings, so Theo had to move the method into a new base class, which created a diamond (pp. 21–23).</details>
-6. What does OOP serialization to JSON usually rely on, according to the book?
-   <details><summary>Answer</summary>Either reflection, which is complex, or verbose code: a query class and a result class per endpoint, because data has a rigid class-defined shape (p. 20).</details>
+1. در این کتاب «پیچیدگی» چه معنا دارد، و تعریفش از کجا می‌آید؟
+   <details><summary>پاسخ</summary>دشوارفهم، همان‌طور که در «Out of the Tar Pit» از موزلی و مارکس (۲۰۰۶) تعریف شده. هیچ ربطی به منابعی که برنامه مصرف می‌کند ندارد، و نسبی است نه مطلق (p. 13).</details>
+2. چهار وجه OOP را که کتاب پیچیدگی را به گردنشان می‌اندازد و اثر هر کدام را نام ببرید.
+   <details><summary>پاسخ</summary>کد و داده‌ی قاطی با رابطه‌های زیاد؛ شیءهای mutable با فکر بیشتر سر خواندن و هم‌آهنگی صریح با رشته‌ها؛ داده‌ی قفل در شیءها با سریالی کردن که بدیهی نیست؛ و کد قفل در کلاس‌ها با سلسله‌مراتب پیچیده. جدول ۱.۱، ص. ۱۴.</details>
+3. کلاس `Member` در چند رابطه شریک است، و وقتی به `MemberCode` و `MemberData` بشکنیدش چه می‌شود؟
+   <details><summary>پاسخ</summary>پنج: دو رابطه‌ی داده، یعنی `Library` چند `Member` دارد و `Member` چند `BookLending`؛ و سه رابطه‌ی کد، یعنی از `User` می‌آید، `Librarian` از آن کار می‌کشد، و از `BookItem` کار می‌کشد. شکستن دو رابطه را روی entity داده و سه را روی entity کد می‌گذارد، در دو بخش مستقل (pp. 15–16).</details>
+4. چرا listing ۱.۲ می‌تواند `true` و بعد `false` چاپ کند، در حالی که listing ۱.۱ نمی‌تواند؟
+   <details><summary>پاسخ</summary>مفهوم version listing ۱.۱ مقداری بدوی را می‌خواند که در متغیری محلی کپی شده. version listing ۱.۲ عضوی از شیئی mutable را دو بار می‌خواند؛ و رشته‌ای دیگر، یا کدی asynchronous در JavaScript، می‌تواند میان آن دو خواندن عوضش کند (p. 17).</details>
+5. چرا تئو نتوانست همان `Librarian::addBookItem` را برای عضوهای VIP به کار ببرد؟
+   <details><summary>پاسخ</summary>آن کد در کلاس `Librarian` قفل است. کلاس `VIPMember` نمی‌تواند از `Librarian` مشتق شود، چون عضوهای VIP نباید عضوها را ببندند یا قرض‌ها را فهرست کنند، پس تئو ناچار شد متد را به کلاس پایه‌ی تازه‌ای بکوچاند، که الماسی ساخت (pp. 21–23).</details>
+6. بنا بر کتاب، سریالی کردن به JSON در OOP معمولاً به چه تکیه می‌کند؟
+   <details><summary>پاسخ</summary>یا به reflection که پیچیده است، یا به کد پرگو: کلاسی پرسش و کلاسی نتیجه برای هر endpoint، چون داده شکلی سخت دارد که کلاس تعریفش کرده (p. 20).</details>

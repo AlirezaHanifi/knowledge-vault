@@ -2,199 +2,213 @@
 book: data-oriented-programming
 chapter: 13
 title: "Polymorphism"
+translated_title: "polymorphism"
 pages: "272–294"
+lang: fa
 ---
 
-# 13. Polymorphism
+# ۱۳. polymorphism
 
-[← 12. Advanced data validation](12-advanced-data-validation.md) · [Book](../README.md) · [14. Advanced data manipulation →](14-advanced-data-manipulation.md)
+[← ۱۲. اعتبارسنجی پیشرفته‌ی داده](12-advanced-data-validation.md) · [کتاب](../README.md) · [۱۴. دست‌کاری پیشرفته‌ی داده →](14-advanced-data-manipulation.md)
 
-## Summary
+## خلاصه
 
-Dave misses another OOP feature, polymorphism. On a day at his parents' house in the countryside, he and Theo distill what it is for: **extensibility**, adding a new case without changing existing code. A `switch` on a `type` field gives different behaviours but fails that test (pp. 273–277).
+دیو ویژگی دیگری از OOP را دلش می‌خواهد، یعنی polymorphism. روزی در خانه‌ی پدرومادرش در حومه، او و تئو چکیده می‌کنند که polymorphism برای چیست: **گسترش‌پذیری**، یعنی افزودن موردی تازه بی عوض کردن کد موجود. یک `switch` روی فیلد `type` رفتارهای مختلف می‌دهد ولی آن سنجش را رد نمی‌کند (pp. 273–277).
 
-DOP gets polymorphism without objects through **multimethods** (pp. 277–281):
+روش DOP polymorphism را بی شیء از راه **multimethod** به دست می‌آورد (pp. 277–281):
 
-- **A dispatch function** defines the signature, validates the arguments and emits a dispatch value.
-- **A set of methods** provide one implementation per dispatch value.
-- **Method declarations are decoupled** from the multimethod's initialization, just as classes are from an interface, so new cases can live in other modules.
-- **A default method** handles unknown dispatch values.
+- **تابعی توزیع‌کننده** امضا را تعریف می‌کند، آرگومان‌ها را اعتبارسنجی، و مقداری توزیعی می‌دهد.
+- **مجموعه‌ای از متدها** برای هر مقدار توزیعی یک پیاده‌سازی می‌دهند.
+- **اعلام متدها از راه انداختن multimethod جداست**، همان‌طور که کلاس‌ها از interfaceی جدایند، پس موردهای تازه می‌توانند در ماژول‌های دیگر بنشینند.
+- **متدی پیش‌فرض** مقدارهای توزیعی ناشناس را می‌چرخاند.
 
-Because the dispatch function can emit *any* value, multimethods go beyond OOP (pp. 281–288):
+چون آن تابع توزیع‌کننده می‌تواند *هر* مقداری بدهد، multimethodها از OOP فراتر می‌روند (pp. 281–288):
 
-- **Single dispatch** emits an argument's `type` field, mimicking class-based polymorphism.
-- **Multiple dispatch** emits a value built from several arguments: an animal's type and a language's type.
-- **Dynamic dispatch** emits a value computed at run time: whether the animal's name is long.
+- **توزیع یگانه** فیلد `type` آرگومانی را می‌دهد، که polymorphism کلاس‌محور را تقلید می‌کند.
+- **توزیع چندگانه** مقداری ساخته از چند آرگومان می‌دهد: گونه‌ی جانوری و گونه‌ی زبانی.
+- **توزیع پویا** مقداری می‌دهد که سر اجرا حساب شده: اینکه نام جانور درازست یا نه.
 
-Joe lists multimethod libraries for Python, Ruby, Java and C# (p. 289). Back at the office, Dave uses a multimethod for a real feature: author names formatted in HTML or Markdown, in italic, bold or both, depending on how many books the author wrote (pp. 289–293).
+جو کتابخانه‌های multimethod را برای Python و Ruby و Java و C# فهرست می‌کند (p. 289). در دفتر، دیو multimethodی را برای ویژگی‌ای واقعی به کار می‌برد: نام نویسنده‌ها که به HTML یا Markdown و به‌شکل ایتالیک یا توپر یا هر دو قالب می‌گیرند، بسته به آنکه آن نویسنده چند کتاب نوشته (pp. 289–293).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **The main benefit of polymorphism is extensibility** (p. 277).
-- **A multimethod = a dispatch function + methods.** The arguments go to both (pp. 277–278).
-- **The dispatch function does three things:** defines the signature, validates the arguments, emits a dispatch value (p. 279).
-- **Internally it's a hash map** from dispatch values to methods; calling the multimethod looks up the dispatched value (p. 280).
-- **Multimethods are called like regular functions**, and support a default implementation (pp. 280–281).
-- **Multiple dispatch**: the value depends on several arguments, and the order of its elements must match the methods' wiring (p. 285).
-- **Dynamic dispatch**: the value goes beyond the arguments' static types, such as a number or a Boolean (p. 286).
-- **Libraries differ** in whether they work with generic data structures: JavaScript, Python and Ruby libraries do; Java's and C#'s don't (p. 289).
+- **سود اصلی polymorphism گسترش‌پذیری است** (p. 277).
+- **هر multimethodی یک تابع توزیع‌کننده به‌علاوه‌ی متدهاست.** آرگومان‌ها به هر دو می‌روند (pp. 277–278).
+- **آن تابع توزیع‌کننده سه کار می‌کند:** امضا را تعریف می‌کند، آرگومان‌ها را اعتبارسنجی، و مقداری توزیعی می‌دهد (p. 279).
+- **درونش hash mapی است** از مقدارهای توزیعی به متدها؛ و صدا زدن آن multimethod مقدار توزیع‌شده را بالا می‌کشد (p. 280).
+- **همه‌ی multimethodها مانند تابع‌های معمولی صدا زده می‌شوند**، و از پیاده‌سازی پیش‌فرض پشتیبانی می‌کنند (pp. 280–281).
+- **توزیع چندگانه**: آن مقدار به چند آرگومان بسته است، و ترتیب عضوهایش باید با سیم‌کشی متدها بخواند (p. 285).
+- **توزیع پویا**: آن مقدار از گونه‌های ایستای آرگومان‌ها فراتر می‌رود، مانند عددی یا بولی (p. 286).
+- **کتابخانه‌ها فرق دارند** در اینکه با ساختارهای داده‌ی عمومی کار می‌کنند یا نه: کتابخانه‌های JavaScript و Python و Ruby می‌کنند؛ و مال Java و C# نه (p. 289).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 13.1 The essence of polymorphism — p. 273
-- 13.2 Multimethods with single dispatch — p. 277
-- 13.3 Multimethods with multiple dispatch — p. 281
-- 13.4 Multimethods with dynamic dispatch — p. 286
-- 13.5 Integrating multimethods in a production system — p. 289
-- Summary — p. 294
+- ۱۳.۱ چکیده‌ی polymorphism — ص. ۲۷۳
+- ۱۳.۲ multimethodها با توزیع یگانه — ص. ۲۷۷
+- ۱۳.۳ multimethodها با توزیع چندگانه — ص. ۲۸۱
+- ۱۳.۴ multimethodها با توزیع پویا — ص. ۲۸۶
+- ۱۳.۵ درهم کردن multimethodها در سیستمی production — ص. ۲۸۹
+- خلاصه — ص. ۲۹۴
 
-## Notes
+## یادداشت‌ها
 
-The chapter shows three kinds of polymorphism, all with the same running example of animals that greet by making a sound and saying their name (p. 273). The animals are maps with `type` and `name` (listing 13.3, p. 275):
+فصل سه گونه polymorphism را نشان می‌دهد، همه با همان یک مثال جاری از جانورانی که با صدا در آوردن و گفتن نامشان سلام می‌کنند (p. 273). جانوران mapاند با `type` و `name` (listing ۱۳.۳، ص. ۲۷۵):
 
-| Map | `type` | `name` |
+| map | `type` | `name` |
 |---|---|---|
 | `myDog` | `"dog"` | `"Fido"` |
 | `myCat` | `"cat"` | `"Milo"` |
 | `myCow` | `"cow"` | `"Clarabelle"` |
 
-### 13.1 The essence of polymorphism
+### ۱۳.۱ چکیده‌ی polymorphism
 
-In OOP, Dave defines an `IAnimal` interface with a `greet` method, implemented by `Dog`, `Cat` and `Cow` (listing 13.1, p. 274). Polymorphism, he says, decouples an interface from its implementations (p. 273). Theo challenges him: what's the fundamental difference with a `switch` on `animal.type`? (listing 13.2, p. 274)
+در OOP، دیو interfaceی `IAnimal` با متد `greet` تعریف می‌کند، که کلاس‌های `Dog` و `Cat` و `Cow` پیاده‌اش می‌کنند (listing ۱۳.۱، ص. ۲۷۴). می‌گوید polymorphism interfaceی را از پیاده‌سازی‌هایش جدا می‌کند (p. 273). تئو به چالشش می‌کشد: تفاوت بنیادینش با یک `switch` روی `animal.type` چیست؟ (listing ۱۳.۲، ص. ۲۷۴)
 
-Dave's objections, and Theo's answers:
+ایرادهای دیو و پاسخ‌های تئو:
 
-| Objection | Theo's fix |
+| ایراد | چاره‌ی تئو |
 |---|---|
-| An invalid map breaks `greet` | Validate with `animalSchema` (listing 13.4, p. 275) |
-| Changing one animal's greeting means editing code for all animals | One function per animal, called from the switch (listing 13.5, p. 276) |
-| Adding a new animal means modifying the original code | No fix: a switch can't do that, while OOP can add a class (p. 277) |
+| mapی نامعتبر تابع `greet` را می‌شکند | با `animalSchema` اعتبارسنجی کنید (listing ۱۳.۴، ص. ۲۷۵) |
+| عوض کردن سلام یک جانور یعنی ویرایش کد همه‌ی جانوران | یک تابع برای هر جانوری، که از آن switch صدا زده شود (listing ۱۳.۵، ص. ۲۷۶) |
+| افزودن جانوری تازه یعنی دست‌کاری کد اصلی | بی چاره: switch نمی‌تواند چنین کند، در حالی که OOP می‌تواند کلاسی بیفزاید (p. 277) |
 
-So the real benefit is the third one, extensibility (p. 277). The book adds that switch statements like these shouldn't be used in production; they're only a didactic step (p. 276). Theo asks Joe, who's about to give a talk at a tech conference, and gets one hint: look at multimethods (p. 277).
+پس سود واقعی همان سومی است، یعنی گسترش‌پذیری (p. 277). کتاب می‌افزاید که switchهایی مانند این‌ها در production نباید به کار روند؛ تنها قدمی آموزشی‌اند (p. 276). تئو از جو می‌پرسد، که سر سخنرانی در کنفرانسی فنی است، و یک نشانه می‌گیرد: به multimethodها نگاه کن (p. 277).
 
-> **Vault note:** the Java in listing 13.1 refers to `animal.name` inside each class, where only `name` (or `this.name`) is in scope, so it wouldn't compile as printed (p. 274).
+> **Vault note:** کد Java در listing ۱۳.۱ درون هر کلاسی به `animal.name` ارجاع می‌دهد، جایی که تنها `name` یا `this.name` در دامنه است، پس همان‌طور که چاپ شده کامپایل نمی‌شد (p. 274).
 
-### 13.2 Multimethods with single dispatch
+### ۱۳.۲ multimethodها با توزیع یگانه
 
-A multimethod has a **dispatch function** and **a set of methods** (p. 277). For `greet`, `greetDispatch` emits the animal's type, and each value is handled by `greetDog`, `greetCat` or `greetCow` (figure 13.1, p. 278):
+هر multimethodی یک **تابع توزیع‌کننده** و **مجموعه‌ای از متدها** دارد (p. 277). برای `greet`، تابع `greetDispatch` گونه‌ی جانور را می‌دهد، و هر مقداری را یکی از `greetDog` یا `greetCat` یا `greetCow` می‌چرخاند (شکل ۱۳.۱، ص. ۲۷۸):
 
-![An animal with type and name goes to greetDispatch, which emits the animal type; "dog", "cat" or "cow" selects greetDog, greetCat or greetCow, and dashed arrows show the animal itself also reaching each method](../figures/13-01.png)
+![جانوری با type و name به greetDispatch می‌رود، که گونه‌ی جانور را می‌دهد؛ مقدارهای «dog» یا «cat» یا «cow» یکی از greetDog یا greetCat یا greetCow را برمی‌گزینند، و پیکان‌های خط‌چین نشان می‌دهند که خود جانور هم به هر متدی می‌رسد](../figures/13-01.png)
 
-*Figure 13.1 (p. 278): the dispatch function only picks a method; the arguments go to the chosen method unchanged.*
+*Figure 13.1 (p. 278): آن تابع توزیع‌کننده تنها متدی را برمی‌گزیند؛ و آرگومان‌ها دست‌نخورده به متد برگزیده می‌روند.*
 
-The example uses the JavaScript **arrows/multimethod** library: `multi` creates a multimethod, `method` adds a method (p. 278).
+مثال از کتابخانه‌ی **arrows/multimethod** در JavaScript کار می‌کشد: تابع `multi` یک multimethod می‌سازد، و `method` متدی می‌افزاید (p. 278).
 
-| Step | Code | Listing |
+| قدم | کد | نمونه |
 |---|---|---|
-| Initialization | `var greet = multi(greetDispatch);`, where `greetDispatch` validates `animal` in dev and returns `animal.type` | 13.6, pp. 278–279 |
-| Method declaration | `greet = method("dog", greetDog)(greet);` | 13.7, p. 279 |
-| More methods | the same for `"cat"` and `"cow"` | 13.8–13.9, pp. 279–280 |
-| Call | `greet(myDog)` → `"Woof woof! My name is Fido"` | 13.10, p. 280 |
-| Default | `greet = method(greetDefault)(greet);` with no dispatch value; `greet(myHorse)` → `"My name is Horace"` | 13.11–13.12, p. 281 |
+| راه انداختن | عبارت `var greet = multi(greetDispatch);`، که در آن `greetDispatch` مقدار `animal` را در dev اعتبارسنجی و `animal.type` را برمی‌گرداند | ۱۳.۶، صص. ۲۷۸–۲۷۹ |
+| اعلام متد | عبارت `greet = method("dog", greetDog)(greet);` | ۱۳.۷، ص. ۲۷۹ |
+| متدهای بیشتر | همان برای `"cat"` و `"cow"` | ۱۳.۸ و ۱۳.۹، صص. ۲۷۹–۲۸۰ |
+| صدا زدن | عبارت `greet(myDog)` که `"Woof woof! My name is Fido"` می‌دهد | ۱۳.۱۰، ص. ۲۸۰ |
+| پیش‌فرض | عبارت `greet = method(greetDefault)(greet);` بی هیچ مقدار توزیعی؛ و `greet(myHorse)` که `"My name is Horace"` می‌دهد | ۱۳.۱۱ و ۱۳.۱۲، ص. ۲۸۱ |
 
-Points from the dialogue (pp. 279–281):
+نکته‌هایی از گفت‌وگو (pp. 279–281):
 
-- **Method declarations needn't be in the same module** as the initialization. That decoupling is what makes multimethods extensible.
-- **Naming convention:** the multimethod's name as prefix, `Dispatch` as the dispatch function's suffix, a specific suffix per method. Names aren't important to the mechanism.
-- **Under the hood**, a hash map from dispatched values to methods.
-- **Validation in the dispatch function** is a best practice, not mandatory. Without a matching method or default, the library throws a `NoMethodError`.
+- **اعلام متدها لازم نیست در همان ماژول** راه انداختن باشد. همان جدایی است که multimethodها را گسترش‌پذیر می‌کند.
+- **عرف نام‌گذاری:** نام آن multimethod به‌شکل پیشوند، واژه‌ی `Dispatch` به‌شکل پسوند تابع توزیع‌کننده، و پسوندی ویژه برای هر متدی. نام‌ها برای آن سازوکار مهم نیستند.
+- **زیر کاپوت**، hash mapی از مقدارهای توزیع‌شده به متدها.
+- **اعتبارسنجی در تابع توزیع‌کننده** بهترین روش است، نه اجباری. بی متدی خورنده یا پیش‌فرضی، آن کتابخانه خطای `NoMethodError` می‌اندازد.
 
-> **Try it:** [Multimethod dispatch](../widgets/13-multimethod-dispatch.html) — pick an animal, a language and a name, switch between single, multiple and dynamic dispatch, and watch the dispatch value being looked up in the method table; add a new animal's method or a default without touching the others.
+> **Try it:** [توزیع multimethod](../widgets/13-multimethod-dispatch.html) — جانوری و زبانی و نامی برگزینید، میان توزیع یگانه و چندگانه و پویا سوئیچ کنید، و ببینید مقدار توزیعی چطور در جدول متدها بالا کشیده می‌شود؛ متدی برای جانوری تازه یا پیش‌فرضی بیفزایید بی دست زدن به بقیه.
 
-### 13.3 Multimethods with multiple dispatch
+> **In practice:** loader برای هر نوع منبع، PostgreSQL، MySQL یا API، رفتار متفاوت دارد؛ توزیع بر اساس یک فیلد config کافی است.
+>
+> **Your turn:** چرا `extract(source)` با یک dict از `source["type"]` به تابع بهتر از سلسله‌مراتب کلاس است؟
+>
+> *Answer:* افزودن نوع تازه یک تابع و یک ردیف در dict است و منبع‌ها داده‌ی ساده می‌مانند. multimethod توزیع را از داده می‌خواند، نه از نوع کلاس (pp. 277–281).
 
-Dave's general diagram makes the point: the dispatch function can emit **any value**, for example the types of two arguments (figure 13.2, pp. 281–282). Theo makes the animals polyglot. Languages are maps too, `{type: "fr", name: "Français"}` and `{type: "en", name: "English"}`, with their own schema (listings 13.13–13.14, p. 282).
+### ۱۳.۳ multimethodها با توزیع چندگانه
 
-`greetLangDispatch(animal, language)` validates both arguments as a tuple with `prefixItems` and returns `[animal.type, language.type]` (listing 13.15, pp. 283–284). Three animals times two languages give six methods, such as `method(["dog", "fr"], greetLangDogFr)` (figure 13.3; listing 13.16, pp. 283–285). The French methods use French onomatopoeia, "Ouaf Ouaf", "Miaou" and "Meuh" (p. 285).
+نمودار کلی دیو نکته را می‌رساند: آن تابع توزیع‌کننده می‌تواند **هر مقداری** بدهد، مثلاً گونه‌ی دو آرگومان (شکل ۱۳.۲، صص. ۲۸۱–۲۸۲). تئو جانوران را چندزبانه می‌کند. زبان‌ها هم mapاند، یعنی `{type: "fr", name: "Français"}` و `{type: "en", name: "English"}`، با طرح خودشان (listingهای ۱۳.۱۳ و ۱۳.۱۴، ص. ۲۸۲).
 
-| Call (listing 13.17, pp. 285–286) | Output |
+تابع `greetLangDispatch(animal, language)` هر دو آرگومان را به‌شکل tuple با `prefixItems` اعتبارسنجی و `[animal.type, language.type]` را برمی‌گرداند (listing ۱۳.۱۵، صص. ۲۸۳–۲۸۴). سه جانور ضرب در دو زبان شش متد می‌دهد، مانند `method(["dog", "fr"], greetLangDogFr)` (شکل ۱۳.۳؛ listing ۱۳.۱۶، صص. ۲۸۳–۲۸۵). متدهای فرانسوی از آوانمایی فرانسوی کار می‌کشند، یعنی «Ouaf Ouaf» و «Miaou» و «Meuh» (p. 285).
+
+| صدا زدن (listing ۱۳.۱۷، صص. ۲۸۵–۲۸۶) | خروجی |
 |---|---|
-| `greetLang(myDog, french)` | "Ouaf Ouaf! Je m'appelle Fido et je parle Français" |
-| `greetLang(myCat, english)` | "Meow! I am Milo and I speak English" |
-| `greetLang(myCow, french)` | "Meuh! Appelle moi Clarabelle et je parle Français" |
+| `greetLang(myDog, french)` | «Ouaf Ouaf! Je m'appelle Fido et je parle Français» |
+| `greetLang(myCat, english)` | «Meow! I am Milo and I speak English» |
+| `greetLang(myCow, french)` | «Meuh! Appelle moi Clarabelle et je parle Français» |
 
-The order of the elements in the dispatch array doesn't matter, but it must be consistent with the wiring of the methods (pp. 284–285). Dave agrees that this is more powerful than OOP polymorphism (p. 286).
+ترتیب عضوهای آن آرایه‌ی توزیعی مهم نیست، ولی باید با سیم‌کشی متدها سازگار باشد (pp. 284–285). دیو می‌پذیرد که این از polymorphism OOP نیرومندتر است (p. 286).
 
-### 13.4 Multimethods with dynamic dispatch
+### ۱۳.۴ multimethodها با توزیع پویا
 
-**Dynamic dispatch** is when the dispatch function returns a value that goes beyond its arguments' static types, such as a number or a Boolean (p. 286). Theo invents *dysmakrylexia*, difficulty pronouncing long words: animals whose name has more than five letters can't say it (p. 286).
+**توزیع پویا** وقتی است که آن تابع توزیع‌کننده مقداری برمی‌گرداند که از گونه‌های ایستای آرگومان‌هایش فراتر می‌رود، مانند عددی یا بولی (p. 286). تئو *dysmakrylexia* را ابداع می‌کند، یعنی دشواری تلفظ واژه‌های دراز: جانورانی که نامشان بیش از پنج حرف دارد نمی‌توانند بگویندش (p. 286).
 
-`dysGreetDispatch` returns `[animal.type, animal.name.length > 5]` (listing 13.18, p. 287), with six methods: the `true` ones mention the name, the `false` ones only make the sound (figure 13.4; listing 13.19, pp. 287–288). In listing 13.20, Fido and Milo say only "Woof woof!" and "Meow!", while Clarabelle says "Moo! Call me Clarabelle" (p. 288).
+تابع `dysGreetDispatch` مقدار `[animal.type, animal.name.length > 5]` را برمی‌گرداند (listing ۱۳.۱۸، ص. ۲۸۷)، با شش متد: آن‌های `true` نام را یاد می‌کنند، و آن‌های `false` تنها صدا در می‌آورند (شکل ۱۳.۴؛ listing ۱۳.۱۹، صص. ۲۸۷–۲۸۸). در listing ۱۳.۲۰، فیدو و مایلو تنها «Woof woof!» و «Meow!» می‌گویند، در حالی که کلارابل «Moo! Call me Clarabelle» می‌گوید (p. 288).
 
-> **Vault note:** the dispatch box in figure 13.4 is labelled with figure 13.3's text (`dysGreetLangDispatch`, "animal, language", "Emit the animal and the language types"), though `dysGreet` takes only an animal and emits its type and whether the name is long. Note also the inversion: a *long* name is the case that *mentions* the name (pp. 287–288).
+> **Vault note:** جعبه‌ی توزیع در شکل ۱۳.۴ با متن شکل ۱۳.۳ برچسب خورده، یعنی `dysGreetLangDispatch` و «animal, language» و «Emit the animal and the language types»، گرچه `dysGreet` تنها جانوری می‌گیرد و گونه‌اش و دراز بودن نام را می‌دهد. آن برگشتگی را هم یاد بدارید: نام *دراز* همان موردی است که نام را *یاد می‌کند* (pp. 287–288).
 
-Joe's email on multimethods in other languages (p. 289):
+ایمیل جو در باب multimethodها در زبان‌های دیگر (p. 289):
 
-| Language | Library | Generic data structures |
+| زبان | کتابخانه | ساختارهای داده‌ی عمومی |
 |---|---|---|
-| JavaScript | arrows/multimethod | Yes |
-| Java | Java Multimethod Framework | No |
-| C# | Native, via `dynamic` | No |
-| Python | multimethods | Yes |
-| Ruby | Ruby multimethods | Yes |
+| JavaScript | arrows/multimethod | بله |
+| Java | Java Multimethod Framework | نه |
+| C# | بومی، از راه `dynamic` | نه |
+| Python | multimethods | بله |
+| Ruby | Ruby multimethods | بله |
 
-### 13.5 Integrating multimethods in a production system
+### ۱۳.۵ درهم کردن multimethodها در سیستمی production
 
-Nancy calls with a "tiny" feature. Since the DOP refactoring, tiny usually is easy (p. 289). Librarians should see authors, ordered by last name, in **HTML** or **Markdown**, with names formatted by how many books they've written (table 13.1, p. 290):
+نانسی با ویژگی‌ای «ناچیز» تلفن می‌زند. از بازآرایی DOP به بعد، ناچیز معمولاً آسان است (p. 289). کتابدارها باید نویسنده‌ها را، چیده به نام خانوادگی، در **HTML** یا **Markdown** ببینند، با نام‌هایی که بسته به شمار کتاب‌های نوشته‌شان قالب گرفته‌اند (جدول ۱۳.۱، ص. ۲۹۰):
 
-| Number of books | Prolificity level | Italic | Bold | HTML | Markdown |
+| شمار کتاب | سطح پرکاری | ایتالیک | توپر | HTML | Markdown |
 |---|---|---|---|---|---|
-| 10 or fewer | `low` | Yes | No | `<i>…</i>` | `*…*` |
-| 11 to 50 | `medium` | No | Yes | `<b>…</b>` | `**…**` |
-| 51 or more | `high` | Yes | Yes | `<b><i>…</i></b>` | `***…***` |
+| ۱۰ یا کم‌تر | `low` | بله | نه | `<i>…</i>` | `*…*` |
+| ۱۱ تا ۵۰ | `medium` | نه | بله | `<b>…</b>` | `**…**` |
+| ۵۱ یا بیشتر | `high` | بله | بله | `<b><i>…</i></b>` | `***…***` |
 
-Theo delegates it to Dave, who sees it as dysmakrylexia again, with the length of an array instead of a string (p. 290). He represents a format as a plain string, `"markdown"` or `"html"`, rather than a map (p. 290), and builds `Author.myName` (pp. 291–293):
+تئو آن را به دیو وامی‌گذارد، که باز dysmakrylexia می‌بیندش، با درازی آرایه‌ای به‌جای رشته‌ای (p. 290). قالب را به‌شکل رشته‌ای خالی می‌نمایاند، یعنی `"markdown"` یا `"html"`، نه mapی (p. 290)، و تابع `Author.myName` را می‌سازد (pp. 291–293):
 
-1. **A helper**, `Author.prolificityLevel(author)`, counts `bookIsbns` with `_.size` and returns `"low"`, `"medium"` or `"high"` (listing 13.23).
-2. **The dispatch function** validates `[author, format]` and returns `[Author.prolificityLevel(author), format]` (listing 13.23).
-3. **Six methods**, one per level and format (listings 13.25 and 13.27).
+1. **یاری‌دهنده‌ای**، یعنی `Author.prolificityLevel(author)`، مقدار `bookIsbns` را با `_.size` می‌شمارد و `"low"` یا `"medium"` یا `"high"` برمی‌گرداند (listing ۱۳.۲۳).
+2. **آن تابع توزیع‌کننده** مقدار `[author, format]` را اعتبارسنجی و `[Author.prolificityLevel(author), format]` را برمی‌گرداند (listing ۱۳.۲۳).
+3. **شش متد**، یکی برای هر سطح و قالبی (listingهای ۱۳.۲۵ و ۱۳.۲۷).
 
-Testing with "a mysterious author," Yehonathan Sharvit, with the ISBN of a data-oriented programming book, gives `"<i>Yehonathan Sharvit</i>"` and `"*Yehonathan Sharvit*"` (listings 13.28–13.29, p. 293).
+آزمودن با «نویسنده‌ای رازآلود»، یعهونتان شارویت، با ISBN کتابی در باب برنامه‌نویسی داده‌گرا، مقدارهای `"<i>Yehonathan Sharvit</i>"` و `"*Yehonathan Sharvit*"` را می‌دهد (listingهای ۱۳.۲۸ و ۱۳.۲۹، ص. ۲۹۳).
 
-> **Try it:** [Author names by prolificity](../widgets/13-author-name.html) — drag the number of books across the 10/11 and 50/51 boundaries and switch formats to see the dispatch value, the chosen method and the rendered name.
+> **Try it:** [نام نویسنده بر پایه‌ی پرکاری](../widgets/13-author-name.html) — شمار کتاب‌ها را از مرزهای ۱۰ و ۱۱ و ۵۰ و ۵۱ بگذرانید و قالب‌ها را سوئیچ کنید تا مقدار توزیعی و متد برگزیده و نام رندرشده را ببینید.
 
-> **Vault note:** listing 13.21's `textFormatSchema` isn't a valid schema for a string (it lists `name` and `type` as if they were properties, with no `"type"` or `"properties"`); the args schema in listing 13.23 uses `{"enum": ["markdown", "html"]}` instead. Listing 13.24 also shows `<i>Yehonathan Sharvit<i>` without the closing slash (pp. 290–292).
+> **Vault note:** مقدار `textFormatSchema` در listing ۱۳.۲۱ طرحی معتبر برای رشته نیست؛ فیلدهای `name` و `type` را چنان فهرست می‌کند که گویی خاصیتند، بی هیچ `"type"` یا `"properties"`. طرح آرگومان‌ها در listing ۱۳.۲۳ در عوض `{"enum": ["markdown", "html"]}` را به کار می‌برد. listing ۱۳.۲۴ هم `<i>Yehonathan Sharvit<i>` را بی ممیز پایانی نشان می‌دهد (pp. 290–292).
 
-## Trade-offs at a glance
+> **In practice:** هر جا رفتار بر اساس داده عوض می‌شود، جدول توزیع هم جزو کد است و باید تست شود.
+>
+> **Your turn:** کسی نوع منبع تازه‌ای در YAML اضافه کرده ولی تابعش را نه. کِی متوجه می‌شوید؟
+>
+> *Answer:* اگر تابع پیش‌فرض خطای روشن بدهد، در اولین اجرا؛ بهتر است در GitLab CI تستی همه‌ی نوع‌های YAML را با کلیدهای جدول توزیع مقایسه کند تا پیش از merge پیدا شود (pp. 289–293).
 
-| Approach | Extensible without editing? | Dispatch on | Works on generic maps? |
+## بده‌بستان‌ها در یک نگاه
+
+| رویکرد | بی ویرایش گسترش‌پذیر؟ | توزیع بر پایه‌ی | روی mapهای عمومی کار می‌کند؟ |
 |---|---|---|---|
-| `switch` on `type` | No (p. 277) | One field | Yes |
-| OOP interface | Yes, add a class | The receiver's class | No, needs classes |
-| Single-dispatch multimethod | Yes, add a method | One argument's value | Yes |
-| Multiple-dispatch multimethod | Yes | Several arguments' values (p. 285) | Yes |
-| Dynamic-dispatch multimethod | Yes | Any computed value (p. 286) | Yes |
+| یک `switch` روی `type` | نه (p. 277) | یک فیلد | بله |
+| interfaceی از OOP | بله، کلاسی بیفزایید | کلاس گیرنده | نه، کلاس می‌خواهد |
+| multimethod با توزیع یگانه | بله، متدی بیفزایید | مقدار یک آرگومان | بله |
+| multimethod با توزیع چندگانه | بله | مقدار چند آرگومان (p. 285) | بله |
+| multimethod با توزیع پویا | بله | هر مقدار حساب‌شده‌ای (p. 286) | بله |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Clojure has multimethods built in.** `defmulti` names the dispatch function, `defmethod` adds methods, `:default` is the fallback, and hierarchies (`derive`, `isa?`) let a method handle a family of values, which a plain hash-map lookup can't.
-- **The expression problem.** Philip Wadler's name for the tension Dave and Theo uncover: OOP makes it easy to add types (classes) but hard to add operations; a switch makes it easy to add operations but hard to add types. Multimethods, like Clojure's protocols, let you add both without editing existing code.
-- **Python's `functools.singledispatch`** dispatches on the class of the first argument, so it gives single dispatch on types, not on values in a map. Dispatching on a value from a dict needs a library like the one Joe mentions, or a hand-rolled dict of functions.
-- **Ambiguity grows with multiple dispatch.** With exact-match dispatch values, as in the book, there's no ambiguity. Systems with inheritance among dispatch values (CLOS, Julia, Clojure hierarchies) must decide which method is "more specific", and may need tie-breaking rules such as Clojure's `prefer-method`.
-- **Pattern matching** (`match` in Python 3.10+, Scala, Rust) is a modern, closed alternative to the switch: concise and exhaustively checked in some languages, but still not open to extension from another module.
+- **زبان Clojure multimethodها را توکار دارد.** تابع `defmulti` تابع توزیع‌کننده را نام می‌دهد، `defmethod` متد می‌افزاید، کلیدواژه‌ی `:default` پشتوانه است، و سلسله‌مراتب با `derive` و `isa?` می‌گذارد متدی خانواده‌ای از مقدارها را بچرخاند، که بالا کشیدن سرراست از hash map نمی‌تواند.
+- **مسئله‌ی عبارت.** نام فیلیپ وادلر برای همان کشاکشی که دیو و تئو رویش می‌کنند: روش OOP افزودن گونه‌ها یا کلاس‌ها را آسان می‌کند ولی افزودن عمل‌ها را سخت؛ و switch افزودن عمل‌ها را آسان می‌کند ولی افزودن گونه‌ها را سخت. multimethodها، مانند protocolهای Clojure، می‌گذارند هر دو را بی ویرایش کد موجود بیفزایید.
+- **تابع `functools.singledispatch` در Python** بر پایه‌ی کلاس آرگومان نخست توزیع می‌کند، پس توزیع یگانه روی گونه‌ها می‌دهد، نه روی مقدارهای درون mapی. توزیع بر پایه‌ی مقداری از dict، کتابخانه‌ای مانند آنچه جو یاد می‌کند یا dictی دست‌ساز از تابع می‌خواهد.
+- **دوپهلویی با توزیع چندگانه بیشتر می‌شود.** با مقدارهای توزیعی دقیق‌خوان، مانند کتاب، هیچ دوپهلویی نیست. سیستم‌هایی که میان مقدارهای توزیعی وراثت دارند، مانند CLOS و Julia و سلسله‌مراتب Clojure، باید تصمیم بگیرند کدام متد «ویژه‌تر» است، و شاید قاعده‌ی گره‌گشایی مانند `prefer-method` در Clojure بخواهند.
+- **خوانش الگو** یعنی `match` در Python ۳.۱۰ به بعد و Scala و Rust، بدیلی نو و بسته برای switch است: موجز و در برخی زبان‌ها فراگیر سنجیده، ولی باز به گسترش از ماژولی دیگر باز نیست.
 
-## Connections
+## پیوندها
 
-- **The argument tuple schema** comes from [12. Advanced data validation](12-advanced-data-validation.md).
-- **Why data is generic maps** in the first place: [3. Basic data manipulation](03-basic-data-manipulation.md).
-- **Next:** [14. Advanced data manipulation](14-advanced-data-manipulation.md).
-- **Run it:** [Multimethods from scratch](../lab/13-multimethods/README.md) — a tiny `multi`/`method` in Python, with single, multiple and dynamic dispatch, a default method, and the author-name boundaries.
+- **طرح tuple آرگومان‌ها** از [۱۲. اعتبارسنجی پیشرفته‌ی داده](12-advanced-data-validation.md) می‌آید.
+- **چرا داده از اساس mapهای عمومی است:** [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md).
+- **پسین:** [۱۴. دست‌کاری پیشرفته‌ی داده](14-advanced-data-manipulation.md).
+- **Run it:** [multimethodها از صفر](../lab/13-multimethods/README.md) — یک `multi` و `method` ناچیز به Python، با توزیع یگانه و چندگانه و پویا، متدی پیش‌فرض، و مرزهای نام نویسنده.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. Why isn't a `switch` on `animal.type` enough, even with validation and one function per animal?
-   <details><summary>Answer</summary>Adding a new animal still requires modifying the original code. The main benefit of polymorphism is extensibility, which the switch lacks (pp. 276–277).</details>
-2. What are the three responsibilities of a multimethod's dispatch function?
-   <details><summary>Answer</summary>Defining the signature of the multimethod, validating the arguments, and emitting a dispatch value (p. 279).</details>
-3. What makes multimethods extensible?
-   <details><summary>Answer</summary>Method declarations are decoupled from the multimethod's initialization, so a method for a new dispatch value can be added anywhere, even in another module, without changing existing code (p. 279).</details>
-4. How does a multimethod work under the hood?
-   <details><summary>Answer</summary>It keeps a hash map from dispatch values to methods. Adding a method adds an entry; calling the multimethod runs the dispatch function and looks up its value (p. 280).</details>
-5. What happens if no method matches the dispatch value?
-   <details><summary>Answer</summary>The default implementation runs if one was declared, by passing a single function to `method`; otherwise the arrows/multimethod library throws a `NoMethodError` (pp. 280–281).</details>
-6. What's the difference between multiple dispatch and dynamic dispatch?
-   <details><summary>Answer</summary>Multiple dispatch: the dispatch value depends on several arguments, such as `[animal.type, language.type]`. Dynamic dispatch: the value goes beyond the arguments' static types, such as a Boolean computed from the name's length (pp. 285–287).</details>
-7. Which method handles an author with exactly 11 books, in Markdown? With 51?
-   <details><summary>Answer</summary>11 books is `medium`, so `authorNameMediumMarkdown`, giving `**name**`; 51 is `high`, giving `***name***` (table 13.1; listings 13.23, 13.27).</details>
+1. چرا یک `switch` روی `animal.type` بس نیست، حتی با اعتبارسنجی و یک تابع برای هر جانوری؟
+   <details><summary>پاسخ</summary>افزودن جانوری تازه باز دست‌کاری کد اصلی را می‌خواهد. سود اصلی polymorphism گسترش‌پذیری است، که آن switch ندارد (pp. 276–277).</details>
+2. سه مسئولیت تابع توزیع‌کننده‌ی یک multimethod کدامند؟
+   <details><summary>پاسخ</summary>تعریف کردن امضای آن multimethod، اعتبارسنجی آرگومان‌ها، و دادن مقداری توزیعی (p. 279).</details>
+3. چه چیزی multimethodها را گسترش‌پذیر می‌کند؟
+   <details><summary>پاسخ</summary>اعلام متدها از راه انداختن آن multimethod جداست، پس متدی برای مقدار توزیعی تازه هر جایی، حتی در ماژولی دیگر، افزودنی است، بی عوض کردن کد موجود (p. 279).</details>
+4. یک multimethod زیر کاپوت چطور کار می‌کند؟
+   <details><summary>پاسخ</summary>عمل hash mapی از مقدارهای توزیعی به متدها نگه می‌دارد. افزودن متدی entryی می‌افزاید؛ و صدا زدن آن multimethod تابع توزیع‌کننده را اجرا و مقدارش را بالا می‌کشد (p. 280).</details>
+5. اگر هیچ متدی با مقدار توزیعی نخواند چه می‌شود؟
+   <details><summary>پاسخ</summary>اگر پیاده‌سازی پیش‌فرضی با فرستادن تابعی تنها به `method` اعلام شده باشد اجرا می‌شود؛ وگرنه کتابخانه‌ی arrows/multimethod خطای `NoMethodError` می‌اندازد (pp. 280–281).</details>
+6. تفاوت توزیع چندگانه و توزیع پویا چیست؟
+   <details><summary>پاسخ</summary>توزیع چندگانه: آن مقدار توزیعی به چند آرگومان بسته است، مانند `[animal.type, language.type]`. توزیع پویا: آن مقدار از گونه‌های ایستای آرگومان‌ها فراتر می‌رود، مانند بولی‌ای حساب‌شده از درازی نام (pp. 285–287).</details>
+7. کدام متد نویسنده‌ای با دقیقاً ۱۱ کتاب را در Markdown می‌چرخاند؟ و با ۵۱ کتاب؟
+   <details><summary>پاسخ</summary>شمار ۱۱ کتاب `medium` است، پس `authorNameMediumMarkdown` که `**name**` می‌دهد؛ و ۵۱ همان `high` است، که `***name***` می‌دهد (جدول ۱۳.۱؛ listingهای ۱۳.۲۳ و ۱۳.۲۷).</details>

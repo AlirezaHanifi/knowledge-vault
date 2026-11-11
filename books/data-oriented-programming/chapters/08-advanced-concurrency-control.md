@@ -2,100 +2,108 @@
 book: data-oriented-programming
 chapter: 8
 title: "Advanced concurrency control"
+translated_title: "کنترل پیشرفته‌ی concurrency"
 pages: "163–174"
+lang: fa
 ---
 
-# 8. Advanced concurrency control
+# ۸. کنترل پیشرفته‌ی concurrency
 
-[← 7. Basic data validation](07-basic-data-validation.md) · [Book](../README.md) · [9. Persistent data structures →](09-persistent-data-structures.md)
+[← ۷. اعتبارسنجی پایه‌ی داده](07-basic-data-validation.md) · [کتاب](../README.md) · [۹. ساختارهای داده‌ی persistent →](09-persistent-data-structures.md)
 
-## Summary
+## خلاصه
 
-Theo's second objection was that chapter 5's commit phase isn't thread-safe. Locks would fix it, but they make it hard to keep a system free of deadlocks. On Sunday, Theo and Joe kept phoning each other at exactly the same times and got busy signals: "A deadlock!" (pp. 163–164). DOP uses a lock-free mechanism instead, the **atom** (p. 163):
+ایراد دوم تئو این بود که فاز commit فصل ۵ thread-safe نیست. قفل‌ها درستش می‌کردند، ولی نگه داشتن سیستمی آزاد از deadlock را سخت می‌کنند. یکشنبه، تئو و جو درست در همان لحظه‌ها به هم تلفن زدند و بوق اشغال گرفتند: «یک deadlock!» (pp. 163–164). روش DOP در عوض از سازوکاری بی قفل کار می‌کشد، یعنی **atom** (p. 163):
 
-- **`get`** returns the current value.
-- **`set`** overwrites it.
-- **`swap(f)`** takes a snapshot, computes `f(snapshot)`, and commits it with an atomic **compare-and-set** if the state is still the snapshot; otherwise it retries (pp. 166–168).
+- متد **`get`** مقدار کنونی را برمی‌گرداند.
+- متد **`set`** از رویش می‌نویسد.
+- متد **`swap(f)`** عکسی می‌گیرد، مقدار `f(snapshot)` را حساب می‌کند، و اگر state هنوز همان عکس باشد با **compare-and-set** اتمی commitش؛ وگرنه از نو تلاش می‌کند (pp. 166–168).
 
-Reads need no protection at all, because immutable data is always a consistent snapshot (p. 164). The chapter builds three things with atoms:
+خواندن‌ها هیچ پناهی نمی‌خواهند، چون داده‌ی immutable همیشه عکسی سازگار است (p. 164). فصل سه چیز با atom می‌سازد:
 
-- **A thread-safe counter** (listing 8.2).
-- **A thread-safe in-memory cache**, a string map compared by reference (listing 8.7).
-- **The whole system state:** wrapping `SystemConsistency.reconcile` in `swap` makes the part 1 commit phase thread-safe (listings 8.9–8.10, pp. 165–174).
+- **شمارنده‌ای thread-safe** (listing ۸.۲).
+- **یک cache thread-safe در حافظه**، یعنی map رشته‌ای که با ارجاع سنجیده می‌شود (listing ۸.۷).
+- **کل state سیستم:** پوشاندن `SystemConsistency.reconcile` در `swap` فاز commit بخش ۱ را thread-safe می‌کند (listingهای ۸.۹ و ۸.۱۰، صص. ۱۶۵–۱۷۴).
 
-Theo's image: mutexes are like phone calls, atoms are like text messages (p. 174). The chapter matters mostly for multi-threaded languages, such as Java, C#, Python and Ruby; its JavaScript is written as if JavaScript were multi-threaded (p. 163).
+تصویر تئو: mutexها مانند تلفن زدن‌اند و atomها مانند پیامک (p. 174). فصل بیشتر برای زبان‌های multi-threaded مهم است، مانند Java و C# و Python و Ruby؛ و JavaScript‌اش چنان نوشته شده که گویی JavaScript multi-threaded است (p. 163).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Locks add complexity:** forgetting to release a lock when an exception is thrown, or acquiring two locks in the wrong order, causes deadlocks (pp. 163, 165).
-- **Cloning data to avoid read locks doesn't scale**; with immutable data, a read is always safe, because it works on a snapshot (p. 164).
-- **With atoms, deadlocks never happen**: they manage concurrency without locks (p. 165).
-- **`swap` retries until no change occurred during the computation.** Its core is `atomicCompareAndSet`, a CPU-backed compare-and-swap, for example Java's `AtomicReference.compareAndSet` (pp. 167–169).
-- **The loop isn't infinite:** if one thread fails, another succeeded. Starvation is possible in theory with thousands of threads doing nothing but swapping, but in practice threads do real work between swaps (p. 170).
-- **Composite data is as easy as numbers**: comparing two maps by reference is safe and fast when they are immutable (pp. 170, 172).
-- **One atom holds the whole system state**, and `commit` becomes `swap(current => reconcile(current, previous, next))` (pp. 173–174).
+- **قفل‌ها پیچیدگی می‌افزایند:** از یاد بردن رها کردن قفلی سر افتادن استثنایی، یا گرفتن دو قفل به ترتیب غلط، deadlock می‌سازد (pp. 163, 165).
+- **کلون کردن داده برای پرهیز از قفل خواندن مقیاس نمی‌گیرد**؛ و با داده‌ی تغییرناپذیر، خواندنی همیشه ایمن است، چون روی عکسی کار می‌کند (p. 164).
+- **با atom، هیچ‌وقت deadlock نمی‌شود**: concurrency را بی قفل مدیریت می‌کنند (p. 165).
+- **متد `swap` از نو تلاش می‌کند تا سر حساب کردن تغییری رخ نداده باشد.** هسته‌اش `atomicCompareAndSet` است، یک compare-and-swap که CPU پشتش است؛ مثلاً `AtomicReference.compareAndSet` از Java (pp. 167–169).
+- **آن حلقه بی‌پایان نیست:** اگر رشته‌ای شکست بخورد، رشته‌ای دیگر برده. گرسنگی در نظر با هزاران رشته که هیچ کاری جز swap نمی‌کنند شدنی است، ولی در کار واقعی رشته‌ها میان swapها کار واقعی می‌کنند (p. 170).
+- **داده‌ی مرکب به‌اندازه‌ی عدد آسان است**: سنجیدن دو map با ارجاع، وقتی تغییرناپذیرند، ایمن و تند است (pp. 170, 172).
+- **یک atom کل state سیستم را نگه می‌دارد**، و `commit` به `swap(current => reconcile(current, previous, next))` بدل می‌شود (pp. 173–174).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 8.1 The complexity of locks — p. 164
-- 8.2 Thread-safe counter with atoms — p. 165
-- 8.3 Thread-safe cache with atoms — p. 170
-- 8.4 State management with atoms — p. 172
-- Summary — p. 174
+- ۸.۱ پیچیدگی قفل‌ها — ص. ۱۶۴
+- ۸.۲ شمارنده‌ی thread-safe با atom — ص. ۱۶۵
+- ۸.۳ کتابخانه‌ی cache thread-safe با atom — ص. ۱۷۰
+- ۸.۴ مدیریت state با atom — ص. ۱۷۲
+- خلاصه — ص. ۱۷۴
 
-## Notes
+## یادداشت‌ها
 
-### 8.1 The complexity of locks
+### ۸.۱ پیچیدگی قفل‌ها
 
-After a 50-mile bike ride across the Golden Gate Bridge, Theo can't reach Joe; the line is always busy. On Monday they discover they had been calling each other at exactly the same times (p. 164).
+پس از دوچرخه‌سواری ۵۰مایلی از پل گلدن‌گیت، تئو به جو نمی‌رسد؛ خط همیشه اشغال است. دوشنبه کشف می‌کنند که درست در همان لحظه‌ها به هم تلفن می‌زده‌اند (p. 164).
 
-Theo protects both reads and writes with a mutex. Without a lock on reads, a write in another thread could make a read logically inconsistent; cloning the data first is too expensive when the data is large (p. 164). In DOP neither is needed. A write never mutates the data being read, so "a read always works on a data snapshot" (p. 164).
+تئو هر دو خواندن و نوشتن را با mutex پناه می‌دهد. بی قفلی روی خواندن، نوشتنی در رشته‌ای دیگر می‌توانست خواندنی را منطقی ناسازگار کند؛ و کلون کردن داده پیش از آن، وقتی داده بزرگ است، خیلی گران است (p. 164). در DOP هیچ‌کدام لازم نیست. نوشتنی هیچ‌وقت داده‌ی زیر خواندن را mutation نمی‌دهد، پس «خواندنی همیشه روی عکسی از داده کار می‌کند» (p. 164).
 
-Their deadlock war stories (p. 165):
+داستان‌های جنگی deadlockشان (p. 165):
 
-- **Joe, ten years earlier:** a lock not released when an exception was thrown in a critical section.
-- **Theo, the previous year:** two locks not released in the proper order.
+- **جو، ده سال پیش‌تر:** قفلی که سر افتادن استثنایی در بخشی بحرانی رها نشد.
+- **تئو، سال پیش:** دو قفل که به ترتیب درست رها نشدند.
 
-### 8.2 Thread-safe counter with atoms
+> **In practice:** در pipeline هم قفل هست: `max_active_runs=1` در Airflow و `concurrencyPolicy: Forbid` در CronJob همان قفل‌اند.
+>
+> **Your turn:** CronJob یک job دارد که گاهی از فاصله‌ی زمان‌بندی طولانی‌تر می‌شود. `Forbid` چه می‌کند و چه هزینه‌ای دارد؟
+>
+> *Answer:* اجرای بعدی را رد می‌کند تا دو نمونه هم‌زمان نوشتن نکنند، ولی اجراهای ردشده دیگر انجام نمی‌شوند. قفل درستی را ساده می‌کند ولی throughput را می‌گیرد و می‌تواند کار را گرسنه بگذارد (pp. 164–165).
 
-The example is a counter of database accesses, logged every minute (p. 165).
+### ۸.۲ شمارنده‌ی thread-safe با atom
 
-| Approach | Increment | Read |
+مثال شمارنده‌ای از دسترسی‌های پایگاه داده است، که هر دقیقه log می‌شود (p. 165).
+
+| رویکرد | افزودن | خواندن |
 |---|---|---|
-| Mutex (listing 8.1, pp. 165–166) | `mutex.lock(); counter = counter + 1; mutex.unlock();` | Locked as well |
-| Atom (listing 8.2, p. 166) | `counter.swap(x => x + 1)` | `counter.get()` |
+| mutex (listing ۸.۱، صص. ۱۶۵–۱۶۶) | `mutex.lock(); counter = counter + 1; mutex.unlock();` | قفل‌شده هم هست |
+| atom (listing ۸.۲، ص. ۱۶۶) | `counter.swap(x => x + 1)` | `counter.get()` |
 
-| Method | Description (table 8.1, p. 166) |
+| متد | توضیح (جدول ۸.۱، ص. ۱۶۶) |
 |---|---|
-| `get` | Returns the current value |
-| `set` | Overwrites the current value |
-| `swap` | Updates the current value with a function |
+| `get` | مقدار کنونی را برمی‌گرداند |
+| `set` | از روی مقدار کنونی می‌نویسد |
+| `swap` | مقدار کنونی را با تابعی به‌روز می‌کند |
 
-**How `swap` is thread-safe without locks.** It computes the next value, and before modifying the atom checks whether the value changed during the computation. If it did, `swap` tries again (pp. 167–168):
+**چطور `swap` بی قفل thread-safe است.** مقدار پسین را حساب می‌کند، و پیش از دست‌کاری atom می‌سنجد که سر حساب کردن آن مقدار عوض شده یا نه. اگر شده باشد، `swap` باز تلاش می‌کند (pp. 167–168):
 
-![Loop: take a snapshot of the state, compute the next state from it, check whether the state still equals the snapshot; if it changed, start again, otherwise set the state to the next state](../figures/08-02.png)
+![حلقه: عکسی از state بگیر، state پسین را از آن حساب کن، بسنج که state هنوز با آن عکس برابر است؛ اگر عوض شده باز آغاز کن، وگرنه state را روی state پسین بگذار](../figures/08-02.png)
 
-*Figure 8.2 (p. 168): the check and the update are one atomic compare-and-set; a lost race only costs a retry.*
+*Figure 8.2 (p. 168): آن سنجش و به‌روزرسانی یک compare-and-set اتمی‌اند؛ و باختن مسابقه‌ای تنها یک تلاش دوباره خرج می‌دهد.*
 
-`atomicCompareAndSet` atomically sets the state to a new value if, and only if, it still equals the provided old value, and returns whether it succeeded (p. 168). It is a compare-and-swap provided by the language and relying on the CPU. Java has `AtomicReference` in `java.util.concurrent.atomic`, Python has the `atomos` library, Ruby and C# have their own, and JavaScript doesn't need one, being single-threaded (table 8.2, pp. 168–169). Java's `Atom` stores its state in an `AtomicReference` and uses generics (listings 8.4–8.5, pp. 169–170).
+تابع `atomicCompareAndSet` مقدار state را اتمی روی مقداری تازه می‌گذارد اگر، و تنها اگر، هنوز با مقدار کهنه‌ی داده‌شده برابر باشد، و برمی‌گرداند که کامیاب شد یا نه (p. 168). این compare-and-swapی است که زبان می‌دهد و به CPU تکیه دارد. زبان Java کلاس `AtomicReference` را در `java.util.concurrent.atomic` دارد، زبان Python کتابخانه‌ی `atomos` را، زبان‌های Ruby و C# مال خودشان را، و JavaScript که single-threaded است هیچ‌کدام را نمی‌خواهد (جدول ۸.۲، صص. ۱۶۸–۱۶۹). کلاس `Atom` در Java مقدار stateش را در `AtomicReference` ذخیره می‌کند و از generic کار می‌کشد (listingهای ۸.۴ و ۸.۵، صص. ۱۶۹–۱۷۰).
 
-Can `swap` loop forever? No. A failed compare-and-set means the atom was changed on another thread, so "in this race between threads, there is always a winner" (p. 170). Starvation is possible in theory, with thousands of threads that do nothing but swap. Joe has never seen it, because in practice threads do real work after a swap, such as database access or I/O, which gives others their chance (p. 170).
+تابع `swap` می‌تواند تا ابد حلقه بزند؟ نه. شکست خوردن compare-and-set یعنی atom در رشته‌ای دیگر عوض شده، پس «در این مسابقه‌ی میان رشته‌ها همیشه برنده‌ای هست» (p. 170). گرسنگی در نظر شدنی است، با هزاران رشته که هیچ کاری جز swap نمی‌کنند. جو هیچ‌وقت ندیده‌اش، چون در کار واقعی رشته‌ها پس از swap کار واقعی می‌کنند، مانند دسترسی به پایگاه داده یا I/O، که به دیگران شانسشان را می‌دهد (p. 170).
 
-> **Vault note:** in listing 8.4, `return nextState;` sits after the `while (true)` loop, where `nextState` is out of scope, so the Java wouldn't compile as printed. Listing 8.3, the JavaScript version, returns inside the loop after a successful compare-and-set, which is the intended structure (pp. 167–169).
+> **Vault note:** در listing ۸.۴، عبارت `return nextState;` پس از حلقه‌ی `while (true)` نشسته، جایی که `nextState` بیرون دامنه است، پس آن Java همان‌طور که چاپ شده کامپایل نمی‌شد. نمونه‌ی ۸.۳، یعنی version JavaScript، درون حلقه و پس از compare-and-set کامیاب برمی‌گردد، که ساختار خواسته همین است (pp. 167–169).
 
-> **Try it:** [Swap or lock](../widgets/08-atom-swap.html) — run threads that increment a shared counter with no protection, with a mutex, or with an atom, step through the interleavings, and count lost updates and swap retries.
+> **Try it:** [swap یا قفل](../widgets/08-atom-swap.html) — رشته‌هایی را اجرا کنید که شمارنده‌ای شریک را بی هیچ پناهی، یا با mutex، یا با atom می‌افزایند، درهم‌رفتن‌ها را قدم‌به‌قدم ببینید، و به‌روزرسانی‌های گم‌شده و تلاش‌های دوباره‌ی swap را بشمارید.
 
-### 8.3 Thread-safe cache with atoms
+### ۸.۳ کتابخانه‌ی cache thread-safe با atom
 
-When database queries don't vary much, cache their results in memory, as a string map from query to result (pp. 170–171). Because the map is immutable, Theo's lock version protects only the update, not the read (listing 8.6). The atom version reads with `cache.get()` and updates with `cache.swap(oldCache => _.set(oldCache, query, result))` (listing 8.7, pp. 171–172).
+وقتی پرسش‌های پایگاه داده زیاد فرق نمی‌کنند، برآمدهایشان را در حافظه cache کنید، به‌شکل map رشته‌ای از پرسش به خروجی (pp. 170–171). چون آن map immutable است، version قفل‌دار تئو تنها به‌روزرسانی را پناه می‌دهد، نه خواندن را (listing ۸.۶). version atom با `cache.get()` می‌خواند و با `cache.swap(oldCache => _.set(oldCache, query, result))` به‌روز می‌کند (listing ۸.۷، صص. ۱۷۱–۱۷۲).
 
-Theo worries that `swap` compares two string maps, which might be slow. It doesn't, because it compares them **by reference**: with immutable data that is safe and super fast (p. 172).
+تئو نگران است که `swap` دو map رشته‌ای را می‌سنجد، که شاید کند باشد. نمی‌سنجد، چون آن‌ها را **با ارجاع** می‌سنجد: با داده‌ی immutable این ایمن و فوق‌تند است (p. 172).
 
-### 8.4 State management with atoms
+### ۸.۴ مدیریت state با atom
 
-The part 1 `SystemState.commit` calls `SystemConsistency.reconcile` unprotected, so two threads can run it concurrently (listing 8.8, pp. 172–173). The fix keeps the system data in an atom (pp. 173–174):
+تابع `SystemState.commit` از بخش ۱ تابع `SystemConsistency.reconcile` را بی پناه صدا می‌زند، پس دو رشته می‌توانند concurrent اجرایش کنند (listing ۸.۸، صص. ۱۷۲–۱۷۳). چاره داده‌ی سیستم را در atomی نگه می‌دارد (pp. 173–174):
 
 ```js
 class SystemState {
@@ -110,9 +118,9 @@ class SystemState {
 }
 ```
 
-*Assembled from listings 8.9 and 8.10 (p. 173); validation omitted, as in the book's listing 8.8.*
+*سوارشده از listingهای ۸.۹ و ۸.۱۰ (p. 173)؛ اعتبارسنجی انداخته شده، مانند listing ۸.۸ کتاب.*
 
-If another mutation commits while `reconcile` runs, the compare-and-set fails and `swap` reconciles again against the newer state. The calculation phase is untouched.
+اگر mutationی دیگر سر اجرای `reconcile` commit کند، آن compare-and-set شکست می‌خورد و `swap` باز در برابر state تازه‌تر reconciliation می‌دهد. فاز حساب دست‌نخورده می‌ماند.
 
 ```mermaid
 sequenceDiagram
@@ -127,49 +135,55 @@ sequenceDiagram
     Note over A,At: if B committed during A's reconcile,<br/>A's CAS fails and A reconciles again
 ```
 
-*The vault's sequence diagram of listing 8.10.*
+*نمودار ترتیبی vault از listing ۸.۱۰.*
 
-Theo: "mutexes are like phone calls, and atoms are like text messages" (p. 174).
+تئو: «mutexها مانند تلفن زدن‌اند و atomها مانند پیامک» (p. 174).
 
-> **Try it:** [The phone-call deadlock](../widgets/08-phone-deadlock.html) — let two callers each grab their own line and then dial the other, see the deadlock, then replay the same conversation as text messages through an atom.
+> **Try it:** [deadlock تلفنی](../widgets/08-phone-deadlock.html) — بگذارید دو تماس‌گیرنده هر کدام خط خودش را بگیرد و بعد شماره‌ی آن یکی را، آن deadlock را ببینید، و بعد همان گفت‌وگو را به‌شکل پیامک از راه atomی replay کنید.
 
-> **Run it:** the [atom experiment](../lab/08-atom-swap/README.md) schedules threads with a seeded interleaver and counts lost updates, mutex waits and compare-and-set retries.
+> **Run it:** [آزمایش atom](../lab/08-atom-swap/README.md) رشته‌ها را با درهم‌بافنده‌ای با seed زمان‌بندی می‌کند و به‌روزرسانی‌های گم‌شده و انتظارهای mutex و تلاش‌های دوباره‌ی compare-and-set را می‌شمارد.
 
-## Trade-offs at a glance
+> **In practice:** atom یعنی جایگزینی اتمی کل state با یک compare-and-swap، و `EXCHANGE TABLES` در ClickHouse همین را برای یک جدول کامل انجام می‌دهد.
+>
+> **Your turn:** چرا ساختن جدول Gold در جدول کناری و جابه‌جایی اتمی از بازنویسی سر جا بهتر است؟
+>
+> *Answer:* خواننده‌ها همیشه یک نسخه‌ی کامل را می‌بینند، قدیمی یا تازه، و اگر ساختن fail شود نسخه‌ی قدیمی دست‌نخورده می‌ماند. atom همین را در حافظه می‌کند: نسخه‌ی تازه را می‌سازد و اشاره‌گر را اتمی عوض می‌کند (pp. 173–174).
 
-| Mechanism | Reads | Writes | Failure mode |
+## بده‌بستان‌ها در یک نگاه
+
+| سازوکار | خواندن | نوشتن | شکل شکست |
 |---|---|---|---|
-| Mutex on mutable data | Need the lock too (p. 164) | Serialized by the lock | Deadlocks from ordering or exceptions; contention (p. 165) |
-| Clone before reading | No lock | Lock | Doesn't scale for large data (p. 164) |
-| Atom over immutable data | Always safe; a snapshot | Optimistic `swap` with retries | Starvation in theory, under extreme contention (p. 170) |
-| Atom holding the whole system state | Snapshot of everything | `swap` around reconcile | Retried reconciles under heavy write load |
+| mutex روی داده‌ی mutable | آن قفل را هم می‌خواهد (p. 164) | آن قفل سری‌اش می‌کند | deadlock از ترتیب یا استثنا؛ و کشاکش (p. 165) |
+| کلون پیش از خواندن | بی قفل | قفل | برای داده‌ی بزرگ مقیاس نمی‌گیرد (p. 164) |
+| atom روی داده‌ی immutable | همیشه ایمن؛ یک عکس | `swap` خوش‌بینانه با تلاش دوباره | گرسنگی در نظر، زیر کشاکش بی‌اندازه (p. 170) |
+| atomی که کل state سیستم را دارد | عکسی از همه چیز | `swap` گرد reconciliation | reconciliationهای تکرارشده زیر بار سنگین نوشتن |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Clojure's atoms.** The API (`deref`, `reset!`, `swap!`) is Clojure's. Clojure's documentation notes that the function passed to `swap!` may be called multiple times, so it must be free of side effects. That rules out putting I/O inside `swap`, which is why listing 8.7 calls `dbAccess` *before* swapping the cache.
-- **Lock-free doesn't mean wait-free.** A compare-and-swap loop guarantees that *some* thread always makes progress, which is lock-freedom. It doesn't guarantee that *every* thread finishes in bounded steps, which is wait-freedom. The book's starvation note is exactly that gap.
-- **The ABA problem**, where a value changes from A to B and back to A, can fool compare-and-swap on raw values. With immutable data and reference comparison, a "new A" is a different object, so the classic problem doesn't arise for atoms over persistent data.
-- **The cache can compute twice.** In listing 8.7, two threads that miss on the same query both call `dbAccess`, and the later `swap` simply overwrites the same key. That's harmless for a pure query cache. Avoiding duplicate work needs a different technique, such as storing a promise or future in the cache.
-- **Memory ordering.** In Java, `AtomicReference` also gives the *visibility* guarantees a plain field lacks. A reader thread is guaranteed to see the latest committed state, not a stale cached value.
+- **همه‌ی atomهای Clojure.** آن API، یعنی `deref` و `reset!` و `swap!`، مال Clojure است. مستند Clojure یاد می‌کند که تابع فرستاده به `swap!` ممکن است چند بار صدا زده شود، پس باید از اثر جانبی آزاد باشد. این گذاشتن I/O درون `swap` را رد می‌کند، و همین است که listing ۸.۷ تابع `dbAccess` را *پیش* از swap کردن cache صدا می‌زند.
+- **بی قفل یعنی بی انتظار نه.** حلقه‌ی compare-and-swap تضمین می‌کند که *رشته‌ای* همیشه پیش می‌رود، که همان بی‌قفلی است. تضمین نمی‌کند که *هر* رشته‌ای در قدم‌هایی کرانه‌دار تمام کند، که بی‌انتظاری است. یادداشت گرسنگی کتاب درست همین رخنه است.
+- **مسئله‌ی ABA**، که مقداری از A به B و باز به A عوض می‌شود، می‌تواند compare-and-swap را روی مقدارهای خام فریب دهد. با داده‌ی immutable و سنجش ارجاع، آن «A تازه» شیئی دیگر است، پس آن مسئله‌ی کلاسیک برای atomها روی داده‌ی persistent پیش نمی‌آید.
+- **آن cache می‌تواند دو بار حساب کند.** در listing ۸.۷، دو رشته که روی همان یک پرسش می‌بازند هر دو `dbAccess` را صدا می‌زنند، و آن `swap` دیرتر تنها از روی همان کلید می‌نویسد. این برای cacheی سرراست از پرسش بی‌آزار است. پرهیز از کار دوباره فنی دیگر می‌خواهد، مانند ذخیره کردن promise یا future در cache.
+- **ترتیب حافظه.** در Java، کلاس `AtomicReference` تضمین‌های *دیده‌شدن* را هم می‌دهد که فیلدی خالی ندارد. تضمین می‌شود که رشته‌ی خواننده تازه‌ترین state commitشده را ببیند، نه مقداری کهنه از cache.
 
-## Connections
+## پیوندها
 
-- **The race this fixes:** the check-then-set in `SystemConsistency` from [5. Basic concurrency control](05-basic-concurrency-control.md) (p. 108).
-- **Why reference comparison is enough:** immutable data from [4. State management](04-state-management.md).
-- **Next objection:** structural sharing at scale, in [9. Persistent data structures](09-persistent-data-structures.md).
-- **Run it:** [Atoms in a seeded scheduler](../lab/08-atom-swap/README.md) — compares no protection, a mutex and an atom on the same interleavings.
+- **مسابقه‌ای که این درست می‌کند:** آن سنجش-بعد-سپردن در `SystemConsistency` از [۵. کنترل پایه‌ی concurrency](05-basic-concurrency-control.md) (p. 108).
+- **چرا سنجش ارجاع بس است:** داده‌ی immutable از [۴. مدیریت state](04-state-management.md).
+- **ایراد پسین:** شریک شدن ساختاری در مقیاس، در [۹. ساختارهای داده‌ی persistent](09-persistent-data-structures.md).
+- **Run it:** [atom در زمان‌بندی با seed](../lab/08-atom-swap/README.md) — بی پناه، mutex و atom را روی همان درهم‌رفتن‌ها می‌سنجد.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. Why don't reads need a lock in DOP?
-   <details><summary>Answer</summary>Data is immutable, so a write in another thread never mutates the data being read; a read always works on a snapshot (p. 164).</details>
-2. What are an atom's three methods?
-   <details><summary>Answer</summary>`get` returns the current value, `set` overwrites it, and `swap` updates it with a function applied to the current value (table 8.1, p. 166).</details>
-3. Describe the flow of `swap`.
-   <details><summary>Answer</summary>Take a snapshot of the state and compute `nextState = f(snapshot)`. Atomically set the state to `nextState` only if it still equals the snapshot; if it changed meanwhile, start over (figure 8.2, pp. 167–168).</details>
-4. Can `swap`'s loop run forever? Can a thread starve?
-   <details><summary>Answer</summary>The loop as a whole always progresses: a failed compare-and-set means another thread's swap succeeded. A single thread could in theory starve with thousands of threads doing nothing but swapping, but in practice threads do real work between swaps (p. 170).</details>
-5. Why is `swap` on a cache map fast, even though the map can be large?
-   <details><summary>Answer</summary>The compare-and-set compares references, which is safe and fast because the maps are immutable (p. 172).</details>
-6. How does chapter 8 make the part 1 commit phase thread-safe?
-   <details><summary>Answer</summary>Store the system data in an atom and implement `commit` as `swap(current => SystemConsistency.reconcile(current, previous, next))` (listings 8.9–8.10, p. 173).</details>
+1. چرا خواندن‌ها در DOP قفل نمی‌خواهند؟
+   <details><summary>پاسخ</summary>داده immutable است، پس نوشتنی در رشته‌ای دیگر هیچ‌وقت داده‌ی زیر خواندن را mutation نمی‌دهد؛ خواندنی همیشه روی عکسی کار می‌کند (p. 164).</details>
+2. سه متد یک atom کدامند؟
+   <details><summary>پاسخ</summary>متد `get` مقدار کنونی را برمی‌گرداند، `set` از رویش می‌نویسد، و `swap` آن را با تابعی به‌روز می‌کند که روی مقدار کنونی پیاده می‌شود (جدول ۸.۱، ص. ۱۶۶).</details>
+3. جریان `swap` را وصف کنید.
+   <details><summary>پاسخ</summary>عکسی از state بگیرید و `nextState = f(snapshot)` را حساب کنید. مقدار state را تنها اگر هنوز با آن عکس برابر است اتمی روی `nextState` بگذارید؛ و اگر میان کار عوض شده، از نو آغاز کنید (شکل ۸.۲، صص. ۱۶۷–۱۶۸).</details>
+4. حلقه‌ی `swap` می‌تواند تا ابد اجرا شود؟ رشته‌ای می‌تواند گرسنه بماند؟
+   <details><summary>پاسخ</summary>آن حلقه به‌شکل یک کل همیشه پیش می‌رود: شکست compare-and-set یعنی swap رشته‌ای دیگر کامیاب شده. یک رشته در نظر می‌توانست با هزاران رشته که هیچ کاری جز swap نمی‌کنند گرسنه بماند، ولی در کار واقعی رشته‌ها میان swapها کار واقعی می‌کنند (p. 170).</details>
+5. چرا `swap` روی mapی از cache تند است، گرچه آن map می‌تواند بزرگ باشد؟
+   <details><summary>پاسخ</summary>آن compare-and-set ارجاع‌ها را می‌سنجد، که چون mapها تغییرناپذیرند ایمن و تند است (p. 172).</details>
+6. فصل ۸ فاز commit بخش ۱ را چطور thread-safe می‌کند؟
+   <details><summary>پاسخ</summary>داده‌ی سیستم را در atomی ذخیره کنید و `commit` را به‌شکل `swap(current => SystemConsistency.reconcile(current, previous, next))` پیاده (listingهای ۸.۹ و ۸.۱۰، ص. ۱۷۳).</details>

@@ -1,68 +1,69 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Split Code from Data</title>
-<meta name="description" content="Split the classes of Theo&#x27;s Library Management System into code and data entities one at a time, and watch the relations per entity and the number of independent parts change. Illustrates Data-Oriented Programming, chapter 1.">
+<title>جدا کردن کد از داده</title>
+<meta name="description" content="کلاس‌های سیستم مدیریت کتابخانه‌ی تئو را یکی‌یکی به entity کد و داده بشکنید، و ببینید رابطه‌های هر entity و شمار بخش‌های مستقل چطور عوض می‌شوند. تصویری از فصل ۱ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>.g { width: 100%; display: block; } .g rect { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.2; rx: 5; }
   .g rect.data { fill: var(--s1-soft, var(--accent-soft)); stroke: var(--s1); } .g rect.code { fill: var(--warn-soft); stroke: var(--warn); stroke-dasharray: 4 2; }
-  .g rect.sel { stroke-width: 3; } .g text { font-size: 11px; fill: var(--ink); text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+  .g rect.sel { stroke-width: 3; } .g text { font-size: 11px; fill: var(--ink); text-anchor: middle; dominant-baseline: middle; pointer-events: none; direction: ltr; }
   .g line { stroke: var(--ink-3); stroke-width: 1.3; } .g line.code { stroke: var(--warn); stroke-dasharray: 5 3; } .g line.data { stroke: var(--s1); }
   .g line.hot { stroke-width: 3; } .g g.node { cursor: pointer; } .g g.node:focus-visible rect { outline: none; stroke: var(--accent); stroke-width: 3; }
+  #rels li { direction: rtl; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/01-complexity-of-object-oriented-programming.html">Chapter 1</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Split code from data</span>
+      <a href="../chapters/01-complexity-of-object-oriented-programming.html">فصل ۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">جدا کردن کد از داده</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 1 · Complexity of object-oriented programming</div>
-  <h1>Split code from data</h1>
-  <p class="lede">In Theo’s OOP design, <code>Member</code> sits in five relations: two about its data, three about its code. Split it into <code>MemberData</code> and <code>MemberCode</code> and each half is simpler. Split <em>every</em> class and the diagram falls into a data part and a code part you can understand separately.</p>
-  <p class="source-note">Illustrates section 1.2.1, Many relations between classes (figures 1.10–1.13, pp. 14–16). The relations are taken from the class roles on pp. 9–12; the layout is the vault’s. Data relations are composition and association; code relations are usage and inheritance. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱ · پیچیدگی برنامه‌نویسی object-oriented</div>
+  <h1>جدا کردن کد از داده</h1>
+  <p class="lede">در طرح OOP تئو، کلاس <code>Member</code> در پنج رابطه می‌نشیند: دو تا در باب داده‌اش، سه تا در باب کدش. به <code>MemberData</code> و <code>MemberCode</code> بشکنیدش و هر نیمی ساده‌تر می‌شود. <em>هر</em> کلاسی را بشکنید و آن نمودار به بخشی داده و بخشی کد می‌افتد که جدا فهمیدنی‌اند.</p>
+  <p class="source-note">تصویری از بخش ۱.۲.۱، یعنی رابطه‌های زیاد میان کلاس‌ها (شکل‌های ۱.۱۰ تا ۱.۱۳، صص. ۱۴–۱۶). رابطه‌ها از نقش کلاس‌ها در صص. ۹–۱۲ برداشته شده‌اند؛ و چیدمان مال vault است. رابطه‌های داده ترکیب و تداعی‌اند؛ و رابطه‌های کد کاربرد و وراثت. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title" id="gt">Theo’s classes and their relations</p>
+      <div class="panel"><p class="panel-title" id="gt">کلاس‌های تئو و رابطه‌هایشان</p>
         <svg class="g" id="g" viewBox="0 0 640 400" role="img"></svg>
-        <p class="field-hint">Solid blue: data relation (composition, association). Dashed orange: code relation (usage, inheritance). Click or press Enter on a class to split it.</p>
+        <p class="field-hint">آبی توپر: رابطه‌ی داده، یعنی ترکیب و تداعی. نارنجی خط‌چین: رابطه‌ی کد، یعنی کاربرد و وراثت. روی کلاسی کلیک کنید یا Enter بزنید تا بشکندش.</p>
         <div class="callout" id="verdict" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">Relations of the selected entity</p><ul id="rels"></ul></div>
+      <div class="panel"><p class="panel-title">رابطه‌های entity برگزیده</p><ul id="rels"></ul></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><button class="btn primary" id="splitAll" type="button">Split every class</button> <button class="btn" id="rs" type="button">↺ Merge all</button>
-        <button class="btn small" id="member" type="button" style="margin-top:8px">Split only Member (fig. 1.12)</button></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><button class="btn primary" id="splitAll" type="button">شکستن هر کلاسی</button> <button class="btn" id="rs" type="button">↺ درهم کردن همه</button>
+        <button class="btn small" id="member" type="button" style="margin-top:8px">شکستن تنها Member، شکل ۱.۱۲</button></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Member’s five relations become two plus three</strong>: <code>MemberData</code> keeps “Library has many” and “has many BookLending”; <code>MemberCode</code> keeps “extends User” and the two usages.</li>
-    <li><strong>Splitting every class leaves two independent parts</strong>: one with only data entities and data relations, one with only code entities and code relations (figure 1.13).</li>
-    <li><strong>No relation crosses between the parts.</strong> That is what lets you understand the data without thinking about the code, and the other way round: the result follows from separating code from data, not from luck.</li>
+    <li><strong>پنج رابطه‌ی Member دو به‌علاوه‌ی سه می‌شود</strong>: کلاس <code>MemberData</code> رابطه‌های «Library چند تا دارد» و «چند BookLending دارد» را نگه می‌دارد؛ و <code>MemberCode</code> رابطه‌ی «از User می‌آید» و آن دو کاربرد را.</li>
+    <li><strong>شکستن هر کلاسی دو بخش مستقل به جا می‌گذارد</strong>: یکی تنها با entityهای داده و رابطه‌های داده، و یکی تنها با entityهای کد و رابطه‌های کد (شکل ۱.۱۳).</li>
+    <li><strong>هیچ رابطه‌ای میان آن دو بخش رد نمی‌شود.</strong> همین است که می‌گذارد داده را بی اندیشیدن به کد بفهمید، و برعکس: آن خروجی از جدا کردن کد از داده پی می‌گیرد، نه از بخت.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/01-complexity-of-object-oriented-programming.html"><small>Lesson</small>1. Complexity of object-oriented programming</a></li>
+    <li><a href="../chapters/01-complexity-of-object-oriented-programming.html"><small>درس</small>فصل ۱: پیچیدگی برنامه‌نویسی object-oriented</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -79,12 +80,13 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log"));
   var N = { Library: [320, 40], Catalog: [520, 110], Librarian: [120, 110], Member: [320, 150], User: [120, 250], Book: [520, 220], Author: [520, 330], BookItem: [320, 280], BookLending: [320, 370] };
-  // [from, to, kind, label]; kind data = composition/association, code = usage/inheritance
-  var R = [["Library", "Catalog", "data", "owns one"], ["Library", "Member", "data", "has many"], ["Library", "Librarian", "data", "has many"],
-    ["Catalog", "Book", "data", "has many"], ["Book", "Author", "data", "associated with many"], ["Book", "BookItem", "data", "has many"],
-    ["BookItem", "BookLending", "data", "has many"], ["Member", "BookLending", "data", "has many"],
-    ["Member", "User", "code", "extends"], ["Librarian", "User", "code", "extends"], ["Librarian", "Member", "code", "uses"],
-    ["Librarian", "BookItem", "code", "uses"], ["Librarian", "BookLending", "code", "uses"], ["Member", "BookItem", "code", "uses"], ["Catalog", "Librarian", "code", "uses"]];
+  var KIND = { data: "داده", code: "کد" };
+  // [from, to, kind, label]؛ گونه‌ی data یعنی ترکیب و تداعی، و code یعنی کاربرد و وراثت
+  var R = [["Library", "Catalog", "data", "مالک یکی است:"], ["Library", "Member", "data", "چند تا دارد:"], ["Library", "Librarian", "data", "چند تا دارد:"],
+    ["Catalog", "Book", "data", "چند تا دارد:"], ["Book", "Author", "data", "با چند تا تداعی می‌شود:"], ["Book", "BookItem", "data", "چند تا دارد:"],
+    ["BookItem", "BookLending", "data", "چند تا دارد:"], ["Member", "BookLending", "data", "چند تا دارد:"],
+    ["Member", "User", "code", "از آن می‌آید:"], ["Librarian", "User", "code", "از آن می‌آید:"], ["Librarian", "Member", "code", "از آن کار می‌کشد:"],
+    ["Librarian", "BookItem", "code", "از آن کار می‌کشد:"], ["Librarian", "BookLending", "code", "از آن کار می‌کشد:"], ["Member", "BookItem", "code", "از آن کار می‌کشد:"], ["Catalog", "Librarian", "code", "از آن کار می‌کشد:"]];
   var split = {}, sel = "Member";
   function ent(cls, kind) { return split[cls] ? cls + (kind === "data" ? "Data" : "Code") : cls; }
   function edges() { return R.map(function (r) { return { a: ent(r[0], r[2]), b: ent(r[1], r[2]), kind: r[2], label: r[3] }; }); }
@@ -99,37 +101,37 @@ function stats(rows) {
       g.appendChild(Kit.svg("line", { class: e.kind + (hot ? " hot" : ""), x1: p[0], y1: p[1], x2: q[0], y2: q[1] })); });
     entities().forEach(function (e) { var p = pos(e), base = e.replace(/(Data|Code)$/, ""), kind = split[base] ? (e.slice(-4) === "Data" ? "data" : "code") : "";
       var w = split[base] ? 88 : Math.max(70, e.length * 7.5 + 12);
-      var grp = Kit.svg("g", { class: "node", tabindex: 0, role: "button", "aria-label": e + (split[base] ? "" : ", press to split") });
+      var grp = Kit.svg("g", { class: "node", tabindex: 0, role: "button", "aria-label": "کلاس " + e + (split[base] ? "" : "، برای شکستن بزنید") });
       grp.appendChild(Kit.svg("rect", { class: kind + (e === sel ? " sel" : ""), x: p[0] - w / 2, y: p[1] - 13, width: w, height: 26 }));
       var t = Kit.svg("text", { x: p[0], y: p[1] }); t.textContent = e; grp.appendChild(t);
-      function act() { if (!split[base]) { split[base] = true; sel = base + "Data"; log.add("Split " + base + " into " + base + "Data and " + base + "Code.", "ok"); } else sel = e; render(); }
+      function act() { if (!split[base]) { split[base] = true; sel = base + "Data"; log.add("کلاس " + base + " به " + base + "Data و " + base + "Code شکست.", "ok"); } else sel = e; render(); }
       grp.addEventListener("click", act); grp.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); act(); } });
       g.appendChild(grp); });
     var mine = E.filter(function (e) { return e.a === sel || e.b === sel; }), ul = Kit.clear(document.getElementById("rels"));
-    mine.forEach(function (e) { ul.appendChild(Kit.el("li", null, e.a + " " + e.label + " " + e.b + " (" + (e.kind === "data" ? "data" : "code") + " relation)")); });
-    if (!mine.length) ul.appendChild(Kit.el("li", null, "No relations."));
+    mine.forEach(function (e) { ul.appendChild(Kit.el("li", null, "رابطه‌ی " + KIND[e.kind] + " — " + e.a + " " + e.label + " " + e.b)); });
+    if (!mine.length) ul.appendChild(Kit.el("li", null, "هیچ رابطه‌ای نیست."));
     var nsplit = Object.keys(split).length, comps = components(), counts = {}; E.forEach(function (e) { counts[e.a] = (counts[e.a] || 0) + 1; counts[e.b] = (counts[e.b] || 0) + 1; });
     var maxRel = Math.max.apply(null, entities().map(function (e) { return counts[e] || 0; }));
-    document.getElementById("g").setAttribute("aria-label", entities().length + " entities, " + E.length + " relations, " + comps + " independent part(s)");
+    document.getElementById("g").setAttribute("aria-label", "شمار " + entities().length + " entity و " + E.length + " رابطه و " + comps + " بخش مستقل");
     var v = document.getElementById("verdict"); v.className = "callout " + (comps > 1 ? "ok" : "");
-    v.textContent = nsplit === Object.keys(N).length ? "Every class split: " + comps + " independent parts, one of data entities only and one of code entities only." : comps > 1 ? comps + " independent parts." : "Everything is connected: to understand any class you may need all the others.";
-    stats([["Entities", entities().length], ["Relations of " + sel, mine.length], ["Most relations on one entity", maxRel], ["Independent parts", comps, comps > 1 ? "ok" : ""]]);
+    v.textContent = nsplit === Object.keys(N).length ? "هر کلاسی شکست: " + comps + " بخش مستقل، یکی تنها از entityهای داده و یکی تنها از entityهای کد." : comps > 1 ? comps + " بخش مستقل." : "همه چیز به هم وصل است: برای فهم هر کلاسی شاید به همه‌ی بقیه نیاز داشته باشید.";
+    stats([["entityها", entities().length], ["رابطه‌های " + sel, mine.length], ["بیشترین رابطه روی یک entity", maxRel], ["بخش‌های مستقل", comps, comps > 1 ? "ok" : ""]]);
   }
-  document.getElementById("splitAll").addEventListener("click", function () { Object.keys(N).forEach(function (c) { split[c] = true; }); sel = "MemberData"; log.add("Split every class (figure 1.13).", "ok"); render(); });
-  document.getElementById("member").addEventListener("click", function () { split = { Member: true }; sel = "MemberData"; log.add("Only Member split: figure 1.12.", "muted"); render(); });
-  document.getElementById("rs").addEventListener("click", function () { split = {}; sel = "Member"; log.add("Classes merged back: code and data mixed.", "muted"); render(); });
+  document.getElementById("splitAll").addEventListener("click", function () { Object.keys(N).forEach(function (c) { split[c] = true; }); sel = "MemberData"; log.add("هر کلاسی شکست (شکل ۱.۱۳).", "ok"); render(); });
+  document.getElementById("member").addEventListener("click", function () { split = { Member: true }; sel = "MemberData"; log.add("تنها Member شکست: شکل ۱.۱۲.", "muted"); render(); });
+  document.getElementById("rs").addEventListener("click", function () { split = {}; sel = "Member"; log.add("کلاس‌ها باز درهم شدند: کد و داده قاطی.", "muted"); render(); });
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How many relations does Member take part in, in the mixed design?",
-      options: ["Two", "Five", "Nine"], answer: 1,
-      explain: "Two data relations and three code relations (p. 15)." },
-    { q: "After splitting every class, how many independent parts does the diagram have?",
-      options: ["One", "Two: data entities and code entities", "As many as there are classes"], answer: 1,
-      explain: "Figure 1.13, p. 16." },
-    { q: "According to the book, why is the split system simpler?",
-      options: ["By accident of this design", "It follows logically from separating code from data", "Because it has fewer classes"], answer: 1,
-      explain: "p. 16." }
+    { q: "در طرح قاطی، کلاس Member در چند رابطه شریک است؟",
+      options: ["دو", "پنج", "نه"], answer: 1,
+      explain: "دو رابطه‌ی داده و سه رابطه‌ی کد (ص. ۱۵)." },
+    { q: "پس از شکستن هر کلاسی، آن نمودار چند بخش مستقل دارد؟",
+      options: ["یکی", "دو: entityهای داده و entityهای کد", "به تعداد کلاس‌ها"], answer: 1,
+      explain: "شکل ۱.۱۳، ص. ۱۶." },
+    { q: "بنا بر کتاب، چرا سیستم شکسته ساده‌تر است؟",
+      options: ["به تصادف همین طرح", "منطقی از جدا کردن کد از داده پی می‌گیرد", "چون کلاس‌های کم‌تری دارد"], answer: 1,
+      explain: "ص. ۱۶." }
   ]);
 })();
 </script>

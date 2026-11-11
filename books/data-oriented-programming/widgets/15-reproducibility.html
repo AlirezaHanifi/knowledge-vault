@@ -1,65 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reproducible or Not?</title>
-<meta name="description" content="Replay a captured call while toggling mutable data during an asynchronous dump, a mutable or immutable database, and other users changing data, and see when the replayed result still matches the original. Illustrates Data-Oriented Programming, chapter 15.">
+<title>بازتولیدپذیر یا نه؟</title>
+<meta name="description" content="صدا زدنی گرفته‌شده را replay کنید در حالی که داده‌ی mutable سر ریختن ناهمگام، پایگاه داده‌ی mutable یا تغییرناپذیر، و عوض کردن داده از سوی کاربران دیگر را روشن و خاموش می‌کنید، و ببینید خروجی replay‌شده کِی هنوز با اصل می‌خواند. تصویری از فصل ۱۵ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
   textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
-  ol.tl { padding-left: 1.2rem; margin: 0; } ol.tl li { padding: 3px 0; font-size: .9rem; color: var(--ink-3); } ol.tl li.done { color: var(--ink); } ol.tl li.cur { font-weight: 600; }
+  ol.tl { padding-right: 1.2rem; padding-left: 0; margin: 0; } ol.tl li { padding: 3px 0; font-size: .9rem; color: var(--ink-3); } ol.tl li.done { color: var(--ink); } ol.tl li.cur { font-weight: 600; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/15-debugging.html">Chapter 15</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Reproducible or not?</span>
+      <a href="../chapters/15-debugging.html">فصل ۱۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">بازتولیدپذیر یا نه؟</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 15 · Debugging</div>
-  <h1>Reproducible or not?</h1>
-  <p class="lede">Replaying a call reproduces it only if two things hold: the <strong>captured context</strong> is what the function really saw, and any <strong>external data source</strong> answers the same way when you replay. Immutable data guarantees the first; an immutable database, or debugging alone on your machine, gives the second.</p>
-  <p class="source-note">Illustrates sections 15.4–15.5 (pp. 323–330): <code>dumpData</code> writes asynchronously, Dave’s worry about data modified while it’s written and why immutability rules it out, and Theo’s answers on external data: immutable databases that query a snapshot, and local debugging where you’re the only user. The timeline, the withdrawal of Watchmen and the other user are the vault’s scenario. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۵ · اشکال‌زدایی</div>
+  <h1>بازتولیدپذیر یا نه؟</h1>
+  <p class="lede">replay صدا زدنی تنها وقتی بازتولیدش می‌کند که دو چیز برپا باشد: <strong>زمینه‌ی گرفته‌شده</strong> همان باشد که آن تابع واقعاً دید، و هر <strong>سرچشمه‌ی داده‌ی بیرونی</strong> سر replay همان‌طور پاسخ دهد. داده‌ی immutable نخستی را تضمین می‌کند؛ و پایگاه داده‌ای تغییرناپذیر، یا اشکال‌زدایی تنها روی ماشین خودتان، دومی را می‌دهد.</p>
+  <p class="source-note">تصویری از بخش‌های ۱۵.۴ و ۱۵.۵ (صص. ۳۲۳–۳۳۰): تابع <code>dumpData</code> که asynchronous می‌نویسد، نگرانی دیو از داده‌ای که سر نوشته شدن دست‌کاری شود و اینکه چرا immutability ردش می‌کند، و پاسخ‌های تئو در باب داده‌ی بیرونی: پایگاه‌های داده‌ی immutable که از عکسی پرسش می‌کنند، و اشکال‌زدایی محلی که تنها کاربر شمایید. آن خط زمان و برداشتن Watchmen و آن کاربر دیگر صحنه‌ی vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Timeline</p><ol class="tl" id="tl"></ol></div>
-      <div class="grid-2"><div class="panel"><p class="panel-title">Replay from the dumped file</p><div class="callout" id="r1" aria-live="polite"></div><pre class="code" id="f1"></pre></div>
-        <div class="panel"><p class="panel-title">Replay by querying the database again</p><div class="callout" id="r2" aria-live="polite"></div><pre class="code" id="f2"></pre></div></div>
+      <div class="panel"><p class="panel-title">خط زمان</p><ol class="tl" id="tl"></ol></div>
+      <div class="grid-2"><div class="panel"><p class="panel-title">replay از فایل ریخته‌شده</p><div class="callout" id="r1" aria-live="polite"></div><pre class="code" id="f1"></pre></div>
+        <div class="panel"><p class="panel-title">replay با پرسش دوباره از پایگاه داده</p><div class="callout" id="r2" aria-live="polite"></div><pre class="code" id="f2"></pre></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="ply"></div><div id="data" style="margin-top:10px"></div><div id="db" style="margin-top:8px"></div>
-        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="others"> Other users change the database before the replay</label></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ply"></div><div id="data" style="margin-top:10px"></div><div id="db" style="margin-top:8px"></div>
+        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="others"> کاربران دیگر پیش از replay پایگاه داده را عوض می‌کنند</label></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Immutable in-memory data</strong>: the code that runs after the call creates a new version instead of changing the catalog, so the asynchronous dump writes exactly what the function received.</li>
-    <li><strong>Mutable data</strong> lets the dump race the code that follows: the file can hold a catalog the function never saw, and the replay no longer matches.</li>
-    <li><strong>External sources</strong> are outside the function context. An immutable database queried at the original time gives the same answer; a mutable one shared with others may not. Alone on your laptop, it usually does.</li>
+    <li><strong>داده‌ی immutable در حافظه</strong>: کدی که پس از آن صدا زدن اجرا می‌شود به‌جای عوض کردن catalog versionی تازه می‌سازد، پس آن ریختن asynchronous دقیقاً همان را می‌نویسد که تابع گرفت.</li>
+    <li><strong>داده‌ی mutable</strong> می‌گذارد آن ریختن با کد پس از خودش مسابقه بدهد: آن فایل می‌تواند catalogی را نگه دارد که تابع هیچ‌وقت ندید، و آن replay دیگر نمی‌خواند.</li>
+    <li><strong>سرچشمه‌های بیرونی</strong> بیرون زمینه‌ی تابعند. پایگاه داده‌ای immutable که سر زمان اصلی پرسش شود همان پاسخ را می‌دهد؛ و mutability که با دیگران شریک باشد شاید نه. تنها روی لپ‌تاپ خودتان، معمولاً می‌دهد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/15-debugging.html"><small>Lesson</small>15. Debugging</a></li>
-    <li><a href="../lab/15-capture-replay/README.md"><small>Experiment</small>Dump, replay and the async-dump race in Python</a></li>
+    <li><a href="../chapters/15-debugging.html"><small>درس</small>فصل ۱۵: اشکال‌زدایی</a></li>
+    <li><a href="../lab/15-capture-replay/README.md"><small>آزمایش</small>ریختن و replay و مسابقه‌ی ریختن asynchronous به Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -76,41 +76,41 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log")), cfg = { data: "imm", db: "mut" }, t = 0;
   var ORIG = ["7 Habits of Highly Effective People", "Watchmen"];
-  var EV = ["The endpoint runs: it queries the database for the catalog", "searchBooksByTitle(catalog, \"Watch\") returns [Watchmen]; dumpData starts writing the context asynchronously",
-    "The handler goes on: a librarian’s request withdraws Watchmen from the catalog in memory", "The asynchronous write finishes", "Another user withdraws Watchmen in the database", "You replay: from the file, and by querying the database again"];
+  var EV = ["آن endpoint اجرا می‌شود: برای catalog از پایگاه داده پرسش می‌کند", "تابع searchBooksByTitle(catalog, \"Watch\") مقدار [Watchmen] را برمی‌گرداند؛ و dumpData آغاز می‌کند زمینه را asynchronous بنویسد",
+    "آن چرخاننده پیش می‌رود: درخواست کتابداری Watchmen را از catalog در حافظه برمی‌دارد", "آن نوشتن asynchronous تمام می‌شود", "کاربری دیگر Watchmen را در پایگاه داده برمی‌دارد", "replay می‌کنید: از آن فایل، و با پرسش دوباره از پایگاه داده"];
   function others() { return document.getElementById("others").checked; }
   function render() {
     var tl = Kit.clear(document.getElementById("tl"));
-    EV.forEach(function (e, i) { var skip = i === 4 && !others(); tl.appendChild(Kit.el("li", { class: i < t ? "done" : i === t ? "cur" : "" }, (i < t ? "✓ " : i === t ? "▸ " : "") + e + (skip ? " (doesn’t happen: you’re alone)" : ""))); });
+    EV.forEach(function (e, i) { var skip = i === 4 && !others(); tl.appendChild(Kit.el("li", { class: i < t ? "done" : i === t ? "cur" : "" }, (i < t ? "✓ " : i === t ? "▸ " : "") + e + (skip ? " — رخ نمی‌دهد: تنهایید" : ""))); });
     var dumped = cfg.data === "mut" ? ORIG.filter(function (x) { return x !== "Watchmen"; }) : ORIG;
     var dbNow = others() && cfg.db === "mut" ? ORIG.filter(function (x) { return x !== "Watchmen"; }) : ORIG;
     var ready = t >= 6, r1 = document.getElementById("r1"), r2 = document.getElementById("r2");
     var m1 = dumped.indexOf("Watchmen") >= 0, m2 = dbNow.indexOf("Watchmen") >= 0;
     document.getElementById("f1").textContent = t >= 4 ? "test-data/searchBooksByTitle-<uuid>.json\n[{\"booksByIsbn\": " + JSON.stringify(dumped) + " …}, \"Watch\"]" : "(still being written)";
-    document.getElementById("f2").textContent = cfg.db === "imm" ? "query as of the original call’s time → " + JSON.stringify(ORIG) : "query now → " + JSON.stringify(t >= 5 ? dbNow : ORIG);
-    r1.className = "callout " + (!ready ? "" : m1 ? "ok" : "bad"); r1.textContent = !ready ? "Not replayed yet." : m1 ? "Same result: [Watchmen]. Reproduced." : "Different result: []. The file holds data the function never saw.";
-    r2.className = "callout " + (!ready ? "" : m2 ? "ok" : "bad"); r2.textContent = !ready ? "Not replayed yet." : m2 ? "Same result: [Watchmen]. Reproduced." : "Different result: []. The database changed under you.";
-    stats([["In-memory data", cfg.data === "imm" ? "immutable" : "mutable"], ["Database", cfg.db === "imm" ? "immutable" : "mutable"], ["File replay", ready ? (m1 ? "match" : "differs") : "–", ready ? (m1 ? "ok" : "bad") : ""], ["DB replay", ready ? (m2 ? "match" : "differs") : "–", ready ? (m2 ? "ok" : "bad") : ""]]); }
+    document.getElementById("f2").textContent = cfg.db === "imm" ? "query as of the original call time → " + JSON.stringify(ORIG) : "query now → " + JSON.stringify(t >= 5 ? dbNow : ORIG);
+    r1.className = "callout " + (!ready ? "" : m1 ? "ok" : "bad"); r1.textContent = !ready ? "هنوز replay نشده." : m1 ? "همان خروجی: [Watchmen]. بازتولید شد." : "خروجیی دیگر: []. آن فایل داده‌ای را نگه داشته که تابع هیچ‌وقت ندید.";
+    r2.className = "callout " + (!ready ? "" : m2 ? "ok" : "bad"); r2.textContent = !ready ? "هنوز replay نشده." : m2 ? "همان خروجی: [Watchmen]. بازتولید شد." : "خروجیی دیگر: []. آن پایگاه داده زیر دستتان عوض شد.";
+    stats([["داده در حافظه", cfg.data === "imm" ? "immutable" : "mutable"], ["پایگاه داده", cfg.db === "imm" ? "immutable" : "mutable"], ["replay فایل", ready ? (m1 ? "می‌خواند" : "فرق دارد") : "–", ready ? (m1 ? "ok" : "bad") : ""], ["replay پایگاه داده", ready ? (m2 ? "می‌خواند" : "فرق دارد") : "–", ready ? (m2 ? "ok" : "bad") : ""]]); }
   var p = Kit.player({ mount: document.getElementById("ply"), interval: 1300,
-    step: function () { if (t >= 6) return false; t++; log.add(EV[t - 1] + (t === 5 && !others() ? " — skipped: you’re alone." : "."), t === 6 ? "ok" : "muted");
-      if (t === 4 && !others()) { t++; log.add(EV[3 + 1] + " — skipped: you’re alone.", "muted"); } render(); return t < 6; },
-    reset: function () { t = 0; render(); log.add("Back to the start.", "muted"); } });
+    step: function () { if (t >= 6) return false; t++; log.add(EV[t - 1] + (t === 5 && !others() ? " — پریده شد: تنهایید." : "."), t === 6 ? "ok" : "muted");
+      if (t === 4 && !others()) { t++; log.add(EV[3 + 1] + " — پریده شد: تنهایید.", "muted"); } render(); return t < 6; },
+    reset: function () { t = 0; render(); log.add("بازگشت به آغاز.", "muted"); } });
   function restart(msg) { t = 0; render(); log.add(msg, "muted"); }
-  document.getElementById("data").appendChild(Kit.segmented({ label: "In-memory data", value: cfg.data, options: [{ value: "imm", label: "Immutable (DOP)" }, { value: "mut", label: "Mutable" }], onChange: function (v) { cfg.data = v; restart("In-memory data is now " + (v === "imm" ? "immutable" : "mutable") + "."); } }).element);
-  document.getElementById("db").appendChild(Kit.segmented({ label: "Database", value: cfg.db, options: [{ value: "mut", label: "Mutable" }, { value: "imm", label: "Immutable (snapshot)" }], onChange: function (v) { cfg.db = v; restart("Database is now " + (v === "imm" ? "immutable: queries carry a time" : "mutable") + "."); } }).element);
-  document.getElementById("others").addEventListener("change", function (e) { restart(e.target.checked ? "Shared environment: others may change data." : "Local debugging: you’re the only user."); });
+  document.getElementById("data").appendChild(Kit.segmented({ label: "داده در حافظه", value: cfg.data, options: [{ value: "imm", label: "تغییرناپذیر، DOP" }, { value: "mut", label: "mutable" }], onChange: function (v) { cfg.data = v; restart("داده در حافظه حالا " + (v === "imm" ? "immutable" : "mutable") + " است."); } }).element);
+  document.getElementById("db").appendChild(Kit.segmented({ label: "پایگاه داده", value: cfg.db, options: [{ value: "mut", label: "mutable" }, { value: "imm", label: "تغییرناپذیر، با عکس" }], onChange: function (v) { cfg.db = v; restart("پایگاه داده حالا " + (v === "imm" ? "immutable است: پرسش‌ها زمانی می‌برند" : "mutable است") + "."); } }).element);
+  document.getElementById("others").addEventListener("change", function (e) { restart(e.target.checked ? "محیطی شریک: دیگران می‌توانند داده را عوض کنند." : "اشکال‌زدایی محلی: تنها کاربر شمایید."); });
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why can’t the function’s data change while dumpData is writing it asynchronously, in DOP?",
-      options: ["Because the write is fast", "Because data is never mutated: changes create new versions", "Because of a lock"], answer: 1,
-      explain: "p. 326." },
-    { q: "How does an immutable database make a query reproducible?",
-      options: ["It caches results", "Updates create new versions with timestamps, and a query runs on a snapshot of a given time", "It forbids writes"], answer: 1,
-      explain: "pp. 329–330." },
-    { q: "Why does Theo say external data is rarely a problem in practice when debugging?",
-      options: ["Databases never change", "Locally, you’re the only one using the system", "Replays bypass the database"], answer: 1,
-      explain: "p. 330." }
+    { q: "در DOP چرا داده‌ی آن تابع سر asynchronous نوشتنش با dumpData نمی‌تواند عوض شود؟",
+      options: ["چون آن نوشتن تند است", "چون داده هیچ‌وقت mutation نمی‌گیرد: تغییرها version تازه می‌سازند", "چون قفلی هست"], answer: 1,
+      explain: "ص. ۳۲۶." },
+    { q: "پایگاه داده‌ای immutable چطور پرسشی را بازتولیدپذیر می‌کند؟",
+      options: ["خروجی‌ها را cache می‌کند", "به‌روزرسانی‌ها version تازه با timestamp می‌سازند، و پرسشی روی عکسی از زمانی داده‌شده اجرا می‌شود", "نوشتن را ممنوع می‌کند"], answer: 1,
+      explain: "صص. ۳۲۹–۳۳۰." },
+    { q: "چرا تئو می‌گوید داده‌ی بیرونی سر اشکال‌زدایی در کار واقعی کم مسئله می‌شود؟",
+      options: ["پایگاه‌های داده هیچ‌وقت عوض نمی‌شوند", "محلی، تنها کسی که سیستم را به کار می‌برد شمایید", "replayها از پایگاه داده رد می‌شوند"], answer: 1,
+      explain: "ص. ۳۳۰." }
   ]);
 })();
 </script>

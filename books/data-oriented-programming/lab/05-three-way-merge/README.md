@@ -1,18 +1,18 @@
-# Three-way merge in Python
+# الگوی three-way merge به Python
 
-A port of the chapter's commit phase: the structural `diff`, `informationPaths`, `havePathInCommon`, the merge and `reconcile`. It replays the tiny library of listings 5.6–5.7: one mutation changes Watchmen's publication year, the other its title and an author's name. Then it shows two pitfalls of the printed code. Finally it measures how often two concurrent mutations abort as they crowd onto fewer fields.
+درگاهی از فاز commit این فصل: تابع `diff` ساختاری و `informationPaths` و `havePathInCommon` و آن درهم‌آمیزی و `reconcile`. کتابخانه‌ی ناچیز listingهای ۵.۶ و ۵.۷ را replay می‌کند: mutationی سال نشر Watchmen را عوض می‌کند و آن یکی عنوانش و نام نویسنده‌ای را. بعد دو دام کد چاپی را نشان می‌دهد. و در پایان می‌سنجد که دو mutation concurrent چند بار abort می‌شوند وقتی روی فیلدهای کم‌تری جمع می‌شوند.
 
-*Illustrates Data-Oriented Programming, chapter 5, sections 5.2–5.5, pp. 94–108 (listings 5.4–5.16). The abort experiment, with one random field per mutation, is the vault's (seeded).*
+*تصویری از فصل ۵ کتاب Data-Oriented Programming، بخش‌های ۵.۲ تا ۵.۵، صص. ۹۴–۱۰۸ (listingهای ۵.۴ تا ۵.۱۶). آزمون abort، با یک فیلد تصادفی برای هر جهشی، مال vault است، با seed.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 three_way_merge.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 diff(previous, next):    {"catalog": {"booksByIsbn": {"978-1779501127": {"publicationYear": 1986}}}}
@@ -67,14 +67,14 @@ Two concurrent mutations, each setting one random field out of F (1,000 trials e
   64       17       1.7%
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- With the code as listed, the name change sits under `catalog`, so the merged result has a single `catalog` with all three changes. That differs from the printed output of listing 5.14 (see the vault note in the lesson).
-- `diff([1], [1, 2])` gives `[null, 2]`, as in table 5.4: equal elements become null.
-- Listing 5.16 as printed throws *Conflicting concurrent mutations* on the book's own non-conflicting example, because its condition is inverted.
-- Comparing paths by identity, as Lodash's `_.intersection` does for arrays, never finds a common path. Two mutations of the same year then merge silently, and one of them is lost.
-- With one random field each, the abort rate is about 1/F. Optimistic concurrency pays off when mutations rarely touch the same fields.
+- با کد همان‌طور که فهرست شده، آن عوض شدن نام زیر `catalog` می‌نشیند، پس خروجی درهم‌آمیخته یک `catalog` تنها با هر سه تغییر دارد. آن از خروجی چاپی listing ۵.۱۴ فرق دارد؛ کادر vault در درس را ببینید.
+- عبارت `diff([1], [1, 2])` مقدار `[null, 2]` می‌دهد، مانند جدول ۵.۴: عضوهای برابر null می‌شوند.
+- کد listing ۵.۱۶ همان‌طور که چاپ شده روی همان مثال بی‌ناسازی خود کتاب خطای *Conflicting concurrent mutations* می‌اندازد، چون شرطش برگشته است.
+- سنجیدن مسیرها با همانندی، آن‌طور که `_.intersection` از Lodash برای آرایه‌ها می‌کند، هیچ‌وقت مسیری مشترک نمی‌یابد. بعد دو mutation روی همان یک سال خاموش درهم می‌آمیزند، و یکی‌شان گم می‌شود.
+- با یک فیلد تصادفی برای هر کدام، نرخ abort حدود ۱ بخش بر F است. concurrency خوش‌بینانه وقتی جواب می‌دهد که mutationها کم به همان فیلدها دست بزنند.
 
-## Related
+## مرتبط
 
-- Chapter note: [5. Basic concurrency control](../../chapters/05-basic-concurrency-control.md) — sections 5.2–5.5, pp. 94–108
+- یادداشت فصل: [فصل ۵: کنترل پایه‌ی concurrency](../../chapters/05-basic-concurrency-control.md) — بخش‌های ۵.۲ تا ۵.۵، صص. ۹۴–۱۰۸

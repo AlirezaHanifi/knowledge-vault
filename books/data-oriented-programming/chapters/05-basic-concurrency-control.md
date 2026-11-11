@@ -2,180 +2,194 @@
 book: data-oriented-programming
 chapter: 5
 title: "Basic concurrency control"
+translated_title: "کنترل پایه‌ی concurrency"
 pages: "91–109"
+lang: fa
 ---
 
-# 5. Basic concurrency control
+# ۵. کنترل پایه‌ی concurrency
 
-[← 4. State management](04-state-management.md) · [Book](../README.md) · [6. Unit tests →](06-unit-tests.md)
+[← ۴. مدیریت state](04-state-management.md) · [کتاب](../README.md) · [۶. تست‌های unit →](06-unit-tests.md)
 
-## Summary
+## خلاصه
 
-In production, mutations run concurrently, so moving the state reference forward naively, as chapter 4 did, isn't enough (p. 91). DOP uses **optimistic concurrency control**, a lock-free strategy (the book cites Elasticsearch) in which mutations "ask forgiveness instead of permission" (pp. 92–93). The calculation phase still computes as if it were the only mutation running. Only the commit phase changes: it **reconciles** the next version with whatever was committed meanwhile, much as Git merges a branch (pp. 93–96):
+در production، mutationها concurrent اجرا می‌شوند، پس پیش بردن ساده‌لوحانه‌ی ارجاع state، آن‌طور که فصل ۴ کرد، بس نیست (p. 91). روش DOP از **optimistic concurrency control** کار می‌کشد، راهبردی بی قفل که کتاب Elasticsearch را گواه می‌آورد و در آن mutationها «به‌جای اجازه، بخشش می‌خواهند» (pp. 92–93). فاز حساب هنوز چنان حساب می‌کند که گویی تنها mutation در اجراست. تنها فاز commit عوض می‌شود: version پسین را با هر چه میان کار commit شده **reconciliation** می‌دهد، تقریباً همان‌طور که Git شاخه‌ای را درهم می‌آمیزد (pp. 93–96):
 
-- **Fast-forward** if the state hasn't changed.
-- **Three-way merge** if the concurrent changes touch different fields.
-- **Abort** if they touch the same field; the user retries.
+- **پیشروی تند** اگر state عوض نشده باشد.
+- **الگوی three-way merge** اگر تغییرهای concurrent به فیلدهای مختلف دست بزنند.
+- **عمل abort** اگر به همان فیلد دست بزنند؛ کاربر از نو تلاش می‌کند.
 
-The pieces are a structural `diff` of two maps (pp. 99–102), the `informationPaths` of a diff (p. 104), a check that two diffs share no path, and `_.merge` to apply a patch (p. 105). Two facts about immutable data make it efficient: unchanged subtrees are shared, so `diff` returns immediately on them, and versions can be compared by reference (pp. 102, 107). The commit code is **universal**, working for any system whose data is an immutable hash map (p. 93). It isn't thread-safe yet; chapter 8 fixes that (p. 108).
+تکه‌ها یکی `diff` ساختاری از دو map است (pp. 99–102)، یکی `informationPaths` از یک diff (p. 104)، یکی سنجش اینکه دو diff هیچ مسیری را شریک نیستند، و `_.merge` برای پیاده کردن وصله (p. 105). دو واقعیت در باب داده‌ی immutable آن را کارآمد می‌کند: زیردرخت‌های دست‌نخورده شریکند، پس `diff` همان‌جا رویشان برمی‌گردد، و versionها با ارجاع سنجیدنی‌اند (pp. 102, 107). کد commit **همه‌جاکار** است و برای هر سیستمی کار می‌کند که داده‌اش hash map immutable باشد (p. 93). هنوز thread-safe نیست؛ و فصل ۸ درستش می‌کند (p. 108).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Optimistic concurrency control is lock-free.** Locks hit performance and risk deadlocks; OCC gives high read and write throughput (pp. 92, 108).
-- **Only the commit phase changes.** The calculation phase computes the next version in isolation, as before (table 5.1, p. 93).
-- **The reconciliation logic is universal:** it assumes only that system data is an immutable map (p. 93).
-- **Three versions meet at commit:** *previous* (the calculation's base), *current* (the state now) and *next* (the calculation's result). `current == previous` means no concurrent mutation, so fast-forward (pp. 95–96).
-- **Three-way merge compares fields instead of lines:** compute diff(previous, current) and diff(previous, next). If they have no information path in common, merge diff(previous, next) into current (pp. 95–96).
-- **In a user-facing system, conflicting concurrent mutations are fairly rare**, so aborting and asking the user to retry is acceptable (pp. 96–97).
-- **Immutable data makes this cheap:** reference equality is a safe and fast comparison, and the diff of two structurally shared versions skips the shared nodes (pp. 102, 107).
-- **The structural diff supports replacements and additions, not deletions** (pp. 99–100).
+- **الگوریتم optimistic concurrency control بی قفل است.** قفل‌ها به کارایی می‌زنند و خطر deadlock دارند؛ و OCC توان‌گذر بالای خواندن و نوشتن می‌دهد (pp. 92, 108).
+- **تنها فاز commit عوض می‌شود.** فاز حساب version پسین را جدا حساب می‌کند، مانند پیش (جدول ۵.۱، ص. ۹۳).
+- **منطق reconciliation همه‌جاکار است:** تنها فرض می‌گیرد داده‌ی سیستم mapی immutable است (p. 93).
+- **سر commit سه version به هم می‌رسند:** version *previous* که پایه‌ی حساب بود، version *current* که state همین حالاست، و *next* که خروجی حساب. برابری `current == previous` یعنی mutation concurrency نبوده، پس پیشروی تند (pp. 95–96).
+- **الگوی three-way merge فیلدها را می‌سنجد، نه خط‌ها را:** دو مقدار diff(previous, current) و diff(previous, next) را حساب کنید. اگر هیچ مسیر خبری را شریک نبودند، diff(previous, next) را در current درهم بیامیزید (pp. 95–96).
+- **در سیستمی رو به کاربر، mutationهای concurrent ناساز کم‌پیش‌آیندند**، پس abort کردن و از کاربر خواستن که از نو تلاش کند پذیرفتنی است (pp. 96–97).
+- **داده‌ی immutable این را ارزان می‌کند:** برابری ارجاع سنجشی ایمن و تند است، و diff دو version شریک‌ساختار از nodeهای شریک می‌پرد (pp. 102, 107).
+- **آن diff ساختاری از جانشینی و افزودن پشتیبانی می‌کند، از برداشتن نه** (pp. 99–100).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 5.1 Optimistic concurrency control — p. 92
-- 5.2 Reconciliation between concurrent mutations — p. 94
-- 5.3 Reducing collections — p. 97
-- 5.4 Structural difference — p. 99
-- 5.5 Implementing the reconciliation algorithm — p. 106
-- Summary — p. 108
+- ۵.۱ optimistic concurrency control — ص. ۹۲
+- ۵.۲ reconciliation میان mutationهای concurrent — ص. ۹۴
+- ۵.۳ تحویل بردن مجموعه‌ها — ص. ۹۷
+- ۵.۴ تفاوت ساختاری — ص. ۹۹
+- ۵.۵ پیاده کردن الگوریتم reconciliation — ص. ۱۰۶
+- خلاصه — ص. ۱۰۸
 
-## Notes
+## یادداشت‌ها
 
-The book warns that this chapter takes more effort: the reconciliation flow is not trivial, and its implementation involves a nontrivial recursion (p. 92). Before work, Theo and Joe talk about conflicts at home. Theo and his wife Jane went to an Imago Relationship Therapy expert about the house budget, which sets up the day's theme of resolving conflicts (p. 92).
+کتاب هشدار می‌دهد که این فصل کوشش بیشتری می‌برد: جریان reconciliation بدیهی نیست، و پیاده‌سازی‌اش بازگشتی نابدیهی دارد (p. 92). پیش از کار، تئو و جو از ناسازی‌های خانه می‌گویند. تئو و همسرش جین سر بودجه‌ی خانه پیش کارشناس Imago Relationship Therapy رفتند، که مایه‌ی آن روز، یعنی حل ناسازی، را راه می‌اندازد (p. 92).
 
-### 5.1 Optimistic concurrency control
+### ۵.۱ optimistic concurrency control
 
-DOP uses no locks: they hurt performance and, if you're not careful, deadlock (p. 92). Optimistic concurrency control (OCC) is the strategy that lets databases like Elasticsearch scale, and it fits DOP because it is "super efficient when the system data is immutable" (pp. 92–93).
+روش DOP هیچ قفلی به کار نمی‌برد: قفل‌ها به کارایی می‌زنند و اگر مراقب نباشید deadlock می‌کنند (p. 92). optimistic concurrency control یا OCC همان راهبردی است که می‌گذارد پایگاه‌هایی مانند Elasticsearch مقیاس بگیرند، و به DOP می‌خورد چون «وقتی داده‌ی سیستم immutable است فوق‌کارآمد است» (pp. 92–93).
 
-| Phase | Responsibility | State | Implementation (table 5.1, p. 93) |
+| فاز | مسئولیت | وضع state | پیاده‌سازی (جدول ۵.۱، ص. ۹۳) |
 |---|---|---|---|
-| Calculation | Compute next state in isolation | Stateless | Specific |
-| Commit | Reconcile and update system state | Stateful | Common |
+| حساب | state پسین را جدا حساب می‌کند | بی‌state | ویژه |
+| commit | reconciliation می‌دهد و state سیستم را به‌روز می‌کند | باstate | مشترک |
 
-![Activity diagram: a calculation phase captures the system state and computes the next version; the commit phase updates the state directly when there were no concurrent mutations, otherwise aborts on conflict or reconciles and then updates](../figures/05-01.png)
+![نمودار فعالیت: فازی حساب state سیستم را می‌گیرد و version پسین را حساب می‌کند؛ فاز commit وقتی mutation concurrency نبوده یک‌راست state را به‌روز می‌کند، وگرنه سر ناسازی abort می‌کند یا reconciliation می‌دهد و بعد به‌روز](../figures/05-01.png)
 
-*Figure 5.1 (p. 94): only the commit phase needs to know about other mutations; the calculation phase is a pure function of the captured state.*
+*Figure 5.1 (p. 94): تنها فاز commit لازم است از mutationهای دیگر خبر داشته باشد؛ و فاز حساب تابعی سرراست از state گرفته‌شده است.*
 
-### 5.2 Reconciliation between concurrent mutations
+> **In practice:** دو merge request که یک فایل config را عوض می‌کنند همان mutationهای concurrent کتاب‌اند و GitLab با rebase آن‌ها را reconcile می‌کند.
+>
+> **Your turn:** چرا GitLab به‌جای قفل کردن فایل، conflict را هنگام merge گزارش می‌کند؟
+>
+> *Answer:* چون این optimistic concurrency control است: هر کس آزادانه روی نسخه‌ی خودش کار می‌کند و فقط هنگام commit تفاوت‌ها مقایسه می‌شوند؛ وقتی conflict نادر است، این از قفل ارزان‌تر است (pp. 92–94).
 
-Examples of conflicts: two members borrowing the same book copy, or two librarians updating the same book's publication year (p. 94). Reconciliation resembles merging a Git branch. If main hasn't moved, Git fast-forwards; if someone else committed meanwhile, it does a three-way merge, and a line changed on both sides needs manual resolution (p. 94). DOP does the same, except a conflict **aborts** the mutation (p. 95).
+### ۵.۲ reconciliation میان mutationهای concurrent
 
-When the commit phase starts there are three versions (figure 5.3, p. 95):
+مثال‌هایی از ناسازی: دو عضو که همان یک نسخه‌ی کتاب را قرض می‌گیرند، یا دو کتابدار که سال نشر همان یک کتاب را به‌روز می‌کنند (p. 94). reconciliation به درهم‌آمیختن شاخه‌ای در Git می‌ماند. اگر main تکان نخورده باشد، Git تند پیش می‌رود؛ و اگر میان کار کسی commit کرده باشد، three-way merge می‌کند، و خطی که در هر دو سو عوض شده حل دستی می‌خواهد (p. 94). روش DOP همان را می‌کند، جز آنکه ناسازی mutation را **abort** می‌کند (p. 95).
 
-| Version | What it is |
+وقتی فاز commit آغاز می‌شود سه version هست (شکل ۵.۳، ص. ۹۵):
+
+| version | چیست |
 |---|---|
-| `previous` | The version the calculation phase based its computation on |
-| `current` | The system state at commit time; differs from `previous` if other mutations committed concurrently |
-| `next` | The version the calculation phase returned |
+| `previous` | versionی که فاز حساب حسابش را رویش نشاند |
+| `current` | مقدار state سیستم سر commit؛ اگر mutationهای دیگری concurrent commit کرده باشند از `previous` فرق دارد |
+| `next` | versionی که فاز حساب برگرداند |
 
-If `current` is `previous`, fast-forward to `next`. Otherwise compare *fields* of the system hash map rather than lines: compute the diffs from `previous` to `next` and from `previous` to `current`. If they have no fields in common, apply the first diff to `current` (pp. 95–96, figure 5.4).
+اگر `current` همان `previous` باشد، تند به `next` پیش بروید. وگرنه *فیلدهای* hash map سیستم را بسنجید، نه خط‌ها را: diffها را از `previous` به `next` و از `previous` به `current` حساب کنید. اگر هیچ فیلدی را شریک نبودند، آن diff نخست را روی `current` پیاده کنید (pp. 95–96).
 
-![previous leads to current through diffPreviousCurrent and to next through diffPreviousNext; applying the other diff to each side yields the same merged state](../figures/05-04.png)
+![مقدار previous از راه diffPreviousCurrent به current و از راه diffPreviousNext به next می‌رسد؛ و پیاده کردن آن یکی diff روی هر سو همان یک state درهم‌آمیخته را می‌دهد](../figures/05-04.png)
 
-*Figure 5.4 (p. 96): the two diffs start from the same `previous`, so when they touch different fields they can be applied in either order.*
+*Figure 5.4 (p. 96): هر دو diff از همان یک `previous` آغاز می‌شوند، پس وقتی به فیلدهای مختلف دست می‌زنند به هر ترتیبی پیاده‌شدنی‌اند.*
 
-| DOP | Git (table 5.2, p. 96) |
+| روش DOP | روش Git (جدول ۵.۲، ص. ۹۶) |
 |---|---|
-| Concurrent mutations | Different branches |
-| A version of the system data | A commit |
-| State | A reference |
-| Calculation phase | Branching |
-| Validation | Precommit hook |
-| Reconciliation | Merge |
-| Fast-forward / three-way merge | Fast-forward / three-way merge |
-| Abort | Manual conflict resolution |
-| Hash map / leaf node / data field | Tree (folder) / blob (file) / line of code |
+| mutationهای concurrent | شاخه‌های مختلف |
+| versionی از داده‌ی سیستم | یک commit |
+| مقدار state | یک ارجاع |
+| فاز حساب | شاخه زدن |
+| اعتبارسنجی | قلاب پیش از commit |
+| reconciliation | درهم‌آمیزی |
+| پیشروی تند یا three-way merge | پیشروی تند یا three-way merge |
+| عمل abort | حل دستی ناسازی |
+| hash map یا node برگ یا فیلد داده | درخت یا پوشه، blob یا فایل، خط کد |
 
-> **Try it:** [Reconcile two mutations](../widgets/05-reconcile.html) — start two mutations from the same tiny library, commit one, then commit the other and watch the commit phase fast-forward, merge or abort.
+> **Try it:** [reconciliation دادن دو mutation](../widgets/05-reconcile.html) — دو mutation را از همان یک کتابخانه‌ی ناچیز آغاز کنید، یکی را commit کنید، بعد آن یکی را و ببینید فاز commit تند پیش می‌رود یا درهم می‌آمیزد یا abort می‌کند.
 
-### 5.3 Reducing collections
+> **In practice:** Argo CD هم مدام reconcile می‌کند: state واقعی cluster را با state مطلوب در git مقایسه می‌کند و تفاوت را برطرف می‌کند.
+>
+> **Your turn:** کسی با `kubectl edit` تعداد replica را دستی عوض کرد. Argo CD با self-heal چه می‌کند؟
+>
+> *Answer:* تفاوت را drift می‌بیند و state را به آنچه git می‌گوید برمی‌گرداند. reconciliation در کتاب سه‌طرفه است، با نسخه‌ی پایه، و این‌جا git منبع حقیقت است؛ تغییر دستی باید از راه merge request بیاید (pp. 94–97).
 
-The diff uses `_.reduce`, which takes a collection, a two-argument function `f` and an initial value. It starts from the initial value and updates the result with `f(result, x)` for each element (p. 97). Theo expands `reduce([1, 2, 3], +, 0)` as `f(f(f(0, 1), 2), 3)` (figure 5.5, p. 98) and writes his own `reduce` as a loop (listing 5.2).
+### ۵.۳ تحویل بردن مجموعه‌ها
 
-### 5.4 Structural difference
+آن diff از `_.reduce` کار می‌کشد، که مجموعه‌ای و تابعی دوآرگومانی `f` و مقداری آغازین می‌گیرد. از مقدار آغازین آغاز می‌کند و خروجی را برای هر عضوی با `f(result, x)` به‌روز (p. 97). تئو عبارت `reduce([1, 2, 3], +, 0)` را به `f(f(f(0, 1), 2), 3)` باز می‌کند (شکل ۵.۵، ص. ۹۸) و `reduce` خودش را به‌شکل حلقه‌ای می‌نویسد (listing ۵.۲).
 
-The book marks this section as skippable: a sophisticated use of recursion that the rest of the book doesn't depend on (p. 99). A **structural** diff looks at the structure of the maps and ignores field order (p. 99).
+### ۵.۴ تفاوت ساختاری
 
-| Kind | First | Second | Diff (tables 5.3–5.5, pp. 99–100) |
+کتاب این بخش را پریدنی نشان می‌کند: کاربردی پیچیده از بازگشت که باقی کتاب به آن بسته نیست (p. 99). هر diff **ساختاری** به ساختار mapها نگاه می‌کند و ترتیب فیلدها را نشنیده می‌گیرد (p. 99).
+
+| گونه | نخست | دوم | مقدار diff (جدول‌های ۵.۳ تا ۵.۵، صص. ۹۹–۱۰۰) |
 |---|---|---|---|
-| Replacement | `{"a": 1}` | `{"a": 2}` | `{"a": 2}` |
-| Addition | `{"a": 1}` | `{"a": 1, "b": 2}` | `{"b": 2}` |
-| Nested replacement | `{"a": {"x": 1}}` | `{"a": {"x": 2}}` | `{"a": {"x": 2}}` |
-| Array replacement | `[1]` | `[2]` | `[2]` |
-| Array addition | `[1]` | `[1, 2]` | `[null, 2]` |
-| Deletion | `{"a": 1, "b": 2}` | `{"a": 1}` | Not supported |
+| جانشینی | `{"a": 1}` | `{"a": 2}` | `{"a": 2}` |
+| افزودن | `{"a": 1}` | `{"a": 1, "b": 2}` | `{"b": 2}` |
+| جانشینی تودرتو | `{"a": {"x": 1}}` | `{"a": {"x": 2}}` | `{"a": {"x": 2}}` |
+| جانشینی در array | `[1]` | `[2]` | `[2]` |
+| افزودن در array | `[1]` | `[1, 2]` | `[null, 2]` |
+| برداشتن | `{"a": 1, "b": 2}` | `{"a": 1}` | پشتیبانی نمی‌شود |
 
-Arrays compare element by element in order: an equal element gives null, and a differing one takes the second array's value (p. 100). Handling deletions is possible but needs a more complicated algorithm (p. 100).
+آرایه‌ها عضوبه‌عضو و به ترتیب سنجیده می‌شوند: عضوی برابر null می‌دهد، و عضوی فرق‌دار مقدار آرایه‌ی دوم را می‌گیرد (p. 100). چرخاندن برداشتن‌ها شدنی است ولی الگوریتمی پیچیده‌تر می‌خواهد (p. 100).
 
-Joe's implementation is about 30 lines, "a recursion inside a reduce" (listing 5.4, pp. 100–101):
+پیاده‌سازی جو حدود ۳۰ خط است، «بازگشتی درون یک reduce» (listing ۵.۴، صص. ۱۰۰–۱۰۱):
 
-- `diff(a, b)` recurses into `diffObjects` when both are collections. Otherwise it returns `b` if the values differ, or the marker `"no-diff"`.
-- `diffObjects(a, b)` returns an empty object or array immediately when `a == b`. Otherwise it reduces over the union of keys, keeping only non-empty child diffs.
+- تابع `diff(a, b)` وقتی هر دو مجموعه باشند به `diffObjects` بازگشت می‌کند. وگرنه اگر مقدارها فرق داشتند `b` را برمی‌گرداند، یا نشانه‌ی `"no-diff"` را.
+- تابع `diffObjects(a, b)` وقتی `a == b` باشد همان‌جا شیء یا آرایه‌ای تهی برمی‌گرداند. وگرنه روی اجتماع کلیدها تحویل می‌برد و تنها diffهای فرزند ناتهی را نگه می‌دارد.
 
-**Why it is fast** (p. 102): in general a diff visits every leaf of both maps. But two versions made by structural sharing from the same map share most nodes, so `diffObjects` usually returns at once because `data1` and `data2` are the same reference.
+**چرا تند است** (p. 102): به‌طور کلی هر diffی به هر برگی از هر دو map سر می‌زند. ولی دو versionی که با شریک شدن ساختاری از همان یک map ساخته شده‌اند بیشتر nodeها را شریکند، پس `diffObjects` معمولاً همان‌جا برمی‌گردد چون `data1` و `data2` همان یک ارجاعند.
 
-Theo tests it on a tiny library with just *Watchmen* (listing 5.6, p. 102). It has two non-conflicting mutations (listing 5.7, p. 103):
+تئو آن را روی کتابخانه‌ای ناچیز با تنها *Watchmen* می‌آزماید (listing ۵.۶، ص. ۱۰۲). دو mutation بی‌ناسازی دارد (listing ۵.۷، ص. ۱۰۳):
 
-- **`next`** sets the publication year to 1986.
-- **`current`** sets the title to "The Watchmen" and Dave Gibbons's name to "David Chester Gibbons."
+- مفهوم version **`next`** سال نشر را روی ۱۹۸۶ می‌گذارد.
+- مفهوم version **`current`** عنوان را روی «The Watchmen» و نام دیو گیبونز را روی «David Chester Gibbons» می‌گذارد.
 
-Their diffs' **information paths** (listings 5.10–5.12, pp. 104–105) are disjoint, so there is no conflict. `havePathInCommon` checks whether `_.intersection` of the two path lists is empty (listing 5.13), and the patch is a recursive `_.merge(current, diff(previous, next))` (listing 5.14, pp. 105–106).
+**مسیرهای خبر** از diffهایشان (listingهای ۵.۱۰ تا ۵.۱۲، صص. ۱۰۴–۱۰۵) جدا از همند، پس ناسازی نیست. تابع `havePathInCommon` می‌سنجد که `_.intersection` دو فهرست مسیر تهی است یا نه (listing ۵.۱۳)، و آن وصله یک `_.merge(current, diff(previous, next))` بازگشتی است (listing ۵.۱۴، صص. ۱۰۵–۱۰۶).
 
-> **Vault note:** some of the printed outputs in this section don't match the code. The author's path for the name change is `["catalog", "authorsById", "dave-gibbons", "name"]`. But listing 5.9 prints `authorsById` at the top level, and Theo reads the path as `["authorsById", "dave-gibbons", "name"]` (pp. 103–104). As a result, listing 5.14's merged output shows an `authorsById` both at the top level and inside `catalog` (pp. 105–106). Listing 5.11 prints a dotted string where listing 5.12 prints arrays. With the code as listed, the name change sits under `catalog`, and the merge produces a single `catalog` with all three changes. The [lab](../lab/05-three-way-merge/README.md) shows the actual output.
+> **Vault note:** برخی خروجی‌های چاپی این بخش با کد نمی‌خوانند. مسیر نویسنده برای عوض شدن نام `["catalog", "authorsById", "dave-gibbons", "name"]` است. ولی listing ۵.۹ مقدار `authorsById` را در بالاترین سطح چاپ می‌کند، و تئو آن مسیر را `["authorsById", "dave-gibbons", "name"]` می‌خواند (pp. 103–104). پس خروجی درهم‌آمیخته‌ی listing ۵.۱۴ یک `authorsById` هم در بالاترین سطح نشان می‌دهد هم درون `catalog` (pp. 105–106). نمونه‌ی ۵.۱۱ رشته‌ای نقطه‌دار چاپ می‌کند جایی که ۵.۱۲ آرایه چاپ می‌کند. با کد همان‌طور که فهرست شده، آن عوض شدن نام زیر `catalog` می‌نشیند، و درهم‌آمیزی یک `catalog` تنها با هر سه تغییر می‌سازد. [آزمایش lab](../lab/05-three-way-merge/README.md) خروجی واقعی را نشان می‌دهد.
 
-### 5.5 Implementing the reconciliation algorithm
+### ۵.۵ پیاده کردن الگوریتم reconciliation
 
-Only `SystemState.commit` changes. It calls `SystemConsistency.reconcile(this.systemData, previous, next)`, validates the result and stores it (listing 5.15, pp. 106–107). `reconcile` fast-forwards when `current == previous` and otherwise calls `threeWayMerge`, which merges or throws "Conflicting concurrent mutations." (listing 5.16, p. 107).
+تنها `SystemState.commit` عوض می‌شود. تابع `SystemConsistency.reconcile(this.systemData, previous, next)` را صدا می‌زند، خروجی را اعتبارسنجی و ذخیره می‌کند (listing ۵.۱۵، صص. ۱۰۶–۱۰۷). تابع `reconcile` وقتی `current == previous` باشد تند پیش می‌رود و وگرنه `threeWayMerge` را صدا می‌زند، که درهم می‌آمیزد یا خطای «Conflicting concurrent mutations.» می‌اندازد (listing ۵.۱۶، ص. ۱۰۷).
 
-Theo objects that `current == previous` compares references, not values. Joe answers that with immutable data, comparing references is safe and super fast: if the references are the same, the data is the same (p. 107).
+تئو ایراد می‌گیرد که `current == previous` ارجاع‌ها را می‌سنجد، نه مقدارها را. جو پاسخ می‌دهد که با داده‌ی تغییرناپذیر، سنجیدن ارجاع ایمن و فوق‌تند است: اگر ارجاع‌ها همانند، داده همان است (p. 107).
 
-Theo also spots a race. A context switch between the check and the update could let one mutation override another's changes. The code is fine in single-threaded JavaScript, with its event loop, but not in a multi-threaded environment; chapter 8 makes it thread-safe (p. 108). It is "optimistic" because it assumes conflicts don't occur often (p. 108).
+تئو مسابقه‌ای هم می‌بیند. عوض شدن زمینه میان سنجش و به‌روزرسانی می‌تواند بگذارد mutationی تغییرهای mutationی دیگر را از رو بنویسد. کد در JavaScript single-threaded با حلقه‌ی رویدادش خوب است، ولی در محیطی multi-threaded نه؛ و فصل ۸ آن را thread-safe می‌کند (p. 108). «خوش‌بینانه» است چون فرض می‌گیرد ناسازی زیاد پیش نمی‌آید (p. 108).
 
-> **Vault note:** as printed, listing 5.16 has its condition inverted: `if(havePathInCommon(...)) { return _.merge(...) }` merges exactly when the diffs *do* share a path, and throws when they don't. The prose on the same page states the intended rule, "If the intersection between the two diffs is empty, it means there is no conflict." So the test should be negated. A second subtlety: Lodash's `_.intersection` compares elements with SameValueZero equality. Two separately built path arrays such as `["a","b"]` and `["a","b"]` are different objects, so they never match. The check only works if paths are compared as strings, or with `_.intersectionWith(..., _.isEqual)`. The lab demonstrates both points.
+> **Vault note:** همان‌طور که چاپ شده، شرط listing ۵.۱۶ برگشته است: عبارت `if(havePathInCommon(...)) { return _.merge(...) }` درست وقتی درهم می‌آمیزد که آن دو diff مسیری را *شریک باشند*، و وقتی نباشند خطا می‌اندازد. متن همان صفحه قاعده‌ی خواسته را می‌گوید، «اگر اشتراک دو diff تهی باشد، یعنی ناسازی نیست.» پس آن سنجش باید نقض شود. ریزکاری دوم: تابع `_.intersection` از Lodash عضوها را با برابری SameValueZero می‌سنجد. دو آرایه‌ی مسیر که جدا ساخته شده‌اند، مانند `["a","b"]` و `["a","b"]`، شیءهای مختلفند، پس هیچ‌وقت نمی‌خورند. آن سنجش تنها وقتی کار می‌کند که مسیرها به‌شکل رشته سنجیده شوند، یا با `_.intersectionWith(..., _.isEqual)`. آزمایش lab هر دو نکته را نشان می‌دهد.
 
-> **Run it:** the [three-way merge experiment](../lab/05-three-way-merge/README.md) ports `diff`, `informationPaths` and `reconcile` to Python and replays the book's example.
+> **Run it:** [آزمایش three-way merge](../lab/05-three-way-merge/README.md) تابع‌های `diff` و `informationPaths` و `reconcile` را به Python می‌برد و مثال کتاب را replay می‌کند.
 
-> **Try it:** [Optimistic or locked](../widgets/05-occ-throughput.html) — run many concurrent mutations against a store, vary how often they touch the same field, and compare aborts and throughput for optimistic commits against a global lock.
+> **Try it:** [خوش‌بینانه یا قفل‌شده](../widgets/05-occ-throughput.html) — mutationهای concurrent زیادی را روی انباری اجرا کنید، فراوانی دست زدنشان به همان یک فیلد را عوض کنید، و abortها و توان‌گذر commitهای خوش‌بینانه را با قفلی سراسری بسنجید.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Strategy | When it shines | Costs |
+| راهبرد | کِی می‌درخشد | چه خرج می‌دهد |
 |---|---|---|
-| Locks (mutexes) | Frequent conflicts on the same data | Performance hit, deadlock risk (pp. 18, 92) |
-| OCC: fast-forward | No concurrent commit | Nothing beyond a reference comparison |
-| OCC: three-way merge | Concurrent changes to different fields | A structural diff, cheap thanks to structural sharing (p. 102) |
-| OCC: abort | Concurrent changes to the same field | The user must retry; acceptable because such conflicts are rare in user-facing systems (p. 96) |
-| This chapter's diff | Replacements and additions | No deletions (p. 100) |
+| قفل‌ها یا mutex | ناسازی پرپیش‌آیند روی همان یک داده | ضربه به کارایی، خطر deadlock (pp. 18, 92) |
+| OCC: پیشروی تند | بی هیچ commit concurrency | هیچ چیز فراتر از سنجش یک ارجاع |
+| OCC: three-way merge | تغییرهای concurrent به فیلدهای مختلف | یک diff ساختاری، که به برکت شریک شدن ساختاری ارزان است (p. 102) |
+| OCC: عمل abort | تغییرهای concurrent به همان یک فیلد | کاربر باید از نو تلاش کند؛ پذیرفتنی است چون چنین ناسازی‌هایی در سیستم‌های رو به کاربر کم‌پیش‌آیندند (p. 96) |
+| diff همین فصل | جانشینی و افزودن | بی هیچ برداشتنی (p. 100) |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **OCC in databases.** Kung and Robinson introduced optimistic concurrency control in 1981 ("On Optimistic Methods for Concurrency Control"), with read, validation and write phases. Joe's calculation phase is the read phase, and reconciliation is validation. Elasticsearch, which the book cites, exposes it through sequence numbers and primary terms on each document: a write that names an outdated version is rejected.
-- **Conflict granularity.** Here two mutations conflict only if they write the same *leaf* path. That is a write-write check. It doesn't catch a mutation whose *decision* depended on a field another mutation changed, a read-write conflict or "write skew." For example, two checkouts that each read "one copy available" and write different lending records would both merge. Database OCC usually validates the read set too. Chapter 8 makes the commit atomic, but it doesn't change what counts as a conflict.
-- **Prefix conflicts.** Comparing exact leaf paths treats a change to `["book", "title"]` and the addition of a whole new subtree at `["book"]` as different paths. Since the diff here never replaces a subtree with a leaf, this rarely matters, but a production version usually treats a path that is a prefix of another as a conflict.
-- **CRDTs** take the opposite approach to aborting: data types designed so that concurrent updates always merge deterministically, such as counters, sets and registers. They suit offline-first and multi-leader systems, where asking a user to retry isn't possible.
+- **روش OCC در پایگاه‌های داده.** کونگ و رابینسون optimistic concurrency control را در ۱۹۸۱ معرفی کردند، در «On Optimistic Methods for Concurrency Control»، با فازهای خواندن و اعتبارسنجی و نوشتن. فاز حساب جو همان فاز خواندن است، و reconciliation همان اعتبارسنجی. کتابخانه‌ی Elasticsearch که کتاب گواه می‌آورد آن را از راه sequence number و primary term روی هر سندی می‌نمایاند: نوشتنی که versionی از مد افتاده را نام ببرد رد می‌شود.
+- **مفهوم granularity ناسازی.** این‌جا دو mutation تنها وقتی ناساز می‌شوند که همان یک مسیر *برگ* را بنویسند. این سنجشی نوشتن-نوشتن است. mutationی را نمی‌گیرد که *تصمیمش* به فیلدی بسته بوده که mutationی دیگر عوضش کرده، یعنی ناسازی خواندن-نوشتن یا «write skew». مثلاً دو برداشت که هر کدام «یک نسخه آزاد است» را خواندند و رکوردهای قرض مختلفی نوشتند، هر دو درهم می‌آمیزند. روش OCC در پایگاه‌های داده معمولاً مجموعه‌ی خوانده را هم اعتبارسنجی می‌کند. فصل ۸ آن commit را اتمی می‌کند، ولی عوض نمی‌کند که چه ناسازی به شمار می‌آید.
+- **ناسازی پیشوندی.** سنجیدن مسیرهای برگ دقیق، تغییری به `["book", "title"]` و افزودن کل زیردرختی تازه در `["book"]` را دو مسیر مختلف می‌گیرد. چون آن diff این‌جا هیچ‌وقت زیردرختی را با برگی جانشین نمی‌کند، این کم مهم می‌شود، ولی versionی production‌آماده معمولاً مسیری را که پیشوند آن یکی است ناسازی می‌گیرد.
+- **ساختارهای CRDT** رویکردی مقابل abort کردن می‌گیرند: گونه‌های داده‌ای چنان طراحی‌شده که به‌روزرسانی‌های concurrent همیشه قطعی درهم بیامیزند، مانند شمارنده و set و ثبات. به سیستم‌های offline-first و چندleader می‌خورند، که نمی‌شود از کاربر خواست از نو تلاش کند.
 
-## Connections
+## پیوندها
 
-- **Previous:** [4. State management](04-state-management.md) built the calculation and commit phases this chapter extends.
-- **Thread safety:** [8. Advanced concurrency control](08-advanced-concurrency-control.md) replaces the check-then-set with an atomic compare-and-swap.
-- **Efficient diffs need sharing:** [9. Persistent data structures](09-persistent-data-structures.md).
-- **Run it:** [Three-way merge in Python](../lab/05-three-way-merge/README.md) — replays listings 5.6–5.16, shows the inverted condition and the array-identity pitfall, and counts aborts as mutations crowd onto fewer fields.
+- **پیشین:** [۴. مدیریت state](04-state-management.md) همان فازهای حساب و commit را ساخت که این فصل گسترششان می‌دهد.
+- **مفهوم thread safety:** [۸. کنترل پیشرفته‌ی concurrency](08-advanced-concurrency-control.md) آن سنجش-بعد-سپردن را با compare-and-swap اتمی جانشین می‌کند.
+- **مفهوم diff کارآمد شریک شدن می‌خواهد:** [۹. ساختارهای داده‌ی persistent](09-persistent-data-structures.md).
+- **Run it:** [three-way merge به Python](../lab/05-three-way-merge/README.md) — listingهای ۵.۶ تا ۵.۱۶ را replay می‌کند، آن شرط برگشته و دام همانندی آرایه را نشان می‌دهد، و abortها را می‌شمارد وقتی mutationها روی فیلدهای کم‌تری جمع می‌شوند.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. What does "ask forgiveness instead of permission" mean here?
-   <details><summary>Answer</summary>Mutations don't take locks before computing. The calculation phase runs as if it were alone, and the commit phase reconciles with concurrent mutations, or aborts if they conflict (p. 93).</details>
-2. Name the three versions present at commit time, and when `current` differs from `previous`.
-   <details><summary>Answer</summary>`previous` is the calculation's base, `current` is the state at commit, and `next` is the calculation's result. `current` differs from `previous` when other mutations committed concurrently (p. 95).</details>
-3. When does the commit fast-forward, merge or abort?
-   <details><summary>Answer</summary>Fast-forward if `current` is `previous`. Otherwise, merge if diff(previous, current) and diff(previous, next) share no information path, and abort if they do (pp. 95–96).</details>
-4. Why is comparing `current == previous` by reference correct here?
-   <details><summary>Answer</summary>The data is immutable, so the same reference means the same data, and the check is super fast (p. 107).</details>
-5. Why is the structural diff cheap on system data, even though it visits all leaves in general?
-   <details><summary>Answer</summary>Versions created by structural sharing from the same map share most nodes, so `diffObjects` usually returns at once because both arguments are the same object (p. 102).</details>
-6. What can't the chapter's diff express?
-   <details><summary>Answer</summary>Deletions of fields or array elements; only replacements and additions are supported (pp. 99–100).</details>
-7. Why isn't the chapter's `SystemConsistency` thread-safe, and when is that fine?
-   <details><summary>Answer</summary>A context switch between checking the state and updating it can let one mutation overwrite another's changes. It is fine in single-threaded JavaScript with its event loop; chapter 8 fixes it for multi-threaded environments (p. 108).</details>
+1. «به‌جای اجازه، بخشش خواستن» این‌جا چه معنا دارد؟
+   <details><summary>پاسخ</summary>همه‌ی mutationها پیش از حساب کردن قفل نمی‌گیرند. فاز حساب چنان اجرا می‌شود که گویی تنهاست، و فاز commit با mutationهای concurrent reconciliation می‌دهد، یا اگر ناساز بودند abort می‌کند (p. 93).</details>
+2. سه version موجود سر commit را نام ببرید، و بگویید `current` کِی از `previous` فرق دارد.
+   <details><summary>پاسخ</summary>مفهوم version `previous` پایه‌ی حساب است، `current` همان state سر commit، و `next` خروجی حساب. مقدار `current` وقتی از `previous` فرق دارد که mutationهای دیگری concurrent commit کرده باشند (p. 95).</details>
+3. آن commit کِی تند پیش می‌رود، کِی درهم می‌آمیزد و کِی abort می‌کند؟
+   <details><summary>پاسخ</summary>اگر `current` همان `previous` باشد تند پیش می‌رود. وگرنه اگر diff(previous, current) و diff(previous, next) هیچ مسیر خبری را شریک نبودند درهم می‌آمیزد، و اگر بودند abort (pp. 95–96).</details>
+4. چرا سنجیدن `current == previous` با ارجاع این‌جا درست است؟
+   <details><summary>پاسخ</summary>داده immutable است، پس همان ارجاع یعنی همان داده، و آن سنجش فوق‌تند است (p. 107).</details>
+5. چرا آن diff ساختاری روی داده‌ی سیستم ارزان است، گرچه به‌طور کلی به همه‌ی برگ‌ها سر می‌زند؟
+   <details><summary>پاسخ</summary>همه‌ی versionهایی که با شریک شدن ساختاری از همان یک map ساخته شده‌اند بیشتر nodeها را شریکند، پس `diffObjects` معمولاً همان‌جا برمی‌گردد چون هر دو آرگومانش همان یک شیءاند (p. 102).</details>
+6. آن diff این فصل چه را نمی‌تواند بگوید؟
+   <details><summary>پاسخ</summary>برداشتن فیلدها یا عضوهای آرایه؛ تنها جانشینی و افزودن پشتیبانی می‌شوند (pp. 99–100).</details>
+7. چرا `SystemConsistency` این فصل thread-safe نیست، و کِی اشکالی ندارد؟
+   <details><summary>پاسخ</summary>عوض شدن زمینه میان سنجیدن state و به‌روز کردنش می‌تواند بگذارد mutationی تغییرهای mutationی دیگر را از رو بنویسد. در JavaScript single-threaded با حلقه‌ی رویدادش اشکالی ندارد؛ و فصل ۸ آن را برای محیط‌های multi-threaded درست می‌کند (p. 108).</details>

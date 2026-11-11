@@ -1,64 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Group and Aggregate</title>
-<meta name="description" content="Step through groupBy and aggregateField to turn the three rows of a books-and-authors join into two books with their author names, then add rows and see the same generic code handle them. Illustrates Data-Oriented Programming, chapter 10.">
+<title>گروه و گرد</title>
+<meta name="description" content="از groupBy و aggregateField قدم‌به‌قدم بگذرید تا سه ردیف یک join از کتاب‌ها و نویسنده‌ها را به دو کتاب با نام نویسنده‌هایشان بدل کنید، بعد ردیف بیفزایید و ببینید همان یک کد عمومی می‌چرخاندشان. تصویری از فصل ۱۰ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
+  #st { direction: rtl; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/10-database-operations.html">Chapter 10</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Group and aggregate</span>
+      <a href="../chapters/10-database-operations.html">فصل ۱۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">گروه و گرد</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 10 · Database operations</div>
-  <h1>Group and aggregate</h1>
-  <p class="lede">A join returns one row per book <em>and author</em>: three rows for two books. Joe reshapes them in the application with two generic functions: <code>_.groupBy</code> on the ISBN, then <code>aggregateField</code>, which collects <code>author_name</code> into <code>authorNames</code> and keeps the first row as the basis.</p>
-  <p class="source-note">Illustrates section 10.4 (listings 10.17–10.26, table 10.6, figure 10.3, pp. 211–218). The rows are table 10.6’s; the extra rows are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۰ · عملیات پایگاه داده</div>
+  <h1>گروه و گرد</h1>
+  <p class="lede">هر joinی برای هر جفت کتاب <em>و نویسنده</em> یک ردیف برمی‌گرداند: سه ردیف برای دو کتاب. جو آن‌ها را در برنامه با دو تابع عمومی از نو شکل می‌دهد: <code>_.groupBy</code> روی ISBN، بعد <code>aggregateField</code> که <code>author_name</code> را در <code>authorNames</code> گرد می‌کند و ردیف نخست را پایه نگه می‌دارد.</p>
+  <p class="source-note">تصویری از بخش ۱۰.۴ (listingهای ۱۰.۱۷ تا ۱۰.۲۶، جدول ۱۰.۶، شکل ۱۰.۳، صص. ۲۱۱–۲۱۸). ردیف‌ها از جدول ۱۰.۶‌اند؛ و ردیف‌های افزوده مال vault. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title" id="st">Stage</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
+      <div class="panel"><p class="panel-title" id="st">مرحله</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="pl"></div>
-        <button class="btn" id="addA" type="button" style="margin-top:8px">Add a co-author to The Power of Habit</button>
-        <button class="btn" id="addB" type="button">Add a book with one author</button>
-        <button class="btn" id="rs" type="button">↺ Table 10.6 rows</button></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="pl"></div>
+        <button class="btn" id="addA" type="button" style="margin-top:8px">افزودن هم‌نویسنده‌ای به The Power of Habit</button>
+        <button class="btn" id="addB" type="button">افزودن کتابی با یک نویسنده</button>
+        <button class="btn" id="rs" type="button">↺ ردیف‌های جدول ۱۰.۶</button></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong><code>groupBy</code> returns a map</strong> from ISBN to that book’s rows; the keys aren’t needed afterwards, so <code>_.values</code> keeps only the groups.</li>
-    <li><strong><code>aggregateField</code> is generic</strong>: <code>aggregateFields(rows, "isbn", "author_name", "authorNames")</code> would aggregate any field of any entity.</li>
-    <li><strong>Adding rows changes nothing in the code</strong>: a new co-author lengthens one list, a new book adds one group.</li>
+    <li><strong>تابع <code>groupBy</code> mapی برمی‌گرداند</strong> از ISBN به ردیف‌های آن کتاب؛ و آن کلیدها بعد لازم نیستند، پس <code>_.values</code> تنها دسته‌ها را نگه می‌دارد.</li>
+    <li><strong>تابع <code>aggregateField</code> عمومی است</strong>: عبارت <code>aggregateFields(rows, "isbn", "author_name", "authorNames")</code> هر فیلدی از هر entityی را گرد می‌کرد.</li>
+    <li><strong>افزودن ردیف هیچ چیز را در کد عوض نمی‌کند</strong>: هم‌نویسنده‌ای تازه یک فهرست را درازتر می‌کند، و کتابی تازه یک دسته می‌افزاید.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/10-database-operations.html"><small>Lesson</small>10. Database operations</a></li>
-    <li><a href="../lab/10-rows-as-maps/README.md"><small>Experiment</small>Rows as maps in SQLite</a></li>
+    <li><a href="../chapters/10-database-operations.html"><small>درس</small>فصل ۱۰: عملیات پایگاه داده</a></li>
+    <li><a href="../lab/10-rows-as-maps/README.md"><small>آزمایش</small>ردیف‌ها به‌شکل map در SQLite</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -77,31 +78,31 @@ function stats(rows) {
   var BASE = [{ title: "7 Habits of Highly Effective People", isbn: "978-1982137274", author_name: "Sean Covey" }, { title: "7 Habits of Highly Effective People", isbn: "978-1982137274", author_name: "Stephen Covey" }, { title: "The Power of Habit", isbn: "978-0812981605", author_name: "Charles Duhigg" }];
   function groupBy(c, k) { var g = {}; c.forEach(function (r) { (g[r[k]] = g[r[k]] || []).push(r); }); return g; }
   function aggregateField(rs, f, af) { var names = rs.map(function (r) { return r[f]; }), b = Object.assign({}, rs[0]); b[af] = names; delete b[f]; return b; }
-  var STAGES = ["sqlRows (table 10.6)", "_.groupBy(sqlRows, \"isbn\")", "_.values(groups)", "_.map(groups, rows => aggregateField(rows, \"author_name\", \"authorNames\"))"];
+  var STAGES = ["sqlRows (جدول ۱۰.۶)", "_.groupBy(sqlRows, \"isbn\")", "_.values(groups)", "_.map(groups, rows => aggregateField(rows, \"author_name\", \"authorNames\"))"];
   function render() { var g = groupBy(rows, "isbn"), vals = Object.values(g), res = vals.map(function (r) { return aggregateField(r, "author_name", "authorNames"); });
     var out = [rows, g, vals, res][stage];
-    document.getElementById("st").textContent = "Stage " + (stage + 1) + " of 4: " + STAGES[stage];
+    document.getElementById("st").textContent = "مرحله‌ی " + (stage + 1) + " از ۴: " + STAGES[stage];
     document.getElementById("out").textContent = JSON.stringify(out, null, 2);
     var v = document.getElementById("verdict"); v.className = "callout " + (stage === 3 ? "ok" : "");
-    v.textContent = stage === 3 ? rows.length + " rows became " + res.length + " books." : "Step to reshape.";
-    stats([["Rows", rows.length], ["Groups", vals.length], ["Books out", stage === 3 ? res.length : "—"]]); }
+    v.textContent = stage === 3 ? rows.length + " ردیف به " + res.length + " کتاب بدل شد." : "قدم بزنید تا از نو شکل بگیرد.";
+    stats([["ردیف‌ها", rows.length], ["دسته‌ها", vals.length], ["کتاب‌های بیرون", stage === 3 ? res.length : "—"]]); }
   function reset() { rows = BASE.slice(); stage = 0; render(); }
-  var pl = Kit.player({ mount: document.getElementById("pl"), interval: 1100, step: function () { if (stage >= 3) return false; stage++; log.add(STAGES[stage], "muted"); render(); return stage < 3; }, reset: function () { stage = 0; render(); log.add("Back to the SQL rows.", "muted"); } });
-  document.getElementById("addA").addEventListener("click", function () { rows.push({ title: "The Power of Habit", isbn: "978-0812981605", author_name: "A. Co-Author" }); stage = 0; render(); log.add("Added a row: The Power of Habit · A. Co-Author (the vault’s).", "ok"); });
-  document.getElementById("addB").addEventListener("click", function () { rows.push({ title: "Watchmen", isbn: "978-1779501127", author_name: "Alan Moore" }); stage = 0; render(); log.add("Added a row: Watchmen · Alan Moore.", "ok"); });
-  document.getElementById("rs").addEventListener("click", function () { reset(); log.add("Table 10.6 rows.", "muted"); });
+  var pl = Kit.player({ mount: document.getElementById("pl"), interval: 1100, step: function () { if (stage >= 3) return false; stage++; log.add(STAGES[stage], "muted"); render(); return stage < 3; }, reset: function () { stage = 0; render(); log.add("بازگشت به ردیف‌های SQL.", "muted"); } });
+  document.getElementById("addA").addEventListener("click", function () { rows.push({ title: "The Power of Habit", isbn: "978-0812981605", author_name: "A. Co-Author" }); stage = 0; render(); log.add("ردیفی افزوده شد: The Power of Habit · A. Co-Author، مال vault.", "ok"); });
+  document.getElementById("addB").addEventListener("click", function () { rows.push({ title: "Watchmen", isbn: "978-1779501127", author_name: "Alan Moore" }); stage = 0; render(); log.add("ردیفی افزوده شد: Watchmen · Alan Moore.", "ok"); });
+  document.getElementById("rs").addEventListener("click", function () { reset(); log.add("ردیف‌های جدول ۱۰.۶.", "muted"); });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How many rows does the join return for the two habit books?",
-      options: ["Two", "Three, because 7 Habits has two authors", "Four"], answer: 1,
-      explain: "Table 10.6, p. 212." },
-    { q: "What does aggregateField take as the basis of the aggregated map?",
-      options: ["The last row", "The first row (_.nth(rows, 0))", "An empty map"], answer: 1,
-      explain: "Listing 10.22, p. 214." },
-    { q: "Why reshape in the application rather than with PostgreSQL's JSON aggregation?",
-      options: ["SQL can't do it", "It keeps the SQL simple and the code is reusable for other entities", "It's faster"], answer: 1,
-      explain: "p. 211." }
+    { q: "آن join برای آن دو کتاب habit چند ردیف برمی‌گرداند؟",
+      options: ["دو", "سه، چون 7 Habits دو نویسنده دارد", "چهار"], answer: 1,
+      explain: "جدول ۱۰.۶، ص. ۲۱۲." },
+    { q: "تابع aggregateField چه را پایه‌ی map گردشده می‌گیرد؟",
+      options: ["ردیف آخر", "ردیف نخست با _.nth(rows, 0)", "mapی تهی"], answer: 1,
+      explain: "listing ۱۰.۲۲، ص. ۲۱۴." },
+    { q: "چرا در برنامه از نو شکل بدهیم و نه با تجمیع JSON در PostgreSQL؟",
+      options: ["زبان SQL نمی‌تواند", "آن SQL را ساده نگه می‌دارد و کد برای entityهای دیگر بازاستفاده‌شدنی است", "تندتر است"], answer: 1,
+      explain: "ص. ۲۱۱." }
   ]);
 })();
 </script>

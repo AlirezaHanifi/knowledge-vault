@@ -1,64 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ISBN Composition</title>
-<meta name="description" content="Toggle which ISBN fields an Open Library book response has and see how allOf with anyOf accepts it, while oneOf would reject Watchmen, which has both. Illustrates Data-Oriented Programming, chapter 7.">
+<title>ترکیب ISBN</title>
+<meta name="description" content="فیلدهای ISBNی را که پاسخ کتاب Open Library دارد روشن و خاموش کنید و ببینید allOf با anyOf چطور می‌پذیردش، در حالی که oneOf کتاب Watchmen را که هر دو را دارد رد می‌کرد. تصویری از فصل ۷ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
   textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; } table.tt td, table.tt th { text-align: center; } table.tt td.y { color: var(--ok); } table.tt td.n { color: var(--bad); font-weight: 600; } table.tt tr.cur td { background: var(--accent-soft); }
+  #verdict { direction: ltr; text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/07-basic-data-validation.html">Chapter 7</a><span aria-hidden="true">/</span>
-      <span aria-current="page">ISBN composition</span>
+      <a href="../chapters/07-basic-data-validation.html">فصل ۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ترکیب ISBN</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 7 · Basic data validation</div>
-  <h1>ISBN composition</h1>
-  <p class="lede">An Open Library response always has <code>isbn_10</code>, <code>isbn_13</code> or both: books published before 2007 have the first, later ones the second, and republished books like <em>Watchmen</em> both. Theo’s rule is <code>basic AND (isbn13 OR isbn10)</code>: in JSON Schema, <code>allOf</code> and <code>anyOf</code>.</p>
-  <p class="source-note">Illustrates section 7.4, Schema composition (listings 7.16–7.19, pp. 154–157). The response is listing 7.16’s Watchmen; the <code>oneOf</code> comparison follows the book’s remark that <code>oneOf</code> exists, and the truth table is the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۷ · اعتبارسنجی پایه‌ی داده</div>
+  <h1>ترکیب ISBN</h1>
+  <p class="lede">هر پاسخی از Open Library همیشه <code>isbn_10</code> یا <code>isbn_13</code> یا هر دو را دارد: کتاب‌های نشرشده پیش از ۲۰۰۷ نخستی را دارند، دیرترها دومی را، و کتاب‌های بازنشرشده مانند <em>Watchmen</em> هر دو را. قاعده‌ی تئو همان <code>basic AND (isbn13 OR isbn10)</code> است: در JSON Schema یعنی <code>allOf</code> و <code>anyOf</code>.</p>
+  <p class="source-note">تصویری از بخش ۷.۴، یعنی ترکیب طرح (listingهای ۷.۱۶ تا ۷.۱۹، صص. ۱۵۴–۱۵۷). آن پاسخ همان Watchmen از listing ۷.۱۶ است؛ و سنجش <code>oneOf</code> از یادآوری کتاب پی می‌گیرد که <code>oneOf</code> هست، و آن جدول درستی مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">The book response</p><pre class="code" id="data"></pre></div>
-      <div class="panel"><p class="panel-title">Every combination</p><div class="table-wrap"><table class="tt" id="tt"></table></div><div class="callout" id="verdict" style="margin-top:8px"></div></div>
+      <div class="panel"><p class="panel-title">پاسخ آن کتاب</p><pre class="code" id="data"></pre></div>
+      <div class="panel"><p class="panel-title">هر ترکیبی</p><div class="table-wrap"><table class="tt" id="tt"></table></div><div class="callout" id="verdict" style="margin-top:8px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><label style="display:flex;gap:6px"><input type="checkbox" id="i10" checked> has <code>isbn_10</code></label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="i13" checked> has <code>isbn_13</code></label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="tt0" checked> has <code>title</code></label>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><label style="display:flex;gap:6px"><input type="checkbox" id="i10" checked> فیلد <code>isbn_10</code> را دارد</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="i13" checked> فیلد <code>isbn_13</code> را دارد</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="tt0" checked> فیلد <code>title</code> را دارد</label>
         <div id="comb" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong><code>allOf</code> is AND</strong>: the basic book schema must hold, including the required <code>title</code>.</li>
-    <li><strong><code>anyOf</code> is OR</strong>: one ISBN or both are fine, which is the rule Theo states.</li>
-    <li><strong><code>oneOf</code> is “exactly one”</strong>: it would reject <em>Watchmen</em>, which has both ISBNs because it was republished after 2007.</li>
+    <li><strong>کلیدواژه‌ی <code>allOf</code> همان AND است</strong>: طرح پایه‌ی کتاب باید برپا باشد، فیلد اجباری <code>title</code> هم.</li>
+    <li><strong>کلیدواژه‌ی <code>anyOf</code> همان OR است</strong>: یک ISBN یا هر دو خوب است، که همان قاعده‌ای است که تئو می‌گوید.</li>
+    <li><strong>کلیدواژه‌ی <code>oneOf</code> همان «دقیقاً یکی» است</strong>: کتاب <em>Watchmen</em> را رد می‌کرد، که هر دو ISBN را دارد چون پس از ۲۰۰۷ بازنشر شد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/07-basic-data-validation.html"><small>Lesson</small>7. Basic data validation</a></li>
+    <li><a href="../chapters/07-basic-data-validation.html"><small>درس</small>فصل ۷: اعتبارسنجی پایه‌ی داده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -127,24 +128,24 @@ function stats(rows) {
     var tb = Kit.clear(document.getElementById("tt")); tb.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["title", "isbn_10", "isbn_13", "allOf + anyOf", "allOf + oneOf"].map(function (h) { return Kit.el("th", null, h); }))));
     var body = Kit.el("tbody");
     [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0], [0, 1, 1]].forEach(function (r) { var dd = book(r[0], r[1], r[2]), sv = comb, res = ["anyOf", "oneOf"].map(function (c) { comb = c; return validate(schema(), dd, false).length === 0; }); comb = sv;
-      body.appendChild(Kit.el("tr", { class: r[0] === +t && r[1] === +a && r[2] === +b ? "cur" : "" }, r.map(function (x) { return Kit.el("td", null, x ? "yes" : "—"); }).concat(res.map(function (ok) { return Kit.el("td", { class: ok ? "y" : "n" }, ok ? "✓ valid" : "✗ invalid"); })))); });
+      body.appendChild(Kit.el("tr", { class: r[0] === +t && r[1] === +a && r[2] === +b ? "cur" : "" }, r.map(function (x) { return Kit.el("td", null, x ? "بله" : "—"); }).concat(res.map(function (ok) { return Kit.el("td", { class: ok ? "y" : "n" }, ok ? "✓ معتبر" : "✗ نامعتبر"); })))); });
     tb.appendChild(body);
     var v = document.getElementById("verdict"); v.className = "callout " + (errs.length ? "bad" : "ok"); v.textContent = "With " + comb + ": " + (errs.length ? errorsText(errs) : "valid.");
-    stats([["Valid", errs.length ? "no" : "yes", errs.length ? "bad" : "ok"], ["ISBN fields", (a ? 1 : 0) + (b ? 1 : 0)], ["Combinator", comb]]); }
-  ["i10", "i13", "tt0"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { render(); log.add((e.target.checked ? "Added " : "Removed ") + id.replace("i", "isbn_").replace("tt0", "title"), "muted"); }); });
-  document.getElementById("comb").appendChild(Kit.segmented({ label: "Combinator for the ISBNs", value: comb, options: [{ value: "anyOf", label: "anyOf (book)" }, { value: "oneOf", label: "oneOf" }], onChange: function (v) { comb = v; render(); log.add("Using " + v + (v === "oneOf" ? ": Watchmen, with both ISBNs, is now rejected." : "."), v === "oneOf" ? "warn" : "ok"); } }).element);
+    stats([["معتبر", errs.length ? "نه" : "بله", errs.length ? "bad" : "ok"], ["فیلدهای ISBN", (a ? 1 : 0) + (b ? 1 : 0)], ["ترکیب‌کننده", comb]]); }
+  ["i10", "i13", "tt0"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { render(); log.add("فیلد " + id.replace("i", "isbn_").replace("tt0", "title") + (e.target.checked ? " افزوده شد" : " برداشته شد"), "muted"); }); });
+  document.getElementById("comb").appendChild(Kit.segmented({ label: "ترکیب‌کننده برای ISBNها", value: comb, options: [{ value: "anyOf", label: "anyOf، کتاب" }, { value: "oneOf", label: "oneOf" }], onChange: function (v) { comb = v; render(); log.add("کلیدواژه‌ی " + v + (v === "oneOf" ? " به کار است: کتاب Watchmen با هر دو ISBN حالا رد می‌شود." : " به کار است."), v === "oneOf" ? "warn" : "ok"); } }).element);
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Which ISBN does a book published before 2007 have in the Open Library response?",
-      options: ["isbn_10", "isbn_13", "Both"], answer: 0,
-      explain: "p. 155." },
-    { q: "How does JSON Schema write Theo's AND and OR?",
+    { q: "کتابی نشرشده پیش از ۲۰۰۷ در پاسخ Open Library کدام ISBN را دارد؟",
+      options: ["isbn_10", "isbn_13", "هر دو"], answer: 0,
+      explain: "ص. ۱۵۵." },
+    { q: "قالب JSON Schema آن AND و OR تئو را چطور می‌نویسد؟",
       options: ["and / or", "allOf / anyOf", "required / enum"], answer: 1,
-      explain: "p. 156." },
-    { q: "Would Watchmen validate if anyOf were replaced by oneOf?",
-      options: ["Yes", "No: it has both ISBNs, and oneOf requires exactly one", "Only without a title"], answer: 1,
-      explain: "Watchmen has both (p. 155); oneOf means exactly one (pp. 156–157)." }
+      explain: "ص. ۱۵۶." },
+    { q: "اگر anyOf با oneOf جانشین شود، کتاب Watchmen اعتبار می‌گیرد؟",
+      options: ["بله", "نه: هر دو ISBN را دارد، و oneOf دقیقاً یکی را اجبار می‌کند", "تنها بی عنوان"], answer: 1,
+      explain: "کتاب Watchmen هر دو را دارد (ص. ۱۵۵)؛ و oneOf یعنی دقیقاً یکی (صص. ۱۵۶–۱۵۷)." }
   ]);
 })();
 </script>

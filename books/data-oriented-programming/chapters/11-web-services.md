@@ -2,177 +2,191 @@
 book: data-oriented-programming
 chapter: 11
 title: "Web services"
+translated_title: "سرویس‌های وب"
 pages: "220–244"
+lang: fa
 ---
 
-# 11. Web services
+# ۱۱. سرویس‌های وب
 
-[← 10. Database operations](10-database-operations.md) · [Book](../README.md) · [12. Advanced data validation →](12-advanced-data-validation.md)
+[← ۱۰. عملیات پایگاه داده](10-database-operations.md) · [کتاب](../README.md) · [۱۲. اعتبارسنجی پیشرفته‌ی داده →](12-advanced-data-validation.md)
 
-## Summary
+## خلاصه
 
-The next milestone is **book information enrichment**. Search results should combine availability from the database with extended information from the **Open Library Books API**. That API returns dozens of fields for some books and two or three for others, so its data is sparse and unpredictable (p. 221). Joe's principle is **build the insides of our systems like we build the outsides**. Components on the wire exchange language-independent data such as JSON. Components inside a program should likewise exchange generic, immutable data collections, so they know only field names, not each other's class definitions. That keeps them loosely coupled (pp. 220–223).
+سنگ‌نشان پسین **غنی کردن خبر کتاب** است. نتیجه‌های جست‌وجو باید در دسترس بودن از پایگاه داده را با خبر گسترده از **Open Library Books API** کنار هم بگذارند. آن API برای برخی کتاب‌ها ده‌ها فیلد و برای برخی دو سه فیلد برمی‌گرداند، پس داده‌اش تنک و پیش‌بینی‌ناپذیر است (p. 221). اصل جو این است که **درون سیستم‌هایمان را همان‌طور بسازیم که بیرونشان را**. مؤلفه‌هایی که سر سیم‌اند داده‌ی زبان‌مستقل مانند JSON مبادله می‌کنند. مؤلفه‌های درون برنامه هم باید همان‌طور مجموعه‌های داده‌ی عمومی و immutable مبادله کنند، پس تنها نام فیلدها را می‌دانند، نه تعریف کلاس یکدیگر را. این سست‌جفتشان نگه می‌دارد (pp. 220–223).
 
-The endpoint takes the client's search request, with `title` and the `fields` to return, as a validated map (pp. 225–227). It then does three things:
+آن endpoint درخواست جست‌وجوی client را، با `title` و همان `fields`ی که برمی‌گرداند، به‌شکل mapی اعتبارسنجی‌شده می‌گیرد (pp. 225–227). بعد سه کار می‌کند:
 
-- **Fetches each book from Open Library,** validates it, and keeps only the relevant and requested fields with `_.pick` twice (pp. 227–231).
-- **Passes the information forward** without opening it, like a messenger who shouldn't read the letter he carries (pp. 231–232).
-- **Combines the database and Open Library results.** Joe compares nesting and merging (table 11.1), and Theo writes a generic `joinArrays` with `_.keyBy` and `_.merge` (pp. 232–239).
+- **هر کتابی را از Open Library می‌آورد،** اعتبارسنجی می‌کند، و با دو بار `_.pick` تنها فیلدهای به‌کار‌آمده و خواسته را نگه می‌دارد (pp. 227–231).
+- **خبر را پیش می‌فرستد** بی بازکردنش، مانند پیک‌هایی که نباید نامه‌ی زیر دستشان را بخوانند (pp. 231–232).
+- **خروجی پایگاه داده و Open Library را کنار هم می‌گذارد.** جو تودرتو کردن و درهم‌آمیختن را می‌سنجد (جدول ۱۱.۱)، و تئو یک `joinArrays` عمومی با `_.keyBy` و `_.merge` می‌نویسد (pp. 232–239).
 
-The project is delivered on time. Theo is promoted and buys Joe's children their gifts: a DJI Mavic Air 2 drone for Neriah and AirPods Pro for Aurelia (p. 244).
+پروژه سر وقت تحویل می‌شود. تئو ارتقا می‌گیرد و هدیه‌های فرزندان جو را می‌خرد: پهپاد DJI Mavic Air 2 برای نریا و AirPods Pro برای اورلیا (p. 244).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Build the insides like the outsides:** inner components communicate with generic data, the way services communicate over the wire with JSON (pp. 222–223).
-- **With classes, a component must import another's class definitions to read its data.** With generic data, it needs only the field names, which is loose coupling (p. 223).
-- **A web service's data flow is data all the way:** parse, data manipulation, serialize to the sources, parse their responses, data manipulation, serialize the response (figure 11.3, p. 224).
-- **Let the client choose fields** with one endpoint and a `fields` list, instead of an endpoint per client and screen (p. 225).
-- **Validate data from external services**, here with `allOf`/`anyOf` for the ISBN rule, before using it (pp. 229–230).
-- **Pass information forward** in generic structures instead of creating classes like `DBBook`, `OpenLibraryBook` and `CombinedBook` (pp. 231–232).
-- **Nesting vs merging** (table 11.1, p. 232): nesting needs no conflict handling but isn't flat; merging is flat but needs conflict handling.
-- **Business logic is often generic data manipulation:** `_.pick`, `_.keyBy`, `_.merge` and `_.values` make `joinArrays` (pp. 236–237).
-- **Classes are much less complex as aggregates of stateless functions** that operate on similar domain entities (p. 243).
+- **درون را مانند بیرون بسازید:** مؤلفه‌های درونی با داده‌ی عمومی گفت‌وگو می‌کنند، همان‌طور که سرویس‌ها سر سیم با JSON (pp. 222–223).
+- **با کلاس، مؤلفه‌ای باید تعریف کلاس آن یکی را وارد کند تا داده‌اش را بخواند.** با داده‌ی عمومی، تنها نام فیلدها را می‌خواهد، که سست‌جفتی است (p. 223).
+- **جریان داده‌ی سرویسی وب سرتاپا داده است:** باز کردن، دست‌کاری داده، سریالی کردن به سوی سرچشمه‌ها، باز کردن پاسخشان، دست‌کاری داده، سریالی کردن پاسخ (شکل ۱۱.۳، ص. ۲۲۴).
+- **بگذارید client فیلدها را برگزیند** با یک endpoint و فهرستی `fields`، به‌جای یک endpoint برای هر client و صفحه (p. 225).
+- **داده‌ی سرویس‌های بیرونی را** پیش از به کار بردنش اعتبارسنجی کنید، این‌جا با `allOf` و `anyOf` برای قاعده‌ی ISBN (pp. 229–230).
+- **خبر را پیش بفرستید** در ساختارهای عمومی، به‌جای ساختن کلاس‌هایی مانند `DBBook` و `OpenLibraryBook` و `CombinedBook` (pp. 231–232).
+- **تودرتو کردن در برابر درهم‌آمیختن** (جدول ۱۱.۱، ص. ۲۳۲): تودرتو کردن چرخاندن ناسازی نمی‌خواهد ولی تخت نیست؛ و درهم‌آمیختن تخت است ولی چرخاندن ناسازی می‌خواهد.
+- **منطق کسب‌وکار بیشتر وقت‌ها دست‌کاری عمومی داده است:** توابع `_.pick` و `_.keyBy` و `_.merge` و `_.values` تابع `joinArrays` را می‌سازند (pp. 236–237).
+- **کلاس‌ها به‌شکل گرد آمدن تابع‌های بی‌state** که روی entityهای همانند دامنه کار می‌کنند، خیلی کم‌پیچیده‌ترند (p. 243).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 11.1 Another feature request — p. 221
-- 11.2 Building the insides like the outsides — p. 222
-- 11.3 Representing a client request as a map — p. 225
-- 11.4 Representing a server response as a map — p. 227
-- 11.5 Passing information forward — p. 231
-- 11.6 Search result enrichment in action — p. 234
-- Summary — p. 244
+- ۱۱.۱ درخواست ویژگی دیگری — ص. ۲۲۱
+- ۱۱.۲ ساختن درون مانند بیرون — ص. ۲۲۲
+- ۱۱.۳ نمایاندن درخواست client به‌شکل map — ص. ۲۲۵
+- ۱۱.۴ نمایاندن پاسخ سرور به‌شکل map — ص. ۲۲۷
+- ۱۱.۵ پیش فرستادن خبر — ص. ۲۳۱
+- ۱۱.۶ غنی کردن نتیجه‌ی جست‌وجو سر کار — ص. ۲۳۴
+- خلاصه — ص. ۲۴۴
 
-## Notes
+## یادداشت‌ها
 
-The JavaScript in this chapter, as in chapter 10, is written as if I/O were synchronous; real code uses `async`/`await` (p. 230).
+کد JavaScript این فصل، مانند فصل ۱۰، چنان نوشته شده که گویی I/O synchronous است؛ و کد واقعی از `async` و `await` کار می‌کشد (p. 230).
 
-### 11.1 Another feature request
+### ۱۱.۱ درخواست ویژگی دیگری
 
-After the database milestone is delivered on time, Nancy wants an ETA for enrichment with the Open Library Books API. Number of pages, weight, physical format, topics and so on replace the database's book information, except for availability (p. 221).
+پس از تحویل سر وقت سنگ‌نشان پایگاه داده، نانسی زمان تخمینی غنی کردن با Open Library Books API را می‌خواهد. شمار صفحه و وزن و قالب فیزیکی و موضوع‌ها و مانند آن، جای خبر کتاب پایگاه داده را می‌گیرند، جز در دسترس بودن (p. 221).
 
-### 11.2 Building the insides like the outsides
+### ۱۱.۲ ساختن درون مانند بیرون
 
-The steps of the data flow inside a web service (p. 222):
+قدم‌های جریان داده درون سرویسی وب (p. 222):
 
-1. Receive a request from a client.
-2. Apply business logic to the request.
-3. Fetch data from external sources, such as the database and other web services.
-4. Apply business logic to the responses from external sources.
-5. Send the response to the client.
+1. درخواستی از clientی بگیرید.
+2. منطق کسب‌وکار را روی آن درخواست پیاده کنید.
+3. داده را از سرچشمه‌های بیرونی بیاورید، مانند پایگاه داده و سرویس‌های وب دیگر.
+4. منطق کسب‌وکار را روی پاسخ سرچشمه‌های بیرونی پیاده کنید.
+5. پاسخ را به client بفرستید.
 
-Over the wire, the data format, often JSON, doesn't depend on the components' languages. Inside a program, traditional OOP breaks that idiom: to access a class member, a component must import the class definition. DOP components communicate with generic data collections, which need no knowledge of other components' internals, only the names of the fields (p. 223).
+سر سیم، قالب داده که بیشتر وقت‌ها JSON است، به زبان مؤلفه‌ها بسته نیست. درون برنامه، OOP سنتی آن اصطلاح را می‌شکند: برای دسترسی به عضوی از کلاسی، مؤلفه‌ای باید تعریف آن کلاس را وارد کند. مؤلفه‌های DOP با مجموعه‌های داده‌ی عمومی گفت‌وگو می‌کنند، که هیچ دانشی از درونه‌های مؤلفه‌های دیگر نمی‌خواهد، تنها نام فیلدها (p. 223).
 
-![A web service between a web browser and a back end: JSON parser (1), data manipulation (2) and JSON serializer (3) on the way to another web service or the database, then JSON parser (4), data manipulation (5) and JSON serializer (6) on the way back](../figures/11-03.png)
+![سرویسی وب میان مرورگری وب و backendی: بازکننده‌ی JSON (۱) و دست‌کاری داده (۲) و سریالی‌کننده‌ی JSON (۳) سر راه به سرویس وب دیگری یا پایگاه داده، بعد بازکننده‌ی JSON (۴) و دست‌کاری داده (۵) و سریالی‌کننده‌ی JSON (۶) سر راه بازگشت](../figures/11-03.png)
 
-*Figure 11.3 (p. 224): Theo's drawing, made alone while Joe takes a call — data stays generic between every step, in both directions.*
+*Figure 11.3 (p. 224): نقاشی تئو، که تنها کشیدش وقتی جو تلفنی داشت — داده میان هر دو قدمی عمومی می‌ماند، در هر دو سو.*
 
-### 11.3 Representing a client request as a map
-
-Should the client decide which Open Library fields to retrieve? Theo first proposes separate endpoints for mobile and desktop. Joe adds extended and basic result screens, which would make four endpoints, and Theo agrees to a single endpoint that lets the client choose (p. 225). The payload is `{"title": "habit", "fields": ["title", "weight", "number_of_pages"]}` (listing 11.1). Web frameworks usually parse it: Express, Spring, Django, Ruby on Rails or ASP.NET. Manually, it's `JSON.parse` in JavaScript or Gson's `fromJson(s, Map.class)` in Java (listings 11.2–11.3, p. 226). The request schema restricts `fields` to an `enum` of the fields Nancy wants exposed (listings 11.4–11.5, pp. 226–227).
-
-### 11.4 Representing a server response as a map
-
-`GET https://openlibrary.org/isbn/978-1982137274.json` returns many fields for *7 Habits of Highly Effective People*: author keys, `created`, `full_title`, `isbn_13`, languages, `number_of_pages` (432), `publish_date` (2020), `publishers`, revisions, `subtitle`, `title`, `works`, and more (listing 11.6, pp. 227–228).
-
-**Double field filtering** (pp. 229–231): keep only the fields Nancy allows, then only those the client requested. `OpenLibraryDataSource.bookInfo` does it in four steps (listing 11.9):
-
-1. Fetch and parse the response.
-2. Validate it against the Books API schema, whose `allOf`/`anyOf` requires at least one ISBN field (listing 11.8). On failure, throw "Internal error: Unexpected result from Open Books API".
-3. Apply `_.pick(_.pick(rawInfo, relevantFields), requestedFields)`.
-4. Set `isbn` on the result, so the two sources can later be combined (p. 231).
-
-> **Try it:** [Enrichment flow](../widgets/11-enrichment-flow.html) — choose the fields a client requests and step through the endpoint: validate the request, query the database, fetch and double-filter each Open Library record, and join the two arrays by ISBN.
-
-### 11.5 Passing information forward
-
-In traditional OOP, Theo would create a class for each kind of book information: `DBBook`, `OpenLibraryBook` and `CombinedBook`. That doesn't fit a dynamic approach where the client decides the fields, and classes add no value when data is just passed forward (p. 231).
-
-Joe's story (pp. 231–232): Hugo asks his friend Willy to deliver flowers and a love letter to his fiancée Iris. Willy proudly reports that he admired Hugo's writing style; he read the letter "to fulfill my duty faithfully." Traditional OOP is like Willy: to pass information forward, OOP developers "open the letter" and represent it with specific classes. DOP passes it forward in generic data structures.
-
-| | Advantages | Disadvantages (table 11.1, p. 232) |
-|---|---|---|
-| Nesting (`extendedInfo` field) | No need to handle conflicts | Result is not flat |
-| Merging | Result is flat | Need to handle conflicts |
-
-Theo hopes the two maps share no fields, so they merge, with `_.merge` from chapter 5 (listings 11.10–11.12, pp. 232–233). The database contributes `isbn` and `available`; Open Library the rest. The response schema requires `title`, `isbn` and `available` (listing 11.13, pp. 233–234).
-
-> **Try it:** [Nest or merge](../widgets/11-nest-or-merge.html) — combine a database record with an Open Library record by nesting or merging, add a field both sides share, and choose which side wins the conflict.
-
-### 11.6 Search result enrichment in action
-
-The steps of the enrichment data flow (p. 234):
-
-1. Receive a request from a client.
-2. Extract the query and the fields to fetch from Open Library.
-3. Retrieve from the database the books that match the query.
-4. Fetch information from Open Library for each matching ISBN.
-5. Extract the required fields from the Open Library responses.
-6. Combine the database information with the Open Library information.
-7. Send the response to the client.
-
-- **The database part** needs only `isbn` and `available`, with no join (listing 11.14, pp. 234–235).
-- **Open Library** has no batch query, so `multipleBookInfo` maps `bookInfo` over the ISBNs. The book pretends `_.map` works with asynchronous functions; real code would use `Promise.all` to send the requests in parallel (listing 11.15, pp. 235–236).
-- **Joining:** Theo can't assume both arrays list the books in the same order, and wishes for two hash maps keyed by ISBN. `_.keyBy` makes them; it is like `_.groupBy` but assumes one element per group, keeping the last (listings 11.16–11.17, pp. 236–237). The generic `joinArrays(a, b, keyA, keyB)` keys both arrays, merges the two maps, and returns the values (listings 11.18–11.19, pp. 237–239). The key names can differ between the arrays.
-- **The endpoint** validates the request, fetches, joins, validates the response and returns it. `Library.searchBooksByTitle` wraps it with `JSON.parse` and `JSON.stringify` (listings 11.20–11.25, pp. 239–243).
-
-Theo reflects that classes are much less complex when they only aggregate stateless functions over similar entities (p. 243). Joe reports that reading *The Power of Habit* stopped him biting his nails (p. 243).
-
-**Delivering on time** (p. 244): Theo remembers the woodcutter story; he took the time to sharpen his saw. The project succeeds and Theo is promoted. At the Westfield San Francisco Center he buys the gifts he owes Joe's children, and a necklace and earrings for his wife Jane.
-
-> **Vault note:** the endpoint listings contain several slips that would stop the code running as printed:
+> **In practice:** prediction API ما درخواست JSON می‌گیرد و پاسخ JSON می‌دهد؛ اگر درونش هم map باشد، تبدیل لایه‌ای لازم نیست.
 >
-> - Listing 11.15 validates `bookInfoSchema` against `dbSearchResultSchema` instead of `rawInfo` against `bookInfoSchema`; listing 11.22 has it right.
-> - `multipleBookInfo` passes `_.map` its arguments in reverse order.
-> - The SQL reads `WHERE title = like '%$1%'`.
-> - Listing 11.24 writes the `fields` enum as `"type": [...]`.
-> - Listings 11.20 and 11.25 call `joinArrays` without its two key names, validate `request` instead of the response, and use an object schema for an array response.
-> - `Library.searchBooksByTitle` calls `Catalog.searchBooksByTitle` rather than `enrichedSearchBooksByTitle`.
+> **Your turn:** چرا پاسخ API را مستقیم از map نتیجه‌ی کوئری می‌سازید و برای هر endpoint کلاس DTO نمی‌نویسید؟
 >
-> The test data in listing 11.19 also gives each Open Library record the other book's title. The code merges the conflicting `title` fields with the Open Library value winning, which is the conflict merging was supposed to avoid (pp. 235–243). The [lab](../lab/11-join-arrays/README.md) runs a corrected version.
+> *Answer:* افزودن فیلد به پاسخ فقط کوئری را عوض می‌کند و schema پاسخ را با JSON Schema در مرز اعتبارسنجی می‌کنید. کتاب داده‌ی درون را هم‌شکل داده‌ی بیرون می‌خواهد تا ترجمه حذف شود (pp. 222–225).
 
-> **Run it:** the [join experiment](../lab/11-join-arrays/README.md) implements `pick`, `keyBy` and `joinArrays` in Python against a mocked Open Library and shows the merge conflict in listing 11.19.
+### ۱۱.۳ نمایاندن درخواست client به‌شکل map
 
-## Trade-offs at a glance
+نقش client باید تصمیم بگیرد کدام فیلدهای Open Library آورده شوند؟ تئو نخست endpointهای جدا برای موبایل و دسکتاپ پیش می‌گذارد. جو صفحه‌های خروجی گسترده و پایه را می‌افزاید، که چهار endpoint می‌شد، و تئو به یک endpoint تنها رضا می‌دهد که می‌گذارد client برگزیند (p. 225). بار آن `{"title": "habit", "fields": ["title", "weight", "number_of_pages"]}` است (listing ۱۱.۱). چارچوب‌های وب معمولاً بازش می‌کنند: Express یا Spring یا Django یا Ruby on Rails یا ASP.NET. دستی، در JavaScript `JSON.parse` است و در Java `fromJson(s, Map.class)` از Gson (listingهای ۱۱.۲ و ۱۱.۳، ص. ۲۲۶). طرح درخواست مقدار `fields` را به `enum`ی از فیلدهایی می‌بندد که نانسی می‌خواهد نمایانده شوند (listingهای ۱۱.۴ و ۱۱.۵، صص. ۲۲۶–۲۲۷).
 
-| Choice | Benefit | Cost |
+### ۱۱.۴ نمایاندن پاسخ سرور به‌شکل map
+
+پرسش `GET https://openlibrary.org/isbn/978-1982137274.json` فیلدهای زیادی برای *7 Habits of Highly Effective People* برمی‌گرداند: کلید نویسنده‌ها و `created` و `full_title` و `isbn_13` و زبان‌ها و `number_of_pages` که ۴۳۲ است و `publish_date` که ۲۰۲۰ است و `publishers` و بازنگری‌ها و `subtitle` و `title` و `works` و بیشتر (listing ۱۱.۶، صص. ۲۲۷–۲۲۸).
+
+**صافی دوباره‌ی فیلد** (pp. 229–231): تنها فیلدهایی را که نانسی روا می‌دارد نگه دارید، بعد تنها آن‌هایی را که client خواسته. تابع `OpenLibraryDataSource.bookInfo` آن را در چهار قدم می‌کند (listing ۱۱.۹):
+
+1. پاسخ را بیاورید و باز کنید.
+2. آن را با طرح Books API اعتبارسنجی کنید، که `allOf` و `anyOf`ش دست‌کم یک فیلد ISBN را اجبار می‌کند (listing ۱۱.۸). سر شکست، خطای «Internal error: Unexpected result from Open Books API» را بیندازید.
+3. عبارت `_.pick(_.pick(rawInfo, relevantFields), requestedFields)` را پیاده کنید.
+4. مقدار `isbn` را روی خروجی بگذارید، تا آن دو سرچشمه دیرتر کنار هم گذاشتنی باشند (p. 231).
+
+> **Try it:** [جریان غنی کردن](../widgets/11-enrichment-flow.html) — فیلدهایی را که clientی می‌خواهد برگزینید و قدم‌به‌قدم از آن endpoint بگذرید: اعتبارسنجی درخواست، پرسش از پایگاه داده، آوردن و دوبار صافی کردن هر رکورد Open Library، و join کردن آن دو آرایه با ISBN.
+
+### ۱۱.۵ پیش فرستادن خبر
+
+در OOP سنتی، تئو برای هر گونه خبر کتاب کلاسی می‌ساخت: `DBBook` و `OpenLibraryBook` و `CombinedBook`. آن به رویکردی پویا نمی‌خورد که client فیلدها را تصمیم می‌گیرد، و کلاس‌ها وقتی داده تنها پیش فرستاده می‌شود هیچ ارزشی نمی‌افزایند (p. 231).
+
+داستان جو (pp. 231–232): هوگو از دوستش ویلی می‌خواهد گل و نامه‌ای عاشقانه را به نامزدش آیریس برساند. ویلی با افتخار گزارش می‌دهد که سبک نوشتن هوگو را پسندیده؛ نامه را خواند «تا وظیفه‌ام را وفادارانه انجام دهم». روش OOP سنتی مانند ویلی است: برای پیش فرستادن خبر، برنامه‌نویسان OOP «نامه را باز می‌کنند» و با کلاس‌های ویژه می‌نمایانندش. روش DOP آن را در ساختارهای داده‌ی عمومی پیش می‌فرستد.
+
+| | حسن | عیب (جدول ۱۱.۱، ص. ۲۳۲) |
 |---|---|---|
-| A class per kind of data (`DBBook`, `CombinedBook`) | Types document shapes | Every component imports others' classes; "opening the letter" (pp. 223, 231) |
-| Generic data passed forward | Loose coupling; generic business logic | Shapes live in schemas, not types |
-| One endpoint with client-chosen `fields` | No endpoint per client and screen (p. 225) | Responses vary in shape; schemas must allow optional fields |
-| Nesting sources | No conflicts | Not flat (p. 232) |
-| Merging sources | Flat result | Conflicts: with `_.merge`, the later source silently wins |
-| One request per book | Works with an API without batch queries | N calls per search; needs parallelism (p. 235) |
+| تودرتو کردن با فیلد `extendedInfo` | نیازی به چرخاندن ناسازی نیست | خروجی تخت نیست |
+| درهم‌آمیختن | خروجی تخت است | چرخاندن ناسازی لازم است |
 
-## Beyond the book
+تئو امید دارد که آن دو map هیچ فیلدی را شریک نباشند، پس با `_.merge` از فصل ۵ درهم می‌آمیزند (listingهای ۱۱.۱۰ تا ۱۱.۱۲، صص. ۲۳۲–۲۳۳). پایگاه داده `isbn` و `available` را می‌دهد؛ و Open Library باقی را. طرح پاسخ سه فیلد `title` و `isbn` و `available` را اجبار می‌کند (listing ۱۱.۱۳، صص. ۲۳۳–۲۳۴).
 
-- **"Build the insides like the outsides"** echoes the "functional core" and "values as the boundary" ideas of Clojure's community and Gary Bernhardt's "Boundaries" talk (2012). Treat internal module boundaries like network boundaries: data in, data out.
-- **Merge conflicts, done deliberately.** `_.merge` is recursive and right-biased: the second argument wins at each leaf. `_.mergeWith` takes a customizer to decide per key. A common policy is to let the authoritative source win per field, such as the database for availability and Open Library for descriptions, and to fail on unexpected overlaps.
-- **`_.keyBy` drops duplicates.** If the database returns two rows with the same ISBN, `_.keyBy` keeps only the last, silently. A `groupBy` followed by an assertion that each group has one element catches data problems at the boundary.
-- **Join semantics.** `joinArrays` behaves like a full outer join. A book missing from Open Library still appears, without extended fields; an Open Library record with no database row appears too, without `available`, which the response schema would then reject. An inner join, keeping only keys present in both, is often what an endpoint wants.
-- **Fan-out cost.** One Open Library request per result multiplies latency and the risk of rate limits. Caching responses by ISBN, as with chapter 8's atom-based cache, is the natural companion to this endpoint.
+> **Try it:** [تودرتو یا درهم](../widgets/11-nest-or-merge.html) — رکوردی از پایگاه داده را با رکوردی از Open Library تودرتو یا درهم‌آمیخته کنار هم بگذارید، فیلدی بیفزایید که هر دو سو شریکند، و برگزینید کدام سو ناسازی را می‌برد.
 
-## Connections
+### ۱۱.۶ غنی کردن نتیجه‌ی جست‌وجو سر کار
 
-- **Request and response schemas:** [7. Basic data validation](07-basic-data-validation.md) wrote the search request and Books API schemas reused here.
-- **The database side:** [10. Database operations](10-database-operations.md).
-- **`_.merge`** was first used for patches in [5. Basic concurrency control](05-basic-concurrency-control.md).
-- **Next:** part 3 opens with [12. Advanced data validation](12-advanced-data-validation.md).
-- **Run it:** [Joining sources by key](../lab/11-join-arrays/README.md) — double field filtering, `keyBy`, and an outer join with explicit conflict reporting.
+قدم‌های جریان داده‌ی غنی کردن (p. 234):
 
-## Check yourself
+1. درخواستی از clientی بگیرید.
+2. آن پرسش و فیلدهایی که باید از Open Library آورده شوند را بیرون بکشید.
+3. کتاب‌هایی را که با آن پرسش می‌خوانند از پایگاه داده بیاورید.
+4. برای هر ISBN خورنده‌ای خبر را از Open Library بیاورید.
+5. فیلدهای لازم را از پاسخ‌های Open Library بیرون بکشید.
+6. خبر پایگاه داده را با خبر Open Library کنار هم بگذارید.
+7. پاسخ را به client بفرستید.
 
-1. What does "build the insides of our systems like we build the outsides" mean?
-   <details><summary>Answer</summary>Inner components of a program should communicate with component-independent data, generic immutable collections, the way services communicate over the wire with a language-independent format like JSON (pp. 220–223).</details>
-2. Why are DOP components loosely coupled, according to Joe?
-   <details><summary>Answer</summary>They need no knowledge of other components' internals, only field names. With classes, a component must import the class definition to access a member (p. 223).</details>
-3. Why does Theo use `_.pick` twice?
-   <details><summary>Answer</summary>Once to keep only the fields Nancy wants exposed, and once to keep only those the client requested (pp. 229–230).</details>
-4. What is the point of the story of Hugo, Willy and the letter?
-   <details><summary>Answer</summary>Willy read the letter to "fulfill his duty faithfully," like OOP developers who open data to represent it with specific classes even when they only pass it forward. DOP passes information forward in generic structures (pp. 231–232).</details>
-5. Compare nesting and merging two maps.
-   <details><summary>Answer</summary>Nesting, adding an `extendedInfo` field, needs no conflict handling but the result isn't flat. Merging gives a flat result but requires handling fields present in both maps (table 11.1, p. 232).</details>
-6. How does `joinArrays` work, and why does it need `_.keyBy`?
-   <details><summary>Answer</summary>The two arrays aren't guaranteed to list books in the same order, so it turns each into a map keyed by its ID field with `_.keyBy`. It then merges the maps and returns their values (pp. 236–237).</details>
+- **بخش پایگاه داده** تنها `isbn` و `available` را می‌خواهد، بی هیچ join (listing ۱۱.۱۴، صص. ۲۳۴–۲۳۵).
+- **مفهوم interface Open Library** پرسش دسته‌ای ندارد، پس `multipleBookInfo` تابع `bookInfo` را روی ISBNها می‌نگارد. کتاب تظاهر می‌کند که `_.map` با تابع‌های asynchronous کار می‌کند؛ و کد واقعی از `Promise.all` کار می‌کشد تا درخواست‌ها را موازی بفرستد (listing ۱۱.۱۵، صص. ۲۳۵–۲۳۶).
+- **عمل join کردن:** تئو نمی‌تواند فرض بگیرد هر دو آرایه کتاب‌ها را به همان ترتیب می‌آورند، و دو hash map کلیدخورده با ISBN آرزو می‌کند. تابع `_.keyBy` می‌سازدشان؛ مانند `_.groupBy` است ولی فرض می‌گیرد هر دسته یک عضو دارد و آخری را نگه می‌دارد (listingهای ۱۱.۱۶ و ۱۱.۱۷، صص. ۲۳۶–۲۳۷). تابع عمومی `joinArrays(a, b, keyA, keyB)` هر دو آرایه را کلید می‌زند، آن دو map را درهم می‌آمیزد، و مقدارها را برمی‌گرداند (listingهای ۱۱.۱۸ و ۱۱.۱۹، صص. ۲۳۷–۲۳۹). نام کلیدها می‌تواند میان آن دو آرایه فرق کند.
+- **آن endpoint** درخواست را اعتبارسنجی می‌کند، می‌آورد، join می‌کند، پاسخ را اعتبارسنجی و برمی‌گرداند. تابع `Library.searchBooksByTitle` آن را با `JSON.parse` و `JSON.stringify` می‌پوشاند (listingهای ۱۱.۲۰ تا ۱۱.۲۵، صص. ۲۳۹–۲۴۳).
+
+تئو می‌اندیشد که کلاس‌ها وقتی تنها تابع‌های بی‌state روی entityهای همانند را گرد می‌کنند خیلی کم‌پیچیده‌ترند (p. 243). جو گزارش می‌دهد که خواندن *The Power of Habit* جویدن ناخنش را بس کرد (p. 243).
+
+**تحویل سر وقت** (p. 244): تئو داستان هیزم‌شکن را یاد می‌آورد؛ وقت گذاشت تا اره‌اش را تیز کند. پروژه کامیاب می‌شود و تئو ارتقا می‌گیرد. در Westfield San Francisco Center هدیه‌هایی را که به فرزندان جو بدهکار است می‌خرد، و گردنبندی و گوشواره‌ای برای همسرش جین.
+
+> **Vault note:** listingهای آن endpoint چند لغزش دارند که کد را همان‌طور که چاپ شده از اجرا بازمی‌دارد:
+>
+> - مفهوم listing ۱۱.۱۵ مقدار `bookInfoSchema` را با `dbSearchResultSchema` اعتبارسنجی می‌کند به‌جای `rawInfo` را با `bookInfoSchema`؛ و listing ۱۱.۲۲ درست داردش.
+> - تابع `multipleBookInfo` آرگومان‌های `_.map` را برگشته می‌فرستد.
+> - آن SQL چنین می‌خواند: `WHERE title = like '%$1%'`.
+> - مفهوم listing ۱۱.۲۴ آن enum از `fields` را `"type": [...]` می‌نویسد.
+> - همه‌ی listingهای ۱۱.۲۰ و ۱۱.۲۵ تابع `joinArrays` را بی دو نام کلیدش صدا می‌زنند، `request` را به‌جای پاسخ اعتبارسنجی می‌کنند، و برای پاسخی آرایه‌ای طرح شیئی به کار می‌برند.
+> - تابع `Library.searchBooksByTitle` تابع `Catalog.searchBooksByTitle` را صدا می‌زند، نه `enrichedSearchBooksByTitle` را.
+>
+> داده‌ی تست در listing ۱۱.۱۹ هم به هر رکورد Open Library عنوان آن یکی کتاب را می‌دهد. کد فیلدهای ناساز `title` را درهم می‌آمیزد و مقدار Open Library می‌برد، که همان ناسازی است که درهم‌آمیختن قرار بود از آن بپرهیزد (pp. 235–243). [آزمایش lab](../lab/11-join-arrays/README.md) versionی تصحیح‌شده را اجرا می‌کند.
+
+> **Run it:** [آزمایش join](../lab/11-join-arrays/README.md) توابع `pick` و `keyBy` و `joinArrays` را به Python در برابر Open Libraryی ساختگی پیاده می‌کند و آن ناسازی درهم‌آمیزی در listing ۱۱.۱۹ را نشان می‌دهد.
+
+> **In practice:** سرویس پیش‌بینی feature را از ClickHouse می‌خواند و پاسخ را با داده‌ی دیگر غنی می‌کند، همان کاری که کتاب با سرویس بیرونی می‌کند.
+>
+> **Your turn:** اگر سرویس غنی‌کننده کند باشد، پاسخ API چه کند؟
+>
+> *Answer:* با timeout و بدون فیلد غنی‌شده برگردد، یا غنی‌سازی را از پیش در Gold انجام دهید. وقتی غنی‌سازی تابعی روی map است، حذف یا جابه‌جایی‌اش ساده است (pp. 234–244).
+
+## بده‌بستان‌ها در یک نگاه
+
+| گزینش | سود | خرج |
+|---|---|---|
+| کلاسی برای هر گونه داده، مانند `DBBook` و `CombinedBook` | گونه‌ها شکل‌ها را مستند می‌کنند | هر مؤلفه‌ای کلاس‌های دیگران را وارد می‌کند؛ یعنی «باز کردن نامه» (pp. 223, 231) |
+| داده‌ی عمومی که پیش فرستاده می‌شود | سست‌جفتی؛ و منطق کسب‌وکار عمومی | شکل‌ها در طرح‌ها می‌نشینند، نه در گونه‌ها |
+| یک endpoint با `fields` برگزیده‌ی client | بی هیچ endpointی برای هر client و صفحه (p. 225) | شکل پاسخ‌ها فرق می‌کند؛ و طرح‌ها باید فیلدهای اختیاری را روا بدارند |
+| تودرتو کردن سرچشمه‌ها | بی هیچ ناسازی | تخت نیست (p. 232) |
+| درهم‌آمیختن سرچشمه‌ها | خروجی تخت | ناسازی: با `_.merge`، سرچشمه‌ی دیرتر خاموش می‌برد |
+| یک درخواست برای هر کتابی | با APIی بی پرسش دسته‌ای کار می‌کند | N صدا زدن برای هر جست‌وجو؛ موازی‌کاری می‌خواهد (p. 235) |
+
+## فراتر از کتاب
+
+- **عبارت «درون را مانند بیرون بسازید»** ایده‌های «هسته‌ی تابعی» و «مقدارها به‌شکل مرز» از جامعه‌ی Clojure و سخنرانی «Boundaries» گری برنهارت (۲۰۱۲) را بازمی‌تاباند. با مرزهای ماژول درونی مانند مرزهای شبکه رفتار کنید: داده تو، داده بیرون.
+- **ناسازی درهم‌آمیزی، به‌عمد.** تابع `_.merge` بازگشتی و راست‌گراست: آرگومان دوم در هر برگی می‌برد. تابع `_.mergeWith` سفارشی‌کننده‌ای می‌گیرد تا برای هر کلیدی تصمیم بگیرد. سیاستی رایج این است که بگذارید سرچشمه‌ی موثق برای هر فیلدی ببرد، مثلاً پایگاه داده برای در دسترس بودن و Open Library برای توضیح‌ها، و سر همپوشانی نامنتظر شکست بخورد.
+- **تابع `_.keyBy` دوباره‌ها را می‌اندازد.** اگر پایگاه داده دو ردیف با همان یک ISBN برگرداند، تابع `_.keyBy` تنها آخری را نگه می‌دارد، خاموش. یک `groupBy` و پس از آن ادعای اینکه هر دسته یک عضو دارد، مسئله‌های داده را بر مرز می‌گیرد.
+- **معنای join.** تابع `joinArrays` مانند full outer join رفتار می‌کند. کتابی که از Open Library جاافتاده باز پیدا می‌شود، بی فیلدهای گسترده؛ و رکوردی از Open Library بی ردیفی در پایگاه داده هم پیدا می‌شود، بی `available`، که بعد طرح پاسخ ردش می‌کرد. یک inner join، که تنها کلیدهای موجود در هر دو را نگه دارد، بیشتر وقت‌ها همان است که endpointی می‌خواهد.
+- **بهای پاشیدن.** یک درخواست Open Library برای هر برآمدی، تأخیر و خطر سقف نرخ را چند برابر می‌کند. cache کردن پاسخ‌ها با ISBN، مانند cacheی atom‌محور فصل ۸، همراه طبیعی این endpoint است.
+
+## پیوندها
+
+- **طرح درخواست و پاسخ:** [۷. اعتبارسنجی پایه‌ی داده](07-basic-data-validation.md) همان طرح‌های درخواست جست‌وجو و Books API را نوشت که این‌جا باز به کار رفته‌اند.
+- **سوی پایگاه داده:** [۱۰. عملیات پایگاه داده](10-database-operations.md).
+- **تابع `_.merge`** نخست برای وصله‌ها در [۵. کنترل پایه‌ی concurrency](05-basic-concurrency-control.md) به کار رفت.
+- **پسین:** بخش ۳ با [۱۲. اعتبارسنجی پیشرفته‌ی داده](12-advanced-data-validation.md) گشوده می‌شود.
+- **Run it:** [join کردن سرچشمه‌ها با کلید](../lab/11-join-arrays/README.md) — صافی دوباره‌ی فیلد، تابع `keyBy`، و outer joinی با گزارش صریح ناسازی.
+
+## خودتان را بسنجید
+
+1. عبارت «درون سیستم‌هایمان را همان‌طور بسازیم که بیرونشان را» چه معنا دارد؟
+   <details><summary>پاسخ</summary>مؤلفه‌های درونی برنامه باید با داده‌ی مؤلفه‌مستقل، یعنی مجموعه‌های عمومی و تغییرناپذیر، گفت‌وگو کنند، همان‌طور که سرویس‌ها سر سیم با قالبی زبان‌مستقل مانند JSON (pp. 220–223).</details>
+2. بنا بر جو، چرا مؤلفه‌های DOP سست‌جفتند؟
+   <details><summary>پاسخ</summary>هیچ دانشی از درونه‌های مؤلفه‌های دیگر نمی‌خواهند، تنها نام فیلدها. با کلاس، مؤلفه‌ای باید تعریف کلاس را وارد کند تا به عضوی دسترسی یابد (p. 223).</details>
+3. چرا تئو دو بار `_.pick` به کار می‌برد؟
+   <details><summary>پاسخ</summary>یک بار برای نگه داشتن تنها فیلدهایی که نانسی می‌خواهد نمایانده شوند، و یک بار برای نگه داشتن تنها آن‌هایی که client خواسته (pp. 229–230).</details>
+4. نکته‌ی داستان هوگو و ویلی و آن نامه چیست؟
+   <details><summary>پاسخ</summary>ویلی نامه را خواند تا «وظیفه‌اش را وفادارانه انجام دهد»، مانند برنامه‌نویسان OOP که داده را باز می‌کنند تا با کلاس‌های ویژه بنمایانندش، حتی وقتی تنها پیش می‌فرستندش. روش DOP خبر را در ساختارهای عمومی پیش می‌فرستد (pp. 231–232).</details>
+5. تودرتو کردن و درهم‌آمیختن دو map را بسنجید.
+   <details><summary>پاسخ</summary>تودرتو کردن، یعنی افزودن فیلد `extendedInfo`، چرخاندن ناسازی نمی‌خواهد ولی خروجی تخت نیست. درهم‌آمیختن خروجیی تخت می‌دهد ولی چرخاندن فیلدهای موجود در هر دو map را می‌خواهد (جدول ۱۱.۱، ص. ۲۳۲).</details>
+6. تابع `joinArrays` چطور کار می‌کند، و چرا به `_.keyBy` نیاز دارد؟
+   <details><summary>پاسخ</summary>تضمین نیست که آن دو آرایه کتاب‌ها را به همان ترتیب بیاورند، پس هر کدام را با `_.keyBy` به mapی کلیدخورده با فیلد شناسه‌اش بدل می‌کند. بعد آن mapها را درهم می‌آمیزد و مقدارهایشان را برمی‌گرداند (pp. 236–237).</details>

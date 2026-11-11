@@ -1,18 +1,18 @@
-# A mini JSON Schema validator
+# اعتبارسنج کوچک JSON Schema
 
-The chapter's JSON Schema keywords in about a hundred lines of Python: `type`, `properties`, `required`, `items`, `enum`, `additionalProperties`, `allOf`, `anyOf` and `oneOf`. Errors come in Ajv's style, with an all-errors switch. The script runs the chapter's requests, database responses and Open Library responses through it.
+کلیدواژه‌های JSON Schema این فصل در حدود صد خط Python: `type` و `properties` و `required` و `items` و `enum` و `additionalProperties` و `allOf` و `anyOf` و `oneOf`. خطاها به سبک Ajv می‌آیند، با کلیدی برای همه‌ی خطاها. اسکریپت درخواست‌ها و پاسخ‌های پایگاه داده و پاسخ‌های Open Library این فصل را از آن می‌گذراند.
 
-*Illustrates Data-Oriented Programming, chapter 7, pp. 144–161 (listings 7.6–7.23). The validator is the vault's; it is a teaching subset, not a full JSON Schema implementation.*
+*تصویری از فصل ۷ کتاب Data-Oriented Programming، صص. ۱۴۴–۱۶۱ (listingهای ۷.۶ تا ۷.۲۳). آن اعتبارسنج مال vault است؛ زیرمجموعه‌ای آموزشی است، نه پیاده‌سازی کامل JSON Schema.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 mini_json_schema.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 Search requests (listings 7.6-7.9)
@@ -36,13 +36,13 @@ Error details (listings 7.20-7.23)
 7.23 myTitle and fields [1, 2], allErrors: true            INVALID: data must have required property 'title', data/fields/0 must be string, data/fields/1 must be string
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- The request of listings 7.7–7.8 asks for a `title` field, which the enum of listing 7.6 doesn't list. Against that schema it is invalid.
-- Unspecified fields are allowed by default (`dummy_property` passes) until `additionalProperties: false`.
-- `allOf` with `anyOf` accepts Watchmen with both ISBNs or only one, and rejects it with none. With `oneOf` instead of `anyOf`, Watchmen fails, because it has both.
-- By default only the first failure is reported. With all errors on, listing 7.23's request yields the three errors the book shows.
+- درخواست listingهای ۷.۷ و ۷.۸ فیلد `title` را می‌خواهد، که آن enum از listing ۷.۶ فهرستش نمی‌کند. در برابر آن طرح نامعتبر است.
+- فیلدهای نگفته پیش‌فرض روایند و مقدار `dummy_property` رد می‌شود، تا `additionalProperties: false`.
+- کلیدواژه‌ی `allOf` با `anyOf` کتاب Watchmen را با هر دو ISBN یا تنها یکی می‌پذیرد، و با هیچ‌کدام ردش می‌کند. با `oneOf` به‌جای `anyOf`، آن Watchmen شکست می‌خورد، چون هر دو را دارد.
+- پیش‌فرض تنها نخستین شکست گزارش می‌شود. با روشن بودن همه‌ی خطاها، درخواست listing ۷.۲۳ همان سه خطایی را می‌دهد که کتاب نشان می‌دهد.
 
-## Related
+## مرتبط
 
-- Chapter note: [7. Basic data validation](../../chapters/07-basic-data-validation.md) — sections 7.2–7.5, pp. 144–161
+- یادداشت فصل: [فصل ۷: اعتبارسنجی پایه‌ی داده](../../chapters/07-basic-data-validation.md) — بخش‌های ۷.۲ تا ۷.۵، صص. ۱۴۴–۱۶۱

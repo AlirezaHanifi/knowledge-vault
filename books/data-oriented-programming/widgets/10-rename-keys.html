@@ -1,39 +1,39 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rename Keys</title>
-<meta name="description" content="Edit a key map and watch one generic renameResultKeys function reshape book rows and user rows from Data-Oriented Programming&#x27;s chapter 10, including keys that aren&#x27;t present.">
+<title>نام‌عوض کردن کلیدها</title>
+<meta name="description" content="mapی از کلید را ویرایش کنید و ببینید یک تابع عمومی renameResultKeys چطور ردیف‌های کتاب و کاربر از فصل ۱۰ کتاب Data-Oriented Programming را از نو شکل می‌دهد، کلیدهای نبوده را هم.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/10-database-operations.html">Chapter 10</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Rename keys</span>
+      <a href="../chapters/10-database-operations.html">فصل ۱۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">نام‌عوض کردن کلیدها</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 10 · Database operations</div>
-  <h1>Rename keys</h1>
-  <p class="lede">Database columns are in snake case; the JSON response wants <code>bookTitle</code> and <code>publicationYear</code>. Instead of a function per query, Theo writes one generic <code>renameResultKeys(rows, keyMap)</code>. It works because fields are accessed by string: <strong>fields are first-class citizens</strong>.</p>
-  <p class="source-note">Illustrates section 10.3, Simple data manipulation (listings 10.11–10.16, pp. 207–211): the three options, <code>renameKeys</code> with <code>_.reduce</code>, <code>_.set</code> and <code>_.omit</code>, and its reuse on users. Rows from tables 10.1 and listing 10.16. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۰ · عملیات پایگاه داده</div>
+  <h1>نام‌عوض کردن کلیدها</h1>
+  <p class="lede">ستون‌های پایگاه داده snake caseاند؛ و پاسخ JSON مقدارهای <code>bookTitle</code> و <code>publicationYear</code> را می‌خواهد. تئو به‌جای تابعی برای هر پرسشی، یک <code>renameResultKeys(rows, keyMap)</code> عمومی می‌نویسد. کار می‌کند چون فیلدها با رشته دسترس‌پذیرند: <strong>فیلدها شهروند درجه‌یکند</strong>.</p>
+  <p class="source-note">تصویری از بخش ۱۰.۳، یعنی دست‌کاری ساده‌ی داده (listingهای ۱۰.۱۱ تا ۱۰.۱۶، صص. ۲۰۷–۲۱۱): آن سه گزینه، تابع <code>renameKeys</code> با <code>_.reduce</code> و <code>_.set</code> و <code>_.omit</code>، و باز به کار بردنش روی کاربران. ردیف‌ها از جدول ۱۰.۱ و listing ۱۰.۱۶. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">Rows from the database</p><pre class="code" id="in"></pre></div>
+      <div class="grid-2"><div class="panel"><p class="panel-title">ردیف‌ها از پایگاه داده</p><pre class="code" id="in"></pre></div>
         <div class="panel"><p class="panel-title">renameResultKeys(rows, keyMap)</p><pre class="code" id="out"></pre></div></div>
-      <div class="panel"><p class="panel-title">The generic code (listing 10.14)</p><pre class="code">function renameKeys(map, keyMap) {
+      <div class="panel"><p class="panel-title">کد عمومی (listing ۱۰.۱۴)</p><pre class="code">function renameKeys(map, keyMap) {
   return _.reduce(keyMap, function(res, newKey, oldKey) {
     var value = _.get(map, oldKey);
     var resWithNewKey = _.set(res, newKey, value);
@@ -46,28 +46,28 @@ function renameResultKeys(results, keyMap) {
 }</pre></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="ds"></div><label class="field-head" for="km" style="margin-top:10px">keyMap (JSON)</label><textarea class="code" id="km" spellcheck="false" style="min-height:90px"></textarea>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ds"></div><label class="field-head" for="km" style="margin-top:10px">مقدار keyMap به JSON</label><textarea class="code" id="km" spellcheck="false" style="min-height:90px"></textarea>
         <div class="callout" id="verdict" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>One function, any entity</strong>: the same code renames book columns and user fields, because it never names a field itself.</li>
-    <li><strong>Unmentioned fields stay as they are</strong>; only the keys in the key map move.</li>
-    <li><strong>A key that isn’t in the row</strong> still gets its new name, with an <code>undefined</code> value, because <code>renameKeys</code> doesn’t check. The vault’s widget shows it; decide whether that is what you want.</li>
+    <li><strong>یک تابع، هر entityی</strong>: همان یک کد ستون‌های کتاب و فیلدهای کاربر را نام‌عوض می‌کند، چون خودش هیچ‌وقت فیلدی را نام نمی‌برد.</li>
+    <li><strong>فیلدهای نگفته همان‌طور می‌مانند</strong>؛ و تنها کلیدهای درون آن map از کلید جابه‌جا می‌شوند.</li>
+    <li><strong>کلیدی که در آن ردیف نیست</strong> باز نام تازه‌اش را می‌گیرد، با مقدار <code>undefined</code>، چون <code>renameKeys</code> نمی‌سنجد. widget از vault نشانش می‌دهد؛ خودتان تصمیم بگیرید که همان را می‌خواهید یا نه.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/10-database-operations.html"><small>Lesson</small>10. Database operations</a></li>
+    <li><a href="../chapters/10-database-operations.html"><small>درس</small>فصل ۱۰: عملیات پایگاه داده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -87,29 +87,29 @@ function stats(rows) {
     users: [[{ email: "jennie@gmail.com", encryptedPassword: "secret-pass" }, { email: "franck@hotmail.com", encryptedPassword: "my-secret" }], { email: "userEmail" }] };
   function renameKeys(map, keyMap) { return Object.keys(keyMap).reduce(function (res, oldKey) { var value = map[oldKey], r = Object.assign({}, res); r[keyMap[oldKey]] = value; if (oldKey !== keyMap[oldKey]) delete r[oldKey]; return r; }, map); }
   function run(quiet) { var rows = DATA[ds][0], km; document.getElementById("in").textContent = JSON.stringify(rows, null, 2);
-    try { km = JSON.parse(document.getElementById("km").value); if (typeof km !== "object" || Array.isArray(km)) throw 0; } catch (e) { var v0 = document.getElementById("verdict"); v0.className = "callout bad"; v0.textContent = "The key map is a JSON object from old key to new key."; return; }
+    try { km = JSON.parse(document.getElementById("km").value); if (typeof km !== "object" || Array.isArray(km)) throw 0; } catch (e) { var v0 = document.getElementById("verdict"); v0.className = "callout bad"; v0.textContent = "آن map از کلید شیئی JSON از کلید کهنه به کلید تازه است."; return; }
     var out = rows.map(function (r) { return renameKeys(r, km); }), missing = Object.keys(km).filter(function (k) { return !rows.every(function (r) { return k in r; }); });
     document.getElementById("out").textContent = JSON.stringify(out, function (k, v) { return v === undefined ? "«undefined»" : v; }, 2);
     var v = document.getElementById("verdict"); v.className = "callout " + (missing.length ? "warn" : "ok");
-    v.textContent = missing.length ? "Not in every row: " + missing.join(", ") + ". The new key is set to undefined." : Object.keys(km).length + " key(s) renamed in " + rows.length + " rows; other fields untouched.";
+    v.textContent = missing.length ? "در هر ردیفی نیست: " + missing.join(", ") + ". آن کلید تازه روی undefined گذاشته می‌شود." : Object.keys(km).length + " کلید در " + rows.length + " ردیف نام‌عوض شد؛ و فیلدهای دیگر دست‌نخورده‌اند.";
     if (!quiet) log.add("renameResultKeys(" + ds + ", " + JSON.stringify(km) + ")", missing.length ? "warn" : "ok");
-    stats([["Rows", rows.length], ["Keys renamed", Object.keys(km).length], ["Missing keys", missing.length, missing.length ? "warn" : "ok"], ["Functions per entity", 0, "ok"]]); }
+    stats([["ردیف‌ها", rows.length], ["کلیدهای نام‌عوض‌شده", Object.keys(km).length], ["کلیدهای جاافتاده", missing.length, missing.length ? "warn" : "ok"], ["تابع برای هر entity", 0, "ok"]]); }
   function load() { document.getElementById("km").value = JSON.stringify(DATA[ds][1], null, 1); run(true); }
-  document.getElementById("ds").appendChild(Kit.segmented({ label: "Rows", value: ds, options: [{ value: "books", label: "Books (table 10.1)" }, { value: "users", label: "Users (listing 10.16)" }], onChange: function (v) { ds = v; load(); log.add("Same function, " + v + " rows.", "muted"); } }).element);
+  document.getElementById("ds").appendChild(Kit.segmented({ label: "ردیف‌ها", value: ds, options: [{ value: "books", label: "کتاب‌ها، جدول ۱۰.۱" }, { value: "users", label: "کاربران، listing ۱۰.۱۶" }], onChange: function (v) { ds = v; load(); log.add("همان یک تابع، روی ردیف‌های " + v + ".", "muted"); } }).element);
   document.getElementById("km").addEventListener("input", function () { run(true); });
   document.getElementById("km").addEventListener("change", function () { run(); });
   load();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why doesn't Joe like renaming in the SQL query?",
-      options: ["It's slower", "It's odd to bend a query to the application's naming, and harder in databases like MongoDB", "SQL can't rename"], answer: 1,
-      explain: "pp. 207–208." },
-    { q: "What makes a generic renameResultKeys possible?",
-      options: ["Reflection", "Fields are accessed dynamically by string: they are first-class citizens", "A schema"], answer: 1,
-      explain: "p. 209." },
-    { q: "Which Lodash function removes the old key?",
+    { q: "چرا جو نام‌عوض کردن در پرسش SQL را دوست ندارد؟",
+      options: ["کندتر است", "خم کردن پرسشی به نام‌گذاری برنامه عجیب است، و در پایگاه‌هایی مانند MongoDB سخت‌تر", "زبان SQL نمی‌تواند نام عوض کند"], answer: 1,
+      explain: "صص. ۲۰۷–۲۰۸." },
+    { q: "چه چیزی یک renameResultKeys عمومی را شدنی می‌کند؟",
+      options: ["روش reflection", "فیلدها پویا و با رشته دسترس‌پذیرند: شهروند درجه‌یکند", "طرحی"], answer: 1,
+      explain: "ص. ۲۰۹." },
+    { q: "کدام تابع Lodash آن کلید کهنه را برمی‌دارد؟",
       options: ["_.pick", "_.omit", "_.at"], answer: 1,
-      explain: "Listing 10.14, p. 209." }
+      explain: "listing ۱۰.۱۴، ص. ۲۰۹." }
   ]);
 })();
 </script>
