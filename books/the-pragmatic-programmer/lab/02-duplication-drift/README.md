@@ -1,18 +1,20 @@
-# Duplication drift
+# رانش تکرار
 
-What does it cost to keep one piece of knowledge in several places? A fact (a tax rate, say) lives in *k* copies and changes 20 times during a project. At each change, the authoritative copy is always updated, but a developer misses each other copy with probability 10%. The script counts how often the copies contradict each other, and how many projects end with a stale copy, for 1 to 8 copies.
+نگه داشتن یک تکه دانش در چند جا چه هزینه‌ای دارد؟ یک واقعیت، مثلاً یک نرخ مالیات، در *k* نسخه زندگی می‌کند و در طول پروژه بیست بار عوض می‌شود. سر هر تغییر، نسخه‌ی معتبر همیشه به‌روز می‌شود، ولی یک developer هر نسخه‌ی دیگر را با احتمال ده درصد از دست می‌دهد. اسکریپت می‌شمارد نسخه‌ها چند وقت یک‌بار با هم تناقض پیدا می‌کنند و چند پروژه با نسخه‌ای کهنه تمام می‌شوند، برای یک تا هشت نسخه.
 
-*Illustrates The Pragmatic Programmer, Topic 9, DRY—The Evils of Duplication, pp. 79–81: with two copies, the question isn't whether you'll forget to change one, but when. The miss rate, the number of changes and the model are the vault's (seeded).*
+*این آزمایش موضوع ۹ از کتاب The Pragmatic Programmer، یعنی اصل DRY و بدی‌های تکرار، صص. ۷۹–۸۱ را نشان می‌دهد: با دو نسخه، پرسش این نیست که یادتان می‌رود یکی را عوض کنید، بلکه این است که کِی. نرخ از‌دست‌دادن و شمار تغییرها و مدل مال خود vault است و با seed ثابت.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 duplication_drift.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 10,000 projects per row; the fact changes 20 times; each extra copy is missed 10% of the time
@@ -27,13 +29,13 @@ copies   changes with a contradiction   projects ending inconsistent
 Once a copy is missed it stays wrong until a later change happens to reach it.
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- With a single authoritative copy there is never a contradiction: that is the DRY principle doing its job.
-- Each extra copy adds roughly another 10% chance per change of a contradiction. Eight copies disagree after about half of all changes.
-- A missed copy stays wrong until some later change happens to reach it, so most of the damage lasts until the end of the project.
-- The fix the book recommends isn't more care: it's removing the copies, or generating them from one source.
+- با یک نسخه‌ی معتبر تنها، هیچ‌وقت تناقضی نیست: همین اصل DRY است که کارش را می‌کند.
+- هر نسخه‌ی اضافه حدوداً ده درصد شانس تناقض به هر تغییر اضافه می‌کند. هشت نسخه بعد از حدود نصف همه‌ی تغییرها با هم اختلاف دارند.
+- نسخه‌ای که از دست رفته تا وقتی تغییری بعدی به آن برسد غلط می‌ماند، پس بیشتر آسیب تا آخر پروژه ادامه دارد.
+- اصلاحی که کتاب توصیه می‌کند دقت بیشتر نیست: برداشتن نسخه‌ها، یا ساختنشان از یک منبع است.
 
-## Related
+## پیوندها
 
-- Chapter note: [2. A Pragmatic Approach](../../chapters/02-a-pragmatic-approach.md) — Topic 9, DRY, pp. 79–81
+- یادداشت فصل: [فصل ۲: رویکرد pragmatic](../../chapters/02-a-pragmatic-approach.md) — موضوع ۹، اصل DRY، صص. ۷۹–۸۱

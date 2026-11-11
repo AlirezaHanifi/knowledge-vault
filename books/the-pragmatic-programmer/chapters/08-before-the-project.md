@@ -3,207 +3,221 @@ book: the-pragmatic-programmer
 chapter: 8
 title: "Before the Project"
 pages: "403–434"
+translated_title: "پیش از پروژه"
+lang: fa
 ---
 
-# 8. Before the Project
+# فصل ۸: پیش از پروژه
 
-[← 7. While You Are Coding](07-while-you-are-coding.md) · [Book](../README.md) · [9. Pragmatic Projects →](09-pragmatic-projects.md)
+[فصل ۷: وقتی کد می‌زنید →](07-while-you-are-coding.md) · [کتاب](../README.md) · [فصل ۹: پروژه‌های pragmatic ←](09-pragmatic-projects.md)
 
-## Summary
+## خلاصه
 
-Before a project gets going, you need to learn the requirements, and being told or listening isn't enough (Topic 45). Hard problems are rarely as hard as they look once you find the real constraints (Topic 46). The secret weapon for impossible projects is solving problems together while coding (Topic 47). No method replaces thinking; what you need is the essence of agility (Topic 48), so you avoid analysis paralysis and actually begin (pp. 403–404).
+پیش از آن که پروژه‌ای راه بیفتد، باید نیازمندی‌ها را یاد بگیرید، و این که به شما گفته شود یا گوش بدهید کافی نیست (موضوع ۴۵). مسئله‌های سخت، همین که قیدهای واقعی را پیدا کنید، کم به‌اندازه‌ی ظاهرشان سخت‌اند (موضوع ۴۶). سلاح پنهان پروژه‌های ناممکن، حل کردن مسئله با هم در حین کد زدن است (موضوع ۴۷). هیچ روشی جای فکر کردن را نمی‌گیرد؛ آن چیزی که لازم دارید جوهر چابکی است (موضوع ۴۸)، تا از فلج تحلیل بپرهیزید و واقعاً شروع کنید (pp. 403–404).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **No one knows exactly what they want, and programmers help people understand it.** A statement of need is an invitation to explore its edge cases (Tips 75–76, pp. 405–409).
-- **Requirements are learned in a feedback loop:** feed back consequences, use mockups and short iterations, and treat the whole project as requirements gathering (Tip 77, pp. 409–410).
-- **Work with a user to think like a user:** sit in on their job for a week (Tip 78, pp. 410–411).
-- **Policy is metadata.** Implement the general case, such as access control, and treat today's business rule as data (Tip 79, pp. 411–412).
-- **The best requirements documentation is working code.** Documents are for planning, as index-card user stories, not for client sign-off. Good requirements are abstract; keep a project glossary (Tip 80, pp. 412–416).
-- **Don't think outside the box; find the box.** Enumerate the options, prove which constraints are real, and handle the most restrictive first. When stuck, step away or explain it to someone (Tip 81, pp. 418–423).
-- **Don't go into the code alone.** Pair, mob, include users, and remember Conway's law (Tip 82, pp. 424–428).
-- **Agile is not a noun; agile is how you do things.** Work out where you are, take the smallest meaningful step, evaluate and fix, recursively at every level. Good design is what makes that loop cheap (Tip 83, pp. 429–434).
+- **هیچ‌کس دقیقاً نمی‌داند چه می‌خواهد، و برنامه‌نویس‌ها کمک می‌کنند مردم بفهمندش.** بیان یک نیاز، دعوتی است به کاویدن حالت‌های لبه‌اش (tipهای ۷۵ و ۷۶، صص. ۴۰۵–۴۰۹).
+- **نیازمندی‌ها در یک حلقه‌ی بازخورد یاد گرفته می‌شوند:** پی‌آمدها را برگردانید، از mockup و تکرارهای کوتاه استفاده کنید، و کل پروژه را جمع کردن نیازمندی ببینید (tip ۷۷، صص. ۴۰۹–۴۱۰).
+- **با یک کاربر کار کنید تا مثل کاربر فکر کنید:** یک هفته در کارش بنشینید (tip ۷۸، صص. ۴۱۰–۴۱۱).
+- **سیاست همان metadata است.** حالت عمومی را پیاده کنید، مثل کنترل دسترسی، و قاعده‌ی کسب‌وکار امروز را داده ببینید (tip ۷۹، صص. ۴۱۱–۴۱۲).
+- **بهترین مستند نیازمندی‌ها کد در حال کار است.** سندها برای برنامه‌ریزی‌اند، به شکل user storyهای روی کارت، و نه برای تأیید مشتری. نیازمندی خوب انتزاعی است؛ یک واژه‌نامه‌ی پروژه نگه دارید (tip ۸۰، صص. ۴۱۲–۴۱۶).
+- **بیرون جعبه فکر نکنید؛ جعبه را پیدا کنید.** گزینه‌ها را برشمارید، ثابت کنید کدام قیدها واقعی‌اند، و سخت‌گیرانه‌ترین را اول بگیرید. وقتی گیر کردید فاصله بگیرید یا برای کسی توضیحش بدهید (tip ۸۱، صص. ۴۱۸–۴۲۳).
+- **تنها به کد نروید.** جفتی و گروهی کار کنید، کاربرها را بیاورید، و قانون Conway را یادتان باشد (tip ۸۲، صص. ۴۲۴–۴۲۸).
+- **چابک اسم نیست؛ چابک شکل کار کردن شماست.** بفهمید کجایید، کوچک‌ترین قدم معنادار را بردارید، ارزیابی کنید و آن چیزی را که شکستید درست، و این را بازگشتی در هر سطحی تکرار. طراحی خوب همان چیزی است که این حلقه را ارزان می‌کند (tip ۸۳، صص. ۴۲۹–۴۳۴).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 45. The Requirements Pit — p. 405
-- Topic 46. Solving Impossible Puzzles — p. 418
-- Topic 47. Working Together — p. 424
-- Topic 48. The Essence of Agility — p. 429
+- موضوع ۴۵. گودال نیازمندی‌ها — ص. ۴۰۵
+- موضوع ۴۶. حل کردن معماهای ناممکن — ص. ۴۱۸
+- موضوع ۴۷. کار کردن با هم — ص. ۴۲۴
+- موضوع ۴۸. جوهر چابکی — ص. ۴۲۹
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 75 | No One Knows Exactly What They Want | 405 |
-| 76 | Programmers Help People Understand What They Want | 406 |
-| 77 | Requirements Are Learned in a Feedback Loop | 409 |
-| 78 | Work with a User to Think Like a User | 411 |
-| 79 | Policy Is Metadata | 411 |
-| 80 | Use a Project Glossary | 416 |
-| 81 | Don’t Think Outside the Box—Find the Box | 420 |
-| 82 | Don’t Go into the Code Alone | 428 |
-| 83 | Agile Is Not a Noun; Agile Is How You Do Things | 429 |
+| ۷۵ | هیچ‌کس دقیقاً نمی‌داند چه می‌خواهد | ۴۰۵ |
+| ۷۶ | برنامه‌نویس‌ها کمک می‌کنند مردم بفهمند چه می‌خواهند | ۴۰۶ |
+| ۷۷ | نیازمندی‌ها در یک حلقه‌ی بازخورد یاد گرفته می‌شوند | ۴۰۹ |
+| ۷۸ | با یک کاربر کار کنید تا مثل کاربر فکر کنید | ۴۱۱ |
+| ۷۹ | سیاست همان metadata است | ۴۱۱ |
+| ۸۰ | یک واژه‌نامه‌ی پروژه به کار ببرید | ۴۱۶ |
+| ۸۱ | بیرون جعبه فکر نکنید؛ جعبه را پیدا کنید | ۴۲۰ |
+| ۸۲ | تنها به کد نروید | ۴۲۸ |
+| ۸۳ | چابک اسم نیست؛ چابک شکل کار کردن شماست | ۴۲۹ |
 
-### Topic 45. The Requirements Pit
+### موضوع ۴۵. گودال نیازمندی‌ها
 
-"Gathering" implies requirements lie on the surface. In reality they're buried under assumptions, misconceptions and politics, and often don't exist at all (p. 405). **Tip 75, No One Knows Exactly What They Want.**
+واژه‌ی «جمع کردن» این حس را می‌دهد که نیازمندی‌ها روی سطح افتاده‌اند. در واقع زیر فرض و برداشت غلط و سیاست خاک شده‌اند، و اغلب کلاً وجود ندارند (p. 405). **tip ۷۵، هیچ‌کس دقیقاً نمی‌داند چه می‌خواهد.**
 
-**The requirements myth** (pp. 405–406): when machines cost more than people, teams specified exactly, then designed, flowcharted and desk-checked, and only automated well-understood, small problems. The real world is messy, so exact specifications are rare. **Tip 76, Programmers Help People Understand What They Want.**
+**افسانه‌ی نیازمندی‌ها** (pp. 405–406): وقتی ماشین‌ها از آدم‌ها گران‌تر بودند، تیم‌ها دقیق مشخص می‌کردند، بعد طراحی و فلوچارت و بررسی روی کاغذ می‌کردند، و فقط مسئله‌های کوچک و خوب‌فهمیده‌شده را خودکار می‌کردند. دنیای واقعی به‌هم‌ریخته است، پس مشخصات دقیق کمیاب‌اند. **tip ۷۶، برنامه‌نویس‌ها کمک می‌کنند مردم بفهمند چه می‌خواهند.**
 
-**Programming as therapy** (pp. 406–409). A client's statement of need is an invitation to explore, not an absolute requirement. Given "Shipping should be free on all orders costing $50 or more," the developer asks:
+**برنامه‌نویسی به‌عنوان روان‌درمانی** (pp. 406–409). بیان نیاز یک مشتری دعوتی به کاویدن است و نه نیازمندی مطلق. با «ارسال باید برای همه‌ی سفارش‌های پنجاه دلار و بیشتر رایگان باشد»، developer می‌پرسد:
 
-- Does it include tax, or current shipping charges?
-- Paper books only, or ebooks too?
-- Which shipping class? International?
-- How often will $50 change?
+- مالیات را شامل می‌شود، یا هزینه‌ی ارسال فعلی را؟
+- فقط کتاب کاغذی، یا کتاب الکترونیکی هم؟
+- کدام کلاس ارسال؟ بین‌المللی؟
+- آن پنجاه دلار چند وقت یک‌بار عوض می‌شود؟
 
-The client says the $50 includes shipping. The developer points out that a $25 book with overnight shipping (about $30) makes $55, which then ships free. Then the developer stops: deliver facts, and let the client decide.
+مشتری می‌گوید آن پنجاه دلار، ارسال را هم شامل می‌شود. developer اشاره می‌کند که یک کتاب بیست‌و‌پنج دلاری با ارسال یک‌شبه، یعنی حدود سی دلار، می‌شود پنجاه‌و‌پنج دلار، که آن‌وقت رایگان ارسال می‌شود. بعد developer می‌ایستد: واقعیت‌ها را بدهید و بگذارید مشتری تصمیم بگیرد.
 
-> **Try it:** [Free shipping over $50](../widgets/08-free-shipping.html) — build an order from the book's example, switch what the $50 threshold includes, and find the orders where the rule gives away more than the client meant.
+> **Try it:** [ارسال رایگان بالای پنجاه دلار](../widgets/08-free-shipping.html)؛ سفارشی از نمونه‌ی کتاب بسازید، عوض کنید که آستانه‌ی پنجاه دلار چه چیزی را شامل می‌شود، و سفارش‌هایی را پیدا کنید که قاعده بیشتر از منظور مشتری می‌بخشد.
 
-**Requirements are a process** (pp. 409–410). **Tip 77, Requirements Are Learned in a Feedback Loop.** When words aren't enough, use "is this what you meant?" mockups and prototypes, flexible enough to change during the conversation. All the work is a form of mockup: by the end there are more clients (QA, operations, marketing). So prefer short iterations that end with client feedback, which minimizes the time lost going the wrong way.
+**نیازمندی‌ها یک فرایندند** (pp. 409–410). **tip ۷۷، نیازمندی‌ها در یک حلقه‌ی بازخورد یاد گرفته می‌شوند.** وقتی کلمه کافی نیست، از mockup و prototypeهای «منظورت این بود؟» استفاده کنید، آن‌قدر انعطاف‌پذیر که در میانه‌ی گفت‌و‌گو عوض شوند. همه‌ی کار شکلی از mockup است: تا آخرش مشتری‌های بیشتری هست، یعنی QA و عملیات و بازاریابی. پس تکرارهای کوتاهی را ترجیح بدهید که با بازخورد مشتری تمام می‌شوند، که وقتِ رفتن در راه غلط را کمینه می‌کند.
 
-**Walk in your client's shoes** (pp. 410–411): monitor the help-desk phones for a couple of days, or work in the warehouse for a week. It also builds trust. **Tip 78, Work with a User to Think Like a User.**
+**در کفش مشتری راه بروید** (pp. 410–411): چند روز تلفن‌های میز پشتیبانی را بپایید، یا یک هفته در انبار کار کنید. اعتماد هم می‌سازد. **tip ۷۸، با یک کاربر کار کنید تا مثل کاربر فکر کنید.**
 
-**Requirements vs. policy** (pp. 411–412): "Only an employee's supervisors and the personnel department may view that employee's records" embeds policy in an absolute. Stated as "only authorized users may access an employee record," it leads to an access-control system where policy changes only touch metadata. **Tip 79, Policy Is Metadata:** implement the general case, with the policy as an example of what it must support.
+**نیازمندی در برابر سیاست** (pp. 411–412): «فقط سرپرست‌های یک کارمند و دپارتمان نیروی انسانی می‌توانند پرونده‌ی آن کارمند را ببینند» سیاست را در یک مطلق جا می‌دهد. وقتی به شکل «فقط کاربرهای مجاز می‌توانند به پرونده‌ی کارمند دسترسی داشته باشند» بیان شود، به سیستم کنترل دسترسی‌ای می‌رسد که تغییر سیاست در آن فقط به metadata می‌خورد. **tip ۷۹، سیاست همان metadata است:** حالت عمومی را پیاده کنید، و سیاست را نمونه‌ای از آن چیزی ببینید که باید پشتیبانی شود.
 
-> **Try it:** [Policy as code or as data](../widgets/08-policy-metadata.html) — apply a stream of HR policy changes to a hard-coded check and to an access-control table, and count the code changes and redeploys each needs.
+> **Try it:** [سیاست به‌عنوان کد یا به‌عنوان داده](../widgets/08-policy-metadata.html)؛ جریانی از تغییرهای سیاست نیروی انسانی را روی یک بررسی سخت‌کد‌شده و روی یک جدول کنترل دسترسی اعمال کنید، و بشمارید هر کدام چند تغییر کد و deploy دوباره می‌خواهد.
 
-**Requirements vs. reality** (p. 412): Brian Eno described (Wired, January 1999) the ultimate mixing board that got in the way, because engineers' ear-to-fingertip feedback was replaced by keyboard and mouse. Successful tools adapt to the hands that use them. Early feedback lets clients say "yes, it does what I want, but not how I want."
+**نیازمندی در برابر واقعیت** (p. 412): Brian Eno در Wired در ژانویه‌ی ۱۹۹۹ از میز میکس نهایی گفت که سر راه بود، چون بازخورد گوش‌به‌نوک‌انگشت مهندس‌ها با keyboard و ماوس عوض شده بود. ابزارهای موفق با دستی که به کارشان می‌برد سازگار می‌شوند. بازخورد زودهنگام می‌گذارد مشتری‌ها بگویند «بله، آن کاری را می‌کند که می‌خواهم، ولی نه آن‌طور که می‌خواهم».
 
-**Documenting requirements** (pp. 412–415):
+**مستند کردن نیازمندی‌ها** (pp. 412–415):
 
-- The best requirements documentation is working code.
-- Inch-thick specifications are a castle on quicksand, and the client never reads them. They heft it, read the Management Summary and look at diagrams; it's like coding a video game from the *Iliad* in Homeric Greek.
-- Write requirements on index cards as **user stories**, small enough to prompt clarifying questions.
-- **Overspecification:** good requirements are abstract. Capture semantic invariants as requirements and current practice as policy. Requirements are not architecture, design or UI; requirements are need.
-- **Requirements creep** ("just one more wafer-thin mint") is the boiled frog. With iterations and feedback, clients see a new card go up and help choose what moves out.
-- **Maintain a glossary** (pp. 415–416): users may distinguish "client" from "customer." **Tip 80, Use a Project Glossary.**
+- بهترین مستند نیازمندی‌ها کد در حال کار است.
+- مشخصات یک‌اینچی قلعه‌ای روی شن روان است، و مشتری هیچ‌وقت نمی‌خواندشان. وزنشان می‌کند، خلاصه‌ی مدیریتی را می‌خواند و به نمودارها نگاه؛ مثل این است که یک بازی ویدئویی را از *ایلیاد* به یونانی هومری کد بزنید.
+- نیازمندی‌ها را روی کارت به شکل **user story** بنویسید، آن‌قدر کوچک که پرسش روشن‌کننده بسازند.
+- **بیش‌مشخص‌سازی:** نیازمندی خوب انتزاعی است. ناوردای معنایی را به‌عنوان نیازمندی و روش فعلی را به‌عنوان سیاست ثبت کنید. نیازمندی، معماری یا طراحی یا UI نیست؛ نیازمندی همان نیاز است.
+- **خزش نیازمندی‌ها**، یعنی «فقط یک نعنای کاغذ‌نازک دیگر»، همان قورباغه‌ی آب‌پز است. با تکرار و بازخورد، مشتری‌ها می‌بینند کارتی تازه بالا می‌رود و کمک می‌کنند انتخاب شود چه چیزی بیرون برود.
+- **یک واژه‌نامه نگه دارید** (pp. 415–416): کاربرها ممکن است «client» را از «customer» جدا کنند. **tip ۸۰، یک واژه‌نامه‌ی پروژه به کار ببرید.**
 
-### Topic 46. Solving Impossible Puzzles
+> **In practice:** درخواست «یک داشبورد برای فروش» تقریباً هیچ‌وقت نیازمندی واقعی نیست.
+>
+> **Your turn:** مدیری داشبوردی با ۳۰ نمودار می‌خواهد. پیش از ساختن چه می‌پرسید؟
+>
+> *Answer:* «با این داشبورد چه تصمیمی می‌گیرید؟» و بعد کمترین تعداد metric که آن تصمیم را پشتیبانی می‌کند. کتاب می‌گوید نیازمندی کشف می‌شود، نه گردآوری؛ با یک prototype در Metabase بازخورد بگیرید (pp. 405–417).
 
-Alexander cut the Gordian knot: "just a little different interpretation of the requirements" (p. 418). Real puzzles defeat the obvious approach; the secret is to identify the *real* constraints, some absolute and some preconceived (pp. 418–419).
+### موضوع ۴۶. حل کردن معماهای ناممکن
 
-**Degrees of freedom** (pp. 419–420): the box is the boundary of constraints, and it may be larger than you think. The book's Four Posts puzzle asks you to connect all the dots and return to the start with three straight lines, without lifting the pen or retracing (Holt, *Math Puzzles & Games*); the solution is at the end of the book. **Tip 81, Don't Think Outside the Box—Find the Box.**
+اسکندر گره گوردیان را برید: «فقط تفسیری کمی متفاوت از نیازمندی‌ها» (p. 418). معمای واقعی رویکرد بدیهی را شکست می‌دهد؛ راز این است که قیدهای *واقعی* را بشناسید، که بعضی مطلق‌اند و بعضی پیش‌فرض ذهنی (pp. 418–419).
 
-- Enumerate every avenue, however stupid it sounds, then explain why each can't be taken. Can you prove it? The Trojan horse went through the front door.
-- Categorize and prioritize constraints, like woodworkers who cut the longest pieces first: fit the most restrictive first.
+**درجه‌های آزادی** (pp. 419–420): جعبه مرز قیدهاست، و می‌تواند از آن چیزی که فکر می‌کنید بزرگ‌تر باشد. معمای چهار میله‌ی کتاب می‌خواهد همه‌ی نقطه‌ها را با سه خط راست وصل کنید و به شروع برگردید، بی برداشتن قلم و بی دوباره‌کشی، از Holt در *Math Puzzles & Games*؛ راه‌حلش آخر کتاب است. **tip ۸۱، بیرون جعبه فکر نکنید؛ جعبه را پیدا کنید.**
 
-**Get out of your own way** (pp. 421–422): when it's harder than it should be, do something else, such as walking the dog or sleeping on it. Psychology Today reports distracted people did better at complex problem-solving. Otherwise, explain it to someone who asks:
+- هر راهی را، هر قدر هم احمقانه به گوش بیاید، برشمارید، و بعد توضیح بدهید چرا هر کدام شدنی نیست. می‌توانید ثابتش کنید؟ اسب تروا از در جلو رد شد.
+- قیدها را رده‌بندی و اولویت‌بندی کنید، مثل نجارهایی که بلندترین قطعه‌ها را اول می‌برند: سخت‌گیرانه‌ترین را اول جا بدهید.
 
-- Why are you solving this, and what's the benefit?
-- Are the problems edge cases you could eliminate?
-- Is there a simpler related problem?
+**از راه خودتان کنار بروید** (pp. 421–422): وقتی سخت‌تر از آن است که باید باشد، کار دیگری بکنید، مثل بردن سگ به پیاده‌روی یا خوابیدن رویش. مجله‌ی Psychology Today خبر می‌دهد که آدم‌های حواس‌پرت در حل مسئله‌ی پیچیده بهتر بودند. وگرنه، برای کسی توضیحش بدهید که می‌پرسد:
 
-**Fortune favors the prepared mind** (Pasteur, p. 422): feed your nonconscious brain with feedback, for example in an engineering daybook. And DON'T PANIC.
+- چرا این را حل می‌کنید، و سودش چیست؟
+- مسئله‌ها حالت‌های لبه‌ای‌اند که می‌توانستید حذفشان کنید؟
+- مسئله‌ی مرتبطِ ساده‌تری هست؟
 
-### Topic 47. Working Together
+**بخت به سراغ ذهن آماده می‌آید** (Pasteur، ص. ۴۲۲): مغز ناهوشیارتان را با بازخورد بخورانید، مثلاً در یک دفتر روزنگار مهندسی. و هول نکنید.
 
-Andy and Dave met on an "impossible" project: an end-of-life system whose often undocumented behaviour had to be matched exactly, hundreds of millions of dollars, a deadline of months. It succeeded because the expert who had run the system for years sat across the hall, continuously available (p. 424). They coded with one typist and others commenting, which might now be called pair or mob programming. "Working with" means discussing *while coding* (p. 425).
+### موضوع ۴۷. کار کردن با هم
 
-**Conway's law** (sidebar, p. 425), from Melvin Conway's 1967 paper: system designs copy the communication structures of the organizations that produce them. Teams that don't talk give stove-pipe systems; a team split in two gives client/server. The reverse works too: distributed teams tend toward modular software, and teams that include users produce software that reflects it.
+کادر Andy و Dave در یک پروژه‌ی «ناممکن» با هم آشنا شدند: سیستمی در پایان عمر که رفتار اغلب بی‌مستندش باید دقیق تطبیق داده می‌شد، چند صد میلیون دلار، و مهلتی چند‌ماهه. موفق شد چون خبره‌ای که سال‌ها آن سیستم را گردانده بود آن طرف راهرو می‌نشست و پیوسته در دسترس بود (p. 424). آن‌ها با یک تایپ‌کننده و بقیه که نظر می‌دادند کد زدند، که حالا شاید برنامه‌نویسی جفتی یا گروهی نامیده شود. «کار کردن با» یعنی بحث کردن *در حین کد زدن* (p. 425).
 
-| Practice | How it works (pp. 425–427) |
+**قانون Conway** (کادر کناری، ص. ۴۲۵)، از مقاله‌ی سال ۱۹۶۷ Melvin Conway: طراحی سیستم‌ها ساختارهای ارتباطی سازمانی را کپی می‌کند که می‌سازدشان. تیم‌هایی که حرف نمی‌زنند سیستم‌های دودکشی می‌دهند؛ و تیمی که دو تکه شود client و server می‌دهد. برعکسش هم کار می‌کند: تیم‌های پراکنده به نرم‌افزار ماژولار متمایل‌اند، و تیم‌هایی که کاربر را در خود دارند نرم‌افزاری می‌سازند که همین را بازتاب می‌دهد.
+
+| کار | چطور کار می‌کند (pp. 425–427) |
 |---|---|
-| **Pair programming** | One types (syntax, details), the other thinks at a higher level; peer pressure avoids `foo` and shortcuts |
-| **Mob programming** | More than two people, one typist, possibly users, sponsors and testers: tight collaboration with live coding. Swap the typist every 5–10 minutes (p. 428) |
+| **برنامه‌نویسی جفتی** | یکی تایپ می‌کند، یعنی syntax و جزئیات، و دیگری در سطحی بالاتر فکر؛ فشار همتا جلوی `foo` و میان‌بر زدن را می‌گیرد |
+| **برنامه‌نویسی گروهی** | بیشتر از دو نفر، با یک تایپ‌کننده، و احتمالاً کاربر و حامی و تست‌کننده: همکاری تنگ با کد زدن زنده. هر پنج تا ده دقیقه تایپ‌کننده را عوض کنید (p. 428) |
 
-**What should I do?** (pp. 427–428):
+**چه کار کنم؟** (pp. 427–428):
 
-- Try pairing for at least two weeks, a few hours at a time, or a mob session for thorny issues.
-- Build the code, not your ego. Start small (mobs of 4–5).
-- Criticize the code, not the person. Listen; different isn't wrong.
-- Hold frequent retrospectives, and read up before you start.
+- جفتی را دست‌کم دو هفته، هر بار چند ساعت، امتحان کنید، یا یک نشست گروهی برای مسئله‌های خاردار.
+- کد را بسازید، نه نفستان را. کوچک شروع کنید، یعنی گروه‌های چهار یا پنج نفری.
+- از کد نقد کنید، نه از آدم. گوش بدهید؛ متفاوت یعنی غلط نیست.
+- بازنگری مکرر برگزار کنید، و پیش از شروع مطالعه کنید.
 
-**Tip 82, Don't Go into the Code Alone** (p. 428).
+**نکته‌ی ۸۲، تنها به کد نروید** (p. 428).
 
-### Topic 48. The Essence of Agility
+### موضوع ۴۸. جوهر چابکی
 
-**Tip 83, Agile Is Not a Noun; Agile Is How You Do Things** (p. 429). Nearly 20 years after the Manifesto, the authors see Agile-in-a-Box: more management layers, reporting and "someone with a clipboard and a stopwatch" (p. 429). The four values put individuals and interactions, working software, customer collaboration and responding to change *over* processes and tools, comprehensive documentation, contract negotiation and following a plan. The introduction describes a generative process, not a static one (p. 430).
+**نکته‌ی ۸۳، چابک اسم نیست؛ چابک شکل کار کردن شماست** (p. 429). نزدیک بیست سال بعد از Manifesto، نویسنده‌ها «چابک در جعبه» می‌بینند: لایه‌های مدیریتی بیشتر، گزارش بیشتر، و «کسی با گیره‌کاغذ و کرنومتر» (p. 429). چهار ارزش، افراد و تعامل و نرم‌افزار در حال کار و همکاری مشتری و پاسخ به تغییر را *بر* فرایند و ابزار و مستند جامع و مذاکره‌ی قرارداد و پیروی از برنامه می‌گذارند. مقدمه، فرایندی زاینده را توصیف می‌کند و نه ایستا (p. 430).
 
-**There can never be an agile process** (pp. 430–431): agility is responding to unknowns, like a gazelle that doesn't run straight. Three of the four values are about gathering and responding to feedback. They tell you what to look for, not what to do, and decisions are contextual.
+**هیچ‌وقت فرایند چابک نمی‌تواند وجود داشته باشد** (pp. 430–431): چابکی پاسخ دادن به ناشناخته‌هاست، مثل غزالی که مستقیم نمی‌دود. سه‌تا از چهار ارزش درباره‌ی جمع کردن و پاسخ دادن به بازخوردند. می‌گویند دنبال چه بگردید و نه چه کار کنید، و تصمیم‌ها وابسته به زمینه‌اند.
 
-**So what do we do?** (pp. 431–432):
+**پس چه کار می‌کنیم؟** (pp. 431–432):
 
 ```mermaid
 flowchart LR
-    A["1 · work out where you are"] --> B["2 · smallest meaningful step toward the goal"] --> C["3 · evaluate and fix what you broke"]
-    C -->|"not done: repeat, recursively at every level"| A
+    A["۱ · بفهمید کجایید"] --> B["۲ · کوچک‌ترین قدم معنادار به سمت هدف"] --> C["۳ · ارزیابی و درست کردن آن چیزی که شکستید"]
+    C -->|"تمام نشده: بازگشتی در هر سطحی تکرار کنید"| A
 ```
 
-The loop at its lowest level is naming a variable (p. 432):
+این حلقه در پایین‌ترین سطحش نام گذاشتن روی یک متغیر است (p. 432):
 
-- `user = accountOwner(accountID)` becomes `owner`.
-- But the story only needs an email, so it becomes `email = emailOfAccountOwner(accountID)`.
-- That reduces coupling to the accounts code.
+- عبارت `user = accountOwner(accountID)` می‌شود `owner`.
+- ولی آن story فقط به یک ایمیل نیاز دارد، پس می‌شود `email = emailOfAccountOwner(accountID)`.
+- همین، coupling به کد حساب‌ها را کم می‌کند.
 
-At the highest level, one step sometimes shows the best solution doesn't involve software. Teams should apply the loop to their process too (p. 433).
+در بالاترین سطح، یک قدم گاهی نشان می‌دهد بهترین راه‌حل اصلاً نرم‌افزار نیست. تیم‌ها باید این حلقه را روی فرایند خودشان هم اعمال کنند (p. 433).
 
-**And this drives design** (p. 433): step 3 requires fixing what you break cheaply, which is why good design means easy to change (ETC). "That is agility."
+**و همین طراحی را می‌راند** (p. 433): قدم ۳ می‌خواهد آن چیزی را که می‌شکنید ارزان درست کنید، و همین دلیلی است که طراحی خوب یعنی آسان برای تغییر، یعنی ETC. «همین چابکی است».
 
-## Trade-offs at a glance
+> **In practice:** چابکی یعنی گام کوچک، بازخورد، اصلاح: merge request کوچک و deploy مکرر با Argo CD همین است.
+>
+> **Your turn:** چرا یک مدل Gold را با یک ستون منتشر می‌کنید و بعد گسترش می‌دهید؟
+>
+> *Answer:* کاربر زودتر بازخورد می‌دهد و اگر جهت غلط بود هزینه کم است. کتاب جوهر چابکی را همین حلقه می‌داند: بفهم کجایی، کوچک‌ترین گام معنادار را بردار، نتیجه را ارزیابی کن (pp. 429–434).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Implement the stated need as given | Fast start | Builds the wrong thing; misses edge cases and gaming |
-| Explore through feedback and mockups | Shared understanding; better solutions | Client time; diplomacy |
-| Hard-code policy | Simple today | Code change for every policy change |
-| Policy as metadata | Policy changes are data changes | A general mechanism to build and secure |
-| Detailed requirements spec | Little ambiguity on paper | Built on quicksand; never read by the client |
-| Index-card user stories | Prompts conversation; easy to reprioritize | Incomplete by design |
-| Solo coding | Focus; no coordination | Less brain bandwidth; bad habits unchecked |
-| Pair or mob coding | More minds, users in the loop, quality | Feels strange at first; needs human skills |
-| Agile-in-a-Box process | Predictable rituals | Not agile by definition |
+| پیاده کردن نیاز همان‌طور که بیان شده | شروع تند | چیز غلط را می‌سازد؛ حالت‌های لبه و سوءاستفاده را از دست می‌دهد |
+| کاویدن با بازخورد و mockup | فهم مشترک؛ راه‌حل بهتر | وقت مشتری؛ دیپلماسی |
+| سخت‌کد کردن سیاست | امروز ساده است | برای هر تغییر سیاست، تغییر کد |
+| سیاست به‌عنوان metadata | تغییر سیاست، تغییر داده است | سازوکاری عمومی برای ساختن و امن کردن |
+| مشخصات مفصل نیازمندی | ابهام کم روی کاغذ | روی شن روان بنا شده؛ مشتری هیچ‌وقت نمی‌خواندش |
+| user story روی کارت | گفت‌و‌گو می‌سازد؛ اولویت‌بندی دوباره آسان است | طراحی‌اش ناقص است |
+| کد زدن تنها | تمرکز؛ بی هماهنگی | پهنای باند مغزی کمتر؛ عادت بد بی‌بررسی می‌ماند |
+| کد زدن جفتی یا گروهی | ذهن بیشتر، کاربر در حلقه، کیفیت | اول عجیب حس می‌شود؛ مهارت انسانی می‌خواهد |
+| فرایند چابک در جعبه | آیین‌های پیش‌بینی‌پذیر | طبق تعریف چابک نیست |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Policy engines.** "Policy is metadata" is the idea behind attribute- and role-based access control and policy engines such as Open Policy Agent, where rules are data evaluated by a general engine; the [policy widget](../widgets/08-policy-metadata.html) contrasts the two styles.
-- **Team Topologies** (Skelton and Pais, 2019) builds on the reverse Conway manoeuvre the sidebar on p. 425 describes: design team boundaries to get the architecture you want.
-- **Iteration length.** The book's argument that short iterations minimize time lost in a wrong direction (p. 410) can be modelled: the [lab](../lab/08-iteration-length/README.md) measures wasted work as a client's wishes drift.
+- **موتورهای سیاست.** «سیاست همان metadata است» ایده‌ی پشت کنترل دسترسی ویژگی‌محور و نقش‌محور و موتورهای سیاست مثل Open Policy Agent است، که قاعده‌ها در آن داده‌اند و یک موتور عمومی ارزیابی‌شان می‌کند؛ [ویجت سیاست](../widgets/08-policy-metadata.html) دو سبک را مقایسه می‌کند.
+- کتاب **Team Topologies** (Skelton و Pais، سال ۲۰۱۹) روی مانور Conway معکوسی بنا می‌شود که کادر کناری ص. ۴۲۵ توضیحش می‌دهد: مرزهای تیم را طوری طراحی کنید که معماری دلخواهتان در بیاید.
+- **طول تکرار.** استدلال کتاب که تکرار کوتاه، وقتِ رفتن در راه غلط را کمینه می‌کند (p. 410) مدل‌شدنی است: [آزمایش](../lab/08-iteration-length/README.md) کار هدر‌رفته را وقتی خواسته‌های مشتری رانش می‌کنند اندازه می‌گیرد.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. A Pragmatic Philosophy](01-a-pragmatic-philosophy.md) (boiled frogs, good-enough software, communicate), [2. A Pragmatic Approach](02-a-pragmatic-approach.md) (ETC, prototypes, tracer bullets, reversibility), [7. While You Are Coding](07-while-you-are-coding.md) (listen to your lizard brain, naming), [9. Pragmatic Projects](09-pragmatic-projects.md) (delight your users, teams).
-- **Run it:** [How long should an iteration be?](../lab/08-iteration-length/README.md) — a seeded model of a client whose wishes drift, measuring work wasted between feedback points for different iteration lengths.
+- **فصل‌های مرتبط:** [فصل ۱: فلسفه‌ی pragmatic](01-a-pragmatic-philosophy.md) که قورباغه‌ی آب‌پز و نرم‌افزار به‌اندازه‌ی کافی خوب و ارتباط گرفتن را دارد، [فصل ۲: رویکرد pragmatic](02-a-pragmatic-approach.md) که ETC و prototype و گلوله‌ی tracer و برگشت‌پذیری را دارد، [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که گوش دادن به مغز مارمولک و نام‌گذاری را دارد، و [فصل ۹: پروژه‌های pragmatic](09-pragmatic-projects.md) که خوشحال کردن کاربرها و تیم‌ها را دارد.
+- **Run it:** [یک تکرار چقدر باید باشد؟](../lab/08-iteration-length/README.md)؛ مدلی seed‌دار از مشتری‌ای که خواسته‌هایش رانش می‌کنند، که کار هدر‌رفته بین نقطه‌های بازخورد را برای طول‌های مختلف تکرار اندازه می‌گیرد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **Why is "gathering" a misleading word for requirements?**
+1. **چرا «جمع کردن» واژه‌ی گمراه‌کننده‌ای برای نیازمندی‌هاست؟**
 
-   *Answer:* It implies they lie on the surface; they're buried under assumptions, misconceptions and politics, and often don't exist yet (p. 405).
+   *Answer:* این حس را می‌دهد که روی سطح افتاده‌اند؛ آن‌ها زیر فرض و برداشت غلط و سیاست خاک شده‌اند، و اغلب هنوز وجود ندارند (p. 405).
 
-2. **How could a customer game "free shipping on orders of $50 or more" if the total includes shipping?**
+2. **اگر جمع سفارش، ارسال را هم شامل شود، مشتری چطور می‌تواند از «ارسال رایگان برای سفارش‌های پنجاه دلار و بیشتر» سوءاستفاده کند؟**
 
-   *Answer:* Buy a $25 book with about $30 of overnight shipping; the $55 order ships free, giving overnight shipping on a $25 book for $25 (p. 408).
+   *Answer:* کتابی بیست‌و‌پنج دلاری با حدود سی دلار ارسال یک‌شبه بخرد؛ سفارش پنجاه‌و‌پنج دلاری رایگان ارسال می‌شود، پس ارسال یک‌شبه‌ی کتابی بیست‌و‌پنج دلاری بیست‌و‌پنج دلار در می‌آید (p. 408).
 
-3. **After pointing that out, what does the experienced developer do?**
+3. **بعد از اشاره به این نکته، developer باتجربه چه می‌کند؟**
 
-   *Answer:* Stops. Deliver facts and let the client make the decision (pp. 408–409).
+   *Answer:* می‌ایستد. واقعیت‌ها را بدهید و بگذارید مشتری تصمیم بگیرد (pp. 408–409).
 
-4. **Restate "only supervisors and personnel may view an employee record" as the book recommends.**
+4. **عبارت «فقط سرپرست‌ها و نیروی انسانی می‌توانند پرونده‌ی کارمند را ببینند» را همان‌طور که کتاب توصیه می‌کند بازگو کنید.**
 
-   *Answer:* "Only authorized users may access an employee record," which leads to an access-control system where policy is metadata (p. 411).
+   *Answer:* «فقط کاربرهای مجاز می‌توانند به پرونده‌ی کارمند دسترسی داشته باشند»، که به سیستم کنترل دسترسی‌ای می‌رسد که سیاست در آن metadata است (p. 411).
 
-5. **The book's preferred form of requirements documentation is:**
-   - [ ] A signed-off specification
-   - [x] Working code, with user stories on index cards for planning
-   - [ ] A Management Summary
+5. **شکل مورد‌ترجیح کتاب برای مستند نیازمندی‌ها این است:**
+   - [ ] مشخصاتی که تأیید شده
+   - [x] کد در حال کار، با user storyهای روی کارت برای برنامه‌ریزی
+   - [ ] یک خلاصه‌ی مدیریتی
 
-   *Answer:* Working code is the best (perhaps only) requirements documentation; stories on cards guide planning (pp. 412–414).
+   *Answer:* کد در حال کار بهترین و شاید تنها مستند نیازمندی‌هاست؛ storyهای روی کارت برنامه‌ریزی را راهنمایی می‌کنند (pp. 412–414).
 
-6. **What is the "box" in "find the box"?**
+6. **«جعبه» در «جعبه را پیدا کنید» چیست؟**
 
-   *Answer:* The boundary of the real constraints and conditions, which may be considerably larger than you think (pp. 419–420).
+   *Answer:* مرز قیدها و شرط‌های واقعی، که می‌تواند بسیار بزرگ‌تر از آن چیزی باشد که فکر می‌کنید (pp. 419–420).
 
-7. **What does Conway's law say, and what's the reverse?**
+7. **قانون Conway چه می‌گوید، و معکوسش چیست؟**
 
-   *Answer:* Designs copy the organization's communication structures; deliberately structuring teams shapes the software, e.g. distributed teams produce more modular software (p. 425).
+   *Answer:* طراحی‌ها ساختارهای ارتباطی سازمان را کپی می‌کنند؛ و ساختار دادن آگاهانه به تیم‌ها نرم‌افزار را شکل می‌دهد، مثلاً تیم‌های پراکنده نرم‌افزار ماژولارتری می‌سازند (p. 425).
 
-8. **What is the book's three-step recipe for working in an agile way?**
+8. **دستور آشپزی سه‌مرحله‌ای کتاب برای کار کردن به شکل چابک چیست؟**
 
-   *Answer:* Work out where you are; make the smallest meaningful step toward where you want to be; evaluate where you end up and fix anything you broke. Repeat, recursively (pp. 431–432).
+   *Answer:* بفهمید کجایید؛ کوچک‌ترین قدم معنادار را به سمت جایی که می‌خواهید باشید بردارید؛ و ارزیابی کنید کجا در آمدید و هر چیزی را که شکستید درست کنید. و بازگشتی تکرار (pp. 431–432).

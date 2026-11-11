@@ -1,65 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How Does It Scale?</title>
-<meta name="description" content="Set a baseline time and input size, grow the input, and compare how long algorithms of seven orders take, with the book&#x27;s one-second example as a preset. Illustrates The Pragmatic Programmer, Topic 39.">
+<title>چطور مقیاس می‌گیرد؟</title>
+<meta name="description" content="یک زمان و اندازه‌ی ورودی مبنا بگذارید، ورودی را بزرگ کنید، و مقایسه کنید الگوریتم‌های هفت مرتبه چقدر طول می‌کشند، با نمونه‌ی یک‌ثانیه‌ای کتاب به‌عنوان حالت آماده. تصویری از موضوع ۳۹ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .ord { display: grid; grid-template-columns: 6.5em 1fr 8.5em; gap: 8px; align-items: center; font-size: .85rem; margin-bottom: 5px; }
   .ord .track { height: 16px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
   .ord .fill { height: 100%; background: var(--accent); } .ord .fill.slow { background: var(--warn); } .ord .fill.hopeless { background: var(--bad); }
-  .ord code { font-size: .85rem; } .ord .t { font-family: var(--mono); text-align: right; }
+  .ord code { font-size: .85rem; } .ord .t { font-family: var(--mono); text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/07-while-you-are-coding.html">Chapter 7</a><span aria-hidden="true">/</span>
-      <span aria-current="page">How does it scale?</span>
+      <a href="../chapters/07-while-you-are-coding.html">فصل ۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">چطور مقیاس می‌گیرد؟</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 7 · While You Are Coding</div>
-  <h1>How does it scale?</h1>
-  <p class="lede">Big-O doesn’t give actual times: it says how time <strong>changes</strong> as input grows. If a routine takes one second for 100 records, how long for 1,000? It depends entirely on its order.</p>
-  <p class="source-note">Illustrates Topic 39, Algorithm Speed (pp. 343–351, Tips 63–64): the orders and examples from the book’s table, and its one-second, 100-to-1,000-records example (p. 345). The times here scale each formula exactly, so O(lg n) and O(n lg n) differ from the book’s rounder “about 3 s” and “some 33 s” (see the vault note in the lesson). Exponential is shown as 2ⁿ. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۷ · وقتی کد می‌زنید</div>
+  <h1>چطور مقیاس می‌گیرد؟</h1>
+  <p class="lede">نماد Big-O زمان واقعی نمی‌دهد: می‌گوید با بزرگ شدن ورودی، زمان چطور <strong>عوض می‌شود</strong>. اگر یک routine برای صد رکورد یک ثانیه می‌برد، برای هزار رکورد چقدر؟ کاملاً به مرتبه‌اش بستگی دارد.</p>
+  <p class="source-note">تصویری از موضوع ۳۹، سرعت الگوریتم (صص. ۳۴۳–۳۵۱، tipهای ۶۳ و ۶۴): مرتبه‌ها و نمونه‌های جدول کتاب، و نمونه‌ی یک‌ثانیه‌ای صد تا هزار رکوردش (ص. ۳۴۵). زمان‌های این‌جا هر فرمول را دقیق مقیاس می‌دهند، پس O(lg n) و O(n lg n) با «حدود سه ثانیه» و «حدود ۳۳ ثانیه»ی گردتر کتاب فرق دارند؛ یادداشت vault در درس را ببینید. مرتبه‌ی نمایی به شکل 2ⁿ نشان داده می‌شود. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title" id="pt">Time at the new size (log scale bar)</p><div id="ords"></div>
-        <p class="field-hint">Bars are on a logarithmic scale: each tick of length is ten times longer.</p>
+      <div class="panel"><p class="panel-title" id="pt">زمان در اندازه‌ی تازه، با نوار مقیاس لگاریتمی</p><div id="ords"></div>
+        <p class="field-hint">نوارها روی مقیاس لگاریتمی‌اند: هر پله‌ی طول ده برابر طولانی‌تر است.</p>
         <div class="callout" id="verdict" style="margin-top:10px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="t0"></div><div id="n0"></div><div id="n1"></div><button class="btn small" id="book" type="button" style="margin-top:8px">Book’s example: 1 s for 100 → 1,000</button></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="t0"></div><div id="n0"></div><div id="n1"></div><button class="btn small" id="book" type="button" style="margin-top:8px">نمونه‌ی کتاب: یک ثانیه برای صد، به هزار</button></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Constant factors vanish</strong>: two O(n) routines can differ by a factor of 1,000, but both get ten times slower for ten times the data.</li>
-    <li><strong>O(n²) and worse</strong> run away quickly. The book’s O(n²) example goes from one second to 100 seconds, and exponential becomes cosmic almost immediately.</li>
-    <li><strong>Test your estimates</strong>: run the code at three or four sizes and see which row of this table your timings follow.</li>
+    <li><strong>ضریب‌های ثابت غیب می‌شوند</strong>: دو routine از جنس O(n) می‌توانند هزار برابر فرق کنند، ولی هر دو برای ده برابر داده ده برابر کندتر می‌شوند.</li>
+    <li><strong>مرتبه‌ی O(n²) و بدتر</strong> تند از دست در می‌روند. نمونه‌ی O(n²) کتاب از یک ثانیه به صد ثانیه می‌رود، و نمایی تقریباً بی‌درنگ کیهانی می‌شود.</li>
+    <li><strong>تخمین‌هایتان را تست کنید</strong>: کد را در سه یا چهار اندازه اجرا کنید و ببینید زمان‌سنجی‌هایتان دنبال کدام ردیف این جدول می‌رود.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/07-while-you-are-coding.html"><small>Lesson</small>7. While You Are Coding</a></li>
+    <li><a href="../chapters/07-while-you-are-coding.html"><small>درس</small>فصل ۷: وقتی کد می‌زنید</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -76,45 +76,45 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log"));
   var cfg = { t0: 1, n0: 100, n1: 1000 };
-  var BOOK = { "1": "1 s", lg: "about 3 s", n: "10 s", nlg: "some 33 s", n2: "100 s", n3: "—", exp: "years (make coffee)" };
-  var ORD = [["1", "O(1)", "array access", function () { return 0; }], ["lg", "O(lg n)", "binary search", function (n) { return Math.log10(Math.log2(n)); }], ["n", "O(n)", "sequential search", function (n) { return Math.log10(n); }],
-    ["nlg", "O(n lg n)", "quicksort (average)", function (n) { return Math.log10(n * Math.log2(n)); }], ["n2", "O(n²)", "insertion sort", function (n) { return 2 * Math.log10(n); }], ["n3", "O(n³)", "matrix multiply", function (n) { return 3 * Math.log10(n); }], ["exp", "O(2ⁿ)", "set partitioning", function (n) { return n * Math.LOG10E * Math.LN2; }]];
+  var BOOK = { "1": "۱ ثانیه", lg: "حدود ۳ ثانیه", n: "۱۰ ثانیه", nlg: "حدود ۳۳ ثانیه", n2: "۱۰۰ ثانیه", n3: "—", exp: "سال‌ها، برو قهوه درست کن" };
+  var ORD = [["1", "O(1)", "دسترسی به array", function () { return 0; }], ["lg", "O(lg n)", "جست‌و‌جوی دودویی", function (n) { return Math.log10(Math.log2(n)); }], ["n", "O(n)", "جست‌و‌جوی پشت‌سرهم", function (n) { return Math.log10(n); }],
+    ["nlg", "O(n lg n)", "میانگین quicksort", function (n) { return Math.log10(n * Math.log2(n)); }], ["n2", "O(n²)", "مرتب‌سازی درجی", function (n) { return 2 * Math.log10(n); }], ["n3", "O(n³)", "ضرب ماتریس", function (n) { return 3 * Math.log10(n); }], ["exp", "O(2ⁿ)", "partitioning مجموعه", function (n) { return n * Math.LOG10E * Math.LN2; }]];
   function human(l10) { // l10 = log10(seconds)
-    if (l10 > 15) return "10^" + Math.round(l10 - 7.5) + " years";
-    var s = Math.pow(10, l10); if (s < 1e-3) return (s * 1e6).toFixed(0) + " µs"; if (s < 1) return (s * 1000).toFixed(0) + " ms"; if (s < 120) return s.toFixed(s < 10 ? 1 : 0) + " s"; if (s < 7200) return (s / 60).toFixed(0) + " min"; if (s < 172800) return (s / 3600).toFixed(1) + " h"; if (s < 3.15e7 * 2) return (s / 86400).toFixed(0) + " days"; return (s / 3.15e7).toExponential(1) + " years";
+    if (l10 > 15) return "۱۰ به توان " + Math.round(l10 - 7.5) + " سال";
+    var s = Math.pow(10, l10); if (s < 1e-3) return (s * 1e6).toFixed(0) + " میکروثانیه"; if (s < 1) return (s * 1000).toFixed(0) + " میلی‌ثانیه"; if (s < 120) return s.toFixed(s < 10 ? 1 : 0) + " ثانیه"; if (s < 7200) return (s / 60).toFixed(0) + " دقیقه"; if (s < 172800) return (s / 3600).toFixed(1) + " ساعت"; if (s < 3.15e7 * 2) return (s / 86400).toFixed(0) + " روز"; return (s / 3.15e7).toExponential(1) + " سال";
   }
   function render() {
     var box = Kit.clear(document.getElementById("ords")), isBook = cfg.t0 === 1 && cfg.n0 === 100 && cfg.n1 === 1000, worst = null;
-    document.getElementById("pt").textContent = "Time for " + cfg.n1.toLocaleString() + " records, given " + human(Math.log10(cfg.t0)) + " for " + cfg.n0.toLocaleString();
+    document.getElementById("pt").textContent = "زمان برای " + cfg.n1.toLocaleString("en-US") + " رکورد، با " + human(Math.log10(cfg.t0)) + " برای " + cfg.n0.toLocaleString("en-US") + " رکورد";
     ORD.forEach(function (o) {
       var l = Math.log10(cfg.t0) + o[3](cfg.n1) - o[3](cfg.n0), w = Math.max(2, Math.min(100, (l + 3) / 12 * 100));
       var cls = l > Math.log10(3600) ? "hopeless" : l > Math.log10(60) ? "slow" : "";
       if (l > Math.log10(3600) && !worst) worst = o[1];
-      box.appendChild(Kit.el("div", { class: "ord", role: "img", "aria-label": o[1] + ": " + human(l) + (isBook && BOOK[o[0]] !== "—" ? "; the book says " + BOOK[o[0]] : "") },
-        Kit.el("code", null, o[1]), Kit.el("div", { class: "track", title: o[2] }, Kit.el("div", { class: "fill " + cls, style: "width:" + w + "%" })), Kit.el("span", { class: "t" }, human(l) + (isBook && BOOK[o[0]] !== "—" ? " (book: " + BOOK[o[0]] + ")" : ""))));
+      box.appendChild(Kit.el("div", { class: "ord", role: "img", "aria-label": "مرتبه‌ی " + o[1] + ": " + human(l) + (isBook && BOOK[o[0]] !== "—" ? "؛ کتاب می‌گوید " + BOOK[o[0]] : "") },
+        Kit.el("code", null, o[1]), Kit.el("div", { class: "track", title: o[2] }, Kit.el("div", { class: "fill " + cls, style: "width:" + w + "%" })), Kit.el("span", { class: "t" }, human(l) + (isBook && BOOK[o[0]] !== "—" ? " (کتاب: " + BOOK[o[0]] + ")" : ""))));
     });
     var v = document.getElementById("verdict"), ratio = cfg.n1 / cfg.n0; v.className = "callout " + (worst ? "warn" : "ok");
-    v.textContent = "Input grows " + (ratio >= 1 ? ratio.toFixed(ratio < 10 ? 1 : 0) + "×" : "to " + Kit.pct(ratio, 0)) + ". " + (worst ? "From " + worst + " on, the run takes over an hour." : "Every order still finishes within an hour.");
-    stats([["Growth factor", ratio.toFixed(1) + "×"], ["O(n) time", human(Math.log10(cfg.t0 * ratio))], ["O(n²) time", human(Math.log10(cfg.t0 * ratio * ratio)), ratio * ratio * cfg.t0 > 3600 ? "bad" : ""]]);
+    v.textContent = "ورودی " + (ratio >= 1 ? ratio.toFixed(ratio < 10 ? 1 : 0) + " برابر" : "به " + Kit.pct(ratio, 0)) + " بزرگ می‌شود. " + (worst ? "از " + worst + " به بعد، اجرا بیشتر از یک ساعت می‌برد." : "هر مرتبه‌ای باز هم زیر یک ساعت تمام می‌شود.");
+    stats([["ضریب رشد", ratio.toFixed(1) + " برابر"], ["زمان O(n)", human(Math.log10(cfg.t0 * ratio))], ["زمان O(n²)", human(Math.log10(cfg.t0 * ratio * ratio)), ratio * ratio * cfg.t0 > 3600 ? "bad" : ""]]);
   }
   var N = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 100000, 1000000];
-  var s0 = Kit.slider({ label: "Baseline time", min: -3, max: 2, step: 1, value: 0, format: function (v) { return human(v); }, onInput: function (v) { cfg.t0 = Math.pow(10, v); render(); } });
-  var s1 = Kit.slider({ label: "Baseline size", min: 0, max: 7, step: 1, value: 3, format: function (v) { return N[v].toLocaleString(); }, onInput: function (v) { cfg.n0 = N[v]; render(); } });
-  var s2 = Kit.slider({ label: "New size", min: 0, max: 11, step: 1, value: 6, format: function (v) { return N[v].toLocaleString(); }, onInput: function (v) { cfg.n1 = N[v]; render(); log.add("New size " + N[v].toLocaleString(), "muted"); } });
+  var s0 = Kit.slider({ label: "زمان مبنا", min: -3, max: 2, step: 1, value: 0, format: function (v) { return human(v); }, onInput: function (v) { cfg.t0 = Math.pow(10, v); render(); } });
+  var s1 = Kit.slider({ label: "اندازه‌ی مبنا", min: 0, max: 7, step: 1, value: 3, format: function (v) { return N[v].toLocaleString("en-US"); }, onInput: function (v) { cfg.n0 = N[v]; render(); } });
+  var s2 = Kit.slider({ label: "اندازه‌ی تازه", min: 0, max: 11, step: 1, value: 6, format: function (v) { return N[v].toLocaleString("en-US"); }, onInput: function (v) { cfg.n1 = N[v]; render(); log.add("اندازه‌ی تازه " + N[v].toLocaleString("en-US"), "muted"); } });
   document.getElementById("t0").appendChild(s0.element); document.getElementById("n0").appendChild(s1.element); document.getElementById("n1").appendChild(s2.element);
-  document.getElementById("book").addEventListener("click", function () { s0.set(0); s1.set(3); s2.set(6); cfg = { t0: 1, n0: 100, n1: 1000 }; render(); log.add("Book’s example: 1 s for 100 records, now 1,000.", "ok"); });
+  document.getElementById("book").addEventListener("click", function () { s0.set(0); s1.set(3); s2.set(6); cfg = { t0: 1, n0: 100, n1: 1000 }; render(); log.add("نمونه‌ی کتاب: یک ثانیه برای صد رکورد، حالا هزار رکورد.", "ok"); });
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "A routine takes 1 s for 100 records. If it's O(n²), about how long for 1,000?",
-      options: ["10 s", "100 s", "1,000 s"], answer: 1,
-      explain: "p. 345: ten times the data, a hundred times the time." },
-    { q: "What does Big-O leave out?",
-      options: ["The growth rate", "Constant factors and low-order terms", "The input size"], answer: 1,
-      explain: "pp. 344–345: one algorithm may be 1,000 times faster than another with the same O()." },
-    { q: "How does the book suggest testing an estimate?",
-      options: ["Prove it mathematically", "Run it at varying input sizes and plot the results; three or four points show the shape", "Ask a colleague"], answer: 1,
-      explain: "p. 350, Tip 64." }
+    { q: "یک routine برای صد رکورد یک ثانیه می‌برد. اگر O(n²) باشد، برای هزار رکورد حدوداً چقدر؟",
+      options: ["ده ثانیه", "صد ثانیه", "هزار ثانیه"], answer: 1,
+      explain: "صفحه‌ی ۳۴۵: ده برابر داده، صد برابر زمان." },
+    { q: "نماد Big-O چه چیزی را نمی‌آورد؟",
+      options: ["نرخ رشد را", "ضریب‌های ثابت و جمله‌های مرتبه‌پایین را", "اندازه‌ی ورودی را"], answer: 1,
+      explain: "صفحه‌های ۳۴۴–۳۴۵: یک الگوریتم می‌تواند هزار برابر از دیگری با همان O() تندتر باشد." },
+    { q: "کتاب چطور پیشنهاد می‌دهد یک تخمین را تست کنیم؟",
+      options: ["ریاضی ثابتش کنید", "در اندازه‌های مختلف ورودی اجرا و نتیجه‌ها را رسم کنید؛ سه یا چهار نقطه شکل را نشان می‌دهد", "از همکاری بپرسید"], answer: 1,
+      explain: "صفحه‌ی ۳۵۰، tip ۶۴." }
   ]);
 })();
 </script>

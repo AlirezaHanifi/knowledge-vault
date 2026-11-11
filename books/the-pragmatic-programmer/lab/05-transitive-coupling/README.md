@@ -1,18 +1,20 @@
-# Transitive coupling
+# coupling transient
 
-If A is coupled to B and C, and they are coupled to others, A is coupled to all of them. How fast does that spread? The script builds 200 random layered dependency graphs per row: 6 layers of 20 modules, where each module depends on a few modules in lower layers, usually the layer just below. It then counts how many modules each one reaches transitively, as the number of direct dependencies per module grows from 1 to 6.
+اگر A به B و C جفت باشد و آن‌ها به دیگران، A به همه‌شان جفت است. این چقدر تند پخش می‌شود؟ اسکریپت برای هر ردیف دویست گراف وابستگی لایه‌ای تصادفی می‌سازد: شش لایه‌ی بیست‌ماژولی، که هر ماژول به چند ماژول در لایه‌های پایین‌تر وابسته است، معمولاً همان لایه‌ی زیرش. بعد می‌شمارد هر ماژول transient به چند ماژول می‌رسد، در حالی که شمار وابستگی‌های مستقیم هر ماژول از یک به شش می‌رود.
 
-*Illustrates The Pragmatic Programmer, Topic 28, Decoupling, pp. 228–229: coupling is transitive, and decoupled code is easier to change. The layered-graph model and its parameters are the vault's (seeded).*
+*این آزمایش موضوع ۲۸ از کتاب The Pragmatic Programmer، یعنی ویژگی decoupling، صص. ۲۲۸–۲۲۹ را نشان می‌دهد: coupling گذراست، و کد decouple‌شده آسان‌تر عوض می‌شود. مدل گراف لایه‌ای و پارامترهایش مال خود vault است و با seed ثابت.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 transitive_coupling.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 200 random graphs per row: 6 layers x 20 modules = 120 modules
@@ -27,12 +29,12 @@ direct deps   top layer: coupled to   all modules: mean   share of lower modules
 A top-layer module has at most 100 modules below it.
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- With one direct dependency, a top-layer module is coupled to about 4 modules, roughly one per layer below it.
-- Three direct dependencies already couple a top module to about half of everything below it; six reach three quarters.
-- The growth is far faster than the number of direct dependencies, because every dependency brings its own dependencies along. That's why the book wants shy code that talks only to what it knows directly.
+- با یک وابستگی مستقیم، یک ماژول لایه‌ی بالا به حدود چهار ماژول جفت است، یعنی تقریباً یکی در هر لایه‌ی زیرش.
+- سه وابستگی مستقیم از قبل یک ماژول بالا را به حدود نصف هر چیزی که زیرش هست جفت می‌کند؛ و شش وابستگی به سه‌چهارم می‌رسد.
+- رشد خیلی تندتر از شمار وابستگی‌های مستقیم است، چون هر وابستگی وابستگی‌های خودش را هم با خود می‌آورد. از همین‌جاست که کتاب کد خجالتی می‌خواهد که فقط با آن چیزی حرف می‌زند که مستقیم می‌شناسد.
 
-## Related
+## پیوندها
 
-- Chapter note: [5. Bend, or Break](../../chapters/05-bend-or-break.md) — Topic 28, Decoupling, pp. 228–229
+- یادداشت فصل: [فصل ۵: خم شو، یا بشکن](../../chapters/05-bend-or-break.md) — موضوع ۲۸، ویژگی decoupling، صص. ۲۲۸–۲۲۹

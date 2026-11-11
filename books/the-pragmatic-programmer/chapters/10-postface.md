@@ -3,92 +3,106 @@ book: the-pragmatic-programmer
 chapter: 10
 title: "Postface"
 pages: "469–473"
+translated_title: "پس‌گفتار"
+lang: fa
 ---
 
-# 10. Postface
+# فصل ۱۰: پس‌گفتار
 
-[← 9. Pragmatic Projects](09-pragmatic-projects.md) · [Book](../README.md)
+[فصل ۹: پروژه‌های pragmatic →](09-pragmatic-projects.md) · [کتاب](../README.md)
 
-## Summary
+## خلاصه
 
-In the twenty years since the first edition, software has grown from business machinery to something that has "truly taken over the world" (p. 469). Developers build the future, and with that power comes an extraordinary responsibility, which is rarely discussed (pp. 469–470). The postface gives a moral compass of two questions about every piece of code: *have I protected the user?* and *would I use this myself?* It closes with the last three tips: First, Do No Harm; Don't Enable Scumbags; and Share it, Celebrate it, Build it (pp. 471–473).
+در بیست سالی که از ویراست اول گذشته، نرم‌افزار از ماشین‌آلات کسب‌وکار به چیزی رسیده که «واقعاً دنیا را گرفته» (p. 469). developerها آینده را می‌سازند، و با آن قدرت، مسئولیتی فوق‌العاده می‌آید که کم درباره‌اش بحث می‌شود (pp. 469–470). پس‌گفتار یک قطب‌نمای اخلاقی از دو پرسش درباره‌ی هر تکه کد می‌دهد: *آیا از کاربر محافظت کرده‌ام؟* و *خودم این را به کار می‌بردم؟* و با سه tip آخر تمام می‌شود: اول، آسیب نزن؛ به آدم‌های پست کمک نکن؛ و به اشتراکش بگذار، جشنش بگیر، بسازش (pp. 471–473).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Software is everywhere, and so is its potential for harm:** embedded devices control power plants, cars and medical equipment, and even a heating controller can kill if poorly built (p. 470).
-- **Non-embedded systems cut both ways:** social media, big data, loan decisions and surveillance can do great good or great harm, and the difference may be subtle (p. 470).
-- **First, do no harm.** Protect users: security patches for the baby monitor, manual control when the thermostat fails, store only the data you need, encrypt anything personal (Tip 98, p. 471).
-- **Don't enable scumbags.** Apply the Golden Rule: would you be happy to be a user? If the project skirts ethics, you're as responsible as its sponsors (Tip 99, pp. 471–472).
-- **Imagine the future you want,** have the courage to say "no!", and build it (Tip 100, p. 473).
+- **نرم‌افزار همه‌جاست، و ظرفیت آسیبش هم:** دستگاه‌های embedded نیروگاه و خودرو و تجهیز پزشکی را کنترل می‌کنند، و حتی یک کنترل‌کننده‌ی گرمایش اگر بد ساخته شود می‌تواند بکشد (p. 470).
+- **سیستم‌های غیر‌embedded از دو سو می‌برند:** شبکه‌های اجتماعی و big data و تصمیم وام و monitoring می‌توانند خوبی بزرگ یا آسیب بزرگ بکنند، و تفاوتش می‌تواند ظریف باشد (p. 470).
+- **اول، آسیب نزن.** از کاربرها محافظت کنید: patch امنیتی برای مونیتور نوزاد، کنترل دستی وقتی ترموستات شکست می‌خورد، ذخیره‌ی فقط داده‌ای که لازم دارید، و رمز کردن هر چیز شخصی (tip ۹۸، ص. ۴۷۱).
+- **به آدم‌های پست کمک نکنید.** قاعده‌ی طلایی را اعمال کنید: خوشحال می‌شدید کاربر این باشید؟ اگر پروژه از اخلاق لیز می‌خورد، شما هم به‌اندازه‌ی حامی‌هایش مسئولید (tip ۹۹، صص. ۴۷۱–۴۷۲).
+- **آینده‌ای را که می‌خواهید تصور کنید،** جرئت «نه!» گفتن داشته باشید، و بسازیدش (tip ۱۰۰، ص. ۴۷۳).
 
-## Section outline
+## فهرست بخش‌ها
 
-*The PDF bookmarks list the postface without sub-entries; these are its own headings. Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*فهرست bookmarkهای PDF پس‌گفتار را بی زیرعنوان می‌آورد؛ این‌ها عنوان‌های خودش‌اند. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- The Moral Compass — p. 471
-- Imagine the Future you Want — p. 473
+- قطب‌نمای اخلاقی — ص. ۴۷۱
+- آینده‌ای را که می‌خواهید تصور کنید — ص. ۴۷۳
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 98 | First, Do No Harm | 471 |
-| 99 | Don’t Enable Scumbags | 472 |
-| 100 | It’s Your Life. Share it. Celebrate it. Build it. | 473 |
+| ۹۸ | اول، آسیب نزن | ۴۷۱ |
+| ۹۹ | به آدم‌های پست کمک نکن | ۴۷۲ |
+| ۱۰۰ | زندگی خودت است. به اشتراکش بگذار. جشنش بگیر. بسازش. | ۴۷۳ |
 
-The postface opens with Fred Brooks' image, from *The Mythical Man-Month*, of the programmer as a poet building castles in the air from pure thought-stuff (p. 469). Its examples of software's reach: Twitter helping people plan revolutions, the processor in your car stopping a skid, the smartphone that remembers daily details for you (p. 469).
+پس‌گفتار با تصویر Fred Brooks از کتاب *The Mythical Man-Month* باز می‌شود، یعنی برنامه‌نویس به‌عنوان شاعری که از جنس خالص فکر در هوا قلعه می‌سازد (p. 469). نمونه‌هایش از گستره‌ی نرم‌افزار: Twitter که به مردم کمک می‌کند انقلاب برنامه‌ریزی کنند، processor داخل خودرویتان که جلوی سرخوردن را می‌گیرد، و گوشی هوشمندی که جزئیات روزانه را برایتان به یاد می‌آورد (p. 469).
 
-### The Moral Compass
+### قطب‌نمای اخلاقی
 
-The price of this power is vigilance (p. 471).
+بهای این قدرت، هوشیاری است (p. 471).
 
-| Question | What it asks (pp. 471–472) |
+| پرسش | چه می‌پرسد (pp. 471–472) |
 |---|---|
-| **1. Have I protected the user?** | Did I list the consequences and protect users from harm? If you can't truthfully say you tried, you bear some responsibility when things go bad. **Tip 98, First, Do No Harm** |
-| **2. Would I use this myself?** | A Golden Rule judgment: do I want my details shared, my movements given to retailers, to be driven by this autonomous vehicle? No degree of separation removes your responsibility. **Tip 99, Don't Enable Scumbags** |
+| **۱. آیا از کاربر محافظت کرده‌ام؟** | پی‌آمدها را برشمردم و از کاربرها در برابر آسیب محافظت کردم؟ اگر نمی‌توانید صادقانه بگویید که کوشیدید، وقتی اوضاع بد شود بخشی از مسئولیت گردن شماست. **tip ۹۸، اول، آسیب نزن** |
+| **۲. خودم این را به کار می‌بردم؟** | قضاوتی از جنس قاعده‌ی طلایی: می‌خواهم جزئیاتم به اشتراک گذاشته شود، حرکت‌هایم به خرده‌فروش‌ها داده شود، این خودروی خودران مرا براند؟ هیچ درجه‌ای از فاصله مسئولیتتان را برنمی‌دارد. **tip ۹۹، به آدم‌های پست کمک نکن** |
 
-### Imagine the Future you Want
+> **In practice:** تیم داده به داده‌ی شخصی دسترسی دارد؛ hash کردن PII پیش از warehouse یک تصمیم اخلاقی است، نه فقط فنی.
+>
+> **Your turn:** تحلیلگری می‌خواهد hash شماره‌ی تلفن را با یک جدول بیرونی join کند تا مشتری‌ها را شناسایی کند. چه می‌پرسید؟
+>
+> *Answer:* آیا صاحب داده با این کار موافق است و آیا هدف آن را توجیه می‌کند؛ hash بدون salt با جست‌وجوی همه‌ی شماره‌ها برگشت‌پذیر است، پس این دیگر بی‌نام نیست. کتاب می‌پرسد آیا از کاربر محافظت کرده‌ام، و آیا خودم این را می‌خواستم (pp. 471–472).
 
-The next twenty years are built from your imagination, hopes and concerns. Recognize when you're working against the future you'd want to inhabit and have the courage to say no; envision a better one and have the courage to create it (p. 473). The book ends with **Tip 100**: *It's Your Life. Share it. Celebrate it. Build it.* And have fun (p. 473).
+### آینده‌ای را که می‌خواهید تصور کنید
 
-## Trade-offs at a glance
+بیست سال بعدی از تصور و امید و دغدغه‌ی شما ساخته می‌شود. بشناسید کِی در برابر آینده‌ای کار می‌کنید که می‌خواستید در آن زندگی کنید و جرئت نه گفتن داشته باشید؛ آینده‌ای بهتر را تصور کنید و جرئت ساختنش را داشته باشید (p. 473). کتاب با **tip ۱۰۰** تمام می‌شود: *زندگی خودت است. به اشتراکش بگذار. جشنش بگیر. بسازش.* و خوش بگذرانید (p. 473).
 
-| Choice | Buys | Costs |
+> **In practice:** ابزار و stack عوض می‌شوند؛ عادت‌ها می‌مانند.
+>
+> **Your turn:** یک کار از این کتاب را که این هفته در تیم شروع می‌کنید نام ببرید.
+>
+> *Answer:* پاسخ شخصی است؛ نمونه: هر incident را با یک تست یا alert تازه ببندید تا همان خطا دوباره رخ ندهد. کتاب با این دعوت تمام می‌شود که آینده‌ای را که می‌خواهید بسازید (p. 473).
+
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Ship and let users cope | Speed | Harm you could have foreseen; shared responsibility |
-| List consequences and protect users | Safer, trustworthy systems | Time; harder conversations with sponsors |
-| "Just following the spec" | Avoids conflict | Doesn't remove responsibility (p. 472) |
-| Saying "no!" | Keeps the future you want | Courage; possibly the project |
+| منتشر کنید و بگذارید کاربرها سر کنند | سرعت | آسیبی که می‌توانستید پیش‌بینی کنید؛ مسئولیت مشترک |
+| پی‌آمدها را برشمارید و از کاربرها محافظت کنید | سیستم‌های امن‌تر و قابل‌اعتماد | وقت؛ گفت‌و‌گوی سخت‌تر با حامی‌ها |
+| «فقط از مشخصات پیروی می‌کنم» | از درگیری می‌پرهیزد | مسئولیت را برنمی‌دارد (p. 472) |
+| «نه!» گفتن | آینده‌ای را که می‌خواهید نگه می‌دارد | جرئت؛ و احتمالاً خود پروژه |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Professional codes.** The ACM Code of Ethics and Professional Conduct (2018) makes the postface's first question explicit: its principle 1.2 is "Avoid harm."
-- **Safety-critical practice.** Standards such as IEC 61508 and ISO 26262 for automotive systems turn "however the thermostat fails, the customer still has manual control" into required hazard analysis and fail-safe design.
-- **Data minimization.** "Am I storing only the data I need?" (p. 471) is a legal requirement in the EU's GDPR, Article 5(1)(c).
+- **قانون‌های حرفه‌ای.** قانون اخلاق و رفتار حرفه‌ای ACM (سال ۲۰۱۸) اولین پرسش پس‌گفتار را صریح می‌کند: اصل ۱٫۲ آن «از آسیب بپرهیز» است.
+- **کار ایمنی‌حیاتی.** استانداردهایی مثل IEC 61508 و ISO 26262 برای سیستم‌های خودرویی، «هر طور که ترموستات شکست بخورد، مشتری باز هم کنترل دستی دارد» را به تحلیل خطر و طراحی fail-safe الزامی تبدیل می‌کنند.
+- **کمینه‌سازی داده.** پرسش «آیا فقط داده‌ای را ذخیره می‌کنم که لازم دارم؟» (p. 471) در GDPR اتحادیه‌ی اروپا، ماده‌ی ۵ بند ۱ قسمت ج، الزامی قانونی است.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. A Pragmatic Philosophy](01-a-pragmatic-philosophy.md) (take responsibility; "it's your life"), [7. While You Are Coding](07-while-you-are-coding.md) (stay safe out there; encrypt sensitive data), [9. Pragmatic Projects](09-pragmatic-projects.md) (delight your users; sign your work).
+- **فصل‌های مرتبط:** [فصل ۱: فلسفه‌ی pragmatic](01-a-pragmatic-philosophy.md) که پذیرفتن مسئولیت و «زندگی خودت است» را دارد، [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که آن بیرون در امان ماندن و رمز کردن داده‌ی حساس را دارد، و [فصل ۹: پروژه‌های pragmatic](09-pragmatic-projects.md) که خوشحال کردن کاربرها و امضا کردن کارتان را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **What two questions should you ask of every piece of code you deliver?**
+1. **درباره‌ی هر تکه کدی که تحویل می‌دهید کدام دو پرسش را باید پرسید؟**
 
-   *Answer:* Have I protected the user? Would I use this myself? (p. 471)
+   *Answer:* آیا از کاربر محافظت کرده‌ام؟ خودم این را به کار می‌بردم؟ (p. 471)
 
-2. **Give two of the book's examples of protecting users.**
+2. **دو نمونه از محافظت از کاربرها در کتاب را بگویید.**
 
-   *Answer:* Ongoing security patches for a baby monitor; manual control however a thermostat fails; storing only the data you need and encrypting anything personal (p. 471).
+   *Answer:* patch امنیتی پیوسته برای مونیتور نوزاد؛ کنترل دستی هر طور که ترموستات شکست بخورد؛ و ذخیره‌ی فقط داده‌ای که لازم دارید و رمز کردن هر چیز شخصی (p. 471).
 
-3. **According to the book, does working several steps removed from an unethical project's sponsors excuse you?**
-   - [ ] Yes, responsibility lies with the sponsors
-   - [x] No, you are just as responsible
-   - [ ] Only if you raised concerns
+3. **به گفته‌ی کتاب، کار کردن با چند مرحله فاصله از حامی‌های یک پروژه‌ی غیراخلاقی شما را معاف می‌کند؟**
+   - [ ] بله، مسئولیت گردن حامی‌هاست
+   - [x] نه، شما هم همان‌قدر مسئولید
+   - [ ] فقط اگر دغدغه‌هایتان را بیان کرده باشید
 
-   *Answer:* No matter how many degrees of separation you rationalize, you are just as responsible; don't enable scumbags (pp. 471–472).
+   *Answer:* هر چند درجه فاصله هم برای خودتان توجیه کنید، شما همان‌قدر مسئولید؛ به آدم‌های پست کمک نکنید (pp. 471–472).
 
-4. **Why does the book single out embedded devices?**
+4. **چرا کتاب دستگاه‌های embedded را جدا برمی‌شمارد؟**
 
-   *Answer:* They outnumber laptops, desktops and data-centre computers by an order of magnitude and often control life-critical systems (p. 470).
+   *Answer:* شمارشان یک مرتبه‌ی بزرگی بیشتر از laptop و desktop و کامپیوترهای دیتاسنتر است و اغلب سیستم‌های حیاتی را کنترل می‌کنند (p. 470).

@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Last Slice of Pie</title>
-<meta name="description" content="Step two waiters through their code in any interleaving, with no lock, with a semaphore, or with a transactional get_pie_if_available, and count how often two customers are promised one slice. Illustrates The Pragmatic Programmer, Topic 34.">
+<title>آخرین برش پای</title>
+<meta name="description" content="دو پیش‌خدمت را به هر ترتیبی از کدشان قدم بدهید، بی قفل یا با semaphore یا با get_pie_if_available تراکنشی، و بشمارید چند بار به دو مشتری یک برش قول داده می‌شود. تصویری از موضوع ۳۴ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .waiters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .code { font-family: var(--mono); font-size: .8rem; line-height: 1.7; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; }
+  .code { font-family: var(--mono); font-size: .8rem; line-height: 1.7; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; direction: ltr; text-align: left; }
   .code div { padding: 0 4px; border-radius: 3px; } .code .pc { background: var(--accent-soft); outline: 1px solid var(--accent); } .code .ran { color: var(--ink-3); }
   .case { font-size: 1.6rem; letter-spacing: 4px; }
 </style>
@@ -16,55 +16,55 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/06-concurrency.html">Chapter 6</a><span aria-hidden="true">/</span>
-      <span aria-current="page">The last slice of pie</span>
+      <a href="../chapters/06-concurrency.html">فصل ۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">آخرین برش پای</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 6 · Concurrency</div>
-  <h1>The last slice of pie</h1>
-  <p class="lede">Two waiters each see one slice in the display case and promise it to their customers. The problem isn’t that both can change the count. It’s that <strong>neither can be sure its view is still true</strong>: checking and taking aren’t atomic. <strong>Shared state is incorrect state.</strong></p>
-  <p class="source-note">Illustrates Topic 34, Shared State Is Incorrect State (pp. 299–306, Tip 57): the waiters’ code, the semaphore (the diner’s plastic leprechaun), get_pie_if_available, and the forgotten unlock when update_sales_data raises. The step breakdown, the enumeration of interleavings and the exception toggle are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۶ · concurrency</div>
+  <h1>آخرین برش پای</h1>
+  <p class="lede">دو پیش‌خدمت هر کدام یک برش را در ویترین می‌بینند و به مشتری خودشان قولش می‌دهند. مسئله این نیست که هر دو می‌توانند شمارش را عوض کنند، بلکه این است که <strong>هیچ‌کدام نمی‌تواند مطمئن باشد نگاهش باز هم درست است</strong>: بررسی کردن و برداشتن اتمی نیستند. <strong>shared state همان حالت نادرست است.</strong></p>
+  <p class="source-note">تصویری از موضوع ۳۴، shared state همان حالت نادرست است (صص. ۲۹۹–۳۰۶، tip ۵۷): کد پیش‌خدمت‌ها، semaphore یعنی لپرکان پلاستیکی رستوران، فراخوانی get_pie_if_available، و unlock فراموش‌شده وقتی update_sales_data خطا پرتاب می‌کند. شکستن به مرحله‌ها و برشمردن interleavingها و کلید exception مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Pie case</p><div class="case" id="case" role="img"></div><p class="field-hint" id="lock"></p>
+      <div class="panel"><p class="panel-title">ویترین پای</p><div class="case" id="case" role="img"></div><p class="field-hint" id="lock"></p>
         <div class="waiters" id="waiters" style="margin-top:8px"></div>
-        <div class="row" style="margin-top:8px"><button class="btn" id="sa" type="button">Step waiter A</button><button class="btn" id="sb" type="button">Step waiter B</button><button class="btn" id="rs" type="button">↺ Reset</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn" id="sa" type="button">قدم پیش‌خدمت A</button><button class="btn" id="sb" type="button">قدم پیش‌خدمت B</button><button class="btn" id="rs" type="button">↺ از نو</button></div>
         <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Every interleaving</p><button class="btn primary" id="all" type="button">Run all interleavings</button><div class="table-wrap" style="margin-top:8px"><table id="tbl"></table></div></div>
+      <div class="panel"><p class="panel-title">هر interleaving</p><button class="btn primary" id="all" type="button">اجرای همه‌ی interleavingها</button><div class="table-wrap" style="margin-top:8px"><table id="tbl"></table></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div><div id="slices" style="margin-top:10px"></div>
-        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="exc"> Waiter A’s update_sales_data raises</label>
-        <label style="display:flex;gap:6px;margin-top:4px"><input type="checkbox" id="ens" checked> Unlock in an ensure block</label></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div><div id="slices" style="margin-top:10px"></div>
+        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="exc"> فراخوانی update_sales_data پیش‌خدمت A خطا پرتاب می‌کند</label>
+        <label style="display:flex;gap:6px;margin-top:4px"><input type="checkbox" id="ens" checked> unlock در یک بلوک ensure</label></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>With no lock</strong>, almost every interleaving (240 of 246 with one slice) lets both waiters read “1 slice” before either takes it, so two customers are promised one pie. Only when one waiter finishes taking before the other looks is it safe.</li>
-    <li><strong>The semaphore</strong> serializes the check and the take. It works only because both waiters follow the convention of holding the leprechaun first.</li>
-    <li><strong>Forget the ensure</strong> and let update_sales_data raise: waiter A never unlocks, and waiter B waits forever. That is the case the book fixes with ensure or protect.</li>
-    <li><strong>get_pie_if_available</strong> moves the check and take into one call on the resource, so callers can’t get it wrong.</li>
+    <li><strong>بی قفل</strong>، تقریباً هر درهم‌آمیختگی، یعنی ۲۴۰ از ۲۴۶ با یک برش، می‌گذارد هر دو پیش‌خدمت پیش از آن که یکی‌شان بردارد «یک برش» بخوانند، پس به دو مشتری یک پای قول داده می‌شود. فقط وقتی امن است که یکی برداشتن را پیش از نگاه کردن دیگری تمام کند.</li>
+    <li><strong>semaphore</strong> بررسی و برداشتن را پشت‌سرهم می‌کند. و فقط کار می‌کند چون هر دو پیش‌خدمت قرارداد نگه داشتن لپرکان را رعایت می‌کنند.</li>
+    <li><strong>عبارت ensure را بردارید</strong> و بگذارید update_sales_data خطا پرتاب کند: پیش‌خدمت A هیچ‌وقت unlock نمی‌کند، و پیش‌خدمت B تا ابد منتظر می‌ماند. این همان حالتی است که کتاب با ensure یا protect درستش می‌کند.</li>
+    <li><strong>فراخوانی get_pie_if_available</strong> بررسی و برداشتن را به یک فراخوانی روی خود منبع می‌برد، پس فراخواننده‌ها نمی‌توانند غلط انجامش بدهند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/06-concurrency.html"><small>Lesson</small>6. Concurrency</a></li>
+    <li><a href="../chapters/06-concurrency.html"><small>درس</small>فصل ۶: concurrency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -90,17 +90,17 @@ function stats(rows) {
   function finished(S, i) { var w = S.w[i]; return w.dead || w.pc >= PROG[cfg.mode].length; }
   function canStep(S, i) { if (finished(S, i)) return false; var op = PROG[cfg.mode][S.w[i].pc][0]; return !(op === "lock" && S.lockHeld !== null && S.lockHeld !== i); }
   function step(S, i, quiet) {
-    var w = S.w[i], P = PROG[cfg.mode], op = P[w.pc][0], name = "Waiter " + "AB"[i];
+    var w = S.w[i], P = PROG[cfg.mode], op = P[w.pc][0], name = "پیش‌خدمت " + "AB"[i];
     function say(t, k) { if (!quiet) log.add(name + ": " + t, k || "muted"); }
-    if (op === "lock") { S.lockHeld = i; say("holds the leprechaun"); }
-    else if (op === "unlock") { if (cfg.exc && i === 0 && !cfg.ens) { say("never reaches unlock(): the exception skipped it", "bad"); w.dead = true; return; } S.lockHeld = null; say("unlocks"); }
-    else if (op === "read") { w.count = S.pies; say("sees " + w.count + " slice(s)"); }
-    else if (op === "check") { var ok = cfg.mode === "tx" ? w.slice : w.count > 0; if (!ok) { w.sorry = true; say("tells the customer there’s no pie", "warn"); if (cfg.mode === "lock") { w.pc = P.length - 2; return; } w.pc = P.length; return; } }
-    else if (op === "promise") { w.promised = true; say("promises the customer pie"); }
-    else if (op === "take") { S.pies--; say("takes a slice; case now holds " + S.pies, S.pies < 0 ? "bad" : "muted"); }
-    else if (op === "sales") { if (cfg.exc && i === 0) { say("update_sales_data raises!", "bad"); if (cfg.ens) { S.lockHeld = null; say("ensure block unlocks the case", "ok"); w.pc = P.length; w.dead = true; return; } w.pc = P.length - 2; return; } say("updates the sales data"); }
-    else if (op === "get") { if (S.pies > 0) { S.pies--; w.slice = true; w.promised = true; say("gets a slice atomically; case now holds " + S.pies); } else say("gets nothing: no pie left"); }
-    else if (op === "give") { if (w.sorry || (cfg.mode === "tx" && !w.slice)) { w.pc++; return; } if (cfg.mode !== "tx" && S.pies < 0 && !w.slice) { w.served = false; w.pc++; say("reaches for a slice that isn’t there", "bad"); return; } w.served = true; say("serves the pie", "ok"); }
+    if (op === "lock") { S.lockHeld = i; say("لپرکان را نگه می‌دارد"); }
+    else if (op === "unlock") { if (cfg.exc && i === 0 && !cfg.ens) { say("هیچ‌وقت به unlock() نمی‌رسد: exception از آن پرید", "bad"); w.dead = true; return; } S.lockHeld = null; say("قفل را باز می‌کند"); }
+    else if (op === "read") { w.count = S.pies; say(w.count + " برش می‌بیند"); }
+    else if (op === "check") { var ok = cfg.mode === "tx" ? w.slice : w.count > 0; if (!ok) { w.sorry = true; say("به مشتری می‌گوید پایی نیست", "warn"); if (cfg.mode === "lock") { w.pc = P.length - 2; return; } w.pc = P.length; return; } }
+    else if (op === "promise") { w.promised = true; say("به مشتری پای قول می‌دهد"); }
+    else if (op === "take") { S.pies--; say("یک برش برمی‌دارد؛ ویترین حالا " + S.pies + " برش دارد", S.pies < 0 ? "bad" : "muted"); }
+    else if (op === "sales") { if (cfg.exc && i === 0) { say("فراخوانی update_sales_data خطا پرتاب می‌کند!", "bad"); if (cfg.ens) { S.lockHeld = null; say("بلوک ensure قفل ویترین را باز می‌کند", "ok"); w.pc = P.length; w.dead = true; return; } w.pc = P.length - 2; return; } say("داده‌ی فروش را به‌روز می‌کند"); }
+    else if (op === "get") { if (S.pies > 0) { S.pies--; w.slice = true; w.promised = true; say("اتمی یک برش می‌گیرد؛ ویترین حالا " + S.pies + " برش دارد"); } else say("چیزی نمی‌گیرد: پایی نمانده"); }
+    else if (op === "give") { if (w.sorry || (cfg.mode === "tx" && !w.slice)) { w.pc++; return; } if (cfg.mode !== "tx" && S.pies < 0 && !w.slice) { w.served = false; w.pc++; say("دست به برشی می‌برد که نیست", "bad"); return; } w.served = true; say("پای را سرو می‌کند", "ok"); }
     w.pc++;
   }
   function outcome(S) {
@@ -111,31 +111,31 @@ function stats(rows) {
     return "ok";
   }
   var S;
-  function reset() { S = init(); log.clear(); log.add("The case holds " + cfg.slices + " slice(s). Step the waiters in any order.", "muted"); render(); }
+  function reset() { S = init(); log.clear(); log.add("ویترین " + cfg.slices + " برش دارد. پیش‌خدمت‌ها را به هر ترتیبی قدم بدهید.", "muted"); render(); }
   function render() {
-    document.getElementById("case").textContent = S.pies > 0 ? new Array(S.pies + 1).join("🥧 ") : "(empty)";
-    document.getElementById("case").setAttribute("aria-label", "Pie case: " + Math.max(0, S.pies) + " slice(s)");
-    document.getElementById("lock").textContent = cfg.mode === "lock" ? (S.lockHeld === null ? "Leprechaun: on the counter (unlocked)" : "Leprechaun: held by waiter " + "AB"[S.lockHeld]) : cfg.mode === "tx" ? "The case checks and takes in one call." : "No lock.";
+    document.getElementById("case").textContent = S.pies > 0 ? new Array(S.pies + 1).join("🥧 ") : "(خالی)";
+    document.getElementById("case").setAttribute("aria-label", "ویترین پای: " + Math.max(0, S.pies) + " برش");
+    document.getElementById("lock").textContent = cfg.mode === "lock" ? (S.lockHeld === null ? "لپرکان: روی پیشخان، یعنی قفل باز" : "لپرکان: دست پیش‌خدمت " + "AB"[S.lockHeld]) : cfg.mode === "tx" ? "ویترین در یک فراخوانی بررسی و برمی‌دارد." : "بی قفل.";
     var wr = Kit.clear(document.getElementById("waiters"));
-    S.w.forEach(function (w, i) { var c = Kit.el("div", { class: "code", "aria-label": "Waiter " + "AB"[i] + " code" });
+    S.w.forEach(function (w, i) { var c = Kit.el("div", { class: "code", "aria-label": "کد پیش‌خدمت " + "AB"[i] });
       PROG[cfg.mode].forEach(function (l, k) { c.appendChild(Kit.el("div", { class: k === w.pc && !finished(S, i) ? "pc" : k < w.pc ? "ran" : "" }, (k === w.pc && !finished(S, i) ? "▶ " : "  ") + l[1])); });
-      wr.appendChild(Kit.el("div", null, Kit.el("strong", null, "Waiter " + "AB"[i] + (w.dead ? " (stopped)" : finished(S, i) ? " (done)" : !canStep(S, i) ? " (waiting for lock)" : "")), c)); });
+      wr.appendChild(Kit.el("div", null, Kit.el("strong", null, "پیش‌خدمت " + "AB"[i] + (w.dead ? " (ایستاده)" : finished(S, i) ? " (تمام)" : !canStep(S, i) ? " (منتظر قفل)" : "")), c)); });
     document.getElementById("sa").disabled = !canStep(S, 0); document.getElementById("sb").disabled = !canStep(S, 1);
     var o = outcome(S), both = finished(S, 0) && finished(S, 1), v = document.getElementById("verdict");
     v.className = "callout " + (o === "ok" ? (both ? "ok" : "") : "bad");
-    v.textContent = o === "deadlock" ? "Stuck: waiter B waits for a lock that will never be released." : o === "oversold" ? "Two customers have been promised one slice: someone will be disappointed." : both ? "Every promise can be kept." : "Keep stepping.";
-    stats([["Slices left", S.pies, S.pies < 0 ? "bad" : ""], ["Promises", S.w.filter(function (w) { return w.promised; }).length], ["Outcome", o, o === "ok" ? "ok" : "bad"]]);
+    v.textContent = o === "deadlock" ? "گیر کرده: پیش‌خدمت B منتظر قفلی است که هیچ‌وقت آزاد نمی‌شود." : o === "oversold" ? "به دو مشتری یک برش قول داده شده: کسی ناامید می‌شود." : both ? "هر قولی می‌تواند نگه داشته شود." : "قدم دادن را ادامه بدهید.";
+    stats([["برش مانده", S.pies, S.pies < 0 ? "bad" : ""], ["قول", S.w.filter(function (w) { return w.promised; }).length], ["پیامد", o === "ok" ? "درست" : o === "oversold" ? "بیش‌فروش" : "deadlock", o === "ok" ? "ok" : "bad"]]);
   }
   function enumerate() {
     var res = { ok: 0, oversold: 0, deadlock: 0 }, n = 0;
     function dfs(st) { var any = false; [0, 1].forEach(function (i) { if (canStep(st, i)) { any = true; var c = JSON.parse(JSON.stringify(st)); step(c, i, true); dfs(c); } }); if (!any) { res[outcome(st)]++; n++; } }
     dfs(init());
-    var t = Kit.clear(document.getElementById("tbl")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "Outcome"), Kit.el("th", null, "Interleavings"), Kit.el("th", null, "Share"))));
-    var tb = Kit.el("tbody"); [["ok", "every promise kept"], ["oversold", "two promised, one slice"], ["deadlock", "stuck forever"]].forEach(function (r) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, r[1]), Kit.el("td", null, String(res[r[0]])), Kit.el("td", null, Kit.pct(res[r[0]] / n, 0)))); });
-    t.appendChild(tb); log.add(n + " interleavings: " + res.oversold + " oversold, " + res.deadlock + " deadlocked", res.oversold || res.deadlock ? "bad" : "ok");
+    var t = Kit.clear(document.getElementById("tbl")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "پیامد"), Kit.el("th", null, "interleaving"), Kit.el("th", null, "سهم"))));
+    var tb = Kit.el("tbody"); [["ok", "هر قول نگه داشته شد"], ["oversold", "دو قول، یک برش"], ["deadlock", "تا ابد گیر کرده"]].forEach(function (r) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, r[1]), Kit.el("td", null, String(res[r[0]])), Kit.el("td", null, Kit.pct(res[r[0]] / n, 0)))); });
+    t.appendChild(tb); log.add(n + " interleaving: " + res.oversold + " بیش‌فروش و " + res.deadlock + " deadlock", res.oversold || res.deadlock ? "bad" : "ok");
   }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Protection", value: cfg.mode, options: [{ value: "none", label: "No lock" }, { value: "lock", label: "Semaphore" }, { value: "tx", label: "get_pie_if_available" }], onChange: function (v) { cfg.mode = v; reset(); Kit.clear(document.getElementById("tbl")); } }).element);
-  document.getElementById("slices").appendChild(Kit.slider({ label: "Slices in the case", min: 1, max: 2, step: 1, value: 1, onInput: function (v) { cfg.slices = v; reset(); } }).element);
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "محافظت", value: cfg.mode, options: [{ value: "none", label: "بی قفل" }, { value: "lock", label: "semaphore" }, { value: "tx", label: "get_pie_if_available" }], onChange: function (v) { cfg.mode = v; reset(); Kit.clear(document.getElementById("tbl")); } }).element);
+  document.getElementById("slices").appendChild(Kit.slider({ label: "برش‌های داخل ویترین", min: 1, max: 2, step: 1, value: 1, onInput: function (v) { cfg.slices = v; reset(); } }).element);
   document.getElementById("exc").addEventListener("change", function (e) { cfg.exc = e.target.checked; reset(); });
   document.getElementById("ens").addEventListener("change", function (e) { cfg.ens = e.target.checked; reset(); });
   document.getElementById("sa").addEventListener("click", function () { step(S, 0); render(); });
@@ -145,15 +145,15 @@ function stats(rows) {
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What does the book say is the real problem in the pie example?",
-      options: ["Two processes can write the same memory", "Neither waiter can guarantee its view of the count is consistent", "The pie count is too small"], answer: 1,
-      explain: "pp. 300–301." },
-    { q: "Why does a semaphore only partly solve it?",
-      options: ["It's slow", "It works only if everyone follows the convention of taking it first", "It can only be used once"], answer: 1,
-      explain: "pp. 301–302." },
-    { q: "Why must the unlock go in an ensure block?",
-      options: ["Style", "If update_sales_data raises, the unlock is skipped and the case stays locked forever", "To make it faster"], answer: 1,
-      explain: "pp. 303–304." }
+    { q: "کتاب می‌گوید مسئله‌ی واقعی در نمونه‌ی پای چیست؟",
+      options: ["دو process می‌توانند همان حافظه را بنویسند", "هیچ پیش‌خدمتی نمی‌تواند تضمین کند نگاهش به شمارش سازگار است", "شمار پای زیادی کم است"], answer: 1,
+      explain: "صفحه‌های ۳۰۰–۳۰۱." },
+    { q: "چرا semaphore فقط بخشی از مسئله را حل می‌کند؟",
+      options: ["کند است", "فقط وقتی کار می‌کند که همه قرارداد اول گرفتنش را رعایت کنند", "فقط یک‌بار می‌شود به کارش برد"], answer: 1,
+      explain: "صفحه‌های ۳۰۱–۳۰۲." },
+    { q: "چرا unlock باید در بلوک ensure برود؟",
+      options: ["برای سبک", "اگر update_sales_data خطا پرتاب کند، از unlock پریده می‌شود و ویترین تا ابد قفل می‌ماند", "تا تندتر شود"], answer: 1,
+      explain: "صفحه‌های ۳۰۳–۳۰۴." }
   ]);
 })();
 </script>

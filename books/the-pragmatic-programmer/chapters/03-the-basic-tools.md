@@ -3,133 +3,141 @@ book: the-pragmatic-programmer
 chapter: 3
 title: "The Basic Tools"
 pages: "143–187"
+translated_title: "ابزارهای پایه"
+lang: fa
 ---
 
-# 3. The Basic Tools
+# فصل ۳: ابزارهای پایه
 
-[← 2. A Pragmatic Approach](02-a-pragmatic-approach.md) · [Book](../README.md) · [4. Pragmatic Paranoia →](04-pragmatic-paranoia.md)
+[فصل ۲: رویکرد pragmatic →](02-a-pragmatic-approach.md) · [کتاب](../README.md) · [فصل ۴: بدگمانی pragmatic ←](04-pragmatic-paranoia.md)
 
-## Summary
+## خلاصه
 
-Like a woodworker's well-worn tools, a programmer's tools become extensions of their hands, and tools amplify talent (pp. 143–144). The chapter warns against living inside one IDE and walks through a basic toolbox (p. 144):
+مثل ابزارهای دست‌سوده‌ی یک نجار، ابزارهای یک برنامه‌نویس امتداد دست‌هایش می‌شوند، و ابزار استعداد را تقویت می‌کند (pp. 143–144). این فصل نسبت به زندگی کردن داخل یک IDE هشدار می‌دهد و یک جعبه‌ابزار پایه را می‌گردد (p. 144):
 
-- the raw material, **plain text** (Topic 16);
-- the workbench, the **command shell** (Topic 17);
-- the most-used tool, the **editor** (Topic 18);
-- **version control** for everything (Topic 19);
-- **debugging** as plain problem solving, with the binary chop, tracing and rubber ducking (Topic 20);
-- a **text manipulation language** as glue (Topic 21);
-- an **engineering daybook**, because the palest ink is better than the best memory (Topic 22).
+- ماده‌ی خام، یعنی **متن ساده** (موضوع ۱۶)؛
+- میزکار، یعنی **shell فرمان** (موضوع ۱۷)؛
+- پراستفاده‌ترین ابزار، یعنی **editor** (موضوع ۱۸)؛
+- **کنترل نسخه** برای همه چیز (موضوع ۱۹)؛
+- **عمل debug کردن** به‌عنوان حل مسئله‌ی ساده، با نصف کردن دودویی و trace و اردک پلاستیکی (موضوع ۲۰)؛
+- یک **زبان دست‌کاری متن** به‌عنوان چسب (موضوع ۲۱)؛
+- یک **دفتر روزنگار مهندسی**، چون کم‌رنگ‌ترین مرکب از بهترین حافظه بهتر است (موضوع ۲۲).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Keep knowledge in plain text.** It outlives the applications that made it, works with every tool, and makes testing easier; binary formats divorce data from its meaning (Tip 25, pp. 146–150).
-- **GUIs show you what you get, and that's all you get.** The shell lets you combine tools and automate (Tip 26, pp. 152–153).
-- **Fluency, not speed, is the point of editor mastery.** When editing is automatic, thoughts flow straight into code (Tip 27, pp. 156–157).
-- **Always use version control,** for everything, including throwaway prototypes and your machine's configuration (Tip 28, pp. 163–165).
-- **Debugging is problem solving.** Fix the problem, not the blame; don't panic; write a failing test before fixing code; read the error message (Tips 29–32, pp. 169–172).
-- **Binary chop** stack frames, datasets and releases to isolate a bug in logarithmic time (pp. 174–175).
-- **"select" isn't broken.** Suspect your own code before the OS or the library, and prove your assumptions rather than trusting them (Tips 33–34, pp. 177–179).
+- **دانش را در متن ساده نگه دارید.** از برنامه‌هایی که ساختندش بیشتر عمر می‌کند، با هر ابزاری کار می‌کند، و تست را آسان‌تر؛ قالب‌های دودویی داده را از معنایش جدا می‌کنند (tip ۲۵، صص. ۱۴۶–۱۵۰).
+- **همه‌ی interfaceهای GUI آن چیزی را نشان می‌دهند که می‌گیرید، و همه‌ی آن چیزی که می‌گیرید همان است.** ابزار shell می‌گذارد ابزارها را ترکیب و خودکار کنید (tip ۲۶، صص. ۱۵۲–۱۵۳).
+- **روانی، و نه سرعت، نکته‌ی تسلط بر editor است.** وقتی ویرایش خودکار شود، فکر یک‌راست به کد سرازیر می‌شود (tip ۲۷، صص. ۱۵۶–۱۵۷).
+- **همیشه کنترل نسخه به کار ببرید،** برای همه چیز، از جمله prototypeهای دور‌انداختنی و تنظیم ماشین خودتان (tip ۲۸، صص. ۱۶۳–۱۶۵).
+- **کار debug همان حل مسئله است.** مسئله را درست کنید، نه تقصیر را؛ هول نکنید؛ پیش از درست کردن کد یک تست شکست‌خورده بنویسید؛ پیام خطا را بخوانید (tipهای ۲۹ تا ۳۲، صص. ۱۶۹–۱۷۲).
+- **نصف کردن دودویی** را روی frameهای stack و مجموعه‌داده‌ها و releaseها اعمال کنید تا باگ را در زمان لگاریتمی جدا کنید (pp. 174–175).
+- **فراخوانی «select» خراب نیست.** پیش از OS و کتابخانه به کد خودتان شک کنید، و فرض‌هایتان را ثابت کنید و نه به آن‌ها اعتماد (tipهای ۳۳ و ۳۴، صص. ۱۷۷–۱۷۹).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 16. The Power of Plain Text — p. 146
-- Topic 17. Shell Games — p. 152
-- Topic 18. Power Editing — p. 156
-- Topic 19. Version Control — p. 161
-- Topic 20. Debugging — p. 168
-- Topic 21. Text Manipulation — p. 181
-- Topic 22. Engineering Daybooks — p. 185
+- موضوع ۱۶. قدرت متن ساده — ص. ۱۴۶
+- موضوع ۱۷. بازی‌های shell — ص. ۱۵۲
+- موضوع ۱۸. ویرایش قدرتمند — ص. ۱۵۶
+- موضوع ۱۹. کنترل نسخه — ص. ۱۶۱
+- موضوع ۲۰. debug کردن — ص. ۱۶۸
+- موضوع ۲۱. دست‌کاری متن — ص. ۱۸۱
+- موضوع ۲۲. دفترهای روزنگار مهندسی — ص. ۱۸۵
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 25 | Keep Knowledge in Plain Text | 147 |
-| 26 | Use the Power of Command Shells | 153 |
-| 27 | Achieve Editor Fluency | 156 |
-| 28 | Always Use Version Control | 163 |
-| 29 | Fix the Problem, Not the Blame | 169 |
-| 30 | Don't Panic | 169 |
-| 31 | Failing Test Before Fixing Code | 172 |
-| 32 | Read the Damn Error Message | 172 |
-| 33 | "select" Isn't Broken | 178 |
-| 34 | Don't Assume It—Prove It | 179 |
-| 35 | Learn a Text Manipulation Language | 182 |
+| ۲۵ | دانش را در متن ساده نگه دارید | ۱۴۷ |
+| ۲۶ | از قدرت shellهای فرمان استفاده کنید | ۱۵۳ |
+| ۲۷ | در editor به روانی برسید | ۱۵۶ |
+| ۲۸ | همیشه کنترل نسخه به کار ببرید | ۱۶۳ |
+| ۲۹ | مسئله را درست کنید، نه تقصیر را | ۱۶۹ |
+| ۳۰ | هول نکنید | ۱۶۹ |
+| ۳۱ | پیش از درست کردن کد، تست شکست‌خورده | ۱۷۲ |
+| ۳۲ | آن پیام خطای لعنتی را بخوانید | ۱۷۲ |
+| ۳۳ | فراخوانی «select» خراب نیست | ۱۷۸ |
+| ۳۴ | فرضش نکنید، ثابتش کنید | ۱۷۹ |
+| ۳۵ | یک زبان دست‌کاری متن یاد بگیرید | ۱۸۲ |
 
-Start with a basic set of general tools, add to it as needs arise, and note each time your tools can't cut it: let need drive acquisitions (p. 144).
+با مجموعه‌ای پایه از ابزارهای عمومی شروع کنید، هر وقت نیازی پیدا شد به آن اضافه کنید، و هر بار که ابزارهایتان کم آوردند یادداشتش کنید: بگذارید نیاز، خریدها را براند (p. 144).
 
-### Topic 16. The Power of Plain Text
+### موضوع ۱۶. قدرت متن ساده
 
-Programmers' raw material is knowledge, and the best format for storing it persistently is **plain text**: printable characters that convey information, understandable to humans (pp. 146–147). `Field19=467abe` is plain text but not useful (p. 147). **Tip 25, Keep Knowledge in Plain Text** (p. 147). Plain text can be structured: HTML, JSON, YAML, HTTP, SMTP and IMAP are all text (p. 147).
+ماده‌ی خام برنامه‌نویس‌ها دانش است، و بهترین قالب برای ذخیره‌ی ماندگارش **متن ساده** است: کاراکترهای چاپ‌شدنی که اطلاعات می‌رسانند و برای انسان فهمیدنی‌اند (pp. 146–147). عبارت `Field19=467abe` متن ساده است ولی به‌کار‌آمدنی نیست (p. 147). **tip ۲۵، دانش را در متن ساده نگه دارید** (p. 147). متن ساده می‌تواند ساختار داشته باشد: HTML و JSON و YAML و HTTP و SMTP و IMAP همه متن‌اند (p. 147).
 
-| Reason | What the book says (pp. 147–150) |
+| دلیل | کتاب چه می‌گوید (pp. 147–150) |
 |---|---|
-| **Insurance against obsolescence** | Human-readable, self-describing data outlives its applications. You can parse it with partial knowledge of the format. `<SOCIAL-SECURITY-NO>123-45-6789</…>` is human *understandable*; `AC27123456789B11P` is not even readable |
-| **Leverage** | Every tool works on text: version control, diff, checksums, grep. The Unix philosophy of small sharp tools relies on line-oriented text files |
-| **Easier testing** | Synthetic test data and regression output in text can be edited and analyzed with ordinary tools |
-| **Lowest common denominator** | In heterogeneous environments, text is the common standard |
+| **بیمه در برابر منسوخ شدن** | داده‌ی انسان‌خوان و خودتوصیف از برنامه‌هایش بیشتر عمر می‌کند. می‌توانید با دانشی جزئی از قالب تجزیه‌اش کنید. عبارت `<SOCIAL-SECURITY-NO>123-45-6789</…>` برای انسان *فهمیدنی* است و `AC27123456789B11P` حتی خواندنی هم نیست |
+| **اهرم** | هر ابزاری روی متن کار می‌کند: کنترل نسخه، diff، checksum، grep. فلسفه‌ی ابزارهای کوچک و تیز Unix روی فایل‌های متنی خط‌محور تکیه دارد |
+| **تست آسان‌تر** | داده‌ی تست ساختگی و خروجی رگرسیون در متن را می‌شود با ابزارهای معمولی ویرایش و تحلیل کرد |
+| **کوچک‌ترین مخرج مشترک** | در محیط‌های ناهمگون، متن استاندارد مشترک است |
 
-### Topic 17. Shell Games
+> **In practice:** هر چیز stack ما در متن ساده است: DAGها، SQL، manifestهای Kubernetes، playbookهای Ansible، dashboardهای Grafana به‌شکل JSON.
+>
+> **Your turn:** چرا dashboardهای Grafana را از UI می‌کشید و به‌شکل JSON در git نگه می‌دارید؟
+>
+> *Answer:* تا بازبینی، diff، تاریخچه و بازسازی داشته باشند و Argo CD یا provisioning آن‌ها را deploy کند؛ dashboardی که فقط در UI است با یک حذف از دست می‌رود. متن ساده از ابزاری که آن را ساخته بیشتر عمر می‌کند (pp. 146–151).
 
-For a programmer, the workbench is the **command shell**: invoke any tool, combine tools with pipes, and build macro commands (p. 152). GUIs are fine for some tasks, but their benefit, WYSIWYG, comes with a cost: **WYSIAYG**, what you see is all you get. They're limited to what their designers intended (pp. 152–153). **Tip 26, Use the Power of Command Shells** (p. 153). The book's example lists the unique Java packages imported in a directory with one `grep | sed | sort -u` pipeline (p. 153).
+### موضوع ۱۷. بازی‌های shell
 
-**Make the shell your own** (pp. 154–155): color themes, a useful prompt (the authors like a short directory, version-control status and the time), aliases and shell functions (`alias rm='rm -iv'`), and context-specific command completion. "Be like a hermit crab" (p. 155).
+برای یک برنامه‌نویس، میزکار همان **shell فرمان** است: هر ابزاری را صدا بزنید، ابزارها را با pipe ترکیب کنید، و فرمان‌های macro بسازید (p. 152). interfaceهای GUI برای بعضی کارها خوب‌اند، ولی سودشان، یعنی WYSIWYG، هزینه‌ای دارد: **WYSIAYG**، یعنی هر چه می‌بینید همه‌ی آن چیزی است که می‌گیرید. به آن چیزی محدودند که طراحانشان در نظر داشتند (pp. 152–153). **tip ۲۶، از قدرت shellهای فرمان استفاده کنید** (p. 153). نمونه‌ی کتاب، بسته‌های یکتای Java که در یک پوشه import شده‌اند را با یک pipeline از `grep | sed | sort -u` فهرست می‌کند (p. 153).
 
-### Topic 18. Power Editing
+**مفهوم shell را مال خودتان کنید** (pp. 154–155): قالب رنگ، یک prompt به‌کار‌آمدنی که نویسنده‌ها پوشه‌ی کوتاه و وضعیت کنترل نسخه و ساعت را در آن دوست دارند، alias و تابع shell مثل `alias rm='rm -iv'`، و کامل کردن فرمان وابسته به زمینه. «مثل خرچنگ راهب باشید» (p. 155).
 
-The authors have softened the first edition's "one editor for everything" advice: use as many editors as you like, but work toward fluency in each (p. 156). **Tip 27, Achieve Editor Fluency** (p. 156).
+### موضوع ۱۸. ویرایش قدرتمند
 
-- Editing 20 hours a week, a 4% gain is an extra week a year, but the real gain is not having to think about the mechanics of editing (p. 156).
-- **The fluency checklist** (p. 157): move and select by character, word, line and paragraph, and by syntactic unit; reindent; comment blocks; undo and redo; split windows; go to a line; sort lines; search by string and regex; use multiple cursors; show compilation errors; run tests. Can you do all of it without the mouse?
-- **Moving toward fluency** (p. 158): watch yourself editing; when you repeat yourself, think "there must be a better way", find it, then use it deliberately until it becomes muscle memory.
-- **Growing your editor** (pp. 158–159): search for extensions, learn the extension language, and publish what you write.
+نویسنده‌ها توصیه‌ی «یک editor برای همه چیز» ویراست اول را نرم‌تر کرده‌اند: هر چند editorی که می‌خواهید به کار ببرید، ولی به سمت روانی در هر کدام کار کنید (p. 156). **tip ۲۷، در editor به روانی برسید** (p. 156).
 
-The challenges: turn off autorepeat, and edit for a week without the mouse (p. 159).
+- با بیست ساعت ویرایش در هفته، چهار درصد بهبود یعنی یک هفته‌ی اضافه در سال، ولی سود واقعی این است که لازم نیست به مکانیک ویرایش فکر کنید (p. 156).
+- **فهرست بررسی روانی** (p. 157): حرکت و انتخاب در سطح کاراکتر و کلمه و خط و بند، و در سطح واحد نحوی؛ دوباره تو رفتن؛ comment کردن بلوک؛ undo و redo؛ شکستن پنجره؛ رفتن به یک خط؛ مرتب کردن خط‌ها؛ جست‌و‌جو با رشته و regex؛ چند cursor؛ نشان دادن خطای compile؛ اجرای تست. می‌توانید همه‌ی این‌ها را بی ماوس بکنید؟
+- **حرکت به سمت روانی** (p. 158): خودتان را در حال ویرایش تماشا کنید؛ وقتی خودتان را تکرار می‌کنید فکر کنید «باید راه بهتری باشد»، پیدایش کنید، و آن‌قدر آگاهانه به کارش ببرید تا حافظه‌ی عضلانی شود.
+- **پروردن editor** (pp. 158–159): دنبال افزونه بگردید، زبان افزونه را یاد بگیرید، و آن چیزی را که می‌نویسید منتشر کنید.
 
-### Topic 19. Version Control
+چالش‌ها: تکرار خودکار کلید را خاموش کنید، و یک هفته بی ماوس ویرایش کنید (p. 159).
 
-A version control system (VCS) is a giant undo key, a project-wide time machine, and also a hub for collaboration, pipelines and issue tracking (p. 161).
+### موضوع ۱۹. کنترل نسخه
 
-- **Shared directories are not version control** (p. 162). Sharing source on a network drive is like concurrent code with shared data and no synchronization. Keeping a repository *on* a cloud drive is worse: simultaneous changes can corrupt it.
-- **What a VCS gives you** (pp. 162–163): who changed this line, the difference from last week, churn per release, the most-changed files, reproducible releases, archiving, and concurrent work with merging.
-- **Tip 28, Always Use Version Control** (p. 163). Always: single-person projects, throwaway prototypes, documents, phone lists, build procedures, the little log-tidying script.
-- **Branches** isolate work and often sit at the heart of a team's workflow. Most workflow advice is "this is what worked for me", so adapt as you learn (pp. 163–164).
-- **A thought experiment** (pp. 164–165). After a cup of tea killed a laptop, one author restored a new machine by the end of the afternoon, because dotfiles, editor configuration, the Homebrew list, the Ansible script and current projects were all in version control.
-- **A project hub** (pp. 165–166). Prefer third-party hosting with access control, a CLI, automated builds and tests, pull requests, integrated issues, reporting and notifications. A push to a branch can build, test and deploy; that's not scary when you can always roll back.
+یک سیستم کنترل نسخه، یعنی VCS، یک کلید undo غول‌آسا و یک ماشین زمان در سطح پروژه است، و همچنین مرکزی برای همکاری و pipeline و پی‌گیری issue (p. 161).
 
-### Topic 20. Debugging
+- **پوشه‌ی مشترک کنترل نسخه نیست** (p. 162). به اشتراک گذاشتن کد منبع روی یک درایو شبکه مثل کد هم‌زمان با داده‌ی مشترک و بی synchronization است. نگه داشتن repository *روی* یک درایو cloud بدتر است: تغییرهای هم‌زمان می‌توانند خرابش کنند.
+- **یک VCS چه می‌دهد** (pp. 162–163): چه کسی این خط را عوض کرد، تفاوت با هفته‌ی پیش، تلاطم در هر release، پرتغییرترین فایل‌ها، releaseهای بازتولید‌شدنی، بایگانی، و کار هم‌زمان با merge.
+- **نکته‌ی ۲۸، همیشه کنترل نسخه به کار ببرید** (p. 163). همیشه: پروژه‌های یک‌نفره، prototypeهای دور‌انداختنی، سندها، فهرست تلفن، رویه‌ی build، و همان اسکریپت کوچک مرتب کردن log.
+- **همه‌ی branchها** کار را جدا می‌کنند و اغلب در قلب گردش‌کار یک تیم می‌نشینند. بیشتر توصیه‌های گردش‌کار «این چیزی است که برای من کار کرد»اند، پس با یاد گرفتن سازگارشان کنید (pp. 163–164).
+- **یک آزمایش ذهنی** (pp. 164–165). بعد از آن که یک فنجان چای یک laptop را کشت، یکی از نویسنده‌ها تا آخر همان بعد از ظهر ماشینی تازه را برگرداند، چون dotfileها و تنظیم editor و فهرست Homebrew و اسکریپت Ansible و پروژه‌های فعلی همه در کنترل نسخه بودند.
+- **یک مرکز پروژه** (pp. 165–166). میزبانی طرف سومی را ترجیح بدهید که کنترل دسترسی و CLI و build و تست خودکار و pull request و issue یکپارچه و گزارش و اطلاع‌رسانی دارد. یک push به یک branch می‌تواند build و تست و deploy کند؛ و این وقتی ترسناک نیست که همیشه بتوانید برگردید.
 
-Bugs are inevitable, so debugging takes a large part of every day (p. 168). Grace Hopper is credited with the first literal computer bug, a moth taped into a log book (p. 168).
+### موضوع ۲۰. debug کردن
 
-**Psychology and mindset** (pp. 169–170):
+باگ ناگزیر است، پس debug کردن بخش بزرگی از هر روز را می‌گیرد (p. 168). اولین باگ واقعی کامپیوتر، یعنی پروانه‌ای که در دفتر log چسبانده شده بود، به Grace Hopper نسبت داده می‌شود (p. 168).
 
-- **Tip 29, Fix the Problem, Not the Blame** (p. 169). Whoever wrote it, it's your problem now.
-- **Tip 30, Don't Panic** (p. 169). If your first reaction is "that's impossible", you're plainly wrong: it happened.
-- Beware of myopia: find the **root cause**, not just this appearance of it (p. 170).
+**روان‌شناسی و ذهنیت** (pp. 169–170):
 
-**Where to start** (pp. 170–171): build cleanly with warnings turned up, gather accurate data, and watch the user if necessary. In Andy's graphics application, the crash only happened with brush strokes from upper right to lower left, the direction the programmer never tried. Test boundary conditions and realistic usage, systematically.
+- **نکته‌ی ۲۹، مسئله را درست کنید، نه تقصیر را** (p. 169). هر کسی نوشته باشدش، حالا مسئله‌ی شماست.
+- **نکته‌ی ۳۰، هول نکنید** (p. 169). اگر اولین واکنشتان «این ناممکن است» باشد، آشکارا اشتباه می‌کنید: اتفاق افتاده.
+- از نزدیک‌بینی برحذر باشید: **ریشه‌ی علت** را پیدا کنید، نه فقط همین ظاهر شدنش را (p. 170).
 
-**Strategies** (pp. 171–177):
+**از کجا شروع کنیم** (pp. 170–171): با هشدارهای بالا تمیز build کنید، داده‌ی دقیق جمع کنید، و اگر لازم شد کاربر را تماشا. در برنامه‌ی گرافیکی Andy، crash فقط با ضربه‌قلم‌هایی از بالا‌راست به پایین‌چپ می‌افتاد، یعنی همان جهتی که برنامه‌نویس هیچ‌وقت امتحانش نکرده بود. شرط‌های مرزی و استفاده‌ی واقع‌بینانه را نظام‌مند تست کنید.
 
-| Strategy | How |
+**راهبردها** (pp. 171–177):
+
+| راهبرد | چطور |
 |---|---|
-| **Reproduce with one command** | **Tip 31, Failing Test Before Fixing Code** (p. 172). Isolating the bug often reveals the fix |
-| **Read the error message** | **Tip 32, Read the Damn Error Message** (p. 172) |
-| **Bad results** | Use the failing test in a debugger, confirm you see the wrong value, move up and down the call stack, and jot down where each chase started (p. 173) |
-| **Sensitivity to input** | Reproduce with a copy of the dataset, then binary chop the data (pp. 173–174) |
-| **Regressions across releases** | Binary chop the releases (p. 174) |
-| **Logging and tracing** | Watch state over time, which a debugger can't. Use a regular format so traces can be parsed: trace every open and close to find a leak (pp. 175–176) |
-| **Rubber ducking** | Explain the code step by step to someone, or something; stating your assumptions exposes them (pp. 176–177) |
-| **Process of elimination** | Assume your code misuses the library before assuming the library is broken (p. 177) |
+| **بازتولید با یک فرمان** | **tip ۳۱، پیش از درست کردن کد، تست شکست‌خورده** (p. 172). جدا کردن باگ اغلب خود اصلاح را آشکار می‌کند |
+| **خواندن پیام خطا** | **tip ۳۲، آن پیام خطای لعنتی را بخوانید** (p. 172) |
+| **نتیجه‌های بد** | تست شکست‌خورده را در یک debugger به کار ببرید، تأیید کنید که مقدار غلط را می‌بینید، در call stack بالا و پایین بروید، و یادداشت کنید هر تعقیب از کجا شروع شد (p. 173) |
+| **حساسیت به ورودی** | با نسخه‌ای از مجموعه‌داده بازتولید کنید و بعد داده را دودویی نصف (pp. 173–174) |
+| **پس‌رفت بین releaseها** | releaseها را دودویی نصف کنید (p. 174) |
+| **log و trace** | حالت را در طول زمان تماشا کنید، که debugger نمی‌تواند. قالبی منظم به کار ببرید تا traceها تجزیه‌شدنی بمانند: هر باز و بسته شدن را trace کنید تا نشتی پیدا شود (pp. 175–176) |
+| **اردک پلاستیکی** | کد را قدم‌به‌قدم برای کسی، یا چیزی، توضیح بدهید؛ بیان کردن فرض‌هایتان آشکارشان می‌کند (pp. 176–177) |
+| **فرایند حذف** | پیش از فرض این که کتابخانه خراب است، فرض کنید کد شما بد به کارش می‌برد (p. 177) |
 
-**The binary chop** (pp. 174–175). Linear search looks at about half the entries; a binary chop halves the range each time. Applied to debugging:
+**نصف کردن دودویی** (pp. 174–175). جست‌و‌جوی خطی حدود نصف ورودی‌ها را نگاه می‌کند، در حالی که نصف کردن دودویی هر بار بازه را نصف می‌کند. وقتی روی debug کردن اعمال شود:
 
-- **Stack frames:** check a frame in the middle of a long stack trace; with 64 frames you need at most six attempts.
-- **Data:** split the dataset in two, feed each half through the app, and keep dividing to a minimal failing set.
-- **Releases:** with a test that fails now, try a release halfway back to the last good one. Many version control systems automate this.
+- **همه‌ی frameهای stack:** frameی در میانه‌ی یک stack trace بلند را بررسی کنید؛ با ۶۴ frame حداکثر شش تلاش لازم دارید.
+- **داده:** مجموعه‌داده را دو نیم کنید، هر نیم را از برنامه بگذرانید، و تا یک مجموعه‌ی کمینه‌ی شکست‌خورده تقسیم را ادامه بدهید.
+- **همه‌ی releaseها:** با تستی که حالا شکست می‌خورد، releaseی را امتحان کنید که نصف راه تا آخرین release سالم است. خیلی از سیستم‌های کنترل نسخه این را خودکار می‌کنند.
 
 ```mermaid
 flowchart LR
@@ -141,89 +149,95 @@ flowchart LR
     E --> B
 ```
 
-*The vault's diagram of the release chop described on p. 175.*
+*نمودار vault از نصف کردن releaseها که در ص. ۱۷۵ توضیح داده شده.*
 
-> **Try it:** [Binary chop](../widgets/03-binary-chop.html) — hunt a regression through a history of releases and a crash through a dataset, chopping in half or stepping one at a time, and compare how many test runs each takes.
+> **Try it:** [نصف کردن دودویی](../widgets/03-binary-chop.html)؛ یک پس‌رفت را در تاریخچه‌ای از releaseها و یک crash را در یک مجموعه‌داده شکار کنید، یک‌بار با نصف کردن و یک‌بار قدم‌به‌قدم، و مقایسه کنید هر کدام چند اجرای تست می‌برد.
 
-**"select" isn't broken** (pp. 177–178). A senior engineer spent weeks working around a supposedly broken `select` system call, until reading its documentation fixed the problem in minutes. **Tip 33, "select" Isn't Broken**: if you see hoof prints, think horses, not zebras. If you "changed only one thing", that thing is likely responsible, even when the change is an upgrade outside your control (p. 178).
+**فراخوانی «select» خراب نیست** (pp. 177–178). یک مهندس ارشد هفته‌ها دور یک فراخوانی سیستمی `select` که به‌گمانش خراب بود راه پیچید، تا این که خواندن مستندش ظرف چند دقیقه مسئله را درست کرد. **tip ۳۳، فراخوانی «select» خراب نیست**: اگر جای سم دیدید، به اسب فکر کنید و نه گورخر. اگر «فقط یک چیز را عوض کردید»، همان چیز احتمالاً مسئول است، حتی وقتی آن تغییر، ارتقایی بیرون از کنترلتان باشد (p. 178).
 
-**The element of surprise** (pp. 178–180). Surprise is proportional to your trust in the code, so a surprising bug means an assumption is wrong. **Tip 34, Don't Assume It—Prove It** (p. 179). After the fix: ask why tests didn't catch it, whether earlier parameter checks would have, where else the same bug lurks, how to make the next fix faster, and whether the wrong assumption is shared by the team. The chapter ends with a debugging checklist (p. 180).
+**عنصر غافلگیری** (pp. 178–180). غافلگیری به اعتمادتان به کد نسبت دارد، پس باگی غافلگیرکننده یعنی فرضی غلط است. **tip ۳۴، فرضش نکنید، ثابتش کنید** (p. 179). بعد از اصلاح: بپرسید چرا تست‌ها نگرفتندش، آیا بررسی پارامتر زودتر می‌گرفتش، همین باگ کجای دیگری کمین کرده، چطور اصلاح بعدی را تندتر کنیم، و آیا تیم در آن فرض غلط شریک است. فصل با یک فهرست بررسی debug کردن تمام می‌شود (p. 180).
 
-### Topic 21. Text Manipulation
+> **In practice:** debug کردن pipeline یعنی پیدا کردن اولین لایه‌ای که داده‌اش غلط است.
+>
+> **Your turn:** عدد Gold غلط است. از کجا شروع می‌کنید؟
+>
+> *Answer:* عقب بروید: Silver، Bronze، Parquet staging، منبع. هر لایه را با یک کوئری شمارش یا مجموع مقایسه کنید تا اولین جایی که عدد عوض می‌شود پیدا شود؛ این جست‌وجوی دودویی کتاب روی لایه‌هاست و خودش باگ را محلی می‌کند (pp. 168–180).
 
-Text manipulation languages are the programmer's router: noisy and brute force, but powerful in the right hands (p. 181). With them you can prototype ideas five or ten times faster, and spending 30 minutes on a crazy idea beats spending five hours (pp. 181–182). Kernighan and Pike's Perl version of a program was 17 lines against C's 150 (p. 182). **Tip 35, Learn a Text Manipulation Language** (p. 182).
+### موضوع ۲۱. دست‌کاری متن
 
-Applied to this book (pp. 182–183): the Pragmatic Bookshelf's Ruby build system; a script that includes tested code by named segment (DRY, so examples can't drift from the programs); website updates; LaTeX-to-text equations; and an index marked up in the text and collated by script. Exercises 11–13 convert YAML to JSON and rename camelCase variables to snake_case (p. 184).
+زبان‌های دست‌کاری متن، router برنامه‌نویس‌اند: پرسر‌و‌صدا و زورکی، ولی در دست درست قدرتمند (p. 181). با آن‌ها می‌توانید ایده‌ها را پنج یا ده برابر تندتر prototype کنید، و گذاشتن سی دقیقه روی ایده‌ای دیوانه از گذاشتن پنج ساعت بهتر است (pp. 181–182). نسخه‌ی Perl یک برنامه در کار Kernighan و Pike هفده خط بود در برابر صد و پنجاه خط C (p. 182). **tip ۳۵، یک زبان دست‌کاری متن یاد بگیرید** (p. 182).
 
-### Topic 22. Engineering Daybooks
+وقتی روی همین کتاب اعمال شود (pp. 182–183): سیستم build به زبان Ruby در Pragmatic Bookshelf؛ اسکریپتی که کد تست‌شده را با نام بخش می‌آورد، یعنی DRY، تا نمونه‌ها از برنامه‌ها رانش نکنند؛ به‌روزرسانی وب‌سایت؛ تبدیل معادله از LaTeX به متن؛ و یک فهرست راهنما که در متن علامت خورده و با اسکریپت جمع‌آوری شده. تمرین‌های ۱۱ تا ۱۳ فایل YAML را به JSON تبدیل می‌کنند و نام متغیرهای camelCase را به snake_case (p. 184).
 
-Dave's colleagues among electronic and mechanical engineers kept paper **daybooks**: what they did, what they learned, sketches, meter readings (p. 185). Its benefits (pp. 185–186):
+### موضوع ۲۲. دفترهای روزنگار مهندسی
 
-- It's more reliable than memory.
-- It stores ideas that aren't relevant right now, so you can keep concentrating.
-- It acts as a rubber duck: writing a note can make you realize what you just did is wrong.
+همکارهای Dave بین مهندس‌های برق و مکانیک **دفتر روزنگار** کاغذی نگه می‌داشتند: چه کردند، چه یاد گرفتند، طرح‌ها، و خوانش دستگاه‌ها (p. 185). سودهایش (pp. 185–186):
 
-The authors recommend paper over a file or wiki, and suggest trying it for a month (p. 186).
+- از حافظه قابل‌اعتمادتر است.
+- ایده‌هایی را ذخیره می‌کند که همین حالا مربوط نیستند، پس می‌توانید تمرکزتان را نگه دارید.
+- مثل اردک پلاستیکی عمل می‌کند: نوشتن یک یادداشت می‌تواند باعث شود بفهمید کاری که همین حالا کردید غلط است.
 
-## Trade-offs at a glance
+نویسنده‌ها کاغذ را به فایل یا wiki ترجیح می‌دهند و پیشنهاد می‌کنند یک ماه امتحانش کنید (p. 186).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Plain text | Longevity, every tool, easy testing | Size and parsing speed compared with binary |
-| Binary format | Compact, fast | Meaningless without the application; brittle |
-| GUI | Convenient for simple tasks | What you see is all you get; hard to automate |
-| Command shell | Combinable tools, automation | Learning curve |
-| Linear search through releases or data | Simple | Up to n test runs |
-| Binary chop | About log₂ n test runs | Needs a reliable one-command test |
-| Debugger | The state of the program now | Can't show history or timing |
-| Tracing | State over time; works for concurrency and events | Noise; needs a parseable format |
+| متن ساده | عمر طولانی، هر ابزاری، تست آسان | اندازه و سرعت تجزیه در مقایسه با دودویی |
+| قالب دودویی | جمع‌و‌جور و تند | بی آن برنامه بی‌معناست؛ شکننده |
+| interface GUI | راحت برای کارهای ساده | هر چه می‌بینید همه‌ی آن چیزی است که می‌گیرید؛ خودکار کردنش سخت است |
+| ابزار shell فرمان | ابزارهای ترکیب‌شدنی، خودکارسازی | شیب یاد گرفتن |
+| جست‌و‌جوی خطی در releaseها یا داده | ساده | تا n اجرای تست |
+| نصف کردن دودویی | حدود log₂ n اجرای تست | به تستی قابل‌اعتماد با یک فرمان نیاز دارد |
+| ابزار debugger | حالت برنامه در همین لحظه | تاریخچه یا زمان‌بندی را نشان نمی‌دهد |
+| ابزار trace | حالت در طول زمان؛ برای concurrency و رویداد کار می‌کند | سر‌و‌صدا؛ قالب تجزیه‌شدنی می‌خواهد |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **`git bisect`** automates the release chop the book describes: mark a good and a bad commit, and Git checks out the midpoints, optionally running a test script (`git bisect run`) to decide each step.
-- **Delta debugging.** Andreas Zeller's *ddmin* algorithm (2002) generalizes the data chop: when neither half fails alone, it tries smaller chunks and complements, and finds a failing input that is minimal in the sense that removing any one element makes it pass. The vault's [binary-chop lab](../lab/03-binary-chop/README.md) compares it with a plain halving chop.
-- **Flaky tests break the chop.** A bisection assumes the test is deterministic: one wrong answer sends the search into the wrong half. That's another reason for the book's insistence on a single-command, reliable reproduction.
+- **فرمان `git bisect`** همان نصف کردن releaseی را خودکار می‌کند که کتاب توضیح می‌دهد: یک commit سالم و یک خراب را علامت بزنید، و Git نقطه‌های میانی را checkout می‌کند و اختیاری یک اسکریپت تست را اجرا، یعنی `git bisect run`، تا هر قدم را تصمیم بگیرد.
+- **عمل debug کردن دلتا.** الگوریتم *ddmin* از Andreas Zeller (سال ۲۰۰۲) نصف کردن داده را تعمیم می‌دهد: وقتی هیچ نیمی به‌تنهایی شکست نمی‌خورد، تکه‌های کوچک‌تر و مکمل‌ها را امتحان می‌کند، و ورودی شکست‌خورده‌ای پیدا می‌کند که به این معنا کمینه است که برداشتن هر یک عنصرش باعث می‌شود قبول شود. [آزمایش نصف کردن دودویی](../lab/03-binary-chop/README.md) در vault آن را با نصف کردن ساده مقایسه می‌کند.
+- **تست‌های لرزان نصف کردن را می‌شکنند.** یک bisection فرض می‌کند تست قطعی است: یک پاسخ غلط، جست‌و‌جو را به نیم غلط می‌فرستد. این دلیل دیگری است برای پافشاری کتاب روی بازتولیدی قابل‌اعتماد با یک فرمان.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. A Pragmatic Approach](02-a-pragmatic-approach.md) (DRY in the book's own build; the daybook for ETC instincts), [4. Pragmatic Paranoia](04-pragmatic-paranoia.md) (crash early and assertions, which isolate bad data earlier), [5. Bend, or Break](05-bend-or-break.md) (configuration as plain text), [7. While You Are Coding](07-while-you-are-coding.md) (algorithm speed, testing), [9. Pragmatic Projects](09-pragmatic-projects.md) (version control in the starter kit).
-- **Run it:** [Binary chop](../lab/03-binary-chop/README.md) — measures test runs to find a regression among 1,000 commits (linear vs. bisection) and to shrink a 1,000-record crashing dataset (halving vs. delta debugging).
+- **فصل‌های مرتبط:** [فصل ۲: رویکرد pragmatic](02-a-pragmatic-approach.md) که DRY در build خود کتاب و دفتر روزنگار برای شهود ETC را دارد، [فصل ۴: بدگمانی pragmatic](04-pragmatic-paranoia.md) که زود crash کردن و assertion را دارد که داده‌ی بد را زودتر جدا می‌کنند، [فصل ۵: خم شو، یا بشکن](05-bend-or-break.md) که تنظیم به‌عنوان متن ساده را دارد، [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که سرعت الگوریتم و تست را دارد، و [فصل ۹: پروژه‌های pragmatic](09-pragmatic-projects.md) که کنترل نسخه را در جعبه‌ی شروع دارد.
+- **Run it:** [نصف کردن دودویی](../lab/03-binary-chop/README.md)؛ اجراهای تست لازم را برای یافتن یک پس‌رفت بین هزار commit اندازه می‌گیرد، یعنی خطی در برابر bisection، و برای کوچک کردن مجموعه‌داده‌ی هزار‌رکوردی crash‌کننده، یعنی نصف کردن در برابر debug دلتا.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **What is the difference between human-readable and human-understandable data?**
+1. **تفاوت داده‌ی انسان‌خوان و داده‌ی انسان‌فهم چیست؟**
 
-   *Answer:* `AC27123456789B11P` is readable characters with no evident meaning; `<SOCIAL-SECURITY-NO>123-45-6789</…>` is self-describing (p. 148).
+   *Answer:* عبارت `AC27123456789B11P` کاراکترهای خواندنی بی معنای آشکار است، در حالی که `<SOCIAL-SECURITY-NO>123-45-6789</…>` خودتوصیف است (p. 148).
 
-2. **What does WYSIAYG mean, and why does it matter?**
+2. **عبارت WYSIAYG یعنی چه و چرا مهم است؟**
 
-   *Answer:* What you see is all you get: a GUI is limited to what its designers intended, so you can't combine or automate beyond it (p. 153).
+   *Answer:* هر چه می‌بینید همه‌ی آن چیزی است که می‌گیرید: یک GUI به آن چیزی محدود است که طراحانش در نظر داشتند، پس فراتر از آن نمی‌توانید ترکیب یا خودکار کنید (p. 153).
 
-3. **What is the real benefit of editor fluency?**
+3. **سود واقعی روانی در editor چیست؟**
 
-   *Answer:* Not the time saved but not having to think about editing mechanics, so thoughts flow into the editor (p. 156).
+   *Answer:* نه وقتی که صرفه‌جویی می‌شود، بلکه این که لازم نیست به مکانیک ویرایش فکر کنید، پس فکرها به editor سرازیر می‌شوند (p. 156).
 
-4. **Why is keeping a Git repository on a shared cloud drive worse than not using version control at all?**
+4. **چرا نگه داشتن یک repository گیت روی درایو cloud مشترک از نداشتن کنترل نسخه هم بدتر است؟**
 
-   *Answer:* The VCS uses interacting files; simultaneous changes from two machines can corrupt the repository (p. 162).
+   *Answer:* سیستم VCS از فایل‌هایی استفاده می‌کند که با هم در تعامل‌اند؛ تغییرهای هم‌زمان از دو ماشین می‌توانند repository را خراب کنند (p. 162).
 
-5. **What is the most important rule of debugging, according to Topic 20?**
-   - [ ] Don't panic
-   - [x] Failing test before fixing code
-   - [ ] Read the error message
+5. **به گفته‌ی موضوع ۲۰، مهم‌ترین قاعده‌ی debug کردن چیست؟**
+   - [ ] هول نکنید
+   - [x] پیش از درست کردن کد، تست شکست‌خورده
+   - [ ] پیام خطا را بخوانید
 
-   *Answer:* Tip 31: make the bug reproducible with a single command (p. 172). "Don't Panic" is the one the book calls the *first* rule (p. 169).
+   *Answer:* شماره‌ی tip ۳۱: باگ را با یک فرمان بازتولید‌شدنی کنید (p. 172). عبارت «هول نکنید» همان است که کتاب قاعده‌ی *اول* می‌نامدش (p. 169).
 
-6. **A stack trace has 64 frames. How many checks does a binary chop need at most?**
+6. **یک stack trace شصت‌و‌چهار frame دارد. نصف کردن دودویی حداکثر چند بررسی لازم دارد؟**
 
-   *Answer:* Six (p. 175).
+   *Answer:* شش بررسی (p. 175).
 
-7. **What does "select is broken" remind the authors of?**
+7. **جمله‌ی «select خراب است» نویسنده‌ها را به یاد چه چیزی می‌اندازد؟**
 
-   *Answer:* That the bug is far more likely in your code than in the OS or a library: think horses, not zebras (pp. 177–178).
+   *Answer:* این که باگ خیلی محتمل‌تر است در کد خودتان باشد تا در OS یا یک کتابخانه: به اسب فکر کنید و نه گورخر (pp. 177–178).
 
-8. **Give the three benefits of an engineering daybook.**
+8. **سه سود دفتر روزنگار مهندسی را بگویید.**
 
-   *Answer:* It's more reliable than memory, it parks ideas that aren't relevant yet, and writing acts as a rubber duck (pp. 185–186).
+   *Answer:* از حافظه قابل‌اعتمادتر است، ایده‌هایی را که هنوز مربوط نیستند پارک می‌کند، و خود نوشتن مثل اردک پلاستیکی عمل می‌کند (pp. 185–186).

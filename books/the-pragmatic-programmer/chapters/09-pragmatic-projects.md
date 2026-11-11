@@ -3,207 +3,221 @@ book: the-pragmatic-programmer
 chapter: 9
 title: "Pragmatic Projects"
 pages: "435–468"
+translated_title: "پروژه‌های pragmatic"
+lang: fa
 ---
 
-# 9. Pragmatic Projects
+# فصل ۹: پروژه‌های pragmatic
 
-[← 8. Before the Project](08-before-the-project.md) · [Book](../README.md) · [10. Postface →](10-postface.md)
+[فصل ۸: پیش از پروژه →](08-before-the-project.md) · [کتاب](../README.md) · [فصل ۱۰: پس‌گفتار ←](10-postface.md)
 
-## Summary
+## خلاصه
 
-The last chapter moves from individual practice to project-sized issues:
+فصل آخر از کار فردی به مسئله‌های اندازه‌ی پروژه می‌رود:
 
-- Ground rules for **pragmatic teams** (Topic 49).
-- Why imitating a method's surface artifacts fails, which the book calls a **cargo cult** (Topic 50).
-- The magic trio of **version control, testing and automation**, the Pragmatic Starter Kit (Topic 51).
-- **Delighting** the sponsor, because the perception of success is what counts (Topic 52).
-- **Signing** your work with pride (Topic 53).
+- قاعده‌های پایه‌ی **تیم‌های pragmatic** (موضوع ۴۹).
+- چرا تقلید کردن مصنوعات سطحی یک روش شکست می‌خورد، که کتاب **کارگو کالت** می‌نامدش (موضوع ۵۰).
+- سه‌گانه‌ی جادویی **کنترل نسخه و تست و خودکارسازی**، یعنی جعبه‌ی شروع pragmatic (موضوع ۵۱).
+- **خوشحال کردن** حامی، چون آن چیزی که به حساب می‌آید برداشت از موفقیت است (موضوع ۵۲).
+- **امضا کردن** کارتان با افتخار (موضوع ۵۳).
 
-The last tip in the book is a direct consequence of all the rest (pp. 435–436).
+آخرین tip کتاب نتیجه‌ی مستقیم همه‌ی بقیه است (pp. 435–436).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Maintain small, stable teams** of under 10–12 people who trust each other. Fifty people are a horde (Tip 84, pp. 437–438).
-- **Apply the individual practices at team level:** no broken windows (quality is built in, not bolted on), watch for boiled frogs, schedule the knowledge portfolio, communicate team presence (Tip 85, pp. 438–441).
-- **Stay DRY through frictionless communication, and organize fully functional teams** that can build tracer bullets end to end without gates and handoffs (Tip 86, pp. 442–443).
-- **Do what works, not what's fashionable:** a once-a-week daily standup is a coconut airport. Pilot ideas, keep what works, and aim to **deliver when users need it** (Tips 87–88, pp. 446–451).
-- **Use version control to drive builds, tests and releases.** Test early, often and automatically; coding isn't done until all the tests run (Tips 89–91, pp. 452–455).
-- **Use saboteurs to test your testing, and test state coverage rather than code coverage.** Find bugs once: each escaped bug gets a test (Tips 92–94, pp. 457–459).
-- **Don't use manual procedures** (Tip 95, pp. 459–460). **Delight users, don't just deliver code**: ask how everyone will know the project succeeded (Tip 96, pp. 462–464). **Sign your work** (Tip 97, pp. 465–466).
+- **تیم‌های کوچک و پایدار** زیر ده تا دوازده نفر نگه دارید که به هم اعتماد دارند. پنجاه نفر یک گله است (tip ۸۴، صص. ۴۳۷–۴۳۸).
+- **کارهای فردی را در سطح تیم اعمال کنید:** پنجره‌ی شکسته نداشته باشید، چون کیفیت از اول ساخته می‌شود و بعداً نمی‌چسبد؛ قورباغه‌ی آب‌پز را بپایید؛ سبد دانش را زمان‌بندی کنید؛ و حضور تیم را اعلام (tip ۸۵، صص. ۴۳۸–۴۴۱).
+- **با ارتباط بی‌اصطکاک DRY بمانید، و تیم‌های کاملاً کارآ سازمان بدهید** که بتوانند گلوله‌ی tracer را سر‌تا‌سر بی دروازه و تحویل‌دهی بسازند (tip ۸۶، صص. ۴۴۲–۴۴۳).
+- **آن چیزی را بکنید که کار می‌کند، نه آن چیزی که مُد است:** جلسه‌ی ایستاده‌ی روزانه‌ی هفته‌ای‌یک‌بار فرودگاه نارگیلی است. ایده‌ها را آزمایشی اجرا کنید، آن چیزی را که کار می‌کند نگه دارید، و هدفتان **تحویل وقتی باشد که کاربرها لازم دارند** (tipهای ۸۷ و ۸۸، صص. ۴۴۶–۴۵۱).
+- **از کنترل نسخه برای راندن build و تست و release استفاده کنید.** زود و زیاد و خودکار تست کنید؛ کد زدن تا همه‌ی تست‌ها اجرا نشوند تمام نشده (tipهای ۸۹ تا ۹۱، صص. ۴۵۲–۴۵۵).
+- **برای تست کردن تستتان از خرابکار استفاده کنید، و پوشش حالت را تست کنید و نه پوشش کد.** باگ‌ها را یک‌بار پیدا کنید: هر باگ فراری یک تست می‌گیرد (tipهای ۹۲ تا ۹۴، صص. ۴۵۷–۴۵۹).
+- **از رویه‌ی دستی استفاده نکنید** (tip ۹۵، صص. ۴۵۹–۴۶۰). **کاربرها را خوشحال کنید، نه فقط کد تحویل بدهید**: بپرسید همه از کجا می‌فهمند پروژه موفق شده (tip ۹۶، صص. ۴۶۲–۴۶۴). **کارتان را امضا کنید** (tip ۹۷، صص. ۴۶۵–۴۶۶).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 49. Pragmatic Teams — p. 437
-- Topic 50. Coconuts Don’t Cut It — p. 446
-- Topic 51. Pragmatic Starter Kit — p. 452
-- Topic 52. Delight Your Users — p. 462
-- Topic 53. Pride and Prejudice — p. 465
+- موضوع ۴۹. تیم‌های pragmatic — ص. ۴۳۷
+- موضوع ۵۰. نارگیل کار را راه نمی‌اندازد — ص. ۴۴۶
+- موضوع ۵۱. جعبه‌ی شروع pragmatic — ص. ۴۵۲
+- موضوع ۵۲. کاربرهایتان را خوشحال کنید — ص. ۴۶۲
+- موضوع ۵۳. غرور و تعصب — ص. ۴۶۵
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 84 | Maintain Small, Stable Teams | 438 |
-| 85 | Schedule It to Make It Happen | 441 |
-| 86 | Organize Fully Functional Teams | 443 |
-| 87 | Do What Works, Not What’s Fashionable | 447 |
-| 88 | Deliver When Users Need It | 450 |
-| 89 | Use Version Control to Drive Builds, Tests, and Releases | 453 |
-| 90 | Test Early, Test Often, Test Automatically | 454 |
-| 91 | Coding Ain’t Done ’Til All the Tests Run | 455 |
-| 92 | Use Saboteurs to Test Your Testing | 457 |
-| 93 | Test State Coverage, Not Code Coverage | 458 |
-| 94 | Find Bugs Once | 459 |
-| 95 | Don’t Use Manual Procedures | 460 |
-| 96 | Delight Users, Don’t Just Deliver Code | 464 |
-| 97 | Sign Your Work | 465 |
+| ۸۴ | تیم‌های کوچک و پایدار نگه دارید | ۴۳۸ |
+| ۸۵ | زمان‌بندی‌اش کنید تا اتفاق بیفتد | ۴۴۱ |
+| ۸۶ | تیم‌های کاملاً کارآ سازمان بدهید | ۴۴۳ |
+| ۸۷ | آن چیزی را بکنید که کار می‌کند، نه آن چیزی که مُد است | ۴۴۷ |
+| ۸۸ | وقتی تحویل بدهید که کاربرها لازم دارند | ۴۵۰ |
+| ۸۹ | از کنترل نسخه برای راندن build و تست و release استفاده کنید | ۴۵۳ |
+| ۹۰ | زود تست کنید، زیاد تست کنید، خودکار تست کنید | ۴۵۴ |
+| ۹۱ | کد زدن تا همه‌ی تست‌ها اجرا نشوند تمام نشده | ۴۵۵ |
+| ۹۲ | برای تست کردن تستتان از خرابکار استفاده کنید | ۴۵۷ |
+| ۹۳ | پوشش حالت را تست کنید، نه پوشش کد | ۴۵۸ |
+| ۹۴ | باگ‌ها را یک‌بار پیدا کنید | ۴۵۹ |
+| ۹۵ | از رویه‌ی دستی استفاده نکنید | ۴۶۰ |
+| ۹۶ | کاربرها را خوشحال کنید، نه فقط کد تحویل بدهید | ۴۶۴ |
+| ۹۷ | کارتان را امضا کنید | ۴۶۵ |
 
-### Topic 49. Pragmatic Teams
+### موضوع ۴۹. تیم‌های pragmatic
 
-Programmers are like cats: intelligent, strong-willed, opinionated, independent (p. 437). A team is small and mostly stable. Fifty people are a horde, and people constantly pulled onto other assignments are "strangers temporarily sharing a bus stop in the rain." A pragmatic team has under 10–12 members who come and go rarely and trust each other. **Tip 84, Maintain Small, Stable Teams** (pp. 437–438). A footnote notes that communication paths grow quickly with team size, until communication breaks down (p. 467).
+برنامه‌نویس‌ها مثل گربه‌اند: باهوش و یک‌دنده و دارای نظر و مستقل (p. 437). یک تیم کوچک و بیشتر پایدار است. پنجاه نفر یک گله‌اند، و آدم‌هایی که مدام به کارهای دیگر کشیده می‌شوند «غریبه‌هایی‌اند که موقت زیر باران یک ایستگاه اتوبوس را شریک شده‌اند». یک تیم pragmatic زیر ده تا دوازده عضو دارد که کم می‌آیند و می‌روند و به هم اعتماد دارند. **tip ۸۴، تیم‌های کوچک و پایدار نگه دارید** (pp. 437–438). پانویسی می‌گوید مسیرهای ارتباطی با اندازه‌ی تیم تند رشد می‌کنند، تا جایی که ارتباط می‌شکند (p. 467).
 
-> **Try it:** [Team size and communication paths](../widgets/09-team-size.html) — grow a team and watch the pairwise communication paths multiply, with the book's 10–12 guideline and its "horde" of fifty marked.
+> **Try it:** [اندازه‌ی تیم و مسیرهای ارتباطی](../widgets/09-team-size.html)؛ تیمی را بزرگ کنید و ببینید مسیرهای ارتباطی دو‌به‌دو چند برابر می‌شوند، با راهنمای ده تا دوازده‌نفری کتاب و «گله»ی پنجاه‌نفری‌اش که علامت خورده‌اند.
 
-| Individual practice | At team level (pp. 438–444) |
+| کار فردی | در سطح تیم (pp. 438–444) |
 |---|---|
-| **No broken windows** | Quality is a team issue; a "quality officer" is ridiculous. Quality is built in, not bolted on |
-| **Boiled frogs** | Teams assume someone else is handling it. Everyone monitors for scope, time-scale and environment changes; keep metrics on new requirements (a burnup chart shows moving goalposts) |
-| **Knowledge portfolio** | Schedule old-system maintenance, process reflection, new-tech experiments (vetted with prototypes) and learning. **Tip 85, Schedule It to Make It Happen** |
-| **Communicate team presence** | Great teams speak with one voice externally and debate lively internally. Brand the project with an off-the-wall name and a 30-minute zany logo |
-| **Don't repeat yourselves** | Communication must be instant and frictionless. Waiting a week for a meeting is friction (Andy met teams with daily standups on Fridays) |
-| **Team tracer bullets** | Separate roles add gates and handoffs, which Lean calls waste. Have frontend, UX, server, DBA and QA in the team. **Tip 86, Organize Fully Functional Teams** |
-| **Automation** | Formatting, tests and deploys automated; the team needs tool-building skills |
-| **Know when to stop adding paint** | Give just enough structure, then let individuals shine |
+| **پنجره‌ی شکسته نداشته باشید** | کیفیت مسئله‌ی تیم است؛ یک «افسر کیفیت» مسخره است. کیفیت از اول ساخته می‌شود و بعداً نمی‌چسبد |
+| **قورباغه‌ی آب‌پز** | تیم‌ها فرض می‌کنند کس دیگری دارد حلش می‌کند. همه تغییر دامنه و مقیاس زمانی و محیط را می‌پایند؛ درباره‌ی نیازمندی‌های تازه metric نگه دارید، که نمودار burnup تیرک‌های جابه‌جا‌شده را نشان می‌دهد |
+| **سبد دانش** | نگه‌داری سیستم قدیمی و بازاندیشی فرایند و آزمایش فناوری تازه، که با prototype بررسی می‌شود، و یاد گرفتن را زمان‌بندی کنید. **tip ۸۵، زمان‌بندی‌اش کنید تا اتفاق بیفتد** |
+| **اعلام حضور تیم** | تیم‌های بزرگ بیرون با یک صدا حرف می‌زنند و داخل سرزنده بحث می‌کنند. پروژه را با نامی خارج از عرف و لوگویی سی‌دقیقه‌ای و شلوغ برند کنید |
+| **خودتان را تکرار نکنید** | ارتباط باید بی‌درنگ و بی‌اصطکاک باشد. یک هفته منتظر جلسه ماندن اصطکاک است؛ Andy تیم‌هایی را دیده که جلسه‌ی ایستاده‌ی روزانه‌شان جمعه‌ها بود |
+| **گلوله‌ی tracer تیمی** | نقش‌های جدا دروازه و تحویل‌دهی اضافه می‌کنند، که Lean هدر می‌نامدش. frontend و UX و server و DBA و QA را در تیم داشته باشید. **tip ۸۶، تیم‌های کاملاً کارآ سازمان بدهید** |
+| **خودکارسازی** | قالب‌بندی و تست و deploy خودکار باشند؛ تیم به مهارت ابزارسازی نیاز دارد |
+| **بدانید کِی دیگر رنگ نزنید** | فقط به‌اندازه‌ی کافی ساختار بدهید و بعد بگذارید افراد بدرخشند |
 
-The challenges include the ditch puzzle (4 workers take 6 hours, so how long for 8?) applied to coding, and reading *The Mythical Man-Month*, "buy two copies so you can read it twice as fast" (p. 445).
+چالش‌ها شامل معمای گودال‌اند، یعنی چهار کارگر شش ساعت می‌برند، پس هشت کارگر چقدر؟، که روی کد زدن اعمال می‌شود، و خواندن *The Mythical Man-Month*، یعنی «دو نسخه بخرید تا دو برابر تندتر بخوانیدش» (p. 445).
 
-### Topic 50. Coconuts Don't Cut It
+> **In practice:** تیم داده هم پنجره‌ی شکسته، قورباغه‌ی آب‌پز و DRY دارد، در سطح تیم.
+>
+> **Your turn:** چه کسی مالک کیفیت یک جدول Gold است؟
+>
+> *Answer:* یک نفر یا یک تیم با نام، که در catalog یا README جدول ثبت شده و alertهایش را می‌گیرد. کتاب می‌گوید تیم را بر اساس کارکرد سازمان دهید و مالکیت را روشن کنید، وگرنه همه فکر می‌کنند دیگری درستش می‌کند (pp. 437–445).
 
-After the war, islanders rebuilt the airport from vines, coconut shells and palm fronds, but the planes didn't come: they imitated the form, not the content. This is a **cargo cult** (p. 446). The authors saw a "Scrum" team doing a daily standup once a week, with four-week iterations that became six or eight, because they used a popular agile scheduling tool (pp. 446–447).
+### موضوع ۵۰. نارگیل کار را راه نمی‌اندازد
 
-**Context matters** (p. 447): copying Spotify, Netflix, Stripe or GitLab ignores market, constraints, expertise, size, culture and users. **Tip 87, Do What Works, Not What's Fashionable.** How do you know what works? Try it: pilot with a small team, keep what works, discard the rest. Those companies didn't follow their current processes while growing (pp. 447–448).
+بعد از جنگ، جزیره‌نشین‌ها فرودگاه را از پیچک و پوست نارگیل و برگ نخل ساختند، ولی هواپیماها نیامدند: شکل را تقلید کرده بودند و نه محتوا را. این **کارگو کالت** است (p. 446). نویسنده‌ها تیمی «Scrum» دیدند که جلسه‌ی ایستاده‌ی روزانه را هفته‌ای یک‌بار داشت، با تکرارهای چهار‌هفته‌ای که شش یا هشت هفته می‌شدند، چون ابزار زمان‌بندی چابک محبوبی به کار می‌بردند (pp. 446–447).
 
-**One size fits no one well** (pp. 448–449): certification that rewards memorizing rules is worse; take the best pieces from several methods. Scrum alone doesn't cover technical practice or governance. Sidebar, "Be Like Them!": to operate like Netflix, first get a few hundred thousand servers and tens of millions of users (p. 449).
+**زمینه مهم است** (p. 447): کپی کردن Spotify یا Netflix یا Stripe یا GitLab، بازار و قید و تخصص و اندازه و فرهنگ و کاربر را نادیده می‌گیرد. **tip ۸۷، آن چیزی را بکنید که کار می‌کند، نه آن چیزی که مُد است.** از کجا می‌فهمید چه چیزی کار می‌کند؟ امتحانش کنید: با تیمی کوچک آزمایشی اجرا کنید، آن چیزی را که کار می‌کند نگه دارید، و بقیه را دور بیندازید. آن شرکت‌ها در حین رشد از فرایند فعلی‌شان پیروی نمی‌کردند (pp. 447–448).
 
-**The real goal** (pp. 449–451) is to deliver working software that gives users a new capability at a moment's notice. Shorten the cycle step by step:
+**یک اندازه به هیچ‌کس خوب نمی‌آید** (pp. 448–449): گواهی‌نامه‌ای که حفظ کردن قاعده‌ها را پاداش می‌دهد بدتر است؛ بهترین تکه‌ها را از چند روش بردارید. تنها Scrum نه کار فنی را می‌پوشاند و نه governance را. کادر کناری «مثل آن‌ها باش!»: برای کار کردن مثل Netflix، اول چند صد هزار سرور و چند ده میلیون کاربر بگیرید (p. 449).
+
+**هدف واقعی** (pp. 449–451) تحویل نرم‌افزار در حال کاری است که به کاربرها در یک لحظه قابلیتی تازه بدهد. چرخه را قدم‌به‌قدم کوتاه کنید:
 
 ```mermaid
 flowchart LR
-    Y["years"] --> M["months"] --> W4["four-week sprints"] --> W2["two weeks"] --> W1["one week"] --> D["daily"] --> OD["on demand"]
+    Y["سال"] --> M["ماه"] --> W4["sprintهای چهار‌هفته‌ای"] --> W2["دو هفته"] --> W1["یک هفته"] --> D["روزانه"] --> OD["به‌درخواست"]
 ```
 
-**Tip 88, Deliver When Users Need It.** On demand doesn't mean every minute. It needs the starter kit, trunk-based development and feature switches. Beginners might start with Scrum plus XP's technical practices; experienced teams might use Kanban and Lean. Over-investing in one method calcifies you: "Might as well be using coconuts" (p. 451).
+**نکته‌ی ۸۸، وقتی تحویل بدهید که کاربرها لازم دارند.** به‌درخواست یعنی هر دقیقه نه. به جعبه‌ی شروع و توسعه‌ی trunk‌محور و کلید قابلیت نیاز دارد. تازه‌کارها می‌توانند با Scrum به‌علاوه‌ی کارهای فنی XP شروع کنند؛ و تیم‌های باتجربه می‌توانند Kanban و Lean به کار ببرند. سرمایه‌گذاری بیش از اندازه روی یک روش شما را سخت می‌کند: «همان بهتر که نارگیل به کار می‌بردید» (p. 451).
 
-### Topic 51. Pragmatic Starter Kit
+### موضوع ۵۱. جعبه‌ی شروع pragmatic
 
-A Model-T's starting instructions ran to more than two pages; modern cars start with a button (Whitehead: civilization advances by extending the operations we can perform without thinking) (p. 452). Every recurring task must be automatic and repeatable on any capable machine. The starter kit's three legs are **version control, regression testing and full automation** (pp. 452–453).
+دستور روشن کردن یک Model-T بیشتر از دو صفحه بود؛ خودروی امروزی با یک دکمه روشن می‌شود، و Whitehead می‌گفت تمدن با گسترش کارهایی پیش می‌رود که می‌توانیم بی فکر کردن انجامشان بدهیم (p. 452). هر کار تکرارشونده باید خودکار و روی هر ماشین توانمندی تکرار‌شدنی باشد. سه پایه‌ی جعبه‌ی شروع **کنترل نسخه و تست رگرسیون و خودکارسازی کامل‌اند** (pp. 452–453).
 
-**Drive with version control** (pp. 453–454):
+**با کنترل نسخه برانید** (pp. 453–454):
 
-- Build machines become ephemeral cloud instances, not "one hallowed, creaky machine in the corner."
-- Deployment configuration is versioned too.
-- Commits trigger build, test and deploy in a container, and a tag specifies a release.
+- ماشین‌های build به نمونه‌های transientی cloud تبدیل می‌شوند و نه «یک ماشین مقدس و قیژ‌قیژی در گوشه».
+- تنظیم deploy هم نسخه‌دار می‌شود.
+- همه‌ی commitها build و تست و deploy را در یک container راه می‌اندازند، و یک tag یک release را تعیین می‌کند.
 
-**Tip 89, Use Version Control to Drive Builds, Tests, and Releases.**
+**نکته‌ی ۸۹، از کنترل نسخه برای راندن build و تست و release استفاده کنید.**
 
-**Ruthless and continuous testing** (pp. 454–459). Developers test gently, avoiding the weak spots; Pragmatic Programmers find their bugs now. Fine nets (unit tests) catch minnows and coarse nets (integration tests) catch sharks. **Tip 90, Test Early, Test Often, Test Automatically.** A good project may have more test code than production code. **Tip 91, Coding Ain't Done 'Til All the Tests Run.** The test environment should match production: gaps are where bugs breed.
+**تست بی‌رحم و پیوسته** (pp. 454–459). developerها نرم تست می‌کنند و از نقطه‌های ضعیف می‌پرهیزند؛ برنامه‌نویس pragmatic باگ‌هایش را همین حالا پیدا می‌کند. تورهای ریز، یعنی unit test، ماهی‌ریزه‌ها را می‌گیرند و تورهای درشت، یعنی تست یکپارچه‌سازی، کوسه‌ها را. **tip ۹۰، زود تست کنید، زیاد تست کنید، خودکار تست کنید.** یک پروژه‌ی خوب می‌تواند کد تست بیشتری از کد تولید داشته باشد. **tip ۹۱، کد زدن تا همه‌ی تست‌ها اجرا نشوند تمام نشده.** محیط تست باید با تولید بخورد: فاصله‌ها جایی‌اند که باگ در آن زاد‌و‌ولد می‌کند.
 
-| Kind of test | What it shows (pp. 455–457) |
+| گونه‌ی تست | چه چیزی را نشان می‌دهد (pp. 455–457) |
 |---|---|
-| **Unit** | Each module honours its contract; the foundation of everything else |
-| **Integration** | Subsystems work together; often the single largest source of bugs |
-| **Validation and verification** | It's what users *need*, with their real access patterns |
-| **Performance** | It meets requirements under real load; is it scalable? |
+| **unit** | هر ماژول قراردادش را رعایت می‌کند؛ پایه‌ی هر چیز دیگری |
+| **یکپارچه‌سازی** | زیرسیستم‌ها با هم کار می‌کنند؛ اغلب تنها بزرگ‌ترین سرچشمه‌ی باگ |
+| **اعتبارسنجی و تأیید** | همان چیزی است که کاربرها *لازم* دارند، با الگوهای دسترسی واقعی‌شان |
+| **performance** | زیر بار واقعی نیازمندی‌ها را برآورده می‌کند؛ مقیاس‌پذیر است؟ |
 
-**Testing the tests** (p. 457): cause the bug deliberately and make sure the test complains. **Tip 92, Use Saboteurs to Test Your Testing.** Introduce bugs on a separate branch, or use Netflix's Chaos Monkey to kill services.
+**تست کردن تست‌ها** (p. 457): آگاهانه باگ را بسازید و مطمئن شوید تست شکایت می‌کند. **tip ۹۲، برای تست کردن تستتان از خرابکار استفاده کنید.** باگ‌ها را روی branchی جدا وارد کنید، یا از Chaos Monkey در Netflix استفاده کنید تا سرویس‌ها را بکشد.
 
-**Testing thoroughly** (pp. 457–458): coverage tools give a feel, but don't expect 100%. What matters is states. `int test(int a, int b) { return a / (a + b); }` with a and b in 0–999 has 1,000,000 logical states, one of which (a + b = 0) fails, and executing the line doesn't tell you that. **Tip 93, Test State Coverage, Not Code Coverage.** Property-based testing generates states for you (p. 458).
+**تست کردن جامع** (pp. 457–458): ابزارهای پوشش حسی می‌دهند، ولی انتظار صد درصد نداشته باشید. آن چیزی که مهم است حالت‌هاست. تابع `int test(int a, int b) { return a / (a + b); }` با a و b در بازه‌ی صفر تا ۹۹۹، یک میلیون حالت منطقی دارد، که یکی‌شان، یعنی a + b = 0، شکست می‌خورد، و اجرا شدن آن خط این را به شما نمی‌گوید. **tip ۹۳، پوشش حالت را تست کنید، نه پوشش کد.** تست property‌محور حالت‌ها را برایتان می‌سازد (p. 458).
 
-> **Try it:** [Saboteurs and state coverage](../widgets/09-saboteurs.html) — plant bugs in a small function and see which ones its test suite catches, then sample the book's `a / (a + b)` input space and see how rarely random tests find the one failing state.
+> **Try it:** [خرابکارها و پوشش حالت](../widgets/09-saboteurs.html)؛ در تابعی کوچک باگ بکارید و ببینید مجموعه‌ی تستش کدام‌ها را می‌گیرد، بعد از فضای ورودی `a / (a + b)` کتاب نمونه بگیرید و ببینید تست تصادفی چقدر کم آن یک حالت شکست‌خورده را پیدا می‌کند.
 
-**Tightening the net** (p. 459): if a bug slips through, add a test to trap it next time. **Tip 94, Find Bugs Once**: once a human tester finds a bug, it's the last time a human finds it.
+**تنگ کردن تور** (p. 459): اگر باگی رد شد، تستی اضافه کنید که بار بعد بگیردش. **tip ۹۴، باگ‌ها را یک‌بار پیدا کنید**: همین که یک تست‌کننده‌ی انسانی باگی را پیدا کرد، آخرین باری است که انسانی پیدایش می‌کند.
 
-**Full automation** (pp. 459–460): use shell scripts with rsync and ssh, or Ansible, Puppet, Chef or Salt, with no manual intervention. At one client, many pages of click-here IDE setup left every machine slightly different, and bugs appeared on some machines only. **Tip 95, Don't Use Manual Procedures.** Scripts are repeatable and versioned; a manual step "just for this one part" is a very large broken window.
+**خودکارسازی کامل** (pp. 459–460): از اسکریپت shell با rsync و ssh استفاده کنید، یا Ansible و Puppet و Chef و Salt، بی هیچ دخالت دستی. در یک مشتری، چند صفحه راه‌اندازی IDE از جنس «این‌جا را کلیک کن» باعث شده بود هر ماشینی کمی فرق کند، و باگ‌ها فقط روی بعضی ماشین‌ها در بیایند. **tip ۹۵، از رویه‌ی دستی استفاده نکنید.** اسکریپت‌ها تکرار‌شدنی و نسخه‌دارند؛ و یک مرحله‌ی دستی «فقط برای همین یک بخش» پنجره‌ی شکسته‌ی خیلی بزرگی است.
 
-### Topic 52. Delight Your Users
+> **In practice:** جعبه‌ی شروع کتاب در stack ما: کنترل نسخه در GitLab، تست در GitLab CI، و خودکارسازی کامل deploy با Argo CD.
+>
+> **Your turn:** کدام کار تیم هنوز دستی است و باید خودکار شود؟
+>
+> *Answer:* هر چیزی که یک بار با `kubectl` یا SSH دستی انجام شده، مثلاً ساختن جدول ClickHouse یا تغییر یک host؛ آن را به migration در CI یا playbook در Ansible ببرید. کتاب می‌گوید هر چیز دستی یک روز خطا می‌کند (pp. 452–461).
 
-The goal is to delight users (Guy Kawasaki's epigraph), not to mine their data or count eyeballs; delivering working software on time isn't enough (p. 462). Users' expectations aren't about software, so ask: *how will you know that we've all been successful a month (or a year) after this project is done?* (pp. 462–463).
+### موضوع ۵۲. کاربرهایتان را خوشحال کنید
 
-The answers can surprise you. Recommendations might be judged on customer retention; a database consolidation on data quality or cost savings. Then (p. 463):
+هدف خوشحال کردن کاربرهاست، به گفته‌ی سرآغاز Guy Kawasaki، و نه کاویدن داده‌شان یا شمردن چشم‌ها؛ تحویل نرم‌افزار در حال کار سر وقت کافی نیست (p. 462). انتظارهای کاربرها درباره‌ی نرم‌افزار نیست، پس بپرسید: *یک ماه، یا یک سال، بعد از تمام شدن این پروژه، از کجا می‌فهمید همه‌مان موفق بوده‌ایم؟* (pp. 462–463).
 
-- Make sure everyone on the team is clear about these expectations.
-- Choose the path that moves closer to them.
-- Critically analyze requirements against them. Stated requirements are often an amateur implementation plan; suggest changes that move closer to the objective.
-- Keep thinking about them as the project progresses.
+پاسخ‌ها می‌توانند غافلگیرتان کنند. توصیه‌گر ممکن است با نگه داشتن مشتری سنجیده شود؛ و یکپارچه کردن دیتابیس با کیفیت داده یا صرفه‌جویی هزینه. بعد (p. 463):
 
-**Tip 96, Delight Users, Don't Just Deliver Code** (p. 464). Your title should really be "Problem Solver."
+- مطمئن شوید همه در تیم درباره‌ی این انتظارها روشن‌اند.
+- راهی را انتخاب کنید که به آن‌ها نزدیک‌تر می‌شود.
+- نیازمندی‌ها را نقادانه در برابرشان تحلیل کنید. نیازمندی بیان‌شده اغلب نقشه‌ی پیاده‌سازی آماتوری است؛ تغییرهایی پیشنهاد بدهید که به هدف نزدیک‌تر می‌شوند.
+- در طول پیش رفتن پروژه مدام به آن‌ها فکر کنید.
 
-### Topic 53. Pride and Prejudice
+**نکته‌ی ۹۶، کاربرها را خوشحال کنید، نه فقط کد تحویل بدهید** (p. 464). عنوان شما در واقع باید «حل‌کننده‌ی مسئله» باشد.
 
-**Tip 97, Sign Your Work** (p. 465). Artisans signed their work. But code ownership can breed territorial fiefdoms and prejudice against coworkers' code, so follow the Golden Rule and mutual respect. Anonymity breeds sloppiness. Code must be owned, but not necessarily by an individual: XP's communal ownership needs practices such as pairing to guard against anonymity. Your signature should signal quality: solid, well written, tested and documented (pp. 465–466).
+### موضوع ۵۳. غرور و تعصب
 
-## Trade-offs at a glance
+**نکته‌ی ۹۷، کارتان را امضا کنید** (p. 465). صنعتگرها کارشان را امضا می‌کردند. ولی مالکیت کد می‌تواند ملوک‌الطوایفی و تعصب در برابر کد همکارها بپروراند، پس قاعده‌ی طلایی و احترام متقابل را رعایت کنید. گمنامی شلختگی می‌پروراند. کد باید مالک داشته باشد، ولی لازم نیست مالکش فرد باشد: مالکیت جمعی XP به کارهایی مثل جفتی کار کردن نیاز دارد تا جلوی گمنامی را بگیرد. امضای شما باید از کیفیت خبر بدهد: محکم و خوش‌نوشته و تست‌شده و مستند (pp. 465–466).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Large or shifting teams | Headcount | Communication breaks down; no trust |
-| Small, stable, full-function team | Trust, end-to-end delivery | Needs broad skills in one team |
-| Specialist teams with handoffs | Deep expertise per stage | Gates, waiting, waste; context lost |
-| Copy a famous company's process | Off-the-shelf answers | Different context; cargo cult |
-| Pilot and keep what works | Fits your context | Requires ongoing experiment |
-| Manual build and deploy | No up-front scripting | Unrepeatable; machine drift; a broken window |
-| Code coverage targets | Easy to measure | Lines aren't states |
-| Saboteurs, chaos testing | Confidence the alarms work | Effort; must be safe to run |
-| Individual or communal ownership | Pride, accountability | Fiefdoms, or anonymity without pairing |
+| تیم بزرگ یا در حال جابه‌جایی | شمار نفرات | ارتباط می‌شکند؛ اعتمادی نیست |
+| تیم کوچک و پایدار و کاملاً کارآ | اعتماد، تحویل سر‌تا‌سری | به مهارت‌های گسترده در یک تیم نیاز دارد |
+| تیم‌های متخصص با تحویل‌دهی | تخصص عمیق در هر مرحله | دروازه و انتظار و هدر؛ زمینه گم می‌شود |
+| کپی کردن فرایند شرکتی معروف | پاسخ‌های آماده | زمینه‌ی متفاوت؛ کارگو کالت |
+| اجرای آزمایشی و نگه داشتن آن چیزی که کار می‌کند | به زمینه‌ی شما می‌خورد | آزمایش پیوسته می‌خواهد |
+| build و deploy دستی | بی اسکریپت‌نویسی اولیه | تکرار‌نشدنی؛ رانش ماشین‌ها؛ یک پنجره‌ی شکسته |
+| هدف پوشش کد | اندازه‌گیری‌اش آسان است | خط‌ها حالت نیستند |
+| خرابکار و تست آشوب | اطمینان از این که هشدارها کار می‌کنند | تلاش؛ باید اجرایش امن باشد |
+| مالکیت فردی یا جمعی | غرور، پاسخ‌گویی | ملوک‌الطوایفی، یا گمنامی بی جفتی کار کردن |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Communication paths.** The footnote on p. 467 gives the growth formula; the standard form is n(n − 1)/2 pairs, so 10 people have 45 paths and 50 people have 1,225. Brooks' law ("adding manpower to a late software project makes it later") is the [Mythical Man-Month](https://en.wikipedia.org/wiki/The_Mythical_Man-Month) result the challenge on p. 445 points to.
-- **Mutation testing** automates the book's saboteurs: tools such as PIT (Java), mutmut (Python) and Stryker (JavaScript) generate small code changes and report which survive the tests. The [lab](../lab/09-saboteurs/README.md) builds a tiny version with the standard library.
-- **DORA metrics** (Forsgren, Humble and Kim, *Accelerate*, 2018) measure the "deliver when users need it" goal: deployment frequency, lead time for changes, change failure rate and time to restore.
+- **مسیرهای ارتباطی.** پانویس ص. ۴۶۷ فرمول رشد را می‌دهد؛ شکل استاندارد n(n − 1)/2 زوج است، پس ده نفر ۴۵ مسیر و پنجاه نفر ۱۲۲۵ مسیر دارند. قانون Brooks، یعنی «اضافه کردن نیروی انسانی به پروژه‌ی نرم‌افزاری عقب‌افتاده، عقب‌تر می‌اندازدش»، همان نتیجه‌ی [Mythical Man-Month](https://en.wikipedia.org/wiki/The_Mythical_Man-Month) است که چالش ص. ۴۴۵ به آن اشاره دارد.
+- **تست mutantی** خرابکارهای کتاب را خودکار می‌کند: ابزارهایی مثل PIT برای Java و mutmut برای Python و Stryker برای جاوااسکریپت تغییرهای کوچک کد می‌سازند و خبر می‌دهند کدام‌ها جان سالم می‌برند. [آزمایش](../lab/09-saboteurs/README.md) نسخه‌ای کوچک را با کتابخانه‌ی استاندارد می‌سازد.
+- **همه‌ی metricهای DORA** (Forsgren و Humble و Kim، کتاب *Accelerate*، سال ۲۰۱۸) همان هدف «وقتی تحویل بده که کاربرها لازم دارند» را اندازه می‌گیرند: بسامد deploy، زمان رسیدن تغییر، نرخ شکست تغییر، و زمان برگرداندن.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. A Pragmatic Philosophy](01-a-pragmatic-philosophy.md) (broken windows, boiled frogs, knowledge portfolio, communicate), [2. A Pragmatic Approach](02-a-pragmatic-approach.md) (DRY, tracer bullets), [3. The Basic Tools](03-the-basic-tools.md) (version control, shell games), [7. While You Are Coding](07-while-you-are-coding.md) (test to code, property-based testing), [8. Before the Project](08-before-the-project.md) (requirements, agility).
-- **Run it:** [Saboteurs: do the tests catch planted bugs?](../lab/09-saboteurs/README.md) — generates mutants of a small function, runs a weak and a strong test suite against each, and reports which bugs survive; then samples the `a / (a + b)` state space.
+- **فصل‌های مرتبط:** [فصل ۱: فلسفه‌ی pragmatic](01-a-pragmatic-philosophy.md) که پنجره‌ی شکسته و قورباغه‌ی آب‌پز و سبد دانش و ارتباط گرفتن را دارد، [فصل ۲: رویکرد pragmatic](02-a-pragmatic-approach.md) که DRY و گلوله‌ی tracer را دارد، [فصل ۳: ابزارهای پایه](03-the-basic-tools.md) که کنترل نسخه و بازی‌های shell را دارد، [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که از تست به کد و تست property‌محور را دارد، و [فصل ۸: پیش از پروژه](08-before-the-project.md) که نیازمندی‌ها و چابکی را دارد.
+- **Run it:** [خرابکارها: تست‌ها باگ‌های کاشته‌شده را می‌گیرند؟](../lab/09-saboteurs/README.md)؛ mutantهایی از تابعی کوچک می‌سازد، یک مجموعه‌ی تست ضعیف و یک قوی را روی هر کدام اجرا می‌کند، و خبر می‌دهد کدام باگ‌ها جان سالم می‌برند؛ و بعد از فضای حالت `a / (a + b)` نمونه می‌گیرد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **How big is a pragmatic team, and what isn't a team?**
+1. **یک تیم pragmatic چقدر بزرگ است، و چه چیزی تیم نیست؟**
 
-   *Answer:* Under 10–12 stable members who trust each other; fifty people are a horde, and constantly reassigned strangers are "sharing a bus stop in the rain" (pp. 437–438).
+   *Answer:* زیر ده تا دوازده عضو پایدار که به هم اعتماد دارند؛ پنجاه نفر یک گله‌اند، و غریبه‌هایی که مدام جابه‌جا می‌شوند «زیر باران یک ایستگاه اتوبوس را شریک شده‌اند» (pp. 437–438).
 
-2. **Why does the book call a "quality officer" ridiculous?**
+2. **چرا کتاب یک «افسر کیفیت» را مسخره می‌نامد؟**
 
-   *Answer:* Quality can only come from every team member's contributions; it's built in, not bolted on (p. 438).
+   *Answer:* کیفیت فقط می‌تواند از سهم هر عضو تیم بیاید؛ از اول ساخته می‌شود و بعداً نمی‌چسبد (p. 438).
 
-3. **What is a cargo cult, in the book's software example?**
+3. **کارگو کالت در نمونه‌ی نرم‌افزاری کتاب چیست؟**
 
-   *Answer:* Imitating form without content: a team "doing Scrum" with a weekly daily standup and slipping four-week iterations, relying on an agile scheduling tool (pp. 446–447).
+   *Answer:* تقلید شکل بی محتوا: تیمی که «Scrum کار می‌کند» با جلسه‌ی ایستاده‌ی روزانه‌ی هفتگی و تکرارهای چهار‌هفته‌ای که می‌کشند، و به ابزار زمان‌بندی چابک تکیه دارد (pp. 446–447).
 
-4. **What are the three legs of the Pragmatic Starter Kit?**
+4. **سه پایه‌ی جعبه‌ی شروع pragmatic چیست؟**
 
-   *Answer:* Version control, regression testing, and full automation (p. 453).
+   *Answer:* کنترل نسخه، تست رگرسیون، و خودکارسازی کامل (p. 453).
 
-5. **How should releases to staging or production be specified?**
+5. **عمل release به staging یا تولید چطور باید تعیین شود؟**
 
-   *Answer:* By a tag in version control; builds and tests are triggered by commits or pushes and run in a container in the cloud (pp. 453–454).
+   *Answer:* با یک tag در کنترل نسخه؛ و build و تست با commit یا push راه می‌افتند و در یک container در cloud اجرا می‌شوند (pp. 453–454).
 
-6. **Why is code coverage not enough, using the book's function?**
-   - [ ] Because coverage tools are inaccurate
-   - [x] `a / (a + b)` has 1,000,000 states and one fails; executing the line doesn't reveal it
-   - [ ] Because integration tests matter more
+6. **با تابع کتاب، چرا پوشش کد کافی نیست؟**
+   - [ ] چون ابزارهای پوشش نادقیق‌اند
+   - [x] تابع `a / (a + b)` یک میلیون حالت دارد و یکی شکست می‌خورد؛ و اجرا شدن آن خط آشکارش نمی‌کند
+   - [ ] چون تست یکپارچه‌سازی مهم‌تر است
 
-   *Answer:* States aren't lines of code; test state coverage (p. 458).
+   *Answer:* حالت‌ها خط کد نیستند؛ پوشش حالت را تست کنید (p. 458).
 
-7. **What does "Find Bugs Once" require?**
+7. **قاعده‌ی «باگ‌ها را یک‌بار پیدا کنید» چه می‌خواهد؟**
 
-   *Answer:* Once a human tester finds a bug, add an automated test so it's the last time a human finds it, however trivial (p. 459).
+   *Answer:* همین که یک تست‌کننده‌ی انسانی باگی را پیدا کرد، تستی خودکار اضافه کنید تا آخرین باری باشد که انسانی پیدایش می‌کند، هر قدر هم پیش‌پاافتاده باشد (p. 459).
 
-8. **What question surfaces users' real expectations?**
+8. **کدام پرسش انتظارهای واقعی کاربرها را بیرون می‌کشد؟**
 
-   *Answer:* "How will you know that we've all been successful a month (or a year) after this project is done?" (pp. 462–463).
+   *Answer:* «یک ماه، یا یک سال، بعد از تمام شدن این پروژه، از کجا می‌فهمید همه‌مان موفق بوده‌ایم؟» (pp. 462–463).

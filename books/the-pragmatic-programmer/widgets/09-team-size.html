@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Team Size and Communication Paths</title>
-<meta name="description" content="Grow a team and watch the pairwise communication paths multiply, with the book&#x27;s ten-to-twelve guideline and its horde of fifty marked; then split a large group into small teams. Illustrates The Pragmatic Programmer, Topic 49.">
+<title>اندازه‌ی تیم و مسیرهای ارتباطی</title>
+<meta name="description" content="تیمی را بزرگ کنید و ببینید مسیرهای ارتباطی دو‌به‌دو چند برابر می‌شوند، با راهنمای ده تا دوازده‌نفری کتاب و گله‌ی پنجاه‌نفری‌اش که علامت خورده‌اند؛ بعد گروهی بزرگ را به تیم‌های کوچک بشکنید. تصویری از موضوع ۴۹ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>.net { width: 100%; max-width: 420px; display: block; margin: 0 auto; } .net line { stroke: var(--accent); stroke-opacity: .25; } .net line.x { stroke: var(--s2); stroke-opacity: .7; stroke-width: 1.5; }
   .net circle { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; } .net circle.lead { fill: var(--s2); stroke: var(--s2); }
@@ -13,50 +13,50 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/09-pragmatic-projects.html">Chapter 9</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Team size</span>
+      <a href="../chapters/09-pragmatic-projects.html">فصل ۹</a><span aria-hidden="true">/</span>
+      <span aria-current="page">اندازه‌ی تیم</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 9 · Pragmatic Projects</div>
-  <h1>Team size and communication paths</h1>
-  <p class="lede">A pragmatic team is <strong>small, under 10–12</strong> people, and stable. Fifty people aren’t a team; they’re a horde. One reason, from the book’s footnote: communication paths grow much faster than the number of people, until communication breaks down.</p>
-  <p class="source-note">Illustrates Topic 49, Pragmatic Teams (pp. 437–438, Tip 84, and footnote 75 on p. 467). The pair count n(n − 1)/2 is the standard formula for the growth the footnote describes. Splitting into teams that talk through one liaison each is the vault’s model. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۹ · پروژه‌های pragmatic</div>
+  <h1>اندازه‌ی تیم و مسیرهای ارتباطی</h1>
+  <p class="lede">یک تیم pragmatic <strong>کوچک و زیر ده تا دوازده</strong> نفر و پایدار است. پنجاه نفر تیم نیستند؛ یک گله‌اند. یک دلیلش، از پانویس کتاب: مسیرهای ارتباطی خیلی تندتر از شمار آدم‌ها رشد می‌کنند، تا جایی که ارتباط می‌شکند.</p>
+  <p class="source-note">تصویری از موضوع ۴۹، تیم‌های pragmatic (صص. ۴۳۷–۴۳۸، tip ۸۴، و پانویس ۷۵ در ص. ۴۶۷). شمار زوج‌ها، یعنی n(n − 1)/2، فرمول استاندارد همان رشدی است که پانویس توضیحش می‌دهد. شکستن به تیم‌هایی که از راه یک interface با هم حرف می‌زنند مدل vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title" id="nt">People and their communication paths</p><svg class="net" id="net" viewBox="0 0 400 400" role="img"></svg>
+      <div class="panel"><p class="panel-title" id="nt">آدم‌ها و مسیرهای ارتباطی‌شان</p><svg class="net" id="net" viewBox="0 0 400 400" role="img"></svg>
         <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Paths by group size</p><svg id="chart" role="img" aria-label="Communication paths by number of people"></svg></div>
+      <div class="panel"><p class="panel-title">مسیرها بر حسب اندازه‌ی گروه</p><svg id="chart" role="img" aria-label="مسیرهای ارتباطی بر حسب شمار آدم‌ها"></svg></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="n"></div><div id="split" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="n"></div><div id="split" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Each new person adds a path to everyone already there</strong>: 10 people have 45 paths, 12 have 66, and 50 have 1,225.</li>
-    <li><strong>Small stable teams</strong> keep that number low enough that everyone can know and trust everyone else.</li>
-    <li><strong>Splitting a horde into teams</strong> cuts the paths sharply, but only if the teams are fully functional (Tip 86), so most work doesn’t need the paths between teams.</li>
+    <li><strong>هر آدم تازه به هر کسی که از قبل هست یک مسیر اضافه می‌کند</strong>: ده نفر ۴۵ مسیر دارند، دوازده نفر ۶۶ مسیر، و پنجاه نفر ۱۲۲۵ مسیر.</li>
+    <li><strong>تیم‌های کوچک و پایدار</strong> آن شمار را آن‌قدر کم نگه می‌دارند که هر کسی بتواند همه را بشناسد و به آن‌ها اعتماد کند.</li>
+    <li><strong>شکستن یک گله به تیم‌ها</strong> مسیرها را تند پایین می‌آورد، ولی فقط اگر تیم‌ها کاملاً کارآ باشند (tip ۸۶)، تا بیشتر کار به مسیرهای بین تیم‌ها نیاز نداشته باشد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/09-pragmatic-projects.html"><small>Lesson</small>9. Pragmatic Projects</a></li>
+    <li><a href="../chapters/09-pragmatic-projects.html"><small>درس</small>فصل ۹: پروژه‌های pragmatic</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,28 +83,28 @@ function stats(rows) {
     if (t > 1) for (var i = 0; i < leads.length; i++) for (var j2 = i + 1; j2 < leads.length; j2++) g.appendChild(Kit.svg("line", { class: "x", x1: pos[leads[i]].x, y1: pos[leads[i]].y, x2: pos[leads[j2]].x, y2: pos[leads[j2]].y }));
     pos.forEach(function (p) { g.appendChild(Kit.svg("circle", { class: p.lead && t > 1 ? "lead" : "", cx: p.x, cy: p.y, r: n > 40 ? 3.5 : 6 })); });
     var total = t > 1 ? s.inner + s.cross : pairs(n);
-    g.setAttribute("aria-label", n + " people" + (t > 1 ? " in " + t + " teams" : "") + ", " + total + " communication paths");
-    document.getElementById("nt").textContent = n + " people" + (t > 1 ? " in " + t + " teams of " + s.sizes.join(", ") + " (liaisons in orange)" : "") + ": " + total + " paths";
+    g.setAttribute("aria-label", n + " نفر" + (t > 1 ? " در " + t + " تیم" : "") + " با " + total + " مسیر ارتباطی");
+    document.getElementById("nt").textContent = n + " نفر" + (t > 1 ? " در " + t + " تیم با اندازه‌های " + s.sizes.join(", ") + "، که interfaceها نارنجی‌اند" : "") + ": " + total + " مسیر";
     var v = document.getElementById("verdict"), big = Math.max.apply(null, s.sizes); v.className = "callout " + (big <= 12 ? "ok" : big < 50 ? "warn" : "bad");
-    v.textContent = big <= 12 ? "A pragmatic team: small enough for everyone to know and trust everyone." : big >= 50 ? "A horde, not a team: " + pairs(big) + " paths inside one group." : "Bigger than the book’s 10–12: " + pairs(big) + " paths inside the largest group.";
+    v.textContent = big <= 12 ? "یک تیم pragmatic: آن‌قدر کوچک که هر کسی همه را بشناسد و به آن‌ها اعتماد کند." : big >= 50 ? "یک گله است و نه تیم: " + pairs(big) + " مسیر داخل یک گروه." : "بزرگ‌تر از ده تا دوازده‌ی کتاب: " + pairs(big) + " مسیر داخل بزرگ‌ترین گروه.";
     var pts = []; for (var k = 1; k <= 60; k++) pts.push([k, pairs(k)]);
-    Kit.lineChart(document.getElementById("chart"), { xMax: 60, yMax: 1800, xLabel: "people in one group", yLabel: "paths", series: [{ label: "n(n − 1)/2", cls: "s1", points: pts }], bands: [{ from: 10, to: 12, label: "10–12" }], marks: [{ x: 50, label: "horde" }, { x: n, label: "you" }] });
-    stats([["People", n], ["Paths (one group)", pairs(n), n > 12 ? "bad" : "ok"], ["Paths with teams", total, total < pairs(n) ? "ok" : ""], ["Largest group", big]]);
+    Kit.lineChart(document.getElementById("chart"), { xMax: 60, yMax: 1800, xLabel: "آدم در یک گروه", yLabel: "مسیر", series: [{ label: "n(n − 1)/2", cls: "s1", points: pts }], bands: [{ from: 10, to: 12, label: "۱۰ تا ۱۲" }], marks: [{ x: 50, label: "گله" }, { x: n, label: "شما" }] });
+    stats([["آدم", n], ["مسیر در یک گروه", pairs(n), n > 12 ? "bad" : "ok"], ["مسیر با تیم‌ها", total, total < pairs(n) ? "ok" : ""], ["بزرگ‌ترین گروه", big]]);
   }
-  document.getElementById("n").appendChild(Kit.slider({ label: "People", min: 2, max: 60, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; render(); if (v === 13) log.add("13 people: past the book’s 10–12.", "warn"); if (v === 50) log.add("50 people: a horde.", "bad"); } }).element);
-  document.getElementById("split").appendChild(Kit.slider({ label: "Split into teams", min: 1, max: 8, step: 1, value: 1, onInput: function (v) { cfg.t = v; render(); log.add(v === 1 ? "One group" : "Split into " + v + " teams", "muted"); } }).element);
+  document.getElementById("n").appendChild(Kit.slider({ label: "آدم‌ها", min: 2, max: 60, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; render(); if (v === 13) log.add("سیزده نفر: از ده تا دوازده‌ی کتاب گذشته.", "warn"); if (v === 50) log.add("پنجاه نفر: یک گله.", "bad"); } }).element);
+  document.getElementById("split").appendChild(Kit.slider({ label: "شکستن به تیم", min: 1, max: 8, step: 1, value: 1, onInput: function (v) { cfg.t = v; render(); log.add(v === 1 ? "یک گروه" : "شکسته به " + v + " تیم", "muted"); } }).element);
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How big is a pragmatic team, according to the book?",
-      options: ["Under 10–12 people", "About 50", "As big as the project needs"], answer: 0,
-      explain: "p. 437." },
-    { q: "How many pairwise communication paths does a team of 10 have?",
-      options: ["10", "45", "100"], answer: 1,
-      explain: "10 × 9 / 2. The footnote on p. 467 describes this growth." },
-    { q: "Why does the book want teams to be stable as well as small?",
-      options: ["To cut costs", "So that everyone knows, trusts and depends on each other", "To simplify payroll"], answer: 1,
-      explain: "pp. 437–438." }
+    { q: "به گفته‌ی کتاب، یک تیم pragmatic چقدر بزرگ است؟",
+      options: ["زیر ده تا دوازده نفر", "حدود پنجاه نفر", "هر قدر که پروژه لازم دارد"], answer: 0,
+      explain: "صفحه‌ی ۴۳۷." },
+    { q: "تیمی ده‌نفره چند مسیر ارتباطی دو‌به‌دو دارد؟",
+      options: ["ده", "۴۵", "صد"], answer: 1,
+      explain: "عبارت ۱۰ × ۹ تقسیم بر ۲. پانویس ص. ۴۶۷ همین رشد را توضیح می‌دهد." },
+    { q: "چرا کتاب می‌خواهد تیم‌ها جز کوچک بودن پایدار هم باشند؟",
+      options: ["برای کم کردن هزینه", "تا هر کسی بقیه را بشناسد و به آن‌ها اعتماد کند و به آن‌ها تکیه", "برای ساده کردن حقوق‌و‌دستمزد"], answer: 1,
+      explain: "صفحه‌های ۴۳۷–۴۳۸." }
   ]);
 })();
 </script>

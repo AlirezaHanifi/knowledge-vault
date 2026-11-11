@@ -1,18 +1,20 @@
-# Counting the orders
+# شمردن مرتبه‌ها
 
-Test your estimates: run the code at several sizes and look at the shape. Instead of timing, which is noisy, this script counts comparisons for linear search (a miss), binary search, insertion sort on random and on sorted input, and merge sort, at n = 250 to 4,000. It then fits the growth exponent as the slope of log(count) against log(n).
+تخمین‌هایتان را تست کنید: کد را در چند اندازه اجرا کنید و به شکلش نگاه. به‌جای زمان‌سنجی، که پرنوفه است، این اسکریپت مقایسه‌ها را برای جست‌و‌جوی خطی در حالت نیافتن، جست‌و‌جوی دودویی، مرتب‌سازی درجی روی ورودی تصادفی و مرتب، و مرتب‌سازی ادغامی، در n از ۲۵۰ تا ۴۰۰۰ می‌شمارد. بعد توان رشد را به‌عنوان شیب لگاریتم شمارش در برابر لگاریتم n برآورد می‌کند.
 
-*Illustrates The Pragmatic Programmer, Topic 39, Algorithm Speed, pp. 343–351 (Tips 63–64): estimate the order of your algorithms, then test the estimates by varying the input size, and use profilers to count steps rather than time. The algorithms, sizes and fitting are the vault's (seeded).*
+*این آزمایش موضوع ۳۹ از کتاب The Pragmatic Programmer، یعنی سرعت الگوریتم، صص. ۳۴۳–۳۵۱ با tipهای ۶۳ و ۶۴ را نشان می‌دهد: مرتبه‌ی الگوریتم‌هایتان را تخمین بزنید، بعد تخمین‌ها را با عوض کردن اندازه‌ی ورودی تست کنید، و از profiler برای شمردن قدم‌ها استفاده کنید و نه زمان. الگوریتم‌ها و اندازه‌ها و برآورد مال خود vault است و با seed ثابت.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 operation_counts.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Comparisons counted at each n; the exponent is the slope of log(count) against log(n)
@@ -27,13 +29,13 @@ merge sort                         1,672     3,845     8,672    19,406    42,847
 Doubling n doubles a linear count, quadruples a quadratic one, and adds about one comparison to binary search.
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Linear search has a slope of exactly 1, and insertion sort on random input almost exactly 2: doubling n quadruples the work.
-- Binary search adds about one comparison per doubling. Its slope near 0 is the log–log signature of O(lg n).
-- Merge sort's slope is a little above 1, the signature of O(n lg n) over this range.
-- Insertion sort on already-sorted input is linear. The book's warning cuts both ways: an algorithm's behaviour can change with the order of its input, not just its size.
+- جست‌و‌جوی خطی شیبی دقیقاً برابر یک دارد، و مرتب‌سازی درجی روی ورودی تصادفی تقریباً دقیقاً دو: دو برابر کردن n کار را چهار برابر می‌کند.
+- جست‌و‌جوی دودویی با هر دو برابر شدن حدود یک مقایسه اضافه می‌کند. شیب نزدیک صفرش امضای log–log برای O(lg n) است.
+- شیب مرتب‌سازی mergeی کمی بالای یک است، یعنی امضای O(n lg n) در این بازه.
+- مرتب‌سازی درجی روی ورودی از‌قبل‌مرتب خطی است. هشدار کتاب از دو سو می‌برد: رفتار یک الگوریتم می‌تواند با ترتیب ورودی‌اش عوض شود و نه فقط با اندازه‌اش.
 
-## Related
+## پیوندها
 
-- Chapter note: [7. While You Are Coding](../../chapters/07-while-you-are-coding.md) — Topic 39, Algorithm Speed, pp. 343–351
+- یادداشت فصل: [فصل ۷: وقتی کد می‌زنید](../../chapters/07-while-you-are-coding.md) — موضوع ۳۹، سرعت الگوریتم، صص. ۳۴۳–۳۵۱

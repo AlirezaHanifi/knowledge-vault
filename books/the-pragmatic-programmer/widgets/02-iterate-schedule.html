@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Iterating the Schedule</title>
-<meta name="description" content="Estimate a project up front, then run it one iteration at a time and watch the forecast based on the team&#x27;s measured pace close in on the real finish. Illustrates The Pragmatic Programmer, Topic 15.">
+<title>تکرار کردن زمان‌بندی</title>
+<meta name="description" content="پروژه‌ای را از اول تخمین بزنید، بعد تکرار‌به‌تکرار اجرایش کنید و ببینید پیش‌بینی‌ای که بر پایه‌ی سرعت اندازه‌گیری‌شده‌ی تیم است چطور به پایان واقعی نزدیک می‌شود. تصویری از موضوع ۱۵ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
 </style>
@@ -12,49 +12,49 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/02-a-pragmatic-approach.html">Chapter 2</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Iterating the schedule</span>
+      <a href="../chapters/02-a-pragmatic-approach.html">فصل ۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">تکرار کردن زمان‌بندی</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 2 · A Pragmatic Approach</div>
-  <h1>Iterating the schedule</h1>
-  <p class="lede">Often the only way to know a project’s timetable is to gain experience on that same project. Work in thin slices, then <strong>refine the estimate</strong> of the remaining iterations after each one. <strong>Iterate the schedule with the code.</strong></p>
-  <p class="source-note">Illustrates “Estimating Project Schedules” in Topic 15, Estimating (pp. 138–140, Tip 24). The project, the team’s pace (random around 8 points per iteration) and the scope found along the way are the vault’s model. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۲ · رویکرد pragmatic</div>
+  <h1>تکرار کردن زمان‌بندی</h1>
+  <p class="lede">اغلب تنها راه دانستن جدول زمانی یک پروژه، به دست آوردن تجربه روی همان پروژه است. در برش‌های نازک کار کنید و بعد از هر برش، <strong>تخمین</strong> تکرارهای مانده را <strong>دقیق‌تر کنید</strong>. <strong>زمان‌بندی را همراه کد تکرار کنید.</strong></p>
+  <p class="source-note">تصویری از «تخمین زمان‌بندی پروژه» در موضوع ۱۵، تخمین زدن (صص. ۱۳۸–۱۴۰، tip ۲۴). پروژه و سرعت تیم، که تصادفی حدود هشت امتیاز در هر تکرار است، و دامنه‌ای که در راه پیدا می‌شود، مدل vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Forecast finish after each iteration</p><svg id="chart" role="img" aria-label="Forecast finish by iteration"></svg>
+      <div class="panel"><p class="panel-title">پیش‌بینی پایان بعد از هر تکرار</p><svg id="chart" role="img" aria-label="پیش‌بینی پایان بر حسب تکرار"></svg>
         <div class="callout" id="verdict" style="margin-top:10px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="est"></div><div id="grow"></div><div id="seed"></div><div id="play" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="est"></div><div id="grow"></div><div id="seed"></div><div id="play" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>The up-front estimate</strong> is a single guess that can’t improve: whatever it misses (true size, pace, scope found along the way) shows up only at the end.</li>
-    <li><strong>The iterated forecast</strong> uses the pace the team has actually shown on this project, so after a few iterations it closes in on the real finish.</li>
-    <li><strong>Scope found along the way</strong> moves the target. The forecast follows it, which is the book’s reason for saying “I’ll get back to you” rather than committing at the coffee machine.</li>
+    <li><strong>تخمین اولیه</strong> یک حدس تک است که نمی‌تواند بهتر شود: هر چیزی را که از دست بدهد، یعنی اندازه‌ی واقعی و سرعت و دامنه‌ای که در راه پیدا می‌شود، فقط آخرش در می‌آید.</li>
+    <li><strong>پیش‌بینی تکرار‌شده</strong> همان سرعتی را به کار می‌برد که تیم واقعاً روی این پروژه نشان داده، پس بعد از چند تکرار به پایان واقعی نزدیک می‌شود.</li>
+    <li><strong>دامنه‌ای که در راه پیدا می‌شود</strong> هدف را جابه‌جا می‌کند. پیش‌بینی دنبالش می‌رود، که همان دلیل کتاب برای گفتن «برمی‌گردم خدمتتان» به‌جای تعهد دادن سر دستگاه قهوه است.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/02-a-pragmatic-approach.html"><small>Lesson</small>2. A Pragmatic Approach</a></li>
+    <li><a href="../chapters/02-a-pragmatic-approach.html"><small>درس</small>فصل ۲: رویکرد pragmatic</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,34 +83,34 @@ function stats(rows) {
   function render() {
     var pts = []; for (var i = 0; i <= k; i++) pts.push([i, forecast(i)]);
     var up = cfg.est / 8, yMax = Math.max(plan.finish, up, 12) * 1.3;
-    Kit.lineChart(document.getElementById("chart"), { xMax: plan.finish, yMax: yMax, xLabel: "iterations completed", yLabel: "forecast finish (iteration)", xTicks: Math.min(plan.finish, 10),
-      series: [{ label: "iterated forecast", cls: "s1", points: pts, dots: true }, { label: "up-front estimate", cls: "s2", points: [[0, up], [plan.finish, up]] }, { label: "actual finish", cls: "s3", points: [[0, plan.finish], [plan.finish, plan.finish]] }] });
+    Kit.lineChart(document.getElementById("chart"), { xMax: plan.finish, yMax: yMax, xLabel: "تکرارهای تمام‌شده", yLabel: "پیش‌بینی پایان، به تکرار", xTicks: Math.min(plan.finish, 10),
+      series: [{ label: "پیش‌بینی تکرار‌شده", cls: "s1", points: pts, dots: true }, { label: "تخمین اولیه", cls: "s2", points: [[0, up], [plan.finish, up]] }, { label: "پایان واقعی", cls: "s3", points: [[0, plan.finish], [plan.finish, plan.finish]] }] });
     var f = forecast(k), err = Math.abs(f - plan.finish) / plan.finish, v = document.getElementById("verdict");
     v.className = "callout " + (err < 0.1 ? "ok" : err < 0.3 ? "warn" : "bad");
-    v.textContent = k === 0 ? "Before any work, the only forecast is the up-front guess: " + up.toFixed(1) + " iterations, against a real finish of " + plan.finish + "." :
-      "After " + k + " iteration(s) the forecast is " + f.toFixed(1) + " (off by " + Kit.pct(err, 0) + "); the up-front guess is off by " + Kit.pct(Math.abs(up - plan.finish) / plan.finish, 0) + ".";
+    v.textContent = k === 0 ? "پیش از هر کاری، تنها پیش‌بینی همان حدس اولیه است: " + up.toFixed(1) + " تکرار، در برابر پایان واقعی " + plan.finish + "." :
+      "بعد از " + k + " تکرار، پیش‌بینی " + f.toFixed(1) + " است، با " + Kit.pct(err, 0) + " خطا؛ و حدس اولیه " + Kit.pct(Math.abs(up - plan.finish) / plan.finish, 0) + " خطا دارد.";
     var it = k ? plan.its[k - 1] : { done: 0, scope: 60 };
-    stats([["Iteration", k + " / " + plan.finish], ["Points done / scope", it.done + " / " + it.scope], ["Measured pace", k ? (it.done / k).toFixed(1) : "—"], ["Forecast error", Kit.pct(err, 0), err < 0.1 ? "ok" : "bad"]]);
+    stats([["تکرار", k + " / " + plan.finish], ["امتیاز انجام‌شده از دامنه", it.done + " / " + it.scope], ["سرعت اندازه‌گیری‌شده", k ? (it.done / k).toFixed(1) : "—"], ["خطای پیش‌بینی", Kit.pct(err, 0), err < 0.1 ? "ok" : "bad"]]);
   }
-  function reset() { plan = build(); k = 0; log.clear(); log.add("New project: 60 points known up front. Up-front estimate: " + cfg.est + " points at 8 per iteration.", "muted"); render(); }
-  document.getElementById("est").appendChild(Kit.slider({ label: "Up-front size estimate", min: 20, max: 100, step: 5, value: cfg.est, unit: " points", onInput: function (v) { cfg.est = v; render(); } }).element);
-  document.getElementById("grow").appendChild(Kit.slider({ label: "Scope found per iteration (max)", min: 0, max: 6, step: 1, value: cfg.grow, unit: " pts", onInput: function (v) { cfg.grow = v; reset(); } }).element);
-  document.getElementById("seed").appendChild(Kit.slider({ label: "Random seed", min: 1, max: 20, step: 1, value: cfg.seed, onInput: function (v) { cfg.seed = v; reset(); } }).element);
+  function reset() { plan = build(); k = 0; log.clear(); log.add("پروژه‌ی تازه: شصت امتیاز از اول شناخته‌شده. تخمین اولیه: " + cfg.est + " امتیاز با هشت امتیاز در هر تکرار.", "muted"); render(); }
+  document.getElementById("est").appendChild(Kit.slider({ label: "تخمین اولیه‌ی اندازه", min: 20, max: 100, step: 5, value: cfg.est, unit: " امتیاز", onInput: function (v) { cfg.est = v; render(); } }).element);
+  document.getElementById("grow").appendChild(Kit.slider({ label: "بیشینه‌ی دامنه‌ی پیدا‌شده در هر تکرار", min: 0, max: 6, step: 1, value: cfg.grow, unit: " امتیاز", onInput: function (v) { cfg.grow = v; reset(); } }).element);
+  document.getElementById("seed").appendChild(Kit.slider({ label: "مقدار seed تصادفی", min: 1, max: 20, step: 1, value: cfg.seed, onInput: function (v) { cfg.seed = v; reset(); } }).element);
   Kit.player({ mount: document.getElementById("play"), interval: 600,
-    step: function () { if (k >= plan.finish) { log.add("Project finished after " + plan.finish + " iterations.", "ok"); return false; } k++; var it = plan.its[k - 1]; log.add("Iteration " + k + ": " + it.v + " points done; scope now " + it.scope + "; forecast " + forecast(k).toFixed(1), "muted"); render(); },
+    step: function () { if (k >= plan.finish) { log.add("پروژه بعد از " + plan.finish + " تکرار تمام شد.", "ok"); return false; } k++; var it = plan.its[k - 1]; log.add("تکرار " + k + ": " + it.v + " امتیاز انجام شد؛ دامنه حالا " + it.scope + "؛ و پیش‌بینی " + forecast(k).toFixed(1), "muted"); render(); },
     reset: reset });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What does the book say is often the only way to determine a project's timetable?",
-      options: ["A PERT chart", "Gaining experience on that same project", "Asking the sponsor"], answer: 1,
-      explain: "pp. 139–140." },
-    { q: "What should you say when asked for an estimate at the coffee machine?",
-      options: ["A number with a range", "“I'll get back to you.”", "Double your first guess"], answer: 1,
-      explain: "p. 141." },
-    { q: "What does PERT give each task?",
-      options: ["One most-likely estimate", "Optimistic, most likely and pessimistic estimates", "A budget"], answer: 1,
-      explain: "p. 139." }
+    { q: "کتاب می‌گوید اغلب تنها راه تعیین جدول زمانی یک پروژه چیست؟",
+      options: ["یک نمودار PERT", "به دست آوردن تجربه روی همان پروژه", "پرسیدن از حامی"], answer: 1,
+      explain: "صفحه‌های ۱۳۹–۱۴۰." },
+    { q: "وقتی سر دستگاه قهوه تخمین خواستند چه باید گفت؟",
+      options: ["عددی با یک بازه", "«برمی‌گردم خدمتتان.»", "اولین حدستان را دو برابر کنید"], answer: 1,
+      explain: "صفحه‌ی ۱۴۱." },
+    { q: "روش PERT به هر task چه می‌دهد؟",
+      options: ["یک تخمین محتمل", "تخمین خوش‌بینانه و محتمل و بدبینانه", "یک بودجه"], answer: 1,
+      explain: "صفحه‌ی ۱۳۹." }
   ]);
 })();
 </script>
