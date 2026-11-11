@@ -3,121 +3,135 @@ book: the-pragmatic-programmer
 chapter: 6
 title: "Concurrency"
 pages: "289–323"
+translated_title: "concurrency"
+lang: fa
 ---
 
-# 6. Concurrency
+# فصل ۶: concurrency
 
-[← 5. Bend, or Break](05-bend-or-break.md) · [Book](../README.md) · [7. While You Are Coding →](07-while-you-are-coding.md)
+[فصل ۵: خم شو، یا بشکن →](05-bend-or-break.md) · [کتاب](../README.md) · [فصل ۷: وقتی کد می‌زنید ←](07-while-you-are-coding.md)
 
-## Summary
+## خلاصه
 
-**Concurrency** is when two or more pieces of code act as if they run at the same time; **parallelism** is when they really do (p. 289). Concurrency needs an environment that switches between code, such as fibers, threads or processes; parallelism needs hardware that does two things at once (p. 289). Almost every decent-sized system is concurrent, explicitly or inside a library (p. 290). The chapter covers four topics:
+**مفهوم concurrency** وقتی است که دو تکه کد یا بیشتر طوری رفتار کنند که گویی با هم اجرا می‌شوند؛ **موازی‌کاری** وقتی است که واقعاً با هم اجرا شوند (p. 289). concurrency به محیطی نیاز دارد که بین کدها سوئیچ کند، مثل fiber و thread و پردازه؛ موازی‌کاری به سخت‌افزاری نیاز دارد که دو کار را با هم بکند (p. 289). تقریباً هر سیستم به‌اندازه‌ی کافی بزرگی هم‌زمان است، صریح یا داخل یک کتابخانه (p. 290). این فصل چهار موضوع را می‌پوشاند:
 
-- **Temporal coupling,** which imposes an order the problem doesn't need (Topic 33).
-- **Shared mutable state,** the biggest culprit, whose workarounds are all error-prone (Topic 34).
-- **Actors,** which share nothing and communicate by messages (Topic 35).
-- **Blackboards,** which coordinate independent agents through a shared store of facts (Topic 36).
+- **مفهوم coupling زمانی،** که ترتیبی را تحمیل می‌کند که مسئله لازمش ندارد (موضوع ۳۳).
+- **ساختار shared state تغییرپذیر،** که بزرگ‌ترین مقصر است و دور‌زدن‌هایش همه خطا‌خیزند (موضوع ۳۴).
+- **همه‌ی actorها،** که هیچ چیزی را شریک نمی‌شوند و با پیام ارتباط می‌گیرند (موضوع ۳۵).
+- **همه‌ی blackboardها،** که agentهای مستقل را از راه انباری مشترک از واقعیت‌ها هماهنگ می‌کنند (موضوع ۳۶).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Temporal coupling is coupling in time:** "tick must happen before tock". Analyze workflow, for example with an activity diagram, to find what can happen at once (Tip 56, pp. 290, 292–295).
-- **Look for activities that take time, but not time in your code,** such as database queries, external services and user input; split independent work across processors for parallelism (pp. 296–297).
-- **Shared state is incorrect state.** The problem isn't two writers but that nobody's *view* of the data stays consistent; check-then-act isn't atomic (Tip 57, pp. 299–301).
-- **Semaphores only work if everyone follows the convention.** Better: make the resource transactional, release locks in `ensure`, and treat composite resources (pie à la mode) as resources of their own (pp. 301–306).
-- **Random failures are often concurrency issues,** even with non-obvious shared resources such as the current directory (Tip 58, pp. 306–307).
-- **Use actors for concurrency without shared state.** Each processes one message at a time with private state, and the same code runs on one core or many machines (Tip 59, pp. 309–316).
-- **Use blackboards to coordinate workflow** when facts arrive in any order. Modern messaging systems such as Kafka and NATS can act as blackboards, but indirect systems are harder to trace (Tip 60, pp. 317–322).
+- **مفهوم coupling زمانی، coupling در زمان است:** «تیک باید پیش از تاک بیفتد». گردش‌کار را تحلیل کنید، مثلاً با یک نمودار فعالیت، تا بفهمید چه چیزی می‌تواند با هم بیفتد (tip ۵۶، صص. ۲۹۰، ۲۹۲–۲۹۵).
+- **دنبال فعالیت‌هایی بگردید که وقت می‌برند، ولی وقت کد شما را نه،** مثل کوئری دیتابیس و سرویس بیرونی و ورودی کاربر؛ و کار مستقل را برای موازی‌کاری بین processorها بشکنید (pp. 296–297).
+- **ساختار shared state همان حالت نادرست است.** مسئله دو نویسنده نیست، بلکه این است که *نگاه* هیچ‌کس به داده سازگار نمی‌ماند؛ بررسی‌و‌بعد‌عمل اتمی نیست (tip ۵۷، صص. ۲۹۹–۳۰۱).
+- **مفهوم semaphore فقط وقتی کار می‌کند که همه قرارداد را رعایت کنند.** بهتر: منبع را تراکنشی کنید، قفل‌ها را در `ensure` آزاد کنید، و منابع ترکیبی، یعنی پای با بستنی، را منبعی جدا ببینید (pp. 301–306).
+- **شکست‌های تصادفی اغلب مسئله‌ی concurrency‌اند،** حتی با منابع مشترک غیر‌بدیهی مثل پوشه‌ی فعلی (tip ۵۸، صص. ۳۰۶–۳۰۷).
+- **برای concurrency بی shared state از actor استفاده کنید.** هر کدام با حالت خصوصی‌اش یک پیام را در هر لحظه پردازش می‌کند، و همان کد روی یک هسته یا چند ماشین اجرا می‌شود (tip ۵۹، صص. ۳۰۹–۳۱۶).
+- **برای هماهنگ کردن گردش‌کار از blackboard استفاده کنید** وقتی واقعیت‌ها به هر ترتیبی می‌رسند. سیستم‌های پیام‌رسانی امروزی مثل Kafka و NATS می‌توانند blackboard شوند، ولی ردیابی سیستم‌های غیرمستقیم سخت‌تر است (tip ۶۰، صص. ۳۱۷–۳۲۲).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 33. Breaking Temporal Coupling — p. 292
-- Topic 34. Shared State Is Incorrect State — p. 299
-- Topic 35. Actors and Processes — p. 309
-- Topic 36. Blackboards — p. 317
+- موضوع ۳۳. شکستن coupling زمانی — ص. ۲۹۲
+- موضوع ۳۴. shared state همان حالت نادرست است — ص. ۲۹۹
+- موضوع ۳۵. actorها و processها — ص. ۳۰۹
+- موضوع ۳۶. blackboardها — ص. ۳۱۷
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 56 | Analyze Workflow to Improve Concurrency | 293 |
-| 57 | Shared State Is Incorrect State | 299 |
-| 58 | Random Failures Are Often Concurrency Issues | 307 |
-| 59 | Use Actors For Concurrency Without Shared State | 310 |
-| 60 | Use Blackboards to Coordinate Workflow | 321 |
+| ۵۶ | گردش‌کار را تحلیل کنید تا concurrency بهتر شود | ۲۹۳ |
+| ۵۷ | shared state همان حالت نادرست است | ۲۹۹ |
+| ۵۸ | شکست‌های تصادفی اغلب مسئله‌ی concurrencyاند | ۳۰۷ |
+| ۵۹ | برای concurrency بی shared state از actor استفاده کنید | ۳۱۰ |
+| ۶۰ | برای هماهنگ کردن گردش‌کار از blackboard استفاده کنید | ۳۲۱ |
 
-We learned to program on sequential systems, and language features that are safe sequentially become liabilities when two things can happen at once (pp. 290–291). Shared state isn't only global variables: any two pieces of code holding references to the same mutable data share state (p. 291).
+ما برنامه‌نویسی را روی سیستم‌های پشت‌سرهم یاد گرفتیم، و قابلیت‌های زبانی‌ای که پشت‌سرهم امن‌اند وقتی دو چیز می‌توانند با هم بیفتند بدهی می‌شوند (pp. 290–291). shared state فقط متغیر سراسری نیست: هر دو تکه کدی که به همان داده‌ی mutable ارجاع دارند حالت را شریک‌اند (p. 291).
 
-### Topic 33. Breaking Temporal Coupling
+### موضوع ۳۳. شکستن coupling زمانی
 
-Time matters in two ways: **concurrency** (things at the same time) and **ordering** (relative positions in time) (p. 292). Linear thinking produces **temporal coupling**: method A must be called before B, only one report can run at once, the screen must redraw before a click is received (p. 292). Decoupling time and order dependencies gives more flexible, faster and more reliable systems (pp. 292–293).
+زمان از دو راه مهم است: **concurrency**، یعنی چیزها با هم، و **ترتیب**، یعنی موقعیت نسبی در زمان (p. 292). فکر کردن خطی **coupling زمانی** می‌سازد: متد A باید پیش از B صدا زده شود، فقط یک گزارش در هر لحظه می‌تواند اجرا شود، صفحه باید پیش از رسیدن کلیک دوباره کشیده شود (p. 292). decouple کردن وابستگی زمان و ترتیب، سیستم‌هایی انعطاف‌پذیرتر و تندتر و قابل‌اعتمادتر می‌دهد (pp. 292–293).
 
-**Looking for concurrency** (pp. 293–295). **Tip 56, Analyze Workflow to Improve Concurrency** (p. 293). In an **activity diagram**, actions are rounded boxes; an arrow means the next action can start once this one finishes; a thick **synchronization bar** waits for all incoming actions; an action with no incoming arrows can start at any time (p. 293).
+**گشتن دنبال concurrency** (pp. 293–295). **tip ۵۶، گردش‌کار را تحلیل کنید تا concurrency بهتر شود** (p. 293). در یک **نمودار فعالیت**، کنش‌ها کادرهای گردند؛ یک فلش یعنی کنش بعدی می‌تواند همین که این یکی تمام شد شروع شود؛ یک **میله‌ی synchronization** کلفت منتظر همه‌ی کنش‌های ورودی می‌ماند؛ و کنشی که فلش ورودی ندارد هر وقت می‌تواند شروع شود (p. 293).
 
-The book's example is a robotic **piña colada** maker with twelve steps (pp. 293–294): 1 open blender, 2 open piña colada mix, 3 put mix in blender, 4 measure ½ cup white rum, 5 pour in rum, 6 add 2 cups of ice, 7 close blender, 8 liquefy for 1 minute, 9 open blender, 10 get glasses, 11 get pink umbrellas, 12 serve. A bartender who did them one by one would lose their job: tasks 1, 2, 4, 10 and 11 can all start up front, and 3, 5 and 6 can run in parallel later (p. 295).
+نمونه‌ی کتاب یک سازنده‌ی رباتیک **پینا کولادا** با دوازده مرحله است (pp. 293–294): ۱ باز کردن مخلوط‌کن، ۲ باز کردن مخلوط پینا کولادا، ۳ ریختن مخلوط در مخلوط‌کن، ۴ اندازه گرفتن نیم پیمانه رام سفید، ۵ ریختن رام، ۶ اضافه کردن دو module یخ، ۷ بستن مخلوط‌کن، ۸ یک دقیقه مایع کردن، ۹ باز کردن مخلوط‌کن، ۱۰ آوردن لیوان‌ها، ۱۱ آوردن چترهای صورتی، ۱۲ سرو کردن. متصدی باری که این‌ها را یکی‌یکی می‌کرد کارش را از دست می‌داد: کارهای ۱ و ۲ و ۴ و ۱۰ و ۱۱ همه می‌توانند از اول شروع شوند، و ۳ و ۵ و ۶ می‌توانند بعداً موازی بروند (p. 295).
 
 ```mermaid
 flowchart LR
-    T1["1 · open blender"] --> T3["3 · mix in"]
-    T2["2 · open mix"] --> T3
-    T1 --> T5["5 · pour rum"]
-    T4["4 · measure rum"] --> T5
-    T1 --> T6["6 · add ice"]
-    T3 & T5 & T6 --> T7["7 · close blender"] --> T8["8 · liquefy 1 min"] --> T9["9 · open blender"]
-    T9 & T10["10 · get glasses"] & T11["11 · get umbrellas"] --> T12["12 · serve"]
+    T1["۱ · باز کردن مخلوط‌کن"] --> T3["۳ · ریختن مخلوط"]
+    T2["۲ · باز کردن مخلوط"] --> T3
+    T1 --> T5["۵ · ریختن رام"]
+    T4["۴ · اندازه گرفتن رام"] --> T5
+    T1 --> T6["۶ · اضافه کردن یخ"]
+    T3 & T5 & T6 --> T7["۷ · بستن مخلوط‌کن"] --> T8["۸ · یک دقیقه مایع کردن"] --> T9["۹ · باز کردن مخلوط‌کن"]
+    T9 & T10["۱۰ · آوردن لیوان"] & T11["۱۱ · آوردن چتر"] --> T12["۱۲ · سرو کردن"]
 ```
 
-*The vault's reading of the piña colada activity diagram, consistent with the concurrency the book identifies on p. 295; the book's figure is an image.*
+*خوانش vault از نمودار فعالیت پینا کولادا، سازگار با concurrencyی که کتاب در ص. ۲۹۵ می‌شناسد؛ شکل کتاب یک تصویر است.*
 
-**Faster formatting** (sidebar, p. 296): the book's own build pipeline runs each processing step concurrently, and converts each mathematical formula, which can take up to 500 ms, in its own parallel process. The authors found several concurrency errors along the way.
+**قالب‌بندی تندتر** (کادر کناری، ص. ۲۹۶): خود pipeline build کتاب هر مرحله‌ی پردازش را هم‌زمان اجرا می‌کند، و هر فرمول ریاضی را، که می‌تواند تا ۵۰۰ میلی‌ثانیه ببرد، در process موازی خودش تبدیل می‌کند. نویسنده‌ها در راه چند خطای concurrency پیدا کردند.
 
-**Opportunities for concurrency** (pp. 296–297). An activity diagram shows *potential* concurrency, not whether it's worth it: a bartender would need five hands to start all the initial tasks. But liquefying takes a minute, during which they can fetch glasses and umbrellas and serve another customer. Look for activities that **take time, but not time in your code**.
+**فرصت‌های concurrency** (pp. 296–297). یک نمودار فعالیت concurrency *ممکن* را نشان می‌دهد و نه این که ارزشش را دارد یا نه: متصدی بار برای شروع همه‌ی کارهای اول به پنج دست نیاز داشت. ولی مایع کردن یک دقیقه می‌برد، و در آن یک دقیقه می‌تواند لیوان و چتر بیاورد و به مشتری دیگری سرو کند. دنبال فعالیت‌هایی بگردید که **وقت می‌برند، ولی وقت کد شما را نه**.
 
-**Opportunities for parallelism** (p. 297). Concurrency is a software mechanism; parallelism is a hardware concern. Split large work into independent chunks, process them in parallel, and combine the results. The Elixir compiler compiles every module in parallel, pausing a module only while a module it depends on finishes.
+**فرصت‌های موازی‌کاری** (p. 297). concurrency سازوکاری نرم‌افزاری است و موازی‌کاری دغدغه‌ای سخت‌افزاری. کار بزرگ را به تکه‌های مستقل بشکنید، موازی پردازششان کنید، و نتیجه‌ها را ترکیب. کامپایلر Elixir هر ماژول را موازی compile می‌کند و یک ماژول را فقط تا وقتی نگه می‌دارد که ماژولی که به آن وابسته است تمام شود.
 
-> **Try it:** [The piña colada scheduler](../widgets/06-pina-colada.html) — give the bartender one, two or more hands and schedule the book's twelve steps serially or by their dependencies, and see where the one-minute liquefy frees hands for other work.
+> **Try it:** [scheduler پینا کولادا](../widgets/06-pina-colada.html)؛ به متصدی بار یک یا دو یا چند دست بدهید و دوازده مرحله‌ی کتاب را پشت‌سرهم یا بر حسب وابستگی‌هایشان زمان‌بندی کنید، و ببینید مایع کردن یک‌دقیقه‌ای کجا دست‌ها را برای کار دیگری آزاد می‌کند.
 
-### Topic 34. Shared State Is Incorrect State
+> **In practice:** DAG در Airflow نمودار وابستگی است: taskهایی که به هم وابسته نیستند می‌توانند موازی اجرا شوند.
+>
+> **Your turn:** DAG شبانه ده جدول Silver را پشت سر هم می‌سازد و سه ساعت طول می‌کشد. چه چیزی را بررسی می‌کنید؟
+>
+> *Answer:* کدام taskها واقعاً به هم وابسته‌اند؛ آن‌هایی که نیستند را موازی کنید و با pool بار ClickHouse را محدود کنید. کتاب activity diagram را برای پیدا کردن همین موازی‌سازی پنهان پیشنهاد می‌کند (pp. 292–298).
 
-Two servers in a diner each see the last slice of apple pie in the display case and promise it to their customers; one customer will be disappointed. Swap in a joint bank account and two point-of-sale devices, and someone ends up very unhappy (p. 299). **Tip 57, Shared State Is Incorrect State** (p. 299).
+### موضوع ۳۴. shared state همان حالت نادرست است
 
-**Nonatomic updates** (pp. 299–301). Each waiter runs `if display_case.pie_count > 0` → promise → `take_pie` → give. The problem isn't that two processes can write the same memory; it's that neither can guarantee its view is consistent. Reading the count copies it into the waiter's own memory, where it goes stale. Fetching and updating aren't atomic.
+دو پیش‌خدمت در یک رستوران هر کدام آخرین برش پای سیب را در ویترین می‌بینند و به مشتری‌های خودشان قولش می‌دهند؛ یکی از مشتری‌ها ناامید می‌شود. حالا یک حساب بانکی مشترک و دو دستگاه فروش بگذارید، و کسی خیلی ناراضی در می‌آید (p. 299). **tip ۵۷، shared state همان حالت نادرست است** (p. 299).
 
-| Fix | How | Remaining problem (pp. 301–306) |
+**به‌روزرسانی ناتمی** (pp. 299–301). هر پیش‌خدمت `if display_case.pie_count > 0` را اجرا می‌کند و بعد قول می‌دهد و `take_pie` و تحویل. مسئله این نیست که دو process می‌توانند همان حافظه را بنویسند؛ مسئله این است که هیچ‌کدام نمی‌تواند تضمین کند نگاهش سازگار است. خواندن شمارش، آن را به حافظه‌ی خود پیش‌خدمت کپی می‌کند، که همان‌جا کهنه می‌شود. گرفتن و به‌روز کردن اتمی نیستند.
+
+| اصلاح | چطور | مسئله‌ی مانده (pp. 301–306) |
 |---|---|---|
-| **Semaphore** | Only one holder at a time. The diner puts a plastic leprechaun on the pie case; a waiter must hold it to sell pie. Classically P and V, now lock and unlock | Works only if everyone follows the convention |
-| **Transactional resource** | The case offers `get_pie_if_available()`, which checks and takes in one call | The method itself can still run concurrently, so it needs its own lock |
-| **Lock with `ensure`** | Unlock in an `ensure` (finally) block, or use a library's `protect { … }` | Without it, an exception in `update_sales_data` leaves the case locked forever |
-| **Composite resource** | Pie à la mode needs pie *and* ice cream. Taking them one at a time leaves you holding pie you can't use, and give-back code buries the business logic | Make "apple pie à la mode", or a generic menu item, a resource of its own that succeeds or fails as a whole |
+| **semaphore** | در هر لحظه فقط یک دارنده. رستوران یک لپرکان پلاستیکی روی ویترین پای می‌گذارد؛ پیش‌خدمت برای فروش پای باید نگهش داشته باشد. کلاسیک P و V، و حالا lock و unlock | فقط وقتی کار می‌کند که همه قرارداد را رعایت کنند |
+| **منبع تراکنشی** | ویترین `get_pie_if_available()` می‌دهد، که در یک فراخوانی بررسی و برمی‌دارد | خود آن متد باز هم می‌تواند هم‌زمان اجرا شود، پس به قفل خودش نیاز دارد |
+| **قفل با `ensure`** | در یک بلوک `ensure`، یعنی finally، unlock کنید، یا از `protect { … }` یک کتابخانه استفاده | بی آن، یک exception در `update_sales_data` ویترین را تا ابد قفل می‌گذارد |
+| **منبع ترکیبی** | پای با بستنی به پای *و* بستنی نیاز دارد. برداشتنشان یکی‌یکی یعنی پایی دستتان می‌ماند که به کار نمی‌آید، و کد پس دادن منطق کسب‌وکار را خاک می‌کند | «پای سیب با بستنی»، یا یک آیتم منوی عمومی، را منبعی جدا کنید که کامل موفق یا شکست می‌خورد |
 
-**Non-transactional updates** (pp. 306–307). Any shared mutable resource counts: files, databases, external services. When the authors parallelized their toolchain, builds failed randomly with missing files: some code temporarily changed the **current directory**, which all threads share. **Tip 58, Random Failures Are Often Concurrency Issues** (p. 307).
+**به‌روزرسانی ناتراکنشی** (pp. 306–307). هر منبع مشترک mutability حساب می‌شود: فایل، دیتابیس، سرویس بیرونی. وقتی نویسنده‌ها زنجیره‌ی ابزارشان را موازی کردند، buildها تصادفی با فایل غایب شکست می‌خوردند: بخشی از کد موقت **پوشه‌ی فعلی** را عوض می‌کرد، که همه‌ی threadها شریکش‌اند. **tip ۵۸، شکست‌های تصادفی اغلب مسئله‌ی concurrencyاند** (p. 307).
 
-**Other kinds of exclusive access** (p. 307): mutexes, monitors and semaphores are libraries; Rust builds in ownership, so only one reference may hold mutable data; functional languages make data immutable but still meet the mutable world.
+**گونه‌های دیگر دسترسی انحصاری** (p. 307): mutex و monitor و semaphore کتابخانه‌اند؛ Rust مالکیت را درون‌ساخت دارد، پس فقط یک ارجاع می‌تواند داده‌ی mutable را نگه دارد؛ و زبان‌های functional داده را immutable می‌کنند ولی باز هم به دنیای mutable می‌خورند.
 
-**Doctor, it hurts when I do this. Then don't do that** (pp. 307–308): managing concurrency over shared resources yourself is fraught, so the next topics avoid it.
+**دکتر، وقتی این کار را می‌کنم درد می‌گیرد. خب نکن** (pp. 307–308): مدیریت concurrency روی منابع مشترک به‌دست خودتان پردردسر است، پس موضوع‌های بعدی از آن می‌پرهیزند.
 
-> **Try it:** [The last slice of pie](../widgets/06-pie-case.html) — step two waiters through every interleaving of their code with no lock, with a semaphore, or with a transactional `get_pie_if_available`, and count how often two customers are promised one slice.
+> **Try it:** [آخرین برش پای](../widgets/06-pie-case.html)؛ دو پیش‌خدمت را از هر interleaving کدشان بگذرانید، بی قفل یا با semaphore یا با `get_pie_if_available` تراکنشی، و بشمارید چند بار به دو مشتری یک برش قول داده می‌شود.
 
-### Topic 35. Actors and Processes
+> **In practice:** دو task که هم‌زمان در یک جدول ClickHouse می‌نویسند shared state دارند.
+>
+> **Your turn:** دو DAG، یکی شبانه و یکی backfill، هم‌زمان partition یک روز را با `REPLACE PARTITION` می‌نویسند. چه می‌شود؟
+>
+> *Answer:* هر کدام آخر بنویسد برنده است و نتیجه به زمان‌بندی بستگی دارد. با pool یا `max_active_runs` آن‌ها را سریالی کنید، یا هر DAG را مالک partitionهای جدا کنید. state مشترک بدون هماهنگی همیشه نادرست است (pp. 299–308).
 
-An **actor** is an independent virtual processor with private state and a mailbox. When idle and a message arrives, it processes it; while doing so it can create actors, send messages to actors it knows, and produce its next state (p. 309). A **process** here is a more general virtual processor constrained by convention to behave like an actor (p. 309).
+### موضوع ۳۵. actorها و processها
 
-What the actor model leaves out (p. 310):
+یک **actor** پردازشگری مجازی و مستقل با حالت خصوصی و یک صندوق‌نامه است. وقتی بی‌کار است و پیامی می‌رسد، پردازشش می‌کند؛ و در این حین می‌تواند actor بسازد و به actorهایی که می‌شناسد پیام بفرستد و حالت بعدی‌اش را بسازد (p. 309). یک **process** این‌جا پردازشگری مجازی عمومی‌تر است که با قرارداد مجبور شده مثل actor رفتار کند (p. 309).
 
-- Nothing is in control: no scheduler orchestrates the flow.
-- The only state is in messages and actors' private state.
-- Messages are one-way. For a reply, include your own mailbox address.
-- Each actor processes one message at a time, to completion.
+آن چیزی که مدل actor نمی‌آورد (p. 310):
 
-So actors run concurrently and asynchronously and share nothing, on one processor or many, with the same code. **Tip 59, Use Actors For Concurrency Without Shared State** (p. 310).
+- هیچ چیزی در کنترل نیست: هیچ زمان‌بندی جریان را ارکستر نمی‌کند.
+- تنها حالت، در پیام‌ها و حالت خصوصی actorهاست.
+- پیام‌ها یک‌طرفه‌اند. برای پاسخ، آدرس صندوق‌نامه‌ی خودتان را بگذارید.
+- هر actor در هر لحظه یک پیام را تا کامل شدن پردازش می‌کند.
 
-**The diner with actors** (pp. 310–315), in JavaScript with the Nact library:
+پس actorها هم‌زمان و asynchronous اجرا می‌شوند و هیچ چیزی را شریک نمی‌شوند، روی یک processor یا چند، با همان کد. **tip ۵۹، برای concurrency بی shared state از actor استفاده کنید** (p. 310).
 
-- The **customer** handles "hungry for pie" (orders from the waiter), "put on table" and "no pie left".
-- The **waiter** handles "order" (asks the pie case to get a slice to this customer), "add to order", and "error" (apologizes to the customer).
-- The **pie case** holds the slices. On "get slice" it either sends a slice to the customer and tells the waiter to bill it, or tells the waiter there is none.
-- With apple, peach and cherry slices, and customers asking for three and two slices, the run serves three and both customers end up sulking; the order of the output may vary.
+**رستوران با actorها** (pp. 310–315)، در جاوااسکریپت با کتابخانه‌ی Nact:
+
+- **مشتری** پیام‌های «گرسنه‌ی پای»، یعنی سفارش از پیش‌خدمت، و «روی میز بگذار» و «پای نمانده» را می‌گیرد.
+- **پیش‌خدمت** پیام‌های «سفارش»، یعنی از ویترین پای می‌خواهد برشی به این مشتری بدهد، و «به سفارش اضافه کن» و «خطا»، یعنی از مشتری عذرخواهی می‌کند، را می‌گیرد.
+- **ویترین پای** برش‌ها را دارد. سر «یک برش بده» یا برشی به مشتری می‌فرستد و به پیش‌خدمت می‌گوید صورت‌حسابش کند، یا به پیش‌خدمت می‌گوید چیزی نمانده.
+- با برش‌های سیب و هلو و گیلاس، و مشتری‌هایی که سه و دو برش می‌خواهند، اجرا سه برش سرو می‌کند و هر دو مشتری دل‌شکسته در می‌آیند؛ ترتیب خروجی می‌تواند فرق کند.
 
 ```mermaid
 sequenceDiagram
@@ -135,88 +149,88 @@ sequenceDiagram
     end
 ```
 
-*The vault's diagram of the message flow described on pp. 310–311.*
+*نمودار vault از جریان پیامی که در صص. ۳۱۰–۳۱۱ توضیح داده شده.*
 
-There is **no explicit concurrency** code and no end-to-end "do this, then that" logic, and nothing about the architecture (p. 315). **Erlang** sets the stage: lightweight isolated processes (millions per machine), message passing, **supervision**, hot code loading, and claims of nine nines availability (pp. 315–316). The challenge asks you to add pie à la mode with separate pie and ice-cream actors (p. 316).
+هیچ کد **concurrency صریحی** نیست و هیچ منطق سر‌تا‌سری «این را بکن، بعد آن را»، و هیچ چیزی درباره‌ی معماری (p. 315). زبان **Erlang** صحنه را می‌چیند: processهای سبک و جداشده، یعنی میلیون‌ها در هر ماشین، رد‌و‌بدل پیام، **supervise کردن**، بار کردن داغ کد، و ادعای در دسترس بودن با نُه رقم نُه (pp. 315–316). چالش می‌خواهد پای با بستنی را با actorهای جدای پای و بستنی اضافه کنید (p. 316).
 
-### Topic 36. Blackboards
+### موضوع ۳۶. blackboardها
 
-Detectives investigating whether Humpty Dumpty fell or was pushed post facts, statements and evidence on a shared blackboard; someone links his gambling debts to the phone logs (pp. 317–318). The features (pp. 318–319):
+کارآگاه‌هایی که بررسی می‌کنند Humpty Dumpty افتاد یا هلش دادند، واقعیت‌ها و اظهارات و شواهد را روی یک blackboard مشترک می‌گذارند؛ کسی بدهی‌های قمارش را به گزارش تماس‌ها وصل می‌کند (pp. 317–318). ویژگی‌هایش (pp. 318–319):
 
-- Detectives don't need to know each other exist; they watch the board and add findings.
-- They may have different training and expertise, and work in different places.
-- They come and go and work different shifts.
-- Anything can go on the board.
+- کارآگاه‌ها لازم نیست بدانند بقیه وجود دارند؛ تخته را می‌پایند و یافته‌ها را اضافه می‌کنند.
+- می‌توانند آموزش و تخصص مختلف داشته باشند و در جاهای مختلف کار کنند.
+- می‌آیند و می‌روند و شیفت‌های مختلف کار می‌کنند.
+- هر چیزی می‌تواند روی تخته برود.
 
-This is **laissez-faire concurrency** (p. 319). Computer blackboards began in AI (speech recognition, knowledge-based reasoning). Gelernter's **Linda** stored typed tuples queried by pattern matching; **JavaSpaces** and **T Spaces** stored active objects matched by templates and subtypes, so an `Author` template with last name "Shakespeare" finds the author, not the gardener. They never took off, perhaps because the need hadn't developed yet (pp. 319–320).
+این **concurrency بگذار‌و‌بگذر** است (p. 319). blackboardهای کامپیوتری در AI شروع شدند، یعنی بازشناسی گفتار و استدلال دانش‌محور. ابزار **Linda** از Gelernter، تاپل‌های نوع‌دار را ذخیره می‌کرد که با الگو‌تطبیق کوئری می‌شدند؛ **JavaSpaces** و **T Spaces** objectهای فعالی را ذخیره می‌کردند که با قالب و زیرنوع تطبیق می‌خوردند، پس یک قالب `Author` با نام خانوادگی «Shakespeare» نویسنده را پیدا می‌کند و نه باغبان را. هیچ‌وقت نگرفتند، شاید چون آن موقع نیاز هنوز نرسیده بود (pp. 319–320).
 
-**A blackboard in action** (pp. 320–321): mortgage or loan applications under odiously complex law, with answers arriving in any order, from different people and systems, with dependencies (no title search without proof of ownership), and new data raising new questions. Hard-wired workflows must be rewritten as regulations change. A blackboard plus a **rules engine** makes arrival order irrelevant: posting a fact triggers rules, whose output can trigger more rules. **Tip 60, Use Blackboards to Coordinate Workflow** (p. 321).
+**یک blackboard در عمل** (pp. 320–321): درخواست وام مسکن یا وام زیر قانونی نفرت‌انگیز پیچیده، که پاسخ‌ها به هر ترتیبی می‌رسند، از آدم‌ها و سیستم‌های مختلف، با وابستگی، یعنی بی اثبات مالکیت جست‌و‌جوی سند نداریم، و داده‌ی تازه پرسش تازه می‌سازد. گردش‌کارهای سیم‌کشی‌شده باید با عوض شدن قاعده‌ها بازنویسی شوند. یک blackboard به‌علاوه‌ی یک **موتور قاعده** ترتیب رسیدن را بی‌اهمیت می‌کند: گذاشتن یک واقعیت، قاعده‌ها را راه می‌اندازد، و خروجی‌شان می‌تواند قاعده‌های بیشتری را راه بیندازد. **tip ۶۰، برای هماهنگ کردن گردش‌کار از blackboard استفاده کنید** (p. 321).
 
-**Messaging systems can be like blackboards** (p. 321): Kafka and NATS persist an event log and support retrieval by pattern matching, so they can serve as a blackboard or as a platform for actors.
+**سیستم‌های پیام‌رسانی می‌توانند مثل blackboard باشند** (p. 321): ابزارهای Kafka و NATS یک log رویداد را ماندگار می‌کنند و بازیابی با الگو‌تطبیق را پشتیبانی، پس می‌توانند blackboard باشند یا بستری برای actorها.
 
-**But it's not that simple** (pp. 321–322). Actor, blackboard and microservice architectures remove a class of concurrency problems but are harder to reason about, because much of the action is indirect:
+**ولی به این سادگی نیست** (pp. 321–322). معماری actor و blackboard و microservice یک رده از مسئله‌های concurrency را برمی‌دارند ولی استدلال کردن درباره‌شان سخت‌تر است، چون بیشتر ماجرا غیرمستقیم است:
 
-- Keep a central repository of message formats or APIs, ideally generating code and documentation.
-- Use good tracing: add a unique trace ID when a business function starts and propagate it, so logs can reconstruct what happened.
-- Expect harder deployment, offset by being able to replace individual actors.
+- یک انبار مرکزی از قالب پیام یا API نگه دارید، در حالت آرمانی با ساختن کد و مستند.
+- مفهوم trace خوب به کار ببرید: سر شروع یک کارکرد کسب‌وکار یک شناسه‌ی trace یکتا اضافه و منتشرش کنید، تا logها بتوانند بازسازی کنند چه اتفاقی افتاد.
+- انتظار deploy سخت‌تری داشته باشید، که با توانایی جابه‌جا کردن هر actor جداگانه جبران می‌شود.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Approach | Buys | Costs |
+| رویکرد | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Serial workflow | Simple to reason about | Slow; temporal coupling |
-| Concurrent workflow from an activity diagram | Faster; uses waiting time | Needs resources (hands) and coordination |
-| Shared state with semaphores | Familiar; fine-grained | Relies on convention; deadlocks; forgotten unlocks |
-| Transactional resource | Atomic check-and-take in one place | Composite operations need their own resources |
-| Actors | No shared state; location-transparent | Indirect flow; one-way messages; harder to trace |
-| Blackboard with rules | Order-independent; agents come and go | Hard to reason about; needs tracing and message schemas |
+| گردش‌کار پشت‌سرهم | استدلال کردن درباره‌اش ساده است | کند؛ coupling زمانی |
+| گردش‌کار هم‌زمان از یک نمودار فعالیت | تندتر؛ وقت انتظار را به کار می‌برد | منابع، یعنی دست، و هماهنگی می‌خواهد |
+| shared state با semaphore | آشنا؛ دانه‌ریز | به قرارداد تکیه دارد؛ بن‌بست؛ unlock فراموش‌شده |
+| منبع تراکنشی | بررسی‌و‌برداشتن اتمی در یک جا | عملیات ترکیبی به منابع خودشان نیاز دارند |
+| actorها | بی حالت مشترک؛ مکان‌شفاف | جریان غیرمستقیم؛ پیام یک‌طرفه؛ ردیابی سخت‌تر |
+| blackboard با قاعده | بی‌نیاز به ترتیب؛ agentها می‌آیند و می‌روند | استدلال کردن سخت است؛ trace و schema پیام می‌خواهد |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Amdahl's law** bounds the speedup from parallelism: if a fraction s of the work is serial, n processors give at most 1 / (s + (1 − s)/n). In the piña colada, the one-minute liquefy is serial whatever the number of hands, which the [scheduler widget](../widgets/06-pina-colada.html) makes visible.
-- **Check-then-act** is the textbook name for the waiters' race; its database cousin is the *lost update* or *write skew*, covered in [DDIA Ch. 8](../../designing-data-intensive-applications/chapters/08-transactions.md), and an `UPDATE … WHERE count > 0` that checks and takes in one statement is the database version of `get_pie_if_available`.
-- **Actors and back-pressure.** Unbounded mailboxes hide overload until memory runs out; production actor systems (Akka, Erlang/OTP) add bounded mailboxes or demand signalling. [Think Distributed Systems](../../think-distributed-systems/README.md) treats the message-delivery guarantees that actor messages inherit.
+- **قانون Amdahl** تندشدن از موازی‌کاری را کران می‌گذارد: اگر کسری به اندازه‌ی s از کار پشت‌سرهم باشد، n processor حداکثر ۱ تقسیم بر (s + (1 − s)/n) می‌دهند. در پینا کولادا، مایع کردن یک‌دقیقه‌ای هر چند دست هم باشد پشت‌سرهم است، که [ویجت scheduler](../widgets/06-pina-colada.html) دیدنی‌اش می‌کند.
+- **بررسی‌و‌بعد‌عمل** نام کتابی مسابقه‌ی پیش‌خدمت‌هاست؛ پسرخاله‌ی دیتابیسی‌اش *به‌روزرسانی گم‌شده* یا *write skew* است که در [فصل ۸ کتاب DDIA](../../designing-data-intensive-applications/chapters/08-transactions.md) پوشانده شده، و یک `UPDATE … WHERE count > 0` که در یک دستور بررسی و برمی‌دارد نسخه‌ی دیتابیسی `get_pie_if_available` است.
+- **همه‌ی actorها و back-pressure.** صندوق‌نامه‌های بی‌کران، بار اضافی را تا تمام شدن حافظه پنهان می‌کنند؛ سیستم‌های actor تولیدی مثل Akka و Erlang/OTP صندوق‌نامه‌ی bounded یا خبر دادن تقاضا اضافه می‌کنند. کتاب [Think Distributed Systems](../../think-distributed-systems/README.md) تضمین‌های تحویل پیامی را می‌گیرد که پیام actorها به ارث می‌برند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [4. Pragmatic Paranoia](04-pragmatic-paranoia.md) (resource balancing and lock ordering; crash early and Erlang supervisors), [5. Bend, or Break](05-bend-or-break.md) (decoupling, global data, events and pubsub, transformations), [7. While You Are Coding](07-while-you-are-coding.md) (programming by coincidence, which concurrency bugs punish).
-- **Run it:** [Every interleaving of the pie case](../lab/06-pie-interleavings/README.md) — enumerates every interleaving of two or three waiters' steps and counts oversold pies with no lock, with a lock, and with a transactional take.
+- **فصل‌های مرتبط:** [فصل ۴: بدگمانی pragmatic](04-pragmatic-paranoia.md) که توازن منابع و ترتیب قفل و زود crash کردن و supervisorهای Erlang را دارد، [فصل ۵: خم شو، یا بشکن](05-bend-or-break.md) که decoupling و داده‌ی سراسری و رویداد و انتشار و اشتراک و تبدیل‌ها را دارد، و [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که برنامه‌نویسی تصادفی را دارد که باگ‌های concurrency تنبیهش می‌کنند.
+- **Run it:** [هر interleaving ویترین پای](../lab/06-pie-interleavings/README.md)؛ هر interleaving مرحله‌های دو یا سه پیش‌خدمت را برمی‌شمارد و پای‌های بیش‌فروش‌شده را بی قفل، با قفل، و با برداشتن تراکنشی می‌شمارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **Define concurrency and parallelism as the book does.**
+1. **مفهوم concurrency و موازی‌کاری را همان‌طور که کتاب می‌گوید تعریف کنید.**
 
-   *Answer:* Concurrency: code acts as if it runs at the same time. Parallelism: it does run at the same time (p. 289).
+   *Answer:* concurrency: کد طوری رفتار می‌کند که گویی با هم اجرا می‌شود. موازی‌کاری: واقعاً با هم اجرا می‌شود (p. 289).
 
-2. **Which piña colada tasks can start immediately?**
+2. **کدام کارهای پینا کولادا می‌توانند بی‌درنگ شروع شوند؟**
 
-   *Answer:* Tasks 1, 2, 4, 10 and 11: open the blender, open the mix, measure the rum, get glasses and get umbrellas (p. 295).
+   *Answer:* کارهای ۱ و ۲ و ۴ و ۱۰ و ۱۱: باز کردن مخلوط‌کن، باز کردن مخلوط، اندازه گرفتن رام، آوردن لیوان، و آوردن چتر (p. 295).
 
-3. **What kind of activity is the best opportunity for concurrency?**
+3. **چه گونه فعالیتی بهترین فرصت برای concurrency است؟**
 
-   *Answer:* One that takes time, but not time in your code: waiting on a database, an external service or user input (pp. 296–297).
+   *Answer:* فعالیتی که وقت می‌برد ولی وقت کد شما را نه: انتظار برای دیتابیس یا سرویس بیرونی یا ورودی کاربر (pp. 296–297).
 
-4. **In the pie example, what is the real problem with shared state?**
-   - [ ] Two processes can write the same memory
-   - [x] Neither process can guarantee its view of the memory is consistent
-   - [ ] The pie count is a global variable
+4. **در نمونه‌ی پای، مسئله‌ی واقعی shared state چیست؟**
+   - [ ] دو process می‌توانند همان حافظه را بنویسند
+   - [x] هیچ processی نمی‌تواند تضمین کند نگاهش به حافظه سازگار است
+   - [ ] شمارش پای یک متغیر سراسری است
 
-   *Answer:* Reading the count copies it; it can change before the waiter acts, because check-then-act isn't atomic (pp. 300–301).
+   *Answer:* خواندن شمارش کپی‌اش می‌کند؛ می‌تواند پیش از عمل پیش‌خدمت عوض شود، چون بررسی‌و‌بعد‌عمل اتمی نیست (pp. 300–301).
 
-5. **Why does `get_pie_if_available` still need a semaphore, and why `ensure`?**
+5. **چرا `get_pie_if_available` باز هم به semaphore نیاز دارد، و چرا به `ensure`؟**
 
-   *Answer:* The method itself can be called from several threads at once; and if `update_sales_data` raises, an unlock without `ensure` never happens and the case hangs forever (pp. 302–304).
+   *Answer:* خود آن متد می‌تواند از چند thread با هم صدا زده شود؛ و اگر `update_sales_data` خطا پرتاب کند، unlock بی `ensure` هیچ‌وقت نمی‌افتد و ویترین تا ابد گیر می‌کند (pp. 302–304).
 
-6. **What caused the authors' random "file not found" build failures?**
+6. **چه چیزی شکست‌های تصادفی «فایل پیدا نشد» در build نویسنده‌ها را می‌ساخت؟**
 
-   *Answer:* Code that temporarily changed the current directory, which is shared by all threads (pp. 306–307).
+   *Answer:* کدی که موقت پوشه‌ی فعلی را عوض می‌کرد، که همه‌ی threadها شریکش‌اند (pp. 306–307).
 
-7. **How does an actor get a reply?**
+7. **یک actor چطور پاسخ می‌گیرد؟**
 
-   *Answer:* Messages are one-way; the sender includes its own mailbox address and receives the response as another message (p. 310).
+   *Answer:* پیام‌ها یک‌طرفه‌اند؛ فرستنده آدرس صندوق‌نامه‌ی خودش را می‌گذارد و پاسخ را به‌عنوان پیامی دیگر می‌گیرد (p. 310).
 
-8. **Why does a blackboard with a rules engine suit loan applications?**
+8. **چرا یک blackboard با موتور قاعده به درخواست وام می‌خورد؟**
 
-   *Answer:* Facts arrive in any order from many sources; posting a fact triggers the applicable rules, whose output can trigger more, so arrival order is irrelevant and rule changes don't require rewiring a workflow (pp. 320–321).
+   *Answer:* واقعیت‌ها به هر ترتیبی از منبع‌های زیادی می‌رسند؛ گذاشتن یک واقعیت قاعده‌های مربوط را راه می‌اندازد، که خروجی‌شان می‌تواند بیشتر را راه بیندازد، پس ترتیب رسیدن بی‌اهمیت است و عوض شدن قاعده به سیم‌کشی دوباره‌ی گردش‌کار نیاز ندارد (pp. 320–321).

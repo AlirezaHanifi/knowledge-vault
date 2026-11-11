@@ -3,213 +3,227 @@ book: the-pragmatic-programmer
 chapter: 1
 title: "A Pragmatic Philosophy"
 pages: "34–72"
+translated_title: "فلسفه‌ی pragmatic"
+lang: fa
 ---
 
-# 1. A Pragmatic Philosophy
+# فصل ۱: فلسفه‌ی pragmatic
 
-[Book](../README.md) · [2. A Pragmatic Approach →](02-a-pragmatic-approach.md)
+[کتاب](../README.md) · [فصل ۲: رویکرد pragmatic ←](02-a-pragmatic-approach.md)
 
-## Summary
+## خلاصه
 
-The first chapter is about the programmer rather than the program. Pragmatic Programmers think beyond the immediate problem, place it in a larger context, and take responsibility for what they do (pp. 34–35). The seven topics build that attitude:
+فصل اول درباره‌ی برنامه‌نویس است و نه برنامه. برنامه‌نویس pragmatic فراتر از مسئله‌ی پیش رو فکر می‌کند، آن را در زمینه‌ای بزرگ‌تر می‌گذارد، و مسئولیت کارش را می‌پذیرد (pp. 34–35). هفت موضوع این نگرش را می‌سازند:
 
-- **Agency:** you can change your environment, or change environments (Topic 1).
-- **Responsibility:** offer options, not excuses (Topic 2).
-- **Fighting entropy:** don't live with broken windows (Topic 3).
-- **Catalysing change** without being boiled by it (Topic 4).
-- **Good-enough software,** with users in the quality trade-off (Topic 5).
-- **A knowledge portfolio** managed like a financial one (Topic 6).
-- **Communication** treated as a programming language of its own (Topic 7).
+- **عاملیت:** می‌توانید محیطتان را عوض کنید، یا محیط را عوض کنید (موضوع ۱).
+- **مسئولیت:** گزینه بدهید، نه بهانه (موضوع ۲).
+- **جنگ با آنتروپی:** با پنجره‌ی شکسته زندگی نکنید (موضوع ۳).
+- **کاتالیز کردن تغییر** بی آن که خودتان آب‌پز شوید (موضوع ۴).
+- **نرم‌افزار به‌اندازه‌ی کافی خوب،** با حضور کاربرها در بده‌بستان کیفیت (موضوع ۵).
+- **سبد دانش** که مثل سبدی مالی مدیریت می‌شود (موضوع ۶).
+- **ارتباط** که مثل یک زبان برنامه‌نویسی مستقل دیده می‌شود (موضوع ۷).
 
-The chapter carries Tips 3 to 13. Tips 1 and 2, *Care About Your Craft* and *Think! About Your Work*, come from the preface (p. 30).
+این فصل tipهای ۳ تا ۱۳ را دارد. tipهای ۱ و ۲، یعنی *به صنعتت اهمیت بده* و *درباره‌ی کارت فکر کن!*، از پیش‌گفتار می‌آیند (p. 30).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **You have agency.** The authors call it the most important tip in the book: if your environment is bad, try to fix it, but not forever (Tip 3, p. 37).
-- **Provide options, don't make lame excuses.** Rehearse the conversation first, to the rubber duck or the cat if need be, and arrive with what *can* be done (Tip 4, pp. 40–41).
-- **Neglect accelerates rot faster than any other factor.** Fix a broken window as soon as you find it, or at least board it up (Tip 5, pp. 43–44).
-- **Be a catalyst for change, and remember the big picture.** Stone soup gets people to join an ongoing success; the boiled frog doesn't notice gradual decline (Tips 6–7, pp. 47–48).
-- **Quality is a requirements issue.** Let users decide when software is good enough, and know when to stop polishing (Tip 8, pp. 51–52).
-- **Knowledge is an expiring asset.** Invest in it regularly, diversify, manage risk, and think critically about what you read (Tips 9–10, pp. 54–60).
-- **Communication is half the job.** Know what you want to say and your audience; how you say it matters as much as what (Tips 11–13, pp. 63–69).
+- **شما عاملیت دارید.** نویسنده‌ها این را مهم‌ترین tip کتاب می‌نامند: اگر محیطتان بد است سعی کنید درستش کنید، ولی نه تا ابد (tip ۳، ص. ۳۷).
+- **گزینه بدهید، بهانه‌ی بی‌مزه نیاورید.** اول گفت‌و‌گو را تمرین کنید، اگر لازم شد برای اردک پلاستیکی یا گربه، و با آن چیزی بیایید که *می‌شود* کرد (tip ۴، صص. ۴۰–۴۱).
+- **بی‌توجهی پوسیدگی را تندتر از هر عامل دیگری می‌کند.** پنجره‌ی شکسته را همین که پیدا کردید تعمیر کنید، یا دست‌کم تخته بزنید (tip ۵، صص. ۴۳–۴۴).
+- **کاتالیزور تغییر باشید و تصویر بزرگ را یادتان بماند.** سوپ سنگی مردم را به یک موفقیت در جریان می‌پیوندد، و قورباغه‌ی آب‌پز افت تدریجی را نمی‌فهمد (tipهای ۶ و ۷، صص. ۴۷–۴۸).
+- **کیفیت مسئله‌ی نیازمندی‌هاست.** بگذارید کاربرها تصمیم بگیرند نرم‌افزار کِی به‌اندازه‌ی کافی خوب است، و بدانید کِی باید دست از جلا دادن بردارید (tip ۸، صص. ۵۱–۵۲).
+- **دانش دارایی‌ای است که تاریخ انقضا دارد.** منظم رویش سرمایه‌گذاری کنید، متنوعش کنید، خطر را مدیریت کنید، و به آن چیزی که می‌خوانید نقادانه فکر کنید (tipهای ۹ و ۱۰، صص. ۵۴–۶۰).
+- **ارتباط نصف کار است.** بدانید چه می‌خواهید بگویید و مخاطبتان کیست؛ شکل گفتن همان‌قدر مهم است که محتوا (tipهای ۱۱ تا ۱۳، صص. ۶۳–۶۹).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 1. It’s Your Life — p. 36
-- Topic 2. The Cat Ate My Source Code — p. 38
-- Topic 3. Software Entropy — p. 42
-- Topic 4. Stone Soup and Boiled Frogs — p. 46
-- Topic 5. Good-Enough Software — p. 50
-- Topic 6. Your Knowledge Portfolio — p. 54
-- Topic 7. Communicate! — p. 63
+- موضوع ۱. زندگی خودت است — ص. ۳۶
+- موضوع ۲. گربه کد منبعم را خورد — ص. ۳۸
+- موضوع ۳. آنتروپی نرم‌افزار — ص. ۴۲
+- موضوع ۴. سوپ سنگی و قورباغه‌ی آب‌پز — ص. ۴۶
+- موضوع ۵. نرم‌افزار به‌اندازه‌ی کافی خوب — ص. ۵۰
+- موضوع ۶. سبد دانش شما — ص. ۵۴
+- موضوع ۷. ارتباط بگیرید! — ص. ۶۳
 
-## Notes
+## یادداشت‌ها
 
-The book is a collection of short, self-contained topics that can be read in any order, with numbered **tips**, open-ended **challenges**, and **exercises** whose possible answers are in an appendix (p. 20). Each topic ends with a list of related sections. These notes keep the tip numbers so they can be cross-referenced.
+کتاب مجموعه‌ای از موضوع‌های کوتاه و خودبسنده است که به هر ترتیبی خوانده می‌شوند، با **tip**های شماره‌دار و **چالش**های سربسته و **تمرین**هایی که پاسخ‌های ممکنشان در یک پیوست است (p. 20). هر موضوع با فهرستی از بخش‌های مرتبط تمام می‌شود. این یادداشت‌ها شماره‌ی tipها را نگه می‌دارند تا ارجاع متقابل شدنی بماند.
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 3 | You Have Agency | 37 |
-| 4 | Provide Options, Don't Make Lame Excuses | 40 |
-| 5 | Don't Live with Broken Windows | 43 |
-| 6 | Be a Catalyst for Change | 47 |
-| 7 | Remember the Big Picture | 48 |
-| 8 | Make Quality a Requirements Issue | 51 |
-| 9 | Invest Regularly in Your Knowledge Portfolio | 57 |
-| 10 | Critically Analyze What You Read and Hear | 60 |
-| 11 | English is Just Another Programming Language | 64 |
-| 12 | It's Both What You Say and the Way You Say It | 68 |
-| 13 | Build Documentation In, Don't Bolt It On | 68 |
+| ۳ | شما عاملیت دارید | ۳۷ |
+| ۴ | گزینه بدهید، بهانه‌ی بی‌مزه نیاورید | ۴۰ |
+| ۵ | با پنجره‌ی شکسته زندگی نکنید | ۴۳ |
+| ۶ | کاتالیزور تغییر باشید | ۴۷ |
+| ۷ | تصویر بزرگ را یادتان بماند | ۴۸ |
+| ۸ | کیفیت را مسئله‌ی نیازمندی‌ها کنید | ۵۱ |
+| ۹ | منظم روی سبد دانشتان سرمایه‌گذاری کنید | ۵۷ |
+| ۱۰ | آن چیزی را که می‌خوانید و می‌شنوید نقادانه تحلیل کنید | ۶۰ |
+| ۱۱ | زبان انگلیسی هم فقط یک زبان برنامه‌نویسی دیگر است | ۶۴ |
+| ۱۲ | هم آن چیزی که می‌گویید مهم است و هم شکل گفتنش | ۶۸ |
+| ۱۳ | مستند را از اول بسازید، بعداً به آن نچسبانید | ۶۸ |
 
-### Topic 1. It’s Your Life
+### موضوع ۱. زندگی خودت است
 
-Many developers feel stuck: stagnating, underpaid, passed by technology. The authors' answer is always the same question: why can't you change it? Software development offers unusual control. Skills are in demand, knowledge crosses borders and remote work is possible (p. 36).
+خیلی از developerها حس می‌کنند گیر افتاده‌اند: در رکودند، کم‌حقوق‌اند، فناوری از آن‌ها جلو زده. پاسخ نویسنده‌ها همیشه همان پرسش است: چرا نمی‌توانید عوضش کنید؟ توسعه‌ی نرم‌افزار کنترل غیرمعمولی می‌دهد. مهارت‌ها تقاضا دارند، دانش از مرزها رد می‌شود، و کار دور‌کار ممکن است (p. 36).
 
-- **Tip 3, You Have Agency** (p. 37). Try to fix a bad environment, but don't try forever. Martin Fowler's line: you can change your organization or change your organization.
-- If technology is passing you by, study in your own time; it's an investment in yourself (p. 37).
-- If you want to work remotely, ask; if the answer is no, find someone who says yes (p. 37).
+- **نکته‌ی ۳، شما عاملیت دارید** (p. 37). سعی کنید محیط بد را درست کنید، ولی تا ابد سعی نکنید. جمله‌ی Martin Fowler: می‌توانید سازمانتان را عوض کنید، یا سازمانتان را عوض کنید.
+- اگر فناوری از شما جلو می‌زند، در وقت خودتان درس بخوانید؛ سرمایه‌گذاری روی خودتان است (p. 37).
+- اگر می‌خواهید دور‌کار باشید، بپرسید؛ و اگر پاسخ نه بود، کسی را پیدا کنید که بله می‌گوید (p. 37).
 
-### Topic 2. The Cat Ate My Source Code
+### موضوع ۲. گربه کد منبعم را خورد
 
-A cornerstone of the philosophy is **taking responsibility** for your career, learning, project and daily work, and not being afraid to admit ignorance or error (p. 38).
+سنگ بنای این فلسفه **پذیرفتن مسئولیت** برای حرفه و یاد گرفتن و پروژه و کار روزانه‌تان است، و نترسیدن از اعتراف به نادانی یا خطا (p. 38).
 
-| Idea | What the book says |
+| ایده | کتاب چه می‌گوید |
 |---|---|
-| **Team trust** | Trust is essential for creativity and collaboration; a team must be able to rely on you, and you on them (pp. 38–39) |
-| **Responsibility is agreed to** | You commit to ensuring something is done right without controlling every aspect. You may decline an impossible, too risky or ethically sketchy responsibility (p. 39) |
-| **Accountability** | Once you accept, you're accountable. Admit mistakes honestly and offer options (p. 39) |
-| **No blame** | Don't blame vendors, languages, management or coworkers. If a vendor might fail you, you should have had a contingency plan; if a disk dies without a backup, it's your fault (pp. 39–40) |
+| **اعتماد تیمی** | اعتماد برای خلاقیت و همکاری ضروری است؛ تیم باید بتواند روی شما حساب کند و شما روی آن‌ها (pp. 38–39) |
+| **مسئولیت پذیرفته می‌شود** | متعهد می‌شوید مطمئن شوید کاری درست انجام می‌شود، بی آن که هر جنبه‌اش را کنترل کنید. می‌توانید مسئولیتی ناممکن یا پرخطر یا اخلاقاً مشکوک را نپذیرید (p. 39) |
+| **پاسخ‌گویی** | همین که پذیرفتید، پاسخ‌گو هستید. صادقانه به خطاها اعتراف کنید و گزینه بدهید (p. 39) |
+| **تقصیر نیندازید** | گردن vendor و زبان و مدیریت و همکار نیندازید. اگر vendorی می‌توانست شما را زمین بزند، باید نقشه‌ی جایگزین داشته باشید؛ و اگر دیسکی بی backup مرد، تقصیر شماست (pp. 39–40) |
 
-**Tip 4, Provide Options, Don't Make Lame Excuses** (p. 40). Before delivering bad news, run the conversation in your head: what will they ask? Then propose what *can* be done: refactoring, prototyping, better testing or automation, more resources, more time with users, or learning a technique (pp. 40–41). A challenge: follow "I don't know" with "but I'll find out" (p. 41).
+**نکته‌ی ۴، گزینه بدهید، بهانه‌ی بی‌مزه نیاورید** (p. 40). پیش از رساندن خبر بد، گفت‌و‌گو را در ذهنتان اجرا کنید: چه می‌پرسند؟ بعد آن چیزی را پیشنهاد بدهید که *می‌شود* کرد: refactoring یا ساختن prototype یا تست بهتر یا خودکارسازی، منابع بیشتر، وقت بیشتر با کاربرها، یا یاد گرفتن یک تکنیک (pp. 40–41). یک چالش: پشت «نمی‌دانم» بگویید «ولی پیدا می‌کنم» (p. 41).
 
-### Topic 3. Software Entropy
+> **In practice:** blameless incident review همان جایی است که تیم به‌جای بهانه، گزینه می‌آورد.
+>
+> **Your turn:** Gold دیروز خالی منتشر شد چون loader بی‌صدا هیچ ردیفی نیاورد. در review چه چیزی را به‌جای «منبع مشکل داشت» می‌گویید؟
+>
+> *Answer:* «ما alertی روی صفر ردیف نداشتیم؛ پیشنهاد: یک check در DAG که بار صفرردیفی را fail کند». کتاب می‌گوید مسئولیت بپذیرید و گزینه بیاورید، نه بهانه (pp. 38–41).
 
-Disorder in software is **software rot**; some call it "technical debt", implying they'll pay it back someday, which they probably won't (p. 42). Psychology, or culture, is the most important factor (p. 42).
+### موضوع ۳. آنتروپی نرم‌افزار
 
-The **broken window** story comes from research on urban decay: one unrepaired broken window gives a sense that nobody cares, and the decline accelerates from there (p. 43). In the original experiment an abandoned car sat untouched for a week, but once a window was broken it was stripped within hours (p. 45).
+بی‌نظمی در نرم‌افزار همان **پوسیدگی نرم‌افزار** است؛ بعضی‌ها «بدهی فنی» می‌نامندش، که یعنی روزی پسش می‌دهند، که احتمالاً نمی‌دهند (p. 42). روان‌شناسی، یا فرهنگ، مهم‌ترین عامل است (p. 42).
 
-- **Tip 5, Don't Live with Broken Windows** (p. 43). Bad designs, wrong decisions and poor code should be fixed as soon as they're found. Without time to fix properly, **board it up**: comment out the offending code, show "Not Implemented", or substitute dummy data, so that the damage stops spreading (p. 43).
-- **First, do no harm** (pp. 44–45). Firefighters at a burning house rolled out a mat before dragging their hoses over a priceless carpet. In a crisis, don't cause collateral damage. On a pristine codebase, people take extra care not to be the first to make a mess.
+داستان **پنجره‌ی شکسته** از پژوهشی روی پوسیدگی شهری می‌آید: یک پنجره‌ی شکسته‌ی تعمیر‌نشده این حس را می‌دهد که کسی اهمیت نمی‌دهد، و افت از همان‌جا تند می‌شود (p. 43). در آزمایش اصلی، یک ماشین رهاشده یک هفته دست‌نخورده ماند، ولی همین که پنجره‌اش شکست، ظرف چند ساعت لخت شد (p. 45).
 
-> **Try it:** [Broken windows](../widgets/01-broken-windows.html) — let a team keep working on a codebase where every visible mess makes the next one more likely, then compare ignoring broken windows with boarding them up and with fixing them at once.
+- **نکته‌ی ۵، با پنجره‌ی شکسته زندگی نکنید** (p. 43). طراحی بد و تصمیم غلط و کد ضعیف باید همین که پیدا شدند درست شوند. اگر وقت تعمیر درست نیست، **تخته بزنید**: کد مشکل‌دار را comment کنید، «Not Implemented» نشان بدهید، یا داده‌ی ساختگی بگذارید، تا آسیب پخش نشود (p. 43).
+- **اول، آسیب نزن** (pp. 44–45). آتش‌نشان‌ها در خانه‌ای در آتش، پیش از کشیدن شلنگ‌ها روی فرشی گران‌بها یک زیرانداز پهن کردند. در بحران، آسیب جانبی نزنید. روی یک codebase بی‌عیب، مردم بیشتر دقت می‌کنند که اولین نفری نباشند که به‌هم‌ریختگی می‌سازد.
 
-### Topic 4. Stone Soup and Boiled Frogs
+> **Try it:** [پنجره‌های شکسته](../widgets/01-broken-windows.html)؛ بگذارید تیمی روی codebaseی کار کند که هر به‌هم‌ریختگی دیدنی، بعدی را محتمل‌تر می‌کند، و بعد نادیده گرفتن پنجره‌های شکسته را با تخته زدن و با تعمیر فوری مقایسه کنید.
 
-In the **stone soup** story, soldiers boil stones and coax hungry villagers into adding carrots, potatoes, beef and herbs until there is a real meal (pp. 46–47). The soldiers act as a **catalyst** for a result nobody could produce alone (p. 47).
+> **In practice:** در stack ما «پنجره‌ی شکسته» شکل‌های آشنایی دارد: DAGی که همیشه یک task قرمز دارد، alert ساکت‌شده در Grafana، تست skipشده در GitLab CI.
+>
+> **Your turn:** alert تازگی یک جدول Gold هفته‌هاست هر روز fire می‌شود و همه آن را نادیده می‌گیرند. چرا این از خود مشکل بدتر است؟
+>
+> *Answer:* تیم یاد می‌گیرد alertها را نادیده بگیرد و alert واقعی بعدی هم دیده نمی‌شود. یا مشکل را درست کنید، یا alert را با یادداشت و تاریخ انقضا silence کنید؛ کتاب می‌گوید پنجره‌ی شکسته را همان روز تخته کنید (pp. 42–45).
 
-- When permission is hard to get ("start-up fatigue"), work out what you can reasonably ask for, develop it well, and show it. Then let people ask for the rest: people find it easier to join an ongoing success (p. 47). **Tip 6, Be a Catalyst for Change** (p. 47).
-- The villagers' side is a warning about **gradual deception**: most disasters start too small to notice, and most overruns happen a day at a time (p. 48). **Tip 7, Remember the Big Picture** (p. 48).
-- The **boiled frog** differs from broken windows: broken windows make people stop caring, while the frog simply doesn't notice the change (p. 48).
+### موضوع ۴. سوپ سنگی و قورباغه‌ی آب‌پز
 
-The challenges ask whether you're making stone soup or frog soup when you catalyze change, and practise situational awareness: without looking, how many lights are in the ceiling above you? (p. 49)
+در داستان **سوپ سنگی**، سربازها سنگ می‌جوشانند و روستایی‌های گرسنه را راضی می‌کنند هویج و سیب‌زمینی و گوشت و سبزی اضافه کنند، تا یک غذای واقعی در بیاید (pp. 46–47). سربازها **کاتالیزور** نتیجه‌ای‌اند که هیچ‌کس تنها نمی‌توانست بسازد (p. 47).
 
-### Topic 5. Good-Enough Software
+- وقتی گرفتن اجازه سخت است، یعنی «خستگی راه‌اندازی»، بفهمید معقولانه چه چیزی را می‌توانید بخواهید، خوب بسازیدش، و نشانش بدهید. بعد بگذارید مردم خودشان بقیه را بخواهند: پیوستن به موفقیتی در جریان برای مردم آسان‌تر است (p. 47). **tip ۶، کاتالیزور تغییر باشید** (p. 47).
+- سمت روستایی‌ها هشداری است درباره‌ی **فریب تدریجی**: بیشتر فاجعه‌ها از آن‌قدر کوچک شروع می‌شوند که دیده نمی‌شوند، و بیشتر از‌برنامه‌خارج‌شدن‌ها روز‌به‌روز اتفاق می‌افتند (p. 48). **tip ۷، تصویر بزرگ را یادتان بماند** (p. 48).
+- **قورباغه‌ی آب‌پز** با پنجره‌ی شکسته فرق دارد: پنجره‌ی شکسته باعث می‌شود مردم اهمیت ندهند، در حالی که قورباغه فقط تغییر را نمی‌فهمد (p. 48).
 
-Perfect, bug-free software isn't achievable, but you can discipline yourself to write software that is **good enough** for users, maintainers and your own peace of mind (pp. 50–51, after Yourdon). This doesn't mean sloppy code: systems must meet requirements and basic performance, privacy and security standards (p. 51).
+چالش‌ها می‌پرسند وقتی تغییر را کاتالیز می‌کنید سوپ سنگی درست می‌کنید یا سوپ قورباغه، و آگاهی موقعیتی را تمرین می‌دهند: بی نگاه کردن، چند چراغ در سقف بالای سرتان است؟ (p. 49)
 
-- **Involve users in the trade-off.** For pacemakers, autopilots or widely used libraries, the bar is fixed and high. For a new product, scope and quality should be discussed as part of the requirements (p. 51). **Tip 8, Make Quality a Requirements Issue** (p. 51).
-- Many users prefer software with rough edges today to a perfect version in a year, and early feedback leads to a better solution (p. 52; see Topic 12, Tracer Bullets).
-- **Know when to stop.** Like a painting lost in the paint, a program can be spoiled by overembellishment and overrefinement (p. 52).
+### موضوع ۵. نرم‌افزار به‌اندازه‌ی کافی خوب
 
-### Topic 6. Your Knowledge Portfolio
+نرم‌افزار بی‌نقص و بی‌باگ شدنی نیست، ولی می‌توانید خودتان را منظم کنید که نرم‌افزاری بنویسید که برای کاربرها و نگه‌دارنده‌ها و آرامش خودتان **به‌اندازه‌ی کافی خوب** است؛ این ایده را از Yourdon گرفته‌اند (pp. 50–51). این یعنی کد شلخته نه: سیستم‌ها باید نیازمندی‌ها و استانداردهای پایه‌ی performance و حریم خصوصی و امنیت را برآورده کنند (p. 51).
 
-Knowledge and experience are your most important professional assets, and they **expire** (p. 54). Managing a knowledge portfolio is like managing a financial one (p. 55):
+- **کاربرها را در بده‌بستان دخیل کنید.** برای pacemaker یا autopilot یا کتابخانه‌های پراستفاده، سقف ثابت و بالاست. برای محصولی تازه، دامنه و کیفیت باید بخشی از نیازمندی‌ها بحث شوند (p. 51). **tip ۸، کیفیت را مسئله‌ی نیازمندی‌ها کنید** (p. 51).
+- خیلی از کاربرها نرم‌افزاری با لبه‌های زبر همین امروز را به نسخه‌ای بی‌نقص یک سال بعد ترجیح می‌دهند، و بازخورد زودهنگام به راه‌حل بهتری می‌رسد؛ موضوع ۱۲، Tracer Bullets، همین را باز می‌کند (p. 52).
+- **بدانید کِی بایستید.** مثل نقاشی‌ای که در رنگ گم می‌شود، یک برنامه را هم زیاده‌آراستن و زیاده‌پرداختن خراب می‌کند (p. 52).
 
-| Investment rule | Applied to knowledge (pp. 55–57) |
+### موضوع ۶. سبد دانش شما
+
+دانش و تجربه مهم‌ترین دارایی‌های حرفه‌ای شمایند، و **تاریخ انقضا دارند** (p. 54). مدیریت سبد دانش مثل مدیریت سبدی مالی است (p. 55):
+
+| قاعده‌ی سرمایه‌گذاری | وقتی روی دانش اعمال شود (pp. 55–57) |
 |---|---|
-| **Invest regularly** | A habit, at a consistent time and place; the habit matters as much as the amounts |
-| **Diversify** | Know your current technology in depth, then others, including non-technical skills |
-| **Manage risk** | Spread across risky, high-reward technologies and low-risk standards |
-| **Buy low, sell high** | Learn an emerging technology early, as Java's early adopters did |
-| **Review and rebalance** | Last month's hot technology may be cold now |
+| **منظم سرمایه‌گذاری کنید** | یک عادت، در وقت و جای ثابت؛ خود عادت همان‌قدر مهم است که مقدار |
+| **متنوع کنید** | فناوری فعلی‌تان را عمیق بشناسید، و بعد بقیه را، از جمله مهارت‌های غیرفنی |
+| **خطر را مدیریت کنید** | بین فناوری‌های پرخطر و پرپاداش و استانداردهای کم‌خطر پخش کنید |
+| **ارزان بخرید، گران بفروشید** | فناوری نوظهوری را زود یاد بگیرید، همان‌طور که اولین کاربرهای Java کردند |
+| **بازبینی و متوازن‌سازی کنید** | فناوری داغ ماه پیش ممکن است حالا سرد شده باشد |
 
-**Tip 9, Invest Regularly in Your Knowledge Portfolio** (p. 57). Suggested goals: learn at least one new language every year; read a technical book each month; read nontechnical books too; take classes; join user groups and meetups; experiment with different environments; stay current (pp. 57–58). The value is in the learning itself, whether or not you use the technology (p. 59). When asked something you don't know, take it as a personal challenge to find out (p. 59).
+**نکته‌ی ۹، منظم روی سبد دانشتان سرمایه‌گذاری کنید** (p. 57). هدف‌های پیشنهادی: سالی دست‌کم یک زبان تازه یاد بگیرید؛ ماهی یک کتاب فنی بخوانید؛ کتاب غیرفنی هم بخوانید؛ کلاس بروید؛ به user group و meetup بپیوندید؛ محیط‌های مختلف را امتحان کنید؛ به‌روز بمانید (pp. 57–58). ارزش در خود یاد گرفتن است، فرق نمی‌کند آن فناوری را به کار ببرید یا نه (p. 59). وقتی چیزی را پرسیدند که نمی‌دانید، آن را چالشی شخصی برای پیدا کردن بگیرید (p. 59).
 
-**Tip 10, Critically Analyze What You Read and Hear** (p. 60). Beware of hype and of commercial placement in search results and bookshops (p. 60). Questions to ask (pp. 60–61):
+**نکته‌ی ۱۰، آن چیزی را که می‌خوانید و می‌شنوید نقادانه تحلیل کنید** (p. 60). از هایپ و از جاگذاری تجاری در نتیجه‌ی جست‌و‌جو و قفسه‌ی کتاب‌فروشی برحذر باشید (p. 60). پرسش‌هایی که باید پرسید (pp. 60–61):
 
-- Ask "why?" at least five times (the **Five Whys**).
-- Who does this benefit?
-- What's the context: best for whom?
-- When or where would this work? Use second-order thinking: what happens after that?
-- Why is this a problem? What is the underlying model?
+- دست‌کم پنج بار «چرا؟» بپرسید، یعنی **پنج چرا**.
+- این به سود چه کسی است؟
+- زمینه چیست: برای چه کسی بهترین است؟
+- کِی یا کجا این کار می‌کند؟ تفکر مرتبه‌دوم به کار ببرید: بعد از آن چه می‌شود؟
+- چرا این یک مسئله است؟ مدل زیرینش چیست؟
 
-### Topic 7. Communicate
+### موضوع ۷. ارتباط بگیرید
 
-A good idea is an orphan without effective communication (p. 63). Treat natural language like code, applying DRY, ETC and automation to it: **Tip 11, English is Just Another Programming Language** (pp. 63–64).
+ایده‌ی خوب بی ارتباط مؤثر یتیم است (p. 63). زبان طبیعی را مثل کد ببینید و DRY و ETC و خودکارسازی را روی آن اعمال کنید: **tip ۱۱، زبان انگلیسی هم فقط یک زبان برنامه‌نویسی دیگر است** (pp. 63–64).
 
-| Practice | What it means (pp. 64–68) |
+| کار | یعنی چه (pp. 64–68) |
 |---|---|
-| **Know your audience** | Pitch the same change differently to users, marketing, managers and developers. Gather feedback: "the meaning of your communication is the response you get" |
-| **Know what you want to say** | Plan and outline, then check that it communicates |
-| **Choose your moment** | Six o'clock on a bad Friday is no time to ask for a laptop upgrade. Ask "is this a good time?" |
-| **Choose a style** | Formal briefing or long chat, expert or newcomer. If in doubt, ask; push back if a paragraph can't do the job |
-| **Make it look good** | Use style sheets, headers, spelling checks (automatic and by hand) |
-| **Involve your audience** | Early drafts and feedback; the process often matters more than the document |
-| **Be a listener** | If you don't listen to them, they won't listen to you |
-| **Get back to people** | Always respond, even if only to say you'll get back later |
+| **مخاطبتان را بشناسید** | همان تغییر را برای کاربرها و بازاریابی و مدیرها و developerها جور دیگری عرضه کنید. بازخورد جمع کنید: «معنای ارتباط شما همان پاسخی است که می‌گیرید» |
+| **بدانید چه می‌خواهید بگویید** | برنامه و طرح کلی بریزید و بعد بررسی کنید که ارتباط برقرار می‌کند |
+| **لحظه‌تان را انتخاب کنید** | ساعت شش یک جمعه‌ی بد وقت درخواست ارتقای laptop نیست. بپرسید «حالا وقت خوبی است؟» |
+| **سبکی انتخاب کنید** | جلسه‌ی رسمی یا گپ طولانی، خبره یا تازه‌وارد. اگر شک دارید بپرسید؛ و اگر یک بند کافی نیست، مقاومت کنید |
+| **خوش‌ظاهرش کنید** | از style sheet و سرتیتر و بررسی غلط املایی، خودکار و دستی، استفاده کنید |
+| **مخاطبتان را دخیل کنید** | پیش‌نویس‌های اولیه و بازخورد؛ خود فرایند اغلب مهم‌تر از سند است |
+| **شنونده باشید** | اگر به آن‌ها گوش نکنید، آن‌ها هم به شما گوش نمی‌کنند |
+| **به مردم جواب بدهید** | همیشه پاسخ بدهید، حتی اگر فقط بگویید بعداً برمی‌گردید |
 
-**Tip 12, It's Both What You Say and the Way You Say It** (p. 68).
+**نکته‌ی ۱۲، هم آن چیزی که می‌گویید مهم است و هم شکل گفتنش** (p. 68).
 
-**Documentation.** **Tip 13, Build Documentation In, Don't Bolt It On** (p. 68). Generate documentation from comments on modules and exported functions, but don't comment every declaration mechanically: that means two things to update and violates DRY. Non-API comments should explain **why**: trade-offs, decisions and discarded alternatives (pp. 68–69).
+**مستندسازی.** **tip ۱۳، مستند را از اول بسازید، بعداً به آن نچسبانید** (p. 68). مستند را از commentهای روی ماژول‌ها و توابع export‌شده بسازید، ولی روی هر اعلان ماشینی comment نگذارید: یعنی دو چیز برای به‌روز کردن، و نقض DRY. commentهای غیر‌API باید **چرا** را توضیح بدهند: بده‌بستان‌ها و تصمیم‌ها و گزینه‌های دور‌انداخته (pp. 68–69).
 
-**Online communication** (sidebar, p. 70): proofread before sending, keep the format simple, keep quoting minimal and attributed, don't flame, check the recipients, and remember that email and posts are forever.
+**ارتباط آنلاین** (کادر کناری، ص. ۷۰): پیش از فرستادن بازخوانی کنید، قالب را ساده نگه دارید، نقل‌قول را کم و با ارجاع نگه دارید، شعله نکشید، گیرنده‌ها را بررسی کنید، و یادتان باشد که ایمیل و پست همیشه می‌مانند.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Fix a broken window now | Stops the spread; signals that someone cares | Time taken from today's task |
-| Board it up | Contains the damage cheaply | The real fix is still owed |
-| Leave it | Nothing today | Rot spreads and morale drops |
-| Ship good-enough software early | Feedback; users get value sooner | Rough edges, which must be agreed with users |
-| Keep polishing | Fewer rough edges | Late delivery; overrefinement |
-| Stone soup (show a small success) | Avoids start-up fatigue; people join | It can shade into deception, or frog soup |
-| Low-risk knowledge investments | Steady value | Miss emerging opportunities |
-| High-risk knowledge investments | Large payoff if they take off | May expire worthless |
+| تعمیر فوری پنجره‌ی شکسته | پخش شدن را می‌بندد؛ نشان می‌دهد کسی اهمیت می‌دهد | وقتی که از کار امروز گرفته می‌شود |
+| تخته زدن | آسیب را ارزان محدود می‌کند | تعمیر واقعی باز هم بدهی است |
+| رهایش کنید | امروز هیچ چیز | پوسیدگی پخش می‌شود و روحیه پایین می‌آید |
+| انتشار زودهنگام نرم‌افزار به‌اندازه‌ی کافی خوب | بازخورد؛ کاربرها زودتر ارزش می‌گیرند | لبه‌های زبر، که باید با کاربرها توافق شوند |
+| ادامه‌ی جلا دادن | لبه‌های زبر کمتر | تحویل دیر؛ زیاده‌پرداختن |
+| سوپ سنگی، یعنی نشان دادن یک موفقیت کوچک | از خستگی راه‌اندازی می‌پرهیزد؛ مردم می‌پیوندند | می‌تواند به فریب، یا سوپ قورباغه، نزدیک شود |
+| سرمایه‌گذاری دانشی کم‌خطر | ارزش پیوسته | فرصت‌های نوظهور را از دست می‌دهید |
+| سرمایه‌گذاری دانشی پرخطر | پاداش بزرگ اگر بگیرد | ممکن است بی‌ارزش منقضی شود |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **The broken windows theory is contested.** The source the book cites, Wilson and Kelling's 1982 article, led to policing policies whose effect on crime is disputed in criminology. As a metaphor for code, the idea is supported by a related observation: developers imitate the style and quality of the code around them. The vault's [broken-windows simulation](../widgets/01-broken-windows.html) is a model of that contagion, not data.
-- **Technical debt as a deliberate choice.** Ward Cunningham's original debt metaphor described consciously shipping imperfect understanding and repaying it by refactoring. The book is sceptical that the debt gets repaid; [Topic 40, Refactoring](07-while-you-are-coding.md) is where it returns to the repayment.
-- **Psychological safety.** Google's Project Aristotle (2015) found that psychological safety was the strongest predictor of team effectiveness, which echoes the book's emphasis on team trust and admitting mistakes.
+- **نظریه‌ی پنجره‌های شکسته مورد اختلاف است.** منبعی که کتاب ارجاع می‌دهد، یعنی مقاله‌ی سال ۱۹۸۲ از Wilson و Kelling، به سیاست‌های پلیسی‌ای رسید که اثرشان روی جرم در جرم‌شناسی محل بحث است. به‌عنوان استعاره‌ای برای کد، این ایده با مشاهده‌ای مرتبط پشتیبانی می‌شود: developerها سبک و کیفیت کد دور و برشان را تقلید می‌کنند. [شبیه‌سازی پنجره‌های شکسته](../widgets/01-broken-windows.html) در vault مدلی از همین سرایت است و نه داده.
+- **بدهی فنی به‌عنوان انتخاب آگاهانه.** استعاره‌ی اصلی بدهی از Ward Cunningham، انتشار آگاهانه‌ی فهمی ناقص و پس دادنش با refactoring را توصیف می‌کرد. کتاب شک دارد که این بدهی پس داده شود؛ [موضوع ۴۰، refactoring](07-while-you-are-coding.md) جایی است که به پس دادنش برمی‌گردد.
+- **امنیت روانی.** پروژه‌ی Aristotle در Google (سال ۲۰۱۵) پیدا کرد که امنیت روانی قوی‌ترین پیش‌بین اثربخشی تیم است، که با تأکید کتاب روی اعتماد تیمی و اعتراف به خطا هم‌صداست.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. A Pragmatic Approach](02-a-pragmatic-approach.md) (DRY and ETC, which Topic 7 applies to writing; tracer bullets for early feedback), [7. While You Are Coding](07-while-you-are-coding.md) (refactoring as fixing broken windows; programming by coincidence as the frog's blind spot), [8. Before the Project](08-before-the-project.md) (requirements and users in the quality trade-off), [9. Pragmatic Projects](09-pragmatic-projects.md) (broken windows and boiled frogs at team level).
+- **فصل‌های مرتبط:** [فصل ۲: رویکرد pragmatic](02-a-pragmatic-approach.md) که DRY و ETC را دارد، که موضوع ۷ روی نوشتن اعمالشان می‌کند، و tracer bullet را برای بازخورد زودهنگام؛ [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که refactoring را به‌عنوان تعمیر پنجره‌ی شکسته و برنامه‌نویسی تصادفی را به‌عنوان نقطه‌ی کور قورباغه دارد؛ [فصل ۸: پیش از پروژه](08-before-the-project.md) که نیازمندی‌ها و کاربرها را در بده‌بستان کیفیت دارد؛ و [فصل ۹: پروژه‌های pragmatic](09-pragmatic-projects.md) که پنجره‌ی شکسته و قورباغه‌ی آب‌پز را در سطح تیم دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **Which tip do the authors call the most important in the book?**
+1. **نویسنده‌ها کدام tip را مهم‌ترین tip کتاب می‌نامند؟**
 
-   *Answer:* Tip 3, You Have Agency (p. 37).
+   *Answer:* شماره‌ی tip ۳، یعنی شما عاملیت دارید (p. 37).
 
-2. **What should you do before telling someone something can't be done?**
+2. **پیش از آن که به کسی بگویید کاری نمی‌شود، چه باید کرد؟**
 
-   *Answer:* Run the conversation in your head (or explain it to the rubber duck or the cat), anticipate their questions, and come with options rather than excuses (Tip 4, pp. 40–41).
+   *Answer:* گفت‌و‌گو را در ذهنتان اجرا کنید، یا برای اردک پلاستیکی یا گربه توضیحش بدهید، پرسش‌هایشان را پیش‌بینی کنید، و با گزینه بیایید و نه بهانه (tip ۴، صص. ۴۰–۴۱).
 
-3. **You find a badly designed module and have no time to fix it properly. What does the book suggest?**
-   - [ ] Leave it until the next release
-   - [x] Board it up: comment it out, show "Not Implemented", or substitute dummy data
-   - [ ] Rewrite the whole subsystem
+3. **ماژولی بدطراحی پیدا می‌کنید و وقتی برای درست کردن درستش ندارید. کتاب چه پیشنهاد می‌دهد؟**
+   - [ ] تا release بعدی رهایش کنید
+   - [x] تخته بزنید: comment کنید، «Not Implemented» نشان بدهید، یا داده‌ی ساختگی بگذارید
+   - [ ] کل زیرسیستم را بازنویسی کنید
 
-   *Answer:* Take some action that prevents further damage and shows you're on top of it (p. 43).
+   *Answer:* کاری بکنید که جلوی آسیب بیشتر را بگیرد و نشان بدهد اوضاع دستتان است (p. 43).
 
-4. **How does the boiled frog differ from the broken window?**
+4. **قورباغه‌ی آب‌پز با پنجره‌ی شکسته چه تفاوتی دارد؟**
 
-   *Answer:* With broken windows, people stop fighting entropy because no one seems to care. The frog simply doesn't notice the gradual change (p. 48).
+   *Answer:* با پنجره‌ی شکسته، مردم دست از جنگ با آنتروپی می‌کشند چون به نظر کسی اهمیت نمی‌دهد. قورباغه فقط تغییر تدریجی را نمی‌فهمد (p. 48).
 
-5. **Who should decide when software is good enough?**
+5. **چه کسی باید تصمیم بگیرد نرم‌افزار کِی به‌اندازه‌ی کافی خوب است؟**
 
-   *Answer:* The users should participate: scope and quality are part of the requirements (Tip 8, p. 51).
+   *Answer:* کاربرها باید شریک باشند: دامنه و کیفیت بخشی از نیازمندی‌هایند (tip ۸، ص. ۵۱).
 
-6. **Name the five rules of the knowledge portfolio.**
+6. **پنج قاعده‌ی سبد دانش را نام ببرید.**
 
-   *Answer:* Invest regularly, diversify, manage risk, buy low and sell high, review and rebalance (pp. 55–57).
+   *Answer:* منظم سرمایه‌گذاری کنید، متنوع کنید، خطر را مدیریت کنید، ارزان بخرید و گران بفروشید، و بازبینی و متوازن‌سازی کنید (pp. 55–57).
 
-7. **What should a non-API code comment explain?**
+7. **یک comment غیر‌API در کد چه چیزی را باید توضیح بدهد؟**
 
-   *Answer:* Why something is done: its purpose, trade-offs and discarded alternatives. The code already shows how (p. 69).
+   *Answer:* این که چرا کاری انجام می‌شود: هدفش و بده‌بستان‌ها و گزینه‌های دور‌انداخته. خود کد از قبل «چطور» را نشان می‌دهد (p. 69).

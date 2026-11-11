@@ -3,218 +3,232 @@ book: the-pragmatic-programmer
 chapter: 4
 title: "Pragmatic Paranoia"
 pages: "188–225"
+translated_title: "بدگمانی pragmatic"
+lang: fa
 ---
 
-# 4. Pragmatic Paranoia
+# فصل ۴: بدگمانی pragmatic
 
-[← 3. The Basic Tools](03-the-basic-tools.md) · [Book](../README.md) · [5. Bend, or Break →](05-bend-or-break.md)
+[فصل ۳: ابزارهای پایه →](03-the-basic-tools.md) · [کتاب](../README.md) · [فصل ۵: خم شو، یا بشکن ←](05-bend-or-break.md)
 
-## Summary
+## خلاصه
 
-The chapter opens with **Tip 36, You Can't Write Perfect Software**, and turns it into an advantage (p. 188). Like defensive drivers, programmers code defensively against other people's code and bad input; Pragmatic Programmers also defend against *their own* mistakes (pp. 188–189). The five defenses:
+فصل با **tip ۳۶، نمی‌توانید نرم‌افزار بی‌نقص بنویسید** باز می‌شود و همین را به مزیت تبدیل می‌کند (p. 188). مثل راننده‌های تدافعی، برنامه‌نویس‌ها در برابر کد دیگران و ورودی بد تدافعی کد می‌زنند؛ برنامه‌نویس pragmatic در برابر خطاهای *خودش* هم دفاع می‌کند (pp. 188–189). پنج دفاع:
 
-- **Design by Contract:** clients and suppliers agree on rights and responsibilities (Topic 23).
-- **Crash early,** because a dead program does less damage than a crippled one (Topic 24).
-- **Assertions** that actively check what "can never happen" (Topic 25).
-- **Balanced resources:** whoever allocates a resource frees it (Topic 26).
-- **Small steps,** so you never outrun your headlights (Topic 27).
+- **طراحی با قرارداد:** client و تأمین‌کننده روی حق و مسئولیت توافق می‌کنند (موضوع ۲۳).
+- **زود crash کنید،** چون برنامه‌ی مرده آسیب کمتری از برنامه‌ی زمین‌گیر می‌زند (موضوع ۲۴).
+- **الگوی assertion**هایی که فعالانه آن چیزی را بررسی می‌کنند که «هیچ‌وقت نمی‌تواند بیفتد» (موضوع ۲۵).
+- **منابع متوازن:** هر کسی که منبعی را گرفت، آزادش می‌کند (موضوع ۲۶).
+- **قدم‌های کوچک،** تا هیچ‌وقت از نور چراغ‌هایتان جلو نزنید (موضوع ۲۷).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **A contract says: if the caller meets the preconditions, the routine guarantees its postconditions and invariants.** Breaking it is a bug, so preconditions are not for validating user input (pp. 192–193).
-- **Be strict in what you accept and promise as little as possible in return** ("lazy" code), and design with contracts (Tip 37, p. 195).
-- **Crash early.** Don't catch and re-raise every exception; when the impossible happens the program is no longer viable, so stop it (Tip 38, pp. 204–206).
-- **Use assertions to prevent the impossible, and leave them on in production,** except the few that really hurt performance (Tip 39, pp. 207–210).
-- **Finish what you start, and act locally.** The routine that allocates a resource frees it; scope the resource to a block; nest allocations and always take them in the same order (Tips 40–41, pp. 212–216).
-- **Take small steps, always, and avoid fortune-telling.** The rate of feedback is your speed limit; design to be replaceable rather than for a guessed future (Tips 42–43, pp. 223–225).
+- **قرارداد می‌گوید: اگر فراخواننده پیش‌شرط‌ها را برآورده کند، آن routine پس‌شرط‌ها و ناوردایش را تضمین می‌کند.** شکستنش یک باگ است، پس پیش‌شرط برای اعتبارسنجی ورودی کاربر نیست (pp. 192–193).
+- **در آن چیزی که می‌پذیرید سخت‌گیر باشید و در عوض کمترین قول را بدهید**، یعنی کد «تنبل»، و با قرارداد طراحی کنید (tip ۳۷، ص. ۱۹۵).
+- **زود crash کنید.** هر exception را نگیرید و دوباره پرتاب نکنید؛ وقتی ناممکن افتاد، برنامه دیگر زنده‌ماندنی نیست، پس متوقفش کنید (tip ۳۸، صص. ۲۰۴–۲۰۶).
+- **برای جلوگیری از ناممکن از assertion استفاده کنید و در تولید روشن نگهشان دارید،** جز همان چند مورد که واقعاً به performance آسیب می‌زنند (tip ۳۹، صص. ۲۰۷–۲۱۰).
+- **آن چیزی را که شروع کردید تمام کنید، و محلی عمل کنید.** همان routineی که منبعی را می‌گیرد آزادش می‌کند؛ دامنه‌ی منبع را به یک بلوک محدود کنید؛ گرفتن‌ها را تو‌در‌تو کنید و همیشه به همان ترتیب بگیریدشان (tipهای ۴۰ و ۴۱، صص. ۲۱۲–۲۱۶).
+- **همیشه قدم‌های کوچک بردارید، و از پیش‌گویی بپرهیزید.** نرخ بازخورد، سرعت مجاز شماست؛ برای جابه‌جا‌شدنی بودن طراحی کنید و نه برای آینده‌ای حدس‌زده (tipهای ۴۲ و ۴۳، صص. ۲۲۳–۲۲۵).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 23. Design by Contract — p. 191
-- Topic 24. Dead Programs Tell No Lies — p. 203
-- Topic 25. Assertive Programming — p. 207
-- Topic 26. How to Balance Resources — p. 212
-- Topic 27. Don’t Outrun Your Headlights — p. 222
+- موضوع ۲۳. طراحی با قرارداد — ص. ۱۹۱
+- موضوع ۲۴. برنامه‌های مرده دروغ نمی‌گویند — ص. ۲۰۳
+- موضوع ۲۵. برنامه‌نویسی قاطع — ص. ۲۰۷
+- موضوع ۲۶. چطور منابع را متوازن کنیم — ص. ۲۱۲
+- موضوع ۲۷. از نور چراغ‌هایت جلو نزن — ص. ۲۲۲
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 36 | You Can't Write Perfect Software | 188 |
-| 37 | Design with Contracts | 195 |
-| 38 | Crash Early | 205 |
-| 39 | Use Assertions to Prevent the Impossible | 207 |
-| 40 | Finish What You Start | 212 |
-| 41 | Act Locally | 216 |
-| 42 | Take Small Steps—Always | 223 |
-| 43 | Avoid Fortune-Telling | 225 |
+| ۳۶ | نمی‌توانید نرم‌افزار بی‌نقص بنویسید | ۱۸۸ |
+| ۳۷ | با قرارداد طراحی کنید | ۱۹۵ |
+| ۳۸ | زود crash کنید | ۲۰۵ |
+| ۳۹ | برای جلوگیری از ناممکن از assertion استفاده کنید | ۲۰۷ |
+| ۴۰ | آن چیزی را که شروع کردید تمام کنید | ۲۱۲ |
+| ۴۱ | محلی عمل کنید | ۲۱۶ |
+| ۴۲ | همیشه قدم‌های کوچک بردارید | ۲۲۳ |
+| ۴۳ | از پیش‌گویی بپرهیزید | ۲۲۵ |
 
-As Woody Allen put it, paranoia is just good thinking when everybody really is out to get you (p. 190).
+به گفته‌ی Woody Allen، بدگمانی وقتی همه واقعاً دنبالتان‌اند فقط فکر کردن خوب است (p. 190).
 
-### Topic 23. Design by Contract
+### موضوع ۲۳. طراحی با قرارداد
 
-A contract defines both parties' rights and responsibilities and the repercussions of breaking it (p. 191). Bertrand Meyer developed **Design by Contract (DBC)** for Eiffel. A correct program does no more and no less than it claims to do; documenting and verifying that claim is the heart of DBC (p. 192).
+قرارداد، حق و مسئولیت هر دو طرف و پی‌آمدهای شکستنش را تعریف می‌کند (p. 191). Bertrand Meyer روش **طراحی با قرارداد**، یعنی DBC، را برای Eiffel ساخت. یک برنامه‌ی درست نه بیشتر از آن چیزی می‌کند که ادعا می‌کند و نه کمتر؛ مستند کردن و تأیید همین ادعا قلب DBC است (p. 192).
 
-| Element | Meaning (pp. 192–193) |
+| عنصر | معنا (pp. 192–193) |
 |---|---|
-| **Precondition** | What must be true for the routine to be called. The *caller* must pass good data |
-| **Postcondition** | What the routine guarantees on completion; it implies the routine terminates |
-| **Class invariant** | Always true from the caller's perspective: it may be broken during a routine but must hold on exit. A class can't give unrestricted write access to data in the invariant |
+| **پیش‌شرط** | آن چیزی که باید درست باشد تا آن routine صدا زده شود. *فراخواننده* باید داده‌ی خوب بدهد |
+| **پس‌شرط** | آن چیزی که routine سر کامل شدن تضمین می‌کند؛ ضمناً یعنی routine تمام می‌شود |
+| **ناوردای کلاس** | از نگاه فراخواننده همیشه درست است: ممکن است در طول یک routine بشکند، ولی سر خروج باید برقرار باشد. یک کلاس نمی‌تواند دسترسی نوشتن بی‌قید به داده‌ی داخل ناوردا بدهد |
 
-The contract: *if the caller meets all preconditions, the routine guarantees all postconditions and invariants on completion* (p. 193). A broken contract invokes an agreed remedy, such as an exception or termination, and is always a **bug**, which is why preconditions shouldn't do user-input validation (p. 193).
+قرارداد: *اگر فراخواننده همه‌ی پیش‌شرط‌ها را برآورده کند، آن routine همه‌ی پس‌شرط‌ها و ناوردا را سر کامل شدن تضمین می‌کند* (p. 193). شکستن قرارداد یک چاره‌ی توافق‌شده را صدا می‌زند، مثل یک exception یا پایان دادن، و همیشه یک **باگ** است، و همین دلیلی است که پیش‌شرط‌ها نباید ورودی کاربر را اعتبارسنجی کنند (p. 193).
 
-- **Clojure** has `:pre` and `:post` conditions: `accept-deposit` requires a positive amount and an open account, and promises the new transaction is among the account's transactions (pp. 193–194).
-- **Elixir guard clauses** dispatch on the amount (over 100,000: call the manager; over 10,000: extra federal reporting). With an amount of zero or less no clause matches, so the function simply can't be called with bad arguments (pp. 194–195).
-- **Tip 37, Design with Contracts** (p. 195). Where Topic 10 asked for *shy* code, this asks for *lazy* code: accept little, promise little. A contract that accepts anything and promises the world means a lot of code.
+- زبان **Clojure** شرط‌های `:pre` و `:post` دارد: تابع `accept-deposit` مبلغی مثبت و حسابی باز می‌خواهد، و قول می‌دهد تراکنش تازه بین تراکنش‌های آن حساب باشد (pp. 193–194).
+- **عبارت‌های guard در Elixir** بر حسب مبلغ ارسال می‌کنند: بیشتر از صد هزار، مدیر را صدا بزن؛ بیشتر از ده هزار، گزارش فدرال اضافه. با مبلغ صفر یا کمتر هیچ عبارتی تطبیق نمی‌دهد، پس تابع به‌سادگی با آرگومان بد صدا زده نمی‌شود (pp. 194–195).
+- **نکته‌ی ۳۷، با قرارداد طراحی کنید** (p. 195). جایی که موضوع ۱۰ کد *خجالتی* می‌خواست، این‌جا کد *تنبل* خواسته می‌شود: کم بپذیرید، کم قول بدهید. قراردادی که هر چیزی را می‌پذیرد و دنیا را قول می‌دهد، یعنی کد زیاد.
 
-**DBC and TDD** (sidebar, pp. 195–196). Both serve correctness. DBC needs no setup or mocking, defines success for all cases rather than one, stays active beyond test time, checks internal invariants, and is DRY-er than defensive programming where everyone validates in case no one else does.
+**روش DBC و TDD** (کادر کناری، صص. ۱۹۵–۱۹۶). هر دو به درستی خدمت می‌کنند. روش DBC به راه‌اندازی یا mock نیاز ندارد، موفقیت را برای همه‌ی حالت‌ها تعریف می‌کند و نه یکی، فراتر از زمان تست فعال می‌ماند، ناوردای درونی را بررسی می‌کند، و از برنامه‌نویسی تدافعی که همه در آن محض احتیاط اعتبارسنجی می‌کنند DRY‌تر است.
 
-Invariants are really about **state**, so they apply to functional code too, where state is passed in and returned (p. 196).
+ناوردا در واقع درباره‌ی **حالت** است، پس به کد functional هم می‌خورد، که حالت در آن داده و برگردانده می‌شود (p. 196).
 
-**Implementing DBC** (pp. 196–198):
+**پیاده کردن DBC** (pp. 196–198):
 
-- Just enumerating the input domain, boundary conditions and promises before coding is a huge step; without it you're programming by coincidence. Contracts can live in comments or unit tests.
-- **Assertions** emulate DBC only partially: they aren't inherited by overriding methods, invariants must be called manually, they may be turned off, there's no built-in `old` value (Eiffel has `old expression`), and libraries don't check them.
-- **Who's responsible?** (sidebar, p. 198). For `sqrt` with a precondition of non-negative input, the caller decides what to do with a negative number from the console. Expressing the domain as a precondition shifts the burden of correctness to the caller, where it belongs.
+- همین که پیش از کد زدن دامنه‌ی ورودی و شرط‌های مرزی و قول‌ها را برمی‌شمارید قدم بزرگی است؛ بی آن، تصادفی برنامه می‌نویسید. قرارداد می‌تواند در comment یا unit test بنشیند.
+- **الگوی assertion**ها DBC را فقط جزئی تقلید می‌کنند: به متدهای override‌کننده به ارث نمی‌رسند، ناوردا باید دستی صدا زده شود، ممکن است خاموش شوند، مقدار `old` درون‌ساخت ندارند، یعنی Eiffel عبارت `old expression` دارد، و کتابخانه‌ها بررسی‌شان نمی‌کنند.
+- **مسئول کیست؟** (کادر کناری، ص. ۱۹۸). برای `sqrt` با پیش‌شرط ورودی نامنفی، فراخواننده تصمیم می‌گیرد با عدد منفی‌ای که از console آمده چه کند. بیان دامنه به‌عنوان پیش‌شرط، بار درستی را به فراخواننده می‌برد، جایی که به آن تعلق دارد.
 
-**DBC and crashing early** (pp. 198–199): a failed precondition such as `sqrt_arg_must_be_positive` with a stack trace is much easier to diagnose than a `NaN` that surfaces far away.
+**روش DBC و زود crash کردن** (pp. 198–199): پیش‌شرط شکست‌خورده‌ای مثل `sqrt_arg_must_be_positive` با یک stack trace خیلی آسان‌تر از یک `NaN` تشخیص داده می‌شود که جایی دور سر در می‌آورد.
 
-**Semantic invariants** (pp. 199–200) are inviolate requirements, a "philosophical contract". In the authors' debit-card transaction switch, a transaction must never be applied twice: on failure, err toward not processing rather than duplicating. Stated plainly: *Err in favor of the consumer.* Don't confuse such laws with policies that change with management.
+**ناوردای معنایی** (pp. 199–200) نیازمندی‌های نشکستنی‌اند، یعنی یک «قرارداد فلسفی». در سوئیچ تراکنش کارت بانکی نویسنده‌ها، یک تراکنش هیچ‌وقت نباید دو بار اعمال شود: سر شکست، به سمت پردازش نکردن خطا کنید و نه تکرار کردن. ساده‌اش: *به سود consumer خطا کنید.* چنین قانون‌هایی را با سیاست‌هایی که با مدیریت عوض می‌شوند قاطی نکنید.
 
-**Dynamic contracts and agents** (pp. 200–201): autonomous agents may renegotiate contracts, but if we can't use contracts by hand, we won't be able to use them automatically.
+**قرارداد پویا و agent** (pp. 200–201): agentهای خودمختار می‌توانند قرارداد را دوباره مذاکره کنند، ولی اگر نتوانیم قرارداد را دستی به کار ببریم، خودکار هم نمی‌توانیم.
 
-Exercise 14 asks for pre- and postconditions and an invariant for a kitchen blender with ten speeds (0 is off) that can't run empty and changes speed one step at a time (pp. 201–202).
+تمرین ۱۴ پیش‌شرط و پس‌شرط و یک ناوردا برای یک مخلوط‌کن آشپزخانه با ده سرعت می‌خواهد، که صفر خاموش است، که نمی‌تواند خالی کار کند و سرعت را پله‌پله عوض می‌کند (pp. 201–202).
 
-> **Try it:** [The blender contract](../widgets/04-blender-contract.html) — drive the book's Exercise 14 blender with the contract switched on or off, try the calls that break it, and see which party each failure blames.
+> **Try it:** [قرارداد مخلوط‌کن](../widgets/04-blender-contract.html)؛ مخلوط‌کن تمرین ۱۴ کتاب را با قرارداد روشن یا خاموش بگردانید، فراخوانی‌هایی را امتحان کنید که می‌شکنندش، و ببینید هر شکست کدام طرف را متهم می‌کند.
 
-### Topic 24. Dead Programs Tell No Lies
+### موضوع ۲۴. برنامه‌های مرده دروغ نمی‌گویند
 
-Often a library notices trouble first: a nil, an empty list, a missing key, a `case` selector that isn't 1, 2 or 3. Every `case` needs a default clause so you know when the "impossible" happened (p. 203). Don't fall into "it can't happen": check that files close, that the code in production is the code you think, that the right dependency versions loaded (p. 203). All errors give information (pp. 203–204).
+اغلب کتابخانه اول دردسر را می‌فهمد: یک nil، فهرستی خالی، کلیدی غایب، یا انتخاب‌گر `case`ی که ۱ یا ۲ یا ۳ نیست. هر `case` به یک عبارت پیش‌فرض نیاز دارد تا بفهمید کِی «ناممکن» افتاده (p. 203). به تله‌ی «نمی‌تواند بیفتد» نیفتید: بررسی کنید که فایل‌ها بسته می‌شوند، کدی که در تولید است همان کدی است که فکر می‌کنید، و نسخه‌های درست وابستگی بار شده‌اند (p. 203). هر خطا اطلاعاتی می‌دهد (pp. 203–204).
 
-**Catch and release is for fish** (p. 204). Catching every exception just to log and re-raise it buries the application code and *couples* the caller to the callee's list of exceptions. Plain `add_score_to_board(score)` propagates any new exception automatically.
+**بگیر و رها کن برای ماهی است** (p. 204). گرفتن هر exceptionی فقط برای log کردن و پرتاب دوباره‌اش، کد برنامه را خاک می‌کند و فراخواننده را به فهرست exceptionهای فراخوانده‌شده **جفت** می‌کند. فراخوانی ساده‌ی `add_score_to_board(score)` هر exception تازه‌ای را خودکار منتشر می‌کند.
 
-**Tip 38, Crash Early** (p. 205). **Crash, don't trash**: continuing may write corrupted data or command a washing machine into its twentieth spin cycle (p. 205).
+**نکته‌ی ۳۸، زود crash کنید** (p. 205). **crash کن، آشغال نکن**: ادامه دادن می‌تواند داده‌ی خراب بنویسد یا یک ماشین لباس‌شویی را به بیستمین دور چرخشش فرمان بدهد (p. 205).
 
-- Erlang and Elixir embrace it: Joe Armstrong is often quoted as saying "Defensive programming is a waste of time. Let it crash!" Failures are managed by **supervisors**, which restart or clean up, arranged in supervisor trees (p. 205).
-- Elsewhere, simply exiting may leave resources, transactions or other processes in a bad state, but the principle holds: once the impossible has happened, everything the program does is suspect (pp. 205–206).
-- A dead program normally does a lot less damage than a crippled one (p. 206).
+- زبان‌های Erlang و Elixir در آغوشش می‌گیرند: از Joe Armstrong زیاد نقل می‌شود که «برنامه‌نویسی تدافعی وقت تلف کردن است. بگذار crash کند!» شکست‌ها را **supervisor**ها مدیریت می‌کنند که راه‌اندازی دوباره یا پاک‌سازی می‌کنند و در درخت‌های supervisor چیده شده‌اند (p. 205).
+- جای دیگر، خروج ساده می‌تواند منابع و تراکنش‌ها و processهای دیگر را در حالت بدی بگذارد، ولی اصل برقرار است: همین که ناممکن افتاد، هر کاری که برنامه می‌کند مشکوک است (pp. 205–206).
+- یک برنامه‌ی مرده معمولاً خیلی کمتر از برنامه‌ای زمین‌گیر آسیب می‌زند (p. 206).
 
-### Topic 25. Assertive Programming
+> **In practice:** loaderی که خطا را می‌گیرد و ادامه می‌دهد بدتر از loaderی است که crash می‌کند.
+>
+> **Your turn:** یک `try/except: pass` در loader خطای اتصال را می‌بلعد و task «success» می‌شود. چه پیامدی دارد؟
+>
+> *Answer:* داده نمی‌رسد و هیچ alertی fire نمی‌شود؛ Gold با داده‌ی کهنه منتشر می‌شود. بگذارید task fail شود تا Airflow retry و alert کند؛ crash زود، دروغ نگفتن است (pp. 203–206).
 
-"This can never happen" is self-deception: the app will never be used abroad, the count can't be negative, logging can't fail (p. 207). **Tip 39, Use Assertions to Prevent the Impossible** (p. 207).
+### موضوع ۲۵. برنامه‌نویسی قاطع
 
-- Assert non-null results, with a descriptive message; assert that a clever `my_sort` really sorted (pp. 207–208).
-- Assertions are **not error handling**: asserting that a user typed Y or N is a very bad idea (p. 208).
-- Your own assertion handler needn't terminate; it can free resources, as long as it doesn't rely on the data that failed (p. 208).
-- **Side effects:** `assert(iter.nextElement() != null)` advances the iterator, so the loop processes only half the elements. Such a check that changes behavior is a kind of Heisenbug (pp. 208–209).
+جمله‌ی «این هیچ‌وقت نمی‌تواند بیفتد» خودفریبی است: برنامه هیچ‌وقت در خارج به کار نمی‌رود، شمارش نمی‌تواند منفی شود، log کردن نمی‌تواند شکست بخورد (p. 207). **tip ۳۹، برای جلوگیری از ناممکن از assertion استفاده کنید** (p. 207).
 
-**Leave assertions turned on** (pp. 209–210). The argument for turning them off assumes testing finds all bugs, and forgets that production is dangerous: rats gnaw cables, memory runs out, logs fill disks. Turning them off is like crossing a high wire without a net because you once made it in practice. Disable only those that really hurt, such as an extra pass over data in a critical sort. A sidebar tells of a network-device startup that left informative assertions on in production, fixed the obscure bugs they revealed, and was acquired for hundreds of millions of dollars (p. 210).
+- نتیجه‌های ناتهی را assert کنید، با پیامی توصیفی؛ و assert کنید که `my_sort` زیرکانه‌تان واقعاً مرتب کرده (pp. 207–208).
+- همه‌ی assertionها **مدیریت خطا نیستند**: assert کردن این که کاربر Y یا N تایپ کرده ایده‌ی خیلی بدی است (p. 208).
+- نقش handler خودتان برای assertion لازم نیست پایان بدهد؛ می‌تواند منابع را آزاد کند، تا وقتی به داده‌ای تکیه نکند که شکست خورده (p. 208).
+- **اثرهای جانبی:** دستور `assert(iter.nextElement() != null)` آن iterator را جلو می‌برد، پس حلقه فقط نصف عنصرها را پردازش می‌کند. چنین بررسی‌ای که رفتار را عوض می‌کند گونه‌ای Heisenbug است (pp. 208–209).
 
-Exercise 16 asks which "impossible" things can happen, from a month with fewer than 28 days to `(a + 1) <= a` (p. 211).
+**همه‌ی assertionها را روشن بگذارید** (pp. 209–210). استدلال خاموش کردنشان فرض می‌کند تست همه‌ی باگ‌ها را پیدا می‌کند، و یادش می‌رود که تولید خطرناک است: موش کابل می‌جود، حافظه تمام می‌شود، logها دیسک را پر می‌کنند. خاموش کردنشان مثل رد شدن از سیم بند‌باز بی تور است، چون یک‌بار در تمرین موفق شده‌اید. فقط آن‌هایی را خاموش کنید که واقعاً آسیب می‌زنند، مثل یک گذر اضافه روی داده در یک مرتب‌سازی حیاتی. یک کادر کناری از start-upی در حوزه‌ی دستگاه شبکه می‌گوید که assertionهای پرخبر را در تولید روشن گذاشت، باگ‌های مرموزی را که آشکار کردند درست کرد، و به چند صد میلیون دلار خریداری شد (p. 210).
 
-### Topic 26. How to Balance Resources
+تمرین ۱۶ می‌پرسد کدام چیزهای «ناممکن» می‌توانند بیفتند، از ماهی با کمتر از بیست‌و‌هشت روز تا `(a + 1) <= a` (p. 211).
 
-Resources (memory, transactions, threads, connections, files, timers) follow a pattern: allocate, use, deallocate (p. 212). **Tip 40, Finish What You Start** (p. 212): the function or object that allocates a resource is responsible for deallocating it.
+### موضوع ۲۶. چطور منابع را متوازن کنیم
 
-The book's Ruby example (pp. 212–215):
+منابع، یعنی حافظه و تراکنش و thread و اتصال و فایل و timer، از یک الگو پیروی می‌کنند: گرفتن، به کار بردن، آزاد کردن (p. 212). **tip ۴۰، آن چیزی را که شروع کردید تمام کنید** (p. 212): همان تابع یا objectی که منبعی را می‌گیرد مسئول آزاد کردنش است.
 
-1. `read_customer` opens a file and stores it in an instance variable; `write_customer` closes it. They're coupled through that hidden variable.
-2. A maintenance change skips `write_customer` for negative amounts, and production dies after hours with too many open files.
-3. Closing the file in the new `else` branch "fixes" it but couples three routines. Not balanced.
-4. The fix: `update_customer` opens the file, passes it as a parameter, and closes it. Better still, Ruby's block form of `File.open` closes the file when the block ends.
+نمونه‌ی Ruby کتاب (pp. 212–215):
 
-**When in doubt, reduce scope. Tip 41, Act Locally** (pp. 215–216). A sidebar on **balancing over time** asks about log rotation, stray debug files and expiring log records: for anything that uses a finite resource, plan how it gets released (p. 216).
+۱. تابع `read_customer` فایلی را باز می‌کند و در یک متغیر نمونه می‌گذاردش؛ و `write_customer` می‌بنددش. از راه همان متغیر پنهان به هم جفت‌اند.
+۲. یک تغییر نگه‌داری، برای مبلغ‌های منفی از `write_customer` می‌پرد، و تولید بعد از چند ساعت با فایل‌های باز زیادی می‌میرد.
+۳. بستن فایل در شاخه‌ی `else` تازه ظاهراً «درستش» می‌کند ولی سه routine را جفت می‌کند. متوازن نیست.
+۴. اصلاح: تابع `update_customer` فایل را باز می‌کند، به‌عنوان پارامتر می‌دهدش، و می‌بنددش. بهتر از آن، شکل بلوکی `File.open` در Ruby، فایل را سر پایان بلوک می‌بندد.
 
-**Nest allocations** (p. 216):
+**وقتی شک دارید، دامنه را کم کنید. tip ۴۱، محلی عمل کنید** (pp. 215–216). یک کادر کناری درباره‌ی **توازن در طول زمان** از چرخش log و فایل‌های debug سرگردان و رکوردهای log منقضی‌شدنی می‌پرسد: برای هر چیزی که منبعی محدود را به کار می‌برد، برنامه بریزید که چطور آزاد می‌شود (p. 216).
 
-- Deallocate in the **opposite order** to allocation, so you don't orphan resources that reference each other.
-- Allocate the same set of resources in the **same order** everywhere, to reduce deadlock. If A holds resource 1 and wants 2 while B holds 2 and wants 1, both wait forever.
+**گرفتن‌های تو‌در‌تو** (p. 216):
 
-**Objects and exceptions** (pp. 217–219):
+- به **ترتیب عکس** گرفتن آزاد کنید، تا منابعی را که به هم ارجاع می‌دهند یتیم نکنید.
+- همان مجموعه‌ی منابع را همه‌جا به **همان ترتیب** بگیرید، تا deadlock کم شود. اگر A منبع ۱ را دارد و ۲ را می‌خواهد و B منبع ۲ را دارد و ۱ را می‌خواهد، هر دو تا ابد منتظر می‌مانند.
 
-- Wrap resources in classes so constructors allocate and destructors free.
-- With exceptions, use **variable scope** (C++ or Rust destructors, as with Rust's `File::open`) or a **`finally`** clause.
-- **An antipattern:** allocating *inside* the `begin…finally` means a failed allocation runs the `finally` and deallocates something that was never allocated. Allocate first, then enter the protected block.
+**همه‌ی objectها و exceptionها** (pp. 217–219):
 
-**When you can't balance** (pp. 219–220): for dynamic data structures, set a semantic invariant for who frees substructures: the top level frees them recursively, orphans them, or refuses to be freed while it has any. Choose explicitly per structure and implement it consistently, perhaps in a module per structure.
+- منابع را در کلاس بپیچید تا constructorها بگیرند و destructorها آزاد کنند.
+- با exception، از **دامنه‌ی متغیر** استفاده کنید، یعنی destructorهای C++ یا Rust مثل `File::open` در Rust، یا از یک عبارت **`finally`**.
+- **یک آنتی‌الگو:** گرفتن *داخل* `begin…finally` یعنی گرفتن شکست‌خورده، `finally` را اجرا می‌کند و چیزی را آزاد می‌کند که هیچ‌وقت گرفته نشده بود. اول بگیرید و بعد وارد بلوک محافظت‌شده شوید.
 
-**Checking the balance** (p. 220): wrap resources to track allocations, check at known points such as the top of a server's main loop that usage hasn't grown, and use leak-checking tools.
+**وقتی نمی‌توانید متوازن کنید** (pp. 219–220): برای ساختارهای داده‌ی پویا، یک ناوردای معنایی بگذارید که چه کسی زیرساختارها را آزاد می‌کند: سطح بالا بازگشتی آزادشان می‌کند، یا یتیمشان می‌کند، یا تا وقتی زیرساختاری دارد از آزاد شدن سر باز می‌زند. برای هر ساختار صریح انتخاب کنید و سازگار پیاده‌اش، شاید در یک ماژول برای هر ساختار.
 
-> **Vault note:** the first refactored `update_customer` on p. 215 reads, updates and closes the file but omits the call to `write_customer`; the block version that follows includes it.
+**بررسی توازن** (p. 220): منابع را بپیچید تا گرفتن‌ها را پی بگیرید، در نقطه‌های شناخته‌شده مثل سر حلقه‌ی اصلی یک سرور بررسی کنید که مصرف بزرگ نشده، و ابزار بررسی نشتی به کار ببرید.
 
-### Topic 27. Don’t Outrun Your Headlights
+> **Vault note:** اولین `update_customer` refactor‌شده در ص. ۲۱۵، فایل را می‌خواند و به‌روز می‌کند و می‌بندد ولی فراخوانی `write_customer` را نمی‌آورد؛ نسخه‌ی بلوکی که بعدش می‌آید آن را دارد.
 
-Headlights have a limited **throw distance**. Per the NHTSA, low beams illuminate about 160 feet, but the stopping distance is 189 feet at 40 mph and 464 feet at 70 mph, assuming 1.5 s reaction time and a deceleration of 17.02 ft/s² (pp. 222–223). Software "headlights" are limited too (p. 223).
+### موضوع ۲۷. از نور چراغ‌هایت جلو نزن
 
-**Tip 42, Take Small Steps—Always** (p. 223). Take small, deliberate steps, checking for feedback before proceeding: **the rate of feedback is your speed limit**. Feedback is anything that independently confirms or disproves your action: REPL results, unit tests, user demos and conversations (p. 223).
+چراغ‌های جلو **فاصله‌ی پرتاب** محدودی دارند. به گفته‌ی NHTSA، نور پایین حدود ۱۶۰ فوت را روشن می‌کند، ولی فاصله‌ی ایستادن در سرعت ۴۰ مایل بر ساعت ۱۸۹ فوت و در ۷۰ مایل بر ساعت ۴۶۴ فوت است، با فرض ۱٫۵ ثانیه زمان واکنش و کاهش سرعت ۱۷٫۰۲ فوت بر مجذور ثانیه (pp. 222–223). چراغ‌های جلوی نرم‌افزار هم محدودند (p. 223).
 
-A task is **too big** if it needs fortune-telling: estimating completion dates months ahead, designing for future maintenance or extensibility, guessing users' future needs or future technology (pp. 223–224). Design for the future only as far ahead as you can see; otherwise, make code **replaceable**, which also helps cohesion, coupling and DRY (p. 224).
+**نکته‌ی ۴۲، همیشه قدم‌های کوچک بردارید** (p. 223). قدم‌های کوچک و آگاهانه بردارید و پیش از ادامه دنبال بازخورد بگردید: **نرخ بازخورد سرعت مجاز شماست**. بازخورد هر چیزی است که مستقل، کارتان را تأیید یا رد کند: نتیجه‌های REPL، unit test، نمایش به کاربر، و گفت‌و‌گو (p. 223).
 
-**Black swans** (p. 224): Taleb argues that significant events come from rare, hard-to-predict outliers. Around the first edition, forums debated whether Motif or OpenLook would win the desktop GUI wars; neither did, and the browser took over. **Tip 43, Avoid Fortune-Telling** (p. 225).
+یک task **زیادی بزرگ** است اگر به پیش‌گویی نیاز داشته باشد: تخمین تاریخ پایان برای ماه‌های جلوتر، طراحی برای نگه‌داری یا گسترش‌پذیری آینده، و حدس زدن نیاز آینده‌ی کاربرها یا فناوری آینده (pp. 223–224). فقط تا جایی که می‌بینید برای آینده طراحی کنید؛ وگرنه کد را **جابه‌جا‌شدنی** کنید، که به انسجام و coupling و DRY هم کمک می‌کند (p. 224).
 
-> **Try it:** [Outrunning your headlights](../widgets/04-headlights.html) — compare stopping distance with headlight throw using the book's NHTSA numbers, then set how far ahead a team commits before getting feedback and see how much work a change of direction throws away.
+**قوهای سیاه** (p. 224): Taleb استدلال می‌کند که رخدادهای مهم از پرت‌های کمیاب و سخت‌پیش‌بینی می‌آیند. حدود ویراست اول، forumها بحث می‌کردند که Motif یا OpenLook کدام در جنگ GUI دسکتاپ می‌برد؛ هیچ‌کدام نبرد و مرورگر همه را گرفت. **tip ۴۳، از پیش‌گویی بپرهیزید** (p. 225).
 
-## Trade-offs at a glance
+> **Try it:** [جلو زدن از نور چراغ‌ها](../widgets/04-headlights.html)؛ فاصله‌ی ایستادن را با فاصله‌ی پرتاب چراغ‌ها با عددهای NHTSA کتاب مقایسه کنید، بعد بگذارید تیم پیش از گرفتن بازخورد تا چه فاصله‌ای متعهد شود و ببینید عوض شدن مسیر چقدر کار را دور می‌ریزد.
 
-| Choice | Buys | Costs |
+> **In practice:** هر تغییر در pipeline را با گام کوچک و بازخورد زود جلو ببرید: merge request کوچک، deploy به staging، یک روز داده.
+>
+> **Your turn:** چرا migration یک جدول بزرگ ClickHouse را اول روی یک partition امتحان می‌کنید؟
+>
+> *Answer:* بازخورد در چند دقیقه به‌جای چند ساعت، و اگر غلط بود فقط یک partition. کتاب می‌گوید گام‌هایتان را به اندازه‌ی بازخوردی که می‌گیرید کوچک کنید (pp. 222–225).
+
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Contracts (DBC) | Correctness stated for all cases; blame is clear | Thinking up front; partial support in most languages |
-| Defensive programming everywhere | Robustness against unknown callers | Duplicated checks (not DRY); unclear responsibility |
-| Catch-log-reraise every exception | Log lines | Coupling to the callee's exceptions; buried logic |
-| Crash early | No corrupted data; accurate diagnostics | Downtime unless supervised and restarted |
-| Assertions on in production | Catches bugs testing missed, with real data | Some overhead; disable only the expensive ones |
-| Resources scoped to a block | Release is guaranteed | Restructuring code around the block |
-| Big steps and long-range design | Fewer check-ins | Fortune-telling; rework when the future differs |
-| Small steps with feedback | Early correction; replaceable code | More frequent feedback loops |
+| قرارداد، یعنی DBC | درستی برای همه‌ی حالت‌ها بیان می‌شود؛ تقصیر روشن است | فکر اولیه؛ پشتیبانی ناقص در بیشتر زبان‌ها |
+| برنامه‌نویسی تدافعی همه‌جا | استواری در برابر فراخواننده‌های ناشناس | بررسی تکراری که DRY نیست؛ مسئولیت نامشخص |
+| گرفتن و log و پرتاب دوباره‌ی هر exception | خط‌های log | coupling به exceptionهای فراخوانده‌شده؛ منطق خاک‌شده |
+| زود crash کردن | داده‌ی خراب نداریم؛ تشخیص دقیق | از دسترس خارج شدن، مگر supervise و دوباره راه‌اندازی شود |
+| assertion روشن در تولید | باگ‌هایی را می‌گیرد که تست از دست داده، با داده‌ی واقعی | کمی سرریز؛ فقط گران‌ها را خاموش کنید |
+| منبع محدود به یک بلوک | آزاد شدن تضمین می‌شود | بازساختاردهی کد دور آن بلوک |
+| قدم بزرگ و طراحی دوربرد | ثبت‌های کمتر | پیش‌گویی؛ کار دوباره وقتی آینده فرق کند |
+| قدم کوچک با بازخورد | اصلاح زودهنگام؛ کد جابه‌جا‌شدنی | حلقه‌های بازخورد مکررتر |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Contracts in mainstream languages.** Python has no built-in contracts, but `assert`, type hints and libraries such as `icontract` emulate them; note that `python -O` strips `assert` statements, which is exactly the "turn assertions off in production" risk the book warns about. C++26 adds language contracts (`pre`, `post`, `contract_assert`).
-- **Lock ordering in practice.** The deadlock rule in Topic 26 is the standard *lock hierarchy* technique; tools such as Linux's lockdep check at run time that locks are always taken in a consistent order. The vault's [lock-ordering lab](../lab/04-lock-ordering/README.md) counts deadlocks with and without it.
-- **Let it crash, carefully.** Supervision only helps if restarting fixes the problem; a crash caused by bad persistent data restarts into the same crash. Erlang supervisors therefore cap restart intensity and escalate to their own supervisor, the tree the book mentions.
+- **قرارداد در زبان‌های رایج.** زبان Python قرارداد درون‌ساخت ندارد، ولی `assert` و type hint و کتابخانه‌هایی مثل `icontract` تقلیدش می‌کنند؛ دقت کنید که `python -O` دستورهای `assert` را حذف می‌کند، که دقیقاً همان خطر «assertion را در تولید خاموش کن» است که کتاب هشدارش می‌دهد. زبان C++26 قرارداد زبانی اضافه می‌کند، یعنی `pre` و `post` و `contract_assert`.
+- **ترتیب قفل در عمل.** قاعده‌ی deadlock در موضوع ۲۶ همان تکنیک استاندارد *سلسله‌مراتب قفل* است؛ ابزارهایی مثل lockdep در لینوکس در زمان اجرا بررسی می‌کنند که قفل‌ها همیشه به ترتیبی سازگار گرفته شوند. [آزمایش ترتیب قفل](../lab/04-lock-ordering/README.md) در vault deadlockها را با آن و بی آن می‌شمارد.
+- **بگذار crash کند، با احتیاط.** supervise کردن فقط وقتی کمک می‌کند که راه‌اندازی دوباره مسئله را درست کند؛ crashی که از داده‌ی ماندگار بد می‌آید، به همان crash دوباره راه می‌افتد. پس supervisorهای Erlang شدت راه‌اندازی دوباره را سقف می‌گذارند و به supervisor خودشان بالا می‌برند، یعنی همان درختی که کتاب می‌گوید.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. A Pragmatic Approach](02-a-pragmatic-approach.md) (shy code, replaceable code, and ETC), [3. The Basic Tools](03-the-basic-tools.md) (read the error message; failing test before fixing code), [5. Bend, or Break](05-bend-or-break.md) (decoupling, which the resource example violates), [6. Concurrency](06-concurrency.md) (deadlock and shared resources), [7. While You Are Coding](07-while-you-are-coding.md) (programming by coincidence; property-based tests check contracts and invariants).
-- **Run it:** [Lock ordering and deadlock](../lab/04-lock-ordering/README.md) — runs thousands of seeded interleavings of threads that need two resources each, with and without a global acquisition order, and counts deadlocks.
+- **فصل‌های مرتبط:** [فصل ۲: رویکرد pragmatic](02-a-pragmatic-approach.md) که کد خجالتی و کد جابه‌جا‌شدنی و ETC را دارد، [فصل ۳: ابزارهای پایه](03-the-basic-tools.md) که خواندن پیام خطا و تست شکست‌خورده پیش از اصلاح کد را دارد، [فصل ۵: خم شو، یا بشکن](05-bend-or-break.md) که decoupling را دارد که نمونه‌ی منابع نقضش می‌کند، [فصل ۶: concurrency](06-concurrency.md) که deadlock و منابع مشترک را دارد، و [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که برنامه‌نویسی تصادفی را دارد و تست property‌محور که قرارداد و ناوردا را بررسی می‌کند.
+- **Run it:** [ترتیب قفل و deadlock](../lab/04-lock-ordering/README.md)؛ هزاران interleaving seed‌دار از threadهایی را اجرا می‌کند که هر کدام دو منبع می‌خواهند، با ترتیب سراسری گرفتن و بی آن، و deadlockها را می‌شمارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **State the contract between a routine and its caller.**
+1. **قرارداد بین یک routine و فراخواننده‌اش را بیان کنید.**
 
-   *Answer:* If the caller meets all the preconditions, the routine guarantees that all postconditions and invariants are true when it completes (p. 193).
+   *Answer:* اگر فراخواننده همه‌ی پیش‌شرط‌ها را برآورده کند، آن routine تضمین می‌کند که سر کامل شدن همه‌ی پس‌شرط‌ها و ناوردا درست‌اند (p. 193).
 
-2. **Why shouldn't preconditions be used to validate user input?**
+2. **چرا نباید از پیش‌شرط برای اعتبارسنجی ورودی کاربر استفاده کرد؟**
 
-   *Answer:* A contract violation is a bug, something that should never happen; bad user input is expected and needs real handling (p. 193).
+   *Answer:* نقض قرارداد یک باگ است، یعنی چیزی که هیچ‌وقت نباید بیفتد؛ ورودی بد کاربر انتظار می‌رود و به مدیریت واقعی نیاز دارد (p. 193).
 
-3. **What does "lazy" code mean in Topic 23?**
+3. **کد «تنبل» در موضوع ۲۳ یعنی چه؟**
 
-   *Answer:* Be strict in what you accept before you begin and promise as little as possible in return (p. 195).
+   *Answer:* پیش از شروع، در آن چیزی که می‌پذیرید سخت‌گیر باشید و در عوض کمترین قول را بدهید (p. 195).
 
-4. **What's wrong with catching every exception, logging it and re-raising it?**
+4. **گرفتن هر exception و log کردن و پرتاب دوباره‌اش چه اشکالی دارد؟**
 
-   *Answer:* The error handling eclipses the code, and the caller is coupled to the callee's list of exceptions, so a new exception leaves it subtly out of date (p. 204).
+   *Answer:* مدیریت خطا کد را می‌پوشاند، و فراخواننده به فهرست exceptionهای فراخوانده‌شده جفت می‌شود، پس یک exception تازه آن را ظریف از رده خارج می‌کند (p. 204).
 
-5. **Should assertions be turned off in production?**
-   - [ ] Yes, once the code is tested
-   - [x] No, except specific ones that really hurt performance
-   - [ ] Only in languages without exceptions
+5. **همه‌ی assertionها باید در تولید خاموش شوند؟**
+   - [ ] بله، همین که کد تست شد
+   - [x] نه، جز آن‌هایی که واقعاً به performance آسیب می‌زنند
+   - [ ] فقط در زبان‌هایی که exception ندارند
 
-   *Answer:* Testing doesn't find all bugs and production is dangerous; disable only the expensive checks (pp. 209–210).
+   *Answer:* تست همه‌ی باگ‌ها را پیدا نمی‌کند و تولید خطرناک است؛ فقط بررسی‌های گران را خاموش کنید (pp. 209–210).
 
-6. **What's wrong with putting `thing = allocate_resource()` inside the `begin…finally` block?**
+6. **گذاشتن `thing = allocate_resource()` داخل بلوک `begin…finally` چه اشکالی دارد؟**
 
-   *Answer:* If allocation fails, the `finally` clause tries to deallocate something that was never allocated (pp. 218–219).
+   *Answer:* اگر گرفتن شکست بخورد، عبارت `finally` می‌کوشد چیزی را آزاد کند که هیچ‌وقت گرفته نشده بود (pp. 218–219).
 
-7. **Two code paths need resources A and B. What rule reduces deadlock?**
+7. **دو مسیر کد به منابع A و B نیاز دارند. کدام قاعده deadlock را کم می‌کند؟**
 
-   *Answer:* Always allocate them in the same order everywhere (and free them in reverse order) (p. 216).
+   *Answer:* همیشه همه‌جا به همان ترتیب بگیریدشان، و به ترتیب عکس آزادشان کنید (p. 216).
 
-8. **What does "the rate of feedback is your speed limit" mean?**
+8. **جمله‌ی «نرخ بازخورد سرعت مجاز شماست» یعنی چه؟**
 
-   *Answer:* Never take a step bigger than you can get independent feedback on; tasks that need predictions far ahead are fortune-telling (p. 223).
+   *Answer:* هیچ‌وقت قدمی بزرگ‌تر از آن چیزی برندارید که می‌توانید رویش بازخورد مستقل بگیرید؛ taskهایی که به پیش‌بینی دوربرد نیاز دارند پیش‌گویی‌اند (p. 223).

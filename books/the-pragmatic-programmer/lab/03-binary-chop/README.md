@@ -1,18 +1,20 @@
-# Binary chop
+# نصف کردن دودویی
 
-How many test runs does it take to find what broke? First, a regression hides among 1,000 commits: step back one commit at a time from the newest, or chop the range in half each time. Second, a 1,000-record dataset crashes the program. Halving keeps whichever half still crashes. Delta debugging (Zeller's *ddmin*) also tries complements and finer splits. Both are run against a crash caused by one bad record, and against one that needs two particular records together.
+پیدا کردن این که چه چیزی شکسته چند اجرای تست می‌برد؟ اول، یک پس‌رفت بین هزار commit قایم شده: از تازه‌ترین commit یکی‌یکی عقب بروید، یا هر بار بازه را نصف کنید. دوم، مجموعه‌داده‌ای هزار‌رکوردی برنامه را crash می‌کند. نصف کردن هر نیمی را نگه می‌دارد که باز هم crash می‌کند. روش debug دلتا، یعنی *ddmin* از Zeller، مکمل‌ها و شکستن‌های ریزتر را هم امتحان می‌کند. هر دو هم روی crashی اجرا می‌شوند که از یک رکورد بد می‌آید و هم روی crashی که به دو رکورد معین با هم نیاز دارد.
 
-*Illustrates The Pragmatic Programmer, “The Binary Chop” in Topic 20, Debugging, pp. 174–175: chop releases and datasets in half to isolate a bug. The sizes, the two-record crash and the delta-debugging comparison are the vault's (seeded).*
+*این آزمایش «نصف کردن دودویی» در موضوع ۲۰ از کتاب The Pragmatic Programmer، یعنی debug کردن، صص. ۱۷۴–۱۷۵ را نشان می‌دهد: release و مجموعه‌داده را نصف کنید تا باگ جدا شود. اندازه‌ها و crash دو‌رکوردی و مقایسه با debug دلتا مال خود vault است و با seed ثابت.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 binary_chop.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Finding the commit that introduced a regression among 1,000 commits (2,000 random culprits)
@@ -30,13 +32,13 @@ crash needs         strategy         mean tests  mean records left  minimal
 2 records together  delta debugging       122.9                2.0     100%
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Bisection needs exactly ⌈log₂ 1000⌉ = 10 tests every time; stepping back averages about 500 and can take 999.
-- For a single bad record, halving and delta debugging both find it in about 15 runs.
-- When the crash needs two records together, plain halving stalls as soon as they land in different halves: neither half crashes, so it stops with hundreds of records left.
-- Delta debugging keeps going by testing complements, and always isolates the pair, at the cost of about 120 runs.
+- روش bisection هر بار دقیقاً ۱۰ تست می‌خواهد، یعنی سقف log₂ 1000؛ و عقب رفتن یکی‌یکی میانگین حدود ۵۰۰ تست می‌برد و می‌تواند ۹۹۹ شود.
+- برای یک رکورد بد تنها، نصف کردن و debug دلتا هر دو در حدود پانزده اجرا پیدایش می‌کنند.
+- وقتی crash به دو رکورد با هم نیاز دارد، نصف کردن ساده همین که آن دو در نیمه‌های مختلف بیفتند از کار می‌ماند: هیچ نیمی crash نمی‌کند، پس با چند صد رکورد باقی می‌ایستد.
+- روش debug دلتا با تست کردن مکمل‌ها ادامه می‌دهد و همیشه آن زوج را جدا می‌کند، به قیمت حدود ۱۲۰ اجرا.
 
-## Related
+## پیوندها
 
-- Chapter note: [3. The Basic Tools](../../chapters/03-the-basic-tools.md) — “The Binary Chop”, pp. 174–175
+- یادداشت فصل: [فصل ۳: ابزارهای پایه](../../chapters/03-the-basic-tools.md) — «نصف کردن دودویی»، صص. ۱۷۴–۱۷۵

@@ -1,18 +1,20 @@
-# How long should an iteration be?
+# یک تکرار چقدر باید باشد؟
 
-The client's real target drifts: a point moving by a random walk. The team builds toward the last position it heard about, and a day's work is worth less the further that aim has drifted from the current target. At each feedback point (the end of an iteration) the team learns the new target, at a cost of a quarter day. The script measures the share of a year's days wasted for iteration lengths from 1 day to half a year, at three rates of drift.
+هدف واقعی مشتری رانش می‌کند: نقطه‌ای که با یک قدم‌زدن تصادفی جابه‌جا می‌شود. تیم به سمت آخرین موقعیتی می‌سازد که از آن خبر داشته، و کار یک روز هر چه آن نشانه‌روی از هدف فعلی بیشتر رانش کرده باشد کم‌ارزش‌تر است. سر هر نقطه‌ی بازخورد، یعنی پایان یک تکرار، تیم هدف تازه را یاد می‌گیرد، به قیمت یک‌چهارم روز. اسکریپت سهم روزهای هدر‌رفته‌ی یک سال را برای طول تکرارهای یک روز تا نیم سال، در سه نرخ رانش، اندازه می‌گیرد.
 
-*Illustrates The Pragmatic Programmer, Topic 45 (short iterations that end with direct client feedback minimize the time lost going in the wrong direction, p. 410) and Topic 48's loop of small steps and feedback (pp. 431–432). The drift model, the value function and the feedback cost are entirely the vault's (seeded).*
+*این آزمایش موضوع ۴۵ از کتاب The Pragmatic Programmer را نشان می‌دهد، یعنی این که تکرارهای کوتاهی که با بازخورد مستقیم مشتری تمام می‌شوند وقتِ رفتن در راه غلط را کمینه می‌کنند، ص. ۴۱۰، و حلقه‌ی قدم‌های کوچک و بازخورد در موضوع ۴۸، صص. ۴۳۱–۴۳۲. مدل رانش و تابع ارزش و هزینه‌ی بازخورد کاملاً مال خود vault است و با seed ثابت.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 iteration_length.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 500 simulated one-year projects per cell (260 working days); feedback costs 0.25 day each
@@ -23,12 +25,12 @@ drift / day      1 d      5 d     10 d     20 d     60 d    130 d   (share of da
        0.06    26.0%    16.7%    18.8%    24.4%    37.6%    53.7%   best: 5 d
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Very long iterations waste the most: by the time feedback arrives, the team has spent months building toward a target that moved.
-- Very short iterations aren't free in this model, because feedback costs time. Daily feedback spends a quarter of every day on it.
-- The faster the client's needs drift, the shorter the best iteration: about 20 days at slow drift, 5 days at fast drift. The model only illustrates the book's argument; the numbers depend entirely on its assumptions.
+- تکرارهای خیلی بلند بیشترین هدر را می‌دهند: تا بازخورد برسد، تیم ماه‌ها به سمت هدفی ساخته که جابه‌جا شده.
+- تکرارهای خیلی کوتاه در این مدل مجانی نیستند، چون بازخورد وقت می‌برد. بازخورد روزانه یک‌چهارم هر روز را رویش خرج می‌کند.
+- هر چه نیاز مشتری تندتر رانش کند، بهترین تکرار کوتاه‌تر است: حدود بیست روز در رانش کند و پنج روز در رانش تند. مدل فقط استدلال کتاب را تصویر می‌کند؛ عددها کاملاً به فرض‌هایش بستگی دارند.
 
-## Related
+## پیوندها
 
-- Chapter note: [8. Before the Project](../../chapters/08-before-the-project.md) — “Requirements Are a Process”, pp. 409–410
+- یادداشت فصل: [فصل ۸: پیش از پروژه](../../chapters/08-before-the-project.md) — «نیازمندی‌ها یک فرایندند»، صص. ۴۰۹–۴۱۰

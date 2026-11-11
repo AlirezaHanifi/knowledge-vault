@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Anagram Pipeline</title>
-<meta name="description" content="Type letters and watch them flow through the book&#x27;s four transformations (subsets, signatures, dictionary lookup, grouping by length), then break a step and see an error tuple short-circuit the rest of the pipeline. Illustrates The Pragmatic Programmer, Topic 30.">
+<title>pipeline آناگرام</title>
+<meta name="description" content="حرف تایپ کنید و ببینید از چهار تبدیل کتاب رد می‌شوند، یعنی زیرمجموعه و امضا و جست‌و‌جوی دیکشنری و گروه‌بندی بر حسب طول، بعد یک قدم را بشکنید و ببینید یک تاپل خطا بقیه‌ی pipeline را قطع می‌کند. تصویری از موضوع ۳۰ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .stage { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); margin-top: 8px; }
@@ -15,50 +15,50 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-bend-or-break.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">The anagram pipeline</span>
+      <a href="../chapters/05-bend-or-break.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">pipeline آناگرام</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Bend, or Break</div>
-  <h1>The anagram pipeline</h1>
-  <p class="lede">Think of a program as a <strong>pipeline of transformations</strong>: data flows in, each step turns it into something new, and the main function reads like the requirement. Wrap each result as <code>{:ok, value}</code> or <code>{:error, reason}</code>, and the first error flows straight through to the end.</p>
-  <p class="source-note">Illustrates Topic 30, Transforming Programming (pp. 255–270): the anagram finder with “vinyl” (pp. 258–264) and error handling with an and_then bind (pp. 265–270). The book uses a full word list; this page uses a small built-in dictionary chosen to include the book’s results, plus a few more words. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۵ · خم شو، یا بشکن</div>
+  <h1>pipeline آناگرام</h1>
+  <p class="lede">برنامه را یک <strong>pipeline از تبدیل‌ها</strong> ببینید: داده وارد می‌شود، هر قدم آن را به چیزی تازه تبدیل می‌کند، و تابع اصلی مثل خود نیازمندی خوانده می‌شود. هر نتیجه را به‌عنوان <code>{:ok, value}</code> یا <code>{:error, reason}</code> بپیچید، و اولین خطا یک‌راست تا آخر جاری می‌شود.</p>
+  <p class="source-note">تصویری از موضوع ۳۰، برنامه‌نویسی تبدیلی (صص. ۲۵۵–۲۷۰): یابنده‌ی آناگرام با «vinyl» (صص. ۲۵۸–۲۶۴) و مدیریت خطا با bind به نام and_then (صص. ۲۶۵–۲۷۰). کتاب از فهرست کامل کلمه‌ها استفاده می‌کند؛ این صفحه یک دیکشنری کوچک درون‌ساخت دارد که طوری انتخاب شده که نتیجه‌های کتاب و چند کلمه‌ی دیگر را داشته باشد. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel"><p class="panel-title">word |&gt; all_subsets_longer_than_three |&gt; as_unique_signatures |&gt; find_in_dictionary |&gt; group_by_length</p><div id="stages"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="letters">Letters</label><input id="letters" type="text" value="vinyl" maxlength="8" style="width:100%;font-family:var(--mono)">
-        <p class="field-hint">Up to 8 letters. The book’s example is “vinyl”.</p>
-        <label class="field-head" for="brk" style="margin-top:10px">Break a step</label><select id="brk" style="width:100%"><option value="none">Nothing broken</option><option value="dict">Dictionary file missing (step 3)</option><option value="validate">Reject non-letters (step 1)</option></select></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="letters">حرف‌ها</label><input id="letters" type="text" value="vinyl" maxlength="8" style="width:100%;font-family:var(--mono);direction:ltr">
+        <p class="field-hint">تا هشت حرف. نمونه‌ی کتاب «vinyl» است.</p>
+        <label class="field-head" for="brk" style="margin-top:10px">شکستن یک قدم</label><select id="brk" style="width:100%"><option value="none">هیچ چیزی نشکسته</option><option value="dict">فایل دیکشنری غایب است، در قدم ۳</option><option value="validate">رد کردن غیرحرف، در قدم ۱</option></select></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Each step only knows its input and its output</strong>, so steps can be tested alone and reused wherever their input matches another step’s output.</li>
-    <li><strong>The signature</strong> (letters sorted) is what makes the lookup cheap: all anagrams share one, so “vinyl” and any other arrangement of the same letters find the same words.</li>
-    <li><strong>With an error tuple</strong>, the remaining steps are skipped rather than crashing, and the pipeline’s final value is the first error. That is the and_then bind from the book.</li>
+    <li><strong>هر قدم فقط ورودی و خروجی خودش را می‌شناسد</strong>، پس قدم‌ها را می‌شود تنها تست کرد و هر جایی دوباره به کار برد که ورودی‌شان با خروجی قدم دیگری بخورد.</li>
+    <li><strong>امضا</strong>، یعنی حرف‌های مرتب‌شده، همان چیزی است که جست‌و‌جو را ارزان می‌کند: همه‌ی آناگرام‌ها یک امضا را شریک‌اند، پس «vinyl» و هر چیدمان دیگری از همان حرف‌ها همان کلمه‌ها را پیدا می‌کنند.</li>
+    <li><strong>با یک تاپل خطا</strong>، قدم‌های مانده رد می‌شوند و crash نمی‌شود، و مقدار نهایی pipeline همان اولین خطاست. این همان bind به نام and_then در کتاب است.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-bend-or-break.html"><small>Lesson</small>5. Bend, or Break</a></li>
+    <li><a href="../chapters/05-bend-or-break.html"><small>درس</small>فصل ۵: خم شو، یا بشکن</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -81,38 +81,38 @@ function stats(rows) {
   function run() {
     var w = document.getElementById("letters").value.trim().toLowerCase(), brk = document.getElementById("brk").value;
     var steps = [
-      ["1 · all_subsets_longer_than_three", function (v) { if (brk === "validate" && !/^[a-z]+$/.test(v)) return { error: "non-letter in input: " + JSON.stringify(v) }; if (!/^[a-z]+$/.test(v)) return { error: "input must be letters" }; return { ok: subsets(v) }; }],
-      ["2 · as_unique_signatures", function (v) { var s = {}; v.forEach(function (x) { s[sig(x)] = 1; }); return { ok: Object.keys(s) }; }],
-      ["3 · find_in_dictionary", function (v) { if (brk === "dict") return { error: "can't open dictionary file" }; var f = []; v.forEach(function (s) { (INDEX[s] || []).forEach(function (x) { f.push(x); }); }); return { ok: f }; }],
-      ["4 · group_by_length", function (v) { var g = {}; v.forEach(function (x) { (g[x.length] = g[x.length] || []).push(x); }); Object.keys(g).forEach(function (k) { g[k].sort(); }); return { ok: g }; }]
+      ["۱ · all_subsets_longer_than_three", function (v) { if (brk === "validate" && !/^[a-z]+$/.test(v)) return { error: "ورودی غیرحرف دارد: " + JSON.stringify(v) }; if (!/^[a-z]+$/.test(v)) return { error: "ورودی باید حرف باشد" }; return { ok: subsets(v) }; }],
+      ["۲ · as_unique_signatures", function (v) { var s = {}; v.forEach(function (x) { s[sig(x)] = 1; }); return { ok: Object.keys(s) }; }],
+      ["۳ · find_in_dictionary", function (v) { if (brk === "dict") return { error: "فایل دیکشنری باز نمی‌شود" }; var f = []; v.forEach(function (s) { (INDEX[s] || []).forEach(function (x) { f.push(x); }); }); return { ok: f }; }],
+      ["۴ · group_by_length", function (v) { var g = {}; v.forEach(function (x) { (g[x.length] = g[x.length] || []).push(x); }); Object.keys(g).forEach(function (k) { g[k].sort(); }); return { ok: g }; }]
     ];
     var val = { ok: w }, st = Kit.clear(document.getElementById("stages")), failedAt = null;
-    st.appendChild(Kit.el("div", { class: "stage" }, Kit.el("h3", null, "input"), Kit.el("code", null, "{:ok, " + JSON.stringify(w) + "}")));
+    st.appendChild(Kit.el("div", { class: "stage" }, Kit.el("h3", null, "ورودی"), Kit.el("code", null, "{:ok, " + JSON.stringify(w) + "}")));
     steps.forEach(function (s, i) {
       st.appendChild(Kit.el("div", { class: "pipe", "aria-hidden": "true" }, "|> and_then ↓"));
-      if (val.error) { st.appendChild(Kit.el("div", { class: "stage skip" }, Kit.el("h3", null, s[0] + " — skipped"), Kit.el("code", null, "passes {:error, …} through"))); return; }
+      if (val.error) { st.appendChild(Kit.el("div", { class: "stage skip" }, Kit.el("h3", null, s[0] + " — رد شد"), Kit.el("code", null, "مقدار {:error, …} را عبور می‌دهد"))); return; }
       val = s[1](val.ok); if (val.error && failedAt === null) failedAt = i + 1;
-      var show = val.error ? "{:error, " + JSON.stringify(val.error) + "}" : "{:ok, " + (Array.isArray(val.ok) ? "[" + val.ok.slice(0, 18).join(", ") + (val.ok.length > 18 ? ", … " + val.ok.length + " in all" : "") + "]" : Object.keys(val.ok).map(function (k) { return k + " ⇒ " + val.ok[k].join(", "); }).join(" · ") || "%{}") + "}";
+      var show = val.error ? "{:error, " + JSON.stringify(val.error) + "}" : "{:ok, " + (Array.isArray(val.ok) ? "[" + val.ok.slice(0, 18).join(", ") + (val.ok.length > 18 ? ", … " + val.ok.length + " در کل" : "") + "]" : Object.keys(val.ok).map(function (k) { return k + " ⇐ " + val.ok[k].join(", "); }).join(" · ") || "%{}") + "}";
       st.appendChild(Kit.el("div", { class: "stage" + (val.error ? " err" : "") }, Kit.el("h3", null, s[0] + (val.error ? " ✗" : " ✓")), Kit.el("code", null, show)));
     });
     var words = val.ok && !Array.isArray(val.ok) ? Object.keys(val.ok).reduce(function (a, k) { return a + val.ok[k].length; }, 0) : 0;
-    log.add(val.error ? "Pipeline result: {:error, " + val.error + "} (from step " + failedAt + ")" : "Pipeline result: " + words + " word(s) from “" + w + "”", val.error ? "bad" : "ok");
-    stats([["Subsets (≥ 3 letters)", /^[a-z]+$/.test(w) ? subsets(w).length : "—"], ["Words found", words], ["Result", val.error ? "error" : "ok", val.error ? "bad" : "ok"]]);
+    log.add(val.error ? "نتیجه‌ی pipeline: {:error, " + val.error + "}، از قدم " + failedAt : "نتیجه‌ی pipeline: " + words + " کلمه از «" + w + "»", val.error ? "bad" : "ok");
+    stats([["زیرمجموعه‌ی سه‌حرفی و بیشتر", /^[a-z]+$/.test(w) ? subsets(w).length : "—"], ["کلمه‌ی پیدا‌شده", words], ["نتیجه", val.error ? "خطا" : "درست", val.error ? "bad" : "ok"]]);
   }
   document.getElementById("letters").addEventListener("input", run);
   document.getElementById("brk").addEventListener("change", function () { if (document.getElementById("brk").value === "validate") document.getElementById("letters").value = "vin1l"; run(); });
   run();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What is the signature of “vinyl” in the book's example?",
-      options: ["vinyl", "ilnvy", "lynvi"], answer: 1,
-      explain: "The letters sorted (pp. 258–259)." },
-    { q: "What does Elixir's |> operator do?",
-      options: ["Runs two functions in parallel", "Passes the value on its left as the first argument of the function on its right", "Pipes output to a file"], answer: 1,
-      explain: "pp. 260–261." },
-    { q: "With an and_then bind, what happens after a step returns {:error, reason}?",
-      options: ["The program crashes", "The remaining steps are skipped and the error becomes the result", "The step is retried"], answer: 1,
-      explain: "pp. 268–270." }
+    { q: "امضای «vinyl» در نمونه‌ی کتاب چیست؟",
+      options: ["رشته‌ی vinyl", "رشته‌ی ilnvy", "رشته‌ی lynvi"], answer: 1,
+      explain: "حرف‌های مرتب‌شده (صص. ۲۵۸–۲۵۹)." },
+    { q: "عملگر |> در Elixir چه می‌کند؟",
+      options: ["دو تابع را موازی اجرا می‌کند", "مقدار چپش را به‌عنوان اولین آرگومان تابع راستش می‌دهد", "خروجی را به یک فایل pipe می‌کند"], answer: 1,
+      explain: "صفحه‌های ۲۶۰–۲۶۱." },
+    { q: "با bind به نام and_then، بعد از آن که قدمی {:error, reason} برگرداند چه می‌شود؟",
+      options: ["برنامه crash می‌کند", "قدم‌های مانده رد می‌شوند و همان خطا نتیجه می‌شود", "آن قدم تلاش دوباره می‌خورد"], answer: 1,
+      explain: "صفحه‌های ۲۶۸–۲۷۰." }
   ]);
 })();
 </script>

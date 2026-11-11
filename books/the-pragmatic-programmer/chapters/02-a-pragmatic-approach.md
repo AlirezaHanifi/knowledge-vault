@@ -3,283 +3,303 @@ book: the-pragmatic-programmer
 chapter: 2
 title: "A Pragmatic Approach"
 pages: "73–142"
+translated_title: "رویکرد pragmatic"
+lang: fa
 ---
 
-# 2. A Pragmatic Approach
+# فصل ۲: رویکرد pragmatic
 
-[← 1. A Pragmatic Philosophy](01-a-pragmatic-philosophy.md) · [Book](../README.md) · [3. The Basic Tools →](03-the-basic-tools.md)
+[فصل ۱: فلسفه‌ی pragmatic →](01-a-pragmatic-philosophy.md) · [کتاب](../README.md) · [فصل ۳: ابزارهای پایه ←](03-the-basic-tools.md)
 
-## Summary
+## خلاصه
 
-This chapter collects ideas that apply at every level of software development (p. 73). It opens with the one everything else follows from: **good design is easier to change** (ETC). Then come two closely related principles. **DRY** says not to duplicate knowledge; **orthogonality** says not to split one piece of knowledge across components (p. 73). **Reversibility** keeps decisions changeable (p. 73). **Tracer bullets** and **prototypes** are two ways to get feedback before committing: one is kept, the other thrown away (p. 74). **Domain languages** let you program in the vocabulary of the problem, and **estimating** helps you survive limited time and resources (p. 74).
+این فصل ایده‌هایی را جمع می‌کند که در هر سطحی از توسعه‌ی نرم‌افزار به کار می‌آیند (p. 73). با همان ایده‌ای باز می‌شود که بقیه از آن می‌آیند: **طراحی خوب طراحی‌ای است که تغییرش آسان‌تر است**، یعنی ETC. بعد دو اصل نزدیک به هم می‌آیند. اصل **DRY** می‌گوید دانش را تکرار نکنید؛ ویژگی **orthogonality** می‌گوید یک تکه دانش را بین مؤلفه‌ها نشکنید (p. 73). **برگشت‌پذیری** تصمیم‌ها را عوض‌شدنی نگه می‌دارد (p. 73). **tracer bullet** و **prototype** دو راه گرفتن بازخورد پیش از تعهدند: یکی نگه داشته می‌شود و دیگری دور انداخته (p. 74). **زبان‌های دامنه** می‌گذارند با واژگان مسئله برنامه بنویسید، و **تخمین زدن** کمک می‌کند با وقت و منابع محدود جان سالم ببرید (p. 74).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **ETC, Easier to Change, is a value, not a rule.** Every design principle the authors know is a special case of it. When you can't tell which path is easier to change, make the code replaceable (Tip 14, pp. 75–76).
-- **DRY is about knowledge, not code.** Every piece of knowledge must have a single, unambiguous, authoritative representation. Identical code can represent different knowledge, and different code can duplicate the same knowledge (Tip 15, pp. 80–85).
-- **Orthogonal components can change independently.** The test: if one requirement changes dramatically, how many modules are affected? Ideally one (Tip 17, pp. 94–96).
-- **There are no final decisions.** Hide third-party APIs behind your own abstractions, so a database, vendor or architecture can change (Tips 18–19, pp. 106–108).
-- **Tracer code is kept; prototypes are thrown away.** Tracer bullets build a thin end-to-end skeleton of the real system; prototypes explore one risky aspect cheaply (Tips 20–21, pp. 111–120).
-- **Program close to the problem domain,** but don't spend more effort on a domain language than it saves (Tip 22, pp. 124–129).
-- **Choose estimate units to match their accuracy, and iterate the schedule with the code.** When asked for an estimate, say "I'll get back to you" (Tips 23–24, pp. 133–141).
+- **ویژگی ETC، یعنی آسان‌تر برای تغییر، یک ارزش است و نه یک قاعده.** هر اصل طراحی‌ای که نویسنده‌ها می‌شناسند حالتی ویژه از آن است. وقتی نمی‌توانید بگویید کدام راه تغییرش آسان‌تر است، کد را جابه‌جا‌شدنی بسازید (tip ۱۴، صص. ۷۵–۷۶).
+- **اصل DRY درباره‌ی دانش است و نه کد.** هر تکه دانش باید یک نمایش یکتا و بی‌ابهام و معتبر داشته باشد. کد یکسان می‌تواند دانش مختلفی را نمایش بدهد، و کد مختلف می‌تواند همان دانش را تکرار کند (tip ۱۵، صص. ۸۰–۸۵).
+- **مؤلفه‌های orthogonal مستقل از هم عوض می‌شوند.** سنجه: اگر یک نیازمندی خیلی عوض شود، چند ماژول اثر می‌گیرند؟ در حالت آرمانی، یکی (tip ۱۷، صص. ۹۴–۹۶).
+- **تصمیم نهایی وجود ندارد.** APIهای طرف سوم را پشت انتزاع‌های خودتان قایم کنید، تا دیتابیس و vendor و معماری عوض‌شدنی بمانند (tipهای ۱۸ و ۱۹، صص. ۱۰۶–۱۰۸).
+- **کد tracer نگه داشته می‌شود و prototype دور انداخته.** گلوله‌های tracer یک اسکلت نازک سر‌تا‌سری از سیستم واقعی می‌سازند، و prototypeها یک جنبه‌ی پرخطر را ارزان می‌کاوند (tipهای ۲۰ و ۲۱، صص. ۱۱۱–۱۲۰).
+- **نزدیک به دامنه‌ی مسئله برنامه بنویسید،** ولی روی یک زبان دامنه بیشتر از آن چیزی که صرفه‌جویی می‌کند تلاش نگذارید (tip ۲۲، صص. ۱۲۴–۱۲۹).
+- **واحد تخمین را به اندازه‌ی دقتش انتخاب کنید، و زمان‌بندی را همراه کد تکرار کنید.** وقتی تخمین خواستند، بگویید «برمی‌گردم خدمتتان» (tipهای ۲۳ و ۲۴، صص. ۱۳۳–۱۴۱).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 8. The Essence of Good Design — p. 75
-- Topic 9. DRY—The Evils of Duplication — p. 79
-- Topic 10. Orthogonality — p. 92
-- Topic 11. Reversibility — p. 104
-- Topic 12. Tracer Bullets — p. 109
-- Topic 13. Prototypes and Post-it Notes — p. 118
-- Topic 14. Domain Languages — p. 124
-- Topic 15. Estimating — p. 133
+- موضوع ۸. جوهر طراحی خوب — ص. ۷۵
+- موضوع ۹. اصل DRY و بدی‌های تکرار — ص. ۷۹
+- موضوع ۱۰. ویژگی orthogonality — ص. ۹۲
+- موضوع ۱۱. برگشت‌پذیری — ص. ۱۰۴
+- موضوع ۱۲. گلوله‌های tracer — ص. ۱۰۹
+- موضوع ۱۳. prototypeها و کاغذ‌چسب‌دارها — ص. ۱۱۸
+- موضوع ۱۴. زبان‌های دامنه — ص. ۱۲۴
+- موضوع ۱۵. تخمین زدن — ص. ۱۳۳
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 14 | Good Design Is Easier to Change Than Bad Design | 75 |
-| 15 | DRY—Don't Repeat Yourself | 80 |
-| 16 | Make It Easy to Reuse | 90 |
-| 17 | Eliminate Effects Between Unrelated Things | 94 |
-| 18 | There Are No Final Decisions | 106 |
-| 19 | Forgo Following Fads | 108 |
-| 20 | Use Tracer Bullets to Find the Target | 111 |
-| 21 | Prototype to Learn | 120 |
-| 22 | Program Close to the Problem Domain | 124 |
-| 23 | Estimate to Avoid Surprises | 133 |
-| 24 | Iterate the Schedule with the Code | 140 |
+| ۱۴ | طراحی خوب از طراحی بد آسان‌تر عوض می‌شود | ۷۵ |
+| ۱۵ | اصل DRY، یعنی خودت را تکرار نکن | ۸۰ |
+| ۱۶ | استفاده‌ی دوباره را آسان کنید | ۹۰ |
+| ۱۷ | اثر بین چیزهای بی‌ربط را از بین ببرید | ۹۴ |
+| ۱۸ | تصمیم نهایی وجود ندارد | ۱۰۶ |
+| ۱۹ | دنبال مُد نروید | ۱۰۸ |
+| ۲۰ | برای پیدا کردن هدف از گلوله‌ی tracer استفاده کنید | ۱۱۱ |
+| ۲۱ | برای یاد گرفتن prototype بسازید | ۱۲۰ |
+| ۲۲ | نزدیک به دامنه‌ی مسئله برنامه بنویسید | ۱۲۴ |
+| ۲۳ | تخمین بزنید تا غافلگیر نشوید | ۱۳۳ |
+| ۲۴ | زمان‌بندی را همراه کد تکرار کنید | ۱۴۰ |
 
 ```mermaid
 flowchart TB
-    ETC["Topic 8 · ETC: Easier to Change"] --> DRY["Topic 9 · DRY:<br/>one home per piece of knowledge"]
-    ETC --> ORTH["Topic 10 · Orthogonality:<br/>one piece of knowledge per component"]
-    ETC --> REV["Topic 11 · Reversibility:<br/>no final decisions"]
+    ETC["موضوع ۸ · ETC: آسان‌تر برای تغییر"] --> DRY["موضوع ۹ · DRY:<br/>یک خانه برای هر تکه دانش"]
+    ETC --> ORTH["موضوع ۱۰ · orthogonality:<br/>یک تکه دانش در هر مؤلفه"]
+    ETC --> REV["موضوع ۱۱ · برگشت‌پذیری:<br/>تصمیم نهایی نداریم"]
     DRY <--> ORTH
-    ETC --> FB["Feedback before commitment"]
-    FB --> TB["Topic 12 · Tracer bullets:<br/>kept, end to end"]
-    FB --> PR["Topic 13 · Prototypes:<br/>thrown away, one aspect"]
-    ETC --> DL["Topic 14 · Domain languages"]
-    FB --> EST["Topic 15 · Estimating:<br/>iterate the schedule"]
+    ETC --> FB["بازخورد پیش از تعهد"]
+    FB --> TB["موضوع ۱۲ · گلوله‌ی tracer:<br/>نگه‌داشتنی و سر‌تا‌سری"]
+    FB --> PR["موضوع ۱۳ · prototype:<br/>دور‌انداختنی و یک‌جنبه‌ای"]
+    ETC --> DL["موضوع ۱۴ · زبان‌های دامنه"]
+    FB --> EST["موضوع ۱۵ · تخمین زدن:<br/>زمان‌بندی را تکرار کنید"]
 ```
 
-*The vault's map of the chapter, after its introduction (pp. 73–74) and Topic 8's claim that the other topics are motivated by ETC (p. 77).*
+*نقشه‌ی vault از این فصل، بر پایه‌ی مقدمه‌اش (pp. 73–74) و این ادعای موضوع ۸ که بقیه‌ی موضوع‌ها از ETC انگیزه می‌گیرند (p. 77).*
 
-### Topic 8. The Essence of Good Design
+### موضوع ۸. جوهر طراحی خوب
 
-**Tip 14, Good Design Is Easier to Change Than Bad Design** (p. 75). A thing is well designed if it adapts to the people who use it; for code, that means it adapts by changing. Hence the **ETC principle: Easier to Change** (p. 75). As far as the authors can tell, every design principle is a special case of it (pp. 75–76):
+**نکته‌ی ۱۴، طراحی خوب از طراحی بد آسان‌تر عوض می‌شود** (p. 75). چیزی خوب طراحی شده اگر با مردمی که به کارش می‌برند سازگار شود؛ برای کد، این یعنی با عوض شدن سازگار می‌شود. از همین‌جا **اصل ETC: آسان‌تر برای تغییر** می‌آید (p. 75). تا جایی که نویسنده‌ها می‌فهمند، هر اصل طراحی حالتی ویژه از آن است (pp. 75–76):
 
-- **Decoupling** isolates concerns, so each is easier to change.
-- **The single responsibility principle** mirrors a change in requirements by a change in one module.
-- **Good naming** makes code easier to read, and you have to read code to change it.
+- **ویژگی decoupling** دغدغه‌ها را جدا می‌کند، پس تغییر هر کدام آسان‌تر است.
+- **اصل مسئولیت یگانه** تغییر در نیازمندی‌ها را با تغییر در یک ماژول بازتاب می‌دهد.
+- **نام‌گذاری خوب** خواندن کد را آسان‌تر می‌کند، و برای عوض کردن کد باید بخوانیدش.
 
-ETC is a **value, not a rule**: it helps you choose between paths. To internalize it, spend a week asking "did the thing I just did make the overall system easier or harder to change?" when you save a file, write a test, or fix a bug (p. 76). When you can't tell which path is easier to change (pp. 76–77):
+ویژگی ETC یک **ارزش است و نه قاعده**: کمک می‌کند بین راه‌ها انتخاب کنید. برای درونی کردنش، یک هفته وقت بگذارید و هر بار که فایلی ذخیره می‌کنید یا تستی می‌نویسید یا باگی را درست می‌کنید بپرسید «کاری که همین حالا کردم، کل سیستم را برای تغییر آسان‌تر کرد یا سخت‌تر؟» (p. 76). وقتی نمی‌توانید بگویید کدام راه تغییرش آسان‌تر است (pp. 76–77):
 
-1. Fall back on making what you write **replaceable**, which means keeping it decoupled and cohesive.
-2. Treat it as a way to develop instincts: record the choice and your guesses in your engineering daybook, leave a tag in the source, and give yourself feedback when the code later changes.
+۱. به این برگردید که آن چیزی را که می‌نویسید **جابه‌جا‌شدنی** کنید، که یعنی decouple و منسجم نگهش دارید.
+۲. آن را راهی برای ساختن شهود ببینید: انتخاب و حدس‌هایتان را در دفتر روزنگار مهندسی‌تان ثبت کنید، در کد منبع یک tag بگذارید، و وقتی کد بعداً عوض شد به خودتان بازخورد بدهید.
 
-### Topic 9. DRY—The Evils of Duplication
+### موضوع ۹. اصل DRY و بدی‌های تکرار
 
-Knowledge isn't stable, so programmers are **constantly in maintenance mode**, not only after release (p. 79). The DRY principle (p. 80): every piece of knowledge must have a single, unambiguous, authoritative representation within a system. **Tip 15, DRY—Don't Repeat Yourself** (p. 80). With two copies, the question isn't whether you'll remember to change both, but when you'll forget (p. 80).
+دانش پایدار نیست، پس برنامه‌نویس‌ها **مدام در حالت نگه‌داری‌اند**، نه فقط بعد از release (p. 79). اصل DRY (p. 80): هر تکه دانش باید داخل یک سیستم یک نمایش یکتا و بی‌ابهام و معتبر داشته باشد. **tip ۱۵، اصل DRY، یعنی خودت را تکرار نکن** (p. 80). با دو نسخه، پرسش این نیست که یادتان می‌ماند هر دو را عوض کنید، بلکه این است که کِی یادتان می‌رود (p. 80).
 
-**DRY is more than code** (p. 81). The authors admit the first edition explained it poorly: it is about duplication of *knowledge and intent*, possibly expressed in totally different ways. The acid test: when one facet must change, do you change it in multiple places and formats, such as code and documentation, or a schema and the structure that holds it?
+**اصل DRY بیشتر از کد است** (p. 81). نویسنده‌ها اعتراف می‌کنند که ویراست اول بد توضیحش داده بود: این اصل درباره‌ی تکرار *دانش و قصد* است، که ممکن است به شکل‌هایی کاملاً مختلف بیان شوند. سنجه‌ی تیزاب: وقتی یک وجه باید عوض شود، آن را در چند جا و چند قالب عوض می‌کنید، مثل کد و مستند، یا یک schema و ساختاری که نگهش می‌دارد؟
 
-| Kind of duplication | The book's example | Remedy (pp. 81–90) |
+| گونه‌ی تکرار | نمونه‌ی کتاب | راه چاره (pp. 81–90) |
 |---|---|---|
-| **In code** | `print_balance` repeats negative-number handling, the field width and the label format | Extract `format_amount`, `print_line` and `report_line`: each format then has one home. The separator's hyphen count is a *different* intent (the customer's), so it stays separate |
-| **Coincidental, not duplication** | `validate_age` and `validate_quantity` have identical bodies | Leave them: same code, different knowledge |
-| **In documentation** | A comment restates the fee rules that the code implements | Better names and layout (`calculate_account_fees`) make the comment redundant |
-| **In data** | A `Line` class stores `start`, `end` *and* `length` | Calculate `length`; if you must cache it for performance, keep the violation private to the class. Use accessors (Meyer's Uniform Access principle) |
-| **Representational** | Your code and an external API, service or schema both know the interface | Neutral API specifications that generate clients and tests; OpenAPI for external APIs; introspect schemas, or use maps plus a table-driven validation suite |
-| **Interdeveloper** | A U.S. state's Y2K survey found more than 10,000 programs, each with its own Social Security Number validation | Tight-knit teams, frequent communication, forums, a project librarian, a central place for utilities, reading each other's code |
+| **در کد** | تابع `print_balance` برخورد با عدد منفی و عرض فیلد و قالب برچسب را تکرار می‌کند | توابع `format_amount` و `print_line` و `report_line` را بیرون بکشید: آن‌وقت هر قالب یک خانه دارد. شمار خط‌تیره‌های جداکننده قصد *دیگری* است، یعنی قصد مشتری، پس جدا می‌ماند |
+| **تصادفی و نه تکرار** | توابع `validate_age` و `validate_quantity` بدنه‌ی یکسانی دارند | رهایشان کنید: کد یکی است و دانش دیگری |
+| **در مستند** | یک comment قاعده‌های کارمزدی را بازگو می‌کند که کد پیاده‌اش می‌کند | نام و چیدمان بهتر، مثل `calculate_account_fees`، آن comment را زیادی می‌کند |
+| **در داده** | کلاس `Line` مقدارهای `start` و `end` *و* `length` را ذخیره می‌کند | مقدار `length` را حساب کنید؛ و اگر برای performance مجبورید cache کنید، نقض را خصوصیِ کلاس نگه دارید. از accessor استفاده کنید، یعنی اصل Uniform Access از Meyer |
+| **نمایشی** | کد شما و یک API یا سرویس یا schema بیرونی هر دو interface را می‌دانند | مشخصات بی‌طرف API که client و تست می‌سازند؛ OpenAPI برای APIهای بیرونی؛ درون‌بینی schemaها، یا map به‌علاوه‌ی مجموعه‌ی اعتبارسنجی جدول‌محور |
+| **بین developerها** | پیمایش Y2K در یکی از ایالت‌های آمریکا بیشتر از ده هزار برنامه پیدا کرد که هر کدام اعتبارسنجی شماره‌ی تأمین اجتماعی خودش را داشت | تیم‌های هم‌بافت، ارتباط مکرر، forum، یک کتابدار پروژه، جایی مرکزی برای ابزارها، و خواندن کد همدیگر |
 
-**Tip 16, Make It Easy to Reuse** (p. 90): if finding and reusing existing code isn't easier than writing it, people won't reuse it, and knowledge gets duplicated.
+**نکته‌ی ۱۶، استفاده‌ی دوباره را آسان کنید** (p. 90): اگر پیدا کردن و استفاده‌ی دوباره از کد موجود از نوشتنش آسان‌تر نباشد، مردم دوباره به کارش نمی‌برند و دانش تکرار می‌شود.
 
-### Topic 10. Orthogonality
+> **In practice:** DRY در stack ما بیشتر از کد، درباره‌ی دانش است: تعریف یک metric، فهرست ستون‌های PII، نسخه‌ی یک image.
+>
+> **Your turn:** «درآمد خالص» در یک مدل Gold، در یک سؤال Metabase و در یک notebook جداگانه تعریف شده و اعدادشان فرق دارد. DRY چه می‌گوید؟
+>
+> *Answer:* یک دانش سه نمایش دارد؛ تعریف را در یک مدل Gold نگه دارید و Metabase و notebook فقط آن را بخوانند. DRY درباره‌ی تکرار دانش است، نه تکرار متن (pp. 79–91).
 
-Two things are **orthogonal** if changes in one don't affect the others. In a well-designed system, the database code is orthogonal to the user interface (p. 92).
+### موضوع ۱۰. ویژگی orthogonality
 
-**A nonorthogonal system** (pp. 93–94): when a helicopter pilot faints, you find that lowering the collective pitch lever makes the nose drop and the craft spiral left, so you must compensate with the cyclic and the pedals, each of which affects all the others. Helicopter controls are not orthogonal, and with interdependent components there is no such thing as a local fix (p. 94).
+دو چیز **orthogonal**اند اگر تغییر در یکی روی بقیه اثر نگذارد. در سیستمی خوش‌طراحی، کد دیتابیس به user interface orthogonal است (p. 92).
 
-**Tip 17, Eliminate Effects Between Unrelated Things** (p. 94). Self-contained components with one well-defined purpose (*cohesion*, after Yourdon and Constantine) bring two benefits (pp. 94–95):
+**یک سیستم غیر‌orthogonal** (pp. 93–94): وقتی خلبان هلی‌کوپتر از حال می‌رود، می‌بینید پایین آوردن اهرم گام جمعی، دماغه را پایین می‌آورد و پرنده را به چپ می‌پیچاند، پس باید با cyclic و پدال‌ها جبرانش کنید، که هر کدامشان روی همه‌ی بقیه اثر دارند. کنترل‌های هلی‌کوپتر orthogonal نیستند، و با مؤلفه‌های وابسته به هم، چیزی به نام اصلاح محلی وجود ندارد (p. 94).
 
-| Benefit | Why |
+**نکته‌ی ۱۷، اثر بین چیزهای بی‌ربط را از بین ببرید** (p. 94). مؤلفه‌های خودبسنده با یک هدف خوب‌تعریف‌شده، که *انسجام* نامیده می‌شود به پیروی از Yourdon و Constantine، دو سود می‌آورند (pp. 94–95):
+
+| سود | چرا |
 |---|---|
-| **Productivity** | Changes are localized; small components can be designed, coded, tested and forgotten; orthogonal components combine to give more functionality per unit of effort, because there's no overlap |
-| **Reduced risk** | Diseased code is isolated and easy to replace; fixes stay local; components are easier to test; you're less tied to one vendor |
+| **بهره‌وری** | تغییرها محلی می‌مانند؛ مؤلفه‌های کوچک را می‌شود طراحی و کد و تست کرد و فراموش؛ و مؤلفه‌های orthogonal با هم ترکیب می‌شوند و در هر واحد تلاش قابلیت بیشتری می‌دهند، چون هم‌پوشانی نیست |
+| **خطر کمتر** | کد بیمار جدا می‌ماند و جابه‌جایی‌اش آسان است؛ اصلاح‌ها محلی می‌مانند؛ تست مؤلفه‌ها آسان‌تر است؛ و کمتر به یک vendor بسته‌اید |
 
-Where to apply it (pp. 95–101):
+کجا اعمالش کنیم (pp. 95–101):
 
-- **Design.** Layers that use only the abstractions below them. The test: if the requirements behind one function change dramatically, how many modules are affected? In an orthogonal system, one (p. 96). Adding a mobile interface to a heating-plant controller should touch only the UI modules (p. 97). Don't rely on properties of things you can't control, such as phone numbers or email addresses as identifiers (p. 97).
-- **Toolkits and libraries.** Ask whether they impose changes on your code that shouldn't be there. EJB's declarative transactions are an example of orthogonality, a form of the Decorator pattern (pp. 97–98).
-- **Coding.** Write *shy* code and follow the Law of Demeter, avoid global data (including singletons used as globals), and avoid similar functions (consider the Strategy pattern) (pp. 98–99).
-- **Testing.** If a unit test needs much of the rest of the system to build, the module isn't decoupled. Track how many files each bug fix touches (p. 100).
-- **Documentation.** Content and presentation are the axes; the authors write in Markdown, and this book is typeset from it (p. 101).
+- **طراحی.** لایه‌هایی که فقط انتزاع‌های پایین‌تر از خودشان را به کار می‌برند. سنجه: اگر نیازمندی‌های پشت یک تابع خیلی عوض شوند، چند ماژول اثر می‌گیرند؟ در سیستمی orthogonal، یکی (p. 96). اضافه کردن یک interface موبایل به کنترل‌کننده‌ی نیروگاه حرارتی باید فقط به ماژول‌های UI بخورد (p. 97). به ویژگی‌های چیزهایی که کنترلشان نمی‌کنید تکیه نکنید، مثل شماره‌ی تلفن یا آدرس ایمیل به‌عنوان شناسه (p. 97).
+- **جعبه‌ابزار و کتابخانه.** بپرسید آیا تغییرهایی را به کدتان تحمیل می‌کنند که نباید آن‌جا باشند. تراکنش‌های اعلانی EJB نمونه‌ای از orthogonality‌اند، یعنی شکلی از الگوی Decorator (pp. 97–98).
+- **کد زدن.** کد *خجالتی* بنویسید و قانون Demeter را رعایت کنید، از داده‌ی سراسری بپرهیزید، از جمله singletonهایی که مثل سراسری به کار می‌روند، و از توابع شبیه به هم بپرهیزید؛ الگوی Strategy را در نظر بگیرید (pp. 98–99).
+- **تست.** اگر یک unit test برای build شدن به بخش بزرگی از بقیه‌ی سیستم نیاز دارد، ماژول decouple نیست. دنبال کنید هر اصلاح باگ به چند فایل می‌خورد (p. 100).
+- **مستند.** محتوا و نمایش دو محورند؛ نویسنده‌ها با Markdown می‌نویسند و همین کتاب از آن حروف‌چینی شده (p. 101).
 
-Orthogonality and DRY are closely related: DRY minimizes duplication, orthogonality minimizes interdependency (p. 101). Exercise 1 asks which of two line-splitting classes is more orthogonal (pp. 102–103).
+ویژگی orthogonality و اصل DRY نزدیک به هم‌اند: DRY تکرار را کمینه می‌کند و orthogonality وابستگی متقابل را (p. 101). تمرین ۱ می‌پرسد کدام یکی از دو کلاس شکستن خط orthogonal‌تر است (pp. 102–103).
 
-> **Try it:** [Orthogonality and the ripple of a change](../widgets/02-orthogonality.html) — wire up a small system with or without shared globals and cross-layer calls, change one requirement, and count how many modules have to change.
+> **Try it:** [ویژگی orthogonality و موج یک تغییر](../widgets/02-orthogonality.html)؛ سیستم کوچکی را با داده‌ی سراسری مشترک و فراخوانی بین‌لایه‌ای یا بی آن‌ها سیم‌کشی کنید، یک نیازمندی را عوض کنید، و بشمارید چند ماژول باید عوض شوند.
 
-### Topic 11. Reversibility
+### موضوع ۱۱. برگشت‌پذیری
 
-There is always more than one way to implement something, and critical decisions aren't easily reversible: each one commits the project to a smaller target that can be missed if it moves (pp. 104–105). Following DRY, decoupling and external configuration means fewer irreversible decisions (p. 105).
+همیشه بیشتر از یک راه برای پیاده کردن چیزی هست، و تصمیم‌های حیاتی آسان برنمی‌گردند: هر کدام پروژه را به هدفی کوچک‌تر متعهد می‌کند که اگر جابه‌جا شود می‌شود از دستش داد (pp. 104–105). رعایت DRY و decoupling و تنظیم بیرونی یعنی تصمیم‌های برنگشتنی کمتر (p. 105).
 
-- If the database is abstracted to "persistence as a service", a too-slow relational database from vendor A can be swapped for vendor B's document database (p. 106).
-- **Tip 18, There Are No Final Decisions** (p. 106): decisions are written in the sand, not carved in stone.
-- **Flexible architecture** (p. 107). Since 2000 the authors list a parade of "best practice" server architectures: big iron, federations of it, commodity clusters, cloud VMs, containers, serverless, and back to big iron. You can't plan for this; you can make it easy to change. Hide third-party APIs behind your own abstraction layers, and break code into components even if they're deployed on one server.
-- **Tip 19, Forgo Following Fads** (p. 108).
+- اگر دیتابیس به «ماندگاری به‌عنوان سرویس» انتزاع شود، یک دیتابیس رابطه‌ای زیادی کند از vendor A را می‌شود با دیتابیس document از vendor B عوض کرد (p. 106).
+- **نکته‌ی ۱۸، تصمیم نهایی وجود ندارد** (p. 106): تصمیم‌ها روی شن نوشته می‌شوند و نه روی سنگ کنده.
+- **معماری انعطاف‌پذیر** (p. 107). نویسنده‌ها از سال ۲۰۰۰ رگباری از معماری‌های سرور «بهترین‌روش» را فهرست می‌کنند: آهن بزرگ، فدراسیونی از آن، cluster کالایی، VM در cloud، container، serverless، و برگشت به آهن بزرگ. نمی‌توانید برای این برنامه بریزید؛ می‌توانید تغییرش را آسان کنید. APIهای طرف سوم را پشت لایه‌های انتزاع خودتان قایم کنید، و کد را به مؤلفه بشکنید حتی اگر روی یک سرور deploy شوند.
+- **نکته‌ی ۱۹، دنبال مُد نروید** (p. 108).
 
-### Topic 12. Tracer Bullets
+> **In practice:** GitOps با Argo CD هر deploy را برگشت‌پذیر می‌کند، ولی تغییر schema در ClickHouse نه.
+>
+> **Your turn:** کدام تصمیم در pipeline کمتر برگشت‌پذیر است: تغییر نسخه‌ی loader یا تغییر `ORDER BY` یک جدول Silver؟
+>
+> *Answer:* `ORDER BY`: عوض کردنش یعنی ساختن جدول تازه و کپی همه‌ی داده. آن را پشت یک view بگذارید تا خواننده‌ها به نام جدول وابسته نباشند. کتاب می‌گوید تصمیم نهایی وجود ندارد؛ جوری بسازید که عوض کردنش ارزان باشد (pp. 104–108).
 
-Tracer rounds show where bullets are going, giving real-time feedback under actual conditions (p. 109). The alternative is to specify the system to death and fire by dead reckoning (p. 110).
+### موضوع ۱۲. گلوله‌های tracer
 
-**Tip 20, Use Tracer Bullets to Find the Target** (p. 111). Find the important requirements and the riskiest areas and code them first. The very first tracer is creating the project with a "hello world!" that compiles and runs (p. 111). A simple feature then exercises every architectural layer end to end, implementing only what it needs in each (pp. 111–112). In the authors' temporal-query project, the first build could only list all rows of a table, but it proved that UI, libraries, serialization and SQL generation worked together (pp. 112–113).
+گلوله‌ی رسام نشان می‌دهد گلوله‌ها کجا می‌روند و زیر شرایط واقعی بازخورد بی‌درنگ می‌دهد (p. 109). جایگزینش این است که سیستم را تا حد مرگ مشخص کنید و با حساب کور شلیک (p. 110).
 
-**Tracer code is not disposable**: it has full error checking, structure and documentation; it just isn't fully functional (p. 113). Its advantages (pp. 113–115):
+**نکته‌ی ۲۰، برای پیدا کردن هدف از گلوله‌ی tracer استفاده کنید** (p. 111). نیازمندی‌های مهم و پرخطرترین نواحی را پیدا کنید و اول کدشان بزنید. اولین tracer همین است که پروژه را با یک «hello world!» بسازید که compile و اجرا می‌شود (p. 111). بعد یک قابلیت ساده هر لایه‌ی معماری را سر‌تا‌سر تمرین می‌دهد و در هر کدام فقط آن چیزی را پیاده می‌کند که لازم دارد (pp. 111–112). در پروژه‌ی کوئری زمانی نویسنده‌ها، اولین build فقط می‌توانست همه‌ی ردیف‌های یک جدول را فهرست کند، ولی ثابت کرد که UI و کتابخانه‌ها و serialization و ساختن SQL با هم کار می‌کنند (pp. 112–113).
 
-- Users see something working early, and their buy-in grows.
-- Developers get a structure to work in.
-- You have an integration platform, so you integrate daily instead of in a big bang.
-- You always have something to demonstrate.
-- You have a better feel for progress, avoiding code reported "95% complete" week after week.
+**کد tracer دور‌انداختنی نیست**: بررسی خطای کامل و ساختار و مستند دارد و فقط کامل کارآ نیست (p. 113). سودهایش (pp. 113–115):
 
-Tracers don't always hit the target; adjusting the aim is the point, and a small body of code has low inertia (p. 115).
+- کاربرها زود چیزی را می‌بینند که کار می‌کند، و هم‌دلی‌شان بیشتر می‌شود.
+- همه‌ی developerها ساختاری برای کار کردن در آن می‌گیرند.
+- یک بستر یکپارچه‌سازی دارید، پس هر روز یکپارچه می‌کنید و نه با یک انفجار بزرگ.
+- همیشه چیزی برای نشان دادن دارید.
+- حس بهتری از پیشرفت دارید و از کدی که هفته‌به‌هفته «۹۵٪ کامل» خبر می‌شود می‌پرهیزید.
 
-| | **Prototype** | **Tracer code** (pp. 115–117) |
+گلوله‌های tracer همیشه به هدف نمی‌خورند؛ تنظیم نشانه‌روی همان نکته است، و پیکره‌ی کوچک کد لختی کمی دارد (p. 115).
+
+| | **prototype** | **کد tracer** (pp. 115–117) |
 |---|---|---|
-| Purpose | Explore specific aspects of the final system | Show how the whole application hangs together |
-| Code | Disposable: thrown away and recoded properly | Lean but complete: part of the final skeleton |
-| Packing example | Prototype the UI in a UI tool; try packing algorithms in Python | A trivial first-come, first-served packer plus a simple working UI |
-| Analogy | Reconnaissance before firing | The first tracer bullets |
+| هدف | کاویدن جنبه‌های معینی از سیستم نهایی | نشان دادن این که کل برنامه چطور به هم وصل می‌شود |
+| کد | دور‌انداختنی: دور انداخته می‌شود و درست دوباره کد می‌شود | لاغر ولی کامل: بخشی از اسکلت نهایی |
+| نمونه‌ی بسته‌بندی | prototype گرفتن UI در یک ابزار UI؛ امتحان الگوریتم‌های بسته‌بندی در Python | یک بسته‌بندِ ساده‌ی اول‌آمده‌اول‌خدمت به‌علاوه‌ی یک UI ساده‌ی کارآ |
+| قیاس | شناسایی پیش از شلیک | اولین گلوله‌های tracer |
 
-### Topic 13. Prototypes and Post-it Notes
+> **In practice:** منبع تازه را با یک tracer bullet شروع کنید: یک جدول، از منبع تا داشبورد، از همه‌ی لایه‌ها.
+>
+> **Your turn:** چرا اول یک جدول را تا Metabase می‌برید، پیش از آن‌که همه‌ی جدول‌های منبع را در Bronze بار کنید؟
+>
+> *Answer:* tracer مسیر کامل را زود آزمایش می‌کند: دسترسی، hash کردن PII، type mapping در ClickHouse، Authentik و نیاز واقعی کاربر. مشکلات لایه‌های آخر زود پیدا می‌شوند و کاربر زود بازخورد می‌دهد (pp. 109–117).
 
-Like carmakers' clay and balsa models, software prototypes analyze and expose risk cheaply (p. 118). They needn't be code: Post-it notes suit workflow and application logic; whiteboards, drawings and interface builders suit UIs (p. 118).
+### موضوع ۱۳. prototypeها و کاغذ‌چسب‌دارها
 
-- **What to prototype** (p. 119): anything risky, untried, critical or doubtful, including architecture, new functionality, external data, third-party tools, performance and UI design.
-- **Tip 21, Prototype to Learn** (p. 120): the value is in the lessons, not the code.
-- **What to ignore** (p. 120): correctness (dummy data), completeness, robustness and style. A high-level scripting language helps (pp. 120–121).
-- **Architecture prototypes** (pp. 121–122) check responsibilities, collaborations, coupling, duplication, interfaces, and whether every module can reach the data it needs when it needs it. That last check generates the most surprises.
-- **How not to use them** (p. 122): make sure everyone knows the code is disposable. You can build a car prototype from balsa wood and duct tape, but you wouldn't drive it in rush-hour traffic. If prototypes might be misunderstood, use tracer bullets instead.
+مثل مدل‌های گلی و بالسای خودروسازها، prototypeهای نرم‌افزار خطر را ارزان تحلیل و آشکار می‌کنند (p. 118). لازم نیست کد باشند: کاغذ‌چسب‌دار به گردش‌کار و منطق برنامه می‌خورد، و وایت‌برد و طرح و interface builder به UI (p. 118).
 
-### Topic 14. Domain Languages
+- **از چه چیزی prototype بگیریم** (p. 119): هر چیزی پرخطر یا نیازموده یا حیاتی یا مشکوک، از جمله معماری و قابلیت تازه و داده‌ی بیرونی و ابزار طرف سوم و performance و طراحی UI.
+- **نکته‌ی ۲۱، برای یاد گرفتن prototype بسازید** (p. 120): ارزش در درس‌هاست و نه در کد.
+- **چه چیزی را نادیده بگیریم** (p. 120): درستی با داده‌ی ساختگی، کامل بودن، استواری، و سبک. یک زبان اسکریپت سطح‌بالا کمک می‌کند (pp. 120–121).
+- **همه‌ی prototypeهای معماری** (pp. 121–122) مسئولیت‌ها و همکاری‌ها و coupling و تکرار و interfaceها را بررسی می‌کنند، و این که هر ماژول بتواند هر وقت لازم است به داده‌ی لازمش برسد. همین بررسی آخر بیشترین غافلگیری را می‌سازد.
+- **چطور به کارشان نبریم** (p. 122): مطمئن شوید همه می‌دانند کد دور‌انداختنی است. می‌شود prototype یک خودرو را از چوب بالسا و چسب‌نواری ساخت، ولی در ترافیک ساعت شلوغی نمی‌رانیدش. اگر ممکن است prototypeها بد فهمیده شوند، به‌جایش از گلوله‌ی tracer استفاده کنید.
 
-Languages influence how you think about a problem; the language of the problem domain can suggest a programming solution too (p. 124). **Tip 22, Program Close to the Problem Domain** (p. 124).
+### موضوع ۱۴. زبان‌های دامنه
 
-| Example | Kind | What it does (pp. 125–127) |
+زبان‌ها روی شکل فکر کردنتان به یک مسئله اثر دارند؛ زبان دامنه‌ی مسئله هم می‌تواند راه‌حلی برنامه‌نویسی پیشنهاد بدهد (p. 124). **tip ۲۲، نزدیک به دامنه‌ی مسئله برنامه بنویسید** (p. 124).
+
+| نمونه | گونه | چه می‌کند (pp. 125–127) |
 |---|---|---|
-| **RSpec** | Internal (Ruby) | Tests that read as expected behavior |
-| **Cucumber** | External | Natural-language test scenarios, mapped to code by matchers |
-| **Phoenix routes** | Internal (Elixir) | Map HTTP requests to handler functions |
-| **Ansible** | External (YAML) | Declarative server configuration |
+| ابزار **RSpec** | درونی، در Ruby | تست‌هایی که مثل رفتار انتظاری خوانده می‌شوند |
+| ابزار **Cucumber** | بیرونی | صحنه‌های تست به زبان طبیعی، که با matcher به کد map می‌شوند |
+| قابلیت **Phoenix routes** | درونی، در Elixir | mapping درخواست‌های HTTP به توابع handler |
+| ابزار **Ansible** | بیرونی، در YAML | تنظیم اعلانی سرور |
 
-An aside asks why business users rarely read Cucumber features: they don't know the detailed requirements, and asking them to sign off on a spec is like asking them to check the spelling of an essay in Sumerian. Give them running code instead (pp. 125–126).
+یک حاشیه می‌پرسد چرا کاربرهای کسب‌وکار کم featureهای Cucumber را می‌خوانند: نیازمندی‌های جزئی را نمی‌دانند، و خواستن از آن‌ها که یک spec را تأیید کنند مثل این است که از آن‌ها بخواهید غلط املایی مقاله‌ای به زبان سومری را بررسی کنند. به‌جایش کد در حال اجرا به آن‌ها بدهید (pp. 125–126).
 
-**Internal vs. external** (pp. 128–129):
+**درونی در برابر بیرونی** (pp. 128–129):
 
-- An **internal** language gets its host language's power for free: Ruby loops can generate 100 RSpec tests. But it's bound by the host's syntax.
-- An **external** language has no such restriction, but needs a parser, and writing a good one isn't trivial.
-- The advice: don't spend more effort than you save. Use off-the-shelf external languages (YAML, JSON, CSV) if you can, then internal ones. Use a custom external language only when your users will write it.
-- **An internal language on the cheap:** just write functions. RSpec's `describe`, `it` and `expect` are ordinary Ruby methods (pp. 129–130).
+- زبان **درونی** توان زبان میزبانش را مجانی می‌گیرد: حلقه‌های Ruby می‌توانند صد تست RSpec بسازند. ولی به syntax میزبان بسته است.
+- زبان **بیرونی** چنین محدودیتی ندارد، ولی parser می‌خواهد، و نوشتن یک parser خوب بی‌دردسر نیست.
+- توصیه: بیشتر از آن چیزی که صرفه‌جویی می‌کنید تلاش نگذارید. اگر می‌شود از زبان‌های بیرونی آماده استفاده کنید، یعنی YAML و JSON و CSV، و بعد از درونی‌ها. زبان بیرونی سفارشی را فقط وقتی به کار ببرید که کاربرهایتان خودشان می‌نویسندش.
+- **یک زبان درونی ارزان:** فقط تابع بنویسید. متدهای `describe` و `it` و `expect` در RSpec متدهای معمولی Ruby‌اند (pp. 129–130).
 
-Exercises 4–8 build a turtle-graphics mini-language (P, D, W, N, E, S, U), first as an external and then as an internal language, and a parser for times such as 4pm, 7:38pm and 23:42 (pp. 130–132).
+تمرین‌های ۴ تا ۸ یک زبان کوچک گرافیک لاک‌پشتی می‌سازند، با دستورهای P و D و W و N و E و S و U، اول به‌عنوان زبان بیرونی و بعد درونی، و یک parser برای زمان‌هایی مثل ۴pm و ۷:۳۸pm و ۲۳:۴۲ (pp. 130–132).
 
-> **Try it:** [A turtle-graphics mini-language](../widgets/02-turtle-language.html) — run the book's Exercise 4 rectangle, write your own commands, see each line parsed into a command or an error, and add a new command by extending a table.
+> **Try it:** [یک زبان کوچک گرافیک لاک‌پشتی](../widgets/02-turtle-language.html)؛ مستطیل تمرین ۴ کتاب را اجرا کنید، دستورهای خودتان را بنویسید، ببینید هر خط به یک دستور یا یک خطا تجزیه می‌شود، و با گسترش یک جدول دستور تازه‌ای اضافه کنید.
 
-### Topic 15. Estimating
+### موضوع ۱۵. تخمین زدن
 
-Learn to estimate until you have an intuitive feel for magnitudes, so you can tell whether a plan is feasible: **Tip 23, Estimate to Avoid Surprises** (p. 133).
+آن‌قدر تخمین زدن را یاد بگیرید که حس شهودی از بزرگی‌ها پیدا کنید، تا بتوانید بگویید یک برنامه شدنی است یا نه: **tip ۲۳، تخمین بزنید تا غافلگیر نشوید** (p. 133).
 
-**Units signal accuracy** (pp. 134–135). "130 working days" sounds precise; "about six months" signals five to seven.
+**واحدها از دقت خبر می‌دهند** (pp. 134–135). «۱۳۰ روز کاری» دقیق به گوش می‌آید، و «حدود شش ماه» از پنج تا هفت ماه خبر می‌دهد.
 
-| Duration | Quote the estimate in |
+| مدت | تخمین را با چه واحدی بگویید |
 |---|---|
-| 1–15 days | Days |
-| 3–6 weeks | Weeks |
-| 8–20 weeks | Months |
-| 20+ weeks | Think hard before giving an estimate |
+| ۱ تا ۱۵ روز | روز |
+| ۳ تا ۶ هفته | هفته |
+| ۸ تا ۲۰ هفته | ماه |
+| بیشتر از ۲۰ هفته | پیش از دادن تخمین خوب فکر کنید |
 
-**Where estimates come from** (pp. 135–138):
+**تخمین‌ها از کجا می‌آیند** (pp. 135–138):
 
-1. Ask someone who has already done it.
-2. Understand what's being asked, including the scope ("assuming there's gas in the car…").
-3. Build a rough model of the system. Building it may reveal a cheaper variant of the question.
-4. Break the model into components and identify their parameters.
-5. Give each parameter a value. Concentrate on the ones that are multiplied or divided; added ones matter less.
-6. Calculate answers, varying the critical parameters, and couch the answer in terms of them. A strange answer means your model or understanding is probably wrong.
-7. Keep track of your estimating prowess and find out why wrong estimates were wrong.
+۱. از کسی بپرسید که از قبل انجامش داده.
+۲. بفهمید چه چیزی خواسته شده، از جمله دامنه‌اش، یعنی «به فرض آن که بنزین در ماشین باشد…».
+۳. مدلی خام از سیستم بسازید. ساختنش می‌تواند گونه‌ی ارزان‌تری از پرسش را آشکار کند.
+۴. مدل را به مؤلفه بشکنید و پارامترهایشان را بشناسید.
+۵. به هر پارامتر مقداری بدهید. روی آن‌هایی تمرکز کنید که ضرب یا تقسیم می‌شوند؛ آن‌هایی که جمع می‌شوند کمتر مهم‌اند.
+۶. پاسخ‌ها را حساب کنید، پارامترهای حیاتی را تغییر بدهید، و پاسخ را بر حسب آن‌ها بیان کنید. پاسخ عجیب یعنی احتمالاً مدل یا فهم شما غلط است.
+۷. توانایی تخمین زدنتان را پی بگیرید و بفهمید تخمین‌های غلط چرا غلط بودند.
 
-**Project schedules** (pp. 138–140):
+**زمان‌بندی پروژه** (pp. 138–140):
 
-- **Painting the missile.** Real people estimate with scenarios: 10 hours if all goes right, 18 realistically, 30 if the weather turns. The U.S. Navy's **PERT** gives each task optimistic, most likely and pessimistic estimates in a dependency network. The authors aren't big fans: people trust wall-sized charts because they used a formula (p. 139).
-- **Eating the elephant.** Often the only way to know a project's timetable is experience on that same project. Repeat thin slices: check requirements, analyze risk (riskiest first), design, implement and integrate, validate with users. Refine the estimate of the remaining iterations after each one (pp. 139–140). **Tip 24, Iterate the Schedule with the Code** (p. 140).
+- **رنگ کردن موشک.** آدم‌های واقعی با صحنه تخمین می‌زنند: ده ساعت اگر همه چیز درست پیش برود، هجده ساعت واقع‌بینانه، و سی ساعت اگر هوا برگردد. روش **PERT** در نیروی دریایی آمریکا به هر task سه تخمین خوش‌بینانه و محتمل و بدبینانه در یک شبکه‌ی وابستگی می‌دهد. نویسنده‌ها طرفدار پر‌و‌پا‌قرصش نیستند: مردم به نمودارهای دیوار‌اندازه اعتماد می‌کنند چون از فرمولی استفاده شده (p. 139).
+- **خوردن فیل.** اغلب تنها راه دانستن جدول زمانی یک پروژه، تجربه روی همان پروژه است. برش‌های نازک را تکرار کنید: نیازمندی‌ها را بررسی کنید، خطر را تحلیل کنید و پرخطرترین را اول بگیرید، طراحی و پیاده و یکپارچه کنید، و با کاربرها اعتبارسنجی. بعد از هر تکرار، تخمین تکرارهای مانده را دقیق‌تر کنید (pp. 139–140). **tip ۲۴، زمان‌بندی را همراه کد تکرار کنید** (p. 140).
 
-**What to say when asked for an estimate:** "I'll get back to you." Estimates given at the coffee machine come back to haunt you (p. 141).
+**وقتی تخمین خواستند چه بگویید:** «برمی‌گردم خدمتتان.» تخمین‌هایی که سر دستگاه قهوه داده می‌شوند برمی‌گردند و سر وقتتان می‌آیند (p. 141).
 
-> **Try it:** [Iterating the schedule](../widgets/02-iterate-schedule.html) — estimate a project up front, then run it one iteration at a time and watch the forecast built from the team's measured pace close in on the real finish.
+> **Try it:** [تکرار کردن زمان‌بندی](../widgets/02-iterate-schedule.html)؛ پروژه‌ای را از اول تخمین بزنید، بعد تکرار‌به‌تکرار اجرایش کنید و ببینید پیش‌بینی‌ای که از سرعت اندازه‌گیری‌شده‌ی تیم ساخته می‌شود چطور به پایان واقعی نزدیک می‌شود.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Removing knowledge duplication | One place to change; no contradictions | An extra function or abstraction; risk of merging coincidental duplicates |
-| Caching a derived value (deliberate DRY violation) | Performance | Must be kept private and consistent |
-| Orthogonal, layered design | Local changes, easier tests, reuse | Upfront thought; some indirection |
-| Abstracting third-party APIs | Reversible vendor and architecture choices | A layer to maintain |
-| Tracer code | A working skeleton, early feedback, daily integration | Must be production quality from the start |
-| Prototype | Cheap answers to specific risks | Must be thrown away; can be mistaken for the product |
-| Internal domain language | Host language power for free | Bound by the host's syntax |
-| External domain language | Any syntax you like | Writing and maintaining a parser |
-| Up-front schedule (e.g. PERT) | A number before work starts | False confidence on unfamiliar projects |
-| Iterating the schedule | Estimates based on real experience | No firm number at the start |
+| برداشتن تکرار دانش | یک جا برای عوض کردن؛ بی تناقض | یک تابع یا انتزاع اضافه؛ خطر merge تکراری‌های تصادفی |
+| cache کردن یک مقدار مشتق، یعنی نقض آگاهانه‌ی DRY | performance | باید خصوصی و سازگار نگه داشته شود |
+| طراحی orthogonal و لایه‌ای | تغییرهای محلی، تست آسان‌تر، استفاده‌ی دوباره | فکر اولیه؛ کمی واسطه‌گری |
+| انتزاع APIهای طرف سوم | انتخاب برگشت‌پذیر vendor و معماری | یک لایه برای نگه‌داری |
+| کد tracer | اسکلتی کارآ، بازخورد زودهنگام، یکپارچه‌سازی روزانه | باید از اول کیفیت تولید داشته باشد |
+| ساختن prototype | پاسخ ارزان به خطرهای معین | باید دور انداخته شود؛ می‌شود با محصول اشتباهش گرفت |
+| زبان دامنه‌ی درونی | توان زبان میزبان مجانی | به syntax میزبان بسته است |
+| زبان دامنه‌ی بیرونی | هر syntaxی که بخواهید | نوشتن و نگه‌داری یک parser |
+| زمان‌بندی اولیه، مثل PERT | عددی پیش از شروع کار | اعتماد دروغین در پروژه‌های ناآشنا |
+| تکرار کردن زمان‌بندی | تخمین بر پایه‌ی تجربه‌ی واقعی | در شروع هیچ عدد قطعی‌ای نیست |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **"Duplication is far cheaper than the wrong abstraction."** Sandi Metz's well-known 2016 essay makes the same point as the book's `validate_age` example from the other side: merging code that only looks alike creates an abstraction every caller must bend. The book's rule, *knowledge* not *text*, is the test for which case you're in.
-- **Cone of uncertainty.** Steve McConnell's *Software Estimation* (2006) describes estimates early in a project as varying by a factor of about four either way, narrowing as the project proceeds. That is the effect "iterate the schedule with the code" exploits. The [schedule widget](../widgets/02-iterate-schedule.html) shows a simplified version.
-- **How often does duplication bite?** The vault's [duplication-drift lab](../lab/02-duplication-drift/README.md) puts a number on "it's a question of when you'll forget".
+- **«تکرار خیلی ارزان‌تر از انتزاع غلط است.»** یادداشت معروف Sandi Metz در سال ۲۰۱۶ همان نکته‌ی نمونه‌ی `validate_age` کتاب را از سمت دیگر می‌گوید: merge کدی که فقط شبیه به نظر می‌آید انتزاعی می‌سازد که هر فراخواننده باید خمش کند. قاعده‌ی کتاب، یعنی *دانش* و نه *متن*، سنجه‌ی این است که در کدام حالتید.
+- **مخروط بلاتکلیفی.** کتاب *Software Estimation* از Steve McConnell (سال ۲۰۰۶) تخمین‌های اول پروژه را توصیف می‌کند که تا حدود چهار برابر در هر دو جهت تغییر می‌کنند و با پیش رفتن پروژه باریک می‌شوند. همین اثر است که «زمان‌بندی را همراه کد تکرار کنید» از آن بهره می‌برد. [ویجت زمان‌بندی](../widgets/02-iterate-schedule.html) نسخه‌ای ساده‌شده را نشان می‌دهد.
+- **تکرار چند وقت یک‌بار گاز می‌گیرد؟** [آزمایش رانش تکرار](../lab/02-duplication-drift/README.md) در vault روی «پرسش این است که کِی یادتان می‌رود» عدد می‌گذارد.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. A Pragmatic Philosophy](01-a-pragmatic-philosophy.md) (Topic 7 applies DRY and ETC to writing), [3. The Basic Tools](03-the-basic-tools.md) (plain text and the engineering daybook used for ETC instincts), [5. Bend, or Break](05-bend-or-break.md) (decoupling and the Law of Demeter, configuration), [7. While You Are Coding](07-while-you-are-coding.md) (refactoring, algorithm speed estimates), [8. Before the Project](08-before-the-project.md) (requirements and the glossary), [9. Pragmatic Projects](09-pragmatic-projects.md) (tracer bullets for teams).
-- **Run it:** [Duplication drift](../lab/02-duplication-drift/README.md) — simulates a fact copied into several places and changed over time by developers who sometimes forget a copy, and counts how often the copies contradict each other.
+- **فصل‌های مرتبط:** [فصل ۱: فلسفه‌ی pragmatic](01-a-pragmatic-philosophy.md) که موضوع ۷ آن DRY و ETC را روی نوشتن اعمال می‌کند، [فصل ۳: ابزارهای پایه](03-the-basic-tools.md) که متن ساده و دفتر روزنگار مهندسی را برای شهود ETC دارد، [فصل ۵: خم شو، یا بشکن](05-bend-or-break.md) که decoupling و قانون Demeter و تنظیم را دارد، [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که refactoring و تخمین سرعت الگوریتم را دارد، [فصل ۸: پیش از پروژه](08-before-the-project.md) که نیازمندی‌ها و واژه‌نامه را دارد، و [فصل ۹: پروژه‌های pragmatic](09-pragmatic-projects.md) که گلوله‌ی tracer را برای تیم‌ها دارد.
+- **Run it:** [رانش تکرار](../lab/02-duplication-drift/README.md)؛ شبیه‌سازی می‌کند که واقعیتی در چند جا کپی شده و در طول زمان توسط developerهایی عوض می‌شود که گاهی یک نسخه را یادشان می‌رود، و می‌شمارد نسخه‌ها چند وقت یک‌بار با هم تناقض پیدا می‌کنند.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **What do the authors claim about every design principle they know?**
+1. **نویسنده‌ها درباره‌ی هر اصل طراحی‌ای که می‌شناسند چه ادعایی دارند؟**
 
-   *Answer:* It's a special case of ETC, Easier to Change (pp. 75–76).
+   *Answer:* حالتی ویژه از ETC است، یعنی آسان‌تر برای تغییر (pp. 75–76).
 
-2. **`validate_age` and `validate_quantity` have identical bodies. Is that a DRY violation?**
-   - [ ] Yes: extract a shared function
-   - [x] No: the code is the same, but the knowledge is different
+2. **توابع `validate_age` و `validate_quantity` بدنه‌ی یکسانی دارند. این نقض DRY است؟**
+   - [ ] بله: یک تابع مشترک بیرون بکشید
+   - [x] نه: کد یکی است ولی دانش دیگری است
 
-   *Answer:* They validate two things that happen to share rules; that's coincidence, not duplication (pp. 84–85).
+   *Answer:* دو چیز را اعتبارسنجی می‌کنند که اتفاقاً قاعده‌هایشان یکی است؛ این تصادف است و نه تکرار (pp. 84–85).
 
-3. **A `Line` stores its start, its end and its length. What's wrong, and when is it acceptable?**
+3. **یک `Line` نقطه‌ی شروع و پایان و طولش را ذخیره می‌کند. اشکال چیست و کِی پذیرفتنی است؟**
 
-   *Answer:* The length duplicates knowledge in the two points. It's acceptable as a performance cache only if the violation is kept private to the class (pp. 86–87).
+   *Answer:* مقدار طول، دانشی را تکرار می‌کند که در آن دو نقطه هست. فقط به‌عنوان cache برای performance پذیرفتنی است، و فقط اگر نقض، خصوصیِ کلاس نگه داشته شود (pp. 86–87).
 
-4. **What is the quick test for an orthogonal design?**
+4. **سنجه‌ی تند طراحی orthogonal چیست؟**
 
-   *Answer:* If the requirements behind one function change dramatically, how many modules are affected? Ideally one (p. 96).
+   *Answer:* اگر نیازمندی‌های پشت یک تابع خیلی عوض شوند، چند ماژول اثر می‌گیرند؟ در حالت آرمانی، یکی (p. 96).
 
-5. **How does tracer code differ from a prototype?**
+5. **کد tracer با prototype چه تفاوتی دارد؟**
 
-   *Answer:* Tracer code is kept: lean but complete, part of the final system's skeleton. Prototype code is disposable and explores one aspect (pp. 113, 117).
+   *Answer:* کد tracer نگه داشته می‌شود: لاغر ولی کامل و بخشی از اسکلت سیستم نهایی. کد prototype دور‌انداختنی است و یک جنبه را می‌کاود (pp. 113, 117).
 
-6. **Someone gets a 25-week estimate. How should it be quoted?**
+6. **کسی تخمین ۲۵ هفته‌ای می‌گیرد. چطور باید بیانش کرد؟**
 
-   *Answer:* As about six months: units should reflect the intended accuracy (pp. 134–135).
+   *Answer:* به‌عنوان حدود شش ماه: واحدها باید دقت موردنظر را بازتاب بدهند (pp. 134–135).
 
-7. **Why are the authors wary of PERT charts?**
+7. **چرا نویسنده‌ها به نمودارهای PERT بدگمان‌اند؟**
 
-   *Answer:* People trust the formula and the wall-sized chart, but on an unfamiliar project the inputs are guesses (p. 139).
+   *Answer:* مردم به فرمول و نمودار دیوار‌اندازه اعتماد می‌کنند، ولی در پروژه‌ای ناآشنا، ورودی‌ها حدس‌اند (p. 139).
 
-8. **What should you say when asked for an estimate?**
+8. **وقتی تخمین خواستند چه باید گفت؟**
 
-   *Answer:* "I'll get back to you" (p. 141).
+   *Answer:* «برمی‌گردم خدمتتان» (p. 141).

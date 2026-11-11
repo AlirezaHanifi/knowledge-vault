@@ -3,330 +3,344 @@ book: the-pragmatic-programmer
 chapter: 7
 title: "While You Are Coding"
 pages: "324–402"
+translated_title: "وقتی کد می‌زنید"
+lang: fa
 ---
 
-# 7. While You Are Coding
+# فصل ۷: وقتی کد می‌زنید
 
-[← 6. Concurrency](06-concurrency.md) · [Book](../README.md) · [8. Before the Project →](08-before-the-project.md)
+[فصل ۶: concurrency →](06-concurrency.md) · [کتاب](../README.md) · [فصل ۸: پیش از پروژه ←](08-before-the-project.md)
 
-## Summary
+## خلاصه
 
-The authors say the idea that coding is mechanical transcription of a design is the single biggest reason projects fail. Coding is a stream of decisions that need judgment (p. 324). The chapter covers eight topics:
+نویسنده‌ها می‌گویند این ایده که کد زدن رونویسی مکانیکی یک طراحی است، تنها بزرگ‌ترین دلیل شکست پروژه‌هاست. کد زدن جریانی از تصمیم‌هاست که قضاوت می‌خواهند (p. 324). این فصل هشت موضوع را می‌پوشاند:
 
-- Listening to your instincts (Topic 37).
-- Programming deliberately rather than by coincidence (Topic 38).
-- Estimating algorithm speed with Big-O (Topic 39).
-- Refactoring continuously (Topic 40).
-- Testing as feedback rather than bug-hunting (Topic 41).
-- Letting the computer test your assumptions with properties (Topic 42).
-- Basic security (Topic 43).
-- Naming (Topic 44).
+- گوش دادن به شهودتان (موضوع ۳۷).
+- آگاهانه برنامه نوشتن و نه تصادفی (موضوع ۳۸).
+- تخمین سرعت الگوریتم با Big-O (موضوع ۳۹).
+- عمل refactor کردن پیوسته (موضوع ۴۰).
+- تست به‌عنوان بازخورد و نه شکار باگ (موضوع ۴۱).
+- گذاشتن این که کامپیوتر فرض‌هایتان را با property تست کند (موضوع ۴۲).
+- امنیت پایه (موضوع ۴۳).
+- نام‌گذاری (موضوع ۴۴).
 
-Like driving, coding can be largely routine, but keeping your wits about you can prevent a disaster (p. 326).
+مثل رانندگی، کد زدن می‌تواند بیشترش روتین باشد، ولی حواس جمع نگه داشتن می‌تواند جلوی یک فاجعه را بگیرد (p. 326).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Listen to your inner lizard.** Reluctance, fear of the blank page or "walking uphill in mud" are feedback. Step away, externalize the problem, or tell yourself you're only prototyping (Tip 61, pp. 327–333).
-- **Don't program by coincidence.** Code that works for reasons you don't know will fail for reasons you don't know. Rely only on documented behaviour, document assumptions and test them (Tip 62, pp. 334–340).
-- **Estimate the order of your algorithms and test your estimates:** loops are O(n), nested loops O(n²), halving O(lg n), permutations factorial. Plot three or four sizes (Tips 63–64, pp. 343–351).
-- **Refactor early, refactor often.** Refactoring is disciplined restructuring that doesn't change external behaviour, done in small, tested steps, like weeding a garden (Tip 65, pp. 354–360).
-- **Testing is not about finding bugs.** A test is the first user of your code: thinking about it reduces coupling and clarifies the API. Build end-to-end, design to test, and test your software or your users will (Tips 66–70, pp. 361–374).
-- **Use property-based tests to validate your assumptions:** generated inputs check invariants that you and your code might wrongly share (Tip 71, pp. 375–383).
-- **Keep it simple and minimize attack surfaces,** use least privilege and secure defaults, encrypt secrets, apply patches quickly, and never roll your own crypto (Tips 72–73, pp. 385–394).
-- **Name well; rename when needed.** Names should reflect the role a thing plays; misleading names are worse than meaningless ones (Tip 74, pp. 395–401).
+- **به مارمولک درونتان گوش بدهید.** بی‌میلی، ترس از صفحه‌ی سفید، یا حس «سربالایی رفتن در گِل» بازخوردند. فاصله بگیرید، مسئله را بیرونی کنید، یا به خودتان بگویید فقط prototype می‌سازید (tip ۶۱، صص. ۳۲۷–۳۳۳).
+- **تصادفی برنامه ننویسید.** کدی که به دلیل‌هایی که نمی‌دانید کار می‌کند، به دلیل‌هایی که نمی‌دانید شکست می‌خورد. فقط به رفتار مستند‌شده تکیه کنید، فرض‌ها را مستند کنید و تستشان (tip ۶۲، صص. ۳۳۴–۳۴۰).
+- **مرتبه‌ی الگوریتم‌هایتان را تخمین بزنید و تخمین‌ها را تست کنید:** حلقه O(n) است، حلقه‌ی تو‌در‌تو O(n²)، نصف کردن O(lg n)، و جایگشت فاکتوریل. سه یا چهار اندازه را رسم کنید (tipهای ۶۳ و ۶۴، صص. ۳۴۳–۳۵۱).
+- **زود refactor کنید، زیاد refactor کنید.** کار refactoring بازساختاردهی منظم است که رفتار بیرونی را عوض نمی‌کند، در قدم‌های کوچک و تست‌شده، مثل علف‌چینی در باغ (tip ۶۵، صص. ۳۵۴–۳۶۰).
+- **تست درباره‌ی پیدا کردن باگ نیست.** یک تست اولین کاربر کد شماست: فکر کردن به آن coupling را کم می‌کند و API را روشن. سر‌تا‌سری بسازید، برای تست‌شدنی بودن طراحی کنید، و نرم‌افزارتان را تست کنید وگرنه کاربرها تستش می‌کنند (tipهای ۶۶ تا ۷۰، صص. ۳۶۱–۳۷۴).
+- **برای اعتبارسنجی فرض‌هایتان از تست property‌محور استفاده کنید:** ورودی‌های ساخته‌شده، ناوردایی را بررسی می‌کنند که شما و کدتان ممکن است به‌غلط شریکش باشید (tip ۷۱، صص. ۳۷۵–۳۸۳).
+- **ساده نگهش دارید و سطح حمله را کمینه کنید،** کمینه‌ی اختیار و پیش‌فرض‌های امن به کار ببرید، secretها را رمز کنید، patchها را تند اعمال کنید، و هیچ‌وقت crypto خودتان را نسازید (tipهای ۷۲ و ۷۳، صص. ۳۸۵–۳۹۴).
+- **خوب نام بگذارید؛ و وقتی لازم شد نام را عوض کنید.** نام باید نقشی را بازتاب بدهد که یک چیز بازی می‌کند؛ نام گمراه‌کننده از نام بی‌معنا بدتر است (tip ۷۴، صص. ۳۹۵–۴۰۱).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 37. Listen to Your Lizard Brain — p. 327
-- Topic 38. Programming by Coincidence — p. 334
-- Topic 39. Algorithm Speed — p. 343
-- Topic 40. Refactoring — p. 354
-- Topic 41. Test to Code — p. 361
-- Topic 42. Property-Based Testing — p. 375
-- Topic 43. Stay Safe Out There — p. 385
-- Topic 44. Naming Things — p. 395
+- موضوع ۳۷. به مغز مارمولکت گوش بده — ص. ۳۲۷
+- موضوع ۳۸. برنامه‌نویسی تصادفی — ص. ۳۳۴
+- موضوع ۳۹. سرعت الگوریتم — ص. ۳۴۳
+- موضوع ۴۰. کار refactoring — ص. ۳۵۴
+- موضوع ۴۱. از تست به کد — ص. ۳۶۱
+- موضوع ۴۲. تست property‌محور — ص. ۳۷۵
+- موضوع ۴۳. آن بیرون در امان بمان — ص. ۳۸۵
+- موضوع ۴۴. نام گذاشتن روی چیزها — ص. ۳۹۵
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 61 | Listen to Your Inner Lizard | 330 |
-| 62 | Don’t Program by Coincidence | 339 |
-| 63 | Estimate the Order of Your Algorithms | 350 |
-| 64 | Test Your Estimates | 350 |
-| 65 | Refactor Early, Refactor Often | 358 |
-| 66 | Testing Is Not About Finding Bugs | 361 |
-| 67 | A Test Is the First User of Your Code | 363 |
-| 68 | Build End-to-End, Not Top-Down or Bottom Up | 366 |
-| 69 | Design to Test | 370 |
-| 70 | Test Your Software, or Your Users Will | 373 |
-| 71 | Use Property-Based Tests to Validate Your Assumptions | 376 |
-| 72 | Keep It Simple and Minimize Attack Surfaces | 389 |
-| 73 | Apply Security Patches Quickly | 392 |
-| 74 | Name Well; Rename When Needed | 400 |
+| ۶۱ | به مارمولک درونت گوش بده | ۳۳۰ |
+| ۶۲ | تصادفی برنامه ننویس | ۳۳۹ |
+| ۶۳ | مرتبه‌ی الگوریتم‌هایت را تخمین بزن | ۳۵۰ |
+| ۶۴ | تخمین‌هایت را تست کن | ۳۵۰ |
+| ۶۵ | زود refactor کن، زیاد refactor کن | ۳۵۸ |
+| ۶۶ | تست درباره‌ی پیدا کردن باگ نیست | ۳۶۱ |
+| ۶۷ | یک تست اولین کاربر کد شماست | ۳۶۳ |
+| ۶۸ | سر‌تا‌سری بساز، نه بالا‌به‌پایین و نه پایین‌به‌بالا | ۳۶۶ |
+| ۶۹ | برای تست‌شدنی بودن طراحی کن | ۳۷۰ |
+| ۷۰ | نرم‌افزارت را تست کن، وگرنه کاربرهایت تستش می‌کنند | ۳۷۳ |
+| ۷۱ | برای اعتبارسنجی فرض‌هایت از تست property‌محور استفاده کن | ۳۷۶ |
+| ۷۲ | ساده نگهش دار و سطح حمله را کمینه کن | ۳۸۹ |
+| ۷۳ | patchهای امنیتی را تند اعمال کن | ۳۹۲ |
+| ۷۴ | خوب نام بگذار؛ و وقتی لازم شد نام را عوض کن | ۴۰۰ |
 
-### Topic 37. Listen to Your Lizard Brain
+### موضوع ۳۷. به مغز مارمولکت گوش بده
 
-The topic opens with Gavin de Becker's *The Gift of Fear*: people who are attacked often felt uneasy beforehand and told themselves they were being silly (p. 327). Instincts are patterns packed into the nonconscious brain, some learned by repetition. With experience you lay down tacit knowledge, but instincts have no words: you feel nervous, queasy, or that a job is too much work (pp. 327–328).
+موضوع با کتاب *The Gift of Fear* از Gavin de Becker باز می‌شود: کسانی که مورد حمله قرار می‌گیرند اغلب از قبل حس ناخوشی داشتند و به خودشان گفتند دارند احمقانه فکر می‌کنند (p. 327). شهود، الگوهایی بسته‌بندی‌شده در مغز ناهوشیار است، که بعضی‌شان با تکرار یاد گرفته شده‌اند. با تجربه دانش ضمنی می‌گذارید، ولی شهود کلمه ندارد: حس عصبی بودن یا دل‌آشوبی می‌کنید، یا این که کاری زیادی زحمت دارد (pp. 327–328).
 
-| Signal | What it may mean (pp. 328–329) |
+| نشانه | ممکن است یعنی چه (pp. 328–329) |
 |---|---|
-| **Fear of the blank page** | A doubt lurking just below perception, which deserves time to crystallize. Or simply fear of making a mistake (imposter syndrome) |
-| **Fighting yourself** | Code that feels like walking uphill in mud: the structure may be wrong, or you may be solving the wrong problem |
+| **ترس از صفحه‌ی سفید** | شکی که همان زیر ادراک کمین کرده و لایق وقت است تا شکل بگیرد. یا به‌سادگی ترس از خطا کردن، یعنی سندروم تقلب |
+| **جنگیدن با خودتان** | کدی که حس سربالایی رفتن در گِل می‌دهد: ساختار ممکن است غلط باشد، یا شما ممکن است مسئله‌ی غلط را حل کنید |
 
-**How to talk lizard** (Tip 61, pp. 330–332):
+**چطور مارمولکی حرف بزنیم** (tip ۶۱، صص. ۳۳۰–۳۳۲):
 
-1. Stop. Do something mindless away from the keyboard, or sleep on it.
-2. Externalize: doodle, or explain it to a coworker (preferably a non-programmer) or a rubber duck.
-3. Still stuck? Prototype. Put an "I'm prototyping" sticky note on your screen, remember prototypes are meant to fail and are thrown away, write a one-sentence comment on what you want to learn, and start coding. When the nervousness gives way to urgency, delete the prototype and write the real code.
+۱. بایستید. دور از keyboard کاری بی‌فکر بکنید، یا رویش بخوابید.
+۲. بیرونی کنید: خط‌خطی کنید، یا برای همکاری توضیحش بدهید، ترجیحاً غیر‌برنامه‌نویس، یا برای یک اردک پلاستیکی.
+۳. باز گیر کرده‌اید؟ prototype بسازید. یک کاغذ‌چسب‌دار «دارم prototype می‌سازم» روی صفحه بزنید، یادتان باشد prototypeها برای شکست خوردن‌اند و دور انداخته می‌شوند، یک comment یک‌جمله‌ای بنویسید که چه می‌خواهید یاد بگیرید، و کد زدن را شروع کنید. وقتی عصبی بودن جایش را به عجله داد، prototype را حذف کنید و کد واقعی را بنویسید.
 
-The same applies to reading other people's code (note what seems strange and look for the patterns that drove it), and to designs or requirements that feel wrong (pp. 332–333).
+همین برای خواندن کد دیگران هم برقرار است، یعنی آن چیزی که عجیب به نظر می‌آید را یادداشت کنید و دنبال الگوهایی بگردید که رانده‌اندش، و همچنین برای طراحی یا نیازمندی‌هایی که غلط حس می‌شوند (pp. 332–333).
 
-### Topic 38. Programming by Coincidence
+### موضوع ۳۸. برنامه‌نویسی تصادفی
 
-A soldier probes a field for mines, finds none, concludes it's safe, and is blown up; his early probes were merely lucky (p. 334). Fred codes until it seems to work; when it stops working he can't fix it, because he never knew why it worked (pp. 334–335).
+سربازی زمینی را برای مین می‌کاود، هیچ پیدا نمی‌کند، نتیجه می‌گیرد امن است، و منفجر می‌شود؛ کاوش‌های اولش فقط خوش‌شانسی بود (p. 334). Fred کد می‌زند تا به نظر کار کند؛ و وقتی از کار می‌افتد نمی‌تواند درستش کند، چون هیچ‌وقت نمی‌دانست چرا کار می‌کرد (pp. 334–335).
 
-| Kind of coincidence | Example (pp. 335–339) |
+| گونه‌ی تصادف | نمونه (pp. 335–339) |
 |---|---|
-| **Accidents of implementation** | Relying on undocumented error or boundary behaviour. Fred calls `paint(); invalidate(); validate(); revalidate(); repaint(); paintImmediately();` until the screen draws, and never removes the spurious calls |
-| **Close enough isn't** | Field units set to local time gave results off by one. Developers added and subtracted 1 until the codebase was a mass of ±1s; the project was scrapped (footnote: "UTC is there for a reason") |
-| **Phantom patterns** | Russian leaders alternating bald and hairy for nearly 200 years; an intermittent error every 1,000 requests may be a race, or a plain bug. Don't assume it, prove it |
-| **Accidents of context** | Relying on a GUI being present, English-speaking users, a writable current directory, accurate server time, copied "cargo cult" code |
-| **Implicit assumptions** | Undocumented and often conflicting between developers; the bane of all projects |
+| **تصادف‌های پیاده‌سازی** | تکیه کردن به رفتار خطا یا مرزی بی‌مستند. Fred فراخوانی‌های `paint(); invalidate(); validate(); revalidate(); repaint(); paintImmediately();` را می‌زند تا صفحه کشیده شود، و هیچ‌وقت فراخوانی‌های بی‌ربط را برنمی‌دارد |
+| **نزدیک به کافی، کافی نیست** | واحدهای میدانی که به زمان محلی تنظیم شده بودند نتیجه‌ای با یک واحد اختلاف می‌دادند. developerها یک را اضافه و کم کردند تا codebase انباری از ۱± شد؛ پروژه دور ریخته شد، با پانویس «UTC دلیلی دارد که هست» |
+| **الگوهای خیالی** | رهبرهای روسیه نزدیک دویست سال یکی‌در‌میان کم‌مو و پرمو بودند؛ خطایی گاه‌به‌گاه در هر هزار درخواست می‌تواند مسابقه باشد، یا یک باگ ساده. فرضش نکنید، ثابتش کنید |
+| **تصادف‌های زمینه** | تکیه کردن به حاضر بودن یک GUI، کاربرهای انگلیسی‌زبان، پوشه‌ی فعلی نوشتنی، زمان دقیق سرور، و کد کپی‌شده‌ی «کارگو کالت» |
+| **فرض‌های ضمنی** | بی‌مستند و اغلب متناقض بین developerها؛ بلای همه‌ی پروژه‌ها |
 
-Reasons not to leave well enough alone: it may only look like it works, the boundary condition may be an accident (another screen resolution, more cores), undocumented behaviour may change in the next release, and extra calls are slower and add bugs (p. 336). For routines you call, **rely only on documented behaviour**, or document your assumption (p. 337). **Tip 62, Don't Program by Coincidence** (p. 339).
+دلیل‌هایی که نگذارید کدی که اتفاقی خوب کار می‌کند به حال خودش بماند: ممکن است فقط به نظر کار کند، شرط مرزی ممکن است تصادفی باشد، مثل تفکیک‌پذیری دیگر صفحه یا هسته‌های بیشتر، رفتار بی‌مستند ممکن است در release بعدی عوض شود، و فراخوانی اضافه کندتر است و باگ اضافه می‌کند (p. 336). برای routineهایی که صدا می‌زنید، **فقط به رفتار مستند‌شده تکیه کنید**، یا فرضتان را مستند کنید (p. 337). **tip ۶۲، تصادفی برنامه ننویس** (p. 339).
 
-**How to program deliberately** (pp. 339–340):
+**چطور آگاهانه برنامه بنویسیم** (pp. 339–340):
 
-- Always be aware of what you're doing; explain it to a junior.
-- Don't code in the dark. Proceed from a plan.
-- Rely only on reliable things. Document assumptions (DBC) and test them with assertions.
-- Prioritize the hard, important parts.
-- Don't be a slave to history: be ready to refactor.
+- همیشه از کاری که می‌کنید آگاه باشید؛ برای یک نیروی junior توضیحش بدهید.
+- در تاریکی کد نزنید. از روی یک نقشه جلو بروید.
+- فقط به چیزهای قابل‌اعتماد تکیه کنید. فرض‌ها را مستند کنید، یعنی DBC، و با assertion تستشان.
+- بخش‌های سخت و مهم را اولویت بدهید.
+- برده‌ی تاریخ نباشید: آماده‌ی refactor باشید.
 
-### Topic 39. Algorithm Speed
+### موضوع ۳۹. سرعت الگوریتم
 
-Pragmatic Programmers estimate the resources algorithms use almost daily: if it runs with 1,000 records, how will it scale to 1,000,000 (p. 343)? **Big-O** notation, O(), gives an upper bound on how a resource grows with input size. It drops low-order terms and constant factors, so one algorithm may be 1,000 times faster than another with the same O(), and it never gives actual times (pp. 344–345).
+برنامه‌نویس pragmatic تقریباً هر روز منابعی را که الگوریتم‌ها می‌خورند تخمین می‌زند: اگر با هزار رکورد اجرا می‌شود، با یک میلیون چطور مقیاس می‌گیرد (p. 343)؟ نماد **Big-O**، یعنی O()، کرانی بالا می‌دهد که منبع چطور با اندازه‌ی ورودی رشد می‌کند. جمله‌های مرتبه‌پایین و ضریب‌های ثابت را می‌اندازد، پس یک الگوریتم می‌تواند هزار برابر از دیگری با همان O() تندتر باشد، و هیچ‌وقت زمان واقعی نمی‌دهد (pp. 344–345).
 
-| Order | Example in the book (pp. 345–346) |
+| مرتبه | نمونه در کتاب (pp. 345–346) |
 |---|---|
-| O(1) | Access element in array, simple statements |
-| O(lg n) | Binary search; the base doesn't matter |
-| O(n) | Sequential search |
-| O(n lg n) | Average quicksort, heapsort |
-| O(n²) | Selection and insertion sorts |
-| O(n³) | Multiplying two matrices |
-| O(Cⁿ) | Traveling salesman, set partitioning |
+| O(1) | دسترسی به عنصر یک array، دستورهای ساده |
+| O(lg n) | جست‌و‌جوی دودویی؛ پایه مهم نیست |
+| O(n) | جست‌و‌جوی پشت‌سرهم |
+| O(n lg n) | میانگین quicksort و heapsort |
+| O(n²) | مرتب‌سازی انتخابی و درجی |
+| O(n³) | ضرب دو ماتریس |
+| O(Cⁿ) | فروشنده‌ی دوره‌گرد، partitioning مجموعه |
 
-The book's worked example (p. 345): a routine takes one second for 100 records; for 1,000 records it takes:
+نمونه‌ی حل‌شده‌ی کتاب (p. 345): یک routine برای صد رکورد یک ثانیه می‌برد؛ و برای هزار رکورد این‌قدر:
 
-- 1 s if O(1)
-- about 3 s if O(lg n)
-- 10 s if O(n)
-- about 33 s if O(n lg n)
-- 100 s if O(n²)
+- یک ثانیه اگر O(1) باشد
+- حدود سه ثانیه اگر O(lg n) باشد
+- ده ثانیه اگر O(n) باشد
+- حدود ۳۳ ثانیه اگر O(n lg n) باشد
+- صد ثانیه اگر O(n²) باشد
 
-An exponential routine would take so long that you're told to make coffee.
+یک routine نمایی آن‌قدر طول می‌کشید که به شما گفته می‌شود بروید قهوه درست کنید.
 
-> **Vault note:** Scaling the formulas exactly (time × f(1000)/f(100)) gives 1.5 s for O(lg n) and 15 s for O(n lg n). The book's "about three" and "some 33" correspond to multiplying by lg 10 ≈ 3.3, the logarithm of the tenfold growth. Either way the ordering is the point. The widget below shows both.
+> **Vault note:** مقیاس دادن دقیق فرمول‌ها، یعنی زمان ضرب در f(1000) تقسیم بر f(100)، برای O(lg n) مقدار ۱٫۵ ثانیه و برای O(n lg n) مقدار ۱۵ ثانیه می‌دهد. «حدود سه» و «حدود ۳۳» کتاب به ضرب در lg 10 که تقریباً ۳٫۳ است می‌خورند، یعنی لگاریتم رشد ده‌برابری. هر طور که باشد، نکته همان ترتیب است. ویجت پایین هر دو را نشان می‌دهد.
 
-**Common sense estimation** (pp. 348–349):
+**تخمین با عقل سلیم** (pp. 348–349):
 
-- **Simple loops** are O(n): exhaustive search, maximum, checksum.
-- **Nested loops** are O(m × n), for example bubble sort.
-- **Binary chop** is O(lg n): binary search, tree traversal, first set bit.
-- **Divide and conquer** is O(n lg n): quicksort, which is technically O(n²) on sorted input.
-- **Combinatoric** algorithms are factorial: five elements to six takes six times longer, and to seven 42 times longer. Heuristics help.
+- **حلقه‌های ساده** O(n)اند: جست‌و‌جوی جامع، بیشینه، checksum.
+- **حلقه‌های تو‌در‌تو** O(m × n)اند، مثلاً مرتب‌سازی حبابی.
+- **نصف کردن دودویی** O(lg n) است: جست‌و‌جوی دودویی، پیمایش درخت، اولین بیت یک.
+- **تقسیم و حل** O(n lg n) است: quicksort، که فنی روی ورودی مرتب O(n²) است.
+- الگوریتم‌های **ترکیبیاتی** فاکتوریل‌اند: از پنج عنصر به شش، شش برابر بیشتر طول می‌کشد و به هفت، ۴۲ برابر. heuristic کمک می‌کند.
 
-**In practice** (pp. 349–351):
+**در عمل** (pp. 349–351):
 
-- **Tip 63, Estimate the Order of Your Algorithms:** ask how large the loop bounds can get, and try to turn O(n²) into O(n lg n) with divide and conquer.
-- **Tip 64, Test Your Estimates:** run it at varying sizes and plot; three or four points show the curve's shape. Use profilers to count steps. Remember thrashing and sorted input. The only timing that counts is production with real data.
-- **Best isn't always best:** a simple insertion sort is as good as quicksort for small inputs; beware high setup costs and premature optimization.
+- **نکته‌ی ۶۳، مرتبه‌ی الگوریتم‌هایت را تخمین بزن:** بپرسید کران‌های حلقه چقدر بزرگ می‌شوند، و بکوشید با تقسیم و حل، O(n²) را به O(n lg n) تبدیل کنید.
+- **نکته‌ی ۶۴، تخمین‌هایت را تست کن:** با اندازه‌های مختلف اجرا و رسم کنید؛ سه یا چهار نقطه شکل خم را نشان می‌دهد. از profiler برای شمردن قدم‌ها استفاده کنید. thrashing و ورودی مرتب را یادتان باشد. تنها زمان‌سنجی‌ای که به حساب می‌آید تولید با داده‌ی واقعی است.
+- **بهترین همیشه بهترین نیست:** یک مرتب‌سازی درجی ساده برای ورودی کوچک به‌خوبی quicksort است؛ از هزینه‌ی راه‌اندازی بالا و بهینه‌سازی نابه‌هنگام برحذر باشید.
 
-> **Try it:** [How does it scale?](../widgets/07-big-o-scaling.html) — set a baseline time and size, grow the input, and compare the seven orders from the book's table, with the book's own one-second example as a preset.
+> **Try it:** [چطور مقیاس می‌گیرد؟](../widgets/07-big-o-scaling.html)؛ یک زمان و اندازه‌ی مبنا بگذارید، ورودی را بزرگ کنید، و هفت مرتبه‌ی جدول کتاب را مقایسه، با نمونه‌ی یک‌ثانیه‌ای خود کتاب به‌عنوان حالت آماده.
 
-### Topic 40. Refactoring
+### موضوع ۴۰. کار refactoring
 
-Software is less like building construction (architect, contractors, tenants) and more like **gardening**: things are planted, thrive or become compost, and get split, pruned and moved (pp. 354–355). Martin Fowler defines **refactoring** as a "disciplined technique for restructuring an existing body of code, altering its internal structure without changing its external behavior" (p. 355). It is a day-to-day, low-risk activity, like weeding, and it needs good automated unit tests to guarantee behaviour hasn't changed (p. 356).
+نرم‌افزار کمتر شبیه ساخت‌و‌ساز ساختمان است، یعنی معمار و پیمانکار و مستأجر، و بیشتر شبیه **باغبانی**: چیزها کاشته می‌شوند، رشد می‌کنند یا کمپوست می‌شوند، و شکافته و هرس و جابه‌جا می‌شوند (pp. 354–355). Martin Fowler کار **refactoring** را «تکنیکی منظم برای بازساختاردهی پیکره‌ای موجود از کد، با تغییر ساختار درونی‌اش بی تغییر رفتار بیرونی‌اش» تعریف می‌کند (p. 355). این کاری روزانه و کم‌خطر است، مثل علف‌چینی، و به unit testهای خودکار خوب نیاز دارد تا تضمین کنند رفتار عوض نشده (p. 356).
 
-**When to refactor** (pp. 356–357): when you've learned something. Triggers: duplication (DRY), nonorthogonal design, outdated knowledge, usage, performance, and **the tests pass** (tidy up right after the test goes green).
+**کِی refactor کنیم** (pp. 356–357): وقتی چیزی یاد گرفته‌اید. محرک‌ها: تکرار یعنی DRY، طراحی غیر‌orthogonal، دانش از‌رده‌خارج، شکل استفاده، performance، و **قبول شدن تست‌ها**، یعنی همین که تست سبز شد مرتب کنید.
 
-**Real-world complications** (pp. 357–358): time pressure is the usual excuse, but code needing refactoring is like a growth, cheaper to remove while small. **Tip 65, Refactor Early, Refactor Often.** If it really takes "a week," it's a rewrite: schedule it and tell users of the code.
+**پیچیدگی‌های دنیای واقعی** (pp. 357–358): فشار زمان بهانه‌ی معمول است، ولی کدی که refactoring می‌خواهد مثل یک غده است، که برداشتنش وقتی کوچک است ارزان‌تر. **tip ۶۵، زود refactor کن، زیاد refactor کن.** اگر واقعاً «یک هفته» می‌برد، بازنویسی است: زمان‌بندی‌اش کنید و به کاربرهای آن کد بگویید.
 
-**How to refactor**, from Fowler (p. 359):
+**چطور refactor کنیم**، از Fowler (p. 359):
 
-1. Don't refactor and add functionality at the same time.
-2. Have good tests first and run them often.
-3. Take short, deliberate steps, testing after each.
+۱. عمل refactor و اضافه کردن قابلیت را با هم نکنید.
+۲. اول تست‌های خوب داشته باشید و زیاد اجراشان کنید.
+۳. قدم‌های کوتاه و آگاهانه بردارید و بعد از هر کدام تست کنید.
 
-IDEs now automate renames and extractions. If you must change interfaces, deliberately break the build so old clients fail to compile (pp. 359–360).
+همه‌ی interfaceهای IDE حالا تغییر نام و بیرون کشیدن را خودکار می‌کنند. اگر باید interface را عوض کنید، آگاهانه build را بشکنید تا clientهای قدیمی compile نشوند (pp. 359–360).
 
-### Topic 41. Test to Code
+### موضوع ۴۱. از تست به کد
 
-**Tip 66, Testing Is Not About Finding Bugs:** the major benefits come when you think about and write the tests, not when you run them (p. 361).
+**نکته‌ی ۶۶، تست درباره‌ی پیدا کردن باگ نیست:** سود اصلی وقتی می‌آید که به تست‌ها فکر می‌کنید و می‌نویسیدشان، و نه وقتی اجراشان می‌کنید (p. 361).
 
-**Thinking about tests** (pp. 362–363). Writing `return_avid_viewers` (people who watch more than 10 videos a week), thinking about how to test it leads to two discoveries before any code is written:
+**فکر کردن به تست‌ها** (pp. 362–363). در نوشتن `return_avid_viewers`، یعنی کسانی که هفته‌ای بیشتر از ده ویدئو می‌بینند، فکر کردن به شکل تستش پیش از نوشتن هر کدی به دو کشف می‌رسد:
 
-- Pass the database in rather than using a global: `return_avid_users(db)`.
-- The schema has both `opened_video` and `completed_video`, and the requirement is ambiguous, so pass the qualifying field name in as well.
+- دیتابیس را به آن بدهید و نه از سراسری استفاده کنید: `return_avid_users(db)`.
+- ساختار schema هم `opened_video` دارد و هم `completed_video`، و نیازمندی مبهم است، پس نام فیلد شرط را هم به آن بدهید.
 
-**Tip 67, A Test Is the First User of Your Code** (p. 363): testable code is less coupled, and you must understand something before you can test it (pp. 363–364).
+**نکته‌ی ۶۷، یک تست اولین کاربر کد شماست** (p. 363): کد تست‌شدنی کمتر جفت است، و برای تست کردن چیزی باید اول بفهمیدش (pp. 363–364).
 
-**Test-driven development** (pp. 364–366):
+**توسعه‌ی تست‌محور** (pp. 364–366):
 
-1. Pick a small piece of functionality.
-2. Write a test that will pass once it exists.
-3. Run all tests; only the new one fails.
-4. Write the least code to pass.
-5. Refactor.
+۱. تکه‌ی کوچکی از قابلیت را انتخاب کنید.
+۲. تستی بنویسید که همین که آن تکه باشد قبول می‌شود.
+۳. همه‌ی تست‌ها را اجرا کنید؛ فقط تست تازه شکست می‌خورد.
+۴. کمترین کد را برای قبول شدن بنویسید.
+۵. کار refactoring را بکنید.
 
-The cycle takes minutes and helps beginners. But people become slaves to it: chasing 100% coverage, writing redundant tests, building bottom-up. **Tip 68, Build End-to-End, Not Top-Down or Bottom Up** (sidebar, pp. 365–366): we don't know what we're doing when we start, so build small end-to-end slices.
+این چرخه چند دقیقه می‌برد و به تازه‌کارها کمک می‌کند. ولی آدم‌ها برده‌اش می‌شوند: دنبال صد درصد پوشش، نوشتن تست تکراری، و ساختن پایین‌به‌بالا. **tip ۶۸، سر‌تا‌سری بساز، نه بالا‌به‌پایین و نه پایین‌به‌بالا** (کادر کناری، صص. ۳۶۵–۳۶۶): وقتی شروع می‌کنیم نمی‌دانیم چه می‌کنیم، پس برش‌های کوچک سر‌تا‌سری بسازید.
 
-**You need to know where you're going** (pp. 366–367): Ron Jeffries' 2006 TDD Sudoku series refined the board representation over five posts and was abandoned. Peter Norvig started from constraint propagation and handled representation in a dozen lines.
+**باید بدانید کجا می‌روید** (pp. 366–367): مجموعه‌ی TDD سودوکوی Ron Jeffries در سال ۲۰۰۶ نمایش تخته را در پنج پست دقیق‌تر کرد و بعد رها شد. Peter Norvig از انتشار قید شروع کرد و نمایش را در دوازده خط اداره کرد.
 
-**Unit testing against contract** (pp. 367–370). Chips have built-in self tests; software needs testability from the start. A square root routine's contract is: argument ≥ 0, and |result² − argument| ≤ ε·argument. The tests that follow:
+**مفهوم unit test در برابر قرارداد** (pp. 367–370). چیپ‌ها self test درون‌ساخت دارند؛ نرم‌افزار از اول به تست‌شدنی بودن نیاز دارد. قرارداد یک routine جذر این است: آرگومان بزرگ‌تر یا برابر صفر، و قدرمطلق نتیجه‌ی توان دو منهای آرگومان کمتر یا برابر اپسیلون ضرب در آرگومان. تست‌هایی که می‌آیند:
 
-- Reject a negative argument.
-- Accept zero, the boundary.
-- Check values across the range.
+- آرگومان منفی را رد کنید.
+- صفر را، که مرز است، بپذیرید.
+- مقدارها را در طول بازه بررسی کنید.
 
-For a module A that uses a DataFeed and a LinearRegression, test DataFeed's contract, then LinearRegression's, then A's; if only A fails, the problem is in A. **Tip 69, Design to Test** (p. 370).
+برای ماژول A که یک DataFeed و یک LinearRegression را به کار می‌برد، اول قرارداد DataFeed را تست کنید، بعد LinearRegression را، بعد A را؛ و اگر فقط A شکست بخورد، مسئله در A است. **tip ۶۹، برای تست‌شدنی بودن طراحی کن** (p. 370).
 
-**Ad hoc tests and test windows** (pp. 370–372):
+**تست موردی و پنجره‌ی تست** (pp. 370–372):
 
-- Turn ad hoc REPL pokes into unit tests.
-- In production, use consistently formatted logs, a hot-key or magic URL diagnostic window, or feature switches for extra diagnostics.
+- سیخونک‌های موردی در REPL را به unit test تبدیل کنید.
+- در تولید، از logهای قالب‌بندی‌شده‌ی سازگار، یک پنجره‌ی تشخیص با کلید میان‌بر یا آدرس جادویی، یا کلید قابلیت برای تشخیص اضافه استفاده کنید.
 
-**A confession** (sidebar, p. 372): Dave stopped writing tests for a couple of months and his code changed "not a lot": after 30+ years, he does the thinking anyway. He still writes tests for shared code and external dependencies, because tests communicate.
+**یک اعتراف** (کادر کناری، ص. ۳۷۲): Dave چند ماه نوشتن تست را متوقف کرد و کدش «زیاد» عوض نشد: بعد از بیشتر از سی سال، به هر حال آن فکر کردن را می‌کند. او باز هم برای کد مشترک و وابستگی‌های بیرونی تست می‌نویسد، چون تست‌ها ارتباط می‌گیرند.
 
-**A culture of testing** (pp. 372–374): the choices are Test First, Test During, or Test Never, which is what "Test Later" really means. All tests pass all the time. Treat test code like production code and avoid fragile tests on GUI positions, timestamps or message wording. **Tip 70, Test Your Software, or Your Users Will** (p. 373).
+**فرهنگ تست** (pp. 372–374): انتخاب‌ها تست اول، تست در حین، یا تست هیچ‌وقت‌اند، که همان چیزی است که «تست بعداً» واقعاً یعنی. همه‌ی تست‌ها همیشه قبول می‌شوند. کد تست را مثل کد تولید ببینید و از تست‌های شکننده روی موقعیت GUI و timestamp و متن پیام بپرهیزید. **tip ۷۰، نرم‌افزارت را تست کن، وگرنه کاربرهایت تستش می‌کنند** (p. 373).
 
-### Topic 42. Property-Based Testing
+### موضوع ۴۲. تست property‌محور
 
-If you write both the code and its tests, a wrong assumption can be in both (p. 375). Rather than splitting coding and testing between people, let the computer, which has no preconceptions, test for you. Contracts and invariants, together called **properties**, can drive automated tests (pp. 375–376). **Tip 71, Use Property-Based Tests to Validate Your Assumptions** (p. 376).
+اگر هم کد را بنویسید و هم تستش را، فرضی غلط می‌تواند در هر دو باشد (p. 375). به‌جای تقسیم کد و تست بین آدم‌ها، بگذارید کامپیوتر، که پیش‌فرض ذهنی ندارد، برایتان تست کند. قرارداد و ناوردا، که با هم **property** نامیده می‌شوند، می‌توانند تست خودکار را برانند (pp. 375–376). **tip ۷۱، برای اعتبارسنجی فرض‌هایت از تست property‌محور استفاده کن** (p. 376).
 
-**Sorting** (pp. 376–377): with Python's Hypothesis and pytest, two properties are tested: the length is unchanged, and each element is ≤ its successor. Hypothesis runs each test 100 times with different lists, as if you'd written 200 tests. Strategies compose, for example lists of naturals of at most 100 elements (pp. 377–378).
+**مرتب‌سازی** (pp. 376–377): با Hypothesis و pytest در Python، دو property تست می‌شوند: طول عوض نشده، و هر عنصر کوچک‌تر یا برابر عنصر بعدی‌اش است. ابزار Hypothesis هر تست را صد بار با فهرست‌های مختلف اجرا می‌کند، مثل این که دویست تست نوشته باشید. راهبردها ترکیب می‌شوند، مثلاً فهرست‌هایی از عددهای طبیعی با حداکثر صد عنصر (pp. 377–378).
 
-**Finding bad assumptions** (pp. 378–382):
+**یافتن فرض‌های بد** (pp. 378–382):
 
-- A `Warehouse` with `{"shoes": 10, "hats": 2, "umbrellas": 0}` and an `order` function pass their hand-written unit tests.
-- The property under test: stock taken plus stock remaining equals the original. It is run with item sampled from shoes and hats, quantity 1–4.
-- Hypothesis reports the falsifying example `item='hats', quantity=3`: `in_stock` only checked for at least one item.
-- The fix: `in_stock(item, quantity)` checks `stock >= quantity`.
+- یک `Warehouse` با `{"shoes": 10, "hats": 2, "umbrellas": 0}` و یک تابع `order` که unit testهای دستی‌نوشته‌شان قبول می‌شوند.
+- مفهوم property تحت تست: موجودی برداشته‌شده به‌علاوه‌ی موجودی مانده برابر اصل است. با item که از shoes و hats نمونه گرفته می‌شود و quantity بین یک تا چهار اجرا می‌شود.
+- ابزار Hypothesis نمونه‌ی ناقض `item='hats', quantity=3` را خبر می‌دهد: تابع `in_stock` فقط برای دست‌کم یک قلم بررسی می‌کرد.
+- اصلاح: `in_stock(item, quantity)` بررسی می‌کند که `stock >= quantity`.
 
-**Property tests surprise you** (pp. 382–383): the test was about stock levels and found a bug in `in_stock`. When one fails, copy its parameters into a regular unit test, both to focus on the failure and to prevent regression, since random values may not recur. Property tests also help design: they make you think about what must not change (p. 383).
+**تست‌های property غافلگیرتان می‌کنند** (pp. 382–383): تست درباره‌ی سطح موجودی بود و باگی در `in_stock` پیدا کرد. وقتی یکی شکست می‌خورد، پارامترهایش را در یک unit test معمولی کپی کنید، هم برای تمرکز روی شکست و هم برای جلوگیری از پس‌رفت، چون مقدارهای تصادفی ممکن است تکرار نشوند. تست‌های property به طراحی هم کمک می‌کنند: شما را به فکر این می‌اندازند که چه چیزی نباید عوض شود (p. 383).
 
-> **Try it:** [Hunt the falsifying example](../widgets/07-property-test.html) — run the book's stock-level property against the buggy and fixed `Warehouse`, watch random cases until one fails, then shrink it to the smallest counterexample.
+> **Try it:** [شکار نمونه‌ی ناقض](../widgets/07-property-test.html)؛ property سطح موجودی کتاب را روی `Warehouse` باگ‌دار و اصلاح‌شده اجرا کنید، حالت‌های تصادفی را تماشا کنید تا یکی شکست بخورد، و بعد تا کوچک‌ترین نمونه‌ی نقض کوچکش کنید.
 
-### Topic 43. Stay Safe Out There
+> **In practice:** تست property‌محور برای transformهای pipeline طبیعی است: ویژگی‌هایی هست که برای هر ورودی باید برقرار باشد.
+>
+> **Your turn:** سه ویژگی برای تابع dedup در Silver بنویسید.
+>
+> *Answer:* خروجی هیچ کلید تکراری ندارد؛ هر کلید ورودی در خروجی هست؛ اجرای دوباره روی خروجی آن را عوض نمی‌کند، یعنی idempotent است. Hypothesis در Python همین را با ورودی‌های تصادفی تست می‌کند (pp. 375–384).
 
-The first edition said "we don't need to be as paranoid as spies or dissidents." The authors were wrong (p. 385). Breaches happen mostly because developers were careless, not because attackers were clever. When the code works you are 90% done, with "the other 90%" to go: how it can go wrong, and how an external actor could deliberately break it. Security through obscurity doesn't work (pp. 385–386).
+### موضوع ۴۳. آن بیرون در امان بمان
 
-| Principle | In practice (pp. 386–392) |
+ویراست اول می‌گفت «لازم نیست به‌اندازه‌ی جاسوس یا مخالف سیاسی بدگمان باشیم». نویسنده‌ها اشتباه می‌کردند (p. 385). نقض امنیت بیشتر چون developerها بی‌دقت بودند اتفاق می‌افتد و نه چون حمله‌کننده‌ها زیرک بودند. وقتی کد کار می‌کند نود درصد تمام شده‌اید و «آن نود درصد دیگر» مانده: چطور می‌تواند خراب شود، و بازیگری بیرونی چطور می‌توانست آگاهانه بشکندش. امنیت با گمنامی کار نمی‌کند (pp. 385–386).
+
+| اصل | در عمل (pp. 386–392) |
 |---|---|
-| **Minimize attack surface area** | Complex code is porous. Sanitize all input: the book's Ruby `system("wc -c #{name}")` example is shown with input `test.dat; rm -rf /`, and `$SAFE = 1` taints input. Unauthenticated services, too many authenticated users, revealing output ("Password is used by another user") and debugging info are all attack vectors. **Tip 72** |
-| **Least privilege** | Take the least privilege for the shortest time: Unix `login` drops root after authenticating. Saltzer (1974). Use finer grains than admin/user |
-| **Secure defaults** | Most secure by default (masked passwords); let users choose convenience |
-| **Encrypt sensitive data** | Don't check secrets, API or SSH keys into version control; use config or environment at deploy |
-| **Maintain security updates** | **Tip 73, Apply Security Patches Quickly**: the largest breaches were on systems behind on updates |
+| **کمینه کردن سطح حمله** | کد پیچیده منفذدار است. هر ورودی را پاک‌سازی کنید: نمونه‌ی `system("wc -c #{name}")` در Ruby در کتاب با ورودی `test.dat; rm -rf /` نشان داده می‌شود، و `$SAFE = 1` ورودی را آلوده علامت می‌زند. سرویس‌های اعتبارسنجی‌نشده، کاربرهای اعتبارسنجی‌شده‌ی زیادی، خروجی لو‌دهنده مثل «Password is used by another user» و اطلاعات debug همه راه حمله‌اند. **tip ۷۲** |
+| **کمینه‌ی اختیار** | کمترین اختیار را برای کوتاه‌ترین زمان بگیرید: فرمان `login` در Unix بعد از اعتبارسنجی، root را می‌اندازد. Saltzer سال ۱۹۷۴. دانه‌هایی ریزتر از admin و user به کار ببرید |
+| **پیش‌فرض‌های امن** | پیش‌فرض، امن‌ترین باشد، مثل گذرواژه‌ی mask‌شده؛ بگذارید کاربرها راحتی را انتخاب کنند |
+| **رمز کردن داده‌ی حساس** | secret و کلید API و SSH را در کنترل نسخه نگذارید؛ سر deploy از تنظیم یا محیط استفاده کنید |
+| **نگه داشتن به‌روزرسانی امنیتی** | **tip ۷۳، patchهای امنیتی را تند اعمال کن**: بزرگ‌ترین نقض‌های امنیت روی سیستم‌هایی بودند که از به‌روزرسانی عقب بودند |
 
-**Password antipatterns**, NIST SP 800-63B (sidebar, pp. 391–392). Do not:
+**آنتی‌الگوهای گذرواژه**، از NIST SP 800-63B (کادر کناری، صص. ۳۹۱–۳۹۲). این کارها را نکنید:
 
-- Cap length below 64 (256 is a good maximum), or truncate.
-- Restrict special characters.
-- Offer hints or security questions.
-- Disable paste.
-- Impose composition rules.
-- Force periodic changes without cause.
+- سقف طول را زیر ۶۴ بگذارید، که ۲۵۶ بیشینه‌ی خوبی است، یا کوتاهش کنید.
+- کاراکترهای ویژه را محدود کنید.
+- راهنما یا پرسش امنیتی بدهید.
+- چسباندن را غیرفعال کنید.
+- قاعده‌ی ترکیب تحمیل کنید.
+- بی دلیل تغییر دوره‌ای را اجبار کنید.
 
-**Common sense vs. crypto** (pp. 393–394): never do crypto yourself. Rely on vetted, maintained libraries, and consider a third-party authentication provider rather than implementing hashing, salting and storage yourself.
+**عقل سلیم در برابر crypto** (pp. 393–394): هیچ‌وقت خودتان crypto نسازید. به کتابخانه‌های بررسی‌شده و نگه‌داری‌شده تکیه کنید، و به‌جای پیاده کردن hash و salt و ذخیره‌سازی به‌دست خودتان، یک تأمین‌کننده‌ی اعتبارسنجی طرف سوم را در نظر بگیرید.
 
-### Topic 44. Naming Things
+> **In practice:** امنیت در stack ما: Authentik برای ورود، hash کردن PII پیش از warehouse، و secretها بیرون از git.
+>
+> **Your turn:** یک کاربر Metabase دسترسی گسترده‌تر از نیازش دارد. اصل کتاب چیست و کجا اعمالش می‌کنید؟
+>
+> *Answer:* کمترین دسترسی: گروه‌های Authentik را به نقش‌های محدود در Metabase و ClickHouse map کنید و هر دسترسی را به گروه بدهید، نه به فرد. کتاب حمله را با کم کردن سطح در معرض و کمترین دسترسی محدود می‌کند (pp. 385–394).
 
-Names reveal intent and belief. Name things by the **role** they play, asking "what is my motivation to create this?" Failing to find a name often reveals the idea makes no sense (p. 395). The **Stroop effect** shows the brain reads words faster than it recognizes colours, so written names carry weight (pp. 395–396).
+### موضوع ۴۴. نام گذاشتن روی چیزها
 
-| Before | After (pp. 396–397) | Why |
+نام‌ها قصد و باور را آشکار می‌کنند. چیزها را با **نقشی** که بازی می‌کنند نام بگذارید و بپرسید «انگیزه‌ی من برای ساختن این چیست؟» ناتوانی در یافتن نام اغلب آشکار می‌کند که ایده بی‌معناست (p. 395). **اثر Stroop** نشان می‌دهد مغز کلمه را تندتر از رنگ می‌خواند، پس نام نوشته‌شده وزن دارد (pp. 395–396).
+
+| پیش | پس (pp. 396–397) | چرا |
 |---|---|---|
-| `user = authenticate(credentials)` | `customer` or `buyer` | Reminds you what the person is trying to do |
-| `deductPercent(double amount)` | `applyDiscount(Percentage discount)` | Names intent, and a type settles 0–100 versus 0.0–1.0 |
-| `Fib.fib(n)` | `Fib.of(0)`, `Fib.nth(20)` (= 4181) | Read in the module's context |
+| `user = authenticate(credentials)` | نام `customer` یا `buyer` | یادتان می‌آورد آن فرد دنبال چه کاری است |
+| `deductPercent(double amount)` | نام `applyDiscount(Percentage discount)` | قصد را نام می‌برد، و یک نوع تعیین می‌کند ۰ تا ۱۰۰ است یا ۰٫۰ تا ۱٫۰ |
+| `Fib.fib(n)` | نام `Fib.of(0)` و `Fib.nth(20)` که برابر ۴۱۸۱ است | در زمینه‌ی خود ماژول خوانده می‌شود |
 
-- **Honor the culture** (pp. 398–399): `i`, `j`, `k` are right in C loops and wrong in Clojure. Follow the community's camelCase or snake_case.
-- **Consistency** (p. 399): every project has jargon. Spread it by pair programming or a project glossary, which becomes a pattern language.
-- **Renaming is even harder** (pp. 399–400): misleading names, like a `getData` that writes to an archive, are worse than meaningless ones. **Tip 74, Name Well; Rename When Needed.** If you can't rename, that's an ETC violation to fix first.
+- **فرهنگ را محترم بدارید** (pp. 398–399): نام‌های `i` و `j` و `k` در حلقه‌های C درست‌اند و در Clojure غلط. از camelCase یا snake_case جامعه پیروی کنید.
+- **سازگاری** (p. 399): هر پروژه‌ای زبان خودش را دارد. با برنامه‌نویسی جفتی یا یک واژه‌نامه‌ی پروژه پخشش کنید، که به یک زبان الگو تبدیل می‌شود.
+- **عوض کردن نام حتی سخت‌تر است** (pp. 399–400): نام گمراه‌کننده، مثل یک `getData` که در بایگانی می‌نویسد، از نام بی‌معنا بدتر است. **tip ۷۴، خوب نام بگذار؛ و وقتی لازم شد نام را عوض کن.** اگر نمی‌توانید نام را عوض کنید، این نقض ETC است که اول باید درست شود.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Push on through resistance | Feels productive | Ignores feedback that the design is wrong |
-| Prototype to unblock | Lowers stakes; surfaces doubts | The code must be thrown away |
-| Rely on observed behaviour | Quick | Breaks on the next release or another context |
-| Exact Big-O analysis | Predicts scaling | Hides constants; small inputs may favour simple code |
-| Refactor continuously | Cheap, small fixes; less entropy | Needs good tests; feels like "not features" |
-| Strict TDD | Always have tests | Redundant tests; local polishing without direction |
-| Example-based unit tests | Precise, readable | Share the author's assumptions |
-| Property-based tests | Find unshared assumptions | Failures can be hard to pin down; random inputs vary |
-| Clever project names | Branding (p. 398) | Not for code identifiers |
+| زور زدن از میان مقاومت | حس بهره‌ور بودن | بازخوردی را نادیده می‌گیرد که می‌گوید طراحی غلط است |
+| prototype برای باز کردن گیر | ریسک را پایین می‌آورد؛ شک‌ها را بیرون می‌کشد | کد باید دور انداخته شود |
+| تکیه کردن به رفتار مشاهده‌شده | تند | در release بعدی یا زمینه‌ی دیگر می‌شکند |
+| تحلیل دقیق Big-O | مقیاس را پیش‌بینی می‌کند | ثابت‌ها را پنهان می‌کند؛ ورودی کوچک ممکن است به سود کد ساده باشد |
+| refactor پیوسته | اصلاح ارزان و کوچک؛ آنتروپی کمتر | تست خوب می‌خواهد؛ حس «قابلیت نیست» می‌دهد |
+| روش TDD سخت‌گیرانه | همیشه تست دارید | تست تکراری؛ جلا دادن محلی بی جهت |
+| unit test نمونه‌محور | دقیق و خواندنی | فرض‌های نویسنده را شریک‌اند |
+| تست property‌محور | فرض‌های ناشریک را پیدا می‌کند | پیدا کردن دقیق شکست سخت است؛ ورودی تصادفی تغییر می‌کند |
+| نام زیرکانه برای پروژه | برندسازی (p. 398) | برای شناسه‌های کد نیست |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Shrinking** is what makes property-based tests practical: Hypothesis and QuickCheck reduce a failing input to a minimal one. The book shows the shrunken `hats, 3` but doesn't name the mechanism; the [property-test widget](../widgets/07-property-test.html) and the [lab](../lab/07-warehouse-properties/README.md) implement a simple version.
-- **Measuring growth.** Plotting time against n on log–log axes turns a power law into a straight line whose slope is the exponent; counting operations instead of wall time removes noise, the idea behind the book's "use code profilers to count" advice (p. 351).
-- **Naming and DDD.** Eric Evans' *ubiquitous language* (*Domain-Driven Design*, 2003) is the same idea as the project glossary on p. 399, carried into the code's types and modules.
+- **کوچک کردن** همان چیزی است که تست property‌محور را عملی می‌کند: Hypothesis و QuickCheck ورودی شکست‌خورده را به کمینه‌اش می‌رسانند. کتاب `hats, 3` کوچک‌شده را نشان می‌دهد ولی سازوکار را نام نمی‌برد؛ [ویجت تست property](../widgets/07-property-test.html) و [آزمایش](../lab/07-warehouse-properties/README.md) نسخه‌ای ساده را پیاده می‌کنند.
+- **اندازه‌گیری رشد.** رسم زمان در برابر n روی محورهای log–log یک قانون توانی را به خط راستی تبدیل می‌کند که شیبش همان توان است؛ و شمردن عملیات به‌جای زمان دیواری نوفه را برمی‌دارد، که ایده‌ی پشت توصیه‌ی «از profiler برای شمردن استفاده کنید» در کتاب است (p. 351).
+- **نام‌گذاری و DDD.** مفهوم *زبان فراگیر* از Eric Evans در کتاب *Domain-Driven Design* (سال ۲۰۰۳) همان ایده‌ی واژه‌نامه‌ی پروژه در ص. ۳۹۹ است، که به نوع‌ها و ماژول‌های کد کشیده شده.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. A Pragmatic Approach](02-a-pragmatic-approach.md) (ETC, DRY, prototypes, estimating), [3. The Basic Tools](03-the-basic-tools.md) (debugging: "don't assume it, prove it"), [4. Pragmatic Paranoia](04-pragmatic-paranoia.md) (design by contract, assertions, headlights), [9. Pragmatic Projects](09-pragmatic-projects.md) (ruthless and continuous testing).
-- **Run it:** [Properties find the warehouse bug](../lab/07-warehouse-properties/README.md) — a standard-library property tester runs the book's stock-level property against the buggy and fixed `Warehouse`, and shrinks the failure to `hats, 3`.
-- **Run it:** [Counting the orders](../lab/07-operation-counts/README.md) — counts comparisons for linear search, binary search, insertion sort and merge sort at growing n, and fits the growth exponent from the log–log slope.
+- **فصل‌های مرتبط:** [فصل ۲: رویکرد pragmatic](02-a-pragmatic-approach.md) که ETC و DRY و prototype و تخمین زدن را دارد، [فصل ۳: ابزارهای پایه](03-the-basic-tools.md) که debug کردن و «فرضش نکن، ثابتش کن» را دارد، [فصل ۴: بدگمانی pragmatic](04-pragmatic-paranoia.md) که طراحی با قرارداد و assertion و چراغ‌های جلو را دارد، و [فصل ۹: پروژه‌های pragmatic](09-pragmatic-projects.md) که تست بی‌رحم و پیوسته را دارد.
+- **Run it:** [propertyها باگ انبار را پیدا می‌کنند](../lab/07-warehouse-properties/README.md)؛ یک تست‌کننده‌ی property با کتابخانه‌ی استاندارد، property سطح موجودی کتاب را روی `Warehouse` باگ‌دار و اصلاح‌شده اجرا می‌کند و شکست را تا `hats, 3` کوچک می‌کند.
+- **Run it:** [شمردن مرتبه‌ها](../lab/07-operation-counts/README.md)؛ مقایسه‌ها را برای جست‌و‌جوی خطی و جست‌و‌جوی دودویی و مرتب‌سازی درجی و مرتب‌سازی mergeی در nهای رشد‌یابنده می‌شمارد و توان رشد را از شیب log–log برآورد می‌کند.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **What are the steps of the book's prototyping "brain hack" for a blank page?**
+1. **مرحله‌های «هک مغزی» prototype گرفتن کتاب برای صفحه‌ی سفید چیست؟**
 
-   *Answer:* Put an "I'm prototyping" sticky note up, remind yourself prototypes fail and are thrown away, write a one-sentence comment of what you want to learn, and start coding (p. 331).
+   *Answer:* یک کاغذ‌چسب‌دار «دارم prototype می‌سازم» بزنید، به خودتان یادآوری کنید prototypeها شکست می‌خورند و دور انداخته می‌شوند، یک comment یک‌جمله‌ای بنویسید که چه می‌خواهید یاد بگیرید، و کد زدن را شروع کنید (p. 331).
 
-2. **Name three reasons not to leave coincidentally working code alone.**
+2. **سه دلیل بگویید که چرا کدی را که اتفاقی کار می‌کند به حال خودش نگذاریم.**
 
-   *Answer:* It may not really work; the boundary condition may be an accident of this context; undocumented behaviour may change next release; extra calls are slower and add bugs (p. 336).
+   *Answer:* ممکن است واقعاً کار نکند؛ شرط مرزی ممکن است تصادف همین زمینه باشد؛ رفتار بی‌مستند ممکن است در release بعدی عوض شود؛ و فراخوانی اضافه کندتر است و باگ اضافه می‌کند (p. 336).
 
-3. **Why was the project with ±1 time corrections scrapped?**
+3. **چرا پروژه‌ای که تصحیح زمانی ۱± داشت دور ریخته شد؟**
 
-   *Answer:* Without a proper model of time, units set to local time were "only" off by one by coincidence; the code became an untenable mass of +1 and −1, none of it correct (p. 337).
+   *Answer:* بی مدلی درست از زمان، واحدهایی که به زمان محلی تنظیم شده بودند «فقط» تصادفی یک واحد اختلاف داشتند؛ کد به انباری تحمل‌ناپذیر از ۱+ و ۱− تبدیل شد که هیچ‌کدامش درست نبود (p. 337).
 
-4. **A loop inside a loop over the same n items is:**
-   - [ ] O(n lg n)
-   - [x] O(n²)
-   - [ ] O(2n)
+4. **حلقه‌ای داخل حلقه‌ای روی همان n قلم، این است:**
+   - [ ] مرتبه‌ی O(n lg n)
+   - [x] مرتبه‌ی O(n²)
+   - [ ] مرتبه‌ی O(2n)
 
-   *Answer:* Nested loops are O(m × n), O(n²) when both bounds are n (p. 348).
+   *Answer:* حلقه‌های تو‌در‌تو O(m × n)اند، که وقتی هر دو کران n باشند O(n²) است (p. 348).
 
-5. **What are Fowler's three rules for refactoring safely?**
+5. **سه قاعده‌ی Fowler برای refactor کردن امن چیست؟**
 
-   *Answer:* Don't refactor and add functionality at once; have good tests first and run them often; take short, deliberate steps (p. 359).
+   *Answer:* refactor و اضافه کردن قابلیت را با هم نکنید؛ اول تست‌های خوب داشته باشید و زیاد اجراشان کنید؛ و قدم‌های کوتاه و آگاهانه بردارید (p. 359).
 
-6. **Thinking about how to test `return_avid_viewers` changed its API how?**
+6. **فکر کردن به شکل تست `return_avid_viewers` چطور API آن را عوض کرد؟**
 
-   *Answer:* It takes the database as a parameter instead of using a global, and the qualifying field name (opened vs completed) as a parameter (pp. 362–363).
+   *Answer:* دیتابیس را به‌عنوان پارامتر می‌گیرد و نه از سراسری استفاده می‌کند، و نام فیلد شرط، یعنی باز‌شده در برابر کامل‌شده، را هم به‌عنوان پارامتر (pp. 362–363).
 
-7. **What falsifying example did Hypothesis find, and what was the bug?**
+7. **ابزار Hypothesis چه نمونه‌ی ناقضی پیدا کرد و باگ چه بود؟**
 
-   *Answer:* `item='hats', quantity=3`; `in_stock` checked only for at least one item rather than enough to fill the order (pp. 381–382).
+   *Answer:* نمونه‌ی `item='hats', quantity=3`؛ تابع `in_stock` فقط دست‌کم یک قلم را بررسی می‌کرد و نه به‌اندازه‌ی سفارش (pp. 381–382).
 
-8. **What should you do with a property test's failing parameters?**
+8. **با پارامترهای شکست‌خورده‌ی یک تست property چه باید کرد؟**
 
-   *Answer:* Turn them into a regular unit test, to focus on the problem and to act as a regression test, because random inputs may not recur (p. 383).
+   *Answer:* به یک unit test معمولی تبدیلشان کنید، هم برای تمرکز روی مسئله و هم به‌عنوان تست پس‌رفت، چون ورودی تصادفی ممکن است تکرار نشود (p. 383).
 
-9. **Name two NIST password recommendations the book lists.**
+9. **دو توصیه‌ی گذرواژه‌ی NIST که کتاب می‌آورد را بگویید.**
 
-   *Answer:* Allow at least 64 characters (256 max), don't truncate, allow all printable characters and Unicode, no hints, allow paste, no composition rules, no arbitrary forced changes (pp. 391–392).
+   *Answer:* دست‌کم ۶۴ کاراکتر اجازه بدهید، با بیشینه‌ی ۲۵۶، کوتاهش نکنید، همه‌ی کاراکترهای چاپ‌شدنی و Unicode را اجازه بدهید، راهنما ندهید، چسباندن را اجازه بدهید، قاعده‌ی ترکیب نگذارید، و تغییر اجباری دلبخواه نخواهید (pp. 391–392).
 
-10. **Why is `applyDiscount(Percentage discount)` better than `deductPercent(double amount)`?**
+10. **چرا `applyDiscount(Percentage discount)` از `deductPercent(double amount)` بهتر است؟**
 
-    *Answer:* It names the intent rather than the mechanism, and the type documents whether a percentage is 0–100 or 0.0–1.0 (p. 397).
+    *Answer:* قصد را نام می‌برد و نه سازوکار را، و نوع مستند می‌کند که درصد ۰ تا ۱۰۰ است یا ۰٫۰ تا ۱٫۰ (p. 397).

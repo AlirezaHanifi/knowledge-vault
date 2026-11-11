@@ -1,63 +1,63 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Policy as Code or as Data</title>
-<meta name="description" content="Apply a stream of HR access-policy changes to a hard-coded check and to an access-control table, and count the code changes and redeploys each needs. Illustrates The Pragmatic Programmer, Topic 45.">
+<title>سیاست به‌عنوان کد یا به‌عنوان داده</title>
+<meta name="description" content="جریانی از تغییرهای سیاست دسترسی نیروی انسانی را روی یک بررسی سخت‌کد‌شده و روی یک جدول کنترل دسترسی اعمال کنید، و بشمارید هر کدام چند تغییر کد و deploy دوباره می‌خواهد. تصویری از موضوع ۴۵ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; min-height: 120px; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; min-height: 120px; direction: ltr; text-align: left; }
   pre.code .new { background: var(--warn-soft); } .acl td { font-family: var(--mono); font-size: .8rem; } .acl tr.new td { background: var(--warn-soft); }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/08-before-the-project.html">Chapter 8</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Policy as code or as data</span>
+      <a href="../chapters/08-before-the-project.html">فصل ۸</a><span aria-hidden="true">/</span>
+      <span aria-current="page">سیاست به‌عنوان کد یا داده</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 8 · Before the Project</div>
-  <h1>Policy as code or as data</h1>
-  <p class="lede">“Only an employee’s supervisors and the personnel department may view that employee’s records” is <strong>business policy</strong> dressed as a requirement. Code it as an <code>if</code> and every policy change is a code change. State it as “only authorized users may access a record”, and policy becomes <strong>metadata</strong> in an access-control table.</p>
-  <p class="source-note">Illustrates “Requirements vs. Policy” in Topic 45, The Requirements Pit (pp. 411–412, Tip 79). The sequence of policy changes, the roles and the table layout are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۸ · پیش از پروژه</div>
+  <h1>سیاست به‌عنوان کد یا به‌عنوان داده</h1>
+  <p class="lede">عبارت «فقط سرپرست‌های یک کارمند و دپارتمان نیروی انسانی می‌توانند پرونده‌ی آن کارمند را ببینند» <strong>سیاست کسب‌وکار</strong>ی است که لباس نیازمندی پوشیده. به‌عنوان یک <code>if</code> کدش کنید و هر تغییر سیاست یک تغییر کد است. به شکل «فقط کاربرهای مجاز می‌توانند به پرونده دسترسی داشته باشند» بیانش کنید، و سیاست به <strong>metadata</strong> در یک جدول کنترل دسترسی تبدیل می‌شود.</p>
+  <p class="source-note">تصویری از «نیازمندی در برابر سیاست» در موضوع ۴۵، گودال نیازمندی‌ها (صص. ۴۱۱–۴۱۲، tip ۷۹). زنجیره‌ی تغییرهای سیاست و نقش‌ها و چیدمان جدول مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Hard-coded: can_view(user, employee)</p><pre class="code" id="code"></pre></div>
-      <div class="panel"><p class="panel-title">Metadata: access-control table read by a general check</p><div class="table-wrap"><table class="acl" id="acl"></table></div></div>
+      <div class="panel"><p class="panel-title">سخت‌کد‌شده: can_view(user, employee)</p><pre class="code" id="code"></pre></div>
+      <div class="panel"><p class="panel-title">metadata: جدول کنترل دسترسی که یک بررسی عمومی می‌خواندش</p><div class="table-wrap"><table class="acl" id="acl"></table></div></div>
       <div class="callout" id="verdict"></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><button class="btn primary" id="next" type="button">Apply next policy change</button> <button class="btn" id="rs" type="button">↺ Reset</button>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><button class="btn primary" id="next" type="button">اعمال تغییر سیاست بعدی</button> <button class="btn" id="rs" type="button">↺ از نو</button>
         <ol id="changes" style="margin-top:10px;font-size:.85rem"></ol></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Both versions give the same answers.</strong> The difference is what changing them costs: an edit, a review and a redeploy for code, against a row edit for data.</li>
-    <li><strong>The general mechanism is built once.</strong> After that, each new policy is an example of the kind of thing it supports, which is the book’s advice: implement the general case.</li>
-    <li><strong>Policy changes keep coming.</strong> The book says they will. A hard-coded check grows a new branch for each one, and old branches are rarely removed.</li>
+    <li><strong>هر دو نسخه همان پاسخ‌ها را می‌دهند.</strong> تفاوت در هزینه‌ی عوض کردنشان است: یک ویرایش و یک بازبینی و یک deploy دوباره برای کد، در برابر ویرایش یک ردیف برای داده.</li>
+    <li><strong>سازوکار عمومی یک‌بار ساخته می‌شود.</strong> بعد از آن، هر سیاست تازه نمونه‌ای از همان چیزی است که پشتیبانی می‌کند، که همان توصیه‌ی کتاب است: حالت عمومی را پیاده کنید.</li>
+    <li><strong>تغییر سیاست مدام می‌آید.</strong> کتاب می‌گوید که می‌آید. یک بررسی سخت‌کد‌شده برای هر کدام شاخه‌ی تازه‌ای می‌رویاند، و شاخه‌های قدیمی کم برداشته می‌شوند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/08-before-the-project.html"><small>Lesson</small>8. Before the Project</a></li>
+    <li><a href="../chapters/08-before-the-project.html"><small>درس</small>فصل ۸: پیش از پروژه</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -74,45 +74,45 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log"));
   var CHANGES = [
-    ["HR business partners may view records in their division", "role == 'hr_partner' and user.division == employee.division", ["hr_partner", "same division", "view"]],
-    ["Supervisors see only their direct reports, not the whole chain", "role == 'supervisor' and employee.manager == user  # was: user in employee.chain", ["supervisor", "direct reports", "view (was: whole chain)"]],
-    ["Payroll may view salary fields only", "role == 'payroll' and field in SALARY_FIELDS", ["payroll", "salary fields", "view"]],
-    ["Personnel loses access to medical notes", "role == 'personnel' and field not in MEDICAL_FIELDS  # was: role == 'personnel'", ["personnel", "all but medical", "view (was: all)"]],
-    ["Auditors get read access during audit windows", "role == 'auditor' and today in audit_window", ["auditor", "all, in audit window", "view"]],
-    ["Contractors' records are visible to procurement", "role == 'procurement' and employee.type == 'contractor'", ["procurement", "contractors", "view"]]];
+    ["شریک‌های کسب‌وکار نیروی انسانی می‌توانند پرونده‌های بخش خودشان را ببینند", "role == 'hr_partner' and user.division == employee.division", ["hr_partner", "همان بخش", "دیدن"]],
+    ["سرپرست‌ها فقط گزارش‌دهنده‌های مستقیمشان را می‌بینند و نه کل زنجیره", "role == 'supervisor' and employee.manager == user  # was: user in employee.chain", ["supervisor", "گزارش‌دهنده‌ی مستقیم", "دیدن، پیش‌تر کل زنجیره"]],
+    ["حقوق‌و‌دستمزد فقط فیلدهای حقوق را می‌بیند", "role == 'payroll' and field in SALARY_FIELDS", ["payroll", "فیلدهای حقوق", "دیدن"]],
+    ["نیروی انسانی دسترسی به یادداشت‌های پزشکی را از دست می‌دهد", "role == 'personnel' and field not in MEDICAL_FIELDS  # was: role == 'personnel'", ["personnel", "همه جز پزشکی", "دیدن، پیش‌تر همه"]],
+    ["auditorها در پنجره‌های audit دسترسی خواندن می‌گیرند", "role == 'auditor' and today in audit_window", ["auditor", "همه، در پنجره‌ی audit", "دیدن"]],
+    ["پرونده‌ی پیمانکارها برای تأمین دیدنی است", "role == 'procurement' and employee.type == 'contractor'", ["procurement", "پیمانکارها", "دیدن"]]];
   var BASE = ["def can_view(user, employee, field):", "    if user.role == 'supervisor' and user in employee.chain: return True", "    if user.role == 'personnel': return True"];
-  var BASE_ACL = [["supervisor", "whole chain", "view"], ["personnel", "all", "view"]];
+  var BASE_ACL = [["supervisor", "کل زنجیره", "دیدن"], ["personnel", "همه", "دیدن"]];
   var k = 0, cnt;
-  function reset() { k = 0; cnt = { edits: 0, deploys: 0, rows: 0 }; log.clear(); log.add("Starting policy: supervisors and personnel may view records.", "muted"); render(); }
+  function reset() { k = 0; cnt = { edits: 0, deploys: 0, rows: 0 }; log.clear(); log.add("سیاست آغازین: سرپرست‌ها و نیروی انسانی می‌توانند پرونده‌ها را ببینند.", "muted"); render(); }
   function render() {
     var code = Kit.clear(document.getElementById("code")), lines = BASE.slice(), newIdx = -1;
     for (var i = 0; i < k; i++) { lines.push("    if user." + CHANGES[i][1] + ": return True"); if (i === k - 1) newIdx = lines.length - 1; }
     lines.push("    return False");
     lines.forEach(function (l, i) { code.appendChild(Kit.el("span", { class: i === newIdx ? "new" : "" }, l + "\n")); });
-    var t = Kit.clear(document.getElementById("acl")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "role"), Kit.el("th", null, "scope"), Kit.el("th", null, "permission"))));
+    var t = Kit.clear(document.getElementById("acl")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "نقش"), Kit.el("th", null, "دامنه"), Kit.el("th", null, "مجوز"))));
     var tb = Kit.el("tbody"); BASE_ACL.concat(CHANGES.slice(0, k).map(function (c) { return c[2]; })).forEach(function (r, i, arr) { tb.appendChild(Kit.el("tr", { class: i === arr.length - 1 && k ? "new" : "" }, Kit.el("td", null, r[0]), Kit.el("td", null, r[1]), Kit.el("td", null, r[2]))); }); t.appendChild(tb);
     var ol = Kit.clear(document.getElementById("changes")); CHANGES.forEach(function (c, i) { ol.appendChild(Kit.el("li", { style: i < k ? "" : "color:var(--ink-3)" }, (i < k ? "✓ " : "") + c[0])); });
     document.getElementById("next").disabled = k >= CHANGES.length;
     var v = document.getElementById("verdict"); v.className = "callout " + (k ? "warn" : "");
-    v.textContent = k ? k + " policy change(s): the hard-coded check needed " + cnt.edits + " code edits and " + cnt.deploys + " redeploys; the table needed " + cnt.rows + " row edits and no deploys." : "Same rules both ways. Apply a policy change to compare the cost.";
-    stats([["Policy changes", k], ["Code edits + deploys", cnt.edits + " + " + cnt.deploys, k ? "bad" : ""], ["Table row edits", cnt.rows, "ok"], ["Branches in can_view", 2 + k]]);
+    v.textContent = k ? k + " تغییر سیاست: بررسی سخت‌کد‌شده به " + cnt.edits + " ویرایش کد و " + cnt.deploys + " deploy دوباره نیاز داشت، و جدول به " + cnt.rows + " ویرایش ردیف و هیچ deployی." : "قاعده‌ها از هر دو راه یکی‌اند. یک تغییر سیاست اعمال کنید تا هزینه را مقایسه کنید.";
+    stats([["تغییر سیاست", k], ["ویرایش کد به‌علاوه‌ی deploy", cnt.edits + " + " + cnt.deploys, k ? "bad" : ""], ["ویرایش ردیف جدول", cnt.rows, "ok"], ["شاخه در can_view", 2 + k]]);
   }
   document.getElementById("next").addEventListener("click", function () { if (k >= CHANGES.length) return; var c = CHANGES[k];
     var e = c[1].indexOf("# was") >= 0 ? 2 : 1; cnt.edits += e; cnt.deploys++; cnt.rows++; k++;
-    log.add("Policy: " + c[0] + ". Code: " + e + " edit(s), review and redeploy. Table: one row.", "warn"); render(); });
+    log.add("سیاست: " + c[0] + ". کد: " + e + " ویرایش و بازبینی و deploy دوباره. جدول: یک ردیف.", "warn"); render(); });
   document.getElementById("rs").addEventListener("click", reset);
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How does the book suggest restating “only supervisors and personnel can view an employee record”?",
-      options: ["Keep it as stated", "“Only authorized users may access an employee record”", "Split it into two requirements"], answer: 1,
-      explain: "p. 411." },
-    { q: "When policy changes, what has to change in the access-control design?",
-      options: ["The code", "Only the metadata", "The database schema"], answer: 1,
-      explain: "p. 411." },
-    { q: "What does Tip 79 say?",
-      options: ["Policy Is Metadata", "Configure, Don't Integrate", "No One Knows Exactly What They Want"], answer: 0,
-      explain: "p. 411: implement the general case, with the policy information as an example of what the system must support." }
+    { q: "کتاب چطور پیشنهاد می‌دهد «فقط سرپرست‌ها و نیروی انسانی می‌توانند پرونده‌ی کارمند را ببینند» بازگو شود؟",
+      options: ["همان‌طور که هست بماند", "«فقط کاربرهای مجاز می‌توانند به پرونده‌ی کارمند دسترسی داشته باشند»", "به دو نیازمندی شکسته شود"], answer: 1,
+      explain: "صفحه‌ی ۴۱۱." },
+    { q: "وقتی سیاست عوض می‌شود، در طراحی کنترل دسترسی چه چیزی باید عوض شود؟",
+      options: ["کد", "فقط metadata", "ساختار schema دیتابیس"], answer: 1,
+      explain: "صفحه‌ی ۴۱۱." },
+    { q: "شماره‌ی tip ۷۹ چه می‌گوید؟",
+      options: ["سیاست همان metadata است", "تنظیم کن، یکپارچه نکن", "هیچ‌کس دقیقاً نمی‌داند چه می‌خواهد"], answer: 0,
+      explain: "صفحه‌ی ۴۱۱: حالت عمومی را پیاده کنید، و اطلاعات سیاست را نمونه‌ای از آن چیزی ببینید که سیستم باید پشتیبانی کند." }
   ]);
 })();
 </script>

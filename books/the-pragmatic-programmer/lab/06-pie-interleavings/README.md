@@ -1,18 +1,20 @@
-# Every interleaving of the pie case
+# هر interleaving ویترین پای
 
-How often do the diner's waiters oversell the last slice? Each waiter runs the book's steps: read the pie count, check it, promise, take, give. With a semaphore, they lock first and unlock after taking. With `get_pie_if_available`, the check and the take are one atomic call. The script enumerates every possible interleaving of two or three waiters (with memoization) and counts those that end with more promises than slices.
+پیش‌خدمت‌های رستوران چند وقت یک‌بار آخرین برش را بیش‌فروش می‌کنند؟ هر پیش‌خدمت مرحله‌های کتاب را اجرا می‌کند: خواندن شمار پای، بررسی‌اش، قول دادن، برداشتن، تحویل دادن. با semaphore، اول قفل می‌کنند و بعد از برداشتن باز. با `get_pie_if_available`، بررسی و برداشتن یک فراخوانی اتمی‌اند. اسکریپت هر interleaving ممکن دو یا سه پیش‌خدمت را با memoization برمی‌شمارد و آن‌هایی را می‌شمارد که با قول‌های بیشتر از برش‌ها تمام می‌شوند.
 
-*Illustrates The Pragmatic Programmer, Topic 34, Shared State Is Incorrect State, pp. 299–304. The steps follow the book's pseudo-code; the exhaustive enumeration is the vault's. The vault's [pie-case widget](../../widgets/06-pie-case.html) lets you step through the same interleavings by hand.*
+*این آزمایش موضوع ۳۴ از کتاب The Pragmatic Programmer، یعنی shared state همان حالت نادرست است، صص. ۲۹۹–۳۰۴ را نشان می‌دهد. مرحله‌ها دنبال شبه‌کد کتاب می‌روند؛ برشمردن جامع مال vault است. [ویجت ویترین پای](../../widgets/06-pie-case.html) در vault می‌گذارد همان interleavingها را دستی قدم بدهید.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 pie_interleavings.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Every interleaving of the waiters' steps; 'oversold' = more promises than slices
@@ -29,12 +31,12 @@ get_pie_if_available         3      1            270         0    0.0%
 get_pie_if_available         3      2            756         0    0.0%
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Without a lock, only the interleavings in which one waiter finishes taking before the other looks are safe: 6 of 246 for two waiters, and 90 of 677,610 for three.
-- A semaphore makes every interleaving safe, and leaves far fewer of them, because one waiter's check-and-take can't be interrupted.
-- The transactional `get_pie_if_available` is also always safe, and it puts the rule in the resource, so no caller can forget the convention.
+- بی قفل، فقط آن interleavingهایی امن‌اند که یک پیش‌خدمت برداشتن را پیش از نگاه کردن دیگری تمام می‌کند: شش از ۲۴۶ برای دو پیش‌خدمت، و نود از ۶۷۷۶۱۰ برای سه پیش‌خدمت.
+- یک semaphore هر interleaving را امن می‌کند، و خیلی کمترشان را می‌گذارد، چون بررسی‌و‌برداشتن یک پیش‌خدمت وسطش قطع نمی‌شود.
+- فراخوانی تراکنشی `get_pie_if_available` هم همیشه امن است، و قاعده را در خود منبع می‌گذارد، پس هیچ فراخواننده‌ای نمی‌تواند قرارداد را فراموش کند.
 
-## Related
+## پیوندها
 
-- Chapter note: [6. Concurrency](../../chapters/06-concurrency.md) — Topic 34, Shared State Is Incorrect State, pp. 299–304
+- یادداشت فصل: [فصل ۶: concurrency](../../chapters/06-concurrency.md) — موضوع ۳۴، shared state همان حالت نادرست است، صص. ۲۹۹–۳۰۴

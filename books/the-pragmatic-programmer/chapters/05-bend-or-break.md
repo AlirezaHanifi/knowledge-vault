@@ -3,99 +3,107 @@ book: the-pragmatic-programmer
 chapter: 5
 title: "Bend, or Break"
 pages: "226–288"
+translated_title: "خم شو، یا بشکن"
+lang: fa
 ---
 
-# 5. Bend, or Break
+# فصل ۵: خم شو، یا بشکن
 
-[← 4. Pragmatic Paranoia](04-pragmatic-paranoia.md) · [Book](../README.md) · [6. Concurrency →](06-concurrency.md)
+[فصل ۴: بدگمانی pragmatic →](04-pragmatic-paranoia.md) · [کتاب](../README.md) · [فصل ۶: concurrency ←](06-concurrency.md)
 
-## Summary
+## خلاصه
 
-Code has to keep up with near-frantic change, so it must be as loose and flexible as possible; this chapter shows how to make decisions reversible (p. 226). It covers five ways to stay flexible:
+کد باید پا‌به‌پای تغییری تقریباً دیوانه‌وار برود، پس باید تا جای ممکن شل و انعطاف‌پذیر باشد؛ این فصل نشان می‌دهد چطور تصمیم‌ها را برگشت‌پذیر کنید (p. 226). پنج راه انعطاف‌پذیر ماندن را می‌پوشاند:
 
-- **Decoupling:** avoid train wrecks, globals and inheritance (Topic 28).
-- **Events:** four strategies for juggling them, namely finite state machines, the observer pattern, publish/subscribe, and reactive streams (Topic 29).
-- **Transformations:** thinking of programs as pipelines that transform data (Topic 30).
-- **Alternatives to inheritance:** interfaces, delegation and mixins (Topic 31).
-- **External configuration,** which moves details out of the code entirely (Topic 32).
+- **الگوی decoupling:** از تصادف قطار و داده‌ی سراسری و وراثت بپرهیزید (موضوع ۲۸).
+- **رویدادها:** چهار راهبرد برای تردستی با آن‌ها، یعنی state machine متناهی، الگوی observer، انتشار و اشتراک، و streamهای reactive (موضوع ۲۹).
+- **تبدیل‌ها:** دیدن برنامه‌ها به‌عنوان pipelineهایی که داده را تبدیل می‌کنند (موضوع ۳۰).
+- **جایگزین‌های وراثت:** interface و واگذاری و mixin (موضوع ۳۱).
+- **تنظیم بیرونی،** که جزئیات را کاملاً از کد بیرون می‌برد (موضوع ۳۲).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Coupling is the enemy of change, and it's transitive.** Decoupled code is easier to change (Tip 44, pp. 228–229).
-- **Tell, don't ask; don't chain method calls.** Don't make decisions from an object's internals and then update it; aim for one "." per access, except for very stable APIs (Tips 45–46, pp. 231–234).
-- **Global data includes singletons and external resources.** If something must be global, wrap it in an API (Tips 47–48, pp. 236–237).
-- **A finite state machine is just data:** a table from state and event to new state, plus optional actions (pp. 240–245).
-- **Pubsub decouples publishers from subscribers** through named channels, at the cost of visibility; **streams** treat events as asynchronous collections (pp. 247–253).
-- **Programs are about data.** Build them as pipelines of transformations; don't hoard state, pass it around; wrap values as ok or error and bind steps with `and_then` (Tips 49–50, pp. 255–270).
-- **Don't pay inheritance tax.** Use interfaces for polymorphism, delegation (has-a beats is-a) and mixins to share functionality (Tips 51–54, pp. 272–283).
-- **Parameterize the app with external configuration,** behind an API, ideally as a dynamic service, but don't overdo it (Tip 55, pp. 284–287).
+- **مفهوم coupling دشمن تغییر است، و گذراست.** کد decouple‌شده آسان‌تر عوض می‌شود (tip ۴۴، صص. ۲۲۸–۲۲۹).
+- **بگو، نپرس؛ و فراخوانی متدها را زنجیر نکنید.** از درون یک object تصمیم نگیرید و بعد به‌روزش کنید؛ هدفتان یک نقطه در هر دسترسی باشد، جز برای APIهای خیلی پایدار (tipهای ۴۵ و ۴۶، صص. ۲۳۱–۲۳۴).
+- **داده‌ی سراسری شامل singleton و منابع بیرونی هم می‌شود.** اگر چیزی باید سراسری باشد، در یک API بپیچیدش (tipهای ۴۷ و ۴۸، صص. ۲۳۶–۲۳۷).
+- **مفهوم state machine متناهی فقط داده است:** جدولی از حالت و رویداد به حالت تازه، به‌علاوه‌ی کنش‌های اختیاری (pp. 240–245).
+- **انتشار و اشتراک، منتشر‌کننده‌ها را از مشترک‌ها decouple می‌کند** از راه کانال‌های نام‌دار، به قیمت دیده شدن؛ و **streamها** رویدادها را مثل مجموعه‌های asynchronous می‌بینند (pp. 247–253).
+- **برنامه‌ها درباره‌ی داده‌اند.** آن‌ها را به شکل pipelineهایی از تبدیل بسازید؛ حالت را احتکار نکنید و دستش بدهید؛ مقدارها را به‌عنوان ok یا error بپیچید و قدم‌ها را با `and_then` ببندید (tipهای ۴۹ و ۵۰، صص. ۲۵۵–۲۷۰).
+- **مالیات وراثت ندهید.** برای چند‌ریختی از interface استفاده کنید، و از واگذاری، یعنی has-a از is-a بهتر است، و از mixin برای شریک شدن قابلیت (tipهای ۵۱ تا ۵۴، صص. ۲۷۲–۲۸۳).
+- **برنامه را با تنظیم بیرونی پارامتری کنید،** پشت یک API، در حالت آرمانی به‌عنوان سرویسی پویا، ولی زیاده‌روی نکنید (tip ۵۵، صص. ۲۸۴–۲۸۷).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks). Page numbers are PDF pages: this edition's reflowed text has no printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF. شماره‌ها صفحه‌ی PDF‌اند، چون متن بازچینش‌شده‌ی این ویراست شماره‌ی صفحه‌ی چاپی ندارد.*
 
-- Topic 28. Decoupling — p. 228
-- Topic 29. Juggling the Real World — p. 239
-- Topic 30. Transforming Programming — p. 255
-- Topic 31. Inheritance Tax — p. 272
-- Topic 32. Configuration — p. 284
+- موضوع ۲۸. ویژگی decoupling — ص. ۲۲۸
+- موضوع ۲۹. تردستی با دنیای واقعی — ص. ۲۳۹
+- موضوع ۳۰. برنامه‌نویسی تبدیلی — ص. ۲۵۵
+- موضوع ۳۱. مالیات وراثت — ص. ۲۷۲
+- موضوع ۳۲. تنظیم — ص. ۲۸۴
 
-## Notes
+## یادداشت‌ها
 
-| Tip | Statement | Page |
+| tip | عبارت | صفحه |
 |---:|---|---|
-| 44 | Decoupled Code Is Easier to Change | 229 |
-| 45 | Tell, Don't Ask | 231 |
-| 46 | Don't Chain Method Calls | 234 |
-| 47 | Avoid Global Data | 236 |
-| 48 | If It's Important Enough to Be Global, Wrap It in an API | 237 |
-| 49 | Programming Is About Code, But Programs Are About Data | 258 |
-| 50 | Don't Hoard State; Pass It Around | 265 |
-| 51 | Don't Pay Inheritance Tax | 276 |
-| 52 | Prefer Interfaces to Express Polymorphism | 278 |
-| 53 | Delegate to Services: Has-A Trumps Is-A | 279 |
-| 54 | Use Mixins to Share Functionality | 282 |
-| 55 | Parameterize Your App Using External Configuration | 284 |
+| ۴۴ | کد decouple‌شده آسان‌تر عوض می‌شود | ۲۲۹ |
+| ۴۵ | بگو، نپرس | ۲۳۱ |
+| ۴۶ | فراخوانی متدها را زنجیر نکنید | ۲۳۴ |
+| ۴۷ | از داده‌ی سراسری بپرهیزید | ۲۳۶ |
+| ۴۸ | اگر آن‌قدر مهم است که سراسری باشد، در یک API بپیچیدش | ۲۳۷ |
+| ۴۹ | برنامه‌نویسی درباره‌ی کد است، ولی برنامه‌ها درباره‌ی داده‌اند | ۲۵۸ |
+| ۵۰ | حالت را احتکار نکنید؛ دستش بدهید | ۲۶۵ |
+| ۵۱ | مالیات وراثت ندهید | ۲۷۶ |
+| ۵۲ | برای بیان چند‌ریختی، interface را ترجیح بدهید | ۲۷۸ |
+| ۵۳ | به سرویس‌ها واگذار کنید: has-a از is-a بهتر است | ۲۷۹ |
+| ۵۴ | برای شریک شدن قابلیت از mixin استفاده کنید | ۲۸۲ |
+| ۵۵ | برنامه‌تان را با تنظیم بیرونی پارامتری کنید | ۲۸۴ |
 
-### Topic 28. Decoupling
+### موضوع ۲۸. ویژگی decoupling
 
-Coupling links things that must change in parallel (p. 228). Bridges should be rigid, so their components are coupled; software should be flexible, so each component should be coupled to as few others as possible (pp. 228–229). **Coupling is transitive**: if A is coupled to B and C, and they to M, N, X and Y, then A is coupled to all six (p. 229). **Tip 44, Decoupled Code Is Easier to Change** (p. 229).
+مفهوم coupling چیزهایی را به هم وصل می‌کند که باید موازی عوض شوند (p. 228). پل‌ها باید سفت باشند، پس مؤلفه‌هایشان جفت‌اند؛ نرم‌افزار باید انعطاف‌پذیر باشد، پس هر مؤلفه باید به کمترین تعداد مؤلفه‌ی دیگر جفت باشد (pp. 228–229). **coupling گذراست**: اگر A به B و C جفت باشد و آن‌ها به M و N و X و Y، پس A به هر شش‌تا جفت است (p. 229). **tip ۴۴، کد decouple‌شده آسان‌تر عوض می‌شود** (p. 229).
 
-**Symptoms of coupling** (p. 230): wacky dependencies between unrelated modules; "simple" changes that break unrelated things; developers afraid to change code; meetings everyone must attend because nobody knows who's affected.
+**نشانه‌های coupling** (p. 230): وابستگی‌های عجیب بین ماژول‌های بی‌ربط؛ تغییرهای «ساده»ای که چیزهای بی‌ربط را می‌شکنند؛ developerهایی که از عوض کردن کد می‌ترسند؛ و جلسه‌هایی که همه باید در آن‌ها باشند چون کسی نمی‌داند چه کسی اثر می‌گیرد.
 
-**Train wrecks** (pp. 230–235). `customer.orders.find(order_id).getTotals()` and then updating `grandTotal` and `discount` crosses five levels of abstraction. All of it must stay unchanged for the code to keep working, and a new rule ("no discount over 40%") can't be enforced, because anyone can set the totals' fields (pp. 230–231).
+**تصادف قطار** (pp. 230–235). عبارت `customer.orders.find(order_id).getTotals()` و بعد به‌روز کردن `grandTotal` و `discount` از پنج سطح انتزاع رد می‌شود. همه‌اش باید دست‌نخورده بماند تا کد کار کند، و یک قاعده‌ی تازه، مثل «تخفیف بیشتر از چهل درصد نداریم»، اعمال‌شدنی نیست، چون هر کسی می‌تواند فیلدهای totals را بگذارد (pp. 230–231).
 
-- **Tip 45, Tell, Don't Ask** (p. 231): don't make decisions based on an object's internal state and then update it. Refactor step by step: `totals.applyDiscount(discount)`, then `customer.findOrder(id)`, then `order.applyDiscount(discount)` (pp. 231–232).
-- TDA is a pattern, not a law of nature: customers and orders are universal top-level concepts, so exposing them is a pragmatic choice (pp. 232–233).
-- **The Law of Demeter**, from Ian Holland in the late 1980s, says a method of class C should only call C's other methods, its parameters, objects it creates, and globals. The authors now dislike the global clause and find the law hard to apply, like parsing a legal document for each call (pp. 233–234).
-- **Tip 46, Don't Chain Method Calls** (p. 234): try not to have more than one "." per access, and intermediate variables don't get around it. The exception is things very unlikely to change, such as the language's standard library; third-party libraries count as volatile (p. 234).
-- **Chains vs. pipelines** (p. 235): a pipeline couples only through data formats, not hidden implementation details, which is far less of a barrier to change.
+- **نکته‌ی ۴۵، بگو، نپرس** (p. 231): بر پایه‌ی حالت درونی یک object تصمیم نگیرید و بعد به‌روزش کنید. قدم‌به‌قدم refactor کنید: `totals.applyDiscount(discount)`، بعد `customer.findOrder(id)`، بعد `order.applyDiscount(discount)` (pp. 231–232).
+- روش TDA یک الگو است و نه قانون طبیعت: مشتری و سفارش مفهوم‌های سطح‌بالای جهان‌شمول‌اند، پس نشان دادنشان انتخابی pragmatic است (pp. 232–233).
+- **قانون Demeter**، از Ian Holland در اواخر دهه‌ی ۱۹۸۰، می‌گوید یک متد از کلاس C باید فقط متدهای دیگر C و پارامترهایش و objectهایی را که می‌سازد و سراسری‌ها را صدا بزند. نویسنده‌ها حالا از بند سراسری خوششان نمی‌آید و قانون را سخت‌اعمال می‌دانند، مثل تجزیه‌ی یک سند حقوقی برای هر فراخوانی (pp. 233–234).
+- **نکته‌ی ۴۶، فراخوانی متدها را زنجیر نکنید** (p. 234): بکوشید در هر دسترسی بیشتر از یک نقطه نداشته باشید، و متغیر میانی دورش نمی‌زند. استثنا چیزهایی‌اند که خیلی بعید است عوض شوند، مثل کتابخانه‌ی استاندارد زبان؛ کتابخانه‌های طرف سوم ناپایدار حساب می‌شوند (p. 234).
+- **زنجیره در برابر pipeline** (p. 235): یک pipeline فقط از راه قالب داده جفت می‌شود و نه جزئیات پنهان پیاده‌سازی، که مانع خیلی کمتری برای تغییر است.
 
-**The evils of globalization** (pp. 235–237). Global data is like an extra parameter on every method. It makes code hard to extract and hard to test without building a global environment (pp. 235–236).
+**بدی‌های جهانی‌سازی** (pp. 235–237). داده‌ی سراسری مثل یک پارامتر اضافه روی هر متد است. بیرون کشیدن کد را سخت می‌کند و تست کردنش را بی ساختن یک محیط سراسری (pp. 235–236).
 
-- **Tip 47, Avoid Global Data** (p. 236).
-- A **singleton** with exported data is still global data with a longer name. Hiding it behind methods helps, but there's still one set of data (pp. 236–237).
-- Any **mutable external resource** (database, file system, service API) is global data too (p. 237).
-- **Tip 48, If It's Important Enough to Be Global, Wrap It in an API** (p. 237).
+- **نکته‌ی ۴۷، از داده‌ی سراسری بپرهیزید** (p. 236).
+- یک **singleton** با داده‌ی بیرون‌داده باز هم داده‌ی سراسری است، فقط با نامی بلندتر. قایم کردنش پشت متدها کمک می‌کند، ولی باز هم یک مجموعه داده هست (pp. 236–237).
+- هر **منبع بیرونی mutable**، یعنی دیتابیس و سیستم فایل و API سرویس، هم داده‌ی سراسری است (p. 237).
+- **نکته‌ی ۴۸، اگر آن‌قدر مهم است که سراسری باشد، در یک API بپیچیدش** (p. 237).
 
-Inheritance, the third source of coupling, gets its own topic (p. 237). Shy code, which deals only with what it directly knows about, keeps applications decoupled (p. 237).
+وراثت، سومین سرچشمه‌ی جفت‌شدگی، موضوع خودش را می‌گیرد (p. 237). کد خجالتی، که فقط با آن چیزی سر‌و‌کار دارد که مستقیم می‌شناسد، برنامه‌ها را decouple نگه می‌دارد (p. 237).
 
-### Topic 29. Juggling the Real World
+> **In practice:** لایه‌های Bronze، Silver و Gold یعنی decoupling: هر لایه فقط به لایه‌ی پیش از خودش وابسته است.
+>
+> **Your turn:** داشبوردی در Metabase مستقیم از Bronze می‌خواند. چه مشکلی پیش می‌آید؟
+>
+> *Answer:* هر تغییر منبع داشبورد را می‌شکند، چون داشبورد به جزئیات لایه‌ای وابسته است که قراری با او نبسته. داشبوردها فقط Gold بخوانند. کتاب درباره‌ی «train wreck» همین را می‌گوید: فقط با همسایه‌ی مستقیمت حرف بزن (pp. 228–238).
 
-An **event** represents the availability of information, from the outside world or internally, down to fetching the next list element. Applications that respond to events work better in the real world (pp. 239–240). The four strategies (p. 240):
+### موضوع ۲۹. تردستی با دنیای واقعی
 
-| Strategy | Idea | Strength | Weakness |
+یک **رویداد** نمایانگر در دسترس بودن اطلاعات است، از دنیای بیرون یا از درون، تا همان گرفتن عنصر بعدی یک فهرست. برنامه‌هایی که به رویداد پاسخ می‌دهند در دنیای واقعی بهتر کار می‌کنند (pp. 239–240). چهار راهبرد (p. 240):
+
+| راهبرد | ایده | نقطه‌ی قوت | نقطه‌ی ضعف |
 |---|---|---|---|
-| **Finite state machine** | A table from (state, event) to new state, optionally with an action | Untangles event handling in a few lines; can be pure data | Doesn't solve every event problem (p. 246) |
-| **Observer** | Observers register callbacks with an observable | Tiny to implement, no library needed; common in UIs | Observers are coupled to the observable; synchronous callbacks can bottleneck (p. 247) |
-| **Publish/subscribe** | Publishers and subscribers meet through named channels | Decouples and can be asynchronous; parts can be added or replaced while running | Hard to see which subscribers handle a message (p. 248) |
-| **Reactive streams** | Events as a growing, possibly asynchronous collection | Filter, zip and merge events like data; unifies sync and async | Needs a library (RxJS in the book's examples) |
+| **state machine متناهی** | جدولی از (حالت، رویداد) به حالت تازه، اختیاری با یک کنش | مدیریت رویداد را در چند خط باز می‌کند؛ می‌تواند داده‌ی خالص باشد | هر مسئله‌ی رویدادی را حل نمی‌کند (p. 246) |
+| **الگوی observer** | observerها callback را در یک observable ثبت می‌کنند | پیاده‌سازی‌اش ریز است و کتابخانه نمی‌خواهد؛ در UI رایج است | observerها به observable جفت‌اند؛ callback synchronous می‌تواند گلوگاه شود (p. 247) |
+| **انتشار و اشتراک** | منتشر‌کننده‌ها و مشترک‌ها از راه کانال‌های نام‌دار به هم می‌رسند | decouple می‌کند و می‌تواند asynchronous باشد؛ بخش‌ها را می‌شود در حال اجرا اضافه یا جابه‌جا کرد | دیدن این که کدام مشترک پیامی را می‌گیرد سخت است (p. 248) |
+| **streamهای reactive** | رویدادها به‌عنوان مجموعه‌ای در حال رشد و احتمالاً asynchronous | رویدادها را مثل داده filter و zip و merge کنید؛ synchronous و asynchronous را یکی می‌کند | کتابخانه می‌خواهد، یعنی RxJS در نمونه‌های کتاب |
 
-**Finite state machines** (pp. 240–246). Dave writes one almost every week, often in a couple of lines (p. 240).
+**ماشین‌های حالت متناهی** (pp. 240–246). Dave تقریباً هر هفته یکی می‌نویسد، اغلب در چند خط (p. 240).
 
-- A **multipart message** parser: from *initial*, a header moves to *reading*; data stays in *reading*; a trailer moves to *done*; anything else is an error. The whole machine is a transition table, and the loop is one line: `state = TRANSITIONS[state][msg.msg_type] || :error` (pp. 241–243).
-- **Adding actions:** a string extractor where each transition also names an action. A quote starts a new string, characters are added, a backslash moves to `copy_next_char` so the next character is copied whatever it is, and a closing quote finishes the string. A `:default` entry handles unlisted events (pp. 243–245).
-- State can live in external storage and drive multi-step workflows such as user sign-up (p. 245).
+- یک parser **پیام چند‌بخشی**: از *initial*، یک header به *reading* می‌رود؛ داده در *reading* می‌ماند؛ یک trailer به *done* می‌رود؛ و هر چیز دیگری خطاست. کل ماشین یک جدول گذار است، و حلقه یک خط: `state = TRANSITIONS[state][msg.msg_type] || :error` (pp. 241–243).
+- **افزودن کنش:** یک بیرون‌کشنده‌ی رشته که هر گذارش یک کنش هم نام می‌برد. نقل‌قول رشته‌ی تازه‌ای شروع می‌کند، کاراکترها اضافه می‌شوند، یک backslash به `copy_next_char` می‌رود تا کاراکتر بعدی هر چه باشد کپی شود، و نقل‌قول بسته رشته را تمام می‌کند. یک ورودی `:default` رویدادهای فهرست‌نشده را می‌گیرد (pp. 243–245).
+- حالت می‌تواند در ذخیره‌سازی بیرونی بنشیند و گردش‌کارهای چند‌مرحله‌ای مثل ثبت‌نام کاربر را براند (p. 245).
 
 ```mermaid
 stateDiagram-v2
@@ -108,124 +116,130 @@ stateDiagram-v2
     copy_next_char --> in_string: any character, so add it
 ```
 
-*The vault's redrawing of the book's string-extracting FSM (pp. 243–244).*
+*بازکشی vault از state machine بیرون‌کشنده‌ی رشته‌ی کتاب (pp. 243–244).*
 
-> **Try it:** [Table-driven state machines](../widgets/05-message-fsm.html) — feed characters to the book's string extractor, or message types to its multipart parser, one event at a time, and watch the transition table pick each next state and action.
+> **Try it:** [ماشین‌های حالت جدول‌محور](../widgets/05-message-fsm.html)؛ به بیرون‌کشنده‌ی رشته‌ی کتاب کاراکتر بدهید، یا به parser چند‌بخشی‌اش نوع پیام، رویداد‌به‌رویداد، و ببینید جدول گذار هر حالت و کنش بعدی را چطور انتخاب می‌کند.
 
-**Observer** (pp. 246–247): the `Terminator` module calls every registered callback before exiting, which shows that an observable needs almost no code. **Pubsub** generalizes it through channels implemented outside your code, often by cloud services (pp. 247–248). **Reactive streams** (pp. 249–253): like spreadsheet cells, values react to the values they use. In RxJS, zipping five animal names with a 500 ms interval emits one pair every half second; fetching users 3, 2 and 1 with `mergeMap` runs the requests in parallel. Streams are asynchronous collections, so time no longer has to be managed by hand (p. 253).
+**الگوی observer** (pp. 246–247): ماژول `Terminator` پیش از خروج هر callback ثبت‌شده را صدا می‌زند، که نشان می‌دهد یک observable تقریباً هیچ کدی نمی‌خواهد. **انتشار و اشتراک** آن را با کانال‌هایی تعمیم می‌دهد که بیرون از کد شما پیاده شده‌اند، اغلب با سرویس‌های cloud (pp. 247–248). **streamهای reactive** (pp. 249–253): مثل خانه‌های spreadsheet، مقدارها به مقدارهایی که به کار می‌برند واکنش نشان می‌دهند. در RxJS، zip کردن پنج نام حیوان با فاصله‌ی ۵۰۰ میلی‌ثانیه هر نیم ثانیه یک زوج منتشر می‌کند؛ و گرفتن کاربرهای ۳ و ۲ و ۱ با `mergeMap` درخواست‌ها را موازی اجرا می‌کند. streamها مجموعه‌های asynchronous‌اند، پس دیگر لازم نیست زمان را دستی مدیریت کنید (p. 253).
 
-Exercise 20 asks which technologies fit four situations, such as notifying operations staff after three network-down events in five minutes (pp. 253–254).
+تمرین ۲۰ می‌پرسد کدام فناوری به چهار موقعیت می‌خورد، مثل خبر دادن به تیم عملیات بعد از سه رویداد قطع شبکه در پنج دقیقه (pp. 253–254).
 
-### Topic 30. Transforming Programming
+### موضوع ۳۰. برنامه‌نویسی تبدیلی
 
-All programs transform data, yet design rarely starts from transformations (p. 255). A 1970s Unix programmer would list the five longest files in a tree with `find . -type f | xargs wc -l | sort -n | tail -5`, then add `tail -6 | head -5` to drop `wc`'s total line (pp. 255–257). **Tip 49, Programming Is About Code, But Programs Are About Data** (p. 258).
+هر برنامه‌ای داده را تبدیل می‌کند، و با این حال طراحی کم از تبدیل‌ها شروع می‌شود (p. 255). یک برنامه‌نویس Unix در دهه‌ی ۱۹۷۰ پنج فایل بلند یک درخت را با `find . -type f | xargs wc -l | sort -n | tail -5` فهرست می‌کرد، و بعد `tail -6 | head -5` اضافه می‌کرد تا خط جمع `wc` بیفتد (pp. 255–257). **tip ۴۹، برنامه‌نویسی درباره‌ی کد است، ولی برنامه‌ها درباره‌ی داده‌اند** (p. 258).
 
-**Finding transformations** (pp. 258–264): start from the requirement's input and output and find the steps between them, top down. The book's **anagram finder** turns letters into words grouped by length using a dictionary keyed by **signature**, the sorted letters of a word:
+**یافتن تبدیل‌ها** (pp. 258–264): از ورودی و خروجی نیازمندی شروع کنید و قدم‌های بینشان را از بالا به پایین پیدا کنید. **یابنده‌ی آناگرام** کتاب، حروف را به کلمه‌هایی تبدیل می‌کند که بر حسب طول گروه شده‌اند، با یک دیکشنری که کلیدش **امضا**ست، یعنی حروف مرتب‌شده‌ی یک کلمه:
 
-| Step | Transformation | For "lvyin" |
+| قدم | تبدیل | برای «lvyin» |
 |---|---|---|
-| 1 | All combinations of three or more letters | vin, viy, … vinyl |
-| 2 | Signature of each combination | inv, ivy, … ilnvy |
-| 3 | Dictionary words matching any signature | ivy, yin, nil, lin, viny, liny, inly, vinyl |
-| 4 | Group by length | 3 ⇒ ivy, lin, nil, yin · 4 ⇒ inly, liny, viny · 5 ⇒ vinyl |
+| ۱ | همه‌ی ترکیب‌های سه حرف یا بیشتر | vin، viy، … vinyl |
+| ۲ | امضای هر ترکیب | inv، ivy، … ilnvy |
+| ۳ | کلمه‌های دیکشنری که با امضایی می‌خورند | ivy، yin، nil، lin، viny، liny، inly، vinyl |
+| ۴ | گروه‌بندی بر حسب طول | ۳ ⇐ ivy، lin، nil، yin · ۴ ⇐ inly، liny، viny · ۵ ⇐ vinyl |
 
-Each step is itself a pipeline (step 1: characters → subsets → keep length ≥ 3 → strings), written in Elixir with the `|>` operator, which passes the left value as the first argument of the function on the right (pp. 260–261). Many languages have a pipe; without one, write the steps as a series of assignments (pp. 261–263). The main function reads as the requirement: `word |> all_subsets… |> as_unique_signatures |> find_in_dictionary |> group_by_length` (pp. 263–264).
+هر قدم خودش یک pipeline است؛ قدم ۱: کاراکترها ← زیرمجموعه‌ها ← نگه داشتن طول سه و بیشتر ← رشته‌ها. در Elixir با عملگر `|>` نوشته می‌شود، که مقدار چپ را به‌عنوان اولین آرگومان تابع راست می‌دهد (pp. 260–261). خیلی از زبان‌ها pipe دارند؛ و بی آن، قدم‌ها را به شکل زنجیره‌ای از انتساب بنویسید (pp. 261–263). تابع اصلی مثل خود نیازمندی خوانده می‌شود: `word |> all_subsets… |> as_unique_signatures |> find_in_dictionary |> group_by_length` (pp. 263–264).
 
-**Why it matters** (pp. 264–265): object orientation hides data in objects that change each other's state, which adds coupling. **Tip 50, Don't Hoard State; Pass It Around**: data is a river, and a function can be reused wherever its parameters match another's output.
+**چرا مهم است** (pp. 264–265): شیءگرایی داده را در objectهایی قایم می‌کند که حالت همدیگر را عوض می‌کنند، و همین coupling اضافه می‌کند. **tip ۵۰، حالت را احتکار نکنید؛ دستش بدهید**: داده یک رود است، و یک تابع را می‌شود هر جایی دوباره به کار برد که پارامترهایش با خروجی تابع دیگری بخورد.
 
-**Error handling** (pp. 265–270): never pass raw values; wrap them as `{:ok, value}` or `{:error, reason}` (like Haskell's `Maybe` or Scala's `Option`).
+**مدیریت خطا** (pp. 265–270): هیچ‌وقت مقدار خام ندهید؛ به‌عنوان `{:ok, value}` یا `{:error, reason}` بپیچیدشان، مثل `Maybe` در Haskell یا `Option` در Scala.
 
-- **Inside each transformation:** every function pattern-matches an error and passes it on, so an error anywhere becomes the pipeline's value (pp. 266–268).
-- **In the pipeline:** an `and_then` **bind** function calls the next step only on `:ok`, so each step simply takes a value and returns ok or error (pp. 268–270).
+- **داخل هر تبدیل:** هر تابع روی خطا الگو‌تطبیق می‌کند و جلو می‌فرستدش، پس خطا در هر جایی به مقدار pipeline تبدیل می‌شود (pp. 266–268).
+- **در خود pipeline:** یک تابع **bind** به نام `and_then` قدم بعدی را فقط روی `:ok` صدا می‌زند، پس هر قدم به‌سادگی مقداری می‌گیرد و ok یا error برمی‌گرداند (pp. 268–270).
 
-> **Try it:** [The anagram pipeline](../widgets/05-anagram-pipeline.html) — type letters and watch them flow through the book's four transformations, then break a step and see an `{:error, …}` short-circuit the rest of the pipeline.
+> **Try it:** [pipeline آناگرام](../widgets/05-anagram-pipeline.html)؛ حرف تایپ کنید و ببینید از چهار تبدیل کتاب رد می‌شوند، بعد یک قدم را بشکنید و ببینید `{:error, …}` بقیه‌ی pipeline را قطع می‌کند.
 
-### Topic 31. Inheritance Tax
+### موضوع ۳۱. مالیات وراثت
 
-Joe Armstrong: you wanted a banana but got the gorilla holding it and the whole jungle (p. 272). Inheritance began in Simula 67 as **prefix classes**, so cars and bicycles could share a linked-list queue; Smalltalk used it for "differential programming", this-is-like-that-except (pp. 272–273). Developers now inherit because they don't like typing (sharing code) or because they like types (is-a-kind-of) (pp. 273–274). Both have problems:
+به گفته‌ی Joe Armstrong، شما موز می‌خواستید ولی گوریلی که نگهش داشته و کل جنگل را گرفتید (p. 272). وراثت در Simula 67 به‌عنوان **کلاس‌های پیشوندی** شروع شد تا خودرو و دوچرخه بتوانند یک صف پیوندی را شریک شوند؛ Smalltalk برای «برنامه‌نویسی تفاضلی» به کارش برد، یعنی این‌مثل‌آن‌است‌جز (pp. 272–273). developerها حالا ارث می‌برند چون از تایپ کردن خوششان نمی‌آید، یعنی شریک شدن کد، یا چون از نوع‌ها خوششان می‌آید، یعنی گونه‌ای‌از‌هست (pp. 273–274). هر دو مسئله دارند:
 
-| Use | Problem (pp. 274–276) |
+| کاربرد | مسئله (pp. 274–276) |
 |---|---|
-| **Sharing code** | Inheritance is coupling, including for code that only uses the child. When `Vehicle` renames `move_at` to `set_velocity` and `@speed` to `@velocity`, code that uses `Car` breaks, and so does `Car` itself |
-| **Building types** | Hierarchies grow into wall-sized diagrams where changes ripple through layers; a Car is also an Asset, InsuredItem and LoanCollateral, which needs multiple inheritance most languages lack |
+| **شریک شدن کد** | وراثت coupling است، حتی برای کدی که فقط از فرزند استفاده می‌کند. وقتی `Vehicle` نام `move_at` را به `set_velocity` و `@speed` را به `@velocity` عوض می‌کند، کدی که `Car` را به کار می‌برد می‌شکند، و خود `Car` هم |
+| **ساختن نوع** | سلسله‌مراتب‌ها به نمودارهای دیوار‌اندازه بزرگ می‌شوند که تغییر در آن‌ها از لایه‌ها موج می‌زند؛ یک Car همچنین Asset و InsuredItem و LoanCollateral است، که به وراثت چندگانه نیاز دارد که بیشتر زبان‌ها ندارند |
 
-**Tip 51, Don't Pay Inheritance Tax** (p. 276). The alternatives (pp. 276–283):
+**نکته‌ی ۵۱، مالیات وراثت ندهید** (p. 276). جایگزین‌ها (pp. 276–283):
 
-- **Interfaces and protocols.** `Car implements Drivable, Locatable` declares behaviors without code; a `List<Locatable>` can hold cars and phones. **Tip 52, Prefer Interfaces to Express Polymorphism** (p. 278).
-- **Delegation.** Subclassing a persistence base class drags its whole API into `Account`. Holding a `Persister` and exposing only `save` keeps control of the interface; separating `Account` from `AccountRecord` goes further, at the cost of boilerplate. **Tip 53, Delegate to Services: Has-A Trumps Is-A** (p. 279).
-- **Mixins and traits.** Add a `CommonFinders` set of functions to every record class; build `AccountForCustomer` and `AccountForAdmin` from common and situation-specific validation mixins instead of one class full of flags. **Tip 54, Use Mixins to Share Functionality** (p. 282).
+- **مفهوم interface و protocol.** عبارت `Car implements Drivable, Locatable` رفتارها را بی کد اعلان می‌کند؛ یک `List<Locatable>` می‌تواند خودرو و تلفن را نگه دارد. **tip ۵۲، برای بیان چند‌ریختی، interface را ترجیح بدهید** (p. 278).
+- **واگذاری.** زیرکلاس کردن یک کلاس پایه‌ی ماندگاری، کل API آن را به `Account` می‌کشاند. نگه داشتن یک `Persister` و نشان دادن فقط `save` کنترل interface را حفظ می‌کند؛ و جدا کردن `Account` از `AccountRecord` جلوتر می‌رود، به قیمت کد تکراری. **tip ۵۳، به سرویس‌ها واگذار کنید: has-a از is-a بهتر است** (p. 279).
+- **الگوی mixin و trait.** یک مجموعه‌ی `CommonFinders` از توابع را به هر کلاس رکورد اضافه کنید؛ و `AccountForCustomer` و `AccountForAdmin` را از mixinهای اعتبارسنجی مشترک و وابسته‌به‌موقعیت بسازید، به‌جای یک کلاس پر از پرچم. **tip ۵۴، برای شریک شدن قابلیت از mixin استفاده کنید** (p. 282).
 
-Choose by intent: sharing type information, adding functionality or sharing methods (pp. 282–283).
+بر حسب قصد انتخاب کنید: شریک شدن اطلاعات نوع، افزودن قابلیت، یا شریک شدن متد (pp. 282–283).
 
-### Topic 32. Configuration
+### موضوع ۳۲. تنظیم
 
-Values that may change after going live, or differ per environment or customer, belong outside the code. **Tip 55, Parameterize Your App Using External Configuration** (p. 284). Candidates: credentials, logging levels and destinations, ports and machine names, environment-specific validation, tax rates, site-specific formatting, license keys (pp. 284–285).
+مقدارهایی که ممکن است بعد از زنده شدن عوض شوند، یا در هر محیط یا مشتری فرق کنند، بیرون از کد تعلق دارند. **tip ۵۵، برنامه‌تان را با تنظیم بیرونی پارامتری کنید** (p. 284). نامزدها: credentialها، سطح و مقصد log، port و نام ماشین، اعتبارسنجی وابسته به محیط، نرخ مالیات، قالب‌بندی وابسته به سایت، و کلید license (pp. 284–285).
 
-- **Static configuration** lives in YAML or JSON files, or in database tables if customers change it. Don't make the loaded structure global: wrap it behind a thin API (p. 285).
-- **Configuration as a service** (pp. 285–286), the authors' current preference: shared across applications with access control, changed globally, maintained through a UI, and **dynamic**, with components notified of changes instead of restarting.
-- **Don't write dodo-code** (pp. 286–287): species that don't adapt die.
-- **Don't overdo it** (sidebar, p. 287). One client made every field configurable, had some 40,000 configuration variables, and took weeks for the smallest change. And don't push decisions into configuration out of laziness: try one way and get feedback.
+- **تنظیم ایستا** در فایل‌های YAML یا JSON می‌نشیند، یا در جدول‌های دیتابیس اگر مشتری‌ها عوضش می‌کنند. ساختار بار‌شده را سراسری نکنید: پشت یک API نازک بپیچیدش (p. 285).
+- **تنظیم به‌عنوان سرویس** (pp. 285–286)، که ترجیح فعلی نویسنده‌هاست: بین برنامه‌ها مشترک با کنترل دسترسی، سراسری عوض‌شدنی، از راه یک UI نگه‌داری‌شدنی، و **پویا**، که به مؤلفه‌ها تغییر خبر داده می‌شود و نیازی به راه‌اندازی دوباره نیست.
+- **کد دودو ننویسید** (pp. 286–287): گونه‌هایی که سازگار نمی‌شوند می‌میرند.
+- **زیاده‌روی نکنید** (کادر کناری، ص. ۲۸۷). یک مشتری هر فیلدی را تنظیم‌شدنی کرد، چیزی حدود چهل هزار متغیر تنظیم داشت، و کوچک‌ترین تغییر هفته‌ها می‌برد. و از تنبلی تصمیم‌ها را به تنظیم هل ندهید: یک راه را امتحان کنید و بازخورد بگیرید.
 
-## Trade-offs at a glance
+> **In practice:** config بیرون از کد: نام جدول‌ها، زمان‌بندی‌ها و آدرس‌ها در YAML و ConfigMap، و secretها از Kubernetes Secret.
+>
+> **Your turn:** کجا رمز اتصال loader به دیتابیس منبع را نگه می‌دارید؟
+>
+> *Answer:* نه در کد و نه در repo؛ در Kubernetes Secret که هنگام deploy تزریق می‌شود و image همه‌جا یکی است. کتاب config را بیرون از کد می‌گذارد تا رفتار بدون build تازه عوض شود (pp. 284–288).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Tell, don't ask | Rules enforced in one place; encapsulation | More methods on domain objects |
-| Method-call chains | Quick to write | Coupled to every class along the chain |
-| Global data or singletons | Easy access anywhere | Hidden coupling; hard to test and extract |
-| Global wrapped in an API | Representation can change | Still one shared set of data |
-| Observer | Minimal code | Registration coupling; synchronous callbacks |
-| Pubsub | Decoupled, asynchronous, replaceable parts | Hard to trace who handles what |
-| Pipelines of transformations | Clear flow; reusable functions; less coupling | Coupling through data formats; error wrapping needed |
-| Inheritance | Code reuse with little typing | Coupling to every ancestor; brittle hierarchies |
-| Interfaces, delegation, mixins | Polymorphism and reuse without ancestors | Some boilerplate (delegation) |
-| Configuration as a service | Dynamic, shared, no restarts | A service to run; everything configurable is too much |
+| بگو، نپرس | قاعده‌ها در یک جا اعمال می‌شوند؛ کپسوله‌سازی | متدهای بیشتر روی objectهای دامنه |
+| زنجیره‌ی فراخوانی متد | نوشتنش تند است | جفت به هر کلاسی در طول زنجیره |
+| داده‌ی سراسری یا singleton | دسترسی آسان از هر جا | coupling پنهان؛ تست و بیرون کشیدنش سخت است |
+| سراسریِ پیچیده در یک API | نمایش می‌تواند عوض شود | باز هم یک مجموعه داده‌ی مشترک |
+| الگوی observer | کد کمینه | coupling ثبت؛ callback synchronous |
+| انتشار و اشتراک | decouple و asynchronous و با بخش‌های جابه‌جا‌شدنی | ردیابی این که چه کسی چه چیزی را می‌گیرد سخت است |
+| pipeline تبدیل‌ها | جریان روشن؛ توابع دوباره‌به‌کار‌رفتنی؛ coupling کمتر | coupling از راه قالب داده؛ پیچیدن خطا لازم است |
+| وراثت | استفاده‌ی دوباره از کد با تایپ کم | coupling به هر نیایی؛ سلسله‌مراتب شکننده |
+| interface و واگذاری و mixin | چند‌ریختی و استفاده‌ی دوباره بی نیا | کمی کد تکراری، در واگذاری |
+| تنظیم به‌عنوان سرویس | پویا و مشترک و بی راه‌اندازی دوباره | سرویسی برای اجرا کردن؛ تنظیم‌شدنی بودن همه چیز زیادی است |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Railway-oriented programming.** Scott Wlaschin's name for the `and_then` style: each function is a switch with a success track and a failure track, and bind joins the switches. Rust's `?` operator and `Result::and_then`, and JavaScript's promise `.then` chains, are the same idea built into languages.
-- **Composition over inheritance** is also the first principle in *Design Patterns* (Gamma et al., 1994): "favor object composition over class inheritance". The book's three alternatives are three ways to compose.
-- **Measuring transitive coupling.** The [transitive-coupling lab](../lab/05-transitive-coupling/README.md) shows how fast "A is coupled to everything B and C are coupled to" grows: a few direct dependencies per module can reach most of a codebase.
+- **برنامه‌نویسی ریل‌محور.** نام Scott Wlaschin برای سبک `and_then`: هر تابع یک سوزن است با یک ریل موفقیت و یک ریل شکست، و bind سوزن‌ها را به هم می‌رساند. عملگر `?` و `Result::and_then` در Rust، و زنجیره‌های `.then` در promiseهای جاوااسکریپت، همین ایده‌اند که داخل زبان ساخته شده.
+- **ترکیب بر وراثت** همچنین اولین اصل در کتاب *Design Patterns* است (Gamma و همکاران، سال ۱۹۹۴): «ترکیب object را بر وراثت کلاس ترجیح بدهید». سه جایگزین کتاب، سه راه ترکیب کردن‌اند.
+- **اندازه‌گیری coupling transient.** [آزمایش coupling transient](../lab/05-transitive-coupling/README.md) نشان می‌دهد «A به هر چیزی جفت است که B و C به آن جفت‌اند» چقدر تند بزرگ می‌شود: چند وابستگی مستقیم در هر ماژول می‌تواند به بیشتر یک codebase برسد.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. A Pragmatic Approach](02-a-pragmatic-approach.md) (ETC, orthogonality and reversibility, which this chapter makes concrete), [3. The Basic Tools](03-the-basic-tools.md) (shell pipelines and plain-text configuration), [4. Pragmatic Paranoia](04-pragmatic-paranoia.md) (the coupled resource example), [6. Concurrency](06-concurrency.md) (shared state as global data; actors and blackboards), [7. While You Are Coding](07-while-you-are-coding.md) (refactoring toward these designs).
-- **Run it:** [Transitive coupling](../lab/05-transitive-coupling/README.md) — builds random layered dependency graphs and measures how many modules each one is transitively coupled to as direct dependencies grow.
+- **فصل‌های مرتبط:** [فصل ۲: رویکرد pragmatic](02-a-pragmatic-approach.md) که ETC و orthogonality و برگشت‌پذیری را دارد، که این فصل عینی‌شان می‌کند، [فصل ۳: ابزارهای پایه](03-the-basic-tools.md) که pipelineهای shell و تنظیم در متن ساده را دارد، [فصل ۴: بدگمانی pragmatic](04-pragmatic-paranoia.md) که نمونه‌ی منابع جفت‌شده را دارد، [فصل ۶: concurrency](06-concurrency.md) که shared state را به‌عنوان داده‌ی سراسری و actor و blackboard را دارد، و [فصل ۷: وقتی کد می‌زنید](07-while-you-are-coding.md) که refactoring به سمت همین طراحی‌ها را دارد.
+- **Run it:** [coupling transient](../lab/05-transitive-coupling/README.md)؛ گراف‌های وابستگی لایه‌ای تصادفی می‌سازد و با رشد وابستگی‌های مستقیم اندازه می‌گیرد هر ماژول به چند ماژول transient جفت است.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's PDF pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های PDF کتاب ارجاع می‌دهند.*
 
-1. **A is coupled to B and C; B is coupled to M and N; C to X and Y. What is A coupled to?**
+1. **ماژول A به B و C جفت است؛ B به M و N؛ و C به X و Y. ماژول A به چه چیزهایی جفت است؟**
 
-   *Answer:* B, C, M, N, X and Y: coupling is transitive (p. 229).
+   *Answer:* به B و C و M و N و X و Y: coupling گذراست (p. 229).
 
-2. **Why can't the 40% discount rule be enforced reliably in the train-wreck version?**
+2. **چرا قاعده‌ی تخفیف چهل درصد در نسخه‌ی تصادف قطار قابل‌اعتماد اعمال نمی‌شود؟**
 
-   *Answer:* Any code anywhere can set the totals' fields directly; the totals object isn't responsible for its own rules (p. 231).
+   *Answer:* هر کدی در هر جایی می‌تواند فیلدهای totals را مستقیم بگذارد؛ خود object به نام totals مسئول قاعده‌های خودش نیست (p. 231).
 
-3. **Is `people.sort_by{…}.first(10).map{…}` a train wreck?**
-   - [ ] Yes: it has more than one dot
-   - [x] No: it chains standard-library methods that are very unlikely to change
+3. **آیا `people.sort_by{…}.first(10).map{…}` تصادف قطار است؟**
+   - [ ] بله: بیشتر از یک نقطه دارد
+   - [x] نه: متدهای کتابخانه‌ی استاندارد را زنجیر می‌کند که خیلی بعید است عوض شوند
 
-   *Answer:* The one-dot rule has an exception for very stable APIs such as the language's own library (p. 234).
+   *Answer:* قاعده‌ی یک‌نقطه برای APIهای خیلی پایدار مثل کتابخانه‌ی خود زبان استثنا دارد (p. 234).
 
-4. **Someone wraps all their globals in a singleton with exported instance variables. What does the book say?**
+4. **کسی همه‌ی سراسری‌هایش را در یک singleton با متغیرهای نمونه‌ی بیرون‌داده می‌پیچد. کتاب چه می‌گوید؟**
 
-   *Answer:* It's still global data, just with a longer name (p. 236).
+   *Answer:* باز هم داده‌ی سراسری است، فقط با نامی بلندتر (p. 236).
 
-5. **What is the main drawback of pubsub compared with the observer pattern?**
+5. **اشکال اصلی انتشار و اشتراک در مقایسه با الگوی observer چیست؟**
 
-   *Answer:* It's hard to see what's going on: you can't look at a publisher and see which subscribers handle a message (p. 248).
+   *Answer:* دیدن این که چه خبر است سخت است: نمی‌توانید به یک منتشر‌کننده نگاه کنید و ببینید کدام مشترک‌ها پیامی را می‌گیرند (p. 248).
 
-6. **What does the `and_then` function do in Topic 30?**
+6. **تابع `and_then` در موضوع ۳۰ چه می‌کند؟**
 
-   *Answer:* It's a bind: given `{:ok, value}` it calls the next function with the value; given anything else it passes it through, so errors short-circuit the pipeline (pp. 269–270).
+   *Answer:* یک bind است: با `{:ok, value}` تابع بعدی را با آن مقدار صدا می‌زند، و با هر چیز دیگری عبورش می‌دهد، پس خطاها pipeline را قطع می‌کنند (pp. 269–270).
 
-7. **Why does code that only uses `Car` break when `Vehicle` renames `move_at`?**
+7. **چرا کدی که فقط `Car` را به کار می‌برد وقتی `Vehicle` نام `move_at` را عوض می‌کند می‌شکند؟**
 
-   *Answer:* Inheritance couples users of the child to all its ancestors (pp. 274–275).
+   *Answer:* وراثت، کاربرهای فرزند را به همه‌ی نیاهایش جفت می‌کند (pp. 274–275).
 
-8. **What went wrong for the client with 40,000 configuration variables?**
+8. **برای مشتری‌ای با چهل هزار متغیر تنظیم چه پیش آمد؟**
 
-   *Answer:* Every field was configurable, so the smallest change took weeks of field and admin code (p. 287).
+   *Answer:* هر فیلدی تنظیم‌شدنی بود، پس کوچک‌ترین تغییر هفته‌ها کد فیلد و کد مدیریت می‌برد (p. 287).

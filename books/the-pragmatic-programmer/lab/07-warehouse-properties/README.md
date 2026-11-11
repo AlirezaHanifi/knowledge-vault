@@ -1,18 +1,20 @@
-# Properties find the warehouse bug
+# تست‌های property باگ انبار را پیدا می‌کنند
 
-The book's `Warehouse` passes its hand-written unit tests. This script builds a tiny property-based tester with the standard library: it generates orders (item from shoes or hats, quantity 1–4, as in the book), checks that stock taken plus stock left equals the original stock, and greedily shrinks any failure toward the first item and smaller quantities. It runs the property against the buggy `in_stock(item)` and the fixed `in_stock(item, quantity)`, and also with quantities up to 20.
+کلاس `Warehouse` کتاب unit testهای دستی‌نوشته‌اش را قبول می‌شود. این اسکریپت یک تست‌کننده‌ی property‌محور ریز با کتابخانه‌ی استاندارد می‌سازد: سفارش می‌سازد، یعنی قلم از کفش یا کلاه و تعداد یک تا چهار مثل کتاب، بررسی می‌کند که موجودی برداشته‌شده به‌علاوه‌ی موجودی مانده برابر موجودی اصلی است، و هر شکستی را حریصانه به سمت اولین قلم و تعدادهای کمتر کوچک می‌کند. property را روی `in_stock(item)` باگ‌دار و `in_stock(item, quantity)` اصلاح‌شده اجرا می‌کند، و همچنین با تعدادهای تا بیست.
 
-*Illustrates The Pragmatic Programmer, “Finding Bad Assumptions” in Topic 42, Property-Based Testing, pp. 378–383: the Warehouse, `order`, the property and the fix follow the book (`proptest/stock.py` and `stock1.py`). The generator and shrinker are the vault's; the book uses Hypothesis.*
+*این آزمایش «یافتن فرض‌های بد» در موضوع ۴۲ از کتاب The Pragmatic Programmer، یعنی تست property‌محور، صص. ۳۷۸–۳۸۳ را نشان می‌دهد: کلاس Warehouse و `order` و property و اصلاح دنبال کتاب می‌روند، یعنی `proptest/stock.py` و `stock1.py`. سازنده و کوچک‌کننده مال vault است؛ کتاب از Hypothesis استفاده می‌کند.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 warehouse_properties.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 == buggy in_stock(item)
@@ -34,13 +36,13 @@ python3 warehouse_properties.py
    quantity 1-20 seed 3: pass (100 cases)
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- The unit tests pass for both versions: they only ever order one hat.
-- With the book's strategy, every seed fails within a few cases and shrinks to `hats, 3`, the book's falsifying example: there are 2 hats, and `in_stock` only checked for at least one.
-- With quantities up to 20 the shrinker lands on `shoes, 11` instead: a different minimal failure of the same bug. The input strategy decides which counterexample you see.
-- The fixed version passes every run, so turn `hats, 3` into a regular unit test, as the book advises, to keep the bug from coming back.
+- تست‌های unit برای هر دو نسخه قبول می‌شوند: هیچ‌وقت بیشتر از یک کلاه سفارش نمی‌دهند.
+- با راهبرد کتاب، هر seedی ظرف چند حالت شکست می‌خورد و تا `hats, 3` کوچک می‌شود، یعنی نمونه‌ی ناقض کتاب: دو کلاه هست، و `in_stock` فقط دست‌کم یکی را بررسی می‌کرد.
+- با تعدادهای تا بیست، کوچک‌کننده به‌جایش روی `shoes, 11` می‌نشیند: شکست کمینه‌ی متفاوتی از همان باگ. راهبرد ورودی تعیین می‌کند کدام نمونه‌ی نقض را می‌بینید.
+- نسخه‌ی اصلاح‌شده هر اجرا را قبول می‌شود، پس همان‌طور که کتاب توصیه می‌کند `hats, 3` را به یک unit test معمولی تبدیل کنید تا باگ برنگردد.
 
-## Related
+## پیوندها
 
-- Chapter note: [7. While You Are Coding](../../chapters/07-while-you-are-coding.md) — Topic 42, Property-Based Testing, pp. 378–383
+- یادداشت فصل: [فصل ۷: وقتی کد می‌زنید](../../chapters/07-while-you-are-coding.md) — موضوع ۴۲، تست property‌محور، صص. ۳۷۸–۳۸۳

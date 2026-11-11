@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Broken Windows</title>
-<meta name="description" content="Let a team keep working on a 144-module codebase where every visible mess makes the next one more likely; compare ignoring broken windows, boarding them up, and fixing them at once. Illustrates The Pragmatic Programmer, Topic 3.">
+<title>پنجره‌های شکسته</title>
+<meta name="description" content="بگذارید تیمی روی codebaseی ۱۴۴ ماژولی کار کند که هر به‌هم‌ریختگی دیدنی، بعدی را محتمل‌تر می‌کند؛ و نادیده گرفتن پنجره‌های شکسته را با تخته زدن و با تعمیر فوری مقایسه کنید. تصویری از موضوع ۳ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
@@ -18,51 +18,51 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/01-a-pragmatic-philosophy.html">Chapter 1</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Broken windows</span>
+      <a href="../chapters/01-a-pragmatic-philosophy.html">فصل ۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">پنجره‌های شکسته</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 1 · A Pragmatic Philosophy</div>
-  <h1>Broken windows</h1>
-  <p class="lede">One unrepaired <strong>broken window</strong> signals that nobody cares, and decay speeds up from there. The book’s advice: don’t live with broken windows. Fix them as soon as you find them, or at least <strong>board them up</strong> so the damage stops spreading.</p>
-  <p class="source-note">Illustrates Topic 3, Software Entropy (pp. 42–45, Tip 5). The model is the vault’s: each edit has a 2% base chance of leaving a mess, plus the share of modules showing visible (unboarded) mess; the team makes ten edits a week. Edits in messy modules deliver half a feature. Fixing a window costs one edit; boarding costs a fifth of one. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱ · فلسفه‌ی pragmatic</div>
+  <h1>پنجره‌های شکسته</h1>
+  <p class="lede">یک <strong>پنجره‌ی شکسته</strong>ی تعمیر‌نشده نشان می‌دهد کسی اهمیت نمی‌دهد، و پوسیدگی از همان‌جا تند می‌شود. توصیه‌ی کتاب: با پنجره‌ی شکسته زندگی نکنید. همین که پیدایشان کردید تعمیرشان کنید، یا دست‌کم <strong>تخته بزنید</strong> تا آسیب پخش نشود.</p>
+  <p class="source-note">تصویری از موضوع ۳، آنتروپی نرم‌افزار (صص. ۴۲–۴۵، tip ۵). مدل مال خود vault است: هر ویرایش ۲٪ شانس پایه دارد که به‌هم‌ریختگی بگذارد، به‌علاوه‌ی سهم ماژول‌هایی که به‌هم‌ریختگی دیدنی و تخته‌نزده دارند؛ و تیم هفته‌ای ده ویرایش می‌کند. ویرایش در ماژول به‌هم‌ریخته نصف یک قابلیت تحویل می‌دهد. تعمیر یک پنجره یک ویرایش خرج می‌کند و تخته زدن یک‌پنجم آن. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title" id="gt">Codebase: 144 modules</p><div class="grid" id="grid" role="img" aria-label="Codebase grid"></div>
-        <div class="legend"><span><i class="cell"></i> clean</span><span><i class="cell broken">✗</i> broken window</span><span><i class="cell boarded">▭</i> boarded up</span></div>
+      <div class="panel"><p class="panel-title" id="gt">codebase: ۱۴۴ ماژول</p><div class="grid" id="grid" role="img" aria-label="شبکه‌ی codebase"></div>
+        <div class="legend"><span><i class="cell"></i> تمیز</span><span><i class="cell broken">✗</i> پنجره‌ی شکسته</span><span><i class="cell boarded">▭</i> تخته‌خورده</span></div>
         <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Visible mess over time (all three policies, same seed)</p><svg id="chart" role="img" aria-label="Share of broken modules over time for each policy"></svg></div>
+      <div class="panel"><p class="panel-title">به‌هم‌ریختگی دیدنی در طول زمان، برای هر سه سیاست با همان seed</p><svg id="chart" role="img" aria-label="سهم ماژول‌های شکسته در طول زمان برای هر سیاست"></svg></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="pol"></div><div id="play" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="pol"></div><div id="play" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Ignoring</strong> starts slowly, then accelerates: each new mess raises the chance of the next. This is the feedback loop the book describes, where decline speeds up once nobody seems to care.</li>
-    <li><strong>Fixing at once</strong> costs a little feature work every week, but keeps the codebase near pristine, so features keep flowing at full speed.</li>
-    <li><strong>Boarding up</strong> is cheap and stops the spread, but the boarded modules are still debt. In this model they still deliver half speed until someone really fixes them.</li>
+    <li><strong>نادیده گرفتن</strong> آرام شروع می‌شود و بعد تند: هر به‌هم‌ریختگی تازه شانس بعدی را بالا می‌برد. این همان حلقه‌ی بازخوردی است که کتاب توضیح می‌دهد، که همین که به نظر کسی اهمیت نمی‌دهد افت تند می‌شود.</li>
+    <li><strong>تعمیر فوری</strong> هفته‌ای کمی کار قابلیت خرج می‌کند، ولی codebase را نزدیک بی‌عیب نگه می‌دارد، پس قابلیت‌ها با سرعت کامل جاری می‌مانند.</li>
+    <li><strong>تخته زدن</strong> ارزان است و جلوی پخش شدن را می‌گیرد، ولی ماژول‌های تخته‌خورده باز هم بدهی‌اند. در این مدل تا وقتی کسی واقعاً تعمیرشان نکند با نصف سرعت تحویل می‌دهند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/01-a-pragmatic-philosophy.html"><small>Lesson</small>1. A Pragmatic Philosophy</a></li>
+    <li><a href="../chapters/01-a-pragmatic-philosophy.html"><small>درس</small>فصل ۱: فلسفه‌ی pragmatic</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -97,41 +97,41 @@ function stats(rows) {
   }
   var WEEKS = 52, H = {}, week = 0;
   ["ignore", "board", "fix"].forEach(function (p) { H[p] = sim(p, WEEKS); });
-  var NAMES = { ignore: "Ignore them", board: "Board them up", fix: "Fix at once" };
+  var NAMES = { ignore: "نادیده گرفتن", board: "تخته زدن", fix: "تعمیر فوری" };
   function render() {
     var h = H[cfg.pol][week], g = Kit.clear(document.getElementById("grid"));
-    h.m.forEach(function (x, i) { g.appendChild(Kit.el("div", { class: "cell" + (x === 1 ? " broken" : x === 2 ? " boarded" : ""), title: "Module " + (i + 1) }, x === 1 ? "✗" : x === 2 ? "▭" : "")); });
-    document.getElementById("grid").setAttribute("aria-label", "Week " + week + ": " + h.broken + " broken, " + h.boarded + " boarded, " + (N - h.broken - h.boarded) + " clean modules");
-    document.getElementById("gt").textContent = "Codebase: 144 modules, week " + week + " (" + NAMES[cfg.pol].toLowerCase() + ")";
+    h.m.forEach(function (x, i) { g.appendChild(Kit.el("div", { class: "cell" + (x === 1 ? " broken" : x === 2 ? " boarded" : ""), title: "ماژول " + (i + 1) }, x === 1 ? "✗" : x === 2 ? "▭" : "")); });
+    document.getElementById("grid").setAttribute("aria-label", "هفته‌ی " + week + ": " + h.broken + " ماژول شکسته، " + h.boarded + " تخته‌خورده، و " + (N - h.broken - h.boarded) + " تمیز");
+    document.getElementById("gt").textContent = "codebase: ۱۴۴ ماژول، هفته‌ی " + week + "، با سیاست " + NAMES[cfg.pol];
     var v = document.getElementById("verdict"), share = (h.broken + h.boarded) / N;
     v.className = "callout " + (h.broken / N > 0.25 ? "bad" : share > 0.1 ? "warn" : "ok");
-    v.textContent = h.broken / N > 0.25 ? "Rot has taken hold: a quarter of the modules are visibly broken, and every edit is likely to add more." :
-      h.boarded > h.broken ? "Boarded windows stop the spread, but " + h.boarded + " modules are still waiting for a real fix." :
-      share > 0.1 ? "Mess is spreading: each broken window makes the next more likely." : "The codebase stays close to pristine; people take care not to be the first to make a mess.";
+    v.textContent = h.broken / N > 0.25 ? "پوسیدگی جا افتاده: یک‌چهارم ماژول‌ها به‌چشم شکسته‌اند، و هر ویرایشی احتمالاً باز هم اضافه می‌کند." :
+      h.boarded > h.broken ? "پنجره‌های تخته‌خورده جلوی پخش شدن را گرفته‌اند، ولی " + h.boarded + " ماژول باز هم منتظر تعمیر واقعی‌اند." :
+      share > 0.1 ? "به‌هم‌ریختگی پخش می‌شود: هر پنجره‌ی شکسته بعدی را محتمل‌تر می‌کند." : "پایگاه کد نزدیک بی‌عیب می‌ماند؛ مردم دقت می‌کنند اولین نفری نباشند که به‌هم‌ریختگی می‌سازد.";
     var pts = {}; ["ignore", "board", "fix"].forEach(function (p) { pts[p] = H[p].slice(0, week + 1).map(function (x, i) { return [i, x.broken / N]; }); });
-    Kit.lineChart(document.getElementById("chart"), { xMax: WEEKS, yMax: 1, xLabel: "week", yLabel: "visibly broken", yFormat: function (y) { return Kit.pct(y, 0); },
-      series: [{ label: "ignore", cls: "s2", points: pts.ignore }, { label: "board up", cls: "s4", points: pts.board }, { label: "fix at once", cls: "s3", points: pts.fix }],
-      marks: [{ x: week, label: "now" }] });
-    stats([["Week", week], ["Broken", h.broken, h.broken > 20 ? "bad" : ""], ["Boarded", h.boarded], ["Features delivered", Math.round(h.feat)]]);
+    Kit.lineChart(document.getElementById("chart"), { xMax: WEEKS, yMax: 1, xLabel: "هفته", yLabel: "به‌چشم شکسته", yFormat: function (y) { return Kit.pct(y, 0); },
+      series: [{ label: "نادیده گرفتن", cls: "s2", points: pts.ignore }, { label: "تخته زدن", cls: "s4", points: pts.board }, { label: "تعمیر فوری", cls: "s3", points: pts.fix }],
+      marks: [{ x: week, label: "حالا" }] });
+    stats([["هفته", week], ["شکسته", h.broken, h.broken > 20 ? "bad" : ""], ["تخته‌خورده", h.boarded], ["قابلیت تحویل‌شده", Math.round(h.feat)]]);
   }
-  document.getElementById("pol").appendChild(Kit.segmented({ label: "Policy", value: cfg.pol, options: [{ value: "ignore", label: "Ignore" }, { value: "board", label: "Board up" }, { value: "fix", label: "Fix at once" }],
-    onChange: function (v) { cfg.pol = v; log.add("Policy: " + NAMES[v] + " (week " + week + ": " + Math.round(H[v][week].feat) + " features so far)", "muted"); render(); } }).element);
+  document.getElementById("pol").appendChild(Kit.segmented({ label: "سیاست", value: cfg.pol, options: [{ value: "ignore", label: "نادیده بگیر" }, { value: "board", label: "تخته بزن" }, { value: "fix", label: "فوری تعمیر کن" }],
+    onChange: function (v) { cfg.pol = v; log.add("سیاست: " + NAMES[v] + "، در هفته‌ی " + week + " با " + Math.round(H[v][week].feat) + " قابلیت تا حالا", "muted"); render(); } }).element);
   Kit.player({ mount: document.getElementById("play"), interval: 260,
-    step: function () { if (week >= WEEKS) { log.add("Year over. Features: ignore " + Math.round(H.ignore[WEEKS].feat) + ", board up " + Math.round(H.board[WEEKS].feat) + ", fix " + Math.round(H.fix[WEEKS].feat) + ".", "ok"); return false; }
-      week++; var h = H[cfg.pol][week], p = H[cfg.pol][week - 1]; if (h.broken > p.broken) log.add("Week " + week + ": " + (h.broken - p.broken) + " new broken window(s)", "warn"); render(); },
+    step: function () { if (week >= WEEKS) { log.add("سال تمام شد. قابلیت‌ها: نادیده گرفتن " + Math.round(H.ignore[WEEKS].feat) + "، تخته زدن " + Math.round(H.board[WEEKS].feat) + "، تعمیر " + Math.round(H.fix[WEEKS].feat) + ".", "ok"); return false; }
+      week++; var h = H[cfg.pol][week], p = H[cfg.pol][week - 1]; if (h.broken > p.broken) log.add("هفته‌ی " + week + ": " + (h.broken - p.broken) + " پنجره‌ی شکسته‌ی تازه", "warn"); render(); },
     reset: function () { week = 0; log.clear(); render(); } });
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What does the book suggest when there isn't time to fix a broken window properly?",
-      options: ["Leave it for the next release", "Board it up: comment it out, show “Not Implemented”, or use dummy data", "Call it technical debt"], answer: 1,
-      explain: "p. 43: stop the damage from spreading." },
-    { q: "In the original broken-window experiment, what happened to the abandoned car once a window was broken?",
-      options: ["Nothing changed", "It was stripped within hours", "It was towed away"], answer: 1,
-      explain: "p. 45." },
-    { q: "Why does ignoring mess get worse faster than linearly in this model?",
-      options: ["Each visible mess raises the chance that the next edit adds another", "The team gets slower every week", "Modules are added over time"], answer: 0,
-      explain: "That feedback loop is the vault's way to model the book's point that neglect speeds up rot." }
+    { q: "کتاب وقتی که وقتی برای تعمیر درستِ یک پنجره‌ی شکسته نیست چه پیشنهاد می‌دهد؟",
+      options: ["برای release بعدی رهایش کنید", "تخته بزنید: comment کنید، «Not Implemented» نشان بدهید، یا داده‌ی ساختگی بگذارید", "بدهی فنی بنامیدش"], answer: 1,
+      explain: "صفحه‌ی ۴۳: جلوی پخش شدن آسیب را بگیرید." },
+    { q: "در آزمایش اصلی پنجره‌ی شکسته، همین که پنجره‌ی ماشین رهاشده شکست چه شد؟",
+      options: ["هیچ چیزی عوض نشد", "ظرف چند ساعت لخت شد", "به پارکینگ برده شد"], answer: 1,
+      explain: "صفحه‌ی ۴۵." },
+    { q: "چرا در این مدل، نادیده گرفتن به‌هم‌ریختگی تندتر از خطی بدتر می‌شود؟",
+      options: ["هر به‌هم‌ریختگی دیدنی شانس این را بالا می‌برد که ویرایش بعدی یکی دیگر اضافه کند", "تیم هر هفته کندتر می‌شود", "ماژول‌ها در طول زمان اضافه می‌شوند"], answer: 0,
+      explain: "این حلقه‌ی بازخورد، راه vault برای مدل کردن این نکته‌ی کتاب است که بی‌توجهی پوسیدگی را تند می‌کند." }
   ]);
 })();
 </script>

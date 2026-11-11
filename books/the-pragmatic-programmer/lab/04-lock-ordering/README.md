@@ -1,18 +1,20 @@
-# Lock ordering and deadlock
+# ترتیب قفل و deadlock
 
-How much does a global lock order help? Each thread picks two of the shared resources, locks them one after the other, works, and unlocks. A random scheduler interleaves the threads' steps; a schedule deadlocks when every remaining thread is waiting for a lock another one holds. The script runs 20,000 schedules per row, with each thread taking its resources in any order, and with every thread taking them in the same global order (lowest number first).
+یک ترتیب سراسری قفل چقدر کمک می‌کند؟ هر thread دو تا از منابع مشترک را انتخاب می‌کند، یکی‌یکی قفلشان می‌کند، کار می‌کند، و قفل را باز. یک scheduler تصادفی مرحله‌های threadها را درهم می‌آمیزد؛ و یک زمان‌بندی وقتی deadlock می‌شود که هر thread مانده منتظر قفلی باشد که یکی دیگر نگهش داشته. اسکریپت برای هر ردیف بیست هزار زمان‌بندی اجرا می‌کند، یک‌بار با این که هر thread منابعش را به هر ترتیبی بگیرد و یک‌بار با این که هر thread به همان ترتیب سراسری بگیرد، یعنی کم‌شماره‌ترین اول.
 
-*Illustrates The Pragmatic Programmer, Topic 26, How to Balance Resources, pp. 212–216: allocate the same resources in the same order everywhere to reduce the chance of deadlock. The thread and resource counts, the scheduler and the model are the vault's (seeded).*
+*این آزمایش موضوع ۲۶ از کتاب The Pragmatic Programmer، یعنی چطور منابع را متوازن کنیم، صص. ۲۱۲–۲۱۶ را نشان می‌دهد: همان منابع را همه‌جا به همان ترتیب بگیرید تا شانس deadlock کم شود. شمار thread و منبع و scheduler و مدل مال خود vault است و با seed ثابت.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 lock_ordering.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 20,000 random schedules per row; each thread locks two resources, works, then unlocks
@@ -27,12 +29,12 @@ threads resources   any order  global order
 Percentages are the share of schedules that ended with every remaining thread waiting forever.
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- With no ordering, about a quarter of the schedules deadlock as soon as two threads want the same two resources, and more than three quarters do with 8 threads on 4 resources.
-- With a global order, no schedule deadlocks: a cycle of waiting threads would need someone to hold a higher-numbered lock while waiting for a lower one, which the order forbids.
-- More resources per thread make collisions rarer (2 threads on 3 resources) but never make deadlock impossible. Only the ordering rule does.
+- بی هیچ ترتیبی، حدود یک‌چهارم زمان‌بندی‌ها همین که دو thread همان دو منبع را بخواهند deadlock می‌شوند، و با هشت thread روی چهار منبع بیشتر از سه‌چهارم.
+- با ترتیب سراسری، هیچ زمان‌بندی‌ای deadlock نمی‌شود: حلقه‌ای از threadهای منتظر به کسی نیاز داشت که قفلی با شماره‌ی بالاتر را نگه داشته و منتظر پایین‌تر است، که ترتیب ممنوعش می‌کند.
+- منابع بیشتر برای هر thread، برخورد را کمیاب‌تر می‌کنند، مثل دو thread روی سه منبع، ولی هیچ‌وقت deadlock را ناممکن نمی‌کنند. فقط قاعده‌ی ترتیب این کار را می‌کند.
 
-## Related
+## پیوندها
 
-- Chapter note: [4. Pragmatic Paranoia](../../chapters/04-pragmatic-paranoia.md) — Topic 26, How to Balance Resources, pp. 212–216
+- یادداشت فصل: [فصل ۴: بدگمانی pragmatic](../../chapters/04-pragmatic-paranoia.md) — موضوع ۲۶، چطور منابع را متوازن کنیم، صص. ۲۱۲–۲۱۶
