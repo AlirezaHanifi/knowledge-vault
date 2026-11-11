@@ -59,7 +59,10 @@
     var deck = document.getElementById("main");
     var current = -1;
 
+    var fa = document.documentElement.lang === "fa";
+    function digits(n) { return fa ? String(n).replace(/[0-9]/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; }) : String(n); }
     function indexOf(id) {
+      try { id = decodeURIComponent(id); } catch (e) { /* keep it as written */ }
       for (var i = 0; i < slides.length; i++) if (slides[i].id === id) return i;
       return -1;
     }
@@ -72,7 +75,7 @@
         if (k === i) a.setAttribute("aria-current", "step"); else a.removeAttribute("aria-current");
       });
       bar.style.width = ((i + 1) / slides.length * 100) + "%";
-      count.textContent = (i + 1) + " / " + slides.length;
+      count.textContent = digits(i + 1) + (fa ? " از " : " / ") + digits(slides.length);
       prev.disabled = i === 0;
       next.disabled = i === slides.length - 1;
       if (history.replaceState) history.replaceState(null, "", "#" + slides[i].id);
@@ -101,8 +104,10 @@
     });
     document.addEventListener("keydown", function (e) {
       if (e.metaKey || e.ctrlKey || e.altKey || typing(e.target)) return;
-      if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); show(current + 1, true); }
-      else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); show(current - 1, true); }
+      var rtl = document.documentElement.dir === "rtl"; // in a right-to-left lesson, ← moves forward
+      var fwd = rtl ? "ArrowLeft" : "ArrowRight", back = rtl ? "ArrowRight" : "ArrowLeft";
+      if (e.key === fwd || e.key === "PageDown") { e.preventDefault(); show(current + 1, true); }
+      else if (e.key === back || e.key === "PageUp") { e.preventDefault(); show(current - 1, true); }
       else if (e.key === "Escape") setToc(false);
     });
     window.addEventListener("hashchange", function () {
@@ -130,7 +135,9 @@
         });
         verdict.hidden = false;
         verdict.className = "verdict " + (right ? "is-right" : "is-wrong");
-        verdict.querySelector(".verdict-head").textContent = right ? "Correct." : "Not quite — the highlighted answer is right.";
+        var fa = document.documentElement.lang === "fa";
+        verdict.querySelector(".verdict-head").textContent = right ? (fa ? "درست است." : "Correct.")
+          : (fa ? "نه کاملاً؛ گزینه‌ی مشخص‌شده درست است." : "Not quite — the highlighted answer is right.");
       });
     });
   }

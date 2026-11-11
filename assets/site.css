@@ -24,11 +24,16 @@
 .slide-body h3 { font-size: 1.08rem; margin: 1.6em 0 .5em; }
 .slide-body h4 { font-size: 1rem; margin: 1.3em 0 .4em; color: var(--ink-2); }
 .slide-body .table-wrap { margin: 0 0 1.2em; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-.slide-body table.data td, .slide-body table.data th { padding: 8px 12px; vertical-align: top; }
+.slide-body table.data td, .slide-body table.data th { padding: 8px 12px; vertical-align: top; overflow-wrap: break-word; }
 .slide-body table.data tr:last-child td { border-bottom: 0; }
 .slide-body .callout { margin: 0 0 1.1em; }
 .callout.vault { border-color: var(--s4); background: color-mix(in srgb, var(--s4) 10%, var(--surface)); }
 .callout.vault::before { content: "Vault note"; display: block; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--s4); margin-bottom: 2px; }
+.callout.practice { border-color: var(--s3); background: color-mix(in srgb, var(--s3) 9%, var(--surface)); }
+.callout.practice::before { content: "In practice · vault's own"; display: block; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--s3); margin-bottom: 2px; }
+.callout.practice .open-q { margin-top: .8em; }
+.callout.practice .open-q .answer { padding-left: 16px; }
+.turn-label { color: var(--s3); font-weight: 700; }
 pre.code {
   background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm);
   padding: 12px 14px; overflow-x: auto; font-size: .85rem; line-height: 1.5; margin: 0 0 1.1em;
@@ -48,7 +53,7 @@ figure.book-fig figcaption { max-width: 72ch; margin: .55em auto 0; font-size: .
 figure.book-fig .fig-label { font-weight: 650; color: var(--ink); }
 : 0; font-family: var(--mono); font-size: .8rem; text-align: left; white-space: pre; color: var(--ink-3); }
 pre.mermaid[data-processed] { text-align: center; white-space: normal; color: inherit; }
-pre.mermaid svg { max-width: 100%; height: auto; }
+pre.mermaid svg { display: block; margin-inline: auto; max-width: 100%; height: auto; }
 
 /* ---------- lesson shell ---------- */
 
@@ -190,7 +195,7 @@ html:not(.js) .deck-nav { display: none; }
   .widget-frame iframe { height: 900px; }
 }
 @media (max-width: 420px) {
-  .deck-nav .btn span { display: none; }
+  .deck-nav .btn span:not(.arrow) { display: none; }
   .deck-count { min-width: 0; }
 }
 @media print {
@@ -237,3 +242,54 @@ html:not(.js) .deck-nav { display: none; }
 .glossary td:last-child { white-space: nowrap; }
 @media (max-width: 600px) { .glossary td:first-child, .glossary td:last-child { white-space: normal; } }
 .quiz-note { color: var(--ink-3); font-size: .9rem; }
+
+/* ---------- right-to-left lessons (chapter front matter `lang: fa`) ---------- */
+
+/* The Persian font, digits and base RTL rules live in kit.css (shared with widgets). */
+html[lang="fa"] h1, html[lang="fa"] h2, html[lang="fa"] h3, html[lang="fa"] h4 { letter-spacing: 0; line-height: 1.5; }
+html[lang="fa"] .eyebrow, html[lang="fa"] .toc-title, html[lang="fa"] .callout::before { letter-spacing: 0; text-transform: none; }
+/* Persian text inside an English page (hub cards, lab titles) gets the Persian font too. */
+body [lang="fa"], .card [lang="fa"].card-title { font-family: "Vazirmatn", Tahoma, sans-serif; letter-spacing: 0; text-align: start; }
+.card-desc[lang="fa"] { line-height: 1.8; }
+/* Persian prose is justified on wide screens; narrow columns keep a ragged edge to avoid wide gaps. */
+@media (min-width: 700px) {
+  html[lang="fa"] .slide-body p, html[lang="fa"] .slide-body li, html[lang="fa"] .cover-summary p,
+  html[lang="fa"] .callout p { text-align: justify; text-justify: inter-word; }
+}
+html[lang="fa"] .slide-body p, html[lang="fa"] .slide-body li { max-width: 78ch; }
+html[lang="fa"] .slide-body ol { list-style-type: persian; }
+.source-link { margin: .9em 0 0; }
+html[lang="fa"] .orig-title { margin: .2em 0 0; color: var(--ink-3); font-size: .95rem; text-align: end; }
+/* Headings may open with a Latin term; they still take the Persian direction from their first strong letter. */
+[dir="rtl"] .slide-body h3, [dir="rtl"] .slide-body h4, [dir="rtl"] .slide-head h2, [dir="rtl"] .slide-head h1 { unicode-bidi: plaintext; text-align: start; }
+[dir="rtl"] .slide-body ul, [dir="rtl"] .slide-body ol { padding-left: 0; padding-right: 1.3em; }
+[dir="rtl"] .callout { border-left: 0; border-right: 3px solid var(--accent); }
+[dir="rtl"] .callout.vault { border-right-color: var(--s4); }
+[dir="rtl"] .callout.practice { border-right-color: var(--s3); }
+[dir="rtl"] .callout.practice .open-q .answer { padding-left: 0; padding-right: 16px; }
+html[lang="fa"] .callout.vault::before { content: "یادداشت vault"; }
+html[lang="fa"] .callout.practice::before { content: "در عمل · برداشت خود vault"; }
+html[lang="fa"] .open-q[open] .reveal::before { content: "بستن · "; }
+[dir="rtl"] .cover-summary { border-left: 0; padding-left: 0; border-right: 3px solid var(--accent); padding-right: 18px; }
+[dir="rtl"] .slide-takeaways .slide-body > ul > li { padding: 12px 52px 12px 16px; }
+[dir="rtl"] .slide-takeaways .slide-body > ul > li::before { left: auto; right: 14px; content: counter(tk, persian); }
+[dir="rtl"] .toc { border-right: 0; border-left: 1px solid var(--line); }
+[dir="rtl"] .deck-nav { left: 0; right: var(--toc-w); }
+[dir="rtl"] .mcq legend { float: right; }
+[dir="rtl"] pre, [dir="rtl"] code { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] pre.code { text-align: left; }
+[dir="rtl"] figure.diagram { direction: ltr; }
+/* Each Mermaid label takes its direction from its own first letter, so Persian labels read right to left. */
+[dir="rtl"] figure.diagram :is(.nodeLabel, .edgeLabel, .cluster-label, foreignObject div, foreignObject span, foreignObject p) { unicode-bidi: plaintext; }
+[dir="rtl"] .arrow { display: inline-block; transform: scaleX(-1); }
+@media (max-width: 900px) {
+  [dir="rtl"] .toc { left: auto; right: 0; transform: translateX(105%); }
+  [dir="rtl"] .toc.open { transform: none; }
+  [dir="rtl"] .deck-nav { right: 0; }
+}
+[dir="rtl"] .skip { left: auto; right: -999px; }
+[dir="rtl"] .skip:focus { left: auto; right: 8px; }
+.pref { white-space: nowrap; }
+/* Page badges and the slide counter hold Persian words and digits: set them in the text font. */
+html[lang="fa"] .slide-head .pages, html[lang="fa"] .deck-count { font-family: var(--font); }
+[dir="rtl"] table.data th, [dir="rtl"] table.data td { text-align: start; }

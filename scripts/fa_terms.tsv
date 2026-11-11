@@ -1,0 +1,154 @@
+# Coined Persian terms that a Persian-speaking engineer would say in English.
+# One rule per line: pattern <TAB> English term <TAB> scope.
+# pattern: a Python regex for the Persian word (Persian suffixes such as ‌ها، ‌های، ی، ‌ای are matched automatically).
+# scope: * (every Persian book), TECH (the technical books), DIST (storage and distributed-systems books), or comma-separated book slugs.
+# scripts/validate.py fails on any match in a Persian note, README, framework, widget or lab README; scripts/fa_terms.py --fix rewrites them.
+# Longer phrases come first, so they win over the single words inside them.
+کنترل خوش‌بینانه‌ی هم‌روندی	optimistic concurrency control	*
+هم‌روندی	concurrency	*
+همروندی	concurrency	*
+هم‌روند	concurrent	*
+همروند	concurrent	*
+کنترل هم‌زمانی	concurrency control	TECH
+هم‌زمانی	concurrency	TECH
+تغییرناپذیری	immutability	*
+تغییرناپذیر	immutable	*
+تغییرپذیری	mutability	*
+تغییرپذیر	mutable	*
+بازپخش	replay	*
+آنکال	on-call	*
+لمپورت	Lamport	*
+پردازه	process	*
+کارخواه	client	*
+زباله‌روب	garbage collector	*
+چندریختی	polymorphism	*
+چندریخت	polymorphic	*
+جفت‌شدگی	coupling	*
+توان عملیاتی	throughput	*
+حافظه‌ی نهان	cache	*
+اجماع	consensus	TECH
+بن‌بست	deadlock	TECH
+خط لوله	pipeline	TECH
+زمان‌بند(?!ی)	scheduler	TECH
+نیمه‌همگام	partially synchronous	TECH
+ناهمگام	asynchronous	TECH
+ناهم‌زمان	asynchronous	TECH
+همگام‌سازی	synchronization	TECH
+هم‌گام‌سازی	synchronization	TECH
+همگام	synchronous	TECH
+تکثیر	replication	TECH
+افراز	partitioning	TECH
+بیش‌پارتیشن‌بندی	over-partitioning	TECH
+دسترس‌پذیری	availability	TECH
+دسترس‌پذیر	available	TECH
+تحمل‌پذیر fault	fault-tolerant	TECH
+تحمل خطا	fault tolerance	TECH
+تحمل پارتیشن	partition tolerance	TECH
+سازگاری غایی	eventual consistency	DIST
+سازگاری سرانجامی	eventual consistency	DIST
+سازگاری بیرونی	external consistency	DIST
+سازگاری رو‌به‌عقب	backward compatibility	TECH
+سازگاری رو‌به‌جلو	forward compatibility	TECH
+سازگاری backward	backward compatibility	TECH
+سازگاری forward	forward compatibility	TECH
+سازگاری schema	schema compatibility	TECH
+مدل‌های سازگاری	consistency modelها	DIST
+مدل سازگاری	consistency model	DIST
+سازگاری	consistency	think-distributed-systems,database-internals
+رهبری	leadership	think-distributed-systems,database-internals,designing-data-intensive-applications
+رهبر	leader	think-distributed-systems,database-internals,designing-data-intensive-applications
+پیرو	follower	think-distributed-systems,database-internals,designing-data-intensive-applications
+خوشه	cluster	think-distributed-systems,database-internals,designing-data-intensive-applications
+گره(?!\s*(?:خورد|گوردیان|‌گشا|بزن))	node	data-oriented-programming,database-internals,think-distributed-systems
+ریسمان	thread	TECH
+نخ	thread	TECH
+ایمنی رشته‌ای	thread safety	TECH
+چندرشته‌ای	multi-threaded	TECH
+یک‌رشته‌ای	single-threaded	TECH
+(?<!نیم )پیمانه	module	TECH
+رمزگذاری	encryption	TECH
+کدگذاری	encoding	TECH
+مخزن	repository	TECH
+انبار داده	data warehouse	*
+دریاچه‌ی داده	data lake	*
+نمایه	index	TECH
+شاخص commit	commit index	DIST
+شاخص	index	data-oriented-programming,database-internals
+مدخل	entry	TECH
+داده‌ی دیررس	late data	TECH
+رویدادهای دیررس	late eventها	TECH
+رویداد دیررس	late event	TECH
+دیررس	late	TECH
+دقیقاً‌یک‌بار	exactly-once	*
+دقیقاً یک‌بار	exactly-once	TECH
+دست‌کم‌یک‌بار	at-least-once	*
+حداکثر‌یک‌بار	at-most-once	*
+خطی‌پذیری	linearizability	*
+خطی‌پذیر	linearizable	*
+زنده‌بودن	liveness	TECH
+سری‌شدنی	serializable	TECH
+سری‌پذیری	serializability	TECH
+تشخیص‌دهنده‌ی شکست	failure detector	TECH
+تشخیص‌دهنده	detector	TECH
+پیشنهاددهنده	proposer	DIST
+پذیرنده	acceptor	DIST
+رأی‌دهنده	voter	DIST
+افزونگی	redundancy	TECH
+زمان‌واقعی	real-time	TECH
+فقط‌افزودنی	append-only	*
+فقط‌افزودن	append-only	*
+فقط‌خواندنی	read-only	*
+متغیر‌اندازه	variable-size	*
+ثابت‌اندازه	fixed-size	*
+انزوا	isolation	TECH
+دانه‌بندی	granularity	TECH
+درهم‌آمیزی سه‌سویه	three-way merge	*
+درهم‌آمیختگی	interleaving	TECH
+جابه‌جایی‌پذیر	commutative	TECH
+شرکت‌پذیر	associative	TECH
+گم‌شدن‌منصفانه	fair-loss	*
+شکست‌شفاف	failure-transparent	*
+سرآیند	header	TECH
+پیمایش‌گر	iterator	TECH
+کم‌ریز	underflow	TECH
+خواهر‌و‌برادر	sibling	TECH
+اندازه‌لایه‌ای	size-tiered	TECH
+یک‌دل	unanimous	TECH
+هماهنگ‌کننده	coordinator	TECH
+تولیدکننده	producer	TECH
+مصرف‌کننده	consumer	TECH
+تأمین‌کننده‌ی داده	data provider	TECH
+درون‌حافظه	in-memory	TECH
+بی‌کران	unbounded	TECH
+بیکران	unbounded	TECH
+کران‌دار	bounded	TECH
+پایین‌دست	downstream	TECH
+بالادست	upstream	TECH
+حالت‌محور	state-based	TECH
+حالت‌دار	stateful	TECH
+بی‌حالت	stateless	TECH
+ماشین حالت	state machine	TECH
+حالت مشترک	shared state	TECH
+واجهه	interface	TECH
+رابط کاربری	UI	TECH
+رابط	interface	TECH
+پایش	monitoring	TECH
+پیکربندی	config	TECH
+استقرار	deployment	TECH
+ادغام	merge	TECH
+نگاشت(?=\s*(?:می‌|نمی‌|شد|کرد|کن))	map	TECH
+نگاشت	mapping	TECH
+پردازش دسته‌ای	batch processing	TECH
+گذرا	transient	TECH
+بادوام	durable	TECH
+ماندگار	durable	think-distributed-systems,database-internals,designing-data-intensive-applications,data-engineering-design-patterns
+(?<!به )تأخیر	latency	think-distributed-systems,database-internals,designing-data-intensive-applications
+جهش	mutation	data-oriented-programming
+جهش	mutant	the-pragmatic-programmer
+جهش	spike	designing-data-intensive-applications,data-engineering-design-patterns
+نگارش	version	data-oriented-programming
+واگرد	undo	data-oriented-programming
+آشتی	reconciliation	data-oriented-programming
+برآمد	خروجی	data-oriented-programming
+hash سازگار	consistent hashing	DIST
+سر رفتن وقت	timeout	TECH

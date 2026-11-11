@@ -16,5 +16,5 @@
     "MD060": false
   },
   "globs": ["**/*.md"],
-  "ignores": [".git", "node_modules"]
+  "ignores": [".git", "node_modules", "books/*/raw"]
 }

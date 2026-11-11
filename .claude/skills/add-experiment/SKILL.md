@@ -17,6 +17,7 @@ An experiment lives in `books/<slug>/lab/NN-slug/` (NN = the chapter): one scrip
    - `## Expected output` — pasted from a real run, never typed by hand.
    - `## What to look for` — 3–5 bullets tying numbers to the book's claims.
    - `## Related` — the chapter lesson (`../../chapters/NN-slug.md`) and any widget (`../../widgets/NN-slug.html`).
+   - For a Persian book, the README is Persian (`## اجرا`, `## خروجی مورد انتظار`, `## به چه چیزی نگاه کنید`, `## پیوندها`) with a line saying the output stays English for the terminal; see [`write-chapter/persian.md`](../write-chapter/persian.md).
 3. **Link it** from the chapter note's *Connections* as `**Run it:**` (the lesson shows the command automatically).
 4. **Verify:** run it twice — the output must be identical and match the README — then `python3 scripts/build.py && python3 scripts/validate.py`.
 

@@ -4,6 +4,49 @@
 (function (global) {
   "use strict";
 
+  /* ---------- language ---------- */
+
+  // A page written in Persian (<html lang="fa" dir="rtl">) gets Persian control
+  // labels and Persian digits. t(en, fa) picks the string for the page language.
+  var FA = document.documentElement.lang === "fa";
+  function t(en, fa) { return FA ? fa : en; }
+  var FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+  // Persian digits for numbers in prose: digits glued to Latin letters (p99, S3,
+  // 2PC, v1) stay as they are; decimal and thousands separators become ٫ and ٬.
+  function digits(text) {
+    if (!FA || text === null || text === undefined) return text;
+    return String(text).replace(/[A-Za-z_]*[0-9][0-9.,]*[A-Za-z_]*/g, function (m) {
+      if (/[A-Za-z_]/.test(m)) return m;
+      return m.replace(/([0-9])\.(?=[0-9])/g, "$1٫").replace(/([0-9]),(?=[0-9]{3})/g, "$1٬")
+              .replace(/[0-9]/g, function (d) { return FA_DIGITS[+d]; });
+    });
+  }
+  // On a Persian page, every text node outside code, keyboard keys, .mono and
+  // [lang=en] shows Persian digits, including text the simulation writes later.
+  var SKIP = "code, kbd, pre, .mono, .kv, .chip, .diagram, .mermaid, [lang=en], script, style, textarea";
+  function localizeNode(node) {
+    if (node.nodeType === 3) {
+      var p = node.parentElement;
+      if (!p || (p.closest && p.closest(SKIP))) return;
+      var v = digits(node.nodeValue);
+      if (v !== node.nodeValue) node.nodeValue = v;
+    } else if (node.nodeType === 1 && !(node.matches && node.matches(SKIP))) {
+      for (var c = node.firstChild; c; c = c.nextSibling) localizeNode(c);
+    }
+  }
+  if (FA && global.MutationObserver) {
+    var observe = function () {
+      localizeNode(document.body);
+      new MutationObserver(function (list) {
+        list.forEach(function (m) {
+          if (m.type === "characterData") localizeNode(m.target);
+          else Array.prototype.forEach.call(m.addedNodes, localizeNode);
+        });
+      }).observe(document.body, { subtree: true, childList: true, characterData: true });
+    };
+    if (document.body) observe(); else document.addEventListener("DOMContentLoaded", observe);
+  }
+
   /* ---------- DOM ---------- */
 
   // el("div", {class: "x", onclick: fn}, child, "text", [more children])
@@ -103,12 +146,13 @@
   // not inside a text field).
   function player(o) {
     var timer = null, speed = 1;
-    var playBtn = el("button", { class: "btn primary", type: "button", "aria-label": "Play" }, "▶ Play");
-    var stepBtn = el("button", { class: "btn", type: "button" }, "Step ›");
-    var resetBtn = el("button", { class: "btn", type: "button" }, "↺ Reset");
+    var PLAY = t("▶ Play", "▶ پخش"), PAUSE = t("❚❚ Pause", "❚❚ توقف");
+    var playBtn = el("button", { class: "btn primary", type: "button", "aria-label": t("Play", "پخش") }, PLAY);
+    var stepBtn = el("button", { class: "btn", type: "button" }, t("Step ›", "یک قدم ‹"));
+    var resetBtn = el("button", { class: "btn", type: "button" }, t("↺ Reset", "↺ از اول"));
     var speedSel = null;
     if (o.speeds !== false) {
-      speedSel = el("select", { "aria-label": "Speed" },
+      speedSel = el("select", { "aria-label": t("Speed", "سرعت") },
         (o.speeds || [0.5, 1, 2, 4]).map(function (s) {
           return el("option", { value: s, selected: s === 1 }, s + "×");
         }));
@@ -117,7 +161,7 @@
         if (timer) { pause(); play(); }
       });
     }
-    var bar = el("div", { class: "row", role: "group", "aria-label": "Simulation controls" },
+    var bar = el("div", { class: "row", role: "group", "aria-label": t("Simulation controls", "کنترل‌های شبیه‌سازی") },
       playBtn, stepBtn, resetBtn, speedSel);
     if (o.mount) o.mount.appendChild(bar);
 
@@ -126,14 +170,14 @@
     }
     function play() {
       if (timer) return;
-      playBtn.textContent = "❚❚ Pause";
-      playBtn.setAttribute("aria-label", "Pause");
+      playBtn.textContent = PAUSE;
+      playBtn.setAttribute("aria-label", t("Pause", "توقف"));
       timer = setInterval(tick, (o.interval || 700) / speed);
     }
     function pause() {
       clearInterval(timer); timer = null;
-      playBtn.textContent = "▶ Play";
-      playBtn.setAttribute("aria-label", "Play");
+      playBtn.textContent = PLAY;
+      playBtn.setAttribute("aria-label", t("Play", "پخش"));
     }
     function stepOnce() { pause(); tick(); }
     function reset() { pause(); o.reset(); }
@@ -148,7 +192,7 @@
         if (t && (t.tagName === "INPUT" && t.type !== "range" && t.type !== "checkbox" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
         if (e.metaKey || e.ctrlKey || e.altKey) return;
         if (e.key === " " && t.tagName !== "BUTTON") { e.preventDefault(); timer ? pause() : play(); }
-        else if (e.key === "ArrowRight" || e.key === ".") { if (t.type !== "range") { e.preventDefault(); stepOnce(); } }
+        else if (e.key === (FA ? "ArrowLeft" : "ArrowRight") || e.key === ".") { if (t.type !== "range") { e.preventDefault(); stepOnce(); } }
         else if (e.key === "r" || e.key === "R") { reset(); }
       });
     }
@@ -214,6 +258,7 @@
       t.addEventListener("click", function () { select(t); });
       t.addEventListener("keydown", function (e) {
         var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (FA) d = -d;
         if (!d) return;
         var next = all[(i + d + all.length) % all.length];
         select(next); next.focus();
@@ -238,12 +283,12 @@
           var right = oi === item.answer;
           label.classList.add(right ? "right" : "wrong");
           clear(verdict);
-          verdict.appendChild(el("strong", null, right ? "Correct. " : "Not quite. "));
+          verdict.appendChild(el("strong", null, right ? t("Correct. ", "درست است. ") : t("Not quite. ", "نه دقیقاً. ")));
           verdict.appendChild(document.createTextNode(item.explain || ""));
         });
         return label;
       });
-      mount.appendChild(el("fieldset", null, el("legend", null, (qi + 1) + ". " + item.q), labels, verdict));
+      mount.appendChild(el("fieldset", null, el("legend", null, digits(qi + 1) + ". " + item.q), labels, verdict));
     });
   }
 
@@ -261,7 +306,12 @@
       return t === "dark"; /* light unless the reader chose dark */
     }
     var btn = el("button", { class: "btn small", type: "button" });
-    function label() { btn.textContent = isDark() ? "☀ Light" : "☾ Dark"; btn.setAttribute("aria-label", "Switch to " + (isDark() ? "light" : "dark") + " theme"); }
+    function label() {
+      var fa = FA;
+      btn.textContent = isDark() ? (fa ? "☀ روشن" : "☀ Light") : (fa ? "☾ تیره" : "☾ Dark");
+      btn.setAttribute("aria-label", fa ? (isDark() ? "رفتن به تم روشن" : "رفتن به تم تیره")
+                                        : "Switch to " + (isDark() ? "light" : "dark") + " theme");
+    }
     btn.addEventListener("click", function () {
       var next = isDark() ? "light" : "dark";
       root.setAttribute("data-theme", next); save(next); label();
@@ -287,7 +337,7 @@
     root.classList.add("chart");
     (o.bands || []).forEach(function (b) {
       root.appendChild(svg("rect", { class: "chart-band", x: X(b.from), y: T, width: X(b.to) - X(b.from), height: H - T - B }));
-      if (b.label) root.appendChild(svg("text", { class: "chart-note", x: X(b.from) + 4, y: T + 12 }, b.label));
+      if (b.label) root.appendChild(svg("text", { class: "chart-note", x: X(b.from) + 4, y: T + 28 }, b.label));
     });
     var yt = o.yTicks || 4, xt = o.xTicks || 5;
     for (var i = 0; i <= yt; i++) {
@@ -317,9 +367,11 @@
       (o.series || []).forEach(function (s) {
         if (!s.label) return;
         root.appendChild(svg("line", { class: "chart-line " + (s.cls || "s1"), x1: lx, x2: lx + 16, y1: T + 8, y2: T + 8 }));
-        var t = svg("text", { class: "chart-tick", x: lx + 20, y: T + 12 }, s.label);
+        var t = svg("text", { class: "chart-tick chart-legend", x: lx + 20, y: T + 12 }, s.label);
         root.appendChild(t);
-        lx += 28 + s.label.length * 6.2;
+        var w = 0;
+        try { w = t.getComputedTextLength(); } catch (e) { /* not rendered yet */ }
+        lx += 28 + (w || s.label.length * 6.2);
       });
     }
     return { x: X, y: Y };
@@ -328,7 +380,7 @@
   /* ---------- formatting ---------- */
 
   function fmtMs(v) { return v >= 1000 ? (v / 1000).toFixed(2) + " s" : Math.round(v) + " ms"; }
-  function pct(v, digits) { return (v * 100).toFixed(digits === undefined ? 1 : digits) + "%"; }
+  function pct(v, places) { return (v * 100).toFixed(places === undefined ? 1 : places) + "%"; }
   function percentile(sorted, p) {
     if (!sorted.length) return NaN;
     var i = Math.min(sorted.length - 1, Math.max(0, Math.ceil(p * sorted.length) - 1));
@@ -364,6 +416,6 @@
   global.Kit = {
     el: el, svg: svg, $: $, clear: clear, rng: rng, log: log, player: player,
     slider: slider, segmented: segmented, tabs: tabs, quiz: quiz, themeToggle: themeToggle, lineChart: lineChart,
-    reducedMotion: reducedMotion, fmtMs: fmtMs, pct: pct, percentile: percentile
+    reducedMotion: reducedMotion, fmtMs: fmtMs, t: t, fa: FA, digits: digits, pct: pct, percentile: percentile
   };
 })(window);

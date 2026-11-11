@@ -28,3 +28,6 @@ build/
 
 # Local env
 .env
+
+# Raw copies of the source blog posts: kept locally for fact-checking, never committed
+books/*/raw/
