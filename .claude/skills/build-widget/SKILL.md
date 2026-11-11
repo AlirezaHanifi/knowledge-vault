@@ -20,9 +20,10 @@ A widget is one HTML page in `books/<slug>/widgets/NN-slug.html` (NN = the chapt
    - Several small charts sit side by side in a grid (`repeat(auto-fit, minmax(240px, 1fr))`); draw them with `Kit.lineChart`.
    - Lay out lists of cards or items in grids, and put the numbers in a `.stats` grid. *What to notice* and the quiz already render as card grids.
    - Check the height: open the page with `#embed` inside a lesson at 1440 × 900.
-7. **Accessibility:** native labelled controls, state changes announced through `Kit.log`, meaning never carried by colour alone.
-8. **Embed it** in the chapter note with a `> **Try it:**` line (see `write-chapter`), then `python3 scripts/build.py`.
-9. **Verify** with the `check-site` skill — the widget on its own *and* inside the lesson.
+7. **Language.** A widget of a Persian book (`lang: fa` chapters) is written in Persian: `<html lang="fa" dir="rtl">` and every visible string Persian, with technical terms in English, as in [`write-chapter/persian.md`](../write-chapter/persian.md). The kit then supplies the font, the player and quiz labels and Persian digits; keep code and record values in `code` or `.mono` so they stay English.
+8. **Accessibility:** native labelled controls, state changes announced through `Kit.log`, meaning never carried by colour alone.
+9. **Embed it** in the chapter note with a `> **Try it:**` line (see `write-chapter`), then `python3 scripts/build.py`.
+10. **Verify** with the `check-site` skill — the widget on its own *and* inside the lesson.
 
 ## Done when
 

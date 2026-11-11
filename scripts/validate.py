@@ -13,6 +13,11 @@ Checks:
   5. The book README's "Chapters" table lists exactly the chapter files.
   6. Generated HTML is up to date with its Markdown (scripts/build.py --check).
   7. No empty directories.
+  8. Every "> **In practice:**" callout's "**Your turn:**" question carries an
+     "*Answer:*", and the reference stack it is written against exists.
+  9. Persian books use the English technical term, not a coined Persian one
+     (scripts/fa_terms.tsv), no Persian Markdown line opens with a Latin word, and
+     page references in Persian Markdown keep the (p. N) form.
 
 Hidden folders (.claude skills and templates, local sources) are skipped.
 Stdlib only. Exit 0 = healthy, 1 = problems found.
@@ -26,7 +31,7 @@ import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP_PARTS = {"node_modules", "vendor"}
+SKIP_PARTS = {"node_modules", "vendor", "raw"}  # `raw/` holds a source's saved pages: local-only, gitignored, not vault content
 IGNORED_NAMES = {".DS_Store", ".gitkeep"}
 
 BOOK_FM_REQUIRED = ("title", "edition", "authors", "publisher", "year",
@@ -171,7 +176,12 @@ def check_book(d: Path) -> None:
         err(f"{rel(readme)}: cover image not found: {fm['cover']}")
 
     rows = []
-    for line in section_lines(text, "Chapters"):
+    if fm.get("lang", "en") not in ("en", "fa"):
+        err(f"{rel(readme)}: lang must be 'en' or 'fa' (the languages scripts/build.py has labels for)")
+    if fm.get("kind", "book") not in ("book", "articles"):
+        err(f"{rel(readme)}: kind must be 'book' or 'articles' (the two groups the library page lists)")
+    # A Persian README (`lang: fa`) names the section «فصل‌ها» (scripts/build.py, BOOK_H2_ALIASES).
+    for line in section_lines(text, "Chapters") or section_lines(text, "فصل‌ها") or section_lines(text, "نوشته‌ها"):
         s = line.strip()
         if not (s.startswith("|") and s.endswith("|")) or SEP_ROW_RE.match(s):
             continue
@@ -202,13 +212,36 @@ def check_book(d: Path) -> None:
                 err(f"{rel(f)}: front matter chapter {cfm['chapter']} != filename {m.group(1)}")
             if f.name not in text:
                 err(f"{rel(f)}: not linked from the book README Chapters table")
+            if cfm.get("lang", "en") not in ("en", "fa"):
+                err(f"{rel(f)}: lang must be 'en' or 'fa' (the languages scripts/build.py has labels for)")
+            check_practice_callouts(f)
     if chapters_dir.exists() and chapter_files and len(chapter_files) != len(rows):
         err(f"{rel(readme)}: Chapters table has {len(rows)} rows "
             f"but chapters/ has {len(chapter_files)} files")
 
 
+def check_practice_callouts(f: Path) -> None:
+    """'> **In practice:**' blocks: each '**Your turn:**' needs an '*Answer:*' in the same block."""
+    blocks, cur = [], None
+    for line in strip_fences(f.read_text(encoding="utf-8")).split("\n"):
+        if line.startswith("> **In practice:**"):
+            cur = [line]
+            blocks.append(cur)
+        elif cur is not None and line.startswith(">"):
+            cur.append(line)
+        else:
+            cur = None
+    if blocks and not (ROOT / "practice" / "reference-stack.md").exists():
+        err(f"{rel(f)}: has 'In practice' callouts but practice/reference-stack.md is missing")
+    for b in blocks:
+        text = "\n".join(b)
+        if "**Your turn:**" in text and "*Answer:*" not in text.split("**Your turn:**", 1)[1]:
+            err(f"{rel(f)}: an 'In practice' callout asks 'Your turn' without an '*Answer:*'")
+
+
 FIG_LINE_RE = re.compile(r"^!\[([^\]]*)\]\(\.\./figures/([^)\s]+)\)\s*$")
 FIG_CAPTION_RE = re.compile(r"^\*Figure ([\w.-]+) \(pp?\. (\d+)(?:[–-]\d+)?\): \S.*\*$")
+FA_PAGE_REF = re.compile(r"\((?:صص|ص)\.\s")  # Markdown keeps (p. N); the build renders it in Persian
 OFFSET_RE = re.compile(r"PDF page\s*[−-]\s*(\d+)")
 
 
@@ -286,9 +319,24 @@ def main() -> int:
     # Widgets are embedded in a lesson; experiments have a README and are linked.
     for book in sorted(books_dir.glob("*/")) if books_dir.exists() else []:
         notes = "\n".join(c.read_text(encoding="utf-8") for c in sorted(book.glob("chapters/*.md")))
+        # A book's framework page (framework.md, the vault's synthesis) may embed widgets too.
+        framework = (book / "framework.md").read_text(encoding="utf-8") if (book / "framework.md").exists() else ""
+        # Every book with written chapters gets a framework (.claude/skills/add-book/framework.md).
+        if not framework and re.search(r"^## (Summary|خلاصه)", notes, re.M):
+            warn(f"{rel(book)}: no framework.md (see .claude/skills/add-book/framework.md)")
         for w in sorted(book.glob("widgets/*.html")):
-            if f"**Try it:** [" not in notes or f"../widgets/{w.name})" not in notes:
-                err(f"{rel(w)}: not embedded in any chapter (add a '> **Try it:**' line)")
+            embedded = any(f"**Try it:** [" in src and f"widgets/{w.name})" in src for src in (notes, framework))
+            if not embedded:
+                err(f"{rel(w)}: not embedded in any chapter or framework (add a '> **Try it:**' line)")
+            # A widget that links to lesson slides (`LESSON = "../chapters/x.html#"`
+            # plus `slide: "id"`) must name slides that exist in that lesson.
+            wtext = w.read_text(encoding="utf-8")
+            lesson = re.search(r'LESSON\s*=\s*"\.\./chapters/([^"#]+\.html)#', wtext)
+            if lesson:
+                lp = book / "chapters" / lesson.group(1)
+                ids = set(re.findall(r'id="([^"]+)"', lp.read_text(encoding="utf-8"))) if lp.exists() else set()
+                for sid in sorted(set(re.findall(r'slide:\s*"([^"]+)"', wtext)) - ids):
+                    err(f"{rel(w)}: slide '{sid}' does not exist in {lesson.group(1)}")
         for exp in sorted(p for p in book.glob("lab/*") if p.is_dir()):
             if not (exp / "README.md").exists():
                 err(f"{rel(exp)}: experiment missing README.md")
@@ -298,6 +346,23 @@ def main() -> int:
     # Book figures: recorded crops, each used by a chapter with a proper caption.
     for book in sorted(books_dir.glob("*/")) if books_dir.exists() else []:
         check_figures(book)
+
+    # Persian books: English technical terms, Persian-first lines (scripts/fa_terms.py).
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import fa_terms  # noqa: E402
+    for hit in fa_terms.scan(False, set()):
+        err(f"{hit} (coined Persian term; see scripts/fa_terms.tsv)")
+    for b in fa_terms.persian_books():
+        for f in fa_terms.files(b):
+            if f.suffix in (".md", ".html") and "§" in f.read_text(encoding="utf-8"):
+                err(f"{rel(f)}: '§' means nothing to a Persian reader; cite a post's section as (بخش «عنوان»)")
+            if f.suffix == ".md":
+                text = f.read_text(encoding="utf-8")
+                for n in fa_terms.latin_first(text):
+                    err(f"{rel(f)}:{n}: Persian line opens with a Latin word")
+                for n, line in enumerate(text.split("\n"), 1):
+                    if "lab" not in f.parts and FA_PAGE_REF.search(line):  # lab READMEs are read on GitHub as they are
+                        err(f"{rel(f)}:{n}: page reference in Persian form; write (p. N) or (pp. N–M), the lesson shows it in Persian")
 
     # Generated pages must match their sources.
     sys.path.insert(0, str(ROOT / "scripts"))

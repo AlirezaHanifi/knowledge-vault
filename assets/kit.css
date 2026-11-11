@@ -183,9 +183,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); width
 .segmented { display: inline-flex; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); overflow: hidden; flex-wrap: wrap; }
 .segmented button {
   font: inherit; font-size: .85rem; padding: 7px 12px; border: 0; background: var(--surface); color: var(--ink-2);
-  cursor: pointer; border-right: 1px solid var(--line);
+  cursor: pointer; border-inline-end: 1px solid var(--line);
 }
-.segmented button:last-child { border-right: 0; }
+.segmented button:last-child { border-inline-end: 0; }
 .segmented button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 
 /* tabs */
@@ -252,9 +252,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); width
 .related small { display: block; color: var(--ink-3); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
 
 table.data { border-collapse: collapse; width: 100%; font-size: .88rem; }
-table.data th, table.data td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+table.data th, table.data td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: start; }
 table.data th { color: var(--ink-3); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
-table.data td.num, table.data th.num { text-align: right; font-family: var(--mono); }
+table.data td.num, table.data th.num { text-align: end; font-family: var(--mono); }
 .table-wrap { overflow-x: auto; }
 
 /* ---------- quiz ---------- */
@@ -283,6 +283,7 @@ svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
 .chart-tick { font-size: 10px; fill: var(--ink-3); font-family: var(--mono); }
 .chart-label { font-size: 10.5px; fill: var(--ink-2); }
 .chart-note { font-size: 10px; fill: var(--ink-3); }
+.chart-legend { font-family: var(--font); }
 .chart-band { fill: var(--warn-soft); }
 .chart-mark { stroke: var(--ink-3); stroke-dasharray: 3 3; }
 .chart-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke: var(--s1); }
@@ -329,3 +330,26 @@ html.embed .page > .eyebrow, html.embed .page > h1 { display: none; }
 html.embed .page > .lede { font-size: 1rem; margin-bottom: .4rem; max-width: none; }
 html.embed .page > .source-note { font-size: .8rem; max-width: none; }
 html.embed .page > h2 { font-size: 1.05rem; margin: 1.4rem 0 .6rem; }
+
+/* ---------- Persian pages (html lang="fa" dir="rtl"): lessons and widgets ---------- */
+
+@font-face { font-family: "Vazirmatn"; src: url("fonts/Vazirmatn-Regular.ttf") format("truetype"); font-weight: 100 549; font-display: swap; }
+@font-face { font-family: "Vazirmatn"; src: url("fonts/Vazirmatn-Bold.ttf") format("truetype"); font-weight: 550 900; font-display: swap; }
+html[lang="fa"] { --font: "Vazirmatn", Tahoma, ui-sans-serif, sans-serif; --serif: "Vazirmatn", Tahoma, serif; }
+/* Monospace fonts have no Persian glyphs: Persian letters and digits in code-styled text (stats, page
+   badges, table numbers) fall back to Vazirmatn instead of whatever system font the browser picks. */
+[lang="fa"] { --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", "Vazirmatn", monospace; }
+html[lang="fa"] body { line-height: 1.85; }
+/* Letter-spacing and upper-casing break Persian letter joining. */
+html[lang="fa"] body * { letter-spacing: 0 !important; text-transform: none !important; }
+html[lang="fa"] .eyebrow, html[lang="fa"] .panel-title, html[lang="fa"] .stat-label, html[lang="fa"] .card .card-ch { text-transform: none; }
+/* Charts and diagrams are laid out in coordinates: keep their anchors left to right. */
+html[lang="fa"] svg { direction: ltr; }
+html[lang="fa"] svg text { unicode-bidi: plaintext; }
+html[lang="fa"] .chart-tick { font-family: var(--font); }
+[dir="rtl"] code, [dir="rtl"] kbd, [dir="rtl"] .mono, [dir="rtl"] .kv, [dir="rtl"] .chip { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] pre { direction: ltr; text-align: left; }
+[dir="rtl"] .page td, [dir="rtl"] .page th { text-align: start; }
+[dir="rtl"] .callout { border-left: 0; border-right: 3px solid var(--accent); border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+[dir="rtl"] .callout.ok { border-right-color: var(--ok); } [dir="rtl"] .callout.warn { border-right-color: var(--warn); } [dir="rtl"] .callout.bad { border-right-color: var(--bad); }
+[dir="rtl"] .notice-list li { border-left: 1px solid var(--line); border-right: 3px solid var(--accent); }

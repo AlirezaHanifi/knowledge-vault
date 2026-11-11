@@ -25,10 +25,11 @@ Everything about a book lives in `books/<slug>/`. This skill creates that folder
    `python3 scripts/pdf.py figures books/<slug> --offset N` lists the figure captions; chapters pick from them later (`add-figures`).
 
    No bookmarks? Transcribe the printed contents pages instead and say so in *Source*. Never use another edition's TOC or memory.
-3. **Create `books/<slug>/README.md`** from [`book.md`](book.md). Slug: full title in kebab-case, no edition unless two editions coexist. Fill only keys you verified; `short_title` is the name used in breadcrumbs. One *Chapters* row per chapter (number, linked title, printed pages). The chapter map is the book's own structure (parts, if any); any grouping of your own must be labelled as such.
+3. **Create `books/<slug>/README.md`** from [`book.md`](book.md). Slug: full title in kebab-case, no edition unless two editions coexist. Fill only keys you verified; `short_title` is the name used in breadcrumbs. One *Chapters* row per chapter (number, linked title, printed pages). The chapter map is the book's own structure (parts, if any); any grouping of your own must be labelled as such. For a book read in Persian, add `lang: fa` and write the README in Persian as [`persian.md`](../write-chapter/persian.md) describes; the hub page then follows.
 4. **Create one note per chapter** at `chapters/NN-title-slug.md` from the `write-chapter` skill's [template](../write-chapter/chapter.md): front matter, navigation line, and the verified outline pasted from step 2. Other sections are added when the chapter is written — never as empty placeholders.
-5. **Register the book** with a row in the root `README.md` *Books* table (linked title, authors).
-6. **Build and validate:**
+5. **Write the framework once the chapters are written.** Every book gets a `framework.md`: the vault's whole-to-part reading in five levels (map, principles, decision guide, stack, chapter map). Shape and rules: [`framework.md`](framework.md).
+6. **Register the book** with a row in the root `README.md` *Books* table (linked title, authors).
+7. **Build and validate:**
 
    ```sh
    python3 scripts/build.py && python3 scripts/validate.py
@@ -38,4 +39,5 @@ Everything about a book lives in `books/<slug>/`. This skill creates that folder
 
 - Every chapter title and section heading matches the source exactly; pages are printed pages.
 - `toc_source`, `toc_verified` and the *Source* section state what was checked and what wasn't, plus the page offset.
+- Once the chapters are written, `framework.md` exists in the standard shape and every lesson's last slide links it.
 - `index.html` lists the book; the validator passes.

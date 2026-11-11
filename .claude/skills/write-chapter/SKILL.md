@@ -20,6 +20,7 @@ The chapter note `books/<slug>/chapters/NN-*.md` is the single source of truth: 
    - `## Beyond the book` — anything not from the authors (outside sources, interpretation). Shorter in-line asides use `> **Vault note:** …`.
    - `## Connections` — `**Run it:**` experiments (`../lab/NN-slug/README.md`) and related chapters.
    - `## Check yourself` — 4–6 numbered questions testing understanding. Give two or three of them options as task items (`- [x]` marks the right one); every question ends with an `*Answer:*` paragraph citing pages. Questions without options become reveal cards.
+   - A Persian chapter (`lang: fa`) follows [`persian.md`](persian.md): English technical terms, no glosses or examples in parentheses, Persian digits everywhere a reader looks, every line starting with a Persian word.
 3. **Glossary.** If the chapter introduces an idea that recurs across chapters, add or extend its row in the book README's *Key concepts* table (term, one-sentence definition, chapter links). There are no separate concept files.
 4. **Figures.** Run `add-figures` for the chapter: list its captions, pick the ones that teach, crop, look at each crop, place it and trim the prose it now carries.
 5. **Fact-check** with the `fact-check` skill before calling it done.
