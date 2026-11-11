@@ -3,97 +3,111 @@ book: the-managers-path
 chapter: 3
 title: "Tech Lead"
 pages: "27–48"
+translated_title: "نقش tech lead"
+lang: fa
 ---
 
-# 3. Tech Lead
+# فصل ۳: نقش tech lead
 
-[← 2. Mentoring](02-mentoring.md) · [Book](../README.md) · [4. Managing People →](04-managing-people.md)
+[فصل ۲: منتورینگ →](02-mentoring.md) · [کتاب](../README.md) · [فصل ۴: مدیریت آدم‌ها ←](04-managing-people.md)
 
-## Summary
+## خلاصه
 
-The tech lead is a leadership role that is usually not a management role, and it is often given to the wrong person: the most experienced engineer, who would rather go deep into their own code. The chapter defines the role as a set of responsibilities rather than a rung on the ladder, and names its "one weird trick": being willing to step away from the code and balance your own technical work with what the whole team needs. It walks through the hats a tech lead wears — systems architect and business analyst, project planner, developer and team leader — and makes the case for project management even on agile teams, with a five-step method. A frank comparison of the imagined and real lives of senior individual contributors and managers helps with the decision between the two tracks; the process czar shows what happens when process replaces leadership (pp. 27–48).
+نقش tech lead یک نقش رهبری است که معمولاً نقش مدیریتی نیست، و اغلب به آدم اشتباهی داده می‌شود: باتجربه‌ترین مهندس، که ترجیح می‌دهد در کد خودش عمیق شود. این فصل نقش را مجموعه‌ای از مسئولیت‌ها تعریف می‌کند، نه پله‌ای روی نردبان، و «آن یک ترفند عجیبش» را نام می‌برد: این‌که حاضر باشید از کد فاصله بگیرید و بین کار فنی خودتان و چیزی که کل تیم لازم دارد تعادل برقرار کنید. کلاه‌هایی را مرور می‌کند که tech lead سرش می‌گذارد؛ معمار سیستم و تحلیل‌گر کسب‌وکار، برنامه‌ریز پروژه، و برنامه‌نویس و رهبر تیم، و استدلال می‌کند که حتی در تیم‌های agile هم مدیریت پروژه لازم است و روشی پنج‌قدمی می‌دهد. مقایسه‌ای رک میان زندگی خیالی و زندگی واقعی individual contributorهای ارشد و مدیرها به انتخاب بین دو مسیر کمک می‌کند؛ و process czar نشان می‌دهد وقتی process جای رهبری را بگیرد چه می‌شود (pp. 27–48).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Tech lead is a set of responsibilities, not a level**, and it is not a reward for being the best coder. It needs communication, prioritization and "pragmatic urgency" (pp. 27–29).
-- **The trick is balance:** step away from the code, master your time, and protect both your maker blocks and the team's focus from random meetings (p. 31).
-- **Wear three hats:** systems architect and business analyst, project planner (break work down so it can run in parallel), and developer and team leader who raises obstacles early instead of heroics (pp. 32–33).
-- **Agile doesn't remove project management.** Its value is the discipline of thinking before diving in; the plan matters less than the planning (pp. 35–36).
-- **Manage a project in five steps:** break down the work, push through the unknowns, run it and adjust, use what you learned to cost requirement changes, and revisit the details at the end with a premortem, a "good enough" line, and launch and rollback plans (pp. 38–39).
-- **Neither track matches the dream.** Senior ICs sell ideas and hunt for big projects; managers lose control of their days and find authority takes more than a title. You can switch tracks (pp. 40–44).
-- **Don't be a process czar:** processes must meet the team's needs; look for self-regulating processes rather than playing rules cop (pp. 45–46).
+- **نقش tech lead مجموعه‌ای از مسئولیت‌هاست، نه یک level**، و جایزه‌ی بهترین کدنویس بودن نیست. ارتباط، اولویت‌بندی و یک جور «فوریت عمل‌گرا» می‌خواهد (pp. 27–29).
+- **ترفندش تعادل است:** از کد فاصله بگیرید، بر وقتتان مسلط شوید و هم بلوک‌های تمرکز خودتان و هم تمرکز تیم را از جلسه‌های بی‌برنامه حفظ کنید (p. 31).
+- **سه کلاه سرتان می‌گذارید:** معمار سیستم و تحلیل‌گر کسب‌وکار، برنامه‌ریز پروژه که کار را طوری می‌شکند که موازی پیش برود، و برنامه‌نویس و رهبر تیم که به‌جای قهرمان‌بازی، مانع‌ها را زود مطرح می‌کند (pp. 32–33).
+- **روش agile مدیریت پروژه را حذف نمی‌کند.** ارزشش نظم فکر کردن پیش از شیرجه زدن است؛ خود برنامه کم‌اهمیت‌تر از برنامه‌ریزی است (pp. 35–36).
+- **پروژه را در پنج قدم بگردانید:** کار را بشکنید، از دل ناشناخته‌ها رد شوید، اجرا کنید و برنامه را تنظیم کنید، با آموخته‌هایتان هزینه‌ی تغییر نیازمندی‌ها را بگویید، و آخر کار جزئیات را با premortem و خط «به‌اندازه‌ی کافی خوب» و برنامه‌ی launch و rollback دوباره مرور کنید (pp. 38–39).
+- **هیچ‌کدام از دو مسیر مثل رؤیایش نیست.** individual contributorهای ارشد ایده می‌فروشند و دنبال پروژه‌های بزرگ می‌گردند؛ مدیرها کنترل روزشان را از دست می‌دهند و می‌بینند اقتدار چیزی بیش از عنوان می‌خواهد. می‌شود مسیر را عوض کرد (pp. 40–44).
+- **فرد process czar نباشید:** processها باید نیاز تیم را برآورده کنند؛ به‌جای پلیس قانون بودن، دنبال processهای خودتنظیم بگردید (pp. 45–46).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- All Great Tech Leads Know This One Weird Trick — p. 31
-- Being a Tech Lead 101 — p. 31
-  - The Main Roles of a Tech Lead — p. 32
-- Managing Projects — p. 34
-- Managing a Project — p. 38
-- Decision Point: Stay on the Technical Track or Become a Manager — p. 40
-  - Imagined Life of a Senior Individual Contributor — p. 40
-  - Real Life of a Senior Individual Contributor — p. 41
-  - Imagined Life of a Manager — p. 42
-  - Real Life of a Manager — p. 43
-- Good Manager, Bad Manager: The Process Czar — p. 45
-- How to Be a Great Tech Lead — p. 46
-  - Understand the Architecture — p. 46
-  - Be a Team Player — p. 46
-  - Lead Technical Decisions — p. 47
-  - Communicate — p. 47
-- Assessing Your Own Experience — p. 48
+- همه‌ی tech leadهای بزرگ این یک ترفند عجیب را بلدند — p. 31
+- مبانی tech lead بودن — p. 31
+  - نقش‌های اصلی یک tech lead — p. 32
+- مدیریت پروژه‌ها — p. 34
+- گرداندن یک پروژه — p. 38
+- سر دوراهی: در مسیر فنی بمانید یا مدیر شوید — p. 40
+  - زندگی خیالی یک individual contributor ارشد — p. 40
+  - زندگی واقعی یک individual contributor ارشد — p. 41
+  - زندگی خیالی یک مدیر — p. 42
+  - زندگی واقعی یک مدیر — p. 43
+- مدیر خوب، مدیر بد: process czar — p. 45
+- چطور tech lead درخشانی باشیم — p. 46
+  - معماری را بفهمید — p. 46
+  - اهل تیم باشید — p. 46
+  - تصمیم‌های فنی را پیش ببرید — p. 47
+  - ارتباط بگیرید — p. 47
+- سنجیدن تجربه‌ی خودتان — p. 48
 
-## Notes
+## یادداشت‌ها
 
-The author became a tech lead without being the most senior person on her team, because she communicated well, prioritized, and was willing to "pick up the pieces" — a pragmatic urgency. She also saw a brilliant engineer flounder as tech lead: he chased refactorings down rabbit holes while the product manager railroaded the team into a poorly designed, overly aggressive commitment. Giving the role automatically to the most experienced engineer is a common misconception (p. 27).
+نویسنده بدون این‌که ارشدترین آدم تیمش باشد tech lead شد، چون خوب ارتباط می‌گرفت، اولویت‌بندی می‌کرد و حاضر بود «تکه‌های زمین‌مانده را بردارد»؛ یک جور فوریت عمل‌گرا. او مهندس درخشانی را هم دید که در نقش tech lead دست‌وپا زد: پشت refactoringها در لانه‌ی خرگوش می‌رفت و در همان حال product manager تیم را به تعهدی بدطراحی‌شده و بیش از حد جاه‌طلبانه می‌کشاند. دادن خودکار این نقش به باتجربه‌ترین مهندس یک برداشت غلط رایج است (p. 27).
 
-At Rent the Runway the career ladder defined tech lead as **a set of responsibilities any engineer may take on from the senior level**, not a point on the ladder. If it includes people management, it carries the same standards as any manager: weekly 1-1s, regular feedback on growth, and helping reports learn. Without reports, the tech lead still mentors. The tech lead learns technical project management, delegates without micromanaging, focuses on the whole team's productivity, and partners with product and analytics. It is the usual way to grow from senior engineer 1 to 2, and required to become engineering lead (pp. 28–29). Patrick Kua's shorter definition: a leader responsible for a development team who spends at least 30 percent of their time writing code with it (p. 29).
+در شرکت Rent the Runway نردبان شغلی، tech lead را **مجموعه‌ای از مسئولیت‌ها** تعریف می‌کرد که هر مهندسی از level ارشد به بعد می‌تواند بردارد، نه نقطه‌ای روی نردبان. اگر مدیریت آدم‌ها هم جزوش باشد، همان استانداردهای هر مدیری را دارد: جلسه‌ی ۱-۱ هفتگی، بازخورد منظم درباره‌ی رشد، و کمک به یاد گرفتن آدم‌های تیم. بدون زیردست هم باز tech lead منتور است. او مدیریت فنی پروژه را یاد می‌گیرد، بدون ذره‌بین گذاشتن کار واگذار می‌کند، روی بهره‌وری کل تیم تمرکز می‌کند و با product و analytics شریک می‌شود. این مسیر معمول رشد از senior engineer 1 به 2 است و برای engineering lead شدن لازم است (pp. 28–29). تعریف کوتاه‌تر Patrick Kua: رهبری که مسئول یک تیم توسعه است و دست‌کم ۳۰ درصد وقتش را با همان تیم کد می‌نویسد (p. 29).
 
-The new skill is less technical than human — plus one technical one: **project management**, whose breakdown work resembles systems design (p. 29).
+مهارت تازه بیشتر انسانی است تا فنی، به‌علاوه‌ی یک مهارت فنی: **مدیریت پروژه**، که شکستن کار در آن شبیه طراحی سیستم است (p. 29).
 
-> **Being a Tech Lead** (Caitie McCaffrey, p. 30). Leading peers who report to the same manager is influencing without authority. She stopped feature work to pay down technical debt, selling it differently to each person — reliability, iteration speed, sleeping through on-call — and to her manager as reduced operational overhead. Critical pages fell by 50% and deploys nearly doubled the next quarter.
+> **کادر Being a Tech Lead** (یادداشت Caitie McCaffrey، p. 30). رهبری هم‌ترازهایی که به همان مدیر گزارش می‌دهند یعنی نفوذ بدون اختیار. او کار روی feature را متوقف کرد تا بدهی فنی را صاف کند و این کار را به هر کسی جور دیگری فروخت؛ reliability، سرعت iteration، خواب راحت در شیفت on-call، و به مدیرش به‌عنوان کاهش سربار عملیاتی. pageهای بحرانی ۵۰٪ کم شدند و deployها در فصل بعد تقریباً دو برابر.
 
-### All Great Tech Leads Know This One Weird Trick
+### همه‌ی tech leadهای بزرگ این یک ترفند عجیب را بلدند
 
-The trick is **the willingness to step away from the code** and balance your technical commitments with the work the whole team needs (p. 31). Balance will stay a core challenge for the rest of your career:
+ترفند این است که **حاضر باشید از کد فاصله بگیرید** و تعهدهای فنی‌تان را با کاری که کل تیم لازم دارد متعادل کنید (p. 31). همین تعادل تا آخر مسیر شغلی‌تان چالش اصلی می‌ماند:
 
-- If you want autonomy, master your time — even though it means spending less time on what you're good at, which feels uncomfortable.
-- Some days are on a **maker's schedule**, some on a **manager's schedule**; learn to give yourself blocks of the right size. The worst mistake is getting pulled randomly into meetings.
-- Break your own work down so it doesn't need multi-day focus — but get the team a schedule that does allow it, and help your boss and product manager respect that focus (p. 31).
+- اگر استقلال می‌خواهید، بر وقتتان مسلط شوید، هرچند یعنی وقت کمتری برای کاری که در آن خوبید، و این حس ناخوشایندی دارد.
+- بعضی روزها روی **برنامه‌ی سازنده** می‌گذرند و بعضی روی **برنامه‌ی مدیر**؛ یاد بگیرید به خودتان بلوک‌هایی با اندازه‌ی درست بدهید. بدترین اشتباه این است که بی‌برنامه به جلسه‌ها کشیده شوید.
+- کار خودتان را طوری بشکنید که به تمرکز چندروزه نیاز نداشته باشد، ولی برای تیم برنامه‌ای بگیرید که چنین تمرکزی را ممکن کند، و به رئیس و product manager کمک کنید به آن تمرکز احترام بگذارند (p. 31).
 
-> **Try it:** [Maker's schedule, manager's schedule](../widgets/03-focus-blocks.html) — place meetings on a week’s calendar and watch how many uninterrupted coding blocks survive when the same meetings are scattered or batched.
+> **Try it:** [برنامه‌ی سازنده، برنامه‌ی مدیر](../widgets/03-focus-blocks.html)؛ جلسه‌ها را روی تقویم یک هفته بگذارید و ببینید وقتی همان جلسه‌ها پخش یا یک‌جا جمع می‌شوند، چند بلوک کدنویسی بی‌وقفه زنده می‌ماند.
 
-### Being a Tech Lead 101
+### مبانی tech lead بودن
 
-Picture a multiweek launch with a product manager and four other engineers. Code and technical decisions are only one of your roles, and probably not the most important; **your highest priority is a wide view of the work that keeps the project moving** (pp. 31–32).
+یک launch چندهفته‌ای را تصور کنید با یک product manager و چهار مهندس دیگر. کد و تصمیم‌های فنی فقط یکی از نقش‌های شماست و احتمالاً مهم‌ترینشان هم نیست؛ **بالاترین اولویت شما نگاهی فراخ به کار است که پروژه را در حرکت نگه می‌دارد** (pp. 31–32).
 
-| Role | What it involves (pp. 32–33) |
+| نقش | شامل چیست (pp. 32–33) |
 |---|---|
-| **Systems architect and business analyst** | Identify the critical systems to change and features to build, to give structure for estimates and ordering. Needs a good sense of the architecture and the ability to turn business requirements into software |
-| **Project planner** | Break the work into rough deliverables that can run in parallel, using agreed abstractions — the frontend codes against an agreed JSON format with dummy objects instead of waiting for the API. Ask the experts; decide what is critical and do it early |
-| **Software developer and team leader** | Keep writing code, but not too much. Communicate obstacles before trying heroics — the product manager may happily compromise on a feature. Delegate as delivery nears, especially parts you meant to build yourself |
+| **معمار سیستم و تحلیل‌گر کسب‌وکار** | سیستم‌های حیاتی‌ای که باید عوض شوند و featureهایی که باید ساخته شوند را مشخص کنید تا برای تخمین و ترتیب‌بندی ساختاری داشته باشید. حس خوبی از معماری می‌خواهد و توانایی تبدیل نیازمندی کسب‌وکار به نرم‌افزار |
+| **برنامه‌ریز پروژه** | کار را به تحویل‌دادنی‌های درشت بشکنید که می‌توانند موازی پیش بروند، با انتزاع‌های توافق‌شده؛ frontend به‌جای منتظر ماندن برای API، روی قالب JSON توافق‌شده و با objectهای ساختگی کد می‌زند. از خبره‌ها بپرسید؛ تصمیم بگیرید چه چیزی حیاتی است و آن را زود انجام بدهید |
+| **برنامه‌نویس و رهبر تیم** | کد نوشتن را ادامه بدهید، ولی نه خیلی زیاد. مانع‌ها را پیش از قهرمان‌بازی اعلام کنید؛ شاید product manager با خوشحالی سر یک feature کوتاه بیاید. هرچه به تحویل نزدیک‌تر می‌شوید بیشتر واگذار کنید، به‌خصوص تکه‌هایی را که قرار بود خودتان بسازید |
 
-> **Ask the CTO: I Hate Being a Tech Lead!** (pp. 33–34). The "Stone of Triumph": recognition that comes at a heavy price. The tech lead rarely gets a raise or title bump, has much wider scope than a senior IC — architecture, planning, making sure the team understands requirements and performs — usually without training, and is still expected to write almost as much code. It is a pure increase in responsibility, and it makes you stronger.
+> **کادر Ask the CTO: از tech lead بودن متنفرم!** (pp. 33–34). همان «سنگ پیروزی»: قدردانی‌ای که بهای سنگینی دارد. tech lead به‌ندرت افزایش حقوق یا ارتقای عنوان می‌گیرد، دامنه‌ای به‌مراتب فراخ‌تر از یک individual contributor ارشد دارد، یعنی معماری، برنامه‌ریزی و اطمینان از این‌که تیم نیازمندی‌ها را فهمیده و خوب کار می‌کند، معمولاً هم بدون آموزش، و باز انتظار می‌رود تقریباً همان‌قدر کد بنویسد. این فقط افزایش مسئولیت است، و قوی‌ترتان می‌کند.
 
-### Managing Projects
+> **In practice:** tech lead تیم داده بیشتر وقتش را صرف کد نمی‌کند: صرف دیدن کل pipeline، dependencyها و ریسک‌ها می‌کند.
+>
+> **Your turn:** tech lead یک مهاجرت جدول‌های Silver به ReplacingMergeTree است. بیشترین ارزشش کجاست؟
+>
+> *Answer:* در دیدن کل: کدام داشبوردها و notebookها به این جدول‌ها وابسته‌اند، ترتیب مهاجرت، و برنامه‌ی rollback. کتاب می‌گوید کد فقط یکی از نقش‌های tech lead است و احتمالاً مهم‌ترینش نیست (pp. 31–32).
 
-The author's first project plan, for splitting an overloaded system across several machines, was "one of the worst experiences ever": sessions across a big wooden desk with her boss Mike, untangling dependencies, test frameworks, deployment, hardware orders and integration time — and one of the most important learning experiences of her career (pp. 34–35).
+### مدیریت پروژه‌ها
 
-**Doesn't agile remove the need for project management? No** (p. 35). Agile helps you break work into small chunks and deliver incrementally, but some projects span many sprints, need estimates for management, or — infrastructure, platform, system work — need architecture and advance planning with many unknowns and hard deadlines.
+اولین برنامه‌ی پروژه‌ی نویسنده، برای شکستن یک سیستم overload شده روی چند ماشین، «یکی از بدترین تجربه‌های عمرش» بود: جلسه‌هایی پشت یک میز چوبی بزرگ با رئیسش Mike، برای باز کردن گره وابستگی‌ها، framework تست، deployment، سفارش سخت‌افزار و زمان یکپارچه‌سازی، و در عین حال یکی از مهم‌ترین تجربه‌های یادگیری مسیر شغلی‌اش (pp. 34–35).
 
-- Project management is tedious and a bit scary, but the alternative is the project failing slower, not faster (p. 35).
-- It shouldn't be done in detail for every effort; the author avoids hiring project managers, who can become a crutch for engineers (p. 36).
-- **The value of planning is the self-discipline to think about the project in depth before diving in. The plan matters less than the act of planning** (p. 36).
+**مگر agile نیاز به مدیریت پروژه را از بین نمی‌برد؟ نه** (p. 35). روش agile کمک می‌کند کار را به تکه‌های کوچک بشکنید و پله‌پله تحویل بدهید، ولی بعضی پروژه‌ها چند sprint طول می‌کشند، برای مدیریت تخمین می‌خواهند، یا، مثل کار زیرساخت و platform و سیستم، به معماری و برنامه‌ریزی از پیش با ناشناخته‌های زیاد و ضرب‌الاجل‌های سفت نیاز دارند.
 
-Her project hit bumps but shipped close to on time with no sleepless nights, while 40 other developers changed the same master branch — because the team had a plan, a picture of success and known risks (p. 36).
+- مدیریت پروژه کسل‌کننده و کمی ترسناک است، ولی جایگزینش این است که پروژه کندتر شکست بخورد، نه سریع‌تر (p. 35).
+- لازم نیست برای هر کاری با جزئیات انجامش بدهید؛ نویسنده از استخدام project manager پرهیز می‌کند، چون می‌توانند به عصای زیر بغل مهندس‌ها تبدیل شوند (p. 36).
+- **ارزش برنامه‌ریزی، نظمی است که وادارتان می‌کند پیش از شیرجه زدن عمیق به پروژه فکر کنید. خودِ برنامه کم‌اهمیت‌تر از عمل برنامه‌ریزی است** (p. 36).
 
-> **Take the Time to Explain** (Michael Marçal, pp. 37–38). A renowned mathematician thanked him for a lucid thesis: he could follow it only because the basics and motivations were explained. Senior managers don't "get" everything either; two hours explaining, without slides, why a fat-client product should move to a hosted platform earned trust and brought about change.
+پروژه‌ی او دست‌انداز داشت ولی تقریباً سر وقت تحویل شد، بدون شب‌بیداری، آن هم در حالی که ۴۰ برنامه‌نویس دیگر روی همان شاخه‌ی master تغییر می‌دادند؛ چون تیم برنامه داشت، تصویری از موفقیت داشت و ریسک‌هایش را می‌شناخت (p. 36).
 
-### Managing a Project
+> **کادر Take the Time to Explain** (یادداشت Michael Marçal، pp. 37–38). ریاضی‌دان سرشناسی از او برای یک پایان‌نامه‌ی روشن تشکر کرد: توانسته بود دنبالش کند چون مبانی و انگیزه‌ها توضیح داده شده بودند. مدیرهای ارشد هم همه چیز را «نمی‌گیرند»؛ دو ساعت توضیح، بدون اسلاید، درباره‌ی این‌که چرا یک محصول fat-client باید به platform میزبانی‌شده برود، اعتماد ساخت و تغییر را رقم زد.
 
-Project management is breaking a complex goal into pieces, ordering them, finding what can run in parallel and what must be sequential, and teasing out the unknowns — knowing you'll still miss some (p. 38).
+> **In practice:** پروژه‌ی داده هم شکستن کار، تخمین و پیدا کردن ناشناخته‌ها می‌خواهد.
+>
+> **Your turn:** پیش از شروع مهاجرت یک منبع بزرگ به dlt، چه ناشناخته‌هایی را فهرست می‌کنید؟
+>
+> *Answer:* نوع‌هایی که type mapping ندارند، حجم بار اول، دسترسی به replica منبع، و کدام کوئری‌های پایین‌دست به نام ستون‌های قدیمی وابسته‌اند. کتاب می‌گوید کار را تا حد کارهای کوچک بشکنید تا ناشناخته‌ها زود پیدا شوند (pp. 34–38).
+
+### گرداندن یک پروژه
+
+مدیریت پروژه یعنی شکستن یک هدف پیچیده به تکه‌ها، ترتیب دادنشان، پیدا کردن این‌که چه چیزی موازی پیش می‌رود و چه چیزی باید پشت سر هم بیاید، و بیرون کشیدن ناشناخته‌ها، با علم به این‌که باز هم بعضی‌شان را از دست خواهید داد (p. 38).
 
 ```mermaid
 flowchart LR
@@ -103,108 +117,108 @@ flowchart LR
     C --> D["5 · Revisit the details at the end<br/>premortem · good-enough line ·<br/>launch and rollback plans · celebrate"]
 ```
 
-*The vault's drawing of the book's five guidelines (pp. 38–39).*
+*تصویر vault از پنج رهنمود کتاب (pp. 38–39).*
 
-- **Break down the work** in a spreadsheet or Gantt chart, from the biggest pieces down; turn what can start immediately into ticket-sized work with the people who'll do it (p. 38).
-- **Push through the details and the unknowns** past the points of irritation; a good manager sits with you and asks where it isn't good enough (p. 38).
-- **Run the project and adjust the plan.** Things always slip; with a plan you can point to milestones hit and work remaining instead of guessing (pp. 38–39).
-- **Manage requirement changes** with the planning insights: be clear about their cost, and against a hard deadline prioritize, cut and simplify (p. 39).
-- **Revisit the details near completion:** testing, verification, a **premortem** listing everything that could fail at launch, a socialized "good enough" line with the work below it cut, a launch plan and a rollback plan — then celebrate (p. 39).
+- **کار را بشکنید** در یک spreadsheet یا نمودار Gantt، از بزرگ‌ترین تکه‌ها به پایین؛ آنچه را همین حالا می‌تواند شروع شود، با خود آدم‌هایی که انجامش می‌دهند به کارهای اندازه‌ی ticket تبدیل کنید (p. 38).
+- **از دل جزئیات و ناشناخته‌ها رد شوید**، حتی از نقطه‌ای که کلافه می‌شوید؛ مدیر خوب کنارتان می‌نشیند و می‌پرسد کجا هنوز به‌اندازه‌ی کافی خوب نیست (p. 38).
+- **پروژه را بگردانید و برنامه را تنظیم کنید.** همیشه چیزی عقب می‌افتد؛ با برنامه می‌توانید به milestoneهای رسیده و کار باقی‌مانده اشاره کنید، نه به حدس (pp. 38–39).
+- **تغییر نیازمندی‌ها را با بینشی که برنامه‌ریزی داده مدیریت کنید:** درباره‌ی هزینه‌شان شفاف باشید، و روبه‌روی ضرب‌الاجل سفت اولویت بدهید، حذف کنید و ساده کنید (p. 39).
+- **نزدیک پایان دوباره سراغ جزئیات بروید:** تست، راستی‌آزمایی، یک **premortem** که هر چیزی را فهرست می‌کند که ممکن است سر launch خراب شود، یک خط «به‌اندازه‌ی کافی خوب» که همه قبولش دارند و هرچه زیرش است حذف می‌شود، برنامه‌ی launch و برنامه‌ی rollback، و بعد جشن (p. 39).
 
-> **Run it:** the [parallel plan](../lab/03-parallel-plan/README.md) experiment schedules a small launch with and without the agreed JSON contract the book recommends, and shows how much the critical path shrinks.
+> **Run it:** آزمایش [برنامه‌ی موازی](../lab/03-parallel-plan/README.md) یک launch کوچک را با و بدون قرارداد JSON توافق‌شده‌ای که کتاب پیشنهاد می‌دهد زمان‌بندی می‌کند و نشان می‌دهد مسیر بحرانی چقدر کوتاه می‌شود.
 
-> **Ask the CTO: I'm Not Sure I Want to Be a Tech Lead** (pp. 39–40). Don't push people into management roles. Being "not technical enough" can block later promotion, and it is easier to learn deeply as an IC than while learning management. You'll probably need to do the tech lead job eventually, even on the IC track — but not necessarily now; take it when individual work no longer challenges you.
+> **کادر Ask the CTO: مطمئن نیستم بخواهم tech lead شوم** (pp. 39–40). آدم‌ها را به زور به نقش‌های مدیریتی هل ندهید. «به‌اندازه‌ی کافی فنی نبودن» می‌تواند جلوی ارتقاهای بعدی را بگیرد، و یادگیری عمیق در نقش individual contributor از یادگیری هم‌زمانِ آن و مدیریت آسان‌تر است. احتمالاً بالاخره باید کار tech lead را بکنید، حتی در مسیر فنی، ولی نه لزوماً حالا؛ وقتی کار فردی دیگر چالش‌برانگیز نبود قبولش کنید.
 
-### Decision Point: Stay on the Technical Track or Become a Manager
+### سر دوراهی: در مسیر فنی بمانید یا مدیر شوید
 
-The author offers caricatures of how she imagined each track and what she found (pp. 40–44):
+نویسنده تصویری اغراق‌شده می‌دهد از این‌که هر مسیر را چطور تصور می‌کرد و چه یافت (pp. 40–44):
 
-| | Imagined | Real |
+| | خیالی | واقعی |
 |---|---|---|
-| **Senior individual contributor** | Deep, fun problems; choose your work; just the right meetings; juniors hang on your words; steady rise; talks, books, open source and fame; nobody minds that you're awkward | Great on the right project — but you sell ideas and coach other teams to adopt your system; big projects are rare and luck-driven and may be cancelled; slow promotion; peers compete; you miss information from meetings you skip; tedious work (email, interviews, reviews) still expected. Still, you build things, choose projects, move teams — and may earn more than your manager |
-| **Manager** | Control and decisions; the team does what you say; you enforce fairness; reports give and take feedback openly; other managers want your advice; clear, stable goals; quick promotion | Meetings all day and lost touch with code; you can narrow decisions rather than make them; goals change and you explain them; the team mirrors your faults; authority takes more than a title; people quit before you notice; little power to make people happy when times are hard; peers find your advice meddling; a staff engineer may earn more than you |
+| **individual contributor ارشد** | مسئله‌های عمیق و جذاب؛ انتخاب کارتان؛ دقیقاً به‌اندازه جلسه؛ تازه‌کارها به حرفتان آویزان‌اند؛ رشد پیوسته؛ سخنرانی و کتاب و open source و شهرت؛ کسی به دست‌وپاچلفتی بودنتان کار ندارد | روی پروژه‌ی درست عالی است، ولی باید ایده بفروشید و به تیم‌های دیگر یاد بدهید سیستمتان را بردارند؛ پروژه‌های بزرگ کم‌اند و به شانس بسته‌اند و ممکن است لغو شوند؛ ارتقا کند است؛ هم‌ترازها رقیب‌اند؛ اطلاعات جلسه‌هایی را که نمی‌روید از دست می‌دهید؛ کار کسل‌کننده مثل ایمیل و مصاحبه و review باز هم از شما انتظار می‌رود. با این همه چیز می‌سازید، پروژه انتخاب می‌کنید، بین تیم‌ها جابه‌جا می‌شوید و شاید از مدیرتان بیشتر بگیرید |
+| **مدیر** | کنترل و تصمیم؛ تیم هر چه بگویید می‌کند؛ انصاف را شما برقرار می‌کنید؛ آدم‌ها راحت بازخورد می‌دهند و می‌گیرند؛ مدیرهای دیگر نظرتان را می‌خواهند؛ هدف‌ها روشن و باثبات‌اند؛ ارتقا سریع است | تمام روز جلسه و فاصله گرفتن از کد؛ بیشتر می‌توانید دامنه‌ی تصمیم را تنگ کنید تا خودتان تصمیم بگیرید؛ هدف‌ها عوض می‌شوند و شما باید توضیحشان بدهید؛ تیم عیب‌های شما را آینه می‌کند؛ اقتدار چیزی بیش از عنوان می‌خواهد؛ آدم‌ها پیش از آن‌که بفهمید استعفا می‌دهند؛ در روزهای سخت قدرت کمی برای خوشحال کردن آدم‌ها دارید؛ هم‌ترازها نظرتان را فضولی می‌بینند؛ شاید یک staff engineer از شما بیشتر بگیرد |
 
-You can switch tracks; many people try management and go back. Go in with your eyes open (p. 44).
+می‌شود مسیر را عوض کرد؛ خیلی‌ها مدیریت را امتحان می‌کنند و برمی‌گردند. با چشم باز وارد شوید (p. 44).
 
-### Good Manager, Bad Manager: The Process Czar
+### مدیر خوب، مدیر بد: process czar
 
-The process czar believes one true process — agile, Kanban, Scrum, lean or even waterfall; one way to do on-call, reviews or releases — will fix everything if followed precisely (p. 45).
+فرد process czar باور دارد یک process حقیقی، چه agile و Kanban و Scrum و lean و حتی waterfall، یا یک شیوه‌ی درست برای on-call و review و release، اگر مو‌به‌مو دنبال شود همه چیز را درست می‌کند (p. 45).
 
-- **Strengths:** organized, detail-oriented, makes sure no task is forgotten; often found in QA, helpdesk, product management and consulting (p. 45).
-- **Failure modes:** blames every problem on not following the process; ignores the need for flexibility; measures what's easy, like hours in the office; as a new tech lead, stops all work to find the perfect tool, or pushes tools at messy human problems (p. 45).
+- **نقطه‌ی قوت:** منظم است، به جزئیات دقت می‌کند و نمی‌گذارد کاری از قلم بیفتد؛ اغلب در QA و helpdesk و مدیریت محصول و مشاوره پیدا می‌شود (p. 45).
+- **شکل‌های شکست:** هر مشکلی را به پیروی نکردن از process نسبت می‌دهد؛ نیاز به انعطاف را نمی‌بیند؛ چیزی را اندازه می‌گیرد که اندازه‌گیری‌اش آسان است، مثلاً ساعت حضور در دفتر؛ و در نقش tech lead تازه‌کار، همه‌ی کار را می‌خواباند تا ابزار بی‌نقص را پیدا کند، یا برای مسئله‌های درهم انسانی ابزار جلو می‌گذارد (p. 45).
 
-The opposite isn't abandoning process but fitting it to the team and the work. The Agile Manifesto's four values summarize healthy process leadership: individuals and interactions over processes and tools; working software over comprehensive documentation; customer collaboration over contract negotiation; responding to change over following a plan (pp. 45–46). Advice (p. 46):
+نقطه‌ی مقابلش رها کردن process نیست، دوختنش به تن تیم و کار است. چهار ارزش Agile Manifesto رهبری سالم در process را خلاصه می‌کنند: افراد و تعامل‌ها بر processها و ابزارها؛ نرم‌افزار کارکننده بر مستندات جامع؛ همکاری با مشتری بر مذاکره‌ی قراردادی؛ پاسخ به تغییر بر پیروی از برنامه (pp. 45–46). توصیه‌ها (p. 46):
 
-- Don't use process to fix communication or leadership gaps; no two great teams look alike.
-- **Look for self-regulating processes.** If you're the rules cop, change the process so it's easier to follow; automation makes rules obvious.
-- If you manage a process czar, make it safe to fail and be imperfect — the obsession is often fear of failure — and stop them punishing the team for not following process.
+- از process برای وصله کردن شکاف‌های ارتباطی یا رهبری استفاده نکنید؛ هیچ دو تیم درخشانی شبیه هم نیستند.
+- **دنبال processهای خودتنظیم بگردید.** اگر شما پلیس قانونید، process را طوری عوض کنید که پیروی از آن آسان‌تر شود؛ automation قانون‌ها را بدیهی می‌کند.
+- اگر مدیرِ یک process czar هستید، فضایی بسازید که شکست خوردن و بی‌نقص نبودن در آن امن باشد، چون این وسواس اغلب ترس از شکست است، و جلویش را بگیرید که تیم را بابت پیروی نکردن از process تنبیه کند.
 
-### How to Be a Great Tech Lead
+### چطور tech lead درخشانی باشیم
 
-| Trait | What it means (pp. 46–48) |
+| ویژگی | یعنی چه (pp. 46–48) |
 |---|---|
-| **Understand the architecture** | Its connections, where data lives and flows, where the products' core logic lives. You can't lead changes to what you don't understand |
-| **Be a team player** | Don't keep all the interesting work — unstick the tricky, boring areas, which also reveal broken process. But don't take only boring work either; give yourself a fun task when you have time to do it well |
-| **Lead technical decisions** | Involved isn't the same as deciding alone. Decide which calls are yours, which go to people with more expertise, and which need the whole team; state what's being decided and communicate the outcome |
-| **Communicate** | The team's productivity matters more than yours; you represent the team in meetings. Write, read carefully, speak; practise with design docs, blogs and meetups. Listen, repeat back, take notes |
+| **معماری را بفهمید** | اتصال‌هایش، این‌که داده کجا می‌نشیند و کجا جریان دارد، و منطق اصلی محصول‌ها کجاست. نمی‌توانید تغییر چیزی را رهبری کنید که نمی‌فهمیدش |
+| **اهل تیم باشید** | همه‌ی کار جذاب را برای خودتان نگه ندارید؛ گره حوزه‌های دشوار و کسل‌کننده را باز کنید، که processهای خراب را هم رو می‌کند. ولی فقط کار کسل‌کننده هم برندارید؛ وقتی فرصت دارید خوب انجامش بدهید، یک کار جذاب هم به خودتان بدهید |
+| **تصمیم‌های فنی را پیش ببرید** | دخیل بودن با تنها تصمیم گرفتن یکی نیست. مشخص کنید کدام تصمیم‌ها با شماست، کدام با آدم‌های خبره‌تر و کدام با کل تیم؛ بگویید سر چه چیزی تصمیم گرفته می‌شود و نتیجه را اعلام کنید |
+| **ارتباط بگیرید** | بهره‌وری تیم از بهره‌وری شما مهم‌تر است؛ در جلسه‌ها نماینده‌ی تیمید. بنویسید، با دقت بخوانید، حرف بزنید؛ با design doc و وبلاگ و meetup تمرین کنید. گوش بدهید، حرف طرف را برایش تکرار کنید، یادداشت بردارید |
 
-### Assessing Your Own Experience
+### سنجیدن تجربه‌ی خودتان
 
-Questions for reflection (p. 48): is there a written tech lead description in your organization? Are you ready to spend time outside the code? Have you asked your manager what they expect from a tech lead? What made the best tech lead you worked with great, and the most frustrating one frustrating?
+پرسش‌هایی برای تأمل (p. 48): در سازمانتان شرح نقش نوشته‌شده‌ای برای tech lead هست؟ آماده‌اید وقتی بیرون از کد بگذرانید؟ از مدیرتان پرسیده‌اید از یک tech lead چه انتظاری دارد؟ بهترین tech leadی که با او کار کرده‌اید چه چیزی را درخشان می‌کرد و کلافه‌کننده‌ترینشان چه چیزی را؟
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Best coder as tech lead | Technical depth | Rabbit holes; team railroaded while the lead codes |
-| Tech lead writes most of the code | Personal output | Nobody keeps the project moving; heroics hide problems |
-| Heroics vs. raising obstacles early | Feature shipped as specified | Overwork on something the PM would have cut |
-| Detailed project plan | Known progress, cost of change, fewer surprises | Tedious, uncomfortable up-front work |
-| No plan ("we're agile") | Start immediately | Projects fail slower; no basis for estimates |
-| Decide alone / never decide | Speed / consensus | Resentment and blame / decisions drag on |
-| Rigid process | Nothing forgotten | Blames people; ignores change; measures the wrong things |
+| بهترین کدنویس در نقش tech lead | عمق فنی | لانه‌ی خرگوش؛ تیم رانده می‌شود در حالی که سرپرست کد می‌زند |
+| نوشتن بیشترِ کد توسط tech lead | خروجی شخصی | کسی پروژه را در حرکت نگه نمی‌دارد؛ قهرمان‌بازی مشکل‌ها را پنهان می‌کند |
+| قهرمان‌بازی در برابر اعلام زودهنگام مانع | feature همان‌طور که خواسته شده تحویل می‌شود | کار اضافی روی چیزی که product manager حاضر بود حذفش کند |
+| برنامه‌ی پروژه‌ی باجزئیات | پیشرفت معلوم، هزینه‌ی تغییر روشن، غافلگیری کمتر | کار پیش‌از‌شروعِ کسل‌کننده و ناخوشایند |
+| بی‌برنامگی به بهانه‌ی «ما agile هستیم» | شروع فوری | پروژه‌ها کندتر شکست می‌خورند؛ مبنایی برای تخمین نیست |
+| تنها تصمیم گرفتن / هرگز تصمیم نگرفتن | سرعت / اجماع | دلخوری و سرزنش / تصمیم‌ها کش می‌آیند |
+| process خشک | چیزی از قلم نمی‌افتد | آدم‌ها را سرزنش می‌کند؛ تغییر را نمی‌بیند؛ چیز اشتباه را اندازه می‌گیرد |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Maker's schedule, manager's schedule** is the title of Paul Graham's 2009 essay: makers need half-day blocks, and a single meeting can cut an afternoon into pieces too small for hard work. The book uses the terms without citing it (p. 31).
-- **Premortems** come from psychologist Gary Klein ("Performing a Project Premortem," *Harvard Business Review*, 2007): imagine the project has failed and ask why, before it starts.
-- **Staff-plus roles.** Will Larson's *Staff Engineer* (2021) later named archetypes for senior ICs — tech lead, architect, solver, right hand — which map closely onto the "real life" the book describes.
+- **برنامه‌ی سازنده و برنامه‌ی مدیر** عنوان یادداشت Paul Graham در سال ۲۰۰۹ است: سازنده‌ها به بلوک‌های نیم‌روزه نیاز دارند و یک جلسه می‌تواند بعدازظهر را به تکه‌هایی ببرد که برای کار سخت خیلی کوچک‌اند. کتاب این اصطلاح‌ها را بدون ارجاع به آن یادداشت به کار می‌برد (p. 31).
+- **روش premortem** از روان‌شناس Gary Klein می‌آید، در «Performing a Project Premortem»، *Harvard Business Review*، ۲۰۰۷: پیش از شروع پروژه تصور کنید شکست خورده و بپرسید چرا.
+- **نقش‌های staff به بالا.** کتاب *Staff Engineer* از Will Larson در سال ۲۰۲۱ بعدتر برای individual contributorهای ارشد کهن‌الگوهایی نام برد؛ tech lead، architect، solver و right hand، که خیلی نزدیک به همان «زندگی واقعی»اند که این کتاب شرح می‌دهد.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Parallel plan: the cost of waiting for the API](../lab/03-parallel-plan/README.md) — schedules a small launch's tasks with and without an agreed interface and prints the critical path.
-- **Related chapters:** [2. Mentoring](02-mentoring.md) (listening and communicating, now with a team), [4. Managing People](04-managing-people.md) (the people side the tech lead may take on), [5. Managing a Team](05-managing-a-team.md) (advanced project management rules of thumb), [9. Bootstrapping Culture](09-bootstrapping-culture.md) (writing a career ladder with tech lead as responsibilities).
+- **Run it:** [برنامه‌ی موازی: هزینه‌ی انتظار برای API](../lab/03-parallel-plan/README.md)؛ کارهای یک launch کوچک را با و بدون interface توافق‌شده زمان‌بندی می‌کند و مسیر بحرانی را چاپ می‌کند.
+- **فصل‌های مرتبط:** [فصل ۲: منتورینگ](02-mentoring.md) که شنیدن و ارتباط گرفتن را حالا با یک تیم می‌بیند، [فصل ۴: مدیریت آدم‌ها](04-managing-people.md) که سمت انسانی‌ای را می‌گوید که tech lead ممکن است برعهده بگیرد، [فصل ۵: مدیریت یک تیم](05-managing-a-team.md) که قاعده‌های سرانگشتی پیشرفته‌ی مدیریت پروژه را دارد، و [فصل ۹: ساختن فرهنگ از صفر](09-bootstrapping-culture.md) که نوشتن نردبان شغلی را با tech lead در جایگاه مجموعه‌ای از مسئولیت‌ها می‌گوید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **Why is giving the tech lead role to the most experienced coder a misconception?**
+1. **چرا دادن نقش tech lead به باتجربه‌ترین کدنویس یک برداشت غلط است؟**
 
-   *Answer:* The role is leadership — communication, prioritization, keeping the project moving — not freedom to focus on one's own code; a tech lead who does that isn't doing the job (pp. 27, 29).
+   *Answer:* این نقش رهبری است، یعنی ارتباط و اولویت‌بندی و در حرکت نگه داشتن پروژه، نه آزادی برای تمرکز روی کد خود آدم؛ tech leadی که این کار را می‌کند، کارش را انجام نمی‌دهد (pp. 27, 29).
 
-2. **What is the tech lead's "one weird trick"?**
-   - [ ] Writing the hardest code personally
-   - [x] Being willing to step away from the code and balance technical work with what the team needs
-   - [ ] Adopting the right agile process
+2. **«آن یک ترفند عجیب» tech lead چیست؟**
+   - [ ] نوشتن سخت‌ترین کد به‌دست خودش
+   - [x] این‌که حاضر باشد از کد فاصله بگیرد و کار فنی را با چیزی که تیم لازم دارد متعادل کند
+   - [ ] برداشتن process درست agile
 
    *Answer:* p. 31.
 
-3. **How does the project planner role let a frontend start before the API is done?**
+3. **نقش برنامه‌ریز پروژه چطور اجازه می‌دهد frontend پیش از آماده شدن API شروع کند؟**
 
-   *Answer:* Agree on an abstraction — the JSON format — and code against it with dummy objects, so the pieces proceed in parallel (p. 32).
+   *Answer:* سر یک انتزاع توافق کنید، یعنی قالب JSON، و با objectهای ساختگی روی همان کد بزنید تا تکه‌ها موازی پیش بروند (p. 32).
 
-4. **According to the book, what is the real value of project planning?**
-   - [ ] Executing the plan perfectly
-   - [ ] Predicting the delivery date exactly
-   - [x] The discipline to think about the project in depth before diving in
+4. **به گفته‌ی کتاب، ارزش واقعی برنامه‌ریزی پروژه چیست؟**
+   - [ ] اجرای بی‌نقص برنامه
+   - [ ] پیش‌بینی دقیق تاریخ تحویل
+   - [x] نظمی که وادارتان می‌کند پیش از شیرجه زدن عمیق به پروژه فکر کنید
 
-   *Answer:* The plan, however accurate, matters less than the act of planning (p. 36).
+   *Answer:* برنامه هر قدر هم دقیق باشد، از عمل برنامه‌ریزی کم‌اهمیت‌تر است (p. 36).
 
-5. **What happens at the end of a project in the book's five steps?**
+5. **در پنج قدم کتاب، آخر پروژه چه اتفاقی می‌افتد؟**
 
-   *Answer:* Revisit the details: testing and verification, a premortem of what could fail at launch, a socialized "good enough" line with work below it cut, launch and rollback plans, and a celebration (p. 39).
+   *Answer:* دوباره سراغ جزئیات بروید: تست و راستی‌آزمایی، یک premortem از هر چیزی که ممکن است سر launch خراب شود، یک خط «به‌اندازه‌ی کافی خوب» که همه قبولش دارند و هرچه زیرش است حذف می‌شود، برنامه‌ی launch و rollback، و یک جشن (p. 39).
 
-6. **What does the book suggest instead of acting as a "rules cop" for a process?**
+6. **کتاب به‌جای پلیس قانون بودن برای یک process چه پیشنهاد می‌دهد؟**
 
-   *Answer:* Look for self-regulating processes: change the process so it's easier to follow, often with automation (p. 46).
+   *Answer:* دنبال processهای خودتنظیم بگردید: process را طوری عوض کنید که پیروی از آن آسان‌تر شود، اغلب با automation (p. 46).

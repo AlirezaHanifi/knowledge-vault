@@ -3,176 +3,190 @@ book: the-managers-path
 chapter: 2
 title: "Mentoring"
 pages: "11–26"
+translated_title: "منتورینگ"
+lang: fa
 ---
 
-# 2. Mentoring
+# فصل ۲: منتورینگ
 
-[← 1. Management 101](01-management-101.md) · [Book](../README.md) · [3. Tech Lead →](03-tech-lead.md)
+[فصل ۱: مدیریت از پایه →](01-management-101.md) · [کتاب](../README.md) · [فصل ۳: نقش tech lead ←](03-tech-lead.md)
 
-## Summary
+## خلاصه
 
-For many engineers the first act of people management is unofficial: they are asked to mentor an intern or a new hire. The chapter treats mentoring as a safe place to practise the core management skills — listening, communicating clearly and calibrating to the other person — and walks through the three common forms: interns, new hires, and technical or career mentoring. It warns against the "alpha geek" who turns expertise into a culture of fear, tells the mentor's manager to set goals and give real recognition for the work, and ends with three habits for mentors: stay curious, speak the mentee's language, and build your network (pp. 11–26).
+برای خیلی از مهندس‌ها اولین تجربه‌ی مدیریت آدم‌ها غیررسمی است: از آن‌ها می‌خواهند منتور یک کارآموز یا یک تازه‌وارد شوند. این فصل منتورینگ را جای امنی برای تمرین مهارت‌های اصلی مدیریت می‌داند، یعنی شنیدن، شفاف حرف زدن و تنظیم شدن با طرف مقابل، و سه شکل رایجش را مرور می‌کند: کارآموز، تازه‌وارد، و منتورینگ فنی یا شغلی. هشدار می‌دهد درباره‌ی alpha geek که تخصص را به فرهنگ ترس تبدیل می‌کند، به مدیرِ منتور می‌گوید هدف بگذارد و برای این کار قدردانی واقعی بکند، و با سه عادت برای منتورها تمام می‌شود: کنجکاو بمانید، به زبان طرف مقابل حرف بزنید و شبکه‌تان را بسازید (pp. 11–26).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Mentoring is a low-risk rehearsal for management.** The likely failure isn't losing coding time; it's a good person having a bad experience and leaving (p. 12).
-- **For an intern, have a project ready and break it into milestones**, sized to take a new hire about half the internship, and plan a presentation at the end (pp. 13, 15–16).
-- **Listen, communicate clearly, calibrate.** Listening is the precursor to empathy; tell the mentee what you expect (such as researching before asking); adjust the check-in frequency to how they work (pp. 13–15).
-- **A new hire gives you fresh eyes on the unspoken rules.** Have them update the onboarding documents and introduce them to your networks (pp. 16–18).
-- **The alpha geek creates a culture of fear, not excellence.** Mentoring is a chance to unlearn it; alpha geeks are usually better kept out of team management (pp. 20–21).
-- **The mentor's manager must treat mentoring as real work:** set a goal, pick the right person, plan for the lost productivity, and don't assume "like must mentor like" (pp. 22–23).
-- **Be curious, listen and speak their language, make connections**: your career succeeds or fails on the strength of your network (pp. 24–26).
+- **منتورینگ تمرین کم‌ریسکِ مدیریت است.** شکست محتمل از دست دادن وقت کدنویسی نیست؛ این است که آدم خوبی تجربه‌ی بدی داشته باشد و برود (p. 12).
+- **برای کارآموز پروژه‌ای آماده داشته باشید و به milestone بشکنیدش**، در اندازه‌ای که یک تازه‌کار در حدود نیمی از دوره تمامش کند، و برای آخرِ کار یک ارائه برنامه‌ریزی کنید (pp. 13, 15–16).
+- **گوش بدهید، شفاف بگویید، تنظیم شوید.** شنیدن مقدمه‌ی همدلی است؛ انتظارتان را بگویید، مثلاً این‌که قبل از پرسیدن جست‌وجو کنند؛ فاصله‌ی سر زدن را با سبک کار آن‌ها تنظیم کنید (pp. 13–15).
+- **تازه‌وارد چشم تازه‌ای به قاعده‌های نانوشته است.** از او بخواهید سندهای onboarding را به‌روز کند و به شبکه‌هایتان معرفی‌اش کنید (pp. 16–18).
+- **فرد alpha geek فرهنگ ترس می‌سازد، نه فرهنگ سرآمدی.** منتورینگ فرصتی است برای ترک این عادت؛ معمولاً بهتر است alpha geekها از مدیریت تیم دور بمانند (pp. 20–21).
+- **مدیرِ منتور باید منتورینگ را کار واقعی بداند:** هدف بگذارد، آدم درست را انتخاب کند، افت بهره‌وری را پیش‌بینی کند و فرض نکند «هر کس باید منتور شبیه خودش باشد» (pp. 22–23).
+- **کنجکاو باشید، گوش بدهید و به زبان آن‌ها حرف بزنید، آدم‌ها را به هم وصل کنید**: موفقیت یا شکست مسیر شغلی‌تان به قوت شبکه‌تان بسته است (pp. 24–26).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- The Importance of Mentoring to Junior Team Members — p. 11
-- Being a Mentor — p. 12
-  - Mentoring an Intern — p. 12
-  - Mentoring a New Hire — p. 16
-  - Technical or Career Mentoring — p. 18
-- Good Manager, Bad Manager: The Alpha Geek — p. 20
-- Tips for the Manager of a Mentor — p. 22
-- Key Takeaways for the Mentor — p. 24
-  - Be Curious and Open-Minded — p. 24
-  - Listen and Speak Their Language — p. 25
-  - Make Connections — p. 25
-- Assessing Your Own Experience — p. 26
+- اهمیت منتورینگ برای اعضای تازه‌کار تیم — p. 11
+- منتور بودن — p. 12
+  - منتورِ یک کارآموز — p. 12
+  - منتورِ یک تازه‌وارد — p. 16
+  - منتورینگ فنی یا شغلی — p. 18
+- مدیر خوب، مدیر بد: alpha geek — p. 20
+- توصیه‌هایی به مدیرِ یک منتور — p. 22
+- نکته‌های کلیدی برای منتور — p. 24
+  - کنجکاو و گشوده باشید — p. 24
+  - گوش بدهید و به زبان آن‌ها حرف بزنید — p. 25
+  - آدم‌ها را به هم وصل کنید — p. 25
+- سنجیدن تجربه‌ی خودتان — p. 26
 
-## Notes
+## یادداشت‌ها
 
-### The Importance of Mentoring to Junior Team Members
+### اهمیت منتورینگ برای اعضای تازه‌کار تیم
 
-Mentors are commonly assigned to new graduates and interns, and many organizations use them in onboarding for every new hire. The mentor may be a junior person who still remembers onboarding, or a senior engineer who can also mentor technically. In a healthy organization both sides gain: the mentor feels what it is like to be responsible for another person, and the mentee gets an overseer focused on them alone (p. 11).
+معمولاً به فارغ‌التحصیل‌های تازه و کارآموزها منتور می‌دهند و خیلی از سازمان‌ها در onboarding هر تازه‌واردی از منتور استفاده می‌کنند. منتور می‌تواند آدم تازه‌کاری باشد که هنوز onboarding خودش یادش است، یا مهندس ارشدی که منتورینگ فنی هم بلد است. در سازمان سالم هر دو طرف چیزی می‌برند: منتور حس می‌کند مسئول بودن در برابر یک آدم دیگر یعنی چه، و طرف مقابل کسی را دارد که فقط حواسش به اوست (p. 11).
 
-The author's own first mentor, a senior engineer called Kevin during an internship at Sun Microsystems on a team writing JVM tools, made time to discuss projects, whiteboard and read code together. That summer showed her she could do real-world work (pp. 11–12).
+اولین منتور خود نویسنده مهندس ارشدی به نام Kevin بود، در دوره‌ی کارآموزی‌اش در Sun Microsystems و در تیمی که ابزارهای JVM می‌نوشت. او وقت می‌گذاشت تا درباره‌ی پروژه‌ها حرف بزنند، پای وایت‌برد بروند و با هم کد بخوانند. آن تابستان به نویسنده نشان داد از پس کار واقعی برمی‌آید (pp. 11–12).
 
-### Being a Mentor
+### منتور بودن
 
-The stakes are low: you're unlikely to be fired for being a bad mentor. The worst outcomes are (a) the mentee drains your time, or (b) someone the organization wants has a bad experience and doesn't join or leaves sooner — and the second is far more likely. Weak mentors squander talent by ignoring their charges, giving them trivial work, or belittling them (p. 12).
+ریسکش پایین است: بعید است به‌خاطر منتور بدی بودن اخراج شوید. بدترین نتیجه‌ها این‌هایند: الف) طرف مقابل وقتتان را تمام کند، یا ب) کسی که سازمان او را می‌خواهد تجربه‌ی بدی داشته باشد و نیاید یا زودتر برود، و دومی خیلی محتمل‌تر است. منتورهای ضعیف استعداد را حرام می‌کنند، چون نادیده‌شان می‌گیرند، کار بی‌اهمیت دستشان می‌دهند یا کوچکشان می‌کنند (p. 12).
 
-#### Mentoring an Intern (pp. 12–16)
+#### منتورِ یک کارآموز (pp. 12–16)
 
-An intern more than a year from graduating will probably know very little and go elsewhere next year unless they have an amazing summer — and they'll tell their friends about it, which shapes your graduate hiring (pp. 12–13). The essentials:
+کارآموزی که بیش از یک سال تا فارغ‌التحصیلی فاصله دارد احتمالاً خیلی کم بلد است و سال بعد جای دیگری می‌رود، مگر این‌که تابستان فوق‌العاده‌ای داشته باشد؛ و همین را به دوستانش می‌گوید، که روی استخدام فارغ‌التحصیل‌های شما اثر می‌گذارد (pp. 12–13). چیزهای ضروری:
 
-- **Have a project.** Without one, the intern is lost and bored all summer; if you're stuck, start with small features of your own project that would take you a few days (p. 13).
-- **Sit with them the first few days**, through setup and the code, touching base several times a day (p. 13).
-- **Break the project into milestones** and walk through the breakdown with them (p. 13).
+- **پروژه داشته باشید.** بدون پروژه، کارآموز تمام تابستان سردرگم و بی‌حوصله است؛ اگر گیر کرده‌اید، از featureهای کوچکی از پروژه‌ی خودتان شروع کنید که چند روز از شما وقت می‌گیرند (p. 13).
+- **چند روز اول کنارشان بنشینید**، از راه‌اندازی محیط تا خواندن کد، و روزی چند بار سر بزنید (p. 13).
+- **پروژه را به milestone بشکنید** و این تقسیم‌بندی را با خودشان مرور کنید (p. 13).
 
-The mentoring exercises three management skills (pp. 13–15):
+این منتورینگ سه مهارت مدیریتی را تمرین می‌دهد (pp. 13–15):
 
-| Skill | What it looks like |
+| مهارت | چه شکلی است |
 |---|---|
-| **Listen carefully** | The first and most basic skill of managing people, and a precursor to empathy. Notice whether you're planning your reply instead of listening; read body language; say complex things several ways and repeat questions back. You hold huge power in the mentee's eyes, so draw the questions out — wrong-direction work costs more than answering questions |
-| **Clearly communicate** | If you expect research before questions, say so. Ask them to explain code back, point them at documents, or hand over the first milestone to work on alone for a day or two |
-| **Calibrate your response** | Interns may outstrip expectations, struggle, rush poor work or polish slowly. Use the first weeks to learn how often to check in — daily, weekly — but check in at least weekly |
+| **با دقت گوش بدهید** | اولین و پایه‌ای‌ترین مهارت مدیریت آدم‌ها و مقدمه‌ی همدلی. حواستان باشد که به‌جای شنیدن، مشغول چیدن جواب نباشید؛ زبان بدن را بخوانید؛ چیزهای پیچیده را چند جور بگویید و پرسش‌ها را برایشان تکرار کنید. در چشم طرف مقابل قدرت زیادی دارید، پس پرسش‌ها را از دلش بیرون بکشید؛ کار رفته در مسیر غلط از جواب دادن به پرسش‌ها گران‌تر است |
+| **شفاف حرف بزنید** | اگر انتظار دارید قبل از پرسیدن جست‌وجو کنند، بگویید. از آن‌ها بخواهید کد را برایتان توضیح بدهند، به سندها ارجاعشان بدهید، یا اولین milestone را دستشان بدهید تا یکی دو روز تنها رویش کار کنند |
+| **واکنشتان را تنظیم کنید** | کارآموزها ممکن است از انتظار جلو بزنند، گیر کنند، با عجله کار بی‌کیفیت بدهند یا کُند و وسواسی پیش بروند. از هفته‌های اول بفهمید هر چند وقت یک‌بار باید سر بزنید، روزانه یا هفتگی، ولی دست‌کم هفتگی سر بزنید |
 
-> **Ask the CTO: Mentoring a Summer Intern** (pp. 15–16). (1) Prepare for the arrival: desk, computer, access. (2) Have a specific, relevant but not urgent project that a new hire could finish in about half the internship — 5 weeks of work for a 10-week intern. (3) Plan for the intern to present the work at the end, coached by you and in the team's usual demo format: interns who feel appreciated come back.
+> **کادر Ask the CTO: منتورِ یک کارآموز تابستانی** (pp. 15–16). ۱) برای آمدنش آماده باشید: میز، کامپیوتر، دسترسی‌ها. ۲) پروژه‌ای مشخص و مرتبط ولی غیرفوری داشته باشید که یک تازه‌وارد در حدود نیمی از دوره تمامش کند؛ برای کارآموز ۱۰ هفته‌ای، ۵ هفته کار. ۳) برنامه بریزید که کارآموز آخر دوره کارش را ارائه بدهد، با تمرین پیش شما و در همان قالب دموی همیشگی تیم: کارآموزی که حس کند قدرش دانسته شده، برمی‌گردد.
 
-> **Try it:** [Sizing an intern project](../widgets/02-intern-project.html) — set the internship length, the intern's pace and the program's other activities, and see whether a project sized at half the internship gets finished.
+> **Try it:** [اندازه‌گیری پروژه‌ی کارآموز](../widgets/02-intern-project.html)؛ طول دوره، سرعت کارآموز و بقیه‌ی برنامه‌های دوره را بگذارید و ببینید پروژه‌ای به اندازه‌ی نصف دوره تمام می‌شود یا نه.
 
-#### Mentoring a New Hire (pp. 16–18)
+#### منتورِ یک تازه‌وارد (pp. 16–18)
 
-The author contrasts her first job at "BigTechCo," where she was shown an office and left alone (and soon left for graduate school), with her next job, where a mentor paired with her and she was productive within days (pp. 16–17). Mentoring a new hire means onboarding, helping them adjust, and building both your networks; it is easier than mentoring an intern but lasts longer (p. 17).
+نویسنده اولین شغلش در شرکتی که «BigTechCo» می‌نامدش را، جایی که اتاقش را نشانش دادند و رهایش کردند و خیلی زود برای تحصیلات تکمیلی رفت، با شغل بعدی‌اش مقایسه می‌کند؛ جایی که منتوری با او pair کرد و ظرف چند روز کارآمد شد (pp. 16–17). منتور بودن برای تازه‌وارد یعنی onboarding، کمک به جا افتادنش و ساختن شبکه‌ی هر دو طرف؛ از منتورینگ کارآموز آسان‌تر است ولی بیشتر طول می‌کشد (p. 17).
 
-- **Fresh eyes on unspoken rules.** The handbook's vacation policy is a spoken rule; "no vacation the week after Thanksgiving in ecommerce" is an unspoken one, as is how long to struggle before asking for help. Noticing them is a chance to clarify them (p. 17).
-- **Onboarding documents** — setup guides, tracking systems, tools — should evolve; having the new hire fix them with every surprise shows they have the power and obligation to share what they learn (pp. 17–18).
-- **Introduce them around.** Companies are full of human networks; even with no interest in management, a career across multiple teams needs a network of trusted people. Treat network building as an investment (p. 18).
+- **چشم تازه روی قاعده‌های نانوشته.** سیاست مرخصی در آیین‌نامه قاعده‌ای نوشته است؛ «در ecommerce هفته‌ی بعد از Thanksgiving مرخصی نگیر» نانوشته است، مثل این‌که چقدر باید با مسئله کلنجار بروید تا کمک بخواهید. دیدنشان فرصتی است برای شفاف کردنشان (p. 17).
+- **سندهای onboarding**، یعنی راهنمای راه‌اندازی، سیستم‌های پیگیری و ابزارها، باید مدام به‌روز شوند؛ وقتی تازه‌وارد با هر غافلگیری یکی‌شان را درست می‌کند، می‌فهمد هم اختیارش را دارد و هم وظیفه‌اش را که آموخته‌هایش را به اشتراک بگذارد (pp. 17–18).
+- **معرفی‌اش کنید.** شرکت‌ها پر از شبکه‌های انسانی‌اند؛ حتی اگر هیچ علاقه‌ای به مدیریت ندارید، مسیر شغلی‌ای که از چند تیم می‌گذرد به شبکه‌ای از آدم‌های قابل‌اعتماد نیاز دارد. ساختن شبکه را سرمایه‌گذاری بدانید (p. 18).
 
-#### Technical or Career Mentoring (pp. 18–19)
+#### منتورینگ فنی یا شغلی (pp. 18–19)
 
-The best mentoring grows naturally in the context of real work: a senior engineer helping a junior one on the same problems gets better code back, and it is often an expected part of a senior role. Formal cross-team programs are often an ambiguous obligation, so be specific about expectations (pp. 18–19).
+بهترین منتورینگ در دل کار واقعی رشد می‌کند: مهندس ارشدی که روی همان مسئله‌ها به یک تازه‌کار کمک می‌کند، کد بهتری تحویل می‌گیرد، و این اغلب بخشی از انتظار از نقش ارشد است. برنامه‌های رسمیِ بین‌تیمی معمولاً تعهدی مبهم‌اند، پس درباره‌ی انتظارها دقیق باشید (pp. 18–19).
 
-| As a mentor | As a mentee |
+| در نقش منتور | در نقش طرف مقابل |
 |---|---|
-| Say what you expect (questions sent in advance, your time commitment) and give candid advice | Know what you want and come prepared, especially with an unpaid outside mentor |
-| It's OK to say no, without giving a reason; with your manager, give real reasons such as workload | If you won't prepare, ask whether you need a mentor at all — maybe a friend, therapist or coach |
-| Never say yes and then not do the work | Respect their time; consider paying a professional |
+| بگویید چه انتظاری دارید، مثلاً پرسش‌ها از قبل فرستاده شوند و چقدر وقت می‌گذارید، و رک نظر بدهید | بدانید چه می‌خواهید و آماده بیایید، به‌خصوص با منتور بیرونیِ بی‌مزد |
+| نه گفتن اشکالی ندارد و دلیل هم لازم نیست؛ با مدیرتان دلیل واقعی بیاورید، مثلاً حجم کار | به وقتشان احترام بگذارید؛ به پول دادن به یک حرفه‌ای هم فکر کنید |
+| هیچ‌وقت بله نگویید و بعد کار را نکنید | اگر حاضر نیستید آماده شوید، بپرسید اصلاً منتور لازم دارید یا نه؛ شاید دوست یا تراپیست یا کوچ بخواهید |
 
-### Good Manager, Bad Manager: The Alpha Geek
+> **In practice:** onboarding یک مهندس داده‌ی تازه روی stack ما، از dlt تا Argo CD، بهترین فرصت منتورینگ است.
+>
+> **Your turn:** هفته‌ی اول عضو تازه را چطور برنامه‌ریزی می‌کنید؟
+>
+> *Answer:* یک tracer کوچک: افزودن یک ستون از منبع تا Gold در یک merge request، با همه‌ی گام‌ها، یعنی CI، Argo CD و dashboard. منتور سؤال‌ها را جواب می‌دهد ولی کار را انجام نمی‌دهد. کتاب ریسک منتورینگ را پایین و ارزشش را برای هر دو طرف بالا می‌داند (pp. 12–16).
 
-The alpha geek is driven to be the best engineer, always right, the one who solves the hard problems, and believes intelligence should decide who makes decisions. They can't handle dissent, belittle mistakes, redo teammates' work without warning, take credit for the team's work, and hide information to keep their edge. They try to create a culture of excellence and end up with a **culture of fear** (pp. 20–21).
+### مدیر خوب، مدیر بد: alpha geek
 
-At their best they inspire and design great systems; at their worst they are rigid, say "I told you so," feel threatened by criticism of their past decisions and demean nontechnical colleagues (p. 20).
+فرد alpha geek می‌خواهد بهترین مهندس باشد، همیشه حق با او باشد، همان کسی باشد که مسئله‌های سخت را حل می‌کند، و باور دارد هوش باید تعیین کند چه کسی تصمیم بگیرد. تاب مخالفت ندارد، اشتباه را کوچک می‌شمارد، کار هم‌تیمی‌ها را بی‌خبر از نو می‌نویسد، اعتبار کار تیم را به نام خودش می‌زند و اطلاعات را پنهان می‌کند تا برتری‌اش را نگه دارد. می‌خواهد فرهنگ سرآمدی بسازد و آخرش **فرهنگ ترس** می‌سازد (pp. 20–21).
 
-The habit often appears when engineers first mentor. Warning signs: people don't come to you for help; you hunt for gotchas; you think correctness is always worth fighting hard for. Mentoring — seeing your mentee as someone to teach in the way that works for *them* — is a chance to break it (p. 21). Alpha geeks make terrible managers unless they let go of being the smartest person in the room; they are often better given technical strategy and design, as in the startup CTO paired with an execution-focused VP of Engineering. Promote them into team management very carefully (p. 21).
+در بهترین حالت الهام‌بخش است و سیستم‌های خوبی طراحی می‌کند؛ در بدترین حالت خشک است، می‌گوید «گفته بودم»، از نقد تصمیم‌های قبلی‌اش حس خطر می‌کند و همکارهای غیرفنی را تحقیر می‌کند (p. 20).
 
-### Tips for the Manager of a Mentor
+این عادت اغلب وقتی سر می‌زند که مهندس‌ها اولین بار منتور می‌شوند. نشانه‌های هشدار: آدم‌ها برای کمک پیش شما نمی‌آیند؛ دنبال مچ‌گیری می‌گردید؛ فکر می‌کنید سر درست بودن همیشه باید سخت جنگید. منتورینگ، یعنی دیدن طرف مقابل به‌عنوان کسی که باید به *شیوه‌ی خودش* به او یاد بدهید، فرصتی است برای شکستن این عادت (p. 21). alpha geekها مدیرهای افتضاحی می‌شوند، مگر این‌که دست از باهوش‌ترین‌آدمِ‌اتاق بودن بردارند؛ اغلب بهتر است استراتژی و طراحی فنی را به آن‌ها بدهید، مثل CTO یک استارتاپ که کنارش یک VP of Engineering اجراگرا نشسته. خیلی با احتیاط به مدیریت تیم ارتقایشان بدهید (p. 21).
 
-"What you measure, you improve": decide what the mentoring relationship should achieve, then pick the person who can achieve it (p. 22).
+### توصیه‌هایی به مدیرِ یک منتور
 
-1. **Know why.** Onboarding interns and new hires has a clear purpose; cross-team pairing programs without structure often yield little and feel like forced socializing (p. 22).
-2. **It's an additional responsibility.** The mentor's productivity may drop; don't push someone on a time-sensitive project into it. Pick someone who can succeed and wants to distinguish themselves beyond coding (p. 22).
-3. **Avoid the pitfalls** (pp. 22–23):
-   - *Treating it as low-status emotional labor.* Recognize it as first-class work and give the mentor time; the return is better networks, faster onboarding and higher intern conversion.
-   - *Assuming like must mentor like* (women for women, people of color for people of color) unless the program has a diversity purpose. Like-for-like does make sense for job roles.
-   - *Missing the chance to grow leaders:* mentoring builds patience, empathy and networks in introverted developers, and humility in impatient young engineers.
+«هر چه را اندازه بگیرید بهتر می‌شود»: اول تصمیم بگیرید رابطه‌ی منتورینگ قرار است به چه برسد، بعد آدمی را انتخاب کنید که می‌تواند به آن برساندش (p. 22).
 
-> **Ask the CTO: Hiring Interns** (p. 24). An internship program is a way to find talent, not to get summer work done. Hire only interns graduating within the year after the internship; and because interns are easier to hire than graduates, push for candidates from underrepresented groups — diversity in interns becomes diversity in new-grad hiring.
+1. **دلیلش را بدانید.** onboarding کارآموز و تازه‌وارد هدف روشنی دارد؛ برنامه‌های pair کردن بین تیم‌ها بدون ساختار اغلب چیز زیادی نمی‌دهند و حس معاشرت اجباری دارند (p. 22).
+2. **این یک مسئولیت اضافه است.** بهره‌وری منتور ممکن است بیفتد؛ کسی را که روی پروژه‌ای زمان‌بند است وسط این کار نیندازید. کسی را انتخاب کنید که می‌تواند موفق شود و می‌خواهد فراتر از کدنویسی خودش را نشان بدهد (p. 22).
+3. **از دام‌ها دوری کنید** (pp. 22–23):
+   - *کار عاطفیِ کم‌ارزش دانستنش.* آن را کار درجه‌یک بدانید و به منتور وقت بدهید؛ بازدهی‌اش شبکه‌های بهتر، onboarding سریع‌تر و تبدیل بیشتر کارآموز به کارمند است.
+   - *فرض این‌که هر کس باید منتور شبیه خودش باشد*، مثل زن برای زن و رنگین‌پوست برای رنگین‌پوست، مگر این‌که برنامه هدف تنوع داشته باشد. همسانی در نقش شغلی البته منطقی است.
+   - *از دست دادن فرصت پرورش رهبرها:* منتورینگ در برنامه‌نویس درون‌گرا صبر و همدلی و شبکه می‌سازد و در مهندس جوانِ بی‌حوصله فروتنی.
 
-### Key Takeaways for the Mentor
+> **کادر Ask the CTO: استخدام کارآموز** (p. 24). برنامه‌ی کارآموزی راهی برای پیدا کردن استعداد است، نه برای انجام دادن کار تابستان. فقط کسانی را بگیرید که تا یک سال بعد از دوره فارغ‌التحصیل می‌شوند؛ و چون استخدام کارآموز از استخدام فارغ‌التحصیل آسان‌تر است، برای نامزدهای گروه‌های کم‌نمایندگی‌شده پافشاری کنید، چون تنوع در کارآموزها بعداً به تنوع در استخدام فارغ‌التحصیل‌ها تبدیل می‌شود.
 
-| Habit | Why (pp. 24–26) |
+> **In practice:** منتورینگ بدون هدف روشن به گپ‌های بی‌پایان تبدیل می‌شود.
+>
+> **Your turn:** برای منتورینگ عضو تازه چه هدفی می‌گذارید؟
+>
+> *Answer:* هدفی سنجیدنی، مثلاً «تا پایان ماه اول به‌تنهایی یک incident بار داده را در on-call دنبال می‌کند». کتاب می‌گوید اول تصمیم بگیرید رابطه به چه برسد، بعد منتور مناسب را انتخاب کنید (p. 22).
+
+### نکته‌های کلیدی برای منتور
+
+| عادت | چرا (pp. 24–26) |
 |---|---|
-| **Be curious and open-minded** | Accumulated "best practices" and scars cloud thinking; a mentee's questions expose what you can't explain and assumptions worth questioning. Creativity is also seeing hidden patterns, which new people help reveal |
-| **Listen and speak their language** | Mentoring hones communication; a bad senior habit is lecturing and debating anyone who doesn't understand or agree. Software is a team sport |
-| **Make connections** | Your career succeeds or fails on your network; your mentee might introduce your next job. The tech world is small, so treat each other well |
+| **کنجکاو و گشوده باشید** | انبوه «best practice»ها و زخم‌های گذشته ذهن را تار می‌کنند؛ پرسش‌های طرف مقابل نشان می‌دهند چه چیزی را نمی‌توانید توضیح بدهید و کدام فرض‌ها جای پرسیدن دارند. خلاقیت هم دیدن الگوهای پنهان است و آدم‌های تازه کمک می‌کنند ببینیدشان |
+| **گوش بدهید و به زبان آن‌ها حرف بزنید** | منتورینگ ارتباط را تیز می‌کند؛ یک عادت بد در آدم‌های ارشد سخنرانی کردن و جر و بحث با هر کسی است که نمی‌فهمد یا موافق نیست. نرم‌افزار ورزش تیمی است |
+| **آدم‌ها را به هم وصل کنید** | موفقیت یا شکست مسیر شغلی‌تان به شبکه‌تان بسته است؛ شاید همین آدم شغل بعدی‌تان را معرفی کند. دنیای فناوری کوچک است، پس هوای هم را داشته باشید |
 
-### Assessing Your Own Experience
+### سنجیدن تجربه‌ی خودتان
 
-Questions for reflection (p. 26): can you volunteer to mentor an intern or a new hire? Have you had a great mentor, and what did they do? Has a mentoring relationship failed, and why?
+پرسش‌هایی برای تأمل (p. 26): می‌توانید داوطلب منتور شدن برای یک کارآموز یا تازه‌وارد شوید؟ منتور درخشانی داشته‌اید و چه می‌کرد؟ رابطه‌ی منتورینگی شکست خورده و چرا؟
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Project ready and broken into milestones | Intern productive and engaged | Up-front thinking by the mentor |
-| Project sized to half the internship | Slack for training and events; a finished project | Less ambitious scope |
-| Frequent check-ins early | Catch wrong directions | Mentor time |
-| Leave the mentee alone | Mentor's coding time | Lost, discouraged mentee who may leave |
-| Formal cross-team program | Wider networks | Ambiguous obligation, little value without structure |
-| Saying no to mentoring | Your time | Must be honest; never say yes and not do it |
+| پروژه‌ی آماده و شکسته‌شده به milestone | کارآموزِ کارآمد و درگیر | فکر کردن منتور پیش از شروع |
+| پروژه‌ای به اندازه‌ی نصف دوره | فرصت برای آموزش و برنامه‌ها؛ پروژه‌ی تمام‌شده | دامنه‌ی کم‌جاه‌طلبانه‌تر |
+| سر زدن پرتکرار در روزهای اول | مسیرهای غلط زود پیدا می‌شوند | وقت منتور |
+| رها کردن طرف مقابل | وقت کدنویسی منتور | آدمی سردرگم و دلسرد که ممکن است برود |
+| برنامه‌ی رسمی بین‌تیمی | شبکه‌ی گسترده‌تر | تعهد مبهم و بی‌ثمر، وقتی ساختار ندارد |
+| نه گفتن به منتورینگ | وقت خودتان | باید صادق باشید؛ هیچ‌وقت بله نگویید و کار را نکنید |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **The intern sizing rule as a buffer.** Sizing work to half the available time is a schedule buffer against two unknowns: how fast a beginner really works and how much time other activities consume. The [widget](../widgets/02-intern-project.html) makes those two inputs explicit; the speeds and overheads in it are the vault's assumptions, not the book's.
-- **Mentoring versus sponsorship.** Later writing on careers in tech distinguishes mentors (who give advice) from sponsors (who spend their influence to get you opportunities) — close to what the book calls an advocate-manager in Chapter 1.
+- **قاعده‌ی نصفِ دوره به‌عنوان حاشیه‌ی امن.** اندازه کردن کار به نصف زمان موجود، حاشیه‌ی امنی در برابر دو ناشناخته است: این‌که یک تازه‌کار واقعاً چقدر سریع کار می‌کند و این‌که بقیه‌ی برنامه‌ها چقدر وقت می‌برند. [این ویجت](../widgets/02-intern-project.html) همین دو ورودی را صریح می‌کند؛ سرعت‌ها و سربارهای داخلش فرض‌های vault است، نه کتاب.
+- **منتور در برابر sponsor.** نوشته‌های بعدی درباره‌ی مسیر شغلی در فناوری، منتور را که نظر می‌دهد از sponsor جدا می‌کنند که نفوذش را خرج می‌کند تا فرصت‌ها را برایتان بگیرد؛ چیزی نزدیک به همان مدیرِ پیگیر که فصل ۱ می‌گوید.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. Management 101](01-management-101.md) (being managed, from the mentee's side), [3. Tech Lead](03-tech-lead.md) (the next step: leading without formal authority), [4. Managing People](04-managing-people.md) (onboarding documents and 30/60/90-day plans for new hires), [8. The Big Leagues](08-the-big-leagues.md) (the CTO and VP of Engineering pairing).
+- **فصل‌های مرتبط:** [فصل ۱: مدیریت از پایه](01-management-101.md) که مدیریت‌شدن را از سمت گیرنده می‌بیند، [فصل ۳: نقش tech lead](03-tech-lead.md) که قدم بعدی است، یعنی رهبری بدون اختیار رسمی، [فصل ۴: مدیریت آدم‌ها](04-managing-people.md) که سندهای onboarding و برنامه‌های ۳۰ / ۶۰ / ۹۰ روزه‌ی تازه‌واردها را دارد، و [فصل ۸: لیگ بزرگ‌ها](08-the-big-leagues.md) که جفت‌شدن CTO و VP of Engineering را می‌گوید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What is the most likely bad outcome of poor mentoring?**
-   - [ ] The mentor loses coding time
-   - [x] Someone the organization wants has a bad experience and doesn't join, or leaves sooner
-   - [ ] The mentor gets fired
+1. **محتمل‌ترین نتیجه‌ی بد منتورینگ ضعیف چیست؟**
+   - [ ] منتور وقت کدنویسی‌اش را از دست می‌دهد
+   - [x] کسی که سازمان او را می‌خواهد تجربه‌ی بدی دارد و نمی‌آید یا زودتر می‌رود
+   - [ ] منتور اخراج می‌شود
 
-   *Answer:* The second outcome is far more likely than the first (p. 12).
+   *Answer:* نتیجه‌ی دوم خیلی محتمل‌تر از اولی است (p. 12).
 
-2. **How big should an intern's project be?**
+2. **پروژه‌ی کارآموز باید چقدر بزرگ باشد؟**
 
-   *Answer:* Specific, relevant but not urgent, and doable by an entry-level engineer in about half the internship — 5 weeks of work for a 10-week intern — leaving time for training and events (p. 16).
+   *Answer:* مشخص، مرتبط ولی غیرفوری، و در حدی که یک مهندس تازه‌کار در حدود نیمی از دوره تمامش کند؛ برای کارآموز ۱۰ هفته‌ای، ۵ هفته کار، تا برای آموزش و برنامه‌ها وقت بماند (p. 16).
 
-3. **Which three management skills does mentoring an intern practise?**
+3. **منتورِ یک کارآموز کدام سه مهارت مدیریتی را تمرین می‌کند؟**
 
-   *Answer:* Listening carefully, clearly communicating what needs to happen, and calibrating your response — including how often to check in (pp. 13–15).
+   *Answer:* با دقت گوش دادن، شفاف گفتن این‌که چه باید بشود، و تنظیم کردن واکنش، از جمله این‌که هر چند وقت یک‌بار سر بزنید (pp. 13–15).
 
-4. **Why have a new hire update the onboarding documents?**
-   - [ ] To save the mentor's time
-   - [x] It shows they have the power and obligation to learn and share what they learned, and keeps the documents current
-   - [ ] It is a test of their writing
+4. **چرا از تازه‌وارد بخواهیم سندهای onboarding را به‌روز کند؟**
+   - [ ] برای صرفه‌جویی در وقت منتور
+   - [x] نشان می‌دهد هم اختیارش را دارد و هم وظیفه‌اش را که یاد بگیرد و آموخته‌اش را به اشتراک بگذارد، و سندها هم به‌روز می‌مانند
+   - [ ] آزمونی برای نوشتن اوست
 
    *Answer:* pp. 17–18.
 
-5. **What culture does an alpha geek create, and where are they better placed?**
+5. **فرد alpha geek چه فرهنگی می‌سازد و جای بهترش کجاست؟**
 
-   *Answer:* A culture of fear rather than excellence; they are often better kept out of team management and given technical strategy and design — e.g. a startup CTO alongside an execution-focused VP of Engineering (pp. 20–21).
+   *Answer:* فرهنگ ترس به‌جای فرهنگ سرآمدی؛ اغلب بهتر است از مدیریت تیم دور بماند و استراتژی و طراحی فنی بگیرد؛ مثلاً CTO یک استارتاپ کنار یک VP of Engineering اجراگرا (pp. 20–21).
 
-6. **Name two pitfalls for the manager who assigns mentors.**
+6. **دو دام پیش پای مدیری که منتور تعیین می‌کند را نام ببرید.**
 
-   *Answer:* Treating mentoring as low-status emotional labor without time or recognition, and assuming like must mentor like; also failing to use it to observe and grow future leaders (pp. 22–23).
+   *Answer:* کار عاطفیِ کم‌ارزش دانستن منتورینگ، بی‌آن‌که وقت و قدردانی بدهد، و فرض این‌که هر کس باید منتور شبیه خودش باشد؛ و همین‌طور از دست دادن فرصت دیدن و پروراندن رهبرهای آینده (pp. 22–23).

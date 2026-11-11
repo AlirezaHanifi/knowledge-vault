@@ -1,18 +1,20 @@
-# Release cadence and contention
+# ریتم release و رقابت بر سرش
 
-Five engineers each merge one change a day for 120 working days. Each change has a 4% chance of breaking the release. A release ships every change merged since the last one; if the batch holds a broken change, the whole batch waits a day for each broken change to be found and fixed. The script compares weekly and daily releases: how many releases, how many were blocked, how big each batch was, and how long a change waited from merge to production.
+پنج مهندس هر کدام روزی یک تغییر را در ۱۲۰ روز کاری merge می‌کنند. هر تغییر با احتمال ۴٪ release را می‌شکند. هر release همه‌ی تغییرهای merge‌شده از release قبلی را می‌برد؛ اگر در دسته یک تغییر خراب باشد، کل دسته برای هر تغییر خراب یک روز منتظر پیدا شدن و رفع آن می‌ماند. اسکریپت release هفتگی و روزانه را مقایسه می‌کند: چند release، چندتاشان مسدود شدند، هر دسته چقدر بزرگ بود، و هر تغییر از merge تا production چقدر منتظر ماند.
 
-*Illustrates The Manager's Path, “Debugging Dysfunctional Teams: The Basics” (not shipping), pp. 79–80. The implementation is the vault’s own: the team, the failure rate and the one-day fix are invented (seeded).*
+*این آزمایش بخش «دیباگ کردن تیم‌های ناکارکرد: مبانی» و قسمت تحویل ندادن از کتاب The Manager's Path را نشان می‌دهد، صص. ۷۹–۸۰. پیاده‌سازی مال خود vault است: تیم و نرخ خرابی و رفع یک‌روزه ساختگی‌اند و با seed ثابت اجرا می‌شوند.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 release_cadence.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 5 engineers, 120 working days, each change broken with p = 0.04; 300 seeded trials
@@ -22,12 +24,12 @@ weekly         24.0      64%             25.0               3.0
 daily         120.0      18%              5.0               0.2
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- A weekly batch of 25 changes almost always contains someone's broken change, so most weekly releases are blocked: everyone's work waits on one person. That is the "resource contention" the book describes.
-- Daily batches are a fifth the size, so far fewer releases are blocked and a blocked one holds back only a day's work.
-- Changes reach production in a fraction of a day instead of about three days. Weekly releases also hide the pain the book names (poor tooling, manual testing, oversized features), which this model leaves out.
+- دسته‌ی هفتگی با ۲۵ تغییر تقریباً همیشه تغییر خراب یک نفر را در خود دارد، پس بیشتر releaseهای هفتگی مسدود می‌شوند: کار همه منتظر یک نفر می‌ماند. همان «رقابت بر سر منبع» که کتاب می‌گوید.
+- دسته‌های روزانه یک‌پنجم این اندازه‌اند، پس releaseهای خیلی کمتری مسدود می‌شوند و release مسدودشده فقط کار یک روز را نگه می‌دارد.
+- تغییرها به‌جای حدود سه روز، در کسری از یک روز به production می‌رسند. release هفتگی دردهایی را هم که کتاب نام می‌برد پنهان می‌کند، یعنی ابزار ضعیف و تست دستی و featureهای بزرگ، که این مدل آن‌ها را کنار گذاشته.
 
-## Related
+## پیوندها
 
-- Chapter note: [5. Managing a Team](../../chapters/05-managing-a-team.md) — “Debugging Dysfunctional Teams: The Basics”, pp. 79–80
+- یادداشت فصل: [فصل ۵: مدیریت یک تیم](../../chapters/05-managing-a-team.md)، بخش «دیباگ کردن تیم‌های ناکارکرد: مبانی»، صص. ۷۹–۸۰

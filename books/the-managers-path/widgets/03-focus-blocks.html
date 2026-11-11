@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Maker&#x27;s Schedule, Manager&#x27;s Schedule</title>
-<meta name="description" content="Place meetings on a week&#x27;s calendar and watch how many uninterrupted coding blocks survive when the same meetings are scattered or batched. Illustrates The Manager&#x27;s Path, Chapter 3.">
+<title>برنامه‌ی سازنده، برنامه‌ی مدیر</title>
+<meta name="description" content="جلسه‌ها را روی تقویم یک هفته بگذارید و ببینید وقتی همان جلسه‌ها پخش یا یک‌جا جمع می‌شوند چند بلوک کدنویسی بی‌وقفه زنده می‌ماند. برای فصل ۳ کتاب The Manager's Path.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.cal { display: grid; grid-template-columns: 3.2em repeat(5, 1fr); gap: 3px; font-size: .78rem; }
-  .cal .h { color: var(--ink-3); text-align: center; padding: 2px 0; } .cal .t { color: var(--ink-3); text-align: right; padding-right: 4px; line-height: 26px; }
+<style>.cal { display: grid; grid-template-columns: 3.6em repeat(5, 1fr); gap: 3px; font-size: .78rem; }
+  .cal .h { color: var(--ink-3); text-align: center; padding: 2px 0; } .cal .t { color: var(--ink-3); text-align: left; padding-left: 4px; line-height: 26px; }
   .cal button { height: 26px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; padding: 0; }
   .cal button[aria-pressed="true"] { background: var(--s2); border-color: var(--s2); color: var(--accent-ink); }
   .cal button.focus { background: var(--ok-soft); border-color: var(--ok); } .cal button.frag { background: var(--warn-soft); }</style>
@@ -15,51 +15,51 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/03-tech-lead.html">Chapter 3</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Focus blocks</span>
+      <a href="../chapters/03-tech-lead.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">بلوک‌های تمرکز</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 3 · Tech Lead</div>
-  <h1>Maker’s schedule, manager’s schedule</h1>
-  <p class="lede">The tech lead’s “one weird trick” is balance: step away from the code when the team needs you, but give yourself — and the team — blocks of uninterrupted time. <strong>The worst mistake is getting pulled randomly into meetings.</strong></p>
-  <p class="source-note">Illustrates “All Great Tech Leads Know This One Weird Trick” (p. 31). The calendar, the presets and the minimum useful block length are the vault’s; the book gives no block length. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۳ · نقش tech lead</div>
+  <h1>برنامه‌ی سازنده، برنامه‌ی مدیر</h1>
+  <p class="lede">«آن یک ترفند عجیب» tech lead تعادل است: وقتی تیم لازمتان دارد از کد فاصله بگیرید، ولی به خودتان و به تیم بلوک‌هایی از وقت بی‌وقفه بدهید. <strong>بدترین اشتباه این است که بی‌برنامه به جلسه‌ها کشیده شوید.</strong></p>
+  <p class="source-note">این شبیه‌سازی بخش «همه‌ی tech leadهای بزرگ این یک ترفند عجیب را بلدند» را نشان می‌دهد (ص. ۳۱). تقویم و حالت‌های آماده و کمینه‌ی طول بلوک مفید مال vault هستند؛ کتاب طول بلوکی نمی‌دهد. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title" id="ct">A working week, 9:00–17:00</p>
-        <div class="cal" id="cal" role="group" aria-label="Week calendar: press an hour to toggle a meeting"></div>
-        <p class="field-hint">Orange “M”: meeting · green “F”: part of a focus block long enough for hard work · pale “·”: a fragment too short to use.</p>
+      <div class="panel"><p class="panel-title" id="ct">یک هفته‌ی کاری، ۹:۰۰ تا ۱۷:۰۰</p>
+        <div class="cal" id="cal" role="group" aria-label="تقویم هفته: روی هر ساعت بزنید تا جلسه اضافه یا حذف شود"></div>
+        <p class="field-hint">نارنجی «ج»: جلسه · سبز «ت»: بخشی از بلوک تمرکزی که برای کار سخت به‌اندازه‌ی کافی بلند است · کمرنگ «·»: تکه‌ای کوتاه‌تر از آن‌که به کار بیاید.</p>
         <div class="callout" id="verdict" style="margin-top:10px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="preset"></div><div id="len" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="preset"></div><div id="len" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>The presets hold the same eight meeting hours.</strong> Scattered, they leave almost no block long enough for deep work; batched, most of the week survives.</li>
-    <li><strong>A single meeting in the middle of an afternoon</strong> destroys more focus time than its own hour.</li>
-    <li>The book asks the tech lead to <strong>break their own work into pieces that don’t need multi-day focus</strong>, while getting the team a schedule that does (p. 31).</li>
+    <li><strong>همه‌ی حالت‌های آماده همان هشت ساعت جلسه را دارند.</strong> وقتی پخش می‌شوند تقریباً هیچ بلوکی به‌اندازه‌ی کافی بلند برای کار عمیق نمی‌ماند؛ وقتی یک‌جا جمع می‌شوند بیشتر هفته زنده می‌ماند.</li>
+    <li><strong>یک جلسه وسط یک بعدازظهر</strong> بیش از یک ساعتِ خودش وقت تمرکز را نابود می‌کند.</li>
+    <li>کتاب از tech lead می‌خواهد <strong>کار خودش را به تکه‌هایی بشکند که به تمرکز چندروزه نیاز ندارند</strong>، و در همان حال برای تیم برنامه‌ای بگیرد که چنین تمرکزی را ممکن کند (ص. ۳۱).</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/03-tech-lead.html"><small>Lesson</small>3. Tech Lead</a></li>
+    <li><a href="../chapters/03-tech-lead.html"><small>درس</small>فصل ۳: نقش tech lead</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -72,7 +72,7 @@
     rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
   }
   var log = Kit.log(document.getElementById("log"));
-  var DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"], HOURS = 8, cfg = { min: 3 }, m = [];
+  var DAYS = ["شنبه", "یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه"], HOURS = 8, cfg = { min: 3 }, m = [];
   var PRESETS = {
     scattered: [[0, 1], [0, 5], [1, 3], [2, 1], [2, 6], [3, 3], [4, 2], [4, 5]],
     batched: [[0, 0], [0, 1], [1, 0], [2, 0], [2, 1], [3, 0], [4, 0], [4, 1]],
@@ -87,7 +87,7 @@
     btn.push([]);
     DAYS.forEach(function (d, di) {
       var hh = h, b = Kit.el("button", { type: "button", "aria-pressed": "false" });
-      b.addEventListener("click", function () { m[di][hh] = !m[di][hh]; log.add((m[di][hh] ? "Meeting added: " : "Meeting removed: ") + d + " " + (9 + hh) + ":00", "muted"); render(); });
+      b.addEventListener("click", function () { m[di][hh] = !m[di][hh]; log.add((m[di][hh] ? "جلسه اضافه شد: " : "جلسه برداشته شد: ") + d + " ساعت " + (9 + hh), "muted"); render(); });
       cal.appendChild(b); btn[h].push(b);
     });
   }
@@ -104,22 +104,22 @@
     });
     var free = DAYS.length * HOURS - meet, v = document.getElementById("verdict"), share = free ? focus / free : 0;
     v.className = "callout " + (share >= 0.75 ? "ok" : share >= 0.4 ? "warn" : "bad");
-    v.textContent = Math.round(share * 100) + "% of the free time is in blocks of " + cfg.min + "+ hours. " + (share >= 0.75 ? "A maker’s week." : share >= 0.4 ? "Some deep work survives." : "A manager’s week: free time, but little of it usable for hard problems.");
-    stats([["Meeting hours", meet], ["Free hours", free], ["Usable focus hours", focus, share >= 0.75 ? "ok" : share < 0.4 ? "bad" : "warn"], ["Wasted fragments", frag + " h", frag ? "warn" : "ok"], ["Focus blocks", blocks]]);
+    v.textContent = Math.round(share * 100) + "٪ از وقت آزاد در بلوک‌های " + cfg.min + " ساعت به بالاست. " + (share >= 0.75 ? "هفته‌ای به سبک سازنده." : share >= 0.4 ? "کمی کار عمیق زنده می‌ماند." : "هفته‌ای به سبک مدیر: وقت آزاد هست، ولی کمی از آن به درد مسئله‌های سخت می‌خورد.");
+    stats([["ساعت‌های جلسه", meet], ["ساعت‌های آزاد", free], ["ساعت‌های تمرکز قابل‌استفاده", focus, share >= 0.75 ? "ok" : share < 0.4 ? "bad" : "warn"], ["تکه‌های هدررفته", frag + " ساعت", frag ? "warn" : "ok"], ["بلوک‌های تمرکز", blocks]]);
   }
   function setCell(di, h, kind) {
     var b = btn[h][di];
     b.setAttribute("aria-pressed", String(kind === "m")); b.className = kind === "f" ? "focus" : kind === "x" ? "frag" : "";
-    b.textContent = kind === "m" ? "M" : kind === "f" ? "F" : "·";
-    b.setAttribute("aria-label", DAYS[di] + " " + (9 + h) + ":00, " + (kind === "m" ? "meeting" : kind === "f" ? "focus block" : "short fragment"));
+    b.textContent = kind === "m" ? "ج" : kind === "f" ? "ت" : "·";
+    b.setAttribute("aria-label", DAYS[di] + " ساعت " + (9 + h) + "، " + (kind === "m" ? "جلسه" : kind === "f" ? "بلوک تمرکز" : "تکه‌ی کوتاه"));
   }
-  document.getElementById("preset").appendChild(Kit.segmented({ label: "Same 8 meeting hours", value: "scattered", options: [{ value: "scattered", label: "Scattered" }, { value: "batched", label: "Batched mornings" }, { value: "day", label: "One meeting day" }], onChange: function (v) { load(v); log.add("Preset: " + v, "muted"); render(); } }).element);
-  document.getElementById("len").appendChild(Kit.slider({ label: "Shortest useful block", min: 1, max: 5, step: 1, value: cfg.min, unit: " h", hint: "Vault assumption", onInput: function (v) { cfg.min = v; render(); } }).element);
+  document.getElementById("preset").appendChild(Kit.segmented({ label: "همان ۸ ساعت جلسه", value: "scattered", options: [{ value: "scattered", label: "پخش‌شده" }, { value: "batched", label: "صبح‌ها یک‌جا" }, { value: "day", label: "یک روزِ جلسه" }], onChange: function (v) { load(v); log.add("حالت: " + (v === "scattered" ? "پخش‌شده" : v === "batched" ? "صبح‌ها یک‌جا" : "یک روزِ جلسه"), "muted"); render(); } }).element);
+  document.getElementById("len").appendChild(Kit.slider({ label: "کوتاه‌ترین بلوک مفید", min: 1, max: 5, step: 1, value: cfg.min, unit: " ساعت", hint: "فرض vault", onInput: function (v) { cfg.min = v; render(); } }).element);
   load("scattered"); render();
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What does the book call the worst mistake for a tech lead’s schedule?", options: ["Writing too little code", "Getting pulled randomly into meetings", "Holding too many 1-1s"], answer: 1, explain: "p. 31." },
-    { q: "Eight meeting hours are scattered across the week, one or two a day. What happens to focus time?", options: ["Nothing: free hours are the same", "Most free hours fall into fragments too short for hard work", "It doubles"], answer: 1, explain: "Free hours stay the same; usable blocks shrink." },
-    { q: "How should a tech lead plan their own coding work?", options: ["In multi-day deep dives", "In pieces that don’t need multi-day focus", "Only on weekends"], answer: 1, explain: "While protecting the team’s focus time (p. 31)." }
+    { q: "کتاب بدترین اشتباه در برنامه‌ی یک tech lead را چه می‌داند؟", options: ["کم کد نوشتن", "بی‌برنامه به جلسه‌ها کشیده شدن", "زیاد برگزار کردن جلسه‌ی ۱-۱"], answer: 1, explain: "ص. ۳۱." },
+    { q: "هشت ساعت جلسه در هفته پخش شده‌اند، روزی یکی دو تا. سر وقت تمرکز چه می‌آید؟", options: ["هیچ؛ ساعت‌های آزاد همان‌قدرند", "بیشتر ساعت‌های آزاد به تکه‌هایی می‌افتند که برای کار سخت کوتاه‌اند", "دو برابر می‌شود"], answer: 1, explain: "ساعت‌های آزاد همان می‌مانند و بلوک‌های قابل‌استفاده آب می‌روند." },
+    { q: "یک tech lead کار کدنویسی خودش را چطور باید برنامه‌ریزی کند؟", options: ["در شیرجه‌های عمیق چندروزه", "در تکه‌هایی که به تمرکز چندروزه نیاز ندارند", "فقط آخر هفته‌ها"], answer: 1, explain: "و در همان حال از وقت تمرکز تیم محافظت کند (ص. ۳۱)." }
   ]);
 
 })();

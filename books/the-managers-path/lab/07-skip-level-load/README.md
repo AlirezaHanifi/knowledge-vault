@@ -1,18 +1,20 @@
-# Skip-level load
+# بار جلسه‌های skip-level
 
-How much of a week do skip-level meetings take as an organization grows? The script works through the book's arithmetic — one short 1-1 per person per quarter, in a quarter of 60 working days and 12 weeks — for organizations from 15 to 1,000 people, and compares the author's alternative: lunch with each whole team a couple of times a quarter.
+همراه با بزرگ شدن سازمان، جلسه‌های skip-level چه سهمی از هفته را می‌گیرند؟ اسکریپت همان حساب‌وکتاب کتاب را پیش می‌برد، یعنی فصلی یک جلسه‌ی ۱-۱ کوتاه برای هر نفر در فصلی با ۶۰ روز کاری و ۱۲ هفته، برای سازمان‌های ۱۵ تا ۱۰۰۰ نفره، و با جایگزینی که نویسنده پیشنهاد می‌دهد مقایسه‌اش می‌کند: فصلی دو بار ناهار با هر تیم.
 
-*Illustrates The Manager's Path, “Skip-Level Meetings”, pp. 128–129. The implementation is the vault’s own: 30-minute 1-1s, teams of seven and one-hour lunches are assumptions; the calculation is deterministic.*
+*این آزمایش بخش «جلسه‌های skip-level» از کتاب The Manager's Path را نشان می‌دهد، صص. ۱۲۸–۱۲۹. پیاده‌سازی مال خود vault است: جلسه‌های ۱-۱ سی‌دقیقه‌ای و تیم‌های هفت‌نفره و ناهارهای یک‌ساعته فرض‌اند؛ محاسبه قطعی است.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic:
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی:
 
 ```sh
 python3 skip_level_load.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 Quarter: 60 working days, 12 weeks; 1-1s 30 min; teams of 7, 2 lunches/team/quarter, 1 h each
@@ -27,12 +29,12 @@ Quarter: 60 working days, 12 weeks; 1-1s 30 min; teams of 7, 2 lunches/team/quar
   1,000     16.67        41.7       104%          23.8        60%
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- At 60 people the book's "one every day" appears: exactly one 1-1 per working day.
-- At 1,000 people, half-hour 1-1s take more than a full 40-hour week — the book's "nothing but these 1-1s."
-- Team lunches grow with the number of teams, not people, so they stay affordable longer — at the cost of individual career coaching and candour about managers, which the book notes group settings lose.
+- در ۶۰ نفر همان «روزی یکی» کتاب ظاهر می‌شود: دقیقاً یک جلسه‌ی ۱-۱ در هر روز کاری.
+- در ۱۰۰۰ نفر، جلسه‌های نیم‌ساعته بیش از یک هفته‌ی کامل ۴۰ ساعته می‌برند؛ همان «کار دیگری نمی‌توانید بکنید» کتاب.
+- ناهار تیمی با تعداد تیم‌ها رشد می‌کند، نه با تعداد آدم‌ها، پس بیشتر دوام می‌آورد، به قیمت از دست دادن کوچینگ فردی مسیر شغلی و رک‌گویی درباره‌ی مدیرها، که کتاب می‌گوید در جمع از دست می‌روند.
 
-## Related
+## پیوندها
 
-- Chapter note: [7. Managing Managers](../../chapters/07-managing-managers.md) — “Skip-Level Meetings”, pp. 128–129
+- یادداشت فصل: [فصل ۷: مدیریت مدیرها](../../chapters/07-managing-managers.md)، بخش «جلسه‌های skip-level»، صص. ۱۲۸–۱۲۹

@@ -3,74 +3,88 @@ book: the-managers-path
 chapter: 10
 title: "Conclusion"
 pages: "217–218"
+translated_title: "جمع‌بندی"
+lang: fa
 ---
 
-# 10. Conclusion
+# فصل ۱۰: جمع‌بندی
 
-[← 9. Bootstrapping Culture](09-bootstrapping-culture.md) · [Book](../README.md)
+[فصل ۹: ساختن فرهنگ از صفر →](09-bootstrapping-culture.md) · [کتاب](../README.md)
 
-## Summary
+## خلاصه
 
-The two-page conclusion distils the book into one lesson: to manage others well, you must first manage yourself. Great managers work through conflict by taking their ego out of the conversation and separating facts from the stories they tell themselves. The author's tools are meditation, a morning page of free writing, and the mantra she ends it with — "Get curious" — about people, process, technology, strategy and business (pp. 217–218).
+جمع‌بندی دوصفحه‌ای کتاب را در یک درس می‌چکاند: برای خوب مدیریت کردن دیگران، اول باید خودتان را مدیریت کنید. مدیرهای درخشان از دل تعارض رد می‌شوند، چون ایگویشان را از گفت‌وگو بیرون می‌گذارند و واقعیت‌ها را از داستانی که برای خودشان می‌سازند جدا می‌کنند. ابزارهای نویسنده مدیتیشن است، یک صفحه نوشتن آزاد در صبح، و همان وردی که فصل را با آن تمام می‌کند: «کنجکاو شو»، درباره‌ی آدم‌ها و process و فناوری و استراتژی و کسب‌وکار (pp. 217–218).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Manage yourself to manage others:** understand how you react, what inspires you and what drives you crazy (p. 217).
-- **Take your ego out of conflict.** Your view of a situation is an interpretation; tell people hard things without embellishing the facts with your storyline (p. 217).
-- **Practise self-awareness** — the author recommends meditation (Tara Brach's podcasts, Pema Chödrön's writing) and daily free writing (pp. 217–218).
-- **Get curious:** look for the other side of the story, examine your emotional reactions, and be willing to be proven wrong (p. 218).
+- **خودتان را مدیریت کنید تا دیگران را مدیریت کنید:** بفهمید چطور واکنش نشان می‌دهید، چه چیزی الهام‌بخشتان است و چه چیزی دیوانه‌تان می‌کند (p. 217).
+- **ایگویتان را از تعارض بیرون بگذارید.** تصویر شما از یک موقعیت یک تفسیر است؛ حرف سخت را بدون آراستنش با داستان خودتان به آدم‌ها بگویید (p. 217).
+- **خودآگاهی را تمرین کنید**؛ نویسنده مدیتیشن، یعنی پادکست‌های Tara Brach و نوشته‌های Pema Chödrön، و نوشتن آزاد روزانه را پیشنهاد می‌دهد (pp. 217–218).
+- **کنجکاو شوید:** دنبال آن روی داستان بگردید، واکنش‌های احساسی‌تان را بررسی کنید و حاضر باشید خلافتان ثابت شود (p. 218).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers. The conclusion has no subsections.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند. جمع‌بندی زیربخشی ندارد.*
 
-- Chapter 10. Conclusion — p. 217
+- فصل ۱۰. جمع‌بندی — p. 217
 
-## Notes
+## یادداشت‌ها
 
-### Managing yourself
+### مدیریت خودتان
 
-The path ran from mentor to manager to senior leader (p. 217). Its most important lesson: **you have to be able to manage yourself if you want to be good at managing others** (p. 217).
+مسیر از منتور به مدیر و بعد به رهبر ارشد رسید (p. 217). مهم‌ترین درسش: **اگر می‌خواهید در مدیریت دیگران خوب باشید، باید بتوانید خودتان را مدیریت کنید** (p. 217).
 
-- **Conflict and ego.** Great managers are masters of working through conflict, which means taking your ego out of the conversation and seeing past your interpretations. Hard messages land when they aren't embellished with your own story (p. 217).
-- **Decisiveness has a cost.** People drawn to management often hold strong views of how things should be; that's useful until you forget your interpretation is only an interpretation (p. 217).
-- **Meditation.** The first draft of the book had a meditation for each level; meditation helped the author recognize her ego's voice. Not a cure-all, but worth trying (p. 217).
+- **تعارض و ایگو.** مدیرهای درخشان استاد رد شدن از دل تعارض‌اند، و این یعنی ایگویتان را از گفت‌وگو بیرون بگذارید و فراتر از تفسیرهایتان را ببینید. پیام سخت وقتی می‌نشیند که با داستان خودتان آراسته نشده باشد (p. 217).
+- **قاطعیت هزینه دارد.** آدم‌هایی که به مدیریت کشیده می‌شوند اغلب نظرهای محکمی درباره‌ی این‌که همه چیز چطور باید باشد دارند؛ این تا وقتی مفید است که یادتان نرود تفسیرتان فقط یک تفسیر است (p. 217).
+- **مدیتیشن.** پیش‌نویس اول کتاب برای هر level یک مدیتیشن داشت؛ مدیتیشن به نویسنده کمک کرد صدای ایگویش را بشناسد. نوشدارو نیست، ولی امتحانش می‌ارزد (p. 217).
 
-### Get curious
+> **In practice:** on-call و incident فشار می‌آورند و واکنش lead به فشار به کل تیم سرایت می‌کند.
+>
+> **Your turn:** در incidentی ساعت سه صبح، چه چیزی از رفتار شما را تیم یاد می‌گیرد؟
+>
+> *Answer:* این‌که آرام بپرسید چه می‌دانیم و چه نمی‌دانیم، یا دنبال مقصر بگردید. کتاب می‌گوید برای خوب مدیریت کردن دیگران باید خودتان را مدیریت کنید (p. 217).
 
-Each morning the author writes a page or two of free-flow thoughts and ends with the mantra "Get curious" (pp. 217–218). Her coach's answer to every frustrating interpersonal situation was to take the other person's perspective — what are they trying to do, what do they value, what do they need? (p. 218). The closing advice (p. 218):
+### کنجکاو شو
 
-| Apply curiosity to… | By… |
+نویسنده هر صبح یکی دو صفحه فکر آزاد می‌نویسد و با ورد «کنجکاو شو» تمامش می‌کند (pp. 217–218). پاسخ کوچش به هر موقعیت آزاردهنده‌ی بین‌فردی این بود که از زاویه‌ی طرف مقابل نگاه کند: دنبال چیست، به چه چیزی ارزش می‌دهد، چه لازم دارد (p. 218)؟ توصیه‌ی پایانی (p. 218):
+
+| کنجکاوی را درباره‌ی… | با… |
 |---|---|
-| People | Looking for the other side of the story and the other perspectives at play |
-| Yourself | Investigating your emotional reactions and noticing when they cloud what needs to be said |
-| Process, technology, strategy, business | Asking questions, and being willing to have your notions proven wrong |
+| آدم‌ها | گشتن دنبال آن روی داستان و زاویه‌های دیگری که در کارند |
+| خودتان | بررسی واکنش‌های احساسی‌تان و دیدن لحظه‌ای که جلوی حرفِ لازم را می‌گیرند |
+| process و فناوری و استراتژی و کسب‌وکار | پرسیدن، و حاضر بودن برای این‌که تصورتان غلط از آب دربیاید |
 
-The thread runs through the whole book: curiosity is how mentors see through a newcomer's eyes (Chapter 2), how managers debug teams and organizations (Chapters 5 and 7), and how senior leaders correct a culture of fear (Chapter 8).
+این رشته در کل کتاب کشیده شده: کنجکاوی همان چیزی است که منتور با آن از چشم یک تازه‌وارد می‌بیند (فصل ۲)، مدیر با آن تیم‌ها و سازمان‌ها را debug می‌کند (فصل‌های ۵ و ۷)، و رهبر ارشد با آن فرهنگ ترس را اصلاح می‌کند (فصل ۸).
 
-## Beyond the book
+> **In practice:** کنجکاوی در تیم داده یعنی پیش از قضاوت بپرسید طرف مقابل چه می‌بیند.
+>
+> **Your turn:** تیم backend بی‌هشدار یک ستون منبع را حذف کرده و loader شکسته. اولین پرسشتان چیست؟
+>
+> *Answer:* «چه چیزی باعث شد این تغییر بدون هشدار به ما برسد؟»، نه «چرا خبر ندادید؟». کتاب پاسخ نویسنده به موقعیت‌های آزاردهنده را نگاه کردن از زاویه‌ی طرف مقابل می‌داند (pp. 217–218).
 
-- **Curiosity in practice.** The book's repeated "get curious" echoes coaching approaches such as Michael Bungay Stanier's *The Coaching Habit* (2016), built around asking one more question — "And what else?" — before giving advice.
+## فراتر از کتاب
 
-## Connections
+- **کنجکاوی در عمل.** «کنجکاو شو»ی تکرارشونده‌ی کتاب با رویکردهای کوچینگ هم‌صداست، مثل *The Coaching Habit* از Michael Bungay Stanier در سال ۲۰۱۶، که حول پرسیدن یک پرسش دیگر، یعنی «و چه چیز دیگری؟»، پیش از نظر دادن ساخته شده.
 
-- **Related chapters:** [2. Mentoring](02-mentoring.md) (be curious and open-minded), [5. Managing a Team](05-managing-a-team.md) (get curious about your own conflict avoidance), [7. Managing Managers](07-managing-managers.md) (be curious when debugging organizations), [8. The Big Leagues](08-the-big-leagues.md) (curiosity against a culture of fear).
+## پیوندها
 
-## Check yourself
+- **فصل‌های مرتبط:** [فصل ۲: منتورینگ](02-mentoring.md) که کنجکاو و گشوده بودن را می‌گوید، [فصل ۵: مدیریت یک تیم](05-managing-a-team.md) که درباره‌ی فرار خودتان از تعارض کنجکاو می‌شود، [فصل ۷: مدیریت مدیرها](07-managing-managers.md) که در دیباگ کردن سازمان‌ها کنجکاوی می‌خواهد، و [فصل ۸: لیگ بزرگ‌ها](08-the-big-leagues.md) که کنجکاوی را در برابر فرهنگ ترس می‌گذارد.
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+## خودتان را بسنجید
 
-1. **What does the author call the most important lesson she learned?**
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-   *Answer:* That you have to be able to manage yourself if you want to be good at managing others (p. 217).
+1. **نویسنده مهم‌ترین درسی را که گرفته چه می‌داند؟**
 
-2. **Why does taking your ego out of a conversation help with hard messages?**
-   - [ ] It makes you seem humble
-   - [x] People can hear hard things told without your storyline embellishing the facts
-   - [ ] It shortens the conversation
+   *Answer:* این‌که اگر می‌خواهید در مدیریت دیگران خوب باشید، باید بتوانید خودتان را مدیریت کنید (p. 217).
+
+2. **چرا بیرون گذاشتن ایگو از گفت‌وگو به رساندن حرف سخت کمک می‌کند؟**
+   - [ ] شما را فروتن نشان می‌دهد
+   - [x] آدم‌ها حرف سخت را وقتی می‌شنوند که داستان شما واقعیت‌ها را نیاراسته باشد
+   - [ ] گفت‌وگو را کوتاه‌تر می‌کند
 
    *Answer:* p. 217.
 
-3. **What questions did the author's coach always prompt her to ask about a frustrating situation?**
+3. **کوچ نویسنده همیشه چه پرسش‌هایی را درباره‌ی موقعیت‌های آزاردهنده پیش می‌کشید؟**
 
-   *Answer:* What is the other person trying to do, what do they value, what do they want and need — "get curious" (p. 218).
+   *Answer:* طرف مقابل دنبال چیست، به چه چیزی ارزش می‌دهد، چه می‌خواهد و چه لازم دارد؛ یعنی «کنجکاو شو» (p. 218).

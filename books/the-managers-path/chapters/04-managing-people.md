@@ -3,238 +3,252 @@ book: the-managers-path
 chapter: 4
 title: "Managing People"
 pages: "49–74"
+translated_title: "مدیریت آدم‌ها"
+lang: fa
 ---
 
-# 4. Managing People
+# فصل ۴: مدیریت آدم‌ها
 
-[← 3. Tech Lead](03-tech-lead.md) · [Book](../README.md) · [5. Managing a Team →](05-managing-a-team.md)
+[فصل ۳: نقش tech lead →](03-tech-lead.md) · [کتاب](../README.md) · [فصل ۵: مدیریت یک تیم ←](05-managing-a-team.md)
 
-## Summary
+## خلاصه
 
-The new manager's job is an entry-level job, not a promotion in seniority. This chapter covers the basic tasks of managing individuals: starting a reporting relationship (questions that build rapport, a 30/60/90-day plan, onboarding documents, stating your expectations), holding regular 1-1s and choosing a style for them, delegating without micromanaging, building a habit of continuous feedback, writing and delivering performance reviews, cultivating careers through the promotion process, and — the hardest part — firing underperformers or coaching out people who have stopped growing. The common thread is the rule of no surprises: pay attention, give feedback early, and keep notes (pp. 49–74).
+شغل مدیر تازه یک شغل سطح‌ورودی است، نه ارتقا در ارشدیت. این فصل کارهای پایه‌ی مدیریت تک‌تک آدم‌ها را می‌گوید: شروع یک رابطه‌ی گزارش‌دهی با پرسش‌هایی که رابطه می‌سازند، برنامه‌ی ۳۰ / ۶۰ / ۹۰ روزه، سندهای onboarding و گفتن انتظارهایتان؛ برگزاری منظم جلسه‌ی ۱-۱ و انتخاب سبکی برای آن؛ واگذاری کار بدون ذره‌بین گذاشتن؛ ساختن عادت بازخورد پیوسته؛ نوشتن و دادن ارزیابی عملکرد؛ پروراندن مسیر شغلی آدم‌ها از دل process ارتقا؛ و سخت‌ترین بخش، یعنی اخراج کسی که عملکردش پایین است یا کوچ کردن کسی که دیگر رشد نمی‌کند. رشته‌ی مشترک همه، قاعده‌ی بدون غافلگیری است: حواستان باشد، زود بازخورد بدهید و یادداشت نگه دارید (pp. 49–74).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Start each reporting relationship deliberately:** ask how they like praise and feedback, what annoys them, what they want; set a 30/60/90-day plan; state your own style and expectations (pp. 50–52).
-- **Default to weekly 1-1s**, then adjust for how much you interact, how much coaching they need, how well they push information up, and how stable things are — and never neglect your stars (pp. 52–54).
-- **Pick a 1-1 style that fits both of you** — to-do list, catch-up, feedback, progress report — but avoid status reports and therapy sessions, leave room to know the person, and keep shared notes (pp. 54–57).
-- **Delegation isn't abdication, and micromanagement isn't control.** Use team goals to choose which details to watch, read the systems before asking people, adjust to the project's stage, set standards, and treat bad news neutrally (pp. 57–61).
-- **Continuous feedback trains you to pay attention:** know your people, observe them, give lightweight feedback starting with the positive, and coach those receptive to it (pp. 61–63).
-- **Write reviews over time, for the whole year, with concrete examples**; spend real time on strengths; keep improvement areas focused; avoid big surprises (pp. 63–67).
-- **Learn how promotion works at your company and play the game for your people**; when someone is stuck or underperforming, say so early, in writing, and never put anyone on a plan you'd be unhappy to lose (pp. 68–73).
+- **هر رابطه‌ی گزارش‌دهی را آگاهانه شروع کنید:** بپرسید تعریف و بازخورد را چطور دوست دارند، چه چیزی کلافه‌شان می‌کند و چه می‌خواهند؛ برنامه‌ی ۳۰ / ۶۰ / ۹۰ روزه بگذارید؛ سبک و انتظارهای خودتان را بگویید (pp. 50–52).
+- **پیش‌فرض را جلسه‌ی ۱-۱ هفتگی بگذارید** و بعد با میزان تعامل روزمره، نیازشان به کوچینگ، توانشان در بالا فرستادن اطلاعات و ثبات اوضاع تنظیمش کنید؛ و هیچ‌وقت از ستاره‌هایتان غافل نشوید (pp. 52–54).
+- **سبکی از ۱-۱ را بردارید که به هر دوتان بخورد**، یعنی فهرست کارها، گپ، بازخورد یا گزارش پیشرفت، ولی از گزارش وضعیت و جلسه‌ی روان‌درمانی پرهیز کنید، برای شناختن خود آدم جا بگذارید و یادداشت مشترک نگه دارید (pp. 54–57).
+- **واگذاری یعنی رها کردن مسئولیت نیست و مدیریت ذره‌بینی هم یعنی کنترل نیست.** با هدف‌های تیم تصمیم بگیرید کدام جزئیات را دنبال کنید، پیش از پرسیدن از آدم‌ها سیستم‌ها را بخوانید، با مرحله‌ی پروژه تنظیم شوید، استاندارد بگذارید و با خبر بد خنثی برخورد کنید (pp. 57–61).
+- **بازخورد پیوسته شما را تمرین می‌دهد که حواستان باشد:** آدم‌هایتان را بشناسید، نگاهشان کنید، بازخورد سبک بدهید و از نکته‌ی مثبت شروع کنید، و به کسانی که پذیرایند کوچینگ بدهید (pp. 61–63).
+- **ارزیابی را در طول زمان بنویسید، برای کل سال و با مثال‌های مشخص**؛ برای نقاط قوت وقت واقعی بگذارید؛ حوزه‌های بهبود را متمرکز نگه دارید؛ از غافلگیری بزرگ پرهیز کنید (pp. 63–67).
+- **یاد بگیرید ارتقا در شرکتتان چطور کار می‌کند و بازی را به نفع آدم‌هایتان ببرید**؛ وقتی کسی گیر کرده یا عملکردش پایین است، زود و کتبی بگویید، و هیچ‌وقت کسی را روی برنامه‌ی بهبود نگذارید که از دست دادنش ناراحتتان می‌کند (pp. 68–73).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Starting a New Reporting Relationship Off Right — p. 50
-  - Build Trust and Rapport — p. 50
-  - Create a 30/60/90-Day Plan — p. 51
-  - Encourage Participation by Updating the New Hire Documentation — p. 51
-  - Communicate Your Style and Expectations — p. 52
-  - Get Feedback from Your New Hire — p. 52
-- Communicating with Your Team — p. 52
-  - Have Regular 1-1s — p. 52
-  - Scheduling 1-1s — p. 53
-  - Adjusting 1-1s — p. 53
-- Different 1-1 Styles — p. 54
-  - The To-Do List Meeting — p. 54
-  - The Catch-up — p. 55
-  - The Feedback Meeting — p. 55
-  - The Progress Report — p. 56
-  - Getting to Know You — p. 56
-  - Mix It Up — p. 56
-- Good Manager, Bad Manager: Micromanager, Delegator — p. 57
-- Practical Advice for Delegating Effectively — p. 59
-  - Use the Team’s Goals to Understand Which Details You Should Dig Into — p. 59
-  - Gather Information from the Systems Before Going to the People — p. 59
-  - Adjust Your Focus Depending on the Stage of Projects — p. 59
-  - Establish Standards for Code and Systems — p. 60
-  - Treat the Open Sharing of Information, Good or Bad, in a Neutral to Positive Way — p. 60
-- Creating a Culture of Continuous Feedback — p. 61
-- Performance Reviews — p. 63
-  - Writing and Delivering a Performance Review — p. 64
-- Cultivating Careers — p. 68
-- Challenging Situations: Firing Underperformers — p. 70
-- Assessing Your Own Experience — p. 73
+- شروع درست یک رابطه‌ی گزارش‌دهی تازه — p. 50
+  - اعتماد و رابطه بسازید — p. 50
+  - برنامه‌ی ۳۰ / ۶۰ / ۹۰ روزه بسازید — p. 51
+  - با به‌روز کردن مستندات تازه‌وارد، مشارکت را تشویق کنید — p. 51
+  - سبک و انتظارهایتان را بگویید — p. 52
+  - از تازه‌وارد بازخورد بگیرید — p. 52
+- ارتباط با تیمتان — p. 52
+  - جلسه‌ی ۱-۱ منظم داشته باشید — p. 52
+  - زمان‌بندی جلسه‌های ۱-۱ — p. 53
+  - تنظیم کردن جلسه‌های ۱-۱ — p. 53
+- سبک‌های مختلف ۱-۱ — p. 54
+  - جلسه‌ی فهرست کارها — p. 54
+  - گپ — p. 55
+  - جلسه‌ی بازخورد — p. 55
+  - گزارش پیشرفت — p. 56
+  - آشنا شدن با شما — p. 56
+  - تنوع بدهید — p. 56
+- مدیر خوب، مدیر بد: مدیر ذره‌بین‌به‌دست، مدیر واگذارکننده — p. 57
+- توصیه‌های عملی برای واگذاری اثربخش — p. 59
+  - با هدف‌های تیم بفهمید در کدام جزئیات باید عمیق شوید — p. 59
+  - پیش از رفتن سراغ آدم‌ها، اطلاعات را از سیستم‌ها جمع کنید — p. 59
+  - تمرکزتان را بسته به مرحله‌ی پروژه تنظیم کنید — p. 59
+  - برای کد و سیستم‌ها استاندارد بگذارید — p. 60
+  - با به‌اشتراک‌گذاری آزادانه‌ی اطلاعات، خوب یا بد، خنثی تا مثبت برخورد کنید — p. 60
+- ساختن فرهنگ بازخورد پیوسته — p. 61
+- ارزیابی عملکرد — p. 63
+  - نوشتن و دادن ارزیابی عملکرد — p. 64
+- پروراندن مسیر شغلی — p. 68
+- موقعیت‌های دشوار: اخراج کسانی که عملکردشان پایین است — p. 70
+- سنجیدن تجربه‌ی خودتان — p. 73
 
-## Notes
+## یادداشت‌ها
 
-The chapter opens with Marc Hedlund's warning that new managers who treat the job as a promotion stay junior managers: "new manager" is an entry-level job (p. 49). Your team is only as healthy as its individuals, so start with them (p. 49). The main tasks are taking on a new report, holding regular 1-1s, giving feedback on growth, goals, improvement and praise, and helping reports learn through projects, outside learning or mentoring (p. 50).
+فصل با هشدار Marc Hedlund باز می‌شود: مدیرهای تازه‌ای که این شغل را ارتقا می‌بینند، مدیر تازه‌کار می‌مانند؛ «مدیر تازه» یک شغل سطح‌ورودی است (p. 49). تیم شما دقیقاً به‌اندازه‌ی تک‌تک آدم‌هایش سالم است، پس از همان‌ها شروع کنید (p. 49). کارهای اصلی عبارت‌اند از تحویل گرفتن یک نفر تازه، برگزاری ۱-۱ منظم، دادن بازخورد درباره‌ی رشد و هدف و بهبود و تعریف، و کمک به یادگیری آدم‌ها از راه پروژه یا آموزش بیرونی یا منتورینگ (p. 50).
 
-### Starting a New Reporting Relationship Off Right
+### شروع درست یک رابطه‌ی گزارش‌دهی تازه
 
-| Step | What to do (pp. 50–52) |
+| قدم | چه کنید (pp. 50–52) |
 |---|---|
-| **Build trust and rapport** | Ask: praise in public or private? Serious feedback in writing or in person? Why did you join, what excites you? How will I know you're annoyed, and what always puts you in a bad mood? Which manager behaviours do you hate? (The author's: skipped 1-1s, no feedback, avoided difficult conversations.) Career goals? Surprises since joining? |
-| **Create a 30/60/90-day plan** | Basic goals — get up to speed on the code, commit a bug fix, do a release — with more input from more senior hires. Realistic milestones based on past hires also **catch mishires quickly** |
-| **Update the new hire documentation** | Every new hire edits the onboarding docs; a peer, mentor or tech lead can guide it, but the manager puts the practice in place |
-| **Communicate your style and expectations** | How often you'll meet, how you'll share information, when you'll review work, whether you want a weekly summary — and how long to struggle alone before asking for help (an hour on some teams, a week on others) |
-| **Get feedback from the new hire** | The first 90 days bring fresh eyes; take observations with a grain of salt, and don't let them read as attacks on the existing team |
+| **اعتماد و رابطه بسازید** | بپرسید: تعریف جلوی جمع یا در خلوت؟ بازخورد جدی کتبی یا حضوری؟ چرا آمدی و چه چیزی هیجان‌زده‌ات می‌کند؟ از کجا بفهمم کلافه‌ای و چه چیزی همیشه حالت را بد می‌کند؟ از کدام رفتار مدیرها بدت می‌آید؟ (آن‌هایی که نویسنده نام می‌برد: لغو کردن ۱-۱، ندادن بازخورد، فرار از گفت‌وگوی سخت.) هدف‌های شغلی‌ات؟ از وقتی آمده‌ای چه چیزی غافلگیرت کرده؟ |
+| **برنامه‌ی ۳۰ / ۶۰ / ۹۰ روزه بسازید** | هدف‌های پایه، مثل مسلط شدن به کد، commit کردن یک رفع باگ و انجام یک release، که برای آدم‌های ارشدتر با نظر خودشان بیشتر شکل می‌گیرد. milestoneهای واقع‌بینانه که از استخدام‌های قبلی درآمده‌اند، **استخدام‌های اشتباه را هم زود لو می‌دهند** |
+| **مستندات تازه‌وارد را به‌روز کنید** | هر تازه‌وارد سندهای onboarding را ویرایش می‌کند؛ یک هم‌تراز یا منتور یا tech lead می‌تواند راهنمایی‌اش کند، ولی این رسم را مدیر برقرار می‌کند |
+| **سبک و انتظارهایتان را بگویید** | هر چند وقت یک‌بار می‌بینیدشان، چطور اطلاعات را به اشتراک می‌گذارید، کی کار را مرور می‌کنید، خلاصه‌ی هفتگی می‌خواهید یا نه، و این‌که چقدر باید تنها کلنجار بروند تا کمک بخواهند؛ در بعضی تیم‌ها یک ساعت و در بعضی یک هفته |
+| **از تازه‌وارد بازخورد بگیرید** | ۹۰ روز اول چشم تازه‌ای دارد؛ مشاهده‌هایش را با احتیاط بردارید و نگذارید به حمله به تیم فعلی تعبیر شوند |
 
-### Communicating with Your Team
+### ارتباط با تیمتان
 
-"Regular 1-1s are like oil changes": skip them and you'll be stranded at the worst moment (Marc Hedlund, p. 52). One experienced CTO friend dislikes regular 1-1s, but unless you have years of experience, assume you need them (pp. 52–53).
+«جلسه‌ی ۱-۱ منظم مثل تعویض روغن است»: ردش کنید و بدترین لحظه وسط جاده می‌مانید (Marc Hedlund، p. 52). یکی از دوستان نویسنده که CTO باتجربه‌ای است از ۱-۱ منظم خوشش نمی‌آید، ولی تا وقتی سال‌ها تجربه ندارید فرض کنید به آن نیاز دارید (pp. 52–53).
 
-**Scheduling** (p. 53): weekly by default, adjusted only if both agree. Weekly keeps meetings short and tolerates a missed week; less frequent ones must be rescheduled when missed. Avoid Mondays and Fridays (long weekends). The author prefers mornings, before things get busy, if the report arrives early and has no standup in the way; respect your reports' maker schedule.
+**زمان‌بندی** (p. 53): پیش‌فرض هفتگی، و فقط با توافق دو طرف تغییر کند. هفتگی جلسه‌ها را کوتاه نگه می‌دارد و از دست رفتن یک هفته را تاب می‌آورد؛ جلسه‌های کم‌تکرارتر وقتی از دست بروند باید دوباره زمان‌بندی شوند. دوشنبه و جمعه را بگذارید کنار، به‌خاطر تعطیلات طولانی. نویسنده صبح‌ها را ترجیح می‌دهد، پیش از شلوغ شدن کار، اگر طرف زود می‌آید و standup وسط نیست؛ به برنامه‌ی سازنده‌ی آدم‌هایتان احترام بگذارید.
 
-**Adjusting** — factors to weigh (pp. 53–54):
+**تنظیم کردن**، عامل‌هایی که باید بسنجید (pp. 53–54):
 
-| Factor | Meet more when… |
+| عامل | وقتی بیشتر ببینیدشان که… |
 |---|---|
-| How often you interact offhand | …you rarely talk outside the 1-1 |
-| How much coaching they need | …they're very junior, or senior but pushing through a hard new project |
-| How much they push information up | …they're not good at it |
-| How good the relationship is | Careful: good relationships need time too. **Don't spend all your time with problem employees and ignore your stars** |
-| How stable the team or company is | …in rapid change or uncertainty: regular 1-1s stabilize the team and slow the rumour mill |
+| هر چند وقت بی‌برنامه حرف می‌زنید | …بیرون از ۱-۱ کم حرف می‌زنید |
+| چقدر کوچینگ لازم دارند | …خیلی تازه‌کارند، یا ارشدند ولی دارند پروژه‌ی تازه‌ی سختی را جلو می‌برند |
+| چقدر اطلاعات را بالا می‌فرستند | …در این کار خوب نیستند |
+| رابطه چقدر خوب است | احتیاط: رابطه‌ی خوب هم وقت می‌خواهد. **همه‌ی وقتتان را با آدم‌های دردسرساز نگذرانید و ستاره‌هایتان را نادیده نگیرید** |
+| تیم یا شرکت چقدر باثبات است | …وسط تغییر سریع یا بلاتکلیفی: ۱-۱ منظم تیم را آرام می‌کند و آسیاب شایعه را کند می‌کند |
 
-### Different 1-1 Styles
+> **In practice:** در تیمی که on-call دارد، ۱-۱ منظم جای بررسی فرسودگی هم هست.
+>
+> **Your turn:** چرا ۱-۱ را در هفته‌ای که incident بزرگ بوده لغو نمی‌کنید؟
+>
+> *Answer:* همان هفته بیشتر از همه لازم است: فرسودگی و ناراحتی پس از incident همان‌جا دیده می‌شود. کتاب ۱-۱ منظم را مثل تعویض روغن می‌داند؛ ردش کنید و وسط جاده می‌مانید (p. 52).
 
-Which style works depends as much on the manager as on the managed (p. 54).
+### سبک‌های مختلف ۱-۱
 
-| Style | How it works | Watch out for (pp. 54–57) |
+این‌که کدام سبک جواب می‌دهد، به‌اندازه‌ی طرف مقابل به خود مدیر بستگی دارد (p. 54).
+
+| سبک | چطور کار می‌کند | مراقب چه باشید (pp. 54–57) |
 |---|---|---|
-| **To-do list** | One or both bring a list, covered in priority order — efficient, professional, forces preparation. One manager kept a shared spreadsheet of topics | Lists of things that could have been chat or email; can feel cold |
-| **Catch-up** | The author's preferred style: report-driven, as much a creative discussion as planning | Turns into complaining or therapy; empathetic managers get sucked into unhealthy closeness. Deal with problems or set them aside by agreement |
-| **Feedback meeting** | Informal feedback and coaching, about quarterly, especially for early-career people; review goals. More often, and documented in writing, for performance problems | Don't save immediate corrections (insulting a colleague, missing a critical meeting) — or praise — for the 1-1 |
-| **Progress report** | Useful when managing managers, or for someone on a side project you don't oversee | Otherwise you hear only the delta since standup; ask them to bring other questions, or meet less often |
-| **Getting to know you** | In any style, care about them as people: family, hobbies, career history and long-term goals | Not prying |
-| **Mix it up** | Walks, coffee, lunch | You'll forget things without notes — not for critical conversations. Keep 1-1s private |
+| **فهرست کارها** | یکی یا هر دو فهرستی می‌آورند و به ترتیب اولویت می‌روند؛ کارآمد، حرفه‌ای و وادارکننده به آمادگی. یک مدیر spreadsheet مشترکی از موضوع‌ها نگه می‌داشت | فهرستی از چیزهایی که چت یا ایمیل هم می‌توانست باشد؛ می‌تواند سرد شود |
+| **گپ** | سبک محبوب نویسنده: هدایتش با طرف مقابل است و به‌اندازه‌ی برنامه‌ریزی، گفت‌وگوی خلاقانه هم هست | به غر زدن یا روان‌درمانی تبدیل می‌شود؛ مدیرهای همدل به نزدیکی ناسالم کشیده می‌شوند. مسئله‌ها را حل کنید یا با توافق کنار بگذارید |
+| **جلسه‌ی بازخورد** | بازخورد و کوچینگ غیررسمی، تقریباً فصلی، به‌خصوص برای آدم‌های اول مسیر؛ مرور هدف‌ها. برای مشکل عملکردی، بیشتر و با ثبت کتبی | اصلاح‌های فوری را، مثل توهین به یک همکار یا نرفتن به جلسه‌ای حیاتی، و تعریف را برای ۱-۱ نگه ندارید |
+| **گزارش پیشرفت** | وقتی مدیرها را مدیریت می‌کنید به کار می‌آید، یا برای کسی که روی پروژه‌ای جانبی است که شما سرپرستی‌اش نمی‌کنید | وگرنه فقط تفاوت نسبت به standup را می‌شنوید؛ از آن‌ها بخواهید پرسش‌های دیگری بیاورند، یا کم‌تکرارتر ببینیدشان |
+| **آشنا شدن با شما** | در هر سبکی، آدم‌ها را به‌عنوان آدم مهم بدانید: خانواده، سرگرمی، سابقه‌ی شغلی و هدف‌های بلندمدت | نه فضولی |
+| **تنوع بدهید** | قدم زدن، قهوه، ناهار | بدون یادداشت چیزهایی را فراموش می‌کنید، پس برای گفت‌وگوهای حیاتی مناسب نیست. جلسه‌ی ۱-۱ را خصوصی نگه دارید |
 
-Keep a **running shared document per report**, with you as note taker: context, feedback given and when, to-dos — an essential record for reviews (pp. 56–57).
+برای هر نفر یک **سند مشترک جاری** نگه دارید که یادداشت‌نویسش خودتانید: زمینه، بازخوردهای داده‌شده و تاریخشان، و کارها؛ سندی ضروری برای ارزیابی‌ها (pp. 56–57).
 
-### Good Manager, Bad Manager: Micromanager, Delegator
+### مدیر خوب، مدیر بد: مدیر ذره‌بین‌به‌دست، مدیر واگذارکننده
 
-Two managers delegate a big project to a new leader (pp. 57–58):
+دو مدیر پروژه‌ی بزرگی را به یک رهبر تازه واگذار می‌کنند (pp. 57–58):
 
-| Jane and Sanjay (micromanager) | Sharell and Beth (delegator) |
+| Jane و Sanjay: مدیریت ذره‌بینی | Sharell و Beth: واگذاری |
 |---|---|
-| Worried about the deadline, Jane attends standups, comments on and reassigns tickets, and takes over day-to-day management when Sanjay and the PM deprioritize a feature | Sharell agrees with Beth which meetings to attend and which details to escalate, and helps cut scope when it gets stressful |
-| The project ships, but Sanjay no longer wants to lead; the best team member becomes a low performer overnight | Beth finishes more confident, ready for bigger projects and to work harder for Sharell |
+| نگرانِ ضرب‌الاجل، Jane در standupها می‌نشیند، روی ticketها نظر می‌دهد و دوباره تخصیصشان می‌دهد، و وقتی Sanjay و product manager اولویت یک feature را پایین می‌آورند، مدیریت روزمره را خودش دست می‌گیرد | Sharell با Beth توافق می‌کند در کدام جلسه‌ها شرکت کند و کدام جزئیات را بالا بفرستد، و وقتی اوضاع پرفشار می‌شود کمک می‌کند دامنه کم شود |
+| پروژه تحویل می‌شود، ولی Sanjay دیگر نمی‌خواهد رهبری کند؛ بهترین عضو تیم یک‌شبه به آدمی کم‌بازده تبدیل می‌شود | Beth با اعتمادبه‌نفس بیشتری تمام می‌کند، آماده‌ی پروژه‌های بزرگ‌تر و آماده‌ی این‌که برای Sharell سخت‌تر کار کند |
 
-Micromanagement creeps up through a high-stress project, a disliked technical choice, or a rule that every decision comes to you (p. 57). It is sometimes needed — junior engineers often want detailed direction, and projects go off the rails — but not as a habit (p. 58). Its roots are **trust and control**, common in talented engineers who become managers and treat reports as "mini-mes"; and since **autonomy** is central to motivation, micromanagers struggle to retain great teams. Yet **delegation is not abdication**: Sharell stayed involved as much as the project needed (p. 58).
+مدیریت ذره‌بینی یواشکی می‌آید، از دل پروژه‌ای پرفشار، یک انتخاب فنی که خوشتان نیامده، یا قاعده‌ای که هر تصمیمی باید به شما برسد (p. 57). گاهی لازم است، چون مهندس‌های تازه‌کار اغلب راهنمایی باجزئیات می‌خواهند و پروژه‌ها از ریل خارج می‌شوند، ولی نه به‌عنوان عادت (p. 58). ریشه‌اش **اعتماد و کنترل** است و در مهندس‌های بااستعدادی که مدیر می‌شوند و آدم‌هایشان را «کپی کوچک خودشان» می‌بینند رایج است؛ و چون **استقلال** هسته‌ی انگیزه است، مدیر ذره‌بین‌به‌دست برای نگه داشتن تیم درخشان به زحمت می‌افتد. با این همه **واگذاری یعنی رها کردن مسئولیت نیست**: Sharell دقیقاً به‌اندازه‌ای که پروژه لازم داشت درگیر ماند (p. 58).
 
-### Practical Advice for Delegating Effectively
+### توصیه‌های عملی برای واگذاری اثربخش
 
-Being a good leader means being good at delegating (p. 59).
+رهبر خوب بودن یعنی در واگذاری کردن خوب بودن (p. 59).
 
-- **Use the team's goals to decide which details to dig into.** Ask how they measure success and to make it visible; then sit on your hands for a week or two. If they're making progress on goals, systems are stable and the product manager is happy, a cursory overview is enough. No goals? Help create them (p. 59).
-- **Gather information from the systems before going to the people:** version control, tickets, alerts, metrics, on-call. The worst micromanagers ask for what they could easily find; the data is context, meaningless without goals (p. 59).
-- **Adjust your focus to the project's stage:** more involved at the start and in design; progress details matter near delivery; in normal flow, know what's moving and what's late (pp. 59–60).
-- **Establish standards for code and systems** — expected unit testing per change, when a decision (a new language or framework) needs wider review. Standards depersonalize technical feedback (p. 60).
-- **Treat open sharing of information, good or bad, neutrally to positively.** When Jack hides his struggles, teach him what to communicate, when and how — brief daily updates at most, not punishment by micromanagement. Blame makes people hide problems until too late (pp. 60–61).
+- **با هدف‌های تیم تصمیم بگیرید در کدام جزئیات عمیق شوید.** بپرسید موفقیت را چطور اندازه می‌گیرند و بخواهید قابل‌دیدنش کنند؛ بعد یکی دو هفته دست نگه دارید. اگر روی هدف‌ها پیشرفت هست، سیستم‌ها باثبات‌اند و product manager راضی است، یک مرور سرسری کافی است. هدفی در کار نیست؟ کمک کنید ساخته شود (p. 59).
+- **پیش از رفتن سراغ آدم‌ها اطلاعات را از سیستم‌ها جمع کنید:** version control، ticketها، alertها، metricها و on-call. بدترین مدیرهای ذره‌بین‌به‌دست چیزی را می‌پرسند که به‌راحتی می‌توانستند پیدا کنند؛ خود داده فقط زمینه است و بدون هدف بی‌معناست (p. 59).
+- **تمرکزتان را با مرحله‌ی پروژه تنظیم کنید:** اول کار و در طراحی بیشتر درگیر شوید؛ جزئیات پیشرفت نزدیک تحویل مهم‌اند؛ در جریان عادی کافی است بدانید چه چیزی پیش می‌رود و چه چیزی عقب است (pp. 59–60).
+- **برای کد و سیستم‌ها استاندارد بگذارید**، مثل این‌که از هر تغییر چه اندازه unit test انتظار می‌رود و کدام تصمیم‌ها، مثل زبان یا framework تازه، بازبینی گسترده‌تر می‌خواهند. استاندارد بازخورد فنی را از آدم‌ها جدا می‌کند (p. 60).
+- **با به‌اشتراک‌گذاری آزادانه‌ی اطلاعات، خوب یا بد، خنثی تا مثبت برخورد کنید.** وقتی Jack گیرهایش را پنهان می‌کند، به او یاد بدهید چه چیزی را کی و چطور بگوید؛ حداکثر یک به‌روزرسانی کوتاه روزانه، نه تنبیه با مدیریت ذره‌بینی. سرزنش باعث می‌شود آدم‌ها مشکل را تا دیر شدن پنهان کنند (pp. 60–61).
 
-If you can't let go, you'll work ever-longer hours. Try a cap: with only 45 hours this week, would you spend five nitpicking a junior developer's code (p. 61)?
+اگر نتوانید رها کنید، ساعت کارتان مدام بیشتر می‌شود. یک سقف امتحان کنید: اگر این هفته فقط ۴۵ ساعت داشتید، پنج ساعتش را خرج مو‌شکافی کد یک برنامه‌نویس تازه‌کار می‌کردید (p. 61)؟
 
-### Creating a Culture of Continuous Feedback
+### ساختن فرهنگ بازخورد پیوسته
 
-Reviews start long before they're written, with **continuous feedback**: a commitment to share positive and corrective feedback regularly instead of saving it for the review cycle. For a new manager it trains attention to individuals and practice at small, awkward conversations (pp. 61–62).
+ارزیابی خیلی پیش از نوشته شدنش شروع می‌شود، با **بازخورد پیوسته**: تعهد به دادن منظم بازخورد مثبت و اصلاحی، به‌جای نگه داشتنش برای دوره‌ی ارزیابی. برای مدیر تازه، این تمرینِ حواس‌جمعی به آدم‌ها و تمرین گفت‌وگوهای کوچکِ معذب‌کننده است (pp. 61–62).
 
-1. **Know your people:** goals, strengths, weaknesses, current level and what the next one needs — from past reviews and from asking them (p. 62).
-2. **Observe your people.** The best outcome may be that it forces you to pay attention. Look for talents first, or feedback becomes continuous criticism; aim to recognize at least one thing every week — ideally something for everyone who reports to you (p. 62).
-3. **Provide lightweight, regular feedback, starting with the positive.** Praise guides behaviour and makes people more receptive to criticism; raise problems as you notice them, not at review time (pp. 62–63).
-4. **Bonus: coaching** — ask what they might have done differently, suggest what could be even better. Save it for early-career people and those who want to advance; not everyone wants or needs it (p. 63).
+1. **آدم‌هایتان را بشناسید:** هدف‌ها، نقاط قوت، نقاط ضعف، level فعلی و چیزی که level بعدی می‌خواهد، هم از ارزیابی‌های گذشته و هم از پرسیدن از خودشان (p. 62).
+2. **آدم‌هایتان را ببینید.** شاید بهترین دستاوردش این باشد که وادارتان می‌کند حواستان باشد. اول دنبال استعدادها بگردید، وگرنه بازخورد به انتقاد پیوسته تبدیل می‌شود؛ هدف بگذارید هر هفته دست‌کم یک چیز را تقدیر کنید، در حالت ایده‌آل چیزی برای هر کسی که به شما گزارش می‌دهد (p. 62).
+3. **بازخورد سبک و منظم بدهید و از نکته‌ی مثبت شروع کنید.** تعریف رفتار را هدایت می‌کند و آدم‌ها را به انتقاد پذیراتر؛ مشکل‌ها را همان موقع که می‌بینید مطرح کنید، نه سر ارزیابی (pp. 62–63).
+4. **امتیاز اضافه، کوچینگ:** بپرسید چه کار دیگری می‌شد کرد و پیشنهاد بدهید چه چیزی می‌توانست بهتر هم باشد. این را برای آدم‌های اول مسیر و کسانی نگه دارید که می‌خواهند جلو بروند؛ همه نه می‌خواهند و نه لازم دارند (p. 63).
 
-### Performance Reviews
+> **In practice:** review در merge request جای بازخورد فنی پیوسته است، نه فقط تأیید.
+>
+> **Your turn:** چطور review merge request را به بازخورد پیوسته تبدیل می‌کنید بی‌آن‌که سنگین شود؟
+>
+> *Answer:* بازخورد مشخص و زود، هم مثبت و هم اصلاحی، در همان merge request؛ و الگوهای تکرارشونده را در ۱-۱ مطرح کنید، نه برای دوره‌ی ارزیابی. کتاب ارزیابی را از بازخورد پیوسته شروع می‌کند (pp. 61–62).
 
-Continuous feedback doesn't replace a formal **360 review**: feedback from the manager, teammates, reports, regular collaborators and a self-review — say two teammates, a mentee and a product manager for an engineer without reports (pp. 63–64). Synthesizing it shows patterns day-to-day feedback misses. Reviews go wrong because there's no time for them, because recent events crowd out older ones, and because of bias (p. 64).
+### ارزیابی عملکرد
 
-| Guideline | Why (pp. 64–67) |
+بازخورد پیوسته جای **ارزیابی ۳۶۰ درجه** را نمی‌گیرد: بازخورد از مدیر، هم‌تیمی‌ها، زیردست‌ها، همکارهای همیشگی و خودارزیابی؛ مثلاً برای مهندسی بدون زیردست، دو هم‌تیمی، یک نفر که منتورش بوده و یک product manager (pp. 63–64). جمع‌بندی این‌ها الگوهایی را نشان می‌دهد که بازخورد روزمره نمی‌بیند. ارزیابی‌ها خراب می‌شوند چون وقتی برایشان نیست، چون اتفاق‌های تازه جای قدیمی‌ترها را تنگ می‌کنند، و به‌خاطر سوگیری (p. 64).
+
+| رهنمود | چرا (pp. 64–67) |
 |---|---|
-| **Give yourself enough time, and start early** | Read and note the feedback, digest, write, and come back to it at least once; anonymize as your company expects |
-| **Account for the whole year** | Keep running 1-1 notes; otherwise reconstruct month by month from email and launches, to credit early wins and growth since |
-| **Use concrete examples and peer excerpts** | If you can't back a point with an example, question whether it belongs: specificity steers away from bias |
-| **Spend plenty of time on strengths** | In writing and in delivery; strengths are what you'll use for promotion. Don't let people skip to the criticism |
-| **Keep improvement areas focused** | Look for clear themes (can't say no to distractions; hard to work with; can't break work into deliverables; works badly across teams; cuts corners). Sanity-check scattershot or single-reviewer complaints; little to improve means ready for promotion or harder work |
-| **Avoid big surprises** | Underperformance shouldn't first appear in the review; warn the newly promoted about higher standards |
-| **Schedule enough time to discuss it** | The author hands over a printed copy the evening before, then walks every section starting with strengths. Ratings below the top are the hardest part; come with reasons and how to score higher |
+| **به خودتان وقت کافی بدهید و زود شروع کنید** | بازخوردها را بخوانید و یادداشت کنید، هضمشان کنید، بنویسید، و دست‌کم یک‌بار دیگر به متن برگردید؛ همان‌طور که شرکتتان انتظار دارد نام‌ها را حذف کنید |
+| **کل سال را حساب کنید** | یادداشت‌های جاری ۱-۱ را نگه دارید؛ وگرنه ماه به ماه از روی ایمیل‌ها و launchها بازسازی کنید تا بردهای اول سال و رشد پس از آن دیده شوند |
+| **از مثال مشخص و تکه‌های بازخورد هم‌ترازها استفاده کنید** | اگر نمی‌توانید نکته‌ای را با مثال پشتیبانی کنید، شک کنید که اصلاً جایش آن‌جاست: مشخص بودن شما را از سوگیری دور می‌کند |
+| **برای نقاط قوت وقت زیادی بگذارید** | هم در نوشتن و هم در گفتن؛ نقاط قوت همان چیزی‌اند که برای ارتقا به کار می‌برید. نگذارید آدم‌ها بپرند سر انتقاد |
+| **حوزه‌های بهبود را متمرکز نگه دارید** | دنبال درون‌مایه‌های روشن بگردید؛ مثلاً نمی‌تواند به حواس‌پرتی نه بگوید، کار کردن با او سخت است، کار را به تحویل‌دادنی نمی‌شکند، بین تیم‌ها بد کار می‌کند، از کار می‌زند. شکایت‌های پراکنده یا تک‌نفره را بسنجید؛ اگر چیز کمی برای بهبود هست، یعنی آماده‌ی ارتقا یا کار سخت‌تر است |
+| **از غافلگیری بزرگ پرهیز کنید** | عملکرد پایین نباید اولین بار در ارزیابی رو شود؛ به تازه‌ارتقایافته‌ها درباره‌ی استانداردهای بالاتر هشدار بدهید |
+| **برای گفت‌وگو درباره‌اش وقت کافی بگذارید** | نویسنده عصر روز قبل یک نسخه‌ی چاپی می‌دهد و بعد همه‌ی بخش‌ها را، با شروع از نقاط قوت، مرور می‌کند. امتیازهای پایین‌تر از بالاترین حالت سخت‌ترین بخش‌اند؛ با دلیل و با راه گرفتن امتیاز بالاتر بیایید |
 
-> **Try it:** [Whole year or last two months?](../widgets/04-review-recency.html) — a year of observed work, scored once from memory that favours recent months and once from running 1-1 notes, to see how recency changes a review.
+> **Try it:** [کل سال یا دو ماه آخر؟](../widgets/04-review-recency.html)؛ یک سال کار دیده‌شده، یک‌بار از روی حافظه‌ای که ماه‌های اخیر را پررنگ می‌کند امتیاز می‌گیرد و یک‌بار از روی یادداشت‌های جاری ۱-۱، تا ببینید تازگی چطور ارزیابی را عوض می‌کند.
 
-> **Ask the CTO: Identifying Potential** (pp. 67–68). Potential is often mistaken for inborn traits or credentials — a great school, articulacy, being tall and male. Someone with no reasonable performance after long enough to observe probably has no potential *at this company*. Real potential shows quickly: going the extra mile, insightful suggestions, helping in neglected areas. A struggling person with real potential may belong elsewhere — a design sense in UI/UX, a great firefighter on an operations team. Potential must be tied to actions and value produced.
+> **کادر Ask the CTO: تشخیص استعداد بالقوه** (pp. 67–68). استعداد بالقوه را اغلب با ویژگی‌های ذاتی یا مدرک اشتباه می‌گیرند؛ دانشگاه خوب، خوش‌بیانی، قدبلند و مرد بودن. کسی که بعد از زمانی که برای دیدن کافی است هیچ عملکرد معقولی ندارد، احتمالاً *در این شرکت* استعداد بالقوه ندارد. استعداد واقعی زود خودش را نشان می‌دهد: پا فراتر گذاشتن، پیشنهادهای بینش‌دار، کمک در جاهایی که کسی سراغشان نمی‌رود. آدمی که گیر کرده ولی واقعاً توان دارد شاید جای دیگری جایش باشد؛ حس طراحی در UI/UX، یا آتش‌نشان درخشان در تیم عملیات. استعداد بالقوه باید به عمل و ارزش تولیدشده گره بخورد.
 
-### Cultivating Careers
+### پروراندن مسیر شغلی
 
-In finance, the author's VP promotion — and later one she prepared for her own report, including his commendation as floor fire warden — succeeded partly because her boss knew how to play the game (pp. 68–69). Managers play a key role in promotions, usually making a case to management or a committee (p. 69).
+در صنعت مالی، ارتقای خود نویسنده به VP، و بعدتر ارتقایی که برای یکی از آدم‌هایش آماده کرد و حتی تقدیرنامه‌اش به‌عنوان مسئول آتش‌نشانی طبقه را هم در آن آورد، تا حدی موفق شد چون رئیسش بلد بود بازی را ببرد (pp. 68–69). مدیرها در ارتقا نقش کلیدی دارند و معمولاً پرونده‌ای را پیش مدیریت یا یک کمیته می‌برند (p. 69).
 
-- **Early-career "up or out" levels:** at "Famous BigCo," graduates join at E2 (E1 is interns); no sign of advancing after two years at E2–E4 means no future there, while E5 can be held forever. Your job is to keep them learning to estimate and deliver within estimates, and to gather evidence: independent projects, on-call, engagement in planning (p. 69).
-- **Learn the game:** how decisions are made, how early packets are due, whether promotions are capped — and be transparent with your team about it (pp. 69–70).
-- **Find promotion-worthy projects** and give them, or encourage volunteering for them, to people close to promotion (p. 70).
-- **Seniority narrows opportunity.** Some people won't advance on your team and may be better off elsewhere. Companies often expect people to act at the next level before promotion, to avoid the Peter Principle; if your team leaves no room to work at a senior level, rethink how work is done (p. 70).
+- **همه‌ی levelهای «بالا برو یا برو» در اول مسیر:** در شرکتی که نویسنده «Famous BigCo» می‌نامدش، فارغ‌التحصیل‌ها از E2 شروع می‌کنند، چون E1 مال کارآموزهاست؛ دو سال ماندن در E2 تا E4 بدون نشانه‌ی پیشرفت یعنی آن‌جا آینده‌ای ندارند، ولی در E5 می‌شود تا ابد ماند. کار شما این است که آن‌ها را در یاد گرفتن تخمین زدن و تحویل دادن در چارچوب تخمین نگه دارید و شواهد جمع کنید: پروژه‌های مستقل، on-call، مشارکت در برنامه‌ریزی (p. 69).
+- **بازی را یاد بگیرید:** تصمیم‌ها چطور گرفته می‌شوند، پرونده‌ها چقدر زودتر باید آماده باشند، و آیا سقفی برای تعداد ارتقاها هست؛ و با تیمتان درباره‌اش شفاف باشید (pp. 69–70).
+- **پروژه‌های ارتقاآور را پیدا کنید** و به آدم‌های نزدیک به ارتقا بدهیدشان یا تشویقشان کنید داوطلب شوند (p. 70).
+- **ارشدتر که شوند فرصت تنگ‌تر می‌شود.** بعضی‌ها در تیم شما جلو نمی‌روند و شاید جای دیگری بهتر باشند. شرکت‌ها اغلب انتظار دارند آدم‌ها پیش از ارتقا در سطح بعدی عمل کنند تا گرفتار اصل Peter نشوند؛ اگر تیم شما جایی برای کار در سطح ارشد نمی‌گذارد، در شیوه‌ی انجام کار بازنگری کنید (p. 70).
 
-### Challenging Situations: Firing Underperformers
+### موقعیت‌های دشوار: اخراج کسانی که عملکردشان پایین است
 
-HR usually dictates the procedure, typically a **performance improvement plan** of clear objectives in a fixed period — sometimes genuine, often a generous way to give someone time to find another job (pp. 70–71). Coaching out begins long before.
+معمولاً HR رویه را تعیین می‌کند، که اغلب یک **برنامه‌ی بهبود عملکرد** است با هدف‌های روشن در بازه‌ای معین؛ گاهی واقعی است و اغلب راهی سخاوتمندانه برای دادن فرصت به آدم تا کار دیگری پیدا کند (pp. 70–71). کوچ کردن آدم به بیرون خیلی زودتر از این شروع می‌شود.
 
-- **The rule of no surprises:** know what the person should deliver, and say early and often when they don't (p. 71).
-- **The realistic case:** Jane has been slow for six months, with late, buggy work — and believable excuses: poor onboarding, the company party, your vacation. That's why feedback must start early, as a conversation, with a record. Managers who ignore excuses lose people to bad onboarding; managers who accept every excuse infuriate the team (pp. 71–72).
-- **Write it down.** Even without HR, give improvement feedback in writing with a timeline and get written acknowledgment — it protects you and treats the employee fairly (p. 72).
-- **Don't put anyone on a plan you wouldn't be happy to lose.** A great engineer put on a surprise plan, after a complaint about a change his manager had approved, met its goals and resigned anyway (p. 72).
+- **قاعده‌ی بدون غافلگیری:** بدانید طرف باید چه چیزی تحویل بدهد و وقتی نمی‌دهد زود و مکرر بگویید (p. 71).
+- **نمونه‌ی واقع‌بینانه:** Jane شش ماه است کند است و کارش دیر و پر از باگ می‌آید، و بهانه‌هایش هم باورپذیرند: onboarding ضعیف، مهمانی شرکت، مرخصی شما. برای همین بازخورد باید زود شروع شود، به شکل گفت‌وگو و با ثبت. مدیرهایی که بهانه‌ها را نادیده می‌گیرند آدم‌هایشان را به‌خاطر onboarding بد از دست می‌دهند؛ مدیرهایی که هر بهانه‌ای را می‌پذیرند تیم را عصبانی می‌کنند (pp. 71–72).
+- **بنویسیدش.** حتی بدون HR، بازخورد بهبود را کتبی و با زمان‌بندی بدهید و تأیید کتبی بگیرید؛ هم از خودتان محافظت می‌کند و هم با کارمند منصفانه رفتار می‌شود (p. 72).
+- **هیچ‌کس را روی برنامه‌ای نگذارید که از دست دادنش ناراحتتان می‌کند.** مهندس درخشانی که بعد از شکایتی درباره‌ی تغییری که مدیرش تأییدش کرده بود ناگهان روی برنامه‌ی بهبود رفت، هدف‌هایش را برآورده کرد و باز هم استعفا داد (p. 72).
 
-> **Ask the CTO: Coaching Someone Out of the Company** (pp. 72–73). An employee doing OK work for years keeps asking how to reach the next level and keeps returning to his comfort zone. Past the up-or-out levels, cruising is fine if both of you are satisfied; but if he wants to progress and can't on your team, say so clearly — you're not firing him, but he needs to move to grow — give him time to find another team or company, and let him go happily, keeping goodwill.
+> **کادر Ask the CTO: کوچ کردن کسی به بیرون از شرکت** (pp. 72–73). کارمندی که سال‌هاست کارش قابل‌قبول است مدام می‌پرسد چطور به level بعدی برسد و مدام به منطقه‌ی امنش برمی‌گردد. بعد از levelهای «بالا برو یا برو»، ماندن در دور آرام اشکالی ندارد اگر هر دو راضی باشید؛ ولی اگر او می‌خواهد جلو برود و در تیم شما نمی‌شود، صریح بگویید؛ اخراجش نمی‌کنید، ولی برای رشد باید جابه‌جا شود. به او وقت بدهید تیم یا شرکت دیگری پیدا کند و با خوشی بدرقه‌اش کنید تا رابطه‌ی خوب بماند.
 
-### Assessing Your Own Experience
+### سنجیدن تجربه‌ی خودتان
 
-Questions for reflection (pp. 73–74): regular 1-1s? Career talk within the last three months? Feedback in the last week, and kudos in front of the team? How quickly, and how privately, did you last correct someone? What made reviews you received valuable or useless? Do you know how promotion works at your company?
+پرسش‌هایی برای تأمل (pp. 73–74): جلسه‌ی ۱-۱ منظم دارید؟ در سه ماه اخیر درباره‌ی مسیر شغلی حرف زده‌اید؟ هفته‌ی گذشته بازخورد داده‌اید و جلوی تیم از کسی تقدیر کرده‌اید؟ آخرین بار چقدر سریع و چقدر خصوصی کسی را اصلاح کردید؟ چه چیزی ارزیابی‌هایی را که گرفته‌اید ارزشمند یا بی‌فایده کرده بود؟ می‌دانید ارتقا در شرکتتان چطور کار می‌کند؟
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Weekly 1-1s | Short, focused meetings; a missed week is harmless | Calendar time |
-| Less frequent 1-1s | Time | Misses must be rescheduled; problems surface late |
-| To-do list 1-1 | Efficiency, preparation | Cold; items that belong in chat |
-| Catch-up 1-1 | Openness, creativity | Drifts into complaints or therapy |
-| Micromanaging | Short-term control | Lost autonomy, motivation and leaders; your own hours |
-| Delegating with support | Growing leaders, scale | Must accept others' choices; stay involved |
-| Continuous feedback | No surprises; attention to people | Small awkward conversations every week |
-| Formal 360 review | Patterns across the year and many viewpoints | Time; recency and other biases |
-| Improvement plan | Clear, documented expectations | Strong people often leave when put on one |
+| جلسه‌ی ۱-۱ هفتگی | جلسه‌های کوتاه و متمرکز؛ از دست رفتن یک هفته بی‌خطر است | وقت تقویم |
+| جلسه‌ی ۱-۱ کم‌تکرارتر | وقت | از دست رفتنش باید جبران شود؛ مشکل‌ها دیر رو می‌شوند |
+| جلسه‌ی فهرست کارها | کارآمدی، آمادگی | سردی؛ موضوع‌هایی که جایشان چت است |
+| جلسه‌ی گپ | گشودگی، خلاقیت | به غر زدن یا روان‌درمانی می‌لغزد |
+| مدیریت ذره‌بینی | کنترل کوتاه‌مدت | از دست رفتن استقلال و انگیزه و رهبرها؛ و ساعت کار خودتان |
+| واگذاری همراه با پشتیبانی | پروراندن رهبر، مقیاس گرفتن | باید انتخاب دیگران را بپذیرید؛ باید درگیر بمانید |
+| بازخورد پیوسته | بی‌غافلگیری؛ حواس‌جمعی به آدم‌ها | گفت‌وگوهای کوچک و معذب‌کننده در هر هفته |
+| ارزیابی رسمی ۳۶۰ درجه | الگوهای کل سال از چند زاویه | وقت؛ سوگیری تازگی و سوگیری‌های دیگر |
+| برنامه‌ی بهبود | انتظارهای روشن و ثبت‌شده | آدم‌های قوی وقتی رویش می‌روند اغلب می‌روند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Recency bias** is the reviewing error the book warns about (p. 64); psychologists also describe the *halo effect*, where one strong trait colours every other judgement. The [widget](../widgets/04-review-recency.html) uses an invented year of work and an exponential memory curve as a simple model of it.
-- **Lara Hogan's questions.** The book points to Lara Hogan's blog post on questions for a new report (p. 51); she later expanded them, with templates, in *Resilient Management* (2019).
-- **Up-or-out levels** resemble the "terminal level" policies of large tech companies, below which engineers are expected to progress within a set time.
+- **سوگیری تازگی** همان خطای ارزیابی است که کتاب از آن برحذر می‌دارد (p. 64)؛ روان‌شناس‌ها *اثر هاله‌ای* را هم توصیف می‌کنند، جایی که یک ویژگی قوی رنگ هر قضاوت دیگری را عوض می‌کند. [این ویجت](../widgets/04-review-recency.html) یک سال کار ساختگی و یک منحنی نمایی حافظه را به‌عنوان مدلی ساده از آن به کار می‌برد.
+- **پرسش‌های Lara Hogan.** کتاب به یادداشت وبلاگی Lara Hogan درباره‌ی پرسش‌های آغاز کار با یک نفر تازه ارجاع می‌دهد (p. 51)؛ او بعدتر این پرسش‌ها را با الگوهای آماده در *Resilient Management* در سال ۲۰۱۹ گسترش داد.
+- **همه‌ی levelهای «بالا برو یا برو»** شبیه سیاست «terminal level» شرکت‌های بزرگ فناوری‌اند، که زیر آن انتظار می‌رود مهندس‌ها در زمانی معین جلو بروند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. Management 101](01-management-101.md) (the same 1-1s and feedback from the report's side), [2. Mentoring](02-mentoring.md) (onboarding documents, listening), [5. Managing a Team](05-managing-a-team.md) (from individuals to team dynamics), [6. Managing Multiple Teams](06-managing-multiple-teams.md) (what to delegate when you can't do it all), [7. Managing Managers](07-managing-managers.md) (progress-report 1-1s and skip-levels).
+- **فصل‌های مرتبط:** [فصل ۱: مدیریت از پایه](01-management-101.md) که همین ۱-۱ و بازخورد را از سمت گیرنده می‌بیند، [فصل ۲: منتورینگ](02-mentoring.md) که سندهای onboarding و شنیدن را می‌گوید، [فصل ۵: مدیریت یک تیم](05-managing-a-team.md) که از تک‌تک آدم‌ها به پویایی تیم می‌رود، [فصل ۶: مدیریت چند تیم](06-managing-multiple-teams.md) که می‌گوید وقتی از پس همه چیز برنمی‌آیید چه چیزی را واگذار کنید، و [فصل ۷: مدیریت مدیرها](07-managing-managers.md) که ۱-۱ گزارش‌پیشرفت و جلسه‌های skip-level را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What does a 30/60/90-day plan give you besides onboarding goals?**
+1. **برنامه‌ی ۳۰ / ۶۰ / ۹۰ روزه جز هدف‌های onboarding چه چیزی به شما می‌دهد؟**
 
-   *Answer:* A way to catch mishires quickly: realistic milestones based on prior hires make it clear to both of you when something needs correcting (p. 51).
+   *Answer:* راهی برای زود فهمیدن استخدام اشتباه: milestoneهای واقع‌بینانه که از استخدام‌های قبلی درآمده‌اند، برای هر دو طرف روشن می‌کنند کِی چیزی باید اصلاح شود (p. 51).
 
-2. **Things are going smoothly with your strongest engineer. Should you cut their 1-1s to spend time on a struggling report?**
-   - [ ] Yes, good relationships need little attention
-   - [x] No — don't spend all your time on problem employees and ignore your stars; they may not agree things are fine
-   - [ ] Only if the company is stable
+2. **با قوی‌ترین مهندستان همه چیز روان پیش می‌رود. جلسه‌های ۱-۱ او را کم کنید تا وقتتان را به کسی بدهید که گیر کرده؟**
+   - [ ] بله، رابطه‌ی خوب توجه کمی لازم دارد
+   - [x] نه؛ همه‌ی وقتتان را با آدم‌های دردسرساز نگذرانید و ستاره‌هایتان را نادیده نگیرید، چون شاید آن‌ها قبول نداشته باشند که همه چیز خوب است
+   - [ ] فقط اگر شرکت باثبات باشد
 
    *Answer:* p. 54.
 
-3. **What is the danger of the "catch-up" style of 1-1?**
+3. **خطر سبک «گپ» در جلسه‌ی ۱-۱ چیست؟**
 
-   *Answer:* Left unchecked it becomes a complaining session or therapy, and commiserating can make problems worse; problems need to be dealt with or set aside by mutual agreement (p. 55).
+   *Answer:* اگر رهایش کنید به جلسه‌ی غر زدن یا روان‌درمانی تبدیل می‌شود و هم‌دردی می‌تواند مشکل را بدتر کند؛ مسئله‌ها باید حل شوند یا با توافق دو طرف کنار گذاشته شوند (p. 55).
 
-4. **What distinguishes Sharell, the delegator, from Jane, the micromanager?**
+4. **چه چیزی Sharell واگذارکننده را از Jane ذره‌بین‌به‌دست جدا می‌کند؟**
 
-   *Answer:* Sharell made Beth's goals and responsibilities clear, agreed which meetings and details mattered, and supported her when needed; Jane never gave up control and undermined Sanjay. Delegation isn't abdication (pp. 57–58).
+   *Answer:* Sharell هدف‌ها و مسئولیت‌های Beth را روشن کرد، توافق کرد کدام جلسه‌ها و جزئیات مهم‌اند و هر وقت لازم بود پشتش ایستاد؛ Jane هیچ‌وقت کنترل را رها نکرد و زیر پای Sanjay را خالی کرد. واگذاری یعنی رها کردن مسئولیت نیست (pp. 57–58).
 
-5. **Where should you look first for project status?**
-   - [ ] Ask each engineer for a written report
-   - [x] The systems: version control, tickets, alerts, metrics, on-call
-   - [ ] The product manager
+5. **برای فهمیدن وضعیت پروژه اول کجا را نگاه می‌کنید؟**
+   - [ ] از هر مهندس گزارش کتبی می‌خواهم
+   - [x] سیستم‌ها: version control، ticketها، alertها، metricها و on-call
+   - [ ] از product manager
 
-   *Answer:* Gather information from the systems before going to the people (p. 59).
+   *Answer:* پیش از رفتن سراغ آدم‌ها اطلاعات را از سیستم‌ها جمع کنید (p. 59).
 
-6. **Name three guidelines for writing a performance review.**
+6. **سه رهنمود برای نوشتن ارزیابی عملکرد بگویید.**
 
-   *Answer:* Start early with enough time; account for the whole year; use concrete examples and peer excerpts; spend plenty of time on strengths; keep improvement areas focused; avoid big surprises; schedule time to discuss it (pp. 64–67).
+   *Answer:* زود شروع کنید و وقت کافی بگذارید؛ کل سال را حساب کنید؛ از مثال مشخص و تکه‌های بازخورد هم‌ترازها استفاده کنید؛ برای نقاط قوت وقت زیادی بگذارید؛ حوزه‌های بهبود را متمرکز نگه دارید؛ از غافلگیری بزرگ پرهیز کنید؛ برای گفت‌وگو وقت بگذارید (pp. 64–67).
 
-7. **Why should you never put someone on an improvement plan you'd be unhappy to lose?**
+7. **چرا هیچ‌وقت نباید کسی را روی برنامه‌ی بهبود بگذارید که از دست دادنش ناراحتتان می‌کند؟**
 
-   *Answer:* Smart employees read a formal warning as a sign they don't fit and leave quickly — like the great engineer who met his surprise plan's goals and resigned anyway (p. 72).
+   *Answer:* آدم‌های باهوش هشدار رسمی را نشانه‌ی این می‌گیرند که جایشان این‌جا نیست و زود می‌روند، مثل همان مهندس درخشانی که هدف‌های برنامه‌ی غافلگیرکننده‌اش را برآورده کرد و باز استعفا داد (p. 72).
