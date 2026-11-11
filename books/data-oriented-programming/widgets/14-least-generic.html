@@ -1,66 +1,67 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Least Generic Tool</title>
-<meta name="description" content="Toggle book items lent or not and switch between the forEach, reduce and countByBoolField versions of lendingRatio: the ratio is the same, but the business logic shrinks to what it means. Illustrates Data-Oriented Programming, chapter 14.">
+<title>کم‌عمومی‌ترین ابزار</title>
+<meta name="description" content="نسخه‌های کتاب را قرض‌رفته یا نرفته کنید و میان versionهای forEach و reduce و countByBoolField از lendingRatio سوئیچ کنید: آن نسبت همان است، ولی منطق کسب‌وکار به معنایش آب می‌رود. تصویری از فصل ۱۴ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
   textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
-  .items label { display: flex; gap: 8px; align-items: center; font-family: var(--mono); font-size: .8rem; padding: 3px 0; }
+  .items label { display: flex; gap: 8px; align-items: center; font-family: var(--mono); font-size: .8rem; padding: 3px 0; direction: ltr; }
+  #verdict { direction: ltr; text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/14-advanced-data-manipulation.html">Chapter 14</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Least generic tool</span>
+      <a href="../chapters/14-advanced-data-manipulation.html">فصل ۱۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">کم‌عمومی‌ترین ابزار</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 14 · Advanced data manipulation</div>
-  <h1>The least generic tool</h1>
-  <p class="lede">Three versions of <code>lendingRatio</code> compute the same number. <code>forEach</code> is a Swiss army knife; <code>reduce</code> is narrower but still low level; <code>countByBoolField</code> is a screwdriver that says what it does. When <em>using</em> a utility, pick the least generic one that solves the problem.</p>
-  <p class="source-note">Illustrates section 14.3 (listings 14.10–14.15, pp. 301–305): the two books with nested book items, the three versions of <code>lendingRatio</code>, the unit test of <code>countByBoolField</code> and its implementation with <code>update</code>. Added book items are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۴ · دست‌کاری پیشرفته‌ی داده</div>
+  <h1>کم‌عمومی‌ترین ابزار</h1>
+  <p class="lede">سه version از <code>lendingRatio</code> همان یک عدد را حساب می‌کنند. تابع <code>forEach</code> چاقویی سوئیسی است؛ تابع <code>reduce</code> باریک‌تر است ولی هنوز سطح‌پایین؛ و <code>countByBoolField</code> پیچ‌گوشتی‌ای است که می‌گوید چه می‌کند. سر <em>به کار بردن</em> ابزاری سودمندی، کم‌عمومی‌ترین را برگزینید که مسئله را حل می‌کند.</p>
+  <p class="source-note">تصویری از بخش ۱۴.۳ (listingهای ۱۴.۱۰ تا ۱۴.۱۵، صص. ۳۰۱–۳۰۵): آن دو کتاب با نسخه‌های تودرتو، سه version <code>lendingRatio</code>، تست unit از <code>countByBoolField</code> و پیاده‌سازی‌اش با <code>update</code>. نسخه‌های افزوده مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">Book items (listing 14.10)</p><div class="items" id="items"></div>
-          <button class="btn small" id="add" type="button" style="margin-top:6px">Add a book item</button></div>
+      <div class="grid-2"><div class="panel"><p class="panel-title">نسخه‌های کتاب (listing ۱۴.۱۰)</p><div class="items" id="items"></div>
+          <button class="btn small" id="add" type="button" style="margin-top:6px">افزودن نسخه‌ی کتاب</button></div>
         <div class="panel"><p class="panel-title">lendingRatio(books)</p><div class="callout" id="verdict" aria-live="polite"></div>
-          <p class="panel-title" style="margin-top:10px">Unit test (listing 14.14)</p><pre class="code" id="test"></pre></div></div>
-      <div class="panel"><p class="panel-title" id="ct">Business logic</p><pre class="code" id="code"></pre></div>
+          <p class="panel-title" style="margin-top:10px">تست unit (listing ۱۴.۱۴)</p><pre class="code" id="test"></pre></div></div>
+      <div class="panel"><p class="panel-title" id="ct">منطق کسب‌وکار</p><pre class="code" id="code"></pre></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="ver"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ver"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>The result never changes</strong>: all three versions return lent ÷ (lent + not lent). What changes is how much of the code is about iterating and how much is about the business.</li>
-    <li><strong>Moving the counters into a map</strong> is what lets the <code>reduce</code> hide behind a named function: <code>countByBoolField</code> is itself a <code>reduce</code> with <code>update</code>.</li>
-    <li><strong>With no book items</strong>, every version divides 0 by 0. The book doesn’t handle it; the widget shows JavaScript’s <code>NaN</code>.</li>
+    <li><strong>آن خروجی هیچ‌وقت عوض نمی‌شود</strong>: هر سه version قرض‌رفته تقسیم بر قرض‌رفته به‌علاوه‌ی نرفته را برمی‌گردانند. آنچه عوض می‌شود این است که چه اندازه از کد در باب گشتن است و چه اندازه در باب کسب‌وکار.</li>
+    <li><strong>کوچاندن آن شمارنده‌ها به mapی</strong> همان است که می‌گذارد آن <code>reduce</code> پشت تابعی نام‌دار پنهان شود: تابع <code>countByBoolField</code> خودش یک <code>reduce</code> با <code>update</code> است.</li>
+    <li><strong>بی هیچ نسخه‌ی کتابی</strong>، هر versionی ۰ را بر ۰ بخش می‌کند. کتاب نمی‌چرخاندش؛ و widget مقدار <code>NaN</code> از JavaScript را نشان می‌دهد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/14-advanced-data-manipulation.html"><small>Lesson</small>14. Advanced data manipulation</a></li>
-    <li><a href="../lab/14-custom-data-tools/README.md"><small>Experiment</small>update, flatMap, countByBoolField and unwind in Python</a></li>
+    <li><a href="../chapters/14-advanced-data-manipulation.html"><small>درس</small>فصل ۱۴: دست‌کاری پیشرفته‌ی داده</a></li>
+    <li><a href="../lab/14-custom-data-tools/README.md"><small>آزمایش</small>توابع update و flatMap و countByBoolField و unwind به Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -97,30 +98,30 @@ var BOOKS = [
   function drawItems() { var box = Kit.clear(document.getElementById("items"));
     books.forEach(function (b, bi) { box.appendChild(Kit.el("p", { class: "field-hint", style: "margin:6px 0 0" }, b.title));
       b.bookItems.forEach(function (it, ii) { var cb = Kit.el("input", { type: "checkbox" }); cb.checked = it.isLent;
-        cb.addEventListener("change", function () { books[bi].bookItems[ii].isLent = cb.checked; log.add(it.id + (cb.checked ? " lent" : " returned") + ".", "muted"); render(); });
+        cb.addEventListener("change", function () { books[bi].bookItems[ii].isLent = cb.checked; log.add("نسخه‌ی " + it.id + (cb.checked ? " قرض رفت" : " برگشت") + ".", "muted"); render(); });
         box.appendChild(Kit.el("label", null, [cb, it.id + " @ " + it.libId + " — isLent"])); }); }); }
   function render() { var items = flatMap(books, "bookItems"), lent = items.filter(function (i) { return i.isLent; }).length, r = IMPL[ver](books), same = [IMPL.forEach(books), IMPL.reduce(books), IMPL.count(books)].every(function (x) { return String(x) === String(r); });
     var v = document.getElementById("verdict"); v.className = "callout " + (isNaN(r) ? "warn" : "ok");
-    v.textContent = "→ " + (isNaN(r) ? "NaN (0 ÷ 0)" : r.toFixed(4) + " (" + lent + " of " + items.length + " lent)") + (same ? "; all three versions agree." : "; versions disagree!");
+    v.textContent = "→ " + (isNaN(r) ? "NaN (0 ÷ 0)" : r.toFixed(4) + " (" + lent + " / " + items.length + " lent)") + (same ? " — all three versions agree" : " — versions disagree!");
     var lines = CODE[ver].split("\n"), bl = ver === "count" ? 5 : lines.length;
     document.getElementById("code").textContent = CODE[ver];
-    document.getElementById("ct").textContent = { forEach: "Listing 14.11: forEach", reduce: "Listing 14.12: reduce", count: "Listing 14.13: countByBoolField" }[ver];
+    document.getElementById("ct").textContent = { forEach: "نمونه‌ی ۱۴.۱۱: با forEach", reduce: "نمونه‌ی ۱۴.۱۲: با reduce", count: "نمونه‌ی ۱۴.۱۳: با countByBoolField" }[ver];
     document.getElementById("test").textContent = "countByBoolField(\n  [{\"a\": true}, {\"a\": true}, {\"a\": true}, {\"a\": false}],\n  \"a\", \"aTrue\", \"aFalse\")\n// → " + JSON.stringify(countByBoolField([{ a: true }, { a: true }, { a: true }, { a: false }], "a", "aTrue", "aFalse"));
-    stats([["Lent", lent], ["Not lent", items.length - lent], ["Ratio", isNaN(r) ? "NaN" : r.toFixed(3)], ["Lines of business logic", bl, ver === "count" ? "ok" : ""]]); }
-  document.getElementById("ver").appendChild(Kit.segmented({ label: "Version", value: ver, options: [{ value: "forEach", label: "forEach" }, { value: "reduce", label: "reduce" }, { value: "count", label: "countByBoolField" }], onChange: function (v) { ver = v; render(); log.add("Switched to the " + v + " version; same result.", "ok"); } }).element);
-  document.getElementById("add").addEventListener("click", function () { var id = "book-item-" + (nextId++); books[0].bookItems.push({ id: id, libId: "nyc-central-lib", isLent: false }); log.add("Added " + id + " to Watchmen, not lent.", "muted"); drawItems(); render(); });
+    stats([["قرض‌رفته", lent], ["قرض‌نرفته", items.length - lent], ["نسبت", isNaN(r) ? "NaN" : r.toFixed(3)], ["خط‌های منطق کسب‌وکار", bl, ver === "count" ? "ok" : ""]]); }
+  document.getElementById("ver").appendChild(Kit.segmented({ label: "version", value: ver, options: [{ value: "forEach", label: "forEach" }, { value: "reduce", label: "reduce" }, { value: "count", label: "countByBoolField" }], onChange: function (v) { ver = v; render(); log.add("سوئیچ به version " + v + "؛ همان خروجی.", "ok"); } }).element);
+  document.getElementById("add").addEventListener("click", function () { var id = "book-item-" + (nextId++); books[0].bookItems.push({ id: id, libId: "nyc-central-lib", isLent: false }); log.add("نسخه‌ی " + id + " به Watchmen افزوده شد، قرض‌نرفته.", "muted"); drawItems(); render(); });
   drawItems(); render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What’s Theo’s rule for choosing a utility function when using one?",
-      options: ["The most generic, for flexibility", "The least generic one that solves the problem", "Always reduce"], answer: 1,
-      explain: "p. 303." },
-    { q: "What does countByBoolField([{a:true},{a:true},{a:true},{a:false}], \"a\", \"aTrue\", \"aFalse\") return?",
+    { q: "قاعده‌ی تئو برای برگزیدن تابعی سودمندی سر به کار بردنش چیست؟",
+      options: ["عمومی‌ترین، برای انعطاف", "کم‌عمومی‌ترینی که مسئله را حل می‌کند", "همیشه reduce"], answer: 1,
+      explain: "ص. ۳۰۳." },
+    { q: "عبارت countByBoolField([{a:true},{a:true},{a:true},{a:false}], \"a\", \"aTrue\", \"aFalse\") چه برمی‌گرداند؟",
       options: ["{aTrue: 3, aFalse: 1}", "[3, 1]", "0.75"], answer: 0,
-      explain: "Listing 14.14 (pp. 304–305)." },
-    { q: "What made it possible to hide the reduce behind a named function?",
-      options: ["Using variables for the counters", "Keeping the counters as fields of a map", "Using forEach"], answer: 1,
-      explain: "p. 304." }
+      explain: "listing ۱۴.۱۴ (صص. ۳۰۴–۳۰۵)." },
+    { q: "چه چیزی پنهان کردن آن reduce را پشت تابعی نام‌دار شدنی کرد؟",
+      options: ["به کار بردن متغیر برای شمارنده‌ها", "نگه داشتن شمارنده‌ها به‌شکل فیلدهای یک map", "به کار بردن forEach"], answer: 1,
+      explain: "ص. ۳۰۴." }
   ]);
 })();
 </script>

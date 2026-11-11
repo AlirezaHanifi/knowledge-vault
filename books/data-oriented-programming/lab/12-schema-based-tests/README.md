@@ -1,18 +1,18 @@
-# Schema-based unit tests
+# تست‌های unit و طرح‌محور
 
-Generates random catalogs that conform to the catalog schema, a small stand-in for JSON Schema Faker. Each test searches by the first letter of the first book's title and lets the function's return-value validation decide pass or fail. The script runs 1,000 seeds with the search as printed, then with Dave's `"Not available"` fix.
+اسکریپت catalogهای تصادفی می‌سازد که با طرح catalog می‌خوانند، بدلی کوچک برای JSON Schema Faker. هر تستی با حرف نخست عنوان کتاب نخست می‌جوید و می‌گذارد اعتبارسنجی مقدار بازگشتی خود تابع رد یا شکست را تصمیم بگیرد. اسکریپت ۱٬۰۰۰ seed را با جست‌وجو همان‌طور که چاپ شده اجرا می‌کند، بعد با چاره‌ی `"Not available"` دیو.
 
-*Illustrates Data-Oriented Programming, chapter 12, section 12.5, pp. 262–268 (figure 12.3; listings 12.10 and 12.21–12.28). The generator, its word list and the number of books and authors are the vault's (seeded).*
+*تصویری از فصل ۱۲ کتاب Data-Oriented Programming، بخش ۱۲.۵، صص. ۲۶۲–۲۶۸ (شکل ۱۲.۳؛ listingهای ۱۲.۱۰ و ۱۲.۲۱ تا ۱۲.۲۸). آن سازنده و فهرست واژه‌هایش و شمار کتاب‌ها و نویسنده‌ها مال vault است، با seed.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 schema_based_tests.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 First five seeds, as printed (listing 12.1):
@@ -30,13 +30,13 @@ Why some unfixed runs pass:
   matching books cite only authors that exist: 0
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Most runs fail with `authorNames/… must be string`. Random author IDs in books and random keys in `authorsById` almost never line up, so the names are missing. That's the bug the book's test found.
-- The runs that pass are lucky: every one of them is a case where the matching books cite no author at all. None passes because a random author happens to exist.
-- With the fix, a missing author is the string `"Not available"`, and all 1,000 runs pass.
-- There is no explicit assertion: the function's own dev-mode check throws, and the test turns that into `false`.
+- بیشتر اجراها با `authorNames/… must be string` شکست می‌خورند. شناسه‌های نویسنده‌ی تصادفی در کتاب‌ها و کلیدهای تصادفی در `authorsById` تقریباً هیچ‌وقت رو هم نمی‌افتند، پس آن نام‌ها جاافتاده‌اند. همان اشکالی است که تست کتاب یافت.
+- اجراهایی که رد می‌شوند خوش‌بختند: هر کدامشان موردی است که کتاب‌های خورنده هیچ نویسنده‌ای را گواه نمی‌آورند. هیچ‌کدام از آن رد نمی‌شود که نویسنده‌ای تصادفی بر بخت باشد.
+- با آن چاره، نویسنده‌ای جاافتاده همان رشته‌ی `"Not available"` است، و هر ۱٬۰۰۰ اجرا رد می‌شود.
+- هیچ ادعای صریحی نیست: سنجش حالت dev خود تابع خطا می‌اندازد، و آن تست همان را به `false` بدل می‌کند.
 
-## Related
+## مرتبط
 
-- Chapter note: [12. Advanced data validation](../../chapters/12-advanced-data-validation.md) — section 12.5, pp. 262–268
+- یادداشت فصل: [فصل ۱۲: اعتبارسنجی پیشرفته‌ی داده](../../chapters/12-advanced-data-validation.md) — بخش ۱۲.۵، صص. ۲۶۲–۲۶۸

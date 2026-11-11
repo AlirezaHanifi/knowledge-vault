@@ -1,71 +1,71 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Structural Sharing</title>
-<meta name="description" content="Set a value deep in the library data immutably and see which maps are new and which are shared with the previous version; then mutate shared data with a native setter and watch both versions change. Illustrates Data-Oriented Programming, chapter 4.">
+<title>شریک شدن ساختاری</title>
+<meta name="description" content="مقداری را عمیق در داده‌ی کتابخانه immutable بگذارید و ببینید کدام mapها تازه‌اند و کدام با version پیشین شریک؛ بعد داده‌ی شریک را با setterی بومی mutation دهید و ببینید هر دو version عوض می‌شوند. تصویری از فصل ۴ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>ul.tree { list-style: none; padding-left: 14px; margin: 0; font-family: var(--mono); font-size: .8rem; } ul.tree li { margin: 1px 0; }
+<style>ul.tree { list-style: none; padding-right: 14px; padding-left: 0; margin: 0; font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: left; } ul.tree li { margin: 1px 0; }
   .tree .k { color: var(--ink-2); } .tree .v { color: var(--ink); } .tree button.key { font: inherit; background: none; border: 0; padding: 0 2px; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
   .tree .on > .lbl, .tree .on > button.key { background: var(--accent-soft); outline: 1px solid var(--accent); border-radius: 3px; }
-  .tree .new > .tag, .tree .shared > .tag { font-size: .7rem; border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+  .tree .new > .tag, .tree .shared > .tag { font-size: .7rem; border-radius: 3px; padding: 0 4px; margin-right: 4px; direction: rtl; }
   .tree .new > .tag { background: var(--warn-soft); color: var(--ink); border: 1px solid var(--warn); } .tree .shared > .tag { background: var(--ok-soft); color: var(--ink); border: 1px solid var(--ok); }
-  ol.steps { font-family: var(--mono); font-size: .8rem; } ol.steps li.miss { color: var(--bad); }
-  pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; }
+  pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; direction: ltr; text-align: left; }
+  #val, #pth { direction: ltr; text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/04-state-management.html">Chapter 4</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Structural sharing</span>
+      <a href="../chapters/04-state-management.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">شریک شدن ساختاری</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 4 · State management</div>
-  <h1>Structural sharing</h1>
-  <p class="lede">An immutable “set” never changes the data it receives. It creates new maps only <strong>along the path</strong> to the change and shares every other part with the previous version. That makes versions cheap, but only as long as nobody mutates shared data behind its back.</p>
-  <p class="source-note">Illustrates sections 4.2–4.4 (pp. 74–83): the publication-year change of figure 4.4, Dave’s <code>setImmutable</code> (listing 4.4) and the shared-array mutation of listing 4.5. The library data is the vault’s small sample. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۴ · مدیریت state</div>
+  <h1>شریک شدن ساختاری</h1>
+  <p class="lede">هر «set» immutability هیچ‌وقت داده‌ای را که می‌گیرد عوض نمی‌کند. mapهای تازه را تنها <strong>روی مسیر</strong> تا آن تغییر می‌سازد و هر بخش دیگری را با version پیشین شریک می‌شود. این versionها را ارزان می‌کند، ولی تنها تا وقتی کسی داده‌ی شریک را پشت سرش mutation ندهد.</p>
+  <p class="source-note">تصویری از بخش‌های ۴.۲ تا ۴.۴ (صص. ۷۴–۸۳): عوض شدن سال نشر در شکل ۴.۴، تابع <code>setImmutable</code> دیو در listing ۴.۴، و mutation آرایه‌ی شریک در listing ۴.۵. داده‌ی کتابخانه نمونه‌ی کوچک vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">Previous version</p><ul class="tree" id="prev"></ul></div>
-        <div class="panel"><p class="panel-title" id="nt">Next version</p><ul class="tree" id="next"></ul></div></div>
+      <div class="grid-2"><div class="panel"><p class="panel-title">version پیشین</p><ul class="tree" id="prev"></ul></div>
+        <div class="panel"><p class="panel-title" id="nt">version پسین</p><ul class="tree" id="next"></ul></div></div>
       <div class="callout" id="verdict"></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="pth">Path to set</label><select id="pth" style="width:100%"></select>
-        <label class="field-head" for="val" style="margin-top:8px">New value (JSON)</label><input id="val" type="text" value="1986" style="width:100%;font-family:var(--mono)">
-        <div class="row" style="margin-top:8px"><button class="btn primary" id="set" type="button">setImmutable</button> <button class="btn" id="native" type="button">Native setter on previous (listing 4.5)</button></div>
-        <button class="btn" id="rs" type="button" style="margin-top:8px">↺ Reset</button></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="pth">مسیری که گذاشته می‌شود</label><select id="pth" style="width:100%"></select>
+        <label class="field-head" for="val" style="margin-top:8px">مقدار تازه، به JSON</label><input id="val" type="text" value="1986" style="width:100%;font-family:var(--mono)">
+        <div class="row" style="margin-top:8px"><button class="btn primary" id="set" type="button">تابع setImmutable</button> <button class="btn" id="native" type="button">setter بومی روی پیشین، listing ۴.۵</button></div>
+        <button class="btn" id="rs" type="button" style="margin-top:8px">↺ از نو</button></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Only the maps on the path are new</strong>: the library, the catalog, <code>booksByIsbn</code> and the Watchmen record. <code>userManagement</code>, <code>authorsById</code> and the book’s arrays are the very same objects in both versions.</li>
-    <li><strong>The previous version is untouched</strong>: it still says 1987. Both versions exist side by side at almost no cost.</li>
-    <li><strong>A native setter breaks the deal.</strong> Changing <code>authorIds[1]</code> in the previous version changes the next one too, because the array is shared. That is why native mutation is forbidden, and why persistent data structures exist.</li>
+    <li><strong>تنها mapهای روی مسیر تازه‌اند</strong>: خود کتابخانه، آن catalog، مقدار <code>booksByIsbn</code> و رکورد Watchmen. مقدارهای <code>userManagement</code> و <code>authorsById</code> و آرایه‌های آن کتاب در هر دو version دقیقاً همان یک شیءاند.</li>
+    <li><strong>version پیشین دست‌نخورده است</strong>: هنوز ۱۹۸۷ می‌گوید. هر دو version تقریباً بی هیچ بهایی پهلوی هم هستند.</li>
+    <li><strong>setterی بومی آن قرار را می‌شکند.</strong> عوض کردن <code>authorIds[1]</code> در version پیشین، آن پسین را هم عوض می‌کند، چون آن آرایه شریک است. همین است که mutation بومی ممنوع است، و همین است که ساختارهای داده‌ی persistent را ساخته.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/04-state-management.html"><small>Lesson</small>4. State management</a></li>
-    <li><a href="../lab/04-structural-sharing/README.md"><small>Experiment</small>Structural sharing, measured</a></li>
+    <li><a href="../chapters/04-state-management.html"><small>درس</small>فصل ۴: مدیریت state</a></li>
+    <li><a href="../lab/04-structural-sharing/README.md"><small>آزمایش</small>شریک شدن ساختاری، اندازه‌گرفته</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -98,34 +98,34 @@ function stats(rows) {
   function draw(id, root, other, tag) { var ul = Kit.clear(document.getElementById(id));
     (function walk(node, o, ul2) { Object.keys(node).forEach(function (k) { var v = node[k], ov = isObj(o) ? o[k] : undefined, cls = !tag || !isObj(v) ? "" : (v === ov ? "shared" : "new");
       var li = Kit.el("li", { class: cls }, Kit.el("span", { class: "lbl" }, (Array.isArray(node) ? k : JSON.stringify(k)) + ": " + (isObj(v) ? (Array.isArray(v) ? "[" : "{") : JSON.stringify(v))));
-      if (cls) li.appendChild(Kit.el("span", { class: "tag" }, cls === "new" ? "new" : "shared"));
+      if (cls) li.appendChild(Kit.el("span", { class: "tag" }, cls === "new" ? "تازه" : "شریک"));
       if (isObj(v) && !(tag && v === ov)) { var sub = Kit.el("ul", { class: "tree" }); walk(v, ov, sub); li.appendChild(sub); } else if (isObj(v)) li.appendChild(Kit.el("span", { class: "k" }, " " + fmt(v) + " (same object)"));
       ul2.appendChild(li); }); })(root, other, ul); }
-  function render() { draw("prev", prev, null, false); if (next) draw("next", next, prev, true); else Kit.clear(document.getElementById("next")).appendChild(Kit.el("li", { class: "k" }, "Pick a path and press setImmutable."));
+  function render() { draw("prev", prev, null, false); if (next) draw("next", next, prev, true); else Kit.clear(document.getElementById("next")).appendChild(Kit.el("li", { class: "k", style: "direction:rtl;text-align:right" }, "مسیری برگزینید و setImmutable را بزنید."));
     var c = next ? counts(next, prev) : { n: 0, s: 0 }, v = document.getElementById("verdict");
     v.className = "callout " + (corrupted ? "bad" : next ? "ok" : "");
-    v.textContent = corrupted ? "The native setter changed shared data: the next version changed too, though nobody touched it." : next ? c.n + " new map(s) along " + JSON.stringify(lastPath) + "; " + c.s + " shared subtree(s) reused as is. The previous version is unchanged." : "Two versions will share everything except the path to the change.";
-    stats([["New maps", c.n, c.n ? "warn" : ""], ["Shared subtrees", c.s, "ok"], ["Previous unchanged", corrupted ? "no" : "yes", corrupted ? "bad" : "ok"]]); }
+    v.textContent = corrupted ? "آن setter بومی داده‌ی شریک را عوض کرد: version پسین هم عوض شد، گرچه کسی دستش نزد." : next ? c.n + " map تازه روی " + JSON.stringify(lastPath) + "؛ و " + c.s + " زیردرخت شریک که همان‌طور باز به کار رفت. version پیشین دست‌نخورده است." : "دو version همه چیز را جز مسیر تا آن تغییر شریک خواهند بود.";
+    stats([["mapهای تازه", c.n, c.n ? "warn" : ""], ["زیردرخت‌های شریک", c.s, "ok"], ["پیشین دست‌نخورده", corrupted ? "نه" : "بله", corrupted ? "bad" : "ok"]]); }
   var sel = document.getElementById("pth"); PATHS.forEach(function (p, i) { sel.appendChild(Kit.el("option", { value: i }, JSON.stringify(p))); });
   sel.addEventListener("change", function () { var p = PATHS[sel.value], cur = p.reduce(function (a, k) { return a[k]; }, prev); document.getElementById("val").value = JSON.stringify(typeof cur === "boolean" ? !cur : typeof cur === "number" ? cur - 1 : cur + " (new)"); });
-  document.getElementById("set").addEventListener("click", function () { var v; try { v = JSON.parse(document.getElementById("val").value); } catch (e) { log.add("The value must be JSON, e.g. 1986 or \"Alan Moore\".", "bad"); return; }
+  document.getElementById("set").addEventListener("click", function () { var v; try { v = JSON.parse(document.getElementById("val").value); } catch (e) { log.add("آن مقدار باید JSON باشد؛ مثلاً 1986 یا \"Alan Moore\".", "bad"); return; }
     lastPath = PATHS[sel.value]; next = setImmutable(prev, lastPath, v); corrupted = false; log.add("setImmutable(library, " + JSON.stringify(lastPath) + ", " + JSON.stringify(v) + ")", "ok"); render(); });
   document.getElementById("native").addEventListener("click", function () { if (!next) { next = setImmutable(prev, PATHS[0], 1986); lastPath = PATHS[0]; }
     prev.catalog.booksByIsbn["978-1779501127"].authorIds[1] = "dave-chester-gibbons"; corrupted = next.catalog.booksByIsbn["978-1779501127"].authorIds[1] === "dave-chester-gibbons";
-    log.add("previous…authorIds[1] = \"dave-chester-gibbons\": next version now reads " + JSON.stringify(next.catalog.booksByIsbn["978-1779501127"].authorIds[1]) + ".", "bad"); render(); });
-  document.getElementById("rs").addEventListener("click", function () { prev = lib(); next = null; corrupted = false; log.add("Fresh library data.", "muted"); render(); });
+    log.add("دستور previous…authorIds[1] = \"dave-chester-gibbons\": version پسین حالا " + JSON.stringify(next.catalog.booksByIsbn["978-1779501127"].authorIds[1]) + " می‌خواند.", "bad"); render(); });
+  document.getElementById("rs").addEventListener("click", function () { prev = lib(); next = null; corrupted = false; log.add("داده‌ی کتابخانه‌ی تازه.", "muted"); render(); });
   prev = lib(); render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "When Watchmen's publication year is set immutably, which maps are created?",
-      options: ["A deep copy of the whole library", "Only the maps along the path: library, catalog, booksByIsbn, the book", "Only the book record"], answer: 1,
-      explain: "Figure 4.4, p. 78." },
-    { q: "What does Dave's setImmutable do on the way back up the path?",
-      options: ["Deep-clones each node", "Shallow-clones each map and swaps in the modified child", "Mutates the map in place"], answer: 1,
-      explain: "Listing 4.4, p. 81." },
-    { q: "Why does Joe forbid native setters on DOP data?",
-      options: ["They are slow", "Data shared between versions would change in both", "They don't work on maps"], answer: 1,
-      explain: "Listing 4.5, p. 82." }
+    { q: "وقتی سال نشر Watchmen immutable گذاشته می‌شود، کدام mapها ساخته می‌شوند؟",
+      options: ["کپی عمیقی از کل کتابخانه", "تنها mapهای روی مسیر: کتابخانه و catalog و booksByIsbn و آن کتاب", "تنها رکورد آن کتاب"], answer: 1,
+      explain: "شکل ۴.۴، ص. ۷۸." },
+    { q: "تابع setImmutable دیو سر بالا آمدن از مسیر چه می‌کند؟",
+      options: ["هر nodeی را عمیق کلون می‌کند", "هر mapی را سطحی کلون و فرزند دست‌کاری‌شده را جایش می‌گذارد", "آن map را سر جایش mutation می‌دهد"], answer: 1,
+      explain: "listing ۴.۴، ص. ۸۱." },
+    { q: "چرا جو setterهای بومی را روی داده‌ی DOP ممنوع می‌کند؟",
+      options: ["کندند", "داده‌ی شریک میان versionها در هر دو عوض می‌شود", "روی map کار نمی‌کنند"], answer: 1,
+      explain: "listing ۴.۵، ص. ۸۲." }
   ]);
 })();
 </script>

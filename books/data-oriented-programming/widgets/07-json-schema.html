@@ -1,64 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JSON Schema Playground</title>
-<meta name="description" content="Validate the chapter 7 search requests and responses against their JSON Schemas, edit the data to introduce typos and extra fields, and switch between first-error and all-errors reporting. Illustrates Data-Oriented Programming, chapter 7.">
+<title>میدان بازی JSON Schema</title>
+<meta name="description" content="درخواست‌ها و پاسخ‌های جست‌وجوی فصل ۷ را با طرح‌های JSON Schemaشان اعتبارسنجی کنید، داده را ویرایش کنید تا غلط تایپی و فیلد افزوده بیندازید، و میان گزارش نخستین‌خطا و همه‌ی‌خطاها سوئیچ کنید. تصویری از فصل ۷ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
+  #verdict { direction: ltr; text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/07-basic-data-validation.html">Chapter 7</a><span aria-hidden="true">/</span>
-      <span aria-current="page">JSON Schema playground</span>
+      <a href="../chapters/07-basic-data-validation.html">فصل ۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">میدان بازی JSON Schema</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 7 · Basic data validation</div>
-  <h1>JSON Schema playground</h1>
-  <p class="lede">In DOP the <strong>schema is separate from the representation</strong>: data is a plain map, and a schema, itself just data, says what shape it should have. Validate at the system’s boundaries and report what went wrong in detail.</p>
-  <p class="source-note">Illustrates sections 7.2, 7.3 and 7.5 (listings 7.2–7.23, pp. 144–159): the search request and response schemas, the database response with and without <code>additionalProperties: false</code>, and Ajv’s error details. The validator is the vault’s small subset of JSON Schema, not Ajv; its messages imitate Ajv’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۷ · اعتبارسنجی پایه‌ی داده</div>
+  <h1>میدان بازی JSON Schema</h1>
+  <p class="lede">در DOP <strong>طرح از نمایش جداست</strong>: داده mapی خالی است، و طرحی که خودش تنها داده است می‌گوید چه شکلی باید داشته باشد. بر مرزهای سیستم اعتبارسنجی کنید و ریز گزارش دهید چه غلط شد.</p>
+  <p class="source-note">تصویری از بخش‌های ۷.۲ و ۷.۳ و ۷.۵ (listingهای ۷.۲ تا ۷.۲۳، صص. ۱۴۴–۱۵۹): طرح درخواست و پاسخ جست‌وجو، پاسخ پایگاه داده با و بی <code>additionalProperties: false</code>، و ریز خطاهای Ajv. آن اعتبارسنج زیرمجموعه‌ی کوچک vault از JSON Schema است، نه Ajv؛ و پیام‌هایش از Ajv تقلید می‌کند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">Schema</p><pre class="code" id="schema"></pre></div>
-        <div class="panel"><p class="panel-title"><label for="data">Data (edit me)</label></p><textarea class="code" id="data" spellcheck="false"></textarea></div></div>
-      <div class="panel"><p class="panel-title">validate(schema, data)</p><div class="callout" id="verdict"></div><pre class="code" id="errs"></pre></div>
+      <div class="grid-2"><div class="panel"><p class="panel-title">طرح</p><pre class="code" id="schema"></pre></div>
+        <div class="panel"><p class="panel-title"><label for="data">داده — ویرایشم کنید</label></p><textarea class="code" id="data" spellcheck="false"></textarea></div></div>
+      <div class="panel"><p class="panel-title">تابع validate(schema, data)</p><div class="callout" id="verdict"></div><pre class="code" id="errs"></pre></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="ex">Example</label><select id="ex" style="width:100%"></select>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="ex">مثال</label><select id="ex" style="width:100%"></select>
         <div id="all" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Fields are optional by default</strong>: only names in <code>required</code> must be present. Mistyping <code>title</code> as <code>tilte</code> fails because <code>title</code> is required, not because <code>tilte</code> is unknown.</li>
-    <li><strong>Extra fields pass unless the schema is strict</strong>: <code>dummy_property</code> validates until <code>additionalProperties: false</code> is added. Joe allows extra fields in requests and forbids them in responses.</li>
-    <li><strong>By default only the first error is reported</strong>; with <code>allErrors</code> you see all three problems of listing 7.23. Note that listing 7.7’s request asks for a <code>title</code> field, which the enum of listing 7.5 doesn’t list: try it.</li>
+    <li><strong>فیلدها پیش‌فرض اختیاری‌اند</strong>: تنها نام‌های درون <code>required</code> باید باشند. غلط تایپ کردن <code>title</code> به‌شکل <code>tilte</code> از آن شکست می‌خورد که <code>title</code> اجباری است، نه از آنکه <code>tilte</code> ناشناس است.</li>
+    <li><strong>فیلدهای افزوده رد می‌شوند مگر آن طرح سخت باشد</strong>: مقدار <code>dummy_property</code> تا افزودن <code>additionalProperties: false</code> اعتبار می‌گیرد. جو فیلدهای افزوده را در درخواست‌ها روا می‌دارد و در پاسخ‌ها ممنوع.</li>
+    <li><strong>پیش‌فرض تنها نخستین خطا گزارش می‌شود</strong>؛ و با <code>allErrors</code> هر سه مسئله‌ی listing ۷.۲۳ را می‌بینید. یاد بدارید که درخواست listing ۷.۷ فیلد <code>title</code> را می‌خواهد، که آن enum از listing ۷.۵ فهرستش نمی‌کند: بیازماییدش.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/07-basic-data-validation.html"><small>Lesson</small>7. Basic data validation</a></li>
-    <li><a href="../lab/07-mini-json-schema/README.md"><small>Experiment</small>A mini JSON Schema validator</a></li>
+    <li><a href="../chapters/07-basic-data-validation.html"><small>درس</small>فصل ۷: اعتبارسنجی پایه‌ی داده</a></li>
+    <li><a href="../lab/07-mini-json-schema/README.md"><small>آزمایش</small>اعتبارسنج کوچک JSON Schema</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -124,39 +125,39 @@ function stats(rows) {
   var DB = { type: "array", items: { type: "object", required: ["title", "isbn", "available"], properties: { title: { type: "string" }, available: { type: "boolean" }, isbn: { type: "string" } } } };
   var DB_STRICT = JSON.parse(JSON.stringify(DB)); DB_STRICT.items.additionalProperties = false;
   var DUMMY = [{ title: "7 Habits of Highly Effective People", available: true, isbn: "978-0812981605", dummy_property: 42 }, { title: "The Power of Habit", available: false, isbn: "978-1982137274", dummy_property: 45 }];
-  var EX = [["Search request (listing 7.8)", REQ, { title: "habit", fields: ["title", "weight", "number_of_pages"] }],
-    ["Typo: tilte (listing 7.9)", REQ, { tilte: "habit", fields: ["title", "weight", "number_of_pages"] }],
-    ["Request against the enum schema (listing 7.5 + required)", REQ_ENUM, { title: "habit", fields: ["title", "weight", "number_of_pages"] }],
-    ["Search response (listing 7.11)", RESP, [{ title: "7 Habits of Highly Effective People", available: true, isbn: "978-0812981605" }, { title: "The Power of Habit", available: false, isbn_13: "978-1982137274", subtitle: "Why We Do What We Do in Life and Business", subjects: ["Social aspects", "Habit", "Change (Psychology)"] }]],
-    ["Database response with dummy_property (listing 7.14)", DB, DUMMY],
-    ["Same, strict schema (listing 7.15)", DB_STRICT, DUMMY],
-    ["Three errors (listing 7.23)", REQ, { myTitle: "habit", fields: [1, 2] }]];
+  var EX = [["درخواست جست‌وجو (listing ۷.۸)", REQ, { title: "habit", fields: ["title", "weight", "number_of_pages"] }],
+    ["غلط تایپی tilte (listing ۷.۹)", REQ, { tilte: "habit", fields: ["title", "weight", "number_of_pages"] }],
+    ["درخواست در برابر طرح enum (listing ۷.۵ به‌علاوه‌ی required)", REQ_ENUM, { title: "habit", fields: ["title", "weight", "number_of_pages"] }],
+    ["پاسخ جست‌وجو (listing ۷.۱۱)", RESP, [{ title: "7 Habits of Highly Effective People", available: true, isbn: "978-0812981605" }, { title: "The Power of Habit", available: false, isbn_13: "978-1982137274", subtitle: "Why We Do What We Do in Life and Business", subjects: ["Social aspects", "Habit", "Change (Psychology)"] }]],
+    ["پاسخ پایگاه داده با dummy_property (listing ۷.۱۴)", DB, DUMMY],
+    ["همان، با طرح سخت (listing ۷.۱۵)", DB_STRICT, DUMMY],
+    ["سه خطا (listing ۷.۲۳)", REQ, { myTitle: "habit", fields: [1, 2] }]];
   var cur = 0;
   function load(i) { cur = i; document.getElementById("schema").textContent = JSON.stringify(EX[i][1], null, 2); document.getElementById("data").value = JSON.stringify(EX[i][2], null, 2); run(); }
   function run(quiet) { var d, v = document.getElementById("verdict"), pre = document.getElementById("errs");
-    try { d = JSON.parse(document.getElementById("data").value); } catch (e) { v.className = "callout bad"; v.textContent = "Not valid JSON: " + e.message; pre.textContent = ""; return; }
+    try { d = JSON.parse(document.getElementById("data").value); } catch (e) { v.className = "callout bad"; v.textContent = "قالب JSON معتبر نیست: " + e.message; pre.textContent = ""; return; }
     var errs = validate(EX[cur][1], d, allErrors); v.className = "callout " + (errs.length ? "bad" : "ok");
     v.textContent = errs.length ? "→ false. errorsText: " + errorsText(errs) : "→ true";
     pre.textContent = errs.length ? JSON.stringify(errs, null, 2) : "(no errors)";
-    if (!quiet) log.add(EX[cur][0] + ": " + (errs.length ? errs.length + " error(s): " + errorsText(errs) : "valid"), errs.length ? "bad" : "ok");
-    stats([["Valid", errs.length ? "no" : "yes", errs.length ? "bad" : "ok"], ["Errors reported", errs.length], ["Mode", allErrors ? "allErrors" : "first error"]]); }
+    if (!quiet) log.add(EX[cur][0] + ": " + (errs.length ? errs.length + " خطا — " + errorsText(errs) : "معتبر"), errs.length ? "bad" : "ok");
+    stats([["معتبر", errs.length ? "نه" : "بله", errs.length ? "bad" : "ok"], ["خطاهای گزارش‌شده", errs.length], ["حالت", allErrors ? "allErrors" : "نخستین خطا"]]); }
   var sel = document.getElementById("ex"); EX.forEach(function (e, i) { sel.appendChild(Kit.el("option", { value: i }, e[0])); });
   sel.addEventListener("change", function () { load(Number(sel.value)); });
   document.getElementById("data").addEventListener("input", function () { run(true); });
   document.getElementById("data").addEventListener("change", function () { run(); });
-  document.getElementById("all").appendChild(Kit.segmented({ label: "Error reporting", value: false, options: [{ value: false, label: "First error (default)" }, { value: true, label: "allErrors: true" }], onChange: function (v) { allErrors = v; run(); } }).element);
+  document.getElementById("all").appendChild(Kit.segmented({ label: "گزارش خطا", value: false, options: [{ value: false, label: "نخستین خطا، پیش‌فرض" }, { value: true, label: "allErrors: true" }], onChange: function (v) { allErrors = v; run(); } }).element);
   load(0);
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why does the request with \"tilte\" fail validation?",
-      options: ["tilte is an unknown field", "title is required and missing", "fields is not an array"], answer: 1,
-      explain: "Listing 7.9, pp. 148–149." },
-    { q: "Does an array of books with an extra dummy_property validate against listing 7.13?",
-      options: ["Yes: additional properties are allowed by default", "No", "Only if dummy_property is a string"], answer: 0,
-      explain: "pp. 152–153." },
-    { q: "Which Ajv option reports every failure instead of the first?",
+    { q: "چرا آن درخواست با \"tilte\" اعتبارسنجی را رد نمی‌کند؟",
+      options: ["فیلد tilte ناشناس است", "فیلد title اجباری است و جاافتاده", "مقدار fields آرایه نیست"], answer: 1,
+      explain: "listing ۷.۹، صص. ۱۴۸–۱۴۹." },
+    { q: "آیا آرایه‌ای از کتاب با dummy_property افزوده در برابر listing ۷.۱۳ اعتبار می‌گیرد؟",
+      options: ["بله: خاصیت‌های افزوده پیش‌فرض روایند", "نه", "تنها اگر dummy_property رشته باشد"], answer: 0,
+      explain: "صص. ۱۵۲–۱۵۳." },
+    { q: "کدام گزینه‌ی Ajv هر شکستی را به‌جای نخستی گزارش می‌کند؟",
       options: ["{strict: true}", "{allErrors: true}", "{verbose: true}"], answer: 1,
-      explain: "Listing 7.23, p. 159." }
+      explain: "listing ۷.۲۳، ص. ۱۵۹." }
   ]);
 })();
 </script>

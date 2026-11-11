@@ -1,65 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Test Bench</title>
-<meta name="description" content="Run the chapter 6 search test cases, compare results as strings or as parsed data, shuffle the field order of the serialized output, and add the all-lowercase case to find and fix the bug. Illustrates Data-Oriented Programming, chapter 6.">
+<title>میز تست</title>
+<meta name="description" content="موردهای تست جست‌وجوی فصل ۶ را اجرا کنید، خروجی‌ها را به‌شکل رشته یا داده‌ی بازشده بسنجید، ترتیب فیلدهای خروجی سریالی را به هم بزنید، و مورد تمام‌حرف‌کوچک را بیفزایید تا آن اشکال را بیابید و درست کنید. تصویری از فصل ۶ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; } table.cases td { font-family: var(--mono); font-size: .78rem; vertical-align: top; } table.cases td.pass { color: var(--ok); } table.cases td.fail { color: var(--bad); font-weight: 600; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; } table.cases td { font-family: var(--mono); font-size: .78rem; vertical-align: top; direction: ltr; text-align: left; } table.cases th { text-align: right; } table.cases td.pass { color: var(--ok); } table.cases td.fail { color: var(--bad); font-weight: 600; direction: rtl; text-align: right; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/06-unit-tests.html">Chapter 6</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Test bench</span>
+      <a href="../chapters/06-unit-tests.html">فصل ۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">میز تست</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 6 · Unit tests</div>
-  <h1>Test bench</h1>
-  <p class="lede">A DOP test case is three steps: build <code>dataIn</code>, build <code>dataOut</code>, and compare <code>f(dataIn)</code> with <code>dataOut</code> using <code>_.isEqual</code>. For a function that returns JSON, compare <strong>data, not strings</strong>: the same data can serialize with its fields in any order.</p>
-  <p class="source-note">Illustrates sections 6.1 and 6.3 (listings 6.1–6.2 and 6.12–6.20, pp. 111–125): <code>_.isEqual</code>, comparing parsed JSON, and the lowercase query that finds a bug. The second book and the field-order switch are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۶ · تست‌های unit</div>
+  <h1>میز تست</h1>
+  <p class="lede">هر موردی از تست در DOP سه قدم است: ساختن <code>dataIn</code>، ساختن <code>dataOut</code>، و سنجیدن <code>f(dataIn)</code> با <code>dataOut</code> از راه <code>_.isEqual</code>. برای تابعی که JSON برمی‌گرداند، <strong>داده را بسنجید، نه رشته‌ها را</strong>: همان یک داده می‌تواند با فیلدهایش به هر ترتیبی سریالی شود.</p>
+  <p class="source-note">تصویری از بخش‌های ۶.۱ و ۶.۳ (listingهای ۶.۱ و ۶.۲ و ۶.۱۲ تا ۶.۲۰، صص. ۱۱۱–۱۲۵): تابع <code>_.isEqual</code>، سنجیدن JSON بازشده، و آن پرسش حرف‌کوچک که اشکالی را می‌یابد. کتاب دوم و کلید ترتیب فیلد مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Test cases for searchBooksByTitleJSON</p><div class="table-wrap"><table class="cases" id="cases"></table></div>
+      <div class="panel"><p class="panel-title">موردهای تست برای searchBooksByTitleJSON</p><div class="table-wrap"><table class="cases" id="cases"></table></div>
         <div class="callout" id="verdict" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">The code under test</p><pre class="code" id="code"></pre></div>
+      <div class="panel"><p class="panel-title">کد زیر تست</p><pre class="code" id="code"></pre></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="cmp"></div>
-        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="shuffle"> Serializer emits fields in another order</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="lower"> Add the all-lowercase case (Joe’s challenge)</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="fix"> Apply Theo’s fix: lowercase query and title</label>
-        <button class="btn primary" id="run" type="button" style="margin-top:8px">Run the tests</button></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="cmp"></div>
+        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="shuffle"> سریالی‌کننده فیلدها را به ترتیبی دیگر می‌دهد</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="lower"> افزودن مورد تمام‌حرف‌کوچک، چالش جو</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="fix"> پیاده کردن چاره‌ی تئو: حرف‌کوچک کردن پرسش و عنوان</label>
+        <button class="btn primary" id="run" type="button" style="margin-top:8px">اجرای تست‌ها</button></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Comparing strings fails for the wrong reason</strong>: change the field order of the serialized output and identical data no longer compares equal. Parse with <code>JSON.parse</code>, then compare with <code>_.isEqual</code>.</li>
-    <li><strong>The lowercase case fails for the right reason</strong>: <code>includes</code> is case-sensitive. Finding that bug is the point of the test.</li>
-    <li><strong>The fix changes the code, not the tests</strong>: lowercase both the query and the title, and every case passes in either comparison mode.</li>
+    <li><strong>سنجش رشته‌ای به دلیل غلط شکست می‌خورد</strong>: ترتیب فیلدهای خروجی سریالی را عوض کنید و داده‌ی یکسان دیگر برابر نمی‌سنجد. با <code>JSON.parse</code> بازش کنید، بعد با <code>_.isEqual</code> بسنجید.</li>
+    <li><strong>مورد حرف‌کوچک به دلیل درست شکست می‌خورد</strong>: تابع <code>includes</code> به بزرگی و کوچکی حرف حساس است. یافتن آن اشکال هدف همان تست است.</li>
+    <li><strong>آن چاره کد را عوض می‌کند، نه تست‌ها را</strong>: هر دو پرسش و عنوان را حرف‌کوچک کنید، و هر موردی در هر دو حالت سنجش رد می‌شود.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/06-unit-tests.html"><small>Lesson</small>6. Unit tests</a></li>
+    <li><a href="../chapters/06-unit-tests.html"><small>درس</small>فصل ۶: تست‌های unit</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,32 +83,32 @@ function stats(rows) {
   function isEqual(a, b) { return JSON.stringify(canon(a)) === JSON.stringify(canon(b)); }
   function canon(x) { if (Array.isArray(x)) return x.map(canon); if (x && typeof x === "object") { var o = {}; Object.keys(x).sort().forEach(function (k) { o[k] = canon(x[k]); }); return o; } return x; }
   function cases() { var c = [["Watchmen", [info(BOOKS[0])]], ["Batman", []], ["Habits", [info(BOOKS[1])]]]; if (document.getElementById("lower").checked) c.push(["watchmen", [info(BOOKS[0])]]); return c; }
-  function run(quiet) { var t = Kit.clear(document.getElementById("cases")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["query", "expected (dataOut)", "result", "verdict"].map(function (h) { return Kit.el("th", null, h); }))));
+  function run(quiet) { var t = Kit.clear(document.getElementById("cases")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["پرسش", "چشم‌داشته یا dataOut", "خروجی", "داوری"].map(function (h) { return Kit.el("th", null, h); }))));
     var tb = Kit.el("tbody"), pass = 0, fail = 0, falseFail = 0;
     cases().forEach(function (c) { var out = search(c[0]), ok = cmp === "string" ? out === JSON.stringify(c[1]) : isEqual(JSON.parse(out), c[1]), sameData = isEqual(JSON.parse(out), c[1]);
       if (ok) pass++; else { fail++; if (sameData) falseFail++; }
-      tb.appendChild(Kit.el("tr", null, Kit.el("td", null, JSON.stringify(c[0])), Kit.el("td", null, JSON.stringify(c[1])), Kit.el("td", null, out), Kit.el("td", { class: ok ? "pass" : "fail" }, ok ? "✓ pass" : sameData ? "✗ fail (same data!)" : "✗ fail"))); });
+      tb.appendChild(Kit.el("tr", null, Kit.el("td", null, JSON.stringify(c[0])), Kit.el("td", null, JSON.stringify(c[1])), Kit.el("td", null, out), Kit.el("td", { class: ok ? "pass" : "fail" }, ok ? "✓ رد شد" : sameData ? "✗ شکست، با همان داده!" : "✗ شکست"))); });
     t.appendChild(tb);
     var v = document.getElementById("verdict"); v.className = "callout " + (fail ? (falseFail === fail ? "warn" : "bad") : "ok");
-    v.textContent = !fail ? "All " + pass + " cases pass." : falseFail === fail ? falseFail + " case(s) fail only because the fields are in another order: compare parsed data instead." : (fail - falseFail) + " real failure(s): the search is case-sensitive.";
+    v.textContent = !fail ? "هر " + pass + " مورد رد می‌شود." : falseFail === fail ? falseFail + " مورد تنها از آن شکست می‌خورد که فیلدها به ترتیبی دیگرند: در عوض داده‌ی بازشده را بسنجید." : (fail - falseFail) + " شکست واقعی: آن جست‌وجو به بزرگی و کوچکی حرف حساس است.";
     document.getElementById("code").textContent = "Catalog.searchBooksByTitle = function(catalogData, query) {\n  var allBooks = _.get(catalogData, \"booksByIsbn\");\n" + (document.getElementById("fix").checked ? "  var queryLowerCased = query.toLowerCase();\n  var matchingBooks = _.filter(allBooks, function(book) {\n    return _.get(book, \"title\").toLowerCase().includes(queryLowerCased);\n  });" : "  var matchingBooks = _.filter(allBooks, function(book) {\n    return _.get(book, \"title\").includes(query);\n  });") + "\n  return _.map(matchingBooks, function(book) { return Catalog.bookInfo(catalogData, book); });\n};\n\n// test: " + (cmp === "string" ? "resultJSON === expectedJSON" : "_.isEqual(JSON.parse(resultJSON), expectedResults)");
-    if (!quiet) log.add(pass + " passed, " + fail + " failed (" + (cmp === "string" ? "string comparison" : "data comparison") + ").", fail ? "bad" : "ok");
-    stats([["Cases", pass + fail], ["Passed", pass, "ok"], ["Failed", fail, fail ? "bad" : ""], ["False failures", falseFail, falseFail ? "warn" : ""]]); }
-  document.getElementById("cmp").appendChild(Kit.segmented({ label: "Compare", value: cmp, options: [{ value: "string", label: "As strings" }, { value: "data", label: "As parsed data" }], onChange: function (v) { cmp = v; run(); } }).element);
+    if (!quiet) log.add(pass + " رد شد و " + fail + " شکست خورد (" + (cmp === "string" ? "سنجش رشته‌ای" : "سنجش داده‌ای") + ").", fail ? "bad" : "ok");
+    stats([["موردها", pass + fail], ["ردشده", pass, "ok"], ["شکست‌خورده", fail, fail ? "bad" : ""], ["شکست‌های کاذب", falseFail, falseFail ? "warn" : ""]]); }
+  document.getElementById("cmp").appendChild(Kit.segmented({ label: "سنجیدن", value: cmp, options: [{ value: "string", label: "به‌شکل رشته" }, { value: "data", label: "به‌شکل داده‌ی بازشده" }], onChange: function (v) { cmp = v; run(); } }).element);
   ["shuffle", "lower", "fix"].forEach(function (id) { document.getElementById(id).addEventListener("change", function () { run(); }); });
   document.getElementById("run").addEventListener("click", function () { run(); });
   run(true);
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why not compare searchBooksByTitleJSON's output with an expected string?",
-      options: ["Strings are slow to compare", "The same data can serialize with fields in a different order", "JSON can't be compared"], answer: 1,
-      explain: "Listing 6.13, pp. 122–123." },
-    { q: "What does the all-lowercase query reveal?",
-      options: ["Nothing", "The search is case-sensitive", "JSON.parse is broken"], answer: 1,
-      explain: "pp. 125." },
-    { q: "Which function compares maps and arrays recursively?",
+    { q: "چرا خروجی searchBooksByTitleJSON را با رشته‌ای چشم‌داشته نسنجیم؟",
+      options: ["سنجیدن رشته کند است", "همان یک داده می‌تواند با فیلدهایی به ترتیبی دیگر سریالی شود", "قالب JSON سنجیدنی نیست"], answer: 1,
+      explain: "listing ۶.۱۳، صص. ۱۲۲–۱۲۳." },
+    { q: "آن پرسش تمام‌حرف‌کوچک چه را رو می‌کند؟",
+      options: ["هیچ", "آن جست‌وجو به بزرگی و کوچکی حرف حساس است", "تابع JSON.parse شکسته است"], answer: 1,
+      explain: "ص. ۱۲۵." },
+    { q: "کدام تابع mapها و آرایه‌ها را بازگشتی می‌سنجد؟",
       options: ["_.isEqual", "_.get", "JSON.stringify"], answer: 0,
-      explain: "pp. 111–112." }
+      explain: "صص. ۱۱۱–۱۱۲." }
   ]);
 })();
 </script>

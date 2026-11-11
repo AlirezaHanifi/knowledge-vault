@@ -1,71 +1,72 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Multimethod Dispatch</title>
-<meta name="description" content="Call greet, greetLang and dysGreet on the book&#x27;s animals, watch the dispatch function emit a value and the method table pick a method, and register a default or a new animal without touching the existing methods. Illustrates Data-Oriented Programming, chapter 13.">
+<title>توزیع multimethod</title>
+<meta name="description" content="توابع greet و greetLang و dysGreet را روی جانوران کتاب صدا بزنید، ببینید تابع توزیع‌کننده مقداری می‌دهد و جدول متدها متدی برمی‌گزیند، و پیش‌فرضی یا جانوری تازه را بی دست زدن به متدهای موجود ثبت کنید. تصویری از فصل ۱۳ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
   textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
   table.mt td, table.mt th { font-family: var(--mono); font-size: .8rem; } table.mt tr.hit td { background: var(--accent-soft); font-weight: 600; }
+  table.mt td { direction: ltr; text-align: left; } table.mt th { text-align: right; } #verdict { direction: ltr; text-align: left; } #dv { direction: ltr; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/13-polymorphism.html">Chapter 13</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Multimethod dispatch</span>
+      <a href="../chapters/13-polymorphism.html">فصل ۱۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">توزیع multimethod</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 13 · Polymorphism</div>
-  <h1>Multimethod dispatch</h1>
-  <p class="lede">A multimethod is a <strong>dispatch function</strong> plus <strong>a table of methods</strong> keyed by the values it emits. Emit the type and you have single dispatch; emit two types for multiple dispatch; emit anything computed, like whether a name is long, for dynamic dispatch. New methods can be added anywhere, without editing the others.</p>
-  <p class="source-note">Illustrates sections 13.2–13.4 (figures 13.1–13.4; listings 13.6–13.20, pp. 277–288): <code>greet</code> with single dispatch and a default, <code>greetLang</code> on <code>[animal type, language type]</code>, and <code>dysGreet</code> on <code>[animal type, name length &gt; 5]</code>. Animals, languages and greetings are the book’s; the horse method and the error text are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۳ · polymorphism</div>
+  <h1>توزیع multimethod</h1>
+  <p class="lede">هر multimethodی یک <strong>تابع توزیع‌کننده</strong> به‌علاوه‌ی <strong>جدولی از متدها</strong> است که با مقدارهایی که آن تابع می‌دهد کلید خورده. گونه را بدهید و توزیع یگانه دارید؛ دو گونه بدهید و توزیع چندگانه؛ و هر مقدار حساب‌شده‌ای بدهید، مانند دراز بودن نامی، و توزیع پویا. متدهای تازه هر جایی افزودنی‌اند، بی ویرایش بقیه.</p>
+  <p class="source-note">تصویری از بخش‌های ۱۳.۲ تا ۱۳.۴ (شکل‌های ۱۳.۱ تا ۱۳.۴؛ listingهای ۱۳.۶ تا ۱۳.۲۰، صص. ۲۷۷–۲۸۸): تابع <code>greet</code> با توزیع یگانه و پیش‌فرضی، تابع <code>greetLang</code> روی <code>[animal type, language type]</code>، و <code>dysGreet</code> روی <code>[animal type, name length &gt; 5]</code>. جانوران و زبان‌ها و سلام‌ها مال کتابند؛ و متد اسب و متن خطا مال vault. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Call</p><pre class="code" id="call"></pre><p class="panel-title">Dispatch function</p><pre class="code" id="disp"></pre>
-        <p class="field-hint">Dispatch value: <code id="dv"></code></p></div>
-      <div class="panel"><p class="panel-title" id="mtt">Method table</p><div class="table-wrap"><table class="data mt" id="mt"></table></div></div>
-      <div class="panel"><p class="panel-title">Output</p><div class="callout" id="verdict" aria-live="polite"></div></div>
+      <div class="panel"><p class="panel-title">صدا زدن</p><pre class="code" id="call"></pre><p class="panel-title">تابع توزیع‌کننده</p><pre class="code" id="disp"></pre>
+        <p class="field-hint">مقدار توزیعی: <code id="dv"></code></p></div>
+      <div class="panel"><p class="panel-title" id="mtt">جدول متدها</p><div class="table-wrap"><table class="data mt" id="mt"></table></div></div>
+      <div class="panel"><p class="panel-title">خروجی</p><div class="callout" id="verdict" aria-live="polite"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div>
-        <label class="field-head" for="an" style="margin-top:10px">Animal</label><select id="an"></select>
-        <label class="field-head" for="nm" style="margin-top:8px">Name</label><input id="nm" style="width:100%">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div>
+        <label class="field-head" for="an" style="margin-top:10px">جانور</label><select id="an"></select>
+        <label class="field-head" for="nm" style="margin-top:8px">نام</label><input id="nm" style="width:100%;direction:ltr;text-align:left">
         <div id="lang" style="margin-top:10px"></div>
-        <p class="field-head" style="margin-top:10px">Extend greet</p>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="dflt"> Register greetDefault (listing 13.11)</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="horse"> Register a "horse" method (vault’s example)</label></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+        <p class="field-head" style="margin-top:10px">گسترش دادن greet</p>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="dflt"> ثبت کردن greetDefault (listing ۱۳.۱۱)</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="horse"> ثبت کردن متدی برای «horse»، مثال vault</label></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>The dispatch value is just data</strong>: a string, an array of two strings, or an array with a Boolean. The table is a hash map from those values to methods.</li>
-    <li><strong>Extending is adding a row</strong>: the default and the horse method are new registrations; the dog, cat and cow methods are never edited.</li>
-    <li><strong>No match and no default</strong> means an error. Try Horace with <code>greetLang</code> or <code>dysGreet</code>, which have no default.</li>
+    <li><strong>مقدار توزیعی تنها داده است</strong>: رشته‌ای، آرایه‌ای از دو رشته، یا آرایه‌ای با بولی. آن جدول hash mapی از همان مقدارها به متدهاست.</li>
+    <li><strong>گسترش دادن یعنی افزودن سطری</strong>: آن پیش‌فرض و متد اسب ثبت‌های تازه‌اند؛ و متدهای سگ و گربه و گاو هیچ‌وقت ویرایش نمی‌شوند.</li>
+    <li><strong>بی خوانش و بی پیش‌فرض</strong> یعنی خطا. نام Horace را با <code>greetLang</code> یا <code>dysGreet</code> بیازمایید، که پیش‌فرضی ندارند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/13-polymorphism.html"><small>Lesson</small>13. Polymorphism</a></li>
-    <li><a href="../lab/13-multimethods/README.md"><small>Experiment</small>Multimethods from scratch in Python</a></li>
+    <li><a href="../chapters/13-polymorphism.html"><small>درس</small>فصل ۱۳: polymorphism</a></li>
+    <li><a href="../lab/13-multimethods/README.md"><small>آزمایش</small>multimethodها از صفر به Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -104,37 +105,37 @@ function stats(rows) {
     var t = table(), key = JSON.stringify(dv), hit = -1, dflt = mode === "greet" && document.getElementById("dflt").checked;
     t.forEach(function (r, i) { if (JSON.stringify(r[0]) === key) hit = i; });
     var mt = Kit.clear(document.getElementById("mt"));
-    mt.appendChild(Kit.el("thead", null, Kit.el("tr", null, [Kit.el("th", null, "dispatch value"), Kit.el("th", null, "method"), Kit.el("th", null, "")])));
+    mt.appendChild(Kit.el("thead", null, Kit.el("tr", null, [Kit.el("th", null, "مقدار توزیعی"), Kit.el("th", null, "متد"), Kit.el("th", null, "")])));
     var tb = Kit.el("tbody");
-    t.forEach(function (r, i) { tb.appendChild(Kit.el("tr", { class: i === hit ? "hit" : "" }, [Kit.el("td", null, JSON.stringify(r[0])), Kit.el("td", null, r[1]), Kit.el("td", null, i === hit ? "← chosen" : "")])); });
-    if (dflt) tb.appendChild(Kit.el("tr", { class: hit < 0 ? "hit" : "" }, [Kit.el("td", null, "(default)"), Kit.el("td", null, "greetDefault"), Kit.el("td", null, hit < 0 ? "← chosen" : "")]));
-    mt.appendChild(tb); document.getElementById("mtt").textContent = "Method table of " + mode + " (" + (t.length + (dflt ? 1 : 0)) + " methods)";
+    t.forEach(function (r, i) { tb.appendChild(Kit.el("tr", { class: i === hit ? "hit" : "" }, [Kit.el("td", null, JSON.stringify(r[0])), Kit.el("td", null, r[1]), Kit.el("td", { style: "direction:rtl;text-align:right" }, i === hit ? "برگزیده →" : "")])); });
+    if (dflt) tb.appendChild(Kit.el("tr", { class: hit < 0 ? "hit" : "" }, [Kit.el("td", null, "(default)"), Kit.el("td", null, "greetDefault"), Kit.el("td", { style: "direction:rtl;text-align:right" }, hit < 0 ? "برگزیده →" : "")]));
+    mt.appendChild(tb); document.getElementById("mtt").textContent = "جدول متدهای " + mode + " با " + (t.length + (dflt ? 1 : 0)) + " متد";
     var v = document.getElementById("verdict"), out, kind;
     if (hit >= 0) { out = t[hit][2](a, l); kind = "ok"; } else if (dflt) { out = "My name is " + a.name; kind = "ok"; } else { out = "NoMethodError: no method for " + key + " and no default"; kind = "bad"; }
     v.className = "callout " + kind; v.textContent = (kind === "ok" ? "→ " : "") + out;
-    if (!quiet) log.add(mode + " dispatched " + key + " → " + (hit >= 0 ? t[hit][1] : dflt ? "greetDefault" : "no method"), kind);
-    stats([["Kind", mode === "greet" ? "single" : mode === "greetLang" ? "multiple" : "dynamic"], ["Dispatch value", key], ["Methods", t.length + (dflt ? 1 : 0)], ["Name length", a.name.length]]); }
+    if (!quiet) log.add("تابع " + mode + " مقدار " + key + " را توزیع کرد → " + (hit >= 0 ? t[hit][1] : dflt ? "greetDefault" : "هیچ متدی"), kind);
+    stats([["گونه", mode === "greet" ? "یگانه" : mode === "greetLang" ? "چندگانه" : "پویا"], ["مقدار توزیعی", key], ["متدها", t.length + (dflt ? 1 : 0)], ["درازی نام", a.name.length]]); }
   var an = document.getElementById("an");
   ANIMALS.forEach(function (x, i) { an.appendChild(Kit.el("option", { value: i }, x.name + " (" + x.type + ")")); });
   an.addEventListener("change", function () { document.getElementById("nm").value = ANIMALS[+an.value].name; run(); });
   document.getElementById("nm").value = "Fido";
   document.getElementById("nm").addEventListener("input", function () { run(true); });
   document.getElementById("nm").addEventListener("change", function () { run(); });
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Multimethod", value: mode, options: [{ value: "greet", label: "greet (single)" }, { value: "greetLang", label: "greetLang (multiple)" }, { value: "dysGreet", label: "dysGreet (dynamic)" }], onChange: function (v) { mode = v; run(); } }).element);
-  document.getElementById("lang").appendChild(Kit.segmented({ label: "Language (greetLang)", value: lang, options: [{ value: "en", label: "English" }, { value: "fr", label: "Français" }], onChange: function (v) { lang = v; run(); } }).element);
-  ["dflt", "horse"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { log.add((e.target.checked ? "Registered " : "Removed ") + (id === "dflt" ? "greetDefault" : "greetHorse") + "; no other method changed.", "muted"); run(true); }); });
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "روش multimethod", value: mode, options: [{ value: "greet", label: "greet، یگانه" }, { value: "greetLang", label: "greetLang، چندگانه" }, { value: "dysGreet", label: "dysGreet، پویا" }], onChange: function (v) { mode = v; run(); } }).element);
+  document.getElementById("lang").appendChild(Kit.segmented({ label: "زبان برای greetLang", value: lang, options: [{ value: "en", label: "English" }, { value: "fr", label: "Français" }], onChange: function (v) { lang = v; run(); } }).element);
+  ["dflt", "horse"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { log.add("متد " + (id === "dflt" ? "greetDefault" : "greetHorse") + (e.target.checked ? " ثبت شد" : " برداشته شد") + "؛ و هیچ متد دیگری عوض نشد.", "muted"); run(true); }); });
   run(true);
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What are the two parts of a multimethod?",
-      options: ["A class and an interface", "A dispatch function and a set of methods keyed by dispatch value", "A switch and a default"], answer: 1,
-      explain: "p. 277." },
-    { q: "What does greetLangDispatch return?",
-      options: ["The language name", "[animal.type, language.type]", "A method"], answer: 1,
-      explain: "Listing 13.15 (pp. 283–284)." },
-    { q: "Why is dysGreet an example of dynamic dispatch?",
-      options: ["It uses a Map", "Its dispatch value includes a computed Boolean, name.length > 5, not just types", "It loads methods at run time"], answer: 1,
-      explain: "pp. 286–287." }
+    { q: "دو بخش یک multimethod کدامند؟",
+      options: ["کلاسی و interfaceی", "تابعی توزیع‌کننده و مجموعه‌ای از متدها که با مقدار توزیعی کلید خورده", "یک switch و یک پیش‌فرض"], answer: 1,
+      explain: "ص. ۲۷۷." },
+    { q: "تابع greetLangDispatch چه برمی‌گرداند؟",
+      options: ["نام زبان", "[animal.type, language.type]", "متدی"], answer: 1,
+      explain: "listing ۱۳.۱۵ (صص. ۲۸۳–۲۸۴)." },
+    { q: "چرا dysGreet مثالی از توزیع پویاست؟",
+      options: ["از Map کار می‌کشد", "مقدار توزیعی‌اش بولی‌ای حساب‌شده دارد، یعنی name.length > 5، نه تنها گونه‌ها", "متدها را سر اجرا بار می‌کند"], answer: 1,
+      explain: "صص. ۲۸۶–۲۸۷." }
   ]);
 })();
 </script>

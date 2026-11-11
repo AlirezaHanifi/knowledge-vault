@@ -11,62 +11,63 @@ toc_source: "Book PDF bookmarks (Manning, 2022), checked against the brief conte
 toc_verified: "2026-11-06"
 source_file: "book.pdf (kept locally, gitignored; 426 PDF pages; printed page = PDF page − 28 for the body; front matter uses roman numerals)"
 cover: "cover.jpg"
+lang: fa
 ---
 
 # Data-Oriented Programming
 
-**Open [`index.html`](index.html) in a browser** for the interactive version: one slide-by-slide lesson per chapter, with embedded simulations and self-checks. Everything here also reads fine on GitHub.
+**فایل [`index.html`](index.html) را در مرورگر باز کنید** تا نسخه‌ی تعاملی را ببینید: برای هر فصل یک درس اسلایدبه‌اسلاید، با شبیه‌سازی‌های کارگذاشته و خودسنجی. هر چه اینجاست روی GitHub هم خوب خوانده می‌شود.
 
-## About
+## درباره‌ی کتاب
 
-*Data-Oriented Programming: Reduce Software Complexity* sets out a paradigm for reducing the complexity of systems that manipulate information, such as frontend applications, backend web servers and web services (p. xx). It is written for developers with a couple of years of experience in a high-level language. OOP developers may need to unlearn some habits; FP developers will find it easier to digest (p. xx).
+کتاب *Data-Oriented Programming: Reduce Software Complexity* الگویی را پیش می‌گذارد برای کم کردن پیچیدگی سیستم‌هایی که خبر را دست‌کاری می‌کنند؛ مثلاً برنامه‌های frontend و سرورهای وب backend و سرویس‌های وب (p. xx). برای برنامه‌نویسانی نوشته شده که چند سال با زبانی سطح‌بالا کار کرده‌اند. برنامه‌نویسان OOP شاید لازم باشد چند عادت را از یاد ببرند؛ و برنامه‌نویسان FP آن را آسان‌تر هضم می‌کنند (p. xx).
 
-The book tells a **story**. Theo, a senior developer at Albatross, struggles with the complexity of an OOP Library Management System for Klafim, the startup of the entrepreneur Nancy. Joe, an independent programmer, mentors him in DOP; later Theo mentors his junior colleague Dave (pp. xx–xxii, xxvi). The author's preface explains the choice: like Plato's dialogues or Goldratt's *The Goal*, an invented story to share ideas (p. xvii). The code is in basic JavaScript, with Lodash for generic data manipulation and occasional Java for statically typed languages (pp. xx–xxiii).
+این کتاب **داستان** می‌گوید. تئو، برنامه‌نویسی ارشد در Albatross، با پیچیدگی یک سیستم مدیریت کتابخانه‌ی OOP برای Klafim، استارتاپ نانسی کارآفرین، دست‌وپنجه نرم می‌کند. جو، برنامه‌نویسی مستقل، او را در DOP راهنمایی می‌کند؛ و بعد تئو همکار جوان‌ترش دیو را راهنمایی (pp. xx–xxii, xxvi). پیش‌گفتار نویسنده این گزینش را روشن می‌کند: مانند گفت‌وگوهای افلاطون یا کتاب *The Goal* از گلدرت، داستانی ساخته برای شریک شدن ایده‌ها (p. xvii). کد به JavaScript ساده است، با Lodash برای دست‌کاری عمومی داده و گاهی Java برای زبان‌های ایستا-نوع (pp. xx–xxiii).
 
-Its four principles are summarized in Appendix A (pp. 333–334):
+چهار اصلش در پیوست A خلاصه شده (pp. 333–334):
 
-1. **Separate code from data.**
-2. **Represent data with generic data structures.**
-3. **Data is immutable.**
-4. **Separate data schema from data representation.**
+1. **کد را از داده جدا کنید.**
+2. **داده را با ساختارهای داده‌ی عمومی بنمایانید.**
+3. **داده immutable است.**
+4. **طرح داده را از نمایش داده جدا کنید.**
 
-Forewords are by Michael T. Nygard and Ryan Singer (pp. xiii–xvi).
+پیش‌گفتارها از مایکل تی. نایگارد و رایان سینگر است (pp. xiii–xvi).
 
-## What's in this folder
+## محتوای این پوشه
 
-| Path | What it is |
+| مسیر | چیست |
 |---|---|
-| [`chapters/NN-*.md`](chapters/01-complexity-of-object-oriented-programming.md) | Chapter notes, **the source of truth**. Each `.md` has a generated `.html` lesson next to it |
-| [`widgets/`](widgets/01-code-data-split.html) | Hand-built simulations, embedded in the lessons; each also opens on its own |
-| [`lab/`](lab/04-structural-sharing/README.md) | Runnable Python experiments with expected output |
-| `index.html` | The book hub, generated from this README and the chapters |
+| [`chapters/NN-*.md`](chapters/01-complexity-of-object-oriented-programming.md) | یادداشت فصل‌ها، **سرچشمه‌ی درستی**. کنار هر `.md` یک درس `.html` تولیدشده هست |
+| [`widgets/`](widgets/01-code-data-split.html) | شبیه‌سازی‌های دست‌ساز، کارگذاشته در درس‌ها؛ هر کدام تنها هم باز می‌شود |
+| [`lab/`](lab/04-structural-sharing/README.md) | آزمایش‌های اجراشدنی Python با خروجی چشم‌داشته |
+| `index.html` | صفحه‌ی اصلی کتاب، تولیدشده از همین README و فصل‌ها |
 
-## How the book fits together
+## کتاب چطور به هم وصل است
 
-The book has three parts (pp. xxi–xxii). Part 1 and chapter 7 are needed for parts 2 and 3; otherwise the author suggests reading in order (p. xx).
+کتاب سه بخش دارد (pp. xxi–xxii). بخش ۱ و فصل ۷ برای بخش‌های ۲ و ۳ لازمند؛ وگرنه نویسنده خواندن به ترتیب را پیش می‌گذارد (p. xx).
 
-- **Part 1, Flexibility** (chapters 1–6): the complexity of OOP, then DOP's basic principles: separating code from data, generic data, immutable state, optimistic concurrency, and simple unit tests.
-- **Part 2, Scalability** (chapters 7–11): data validation at the boundaries, lock-free concurrency with an atom, persistent data structures, databases and web services.
-- **Part 3, Maintainability** (chapters 12–15): validation inside the system, polymorphism with multimethods, custom data manipulation tools, and debugging by reproducing a context.
+- **بخش ۱، انعطاف‌پذیری** (فصل‌های ۱ تا ۶): پیچیدگی OOP، و بعد اصل‌های پایه‌ی DOP، یعنی جدا کردن کد از داده، داده‌ی عمومی، state تغییرناپذیر، concurrency خوش‌بینانه، و تست unit ساده.
+- **بخش ۲، مقیاس‌پذیری** (فصل‌های ۷ تا ۱۱): اعتبارسنجی داده بر مرزها، concurrency بی قفل با یک atom، ساختارهای داده‌ی persistent، پایگاه داده و سرویس‌های وب.
+- **بخش ۳، نگه‌داشت‌پذیری** (فصل‌های ۱۲ تا ۱۵): اعتبارسنجی درون سیستم، polymorphism با multimethod، ابزارهای دست‌ساز دست‌کاری داده، و اشکال‌زدایی با بازساختن یک زمینه.
 
 ```mermaid
 flowchart TB
-    subgraph P1["Part 1 · Flexibility"]
-        C1["1 · Complexity of OOP"] --> C2["2 · Separating code and data"] --> C3["3 · Basic data manipulation"]
-        C3 --> C4["4 · State management"] --> C5["5 · Basic concurrency control"]
-        C3 --> C6["6 · Unit tests"]
+    subgraph P1["بخش ۱ · انعطاف‌پذیری"]
+        C1["فصل ۱ · پیچیدگی OOP"] --> C2["فصل ۲ · جدایی کد و داده"] --> C3["فصل ۳ · دست‌کاری پایه‌ی داده"]
+        C3 --> C4["فصل ۴ · مدیریت state"] --> C5["فصل ۵ · کنترل پایه‌ی concurrency"]
+        C3 --> C6["فصل ۶ · تست‌های unit"]
     end
-    subgraph P2["Part 2 · Scalability"]
-        C7["7 · Basic data validation"]
-        C8["8 · Advanced concurrency control"]
-        C9["9 · Persistent data structures"]
-        C10["10 · Database operations"] --> C11["11 · Web services"]
+    subgraph P2["بخش ۲ · مقیاس‌پذیری"]
+        C7["فصل ۷ · اعتبارسنجی پایه‌ی داده"]
+        C8["فصل ۸ · کنترل پیشرفته‌ی concurrency"]
+        C9["فصل ۹ · ساختارهای داده‌ی persistent"]
+        C10["فصل ۱۰ · عملیات پایگاه داده"] --> C11["فصل ۱۱ · سرویس‌های وب"]
     end
-    subgraph P3["Part 3 · Maintainability"]
-        C12["12 · Advanced data validation"]
-        C13["13 · Polymorphism"]
-        C14["14 · Advanced data manipulation"]
-        C15["15 · Debugging"]
+    subgraph P3["بخش ۳ · نگه‌داشت‌پذیری"]
+        C12["فصل ۱۲ · اعتبارسنجی پیشرفته‌ی داده"]
+        C13["فصل ۱۳ · polymorphism"]
+        C14["فصل ۱۴ · دست‌کاری پیشرفته‌ی داده"]
+        C15["فصل ۱۵ · اشکال‌زدایی"]
     end
     C3 --> C7 --> C10
     C5 --> C8
@@ -77,80 +78,80 @@ flowchart TB
     C3 --> C14
 ```
 
-*The parts and chapter order are the book's (pp. xxi–xxii); the arrows are the vault's reading of which chapters build on which.*
+*بخش‌ها و ترتیب فصل‌ها مال کتاب است (pp. xxi–xxii)؛ و پیکان‌ها خوانش vault از این است که کدام فصل روی کدام می‌نشیند.*
 
-Some threads run through the whole book:
+چند رشته از سر تا ته کتاب می‌گذرند:
 
-- **Generic data and generic functions**: maps, arrays and Lodash replace classes and their methods (2, 3, 10, 11, 14).
-- **Immutability** makes state versions, concurrency, persistent structures and reproducibility work (4, 5, 8, 9, 15).
-- **Schemas as data**, separate from the data itself: at the boundaries, inside the system, in diagrams and in generated tests (7, 10, 11, 12, 13).
-- **Data in, data out** makes unit tests and debugging simple (6, 12, 14, 15).
+- **داده‌ی عمومی و تابع عمومی**: map و array و Lodash جای کلاس‌ها و متدهایشان را می‌گیرند (۲ و ۳ و ۱۰ و ۱۱ و ۱۴).
+- **مفهوم immutability** است که versionهای state و concurrency و ساختارهای persistent و بازتولیدپذیری را کار می‌اندازد (۴ و ۵ و ۸ و ۹ و ۱۵).
+- **طرح به‌شکل داده**، جدا از خود داده: بر مرزها، درون سیستم، در نمودارها و در تست‌های تولیدشده (۷ و ۱۰ و ۱۱ و ۱۲ و ۱۳).
+- **داده تو، داده بیرون** است که تست unit و اشکال‌زدایی را ساده می‌کند (۶ و ۱۲ و ۱۴ و ۱۵).
 
-## Chapters
+## فصل‌ها
 
-| # | Chapter | Pages |
+| # | فصل | صفحه‌ها |
 |---:|---|---|
-| 1 | [Complexity of object-oriented programming](chapters/01-complexity-of-object-oriented-programming.md) | 3–25 |
-| 2 | [Separation between code and data](chapters/02-separation-between-code-and-data.md) | 26–42 |
-| 3 | [Basic data manipulation](chapters/03-basic-data-manipulation.md) | 43–70 |
-| 4 | [State management](chapters/04-state-management.md) | 71–90 |
-| 5 | [Basic concurrency control](chapters/05-basic-concurrency-control.md) | 91–109 |
-| 6 | [Unit tests](chapters/06-unit-tests.md) | 110–136 |
-| 7 | [Basic data validation](chapters/07-basic-data-validation.md) | 141–162 |
-| 8 | [Advanced concurrency control](chapters/08-advanced-concurrency-control.md) | 163–174 |
-| 9 | [Persistent data structures](chapters/09-persistent-data-structures.md) | 175–196 |
-| 10 | [Database operations](chapters/10-database-operations.md) | 197–219 |
-| 11 | [Web services](chapters/11-web-services.md) | 220–244 |
-| 12 | [Advanced data validation](chapters/12-advanced-data-validation.md) | 247–271 |
-| 13 | [Polymorphism](chapters/13-polymorphism.md) | 272–294 |
-| 14 | [Advanced data manipulation](chapters/14-advanced-data-manipulation.md) | 295–310 |
-| 15 | [Debugging](chapters/15-debugging.md) | 311–331 |
+| ۱ | [پیچیدگی برنامه‌نویسی object-oriented](chapters/01-complexity-of-object-oriented-programming.md) | ۳–۲۵ |
+| ۲ | [جدایی کد از داده](chapters/02-separation-between-code-and-data.md) | ۲۶–۴۲ |
+| ۳ | [دست‌کاری پایه‌ی داده](chapters/03-basic-data-manipulation.md) | ۴۳–۷۰ |
+| ۴ | [مدیریت state](chapters/04-state-management.md) | ۷۱–۹۰ |
+| ۵ | [کنترل پایه‌ی concurrency](chapters/05-basic-concurrency-control.md) | ۹۱–۱۰۹ |
+| ۶ | [تست‌های unit](chapters/06-unit-tests.md) | ۱۱۰–۱۳۶ |
+| ۷ | [اعتبارسنجی پایه‌ی داده](chapters/07-basic-data-validation.md) | ۱۴۱–۱۶۲ |
+| ۸ | [کنترل پیشرفته‌ی concurrency](chapters/08-advanced-concurrency-control.md) | ۱۶۳–۱۷۴ |
+| ۹ | [ساختارهای داده‌ی persistent](chapters/09-persistent-data-structures.md) | ۱۷۵–۱۹۶ |
+| ۱۰ | [عملیات پایگاه داده](chapters/10-database-operations.md) | ۱۹۷–۲۱۹ |
+| ۱۱ | [سرویس‌های وب](chapters/11-web-services.md) | ۲۲۰–۲۴۴ |
+| ۱۲ | [اعتبارسنجی پیشرفته‌ی داده](chapters/12-advanced-data-validation.md) | ۲۴۷–۲۷۱ |
+| ۱۳ | [polymorphism](chapters/13-polymorphism.md) | ۲۷۲–۲۹۴ |
+| ۱۴ | [دست‌کاری پیشرفته‌ی داده](chapters/14-advanced-data-manipulation.md) | ۲۹۵–۳۱۰ |
+| ۱۵ | [اشکال‌زدایی](chapters/15-debugging.md) | ۳۱۱–۳۳۱ |
 
-Page ranges are printed pages. Part openers are at p. 1 (Part 1), pp. 137–139 (Part 2) and pp. 245–246 (Part 3); the notes for chapters 7 and 12 cover the openers of parts 2 and 3. The front matter (pp. i–xxvi) has the forewords, the preface, *about this book* and the *dramatis personae*. The book ends with four appendices:
+بازه‌های صفحه، صفحه‌های چاپی‌اند. سرآغاز بخش‌ها در ص. ۱ برای بخش ۱، صص. ۱۳۷–۱۳۹ برای بخش ۲ و صص. ۲۴۵–۲۴۶ برای بخش ۳ است؛ و یادداشت فصل‌های ۷ و ۱۲ سرآغاز بخش‌های ۲ و ۳ را می‌پوشاند. صفحه‌های آغازین، صص. i–xxvi، پیش‌گفتارها و دیباچه و *about this book* و *dramatis personae* را دارند. کتاب با چهار پیوست تمام می‌شود:
 
-- **A: Principles of data-oriented programming** (p. 333).
-- **B: Generic data access in statically-typed languages** (p. 364).
-- **C: Data-oriented programming, a link in the chain of programming paradigms** (p. 381).
-- **D: Lodash reference** (p. 387).
+- **پیوست A: اصل‌های برنامه‌نویسی داده‌گرا** (p. 333).
+- **پیوست B: دسترسی عمومی به داده در زبان‌های ایستا-نوع** (p. 364).
+- **پیوست C: برنامه‌نویسی داده‌گرا، حلقه‌ای در زنجیره‌ی الگوهای برنامه‌نویسی** (p. 381).
+- **پیوست D: مرجع Lodash** (p. 387).
 
-## Key concepts
+## مفهوم‌های کلیدی
 
-These ideas recur across chapters; each row lists the chapters that discuss them. The definitions are the vault's summaries of the book's explanations.
+این ایده‌ها در چند فصل برمی‌گردند؛ و هر سطر فصل‌هایی را می‌آورد که از آن می‌گویند. تعریف‌ها خلاصه‌های vault از توضیح‌های کتاب است.
 
-| Concept | Definition | Chapters |
+| مفهوم | تعریف | فصل‌ها |
 |---|---|---|
-| Separate code from data (Principle #1) | Code lives in stateless functions whose behaviour doesn't depend on data encapsulated in their context; data lives in entities. | [1](chapters/01-complexity-of-object-oriented-programming.md) · [2](chapters/02-separation-between-code-and-data.md) |
-| Generic data structures (Principle #2) | Records are maps and collections are arrays, manipulated with generic functions such as Lodash's, instead of classes. | [3](chapters/03-basic-data-manipulation.md) · [10](chapters/10-database-operations.md) · [11](chapters/11-web-services.md) · [14](chapters/14-advanced-data-manipulation.md) |
-| Immutable data (Principle #3) | Data is never changed in place; "mutations" compute a new version, sharing unchanged parts. | [4](chapters/04-state-management.md) · [9](chapters/09-persistent-data-structures.md) · [15](chapters/15-debugging.md) |
-| Separate schema from representation (Principle #4) | The expected shape of data is itself data (JSON Schema), validated when and where you choose. | [7](chapters/07-basic-data-validation.md) · [12](chapters/12-advanced-data-validation.md) |
-| Index (homogeneous map) | A map from IDs to records of the same shape, such as `booksByIsbn`, as opposed to a record's heterogeneous map. | [3](chapters/03-basic-data-manipulation.md) · [12](chapters/12-advanced-data-validation.md) |
-| Information path | The chain of keys from the system data's root to a value, used with `_.get`. | [3](chapters/03-basic-data-manipulation.md) · [5](chapters/05-basic-concurrency-control.md) |
-| Structural sharing | A new version copies only the path to what changed and shares everything else with the previous version. | [4](chapters/04-state-management.md) · [9](chapters/09-persistent-data-structures.md) |
-| Multi-version state | The system state is a reference to the current version of immutable system data; a mutation is a calculation phase plus a commit. | [4](chapters/04-state-management.md) · [5](chapters/05-basic-concurrency-control.md) · [8](chapters/08-advanced-concurrency-control.md) |
-| Optimistic concurrency and reconciliation | Writers compute without locks; on commit, non-conflicting changes are merged with a three-way diff, and conflicts abort. | [5](chapters/05-basic-concurrency-control.md) · [8](chapters/08-advanced-concurrency-control.md) |
-| Atom | A thread-safe reference updated by compare-and-swap in a retry loop, so state is managed without locks. | [8](chapters/08-advanced-concurrency-control.md) |
-| Persistent data structures | Immutable collections (Bagwell's hash array mapped tries) whose updates are efficient through structural sharing. | [9](chapters/09-persistent-data-structures.md) |
-| Validation at the boundaries | Requests, responses and external data are validated against schemas where they enter and leave the system, in production. | [7](chapters/07-basic-data-validation.md) · [10](chapters/10-database-operations.md) · [11](chapters/11-web-services.md) |
-| Validation inside the system | Function arguments and return values are validated against schemas in development only, as documentation and early errors. | [12](chapters/12-advanced-data-validation.md) · [13](chapters/13-polymorphism.md) |
-| Data-in, data-out tests | Unit tests call a function with data and compare the returned data, with no mocks or object state to set up. | [6](chapters/06-unit-tests.md) · [12](chapters/12-advanced-data-validation.md) · [15](chapters/15-debugging.md) |
-| Multimethods | Polymorphism without objects: a dispatch function emits a value, and methods registered for each value implement it; single, multiple or dynamic dispatch. | [13](chapters/13-polymorphism.md) |
-| Custom data manipulation tools | Small, well-named generic functions (`update`, `flatMap`, `unwind`) that keep business logic free of low-level iteration. | [14](chapters/14-advanced-data-manipulation.md) |
-| Context capturing | Serializing a function's arguments so the call can be replayed in a REPL or a unit test; works because data is immutable and serializable. | [15](chapters/15-debugging.md) |
+| جدا کردن کد از داده، اصل ۱ | کد در تابع‌های بی‌state می‌نشیند که رفتارشان به داده‌ی بسته‌بندی‌شده در زمینه‌شان بسته نیست؛ و داده در entityها می‌نشیند. | [۱](chapters/01-complexity-of-object-oriented-programming.md) · [۲](chapters/02-separation-between-code-and-data.md) |
+| ساختارهای داده‌ی عمومی، اصل ۲ | رکوردها mapاند و مجموعه‌ها arrayاند، که با تابع‌های عمومی مانند تابع‌های Lodash دست‌کاری می‌شوند، نه با کلاس. | [۳](chapters/03-basic-data-manipulation.md) · [۱۰](chapters/10-database-operations.md) · [۱۱](chapters/11-web-services.md) · [۱۴](chapters/14-advanced-data-manipulation.md) |
+| داده‌ی تغییرناپذیر، اصل ۳ | داده هیچ‌وقت سر جایش عوض نمی‌شود؛ «mutation» versionی تازه را حساب می‌کند و بخش‌های دست‌نخورده را شریک. | [۴](chapters/04-state-management.md) · [۹](chapters/09-persistent-data-structures.md) · [۱۵](chapters/15-debugging.md) |
+| جدا کردن طرح از نمایش، اصل ۴ | شکل چشم‌داشته‌ی داده خودش داده است، یعنی JSON Schema، که هر وقت و هر جا شما بخواهید اعتبارسنجی می‌شود. | [۷](chapters/07-basic-data-validation.md) · [۱۲](chapters/12-advanced-data-validation.md) |
+| شاخص، یا map همگن | یک map از شناسه‌ها به رکوردهای هم‌شکل، مانند `booksByIsbn`، در برابر map ناهمگن یک رکورد. | [۳](chapters/03-basic-data-manipulation.md) · [۱۲](chapters/12-advanced-data-validation.md) |
+| مسیر خبر | زنجیره‌ی کلیدها از ریشه‌ی داده‌ی سیستم تا یک مقدار، که با `_.get` به کار می‌رود. | [۳](chapters/03-basic-data-manipulation.md) · [۵](chapters/05-basic-concurrency-control.md) |
+| شریک شدن ساختاری | versionی تازه تنها مسیر تا چیز عوض‌شده را کپی می‌کند و باقی را با version پیشین شریک می‌شود. | [۴](chapters/04-state-management.md) · [۹](chapters/09-persistent-data-structures.md) |
+| state چندنگارشی | مقدار state سیستم ارجاعی به version کنونی داده‌ی immutable سیستم است؛ و هر mutationی یک فاز حساب به‌علاوه‌ی یک commit است. | [۴](chapters/04-state-management.md) · [۵](chapters/05-basic-concurrency-control.md) · [۸](chapters/08-advanced-concurrency-control.md) |
+| concurrency خوش‌بینانه و reconciliation | نویسنده‌ها بی قفل حساب می‌کنند؛ و سر commit، تغییرهای بی‌ناسازی با یک diff سه‌سویه درهم می‌آمیزند، و ناسازی‌ها abort می‌کنند. | [۵](chapters/05-basic-concurrency-control.md) · [۸](chapters/08-advanced-concurrency-control.md) |
+| واحد atom | ارجاعی thread-safe که با compare-and-swap در حلقه‌ای از نو تلاش به‌روز می‌شود، پس state بی قفل مدیریت می‌شود. | [۸](chapters/08-advanced-concurrency-control.md) |
+| ساختارهای داده‌ی persistent | مجموعه‌های تغییرناپذیر، همان hash array mapped trie از بگول، که به‌روزرسانی‌هایشان با شریک شدن ساختاری کارآمد است. | [۹](chapters/09-persistent-data-structures.md) |
+| اعتبارسنجی بر مرزها | درخواست‌ها و پاسخ‌ها و داده‌ی بیرونی همان جا که به سیستم وارد و از آن بیرون می‌شوند با طرح‌ها اعتبارسنجی می‌شوند، در production. | [۷](chapters/07-basic-data-validation.md) · [۱۰](chapters/10-database-operations.md) · [۱۱](chapters/11-web-services.md) |
+| اعتبارسنجی درون سیستم | آرگومان‌ها و مقدارهای بازگشتی تابع‌ها تنها در توسعه با طرح‌ها اعتبارسنجی می‌شوند، به‌شکل مستندسازی و خطای زودهنگام. | [۱۲](chapters/12-advanced-data-validation.md) · [۱۳](chapters/13-polymorphism.md) |
+| تست داده-تو داده-بیرون | هر تست unit تابعی را با داده صدا می‌زند و داده‌ی بازگشتی را می‌سنجد، بی هیچ mock یا state شیئی که راه بیندازد. | [۶](chapters/06-unit-tests.md) · [۱۲](chapters/12-advanced-data-validation.md) · [۱۵](chapters/15-debugging.md) |
+| روش multimethod | polymorphism بی شیء: تابعی توزیع‌کننده مقداری می‌دهد، و متدهای ثبت‌شده برای هر مقدار پیاده‌اش می‌کنند؛ توزیع یگانه یا چندگانه یا پویا. | [۱۳](chapters/13-polymorphism.md) |
+| ابزارهای دست‌ساز دست‌کاری داده | تابع‌های عمومی کوچک و خوش‌نام، مانند `update` و `flatMap` و `unwind`، که منطق کسب‌وکار را از پیمایش سطح‌پایین آزاد نگه می‌دارند. | [۱۴](chapters/14-advanced-data-manipulation.md) |
+| گرفتن زمینه | سریالی کردن آرگومان‌های یک تابع تا آن صدا زدن در REPL یا تستی unit replay شود؛ کار می‌کند چون داده immutable و سریالی‌شدنی است. | [۱۵](chapters/15-debugging.md) |
 
-## How these notes work
+## این یادداشت‌ها چطور نوشته شده‌اند
 
-- **Everything above *Beyond the book* in a chapter note restates the book**, with page references. Supplementary material, meaning outside sources and the vault's interpretation, lives under *Beyond the book* or in `> **Vault note:**` callouts.
-- **Page numbers are printed pages.** The body's printed page is the PDF page minus 28; the front matter uses roman numerals.
-- **The story is kept, briefly.** Who says what matters to the book's teaching, so the notes name the characters, but they summarize the dialogue rather than reproduce it.
-- **Listing bugs are flagged.** Where a printed listing has an error (a wrong variable, a missing concatenation, an inverted condition), a vault note says so, and the widgets and experiments use a corrected version.
-- Section outlines are the book's own table of contents, taken from the PDF's bookmarks.
-- Mermaid diagrams are the vault's redrawings of the book's figures, or its own summaries. Captions say which.
-- *Check yourself* questions and answers are the vault's, written from the notes; the answers cite pages.
-- Simulations and experiments are the vault's own implementations of the book's examples (the Library Management System, the animals, the catalog), in JavaScript in the browser and in standard-library Python. Each says which pages it illustrates and what it simplifies.
+- **هر چه در یادداشت فصل بالای *فراتر از کتاب* است، کتاب را بازمی‌گوید**، با ارجاع صفحه. مواد افزوده، یعنی منبع‌های بیرونی و تفسیر vault، زیر *فراتر از کتاب* یا در کادرهای `> **Vault note:**` می‌نشیند.
+- **شماره‌ی صفحه‌ها صفحه‌ی چاپی است.** صفحه‌ی چاپی متن اصلی همان صفحه‌ی PDF منهای ۲۸ است؛ و صفحه‌های آغازین شماره‌ی رومی دارند.
+- **داستان کوتاه نگه داشته شده.** اینکه چه کسی چه می‌گوید برای آموزش کتاب مهم است، پس یادداشت‌ها نام شخصیت‌ها را می‌آورند، ولی گفت‌وگو را خلاصه می‌کنند، نه بازنویسی.
+- **اشکال‌های listingها نشانه‌گذاری شده‌اند.** هر جا listing چاپی خطایی دارد؛ مثلاً متغیری غلط، به‌هم‌چسبانی جاافتاده، شرطی برگشته، کادری از vault می‌گویدش، و widgetها و آزمایش‌ها version تصحیح‌شده را به کار می‌برند.
+- فهرست بخش‌ها همان فهرست خود کتاب است، برگرفته از bookmarkهای PDF.
+- نمودارهای Mermaid بازکشیدن‌های vault از شکل‌های کتاب‌اند، یا خلاصه‌های خودش. زیرنویس‌ها می‌گویند کدام.
+- پرسش‌ها و پاسخ‌های *خودتان را بسنجید* مال vault است و از همین یادداشت‌ها نوشته شده؛ و پاسخ‌ها صفحه می‌دهند.
+- شبیه‌سازی‌ها و آزمایش‌ها پیاده‌سازی‌های خود vault از مثال‌های کتاب‌اند، یعنی سیستم مدیریت کتابخانه و جانوران و فهرست، به JavaScript در مرورگر و به Python کتابخانه‌ی استاندارد. هر کدام می‌گوید کدام صفحه‌ها را تصویر می‌کند و چه را ساده.
 
-## Source
+## منبع
 
-- **Primary source:** the publisher's PDF of *Data-Oriented Programming: Reduce Software Complexity*, © 2022 Manning Publications Co., ISBN 9781617298578 (426 PDF pages). The PDF is kept outside version control (see `.gitignore`).
-- **Table of contents:** taken from the PDF's bookmark outline and checked against the book's brief contents.
-- **Structure:** front matter (forewords, preface, about this book, dramatis personae), three parts of 15 chapters, four appendices and an index.
-- **Coverage:** all 15 chapters, with the part openers. The appendices are referenced where chapters point to them but have no notes of their own.
+- **منبع اصلی:** نسخه‌ی PDF ناشر از *Data-Oriented Programming: Reduce Software Complexity*، © ۲۰۲۲ Manning Publications Co.، شماره‌ی ISBN ۹۷۸۱۶۱۷۲۹۸۵۷۸، با ۴۲۶ صفحه‌ی PDF. آن PDF بیرون از کنترل version نگه داشته می‌شود؛ `.gitignore` را ببینید.
+- **فهرست مطالب:** برگرفته از فهرست bookmarkهای PDF و سنجیده با فهرست کوتاه کتاب.
+- **ساختار:** صفحه‌های آغازین، یعنی پیش‌گفتارها و دیباچه و *about this book* و *dramatis personae*، سپس سه بخش با ۱۵ فصل، چهار پیوست و یک index.
+- **پوشش:** همه‌ی ۱۵ فصل، با سرآغاز بخش‌ها. پیوست‌ها هر جا فصلی به آن‌ها اشاره کند یاد می‌شوند ولی یادداشت خودشان را ندارند.

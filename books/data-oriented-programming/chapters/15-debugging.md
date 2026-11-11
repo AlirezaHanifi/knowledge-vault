@@ -2,70 +2,72 @@
 book: data-oriented-programming
 chapter: 15
 title: "Debugging"
+translated_title: "اشکال‌زدایی"
 pages: "311–331"
+lang: fa
 ---
 
-# 15. Debugging
+# ۱۵. اشکال‌زدایی
 
-[← 14. Advanced data manipulation](14-advanced-data-manipulation.md) · [Book](../README.md)
+[← ۱۴. دست‌کاری پیشرفته‌ی داده](14-advanced-data-manipulation.md) · [کتاب](../README.md)
 
-## Summary
+## خلاصه
 
-A debugger lets you step through code to find the line that causes a bug, but it doesn't let you **reproduce** the scenario. In DOP, you can capture the context of a scenario and replay it in a separate process, a REPL or a unit test, with a short feedback loop between each fix and its result (p. 311).
+هر اشکال‌زدایی می‌گذارد کد را قدم‌به‌قدم بگذرانید تا خطی را بیابید که اشکال را می‌سازد، ولی نمی‌گذارد آن صحنه را **بازتولید** کنید. در DOP، می‌توانید زمینه‌ی صحنه‌ای را بگیرید و در فرایندی جدا یا REPLی یا تستی unit replayش کنید، با حلقه‌ی بازخوردی کوتاه میان هر چاره و خروجیش (p. 311).
 
-Theo is leaving Albatross, and Dave will be in charge of DOP. Their last session is at the Exploratorium, where Theo shares his own innovation (pp. 312–314):
+تئو Albatross را ترک می‌کند، و دیو مسئول DOP خواهد بود. نشست آخرشان در Exploratorium است، جایی که تئو ابداع خودش را شریک می‌شود (pp. 312–314):
 
-- **Determinism:** in modules that deal with immutable data, the same arguments always give the same return value. Only `SystemState` deals with state.
-- **The function context** is the values of the arguments a function is called with. In DOP, that is all there is.
-- **Two conditions for reproducibility:** immutability, and ease of serialization and deserialization, which generic data structures provide.
+- **قطعیت:** در ماژول‌هایی که با داده‌ی immutable سروکار دارند، همان آرگومان‌ها همیشه همان مقدار بازگشتی را می‌دهند. تنها `SystemState` با state سروکار دارد.
+- **زمینه‌ی تابع** مقدار آرگومان‌هایی است که تابعی با آن‌ها صدا زده می‌شود. در DOP، همین همه‌اش است.
+- **دو شرط بازتولیدپذیری:** تغییرناپذیری، و آسانی سریالی کردن و باز کردن، که ساختارهای داده‌ی عمومی می‌دهندش.
 
-The rest of the chapter applies this (pp. 314–329):
+باقی فصل این را پیاده می‌کند (pp. 314–329):
 
-- **Context-capturing code** prints the arguments at the top of a function. It is serialized to JSON, because strings lose their quotes and escapes otherwise.
-- **Replay in the REPL.** The improved book search, a prefix of any word in the title, is developed in the REPL against a captured catalog.
-- **Captured data becomes unit tests.** It is written to JSON files named by context and UUID, asynchronously, which is safe because the data can't change.
+- **کد گرفتن زمینه** آرگومان‌ها را سر تابع چاپ می‌کند. به JSON سریالی می‌شود، چون وگرنه رشته‌ها گیومه و گریزهایشان را گم می‌کنند.
+- **عمل replay در REPL.** آن جست‌وجوی بهبودیافته‌ی کتاب، یعنی پیشوند هر واژه‌ای از عنوان، در REPL در برابر catalogی گرفته‌شده توسعه می‌یابد.
+- **داده‌ی گرفته‌شده تست unit می‌شود.** در فایل‌های JSON نوشته می‌شود که با زمینه و UUID نام گرفته‌اند، ناهمگام، که ایمن است چون آن داده نمی‌تواند عوض شود.
 
-External data sources can break reproducibility, unless the database is immutable, like Datomic. In local debugging, data rarely changes anyway (pp. 329–330). At Theo's farewell party, he says he's taking a break to travel, and may write a book about DOP (pp. 330–331).
+سرچشمه‌های داده‌ی بیرونی می‌توانند بازتولیدپذیری را بشکنند، مگر آن پایگاه داده immutable باشد، مانند Datomic. سر اشکال‌زدایی محلی، داده هر طور که باشد کم عوض می‌شود (pp. 329–330). در میهمانی خداحافظی تئو، می‌گوید که دارد وقفه‌ای می‌گیرد تا سفر کند، و شاید کتابی در باب DOP بنویسد (pp. 330–331).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **In modules that deal with immutable data, function behaviour is deterministic** (p. 312).
-- **In DOP, the function context is made of the values of the function arguments** (p. 313).
-- **The two conditions for reproducibility are immutability and ease of (de)serialization** (p. 314).
-- **Serialize captured strings to JSON**, so they keep their quotes and backslashes; JSON works for any data, primitive or collection (pp. 317–318).
-- **Reproducibility lets you reproduce a scenario in a pristine environment** (p. 319).
-- **Don't trigger the endpoint while iterating**; use the REPL's shorter feedback loop, then test end to end once fixed (pp. 320, 329).
-- **Captured data makes unit test input**: no more building nested catalogs by hand (p. 321).
-- **Write captured data asynchronously** so the real work isn't slowed; immutability guarantees the data doesn't change while it's written (pp. 323, 326).
+- **در ماژول‌هایی که با داده‌ی immutable سروکار دارند، رفتار تابع قطعی است** (p. 312).
+- **در DOP، زمینه‌ی تابع از مقدار آرگومان‌های تابع ساخته می‌شود** (p. 313).
+- **دو شرط بازتولیدپذیری immutability و آسانی سریالی کردن و باز کردن است** (p. 314).
+- **رشته‌های گرفته‌شده را به JSON سریالی کنید**، تا گیومه و ممیز معکوسشان را نگه دارند؛ و JSON برای هر داده‌ای، بدوی یا مجموعه، کار می‌کند (pp. 317–318).
+- **بازتولیدپذیری می‌گذارد صحنه‌ای را در محیطی دست‌نخورده بازتولید کنید** (p. 319).
+- **سر تکرار کردن آن endpoint را نزنید**؛ از حلقه‌ی بازخورد کوتاه‌تر REPL کار بکشید، بعد که درست شد سرتاسر تست کنید (pp. 320, 329).
+- **داده‌ی گرفته‌شده ورودی تست unit می‌شود**: دیگر ساختن دستی catalogهای تودرتو نیست (p. 321).
+- **داده‌ی گرفته‌شده را asynchronous بنویسید** تا کار واقعی کند نشود؛ و immutability تضمین می‌کند که آن داده سر نوشته شدن عوض نمی‌شود (pp. 323, 326).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 15.1 Determinism in programming — p. 312
-- 15.2 Reproducibility with numbers and strings — p. 314
-- 15.3 Reproducibility with any data — p. 318
-- 15.4 Unit tests — p. 321
-- 15.5 Dealing with external data sources — p. 329
-- Farewell — p. 330
-- Summary — p. 331
+- ۱۵.۱ قطعیت در برنامه‌نویسی — ص. ۳۱۲
+- ۱۵.۲ بازتولیدپذیری با عدد و رشته — ص. ۳۱۴
+- ۱۵.۳ بازتولیدپذیری با هر داده‌ای — ص. ۳۱۸
+- ۱۵.۴ تست‌های unit — ص. ۳۲۱
+- ۱۵.۵ سروکار داشتن با سرچشمه‌های داده‌ی بیرونی — ص. ۳۲۹
+- خداحافظی — ص. ۳۳۰
+- خلاصه — ص. ۳۳۱
 
-## Notes
+## یادداشت‌ها
 
-A few months on, Theo calls Dave. He's leaving Albatross, and, after consulting management, Dave will be in charge of DOP. Theo invites him for a last work session at the Exploratorium Museum of Science, where Theo thinks he has found a connection between DOP and science (p. 312).
+چند ماه بعد، تئو به دیو تلفن می‌زند. دارد Albatross را ترک می‌کند، و پس از رأی‌زنی با مدیریت، دیو مسئول DOP خواهد بود. تئو او را به نشست کاری آخری در موزه‌ی علم Exploratorium می‌خواند، جایی که تئو می‌پندارد پیوندی میان DOP و دانش یافته (p. 312).
 
-### 15.1 Determinism in programming
+### ۱۵.۱ قطعیت در برنامه‌نویسی
 
-Does the same cause always produce the same effect? Otherwise, Dave says, he'd be scared every time he took an elevator (p. 312). In programming, take **causes as function arguments and effects as return values**, leaving side effects aside (p. 312).
+آیا همان علت همیشه همان اثر را می‌سازد؟ وگرنه، دیو می‌گوید، هر بار که سوار آسانسور می‌شد می‌ترسید (p. 312). در برنامه‌نویسی، **علت‌ها را آرگومان تابع و اثرها را مقدار بازگشتی بگیرید**، و اثرهای جانبی را کنار بگذارید (p. 312).
 
-| Concern | Answer (pp. 312–314) |
+| نگرانی | پاسخ (pp. 312–314) |
 |---|---|
-| State can make the same arguments give different results | Minimize the modules that deal with state: only `SystemState` does; the rest is immutable data |
-| What must be captured to replay a call? | The **function context**: in general arguments plus program state; in DOP, only the arguments |
-| How to capture a huge nested map from a debugger? | Chrome's console has a Copy option; or serialize to JSON, paste, and deserialize |
-| Where to replay? | A **REPL**, possibly in a separate process: "a scientific lab" |
+| مقدار state می‌تواند همان آرگومان‌ها را به خروجی‌های مختلف برساند | ماژول‌هایی را که با state سروکار دارند کمینه کنید: تنها `SystemState` می‌کند؛ و باقی داده‌ی immutable است |
+| برای replay صدا زدنی چه باید گرفته شود؟ | **زمینه‌ی تابع**: به‌طور کلی آرگومان‌ها به‌علاوه‌ی state برنامه؛ و در DOP، تنها آرگومان‌ها |
+| mapی تودرتو و بسیار بزرگ را چطور از اشکال‌زدایی بگیریم؟ | کنسول Chrome گزینه‌ی Copy دارد؛ یا به JSON سریالی کنید، بچسبانید، و باز کنید |
+| کجا replay کنیم؟ | یک **REPL**، شاید در فرایندی جدا: «آزمایشگاهی علمی» |
 
-The REPL is a programming environment that executes pieces of code and displays the result (p. 313). Table 15.1 lists one per language: the browser console, the Node CLI, JShell, the C# REPL, the Python interpreter and Interactive Ruby (p. 313).
+هر REPLی محیطی برنامه‌نویسی است که تکه‌هایی کد را اجرا و خروجی را نشان می‌دهد (p. 313). جدول ۱۵.۱ برای هر زبانی یکی می‌آورد: کنسول مرورگر، interface Node CLI، ابزار JShell، REPL از C#، مفسر Python و Interactive Ruby (p. 313).
 
 ```mermaid
 flowchart LR
@@ -76,119 +78,131 @@ flowchart LR
     T --> F
 ```
 
-*The vault's summary of the chapter's flow (pp. 311, 319, 321).*
+*خلاصه‌ی vault از جریان این فصل (pp. 311, 319, 321).*
 
-### 15.2 Reproducibility with numbers and strings
+### ۱۵.۲ بازتولیدپذیری با عدد و رشته
 
-No debugger is needed: add **context-capturing code** at the beginning of the function, printing its arguments (p. 314).
+هیچ اشکال‌زدایی لازم نیست: **کد گرفتن زمینه** را سر تابع بیفزایید، که آرگومان‌هایش را چاپ می‌کند (p. 314).
 
-| Function | Capturing code | What goes wrong | Listing |
+| تابع | کد گرفتن | چه غلط در می‌آید | نمونه |
 |---|---|---|---|
-| `nthDigit(a, n)`, from Stack Overflow | `console.log(a); console.log(n);` | Nothing: a number is a number | 15.1–15.2, pp. 315 |
-| `hasWordStartingWith(sentence, prefix)` | `console.log(sentence)` | Printed strings lose their quotes and escaped quotes | 15.3–15.5, pp. 316–317 |
-| the same | `console.log(JSON.stringify(sentence))` | Nothing: quotes and backslashes are kept | 15.6–15.7, p. 317 |
+| `nthDigit(a, n)` از Stack Overflow | عبارت `console.log(a); console.log(n);` | هیچ: عددی عدد است | ۱۵.۱ و ۱۵.۲، ص. ۳۱۵ |
+| `hasWordStartingWith(sentence, prefix)` | عبارت `console.log(sentence)` | رشته‌های چاپ‌شده گیومه و گیومه‌های گریزخورده‌شان را گم می‌کنند | ۱۵.۳ تا ۱۵.۵، صص. ۳۱۶–۳۱۷ |
+| همان | عبارت `console.log(JSON.stringify(sentence))` | هیچ: گیومه و ممیز معکوس نگه داشته می‌شوند | ۱۵.۶ و ۱۵.۷، ص. ۳۱۷ |
 
-`hasWordStartingWith` splits the sentence on spaces and uses `_.find` rather than `_.filter`, which would process every word instead of stopping at the first match (p. 316). Strings, like numbers, are valid JSON, and JSON serialization works for any data (pp. 317–318).
+تابع `hasWordStartingWith` آن جمله را سر فاصله‌ها می‌شکند و از `_.find` کار می‌کشد، نه `_.filter` که هر واژه‌ای را می‌پرداخت به‌جای ایستادن سر نخستین خوانش (p. 316). رشته‌ها، مانند عددها، JSON معتبرند، و سریالی کردن JSON برای هر داده‌ای کار می‌کند (pp. 317–318).
 
-### 15.3 Reproducibility with any data
+### ۱۵.۳ بازتولیدپذیری با هر داده‌ای
 
-"The essence of DOP is that it treats data as a first-class citizen," so any data scenario is as reproducible as one with numbers and strings (p. 318). Nancy likes the idea of an improved search that matches a prefix of *any* word in a title (p. 318).
+«چکیده‌ی DOP این است که با داده مانند شهروندی درجه‌یک رفتار می‌کند»، پس هر صحنه‌ای از داده همان‌قدر بازتولیدپذیر است که صحنه‌ای با عدد و رشته (p. 318). نانسی ایده‌ی جست‌وجویی بهبودیافته را می‌پسندد که پیشوند *هر* واژه‌ای از عنوانی را می‌خواند (p. 318).
 
-1. **Capture.** `Catalog.searchBooksByTitle` logs `JSON.stringify` of `catalogData` and `query` (listing 15.8, p. 318). Searching "Watch" prints a long one-line catalog with *7 Habits of Highly Effective People* and *Watchmen* (listing 15.9, p. 319).
-2. **Replay.** Paste both into the REPL and call the function (listing 15.10, p. 319).
-3. **Iterate in the REPL.** "Habit" returns `[]`, because the title starts with "7 Habits" (listing 15.11). The improved version filters with `hasWordStartingWith` and finds the book (listings 15.12–15.13, pp. 320–321).
+1. **بگیرید.** تابع `Catalog.searchBooksByTitle` مقدار `JSON.stringify` از `catalogData` و `query` را log می‌کند (listing ۱۵.۸، ص. ۳۱۸). جست‌وجوی «Watch» catalogی درازِ یک‌خطی با *7 Habits of Highly Effective People* و *Watchmen* چاپ می‌کند (listing ۱۵.۹، ص. ۳۱۹).
+2. **عمل replay کنید.** هر دو را در REPL بچسبانید و آن تابع را صدا بزنید (listing ۱۵.۱۰، ص. ۳۱۹).
+3. **در REPL تکرار کنید.** مقدار «Habit» خروجی `[]` می‌دهد، چون آن عنوان با «7 Habits» آغاز می‌شود (listing ۱۵.۱۱). version بهبودیافته با `hasWordStartingWith` صافی می‌کند و آن کتاب را می‌یابد (listingهای ۱۵.۱۲ و ۱۵.۱۳، صص. ۳۲۰–۳۲۱).
 
-Theo stops Dave from triggering the endpoint: the REPL gives much quicker feedback, and reproducing real-life conditions in a more effective environment is the main benefit of reproducibility (p. 320). Of Theo's four test queries, "abit" and "bit" correctly find nothing, but "habit" and "7 Habits" fail too (p. 321).
+تئو دیو را از زدن آن endpoint بازمی‌دارد: REPL بازخورد خیلی تندتری می‌دهد، و بازتولید شرط‌های زندگی واقعی در محیطی کارآمدتر سود اصلی بازتولیدپذیری است (p. 320). از چهار پرسش آزمایشی تئو، «abit» و «bit» درست هیچ نمی‌یابند، ولی «habit» و «7 Habits» هم شکست می‌خورند (p. 321).
 
-> **Try it:** [Capture and replay](../widgets/15-capture-replay.html) — trigger the search endpoint, compare `console.log` with `JSON.stringify` capture, replay the captured context in a mock REPL, and switch between the three versions of the search to see which of the eight queries pass.
+> **Try it:** [گرفتن و replay](../widgets/15-capture-replay.html) — آن endpoint جست‌وجو را بزنید، گرفتن با `console.log` را با `JSON.stringify` بسنجید، آن زمینه‌ی گرفته‌شده را در REPLی ساختگی replay کنید، و میان سه version جست‌وجو سوئیچ کنید تا ببینید از آن هشت پرسش کدام رد می‌شوند.
 
-### 15.4 Unit tests
+> **In practice:** وقتی task در Airflow روی داده‌ی یک روز fail می‌شود، بازتولید یعنی همان ورودی را دوباره داشته باشید.
+>
+> **Your turn:** چرا Parquet staging برای debug کردن ارزشمند است؟
+>
+> *Answer:* ورودی دقیق آن اجرا را نگه می‌دارد؛ می‌شود آن را در JupyterHub بار کرد و transform را روی همان داده دوباره اجرا کرد. با تابع‌های خالص، همان ورودی همان خطا را می‌دهد (pp. 318–321).
 
-DOP unit tests call a function with data and compare the returned data, but building nested catalogs by hand was no pleasure. Instead, **put the system in the conditions to test, capture the data inside the function, and use it in the test** (p. 321). Listing 15.14 pastes the captured catalog inline; searching "Habit" should return the book with authors "Sean Covey" and "Stephen Covey" (pp. 321–322).
+### ۱۵.۴ تست‌های unit
 
-To avoid copying and pasting, write the captured data to files under the unit tests' file tree (pp. 322–326):
+تست‌های unit در DOP تابعی را با داده صدا می‌زنند و داده‌ی بازگشتی را می‌سنجند، ولی ساختن دستی catalogهای تودرتو هیچ خوشی نداشت. در عوض، **سیستم را در شرط‌های زیر تست بگذارید، داده را درون تابع بگیرید، و در تست به کارش ببرید** (p. 321). listing ۱۵.۱۴ آن catalog گرفته‌شده را درون‌خطی می‌چسباند؛ و جست‌وجوی «Habit» باید آن کتاب را با نویسنده‌های «Sean Covey» و «Stephen Covey» برگرداند (pp. 321–322).
 
-| Piece | Design | Listing |
+برای پرهیز از کپی و چسباندن، داده‌ی گرفته‌شده را در فایل‌هایی زیر درخت فایل تست‌های unit بنویسید (pp. 322–326):
+
+| تکه | طرح | نمونه |
 |---|---|---|
-| File name | A context (the function's name) plus a UUID, under `test-data/`, `.json` extension; UUID libraries per language in table 15.2 | 15.15, pp. 322–323 |
-| `dumpData(data, context)` | `JSON.stringify`, then `fs.writeFile` **asynchronously**, logging the path when done | 15.16, p. 323 |
-| Capture | `dumpData([catalogData, query], 'searchBooksByTitle')` | 15.17–15.18, pp. 323–324 |
-| Readability | `JSON.stringify(data, null, 2)` for two-space indentation | 15.20–15.21, pp. 324–325 |
-| `readData(path)` | `JSON.parse(fs.readFileSync(path))`, **synchronously**, since the test can't run before the data is read | 15.22–15.23, p. 326 |
+| نام فایل | زمینه‌ای یعنی نام آن تابع به‌علاوه‌ی UUIDی، زیر `test-data/`، با پسوند `.json`؛ و کتابخانه‌های UUID هر زبانی در جدول ۱۵.۲ | ۱۵.۱۵، صص. ۳۲۲–۳۲۳ |
+| `dumpData(data, context)` | تابع `JSON.stringify`، بعد `fs.writeFile` به‌شکل **asynchronous**، که سر تمام شدن آن مسیر را log می‌کند | ۱۵.۱۶، ص. ۳۲۳ |
+| گرفتن | عبارت `dumpData([catalogData, query], 'searchBooksByTitle')` | ۱۵.۱۷ و ۱۵.۱۸، صص. ۳۲۳–۳۲۴ |
+| خواندنی بودن | عبارت `JSON.stringify(data, null, 2)` برای تودرفتگی دو فاصله‌ای | ۱۵.۲۰ و ۱۵.۲۱، صص. ۳۲۴–۳۲۵ |
+| `readData(path)` | عبارت `JSON.parse(fs.readFileSync(path))` به‌شکل **synchronous**، چون تست نمی‌تواند پیش از خوانده شدن داده اجرا شود | ۱۵.۲۲ و ۱۵.۲۳، ص. ۳۲۶ |
 
-While Theo fetches tea (he's reading Charles Duhigg's *The Power of Habit* to cut down on coffee), Dave wonders: what if the function modifies the data while it's being written asynchronously? At the Wind Arrows exhibit, he realizes it can't, because in DOP data is never mutated (p. 326). Inline data is better when it is minimal, and a file when it's substantial (p. 327).
+سر آنکه تئو چای می‌آورد، چون *The Power of Habit* از چارلز داهیگ را می‌خواند تا قهوه‌اش را کم کند، دیو می‌پرسد: اگر آن تابع داده را سر asynchronous نوشته شدنش دست‌کاری کند چه؟ سر نمایشگاه Wind Arrows در می‌آورد که نمی‌تواند، چون در DOP داده هیچ‌وقت mutation نمی‌گیرد (p. 326). داده‌ی درون‌خطی وقتی کمینه است بهتر است، و فایلی وقتی چشم‌گیر (p. 327).
 
-**The fix** (pp. 327–328): lowercase both title and query, and use the `\b` word-boundary metacharacter, so `\b7 habits` and `\bhabits of` match a prefix even across several words (listing 15.24). Theo writes one test for the queries that should find the book and one for those that shouldn't (listings 15.25–15.26, p. 328):
+**آن چاره** (pp. 327–328): هر دو عنوان و پرسش را حرف‌کوچک کنید، و از فرانویسه‌ی مرز واژه‌ی `\b` کار بکشید، تا `\b7 habits` و `\bhabits of` پیشوندی را حتی سر چند واژه بخوانند (listing ۱۵.۲۴). تئو یک تست برای پرسش‌هایی می‌نویسد که باید آن کتاب را بیابند و یکی برای آن‌هایی که نباید (listingهای ۱۵.۲۵ و ۱۵.۲۶، ص. ۳۲۸):
 
-| Should return the book | Should return nothing |
+| باید آن کتاب را برگرداند | باید هیچ برنگرداند |
 |---|---|
-| "Habit", "habit", "7 Habit", "habits of" | "abit", "bit", "7 abit", "habit of" |
+| مقدارهای «Habit» و «habit» و «7 Habit» و «habits of» | مقدارهای «abit» و «bit» و «7 abit» و «habit of» |
 
-The tests pass, and only then does Dave trigger the endpoint with "7 Habit", to test the system end to end (p. 329).
+تست‌ها رد می‌شوند، و تنها پس از آن دیو آن endpoint را با «7 Habit» می‌زند، تا سیستم را سرتاسر تست کند (p. 329).
 
-> **Vault note:** as printed, listing 15.15 generates a UUID but never concatenates it, so every file would be named `searchBooksByTitle-.json` and overwrite the last (p. 323). Listing 15.23 shows `// → false` for the same comparison listing 15.14 shows as `true`, without comment (pp. 322, 327). And `_.every` in listings 15.25–15.26 returns a single Boolean, not `[true, true, true, true]` (p. 328). The lab fixes the file name.
+> **Vault note:** همان‌طور که چاپ شده، listing ۱۵.۱۵ یک UUID می‌سازد ولی هیچ‌وقت به‌هم‌چسبانی‌اش نمی‌کند، پس هر فایلی `searchBooksByTitle-.json` نام می‌گرفت و از روی آخری می‌نوشت (p. 323). listing ۱۵.۲۳ هم برای همان سنجشی که listing ۱۵.۱۴ آن را `true` نشان می‌دهد، `// → false` نشان می‌دهد، بی هیچ توضیحی (pp. 322, 327). و تابع `_.every` در listingهای ۱۵.۲۵ و ۱۵.۲۶ یک بولی تنها برمی‌گرداند، نه `[true, true, true, true]` (p. 328). آزمایش lab آن نام فایل را درست می‌کند.
 
-> **Run it:** the [capture-and-replay experiment](../lab/15-capture-replay/README.md) dumps a function context to a JSON file named by context and UUID, replays it, runs the eight queries against the three search versions, and shows what an asynchronous dump records when the data is mutated meanwhile.
+> **Run it:** [آزمایش گرفتن و replay](../lab/15-capture-replay/README.md) زمینه‌ی تابعی را در فایلی JSON می‌ریزد که با زمینه و UUID نام گرفته، replayش می‌کند، آن هشت پرسش را روی سه version جست‌وجو اجرا، و نشان می‌دهد ریختن asynchronous چه ثبت می‌کند وقتی داده میان کار mutation بگیرد.
 
-### 15.5 Dealing with external data sources
+### ۱۵.۵ سروکار داشتن با سرچشمه‌های داده‌ی بیرونی
 
-The function context may be identical, but a database or service can answer the same query differently (p. 329). Theo's answers (pp. 329–330):
+زمینه‌ی تابع می‌تواند همان باشد، ولی پایگاه داده‌ای یا سرویسی می‌تواند به همان پرسش فرق‌دار پاسخ دهد (p. 329). پاسخ‌های تئو (pp. 329–330):
 
-- **Immutable databases**, also called functional or append-only. Records carry automatically generated timestamps; updates create new versions; queries carry a time range and run on a snapshot that never changes. Datomic is used by some digital banks.
-- **In practice**, when debugging locally, you are the only one using the system, so the data doesn't change between triggering and replaying.
+- **پایگاه‌های داده‌ی immutable**، که تابعی یا تنها-افزودنی هم نامیده می‌شوند. رکوردها timestampهای خودکارساخته می‌برند؛ به‌روزرسانی‌ها version تازه می‌سازند؛ و پرسش‌ها بازه‌ای از زمان می‌برند و روی عکسی اجرا می‌شوند که هیچ‌وقت عوض نمی‌شود. برخی بانک‌های دیجیتال از Datomic کار می‌کشند.
+- **در کار واقعی**، سر اشکال‌زدایی محلی، تنها شما سیستم را به کار می‌برید، پس داده میان زدن و replay عوض نمی‌شود.
 
-Dave's analogy, fitting for the museum: external data sources are like hidden variables in quantum physics, which in theory can alter an experiment while the macro world looks stable (p. 330). Theo gives him a T-shirt with Einstein and Alan Kay on it. Kay's quote: "The last thing you want to do is to mess with internal state" (p. 330).
+همانندی دیو، که برای آن موزه هم می‌خورد: سرچشمه‌های داده‌ی بیرونی مانند متغیرهای پنهان در فیزیک کوانتومند، که در نظر می‌توانند آزمایشی را دگر کنند در حالی که جهان بزرگ استوار می‌نماید (p. 330). تئو به او تی‌شرتی با عکس اینشتین و آلن کی می‌دهد. نقل کی: «آخرین کاری که می‌خواهید بکنید ور رفتن با state درونی است» (p. 330).
 
-> **Try it:** [Reproducible or not?](../widgets/15-reproducibility.html) — replay a captured call while toggling mutation during an async dump, a mutable vs immutable database, and other users changing data, and see when the replayed result still matches the original.
+> **Try it:** [بازتولیدپذیر یا نه؟](../widgets/15-reproducibility.html) — صدا زدنی گرفته‌شده را replay کنید در حالی که mutation سر ریختن ناهمگام، پایگاه داده‌ی mutable در برابر تغییرناپذیر، و عوض کردن داده از سوی کاربران دیگر را روشن و خاموش می‌کنید، و ببینید خروجی replay‌شده کِی هنوز با اصل می‌خواند.
 
-### Farewell
+> **In practice:** دیتابیس منبع بیرون از کنترل ماست و هر بار ممکن است داده‌ی دیگری برگرداند.
+>
+> **Your turn:** باگی فقط با داده‌ی production ظاهر می‌شود. چطور آن را به تست تبدیل می‌کنید بی‌آن‌که PII وارد repo شود؟
+>
+> *Answer:* رکوردهای مشکل‌ساز را از Bronze که PIIاش hash شده بردارید، کوچک و بی‌نام کنید و در fixture تست بگذارید؛ کتاب داده‌ی بیرونی را ضبط و در تست replay می‌کند تا قطعیت برگردد (pp. 329–330).
 
-At Theo's farewell party a week later, Joe meets Nancy for the first time, and Theo tells her that Klafim met its deadlines thanks to Joe (p. 330). Theo is taking a break to travel for a couple of months, and is thinking of writing a book about his DOP journey. Everyone raises a glass: "Cheers! Here's to a successful book" (pp. 330–331).
+### خداحافظی
 
-## Trade-offs at a glance
+در میهمانی خداحافظی تئو یک هفته بعد، جو برای نخستین بار نانسی را می‌بیند، و تئو به او می‌گوید که Klafim به برکت جو به مهلت‌هایش رسید (p. 330). تئو وقفه‌ای می‌گیرد تا چند ماه سفر کند، و به نوشتن کتابی در باب سفر DOPش می‌اندیشد. همه جامی بالا می‌برند: «به سلامتی! به سلامتی کتابی کامیاب» (pp. 330–331).
 
-| Approach | Strength | Weakness |
+## بده‌بستان‌ها در یک نگاه
+
+| رویکرد | قوت | ضعف |
 |---|---|---|
-| Debugger and breakpoints | No code changes; inspect anything | Doesn't reproduce the scenario (p. 311) |
-| Capture to the console, replay in the REPL | Short feedback loop (p. 320) | Copying and pasting; unreadable one-line JSON (p. 319) |
-| Capture to files | Becomes unit-test data (p. 322) | Many files to name and manage |
-| Inline test data | Visible in the test (p. 327) | Hard to read when large |
-| Asynchronous dump | Doesn't slow the real work (p. 323) | Only safe because data is immutable (p. 326) |
-| Mutable external sources | The usual databases | Replays may differ, in theory (p. 330) |
-| Immutable database (Datomic) | Same query, same answer (p. 329) | A different kind of database |
+| اشکال‌زدا و نقطه‌های شکست | بی هیچ تغییر کد؛ هر چیزی را بازرسی می‌کند | آن صحنه را بازتولید نمی‌کند (p. 311) |
+| گرفتن در کنسول و replay در REPL | حلقه‌ی بازخورد کوتاه (p. 320) | کپی و چسباندن؛ و JSON یک‌خطی ناخواندنی (p. 319) |
+| گرفتن در فایل | داده‌ی تست unit می‌شود (p. 322) | فایل‌های زیادی که باید نام داد و مدیریت کرد |
+| داده‌ی تست درون‌خطی | در تست دیدنی است (p. 327) | وقتی بزرگ باشد سخت‌خوان است |
+| ریختن asynchronous | کار واقعی را کند نمی‌کند (p. 323) | تنها از آن ایمن است که داده immutable است (p. 326) |
+| سرچشمه‌های بیرونی mutable | پایگاه‌های داده‌ی معمول | replayها در نظر می‌توانند فرق کنند (p. 330) |
+| پایگاه داده‌ی immutable مانند Datomic | همان پرسش، همان پاسخ (p. 329) | گونه‌ای دیگر از پایگاه داده |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Escape user input in regular expressions.** `new RegExp("\\b" + prefix)` breaks on queries with special characters: "C++" throws an invalid-regex error and "(" too. Escaping (`prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")`) keeps the search a prefix match.
-- **`\b` is ASCII-only in JavaScript.** Without the `u` flag and Unicode-aware handling, word boundaries ignore accented letters, so a prefix after "é" may match mid-word. Titles in other languages need care.
-- **Not everything serializes.** Dates become strings, `undefined` disappears, `Map`, `Set` and `BigInt` don't round-trip through `JSON.stringify`, and cyclic structures throw. DOP's insistence on plain maps, arrays and primitives is what makes capturing reliable.
-- **Snapshot and golden-file testing** are the industry name for the captured-data tests: Jest snapshots, Python's `syrupy` or approval tests. Record-and-replay tools for HTTP, such as VCR or Polly.js, do the same for external services.
-- **Sensitive data.** Captured production contexts can contain personal data; scrub or synthesize before committing them to a test tree.
-- **Deterministic simulation testing** goes further: systems like FoundationDB control time, randomness and the network, so a whole distributed run can be replayed from a seed.
+- **ورودی کاربر را در عبارت باقاعده گریز بدهید.** عبارت `new RegExp("\\b" + prefix)` روی پرسش‌هایی با نویسه‌های ویژه می‌شکند: مقدار «C++» خطای عبارت باقاعده‌ی نامعتبر می‌اندازد و «(» هم. گریز دادن، یعنی `prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")`، آن جست‌وجو را خوانش پیشوندی نگه می‌دارد.
+- **فرانویسه‌ی `\b` در JavaScript تنها ASCII است.** بی پرچم `u` و چرخاندن Unicode‌آگاه، مرزهای واژه حرف‌های تکیه‌دار را نشنیده می‌گیرند، پس پیشوندی پس از «é» می‌تواند میان واژه بخورد. عنوان‌های زبان‌های دیگر مراقبت می‌خواهند.
+- **هر چیزی سریالی نمی‌شود.** تاریخ‌ها رشته می‌شوند، مقدار `undefined` ناپدید می‌شود، نوع‌های `Map` و `Set` و `BigInt` از `JSON.stringify` رفت‌وبرگشت نمی‌کنند، و ساختارهای چرخه‌ای خطا می‌اندازند. پافشاری DOP بر map و آرایه و بدوی خالی همان است که گرفتن را قابل اعتماد می‌کند.
+- **تست snapshot و فایل طلایی** نام صنعتی همان تست‌های داده‌ی گرفته‌شده است: snapshotهای Jest، ابزار `syrupy` در Python یا approval test. ابزارهای ضبط و replay برای HTTP، مانند VCR یا Polly.js، همان را برای سرویس‌های بیرونی می‌کنند.
+- **داده‌ی حساس.** زمینه‌های گرفته‌شده از production می‌توانند داده‌ی شخصی داشته باشند؛ پیش از commit کردنشان در درخت تست پاکشان کنید یا ساختگی بسازید.
+- **تست شبیه‌سازی قطعی** فراتر می‌رود: سیستم‌هایی مانند FoundationDB زمان و تصادف و شبکه را کنترل می‌کنند، پس کل یک اجرای توزیع‌شده از seedی replay‌شدنی است.
 
-## Connections
+## پیوندها
 
-- **Immutability and the `SystemState` module:** [4. State management](04-state-management.md).
-- **Unit tests in DOP:** [6. Unit tests](06-unit-tests.md); schema-generated inputs in [12. Advanced data validation](12-advanced-data-validation.md).
-- **The search function's history:** [3. Basic data manipulation](03-basic-data-manipulation.md).
-- **Persistent, time-aware data:** [9. Persistent data structures](09-persistent-data-structures.md).
-- **Run it:** [Capture and replay](../lab/15-capture-replay/README.md) — dump, replay, the three search versions, and the async-dump race with mutable data.
+- **مفهوم immutability و ماژول `SystemState`:** [۴. مدیریت state](04-state-management.md).
+- **تست‌های unit در DOP:** [۶. تست‌های unit](06-unit-tests.md)؛ و ورودی‌های ساخته از طرح در [۱۲. اعتبارسنجی پیشرفته‌ی داده](12-advanced-data-validation.md).
+- **تاریخ آن تابع جست‌وجو:** [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md).
+- **داده‌ی persistent و زمان‌آگاه:** [۹. ساختارهای داده‌ی persistent](09-persistent-data-structures.md).
+- **Run it:** [گرفتن و replay](../lab/15-capture-replay/README.md) — ریختن و بازپخش، آن سه version جست‌وجو، و مسابقه‌ی ریختن asynchronous با داده‌ی mutable.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. Why is function behaviour deterministic in most DOP modules?
-   <details><summary>Answer</summary>They deal only with immutable data; only `SystemState` deals with state. So the same arguments always lead to the same return values (p. 312).</details>
-2. What is a function context, and what does it consist of in DOP?
-   <details><summary>Answer</summary>The values a function is called with. In general it involves the arguments and the program state; in DOP, only the arguments' values (p. 313).</details>
-3. What are the two conditions for reproducibility?
-   <details><summary>Answer</summary>Immutability and ease of serialization and deserialization (p. 314).</details>
-4. Why capture strings with `JSON.stringify` rather than `console.log`?
-   <details><summary>Answer</summary>`console.log` prints a string's content without its quotes and escape backslashes, so it can't be pasted back as-is. JSON serialization keeps them (pp. 317).</details>
-5. Why does Theo stop Dave from triggering the search endpoint while fixing the search?
-   <details><summary>Answer</summary>The REPL gives much quicker feedback; reproducing real conditions in a more effective environment is the main benefit of reproducibility. The end-to-end test comes once the fix is done (pp. 320, 329).</details>
-6. Captured data is written asynchronously. Why is that safe?
-   <details><summary>Answer</summary>In DOP data is never mutated, so the function can't change the data while it's being written (p. 326).</details>
-7. Why do "habit" and "7 Habits" fail with the first improved search, and how does Dave fix it?
-   <details><summary>Answer</summary>The search is case-sensitive, and it checks one word at a time, so a two-word prefix never matches. Dave lowercases both strings and matches a regex `\b` + prefix (pp. 321, 327–328).</details>
-8. How can a database be both writable and immutable?
-   <details><summary>Answer</summary>Records get timestamps; updates create new versions; queries carry a time range and run on a snapshot that never changes, so the same query always returns the same response, as in Datomic (pp. 329–330).</details>
+1. چرا رفتار تابع در بیشتر ماژول‌های DOP قطعی است؟
+   <details><summary>پاسخ</summary>تنها با داده‌ی immutable سروکار دارند؛ و تنها `SystemState` با state سروکار دارد. پس همان آرگومان‌ها همیشه به همان مقدار بازگشتی می‌رسند (p. 312).</details>
+2. زمینه‌ی تابع چیست، و در DOP از چه ساخته می‌شود؟
+   <details><summary>پاسخ</summary>مقدارهایی که تابعی با آن‌ها صدا زده می‌شود. به‌طور کلی آرگومان‌ها و state برنامه را درگیر می‌کند؛ و در DOP، تنها مقدار آرگومان‌ها (p. 313).</details>
+3. دو شرط بازتولیدپذیری کدامند؟
+   <details><summary>پاسخ</summary>مفهوم immutability و آسانی سریالی کردن و باز کردن (p. 314).</details>
+4. چرا رشته‌ها را با `JSON.stringify` بگیریم و نه با `console.log`؟
+   <details><summary>پاسخ</summary>تابع `console.log` محتوای رشته‌ای را بی گیومه و ممیزهای معکوس گریزش چاپ می‌کند، پس همان‌طور بازچسباندنی نیست. سریالی کردن JSON نگهشان می‌دارد (p. 317).</details>
+5. چرا تئو دیو را سر درست کردن جست‌وجو از زدن آن endpoint بازمی‌دارد؟
+   <details><summary>پاسخ</summary>سیستم REPL بازخورد خیلی تندتری می‌دهد؛ و بازتولید شرط‌های واقعی در محیطی کارآمدتر سود اصلی بازتولیدپذیری است. تست سرتاسر همین که آن چاره تمام شد می‌آید (pp. 320, 329).</details>
+6. داده‌ی گرفته‌شده asynchronous نوشته می‌شود. چرا این ایمن است؟
+   <details><summary>پاسخ</summary>در DOP داده هیچ‌وقت mutation نمی‌گیرد، پس آن تابع نمی‌تواند داده را سر نوشته شدنش عوض کند (p. 326).</details>
+7. چرا «habit» و «7 Habits» با نخستین جست‌وجوی بهبودیافته شکست می‌خورند، و دیو چطور درستش می‌کند؟
+   <details><summary>پاسخ</summary>آن جست‌وجو به بزرگی و کوچکی حرف حساس است، و هر بار یک واژه را می‌سنجد، پس پیشوندی دوواژه‌ای هیچ‌وقت نمی‌خورد. دیو هر دو رشته را حرف‌کوچک می‌کند و عبارت باقاعده‌ی `\b` به‌علاوه‌ی پیشوند را می‌خواند (pp. 321, 327–328).</details>
+8. چطور پایگاه داده‌ای می‌تواند هم نوشتنی باشد هم تغییرناپذیر؟
+   <details><summary>پاسخ</summary>رکوردها timestamp می‌گیرند؛ به‌روزرسانی‌ها version تازه می‌سازند؛ و پرسش‌ها بازه‌ای از زمان می‌برند و روی عکسی اجرا می‌شوند که هیچ‌وقت عوض نمی‌شود، پس همان پرسش همیشه همان پاسخ را برمی‌گرداند، مانند Datomic (pp. 329–330).</details>

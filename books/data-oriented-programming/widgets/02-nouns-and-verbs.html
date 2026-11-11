@@ -1,66 +1,67 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nouns and Verbs</title>
-<meta name="description" content="Sort the phrases of Nancy&#x27;s requirements into data entities and functions, and watch the data mind map and the Library module build up. Illustrates Data-Oriented Programming, chapter 2.">
+<title>اسم‌ها و فعل‌ها</title>
+<meta name="description" content="گروه‌های واژه‌ی نیازمندی‌های نانسی را به entityهای داده و تابع‌ها بچینید، و ببینید نقشه‌ی ذهنی داده و ماژول Library چطور بالا می‌آیند. تصویری از فصل ۲ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>.req { line-height: 2.1; } .req button.w { font: inherit; border: 1px dashed var(--line); background: var(--surface); border-radius: 4px; padding: 0 4px; cursor: pointer; color: var(--ink); }
   .req button.w[data-k=noun] { background: var(--accent-soft); border-style: solid; border-color: var(--accent); } .req button.w[data-k=verb] { background: var(--warn-soft); border-style: solid; border-color: var(--warn); }
   .req button.w[data-k=noun]::after { content: " ▪"; } .req button.w[data-k=verb]::after { content: " ▸"; }
   .req button.w.wrong { outline: 2px solid var(--bad); } .req li { margin: 4px 0; } ul.tree, ul.mod { font-family: var(--mono); font-size: .82rem; }
+  ul.mod li { direction: ltr; text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/02-separation-between-code-and-data.html">Chapter 2</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Nouns and verbs</span>
+      <a href="../chapters/02-separation-between-code-and-data.html">فصل ۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">اسم‌ها و فعل‌ها</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 2 · Separation between code and data</div>
-  <h1>Nouns and verbs</h1>
-  <p class="lede">DOP design starts with the data: highlight the <strong>nouns and noun phrases</strong> in the requirements to find data entities, and group them. Then highlight the <strong>verb phrases</strong> to find the functionality, which becomes stateless functions in code modules.</p>
-  <p class="source-note">Illustrates sections 2.2 and 2.3 (pp. 29–36): Nancy’s requirements, the data mind map of figure 2.3 and the functions of figures 2.4–2.9. Which words are offered as phrases is the vault’s choice; the correct sorting follows the book. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۲ · جدایی کد از داده</div>
+  <h1>اسم‌ها و فعل‌ها</h1>
+  <p class="lede">طراحی DOP با داده آغاز می‌شود: برای یافتن entityهای داده <strong>اسم‌ها و گروه‌های اسمی</strong> نیازمندی‌ها را پررنگ کنید، و دسته‌شان کنید. بعد برای یافتن کارکرد <strong>گروه‌های فعلی</strong> را پررنگ کنید، که در ماژول‌های کد تابع بی‌state می‌شوند.</p>
+  <p class="source-note">تصویری از بخش‌های ۲.۲ و ۲.۳ (صص. ۲۹–۳۶): نیازمندی‌های نانسی، نقشه‌ی ذهنی داده در شکل ۲.۳ و تابع‌های شکل‌های ۲.۴ تا ۲.۹. اینکه کدام واژه‌ها به‌شکل گروه پیشنهاد می‌شوند گزینش vault است؛ و چینش درست از کتاب پی می‌گیرد. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Nancy’s requirements (click a phrase to cycle: unmarked → data ▪ → function ▸)</p><ul class="req" id="req"></ul>
+      <div class="panel"><p class="panel-title">نیازمندی‌های نانسی — روی گروهی کلیک کنید تا بچرخد: بی‌نشان ← داده ▪ ← تابع ▸</p><ul class="req" id="req"></ul>
         <div class="callout" id="verdict" style="margin-top:8px"></div></div>
-      <div class="grid-2"><div class="panel"><p class="panel-title">Data mind map</p><ul class="tree" id="tree"></ul></div>
-        <div class="panel"><p class="panel-title">Library module</p><ul class="mod" id="mod"></ul></div></div>
+      <div class="grid-2"><div class="panel"><p class="panel-title">نقشه‌ی ذهنی داده</p><ul class="tree" id="tree"></ul></div>
+        <div class="panel"><p class="panel-title">ماژول Library</p><ul class="mod" id="mod"></ul></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><button class="btn primary" id="check" type="button">Check my sorting</button> <button class="btn" id="show" type="button">Show the book’s sorting</button>
-        <button class="btn" id="rs" type="button" style="margin-top:8px">↺ Clear</button></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><button class="btn primary" id="check" type="button">سنجیدن چینش من</button> <button class="btn" id="show" type="button">نشان دادن چینش کتاب</button>
+        <button class="btn" id="rs" type="button" style="margin-top:8px">↺ پاک کردن</button></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Nouns become data entities</strong>, grouped into two high-level groups: the catalog (books, authors, book items, book lendings) and user management (users, members, librarians).</li>
-    <li><strong>Verb phrases become functions</strong>, plus two the requirements imply: returning a book and checking whether a user is a librarian.</li>
-    <li><strong>The modules follow the data</strong>: <code>Catalog</code> and <code>UserManagement</code> match the two groups of the mind map, and every function receives its data as an explicit first argument.</li>
+    <li><strong>اسم‌ها entity داده می‌شوند</strong>، دسته‌شده در دو دسته‌ی سطح‌بالا: catalog با کتاب‌ها و نویسنده‌ها و نسخه‌ها و قرض‌ها، و مدیریت کاربر با کاربران و عضوها و کتابدارها.</li>
+    <li><strong>گروه‌های فعلی تابع می‌شوند</strong>، به‌علاوه‌ی دو تا که نیازمندی‌ها می‌رسانندشان: برگرداندن کتاب و سنجیدن اینکه کاربری کتابدار است.</li>
+    <li><strong>ماژول‌ها از داده پی می‌گیرند</strong>: ماژول‌های <code>Catalog</code> و <code>UserManagement</code> با آن دو دسته‌ی نقشه‌ی ذهنی می‌خوانند، و هر تابعی داده‌اش را آرگومان نخستی صریح می‌گیرد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/02-separation-between-code-and-data.html"><small>Lesson</small>2. Separation between code and data</a></li>
+    <li><a href="../chapters/02-separation-between-code-and-data.html"><small>درس</small>فصل ۲: جدایی کد از داده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -76,54 +77,56 @@ function stats(rows) {
   }
 
   var log = Kit.log(document.getElementById("log"));
-  // segments: plain text or [phrase, kind, entity-or-function, group]
+  var GC = "بخش catalog", GU = "مدیریت کاربر";
+  // بخش‌ها: متن خالی یا [گروه، گونه، entity یا تابع، دسته]
   var REQ = [
-    ["There are two kinds of ", ["users", "noun", "Users", "User management"], ": ", ["library members", "noun", "Members", "User management"], " and ", ["librarians", "noun", "Librarians", "User management"], "."],
-    [["Users", "noun", "Users", "User management"], " ", ["log in", "verb", "login(libraryData, loginInfo)"], " to the system via email and password."],
-    [["Members", "noun", "Members", "User management"], " can ", ["borrow books", "verb", "checkoutBook(libraryData, userId, bookItemId)"], "."],
-    ["Members and librarians can ", ["search books", "verb", "searchBook(libraryData, searchQuery)"], " by title or by ", ["author", "noun", "Authors", "Catalog"], "."],
-    ["Librarians can ", ["block", "verb", "blockMember(libraryData, memberId)"], " and ", ["unblock members", "verb", "unblockMember(libraryData, memberId)"], " (e.g., when they are late returning a book)."],
-    ["Librarians can ", ["list the books currently lent", "verb", "getBookLendings(libraryData, userId)"], " to a member."],
-    ["There could be several ", ["copies of a book", "noun", "Book items", "Catalog"], "."],
-    ["A ", ["book", "noun", "Books", "Catalog"], " belongs to a ", ["physical library", "none"], "."],
-    ["(Implied) Members can ", ["return a book", "verb", "returnBook(libraryData, userId, bookItemId)"], "; a ", ["book lending", "noun", "Book lendings", "Catalog"], " records each loan."],
-    ["(Implied) Librarians can ", ["add book items", "verb", "addBookItem(libraryData, bookItemInfo)"], "; there is a way to ", ["tell whether a user is a librarian", "verb", "isLibrarian(userManagementData, userId)"], "."]];
+    ["دو گونه ", ["کاربر", "noun", "کاربران", GU], " هست: ", ["عضوهای کتابخانه", "noun", "عضوها", GU], " و ", ["کتابدارها", "noun", "کتابدارها", GU], "."],
+    [["کاربران", "noun", "کاربران", GU], " با ایمیل و گذرواژه ", ["وارد می‌شوند", "verb", "login(libraryData, loginInfo)"], " به سیستم."],
+    [["عضوها", "noun", "عضوها", GU], " می‌توانند ", ["کتاب قرض بگیرند", "verb", "checkoutBook(libraryData, userId, bookItemId)"], "."],
+    ["عضوها و کتابدارها می‌توانند با عنوان یا ", ["نویسنده", "noun", "نویسنده‌ها", GC], " ", ["کتاب بجویند", "verb", "searchBook(libraryData, searchQuery)"], "."],
+    ["کتابدارها می‌توانند عضوها را ", ["ببندند", "verb", "blockMember(libraryData, memberId)"], " و ", ["باز کنند", "verb", "unblockMember(libraryData, memberId)"], "؛ مثلاً وقتی در برگرداندن کتابی دیر می‌کنند."],
+    ["کتابدارها می‌توانند کتاب‌هایی را که همین حالا به عضوی قرض داده شده ", ["فهرست کنند", "verb", "getBookLendings(libraryData, userId)"], "."],
+    ["می‌شود چند ", ["نسخه از کتابی", "noun", "نسخه‌های کتاب", GC], " باشد."],
+    ["هر ", ["کتابی", "noun", "کتاب‌ها", GC], " به ", ["کتابخانه‌ای فیزیکی", "none"], " تعلق دارد."],
+    ["برداشت‌شده: عضوها می‌توانند ", ["کتابی را برگردانند", "verb", "returnBook(libraryData, userId, bookItemId)"], "؛ و هر ", ["قرض کتابی", "noun", "قرض‌های کتاب", GC], " آن وام را ثبت می‌کند."],
+    ["برداشت‌شده: کتابدارها می‌توانند ", ["نسخه‌ی کتاب بیفزایند", "verb", "addBookItem(libraryData, bookItemInfo)"], "؛ و راهی هست که ", ["بگوید کاربری کتابدار است یا نه", "verb", "isLibrarian(userManagementData, userId)"], "."]];
   var marks = [], buttons = [];
   function build() { var ul = Kit.clear(document.getElementById("req")); buttons = []; marks = [];
     REQ.forEach(function (line) { var li = Kit.el("li"); line.forEach(function (seg) { if (typeof seg === "string") li.appendChild(document.createTextNode(seg)); else {
-      var i = buttons.length, b = Kit.el("button", { class: "w", type: "button", "data-k": "", "aria-label": seg[0] + ": unmarked" }, seg[0]); marks.push(""); buttons.push({ b: b, seg: seg });
+      var i = buttons.length, b = Kit.el("button", { class: "w", type: "button", "data-k": "", "aria-label": seg[0] + ": بی‌نشان" }, seg[0]); marks.push(""); buttons.push({ b: b, seg: seg });
       b.addEventListener("click", function () { var nx = { "": "noun", noun: "verb", verb: "" }[marks[i]]; marks[i] = nx; b.setAttribute("data-k", nx); b.classList.remove("wrong");
-        b.setAttribute("aria-label", seg[0] + ": " + (nx === "noun" ? "data entity" : nx === "verb" ? "function" : "unmarked")); render(); });
+        b.setAttribute("aria-label", seg[0] + ": " + (nx === "noun" ? "entity داده" : nx === "verb" ? "تابع" : "بی‌نشان")); render(); });
       li.appendChild(b); } }); ul.appendChild(li); }); }
   function render() {
-    var groups = { Catalog: {}, "User management": {} }, fns = {};
+    var groups = {}, fns = {}; groups[GC] = {}; groups[GU] = {};
     buttons.forEach(function (x, i) { if (marks[i] === "noun" && x.seg[1] === "noun") groups[x.seg[3]][x.seg[2]] = 1; if (marks[i] === "verb" && x.seg[1] === "verb") fns[x.seg[2]] = 1; });
-    var tr = Kit.clear(document.getElementById("tree")); var root = Kit.el("li", null, "Library data"), sub = Kit.el("ul");
-    Object.keys(groups).forEach(function (g) { var ks = Object.keys(groups[g]); if (!ks.length) return; sub.appendChild(Kit.el("li", null, g, Kit.el("ul", null, ks.map(function (k) { return Kit.el("li", null, k); })))); });
+    var tr = Kit.clear(document.getElementById("tree")); var root = Kit.el("li", null, "داده‌ی کتابخانه"), sub = Kit.el("ul");
+    [GC, GU].forEach(function (g) { var ks = Object.keys(groups[g]); if (!ks.length) return; sub.appendChild(Kit.el("li", null, g, Kit.el("ul", null, ks.map(function (k) { return Kit.el("li", null, k); })))); });
     root.appendChild(sub); tr.appendChild(root);
     var md = Kit.clear(document.getElementById("mod")); Object.keys(fns).forEach(function (f) { md.appendChild(Kit.el("li", null, (/^isLibrarian/.test(f) ? "UserManagement." : "Library.") + f)); });
-    if (!Object.keys(fns).length) md.appendChild(Kit.el("li", { style: "color:var(--ink-3)" }, "Mark verb phrases to add functions."));
+    if (!Object.keys(fns).length) md.appendChild(Kit.el("li", { style: "color:var(--ink-3);direction:rtl;text-align:right" }, "گروه‌های فعلی را نشان بزنید تا تابع افزوده شود."));
     var nn = 0, nv = 0, wrong = 0; buttons.forEach(function (x, i) { if (marks[i] === "noun") nn++; if (marks[i] === "verb") nv++; if (marks[i] && marks[i] !== x.seg[1]) wrong++; });
-    stats([["Data entities", Object.keys(groups.Catalog).length + Object.keys(groups["User management"]).length + " / 7"], ["Functions", Object.keys(fns).length + " / 9"], ["Marked phrases", nn + nv], ["Mis-sorted", wrong, wrong ? "bad" : "ok"]]);
-    var v = document.getElementById("verdict"), done = Object.keys(fns).length === 9 && Object.keys(groups.Catalog).length + Object.keys(groups["User management"]).length === 7 && !wrong;
-    v.className = "callout " + (done ? "ok" : ""); v.textContent = done ? "Matches the book: seven data entities in two groups (figure 2.3) and nine functions (pp. 31–32)." : "Mark nouns as data and verb phrases as functions.";
+    var ents = Object.keys(groups[GC]).length + Object.keys(groups[GU]).length;
+    stats([["entityهای داده", ents + " / 7"], ["تابع‌ها", Object.keys(fns).length + " / 9"], ["گروه‌های نشان‌خورده", nn + nv], ["بدچیده", wrong, wrong ? "bad" : "ok"]]);
+    var v = document.getElementById("verdict"), done = Object.keys(fns).length === 9 && ents === 7 && !wrong;
+    v.className = "callout " + (done ? "ok" : ""); v.textContent = done ? "با کتاب می‌خواند: هفت entity داده در دو دسته (شکل ۲.۳) و نه تابع (صص. ۳۱–۳۲)." : "اسم‌ها را داده و گروه‌های فعلی را تابع نشان بزنید.";
   }
   document.getElementById("check").addEventListener("click", function () { var w = 0; buttons.forEach(function (x, i) { var bad = marks[i] && marks[i] !== x.seg[1]; x.b.classList.toggle("wrong", bad); if (bad) w++; });
-    log.add(w ? w + " phrase(s) mis-sorted, outlined in red." + (buttons.some(function (x, i) { return x.seg[1] === "none" && marks[i]; }) ? " “Physical library” is only an attribute here: a book item’s libId." : "") : "No mis-sorted phrases.", w ? "bad" : "ok"); });
-  document.getElementById("show").addEventListener("click", function () { buttons.forEach(function (x, i) { marks[i] = x.seg[1] === "none" ? "" : x.seg[1]; x.b.setAttribute("data-k", marks[i]); x.b.classList.remove("wrong"); }); log.add("The book’s sorting: nouns to the mind map, verb phrases to the module.", "ok"); render(); });
-  document.getElementById("rs").addEventListener("click", function () { build(); render(); log.add("Cleared.", "muted"); });
+    log.add(w ? w + " گروه بدچیده، با دور سرخ." + (buttons.some(function (x, i) { return x.seg[1] === "none" && marks[i]; }) ? " عبارت «کتابخانه‌ای فیزیکی» این‌جا تنها خصیصه‌ای است: همان libId یک نسخه‌ی کتاب." : "") : "هیچ گروه بدچیده‌ای نیست.", w ? "bad" : "ok"); });
+  document.getElementById("show").addEventListener("click", function () { buttons.forEach(function (x, i) { marks[i] = x.seg[1] === "none" ? "" : x.seg[1]; x.b.setAttribute("data-k", marks[i]); x.b.classList.remove("wrong"); }); log.add("چینش کتاب: اسم‌ها به نقشه‌ی ذهنی، و گروه‌های فعلی به ماژول.", "ok"); render(); });
+  document.getElementById("rs").addEventListener("click", function () { build(); render(); log.add("پاک شد.", "muted"); });
   build(); render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How does Theo discover the data entities?",
-      options: ["From the database schema", "By highlighting nouns and noun phrases in the requirements", "From the class diagram"], answer: 1,
-      explain: "p. 29." },
-    { q: "Into which two high-level groups does he sort them?",
-      options: ["Catalog and user management", "Books and members", "Code and data"], answer: 0,
-      explain: "Figure 2.3, p. 30; p. 31." },
-    { q: "How does a DOP function get the data it works on?",
-      options: ["From this", "As an explicit argument, such as libraryData", "From a global"], answer: 1,
-      explain: "pp. 33–34." }
+    { q: "تئو entityهای داده را چطور کشف می‌کند؟",
+      options: ["از طرح پایگاه داده", "با پررنگ کردن اسم‌ها و گروه‌های اسمی در نیازمندی‌ها", "از نمودار کلاس"], answer: 1,
+      explain: "ص. ۲۹." },
+    { q: "آن‌ها را در کدام دو دسته‌ی سطح‌بالا می‌چیند؟",
+      options: ["catalog و مدیریت کاربر", "کتاب‌ها و عضوها", "کد و داده"], answer: 0,
+      explain: "شکل ۲.۳، ص. ۳۰؛ ص. ۳۱." },
+    { q: "تابعی در DOP داده‌ی زیر کارش را چطور می‌گیرد؟",
+      options: ["از this", "آرگومانی صریح، مانند libraryData", "از متغیری سراسری"], answer: 1,
+      explain: "صص. ۳۳–۳۴." }
   ]);
 })();
 </script>

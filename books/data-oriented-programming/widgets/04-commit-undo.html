@@ -1,68 +1,69 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Commit and Undo</title>
-<meta name="description" content="Run mutations through the calculation and commit phases of Data-Oriented Programming&#x27;s chapter 4, reject an invalid version at the commit, and compare a single previous reference with a stack of versions when undoing.">
+<title>commit و undo</title>
+<meta name="description" content="mutationها را از فازهای حساب و commit فصل ۴ کتاب Data-Oriented Programming بگذرانید، versionی نامعتبر را سر commit رد کنید، و سر undo یک ارجاع پیشین را با پشته‌ای از versionها بسنجید.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.versions { display: flex; flex-wrap: wrap; gap: 6px; } .ver { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px 8px; font-family: var(--mono); font-size: .8rem; background: var(--surface); }
+<style>.versions { display: flex; flex-wrap: wrap; gap: 6px; direction: ltr; } .ver { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px 8px; font-family: var(--mono); font-size: .8rem; background: var(--surface); }
   .ver.cur { border-color: var(--accent); background: var(--accent-soft); } .ver.prev { border-style: dashed; border-color: var(--ink-2); } .ver.gone { opacity: .4; text-decoration: line-through; }
+  #members li { direction: ltr; text-align: left; font-family: var(--mono); font-size: .82rem; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/04-state-management.html">Chapter 4</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Commit and undo</span>
+      <a href="../chapters/04-state-management.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">commit و undo</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 4 · State management</div>
-  <h1>Commit and undo</h1>
-  <p class="lede">A DOP mutation has two phases. The <strong>calculation</strong> is a pure function that returns the next version or throws. The <strong>commit</strong> is common to all mutations: it validates the next version and moves the system state forward. Keeping the old references makes undo trivial.</p>
-  <p class="source-note">Illustrates sections 4.5–4.7 (listings 4.7–4.10, pp. 83–89): <code>System</code>, <code>SystemState</code>, whole-system validation at commit, and undo with <code>previousSystemData</code>. The member names, the invalid lending example as data and the stack option are the vault’s (the book mentions a stack on pp. 88–89). Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۴ · مدیریت state</div>
+  <h1>commit و undo</h1>
+  <p class="lede">هر mutationی در DOP دو فاز دارد. <strong>حساب</strong> تابعی سرراست است که version پسین را برمی‌گرداند یا خطا می‌اندازد. <strong>commit</strong> میان همه‌ی mutationها مشترک است: version پسین را اعتبارسنجی و state سیستم را پیش می‌برد. نگه داشتن ارجاع‌های کهنه undo را بدیهی می‌کند.</p>
+  <p class="source-note">تصویری از بخش‌های ۴.۵ تا ۴.۷ (listingهای ۴.۷ تا ۴.۱۰، صص. ۸۳–۸۹): کلاس‌های <code>System</code> و <code>SystemState</code>، اعتبارسنجی کل سیستم سر commit، و undo با <code>previousSystemData</code>. نام عضوها و آن مثال قرض نامعتبر به‌شکل داده و گزینه‌ی پشته مال vault است؛ کتاب در صص. ۸۸–۸۹ از پشته یاد می‌کند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Versions of the system data</p><div class="versions" id="vers"></div>
-        <p class="field-hint">Solid blue: <code>systemData</code>. Dashed: still referenced for undo. Struck out: unreachable, garbage-collected.</p></div>
-      <div class="panel"><p class="panel-title">Current members</p><ul id="members"></ul><div class="callout" id="verdict"></div></div>
+      <div class="panel"><p class="panel-title">versionهای داده‌ی سیستم</p><div class="versions" id="vers"></div>
+        <p class="field-hint">آبی توپر: مقدار <code>systemData</code>. خط‌چین: هنوز برای undo ارجاع‌شده. خط‌خورده: نارسیدنی و garbage collectorی‌شده.</p></div>
+      <div class="panel"><p class="panel-title">عضوهای کنونی</p><ul id="members"></ul><div class="callout" id="verdict"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="mode"></div>
-        <p class="panel-title" style="margin-top:10px">Mutations</p>
-        <button class="btn primary" data-m="add" type="button">Add a new member</button>
-        <button class="btn" data-m="dup" type="button">Add an existing member</button>
-        <button class="btn" data-m="bad" type="button">Lend a copy without marking it lent</button>
-        <button class="btn" data-m="block" type="button">Block a member</button>
-        <div class="row" style="margin-top:8px"><button class="btn" id="undo" type="button">Undo</button> <button class="btn" id="rs" type="button">↺ Reset</button></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div>
+        <p class="panel-title" style="margin-top:10px">mutationها</p>
+        <button class="btn primary" data-m="add" type="button">افزودن عضوی تازه</button>
+        <button class="btn" data-m="dup" type="button">افزودن عضوی موجود</button>
+        <button class="btn" data-m="bad" type="button">قرض دادن نسخه‌ای بی نشان کردنش</button>
+        <button class="btn" data-m="block" type="button">بستن عضوی</button>
+        <div class="row" style="margin-top:8px"><button class="btn" id="undo" type="button">undo</button> <button class="btn" id="rs" type="button">↺ از نو</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>The calculation can fail on its own</strong>: adding a member who already exists throws “Member already exists.” and nothing is committed.</li>
-    <li><strong>The commit can reject what the calculation produced</strong>: a lending without the copy marked lent is an invalid system state, caught once for the whole system instead of in each class.</li>
-    <li><strong>One previous reference allows one undo.</strong> Undo twice and you stay where you are; with a stack of references, every version can be restored. Structural sharing keeps them cheap.</li>
+    <li><strong>حساب می‌تواند خودش شکست بخورد</strong>: افزودن عضوی که از پیش هست خطای «Member already exists.» می‌اندازد و هیچ چیز commit نمی‌شود.</li>
+    <li><strong>commit می‌تواند آنچه حساب ساخته را رد کند</strong>: قرضی بی نسخه‌ای که قرض‌رفته نشان خورده باشد stateی نامعتبر از سیستم است، که یک‌بار برای کل سیستم گرفته می‌شود، نه در هر کلاسی.</li>
+    <li><strong>یک ارجاع پیشین یک undo می‌دهد.</strong> دو بار undo کنید و همان جا می‌مانید؛ و با پشته‌ای از ارجاع، هر versionی برگرداندنی است. شریک شدن ساختاری ارزان نگهشان می‌دارد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/04-state-management.html"><small>Lesson</small>4. State management</a></li>
+    <li><a href="../chapters/04-state-management.html"><small>درس</small>فصل ۴: مدیریت state</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -87,41 +88,41 @@ function stats(rows) {
     if (m === "bad") { n.members["samantha@gmail.com"].lendings.push("book-item-2"); return n; }
     if (m === "block") { var k = Object.keys(n.members).filter(function (e) { return !n.members[e].isBlocked; })[0]; if (!k) throw "No unblocked member."; n.members[k].isBlocked = true; return n; }
     return n; }
-  function validate(prev, next) { var bad = []; Object.keys(next.members).forEach(function (e) { next.members[e].lendings.forEach(function (it) { if (!next.items[it].isLent) bad.push(e + " holds " + it + ", but the catalog says it isn’t lent"); }); }); return bad; }
+  function validate(prev, next) { var bad = []; Object.keys(next.members).forEach(function (e) { next.members[e].lendings.forEach(function (it) { if (!next.items[it].isLent) bad.push("عضو " + e + " نسخه‌ی " + it + " را دارد، ولی catalog می‌گوید قرض نرفته"); }); }); return bad; }
   function mutate(m) { var previous = versions[cur], next;
-    try { next = calc(m, previous); } catch (e) { log.add("Calculation threw: " + e + " Nothing to commit.", "warn"); render(e); return; }
-    var bad = validate(previous, next); if (bad.length) { rejected++; log.add("Commit rejected by validate(previous, next): " + bad[0] + ".", "bad"); render("rejected"); return; }
+    try { next = calc(m, previous); } catch (e) { log.add("حساب خطا انداخت: " + e + " هیچ چیز برای commit نیست.", "warn"); render(e); return; }
+    var bad = validate(previous, next); if (bad.length) { rejected++; log.add("تابع validate(previous, next) آن commit را رد کرد: " + bad[0] + ".", "bad"); render("rejected"); return; }
     next.id = versions.length + 1; if (m === "add") nextName++;
     versions.push(next); if (mode === "single") prevRef = cur; else stack.push(cur); cur = versions.length - 1;
-    log.add("Committed V" + next.id + ": systemData moves forward.", "ok"); render(); }
-  function undo() { if (mode === "single") { if (prevRef === null || prevRef === cur) { log.add("Undo: systemData already equals previousSystemData. Nothing changes.", "warn"); render(); return; } cur = prevRef; log.add("Undo: systemData = previousSystemData (V" + versions[cur].id + "). Both now refer to the same version.", "ok"); }
-    else { if (!stack.length) { log.add("Undo: the stack is empty.", "warn"); render(); return; } cur = stack.pop(); log.add("Undo: popped V" + versions[cur].id + " from the stack.", "ok"); } render(); }
+    log.add("version V" + next.id + " commit شد: مقدار systemData پیش می‌رود.", "ok"); render(); }
+  function undo() { if (mode === "single") { if (prevRef === null || prevRef === cur) { log.add("undo: مقدار systemData از پیش با previousSystemData برابر است. هیچ چیز عوض نمی‌شود.", "warn"); render(); return; } cur = prevRef; log.add("undo: systemData = previousSystemData یعنی V" + versions[cur].id + ". هر دو حالا به همان یک version ارجاع می‌دهند.", "ok"); }
+    else { if (!stack.length) { log.add("undo: آن پشته تهی است.", "warn"); render(); return; } cur = stack.pop(); log.add("undo: version V" + versions[cur].id + " از پشته برداشته شد.", "ok"); } render(); }
   function render(note) {
     var refd = {}; refd[cur] = 1; if (mode === "single" && prevRef !== null) refd[prevRef] = 1; if (mode === "stack") stack.forEach(function (i) { refd[i] = 1; });
     var vs = Kit.clear(document.getElementById("vers"));
-    versions.forEach(function (v, i) { vs.appendChild(Kit.el("span", { class: "ver " + (i === cur ? "cur" : refd[i] ? "prev" : "gone"), "aria-label": "V" + v.id + (i === cur ? ", current" : refd[i] ? ", kept for undo" : ", unreachable") }, "V" + v.id)); });
+    versions.forEach(function (v, i) { vs.appendChild(Kit.el("span", { class: "ver " + (i === cur ? "cur" : refd[i] ? "prev" : "gone"), "aria-label": "version V" + v.id + (i === cur ? "، کنونی" : refd[i] ? "، نگه‌داشته برای undo" : "، نارسیدنی") }, "V" + v.id)); });
     var ul = Kit.clear(document.getElementById("members")), d = versions[cur];
-    Object.keys(d.members).forEach(function (e) { ul.appendChild(Kit.el("li", null, e + (d.members[e].isBlocked ? " (blocked)" : "") + (d.members[e].lendings.length ? " — holds " + d.members[e].lendings.join(", ") : ""))); });
+    Object.keys(d.members).forEach(function (e) { ul.appendChild(Kit.el("li", null, e + (d.members[e].isBlocked ? " [blocked]" : "") + (d.members[e].lendings.length ? " — holds " + d.members[e].lendings.join(", ") : ""))); });
     var v = document.getElementById("verdict"); v.className = "callout " + (note === "rejected" ? "bad" : note ? "warn" : "ok");
-    v.textContent = note === "rejected" ? "SystemState.commit refused the next version: systemData still refers to V" + d.id + "." : note ? "The calculation threw “" + note + "”: the state never moved." : "systemData refers to V" + d.id + ".";
+    v.textContent = note === "rejected" ? "تابع SystemState.commit version پسین را نپذیرفت: مقدار systemData هنوز به V" + d.id + " ارجاع می‌دهد." : note ? "حساب خطای «" + note + "» را انداخت: آن state هیچ‌وقت تکان نخورد." : "مقدار systemData به V" + d.id + " ارجاع می‌دهد.";
     var kept = Object.keys(refd).length;
-    stats([["Current version", "V" + d.id], ["Versions kept", kept], ["Undos available", mode === "single" ? (prevRef !== null && prevRef !== cur ? 1 : 0) : stack.length], ["Commits rejected", rejected, rejected ? "bad" : ""]]); }
-  function reset() { versions = [initial()]; cur = 0; prevRef = null; stack = []; nextName = 1; rejected = 0; log.clear(); log.add("V1: one member, two book items.", "muted"); render(); }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Undo history", value: mode, options: [{ value: "single", label: "previousSystemData (book)" }, { value: "stack", label: "Stack of versions" }], onChange: function (m) { mode = m; reset(); log.add(m === "single" ? "One previous reference, as in listing 4.10." : "A stack of references, for multiple undos.", "muted"); } }).element);
+    stats([["version کنونی", "V" + d.id], ["versionهای نگه‌داشته", kept], ["undoهای در دست", mode === "single" ? (prevRef !== null && prevRef !== cur ? 1 : 0) : stack.length], ["commitهای ردشده", rejected, rejected ? "bad" : ""]]); }
+  function reset() { versions = [initial()]; cur = 0; prevRef = null; stack = []; nextName = 1; rejected = 0; log.clear(); log.add("version V1: یک عضو و دو نسخه‌ی کتاب.", "muted"); render(); }
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "تاریخ undo", value: mode, options: [{ value: "single", label: "یک previousSystemData، کتاب" }, { value: "stack", label: "پشته‌ای از versionها" }], onChange: function (m) { mode = m; reset(); log.add(m === "single" ? "یک ارجاع پیشین، مانند listing ۴.۱۰." : "پشته‌ای از ارجاع، برای چند undo.", "muted"); } }).element);
   Array.prototype.forEach.call(document.querySelectorAll("[data-m]"), function (b) { b.addEventListener("click", function () { mutate(b.getAttribute("data-m")); }); });
   document.getElementById("undo").addEventListener("click", undo); document.getElementById("rs").addEventListener("click", reset);
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Which phase of a mutation is stateful?",
-      options: ["The calculation", "The commit", "Both"], answer: 1,
-      explain: "Table 4.1, p. 72." },
-    { q: "Where does DOP check system-state integrity?",
-      options: ["In each class's methods", "Once, in the commit phase, for the whole system", "In the database"], answer: 1,
-      explain: "Listing 4.9, pp. 85–86." },
-    { q: "With only systemData and previousSystemData, what happens on a second consecutive undo?",
-      options: ["It goes back one more version", "Nothing changes: both already refer to the same version", "It throws"], answer: 1,
-      explain: "pp. 86–88; a stack allows multiple undos (pp. 88–89)." }
+    { q: "کدام فاز یک mutation باstate است؟",
+      options: ["حساب", "commit", "هر دو"], answer: 1,
+      explain: "جدول ۴.۱، ص. ۷۲." },
+    { q: "روش DOP تمامیت state سیستم را کجا می‌سنجد؟",
+      options: ["در متدهای هر کلاسی", "یک‌بار، در فاز commit، برای کل سیستم", "در پایگاه داده"], answer: 1,
+      explain: "listing ۴.۹، صص. ۸۵–۸۶." },
+    { q: "با تنها systemData و previousSystemData، سر undo دوم پشت‌سرهم چه می‌شود؟",
+      options: ["یک version دیگر عقب می‌رود", "هیچ چیز عوض نمی‌شود: هر دو از پیش به همان یک version ارجاع می‌دهند", "خطا می‌اندازد"], answer: 1,
+      explain: "صص. ۸۶–۸۸؛ و پشته چند undo می‌دهد (صص. ۸۸–۸۹)." }
   ]);
 })();
 </script>

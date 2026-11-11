@@ -1,68 +1,67 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Search as Data Manipulation</title>
-<meta name="description" content="Run the chapter 3 book search stage by stage over a small catalog: get the books, filter by title, map each to a BookInfo and serialize to JSON. Change the query, add a field to a book, and see which code cares. Illustrates Data-Oriented Programming, chapter 3.">
+<title>جست‌وجو به‌شکل دست‌کاری داده</title>
+<meta name="description" content="جست‌وجوی کتاب فصل ۳ را مرحله‌به‌مرحله روی catalogی کوچک اجرا کنید: کتاب‌ها را بگیرید، با عنوان صافی کنید، هر کدام را به BookInfo بنگارید و به JSON سریالی. پرسش را عوض کنید، فیلدی به کتابی بیفزایید، و ببینید کدام کد اهمیتش می‌دهد. تصویری از فصل ۳ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>ul.tree { list-style: none; padding-left: 14px; margin: 0; font-family: var(--mono); font-size: .8rem; } ul.tree li { margin: 1px 0; }
+<style>ul.tree { list-style: none; padding-right: 14px; padding-left: 0; margin: 0; font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: left; } ul.tree li { margin: 1px 0; }
   .tree .k { color: var(--ink-2); } .tree .v { color: var(--ink); } .tree button.key { font: inherit; background: none; border: 0; padding: 0 2px; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
   .tree .on > .lbl, .tree .on > button.key { background: var(--accent-soft); outline: 1px solid var(--accent); border-radius: 3px; }
-  .tree .new > .tag, .tree .shared > .tag { font-size: .7rem; border-radius: 3px; padding: 0 4px; margin-left: 4px; }
-  .tree .new > .tag { background: var(--warn-soft); color: var(--ink); border: 1px solid var(--warn); } .tree .shared > .tag { background: var(--ok-soft); color: var(--ink); border: 1px solid var(--ok); }
-  ol.steps { font-family: var(--mono); font-size: .8rem; } ol.steps li.miss { color: var(--bad); }
-  pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; } .stage-list li { margin: 6px 0; } .stage-list li.cur pre.code { border-color: var(--accent); } .stage-list li.todo { opacity: .5; }
+  ol.steps { font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: left; } ol.steps li.miss { color: var(--bad); }
+  pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; direction: ltr; text-align: left; } .stage-list li { margin: 6px 0; } .stage-list li.cur pre.code { border-color: var(--accent); } .stage-list li.todo { opacity: .5; }
+  .stage-list code { direction: ltr; display: inline-block; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/03-basic-data-manipulation.html">Chapter 3</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Search as data manipulation</span>
+      <a href="../chapters/03-basic-data-manipulation.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">جست‌وجو به‌شکل دست‌کاری داده</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 3 · Basic data manipulation</div>
-  <h1>Search as data manipulation</h1>
-  <p class="lede">Joe’s search is four small functions and no classes: <code>_.get</code> the books, <code>_.filter</code> by title, <code>_.map</code> each to a <code>BookInfo</code> map literal, and <code>JSON.stringify</code> the result. “The code contains no abstractions. It’s just data manipulation!”</p>
-  <p class="source-note">Illustrates section 3.4, Calculating search results (listings 3.10–3.24, pp. 58–64), with Watchmen from listing 3.5. The two extra books, the stage view and the extra-field experiment are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۳ · دست‌کاری پایه‌ی داده</div>
+  <h1>جست‌وجو به‌شکل دست‌کاری داده</h1>
+  <p class="lede">جست‌وجوی جو چهار تابع کوچک است و هیچ کلاسی: با <code>_.get</code> کتاب‌ها، با <code>_.filter</code> بر پایه‌ی عنوان، با <code>_.map</code> هر کدام به map لفظی <code>BookInfo</code>، و `JSON.stringify` روی خروجی. «کد هیچ انتزاعی ندارد. تنها دست‌کاری داده است!»</p>
+  <p class="source-note">تصویری از بخش ۳.۴، یعنی حساب کردن نتیجه‌های جست‌وجو (listingهای ۳.۱۰ تا ۳.۲۴، صص. ۵۸–۶۴)، با Watchmen از listing ۳.۵. آن دو کتاب افزوده و نمای مرحله‌ای و آزمون فیلد افزوده مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Library.searchBooksByTitleJSON(libraryData, query)</p><ol class="stage-list" id="stages"></ol></div>
+      <div class="panel"><p class="panel-title">تابع Library.searchBooksByTitleJSON(libraryData, query)</p><ol class="stage-list" id="stages"></ol></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><label class="field-head" for="q">Query</label><input id="q" type="text" value="Wat" style="width:100%">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="q">پرسش</label><input id="q" type="text" value="Wat" style="width:100%;direction:ltr;text-align:left">
         <div id="pl" style="margin-top:10px"></div>
-        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="extra"> Add a <code>"genre"</code> field to every book</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="noauth"> Remove Dave Gibbons from <code>authorsById</code></label></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="extra"> افزودن فیلد <code>"genre"</code> به هر کتابی</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="noauth"> برداشتن Dave Gibbons از <code>authorsById</code></label></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Each stage is data in, data out</strong>, so you can look at any intermediate value, and serializing the result needs no code: it is already JSON-shaped.</li>
-    <li><strong>Adding a field to books changes nothing</strong> in the search: <code>authorNames</code> reads only <code>authorIds</code>, and <code>bookInfo</code> picks only <code>title</code> and <code>isbn</code>. The data model is flexible.</li>
-    <li><strong>The flip side is safety</strong>: remove an author and the search returns <code>null</code> where a name should be, silently. Chapters 7 and 12 add schemas for that.</li>
+    <li><strong>هر مرحله‌ای داده تو، داده بیرون است</strong>، پس می‌توانید به هر مقدار میانی‌ای نگاه کنید، و سریالی کردن خروجی هیچ کدی نمی‌خواهد: از پیش JSON‌شکل است.</li>
+    <li><strong>افزودن فیلدی به کتاب‌ها هیچ چیز را</strong> در آن جست‌وجو عوض نمی‌کند: تابع <code>authorNames</code> تنها <code>authorIds</code> را می‌خواند، و <code>bookInfo</code> تنها <code>title</code> و <code>isbn</code> را برمی‌دارد. مدل داده نرم است.</li>
+    <li><strong>آن سوی دیگر ایمنی است</strong>: نویسنده‌ای را بردارید و آن جست‌وجو جای نامی <code>null</code> برمی‌گرداند، خاموش. فصل‌های ۷ و ۱۲ برای آن طرح می‌افزایند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/03-basic-data-manipulation.html"><small>Lesson</small>3. Basic data manipulation</a></li>
+    <li><a href="../chapters/03-basic-data-manipulation.html"><small>درس</small>فصل ۳: دست‌کاری پایه‌ی داده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,7 +82,6 @@ function stats(rows) {
         bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }, { id: "book-item-2", libId: "nyc-central-lib", isLent: false }] } },
     authorsById: { "alan-moore": { name: "Alan Moore", bookIsbns: ["978-1779501127"] }, "dave-gibbons": { name: "Dave Gibbons", bookIsbns: ["978-1779501127"] } } }; }
   function isObj(x) { return x !== null && typeof x === "object"; }
-  function fmt(v) { return Array.isArray(v) ? "[…" + v.length + "]" : isObj(v) ? "{…" + Object.keys(v).length + "}" : JSON.stringify(v); }
 
   var log = Kit.log(document.getElementById("log")), stage = 4;
   function libraryData() { var c = catalog();
@@ -107,25 +105,25 @@ function stats(rows) {
     var ol = Kit.clear(document.getElementById("stages"));
     S.forEach(function (s, i) { ol.appendChild(Kit.el("li", { class: i + 1 === stage ? "cur" : i + 1 > stage ? "todo" : "" }, Kit.el("code", null, s[0]), Kit.el("pre", { class: "code" }, i + 1 > stage ? "…" : s[1]))); });
     var nulls = infos.reduce(function (a, x) { return a + x.authorNames.filter(function (n) { return n === null; }).length; }, 0);
-    stats([["Books", all.length], ["Matching", matching.length], ["Classes defined", 0, "ok"], ["Missing author names", nulls, nulls ? "bad" : "ok"]]);
+    stats([["کتاب‌ها", all.length], ["خورنده", matching.length], ["کلاس‌های تعریف‌شده", 0, "ok"], ["نام نویسنده‌های جاافتاده", nulls, nulls ? "bad" : "ok"]]);
     return { m: matching.length, nulls: nulls };
   }
-  var pl = Kit.player({ mount: document.getElementById("pl"), interval: 900, step: function () { if (stage >= 4) return false; stage++; log.add("Stage " + stage + " computed.", "muted"); run(); return stage < 4; }, reset: function () { stage = 1; run(); log.add("Back to the first stage.", "muted"); } });
-  document.getElementById("q").addEventListener("input", function () { var r = run(); log.add("Query " + JSON.stringify(document.getElementById("q").value) + ": " + r.m + " book(s).", "muted"); });
-  document.getElementById("extra").addEventListener("change", function (e) { run(); log.add(e.target.checked ? "Added genre to every book: the search code is unchanged and so is its output." : "Removed the genre field.", "ok"); });
-  document.getElementById("noauth").addEventListener("change", function (e) { var r = run(); log.add(e.target.checked ? "Dave Gibbons removed: " + r.nulls + " missing author name(s) in the result, with no error." : "Dave Gibbons restored.", e.target.checked ? "bad" : "muted"); });
+  var pl = Kit.player({ mount: document.getElementById("pl"), interval: 900, step: function () { if (stage >= 4) return false; stage++; log.add("مرحله‌ی " + stage + " حساب شد.", "muted"); run(); return stage < 4; }, reset: function () { stage = 1; run(); log.add("بازگشت به مرحله‌ی نخست.", "muted"); } });
+  document.getElementById("q").addEventListener("input", function () { var r = run(); log.add("پرسش " + JSON.stringify(document.getElementById("q").value) + ": " + r.m + " کتاب.", "muted"); });
+  document.getElementById("extra").addEventListener("change", function (e) { run(); log.add(e.target.checked ? "فیلد genre به هر کتابی افزوده شد: کد جست‌وجو دست‌نخورده است و خروجی‌اش هم." : "فیلد genre برداشته شد.", "ok"); });
+  document.getElementById("noauth").addEventListener("change", function (e) { var r = run(); log.add(e.target.checked ? "نام Dave Gibbons برداشته شد: " + r.nulls + " نام نویسنده‌ی جاافتاده در برآمد، بی هیچ خطایی." : "نام Dave Gibbons برگشت.", e.target.checked ? "bad" : "muted"); });
   run();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How is a BookInfo created in Joe's code?",
-      options: ["With a BookInfo class", "As a map literal in Catalog.bookInfo", "By a JSON parser"], answer: 1,
-      explain: "p. 64: there's no need to create a class for bookInfo." },
-    { q: "What does _.filter do when passed a map such as booksByIsbn?",
-      options: ["Throws", "Iterates over the map's values", "Iterates over its keys"], answer: 1,
-      explain: "Listing 3.23, p. 64." },
-    { q: "Which module does searchBooksByTitleJSON belong to?",
+    { q: "در کد جو، هر BookInfo چطور ساخته می‌شود؟",
+      options: ["با کلاس BookInfo", "به‌شکل map لفظی در Catalog.bookInfo", "با بازکننده‌ای JSON"], answer: 1,
+      explain: "ص. ۶۴: هیچ نیازی به ساختن کلاسی برای bookInfo نیست." },
+    { q: "تابع _.filter وقتی mapی مانند booksByIsbn بگیرد چه می‌کند؟",
+      options: ["خطا می‌اندازد", "روی مقدارهای آن map می‌گردد", "روی کلیدهایش می‌گردد"], answer: 1,
+      explain: "listing ۳.۲۳، ص. ۶۴." },
+    { q: "تابع searchBooksByTitleJSON به کدام ماژول تعلق دارد؟",
       options: ["Catalog", "Library", "UserManagement"], answer: 1,
-      explain: "p. 63." }
+      explain: "ص. ۶۳." }
   ]);
 })();
 </script>

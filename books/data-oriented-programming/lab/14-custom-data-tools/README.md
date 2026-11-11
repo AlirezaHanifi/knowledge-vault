@@ -1,18 +1,18 @@
-# Custom data tools
+# ابزارهای دست‌ساز داده
 
-`update`, `flatMap`, `countByBoolField` and `unwind` in Python, run on the chapter's data: the income map, the two books with their book items, and Joe's cart. The script then runs `update` and `unwind` again with a `set` that mutates in place, as default Lodash's `_.set` does.
+توابع `update` و `flatMap` و `countByBoolField` و `unwind` به Python، اجراشده روی داده‌ی این فصل: آن map درآمد، آن دو کتاب با نسخه‌هایشان، و سبد جو. بعد اسکریپت `update` و `unwind` را باز با `set`ی اجرا می‌کند که سر جا mutation می‌دهد، آن‌طور که `_.set` پیش‌فرض Lodash می‌کند.
 
-*Illustrates Data-Oriented Programming, chapter 14, pp. 296–309 (listings 14.3–14.19). The duplicated author in step 1 is the vault's example; the mutating-set comparison illustrates the vault note in the lesson.*
+*تصویری از فصل ۱۴ کتاب Data-Oriented Programming، صص. ۲۹۶–۳۰۹ (listingهای ۱۴.۳ تا ۱۴.۱۹). نویسنده‌ی دوباره در قدم ۱ مثال vault است؛ و سنجش set mutationی کادر vault در درس را تصویر می‌کند.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 custom_data_tools.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 update (listings 14.2-14.4)
@@ -43,13 +43,13 @@ The same with a mutating set (the vault note in the lesson)
   books grouped by library: {'nyc-central-lib': ['book-item-1', 'book-item-17', 'book-item-17']}
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- `update` returns a new map and leaves its input alone; `countByBoolField` passes listing 14.14's test, and the lending ratio of the sample is 2/3.
-- `unwind` turns the cart into two maps with one item each, and the cart is unchanged.
-- Grouping the unwound books by `bookItems.libId` puts Watchmen and one copy of 7 Habits at nyc-central-lib, and the other copy at hudson-park-lib.
-- With a mutating set, `unwind` returns the same object twice, each showing the last item, and changes the cart. `update` changes its input. The grouping then collapses into one library with a duplicated item.
+- تابع `update` mapی تازه برمی‌گرداند و ورودی‌اش را رها می‌کند؛ تابع `countByBoolField` تست listing ۱۴.۱۴ را رد می‌کند، و نسبت قرض آن نمونه ۲ بخش بر ۳ است.
+- تابع `unwind` آن سبد را به دو map با یک نسخه برای هر کدام بدل می‌کند، و خود سبد دست‌نخورده می‌ماند.
+- گروه کردن کتاب‌های بازشده با `bookItems.libId` کتاب Watchmen و یک نسخه از 7 Habits را در nyc-central-lib می‌گذارد، و آن نسخه‌ی دیگر را در hudson-park-lib.
+- با setی جهشی، تابع `unwind` همان یک شیء را دو بار برمی‌گرداند که هر دو نسخه‌ی آخر را نشان می‌دهند، و آن سبد را عوض می‌کند. تابع `update` ورودی‌اش را عوض می‌کند. بعد آن گروه کردن در یک کتابخانه با نسخه‌ای دوباره فرو می‌ریزد.
 
-## Related
+## مرتبط
 
-- Chapter note: [14. Advanced data manipulation](../../chapters/14-advanced-data-manipulation.md) — sections 14.1–14.4, pp. 296–309
+- یادداشت فصل: [فصل ۱۴: دست‌کاری پیشرفته‌ی داده](../../chapters/14-advanced-data-manipulation.md) — بخش‌های ۱۴.۱ تا ۱۴.۴، صص. ۲۹۶–۳۰۹

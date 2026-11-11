@@ -1,18 +1,18 @@
-# Structural sharing in numbers
+# شریک شدن ساختاری در عدد
 
-How much does an immutable update really copy? A Python port of `setImmutable` sets one book's publication year in libraries of 10 to 10,000 books. The script counts the maps it creates, the slots it copies, and the maps it shares with the previous version, compared with a deep copy. Then it keeps 1,000 versions of a 1,000-book library and counts the maps they hold together.
+هر به‌روزرسانی immutability واقعاً چقدر کپی می‌کند؟ درگاهی Python از `setImmutable` سال نشر یک کتاب را در کتابخانه‌هایی از ۱۰ تا ۱۰٬۰۰۰ کتاب می‌گذارد. اسکریپت mapهایی را که می‌سازد، خانه‌هایی را که کپی می‌کند، و mapهایی را که با version پیشین شریک می‌شود در برابر کپی عمیق می‌شمارد. بعد ۱٬۰۰۰ version از کتابخانه‌ای ۱٬۰۰۰کتابی را نگه می‌دارد و mapهایی را که با هم دارند می‌شمارد.
 
-*Illustrates Data-Oriented Programming, chapter 4, sections 4.2–4.3, pp. 75–81: structural sharing, and Dave's `setImmutable` (listing 4.4, p. 81). The library's shape follows figure 4.2; its size, the authors and the random updates are the vault's (seeded).*
+*تصویری از فصل ۴ کتاب Data-Oriented Programming، بخش‌های ۴.۲ و ۴.۳، صص. ۷۵–۸۱: شریک شدن ساختاری، و تابع `setImmutable` دیو (listing ۴.۴، ص. ۸۱). شکل آن کتابخانه از شکل ۴.۲ پی می‌گیرد؛ و اندازه‌اش و نویسنده‌ها و به‌روزرسانی‌های تصادفی مال vault است، با seed.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 structural_sharing.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 One update: set a book's publication year
@@ -34,13 +34,13 @@ Keeping 1,000 versions of a 1,000-book library (one random update each)
   maps kept by 1,001 deep copies:     3,811,808  (1001x)
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Exactly 4 maps are new after one update, one per level of the path (library, catalog, `booksByIsbn`, the book), whatever the library's size. Everything else is shared, including `userManagement` and the sibling books.
-- *Slots copied* grows with the collection: the shallow clone of `booksByIsbn` copies every key. That's the slowdown chapter 9 sets out to fix with persistent data structures.
-- A deep copy creates as many maps as the library holds. That's 35,308 for 10,000 books, against 4.
-- A thousand shared versions hold only about twice the maps of one version. A thousand deep copies would hold a thousand times as many.
+- پس از یک به‌روزرسانی دقیقاً ۴ map تازه‌اند، یکی برای هر سطح آن مسیر، یعنی کتابخانه و catalog و `booksByIsbn` و خود کتاب، هر اندازه‌ای هم آن کتابخانه داشته باشد. باقی شریک است، مقدار `userManagement` و کتاب‌های هم‌نیا هم.
+- *خانه‌های کپی‌شده* با آن مجموعه رشد می‌کند: کلون سطحی `booksByIsbn` هر کلیدی را کپی می‌کند. همان کندی‌ای است که فصل ۹ با ساختارهای داده‌ی persistent به درست کردنش می‌رود.
+- کپی عمیق به‌اندازه‌ی mapهایی که آن کتابخانه دارد map می‌سازد. آن برای ۱۰٬۰۰۰ کتاب ۳۵٬۳۰۸ است، در برابر ۴.
+- هزار version شریک تنها حدود دو برابر mapهای یک version را نگه می‌دارند. هزار کپی عمیق هزار برابر را نگه می‌داشتند.
 
-## Related
+## مرتبط
 
-- Chapter note: [4. State management](../../chapters/04-state-management.md) — sections 4.2–4.3, pp. 75–81
+- یادداشت فصل: [فصل ۴: مدیریت state](../../chapters/04-state-management.md) — بخش‌های ۴.۲ و ۴.۳، صص. ۷۵–۸۱

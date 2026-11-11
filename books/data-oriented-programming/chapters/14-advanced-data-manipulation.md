@@ -2,27 +2,29 @@
 book: data-oriented-programming
 chapter: 14
 title: "Advanced data manipulation"
+translated_title: "دست‌کاری پیشرفته‌ی داده"
 pages: "295–310"
+lang: fa
 ---
 
-# 14. Advanced data manipulation
+# ۱۴. دست‌کاری پیشرفته‌ی داده
 
-[← 13. Polymorphism](13-polymorphism.md) · [Book](../README.md) · [15. Debugging →](15-debugging.md)
+[← ۱۳. polymorphism](13-polymorphism.md) · [کتاب](../README.md) · [۱۵. اشکال‌زدایی →](15-debugging.md)
 
-## Summary
+## خلاصه
 
-When business logic involves advanced data processing, the generic functions of the language and of libraries may not be enough. Instead of mixing data manipulation details into business logic, **write your own generic data manipulation functions** and express the logic with them. The business code becomes concise and conveys its intent (p. 295).
+وقتی منطق کسب‌وکار پردازش پیشرفته‌ی داده را درگیر می‌کند، تابع‌های عمومی زبان و کتابخانه‌ها شاید بس نباشند. به‌جای قاطی کردن ریزکاری دست‌کاری داده در منطق کسب‌وکار، **تابع‌های عمومی دست‌کاری داده‌ی خودتان را بنویسید** و منطق را با آن‌ها بگویید. کد کسب‌وکار موجز می‌شود و قصدش را می‌رساند (p. 295).
 
-Dave, now mostly autonomous, builds four such tools while fixing a bug and three admin features (pp. 296–309):
+دیو، که حالا بیشتر خودگردان است، سر درست کردن اشکالی و سه ویژگی مدیریتی چهار ابزار از این دست می‌سازد (pp. 296–309):
 
-| Tool | Problem it solves | Built from |
+| ابزار | مسئله‌ای که حلش می‌کند | ساخته از |
 |---|---|---|
-| `update(map, path, fun)` | Remove duplicate author names; any "next value from the current value" | `_.get`, `_.set` |
-| `flatMap(coll, f)` | List all author IDs from books | `_.flatten`, `_.map` |
-| `countByBoolField(coll, field, keyTrue, keyFalse)` | The book lending ratio | `_.reduce`, `update`, `inc` |
-| `unwind(map, field)` | Group book items by library, keeping each book's title and ISBN | `_.map`, `_.set` |
+| `update(map, path, fun)` | برداشتن نام نویسنده‌های دوباره؛ و هر «مقدار پسین از مقدار کنونی» | توابع `_.get` و `_.set` |
+| `flatMap(coll, f)` | فهرست کردن همه‌ی شناسه‌ی نویسنده‌ها از کتاب‌ها | توابع `_.flatten` و `_.map` |
+| `countByBoolField(coll, field, keyTrue, keyFalse)` | نسبت قرض کتاب | توابع `_.reduce` و `update` و `inc` |
+| `unwind(map, field)` | گروه کردن نسخه‌های کتاب با کتابخانه، با نگه داشتن عنوان و ISBN هر کتابی | توابع `_.map` و `_.set` |
 
-Joe's advice on the phone from a taxi is to "put the cart before the horse": write the business logic as if the tool existed, to discover its signature (p. 297). The chapter's summary turns that into a four-step process (p. 310):
+پند جو، تلفنی از تاکسی، این است که «گاری را پیش اسب ببند»: منطق کسب‌وکار را چنان بنویسید که گویی آن ابزار هست، تا امضایش را کشف کنید (p. 297). خلاصه‌ی فصل آن را به فرایندی چهارقدمی بدل می‌کند (p. 310):
 
 ```mermaid
 flowchart LR
@@ -31,42 +33,42 @@ flowchart LR
     C --> D[4 Implement it]
 ```
 
-*The four steps from the chapter summary (p. 310).*
+*آن چهار قدم از خلاصه‌ی فصل (p. 310).*
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Separate business logic from data manipulation**: the code becomes concise and conveys its intent (p. 310).
-- **Find a tool's signature by using it first**, in the most convenient way (p. 297).
-- **Keep tools generic**: `update` receives the updating function, such as `_.uniq`, rather than knowing about duplicates (p. 297).
-- **Formulate the behaviour in plain English** before implementing (p. 298).
-- **It's not about code size**; it's the clarity of intent and the power of naming things (p. 301).
-- **Pick the least generic utility function that solves your problem**: `forEach` is a Swiss army knife (p. 303).
-- **Hide `_.reduce`** and other low-level functions behind well-named utilities; don't use them in business logic (p. 304).
-- **Write a unit test before implementing a complicated function** (p. 307).
+- **منطق کسب‌وکار را از دست‌کاری داده جدا کنید**: کد موجز می‌شود و قصدش را می‌رساند (p. 310).
+- **امضای ابزاری را با نخست به کار بردنش بیابید**، به راحت‌ترین شکل (p. 297).
+- **ابزارها را عمومی نگه دارید**: تابع `update` همان تابع به‌روزکننده را می‌گیرد، مانند `_.uniq`، نه آنکه از دوباره‌ها خبر داشته باشد (p. 297).
+- **رفتار را به زبان ساده بگویید** پیش از پیاده کردن (p. 298).
+- **سر اندازه‌ی کد نیست**؛ سر روشنی قصد و نیروی نام دادن به چیزهاست (p. 301).
+- **کم‌عمومی‌ترین تابع سودمندی را که مسئله‌تان را حل می‌کند برگزینید**: تابع `forEach` چاقوی سوئیسی است (p. 303).
+- **تابع `_.reduce` را پنهان کنید** و تابع‌های سطح‌پایین دیگر را پشت ابزارهای خوش‌نام؛ در منطق کسب‌وکار به کارشان نبرید (p. 304).
+- **پیش از پیاده کردن تابعی بغرنج تستی unit بنویسید** (p. 307).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 14.1 Updating a value in a map with eloquence — p. 296
-- 14.2 Manipulating nested data — p. 299
-- 14.3 Using the best tool for the job — p. 301
-- 14.4 Unwinding at ease — p. 305
-- Summary — p. 310
+- ۱۴.۱ به‌روز کردن مقداری در mapی با شیوایی — ص. ۲۹۶
+- ۱۴.۲ دست‌کاری داده‌ی تودرتو — ص. ۲۹۹
+- ۱۴.۳ به کار بردن بهترین ابزار برای کار — ص. ۳۰۱
+- ۱۴.۴ باز کردن با آسودگی — ص. ۳۰۵
+- خلاصه — ص. ۳۱۰
 
-## Notes
+## یادداشت‌ها
 
-Dave's code quality standards are high: even when his code works, he's often unhappy with its readability (p. 296). Each section starts with code he doesn't like and ends with a named tool.
+معیارهای کیفیت کد دیو بالاست: حتی وقتی کدش کار می‌کند، بیشتر وقت‌ها از خواندنی بودنش ناخشنود است (p. 296). هر بخشی با کدی آغاز می‌شود که دوستش ندارد و با ابزاری نام‌دار تمام.
 
-### 14.1 Updating a value in a map with eloquence
+### ۱۴.۱ به‌روز کردن مقداری در mapی با شیوایی
 
-The bug: the Open Library API sometimes returns duplicate author names, which are passed through to the client (p. 296). Dave's fix gets the authors, applies `_.uniq` and sets them back (listing 14.1). Theo finds it tedious because the next value is based on the current one (p. 296).
+اشکال: interface Open Library API گاهی نام نویسنده‌های دوباره برمی‌گرداند، که به client رد می‌شوند (p. 296). چاره‌ی دیو نویسنده‌ها را می‌گیرد، `_.uniq` را پیاده می‌کند و بازشان می‌گذارد (listing ۱۴.۱). تئو آن را خسته‌کننده می‌یابد چون مقدار پسین روی مقدار کنونی نشسته (p. 296).
 
-Joe's advice, on the phone from a taxi back from his conference talk, is to write a generic `update` (pp. 296–297):
+پند جو، تلفنی از تاکسی سر بازگشت از سخنرانی کنفرانسش، نوشتن یک `update` عمومی است (pp. 296–297):
 
-1. **Use it first.** `removeAuthorDuplicates` becomes `return update(book, "authors", _.uniq);` (listing 14.2, p. 298).
-2. **Say it in English.** `update` receives `map`, `path` and `fun`, and returns a new version of `map` where `path` is associated with `fun(currentValue)` (figure 14.1, p. 298).
-3. **Implement it** (listing 14.3, p. 298):
+1. **نخست به کارش ببرید.** تابع `removeAuthorDuplicates` به `return update(book, "authors", _.uniq);` بدل می‌شود (listing ۱۴.۲، ص. ۲۹۸).
+2. **به زبان ساده بگوییدش.** تابع `update` مقدارهای `map` و `path` و `fun` را می‌گیرد، و versionی تازه از `map` برمی‌گرداند که در آن `path` با `fun(currentValue)` تداعی شده (شکل ۱۴.۱، ص. ۲۹۸).
+3. **پیاده‌اش کنید** (listing ۱۴.۳، ص. ۲۹۸):
 
 ```js
 function update(map, path, fun) {
@@ -76,95 +78,107 @@ function update(map, path, fun) {
 }
 ```
 
-Doubling an income, `update(m, "income", x => x * 2)`, turns 100000 into 200000 (listing 14.4, p. 299). A footnote says Lodash provides its own `update`; the book writes one for teaching (p. 297).
+دو برابر کردن درآمدی، یعنی `update(m, "income", x => x * 2)`، مقدار ۱۰۰۰۰۰ را ۲۰۰۰۰۰ می‌کند (listing ۱۴.۴، ص. ۲۹۹). پانویسی می‌گوید Lodash خودش `update` را می‌دهد؛ و کتاب برای آموزش یکی می‌نویسد (p. 297).
 
-> **Vault note:** `update` and `unwind` are correct only because `_.set` here is the immutable version from Lodash FP (chapter 4, pp. 75–76). With default Lodash, `_.set` mutates and returns the same object, so `update` would change its input, and `unwind` would return several references to one map, each holding the last element.
+> **Vault note:** توابع `update` و `unwind` تنها از آن درستند که `_.set` این‌جا همان version immutable از Lodash FP است (فصل ۴، صص. ۷۵–۷۶). با Lodash پیش‌فرض، تابع `_.set` mutation می‌دهد و همان شیء را برمی‌گرداند، پس `update` ورودی‌اش را عوض می‌کرد، و `unwind` چند ارجاع به یک map برمی‌گرداند که هر کدام عضو آخر را دارد.
 
-### 14.2 Manipulating nested data
+### ۱۴.۲ دست‌کاری داده‌ی تودرتو
 
-Nancy asks for three admin features: list all book author IDs, calculate the book lending ratio, and group books by physical library, all by the end of the week (p. 299).
+نانسی سه ویژگی مدیریتی می‌خواهد: فهرست کردن همه‌ی شناسه‌ی نویسنده‌های کتاب، حساب کردن نسبت قرض کتاب، و گروه کردن کتاب‌ها با کتابخانه‌ی فیزیکی، همه تا پایان هفته (p. 299).
 
-| Version | Result | Listing |
+| version | خروجی | نمونه |
 |---|---|---|
-| `_.map(books, "authorIds")` | An array of arrays, `[["sean-covey", "stephen-covey"], ["alan-moore", "dave-gibbons"]]` | 14.5–14.6, p. 300 |
-| `_.flatten(_.map(books, "authorIds"))` | A flat array of IDs | 14.7, p. 300 |
-| `flatMap(books, "authorIds")` | The same, with a named tool | 14.8–14.9, pp. 300–301 |
+| `_.map(books, "authorIds")` | آرایه‌ای از آرایه، یعنی `[["sean-covey", "stephen-covey"], ["alan-moore", "dave-gibbons"]]` | ۱۴.۵ و ۱۴.۶، ص. ۳۰۰ |
+| `_.flatten(_.map(books, "authorIds"))` | آرایه‌ای تخت از شناسه‌ها | ۱۴.۷، ص. ۳۰۰ |
+| `flatMap(books, "authorIds")` | همان، با ابزاری نام‌دار | ۱۴.۸ و ۱۴.۹، صص. ۳۰۰–۳۰۱ |
 
-Dave finds such a small function odd, and the two versions similar. Theo asks him to pass "that thing on your desk that's used for writing" to show the cost of describing instead of naming: the point is clarity of intent, not code size (p. 301).
+دیو تابعی این‌قدر کوچک را عجیب می‌یابد، و آن دو version را همانند. تئو از او می‌خواهد «آن چیزی را که روی میزت است و برای نوشتن به کار می‌رود» بدهد تا بهای وصف کردن به‌جای نام دادن را نشان دهد: نکته روشنی قصد است، نه اندازه‌ی کد (p. 301).
 
-### 14.3 Using the best tool for the job
+> **In practice:** پاسخ APIهای منبع اغلب JSON تودرتوست و dlt آن را به جدول‌های فرزند تخت می‌کند.
+>
+> **Your turn:** یک منبع آرایه‌ای از آیتم‌ها در هر سفارش برمی‌گرداند. در Bronze چه می‌بینید و در Silver چه می‌کنید؟
+>
+> *Answer:* dlt یک جدول فرزند با کلید والد می‌سازد؛ در Silver دو جدول را join می‌کنید یا آیتم‌ها را در ستون `Array` یا `Nested` در ClickHouse نگه می‌دارید. تابع‌های مسیرمحور روی داده‌ی تودرتو همان ابزاری‌اند که کتاب برای این کار پیشنهاد می‌کند (pp. 299–301).
 
-The lending ratio works on books with nested `bookItems`, each with `id`, `libId` and `isLent` (listing 14.10, pp. 301–302). The book's sample has three items, two of them lent.
+### ۱۴.۳ به کار بردن بهترین ابزار برای کار
 
-| Version | What the business logic shows | Listing |
+نسبت قرض روی کتاب‌هایی با `bookItems` تودرتو کار می‌کند، که هر کدام `id` و `libId` و `isLent` دارد (listing ۱۴.۱۰، صص. ۳۰۱–۳۰۲). نمونه‌ی کتاب سه نسخه دارد که دوتایشان قرض رفته‌اند.
+
+| version | منطق کسب‌وکار چه نشان می‌دهد | نمونه |
 |---|---|---|
-| `_.forEach` incrementing `lent` and `notLent` variables | Iteration and mutation | 14.11, p. 302 |
-| `_.reduce` with `{lent: 0, notLent: 0}` | A fold; still low-level | 14.12, p. 303 |
-| `countByBoolField(bookItems, "isLent", "lent", "notLent")` | What's being counted | 14.13, p. 304 |
+| تابع `_.forEach` که متغیرهای `lent` و `notLent` را می‌افزاید | گشتن و mutation | ۱۴.۱۱، ص. ۳۰۲ |
+| تابع `_.reduce` با `{lent: 0, notLent: 0}` | تا کردنی؛ هنوز سطح‌پایین | ۱۴.۱۲، ص. ۳۰۳ |
+| تابع `countByBoolField(bookItems, "isLent", "lent", "notLent")` | آنچه شمرده می‌شود | ۱۴.۱۳، ص. ۳۰۴ |
 
-Theo doesn't like *any* code with `forEach`: it's too generic. Genericity is good when *building* a utility; when *using* one, choose the least generic function that solves the problem. He uses a screwdriver, not a Swiss army knife, to open his drone, and anyone watching knows he's turning a screw (p. 303). Putting the two counters in a map lets the `reduce` be hidden behind a named function (p. 304).
+تئو *هیچ* کدی با `forEach` را دوست ندارد: خیلی عمومی است. عمومیت وقتی خوب است که ابزاری سودمندی *می‌سازید*؛ و سر *به کار بردن* یکی، کم‌عمومی‌ترین تابعی را برگزینید که مسئله را حل می‌کند. برای باز کردن پهپادش پیچ‌گوشتی به کار می‌برد، نه چاقوی سوئیسی، و هر که ببیند می‌داند دارد پیچی می‌چرخاند (p. 303). گذاشتن آن دو شمارنده در mapی می‌گذارد آن `reduce` پشت تابعی نام‌دار پنهان شود (p. 304).
 
-Dave writes a unit test first: four maps with `a` true three times give `{"aTrue": 3, "aFalse": 1}` (listing 14.14, pp. 304–305). The implementation reduces with `update(res, keyTrue, inc)` or `update(res, keyFalse, inc)`, starting from a map with both keys at 0 (listing 14.15, p. 305).
+دیو نخست تستی unit می‌نویسد: چهار map که `a` در سه‌تایشان درست است، مقدار `{"aTrue": 3, "aFalse": 1}` می‌دهد (listing ۱۴.۱۴، صص. ۳۰۴–۳۰۵). آن پیاده‌سازی با `update(res, keyTrue, inc)` یا `update(res, keyFalse, inc)` تحویل می‌برد، از mapی که هر دو کلیدش ۰ است آغاز (listing ۱۴.۱۵، ص. ۳۰۵).
 
-> **Try it:** [The least generic tool](../widgets/14-least-generic.html) — toggle book items lent or not and switch between the `forEach`, `reduce` and `countByBoolField` versions of `lendingRatio`: the ratio stays the same, while the business logic shrinks to what it means.
+> **Try it:** [کم‌عمومی‌ترین ابزار](../widgets/14-least-generic.html) — نسخه‌های کتاب را قرض‌رفته یا نرفته کنید و میان versionهای `forEach` و `reduce` و `countByBoolField` از `lendingRatio` سوئیچ کنید: آن نسبت همان می‌ماند، در حالی که منطق کسب‌وکار به معنایش آب می‌رود.
 
-### 14.4 Unwinding at ease
+> **In practice:** Lodash در کتاب همان نقشی را دارد که در stack ما تابع‌های آرایه و JSON در ClickHouse و کتابخانه‌ی استاندارد Python دارند.
+>
+> **Your turn:** پیش از نوشتن تابع تازه برای دست‌کاری JSON در Python، چه چیزی را چک می‌کنید؟
+>
+> *Answer:* این‌که کار با تابع‌های داخلی ClickHouse، مثل `JSONExtract` و `arrayMap`، در خود کوئری شدنی است، یا تابعی در کتابخانه‌ی مشترک تیم هست. تابع عمومی موجود را پیدا کنید پیش از نوشتن تابع تازه (pp. 303–305).
 
-Grouping by library is harder: the work is on book items, but each item lacks its book's title and ISBN (p. 307). Dave's unit test expects a map from `libId` to entries that keep `isbn` and `title`, with `bookItems` holding a *single* item (listing 14.16, pp. 306–307).
+### ۱۴.۴ باز کردن با آسودگی
 
-Theo recalls MongoDB's **`$unwind`** operator from an online-store query, where a cart with `customer-id` and an `items` array became one document per item (figure 14.2, pp. 307–308). Given a map with an array field, `unwind` returns one map per element, the same map with the field associated to that element. Dave writes the business logic first, then the test and the tool (pp. 308–309):
+گروه کردن با کتابخانه سخت‌تر است: کار روی نسخه‌های کتاب است، ولی هر نسخه‌ای عنوان و ISBN کتابش را ندارد (p. 307). تست unit دیو mapی از `libId` به entryهایی چشم دارد که `isbn` و `title` را نگه می‌دارند، با `bookItems`ی که *یک* نسخه دارد (listing ۱۴.۱۶، صص. ۳۰۶–۳۰۷).
 
-| Step | Code | Listing |
+تئو عملگر **`$unwind`** از MongoDB را یاد می‌آورد، از پرسشی در فروشگاهی آنلاین، که سبدی با `customer-id` و آرایه‌ی `items` به یک سند برای هر نسخه بدل شد (شکل ۱۴.۲، صص. ۳۰۷–۳۰۸). اگر mapی با فیلدی آرایه‌ای داده شود، تابع `unwind` یک map برای هر عضوی برمی‌گرداند، یعنی همان map با فیلدی که به آن عضو تداعی شده. دیو نخست منطق کسب‌وکار را می‌نویسد، بعد تست و ابزار را (pp. 308–309):
+
+| قدم | کد | نمونه |
 |---|---|---|
-| Usage | `flatMap(books, book => unwind(book, "bookItems"))`, then `_.groupBy(bookItems, "bookItems.libId")` | 14.17, p. 308 |
-| Test | Joe's cart → two maps, each with `customer-id` and one item | 14.18, p. 309 |
-| Implementation | `_.map(_.get(map, field), elem => _.set(map, field, elem))` | 14.19, p. 309 |
+| کاربرد | عبارت `flatMap(books, book => unwind(book, "bookItems"))`، بعد `_.groupBy(bookItems, "bookItems.libId")` | ۱۴.۱۷، ص. ۳۰۸ |
+| تست | سبد جو که به دو map بدل می‌شود، هر کدام با `customer-id` و یک نسخه | ۱۴.۱۸، ص. ۳۰۹ |
+| پیاده‌سازی | عبارت `_.map(_.get(map, field), elem => _.set(map, field, elem))` | ۱۴.۱۹، ص. ۳۰۹ |
 
-Because data is immutable, there's no need to clone the map for each element (p. 309).
+چون داده immutable است، نیازی نیست آن map برای هر عضوی کلون شود (p. 309).
 
-> **Try it:** [Unwind and group](../widgets/14-unwind.html) — step through `unwind` on each book, then `groupBy` on `bookItems.libId`, and watch title and ISBN travel with every item; add an item to a new library.
+> **Try it:** [باز کردن و گروه کردن](../widgets/14-unwind.html) — تابع `unwind` را روی هر کتابی قدم‌به‌قدم ببینید، بعد `groupBy` را روی `bookItems.libId`، و تماشا کنید عنوان و ISBN با هر نسخه‌ای سفر می‌کنند؛ نسخه‌ای به کتابخانه‌ای تازه بیفزایید.
 
-> **Vault note:** the function is called `booksByRack` in listings 14.16–14.17 but `booksByLib` in the dialogue (p. 307).
+> **Vault note:** آن تابع در listingهای ۱۴.۱۶ و ۱۴.۱۷ `booksByRack` نامیده می‌شود ولی در گفت‌وگو `booksByLib` (p. 307).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Benefit | Cost |
+| گزینش | سود | خرج |
 |---|---|---|
-| Inline `_.get` / `_.set` / `_.reduce` | No extra functions | Business intent buried in mechanics |
-| Named custom tools (`update`, `flatMap`, …) | Concise, intent-revealing business code (p. 310) | More small functions to know and maintain |
-| Very generic utilities (`forEach`) | Can do anything | Convey nothing about intent (p. 303) |
-| Least generic utility | Intent is obvious | Must exist, or be written |
-| Writing your own vs Lodash's `update`, `flatMap` | Teaches the design steps (pp. 297, 300) | Duplicates library functions in real code |
+| توابع `_.get` و `_.set` و `_.reduce` درون‌خطی | بی هیچ تابع افزوده | قصد کسب‌وکار زیر سازوکار گم می‌شود |
+| ابزارهای دست‌ساز نام‌دار مانند `update` و `flatMap` | کد کسب‌وکار موجز و قصدنما (p. 310) | تابع‌های کوچک بیشتری که باید دانست و نگه داشت |
+| ابزارهای سودمندی خیلی عمومی مانند `forEach` | هر کاری می‌توانند | هیچ از قصد نمی‌رسانند (p. 303) |
+| کم‌عمومی‌ترین ابزار سودمندی | قصد آشکار است | باید باشد، یا نوشته شود |
+| نوشتن مال خودتان در برابر `update` و `flatMap` از Lodash | قدم‌های طراحی را می‌آموزد (pp. 297, 300) | در کد واقعی تابع‌های کتابخانه را دوباره می‌گوید |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Lodash already has them.** `_.update`, `_.flatMap` and `_.countBy` exist, though `_.countBy` counts by the *value* returned, giving `{"true": 2, "false": 1}` rather than custom key names. In practice, write your own tool only when no library function says what you mean.
-- **Clojure's `update` and `update-in`** are the same idea built into the language, and they're used constantly with `inc`, `conj` or `dissoc`. Clojure's `frequencies` and `group-by` cover `countByBoolField` and `groupBy`.
-- **`$unwind` in SQL** is a lateral join over an array: PostgreSQL's `unnest` or `jsonb_array_elements` in a `LATERAL` join, and in pandas, `DataFrame.explode`.
-- **Empty arrays disappear.** `unwind` on a book with no items returns no maps, so that book vanishes from the grouping, which is also what MongoDB's `$unwind` does by default (unless `preserveNullAndEmptyArrays` is set).
-- **Ratio of zero items.** `lendingRatio` divides by `lent + notLent`, so a catalog with no book items returns `NaN` in JavaScript. A named tool is a natural place to decide that edge case once.
+- **کتابخانه‌ی Lodash از پیش داردشان.** توابع `_.update` و `_.flatMap` و `_.countBy` هستند، گرچه `_.countBy` با *مقدار* برگشته می‌شمارد و `{"true": 2, "false": 1}` می‌دهد، نه نام کلیدهای دست‌ساز. در کار واقعی، ابزار خودتان را تنها وقتی بنویسید که هیچ تابع کتابخانه‌ای آنچه می‌خواهید را نمی‌گوید.
+- **توابع `update` و `update-in` در Clojure** همان ایده‌اند که در خود زبان ساخته شده، و همیشه با `inc` یا `conj` یا `dissoc` به کار می‌روند. توابع `frequencies` و `group-by` در Clojure جای `countByBoolField` و `groupBy` را می‌پوشانند.
+- **عملگر `$unwind` در SQL** joinی جانبی روی آرایه است: تابع `unnest` یا `jsonb_array_elements` در PostgreSQL درون joinی `LATERAL`، و در pandas متد `DataFrame.explode`.
+- **آرایه‌های تهی ناپدید می‌شوند.** تابع `unwind` روی کتابی بی هیچ نسخه‌ای هیچ mapی برنمی‌گرداند، پس آن کتاب از گروه کردن غیب می‌شود، که عملگر `$unwind` در MongoDB هم پیش‌فرض همان را می‌کند، مگر `preserveNullAndEmptyArrays` گذاشته شود.
+- **نسبت صفر نسخه.** تابع `lendingRatio` بر `lent + notLent` بخش می‌کند، پس catalogی بی هیچ نسخه‌ی کتابی در JavaScript مقدار `NaN` برمی‌گرداند. ابزاری نام‌دار جای طبیعی تصمیم گرفتن یک‌باره‌ی آن مورد لبه است.
 
-## Connections
+## پیوندها
 
-- **Immutable `_.set`** and structural sharing: [4. State management](04-state-management.md).
-- **Unit tests for data in, data out:** [6. Unit tests](06-unit-tests.md).
-- **Nested data and `groupBy`** in queries: [3. Basic data manipulation](03-basic-data-manipulation.md) and [10. Database operations](10-database-operations.md).
-- **Next:** [15. Debugging](15-debugging.md).
-- **Run it:** [Custom data tools](../lab/14-custom-data-tools/README.md) — `update`, `flat_map`, `count_by_bool_field` and `unwind` in Python, run on the chapter's books, plus what happens to `unwind` when `set` mutates.
+- **تابع `_.set` immutable** و شریک شدن ساختاری: [۴. مدیریت state](04-state-management.md).
+- **تست unit برای داده تو، داده بیرون:** [۶. تست‌های unit](06-unit-tests.md).
+- **داده‌ی تودرتو و `groupBy`** در پرسش‌ها: [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md) و [۱۰. عملیات پایگاه داده](10-database-operations.md).
+- **پسین:** [۱۵. اشکال‌زدایی](15-debugging.md).
+- **Run it:** [ابزارهای دست‌ساز داده](../lab/14-custom-data-tools/README.md) — توابع `update` و `flat_map` و `count_by_bool_field` و `unwind` به Python، اجراشده روی کتاب‌های این فصل، به‌علاوه‌ی آنچه بر `unwind` می‌گذرد وقتی `set` mutation می‌دهد.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. What is the best way to find the signature of a custom data manipulation function?
-   <details><summary>Answer</summary>Think about the most convenient way to use it: write the business logic as if it already existed, "putting the cart before the horse" (p. 297).</details>
-2. Define `update` in plain English.
-   <details><summary>Answer</summary>It receives a map, a path and a function, and returns a new version of the map where the path is associated with the function applied to the path's current value (p. 298).</details>
-3. If `flatMap` is only `_.flatten(_.map(coll, f))`, why write it?
-   <details><summary>Answer</summary>It's not about code size but clarity of intent and the power of naming things, like asking for "the pen" instead of "that thing used for writing" (p. 301).</details>
-4. Why does Theo dislike `forEach` in business logic?
-   <details><summary>Answer</summary>It's too generic, a Swiss army knife. When using utilities, pick the least generic one that solves the problem, so the code conveys its intent (p. 303).</details>
-5. What does `unwind(map, field)` return?
-   <details><summary>Answer</summary>An array with one map per element of the array at `field`: each is the original map with `field` associated to that single element (figure 14.2; listing 14.19, pp. 307–309).</details>
-6. Why does `unwind` not need to clone the map for each element?
-   <details><summary>Answer</summary>Data is immutable, so `_.set` returns a new version each time and the shared parts can't change (p. 309).</details>
-7. List the four steps for designing a custom data manipulation function.
-   <details><summary>Answer</summary>Discover the signature by using the function before it is implemented; write a unit test; formulate the behaviour in plain English; implement it (p. 310).</details>
+1. بهترین راه یافتن امضای تابعی دست‌ساز از دست‌کاری داده چیست؟
+   <details><summary>پاسخ</summary>به راحت‌ترین راه به کار بردنش بیندیشید: منطق کسب‌وکار را چنان بنویسید که گویی از پیش هست، یعنی «گاری را پیش اسب بستن» (p. 297).</details>
+2. تابع `update` را به زبان ساده تعریف کنید.
+   <details><summary>پاسخ</summary>یک map و مسیری و تابعی می‌گیرد، و versionی تازه از آن map برمی‌گرداند که در آن مسیر با همان تابع پیاده‌شده روی مقدار کنونی مسیر تداعی شده (p. 298).</details>
+3. اگر `flatMap` تنها `_.flatten(_.map(coll, f))` است، چرا بنویسیمش؟
+   <details><summary>پاسخ</summary>سر اندازه‌ی کد نیست، سر روشنی قصد و نیروی نام دادن به چیزهاست، مانند خواستن «خودکار» به‌جای «آن چیزی که برای نوشتن به کار می‌رود» (p. 301).</details>
+4. چرا تئو تابع `forEach` را در منطق کسب‌وکار دوست ندارد؟
+   <details><summary>پاسخ</summary>خیلی عمومی است، چاقویی سوئیسی. سر به کار بردن ابزارهای سودمندی، کم‌عمومی‌ترین را برگزینید که مسئله را حل می‌کند، تا کد قصدش را برساند (p. 303).</details>
+5. تابع `unwind(map, field)` چه برمی‌گرداند؟
+   <details><summary>پاسخ</summary>آرایه‌ای با یک map برای هر عضوی از آرایه‌ی زیر `field`: هر کدام همان map اصلی است که `field`ش به آن یک عضو تداعی شده (شکل ۱۴.۲؛ listing ۱۴.۱۹، صص. ۳۰۷–۳۰۹).</details>
+6. چرا `unwind` لازم نیست آن map را برای هر عضوی کلون کند؟
+   <details><summary>پاسخ</summary>داده immutable است، پس `_.set` هر بار versionی تازه برمی‌گرداند و بخش‌های شریک نمی‌توانند عوض شوند (p. 309).</details>
+7. چهار قدم طراحی تابعی دست‌ساز از دست‌کاری داده را فهرست کنید.
+   <details><summary>پاسخ</summary>امضا را با به کار بردن تابع پیش از پیاده شدنش کشف کنید؛ تستی unit بنویسید؛ رفتار را به زبان ساده بگویید؛ پیاده‌اش کنید (p. 310).</details>

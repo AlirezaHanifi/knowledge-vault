@@ -2,177 +2,191 @@
 book: data-oriented-programming
 chapter: 10
 title: "Database operations"
+translated_title: "عملیات پایگاه داده"
 pages: "197–219"
+lang: fa
 ---
 
-# 10. Database operations
+# ۱۰. عملیات پایگاه داده
 
-[← 9. Persistent data structures](09-persistent-data-structures.md) · [Book](../README.md) · [11. Web services →](11-web-services.md)
+[← ۹. ساختارهای داده‌ی persistent](09-persistent-data-structures.md) · [کتاب](../README.md) · [۱۱. سرویس‌های وب →](11-web-services.md)
 
-## Summary
+## خلاصه
 
-Theo's fourth objection was that real data lives in a database, not in memory. OOP usually puts design patterns and layers of objects between code and the database. DOP represents query results the same way as any other data, as **generic data collections**: for a relational database, a **list of maps** whose fields are column values (pp. 197–198). The data flows from the database driver as a list of maps, through validation and generic data manipulation, to JSON serialization (figure 10.2, p. 202):
+ایراد چهارم تئو این بود که داده‌ی واقعی در پایگاه داده می‌نشیند، نه در حافظه. روش OOP معمولاً الگوهای طراحی و لایه‌هایی از شیء را میان کد و پایگاه داده می‌گذارد. روش DOP خروجی پرسش را همان‌طور که هر داده‌ی دیگری را می‌نمایاند، یعنی به‌شکل **مجموعه‌های داده‌ی عمومی**: برای پایگاه داده‌ای رابطه‌ای، یک **فهرست از map** که فیلدهایش مقدار ستون‌هاست (pp. 197–198). داده از راننده‌ی پایگاه داده به‌شکل فهرستی از map جاری می‌شود، از اعتبارسنجی و دست‌کاری عمومی داده می‌گذرد، و به سریالی کردن JSON می‌رسد (شکل ۱۰.۲، ص. ۲۰۲):
 
-- **In JavaScript**, a driver like node-postgres returns a list of maps directly.
-- **In Java**, a ten-line function converts a JDBC result set into one (listing 10.5).
+- **در JavaScript**، راننده‌ای مانند node-postgres یک‌راست فهرستی از map برمی‌گرداند.
+- **در Java**، تابعی ده‌خطی مجموعه‌ی خروجی JDBC را به یکی بدل می‌کند (listing ۱۰.۵).
 
-Values stay typed as `Object` until the JSON serializer looks at them, which Joe calls **late binding** (pp. 202–204). Storing data passes map fields as query parameters, and `_.at` picks several at once (pp. 204–206). Because field names are just strings, **fields are first-class**, so generic functions can reshape any query's results. `renameResultKeys` renames columns from a key map (pp. 207–211). `aggregateFields` turns a join's three rows into two books, each with a list of author names, via `_.groupBy` (pp. 211–218). The chapter title's koan, "A cloud is a cloud," means: represent data as data (pp. 198, 218).
+مقدارها تا وقتی سریالی‌کننده‌ی JSON نگاهشان کند به‌شکل `Object` گونه‌دار می‌مانند، که جو **پیوند late** می‌نامدش (pp. 202–204). ذخیره کردن داده فیلدهای map را آرگومان پرسش می‌فرستد، و `_.at` چندشان را یک‌جا برمی‌دارد (pp. 204–206). چون نام فیلدها تنها رشته‌اند، **فیلدها درجه‌یک‌اند**، پس تابع‌های عمومی می‌توانند خروجی هر پرسشی را از نو شکل دهند. تابع `renameResultKeys` ستون‌ها را از mapی از کلید نام‌عوض می‌کند (pp. 207–211). تابع `aggregateFields` سه ردیف یک join را به دو کتاب بدل می‌کند، که هر کدام فهرستی از نام نویسنده دارد، از راه `_.groupBy` (pp. 211–218). کوآن عنوان فصل، «ابری ابر است»، یعنی: داده را به‌شکل داده بنمایانید (pp. 198, 218).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **The best way to manipulate data is to represent data as data** (p. 197).
-- **Rows are maps.** A relational result is a list of maps; NoSQL access works the same way (pp. 198, 200).
-- **Validate what the database returns** with a JSON Schema before using it, and report errors as internal errors (listing 10.6, p. 204).
-- **JDBC is, in a sense, data-oriented:** converting a result set into maps is straightforward (pp. 202–203).
-- **Late binding:** values pass through as `Object`, and only the JSON serializer, such as Gson, inspects their concrete types (pp. 203–204).
-- **Flexible field access beats class members**: `_.at(member, ["email", "encryptedPassword"])` builds the parameter list (pp. 205–206).
-- **Reshape in the application when it keeps SQL simple.** Renaming in SQL with `AS` works but bends the query to the application's conventions, and some databases, MongoDB for instance, make it harder (pp. 207, 211).
-- **Generic functions take field names as arguments**, so the same code serves different entities (p. 218).
+- **بهترین راه دست‌کاری داده، نمایاندن داده به‌شکل داده است** (p. 197).
+- **ردیف‌ها mapاند.** خروجیی رابطه‌ای فهرستی از map است؛ و دسترسی NoSQL هم همان‌طور کار می‌کند (pp. 198, 200).
+- **آنچه پایگاه داده برمی‌گرداند را** پیش از به کار بردنش با JSON Schema اعتبارسنجی کنید، و خطاها را به‌شکل خطای درونی گزارش (listing ۱۰.۶، ص. ۲۰۴).
+- **مفهوم interface JDBC به‌معنایی داده‌گراست:** بدل کردن مجموعه‌ی خروجی به map سرراست است (pp. 202–203).
+- **پیوند late:** مقدارها به‌شکل `Object` از آن می‌گذرند، و تنها سریالی‌کننده‌ی JSON، مانند Gson، گونه‌های ملموسشان را بازرسی می‌کند (pp. 203–204).
+- **دسترسی نرم به فیلد از عضوهای کلاس می‌برد**: عبارت `_.at(member, ["email", "encryptedPassword"])` فهرست آرگومان را می‌سازد (pp. 205–206).
+- **وقتی SQL را ساده نگه می‌دارد، در برنامه از نو شکل دهید.** نام‌عوض کردن در SQL با `AS` کار می‌کند ولی پرسش را به عرف برنامه خم می‌کند، و برخی پایگاه‌های داده، مثلاً MongoDB، سخت‌ترش می‌کنند (pp. 207, 211).
+- **تابع‌های عمومی نام فیلدها را آرگومان می‌گیرند**، پس همان یک کد به entityهای مختلف سرویس می‌دهد (p. 218).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 10.1 Fetching data from the database — p. 198
-- 10.2 Storing data in the database — p. 204
-- 10.3 Simple data manipulation — p. 207
-- 10.4 Advanced data manipulation — p. 211
-- Summary — p. 218
+- ۱۰.۱ آوردن داده از پایگاه داده — ص. ۱۹۸
+- ۱۰.۲ ذخیره کردن داده در پایگاه داده — ص. ۲۰۴
+- ۱۰.۳ دست‌کاری ساده‌ی داده — ص. ۲۰۷
+- ۱۰.۴ دست‌کاری پیشرفته‌ی داده — ص. ۲۱۱
+- خلاصه — ص. ۲۱۸
 
-## Notes
+## یادداشت‌ها
 
-The chapter assumes basic SQL (`SELECT`, `AS`, `WHERE`, `INNER JOIN`) and says the approach adapts easily to NoSQL databases (p. 197). Representing database data as generic collections gives reduced system complexity and increased genericity (p. 198).
+فصل SQL پایه، یعنی `SELECT` و `AS` و `WHERE` و `INNER JOIN`، را فرض می‌گیرد و می‌گوید این رویکرد آسان با پایگاه‌های داده‌ی NoSQL کنار می‌آید (p. 197). نمایاندن داده‌ی پایگاه داده به‌شکل مجموعه‌های عمومی، پیچیدگی کم‌تر سیستم و عمومیت بیشتر می‌دهد (p. 198).
 
-### 10.1 Fetching data from the database
+### ۱۰.۱ آوردن داده از پایگاه داده
 
-On a bench by a lake, Theo sees a horse and a car in the clouds; Joe answers, "A cloud is a cloud" (p. 198). Theo's rough database model (figure 10.1, p. 199):
+روی نیمکتی کنار دریاچه، تئو اسبی و خودرویی در ابرها می‌بیند؛ و جو پاسخ می‌دهد، «ابری ابر است» (p. 198). مدل خام پایگاه داده‌ی تئو (شکل ۱۰.۱، ص. ۱۹۹):
 
-![Tables books (isbn, title, publication_year) and authors (id, name), each in a one-to-many relation with book_authors (book_isbn, author_id)](../figures/10-01.png)
+![جدول‌های books با isbn و title و publication_year و authors با id و name، که هر کدام رابطه‌ای یک‌به‌چند با book_authors با book_isbn و author_id دارند](../figures/10-01.png)
 
-*Figure 10.1 (p. 199): a many-to-many relation between books and authors stored through the `book_authors` table.*
+*Figure 10.1 (p. 199): رابطه‌ای چندبه‌چند میان کتاب‌ها و نویسنده‌ها که از راه جدول `book_authors` ذخیره شده.*
 
-The sample data (tables 10.1–10.3, p. 199):
+داده‌ی نمونه (جدول‌های ۱۰.۱ تا ۱۰.۳، ص. ۱۹۹):
 
-- **Books:** *The Power of Habit* (2012) and *7 Habits of Highly Effective People* (1989).
-- **Authors:** Sean Covey, Stephen Covey and Charles Duhigg.
-- **Links:** *7 Habits* to both Coveys, and *The Power of Habit* to Duhigg.
+- **کتاب‌ها:** کتاب *The Power of Habit* از ۲۰۱۲ و *7 Habits of Highly Effective People* از ۱۹۸۹.
+- **نویسنده‌ها:** شان کاوی و استیون کاوی و چارلز داهیگ.
+- **پیوندها:** کتاب *7 Habits* به هر دو کاوی، و *The Power of Habit* به داهیگ.
 
-A `SELECT title, isbn, publication_year FROM books WHERE title LIKE '%habit%'` returns both books. As data, that is a list of two maps, described by a JSON Schema that requires the three fields (listings 10.1–10.4, pp. 200–201). Theo writes the schema with Joe's cheat sheet, since "the purpose of a gift is to be used by the one who receives it" (p. 201).
+پرسش `SELECT title, isbn, publication_year FROM books WHERE title LIKE '%habit%'` هر دو کتاب را برمی‌گرداند. به‌شکل داده، آن فهرستی از دو map است، که JSON Schemaی وصفش می‌کند و هر سه فیلد را اجبار (listingهای ۱۰.۱ تا ۱۰.۴، صص. ۲۰۰–۲۰۱). تئو آن طرح را با برگه‌ی تقلب جو می‌نویسد، چون «هدف هدیه این است که گیرنده‌اش به کارش ببرد» (p. 201).
 
-![Data flows from the database through the database driver as a list of maps, through data manipulation, to a JSON serializer](../figures/10-02.png)
+![داده از پایگاه داده از راه راننده‌ی پایگاه داده به‌شکل فهرستی از map جاری می‌شود، از دست‌کاری داده می‌گذرد، و به سریالی‌کننده‌ی JSON می‌رسد](../figures/10-02.png)
 
-*Figure 10.2 (p. 202): the driver already returns generic data, so no step needs a class for a row.*
+*Figure 10.2 (p. 202): آن راننده از پیش داده‌ی عمومی برمی‌گرداند، پس هیچ قدمی کلاسی برای ردیف نمی‌خواهد.*
 
-| Language | Driver to list of maps |
+| زبان | از راننده به فهرستی از map |
 |---|---|
-| JavaScript | A driver like node-postgres (p. 202) |
-| Java | JDBC plus `convertJDBCResultSetToListOfMaps`, which loops over rows and puts `getColumnLabel(i)` → `getObject(i)` in a `HashMap` (listing 10.5, pp. 202–203) |
+| JavaScript | راننده‌ای مانند node-postgres (p. 202) |
+| Java | interface JDBC به‌علاوه‌ی `convertJDBCResultSetToListOfMaps`، که روی ردیف‌ها حلقه می‌زند و `getColumnLabel(i)` به `getObject(i)` را در `HashMap` می‌گذارد (listing ۱۰.۵، صص. ۲۰۲–۲۰۳) |
 
-**Late binding** (pp. 203–204): each value in the converted maps is an `Object`. Book search never looks at the types; it passes them along. The type only matters at JSON serialization, where a library like Gson detects it at run time and writes `publication_year` without quotes and `title` with them. "With late binding, we defer dealing with data types as long as possible."
+**پیوند late** (pp. 203–204): هر مقداری در mapهای بدل‌شده یک `Object` است. جست‌وجوی کتاب هیچ‌وقت به گونه‌ها نگاه نمی‌کند؛ ردشان می‌کند. گونه تنها سر سریالی کردن JSON مهم می‌شود، جایی که کتابخانه‌ای مانند Gson سر اجرا تشخیصش می‌دهد و `publication_year` را بی گیومه و `title` را با گیومه می‌نویسد. «با پیوند دیررس، سروکار داشتن با گونه‌های داده را تا جای شدنی وامی‌گذاریم.»
 
-Listing 10.6 puts it together (p. 204):
+مفهوم listing ۱۰.۶ کنار هم می‌گذاردش (p. 204):
 
-1. Run a parameterized query, a security best practice, through `dbClient.query`.
-2. Validate the rows against `dbSearchResultSchema` with Ajv's `allErrors`; on failure, throw "Internal error: Unexpected result from the database" with the error text.
-3. `JSON.stringify` the rows.
+1. پرسشی پارامتری، که بهترین روش امنیتی است، از راه `dbClient.query` اجرا کنید.
+2. ردیف‌ها را با `dbSearchResultSchema` و با `allErrors` از Ajv اعتبارسنجی کنید؛ و سر شکست خطای «Internal error: Unexpected result from the database» را با متن خطا بیندازید.
+3. ردیف‌ها را `JSON.stringify` کنید.
 
-The chapter writes JavaScript I/O as if it were synchronous; real code would use `async`/`await` (p. 203).
+فصل I/O از JavaScript را چنان می‌نویسد که گویی synchronous است؛ و کد واقعی از `async` و `await` کار می‌کشد (p. 203).
 
-> **Vault note:** two details of listing 10.6 wouldn't work as printed (p. 204). First, the query selects only `title` and `isbn`, but `dbSearchResultSchema` (listing 10.4) requires `publication_year`, so validation would fail on every row. Second, in PostgreSQL a `$1` inside a quoted literal (`'%$1%'`) is just text, not a parameter. The usual form is `LIKE '%' || $1 || '%'`, or passing `"%habit%"` as the parameter. The [lab](../lab/10-rows-as-maps/README.md) runs the corrected query.
+> **Vault note:** دو ریزکاری از listing ۱۰.۶ همان‌طور که چاپ شده کار نمی‌کرد (p. 204). نخست، آن پرسش تنها `title` و `isbn` را برمی‌دارد، ولی `dbSearchResultSchema` در listing ۱۰.۴ مقدار `publication_year` را اجبار می‌کند، پس اعتبارسنجی روی هر ردیفی شکست می‌خورد. دوم، در PostgreSQL یک `$1` درون مقداری گیومه‌دار، یعنی `'%$1%'`، تنها متن است، نه آرگومان. شکل رایجش `LIKE '%' || $1 || '%'` است، یا فرستادن `"%habit%"` به‌شکل آرگومان. [آزمایش lab](../lab/10-rows-as-maps/README.md) پرسش تصحیح‌شده را اجرا می‌کند.
 
-### 10.2 Storing data in the database
+> **In practice:** loader ردیف‌های منبع را به‌شکل dict می‌آورد و هیچ کلاس ORM ندارد، همان کاری که کتاب پیشنهاد می‌کند.
+>
+> **Your turn:** چرا loader را با ORM و کلاس برای هر جدول منبع نمی‌نویسید؟
+>
+> *Answer:* با ده‌ها جدول منبع، هر کلاس باید با هر تغییر schema عوض شود؛ ردیف به‌شکل map بدون کد تازه هر ستونی را می‌آورد. کتاب داده‌ی دیتابیس را مستقیم map می‌کند و از لایه‌ی کلاس می‌گذرد (pp. 198–204).
 
-Adding a member is a parameterized `INSERT INTO members (email, encrypted_password) VALUES ($1, $2)`, with the values taken from the member map (listings 10.7–10.8, pp. 204–205).
+### ۱۰.۲ ذخیره کردن داده در پایگاه داده
 
-Theo finds `_.get(member, "email")` cumbersome compared with `member.email`. JavaScript allows dot notation on maps, but the book avoids it to show how DOP applies in languages, like Java, where dot notation isn't available for hash maps (p. 205). The flexible access pays off with **`_.at`**, which returns the values for a list of keys, in that order (listings 10.9–10.10, pp. 205–206):
+افزودن عضوی، پرسشی پارامتری به‌شکل `INSERT INTO members (email, encrypted_password) VALUES ($1, $2)` است، با مقدارهایی که از map عضو برداشته می‌شوند (listingهای ۱۰.۷ و ۱۰.۸، صص. ۲۰۴–۲۰۵).
+
+تئو عبارت `_.get(member, "email")` را در برابر `member.email` دست‌وپاگیر می‌یابد. زبان JavaScript نشانه‌ی نقطه را روی map روا می‌دارد، ولی کتاب از آن می‌پرهیزد تا نشان دهد DOP در زبان‌هایی مانند Java، که نشانه‌ی نقطه برای hash map در دست نیست، چطور پیاده می‌شود (p. 205). دسترسی نرم با **`_.at`** جواب می‌دهد، که مقدارهای فهرستی از کلید را به همان ترتیب برمی‌گرداند (listingهای ۱۰.۹ و ۱۰.۱۰، صص. ۲۰۵–۲۰۶):
 
 ```js
 dbClient.query(addMemberQuery, _.at(member, ["email", "encryptedPassword"]));
 ```
 
-### 10.3 Simple data manipulation
+### ۱۰.۳ دست‌کاری ساده‌ی داده
 
-Database columns are in snake case (`publication_year`); Joe wants `publicationYear` in JSON, and Theo wants `bookTitle` instead of `title` (p. 207). There are three options (pp. 207–209):
+ستون‌های پایگاه داده snake caseاند، مانند `publication_year`؛ و جو در JSON مقدار `publicationYear` را می‌خواهد، و تئو `bookTitle` را جای `title` (p. 207). سه گزینه هست (pp. 207–209):
 
-| Option | How | Verdict |
+| گزینه | چطور | داوری |
 |---|---|---|
-| Rename in SQL (listing 10.11) | `title AS bookTitle`, `publication_year AS publicationYear` | Works, but it's odd to bend a query to the application's naming, and harder in a database like MongoDB |
-| A specific function per query (listing 10.12) | `renameBookInfoKeys` builds a new map | One function per kind of result |
-| A generic function (listings 10.13–10.14) | `renameResultKeys(results, {"title": "bookTitle", "publication_year": "publicationYear"})` | Works on any list of maps; unmentioned fields stay as they are |
+| نام‌عوض کردن در SQL (listing ۱۰.۱۱) | عبارت‌های `title AS bookTitle` و `publication_year AS publicationYear` | کار می‌کند، ولی خم کردن پرسشی به نام‌گذاری برنامه عجیب است، و در پایگاهی مانند MongoDB سخت‌تر |
+| تابعی ویژه برای هر پرسشی (listing ۱۰.۱۲) | تابع `renameBookInfoKeys` mapی تازه می‌سازد | یک تابع برای هر گونه خروجیی |
+| تابعی عمومی (listingهای ۱۰.۱۳ و ۱۰.۱۴) | عبارت `renameResultKeys(results, {"title": "bookTitle", "publication_year": "publicationYear"})` | روی هر فهرستی از map کار می‌کند؛ و فیلدهای نگفته همان‌طور می‌مانند |
 
-`renameKeys` reduces over the key map: for each old key it sets the value under the new key, then `_.omit`s the old one. `renameResultKeys` maps that over the rows (listing 10.14, p. 209). It's possible because fields are accessible dynamically by string, which makes **fields first-class citizens** (p. 209). It is unit-tested like any data function (listing 10.15). The same function renames `email` to `userEmail` in a query on users, because it is decoupled from the data it operates on (listing 10.16, pp. 210–211).
+تابع `renameKeys` روی آن map از کلید تحویل می‌برد: برای هر کلید کهنه‌ای مقدار را زیر کلید تازه می‌گذارد، بعد کهنه را `_.omit` می‌کند. تابع `renameResultKeys` آن را روی ردیف‌ها می‌نگارد (listing ۱۰.۱۴، ص. ۲۰۹). این شدنی است چون فیلدها پویا و با رشته دسترس‌پذیرند، که **فیلدها را شهروند درجه‌یک** می‌کند (p. 209). مانند هر تابع داده‌ای، تست unit می‌شود (listing ۱۰.۱۵). همان تابع در پرسشی روی کاربران `email` را به `userEmail` نام‌عوض می‌کند، چون از داده‌ای که رویش کار می‌کند جدا شده (listing ۱۰.۱۶، صص. ۲۱۰–۲۱۱).
 
-> **Try it:** [Rename keys](../widgets/10-rename-keys.html) — edit the key map and watch `renameResultKeys` reshape book rows and user rows with the same code, including keys that aren't present.
+> **Try it:** [نام‌عوض کردن کلیدها](../widgets/10-rename-keys.html) — آن map از کلید را ویرایش کنید و ببینید `renameResultKeys` چطور با همان یک کد ردیف‌های کتاب و کاربر را از نو شکل می‌دهد، کلیدهای نبوده را هم.
 
-> **Vault note:** the book calls `publicationYear` "Pascal case" (p. 207); the usual name for that style is camel case. Pascal case capitalizes the first letter too (`PublicationYear`).
+> **Vault note:** کتاب `publicationYear` را «Pascal case» می‌نامد (p. 207)؛ و نام رایج آن سبک camel case است. سبک Pascal case حرف نخست را هم بزرگ می‌کند، یعنی `PublicationYear`.
 
-### 10.4 Advanced data manipulation
+### ۱۰.۴ دست‌کاری پیشرفته‌ی داده
 
-Sometimes rows must be restructured, for example aggregating fields from several rows into one map. PostgreSQL's JSON aggregation can do that in SQL, but reshaping in the application keeps the SQL simple, and the code is reusable for other entities (p. 211). Joining `books`, `book_authors` and `authors` for "habit" gives three rows for two books, because *7 Habits* has two authors (listing 10.17 and table 10.6, pp. 211–212). The target is two maps with `authorNames` lists (listing 10.19, p. 213).
+گاهی ردیف‌ها باید از نو ساختار بگیرند؛ مثلاً گرد کردن فیلدهایی از چند ردیف در یک map. تجمیع JSON در PostgreSQL می‌تواند این را در SQL بکند، ولی از نو شکل دادن در برنامه SQL را ساده نگه می‌دارد، و آن کد برای entityهای دیگر بازاستفاده‌شدنی است (p. 211). join کردن `books` و `book_authors` و `authors` برای «habit» سه ردیف برای دو کتاب می‌دهد، چون *7 Habits* دو نویسنده دارد (listing ۱۰.۱۷ و جدول ۱۰.۶، صص. ۲۱۱–۲۱۲). هدف دو map با فهرست `authorNames` است (listing ۱۰.۱۹، ص. ۲۱۳).
 
-![Three rows (two for the same book with different authors) are grouped by isbn into two groups, then each group is aggregated into one book with an authorNames list](../figures/10-03.png)
+![سه ردیف، که دوتایشان همان یک کتاب با نویسنده‌های مختلفند، با isbn به دو دسته گروه می‌شوند، بعد هر دسته‌ای در یک کتاب با فهرستی از authorNames گرد می‌شود](../figures/10-03.png)
 
-*Figure 10.3 (p. 214): a SQL join returns one row per book–author pair; two generic steps, group and aggregate, turn them back into one map per book.*
+*Figure 10.3 (p. 214): هر join از SQL برای هر جفت کتاب-نویسنده یک ردیف برمی‌گرداند؛ و دو قدم عمومی، یعنی گروه و گرد، آن‌ها را باز به یک map برای هر کتاب بدل می‌کند.*
 
-The steps (pp. 213–218):
+قدم‌ها (pp. 213–218):
 
-1. **`_.groupBy(sqlRows, "isbn")`** gives a map from ISBN to that book's rows (listings 10.20–10.21).
-2. **For one group** (listing 10.22): `_.map(rows, "author_name")` collects the names. `_.nth(rows, 0)` takes the first row as the basis, `_.set` adds `authorNames`, and `_.omit` removes `author_name`.
-3. **Generalize** to `aggregateField(rows, fieldName, aggregateFieldName)` and test it (listings 10.23–10.24).
-4. **Combine** into `aggregateFields(rows, idFieldName, fieldName, aggregateFieldName)`: group by the ID field, take the values (the keys don't matter), and map `aggregateField` over each group (listings 10.25–10.26).
+1. تابع **`_.groupBy(sqlRows, "isbn")`** mapی از ISBN به ردیف‌های آن کتاب می‌دهد (listingهای ۱۰.۲۰ و ۱۰.۲۱).
+2. **برای یک دسته** (listing ۱۰.۲۲): عبارت `_.map(rows, "author_name")` نام‌ها را گرد می‌کند. عبارت `_.nth(rows, 0)` ردیف نخست را پایه می‌گیرد، `_.set` مقدار `authorNames` را می‌افزاید، و `_.omit` مقدار `author_name` را برمی‌دارد.
+3. **عمومی کنید** به `aggregateField(rows, fieldName, aggregateFieldName)` و تستش کنید (listingهای ۱۰.۲۳ و ۱۰.۲۴).
+4. **کنار هم بگذارید** در `aggregateFields(rows, idFieldName, fieldName, aggregateFieldName)`: با فیلد شناسه گروه کنید، مقدارها را بردارید چون کلیدها مهم نیستند، و `aggregateField` را روی هر دسته‌ای بنگارید (listingهای ۱۰.۲۵ و ۱۰.۲۶).
 
-Theo understands the koan now: instead of trapping data in objects, represent data as data (p. 218).
+تئو حالا آن کوآن را می‌فهمد: به‌جای به دام انداختن داده در شیءها، داده را به‌شکل داده بنمایانید (p. 218).
 
-| Lodash function (p. 219) | Description |
+| تابع Lodash (p. 219) | توضیح |
 |---|---|
-| `at(map, [paths])` | Array of the values at `paths` |
-| `omit(map, [paths])` | Map without the fields in `paths` |
-| `nth(arr, n)` | Element at index `n` |
-| `groupBy(coll, f)` | Map from `f(element)` to the elements that produced it |
+| `at(map, [paths])` | آرایه‌ای از مقدارها در `paths` |
+| `omit(map, [paths])` | mapی بی فیلدهای `paths` |
+| `nth(arr, n)` | عضوی در index `n` |
+| `groupBy(coll, f)` | mapی از `f(element)` به عضوهایی که ساختندش |
 
-> **Try it:** [Group and aggregate](../widgets/10-group-aggregate.html) — add books and authors to the join result and step through `groupBy` and `aggregateField` to see three rows become two books.
+> **Try it:** [گروه و گرد](../widgets/10-group-aggregate.html) — کتاب و نویسنده به خروجی join بیفزایید و از `groupBy` و `aggregateField` قدم‌به‌قدم بگذرید تا ببینید سه ردیف چطور دو کتاب می‌شود.
 
-> **Run it:** the [rows-as-maps experiment](../lab/10-rows-as-maps/README.md) loads the chapter's tables into SQLite, fetches rows as dictionaries, validates them, renames keys and aggregates the join.
+> **Run it:** [آزمایش ردیف‌ها به‌شکل map](../lab/10-rows-as-maps/README.md) جدول‌های این فصل را در SQLite بار می‌کند، ردیف‌ها را به‌شکل dictionary می‌آورد، اعتبارسنجی‌شان می‌کند، کلیدها را نام‌عوض و آن join را گرد.
 
-> **Vault note:** the ISBNs differ between chapters. Chapter 7's search response gives *7 Habits* `978-0812981605` and *The Power of Habit* `978-1982137274` (p. 149). This chapter's tables swap them, and they're consistent within the chapter (p. 199). Listing 10.18 also prints `"publication_year": "Sean Covey"` where `"author_name"` is meant (p. 212). The notes and widgets follow this chapter's tables.
+> **Vault note:** شماره‌های ISBN میان فصل‌ها فرق دارند. پاسخ جست‌وجوی فصل ۷ به *7 Habits* مقدار `978-0812981605` و به *The Power of Habit* مقدار `978-1982137274` می‌دهد (p. 149). جدول‌های این فصل جابه‌جاشان می‌کنند، و درون همین فصل سازگارند (p. 199). listing ۱۰.۱۸ هم `"publication_year": "Sean Covey"` را چاپ می‌کند جایی که `"author_name"` خواسته است (p. 212). یادداشت‌ها و widgetها از جدول‌های همین فصل پی می‌گیرند.
 
-## Trade-offs at a glance
+> **In practice:** بخش زیادی از دست‌کاری داده در ClickHouse با SQL انجام می‌شود، و بخشی در Python با map.
+>
+> **Your turn:** تبدیلی را که در Python روی dict نوشته‌اید کِی به SQL در ClickHouse می‌برید؟
+>
+> *Answer:* وقتی داده بزرگ است و تبدیل تجمیع یا join است: ClickHouse آن را ستونی و موازی اجرا می‌کند و داده جابه‌جا نمی‌شود. Python را برای منطق ردیفی پیچیده نگه دارید. کتاب هم دست‌کاری را تابع عمومی روی داده می‌بیند، هر جا اجرا شود (pp. 211–218).
 
-| Choice | Benefit | Cost |
+## بده‌بستان‌ها در یک نگاه
+
+| گزینش | سود | خرج |
 |---|---|---|
-| ORM or object layers (traditional OOP) | Typed objects; IDE support | Design patterns and class hierarchies per entity (p. 218) |
-| Rows as a list of maps (DOP) | Generic code; JSON for free; no mapping classes | Values are `Object` in Java until used (p. 203) |
-| Reshape in SQL (`AS`, JSON aggregation) | One round trip; the database does the work | Queries bend to the app's conventions; varies by database (pp. 207, 211) |
-| Reshape in the application | Simple SQL; reusable generic functions | Transfers duplicated columns, such as one row per author |
-| Validate database results | Unexpected data stops at the boundary (ch. 7) | A schema to maintain per query |
+| ORM یا لایه‌های شیء در OOP سنتی | شیءهای گونه‌دار؛ و پشتیبانی IDE | الگوهای طراحی و سلسله‌مراتب کلاس برای هر entity (p. 218) |
+| ردیف‌ها به‌شکل فهرستی از map در DOP | کد عمومی؛ JSON مفت؛ بی هیچ کلاس version | مقدارها در Java تا سر به کار بردن `Object`اند (p. 203) |
+| از نو شکل دادن در SQL با `AS` یا تجمیع JSON | یک رفت‌وبرگشت؛ پایگاه داده کار را می‌کند | پرسش‌ها به عرف برنامه خم می‌شوند؛ و از پایگاهی به پایگاهی فرق دارد (pp. 207, 211) |
+| از نو شکل دادن در برنامه | SQL ساده؛ تابع‌های عمومی بازاستفاده‌شدنی | ستون‌های دوباره را جابه‌جا می‌کند، مانند یک ردیف برای هر نویسنده |
+| اعتبارسنجی خروجی پایگاه داده | داده‌ی نامنتظر بر مرز می‌ایستد (فصل ۷) | طرحی برای هر پرسشی که باید نگه‌داشت |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Drivers that already speak maps.** Python's `sqlite3` returns rows as `dict`-like objects with `row_factory = sqlite3.Row`. Clojure's next.jdbc returns maps by default. node-postgres returns objects keyed by column name. JDBC is the outlier that needs the conversion function.
-- **Name collisions in joins.** A map keyed by column *label* loses data when two joined tables share a column name, such as `id`; the later column silently overwrites the earlier. Joe's `getColumnLabel` respects `AS` aliases, so aliasing in the SELECT, as listing 10.17 does with `author_name`, avoids it.
-- **`renameKeys` and identity mappings.** In listing 10.14, a mapping from a key to itself (`{"isbn": "isbn"}`) sets the value and then omits the same key, deleting the field. Two keys swapped in one map (`{"a": "b", "b": "a"}`) also go wrong, because the second rename sees the already-renamed value. Lodash has no built-in rename; a safer version builds the result from scratch rather than updating in place.
-- **`aggregateField` keeps the first row's other fields.** If the rows of one group disagree on a non-aggregated column, for example a book row joined with two different editions, the later values are silently dropped. That is fine for the book's case, where everything but the author name repeats.
-- **The N+1 alternative.** Fetching books and then querying authors per book avoids duplicate columns but costs one query per book. The single join plus in-memory grouping shown here is usually the better trade.
+- **راننده‌هایی که از پیش map می‌گویند.** ماژول `sqlite3` در Python با `row_factory = sqlite3.Row` ردیف‌ها را به‌شکل شیءهای dictionary‌مانند برمی‌گرداند. کتابخانه‌ی next.jdbc در Clojure پیش‌فرض map برمی‌گرداند. راننده‌ی node-postgres شیءهایی کلیدخورده با نام ستون برمی‌گرداند. interface JDBC همان بیرون‌افتاده‌ای است که تابع بدل را می‌خواهد.
+- **برخورد نام در join.** mapی که با *برچسب* ستون کلید خورده، وقتی دو جدول joinشده نام ستونی مانند `id` را شریک باشند داده گم می‌کند؛ ستون دیرتر خاموش از روی پیشین می‌نویسد. تابع `getColumnLabel` جو نام‌های مستعار `AS` را پاس می‌دارد، پس نام مستعار دادن در SELECT، آن‌طور که listing ۱۰.۱۷ با `author_name` می‌کند، از آن می‌پرهیزد.
+- **تابع `renameKeys` و mappingهای همانی.** در listing ۱۰.۱۴، mappingی از کلیدی به خودش، یعنی `{"isbn": "isbn"}`، مقدار را می‌گذارد و بعد همان کلید را می‌اندازد، که آن فیلد را پاک می‌کند. دو کلید جابه‌جاشده در یک map، یعنی `{"a": "b", "b": "a"}`، هم غلط در می‌آید، چون آن نام‌عوض دوم مقدار از پیش نام‌عوض‌شده را می‌بیند. Lodash هیچ نام‌عوض توکاری ندارد؛ و versionی ایمن‌تر خروجی را از صفر می‌سازد، نه آنکه سر جا به‌روزش کند.
+- **تابع `aggregateField` فیلدهای دیگر ردیف نخست را نگه می‌دارد.** اگر ردیف‌های یک دسته سر ستونی ناگردشده ناسازگار باشند، مثلاً ردیف کتابی که با دو ویراست مختلف join شده، مقدارهای دیرتر خاموش انداخته می‌شوند. برای مورد کتاب این خوب است، جایی که همه چیز جز نام نویسنده تکرار می‌شود.
+- **بدیل N+1.** آوردن کتاب‌ها و بعد پرسش از نویسنده‌ها برای هر کتابی از ستون‌های دوباره می‌پرهیزد ولی یک پرسش برای هر کتاب خرج می‌دهد. همان یک join به‌علاوه‌ی گروه کردن در حافظه که این‌جا نشان داده شد معمولاً بده‌بستان بهتری است.
 
-## Connections
+## پیوندها
 
-- **Generic functions:** this chapter extends the toolkit from [3. Basic data manipulation](03-basic-data-manipulation.md) with `at`, `omit`, `nth` and `groupBy`.
-- **Validation at the database boundary:** [7. Basic data validation](07-basic-data-validation.md).
-- **Next:** [11. Web services](11-web-services.md) applies the same approach to data from external services.
-- **More generic manipulation:** [14. Advanced data manipulation](14-advanced-data-manipulation.md).
-- **Run it:** [Rows as maps with SQLite](../lab/10-rows-as-maps/README.md) — runs the chapter's queries against an in-memory database with the corrected `LIKE` parameter.
+- **تابع‌های عمومی:** این فصل آن جعبه‌ابزار [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md) را با `at` و `omit` و `nth` و `groupBy` گسترش می‌دهد.
+- **اعتبارسنجی بر مرز پایگاه داده:** [۷. اعتبارسنجی پایه‌ی داده](07-basic-data-validation.md).
+- **پسین:** [۱۱. سرویس‌های وب](11-web-services.md) همان رویکرد را روی داده‌ی سرویس‌های بیرونی پیاده می‌کند.
+- **دست‌کاری عمومی بیشتر:** [۱۴. دست‌کاری پیشرفته‌ی داده](14-advanced-data-manipulation.md).
+- **Run it:** [ردیف‌ها به‌شکل map با SQLite](../lab/10-rows-as-maps/README.md) — پرسش‌های این فصل را روی پایگاهی در حافظه با آرگومان `LIKE` تصحیح‌شده اجرا می‌کند.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. How does DOP represent the result of a relational query?
-   <details><summary>Answer</summary>As a list of maps, where each map's fields are the column values; NoSQL results are handled the same way (pp. 198, 200).</details>
-2. What is "late binding" in this chapter?
-   <details><summary>Answer</summary>Deferring dealing with data types as long as possible. In Java, row values are `Object`s passed along untouched, and only the JSON serializer, such as Gson, detects their concrete types at run time (pp. 203–204).</details>
-3. What three steps does listing 10.6 take to serve a search from the database?
-   <details><summary>Answer</summary>Run a parameterized query, validate the rows against a JSON Schema and throw an internal error if they're invalid, then `JSON.stringify` them (p. 204).</details>
-4. What does `_.at(member, ["email", "encryptedPassword"])` return, and why is it useful here?
-   <details><summary>Answer</summary>The values of those fields, in that order, such as `["samantha@gmail.com", "c2VjcmV0"]`. That is exactly the parameter array for the INSERT, which is shorter than listing each `_.get` (pp. 205–206).</details>
-5. Why does Joe prefer `renameResultKeys` to `AS` in SQL or a per-query function?
-   <details><summary>Answer</summary>Renaming in SQL bends the query to the app's naming convention and is harder in some databases. A generic function, given a key map, works on the results of any query, because field names are just strings (pp. 207–210).</details>
-6. How does `aggregateFields` turn the three join rows into two books?
-   <details><summary>Answer</summary>It groups rows by ISBN with `_.groupBy` and takes the groups. In each group it collects `author_name` values into `authorNames`, starting from the first row and omitting `author_name` (pp. 213–217).</details>
+1. روش DOP خروجی پرسشی رابطه‌ای را چطور می‌نمایاند؟
+   <details><summary>پاسخ</summary>به‌شکل فهرستی از map، که فیلدهای هر map مقدار ستون‌هاست؛ و خروجی‌های NoSQL همان‌طور چرخانده می‌شوند (pp. 198, 200).</details>
+2. «پیوند late» در این فصل چیست؟
+   <details><summary>پاسخ</summary>واگذاشتن سروکار داشتن با گونه‌های داده تا جای شدنی. در Java، مقدارهای ردیف `Object`اند که دست‌نخورده رد می‌شوند، و تنها سریالی‌کننده‌ی JSON، مانند Gson، گونه‌های ملموسشان را سر اجرا تشخیص می‌دهد (pp. 203–204).</details>
+3. مفهوم listing ۱۰.۶ برای سرویس دادن به جست‌وجویی از پایگاه داده چه سه قدمی برمی‌دارد؟
+   <details><summary>پاسخ</summary>پرسشی پارامتری اجرا می‌کند، ردیف‌ها را با JSON Schemaی اعتبارسنجی می‌کند و اگر نامعتبر بودند خطایی درونی می‌اندازد، بعد `JSON.stringify`شان می‌کند (p. 204).</details>
+4. عبارت `_.at(member, ["email", "encryptedPassword"])` چه برمی‌گرداند، و چرا این‌جا به کار می‌آید؟
+   <details><summary>پاسخ</summary>مقدار همان فیلدها را به همان ترتیب، مانند `["samantha@gmail.com", "c2VjcmV0"]`. آن درست همان آرایه‌ی آرگومان برای INSERT است، که از فهرست کردن هر `_.get` کوتاه‌تر است (pp. 205–206).</details>
+5. چرا جو `renameResultKeys` را بر `AS` در SQL یا تابعی برای هر پرسش ترجیح می‌دهد؟
+   <details><summary>پاسخ</summary>نام‌عوض کردن در SQL آن پرسش را به عرف نام‌گذاری برنامه خم می‌کند و در برخی پایگاه‌های داده سخت‌تر است. تابعی عمومی که mapی از کلید بگیرد، روی خروجی هر پرسشی کار می‌کند، چون نام فیلدها تنها رشته‌اند (pp. 207–210).</details>
+6. تابع `aggregateFields` آن سه ردیف join را چطور به دو کتاب بدل می‌کند؟
+   <details><summary>پاسخ</summary>ردیف‌ها را با `_.groupBy` با ISBN گروه می‌کند و دسته‌ها را برمی‌دارد. در هر دسته‌ای مقدارهای `author_name` را در `authorNames` گرد می‌کند، از ردیف نخست آغاز و `author_name` را می‌اندازد (pp. 213–217).</details>

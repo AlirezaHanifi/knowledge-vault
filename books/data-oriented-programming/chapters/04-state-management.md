@@ -2,85 +2,93 @@
 book: data-oriented-programming
 chapter: 4
 title: "State management"
+translated_title: "مدیریت state"
 pages: "71–90"
+lang: fa
 ---
 
-# 4. State management
+# ۴. مدیریت state
 
-[← 3. Basic data manipulation](03-basic-data-manipulation.md) · [Book](../README.md) · [5. Basic concurrency control →](05-basic-concurrency-control.md)
+[← ۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md) · [کتاب](../README.md) · [۵. کنترل پایه‌ی concurrency →](05-basic-concurrency-control.md)
 
-## Summary
+## خلاصه
 
-Chapter 3 handled queries; this chapter handles **mutations**, operations that change the system state (p. 72). Instead of updating data in place, DOP keeps **multiple versions** of the system data, like Git, and the system state is a reference to one of them. That rests on the third principle, **data is immutable**: the data is immutable, but the state reference is mutable (pp. 71, 73). New versions are cheap because of **structural sharing**: an immutable `_.set` copies only the nodes along the changed path and shares everything else. Dave implements it in 11 lines (pp. 74–81).
+فصل ۳ پرسش‌ها را چرخاند؛ و این فصل **mutationها** را، یعنی عملیاتی که state سیستم را عوض می‌کند (p. 72). روش DOP به‌جای به‌روز کردن داده سر جایش، **چند version** از داده‌ی سیستم را نگه می‌دارد، مانند Git، و state سیستم ارجاعی به یکی‌شان است. این روی اصل سوم می‌نشیند، **داده immutable است**: داده immutable است، ولی ارجاع state mutable (pp. 71, 73). versionهای تازه ارزانند چون **شریک شدن ساختاری** هست: یک `_.set` immutable تنها nodeهای روی مسیر عوض‌شده را کپی و باقی را شریک می‌شود. دیو آن را در ۱۱ خط پیاده می‌کند (pp. 74–81).
 
-A mutation splits into two phases (table 4.1, p. 72):
+هر mutationی به دو فاز می‌شکند (جدول ۴.۱، ص. ۷۲):
 
-- **Calculation** is stateless and specific to each mutation; it computes the next version with generic immutable functions.
-- **Commit** is stateful and common to all mutations; it moves the state reference forward.
+- **حساب** بی‌state است و ویژه‌ی هر جهشی؛ version پسین را با تابع‌های immutable عمومی حساب می‌کند.
+- **عمل commit** باstate است و میان همه‌ی mutationها مشترک؛ ارجاع state را پیش می‌برد.
 
-Because the commit is common, it is the one place to **validate the whole system data**, like a Git commit hook (pp. 85–86). Keeping the previous reference makes **undo** trivial (pp. 86–89). The chapter assumes no concurrent mutations; chapter 5 adds them (p. 72).
+چون آن commit مشترک است، همان یک جاست که می‌شود **کل داده‌ی سیستم را اعتبارسنجی کرد**، مانند قلاب commit در Git (pp. 85–86). نگه داشتن ارجاع پیشین **undo** را بدیهی می‌کند (pp. 86–89). فصل فرض می‌گیرد mutation concurrent نیست؛ و فصل ۵ آن را می‌افزاید (p. 72).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Principle #3: data is immutable.** Keeping several versions requires immutability, and structural sharing makes it efficient in memory and computation (pp. 71–72).
-- **The data is immutable, but the state reference is mutable** (p. 73).
-- **Structural sharing** creates a new version by recursively sharing the parts that don't need to change; changing one field copies only the maps on its path (pp. 74–78).
-- **Lodash's default functions mutate.** The immutable versions come from Lodash FP, configured (listing 4.1) to keep the documented signatures (pp. 75–76).
-- **All data manipulation must go through immutable functions; the native setter is forbidden.** That is a developer discipline. **Persistent data structures** enforce it at the data level, and Joe recommends them for production (pp. 82–83).
-- **Only the commit phase is stateful,** so the stateful part of the system shrinks to a bare minimum, a small OOP-like `SystemState` class (pp. 72, 84–85).
-- **Validation is decoupled from manipulation:** the commit checks the next version as a whole, given both previous and next so it can validate only what changed (pp. 85–86).
-- **History is cheap.** Structural sharing lets you keep many versions without exploding memory, so restoring a previous state is easy (pp. 86–89).
+- **اصل ۳: داده immutable است.** نگه داشتن چند version immutability می‌خواهد، و شریک شدن ساختاری آن را در حافظه و حساب کارآمد می‌کند (pp. 71–72).
+- **داده immutable است، ولی ارجاع state mutable** (p. 73).
+- **شریک شدن ساختاری** versionی تازه می‌سازد با شریک شدن بازگشتی بخش‌هایی که لازم نیست عوض شوند؛ و عوض کردن فیلدی تنها mapهای روی مسیرش را کپی می‌کند (pp. 74–78).
+- **تابع‌های پیش‌فرض Lodash mutation می‌دهند.** versionهای immutable از Lodash FP می‌آیند، که (listing ۴.۱) کوک می‌شود تا امضاهای مستندشده را نگه دارد (pp. 75–76).
+- **همه‌ی دست‌کاری داده باید از تابع‌های immutable بگذرد؛ و setter بومی ممنوع است.** این انتظامی از برنامه‌نویس است. **ساختارهای داده‌ی persistent** آن را در سطح داده به زور می‌آورند، و جو برای production پیشنهادشان می‌کند (pp. 82–83).
+- **تنها فاز commit باstate است،** پس بخش باstate سیستم به کم‌ترین اندازه آب می‌رود، یعنی کلاسی کوچک و OOP‌مانند به نام `SystemState` (pp. 72, 84–85).
+- **اعتبارسنجی از دست‌کاری جدا شده:** آن commit version پسین را به‌شکل یک کل می‌سنجد، با گرفتن هر دو version پیشین و پسین، پس می‌تواند تنها چیز عوض‌شده را اعتبارسنجی کند (pp. 85–86).
+- **تاریخ ارزان است.** شریک شدن ساختاری می‌گذارد versionهای زیادی را بی منفجر شدن حافظه نگه دارید، پس برگرداندن stateی پیشین آسان است (pp. 86–89).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 4.1 Multiple versions of the system data — p. 72
-- 4.2 Structural sharing — p. 74
-- 4.3 Implementing structural sharing — p. 80
-- 4.4 Data safety — p. 82
-- 4.5 The commit phase of a mutation — p. 83
-- 4.6 Ensuring system state integrity — p. 85
-- 4.7 Restoring previous states — p. 86
-- Summary — p. 89
+- ۴.۱ چند version از داده‌ی سیستم — ص. ۷۲
+- ۴.۲ شریک شدن ساختاری — ص. ۷۴
+- ۴.۳ پیاده کردن شریک شدن ساختاری — ص. ۸۰
+- ۴.۴ ایمنی داده — ص. ۸۲
+- ۴.۵ فاز commit یک mutation — ص. ۸۳
+- ۴.۶ پاس داشتن تمامیت state سیستم — ص. ۸۵
+- ۴.۷ برگرداندن stateهای پیشین — ص. ۸۶
+- خلاصه — ص. ۸۹
 
-## Notes
+## یادداشت‌ها
 
-| Phase | Responsibility | State | Implementation (table 4.1, p. 72) |
+| فاز | مسئولیت | وضع state | پیاده‌سازی (جدول ۴.۱، ص. ۷۲) |
 |---|---|---|---|
-| Calculation | Computes the next version of system data | Stateless | Specific |
-| Commit | Moves the system state forward | Stateful | Common |
+| حساب | version پسین داده‌ی سیستم را حساب می‌کند | بی‌state | ویژه |
+| commit | state سیستم را پیش می‌برد | باstate | مشترک |
 
-### 4.1 Multiple versions of the system data
+### ۴.۱ چند version از داده‌ی سیستم
 
-On a walk, Theo and Joe discuss how Git keeps the whole commit history and can restore code to a previous state fast, which reminds Theo of *Back to the Future* (p. 72). Theo asks why a mutation isn't just code that modifies part of the hash map. Joe answers that mutating in place makes it hard to ensure a mutation doesn't put the system into an invalid state, and loses previous versions (p. 73).
+سر پیاده‌روی، تئو و جو از این می‌گویند که Git چطور کل تاریخ commit را نگه می‌دارد و می‌تواند کد را تند به stateی پیشین برگرداند، که تئو را یاد *Back to the Future* می‌اندازد (p. 72). تئو می‌پرسد چرا mutation تنها کدی نیست که بخشی از hash map را دست‌کاری می‌کند. جو پاسخ می‌دهد که mutation سر جا، پاس داشتن اینکه mutationی سیستم را به stateی نامعتبر نیندازد را سخت می‌کند، و versionهای پیشین را گم (p. 73).
 
-DOP's **multi-version state approach** (figure 4.1, p. 73): at any moment the system state refers to one version of the data, and after a mutation the reference moves forward (V12 → V13). It doesn't deep-copy the data before each mutation, which would be inefficient; structural sharing makes new versions cheap (pp. 73–74). In a simple application, old versions are garbage-collected. When you want Git-like time travel, you keep references to them (p. 74).
+**رویکرد state چندنگارشی** در DOP (شکل ۴.۱، ص. ۷۳): در هر لحظه state سیستم به یک version از داده ارجاع می‌دهد، و پس از mutationی آن ارجاع پیش می‌رود، از V12 به V13. پیش از هر mutationی داده را عمیق کپی نمی‌کند، که ناکارآمد بود؛ شریک شدن ساختاری versionهای تازه را ارزان می‌کند (pp. 73–74). در برنامه‌ای ساده، versionهای کهنه garbage collectorی می‌شوند. وقتی سفر در زمان Git‌مانند بخواهید، ارجاع‌هایشان را نگه می‌دارید (p. 74).
 
-### 4.2 Structural sharing
+> **In practice:** Bronze در ClickHouse append-only است: هر بار تازه‌ی loader نسخه‌ی تازه‌ای از ردیف را کنار نسخه‌های قبلی می‌گذارد.
+>
+> **Your turn:** چرا Bronze را append-only نگه می‌دارید و Silver را جای به‌روزرسانی در Bronze می‌سازید؟
+>
+> *Answer:* نسخه‌های قبلی امکان بازسازی Silver، بررسی گذشته و rollback را می‌دهند؛ Silver از Bronze مشتق است و هر وقت لازم شد از نو ساخته می‌شود. کتاب state را دنباله‌ای از نسخه‌های immutable می‌بیند، نه یک شیء که عوض می‌شود (pp. 72–74).
 
-In the calculation phase you don't deal with state, so its code is stateless and "as simple as the code of a query" (p. 74). To set *Watchmen*'s publication year to 1986, the path is `["catalog", "booksByIsbn", "978-1779501127", "publicationYear"]` (p. 75).
+### ۴.۲ شریک شدن ساختاری
 
-**Immutable Lodash** (pp. 75–76): the default `_.set` mutates the object. The immutable versions are in the Lodash FP module, whose argument order is shuffled by default. Listing 4.1 configures it with `fp.convert({cap: false, curry: false, fixed: false, immutable: true, rearg: false})`, so the immutable functions have the documented signatures. A function is **immutable** when it creates a new version of the data instead of changing the data it receives (p. 76).
+در فاز حساب با state سروکار ندارید، پس کدش بی‌state است و «به‌سادگی کد یک پرسش» (p. 74). برای گذاشتن سال نشر *Watchmen* روی ۱۹۸۶، مسیر `["catalog", "booksByIsbn", "978-1779501127", "publicationYear"]` است (p. 75).
 
-Joe's question-by-question narrowing (pp. 76–77): only the `Catalog` is affected, not `UserManagement`; within it only `booksByIsbn`; within that only the *Watchmen* record; within that only `publicationYear`. So the immutable function builds a fresh `Library` that reuses the unchanged parts, never deep-copying them (figure 4.4, p. 78):
+**کتابخانه‌ی Lodash immutable** (pp. 75–76): تابع پیش‌فرض `_.set` شیء را mutation می‌دهد. versionهای immutable در ماژول Lodash FP‌اند، که ترتیب آرگومانش پیش‌فرض به هم ریخته. listing ۴.۱ آن را با `fp.convert({cap: false, curry: false, fixed: false, immutable: true, rearg: false})` کوک می‌کند، تا تابع‌های immutable امضاهای مستندشده را داشته باشند. تابعی **immutable** است وقتی به‌جای عوض کردن داده‌ای که می‌گیرد، versionی تازه از آن می‌سازد (p. 76).
 
-![Structural sharing: a Next Library, Next Catalog, Next booksByIsbn and Next watchmen node are created along the path to the changed publicationYear, and they point to the unchanged UserManagement, authorsById and other fields of the old version](../figures/04-04.png)
+باریک کردن پرسش‌به‌پرسش جو (pp. 76–77): تنها `Catalog` اثر می‌گیرد، نه `UserManagement`؛ و درونش تنها `booksByIsbn`؛ و درون آن تنها رکورد *Watchmen*؛ و درون آن تنها `publicationYear`. پس تابع immutable `Library` تازه‌ای می‌سازد که بخش‌های دست‌نخورده را باز به کار می‌برد، بی هیچ‌وقت عمیق کپی کردنشان (شکل ۴.۴، ص. ۷۸):
 
-*Figure 4.4 (p. 78): only the four maps on the path to the change are new; everything else is shared with the previous version.*
+![شریک شدن ساختاری: nodeهای Next Library و Next Catalog و Next booksByIsbn و Next watchmen روی مسیر تا publicationYear عوض‌شده ساخته می‌شوند، و به UserManagement و authorsById و فیلدهای دیگر دست‌نخورده‌ی version کهنه اشاره می‌کنند](../figures/04-04.png)
 
-**Adding a member** (figure 4.5 and listing 4.3, pp. 79–80) shares the `Catalog` and the librarians. The mutation differs from a query in two ways:
+*Figure 4.4 (p. 78): تنها همان چهار map روی مسیر تغییر تازه‌اند؛ و باقی با version پیشین شریک است.*
 
-- **It can fail:** `UserManagement.addMember` throws "Member already exists." if `["membersByEmail", email]` is already present.
-- **It must rebuild the parents:** `Library.addMember` sets the new `userManagement` into a new `Library`.
+**افزودن عضوی** (شکل ۴.۵ و listing ۴.۳، صص. ۷۹–۸۰) آن `Catalog` و کتابدارها را شریک می‌شود. mutation به دو شکل از پرسش فرق دارد:
 
-Returning an updated version instead of changing data in place felt weird to Joe too, when he met immutable data in Clojure seven years earlier. It took him a couple of weeks to get used to it (p. 80).
+- **می‌تواند شکست بخورد:** تابع `UserManagement.addMember` خطای «Member already exists.» می‌اندازد اگر `["membersByEmail", email]` از پیش باشد.
+- **باید پدرها را از نو بسازد:** تابع `Library.addMember` مقدار `userManagement` تازه را در `Library` تازه‌ای می‌گذارد.
 
-> **Try it:** [Structural sharing](../widgets/04-structural-sharing.html) — pick a path in the library data and set it immutably, see which maps are new and which are shared, then try a native setter on shared data as in listing 4.5.
+برگرداندن versionی به‌روز به‌جای عوض کردن داده سر جا برای خود جو هم عجیب بود، وقتی هفت سال پیش‌تر در Clojure به داده‌ی immutable خورد. چند هفته برد تا خو کند (p. 80).
 
-### 4.3 Implementing structural sharing
+> **Try it:** [شریک شدن ساختاری](../widgets/04-structural-sharing.html) — مسیری در داده‌ی کتابخانه برگزینید و immutable بگذاریدش، ببینید کدام mapها تازه‌اند و کدام شریک، بعد مانند listing ۴.۵ setterی بومی را روی داده‌ی شریک بیازمایید.
 
-Dave, the junior developer, takes up the challenge and the next day shows an 11-line JavaScript implementation (listing 4.4, p. 81):
+### ۴.۳ پیاده کردن شریک شدن ساختاری
+
+دیو، برنامه‌نویس جوان، چالش را برمی‌دارد و فردا پیاده‌سازی ۱۱خطی JavaScript را نشان می‌دهد (listing ۴.۴، ص. ۸۱):
 
 ```js
 function setImmutable(map, path, v) {
@@ -96,17 +104,17 @@ function setImmutable(map, path, v) {
 }
 ```
 
-It recurses down the path, then shallow-clones each map on the way back up and swaps in the modified child. Every sibling is shared by reference.
+روی مسیر پایین بازگشت می‌کند، بعد سر بالا آمدن هر mapی را سطحی کلون و فرزند دست‌کاری‌شده را جایش می‌گذارد. هر هم‌نیایی با ارجاع شریک می‌شود.
 
-> **Run it:** the [structural-sharing experiment](../lab/04-structural-sharing/README.md) measures this with a Python port of `setImmutable`.
+> **Run it:** [آزمایش شریک شدن ساختاری](../lab/04-structural-sharing/README.md) آن را با درگاهی Python از `setImmutable` می‌سنجد.
 
-### 4.4 Data safety
+### ۴.۴ ایمنی داده
 
-Theo's worry: what if code modifies data that two versions share? In listing 4.5, after `nextBooks = _.set(books, …)`, assigning `books[…]["authorIds"][1] = "dave-chester-gibbons"` changes `nextBooks` too, because that array is shared (p. 82).
+نگرانی تئو: اگر کدی داده‌ای را دست‌کاری کند که دو version شریکش‌اند چه؟ در listing ۴.۵، پس از `nextBooks = _.set(books, …)`، سپردن `books[…]["authorIds"][1] = "dave-chester-gibbons"` مقدار `nextBooks` را هم عوض می‌کند، چون آن array شریک است (p. 82).
 
-Joe's answer: mutating data with the native hash map setter is **forbidden**; all data manipulation must use immutable functions. "Forbidden" means it's up to the developer (p. 82). To protect against mistakes, use **persistent data structures**, which are immutable at the level of the data, so there is no way to mutate them even by mistake. Their internal organization makes them even more efficient than immutable functions (pp. 82–83). Joe's list of libraries (p. 83):
+پاسخ جو: mutation دادن داده با setter بومی hash map **ممنوع** است؛ همه‌ی دست‌کاری داده باید از تابع‌های immutable کار بکشد. «ممنوع» یعنی به خود برنامه‌نویس بسته است (p. 82). برای پناه گرفتن از اشتباه، **ساختارهای داده‌ی persistent** را به کار ببرید، که در سطح داده تغییرناپذیرند، پس هیچ راهی به mutation دادنشان نیست، حتی به اشتباه. سازمان درونی‌شان آن‌ها را حتی از تابع‌های immutable کارآمدتر می‌کند (pp. 82–83). فهرست کتابخانه‌های جو (p. 83):
 
-| Language | Library |
+| زبان | کتابخانه |
 |---|---|
 | JavaScript | Immutable.js |
 | Java | Paguro |
@@ -114,17 +122,17 @@ Joe's answer: mutating data with the native hash map setter is **forbidden**; al
 | Python | Pyrsistent |
 | Ruby | Hamster |
 
-The drawback is that they are not native, so you convert between native and persistent structures. Joe's advice: play with immutable functions, but use persistent data structures in production. One reason he loves Clojure is that its native data structures are immutable (p. 83).
+عیبش این است که بومی نیستند، پس میان ساختارهای بومی و persistent بدل می‌کنید. پند جو: با تابع‌های immutable بازی کنید، ولی در production از ساختارهای داده‌ی persistent کار بکشید. یک دلیل دوست داشتن Clojure برایش این است که ساختارهای داده‌ی بومی‌اش تغییرناپذیرند (p. 83).
 
-> **Vault note:** listing 4.5 is about `authorIds`, but the line after it asks for "the value of isBlocked in updatedMember." That looks like a leftover from an earlier draft; the listing's own output answers the question it actually shows (p. 82).
+> **Vault note:** listing ۴.۵ از `authorIds` است، ولی خط پس از آن «مقدار isBlocked در updatedMember» را می‌پرسد. این به جامانده‌ای از پیش‌نویسی پیشین می‌ماند؛ و خروجی خود listing به پرسشی پاسخ می‌دهد که واقعاً نشان می‌دهد (p. 82).
 
-### 4.5 The commit phase of a mutation
+### ۴.۵ فاز commit یک mutation
 
-`Library.addMember` returns a new library but doesn't change the current state (p. 83). The commit phase moves the system state forward to the version the calculation returned (figure 4.7, p. 84). It is implemented by two singleton, stateful, OOP-like classes: `System`, which implements the mutations, and `SystemState`, which manages the state (pp. 84–85). As Joe puts it, meditation taught him that every part of the universe has a role to play (p. 84).
+تابع `Library.addMember` کتابخانه‌ای تازه برمی‌گرداند ولی state کنونی را عوض نمی‌کند (p. 83). فاز commit مقدار state سیستم را به versionی پیش می‌برد که حساب برگردانده (شکل ۴.۷، ص. ۸۴). دو کلاس یگانه و باstate و OOP‌مانند پیاده‌اش می‌کنند: کلاس `System` که mutationها را پیاده می‌کند، و `SystemState` که state را مدیریت (pp. 84–85). به گفته‌ی جو، مراقبه به او آموخت که هر بخشی از گیتی نقشی برای بازی دارد (p. 84).
 
-![Before commit, the system state points to a state with one member; addMember creates a state with two members; after commit the system state points to the new one](../figures/04-07.png)
+![پیش از commit، state سیستم به stateی با یک عضو اشاره می‌کند؛ تابع addMember stateی با دو عضو می‌سازد؛ و پس از commit، state سیستم به آن تازه اشاره می‌کند](../figures/04-07.png)
 
-*Figure 4.7 (p. 84): committing is just moving one reference; both versions still exist.*
+*Figure 4.7 (p. 84): هر commitی تنها جابه‌جا کردن یک ارجاع است؛ و هر دو version هنوز هستند.*
 
 ```js
 class System {
@@ -136,13 +144,13 @@ class System {
 }
 ```
 
-*Listing 4.7 (pp. 84–85); `SystemState` (listing 4.8) has a `get()` and a `commit(previous, next)` that assigns `next`.*
+*نمونه‌ی listing ۴.۷ (pp. 84–85)؛ کلاس `SystemState` در listing ۴.۸ یک `get()` و یک `commit(previous, next)` دارد که `next` را می‌سپارد.*
 
-### 4.6 Ensuring system state integrity
+### ۴.۶ پاس داشتن تمامیت state سیستم
 
-In OOP, only a class's own methods touch its data, which protects its inner state. Theo's example of an invalid state is a mutation that adds a book item to a member's lendings without marking the item lent in the catalog (p. 85). In DOP, integrity is checked **at the level of the whole system**, instead of being scattered among classes. Because the commit code is common to all mutations, its first step can validate the version to be committed and reject it if it's invalid (listing 4.9, pp. 85–86). Theo likens it to a Git commit hook.
+در OOP، تنها متدهای خود کلاس به داده‌اش دست می‌زنند، که state درونی‌اش را پناه می‌دهد. مثال تئو از stateی نامعتبر، mutationی است که نسخه‌ی کتابی را به قرض‌های عضوی می‌افزاید بی آنکه آن نسخه را در catalog قرض‌داده نشان کند (p. 85). در DOP، تمامیت **در سطح کل سیستم** سنجیده می‌شود، به‌جای پخش شدن میان کلاس‌ها. چون کد commit میان همه‌ی mutationها مشترک است، قدم نخستش می‌تواند versionی را که قرار است commit شود اعتبارسنجی و اگر نامعتبر بود ردش کند (listing ۴.۹، صص. ۸۵–۸۶). تئو آن را به قلاب commit در Git می‌ماند.
 
-`validate` receives both `previous` and `next` so it can optimize, for example by validating only the data that changed (p. 86). Defining the schema comes in chapters 7 and 12.
+تابع `validate` هر دو `previous` و `next` را می‌گیرد تا بتواند بهینه کند؛ مثلاً با اعتبارسنجی تنها داده‌ی عوض‌شده (p. 86). تعریف کردن طرح در فصل‌های ۷ و ۱۲ می‌آید.
 
 ```mermaid
 sequenceDiagram
@@ -163,59 +171,65 @@ sequenceDiagram
     end
 ```
 
-*The vault's sequence diagram of listings 4.7–4.9 (pp. 84–86).*
+*نمودار ترتیبی vault از listingهای ۴.۷ تا ۴.۹ (pp. 84–86).*
 
-### 4.7 Restoring previous states
+### ۴.۷ برگرداندن stateهای پیشین
 
-Structural sharing lets you keep every version without exploding memory (p. 86). For **undo**, `SystemState` keeps two references, `systemData` and `previousSystemData` (pp. 86–88):
+شریک شدن ساختاری می‌گذارد هر versionی را بی منفجر شدن حافظه نگه دارید (p. 86). برای **undo**، کلاس `SystemState` دو ارجاع نگه می‌دارد، یعنی `systemData` و `previousSystemData` (pp. 86–88):
 
-- **Commit:** both move forward. At V12, `previousSystemData` is V11; after a commit it is V12 and `systemData` is V13.
-- **Undo:** `systemData` is set to `previousSystemData`, so both refer to V12.
+- **سر commit:** هر دو پیش می‌روند. در V12، مقدار `previousSystemData` همان V11 است؛ و پس از commit آن V12 می‌شود و `systemData` مقدار V13.
+- **سر undo:** مقدار `systemData` روی `previousSystemData` گذاشته می‌شود، پس هر دو به V12 ارجاع می‌دهند.
 
-In practice you'd keep a stack of all state references for multiple undos; one reference keeps the example simple (pp. 88–89). Listing 4.10 shows the full class. Theo: "in DOP, time travel is real" (p. 89).
+در کار واقعی پشته‌ای از همه‌ی ارجاع‌های state را برای چند undo نگه می‌دارید؛ و یک ارجاع مثال را ساده نگه می‌دارد (pp. 88–89). listing ۴.۱۰ کل آن کلاس را نشان می‌دهد. تئو: «در DOP، سفر در زمان واقعی است» (p. 89).
 
-> **Try it:** [Commit and undo](../widgets/04-commit-undo.html) — run mutations through the calculation and commit phases, reject an invalid one at the commit, and compare a single previous reference with a stack of versions when you undo twice.
+> **Try it:** [commit و undo](../widgets/04-commit-undo.html) — mutationها را از فازهای حساب و commit بگذرانید، یکی نامعتبر را سر commit رد کنید، و وقتی دو بار undo می‌کنید یک ارجاع پیشین را با پشته‌ای از versionها بسنجید.
 
-> **Vault note:** listings 4.9 and 4.10 differ in small ways. 4.9 assigns `this.systemData` in a class that 4.8 declared with `systemState`, and 4.10 calls `Consistency.validate` where 4.9 called `SystemValidity.validate`. The prose before 4.10 also mentions "conflict resolution", which anticipates chapter 5 (pp. 85–88).
+> **Vault note:** listingهای ۴.۹ و ۴.۱۰ ریز فرق دارند. نمونه‌ی ۴.۹ مقدار `this.systemData` را می‌سپارد در کلاسی که ۴.۸ با `systemState` اعلامش کرده بود، و ۴.۱۰ تابع `Consistency.validate` را صدا می‌زند جایی که ۴.۹ تابع `SystemValidity.validate` را. متن پیش از ۴.۱۰ از «حل ناسازی» هم می‌گوید، که پیش‌درآمد فصل ۵ است (pp. 85–88).
 
-## Trade-offs at a glance
+> **In practice:** rollback در GitOps با Argo CD همان برگرداندن state پیشین است: کافی است اشاره‌گر را به commit قبلی برگردانید.
+>
+> **Your turn:** deploy تازه‌ی loader داده‌ی خراب نوشت. rollback کد کافی است؟
+>
+> *Answer:* کد آری، با git revert و sync در Argo CD؛ داده نه: partitionهای خراب را باید از Bronze دوباره بسازید. برگرداندن state فقط وقتی ارزان است که نسخه‌ی قبلی هنوز وجود داشته باشد، که برای کد در git هست و برای داده در Bronze append-only (pp. 86–88).
 
-| Choice | Gains | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| گزینش | چه می‌برد | چه خرج می‌دهد |
 |---|---|---|
-| Mutate in place | Simple, familiar | Hard to guarantee validity; no history (p. 73) |
-| Deep copy per version | History and isolation | Inefficient in memory and computation (p. 73) |
-| Immutable functions with structural sharing | Cheap versions, history, stateless calculation | Discipline: a native setter on shared data corrupts other versions (p. 82) |
-| Persistent data structures | Immutability enforced; even more efficient | Not native; convert in and out (p. 83) |
-| Central commit with validation | Integrity checked for the whole system, in one place | One stateful component to get right; schema still to be written (chs. 7, 12) |
+| mutation سر جا | ساده و آشنا | تضمین اعتبار سخت است؛ بی هیچ تاریخی (p. 73) |
+| کپی عمیق برای هر version | تاریخ و جدایی | در حافظه و حساب ناکارآمد (p. 73) |
+| تابع‌های immutable با شریک شدن ساختاری | version ارزان، تاریخ، حساب بی‌state | انتظام: setterی بومی روی داده‌ی شریک versionهای دیگر را خراب می‌کند (p. 82) |
+| ساختارهای داده‌ی persistent | immutability به زور؛ و حتی کارآمدتر | بومی نیستند؛ تو و بیرون بدل می‌کنید (p. 83) |
+| commit مرکزی با اعتبارسنجی | تمامیت کل سیستم، در یک جا سنجیده | یک مؤلفه‌ی باstate که باید درست باشد؛ و طرحی که هنوز باید نوشته شود، فصل‌های ۷ و ۱۲ |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Path copying.** What `setImmutable` does is known in the literature as *path copying*: an update copies the O(depth) nodes from the root to the change. For a balanced tree that is O(log n) of n nodes; for Klafim's nested maps it is just the depth of the path. The lab measures this for a JSON-like tree. One caveat: a shallow clone of a map with k keys costs O(k), so a flat index with thousands of entries makes each update copy every key of that level. Persistent data structures, chapter 9, avoid that.
-- **Git again.** Git's tree objects share unchanged subtrees between commits in exactly this way: a commit that changes one file creates new tree objects only along that file's path.
-- **Redux and React.** JavaScript front-end state management popularized the same split. A pure reducer computes the next state, the store holds a single mutable reference, and Redux DevTools offers time travel. Joe's `SystemState` corresponds to the store and `Library.addMember` to a reducer.
-- **Freezing as a cheap guard.** In JavaScript, `Object.freeze` applied recursively (deep freeze) makes accidental native mutation throw in strict mode. It is a stopgap between discipline and persistent data structures, at some run-time cost.
+- **کپی مسیر.** آنچه `setImmutable` می‌کند در ادبیات به *path copying* شناخته می‌شود: هر به‌روزرسانی O(depth) node را از ریشه تا تغییر کپی می‌کند. برای درختی متوازن آن O(log n) از n node است؛ و برای mapهای تودرتوی Klafim تنها عمق مسیر. آزمایش lab این را برای درختی JSON‌مانند می‌سنجد. یک تذکر: کلون سطحی mapی با k کلید O(k) خرج می‌دهد، پس indexی تخت با هزاران entry هر به‌روزرسانی را وامی‌دارد همه‌ی کلیدهای آن سطح را کپی کند. ساختارهای داده‌ی persistent، فصل ۹، از آن می‌پرهیزند.
+- **باز هم Git.** شیءهای درخت در Git زیردرخت‌های دست‌نخورده را میان commitها دقیقاً همین‌طور شریک می‌شوند: commitی که یک فایل را عوض می‌کند تنها روی مسیر همان فایل شیء درخت تازه می‌سازد.
+- **کتابخانه‌های Redux و React.** مدیریت state در frontend به JavaScript همین شکستن را رایج کرد. reducerی سرراست state پسین را حساب می‌کند، آن store یک ارجاع mutable را نگه می‌دارد، و Redux DevTools سفر در زمان می‌دهد. کلاس `SystemState` جو با store می‌خواند و `Library.addMember` با reducer.
+- **یخ زدن به‌شکل پناهی ارزان.** در JavaScript، تابع `Object.freeze` که بازگشتی پیاده شود، یعنی deep freeze، mutation بومی تصادفی را در حالت سخت وامی‌دارد خطا بیندازد. میانه‌ای است بین انتظام و ساختارهای داده‌ی persistent، به بهایی سر اجرا.
 
-## Connections
+## پیوندها
 
-- **Previous:** [3. Basic data manipulation](03-basic-data-manipulation.md) did queries with `_.get`; this chapter adds `_.set`.
-- **Next:** [5. Basic concurrency control](05-basic-concurrency-control.md) lets mutations run concurrently and adds reconciliation to the commit phase.
-- **Validation in the commit:** [7. Basic data validation](07-basic-data-validation.md).
-- **Enforced immutability:** [9. Persistent data structures](09-persistent-data-structures.md).
-- **Run it:** [Structural sharing in numbers](../lab/04-structural-sharing/README.md) — counts the maps created and shared by an immutable set against a deep copy, and the cost of keeping a thousand versions.
+- **پیشین:** [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md) پرسش‌ها را با `_.get` کرد؛ و این فصل `_.set` را می‌افزاید.
+- **پسین:** [۵. کنترل پایه‌ی concurrency](05-basic-concurrency-control.md) می‌گذارد mutationها concurrent اجرا شوند و reconciliation را به فاز commit می‌افزاید.
+- **اعتبارسنجی در commit:** [۷. اعتبارسنجی پایه‌ی داده](07-basic-data-validation.md).
+- **مفهوم immutability به زور:** [۹. ساختارهای داده‌ی persistent](09-persistent-data-structures.md).
+- **Run it:** [شریک شدن ساختاری در عدد](../lab/04-structural-sharing/README.md) — mapهای ساخته و شریک‌شده‌ی یک set immutable را در برابر کپی عمیق می‌شمارد، و بهای نگه داشتن هزار version.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. State DOP Principle #3, and explain "the data is immutable, but the state reference is mutable."
-   <details><summary>Answer</summary>Data is immutable (p. 71). Each version of the system data never changes; the system state is a reference to one version, and a mutation moves that reference to a new version (p. 73).</details>
-2. What are the two phases of a mutation, and which is stateful?
-   <details><summary>Answer</summary>Calculation computes the next version; it is stateless and specific to each mutation. Commit moves the system state forward; it is stateful and common to all mutations (table 4.1, p. 72).</details>
-3. When *Watchmen*'s publication year is set immutably, which maps are new and which are shared?
-   <details><summary>Answer</summary>New: the `Library`, its `Catalog`, `booksByIsbn` and the *Watchmen* record. Shared: `UserManagement`, `authorsById`, and every other field of the book (pp. 77–78).</details>
-4. Why does listing 4.5 print `dave-chester-gibbons` for `nextBooks`?
-   <details><summary>Answer</summary>The `authorIds` array is shared between the two versions, and the code mutated it with a native setter. That's why native setters are forbidden and all manipulation must use immutable functions (p. 82).</details>
-5. What do persistent data structures add, and why doesn't Joe use them from the start?
-   <details><summary>Answer</summary>They are immutable at the level of the data, so they can't be mutated even by mistake, and they're even more efficient. But they aren't native, so you convert to and from them. Joe suggests immutable functions to play around and persistent structures for production (pp. 82–83).</details>
-6. Why can DOP validate data in one place, and why does `validate` get both `previous` and `next`?
-   <details><summary>Answer</summary>The commit phase is common to all mutations, so validation runs there for the whole system before the reference moves. Having both versions lets it optimize, for example by validating only what changed (pp. 85–86).</details>
-7. With one `previousSystemData` reference, what happens after one commit and then one undo?
-   <details><summary>Answer</summary>Starting at V12 (previous V11), the commit makes `systemData` V13 and previous V12; the undo sets `systemData` to V12, so both refer to V12. Multiple undos need a stack of references (pp. 87–88).</details>
+1. اصل ۳ از DOP را بگویید، و «داده immutable است، ولی ارجاع state mutable» را توضیح دهید.
+   <details><summary>پاسخ</summary>داده immutable است (p. 71). هر versionی از داده‌ی سیستم هیچ‌وقت عوض نمی‌شود؛ مقدار state سیستم ارجاعی به یک version است، و mutationی آن ارجاع را به versionی تازه می‌برد (p. 73).</details>
+2. دو فاز یک mutation کدامند، و کدام باstate است؟
+   <details><summary>پاسخ</summary>حساب version پسین را حساب می‌کند؛ بی‌state است و ویژه‌ی هر mutationی. commit مقدار state سیستم را پیش می‌برد؛ باstate است و میان همه‌ی mutationها مشترک (جدول ۴.۱، ص. ۷۲).</details>
+3. وقتی سال نشر *Watchmen* immutable گذاشته می‌شود، کدام mapها تازه‌اند و کدام شریک؟
+   <details><summary>پاسخ</summary>تازه: خود `Library` و `Catalog`ش و `booksByIsbn` و رکورد *Watchmen*. شریک: `UserManagement` و `authorsById` و هر فیلد دیگری از آن کتاب (pp. 77–78).</details>
+4. چرا listing ۴.۵ برای `nextBooks` مقدار `dave-chester-gibbons` چاپ می‌کند؟
+   <details><summary>پاسخ</summary>آرایه‌ی `authorIds` میان آن دو version شریک است، و کد با setterی بومی mutationش داد. همین است که setterهای بومی ممنوعند و همه‌ی دست‌کاری باید از تابع‌های immutable کار بکشد (p. 82).</details>
+5. ساختارهای داده‌ی persistent چه می‌افزایند، و چرا جو از آغاز به کارشان نمی‌برد؟
+   <details><summary>پاسخ</summary>در سطح داده تغییرناپذیرند، پس حتی به اشتباه هم mutation‌دادنی نیستند، و حتی کارآمدترند. ولی بومی نیستند، پس به آن‌ها و از آن‌ها بدل می‌کنید. جو تابع‌های immutable را برای بازی کردن و ساختارهای persistent را برای production پیش می‌گذارد (pp. 82–83).</details>
+6. چرا DOP می‌تواند داده را در یک جا اعتبارسنجی کند، و چرا `validate` هر دو `previous` و `next` را می‌گیرد؟
+   <details><summary>پاسخ</summary>فاز commit میان همه‌ی mutationها مشترک است، پس اعتبارسنجی همان‌جا برای کل سیستم پیش از جابه‌جا شدن ارجاع اجرا می‌شود. داشتن هر دو version می‌گذارد بهینه کند؛ مثلاً با اعتبارسنجی تنها چیز عوض‌شده (pp. 85–86).</details>
+7. با یک ارجاع `previousSystemData`، پس از یک commit و بعد یک undo چه می‌شود؟
+   <details><summary>پاسخ</summary>از V12 که آغاز شود و پیشینش V11 باشد، آن commit مقدار `systemData` را V13 و پیشین را V12 می‌کند؛ و آن undo `systemData` را روی V12 می‌گذارد، پس هر دو به V12 ارجاع می‌دهند. چند undo پشته‌ای از ارجاع‌ها می‌خواهد (pp. 87–88).</details>

@@ -1,18 +1,18 @@
-# Rows as maps with SQLite
+# ردیف‌ها به‌شکل map با SQLite
 
-Loads tables 10.1–10.3 into an in-memory SQLite database, with a row factory that returns each row as a dictionary: the driver step of figure 10.2. It then runs the chapter's search as printed and corrected, and validates the rows against the schema. Last, it renames keys with one generic function for books and users, and aggregates the three-row join into two books.
+جدول‌های ۱۰.۱ تا ۱۰.۳ را در پایگاه داده‌ای SQLite در حافظه بار می‌کند، با row factoryی که هر ردیفی را به‌شکل dictionary برمی‌گرداند: همان قدم راننده در شکل ۱۰.۲. بعد جست‌وجوی این فصل را همان‌طور که چاپ شده و تصحیح‌شده اجرا می‌کند، و ردیف‌ها را با آن طرح اعتبارسنجی. در پایان، کلیدها را با یک تابع عمومی برای کتاب‌ها و کاربران نام‌عوض می‌کند، و آن join سه‌ردیفی را در دو کتاب گرد.
 
-*Illustrates Data-Oriented Programming, chapter 10, pp. 198–218 (listings 10.4–10.26). SQLite stands in for the book's PostgreSQL; the placeholder is `?` instead of `$1`.*
+*تصویری از فصل ۱۰ کتاب Data-Oriented Programming، صص. ۱۹۸–۲۱۸ (listingهای ۱۰.۴ تا ۱۰.۲۶). پایگاه SQLite جای PostgreSQL کتاب می‌نشیند؛ و جایگزین `?` است به‌جای `$1`.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 rows_as_maps.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 1. The query of listing 10.6, as printed: '%$1%' inside the quotes
@@ -43,14 +43,14 @@ python3 rows_as_maps.py
      {"title": "7 Habits of Highly Effective People", "isbn": "978-1982137274", "authorNames": ["Sean Covey", "Stephen Covey"]}
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- A placeholder inside a quoted literal is just text: SQLite refuses the extra binding. In PostgreSQL, `'%$1%'` would silently search for the characters `$1`.
-- Selecting only `title` and `isbn`, as listing 10.6 does, fails `dbSearchResultSchema`, which requires `publication_year` (see the vault note in the lesson).
-- SQLite's `LIKE` ignores ASCII case, so `habit` finds both titles. With a case-sensitive `LIKE`, as in PostgreSQL, it finds none, and you'd need `ILIKE` there. This is the vault's observation: the book doesn't discuss case.
-- The same `renameResultKeys` reshapes book rows and user rows.
-- `aggregateFields` turns the three rows of the join into two books, the Coveys' names collected in one `authorNames` list.
+- جایگزینی درون مقداری گیومه‌دار تنها متن است: پایگاه SQLite آن bindingی افزوده را نمی‌پذیرد. در PostgreSQL، عبارت `'%$1%'` خاموش نویسه‌های `$1` را می‌جست.
+- برداشتن تنها `title` و `isbn`، آن‌طور که listing ۱۰.۶ می‌کند، در `dbSearchResultSchema` شکست می‌خورد، که `publication_year` را اجبار می‌کند؛ کادر vault در درس را ببینید.
+- عملگر `LIKE` در SQLite بزرگی و کوچکی ASCII را نشنیده می‌گیرد، پس `habit` هر دو عنوان را می‌یابد. با `LIKE`ی حساس، مانند PostgreSQL، هیچ نمی‌یابد، و آن‌جا به `ILIKE` نیاز داشتید. این مشاهده‌ی vault است: کتاب از بزرگی و کوچکی حرف نمی‌گوید.
+- همان یک `renameResultKeys` ردیف‌های کتاب و کاربر را از نو شکل می‌دهد.
+- تابع `aggregateFields` سه ردیف آن join را به دو کتاب بدل می‌کند، با نام کاوی‌ها گردشده در یک فهرست `authorNames`.
 
-## Related
+## مرتبط
 
-- Chapter note: [10. Database operations](../../chapters/10-database-operations.md) — sections 10.1–10.4, pp. 198–218
+- یادداشت فصل: [فصل ۱۰: عملیات پایگاه داده](../../chapters/10-database-operations.md) — بخش‌های ۱۰.۱ تا ۱۰.۴، صص. ۱۹۸–۲۱۸

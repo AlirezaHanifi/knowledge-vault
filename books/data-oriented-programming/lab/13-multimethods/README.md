@@ -1,18 +1,18 @@
-# Multimethods from scratch
+# پیاده‌سازی multimethodها از صفر
 
-A tiny `multi` and `method` in Python: a dispatch function plus a hash map from dispatch values to methods, with an optional default. The script replays single dispatch with `greet`, multiple dispatch with `greetLang` and dynamic dispatch with `dysGreet`. Then it runs `Author.myName` across the prolificity boundaries of table 13.1.
+یک `multi` و `method` ناچیز به Python: تابعی توزیع‌کننده به‌علاوه‌ی hash mapی از مقدارهای توزیعی به متدها، با پیش‌فرضی اختیاری. اسکریپت توزیع یگانه را با `greet` و توزیع چندگانه را با `greetLang` و توزیع پویا را با `dysGreet` replay می‌کند. بعد `Author.myName` را از مرزهای پرکاری جدول ۱۳.۱ می‌گذراند.
 
-*Illustrates Data-Oriented Programming, chapter 13, pp. 277–293 (listings 13.6–13.29). The implementation stands in for the arrows/multimethod library. Fidelio, Milou, the book counts and the `pdf` format are the vault's test inputs.*
+*تصویری از فصل ۱۳ کتاب Data-Oriented Programming، صص. ۲۷۷–۲۹۳ (listingهای ۱۳.۶ تا ۱۳.۲۹). آن پیاده‌سازی جای کتابخانه‌ی arrows/multimethod می‌نشیند. نام‌های Fidelio و Milou و شمار کتاب‌ها و قالب `pdf` ورودی‌های تست vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 multimethods.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 Single dispatch on the animal's type
@@ -48,13 +48,13 @@ Author.myName across the boundaries of table 13.1
   format 'pdf': Author.myName called with invalid arguments: data/1 must be equal to one of the allowed values
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Horace has no method until `greetDefault` is registered. Adding it doesn't edit any other method: that's the extensibility the chapter is after.
-- The six `greetLang` lines match listing 13.17's outputs.
-- `dysGreet` dispatches on whether the name has more than five letters: Milou (5) is short, Fidelio (7) is long.
-- 10 books is still low, 11 is medium, 50 is still medium, and 51 is high. The format enum rejects anything but HTML and Markdown.
+- اسب Horace تا ثبت شدن `greetDefault` هیچ متدی ندارد. افزودنش هیچ متد دیگری را ویرایش نمی‌کند: همان گسترش‌پذیری است که فصل در پی‌اش است.
+- آن شش خط `greetLang` با خروجی‌های listing ۱۳.۱۷ می‌خوانند.
+- تابع `dysGreet` بر پایه‌ی اینکه آن نام بیش از پنج حرف دارد یا نه توزیع می‌کند: نام Milou با ۵ حرف کوتاه است و Fidelio با ۷ حرف دراز.
+- شمار ۱۰ کتاب هنوز low است، ۱۱ همان medium، ۵۰ هنوز medium، و ۵۱ همان high. آن enum قالب هر چیزی جز HTML و Markdown را رد می‌کند.
 
-## Related
+## مرتبط
 
-- Chapter note: [13. Polymorphism](../../chapters/13-polymorphism.md) — sections 13.2–13.5, pp. 277–293
+- یادداشت فصل: [فصل ۱۳: polymorphism](../../chapters/13-polymorphism.md) — بخش‌های ۱۳.۲ تا ۱۳.۵، صص. ۲۷۷–۲۹۳

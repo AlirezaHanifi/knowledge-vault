@@ -2,121 +2,135 @@
 book: data-oriented-programming
 chapter: 3
 title: "Basic data manipulation"
+translated_title: "دست‌کاری پایه‌ی داده"
 pages: "43–70"
+lang: fa
 ---
 
-# 3. Basic data manipulation
+# ۳. دست‌کاری پایه‌ی داده
 
-[← 2. Separation between code and data](02-separation-between-code-and-data.md) · [Book](../README.md) · [4. State management →](04-state-management.md)
+[← ۲. جدایی کد از داده](02-separation-between-code-and-data.md) · [کتاب](../README.md) · [۴. مدیریت state →](04-state-management.md)
 
-## Summary
+## خلاصه
 
-With code separated from data, Joe and Theo design the data on its own. The second principle of DOP is to **represent data entities with generic data structures**: records become heterogeneous string maps, indexes become homogeneous string maps, and positional collections are whatever collection suits (pp. 43, 48–49). Every piece of information then has an **information path**, such as `["booksByIsbn", "978-1779501127", "title"]`, and can be read with a generic function like Lodash's `_.get` (pp. 55–57). Joe builds book search entirely from generic functions (`_.get`, `_.map`, `_.filter`, `_.values`), with `JSON.stringify` at the end. Theo's "Aha!" is that the code contains no abstractions: it is just data manipulation (pp. 58–64). Records rarely need a type; to tell VIP and Super members apart, Joe uses **feature fields** like `isVIP` (pp. 65–68). The price is safety: DOP trades the compile-time checking of classes for flexibility and genericity (table 3.1, p. 54).
+با کدی جدا از داده، جو و تئو داده را تنها و خودش طراحی می‌کنند. اصل دوم DOP این است که **entityهای داده را با ساختارهای داده‌ی عمومی بنمایانید**: رکوردها به map رشته‌ای ناهمگن بدل می‌شوند، indexها به map رشته‌ای همگن، و مجموعه‌های جایگاهی هر مجموعه‌ای که بخورد (pp. 43, 48–49). بعد هر تکه خبری **مسیر خبر** دارد، مانند `["booksByIsbn", "978-1779501127", "title"]`، و با تابعی عمومی مانند `_.get` از Lodash خواندنی است (pp. 55–57). جو جست‌وجوی کتاب را سرتاپا از تابع‌های عمومی می‌سازد، یعنی `_.get` و `_.map` و `_.filter` و `_.values`، با `JSON.stringify` در پایان. «آهان!» تئو این است که کد هیچ انتزاعی ندارد: تنها دست‌کاری داده است (pp. 58–64). رکوردها کم به گونه نیاز دارند؛ و جو برای جدا کردن عضوهای VIP و Super از **فیلدهای ویژگی** مانند `isVIP` کار می‌کشد (pp. 65–68). بهایش ایمنی است: روش DOP سنجش زمان کامپایل کلاس‌ها را با انعطاف و عمومیت بده‌بستان می‌کند (جدول ۳.۱، ص. ۵۴).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Principle #2: represent data entities with generic data structures** (p. 43). Code depends on data only weakly: it needs to know just the keys it uses (p. 44).
-- **A data entity diagram has three kinds of aggregation:** records, positional collections (`[String]`) and indexes (`{Book}`, whose keys are always strings). The relations are composition or association (pp. 46–48).
-- **Records are heterogeneous string maps; indexes are homogeneous string maps** (pp. 48–49).
-- **Classes buy safety at the cost of flexibility.** With maps there is no `BookInSearchResults` class or copy constructor for each variation; fields can be added, removed and renamed at run time (p. 52).
-- **JSON serialization comes for free**, because a record is just data and a generic function serializes any record (p. 53).
-- **Information paths are first-class:** they can be stored in variables and passed to functions. With objects, each kind of path needs specific code (pp. 55–57).
-- **Most of the time, there's no need to know a record's type.** Prefer a feature field such as `isVIP` over type information (pp. 65–67).
-- **Accessing a map field is slightly slower than a class member, usually not significantly.** Statically typed languages sometimes need casts (pp. 56–57).
+- **اصل ۲: entityهای داده را با ساختارهای داده‌ی عمومی بنمایانید** (p. 43). کد تنها سست به داده بسته است: کافی است همان کلیدهایی را بداند که به کار می‌برد (p. 44).
+- **نمودار entity داده سه گونه گرد آمدن دارد:** رکوردها، مجموعه‌های جایگاهی `[String]` و indexها `{Book}` که کلیدهایشان همیشه رشته‌اند. رابطه‌ها ترکیب یا تداعی‌اند (pp. 46–48).
+- **رکوردها map رشته‌ای ناهمگن‌اند؛ و indexها map رشته‌ای همگن** (pp. 48–49).
+- **کلاس‌ها ایمنی را به بهای انعطاف می‌خرند.** با map هیچ کلاس `BookInSearchResults` یا سازنده‌ی کپی برای هر گونه‌ای لازم نیست؛ و فیلدها سر اجرا افزودنی و برداشتنی و نام‌عوض‌کردنی‌اند (p. 52).
+- **سریالی کردن به JSON مفت می‌آید**، چون رکورد تنها داده است و تابعی عمومی هر رکوردی را سریالی می‌کند (p. 53).
+- **مسیرهای خبر درجه‌یک‌اند:** می‌شود در متغیر ذخیره و به تابع فرستادشان. با شیءها هر گونه مسیری کد ویژه‌ی خودش را می‌خواهد (pp. 55–57).
+- **بیشتر وقت‌ها لازم نیست گونه‌ی رکوردی را بدانید.** فیلدی ویژگی مانند `isVIP` را بر خبر گونه ترجیح دهید (pp. 65–67).
+- **دسترسی به فیلدی از map کمی از عضوی از کلاس کندتر است، و معمولاً نه چندان.** زبان‌های ایستا-نوع گاهی cast می‌خواهند (pp. 56–57).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 3.1 Designing a data model — p. 44
-- 3.2 Representing records as maps — p. 48
-- 3.3 Manipulating data with generic functions — p. 54
-- 3.4 Calculating search results — p. 58
-- 3.5 Handling records of different types — p. 65
-- Summary — p. 69
+- ۳.۱ طراحی مدل داده — ص. ۴۴
+- ۳.۲ نمایاندن رکوردها به‌شکل map — ص. ۴۸
+- ۳.۳ دست‌کاری داده با تابع‌های عمومی — ص. ۵۴
+- ۳.۴ حساب کردن نتیجه‌های جست‌وجو — ص. ۵۸
+- ۳.۵ چرخاندن رکوردهای گونه‌های مختلف — ص. ۶۵
+- خلاصه — ص. ۶۹
 
-## Notes
+## یادداشت‌ها
 
-The chapter covers data *query* only; chapter 4 covers changes to system state (p. 44). Representing records as string maps, rather than objects instantiated from classes, makes data "a first-class citizen powered by generic functions to add, remove, or rename fields" (p. 44). ("String maps" are maps with string keys.)
+این فصل تنها *پرسش* از داده را می‌پوشاند؛ و فصل ۴ تغییرهای state سیستم را (p. 44). نمایاندن رکوردها به‌شکل map رشته‌ای، نه شیءهایی نمونه‌شده از کلاس، داده را «شهروندی درجه‌یک می‌کند که تابع‌های عمومی برای افزودن و برداشتن و نام‌عوض‌کردن فیلدها نیرویش می‌دهند» (p. 44). «map رشته‌ای» mapی است با کلیدهای رشته‌ای.
 
-### 3.1 Designing a data model
+### ۳.۱ طراحی مدل داده
 
-When designing the data you don't think about code, and the only relations are association and composition (p. 44). Theo turns the data mind map into a data entity diagram with fields (figure 3.2, p. 45), then makes each relation explicit (pp. 46–47):
+سر طراحی داده به کد فکر نمی‌کنید، و تنها رابطه‌ها تداعی و ترکیب‌اند (p. 44). تئو نقشه‌ی ذهنی داده را به نمودار entity داده با فیلدها بدل می‌کند (شکل ۳.۲، ص. ۴۵)، و بعد هر رابطه‌ای را صریح (pp. 46–47):
 
-- **Book ↔ Author** (many-to-many): each `Book` holds a collection of author IDs and each `Author` a collection of book ISBNs. Neither holds the other; the relation is indirect and goes through an index.
-- **IDs:** a book's ID is its ISBN, a numeric commercial identifier intended to be unique. An author's ID is the author's name in lowercase with dashes for spaces, assuming no two authors share a name.
-- **Indexes** live in `Catalog`: `booksByIsbn` (`{Book}`) and `authorsById` (`{Author}`). `UserManagement` holds `librariansByEmail` and `membersByEmail`.
+- **کتاب ↔ نویسنده**، چندبه‌چند: هر `Book` مجموعه‌ای از شناسه‌ی نویسنده‌ها را دارد و هر `Author` مجموعه‌ای از ISBN کتاب‌ها. هیچ‌کدام آن یکی را ندارد؛ رابطه ناسرراست است و از indexی می‌گذرد.
+- **شناسه‌ها:** شناسه‌ی هر کتابی همان ISBN آن است، شناسه‌ای عددی و تجاری که قرار است یکتا باشد. شناسه‌ی هر نویسنده‌ای نامش با حرف کوچک و خط تیره جای فاصله است، به فرض آنکه دو نویسنده هم‌نام نباشند.
+- **همه‌ی indexها** در `Catalog` می‌نشینند: `booksByIsbn` به‌شکل `{Book}` و `authorsById` به‌شکل `{Author}`. ماژول `UserManagement` دو index `librariansByEmail` و `membersByEmail` را دارد.
 
-A **positional collection** keeps its elements in order, like a list or an array, and is noted `[String]`. An **index** gives access by key, like a hash map, and is noted `{Book}`; in a data model, index keys are always strings (p. 46).
+هر **مجموعه‌ی جایگاهی** عضوهایش را به ترتیب نگه می‌دارد، مانند فهرست یا array، و `[String]` نوشته می‌شود. هر **indexی** دسترسی با کلید می‌دهد، مانند hash map، و `{Book}` نوشته می‌شود؛ و در مدل داده، کلیدهای index همیشه رشته‌اند (p. 46).
 
-![Relation model of the library: Library holds Catalog and UserManagement; Catalog indexes Books and Authors; Books hold BookItems; UserManagement indexes Librarians and Members; Members hold BookLendings; dashed lines link records that refer to each other by ID](../figures/03-03.png)
+![مدل رابطه‌ی کتابخانه: Library دو تا Catalog و UserManagement را دارد؛ Catalog کتاب‌ها و نویسنده‌ها را index می‌کند؛ کتاب‌ها نسخه‌ها را دارند؛ UserManagement کتابدارها و عضوها را index می‌کند؛ عضوها قرض‌ها را دارند؛ و خط‌چین‌ها رکوردهایی را به هم وصل می‌کنند که با شناسه به هم ارجاع می‌دهند](../figures/03-03.png)
 
-*Figure 3.3 (p. 47): solid arrows are positional or indexed containment; dashed lines are references by ID. The book writes `{Book}` for an index and `[String]` for a positional collection.*
+*Figure 3.3 (p. 47): پیکان‌های توپر دربرگیری جایگاهی یا index‌شده‌اند؛ و خط‌چین‌ها ارجاع با شناسه. کتاب برای index `{Book}` و برای مجموعه‌ی جایگاهی `[String]` می‌نویسد.*
 
-Joe names the third kind of aggregation: what they had been calling an "entity" is, in computer science terms, a **record**. That is a collection of fields, possibly of different types (pp. 47–48). So a data entity diagram consists of records whose values are primitives, positional collections or indexes, and the relations between records are composition or association, each one-to-one, one-to-many or many-to-many (p. 48).
+جو گونه‌ی سوم گرد آمدن را نام می‌گذارد: آنچه «entity» صدایش می‌کردند، در زبان علوم کامپیوتر، **رکورد** است. یعنی مجموعه‌ای از فیلدها، شاید از گونه‌های مختلف (pp. 47–48). پس نمودار entity داده از رکوردهایی ساخته می‌شود که مقدارهایشان بدوی یا مجموعه‌ی جایگاهی یا index‌اند، و رابطه‌های میان رکوردها ترکیب یا تداعی‌اند، هر کدام یک‌به‌یک یا یک‌به‌چند یا چندبه‌چند (p. 48).
 
-### 3.2 Representing records as maps
+### ۳.۲ نمایاندن رکوردها به‌شکل map
 
-DOP has nothing special to say about collections, which can be linked lists, arrays, vectors or sets (the book uses arrays for now). Indexes are **homogeneous** string maps, where all values have the same type, as in OOP. The surprise is that **records are heterogeneous string maps**, whose values have different types (pp. 48–49). This holds for OOP and FP languages alike. It feels natural in JavaScript, Python and Ruby, and is a bit more cumbersome in Java and C# (p. 48).
+روش DOP حرف ویژه‌ای در باب مجموعه‌ها ندارد، که می‌توانند فهرست پیوندی یا array یا vector یا set باشند؛ کتاب فعلاً array به کار می‌برد. indexها map رشته‌ای **همگن**‌اند، که همه‌ی مقدارهایشان هم‌گونه است، مانند OOP. شگفتی این است که **رکوردها map رشته‌ای ناهمگن‌اند**، که مقدارهایشان گونه‌های مختلف دارد (pp. 48–49). این برای زبان‌های OOP و FP یکسان برپاست. در JavaScript و Python و Ruby طبیعی حس می‌شود، و در Java و C# کمی دست‌وپاگیرتر (p. 48).
 
-![Data representation splits into records (heterogeneous maps), collections (linked lists, arrays, sets, vectors) and indexes (homogeneous maps)](../figures/03-04.png)
+![نمایش داده به رکوردها به‌شکل map ناهمگن، مجموعه‌ها به‌شکل فهرست پیوندی و array و set و vector، و indexها به‌شکل map همگن می‌شکند](../figures/03-04.png)
 
-*Figure 3.4 (p. 49): three building blocks — records, collections and indexes — are enough to represent the whole system's data.*
+*Figure 3.4 (p. 49): سه خشت ساختمانی، یعنی رکورد و مجموعه و شاخص، بس است تا داده‌ی کل سیستم را بنمایاند.*
 
-Joe's favourite graphic novel, *Watchmen* by Alan Moore and Dave Gibbons (1987), with two copies at library `nyc-central-lib`, one of them out, becomes a JavaScript map literal (listings 3.1–3.2, pp. 50). In Java it uses the immutable `Map.of` and `List.of` factory methods (listing 3.3, p. 51).
+رمان گرافیکی محبوب جو، *Watchmen* از آلن مور و دیو گیبونز (۱۹۸۷)، با دو نسخه در کتابخانه‌ی `nyc-central-lib` که یکی‌شان بیرون است، به map لفظی JavaScript بدل می‌شود (listingهای ۳.۱ و ۳.۲، ص. ۵۰). در Java از متدهای کارخانه‌ی immutable `Map.of` و `List.of` کار می‌کشد (listing ۳.۳، ص. ۵۱).
 
-**Why Theo prefers classes, and what they cost** (pp. 51–52):
+**چرا تئو کلاس‌ها را ترجیح می‌دهد، و چه خرج می‌دهند** (pp. 51–52):
 
-- Classes make the data shape part of the program, so the IDE autocompletes field names and errors are caught at compile time.
-- But showing a book in search results, with author *names* and no book items, needs a new `BookInSearchResults` class and a copy constructor. Classes bring safety at the cost of flexibility.
+- کلاس‌ها شکل داده را بخشی از برنامه می‌کنند، پس IDE نام فیلدها را خودکار کامل می‌کند و خطاها سر کامپایل گرفته می‌شوند.
+- ولی نشان دادن کتابی در نتیجه‌های جست‌وجو، با *نام* نویسنده‌ها و بی نسخه‌های کتاب، کلاس تازه‌ی `BookInSearchResults` و سازنده‌ی کپی می‌خواهد. کلاس‌ها ایمنی را به بهای انعطاف می‌آورند.
 
-**Genericity** (pp. 52–53): a record is just data, so one generic function serializes any record to JSON, with no reflection like the Gson library uses. JavaScript has `JSON.stringify`, but nothing built in to omit several keys or rename keys. The book uses **Lodash** for such generic functions, which has ports for Java, C#, Python (pydash) and Ruby. There is nothing special about Lodash: other libraries or custom code would do (p. 53).
+**عمومیت** (pp. 52–53): رکورد تنها داده است، پس یک تابع عمومی هر رکوردی را به JSON سریالی می‌کند، بی هیچ reflection مانند آنچه کتابخانه‌ی Gson به کار می‌برد. زبان JavaScript تابع `JSON.stringify` را دارد، ولی هیچ چیز توکار برای انداختن چند کلید یا نام‌عوض‌کردنشان. کتاب برای چنین تابع‌های عمومی **Lodash** را به کار می‌برد، که برای Java و C# و Python با نام pydash و Ruby هم درگاه دارد. هیچ چیز ویژه‌ای در Lodash نیست: کتابخانه‌های دیگر یا کد دست‌ساز هم کار می‌کنند (p. 53).
 
-| | OOP | DOP (table 3.1, p. 54) |
+| | روش OOP | روش DOP (جدول ۳.۱، ص. ۵۴) |
 |---|---|---|
-| Safety | High | Low |
-| Flexibility | Low | High |
-| Genericity | Low | High |
+| ایمنی | بالا | پایین |
+| انعطاف | پایین | بالا |
+| عمومیت | پایین | بالا |
 
-### 3.3 Manipulating data with generic functions
+> **In practice:** dlt هر ردیف منبع را dict می‌بیند و ClickHouse ستون `JSON` و `Map` دارد: رکورد به‌شکل map در سراسر pipeline ما هست.
+>
+> **Your turn:** یک منبع ستون JSON با کلیدهای متغیر دارد. آن را در Bronze چطور نگه می‌دارید؟
+>
+> *Answer:* در Bronze به‌شکل map خام، بی‌آن‌که برای هر کلید ستون بسازید، و در Silver کلیدهای لازم را با مسیر استخراج کنید. map رکوردهای ناهمگون را بدون تغییر schema نگه می‌دارد و این همان آزادی‌ای است که کتاب از map انتظار دارد (pp. 48–54).
 
-Joe builds a `Catalog` record with *Watchmen* and its two authors (listing 3.5, pp. 54–55). In the entity diagram records and indexes are clearly distinct, but in code both are plain data. "In DOP, data is represented as data," which makes any part of the system data easy to visualize; Theo calls it a lapalissade, an obvious truth (p. 55).
+### ۳.۳ دست‌کاری داده با تابع‌های عمومی
 
-**Information paths.** Every piece of information has a path, like a file path whose names are nested entities (p. 55):
+جو رکوردی `Catalog` با *Watchmen* و دو نویسنده‌اش می‌سازد (listing ۳.۵، صص. ۵۴–۵۵). در نمودار entity، رکوردها و indexها روشن از هم جدایند، ولی در کد هر دو داده‌ی خالی‌اند. «در DOP، داده به‌شکل داده نمایانده می‌شود»، که تصویر کردن هر بخشی از داده‌ی سیستم را آسان می‌کند؛ و تئو بدیهی‌گویی‌اش می‌نامد، حقیقتی آشکار (p. 55).
+
+**مسیرهای خبر.** هر تکه خبری مسیری دارد، مانند مسیر فایلی که نام‌هایش entityهای تودرتوست (p. 55):
 
 ```js
 _.get(catalogData, ["booksByIsbn", "978-1779501127", "title"])
 // → "Watchmen"
 ```
 
-Theo writes his own `get` as a loop over the path in a few minutes (listing 3.7, p. 56). Paths mix strings and integers: Alan Moore's first book is `["catalog", "authorsById", "alan-moore", "bookIsbns", 0]` (figure 3.5, p. 57).
+تئو `get` خودش را در چند دقیقه به‌شکل حلقه‌ای روی مسیر می‌نویسد (listing ۳.۷، ص. ۵۶). مسیرها رشته و عدد صحیح را قاطی می‌کنند: کتاب نخست آلن مور `["catalog", "authorsById", "alan-moore", "bookIsbns", 0]` است (شکل ۳.۵، ص. ۵۷).
 
-**Points Joe and Theo settle** (pp. 56–57):
+**نکته‌هایی که جو و تئو ته‌نشین می‌کنند** (pp. 56–57):
 
-| Question | Answer |
+| پرسش | پاسخ |
 |---|---|
-| Does `_.get` work in Java? | To use a value concretely you cast it, `((String)watchmen.get("title")).toUpperCase()`, because the map is a `Map<String,Object>`; often code just passes data around. C#'s `dynamic` avoids the cast |
-| Performance? | Map field access is slightly slower than a class member; usually not significant |
-| Doesn't `catalogData.booksByIsbn["…"].title` work in OOP too? | With objects you need specific code for each kind of path: class imports in Java, and dot notation for members but brackets for map keys even in JavaScript. With maps, one generic function takes the path as an argument |
+| تابع `_.get` در Java کار می‌کند؟ | برای به کار بردن ملموس مقداری castش می‌کنید، یعنی `((String)watchmen.get("title")).toUpperCase()`، چون آن map یک `Map<String,Object>` است؛ و بیشتر وقت‌ها کد تنها داده را این‌ور آن‌ور می‌فرستد. واژه‌ی `dynamic` در C# از آن cast می‌پرهیزد |
+| کارایی؟ | دسترسی به فیلدی از map کمی از عضوی از کلاس کندتر است؛ و معمولاً نه چندان |
+| مگر `catalogData.booksByIsbn["…"].title` در OOP هم کار نمی‌کند؟ | با شیءها برای هر گونه مسیری کد ویژه می‌خواهید: وارد کردن کلاس در Java، و نقطه برای عضوها ولی کروشه برای کلیدهای map حتی در JavaScript. با map، یک تابع عمومی مسیر را آرگومان می‌گیرد |
 
-The information path is a first-class citizen: it can be stored in a variable and passed to a function (p. 57).
+مسیر خبر شهروندی درجه‌یک است: می‌شود در متغیری ذخیره و به تابعی فرستادش (p. 57).
 
-> **Try it:** [Information paths](../widgets/03-information-path.html) — click through the catalog tree from figure 3.5, or type a path, and see `_.get` resolve it step by step, including missing keys.
+> **Try it:** [مسیرهای خبر](../widgets/03-information-path.html) — درخت catalog از شکل ۳.۵ را کلیک‌به‌کلیک بگردید، یا مسیری تایپ کنید، و ببینید `_.get` چطور قدم‌به‌قدم حلش می‌کند، کلیدهای جاافتاده هم.
 
-### 3.4 Calculating search results
+> **In practice:** تابع‌های عمومی روی map همان transform تکرارپذیر در pipeline‌اند، مثل hash کردن PII.
+>
+> **Your turn:** hash کردن PII در هر منبع جدا با کد خاص آن منبع نوشته شده. چرا یک تابع عمومی با فهرست مسیر فیلدها بهتر است؟
+>
+> *Answer:* یک تابع `hash_fields(record, paths)` که فهرست مسیرهای PII هر منبع را از config می‌گیرد یک بار تست می‌شود و افزودن منبع فقط فهرست را عوض می‌کند. کتاب می‌گوید تابع‌های عمومی روی map جای accessorهای خاص هر کلاس را می‌گیرند (pp. 55–58).
 
-A search result is a `BookInfo` record with `title`, `isbn` and `authorNames` (listing 3.10, p. 58). Joe builds it in four functions (pp. 59–64):
+### ۳.۴ حساب کردن نتیجه‌های جست‌وجو
 
-| Function | Module | What it does |
+هر نتیجه‌ی جست‌وجو رکوردی `BookInfo` با `title` و `isbn` و `authorNames` است (listing ۳.۱۰، ص. ۵۸). جو آن را در چهار تابع می‌سازد (pp. 59–64):
+
+| تابع | ماژول | چه می‌کند |
 |---|---|---|
-| `authorNames(catalogData, book)` | `Catalog` | `_.map` the book's `authorIds` to `["authorsById", id, "name"]` |
-| `bookInfo(catalogData, book)` | `Catalog` | Build a map literal; no class for `BookInfo` |
-| `searchBooksByTitle(catalogData, query)` | `Catalog` | `_.values` of `booksByIsbn`, `_.filter` by `title.includes(query)`, `_.map` to `bookInfo` |
-| `searchBooksByTitleJSON(libraryData, query)` | `Library` | Get `"catalog"`, search, `JSON.stringify` |
+| `authorNames(catalogData, book)` | `Catalog` | با `_.map` مقدار `authorIds` کتاب را به `["authorsById", id, "name"]` می‌نگارد |
+| `bookInfo(catalogData, book)` | `Catalog` | map لفظی می‌سازد؛ بی هیچ کلاسی برای `BookInfo` |
+| `searchBooksByTitle(catalogData, query)` | `Catalog` | با `_.values` از `booksByIsbn`، با `_.filter` بر پایه‌ی `title.includes(query)`، و با `_.map` به `bookInfo` |
+| `searchBooksByTitleJSON(libraryData, query)` | `Library` | کلید `"catalog"` را می‌گیرد، می‌جوید، و `JSON.stringify` |
 
-Theo objects that `_.map` smells like functional programming. Joe says it's just a function that transforms a collection's values, and Theo writes `map` and `filter` as plain `for` loops (listings 3.12, 3.17). Joe prefers `_.get(book, "title")` to `book.title` because dot and bracket notation might not work on maps in some languages; "being language-agnostic has a price," says Theo (pp. 61–62). In listing 3.23, `_.filter` is passed the `booksByIsbn` map directly, since given a map it iterates over the values (p. 64).
+تئو ایراد می‌گیرد که `_.map` بوی برنامه‌نویسی تابعی می‌دهد. جو می‌گوید تنها تابعی است که مقدارهای مجموعه‌ای را دگر می‌کند، و تئو `map` و `filter` را به‌شکل حلقه‌ی `for` خالی می‌نویسد (listingهای ۳.۱۲ و ۳.۱۷). جو `_.get(book, "title")` را بر `book.title` ترجیح می‌دهد چون نشانه‌ی نقطه و کروشه شاید در برخی زبان‌ها روی map کار نکند؛ «زبان‌ناشناس بودن بها دارد»، تئو می‌گوید (pp. 61–62). در listing ۳.۲۳، تابع `_.filter` یک‌راست همان map از `booksByIsbn` را می‌گیرد، چون اگر mapی بگیرد روی مقدارها می‌گردد (p. 64).
 
-The field list of a `BookInfo` isn't part of the program; you document it in the entity diagram or the function's documentation. Chapters 7 and 12 show how to make it part of the program (p. 60).
+فهرست فیلدهای `BookInfo` بخشی از برنامه نیست؛ در نمودار entity یا مستند تابع می‌نویسیدش. فصل‌های ۷ و ۱۲ نشان می‌دهند چطور بخشی از برنامه‌اش کنید (p. 60).
 
 ```mermaid
 flowchart LR
@@ -127,70 +141,70 @@ flowchart LR
     BI -->|JSON.stringify| J[JSON string]
 ```
 
-*The vault's diagram of listing 3.23 (pp. 63–64).*
+*نمودار vault از listing ۳.۲۳ (pp. 63–64).*
 
-"The important thing is not that the code is concise, but that the code contains no abstractions. It's just data manipulation!" Joe likens it to his meditation teacher's lesson of grasping reality without the abstractions created by thought (p. 64).
+«مهم این نیست که کد موجز است، بلکه این است که کد هیچ انتزاعی ندارد. تنها دست‌کاری داده است!» جو آن را به درس آموزگار مراقبه‌اش می‌ماند که واقعیت را بی انتزاع‌های ساخته‌ی اندیشه بگیرد (p. 64).
 
-> **Try it:** [Search as data manipulation](../widgets/03-search-pipeline.html) — run `searchBooksByTitle` stage by stage over a small catalog, change the query, and add a field to a book to see which code cares.
+> **Try it:** [جست‌وجو به‌شکل دست‌کاری داده](../widgets/03-search-pipeline.html) — تابع `searchBooksByTitle` را مرحله‌به‌مرحله روی catalogی کوچک اجرا کنید، پرسش را عوض کنید، و فیلدی به کتابی بیفزایید تا ببینید کدام کد اهمیتش می‌دهد.
 
-### 3.5 Handling records of different types
+### ۳.۵ چرخاندن رکوردهای گونه‌های مختلف
 
-If a record is just a map, how do you know its type? "Most of the time, there's no need to know the record type"; what matters is the values of the fields. `authorNames` only cares about `authorIds` (p. 65). The record types handle themselves:
+اگر رکورد تنها mapی است، گونه‌اش را از کجا می‌دانید؟ «بیشتر وقت‌ها لازم نیست گونه‌ی رکورد را بدانید»؛ آنچه مهم است مقدار فیلدهاست. تابع `authorNames` تنها `authorIds` را اهمیت می‌دهد (p. 65). گونه‌های رکورد خودشان را می‌چرخانند:
 
-- **Librarian or member:** check which index the record is found in. `isLibrarian` is `_.has(_.get(userManagement, "librariansByEmail"), email)` (listings 3.26–3.27, pp. 65–66). The sample data encodes passwords as naive base-64 to keep things simple.
-- **VIP and Super members:** Joe could add `VIPMembersByEmail` and `SuperMembersByEmail` indexes, but prefers adding `isVIP: true` or `isSuper: true` to the member record and checking the path `["membersByEmail", email, "isVIP"]` (listings 3.29–3.30, pp. 66–67).
+- **کتابدار یا عضو:** بسنجید رکورد در کدام index یافت می‌شود. تابع `isLibrarian` همان `_.has(_.get(userManagement, "librariansByEmail"), email)` است (listingهای ۳.۲۶ و ۳.۲۷، صص. ۶۵–۶۶). داده‌ی نمونه گذرواژه‌ها را ساده‌لوحانه با base-64 رمز می‌کند تا کار ساده بماند.
+- **عضوهای VIP و Super:** جو می‌توانست indexهای `VIPMembersByEmail` و `SuperMembersByEmail` را بیفزاید، ولی ترجیح می‌دهد `isVIP: true` یا `isSuper: true` را به رکورد عضو بیفزاید و مسیر `["membersByEmail", email, "isVIP"]` را بسنجد (listingهای ۳.۲۹ و ۳.۳۰، صص. ۶۶–۶۷).
 
-Why not a `type` field? A member can be both VIP and Super. A `types` collection would work and is sometimes helpful, but Joe finds a Boolean **feature field** per feature simpler (p. 67). Librarians and members stay separate record types, though, because they differ in data: members have book lendings and librarians don't (p. 68). Figure 3.6 adds `isVIP` and `isSuper` to `Member` (p. 68).
+چرا فیلدی `type` نه؟ عضوی می‌تواند هم VIP باشد هم Super. مجموعه‌ای `types` کار می‌کرد و گاهی به کار می‌آید، ولی جو فیلدی ویژگی و بولی برای هر ویژگی را ساده‌تر می‌یابد (p. 67). با این حال کتابدارها و عضوها گونه‌های رکورد جدا می‌مانند، چون در داده تفاوت دارند: عضوها قرض کتاب دارند و کتابدارها نه (p. 68). شکل ۳.۶ دو فیلد `isVIP` و `isSuper` را به `Member` می‌افزاید (p. 68).
 
-Theo's closing connection: meditation means experiencing reality without the filter of thoughts, and DOP means treating data as data, without the filter of classes (p. 69).
+پیوند پایانی تئو: مراقبه یعنی تجربه‌ی واقعیت بی صافی اندیشه‌ها، و DOP یعنی رفتار با داده به‌شکل داده، بی صافی کلاس‌ها (p. 69).
 
-| Lodash function (p. 70) | Description |
+| تابع Lodash (p. 70) | توضیح |
 |---|---|
-| `get(map, path)` | The value of `map` at `path` |
-| `has(map, path)` | Whether `map` has a field at `path` |
-| `merge(mapA, mapB)` | Recursive merge of two maps |
-| `values(map)` | Array of the map's values |
-| `filter(coll, pred)` | Elements for which `pred` is true |
-| `map(coll, f)` | Each element run through `f` |
+| `get(map, path)` | مقدار `map` در `path` |
+| `has(map, path)` | آیا `map` در `path` فیلدی دارد |
+| `merge(mapA, mapB)` | درهم‌آمیزی بازگشتی دو map |
+| `values(map)` | آرایه‌ای از مقدارهای map |
+| `filter(coll, pred)` | عضوهایی که `pred` برایشان درست است |
+| `map(coll, f)` | هر عضوی از `f` گذرانده |
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| | Records as class instances | Records as string maps (DOP) |
+| | رکورد به‌شکل نمونه‌ی کلاس | رکورد به‌شکل map رشته‌ای در DOP |
 |---|---|---|
-| Field names checked | At compile time, with IDE autocomplete | Not by the program (until chapters 7 and 12) |
-| A new shape (search result) | A new class and a copy constructor | A new map literal |
-| JSON | Reflection or a class per shape | One generic function |
-| Reading a nested value | Specific code per path | `_.get(data, path)`, with the path as data |
-| Static languages | Natural | Casts from `Object` when you use a value (p. 56) |
-| Performance | Member access | Slightly slower map access, usually not significant (p. 57) |
+| سنجش نام فیلد | سر کامپایل، با تکمیل خودکار IDE | برنامه نمی‌سنجدش، تا فصل‌های ۷ و ۱۲ |
+| شکلی تازه، مانند نتیجه‌ی جست‌وجو | کلاسی تازه و سازنده‌ی کپی | map لفظی تازه‌ای |
+| قالب JSON | یا reflection یا کلاسی برای هر شکل | یک تابع عمومی |
+| خواندن مقداری تودرتو | کدی ویژه برای هر مسیری | عبارت `_.get(data, path)`، با مسیری که خودش داده است |
+| زبان‌های ایستا | طبیعی | سر به کار بردن مقداری، cast از `Object` (p. 56) |
+| کارایی | دسترسی به عضو | دسترسی کمی کندتر به map، معمولاً نه چندان (p. 57) |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Clojure's influence.** Joe's background (Java, then Clojure) is no accident: idiomatic Clojure models domain entities as plain maps with keyword keys and manipulates them with a large library of generic functions. Rich Hickey's talks, such as "Simple Made Easy" (2011) and "The Value of Values" (2012), argue for this style. Lodash's `_.get` corresponds to Clojure's `get-in`.
-- **Missing paths.** `_.get` returns `undefined` for a path that doesn't exist; Lodash also accepts an optional default value as a third argument. Theo's custom `get` (listing 3.7) would instead throw when it tries to index into `undefined` partway down the path. The widget shows the Lodash behaviour.
-- **Structural typing as a middle ground.** TypeScript describes the shape of plain objects without classes, so a `BookInfo` can be a type alias over a map literal. Appendix B of the book discusses generic data access in statically typed languages.
-- **Feature fields vs. tagged unions.** Functional languages often prefer a closed `type` tag checked exhaustively by the compiler. Feature fields are open: any record can carry `isVIP` without changing a type definition, which suits Joe's goal of flexibility but gives up exhaustiveness checks.
+- **اثر Clojure.** پیشینه‌ی جو، یعنی Java و بعد Clojure، تصادفی نیست: کد اصطلاحی Clojure entityهای دامنه را به‌شکل map خالی با کلیدهای keyword مدل می‌کند و با کتابخانه‌ای بزرگ از تابع‌های عمومی دست‌کاری. سخنرانی‌های ریچ هیکی، مانند «Simple Made Easy» (۲۰۱۱) و «The Value of Values» (۲۰۱۲)، از همین سبک پشتیبانی می‌کنند. تابع `_.get` از Lodash با `get-in` از Clojure می‌خواند.
+- **مسیرهای جاافتاده.** تابع `_.get` برای مسیری که نیست `undefined` برمی‌گرداند؛ و Lodash مقدار پیش‌فرضی اختیاری را هم آرگومان سوم می‌پذیرد. تابع `get` دست‌ساز تئو (listing ۳.۷) در عوض وقتی بکوشد میانه‌ی مسیر در `undefined` index بزند خطا می‌اندازد. widget رفتار Lodash را نشان می‌دهد.
+- **گونه‌دهی ساختاری به‌شکل میانه‌ای.** زبان TypeScript شکل شیءهای خالی را بی کلاس وصف می‌کند، پس `BookInfo` می‌تواند نام‌مستعاری گونه روی map لفظی باشد. پیوست B کتاب از دسترسی عمومی به داده در زبان‌های ایستا-نوع می‌گوید.
+- **فیلدهای ویژگی در برابر اجتماع برچسب‌خورده.** زبان‌های تابعی بیشتر وقت‌ها برچسب `type` بسته‌ای را ترجیح می‌دهند که کامپایلر فراگیر می‌سنجدش. فیلدهای ویژگی بازند: هر رکوردی می‌تواند `isVIP` را بی عوض کردن تعریف گونه‌ای ببرد، که به هدف انعطاف جو می‌خورد ولی سنجش فراگیری را وامی‌گذارد.
 
-## Connections
+## پیوندها
 
-- **Previous:** [2. Separation between code and data](02-separation-between-code-and-data.md) left `isLibrarian` and `getBookLendings` unimplemented; this chapter implements the first.
-- **Next:** [4. State management](04-state-management.md) handles *changes* to this data, which this chapter avoided.
-- **Getting safety back:** [7. Basic data validation](07-basic-data-validation.md) and [12. Advanced data validation](12-advanced-data-validation.md) make record shapes part of the program again, with JSON Schema.
-- **More generic functions:** [14. Advanced data manipulation](14-advanced-data-manipulation.md).
+- **پیشین:** [۲. جدایی کد از داده](02-separation-between-code-and-data.md) تابع‌های `isLibrarian` و `getBookLendings` را پیاده‌نشده گذاشت؛ و این فصل نخستی را پیاده می‌کند.
+- **پسین:** [۴. مدیریت state](04-state-management.md) *تغییرهای* همین داده را می‌چرخاند، که این فصل از آن پرهیخت.
+- **برگرداندن ایمنی:** [۷. اعتبارسنجی پایه‌ی داده](07-basic-data-validation.md) و [۱۲. اعتبارسنجی پیشرفته‌ی داده](12-advanced-data-validation.md) شکل رکوردها را با JSON Schema باز بخشی از برنامه می‌کنند.
+- **تابع‌های عمومی بیشتر:** [۱۴. دست‌کاری پیشرفته‌ی داده](14-advanced-data-manipulation.md).
 
-## Check yourself
+## خودتان را بسنجید
 
-1. State DOP Principle #2, and say how records, indexes and collections are represented.
-   <details><summary>Answer</summary>Represent data entities with generic data structures (p. 43). Records are heterogeneous string maps, indexes are homogeneous string maps, and positional collections can be any suitable collection; the book uses arrays (pp. 48–49).</details>
-2. What is an information path? Give the path to Alan Moore's first book.
-   <details><summary>Answer</summary>The sequence of keys and indices that leads to a piece of information in nested data, like a file path. Alan Moore's first book is `["catalog", "authorsById", "alan-moore", "bookIsbns", 0]` (pp. 55–57).</details>
-3. Why does Joe say information paths are first-class in DOP but not with objects?
-   <details><summary>Answer</summary>With maps, one generic function such as `_.get` takes the path as an argument, so a path can be stored and passed around. With objects you need specific code for each kind of path: class imports in Java, and dot notation for members versus brackets for map keys in JavaScript (p. 57).</details>
-4. What does a class-based model need in order to show books in search results, and why doesn't DOP need it?
-   <details><summary>Answer</summary>A `BookInSearchResults` class without `bookItems`, with `authorNames` in place of author IDs, and a copy constructor from `Book`. In DOP a record is a map, so `bookInfo` simply builds a new map literal (pp. 52, 60).</details>
-5. According to table 3.1, what does DOP give up and what does it gain?
-   <details><summary>Answer</summary>It gives up safety (high in OOP, low in DOP) and gains flexibility and genericity (low in OOP, high in DOP) (p. 54).</details>
-6. How does the book distinguish VIP members, and why not with a `type` field?
-   <details><summary>Answer</summary>With a Boolean feature field, `isVIP`, checked via the path `["membersByEmail", email, "isVIP"]`. A member can be both VIP and Super, and Joe finds a Boolean per feature simpler than a `types` collection (pp. 66–67).</details>
-7. What was Theo's "Aha!" about the search code?
-   <details><summary>Answer</summary>It isn't that the code is concise, but that it contains no abstractions: it is just data manipulation (p. 64).</details>
+1. اصل ۲ از DOP را بگویید، و بگویید رکوردها و indexها و مجموعه‌ها چطور نمایانده می‌شوند.
+   <details><summary>پاسخ</summary>همه‌ی entityهای داده را با ساختارهای داده‌ی عمومی بنمایانید (p. 43). رکوردها map رشته‌ای ناهمگن‌اند، indexها map رشته‌ای همگن، و مجموعه‌های جایگاهی می‌توانند هر مجموعه‌ی خورنده‌ای باشند؛ کتاب array به کار می‌برد (pp. 48–49).</details>
+2. مسیر خبر چیست؟ مسیر کتاب نخست آلن مور را بدهید.
+   <details><summary>پاسخ</summary>زنجیره‌ی کلیدها و indexهایی که به تکه‌ای خبر در داده‌ی تودرتو می‌رساند، مانند مسیر فایل. کتاب نخست آلن مور `["catalog", "authorsById", "alan-moore", "bookIsbns", 0]` است (pp. 55–57).</details>
+3. چرا جو می‌گوید مسیرهای خبر در DOP درجه‌یک‌اند ولی با شیءها نه؟
+   <details><summary>پاسخ</summary>با map، یک تابع عمومی مانند `_.get` مسیر را آرگومان می‌گیرد، پس می‌شود مسیری را ذخیره و این‌ور آن‌ور فرستاد. با شیءها برای هر گونه مسیری کد ویژه می‌خواهید: وارد کردن کلاس در Java، و نقطه برای عضوها در برابر کروشه برای کلیدهای map در JavaScript (p. 57).</details>
+4. مدل کلاس‌محور برای نشان دادن کتاب‌ها در نتیجه‌های جست‌وجو چه می‌خواهد، و چرا DOP آن را نمی‌خواهد؟
+   <details><summary>پاسخ</summary>کلاس `BookInSearchResults` بی `bookItems`، با `authorNames` جای شناسه‌ی نویسنده‌ها، و سازنده‌ی کپی از `Book`. در DOP رکورد mapی است، پس `bookInfo` تنها map لفظی تازه‌ای می‌سازد (pp. 52, 60).</details>
+5. بنا بر جدول ۳.۱، روش DOP چه وامی‌گذارد و چه می‌برد؟
+   <details><summary>پاسخ</summary>ایمنی را وامی‌گذارد، که در OOP بالاست و در DOP پایین، و انعطاف و عمومیت را می‌برد، که در OOP پایین‌اند و در DOP بالا (p. 54).</details>
+6. کتاب عضوهای VIP را چطور جدا می‌کند، و چرا نه با فیلدی `type`؟
+   <details><summary>پاسخ</summary>با فیلدی ویژگی و بولی، یعنی `isVIP`، که از راه مسیر `["membersByEmail", email, "isVIP"]` سنجیده می‌شود. عضوی می‌تواند هم VIP باشد هم Super، و جو بولی برای هر ویژگی را از مجموعه‌ای `types` ساده‌تر می‌یابد (pp. 66–67).</details>
+7. «آهان!» تئو در باب کد جست‌وجو چه بود؟
+   <details><summary>پاسخ</summary>نه آنکه کد موجز است، بلکه آنکه هیچ انتزاعی ندارد: تنها دست‌کاری داده است (p. 64).</details>

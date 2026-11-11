@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Optimistic or Locked</title>
-<meta name="description" content="Simulate concurrent mutations against a store with optimistic commits or a global lock, vary how many distinct fields they touch, and compare throughput and aborts. Illustrates the optimistic strategy of Data-Oriented Programming, chapter 5.">
+<title>خوش‌بینانه یا قفل‌شده</title>
+<meta name="description" content="mutationهای concurrent را روی انباری با commit خوش‌بینانه یا قفلی سراسری شبیه‌سازی کنید، شمار فیلدهای جدایی که دست می‌زنند را عوض کنید، و توان‌گذر و abortها را بسنجید. تصویری از راهبرد خوش‌بینانه‌ی فصل ۵ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
 </style>
@@ -12,49 +12,49 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-basic-concurrency-control.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Optimistic or locked</span>
+      <a href="../chapters/05-basic-concurrency-control.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">خوش‌بینانه یا قفل‌شده</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Basic concurrency control</div>
-  <h1>Optimistic or locked</h1>
-  <p class="lede">A global lock lets one mutation compute at a time. Optimistic concurrency lets every mutation compute in parallel and checks for conflicts only at commit, aborting and retrying the losers. It pays off when conflicts are rare, which is the “optimistic” assumption.</p>
-  <p class="source-note">Illustrates the strategy of sections 5.1 and 5.5 (pp. 92–94, 108): optimistic concurrency control, aborts on conflict, and its assumption that conflicts are rare. The workload model, timings and retry policy are the vault’s; the book has no such measurements. Seeded randomness. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۵ · کنترل پایه‌ی concurrency</div>
+  <h1>خوش‌بینانه یا قفل‌شده</h1>
+  <p class="lede">قفلی سراسری می‌گذارد هر بار یک mutation حساب کند. concurrency خوش‌بینانه می‌گذارد هر mutationی موازی حساب کند و تنها سر commit ناسازی را می‌سنجد، و بازنده‌ها را abort و از نو تلاش. وقتی ناسازی کم‌پیش‌آیند باشد جواب می‌دهد، که همان فرض «خوش‌بینانه» است.</p>
+  <p class="source-note">تصویری از راهبرد بخش‌های ۵.۱ و ۵.۵ (صص. ۹۲–۹۴ و ۱۰۸): کنترل خوش‌بینانه‌ی هم‌روندی، abort سر ناسازی، و فرضش که ناسازی کم‌پیش‌آیند است. مدل بار کاری و زمان‌ها و سیاست تلاش دوباره مال vault است؛ کتاب چنین اندازه‌گیری‌ای ندارد. تصادف با seed. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Throughput by number of distinct fields (more fields = fewer conflicts)</p><svg id="chart" role="img" aria-label="Committed mutations per 100 ticks by number of fields"></svg></div>
-      <div class="panel"><p class="panel-title">This configuration</p><div class="callout" id="verdict"></div></div>
+      <div class="panel"><p class="panel-title">توان‌گذر بر پایه‌ی شمار فیلدهای جدا — فیلد بیشتر یعنی ناسازی کم‌تر</p><svg id="chart" role="img" aria-label="نمودار mutationهای commitشده در هر ۱۰۰ تیک بر پایه‌ی شمار فیلدها"></svg></div>
+      <div class="panel"><p class="panel-title">همین چیدمان</p><div class="callout" id="verdict"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="w"></div><div id="f"></div><div id="t"></div><div id="s"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="w"></div><div id="f"></div><div id="t"></div><div id="s"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>With many fields, optimistic wins by about the number of workers</strong>: everyone computes at once, and almost every commit succeeds.</li>
-    <li><strong>With very few fields, aborts eat the advantage.</strong> Every abort wastes a whole calculation; at a single hot field, optimistic can do no better than one commit per calculation time, like the lock.</li>
-    <li><strong>The lock never aborts but never overlaps</strong>, so its throughput is flat: one mutation per calculation time, whatever the data.</li>
+    <li><strong>با فیلدهای زیاد، خوش‌بینانه حدود شمار کارگرها می‌برد</strong>: همه یک‌جا حساب می‌کنند، و تقریباً هر commitی کامیاب می‌شود.</li>
+    <li><strong>با فیلدهای خیلی کم، abortها آن برتری را می‌خورند.</strong> هر abortی کل یک حساب را هدر می‌دهد؛ و روی یک فیلد گرم تنها، خوش‌بینانه بهتر از یک commit در هر زمان حساب نمی‌تواند، مانند آن قفل.</li>
+    <li><strong>آن قفل هیچ‌وقت abort نمی‌کند ولی هیچ‌وقت همپوشان نمی‌شود</strong>، پس توان‌گذرش تخت است: یک mutation در هر زمان حساب، هر داده‌ای هم که باشد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-basic-concurrency-control.html"><small>Lesson</small>5. Basic concurrency control</a></li>
+    <li><a href="../chapters/05-basic-concurrency-control.html"><small>درس</small>فصل ۵: کنترل پایه‌ی concurrency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,30 +83,30 @@ function stats(rows) {
   function render() {
     var o = simulate("occ", cfg.f, cfg.w, cfg.t, cfg.seed), l = simulate("lock", cfg.f, cfg.w, cfg.t, cfg.seed), occ = [], lk = [];
     [1, 2, 3, 5, 8, 12, 20, 35, 60, 100].forEach(function (f) { occ.push([f, simulate("occ", f, cfg.w, cfg.t, cfg.seed).commits / 10]); lk.push([f, l.commits / 10]); });
-    Kit.lineChart(document.getElementById("chart"), { xMax: 100, yMax: Math.max(10, Math.ceil(cfg.w * 100 / cfg.t / 5) * 5 * 1.1), xLabel: "distinct fields touched", yLabel: "commits / 100 ticks",
-      series: [{ label: "optimistic", cls: "s1", points: occ }, { label: "global lock", cls: "s2", points: lk }], marks: [{ x: cfg.f, label: "now" }] });
+    Kit.lineChart(document.getElementById("chart"), { xMax: 100, yMax: Math.max(10, Math.ceil(cfg.w * 100 / cfg.t / 5) * 5 * 1.1), xLabel: "فیلدهای جدای دست‌خورده", yLabel: "commit در هر ۱۰۰ تیک",
+      series: [{ label: "خوش‌بینانه", cls: "s1", points: occ }, { label: "قفل سراسری", cls: "s2", points: lk }], marks: [{ x: cfg.f, label: "حالا" }] });
     var v = document.getElementById("verdict"), ratio = o.commits / l.commits;
     v.className = "callout " + (ratio > 1.5 ? "ok" : ratio < 1.1 ? "warn" : "");
-    v.textContent = "Optimistic: " + o.commits + " commits and " + o.aborts + " aborts in 1,000 ticks. Lock: " + l.commits + " commits, no aborts. Optimistic is " + ratio.toFixed(1) + "× the lock here.";
-    stats([["Optimistic commits", o.commits, "ok"], ["Optimistic aborts", o.aborts, o.aborts ? "warn" : ""], ["Abort rate", Kit.pct(o.aborts / Math.max(1, o.commits + o.aborts))], ["Lock commits", l.commits]]);
+    v.textContent = "خوش‌بینانه: " + o.commits + " commit و " + o.aborts + " abort در ۱٬۰۰۰ تیک. قفل: " + l.commits + " commit، بی هیچ abortی. خوش‌بینانه این‌جا " + ratio.toFixed(1) + " برابر آن قفل است.";
+    stats([["commitهای خوش‌بینانه", o.commits, "ok"], ["abortهای خوش‌بینانه", o.aborts, o.aborts ? "warn" : ""], ["نرخ abort", Kit.pct(o.aborts / Math.max(1, o.commits + o.aborts))], ["commitهای قفل", l.commits]]);
   }
   function sl(id, label, min, max, key, msg) { document.getElementById(id).appendChild(Kit.slider({ label: label, min: min, max: max, value: cfg[key], onInput: function (v) { cfg[key] = v; render(); log.add(msg(v), "muted"); } }).element); }
-  sl("w", "Concurrent workers", 1, 16, "w", function (v) { return v + " workers"; });
-  sl("f", "Distinct fields", 1, 100, "f", function (v) { return v + " distinct field(s): " + (v === 1 ? "every mutation conflicts with every other" : "random field per mutation"); });
-  sl("t", "Calculation time (ticks)", 1, 20, "t", function (v) { return "Each calculation takes " + v + " ticks"; });
-  sl("s", "Seed", 1, 50, "seed", function (v) { return "Seed " + v; });
+  sl("w", "کارگرهای concurrent", 1, 16, "w", function (v) { return "شمار " + v + " کارگر"; });
+  sl("f", "فیلدهای جدا", 1, 100, "f", function (v) { return "شمار " + v + " فیلد جدا: " + (v === 1 ? "هر mutationی با هر mutationی ناساز می‌شود" : "فیلدی تصادفی برای هر mutationی"); });
+  sl("t", "زمان حساب، به تیک", 1, 20, "t", function (v) { return "هر حسابی " + v + " تیک می‌برد"; });
+  sl("s", "مقدار seed", 1, 50, "seed", function (v) { return "مقدار seed همان " + v + " است"; });
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why is the strategy called optimistic?",
-      options: ["It never fails", "It assumes conflicts don't occur often", "It retries forever"], answer: 1,
-      explain: "p. 108." },
-    { q: "What happens to a mutation whose diff conflicts with a concurrent one?",
-      options: ["It waits for a lock", "It is aborted", "It overwrites the other"], answer: 1,
-      explain: "pp. 95, 107." },
-    { q: "In this simulation, when does a global lock come close to optimistic control?",
-      options: ["When mutations touch many different fields", "When almost every mutation touches the same field", "Never"], answer: 1,
-      explain: "Conflicts make optimistic work wasted; this is the vault's model, not a book measurement." }
+    { q: "چرا این راهبرد خوش‌بینانه نامیده می‌شود؟",
+      options: ["هیچ‌وقت شکست نمی‌خورد", "فرض می‌گیرد ناسازی زیاد پیش نمی‌آید", "تا ابد از نو تلاش می‌کند"], answer: 1,
+      explain: "ص. ۱۰۸." },
+    { q: "بر mutationی که diffش با mutationی concurrent ناساز می‌شود چه می‌گذرد؟",
+      options: ["برای قفلی منتظر می‌ماند", "abort می‌شود", "از روی آن یکی می‌نویسد"], answer: 1,
+      explain: "صص. ۹۵ و ۱۰۷." },
+    { q: "در این شبیه‌سازی، قفلی سراسری کِی به کنترل خوش‌بینانه نزدیک می‌شود؟",
+      options: ["وقتی mutationها به فیلدهای مختلف زیادی دست می‌زنند", "وقتی تقریباً هر mutationی به همان یک فیلد دست می‌زند", "هیچ‌وقت"], answer: 1,
+      explain: "ناسازی کار خوش‌بینانه را هدر می‌دهد؛ این مدل vault است، نه اندازه‌گیری کتاب." }
   ]);
 })();
 </script>

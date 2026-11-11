@@ -2,165 +2,179 @@
 book: data-oriented-programming
 chapter: 2
 title: "Separation between code and data"
+translated_title: "جدایی کد از داده"
 pages: "26–42"
+lang: fa
 ---
 
-# 2. Separation between code and data
+# ۲. جدایی کد از داده
 
-[← 1. Complexity of object-oriented programming](01-complexity-of-object-oriented-programming.md) · [Book](../README.md) · [3. Basic data manipulation →](03-basic-data-manipulation.md)
+[← ۱. پیچیدگی برنامه‌نویسی object-oriented](01-complexity-of-object-oriented-programming.md) · [کتاب](../README.md) · [۳. دست‌کاری پایه‌ی داده →](03-basic-data-manipulation.md)
 
-## Summary
+## خلاصه
 
-After the prototype ships, Theo asks online how to build less complex systems and meets **Joe**, a San Francisco developer who programmed in Java for nearly a decade before adopting Clojure about seven years ago (pp. 27–28). Joe introduces the first principle of data-oriented programming: **separate code from data**. Data lives in **data entities** that hold only members; code lives in **modules of stateless functions** that take the data they work on as an explicit argument, usually the first (pp. 26, 28, 34). Theo redesigns Klafim with Joe:
+پس از تحویل نمونه‌ی اولیه، تئو آنلاین می‌پرسد چطور سیستم‌های کم‌پیچیده‌تر بسازد و با **جو** آشنا می‌شود، برنامه‌نویسی از سان‌فرانسیسکو که نزدیک یک دهه به Java برنامه نوشت و حدود هفت سال پیش Clojure را برگزید (pp. 27–28). جو اصل نخست برنامه‌نویسی داده‌گرا را معرفی می‌کند: **کد را از داده جدا کنید**. داده در **entityهای داده** می‌نشیند که تنها عضو دارند؛ و کد در **ماژول‌هایی از تابع‌های بی‌state** که داده‌ی زیر کارشان را آرگومانی صریح می‌گیرند، معمولاً آرگومان نخست (pp. 26, 28, 34). تئو با جو سیستم Klafim را از نو طراحی می‌کند:
 
-- The **data entities** come from the nouns in the requirements, grouped into a mind map (pp. 29–31).
-- The **functions** come from the verbs, collected into a `Library` module (pp. 31–34).
-- The **high-level modules** mirror the high-level data entities: `Catalog` and `UserManagement` (pp. 34–36).
+- **همه‌ی entityهای داده** از اسم‌های نیازمندی‌ها می‌آیند، که در نقشه‌ی ذهنی دسته می‌شوند (pp. 29–31).
+- **تابع‌ها** از فعل‌ها می‌آیند، که در ماژول `Library` گرد می‌شوند (pp. 31–34).
+- **ماژول‌های سطح‌بالا** آینه‌ی entityهای داده‌ی سطح‌بالایند: `Catalog` و `UserManagement` (pp. 34–36).
 
-The result is easier to understand, because each part has constraints, and more flexible: Super and VIP members take a few lines of code and no design change (pp. 36–41).
+خروجی آسان‌فهم‌تر است، چون هر بخشی قید دارد، و انعطاف‌پذیرتر: عضوهای Super و VIP چند خط کد می‌خواهند و هیچ تغییر طرحی (pp. 36–41).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Principle #1:** separate code from data so that code lives in functions whose behaviour doesn't depend on data encapsulated in the function's context (p. 26).
-- **DOP is against data encapsulation**, and its principles are language-agnostic: no monads, algebraic data types or higher-order functions required (p. 28).
-- **Most of DOP's ideas are known best practices**; the novelty is combining them into a cohesive whole (p. 28).
-- **Design data first.** Find data entities as the nouns of the requirements and sort them into high-level groups, as a nested list or a mind map (pp. 29–31).
-- **In OOP, an object's state is an implicit argument of its methods; in DOP it is explicit.** `getBookLendings(libraryData, userId, memberId)` is a static method of a class with no data members (pp. 33–34).
-- **High-level modules correspond to high-level data entities** (p. 36).
-- **Constraints make each part easy to understand** (table 2.1, p. 38): data entities have members only and only association and composition relations; code modules have stateless functions only and only usage relations, with no inheritance.
-- **DOP systems often adapt to new requirements without design changes** (p. 40).
+- **اصل ۱:** کد را از داده جدا کنید تا کد در تابع‌هایی بنشیند که رفتارشان به داده‌ی بسته‌بندی‌شده در زمینه‌ی تابع بسته نباشد (p. 26).
+- **روش DOP با بسته‌بندی داده مخالف است**، و اصل‌هایش زبان‌ناشناسند: هیچ monad یا گونه‌ی داده‌ی جبری یا تابع مرتبه‌بالا لازم نیست (p. 28).
+- **بیشتر ایده‌های DOP بهترین روش‌های شناخته‌اند**؛ و تازگی‌اش درهم‌آمیختنشان در کلی هم‌بسته است (p. 28).
+- **نخست داده را طراحی کنید.** entityهای داده را به‌شکل اسم‌های نیازمندی‌ها بیابید و در دسته‌های سطح‌بالا بچینید، به‌شکل فهرستی تودرتو یا نقشه‌ی ذهنی (pp. 29–31).
+- **در OOP، مقدار state یک شیء آرگومانی ناصریح از متدهایش است؛ و در DOP صریح.** عبارت `getBookLendings(libraryData, userId, memberId)` متدی ایستا از کلاسی بی هیچ عضو داده است (pp. 33–34).
+- **ماژول‌های سطح‌بالا با entityهای داده‌ی سطح‌بالا می‌خوانند** (p. 36).
+- **قیدها هر بخشی را آسان‌فهم می‌کنند** (جدول ۲.۱، ص. ۳۸): entityهای داده تنها عضو دارند و تنها رابطه‌ی تداعی و ترکیب؛ و ماژول‌های کد تنها تابع بی‌state دارند و تنها رابطه‌ی کاربرد، بی هیچ وراثت.
+- **سیستم‌های DOP بیشتر وقت‌ها بی تغییر طرح با نیازمندی‌های تازه کنار می‌آیند** (p. 40).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 2.1 The two parts of a DOP system — p. 27
-- 2.2 Data entities — p. 29
-- 2.3 Code modules — p. 31
-- 2.4 DOP systems are easy to understand — p. 36
-- 2.5 DOP systems are flexible — p. 38
-- Summary — p. 42
+- ۲.۱ دو بخش یک سیستم DOP — ص. ۲۷
+- ۲.۲ entityهای داده — ص. ۲۹
+- ۲.۳ ماژول‌های کد — ص. ۳۱
+- ۲.۴ سیستم‌های DOP آسان‌فهم‌اند — ص. ۳۶
+- ۲.۵ سیستم‌های DOP انعطاف‌پذیرند — ص. ۳۸
+- خلاصه — ص. ۴۲
 
-## Notes
+## یادداشت‌ها
 
-The chapter is a deep dive into DOP's first principle (figure 2.1, p. 27). The separation brings two benefits now, and others later in the book (p. 27):
+این فصل شیرجه‌ای است در اصل نخست DOP (شکل ۲.۱، ص. ۲۷). آن جدایی حالا دو سود می‌آورد، و بقیه را دیرتر در کتاب (p. 27):
 
-- **The system is simple**, meaning easy to understand.
-- **The system is flexible and extensible**, often needing no design change to meet changing requirements.
+- **سیستم ساده است**، یعنی آسان‌فهم.
+- **سیستم انعطاف‌پذیر و گسترش‌پذیر است**، و بیشتر وقت‌ها برای رسیدن به نیازمندی‌های عوض‌شونده هیچ تغییر طرحی نمی‌خواهد.
 
-This chapter designs the code; chapter 3 designs the data (p. 27).
+این فصل کد را طراحی می‌کند؛ و فصل ۳ داده را (p. 27).
 
-| Part | Entities | Relations (figure 2.1, p. 27) |
+| بخش | entityها | رابطه‌ها (شکل ۲.۱، ص. ۲۷) |
 |---|---|---|
-| Code modules | Stateless (static) functions, taking data as the first argument | Usage only, no inheritance |
-| Data entities | Members only, no code | Association and composition |
+| ماژول‌های کد | تابع‌های بی‌state یا ایستا، که داده را آرگومان نخست می‌گیرند | تنها کاربرد، بی هیچ وراثت |
+| entityهای داده | تنها عضو، بی هیچ کد | تداعی و ترکیب |
 
-### 2.1 The two parts of a DOP system
+### ۲.۱ دو بخش یک سیستم DOP
 
-Theo knows he satisfied the customer more by luck than brains: had Nancy kept Super members, he would have missed the deadline (p. 27). Joe tells him that most of DOP's foundational ideas are known best practices, combined into a cohesive whole (p. 28). On the relation between code and data:
+تئو می‌داند بیشتر از بخت تا از عقل مشتری را راضی کرده: اگر نانسی عضوهای Super را نگه داشته بود، مهلت را از دست می‌داد (p. 27). جو می‌گویدش که بیشتر ایده‌های بنیادین DOP بهترین روش‌های شناخته‌اند، درهم‌آمیخته در کلی هم‌بسته (p. 28). در باب رابطه‌ی کد و داده:
 
-- **DOP is against data encapsulation.** Encapsulation has merits and drawbacks, and the mixing of code and data in objects is the main cause of complexity and inflexibility (p. 28).
-- **DOP is language-agnostic:** it applies in object-oriented and in functional languages (p. 28).
-- **Data entities only hold members; code is aggregated into modules where all functions are stateless,** taking the data entity as an argument instead of encapsulating it (pp. 28–29).
+- **روش DOP با بسته‌بندی داده مخالف است.** بسته‌بندی حسن و عیب دارد، و قاطی کردن کد و داده در شیءها سرچشمه‌ی اصلی پیچیدگی و بی‌انعطافی است (p. 28).
+- **روش DOP زبان‌ناشناس است:** در زبان‌های object-oriented و تابعی هر دو پیاده می‌شود (p. 28).
+- **همه‌ی entityهای داده تنها عضو دارند؛ و کد در ماژول‌هایی گرد می‌شود که همه‌ی تابع‌هایشان بی‌stateاند**، و entity داده را به‌جای بسته‌بندی‌اش آرگومانی می‌گیرند (pp. 28–29).
 
-### 2.2 Data entities
+### ۲.۲ entityهای داده
 
-"It's data-oriented programming, so let's start with data" (p. 29). Data entities are the parts of the system that hold information. One way to find them is to highlight the nouns and noun phrases in the requirements (p. 29). Theo groups them into two (p. 30):
+«برنامه‌نویسی داده‌گراست، پس بگذارید با داده آغاز کنیم» (p. 29). entityهای داده بخش‌هایی از سیستم‌اند که خبر را نگه می‌دارند. یک راه یافتنشان پررنگ کردن اسم‌ها و گروه‌های اسمی در نیازمندی‌هاست (p. 29). تئو آن‌ها را به دو دسته می‌چیند (p. 30):
 
-![A mind map: library data branches into catalog (books, authors, book items, book lendings) and user management (users, members, librarians)](../figures/02-03.png)
+![یک نقشه‌ی ذهنی: داده‌ی کتابخانه به catalog با کتاب‌ها و نویسنده‌ها و نسخه‌ها و قرض‌ها، و به user management با کاربران و عضوها و کتابدارها شاخه می‌زند](../figures/02-03.png)
 
-*Figure 2.3 (p. 30): data entities grouped by what they belong to, with no code attached.*
+*Figure 2.3 (p. 30): entityهای داده دسته‌شده بر پایه‌ی آنکه به چه تعلق دارند، بی هیچ کد چسبیده.*
 
-Theo asks whether books and authors are an association or a composition; Joe says not to worry yet. The most precise view is a data entity diagram with different arrows for the two, which comes later (pp. 30–31).
+تئو می‌پرسد کتاب‌ها و نویسنده‌ها تداعی‌اند یا ترکیب؛ و جو می‌گوید فعلاً نگرانش نباش. دقیق‌ترین نگاه، نمودار entity داده با پیکان‌های جدا برای آن دو است، که دیرتر می‌آید (pp. 30–31).
 
-> **Try it:** [Nouns and verbs](../widgets/02-nouns-and-verbs.html) — sort the words of Nancy's requirements into data entities and functions, and watch the data mind map and the `Library` module build up.
+> **Try it:** [اسم‌ها و فعل‌ها](../widgets/02-nouns-and-verbs.html) — واژه‌های نیازمندی‌های نانسی را به entityهای داده و تابع‌ها بچینید، و ببینید نقشه‌ی ذهنی داده و ماژول `Library` چطور بالا می‌آیند.
 
-### 2.3 Code modules
+> **In practice:** SQL مدل‌های Silver و Gold و config منابع در YAML همان «entityهای داده»‌اند؛ DAGهای Airflow «ماژول‌های کد».
+>
+> **Your turn:** چرا تعریف هر منبع، یعنی جدول، کلید و cursor، را در یک فایل YAML نگه می‌دارید و نه در کد DAG؟
+>
+> *Answer:* تا DAG یک تابع عمومی بماند که روی هر config کار می‌کند؛ افزودن منبع فقط داده اضافه می‌کند و کد را عوض نمی‌کند، و merge request کوچک و قابل بازبینی می‌شود (pp. 29–31).
 
-The second step is the code. Highlight the verb phrases, which represent functionality (p. 31). Theo adds two obvious ones, returning a book and checking whether a user is a librarian, to get nine functions (pp. 31–32). All of them except the librarian check are exposed to the outside world, for example as HTTP endpoints. They go into a module box called `Library` (figure 2.4, p. 32):
+### ۲.۳ ماژول‌های کد
+
+قدم دوم کد است. گروه‌های فعلی را پررنگ کنید، که کارکرد را می‌نمایانند (p. 31). تئو دو تای آشکار را می‌افزاید، یعنی برگرداندن کتاب و سنجیدن اینکه کاربری کتابدار است، تا نه تابع به دست آید (pp. 31–32). همه‌شان جز سنجش کتابدار به جهان بیرون نمایانده می‌شوند؛ مثلاً به‌شکل endpointهای HTTP. در جعبه‌ی ماژولی به نام `Library` می‌نشینند (شکل ۲.۴، ص. ۳۲):
 
 `searchBook`, `addBookItem`, `blockMember`, `unblockMember`, `getBookLendings`, `checkoutBook`, `returnBook`
 
-A **module is an aggregation of functions**: a class in OOP, but a package or namespace elsewhere. What matters is that DOP modules contain only stateless functions, like Java static methods in a class with no data members (pp. 32–34).
+هر **ماژولی گرد آمدنی از تابع‌هاست**: در OOP کلاسی، ولی جای دیگر بسته‌ای یا فضای نامی. مهم این است که ماژول‌های DOP تنها تابع بی‌state دارند، مانند متدهای ایستای Java در کلاسی بی هیچ عضو داده (pp. 32–34).
 
-**Implicit vs explicit state** (pp. 33–34):
+**مقدار state ناصریح در برابر صریح** (pp. 33–34):
 
-| Style | Signature | Where the state comes from |
+| سبک | امضا | مقدار state از کجا می‌آید |
 |---|---|---|
-| Classic OOP | `Library#getBookLendings(userId, memberId)` | `this.catalog` and `this.userManagement`: the state is an *implicit* argument |
-| DOP (listing 2.1) | `static Library.getBookLendings(libraryData, userId, memberId)` | Passed as an *explicit* argument |
+| OOP کلاسیک | `Library#getBookLendings(userId, memberId)` | از `this.catalog` و `this.userManagement`: مقدار state آرگومانی *ناصریح* است |
+| DOP، listing ۲.۱ | `static Library.getBookLendings(libraryData, userId, memberId)` | آرگومانی *صریح* فرستاده می‌شود |
 
-Theo compares it to Python's `self` in method signatures (listing 2.2). Joe says the difference is deeper than syntax: the data lives *outside* the modules (p. 34). Figure 2.5 then gives every `Library` function a `libraryData` first argument (p. 34).
+تئو آن را با `self` در امضای متدهای Python می‌سنجد (listing ۲.۲). جو می‌گوید تفاوت از نحو عمیق‌تر است: داده *بیرون* ماژول‌ها می‌نشیند (p. 34). بعد شکل ۲.۵ به هر تابعی از `Library` آرگومان نخست `libraryData` می‌دهد (p. 34).
 
-**High-level design** in DOP means defining the modules and their interactions. The high-level modules correspond to the high-level data entities of the mind map (pp. 34–36):
+**طرح سطح‌بالا** در DOP یعنی تعریف ماژول‌ها و برخوردشان. ماژول‌های سطح‌بالا با entityهای داده‌ی سطح‌بالای نقشه‌ی ذهنی می‌خوانند (pp. 34–36):
 
-- **`Catalog`** functions receive `catalogData` first: `searchBook`, `addBookItem`, `checkoutBook`, `returnBook`, `getBookLendings`.
-- **`UserManagement`** functions receive `userManagementData` first: `blockMember`, `unblockMember`, `login`, `isLibrarian`.
-- **`Library`** functions receive `libraryData`, and pass `libraryData.catalog` and `libraryData.userManagement` on to the other two modules. For now Theo thinks of `libraryData` as a class with those two members (p. 36).
+- تابع‌های **`Catalog`** نخست `catalogData` را می‌گیرند: `searchBook` و `addBookItem` و `checkoutBook` و `returnBook` و `getBookLendings`.
+- تابع‌های **`UserManagement`** نخست `userManagementData` را می‌گیرند: `blockMember` و `unblockMember` و `login` و `isLibrarian`.
+- تابع‌های **`Library`** مقدار `libraryData` را می‌گیرند، و `libraryData.catalog` و `libraryData.userManagement` را به آن دو ماژول دیگر می‌فرستند. فعلاً تئو `libraryData` را کلاسی با همان دو عضو می‌پندارد (p. 36).
 
-![Three modules with stateless functions: Library (searchBook, addBookItem, blockMember, login, checkoutBook, returnBook, …) uses UserManagement and Catalog, each listing its own functions with explicit data arguments](../figures/02-07.png)
+![سه ماژول با تابع‌های بی‌state: ماژول Library با searchBook و addBookItem و blockMember و login و checkoutBook و returnBook و بقیه، که از UserManagement و Catalog کار می‌کشد، و هر کدام تابع‌های خودش را با آرگومان صریح داده می‌آورد](../figures/02-07.png)
 
-*Figure 2.7 (p. 35): every function receives the data it works on as an argument; the only relation between modules is usage.*
+*Figure 2.7 (p. 35): هر تابعی داده‌ی زیر کارش را آرگومانی می‌گیرد؛ و تنها رابطه‌ی میان ماژول‌ها کاربرد است.*
 
-### 2.4 DOP systems are easy to understand
+### ۲.۴ سیستم‌های DOP آسان‌فهم‌اند
 
-The main benefit over traditional OOP is that the system splits cleanly into code modules and data entities (p. 36). To understand the data you don't think about the code, and vice versa. Theo's "Aha!": data lives on its own (p. 36).
+سود اصلی در برابر OOP سنتی این است که سیستم پاک به ماژول‌های کد و entityهای داده می‌شکند (p. 36). برای فهم داده به کد فکر نمی‌کنید، و برعکس. «آهان!» تئو این است: داده خودش تنها زندگی می‌کند (p. 36).
 
-The module diagram looks like a class diagram but is simpler, because it has constraints (pp. 37–38):
+نمودار ماژول‌ها به نمودار کلاس می‌ماند ولی ساده‌تر است، چون قید دارد (pp. 37–38):
 
-| System part | Constraint on entities | Constraint on relations (table 2.1, p. 38) |
+| بخش سیستم | قید روی entityها | قید روی رابطه‌ها (جدول ۲.۱، ص. ۳۸) |
 |---|---|---|
-| Data entities | Members only (no code) | Association and composition |
-| Code modules | Stateless functions (no members) | Usage (no inheritance) |
+| entityهای داده | تنها عضو، بی هیچ کد | تداعی و ترکیب |
+| ماژول‌های کد | تابع‌های بی‌state، بی هیچ عضو | کاربرد، بی هیچ وراثت |
 
-Theo asks whether no inheritance means DOP is against polymorphism. Joe says DOP achieves polymorphism by another mechanism, which is the subject of chapter 13 (p. 38).
+تئو می‌پرسد نبودن وراثت یعنی DOP با polymorphism مخالف است؛ و جو می‌گوید DOP polymorphism را با سازوکاری دیگر به دست می‌آورد، که موضوع فصل ۱۳ است (p. 38).
 
-### 2.5 DOP systems are flexible
+### ۲.۵ سیستم‌های DOP انعطاف‌پذیرند
 
-Back to the requirements that broke the class hierarchy (p. 39): Super members may list other members' book lendings, and VIP members may add book items. `Library.getBookLendings` has two parts. It calls `UserManagement.isLibrarian` with the user-management data, then `Catalog.getBookLendings` with the catalog data, and otherwise throws "Not allowed to get book lendings" (listing 2.3, pp. 39–40). The inner functions are left for chapter 3, which handles permissions and queries with generic data collections.
+بازگشت به نیازمندی‌هایی که سلسله‌مراتب کلاس را شکستند (p. 39): عضوهای Super می‌توانند قرض‌های عضوهای دیگر را فهرست کنند، و عضوهای VIP می‌توانند نسخه‌ی کتاب بیفزایند. تابع `Library.getBookLendings` دو بخش دارد. تابع `UserManagement.isLibrarian` را با داده‌ی مدیریت کاربر صدا می‌زند، بعد `Catalog.getBookLendings` را با داده‌ی catalog، و وگرنه خطای «Not allowed to get book lendings» می‌اندازد (listing ۲.۳، صص. ۳۹–۴۰). تابع‌های درونی به فصل ۳ وامانده‌اند، که اجازه‌ها و پرسش‌ها را با مجموعه‌های داده‌ی عمومی می‌چرخاند.
 
-| Change | DOP code change |
+| تغییر | تغییر کد DOP |
 |---|---|
-| Super members (listing 2.4, p. 40) | Add `UserManagement.isSuperMember` and `\|\|` it into the check in `Library.getBookLendings` |
-| VIP members (listing 2.6, p. 41) | Add `UserManagement.isVIPMember` and `\|\|` it into the check in `Library.addBookItem` |
+| عضوهای Super (listing ۲.۴، ص. ۴۰) | تابع `UserManagement.isSuperMember` را بیفزایید و با `\|\|` در سنجش `Library.getBookLendings` بگذاریدش |
+| عضوهای VIP (listing ۲.۶، ص. ۴۱) | تابع `UserManagement.isVIPMember` را بیفزایید و با `\|\|` در سنجش `Library.addBookItem` بگذاریدش |
 
-Passing `libraryData`, `libraryData.userManagement` and `libraryData.catalog` around feels awkward at first, but the change "takes only a few lines of code and requires no changes in the system design" (p. 40). `bookItemInfo` is, for now, an object; chapter 3 shows how DOP represents data, and chapter 4 how `Catalog.addBookItem` manages state with immutable data (p. 41). The hardest thing for Theo to accept is that data isn't encapsulated in objects (p. 42).
+فرستادن `libraryData` و `libraryData.userManagement` و `libraryData.catalog` این‌ور آن‌ور نخست ناجور حس می‌شود، ولی آن تغییر «تنها چند خط کد می‌گیرد و هیچ تغییری در طرح سیستم نمی‌خواهد» (p. 40). مقدار `bookItemInfo` فعلاً شیئی است؛ و فصل ۳ نشان می‌دهد DOP داده را چطور می‌نمایاند، و فصل ۴ اینکه `Catalog.addBookItem` مقدار state را با داده‌ی immutable چطور مدیریت می‌کند (p. 41). سخت‌ترین چیز برای پذیرش تئو این است که داده در شیءها بسته‌بندی نشده (p. 42).
 
-> **Try it:** [The tiny feature](../widgets/01-class-hierarchy.html) — switch to the DOP design and add Super and VIP members again: one predicate and one `||` each, with the module diagram unchanged.
+> **Try it:** [آن ویژگی ناچیز](../widgets/01-class-hierarchy.html) — به طرح DOP سوئیچ کنید و عضوهای Super و VIP را از نو بیفزایید: برای هر کدام یک گزاره و یک `||`، با نمودار ماژولی دست‌نخورده.
 
-## Trade-offs at a glance
+> **In practice:** dynamic DAG در Airflow همین اصل است: یک تابع از روی فهرست منابع DAG می‌سازد.
+>
+> **Your turn:** dynamic DAG چه خطری دارد که DAG دستی ندارد؟
+>
+> *Answer:* خطای یک ردیف config ممکن است کل فایل DAG را بشکند و همه‌ی DAGها را از Airflow حذف کند. config را در GitLab CI با schema اعتبارسنجی کنید؛ انعطاف داده‌محور بدون validation شکننده است (pp. 39–42).
 
-| | Traditional OOP (ch. 1) | DOP principle #1 |
+## بده‌بستان‌ها در یک نگاه
+
+| | OOP سنتی، فصل ۱ | اصل ۱ از DOP |
 |---|---|---|
-| Where state lives | Inside objects; an implicit `this` argument | In data entities; an explicit first argument |
-| Relations | Composition, association, usage and inheritance, all in one diagram | Data: association and composition. Code: usage only |
-| Late requirement (Super members) | New base classes and diamonds | A new predicate; no design change |
-| Encapsulation | Protects data behind methods | Rejected: data is open and lives on its own |
-| What feels awkward | Hierarchies under change | Passing data objects around everywhere (p. 40) |
+| مقدار state کجا می‌نشیند | درون شیءها؛ آرگومانی ناصریح به نام `this` | در entityهای داده؛ آرگومان نخستی صریح |
+| رابطه‌ها | ترکیب و تداعی و کاربرد و وراثت، همه در یک نمودار | داده: تداعی و ترکیب. کد: تنها کاربرد |
+| نیازمندی دیررس، عضوهای Super | کلاس‌های پایه‌ی تازه و الماس | گزاره‌ای تازه؛ بی هیچ تغییر طرح |
+| بسته‌بندی | داده را پشت متدها پناه می‌دهد | رد شده: داده باز است و خودش تنها می‌نشیند |
+| چه ناجور حس می‌شود | سلسله‌مراتب زیر تغییر | فرستادن شیءهای داده به همه‌جا (p. 40) |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **This is the "procedural" shape, deliberately.** Separating data structures from the procedures that operate on them is how C and Pascal programs were organized long before OOP. The book's claim (p. 28) is that DOP combines this with later best practices, such as immutable data from chapter 4 and generic data structures from chapter 3, which classic procedural code often lacked.
-- **Robert C. Martin** draws a related distinction in *Clean Code* (2008, "Objects and Data Structures"). Objects hide data and expose behaviour, which makes it easy to add new kinds of objects. Data structures expose data and have no behaviour, which makes it easy to add new functions. DOP chooses the second side, and chapter 13 addresses the cost, adding new kinds, with multimethods.
-- **Encapsulation still exists in DOP-style code at the module level.** A module can keep its internal helpers private; what DOP gives up is hiding the *data* behind methods. Chapter 7 restores some of the safety that encapsulation gave, through data validation at boundaries.
+- **این شکل «رویه‌ای» است، به‌عمد.** جدا کردن ساختارهای داده از رویه‌هایی که رویشان کار می‌کنند همان شیوه‌ای است که برنامه‌های C و Pascal مدت‌ها پیش از OOP سازمان می‌گرفتند. ادعای کتاب (p. 28) این است که DOP این را با بهترین روش‌های دیرتر درهم می‌آمیزد، مانند داده‌ی immutable فصل ۴ و ساختارهای داده‌ی عمومی فصل ۳، که کد رویه‌ای کلاسیک بیشتر وقت‌ها نداشت.
+- **رابرت سی. مارتین** در *Clean Code* (۲۰۰۸، بخش «Objects and Data Structures») تفکیکی خویشاوند می‌کشد. شیءها داده را پنهان و رفتار را نمایان می‌کنند، که افزودن گونه‌های تازه‌ی شیء را آسان می‌کند. ساختارهای داده داده را نمایان می‌کنند و رفتاری ندارند، که افزودن تابع‌های تازه را آسان می‌کند. روش DOP سوی دوم را برمی‌گزیند، و فصل ۱۳ به بهایش، یعنی افزودن گونه‌های تازه، با multimethod می‌پردازد.
+- **بسته‌بندی در کد سبک DOP هنوز در سطح ماژول هست.** هر ماژولی می‌تواند یاری‌دهنده‌های درونی‌اش را خصوصی نگه دارد؛ و آنچه DOP وامی‌گذارد پنهان کردن *داده* پشت متدهاست. فصل ۷ کمی از ایمنی‌ای را که بسته‌بندی می‌داد برمی‌گرداند، با اعتبارسنجی داده بر مرزها.
 
-## Connections
+## پیوندها
 
-- **Previous:** [1. Complexity of object-oriented programming](01-complexity-of-object-oriented-programming.md) set out the four sources of complexity; this chapter answers the first, mixed code and data.
-- **Next:** [3. Basic data manipulation](03-basic-data-manipulation.md) designs the data side and fills in `isLibrarian` and `getBookLendings`.
-- **Polymorphism without inheritance:** [13. Polymorphism](13-polymorphism.md).
+- **پیشین:** [۱. پیچیدگی برنامه‌نویسی object-oriented](01-complexity-of-object-oriented-programming.md) چهار سرچشمه‌ی پیچیدگی را پیش گذاشت؛ و این فصل به نخستی، یعنی کد و داده‌ی قاطی، پاسخ می‌دهد.
+- **پسین:** [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md) سوی داده را طراحی و `isLibrarian` و `getBookLendings` را پر می‌کند.
+- **مفهوم polymorphism بی وراثت:** [۱۳. polymorphism](13-polymorphism.md).
 
-## Check yourself
+## خودتان را بسنجید
 
-1. State DOP Principle #1.
-   <details><summary>Answer</summary>Separate code from data, so that the code resides in functions whose behaviour doesn't depend on data that is somehow encapsulated in the function's context (p. 26).</details>
-2. How does Theo find the data entities, and how does he find the functions?
-   <details><summary>Answer</summary>He highlights the nouns and noun phrases in the requirements for data entities (pp. 29–30) and the verb phrases for functionality (pp. 31–32), adding returning a book and checking whether a user is a librarian.</details>
-3. What is the difference between `this` in an OOP method and `libraryData` in a DOP function?
-   <details><summary>Answer</summary>In OOP, the object's state is an implicit argument of its methods, reached through `this`. In DOP, the data is passed as an explicit argument, usually the first, to a stateless function, and the data lives outside the module (pp. 33–34).</details>
-4. Which modules does the Klafim design have, and how are they chosen?
-   <details><summary>Answer</summary>`Library`, `Catalog` and `UserManagement`. High-level modules correspond to the high-level data entities in the mind map (pp. 34–36).</details>
-5. Why is a DOP module diagram simpler than a class diagram that looks similar?
-   <details><summary>Answer</summary>It has constraints: all functions are stateless, and the only relation between modules is usage, with no association, composition or inheritance (pp. 37–38, table 2.1).</details>
-6. How does the DOP design add Super members, and what does it not need to change?
-   <details><summary>Answer</summary>Add an `isSuperMember` function to `UserManagement` and OR it into the check in `Library.getBookLendings`. A few lines of code, and no change in the system design (listing 2.4, p. 40).</details>
+1. اصل ۱ از DOP را بگویید.
+   <details><summary>پاسخ</summary>کد را از داده جدا کنید، تا کد در تابع‌هایی بنشیند که رفتارشان به داده‌ای که جوری در زمینه‌ی تابع بسته‌بندی شده بسته نباشد (p. 26).</details>
+2. تئو entityهای داده را چطور می‌یابد، و تابع‌ها را چطور؟
+   <details><summary>پاسخ</summary>برای entityهای داده اسم‌ها و گروه‌های اسمی نیازمندی‌ها را پررنگ می‌کند (pp. 29–30) و برای کارکرد گروه‌های فعلی را (pp. 31–32)، و برگرداندن کتاب و سنجیدن کتابدار بودن کاربر را می‌افزاید.</details>
+3. تفاوت `this` در متدی از OOP و `libraryData` در تابعی از DOP چیست؟
+   <details><summary>پاسخ</summary>در OOP، مقدار state شیء آرگومانی ناصریح از متدهایش است که از راه `this` به آن می‌رسند. در DOP، داده آرگومانی صریح، معمولاً نخست، به تابعی بی‌state فرستاده می‌شود، و داده بیرون ماژول می‌نشیند (pp. 33–34).</details>
+4. طرح Klafim کدام ماژول‌ها را دارد، و چطور برگزیده شده‌اند؟
+   <details><summary>پاسخ</summary>ماژول‌های `Library` و `Catalog` و `UserManagement`. ماژول‌های سطح‌بالا با entityهای داده‌ی سطح‌بالای نقشه‌ی ذهنی می‌خوانند (pp. 34–36).</details>
+5. چرا نمودار ماژول DOP از نمودار کلاسی که همانندش می‌نماید ساده‌تر است؟
+   <details><summary>پاسخ</summary>قید دارد: همه‌ی تابع‌ها بی‌stateاند، و تنها رابطه‌ی میان ماژول‌ها کاربرد است، بی هیچ تداعی و ترکیب و وراثت (pp. 37–38).</details>
+6. طرح DOP عضوهای Super را چطور می‌افزاید، و چه را لازم نیست عوض کند؟
+   <details><summary>پاسخ</summary>تابع `isSuperMember` را به `UserManagement` بیفزایید و با OR در سنجش `Library.getBookLendings` بگذاریدش. چند خط کد، و هیچ تغییری در طرح سیستم (listing ۲.۴، ص. ۴۰).</details>

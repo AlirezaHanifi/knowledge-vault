@@ -2,162 +2,176 @@
 book: data-oriented-programming
 chapter: 6
 title: "Unit tests"
+translated_title: "تست‌های unit"
 pages: "110–136"
+lang: fa
 ---
 
-# 6. Unit tests
+# ۶. تست‌های unit
 
-[← 5. Basic concurrency control](05-basic-concurrency-control.md) · [Book](../README.md) · [7. Basic data validation →](07-basic-data-validation.md)
+[← ۵. کنترل پایه‌ی concurrency](05-basic-concurrency-control.md) · [کتاب](../README.md) · [۷. اعتبارسنجی پایه‌ی داده →](07-basic-data-validation.md)
 
-## Summary
+## خلاصه
 
-In a data-oriented system most functions receive data and return data, so a unit test is easy enough to write in a coffee shop. Every test case has the same three steps: generate the input, generate the expected output, and compare `f(input)` with it. A generic recursive comparison, Lodash's `_.isEqual`, does the comparing, and there is usually no need for mocks (pp. 110–112). Joe draws the **tree of function calls** of a code flow on a napkin and uses it to decide the *quality* and *quantity* of test cases (pp. 113–115):
+در سیستمی داده‌گرا بیشتر تابع‌ها داده می‌گیرند و داده برمی‌گردانند، پس تستی unit آن‌قدر آسان است که در کافه نوشتنی باشد. هر موردی از تست همان سه قدم را دارد: ورودی را بسازید، خروجی چشم‌داشته را بسازید، و `f(input)` را با آن بسنجید. سنجشی عمومی و بازگشتی، یعنی `_.isEqual` از Lodash، سنجیدن را می‌کند، و معمولاً هیچ نیازی به mock نیست (pp. 110–112). جو **درخت صدا زدن تابع‌ها** از جریانی کد را روی دستمالی می‌کشد و با آن *کیفیت* و *کمیت* موردهای تست را تصمیم می‌گیرد (pp. 113–115):
 
-- Functions **deep in the tree** take simpler data and need more test cases.
-- Functions **near the root** take more complex data and need fewer, because you assume the functions they call are already tested (pp. 119–121).
+- تابع‌های **عمیق در درخت** داده‌ی ساده‌تری می‌گیرند و موردهای تست بیشتری می‌خواهند.
+- تابع‌های **نزدیک به ریشه** داده‌ی پیچیده‌تری می‌گیرند و موردهای کم‌تری می‌خواهند، چون فرض می‌گیرید تابع‌هایی که صدایشان می‌زنند از پیش تست شده‌اند (pp. 119–121).
 
-Test inputs should be **minimal**, since data validity depends on context (p. 117). Compare data, never JSON strings (pp. 121–123). A lowercase query exposes a real bug in the search (pp. 124–125). Mutations are tested on their calculation phase by comparing whole state maps, including negative cases. The stateful `System.addMember` is tested by reading the state back after the call (pp. 126–133). The part ends on a twist: Albatross wins Nancy's long-term project, but Theo's engineers conclude that DOP "won't work well at scale" (p. 134).
+ورودی تست باید **کمینه** باشد، چون اعتبار داده به زمینه بسته است (p. 117). داده را بسنجید، هیچ‌وقت رشته‌ی JSON را (pp. 121–123). پرسشی با حرف کوچک اشکالی واقعی را در جست‌وجو رو می‌کند (pp. 124–125). mutationها از راه فاز حسابشان تست می‌شوند، با سنجیدن کل mapهای state، موردهای منفی هم. تابع باstate `System.addMember` با خواندن state پس از آن صدا زدن تست می‌شود (pp. 126–133). بخش با پیچی تمام می‌شود: Albatross پروژه‌ی بلندمدت نانسی را می‌برد، ولی مهندسان تئو نتیجه می‌گیرند که DOP «در مقیاس خوب کار نمی‌کند» (p. 134).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **A data-oriented test case:** `_.isEqual(f(dataIn), dataOut)` (listing 6.3, p. 112). Mocks are rarely needed (p. 111).
-- **The tree of function calls** has `f` at the root, the functions each node calls as its children, and functions outside the code base as leaves. A call inside an anonymous function still counts as a child (p. 114).
-- **Assume callees are tested.** A unit test for a function needs only a minimal case for what its callees already cover, which significantly reduces the number of test cases (p. 119).
-- **Depth trades data complexity against case count** (table 6.2, p. 121).
-- **Use minimal data.** The validity of data depends on context: `catalogData` with only `authorsById` is invalid for search but valid for `authorNames`. The smaller the data, the easier it is to manipulate (p. 117).
-- **Avoid string comparison.** Two JSON strings can serialize the same data with fields in a different order, so parse with `JSON.parse` and compare data (pp. 122–123).
-- **Mutation tests compare states**, before and expected-after, and need more effort than query tests (p. 127). Include **negative test cases** (p. 129).
-- **The stateful part still needs testing:** `System.addMember` returns nothing, so read the state after the call (pp. 131–133).
+- **موردی داده‌گرا از تست:** عبارت `_.isEqual(f(dataIn), dataOut)` (listing ۶.۳، ص. ۱۱۲). به mock کم نیاز می‌شود (p. 111).
+- **درخت صدا زدن تابع‌ها** تابع `f` را در ریشه دارد، تابع‌هایی که هر node صدا می‌زند را به‌شکل فرزندانش، و تابع‌های بیرون از کدبیس را به‌شکل برگ. صدا زدنی درون تابعی بی‌نام هم فرزند به شمار می‌آید (p. 114).
+- **فرض بگیرید صداشده‌ها تست شده‌اند.** تستی unit برای تابعی تنها موردی کمینه می‌خواهد برای آنچه صداشده‌هایش از پیش می‌پوشانند، که شمار موردهای تست را به‌جد کم می‌کند (p. 119).
+- **عمق، پیچیدگی داده را با شمار موردها بده‌بستان می‌کند** (جدول ۶.۲، ص. ۱۲۱).
+- **داده‌ی کمینه به کار ببرید.** اعتبار داده به زمینه بسته است: مقدار `catalogData` با تنها `authorsById` برای جست‌وجو نامعتبر است ولی برای `authorNames` معتبر. داده هر چه کوچک‌تر، دست‌کاری‌اش آسان‌تر (p. 117).
+- **از سنجش رشته‌ای بپرهیزید.** دو رشته‌ی JSON می‌توانند همان یک داده را با ترتیب فیلد مختلف سریالی کنند، پس با `JSON.parse` بازکنیدش و داده را بسنجید (pp. 122–123).
+- **تست mutationها stateها را می‌سنجد**، یعنی پیش و چشم‌داشته‌ی پس، و کوشش بیشتری از تست پرسش‌ها می‌خواهد (p. 127). **موردهای منفی تست** را بگنجانید (p. 129).
+- **بخش باstate هنوز تست می‌خواهد:** تابع `System.addMember` هیچ برنمی‌گرداند، پس state را پس از آن صدا زدن بخوانید (pp. 131–133).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 6.1 The simplicity of data-oriented test cases — p. 110
-- 6.2 Unit tests for data manipulation code — p. 112
-  - 6.2.1 The tree of function calls — p. 113
-  - 6.2.2 Unit tests for functions down the tree — p. 115
-  - 6.2.3 Unit tests for nodes in the tree — p. 119
-- 6.3 Unit tests for queries — p. 121
-- 6.4 Unit tests for mutations — p. 126
-- Summary — p. 134
+- ۶.۱ سادگی موردهای داده‌گرای تست — ص. ۱۱۰
+- ۶.۲ تست‌های unit برای کد دست‌کاری داده — ص. ۱۱۲
+  - ۶.۲.۱ درخت صدا زدن تابع‌ها — ص. ۱۱۳
+  - ۶.۲.۲ تست‌های unit برای تابع‌های پایین درخت — ص. ۱۱۵
+  - ۶.۲.۳ تست‌های unit برای nodeهای درخت — ص. ۱۱۹
+- ۶.۳ تست‌های unit برای پرسش‌ها — ص. ۱۲۱
+- ۶.۴ تست‌های unit برای mutationها — ص. ۱۲۶
+- خلاصه — ص. ۱۳۴
 
-## Notes
+## یادداشت‌ها
 
-The chapter deals with the logic of test cases, not with test runners or frameworks: "use your preferred test framework" (pp. 118–119).
+فصل با منطق موردهای تست سروکار دارد، نه با اجراگر یا چارچوب تست: «چارچوب تست محبوبتان را به کار ببرید» (pp. 118–119).
 
-### 6.1 The simplicity of data-oriented test cases
+### ۶.۱ سادگی موردهای داده‌گرای تست
 
-Theo and Joe work at "La vie est belle," a French coffee shop near the Golden Gate Bridge (p. 110). The steps of a test case (p. 111):
+تئو و جو در «La vie est belle» کار می‌کنند، کافه‌ای فرانسوی نزدیک پل گلدن‌گیت (p. 110). قدم‌های یک مورد تست (p. 111):
 
-1. Generate the data input, `dataIn`.
-2. Generate the expected output, `dataOut`.
-3. Compare `f(dataIn)` with `dataOut`.
+1. ورودی داده را بسازید، یعنی `dataIn`.
+2. خروجی چشم‌داشته را بسازید، یعنی `dataOut`.
+3. مقدار `f(dataIn)` را با `dataOut` بسنجید.
 
-Comparing maps means comparing field by field, recursively. Theo can't write recursive code in a coffee shop, but he doesn't need to: because data is generic, `_.isEqual` compares maps and arrays recursively (listings 6.1–6.2, pp. 111–112).
+سنجیدن mapها یعنی فیلدبه‌فیلد و بازگشتی سنجیدن. تئو نمی‌تواند در کافه کد بازگشتی بنویسد، ولی لازم هم ندارد: چون داده عمومی است، تابع `_.isEqual` mapها و آرایه‌ها را بازگشتی می‌سنجد (listingهای ۶.۱ و ۶.۲، صص. ۱۱۱–۱۱۲).
 
-### 6.2 Unit tests for data manipulation code
+> **In practice:** تست transformهای Python و مدل‌های SQL در GitLab CI اجرا می‌شود و ساده‌ترینش ورودی داده و خروجی داده است.
+>
+> **Your turn:** تابع `hash_fields` را چطور تست می‌کنید بی‌آن‌که به دیتابیس یا ClickHouse نیاز باشد؟
+>
+> *Answer:* یک dict ورودی، یک dict انتظاری و یک `assert` برابری؛ چون تابع خالص است و داده را برمی‌گرداند، هیچ mock یا fixture لازم نیست. کتاب می‌گوید تست داده‌گرا همین سادگی را دارد (pp. 110–112).
 
-The code under test is the search query from chapter 3 (listing 6.4, p. 113). It has been slightly refactored: `authorNames` now takes `authorIds` rather than a book.
+### ۶.۲ تست‌های unit برای کد دست‌کاری داده
 
-#### 6.2.1 The tree of function calls
+کد زیر تست همان پرسش جست‌وجوی فصل ۳ است (listing ۶.۴، ص. ۱۱۳). کمی بازآرایی شده: تابع `authorNames` حالا `authorIds` را می‌گیرد، نه کتابی را.
 
-![Call tree of Library.searchBooksByTitleJSON: it calls _.get, JSON.stringify and Catalog.searchBooksByTitle, which calls _.get, _.map, _.filter and Catalog.bookInfo, which in turn calls _.get and Catalog.authorNames](../figures/06-01.png)
+#### ۶.۲.۱ درخت صدا زدن تابع‌ها
 
-*Figure 6.1 (p. 114): the leaves are functions outside the application's code base — Lodash and `JSON` — so testing starts one level up.*
+![درخت صدا زدن Library.searchBooksByTitleJSON: تابع‌های _.get و JSON.stringify و Catalog.searchBooksByTitle را صدا می‌زند، که _.get و _.map و _.filter و Catalog.bookInfo را صدا می‌زند، که به نوبت _.get و Catalog.authorNames را صدا می‌زند](../figures/06-01.png)
 
-You expand the tree until you reach a function outside the application's code base, or one that calls nothing. `Catalog.bookInfo` is a child of `searchBooksByTitle` even though it's called inside an anonymous function (p. 114).
+*Figure 6.1 (p. 114): برگ‌ها تابع‌های بیرون کدبیس برنامه‌اند، یعنی Lodash و `JSON`، پس تست یک سطح بالاتر آغاز می‌شود.*
 
-#### 6.2.2 Unit tests for functions down the tree
+درخت را تا رسیدن به تابعی بیرون کدبیس برنامه، یا تابعی که هیچ صدا نمی‌زند، باز می‌کنید. تابع `Catalog.bookInfo` فرزند `searchBooksByTitle` است گرچه درون تابعی بی‌نام صدا زده می‌شود (p. 114).
 
-Start at the deepest application function, `Catalog.authorNames(catalogData, authorIds)` → `authorNames` (figure 6.2, p. 115). Theo's table of cases (table 6.1, p. 116) uses a catalog with two authors and `authorIds` that are empty, have one ID or have two. More cases follow (listing 6.9, p. 118):
+#### ۶.۲.۲ تست‌های unit برای تابع‌های پایین درخت
 
-- **Empty catalog data.**
-- **Unknown author IDs**, which yield `undefined` in the output.
+از عمیق‌ترین تابع برنامه آغاز کنید، یعنی `Catalog.authorNames(catalogData, authorIds)` که `authorNames` می‌دهد (شکل ۶.۲، ص. ۱۱۵). جدول موردهای تئو (جدول ۶.۱، ص. ۱۱۶) از catalogی با دو نویسنده و `authorIds`ی کار می‌کشد که تهی است یا یک شناسه دارد یا دو. موردهای بیشتری پی می‌آیند (listing ۶.۹، ص. ۱۱۸):
 
-Joe shrinks the input. The full `catalogData` of listing 6.6 can lose `booksByIsbn` and the authors' `bookIsbns` (listing 6.7, p. 117). Theo protests that this `catalogData` isn't valid. Joe: in DOP, **validity depends on the context**. The minimal version is invalid for `searchBooksByTitle` but perfectly valid for `bookInfo` and `authorNames`, which read only `authorsById` (p. 117).
+- **داده‌ی catalog تهی.**
+- **شناسه‌ی نویسنده‌های ناشناس**، که در خروجی `undefined` می‌دهند.
 
-#### 6.2.3 Unit tests for nodes in the tree
+جو ورودی را آب می‌کند. مقدار کامل `catalogData` در listing ۶.۶ می‌تواند `booksByIsbn` و `bookIsbns` نویسنده‌ها را از دست بدهد (listing ۶.۷، ص. ۱۱۷). تئو اعتراض می‌کند که این `catalogData` معتبر نیست. جو: در DOP، **اعتبار به زمینه بسته است**. version کمینه برای `searchBooksByTitle` نامعتبر است ولی برای `bookInfo` و `authorNames` کاملاً معتبر، که تنها `authorsById` را می‌خوانند (p. 117).
 
-For `Catalog.bookInfo`, Theo starts listing as many cases as for `authorNames`. Joe stops him: assume the functions it calls are already covered and working, and write one minimal case (listing 6.11, pp. 119–120). That one case involves records, so its data is more complex (p. 120).
+#### ۶.۲.۳ تست‌های unit برای nodeهای درخت
 
-| Position in the tree | Complexity of the data | Number of test cases (table 6.2, p. 121) |
+برای `Catalog.bookInfo`، تئو آغاز می‌کند به فهرست کردن همان‌قدر مورد که برای `authorNames`. جو بازش می‌دارد: فرض بگیرید تابع‌هایی که صدا می‌زند از پیش پوشیده و سالم‌اند، و یک مورد کمینه بنویسید (listing ۶.۱۱، صص. ۱۱۹–۱۲۰). همان یک مورد رکوردها را درگیر می‌کند، پس داده‌اش پیچیده‌تر است (p. 120).
+
+| جایگاه در درخت | پیچیدگی داده | شمار موردهای تست (جدول ۶.۲، ص. ۱۲۱) |
 |---|---|---|
-| Near the root (lower depth) | Higher | Lower |
-| Deep in the tree (higher depth) | Lower | Higher |
+| نزدیک ریشه، عمق کم‌تر | بالاتر | کم‌تر |
+| عمیق در درخت، عمق بیشتر | پایین‌تر | بیشتر |
 
-> **Vault note:** the table's first column is "Depth in the tree," where "lower" depth means near the root. The tip just before it says "functions that appear in a lower level in the tree … involve less complex data," which reads "lower" as deeper on the drawing. Both describe the same rule: deep nodes get simple data and many cases (pp. 120–121).
+> **Vault note:** ستون نخست آن جدول «عمق در درخت» است، که عمق «کم‌تر» یعنی نزدیک ریشه. نکته‌ی درست پیش از آن می‌گوید «تابع‌هایی که در سطحی پایین‌تر از درخت پیدا می‌شوند … داده‌ی کم‌پیچیده‌تری درگیر می‌کنند»، که «پایین‌تر» را عمیق‌تر روی نقاشی می‌خواند. هر دو همان یک قاعده را وصف می‌کنند: nodeهای عمیق داده‌ی ساده و موردهای زیاد می‌گیرند (pp. 120–121).
 
-> **Try it:** [Tree of function calls](../widgets/06-call-tree.html) — pick a node in the search or add-member tree to see its inputs and outputs, the fields it actually reads, the minimal test data that's valid in its context, and how many cases the book's rule suggests.
+> **Try it:** [درخت صدا زدن تابع‌ها](../widgets/06-call-tree.html) — nodeی از درخت جست‌وجو یا افزودن عضو برگزینید تا ورودی‌ها و خروجی‌هایش، فیلدهایی که واقعاً می‌خواند، داده‌ی تست کمینه‌ای که در زمینه‌اش معتبر است، و شمار موردهایی که قاعده‌ی کتاب پیش می‌گذارد را ببینید.
 
-### 6.3 Unit tests for queries
+### ۶.۳ تست‌های unit برای پرسش‌ها
 
-`Library.searchBooksByTitleJSON` takes library data and a query and returns a JSON string (figure 6.4, p. 121). Theo's first idea, comparing with an expected string, is rejected (pp. 122–123):
+تابع `Library.searchBooksByTitleJSON` داده‌ی کتابخانه و پرسشی می‌گیرد و رشته‌ای JSON برمی‌گرداند (شکل ۶.۴، ص. ۱۲۱). ایده‌ی نخست تئو، یعنی سنجیدن با رشته‌ای چشم‌داشته، رد می‌شود (pp. 122–123):
 
-- `{"title":"Watchmen","publicationYear":1987}` and `{"publicationYear":1987,"title":"Watchmen"}` are different strings that serialize the same data (listing 6.13).
-- So **deserialize**, generating the data whose serialization is the string, with the native `JSON.parse`, and compare with `_.isEqual` (listings 6.14–6.15).
+- دو رشته‌ی `{"title":"Watchmen","publicationYear":1987}` و `{"publicationYear":1987,"title":"Watchmen"}` فرق دارند ولی همان یک داده را سریالی می‌کنند (listing ۶.۱۳).
+- پس **بازش کنید**، یعنی داده‌ای را بسازید که سریالی‌اش همان رشته است، با `JSON.parse` بومی، و با `_.isEqual` بسنجید (listingهای ۶.۱۴ و ۶.۱۵).
 
-The test for `Catalog.searchBooksByTitle` is pleasanter: it returns data, so there is nothing to parse, and its input needs no `libraryData` wrapper (pp. 124–125). Joe then asks for an all-lowercase query. `"watchmen"` fails, which is the point of unit tests: to find bugs. Theo fixes it by lowercasing both the query and the title before `includes` (listings 6.18–6.20, p. 125).
+تست `Catalog.searchBooksByTitle` خوشایندتر است: داده برمی‌گرداند، پس چیزی برای باز کردن نیست، و ورودی‌اش پوششی `libraryData` نمی‌خواهد (pp. 124–125). بعد جو پرسشی تمام‌حرف‌کوچک می‌خواهد. مقدار `"watchmen"` شکست می‌خورد، که هدف تست‌های unit همین است: یافتن اشکال. تئو با حرف‌کوچک کردن هر دو پرسش و عنوان پیش از `includes` درستش می‌کند (listingهای ۶.۱۸ تا ۶.۲۰، ص. ۱۲۵).
 
-> **Try it:** [Test bench](../widgets/06-test-bench.html) — run the chapter's search test cases, compare results as strings or as parsed data, shuffle field order, and add the lowercase case to find, then fix, the bug.
+> **Try it:** [میز تست](../widgets/06-test-bench.html) — موردهای تست جست‌وجوی این فصل را اجرا کنید، خروجی‌ها را به‌شکل رشته یا داده‌ی بازشده بسنجید، ترتیب فیلدها را به هم بزنید، و آن مورد حرف‌کوچک را بیفزایید تا آن اشکال را بیابید و بعد درست کنید.
 
-### 6.4 Unit tests for mutations
+> **In practice:** کوئری‌های Silver و Gold هم پرسش‌اند و می‌شود آن‌ها را با داده‌ی کوچک تست کرد.
+>
+> **Your turn:** چطور یک مدل Gold را در GitLab CI تست می‌کنید؟
+>
+> *Answer:* یک ClickHouse موقت در Docker، چند ردیف ورودی شناخته‌شده، اجرای کوئری و مقایسه‌ی خروجی با جدول انتظاری. چون کوئری داده می‌گیرد و داده می‌دهد، تست همان شکل تست تابع خالص را دارد (pp. 122–126).
 
-![Call tree of System.addMember: it calls SystemState.get, SystemState.commit and Library.addMember; Library.addMember calls _.get, _.set and UserManagement.addMember, which calls _.has and _.set](../figures/06-05.png)
+### ۶.۴ تست‌های unit برای mutationها
 
-*Figure 6.5 (p. 126): the mutation's tree mixes state handling (`SystemState`) with pure calculations below `Library.addMember`.*
+![درخت صدا زدن System.addMember: تابع‌های SystemState.get و SystemState.commit و Library.addMember را صدا می‌زند؛ تابع Library.addMember هم _.get و _.set و UserManagement.addMember را، که _.has و _.set را صدا می‌زند](../figures/06-05.png)
 
-Of the application functions, the `SystemState` ones are generic and tested outside any particular mutation. That leaves three, and the real meat is in `UserManagement.addMember`; the other two are wrappers (p. 127). A mutation's test needs more effort than a query's, because a mutation computes a new *system state* from the current state and its arguments, while a query returns response data (figure 6.6, p. 127). The tests for `UserManagement.addMember` (pp. 127–130):
+*Figure 6.5 (p. 126): درخت آن جهش، چرخاندن state با `SystemState` را با حساب‌های سرراست زیر `Library.addMember` قاطی می‌کند.*
 
-| Case | Before | Expected |
+از تابع‌های برنامه، آن‌های `SystemState` عمومی‌اند و بیرون هر mutation ویژه‌ای تست می‌شوند. سه تا می‌ماند، و گوشت واقعی در `UserManagement.addMember` است؛ آن دو تای دیگر پوششند (p. 127). تست mutationی کوشش بیشتری از تست پرسشی می‌خواهد، چون mutation *state سیستم* تازه‌ای را از state کنونی و آرگومان‌هایش حساب می‌کند، در حالی که پرسش داده‌ی پاسخ برمی‌گرداند (شکل ۶.۶، ص. ۱۲۷). تست‌های `UserManagement.addMember` (pp. 127–130):
+
+| مورد | پیش | چشم‌داشته |
 |---|---|---|
-| Empty state (listing 6.22) | `{}` | `membersByEmail` with jessie |
-| Existing members (listing 6.23) | franck | franck and jessie |
-| Negative (listing 6.24) | jessie | exception "Member already exists.", caught with try/catch and compared |
+| state تهی (listing ۶.۲۲) | `{}` | مقدار `membersByEmail` با jessie |
+| عضوهای موجود (listing ۶.۲۳) | franck | هر دو franck و jessie |
+| منفی (listing ۶.۲۴) | jessie | استثنای «Member already exists.»، که با try/catch گرفته و سنجیده می‌شود |
 
-Theo admits he always forgets negative cases because he's an optimist (p. 129). `Library.addMember` gets only the existing-members case, since its callee is covered (listing 6.25, pp. 130–131).
+تئو می‌پذیرد که همیشه موردهای منفی را از یاد می‌برد چون خوش‌بین است (p. 129). تابع `Library.addMember` تنها مورد عضوهای موجود را می‌گیرد، چون صداشده‌اش پوشیده است (listing ۶.۲۵، صص. ۱۳۰–۱۳۱).
 
-**The stateful part.** `System.addMember` returns nothing; it changes the system state (figure 6.7, p. 131). "Although DOP allows us to reduce the size of the stateful part of our code, it still exists" (p. 131). The test creates a `SystemState`, commits `libraryStateBefore`, runs the mutation, and compares `systemState.get()` with the expected state using `_.isEqual`. The system state is a map like any other (listing 6.27, pp. 132–133). Writing it "requires the calm of the office," so they take the cable car back to Albatross (p. 132).
+**بخش باstate.** تابع `System.addMember` هیچ برنمی‌گرداند؛ state سیستم را عوض می‌کند (شکل ۶.۷، ص. ۱۳۱). «گرچه DOP می‌گذارد اندازه‌ی بخش باstate کدمان را کم کنیم، آن بخش هنوز هست» (p. 131). تست یک `SystemState` می‌سازد، مقدار `libraryStateBefore` را commit می‌کند، mutation را اجرا، و `systemState.get()` را با state چشم‌داشته با `_.isEqual` می‌سنجد. مقدار state سیستم mapی است مانند هر map دیگری (listing ۶.۲۷، صص. ۱۳۲–۱۳۳). نوشتنش «آرامش دفتر را می‌خواهد»، پس با تله‌کابین به Albatross برمی‌گردند (p. 132).
 
-**Moving forward** (p. 134): Klafim gets market traction and Albatross wins a long-term project with a nice budget. But after refactoring the prototype to DOP and a deep analysis with his engineers, Theo has concluded that DOP fits a prototype but "won't work well at scale." He agrees to meet Joe for a farewell; the story continues in the part 2 opener.
+**پیش رفتن** (p. 134): سیستم Klafim در بازار جا می‌گیرد و Albatross پروژه‌ای بلندمدت با بودجه‌ای خوب می‌برد. ولی پس از بازآرایی نمونه‌ی اولیه به DOP و تحلیلی عمیق با مهندسانش، تئو نتیجه گرفته که DOP به نمونه‌ی اولیه می‌خورد ولی «در مقیاس خوب کار نمی‌کند». می‌پذیرد برای خداحافظی جو را ببیند؛ و داستان در سرآغاز بخش ۲ پی می‌گیرد.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Benefit | Cost |
+| گزینش | سود | خرج |
 |---|---|---|
-| Generic `_.isEqual` | One comparison for any data; no field-by-field code | Compares everything, including fields a test doesn't care about |
-| Minimal input data | Easy to write and read | Valid only in the function's context (p. 117) |
-| Assume callees are tested | Far fewer cases near the root (p. 119) | A gap in a deep function's tests propagates upward |
-| Parse JSON, then compare | Field order no longer matters (p. 122) | One more step for serialized outputs |
-| Testing the stateful wrapper | Covers the commit path | Needs a real `SystemState` and its setup (pp. 131–133) |
+| تابع عمومی `_.isEqual` | یک سنجش برای هر داده‌ای؛ بی هیچ کد فیلدبه‌فیلد | همه را می‌سنجد، فیلدهایی را هم که تستی اهمیتشان نمی‌دهد |
+| داده‌ی ورودی کمینه | نوشتن و خواندنش آسان | تنها در زمینه‌ی آن تابع معتبر (p. 117) |
+| فرض گرفتن تست‌شدن صداشده‌ها | موردهای خیلی کم‌تر نزدیک ریشه (p. 119) | رخنه‌ای در تست تابعی عمیق رو به بالا پخش می‌شود |
+| باز کردن JSON و بعد سنجیدن | ترتیب فیلد دیگر مهم نیست (p. 122) | یک قدم بیشتر برای خروجی‌های سریالی |
+| تست کردن پوشش باstate | مسیر commit را می‌پوشاند | یک `SystemState` واقعی و راه انداختنش را می‌خواهد (pp. 131–133) |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Mock-free tests** follow from the functional-core, imperative-shell architecture Gary Bernhardt described in "Boundaries" (2012). Push decisions into pure functions over values and keep a thin shell for I/O and state. DOP's calculation and commit phases are that split, so most tests are plain value comparisons.
-- **Property-based testing** fits generic data well. Libraries like fast-check (JavaScript), Hypothesis (Python) and test.check (Clojure) generate maps and arrays, so properties such as "searching for a book's exact lowercased title always finds it" can be checked over thousands of generated catalogs. With JSON Schemas (chapter 7), you can also generate *valid* inputs from the schema.
-- **Snapshot or "golden" tests** store a function's output and compare later runs against it. With data outputs, a structural diff like chapter 5's gives far more readable failures than a string diff.
-- **Mutation testing**, which deliberately breaks the code to see whether tests catch it, is a good check on the "assume callees are tested" rule.
+- **تست‌های بی mock** از معماری هسته‌ی تابعی و پوسته‌ی دستوری پی می‌گیرند که گری برنهارت در «Boundaries» (۲۰۱۲) وصفش کرد. تصمیم‌ها را به تابع‌های سرراست روی مقدارها برانید و پوسته‌ای نازک برای I/O و state نگه دارید. فازهای حساب و commit از DOP همان شکستن است، پس بیشتر تست‌ها سنجش مقدار خالی‌اند.
+- **تست خاصیت‌محور** به داده‌ی عمومی خوب می‌خورد. کتابخانه‌هایی مانند fast-check برای JavaScript و Hypothesis برای Python و test.check برای Clojure mapها و آرایه‌ها را می‌سازند، پس خاصیت‌هایی مانند «جست‌وجوی عنوان دقیق حرف‌کوچک‌شده‌ی کتابی همیشه می‌یابدش» را می‌شود روی هزاران catalog ساخته سنجید. با طرح‌های JSON Schema از فصل ۷، می‌شود ورودی‌های *معتبر* را هم از طرح ساخت.
+- **تست‌های snapshot یا «طلایی»** خروجی تابعی را ذخیره و اجراهای دیرتر را با آن می‌سنجند. با خروجی داده‌ای، diff ساختاری مانند فصل ۵ شکست‌هایی خیلی خواندنی‌تر از diff رشته‌ای می‌دهد.
+- **تست mutationی**، که به‌عمد کد را می‌شکند تا ببیند تست‌ها می‌گیرندش یا نه، سنجش خوبی برای قاعده‌ی «فرض بگیرید صداشده‌ها تست شده‌اند» است.
 
-## Connections
+## پیوندها
 
-- **What's being tested:** the search query from [3. Basic data manipulation](03-basic-data-manipulation.md) and the add-member mutation from [4. State management](04-state-management.md).
-- **Next:** [7. Basic data validation](07-basic-data-validation.md) opens part 2, where Theo's doubts about DOP at scale are answered.
-- **Context-dependent validity** becomes explicit in the function-argument schemas of [12. Advanced data validation](12-advanced-data-validation.md).
-- **Reproducing bugs as tests:** [15. Debugging](15-debugging.md) turns captured inputs into unit tests.
+- **چه زیر تست است:** پرسش جست‌وجو از [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md) و mutation افزودن عضو از [۴. مدیریت state](04-state-management.md).
+- **پسین:** [۷. اعتبارسنجی پایه‌ی داده](07-basic-data-validation.md) بخش ۲ را می‌گشاید، جایی که شک‌های تئو در باب DOP در مقیاس پاسخ می‌گیرد.
+- **اعتبار بسته به زمینه** در طرح‌های آرگومان تابع [۱۲. اعتبارسنجی پیشرفته‌ی داده](12-advanced-data-validation.md) صریح می‌شود.
+- **بازساختن اشکال‌ها به‌شکل تست:** [۱۵. اشکال‌زدایی](15-debugging.md) ورودی‌های گرفته‌شده را به تست unit بدل می‌کند.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. What are the three steps of a data-oriented test case, and why are mocks usually unnecessary?
-   <details><summary>Answer</summary>Generate the input, generate the expected output, and compare the function's output with it. Most functions just receive and return data, so there are no collaborators to mock (pp. 111–112).</details>
-2. Define the tree of function calls. Where do you stop expanding it?
-   <details><summary>Answer</summary>The root is the function `f`, and the children of a node `g` are the functions `g` calls, including calls inside anonymous functions. You stop at functions outside the application's code base, or that call no other functions, such as Lodash's (p. 114).</details>
-3. Why does `Catalog.bookInfo` need only one test case when `Catalog.authorNames` needs several?
-   <details><summary>Answer</summary>When testing a function you assume its callees are covered and work, so `bookInfo` needs only a minimal case. Higher nodes get fewer cases with more complex data; deeper nodes get more cases with simpler data (pp. 119–121).</details>
-4. How can a `catalogData` with only `authorsById` be valid?
-   <details><summary>Answer</summary>Validity depends on context. `authorNames` and `bookInfo` read only `authorsById`, so for them the minimal map is valid, though it would be invalid for `searchBooksByTitle` (p. 117).</details>
-5. Why compare parsed data rather than JSON strings?
-   <details><summary>Answer</summary>Two different strings can serialize the same data, for example with fields in a different order, so a string comparison can fail on correct output (pp. 122–123).</details>
-6. What did the lowercase test case reveal, and how was it fixed?
-   <details><summary>Answer</summary>A search for "watchmen" didn't find "Watchmen". Theo lowercased both the query and the title before calling `includes` (p. 125).</details>
-7. How do you test `System.addMember`, which returns nothing?
-   <details><summary>Answer</summary>Create a `SystemState`, commit the initial library data, run the mutation, then compare `systemState.get()` with the expected state using `_.isEqual` (pp. 131–133).</details>
+1. سه قدم موردی داده‌گرا از تست کدامند، و چرا معمولاً mock لازم نیست؟
+   <details><summary>پاسخ</summary>ورودی را بسازید، خروجی چشم‌داشته را بسازید، و خروجی تابع را با آن بسنجید. بیشتر تابع‌ها تنها داده می‌گیرند و برمی‌گردانند، پس هم‌کاری نیست که mockش کنید (pp. 111–112).</details>
+2. درخت صدا زدن تابع‌ها را تعریف کنید. باز کردنش را کجا بس می‌کنید؟
+   <details><summary>پاسخ</summary>ریشه تابع `f` است، و فرزندان node `g` تابع‌هایی‌اند که `g` صدا می‌زند، صدا زدن‌های درون تابع‌های بی‌نام هم. سر تابع‌های بیرون کدبیس برنامه، یا تابع‌هایی که هیچ تابعی را صدا نمی‌زنند، مانند تابع‌های Lodash، بس می‌کنید (p. 114).</details>
+3. چرا `Catalog.bookInfo` تنها یک مورد تست می‌خواهد در حالی که `Catalog.authorNames` چند تا؟
+   <details><summary>پاسخ</summary>سر تست کردن تابعی فرض می‌گیرید صداشده‌هایش پوشیده و سالم‌اند، پس `bookInfo` تنها موردی کمینه می‌خواهد. nodeهای بالاتر موردهای کم‌تری با داده‌ی پیچیده‌تر می‌گیرند؛ و nodeهای عمیق‌تر موردهای بیشتری با داده‌ی ساده‌تر (pp. 119–121).</details>
+4. چطور `catalogData`ی با تنها `authorsById` می‌تواند معتبر باشد؟
+   <details><summary>پاسخ</summary>اعتبار به زمینه بسته است. تابع‌های `authorNames` و `bookInfo` تنها `authorsById` را می‌خوانند، پس برای آن‌ها آن map کمینه معتبر است، گرچه برای `searchBooksByTitle` نامعتبر بود (p. 117).</details>
+5. چرا داده‌ی بازشده را بسنجیم و نه رشته‌ی JSON را؟
+   <details><summary>پاسخ</summary>دو رشته‌ی مختلف می‌توانند همان یک داده را سریالی کنند، مثلاً با فیلدهایی به ترتیبی دیگر، پس سنجش رشته‌ای می‌تواند روی خروجی درست شکست بخورد (pp. 122–123).</details>
+6. آن مورد تست حرف‌کوچک چه را رو کرد، و چطور درست شد؟
+   <details><summary>پاسخ</summary>جست‌وجوی «watchmen» عنوان «Watchmen» را نیافت. تئو هر دو پرسش و عنوان را پیش از صدا زدن `includes` حرف‌کوچک کرد (p. 125).</details>
+7. تابع `System.addMember` را که هیچ برنمی‌گرداند چطور تست می‌کنید؟
+   <details><summary>پاسخ</summary>یک `SystemState` بسازید، داده‌ی آغازین کتابخانه را commit کنید، mutation را اجرا کنید، بعد `systemState.get()` را با state چشم‌داشته با `_.isEqual` بسنجید (pp. 131–133).</details>

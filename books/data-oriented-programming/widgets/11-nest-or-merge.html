@@ -1,64 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nest or Merge</title>
-<meta name="description" content="Combine a database book record with an Open Library record by nesting or merging, add a field both sides share, and choose which side wins the conflict. Illustrates Data-Oriented Programming, chapter 11.">
+<title>تودرتو یا درهم</title>
+<meta name="description" content="رکورد کتاب از پایگاه داده را با رکورد Open Library تودرتو یا درهم‌آمیخته کنار هم بگذارید، فیلدی بیفزایید که هر دو سو شریکند، و برگزینید کدام سو ناسازی را می‌برد. تصویری از فصل ۱۱ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
+<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
+  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
+  #rt { direction: ltr; text-align: left; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/11-web-services.html">Chapter 11</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Nest or merge</span>
+      <a href="../chapters/11-web-services.html">فصل ۱۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">تودرتو یا درهم</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 11 · Web services</div>
-  <h1>Nest or merge</h1>
-  <p class="lede">Two sources describe the same book. You can <strong>nest</strong> one inside the other, as an <code>extendedInfo</code> field, and never worry about conflicts, or <strong>merge</strong> them into one flat map and handle fields both sides define. Either way, the information is passed forward as data, unopened.</p>
-  <p class="source-note">Illustrates section 11.5, Passing information forward (table 11.1 and listings 11.10–11.12, pp. 231–233), and the conflicting titles of listing 11.19 (p. 238). The extra shared fields are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۱ · سرویس‌های وب</div>
+  <h1>تودرتو یا درهم</h1>
+  <p class="lede">دو سرچشمه همان یک کتاب را وصف می‌کنند. می‌توانید یکی را <strong>تودرتو</strong> درون آن یکی بگذارید، به‌شکل فیلد <code>extendedInfo</code>، و هیچ‌وقت نگران ناسازی نباشید، یا <strong>درهمشان بیامیزید</strong> در mapی تخت و فیلدهایی را که هر دو سو تعریف می‌کنند بچرخانید. هر طور که باشد، آن خبر به‌شکل داده و بازنشده پیش فرستاده می‌شود.</p>
+  <p class="source-note">تصویری از بخش ۱۱.۵، یعنی پیش فرستادن خبر (جدول ۱۱.۱ و listingهای ۱۱.۱۰ تا ۱۱.۱۲، صص. ۲۳۱–۲۳۳)، و عنوان‌های ناساز listing ۱۱.۱۹ (ص. ۲۳۸). فیلدهای شریک افزوده مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">Database</p><pre class="code" id="db"></pre></div>
+      <div class="grid-2"><div class="panel"><p class="panel-title">پایگاه داده</p><pre class="code" id="db"></pre></div>
         <div class="panel"><p class="panel-title">Open Library</p><pre class="code" id="ol"></pre></div></div>
-      <div class="panel"><p class="panel-title" id="rt">Result</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
+      <div class="panel"><p class="panel-title" id="rt">خروجی</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="how"></div><div id="win" style="margin-top:10px"></div>
-        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="t"> Open Library also sends a different <code>title</code> (listing 11.19)</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="a"> Open Library also sends <code>available</code></label></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="how"></div><div id="win" style="margin-top:10px"></div>
+        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="t"> interface Open Library مقدار <code>title</code> دیگری هم می‌فرستد (listing ۱۱.۱۹)</label>
+        <label style="display:flex;gap:6px"><input type="checkbox" id="a"> interface Open Library مقدار <code>available</code> را هم می‌فرستد</label></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Nesting never conflicts</strong>, but the result is not flat: the client must know to look inside <code>extendedInfo</code>.</li>
-    <li><strong>Merging is flat</strong>, and safe as long as the two maps share no fields. In listing 11.19 they share <code>title</code>, with different values, and the side merged last wins silently.</li>
-    <li><strong>Hugo’s letter</strong>: neither option opens the information. Data is passed forward in generic structures, without a class per source.</li>
+    <li><strong>تودرتو کردن هیچ‌وقت ناساز نمی‌شود</strong>، ولی خروجی تخت نیست: client باید بداند که درون <code>extendedInfo</code> را ببیند.</li>
+    <li><strong>درهم‌آمیختن تخت است</strong>، و تا وقتی آن دو map فیلدی را شریک نباشند ایمن. در listing ۱۱.۱۹ فیلد <code>title</code> را با مقدارهای مختلف شریکند، و سویی که دیرتر درهم آمیخته می‌شود خاموش می‌برد.</li>
+    <li><strong>نامه‌ی هوگو</strong>: هیچ‌کدام آن خبر را باز نمی‌کند. داده در ساختارهای عمومی پیش فرستاده می‌شود، بی هیچ کلاسی برای هر سرچشمه.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/11-web-services.html"><small>Lesson</small>11. Web services</a></li>
+    <li><a href="../chapters/11-web-services.html"><small>درس</small>فصل ۱۱: سرویس‌های وب</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -80,26 +81,26 @@ function stats(rows) {
     document.getElementById("db").textContent = JSON.stringify(DBR, null, 2); document.getElementById("ol").textContent = JSON.stringify(o, null, 2);
     if (how === "nest") out = Object.assign({}, DBR, { extendedInfo: o }); else out = win === "ol" ? Object.assign({}, DBR, o) : Object.assign({}, o, DBR);
     document.getElementById("out").textContent = JSON.stringify(out, null, 2);
-    document.getElementById("rt").textContent = how === "nest" ? "Nested: _.set(dbInfo, \"extendedInfo\", openLibInfo)" : "Merged: _.merge(" + (win === "ol" ? "dbInfo, openLibInfo" : "openLibInfo, dbInfo") + ")";
+    document.getElementById("rt").textContent = how === "nest" ? "_.set(dbInfo, \"extendedInfo\", openLibInfo)" : "_.merge(" + (win === "ol" ? "dbInfo, openLibInfo" : "openLibInfo, dbInfo") + ")";
     var v = document.getElementById("verdict"); v.className = "callout " + (how === "merge" && conflicts.length ? "bad" : "ok");
-    v.textContent = how === "nest" ? "No conflicts possible; the result has " + Object.keys(out).length + " top-level fields, one of them nested." : conflicts.length ? "Conflict on " + conflicts.join(", ") + ": " + conflicts.map(function (k) { return k + " = " + JSON.stringify(out[k]); }).join(", ") + ", from " + (win === "ol" ? "Open Library" : "the database") + ". The other value is lost." : "Disjoint fields (apart from isbn): a flat, conflict-free merge.";
+    v.textContent = how === "nest" ? "هیچ ناسازی‌ای شدنی نیست؛ خروجی " + Object.keys(out).length + " فیلد سطح‌بالا دارد که یکی‌شان تودرتوست." : conflicts.length ? "ناسازی روی " + conflicts.join(", ") + ": " + conflicts.map(function (k) { return k + " = " + JSON.stringify(out[k]); }).join(", ") + "، از " + (win === "ol" ? "Open Library" : "پایگاه داده") + ". آن مقدار دیگر گم می‌شود." : "فیلدهای جدا از هم، جز isbn: درهم‌آمیزی‌ای تخت و بی‌ناسازی.";
     if (!quiet) log.add(v.textContent, conflicts.length && how === "merge" ? "bad" : "ok");
-    stats([["Top-level fields", Object.keys(out).length], ["Shared fields", conflicts.length, conflicts.length ? "warn" : "ok"], ["Flat", how === "merge" ? "yes" : "no"]]); }
-  document.getElementById("how").appendChild(Kit.segmented({ label: "Combine by", value: how, options: [{ value: "nest", label: "Nesting" }, { value: "merge", label: "Merging" }], onChange: function (v) { how = v; render(); } }).element);
-  document.getElementById("win").appendChild(Kit.segmented({ label: "Merged last (wins)", value: win, options: [{ value: "ol", label: "Open Library wins" }, { value: "db", label: "Database wins" }], onChange: function (v) { win = v; render(); } }).element);
+    stats([["فیلدهای سطح‌بالا", Object.keys(out).length], ["فیلدهای شریک", conflicts.length, conflicts.length ? "warn" : "ok"], ["تخت", how === "merge" ? "بله" : "نه"]]); }
+  document.getElementById("how").appendChild(Kit.segmented({ label: "کنار هم گذاشتن با", value: how, options: [{ value: "nest", label: "تودرتو کردن" }, { value: "merge", label: "درهم‌آمیختن" }], onChange: function (v) { how = v; render(); } }).element);
+  document.getElementById("win").appendChild(Kit.segmented({ label: "دیرتر درهم‌آمیخته، یعنی برنده", value: win, options: [{ value: "ol", label: "Open Library می‌برد" }, { value: "db", label: "پایگاه داده می‌برد" }], onChange: function (v) { win = v; render(); } }).element);
   ["t", "a"].forEach(function (id) { document.getElementById(id).addEventListener("change", function () { render(); }); });
   render(true);
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What is the disadvantage of nesting, according to table 11.1?",
-      options: ["Conflicts", "The result is not flat", "It needs a class"], answer: 1,
-      explain: "p. 232." },
-    { q: "In Joe's story, who is like traditional OOP?",
-      options: ["Hugo", "Willy, who opens the letter to pass it on", "Iris"], answer: 1,
-      explain: "pp. 231–232." },
-    { q: "When is merging safe without conflict handling?",
-      options: ["Always", "When the two maps share no fields", "When both come from the database"], answer: 1,
-      explain: "pp. 232–233." }
+    { q: "بنا بر جدول ۱۱.۱، عیب تودرتو کردن چیست؟",
+      options: ["ناسازی", "خروجی تخت نیست", "کلاسی می‌خواهد"], answer: 1,
+      explain: "ص. ۲۳۲." },
+    { q: "در داستان جو، کدام‌یک مانند OOP سنتی است؟",
+      options: ["هوگو", "ویلی، که نامه را باز می‌کند تا برساندش", "آیریس"], answer: 1,
+      explain: "صص. ۲۳۱–۲۳۲." },
+    { q: "درهم‌آمیختن کِی بی چرخاندن ناسازی ایمن است؟",
+      options: ["همیشه", "وقتی آن دو map هیچ فیلدی را شریک نباشند", "وقتی هر دو از پایگاه داده بیایند"], answer: 1,
+      explain: "صص. ۲۳۲–۲۳۳." }
   ]);
 })();
 </script>

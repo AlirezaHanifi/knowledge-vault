@@ -2,185 +2,199 @@
 book: data-oriented-programming
 chapter: 12
 title: "Advanced data validation"
+translated_title: "اعتبارسنجی پیشرفته‌ی داده"
 pages: "247–271"
+lang: fa
 ---
 
-# 12. Advanced data validation
+# ۱۲. اعتبارسنجی پیشرفته‌ی داده
 
-[← 11. Web services](11-web-services.md) · [Book](../README.md) · [13. Polymorphism →](13-polymorphism.md)
+[← ۱۱. سرویس‌های وب](11-web-services.md) · [کتاب](../README.md) · [۱۳. polymorphism →](13-polymorphism.md)
 
-## Summary
+## خلاصه
 
-Part 3 starts a month later, in the maintenance phase. Monica assigns Dave to Klafim, and Joe asks Theo to mentor him: "Knowledge is never complete," and DOP is simple enough to be fertile ground for invention (pp. 245–246). Dave's first tasks go well, but as the code base grows, functions that receive and return only generic data are hard to use. It's unclear what shape an argument should have, and invalid data gives no meaningful error (pp. 247–248).
+بخش ۳ یک ماه دیرتر آغاز می‌شود، در فاز نگه‌داشت. مونیکا دیو را به Klafim می‌سپارد، و جو از تئو می‌خواهد راهنمایی‌اش کند: «دانش هیچ‌وقت کامل نیست»، و DOP آن‌قدر ساده است که زمینی حاصلخیز برای ابداع باشد (pp. 245–246). کارهای نخست دیو خوب پیش می‌رود، ولی با بزرگ شدن کدبیس، تابع‌هایی که تنها داده‌ی عمومی می‌گیرند و برمی‌گردانند سخت به کار می‌آیند. روشن نیست آرگومانی چه شکلی باید داشته باشد، و داده‌ی نامعتبر هیچ خطای معناداری نمی‌دهد (pp. 247–248).
 
-The fix is the same separation of schema and representation as at the boundaries, now applied to **function arguments and return values** (pp. 248–257):
+چاره همان جدایی طرح از نمایش است که بر مرزها بود، حالا روی **آرگومان‌ها و مقدار بازگشتی تابع** پیاده (pp. 248–257):
 
-- **Arguments** are validated as a tuple, using `prefixItems`.
-- **Indexes** are validated as homogeneous maps, using `additionalProperties` with a schema.
-- **The checks** run only in development, guarded by a `dev()` flag, like Java assertions.
+- **آرگومان‌ها** به‌شکل tuple اعتبارسنجی می‌شوند، با `prefixItems`.
+- **همه‌ی indexها** به‌شکل map همگن اعتبارسنجی می‌شوند، با `additionalProperties` که طرحی می‌گیرد.
+- **آن سنجش‌ها** تنها در توسعه اجرا می‌شوند، پناه‌گرفته زیر پرچم `dev()`، مانند assertion در Java.
 
-Because validation runs on the data itself at run time, it goes **beyond static types**: number ranges, regular expressions with `pattern`, and predefined formats such as `date` (pp. 257–260). Joe adds two bonuses (pp. 260–268):
+چون اعتبارسنجی سر اجرا روی خود داده اجرا می‌شود، **فراتر از گونه‌های ایستا** می‌رود: بازه‌ی عددی، عبارت باقاعده با `pattern`، و قالب‌های از پیش تعریف‌شده مانند `date` (pp. 257–260). جو دو پاداش می‌افزاید (pp. 260–268):
 
-- **Generated data model diagrams:** Malli turns the schema into PlantUML.
-- **Schema-based unit tests:** JSON Schema Faker generates random valid arguments, and the function's own return-value check acts as the assertion. It catches a real bug, where an author missing from the index produces `undefined` names.
+- **نمودار مدل داده‌ی تولیدشده:** کتابخانه‌ی Malli آن طرح را به PlantUML بدل می‌کند.
+- **تست unit طرح‌محور:** ابزار JSON Schema Faker آرگومان‌های معتبر تصادفی می‌سازد، و سنجش مقدار بازگشتی خود تابع نقش ادعا را بازی می‌کند. اشکالی واقعی را می‌گیرد، جایی که نویسنده‌ای جاافتاده از شاخص، نام‌هایی `undefined` می‌سازد.
 
-Dave returns the favour with his own gift, an advanced JSON Schema cheat sheet (pp. 269–270).
+دیو با هدیه‌ی خودش لطف را برمی‌گرداند، یعنی برگه‌ی تقلب پیشرفته‌ی JSON Schema (pp. 269–270).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Validation inside the system is for ease of development** (dev, testing, staging); at the boundaries it is a guardian in production (table 12.1, p. 248).
-- **Disable it in production**: boundary data was already validated, so revalidating on every call is superfluous and costs performance (pp. 254–255).
-- **Treat data validation like unit tests:** validate the arguments of the functions you'd write unit tests for, not every function (p. 255).
-- **Arguments are a tuple**: an array of fixed size whose elements have different shapes, written with `prefixItems` (pp. 253–254).
-- **Homogeneous string maps** (indexes) are `type: object` with no `properties` and `additionalProperties` set to a schema (pp. 252–253).
-- **Store nested schemas in variables** to keep complex schemas readable (p. 252).
-- **Beyond static types:** `minimum`/`maximum`, `pattern` and `format`. Static types are checked at compile time with only type information; schemas are checked at run time against the data itself (pp. 257–258).
-- **Schemas generate diagrams and tests**: Malli with PlantUML for diagrams, JSON Schema Faker for random valid inputs (pp. 260–268).
+- **اعتبارسنجی درون سیستم برای آسانی توسعه است** در dev و تست و staging؛ و بر مرزها نگهبانی در production است (جدول ۱۲.۱، ص. ۲۴۸).
+- **در production خاموشش کنید**: داده‌ی مرزی از پیش اعتبارسنجی شده بود، پس اعتبارسنجی دوباره سر هر صدا زدنی زیادی است و به کارایی خرج می‌دهد (pp. 254–255).
+- **با اعتبارسنجی داده مانند تست unit رفتار کنید:** آرگومان تابع‌هایی را اعتبارسنجی کنید که برایشان تست unit می‌نوشتید، نه هر تابعی (p. 255).
+- **آرگومان‌ها tupleاند**: آرایه‌ای با اندازه‌ی ثابت که عضوهایش شکل‌های مختلف دارند، نوشته‌شده با `prefixItems` (pp. 253–254).
+- **همه‌ی mapهای رشته‌ای همگن**، یعنی index‌ها، با `type: object` بی هیچ `properties` و با `additionalProperties`ی که روی طرحی گذاشته شده نوشته می‌شوند (pp. 252–253).
+- **طرح‌های تودرتو را در متغیر ذخیره کنید** تا طرح‌های پیچیده خواندنی بمانند (p. 252).
+- **فراتر از گونه‌های ایستا:** کلیدواژه‌های `minimum` و `maximum` و `pattern` و `format`. گونه‌های ایستا سر کامپایل و تنها با خبر گونه سنجیده می‌شوند؛ و طرح‌ها سر اجرا در برابر خود داده (pp. 257–258).
+- **طرح‌ها نمودار و تست می‌سازند**: کتابخانه‌ی Malli با PlantUML برای نمودار، و JSON Schema Faker برای ورودی‌های معتبر تصادفی (pp. 260–268).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 12.1 Function arguments validation — p. 248
-- 12.2 Return value validation — p. 255
-- 12.3 Advanced data validation — p. 257
-- 12.4 Automatic generation of data model diagrams — p. 260
-- 12.5 Automatic generation of schema-based unit tests — p. 262
-- 12.6 A new gift — p. 269
-- Summary — p. 270
+- ۱۲.۱ اعتبارسنجی آرگومان تابع — ص. ۲۴۸
+- ۱۲.۲ اعتبارسنجی مقدار بازگشتی — ص. ۲۵۵
+- ۱۲.۳ اعتبارسنجی پیشرفته‌ی داده — ص. ۲۵۷
+- ۱۲.۴ ساختن خودکار نمودار مدل داده — ص. ۲۶۰
+- ۱۲.۵ ساختن خودکار تست unit طرح‌محور — ص. ۲۶۲
+- ۱۲.۶ هدیه‌ای تازه — ص. ۲۶۹
+- خلاصه — ص. ۲۷۰
 
-## Notes
+## یادداشت‌ها
 
-Dave's first tasks are three new HTTP endpoints: download the catalog as CSV, search books by author, and rate books (p. 248). He validated every request, database query and external response at the boundaries. Production works well, but during development he can't tell what shape a function's arguments should have, and mistakes give unclear errors (p. 248).
+کارهای نخست دیو سه endpoint تازه‌ی HTTP است: گرفتن catalog به‌شکل CSV، جستن کتاب با نویسنده، و امتیاز دادن به کتاب (p. 248). او هر درخواست و پرسش پایگاه داده و پاسخ بیرونی را بر مرزها اعتبارسنجی کرد. production خوب کار می‌کند، ولی سر توسعه نمی‌تواند بگوید آرگومان تابعی چه شکلی باید داشته باشد، و اشتباه‌ها خطاهای ناروشن می‌دهند (p. 248).
 
-| Kind of validation | Purpose | Environment (table 12.1, p. 248) |
+| گونه‌ی اعتبارسنجی | هدف | محیط (جدول ۱۲.۱، ص. ۲۴۸) |
 |---|---|---|
-| Boundaries | Guardian | Production |
-| Inside | Ease of development | Dev |
+| مرزها | نگهبان | production |
+| درون | آسانی توسعه | dev |
 
-### 12.1 Function arguments validation
+### ۱۲.۱ اعتبارسنجی آرگومان تابع
 
-The example is the in-memory `Catalog.searchBooksByTitle(catalogData, query)`. It's more interesting than the database version, because it receives the catalog as well as the query (listing 12.1, pp. 249–250). `query` is a string; `catalogData` follows the catalog data model of figure 12.1 (p. 250). Theo hands Dave Joe's cheat sheet, by now "well-worn," "a bit torn and quite wrinkled" (p. 250).
+مثال همان `Catalog.searchBooksByTitle(catalogData, query)` در حافظه است. از version پایگاه داده جالب‌تر است، چون هم catalog را می‌گیرد هم آن پرسش را (listing ۱۲.۱، صص. ۲۴۹–۲۵۰). مقدار `query` رشته‌ای است؛ و `catalogData` از مدل داده‌ی catalog در شکل ۱۲.۱ پی می‌گیرد (p. 250). تئو برگه‌ی تقلب جو را به دیو می‌دهد، که تا حالا «خوب کار کرده» و «کمی پاره و پرچین‌وچروک» است (p. 250).
 
-The schemas build up in four steps:
+طرح‌ها در چهار قدم بالا می‌آیند:
 
-| Schema | Points of interest |
+| طرح | نکته‌های به‌کار‌آمده |
 |---|---|
-| `authorSchema` (listing 12.3, p. 251) | `id`, `name`, `bookIsbns` all required |
-| `bookItemSchema`, `bookSchema` (listing 12.4, pp. 251–252) | Nested schema stored in a variable; `publicationYear` not required, since some books lack it, which is easier than nullable class members |
-| `catalogSchema` (listing 12.6, p. 253) | `booksByIsbn` and `authorsById` are indexes: `{"type": "object", "additionalProperties": bookSchema}` |
-| `searchBooksArgsSchema` (listing 12.8, p. 254) | A tuple: `{"type": "array", "prefixItems": [catalogSchema, {"type": "string"}]}` |
+| `authorSchema` (listing ۱۲.۳، ص. ۲۵۱) | فیلدهای `id` و `name` و `bookIsbns` همه اجباری‌اند |
+| `bookItemSchema` و `bookSchema` (listing ۱۲.۴، صص. ۲۵۱–۲۵۲) | طرح تودرتو در متغیری ذخیره شده؛ و `publicationYear` اجباری نیست، چون برخی کتاب‌ها ندارندش، که از عضوهای nullable کلاس آسان‌تر است |
+| `catalogSchema` (listing ۱۲.۶، ص. ۲۵۳) | مقدارهای `booksByIsbn` و `authorsById` شاخصند: `{"type": "object", "additionalProperties": bookSchema}` |
+| `searchBooksArgsSchema` (listing ۱۲.۸، ص. ۲۵۴) | یک tuple: `{"type": "array", "prefixItems": [catalogSchema, {"type": "string"}]}` |
 
-**Homogeneous maps.** Records are heterogeneous maps: known field names, differently shaped values. Indexes are homogeneous maps: unknown field names, values of a common shape (p. 252). `additionalProperties` is usually a Boolean, but it can also be a schema that properties not mentioned in the schema must satisfy. A homogeneous map is then a map with no predefined properties, whose additional properties all conform (listing 12.5, pp. 252–253).
+**همه‌ی mapهای همگن.** رکوردها map ناهمگن‌اند: نام فیلد دانسته، مقدارهایی با شکل‌های مختلف. indexها map همگن‌اند: نام فیلد نادانسته، مقدارهایی با شکلی مشترک (p. 252). کلیدواژه‌ی `additionalProperties` معمولاً بولی است، ولی می‌تواند طرحی هم باشد که خاصیت‌های نگفته در آن طرح باید برآورندش. پس mapی همگن، mapی است بی هیچ خاصیت از پیش تعریف‌شده، که همه‌ی خاصیت‌های افزوده‌اش با آن می‌خوانند (listing ۱۲.۵، صص. ۲۵۲–۲۵۳).
 
-**Plugging it in** (listing 12.9, pp. 254–255): at the top of the function, `if (dev()) { validate([catalogData, query]) }`, throwing "searchBooksByTitle called with invalid arguments: …" with the error text. `dev()` returns true in every environment except production, including testing and staging. Dave compares it to Java assertions, which are disabled in production (p. 255).
+**جا زدنش** (listing ۱۲.۹، صص. ۲۵۴–۲۵۵): سر تابع، عبارت `if (dev()) { validate([catalogData, query]) }`، که خطای «searchBooksByTitle called with invalid arguments: …» را با متن خطا می‌اندازد. تابع `dev()` در هر محیطی جز production درست برمی‌گرداند، در تست و staging هم. دیو آن را به assertionهای Java می‌ماند، که در production خاموشند (p. 255).
 
-> **Try it:** [Validation inside the system](../widgets/12-dev-validation.html) — call `searchBooksByTitle` with valid and broken catalogs and queries, toggle `dev()`, and see the argument and return-value checks report, or skip, each mistake.
+> **Try it:** [اعتبارسنجی درون سیستم](../widgets/12-dev-validation.html) — تابع `searchBooksByTitle` را با catalogها و پرسش‌های معتبر و شکسته صدا بزنید، تابع `dev()` را روشن و خاموش کنید، و ببینید سنجش آرگومان و مقدار بازگشتی هر اشتباهی را گزارش می‌کند یا از آن می‌پرد.
 
-### 12.2 Return value validation
+> **In practice:** اعتبارسنجی آرگومان در محیط توسعه و CI، و خاموش کردنش در production، همان کاری است که کتاب برای کارایی پیشنهاد می‌کند.
+>
+> **Your turn:** transform مهمی در loader دارید که ورودی‌اش را با schema چک می‌کند و ۲۰٪ زمان اجرا را می‌گیرد. چه می‌کنید؟
+>
+> *Answer:* در GitLab CI و محیط staging روشن نگه دارید و در production با یک متغیر محیطی خاموش کنید، ولی اعتبارسنجی مرز، یعنی schema contract در dlt، را همیشه روشن بگذارید (pp. 250–255).
 
-The return value is an array of book infos with `title`, `isbn` and `authorNames`, all required (listing 12.10, p. 256). Listing 12.11 checks it at the end of the function, also only in dev, throwing "searchBooksByTitle returned an invalid value: …" (pp. 256–257).
+### ۱۲.۲ اعتبارسنجی مقدار بازگشتی
 
-### 12.3 Advanced data validation
+مقدار بازگشتی آرایه‌ای از خبر کتاب با `title` و `isbn` و `authorNames` است، که همه اجباری‌اند (listing ۱۲.۱۰، ص. ۲۵۶). listing ۱۲.۱۱ آن را ته تابع می‌سنجد، باز تنها در dev، و خطای «searchBooksByTitle returned an invalid value: …» را می‌اندازد (pp. 256–257).
 
-"Be courageous, go beyond types" (p. 257). The new constraints (pp. 257–260):
+### ۱۲.۳ اعتبارسنجی پیشرفته‌ی داده
 
-| Constraint | Schema | Listing |
+«دل‌دار باش، فراتر از گونه‌ها برو» (p. 257). قیدهای تازه (pp. 257–260):
+
+| قید | طرح | نمونه |
 |---|---|---|
-| A publication year after 1900 and no later than the current year | `{"type": "integer", "minimum": 1900, "maximum": 2021}` | 12.12 |
-| A book item ID that is a UUID | `{"type": "string", "pattern": "[0-9a-fA-F]{8}-…-[0-9a-fA-F]{12}"}` | 12.13–12.14 |
-| A purchase date | `{"type": "string", "format": "date"}` | 12.15 |
-| ISBN, library ID, author ID | Simplified regular expressions, such as `^[0-9-]{10,20}$` for ISBNs | 12.16 |
+| سال نشری پس از ۱۹۰۰ و نه دیرتر از سال کنونی | عبارت `{"type": "integer", "minimum": 1900, "maximum": 2021}` | ۱۲.۱۲ |
+| شناسه‌ی نسخه‌ی کتابی که UUID است | عبارت `{"type": "string", "pattern": "[0-9a-fA-F]{8}-…-[0-9a-fA-F]{12}"}` | ۱۲.۱۳ و ۱۲.۱۴ |
+| تاریخ خریدی | عبارت `{"type": "string", "format": "date"}` | ۱۲.۱۵ |
+| شماره‌ی ISBN و شناسه‌ی کتابخانه و شناسه‌ی نویسنده | عبارت باقاعده‌ی ساده‌شده، مانند `^[0-9-]{10,20}$` برای ISBN | ۱۲.۱۶ |
 
-Why isn't this possible with OOP types? Dave works it out. Static type checking runs at compile time, with only type information; DOP's validation runs at run time, with the data itself, so it can go beyond types (p. 257). The book notes that OOP code can of course do custom run-time validation; the comparison is between schemas and static types. Also, according to the JSON Schema specification, `format` is only an annotation, but in practice validation libraries use it to validate (p. 258). Listings 12.16–12.17 assemble the refined catalog schema (pp. 259–260).
+چرا این با گونه‌های OOP شدنی نیست؟ دیو درش می‌آورد. سنجش ایستای گونه سر کامپایل اجرا می‌شود، تنها با خبر گونه؛ و اعتبارسنجی DOP سر اجرا، با خود داده، پس می‌تواند فراتر از گونه‌ها برود (p. 257). کتاب یاد می‌کند که کد OOP البته می‌تواند اعتبارسنجی دست‌ساز سر اجرا بکند؛ آن سنجیدن میان طرح و گونه‌های ایستاست. و بنا بر مشخصه‌ی JSON Schema، کلیدواژه‌ی `format` تنها حاشیه‌نویسی است، ولی در کار واقعی کتابخانه‌های اعتبارسنجی برای اعتبارسنجی به کارش می‌برند (p. 258). listingهای ۱۲.۱۶ و ۱۲.۱۷ طرح پالوده‌ی catalog را سوار می‌کنند (pp. 259–260).
 
-> **Vault note:** in listing 12.16 the refined `bookItemSchema` puts its field schemas under `additionalProperties` instead of `properties`, and listing 12.17 uses it directly for `bookItems` instead of as an array's `items`. As printed, `bookItems` becomes a map of anything, which is why the generated data in listing 12.20 has `bookItems` as an object with keys like `"ullamco5"`. The refined `authorSchema` also leaves out `"type": "array"` for `bookIsbns` (pp. 259–260). The widget and the lab use the intended schema.
+> **Vault note:** در listing ۱۲.۱۶ آن `bookItemSchema` پالوده، طرح فیلدهایش را زیر `additionalProperties` می‌گذارد به‌جای `properties`، و listing ۱۲.۱۷ یک‌راست برای `bookItems` به کارش می‌برد به‌جای آنکه `items` آرایه‌ای باشد. همان‌طور که چاپ شده، مقدار `bookItems` mapی از هر چیزی می‌شود، و همین است که داده‌ی ساخته در listing ۱۲.۲۰ مقدار `bookItems` را شیئی با کلیدهایی مانند `"ullamco5"` دارد. آن `authorSchema` پالوده هم `"type": "array"` را برای `bookIsbns` جا می‌اندازد (pp. 259–260). widget و lab از طرح خواسته کار می‌کشند.
 
-### 12.4 Automatic generation of data model diagrams
+### ۱۲.۴ ساختن خودکار نمودار مدل داده
 
-The next day Joe visits. Dave admits that schemas are less convenient than writing a class for function arguments, but going beyond static types makes up for it. Theo adds that not every function needs validation (p. 260). Joe's first trick: tools turn a JSON Schema into a plain-text data model format, which can then be rendered as an image. Joe's favourite format is **PlantUML**; he has also used JSON Schema Viewer and Malli (p. 260). Malli generates PlantUML from the catalog schema (listing 12.18, p. 261), and pasting it into PlantText renders figure 12.2 (pp. 261–262).
+فردا جو سر می‌زند. دیو می‌پذیرد که طرح‌ها از نوشتن کلاسی برای آرگومان تابع کم‌راحت‌ترند، ولی فراتر رفتن از گونه‌های ایستا جبرانش می‌کند. تئو می‌افزاید که هر تابعی اعتبارسنجی نمی‌خواهد (p. 260). ترفند نخست جو: ابزارها یک JSON Schema را به قالب متنی مدل داده بدل می‌کنند، که بعد به‌شکل تصویر رندر می‌شود. قالب محبوب جو **PlantUML** است؛ از JSON Schema Viewer و Malli هم کار کشیده (p. 260). کتابخانه‌ی Malli از طرح catalog قالب PlantUML می‌سازد (listing ۱۲.۱۸، ص. ۲۶۱)، و چسباندنش در PlantText شکل ۱۲.۲ را رندر می‌کند (pp. 261–262).
 
-Two limitations (p. 262):
+دو مرز (p. 262):
 
-- **The entities are named `Entity1`, `Entity2`, …**, because a JSON Schema has no way to name a schema.
-- **The extra constraints aren't shown**, such as the year range and the ISBN pattern, because they aren't part of the data model.
+- **همه‌ی entityها `Entity1` و `Entity2` و مانند آن نام می‌گیرند**، چون یک JSON Schema هیچ راهی به نام دادن به طرحی ندارد.
+- **قیدهای افزوده نشان داده نمی‌شوند**، مانند بازه‌ی سال و الگوی ISBN، چون بخشی از مدل داده نیستند.
 
-### 12.5 Automatic generation of schema-based unit tests
+### ۱۲.۵ ساختن خودکار تست unit طرح‌محور
 
-Once a function has schemas for its arguments and return value, a unit test is mechanical (p. 263):
+همین که تابعی طرح‌هایی برای آرگومان‌ها و مقدار بازگشتی‌اش داشته باشد، تست unit ماشینی است (p. 263):
 
-![Generate random data that conforms to the input schema, execute the function, then check whether the output conforms to the output schema: yes means the test passes, no means it fails](../figures/12-03.png)
+![داده‌ی تصادفی بساز که با طرح ورودی می‌خواند، تابع را اجرا کن، بعد بسنج که خروجی با طرح خروجی می‌خواند یا نه: بله یعنی تست رد می‌شود، نه یعنی شکست می‌خورد](../figures/12-03.png)
 
-*Figure 12.3 (p. 263): the schemas serve as both the input generator and the oracle, so no example has to be written by hand.*
+*Figure 12.3 (p. 263): آن طرح‌ها هم سازنده‌ی ورودی‌اند هم سنگ محک، پس هیچ مثالی دستی نوشتنی نیست.*
 
-**JSON Schema Faker** generates conforming data. It gives a different UUID on each call (listing 12.19), and a long random catalog for the catalog schema (listing 12.20, pp. 263–265). From the odd ISBNs it produces, Joe sees that the regular expressions have bugs: "I hate regular expressions!" says Dave (p. 265).
+**ابزار JSON Schema Faker** داده‌ی خورنده می‌سازد. سر هر صدا زدنی UUIDی دیگر می‌دهد (listing ۱۲.۱۹)، و برای طرح catalog آن catalog تصادفی درازی (listing ۱۲.۲۰، صص. ۲۶۳–۲۶۵). از ISBNهای عجیبی که می‌سازد، جو می‌بیند آن عبارت‌های باقاعده اشکال دارند: «از عبارت باقاعده بدم می‌آید!» دیو می‌گوید (p. 265).
 
-The test evolves over four listings (pp. 265–268):
+آن تست در چهار نمونه تکامل می‌یابد (pp. 265–268):
 
-1. **Call the function** with generated arguments. There's no explicit assertion, because the function's own dev-mode return check throws (listings 12.21–12.22).
-2. **Return true or false**, catching the exception (listing 12.23).
-3. **Make the query match:** use the first letter of the first generated book's title, so the search finds at least one book. Joe says random data seldom needs such tweaking (listing 12.24).
-4. **Log the error** when the test fails (listings 12.25–12.27).
+1. **تابع را صدا بزنید** با آرگومان‌های ساخته. هیچ ادعای صریحی نیست، چون سنجش بازگشت dev خود تابع خطا می‌اندازد (listingهای ۱۲.۲۱ و ۱۲.۲۲).
+2. **درست یا غلط برگردانید**، با گرفتن آن استثنا (listing ۱۲.۲۳).
+3. **آن پرسش را خورنده کنید:** حرف نخست عنوان کتاب نخست ساخته را به کار ببرید، تا جست‌وجو دست‌کم یک کتاب بیابد. جو می‌گوید داده‌ی تصادفی کم به چنین دست‌کاری‌ای نیاز دارد (listing ۱۲.۲۴).
+4. **خطا را log کنید** وقتی تست شکست می‌خورد (listingهای ۱۲.۲۵ تا ۱۲.۲۷).
 
-The log reveals the bug. The random catalog's books cite authors that aren't in `authorsById`, so `authorNames` contains `undefined` where the schema expects strings. Dave's fix passes a default to `_.get`, `"Not available"`, and the test passes (listings 12.28–12.29, p. 268).
+آن log اشکال را رو می‌کند. کتاب‌های catalog تصادفی نویسنده‌هایی را گواه می‌آورند که در `authorsById` نیستند، پس `authorNames` مقدار `undefined` دارد جایی که طرح رشته چشم دارد. چاره‌ی دیو مقداری پیش‌فرض به `_.get` می‌فرستد، یعنی `"Not available"`، و آن تست رد می‌شود (listingهای ۱۲.۲۸ و ۱۲.۲۹، ص. ۲۶۸).
 
-> **Try it:** [Schema-based tests](../widgets/12-schema-based-test.html) — generate random catalogs from the schema with a seed, run the search, watch the return-value check fail on missing authors, then apply Dave's fix and rerun.
+> **Try it:** [تست‌های طرح‌محور](../widgets/12-schema-based-test.html) — catalogهای تصادفی را با seed از آن طرح بسازید، جست‌وجو را اجرا کنید، ببینید سنجش مقدار بازگشتی سر نویسنده‌های جاافتاده شکست می‌خورد، بعد چاره‌ی دیو را پیاده و باز اجرا کنید.
 
-Dave still misses one OOP feature: autocompletion of field names. Joe says it exists only in Clojure, via clj-kondo's integration with Malli. IntelliJ and Visual Studio Code already validate JSON files against JSON Schemas, so he expects function-argument support to follow (pp. 268–269).
+دیو هنوز یک ویژگی OOP را دلش می‌خواهد: تکمیل خودکار نام فیلدها. جو می‌گوید تنها در Clojure هست، از راه درهم شدن clj-kondo با Malli. ابزارهای IntelliJ و Visual Studio Code از پیش فایل‌های JSON را با JSON Schema اعتبارسنجی می‌کنند، پس چشم دارد پشتیبانی آرگومان تابع هم پی بیاید (pp. 268–269).
 
-> **Run it:** the [schema-based testing experiment](../lab/12-schema-based-tests/README.md) generates seeded random catalogs from the chapter's schema, runs the search with return-value validation, and counts how often the original and fixed versions fail.
+> **Run it:** [آزمایش تست طرح‌محور](../lab/12-schema-based-tests/README.md) catalogهای تصادفی با seed را از طرح این فصل می‌سازد، جست‌وجو را با اعتبارسنجی مقدار بازگشتی اجرا می‌کند، و می‌شمارد که version اصلی و تصحیح‌شده چند بار شکست می‌خورند.
 
-### 12.6 A new gift
+> **In practice:** از schema می‌شود داده‌ی تست ساخت: هر ستون نوع و محدوده‌ای دارد.
+>
+> **Your turn:** چطور transformهای Silver را با داده‌ای آزمایش می‌کنید که کسی دستی ننوشته؟
+>
+> *Answer:* از schema جدول یا JSON Schema ورودی، رکوردهای تصادفی با seed ثابت بسازید و ویژگی‌هایی را چک کنید که برای هر ورودی برقرارند، مثل «شمار ردیف خروجی بیشتر از ورودی نیست». کتاب همین را با تولید خودکار تست از طرح نشان می‌دهد (pp. 263–269).
 
-Dave makes his own **advanced JSON Schema cheat sheet**, wrapped in a light blue ribbon and decorated with little computers on one side and keyboards and mice on the other (p. 269). It adds to Joe's (listings 12.30–12.31, pp. 269–270):
+### ۱۲.۶ هدیه‌ای تازه
 
-- An integer range: `myAge`, 0 to 120.
-- A date format: `myBirthday`.
-- A pattern: `myLetters`, `[a-zA-Z]*`.
-- A homogeneous map: `myNumberMap`, via `additionalProperties`.
-- A tuple: `myTuple`, via `prefixItems`.
+دیو **برگه‌ی تقلب پیشرفته‌ی JSON Schema** خودش را می‌سازد، پیچیده در روبانی آبی روشن و آراسته با کامپیوترهای کوچک در یک سو و کیبورد و موش در آن یکی (p. 269). به مال جو می‌افزاید (listingهای ۱۲.۳۰ و ۱۲.۳۱، صص. ۲۶۹–۲۷۰):
 
-## Trade-offs at a glance
+- بازه‌ای صحیح: مقدار `myAge` از ۰ تا ۱۲۰.
+- قالبی تاریخ: مقدار `myBirthday`.
+- الگویی: مقدار `myLetters` با `[a-zA-Z]*`.
+- یک map همگن: مقدار `myNumberMap` از راه `additionalProperties`.
+- یک tuple: مقدار `myTuple` از راه `prefixItems`.
 
-| Choice | Benefit | Cost |
+## بده‌بستان‌ها در یک نگاه
+
+| گزینش | سود | خرج |
 |---|---|---|
-| Static types (OOP) | Compile-time checking; IDE autocompletion (p. 268) | Only type information; no ranges or patterns |
-| Argument and return schemas (DOP) | Documents shapes; meaningful errors; beyond types | Less convenient than a class (p. 260); maintained by hand |
-| Validate in dev only | No production cost (p. 255) | Production relies on boundary validation alone |
-| Validate every function | Maximum coverage | Superfluous; the book validates only functions you'd unit test (p. 255) |
-| Generated diagrams | Always in sync with the schema | Anonymous entity names; constraints hidden (p. 262) |
-| Generated tests | Find bugs on inputs nobody wrote (p. 268) | Random data may need tweaks; the schemas themselves can be wrong (p. 265) |
+| گونه‌های ایستا در OOP | سنجش سر کامپایل؛ و تکمیل خودکار IDE (p. 268) | تنها خبر گونه؛ بی هیچ بازه و الگو |
+| طرح آرگومان و بازگشت در DOP | شکل‌ها را مستند می‌کند؛ خطای معنادار؛ فراتر از گونه‌ها | از کلاسی کم‌راحت‌تر (p. 260)؛ و دستی نگه داشته می‌شود |
+| اعتبارسنجی تنها در dev | بی هیچ بهایی در production (p. 255) | production تنها به اعتبارسنجی مرزی تکیه دارد |
+| اعتبارسنجی هر تابعی | بیشترین پوشش | زیادی است؛ کتاب تنها تابع‌هایی را اعتبارسنجی می‌کند که تست unit می‌نوشتید (p. 255) |
+| نمودارهای ساخته | همیشه با طرح هم‌گام | نام entityهای بی‌نام؛ و قیدهای پنهان (p. 262) |
+| تست‌های ساخته | اشکال‌ها را روی ورودی‌هایی می‌یابد که کسی ننوشته (p. 268) | داده‌ی تصادفی شاید دست‌کاری بخواهد؛ و خود طرح‌ها می‌توانند غلط باشند (p. 265) |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Tuples need a length.** `prefixItems` constrains the first elements, but a three-element array still validates unless the schema adds `"items": false` (or `maxItems: 2`) and `minItems: 2`. For argument checking, that catches a caller passing an extra argument.
-- **Anchor your patterns.** JSON Schema's `pattern` matches anywhere in the string unless anchored. The UUID pattern in listing 12.14 and the author-ID pattern `[a-z-]{2,50}` accept any string that *contains* a match, so `"!!!ab"` passes the latter. Wrapping them in `^…$` makes them mean what they say.
-- **Formats in Ajv.** Since Ajv v7, `format` validation comes from a separate package, `ajv-formats`; without it, Ajv either ignores unknown formats or fails at compile time, depending on its options. That is the practical side of the book's note that `format` is officially just an annotation.
-- **Property-based testing, again.** The schema-based test is property-based testing with the property "output conforms to the output schema." Tools like fast-check and Hypothesis add *shrinking*: when a random input fails, they search for the smallest failing input, here likely a catalog with one book and one missing author.
-- **Clojure's spec and Malli** take the same approach natively. `instrument` checks function arguments in development, generators come from the specs, and tooling such as clj-kondo reads the schemas for editor feedback, the autocompletion Dave misses.
-- **Hard-coded years age badly.** `"maximum": 2021` will reject new books from 2022 onward. A schema can't express "the current year," so it's usually generated at startup or checked in code.
+- **همه‌ی tupleها درازی می‌خواهند.** کلیدواژه‌ی `prefixItems` عضوهای نخست را قید می‌کند، ولی آرایه‌ای سه‌عضوی باز اعتبار می‌گیرد مگر آن طرح `"items": false` یا `maxItems: 2` و `minItems: 2` را بیفزاید. برای سنجش آرگومان، همین است که صداکننده‌ای را می‌گیرد که آرگومانی افزوده می‌فرستد.
+- **الگوهایتان را لنگر بزنید.** کلیدواژه‌ی `pattern` در JSON Schema هر جای رشته را می‌خواند مگر لنگر خورده باشد. الگوی UUID در listing ۱۲.۱۴ و الگوی شناسه‌ی نویسنده `[a-z-]{2,50}` هر رشته‌ای را می‌پذیرند که خوانشی *درونش* باشد، پس دومی رشته‌ی `"!!!ab"` را هم می‌پذیرد. پوشاندنشان در `^…$` آن‌ها را همان می‌کند که می‌گویند.
+- **قالب‌ها در Ajv.** از Ajv version ۷، اعتبارسنجی `format` از بسته‌ای جدا می‌آید، یعنی `ajv-formats`؛ و بی آن، Ajv بسته به گزینه‌هایش یا قالب‌های ناشناس را نشنیده می‌گیرد یا سر کامپایل شکست می‌خورد. همین سوی عملی آن یادداشت کتاب است که `format` رسماً تنها حاشیه‌نویسی است.
+- **باز هم تست خاصیت‌محور.** آن تست طرح‌محور، تست خاصیت‌محور با خاصیت «خروجی با طرح خروجی می‌خواند» است. ابزارهایی مانند fast-check و Hypothesis *آب کردن* را می‌افزایند: وقتی ورودی تصادفی شکست می‌خورد، کوچک‌ترین ورودی شکست‌خورده را می‌جویند، این‌جا به‌احتمال catalogی با یک کتاب و یک نویسنده‌ی جاافتاده.
+- **ابزارهای spec و Malli در Clojure** همان رویکرد را بومی می‌گیرند. تابع `instrument` آرگومان تابع را در توسعه می‌سنجد، سازنده‌ها از همان specها می‌آیند، و ابزارهایی مانند clj-kondo آن طرح‌ها را برای بازخورد ویرایشگر می‌خوانند، همان تکمیل خودکاری که دیو دلش می‌خواهد.
+- **سال‌های سخت‌کدشده بد پیر می‌شوند.** مقدار `"maximum": 2021` کتاب‌های تازه از ۲۰۲۲ به بعد را رد می‌کند. طرحی نمی‌تواند «سال کنونی» را بگوید، پس معمولاً سر بالا آمدن ساخته یا در کد سنجیده می‌شود.
 
-## Connections
+## پیوندها
 
-- **Boundary validation and the first cheat sheet:** [7. Basic data validation](07-basic-data-validation.md).
-- **Unit tests by hand:** [6. Unit tests](06-unit-tests.md); this chapter generates them from schemas.
-- **Records and indexes:** the heterogeneous vs homogeneous maps of [3. Basic data manipulation](03-basic-data-manipulation.md), now expressed in JSON Schema.
-- **Next:** [13. Polymorphism](13-polymorphism.md).
-- **Run it:** [Schema-based tests](../lab/12-schema-based-tests/README.md) — seeded random catalogs, return-value validation, and the `"Not available"` fix.
+- **اعتبارسنجی مرزی و آن برگه‌ی تقلب نخست:** [۷. اعتبارسنجی پایه‌ی داده](07-basic-data-validation.md).
+- **تست unit دستی:** [۶. تست‌های unit](06-unit-tests.md)؛ و این فصل از طرح‌ها می‌سازدشان.
+- **رکوردها و indexها:** همان mapهای ناهمگن در برابر همگن از [۳. دست‌کاری پایه‌ی داده](03-basic-data-manipulation.md)، که حالا به JSON Schema گفته شده‌اند.
+- **پسین:** [۱۳. polymorphism](13-polymorphism.md).
+- **Run it:** [تست‌های طرح‌محور](../lab/12-schema-based-tests/README.md) — catalogهای تصادفی با seed، اعتبارسنجی مقدار بازگشتی، و آن چاره‌ی `"Not available"`.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. How does validation inside the system differ from validation at the boundaries?
-   <details><summary>Answer</summary>At the boundaries it is a guardian that keeps invalid data out in production. Inside, it eases development by making argument shapes explicit and giving meaningful errors, and it runs only outside production (table 12.1, pp. 248, 254–255).</details>
-2. Why disable inside validation in production?
-   <details><summary>Answer</summary>The data was already validated at a system boundary, so validating it again on every call is superfluous and hurts performance (pp. 254–255).</details>
-3. How do you write the schema of a homogeneous string map, such as `booksByIsbn`?
-   <details><summary>Answer</summary>`{"type": "object", "additionalProperties": bookSchema}`: no predefined properties, and every additional property must conform to the value schema (pp. 252–253).</details>
-4. How are a function's arguments described in JSON Schema?
-   <details><summary>Answer</summary>As a tuple, an array whose elements have different shapes, using `prefixItems`, for example `[catalogSchema, {"type": "string"}]` for `searchBooksByTitle` (pp. 253–254).</details>
-5. Why can schemas go "beyond static types"?
-   <details><summary>Answer</summary>They're checked at run time against the actual data, while static types are checked at compile time with only type information. So ranges (`minimum`/`maximum`), regular expressions (`pattern`) and formats (`date`) are possible (pp. 257–258).</details>
-6. Describe the flow of a schema-based unit test, and the bug it found.
-   <details><summary>Answer</summary>Generate random arguments that conform to the input schema, run the function, and check that the output conforms to the output schema (figure 12.3). It found that authors missing from `authorsById` gave `undefined` author names; the fix returns `"Not available"` by default (pp. 263–268).</details>
-7. Why does the generated PlantUML diagram name its entities `Entity1`, `Entity2`, …?
-   <details><summary>Answer</summary>JSON Schema has no way to give a schema a name, so Malli has to generate names (p. 262).</details>
+1. اعتبارسنجی درون سیستم از اعتبارسنجی بر مرزها چه فرقی دارد؟
+   <details><summary>پاسخ</summary>بر مرزها نگهبانی است که داده‌ی نامعتبر را در production بیرون نگه می‌دارد. درون، با صریح کردن شکل آرگومان‌ها و دادن خطای معنادار توسعه را آسان می‌کند، و تنها بیرون production اجرا می‌شود (جدول ۱۲.۱، صص. ۲۴۸ و ۲۵۴–۲۵۵).</details>
+2. چرا اعتبارسنجی درون را در production خاموش کنیم؟
+   <details><summary>پاسخ</summary>داده از پیش بر مرزی از سیستم اعتبارسنجی شده بود، پس اعتبارسنجی دوباره‌اش سر هر صدا زدنی زیادی است و به کارایی می‌زند (pp. 254–255).</details>
+3. طرح mapی رشته‌ای و همگن، مانند `booksByIsbn`، را چطور می‌نویسید؟
+   <details><summary>پاسخ</summary>عبارت `{"type": "object", "additionalProperties": bookSchema}`: بی هیچ خاصیت از پیش تعریف‌شده، و هر خاصیت افزوده‌ای باید با طرح مقدار بخواند (pp. 252–253).</details>
+4. آرگومان‌های یک تابع در JSON Schema چطور وصف می‌شوند؟
+   <details><summary>پاسخ</summary>به‌شکل tuple، یعنی آرایه‌ای که عضوهایش شکل‌های مختلف دارند، با `prefixItems`؛ مثلاً `[catalogSchema, {"type": "string"}]` برای `searchBooksByTitle` (pp. 253–254).</details>
+5. چرا طرح‌ها می‌توانند «فراتر از گونه‌های ایستا» بروند؟
+   <details><summary>پاسخ</summary>سر اجرا در برابر خود داده سنجیده می‌شوند، در حالی که گونه‌های ایستا سر کامپایل و تنها با خبر گونه. پس بازه با `minimum` و `maximum`، و عبارت باقاعده با `pattern`، و قالب مانند `date` شدنی‌اند (pp. 257–258).</details>
+6. جریان تستی unit و طرح‌محور و آن اشکالی که یافت را وصف کنید.
+   <details><summary>پاسخ</summary>آرگومان‌های تصادفی بسازید که با طرح ورودی می‌خوانند، تابع را اجرا کنید، و بسنجید که خروجی با طرح خروجی می‌خواند (شکل ۱۲.۳). یافت که نویسنده‌های جاافتاده از `authorsById` نام نویسنده‌ی `undefined` می‌دادند؛ و آن چاره پیش‌فرض `"Not available"` را برمی‌گرداند (pp. 263–268).</details>
+7. چرا نمودار ساخته‌ی PlantUML به entityهایش نام `Entity1` و `Entity2` و مانند آن می‌دهد؟
+   <details><summary>پاسخ</summary>قالب JSON Schema هیچ راهی به نام دادن به طرحی ندارد، پس Malli ناچار است نام بسازد (p. 262).</details>

@@ -1,18 +1,18 @@
-# Joining sources by key
+# عمل join کردن سرچشمه‌ها با کلید
 
-Double field filtering with `pick`, `keyBy` and the generic `joinArrays`, run against a mocked Open Library, so no network is needed. The script filters a record with the printed and the corrected relevant fields, joins the test data of listing 11.19 while reporting conflicts, runs the enrichment join on the mock, and shows that the join is an outer join.
+صافی دوباره‌ی فیلد با `pick` و `keyBy` و تابع عمومی `joinArrays`، اجراشده در برابر Open Libraryی ساختگی، پس هیچ شبکه‌ای لازم نیست. اسکریپت رکوردی را با فیلدهای به‌کار‌آمده‌ی چاپی و تصحیح‌شده صافی می‌کند، داده‌ی تست listing ۱۱.۱۹ را با گزارش ناسازی‌ها join می‌کند، آن join غنی کردن را روی نسخه‌ی ساختگی اجرا، و نشان می‌دهد که آن join یک outer join است.
 
-*Illustrates Data-Oriented Programming, chapter 11, pp. 229–239 (listings 11.9 and 11.16–11.19). The mock's 7 Habits record uses fields from listing 11.6, and The Power of Habit's uses those of listing 11.19. Its `isbn_13` and the extra ISBNs in step 5 are the vault's.*
+*تصویری از فصل ۱۱ کتاب Data-Oriented Programming، صص. ۲۲۹–۲۳۹ (listingهای ۱۱.۹ و ۱۱.۱۶ تا ۱۱.۱۹). رکورد 7 Habits در نسخه‌ی ساختگی از فیلدهای listing ۱۱.۶ کار می‌کشد، و رکورد The Power of Habit از فیلدهای listing ۱۱.۱۹. مقدار `isbn_13`ش و ISBNهای افزوده در قدم ۵ مال vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 join_arrays.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 1. Double field filtering of 7 Habits, requested: ['title', 'publishers', 'number_of_pages', 'revision']
@@ -42,14 +42,14 @@ python3 join_arrays.py
    {"isbn": "978-0000000002", "title": "Only in Open Library"}
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- `relevantFields` lists `publisher`, but the API returns `publishers`, so as printed the publishers never reach the client.
-- A field that is requested but not relevant (`revision`) is dropped: the first filter is the server's whitelist.
-- In listing 11.19 each Open Library record carries the other book's title, and the merge lets Open Library win silently. That's the conflict merging was supposed to avoid (see the vault note in the lesson).
-- With the database contributing only `isbn` and `available`, as in the enrichment flow, there is nothing to conflict.
-- Books present on only one side still appear: keying both arrays and merging the maps is an outer join.
+- مقدار `relevantFields` فیلد `publisher` را فهرست می‌کند، ولی آن API مقدار `publishers` را برمی‌گرداند، پس همان‌طور که چاپ شده ناشران هیچ‌وقت به client نمی‌رسند.
+- فیلدی که خواسته شده ولی به‌کار‌آمده نیست، یعنی `revision`، انداخته می‌شود: صافی نخست فهرست سپید سرور است.
+- در listing ۱۱.۱۹ هر رکورد Open Library عنوان آن یکی کتاب را می‌برد، و آن درهم‌آمیزی می‌گذارد Open Library خاموش ببرد. همان ناسازی است که درهم‌آمیختن قرار بود از آن بپرهیزد؛ کادر vault در درس را ببینید.
+- وقتی پایگاه داده تنها `isbn` و `available` را می‌دهد، مانند جریان غنی کردن، چیزی برای ناساز شدن نیست.
+- کتاب‌هایی که تنها در یک سو هستند باز پیدا می‌شوند: کلید زدن هر دو آرایه و درهم آمیختن mapها یک outer join است.
 
-## Related
+## مرتبط
 
-- Chapter note: [11. Web services](../../chapters/11-web-services.md) — sections 11.4–11.6, pp. 229–239
+- یادداشت فصل: [فصل ۱۱: سرویس‌های وب](../../chapters/11-web-services.md) — بخش‌های ۱۱.۴ تا ۱۱.۶، صص. ۲۲۹–۲۳۹

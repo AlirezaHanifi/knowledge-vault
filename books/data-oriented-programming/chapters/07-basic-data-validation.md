@@ -2,89 +2,97 @@
 book: data-oriented-programming
 chapter: 7
 title: "Basic data validation"
+translated_title: "اعتبارسنجی پایه‌ی داده"
 pages: "141–162"
+lang: fa
 ---
 
-# 7. Basic data validation
+# ۷. اعتبارسنجی پایه‌ی داده
 
-[← 6. Unit tests](06-unit-tests.md) · [Book](../README.md) · [8. Advanced concurrency control →](08-advanced-concurrency-control.md)
+[← ۶. تست‌های unit](06-unit-tests.md) · [کتاب](../README.md) · [۸. کنترل پیشرفته‌ی concurrency →](08-advanced-concurrency-control.md)
 
-## Summary
+## خلاصه
 
-The part 2 opener sets the stakes. Theo has decided against DOP for the big Klafim project, which has several developers, a large code base and an "optimistic" deadline his boss Monica accepted. His reasons (pp. 137–138):
+سرآغاز بخش ۲ گرو را روشن می‌کند. تئو برای پروژه‌ی بزرگ Klafim DOP را نپذیرفته، پروژه‌ای با چند برنامه‌نویس و کدبیسی بزرگ و مهلتی «خوش‌بینانه» که رئیسش مونیکا پذیرفت. دلیل‌هایش (pp. 137–138):
 
-- With generic data, nobody knows what kind of data is in hand.
-- The concurrency control isn't thread-safe.
-- Structural sharing reportedly slows down as data grows.
-- Data will live in a database and external services, not in memory.
+- با داده‌ی عمومی، هیچ‌کس نمی‌داند چه گونه داده‌ای دستش است.
+- کنترل concurrency thread-safe نیست.
+- شریک شدن ساختاری، چنان که می‌گویند، با بزرگ شدن داده کند می‌شود.
+- داده در پایگاه داده و سرویس‌های بیرونی خواهد نشست، نه در حافظه.
 
-Joe answers with the story of the woodcutter too busy to sharpen his saw, and a bet. If Theo misses the deadline and is fired, Joe hires him at double his salary; if he meets it, Theo buys gifts for Joe's children (pp. 138–139). Part 2 then takes the objections one at a time.
+جو با داستان آن هیزم‌شکن که آن‌قدر گرفتار بود که اره‌اش را تیز نکند، و با شرطی پاسخ می‌دهد. اگر تئو مهلت را از دست دهد و بیرونش کنند، جو با دو برابر حقوق استخدامش می‌کند؛ و اگر به مهلت برسد، تئو برای فرزندان جو هدیه می‌خرد (pp. 138–139). بعد بخش ۲ ایرادها را یکی‌یکی برمی‌دارد.
 
-This chapter answers the first. DOP's fourth principle is to **separate data schema from data representation** (p. 141). Data stays in generic maps, and a separate **JSON Schema** describes what valid data looks like. The most important place to validate is the **boundaries of the system**: client requests and responses, the database, and web services. Once boundary data is valid, unexpected data inside is unlikely (pp. 142–143). Joe and Theo write schemas for a search request, a search response, a database response and the Open Library Books API, using `type`, `properties`, `items`, `enum`, `required`, `additionalProperties`, and the composition keywords `allOf` and `anyOf` (pp. 143–157). They read failure details from the Ajv validator (pp. 158–160). Joe's parting gift is a JSON Schema cheat sheet (pp. 160–161).
+این فصل به نخستی پاسخ می‌دهد. اصل چهارم DOP این است که **طرح داده را از نمایش داده جدا کنید** (p. 141). داده در mapهای عمومی می‌ماند، و **JSON Schema**ی جدایی وصف می‌کند داده‌ی معتبر چه شکلی است. مهم‌ترین جای اعتبارسنجی **مرزهای سیستم** است: درخواست و پاسخ کارخواه، پایگاه داده، و سرویس‌های وب. همین که داده‌ی مرزی معتبر شد، داده‌ی نامنتظر درون سیستم کم‌پیش‌آیند است (pp. 142–143). جو و تئو برای درخواستی جست‌وجو و پاسخی جست‌وجو و پاسخی از پایگاه داده و Open Library Books API طرح می‌نویسند، با `type` و `properties` و `items` و `enum` و `required` و `additionalProperties`، و با کلیدواژه‌های ترکیب `allOf` و `anyOf` (pp. 143–157). ریز شکست‌ها را از اعتبارسنج Ajv می‌خوانند (pp. 158–160). هدیه‌ی خداحافظی جو برگه‌ی تقلب JSON Schema است (pp. 160–161).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Principle #4: separate data schema from data representation.** DOP doesn't force validation but doesn't prevent it. You validate data against a schema "as you will and when you will" (pp. 141–144).
-- **Boundaries are where the system exchanges data.** For a web server those are the client, the database and web services (pp. 142–143).
-- **Two kinds of validation** (table 7.1, p. 143): at the boundaries, as a guardian in production; inside the system, for ease of development in dev (covered in part 3).
-- **JSON Schema is verbose but language-independent and highly expressive** (p. 149).
-- **Map fields are optional by default**; list mandatory ones in `required`. That is simpler than marking class members nullable (p. 150).
-- **Fields not in the schema are allowed by default**; `additionalProperties: false` forbids them (p. 153).
-- **Be strict with what you send, flexible with what you receive.** Joe allows extra fields in requests and disallows them in responses, following Postel's robustness principle (p. 153).
-- **Schemas are just maps,** so you can store them in variables and compose them with `allOf`, `anyOf` and `oneOf` (pp. 151, 155–157).
-- **Validation failures carry details.** Ajv stores them in `errors`, reports only the first by default, and reports all with `allErrors: true` (pp. 158–160).
+- **اصل ۴: طرح داده را از نمایش داده جدا کنید.** روش DOP اعتبارسنجی را به زور نمی‌آورد ولی بازش هم نمی‌دارد. داده را «هر طور که بخواهید و هر وقت که بخواهید» با طرحی اعتبارسنجی می‌کنید (pp. 141–144).
+- **مرزها جایی‌اند که سیستم داده مبادله می‌کند.** برای سروری وب، آن‌ها client و پایگاه داده و سرویس‌های وب‌اند (pp. 142–143).
+- **دو گونه اعتبارسنجی** (جدول ۷.۱، ص. ۱۴۳): بر مرزها، به‌شکل نگهبانی در production؛ و درون سیستم، برای آسانی توسعه در dev که بخش ۳ می‌پوشاندش.
+- **قالب JSON Schema پرگوست ولی زبان‌مستقل و خیلی رساست** (p. 149).
+- **فیلدهای map پیش‌فرض اختیاری‌اند**؛ اجباری‌ها را در `required` فهرست کنید. این از nullable نشان کردن عضوهای کلاس ساده‌تر است (p. 150).
+- **فیلدهای بیرون طرح پیش‌فرض رواست**؛ و `additionalProperties: false` ممنوعشان می‌کند (p. 153).
+- **در آنچه می‌فرستید سخت باشید و در آنچه می‌گیرید نرم.** جو فیلدهای افزوده را در درخواست‌ها روا و در پاسخ‌ها ناروا می‌دارد، و از اصل استواری پوستل پی می‌گیرد (p. 153).
+- **طرح‌ها تنها mapاند،** پس می‌شود در متغیر ذخیره‌شان کرد و با `allOf` و `anyOf` و `oneOf` ترکیبشان (pp. 151, 155–157).
+- **شکست‌های اعتبارسنجی ریزکاری می‌آورند.** کتابخانه‌ی Ajv آن‌ها را در `errors` ذخیره می‌کند، پیش‌فرض تنها نخستی را گزارش، و با `allErrors: true` همه را (pp. 158–160).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست خود کتاب، یعنی bookmarkهای PDF؛ شماره‌ی صفحه‌ها چاپی‌اند.*
 
-- 7.1 Data validation in DOP — p. 142
-- 7.2 JSON Schema in a nutshell — p. 143
-- 7.3 Schema flexibility and strictness — p. 149
-- 7.4 Schema composition — p. 154
-- 7.5 Details about data validation failures — p. 158
-- Summary — p. 161
+- ۷.۱ اعتبارسنجی داده در DOP — ص. ۱۴۲
+- ۷.۲ قالب JSON Schema در یک جمله — ص. ۱۴۳
+- ۷.۳ نرمی و سختی طرح — ص. ۱۴۹
+- ۷.۴ ترکیب طرح — ص. ۱۵۴
+- ۷.۵ ریزکاری شکست‌های اعتبارسنجی داده — ص. ۱۵۸
+- خلاصه — ص. ۱۶۱
 
-## Notes
+## یادداشت‌ها
 
-| Theo's objection at scale (pp. 138) | Where part 2 answers it |
+| ایراد تئو در مقیاس (p. 138) | بخش ۲ کجا پاسخش می‌دهد |
 |---|---|
-| Hard to know what kind of data you have | This chapter (validation); type-like help returns in chapter 12 |
-| Concurrency control isn't thread-safe | [8. Advanced concurrency control](08-advanced-concurrency-control.md) |
-| Structural sharing slows down as data grows | [9. Persistent data structures](09-persistent-data-structures.md) |
-| Data will live in databases and services | [10. Database operations](10-database-operations.md), [11. Web services](11-web-services.md) |
+| سخت است بدانی چه گونه داده‌ای داری | همین فصل، یعنی اعتبارسنجی؛ و کمک گونه‌مانند در فصل ۱۲ برمی‌گردد |
+| کنترل concurrency thread-safe نیست | [۸. کنترل پیشرفته‌ی concurrency](08-advanced-concurrency-control.md) |
+| شریک شدن ساختاری با بزرگ شدن داده کند می‌شود | [۹. ساختارهای داده‌ی persistent](09-persistent-data-structures.md) |
+| داده در پایگاه داده و سرویس‌ها خواهد نشست | [۱۰. عملیات پایگاه داده](10-database-operations.md) و [۱۱. سرویس‌های وب](11-web-services.md) |
 
-The chapter focuses on validation at the system's boundaries; validation as data flows *through* the system comes in part 3 (p. 141).
+فصل روی اعتبارسنجی بر مرزهای سیستم تمرکز می‌کند؛ و اعتبارسنجی سر جاری شدن داده *از درون* سیستم در بخش ۳ می‌آید (p. 141).
 
-### 7.1 Data validation in DOP
+### ۷.۱ اعتبارسنجی داده در DOP
 
-What Theo would miss most from OOP is the guarantee that an instantiated class has fields with the proper names and types; with maps it's easy to make small mistakes (p. 142). Joe: in DOP the schema is separate from the representation, and the most important data to validate is data crossing the system's boundaries. For a web server those are its communication with clients, databases and web services (figure 7.1, pp. 142–143).
+آنچه تئو بیش از همه از OOP دلش می‌خواهد، تضمین این است که کلاسی نمونه‌شده فیلدهایی با نام و گونه‌ی درست دارد؛ و با map آسان است خطاهای ریز کرد (p. 142). جو: در DOP طرح از نمایش جداست، و مهم‌ترین داده‌ای که اعتبارسنجی می‌خواهد داده‌ای است که از مرزهای سیستم می‌گذرد. برای سروری وب آن‌ها گفت‌وگویش با clientها و پایگاه‌های داده و سرویس‌های وب‌اند (شکل ۷.۱، صص. ۱۴۲–۱۴۳).
 
-![A client such as a web browser exchanges data with a web server, which exchanges data with a web service and a database](../figures/07-01.png)
+![clientی مانند مرورگر وب با سروری وب داده مبادله می‌کند، که با سرویسی وب و پایگاهی داده داده مبادله می‌کند](../figures/07-01.png)
 
-*Figure 7.1 (p. 142): every arrow is a boundary where data enters or leaves the system — the places Theo names for validation (p. 143).*
+*Figure 7.1 (p. 142): هر پیکانی مرزی است که داده از آن تو یا بیرون می‌رود؛ همان جاهایی که تئو برای اعتبارسنجی نام می‌برد (p. 143).*
 
-| Kind of validation | Purpose | Environment (table 7.1, p. 143) |
+| گونه‌ی اعتبارسنجی | هدف | محیط (جدول ۷.۱، ص. ۱۴۳) |
 |---|---|---|
-| Boundaries | Guardian | Production |
-| Inside | Ease of development | Dev |
+| مرزها | نگهبان | production |
+| درون | آسانی توسعه | dev |
 
-At the boundaries the purpose is to keep invalid data from going in or out, and to display informative errors when it is encountered (p. 143).
+بر مرزها هدف این است که داده‌ی نامعتبر تو یا بیرون نرود، و سر خوردن به آن خطاهای روشنگر نشان داده شود (p. 143).
 
-### 7.2 JSON Schema in a nutshell
+> **In practice:** مرز سیستم جای اعتبارسنجی است: loader وقتی داده را از منبع می‌گیرد و API وقتی درخواست را می‌پذیرد.
+>
+> **Your turn:** چرا schema contract در dlt را روی `freeze` برای ستون‌ها می‌گذارید؟
+>
+> *Answer:* تا ستون تازه یا نوع عوض‌شده در منبع، load را متوقف کند و بی‌صدا به Bronze نرسد؛ اعتبارسنجی در مرز، نه در هر تابع داخلی. کتاب داده را درون سیستم آزاد و در مرز اعتبارسنجی‌شده می‌خواهد (pp. 142–143).
 
-A search request has a `title` string and a `fields` array of strings (listing 7.1, p. 144). Its schema is built step by step (pp. 144–147); the book uses JSON Schema version 2020-12:
+### ۷.۲ قالب JSON Schema در یک جمله
 
-| Step | Keyword | Listing |
+هر درخواست جست‌وجو یک `title` رشته‌ای و یک آرایه‌ی `fields` از رشته دارد (listing ۷.۱، ص. ۱۴۴). طرحش قدم‌به‌قدم ساخته می‌شود (pp. 144–147)؛ و کتاب version 2020-12 از JSON Schema را به کار می‌برد:
+
+| قدم | کلیدواژه | نمونه |
 |---|---|---|
-| A map | `"type": "object"` with `properties` holding each field's schema | 7.2–7.3 |
-| Array elements | `"items": {"type": "string"}` | 7.4 |
-| A closed list of fields | `"items": {"enum": ["publishers", "number_of_pages", "weight", …]}` | 7.5 |
-| Mandatory fields | `"required": ["title", "fields"]` | 7.6 |
+| یک map | عبارت `"type": "object"` با `properties` که طرح هر فیلدی را دارد | ۷.۲ و ۷.۳ |
+| عضوهای آرایه | عبارت `"items": {"type": "string"}` | ۷.۴ |
+| فهرستی بسته از فیلدها | عبارت `"items": {"enum": ["publishers", "number_of_pages", "weight", …]}` | ۷.۵ |
+| فیلدهای اجباری | عبارت `"required": ["title", "fields"]` | ۷.۶ |
 
-Validating means checking whether data conforms to a schema. Libraries expose a `validate(schema, data)` that returns true or false (p. 147):
+اعتبارسنجی یعنی سنجیدن اینکه داده با طرحی می‌خواند یا نه. کتابخانه‌ها یک `validate(schema, data)` می‌نمایانند که درست یا غلط برمی‌گرداند (p. 147):
 
-| Language | Library (table 7.2, p. 147) |
+| زبان | کتابخانه (جدول ۷.۲، ص. ۱۴۷) |
 |---|---|
 | JavaScript | Ajv |
 | Java | Snow |
@@ -92,26 +100,26 @@ Validating means checking whether data conforms to a schema. Libraries expose a 
 | Python | jschon |
 | Ruby | JSONSchemer |
 
-The request `{"title": "habit", "fields": [...]}` validates; a typo `tilte` fails, because `title` is required (listings 7.8–7.9, pp. 148–149). Why is JSON Schema more verbose than class members? It is language-independent, and it can express conditions that are hard or impossible with classes, such as number ranges or regular expressions. Those come in chapter 12 (p. 149).
+درخواست `{"title": "habit", "fields": [...]}` اعتبار می‌گیرد؛ و غلط تایپی `tilte` شکست می‌خورد، چون `title` اجباری است (listingهای ۷.۸ و ۷.۹، صص. ۱۴۸–۱۴۹). چرا JSON Schema از عضوهای کلاس پرگوتر است؟ زبان‌مستقل است، و می‌تواند شرط‌هایی را بگوید که با کلاس سخت یا نشدنی‌اند، مانند بازه‌ی عددی یا عبارت باقاعده. آن‌ها در فصل ۱۲ می‌آیند (p. 149).
 
-> **Try it:** [JSON Schema playground](../widgets/07-json-schema.html) — validate the chapter's requests and responses against its schemas, introduce typos and extra fields, and switch between first-error and all-errors reporting.
+> **Try it:** [میدان بازی JSON Schema](../widgets/07-json-schema.html) — درخواست‌ها و پاسخ‌های این فصل را با طرح‌هایش اعتبارسنجی کنید، غلط تایپی و فیلد افزوده بیندازید، و میان گزارش نخستین‌خطا و همه‌ی‌خطاها سوئیچ کنید.
 
-### 7.3 Schema flexibility and strictness
+### ۷.۳ نرمی و سختی طرح
 
-A search response is an array of book results. `title` and `available` are required, and `subtitle`, `number_of_pages`, `subjects`, `isbn` and `isbn_13` are optional (listings 7.10–7.11, pp. 149–150). Joe is reading *The Power of Habit* to stop biting his nails (p. 150). Because the schema is just JSON, the nested book schema can live in a variable, `bookInfoSchema`, and be reused as `"items": bookInfoSchema`. JSON Schemas are more composable than class definitions (listing 7.12, p. 151).
+هر پاسخ جست‌وجو آرایه‌ای از خروجی کتاب است. فیلدهای `title` و `available` اجباری‌اند، و `subtitle` و `number_of_pages` و `subjects` و `isbn` و `isbn_13` اختیاری (listingهای ۷.۱۰ و ۷.۱۱، صص. ۱۴۹–۱۵۰). جو کتاب *The Power of Habit* را می‌خواند تا جویدن ناخنش را بس کند (p. 150). چون طرح تنها JSON است، آن طرح تودرتوی کتاب می‌تواند در متغیری به نام `bookInfoSchema` بنشیند و به‌شکل `"items": bookInfoSchema` باز به کار رود. طرح‌های JSON Schema از تعریف کلاس ترکیب‌پذیرترند (listing ۷.۱۲، ص. ۱۵۱).
 
-A **database response** has exactly three fields, `title`, `isbn` and `available`, all required (listing 7.13, p. 152). An array whose books carry an extra `dummy_property` still validates, because unspecified fields are allowed by default. Usually that's harmless, since code ignores fields it doesn't care about. `additionalProperties: false` makes the schema strict (listings 7.14–7.15, pp. 152–153).
+هر **پاسخ پایگاه داده** دقیقاً سه فیلد دارد، یعنی `title` و `isbn` و `available`، که همه اجباری‌اند (listing ۷.۱۳، ص. ۱۵۲). آرایه‌ای که کتاب‌هایش `dummy_property` افزوده‌ای می‌برند هنوز اعتبار می‌گیرد، چون فیلدهای نگفته پیش‌فرض روایند. معمولاً این بی‌آزار است، چون کد فیلدهایی را که اهمیتشان نمی‌دهد نشنیده می‌گیرد. عبارت `additionalProperties: false` آن طرح را سخت می‌کند (listingهای ۷.۱۴ و ۷.۱۵، صص. ۱۵۲–۱۵۳).
 
-Should request and response schemas be strict? Joe calls it a matter of taste. He prefers to allow extra fields in requests and disallow them in responses: the server is responsible for what it sends, but should serve its clients even when they aren't strict. He cites Jon Postel's robustness principle, "Be conservative in what you send, be liberal in what you accept" (p. 153).
+طرح درخواست و پاسخ باید سخت باشد؟ جو آن را مسئله‌ی سلیقه می‌نامد. ترجیح می‌دهد فیلدهای افزوده را در درخواست‌ها روا و در پاسخ‌ها ناروا بدارد: سرور مسئول چیزی است که می‌فرستد، ولی باید client‌هایش را سرویس دهد حتی وقتی سخت نیستند. اصل استواری جان پوستل را گواه می‌آورد، «در آنچه می‌فرستی محافظه‌کار باش، در آنچه می‌پذیری آزاد» (p. 153).
 
-### 7.4 Schema composition
+### ۷.۴ ترکیب طرح
 
-The Open Library Books API returns rich book data (listing 7.16, p. 154). Theo's schema requires only `title` (listing 7.17, pp. 154–155). Joe stares at the ISBNs, because one of them must always be there (p. 155):
+مفهوم interface Open Library Books API داده‌ی غنی کتاب برمی‌گرداند (listing ۷.۱۶، ص. ۱۵۴). طرح تئو تنها `title` را اجبار می‌کند (listing ۷.۱۷، صص. ۱۵۴–۱۵۵). جو به آن ISBNها خیره می‌شود، چون یکی‌شان همیشه باید باشد (p. 155):
 
-- Books published before 2007 have `isbn_10`, and books published after have `isbn_13`.
-- *Watchmen* has both: it was first published in 1986 but republished after 2007.
+- کتاب‌های نشرشده پیش از ۲۰۰۷ مقدار `isbn_10` دارند، و کتاب‌های نشرشده پس از آن `isbn_13`.
+- کتاب *Watchmen* هر دو را دارد: نخست در ۱۹۸۶ نشر شد ولی پس از ۲۰۰۷ باز نشر.
 
-Theo writes the rule as `basicBookInfoSchema AND (mandatoryIsbn13 OR mandatoryIsbn10)`. In JSON Schema that is `allOf` and `anyOf`; `oneOf` also exists, for "exactly one" (listing 7.18, pp. 155–157):
+تئو آن قاعده را `basicBookInfoSchema AND (mandatoryIsbn13 OR mandatoryIsbn10)` می‌نویسد. در JSON Schema آن `allOf` و `anyOf` است؛ و `oneOf` هم هست، برای «دقیقاً یکی» (listing ۷.۱۸، صص. ۱۵۵–۱۵۷):
 
 ```js
 var bookInfoSchema = {
@@ -122,65 +130,71 @@ var bookInfoSchema = {
 };
 ```
 
-The *Watchmen* response validates (listing 7.19, p. 157).
+پاسخ *Watchmen* اعتبار می‌گیرد (listing ۷.۱۹، ص. ۱۵۷).
 
-> **Try it:** [ISBN composition](../widgets/07-isbn-composition.html) — toggle which ISBN fields a book has and see how `allOf` with `anyOf` accepts it, and how `oneOf` would reject *Watchmen*, which has both.
+> **Try it:** [ترکیب ISBN](../widgets/07-isbn-composition.html) — فیلدهای ISBNی را که کتابی دارد روشن و خاموش کنید و ببینید `allOf` با `anyOf` چطور می‌پذیردش، و `oneOf` چطور *Watchmen* را که هر دو را دارد رد می‌کرد.
 
-### 7.5 Details about data validation failures
+### ۷.۵ ریزکاری شکست‌های اعتبارسنجی داده
 
-Validation isn't binary: a failure says what went wrong. Each library exposes details its own way; Ajv stores the last validation's errors as an array on the validator instance (p. 158).
+اعتبارسنجی دوتایی نیست: هر شکستی می‌گوید چه غلط شد. هر کتابخانه‌ای ریزکاری را به شکل خودش می‌نمایاند؛ و Ajv خطاهای آخرین اعتبارسنجی را به‌شکل آرایه‌ای روی نمونه‌ی اعتبارسنج ذخیره می‌کند (p. 158).
 
-| Request | Ajv result |
+| درخواست | خروجی Ajv |
 |---|---|
-| `myTitle` instead of `title` (listings 7.20–7.21) | One error: `instancePath ""`, `schemaPath "#/required"`, `keyword "required"`, `params.missingProperty "title"` |
-| The same, through `ajv.errorsText` (listing 7.22) | `data must have required property 'title'` |
-| `myTitle`, and `fields: [1, 2]`, with `new Ajv({allErrors: true})` (listing 7.23) | Three errors: the missing `title`, `data/fields/0 must be string`, `data/fields/1 must be string` |
+| مقدار `myTitle` جای `title` (listingهای ۷.۲۰ و ۷.۲۱) | یک خطا: `instancePath ""` و `schemaPath "#/required"` و `keyword "required"` و `params.missingProperty "title"` |
+| همان، از راه `ajv.errorsText` (listing ۷.۲۲) | متن `data must have required property 'title'` |
+| مقدار `myTitle` و `fields: [1, 2]` با `new Ajv({allErrors: true})` (listing ۷.۲۳) | سه خطا: جاافتادن `title` و `data/fields/0 must be string` و `data/fields/1 must be string` |
 
-By default, Ajv catches only the first validation failure; Theo guesses that's for performance (p. 159). The summary adds that the details are sent back to the client in human-readable form (p. 161).
+پیش‌فرض، Ajv تنها نخستین شکست اعتبارسنجی را می‌گیرد؛ و تئو حدس می‌زند برای کارایی است (p. 159). خلاصه می‌افزاید که آن ریزکاری به شکلی آدم‌خوان به client برگردانده می‌شود (p. 161).
 
-Joe's gift, wrapped in a light-green ribbon, is a **JSON Schema cheat sheet**. It shows an array of maps with a number, a string, an enum and a Boolean field, two of them required and `additionalProperties: false`. On the back is an example of valid data (listings 7.24–7.25, pp. 160–161).
+هدیه‌ی جو، پیچیده در روبانی سبز روشن، **برگه‌ی تقلب JSON Schema** است. آرایه‌ای از map را نشان می‌دهد با فیلدی عددی و رشته‌ای و enum و بولی، که دو تایشان اجباری‌اند و `additionalProperties: false`. پشتش نمونه‌ای از داده‌ی معتبر است (listingهای ۷.۲۴ و ۷.۲۵، صص. ۱۶۰–۱۶۱).
 
-> **Run it:** the [mini validator experiment](../lab/07-mini-json-schema/README.md) implements the chapter's subset of JSON Schema in Python and runs listings 7.8–7.23 through it.
+> **Run it:** [آزمایش اعتبارسنج کوچک](../lab/07-mini-json-schema/README.md) زیرمجموعه‌ی JSON Schema این فصل را به Python پیاده می‌کند و listingهای ۷.۸ تا ۷.۲۳ را از آن می‌گذراند.
 
-## Trade-offs at a glance
+> **In practice:** وقتی validation fail می‌شود، پیام خطا باید به on-call بگوید کدام فیلد در کدام رکورد.
+>
+> **Your turn:** alert در Grafana فقط می‌گوید «validation failed». چه چیزی باید به آن اضافه شود؟
+>
+> *Answer:* مسیر فیلد، مقدار و قاعده‌ی شکسته، که JSON Schema به‌صورت داده برمی‌گرداند؛ آن را در لاگ ساخت‌یافته بنویسید تا در Grafana قابل جست‌وجو باشد. خطای اعتبارسنجی خودش داده است (pp. 158–161).
 
-| Choice | Benefit | Cost |
+## بده‌بستان‌ها در یک نگاه
+
+| گزینش | سود | خرج |
 |---|---|---|
-| Classes as schema (OOP) | Names and types checked when instantiated; IDE support | Rigid; nullable members; limited expressiveness (pp. 142, 149–150) |
-| JSON Schema, separate from data | Language-independent, composable, expressive | Verbose (p. 149) |
-| Validate at boundaries only | Catches bad data where it enters or leaves; cheap | Inside the system, nothing checks shapes (until part 3) |
-| `additionalProperties` allowed | Lenient with clients; tolerant of extra fields | Typos in optional fields slip through |
-| `additionalProperties: false` | Strict responses and database reads | Every new field needs a schema change |
-| Ajv defaults | Stops at the first failure | Needs `allErrors: true` for full feedback (p. 159) |
+| کلاس به‌شکل طرح در OOP | نام و گونه سر نمونه شدن سنجیده می‌شود؛ و پشتیبانی IDE | سخت است؛ عضوهای nullable؛ و رسایی محدود (pp. 142, 149–150) |
+| قالب JSON Schema، جدا از داده | زبان‌مستقل و ترکیب‌پذیر و رسا | پرگو (p. 149) |
+| اعتبارسنجی تنها بر مرزها | داده‌ی بد را همان جا که تو یا بیرون می‌رود می‌گیرد؛ و ارزان است | درون سیستم، هیچ چیز شکل‌ها را نمی‌سنجد، تا بخش ۳ |
+| روا بودن `additionalProperties` | با clientها نرم؛ و بردبار در برابر فیلد افزوده | غلط تایپی در فیلدهای اختیاری در می‌رود |
+| عبارت `additionalProperties: false` | پاسخ‌ها و خواندن‌های پایگاه داده سخت می‌شوند | هر فیلد تازه‌ای تغییر طرح می‌خواهد |
+| پیش‌فرض‌های Ajv | سر نخستین شکست می‌ایستد | برای بازخورد کامل `allErrors: true` می‌خواهد (p. 159) |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **A typo in an optional field passes silently.** Validation catches the `tilte` typo only because `title` is required (listing 7.9). Misspell an *optional* field such as `subtitle` in a lenient schema and the request is valid, just without the subtitle. That is the hidden cost of Joe's preference for liberal requests; `additionalProperties: false`, or JSON Schema's `unevaluatedProperties` in 2020-12, closes the gap.
-- **Postel's principle has critics.** RFC 9413 (2023, "Maintaining Robust Protocols") argues that being liberal in what you accept lets broken senders persist and makes protocols harder to evolve. Being liberal is a choice to revisit as an API matures.
-- **Schemas as data, beyond validation.** Because a JSON Schema is a map, tools generate forms, documentation (OpenAPI uses JSON Schema for request and response bodies), test data and even TypeScript types from it. Chapter 12 uses that for function arguments and for generating data.
-- **Runtime validators in other ecosystems.** Clojure's spec and Malli, Python's pydantic and TypeScript's zod play the same role. Malli and zod, like JSON Schema, describe data with data or plain values rather than classes.
+- **غلط تایپی در فیلدی اختیاری خاموش رد می‌شود.** اعتبارسنجی غلط تایپی `tilte` را تنها از آن می‌گیرد که `title` اجباری است (listing ۷.۹). فیلدی *اختیاری* مانند `subtitle` را در طرحی نرم غلط بنویسید و آن درخواست معتبر است، تنها بی زیرعنوان. این بهای پنهان ترجیح جو به درخواست‌های آزاد است؛ و `additionalProperties: false`، یا `unevaluatedProperties` از JSON Schema در 2020-12، آن رخنه را می‌بندد.
+- **اصل پوستل منتقد دارد.** سند RFC 9413 (۲۰۲۳، «Maintaining Robust Protocols») می‌گوید آزاد بودن در آنچه می‌پذیرید می‌گذارد فرستنده‌های شکسته بمانند و پروتکل‌ها را سخت‌تکامل‌پذیر می‌کند. آزاد بودن گزینشی است که سر پختگی یک API باید از نو دیدش.
+- **طرح به‌شکل داده، فراتر از اعتبارسنجی.** چون JSON Schema mapی است، ابزارها از آن فرم و مستند می‌سازند، که OpenAPI برای بدنه‌ی درخواست و پاسخ از JSON Schema کار می‌کشد، و داده‌ی تست و حتی گونه‌های TypeScript. فصل ۱۲ آن را برای آرگومان تابع‌ها و برای ساختن داده به کار می‌برد.
+- **اعتبارسنج‌های زمان اجرا در زیست‌بوم‌های دیگر.** ابزارهای spec و Malli در Clojure و pydantic در Python و zod در TypeScript همان نقش را بازی می‌کنند. ابزارهای Malli و zod، مانند JSON Schema، داده را با داده یا مقدارهای خالی وصف می‌کنند، نه با کلاس.
 
-## Connections
+## پیوندها
 
-- **The objection answered:** "it's hard to know what data you have" from [6. Unit tests](06-unit-tests.md) (part 1's ending) and the part 2 opener.
-- **Validation in the commit phase:** the `SystemValidity.validate` placeholder from [4. State management](04-state-management.md).
-- **Boundaries in practice:** database results in [10. Database operations](10-database-operations.md) and web service data in [11. Web services](11-web-services.md).
-- **Validating inside the system:** [12. Advanced data validation](12-advanced-data-validation.md).
-- **Run it:** [A mini JSON Schema validator](../lab/07-mini-json-schema/README.md) — the chapter's keywords in about a hundred lines of Python, with Ajv-style error paths.
+- **ایراد پاسخ‌گرفته:** «سخت است بدانی چه داده‌ای داری» از [۶. تست‌های unit](06-unit-tests.md) که پایان بخش ۱ است، و از سرآغاز بخش ۲.
+- **اعتبارسنجی در فاز commit:** آن جایگزین `SystemValidity.validate` از [۴. مدیریت state](04-state-management.md).
+- **مرزها در کار:** خروجی پایگاه داده در [۱۰. عملیات پایگاه داده](10-database-operations.md) و داده‌ی سرویس وب در [۱۱. سرویس‌های وب](11-web-services.md).
+- **اعتبارسنجی درون سیستم:** [۱۲. اعتبارسنجی پیشرفته‌ی داده](12-advanced-data-validation.md).
+- **Run it:** [اعتبارسنج کوچک JSON Schema](../lab/07-mini-json-schema/README.md) — کلیدواژه‌های این فصل در حدود صد خط Python، با مسیرهای خطای سبک Ajv.
 
-## Check yourself
+## خودتان را بسنجید
 
-1. State DOP Principle #4. Does DOP force you to validate data?
-   <details><summary>Answer</summary>Separate data schema from data representation (p. 141). DOP doesn't force validation but doesn't prevent it; you validate data against a schema whenever you choose (pp. 142, 144).</details>
-2. What are a system's boundaries, and why does validating there matter most?
-   <details><summary>Answer</summary>The areas where the system exchanges data; for a web server, its clients, database and web services. Once data going in and out is valid, the odds of unexpected data inside are low (pp. 142–143).</details>
-3. In JSON Schema, are map fields optional or required by default? Are extra fields allowed?
-   <details><summary>Answer</summary>Fields are optional by default; list mandatory ones in `required` (p. 150). Extra fields are allowed by default; `additionalProperties: false` forbids them (p. 153).</details>
-4. Where does Joe set `additionalProperties: false`, and why?
-   <details><summary>Answer</summary>In responses but not requests. The server is responsible for what it sends, so it should be strict there, but it wants to serve clients even when they aren't strict. That follows Postel's "be conservative in what you send, be liberal in what you accept" (p. 153).</details>
-5. Write the rule for the Books API response that requires at least one ISBN field.
-   <details><summary>Answer</summary>`allOf: [basicBookInfoSchema, {anyOf: [mandatoryIsbn13, mandatoryIsbn10]}]`, where each mandatory schema just requires its field (listing 7.18, pp. 156–157).</details>
-6. Why does a request with `myTitle` and `fields: [1, 2]` show one error by default and three with `allErrors`?
-   <details><summary>Answer</summary>Ajv stops at the first validation failure by default. With `allErrors: true` it also reports `data/fields/0 must be string` and `data/fields/1 must be string` (pp. 159–160).</details>
-7. Give two reasons JSON Schema is more verbose than class member declarations.
-   <details><summary>Answer</summary>It is language-independent, usable from any language with a validator, and it expresses conditions that are hard or impossible with classes, such as ranges and regular expressions (p. 149).</details>
+1. اصل ۴ از DOP را بگویید. روش DOP اعتبارسنجی داده را به زور می‌آورد؟
+   <details><summary>پاسخ</summary>طرح داده را از نمایش داده جدا کنید (p. 141). روش DOP اعتبارسنجی را به زور نمی‌آورد ولی بازش هم نمی‌دارد؛ هر وقت برگزینید داده را با طرحی اعتبارسنجی می‌کنید (pp. 142, 144).</details>
+2. مرزهای یک سیستم کدامند، و چرا اعتبارسنجی همان جا بیش از همه مهم است؟
+   <details><summary>پاسخ</summary>همان جاهایی که سیستم داده مبادله می‌کند؛ برای سروری وب، clientها و پایگاه داده و سرویس‌های وب. همین که داده‌ی تو و بیرون معتبر شد، شانس داده‌ی نامنتظر درون سیستم کم است (pp. 142–143).</details>
+3. در JSON Schema، فیلدهای map پیش‌فرض اختیاری‌اند یا اجباری؟ فیلدهای افزوده روایند؟
+   <details><summary>پاسخ</summary>فیلدها پیش‌فرض اختیاری‌اند؛ اجباری‌ها را در `required` فهرست کنید (p. 150). فیلدهای افزوده پیش‌فرض روایند؛ و `additionalProperties: false` ممنوعشان می‌کند (p. 153).</details>
+4. جو `additionalProperties: false` را کجا می‌گذارد، و چرا؟
+   <details><summary>پاسخ</summary>در پاسخ‌ها ولی نه در درخواست‌ها. سرور مسئول چیزی است که می‌فرستد، پس آن‌جا باید سخت باشد، ولی می‌خواهد clientها را سرویس دهد حتی وقتی سخت نیستند. این از «در آنچه می‌فرستی محافظه‌کار باش، در آنچه می‌پذیری آزاد» پوستل پی می‌گیرد (p. 153).</details>
+5. قاعده‌ی پاسخ Books API را بنویسید که دست‌کم یک فیلد ISBN می‌خواهد.
+   <details><summary>پاسخ</summary>عبارت `allOf: [basicBookInfoSchema, {anyOf: [mandatoryIsbn13, mandatoryIsbn10]}]`، که در آن هر طرح اجباری تنها فیلد خودش را اجبار می‌کند (listing ۷.۱۸، صص. ۱۵۶–۱۵۷).</details>
+6. چرا درخواستی با `myTitle` و `fields: [1, 2]` پیش‌فرض یک خطا و با `allErrors` سه خطا نشان می‌دهد؟
+   <details><summary>پاسخ</summary>کتابخانه‌ی Ajv پیش‌فرض سر نخستین شکست اعتبارسنجی می‌ایستد. با `allErrors: true` دو خطای `data/fields/0 must be string` و `data/fields/1 must be string` را هم گزارش می‌کند (pp. 159–160).</details>
+7. دو دلیل بیاورید که JSON Schema از اعلام عضوهای کلاس پرگوتر است.
+   <details><summary>پاسخ</summary>زبان‌مستقل است و از هر زبانی که اعتبارسنج داشته باشد به کار می‌آید، و شرط‌هایی را می‌گوید که با کلاس سخت یا نشدنی‌اند، مانند بازه و عبارت باقاعده (p. 149).</details>
