@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۳ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را از منبع OLTP و loader تا Bronze، Silver، Gold، notebook، داشبورد و API طی کنید و ببینید ایده‌های فصل ۳ در هر مرحله کجا می‌نشینند: normalization، schema-on-read، log در برابر state، و این‌که هر client چقدر می‌تواند بپرسد. برای فصل ۳ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+  @media (max-width: 760px) { .detail { grid-template-columns: minmax(0, 1fr); } }
+  .detail h3 { margin: 0 0 4px; font-size: 1.1rem; }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+  .shape { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; min-height: 70px; }
+  .shape .tbl { border: 1px solid var(--line-strong); border-radius: 3px; background: var(--surface-2); }
+  .shape .tbl i { display: block; height: 5px; border-bottom: 1px solid var(--line); }
+  .shape-caption { font-size: .8rem; color: var(--ink-3); margin-top: 6px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-data-models-and-query-languages.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۳ · مدل‌های داده و زبان‌های کوئری</div>
+  <h1>فصل ۳ در طول یک pipeline داده</h1>
+  <p class="lede">ایده‌های این فصل یک انتخاب یک‌باره نیستند: یک pipeline از چند تای آن‌ها می‌گذرد. یک lens انتخاب کنید، مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید و ببینید داده کجا شکلش را عوض می‌کند.</p>
+  <p class="source-note">کل فصل را، صص. ۶۵–۱۰۸، روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+    <div class="panel">
+      <p class="panel-title">شکل داده در این مرحله</p>
+      <div class="shape" id="shape" aria-hidden="true"></div>
+      <p class="shape-caption" id="shape-caption"></p>
+    </div>
+  </div>
+
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens شکل:</strong> داده normalized شروع می‌شود و denormalized تمام می‌شود. هر قدم به جلو سادگی write را با سرعت read عوض می‌کند، و هر جدول denormalized یک derived data است که با تغییر ورودی‌هایش باید rebuild شود.</li>
+    <li><strong>با lens اسکیما:</strong> دو سر pipeline، یعنی دیتابیس منبع، جدول‌های Gold و API، schema-on-write هستند و وسطش schema-on-read. لایه‌ی Silver جایی است که شکل قدیم و جدید منبع در SQL با هم آشتی داده می‌شوند.</li>
+    <li><strong>با lens وضعیت یا log:</strong> فقط Bronze تاریخچه نگه می‌دارد. همین Silver و Gold را rebuildپذیر می‌کند، و همین دلیل است که چیزی که loader هیچ‌وقت نمی‌بیند، مثل hard delete، در downstream هم هیچ‌وقت درست نمی‌شود.</li>
+    <li><strong>با lens interface:</strong> تحلیلگرها SQL باز را پشت یک proxy با محدودیت می‌گیرند و اپلیکیشن‌ها یک API باریک. فراخواننده هرچه کمتر قابل اعتماد باشد، interface باریک‌تر است.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-data-models-and-query-languages.html"><small>درس</small>فصل ۳: مدل‌های داده و زبان‌های کوئری</a></li>
+    <li><a href="03-join-fanout.html"><small>شبیه‌سازی</small>چرا جمع بزرگ‌تر می‌شود؟</a></li>
+    <li><a href="03-incremental-delete.html"><small>شبیه‌سازی</small>حذفی که هیچ‌وقت نمی‌رسد</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/03-data-models-and-query-languages.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis; shape = how the data looks (tables: [columns, rows])
+  var LENSES = {
+    shape: {
+      label: "شکل", axis: ["حالت normalized", "حالت denormalized"],
+      cells: {
+        source: { tag: "حالت normalized", level: 0, pages: "صص. ۷۲–۷۴", slide: "مفهوم-normalization-denormalization-و-join",
+          text: "جدول‌های کوچک زیادی که به هم وصل‌اند. هر واقعیت یک بار ذخیره می‌شود و با ID به آن ارجاع داده می‌شود، و همین write تک‌ردیفی را ارزان و سازگار نگه می‌دارد.",
+          tables: [[3, 4], [2, 3], [4, 5], [2, 2], [3, 3]], cap: "پنج جدول باریک که با ID به هم وصل‌اند" },
+        loader: { tag: "کپی بی‌تغییر", level: 0, pages: "ص. ۷۴", slide: "مفهوم-normalization-denormalization-و-join",
+          text: "ستون‌های فهرست‌شده‌ی هر جدول را برمی‌دارد و هیچ چیزی از شکل را عوض نمی‌کند. Bronze عمداً normalized می‌ماند تا بعداً بشود هر شکلی را از آن derive کرد.",
+          tables: [[3, 4], [2, 3], [4, 5], [2, 2], [3, 3]], cap: "همان پنج جدول، کپی‌شده" },
+        bronze: { tag: "کپی normalized", level: 0, pages: "ص. ۷۴", slide: "مفهوم-normalization-denormalization-و-join",
+          text: "همان جدول‌ها و ستون‌های منبع. هنوز joinی در کار نیست: همه‌چیزِ downstream از همین کپی خام derive می‌شود.",
+          tables: [[3, 4], [2, 3], [4, 5], [2, 2], [3, 3]], cap: "هنوز پنج جدول باریک" },
+        silver: { tag: "عمل join روی کلیدهای مشترک", level: 2, pages: "ص. ۷۲", slide: "مفهوم-normalization-denormalization-و-join",
+          text: "منبع‌ها join می‌شوند. IDهای هش‌شده فقط به این دلیل join می‌شوند که اول به یک املای واحد normalize شده‌اند: همان استدلال کتاب برای IDهای استاندارد.",
+          tables: [[6, 6], [4, 4]], cap: "جدول‌های کمتر و پهن‌تر" },
+        gold: { tag: "طرح star یا یک جدول بزرگ", level: 4, pages: "صص. ۷۷–۷۹", slide: "طرحهای-star-و-snowflake-schemaهای-تحلیلی",
+          text: "یک fact table با grain مشخص و چند dimension، یا joinها از قبل حساب‌شده در یک جدول پهن. خواندنش سریع است؛ با تغییر ورودی‌ها باید rebuild شود.",
+          tables: [[10, 7]], cap: "یک جدول پهن" },
+        nb: { tag: "از DataFrame تا ماتریس", level: 4, pages: "صص. ۱۰۵–۱۰۶", slide: "ساختارهای-dataframe-ماتریس-و-آرایه",
+          text: "یک کپی خصوصی که برای مدل به ماتریس مشتری × category تبدیل شده. بیشترش صفر است: یک sparse matrix.",
+          tables: [[12, 6]], cap: "یک ماتریس عددی پهن" },
+        serve: { tag: "جواب‌های از قبل حساب‌شده", level: 4, pages: "صص. ۹۸–۱۰۱", slide: "زبان-graphql",
+          text: "داشبوردها و API نتیجه‌هایی را می‌خوانند که از قبل برایشان شکل گرفته، مثل documentای که UI درخواست می‌کند.",
+          tables: [[5, 2]], cap: "یک نتیجه‌ی کوچک، شکل‌گرفته برای یک صفحه" }
+      }
+    },
+    schema: {
+      label: "اسکیما", axis: ["رویکرد schema-on-write", "رویکرد schema-on-read"],
+      cells: {
+        source: { tag: "هنگام نوشتن", level: 0, pages: "صص. ۸۰–۸۱", slide: "کدام-مدل-را-کی-به-کار-ببریم",
+          text: "دیتابیس type و constraint را پیش از ساخته شدن ردیف اعمال می‌کند." },
+        loader: { tag: "هنگام نوشتن با ستون‌های صریح", level: 0, pages: "ص. ۸۱", slide: "کدام-مدل-را-کی-به-کار-ببریم",
+          text: "فایل هر جدول ستون‌هایش را فهرست می‌کند. ستون جدید منبع تا وقتی کسی اضافه‌اش نکند بی‌صدا نادیده گرفته می‌شود: با یک بررسی schema drift بگیریدش." },
+        bronze: { tag: "ستون‌های typeدار و JSON خام", level: 1, pages: "صص. ۸۱–۸۲", slide: "کدام-مدل-را-کی-به-کار-ببریم",
+          text: "ستون‌ها type دارند، اما payloadهایی که به شکل JSON می‌رسند همان‌طور نگه داشته می‌شوند تا بعداً تفسیر شوند." },
+        silver: { tag: "هنگام خواندن", level: 3, pages: "ص. ۸۱", slide: "کدام-مدل-را-کی-به-کار-ببریم",
+          text: "کد SQL شکل قدیم و جدید منبع را تفسیر می‌کند؛ مثلاً اسم کامل را با نام و نام خانوادگی جداشده coalesce می‌کند: همان راه‌حل schema-on-read کتاب، منتقل‌شده به SQL." },
+        gold: { tag: "هنگام نوشتن، مثل یک قرارداد", level: 0, pages: "ص. ۸۱", slide: "کدام-مدل-را-کی-به-کار-ببریم",
+          text: "داشبوردها به ستون‌های Gold وابسته‌اند. تغییرشان یک migration است، نه یک ویرایش ساده." },
+        nb: { tag: "هنگام خواندن", level: 4, pages: "صص. ۸۰–۸۲", slide: "کدام-مدل-را-کی-به-کار-ببریم",
+          text: "کتابخانه‌ی pandas وقتی داده می‌رسد type را حدس می‌زند؛ کد notebook خودش اسکیماست." },
+        serve: { tag: "قرارداد ثابت", level: 0, pages: "ص. ۹۹", slide: "زبان-graphql",
+          text: "این API یک شکل ثابت می‌گیرد و برمی‌گرداند. clientها نمی‌توانند چیز دیگری بخواهند." }
+      }
+    },
+    log: {
+      label: "وضعیت یا log", axis: ["وضعیت فعلی", "log تغییرها"],
+      cells: {
+        source: { tag: "وضعیت فعلی", level: 0, pages: "ص. ۱۰۱", slide: "الگوی-event-sourcing-و-cqrs",
+          text: "ردیف‌ها در جا update می‌شوند. بعد از هر update نسخه‌ی قبلی ردیف از بین رفته است." },
+        loader: { tag: "فقط ردیف‌های تغییرکرده", level: 2, pages: "ص. ۱۰۳", slide: "الگوی-event-sourcing-و-cqrs",
+          text: "یک cursor افزایشی روی update_date نسخه‌های تازه را برمی‌دارد. hard delete چیزی برای برداشتن باقی نمی‌گذارد." },
+        bronze: { tag: "نسخه‌های append-only", level: 4, pages: "صص. ۱۰۲–۱۰۳", slide: "الگوی-event-sourcing-و-cqrs",
+          text: "هر نسخه‌ای که loader دیده اضافه می‌شود. به event log نزدیک است، اما log تغییر ردیف است نه رویداد کسب‌وکار، پس «چرا» گم می‌شود." },
+        silver: { tag: "یک view از جدیدترین نسخه", level: 1, pages: "صص. ۱۰۲–۱۰۳", slide: "الگوی-event-sourcing-و-cqrs",
+          text: "وضعیت فعلی که از Bronze derive شده، مثل یک materialized view. باگ را با درست کردن SQL و rebuild درست کنید." },
+        gold: { tag: "مدل‌های خواندنِ derived", level: 1, pages: "ص. ۱۰۳", slide: "الگوی-event-sourcing-و-cqrs",
+          text: "برای سؤال‌ها ساخته شده‌اند؛ وقتی منطق عوض شد، حذف و rebuildشان کنید." },
+        nb: { tag: "یک snapshot", level: 1, pages: "ص. ۱۰۵", slide: "ساختارهای-dataframe-ماتریس-و-آرایه",
+          text: "کپی‌ای که در یک لحظه کشیده شده. اگر Silver در این فاصله عوض شده باشد، اجرای دوباره ممکن است فرق کند." },
+        serve: { tag: "سمت خواندن در CQRS", level: 1, pages: "ص. ۱۰۲", slide: "الگوی-event-sourcing-و-cqrs",
+          text: "داشبوردها و API فقط viewها را می‌خوانند، هیچ‌وقت log را: همان جدایی شکل نوشتن و خواندن." }
+      }
+    },
+    query: {
+      label: "چه کسی چه می‌پرسد", axis: ["interface باریک", "کوئری باز"],
+      cells: {
+        source: { tag: "کوئری‌های کوتاه با کلید", level: 1, pages: "ص. ۶۶", slide: "introduction",
+          text: "ترافیک OLTP: پیدا کردن یک حساب، نوشتن یک انتقال. تیم داده فقط از یک replica می‌خواند." },
+        loader: { tag: "یک SELECT افزایشی", level: 1, pages: "ص. ۶۶", slide: "introduction",
+          text: "شرط WHERE update_date > last cursor، هر بار یک جدول. چیز دیگری از منبع خواسته نمی‌شود." },
+        bronze: { tag: "کد SQL به شکل declarative", level: 4, pages: "ص. ۶۶", slide: "introduction",
+          text: "مهندس‌ها می‌گویند چه می‌خواهند؛ engine پارتیشن، بازه‌ی index و هسته‌ها را انتخاب می‌کند." },
+        silver: { tag: "کد SQL به شکل declarative", level: 4, pages: "ص. ۶۶", slide: "introduction",
+          text: "اگر sort key یا پارتیشن‌بندی جدول را عوض کنید، هر کوئری همان جواب را می‌دهد، فقط سریع‌تر یا کندتر." },
+        gold: { tag: "کد SQL به شکل declarative", level: 4, pages: "ص. ۶۶", slide: "introduction",
+          text: "جدول‌هایی که تحلیلگرها و داشبوردها بیشتر از همه کوئری می‌زنند؛ پشت یک proxy با محدودیت برای هر نفر." },
+        nb: { tag: "کد DataFrame قدم‌به‌قدم", level: 4, pages: "ص. ۱۰۵", slide: "ساختارهای-dataframe-ماتریس-و-آرایه",
+          text: "یک دنباله فرمان روی یک کپی خصوصی. اول GROUP BY را به warehouse بسپارید، بعد نتیجه‌ی کوچک را wrangle کنید." },
+        serve: { tag: "یک API باریک", level: 0, pages: "صص. ۹۸–۹۹", slide: "زبان-graphql",
+          text: "اپ‌ها هیچ‌وقت SQL نمی‌گیرند: یک endpoint ثابت با هزینه‌ی معلوم. GraphQL هم به همین دلیل کوئری clientهای نامطمئن را محدود می‌کند." }
+      }
+    }
+  };
+
+  var lens = "shape", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+    var shape = Kit.clear(Kit.$("#shape"));
+    var cell = LENSES.shape.cells[current];
+    cell.tables.forEach(function (t) {
+      var rows = [];
+      for (var r = 0; r < t[1]; r++) rows.push(el("i"));
+      shape.appendChild(el("div", { class: "tbl", style: "width:" + (t[0] * 9) + "px" }, rows));
+    });
+    Kit.$("#shape-caption").textContent = cell.cap + ".";
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "وقتی همه از Gold کوئری می‌گیرند، چرا Bronze خام و normalized نگه داشته می‌شود؟",
+      options: ["جدول normalized در warehouse ستونی سریع‌تر اسکن می‌شود", "همه‌ی جدول‌های دیگر از آن derive می‌شوند، پس هر transformation را می‌شود درست کرد و از Bronze دوباره ساخت", "دیتابیس منبع این را لازم دارد", "داشبوردها نمی‌توانند جدول پهن بخوانند"],
+      answer: 1, explain: "لایه‌ی Bronze داخل warehouse نقش system of record را دارد: جدول‌های denormalized همه derived data هستند و نگه داشتن کپی خام یعنی باگ هر transformation با اجرای دوباره درست می‌شود (صص. ۷۴ و ۱۰۳)." },
+    { q: "لایه‌ی Silver ستون قدیمی اسم کامل را با ستون‌های جدید نام و نام خانوادگی coalesce می‌کند. این کدام ایده است؟",
+      options: ["رویکرد schema-on-write", "رویکرد schema-on-read: کد خواننده هر دو شکل داده را مدیریت می‌کند", "مفهوم normalization", "الگوی event sourcing"],
+      answer: 1, explain: "مثال کتاب وقتی فیلد name شکسته می‌شود documentهای قدیمی را در کد اپلیکیشن مدیریت می‌کند (ص. ۸۱). این‌جا کد خواننده همان SQL در Silver است." }
+  ]);
+})();
+</script>
+</body>
+</html>

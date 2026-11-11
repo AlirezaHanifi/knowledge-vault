@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clock Skew and Last Write Wins</title>
-<meta name="description" content="Replay the book's Figure 9-3: with a few milliseconds of clock skew, last write wins orders a causally later increment before the write it built on and silently drops it. Then measure how many writes are lost as skew grows. Illustrates DDIA Chapter 9.">
+<title>مفهوم clock skew و last write wins</title>
+<meta name="description" content="شکل ۹-۳ کتاب را دوباره اجرا کنید: با چند میلی‌ثانیه clock skew، last write wins افزایشی را که از نظر علّی بعدی است پیش از نوشتنی که بر آن بنا شده می‌گذارد و بی‌صدا دورش می‌ریزد. بعد بسنجید با بیشتر شدن skew چند نوشتن گم می‌شود. برای فصل ۹ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .tl .life { stroke: var(--line-strong); }
@@ -23,66 +23,66 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/09-the-trouble-with-distributed-systems.html">Chapter 9</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Clock skew</span>
+      <a href="../chapters/09-the-trouble-with-distributed-systems.html">فصل ۹</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم clock skew</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 9 · The Trouble with Distributed Systems</div>
-  <h1>Clock skew and last write wins</h1>
-  <p class="lede">Last write wins keeps the value with the greatest timestamp — but the timestamp comes from the clock of whichever node accepted the write. If that clock is a few milliseconds slow, a write that clearly happened later gets an earlier timestamp and is thrown away, with no error.</p>
-  <p class="source-note">Illustrates “Timestamps for ordering events” (pp. 362–364, Figure 9-3: x = 1 stamped 42.004 s, the increment stamped 42.003 s). The bottom chart is the vault’s own experiment: 400 dependent writes alternating between two nodes, about 5 ms apart. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۹ · دردسرهای سیستم‌های توزیع‌شده</div>
+  <h1>مفهوم clock skew و last write wins</h1>
+  <p class="lede">قاعده‌ی last write wins مقداری را نگه می‌دارد که بزرگ‌ترین timestamp را دارد؛ اما timestamp از ساعت همان nodeی می‌آید که نوشتن را پذیرفته. اگر آن ساعت چند میلی‌ثانیه کند باشد، نوشتنی که آشکارا بعدتر رخ داده timestamp زودتری می‌گیرد و بی هیچ خطایی دور ریخته می‌شود.</p>
+  <p class="source-note">برای بخش «مفهوم timestamp برای ترتیب رویدادها» در صص. ۳۶۲–۳۶۴ و شکل ۹-۳: <span lang="en">x = 1</span> با برچسب ۴۲٫۰۰۴ ثانیه و افزایش با برچسب ۴۲٫۰۰۳ ثانیه. نمودار پایین آزمایش خود vault است: ۴۰۰ نوشتن وابسته که به نوبت بین دو node می‌روند، با فاصله‌ی حدود ۵ میلی‌ثانیه. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
       <div class="twocol">
         <div>
-          <p class="panel-title">Figure 9-3, replayed</p>
-          <div class="stage"><svg class="tl" id="tl" viewBox="0 0 360 240" role="img" aria-label="Three nodes; see the verdict for the outcome"></svg></div>
+          <p class="panel-title">اجرای دوباره‌ی شکل ۹-۳</p>
+          <div class="stage" dir="ltr"><svg class="tl" id="tl" viewBox="0 0 360 240" role="img" aria-label="سه node؛ نتیجه را در حکم ببینید"></svg></div>
         </div>
         <div>
-          <p class="panel-title">Writes lost vs clock skew (vault experiment)</p>
-          <svg id="chart" role="img" aria-label="Share of writes lost rises with clock skew"></svg>
+          <p class="panel-title">نوشتن‌های گم‌شده بر حسب clock skew، آزمایش vault</p>
+          <svg id="chart" dir="ltr" role="img" aria-label="سهم نوشتن‌های گم‌شده با clock skew بالا می‌رود"></svg>
         </div>
       </div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Clocks and conflict resolution</p>
+        <p class="panel-title">ساعت‌ها و حل conflict</p>
         <div id="sliders"></div>
-        <div class="field" style="margin-top:10px"><span class="field-head">When a write overwrites a value…</span><div id="mode"></div></div>
+        <div class="field" style="margin-top:10px"><span class="field-head">وقتی یک نوشتن مقداری را بازنویسی می‌کند…</span><div id="mode"></div></div>
       </div>
       <div class="panel wide">
-        <p class="panel-title">Verdict at node 2</p>
+        <p class="panel-title">حکم در node 2</p>
         <div class="stats" id="stats"></div>
         <p class="field-hint" id="verdict" aria-live="polite" style="margin:8px 0 0"></p>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Causality vs timestamps.</strong> B’s increment reads x = 1, so it must come after A’s write — yet with node 3 just 3 ms slow it is stamped earlier, and node 2 keeps x = 1.</li>
-    <li><strong>Silent loss.</strong> Nothing fails; the increment simply disappears. The chart shows how quickly losses climb once skew approaches the gap between dependent writes.</li>
-    <li><strong>The book’s fix.</strong> Give an overwriting write a timestamp above the value it replaces (at the cost of reading it first): no write is lost, whatever the skew.</li>
-    <li><strong>Better still:</strong> logical clocks and version vectors order events by causality instead of quartz crystals (pp. 364, 420).</li>
+    <li><strong>ترتیب علّی در برابر timestamp.</strong> افزایش B مقدار <span lang="en">x = 1</span> را می‌خواند، پس باید بعد از نوشتن A باشد؛ اما وقتی node 3 فقط ۳ میلی‌ثانیه کند است، برچسب زودتری می‌خورد و node 2 مقدار <span lang="en">x = 1</span> را نگه می‌دارد.</li>
+    <li><strong>گم شدن بی‌صدا.</strong> هیچ چیز شکست نمی‌خورد؛ افزایش فقط ناپدید می‌شود. نمودار نشان می‌دهد وقتی skew به فاصله‌ی بین نوشتن‌های وابسته نزدیک می‌شود، گم شدن‌ها چقدر سریع بالا می‌روند.</li>
+    <li><strong>راه‌حل کتاب.</strong> به نوشتنی که بازنویسی می‌کند timestampی بالاتر از مقداری که جایگزین می‌کند بدهید؛ به قیمت این‌که اول آن را بخوانید. هر قدر هم skew باشد، هیچ نوشتنی گم نمی‌شود.</li>
+    <li><strong>از آن هم بهتر:</strong> مفهوم logical clock و version vector رویدادها را با ترتیب علّی مرتب می‌کنند، نه با کریستال quartz (صص. ۳۶۴ و ۴۲۰).</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>Lesson</small>9. The Trouble with Distributed Systems</a></li>
-    <li><a href="10-logical-clocks.html"><small>Simulation</small>Ordering events with logical clocks</a></li>
+    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
+    <li><a href="10-logical-clocks.html"><small>شبیه‌سازی</small>مرتب کردن رویدادها با logical clock</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -140,38 +140,38 @@
     var pts = [], ptsFix = [];
     for (var sk = 0; sk <= 12; sk += 0.5) { pts.push([sk, lostShare(-sk, "lww") * 100]); ptsFix.push([sk, lostShare(-sk, "bump") * 100]); }
     Kit.lineChart(document.getElementById("chart"), {
-      width: 360, height: 230, xMax: 12, yMax: 60, xLabel: "how far node 3 is behind (ms)", yFormat: function (v) { return v + "%"; },
-      series: [{ points: pts, cls: "s2", label: "LWW" }, { points: ptsFix, cls: "ok", label: "ts above overwritten" }],
-      marks: [{ x: Math.max(0, Math.min(12, -cfg.skew)), label: "now" }]
+      width: 360, height: 230, xMax: 12, yMax: 60, xLabel: "عقب بودن node 3 (ms)", yFormat: function (v) { return v + "%"; },
+      series: [{ points: pts, cls: "s2", label: "LWW" }, { points: ptsFix, cls: "ok", label: "ts بالاتر از مقدار قبلی" }],
+      marks: [{ x: Math.max(0, Math.min(12, -cfg.skew)), label: "اکنون" }]
     });
 
     var stats = Kit.clear(document.getElementById("stats"));
-    [["A’s timestamp", f.tsA.toFixed(3), ""], ["B’s timestamp", f.tsB.toFixed(3), f.tsB <= f.tsA ? "bad" : ""], ["Node 2 keeps", "x = " + f.keeps, f.keeps === 2 ? "ok" : "bad"]].forEach(function (x) {
+    [["مفهوم timestamp برای A", f.tsA.toFixed(3), ""], ["مفهوم timestamp برای B", f.tsB.toFixed(3), f.tsB <= f.tsA ? "bad" : ""], ["مقداری که node 2 نگه می‌دارد", "x = " + f.keeps, f.keeps === 2 ? "ok" : "bad"]].forEach(function (x) {
       stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
     });
     document.getElementById("verdict").textContent = f.keeps === 2
-      ? (cfg.mode === "bump" && 42.006 + cfg.skew / 1000 <= 42.004 ? "B’s write was bumped above the value it overwrote, so it survives despite the slow clock." : "B’s timestamp is later, so LWW happens to keep the increment.")
-      : "B’s increment happened after A’s write, but its timestamp is earlier: node 2 discards it. No error is reported.";
+      ? (cfg.mode === "bump" && 42.006 + cfg.skew / 1000 <= 42.004 ? "نوشتن B به بالای مقداری که بازنویسی کرده برده شد، پس با وجود ساعت کند می‌ماند." : "مفهوم timestamp برای B دیرتر است، پس LWW از قضا افزایش را نگه می‌دارد.")
+      : "افزایش B بعد از نوشتن A رخ داد، اما timestampش زودتر است: node 2 دورش می‌ریزد. هیچ خطایی گزارش نمی‌شود.";
   }
 
-  document.getElementById("sliders").appendChild(Kit.slider({ label: "Node 3 clock offset", min: -10, max: 5, step: 0.5, value: cfg.skew,
-    format: function (v) { return (v > 0 ? "+" : "") + v + " ms"; }, hint: "Node 1’s clock is exact; negative = node 3 runs slow.",
+  document.getElementById("sliders").appendChild(Kit.slider({ label: "اختلاف ساعت node 3", min: -10, max: 5, step: 0.5, value: cfg.skew,
+    format: function (v) { return (v > 0 ? "+" : "") + v + " ms"; }, hint: "ساعت node 1 دقیق است؛ عدد منفی یعنی node 3 کند است.",
     onInput: function (v) { cfg.skew = v; render(); } }).element);
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Conflict resolution", value: cfg.mode,
-    options: [{ value: "lww", label: "Plain LWW (writer’s clock)" }, { value: "bump", label: "Timestamp above overwritten" }],
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "حل conflict", value: cfg.mode,
+    options: [{ value: "lww", label: "مدل LWW ساده با ساعت نویسنده" }, { value: "bump", label: "مفهوم timestamp بالاتر از مقدار قبلی" }],
     onChange: function (v) { cfg.mode = v; render(); } }).element);
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why does node 2 drop the increment in Figure 9-3?",
-      options: ["The network lost it", "Its timestamp, from node 3’s slightly slow clock, is lower than that of the write it built on", "Node 2 crashed"],
-      answer: 1, explain: "B’s write is causally later but stamped 42.003 vs 42.004; LWW keeps the greater timestamp (p. 363)." },
-    { q: "Could better NTP make LWW ordering always correct?",
-      options: ["Yes, with a local NTP server", "Probably not: NTP accuracy is itself limited by network round-trip time", "Yes, if clocks have microsecond resolution"],
-      answer: 1, explain: "You would need clock error far below network delay, which is not possible (p. 364)." },
-    { q: "What is the safer alternative for ordering events?",
-      options: ["Monotonic clocks", "Logical clocks, which count events rather than seconds", "Bigger timestamps"],
-      answer: 1, explain: "Logical clocks capture relative order (happened-before), not time of day (p. 364)." }
+    { q: "چرا node 2 در شکل ۹-۳ افزایش را دور می‌ریزد؟",
+      options: ["شبکه گمش کرد", "چون timestampش، که از ساعت کمی کند node 3 آمده، از نوشتنی که بر آن بنا شده کمتر است", "مفهوم node 2 crash کرد"],
+      answer: 1, explain: "نوشتن B از نظر علّی بعدی است اما با ۴۲٫۰۰۳ در برابر ۴۲٫۰۰۴ برچسب خورده؛ LWW بزرگ‌ترین timestamp را نگه می‌دارد (ص. ۳۶۳)." },
+    { q: "آیا NTP بهتر می‌تواند ترتیب LWW را همیشه درست کند؟",
+      options: ["بله، با یک سرور NTP محلی", "احتمالاً نه: دقت NTP خودش به زمان رفت‌وبرگشت شبکه محدود است", "بله، اگر ساعت‌ها دقت میکروثانیه داشته باشند"],
+      answer: 1, explain: "به خطای ساعتی خیلی کمتر از latency شبکه نیاز دارید، که ممکن نیست (ص. ۳۶۴)." },
+    { q: "جایگزین امن‌تر برای مرتب کردن رویدادها چیست؟",
+      options: ["ساعت monotonic", "مفهوم logical clock، که رویدادها را می‌شمارد نه ثانیه‌ها را", "مفهوم timestamp بزرگ‌تر"],
+      answer: 1, explain: "مفهوم logical clock ترتیب نسبی، یعنی happened-before، را نگه می‌دارد، نه ساعت روز را (ص. ۳۶۴)." }
   ]);
 })();
 </script>

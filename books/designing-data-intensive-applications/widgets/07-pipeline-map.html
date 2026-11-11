@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۷ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را طی کنید و ببینید داده در هر مرحله بر چه اساسی تقسیم می‌شود، hot spot کجا پیدا می‌شود و جست‌وجو با مقدار غیرکلیدی کجا همه‌جا را می‌گردد. برای فصل ۷ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/07-sharding.html">فصل ۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۷ · مفهوم sharding</div>
+  <h1>فصل ۷ در طول یک pipeline داده</h1>
+  <p class="lede">حتی pipelineی که هیچ shardی ندارد داده‌اش را تقسیم می‌کند: بر اساس جدول، ماه، کلید sort یا container. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید کلید تقسیم کجا به کوئری کمک می‌کند، بار کجا روی یک تکه جمع می‌شود و کوئری بر اساس ستون دیگر کجا باید همه‌جا را بگردد.</p>
+  <p class="source-note">کل فصل را (صص. ۲۵۱–۲۷۶) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens تقسیم داده:</strong> warehouse هیچ shardی ندارد، اما داده‌اش را دو بار تقسیم می‌کند: partition ماهانه، که key range روی زمان است، و ORDER BY، که ترتیب داخل هر partition است.</li>
+    <li><strong>با lens hot spot:</strong> بیشترین skew در داده است، نه در زیرساخت: چند merchant و حساب بزرگ. هر موتور توزیع‌شده‌ای که روی این داده group by بزند، hot key کتاب را می‌بیند.</li>
+    <li><strong>با lens جست‌وجو با مقدار:</strong> هر کوئری که بر اساس ستونی غیر از partition و ORDER BY فیلتر کند همه‌جا را می‌گردد؛ انتخاب بین skip index و جدول دوم همان انتخاب کتاب بین local و global index است.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/07-sharding.html"><small>درس</small>فصل ۷: مفهوم sharding</a></li>
+    <li><a href="07-sharding.html"><small>شبیه‌سازی</small>مفهوم sharding و rebalancing</a></li>
+    <li><a href="07-secondary-indexes.html"><small>شبیه‌سازی</small>مقایسه‌ی local و global secondary index</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/07-sharding.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    split: {
+      label: "تقسیم داده", axis: ["بدون تقسیم", "تقسیم بر اساس کلید"],
+      cells: {
+        source: { tag: "یک ماشین، بدون shard", level: 0, pages: "صص. ۲۵۳–۲۵۴", slide: "مزیتها-و-عیبهای-sharding",
+          text: "دیتابیس منبع یک row store روی یک ماشین است؛ برای بار فعلی‌اش sharding لازم نیست، همان توصیه‌ی کتاب." },
+        loader: { tag: "یک container برای هر جدول", level: 2, pages: "ص. ۲۵۴", slide: "مزیتها-و-عیبهای-sharding",
+          text: "کار load بر اساس جدول تقسیم شده: هر جدول container و DAG خودش را دارد، شبیه sharding داخل یک ماشین که هر process یک بخش را دارد." },
+        bronze: { tag: "partition ماهانه", level: 3, pages: "صص. ۲۵۲ و ۲۵۶–۲۵۷", slide: "مفهوم-sharding-بر-اساس-key-range",
+          text: "هر جدول بر اساس ماه partition می‌شود: key range روی زمان، اما روی یک ماشین؛ مثل partitioning در PostgreSQL، نه sharding." },
+        silver: { tag: "partition و ORDER BY", level: 4, pages: "ص. ۲۶۲", slide: "مفهوم-sharding-بر-اساس-hash-کلید",
+          text: "ماه partition را تعیین می‌کند و ORDER BY ترتیب داخل آن را؛ همان partition key و cluster column که کتاب از BigQuery نقل می‌کند." },
+        gold: { tag: "ماه یا بخش مشتری", level: 3, pages: "ص. ۲۶۲", slide: "مفهوم-sharding-بر-اساس-hash-کلید",
+          text: "جدول‌های Gold بر اساس پرسش کسب‌وکار، مثلاً ماه یا بخش مشتری، مرتب می‌شوند تا داشبوردها فقط تکه‌ی لازم را بخوانند." },
+        nb: { tag: "یک DataFrame", level: 0, pages: "ص. ۲۵۳", slide: "مزیتها-و-عیبهای-sharding",
+          text: "داده در حافظه‌ی یک kernel است و تقسیم نمی‌شود؛ تا وقتی در حافظه جا می‌شود، sharding فقط پیچیدگی اضافه می‌کند." },
+        serve: { tag: "نمونه‌های stateless", level: 1, pages: "ص. ۲۶۵", slide: "مفهوم-request-routing",
+          text: "هر نمونه‌ی API پیش‌بینی می‌تواند هر درخواستی را جواب بدهد، چون stateی ندارد؛ برخلاف shard که فقط replica درست می‌تواند یک کلید را سرویس بدهد." }
+      }
+    },
+    hot: {
+      label: "مفهوم hot spot", axis: ["بار پخش", "بار روی یک تکه"],
+      cells: {
+        source: { tag: "batch شبانه‌ی partner", level: 3, pages: "ص. ۲۶۴", slide: "بارهای-نامتوازن-و-کم-کردن-hot-spot",
+          text: "منبع B همه‌ی داده‌ی روزش را در یک batch شبانه می‌گیرد؛ بار در زمان متمرکز است، نه در کلید، اما همان اثر اوج را دارد." },
+        loader: { tag: "جدول‌های بزرگ", level: 3, pages: "صص. ۲۶۳–۲۶۴", slide: "بارهای-نامتوازن-و-کم-کردن-hot-spot",
+          text: "چند جدول تراکنش بیشتر ردیف‌ها را دارند؛ container آن‌ها بیشترین زمان را می‌گیرد و کل pipeline منتظرش می‌ماند." },
+        bronze: { tag: "partition ماه جاری", level: 3, pages: "ص. ۲۵۷", slide: "مفهوم-sharding-بر-اساس-key-range",
+          text: "همه‌ی insertها به partition ماه جاری می‌روند؛ hot spot روی کلیدهای پشت سر هم، که این‌جا چون هیچ shardی نیست فقط merge بیشتر در آن partition است." },
+        silver: { tag: "merchant یا حساب بزرگ", level: 4, pages: "صص. ۲۶۳–۲۶۴", slide: "بارهای-نامتوازن-و-کم-کردن-hot-spot",
+          text: "چند merchant و حساب partner سهم بزرگی از تراکنش‌ها را دارند؛ هر join یا group by روی آن‌ها hot key است." },
+        gold: { tag: "داشبورد پربازدید", level: 2, pages: "ص. ۲۶۴", slide: "بارهای-نامتوازن-و-کم-کردن-hot-spot",
+          text: "چند داشبورد بیشتر کوئری‌ها را می‌سازند و بار در طول روز جابه‌جا می‌شود، مثلاً اول ماه." },
+        nb: { tag: "یک گروه بزرگ", level: 3, pages: "صص. ۲۶۳–۲۶۴", slide: "بارهای-نامتوازن-و-کم-کردن-hot-spot",
+          text: "در notebook یک گروه چند برابر بقیه است؛ در یک موتور توزیع‌شده همان hot key است که کتاب با پسوند تصادفی پخشش می‌کند." },
+        serve: { tag: "بار پخش بین نمونه‌ها", level: 1, pages: "ص. ۲۶۵", slide: "مفهوم-request-routing",
+          text: "load balancer درخواست‌ها را بین نمونه‌های API پخش می‌کند؛ hot key معنایی ندارد چون هیچ نمونه‌ای مالک داده نیست." }
+      }
+    },
+    lookup: {
+      label: "جست‌وجو با مقدار", axis: ["یک جا", "همه‌جا را می‌گردد"],
+      cells: {
+        source: { tag: "index روی update_date", level: 1, pages: "ص. ۲۶۸", slide: "مفهوم-sharding-و-secondary-index",
+          text: "cursor در loader روی update_date فیلتر می‌کند؛ با یک secondary index روی آن ستون یک range scan است، بدون آن اسکن کل جدول." },
+        loader: { tag: "هر جدول جدا", level: 1, pages: "ص. ۲۶۵", slide: "مفهوم-request-routing",
+          text: "هر جدول مسیر خودش را دارد و loader دقیقاً می‌داند کجا بنویسد؛ مثل shard-aware client." },
+        bronze: { tag: "همه‌ی partitionها", level: 4, pages: "صص. ۲۶۸–۲۶۹", slide: "مفهوم-sharding-و-secondary-index",
+          text: "کوئری بر اساس id یک ردیف بدون فیلتر زمان باید همه‌ی partitionهای ماهانه را بگردد؛ همان scatter/gather در local index." },
+        silver: { tag: "skip index در هر part", level: 3, pages: "صص. ۲۶۸–۲۶۹", slide: "مفهوم-sharding-و-secondary-index",
+          text: "skip index برای هر part جداست، مثل local secondary index: نوشتن ارزان، خواندن بر اساس ستون غیرکلیدی همه‌ی partها را بررسی می‌کند." },
+        gold: { tag: "جدول دوم مرتب", level: 1, pages: "صص. ۲۷۰–۲۷۱", slide: "مفهوم-sharding-و-secondary-index",
+          text: "اگر کوئری پرتکراری بر اساس ستون دیگری است، یک جدول یا projection با ORDER BY دیگر مثل global index است: خواندن یک جا، نوشتن دو جا." },
+        nb: { tag: "فیلتر روی کل DataFrame", level: 3, pages: "ص. ۲۶۸", slide: "مفهوم-sharding-و-secondary-index",
+          text: "هر فیلتر در pandas کل ستون را می‌خواند؛ برای چند میلیون ردیف مشکلی نیست." },
+        serve: { tag: "نتیجه‌ی آماده", level: 0, pages: "صص. ۲۷۰–۲۷۱", slide: "مفهوم-sharding-و-secondary-index",
+          text: "داشبورد از جدول Gold آماده می‌خواند و API فقط یک ورودی می‌گیرد؛ جست‌وجوی سنگین پیش‌تر انجام شده." }
+      }
+    }
+};
+
+  var lens = "split", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "جدول Silver با PARTITION BY ماه و ORDER BY (account_id, posting_date) ساخته شده. کدام کوئری کمترین داده را می‌خواند؟",
+      options: ["همه‌ی تراکنش‌های یک card_hash", "همه‌ی تراکنش‌های یک حساب در سه ماه اخیر", "همه‌ی تراکنش‌ها با مبلغ بالای یک حد", "شمارش تراکنش‌ها بر اساس merchant"],
+      answer: 1, explain: "فیلتر زمان فقط سه partition را نگه می‌دارد و account_id اولین کلید sort است، پس داخل هر partition فقط بلوک‌های همان حساب خوانده می‌شود (صص. ۲۵۶–۲۶۲)." },
+    { q: "چرا اضافه کردن یک پسوند تصادفی به کلید merchant در یک group by توزیع‌شده کمک می‌کند و هزینه‌اش چیست؟",
+      options: ["بار را پخش می‌کند و هزینه‌اش یک قدم ترکیب نتیجه‌های جزئی است", "دقت نتیجه را بالا می‌برد", "نیاز به sort را حذف می‌کند", "هزینه‌ای ندارد"],
+      answer: 0, explain: "گروه داغ بین چند worker پخش می‌شود، اما برای جواب نهایی همه‌ی زیرگروه‌ها باید دوباره ترکیب شوند؛ همان «خواندن باید همه را بگیرد» در کتاب (صص. ۲۶۳–۲۶۴)." }
+  ]);
+})();
+</script>
+</body>
+</html>

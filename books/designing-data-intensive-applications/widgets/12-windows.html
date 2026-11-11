@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stream Window Types</title>
-<meta name="description" content="Group the same stream of user events into tumbling, hopping, sliding and session windows, and see which events each window counts. Illustrates DDIA Chapter 12.">
+<title>انواع window در stream</title>
+<meta name="description" content="یک stream از رویدادهای کاربران را در windowهای tumbling، hopping، sliding و session گروه کنید و ببینید هر window کدام رویدادها را می‌شمارد. برای فصل ۱۲ DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .win .lane { stroke: var(--line); }
@@ -23,58 +23,58 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/12-stream-processing.html">Chapter 12</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Window types</span>
+      <a href="../chapters/12-stream-processing.html">فصل ۱۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">انواع window</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 12 · Stream Processing</div>
-  <h1>Tumbling, hopping, sliding and session windows</h1>
-  <p class="lede">An aggregation over an unbounded stream needs a window: a rule for which events count together. The same twenty minutes of clicks from two users give very different answers depending on whether windows have fixed boundaries, overlap, slide with the events, or follow each user’s bursts of activity.</p>
-  <p class="source-note">Illustrates “Types of windows” (p. 522): the book’s one-minute tumbling, five-minute hopping with one-minute hop, five-minute sliding, and 30-minute-inactivity session examples, scaled down so twenty minutes fit on screen. The event stream is the vault’s own. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۲ · پردازش stream</div>
+  <h1>مفهوم window از نوع tumbling، hopping، sliding و session</h1>
+  <p class="lede">هر aggregation روی یک stream بی‌انتها به window نیاز دارد: قاعده‌ای که می‌گوید کدام رویدادها با هم شمرده شوند. همین بیست دقیقه کلیک از دو کاربر، بسته به اینکه windowها مرز ثابت داشته باشند، هم‌پوشانی داشته باشند، همراه رویدادها بلغزند یا دنبال دوره‌های فعالیت هر کاربر بروند، جواب‌های خیلی متفاوتی می‌دهد.</p>
+  <p class="source-note">برای بخش «انواع window» در ص. ۵۲۲: مثال‌های کتاب، یعنی tumbling یک‌دقیقه‌ای، hopping پنج‌دقیقه‌ای با گام یک دقیقه، sliding پنج‌دقیقه‌ای و session با ۳۰ دقیقه بی‌فعالیتی، کوچک شده‌اند تا بیست دقیقه در صفحه جا شود. stream رویدادها و پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
-      <div class="stage"><svg class="win" id="win" viewBox="0 0 740 300" role="img" aria-label="Events on a timeline and the windows that group them"></svg></div>
+      <div class="stage" dir="ltr"><svg class="win" id="win" viewBox="0 0 740 300" role="img" aria-label="رویدادها روی خط زمان و windowهایی که گروهشان می‌کنند"></svg></div>
       <p class="field-hint" id="explain" aria-live="polite" style="margin:6px 0 0"></p>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Window type</p>
+        <p class="panel-title">نوع window</p>
         <div id="type"></div>
         <div id="sliders" style="margin-top:10px"></div>
       </div>
       <div class="panel wide">
-        <p class="panel-title">Result</p>
+        <p class="panel-title">نتیجه</p>
         <div class="stats" id="stats"></div>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Tumbling:</strong> fixed length, every event in exactly one window — implemented by rounding each timestamp down.</li>
-    <li><strong>Hopping:</strong> fixed length but overlapping, so each event is counted in several windows; the result is smoother.</li>
-    <li><strong>Sliding:</strong> no fixed boundaries — two events a few minutes apart share a window even if a tumbling boundary falls between them. It needs a buffer of recent events.</li>
-    <li><strong>Session:</strong> no fixed length at all; a user’s window ends after a gap of inactivity. Shrink the gap and sessions split.</li>
+    <li><strong>نوع Tumbling:</strong> طول ثابت، و هر رویداد دقیقاً در یک window؛ با گرد کردن هر timestamp به پایین پیاده می‌شود.</li>
+    <li><strong>نوع Hopping:</strong> طول ثابت اما با هم‌پوشانی، پس هر رویداد در چند window شمرده می‌شود و نتیجه هموارتر است.</li>
+    <li><strong>نوع Sliding:</strong> مرز ثابت ندارد؛ دو رویداد با چند دقیقه فاصله در یک window می‌افتند، حتی اگر مرز tumbling بینشان باشد. به buffer رویدادهای اخیر نیاز دارد.</li>
+    <li><strong>نوع Session:</strong> اصلاً طول ثابت ندارد؛ window هر کاربر بعد از یک فاصله‌ی بی‌فعالیتی تمام می‌شود. فاصله را کم کنید تا sessionها تکه شوند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/12-stream-processing.html"><small>Lesson</small>12. Stream Processing</a></li>
-    <li><a href="../lab/12-stream-windows/README.md"><small>Experiment</small>Event-time windows and stragglers</a></li>
-    <li><a href="12-stream-time.html"><small>Simulation</small>Event time, processing time, and stragglers</a></li>
+    <li><a href="../chapters/12-stream-processing.html"><small>درس</small>فصل ۱۲: پردازش stream</a></li>
+    <li><a href="../lab/12-stream-windows/README.md"><small>آزمایش</small>مفهوم window بر اساس event time و late event</a></li>
+    <li><a href="12-stream-time.html"><small>شبیه‌سازی</small>مفهوم event time، processing time و late event</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -157,44 +157,44 @@
     }
     var stats = Kit.clear(document.getElementById("stats")), rowsOut, explain;
     if (cfg.type === "sliding") {
-      rowsOut = [["Window", cfg.size + " min, any start"], ["State kept", "a buffer of events"]];
-      explain = "The line counts the events in the " + cfg.size + " minutes up to each moment; any two events less than " + cfg.size + " minutes apart share some window.";
+      rowsOut = [["مفهوم window", cfg.size + " دقیقه، با هر شروعی"], ["حالت نگه‌داشته", "یک buffer از رویدادها"]];
+      explain = "این خط رویدادهای " + cfg.size + " دقیقه‌ی منتهی به هر لحظه را می‌شمارد؛ هر دو رویدادی که کمتر از " + cfg.size + " دقیقه فاصله دارند در یک window مشترک می‌افتند.";
     } else {
       var counted = ws.reduce(function (a, w) { return a + w.events.length; }, 0);
-      rowsOut = [["Windows", ws.length], ["Events", events.length], ["Times counted", counted]];
-      explain = cfg.type === "tumbling" ? "Each event is in exactly one window: counted " + counted + " times for " + events.length + " events."
-        : cfg.type === "hopping" ? "Windows of " + cfg.size + " min start every " + cfg.hop + " min, so each event is counted in up to " + Math.round(cfg.size / cfg.hop) + " windows."
-        : "A session ends after " + cfg.gap + " min without an event from that user: " + ws.filter(function (w) { return w.u === "a"; }).length + " sessions for A, " + ws.filter(function (w) { return w.u === "b"; }).length + " for B.";
+      rowsOut = [["تعداد windowها", ws.length], ["رویدادها", events.length], ["دفعات شمارش", counted]];
+      explain = cfg.type === "tumbling" ? "هر رویداد دقیقاً در یک window است: " + counted + " بار شمارش برای " + events.length + " رویداد."
+        : cfg.type === "hopping" ? "مفهوم windowهای " + cfg.size + " دقیقه‌ای هر " + cfg.hop + " دقیقه شروع می‌شوند، پس هر رویداد در حداکثر " + Math.round(cfg.size / cfg.hop) + " window شمرده می‌شود."
+        : "هر session بعد از " + cfg.gap + " دقیقه بی‌رویداد از همان کاربر تمام می‌شود: " + ws.filter(function (w) { return w.u === "a"; }).length + " session برای A و " + ws.filter(function (w) { return w.u === "b"; }).length + " برای B.";
     }
     rowsOut.forEach(function (x) { stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value" }, String(x[1])))); });
     document.getElementById("explain").textContent = explain;
   }
 
   var sliders = document.getElementById("sliders");
-  var sizeS = Kit.slider({ label: "Window length", min: 1, max: 8, value: cfg.size, unit: " min", onInput: function (v) { cfg.size = v; if (cfg.hop > v) { cfg.hop = v; hopS.set(v); } render(); } });
-  var hopS = Kit.slider({ label: "Hop", min: 1, max: 4, value: cfg.hop, unit: " min", onInput: function (v) { cfg.hop = Math.min(v, cfg.size); render(); } });
-  var gapS = Kit.slider({ label: "Session ends after inactivity of", min: 1, max: 6, step: 0.5, value: cfg.gap, unit: " min", onInput: function (v) { cfg.gap = v; render(); } });
+  var sizeS = Kit.slider({ label: "طول window", min: 1, max: 8, value: cfg.size, unit: " دقیقه", onInput: function (v) { cfg.size = v; if (cfg.hop > v) { cfg.hop = v; hopS.set(v); } render(); } });
+  var hopS = Kit.slider({ label: "گام hop", min: 1, max: 4, value: cfg.hop, unit: " دقیقه", onInput: function (v) { cfg.hop = Math.min(v, cfg.size); render(); } });
+  var gapS = Kit.slider({ label: "پایان session بعد از بی‌فعالیتی", min: 1, max: 6, step: 0.5, value: cfg.gap, unit: " دقیقه", onInput: function (v) { cfg.gap = v; render(); } });
   [sizeS, hopS, gapS].forEach(function (x) { sliders.appendChild(x.element); });
   function showSliders() {
     sizeS.element.hidden = cfg.type === "session";
     hopS.element.hidden = cfg.type !== "hopping";
     gapS.element.hidden = cfg.type !== "session";
   }
-  document.getElementById("type").appendChild(Kit.segmented({ label: "Window type", value: cfg.type,
+  document.getElementById("type").appendChild(Kit.segmented({ label: "نوع window", value: cfg.type,
     options: [{ value: "tumbling", label: "Tumbling" }, { value: "hopping", label: "Hopping" }, { value: "sliding", label: "Sliding" }, { value: "session", label: "Session" }],
     onChange: function (v) { cfg.type = v; showSliders(); render(); } }).element);
   showSliders(); render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How can a one-minute tumbling window be implemented?",
-      options: ["Keep a buffer of all events", "Round each event’s timestamp down to the minute to find its window", "Wait for a gap in activity"],
-      answer: 1, explain: "Every event belongs to exactly one window (p. 522)." },
-    { q: "Events at 10:03:39 and 10:08:12 — which five-minute window type can put them together?",
-      options: ["Tumbling", "Hopping", "Sliding"],
-      answer: 2, explain: "They are less than five minutes apart, but fixed boundaries separate them in tumbling and hopping windows (p. 522)." },
-    { q: "Which window type has no fixed duration?",
-      options: ["Hopping", "Session", "Tumbling"],
-      answer: 1, explain: "A session window ends when the user has been inactive for some time (p. 522)." }
+    { q: "یک tumbling window یک‌دقیقه‌ای را چطور می‌شود پیاده کرد؟",
+      options: ["نگه داشتن buffer همه‌ی رویدادها", "گرد کردن timestamp هر رویداد به پایین تا دقیقه برای پیدا کردن windowاش", "صبر برای یک وقفه در فعالیت"],
+      answer: 1, explain: "هر رویداد دقیقاً به یک window تعلق دارد (ص. ۵۲۲)." },
+    { q: "رویدادهایی در 10:03:39 و 10:08:12؛ کدام نوع window پنج‌دقیقه‌ای می‌تواند آن‌ها را کنار هم بگذارد؟",
+      options: ["نوع Tumbling", "نوع Hopping", "نوع Sliding"],
+      answer: 2, explain: "کمتر از پنج دقیقه فاصله دارند، اما مرزهای ثابت در tumbling و hopping جدایشان می‌کند (ص. ۵۲۲)." },
+    { q: "کدام نوع window مدت ثابت ندارد؟",
+      options: ["نوع Hopping", "نوع Session", "نوع Tumbling"],
+      answer: 1, explain: "مفهوم session window وقتی تمام می‌شود که کاربر مدتی بی‌فعالیت بوده (ص. ۵۲۲)." }
   ]);
 })();
 </script>

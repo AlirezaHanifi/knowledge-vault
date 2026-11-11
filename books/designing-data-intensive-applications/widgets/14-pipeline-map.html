@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۱۴ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را با چشم اخلاق ببینید: کجا داده‌ی بیشتر از هدف جمع می‌شود، کجا خروجی درباره‌ی آدم‌ها تصمیم می‌گیرد و داده‌ی شخصی کجا بیش از اندازه می‌ماند. برای فصل ۱۴ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/14-doing-the-right-thing.html">فصل ۱۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۱۴ · کار درست را انجام دادن</div>
+  <h1>فصل ۱۴ در طول یک pipeline داده</h1>
+  <p class="lede">بیشتر جدول‌های این pipeline درباره‌ی آدم‌ها هستند. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید data minimization کجا اعمال می‌شود، تصمیم‌های خودکار کجا به زندگی آدم‌ها برمی‌گردند و داده‌ی شخصی تا کی و کجا نگه داشته می‌شود.</p>
+  <p class="source-note">کل فصل را (صص. ۵۸۵–۶۰۲) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens هدف:</strong> مفهوم data minimization در فهرست ستون‌های loader اعمال می‌شود؛ هر ستون اضافه تا ابد در Bronze می‌ماند.</li>
+    <li><strong>با lens تصمیم:</strong> خطر جایی بیشتر است که خروجی درباره‌ی آدم‌ها تصمیم بگیرد و نتیجه‌ی آن تصمیم دوباره داده‌ی آموزشی شود.</li>
+    <li><strong>با lens عمر داده:</strong> مفهوم Bronze immutable و نسخه‌های محلی در notebookها پاک کردن را سخت می‌کنند؛ سیاست نگه‌داری باید از Bronze شروع شود.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/14-doing-the-right-thing.html"><small>درس</small>فصل ۱۴: کار درست را انجام دادن</a></li>
+    <li><a href="14-feedback-loop.html"><small>شبیه‌سازی</small>مفهوم feedback loop امتیاز اعتباری</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/14-doing-the-right-thing.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    purpose: {
+      label: "هدف و minimization", axis: ["فقط آنچه هدف لازم دارد", "همه چیز، شاید روزی"],
+      cells: {
+        source: { tag: "داده‌ی محصول", level: 1, pages: "صص. ۵۸۹–۵۹۰", slide: "حریم-خصوصی-و-ردیابی",
+          text: "منبع داده‌ای را دارد که کاربر برای خود سرویس وارد کرده؛ رابطه‌ای که در آن مشتری خود کاربر است." },
+        loader: { tag: "فهرست ستون‌ها", level: 0, pages: "ص. ۵۹۶", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "فهرست ستون‌های YAML جایی است که purpose limitation اعمال می‌شود؛ ستونی که load نشود هرگز نشت نمی‌کند." },
+        bronze: { tag: "کپی کامل", level: 3, pages: "صص. ۵۹۶–۵۹۷", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "مفهوم Bronze هر ستونی را که load شده با همه‌ی تاریخچه‌اش نگه می‌دارد؛ هر ستون اضافه آنجا هم اضافه است." },
+        silver: { tag: "مفهوم join", level: 2, pages: "صص. ۵۹۱–۵۹۲", slide: "رضایت-و-آزادی-انتخاب",
+          text: "مفهوم join منبع‌ها چیزهایی می‌سازد که هیچ کاربری با آن موافقت نکرده؛ datasetهای مشتق‌شده فهم‌ناپذیرند." },
+        gold: { tag: "سؤال مشخص", level: 1, pages: "ص. ۵۹۶", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "هر جدول Gold یک پرسش کسب‌وکار را جواب می‌دهد؛ یعنی هدفی مشخص و صریح." },
+        nb: { tag: "کاوش آزاد", level: 3, pages: "ص. ۵۹۶", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "کاوش «ببینیم چه پیدا می‌شود» همان فلسفه‌ی big data است که GDPR با آن در تضاد است." },
+        serve: { tag: "نمایش تجمیعی", level: 1, pages: "ص. ۵۹۳", slide: "حریم-خصوصی-و-استفاده-از-داده",
+          text: "داشبوردهای تجمیعی کمتر درباره‌ی یک نفر لو می‌دهند؛ برش‌های خیلی کوچک دوباره فرد را پیدا می‌کنند." }
+      }
+    },
+    decide: {
+      label: "تصمیم درباره‌ی آدم‌ها", axis: ["فقط گزارش", "تصمیم خودکار با حلقه"],
+      cells: {
+        source: { tag: "تصمیم‌های گذشته", level: 2, pages: "ص. ۵۸۷", slide: "مفهوم-bias-و-تبعیض",
+          text: "تصمیم‌های ثبت‌شده‌ی گذشته، مثل قبول یا رد یک درخواست، bias آدم‌هایی را که گرفته‌اند با خود دارند." },
+        loader: { tag: "کپی", level: 0, pages: "ص. ۵۸۶", slide: "مفهوم-predictive-analytics",
+          text: "مفهوم loader درباره‌ی کسی تصمیم نمی‌گیرد؛ فقط داده را جابه‌جا می‌کند." },
+        bronze: { tag: "تاریخچه", level: 1, pages: "ص. ۵۸۷", slide: "مفهوم-bias-و-تبعیض",
+          text: "تاریخچه‌ی خام همان چیزی است که مدل‌های پیش‌بین از آن برون‌یابی می‌کنند." },
+        silver: { tag: "ویژگی‌های جانشین", level: 3, pages: "ص. ۵۸۷", slide: "مفهوم-bias-و-تبعیض",
+          text: "ستون‌هایی مثل شهر یا محله می‌توانند جانشین ویژگی‌های محافظت‌شده باشند." },
+        gold: { tag: "امتیاز مشتری", level: 3, pages: "صص. ۵۸۷–۵۸۸", slide: "مسئولیت-و-پاسخگویی",
+          text: "امتیازی که مشتری‌ها را دسته‌بندی می‌کند باید قابل توضیح و قابل اعتراض باشد." },
+        nb: { tag: "آموزش مدل", level: 3, pages: "صص. ۵۸۶–۵۸۷", slide: "مفهوم-bias-و-تبعیض",
+          text: "مدلی که در notebook آموزش می‌بیند bias داده را یاد می‌گیرد و بزرگ‌ترش می‌کند." },
+        serve: { tag: "مفهوم feedback loop", level: 4, pages: "صص. ۵۸۸–۵۸۹", slide: "مفهوم-feedback-loop",
+          text: "وقتی پیش‌بینی API بر زندگی کاربر اثر بگذارد، رفتار بعدی او داده‌ی آموزشی مدل بعدی می‌شود." }
+      }
+    },
+    life: {
+      label: "عمر داده", axis: ["کوتاه و پاک‌شدنی", "durable و پراکنده"],
+      cells: {
+        source: { tag: "حذف در منبع", level: 1, pages: "ص. ۵۹۷", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "حذف در منبع شروع کار است، اما loader حذف‌ها را نمی‌بیند و نسخه‌های downstream می‌مانند." },
+        loader: { tag: "مرحله‌ی PII", level: 1, pages: "ص. ۵۹۴", slide: "داده-به-عنوان-دارایی-و-قدرت",
+          text: "مفهوم hash با salt شناسه‌ها را پنهان می‌کند اما شخصی بودنشان را از بین نمی‌برد؛ هنوز یک دارایی سمی‌اند." },
+        bronze: { tag: "برای همیشه", level: 4, pages: "صص. ۵۹۶–۵۹۷", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "مفهوم Bronze برای بازسازی همه چیز را نگه می‌دارد؛ بدون سیاست نگه‌داری، داده‌ی مشتری رفته هم می‌ماند." },
+        silver: { tag: "بازسازی", level: 3, pages: "ص. ۵۹۷", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "پاک کردن از Silver کافی نیست؛ ساختن دوباره از Bronze داده را برمی‌گرداند." },
+        gold: { tag: "تجمیعی", level: 1, pages: "ص. ۵۹۷", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "جدول‌های تجمیعی کمتر به یک نفر وابسته‌اند، اما با هر بازسازی باید تازه شوند." },
+        nb: { tag: "نسخه‌های محلی", level: 4, pages: "صص. ۵۹۴–۵۹۵", slide: "داده-به-عنوان-دارایی-و-قدرت",
+          text: "مفهوم DataFrame ذخیره‌شده در یک notebook از هر سیاست حذفی بیرون می‌ماند." },
+        serve: { tag: "مفهوم model registry", level: 3, pages: "ص. ۵۹۷", slide: "قانونگذاری-و-خودتنظیمی",
+          text: "مدلی که روی داده‌ی یک نفر آموزش دیده، بعد از حذف آن داده هم چیزی از آن را در خود دارد." }
+      }
+    }
+};
+
+  var lens = "purpose", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "مدلی ستون قومیت را ندارد اما محله را دارد. چرا ممکن است باز هم تبعیض بگذارد؟",
+      options: ["نمی‌گذارد", "چون محله می‌تواند جانشین ویژگی محافظت‌شده باشد", "چون ClickHouse داده را خراب می‌کند", "چون مدل کوچک است"],
+      answer: 1, explain: "ویژگی‌های همبسته نقش جانشین را بازی می‌کنند؛ مثل کد پستی یا آدرس IP در کتاب (ص. ۵۸۷)." },
+    { q: "مشتری‌ای می‌خواهد داده‌اش پاک شود. چرا پاک کردن از Silver کافی نیست؟",
+      options: ["کافی است", "چون Silver از Bronze دوباره ساخته می‌شود و داده برمی‌گردد", "چون Silver read-only است", "چون Metabase cache دارد"],
+      answer: 1, explain: "تا وقتی داده در لایه‌ی منبع بازسازی هست، هر لایه‌ی مشتق‌شده آن را برمی‌گرداند؛ داده‌ای که ندارید را نمی‌شود نشت داد (صص. ۵۹۶–۵۹۷)." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sort the Workloads</title>
-<meta name="description" content="Classify queries as operational (OLTP) or analytical (OLAP), and datasets as systems of record or derived data — with feedback drawn from the characteristics the book uses. Illustrates DDIA 2nd ed., Chapter 1.">
+<title>دسته‌بندی workloadها</title>
+<meta name="description" content="کوئری‌ها را به OLTP یا OLAP و مجموعه‌داده‌ها را به system of record یا derived دسته‌بندی کنید، با بازخوردی از همان مشخصه‌هایی که کتاب به کار می‌برد. برای فصل ۱ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .deck { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); align-items: start; }
@@ -20,53 +20,53 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/01-trade-offs-in-data-systems-architecture.html">Chapter 1</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Workloads</span>
+      <a href="../chapters/01-trade-offs-in-data-systems-architecture.html">فصل ۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">workloadها</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 1 · Trade-Offs in Data Systems Architecture</div>
-  <h1>Sort the workloads</h1>
-  <p class="lede">Two distinctions run through the whole book: operational versus analytical workloads, and systems of record versus derived data. Classify each item; the feedback names the characteristic that decides it.</p>
-  <p class="source-note">Illustrates “Characterizing Transaction Processing and Analytics” (pp. 5–7, Table 1-1) and “Systems of Record and Derived Data” (pp. 10–11). The example items are the vault’s own.</p>
+  <div class="eyebrow">فصل ۱ · بده‌بستان‌ها در معماری سیستم‌های داده</div>
+  <h1>دسته‌بندی workloadها</h1>
+  <p class="lede">دو تمایز در سراسر کتاب تکرار می‌شود: workload عملیاتی در برابر تحلیلی، و system of record در برابر derived data. هر مورد را دسته‌بندی کنید؛ بازخورد، مشخصه‌ای را که تعیین‌کننده است نام می‌برد.</p>
+  <p class="source-note">برای بخش‌های «مشخصه‌های پردازش تراکنش و تحلیل» (صص. ۵–۷ و جدول ۱-۱) و «مفهوم system of record و derived data» (صص. ۱۰–۱۱). نمونه‌ها و پیاده‌سازی مال خود vault است.</p>
 
   <div class="tabs" style="margin-top:20px">
-    <div role="tablist" aria-label="Exercises">
-      <button role="tab" id="t1" aria-controls="p1" aria-selected="true">OLTP or OLAP?</button>
-      <button role="tab" id="t2" aria-controls="p2" aria-selected="false">Record or derived?</button>
+    <div role="tablist" aria-label="تمرین‌ها">
+      <button role="tab" id="t1" aria-controls="p1" aria-selected="true">OLTP یا OLAP؟</button>
+      <button role="tab" id="t2" aria-controls="p2" aria-selected="false">record یا derived؟</button>
     </div>
     <div role="tabpanel" id="p1" aria-labelledby="t1"><div class="deck" id="deck1"></div></div>
     <div role="tabpanel" id="p2" aria-labelledby="t2"><div class="deck" id="deck2"></div></div>
   </div>
 
   <div class="panel" style="margin-top:16px">
-    <p class="panel-title">Score</p>
+    <p class="panel-title">امتیاز</p>
     <div class="score">
-      <div class="stat"><span class="stat-label">Answered</span><span class="stat-value" id="answered">0</span></div>
-      <div class="stat"><span class="stat-label">Correct</span><span class="stat-value ok" id="correct">0</span></div>
+      <div class="stat"><span class="stat-label">پاسخ داده‌شده</span><span class="stat-value" id="answered">0</span></div>
+      <div class="stat"><span class="stat-label">درست</span><span class="stat-value ok" id="correct">0</span></div>
     </div>
-    <p style="margin:10px 0 0"><button class="btn small" type="button" id="reset">↺ Start over</button></p>
+    <p style="margin:10px 0 0"><button class="btn small" type="button" id="reset">↺ شروع دوباره</button></p>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>The access pattern decides, not the data.</strong> The same orders table serves point lookups (operational) and year-long aggregates (analytical).</li>
-    <li><strong>Who asks matters.</strong> Operational queries come from end users through an application; analytical queries come from analysts and data scientists supporting decisions.</li>
-    <li><strong>Derived data can be thrown away and rebuilt.</strong> If you can recompute it from somewhere else, it isn’t the system of record — even if it is a copy you rely on every day.</li>
+    <li><strong>الگوی دسترسی تعیین می‌کند، نه خود داده.</strong> همان جدول orders هم به point lookupهای عملیاتی جواب می‌دهد و هم به تجمیع‌های یک‌ساله‌ی تحلیلی.</li>
+    <li><strong>این‌که چه کسی می‌پرسد مهم است.</strong> کوئری عملیاتی از کاربر نهایی و از راه اپلیکیشن می‌آید؛ کوئری تحلیلی از تحلیلگر و data scientist، برای پشتیبانی از تصمیم.</li>
+    <li><strong>داده‌ی derived را می‌شود دور ریخت و دوباره ساخت.</strong> اگر بشود آن را از جای دیگری دوباره حساب کرد، system of record نیست؛ حتی اگر کپی‌ای باشد که هر روز به آن تکیه می‌کنید.</li>
   </ul>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/01-trade-offs-in-data-systems-architecture.html"><small>Lesson</small>1. Trade-Offs in Data Systems Architecture</a></li>
-    <li><a href="04-lsm-tree.html"><small>Simulation</small>Inside an LSM-tree (storage for OLTP)</a></li>
+    <li><a href="../chapters/01-trade-offs-in-data-systems-architecture.html"><small>درس</small>فصل ۱: بده‌بستان‌ها در معماری سیستم‌های داده</a></li>
+    <li><a href="04-lsm-tree.html"><small>شبیه‌سازی</small>درون یک LSM-tree، storage برای OLTP</a></li>
   </ul>
-  <p class="footer">Knowledge Vault exercise · implementation is the vault’s own.</p>
+  <p class="footer">تمرین Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -76,22 +76,22 @@
   var el = Kit.el;
   var SETS = [
     { mount: "#deck1", choices: ["OLTP", "OLAP"], items: [
-      ["Show the contents of customer 4711’s shopping cart", 0, "A point query that fetches a small number of records by key, for an end user."],
-      ["Total revenue per store per month over the last two years", 1, "Aggregates over a large number of records — the classic analytical read pattern."],
-      ["Change the delivery address of one order", 0, "Updates an individual record: operational write pattern."],
-      ["Load yesterday’s data from twenty operational databases", 1, "Bulk import (ETL) is how analytical systems are typically written."],
-      ["Which products are most often bought together?", 1, "Scans the history of many purchases to support a business decision."],
-      ["Post a comment on a photo", 0, "Creates one record on behalf of a user, with low latency expected."],
-      ["Did conversion drop after last week’s redesign?", 1, "An analyst’s question over the history of events, not the latest state."],
-      ["Check the current balance of an account before a payment", 0, "Reads the latest state of one record, in the critical path of a user request."]
+      ["نمایش سبد خرید مشتری ۴۷۱۱", 0, "یک point query که چند رکورد را با کلید برای کاربر نهایی می‌آورد."],
+      ["درآمد کل هر فروشگاه در هر ماه طی دو سال گذشته", 1, "تجمیع روی تعداد زیادی رکورد؛ الگوی کلاسیک خواندن تحلیلی."],
+      ["تغییر آدرس تحویل یک سفارش", 0, "به‌روزرسانی یک رکورد: الگوی نوشتن عملیاتی."],
+      ["بارگذاری داده‌ی دیروز از بیست دیتابیس عملیاتی", 1, "بارگذاری دسته‌ای با ETL روش معمول نوشتن در سیستم‌های تحلیلی است."],
+      ["کدام محصول‌ها بیشتر با هم خریده می‌شوند؟", 1, "تاریخچه‌ی خریدهای زیادی را اسکن می‌کند تا از یک تصمیم کسب‌وکار پشتیبانی کند."],
+      ["گذاشتن کامنت زیر یک عکس", 0, "یک رکورد از طرف کاربر ساخته می‌شود و latency کم انتظار می‌رود."],
+      ["آیا بعد از طراحی تازه‌ی هفته‌ی پیش conversion افت کرد؟", 1, "پرسش یک تحلیلگر روی تاریخچه‌ی رویدادها، نه آخرین وضعیت."],
+      ["بررسی موجودی فعلی یک حساب پیش از پرداخت", 0, "آخرین وضعیت یک رکورد را در مسیر حیاتی درخواست کاربر می‌خواند."]
     ] },
-    { mount: "#deck2", choices: ["System of record", "Derived"], items: [
-      ["The orders table that the checkout service writes to", 0, "Each order is first written here; it is the authoritative version of the fact."],
-      ["A full-text search index over product descriptions", 1, "Built from the product data; if lost, it can be rebuilt by reindexing."],
-      ["A cache of rendered product pages", 1, "A copy computed from other data, kept for faster reads."],
-      ["A recommendation model trained on purchase history", 1, "Computed by transforming other data; retrain it from the source if needed."],
-      ["A data-warehouse table loaded nightly by ETL", 1, "Copied and transformed from operational systems."],
-      ["The event log where an event-sourced app first records each user action", 0, "Events are written here first and other views are derived from them."]
+    { mount: "#deck2", choices: ["system of record", "derived"], items: [
+      ["جدول orders که سرویس checkout در آن می‌نویسد", 0, "هر سفارش اول این‌جا نوشته می‌شود؛ نسخه‌ی معتبر آن واقعیت است."],
+      ["یک full-text search index روی توضیح محصول‌ها", 1, "از داده‌ی محصول ساخته می‌شود؛ اگر از دست برود، با reindex دوباره ساخته می‌شود."],
+      ["یک cache از صفحه‌های رندرشده‌ی محصول", 1, "کپی‌ای که از داده‌ی دیگری حساب شده تا خواندن سریع‌تر شود."],
+      ["یک مدل recommendation که روی تاریخچه‌ی خرید آموزش دیده", 1, "با transform کردن داده‌ی دیگری ساخته شده؛ در صورت نیاز از روی منبع دوباره train می‌شود."],
+      ["جدولی در data warehouse که هر شب با ETL بارگذاری می‌شود", 1, "از سیستم‌های عملیاتی کپی و transform شده است."],
+      ["event logی که یک اپلیکیشن event-sourced هر کار کاربر را اول در آن ثبت می‌کند", 0, "رویدادها اول این‌جا نوشته می‌شوند و viewهای دیگر از آن‌ها derive می‌شوند."]
     ] }
   ];
   var answered = 0, correct = 0;
@@ -115,7 +115,7 @@
             answered++; if (ok) correct++; score();
             card.classList.add(ok ? "right" : "wrong");
             buttons.forEach(function (x, xi) { x.disabled = true; if (xi === it[1]) x.setAttribute("aria-pressed", "true"); });
-            why.textContent = (ok ? "Correct — " : "It’s " + set.choices[it[1]] + ". ") + it[2];
+            why.textContent = (ok ? "درست است. " : "جوابش " + set.choices[it[1]] + " است. ") + it[2];
           });
           return b;
         });

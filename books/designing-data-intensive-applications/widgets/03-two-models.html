@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>یک profile، دو مدل</title>
+<meta name="description" content="یک رزومه، یک بار به شکل JSON document و یک بار به شکل جدول‌های relational. هفت عملیات روزمره را روی هر دو اجرا کنید و ببینید هر کدام به کدام ردیف‌ها یا خط‌ها دست می‌زند، چقدر هزینه دارد و کدام مدل می‌برد. برای فصل ۳ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .ops { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); margin-top: 10px; }
+  .op { font: inherit; text-align: start; cursor: pointer; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); padding: 8px 10px; display: grid; gap: 2px; }
+  .op:hover { border-color: var(--line-strong); }
+  .op[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .op small { color: var(--ink-3); font-size: .74rem; }
+  .op .mark { font-size: .74rem; font-weight: 700; }
+  .cols { display: grid; gap: 14px; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr) minmax(0, 4fr); margin-top: 14px; }
+  @media (max-width: 980px) { .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .cols > :last-child { grid-column: 1 / -1; } }
+  @media (max-width: 640px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+  pre.doc { margin: 0; font-family: var(--mono); font-size: .72rem; line-height: 1.5; overflow-x: auto; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 0; }
+  pre.doc span { display: block; padding: 0 8px 0 2.2em; text-indent: -1.4em; border-left: 3px solid transparent; white-space: pre-wrap; overflow-wrap: anywhere; }
+  pre.doc span.hl, table.data tr.hl td { background: var(--accent-soft); }
+  pre.doc span.hl { border-left-color: var(--accent); }
+  pre.doc span.dim, table.data tr.dim td { opacity: .45; }
+  .tbls { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+  .tbls .tname { font-family: var(--mono); font-size: .76rem; font-weight: 700; color: var(--ink-2); margin: 0 0 3px; }
+  .tbls table.data { font-size: .74rem; }
+  .tbls table.data td, .tbls table.data th { padding: 3px 6px; }
+  .cost { margin: 0 0 10px; font-size: .9rem; }
+  .cost b { display: block; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  .win { display: inline-block; font-size: .78rem; font-weight: 700; border-radius: 999px; padding: 1px 9px; border: 1px solid var(--line-strong); }
+  .win.doc { border-color: var(--s1); color: var(--s1); }
+  .win.rel { border-color: var(--s2); color: var(--s2); }
+  .score { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: .84rem; }
+  .why { font-size: .88rem; margin: 8px 0; }
+  .practice { font-size: .86rem; border-inline-start: 3px solid var(--s3); padding-block: 4px; padding-inline: 10px 0; color: var(--ink-2); }
+  .practice b { color: var(--s3); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-data-models-and-query-languages.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">دو مدل</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۳ · مدل‌های داده و زبان‌های کوئری</div>
+  <h1>یک profile، دو مدل</h1>
+  <p class="lede">یک رزومه، یک بار به شکل JSON document و یک بار به شکل جدول. یک عملیات روزمره انتخاب کنید و ببینید هر مدل به چه چیزهایی باید دست بزند. هیچ‌کدام همیشه نمی‌برد: شکل دسترسی تعیین می‌کند.</p>
+  <p class="source-note">برای «مدل relational در برابر مدل document» در صص. ۶۷–۸۴: کاربر ۲۵۱ از مثال‌های ۳-۱ و ۳-۲ در صص. ۷۰ و ۷۶، جدول‌های شکل ۳-۱ و ۳-۳، جابه‌جایی ترتیب و ارجاع به آیتم تودرتو در ص. ۸۰، migration اسم در ص. ۸۱ و locality در ص. ۸۲. کاربر ۴۶۷ رکورد آزمایشی خود vault است؛ متن هزینه‌ها و خط‌های <em>در عمل</em> مال خود vault است. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="row"><div id="orgmode"></div></div>
+    <div class="ops" id="ops" role="group" aria-label="عملیات‌ها"></div>
+    <div class="score" id="score" aria-live="polite"></div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <p class="panel-title">مدل document</p>
+      <pre class="doc" id="doc"></pre>
+    </div>
+    <div class="panel">
+      <p class="panel-title">مدل relational</p>
+      <div class="tbls" id="tbls" lang="en" dir="ltr"></div>
+    </div>
+    <div class="panel" aria-live="polite" id="verdict"></div>
+  </div>
+
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>خواندن کل یک درخت به نفع document است.</strong> صفحه‌ی profile به یک document دست می‌زند اما به ردیف‌هایی در پنج جدول: این همان locality است، ص. ۸۲، و همان shredding که کتاب درباره‌اش هشدار می‌دهد، ص. ۸۰.</li>
+    <li><strong>هر چیزی که از مرز documentها رد شود به نفع جدول است.</strong> «چه کسی در ۵۱۴ کار کرده؟»، تغییر نام یک سازمان و اشاره به یک سمت، همه از ID و join می‌گذرند؛ صص. ۷۵–۸۰.</li>
+    <li><strong>سازمان‌ها را به ID تبدیل کنید</strong>، مثل مثال ۳-۲: تغییر نام یک write می‌شود، اما صفحه‌ی profile حالا lookup لازم دارد. مفهوم normalization هزینه را از write به read منتقل می‌کند؛ صص. ۷۲–۷۴.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-data-models-and-query-languages.html#کدام-مدل-را-کی-به-کار-ببریم"><small>درس</small>فصل ۳: کدام مدل را کی به کار ببریم</a></li>
+    <li><a href="03-normalization.html"><small>شبیه‌سازی</small>داده را normalize کنیم یا denormalize؟</a></li>
+    <li><a href="03-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۳ در طول یک pipeline داده</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var orgMode = "names", current = null, done = {};
+
+  function docLines() {
+    var ids = orgMode === "ids";
+    return [
+      ["open", "{"],
+      ["uid", '  "user_id": 251,'],
+      ["name", '  "first_name": "Barack", "last_name": "Obama",'],
+      ["headline", '  "headline": "Former President of the United States of America",'],
+      ["region", '  "region_id": "us:91",'],
+      ["pos", '  "positions": ['],
+      ["pos1", ids ? '    {"start": 2009, "end": 2017, "job_title": "President", "org_id": 513},'
+                   : '    {"job_title": "President", "organization": "United States of America"},'],
+      ["pos2", ids ? '    {"start": 2005, "end": 2008, "job_title": "US Senator (D-IL)", "org_id": 514}'
+                   : '    {"job_title": "US Senator (D-IL)", "organization": "United States Senate"}'],
+      ["posc", "  ],"],
+      ["edu", '  "education": ['],
+      ["edu1", '    {"school_name": "Harvard University", "start": 1988, "end": 1991},'],
+      ["edu2", '    {"school_name": "Columbia University", "start": 1981, "end": 1983}'],
+      ["educ", "  ],"],
+      ["ci", '  "contact_info": {"website": "https://barackobama.com",'],
+      ["ci2", '                   "x": "https://x.com/barackobama"}'],
+      ["close", "}"],
+      ["gap", ""],
+      ["u467", ids ? '{"user_id": 467, …, "positions": [{"job_title": "Policy adviser", "org_id": 514}]}'
+                   : '{"user_id": 467, …, "positions": [{"job_title": "Policy adviser", "organization": "United States Senate"}]}']
+    ].concat(ids ? [["gap2", ""], ["o513", '{"org_id": 513, "name": "United States of America"}'], ["o514", '{"org_id": 514, "name": "United States Senate"}']] : []);
+  }
+  var ALL251 = ["open", "uid", "name", "headline", "region", "pos", "pos1", "pos2", "posc", "edu", "edu1", "edu2", "educ", "ci", "ci2", "close"];
+
+  var TABLES = [
+    { name: "users", cols: ["user_id", "first_name", "last_name", "region_id"], rows: [
+      ["u251", "251", "Barack", "Obama", "us:91"], ["u467", "467", "Sam", "Rivera", "us:91"]] },
+    { name: "positions", cols: ["position_id", "user_id", "job_title", "org_id", "sort"], rows: [
+      ["p1", "p1", "251", "President", "513", "1"], ["p2", "p2", "251", "US Senator (D-IL)", "514", "2"], ["p3", "p3", "467", "Policy adviser", "514", "1"]] },
+    { name: "organizations", cols: ["org_id", "name"], rows: [
+      ["o513", "513", "United States of America"], ["o514", "514", "United States Senate"]] },
+    { name: "education", cols: ["user_id", "school_name", "start", "end"], rows: [
+      ["e1", "251", "Harvard University", "1988", "1991"], ["e2", "251", "Columbia University", "1981", "1983"]] },
+    { name: "contact_info", cols: ["user_id", "type", "url"], rows: [
+      ["c1", "251", "website", "https://barackobama.com"], ["c2", "251", "x", "https://x.com/barackobama"]] }
+  ];
+
+  /* each op: doc/rel = {hl, cost}; docIds overrides doc when organizations are IDs */
+  var OPS = [
+    { key: "page", label: "نمایش صفحه‌ی profile", sub: "خواندن کل درخت",
+      doc: { hl: ALL251, cost: "۱ خواندن: یک document که کنار هم ذخیره شده." },
+      docIds: { hl: ALL251.concat(["o513", "o514"]), cost: "۱ خواندن و ۲ lookup برای تبدیل org_id ۵۱۳ و ۵۱۴ به اسم: یک join در کد اپلیکیشن." },
+      rel: { hl: ["u251", "p1", "p2", "o513", "o514", "e1", "e2", "c1", "c2"], cost: "ردیف‌هایی در ۵ جدول: ۵ کوئری یا یک join چندطرفه. یک حلقه‌ی ORM می‌تواند آن را N+1 کند." },
+      win: "doc", winIds: "tie",
+      why: "درختی از داده‌ی one-to-many که یک‌جا load می‌شود دقیقاً کار document است: locality بهتر و بدون shredding؛ صص. ۷۰–۷۱ و ۸۰.",
+      practice: "اگر API منبع کل آبجکت JSON را برمی‌گرداند، دارد document به شما می‌دهد. خود JSON خام را در Bronze بنشانید و در Silver فقط بخش‌هایی را که کوئری می‌شوند به جدول بشکنید." },
+    { key: "who", label: "چه کسی در سازمان ۵۱۴ کار کرده؟", sub: "جهت مخالف",
+      doc: { hl: ["pos2", "u467"], cost: "باید داخل آرایه‌ی positions همه‌ی documentها را گشت، مگر دیتابیس بتواند فیلدهای داخل آرایه را index کند." },
+      rel: { hl: ["o514", "p2", "p3", "u251", "u467"], cost: "یک index lookup روی positions.org_id: ۲ ردیف، بعد ۲ ردیف کاربر." },
+      win: "rel",
+      why: "رابطه‌های many-to-many از هر دو جهت کوئری می‌شوند؛ یک join table با index روی هر دو ستون به هر دو جواب می‌دهد؛ صص. ۷۵–۷۷.",
+      practice: "در warehouse این یک filter روی join table است. اگر رابطه داخل یک ستون آرایه‌ی JSON باشد، هر کوئری باید اول unnestش کند." },
+    { key: "rename", label: "تغییر نام سازمان ۵۱۴", sub: "یک واقعیت، چند کپی؟",
+      doc: { hl: ["pos2", "u467"], cost: "بازنویسی ۲ document، یعنی همه‌ی کپی‌های اسم. یکی جا بماند، با هم ناهم‌خوان می‌شوند." },
+      docIds: { hl: ["o514"], cost: "۱ write روی document سازمان؛ profileها همان org_id ۵۱۴ را نگه می‌دارند." },
+      rel: { hl: ["o514"], cost: "۱ ردیف به‌روز می‌شود." },
+      win: "rel", winIds: "tie",
+      why: "ذخیره‌ی ID واقعیتِ خوانا برای انسان را در یک جا نگه می‌دارد؛ کپی‌ها را باید همه پیدا کرد و عوض کرد؛ صص. ۷۲–۷۴.",
+      practice: "همین اتفاق وقتی می‌افتد که اسم یک category روی همه‌ی ردیف‌های یک جدول Gold کپی شده باشد: با تغییر نامش باید rebuild کنید، یا به جایش یک dimension را join کنید." },
+    { key: "order", label: "بردن یک سمت به بالای فهرست", sub: "ترتیب انتخابی کاربر",
+      doc: { hl: ["pos", "pos1", "pos2", "posc"], cost: "جابه‌جایی دو آیتم در آرایه؛ بازنویسی یک document." },
+      rel: { hl: ["p1", "p2"], cost: "به‌روزرسانی عددهای sort. درج در وسط یعنی شماره‌گذاری دوباره، linked list یا fractional indexing." },
+      win: "doc",
+      why: "آرایه‌ی JSON ترتیب را مجانی نگه می‌دارد؛ دیتابیس‌های relational راه استانداردی برای ذخیره‌ی فهرست قابل جابه‌جایی ندارند؛ ص. ۸۰.",
+      practice: "فهرست‌های مرتب یک اپ معمولاً به شکل آرایه می‌رسند؛ مثلاً گیرنده‌های ذخیره‌شده یا کاشی‌های داشبورد. وقتی آن‌ها را می‌شکنید، index آرایه را به شکل یک ستون نگه دارید." },
+    { key: "ref", label: "لینک به یک سمت", sub: "ارجاع به آیتم تودرتو",
+      doc: { hl: ["pos2"], cost: "خودش ID ندارد: «آیتم ۲ از positions کاربر ۲۵۱»، که با جابه‌جایی فهرست می‌شکند." },
+      rel: { hl: ["p2"], cost: "مقدار position_id برابر p2: یک کلید پایدار." },
+      win: "rel",
+      why: "نمی‌شود مستقیم به آیتم تودرتوی یک document ارجاع داد؛ در جدول هر آیتم ID خودش را دارد؛ ص. ۸۰.",
+      practice: "وقتی loader یک آرایه را flat می‌کند، به هر عضو یک کلید پایدار از منبع بدهید، نه فقط جایگاهش در آرایه." },
+    { key: "headline", label: "ویرایش headline", sub: "یک به‌روزرسانی کوچک",
+      doc: { hl: ALL251, cost: "معمولاً کل document بازنویسی می‌شود؛ documentها را کوچک نگه دارید." },
+      rel: { hl: ["u251"], cost: "۱ مقدار در ۱ ردیف." },
+      win: "rel",
+      why: "هر document یک رشته‌ی پیوسته ذخیره می‌شود؛ locality وقتی بیشترش را لازم دارید کمک می‌کند و وقتی کمی از آن را عوض می‌کنید هزینه دارد؛ ص. ۸۲.",
+      practice: "اگر blobهای پهن JSON با هر تغییر کوچک دوباره فرستاده شوند، loader خیلی بیشتر از مقدار تغییر بایت جابه‌جا می‌کند. یک change feed یا آبجکت‌های باریک‌تر بخواهید." },
+    { key: "schema", label: "شکستن فیلد name", sub: "تغییر قالب",
+      doc: { hl: ["name"], cost: "documentهای جدید با فیلدهای جدید نوشته می‌شوند و هر خواننده باید قدیمی‌ها را هم بفهمد: if (user.name && !user.first_name) …؛ یعنی schema-on-read." },
+      rel: { hl: ["u251", "u467"], cost: "دستور ALTER TABLE ADD COLUMN سریع است؛ بعد UPDATE روی همه‌ی ردیف‌ها که در جدول بزرگ کند است، یا پر کردن در زمان خواندن." },
+      win: "tie",
+      why: "رویکرد schema-on-read شبیه dynamic typing است و schema-on-write شبیه static typing؛ برنده‌ی روشنی ندارد؛ صص. ۸۰–۸۱.",
+      practice: "یک loader با فهرست ستون‌های اعلام‌شده schema-on-write است. ستون JSON خام schema-on-read است، و coalesce() در Silver همان if کتاب است." }
+  ];
+
+  function pick(o, part) { return orgMode === "ids" && o[part + "Ids"] ? o[part + "Ids"] : o[part]; }
+
+  function render() {
+    var op = OPS.filter(function (o) { return o.key === current; })[0];
+    var dhl = op ? pick(op, "doc").hl : [], rhl = op ? op.rel.hl : [];
+    var pre = Kit.clear(Kit.$("#doc"));
+    docLines().forEach(function (l) { pre.appendChild(el("span", { class: op ? (dhl.indexOf(l[0]) >= 0 ? "hl" : "dim") : "" }, l[1] || " ")); });
+
+    var tb = Kit.clear(Kit.$("#tbls"));
+    TABLES.forEach(function (t) {
+      tb.appendChild(el("div", null, el("p", { class: "tname" }, t.name),
+        el("div", { class: "table-wrap" }, el("table", { class: "data" },
+          el("thead", null, el("tr", null, t.cols.map(function (c) { return el("th", null, c); }))),
+          el("tbody", null, t.rows.map(function (r) {
+            return el("tr", { class: op ? (rhl.indexOf(r[0]) >= 0 ? "hl" : "dim") : "" }, r.slice(1).map(function (c) { return el("td", null, c); }));
+          }))))));
+    });
+
+    var v = Kit.clear(Kit.$("#verdict"));
+    if (!op) {
+      v.appendChild(el("p", { class: "panel-title" }, "نتیجه"));
+      v.appendChild(el("p", null, "یک عملیات از بالا انتخاب کنید. خط‌ها و ردیف‌های پررنگ همان چیزهایی‌اند که به آن‌ها دست می‌زند."));
+    } else {
+      var w = pick(op, "win");
+      v.appendChild(el("p", { class: "panel-title" }, op.label));
+      v.appendChild(el("p", { class: "cost" }, el("b", null, "مدل document"), pick(op, "doc").cost));
+      v.appendChild(el("p", { class: "cost" }, el("b", null, "مدل relational"), op.rel.cost));
+      v.appendChild(el("span", { class: "win " + w }, w === "doc" ? "مدل document می‌برد" : w === "rel" ? "مدل relational می‌برد" : "هیچ‌کدام قاطعانه نمی‌برد"));
+      v.appendChild(el("p", { class: "why" }, op.why));
+      v.appendChild(el("p", { class: "practice" }, el("b", null, "در عمل: "), op.practice));
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll(".op"), function (b) {
+      var o = OPS.filter(function (x) { return x.key === b.getAttribute("data-op"); })[0];
+      b.setAttribute("aria-pressed", String(o.key === current));
+      var w = pick(o, "win");
+      b.querySelector(".mark").textContent = done[o.key] ? (w === "doc" ? "✓ مدل document" : w === "rel" ? "✓ مدل relational" : "= مساوی") : "";
+    });
+    var tally = { doc: 0, rel: 0, tie: 0 }, n = 0;
+    OPS.forEach(function (o) { if (done[o.key]) { tally[pick(o, "win")]++; n++; } });
+    Kit.$("#score").textContent = n ? "امتحان‌شده " + n + " از " + OPS.length + ": document " + tally.doc + " · relational " + tally.rel + " · مساوی " + tally.tie : "";
+  }
+
+  var ops = Kit.$("#ops");
+  OPS.forEach(function (o) {
+    ops.appendChild(el("button", { class: "op", type: "button", "data-op": o.key, "aria-pressed": "false",
+      onclick: function () { current = o.key; done[o.key] = true; render(); } },
+      el("span", null, o.label), el("small", null, o.sub), el("span", { class: "mark" })));
+  });
+  Kit.$("#orgmode").appendChild(Kit.segmented({ label: "documentها سازمان را چطور ذخیره می‌کنند", value: orgMode,
+    options: [{ value: "names", label: "سازمان به شکل اسم کپی‌شده، مثال ۳-۱" }, { value: "ids", label: "سازمان به شکل ID، مثال ۳-۲" }],
+    onChange: function (v) { orgMode = v; render(); } }).element);
+  render();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "یک اپ تنظیمات هر مشتری را همیشه به شکل یک آبجکت load می‌کند و هیچ‌وقت روی چند مشتری کوئری نمی‌زند. کدام مدل مناسب است؟",
+      options: ["مدل relational، شکسته به یک جدول برای هر گروه تنظیمات", "یک document برای هر مشتری", "یک graph", "یک star schema"],
+      answer: 1, explain: "درخت خودکفایی که یک‌جا load می‌شود مورد مدل document است؛ شکستنش فقط بی‌دلیل جدول و join اضافه می‌کند (ص. ۸۰)." },
+    { q: "چرا تبدیل سازمان‌ها به ID صفحه‌ی profile را کندتر اما تغییر نام را سریع‌تر می‌کند؟",
+      options: ["ID از اسم بلندتر است", "اسم حالا در یک جاست، پس خواندنش lookup لازم دارد و تغییرش یک write", "document نمی‌تواند عدد ذخیره کند", "indexها از کار می‌افتند"],
+      answer: 1, explain: "مفهوم normalization یک کپی نگه می‌دارد و write را ارزان می‌کند، به قیمت یک join در زمان خواندن (صص. ۷۲–۷۴)." }
+  ]);
+})();
+</script>
+</body>
+</html>

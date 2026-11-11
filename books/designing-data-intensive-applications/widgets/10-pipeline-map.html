@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۱۰ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را طی کنید و ببینید هر مرحله کجا تازه‌ترین داده را تضمین می‌کند، ترتیب رویدادها از کجا می‌آید و کجا به هماهنگی با consensus تکیه دارد. برای فصل ۱۰ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/10-consistency-and-consensus.html">فصل ۱۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۱۰ · مفهوم consistency و consensus</div>
+  <h1>فصل ۱۰ در طول یک pipeline داده</h1>
+  <p class="lede">هر مرحله‌ی pipeline یا داده‌ی تازه را می‌بیند یا نسخه‌ای کهنه را، ترتیب ردیف‌ها را از جایی می‌گیرد، و گاهی به سرویسی تکیه می‌کند که فقط یک صاحب را مجاز می‌داند. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید کجا linearizability هست، کجا فقط ترتیب تقریبی، و کجا consensus پشت صحنه کار می‌کند.</p>
+  <p class="source-note">کل فصل را (صص. ۴۰۱–۴۵۰) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens تازگی:</strong> هر جا خواندن به یکی از چند replica می‌رود، از loader تا داشبورد، تضمین تازگی وجود ندارد؛ پیام‌هایی که از کانال جدا می‌رسند این را آشکار می‌کنند.</li>
+    <li><strong>با lens ترتیب:</strong> تنها ترتیب واقعاً قابل اعتماد در log دیتابیس منبع است؛ هر چیزی که بر اساس ساعت مرتب می‌شود فقط تقریبی است.</li>
+    <li><strong>با lens هماهنگی:</strong> مفهوم consensus پشت صحنه‌ی warehouse کار می‌کند؛ لازم نیست خودتان پیاده‌اش کنید، اما باید بدانید اکثریتش کجاست.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/10-consistency-and-consensus.html"><small>درس</small>فصل ۱۰: مفهوم consistency و consensus</a></li>
+    <li><a href="10-logical-clocks.html"><small>شبیه‌سازی</small>ساعت دیواری، Lamport clock و vector clock</a></li>
+    <li><a href="10-consensus.html"><small>شبیه‌سازی</small>مفهوم consensus</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/10-consistency-and-consensus.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    fresh: {
+      label: "تازگی", axis: ["تازه‌ترین مقدار", "ممکن است کهنه باشد"],
+      cells: {
+        source: { tag: "مفهوم leader منبع", level: 0, pages: "ص. ۴۱۱", slide: "پیادهسازی-سیستمهای-linearizable",
+          text: "اپلیکیشن روی leader دیتابیس منبع می‌نویسد و از آن می‌خواند؛ تا وقتی leader واقعاً leader است، این بالقوه linearizable است." },
+        loader: { tag: "خواندن از replica", level: 3, pages: "صص. ۴۰۳–۴۰۴", slide: "مفهوم-linearizability",
+          text: "مفهوم loader از replica منبع می‌خواند که ممکن است چند ثانیه عقب باشد؛ آنچه load می‌شود لزوماً تازه‌ترین وضعیت نیست." },
+        bronze: { tag: "دو replica", level: 2, pages: "صص. ۴۱۱–۴۱۳", slide: "پیادهسازی-سیستمهای-linearizable",
+          text: "نوشتن روی یک replica انجام می‌شود و با latency به دیگری می‌رسد؛ کوئری از replica دیگر ممکن است آن را هنوز نبیند." },
+        silver: { tag: "ساخت از Bronze", level: 2, pages: "ص. ۴۰۷", slide: "چه-چیزی-یک-سیستم-را-linearizable-میکند",
+          text: "اگر Silver روی replicaی ساخته شود که هنوز آخرین load را ندارد، نتیجه کهنه است اما خطایی نمی‌دهد." },
+        gold: { tag: "پیام «آماده است»", level: 4, pages: "صص. ۴۰۹–۴۱۱", slide: "تکیه-بر-linearizability",
+          text: "پیام پایان DAG از کانالی جدا می‌رسد و ممکن است از replication جلو بزند؛ همان race بین کانال‌ها در شکل ۱۰-۵." },
+        nb: { tag: "کوئری‌های پشت‌سرهم", level: 3, pages: "ص. ۴۰۷", slide: "چه-چیزی-یک-سیستم-را-linearizable-میکند",
+          text: "دو کوئری پشت‌سرهم در notebook ممکن است به دو replica بروند؛ دومی ممکن است داده‌ای قدیمی‌تر از اولی ببیند." },
+        serve: { tag: "داشبورد پشت proxy", level: 3, pages: "صص. ۴۰۳–۴۰۴", slide: "مفهوم-linearizability",
+          text: "دو بار تازه کردن داشبورد ممکن است دو replica را ببیند؛ مثل Bryce در شکل ۱۰-۱ که نتیجه‌ی کهنه را می‌بیند." }
+      }
+    },
+    order: {
+      label: "ترتیب رویدادها", axis: ["ترتیب قابل اعتماد", "فقط تقریبی"],
+      cells: {
+        source: { tag: "مفهوم log در منبع", level: 0, pages: "صص. ۴۲۹–۴۳۱", slide: "چهرههای-گوناگون-consensus",
+          text: "مفهوم WAL در دیتابیس منبع یک ترتیب کامل از نوشتن‌ها دارد؛ اگر CDC از آن بخواند، ترتیب قابل اعتماد است." },
+        loader: { tag: "مفهوم cursor زمانی", level: 3, pages: "صص. ۴۱۸–۴۱۹", slide: "مولدهای-id-و-logical-clockها",
+          text: "ترتیب بر اساس update_date به ساعت سرورهای منبع تکیه دارد؛ مثل IDهای مبتنی بر timestamp، فقط تقریبی است." },
+        bronze: { tag: "شناسه‌ی load", level: 2, pages: "صص. ۴۱۸–۴۱۹", slide: "مولدهای-id-و-logical-clockها",
+          text: "شناسه‌ای که loader روی چند worker می‌سازد یکتاست اما ترتیبش چیزی درباره‌ی ترتیب واقعی رویدادها نمی‌گوید." },
+        silver: { tag: "آخرین نسخه", level: 3, pages: "صص. ۴۲۰–۴۲۲", slide: "مفهوم-logical-clock",
+          text: "انتخاب آخرین نسخه‌ی هر ردیف ترتیبی سازگار با ترتیب علّی لازم دارد؛ شماره‌ی نسخه‌ی افزایشی از منبع از timestamp قابل اعتمادتر است." },
+        gold: { tag: "جمع بر اساس زمان", level: 2, pages: "ص. ۴۱۹", slide: "مولدهای-id-و-logical-clockها",
+          text: "جمع روزانه و ماهانه به برچسب زمان رویداد تکیه دارد؛ برای گزارش کافی است، برای تصمیم درباره‌ی «کدام اول بود» نه." },
+        nb: { tag: "مرتب کردن دستی", level: 2, pages: "ص. ۴۲۰", slide: "مفهوم-logical-clock",
+          text: "مرتب کردن رویدادها بر اساس timestamp در notebook ممکن است پاسخ را پیش از پرسش بگذارد، مثل آزمایش logical clock." },
+        serve: { tag: "فقط خواندن", level: 1, pages: "ص. ۴۲۴", slide: "مولدهای-id-با-linearizability",
+          text: "داشبورد ترتیبی نمی‌سازد؛ همان ترتیبی را نشان می‌دهد که لایه‌های پیش ساخته‌اند." }
+      }
+    },
+    coord: {
+      label: "هماهنگی و consensus", axis: ["بدون نیاز به هماهنگی", "به consensus تکیه دارد"],
+      cells: {
+        source: { tag: "مفهوم failover منبع", level: 3, pages: "صص. ۴۳۴–۴۳۵", slide: "مفهوم-consensus-در-عمل",
+          text: "مفهوم failover خودکار امن در دیتابیس منبع یعنی consensus؛ بدون الگوریتم اثبات‌شده ممکن است split brain یا گم شدن commitها پیش بیاید." },
+        loader: { tag: "یک اجرای فعال", level: 3, pages: "صص. ۴۰۸–۴۰۹", slide: "تکیه-بر-linearizability",
+          text: "قاعده‌ی «فقط یک اجرای فعال برای هر DAG» یک قفل است که روی دیتابیس metadata در Airflow تکیه دارد؛ یک node تنها با تراکنش." },
+        bronze: { tag: "هماهنگی replicaها", level: 4, pages: "صص. ۴۳۷–۴۳۹", slide: "مفهوم-coordination-service",
+          text: "مفهوم replication جدول‌ها در ClickHouse با یک coordination service مثل ClickHouse Keeper هماهنگ می‌شود؛ اگر اکثریتش از دست برود، نوشتن‌ها متوقف می‌شوند." },
+        silver: { tag: "همان هماهنگی", level: 3, pages: "ص. ۴۳۷", slide: "مفهوم-coordination-service",
+          text: "جدول‌های Silver هم روی همان دو replica و همان coordination service هستند." },
+        gold: { tag: "همان هماهنگی", level: 3, pages: "ص. ۴۳۷", slide: "مفهوم-coordination-service",
+          text: "مثل Silver؛ یک coordination service سه‌nodeی یک خرابی را تحمل می‌کند." },
+        nb: { tag: "کار مستقل", level: 0, pages: "ص. ۴۴۳", slide: "مفهوم-coordination-service",
+          text: "کار تحلیل‌گرها هماهنگی لازم ندارد؛ consensus اینجا فقط هزینه می‌سازد." },
+        serve: { tag: "خواندن کهنه قابل قبول", level: 1, pages: "ص. ۴۴۰", slide: "مفهوم-coordination-service",
+          text: "داشبورد و API می‌توانند داده‌ی کمی کهنه را بپذیرند؛ مثل service discovery، در دسترس بودن از linearizability مهم‌تر است." }
+      }
+    }
+};
+
+  var lens = "fresh", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "پیام «گزارش آماده است» رسیده اما داشبورد عددهای دیروز را نشان می‌دهد. این کدام مشکل است؟",
+      options: ["مفهوم write skew", "وابستگی زمانی بین کانال‌ها: پیام از replication جلو زده", "خطای Gold", "مفهوم clock skew"],
+      answer: 1, explain: "مثل شکل ۱۰-۵: دو کانال، یعنی پیام و replication، با سرعت‌های متفاوت؛ بدون linearizability گیرنده ممکن است داده‌ی کهنه ببیند (صص. ۴۰۹–۴۱۱)." },
+    { q: "یک coordination service سه‌nodeی چند خرابی هم‌زمان را تحمل می‌کند؟",
+      options: ["هیچ", "یک", "دو", "سه"],
+      answer: 1, explain: "مفهوم consensus اکثریت لازم دارد؛ دو node از سه اکثریت است، پس یک خرابی تحمل می‌شود (ص. ۴۳۷)." }
+  ]);
+})();
+</script>
+</body>
+</html>

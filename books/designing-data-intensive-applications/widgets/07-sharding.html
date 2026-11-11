@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sharding and Rebalancing</title>
-<meta name="description" content="Compare hash mod N, a fixed number of shards, and rendezvous hashing when nodes join; see how key-range sharding and hot keys create hot spots. Illustrates DDIA 2nd ed., Chapter 7.">
+<title>مفهوم sharding و rebalancing</title>
+<meta name="description" content="وقتی node اضافه می‌شود hash mod N، تعداد ثابت shard و rendezvous hashing را مقایسه کنید؛ و ببینید key range و hot key چطور hot spot می‌سازند. برای فصل ۷ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .bars { display: grid; gap: 6px; }
@@ -12,13 +12,13 @@
   .bar .track { height: 18px; background: var(--surface-2); border-radius: 4px; overflow: hidden; display: flex; }
   .bar .stay { background: var(--accent); opacity: .75; }
   .bar .moved { background: var(--s2); }
-  .bar .num { font-family: var(--mono); text-align: right; color: var(--ink-2); }
+  .bar .num { font-family: var(--mono); text-align: end; color: var(--ink-2); }
   .bar.hot .track { outline: 2px solid var(--bad); }
   .keymap { display: grid; grid-template-columns: repeat(64, 1fr); gap: 1px; }
   .keymap i { aspect-ratio: 1; border-radius: 2px; display: block; }
   .keymap i.mv { outline: 1.5px solid var(--ink); outline-offset: -1px; }
   .legend { display: flex; gap: 14px; font-size: .8rem; color: var(--ink-2); flex-wrap: wrap; margin-top: 8px; }
-  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; }
+  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-inline-end: 5px; vertical-align: -2px; }
   .legend .s::before { background: var(--accent); opacity: .75; }
   .legend .m::before { background: var(--s2); }
 </style>
@@ -26,87 +26,87 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/07-sharding.html">Chapter 7</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Sharding</span>
+      <a href="../chapters/07-sharding.html">فصل ۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم sharding</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 7 · Sharding</div>
-  <h1>Sharding and rebalancing</h1>
-  <p class="lede">Sharding spreads data and load over many machines. Two questions decide whether it works: how much data has to move when a node joins, and whether the load actually ends up even.</p>
-  <p class="source-note">Illustrates “Sharding by Hash of Key” (hash mod N, fixed number of shards, hash-range sharding, consistent hashing; pp. 258–263) and “Skewed Workloads and Relieving Hot Spots” (pp. 263–264). Rendezvous (highest-random-weight) hashing is one of the consistent hashing algorithms the book names. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۷ · مفهوم sharding</div>
+  <h1>مفهوم sharding و rebalancing</h1>
+  <p class="lede">مفهوم sharding داده و بار را روی ماشین‌های زیادی پخش می‌کند. دو پرسش تعیین می‌کنند که کار می‌کند یا نه: وقتی یک node اضافه می‌شود چقدر داده باید جابه‌جا شود، و آیا بار واقعاً یکنواخت پخش می‌شود.</p>
+  <p class="source-note">برای بخش «مفهوم sharding بر اساس hash کلید» در صص. ۲۵۸–۲۶۳، یعنی hash mod N، تعداد ثابت shard، hash range و consistent hashing، و بخش «بارهای نامتوازن و کم کردن hot spot» در صص. ۲۶۳–۲۶۴. روش rendezvous hashing، یا highest random weight، یکی از الگوریتم‌های consistent hashing است که کتاب نام می‌برد. پیاده‌سازی مال خود vault است.</p>
 
   <div class="tabs" id="tabs">
-    <div role="tablist" aria-label="Scenarios">
-      <button role="tab" id="t-rb" aria-controls="p-rb" aria-selected="true">Rebalancing</button>
-      <button role="tab" id="t-hot" aria-controls="p-hot" aria-selected="false">Hot spots</button>
+    <div role="tablist" aria-label="سناریوها">
+      <button role="tab" id="t-rb" aria-controls="p-rb" aria-selected="true">مفهوم rebalancing</button>
+      <button role="tab" id="t-hot" aria-controls="p-hot" aria-selected="false">مفهوم hot spot</button>
     </div>
 
     <section id="p-rb" role="tabpanel" aria-labelledby="t-rb">
       <div class="sim">
         <div class="panel">
-          <p class="panel-title">Keys per node after going from <span id="from"></span> to <span id="to"></span> nodes</p>
-          <div class="bars" id="rb-bars"></div>
-          <div class="legend"><span class="s">stayed on its node</span><span class="m">moved here</span></div>
-          <p class="panel-title" style="margin-top:14px">First 512 keys (colour = node, outline = moved)</p>
-          <div class="keymap" id="keymap" aria-hidden="true"></div>
+          <p class="panel-title">تعداد کلید هر node بعد از رفتن از <span id="from"></span> به <span id="to"></span> node</p>
+          <div class="bars" id="rb-bars" dir="ltr"></div>
+          <div class="legend"><span class="s">روی node خودش ماند</span><span class="m">به این‌جا منتقل شد</span></div>
+          <p class="panel-title" style="margin-top:14px">نخستین ۵۱۲ کلید؛ رنگ یعنی node و حاشیه یعنی منتقل‌شده</p>
+          <div class="keymap" id="keymap" dir="ltr" aria-hidden="true"></div>
           <div class="stats" id="rb-stats" style="margin-top:14px"></div>
         </div>
         <div class="stack">
           <div class="panel">
-            <p class="panel-title">Setup</p>
-            <div class="field"><span class="field-head">Assignment strategy</span><div id="strategy"></div><span class="field-hint" id="strategy-hint"></span></div>
+            <p class="panel-title">تنظیمات</p>
+            <div class="field"><span class="field-head">روش تخصیص</span><div id="strategy"></div><span class="field-hint" id="strategy-hint"></span></div>
             <div id="rb-sliders" style="margin-top:10px"></div>
           </div>
         </div>
       </div>
-      <h3 style="margin-top:20px">What to notice</h3>
+      <h3 style="margin-top:20px">به چه چیزی دقت کنید</h3>
       <ul class="notice-list">
-        <li><strong>Hash mod N</strong> moves almost every key when N changes (going from 3 to 4 nodes keeps only about a quarter in place) — far more than the 1/N share the new node needs.</li>
-        <li><strong>Fixed number of shards</strong> moves whole shards: the new node steals some shards from each existing node, so only about 1/N of the data moves. Balance is limited by shard granularity — try 16 shards on 12 nodes.</li>
-        <li><strong>Rendezvous hashing</strong> also moves ~1/N, but the new node receives individual keys scattered across all old nodes rather than whole shards.</li>
+        <li><strong>روش hash mod N</strong> با تغییر N تقریباً همه‌ی کلیدها را جابه‌جا می‌کند؛ رفتن از ۳ به ۴ node فقط حدود یک‌چهارم را سر جایش نگه می‌دارد، خیلی بیشتر از سهم 1/N که node تازه لازم دارد.</li>
+        <li><strong>تعداد ثابت shard</strong> shardهای کامل را جابه‌جا می‌کند: node تازه چند shard از هر node موجود برمی‌دارد، پس فقط حدود 1/N داده جابه‌جا می‌شود. توازن به اندازه‌ی shardها محدود است؛ ۱۶ shard روی ۱۲ node را امتحان کنید.</li>
+        <li><strong>روش rendezvous hashing</strong> هم حدود 1/N را جابه‌جا می‌کند، اما node تازه به جای shardهای کامل کلیدهای تکی پراکنده از همه‌ی nodeهای قدیمی را می‌گیرد.</li>
       </ul>
     </section>
 
     <section id="p-hot" role="tabpanel" aria-labelledby="t-hot" hidden>
       <div class="sim">
         <div class="panel">
-          <p class="panel-title">Write load per shard (last 2,000 writes)</p>
-          <div class="bars" id="hot-bars"></div>
+          <p class="panel-title">بار نوشتن هر shard در ۲٬۰۰۰ نوشتن آخر</p>
+          <div class="bars" id="hot-bars" dir="ltr"></div>
           <div class="stats" id="hot-stats" style="margin-top:14px"></div>
         </div>
         <div class="panel">
-          <p class="panel-title">Workload</p>
-          <div class="field"><span class="field-head">Sharding scheme</span><div id="scheme"></div></div>
-          <div class="field"><span class="field-head">Keys being written</span><div id="keys"></div></div>
+          <p class="panel-title">بار کاری</p>
+          <div class="field"><span class="field-head">طرح sharding</span><div id="scheme"></div></div>
+          <div class="field"><span class="field-head">کلیدهایی که نوشته می‌شوند</span><div id="keys"></div></div>
           <div id="hot-sliders" style="margin-top:10px"></div>
-          <label class="check" style="margin-top:10px"><input type="checkbox" id="split"> Split the hot key with a two-digit random suffix</label>
+          <label class="check" style="margin-top:10px"><input type="checkbox" id="split"> تقسیم hot key با یک پسوند تصادفی دورقمی</label>
           <p class="field-hint" id="split-hint"></p>
         </div>
       </div>
-      <h3 style="margin-top:20px">What to notice</h3>
+      <h3 style="margin-top:20px">به چه چیزی دقت کنید</h3>
       <ul class="notice-list">
-        <li><strong>Key-range sharding + sequential keys</strong> (e.g. timestamps): every write lands on the shard holding the newest range — one hot shard, the rest idle. Hashing the key spreads them.</li>
-        <li><strong>A single hot key</strong> (a celebrity's post) defeats any hash: all its writes go to one shard. Appending two random digits splits its writes over 100 keys — at the cost of reads that must now fetch and combine all 100.</li>
+        <li><strong>مدل key range با کلیدهای پشت سر هم</strong>، مثل timestamp: هر نوشتن روی shardی می‌افتد که جدیدترین بازه را دارد؛ یک shard داغ و بقیه بیکار. hash کردن کلید آن‌ها را پخش می‌کند.</li>
+        <li><strong>یک hot key تکی</strong>، مثل پست یک چهره‌ی مشهور، هر hashی را شکست می‌دهد: همه‌ی نوشتن‌هایش به یک shard می‌روند. اضافه کردن دو رقم تصادفی نوشتن‌هایش را بین ۱۰۰ کلید پخش می‌کند؛ به قیمت خواندن‌هایی که حالا باید هر ۱۰۰ تا را بگیرند و ترکیب کنند.</li>
       </ul>
     </section>
   </div>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/07-sharding.html"><small>Lesson</small>7. Sharding</a></li>
-    <li><a href="../lab/07-rebalancing/README.md"><small>Experiment</small>Measure key movement in Python</a></li>
+    <li><a href="../chapters/07-sharding.html"><small>درس</small>فصل ۷: مفهوم sharding</a></li>
+    <li><a href="../lab/07-rebalancing/README.md"><small>آزمایش</small>اندازه‌گیری جابه‌جایی کلیدها در Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -128,7 +128,7 @@
     var w1 = 100 * stay / max, w2 = 100 * moved / max;
     return el("div", { class: "bar" + (hot ? " hot" : "") },
       el("span", null, label),
-      el("span", { class: "track", role: "img", "aria-label": label + ": " + (stay + moved) + (moved ? ", of which " + moved + " moved in" : "") },
+      el("span", { class: "track", role: "img", "aria-label": label + ": " + (stay + moved) + (moved ? "، که " + moved + " تا منتقل شده" : "") },
         el("span", { class: "stay", style: "width:" + w1 + "%" }), el("span", { class: "moved", style: "width:" + w2 + "%" })),
       el("span", { class: "num" }, note));
   }
@@ -142,9 +142,9 @@
   for (var i = 0; i < KEYS; i++) keyHashes.push(hash("user:" + i));
   var R = { strategy: "mod", nodes: 4, shards: 64 };
   var hints = {
-    mod: "node = hash(key) mod N",
-    fixed: "shard = hash(key) mod S (S fixed); shards are dealt to nodes; a new node steals shards evenly",
-    hrw: "node = the node with the highest hash(key, node) — rendezvous hashing"
+    mod: "قاعده: node = hash(key) mod N",
+    fixed: "قاعده: shard = hash(key) mod S با S ثابت؛ shardها بین nodeها پخش می‌شوند و node تازه به‌طور مساوی shard برمی‌دارد",
+    hrw: "قاعده: nodeی که بزرگ‌ترین hash(key, node) را دارد؛ یعنی rendezvous hashing"
   };
 
   // Fixed shards: deterministic "steal evenly" assignment built up node by node.
@@ -192,16 +192,16 @@
     for (var k = 0; k < 512; k++) km.appendChild(el("i", { class: after[k] !== before[k] ? "mv" : null, style: "background:" + color(after[k]) }));
     var ideal = 1 / N, frac = moved / KEYS;
     var mean = KEYS / N, imb = max / mean;
-    stats("rb-stats", [["keys moved", Kit.pct(frac), frac > 2 * ideal ? "bad" : "ok"], ["ideal (1/N)", Kit.pct(ideal)], ["max / mean load", imb.toFixed(2) + "×", imb > 1.3 ? "warn" : ""]]);
+    stats("rb-stats", [["کلیدهای منتقل‌شده", Kit.pct(frac), frac > 2 * ideal ? "bad" : "ok"], ["حالت ایده‌آل، یعنی 1/N", Kit.pct(ideal)], ["نسبت بیشترین بار به میانگین", imb.toFixed(2) + "×", imb > 1.3 ? "warn" : ""]]);
   }
   var shardSlider;
-  document.getElementById("strategy").appendChild(Kit.segmented({ label: "Assignment strategy", value: R.strategy,
-    options: [{ value: "mod", label: "hash mod N" }, { value: "fixed", label: "Fixed shards" }, { value: "hrw", label: "Rendezvous" }],
+  document.getElementById("strategy").appendChild(Kit.segmented({ label: "روش تخصیص", value: R.strategy,
+    options: [{ value: "mod", label: "روش hash mod N" }, { value: "fixed", label: "تعداد ثابت shard" }, { value: "hrw", label: "روش rendezvous" }],
     onChange: function (v) { R.strategy = v; document.getElementById("strategy-hint").textContent = hints[v]; shardSlider.element.hidden = v !== "fixed"; renderRb(); } }).element);
   document.getElementById("strategy-hint").textContent = hints[R.strategy];
   var rs = document.getElementById("rb-sliders");
-  rs.appendChild(Kit.slider({ label: "Nodes after adding one (N)", min: 2, max: 12, value: R.nodes, onInput: function (v) { R.nodes = v; renderRb(); } }).element);
-  shardSlider = Kit.slider({ label: "Number of shards (S)", min: 16, max: 256, step: 16, value: R.shards, onInput: function (v) { R.shards = v; renderRb(); } });
+  rs.appendChild(Kit.slider({ label: "تعداد node بعد از افزودن یکی، یعنی N", min: 2, max: 12, value: R.nodes, onInput: function (v) { R.nodes = v; renderRb(); } }).element);
+  shardSlider = Kit.slider({ label: "تعداد shard، یعنی S", min: 16, max: 256, step: 16, value: R.shards, onInput: function (v) { R.shards = v; renderRb(); } });
   shardSlider.element.hidden = true;
   rs.appendChild(shardSlider.element);
   renderRb();
@@ -232,28 +232,28 @@
     var bars = Kit.clear(document.getElementById("hot-bars"));
     load.forEach(function (c, s) { bars.appendChild(bar("shard " + s, c, 0, max, c, c > 2 * mean)); });
     var busiest = max / 2000;
-    stats("hot-stats", [["busiest shard", Kit.pct(busiest), busiest > 0.3 ? "bad" : busiest > 0.2 ? "warn" : "ok"], ["fair share", Kit.pct(1 / SHARDS)]]);
-    document.getElementById("split-hint").textContent = H.keys === "hot" ? (split ? (H.scheme === "range" ? "With key-range sharding a suffix keeps the 100 keys adjacent, so they stay on one shard — switch to hash sharding (or put the digits at the start of the key)." : "Writes to the hot key now spread over 100 keys; a read must query all of them.") : "All writes to the hot key share one partition key.") : "Applies to the hot-key workload.";
+    stats("hot-stats", [["پرکارترین shard", Kit.pct(busiest), busiest > 0.3 ? "bad" : busiest > 0.2 ? "warn" : "ok"], ["سهم منصفانه", Kit.pct(1 / SHARDS)]]);
+    document.getElementById("split-hint").textContent = H.keys === "hot" ? (split ? (H.scheme === "range" ? "با key range، پسوند ۱۰۰ کلید را کنار هم نگه می‌دارد، پس روی یک shard می‌مانند؛ به hash بروید، یا رقم‌ها را اول کلید بگذارید." : "نوشتن‌های hot key حالا بین ۱۰۰ کلید پخش شده‌اند؛ هر خواندن باید از همه‌ی آن‌ها بپرسد.") : "همه‌ی نوشتن‌های hot key یک partition key دارند.") : "فقط برای بار کاری hot key کاربرد دارد.";
   }
-  document.getElementById("scheme").appendChild(Kit.segmented({ label: "Sharding scheme", value: H.scheme,
-    options: [{ value: "range", label: "Key range" }, { value: "hash", label: "Hash of key" }], onChange: function (v) { H.scheme = v; renderHot(); } }).element);
-  document.getElementById("keys").appendChild(Kit.segmented({ label: "Keys being written", value: H.keys,
-    options: [{ value: "seq", label: "Sequential timestamps" }, { value: "uniform", label: "Uniform" }, { value: "hot", label: "One hot key" }], onChange: function (v) { H.keys = v; renderHot(); } }).element);
-  document.getElementById("hot-sliders").appendChild(Kit.slider({ label: "Share of writes to the hot key", min: 0.05, max: 0.8, step: 0.05, value: H.hotShare,
+  document.getElementById("scheme").appendChild(Kit.segmented({ label: "طرح sharding", value: H.scheme,
+    options: [{ value: "range", label: "مدل key range" }, { value: "hash", label: "مدل hash کلید" }], onChange: function (v) { H.scheme = v; renderHot(); } }).element);
+  document.getElementById("keys").appendChild(Kit.segmented({ label: "کلیدهایی که نوشته می‌شوند", value: H.keys,
+    options: [{ value: "seq", label: "timestampهای پشت سر هم" }, { value: "uniform", label: "یکنواخت" }, { value: "hot", label: "یک hot key" }], onChange: function (v) { H.keys = v; renderHot(); } }).element);
+  document.getElementById("hot-sliders").appendChild(Kit.slider({ label: "سهم نوشتن‌های hot key", min: 0.05, max: 0.8, step: 0.05, value: H.hotShare,
     format: function (v) { return Kit.pct(v, 0); }, onInput: function (v) { H.hotShare = v; renderHot(); } }).element);
   document.getElementById("split").addEventListener("change", renderHot);
   renderHot();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why is hash(key) mod N a poor way to assign keys to nodes?",
-      options: ["It distributes keys unevenly", "Changing N moves most keys to a different node", "It cannot be computed by clients"],
-      answer: 1, explain: "Distribution is even, but almost every key's remainder changes when N changes, so rebalancing moves nearly everything." },
-    { q: "What do you give up by sharding on a hash of the key instead of the key itself?",
-      options: ["Even distribution", "Efficient range queries over the key", "The ability to add nodes"],
-      answer: 1, explain: "Adjacent keys land on unrelated shards, so a range scan must query all shards." },
-    { q: "Appending a random two-digit suffix to a hot key…",
-      options: ["Reduces both read and write load per shard", "Splits the writes, but each read must now combine up to 100 keys", "Makes the key cold"],
-      answer: 1, explain: "Writes spread across 100 keys; reads have to fetch and merge all of them, and you must track which keys are split." }
+    { q: "چرا hash(key) mod N راه بدی برای تخصیص کلیدها به nodeهاست؟",
+      options: ["چون کلیدها را نامتوازن پخش می‌کند", "چون تغییر N بیشتر کلیدها را به node دیگری می‌برد", "چون clientها نمی‌توانند حسابش کنند"],
+      answer: 1, explain: "پخش یکنواخت است، اما باقی‌مانده‌ی تقریباً هر کلیدی با تغییر N عوض می‌شود، پس rebalancing تقریباً همه‌چیز را جابه‌جا می‌کند (صص. ۲۵۸–۲۵۹)." },
+    { q: "با sharding بر اساس hash کلید به جای خود کلید، چه چیزی را از دست می‌دهید؟",
+      options: ["پخش یکنواخت", "کوئری بازه‌ای کارآمد روی کلید", "امکان اضافه کردن node"],
+      answer: 1, explain: "کلیدهای مجاور روی shardهای بی‌ربط می‌افتند، پس range scan باید از همه‌ی shardها بپرسد (صص. ۲۵۸–۲۶۱)." },
+    { q: "اضافه کردن یک پسوند تصادفی دورقمی به یک hot key…",
+      options: ["بار خواندن و نوشتن هر shard را کم می‌کند", "نوشتن‌ها را پخش می‌کند، اما هر خواندن حالا باید تا ۱۰۰ کلید را ترکیب کند", "کلید را سرد می‌کند"],
+      answer: 1, explain: "نوشتن‌ها بین ۱۰۰ کلید پخش می‌شوند؛ خواندن‌ها باید همه را بگیرند و merge کنند، و باید حساب کنید کدام کلیدها تقسیم شده‌اند (صص. ۲۶۳–۲۶۴)." }
   ]);
 })();
 </script>

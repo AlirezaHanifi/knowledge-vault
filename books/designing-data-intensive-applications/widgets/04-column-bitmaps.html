@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Column Storage and Bitmap Indexes</title>
-<meta name="description" content="Store a fact table by column, turn a column into one bitmap per distinct value, run-length encode the bitmaps, and answer IN and AND filters with bitwise OR and AND. Illustrates DDIA Chapter 4.">
+<title>ذخیره‌سازی ستونی و bitmap index</title>
+<meta name="description" content="یک fact table را ستونی ذخیره کنید، یک ستون را به یک bitmap برای هر مقدار متمایز تبدیل کنید، bitmapها را run-length encode کنید و فیلترهای IN و AND را با OR و AND بیتی جواب بدهید. برای فصل ۴ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .grid24 { display: grid; gap: 3px; font-family: var(--mono); font-size: .72rem; overflow-x: auto; }
@@ -29,58 +29,58 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/04-storage-and-retrieval.html">Chapter 4</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Column storage</span>
+      <a href="../chapters/04-storage-and-retrieval.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ذخیره‌سازی ستونی</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 4 · Storage and Retrieval</div>
-  <h1>Column storage and bitmap indexes</h1>
-  <p class="lede">A column store keeps each column’s values together, in the same row order. A column with few distinct values becomes one bitmap per value — a bit per row — and those mostly-zero bitmaps run-length encode to almost nothing. Filters then turn into bitwise OR and AND.</p>
-  <p class="source-note">Illustrates “Column-Oriented Storage”, “Column compression” and “Sort order in column storage” (pp. 137–141, Figures 4-7 and 4-8, and the two example <code>WHERE</code> clauses on p. 140). The 24 sales rows are the vault’s own toy data; real blocks hold thousands to millions of rows. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۴ · ذخیره‌سازی و بازیابی</div>
+  <h1>ذخیره‌سازی ستونی و bitmap index</h1>
+  <p class="lede">هر column store مقدارهای هر ستون را کنار هم و با ترتیب ردیف یکسان نگه می‌دارد. ستونی با مقدارهای متمایز کم به یک bitmap برای هر مقدار تبدیل می‌شود، یک بیت برای هر ردیف، و این bitmapهای پر از صفر با run-length encoding تقریباً به هیچ می‌رسند. بعد فیلترها به OR و AND بیتی تبدیل می‌شوند.</p>
+  <p class="source-note">برای «ذخیره‌سازی column-oriented»، «فشرده‌سازی ستون‌ها» و «ترتیب مرتب‌سازی در ذخیره‌سازی ستونی» در صص. ۱۳۷–۱۴۱، شکل‌های ۴-۷ و ۴-۸ و دو مثال <code>WHERE</code> در ص. ۱۴۰. بیست‌وچهار ردیف فروش داده‌ی آزمایشی خود vault است؛ بلوک‌های واقعی هزاران تا میلیون‌ها ردیف دارند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
-      <div class="grid24" id="grid" role="img" aria-label="Columns and bitmaps; the result line lists matching rows"></div>
-      <p class="field-hint" style="margin-top:8px">Each column is one line: row <em>k</em> is position <em>k</em> in every line. Run-length encoding (right) lists alternating run lengths, starting with zeros — <code>3,2,19</code> = 3 zeros, 2 ones, 19 zeros.</p>
+      <div class="grid24" id="grid" dir="ltr" role="img" aria-label="ستون‌ها و bitmapها؛ خط نتیجه ردیف‌های منطبق را نشان می‌دهد"></div>
+      <p class="field-hint" style="margin-top:8px">هر ستون یک خط است: ردیف <em>k</em> در هر خط جایگاه <em>k</em> است. ستون run-length encoding در سمت راست طول runهای پشت‌سرهم را از صفر شروع می‌کند؛ <code>3,2,19</code> یعنی ۳ صفر، ۲ یک و ۱۹ صفر.</p>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Query</p>
-        <div class="field"><span class="field-head">product_sk IN (…) — bitwise OR</span><div class="chips" id="prod"></div></div>
-        <div class="field" style="margin-top:10px"><span class="field-head">AND store_sk = … — bitwise AND</span><div id="store"></div></div>
+        <p class="panel-title">کوئری</p>
+        <div class="field"><span class="field-head">شرط product_sk IN (…)، یعنی OR بیتی</span><div class="chips" id="prod"></div></div>
+        <div class="field" style="margin-top:10px"><span class="field-head">شرط AND store_sk = …، یعنی AND بیتی</span><div id="store"></div></div>
         <code class="q" id="sql"></code>
-        <label class="check" style="margin-top:12px"><input type="checkbox" id="sorted"> Sort rows by product_sk, then store_sk</label>
+        <label class="check" style="margin-top:12px"><input type="checkbox" id="sorted"> ردیف‌ها را بر اساس product_sk و بعد store_sk مرتب کن</label>
       </div>
       <div class="panel wide">
-        <p class="panel-title">Result</p>
+        <p class="panel-title">نتیجه</p>
         <div class="stats" id="stats"></div>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Row k is bit k everywhere.</strong> AND-ing a product bitmap with a store bitmap only works because every column keeps the rows in the same order.</li>
-    <li><strong>Sparse bitmaps compress.</strong> Each bitmap is mostly zeros; run-length encoding stores a few counts instead of 24 bits.</li>
-    <li><strong>Sorting helps compression.</strong> Sort by product_sk and each product’s ones become one contiguous run — the first sort column compresses best (p. 141).</li>
-    <li><strong>Only touched columns are read.</strong> The query needs product_sk and store_sk; the other columns never leave disk.</li>
+    <li><strong>ردیف k همه‌جا بیت k است.</strong> AND کردن bitmap محصول با bitmap فروشگاه فقط به این دلیل کار می‌کند که همه‌ی ستون‌ها ردیف‌ها را با یک ترتیب نگه می‌دارند.</li>
+    <li><strong>bitmapهای sparse فشرده می‌شوند.</strong> هر bitmap بیشتر صفر است؛ run-length encoding به جای ۲۴ بیت چند عدد ذخیره می‌کند.</li>
+    <li><strong>مرتب‌سازی به فشرده‌سازی کمک می‌کند.</strong> بر اساس product_sk مرتب کنید تا یک‌های هر محصول یک run پیوسته شوند؛ اولین ستون sort بهتر از همه فشرده می‌شود، ص. ۱۴۱.</li>
+    <li><strong>فقط ستون‌های لازم خوانده می‌شوند.</strong> کوئری product_sk و store_sk را لازم دارد؛ بقیه‌ی ستون‌ها هیچ‌وقت از دیسک خوانده نمی‌شوند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/04-storage-and-retrieval.html"><small>Lesson</small>4. Storage and Retrieval</a></li>
+    <li><a href="../chapters/04-storage-and-retrieval.html"><small>درس</small>فصل ۴: ذخیره‌سازی و بازیابی</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -111,7 +111,7 @@
   }
   function bitLine(label, bits, cls) {
     return line(label, bits.map(function (b) { return Kit.el("span", { class: "b" + (b ? " on" : "") }); }), cls, rle(bits).join(","),
-      label + ": rows " + bits.map(function (b, i) { return b ? i + 1 : null; }).filter(Boolean).join(", "));
+      label + ": ردیف‌های " + bits.map(function (b, i) { return b ? i + 1 : null; }).filter(Boolean).join(", "));
   }
   function render() {
     var rs = rows();
@@ -121,25 +121,25 @@
     var result = storeBits ? prodOr.map(function (b, i) { return b & storeBits[i]; }) : prodOr;
 
     var grid = Kit.clear(document.getElementById("grid"));
-    grid.appendChild(line("row", rs.map(function (_, i) { return Kit.el("span", { class: "c" }, String(i + 1)); }), "head"));
-    grid.appendChild(Kit.el("div", { class: "sub" }, "fact_sales, stored column by column"));
+    grid.appendChild(line("ردیف", rs.map(function (_, i) { return Kit.el("span", { class: "c" }, String(i + 1)); }), "head"));
+    grid.appendChild(Kit.el("div", { class: "sub" }, "جدول fact_sales، ذخیره‌شده ستون‌به‌ستون"));
     [["date_key (1401…)", "date_key"], ["product_sk", "product_sk"], ["store_sk", "store_sk"], ["quantity", "quantity"]].forEach(function (c) {
       grid.appendChild(line(c[0], rs.map(function (row, i) {
         var v = c[1] === "date_key" ? String(row.date_key).slice(-2) : String(row[c[1]]);
         return Kit.el("span", { class: "c" + (result[i] && (c[1] === "product_sk" || c[1] === "store_sk") ? " match" : "") }, v);
       })));
     });
-    grid.appendChild(Kit.el("div", { class: "sub" }, "bitmaps for product_sk, one bit per row · RLE"));
+    grid.appendChild(Kit.el("div", { class: "sub" }, "bitmapهای product_sk، یک بیت برای هر ردیف · RLE"));
     var rleTotal = 0;
     PRODUCTS.forEach(function (p) {
       var b = bitmap(rs, "product_sk", p);
       rleTotal += rle(b).length;
       grid.appendChild(bitLine("= " + p, b, state.prods.indexOf(p) >= 0 ? "sel" : null));
     });
-    grid.appendChild(Kit.el("div", { class: "sub" }, "query"));
+    grid.appendChild(Kit.el("div", { class: "sub" }, "کوئری"));
     if (state.prods.length) grid.appendChild(bitLine("OR (" + state.prods.join(",") + ")", prodOr));
     if (storeBits) grid.appendChild(bitLine("store_sk = " + state.store, storeBits, "sel"));
-    grid.appendChild(bitLine(storeBits ? "AND → result" : "result", result, "result"));
+    grid.appendChild(bitLine(storeBits ? "AND → نتیجه" : "نتیجه", result, "result"));
 
     var where = [];
     if (state.prods.length) where.push("product_sk IN (" + state.prods.join(", ") + ")");
@@ -149,7 +149,7 @@
     var matches = result.reduce(function (a, b) { return a + b; }, 0);
     var qty = rs.reduce(function (a, row, i) { return a + (result[i] ? row.quantity : 0); }, 0);
     var stats = Kit.clear(document.getElementById("stats"));
-    [["Matching rows", matches], ["SUM(quantity)", qty], ["Bitmap bits", PRODUCTS.length * rs.length], ["RLE numbers", rleTotal]].forEach(function (s) {
+    [["ردیف‌های منطبق", matches], ["مقدار SUM(quantity)", qty], ["بیت‌های bitmap", PRODUCTS.length * rs.length], ["عددهای RLE", rleTotal]].forEach(function (s) {
       stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value" }, String(s[1]))));
     });
   }
@@ -166,22 +166,22 @@
     });
     prod.appendChild(b);
   });
-  document.getElementById("store").appendChild(Kit.segmented({ label: "Store filter", value: 0,
-    options: [{ value: 0, label: "any" }].concat(STORES.map(function (s) { return { value: s, label: String(s) }; })),
+  document.getElementById("store").appendChild(Kit.segmented({ label: "فیلتر فروشگاه", value: 0,
+    options: [{ value: 0, label: "همه" }].concat(STORES.map(function (s) { return { value: s, label: String(s) }; })),
     onChange: function (v) { state.store = v; render(); } }).element);
   document.getElementById("sorted").addEventListener("change", function (e) { state.sorted = e.target.checked; render(); });
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How does a column store answer WHERE product_sk IN (31, 68, 69)?",
-      options: ["Scan every row and test each value", "Load the three bitmaps and OR them together", "Look the values up in a B-tree"],
-      answer: 1, explain: "Each value has its own bitmap; IN becomes a bitwise OR (p. 140)." },
-    { q: "Why can the product_sk and store_sk bitmaps be AND-ed?",
-      options: ["Both columns are sorted independently", "Every column stores the rows in the same order, so bit k means row k in both", "Bitmaps are always the same length by chance"],
-      answer: 1, explain: "Sorting columns independently would break this; rows are sorted as a whole even though they are stored by column (p. 140)." },
-    { q: "Which column compresses best after sorting by (product_sk, store_sk)?",
-      options: ["product_sk — its equal values become long runs", "store_sk", "quantity"],
-      answer: 0, explain: "The first sort key gets the longest runs; later keys are only sorted within groups (p. 141)." }
+    { q: "هر column store شرط WHERE product_sk IN (31, 68, 69) را چطور جواب می‌دهد؟",
+      options: ["همه‌ی ردیف‌ها را اسکن می‌کند و هر مقدار را بررسی می‌کند", "سه bitmap را load می‌کند و با هم OR می‌کند", "مقدارها را در یک B-tree پیدا می‌کند"],
+      answer: 1, explain: "هر مقدار bitmap خودش را دارد؛ IN به OR بیتی تبدیل می‌شود (ص. ۱۴۰)." },
+    { q: "چرا می‌شود bitmapهای product_sk و store_sk را با هم AND کرد؟",
+      options: ["هر دو ستون مستقل از هم مرتب شده‌اند", "همه‌ی ستون‌ها ردیف‌ها را با یک ترتیب ذخیره می‌کنند، پس بیت k در هر دو یعنی ردیف k", "طول bitmapها اتفاقاً همیشه برابر است"],
+      answer: 1, explain: "مرتب کردن ستون‌ها به‌طور مستقل این را خراب می‌کرد؛ ردیف‌ها یک‌جا مرتب می‌شوند، با این‌که ستونی ذخیره می‌شوند (ص. ۱۴۰)." },
+    { q: "بعد از مرتب‌سازی بر اساس (product_sk, store_sk) کدام ستون بهتر از همه فشرده می‌شود؟",
+      options: ["ستون product_sk، چون مقدارهای برابرش runهای بلند می‌شوند", "ستون store_sk", "ستون quantity"],
+      answer: 0, explain: "اولین sort key بلندترین runها را می‌گیرد؛ کلیدهای بعدی فقط داخل گروه‌ها مرتب‌اند (ص. ۱۴۱)." }
   ]);
 })();
 </script>

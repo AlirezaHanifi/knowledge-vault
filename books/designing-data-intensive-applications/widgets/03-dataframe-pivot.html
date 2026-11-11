@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>از ردیف تا ماتریس</title>
+<meta name="description" content="یک notebook را سلول‌به‌سلول اجرا کنید: امتیازهای فیلم کتاب را به یک ماتریس sparse کاربر × فیلم pivot کنید، یک category را one-hot encode کنید و تاریخ‌ها را scale کنید؛ بعد همین را با داده‌ی خرج انجام دهید و ببینید چند ردیف به notebook می‌کشید. برای فصل ۳ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .cells { display: grid; gap: 8px; }
+  .cell { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .cell.ran { border-color: var(--ok); }
+  .cell.next { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .cell .head { display: flex; justify-content: space-between; gap: 8px; font-size: .74rem; color: var(--ink-3); padding: 4px 8px 0; }
+  .cell pre { margin: 0; padding: 2px 8px 6px; font-family: var(--mono); font-size: .76rem; white-space: pre-wrap; word-break: break-word; }
+  .cell .say { font-size: .8rem; color: var(--ink-2); padding: 0 8px 6px; margin: 0; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  table.data.m td, table.data.m th { text-align: center; padding: 3px 7px; font-variant-numeric: tabular-nums; }
+  table.data.m td.empty { color: var(--ink-3); }
+  table.data.m td.v { background: color-mix(in srgb, var(--s1) 18%, var(--surface)); font-weight: 650; }
+  table.data.m td.one { background: color-mix(in srgb, var(--s3) 20%, var(--surface)); font-weight: 650; }
+  table.data.m td.new, table.data.m th.new { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .outhead { font-size: .82rem; color: var(--ink-3); margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-data-models-and-query-languages.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">از ردیف تا ماتریس</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۳ · مدل‌های داده و زبان‌های کوئری</div>
+  <h1>از ردیف تا ماتریس</h1>
+  <p class="lede">ساختار DataFrame با یک دنباله از فرمان‌ها کار می‌کند، نه با یک کوئری declarative. notebook را سلول‌به‌سلول اجرا کنید و ببینید یک جدول relational چطور به ماتریس عددی‌ای تبدیل می‌شود که مدل انتظارش را دارد.</p>
+  <p class="source-note">برای «ساختارهای DataFrame، ماتریس و آرایه» در صص. ۱۰۵–۱۰۷: امتیازهای فیلم و ماتریس شکل ۳-۹ در ص. ۱۰۶، one-hot encoding و تاریخ‌های scaleشده. ژانر فیلم‌ها، داده‌ی خرج و کد سبک pandas مال خود vault است؛ کد فقط نمایش داده می‌شود و اجرا نمی‌شود. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel" aria-live="polite">
+        <p class="panel-title" id="out-title">خروجی</p>
+        <p class="outhead" id="out-head"></p>
+        <div class="table-wrap" id="out" lang="en" dir="ltr"></div>
+      </div>
+      <div class="panel">
+        <div class="stats">
+          <div class="stat"><span class="stat-label">ابعاد</span><span class="stat-value" id="s-shape">–</span></div>
+          <div class="stat"><span class="stat-label">خانه‌های پر</span><span class="stat-value" id="s-fill">–</span></div>
+          <div class="stat"><span class="stat-label">ردیف‌های کشیده‌شده به notebook</span><span class="stat-value" id="s-pulled">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <div id="dataset"></div>
+        <div id="pull" style="margin-top:10px"></div>
+        <div class="btns">
+          <button class="btn primary" type="button" id="run">اجرای سلول بعدی</button>
+          <button class="btn" type="button" id="reset">از اول</button>
+        </div>
+      </div>
+      <div class="panel wide"><div class="cells" id="cells"></div></div>
+      <div class="panel wide"><ol id="log"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>رویکرد imperative، قدم‌به‌قدم.</strong> هر سلول شکل داده را کمی عوض می‌کند؛ wrangling همین‌طور کار می‌کند، برخلاف یک دستور SQL؛ ص. ۱۰۵.</li>
+    <li><strong>ماتریس sparse است.</strong> فقط ۱۱ خانه از ۴۲ خانه‌ی کاربر × فیلم امتیاز دارند. با هزاران فیلم، این برای جدول مناسب نیست و برای sparse array مناسب است؛ ص. ۱۰۶.</li>
+    <li><strong>همه‌چیز عدد می‌شود.</strong> ژانرها به ستون‌های ۰ و ۱ تبدیل می‌شوند، یعنی one-hot، و تاریخ‌ها به float؛ بعد جبر خطی به کار می‌آید؛ ص. ۱۰۶.</li>
+    <li><strong>در عمل، کمتر بکشید.</strong> aggregate کردن در warehouse و pivot کردن نتیجه‌ی کوچک، همان ماتریس را با ردیف‌های خیلی کمتری می‌دهد.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/03-data-models-and-query-languages.html#ساختارهای-dataframe-ماتریس-و-آرایه"><small>درس</small>فصل ۳: ساختارهای DataFrame، ماتریس و آرایه</a></li>
+    <li><a href="03-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۳ در طول یک pipeline داده</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+
+  /* Figure 3-9 (p. 106) */
+  var RATINGS = [[100, 12, 4, "2017-12-14"], [100, 14, 5, "2021-10-28"], [101, 10, 1, "2024-04-18"], [101, 11, 3, "2004-05-25"],
+    [101, 13, 2, "2020-07-13"], [102, 15, 4, "2010-05-11"], [103, 13, 3, "2007-02-07"], [104, 13, 3, "2000-02-25"],
+    [104, 14, 5, "2009-11-15"], [105, 11, 4, "2005-10-24"], [106, 14, 5, "2024-03-10"]];
+  var USERS = [100, 101, 102, 103, 104, 105, 106], MOVIES = [10, 11, 12, 13, 14, 15];
+  var GENRE = { 10: "comedy", 11: "drama", 12: "horror", 13: "comedy", 14: "drama", 15: "comedy" }; // vault's toy genres
+
+  /* practice: toy spending */
+  var CATS = ["groceries", "transport", "rent", "fun"];
+  var TX = [["c1", "groceries", 42], ["c1", "groceries", 18], ["c1", "rent", 900], ["c1", "fun", 35], ["c2", "transport", 12], ["c2", "transport", 9],
+    ["c2", "groceries", 64], ["c3", "rent", 750], ["c3", "groceries", 27], ["c3", "groceries", 31], ["c3", "fun", 80], ["c4", "transport", 22],
+    ["c4", "fun", 15], ["c4", "fun", 40], ["c4", "groceries", 51]];
+  var SEG = { c1: "salaried", c2: "student", c3: "salaried", c4: "freelance" }; // toy
+
+  var dataset = "book", pull = "agg", ran = 0;
+  var log = Kit.log(Kit.$("#log"), { max: 10 });
+
+  function scaleDates() {
+    var ts = RATINGS.map(function (r) { return Date.parse(r[3]); });
+    var lo = Math.min.apply(null, ts), hi = Math.max.apply(null, ts);
+    return ts.map(function (t) { return ((t - lo) / (hi - lo)).toFixed(2); });
+  }
+  function aggregate() {
+    var m = {};
+    TX.forEach(function (t) { var k = t[0] + "|" + t[1]; m[k] = (m[k] || 0) + t[2]; });
+    return Object.keys(m).sort().map(function (k) { var p = k.split("|"); return [p[0], p[1], m[k]]; });
+  }
+
+  function cellsFor() {
+    if (dataset === "book") return [
+      { code: 'ratings = pd.read_sql("SELECT * FROM movie_ratings", db)', say: "جدول relational را load کنید: یک ردیف برای هر امتیاز.", pulled: 11,
+        out: function () { return { title: "ratings", head: "۱۱ ردیف × ۴ ستون", shape: "11 × 4", fill: "100%", table: table(["user_id", "movie_id", "rating", "date"], RATINGS) }; } },
+      { code: 'm = ratings.pivot(index="user_id", columns="movie_id", values="rating")', say: "عمل pivot: هر فیلم یک ستون و هر کاربر یک ردیف می‌شود.",
+        out: function () { return { title: "m", head: "کاربر × فیلم؛ خانه‌ی خالی یعنی بدون امتیاز", shape: "7 × 6", fill: "۱۱ از ۴۲؛ ۲۶٪", table: matrix(USERS, MOVIES, function (u, mv) { var r = RATINGS.filter(function (x) { return x[0] === u && x[1] === mv; })[0]; return r ? r[2] : null; }, "v") }; } },
+      { code: 'genres = pd.get_dummies(movies.set_index("movie_id")["genre"], dtype=int)', say: "ژانر را one-hot encode کنید: یک ستون ۰ و ۱ برای هر مقدار.",
+        out: function () { var gs = ["comedy", "drama", "horror"]; return { title: "genres", head: "فیلم × ژانر؛ ژانرهای آزمایشی", shape: "6 × 3", fill: "۶ عدد ۱ از ۱۸", table: matrix(MOVIES, gs, function (mv, g) { return GENRE[mv] === g ? 1 : 0; }, "one", "movie_id") }; } },
+      { code: 'ratings["t"] = (ratings.date - ratings.date.min()) / (ratings.date.max() - ratings.date.min())', say: "تاریخ‌ها را به floatهای بین ۰ و ۱ scale کنید.",
+        out: function () { var s = scaleDates(); return { title: "ratings", head: "یک ستون عددی جدید به اسم t", shape: "11 × 5", fill: "100%", table: table(["user_id", "movie_id", "rating", "date", "t"], RATINGS.map(function (r, i) { return r.concat([s[i]]); }), 4) }; } }
+    ];
+    var first = pull === "raw"
+      ? { code: 'tx = pd.read_sql("SELECT customer_id, category, amount FROM gold.transactions", db)\nagg = tx.groupby(["customer_id", "category"]).amount.sum().reset_index()', say: "همه‌ی تراکنش‌ها را بکشید، بعد در notebook گروه کنید.", pulled: TX.length,
+          out: function () { return { title: "agg", head: TX.length + " ردیف خام کشیده شد و به " + aggregate().length + " ردیف گروه شد", shape: aggregate().length + " × 3", fill: "100%", table: table(["customer_id", "category", "amount"], aggregate()) }; } }
+      : { code: 'agg = pd.read_sql("""\n  SELECT customer_id, category, sum(amount) AS amount\n  FROM gold.transactions GROUP BY 1, 2""", db)', say: "بگذارید warehouse گروه کند؛ فقط نتیجه را بکشید.", pulled: aggregate().length,
+          out: function () { return { title: "agg", head: aggregate().length + " ردیف کشیده شد که از قبل گروه شده‌اند", shape: aggregate().length + " × 3", fill: "100%", table: table(["customer_id", "category", "amount"], aggregate()) }; } };
+    return [first,
+      { code: 'm = agg.pivot(index="customer_id", columns="category", values="amount").fillna(0)', say: "به مشتری × category pivot کنید؛ خرج نکردن ۰ می‌شود.",
+        out: function () { var a = aggregate(); return { title: "m", head: "مشتری × category", shape: "4 × 4", fill: a.length + " از ۱۶ غیرصفر", table: matrix(["c1", "c2", "c3", "c4"], CATS, function (c, k) { var r = a.filter(function (x) { return x[0] === c && x[1] === k; })[0]; return r ? r[2] : 0; }, "v", "customer_id", true) }; } },
+      { code: 'X = m.join(pd.get_dummies(customers.set_index("customer_id")["segment"], dtype=int))', say: "مقدار segment را به شکل ستون‌های one-hot اضافه کنید: یک feature matrix.",
+        out: function () { var a = aggregate(), cols = CATS.concat(["freelance", "salaried", "student"]); return { title: "X", head: "featureهای آماده برای مدل", shape: "4 × 7", fill: "فقط عدد", table: matrix(["c1", "c2", "c3", "c4"], cols, function (c, k) { if (CATS.indexOf(k) >= 0) { var r = a.filter(function (x) { return x[0] === c && x[1] === k; })[0]; return r ? r[2] : 0; } return SEG[c] === k ? 1 : 0; }, function (k) { return CATS.indexOf(k) >= 0 ? "v" : "one"; }, "customer_id", true, ["freelance", "salaried", "student"]) }; } }
+    ];
+  }
+
+  function table(cols, rows, newCol) {
+    return el("table", { class: "data m" }, el("thead", null, el("tr", null, cols.map(function (c, i) { return el("th", { class: i === newCol ? "new" : "" }, c); }))),
+      el("tbody", null, rows.map(function (r) { return el("tr", null, r.map(function (v, i) { return el("td", { class: i === newCol ? "new" : "" }, String(v)); })); })));
+  }
+  function matrix(rows, cols, get, cls, corner, zeroIsEmpty, newCols) {
+    return el("table", { class: "data m" },
+      el("thead", null, el("tr", null, el("th", null, corner || "user_id"), cols.map(function (c) { return el("th", { class: newCols && newCols.indexOf(c) >= 0 ? "new" : "" }, String(c)); }))),
+      el("tbody", null, rows.map(function (r) {
+        return el("tr", null, el("th", null, String(r)), cols.map(function (c) {
+          var v = get(r, c), k = typeof cls === "function" ? cls(c) : cls;
+          var empty = v === null || (zeroIsEmpty && v === 0 && k === "v") || (k === "one" && v === 0);
+          return el("td", { class: empty ? "empty" : k }, v === null ? "·" : String(v));
+        }));
+      })));
+  }
+
+  function render() {
+    var cells = cellsFor(), box = Kit.clear(Kit.$("#cells"));
+    cells.forEach(function (c, i) {
+      box.appendChild(el("div", { class: "cell" + (i < ran ? " ran" : i === ran ? " next" : "") },
+        el("div", { class: "head" }, el("span", null, "In [" + (i < ran ? i + 1 : " ") + "]"), el("span", null, i < ran ? "✓ اجرا شد" : i === ran ? "◀ بعدی" : "")),
+        el("pre", null, c.code), el("p", { class: "say" }, c.say)));
+    });
+    var out = Kit.clear(Kit.$("#out"));
+    if (!ran) {
+      Kit.$("#out-title").textContent = "خروجی"; Kit.$("#out-head").textContent = "سلول اول را اجرا کنید.";
+      Kit.$("#s-shape").textContent = "–"; Kit.$("#s-fill").textContent = "–";
+    } else {
+      var o = cells[ran - 1].out();
+      Kit.$("#out-title").textContent = "Out [" + ran + "]: " + o.title; Kit.$("#out-head").textContent = o.head;
+      out.appendChild(o.table);
+      Kit.$("#s-shape").textContent = o.shape; Kit.$("#s-fill").textContent = o.fill;
+    }
+    var pulled = cells.slice(0, ran).reduce(function (a, c) { return a + (c.pulled || 0); }, 0);
+    Kit.$("#s-pulled").textContent = String(pulled);
+    Kit.$("#run").disabled = ran >= cells.length;
+    document.getElementById("pull").style.display = dataset === "tx" ? "" : "none";
+  }
+
+  Kit.$("#run").addEventListener("click", function () {
+    var cells = cellsFor(); if (ran >= cells.length) return;
+    ran++; render();
+    log.add("سلول " + ran + ": " + cells[ran - 1].say, "muted");
+    if (dataset === "tx" && ran === 1) log.add(pull === "raw" ? TX.length + " ردیف خام کشیده شد. در یک جدول واقعی یعنی همه‌ی تراکنش‌هایی که تا حالا انجام شده." : aggregate().length + " ردیف کشیده شد: یکی برای هر مشتری و category.", pull === "raw" ? "warn" : "ok");
+    if (ran === cellsFor().length) log.add("تمام شد: یک ماتریس عددی، آماده‌ی جبر خطی؛ ص. ۱۰۶.", "ok");
+  });
+  Kit.$("#reset").addEventListener("click", function () { ran = 0; log.clear(); render(); });
+  Kit.$("#dataset").appendChild(Kit.segmented({ label: "داده", value: dataset,
+    options: [{ value: "book", label: "کتاب: امتیاز فیلم" }, { value: "tx", label: "در عمل: خرج مشتری" }],
+    onChange: function (v) { dataset = v; ran = 0; log.clear(); render(); } }).element);
+  Kit.$("#pull").appendChild(Kit.segmented({ label: "سلول اول", value: pull,
+    options: [{ value: "agg", label: "عمل aggregate در warehouse" }, { value: "raw", label: "کشیدن ردیف‌های خام" }],
+    onChange: function (v) { pull = v; ran = 0; log.clear(); render(); } }).element);
+  render();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "چرا ماتریس کاربر × فیلم در مقیاس بزرگ برای جدول relational مناسب نیست؟",
+      options: ["ردیف‌هایش خیلی کم است", "ماتریس sparse است و می‌تواند هزاران ستون داشته باشد، یکی برای هر فیلم", "امتیازها عدد نیستند", "جدول نمی‌تواند عدد صحیح ذخیره کند"],
+      answer: 1, explain: "هر فیلم یک ستون می‌شود و بیشتر خانه‌ها خالی‌اند؛ sparse array این را راحت مدیریت می‌کند و جدول نه (ص. ۱۰۶)." },
+    { q: "روش one-hot encoding با ستون ژانری که مقدارهای comedy، drama و horror دارد چه می‌کند؟",
+      options: ["آن را با عددهای ۱، ۲ و ۳ جایگزین می‌کند", "برای هر ژانر یک ستون ۰ و ۱ می‌سازد که هر جا فیلم آن ژانر را دارد ۱ است", "حذفش می‌کند", "فیلم‌ها را بر اساس ژانر مرتب می‌کند"],
+      answer: 1, explain: "یک ستون برای هر مقدار ممکن؛ برای فیلم‌هایی با چند ژانر هم کار می‌کند (ص. ۱۰۶)." }
+  ]);
+})();
+</script>
+</body>
+</html>

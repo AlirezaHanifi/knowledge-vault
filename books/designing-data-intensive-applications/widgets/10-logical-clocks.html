@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ordering Events with Logical Clocks</title>
-<meta name="description" content="Post and reply in the book's three-person chat and compare three ways to order the messages: skewed wall-clock timestamps, Lamport timestamps, and vector clocks that reveal which messages were concurrent. Illustrates DDIA Chapter 10.">
+<title>مرتب کردن رویدادها با logical clock</title>
+<meta name="description" content="در چت سه‌نفره‌ی کتاب پیام بفرستید و جواب بدهید و سه روش مرتب کردن پیام‌ها را مقایسه کنید: timestampهای ساعت دیواری با skew، مفهوم Lamport timestamp، و vector clockهایی که نشان می‌دهند کدام پیام‌ها concurrent بوده‌اند. برای فصل ۱۰ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .people { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -17,31 +17,31 @@
   @media (max-width: 700px) { .people, .orders { grid-template-columns: 1fr; } }
   .order h4 { font-size: .8rem; margin: 0 0 4px; color: var(--ink-2); }
   .order ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
-  .order li { font-size: .76rem; padding: 4px 6px; border-radius: 4px; background: var(--surface-2); border-left: 3px solid var(--line-strong); }
-  .order li .ts { font-family: var(--mono); color: var(--ink-3); float: right; margin-left: 6px; }
-  .order li.bad { background: var(--bad-soft); border-left-color: var(--bad); }
-  .order li.conc { border-left-color: var(--warn); }
+  .order li { font-size: .76rem; padding: 4px 6px; border-radius: 4px; background: var(--surface-2); border-inline-start: 3px solid var(--line-strong); }
+  .order li .ts { font-family: var(--mono); color: var(--ink-3); float: inline-end; margin-inline-start: 6px; }
+  .order li.bad { background: var(--bad-soft); border-inline-start-color: var(--bad); }
+  .order li.conc { border-inline-start-color: var(--warn); }
   .A { color: var(--s1); font-weight: 650; } .B { color: var(--s2); font-weight: 650; } .C { color: var(--s3); font-weight: 650; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/10-consistency-and-consensus.html">Chapter 10</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Logical clocks</span>
+      <a href="../chapters/10-consistency-and-consensus.html">فصل ۱۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم logical clock</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 10 · Consistency and Consensus</div>
-  <h1>Ordering events: wall clocks, Lamport clocks, vector clocks</h1>
-  <p class="lede">A reply must never be ordered before the message it answers. Wall-clock timestamps can get that wrong when clocks are skewed. A Lamport clock — a counter that jumps forward whenever it sees a larger one — always orders causes before effects; a vector clock additionally tells you which messages were concurrent.</p>
-  <p class="source-note">Illustrates “ID Generators and Logical Clocks”, “Lamport timestamps” and “Lamport/hybrid logical clocks versus vector clocks” (pp. 417–422, Figures 10-8 and 10-9), with the book’s Aaliyah, Bryce and Caleb chat. Clock offsets, delivery delays and message texts are the vault’s own. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۰ · مفهوم consistency و consensus</div>
+  <h1>مرتب کردن رویدادها: ساعت دیواری، Lamport clock و vector clock</h1>
+  <p class="lede">یک پاسخ هرگز نباید پیش از پیامی که به آن جواب می‌دهد قرار بگیرد. timestampهای ساعت دیواری وقتی ساعت‌ها skew دارند ممکن است این را اشتباه کنند. یک Lamport clock، یعنی شمارنده‌ای که هر وقت عدد بزرگ‌تری ببیند به آن می‌پرد، همیشه علت را پیش از معلول می‌گذارد؛ و vector clock علاوه بر این می‌گوید کدام پیام‌ها concurrent بوده‌اند.</p>
+  <p class="source-note">برای بخش «مولدهای ID و logical clockها»، از جمله Lamport timestamp و مقایسه‌ی Lamport و hybrid logical clock با vector clock، در صص. ۴۱۷–۴۲۲ و شکل‌های ۱۰-۸ و ۱۰-۹، با چت Aaliyah و Bryce و Caleb کتاب. اختلاف ساعت‌ها، latency تحویل و متن پیام‌ها مال خود vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
@@ -52,37 +52,37 @@
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Network</p>
+        <p class="panel-title">شبکه</p>
         <div class="row">
-          <button class="btn primary" type="button" id="deliver">Deliver next message</button>
-          <button class="btn" type="button" id="all">Deliver all</button>
+          <button class="btn primary" type="button" id="deliver">تحویل پیام بعدی</button>
+          <button class="btn" type="button" id="all">تحویل همه</button>
         </div>
         <div id="sliders" style="margin-top:10px"></div>
-        <p class="panel-title" style="margin-top:12px">The book’s scenario (Figure 10-9)</p>
+        <p class="panel-title" style="margin-top:12px">سناریوی کتاب، شکل ۱۰-۹</p>
         <div id="player"></div>
       </div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Wall clocks break causality.</strong> With Bryce’s clock slow, his reply is stamped earlier than Aaliyah’s message — red in the first list.</li>
-    <li><strong>Lamport: (counter, node).</strong> Both first messages get counter 1; Bryce, having seen 1, stamps his reply 2. Ties are broken by node name: (1, Aaliyah) &lt; (1, Caleb) &lt; (2, Bryce).</li>
-    <li><strong>Total order, not concurrency.</strong> Lamport timestamps order concurrent messages arbitrarily; the vector clocks show that Aaliyah’s and Caleb’s messages were concurrent (amber).</li>
-    <li><strong>The cost of vectors.</strong> A vector clock carries one counter per node — fine for three people, heavy for thousands of nodes (p. 422).</li>
+    <li><strong>ساعت دیواری ترتیب علّی را می‌شکند.</strong> وقتی ساعت Bryce کند است، پاسخش برچسبی زودتر از پیام Aaliyah می‌خورد؛ با رنگ قرمز در فهرست اول.</li>
+    <li><strong>مدل Lamport یعنی زوج <span lang="en">(counter, node)</span>.</strong> هر دو پیام اول counter یک می‌گیرند؛ Bryce که ۱ را دیده، پاسخش را با ۲ برچسب می‌زند. تساوی با اسم node شکسته می‌شود: <span lang="en">(1, Aaliyah) &lt; (1, Caleb) &lt; (2, Bryce)</span>.</li>
+    <li><strong>ترتیب کامل، نه تشخیص concurrency.</strong> مفهوم Lamport timestamp پیام‌های concurrent را دلبخواهی مرتب می‌کند؛ vector clockها نشان می‌دهند پیام‌های Aaliyah و Caleb concurrent بوده‌اند، با رنگ کهربایی.</li>
+    <li><strong>هزینه‌ی vectorها.</strong> هر vector clock برای هر node یک counter دارد؛ برای سه نفر خوب است و برای هزاران node سنگین (ص. ۴۲۲).</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/10-consistency-and-consensus.html"><small>Lesson</small>10. Consistency and Consensus</a></li>
-    <li><a href="../lab/10-logical-clocks/README.md"><small>Experiment</small>Physical, Lamport and hybrid logical clocks</a></li>
-    <li><a href="09-clock-skew.html"><small>Simulation</small>Clock skew and last write wins</a></li>
+    <li><a href="../chapters/10-consistency-and-consensus.html"><small>درس</small>فصل ۱۰: مفهوم consistency و consensus</a></li>
+    <li><a href="../lab/10-logical-clocks/README.md"><small>آزمایش</small>ساعت فیزیکی، Lamport clock و hybrid logical clock</a></li>
+    <li><a href="09-clock-skew.html"><small>شبیه‌سازی</small>مفهوم clock skew و last write wins</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -97,7 +97,7 @@
   function reset() {
     s = { t: 1000, msgs: [], flight: [], nodes: {}, pc: 0 };
     IDS.forEach(function (id) { s.nodes[id] = { lam: 0, vc: { A: 0, B: 0, C: 0 }, seen: [] }; });
-    log.clear(); log.add("Everyone starts with counter 0. Bryce’s clock is " + Math.abs(OFF.B) + " ms slow.", "muted");
+    log.clear(); log.add("همه با counter صفر شروع می‌کنند. ساعت Bryce " + Math.abs(OFF.B) + " میلی‌ثانیه کند است.", "muted");
     render();
   }
   function wall(id) { return s.t + OFF[id]; }
@@ -107,10 +107,10 @@
     var n = s.nodes[id];
     n.lam += 1; n.vc[id] += 1;
     var m = { id: s.msgs.length + 1, from: id, replyTo: replyTo || null, wall: wall(id), lam: n.lam, vc: Object.assign({}, n.vc) };
-    m.text = replyTo ? "re: #" + replyTo.id : ["Lunch?", "Ship it", "Who broke main?", "Coffee", "LGTM"][m.id % 5];
+    m.text = replyTo ? "پاسخ به #" + replyTo.id : ["ناهار؟", "منتشرش کن", "کی main را خراب کرد؟", "قهوه", "تأیید"][m.id % 5];
     s.msgs.push(m); n.seen.push(m);
     IDS.forEach(function (to) { if (to !== id) s.flight.push({ m: m, to: to }); });
-    log.add(NAME[id] + (replyTo ? " replies to #" + replyTo.id : " posts #" + m.id) + " — wall " + m.wall + " ms, Lamport (" + m.lam + ", " + NAME[id] + ")", "ok");
+    log.add(NAME[id] + (replyTo ? " به #" + replyTo.id + " جواب می‌دهد" : " پیام #" + m.id + " را می‌فرستد") + "؛ ساعت دیواری " + m.wall + " ms، Lamport (" + m.lam + ", " + NAME[id] + ")", "ok");
     render();
     return m;
   }
@@ -122,7 +122,7 @@
     n.lam = Math.max(n.lam, f.m.lam);
     IDS.forEach(function (i) { n.vc[i] = Math.max(n.vc[i], f.m.vc[i]); });
     n.seen.push(f.m);
-    log.add(NAME[f.to] + " receives #" + f.m.id + (n.lam > before ? "; counter jumps " + before + " → " + n.lam : ""), "muted");
+    log.add(NAME[f.to] + " پیام #" + f.m.id + " را می‌گیرد" + (n.lam > before ? "؛ counter از " + before + " به " + n.lam + " می‌پرد" : ""), "muted");
     render();
     return true;
   }
@@ -153,7 +153,7 @@
     return Kit.el("div", { class: "order" }, Kit.el("h4", null, title), Kit.el("ol", null, items.map(function (it) {
       var conc = concurrentMark && s.msgs.some(function (o) { return o !== it.m && !happenedBefore(o, it.m) && !happenedBefore(it.m, o); });
       return Kit.el("li", { class: it.bad ? "bad" : conc ? "conc" : null },
-        Kit.el("span", { class: "ts" }, it.key), Kit.el("span", { class: it.m.from }, NAME[it.m.from]), " #" + it.m.id + " " + it.m.text + (it.bad ? " ✕ before its original" : ""));
+        Kit.el("span", { class: "ts" }, it.key), Kit.el("span", { class: it.m.from }, NAME[it.m.from]), " #" + it.m.id + " " + it.m.text + (it.bad ? " ✕ پیش از پیام اصلی" : ""));
     })));
   }
 
@@ -162,44 +162,44 @@
     IDS.forEach(function (id) {
       var n = s.nodes[id];
       var lastOther = n.seen.filter(function (m) { return m.from !== id; }).slice(-1)[0];
-      var post = Kit.el("button", { class: "btn small", type: "button" }, "Post");
+      var post = Kit.el("button", { class: "btn small", type: "button" }, "ارسال");
       post.addEventListener("click", function () { send(id); });
-      var reply = Kit.el("button", { class: "btn small", type: "button", disabled: !lastOther }, lastOther ? "Reply to #" + lastOther.id : "Reply");
+      var reply = Kit.el("button", { class: "btn small", type: "button", disabled: !lastOther }, lastOther ? "پاسخ به #" + lastOther.id : "پاسخ");
       reply.addEventListener("click", function () { send(id, lastOther); });
       var waiting = s.flight.filter(function (f) { return f.to === id; }).map(function (f) { return "#" + f.m.id; });
       ppl.appendChild(Kit.el("div", { class: "person" },
-        Kit.el("h3", null, Kit.el("span", { class: id }, NAME[id]), Kit.el("span", { class: "clk" }, "clock " + (OFF[id] >= 0 ? "+" : "") + OFF[id] + " ms")),
-        Kit.el("div", { class: "clk" }, "Lamport counter " + n.lam), Kit.el("div", { class: "clk" }, "vector [A " + n.vc.A + ", B " + n.vc.B + ", C " + n.vc.C + "]"),
+        Kit.el("h3", null, Kit.el("span", { class: id }, NAME[id]), Kit.el("span", { class: "clk", dir: "ltr" }, "clock " + (OFF[id] >= 0 ? "+" : "") + OFF[id] + " ms")),
+        Kit.el("div", { class: "clk", dir: "ltr" }, "Lamport counter " + n.lam), Kit.el("div", { class: "clk", dir: "ltr" }, "vector [A " + n.vc.A + ", B " + n.vc.B + ", C " + n.vc.C + "]"),
         Kit.el("div", { class: "btns" }, post, reply),
-        Kit.el("div", { class: "inflight" }, waiting.length ? "on its way: " + waiting.join(", ") : "")));
+        Kit.el("div", { class: "inflight" }, waiting.length ? "در راه: " + waiting.join("، ") : "")));
     });
     var byWall = s.msgs.slice().sort(function (a, b) { return a.wall - b.wall; });
     var byLam = s.msgs.slice().sort(function (a, b) { return a.lam - b.lam || (NAME[a.from] < NAME[b.from] ? -1 : 1); });
     var ord = Kit.clear(document.getElementById("orders"));
-    ord.appendChild(orderEl("By wall-clock timestamp", ordered(byWall, function (m) { return m.wall + " ms"; })));
-    ord.appendChild(orderEl("By Lamport timestamp", ordered(byLam, function (m) { return "(" + m.lam + ", " + NAME[m.from][0] + ")"; })));
-    ord.appendChild(orderEl("Vector clocks (amber = concurrent)", ordered(byLam, function (m) { return "[" + m.vc.A + "," + m.vc.B + "," + m.vc.C + "]"; }), true));
+    ord.appendChild(orderEl("بر اساس timestamp ساعت دیواری", ordered(byWall, function (m) { return m.wall + " ms"; })));
+    ord.appendChild(orderEl("بر اساس Lamport timestamp", ordered(byLam, function (m) { return "(" + m.lam + ", " + NAME[m.from][0] + ")"; })));
+    ord.appendChild(orderEl("مفهوم vector clock؛ کهربایی یعنی concurrent", ordered(byLam, function (m) { return "[" + m.vc.A + "," + m.vc.B + "," + m.vc.C + "]"; }), true));
     document.getElementById("deliver").disabled = !s.flight.length;
     document.getElementById("all").disabled = !s.flight.length;
   }
 
   document.getElementById("deliver").addEventListener("click", function () { deliver(0); });
   document.getElementById("all").addEventListener("click", function () { while (deliver(0)) { /* drain */ } });
-  document.getElementById("sliders").appendChild(Kit.slider({ label: "Bryce’s clock offset", min: -60, max: 30, step: 5, value: OFF.B,
+  document.getElementById("sliders").appendChild(Kit.slider({ label: "اختلاف ساعت Bryce", min: -60, max: 30, step: 5, value: OFF.B,
     format: function (v) { return (v > 0 ? "+" : "") + v + " ms"; }, onInput: function (v) { OFF.B = v; player.reset(); } }).element);
   var player = Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1000, speeds: false });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What does a node do when it receives a Lamport timestamp with a larger counter than its own?",
-      options: ["Ignores it", "Moves its own counter up to that value", "Resets to zero"],
-      answer: 1, explain: "That jump is what makes the order consistent with causality (p. 421)." },
-    { q: "Two messages have Lamport timestamps (1, Aaliyah) and (2, Bryce). What can you conclude?",
-      options: ["Aaliyah’s happened before Bryce’s", "Only that Aaliyah’s sorts first — they may or may not be concurrent", "They were concurrent"],
-      answer: 1, explain: "With different counters you can’t tell whether they were concurrent; that needs vector clocks (p. 422)." },
-    { q: "Are Lamport clocks linearizable?",
-      options: ["Yes", "No — they order events consistently with causality but don’t ensure a value is up to date", "Only on one node"],
-      answer: 1, explain: "Lamport clocks provide a total order, not linearizability (p. 420)." }
+    { q: "وقتی یک node یک Lamport timestamp با counter بزرگ‌تر از counter خودش می‌گیرد چه می‌کند؟",
+      options: ["نادیده‌اش می‌گیرد", "مفهوم counter خودش را تا آن مقدار بالا می‌برد", "به صفر برمی‌گردد"],
+      answer: 1, explain: "همین پرش است که ترتیب را با ترتیب علّی سازگار می‌کند (ص. ۴۲۱)." },
+    { q: "دو پیام Lamport timestampهای (1, Aaliyah) و (2, Bryce) دارند. چه نتیجه‌ای می‌گیرید؟",
+      options: ["پیام Aaliyah پیش از پیام Bryce رخ داده", "فقط این‌که پیام Aaliyah اول مرتب می‌شود؛ ممکن است concurrent بوده باشند یا نه", "مفهوم concurrent بودن قطعی است"],
+      answer: 1, explain: "با counterهای متفاوت نمی‌شود فهمید concurrent بوده‌اند یا نه؛ این vector clock لازم دارد (ص. ۴۲۲)." },
+    { q: "آیا Lamport clock linearizable است؟",
+      options: ["بله", "نه؛ رویدادها را سازگار با ترتیب علّی مرتب می‌کند اما تضمین نمی‌کند مقدار به‌روز باشد", "فقط روی یک node"],
+      answer: 1, explain: "مفهوم Lamport clock یک ترتیب کامل می‌دهد، نه linearizability (ص. ۴۲۰)." }
   ]);
 })();
 </script>

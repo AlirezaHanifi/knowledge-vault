@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dual Writes vs a Change Log</title>
-<meta name="description" content="Two clients update the same item at almost the same time. With dual writes, the database and the search index can apply the updates in different orders and stay inconsistent forever; deriving the index from the database's change log cannot. Illustrates DDIA 2nd ed., Chapters 12 and 13.">
+<title>مفهوم dual write در برابر change log</title>
+<meta name="description" content="دو client تقریباً هم‌زمان یک آیتم را به‌روز می‌کنند. با dual write، دیتابیس و search index ممکن است به‌روزرسانی‌ها را با ترتیب‌های متفاوت اعمال کنند و برای همیشه ناسازگار بمانند؛ با مشتق کردن index از change log دیتابیس نه. برای فصل‌های ۱۲ و ۱۳ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .lane-label { font-size: 12px; font-weight: 600; }
@@ -23,72 +23,72 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/13-a-philosophy-of-streaming-systems.html">Chapter 13</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Dual writes</span>
+      <a href="../chapters/13-a-philosophy-of-streaming-systems.html">فصل ۱۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم dual write</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapters 12–13 · Keeping derived data in sync</div>
-  <h1>Dual writes vs a change log</h1>
-  <p class="lede">Client 1 sets item X to <strong>A</strong>; at almost the same moment Client 2 sets it to <strong>B</strong>. Both values must reach the database and the search index. If each client writes to both systems itself, network delays can deliver the updates in different orders. If the index is derived from the database’s change log, it applies them in the database’s order.</p>
-  <p class="source-note">Illustrates “Keeping Systems in Sync” (pp. 501–503, Figure 12-4) and “Combining Specialized Tools by Deriving Data” (pp. 540–544). Network delays are random but seeded; times are in milliseconds. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل‌های ۱۲ و ۱۳ · synchronous نگه داشتن داده‌ی مشتق‌شده</div>
+  <h1>مفهوم dual write در برابر change log</h1>
+  <p class="lede">کلاینت ۱ آیتم X را <strong>A</strong> می‌کند؛ تقریباً در همان لحظه کلاینت ۲ آن را <strong>B</strong> می‌کند. هر دو مقدار باید به دیتابیس و search index برسند. اگر هر client خودش در هر دو سیستم بنویسد، latency شبکه ممکن است به‌روزرسانی‌ها را با ترتیب‌های متفاوت برساند. اگر index از change log دیتابیس مشتق شود، آن‌ها را به ترتیب دیتابیس اعمال می‌کند.</p>
+  <p class="source-note">برای بخش «synchronous نگه داشتن سیستم‌ها» در صص. ۵۰۱–۵۰۳ و شکل ۱۲-۴، و بخش «ترکیب ابزارهای تخصصی با مشتق کردن داده» در صص. ۵۴۰–۵۴۴. latencyهای شبکه تصادفی‌اند اما با seed ثابت؛ زمان‌ها بر حسب میلی‌ثانیه‌اند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
       <div class="row" style="margin-bottom:12px">
         <div id="mode"></div>
         <span class="spacer"></span>
-        <button class="btn primary" type="button" id="race">Run a race</button>
-        <button class="btn" type="button" id="many">Run 1,000</button>
+        <button class="btn primary" type="button" id="race">اجرای یک مسابقه</button>
+        <button class="btn" type="button" id="many">اجرای ۱٬۰۰۰ بار</button>
       </div>
-      <div class="stage" id="stage"></div>
+      <div class="stage" id="stage" dir="ltr"></div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Final value of X</p>
+        <p class="panel-title">مقدار نهایی X</p>
         <div class="final">
-          <div class="stat"><span class="stat-label">Database</span><span class="stat-value" id="db">—</span></div>
-          <div class="stat"><span class="stat-label">Search index</span><span class="stat-value" id="idx">—</span></div>
+          <div class="stat"><span class="stat-label">دیتابیس</span><span class="stat-value" id="db">—</span></div>
+          <div class="stat"><span class="stat-label">مفهوم search index</span><span class="stat-value" id="idx">—</span></div>
         </div>
         <div class="callout" id="outcome" style="margin-top:12px"></div>
       </div>
       <div class="panel">
-        <p class="panel-title">Many races</p>
+        <p class="panel-title">مسابقه‌های زیاد</p>
         <div class="final">
-          <div class="stat"><span class="stat-label">Dual writes diverged</span><span class="stat-value" id="dw">—</span></div>
-          <div class="stat"><span class="stat-label">Change log diverged</span><span class="stat-value" id="cl">—</span></div>
+          <div class="stat"><span class="stat-label">واگرایی با dual write</span><span class="stat-value" id="dw">—</span></div>
+          <div class="stat"><span class="stat-label">واگرایی با change log</span><span class="stat-value" id="cl">—</span></div>
         </div>
       </div>
       <div class="panel">
-        <p class="panel-title">Event log</p>
+        <p class="panel-title">گزارش رویدادها</p>
         <ol id="log"></ol>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Dual writes fail silently.</strong> No write returns an error, yet the two systems end up permanently disagreeing — until some later write happens to overwrite both.</li>
-    <li><strong>A single log fixes the order.</strong> The database decides which write came last; every derived system replays its change log in that order, so all of them converge.</li>
-    <li><strong>Deriving is asynchronous.</strong> In change-log mode the index lags behind the database: a read from the index just after a write may still see the old value.</li>
-    <li><strong>Partial failure is the other half of the problem.</strong> With dual writes, one write can succeed and the other fail; with a log, a failed consumer retries from its offset.</li>
+    <li><strong>مفهوم dual write بی‌صدا شکست می‌خورد.</strong> هیچ نوشتنی خطا برنمی‌گرداند، اما دو سیستم برای همیشه با هم ناسازگار می‌مانند، تا وقتی که نوشتن بعدی اتفاقاً هر دو را بازنویسی کند.</li>
+    <li><strong>یک log واحد ترتیب را ثابت می‌کند.</strong> دیتابیس تصمیم می‌گیرد کدام نوشتن آخر بوده؛ هر سیستم مشتق‌شده change log آن را به همان ترتیب replay می‌کند، پس همه به یک نتیجه می‌رسند.</li>
+    <li><strong>مشتق کردن asynchronous است.</strong> در حالت change log، مفهوم index از دیتابیس عقب است: خواندن از index درست بعد از یک نوشتن ممکن است هنوز مقدار قدیمی را ببیند.</li>
+    <li><strong>مفهوم partial failure نیمه‌ی دیگر مسئله است.</strong> با dual write، یک نوشتن ممکن است موفق شود و دیگری fail؛ با log، consumer fail‌شده از offset خودش دوباره تلاش می‌کند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/13-a-philosophy-of-streaming-systems.html"><small>Lesson</small>13. A Philosophy of Streaming Systems</a></li>
-    <li><a href="../chapters/12-stream-processing.html"><small>Lesson</small>12. Stream Processing</a></li>
+    <li><a href="../chapters/13-a-philosophy-of-streaming-systems.html"><small>درس</small>فصل ۱۳: فلسفه‌ی سیستم‌های streaming</a></li>
+    <li><a href="../chapters/12-stream-processing.html"><small>درس</small>فصل ۱۲: پردازش stream</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -155,8 +155,8 @@
     log.clear();
     var events = [];
     r.clients.forEach(function (c) {
-      events.push({ t: c.db, text: "Database applies X=" + c.v });
-      events.push({ t: c.idx, text: "Index applies X=" + c.v + (mode === "log" ? " (from the change log)" : "") });
+      events.push({ t: c.db, text: "دیتابیس X=" + c.v + " را اعمال می‌کند" });
+      events.push({ t: c.idx, text: "مفهوم index مقدار X=" + c.v + (mode === "log" ? " را از change log" : " را") + " اعمال می‌کند" });
     });
     events.sort(function (a, b) { return a.t - b.t; }).forEach(function (e) { log.add(e.t.toFixed(1) + " ms  " + e.text, "muted"); });
     Kit.$("#db").textContent = r.db;
@@ -164,11 +164,11 @@
     var box = Kit.$("#outcome");
     if (r.db === r.idx) {
       box.className = "callout ok";
-      box.textContent = mode === "log" ? "Consistent: the index replayed the database’s writes in commit order (it lagged by about " + LAG + " ms)."
-        : "Consistent this time — both systems happened to receive the writes in the same order. Run more races.";
+      box.textContent = mode === "log" ? "سازگار: index نوشتن‌های دیتابیس را به ترتیب commit دوباره اجرا کرد، با حدود " + LAG + " ms latency."
+        : "این بار سازگار؛ هر دو سیستم اتفاقاً نوشتن‌ها را با یک ترتیب گرفتند. مسابقه‌های بیشتری اجرا کنید.";
     } else {
       box.className = "callout bad";
-      box.textContent = "Diverged: the database says " + r.db + ", the index says " + r.idx + ". No error was reported, and nothing will fix it.";
+      box.textContent = "واگرا شد: دیتابیس می‌گوید " + r.db + " و index می‌گوید " + r.idx + ". هیچ خطایی گزارش نشد و هیچ چیز درستش نمی‌کند.";
     }
   }
   function many() {
@@ -184,8 +184,8 @@
     Kit.$("#cl").className = "stat-value ok";
   }
 
-  var seg = Kit.segmented({ label: "How the index is updated", value: mode,
-    options: [{ value: "dual", label: "Dual writes" }, { value: "log", label: "Derived from change log" }],
+  var seg = Kit.segmented({ label: "روش به‌روز شدن index", value: mode,
+    options: [{ value: "dual", label: "مفهوم dual write" }, { value: "log", label: "مشتق از change log" }],
     onChange: function (v) { mode = v; one(); } });
   Kit.$("#mode").appendChild(seg.element);
   Kit.$("#race").addEventListener("click", function () { seed += 1; one(); });
@@ -193,12 +193,12 @@
   one();
 
   Kit.quiz(Kit.$("#quiz"), [
-    { q: "Why can dual writes leave the database and the index permanently inconsistent?",
-      options: ["Because the index uses a different data model", "Because concurrent writes can reach the two systems in different orders, with no error reported", "Because databases are faster than indexes", "Because the index rejects duplicate values"],
-      answer: 1, explain: "Each system ends up with whichever write it received last, and those can differ (pp. 501–503)." },
-    { q: "What do you give up by deriving the index from the database’s change log?",
-      options: ["Convergence", "Ordering", "Reading your own writes immediately from the index — the derived system is updated asynchronously", "Fault tolerance"],
-      answer: 2, explain: "Log-based derivation is asynchronous, so by default it doesn’t offer read-your-writes on the derived system (pp. 540–544)." }
+    { q: "چرا dual write ممکن است دیتابیس و index را برای همیشه ناسازگار بگذارد؟",
+      options: ["چون index مدل داده‌ی دیگری دارد", "چون نوشتن‌های هم‌زمان ممکن است با ترتیب‌های متفاوت به دو سیستم برسند، بی‌آن‌که خطایی گزارش شود", "چون دیتابیس از index سریع‌تر است", "چون index مقدارهای تکراری را رد می‌کند"],
+      answer: 1, explain: "هر سیستم با آخرین نوشتنی که گرفته می‌ماند، و این دو ممکن است فرق کنند (صص. ۵۰۱–۵۰۳)." },
+    { q: "با مشتق کردن index از change log دیتابیس چه چیزی را از دست می‌دهید؟",
+      options: ["همگرایی", "ترتیب", "خواندن فوری نوشته‌های خود از index؛ سیستم مشتق‌شده asynchronous به‌روز می‌شود", "تحمل fault"],
+      answer: 2, explain: "مشتق‌سازی بر پایه‌ی log asynchronous است، پس به طور پیش‌فرض read-your-writes روی سیستم مشتق‌شده نمی‌دهد (صص. ۵۴۰–۵۴۴)." }
   ]);
 })();
 </script>

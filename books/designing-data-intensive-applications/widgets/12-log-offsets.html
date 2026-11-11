@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Partitioned Logs and Consumer Offsets</title>
-<meta name="description" content="Produce keyed messages into a sharded log, consume them with a consumer group that records offsets, then crash a consumer to see messages processed twice, or let one fall behind retention and miss messages. Illustrates DDIA Chapter 12.">
+<title>مفهوم partitioned log و consumer offset</title>
+<meta name="description" content="پیام‌های کلیددار را در یک log shardشده بنویسید، با یک consumer group که offset ثبت می‌کند مصرفشان کنید، بعد یک consumer را crash کنید تا پیام‌ها دو بار پردازش شوند، یا بگذارید یکی از دوره‌ی نگه‌داری عقب بیفتد و پیام‌ها را از دست بدهد. برای فصل ۱۲ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .parts { display: grid; gap: 10px; }
@@ -24,68 +24,68 @@
   .cons { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 10px; font-size: .8rem; background: var(--surface); }
   .cons.down { opacity: .5; border-style: dashed; }
   .cons.slow { border-color: var(--warn); }
-  .cons b { margin-right: 6px; }
+  .cons b { margin-inline-end: 6px; }
   .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .76rem; color: var(--ink-2); margin-top: 6px; }
-  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; border: 1px solid var(--line); }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-inline-end: 4px; vertical-align: -1px; border: 1px solid var(--line); }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/12-stream-processing.html">Chapter 12</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Log offsets</span>
+      <a href="../chapters/12-stream-processing.html">فصل ۱۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم offset در log</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 12 · Stream Processing</div>
-  <h1>Partitioned logs and consumer offsets</h1>
-  <p class="lede">A log-based broker appends each message to one partition of a topic, chosen by its key, and gives it an increasing offset. Consumers in a group each own whole partitions and read them in order; the broker only needs to remember each partition’s committed offset — which is exactly why a crash causes re-processing, and a slow consumer can fall off the end of retention.</p>
-  <p class="source-note">Illustrates “Using logs for message storage”, “Logs compared to traditional messaging”, “Consumer offsets” and “Disk space usage” (pp. 496–499, Figure 12-3). Three partitions, keys hashed to partitions, offsets committed every few messages, and retention counted in messages rather than disk segments. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۲ · پردازش stream</div>
+  <h1>مفهوم partitioned log و consumer offset</h1>
+  <p class="lede">یک broker مبتنی بر log هر پیام را به یکی از partitionهای یک topic، که با کلیدش انتخاب می‌شود، append می‌کند و یک offset افزایشی به آن می‌دهد. هر consumer در یک group صاحب partitionهای کاملی است و آن‌ها را به‌ترتیب می‌خواند؛ broker فقط باید offset ثبت‌شده‌ی هر partition را به خاطر بسپارد؛ و دقیقاً برای همین crash باعث پردازش دوباره می‌شود و consumer کند ممکن است از انتهای دوره‌ی نگه‌داری بیفتد.</p>
+  <p class="source-note">برای بخش «مفهوم message broker مبتنی بر log»، از جمله ذخیره‌ی پیام در log، مقایسه با پیام‌رسانی سنتی، consumer offset و مصرف فضای دیسک، در صص. ۴۹۶–۴۹۹ و شکل ۱۲-۳. سه partition، کلیدهایی که با hash به partitionها می‌روند، offsetهایی که هر چند پیام یک بار ثبت می‌شوند، و نگه‌داری که به جای segment دیسک با تعداد پیام شمرده می‌شود. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
       <div class="consumers" id="consumers"></div>
-      <div class="parts" id="parts"></div>
-      <div class="legend"><span><i style="background:var(--ok-soft)"></i>processed</span><span><i style="background:var(--warn-soft)"></i>processed twice</span><span><i style="background:var(--bad-soft)"></i>deleted before it was read</span><span style="color:var(--accent)">▲ consumer position</span><span style="color:var(--s4)">▼ committed offset</span></div>
+      <div class="parts" id="parts" dir="ltr"></div>
+      <div class="legend"><span><i style="background:var(--ok-soft)"></i>پردازش‌شده</span><span><i style="background:var(--warn-soft)"></i>دو بار پردازش‌شده</span><span><i style="background:var(--bad-soft)"></i>پیش از خوانده شدن پاک شده</span><span style="color:var(--accent)">▲ جایگاه consumer</span><span style="color:var(--s4)">▼ مقدار offset ثبت‌شده</span></div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Run</p>
+        <p class="panel-title">اجرا</p>
         <div id="player"></div>
         <div class="row" style="margin-top:10px" id="actions"></div>
         <div id="sliders" style="margin-top:10px"></div>
       </div>
       <div class="panel">
-        <p class="panel-title">Counters</p>
+        <p class="panel-title">شمارنده‌ها</p>
         <div class="stats" id="stats"></div>
       </div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Order per partition, not per topic.</strong> All of one user’s messages go to the same partition, so they stay in order; there is no ordering across partitions.</li>
-    <li><strong>Crash → duplicates.</strong> Kill a consumer: its partitions move to a survivor, which resumes from the last <em>committed</em> offset, so everything after it is processed again. Commit more often and fewer repeat — at more bookkeeping cost.</li>
-    <li><strong>At most one consumer per partition.</strong> A third consumer helps; a fourth would sit idle with three partitions.</li>
-    <li><strong>The log is a bounded buffer.</strong> Pause a consumer: when retention deletes old messages, a consumer that fell too far behind skips them for good.</li>
+    <li><strong>ترتیب در هر partition، نه در کل topic.</strong> همه‌ی پیام‌های یک کاربر به یک partition می‌روند، پس مرتب می‌مانند؛ بین partitionها ترتیبی نیست.</li>
+    <li><strong>مفهوم crash یعنی تکراری.</strong> یک consumer را از کار بیندازید: partitionهایش به یک بازمانده می‌رسند که از آخرین offset <em>ثبت‌شده</em> ادامه می‌دهد، پس همه‌چیز بعد از آن دوباره پردازش می‌شود. offset را بیشتر ثبت کنید تا تکرار کمتر شود؛ به قیمت حساب‌وکتاب بیشتر.</li>
+    <li><strong>حداکثر یک consumer برای هر partition.</strong> consumer سوم کمک می‌کند؛ چهارمی با سه partition بیکار می‌نشیند.</li>
+    <li><strong>مفهوم log یک buffer محدود است.</strong> یک consumer را کند کنید: وقتی دوره‌ی نگه‌داری پیام‌های قدیمی را پاک می‌کند، consumerی که زیادی عقب افتاده برای همیشه از آن‌ها رد می‌شود.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/12-stream-processing.html"><small>Lesson</small>12. Stream Processing</a></li>
-    <li><a href="13-dual-writes.html"><small>Simulation</small>Dual writes vs a change log</a></li>
+    <li><a href="../chapters/12-stream-processing.html"><small>درس</small>فصل ۱۲: پردازش stream</a></li>
+    <li><a href="13-dual-writes.html"><small>شبیه‌سازی</small>مقایسه‌ی dual write و change log</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -104,7 +104,7 @@
     for (var p = 0; p < P; p++) s.parts.push({ msgs: [], start: 0, committed: 0, pos: 0, owner: null, sinceCommit: 0 });
     ["C1", "C2"].forEach(function (n) { s.cons.push({ name: n, up: true, slow: false }); });
     assign();
-    log.clear(); log.add("Two consumers share three partitions. Press Play.", "muted");
+    log.clear(); log.add("دو consumer سه partition را شریک‌اند. پخش را بزنید.", "muted");
     render();
   }
   function live() { return s.cons.filter(function (c) { return c.up; }); }
@@ -126,7 +126,7 @@
         if (m.seen === 0 && p.pos <= p.start) { m.skipped = true; s.skipped++; }
         p.start++;
       }
-      if (p.pos < p.start) { log.add("P" + i + ": consumer position " + p.pos + " was deleted by retention; jumps to " + p.start, "bad"); p.pos = p.start; if (p.committed < p.start) p.committed = p.start; }
+      if (p.pos < p.start) { log.add("P" + i + ": جایگاه " + p.pos + " consumer با نگه‌داری پاک شد؛ به " + p.start + " می‌پرد", "bad"); p.pos = p.start; if (p.committed < p.start) p.committed = p.start; }
       var c = owner(p);
       if (!c || !c.up || (c.slow && s.tick % 4)) return;
       if (p.pos < p.msgs.length) {
@@ -148,7 +148,7 @@
     var lostWork = 0;
     s.parts.forEach(function (p) { if (p.owner === name) { lostWork += p.pos - p.committed; p.pos = p.committed; p.sinceCommit = 0; } });
     assign();
-    log.add(name + " crashes. Its partitions go to " + (live().map(function (x) { return x.name; }).join(", ") || "nobody") + ", resuming from the committed offsets: " + lostWork + " message(s) will be processed again.", lostWork ? "warn" : "ok");
+    log.add(name + " crash می‌کند. partitionهایش به " + (live().map(function (x) { return x.name; }).join("، ") || "هیچ‌کس") + " می‌رسند که از offsetهای ثبت‌شده ادامه می‌دهد: " + lostWork + " پیام دوباره پردازش می‌شود.", lostWork ? "warn" : "ok");
     render();
   }
   function addConsumer() {
@@ -157,7 +157,7 @@
     s.parts.forEach(function (p) { p.committed = p.pos; p.sinceCommit = 0; });
     assign();
     var idle = live().length > P;
-    log.add(name + " joins; partitions are rebalanced." + (idle ? " There are more consumers than partitions, so one has nothing to do." : ""), idle ? "warn" : "ok");
+    log.add(name + " می‌پیوندد؛ partitionها دوباره تقسیم می‌شوند." + (idle ? " تعداد consumerها از partitionها بیشتر است، پس یکی کاری ندارد." : ""), idle ? "warn" : "ok");
     render();
   }
 
@@ -165,12 +165,12 @@
     var cons = Kit.clear(document.getElementById("consumers"));
     s.cons.forEach(function (c) {
       var mine = s.parts.map(function (p, i) { return p.owner === c.name && c.up ? "P" + i : null; }).filter(Boolean);
-      var kill = Kit.el("button", { class: "btn small danger", type: "button", disabled: !c.up }, "Crash");
+      var kill = Kit.el("button", { class: "btn small danger", type: "button", disabled: !c.up }, "مفهوم crash");
       kill.addEventListener("click", function () { crash(c.name); });
-      var slow = Kit.el("button", { class: "btn small", type: "button", "aria-pressed": String(c.slow), disabled: !c.up }, c.slow ? "Slow ✓" : "Slow");
-      slow.addEventListener("click", function () { c.slow = !c.slow; log.add(c.name + (c.slow ? " slows down to a quarter of its speed" : " is back to normal speed"), "muted"); render(); });
+      var slow = Kit.el("button", { class: "btn small", type: "button", "aria-pressed": String(c.slow), disabled: !c.up }, c.slow ? "کند ✓" : "کند");
+      slow.addEventListener("click", function () { c.slow = !c.slow; log.add(c.name + (c.slow ? " به یک‌چهارم سرعت کند می‌شود" : " به سرعت عادی برمی‌گردد"), "muted"); render(); });
       cons.appendChild(Kit.el("div", { class: "cons" + (c.up ? "" : " down") + (c.slow ? " slow" : "") },
-        Kit.el("b", null, c.name), c.up ? (mine.length ? "reads " + mine.join(", ") : "idle") : "down", " ", slow, " ", kill));
+        Kit.el("b", null, c.name), c.up ? (mine.length ? "می‌خواند: " + mine.join("، ") : "بیکار") : "خاموش", " ", slow, " ", kill));
     });
     var parts = Kit.clear(document.getElementById("parts"));
     s.parts.forEach(function (p, i) {
@@ -191,31 +191,31 @@
     });
     var stats = Kit.clear(document.getElementById("stats"));
     var lag = s.parts.reduce(function (a, p) { return a + (p.msgs.length - p.pos); }, 0);
-    [["Processed", s.processed, ""], ["Twice", s.dups, s.dups ? "warn" : ""], ["Never read", s.skipped, s.skipped ? "bad" : ""], ["Lag", lag, lag > 20 ? "warn" : ""]].forEach(function (x2) {
+    [["پردازش‌شده", s.processed, ""], ["دو بار", s.dups, s.dups ? "warn" : ""], ["هرگز خوانده نشده", s.skipped, s.skipped ? "bad" : ""], ["عقب‌ماندگی", lag, lag > 20 ? "warn" : ""]].forEach(function (x2) {
       stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x2[0]), Kit.el("span", { class: "stat-value " + x2[2] }, String(x2[1]))));
     });
   }
 
   var actions = document.getElementById("actions");
-  var add = Kit.el("button", { class: "btn", type: "button" }, "Add a consumer");
+  var add = Kit.el("button", { class: "btn", type: "button" }, "افزودن یک consumer");
   add.addEventListener("click", addConsumer);
   actions.appendChild(add);
   var sl = document.getElementById("sliders");
-  sl.appendChild(Kit.slider({ label: "Commit offset every", min: 1, max: 10, value: cfg.commitEvery, unit: " msgs", onInput: function (v) { cfg.commitEvery = v; } }).element);
-  sl.appendChild(Kit.slider({ label: "Retention per partition", min: 8, max: 40, value: cfg.retention, unit: " msgs", onInput: function (v) { cfg.retention = v; } }).element);
+  sl.appendChild(Kit.slider({ label: "ثبت offset هر", min: 1, max: 10, value: cfg.commitEvery, unit: " پیام", onInput: function (v) { cfg.commitEvery = v; } }).element);
+  sl.appendChild(Kit.slider({ label: "نگه‌داری در هر partition", min: 8, max: 40, value: cfg.retention, unit: " پیام", onInput: function (v) { cfg.retention = v; } }).element);
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 500 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why does a log-based broker not need to track an acknowledgment for every message?",
-      options: ["It never redelivers", "Consumers read each partition in order, so one offset per partition says what has been processed", "Messages are deleted once read"],
-      answer: 1, explain: "All messages below the consumer offset are processed; those above are not (p. 498)." },
-    { q: "A consumer crashes after processing offsets 40–45 but committing only 40. What happens?",
-      options: ["Messages 41–45 are lost", "The new owner resumes at 40 and processes 41–45 a second time", "The broker replays the whole partition"],
-      answer: 1, explain: "Restart from the last recorded offset can cause a consumer to see some messages twice (p. 498)." },
-    { q: "How do you keep all events for one user in order?",
-      options: ["Use one consumer", "Make the user ID the partition key, so all of them land in one partition", "Sort by timestamp later"],
-      answer: 1, explain: "Order is only guaranteed within a partition (p. 498)." }
+    { q: "چرا یک broker مبتنی بر log لازم ندارد برای هر پیام acknowledgment نگه دارد؟",
+      options: ["چون هرگز دوباره تحویل نمی‌دهد", "چون consumerها هر partition را به‌ترتیب می‌خوانند، پس یک offset برای هر partition می‌گوید چه چیزی پردازش شده", "چون پیام‌ها بعد از خوانده شدن پاک می‌شوند"],
+      answer: 1, explain: "همه‌ی پیام‌های زیر consumer offset پردازش شده‌اند و بالاتری‌ها نه (ص. ۴۹۸)." },
+    { q: "یک consumer بعد از پردازش offsetهای ۴۰ تا ۴۵ اما با ثبت فقط ۴۰ crash می‌کند. چه می‌شود؟",
+      options: ["پیام‌های ۴۱ تا ۴۵ گم می‌شوند", "صاحب تازه از ۴۰ ادامه می‌دهد و ۴۱ تا ۴۵ را دوباره پردازش می‌کند", "مفهوم broker کل partition را replay می‌کند"],
+      answer: 1, explain: "شروع دوباره از آخرین offset ثبت‌شده ممکن است باعث شود consumer بعضی پیام‌ها را دو بار ببیند (ص. ۴۹۸)." },
+    { q: "چطور همه‌ی رویدادهای یک کاربر را مرتب نگه می‌دارید؟",
+      options: ["با یک consumer", "با partition key کردن user ID، تا همه در یک partition بنشینند", "با مرتب کردن بعدی بر اساس timestamp"],
+      answer: 1, explain: "ترتیب فقط داخل یک partition تضمین می‌شود (ص. ۴۹۸)." }
   ]);
 })();
 </script>

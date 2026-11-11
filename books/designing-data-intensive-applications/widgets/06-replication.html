@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Replication Lag and Quorums</title>
-<meta name="description" content="Watch replication lag break read-after-write and monotonic reads, lose writes on failover, and see why w + r > n quorums overlap. Illustrates DDIA 2nd ed., Chapter 6.">
+<title>مفهوم replication lag و quorum</title>
+<meta name="description" content="ببینید replication lag چطور read-after-write و monotonic reads را می‌شکند، failover چطور نوشتن گم می‌کند، و چرا quorumهای w + r > n هم‌پوشانی دارند. برای فصل ۶ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .nodes { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -25,7 +25,7 @@
   .rep.down { opacity: .45; border-style: dashed; }
   .rep.stale .ver { color: var(--bad); }
   .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--ink-2); justify-content: center; }
-  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; }
+  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-inline-end: 5px; vertical-align: -2px; }
   .legend .lw::before { border: 2px solid var(--s1); }
   .legend .lr::before { box-shadow: 0 0 0 3px var(--s3); }
   .legend .ld::before { border: 2px dashed var(--line-strong); }
@@ -34,26 +34,26 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/06-replication.html">Chapter 6</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Replication</span>
+      <a href="../chapters/06-replication.html">فصل ۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم replication</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 6 · Replication</div>
-  <h1>Replication lag and quorums</h1>
-  <p class="lede">A leader streams its changes to followers, but followers apply them late. Reading from a lagging follower can make your own writes vanish or make time appear to go backward — and promoting a lagging follower after a crash loses writes. Leaderless systems instead read and write overlapping subsets of replicas.</p>
-  <p class="source-note">Illustrates “Synchronous Versus Asynchronous Replication” (p. 200), “Handling Node Outages” (p. 204), “Problems with Replication Lag” and “Solutions for Replication Lag” (pp. 209–215), and quorum reads/writes in “Leaderless Replication” (pp. 229–235). Timings are illustrative; implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۶ · مفهوم replication</div>
+  <h1>مفهوم replication lag و quorum</h1>
+  <p class="lede">هر leader تغییرهایش را برای followerها می‌فرستد، اما followerها دیرتر اعمالشان می‌کنند. خواندن از یک follower عقب‌مانده ممکن است نوشتن خودتان را ناپدید کند یا زمان را به عقب برگرداند؛ و ارتقای یک follower عقب‌مانده بعد از crash نوشتن‌ها را گم می‌کند. سیستم‌های leaderless به جای این از زیرمجموعه‌هایی از replicaها می‌خوانند و می‌نویسند که با هم هم‌پوشانی دارند.</p>
+  <p class="source-note">برای بخش‌های «مقایسه‌ی replication از نوع synchronous و asynchronous» در ص. ۲۰۰، «مدیریت از کار افتادن node» در ص. ۲۰۴، «مشکل‌های replication lag» و «راه‌حل‌های replication lag» در صص. ۲۰۹–۲۱۵، و خواندن و نوشتن با quorum در «مفهوم leaderless replication» در صص. ۲۲۹–۲۳۵. زمان‌ها نمایشی‌اند؛ پیاده‌سازی مال خود vault است.</p>
 
   <div class="tabs" id="tabs">
-    <div role="tablist" aria-label="Scenarios">
-      <button role="tab" id="t-lag" aria-controls="p-lag" aria-selected="true">Single leader: lag</button>
-      <button role="tab" id="t-q" aria-controls="p-q" aria-selected="false">Leaderless: quorums</button>
+    <div role="tablist" aria-label="سناریوها">
+      <button role="tab" id="t-lag" aria-controls="p-lag" aria-selected="true">مدل single-leader و lag</button>
+      <button role="tab" id="t-q" aria-controls="p-q" aria-selected="false">مدل leaderless و quorum</button>
     </div>
 
     <section id="p-lag" role="tabpanel" aria-labelledby="t-lag">
@@ -64,33 +64,33 @@
           <div class="client" id="client"></div>
           <div class="stats" id="lag-stats" style="margin-top:14px"></div>
         </div>
-          <div class="panel"><p class="panel-title">Event log</p><ol id="lag-log"></ol></div>
+          <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="lag-log"></ol></div>
         </div>
         <div class="stack">
           <div class="panel">
-            <p class="panel-title">Client actions</p>
+            <p class="panel-title">کارهای client</p>
             <div class="row">
-              <button class="btn primary" type="button" id="w">Write</button>
-              <button class="btn" type="button" id="rd">Read</button>
-              <button class="btn danger" type="button" id="fail">Leader fails</button>
+              <button class="btn primary" type="button" id="w">نوشتن</button>
+              <button class="btn" type="button" id="rd">خواندن</button>
+              <button class="btn danger" type="button" id="fail">خرابی leader</button>
             </div>
             <div class="field" style="margin-top:12px">
-              <span class="field-head">Route reads to</span>
+              <span class="field-head">خواندن‌ها به کجا بروند</span>
               <div id="route"></div>
               <span class="field-hint" id="route-hint"></span>
             </div>
-            <label class="check" style="margin-top:10px"><input type="checkbox" id="sync"> Follower 1 is synchronous</label>
+            <label class="check" style="margin-top:10px"><input type="checkbox" id="sync"> follower ۱ از نوع synchronous باشد</label>
             <div id="lag-sliders" style="margin-top:10px"></div>
-            <p class="panel-title" style="margin-top:12px">Auto-run (write, read, read…)</p>
+            <p class="panel-title" style="margin-top:12px">اجرای خودکار: نوشتن، خواندن، خواندن…</p>
             <div id="lag-player"></div>
           </div>
         </div>
       </div>
-      <h3 style="margin-top:20px">What to notice</h3>
+      <h3 style="margin-top:20px">به چه چیزی دقت کنید</h3>
       <ul class="notice-list">
-        <li>With <em>random replica</em> routing, a read right after a write often misses it — a <strong>read-after-write</strong> violation. Route your own reads to the leader to fix it.</li>
-        <li>Two reads in a row can hit followers with different lag, so a later read returns an <em>older</em> value — a <strong>monotonic reads</strong> violation. Sticky routing (always the same replica) fixes it.</li>
-        <li>Press <em>Leader fails</em> while writes are in flight: the most up-to-date follower is promoted, and writes it never received are <strong>lost</strong> even though the client was told they succeeded. Make follower 1 synchronous and the acknowledged writes survive — at the price of slower writes.</li>
+        <li>با مسیریابی <em>replica تصادفی</em>، خواندنی که درست بعد از نوشتن می‌آید اغلب آن را نمی‌بیند؛ یعنی نقض <strong>read-after-write</strong>. برای درمانش خواندن‌های داده‌ی خودتان را به leader بفرستید.</li>
+        <li>دو خواندن پشت سر هم ممکن است به followerهایی با lag متفاوت برسند، پس خواندن بعدی مقدار <em>قدیمی‌تری</em> برمی‌گرداند؛ یعنی نقض <strong>monotonic reads</strong>. مسیریابی چسبنده، یعنی همیشه همان replica، درمانش است.</li>
+        <li>وقتی نوشتن‌هایی در راه‌اند، <em>خرابی leader</em> را بزنید: به‌روزترین follower ارتقا پیدا می‌کند و نوشتن‌هایی که هیچ‌وقت به آن نرسیده‌اند <strong>گم می‌شوند</strong>، با این‌که به client گفته شده بود موفق بوده‌اند. follower ۱ را synchronous کنید تا نوشتن‌های تأییدشده بمانند؛ به قیمت نوشتن‌های کندتر.</li>
       </ul>
     </section>
 
@@ -98,45 +98,45 @@
       <div class="sim">
         <div class="stack">
         <div class="panel">
-          <p class="panel-title">Replicas (click one to take it down or bring it back)</p>
+          <p class="panel-title">فهرست replicaها: روی هر کدام بزنید تا خاموش یا روشن شود</p>
           <div class="ring" id="ring"></div>
-          <div class="legend"><span class="lw">last write set</span><span class="lr">last read set</span><span class="ld">down</span></div>
+          <div class="legend"><span class="lw">مجموعه‌ی آخرین نوشتن</span><span class="lr">مجموعه‌ی آخرین خواندن</span><span class="ld">خاموش</span></div>
           <div class="callout" id="q-verdict" style="margin-top:14px"></div>
           <div class="stats" id="q-stats" style="margin-top:14px"></div>
         </div>
-          <div class="panel"><p class="panel-title">Event log</p><ol id="q-log"></ol></div>
+          <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="q-log"></ol></div>
         </div>
         <div class="stack">
           <div class="panel">
-            <p class="panel-title">Quorum parameters</p>
+            <p class="panel-title">پارامترهای quorum</p>
             <div id="q-sliders"></div>
             <div class="row" style="margin-top:12px">
-              <button class="btn primary" type="button" id="qw">Write</button>
-              <button class="btn" type="button" id="qr">Read</button>
-              <button class="btn" type="button" id="qmc">Run 1,000 trials</button>
+              <button class="btn primary" type="button" id="qw">نوشتن</button>
+              <button class="btn" type="button" id="qr">خواندن</button>
+              <button class="btn" type="button" id="qmc">اجرای ۱٬۰۰۰ آزمایش</button>
             </div>
-            <label class="check" style="margin-top:10px"><input type="checkbox" id="repair" checked> Read repair</label>
+            <label class="check" style="margin-top:10px"><input type="checkbox" id="repair" checked> فعال بودن read repair</label>
           </div>
         </div>
       </div>
-      <h3 style="margin-top:20px">What to notice</h3>
+      <h3 style="margin-top:20px">به چه چیزی دقت کنید</h3>
       <ul class="notice-list">
-        <li>When <span class="mono">w + r &gt; n</span>, every read set overlaps the last write set in at least one replica, so the read can return the newest version (it takes the highest version number it sees).</li>
-        <li>Set <span class="mono">w = 1, r = 1</span> with <span class="mono">n = 5</span>: reads are fast and available, but most of them are stale.</li>
-        <li>Take nodes down: writes and reads fail outright once fewer than <span class="mono">w</span> or <span class="mono">r</span> replicas are reachable. Quorums trade availability for the overlap guarantee — and even with the overlap, the book notes edge cases (concurrent writes, partially failed writes, clock-based conflict resolution) where stale values can still appear.</li>
+        <li>وقتی <span class="mono" dir="ltr">w + r &gt; n</span> باشد، هر مجموعه‌ی خواندن دست‌کم در یک replica با مجموعه‌ی آخرین نوشتن هم‌پوشانی دارد، پس خواندن می‌تواند جدیدترین نسخه را برگرداند؛ بزرگ‌ترین شماره‌ی نسخه‌ای را که می‌بیند انتخاب می‌کند.</li>
+        <li>مقدارها را <span class="mono" dir="ltr">w = 1, r = 1</span> با <span class="mono" dir="ltr">n = 5</span> بگذارید: خواندن‌ها سریع و در دسترس‌اند، اما بیشترشان کهنه‌اند.</li>
+        <li>چند node را خاموش کنید: وقتی کمتر از <span class="mono">w</span> یا <span class="mono">r</span> replica در دسترس باشد، نوشتن و خواندن کاملاً شکست می‌خورند. quorum در ازای تضمین هم‌پوشانی availability را می‌دهد؛ و کتاب می‌گوید حتی با هم‌پوشانی، در حالت‌های مرزی مثل نوشتن‌های concurrent، نوشتن‌های نیمه‌شکست‌خورده و حل conflict بر اساس ساعت، باز هم ممکن است مقدار کهنه دیده شود.</li>
       </ul>
     </section>
   </div>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/06-replication.html"><small>Lesson</small>6. Replication</a></li>
-    <li><a href="../lab/06-version-vectors/README.md"><small>Experiment</small>Concurrent writes &amp; version vectors</a></li>
+    <li><a href="../chapters/06-replication.html"><small>درس</small>فصل ۶: مفهوم replication</a></li>
+    <li><a href="../lab/06-version-vectors/README.md"><small>آزمایش</small>نوشتن‌های concurrent و version vector</a></li>
   </ul>
-  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset (lag tab).</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها در تب lag: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -156,7 +156,7 @@
     rr = Kit.rng(11);
     L = {
       t: 0, seq: 0,
-      nodes: [{ name: "Leader", up: true, applied: [] }, { name: "Follower 1", up: true, applied: [] }, { name: "Follower 2", up: true, applied: [] }],
+      nodes: [{ name: "leader اولیه", up: true, applied: [] }, { name: "follower 1", up: true, applied: [] }, { name: "follower 2", up: true, applied: [] }],
       leader: 0, log: [], acked: [], lastWrite: 0, lastRead: 0, sticky: null,
       raw: 0, mono: 0, reads: 0, lost: [], pendingAck: [], script: 0
     };
@@ -171,7 +171,7 @@
 
   function write() {
     var leader = L.nodes[L.leader];
-    if (!leader.up) { lagLog.add("Write rejected: no leader", "bad"); return; }
+    if (!leader.up) { lagLog.add("نوشتن رد شد: leaderی نیست", "bad"); return; }
     var e = { seq: ++L.seq, t: L.t, arrive: {} };
     L.nodes.forEach(function (n, i) {
       if (i !== L.leader) e.arrive[i] = L.t + followerLag(i) + rr.int(2);
@@ -181,10 +181,10 @@
     var sync = document.getElementById("sync").checked && L.leader !== 1 && L.nodes[1].up;
     if (sync) {
       L.pendingAck.push({ seq: e.seq, at: e.arrive[1] });
-      lagLog.add("t=" + L.t + " WRITE v" + e.seq + " → leader; waiting for synchronous follower 1…");
+      lagLog.add("زمان " + L.t + ": نوشتن v" + e.seq + " در leader؛ منتظر follower ۱ که synchronous است…");
     } else {
       L.acked.push(e.seq); L.lastWrite = e.seq;
-      lagLog.add("t=" + L.t + " WRITE v" + e.seq + " → leader, acknowledged immediately (async)", "ok");
+      lagLog.add("زمان " + L.t + ": نوشتن v" + e.seq + " در leader، فوراً تأیید شد چون asynchronous است", "ok");
     }
   }
 
@@ -200,12 +200,12 @@
 
   function read() {
     var i = pickReplica();
-    if (i === undefined) { lagLog.add("Read failed: no replica up", "bad"); return; }
+    if (i === undefined) { lagLog.add("خواندن شکست خورد: هیچ replicaای روشن نیست", "bad"); return; }
     var n = L.nodes[i], v = n.applied.length ? n.applied[n.applied.length - 1] : 0;
     L.reads++;
-    var msg = "t=" + L.t + " READ from " + n.name + " → v" + v;
-    if (v < L.lastWrite) { L.raw++; lagLog.add(msg + " ✗ your write v" + L.lastWrite + " is missing (read-after-write)", "bad"); }
-    else if (v < L.lastRead) { L.mono++; lagLog.add(msg + " ✗ older than your previous read v" + L.lastRead + " (monotonic reads)", "bad"); }
+    var msg = "زمان " + L.t + ": خواندن از " + n.name + " مقدار v" + v + " را داد";
+    if (v < L.lastWrite) { L.raw++; lagLog.add(msg + " ✗ نوشتن خودتان یعنی v" + L.lastWrite + " نیست؛ نقض read-after-write", "bad"); }
+    else if (v < L.lastRead) { L.mono++; lagLog.add(msg + " ✗ قدیمی‌تر از خواندن قبلی‌تان یعنی v" + L.lastRead + "؛ نقض monotonic reads", "bad"); }
     else lagLog.add(msg, "ok");
     L.lastRead = Math.max(L.lastRead, v);
   }
@@ -220,11 +220,11 @@
       var pos = n.applied.length ? n.applied[n.applied.length - 1] : 0;
       if (pos > bestPos) { bestPos = pos; best = i; }
     });
-    lagLog.add("t=" + L.t + " LEADER FAILED. Promoting " + L.nodes[best].name + " (has up to v" + bestPos + ")", "bad");
+    lagLog.add("زمان " + L.t + ": leader خراب شد. " + L.nodes[best].name + " ارتقا پیدا می‌کند، که تا v" + bestPos + " را دارد", "bad");
     var lost = L.acked.filter(function (s) { return s > bestPos; });
     L.lost = L.lost.concat(lost);
-    if (lost.length) lagLog.add("Lost acknowledged write(s): " + lost.map(function (s) { return "v" + s; }).join(", ") + " — the client was told they succeeded", "bad");
-    else lagLog.add("No acknowledged writes lost", "ok");
+    if (lost.length) lagLog.add("نوشتن‌های تأییدشده‌ی گم‌شده: " + lost.map(function (s) { return "v" + s; }).join("، ") + "؛ به client گفته شده بود موفق بوده‌اند", "bad");
+    else lagLog.add("هیچ نوشتن تأییدشده‌ای گم نشد", "ok");
     L.log = L.log.filter(function (e) { return e.seq <= bestPos; });
     L.pendingAck = [];
     L.leader = best; L.seq = bestPos;
@@ -251,7 +251,7 @@
     L.pendingAck = L.pendingAck.filter(function (p) {
       if (L.nodes[1].applied.indexOf(p.seq) >= 0) {
         L.acked.push(p.seq); L.lastWrite = Math.max(L.lastWrite, p.seq);
-        lagLog.add("t=" + L.t + " v" + p.seq + " acknowledged after follower 1 confirmed", "ok");
+        lagLog.add("زمان " + L.t + ": v" + p.seq + " بعد از تأیید follower ۱ تأیید شد", "ok");
         return false;
       }
       return true;
@@ -265,36 +265,36 @@
       var isLeader = i === L.leader && n.up;
       var applied = n.applied.slice(-6).map(function (s) { return el("span", { class: "chip" + (L.lost.indexOf(s) >= 0 ? " lost" : "") }, "v" + s); });
       var flight = n.up && !isLeader ? L.log.filter(function (e) { return n.applied.indexOf(e.seq) < 0; }).slice(0, 4)
-        .map(function (e) { return el("span", { class: "chip flight", title: "in flight" }, "v" + e.seq); }) : [];
+        .map(function (e) { return el("span", { class: "chip flight", title: "در راه" }, "v" + e.seq); }) : [];
       var pos = n.applied.length ? n.applied[n.applied.length - 1] : 0;
       root.appendChild(el("div", { class: "node-box" + (isLeader ? " is-leader" : "") + (n.up ? "" : " is-down") },
         el("div", { class: "node-name" }, n.name,
           el("span", { class: "badge " + (!n.up ? "bad" : isLeader ? "accent" : pos < head ? "warn" : "ok") },
-            !n.up ? "down" : isLeader ? "leader" : pos < head ? "behind " + (head - pos) : "caught up")),
-        el("div", { class: "entries" }, applied.length ? applied : el("span", { class: "empty muted" }, "no data"), flight)));
+            !n.up ? "خاموش" : isLeader ? "leader" : pos < head ? (head - pos) + " نسخه عقب" : "به‌روز")),
+        el("div", { class: "entries" }, applied.length ? applied : el("span", { class: "empty muted" }, "بدون داده"), flight)));
     });
     Kit.clear(document.getElementById("client")).appendChild(el("span", null,
-      "t = ", el("strong", { class: "mono" }, L.t), " · your last write ", el("strong", { class: "mono" }, "v" + L.lastWrite),
-      " · your last read ", el("strong", { class: "mono" }, "v" + L.lastRead)));
+      "زمان ", el("strong", { class: "mono" }, L.t), " · آخرین نوشتن شما ", el("strong", { class: "mono" }, "v" + L.lastWrite),
+      " · آخرین خواندن شما ", el("strong", { class: "mono" }, "v" + L.lastRead)));
     var st = Kit.clear(document.getElementById("lag-stats"));
-    [["reads", L.reads, ""], ["read-your-writes ✗", L.raw, L.raw ? "bad" : "ok"], ["monotonic ✗", L.mono, L.mono ? "bad" : "ok"], ["lost writes", L.lost.length, L.lost.length ? "bad" : "ok"]]
+    [["خواندن‌ها", L.reads, ""], ["نقض read-your-writes", L.raw, L.raw ? "bad" : "ok"], ["نقض monotonic reads", L.mono, L.mono ? "bad" : "ok"], ["نوشتن‌های گم‌شده", L.lost.length, L.lost.length ? "bad" : "ok"]]
       .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, x[1]))); });
   }
 
   var hints = {
-    random: "Any replica that is up — fast and spread out, but anomalies appear.",
-    leader: "Read your own data from the leader: read-after-write consistency.",
-    sticky: "Always the same follower: monotonic reads (but not read-your-writes)."
+    random: "هر replicaای که روشن است؛ سریع و پخش، اما ناهنجاری‌ها پیدا می‌شوند.",
+    leader: "داده‌ی خودتان را از leader بخوانید: read-after-write consistency.",
+    sticky: "همیشه همان follower: monotonic reads، اما نه read-your-writes."
   };
-  var routeCtl = Kit.segmented({ label: "Read routing", value: route,
-    options: [{ value: "random", label: "Random replica" }, { value: "leader", label: "Leader" }, { value: "sticky", label: "Sticky follower" }],
+  var routeCtl = Kit.segmented({ label: "مسیریابی خواندن", value: route,
+    options: [{ value: "random", label: "replica تصادفی" }, { value: "leader", label: "خود leader" }, { value: "sticky", label: "follower ثابت" }],
     onChange: function (v) { route = v; L.sticky = null; document.getElementById("route-hint").textContent = hints[v]; } });
   document.getElementById("route").appendChild(routeCtl.element);
   document.getElementById("route-hint").textContent = hints[route];
 
   var ls = document.getElementById("lag-sliders");
-  ls.appendChild(Kit.slider({ label: "Follower 1 lag", min: 0, max: 12, value: lags[0], unit: " ticks", onInput: function (v) { lags[0] = v; } }).element);
-  ls.appendChild(Kit.slider({ label: "Follower 2 lag", min: 0, max: 12, value: lags[1], unit: " ticks", onInput: function (v) { lags[1] = v; } }).element);
+  ls.appendChild(Kit.slider({ label: "lag در follower ۱", min: 0, max: 12, value: lags[0], unit: " tick", onInput: function (v) { lags[0] = v; } }).element);
+  ls.appendChild(Kit.slider({ label: "lag در follower ۲", min: 0, max: 12, value: lags[1], unit: " tick", onInput: function (v) { lags[1] = v; } }).element);
 
   function lagAct(fn) { return function () { fn(); renderLag(); }; }
   document.getElementById("w").addEventListener("click", lagAct(write));
@@ -309,10 +309,10 @@
       if (a === "w") write(); else if (a === "r") read();
       renderLag();
     },
-    reset: function () { freshLag(); lagLog.clear(); lagLog.add("Reset", "muted"); renderLag(); } });
+    reset: function () { freshLag(); lagLog.clear(); lagLog.add("از اول", "muted"); renderLag(); } });
 
   freshLag(); renderLag();
-  lagLog.add("Press Play, or Write then Read quickly. Each step is one tick of time.", "muted");
+  lagLog.add("پخش را بزنید، یا سریع نوشتن و بعد خواندن را. هر قدم یک tick زمان است.", "muted");
 
   /* ================= Tab 2: leaderless quorums ================= */
   var qLog = Kit.log(document.getElementById("q-log"));
@@ -329,24 +329,24 @@
 
   function qWrite() {
     var set = chooseUp(Q.w);
-    if (!set) { qLog.add("Write FAILED: fewer than w=" + Q.w + " replicas up", "bad"); return; }
+    if (!set) { qLog.add("نوشتن شکست خورد: کمتر از w=" + Q.w + " replica روشن است", "bad"); return; }
     Q.ver++;
     set.forEach(function (i) { Q.reps[i].v = Q.ver; });
     Q.lastW = set; Q.lastR = [];
-    qLog.add("Write v" + Q.ver + " → replicas " + set.map(function (i) { return "#" + (i + 1); }).join(", ") + " (" + Q.w + " acks)", "ok");
+    qLog.add("نوشتن v" + Q.ver + " در replicaهای " + set.map(function (i) { return "#" + (i + 1); }).join("، ") + " با " + Q.w + " تأیید", "ok");
   }
 
   function qRead() {
     var set = chooseUp(Q.r);
-    if (!set) { qLog.add("Read FAILED: fewer than r=" + Q.r + " replicas up", "bad"); return; }
+    if (!set) { qLog.add("خواندن شکست خورد: کمتر از r=" + Q.r + " replica روشن است", "bad"); return; }
     Q.lastR = set;
     var best = Math.max.apply(null, set.map(function (i) { return Q.reps[i].v; }));
     var stale = best < Q.ver;
-    qLog.add("Read from " + set.map(function (i) { return "#" + (i + 1) + ":v" + Q.reps[i].v; }).join(", ") + " → v" + best + (stale ? " ✗ stale (latest is v" + Q.ver + ")" : " ✓"), stale ? "bad" : "ok");
+    qLog.add("خواندن از " + set.map(function (i) { return "#" + (i + 1) + ":v" + Q.reps[i].v; }).join("، ") + " نتیجه‌ی v" + best + " را داد" + (stale ? " ✗ کهنه است؛ آخرین نسخه v" + Q.ver + " است" : " ✓"), stale ? "bad" : "ok");
     if (document.getElementById("repair").checked) {
       var fixed = set.filter(function (i) { return Q.reps[i].v < best; });
       fixed.forEach(function (i) { Q.reps[i].v = best; });
-      if (fixed.length) qLog.add("Read repair: wrote v" + best + " back to " + fixed.map(function (i) { return "#" + (i + 1); }).join(", "), "muted");
+      if (fixed.length) qLog.add("مفهوم read repair: v" + best + " دوباره در " + fixed.map(function (i) { return "#" + (i + 1); }).join("، ") + " نوشته شد", "muted");
     }
   }
 
@@ -359,53 +359,53 @@
       var ws = pick(Q.w), rs = pick(Q.r);
       if (!rs.some(function (i) { return ws.indexOf(i) >= 0; })) stale++;
     }
-    qLog.add("1,000 independent write→read trials: " + stale + " stale, " + failed + " unavailable", stale ? "warn" : "ok");
+    qLog.add("۱٬۰۰۰ آزمایش مستقل نوشتن و بعد خواندن: " + stale + " خواندن کهنه و " + failed + " بار در دسترس نبودن", stale ? "warn" : "ok");
   }
 
   function renderQ() {
     var ring = Kit.clear(document.getElementById("ring"));
     Q.reps.forEach(function (rep, i) {
       var b = el("button", { type: "button", class: "rep" + (Q.lastW.indexOf(i) >= 0 ? " w" : "") + (Q.lastR.indexOf(i) >= 0 ? " r" : "") + (rep.up ? "" : " down") + (rep.v < Q.ver ? " stale" : ""),
-        "aria-label": "Replica " + (i + 1) + ", version " + rep.v + (rep.up ? "" : ", down") + ". Click to toggle." },
-        el("small", null, "replica #" + (i + 1)), el("span", { class: "ver" }, "v" + rep.v), el("small", null, rep.up ? (rep.v < Q.ver ? "stale" : "current") : "down"));
-      b.addEventListener("click", function () { rep.up = !rep.up; qLog.add("Replica #" + (i + 1) + (rep.up ? " is back" : " went down"), rep.up ? "muted" : "warn"); renderQ(); });
+        "aria-label": "replica شماره‌ی " + (i + 1) + "، نسخه‌ی " + rep.v + (rep.up ? "" : "، خاموش") + ". برای تغییر وضعیت بزنید." },
+        el("small", null, "replica #" + (i + 1)), el("span", { class: "ver" }, "v" + rep.v), el("small", null, rep.up ? (rep.v < Q.ver ? "کهنه" : "به‌روز") : "خاموش"));
+      b.addEventListener("click", function () { rep.up = !rep.up; qLog.add("replica #" + (i + 1) + (rep.up ? " برگشت" : " خاموش شد"), rep.up ? "muted" : "warn"); renderQ(); });
       ring.appendChild(b);
     });
     var overlap = Q.w + Q.r > Q.n;
     var v = Kit.clear(document.getElementById("q-verdict"));
     v.className = "callout " + (overlap ? "ok" : "warn");
-    v.appendChild(el("p", null, el("strong", { class: "mono" }, "w + r = " + (Q.w + Q.r) + (overlap ? " > " : " ≤ ") + "n = " + Q.n + ". "),
-      overlap ? "Every read set overlaps every write set — reads can see the latest write." : "A read set can miss the write set entirely — stale reads are possible."));
+    v.appendChild(el("p", null, el("strong", { class: "mono", dir: "ltr" }, "w + r = " + (Q.w + Q.r) + (overlap ? " > " : " ≤ ") + "n = " + Q.n), " ",
+      overlap ? "هر مجموعه‌ی خواندن با هر مجموعه‌ی نوشتن هم‌پوشانی دارد؛ خواندن‌ها می‌توانند آخرین نوشتن را ببینند." : "یک مجموعه‌ی خواندن ممکن است اصلاً با مجموعه‌ی نوشتن هم‌پوشانی نداشته باشد؛ خواندن کهنه ممکن است."));
     var upN = Q.reps.filter(function (r) { return r.up; }).length;
     var st = Kit.clear(document.getElementById("q-stats"));
-    [["replicas up", upN + " / " + Q.n, ""], ["writes tolerate", Math.max(0, Q.n - Q.w) + " down", ""], ["reads tolerate", Math.max(0, Q.n - Q.r) + " down", ""]]
+    [["replicaهای روشن", upN + " از " + Q.n, ""], ["نوشتن تحمل می‌کند", Math.max(0, Q.n - Q.w) + " خاموش", ""], ["خواندن تحمل می‌کند", Math.max(0, Q.n - Q.r) + " خاموش", ""]]
       .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value" }, x[1]))); });
   }
 
   var qs = document.getElementById("q-sliders");
   var sw, sr;
-  qs.appendChild(Kit.slider({ label: "n (replicas)", min: 1, max: 7, value: Q.n, onInput: function (v) {
+  qs.appendChild(Kit.slider({ label: "مقدار n، تعداد replica", min: 1, max: 7, value: Q.n, onInput: function (v) {
     Q.n = v; Q.w = Math.min(Q.w, v); Q.r = Math.min(Q.r, v); sw.input.max = v; sr.input.max = v; sw.set(Q.w); sr.set(Q.r);
     resetReps(); Q.lastW = []; Q.lastR = []; renderQ(); } }).element);
-  sw = Kit.slider({ label: "w (write acks)", min: 1, max: Q.n, value: Q.w, onInput: function (v) { Q.w = v; renderQ(); } });
-  sr = Kit.slider({ label: "r (read responses)", min: 1, max: Q.n, value: Q.r, onInput: function (v) { Q.r = v; renderQ(); } });
+  sw = Kit.slider({ label: "مقدار w، تأیید نوشتن", min: 1, max: Q.n, value: Q.w, onInput: function (v) { Q.w = v; renderQ(); } });
+  sr = Kit.slider({ label: "مقدار r، پاسخ خواندن", min: 1, max: Q.n, value: Q.r, onInput: function (v) { Q.r = v; renderQ(); } });
   qs.appendChild(sw.element); qs.appendChild(sr.element);
   document.getElementById("qw").addEventListener("click", function () { qWrite(); renderQ(); });
   document.getElementById("qr").addEventListener("click", function () { qRead(); renderQ(); });
   document.getElementById("qmc").addEventListener("click", monteCarlo);
   renderQ();
-  qLog.add("Write, then read. Try w=1, r=1 and compare with w=3, r=3.", "muted");
+  qLog.add("بنویسید و بعد بخوانید. w=1 و r=1 را امتحان کنید و با w=3 و r=3 مقایسه کنید.", "muted");
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "A user updates their profile and immediately reloads the page, which reads from a random follower. Which guarantee is at risk?",
-      options: ["Monotonic reads", "Read-after-write (read-your-writes) consistency", "Consistent prefix reads"],
-      answer: 1, explain: "The follower may not yet have the user's own write. Routing the user's reads of their own data to the leader is one fix." },
-    { q: "With asynchronous replication, why can failover lose writes the client was told had succeeded?",
-      options: ["The new leader may not have received them before the old leader crashed", "Followers reject writes during failover", "Clients retry writes too slowly"],
-      answer: 0, explain: "An acknowledged write that existed only on the old leader is gone once a follower that lacked it becomes leader." },
-    { q: "n = 5. Which setting guarantees that a read overlaps the latest successful write?",
-      options: ["w = 2, r = 3", "w = 3, r = 3", "w = 1, r = 4"],
-      answer: 1, explain: "Overlap requires w + r > n: 3 + 3 = 6 > 5. The other two sum to exactly 5." }
+    { q: "کاربری پروفایلش را به‌روز می‌کند و بلافاصله صفحه را دوباره باز می‌کند، که از یک follower تصادفی می‌خواند. کدام تضمین در خطر است؟",
+      options: ["مدل monotonic reads", "مدل read-after-write یا read-your-writes", "مدل consistent prefix reads"],
+      answer: 1, explain: "ممکن است follower هنوز نوشتن خود کاربر را نداشته باشد. فرستادن خواندن‌های کاربر از داده‌ی خودش به leader یکی از راه‌حل‌هاست (صص. ۲۱۰–۲۱۱)." },
+    { q: "با replication از نوع asynchronous، چرا failover ممکن است نوشتن‌هایی را گم کند که به client گفته شده موفق بوده‌اند؟",
+      options: ["چون ممکن است leader تازه پیش از crash کردن leader قدیم آن‌ها را نگرفته باشد", "چون followerها هنگام failover نوشتن‌ها را رد می‌کنند", "چون clientها نوشتن‌ها را خیلی کند retry می‌کنند"],
+      answer: 0, explain: "نوشتن تأییدشده‌ای که فقط روی leader قدیم بوده، وقتی followerی که آن را نداشت leader می‌شود از بین می‌رود (صص. ۲۰۵–۲۰۶)." },
+    { q: "با n = 5، کدام تنظیم تضمین می‌کند که خواندن با آخرین نوشتن موفق هم‌پوشانی داشته باشد؟",
+      options: ["w = 2 و r = 3", "w = 3 و r = 3", "w = 1 و r = 4"],
+      answer: 1, explain: "هم‌پوشانی یعنی w + r > n؛ یعنی ۳ + ۳ = ۶ که از ۵ بیشتر است. جمع دو گزینه‌ی دیگر دقیقاً ۵ است (صص. ۲۳۱–۲۳۲)." }
   ]);
 })();
 </script>

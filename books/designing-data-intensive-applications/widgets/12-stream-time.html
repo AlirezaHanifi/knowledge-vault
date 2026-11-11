@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Event Time and Stragglers</title>
-<meta name="description" content="Count events in tumbling windows by event time and by processing time, decide when to close a window, and handle straggler events. Illustrates DDIA 2nd ed., Chapter 12.">
+<title>مفهوم event time و late event</title>
+<meta name="description" content="رویدادها را در tumbling windowها یک بار بر اساس event time و یک بار بر اساس processing time بشمارید، تصمیم بگیرید یک window کی بسته شود، و late eventها را مدیریت کنید. برای فصل ۱۲ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .axis { stroke: var(--line-strong); }
@@ -24,57 +24,57 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/12-stream-processing.html">Chapter 12</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Event time</span>
+      <a href="../chapters/12-stream-processing.html">فصل ۱۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم event time</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 12 · Stream Processing</div>
-  <h1>Event time, processing time, and stragglers</h1>
-  <p class="lede">An event carries the time it happened (event time), but reaches the stream processor later (processing time). Windowing by arrival time is easy but wrong when delays vary; windowing by event time is right but forces a decision: when is a window complete, and what happens to events that arrive after that?</p>
-  <p class="source-note">Illustrates “Reasoning About Time” (pp. 518–523): event versus processing time, Figure 12-8’s processing-time artifacts, handling straggler events (ignore them or publish a correction, p. 520), and tumbling windows (p. 522). The arrival model is the vault’s own illustration.</p>
+  <div class="eyebrow">فصل ۱۲ · پردازش stream</div>
+  <h1>مفهوم event time، processing time و late event</h1>
+  <p class="lede">هر رویداد زمان رخ دادنش را دارد، یعنی event time، اما دیرتر به پردازش‌کننده‌ی stream می‌رسد، یعنی processing time. window بر اساس زمان رسیدن آسان است اما وقتی latencyها متغیرند غلط است؛ window بر اساس event time درست است اما تصمیمی را تحمیل می‌کند: یک window کی کامل است، و با رویدادهایی که بعد از آن می‌رسند چه می‌شود؟</p>
+  <p class="source-note">برای بخش «استدلال درباره‌ی زمان» در صص. ۵۱۸–۵۲۳: event time در برابر processing time، عددهای ساختگی processing time در شکل ۱۲-۸، مدیریت رویدادهای دیررس، یعنی نادیده گرفتن یا انتشار اصلاحیه در ص. ۵۲۰، و tumbling window در ص. ۵۲۲. مدل رسیدن رویدادها تصویرسازی خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
-      <p class="panel-title">Each dot is an event · x = event time · y = arrival (processing) time</p>
-      <div class="stage" id="plot" role="img" aria-label="Scatter of events by event time and arrival time, with tumbling windows and their closing times"></div>
+      <p class="panel-title">هر نقطه یک رویداد است · محور افقی event time · محور عمودی زمان رسیدن، یعنی processing time</p>
+      <div class="stage" id="plot" dir="ltr" role="img" aria-label="پراکندگی رویدادها بر اساس event time و زمان رسیدن، با tumbling windowها و زمان بسته شدنشان"></div>
       <div class="table-wrap" style="margin-top:12px"><table class="data" id="table"></table></div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Stream</p>
+        <p class="panel-title">مفهوم stream</p>
         <div id="sliders"></div>
-        <div class="field" style="margin-top:12px"><span class="field-head">Stragglers after a window closes</span><div id="policy"></div></div>
+        <div class="field" style="margin-top:12px"><span class="field-head">late eventها بعد از بسته شدن window</span><div id="policy"></div></div>
         <div style="margin-top:12px" id="player"></div>
       </div>
-      <div class="panel"><p class="panel-title">Totals</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">جمع‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Processing-time windows are distorted by delay</strong>: the “by arrival” column counts events in the window they happened to arrive in, not the one they belong to. Raise the delay or add a backlog burst and the two columns diverge.</li>
-    <li><strong>Waiting longer reduces stragglers but delays results.</strong> The grace period is the trade-off between completeness and latency — there is no setting that gives both when some devices are offline for a long time.</li>
-    <li><strong>Ignoring stragglers</strong> leaves permanently wrong counts (track how many you drop). <strong>Publishing corrections</strong> fixes them, but downstream consumers must handle a window’s value changing after it was first emitted.</li>
+    <li><strong>مفهوم window بر اساس processing time با latency کج می‌شود</strong>: ستون «بر اساس رسیدن» رویدادها را در windowی می‌شمارد که اتفاقاً در آن رسیده‌اند، نه windowی که به آن تعلق دارند. latency را بالا ببرید یا رویدادهای آفلاین را بیشتر کنید تا دو ستون از هم دور شوند.</li>
+    <li><strong>صبر بیشتر late eventها را کم می‌کند اما نتیجه را دیر می‌کند.</strong> مهلت بسته شدن بده‌بستان بین کامل بودن و latency است؛ وقتی بعضی دستگاه‌ها مدت زیادی آفلاین‌اند، هیچ تنظیمی هر دو را نمی‌دهد.</li>
+    <li><strong>نادیده گرفتن late eventها</strong> شمارش‌ها را برای همیشه غلط می‌گذارد؛ تعداد دورریخته‌ها را دنبال کنید. <strong>انتشار اصلاحیه</strong> درستشان می‌کند، اما consumerهای downstreamی باید با تغییر مقدار یک window بعد از اولین انتشار کنار بیایند.</li>
   </ul>
-  <div class="callout"><p><strong>Vault note:</strong> the book describes a processor emitting a special message meaning “no more events earlier than <em>t</em> will arrive”. Stream frameworks commonly call this a <em>watermark</em>; the grace-period rule used here is the simplest such heuristic.</p></div>
+  <div class="callout"><p><strong>یادداشت vault:</strong> کتاب پردازش‌کننده‌ای را توصیف می‌کند که پیام ویژه‌ای به معنای «رویدادی زودتر از <em>t</em> دیگر نمی‌آید» می‌فرستد. چارچوب‌های stream معمولاً به این <em>watermark</em> می‌گویند؛ قاعده‌ی مهلت در اینجا ساده‌ترین روش ابتکاری از این دست است.</p></div>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/12-stream-processing.html"><small>Lesson</small>12. Stream Processing</a></li>
-    <li><a href="../lab/12-stream-windows/README.md"><small>Experiment</small>Tumbling windows in Python</a></li>
+    <li><a href="../chapters/12-stream-processing.html"><small>درس</small>فصل ۱۲: پردازش stream</a></li>
+    <li><a href="../lab/12-stream-windows/README.md"><small>آزمایش</small>مفهوم tumbling window در Python</a></li>
   </ul>
-  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -99,7 +99,7 @@
   function win(t) { return Math.floor(t / W); }
   function closesAt(w) { return (w + 1) * W + cfg.grace; }
 
-  function reset() { now = 0; closed = {}; generate(); log.clear(); log.add("Processing time starts at 0 s; press Play.", "muted"); render(); }
+  function reset() { now = 0; closed = {}; generate(); log.clear(); log.add("مفهوم processing time از ۰ ثانیه شروع می‌شود؛ پخش را بزنید.", "muted"); render(); }
 
   function step() {
     if (now >= TMAX) return false;
@@ -108,14 +108,14 @@
       if (!closed[w] && closesAt(w) <= now) {
         var n = events.filter(function (e) { return win(e.et) === w && e.at <= closesAt(w); }).length;
         closed[w] = { first: n, corrections: 0 };
-        log.add("t=" + now + "s window [" + w * W + ", " + (w + 1) * W + ") closed with count " + n, "ok");
+        log.add("t=" + now + "s مفهوم window [" + w * W + ", " + (w + 1) * W + ") با شمارش " + n + " بسته شد", "ok");
       }
     }
     events.forEach(function (e) {
       var w = win(e.et);
       if (closed[w] && e.at > prev && e.at <= now && e.at > closesAt(w)) {
-        if (cfg.policy === "drop") log.add("Straggler (event time " + e.et.toFixed(1) + "s) for closed window " + w + " — dropped", "bad");
-        else { closed[w].corrections++; log.add("Straggler for window " + w + " — correction published", "warn"); }
+        if (cfg.policy === "drop") log.add("late event با event time " + e.et.toFixed(1) + "s برای window بسته‌ی " + w + "؛ دور ریخته شد", "bad");
+        else { closed[w].corrections++; log.add("late event برای window " + w + "؛ اصلاحیه منتشر شد", "warn"); }
       }
     });
     render();
@@ -149,7 +149,7 @@
     Kit.clear(document.getElementById("plot")).appendChild(s);
 
     var tb = Kit.clear(document.getElementById("table"));
-    tb.appendChild(el("tr", null, ["window", "true count", "by arrival", "emitted", "stragglers", "final"].map(function (h, i) { return el("th", { class: i ? "num" : null }, h); })));
+    tb.appendChild(el("tr", null, ["مفهوم window", "شمارش واقعی", "بر اساس رسیدن", "منتشرشده", "lateها", "نهایی"].map(function (h, i) { return el("th", { class: i ? "num" : null }, h); })));
     var dropped = 0, totalLate = 0;
     for (var k = 0; k < SPAN / W; k++) {
       var truth = events.filter(function (e) { return win(e.et) === k; }).length;
@@ -163,38 +163,38 @@
         el("td", { class: "mono" }, "[" + k * W + ", " + (k + 1) * W + ")"),
         el("td", { class: "num" }, truth),
         el("td", { class: "num" + (byArrival !== truth && now >= TMAX ? " bad" : "") }, byArrival),
-        el("td", { class: "num" }, c ? c.first : "open"),
+        el("td", { class: "num" }, c ? c.first : "باز"),
         el("td", { class: "num" + (late ? " bad" : "") }, late),
         el("td", { class: "num " + (c ? (fin === truth || now < TMAX ? "ok" : "bad") : "") }, fin)));
     }
     var st = Kit.clear(document.getElementById("stats"));
-    [["now", now + " s", ""], ["stragglers", totalLate, totalLate ? "warn" : "ok"], ["dropped", dropped, dropped ? "bad" : "ok"]]
+    [["اکنون", now + " s", ""], ["lateها", totalLate, totalLate ? "warn" : "ok"], ["دورریخته", dropped, dropped ? "bad" : "ok"]]
       .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, x[1]))); });
   }
 
   var sl = document.getElementById("sliders");
-  sl.appendChild(Kit.slider({ label: "Typical network delay", min: 0.5, max: 8, step: 0.5, value: cfg.delay, unit: " s", onInput: function (v) { cfg.delay = v; reset(); } }).element);
-  sl.appendChild(Kit.slider({ label: "Events from offline devices", min: 0, max: 0.3, step: 0.01, value: cfg.offline, format: function (v) { return Kit.pct(v, 0); },
-    hint: "Buffered on the device and sent 10–35 s later", onInput: function (v) { cfg.offline = v; reset(); } }).element);
-  sl.appendChild(Kit.slider({ label: "Grace period before closing a window", min: 0, max: 30, value: cfg.grace, unit: " s", hint: "Gold lines: when each window is declared complete",
+  sl.appendChild(Kit.slider({ label: "latency معمول شبکه", min: 0.5, max: 8, step: 0.5, value: cfg.delay, unit: " s", onInput: function (v) { cfg.delay = v; reset(); } }).element);
+  sl.appendChild(Kit.slider({ label: "رویدادهای دستگاه‌های آفلاین", min: 0, max: 0.3, step: 0.01, value: cfg.offline, format: function (v) { return Kit.pct(v, 0); },
+    hint: "روی دستگاه buffer می‌شوند و ۱۰ تا ۳۵ ثانیه بعد فرستاده می‌شوند", onInput: function (v) { cfg.offline = v; reset(); } }).element);
+  sl.appendChild(Kit.slider({ label: "مهلت پیش از بستن window", min: 0, max: 30, value: cfg.grace, unit: " s", hint: "خط‌های طلایی: زمانی که هر window کامل اعلام می‌شود",
     onInput: function (v) { cfg.grace = v; reset(); } }).element);
-  document.getElementById("policy").appendChild(Kit.segmented({ label: "Straggler policy", value: cfg.policy,
-    options: [{ value: "drop", label: "Ignore (drop)" }, { value: "correct", label: "Publish correction" }],
+  document.getElementById("policy").appendChild(Kit.segmented({ label: "سیاست late event", value: cfg.policy,
+    options: [{ value: "drop", label: "نادیده گرفتن" }, { value: "correct", label: "انتشار اصلاحیه" }],
     onChange: function (v) { cfg.policy = v; reset(); } }).element);
 
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 250 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "A stream job restarts and reprocesses an hour of backlog in two minutes. What happens to per-minute counts computed by processing time?",
-      options: ["Nothing changes", "The backlog lands in a couple of windows, creating a spike that never happened", "Counts are dropped"],
-      answer: 1, explain: "Processing-time windows measure when events were processed, not when they occurred (Figure 12-8)." },
-    { q: "You can never be sure a window has received all its events. What are the two broad options for stragglers?",
-      options: ["Ignore them (and monitor how many) or publish a correction", "Block until all devices report", "Reorder the stream"],
-      answer: 0, explain: "Both are legitimate; corrections need consumers that can handle updated (and possibly retracted) results." },
-    { q: "Why might you log the device's send time in addition to the event time and the server's receive time?",
-      options: ["To compress events", "To estimate the offset between the device clock and the server clock", "To deduplicate events"],
-      answer: 1, explain: "Receive time minus send time estimates the clock offset (ignoring network delay), which can then correct the event timestamp." }
+    { q: "یک job مربوط به stream restart می‌شود و یک ساعت صف عقب‌افتاده را در دو دقیقه پردازش می‌کند. شمارش‌های دقیقه‌ای بر اساس processing time چه می‌شوند؟",
+      options: ["تغییری نمی‌کنند", "صف عقب‌افتاده در چند window می‌نشیند و spikeی می‌سازد که هرگز رخ نداده", "شمارش‌ها دور ریخته می‌شوند"],
+      answer: 1, explain: "مفهوم window بر اساس processing time می‌سنجد رویدادها کی پردازش شده‌اند، نه کی رخ داده‌اند؛ شکل ۱۲-۸ (ص. ۵۲۰)." },
+    { q: "هرگز نمی‌توانید مطمئن باشید یک window همه‌ی رویدادهایش را گرفته. دو گزینه‌ی کلی برای late eventها چیست؟",
+      options: ["نادیده گرفتن، با monitoring تعدادشان، یا انتشار اصلاحیه", "مسدود کردن تا همه‌ی دستگاه‌ها گزارش دهند", "مرتب کردن دوباره‌ی stream"],
+      answer: 0, explain: "هر دو مشروع‌اند؛ اصلاحیه consumerهایی لازم دارد که نتیجه‌های به‌روزشده و شاید پس‌گرفته را مدیریت کنند (صص. ۵۲۰–۵۲۱)." },
+    { q: "چرا ممکن است علاوه بر event time و زمان دریافت سرور، زمان فرستادن دستگاه را هم ثبت کنید؟",
+      options: ["برای فشرده کردن رویدادها", "برای تخمین اختلاف ساعت دستگاه و ساعت سرور", "برای حذف تکراری‌ها"],
+      answer: 1, explain: "زمان دریافت منهای زمان فرستادن، با چشم‌پوشی از latency شبکه، اختلاف ساعت را تخمین می‌زند و می‌شود با آن timestamp رویداد را اصلاح کرد (ص. ۵۲۱)." }
   ]);
 })();
 </script>

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Concurrent Writes and Siblings</title>
-<meta name="description" content="Replay the book's shopping-cart example: two clients add items concurrently, the server uses version numbers to keep concurrent values as siblings, and last write wins loses items. Illustrates DDIA Chapter 6.">
+<title>نوشتن‌های concurrent و sibling</title>
+<meta name="description" content="مثال سبد خرید کتاب را دوباره اجرا کنید: دو client هم‌زمان آیتم اضافه می‌کنند، سرور با شماره‌ی نسخه مقدارهای concurrent را به شکل sibling نگه می‌دارد، و last write wins آیتم‌ها را گم می‌کند. برای فصل ۶ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .actors { display: grid; gap: 12px; grid-template-columns: 1fr 1.2fr 1fr; align-items: start; }
@@ -18,7 +18,7 @@
   .know { font-family: var(--mono); font-size: .78rem; color: var(--ink-2); }
   .add { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   .lost { color: var(--bad); font-weight: 600; }
-  .script { font-size: .84rem; margin: 0; padding-left: 1.3em; }
+  .script { font-size: .84rem; margin: 0; padding-inline-start: 1.3em; }
   .script li { margin: 2px 0; color: var(--ink-3); }
   .script li.done { color: var(--ink); }
   .script li.next { color: var(--accent); font-weight: 600; }
@@ -27,21 +27,21 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/06-replication.html">Chapter 6</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Concurrent writes</span>
+      <a href="../chapters/06-replication.html">فصل ۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">نوشتن‌های concurrent</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 6 · Replication</div>
-  <h1>Concurrent writes: siblings vs last write wins</h1>
-  <p class="lede">Two writes are concurrent when neither knew about the other. The server can tell from version numbers: a write carries the version it was based on, overwrites everything up to that version, and keeps anything newer as a sibling for the client to merge. Last write wins skips all that — and silently drops items.</p>
-  <p class="source-note">Illustrates “Last write wins”, “The happens-before relation and concurrency” and “Capturing the happens-before relationship” (pp. 237–242, Figures 6-15 and 6-16): the book’s five cart writes on a single replica. With several replicas the same idea needs a version vector (p. 242). Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۶ · مفهوم replication</div>
+  <h1>نوشتن‌های concurrent: مقایسه‌ی sibling و last write wins</h1>
+  <p class="lede">دو نوشتن concurrent هستند وقتی هیچ‌کدام از دیگری خبر نداشته باشد. سرور این را از شماره‌ی نسخه می‌فهمد: هر نوشتن نسخه‌ای را که رویش ساخته شده همراه دارد، همه‌چیز تا آن نسخه را بازنویسی می‌کند و هر چیز جدیدتری را به شکل sibling نگه می‌دارد تا client merge کند. last write wins از همه‌ی این‌ها می‌گذرد و آیتم‌ها را بی‌صدا دور می‌ریزد.</p>
+  <p class="source-note">برای بخش‌های «تشخیص نوشتن‌های concurrent»، «رابطه‌ی happens-before» و «ثبت رابطه‌ی happens-before» در صص. ۲۳۷–۲۴۲، با شکل‌های ۶-۱۵ و ۶-۱۶: پنج نوشتن سبد خرید کتاب روی یک replica. با چند replica همین ایده یک version vector لازم دارد (ص. ۲۴۲). پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
@@ -52,41 +52,41 @@
           <div class="actor" id="c2"></div>
         </div>
       </div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Conflict handling on the server</p>
+        <p class="panel-title">برخورد سرور با conflict</p>
         <div id="mode"></div>
-        <p class="panel-title" style="margin-top:14px">The book’s sequence (Figure 6-15)</p>
+        <p class="panel-title" style="margin-top:14px">ترتیب کتاب در شکل ۶-۱۵</p>
         <ol class="script" id="script"></ol>
         <div id="player" style="margin-top:10px"></div>
       </div>
       <div class="panel wide">
-        <p class="panel-title">Outcome</p>
+        <p class="panel-title">نتیجه</p>
         <div class="stats" id="stats"></div>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Version numbers capture “knew about”.</strong> Client 1 writes [milk, flour] based on version 1: it replaces [milk] but cannot replace [eggs], which it never saw — so [eggs] stays as a sibling.</li>
-    <li><strong>Clients merge siblings.</strong> Each write merges everything the client last received, so nothing is lost even though the clients are never fully up to date.</li>
-    <li><strong>Last write wins is not “latest”.</strong> Switch modes and replay: each write overwrites the cart, and items added by the other client vanish without an error.</li>
-    <li><strong>Try your own order.</strong> Add items directly from either client; a client that never read writes with version 0, concurrent with everything.</li>
+    <li><strong>شماره‌ی نسخه «خبر داشتن» را ثبت می‌کند.</strong> client ۱ مقدار [milk, flour] را بر اساس نسخه‌ی ۱ می‌نویسد: جای [milk] را می‌گیرد اما نمی‌تواند جای [eggs] را بگیرد، چون هرگز آن را ندیده؛ پس [eggs] به شکل sibling می‌ماند.</li>
+    <li><strong>هر client siblingها را merge می‌کند.</strong> هر نوشتن همه‌ی چیزهایی را که client آخرین بار گرفته merge می‌کند، پس هیچ چیز گم نمی‌شود، با این‌که clientها هیچ‌وقت کاملاً به‌روز نیستند.</li>
+    <li><strong>مدل last write wins یعنی «آخرین» نیست.</strong> حالت را عوض کنید و دوباره اجرا کنید: هر نوشتن سبد را بازنویسی می‌کند و آیتم‌هایی که client دیگر اضافه کرده بدون هیچ خطایی ناپدید می‌شوند.</li>
+    <li><strong>ترتیب خودتان را امتحان کنید.</strong> مستقیم از هر client آیتم اضافه کنید؛ clientی که هیچ‌وقت نخوانده با نسخه‌ی ۰ می‌نویسد، که با همه‌چیز concurrent است.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/06-replication.html"><small>Lesson</small>6. Replication</a></li>
-    <li><a href="../lab/06-version-vectors/README.md"><small>Experiment</small>Concurrent writes and version vectors</a></li>
-    <li><a href="06-replication.html"><small>Simulation</small>Replication lag and quorums</a></li>
+    <li><a href="../chapters/06-replication.html"><small>درس</small>فصل ۶: مفهوم replication</a></li>
+    <li><a href="../lab/06-version-vectors/README.md"><small>آزمایش</small>نوشتن‌های concurrent و version vector</a></li>
+    <li><a href="06-replication.html"><small>شبیه‌سازی</small>مفهوم replication lag و quorum</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -101,7 +101,7 @@
   function reset() {
     s = { counter: 0, siblings: [], clients: { 1: { version: 0, seen: [] }, 2: { version: 0, seen: [] } }, added: [], pos: 0, fresh: null };
     log.clear();
-    log.add(mode === "versions" ? "Empty cart. The server keeps a version number per key." : "Empty cart. The server keeps only the value with the latest timestamp.", "muted");
+    log.add(mode === "versions" ? "سبد خالی است. سرور برای هر کلید یک شماره‌ی نسخه نگه می‌دارد." : "سبد خالی است. سرور فقط مقداری را نگه می‌دارد که بزرگ‌ترین timestamp را دارد.", "muted");
     render();
   }
 
@@ -118,12 +118,12 @@
       var kept = s.siblings.filter(function (sib) { return sib.v > c.version; });
       var dropped = s.siblings.length - kept.length;
       s.siblings = kept.concat([{ v: v, value: merged }]);
-      log.add("Client " + cid + " writes [" + merged.join(", ") + "] based on version " + c.version + " → version " + v +
-        (dropped ? "; overwrites " + dropped + " value(s)" : "") + (kept.length ? "; keeps " + kept.length + " concurrent sibling(s)" : ""), kept.length ? "warn" : "ok");
+      log.add("client " + cid + " مقدار [" + merged.join(", ") + "] را بر اساس نسخه‌ی " + c.version + " می‌نویسد و نسخه‌ی " + v + " ساخته می‌شود" +
+        (dropped ? "؛ " + dropped + " مقدار بازنویسی شد" : "") + (kept.length ? "؛ " + kept.length + " sibling هم‌زمان ماند" : ""), kept.length ? "warn" : "ok");
     } else {
       var lostNow = s.siblings.length ? s.siblings[0].value.filter(function (x) { return merged.indexOf(x) < 0; }) : [];
       s.siblings = [{ v: v, value: merged }];
-      log.add("Client " + cid + " writes [" + merged.join(", ") + "] with timestamp " + v + " → replaces the cart" + (lostNow.length ? "; " + lostNow.join(", ") + " silently lost" : ""), lostNow.length ? "bad" : "ok");
+      log.add("client " + cid + " مقدار [" + merged.join(", ") + "] را با timestamp برابر " + v + " می‌نویسد و جای کل سبد را می‌گیرد" + (lostNow.length ? "؛ " + lostNow.join(", ") + " بی‌صدا گم شد" : ""), lostNow.length ? "bad" : "ok");
     }
     c.version = v; c.seen = s.siblings.map(function (sib) { return { v: sib.v, value: sib.value.slice() }; });
     s.fresh = v;
@@ -138,12 +138,12 @@
   }
 
   function sibEl(sib) {
-    return Kit.el("div", { class: "sib" + (sib.v === s.fresh ? " fresh" : "") }, Kit.el("span", null, "[" + sib.value.join(", ") + "]"), Kit.el("span", { class: "ver" }, (mode === "versions" ? "v" : "t=") + sib.v));
+    return Kit.el("div", { class: "sib" + (sib.v === s.fresh ? " fresh" : "") }, Kit.el("span", { dir: "ltr" }, "[" + sib.value.join(", ") + "]"), Kit.el("span", { class: "ver" }, (mode === "versions" ? "v" : "t=") + sib.v));
   }
   function clientEl(cid) {
     var c = s.clients[cid], box = Kit.clear(document.getElementById("c" + cid));
-    box.appendChild(Kit.el("h3", null, Kit.el("span", null, "Client " + cid), Kit.el("span", { class: "ver" }, "based on v" + c.version)));
-    box.appendChild(Kit.el("div", { class: "know" }, c.seen.length ? "last saw: " + c.seen.map(function (x) { return "[" + x.value.join(", ") + "]"; }).join(" + ") : "has not read the cart"));
+    box.appendChild(Kit.el("h3", null, Kit.el("span", null, "client " + cid), Kit.el("span", { class: "ver" }, "بر اساس v" + c.version)));
+    box.appendChild(Kit.el("div", { class: "know" }, c.seen.length ? "آخرین بار دید: " + c.seen.map(function (x) { return "[" + x.value.join(", ") + "]"; }).join(" + ") : "هنوز سبد را نخوانده"));
     var row = Kit.el("div", { class: "add" });
     ITEMS.forEach(function (it) {
       var b = Kit.el("button", { class: "btn small", type: "button" }, "+ " + it);
@@ -156,38 +156,38 @@
   function render() {
     clientEl(1); clientEl(2);
     var srv = Kit.clear(document.getElementById("server"));
-    srv.appendChild(Kit.el("h3", null, Kit.el("span", null, "Server: cart"), Kit.el("span", { class: "ver" }, mode === "versions" ? "counter " + s.counter : "LWW")));
-    if (!s.siblings.length) srv.appendChild(Kit.el("div", { class: "know" }, "empty"));
+    srv.appendChild(Kit.el("h3", null, Kit.el("span", null, "سبد روی سرور"), Kit.el("span", { class: "ver" }, mode === "versions" ? "شمارنده " + s.counter : "LWW")));
+    if (!s.siblings.length) srv.appendChild(Kit.el("div", { class: "know" }, "خالی"));
     s.siblings.forEach(function (sib) { srv.appendChild(sibEl(sib)); });
     var present = [];
     s.siblings.forEach(function (sib) { sib.value.forEach(function (x) { if (present.indexOf(x) < 0) present.push(x); }); });
     var lost = s.added.filter(function (x, i) { return s.added.indexOf(x) === i && present.indexOf(x) < 0; });
-    srv.appendChild(Kit.el("div", { class: "know", style: "margin-top:6px" }, "a read returns " + s.siblings.length + " value(s)" + (s.siblings.length > 1 ? " — the client must merge them" : "")));
+    srv.appendChild(Kit.el("div", { class: "know", style: "margin-top:6px" }, "هر خواندن " + s.siblings.length + " مقدار برمی‌گرداند" + (s.siblings.length > 1 ? "؛ client باید merge‌شان کند" : "")));
     var stats = Kit.clear(document.getElementById("stats"));
-    [["Siblings", s.siblings.length, ""], ["Items added", s.added.length, ""], ["Items lost", lost.length, lost.length ? "bad" : "ok"]].forEach(function (x) {
+    [["siblingها", s.siblings.length, ""], ["آیتم‌های اضافه‌شده", s.added.length, ""], ["آیتم‌های گم‌شده", lost.length, lost.length ? "bad" : "ok"]].forEach(function (x) {
       stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
     });
-    if (lost.length) stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, "Lost"), Kit.el("span", { class: "lost" }, lost.join(", "))));
+    if (lost.length) stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, "گم‌شده‌ها"), Kit.el("span", { class: "lost", dir: "ltr" }, lost.join(", "))));
     var sc = Kit.clear(document.getElementById("script"));
-    SCRIPT.forEach(function (w, i) { sc.appendChild(Kit.el("li", { class: i < s.pos ? "done" : i === s.pos ? "next" : null }, "Client " + w[0] + " adds " + w[1])); });
+    SCRIPT.forEach(function (w, i) { sc.appendChild(Kit.el("li", { class: i < s.pos ? "done" : i === s.pos ? "next" : null }, "client " + w[0] + " آیتم " + w[1] + " را اضافه می‌کند")); });
   }
 
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "Conflict handling", value: mode,
-    options: [{ value: "versions", label: "Version numbers + siblings" }, { value: "lww", label: "Last write wins" }],
+  document.getElementById("mode").appendChild(Kit.segmented({ label: "برخورد با conflict", value: mode,
+    options: [{ value: "versions", label: "شماره‌ی نسخه و sibling" }, { value: "lww", label: "مدل last write wins" }],
     onChange: function (v) { mode = v; reset(); } }).element);
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1200, speeds: false });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "When are two writes concurrent?",
-      options: ["When they happen within the same millisecond", "When neither knew about the other, whatever the physical time", "When they go to different replicas"],
-      answer: 1, explain: "Exact time doesn’t matter; operations are concurrent if both are unaware of each other (pp. 238–239)." },
-    { q: "A write arrives based on version 3 while the server holds siblings v3 and v4. What happens?",
-      options: ["Both are overwritten", "v3 is overwritten; v4 is kept as a concurrent sibling", "The write is rejected"],
-      answer: 1, explain: "The server may overwrite values with that version or below, but must keep higher ones (p. 240)." },
-    { q: "What does a single replica’s version number become with several replicas accepting writes?",
-      options: ["A timestamp", "A version vector — one version number per replica", "A lock"],
-      answer: 1, explain: "Each replica increments its own counter and tracks the others’; the collection is a version vector (p. 242)." }
+    { q: "دو نوشتن کی concurrent هستند؟",
+      options: ["وقتی در یک میلی‌ثانیه اتفاق بیفتند", "وقتی هیچ‌کدام از دیگری خبر نداشته باشد، زمان فیزیکی هر چه باشد", "وقتی به replicaهای مختلف بروند"],
+      answer: 1, explain: "زمان دقیق مهم نیست؛ عملیات‌ها concurrent هستند اگر هر دو از هم بی‌خبر باشند (صص. ۲۳۸–۲۳۹)." },
+    { q: "نوشتنی بر اساس نسخه‌ی ۳ می‌رسد، در حالی که سرور siblingهای v3 و v4 را دارد. چه می‌شود؟",
+      options: ["هر دو بازنویسی می‌شوند", "جای v3 گرفته می‌شود و v4 به شکل sibling هم‌زمان می‌ماند", "نوشتن رد می‌شود"],
+      answer: 1, explain: "سرور می‌تواند مقدارهای با آن نسخه یا پایین‌تر را بازنویسی کند، اما باید بالاترها را نگه دارد (ص. ۲۴۰)." },
+    { q: "وقتی چند replica نوشتن می‌پذیرند، شماره‌ی نسخه‌ی یک replica به چه چیزی تبدیل می‌شود؟",
+      options: ["یک timestamp", "یک version vector، یعنی یک شماره‌ی نسخه برای هر replica", "یک قفل"],
+      answer: 1, explain: "هر replica شمارنده‌ی خودش را بالا می‌برد و شمارنده‌ی بقیه را دنبال می‌کند؛ مجموعه‌ی آن‌ها یک version vector است (ص. ۲۴۲)." }
   ]);
 })();
 </script>

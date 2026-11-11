@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۱ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را مرحله‌به‌مرحله طی کنید، از دیتابیس OLTP و loader تا Bronze و Silver و Gold و notebook و داشبورد و API، و ببینید بده‌بستان‌های فصل ۱ در هر مرحله کجا هستند: OLTP در برابر OLAP، system of record در برابر derived data، داده‌ی شخصی، و یک node در برابر چند node. برای فصل ۱ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/01-trade-offs-in-data-systems-architecture.html">فصل ۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۱ · بده‌بستان‌ها در معماری سیستم‌های داده</div>
+  <h1>فصل ۱ در طول یک pipeline داده</h1>
+  <p class="lede">هر بده‌بستانِ این فصل جایی در یک pipeline معمولی انتخاب می‌شود. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید هر انتخاب کجا می‌نشیند.</p>
+  <p class="source-note">کل فصل را (صص. ۱–۳۲) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens نوع workload:</strong> فقط دو سر pipeline هر بار یک رکورد را سرو می‌کنند. همه‌چیز بینشان دسته‌ای می‌خواند و می‌نویسد، و برای همین در یک سیستم تحلیلی جدا زندگی می‌کند (صص. ۵–۹).</li>
+    <li><strong>با lens نوع داده:</strong> منبع تنها system of record واقعی است و داخل warehouse نقشش را Bronze بازی می‌کند. هر چه سمت چپ آن است را می‌شود دور ریخت و دوباره ساخت (صص. ۱۰–۱۱).</li>
+    <li><strong>با lens داده‌ی شخصی:</strong> کم کردن داده در loader ارزان است؛ پاک کردن بعدی نه، چون هر مرحله‌ی بعدی یک کپی دارد (صص. ۲۴–۲۵).</li>
+    <li><strong>با lens تعداد node:</strong> pipeline هر جا fault tolerance یا storage جدا لازم دارد توزیع‌شده است، و یک notebook روی یک ماشین اغلب ابزار بهتری است (صص. ۱۹–۲۱).</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/01-trade-offs-in-data-systems-architecture.html"><small>درس</small>فصل ۱: بده‌بستان‌ها در معماری سیستم‌های داده</a></li>
+    <li><a href="01-workloads.html"><small>شبیه‌سازی</small>دسته‌بندی workloadها</a></li>
+    <li><a href="01-erasure.html"><small>شبیه‌سازی</small>پاک کردن داده‌ی یک مشتری</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/01-trade-offs-in-data-systems-architecture.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    workload: {
+      label: "نوع workload", axis: ["point query یا OLTP", "اسکن و تجمیع یا OLAP"],
+      cells: {
+        source: { tag: "خواندن و نوشتن نقطه‌ای", level: 0, pages: "صص. ۵–۷", slide: "مشخصههای-پردازش-تراکنش-و-تحلیل",
+          text: "دیتابیس محصول به کوئری‌های کوچک با کلید جواب می‌دهد: موجودی یک مشتری، یک پرداخت تازه. تیم داده از یک replica می‌خواند تا اسکن‌هایش با کاربرانی که منتظر محصول‌اند رقابت نکند." },
+        loader: { tag: "استخراج دسته‌ای", level: 2, pages: "ص. ۷", slide: "مفهوم-data-warehousing",
+          text: "هر ساعت برای هر جدول یک SELECT افزایشی. کتاب می‌گوید چنین خواندن دسته‌ای‌ای نباید روی سیستم OLTP اجرا شود؛ یک read replica بارش را می‌گیرد." },
+        bronze: { tag: "bulk import", level: 3, pages: "ص. ۶", slide: "مشخصههای-پردازش-تراکنش-و-تحلیل",
+          text: "ردیف‌ها دسته‌ای می‌رسند، با INSERT … SELECT از فایل‌های Parquet، نه تک‌تک از طرف کاربران: الگوی نوشتن تحلیلی در جدول ۱-۱." },
+        silver: { tag: "اسکن روی تاریخچه", level: 4, pages: "ص. ۶", slide: "مشخصههای-پردازش-تراکنش-و-تحلیل",
+          text: "حذف تکراری‌ها و joinها کل partitionها را می‌خوانند: تجمیع روی تعداد زیادی رکورد، همان الگوی خواندن OLAP." },
+        gold: { tag: "تجمیع از پیش محاسبه‌شده", level: 4, pages: "ص. ۵", slide: "مشخصههای-پردازش-تراکنش-و-تحلیل",
+          text: "یک ردیف برای هر پرسش کسب‌وکار، از همان جنس مثال سوپرمارکت کتاب: درآمد کل هر فروشگاه در ژانویه." },
+        nb: { tag: "کاوش ad hoc", level: 4, pages: "ص. ۶", slide: "مشخصههای-پردازش-تراکنش-و-تحلیل",
+          text: "پرسش‌هایی که کسی از قبل برنامه‌ریزی نکرده و دستی نوشته می‌شوند: نوع کوئری «دلخواه و ad hoc» در جدول ۱-۱، و دلیل این‌که تحلیلگرها SQL دارند و کاربران OLTP نه." },
+        serve: { tag: "داشبورد اسکن می‌کند، API نقطه‌ای می‌خواند", level: 2, pages: "ص. ۶", slide: "مشخصههای-پردازش-تراکنش-و-تحلیل",
+          text: "داشبوردها کوئری‌های تجمیعی ثابت اجرا می‌کنند. API پیش‌بینی هر بار به یک درخواست، سریع، جواب می‌دهد: تحلیلی که داخل محصول نشسته، مثل product analytics کتاب." }
+      }
+    },
+    record: {
+      label: "record یا derived", axis: ["system of record", "derived data"],
+      cells: {
+        source: { tag: "system of record", level: 0, pages: "ص. ۱۰", slide: "مفهوم-system-of-record-و-derived-data",
+          text: "نسخه‌ی معتبر: یک پرداخت وجود دارد چون این دیتابیس می‌گوید وجود دارد. هر واقعیت یک بار و normalized ذخیره می‌شود." },
+        loader: { tag: "جابه‌جا می‌کند، تصمیم نمی‌گیرد", level: 1, pages: "ص. ۱۱", slide: "مفهوم-system-of-record-و-derived-data",
+          text: "ردیف‌ها را کپی می‌کند بی‌آن‌که تعیین کند چه چیزی درست است. اجرای شکست‌خورده را فقط دوباره روی منبع اجرا می‌کنیم." },
+        bronze: { tag: "record داخل warehouse", level: 1, pages: "ص. ۱۱", slide: "مفهوم-system-of-record-و-derived-data",
+          text: "در واقع کپی منبع است، اما همه‌ی جدول‌های warehouse از روی آن ساخته می‌شوند و تیم آن را system of record خودش می‌داند. حرف کتاب همین است: این تمایز به نحوه‌ی استفاده از ابزار برمی‌گردد، نه خود ابزار." },
+        silver: { tag: "derived", level: 3, pages: "ص. ۱۱", slide: "مفهوم-system-of-record-و-derived-data",
+          text: "از روی Bronze تمیز و join شده. اگر جدولی در Silver از دست برود یا غلط باشد، SQL را درست و دوباره اجرا کنید." },
+        gold: { tag: "derived و denormalized", level: 4, pages: "ص. ۱۱", slide: "مفهوم-system-of-record-و-derived-data",
+          text: "تجمیع‌های تکراری که برای خواندن شکل گرفته‌اند، مثل یک materialized view. هر بار Silver عوض شود، چیزی باید آن‌ها را دوباره بسازد." },
+        nb: { tag: "snapshot derived", level: 4, pages: "ص. ۱۱", slide: "مفهوم-system-of-record-و-derived-data",
+          text: "کپی‌ای که در یک لحظه کشیده شده. وقتی ورودی‌هایش عوض شوند هیچ چیز به‌روزش نمی‌کند: همان مسئله‌ی یکپارچه‌سازی که کتاب مطرح می‌کند." },
+        serve: { tag: "derived: یک مدل آموزش‌دیده", level: 4, pages: "صص. ۱۰–۱۱", slide: "مفهوم-system-of-record-و-derived-data",
+          text: "مدل آموزش‌دیده هم داده‌ی derived است که به مسیر عملیاتی برمی‌گردد: reverse ETL." }
+      }
+    },
+    personal: {
+      label: "داده‌ی شخصی", axis: ["شناسه‌های خام", "کمینه‌شده"],
+      cells: {
+        source: { tag: "شناسه‌های خام", level: 0, pages: "ص. ۲۴", slide: "سیستمهای-داده-قانون-و-جامعه",
+          text: "شماره‌ی تلفن و کد ملی به شکل متن خام، چون محصول به آن‌ها نیاز دارد. درخواست پاک شدن این‌جا شروع می‌شود، اما این‌جا تمام نمی‌شود." },
+        loader: { tag: "فقط ستون‌های فهرست‌شده", level: 3, pages: "ص. ۲۵", slide: "سیستمهای-داده-قانون-و-جامعه",
+          text: "فقط ستون‌هایی را کپی می‌کند که یک هدف لازم دارد و شناسه‌ها را پیش از ذخیره hash می‌کند: data minimization دم در." },
+        bronze: { tag: "hashشده و append-only", level: 3, pages: "ص. ۲۴", slide: "سیستمهای-داده-قانون-و-جامعه",
+          text: "hash شده، اما همه‌ی نسخه‌ها نگه داشته می‌شوند. این‌که یک آدم را چطور از وسط یک تاریخچه‌ی append-only پاک کنیم پرسش خود کتاب است." },
+        silver: { tag: "کلیدهای join هش‌شده", level: 3, pages: "ص. ۲۴", slide: "سیستمهای-داده-قانون-و-جامعه",
+          text: "هنوز برای هر آدم یک ردیف دارد. از روی Bronze ساخته می‌شود، پس کسی که فقط این‌جا پاک شده در اجرای بعدی برمی‌گردد." },
+        gold: { tag: "تجمیع‌ها", level: 4, pages: "ص. ۲۵", slide: "سیستمهای-داده-قانون-و-جامعه",
+          text: "شمارش بر اساس ماه و segment کسی را شناسایی نمی‌کند. با این حال ردیف‌های آن آدم تا rebuild بعدی Gold در این عددها اثر دارند." },
+        nb: { tag: "کپی‌ها warehouse را ترک می‌کنند", level: 1, pages: "ص. ۲۵", slide: "سیستمهای-داده-قانون-و-جامعه",
+          text: "هر فایل خروجی یا DataFrame یک کپی دیگر است که باید پیدا شود. هزینه‌ی نگهداری داده همین مسئولیت را هم شامل می‌شود." },
+        serve: { tag: "داده‌ی آموزش", level: 2, pages: "ص. ۲۴", slide: "سیستمهای-داده-قانون-و-جامعه",
+          text: "مدلی که روی ردیف‌های این آدم آموزش دیده. کتاب داده‌ی آموزش ML را مجموعه‌داده‌ی derivedی می‌داند که حذف باید به آن برسد." }
+      }
+    },
+    nodes: {
+      label: "یک node یا چند node", axis: ["یک ماشین", "توزیع‌شده"],
+      cells: {
+        source: { tag: "primary به‌اضافه‌ی read replica", level: 3, pages: "صص. ۷ و ۱۹", slide: "سیستم-توزیعشده-در-برابر-تکماشین",
+          text: "ماشین دومی یک کپی دارد: fault tolerance، و جایی برای خواندن‌های تحلیلی که آن‌ها را از production دور نگه می‌دارد." },
+        loader: { tag: "فراخوانی از روی شبکه", level: 3, pages: "ص. ۲۰", slide: "مشکلات-سیستمهای-توزیعشده",
+          text: "برای هر جدول یک container که منبع و object store را صدا می‌زند. هر فراخوانی ممکن است time out شود بی‌آن‌که معلوم باشد اجرا شده یا نه، پس append تکرارشده نباید ردیف‌ها را دو بار بارگذاری کند." },
+        bronze: { tag: "storage جدا از compute", level: 4, pages: "صص. ۱۶–۱۷", slide: "معماری-سیستم-cloud-native",
+          text: "فایل‌های Parquet روی object storage و یک warehouse ستونی با دو replica: همان جدا شدن storage از compute در سیستم‌های cloud-native." },
+        silver: { tag: "محاسبه کنار داده", level: 3, pages: "ص. ۲۰", slide: "مشکلات-سیستمهای-توزیعشده",
+          text: "transformها داخل warehouse اجرا می‌شوند، نه با بیرون کشیدن ردیف‌ها: گاهی بردن محاسبه نزد داده سریع‌تر است." },
+        gold: { tag: "replicate شده", level: 3, pages: "ص. ۱۹", slide: "سیستم-توزیعشده-در-برابر-تکماشین",
+          text: "دو replica باعث می‌شوند وقتی یک node خراب شد داشبوردها همچنان جواب بدهند." },
+        nb: { tag: "یک ماشین کافی است", level: 0, pages: "ص. ۲۱", slide: "مشکلات-سیستمهای-توزیعشده",
+          text: "بیشتر کارهای notebook روی یک ماشین جا می‌شود. DuckDB یا pandas روی چند گیگابایت ساده‌تر و اغلب سریع‌تر از یک cluster است." },
+        serve: { tag: "یک سرویس کوچک", level: 2, pages: "صص. ۲۱–۲۲", slide: "میکروسرویسها-و-serverless",
+          text: "یک HTTP API باریک با یک هدف و deploy جدای خودش: یک microservice کوچک، با monitoringی که بعد از آن لازم می‌شود." }
+      }
+    }
+  };
+
+  var lens = "workload", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "چرا loader از یک replica دیتابیس منبع می‌خواند و نه از primary؟",
+      options: ["replicaها داده‌ی بیشتری دارند", "خواندن دسته‌ای با کوئری‌های کوچک و حساس به latency که کاربران منتظرشان هستند رقابت می‌کند", "primary اجازه‌ی SELECT نمی‌دهد", "replicaها همیشه به‌روزترند"],
+      answer: 1, explain: "کوئری‌های تحلیلی سنگین performance کاربران OLTP را پایین می‌آورند؛ یکی از دلیل‌های کتاب برای warehouse جدا (ص. ۷)." },
+    { q: "یک جدول Gold به خاطر باگی در SQLاش غلط است. چه چیزی رفعش را ارزان می‌کند؟",
+      options: ["Gold یک system of record است", "Gold داده‌ی derived است: SQL را درست کنید و از روی Silver و Bronze دوباره بسازیدش", "دیتابیس منبع از Gold backup دارد", "داشبوردها جواب‌های قدیمی را cache کرده‌اند"],
+      answer: 1, explain: "داده‌ی derived را می‌شود از روی منبعش دوباره ساخت (صص. ۱۰–۱۱). رفعش فقط چون Bronze تاریخچه‌ی خام را نگه می‌دارد ارزان است." }
+  ]);
+})();
+</script>
+</body>
+</html>

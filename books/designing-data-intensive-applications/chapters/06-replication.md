@@ -3,273 +3,313 @@ book: designing-data-intensive-applications
 chapter: 6
 title: "Replication"
 pages: "197–250"
+translated_title: "مفهوم replication"
+lang: fa
 ---
 
-# 6. Replication
+# فصل ۶: مفهوم replication
 
-[← 5. Encoding and Evolution](05-encoding-and-evolution.md) · [Book](../README.md) · [7. Sharding →](07-sharding.md)
+[فصل ۵: قالب‌های encoding و تکامل →](05-encoding-and-evolution.md) · [کتاب](../README.md) · [فصل ۷: مفهوم sharding ←](07-sharding.md)
 
-## Summary
+## خلاصه
 
-Replication keeps a copy of the same data on several machines — for availability, durability, disconnected operation, lower latency, and read scalability. Keeping copies is easy when data never changes; all the difficulty lies in propagating changes. The chapter compares the three families of algorithms — **single-leader**, **multi-leader**, and **leaderless** — along with synchronous versus asynchronous propagation, failover, the anomalies replication lag causes (and the consistency guarantees that fix them), local-first sync engines, and how concurrent writes are detected (version vectors) and resolved (last-write-wins, manual resolution, CRDTs).
+مفهوم replication یعنی نگه داشتن یک کپی از همان داده روی چند ماشین، برای availability، durability، کار بدون اتصال، latency کمتر و مقیاس‌پذیری خواندن. نگه داشتن کپی وقتی داده عوض نمی‌شود آسان است؛ همه‌ی سختی در پخش کردن تغییرهاست. فصل سه خانواده‌ی الگوریتم را مقایسه می‌کند: **single-leader**، **multi-leader** و **leaderless**؛ و در کنارش انتشار synchronous و asynchronous، failover، ناهنجاری‌هایی که replication lag می‌سازد و تضمین‌های consistency که درمانشان می‌کنند، sync engineهای local-first، و این‌که نوشتن‌های concurrent چطور تشخیص داده می‌شوند، با version vector، و چطور حل می‌شوند، با last write wins، حل دستی یا CRDT.
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Replication is not backup**: an accidental delete replicates instantly; backups preserve history (p. 198).
-- **Synchronous replication guarantees an up-to-date follower but blocks writes when it is down**; in practice one follower is synchronous (semi-synchronous) or replication is fully asynchronous — and then **failover can lose acknowledged writes** (pp. 200–208).
-- **Failover is fraught**: detecting failure by timeout, choosing the most up-to-date replica, and avoiding **split brain** (pp. 204–207).
-- **Replication lag causes anomalies** that consistency models address: **read-after-write**, **monotonic reads**, **consistent prefix reads** (pp. 209–215).
-- **Multi-leader replication** suits multi-region operation and offline-capable clients (**sync engines, local-first software**), but concurrent writes conflict (pp. 215–229).
-- **Leaderless replication** writes to and reads from several replicas in parallel; with **w + r > n** quorums, reads overlap the latest write — though edge cases remain (pp. 229–237).
-- **Concurrency is about knowledge, not time**: two writes are concurrent if neither knew of the other. **Version vectors** detect this; merging siblings (e.g. CRDTs) resolves it (pp. 237–243).
+- **مفهوم replication جای backup را نمی‌گیرد:** یک حذف اشتباهی بلافاصله replicate می‌شود؛ backup تاریخچه را نگه می‌دارد (p. 198).
+- **مدل synchronous یک follower به‌روز را تضمین می‌کند اما وقتی آن follower خاموش است نوشتن‌ها را متوقف می‌کند**؛ در عمل یک follower synchronous است، یعنی semi-synchronous، یا replication کاملاً asynchronous است، و آن وقت **failover ممکن است نوشتن‌های تأییدشده را گم کند** (pp. 200–208).
+- **کار failover پرخطر است:** تشخیص خرابی با timeout، انتخاب به‌روزترین replica، و پرهیز از **split brain** (pp. 204–207).
+- **پدیده‌ی replication lag ناهنجاری می‌سازد** و مدل‌های consistency درمانش می‌کنند: **read-after-write**، **monotonic reads** و **consistent prefix reads** (pp. 209–215).
+- **مدل multi-leader** به کار در چند region و clientهایی که آفلاین کار می‌کنند می‌خورد، یعنی **sync engine و نرم‌افزار local-first**؛ اما نوشتن‌های concurrent با هم conflict پیدا می‌کنند (pp. 215–229).
+- **مدل leaderless** به چند replica موازی می‌نویسد و از چند replica می‌خواند؛ با quorumهایی که **`w + r > n`** باشند، هر خواندن با آخرین نوشتن هم‌پوشانی دارد، هرچند حالت‌های مرزی می‌مانند (pp. 229–237).
+- **مفهوم concurrency به دانستن مربوط است، نه به زمان:** دو نوشتن concurrent هستند اگر هیچ‌کدام از دیگری خبر نداشته باشد. **version vector** این را تشخیص می‌دهد و merge کردن siblingها، مثلاً با CRDT، حلش می‌کند (pp. 237–243).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، یعنی bookmarkهای PDF، با شماره‌ی صفحه‌های چاپی.*
 
-- Single-Leader Replication — p. 198
-  - Synchronous Versus Asynchronous Replication — p. 200
-  - Setting Up New Followers — p. 201
-  - Handling Node Outages — p. 204
-  - Implementation of Replication Logs — p. 206
-  - Problems with Replication Lag — p. 209
-  - Solutions for Replication Lag — p. 214
-- Multi-Leader Replication — p. 215
-  - Geographically Distributed Operation — p. 216
-  - Sync Engines and Local-First Software — p. 220
-  - Dealing with Conflicting Writes — p. 222
-- Leaderless Replication — p. 229
-  - Writing to the Database When a Node Is Down — p. 229
-  - Single-Leader Versus Leaderless Replication Performance — p. 235
-  - Multi-Region Operation — p. 236
-  - Detecting Concurrent Writes — p. 237
-- Summary — p. 243
+- مفهوم single-leader replication (p. 198)
+  - مقایسه‌ی replication از نوع synchronous و asynchronous (p. 200)
+  - راه‌اندازی follower تازه (p. 201)
+  - مدیریت از کار افتادن node (p. 204)
+  - پیاده‌سازی replication log (p. 206)
+  - مشکل‌های replication lag (p. 209)
+  - راه‌حل‌های replication lag (p. 214)
+- مفهوم multi-leader replication (p. 215)
+  - کار در چند منطقه‌ی جغرافیایی (p. 216)
+  - مفهوم sync engine و نرم‌افزار local-first (p. 220)
+  - برخورد با نوشتن‌های متعارض (p. 222)
+- مفهوم leaderless replication (p. 229)
+  - نوشتن در دیتابیس وقتی یک node خاموش است (p. 229)
+  - مقایسه‌ی کارایی single-leader و leaderless (p. 235)
+  - کار در چند region (p. 236)
+  - تشخیص نوشتن‌های concurrent (p. 237)
+- جمع‌بندی (p. 243)
 
-## Notes
+## یادداشت‌ها
 
-**Replication** keeps a copy of the same data on several networked machines — to keep data close to users (latency), keep working when parts fail (availability, durability), and serve more reads (throughput). This chapter assumes every node holds the whole dataset; Chapter 7 shards it. All the difficulty lies in *changes*; nearly every distributed database uses one of three families — single-leader, multi-leader, leaderless (pp. 197–198).
+مفهوم **replication** یعنی نگه داشتن کپی همان داده روی چند ماشین که با شبکه به هم وصل‌اند: تا داده نزدیک کاربر باشد، یعنی latency؛ تا وقتی بخشی خراب می‌شود کار ادامه پیدا کند، یعنی availability و durability؛ و تا خواندن‌های بیشتری سرویس داده شود، یعنی throughput. این فصل فرض می‌کند هر node کل داده را دارد؛ فصل ۷ آن را shard می‌کند. همه‌ی سختی در *تغییرها*ست و تقریباً هر دیتابیس توزیع‌شده از یکی از سه خانواده استفاده می‌کند: single-leader، multi-leader و leaderless (pp. 197–198).
 
-**Backups are still needed** (p. 198): replicas propagate an accidental delete within moments; backups let you go back in time. The two complement each other — snapshots seed new replicas, and archived replication logs form part of a backup.
+**هنوز به backup نیاز دارید** (p. 198): replicaها یک حذف اشتباهی را در چند لحظه پخش می‌کنند؛ backup اجازه می‌دهد به گذشته برگردید. این دو مکمل هم‌اند: snapshotها replicaهای تازه را راه می‌اندازند و replication logهای آرشیوشده بخشی از backup می‌شوند.
 
-### Single-leader replication
+> **Try it:** [فصل ۶ در طول یک pipeline داده](../widgets/06-pipeline-map.html): از دیتابیس منبع تا داشبورد را با lensهای کپی‌ها، lag و خرابی طی کنید و ببینید کجا یک replica پشت سر است و کجا یک خرابی داده را گم می‌کند.
 
-Also called leader-based, primary-backup or active/passive (pp. 198–199):
+> **In practice:** warehouse در reference stack دو replica دارد و Bronze خام همه‌ی ردیف‌های منبع را نگه می‌دارد.
+>
+> **Your turn:** کسی با یک `DELETE` اشتباه نیمی از یک جدول Silver را پاک می‌کند. replica دوم warehouse کمکی می‌کند؟ چه چیزی جدول را برمی‌گرداند؟
+>
+> *Answer:* نه؛ حذف در چند لحظه به replica دوم هم می‌رسد، چون replication جای backup را نمی‌گیرد (p. 198). در این stack لایه‌ی Bronze نقش تاریخچه را دارد: Silver را می‌شود با اجرای دوباره‌ی همان SQL از Bronze ساخت. برای Bronze خودش، که از هیچ چیز دیگری ساخته نمی‌شود، backup واقعی لازم است.
 
-1. One replica is the **leader** (primary, source); all writes go to it and it writes them locally.
-2. It sends each change to the **followers** (read replicas, secondaries, hot standbys) in a **replication log** (change stream); they apply changes in the same order.
-3. Reads may go to any replica; only the leader accepts writes.
+### مفهوم single-leader replication
 
-With sharding, each shard has its own leader. Used by PostgreSQL, MySQL, Oracle Data Guard, SQL Server Always On, MongoDB, DynamoDB, Kafka, DRBD, and consensus systems such as Raft (CockroachDB, TiDB, etcd, RabbitMQ quorum queues). “Master–slave” is the old, offensive term (pp. 199–200).
+به آن leader-based، primary-backup یا active/passive هم می‌گویند (pp. 198–199):
 
-#### Synchronous versus asynchronous replication (pp. 200–201)
+1. یک replica **leader** است، یا primary یا source؛ همه‌ی نوشتن‌ها به آن می‌روند و آن‌ها را محلی می‌نویسد.
+2. هر تغییر را در یک **replication log**، یا change stream، برای **follower**ها می‌فرستد، که read replica، secondary یا hot standby هم نام دارند؛ آن‌ها تغییرها را با همان ترتیب اعمال می‌کنند.
+3. خواندن از هر replicaای ممکن است؛ فقط leader نوشتن می‌پذیرد.
 
-| Mode | Leader waits for | Gain | Cost |
+با sharding هر shard leader خودش را دارد. این مدل را PostgreSQL، MySQL، Oracle Data Guard، SQL Server Always On، MongoDB، DynamoDB، Kafka و DRBD به کار می‌برند، و سیستم‌های consensus مثل Raft هم، یعنی CockroachDB، TiDB، etcd و quorum queueهای RabbitMQ. اصطلاح «master–slave» قدیمی و توهین‌آمیز است (pp. 199–200).
+
+#### مقایسه‌ی replication از نوع synchronous و asynchronous (pp. 200–201)
+
+| حالت | leader منتظر چه کسی می‌ماند | سود | هزینه |
 |---|---|---|---|
-| Synchronous (all followers) | Every follower | Every follower up to date | One slow or dead node blocks all writes — impractical |
-| **Semi-synchronous** | One follower (another promoted if it lags) | At least two up-to-date copies | Some latency |
-| Majority quorum (e.g. 3 of 5) | A majority | Basis of consensus systems (Ch. 10) | Latency of the median node |
-| Fully asynchronous | No follower | Leader keeps going even if all followers lag; common with many or distant followers | An **acknowledged write can be lost** if the leader dies |
+| synchronous برای همه‌ی followerها | همه‌ی followerها | همه‌ی followerها به‌روزند | یک node کند یا مرده همه‌ی نوشتن‌ها را متوقف می‌کند؛ عملی نیست |
+| **مدل semi-synchronous** | یک follower، و اگر عقب بیفتد یکی دیگر جایش می‌آید | دست‌کم دو کپی به‌روز | کمی latency |
+| quorum اکثریت، مثلاً ۳ از ۵ | اکثریت | پایه‌ی سیستم‌های consensus در فصل ۱۰ | latency نود میانه |
+| کاملاً asynchronous | هیچ followerی | leader حتی اگر همه‌ی followerها عقب باشند ادامه می‌دهد؛ با followerهای زیاد یا دور رایج است | اگر leader بمیرد **نوشتن تأییدشده ممکن است گم شود** |
 
-![User 1234 updates a picture URL on the leader; the leader waits for follower 1's OK before confirming, while follower 2 receives the change later and asynchronously](../figures/06-02.png)
+![کاربر ۱۲۳۴ آدرس عکسش را روی leader عوض می‌کند؛ leader پیش از تأیید منتظر OK از follower ۱ می‌ماند، در حالی که follower ۲ تغییر را بعداً و asynchronous می‌گیرد](../figures/06-02.png)
 
-*Figure 6-2 (p. 200): follower 1 is synchronous, so the user's OK waits for it; follower 2 is asynchronous and may lag arbitrarily.*
+*Figure 6-2 (p. 200): follower ۱ synchronous است، پس OK کاربر منتظر آن می‌ماند؛ follower ۲ asynchronous است و ممکن است هر قدر عقب بیفتد.*
 
-Replication is usually sub-second, but followers can fall minutes behind — during recovery, near capacity, or with network problems (pp. 200–201).
+مفهوم latency replication معمولاً زیر یک ثانیه است، اما followerها ممکن است چند دقیقه عقب بیفتند: هنگام بازیابی، نزدیک ظرفیت یا با مشکل شبکه (pp. 200–201).
 
-#### Setting up new followers (pp. 201–203)
+#### راه‌اندازی follower تازه (pp. 201–203)
 
-1. Take a **consistent snapshot** of the leader without locking it (built in, or tools like Percona XtraBackup).
-2. Copy it to the new node.
-3. Request every change since the snapshot’s exact log position — PostgreSQL’s **log sequence number**, MySQL’s binlog coordinates or GTIDs.
-4. When the backlog is processed, the follower has **caught up**.
+1. یک **snapshot سازگار** از leader بگیرید، بدون قفل کردنش؛ قابلیت داخلی دیتابیس یا ابزارهایی مثل Percona XtraBackup.
+2. آن را به node تازه کپی کنید.
+3. همه‌ی تغییرها از موقعیت دقیق snapshot در log را درخواست کنید: **log sequence number** در PostgreSQL، و مختصات binlog یا GTID در MySQL.
+4. وقتی عقب‌ماندگی پردازش شد، follower **به leader رسیده** است.
 
-Archiving snapshots plus the replication log in an object store (WAL-G for PostgreSQL/MySQL/SQL Server, Litestream for SQLite) gives backups, disaster recovery and steps 1–2 for free (p. 202).
+آرشیو کردن snapshotها و replication log در یک object store، با WAL-G برای PostgreSQL و MySQL و SQL Server یا Litestream برای SQLite، backup، بازیابی از فاجعه و قدم‌های ۱ و ۲ را مجانی می‌دهد (p. 202).
 
-**Databases backed by object storage** (pp. 202–203):
+**دیتابیس‌هایی که روی object storage ساخته شده‌اند** (pp. 202–203):
 
-| Benefits | Trade-offs |
+| مزیت‌ها | بده‌بستان‌ها |
 |---|---|
-| Cheap; working set in memory/SSD, cold data on object storage | Much higher read/write latency than local disks or EBS |
-| Multi-zone/region durability, avoiding inter-zone fees | Per-request fees force batching (more latency) |
-| Conditional writes (compare-and-set) for transactions and leader election | Immutable objects make random writes expensive |
-| One store for many systems eases integration (Parquet, Iceberg) | No standard filesystem interface; FUSE mounts lack POSIX features |
+| ارزان؛ working set در حافظه یا SSD و داده‌ی سرد روی object storage | latency خواندن و نوشتن خیلی بیشتر از دیسک محلی یا EBS |
+| durability در چند zone یا region، بدون هزینه‌ی ترافیک بین zoneها | هزینه‌ی هر درخواست مجبورتان می‌کند batch کنید، یعنی latency بیشتر |
+| نوشتن شرطی، یعنی compare-and-set، برای تراکنش و انتخاب leader | objectهای immutable نوشتن تصادفی را گران می‌کنند |
+| یک store برای سیستم‌های زیاد یکپارچه‌سازی را آسان می‌کند، مثل Parquet و Iceberg | interface استاندارد filesystem ندارد؛ mountهای FUSE قابلیت‌های POSIX را ندارند |
 
-Designs range from **tiered storage**, to object storage as primary with a low-latency WAL (EBS, Neon’s Safekeepers), to **zero-disk architectures** with disks only as cache — WarpStream, Confluent Freight, Bufstream, Redpanda Serverless, most cloud warehouses, Turbopuffer, SlateDB (p. 203).
+طراحی‌ها از **tiered storage** شروع می‌شوند، به object storage به عنوان storage اصلی با یک WAL کم‌latency می‌رسند، مثل EBS یا Safekeepers در Neon، و تا **معماری zero-disk** پیش می‌روند که دیسک فقط cache است: WarpStream، Confluent Freight، Bufstream، Redpanda Serverless، بیشتر warehouseهای cloud، Turbopuffer و SlateDB (p. 203).
 
-#### Handling node outages (pp. 204–206)
+#### مدیریت از کار افتادن node (pp. 204–206)
 
-**Follower failure → catch-up recovery**: the follower knows the last change it processed and asks for everything since. Catching up after a long outage loads both nodes, and the leader must either retain its log (risking full disks) or delete it (forcing a restore from backup) (p. 204).
+**خرابی follower و بازیابی با catch-up:** follower آخرین تغییری را که پردازش کرده می‌داند و همه‌ی تغییرهای بعد از آن را می‌خواهد. رسیدن دوباره بعد از یک قطعی طولانی به هر دو node فشار می‌آورد، و leader یا باید log را نگه دارد، با خطر پر شدن دیسک، یا پاکش کند و follower را مجبور به بازیابی از backup کند (p. 204).
 
-**Leader failure → failover**, manual or automatic (pp. 204–205):
+**خرابی leader و failover**، دستی یا خودکار (pp. 204–205):
 
 ```mermaid
 flowchart LR
     D["1 · Detect failure<br/>(usually a timeout, e.g. 30 s)"] --> C["2 · Choose a new leader<br/>(election by majority, or a controller;<br/>most up-to-date replica)"] --> R["3 · Reconfigure<br/>(clients write to the new leader;<br/>old leader must step down)"]
 ```
 
-What goes wrong (pp. 205–206):
+چه چیزهایی خراب می‌شود (pp. 205–206):
 
-- With async replication the new leader may lack the old leader’s last writes; they are usually **discarded** — “committed” writes weren’t durable.
-- Discarding is dangerous when other systems saw them: at **GitHub**, a lagging MySQL follower was promoted and **reused autoincrement keys** already used in Redis, disclosing private data to the wrong users.
-- **Split brain**: two nodes both act as leader; naive shutdown mechanisms can kill both, or act too late. Guarding against it is **fencing** (Ch. 9).
-- The **timeout**: too long → slow recovery; too short → needless failovers during load spikes, making things worse. Some teams prefer manual failover.
+- با replication از نوع asynchronous ممکن است leader تازه آخرین نوشتن‌های leader قدیم را نداشته باشد؛ معمولاً **دور ریخته می‌شوند**، یعنی نوشتن‌های «commitشده» durable نبودند.
+- دور ریختن وقتی سیستم‌های دیگر آن نوشتن‌ها را دیده‌اند خطرناک است: در **GitHub** یک follower عقب‌مانده‌ی MySQL به leader تبدیل شد و **کلیدهای autoincrementی را دوباره به کار برد** که پیش‌تر در Redis استفاده شده بودند، و داده‌ی خصوصی به دست کاربرهای اشتباه رسید.
+- پدیده‌ی **split brain**: دو node هر دو خودشان را leader می‌دانند؛ سازوکارهای خام خاموش‌کردن ممکن است هر دو را بکشند یا دیر عمل کنند. محافظت در برابرش **fencing** است، در فصل ۹.
+- مقدار **timeout**: اگر خیلی طولانی باشد بازیابی کند است؛ اگر خیلی کوتاه، failoverهای بی‌دلیل در اوج بار وضع را بدتر می‌کنند. بعضی تیم‌ها failover دستی را ترجیح می‌دهند.
 
-Always promote the most up-to-date follower — the synchronous one, or the highest log sequence number (p. 206).
+همیشه به‌روزترین follower را ارتقا بدهید: follower synchronous یا آن که بالاترین log sequence number را دارد (p. 206).
 
-#### Implementation of replication logs (pp. 206–208)
+> **In practice:** دیتابیس منبع A در reference stack یک replica read-only از دیتابیس اصلی محصول است. اگر دیتابیس اصلی failover کند و follower تازه آخرین نوشتن‌ها را نداشته باشد، آن نوشتن‌ها دور ریخته می‌شوند.
+>
+> **Your turn:** بعد از یک failover در دیتابیس اصلی، چند پرداخت که loader ساعت پیش در Bronze نوشته دیگر در منبع نیستند و شناسه‌هایشان به پرداخت‌های تازه داده شده. چرا، و این برای Silver چه معنایی دارد؟
+>
+> *Answer:* leader قدیم آن نوشتن‌ها را تأیید کرده بود، اما پیش از replicate شدن مرد؛ leader تازه آن‌ها را نداشت و شمارنده‌ی autoincrement را از عقب‌تر ادامه داد، مثل ماجرای GitHub (pp. 205–206). حالا Bronze دو نسخه با یک id دارد که دو پرداخت متفاوت‌اند، و dedup در Silver بر اساس id یکی را بی‌صدا دور می‌ریزد. یک بررسی reconciliation با منبع باید این را بگیرد.
 
-| Method | What is shipped | Problems / uses |
+#### پیاده‌سازی replication log (pp. 206–208)
+
+| روش | چه چیزی فرستاده می‌شود | مشکل‌ها و کاربردها |
 |---|---|---|
-| **Statement-based** | Each `INSERT`/`UPDATE`/`DELETE` statement | Nondeterministic functions (`NOW`, `RAND`), autoincrement or data-dependent statements needing identical order, side effects of triggers and procedures. Workaround: substitute fixed values — i.e. **state machine replication**. MySQL before 5.1; VoltDB requires deterministic transactions |
-| **Write-ahead log shipping** | The storage engine’s WAL — which bytes changed in which blocks | PostgreSQL, Oracle. Tied to the storage format: leader and followers usually can’t run different versions, so upgrades need downtime |
-| **Logical (row-based) log** | Per-row inserts (all values), deletes (key), updates (key + new values), then a commit record | Decoupled from storage → mixed versions, near-zero-downtime upgrades; parseable by outside systems — **change data capture**. MySQL’s binlog; PostgreSQL decodes its WAL logically |
+| **مدل statement-based** | هر دستور `INSERT`، `UPDATE` و `DELETE` | تابع‌های nondeterministic مثل `NOW` و `RAND`، autoincrement یا دستورهای وابسته به داده که ترتیب یکسان لازم دارند، و اثر جانبی trigger و procedure. راه‌حل: گذاشتن مقدارهای ثابت به جای آن‌ها، یعنی **state machine replication**. در MySQL پیش از ۵.۱؛ VoltDB تراکنش‌های deterministic لازم دارد |
+| **ارسال write-ahead log** | همان WAL خود storage engine: کدام بایت‌ها در کدام بلوک‌ها عوض شدند | در PostgreSQL و Oracle. به قالب storage بسته است: leader و followerها معمولاً نمی‌توانند نسخه‌های متفاوت اجرا کنند، پس ارتقا downtime لازم دارد |
+| **لاگ logical یا row-based** | برای هر ردیف: insert با همه‌ی مقدارها، delete با کلید، update با کلید و مقدارهای تازه، و بعد یک رکورد commit | از storage جداست، پس نسخه‌های مختلف کنار هم و ارتقای تقریباً بدون downtime ممکن است؛ سیستم‌های بیرونی هم می‌توانند بخوانندش، یعنی **change data capture**. binlog در MySQL؛ PostgreSQL WAL خودش را logical decode می‌کند |
 
-A zero-downtime upgrade = upgrade the followers, then fail over to one of them — possible only if the protocol tolerates version differences (pp. 207–208).
+ارتقای بدون downtime یعنی followerها را ارتقا بدهید و بعد به یکی از آن‌ها failover کنید؛ فقط وقتی ممکن است که پروتکل اختلاف نسخه را تحمل کند (pp. 207–208).
 
-### Problems with replication lag
+> **In practice:** loader در reference stack هیچ replication logی نمی‌خواند؛ هر ساعت ردیف‌هایی را می‌گیرد که `update_date` آن‌ها جلو رفته. برای همین hard deleteها در منبع برایش نامرئی‌اند.
+>
+> **Your turn:** کدام روش replication log کتاب این مشکل را حل می‌کند و چرا؟
+>
+> *Answer:* لاگ logical یا row-based، یعنی change data capture: برای هر ردیف حذف‌شده یک رکورد delete با کلیدش دارد، و سیستم‌های بیرونی می‌توانند parseاش کنند (pp. 207–208). cursor روی `update_date` فقط وضع فعلی ردیف‌های باقی‌مانده را می‌بیند، نه رویداد حذف را.
 
-Mostly-read workloads tempt you to add many followers and spread reads — **read scaling**, which only works with asynchronous replication (synchronous to all would make any single failure stop writes). Readers then may see stale data: **eventual consistency** (coined by Terry et al., popularized by Werner Vogels). “Eventually” has no bound — normally a fraction of a second of **replication lag**, but seconds or minutes near capacity or during network trouble (p. 209).
+### مشکل‌های replication lag
 
-| Anomaly | Guarantee | Techniques (pp. 210–214) |
+بارهای کاری که بیشترشان خواندن است وسوسه‌تان می‌کنند followerهای زیاد اضافه کنید و خواندن‌ها را پخش کنید، یعنی **read scaling**، که فقط با replication از نوع asynchronous کار می‌کند؛ synchronous برای همه یعنی هر خرابی تکی نوشتن‌ها را متوقف می‌کند. آن وقت خواننده‌ها ممکن است داده‌ی کهنه ببینند: **eventual consistency**، اصطلاحی که Terry و همکارانش ساختند و Werner Vogels رایجش کرد. «بالاخره» هیچ حد مشخصی ندارد: معمولاً کسری از ثانیه **replication lag** است، اما نزدیک ظرفیت یا هنگام مشکل شبکه چند ثانیه یا چند دقیقه (p. 209).
+
+| ناهنجاری | تضمین | روش‌ها (pp. 210–214) |
 |---|---|---|
-| You don’t see your own write (Figure 6-3) | **Read-after-write** (read-your-writes): you always see your own updates; nothing promised about others’ | Read things the user can edit from the leader (own profile from the leader, others’ from followers); read from the leader for a minute after a write, or avoid followers lagging > 1 min; remember the user’s last write timestamp (logical, e.g. LSN, or clock-based) and only use replicas at least that fresh |
-| Data appears, then disappears on refresh (Figure 6-4) | **Monotonic reads**: no going back in time — stronger than eventual, weaker than strong consistency | Each user reads from one replica, chosen by hash of user ID (rerouted if it fails) |
-| An answer appears before its question — Mrs Cake answering Mr Poons (Figure 6-5) | **Consistent prefix reads**: writes are seen in the order they happened | Write causally related data to the same shard; or track causal dependencies |
+| نوشتن خودتان را نمی‌بینید؛ شکل ۶-۳ | **مدل read-after-write**، یا read-your-writes: به‌روزرسانی‌های خودتان را همیشه می‌بینید؛ درباره‌ی دیگران قولی نیست | چیزهایی را که کاربر می‌تواند ویرایش کند از leader بخوانید، مثلاً پروفایل خودش از leader و پروفایل دیگران از followerها؛ تا یک دقیقه بعد از هر نوشتن از leader بخوانید، یا از followerهایی که بیش از یک دقیقه عقب‌اند نخوانید؛ timestamp آخرین نوشتن کاربر را نگه دارید، logical مثل LSN یا بر اساس ساعت، و فقط از replicaهایی بخوانید که دست‌کم همان‌قدر تازه‌اند |
+| داده ظاهر می‌شود و با refresh ناپدید؛ شکل ۶-۴ | **مدل monotonic reads**: برگشت به گذشته ممنوع؛ قوی‌تر از eventual و ضعیف‌تر از strong consistency | هر کاربر از یک replica بخواند که با hash شناسه‌ی کاربر انتخاب می‌شود و اگر خراب شد جایش عوض می‌شود |
+| جواب پیش از سؤال ظاهر می‌شود: خانم Cake به آقای Poons جواب می‌دهد؛ شکل ۶-۵ | **مدل consistent prefix reads**: نوشتن‌ها با همان ترتیبی دیده می‌شوند که اتفاق افتاده‌اند | داده‌های علّی مرتبط را در یک shard بنویسید، یا وابستگی‌های علّی را دنبال کنید |
 
-![User 1234 inserts a comment through the leader; the write reaches follower 1 quickly but follower 2 late, and the user's next read goes to follower 2, which returns no results](../figures/06-03.png)
+![کاربر ۱۲۳۴ از طریق leader یک کامنت درج می‌کند؛ نوشتن زود به follower ۱ و دیر به follower ۲ می‌رسد، و خواندن بعدی کاربر به follower ۲ می‌رود که هیچ نتیجه‌ای برنمی‌گرداند](../figures/06-03.png)
 
-*Figure 6-3 (p. 210): reading from a lagging follower right after a write makes your own write seem to vanish.*
+*Figure 6-3 (p. 210): خواندن از یک follower عقب‌مانده درست بعد از نوشتن باعث می‌شود نوشتن خودتان ناپدید به نظر برسد.*
 
-![Mr. Poons asks a question and Mrs. Cake answers through different shards; the observer receives the answer through a faster follower before the question](../figures/06-05.png)
+![آقای Poons سؤالی می‌پرسد و خانم Cake از طریق shardهای مختلف جواب می‌دهد؛ ناظر جواب را از یک follower سریع‌تر پیش از سؤال دریافت می‌کند](../figures/06-05.png)
 
-*Figure 6-5 (p. 214): when shards replicate at different speeds, an observer can see an answer before its question.*
+*Figure 6-5 (p. 214): وقتی shardها با سرعت‌های متفاوت replicate می‌شوند، ناظر ممکن است جواب را پیش از سؤال ببیند.*
 
-**Cross-device** read-after-write needs centralized “last write” metadata, and different devices (home broadband vs cellular) may reach different **regions** — collections of **availability zones** (separate datacenters with their own power and cooling, linked by fast networks). Multi-zone survives a zone outage; surviving a regional outage needs multiple regions, with higher latency and cost (pp. 211–212).
+**مدل read-after-write بین دستگاه‌ها** به metadata متمرکز «آخرین نوشتن» نیاز دارد، و دستگاه‌های مختلف، مثلاً اینترنت خانگی و شبکه‌ی موبایل، ممکن است به **region**های مختلف برسند. هر region مجموعه‌ای از **availability zone**هاست، یعنی datacenterهای جدا با برق و سرمایش خودشان که با شبکه‌ی سریع به هم وصل‌اند. چند zone از یک قطعی zone جان سالم به در می‌برد؛ برای قطعی کل region چند region لازم است، با latency و هزینه‌ی بیشتر (pp. 211–212).
 
-**Solutions** (pp. 214–215): ask how the app behaves if lag grows to minutes or hours; don’t pretend asynchronous replication is synchronous. Application-level fixes are complex; the simplest model is a database with **linearizability** (Ch. 10) and **ACID transactions** (Ch. 8). NoSQL argued these don’t scale; **NewSQL** databases now provide them with distribution — yet weaker models remain attractive for resilience to network interruptions and lower overhead.
+**راه‌حل‌ها** (pp. 214–215): بپرسید اگر lag به چند دقیقه یا چند ساعت برسد اپلیکیشن چه رفتاری دارد؛ وانمود نکنید replication از نوع asynchronous همان synchronous است. راه‌حل‌های سطح اپلیکیشن پیچیده‌اند؛ ساده‌ترین مدل دیتابیسی است با **linearizability**، در فصل ۱۰، و **تراکنش‌های ACID**، در فصل ۸. دنیای NoSQL می‌گفت این‌ها scale نمی‌شوند؛ دیتابیس‌های **NewSQL** حالا آن‌ها را به شکل توزیع‌شده می‌دهند؛ با این حال مدل‌های ضعیف‌تر به خاطر تحمل قطعی شبکه و سربار کمتر هنوز جذاب‌اند.
 
-> **Try it:** [Replication lag and quorums](../widgets/06-replication.html) — break read-your-writes and monotonic reads with a lagging follower, lose writes on failover, then tune n, w and r.
+> **Try it:** [مفهوم replication lag و quorum](../widgets/06-replication.html): با یک follower عقب‌مانده read-your-writes و monotonic reads را بشکنید، در failover نوشتن گم کنید، و بعد n و w و r را تنظیم کنید.
 
-### Multi-leader replication
+> **In practice:** کوئری‌ها از طریق یک SQL proxy به هر کدام از دو replica در warehouse می‌رسند، و یک insert ممکن است چند لحظه بعد به replica دیگر برسد.
+>
+> **Your turn:** یک تحلیل‌گر ردیف‌هایی را در یک جدول موقت insert می‌کند و کوئری بعدی‌اش جدول را خالی نشان می‌دهد؛ با refresh ردیف‌ها می‌آیند و با refresh بعدی دوباره می‌روند. این دو ناهنجاری کدام‌اند و درمان کتاب چیست؟
+>
+> *Answer:* اول نقض read-after-write است، چون نوشتن خودش را نمی‌بیند؛ بعد نقض monotonic reads، چون بین یک replica تازه و یک replica عقب‌مانده جابه‌جا می‌شود (pp. 210–213). درمان کتاب این است که هر کاربر همیشه از یک replica بخواند، مثلاً با hash شناسه‌ی کاربر، یا فقط از replicaای که دست‌کم تا آخرین نوشتن او رسیده.
 
-Several nodes accept writes, each also a follower of the others (active/active, bidirectional). **Synchronous** multi-leader is effectively single-leader, so the book focuses on **asynchronous**: any leader keeps accepting writes while cut off (pp. 215–216).
+> **In practice:** loader در شب، هم‌زمان با batchهای سنگین دیتابیس اصلی، از replica منبع می‌خواند.
+>
+> **Your turn:** داشبورد پرداخت‌های دیروز ساعت یک بامداد ناقص است و صبح کامل. چطور می‌شود فهمید تقصیر replication lag است؟
+>
+> *Answer:* در سیستم‌های leader-based lag را می‌شود اندازه گرفت: اختلاف موقعیت log بین leader و replica (pp. 234–235). اگر این عدد را کنار زمان هر load ثبت کنید، معلوم می‌شود loader از replicaای خوانده که چند دقیقه یا چند ساعت عقب بوده؛ بررسی freshness باید به این عدد نگاه کند، نه فقط به زمان اجرای load.
 
-#### Geographically distributed operation (pp. 216–220)
+### مفهوم multi-leader replication
 
-One leader per region (Figure 6-6), with ordinary leader–follower replication inside each region (pp. 216–217):
+چند node نوشتن می‌پذیرند و هر کدام follower بقیه هم هستند، یعنی active/active یا دوطرفه. multi-leader از نوع **synchronous** در عمل همان single-leader است، پس کتاب روی **asynchronous** تمرکز می‌کند: هر leader حتی وقتی ارتباطش قطع شده نوشتن می‌پذیرد (pp. 215–216).
 
-| | Single leader across regions | Multi-leader (one per region) |
+#### کار در چند منطقه‌ی جغرافیایی (pp. 216–220)
+
+یک leader در هر region، شکل ۶-۶، با replication معمولی leader و follower داخل هر region (pp. 216–217):
+
+| | یک leader برای همه‌ی regionها | مدل multi-leader، یک leader در هر region |
 |---|---|---|
-| Write latency | Every write crosses the internet to the leader’s region | Local; replicated asynchronously — delay hidden from users |
-| Regional outage | Fail over to a follower elsewhere | Each region keeps running; catch up later |
-| Inter-region network problems | Very sensitive — writes wait on the link | Tolerated |
-| Consistency | Can offer serializable transactions | Much weaker: can’t guarantee a balance never goes negative or a username is unique |
+| latency نوشتن | هر نوشتن از اینترنت تا region مربوط به leader می‌رود | محلی؛ asynchronous replicate می‌شود و latencyش از کاربر پنهان است |
+| قطعی یک region | failover به followerی در جای دیگر | هر region کار می‌کند و بعداً عقب‌ماندگی را جبران می‌کند |
+| مشکل شبکه بین regionها | خیلی حساس؛ نوشتن‌ها منتظر لینک می‌مانند | تحمل می‌شود |
+| مفهوم consistency | می‌تواند تراکنش serializable بدهد | خیلی ضعیف‌تر: نمی‌تواند تضمین کند موجودی منفی نشود یا یک username یکتا باشد |
 
-Supported by MySQL, Oracle, SQL Server, YugabyteDB, and add-ons (Redis Enterprise, EDB Postgres Distributed, pglogical). Often retrofitted, so autoincrement keys, triggers and integrity constraints misbehave — “dangerous territory” (pp. 217–218).
+این مدل را MySQL، Oracle، SQL Server و YugabyteDB پشتیبانی می‌کنند، و افزونه‌هایی مثل Redis Enterprise، EDB Postgres Distributed و pglogical. اغلب بعداً به سیستم اضافه شده، پس کلیدهای autoincrement، triggerها و integrity constraintها بد رفتار می‌کنند؛ کتاب آن را «قلمرو خطرناک» می‌نامد (pp. 217–218).
 
-**Topologies** (Figure 6-7):
+**توپولوژی‌ها** (شکل ۶-۷):
 
-![Three multi-leader topologies: (a) circular, each leader forwarding to the next; (b) star, a central leader forwarding to the rest; (c) all-to-all, every leader sending to every other](../figures/06-07.png)
+![سه توپولوژی multi-leader: (a) دایره‌ای، که هر leader به بعدی می‌فرستد؛ (b) ستاره‌ای، که یک leader مرکزی به بقیه می‌فرستد؛ (c) all-to-all، که هر leader به همه‌ی دیگران می‌فرستد](../figures/06-07.png)
 
-*Figure 6-7 (p. 218): circular and star topologies forward writes through other nodes; all-to-all sends directly but can reorder writes.*
+*Figure 6-7 (p. 218): توپولوژی دایره‌ای و ستاره‌ای نوشتن‌ها را از node‌های دیگر عبور می‌دهند؛ all-to-all مستقیم می‌فرستد اما ممکن است ترتیب نوشتن‌ها را به هم بزند.*
 
-In circular and star topologies writes are forwarded through other nodes, tagged with the IDs of nodes they passed to prevent loops — and one failed node can halt the flow. All-to-all is more fault-tolerant, but messages can **overtake** one another: leader 2 may receive B’s *update* before A’s *insert* of the same row (Figure 6-8). Timestamps can’t fix this; **version vectors** can — yet many systems don’t use them, so test what you rely on (pp. 218–220).
+در توپولوژی دایره‌ای و ستاره‌ای نوشتن‌ها از nodeهای دیگر عبور داده می‌شوند و با شناسه‌ی nodeهایی که از آن‌ها گذشته‌اند علامت می‌خورند تا حلقه پیش نیاید؛ و یک node خراب ممکن است جریان را متوقف کند. all-to-all fault toleranceی بیشتری دارد، اما پیام‌ها ممکن است از هم **سبقت** بگیرند: leader ۲ ممکن است *update* از B را پیش از *insert* از A برای همان ردیف بگیرد؛ شکل ۶-۸. timestamp این را حل نمی‌کند؛ **version vector** حل می‌کند؛ با این حال خیلی از سیستم‌ها از آن استفاده نمی‌کنند، پس آنچه را که به آن تکیه دارید تست کنید (pp. 218–220).
 
-#### Sync engines and local-first software (pp. 220–222)
+#### مفهوم sync engine و نرم‌افزار local-first (pp. 220–222)
 
-Offline calendars and collaborative apps (Google Docs/Sheets, Figma, Linear) are multi-leader taken to the extreme: every device or browser tab is a replica-leader; lag can be hours or days. A **sync engine** captures local changes, sends or queues them, merges remote ones and updates the UI. **Offline-first** apps keep working offline; **local-first** apps keep working even if the vendor shuts down, e.g. via an open sync protocol — Git is local-first (without real-time collaboration) (pp. 220–221).
+تقویم‌های آفلاین و اپ‌های همکاری، مثل Google Docs و Sheets، Figma و Linear، همان multi-leader در حد افراط‌اند: هر دستگاه یا tab مرورگر یک replica-leader است و lag ممکن است چند ساعت یا چند روز باشد. یک **sync engine** تغییرهای محلی را می‌گیرد، می‌فرستد یا در صف می‌گذارد، تغییرهای راه دور را merge می‌کند و UI را به‌روز می‌کند. اپ‌های **offline-first** بدون اینترنت کار می‌کنند؛ اپ‌های **local-first** حتی اگر شرکت سازنده تعطیل شود کار می‌کنند، مثلاً با یک پروتکل sync باز؛ Git یک ابزار local-first است، بدون همکاری real-time (pp. 220–221).
 
-| Pros (pp. 221–222) | Limits |
+| مزیت‌ها (pp. 221–222) | محدودیت‌ها |
 |---|---|
-| Local data → UI can respond within a frame (16 ms at 60 Hz) | Works best when all data the user needs can be downloaded in advance — fine for a user’s own files, not an entire e-commerce catalog |
-| Offline needs no special mode — it is just a very large network delay | Concurrent edits make conflicts inevitable |
-| Local reads/writes almost never fail → declarative programming | |
-| Real-time updates via reactive programming | |
+| داده‌ی محلی یعنی UI می‌تواند در یک frame پاسخ بدهد، یعنی ۱۶ میلی‌ثانیه در ۶۰ هرتز | وقتی بهترین کار را می‌کند که همه‌ی داده‌ای که کاربر لازم دارد از پیش دانلود شود؛ برای فایل‌های خود کاربر خوب است، برای کل کاتالوگ یک فروشگاه نه |
+| آفلاین بودن حالت خاصی نیست؛ فقط یک latency شبکه‌ی خیلی بزرگ است | ویرایش‌های هم‌زمان conflict را اجتناب‌ناپذیر می‌کنند |
+| خواندن و نوشتن محلی تقریباً هیچ‌وقت شکست نمی‌خورد، پس برنامه‌نویسی declarative ممکن می‌شود | |
+| به‌روزرسانی real-time با برنامه‌نویسی reactive | |
 
-Pioneered by Lotus Notes in the 1980s; today Firestore, Realm, Ditto (proprietary backends) and PouchDB/CouchDB, Automerge, Yjs (open). Games call it **netcode** (p. 222).
+پیشگامش Lotus Notes در دهه‌ی ۱۹۸۰ بود؛ امروز Firestore، Realm و Ditto با backend اختصاصی، و PouchDB و CouchDB، Automerge و Yjs به شکل باز. بازی‌ها به آن **netcode** می‌گویند (p. 222).
 
-#### Dealing with conflicting writes (pp. 222–229)
+#### برخورد با نوشتن‌های متعارض (pp. 222–229)
 
-Two users change a wiki title from A to B and A to C on different leaders (Figure 6-9). The writes are **concurrent** because neither was aware of the other — not because of wall-clock time.
+دو کاربر عنوان یک صفحه‌ی ویکی را روی دو leader مختلف عوض می‌کنند، یکی از A به B و دیگری از A به C؛ شکل ۶-۹. این نوشتن‌ها **concurrent** هستند چون هیچ‌کدام از دیگری خبر نداشت، نه به خاطر زمان ساعت دیواری.
 
-![User 1 sets the title to B on leader 1 while user 2 sets it to C on leader 2; each leader accepts, then the asynchronous replication of each change hits a conflict on the other leader](../figures/06-09.png)
+![کاربر ۱ عنوان را روی leader ۱ به B تغییر می‌دهد و کاربر ۲ روی leader ۲ به C؛ هر leader می‌پذیرد، و بعد replication asynchronous هر تغییر روی leader دیگر به conflict می‌خورد](../figures/06-09.png)
 
-*Figure 6-9 (p. 223): both writes succeed locally; the conflict is only discovered later, when it can no longer be reported to the users.*
+*Figure 6-9 (p. 223): هر دو نوشتن محلی موفق می‌شوند؛ conflict بعداً کشف می‌شود، وقتی دیگر نمی‌شود به کاربرها گزارشش داد.*
 
-| Strategy | How | Catch |
+| راهبرد | چطور | گیرش |
 |---|---|---|
-| **Conflict avoidance** | Route all writes for a record to one leader (a user’s “home” region); odd/even ID ranges for two leaders | Breaks when the designated leader changes; impossible for offline clients |
-| **Last write wins (LWW)** | Keep the greatest timestamp (tie → compare values) | Really means *randomly* pick a winner and **silently discard** the rest; clock skew lets a later write lose. Fine only if keys are written once |
-| **Manual resolution** | Keep all values as **siblings** (CouchDB) and resolve in app code or with the user | API returns sets; resolution UI is hard; naive merges surprise — Amazon’s cart re-added deleted items (Figure 6-10); concurrent resolutions can conflict again (B/C vs C/B) |
-| **Automatic resolution** | Merge algorithms per data type → **strong eventual consistency** | Can’t enforce everything (e.g. “at most five items” means dropping some) |
+| **پرهیز از conflict** | همه‌ی نوشتن‌های یک رکورد را به یک leader بفرستید، مثلاً region «خانه»‌ی کاربر؛ یا بازه‌ی id زوج و فرد برای دو leader | وقتی leader تعیین‌شده عوض شود می‌شکند؛ برای clientهای آفلاین ناممکن است |
+| **مدل last write wins یا LWW** | بزرگ‌ترین timestamp را نگه دارید و در تساوی مقدارها را مقایسه کنید | در واقع یعنی برنده را *تصادفی* انتخاب کنید و بقیه را **بی‌صدا دور بریزید**؛ clock skew ممکن است نوشتن دیرتر را بازنده کند. فقط وقتی خوب است که هر کلید یک بار نوشته شود |
+| **حل دستی** | همه‌ی مقدارها را به شکل **sibling** نگه دارید، مثل CouchDB، و در کد اپلیکیشن یا با کمک کاربر حلشان کنید | API مجموعه برمی‌گرداند؛ UI حل conflict سخت است؛ mergeهای ساده غافلگیر می‌کنند: سبد خرید Amazon آیتم‌های حذف‌شده را برمی‌گرداند، شکل ۶-۱۰؛ حل‌های هم‌زمان ممکن است دوباره conflict بسازند، مثل B/C در برابر C/B |
+| **حل خودکار** | الگوریتم merge برای هر نوع داده، یعنی **strong eventual consistency** | نمی‌تواند همه‌چیز را اجرا کند؛ مثلاً «حداکثر پنج آیتم» یعنی باید بعضی را دور ریخت |
 
-Automatic merges (pp. 226–227): text keeps all insertions and deletions with a deterministic order for same-position inserts; collections track insertions *and deletions* (so the cart becomes {Soap}); counters add up increments and decrements without double-counting; maps merge per key.
+همه‌ی mergeهای خودکار یا mergeها (pp. 226–227): متن همه‌ی درج‌ها و حذف‌ها را نگه می‌دارد و برای درج‌های هم‌مکان یک ترتیب deterministic دارد؛ collectionها هم درج *و هم حذف* را ثبت می‌کنند، پس سبد خرید {Soap} می‌شود؛ counterها افزایش‌ها و کاهش‌ها را بدون دو بار شمردن جمع می‌کنند؛ mapها برای هر کلید merge می‌کنند.
 
-**CRDTs vs operational transformation** — both merge `ice` → `nice` and `ice!` into `nice!` (Figure 6-11):
+**مقایسه‌ی CRDT و operational transformation:** هر دو `ice` را با `nice` و `ice!` به `nice!` merge می‌کنند؛ شکل ۶-۱۱:
 
-| | Operational transformation (OT) | CRDT |
+| | مدل operational transformation یا OT | مدل CRDT |
 |---|---|---|
-| Positions | Indexes: insert `n` at 0, `!` at 3 | Unique immutable IDs per character: insert `!` (4B) after `e` (3A) |
-| Merging | Transform concurrent operations’ indexes (`!` moves to 4) | No transformation; concurrent same-position inserts ordered by ID |
-| Typical use | Real-time text editing — Google Docs; ShareDB | Databases — Redis Enterprise, Riak, Cosmos DB; Automerge, Yjs |
+| موقعیت‌ها | با index: `n` را در ۰ و `!` را در ۳ درج کن | شناسه‌ی یکتا و immutable برای هر کاراکتر: `!` با شناسه‌ی 4B را بعد از `e` با شناسه‌ی 3A درج کن |
+| merge کردن | indexهای عملیات‌های هم‌زمان را تبدیل می‌کند؛ `!` به ۴ می‌رود | تبدیلی لازم نیست؛ درج‌های هم‌مکان با شناسه مرتب می‌شوند |
+| کاربرد رایج | ویرایش real-time متن؛ Google Docs و ShareDB | دیتابیس‌ها؛ Redis Enterprise، Riak و Cosmos DB، و Automerge و Yjs |
 
-**Types of conflict** (pp. 228–229): obvious ones (same field) and subtle ones — two **meeting-room bookings** for the same slot, each inserting a new record after checking availability. Chapters 8 and 13 return to this.
+**انواع conflict** (pp. 228–229): conflictهای آشکار، مثل یک فیلد، و conflictهای ظریف، مثل دو **رزرو اتاق جلسه** برای یک بازه که هر کدام بعد از بررسی خالی بودن یک رکورد تازه درج می‌کنند. فصل‌های ۸ و ۱۳ به این برمی‌گردند.
 
-### Leaderless replication
+> **In practice:** جدول Silver در reference stack برای هر id «جدیدترین نسخه» را بر اساس `update_date` نگه می‌دارد. این همان last write wins است.
+>
+> **Your turn:** دو نسخه از یک ردیف با `update_date` یکسان تا ثانیه در Bronze هست. کدام برنده می‌شود، و چه چیزی بی‌صدا از دست می‌رود؟
+>
+> *Answer:* بدون یک قاعده‌ی شکستن تساوی، برنده عملاً تصادفی است و نسخه‌ی دیگر بی‌صدا دور ریخته می‌شود، همان ضعف LWW (pp. 222–229). قاعده‌ای deterministic اضافه کنید، مثلاً زمان load یا موقعیت در فایل، و تعداد تساوی‌ها را بشمارید؛ اگر ساعت منبع عقب و جلو برود، حتی نسخه‌ی واقعاً دیرتر هم ممکن است ببازد.
 
-Any replica accepts writes directly from clients (or via a **coordinator** that imposes no ordering). Early systems were leaderless; Amazon’s **Dynamo** (2007) revived the idea for Riak, Cassandra and ScyllaDB — “Dynamo-style”. (DynamoDB, confusingly, is single-leader on Multi-Paxos.) (p. 229)
+### مفهوم leaderless replication
 
-#### Writing when a node is down (pp. 229–231)
+هر replica نوشتن را مستقیم از client می‌پذیرد، یا از طریق یک **coordinator** که هیچ ترتیبی تحمیل نمی‌کند. سیستم‌های اولیه leaderless بودند؛ **Dynamo** در Amazon در سال ۲۰۰۷ این ایده را برای Riak، Cassandra و ScyllaDB زنده کرد، که به آن‌ها «Dynamo-style» می‌گویند. DynamoDB، برخلاف اسمش، single-leader و روی Multi-Paxos است (p. 229).
 
-With three replicas and one down, the client writes to all three and succeeds once two acknowledge; reads also go to several replicas, and **version numbers** pick the newest response (Figure 6-12). No failover is needed. Missed writes are repaired by:
+#### نوشتن در دیتابیس وقتی یک node خاموش است (pp. 229–231)
 
-![User 1234 writes to three replicas while replica 3 is offline; later user 2345 reads from all three, gets version 7 from replicas 1 and 2 and stale version 6 from replica 3, and writes the new value back to replica 3](../figures/06-12.png)
+با سه replica و یکی خاموش، client به هر سه می‌نویسد و وقتی دو تا تأیید کنند موفق است؛ خواندن هم به چند replica می‌رود و **شماره‌ی نسخه** جدیدترین پاسخ را انتخاب می‌کند؛ شکل ۶-۱۲. failover لازم نیست. نوشتن‌های جاافتاده این‌طور جبران می‌شوند:
 
-*Figure 6-12 (p. 230): a majority write plus a majority read always overlap in one up-to-date replica, and the reader repairs the stale one.*
+![کاربر ۱۲۳۴ به سه replica می‌نویسد در حالی که replica ۳ خاموش است؛ بعداً کاربر ۲۳۴۵ از هر سه می‌خواند، نسخه‌ی ۷ را از replica ۱ و ۲ و نسخه‌ی کهنه‌ی ۶ را از replica ۳ می‌گیرد و مقدار تازه را در replica ۳ می‌نویسد](../figures/06-12.png)
 
-| Mechanism | How | Covers |
+*Figure 6-12 (p. 230): نوشتن در اکثریت و خواندن از اکثریت همیشه در یک replica به‌روز هم‌پوشانی دارند، و خواننده replica کهنه را تعمیر می‌کند.*
+
+| سازوکار | چطور | چه چیزی را پوشش می‌دهد |
 |---|---|---|
-| **Read repair** | A reader seeing v6 on one replica and v7 on others writes v7 back | Frequently read values |
-| **Hinted handoff** | Another replica stores **hints** for the down node and forwards them when it returns | Values never read |
-| **Anti-entropy** | Background comparison and copying, in no particular order, possibly with long delays | Everything, eventually |
+| **مفهوم read repair** | خواننده‌ای که v6 را روی یک replica و v7 را روی بقیه می‌بیند، v7 را برمی‌گرداند و می‌نویسد | مقدارهایی که زیاد خوانده می‌شوند |
+| **مفهوم hinted handoff** | replica دیگری برای node خاموش **hint** نگه می‌دارد و وقتی برگشت برایش می‌فرستد | مقدارهایی که هیچ‌وقت خوانده نمی‌شوند |
+| **مفهوم anti-entropy** | مقایسه و کپی در پس‌زمینه، بدون ترتیب خاص و شاید با latency طولانی | همه‌چیز، بالاخره |
 
-#### Quorums for reading and writing (pp. 231–235)
+#### مفهوم quorum برای خواندن و نوشتن (pp. 231–235)
 
-With **n** replicas, a write needs **w** acknowledgments and a read queries **r** replicas. If **w + r > n**, the read set and write set overlap, so at least one replica read has the latest write (Figure 6-13). Requests always go to all n replicas; w and r say how many to wait for.
+با **n** replica، هر نوشتن **w** تأیید لازم دارد و هر خواندن از **r** replica می‌پرسد. اگر `w + r > n` باشد، مجموعه‌ی خواندن و مجموعه‌ی نوشتن هم‌پوشانی دارند، پس دست‌کم یکی از replicaهای خوانده‌شده آخرین نوشتن را دارد؛ شکل ۶-۱۳. درخواست‌ها همیشه به هر n replica می‌روند؛ w و r می‌گویند منتظر چند تا بمانیم.
 
-| Setting | Tolerates | Notes |
+| تنظیم | چه چیزی را تحمل می‌کند | نکته |
 |---|---|---|
-| n = 3, w = 2, r = 2 | 1 unavailable node | Common: n odd, w = r = (n + 1)/2 |
-| n = 5, w = 3, r = 3 | 2 unavailable nodes | |
-| w = n, r = 1 | No node failure for writes | Fast reads for read-heavy, write-light workloads |
-| w + r ≤ n | More failures, lower latency | More stale reads |
+| `n = 3, w = 2, r = 2` | یک node از دسترس خارج | رایج: n فرد و `w = r = (n + 1)/2` |
+| `n = 5, w = 3, r = 3` | دو node از دسترس خارج | |
+| `w = n, r = 1` | برای نوشتن هیچ خرابی node را تحمل نمی‌کند | خواندن سریع برای بارهای پرخواندن و کم‌نوشتن |
+| `w + r ≤ n` | خرابی‌های بیشتر، latency کمتر | خواندن‌های کهنه‌ی بیشتر |
 
-Quorums needn’t be majorities — only overlap matters (p. 233). **Edge cases where stale values still appear even with w + r > n** (pp. 233–234): a node with the new value is restored from a stale replica; rebalancing changes which nodes hold the n copies; a read concurrent with a write; a write that succeeded on fewer than w replicas isn’t rolled back; LWW with clock skew (Cassandra, ScyllaDB) silently drops writes; concurrent writes applied in different orders. Dynamo-style systems are built for eventual consistency — treat w and r as tuning the *probability* of staleness.
+مفهوم quorumها لازم نیست اکثریت باشند؛ فقط هم‌پوشانی مهم است (p. 233). **حالت‌های مرزی که حتی با `w + r > n` مقدار کهنه برمی‌گرداند** (pp. 233–234): nodeی که مقدار تازه دارد از یک replica کهنه بازیابی می‌شود؛ rebalancing جای n کپی را عوض می‌کند؛ خواندنی هم‌زمان با یک نوشتن؛ نوشتنی که روی کمتر از w replica موفق شد rollback نمی‌شود؛ LWW با clock skew، در Cassandra و ScyllaDB، نوشتن‌ها را بی‌صدا می‌اندازد؛ و نوشتن‌های هم‌زمان با ترتیب‌های متفاوت اعمال می‌شوند. سیستم‌های Dynamo-style برای eventual consistency ساخته شده‌اند؛ w و r را تنظیم *احتمال* کهنگی بدانید.
 
-**Monitoring staleness** (pp. 234–235): leader-based systems expose lag as the difference in log positions; leaderless systems have no fixed write order, so it’s hard — hint counts are one rough signal. “Eventual” should be quantified.
+**مفهوم monitoring کهنگی** (pp. 234–235): سیستم‌های leader-based مقدار lag را به شکل اختلاف موقعیت در log نشان می‌دهند؛ سیستم‌های leaderless ترتیب نوشتن ثابتی ندارند، پس سخت است؛ تعداد hintها یک نشانه‌ی تقریبی است. «بالاخره» را باید اندازه گرفت.
 
-#### Single-leader versus leaderless performance (pp. 235–236)
+#### مقایسه‌ی کارایی single-leader و leaderless (pp. 235–236)
 
-| | Read from the leader | Leaderless |
+| | خواندن از leader | مدل leaderless |
 |---|---|---|
-| Consistency | Up-to-date; strong guarantees possible | Probabilistic |
-| Throughput | Limited by one leader | Spread across replicas |
-| Failure / slowness | Wait for detection and failover; a slow leader slows everyone | No failover; use the fastest responses — **request hedging** cuts tail latency; handles **gray failures** (degraded nodes) gracefully |
-| Costs | — | Hinted handoff adds load when the system is already strained; bigger quorums wait on more replicas (rarely beyond 4 of 7 or 5 of 9); a large partition can prevent any quorum — **sloppy quorum** (Riak, Dynamo) / consistency level **ANY** (Cassandra, ScyllaDB) accepts writes anywhere, with no read guarantee |
+| مفهوم consistency | به‌روز؛ تضمین‌های قوی ممکن است | احتمالاتی |
+| مقدار throughput | محدود به یک leader | پخش بین replicaها |
+| خرابی یا کندی | منتظر تشخیص و failover بمانید؛ leader کند همه را کند می‌کند | failover ندارد؛ از سریع‌ترین پاسخ‌ها استفاده می‌کند؛ **request hedging** tail latency را کم می‌کند؛ با **gray failure**، یعنی nodeهای نیمه‌خراب، آرام کنار می‌آید |
+| هزینه‌ها | ندارد | hinted handoff وقتی سیستم زیر فشار است بار اضافه می‌کند؛ quorumهای بزرگ‌تر منتظر replicaهای بیشتری می‌مانند، به‌ندرت بیش از ۴ از ۷ یا ۵ از ۹؛ یک partition بزرگ ممکن است جلوی هر quorumی را بگیرد؛ **sloppy quorum** در Riak و Dynamo، یا سطح consistency از نوع **ANY** در Cassandra و ScyllaDB، نوشتن را هر جایی می‌پذیرد، بدون هیچ تضمینی برای خواندن |
 
-Multi-leader is even more resilient to network interruptions (talk to one nearby leader) but reads can be arbitrarily stale; quorums are the middle ground (p. 236).
+مدل multi-leader در برابر قطعی شبکه حتی مقاوم‌تر است، چون با یک leader نزدیک حرف می‌زنید، اما خواندن‌ها ممکن است هر قدر کهنه باشند؛ quorumها حد وسط‌اند (p. 236).
 
-**Multi-region** (pp. 236–237): in Cassandra and ScyllaDB the client’s local **coordinator** sends a write to all local replicas and to one replica per other region, which forwards it locally. Consistency levels choose a global quorum, a quorum per region, or a **local quorum** (fast, more likely stale). Riak keeps n within a region and replicates between regions asynchronously, multi-leader style.
+**کار در چند region** (pp. 236–237): در Cassandra و ScyllaDB، **coordinator** محلی client یک نوشتن را به همه‌ی replicaهای محلی و به یک replica در هر region دیگر می‌فرستد، که آن را در region خودش پخش می‌کند. سطح‌های consistency یک quorum سراسری، یک quorum برای هر region یا یک **local quorum** را انتخاب می‌کنند، که سریع است و احتمال کهنگی‌اش بیشتر. Riak مقدار n را داخل یک region نگه می‌دارد و بین regionها asynchronous و به سبک multi-leader replicate می‌کند.
 
-### Detecting concurrent writes
+### تشخیص نوشتن‌های concurrent
 
-Variable delays and partial failures mean replicas receive writes in different orders: in Figure 6-14, node 1 never gets B’s write, node 2 sees A then B, node 3 sees B then A — naive overwriting leaves them permanently inconsistent. Replicas must **converge** — via LWW (Cassandra, ScyllaDB), siblings, or CRDTs (Riak) — and LWW can’t tell concurrent writes from sequential ones (pp. 237–238).
+همه‌ی latencyهای متغیر و خرابی‌های جزئی یعنی replicaها نوشتن‌ها را با ترتیب‌های متفاوت می‌گیرند: در شکل ۶-۱۴ node ۱ هیچ‌وقت نوشتن B را نمی‌گیرد، node ۲ اول A و بعد B را می‌بیند و node ۳ اول B و بعد A را؛ بازنویسی ساده آن‌ها را برای همیشه ناسازگار می‌گذارد. replicaها باید **همگرا شوند**، با LWW در Cassandra و ScyllaDB، با sibling، یا با CRDT در Riak؛ و LWW نمی‌تواند نوشتن‌های concurrent را از نوشتن‌های پشت سر هم تشخیص بدهد (pp. 237–238).
 
-#### The happens-before relation (pp. 238–239)
+#### رابطه‌ی happens-before (pp. 238–239)
 
-**A happens before B** if B knows about, depends on, or builds upon A (Figure 6-8’s update builds on the insert). Two operations are **concurrent if neither happens before the other** — physical time is irrelevant, much as in relativity events too far apart for light to connect them can’t affect each other; a slow network can make operations seconds apart concurrent. So for any A and B: A → B, B → A, or A ∥ B — and only the last is a conflict.
+**رویداد A پیش از B اتفاق می‌افتد** اگر B از A خبر داشته باشد، به آن وابسته باشد یا روی آن ساخته شده باشد؛ update در شکل ۶-۸ روی insert ساخته شده. دو عملیات **concurrent هستند اگر هیچ‌کدام پیش از دیگری اتفاق نیفتد**؛ زمان فیزیکی بی‌ربط است، همان‌طور که در نسبیت رویدادهایی که آن‌قدر از هم دورند که نور نمی‌تواند به هم وصلشان کند نمی‌توانند روی هم اثر بگذارند؛ یک شبکه‌ی کند ممکن است عملیات‌هایی را که چند ثانیه از هم فاصله دارند concurrent کند. پس برای هر A و B یکی از این سه برقرار است: `A → B`، `B → A` یا `A ∥ B`؛ و فقط آخری conflict است.
 
-#### Capturing the happens-before relationship (pp. 239–242)
+#### ثبت رابطه‌ی happens-before (pp. 239–242)
 
 ```mermaid
 flowchart LR
@@ -279,64 +319,72 @@ flowchart LR
     W --> O["Server overwrites values ≤ that version,<br/>keeps higher ones as concurrent siblings"]
 ```
 
-A write without a version is concurrent with everything and overwrites nothing. The book’s cart walkthrough (Figure 6-15): client 1 adds milk (v1); client 2 adds eggs unaware (v2, siblings [milk] and [eggs]); client 1 writes [milk, flour] based on v1 (v3 replaces [milk], keeps [eggs]); client 2 writes [eggs, milk, ham] based on v2 (v4 replaces [eggs]); client 1 writes [milk, flour, eggs, bacon] based on v3 (v5) — leaving siblings v4 and v5. Old versions are overwritten eventually and **no writes are lost** (pp. 240–241).
+نوشتنی که هیچ نسخه‌ای همراهش نیست با همه‌چیز concurrent است و هیچ چیز را بازنویسی نمی‌کند. مثال سبد خرید کتاب، شکل ۶-۱۵: client ۱ شیر را اضافه می‌کند و نسخه‌ی v1 ساخته می‌شود؛ client ۲ بی‌خبر تخم‌مرغ را اضافه می‌کند و v2 با siblingهای [milk] و [eggs] ساخته می‌شود؛ client ۱ بر اساس v1 مقدار [milk, flour] را می‌نویسد و v3 جای [milk] را می‌گیرد و [eggs] را نگه می‌دارد؛ client ۲ بر اساس v2 مقدار [eggs, milk, ham] را می‌نویسد و v4 جای [eggs] را می‌گیرد؛ client ۱ بر اساس v3 مقدار [milk, flour, eggs, bacon] را می‌نویسد و v5 ساخته می‌شود؛ و siblingهای v4 و v5 می‌مانند. نسخه‌های قدیمی بالاخره بازنویسی می‌شوند و **هیچ نوشتنی گم نمی‌شود** (pp. 240–241).
 
-![A graph of cart versions: from empty, one client adds milk, then flour, then bacon; the other adds eggs, then ham; arrows show which version each write was based on, ending with milk, flour, eggs, bacon and eggs, milk, ham](../figures/06-16.png)
+![گرافی از نسخه‌های سبد خرید: از سبد خالی، یک client شیر، بعد آرد و بعد بیکن اضافه می‌کند؛ دیگری تخم‌مرغ و بعد ژامبون؛ فلش‌ها نشان می‌دهند هر نوشتن بر اساس کدام نسخه بوده، و در پایان milk, flour, eggs, bacon و eggs, milk, ham می‌مانند](../figures/06-16.png)
 
-*Figure 6-16 (p. 242): each write names the version it built on, so the server can tell overwrites from concurrent siblings.*
+*Figure 6-16 (p. 242): هر نوشتن نسخه‌ای را که رویش ساخته شده نام می‌برد، پس سرور می‌تواند بازنویسی را از sibling هم‌زمان تشخیص بدهد.*
 
-> **Try it:** [Concurrent writes: siblings vs last write wins](../widgets/06-concurrent-writes.html) — replay the book's shopping-cart example with version numbers, then with last write wins.
+> **Try it:** [نوشتن‌های concurrent: sibling در برابر last write wins](../widgets/06-concurrent-writes.html): مثال سبد خرید کتاب را با شماره‌ی نسخه و بعد با last write wins دوباره اجرا کنید.
 
-**Version vectors** (p. 242): with several replicas accepting writes, keep a version number **per replica per key**; the collection is a **version vector** (Riak 2.0 uses *dotted version vectors* and calls it the *causal context*). It travels to the client on reads and back on writes, distinguishing overwrites from concurrent writes, and makes it safe to read from one replica and write to another. A **vector clock** is similar but subtly different; for comparing replica states, version vectors are the right structure.
+**مفهوم version vector** (p. 242): وقتی چند replica نوشتن می‌پذیرند، برای **هر replica و هر کلید** یک شماره‌ی نسخه نگه دارید؛ مجموعه‌ی آن‌ها یک **version vector** است. Riak 2.0 از *dotted version vector* استفاده می‌کند و آن را *causal context* می‌نامد. این بردار در خواندن به client می‌رود و در نوشتن برمی‌گردد، بازنویسی را از نوشتن concurrent جدا می‌کند و خواندن از یک replica و نوشتن در replica دیگر را بی‌خطر می‌کند. **vector clock** شبیه آن است اما تفاوت ظریفی دارد؛ برای مقایسه‌ی وضعیت replicaها، version vector ساختار درست است.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| | Single-leader | Multi-leader | Leaderless |
+| | مدل single-leader | مدل multi-leader | مدل leaderless |
 |---|---|---|---|
-| Writes go to | One leader | Any leader | Several replicas in parallel |
-| Consistency | Strongest (reads from leader) | Conflicts must be resolved | Quorums; conflicts resolved |
-| Write availability | Leader failure → failover | Each leader independent | Tolerates node failures without failover |
-| Latency (multi-region) | Writes cross regions | Local writes | Local quorums |
-| Main hazard | Lost writes on async failover; split brain | Conflicts; broken constraints | Stale reads despite quorums; siblings |
+| نوشتن‌ها به کجا می‌روند | یک leader | هر leader | چند replica به شکل موازی |
+| مفهوم consistency | قوی‌ترین، با خواندن از leader | conflictها باید حل شوند | quorum؛ conflictها حل می‌شوند |
+| availability نوشتن | خرابی leader یعنی failover | هر leader مستقل است | خرابی node را بدون failover تحمل می‌کند |
+| latency در چند region | نوشتن‌ها از regionها عبور می‌کنند | نوشتن‌های محلی | quorumهای محلی |
+| خطر اصلی | گم شدن نوشتن در failover ناهمگام؛ split brain | conflict؛ constraintهای شکسته | خواندن کهنه با وجود quorum؛ sibling |
 
-## Beyond the book
+## فراتر از کتاب
 
-- Pre-vote and leader leases are the practical mechanisms consensus-based systems use to avoid disruptive elections and stale-leader reads (see Chapter 10).
-- A common way to support removals in a set-like CRDT is to record removals as tombstones (or use an observed-remove set), so a concurrent add and remove can be merged without the removed item resurrecting.
+- سازوکارهای pre-vote و leader lease راه‌های عملی سیستم‌های مبتنی بر consensus برای پرهیز از انتخاب‌های مزاحم و خواندن از leader کهنه‌اند؛ فصل ۱۰ را ببینید.
+- یک راه رایج برای پشتیبانی از حذف در CRDTهای شبیه set این است که حذف‌ها را به شکل tombstone ثبت کنید، یا از observed-remove set استفاده کنید، تا یک افزودن و حذف هم‌زمان بدون زنده شدن دوباره‌ی آیتم حذف‌شده merge شوند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Concurrent writes and version vectors](../lab/06-version-vectors/README.md) — the book's shopping-cart example.
-- **Related chapters:** [7. Sharding](07-sharding.md), [9. The Trouble with Distributed Systems](09-the-trouble-with-distributed-systems.md) (timeouts, clocks for LWW), [10. Consistency and Consensus](10-consistency-and-consensus.md) (linearizability, automatic failover done right).
+- **Run it:** [نوشتن‌های concurrent و version vector](../lab/06-version-vectors/README.md): مثال سبد خرید کتاب.
+- **فصل‌های مرتبط:** [فصل ۷: مفهوم sharding](07-sharding.md)، [فصل ۹: دردسرهای سیستم‌های توزیع‌شده](09-the-trouble-with-distributed-systems.md) برای timeout و ساعت‌ها در LWW، و [فصل ۱۰: مفهوم consistency و consensus](10-consistency-and-consensus.md) برای linearizability و failover خودکار درست.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها را خود vault از روی یادداشت‌های بالا نوشته است؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **With fully asynchronous replication, how can a write that the client saw succeed be lost?**
+1. **با replication کاملاً asynchronous، چطور نوشتنی که client موفقیتش را دیده ممکن است گم شود؟**
 
-   *Answer:* The leader confirms the write before any follower has it. If the leader then fails and a follower is promoted, the new leader never received the write; when the old leader comes back, its unreplicated writes are typically discarded (pp. 200–206).
+   *Answer:* leader نوشتن را پیش از این‌که هیچ followerی داشته باشدش تأیید می‌کند. اگر leader بعد از آن خراب شود و یک follower ارتقا پیدا کند، leader تازه هیچ‌وقت آن نوشتن را نگرفته؛ وقتی leader قدیم برمی‌گردد، نوشتن‌های replicateنشده‌اش معمولاً دور ریخته می‌شوند (pp. 200–206).
 
-2. **"Always read from the same replica" provides which guarantee?**
-   - [ ] Read-after-write consistency
-   - [x] Monotonic reads
-   - [ ] Consistent prefix reads across shards
-   - [ ] Linearizability
+2. **قاعده‌ی «همیشه از یک replica بخوان» کدام تضمین را می‌دهد؟**
+   - [ ] مدل read-after-write
+   - [x] مدل monotonic reads
+   - [ ] مدل consistent prefix reads بین shardها
+   - [ ] مفهوم linearizability
 
-   *Answer:* Routing each user to one replica means they never see data go "back in time" (monotonic reads). It doesn't guarantee they see their own recent writes, and consistent prefix is a separate problem with sharded data (pp. 209–214).
+   *Answer:* فرستادن هر کاربر به یک replica یعنی هیچ‌وقت نمی‌بیند داده «به گذشته برگردد»، یعنی monotonic reads. تضمین نمی‌کند نوشتن‌های تازه‌ی خودش را ببیند، و consistent prefix مسئله‌ی جدایی در داده‌ی shardشده است (pp. 209–214).
 
-3. **Why are autoincrement keys and uniqueness constraints problematic with multi-leader replication?**
+3. **چرا کلیدهای autoincrement و قیدهای یکتایی در multi-leader replication مشکل‌سازند؟**
 
-   *Answer:* Each leader accepts writes independently and only later learns about the others', so two leaders can hand out the same ID or accept the same username concurrently — the conflict is detected only after both writes succeeded (pp. 216–229).
+   *Answer:* هر leader مستقل نوشتن می‌پذیرد و فقط بعداً از نوشتن‌های بقیه خبردار می‌شود، پس دو leader ممکن است یک id را بدهند یا یک username را هم‌زمان بپذیرند؛ conflict فقط بعد از موفق شدن هر دو نوشتن کشف می‌شود (pp. 216–229).
 
-4. **Give a scenario where w + r > n holds and a read still returns a stale value.**
+4. **سناریویی بگویید که `w + r > n` برقرار است و خواندن باز هم مقدار کهنه برمی‌گرداند.**
 
-   *Answer:* For example: a write succeeds on fewer than w replicas and is reported as failed but not rolled back; a node carrying the new value fails and is restored from an old replica; concurrent writes resolved by last-write-wins with skewed clocks; or a read concurrent with a write (pp. 232–235).
+   *Answer:* برای نمونه: نوشتنی روی کمتر از w replica موفق شده و شکست‌خورده گزارش شده اما rollback نشده؛ nodeی که مقدار تازه را داشت خراب و از یک replica قدیمی بازیابی شده؛ نوشتن‌های concurrent که با last write wins و ساعت‌های ناهماهنگ حل شده‌اند؛ یا خواندنی هم‌زمان با یک نوشتن (pp. 232–235).
 
-5. **What makes two writes "concurrent"?**
-   - [ ] They happen within the same millisecond
-   - [ ] They are sent to the same replica
-   - [x] Neither write knew about the other when it was made
-   - [ ] They modify different keys
+5. **چه چیزی دو نوشتن را «concurrent» می‌کند؟**
+   - [ ] این‌که در یک میلی‌ثانیه اتفاق بیفتند
+   - [ ] این‌که به یک replica فرستاده شوند
+   - [x] این‌که هیچ‌کدام هنگام انجام شدن از دیگری خبر نداشته باشد
+   - [ ] این‌که کلیدهای متفاوتی را تغییر دهند
 
-   *Answer:* Concurrency is about causality, not clock time: two writes a minute apart are concurrent if neither client had seen the other's write. Version vectors detect this (pp. 237–243).
+   *Answer:* concurrency به علیت مربوط است، نه به زمان ساعت: دو نوشتن با یک دقیقه فاصله concurrent هستند اگر هیچ‌کدام از clientها نوشتن دیگری را ندیده باشد. version vector این را تشخیص می‌دهد (pp. 237–243).
+
+6. **دو کوئری پشت سر هم یک تحلیل‌گر از طریق proxy به دو replica متفاوت warehouse می‌رسند و دومی ردیفی را که اولی دیده نشان نمی‌دهد. کدام تضمین نقض شده؟**
+   - [ ] مدل read-after-write
+   - [x] مدل monotonic reads
+   - [ ] مفهوم durability
+   - [ ] مدل consistent prefix reads
+
+   *Answer:* تحلیل‌گر چیزی را دیده و بعد آن را ندیده، یعنی خواندن به گذشته برگشته؛ این نقض monotonic reads است و درمانش خواندن هر کاربر از یک replica ثابت است (pp. 212–213).

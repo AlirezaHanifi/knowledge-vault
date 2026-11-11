@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فصل ۶ در طول یک pipeline داده</title>
+<meta name="description" content="یک pipeline داده‌ی معمولی را طی کنید و ببینید هر مرحله چند کپی از داده دارد، چقدر ممکن است عقب باشد و یک خرابی کجا داده را گم می‌کند. برای فصل ۶ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lenses { margin-bottom: 14px; }
+  .axis { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-3); margin: 0 2px 6px; }
+  .axis span:last-child { text-align: end; }
+  .pipe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stage-btn {
+    font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+    padding: 10px 10px 12px; position: relative; min-height: 118px;
+  }
+  .stage-btn:hover { border-color: var(--line-strong); }
+  .stage-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stage-btn .zone { font-size: .72rem; color: var(--ink-3); font-weight: 700; }
+  .stage-btn .name { font-weight: 650; font-size: .95rem; }
+  .stage-btn .tag { font-size: .8rem; color: var(--ink-2); line-height: 1.4; }
+  .stage-btn:not(:last-child)::after {
+    content: "←"; position: absolute; left: -9px; top: 40%; color: var(--ink-3); font-size: .9rem;
+    background: var(--bg); line-height: 1; padding: 1px 0;
+  }
+  @media (max-width: 860px) { .stage-btn::after { display: none; } }
+  .meter { display: flex; gap: 3px; }
+  .meter i { display: block; width: 100%; height: 7px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .meter i.on { background: var(--s1); border-color: var(--s1); }
+  .detail { margin-top: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  .detail .big-tag { font-size: 1rem; font-weight: 650; color: var(--s1); margin: 0 0 8px; }
+  .detail p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/06-replication.html">فصل ۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">در طول pipeline</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">فصل ۶ · مفهوم replication</div>
+  <h1>فصل ۶ در طول یک pipeline داده</h1>
+  <p class="lede">تقریباً هر مرحله‌ی pipeline داده‌اش را از یک کپی می‌خواند یا در چند کپی می‌نویسد. یک lens انتخاب کنید و مرحله‌ها را از دیتابیس منبع تا داشبورد طی کنید تا ببینید کدام کپی ممکن است عقب باشد، replication کجا جای backup را نمی‌گیرد و یک failover کجا نوشتن تأییدشده را گم می‌کند.</p>
+  <p class="source-note">کل فصل را (صص. ۱۹۷–۲۵۰) روی <em>reference stack</em> خود vault نشان می‌دهد، یعنی یک پلتفرم داده‌ی عمومی: دیتابیس relational منبع ← loader ← لایه‌های Bronze و Silver و Gold در یک warehouse ستونی ← notebook، داشبورد و یک API. مرحله‌ها و نمره‌های ۱ تا ۵ ساده‌سازی خود vault است، و پیاده‌سازی هم.</p>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="lenses" id="lenses"></div>
+    <div class="axis" aria-hidden="true"><span id="axis-l"></span><span id="axis-r"></span></div>
+    <div class="pipe" id="pipe" role="group" aria-label="مرحله‌های pipeline"></div>
+  </div>
+
+  <div class="detail">
+    <div class="panel" aria-live="polite" id="detail"></div>
+  </div>
+  <h2>به چه چیزی دقت کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با lens کپی‌ها:</strong> دو نوع کپی در pipeline هست: replicaهای warehouse که در برابر خرابی ماشین محافظت می‌کنند، و Bronze که در برابر خطای انسانی محافظت می‌کند چون همه‌چیز از آن دوباره ساخته می‌شود.</li>
+    <li><strong>با lens replication lag:</strong> هرچه به راست بروید lag بیشتر می‌شود، چون هر مرحله روی lag مرحله‌ی قبل ساخته شده. eventual consistency در pipeline یک حد مشخص دارد که زمان‌بندی تعیینش می‌کند.</li>
+    <li><strong>با lens خرابی:</strong> خطرناک‌ترین خرابی بیرون از pipeline است: failover در دیتابیس اصلی، که ممکن است ردیف‌هایی را که loader دیده از منبع حذف کند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/06-replication.html"><small>درس</small>فصل ۶: مفهوم replication</a></li>
+    <li><a href="06-replication.html"><small>شبیه‌سازی</small>مفهوم replication lag و quorum</a></li>
+    <li><a href="06-concurrent-writes.html"><small>شبیه‌سازی</small>نوشتن‌های concurrent</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el;
+  var LESSON = "../chapters/06-replication.html#";
+
+  var STAGES = [
+    { id: "source", zone: "بیرون از پلتفرم", name: "منبع OLTP" },
+    { id: "loader", zone: "ingestion", name: "Loader" },
+    { id: "bronze", zone: "warehouse", name: "Bronze" },
+    { id: "silver", zone: "warehouse", name: "Silver" },
+    { id: "gold", zone: "warehouse", name: "Gold" },
+    { id: "nb", zone: "مصرف", name: "Notebookها" },
+    { id: "serve", zone: "مصرف", name: "داشبورد و API" }
+  ];
+
+  // level 0–4 = position on the lens's axis
+  var LENSES = {
+    copies: {
+      label: "کپی‌ها", axis: ["یک کپی", "چند کپی"],
+      cells: {
+        source: { tag: "leader و replica read-only", level: 3, pages: "صص. ۱۹۸–۲۰۰", slide: "مفهوم-single-leader-replication",
+          text: "دیتابیس اصلی محصول leader است و loader از یک follower read-only می‌خواند؛ single-leader replication در ساده‌ترین شکلش." },
+        loader: { tag: "بدون state", level: 0, pages: "ص. ۲۰۴", slide: "مدیریت-از-کار-افتادن-node",
+          text: "loader فقط cursor خودش را نگه می‌دارد؛ اگر container بمیرد، اجرای بعدی از همان cursor ادامه می‌دهد، مثل catch-up recovery یک follower." },
+        bronze: { tag: "دو replica در warehouse", level: 3, pages: "صص. ۲۰۰–۲۰۱", slide: "مقایسهی-replication-از-نوع-synchronous-و-asynchronous",
+          text: "هر insert روی یک replica نوشته می‌شود و replica دیگر part تازه را بعداً، به شکل asynchronous، می‌گیرد." },
+        silver: { tag: "قابل ساخت از Bronze", level: 2, pages: "ص. ۱۹۸", slide: "introduction",
+          text: "جدول Silver روی دو replica هست، اما کپی واقعی‌اش Bronze است: هر خرابی یا حذف اشتباهی با اجرای دوباره‌ی SQL جبران می‌شود." },
+        gold: { tag: "قابل ساخت از Silver", level: 2, pages: "ص. ۱۹۸", slide: "introduction",
+          text: "جدول Gold هم روی دو replica است و هم از Silver دوباره ساخته می‌شود؛ دو نوع کپی، با دو کاربرد متفاوت." },
+        nb: { tag: "کپی شخصی", level: 4, pages: "صص. ۲۲۰–۲۲۱", slide: "مفهوم-sync-engine-و-نرمافزار-local-first",
+          text: "هر DataFrame در notebook یک کپی محلی و جداست که هیچ sync engineی به‌روزش نمی‌کند؛ از لحظه‌ی خواندن شروع به کهنه شدن می‌کند." },
+        serve: { tag: "کپی در cache داشبورد", level: 3, pages: "ص. ۲۰۹", slide: "مشکلهای-replication-lag",
+          text: "داشبوردها نتیجه‌ی کوئری‌ها را cache می‌کنند و API پیش‌بینی چند نمونه دارد؛ هر کدام یک کپی که ممکن است عقب باشد." }
+      }
+    },
+    lag: {
+      label: "replication lag", axis: ["تازه", "ممکن است خیلی عقب باشد"],
+      cells: {
+        source: { tag: "lag در replica منبع", level: 3, pages: "صص. ۲۰۹ و ۲۳۴–۲۳۵", slide: "مشکلهای-replication-lag",
+          text: "replica معمولاً زیر یک ثانیه عقب است، اما هنگام batchهای سنگین شبانه ممکن است چند دقیقه عقب بیفتد؛ اختلاف موقعیت log اندازه‌اش را می‌گوید." },
+        loader: { tag: "تا یک ساعت", level: 3, pages: "ص. ۲۰۹", slide: "مشکلهای-replication-lag",
+          text: "loader هر ساعت اجرا می‌شود، پس Bronze عمداً تا یک ساعت عقب است؛ eventual consistency با حدی که خودتان انتخاب کرده‌اید." },
+        bronze: { tag: "lag بین دو replica", level: 2, pages: "صص. ۲۱۰–۲۱۳", slide: "مشکلهای-replication-lag",
+          text: "کوئری‌ای که از proxy به replica دوم می‌رسد ممکن است insert چند لحظه پیش را نبیند: نقض read-after-write." },
+        silver: { tag: "بعد از load", level: 3, pages: "ص. ۲۰۹", slide: "مشکلهای-replication-lag",
+          text: "جدول Silver بعد از هر load دوباره ساخته می‌شود؛ تا آن وقت از Bronze عقب است." },
+        gold: { tag: "lag روی lag", level: 4, pages: "ص. ۲۰۹", slide: "مشکلهای-replication-lag",
+          text: "جدول Gold از Silver ساخته می‌شود که از Bronze ساخته شده که از replica منبع آمده؛ lagها روی هم جمع می‌شوند." },
+        nb: { tag: "از لحظه‌ی خواندن", level: 4, pages: "صص. ۲۲۰–۲۲۱", slide: "مفهوم-sync-engine-و-نرمافزار-local-first",
+          text: "DataFrame هر قدر که notebook باز بماند کهنه‌تر می‌شود؛ مثل یک replica آفلاین که هیچ‌وقت sync نمی‌شود." },
+        serve: { tag: "cache داشبورد", level: 3, pages: "صص. ۲۱۲–۲۱۳", slide: "مشکلهای-replication-lag",
+          text: "دو تب یک داشبورد ممکن است دو نسخه‌ی cache متفاوت نشان بدهند: با refresh عدد بالا و پایین می‌رود، یعنی نقض monotonic reads." }
+      }
+    },
+    failure: {
+      label: "خرابی", axis: ["بدون از دست رفتن داده", "داده گم می‌شود"],
+      cells: {
+        source: { tag: "failover و نوشتن‌های دورریخته", level: 4, pages: "صص. ۲۰۵–۲۰۶", slide: "مدیریت-از-کار-افتادن-node",
+          text: "اگر دیتابیس اصلی failover کند و follower تازه آخرین نوشتن‌ها را نداشته باشد، آن نوشتن‌ها دور ریخته می‌شوند، در حالی که شاید loader آن‌ها را پیش‌تر در Bronze نوشته باشد." },
+        loader: { tag: "retry از cursor", level: 1, pages: "ص. ۲۰۴", slide: "مدیریت-از-کار-افتادن-node",
+          text: "اگر load شکست بخورد، اجرای بعدی از آخرین cursor ذخیره‌شده ادامه می‌دهد؛ ممکن است تکراری بسازد، اما چیزی گم نمی‌کند." },
+        bronze: { tag: "یک replica خراب", level: 1, pages: "صص. ۲۰۰–۲۰۱", slide: "مقایسهی-replication-از-نوع-synchronous-و-asynchronous",
+          text: "با خرابی یک replica، دیگری کار را ادامه می‌دهد و replica برگشته عقب‌ماندگی را جبران می‌کند؛ insertی که فقط روی replica خراب بود و هنوز پخش نشده بود در خطر است." },
+        silver: { tag: "حذف اشتباهی", level: 3, pages: "ص. ۱۹۸", slide: "introduction",
+          text: "یک DELETE اشتباه در چند لحظه به هر دو replica می‌رسد؛ replication جای backup را نمی‌گیرد، اما Bronze می‌تواند Silver را دوباره بسازد." },
+        gold: { tag: "قابل ساخت دوباره", level: 1, pages: "ص. ۱۹۸", slide: "introduction",
+          text: "هر خرابی در Gold با اجرای دوباره‌ی SQL از Silver جبران می‌شود." },
+        nb: { tag: "کار ذخیره‌نشده", level: 3, pages: "ص. ۱۹۸", slide: "introduction",
+          text: "اگر kernel یا سرور notebook بمیرد، هر چیزی که فقط در حافظه بوده از دست می‌رود؛ هیچ replicaای ندارد." },
+        serve: { tag: "نمونه‌ی دیگر API", level: 1, pages: "صص. ۲۳۵–۲۳۶", slide: "مقایسهی-کارایی-single-leader-و-leaderless",
+          text: "اگر یک نمونه‌ی API پیش‌بینی بمیرد، نمونه‌های دیگر پاسخ می‌دهند؛ هیچ stateی ندارد که گم شود." }
+      }
+    }
+};
+
+  var lens = "copies", current = "source", buttons = {};
+
+  function meter(level, axis) {
+    var bars = [];
+    for (var i = 0; i < 5; i++) bars.push(el("i", { class: i <= level ? "on" : "" }));
+    return el("div", { class: "meter", role: "img", "aria-label": (level + 1) + " از 5 به سمت " + axis[1] }, bars);
+  }
+
+  function renderPipe() {
+    var L = LENSES[lens], pipe = Kit.clear(Kit.$("#pipe"));
+    Kit.$("#axis-l").textContent = "▮ = " + L.axis[0];
+    Kit.$("#axis-r").textContent = "▮▮▮▮▮ = " + L.axis[1];
+    STAGES.forEach(function (s) {
+      var c = L.cells[s.id];
+      var b = el("button", { type: "button", class: "stage-btn", "aria-pressed": String(s.id === current),
+        onclick: function () { current = s.id; renderPipe(); renderDetail(); } },
+        el("span", { class: "zone" }, s.zone), el("span", { class: "name" }, s.name),
+        meter(c.level, L.axis), el("span", { class: "tag" }, c.tag));
+      buttons[s.id] = b;
+      pipe.appendChild(b);
+    });
+  }
+
+  function renderDetail() {
+    var L = LENSES[lens], c = L.cells[current], s = STAGES.filter(function (x) { return x.id === current; })[0];
+    var d = Kit.clear(Kit.$("#detail"));
+    d.appendChild(el("p", { class: "panel-title" }, L.label + " · " + s.name));
+    d.appendChild(el("p", { class: "big-tag" }, c.tag));
+    d.appendChild(el("p", null, c.text));
+    d.appendChild(el("p", { style: "font-size:.85rem;color:var(--ink-3)" }, "در کتاب: " + c.pages + " · ",
+      el("a", { href: LESSON + c.slide, target: "_top" }, "همین اسلاید را در درس باز کنید")));
+  }
+
+  var seg = Kit.segmented({ label: "lens", value: lens,
+    options: Object.keys(LENSES).map(function (k) { return { value: k, label: LENSES[k].label }; }),
+    onChange: function (v) { lens = v; renderPipe(); renderDetail(); } });
+  Kit.$("#lenses").appendChild(seg.element);
+
+  renderPipe();
+  renderDetail();
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "کوئری یک تحلیل‌گر از proxy به replica دوم warehouse می‌رسد و insert چند لحظه پیش خودش را نمی‌بیند. کدام تضمین نقض شده؟",
+      options: ["مدل consistent prefix reads", "مدل read-after-write", "مفهوم durability", "مفهوم linearizability بین shardها"],
+      answer: 1, explain: "کاربر نوشتن خودش را نمی‌بیند چون از replicaای خوانده که هنوز به آن نرسیده؛ درمان، خواندن از replicaای است که دست‌کم تا آخرین نوشتن کاربر رسیده (صص. ۲۱۰–۲۱۲)." },
+    { q: "چرا دو replica در warehouse جلوی از دست رفتن داده بعد از یک DELETE اشتباه را نمی‌گیرند؟",
+      options: ["چون replicaها synchronous نیستند", "چون حذف هم مثل هر نوشتن دیگری به همه‌ی replicaها پخش می‌شود", "چون warehouse از LWW استفاده می‌کند", "چون replica دوم read-only است"],
+      answer: 1, explain: "مفهوم replication جای backup را نمی‌گیرد: حذف اشتباهی در چند لحظه پخش می‌شود و فقط backup یا یک منبع قابل بازسازی تاریخچه را نگه می‌دارد (ص. ۱۹۸)." }
+  ]);
+})();
+</script>
+</body>
+</html>

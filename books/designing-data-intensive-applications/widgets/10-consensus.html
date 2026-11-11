@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Consensus: Leader Election and Log Replication</title>
-<meta name="description" content="A five-node, Raft-style cluster: elect leaders with epoch (term) numbers, replicate log entries to a quorum, crash nodes and partition the network. Illustrates DDIA 2nd ed., Chapter 10.">
+<title>مفهوم consensus: انتخاب leader و replication مربوط به log</title>
+<meta name="description" content="یک cluster پنج‌nodeی به سبک Raft: leaderها را با شماره‌ی epoch، یعنی term، انتخاب کنید، entryهای log را به یک quorum برسانید، nodeها را crash کنید و شبکه را partition کنید. برای فصل ۱۰ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .ring-svg .link { stroke: var(--line); stroke-width: 1.5; }
@@ -32,63 +32,63 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/10-consistency-and-consensus.html">Chapter 10</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Consensus</span>
+      <a href="../chapters/10-consistency-and-consensus.html">فصل ۱۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مفهوم consensus</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 10 · Consistency and Consensus</div>
-  <h1>Consensus: elect a leader, replicate a log</h1>
-  <p class="lede">Consensus algorithms are single-leader replication with automatic, safe failover. A node that stops hearing from the leader starts an election for a new, higher epoch (Raft calls it a <em>term</em>); a quorum must vote for it, and a quorum must store every log entry before it counts as committed.</p>
-  <p class="source-note">Illustrates “From single-leader replication to consensus” and “Subtleties of consensus” (pp. 434–436) and the cost of quorums in “Pros and cons of consensus” (p. 436). A teaching model loosely following Raft: leaders send their whole log rather than incremental entries, there is no log compaction or membership change, and timing is in abstract ticks. Implementation is the vault’s own — not a production algorithm.</p>
+  <div class="eyebrow">فصل ۱۰ · مفهوم consistency و consensus</div>
+  <h1>مفهوم consensus: انتخاب leader و replicate کردن log</h1>
+  <p class="lede">الگوریتم‌های consensus همان single-leader replication با failover خودکار و امن‌اند. nodeی که دیگر از leader خبری نمی‌شنود، انتخاباتی برای یک epoch تازه و بزرگ‌تر شروع می‌کند که Raft به آن <em>term</em> می‌گوید؛ یک quorum باید به آن رأی بدهد، و یک quorum باید هر entry در log را ذخیره کند تا commitشده حساب شود.</p>
+  <p class="source-note">برای بخش‌های «از single-leader replication تا consensus» و نکته‌های ظریف consensus در صص. ۴۳۴–۴۳۶، و هزینه‌ی quorum در «مزایا و معایب» در ص. ۴۳۶. یک مدل آموزشی که آزادانه از Raft followerی می‌کند: leaderها کل log را می‌فرستند نه entryهای افزایشی را، compaction و تغییر عضویت ندارد، و زمان به tick انتزاعی است. پیاده‌سازی مال خود vault است و الگوریتم production نیست.</p>
 
   <div class="sim">
     <div class="panel">
-      <div class="stage"><svg class="ring-svg" id="ring" viewBox="0 0 420 330" role="img" aria-label="Five nodes; see the event log for changes"></svg></div>
+      <div class="stage" dir="ltr"><svg class="ring-svg" id="ring" viewBox="0 0 420 330" role="img" aria-label="پنج node؛ تغییرها را در گزارش رویدادها ببینید"></svg></div>
       <div class="stats" id="stats" style="margin-top:8px"></div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Controls</p>
+        <p class="panel-title">کنترل‌ها</p>
         <div id="player"></div>
         <div class="row" style="margin-top:10px">
-          <button class="btn primary" type="button" id="req">Client write</button>
-          <button class="btn danger" type="button" id="kill">Crash leader</button>
-          <button class="btn" type="button" id="part" aria-pressed="false">Partition {A,B} | {C,D,E}</button>
+          <button class="btn primary" type="button" id="req">نوشتن client</button>
+          <button class="btn danger" type="button" id="kill">crash کردن leader</button>
+          <button class="btn" type="button" id="part" aria-pressed="false">جدا کردن <span dir="ltr">{A,B} | {C,D,E}</span></button>
         </div>
-        <p class="field-hint" style="margin-top:8px">Click (or focus + Enter) a node to crash or restart it.</p>
+        <p class="field-hint" style="margin-top:8px">برای crash یا restart یک node رویش کلیک کنید، یا focus کنید و Enter بزنید.</p>
         <div id="sliders" style="margin-top:8px"></div>
       </div>
       <div class="panel">
-        <p class="panel-title">Logs (term·cmd; solid = committed)</p>
-        <div class="logs" id="logs"></div>
+        <p class="panel-title">مفهوم log در هر node؛ term·cmd، و خط پیوسته یعنی commitشده</p>
+        <div class="logs" id="logs" dir="ltr"></div>
       </div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log"></ol></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Epochs make leaders unique per term, not globally.</strong> After a partition heals, an old leader with a lower term steps down the moment it sees a higher term.</li>
-    <li><strong>Writes need a majority.</strong> Partition the leader into the minority {A,B}: it keeps accepting client writes but can never commit them. The majority side elects a new leader and continues; when the partition heals, the minority's uncommitted entries are overwritten.</li>
-    <li><strong>Votes check log freshness.</strong> A node only votes for a candidate whose log is at least as up-to-date as its own, so a new leader always has every committed entry.</li>
-    <li><strong>Five nodes tolerate two failures.</strong> Crash a third node and the cluster stops making progress — safe, but unavailable.</li>
+    <li><strong>مفهوم epoch leader را در هر term یکتا می‌کند، نه در کل زمان.</strong> بعد از درمان partition، leader قدیمی با term کوچک‌تر همان لحظه که term بزرگ‌تری ببیند کنار می‌رود.</li>
+    <li><strong>نوشتن اکثریت لازم دارد.</strong> مفهوم leader را در اقلیت <span dir="ltr">{A,B}</span> جدا کنید: همچنان نوشتن‌های client را می‌پذیرد اما هرگز نمی‌تواند commitشان کند. سمت اکثریت leader تازه‌ای انتخاب می‌کند و ادامه می‌دهد؛ وقتی partition درمان شود، entryهای commitنشده‌ی اقلیت بازنویسی می‌شوند.</li>
+    <li><strong>رأی‌ها تازگی log را بررسی می‌کنند.</strong> یک node فقط به candidateی رأی می‌دهد که log او دست‌کم به اندازه‌ی log خودش به‌روز باشد، پس leader تازه همیشه همه‌ی entryهای commitشده را دارد.</li>
+    <li><strong>پنج node دو خرابی را تحمل می‌کنند.</strong> node سوم را crash کنید تا cluster از پیشرفت بایستد؛ امن، اما در دسترس نیست.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/10-consistency-and-consensus.html"><small>Lesson</small>10. Consistency and Consensus</a></li>
+    <li><a href="../chapters/10-consistency-and-consensus.html"><small>درس</small>فصل ۱۰: مفهوم consistency و consensus</a></li>
   </ul>
-  <p class="footer">Knowledge Vault explorable · implementation is the vault’s own · keys: <kbd>Space</kbd> play/pause, <kbd>→</kbd> step, <kbd>R</kbd> reset.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -120,19 +120,19 @@
   function broadcast(n, mk) { for (var j = 0; j < N; j++) if (j !== n.id) send(n.id, j, mk(j)); }
 
   function stepDown(n, term) {
-    if (n.role === "leader") log.add(n.name + " sees term " + term + " > " + n.term + " and steps down", "warn");
+    if (n.role === "leader") log.add(n.name + " مقدار term " + term + " > " + n.term + " را می‌بیند و کنار می‌رود", "warn");
     n.term = term; n.role = "follower"; n.votedFor = null;
   }
 
   function startElection(n) {
     n.term++; n.role = "candidate"; n.votedFor = n.id; n.votes = 1; n.timer = timeout();
-    log.add("t=" + S.t + " " + n.name + " timed out → candidate for term " + n.term);
+    log.add("t=" + S.t + " " + n.name + " به timeout خورد ← candidate برای term " + n.term);
     broadcast(n, function () { return { type: "vote", term: n.term, lastIdx: n.log.length, lastTerm: lastTerm(n) }; });
   }
 
   function becomeLeader(n) {
     n.role = "leader"; n.hb = 0; n.match = [0, 0, 0, 0, 0]; n.match[n.id] = n.log.length;
-    log.add("t=" + S.t + " " + n.name + " won a majority → LEADER for term " + n.term, "ok");
+    log.add("t=" + S.t + " " + n.name + " اکثریت را برد ← leader برای term " + n.term, "ok");
     heartbeat(n);
   }
 
@@ -148,7 +148,7 @@
       var upToDate = m.lastTerm > lastTerm(n) || (m.lastTerm === lastTerm(n) && m.lastIdx >= n.log.length);
       var grant = m.term === n.term && (n.votedFor === null || n.votedFor === m.from) && upToDate;
       if (grant) { n.votedFor = m.from; n.timer = timeout(); }
-      else if (m.term === n.term && !upToDate) log.add(n.name + " refuses to vote for " + NAMES[m.from] + ": its log is less up-to-date", "muted");
+      else if (m.term === n.term && !upToDate) log.add(n.name + " به " + NAMES[m.from] + " رأی نمی‌دهد: log او کمتر به‌روز است", "muted");
       send(n.id, m.from, { type: "vote-resp", term: n.term, granted: grant });
     } else if (m.type === "vote-resp") {
       if (n.role === "candidate" && m.term === n.term && m.granted && ++n.votes >= MAJ) becomeLeader(n);
@@ -158,7 +158,7 @@
       n.timer = timeout();
       // Simplification: adopt the leader's log wholesale (Raft reaches the same state incrementally).
       var dropped = n.log.length > m.entries.length || n.log.some(function (e, i) { return !m.entries[i] || m.entries[i].term !== e.term; });
-      if (dropped && n.log.length > n.commit) log.add(n.name + " discards uncommitted entries that conflict with leader " + NAMES[m.from] + "'s log", "warn");
+      if (dropped && n.log.length > n.commit) log.add(n.name + " entryهای commitنشده‌ای را که با log مربوط به leader " + NAMES[m.from] + " تعارض دارند دور می‌ریزد", "warn");
       n.log = m.entries.slice();
       n.commit = Math.max(n.commit, Math.min(m.commit, n.log.length));
       send(n.id, m.from, { type: "append-resp", term: n.term, ok: true, len: n.log.length });
@@ -168,7 +168,7 @@
       for (var idx = n.log.length; idx > n.commit; idx--) {
         var count = n.match.filter(function (x, j) { return j === n.id ? n.log.length >= idx : x >= idx; }).length;
         if (count >= MAJ && n.log[idx - 1].term === n.term) {
-          log.add("t=" + S.t + " leader " + n.name + " committed entries up to #" + idx + " (stored on " + count + " nodes)", "ok");
+          log.add("t=" + S.t + " مفهوم leader " + n.name + " entryها را تا #" + idx + " commit کرد؛ ذخیره روی " + count + " node", "ok");
           n.commit = idx; break;
         }
       }
@@ -198,11 +198,11 @@
   // it is leader receives a write — a stale leader accepts it but can't commit it.
   function clientWrite() {
     var leaders = S.nodes.filter(function (n) { return n.up && n.role === "leader"; });
-    if (!leaders.length) { log.add("Client write rejected: no leader right now", "bad"); return; }
+    if (!leaders.length) { log.add("نوشتن client رد شد: الان leaderی نیست", "bad"); return; }
     leaders.forEach(function (L) {
       var e = { term: L.term, cmd: "x" + (++S.cmd) };
       L.log.push(e); L.match[L.id] = L.log.length;
-      log.add("Client write " + e.cmd + " → leader " + L.name + " (term " + L.term + "), appended as #" + L.log.length);
+      log.add("نوشتن client با " + e.cmd + " ← leader " + L.name + " در term " + L.term + "، اضافه‌شده به شکل #" + L.log.length);
       heartbeat(L);
     });
   }
@@ -210,8 +210,8 @@
   function toggle(i) {
     var n = S.nodes[i];
     n.up = !n.up;
-    if (n.up) { n.role = "follower"; n.timer = timeout(); log.add(n.name + " restarted (term and log survive on disk)", "muted"); }
-    else log.add(n.name + " crashed" + (n.role === "leader" ? " (it was the leader)" : ""), "bad");
+    if (n.up) { n.role = "follower"; n.timer = timeout(); log.add(n.name + " دوباره بالا آمد؛ term و log روی دیسک مانده‌اند", "muted"); }
+    else log.add(n.name + " crash کرد" + (n.role === "leader" ? "؛ leader بود" : ""), "bad");
     render();
   }
 
@@ -233,7 +233,7 @@
     });
     S.nodes.forEach(function (n, i) {
       var g = svg("g", { class: "node " + (n.up ? n.role : "down"), tabindex: 0, role: "button",
-        "aria-label": "Node " + n.name + ", " + (n.up ? n.role : "crashed") + ", term " + n.term + ". Press to " + (n.up ? "crash" : "restart") });
+        "aria-label": "node " + n.name + "، " + (n.up ? n.role : "crashed") + "، term " + n.term + ". برای " + (n.up ? "crash" : "restart") + " بزنید" });
       g.addEventListener("click", function () { toggle(i); });
       g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggle(i); } });
       var x = POS[i][0], y = POS[i][1];
@@ -258,40 +258,40 @@
     });
     var L = leader(), up = S.nodes.filter(function (n) { return n.up; }).length;
     var st = Kit.clear(document.getElementById("stats"));
-    [["tick", S.t, ""], ["leader", L ? L.name + " (t" + L.term + ")" : "none", L ? "ok" : "warn"], ["nodes up", up + " / 5", up >= MAJ ? "ok" : "bad"],
-     ["committed", L ? L.commit : Math.max.apply(null, S.nodes.map(function (n) { return n.commit; })), ""]]
+    [["مفهوم tick", S.t, ""], ["مفهوم leader", L ? L.name + " (t" + L.term + ")" : "هیچ", L ? "ok" : "warn"], ["nodeهای بالا", up + " / 5", up >= MAJ ? "ok" : "bad"],
+     ["commitشده", L ? L.commit : Math.max.apply(null, S.nodes.map(function (n) { return n.commit; })), ""]]
       .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, x[1]))); });
   }
 
   document.getElementById("req").addEventListener("click", function () { clientWrite(); render(); });
-  document.getElementById("kill").addEventListener("click", function () { var L = leader(); if (L) toggle(L.id); else log.add("No leader to crash", "muted"); });
+  document.getElementById("kill").addEventListener("click", function () { var L = leader(); if (L) toggle(L.id); else log.add("هیچ leaderی برای crash نیست", "muted"); });
   var partBtn = document.getElementById("part");
   partBtn.addEventListener("click", function () {
     S.partition = !S.partition;
     partBtn.setAttribute("aria-pressed", String(S.partition));
-    log.add(S.partition ? "Network partition: {A,B} cannot reach {C,D,E}" : "Partition healed", S.partition ? "warn" : "muted");
+    log.add(S.partition ? "مفهوم network partition: {A,B} به {C,D,E} نمی‌رسد" : "مفهوم partition درمان شد", S.partition ? "warn" : "muted");
     render();
   });
   var sl = document.getElementById("sliders");
-  sl.appendChild(Kit.slider({ label: "Message delay", min: 1, max: 6, value: cfg.delay, unit: " ticks", onInput: function (v) { cfg.delay = v; } }).element);
-  sl.appendChild(Kit.slider({ label: "Election timeout (min)", min: 8, max: 26, value: cfg.tMin, unit: " ticks", hint: "Randomised between min and min + 14 so candidates rarely collide",
+  sl.appendChild(Kit.slider({ label: "latency پیام", min: 1, max: 6, value: cfg.delay, unit: " tick", onInput: function (v) { cfg.delay = v; } }).element);
+  sl.appendChild(Kit.slider({ label: "کمینه‌ی timeout انتخابات", min: 8, max: 26, value: cfg.tMin, unit: " tick", hint: "به‌طور تصادفی بین کمینه و کمینه به‌علاوه‌ی ۱۴، تا candidateها به‌ندرت با هم برخورد کنند",
     onInput: function (v) { cfg.tMin = v; cfg.tMax = v + 14; } }).element);
 
   Kit.player({ mount: document.getElementById("player"), step: step, interval: 260,
-    reset: function () { fresh(); partBtn.setAttribute("aria-pressed", "false"); log.clear(); log.add("Reset: all followers in term 0", "muted"); render(); } });
+    reset: function () { fresh(); partBtn.setAttribute("aria-pressed", "false"); log.clear(); log.add("از اول: همه follower در term صفر", "muted"); render(); } });
   fresh(); render();
-  log.add("Press Play. A follower whose timer (green arc) runs out starts an election.", "muted");
+  log.add("پخش را بزنید. followerی که timerش، کمان سبز، تمام شود انتخابات را شروع می‌کند.", "muted");
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Two nodes both believe they are leader. How does a consensus algorithm keep this safe?",
-      options: ["It cannot happen", "Each leader belongs to a different epoch (term); the higher epoch wins, and the old leader cannot get a quorum to accept its writes", "The leaders merge their logs"],
-      answer: 1, explain: "Uniqueness is per epoch. Any decision needs a quorum, and quorums overlap, so the stale leader learns of the higher epoch before it can commit anything." },
-    { q: "Why does a five-node cluster keep working with two nodes down but stop with three?",
-      options: ["Leader election needs all nodes", "Every election and every commit needs a majority (3 of 5)", "Heartbeats time out"],
-      answer: 1, explain: "Safety requires overlapping quorums; with only two nodes left, no majority exists, so the cluster waits rather than risking split brain." },
-    { q: "Why must a node refuse to vote for a candidate whose log is behind its own?",
-      options: ["To save network bandwidth", "So that a newly elected leader always holds every committed entry", "To make elections faster"],
-      answer: 1, explain: "A committed entry is stored on a majority; any winning candidate needs votes from a majority; the overlap guarantees the winner has the entry." }
+    { q: "دو node هر دو فکر می‌کنند leader هستند. الگوریتم consensus چطور این را امن نگه می‌دارد؟",
+      options: ["این اتفاق نمی‌افتد", "هر leader مال epoch، یعنی term، متفاوتی است؛ epoch بزرگ‌تر می‌برد و leader قدیمی نمی‌تواند quorumی برای پذیرش نوشتن‌هایش پیدا کند", "مفهوم leaderها logهایشان را merge می‌کنند"],
+      answer: 1, explain: "یکتایی در هر epoch است. هر تصمیم یک quorum لازم دارد و quorumها هم‌پوشانی دارند، پس leader کهنه پیش از commit کردن چیزی از epoch بزرگ‌تر باخبر می‌شود (ص. ۴۳۵)." },
+    { q: "چرا یک cluster پنج‌nodeی با دو node خاموش کار می‌کند اما با سه node خاموش می‌ایستد؟",
+      options: ["انتخاب leader همه‌ی nodeها را لازم دارد", "هر انتخابات و هر commit یک اکثریت، یعنی ۳ از ۵، لازم دارد", "مفهوم heartbeatها timeout می‌شوند"],
+      answer: 1, explain: "مفهوم safety به quorumهای هم‌پوشان نیاز دارد؛ با دو node باقی‌مانده اکثریتی نیست، پس cluster به جای خطر split brain صبر می‌کند (ص. ۴۳۷)." },
+    { q: "چرا یک node باید به candidateی که log او از log خودش عقب‌تر است رأی ندهد؟",
+      options: ["برای صرفه‌جویی در پهنای باند", "تا leader تازه‌انتخاب‌شده همیشه همه‌ی entryهای commitشده را داشته باشد", "تا انتخابات سریع‌تر شود"],
+      answer: 1, explain: "یک entry commitشده روی یک اکثریت ذخیره شده؛ هر candidate برنده رأی یک اکثریت را لازم دارد؛ هم‌پوشانی تضمین می‌کند برنده آن entry را دارد (صص. ۴۳۵–۴۳۶)." }
   ]);
 })();
 </script>

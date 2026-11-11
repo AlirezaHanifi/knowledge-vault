@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Schema Evolution</title>
-<meta name="description" content="Change the book's Avro Person schema — add, remove and rename fields with and without defaults — and see whether old and new code can still read each other's records. Illustrates DDIA Chapter 5.">
+<title>تکامل schema</title>
+<meta name="description" content="در schema نمونه‌ی Avro کتاب، یعنی Person، فیلد با default و بدون default اضافه، حذف یا تغییر نام بدهید و ببینید کد قدیم و جدید هنوز رکوردهای همدیگر را می‌خوانند یا نه. برای فصل ۵ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .schemas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
@@ -27,63 +27,63 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-encoding-and-evolution.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Schema evolution</span>
+      <a href="../chapters/05-encoding-and-evolution.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">تکامل schema</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Encoding and Evolution</div>
-  <h1>Writer’s schema, reader’s schema</h1>
-  <p class="lede">Avro decodes with two schemas: the writer’s, used to encode the record, and the reader’s, which the application expects. Fields are matched by name; a field only the writer has is ignored, and a field only the reader has is filled from the reader’s default. Whether that works in both directions decides forward and backward compatibility.</p>
-  <p class="source-note">Illustrates “Avro”, “The writer’s schema and the reader’s schema” and “Schema evolution rules” (pp. 172–175), using the book’s <code>Person</code> schema and record (Martin, 1337, daydreaming and hacking). Protocol Buffers’ tag-number rules (p. 171) appear in the notes. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۵ · قالب‌های encoding و تکامل</div>
+  <h1>مقایسه‌ی writer's schema و reader's schema</h1>
+  <p class="lede">قالب Avro با دو schema decode می‌کند: writer's schema، که رکورد با آن encode شده، و reader's schema، که اپلیکیشن انتظارش را دارد. فیلدها با اسم جفت می‌شوند؛ فیلدی که فقط نویسنده دارد نادیده گرفته می‌شود و فیلدی که فقط خواننده دارد default خواننده را می‌گیرد. این‌که این تطبیق در هر دو جهت کار کند، forward و backward compatibility را تعیین می‌کند.</p>
+  <p class="source-note">برای بخش «قالب Avro»، از جمله writer's schema و reader's schema و قاعده‌های تکامل schema در صص. ۱۷۲–۱۷۵، با schema و رکورد نمونه‌ی کتاب، یعنی <code>Person</code> با Martin و 1337 و daydreaming و hacking. قاعده‌های شماره‌ی tag در Protocol Buffers از ص. ۱۷۱ در نکته‌ها آمده. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="panel">
       <div class="schemas">
-        <div><p class="panel-title">Old schema (v1)</p><div class="schema" id="v1"></div></div>
-        <div><p class="panel-title">New schema (v2)</p><div class="schema" id="v2"></div></div>
+        <div><p class="panel-title">نسخه‌ی قدیم schema، یعنی v1</p><div class="schema" id="v1" lang="en" dir="ltr"></div></div>
+        <div><p class="panel-title">نسخه‌ی جدید schema، یعنی v2</p><div class="schema" id="v2" lang="en" dir="ltr"></div></div>
       </div>
       <div class="flow" id="flow"></div>
     </div>
     <div class="stack">
       <div class="panel">
-        <p class="panel-title">Change the new schema</p>
+        <p class="panel-title">نسخه‌ی جدید schema را تغییر بدهید</p>
         <div class="changes" id="changes"></div>
-        <button class="btn small" type="button" id="reset" style="margin-top:10px">↺ Back to v1</button>
+        <button class="btn small" type="button" id="reset" style="margin-top:10px">↺ بازگشت به v1</button>
       </div>
       <div class="panel wide">
-        <p class="panel-title">Verdict</p>
+        <p class="panel-title">نتیجه</p>
         <div class="stats" id="stats"></div>
         <p class="field-hint" id="rule" aria-live="polite" style="margin:8px 0 0"></p>
       </div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی دقت کنید</h2>
   <ul class="notice-list">
-    <li><strong>Defaults are what make change safe.</strong> Add or remove only fields that have a default, and both directions keep working (p. 175).</li>
-    <li><strong>Add without a default</strong> breaks backward compatibility: new code reading an old record has nothing to put in the field.</li>
-    <li><strong>Remove without a default</strong> breaks forward compatibility: old code reading a new record misses a field it requires.</li>
-    <li><strong>Renaming via an alias</strong> is backward compatible but not forward compatible — old readers don’t know the new name.</li>
-    <li><strong>Protocol Buffers instead uses tag numbers:</strong> names can change freely, a tag may never be reused, and unknown tags are skipped (p. 171).</li>
+    <li><strong>مقدار default است که تغییر را بی‌خطر می‌کند.</strong> فقط فیلدهایی را اضافه یا حذف کنید که default دارند، تا هر دو جهت کار کنند (ص. ۱۷۵).</li>
+    <li><strong>اضافه کردن بدون default</strong> backward compatibility را می‌شکند: کد جدید وقتی رکورد قدیم را می‌خواند چیزی برای گذاشتن در فیلد ندارد.</li>
+    <li><strong>حذف بدون default</strong> forward compatibility را می‌شکند: کد قدیم وقتی رکورد جدید را می‌خواند فیلدی را که لازم دارد پیدا نمی‌کند.</li>
+    <li><strong>تغییر نام با alias</strong> سازگار backward است اما forward نه؛ خواننده‌های قدیم اسم تازه را نمی‌شناسند.</li>
+    <li><strong>قالب Protocol Buffers به جای اسم از شماره‌ی tag استفاده می‌کند:</strong> اسم‌ها آزادانه عوض می‌شوند، هیچ tagی دوباره به کار نمی‌رود و tagهای ناشناخته رد می‌شوند (ص. ۱۷۱).</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-encoding-and-evolution.html"><small>Lesson</small>5. Encoding and Evolution</a></li>
-    <li><a href="../lab/05-schema-evolution/README.md"><small>Experiment</small>Binary encodings and schema evolution</a></li>
-    <li><a href="05-encodings.html"><small>Simulation</small>One record, four encodings</a></li>
+    <li><a href="../chapters/05-encoding-and-evolution.html"><small>درس</small>فصل ۵: قالب‌های encoding و تکامل</a></li>
+    <li><a href="../lab/05-schema-evolution/README.md"><small>آزمایش</small>encodingهای باینری و تکامل schema</a></li>
+    <li><a href="05-encodings.html"><small>شبیه‌سازی</small>یک رکورد، چهار encoding</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -97,11 +97,11 @@
   ];
   var RECORD_V1 = { userName: "\"Martin\"", favoriteNumber: "1337", interests: "[\"daydreaming\", \"hacking\"]" };
   var CHANGES = [
-    { id: "addDef", label: "Add photoUrl: union { null, string } = null", add: { name: "photoUrl", type: "union { null, string }", def: "null" }, value: "\"me.jpg\"" },
-    { id: "addNoDef", label: "Add country: string (no default)", add: { name: "country", type: "string" }, value: "\"UK\"" },
-    { id: "rmDef", label: "Remove favoriteNumber (has a default)", remove: "favoriteNumber" },
-    { id: "rmNoDef", label: "Remove interests (no default)", remove: "interests" },
-    { id: "rename", label: "Rename userName → name (alias \"userName\")", rename: ["userName", "name"] }
+    { id: "addDef", label: "افزودن photoUrl با default برابر null", add: { name: "photoUrl", type: "union { null, string }", def: "null" }, value: "\"me.jpg\"" },
+    { id: "addNoDef", label: "افزودن country از نوع string، بدون default", add: { name: "country", type: "string" }, value: "\"UK\"" },
+    { id: "rmDef", label: "حذف favoriteNumber، که default دارد", remove: "favoriteNumber" },
+    { id: "rmNoDef", label: "حذف interests، که default ندارد", remove: "interests" },
+    { id: "rename", label: "تغییر نام userName به name با alias", rename: ["userName", "name"] }
   ];
   var active = {};
 
@@ -130,13 +130,13 @@
     for (var i = 0; i < reader.length; i++) {
       var rf = reader[i];
       var wf = writer.filter(function (w) { return w.name === rf.name || (rf.alias && w.name === rf.alias); })[0];
-      if (wf) { out[rf.name] = rec[wf.name]; if (wf.name !== rf.name) notes.push(wf.name + " read as " + rf.name + " via alias"); }
-      else if (rf.def !== undefined) { out[rf.name] = rf.def; notes.push(rf.name + " missing → default " + rf.def); }
-      else return { error: "reader expects " + rf.name + ", the writer’s schema has no such field and the reader declares no default" };
+      if (wf) { out[rf.name] = rec[wf.name]; if (wf.name !== rf.name) notes.push("فیلد " + wf.name + " با alias به شکل " + rf.name + " خوانده شد"); }
+      else if (rf.def !== undefined) { out[rf.name] = rf.def; notes.push("فیلد " + rf.name + " نیست، پس default یعنی " + rf.def + " گذاشته شد"); }
+      else return { error: "خواننده فیلد " + rf.name + " را انتظار دارد، writer's schema چنین فیلدی ندارد و خواننده هم default تعریف نکرده" };
     }
     writer.forEach(function (w) {
       var known = reader.some(function (rf) { return rf.name === w.name || rf.alias === w.name; });
-      if (!known) notes.push(w.name + " ignored (unknown to reader)");
+      if (!known) notes.push("فیلد " + w.name + " برای خواننده ناشناخته است و نادیده گرفته شد");
     });
     return { value: out, notes: notes };
   }
@@ -158,21 +158,21 @@
     Kit.clear(document.getElementById("v2")).appendChild(Kit.el("div", null, schemaEl(n2, V1)));
     var back = resolve(V1, n2, r1), fwd = resolve(n2, V1, r2);
     var flow = Kit.clear(document.getElementById("flow"));
-    [["Backward compatibility", "new code (reader v2) reads a record written by old code (writer v1)", back],
-     ["Forward compatibility", "old code (reader v1) reads a record written by new code (writer v2)", fwd]].forEach(function (c) {
+    [["backward compatibility", "کد جدید، یعنی خواننده‌ی v2، رکوردی را می‌خواند که کد قدیم، یعنی نویسنده‌ی v1، نوشته", back],
+     ["forward compatibility", "کد قدیم، یعنی خواننده‌ی v1، رکوردی را می‌خواند که کد جدید، یعنی نویسنده‌ی v2، نوشته", fwd]].forEach(function (c) {
       var res = c[2];
       flow.appendChild(Kit.el("div", { class: "case " + (res.error ? "bad" : "ok") },
         Kit.el("h3", null, (res.error ? "✕ " : "✓ ") + c[0]), Kit.el("div", { class: "who" }, c[1]),
-        Kit.el("pre", null, res.error ? "Decoding fails: " + res.error : show(res.value)),
+        res.error ? Kit.el("pre", { style: "font-family:var(--font)" }, "decode شکست می‌خورد: " + res.error) : Kit.el("pre", { lang: "en", dir: "ltr" }, show(res.value)),
         res.notes && res.notes.length ? Kit.el("div", { class: "field-hint", style: "margin-top:6px" }, res.notes.join(" · ")) : null));
     });
     var stats = Kit.clear(document.getElementById("stats"));
-    [["Backward", back.error ? "broken" : "ok", back.error ? "bad" : "ok"], ["Forward", fwd.error ? "broken" : "ok", fwd.error ? "bad" : "ok"]].forEach(function (s) {
+    [["backward compatibility", back.error ? "شکسته" : "برقرار", back.error ? "bad" : "ok"], ["forward compatibility", fwd.error ? "شکسته" : "برقرار", fwd.error ? "bad" : "ok"]].forEach(function (s) {
       stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value " + s[2] }, s[1])));
     });
     document.getElementById("rule").textContent = back.error || fwd.error
-      ? "Rule: you may add or remove only a field that has a default value."
-      : Object.keys(active).some(function (k) { return active[k]; }) ? "Both directions work, so old and new code can run side by side during a rolling upgrade." : "Pick a change on the left.";
+      ? "قاعده: فقط فیلدی را می‌شود اضافه یا حذف کرد که مقدار default دارد."
+      : Object.keys(active).some(function (k) { return active[k]; }) ? "هر دو جهت کار می‌کند، پس کد قدیم و جدید در یک rolling upgrade می‌توانند کنار هم اجرا شوند." : "یکی از تغییرها را انتخاب کنید.";
   }
 
   var box = document.getElementById("changes");
@@ -187,15 +187,15 @@
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "In Avro, what does “forward compatibility” mean?",
-      options: ["The reader’s schema is newer than the writer’s", "The writer’s schema is newer than the reader’s — old code reads new data", "Fields are written in sorted order"],
-      answer: 1, explain: "Forward compatibility: the writer can use a newer schema than the reader (p. 175)." },
-    { q: "You add a field without a default. What breaks?",
-      options: ["Forward compatibility", "Backward compatibility — new readers can’t fill the field for old records", "Nothing"],
-      answer: 1, explain: "A new reader of an old record has no value and no default for the field (p. 175)." },
-    { q: "Why can a Protocol Buffers field be renamed but its tag number never changed?",
-      options: ["Names are hashed into tags", "Encoded data refers to fields only by tag number, never by name", "Tags are sorted"],
-      answer: 1, explain: "Changing a tag would make all existing encoded data invalid (p. 171)." }
+    { q: "در Avro، forward compatibility یعنی چه؟",
+      options: ["reader's schema جدیدتر از writer's schema است", "writer's schema جدیدتر از reader's schema است؛ کد قدیم داده‌ی جدید را می‌خواند", "فیلدها به ترتیب مرتب نوشته می‌شوند"],
+      answer: 1, explain: "forward compatibility یعنی نویسنده می‌تواند schemaی جدیدتر از خواننده داشته باشد (ص. ۱۷۵)." },
+    { q: "فیلدی را بدون default اضافه می‌کنید. چه چیزی می‌شکند؟",
+      options: ["forward compatibility", "سازگاری backward؛ خواننده‌های جدید برای رکوردهای قدیم مقداری برای آن فیلد ندارند", "هیچ چیز"],
+      answer: 1, explain: "خواننده‌ی جدیدی که رکورد قدیم را می‌خواند نه مقداری برای فیلد دارد و نه default (ص. ۱۷۵)." },
+    { q: "چرا در Protocol Buffers می‌شود اسم فیلد را عوض کرد اما شماره‌ی tag را هرگز؟",
+      options: ["چون اسم‌ها به tag hash می‌شوند", "چون داده‌ی encodeشده فیلدها را فقط با شماره‌ی tag می‌شناسد، هرگز با اسم", "چون tagها مرتب‌اند"],
+      answer: 1, explain: "تغییر tag همه‌ی داده‌ی encodeشده‌ی موجود را نامعتبر می‌کند (ص. ۱۷۱)." }
   ]);
 })();
 </script>
