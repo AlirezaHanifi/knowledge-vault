@@ -17,6 +17,14 @@ Technical books turned into interactive lessons. For each book there is one fold
 | [The Manager's Path](books/the-managers-path/README.md) | Camille Fournier |
 | [Engineering Leadership: The Hard Parts](books/engineering-leadership-the-hard-parts/README.md) | Juan Pablo Buriticá, James Turnbull |
 
+## Articles
+
+Post series rather than books (`kind: articles` in the front matter); the library page lists them in their own group.
+
+| Series | Author |
+|---|---|
+| [Paul Levchuk on Medium](books/paul-levchuk-medium-posts/README.md) | Paul Levchuk |
+
 ## Layout
 
 ```text

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نقشه‌ی چارچوب</title>
+<meta name="description" content="ناوبر چارچوب تحلیلی مجموعه‌ی Levchuk: یک پرسش انتخاب کنید تا مسیر خواندن نوشته‌ها را ببینید، یا از جدول لایه‌ها و اصل‌ها نوشته‌های هر خانه را پیدا کنید.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .route { list-style: none; padding: 0; margin: 0; counter-reset: st; }
+  .route li { counter-increment: st; display: grid; grid-template-columns: 2rem 1fr; gap: 8px; align-items: start; margin: 6px 0; }
+  .route li::before { content: counter(st); display: inline-grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--s1); color: var(--bg); font-weight: 700; font-size: .85rem; }
+  .plist { list-style: none; padding: 0; margin: 0; }
+  .plist li { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
+  .plist li:last-child { border-bottom: 0; }
+  .plist small { display: block; color: var(--ink-3); }
+  .num { font-weight: 700; margin-inline-end: 4px; }
+  .mwrap { overflow-x: auto; }
+  table.matrix { border-collapse: collapse; width: 100%; font-size: .82rem; }
+  table.matrix th, table.matrix td { border: 1px solid var(--line); padding: 3px; text-align: center; }
+  table.matrix th[scope=row] { text-align: start; white-space: nowrap; font-weight: 600; }
+  table.matrix thead th { font-weight: 600; vertical-align: bottom; }
+  table.matrix button { width: 100%; min-width: 2.2rem; min-height: 2rem; border: 1px solid transparent; border-radius: 4px; cursor: pointer; font: inherit; color: var(--ink); }
+  table.matrix button.c1 { background: color-mix(in srgb, var(--s1) 18%, transparent); }
+  table.matrix button.c2 { background: color-mix(in srgb, var(--s1) 38%, transparent); }
+  table.matrix button.c3 { background: color-mix(in srgb, var(--s1) 62%, transparent); font-weight: 700; }
+  table.matrix button[aria-pressed=true] { outline: 2px solid var(--s2); outline-offset: -2px; }
+  table.matrix td.empty { color: var(--ink-3); }
+  .trap { margin-top: 10px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../framework.html">چارچوب تحلیلی</a><span aria-hidden="true">/</span>
+      <span aria-current="page">نقشه‌ی چارچوب</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">چارچوب تحلیلی · ناوبر نوشته‌ها</div>
+  <h1>نقشه‌ی چارچوب</h1>
+  <p class="lede">هر ۷۱ نوشته در یک جا: یا <strong>از پرسشتان شروع کنید</strong> و مسیر خواندن را ببینید، یا در <strong>جدول لایه‌ها و اصل‌ها</strong> روی یک خانه بزنید تا نوشته‌هایش را ببینید.</p>
+  <p class="source-note">این ناوبر سنتز خود vault است: لایه، اصل و نقش هر نوشته همان‌هایی‌اند که در صفحه‌ی چارچوب آمده‌اند. نوشته‌ها و یافته‌هایشان مال نویسنده‌اند؛ دسته‌بندی و مسیرها مال vault.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel" id="qpanel"><p class="panel-title">مسیر پیشنهادی</p><ol class="route" id="route"></ol>
+        <div class="callout warn trap" id="trap"></div></div>
+      <div class="panel" id="mpanel" hidden><p class="panel-title">جدول لایه‌ها و اصل‌ها</p>
+        <div class="mwrap"><table class="matrix" id="matrix"></table></div>
+        <p class="field-hint">عدد هر خانه شمار نوشته‌هاست؛ پررنگی همین شمار را تکرار می‌کند.</p></div>
+      <div class="panel"><p class="panel-title" id="ptitle">نوشته‌ها</p><ul class="plist" id="plist"></ul></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>بیشتر مسیرها از شمردن درست شروع می‌شوند</strong>: پیش از مدل، واحد و پنجره و شکل را درست کنید.</li>
+    <li><strong>خانه‌های خالی جدول هم حرف دارند</strong>: مثلاً لایه‌ی رشد کمتر از بقیه نوشته دارد.</li>
+    <li><strong>ستون «اقدام علّی» بیشتر در نوشته‌های ۲۰۲۶ پر می‌شود</strong>، یعنی جایی که مجموعه از پیش‌بینی به تصمیم رسید.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = {"posts": {"28": {"t": "مدل‌های رشد", "h": "28-growth-models.html", "l": "رشد", "p": [7], "r": "مدل رشد: فرض‌ها، کانال، فصلی بودن"}, "40": {"t": "همه‌ی cohortها پرنویزند، ولی بعضی داستانی می‌گویند", "h": "40-all-user-cohorts-are-noisy-but-some-can-tell-you-a-story.html", "l": "ماندن", "p": [7], "r": "نویز cohort و خطای نسبی دم"}, "47": {"t": "پیش‌بینی LTV: نبرد برای دقت", "h": "47-ltv-forecasting-battle-for-accuracy.html", "l": "اقتصاد واحد", "p": [7], "r": "مدل تصحیحی"}, "03": {"t": "این feature بین کاربران فعال هفتگی و روزانه چقدر محبوب است؟", "h": "03-how-popular-is-this-feature-among-weekly-daily-active.html", "l": "عادت", "p": [1], "r": "محبوبیت: از رویداد به کاربر، درصد و جدا برای جدید و قدیمی"}, "02": {"t": "موفقیت یک feature محصول را چطور بسنجیم؟", "h": "02-how-do-you-measure-the-success-of-a-product-feature.html", "l": "روش", "p": [3, 8], "r": "نقشه‌ی هفت پرسش سنجش feature؛ هنوز علیت نیست"}, "10": {"t": "تحلیل retention فیچر با Information gain", "h": "10-retention-deep-dive.html", "l": "ماندن", "p": [3], "r": "غیرکاربران هم مهم‌اند: Information Gain"}, "62": {"t": "درخت متریک را تکه‌تکه نکنید", "h": "62-stop-decomposing-metric-tree.html", "l": "روش", "p": [5], "r": "ارزیابی هر بُعد با IV و WOE به‌جای drill-down"}, "45": {"t": "LTV و سیگنال‌های رفتاری", "h": "45-ltv-and-behavioral-signals.html", "l": "اقتصاد واحد", "p": [6], "r": "سیگنال رفتاری LTV را توضیح نمی‌دهد"}, "49": {"t": "ماتریس RF: مقدمه", "h": "49-rf-matrix-introduction.html", "l": "پس از خرید", "p": [4], "r": "ماتریس RF"}, "48": {"t": "پیش‌بینی LTV: مدل‌های اصلاحی چقدر خوب‌اند", "h": "48-ltv-forecasting-how-good-the-corrective-models-are.html", "l": "اقتصاد واحد", "p": [7], "r": "مدل تصحیحی برای هر cohort"}, "04": {"t": "کاربران هر هفته چقدر منظم از این feature استفاده می‌کنند؟", "h": "04-how-regular-are-users-using-this-feature-per-week.html", "l": "عادت", "p": [1], "r": "عادت هفتگی: توزیع به‌جای میانگین"}, "63": {"t": "چرا بهترین سیگنال جذب کاربر از هیچ‌کاری‌نکردن درآمد کمتری می‌سازد؟", "h": "63-best-ua-signal-less-revenue-than-nothing.html", "l": "جذب", "p": [6], "r": "دام دقت: AUC، پوشش، درآمد"}, "11": {"t": "غواصی در retention فیچر: ضریب MCC", "h": "11-product-feature-retention-deep-dive-mcc-coefficient.html", "l": "ماندن", "p": [3], "r": "جهت اثر با MCC؛ featureهای محبوب منفی‌اند"}, "05": {"t": "کاربران در هر روز چند بار از این feature استفاده می‌کنند؟", "h": "05-how-often-are-users-using-this-feature-per-day.html", "l": "عادت", "p": [1], "r": "شدت روزانه: هیستوگرام و جدا کردن کاربر جدید"}, "43": {"t": "بنچمارک دوره‌ی بازگشت CAC", "h": "43-cac-payback-period-benchmarks.html", "l": "اقتصاد واحد", "p": [7], "r": "بنچمارک payback و توزیع کمپین‌ها"}, "67": {"t": "شرکت Flo Health: «uplift صفر» واقعاً یعنی چه", "h": "67-flo-health-what-zero-uplift-really-means.html", "l": "درآمد", "p": [5, 8], "r": "holdout و ترکیب در برابر رفتار"}, "06": {"t": "خوشه‌بندی کاربران بر پایه‌ی الگوی عادت هفتگی و شدت استفاده‌ی روزانه", "h": "06-clustering-users-based-on-weekly-habit-and-daily.html", "l": "عادت", "p": [3], "r": "خوشه‌بندی با صدک ۵۰ و ۸۰"}, "19": {"t": "رشد PLG: فعال‌سازی کاربر جدید", "h": "19-plg-growth-activating-new-users.html", "l": "فعال‌سازی", "p": [3, 4], "r": "featureهای اثرگذار از P0 تا P3 عوض می‌شوند"}, "38": {"t": "cohort کاربر را درست بسازید", "h": "38-how-to-build-user-cohort-properly.html", "l": "ماندن", "p": [1, 2], "r": "ساختن cohort با بازه‌ی ۲۴ ساعته"}, "08": {"t": "نسخه‌ی بهبودیافته‌ی تحلیل اثر featureها روی retention", "h": "08-an-enhanced-version-of-the-analysis-of-how-product.html", "l": "ماندن", "p": [3], "r": "کمیت کنار کیفیت: نُه خوشه"}, "27": {"t": "بینش‌های stickiness، بخش سوم", "h": "27-stickiness-insights-part3.html", "l": "عادت", "p": [4, 7], "r": "Lness اخیر از Lness اولیه پیش‌بینی‌کننده‌تر است"}, "56": {"t": "نمودار گذار بین وضعیت‌های کاربر", "h": "56-user-transition-states-diagram.html", "l": "درآمد", "p": [4], "r": "نمودار گذار هفت وضعیتی"}, "20": {"t": "ضریب MCC یا تحلیل cohort؟", "h": "20-the-mcc-coefficient-or-cohort-analysis.html", "l": "روش", "p": [3], "r": "ضریب MCC روی cohort"}, "65": {"t": "وقتی منحنی retention بیشتر از آنچه نشان می‌دهد پنهان می‌کند", "h": "65-retention-curve-hides-more-than-it-shows.html", "l": "ماندن", "p": [7], "r": "بنیان‌های دوبخشی"}, "30": {"t": "درگیری کاربر: بازه‌ی تحلیل", "h": "30-user-engagement-period-of-analysis.html", "l": "فعال‌سازی", "p": [1], "r": "پنجره‌ی ۲۴ ساعته به‌جای روز تقویمی"}, "71": {"t": "چطور جهش churn را به mix و rate بشکنیم", "h": "71-split-a-churn-spike-lmdi.html", "l": "روش", "p": [5], "r": "تجزیه با LMDI"}, "46": {"t": "پیش‌بینی LTV: مقدمه", "h": "46-ltv-forecasting-introduction.html", "l": "اقتصاد واحد", "p": [6, 7], "r": "پیش‌بینی LTV و خطا بر حسب داده"}, "52": {"t": "ماتریس‌های RR/FF: مقدمه‌ای بر وضعیت‌های مشتری", "h": "52-rr-ff-matrices-introduction-to-customer-states.html", "l": "پس از خرید", "p": [4], "r": "ماتریس RR و FF: مسیر مشتری"}, "60": {"t": "چهار پرسشی که تحلیل churn باید جواب بدهد", "h": "60-the-four-questions-churn-analysis-should-answer.html", "l": "ماندن", "p": [8], "r": "چهار پرسش churn و سه سطل"}, "64": {"t": "وقتی دم بلند مدل LTV را می‌خورد", "h": "64-long-tail-eats-your-ltv-model.html", "l": "اقتصاد واحد", "p": [7], "r": "اختلاف مدل‌ها به‌عنوان عدم قطعیت"}, "39": {"t": "cohortهای کاربر را درست رنگ‌آمیزی و بخوانید", "h": "39-how-to-draw-and-read-user-cohorts-properly.html", "l": "ماندن", "p": [1, 2], "r": "رنگ‌بندی آماری جدول cohort"}, "61": {"t": "D30 ROAS متریک اشتباهی است؛ به‌جایش چه بسنجیم", "h": "61-d30-roas-is-the-wrong-metric-here-is-what-to-use-instead.html", "l": "جذب", "p": [6, 8], "r": "شاخص D30 ROAS و archetypeها"}, "35": {"t": "چرا تحلیل محصول از تحلیل featureهای محصول فراتر می‌رود؟", "h": "35-why-does-product-analytics-go-beyond-product-feature.html", "l": "عادت", "p": [2, 3], "r": "event کلیدی بر پایه‌ی cohort و عمر feature هسته"}, "51": {"t": "ماتریس RF: بُعد Frequency", "h": "51-rf-matrix-frequency-dimension.html", "l": "پس از خرید", "p": [4, 6], "r": "شاخص Frequency و ضرب‌آهنگ تراکنش"}, "15": {"t": "یک feature موفق چه شکلی دارد؟", "h": "15-how-a-successful-product-feature-should-look-like.html", "l": "ماندن", "p": [3], "r": "نقطه‌ی شیرین: محبوبیت ۱۰٪ تا ۳۰٪ و MCC بالا"}, "16": {"t": "آیا تمرکز روی retention به درآمدزایی کمک می‌کند؟", "h": "16-is-focusing-on-retention-could-help-us-improve.html", "l": "درآمد", "p": [3], "r": "retention و درآمدزایی هم‌بسته‌اند"}, "55": {"t": "قیف جذب کاربر", "h": "55-user-acquisition-funnel.html", "l": "جذب", "p": [4], "r": "قیف فرایند را پنهان می‌کند؛ churn مستقیم و غیرفعال"}, "29": {"t": "درگیری کاربر: مقدمه", "h": "29-user-engagement-introduction.html", "l": "فعال‌سازی", "p": [4], "r": "ورود به engagement با دو پرسش"}, "32": {"t": "درگیری کاربر: retention روز اول", "h": "32-user-engagement-d1-retention.html", "l": "فعال‌سازی", "p": [5], "r": "شاخص D1 به حاصل‌ضرب دو مرحله"}, "68": {"t": "چرا streak در Duolingo کار می‌کند، در چهار پرسش", "h": "68-why-duolingo-streaks-work-in-four-questions.html", "l": "عادت", "p": [5], "r": "چهار پرسش، جمع‌پذیر با سه دروازه"}, "17": {"t": "استراتژی PLG و تحلیل محصول", "h": "17-plg-strategy-and-product-analytics.html", "l": "روش", "p": [4], "r": "پنج هدف PLG و پرسش‌های تحلیلی‌شان"}, "69": {"t": "در Duolingo، streak عدد نیست بلکه چرخه‌ی عمر است", "h": "69-a-streak-is-a-lifecycle.html", "l": "عادت", "p": [4], "r": "شمارنده‌ی streak چرخه‌ی عمر است"}, "53": {"t": "وضعیت مشتری: بلوک سازنده‌ی تحلیل پیشرفته‌ی مشتری", "h": "53-customer-state-a-key-building-block-of-advanced-customer.html", "l": "پس از خرید", "p": [2, 4], "r": "سه دوره: از کجا آمده، به کجا می‌رود"}, "37": {"t": "retention مخلوط در برابر retention هر cohort", "h": "37-blended-retention-vs-cohort-retention.html", "l": "ماندن", "p": [2, 5], "r": "retention آمیخته گمراه می‌کند"}, "66": {"t": "دو cohort، یک دوره‌ی payback، دو سرمایه‌گذاری کاملاً متفاوت", "h": "66-two-cohorts-same-payback-different-investments.html", "l": "اقتصاد واحد", "p": [7], "r": "فاصله تا سقف کنار payback"}, "25": {"t": "بینش‌های stickiness، بخش دوم", "h": "25-stickiness-insights-part-2.html", "l": "عادت", "p": [4], "r": "ماتریس گذار Lness"}, "26": {"t": "تحلیل رشد Threads", "h": "26-threads-growth-analysis.html", "l": "جذب", "p": [2], "r": "شرکت Threads: شروع سریع موفقیت نیست"}, "57": {"t": "وقتی LTV دروغ می‌گوید: «مجانب مرگ»", "h": "57-when-ltv-can-lie-to-you-asymptote-of-death.html", "l": "اقتصاد واحد", "p": [7], "r": "مجانب مرگ"}, "12": {"t": "استفاده از feature بین کاربران رایگان و پولی چه فرقی دارد؟", "h": "12-what-is-the-difference-in-product-feature-usage-between.html", "l": "درآمد", "p": [3, 6], "r": "ضریب MCC جدا برای رایگان و پولی"}, "54": {"t": "دام درخت متریک", "h": "54-the-metric-tree-trap.html", "l": "روش", "p": [5], "r": "دام درخت متریک"}, "18": {"t": "رشد PLG: جذب کاربر جدید", "h": "18-plg-growth-attracting-users.html", "l": "جذب", "p": [2, 6], "r": "کانال و UVP ریزش cohort جدید را می‌رانند"}, "21": {"t": "تسلط بر ضریب MCC", "h": "21-mastering-the-mcc-coefficient.html", "l": "روش", "p": [1, 3], "r": "تعریف «برگشته» در MCC"}, "41": {"t": "کی باید پیش‌بینی LTV داشت؟", "h": "41-when-do-you-need-to-use-the-ltv-projection.html", "l": "اقتصاد واحد", "p": [8], "r": "چهار تصمیمی که LTV لازم دارند"}, "01": {"t": "تحول churn در Netflix", "h": "01-churn-rate-evolution-at-netflix.html", "l": "رشد", "p": [7], "r": "سقف رشد برابر جذب ÷ churn؛ churn قاتل خاموش"}, "58": {"t": "چرا مدل LTV در Live-Ops پول را به آتش می‌کشد؟", "h": "58-why-your-live-ops-ltv-model-is-setting-money-on-fire.html", "l": "درآمد", "p": [6, 8], "r": "intent در برابر solvency و موتور علّی"}, "42": {"t": "دوره‌ی بازگشت CAC", "h": "42-cac-payback-period.html", "l": "اقتصاد واحد", "p": [1, 7], "r": "دوره‌ی payback و WOE درآمد ۳۰ روز"}, "70": {"t": "در Duolingo: ورود، ساختن، قفل شدن", "h": "70-getting-in-building-it-locking-in.html", "l": "عادت", "p": [5], "r": "دروازه، جمع، برهم‌کنش"}, "34": {"t": "درگیری کاربر: رویدادهای کلیدی", "h": "34-user-engagement-key-events.html", "l": "فعال‌سازی", "p": [3], "r": "تعریف event کلیدی با MCC"}, "14": {"t": "نرخ تکمیل یک feature محصول چقدر است؟", "h": "14-what-is-the-completion-rate-of-a-product-feature.html", "l": "ماندن", "p": [3], "r": "نرخ تکمیل کنار اثر روی retention"}, "44": {"t": "دوره‌ی بازگشت CAC در برابر LTV / CAC", "h": "44-cac-payback-period-vs-ltv-cac.html", "l": "اقتصاد واحد", "p": [8], "r": "دوره‌ی payback در برابر LTV به CAC"}, "33": {"t": "retention روز اول: متریکی که پیش‌بینی‌اش حیله‌گر است", "h": "33-d1-retention-a-tricky-metric-to-predict.html", "l": "فعال‌سازی", "p": [6, 7], "r": "کدام سیگنال روز صفر D1 را پیش‌بینی می‌کند"}, "50": {"t": "ماتریس RF: جادوی Recency", "h": "50-rf-matrix-the-magic-of-recency.html", "l": "پس از خرید", "p": [6], "r": "شاخص Recency قوی‌ترین سیگنال است"}, "24": {"t": "بینش‌های stickiness", "h": "24-in-the-last-post-i-discussed-how-stickiness-relates-to.html", "l": "عادت", "p": [2, 4], "r": "retention دوره به دوره و پنجره‌ی فرصت"}, "59": {"t": "paywall روز دوم بهترین مشتریان آینده‌تان را می‌سوزاند", "h": "59-your-day-2-paywall-is-burning-your-best-future-customers.html", "l": "درآمد", "p": [6, 8], "r": "paywall متناسب با intent"}, "07": {"t": "featureهای محصول چه اثری روی retention دارند؟", "h": "07-what-is-the-impact-on-the-retention-rate.html", "l": "ماندن", "p": [3], "r": "retention هر feature، نسخه‌ی اول"}, "23": {"t": "رشد PLG: نگه داشتن کاربران", "h": "23-plg-growth-retaining-users.html", "l": "عادت", "p": [1], "r": "stickiness و Lness به‌جای DAU/MAU"}, "13": {"t": "جریان کاربر", "h": "13-user-flow.html", "l": "ماندن", "p": [3, 4], "r": "زمینه: MCC در جریان کاربر"}, "09": {"t": "دو نوع retention برای feature", "h": "09-two-types-of-feature-retention.html", "l": "ماندن", "p": [1, 3], "r": "retention محلی در برابر سراسری"}, "22": {"t": "رشد PLG: نگه داشتن و پولی کردن کاربران", "h": "22-plg-growth-retaining-monetizing-users.html", "l": "رشد", "p": [7], "r": "چرا retention، و چهار نوع مشتری freemium"}, "36": {"t": "retention cohort کاربران", "h": "36-user-cohort-retention.html", "l": "ماندن", "p": [2], "r": "سه سناریو و سه مرحله‌ی هر cohort"}, "31": {"t": "درگیری کاربر: تجربه‌ی اولیه‌ی کاربر", "h": "31-user-engagement-first-time-user-experience.html", "l": "فعال‌سازی", "p": [1, 4], "r": "تجربه‌ی FTUE و زمان جلسه‌ی اول"}}, "routes": [{"q": "این feature ارزش دارد؟", "steps": ["کاربر و درصد", "نُه خوشه", "MCC روی cohort", "زمینه", "پولی و رایگان"], "trap": "retention تک‌بعدی، Information Gain بی‌جهت", "posts": ["03", "08", "11", "13", "12", "20"]}, {"q": "چرا کاربران جدید برنمی‌گردند؟", "steps": ["پنجره‌ی ۲۴ ساعته", "جلسه‌ی دوم", "D1 دومرحله‌ای", "سیگنال روز صفر", "event کلیدی", "کانال و UVP"], "trap": "روز تقویمی، میانگین زمان جلسه", "posts": ["30", "31", "32", "33", "34", "18"]}, {"q": "retention بهتر شده؟", "steps": ["cohort بر پایه‌ی lifetime", "رنگ آماری", "سه مرحله‌ی منحنی"], "trap": "retention آمیخته", "posts": ["36", "37", "38", "39", "40"]}, {"q": "کاربران عادت می‌سازند؟", "steps": ["توزیع Lness", "دوره به دوره", "ماتریس گذار", "Lness اخیر"], "trap": "نسبت DAU/MAU", "posts": ["23", "24", "25", "26", "27"]}, {"q": "streak یا مکانیزم عادت ما چرا کار می‌کند؟", "steps": ["چهار پرسش", "دروازه، جمع، برهم‌کنش", "چرخه‌ی عمر"], "trap": "streak به‌عنوان یک عدد", "posts": ["68", "69", "70"]}, {"q": "چرا churn جهش کرد؟", "steps": ["هر بُعد با IV و WOE", "LMDI به mix و rate و volume"], "trap": "drill-down با ترتیب دلخواه", "posts": ["54", "62", "71"]}, {"q": "این کمپین یا کانال سودآور است؟", "steps": ["توزیع payback", "LTV به CAC", "سقف LTV و فاصله تا سقف"], "trap": "payback ساده، D30 ROAS", "posts": ["42", "43", "44", "57", "65", "66"]}, {"q": "LTV را چطور پیش‌بینی کنم؟", "steps": ["داده‌ی تراکنش", "مدل لگاریتمی", "مدل تصحیحی", "میانگین چند مدل"], "trap": "اعتماد به برازش درون‌نمونه", "posts": ["46", "47", "48", "64"]}, {"q": "کدام سیگنال را به شبکه‌ی تبلیغات بدهم؟", "steps": ["AUC × پوشش × درآمد در برابر هیچ‌کاری‌نکردن", "archetype و D180"], "trap": "سیگنال دقیق بی‌حجم", "posts": ["61", "63"]}, {"q": "به چه کسی پیشنهاد یا مداخله بدهم؟", "steps": ["intent جدا از solvency", "پیشنهاد متناسب", "چهار پرسش و سه سطل"], "trap": "پیش‌بینی churn به‌جای تصمیم", "posts": ["58", "59", "60"]}, {"q": "آزمایش «uplift صفر» داد؛ یعنی چه؟", "steps": ["holdout", "نشانه در برابر اهرم", "mix در برابر رفتار", "بلندمدت"], "trap": "صفر را «بی‌اثر» خواندن", "posts": ["67"]}, {"q": "مشتری پس از خرید کجا می‌رود؟", "steps": ["ماتریس RF", "RR و FF", "سه دوره", "نمودار گذار"], "trap": "cohort که سابقه‌ها را قاطی می‌کند", "posts": ["49", "50", "51", "52", "53", "56"]}, {"q": "سقف رشد ما کجاست؟", "steps": ["جذب ÷ churn", "اثر retention بر رشد", "مدل رشد با فرض صریح"], "trap": "رشد به هر قیمت", "posts": ["01", "16", "22", "28"]}]};
+  var LAYERS = ["جذب", "فعال‌سازی", "عادت", "ماندن", "درآمد", "پس از خرید", "اقتصاد واحد", "رشد", "روش"];
+  var PR = ["درست بشمار", "cohort به‌جای تقویم", "کیفیت، کمیت و جهت", "فرایند به‌جای نتیجه", "تجزیه‌ی صادق", "سیگنال‌های جدا", "عدم قطعیت", "اقدام علّی"];
+  var log = Kit.log(document.getElementById("log"));
+  var ids = Object.keys(D.posts).sort();
+  var cfg = { mode: "q", q: 0, cell: null };
+
+  function stats(rows) {
+    var st = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value" }, String(x[1])))); });
+  }
+  function postItem(n) {
+    var p = D.posts[n];
+    return Kit.el("li", null, Kit.el("a", { href: "../chapters/" + p.h }, Kit.el("span", { class: "num" }, String(+n) + "."), p.t),
+      Kit.el("small", null, p.l + " · اصل " + p.p.join("، ") + " · " + p.r));
+  }
+  function showPosts(title, list) {
+    document.getElementById("ptitle").textContent = title;
+    var ul = Kit.clear(document.getElementById("plist"));
+    list.forEach(function (n) { ul.appendChild(postItem(n)); });
+  }
+  function renderQ() {
+    var r = D.routes[cfg.q], ol = Kit.clear(document.getElementById("route"));
+    r.steps.forEach(function (s) { ol.appendChild(Kit.el("li", null, Kit.el("span", null, s))); });
+    document.getElementById("trap").textContent = "دامی که باید دور زد: " + r.trap;
+    showPosts("نوشته‌ها به ترتیب خواندن", r.posts);
+    stats([["گام‌های مسیر", r.steps.length], ["نوشته‌ها", r.posts.length]]);
+  }
+  function inCell(n, li, pi) { var p = D.posts[n]; return p.l === LAYERS[li] && p.p.indexOf(pi + 1) >= 0; }
+  function renderM() {
+    var tb = Kit.clear(document.getElementById("matrix"));
+    var hr = Kit.el("tr", null, Kit.el("th", { scope: "col" }, "لایه / اصل"));
+    PR.forEach(function (p, i) { hr.appendChild(Kit.el("th", { scope: "col" }, String(i + 1) + ". " + p)); });
+    tb.appendChild(Kit.el("thead", null, hr));
+    var body = Kit.el("tbody");
+    LAYERS.forEach(function (l, li) {
+      var tr = Kit.el("tr", null, Kit.el("th", { scope: "row" }, l));
+      PR.forEach(function (p, pi) {
+        var c = ids.filter(function (n) { return inCell(n, li, pi); }).length;
+        if (!c) { tr.appendChild(Kit.el("td", { class: "empty" }, Kit.el("span", { "aria-label": "هیچ نوشته‌ای" }, "—"))); return; }
+        var on = cfg.cell && cfg.cell[0] === li && cfg.cell[1] === pi;
+        tr.appendChild(Kit.el("td", null, Kit.el("button", { type: "button", class: c >= 4 ? "c3" : c >= 2 ? "c2" : "c1", "aria-pressed": on ? "true" : "false",
+          "aria-label": l + "، اصل " + (pi + 1) + ": " + c + " نوشته", onclick: function () { pick(li, pi); } }, String(c))));
+      });
+      body.appendChild(tr);
+    });
+    tb.appendChild(body);
+    if (!cfg.cell) { showPosts("روی یک خانه بزنید", []); }
+    var filled = 0; LAYERS.forEach(function (l, li) { PR.forEach(function (p, pi) { if (ids.some(function (n) { return inCell(n, li, pi); })) filled++; }); });
+    stats([["نوشته‌ها", ids.length], ["خانه‌های پر", filled + " از " + LAYERS.length * PR.length]]);
+  }
+  function pick(li, pi) {
+    cfg.cell = [li, pi];
+    var list = ids.filter(function (n) { return inCell(n, li, pi); });
+    renderM();
+    showPosts(LAYERS[li] + " × اصل " + (pi + 1) + ": " + PR[pi], list);
+    log.add(LAYERS[li] + " × " + PR[pi] + ": " + list.length + " نوشته.", "ok");
+  }
+  function render() {
+    document.getElementById("qpanel").hidden = cfg.mode !== "q";
+    document.getElementById("mpanel").hidden = cfg.mode !== "m";
+    if (cfg.mode === "q") renderQ(); else renderM();
+  }
+
+  var ctl = document.getElementById("ctl");
+  ctl.appendChild(Kit.segmented({ label: "نما", value: cfg.mode, options: [{ value: "q", label: "از پرسش" }, { value: "m", label: "لایه × اصل" }],
+    onChange: function (v) { cfg.mode = v; render(); log.add(v === "q" ? "نمای پرسش." : "نمای جدول لایه‌ها و اصل‌ها.", "info"); } }).element);
+  var sel = Kit.el("select", { id: "qsel" });
+  D.routes.forEach(function (r, i) { sel.appendChild(Kit.el("option", { value: String(i) }, r.q)); });
+  sel.addEventListener("change", function () { cfg.q = +sel.value; cfg.mode = "q"; render(); log.add("پرسش: " + D.routes[cfg.q].q, "ok"); });
+  ctl.appendChild(Kit.el("div", { class: "field" }, Kit.el("label", { for: "qsel" }, "پرسش شما"), sel));
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "پرسش «چرا churn جهش کرد؟» را انتخاب کنید. مسیر از کدام ابزار شروع می‌شود؟",
+      options: ["درخت متریک با drill-down", "هر بُعد جدا با IV و WOE", "ضریب MCC هر feature"], answer: 1,
+      explain: "رتبه‌بندی مستقل هر بُعد به ترتیب شکافتن وابسته نیست؛ بعد LMDI سهم mix و rate و volume را جدا می‌کند (نوشته‌های ۶۲ و ۷۱)." },
+    { q: "در نمای جدول، اصل «عدم قطعیت» بیشتر در کدام لایه پر است؟",
+      options: ["اقتصاد واحد", "فعال‌سازی", "پس از خرید"], answer: 0,
+      explain: "پیش‌بینی LTV و payback و اختلاف مدل‌ها همه در اقتصاد واحدند (نوشته‌های ۴۲ تا ۴۸ و ۶۴ و ۶۶)." },
+    { q: "این ناوبر مال کیست؟",
+      options: ["نقشه‌ای که خود نویسنده منتشر کرده", "سنتز vault از نوشته‌ها", "خروجی یک مدل آماری"], answer: 1,
+      explain: "نویسنده چارچوب واحدی منتشر نکرده؛ لایه‌ها و اصل‌ها و مسیرها خوانش vault‌اند." }
+  ]);
+})();
+</script>
+</body>
+</html>

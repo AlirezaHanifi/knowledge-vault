@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ترکیب یا رفتار؟</title>
+<meta name="description" content="تغییر ارزش ترکیبی هر کاربر را به ترکیب جمعیت، یعنی چه کسانی در مخاطب‌اند، و تغییر ساختاری، یعنی ارزش داخل هر کانال، بشکنید. برای نوشته‌ی ۶۷ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/67-flo-health-what-zero-uplift-really-means.html">نوشته‌ی ۶۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ترکیب یا رفتار؟</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۶۷ · شرکت Flo Health و «uplift صفر»</div>
+  <h1>ترکیب یا رفتار؟</h1>
+  <p class="lede">مخاطب را به سمت کانال پرارزش ببرید و ببینید چه سهمی از یک <strong>«‎+۲۰٪‎ ارزش»</strong> فقط ترکیب غنی‌تر است و نه رفتار متفاوت کاربرها.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «Flo Health: What ‘zero uplift’ really means» را نشان می‌دهد (بخش‌های «1/ Throw out the number everyone trusts» و «Appendix»). جدول کانال‌ها شبیه‌سازی توضیحی خود نوشته است، نه داده‌ی Flo، و از تصویرش خوانده شده؛ دو اسلایدر مال vault است. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">تغییر ارزش هر کاربر از کجا می‌آید</p><div id="split"></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">کانال‌ها، قبل و بعد</p><div class="table-wrap" id="tbl"></div></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازگشت به جدول نوشته</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>ارزش ترکیبی بدون هیچ تغییری در رفتار بالا می‌رود</strong>، همین‌که Organic بزرگ و Paid کوچک شود.</li>
+    <li><strong>سهم ترکیب برابر است با تغییر سهم ضرب در ارزش قدیم</strong> و سهم ساختاری برابر تغییر ارزش ضرب در سهم جدید؛ این دو تقریباً کل تغییر را می‌سازند.</li>
+    <li><strong>پیش از این‌که افزایشِ قبل و بعد را به پای یک feature بنویسید</strong>، بپرسید چه سهمی از آن مخاطب متفاوت است.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/67-flo-health-what-zero-uplift-really-means.html"><small>درس</small>نوشته‌ی ۶۷: شرکت Flo Health و «uplift صفر»</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
+
+  var log = Kit.log(document.getElementById("log"));
+  var CH = [ { n: "Organic، پرارزش", s0: 0.30, v0: 1.89, v1: 2.03 }, { n: "Paid، کم‌ارزش", s0: 0.50, v0: 0.98, v1: 1.04 }, { n: "Search", s0: 0.20, v0: 1.34, v1: 1.40 } ];
+  var DEF = { org: 48, within: 1 }, cfg = Object.assign({}, DEF), sl = {}, last = null;
+  function calc() {
+    var org = cfg.org / 100, search = 0.20, paid = 1 - org - search;
+    var s1 = [org, paid, search], rows = CH.map(function (c, i) { var v1 = c.v0 + cfg.within * (c.v1 - c.v0); return { n: c.n, s0: c.s0, s1: s1[i], v0: c.v0, v1: v1, comp: (s1[i] - c.s0) * c.v0, st: (v1 - c.v0) * s1[i] }; });
+    var b0 = 0, b1 = 0, comp = 0, st = 0; rows.forEach(function (r) { b0 += r.s0 * r.v0; b1 += r.s1 * r.v1; comp += r.comp; st += r.st; });
+    return { rows: rows, b0: b0, b1: b1, comp: comp, st: st };
+  }
+  function render() {
+    var C = calc(), d = C.b1 - C.b0, tot = C.comp + C.st, cs = Math.abs(tot) < 1e-9 ? 0 : C.comp / tot;
+    var sp = Kit.clear(document.getElementById("split"));
+    sp.appendChild(bar("ترکیب جمعیت کاربرها", Math.abs(C.comp) / (Math.abs(C.comp) + Math.abs(C.st) || 1), (C.comp >= 0 ? "+" : "−") + "$" + Math.abs(C.comp).toFixed(3), C.comp >= 0 ? "pos" : "neg"));
+    sp.appendChild(bar("ساختاری: ارزش داخل کانال‌ها", Math.abs(C.st) / (Math.abs(C.comp) + Math.abs(C.st) || 1), (C.st >= 0 ? "+" : "−") + "$" + Math.abs(C.st).toFixed(3), C.st >= 0 ? "pos" : "neg"));
+    var v = document.getElementById("verdict"), strong = cs > 0.5; v.className = "callout " + (strong ? "warn" : "ok");
+    v.textContent = strong ? "بیش از نیمی از تغییر از این است که چه کسانی در مخاطب‌اند، نه این‌که کاربرها چه می‌کنند؛ آن را به پای feature ننویسید." : "بیشتر تغییر، تغییر واقعی ارزش داخل کانال‌هاست.";
+    if (last !== null && strong !== last) log.add(strong ? "حالا ترکیب جمعیت بیشتر تغییر را توضیح می‌دهد." : "حالا تغییر ساختاری بیشتر تغییر را توضیح می‌دهد.", strong ? "warn" : "ok"); last = strong;
+    var t = Kit.el("table", { class: "data" });
+    t.appendChild(Kit.el("tr", null, ["کانال", "سهم", "ارزش هر کاربر"].map(function (h, i) { return Kit.el("th", { class: i ? "num" : "" }, h); })));
+    C.rows.forEach(function (r) { t.appendChild(Kit.el("tr", null, [r.n, pct(r.s0, 0) + " ← " + pct(r.s1, 0), "$" + r.v0.toFixed(2) + " ← $" + r.v1.toFixed(2)].map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, c); }))); });
+    t.appendChild(Kit.el("tr", null, ["ترکیبی", "", "$" + C.b0.toFixed(2) + " ← $" + C.b1.toFixed(2)].map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, Kit.el("strong", null, c)); })));
+    Kit.clear(document.getElementById("tbl")).appendChild(t);
+    stats("stats", [["تغییر ارزش ترکیبی", (d >= 0 ? "+" : "−") + "$" + Math.abs(d).toFixed(3) + "، یعنی " + (d / C.b0 * 100).toFixed(0) + "٪"], ["سهم ترکیب جمعیت", pct(cs, 0), strong ? "warn" : "ok"], ["سهم Paid پس از تغییر", pct(1 - cfg.org / 100 - 0.2, 0)]]);
+  }
+  var ctl = document.getElementById("ctl");
+  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  add("org", { label: "سهم Organic پس از تغییر، که پیش از آن ۳۰٪ بود", min: 30, max: 60, step: 1, unit: "٪", hint: "سهم Paid به همان اندازه جابه‌جا می‌شود و Search روی ۲۰٪ می‌ماند" });
+  add("within", { label: "تغییر ارزش داخل کانال‌ها، ضریبی از مقدار نوشته", min: 0, max: 3, step: 0.25, format: function (v) { return v.toFixed(2) + "×"; }, hint: "ضریب یک یعنی ۱٫۸۹ به ۲٫۰۳ و ۰٫۹۸ به ۱٫۰۴ و ۱٫۳۴ به ۱٫۴۰ دلار" });
+  document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; sl[k].set(DEF[k]); }); render(); log.add("به جدول نوشته برگشت.", "muted"); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "با جدول خود نوشته، چه سهمی از آن ‎+۲۰٪‎ ترکیب جمعیت است؟",
+    "options": [
+      "حدود ۶۲٪",
+      "حدود ۲۰٪",
+      "حدود ۹۵٪"
+    ],
+    "answer": 0,
+    "explain": "جابه‌جایی ترکیب به سمت Organic حدود ۶۲٪ را توضیح می‌دهد (بخش «1/»)."
+  },
+  {
+    "q": "سهم Organic را به ۳۰٪ برگردانید. تغییر از کجا می‌آید؟",
+    "options": [
+      "ترکیب جمعیت",
+      "تغییر ساختاری داخل کانال‌ها",
+      "هیچ‌کدام؛ تغییری در کار نیست"
+    ],
+    "answer": 1,
+    "explain": "وقتی ترکیب عوض نشده، فقط تغییر ارزش داخل کانال‌ها می‌ماند."
+  },
+  {
+    "q": "کدام فرمول تکه‌ی ترکیب جمعیت را برای یک کانال می‌دهد؟",
+    "options": [
+      "تغییر سهم ضرب در ارزش قدیم",
+      "تغییر ارزش ضرب در سهم جدید",
+      "تغییر سهم ضرب در تغییر ارزش"
+    ],
+    "answer": 0,
+    "explain": "ترکیب برابر تغییر سهم ضرب در ارزش قدیم است و ساختاری برابر تغییر ارزش ضرب در سهم جدید (بخش «Appendix»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>دام دقت</title>
+<meta name="description" content="مقدار بودجه‌ای که یک سیگنال جذب کاربر می‌تواند خرج کند و ROAS دروازه‌اش را بگذارید و درآمد هفتگی را با bid ساده‌ی CPI مقایسه کنید. برای نوشته‌ی ۶۳ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
+  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
+  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
+  .bar-row .v { font-family: var(--mono); text-align: end; }
+  svg.plot { width: 100%; display: block; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/63-best-ua-signal-less-revenue-than-nothing.html">نوشته‌ی ۶۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">دام دقت</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="eyebrow">نوشته‌ی ۶۳ · چرا بهترین سیگنال جذب کاربر از هیچ‌کاری‌نکردن درآمد کمتری می‌سازد؟</div>
+  <h1>دام دقت</h1>
+  <p class="lede">درآمد یک سیگنال برابر است با <strong>خرج انجام‌شده ضرب در ROAS</strong>. خرج قابل‌انجام را پایین بکشید و ببینید بهترین ROAS سبد چطور از هیچ‌کاری‌نکردن عقب می‌افتد.</p>
+  <p class="source-note">این شبیه‌سازی نوشته‌ی «Why does the Best UA Signal Generate Less Revenue than Doing Nothing?» را نشان می‌دهد (بخش‌های «The precision trap» و «The coverage cliff»). عددها از نوشته‌اند: بودجه‌ی هفتگی ۳۰٬۰۰۰ دلار، bid ساده‌ی CPI با ۱٫۸۲ برابر یعنی ۵۴٬۶۰۰ دلار، خرید روز اول با ۶٫۱۹ برابر روی ۱٬۲۵۹ دلار، و برتری ۵۵٬۰۵۷ و ۸۶ هزار دلاری دیدن صفحه‌ی محصول و درآمد روز هفتم، که vault آن‌ها را روی کل بودجه به ROAS حدود ۳٫۶۶ و ۴٫۶۹ برابر تبدیل کرده. مدل یک‌خطی درآمد، خوانش vault از حساب‌وکتاب نوشته است. پیاده‌سازی مال خود vault است.</p>
+
+  <div class="sim">
+    <div class="stack">
+      <div class="panel"><p class="panel-title">درآمد هفتگی: سیگنال در برابر هیچ‌کاری‌نکردن</p><div id="bars"></div>
+        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
+      <div class="panel"><p class="panel-title">ROASی که یک سیگنال برای شکست دادن bid ساده‌ی CPI لازم دارد، بر حسب خرج قابل‌انجام</p>
+        <svg class="plot" id="chart" role="img" aria-label="ROAS دروازه برای سربه‌سر شدن در برابر خرج هفتگی قابل‌انجام"></svg>
+        <p class="field-hint">منحنی: ROAS سربه‌سر برابر ۵۴٬۶۰۰ دلار تقسیم بر خرج قابل‌انجام. نقطه: سیگنال شما.</p></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
+        <div class="row" style="margin-top:10px" id="presets"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    </div>
+  </div>
+
+  <h2>به چه چیزی نگاه کنید</h2>
+  <ul class="notice-list">
+    <li><strong>با کوچک شدن خرج قابل‌انجام، ROAS سربه‌سر بالا می‌رود</strong>: در ۴٪ بودجه هیچ ROAS واقع‌بینانه‌ای برنده نمی‌شود.</li>
+    <li><strong>بالای پرتگاه پوشش</strong>، یعنی کل ۳۰٬۰۰۰ دلار، یک ROAS متوسط ۳٫۶۶ برابری با حدود ۵۵ هزار دلار از bid ساده جلو می‌زند.</li>
+    <li><strong>اسلایدر ROAS به‌تنهایی هیچ‌وقت درستش نمی‌کند</strong>: حجم و کیفیت دو قید مستقل‌اند.</li>
+  </ul>
+
+  <h2>فهمتان را بسنجید</h2>
+  <div id="quiz"></div>
+
+  <h2 class="no-embed">مرتبط</h2>
+  <ul class="related no-embed">
+    <li><a href="../chapters/63-best-ua-signal-less-revenue-than-nothing.html"><small>درس</small>نوشته‌ی ۶۳: چرا بهترین سیگنال جذب کاربر از هیچ‌کاری‌نکردن درآمد کمتری می‌سازد؟</a></li>
+  </ul>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  function stats(id, rows) {
+    var st = Kit.clear(document.getElementById(id));
+    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  }
+  function bar(label, frac, text, cls) {
+    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
+      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
+      Kit.el("span", { class: "v" }, text));
+  }
+  function money(x, d) { var s = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); return (x < 0 ? "−$" : "$") + s; }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
+
+  var log = Kit.log(document.getElementById("log"));
+  var BUDGET = 30000, FLAT = 54600, cfg = { spend: 1259, roas: 6.19 }, sl = {}, last = null;
+  var PRESETS = [ { n: "خرید روز اول", spend: 1259, roas: 6.19 }, { n: "دیدن صفحه‌ی محصول، روز اول و دوم", spend: 30000, roas: 3.66 }, { n: "درآمد روز هفتم", spend: 30000, roas: 4.69 }, { n: "bid ساده‌ی CPI", spend: 30000, roas: 1.82 } ];
+  function render() {
+    var rev = cfg.spend * cfg.roas, lift = rev - FLAT, be = FLAT / cfg.spend, cov = cfg.spend / BUDGET;
+    var b = Kit.clear(document.getElementById("bars"));
+    b.appendChild(bar("bid ساده، بدون فیلتر", FLAT / 150000, money(FLAT), ""));
+    b.appendChild(bar("این سیگنال", rev / 150000, money(rev), lift >= 0 ? "pos" : "neg"));
+    var ok = lift >= 0, v = document.getElementById("verdict"); v.className = "callout " + (ok ? "ok" : "bad");
+    v.textContent = ok ? "هفته‌ای " + money(lift) + " از هیچ‌کاری‌نکردن جلوتر است." : "هفته‌ای " + money(-lift) + " از هیچ‌کاری‌نکردن بدتر است؛ با این خرج قابل‌انجام به ROAS برابر " + be.toFixed(1) + " برابر نیاز دارد تا سربه‌سر شود.";
+    if (last !== null && ok !== last) log.add(ok ? "سیگنال حالا از bid ساده‌ی CPI جلو زده." : "سیگنال حالا به bid ساده‌ی CPI می‌بازد.", ok ? "ok" : "bad"); last = ok;
+    var pts = []; for (var s = 1500; s <= 30000; s += 750) pts.push([s, Math.min(40, FLAT / s)]);
+    Kit.lineChart(document.getElementById("chart"), { width: 520, height: 210, xMax: 30000, yMax: 40, xLabel: "خرج هفتگی قابل‌انجام، دلار", yLabel: "ROAS سربه‌سر", xTicks: 6, yTicks: 4,
+      series: [{ points: pts, cls: "s2", label: "سربه‌سر" }, { points: [[cfg.spend, cfg.roas]], cls: ok ? "ok" : "bad", label: "سیگنال", dots: true }] });
+    stats("stats", [["سهم قابل‌انجام از بودجه", pct(cov, 0), cov < 0.15 ? "bad" : ""], ["درآمد هفتگی", money(rev), ok ? "ok" : "bad"], ["برتری نسبت به bid ساده", (lift >= 0 ? "+" : "") + money(lift)], ["ROAS سربه‌سر", be.toFixed(1) + " برابر"]]);
+  }
+  var ctl = document.getElementById("ctl");
+  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  add("spend", { label: "خرجی که سیگنال می‌تواند انجام بدهد، از ۳۰٬۰۰۰ دلار", min: 500, max: 30000, step: 250, format: function (v) { return money(v); }, hint: "پوشش تعیینش می‌کند: چند نصب واجد شرایط‌اند" });
+  add("roas", { label: "ROAS دروازه", min: 1, max: 8, step: 0.05, format: function (v) { return v.toFixed(2) + "×"; } });
+  var pr = document.getElementById("presets");
+  PRESETS.forEach(function (p) { pr.appendChild(Kit.el("button", { class: "btn", type: "button", onclick: function () { cfg.spend = p.spend; cfg.roas = p.roas; sl.spend.set(p.spend); sl.roas.set(p.roas); render(); log.add("بار شد: " + p.n + "، با " + money(p.spend) + " و ROAS برابر " + p.roas.toFixed(2) + " برابر.", "muted"); } }, p.n)); });
+  render();
+
+  Kit.quiz(document.getElementById("quiz"), [
+  {
+    "q": "حالت «خرید روز اول» را بار کنید. چرا سیگنالی با ۶٫۱۹ برابر می‌بازد؟",
+    "options": [
+      "معیار ROAS آن غلط است",
+      "فقط حدود ۱٬۲۵۹ دلار می‌تواند خرج کند، پس درآمدش حدود ۷٬۸۰۰ دلار است در برابر ۵۴٬۶۰۰ دلار",
+      "بودجه خیلی بزرگ است"
+    ],
+    "answer": 1,
+    "explain": "درآمد برابر خرج انجام‌شده ضرب در ROAS است (بخش «The precision trap»)."
+  },
+  {
+    "q": "سیگنالی که ۱٬۲۵۹ دلار خرج می‌کند تقریباً به چه ROASی نیاز دارد تا با bid ساده‌ی CPI برابر شود؟",
+    "options": [
+      "حدود ۴ برابر",
+      "حدود ۱۰ برابر",
+      "حدود ۴۳ برابر"
+    ],
+    "answer": 2,
+    "explain": "۵۴٬۶۰۰ تقسیم بر ۱٬۲۵۹ حدود ۴۳ برابر می‌شود، که هیچ سیگنالی نمی‌تواند بدهد."
+  },
+  {
+    "q": "کدام دو حالت آماده برنده می‌شوند و چرا؟",
+    "options": [
+      "دیدن صفحه‌ی محصول و درآمد روز هفتم: کل بودجه را با ROAS آبرومندی خرج می‌کنند",
+      "خرید روز اول و bid ساده‌ی CPI",
+      "فقط خرید روز اول"
+    ],
+    "answer": 0,
+    "explain": "پوششش از پرتگاه رد می‌شود، پس خرج انجام‌شده کل ۳۰٬۰۰۰ دلار است (بخش «The coverage cliff»)."
+  }
+]);
+})();
+</script>
+</body>
+</html>
