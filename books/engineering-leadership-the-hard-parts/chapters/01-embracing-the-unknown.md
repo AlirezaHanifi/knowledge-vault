@@ -3,161 +3,175 @@ book: engineering-leadership-the-hard-parts
 chapter: 1
 title: "Embracing the Unknown"
 pages: "1–11"
+translated_title: "پذیرفتن ناشناخته"
+lang: fa
 ---
 
-# 1. Embracing the Unknown
+# فصل ۱: پذیرفتن ناشناخته
 
-[Book](../README.md) · [2. Understanding Your Role →](02-understanding-your-role.md)
+[کتاب](../README.md) · [فصل ۲: فهمیدن نقشتان ←](02-understanding-your-role.md)
 
-## Summary
+## خلاصه
 
-To lead in a chaotic organization you first have to recognize what you're up against. The chapter lists ten symptoms of chaos — from lack of ownership and blame culture to constant crisis mode and no meaningful measurement — and then turns the picture around: chaos strips away bureaucracy, gives you access and permission to build, and is where leadership reputations are made. It is also exhausting and isolating, so the authors ask readers to weigh their own well-being, to consider leaving, and to ask whether they are part of the problem. It closes by introducing the book's framework: five pillars of engineering leadership — people, mission, plan, process and product (pp. 1–11).
+برای رهبری در سازمانی آشوب‌زده اول باید بشناسید با چه چیزی طرفید. این فصل ده نشانه‌ی آشوب را فهرست می‌کند، از نبود مالکیت و فرهنگ سرزنش تا حالت بحران دائمی و نبود اندازه‌گیری معنادار، و بعد تصویر را برمی‌گرداند: آشوب دیوان‌سالاری را کنار می‌زند، دسترسی و اجازه‌ی ساختن می‌دهد، و همان‌جایی است که اعتبار رهبرها ساخته می‌شود. در عین حال فرساینده و منزوی‌کننده هم هست، پس نویسنده‌ها از خواننده می‌خواهند حال خودشان را بسنجند، به رفتن فکر کنند، و بپرسند خودشان بخشی از مسئله نیستند. فصل با معرفی چارچوب کتاب تمام می‌شود: پنج ستون رهبری مهندسی، یعنی آدم‌ها و مأموریت و برنامه و process و محصول (pp. 1–11).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Chaos can be a creeping normality** — like the (factually wrong) boiling-frog fable — and is often hidden from candidates or shielded by good leaders (p. 1).
-- **Ten common symptoms:** lack of ownership, absence of structure, outsized responsibility, undefined process, poor communication, blame culture, high turnover, lack of strategy, frequent crisis mode and no meaningful measurement (p. 2).
-- **Chaotic organizations can still be risk-averse:** people grow fatalistic and cling to what "works," and chaos and fatalism reinforce each other (p. 3).
-- **Chaos is opportunity:** less bureaucracy, permission to build, range, direct access to decision makers, and compounding small wins (pp. 6–7).
-- **Aim for just enough order** — just enough process to prevent disasters, just enough structure to stay sane — built to bend without breaking (p. 7).
-- **No job is worth your mental health.** Leaving isn't failure; and ask yourself, "Am I part of the problem too?" (pp. 8–9).
-- **Create pockets of stability** you control; they can model change for the rest of the organization (p. 10).
+- **آشوب می‌تواند عادی‌شدنی خزنده باشد**، مثل افسانه‌ی قورباغه و آب جوش که از نظر واقعی غلط است، و اغلب از نامزدهای استخدام پنهان می‌ماند یا رهبرهای خوب جلویش را می‌گیرند (p. 1).
+- **ده نشانه‌ی رایج:** نبود مالکیت، نبود ساختار، مسئولیت بیش از اندازه، process تعریف‌نشده، ارتباط ضعیف، فرهنگ سرزنش، ریزش بالای نیرو، نبود استراتژی، حالت بحران پرتکرار، و نبود اندازه‌گیری معنادار (p. 2).
+- **سازمان آشوب‌زده می‌تواند ریسک‌گریز هم باشد:** آدم‌ها تقدیرگرا می‌شوند و به چیزی که «کار می‌کند» می‌چسبند، و آشوب و تقدیرگرایی هم را تقویت می‌کنند (p. 3).
+- **آشوب فرصت است:** دیوان‌سالاری کمتر، اجازه‌ی ساختن، دامنه‌ی گسترده، دسترسی مستقیم به تصمیم‌گیرها، و بردهای کوچکی که روی هم جمع می‌شوند (pp. 6–7).
+- **هدف، به‌اندازه نظم است**، یعنی به‌اندازه process برای جلوگیری از فاجعه و به‌اندازه ساختار برای سالم ماندن، ساخته‌شده طوری که خم شود و نشکند (p. 7).
+- **هیچ شغلی به سلامت روانتان نمی‌ارزد.** رفتن شکست نیست؛ و از خودتان بپرسید «نکند من هم بخشی از مسئله‌ام؟» (pp. 8–9).
+- **جزیره‌های ثبات بسازید** که در کنترل خودتان است؛ همان‌ها می‌توانند برای بقیه‌ی سازمان الگوی تغییر شوند (p. 10).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- What Does Chaos Look Like? — p. 1
-  - Lack of Ownership — p. 2
-  - Absence of Structure — p. 2
-  - Outsized Responsibility — p. 3
-  - Undefined Process — p. 3
-  - Poor Communication — p. 4
-  - Blame Culture, Scapegoating, and Recrimination — p. 4
-  - High Turnover — p. 5
-  - Lack of Strategy and Planning — p. 5
-  - Frequent Crisis Mode — p. 5
-  - No Meaningful Measurement — p. 6
-- Chaos or Opportunity? — p. 6
-- Well, That Was Fun — p. 7
-- This Sounds Scary — p. 8
-- What Are We Going to Do to Help? — p. 9
-- Conclusion: From Chaos to Clarity — p. 10
+- آشوب چه شکلی است؟ — p. 1
+  - نبود مالکیت — p. 2
+  - نبود ساختار — p. 2
+  - مسئولیت بیش از اندازه — p. 3
+  - بخش process تعریف‌نشده — p. 3
+  - ارتباط ضعیف — p. 4
+  - فرهنگ سرزنش، قربانی‌تراشی و تلافی — p. 4
+  - ریزش بالای نیرو — p. 5
+  - نبود استراتژی و برنامه‌ریزی — p. 5
+  - حالت بحران پرتکرار — p. 5
+  - نبود اندازه‌گیری معنادار — p. 6
+- آشوب یا فرصت؟ — p. 6
+- خب، جالب بود — p. 7
+- ترسناک به نظر می‌رسد — p. 8
+- قرار است چه کمکی بکنیم؟ — p. 9
+- جمع‌بندی: از آشوب تا روشنی — p. 10
 
-## Notes
+## یادداشت‌ها
 
-Understanding the nature and extent of chaos lets you find the root causes of dysfunction and address them strategically (p. 1). The book's preface explains its premise: most leadership advice assumes a stable, functional environment, and telling a leader in chaos to "just" add a process is like telling a drowning person to "just" swim to shore (Preface, pp. xiv–xv).
+فهمیدن جنس و اندازه‌ی آشوب به شما اجازه می‌دهد ریشه‌های ناکارکردی را پیدا کنید و راهبردی سراغشان بروید (p. 1). پیش‌گفتار کتاب فرض بنیادی‌اش را توضیح می‌دهد: بیشتر توصیه‌های رهبری محیطی باثبات و کارآمد را فرض می‌گیرند، و گفتن «فقط یک process اضافه کن» به رهبری که در آشوب است، مثل گفتن «فقط شنا کن تا ساحل» به کسی است که دارد غرق می‌شود (پیش‌گفتار، pp. xiv–xv).
 
-### What Does Chaos Look Like?
+### آشوب چه شکلی است؟
 
-It can be hard to tell whether an organization is chaotic or just fuzzy at the edges. Chaos creeps up like the water in the boiling-frog fable (which the authors note is factually incorrect), and employers selling a job may present it in a rosier light. Even inside an organization, chaos can be hidden: James once worked where several teams functioned only because their leaders shielded them, and saw the organization's real state only after being promoted (pp. 1–2).
+گاهی سخت است تشخیص بدهید سازمان آشوب‌زده است یا فقط لبه‌هایش مبهم‌اند. آشوب مثل آب در افسانه‌ی قورباغه بالا می‌آید، افسانه‌ای که خود نویسنده‌ها می‌گویند از نظر واقعی غلط است، و کارفرمایی که دارد یک شغل را می‌فروشد آن را خوشرنگ‌تر نشان می‌دهد. حتی داخل سازمان هم آشوب می‌تواند پنهان بماند: James یک‌بار جایی کار می‌کرد که چند تیم فقط به این دلیل می‌چرخیدند که رهبرهایشان سپرشان بودند، و وضعیت واقعی سازمان را تازه بعد از ارتقا دید (pp. 1–2).
 
-| Symptom | What it looks like (pp. 2–6) |
+| نشانه | چه شکلی است (pp. 2–6) |
 |---|---|
-| **Lack of ownership** | Nobody is clearly accountable, so tasks fall through the cracks or are tackled twice; blame games or learned helplessness |
-| **Absence of structure** | Poorly defined teams and roles; duplicated effort and teams working at cross-purposes |
-| **Outsized responsibility** | A junior engineer as sole owner of a critical system; a manager running several teams without support — burnout and single points of failure |
-| **Undefined process** | Processes made up on the fly or held as institutional knowledge; hard onboarding; "not invented here." Paradoxically, people grow fatalistic and resist change — chaos and fatalism reinforce each other |
-| **Poor communication** | Siloed information, haphazard updates, sometimes deliberate restriction because reporting makes you a target |
-| **Blame culture, scapegoating and recrimination** | Looking for whom to blame instead of fixing the problem. James's colleague called one incident process a "blamestorm" — assigning fault delayed every recovery |
-| **High turnover** | Burnout and no growth path; lost institutional knowledge; a damaged reputation |
-| **Lack of strategy and planning** | Purely reactive work; resources not allocated by priority; fissures with other functions — sales overselling, engineering over- or undercommitting |
-| **Frequent crisis mode** | Every issue is an emergency; no room for long-term improvement; chronic stress |
-| **No meaningful measurement** | No metrics for product, team or business health; decisions made in the dark; no way to tell whether an initiative worked or to run a productive postmortem |
+| **نبود مالکیت** | هیچ‌کس روشن پاسخ‌گو نیست، پس کارها یا از قلم می‌افتند یا دو بار انجام می‌شوند؛ یا بازی سرزنش راه می‌افتد یا درماندگی آموخته‌شده |
+| **نبود ساختار** | تیم‌ها و نقش‌ها بد تعریف شده‌اند؛ کار تکراری و تیم‌هایی که خلاف جهت هم کار می‌کنند |
+| **مسئولیت بیش از اندازه** | یک مهندس تازه‌کار تنها صاحب سیستمی حیاتی است؛ یا یک مدیر چند تیم را بدون پشتیبانی می‌گرداند؛ یعنی فرسودگی و نقطه‌ی تکِ شکست |
+| **process تعریف‌نشده** | processها در لحظه ساخته می‌شوند یا در حافظه‌ی آدم‌ها می‌مانند؛ onboarding سخت است و «این‌جا اختراع نشده» رواج دارد. به‌طرز متناقضی آدم‌ها تقدیرگرا می‌شوند و در برابر تغییر مقاومت می‌کنند، و آشوب و تقدیرگرایی هم را تقویت می‌کنند |
+| **ارتباط ضعیف** | اطلاعات در سیلو می‌ماند، به‌روزرسانی‌ها بی‌نظم‌اند، و گاهی اطلاعات عمداً محدود می‌شود چون گزارش دادن شما را هدف می‌کند |
+| **فرهنگ سرزنش، قربانی‌تراشی و تلافی** | به‌جای حل مسئله دنبال مقصر می‌گردند. همکار James به یکی از processهای رسیدگی به حادثه می‌گفت «طوفان سرزنش»؛ تعیین مقصر هر بار بازیابی را عقب می‌انداخت |
+| **ریزش بالای نیرو** | فرسودگی و نبود مسیر رشد؛ از دست رفتن دانش سازمانی؛ و اعتباری که خدشه‌دار می‌شود |
+| **نبود استراتژی و برنامه‌ریزی** | کار کاملاً واکنشی؛ منابع بر پایه‌ی اولویت تخصیص نمی‌یابند؛ و شکاف با کارکردهای دیگر، مثل فروشی که بیش از توان می‌فروشد و مهندسی‌ای که کم یا زیاد تعهد می‌دهد |
+| **حالت بحران پرتکرار** | هر مسئله‌ای اورژانس است؛ جایی برای بهبود بلندمدت نمی‌ماند؛ و استرس مزمن می‌شود |
+| **نبود اندازه‌گیری معنادار** | برای سلامت محصول و تیم و کسب‌وکار متریکی نیست؛ تصمیم‌ها در تاریکی گرفته می‌شوند؛ و راهی نیست بفهمید طرحی جواب داده یا postmortem مفیدی بگیرید |
 
-### Chaos or Opportunity?
+### آشوب یا فرصت؟
 
-The flip side: **chaos is where careers are made**. Ask respected leaders about their defining moments and they describe inheriting a disaster, not maintaining a stable system (p. 6).
+آن روی سکه: **آشوب همان‌جایی است که مسیرهای شغلی ساخته می‌شوند**. از رهبرهای محترم درباره‌ی لحظه‌های تعیین‌کننده‌شان بپرسید و از تحویل گرفتن یک فاجعه می‌گویند، نه از نگه داشتن سیستمی باثبات (p. 6).
 
-| Chaos gives you… | Because… (pp. 6–7) |
+| آشوب به شما می‌دهد… | چون… (pp. 6–7) |
 |---|---|
-| **Less bureaucracy** | You can just fix a deployment process instead of running committees; if it fails, try something else tomorrow |
-| **Permission to build** | No ownership: claim what you're brave enough to own. No process: no six-month fight. No metrics: you define success |
-| **Range** | Undefined roles teach you product management, recruiting and business metrics by necessity |
-| **Access** | You may explain architecture directly to the CEO instead of through seven layers |
-| **Visibility** | Chaos reveals who can build versus who can only maintain |
-| **Low expectations and compounding wins** | Nobody expects miracles; every fixed bug and successful deployment builds momentum |
+| **دیوان‌سالاری کمتر** | می‌توانید همین‌طوری process انتشار را درست کنید به‌جای گرداندن کمیته؛ و اگر شکست خورد فردا چیز دیگری امتحان کنید |
+| **اجازه‌ی ساختن** | مالکیتی نیست: هر چیزی را که جرئت داری صاحبش شو. processی نیست: دعوای شش‌ماهه‌ای در کار نیست. متریکی نیست: موفقیت را خودتان تعریف می‌کنید |
+| **دامنه** | نقش‌های تعریف‌نشده به‌اجبار مدیریت محصول و استخدام و متریک‌های کسب‌وکار را یادتان می‌دهند |
+| **دسترسی** | شاید معماری را مستقیم برای مدیرعامل توضیح بدهید، نه از دل هفت لایه |
+| **دیده شدن** | آشوب نشان می‌دهد چه کسی می‌تواند بسازد و چه کسی فقط می‌تواند نگه دارد |
+| **انتظار پایین و بردهای روی‌هم‌جمع‌شونده** | کسی معجزه انتظار ندارد؛ هر باگ رفع‌شده و هر deployment موفق شتاب می‌سازد |
 
-You're not trying to eliminate chaos — that's impossible — but to create just enough order, process and structure, building systems that can bend without breaking. The authors claim a year of successful leadership in chaos teaches more than five years of steady-state management (p. 7).
+قرار نیست آشوب را از بین ببرید، چون ناممکن است، بلکه قرار است به‌اندازه نظم و process و ساختار بسازید؛ سیستم‌هایی که خم شوند و نشکنند. نویسنده‌ها می‌گویند یک سال رهبری موفق در آشوب بیشتر از پنج سال مدیریتِ وضعیت باثبات یاد می‌دهد (p. 7).
 
-### Well, That Was Fun
+> **In practice:** تیم داده‌ی کوچک با stack تازه، یعنی ClickHouse و Kubernetes و GitOps، دقیقاً همان محیط بی‌ثباتی است که کتاب از آن حرف می‌زند.
+>
+> **Your turn:** process انتشار مدل‌های Gold هنوز دستی است و کسی مالکش نیست. این مشکل است یا فرصت؟
+>
+> *Answer:* هر دو: نبود دیوان‌سالاری یعنی می‌شود همین هفته یک merge request و یک check در GitLab CI را به process تبدیل کرد و اگر جواب نداد عوضش کرد. کتاب آشوب را جایی می‌داند که اجازه‌ی ساختن و مالکیت راحت‌تر به دست می‌آید (pp. 6–7).
 
-Chaos is common during rapid growth or significant change. Acknowledging it is the first step; the key is recognizing the patterns early, assessing the organization's current state, finding root causes and making targeted interventions (pp. 7–8).
+### خب، جالب بود
 
-### This Sounds Scary
+آشوب در دوره‌ی رشد سریع یا تغییر بزرگ رایج است. به رسمیت شناختنش اولین قدم است؛ نکته‌ی کلیدی این است که الگوها را زود بشناسید، وضعیت فعلی سازمان را بسنجید، ریشه‌ها را پیدا کنید و مداخله‌های هدفمند بکنید (pp. 7–8).
 
-Sometimes **the best solution is not working there at all** (p. 8). Leadership is isolating, more so without supportive leaders, peers and mentors; both authors have burnt out in such roles (p. 8).
+### ترسناک به نظر می‌رسد
 
-- **Weigh staying or leaving** against your core values and long-term goals: does the mission fit, are there growth opportunities and mentors, is there a sustainable path? (p. 8)
-- **Ask "Am I part of the problem too?"** In defending your team you can become a leader who enables chaos, or even a toxic element (p. 8).
-- **Build support outside work** — friends, family, networks, exercise, hobbies, mindfulness. Leaving a chaotic organization is not a sign of failure (p. 9).
+گاهی **بهترین راه‌حل این است که اصلاً آن‌جا کار نکنید** (p. 8). رهبری منزوی‌کننده است و بدون رهبرها و هم‌ترازها و منتورهای پشتیبان بیشتر هم می‌شود؛ هر دو نویسنده در چنین نقش‌هایی سوخته‌اند (p. 8).
 
-### What Are We Going to Do to Help?
+- **ماندن یا رفتن را** با ارزش‌های بنیادی و هدف‌های بلندمدتتان بسنجید: مأموریت با شما می‌خواند؟ فرصت رشد و منتور هست؟ مسیری پایدار وجود دارد (p. 8)؟
+- **بپرسید «نکند من هم بخشی از مسئله‌ام؟»** در دفاع از تیمتان می‌توانید به رهبری تبدیل شوید که آشوب را ممکن می‌کند، یا حتی به عنصری سمی (p. 8).
+- **بیرون از کار پشتیبان بسازید**، یعنی دوست و خانواده و شبکه و ورزش و سرگرمی و ذهن‌آگاهی. رفتن از سازمانی آشوب‌زده نشانه‌ی شکست نیست (p. 9).
 
-The book is a flexible toolkit of principles, techniques and mental models, not a playbook (p. 9). Its arc: leadership foundations and your role; setting direction and building teams; prioritization, balancing work types, planning and budgeting; technical strategy and principles; collaborative decision making; and metrics (pp. 9–10). **You can't control the whole organization**, but by focusing on what you can influence you create pockets of stability that can model broader change (p. 10).
+### قرار است چه کمکی بکنیم؟
 
-### Conclusion: From Chaos to Clarity
+کتاب جعبه‌ابزاری انعطاف‌پذیر از اصول و تکنیک‌ها و مدل‌های ذهنی است، نه یک دستورالعمل (p. 9). قوسش این است: پایه‌های رهبری و نقش شما؛ تعیین جهت و ساختن تیم؛ اولویت‌بندی و تعادل بین انواع کار و برنامه‌ریزی و بودجه؛ استراتژی و اصول فنی؛ تصمیم‌گیری مشارکتی؛ و متریک‌ها (pp. 9–10). **نمی‌توانید کل سازمان را کنترل کنید**، ولی با تمرکز روی چیزی که می‌توانید بر آن اثر بگذارید، جزیره‌هایی از ثبات می‌سازید که می‌توانند الگوی تغییر گسترده‌تر شوند (p. 10).
 
-You can't fix everything at once; leaders who try end up exhausted and part of the chaos. Instead, focus on the **five pillars of engineering leadership** that Chapter 2 develops (pp. 10–11):
+> **In practice:** این کتاب در stack ما بیشتر به ردیف «How the team works» در reference stack ربط دارد: آدم‌ها، جریان کار، اجرا و اندازه‌گیری.
+>
+> **Your turn:** کدام یک از این چهار در تیم شما امروز ضعیف‌ترین است؟
+>
+> *Answer:* پاسخ شخصی است؛ نشانه‌ها: on-call بی‌قاعده یعنی «اجرا»، merge requestهای چندروزه یعنی «جریان کار»، و نبود metric تحویل یعنی «اندازه‌گیری». فصل‌های بعدی کتاب هر کدام را جدا باز می‌کنند (p. 9).
 
-| Pillar | Focus (p. 11) |
+### جمع‌بندی: از آشوب تا روشنی
+
+نمی‌شود همه چیز را یک‌دفعه درست کرد؛ رهبرهایی که تلاش می‌کنند، فرسوده می‌شوند و خودشان بخشی از آشوب. به‌جایش روی **پنج ستون رهبری مهندسی** تمرکز کنید که فصل ۲ بازشان می‌کند (pp. 10–11):
+
+| ستون | تمرکز (p. 11) |
 |---|---|
-| **People** | Building and developing your team, from hiring to performance management to a collaborative culture |
-| **Mission** | Connecting engineers to the "why," even when company direction is unclear |
-| **Plan** | Roadmaps and priorities that balance business needs with technical reality |
-| **Process** | Lightweight workflows that enable rather than obstruct |
-| **Product** | Outcomes that matter, not output that looks good on a dashboard |
+| **آدم‌ها** | ساختن و پروراندن تیم، از استخدام تا مدیریت عملکرد تا فرهنگ مشارکتی |
+| **مأموریت** | وصل کردن مهندس‌ها به «چرا»، حتی وقتی جهت شرکت روشن نیست |
+| **برنامه** | نقشه‌ی راه و اولویت‌هایی که نیاز کسب‌وکار را با واقعیت فنی متعادل می‌کنند |
+| **process** | گردش‌کارهای سبک که راه را باز می‌کنند، نه سد می‌شوند |
+| **محصول** | نتیجه‌هایی که اهمیت دارند، نه خروجی‌ای که روی داشبورد خوب به نظر می‌رسد |
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Staying to fix the chaos | Fast learning, visibility, a leadership story | Stress, isolation, burnout risk |
-| Leaving | Your health; a supportive environment | The opportunity; feels like failure (it isn't) |
-| Fixing everything at once | Feels responsive | Exhaustion; you add to the chaos |
-| Building pockets of stability | Visible progress you control | Organization-wide problems remain |
-| Rigid order | Predictability | Breaks under fluid conditions |
-| Just enough structure | Bends without breaking | Requires constant judgement |
+| ماندن برای درست کردن آشوب | یادگیری سریع، دیده شدن، یک داستان رهبری | استرس، انزوا، خطر فرسودگی |
+| رفتن | سلامتتان؛ محیطی پشتیبان | آن فرصت؛ و حس شکست، که البته شکست نیست |
+| درست کردن همه چیز یک‌دفعه | واکنشی به نظر می‌رسد | فرسودگی؛ خودتان به آشوب اضافه می‌کنید |
+| ساختن جزیره‌های ثبات | پیشرفت دیدنی که در کنترل شماست | مشکل‌های کل سازمان سر جایشان می‌مانند |
+| نظم خشک | پیش‌بینی‌پذیری | زیر شرایط سیال می‌شکند |
+| به‌اندازه ساختار | خم می‌شود و نمی‌شکند | قضاوت پیوسته می‌خواهد |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Learned helplessness**, which the book names as a result of lacking ownership (p. 2), is a term from Martin Seligman's psychology experiments of the late 1960s.
-- **Blameless postmortems** — the opposite of the "blamestorm" (p. 4) — are the subject of Chapter 9 of [*The Manager's Path*](../../the-managers-path/chapters/09-bootstrapping-culture.md), whose author, Camille Fournier, the authors thank in their acknowledgments.
+- **درماندگی آموخته‌شده**، که کتاب آن را نتیجه‌ی نبود مالکیت می‌نامد (p. 2)، اصطلاحی از آزمایش‌های روان‌شناسی Martin Seligman در اواخر دهه‌ی ۱۹۶۰ است.
+- **مفهوم postmortem بدون سرزنش**، نقطه‌ی مقابل همان «طوفان سرزنش» (p. 4)، موضوع فصل ۹ کتاب [*The Manager's Path*](../../the-managers-path/chapters/09-bootstrapping-culture.md) است، که نویسنده‌های این کتاب در قدردانی‌هایشان از نویسنده‌اش Camille Fournier تشکر می‌کنند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. Understanding Your Role](02-understanding-your-role.md) (the five pillars in depth), [3. Navigating Chaos](03-navigating-chaos.md) (diagnosing context), [10. Metrics That Matter](10-metrics-that-matter-for-engineering-teams.md) (meaningful measurement), [11. Fitting It All Together](11-fitting-it-all-together.md).
+- **فصل‌های مرتبط:** [فصل ۲: فهمیدن نقشتان](02-understanding-your-role.md) که پنج ستون را باز می‌کند، [فصل ۳: راه بردن در آشوب](03-navigating-chaos.md) که تشخیص زمینه را می‌گوید، [فصل ۱۰: متریک‌هایی که مهم‌اند](10-metrics-that-matter-for-engineering-teams.md) که اندازه‌گیری معنادار را می‌گوید، و [فصل ۱۱: کنار هم گذاشتن همه چیز](11-fitting-it-all-together.md).
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **Why can a chaotic organization also be risk-averse and resistant to innovation?**
+1. **چرا یک سازمان آشوب‌زده می‌تواند ریسک‌گریز و مقاوم در برابر نوآوری هم باشد؟**
 
-   *Answer:* People become accustomed to the chaos and fatalistic about it, clinging to what "works" because change risks failure — and fatalism in turn generates more chaos (p. 3).
+   *Answer:* آدم‌ها به آشوب عادت می‌کنند و درباره‌اش تقدیرگرا می‌شوند و به چیزی که «کار می‌کند» می‌چسبند، چون تغییر خطر شکست دارد؛ و تقدیرگرایی هم آشوب بیشتری می‌سازد (p. 3).
 
-2. **What is a "blamestorm"?**
-   - [ ] A brainstorming technique
-   - [x] An incident process that begins by asking whose fault it is, delaying recovery
-   - [ ] A retrospective format
+2. **«طوفان سرزنش» چیست؟**
+   - [ ] یک تکنیک ایده‌پردازی
+   - [x] یک process برای رسیدگی به حادثه که با پرسیدن «تقصیر کیست؟» شروع می‌شود و بازیابی را عقب می‌اندازد
+   - [ ] قالبی برای جلسه‌ی مرور
 
-   *Answer:* A colleague of James coined it; assigning blame added significant delays to recovery (p. 4).
+   *Answer:* یکی از همکارهای James این اصطلاح را ساخت؛ تعیین مقصر تأخیر زیادی به بازیابی اضافه می‌کرد (p. 4).
 
-3. **Name three ways chaos creates opportunity for a leader.**
+3. **سه راهی را بگویید که آشوب برای یک رهبر فرصت می‌سازد.**
 
-   *Answer:* Any of: less bureaucracy; permission to build where ownership, process or metrics are missing; range; direct access to decision makers; visibility for those who can build; low expectations so small wins compound (pp. 6–7).
+   *Answer:* هر کدام از این‌ها: دیوان‌سالاری کمتر؛ اجازه‌ی ساختن آن‌جا که مالکیت یا process یا متریک نیست؛ دامنه‌ی گسترده؛ دسترسی مستقیم به تصمیم‌گیرها؛ دیده شدن آدم‌هایی که می‌توانند بسازند؛ و انتظار پایین که بردهای کوچک را روی هم جمع می‌کند (pp. 6–7).
 
-4. **What do the authors aim for instead of eliminating chaos?**
+4. **نویسنده‌ها به‌جای از بین بردن آشوب دنبال چه‌اند؟**
 
-   *Answer:* Just enough order, process and structure for productivity and sanity — systems that can bend without breaking (p. 7).
+   *Answer:* به‌اندازه نظم و process و ساختار برای بهره‌وری و سلامت روان؛ سیستم‌هایی که خم شوند و نشکنند (p. 7).
 
-5. **Which question do the authors ask readers to put to themselves?**
-   - [ ] "Is my team the best?"
-   - [x] "Am I part of the problem too?"
-   - [ ] "Can I fix this in a quarter?"
+5. **نویسنده‌ها از خواننده می‌خواهند کدام پرسش را از خودش بپرسد؟**
+   - [ ] «آیا تیم من بهترین است؟»
+   - [x] «نکند من هم بخشی از مسئله‌ام؟»
+   - [ ] «می‌توانم این را در یک فصل درست کنم؟»
 
-   *Answer:* Defending your team can turn you into a leader who enables chaos (p. 8).
+   *Answer:* دفاع از تیم می‌تواند شما را به رهبری تبدیل کند که آشوب را ممکن می‌کند (p. 8).
 
-6. **What are the five pillars of engineering leadership?**
+6. **پنج ستون رهبری مهندسی کدام‌اند؟**
 
-   *Answer:* People, mission, plan, process and product (p. 11).
+   *Answer:* آدم‌ها، مأموریت، برنامه، process و محصول (p. 11).

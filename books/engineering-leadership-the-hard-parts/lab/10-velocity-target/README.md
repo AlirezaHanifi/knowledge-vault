@@ -1,18 +1,20 @@
-# Velocity target
+# هدف‌گذاری velocity
 
-What does a team actually deliver once velocity becomes a target? The script simulates twelve sprints of a team that honestly does about 30 points of work a sprint, run two ways: planning with velocity, or told to report 45 points — the jump the board demanded of April's team.
+وقتی velocity به هدف تبدیل شود، تیم واقعاً چه تحویل می‌دهد؟ اسکریپت دوازده sprint از تیمی را شبیه‌سازی می‌کند که صادقانه حدود ۳۰ point کار در هر sprint انجام می‌دهد، یک‌بار با برنامه‌ریزی بر پایه‌ی velocity و یک‌بار با دستور گزارش کردن ۴۵ point، یعنی همان جهشی که هیئت‌مدیره از تیم April خواست.
 
-*Illustrates Engineering Leadership: The Hard Parts, “Velocity: The Most Misused Metric in Software”, pp. 215–216, and Goodhart's Law, p. 219. The implementation is the vault’s own: the model and all its parameters (25% estimate inflation, 20% effort saved by skipping review and documentation, bug-escape and incident rates, rework costs) are invented to mirror the mechanisms in April's story; the simulation is seeded.*
+*این آزمایش بخش «velocity: بدمصرف‌شده‌ترین متریک نرم‌افزار» از کتاب Engineering Leadership: The Hard Parts را نشان می‌دهد، صص. ۲۱۵–۲۱۶، و قانون Goodhart در ص. ۲۱۹. پیاده‌سازی مال خود vault است: مدل و همه‌ی پارامترهایش، یعنی ۲۵٪ باد کردن تخمین و ۲۰٪ صرفه‌جویی تلاش با رد کردن review و مستندسازی و نرخ فرار باگ و حادثه و هزینه‌ی دوباره‌کاری، ساختگی‌اند و سازوکارهای داستان April را آینه می‌کنند؛ شبیه‌سازی با seed ثابت اجرا می‌شود.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic:
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی:
 
 ```sh
 python3 velocity_target.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 12 sprints, honest capacity ~30 points; 2,000 seeded runs (averages)
@@ -23,13 +25,13 @@ velocity for planning        26.6     26.7     26.6     26.5       2.9        0.
 target of 45 points          38.7     33.1     30.7     29.1      16.8        3.9        0.0
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- **Reported velocity jumps** from about 27 to about 39 points, but a quarter of that rise is inflated estimates — the same work, relabelled.
-- **Real feature work rises at first** (skipping reviews really is faster) and then **declines sprint after sprint**, as escaped bugs and incidents come back as rework. The planning team stays flat.
-- The targeted team lets almost six times as many bugs escape and spends nothing on debt, so its incident risk keeps climbing — the six-hour outage in April's story is where this curve leads (p. 219).
-- In this model, the planning team's only "cost" is lower reported velocity — which is why the book keeps velocity inside the team as a capacity-planning tool (p. 216).
+- **مفهوم velocity گزارش‌شده جهش می‌کند** از حدود ۲۷ به حدود ۳۹ point، ولی یک‌چهارم این بالا رفتن تخمین بادکرده است؛ همان کار با برچسب تازه.
+- **کار واقعی روی feature اول بالا می‌رود**، چون رد کردن review واقعاً سریع‌تر است، و بعد **sprint به sprint پایین می‌آید**، چون باگ‌های فراری و حادثه‌ها به شکل دوباره‌کاری برمی‌گردند. تیمی که برنامه‌ریزی می‌کند صاف می‌ماند.
+- تیم هدف‌گرفته تقریباً شش برابر باگ بیشتری فراری می‌دهد و هیچ چیزی خرج بدهی نمی‌کند، پس ریسک حادثه‌اش مدام بالا می‌رود؛ قطعی شش‌ساعته‌ی داستان April همان‌جایی است که این منحنی به آن می‌رسد (ص. ۲۱۹).
+- در این مدل تنها «هزینه»ی تیمِ برنامه‌ریز، velocity گزارش‌شده‌ی پایین‌تر است، و برای همین است که کتاب velocity را داخل خود تیم و به‌عنوان ابزار برنامه‌ریزی ظرفیت نگه می‌دارد (ص. ۲۱۶).
 
-## Related
+## پیوندها
 
-- Chapter note: [10. Metrics That Matter for Engineering Teams](../../chapters/10-metrics-that-matter-for-engineering-teams.md) — “Velocity: The Most Misused Metric in Software”, pp. 215–216; “Humans and Metrics”, p. 219
+- یادداشت فصل: [فصل ۱۰: متریک‌هایی که برای تیم‌های مهندسی مهم‌اند](../../chapters/10-metrics-that-matter-for-engineering-teams.md)، بخش «velocity: بدمصرف‌شده‌ترین متریک نرم‌افزار»، صص. ۲۱۵–۲۱۶، و «آدم‌ها و متریک‌ها»، ص. ۲۱۹

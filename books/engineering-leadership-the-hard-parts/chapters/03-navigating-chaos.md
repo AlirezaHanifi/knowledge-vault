@@ -3,242 +3,256 @@ book: engineering-leadership-the-hard-parts
 chapter: 3
 title: "Navigating Chaos"
 pages: "35–58"
+translated_title: "راه بردن در آشوب"
+lang: fa
 ---
 
-# 3. Navigating Chaos
+# فصل ۳: راه بردن در آشوب
 
-[← 2. Understanding Your Role](02-understanding-your-role.md) · [Book](../README.md) · [4. Building Cohesive Teams →](04-building-cohesive-teams.md)
+[فصل ۲: فهمیدن نقشتان →](02-understanding-your-role.md) · [کتاب](../README.md) · [فصل ۴: ساختن تیم‌های منسجم ←](04-building-cohesive-teams.md)
 
-## Summary
+## خلاصه
 
-Leaders are usually hired because something is broken, and the authors argue you fix it with range, not control. Range is four "switches" — deliberate shifts in tone, pace and focus: **diagnose context** through system, human, work and cultural lenses; **thrive in chaos** by creating motion instead of bureaucracy (illustrated with punk, hardcore and open source); **focus on outcomes** rather than activity, without sliding into outcome obsession; and **shift between roles** — pilot, medic and engineer. The chapter is candid that identity and position limit which approaches are available, and follows April through an outage and its post-incident meeting (pp. 35–58).
+رهبرها معمولاً استخدام می‌شوند چون چیزی خراب است، و نویسنده‌ها می‌گویند آن را با دامنه درست می‌کنید، نه با کنترل. دامنه چهار «کلید» است، یعنی جابه‌جایی عامدانه در لحن و سرعت و تمرکز: **تشخیص زمینه** از دل چهار عدسی سیستم و انسان و کار و فرهنگ؛ **دوام آوردن در آشوب** با ساختن حرکت به‌جای دیوان‌سالاری، که با پانک و hardcore و open source نشان داده می‌شود؛ **تمرکز بر نتیجه** به‌جای فعالیت، بدون لغزیدن به وسواس نتیجه؛ و **جابه‌جایی بین نقش‌ها**، یعنی خلبان و امدادگر و مهندس. فصل صریح می‌گوید که هویت و جایگاه محدود می‌کنند کدام رویکردها در دسترس شمایند، و April را در یک قطعی و جلسه‌ی پس از آن دنبال می‌کند (pp. 35–58).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **You don't fix chaos with control; you fix it with range** — four switches that are lenses for reading a situation and tools for acting (pp. 35–36).
-- **Diagnose before you act:** read the system (early stage, scale-up, enterprise), the people, the work and the culture; mismatches waste energy (pp. 37–43).
-- **Burnout masquerades as resistance.** Resistance needs vision and buy-in; burnout needs capacity protection — opposite interventions (p. 39).
-- **Diagnosis isn't neutral:** identity, background and position change which approaches are viable — including the authors' own advice (pp. 40–41).
-- **Motion creates clarity.** Bureaucratic control looks productive but adds paperwork to drowning teams; ship small, prototype, write the first draft — and build the coalition before the solution (pp. 43–47).
-- **Don't confuse activity with progress.** Experienced teams fall into a "sophistication trap"; aim for outcome awareness, not outcome obsession (pp. 47–51).
-- **Switch consciously between pilot, medic and engineer**, explaining why, rather than defending a fixed style (pp. 51–56).
+- **آشوب را با کنترل درست نمی‌کنید؛ با دامنه درستش می‌کنید**؛ چهار کلید که هم عدسی خواندن موقعیت‌اند و هم ابزار عمل (pp. 35–36).
+- **پیش از عمل تشخیص بدهید:** سیستم را بخوانید، یعنی مرحله‌ی اولیه یا scale-up یا سازمان بزرگ، و بعد آدم‌ها و کار و فرهنگ را؛ ناهم‌خوانی انرژی را هدر می‌دهد (pp. 37–43).
+- **فرسودگی لباس مقاومت می‌پوشد.** مقاومت به چشم‌انداز و همراهی نیاز دارد و فرسودگی به محافظت از ظرفیت؛ دو مداخله‌ی مخالف هم (p. 39).
+- **تشخیص خنثی نیست:** هویت و پیشینه و جایگاه عوض می‌کنند کدام رویکرد شدنی است، حتی برای خود توصیه‌های نویسنده‌ها (pp. 40–41).
+- **حرکت روشنی می‌سازد.** کنترل دیوان‌سالارانه پربازده به نظر می‌رسد ولی به تیم در حال غرق شدن کاغذبازی اضافه می‌کند؛ کوچک تحویل بدهید، نمونه‌ی اولیه بسازید، پیش‌نویس اول را خودتان بنویسید، و پیش از راه‌حل، ائتلاف را بسازید (pp. 43–47).
+- **فعالیت را با پیشرفت اشتباه نگیرید.** تیم‌های باتجربه در «دام پیچیدگی» می‌افتند؛ هدف آگاهی از نتیجه است، نه وسواس نتیجه (pp. 47–51).
+- **آگاهانه بین خلبان و امدادگر و مهندس جابه‌جا شوید** و دلیلش را بگویید، به‌جای دفاع از یک سبک ثابت (pp. 51–56).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Diagnose Context — p. 37
-  - Why Diagnosis Matters More Than Style — p. 37
-  - Four Lenses for Reading Context — p. 38
-  - The Reality of Power and Identity — p. 40
-  - Rapid Assessment When You’re New — p. 41
-  - When Diagnosis Reveals Hard Truths — p. 42
-  - Connecting Diagnosis to Action — p. 42
-- Thrive in Chaos — p. 43
-  - The Trap of Bureaucratic Control — p. 44
-  - The Punk Alternative: Motion Creates Clarity — p. 44
-  - From Energy to Discipline — p. 45
-  - Open Source: Punk Principles at Scale — p. 45
-  - What This Means for Seasoned Leaders — p. 46
-  - The Political Reality — p. 46
-  - When Momentum Matters Most — p. 46
-- Focus on Outcomes — p. 47
-  - The Sophistication Trap — p. 47
-  - Why Outcome Frameworks Miss the Point — p. 47
-  - When Outcomes Are Genuinely Unclear — p. 48
-  - The Political Dimension — p. 48
-  - Context Shapes Outcome Focus — p. 49
-  - Failure Modes of Outcome Obsession — p. 49
-  - What This Looks Like in Practice — p. 50
-  - Making It Sustainable — p. 51
-- Shift Between Roles — p. 51
-  - The Cost of Leadership Rigidity — p. 51
-  - Three Essential Modes — p. 52
-  - The Switching Skill — p. 54
-  - The Reality of Constraints — p. 54
-  - Leading Through Others — p. 55
-  - What This Looks Like in Practice — p. 55
-- Conclusion: Pulling It All Together — p. 58
+- تشخیص زمینه — p. 37
+  - چرا تشخیص از سبک مهم‌تر است — p. 37
+  - چهار عدسی برای خواندن زمینه — p. 38
+  - واقعیت قدرت و هویت — p. 40
+  - ارزیابی سریع وقتی تازه‌واردید — p. 41
+  - وقتی تشخیص حقیقت‌های سخت را رو می‌کند — p. 42
+  - وصل کردن تشخیص به عمل — p. 42
+- دوام آوردن در آشوب — p. 43
+  - دام کنترل دیوان‌سالارانه — p. 44
+  - جایگزین پانکی: حرکت روشنی می‌سازد — p. 44
+  - از انرژی تا انضباط — p. 45
+  - بخش open source: اصول پانک در مقیاس — p. 45
+  - این برای رهبرهای کارکشته یعنی چه — p. 46
+  - واقعیت سیاسی — p. 46
+  - کِی شتاب بیشترین اهمیت را دارد — p. 46
+- تمرکز بر نتیجه — p. 47
+  - دام پیچیدگی — p. 47
+  - چرا چارچوب‌های نتیجه‌محور نکته را از دست می‌دهند — p. 47
+  - وقتی نتیجه‌ها واقعاً مبهم‌اند — p. 48
+  - بُعد سیاسی — p. 48
+  - زمینه به تمرکز بر نتیجه شکل می‌دهد — p. 49
+  - شکل‌های شکست وسواس نتیجه — p. 49
+  - در عمل چه شکلی است — p. 50
+  - پایدار کردنش — p. 51
+- جابه‌جایی بین نقش‌ها — p. 51
+  - هزینه‌ی خشکی در رهبری — p. 51
+  - سه حالت ضروری — p. 52
+  - مهارت جابه‌جا شدن — p. 54
+  - واقعیت قیدها — p. 54
+  - رهبری از راه دیگران — p. 55
+  - در عمل چه شکلی است — p. 55
+- جمع‌بندی: کنار هم گذاشتن همه — p. 58
 
-## Notes
+## یادداشت‌ها
 
-Most leaders inherit something broken — a team behind, shaky trust, inconsistent delivery — with no onboarding guide for chaos. Range lets you read the room, lead with clarity, be decisive without rigidity, and calm things down without slowing them down. The authors call the shifts **switches**: adjustments in tone, pace and focus, not personality changes (p. 35).
+بیشتر رهبرها چیزی خراب را به ارث می‌برند؛ تیمی که عقب است، اعتمادی لرزان، تحویل ناهموار، و هیچ راهنمای onboardingی برای آشوب نیست. دامنه به شما اجازه می‌دهد اتاق را بخوانید، با روشنی رهبری کنید، قاطع باشید بی‌آن‌که خشک شوید، و اوضاع را آرام کنید بی‌آن‌که کندش کنید. نویسنده‌ها این جابه‌جایی‌ها را **کلید** می‌نامند: تنظیم لحن و سرعت و تمرکز، نه عوض شدن شخصیت (p. 35).
 
-![Mind map with leadership range at the centre and four branches — diagnose context, focus on outcomes, shift between roles and thrive in chaos — each with three sub-skills](../figures/03-01.png)
+![نقشه‌ی ذهنی با دامنه‌ی رهبری در مرکز و چهار شاخه، یعنی تشخیص زمینه و تمرکز بر نتیجه و جابه‌جایی بین نقش‌ها و دوام آوردن در آشوب، که هر کدام سه زیرمهارت دارند](../figures/03-01.png)
 
-*Figure 3-1 (p. 36): each of the four switches breaks down into three concrete moves — for example, shifting between roles means choosing implementer, strategist or coach mode.*
+*Figure 3-1 (p. 36): هر کدام از چهار کلید به سه حرکت مشخص می‌شکند؛ مثلاً جابه‌جایی بین نقش‌ها یعنی انتخاب بین حالت پیاده‌ساز و استراتژیست و کوچ.*
 
-### Diagnose Context
+### تشخیص زمینه
 
-One of the fastest ways to lose a team is leading them as if they're somewhere else: many leaders fall back on what worked before (p. 37). Diagnosis reads three **dimensions** — **human** (energy, trust), **operational** (clear priorities, visible work, sustainable pace) and **cultural** (unspoken rules about what is rewarded or punished) (p. 37).
+یکی از سریع‌ترین راه‌های از دست دادن تیم این است که طوری رهبری‌شان کنید که انگار جای دیگری‌اند: خیلی از رهبرها به چیزی برمی‌گردند که قبلاً جواب داده (p. 37). تشخیص سه **بُعد** را می‌خواند: **انسانی** یعنی انرژی و اعتماد، **عملیاتی** یعنی اولویت‌های روشن و کار دیدنی و سرعت پایدار، و **فرهنگی** یعنی قاعده‌های نانوشته درباره‌ی این‌که چه چیزی پاداش می‌گیرد و چه چیزی تنبیه می‌شود (p. 37).
 
-#### Four Lenses for Reading Context
+#### چهار عدسی برای خواندن زمینه
 
-| Lens | Question | What to look for (pp. 38–40) |
+| عدسی | پرسش | دنبال چه بگردید (pp. 38–40) |
 |---|---|---|
-| **1. System** | What kind of environment are we in? | Constraints that set pace and risk tolerance: startup speed is a liability under compliance; enterprise caution is costly in a startup, where hesitation burns runway |
-| **2. Human** | What shape are my people in? | Energy, trust and history decide whether people can absorb new challenges |
-| **3. Work** | What's actually on the plate? | Hidden or misaligned work makes good teams look dysfunctional |
-| **4. Cultural** | What are the unspoken rules? | The right strategy with the wrong cultural approach gets "rejected like a bad organ transplant" |
+| **۱. سیستم** | در چه جور محیطی هستیم؟ | قیدهایی که سرعت و تحمل ریسک را تعیین می‌کنند: سرعت استارتاپی زیر مقررات دردسر است و احتیاط سازمان بزرگ در استارتاپ گران تمام می‌شود، جایی که تردید سرمایه را می‌سوزاند |
+| **۲. انسان** | آدم‌هایم در چه حالی‌اند؟ | انرژی و اعتماد و تاریخچه تعیین می‌کنند آدم‌ها می‌توانند چالش تازه را جذب کنند یا نه |
+| **۳. کار** | واقعاً چه چیزی روی میز است؟ | کار پنهان یا ناهم‌راستا تیم‌های خوب را ناکارکرد نشان می‌دهد |
+| **۴. فرهنگ** | قاعده‌های نانوشته چیست‌اند؟ | استراتژی درست با رویکرد فرهنگی غلط «مثل پیوند عضو بد پس زده می‌شود» |
 
-| *Table 3-1. Leadership by organizational stage* (p. 38) | Defining traits | Leadership focus |
+| *جدول ۳-۱. رهبری بر حسب مرحله‌ی سازمان* (p. 38) | ویژگی‌های تعیین‌کننده | تمرکز رهبری |
 |---|---|---|
-| **Early stage** | Existential pressure, resource constraints, rapid iteration | Protecting energy, simplifying decisions, maintaining focus |
-| **Scale-up** | Growth outpacing systems, unclear ownership, increasing complexity | Building sustainable practices, clarifying boundaries, managing overwhelm |
-| **Enterprise** | Established processes, political dynamics, interdependencies | Navigating stakeholders, influencing indirectly, finding leverage points |
+| **مرحله‌ی اولیه** | فشار بقا، قید منابع، تکرار سریع | محافظت از انرژی، ساده کردن تصمیم‌ها، حفظ تمرکز |
+| **scale-up** | رشدی که از سیستم‌ها جلو زده، مالکیت نامشخص، پیچیدگی فزاینده | ساختن رویه‌های پایدار، روشن کردن مرزها، مدیریت غرق‌شدگی |
+| **سازمان بزرگ** | processهای جاافتاده، پویایی سیاسی، وابستگی متقابل | راه بردن بین ذی‌نفع‌ها، نفوذ غیرمستقیم، پیدا کردن نقطه‌های اهرم |
 
-| *Table 3-2. Readiness for change* (p. 39) | Warning signs | Leadership response |
+| *جدول ۳-۲. آمادگی برای تغییر* (p. 39) | نشانه‌های هشدار | پاسخ رهبری |
 |---|---|---|
-| **Energy levels** | Fatigue versus enthusiasm in meetings and work | Protect recovery time, or channel momentum |
-| **Trust dynamics** | How freely people raise problems and disagree constructively | Rebuild through small, visible commitments |
-| **Historical baggage** | References to past failures, leadership changes, broken promises | Acknowledge history; create safety before pushing change |
+| **سطح انرژی** | خستگی در برابر اشتیاق در جلسه‌ها و کار | از زمان بازیابی محافظت کنید، یا شتاب را هدایت کنید |
+| **پویایی اعتماد** | این‌که آدم‌ها چقدر راحت مسئله را مطرح می‌کنند و سازنده مخالفت می‌کنند | با تعهدهای کوچک و دیدنی دوباره بسازیدش |
+| **بار تاریخی** | اشاره به شکست‌های گذشته، تغییر رهبرها، قول‌های شکسته | تاریخ را به رسمیت بشناسید؛ پیش از هل دادن تغییر، امنیت بسازید |
 
-**Burnout often masquerades as resistance** (p. 39). Resistance shows up as active pushback and vocal concerns; burnout as withdrawal, declining quality and hollow compliance. The interventions are opposite: resistance needs vision clarification and rebuilt buy-in; burnout needs capacity protection — slowing down, reducing scope, recovery time.
+**فرسودگی اغلب لباس مقاومت می‌پوشد** (p. 39). مقاومت به شکل پس زدن فعال و نگرانی‌های بلند بیان‌شده پیدا می‌شود و فرسودگی به شکل کناره‌گیری و افت کیفیت و پیروی توخالی. مداخله‌ها مخالف هم‌اند: مقاومت به شفاف شدن چشم‌انداز و بازسازی همراهی نیاز دارد و فرسودگی به محافظت از ظرفیت، یعنی کند کردن و کم کردن دامنه و زمان بازیابی.
 
-| *Table 3-3. Productivity illusions* (p. 40) | Warning signs | Leadership action |
+| *جدول ۳-۳. توهم‌های بهره‌وری* (p. 40) | نشانه‌های هشدار | اقدام رهبری |
 |---|---|---|
-| **Hidden work** | Complaints about being "busy" with low visible output | Make all work visible; track interruptions |
-| **Low-impact focus** | Lots of activity, unclear business connection | Reconnect work to outcomes; cut low-value tasks |
-| **Unsustainable balance** | Constant crisis response or endless optimization | Protect capacity; enforce prioritization boundaries |
+| **کار پنهان** | شکایت از «شلوغی» با خروجی دیدنیِ کم | همه‌ی کار را دیدنی کنید؛ وقفه‌ها را ثبت کنید |
+| **تمرکز بر کار کم‌اثر** | فعالیت زیاد با پیوند مبهم به کسب‌وکار | کار را دوباره به نتیجه وصل کنید؛ کارهای کم‌ارزش را حذف کنید |
+| **تعادل ناپایدار** | واکنش دائمی به بحران یا بهینه‌سازی بی‌پایان | از ظرفیت محافظت کنید؛ مرزهای اولویت‌بندی را اجرا کنید |
 
-| *Table 3-4. Cultural dimensions* (p. 40) | Strengths to amplify | Leadership action |
+| *جدول ۳-۴. ابعاد فرهنگی* (p. 40) | نقاط قوتی که باید تقویت شوند | اقدام رهبری |
 |---|---|---|
-| **Speed versus stability** | Move fast and break things / measure twice, cut once | Calibrate pace to context; explain timing decisions |
-| **Decision-making style** | Consensus-driven / top-down clarity | Set decision timelines; create safe dissent channels |
-| **Risk tolerance** | Innovation rewarded / failure punished | Align incentives with desired risk behaviour; celebrate intelligent failures |
+| **سرعت در برابر ثبات** | سریع حرکت کن و بشکن / دو بار اندازه بگیر، یک بار ببر | سرعت را با زمینه کالیبره کنید؛ تصمیم‌های زمانی را توضیح بدهید |
+| **سبک تصمیم‌گیری** | مبتنی بر اجماع / روشنیِ از بالا به پایین | برای تصمیم‌ها زمان‌بندی بگذارید؛ کانال‌های امن مخالفت بسازید |
+| **تحمل ریسک** | نوآوری پاداش می‌گیرد / شکست تنبیه می‌شود | انگیزه‌ها را با رفتار ریسکی مطلوب هم‌راستا کنید؛ شکست‌های هوشمندانه را جشن بگیرید |
 
-#### The Reality of Power and Identity
+#### واقعیت قدرت و هویت
 
-Diagnosis isn't neutral: background, identity and position affect what you can see and do. Some leaders can challenge executives directly and gain trust; others face more scrutiny for the same behaviour because of their background, accent or visible identity, and those with multiple marginalized identities may face compounded challenges (p. 40). The authors — "both bald, tattooed men, one Colombian, one Australian" — note that what works for one of them may not work for the other, so **adaptable frameworks matter more than specific tactics** (p. 41). Sometimes the effective approach is indirect — allies, small-scale results, reframing proposals — and sometimes a direct challenge (p. 41).
+تشخیص خنثی نیست: پیشینه و هویت و جایگاه بر این‌که چه می‌بینید و چه می‌توانید بکنید اثر می‌گذارند. بعضی رهبرها می‌توانند مستقیم مدیران اجرایی را به چالش بکشند و اعتماد بگیرند؛ بعضی دیگر برای همان رفتار به‌خاطر پیشینه یا لهجه یا هویت دیدنی‌شان بیشتر زیر ذره‌بین می‌روند، و کسانی که چند هویت به‌حاشیه‌رانده‌شده دارند با چالش‌های روی‌هم‌انباشته روبه‌رویند (p. 40). خود نویسنده‌ها، «هر دو مردهایی کچل و خالکوبی‌شده، یکی کلمبیایی و یکی استرالیایی»، می‌گویند چیزی که برای یکی‌شان کار می‌کند شاید برای آن یکی کار نکند، پس **چارچوب‌های تطبیق‌پذیر از تاکتیک‌های مشخص مهم‌ترند** (p. 41). گاهی رویکرد مؤثر غیرمستقیم است، یعنی هم‌پیمان و نتیجه‌ی کوچک و بازقاب‌بندی پیشنهاد، و گاهی چالش مستقیم (p. 41).
 
-#### Rapid Assessment When You’re New
+#### ارزیابی سریع وقتی تازه‌واردید
 
-Observe before acting: attend meetings without fixing them, read Slack channels, follow a deploy or an incident (p. 41). Ask questions about dynamics: *What's working well that I shouldn't break? What keeps falling through the cracks? Where does the team feel most and least confident?* Seek quiet voices and one-on-one conversations, look for patterns, and **test small hypotheses** — propose a minor process change and watch the response (pp. 41–42).
+پیش از عمل مشاهده کنید: به جلسه‌ها بروید بی‌آن‌که درستشان کنید، کانال‌های Slack را بخوانید، یک deploy یا یک حادثه را دنبال کنید (p. 41). درباره‌ی پویایی‌ها بپرسید: *چه چیزی خوب کار می‌کند که نباید خرابش کنم؟ چه چیزی مدام از قلم می‌افتد؟ تیم کجا بیشترین و کجا کمترین اعتمادبه‌نفس را دارد؟* سراغ صداهای ساکت و گفت‌وگوی تک‌نفره بروید، دنبال الگو بگردید، و **فرضیه‌های کوچک را آزمون کنید**؛ تغییر کوچکی در process پیشنهاد بدهید و واکنش را ببینید (pp. 41–42).
 
-#### When Diagnosis Reveals Hard Truths
+#### وقتی تشخیص حقیقت‌های سخت را رو می‌کند
 
-Sometimes the team isn't dysfunctional but "responding rationally to irrational constraints" — years of pressure to ship over investing in stability. **Name the context**: acknowledge that the system creates unsustainable demands while improving what you can (p. 42).
+گاهی تیم ناکارکرد نیست بلکه «دارد به قیدهای نامعقول، معقول پاسخ می‌دهد»؛ سال‌ها فشار برای تحویل دادن به‌جای سرمایه‌گذاری روی ثبات. **زمینه را نام ببرید**: بپذیرید که سیستم تقاضای ناپایدار می‌سازد، و در همان حال هر چه می‌توانید بهتر کنید (p. 42).
 
-> **In Practice: April's Story** (pp. 42–43). After a 30-minute outage from a routine deployment, April applies the lenses: scale-up chaos (system), a team exhausted by six months of firefighting (human), hidden operational work consuming 40% of capacity (work), and a culture valuing fast shipping over safe shipping. It isn't a technical problem: she'd been trying to solve an organizational mismatch with monitoring tools. Her breakthrough comes from addressing all four dimensions together.
+> **کادر In Practice: داستان April** (pp. 42–43). بعد از یک قطعی ۳۰ دقیقه‌ای از دل یک deployment معمولی، April عدسی‌ها را به کار می‌برد: آشوب مرحله‌ی scale-up در عدسی سیستم، تیمی خسته از شش ماه آتش‌نشانی در عدسی انسان، کار عملیاتی پنهان که ۴۰٪ ظرفیت را می‌خورد در عدسی کار، و فرهنگی که تحویل سریع را بالاتر از تحویل امن می‌نشاند. مسئله فنی نبود: او داشت با ابزار monitoring ناهم‌خوانی سازمانی را حل می‌کرد. گره وقتی باز می‌شود که هر چهار بُعد را با هم ببیند.
 
-#### Connecting Diagnosis to Action
+#### وصل کردن تشخیص به عمل
 
-System insights set your pace and communication; human insights your emotional approach (exhausted teams need protection, anxious teams predictability, confident teams can take ambiguity); work insights drive operational changes; cultural insights shape your political strategy — direct challenge or coalition building. The goal is a good-enough assessment that avoids big mismatches (pp. 42–43).
+بینش سیستمی سرعت و ارتباط شما را تعیین می‌کند؛ بینش انسانی رویکرد عاطفی‌تان را، چون تیم خسته محافظت می‌خواهد و تیم مضطرب پیش‌بینی‌پذیری و تیم بااعتمادبه‌نفس می‌تواند ابهام را تاب بیاورد؛ بینش کاری تغییرهای عملیاتی را می‌راند؛ و بینش فرهنگی به راهبرد سیاسی‌تان شکل می‌دهد، یعنی چالش مستقیم یا ساختن ائتلاف. هدف، ارزیابی‌ای به‌اندازه‌ی کافی خوب است که از ناهم‌خوانی‌های بزرگ جلوگیری کند (pp. 42–43).
 
-> **Try it:** [Pilot, medic or engineer?](../widgets/03-leadership-modes.html) — read the signals in the book's own situations, tell burnout from resistance, and choose the mode each moment needs.
+> **Try it:** [خلبان، امدادگر یا مهندس؟](../widgets/03-leadership-modes.html)؛ نشانه‌ها را در موقعیت‌های خود کتاب بخوانید، فرسودگی را از مقاومت تشخیص بدهید و حالتی را انتخاب کنید که هر لحظه لازم دارد.
 
-### Thrive in Chaos
+> **In practice:** روشی که در یک تیم داده جواب داده، مثلاً یک warehouse مدیریت‌شده با تیم بزرگ، لزوماً در تیم کوچک با ClickHouse self-hosted جواب نمی‌دهد.
+>
+> **Your turn:** می‌خواهید process code review سنگین تیم قبلی‌تان را بیاورید. پیش از آن چه چیزی را می‌خوانید؟
+>
+> *Answer:* سه بُعد کتاب: انسانی، یعنی اعتماد و انرژی تیم؛ عملیاتی، یعنی سرعت فعلی merge requestها و بار on-call؛ و فرهنگی، یعنی این‌که امروز چه چیزی پاداش می‌گیرد. کتاب هشدار می‌دهد که رهبری کردن تیم مثل جای دیگر سریع‌ترین راه از دست دادنش است (p. 37).
 
-When things fall apart most leaders grab for control — approval layers, checkpoints — and everyone feels busy but achieves nothing; control is often the problem (p. 43).
+### دوام آوردن در آشوب
 
-- **The trap of bureaucratic control.** More meetings, sign-offs and reports that nobody reads: "now your team is drowning and filling out paperwork." It isn't anti-process — architecture decisions, incident protocols and clear ownership help — but there's a difference between infrastructure that helps people do the job and bureaucracy that becomes the job (p. 44).
-- **The punk alternative: motion creates clarity.** Punk bypassed the music industry's gatekeepers: the Ramones recorded their debut album in seven days; Minor Threat released eight songs in under ten minutes; Black Flag played anywhere. You get good by doing, failing fast and doing it again (pp. 44–45).
-- **From energy to discipline.** Some punk scenes burned out; hardcore kept the urgency but added discipline and community — shared vans and gear, zines connecting cities. Move from motion to *sustainable* motion, "from moving fast to moving fast together" (p. 45).
-- **Open source: punk principles at scale.** Linux, PostgreSQL and Apache came from people who fixed what was broken and shared it; influence was earned commit by commit, coordination replaced control. Open source also shows the limits: maintainer burnout, messy governance, broken funding models (p. 45).
+وقتی همه چیز از هم می‌پاشد بیشتر رهبرها به کنترل چنگ می‌زنند، یعنی لایه‌های تأیید و ایستگاه‌های بازبینی، و همه حس شلوغی می‌کنند بی‌آن‌که چیزی به دست بیاید؛ اغلب خود کنترل مسئله است (p. 43).
 
-| What this means for seasoned leaders (p. 46) | Instead of… |
+- **دام کنترل دیوان‌سالارانه.** جلسه و امضا و گزارش‌هایی که کسی نمی‌خواندشان: «حالا تیمتان هم دارد غرق می‌شود و هم کاغذ پر می‌کند.» این ضدیت با process نیست، چون تصمیم‌های معماری و پروتکل حادثه و مالکیت روشن کمک می‌کنند، ولی بین زیرساختی که کمک می‌کند آدم‌ها کارشان را بکنند و دیوان‌سالاری‌ای که خودش به کار تبدیل می‌شود فرق هست (p. 44).
+- **جایگزین پانکی: حرکت روشنی می‌سازد.** پانک دروازه‌بان‌های صنعت موسیقی را دور زد: گروه Ramones اولین آلبومش را در هفت روز ضبط کرد؛ Minor Threat هشت آهنگ در کمتر از ده دقیقه منتشر کرد؛ Black Flag هر جایی اجرا می‌کرد. با انجام دادن و سریع شکست خوردن و دوباره انجام دادن خوب می‌شوید (pp. 44–45).
+- **از انرژی تا انضباط.** بعضی صحنه‌های پانک سوختند؛ hardcore همان فوریت را نگه داشت و انضباط و اجتماع اضافه کرد، یعنی ون و تجهیزات مشترک و zineهایی که شهرها را به هم وصل می‌کردند. از حرکت به حرکت *پایدار* بروید، «از سریع حرکت کردن به سریع حرکت کردن با هم» (p. 45).
+- **عمل open source: اصول پانک در مقیاس.** پروژه‌های Linux و PostgreSQL و Apache از آدم‌هایی آمدند که چیز خراب را درست کردند و به اشتراک گذاشتند؛ نفوذ commit به commit به دست می‌آمد و هماهنگی جای کنترل را گرفت. open source محدودیت‌ها را هم نشان می‌دهد: فرسودگی نگه‌دارنده‌ها، حاکمیت درهم، و مدل‌های تأمین مالی خراب (p. 45).
+
+| این برای رهبرهای کارکشته یعنی چه (p. 46) | به‌جای… |
 |---|---|
-| Ship something small and learn from it | More planning meetings when the roadmap fails |
-| Prototype the most likely path for executives to react to | Waiting while they debate strategy |
-| Write the first draft of the broken process yourself | Waiting for someone to own fixing it |
+| چیزی کوچک تحویل بدهید و از آن یاد بگیرید | جلسه‌ی برنامه‌ریزی بیشتر وقتی نقشه‌ی راه شکست می‌خورد |
+| محتمل‌ترین مسیر را نمونه بسازید تا مدیران اجرایی واکنش نشان بدهند | انتظار کشیدن تا آن‌ها سر استراتژی بحث کنند |
+| پیش‌نویس اول processِ خراب را خودتان بنویسید | انتظار کشیدن تا کسی صاحب درست کردنش شود |
 
-Read the situation: some teams need *more* structure, and moving fast in a compliance-heavy industry can create legal problems. Distinguish **constraints that serve the work from constraints that serve themselves** (p. 46). Leading this way carries career risk; sustainable change needs community — start small, demonstrate results, find allies: **build the coalition before you build the solution** (p. 46). In circular debates or broken processes, the worst move isn't the wrong decision but no decision (pp. 46–47).
+موقعیت را بخوانید: بعضی تیم‌ها ساختار *بیشتری* لازم دارند، و سریع حرکت کردن در صنعتی پر از مقررات می‌تواند دردسر حقوقی بسازد. **قیدهایی که به کار خدمت می‌کنند را از قیدهایی که به خودشان خدمت می‌کنند جدا کنید** (p. 46). این شیوه‌ی رهبری ریسک شغلی دارد؛ تغییر پایدار به اجتماع نیاز دارد، پس کوچک شروع کنید و نتیجه نشان بدهید و هم‌پیمان پیدا کنید: **پیش از ساختن راه‌حل، ائتلاف را بسازید** (p. 46). در بحث‌های دایره‌ای یا processهای خراب، بدترین حرکت تصمیم اشتباه نیست، تصمیم نگرفتن است (pp. 46–47).
 
-### Focus on Outcomes
+### تمرکز بر نتیجه
 
-In unstable environments teams grab what they can measure — velocity, story points, deployment frequency — because measurable activity feels safe. But "activity without direction burns people out faster than honest idleness" (p. 47).
+در محیط‌های بی‌ثبات، تیم‌ها به هر چیزی که می‌شود اندازه گرفت چنگ می‌زنند، یعنی velocity و story point و تکرار deployment، چون فعالیت اندازه‌پذیر حس امنیت می‌دهد. ولی «فعالیت بدون جهت آدم‌ها را سریع‌تر از بی‌کاریِ صادقانه می‌سوزاند» (p. 47).
 
-- **The sophistication trap.** Experienced teams don't chase vanity metrics; they pursue work that *feels* important — architecture discussions that never conclude, refactoring that unlocks nothing, elaborate planning, process polish — until it becomes an end in itself (p. 47).
-- **Why outcome frameworks miss the point.** OKRs fail when they treat symptoms: clarity comes from understanding context, not better goal writing. The discipline is the same everywhere — connect daily work to meaningful outcomes, even indirect or delayed ones (pp. 47–48).
-- **When outcomes are genuinely unclear** — exploratory product work, architecture, platform investments that create leverage — be explicit about the hypothesis you're testing or the capability you're building (p. 48).
-- **The political dimension.** Reframe outcomes in business language — technical debt reduction becomes "increasing feature delivery predictability," infrastructure "reducing business risk from outages" — or surface the trade-off explicitly; know when to align, push back, or document disagreement and move on (pp. 48–49).
-- **Context shapes outcome focus:** the system sets the time horizon, the human context how you communicate (burned-out, low-trust teams need quick, frequent wins), the work context whether outcomes are even the problem, and culture what's politically viable (p. 49).
+- **دام پیچیدگی.** تیم‌های باتجربه دنبال متریک‌های پوچ نمی‌روند؛ دنبال کاری می‌روند که *حس* مهم بودن می‌دهد، مثل بحث‌های معماری که هیچ‌وقت تمام نمی‌شوند و refactoringی که چیزی را باز نمی‌کند و برنامه‌ریزی مفصل و صیقل دادن process، تا جایی که خودش هدف می‌شود (p. 47).
+- **چرا چارچوب‌های نتیجه‌محور نکته را از دست می‌دهند.** روش OKR وقتی شکست می‌خورد که سراغ نشانه‌ها برود: روشنی از فهمیدن زمینه می‌آید، نه از بهتر نوشتن هدف. انضباطش همه‌جا یکی است: کار روزمره را به نتیجه‌ی معنادار وصل کنید، حتی اگر غیرمستقیم یا با تأخیر باشد (pp. 47–48).
+- **وقتی نتیجه‌ها واقعاً مبهم‌اند**، مثل کار اکتشافی محصول و معماری و سرمایه‌گذاری روی platform که اهرم می‌سازد، صریح بگویید چه فرضیه‌ای را آزمون می‌کنید یا چه توانمندی‌ای می‌سازید (p. 48).
+- **بُعد سیاسی.** نتیجه‌ها را به زبان کسب‌وکار بازقاب‌بندی کنید، یعنی کم کردن بدهی فنی می‌شود «بالا بردن پیش‌بینی‌پذیری تحویل feature» و زیرساخت می‌شود «کم کردن ریسک کسب‌وکار از قطعی»، یا معامله را صریح روی میز بگذارید؛ و بدانید کِی باید هم‌راستا شوید، کِی پافشاری کنید، و کِی مخالفتتان را ثبت کنید و جلو بروید (pp. 48–49).
+- **زمینه به تمرکز بر نتیجه شکل می‌دهد:** سیستم افق زمانی را تعیین می‌کند، زمینه‌ی انسانی شیوه‌ی ارتباط را، چون تیم فرسوده و کم‌اعتماد به بردهای سریع و پرتکرار نیاز دارد، زمینه‌ی کار این را که اصلاً نتیجه مسئله هست یا نه، و فرهنگ این را که چه چیزی سیاسی شدنی است (p. 49).
 
-| Failure mode of outcome obsession (pp. 49–50) | Looks like |
+| شکل شکست وسواس نتیجه (pp. 49–50) | چه شکلی است |
 |---|---|
-| **Measurement illusion** | More time tracking progress than making it; unused dashboards |
-| **Outcome rigidity** | Treating outcome statements as contracts, not hypotheses |
-| **False precision** | Pretending to measure morale or code quality instead of using judgement |
-| **Gaming** | Splitting changes into meaningless commits to raise deployment frequency; hitting delivery targets by cutting quality |
+| **توهم اندازه‌گیری** | وقت بیشتری صرف پیگیری پیشرفت می‌شود تا خود پیشرفت؛ داشبوردهای بی‌استفاده |
+| **خشکی نتیجه** | با بیانیه‌های نتیجه مثل قرارداد برخورد می‌شود، نه مثل فرضیه |
+| **دقت دروغین** | وانمود به اندازه‌گیری روحیه یا کیفیت کد، به‌جای به کار بردن قضاوت |
+| **بازی دادن سنجه** | شکستن تغییرها به commitهای بی‌معنا برای بالا بردن تکرار deployment؛ یا رسیدن به هدف تحویل با کم کردن کیفیت |
 
-In practice, measure leading indicators: a feature's early engagement, not completion percentage; a deployment migration's time to production and rollback success, not percent migrated; an internal tool's onboarding time and pipeline failures, not adoption (pp. 50–51). Make it sustainable with outcome reviews ("What did we achieve?" not "What did we ship?"), retrospectives that ask whether work solved problems, and planning that starts from outcomes (p. 51).
+در عمل، شاخص‌های پیشرو را اندازه بگیرید: درگیری اولیه با یک feature، نه درصد تکمیلش؛ زمان رسیدن به production و موفقیت rollback در مهاجرت یک deployment، نه درصد مهاجرت‌شده؛ و زمان onboarding و خرابی pipeline برای یک ابزار داخلی، نه میزان پذیرشش (pp. 50–51). با جلسه‌های مرور نتیجه که می‌پرسند «به چه رسیدیم؟» نه «چه تحویل دادیم؟»، با retrospectiveهایی که می‌پرسند کار مسئله‌ای را حل کرد یا نه، و با برنامه‌ریزی‌ای که از نتیجه شروع می‌کند، پایدارش کنید (p. 51).
 
-### Shift Between Roles
+> **In practice:** شمار DAGها، شمار جدول‌ها و شمار deployها در هفته فعالیت‌اند، نه نتیجه.
+>
+> **Your turn:** کدام metric برای تیم داده به نتیجه نزدیک‌تر است؟
+>
+> *Answer:* تازگی و درستی جدول‌های Gold که تصمیم‌ها به آن‌ها تکیه دارند، و زمانی که یک پرسش تازه‌ی کسب‌وکار تا پاسخ طول می‌کشد. کتاب می‌گوید فعالیت اندازه‌پذیر حس امنیت می‌دهد ولی بدون جهت به جایی نمی‌رسد (pp. 47–48).
 
-Most leaders fail not from lack of skill but from **rigidly applying what worked before** — the VP still in implementation details, the consensus-building director when decisions must be fast, the staff engineer who can't step back. It deepens when identity fuses with style ("I'm a service-oriented leader"); leadership is a situational skill, not a brand (pp. 51–52).
+### جابه‌جایی بین نقش‌ها
 
-| Mode | Use it when | Looks like | Backfires when (pp. 52–54) |
+بیشتر رهبرها نه از کمبود مهارت که از **به‌کار‌بستن خشک چیزی که قبلاً جواب داده** شکست می‌خورند؛ VPای که هنوز در جزئیات پیاده‌سازی است، directorی که دنبال اجماع است وقتی تصمیم باید سریع باشد، و staff engineerی که نمی‌تواند یک قدم عقب بایستد. وقتی هویت با سبک جوش بخورد عمیق‌تر هم می‌شود، مثل «من رهبری خدمتگزارم»؛ رهبری مهارتی موقعیتی است، نه یک برند (pp. 51–52).
+
+| حالت | کِی به کار بیاید | چه شکلی است | کِی برعکس عمل می‌کند (pp. 52–54) |
 |---|---|---|---|
-| **Pilot** — zoom out for direction | Priorities are unclear, teams stuck in tactical debates, competing stakeholder pressures | Reframing a circular architecture discussion around user impact; surfacing real trade-offs | The team is overwhelmed by operational problems; cultures resist top-down direction |
-| **Medic** — stabilize and rebuild trust | Tension rising, someone burned out or isolated, a hard decision just landed | Discovering a quiet senior engineer is overwhelmed by scope changes; admitting a reorganization was disruptive | Emotional labour becomes expected, especially of underrepresented leaders; cultures punish "soft" work |
-| **Engineer** — get into the work | Momentum stalled despite clarity; critical details blocking; the team needs to see you with them | Pairing on a complex migration; joining customer calls; writing the first draft of a process | Overuse undermines autonomy; your skills may be outdated; strategy suffers |
+| **خلبان**: زوم به عقب برای تعیین جهت | اولویت‌ها مبهم‌اند، تیم‌ها در بحث تاکتیکی گیر کرده‌اند، فشار ذی‌نفع‌های رقیب هست | بازقاب‌بندی یک بحث دایره‌ای معماری حول اثر روی کاربر؛ رو کردن معامله‌های واقعی | وقتی تیم زیر مسئله‌های عملیاتی غرق است؛ یا فرهنگ در برابر جهت‌دهی از بالا مقاومت می‌کند |
+| **امدادگر**: آرام کردن و بازسازی اعتماد | تنش بالا می‌رود، کسی فرسوده یا منزوی شده، یا تصمیم سختی تازه اعلام شده | فهمیدن این‌که یک مهندس ارشدِ ساکت زیر تغییرهای دامنه غرق شده؛ پذیرفتن این‌که یک بازسازی سازمانی به‌هم‌ریزنده بوده | وقتی کار عاطفی انتظارِ همیشگی می‌شود، به‌خصوص از رهبران گروه‌های کم‌نمایندگی‌شده؛ یا فرهنگ کار «نرم» را تنبیه می‌کند |
+| **مهندس**: رفتن وسط خود کار | شتاب با وجود روشنی خوابیده؛ جزئیات حیاتی سد شده‌اند؛ تیم باید شما را کنار خودش ببیند | pair کردن روی یک مهاجرت پیچیده؛ رفتن به تماس با مشتری؛ نوشتن پیش‌نویس اول یک process | استفاده‌ی بیش از حد استقلال را از بین می‌برد؛ مهارت‌هایتان شاید کهنه باشند؛ و استراتژی آسیب می‌بیند |
 
-**The switching skill** is judgement: pattern recognition (people talking past each other, energy dropping, work stalling), mode flexibility without losing authenticity, and awareness of switching costs — teams need to know *why* you changed approach (p. 54). Identity, position and culture limit which modes are available (p. 54). In senior roles, help reports develop their own range, building collective range across managers, and decide when your switch should be visible (p. 55).
+**مهارت جابه‌جا شدن** قضاوت است: تشخیص الگو، یعنی آدم‌هایی که از کنار هم حرف می‌زنند و انرژی‌ای که می‌افتد و کاری که می‌خوابد؛ انعطاف در حالت بدون از دست دادن اصالت؛ و آگاهی از هزینه‌ی جابه‌جایی، چون تیم باید بداند *چرا* رویکردتان عوض شده (p. 54). هویت و جایگاه و فرهنگ محدود می‌کنند کدام حالت‌ها در دسترس شمایند (p. 54). در نقش‌های ارشد کمک کنید آدم‌هایتان دامنه‌ی خودشان را بسازند و دامنه‌ای جمعی بین مدیرها شکل بگیرد، و تصمیم بگیرید کِی جابه‌جایی شما باید دیده شود (p. 55).
 
-> **In Practice: April's Story** (p. 56). In the post-incident meeting the business wants timelines, seniors are defensive and juniors quietly blame themselves. April starts as pilot (the outage and infrastructure needs), switches to medic when tension rises with product (acknowledging stress and capacity), and to engineer when the discussion stalls on detail (mapping fixes) — ending with alignment on fixes and platform investment.
+> **کادر In Practice: داستان April** (p. 56). در جلسه‌ی پس از حادثه، کسب‌وکار زمان‌بندی می‌خواهد، آدم‌های ارشد حالت دفاعی دارند و تازه‌کارها بی‌صدا خودشان را سرزنش می‌کنند. April با حالت خلبان شروع می‌کند، درباره‌ی قطعی و نیازهای زیرساخت، وقتی تنش با product بالا می‌رود به امدادگر می‌رود و فشار و ظرفیت را به رسمیت می‌شناسد، و وقتی بحث روی جزئیات می‌خوابد به مهندس می‌رود و رفع‌ها را نقشه می‌کند، و جلسه با هم‌راستایی روی رفع‌ها و سرمایه‌گذاری روی platform تمام می‌شود.
 
-> **Exercise: Practice Your Switches** (pp. 56–58). Pick a stalled situation in one sentence; run it through the four lenses and write the biggest insight; decide whether it needs more momentum, more (useful) control, or a different focus; write the real outcome — not "better communication"; choose pilot, medic or engineer and one action for the next three days. If nothing would change, diagnose again.
+> **تمرین: کلیدهایتان را تمرین کنید** (pp. 56–58). یک موقعیت خوابیده را در یک جمله بنویسید؛ از چهار عدسی ردش کنید و بزرگ‌ترین بینش را بنویسید؛ تصمیم بگیرید شتاب بیشتر می‌خواهد یا کنترل بیشترِ مفید یا تمرکزی دیگر؛ نتیجه‌ی واقعی را بنویسید، نه «ارتباط بهتر»؛ و بین خلبان و امدادگر و مهندس یکی را با یک اقدام برای سه روز آینده انتخاب کنید. اگر هیچ چیز عوض نمی‌شود، دوباره تشخیص بدهید.
 
-### Conclusion: Pulling It All Together
+### جمع‌بندی: کنار هم گذاشتن همه
 
-You don't beat chaos with control or earn trust with posturing; you act, commit, teach and show up consistently. The switches work together: diagnosis tells you which approach; motion builds momentum; outcomes keep you pointed at impact; role flexibility meets each moment. "Range beats rigidity," and motion creates clarity (p. 58).
+آشوب را با کنترل نمی‌برید و اعتماد را با ژست به دست نمی‌آورید؛ عمل می‌کنید، متعهد می‌شوید، یاد می‌دهید و پیوسته حاضر می‌شوید. کلیدها با هم کار می‌کنند: تشخیص می‌گوید کدام رویکرد، حرکت شتاب می‌سازد، نتیجه‌ها شما را رو به اثر نگه می‌دارند، و انعطاف در نقش به هر لحظه پاسخ می‌دهد. «دامنه بر خشکی می‌چربد»، و حرکت روشنی می‌سازد (p. 58).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Bureaucratic control | Visible activity; feels safe | Paperwork for drowning teams; no momentum |
-| Punk-style motion | Momentum and clarity | Burnout without discipline; career and compliance risk |
-| Pushing a resistant team | Buy-in once vision is clear | Deepens burnout if the team is actually depleted |
-| Outcome focus | Effort on what matters | Can slide into measurement illusion, rigidity, gaming |
-| Pilot mode | Clarity on direction | Feels disconnected to overwhelmed teams |
-| Medic mode | Trust and recovery | Unequal emotional labour; seen as "soft" |
-| Engineer mode | Unblocks; shows solidarity | Undermines autonomy; distracts from strategy |
-| Frequent switching | Fits each moment | Confuses teams without explanation |
+| کنترل دیوان‌سالارانه | فعالیت دیدنی؛ حس امنیت | کاغذبازی برای تیمی که دارد غرق می‌شود؛ بی‌شتابی |
+| حرکت به سبک پانک | شتاب و روشنی | بدون انضباط، فرسودگی؛ ریسک شغلی و ریسک مقررات |
+| هل دادن تیمی مقاوم | وقتی چشم‌انداز روشن شود همراهی می‌آید | اگر تیم واقعاً تهی شده، فرسودگی را عمیق‌تر می‌کند |
+| تمرکز بر نتیجه | تلاش روی چیزی که مهم است | می‌تواند به توهم اندازه‌گیری و خشکی و بازی دادن سنجه بلغزد |
+| حالت خلبان | روشنی در جهت | برای تیم غرق‌شده حس فاصله می‌دهد |
+| حالت امدادگر | اعتماد و بازیابی | کار عاطفیِ نابرابر؛ «نرم» دیده شدن |
+| حالت مهندس | گره را باز می‌کند؛ همدلی نشان می‌دهد | استقلال را از بین می‌برد؛ از استراتژی دور می‌کند |
+| جابه‌جایی پرتکرار | با هر لحظه جور درمی‌آید | بدون توضیح، تیم را گیج می‌کند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Situational leadership.** The idea that style should match the situation goes back to Hersey and Blanchard's Situational Leadership model (1969); the book's pilot, medic and engineer are its own, chaos-oriented modes.
-- **Goodhart's law** — "when a measure becomes a target, it ceases to be a good measure" — names the gaming failure mode the book describes (p. 50).
+- **رهبری موقعیتی.** این ایده که سبک باید با موقعیت بخواند به مدل Situational Leadership از Hersey و Blanchard در سال ۱۹۶۹ برمی‌گردد؛ خلبان و امدادگر و مهندسِ کتاب حالت‌های خودش‌اند، با نگاه به آشوب.
+- **قانون Goodhart**، یعنی «وقتی یک سنجه به هدف تبدیل شود دیگر سنجه‌ی خوبی نیست»، همان شکست بازی دادن سنجه را نام می‌برد که کتاب شرح می‌دهد (p. 50).
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. Embracing the Unknown](01-embracing-the-unknown.md) (symptoms of chaos), [2. Understanding Your Role](02-understanding-your-role.md) (the five pillars), [4. Building Cohesive Teams](04-building-cohesive-teams.md) (applying the switches to teams), [5. Setting Direction](05-setting-direction.md) (drift and alignment), [10. Metrics That Matter](10-metrics-that-matter-for-engineering-teams.md) (measurement illusion and gaming).
+- **فصل‌های مرتبط:** [فصل ۱: پذیرفتن ناشناخته](01-embracing-the-unknown.md) که نشانه‌های آشوب را می‌گوید، [فصل ۲: فهمیدن نقشتان](02-understanding-your-role.md) که پنج ستون را دارد، [فصل ۴: ساختن تیم‌های منسجم](04-building-cohesive-teams.md) که کلیدها را روی تیم‌ها به کار می‌برد، [فصل ۵: تعیین جهت](05-setting-direction.md) که رانش و هم‌راستایی را می‌گوید، و [فصل ۱۰: متریک‌هایی که مهم‌اند](10-metrics-that-matter-for-engineering-teams.md) که توهم اندازه‌گیری و بازی دادن سنجه را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What are the four switches of leadership range?**
+1. **چهار کلید دامنه‌ی رهبری کدام‌اند؟**
 
-   *Answer:* Diagnose context, thrive in chaos, focus on outcomes, shift between roles (p. 36).
+   *Answer:* تشخیص زمینه، دوام آوردن در آشوب، تمرکز بر نتیجه، و جابه‌جایی بین نقش‌ها (p. 36).
 
-2. **A team has gone quiet: quality is slipping and people comply without volunteering ideas. What is it more likely to be, and what does it need?**
-   - [ ] Resistance — clarify the vision and rebuild buy-in
-   - [x] Burnout — protect capacity by slowing down, cutting scope or creating recovery time
-   - [ ] Laziness — add accountability
+2. **تیمی ساکت شده: کیفیت می‌لغزد و آدم‌ها بدون پیشنهاد دادن فقط اطاعت می‌کنند. این احتمالاً چیست و چه لازم دارد؟**
+   - [ ] مقاومت؛ چشم‌انداز را شفاف کنید و همراهی را بازسازی کنید
+   - [x] فرسودگی؛ با کند کردن و کم کردن دامنه یا ساختن زمان بازیابی از ظرفیت محافظت کنید
+   - [ ] تنبلی؛ پاسخ‌گویی اضافه کنید
 
-   *Answer:* Burnout masquerades as withdrawal and hollow compliance; resistance shows up as active pushback (p. 39).
+   *Answer:* فرسودگی به شکل کناره‌گیری و پیروی توخالی پیدا می‌شود و مقاومت به شکل پس زدن فعال (p. 39).
 
-3. **Which leadership focus does Table 3-1 give for a scale-up?**
+3. **جدول ۳-۱ برای یک scale-up چه تمرکز رهبری‌ای می‌دهد؟**
 
-   *Answer:* Building sustainable practices, clarifying boundaries and managing overwhelm (p. 38).
+   *Answer:* ساختن رویه‌های پایدار، روشن کردن مرزها، و مدیریت غرق‌شدگی (p. 38).
 
-4. **What did April's four lenses reveal about the outage?**
+4. **چهار عدسی April درباره‌ی آن قطعی چه چیزی را رو کردند؟**
 
-   *Answer:* Scale-up chaos, an exhausted team, hidden operational work consuming 40% of capacity, and a culture that rewarded fast over safe shipping — an organizational mismatch, not a technical problem (p. 42).
+   *Answer:* آشوب مرحله‌ی scale-up، تیمی خسته، کار عملیاتی پنهان که ۴۰٪ ظرفیت را می‌خورد، و فرهنگی که تحویل سریع را به تحویل امن ترجیح می‌داد؛ یعنی ناهم‌خوانی سازمانی، نه مسئله‌ی فنی (p. 42).
 
-5. **How do the authors tell useful structure from bureaucracy?**
+5. **نویسنده‌ها ساختار مفید را چطور از دیوان‌سالاری جدا می‌کنند؟**
 
-   *Answer:* Constraints that serve the work versus constraints that serve themselves; infrastructure that helps people do the job versus bureaucracy that becomes the job (pp. 44, 46).
+   *Answer:* قیدهایی که به کار خدمت می‌کنند در برابر قیدهایی که به خودشان خدمت می‌کنند؛ زیرساختی که کمک می‌کند آدم‌ها کارشان را بکنند در برابر دیوان‌سالاری‌ای که خودش به کار تبدیل می‌شود (pp. 44, 46).
 
-6. **What is the "sophistication trap"?**
+6. **«دام پیچیدگی» چیست؟**
 
-   *Answer:* Experienced teams pursuing work that feels important — endless architecture discussions, refactoring that unlocks nothing, elaborate planning — as an end in itself, disconnected from outcomes (p. 47).
+   *Answer:* تیم‌های باتجربه‌ای که دنبال کاری می‌روند که حس مهم بودن می‌دهد، مثل بحث‌های بی‌پایان معماری و refactoringی که چیزی را باز نمی‌کند و برنامه‌ریزی مفصل، تا جایی که خودش هدف می‌شود و از نتیجه می‌بُرد (p. 47).
 
-7. **Which mode fits a critical migration stalled on integration details?**
-   - [ ] Pilot
-   - [ ] Medic
-   - [x] Engineer
+7. **برای مهاجرتی حیاتی که روی جزئیات یکپارچه‌سازی خوابیده، کدام حالت جور است؟**
+   - [ ] خلبان
+   - [ ] امدادگر
+   - [x] مهندس
 
-   *Answer:* Sit with the team and work through the details (pp. 53, 55).
+   *Answer:* کنار تیم بنشینید و جزئیات را با هم رد کنید (pp. 53, 55).

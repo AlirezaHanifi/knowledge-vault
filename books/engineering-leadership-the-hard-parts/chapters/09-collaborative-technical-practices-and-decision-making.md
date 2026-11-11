@@ -3,142 +3,150 @@ book: engineering-leadership-the-hard-parts
 chapter: 9
 title: "Collaborative Technical Practices and Decision Making"
 pages: "173–206"
+translated_title: "کارهای فنی مشارکتی و تصمیم‌گیری"
+lang: fa
 ---
 
-# 9. Collaborative Technical Practices and Decision Making
+# فصل ۹: کارهای فنی مشارکتی و تصمیم‌گیری
 
-[← 8. Technical Principles and Strategy](08-technical-principles-and-strategy.md) · [Book](../README.md) · [10. Metrics That Matter →](10-metrics-that-matter-for-engineering-teams.md)
+[فصل ۸: اصول و استراتژی فنی →](08-technical-principles-and-strategy.md) · [کتاب](../README.md) · [فصل ۱۰: متریک‌هایی که مهم‌اند ←](10-metrics-that-matter-for-engineering-teams.md)
 
-## Summary
+## خلاصه
 
-In chaos, success hinges on how well teams work together and decide: decisions must be crisp and fast, with everyone moving the same way. The authors repeat the light-touch rule from Chapter 6 — people innovate in light-touch environments and stagnate in high-touch ones — and build on Chapter 8's principles. The chapter covers how shared principles shape culture as well as code, communication as multicasting the right message over the right media, collaboration like a jazz ensemble rather than a kitchen brigade, execution through coding practices, humane code review and RFCs with ADRs, and decision making founded on psychological safety, inclusive and data-driven choices, and continuous improvement of the process itself (pp. 173–205).
+در آشوب، موفقیت به این بسته است که تیم‌ها چقدر خوب با هم کار می‌کنند و تصمیم می‌گیرند: تصمیم‌ها باید تیز و سریع باشند و همه در یک جهت حرکت کنند. نویسنده‌ها همان قاعده‌ی دست‌سبک فصل ۶ را تکرار می‌کنند، یعنی آدم‌ها در محیط‌های دست‌سبک نوآوری می‌کنند و در محیط‌های دست‌سنگین راکد می‌شوند، و روی اصول فصل ۸ می‌سازند. این فصل می‌گوید اصول مشترک چطور هم به کد و هم به فرهنگ شکل می‌دهند، ارتباط یعنی پخش کردن پیام درست روی رسانه‌های درست، همکاری بیشتر شبیه گروه جَز است تا آشپزخانه‌ی نظامی، اجرا از دل رویه‌های کدنویسی و code review انسانی و RFC و ADR می‌گذرد، و تصمیم‌گیری روی امنیت روانی و انتخاب فراگیر و داده‌محور و بهبود پیوسته‌ی خود process بنا می‌شود (pp. 173–205).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Technical principles do double duty:** they guide implementation and shape team culture — "simplicity first" also shortens meetings (pp. 174–175).
-- **Make principles stick** by displaying them, referencing them in reviews and planning, modelling them, and reviewing them quarterly (pp. 176–177).
-- **Product teams are jazz ensembles, not kitchen brigades** — the brigade is built for repetition, not discovery (pp. 177–179).
-- **Match the medium to the message and multicast** — the same information through several media isn't spam (pp. 180–181).
-- **Communication isn't done until it's understood;** passive disagreement is more dangerous than active (pp. 187–188).
-- **Code reviews improve the team's output, not gatekeep;** separate "must fix" from "consider" (pp. 193–194).
-- **RFCs decide before implementation; ADRs record what was decided** (pp. 194–201).
-- **Psychological safety is the foundation of collaborative decisions;** fast-track reversible decisions and concentrate on irreversible ones (pp. 201–203).
+- **اصول فنی دو کار می‌کنند:** هم پیاده‌سازی را هدایت می‌کنند و هم به فرهنگ تیم شکل می‌دهند؛ «اول سادگی» جلسه‌ها را هم کوتاه‌تر می‌کند (pp. 174–175).
+- **اصول را ماندگار کنید** با نمایش دادنشان، ارجاع به آن‌ها در review و برنامه‌ریزی، الگو بودن، و بازبینی فصلی (pp. 176–177).
+- **تیم‌های محصول گروه جَزند، نه آشپزخانه‌ی نظامی**؛ آن ساختار برای تکرار ساخته شده، نه برای کشف (pp. 177–179).
+- **رسانه را با پیام جور کنید و چندرسانه‌ای پخش کنید**؛ گفتن یک اطلاعات روی چند رسانه اسپم نیست (pp. 180–181).
+- **ارتباط تا وقتی فهمیده نشود تمام نشده؛** مخالفت منفعل از مخالفت فعال خطرناک‌تر است (pp. 187–188).
+- **مفهوم code review خروجی تیم را بهتر می‌کند، دروازه‌بانی نمی‌کند؛** «حتماً درست شود» را از «در نظر بگیرید» جدا کنید (pp. 193–194).
+- **سند RFC پیش از پیاده‌سازی تصمیم می‌گیرد و سند ADR ثبت می‌کند چه تصمیمی گرفته شد** (pp. 194–201).
+- **امنیت روانی پایه‌ی تصمیم‌های مشارکتی است؛** تصمیم‌های برگشت‌پذیر را سریع رد کنید و انرژی را روی تصمیم‌های برگشت‌ناپذیر بگذارید (pp. 201–203).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Shared Technical Principles — p. 174
-- Communication, Collaboration, and Execution — p. 177
-  - Communicate, Communicate, Communicate — p. 179
-  - Collaboration — p. 189
-  - Execution — p. 192
-- Decision Making in Chaotic Conditions — p. 201
-  - Psychological Safety — p. 201
-  - Inclusive and Data-Driven Decision Making — p. 203
-  - Continuous Improvement — p. 204
-- Conclusion: Collaboration Is the Glue — p. 205
+- اصول فنی مشترک — p. 174
+- ارتباط، همکاری و اجرا — p. 177
+  - ارتباط، ارتباط، ارتباط — p. 179
+  - همکاری — p. 189
+  - اجرا — p. 192
+- تصمیم‌گیری در شرایط آشوب‌زده — p. 201
+  - امنیت روانی — p. 201
+  - تصمیم‌گیری فراگیر و داده‌محور — p. 203
+  - بهبود پیوسته — p. 204
+- جمع‌بندی: همکاری همان چسب است — p. 205
 
-## Notes
+## یادداشت‌ها
 
-Without robust collaborative practices, even talented engineers build the wrong things, add complexity and duplicate effort. Start with the smallest process and add only if needed (p. 173).
+بدون رویه‌های مشارکتی محکم، حتی مهندس‌های بااستعداد هم چیز اشتباه می‌سازند، پیچیدگی اضافه می‌کنند و کار تکراری انجام می‌دهند. از کوچک‌ترین process شروع کنید و فقط در صورت نیاز اضافه کنید (p. 173).
 
-### Shared Technical Principles
+### اصول فنی مشترک
 
-The 14 principles from Chapter 8 are almost never purely technical — they carry social and cultural elements by design. Tabs versus spaces isn't a principle: it is narrow and delivers no real value, and principles that detailed hinder innovation (pp. 174–175).
+آن ۱۴ اصل فصل ۸ تقریباً هیچ‌وقت صرفاً فنی نیستند؛ عمداً عنصر اجتماعی و فرهنگی هم دارند. tab در برابر space اصل نیست: خیلی باریک است، ارزش واقعی نمی‌دهد، و اصول در این حد جزئیات جلوی نوآوری را می‌گیرند (pp. 174–175).
 
-| Principle | Technical side | Cultural side (p. 175) |
+| اصل | سمت فنی | سمت فرهنگی (p. 175) |
 |---|---|---|
-| Simplicity first | Fewer moving parts | Permission to question a 12-microservice design; shorter meetings; onboarding starts with core concepts |
-| Documentation | Code comments | A teaching culture; avoids dependence on individuals |
-| Automation | Infrastructure as code | Valuing everyone's time for creative work |
+| اول سادگی | قطعه‌های متحرک کمتر | اجازه‌ی زیر سؤال بردن طراحی ۱۲ microserviceای؛ جلسه‌های کوتاه‌تر؛ onboarding که از مفهوم‌های اصلی شروع می‌شود |
+| مستندسازی | توضیح در کد | فرهنگ یاد دادن؛ دوری از وابستگی به افراد |
+| automation | زیرساخت به‌شکل کد | ارزش دادن به وقت همه برای کار خلاقانه |
 
-> **In Practice: April's Story** (p. 176). Three seniors, three philosophies: Marcus's "performance above all," Sarah's "move fast and break things," Derek's "fortress engineering" — juniors got whiplash. The first shared principle, "simplicity first," made code reviews less combative within weeks.
+> **کادر In Practice: داستان April** (p. 176). سه آدم ارشد با سه فلسفه: «performance بالاتر از همه» برای Marcus، «سریع حرکت کن و بشکن» برای Sarah، و «مهندسی دژگونه» برای Derek؛ تازه‌کارها گیج می‌شدند. اولین اصل مشترک، یعنی «اول سادگی»، ظرف چند هفته code reviewها را کم‌تنش‌تر کرد.
 
-**Making principles stick** (pp. 176–177): display them prominently — James, a cynic, came to value printing them on the wall — and reference them in design discussions, reviews and planning; staff and principal engineers are ideal champions. Model them: if you preach simplicity but approve complex designs, the team follows your actions. Review them perhaps quarterly.
+**ماندگار کردن اصول** (pp. 176–177): آن‌ها را جایی پیدا نمایش بدهید، و James که آدم بدبینی است بالاخره به چاپ کردنشان روی دیوار رسید، و در بحث‌های طراحی و reviewها و برنامه‌ریزی به آن‌ها ارجاع بدهید؛ staff و principal engineerها پرچم‌دارهای ایده‌آلند. الگو باشید: اگر سادگی موعظه کنید و طراحی پیچیده را تأیید کنید، تیم از عملتان پیروی می‌کند. شاید فصلی یک‌بار بازبینی‌شان کنید.
 
-### Communication, Collaboration, and Execution
+> **In practice:** اصلی مثل «SQL با حروف بزرگ» اصل نیست؛ قاعده‌ی lint است و جایش در CI است.
+>
+> **Your turn:** کدام قاعده‌ها را به linter در GitLab CI می‌سپارید و کدام را اصل تیم می‌کنید؟
+>
+> *Answer:* سبک SQL و Python را linter اعمال کند؛ اصل باید ارزش واقعی داشته باشد، مثلاً «هر مدل Gold مالک و تست دارد». کتاب می‌گوید اصل در حد tab در برابر space خیلی باریک است (pp. 174–175).
 
-The reflex fix for uncoordinated work is rigid command and control. The authors — Juan was a professional chef — reject the **kitchen brigade** as a model (pp. 177–179):
+### ارتباط، همکاری و اجرا
 
-| Kitchen brigade | Product team |
+واکنش غریزی به کار ناهماهنگ، فرمان و کنترل خشک است. نویسنده‌ها، که Juan سرآشپز حرفه‌ای بوده، **آشپزخانه‌ی نظامی** را به‌عنوان الگو رد می‌کنند (pp. 177–179):
+
+| آشپزخانه‌ی نظامی | تیم محصول |
 |---|---|
-| Designed for execution and repetition | Discovery, iteration, problem-solving |
-| "Just cook it as directed" | Best ideas come from those closest to the problem |
-| Station silos are acceptable | Silos create dangerous dependencies |
-| "Yes, chef!" | Questioning and challenging drive innovation |
+| برای اجرا و تکرار ساخته شده | کشف، تکرار، حل مسئله |
+| «همان‌طور که گفتم بپز» | بهترین ایده‌ها از نزدیک‌ترین آدم‌ها به مسئله می‌آیند |
+| سیلوی ایستگاه‌ها پذیرفتنی است | سیلوها وابستگی خطرناک می‌سازند |
+| «بله سرآشپز!» | پرسیدن و به چالش کشیدن نوآوری را می‌رانند |
 
-Successful teams look more like **jazz ensembles**: individual expertise, collaborative improvisation, shared objectives (p. 179).
+تیم‌های موفق بیشتر شبیه **گروه جَز**ند: تخصص فردی، بداهه‌نوازی مشارکتی، هدف‌های مشترک (p. 179).
 
-> **In Practice: April's Story** (p. 178). Marcus's authentication service fails at 2:00 a.m.; Derek and Sarah spend four hours on his undocumented JWT rotation; he fixes it in five minutes after his vacation. April starts "Documentation Fridays": two hours each week documenting institutional knowledge, presented to juniors until they can operate the systems.
+> **کادر In Practice: داستان April** (p. 178). سرویس احراز هویت Marcus ساعت ۲ بامداد خراب می‌شود؛ Derek و Sarah چهار ساعت با چرخش JWT مستندنشده‌ی او کلنجار می‌روند و خودش بعد از مرخصی در پنج دقیقه درستش می‌کند. April «جمعه‌های مستندسازی» را راه می‌اندازد: هفته‌ای دو ساعت مستند کردن دانش سازمانی، که به تازه‌کارها ارائه می‌شود تا بتوانند سیستم‌ها را بگردانند.
 
-#### Communicate, Communicate, Communicate
+#### ارتباط، ارتباط، ارتباط
 
-Communication isn't just transferring information; it creates shared context, which grows harder to keep as teams grow. Leaders weave individual contributions into a coherent narrative (p. 179).
+ارتباط فقط منتقل کردن اطلاعات نیست؛ زمینه‌ی مشترک می‌سازد، که با بزرگ شدن تیم نگه داشتنش سخت‌تر می‌شود. رهبرها مشارکت‌های فردی را به یک روایت منسجم می‌بافند (p. 179).
 
-- **Cadences:** daily check-ins, weekly syncs, monthly reviews. If you ask "Do you know what you need to know?" and see panic, look at frequency (p. 180).
-- **Mediums and modalities:** different information flows best, is consumed best, and survives time zones and cultures best through different channels — so match the medium to the message and **multicast** it. Spamming is the same message repeatedly through the same medium (pp. 180–181).
+- **ریتم‌ها:** سرکشی روزانه، هم‌سوسازی هفتگی، بازبینی ماهانه. اگر بپرسید «چیزهایی که باید بدانید را می‌دانید؟» و وحشت ببینید، به تکرارشان نگاه کنید (p. 180).
+- **رسانه‌ها و شیوه‌ها:** هر نوع اطلاعاتی بهتر از کانالی جاری می‌شود، بهتر از کانالی مصرف می‌شود و بهتر از کانالی از منطقه‌های زمانی و فرهنگ‌ها رد می‌شود؛ پس رسانه را با پیام جور کنید و **چندرسانه‌ای پخشش کنید**. اسپم یعنی همان پیام، مکرر، روی همان رسانه (pp. 180–181).
 
-| Medium | Best for | Watch out for (pp. 181–186) |
+| رسانه | برای چه خوب است | مراقب چه باشید (pp. 181–186) |
 |---|---|---|
-| **Visualizations** | Relationships and patterns; progressive disclosure | Over-detailed diagrams; inconsistent notation; colour alone (~8% have colour vision deficiency) |
-| **Video calls** | Emotion, relationships, complex discussion; virtual coffee | Terrible for detailed work unless structured — "avoid slides. Please." |
-| **Audio** | Nuanced feedback (voice-note code reviews), recorded discussions, listening on a walk | Underused |
-| **Chat** | Day-to-day coordination; threads; culture channels | Firehoses; always-on pressure — create channels only when needed; Juan's prefixes (Team-, Proj-, Ext-) |
-| **Email** | Formality, paper trails, crossing organizational boundaries, considered proposals | Reply-all and notification fatigue; threads of 10+ emails need another medium |
-| **In person** | Whiteboarding, pairing, serendipity; off-sites every few months | Hard for distributed teams |
-| **Documentation** | External team memory — "a form of time travel" | Drift; keep it with the code and in the definition of done |
+| **تصویرسازی** | رابطه‌ها و الگوها؛ آشکارسازی تدریجی | نمودار بیش از حد ریز؛ نمادگذاری ناهمسان؛ تکیه بر رنگ به‌تنهایی، چون حدود ۸٪ آدم‌ها نقص دید رنگ دارند |
+| **تماس تصویری** | احساس، رابطه، بحث پیچیده؛ قهوه‌ی مجازی | برای کار باجزئیات افتضاح است مگر ساختار داشته باشد؛ «از اسلاید پرهیز کنید. لطفاً.» |
+| **صوت** | بازخورد ظریف مثل code review صوتی، بحث ضبط‌شده، گوش دادن حین قدم زدن | کم‌استفاده مانده |
+| **چت** | هماهنگی روزمره؛ thread؛ کانال‌های فرهنگی | سیل پیام؛ فشار همیشه-روشن بودن؛ فقط وقتی لازم است کانال بسازید؛ Juan پیشوندهای Team- و Proj- و Ext- را به کار می‌برد |
+| **ایمیل** | رسمیت، ردِ مکتوب، عبور از مرزهای سازمانی، پیشنهاد سنجیده | پاسخ به همه و خستگی اعلان؛ thread با بیش از ۱۰ ایمیل رسانه‌ی دیگری می‌خواهد |
+| **حضوری** | وایت‌برد، pair کردن، برخوردهای اتفاقی؛ نشست هر چند ماه | برای تیم‌های پراکنده سخت است |
+| **مستندات** | حافظه‌ی بیرونی تیم؛ «یک جور سفر در زمان» | رانش؛ کنار کد نگهش دارید و در تعریف «تمام‌شده» بیاوریدش |
 
-On documentation: reference docs (APIs, schemas) benefit from automation; conceptual docs need human explanation and visuals; procedural docs need step-by-step examples. James's team spent three weeks reverse-engineering an undocumented API after a security incident. The adage: document the why thoroughly, the what clearly, and the how only when the code doesn't show it (pp. 186–187).
+درباره‌ی مستندات: سندهای مرجع مثل API و schema از automation سود می‌برند؛ سندهای مفهومی به توضیح انسانی و تصویر نیاز دارند؛ و سندهای رویه‌ای به نمونه‌ی قدم‌به‌قدم. تیم James بعد از یک حادثه‌ی امنیتی سه هفته صرف مهندسی معکوس یک API مستندنشده کرد. قاعده‌اش: «چرا» را کامل مستند کنید، «چه» را روشن، و «چطور» را فقط وقتی که کد خودش نشان نمی‌دهد (pp. 186–187).
 
-> **Try it:** [Medium matcher](../widgets/09-medium-matcher.html) — pick a channel for each message, from an architecture debate to a decision that needs a paper trail, and compare with the strengths the book gives each medium.
+> **Try it:** [جورکننده‌ی رسانه](../widgets/09-medium-matcher.html)؛ برای هر پیام یک کانال انتخاب کنید، از بحث معماری تا تصمیمی که ردِ مکتوب می‌خواهد، و با نقاط قوتی که کتاب برای هر رسانه می‌گوید مقایسه کنید.
 
-**Confirming understanding and handling disagreement** (pp. 187–188):
+**وارسی فهم و برخورد با مخالفت** (pp. 187–188):
 
-- Ask people to summarize back — framed as checking *your* explanation; ask for explicit acknowledgment of written decisions.
-- If it doesn't land, switch modality; after three failed attempts, escalate or find a translator.
-- **Passive disagreement** (nodding along) is more dangerous than active — invite it: "If you had to argue against this, what would you say?"
-- Restate an objection before countering, then document unresolved disagreement with a trigger for revisiting it.
+- از آدم‌ها بخواهید حرف را برایتان خلاصه کنند، و قابش این باشد که دارید *توضیح خودتان* را می‌سنجید؛ و برای تصمیم‌های مکتوب تأیید صریح بخواهید.
+- اگر پیام ننشست، شیوه را عوض کنید؛ بعد از سه تلاش ناموفق، ارجاع بدهید یا مترجمی پیدا کنید.
+- **مخالفت منفعل**، یعنی سر تکان دادن، از مخالفت فعال خطرناک‌تر است؛ دعوتش کنید: «اگر قرار بود علیه این استدلال کنی، چه می‌گفتی؟»
+- پیش از پاسخ دادن، اعتراض را دوباره بیان کنید، و بعد مخالفت حل‌نشده را با یک ماشه برای بازگشت به آن ثبت کنید.
 
-**Transparency and ambiguity:** reduce anxiety with frameworks, not false certainty — clear decision processes, a definition of "good enough," structured speculation. Juan's motto: "Default to open and public" (p. 188).
+**شفافیت و ابهام:** اضطراب را با چارچوب کم کنید، نه با قطعیت دروغین؛ یعنی process تصمیم روشن، تعریف «به‌اندازه‌ی کافی خوب»، و گمانه‌زنی ساختارمند. شعار Juan: «پیش‌فرض باز و عمومی باشد» (p. 188).
 
-**Exercise: The Architecture Telephone Game** (p. 189). One person describes a system diagram verbally for two minutes; the next draws it and describes it on; compare the first and last drawings and debrief where information was lost — terminology, missing context, unstated knowledge.
+**تمرین: بازی تلفن معماری** (p. 189). یک نفر دو دقیقه نمودار یک سیستم را شفاهی توصیف می‌کند؛ نفر بعد می‌کشدش و برای نفر بعد توصیفش می‌کند؛ اولین و آخرین نقاشی را مقایسه کنید و ببینید اطلاعات کجا گم شده، یعنی اصطلاح‌ها یا زمینه‌ی نگفته یا دانش ضمنی.
 
-#### Collaboration
+#### همکاری
 
-- Break down "us and them" with shared goals and metrics, joint planning, and leaders who reward collaboration (pp. 189–190).
-- Include everyone who should own the outcome. James fixed features rejected by users with kickoff sessions where product, engineering and QA refined requirements together (p. 190).
-- Default to open channels: a private engineering channel "so nonengineers don't bug us" is the wrong answer — point people to a support channel instead (p. 190).
-- Build shared language and psychological safety, for example senior "designated novice" questions such as "Can you explain that concept again? I'm not following." (p. 191)
-- **Change direction based on input,** or people conclude "my input never matters" (p. 191).
-- James replaced handovers (product to design to engineering to QA) with cross-functional pods, and collaboration "soared" (pp. 191–192).
+- «ما و آن‌ها» را با هدف و متریک مشترک و برنامه‌ریزی مشترک و رهبرهایی که همکاری را پاداش می‌دهند بشکنید (pp. 189–190).
+- هر کسی را که باید صاحب نتیجه باشد دخیل کنید. James featureهایی را که کاربرها پس زده بودند با جلسه‌های شروع درست کرد، جایی که product و مهندسی و QA با هم نیازمندی‌ها را تیز می‌کردند (p. 190).
+- پیش‌فرض را کانال باز بگذارید: کانال خصوصی مهندسی «تا آدم‌های غیرفنی مزاحممان نشوند» پاسخ غلطی است؛ به‌جایش آدم‌ها را به کانال پشتیبانی راهنمایی کنید (p. 190).
+- زبان مشترک و امنیت روانی بسازید، مثلاً با پرسش‌های «تازه‌کارِ تعیین‌شده» از آدم‌های ارشد: «می‌شود آن مفهوم را دوباره توضیح بدهی؟ متوجه نمی‌شوم.» (p. 191)
+- **بر پایه‌ی نظر آدم‌ها جهت را عوض کنید**، وگرنه نتیجه می‌گیرند «نظر من هیچ‌وقت فرقی نمی‌کند» (p. 191).
+- کادر James تحویل‌دهی زنجیره‌ای از product به design به مهندسی به QA را با podهای بین‌کارکردی جایگزین کرد و همکاری «اوج گرفت» (pp. 191–192).
 
-#### Execution
+#### اجرا
 
-**Coding practices** make principles concrete. Develop them collaboratively — though someone still makes the final call — aim for consistency, reinforce through mentoring and review, evolve them (what works for 3 may not work for 30), and borrow from open source (p. 192).
+**رویه‌های کدنویسی** اصول را ملموس می‌کنند. آن‌ها را مشارکتی بپرورانید، هرچند بالاخره یک نفر تصمیم آخر را می‌گیرد، دنبال یکدستی باشید، با منتورینگ و review تقویتشان کنید، تکاملشان بدهید، چون چیزی که برای ۳ نفر کار می‌کند شاید برای ۳۰ نفر کار نکند، و از open source قرض بگیرید (p. 192).
 
-**Navigating code-review drama.** Reviews catch bugs, uphold standards, spread knowledge and mentor — not gatekeeping (p. 193).
+**رد شدن از درام code review.** review باگ می‌گیرد، استاندارد را نگه می‌دارد، دانش پخش می‌کند و منتورینگ است؛ دروازه‌بانی نیست (p. 193).
 
-> **In Practice: April's Story** (p. 193). Marcus leaves 47 comments on junior Emma's first pull request ("Did you even read the documentation?"). April finds the code solid — it just ignored Marcus's undocumented preferences. Her fix: a checklist separating "must fix" (security, bugs) from "consider" (style); constructive tone as a rule; and pairing Marcus with Emma for a week.
+> **کادر In Practice: داستان April** (p. 193). مهندسی به نام Marcus روی اولین pull request یک تازه‌کار به نام Emma ۴۷ نظر می‌گذارد، از جمله «اصلاً مستندات را خواندی؟» April می‌بیند کد محکم است و فقط سلیقه‌های مستندنشده‌ی Marcus را نادیده گرفته. راه‌حلش: فهرست وارسی‌ای که «حتماً درست شود»، یعنی امنیت و باگ، را از «در نظر بگیرید»، یعنی سبک، جدا می‌کند؛ لحن سازنده به‌عنوان قاعده؛ و pair کردن Marcus و Emma برای یک هفته.
 
-Talk privately to harsh reviewers — many were never taught feedback; suggest opening with positives and asking questions. James asks senior candidates what they'd tell a junior after a bad review; "suck it up" is illuminating. His "code review buddies" pre-review juniors' code (p. 194).
+با بازبین‌های تند خصوصی حرف بزنید؛ خیلی‌هایشان هیچ‌وقت بازخورد دادن را یاد نگرفته‌اند؛ پیشنهاد بدهید با نکته‌ی مثبت شروع کنند و پرسش بپرسند. James از نامزدهای ارشد می‌پرسد بعد از یک review بد به یک تازه‌کار چه می‌گویند؛ پاسخ «تحمل کن» روشنگر است. «رفیق‌های code review» او کد تازه‌کارها را پیش‌بینی می‌کنند (p. 194).
 
-**Making good technical decisions: RFCs.** Architecture governance boards are "committees powered by presentation slides" (p. 194). The authors prefer **RFCs**: short proposals of significant changes that invite structured discussion, check alignment with principles (a maze of twisty passages fails "simplicity first"), and establish clear ownership — "Jamal owns this decision." Wherever they introduced RFCs, decisions got faster (pp. 194–195).
+**گرفتن تصمیم‌های فنی خوب با RFC.** شوراهای حاکمیت معماری «کمیته‌هایی‌اند که با اسلاید کار می‌کنند» (p. 194). نویسنده‌ها **RFC** را ترجیح می‌دهند: پیشنهادهای کوتاه برای تغییرهای مهم که بحث ساختارمند را دعوت می‌کنند، هم‌خوانی با اصول را می‌سنجند، چون هزارتویی از دالان‌های پیچ‌درپیچ از آزمون «اول سادگی» رد نمی‌شود، و مالکیت روشن برقرار می‌کنند: «Jamal صاحب این تصمیم است». هر جا RFC آوردند، تصمیم‌ها سریع‌تر شدند (pp. 194–195).
 
-> **In Practice: April's Story** (pp. 195–196). Before RFCs, "whoever builds it first, wins" produced three logging systems. Marcus's first RFC — rewrite the backend in Rust — meets Sarah's hiring costs (three Rust developers at $300K each), Derek's estimate of 18 months without features, and the juniors' question about the 4K feature. His replacement RFC, optimizing Node.js hot paths, gives a threefold improvement in three weeks.
+> **کادر In Practice: داستان April** (pp. 195–196). پیش از RFC، قاعده‌ی «هر کس اول بسازد برنده است» سه سیستم logging ساخته بود. اولین RFC مربوط به Marcus، یعنی بازنویسی backend با Rust، با هزینه‌ی استخدام از نگاه Sarah، یعنی سه برنامه‌نویس Rust هر کدام ۳۰۰ هزار دلار، و تخمین Derek یعنی ۱۸ ماه بدون feature، و پرسش تازه‌کارها درباره‌ی feature مربوط به 4K روبه‌رو می‌شود. RFC جایگزینش، یعنی بهینه کردن مسیرهای داغ Node.js، در سه هفته سه برابر بهبود می‌دهد.
 
-The book's example is an "RFC on RFCs" (pp. 196–199):
+نمونه‌ی کتاب یک «RFC درباره‌ی RFC» است (pp. 196–199):
 
-| Section | Content |
+| بخش | محتوا |
 |---|---|
-| Header | Title, main author, backers, status (draft, in review, rejected, approved) |
-| Motivation | Early light design; shared risks and expertise; institutional knowledge; onboarding; belonging; less fear of failure; clear ownership; less bikeshedding |
-| When to RFC | New endpoint, new project, architectural impact, new tool, library, technology or process — or when reviewers ask for one on a pull request |
-| How to RFC | Template → numbered (000X) draft → share → all-day calendar deadline → everyone reads (no votes needed) → authors resolve comments → approve or veto → publish a readable version |
-| Notes | Start work early if acceptance is likely; urgent RFCs can review in under 24 hours; allow for time zones; extend the deadline if needed |
-| Drawbacks, alternatives, impact of not doing it, unresolved questions | Slower shipping at first; a Discourse-style forum; lost knowledge; including non-engineers |
+| سربرگ | عنوان، نویسنده‌ی اصلی، حامی‌ها، وضعیت مثل پیش‌نویس و در حال بررسی و رد‌شده و تأییدشده |
+| انگیزه | طراحی سبک زودهنگام؛ ریسک و تخصص مشترک؛ دانش سازمانی؛ onboarding؛ حس تعلق؛ ترس کمتر از شکست؛ مالکیت روشن؛ بحث کمتر بر سر بی‌اهمیت‌ها |
+| کِی RFC بنویسیم | endpoint تازه، پروژه‌ی تازه، اثر معماری، ابزار یا کتابخانه یا فناوری یا process تازه، یا وقتی بازبین‌ها سر یک pull request درخواستش می‌کنند |
+| چطور RFC بنویسیم | قالب، بعد پیش‌نویس شماره‌دار با الگوی 000X، بعد اشتراک‌گذاری، بعد ضرب‌الاجل تمام‌روز روی تقویم، بعد خواندن همه بدون نیاز به رأی، بعد حل نظرها توسط نویسنده‌ها، بعد تأیید یا وتو، و بعد انتشار نسخه‌ی خواندنی |
+| یادداشت‌ها | اگر پذیرش محتمل است کار را زود شروع کنید؛ RFCهای فوری می‌توانند زیر ۲۴ ساعت بررسی شوند؛ منطقه‌های زمانی را در نظر بگیرید؛ در صورت نیاز ضرب‌الاجل را تمدید کنید |
+| معایب، جایگزین‌ها، اثر انجام ندادنش، پرسش‌های حل‌نشده | اولش تحویل کندتر می‌شود؛ یک انجمن سبک Discourse؛ دانش از‌دست‌رفته؛ دخیل کردن آدم‌های غیرمهندس |
 
-RFCs are living documents and can include non-technical stakeholders (p. 200).
+سندهای RFC زنده‌اند و می‌توانند ذی‌نفع‌های غیرفنی را هم در بر بگیرند (p. 200).
 
 ```mermaid
 flowchart LR
@@ -149,92 +157,98 @@ flowchart LR
   B --> D["ADR<br/>retrospective: what we did and why"]
 ```
 
-**ADRs** record final decisions — context, options, choice, consequences — so settled questions aren't relitigated; some teams generate them from approved RFCs (pp. 200–201).
+سندهای **ADR** تصمیم‌های نهایی را ثبت می‌کنند، یعنی زمینه و گزینه‌ها و انتخاب و پیامدها، تا پرونده‌های بسته دوباره باز نشوند؛ بعضی تیم‌ها آن‌ها را از RFCهای تأییدشده تولید می‌کنند (pp. 200–201).
 
-**Leadership:** where leaders spend time signals what matters — reviews, technical discussion, knowledge sharing, protecting the team from context switching (p. 201).
+**رهبری:** جایی که رهبرها وقت می‌گذارند نشان می‌دهد چه چیزی مهم است، یعنی reviewها، بحث فنی، به اشتراک گذاشتن دانش، و محافظت از تیم در برابر جابه‌جایی زمینه (p. 201).
 
-### Decision Making in Chaotic Conditions
+### تصمیم‌گیری در شرایط آشوب‌زده
 
-Streamline **reversible** decisions; concentrate effort on **irreversible**, high-stakes ones to reduce decision fatigue (p. 201).
+تصمیم‌های **برگشت‌پذیر** را روان کنید؛ انرژی را روی تصمیم‌های **برگشت‌ناپذیر** و پرریسک بگذارید تا خستگی تصمیم کم شود (p. 201).
 
-#### Psychological Safety
+#### امنیت روانی
 
-The belief you won't be punished or humiliated for speaking up — the foundation of collaborative decisions. It focuses critique on work, not people; it doesn't lower standards (pp. 201–202). A CTO who shot down ideas got safe, predictable proposals, low morale and turnover (p. 202).
+این باور که بابت حرف زدن تنبیه یا تحقیر نمی‌شوید؛ پایه‌ی تصمیم‌های مشارکتی. نقد را روی کار متمرکز می‌کند، نه روی آدم‌ها، و استاندارد را پایین نمی‌آورد (pp. 201–202). یک CTO که ایده‌ها را می‌کوبید در نهایت پیشنهادهای امن و قابل‌پیش‌بینی و روحیه‌ی پایین و ریزش نیرو گرفت (p. 202).
 
-> **In Practice: April's Story** (p. 202). In architecture meetings the loudest (Marcus) won. April had everyone write proposals on sticky notes before discussion. Derek's connection pooling saved $3,000 a month; junior Alex's caching cut API latency by 60%; participation went from three speakers to eight in a month.
+> **کادر In Practice: داستان April** (p. 202). در جلسه‌های معماری بلندترین صدا، یعنی Marcus، برنده می‌شد. April از همه خواست پیش از بحث پیشنهادشان را روی کاغذ یادداشت بنویسند. ایده‌ی connection pooling از Derek ماهی ۳٬۰۰۰ دلار صرفه‌جویی کرد؛ caching از Alex که تازه‌کار بود latency یک API را ۶۰٪ کم کرد؛ و مشارکت ظرف یک ماه از سه نفر به هشت نفر رسید.
 
-Leaders build it by admitting mistakes, asking "What can we learn?" not "Who screwed up?", and thanking dissenters (p. 202).
+رهبرها آن را با پذیرفتن اشتباه‌هایشان، با پرسیدن «چه یاد می‌گیریم؟» به‌جای «چه کسی خراب کرد؟»، و با تشکر از مخالف‌ها می‌سازند (p. 202).
 
-#### Inclusive and Data-Driven Decision Making
+#### تصمیم‌گیری فراگیر و داده‌محور
 
-Include affected perspectives — product, design, SRE — in moderation ("vote with your feet" from meetings you don't add to). Speak in outcomes to non-technical people; draw out juniors; not everyone gets an equal vote, but all are heard. State the factors considered. Use data, and where none exists, build proofs of concept and small experiments (p. 203).
+زاویه‌های اثرپذیر، یعنی product و design و SRE، را به‌اندازه دخیل کنید؛ «با پای خودتان رأی بدهید» و از جلسه‌هایی که چیزی به آن‌ها اضافه نمی‌کنید بیرون بیایید. با آدم‌های غیرفنی به زبان نتیجه حرف بزنید؛ تازه‌کارها را به حرف بیاورید؛ رأی همه برابر نیست، ولی حرف همه شنیده می‌شود. بگویید چه عامل‌هایی را در نظر گرفته‌اید. از داده استفاده کنید، و جایی که داده نیست، نمونه‌ی اولیه و آزمایش‌های کوچک بسازید (p. 203).
 
-#### Continuous Improvement
+#### بهبود پیوسته
 
-Run post-decision retrospectives and process-health check-ins; amplify what works; leaders guide rather than decide everything — but remain accountable (p. 204).
+بعد از تصمیم‌ها retrospective بگیرید و سلامت process را وارسی کنید؛ چیزی را که کار می‌کند تقویت کنید؛ و رهبرها به‌جای تصمیم گرفتن درباره‌ی همه چیز هدایت کنند، ولی پاسخ‌گو بمانند (p. 204).
 
-> **In Practice: April's Story** (pp. 204–205). Three months in, the RFC retrospective finds RFCs under two pages approved quickly while longer ones stalled (Marcus stopped at page 3), synchronous reviews ate time, and juniors feared commenting. Fixes: a strict two-page limit with appendices, async-first review, and "RFC buddies" — juniors must ask at least one question. Decision time drops from two weeks to three days.
+> **کادر In Practice: داستان April** (pp. 204–205). بعد از سه ماه، retrospective مربوط به RFCها نشان می‌دهد RFCهای زیر دو صفحه سریع تأیید می‌شوند و بلندترها می‌خوابند، چون Marcus از صفحه‌ی سوم جلوتر نمی‌رفت، بررسی هم‌زمان وقت می‌خورد، و تازه‌کارها از نظر دادن می‌ترسند. راه‌حل‌ها: سقف سخت دو صفحه با پیوست، بررسی ناهمگام به‌عنوان پیش‌فرض، و «رفیق‌های RFC» که تازه‌کارها باید دست‌کم یک پرسش بپرسند. زمان تصمیم از دو هفته به سه روز می‌افتد.
 
-Model intellectual humility: "Be curious, not judgmental" — reductive, and not Walt Whitman's, but a good habit of asking rather than telling (p. 205).
+فروتنی فکری را الگو کنید: «کنجکاو باش، نه قضاوت‌گر»؛ جمله‌ای ساده‌انگارانه که مال Walt Whitman هم نیست، ولی عادت خوبی است که به‌جای گفتن بپرسید (p. 205).
 
-### Conclusion: Collaboration Is the Glue
+> **In practice:** GitOps بیشتر تصمیم‌های deploy را برگشت‌پذیر می‌کند؛ تغییر schema و حذف داده برگشت‌ناپذیرند.
+>
+> **Your turn:** کدام تصمیم را در یک merge request ساده می‌گذارید و کدام را به یک سند طراحی و بازبینی تیمی می‌برید؟
+>
+> *Answer:* نسخه‌ی loader، تنظیم DAG و dashboardها برگشت‌پذیرند و merge request بس است؛ `ORDER BY` یک جدول بزرگ، سیاست نگهداری داده و حذف PII برگشت‌ناپذیرند و بازبینی می‌خواهند. کتاب می‌گوید تصمیم برگشت‌پذیر را روان و انرژی را روی برگشت‌ناپذیر خرج کنید (p. 201).
 
-Shared principles, consistent practices, RFCs and inclusive collaboration aren't bureaucracy; they pay off in less rework and preserved knowledge. Start light and refine (p. 205).
+### جمع‌بندی: همکاری همان چسب است
 
-## Trade-offs at a glance
+اصول مشترک و رویه‌های یکدست و RFC و همکاری فراگیر دیوان‌سالاری نیستند؛ با دوباره‌کاری کمتر و دانش حفظ‌شده جبران می‌شوند. سبک شروع کنید و تیزش کنید (p. 205).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Brigade-style command and control | Clear roles; repeatable execution | Silos; suppressed ideas; poor fit for discovery |
-| Jazz-ensemble teams | Adaptation, shared ownership | Needs shared goals and trust |
-| Multicasting across media | Message reaches everyone | Effort to adapt the message |
-| RFCs | Faster, owned, documented decisions | Slower shipping at first; reading time |
-| Long RFCs | Thoroughness | Stall — nobody reads past page 3 |
-| Async-first review | Time zones, less meeting time | Slower back-and-forth |
-| Inviting more people to decisions | Diverse perspectives | Meetings people don't need |
+| فرمان و کنترل به سبک آشپزخانه‌ی نظامی | نقش‌های روشن؛ اجرای تکرارپذیر | سیلو؛ ایده‌های خفه‌شده؛ ناجور برای کشف |
+| تیم‌هایی به سبک گروه جَز | تطبیق، مالکیت مشترک | به هدف مشترک و اعتماد نیاز دارد |
+| پخش چندرسانه‌ای | پیام به همه می‌رسد | زحمت تطبیق دادن پیام |
+| سندهای RFC | تصمیم سریع‌تر و صاحب‌دار و مستند | اولش تحویل کندتر؛ وقت خواندن |
+| RFCهای بلند | کامل بودن | می‌خوابند؛ کسی از صفحه‌ی سوم جلوتر نمی‌رود |
+| بررسی ناهمگام به‌عنوان پیش‌فرض | منطقه‌های زمانی، وقت جلسه‌ی کمتر | رفت‌و‌برگشت کندتر |
+| دعوت آدم‌های بیشتر به تصمیم‌ها | زاویه‌های متنوع | جلسه‌هایی که آدم‌ها لازمشان ندارند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Reversible versus irreversible decisions** echoes Amazon's "one-way" and "two-way door" framing from Jeff Bezos's 2015 shareholder letter.
-- **Psychological safety** as a team construct comes from Amy Edmondson's research (1999); Google's Project Aristotle later found it the strongest predictor of team effectiveness.
-- **Joel Parker Henderson's ADR repository** on GitHub, which the book recommends (p. 201), collects many ADR templates.
+- **تصمیم برگشت‌پذیر در برابر برگشت‌ناپذیر** یادآور قاب «در یک‌طرفه» و «در دوطرفه» در نامه‌ی ۲۰۱۵ Jeff Bezos به سهام‌داران Amazon است.
+- **امنیت روانی** به‌عنوان یک سازه‌ی تیمی از پژوهش Amy Edmondson در سال ۱۹۹۹ می‌آید؛ پژوهش Project Aristotle در Google بعدتر آن را قوی‌ترین پیش‌بینی‌کننده‌ی اثربخشی تیم یافت.
+- **مخزن ADR از Joel Parker Henderson** در GitHub، که کتاب پیشنهادش می‌دهد (p. 201)، قالب‌های زیادی برای ADR جمع کرده.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [8. Technical Principles and Strategy](08-technical-principles-and-strategy.md) (the 14 principles), [6. Shipping Products and Code](06-shipping-products-and-code-in-chaotic-environments.md) (light-touch process), [3. Navigating Chaos](03-navigating-chaos.md) (communication strategies), [10. Metrics That Matter](10-metrics-that-matter-for-engineering-teams.md).
-- **Other books:** *The Manager's Path*'s tech lead chapter covers understanding the architecture and leading technical decisions within a team.
+- **فصل‌های مرتبط:** [فصل ۸: اصول و استراتژی فنی](08-technical-principles-and-strategy.md) که آن ۱۴ اصل را دارد، [فصل ۶: تحویل محصول و کد](06-shipping-products-and-code-in-chaotic-environments.md) که process دست‌سبک را می‌گوید، [فصل ۳: راه بردن در آشوب](03-navigating-chaos.md) که راهبردهای ارتباط را دارد، و [فصل ۱۰: متریک‌هایی که مهم‌اند](10-metrics-that-matter-for-engineering-teams.md).
+- **کتاب‌های دیگر:** فصل tech lead در *The Manager's Path* درباره‌ی فهمیدن معماری و پیش بردن تصمیم‌های فنی داخل یک تیم حرف می‌زند.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **Why isn't "tabs versus spaces" a good technical principle?**
+1. **چرا «tab در برابر space» اصل فنی خوبی نیست؟**
 
-   *Answer:* It is a very narrow focus and delivers no real value; principles that detailed become impossible to reason about (pp. 174–175).
+   *Answer:* تمرکزش خیلی باریک است و ارزش واقعی نمی‌دهد؛ اصول در این حد جزئیات دیگر قابل‌استدلال نیستند (pp. 174–175).
 
-2. **Why do the authors reject the kitchen brigade as a model for product teams?**
+2. **چرا نویسنده‌ها آشپزخانه‌ی نظامی را الگوی تیم محصول نمی‌دانند؟**
 
-   *Answer:* It was designed for execution and repetition, not creation; its hierarchy, silos and "Yes, chef!" style stifle the collaboration and challenge that discovery needs (pp. 177–178).
+   *Answer:* برای اجرا و تکرار ساخته شده، نه برای خلق کردن؛ سلسله‌مراتب و سیلو و سبک «بله سرآشپز!» همان همکاری و به‌چالش‌کشیدنی را خفه می‌کنند که کشف لازم دارد (pp. 177–178).
 
-3. **What is the difference between multicasting and spamming?**
-   - [x] Multicasting sends the message through several media; spamming repeats it through the same medium
-   - [ ] Multicasting goes to more people
-   - [ ] There is none
+3. **تفاوت پخش چندرسانه‌ای با اسپم چیست؟**
+   - [x] پخش چندرسانه‌ای پیام را روی چند رسانه می‌فرستد و اسپم همان را روی یک رسانه تکرار می‌کند
+   - [ ] پخش چندرسانه‌ای به آدم‌های بیشتری می‌رسد
+   - [ ] تفاوتی ندارند
 
    *Answer:* p. 181.
 
-4. **Which kind of disagreement is more dangerous, and why?**
+4. **کدام جنس مخالفت خطرناک‌تر است و چرا؟**
 
-   *Answer:* Passive disagreement — nodding along — which surfaces late as slow execution, subtle sabotage or surprise objections (p. 187).
+   *Answer:* مخالفت منفعل، یعنی سر تکان دادن، که دیر و به شکل اجرای کند و خرابکاری ظریف و اعتراض‌های غافلگیرکننده رو می‌شود (p. 187).
 
-5. **What did April's code review checklist separate?**
+5. **فهرست وارسی code review آپریل چه چیزی را از چه چیزی جدا کرد؟**
 
-   *Answer:* "Must fix" items (security issues, bugs) from "consider" items (style preferences) (p. 193).
+   *Answer:* قلم‌های «حتماً درست شود»، یعنی مسئله‌های امنیتی و باگ، را از قلم‌های «در نظر بگیرید»، یعنی سلیقه‌های سبکی (p. 193).
 
-6. **What is the difference between an RFC and an ADR?**
+6. **تفاوت RFC و ADR چیست؟**
 
-   *Answer:* An RFC is prospective — collaborative input on what to do; an ADR is retrospective — a record of what was decided and why (pp. 200–201).
+   *Answer:* سند RFC رو به جلوست، یعنی نظر مشارکتی درباره‌ی این‌که چه کار کنیم؛ و سند ADR رو به عقب است، یعنی ثبت این‌که چه تصمیمی گرفته شد و چرا (pp. 200–201).
 
-7. **What changes cut April's RFC decision time from two weeks to three days?**
+7. **چه تغییرهایی زمان تصمیم RFC در تیم April را از دو هفته به سه روز رساند؟**
 
-   *Answer:* A two-page limit with appendices, async-first reviews, and RFC buddies who must ask at least one question (pp. 204–205).
+   *Answer:* سقف دو صفحه با پیوست، بررسی ناهمگام به‌عنوان پیش‌فرض، و رفیق‌های RFC که باید دست‌کم یک پرسش بپرسند (pp. 204–205).

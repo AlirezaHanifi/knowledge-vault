@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Impact Versus Effort</title>
-<meta name="description" content="Place the book&#x27;s example work items and your own on an impact-versus-effort grid and see which quadrant each lands in and what the book says to do with it. Illustrates Engineering Leadership: The Hard Parts, Chapter 6.">
+<title>اثر در برابر تلاش</title>
+<meta name="description" content="قلم‌های نمونه‌ی کتاب و قلم‌های خودتان را روی شبکه‌ی اثر در برابر تلاش بگذارید و ببینید هر کدام در کدام چهارخانه می‌افتند و کتاب درباره‌شان چه می‌گوید. برای فصل ۶ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>#item { max-width: 100%; }
   #grid { width: 100%; max-width: 520px; height: auto; display: block; margin: 0 auto; }
@@ -12,54 +12,54 @@
   #grid text { font-size: 11px; fill: var(--ink-3); } #grid .ql { font-weight: 600; } #grid .dot { fill: var(--surface); stroke: var(--ink-3); stroke-width: 1.5; }
   #grid .dot.sel { fill: var(--accent); stroke: var(--accent-ink); } #grid .dn { fill: currentColor; font-size: 10px; font-weight: 700; }
   .inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; } .inline input[type=text] { min-width: 14em; }
-  ol.items { margin: 0; padding-left: 1.4em; font-size: .88rem; }</style>
+  ol.items { margin: 0; padding-right: 1.4em; font-size: .88rem; }</style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/06-shipping-products-and-code-in-chaotic-environments.html">Chapter 6</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Impact versus effort</span>
+      <a href="../chapters/06-shipping-products-and-code-in-chaotic-environments.html">فصل ۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">اثر در برابر تلاش</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 6 · Shipping Products and Code in Chaotic Environments</div>
-  <h1>Impact versus effort</h1>
-  <p class="lede">When everything is a priority, a two-by-two grid starts the right conversation. Pick an item, set its <strong>impact</strong> and <strong>effort</strong>, and see where it lands. The starting positions follow the book’s own examples; add your own items to run the mapping session.</p>
-  <p class="source-note">Illustrates “Impact-versus-effort analysis” (Figure 6-2, pp. 106–110) and “Exercise: The Impact-Versus-Effort Mapping Session” (pp. 110–111). The quadrant advice and example items are the book’s; their exact positions on a 1–10 scale are the vault’s.</p>
+  <div class="eyebrow">فصل ۶ · تحویل محصول و کد در محیط‌های آشوب‌زده</div>
+  <h1>اثر در برابر تلاش</h1>
+  <p class="lede">وقتی همه چیز اولویت است، یک شبکه‌ی دو‌در‌دو گفت‌وگوی درست را شروع می‌کند. یک قلم را بردارید، <strong>اثر</strong> و <strong>تلاش</strong>ش را بگذارید و ببینید کجا می‌افتد. جایگاه‌های اولیه از نمونه‌های خود کتاب می‌آیند؛ قلم‌های خودتان را اضافه کنید تا جلسه‌ی نگاشت را اجرا کنید.</p>
+  <p class="source-note">این شبیه‌سازی «تحلیل اثر در برابر تلاش» (شکل ۶-۲، صص. ۱۰۶–۱۱۰) و «تمرین: جلسه‌ی نگاشت اثر در برابر تلاش» (صص. ۱۱۰–۱۱۱) را نشان می‌دهد. توصیه‌ی هر چهارخانه و قلم‌های نمونه از خود کتاب‌اند؛ جایگاه دقیقشان روی مقیاس ۱ تا ۱۰ مال vault است.</p>
 
   <div class="sim stack">
-    <div class="panel"><svg id="grid" viewBox="0 0 520 380" role="img" aria-labelledby="gridlabel"><title id="gridlabel">Impact versus effort grid</title><g id="g"></g></svg></div>
+    <div class="panel"><svg id="grid" viewBox="0 0 520 380" role="img" aria-labelledby="gridlabel"><title id="gridlabel">شبکه‌ی اثر در برابر تلاش</title><g id="g"></g></svg></div>
     <div class="panel stack">
-      <div><label for="item">Item to place</label><br><select id="item"></select></div>
+      <div><label for="item">قلمی که می‌خواهید جایش بگذارید</label><br><select id="item"></select></div>
       <div id="imp"></div><div id="eff"></div>
       <div id="verdict" class="callout" aria-live="polite"></div>
-      <div class="inline"><div><label for="newitem">Add your own item</label><br><input type="text" id="newitem" maxlength="60" placeholder="e.g. Migrate the billing cron jobs"></div><button class="btn" id="add" type="button">Add</button></div>
+      <div class="inline"><div><label for="newitem">قلم خودتان را اضافه کنید</label><br><input type="text" id="newitem" maxlength="60" placeholder="مثلاً مهاجرت cron jobهای صورت‌حساب"></div><button class="btn" id="add" type="button">افزودن</button></div>
     </div>
-    <div class="panel"><p class="panel-title">Items by quadrant</p><div id="byq"></div></div>
-    <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="panel"><p class="panel-title">قلم‌ها به تفکیک چهارخانه</p><div id="byq"></div></div>
+    <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li>Top left is the sweet spot; bottom right is the danger zone — work that is expensive and changes little. Ask whether a cheaper version reaches the same outcome.</li>
-    <li>April’s two items show the grid’s real use: start the high-impact, low-effort cross-team reviews now, and plan the high-effort onboarding program for next quarter.</li>
-    <li>Positions are relative and arguable. When people place the same item differently, that disagreement is data about how they see its impact.</li>
+    <li>بالا سمت چپ نقطه‌ی شیرین است و پایین سمت راست منطقه‌ی خطر، یعنی کاری که گران است و چیز کمی را عوض می‌کند. بپرسید نسخه‌ی ارزان‌ترش به همان نتیجه می‌رسد یا نه.</li>
+    <li>دو قلم April کاربرد واقعی شبکه را نشان می‌دهند: code reviewهای بین‌تیمی با اثر بالا و تلاش کم را همین حالا شروع کنید، و برنامه‌ی onboarding با تلاش زیاد را برای فصل بعد برنامه بریزید.</li>
+    <li>جایگاه‌ها نسبی و قابل‌بحث‌اند. وقتی آدم‌ها یک قلم را جای متفاوتی می‌گذارند، همین اختلاف خودش داده است درباره‌ی این‌که اثر را چطور می‌بینند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/06-shipping-products-and-code-in-chaotic-environments.html"><small>Lesson</small>6. Shipping Products and Code in Chaotic Environments</a></li>
+    <li><a href="../chapters/06-shipping-products-and-code-in-chaotic-environments.html"><small>درس</small>فصل ۶: تحویل محصول و کد در محیط‌های آشوب‌زده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -69,30 +69,30 @@
 
   var log = Kit.log(document.getElementById("log"));
   var Q = {
-    hl: ["High impact, low effort", "The sweet spot: tackle first."],
-    hh: ["High impact, high effort", "Strategic: break it down or time it carefully."],
-    ll: ["Low impact, low effort", "Spare moments or morale boosters — don’t let them dominate."],
-    lh: ["Low impact, high effort", "Danger zone: deprioritize, avoid, or reimagine a cheaper version."]
+    hl: ["اثر بالا، تلاش کم", "نقطه‌ی شیرین: اول همین را بردارید."],
+    hh: ["اثر بالا، تلاش زیاد", "راهبردی: بشکنیدش یا با دقت زمان‌بندی‌اش کنید."],
+    ll: ["اثر کم، تلاش کم", "برای وقت‌های خالی یا بالا بردن روحیه؛ نگذارید غالب شوند."],
+    lh: ["اثر کم، تلاش زیاد", "منطقه‌ی خطر: اولویتش را پایین بیاورید، پرهیز کنید، یا نسخه‌ی ارزان‌تری از آن را تصور کنید."]
   };
   var items = [
-    ["Product-listing filter users have long requested", 8, 3], ["Navigation tweak that raises retention", 7, 2],
-    ["Rebuild a core component for scale", 9, 8], ["New module integrating many systems", 7, 9],
-    ["Change a page colour", 2, 1], ["Tooltip tweak", 2, 2],
-    ["Refactor with no measurable benefit", 2, 8], ["Complex feature nobody asked for", 3, 9],
-    ["April: weekly cross-team code reviews", 9, 3], ["April: comprehensive onboarding program", 8, 7]
+    ["فیلتر فهرست محصول که کاربرها مدت‌ها خواسته‌اند", 8, 3], ["تغییر کوچک ناوبری که retention را بالا می‌برد", 7, 2],
+    ["بازسازی یک مؤلفه‌ی اصلی برای مقیاس", 9, 8], ["ماژول تازه‌ای که چند سیستم را یکپارچه می‌کند", 7, 9],
+    ["عوض کردن رنگ یک صفحه", 2, 1], ["تغییر کوچک یک tooltip", 2, 2],
+    ["refactoring بدون فایده‌ی اندازه‌پذیر", 2, 8], ["feature پیچیده‌ای که کسی نخواسته", 3, 9],
+    ["April: code review هفتگی بین‌تیمی", 9, 3], ["April: برنامه‌ی جامع onboarding", 8, 7]
   ];
   var cur = 0, sel = document.getElementById("item");
   function quad(it) { return (it[1] > 5 ? "h" : "l") + (it[2] > 5 ? "h" : "l"); }
   function fillSel() { Kit.clear(sel); items.forEach(function (it, i) { sel.appendChild(Kit.el("option", { value: String(i) }, (i + 1) + ". " + it[0])); }); sel.value = String(cur); }
-  var imp = Kit.slider({ label: "Impact", min: 1, max: 10, step: 1, value: items[0][1], hint: "Benefit to users, customers or the business", onInput: function (v) { set(1, v); } });
-  var eff = Kit.slider({ label: "Effort", min: 1, max: 10, step: 1, value: items[0][2], hint: "Time, skill and complexity required", onInput: function (v) { set(2, v); } });
+  var imp = Kit.slider({ label: "اثر", min: 1, max: 10, step: 1, value: items[0][1], hint: "فایده برای کاربر و مشتری و کسب‌وکار", onInput: function (v) { set(1, v); } });
+  var eff = Kit.slider({ label: "تلاش", min: 1, max: 10, step: 1, value: items[0][2], hint: "زمان و مهارت و پیچیدگی لازم", onInput: function (v) { set(2, v); } });
   document.getElementById("imp").appendChild(imp.element); document.getElementById("eff").appendChild(eff.element);
   var lastQ = quad(items[0]);
-  function set(k, v) { items[cur][k] = v; var q = quad(items[cur]); if (q !== lastQ) { log.add(items[cur][0] + " → " + Q[q][0], q === "hl" ? "ok" : q === "lh" ? "bad" : "muted"); lastQ = q; } render(); }
+  function set(k, v) { items[cur][k] = v; var q = quad(items[cur]); if (q !== lastQ) { log.add(items[cur][0] + " ← " + Q[q][0], q === "hl" ? "ok" : q === "lh" ? "bad" : "muted"); lastQ = q; } render(); }
   sel.addEventListener("change", function () { cur = +sel.value; imp.set(items[cur][1]); eff.set(items[cur][2]); lastQ = quad(items[cur]); render(); });
   document.getElementById("add").addEventListener("click", function () {
     var inp = document.getElementById("newitem"), t = inp.value.trim(); if (!t) { inp.focus(); return; }
-    items.push([t, 5, 5]); cur = items.length - 1; inp.value = ""; fillSel(); imp.set(5); eff.set(5); lastQ = quad(items[cur]); log.add("Added: " + t, "muted"); render();
+    items.push([t, 5, 5]); cur = items.length - 1; inp.value = ""; fillSel(); imp.set(5); eff.set(5); lastQ = quad(items[cur]); log.add("اضافه شد: " + t, "muted"); render();
   });
   function X(e) { return 60 + (e - 0.5) / 10 * 440; } function Y(i) { return 340 - (i - 0.5) / 10 * 320; }
   function render() {
@@ -101,8 +101,8 @@
       g.appendChild(Kit.svg("rect", { class: "q" + (c[0] === q ? " hot" : ""), x: c[1], y: c[2], width: 220, height: 160 }));
       g.appendChild(Kit.svg("text", { class: "ql", x: c[1] + 8, y: c[2] + 16 }, Q[c[0]][0]));
     });
-    g.appendChild(Kit.svg("text", { x: 280, y: 362, "text-anchor": "middle" }, "Effort →"));
-    g.appendChild(Kit.svg("text", { x: 20, y: 180, transform: "rotate(-90 20 180)", "text-anchor": "middle" }, "Impact →"));
+    g.appendChild(Kit.svg("text", { x: 280, y: 362, "text-anchor": "middle" }, "تلاش ←"));
+    g.appendChild(Kit.svg("text", { x: 20, y: 180, transform: "rotate(-90 20 180)", "text-anchor": "middle" }, "اثر ←"));
     items.forEach(function (it, i) {
       var x = X(it[2]) + ((i * 7) % 11) - 5, y = Y(it[1]) + ((i * 5) % 9) - 4;
       g.appendChild(Kit.svg("circle", { class: "dot" + (i === cur ? " sel" : ""), cx: x, cy: y, r: 10 }));
@@ -118,9 +118,9 @@
   }
   fillSel(); render();
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "What does the book say to do with high-impact, high-effort items?", options: ["Tackle them first", "Break them down or time them carefully", "Drop them"], answer: 1, explain: "pp. 107–108." },
-    { q: "A refactor with no measurable benefit sits in which quadrant?", options: ["Sweet spot", "Low impact, high effort — the danger zone", "Low impact, low effort"], answer: 1, explain: "p. 109." },
-    { q: "In the mapping session, what does it mean when people place an item very differently?", options: ["Someone is wrong", "It is data about differing views of impact", "The grid doesn’t work"], answer: 1, explain: "pp. 110–111." }
+    { q: "کتاب می‌گوید با قلم‌های اثر بالا و تلاش زیاد چه کنیم؟", options: ["اول همان‌ها را برداریم", "بشکنیمشان یا با دقت زمان‌بندی‌شان کنیم", "حذفشان کنیم"], answer: 1, explain: "صص. ۱۰۷–۱۰۸." },
+    { q: "یک refactoring بدون فایده‌ی اندازه‌پذیر در کدام چهارخانه می‌نشیند؟", options: ["نقطه‌ی شیرین", "اثر کم و تلاش زیاد، یعنی منطقه‌ی خطر", "اثر کم و تلاش کم"], answer: 1, explain: "ص. ۱۰۹." },
+    { q: "در جلسه‌ی نگاشت، وقتی آدم‌ها یک قلم را خیلی متفاوت جا می‌دهند یعنی چه؟", options: ["یکی اشتباه می‌کند", "خودش داده‌ای است درباره‌ی برداشت‌های متفاوت از اثر", "شبکه کار نمی‌کند"], answer: 1, explain: "صص. ۱۱۰–۱۱۱." }
   ]);
 
 })();

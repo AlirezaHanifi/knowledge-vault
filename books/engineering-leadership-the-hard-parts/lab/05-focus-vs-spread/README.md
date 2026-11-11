@@ -1,18 +1,20 @@
-# Focus versus spread
+# تمرکز در برابر پراکندگی
 
-Twelve engineers share a backlog of 30 priorities, each of uncertain size. A priority delivers value only once it is finished. The team keeps a fixed number of priorities open at a time — all 30, or 12, 6 or 3 — and starts the next whenever one finishes; capacity is split evenly over the open ones, and every extra priority an engineer juggles costs them focus. The script counts what is finished after one and two quarters, and how many weeks of use the finished work gets.
+دوازده مهندس روی backlogی با ۳۰ اولویت کار می‌کنند که اندازه‌ی هر کدام نامعلوم است. هر اولویت فقط وقتی ارزش می‌دهد که تمام شود. تیم هر بار تعداد ثابتی اولویت را باز نگه می‌دارد، یعنی هر ۳۰تا یا ۱۲ یا ۶ یا ۳، و هر بار یکی تمام شود بعدی را شروع می‌کند؛ ظرفیت به‌طور مساوی بین اولویت‌های باز پخش می‌شود، و هر اولویت اضافه‌ای که یک مهندس هم‌زمان می‌چرخاند از تمرکزش کم می‌کند. اسکریپت می‌شمارد بعد از یک و دو سه‌ماهه چه چیزی تمام شده و کار تمام‌شده چند هفته استفاده می‌شود.
 
-*Illustrates Engineering Leadership: The Hard Parts, “What Good Direction Looks Like” and the Stripe LATAM story, pp. 75–76, 78–80. The implementation is the vault’s own: the team, the priority sizes, the switching cost and “value-weeks” are invented (seeded).*
+*این آزمایش بخش «جهت خوب چه شکلی است» و داستان تیم آمریکای لاتین Stripe از کتاب Engineering Leadership: The Hard Parts را نشان می‌دهد، صص. ۷۵–۷۶ و ۷۸–۸۰. پیاده‌سازی مال خود vault است: تیم و اندازه‌ی اولویت‌ها و هزینه‌ی جابه‌جایی و «هفته‌های ارزش» ساختگی‌اند و با seed ثابت اجرا می‌شوند.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic (seeded):
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی با seed ثابت:
 
 ```sh
 python3 focus_vs_spread.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 12 engineers, backlog of 30 priorities (4-16 engineer-weeks each), 26 weeks; 2,000 seeded trials
@@ -24,12 +26,12 @@ open at once  focus  first done  done by wk 13  done by wk 26  value-weeks
            3   100%         2.3           12.1           25.1          302
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- **With all 30 open, almost nothing finishes in the first quarter** — about one priority — even though everyone is busy the whole time. That is drift as the book describes it: activity that doesn't compound.
-- **With six open, the first priority lands in about three weeks** and twelve are done by the end of the quarter; finished work starts delivering value months earlier (value-weeks roughly triple).
-- Past a point, fewer open priorities stop helping much in this model (6 and 3 are close). The book's choice of two per team is a judgement about focus and coordination; the toy model only shows why far fewer than 30 is better.
+- **وقتی هر ۳۰ اولویت باز باشند، در سه‌ماهه‌ی اول تقریباً هیچ چیز تمام نمی‌شود**، یعنی حدود یک اولویت، با وجود این‌که همه تمام مدت مشغول‌اند. همان رانشی است که کتاب می‌گوید: فعالیتی که روی هم جمع نمی‌شود.
+- **با شش اولویت باز، اولین اولویت حدود سه هفته‌ای می‌رسد** و تا پایان سه‌ماهه دوازده‌تا تمام می‌شوند؛ کار تمام‌شده ماه‌ها زودتر ارزش دادن را شروع می‌کند و هفته‌های ارزش تقریباً سه برابر می‌شوند.
+- از جایی به بعد، کمتر کردن اولویت‌های باز در این مدل کمک چندانی نمی‌کند، چون ۶ و ۳ نزدیک هم‌اند. انتخاب دوتا برای هر تیم در کتاب قضاوتی درباره‌ی تمرکز و هماهنگی است؛ این مدل اسباب‌بازی فقط نشان می‌دهد چرا خیلی کمتر از ۳۰ بهتر است.
 
-## Related
+## پیوندها
 
-- Chapter note: [5. Setting Direction](../../chapters/05-setting-direction.md) — “What Good Direction Looks Like”, pp. 79–81
+- یادداشت فصل: [فصل ۵: تعیین جهت](../../chapters/05-setting-direction.md)، بخش «جهت خوب چه شکلی است»، صص. ۷۹–۸۱

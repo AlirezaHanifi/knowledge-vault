@@ -3,247 +3,261 @@ book: engineering-leadership-the-hard-parts
 chapter: 10
 title: "Metrics That Matter for Engineering Teams"
 pages: "207–226"
+translated_title: "متریک‌هایی که برای تیم‌های مهندسی مهم‌اند"
+lang: fa
 ---
 
-# 10. Metrics That Matter for Engineering Teams
+# فصل ۱۰: متریک‌هایی که برای تیم‌های مهندسی مهم‌اند
 
-[← 9. Collaborative Technical Practices](09-collaborative-technical-practices-and-decision-making.md) · [Book](../README.md) · [11. Fitting It All Together →](11-fitting-it-all-together.md)
+[فصل ۹: کارهای فنی مشارکتی →](09-collaborative-technical-practices-and-decision-making.md) · [کتاب](../README.md) · [فصل ۱۱: کنار هم گذاشتن همه چیز ←](11-fitting-it-all-together.md)
 
-## Summary
+## خلاصه
 
-"How's the engineering team doing?" is hard to answer, and dashboards of squiggly lines rarely help. The chapter argues for a small set of metrics that spot problems early and show whether improvements work, while avoiding vanity metrics and surveillance. It treats metrics as a product: know your customers, dig past what they want to what they need, and break big questions into measurable criteria. Start with the four DORA metrics plus one or two for your biggest pain point, and use data you already have. Velocity is a capacity-planning tool, never a performance measure. Measure teams rather than individuals, beware Goodhart's Law and invisible work, keep metrics visible, version and retire them, and apply the same approach to AI (pp. 207–225).
+پاسخ دادن به «تیم مهندسی چطور است؟» سخت است و داشبوردهای پر از خط‌های پیچ‌درپیچ به‌ندرت کمک می‌کنند. این فصل از مجموعه‌ای کوچک از متریک‌ها دفاع می‌کند که مسئله را زود پیدا می‌کنند و نشان می‌دهند بهبودها جواب داده‌اند یا نه، و در همان حال از متریک پوچ و نظارت پلیسی پرهیز می‌کنند. متریک را مثل یک محصول می‌بیند: مشتری‌هایتان را بشناسید، از چیزی که می‌خواهند به چیزی که لازم دارند بروید، و پرسش‌های بزرگ را به معیارهای اندازه‌پذیر بشکنید. با چهار متریک DORA شروع کنید و یکی دوتا برای بزرگ‌ترین نقطه‌ی دردتان اضافه کنید، و از داده‌ای استفاده کنید که از قبل دارید. مقدار velocity ابزار برنامه‌ریزی ظرفیت است، نه سنجه‌ی عملکرد. تیم را اندازه بگیرید نه افراد را، مراقب قانون Goodhart و کار نامرئی باشید، متریک‌ها را دیدنی نگه دارید و نسخه‌بندی و بازنشسته‌شان کنید، و همین رویکرد را برای هوش مصنوعی هم به کار ببرید (pp. 207–225).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Good metrics do two things:** spot problems while they're small, and tell you whether improvements work; badly used ones are worse than none (p. 208).
-- **Treat metrics as a product** with three customer groups: engineers, engineering managers and leaders outside engineering (pp. 208–209).
-- **Find the question behind the question** — "which team is most productive?" usually means "Are we okay?" (pp. 209–211).
-- **Start with DORA,** add one or two context metrics — five or six in total — after four to six weeks of baseline (pp. 212–213).
-- **Velocity is for capacity planning,** within the team; never a performance metric or cross-team comparison (pp. 215–216).
-- **Measure teams, not individuals;** individual problems show up in qualitative signals first (pp. 217–218).
-- **"When a measure becomes a target, it ceases to be a good measure"** — balance volume metrics with outcome and quality metrics (p. 219).
-- **Metrics need maintenance:** a changelog, versions, an owner, feedback, and retirement (pp. 221–223).
+- **متریک خوب دو کار می‌کند:** مسئله را وقتی کوچک است پیدا می‌کند، و می‌گوید بهبودها جواب داده‌اند یا نه؛ متریکی که بد به کار برود از نداشتنش بدتر است (p. 208).
+- **متریک را مثل یک محصول ببینید** با سه گروه مشتری: مهندس‌ها، مدیرهای مهندسی، و رهبرهای بیرون از مهندسی (pp. 208–209).
+- **پرسش پشت پرسش را پیدا کنید**؛ «کدام تیم بهره‌ورتر است؟» معمولاً یعنی «حالمان خوب است؟» (pp. 209–211).
+- **با DORA شروع کنید** و بعد از چهار تا شش هفته خط پایه، یکی دو متریک زمینه‌ای اضافه کنید، یعنی در کل پنج شش‌تا (pp. 212–213).
+- **مقدار velocity برای برنامه‌ریزی ظرفیت است** و داخل خود تیم؛ هیچ‌وقت سنجه‌ی عملکرد یا ابزار مقایسه‌ی تیم‌ها نیست (pp. 215–216).
+- **تیم را اندازه بگیرید، نه افراد را؛** مشکل فردی اول در سیگنال‌های کیفی پیدا می‌شود (pp. 217–218).
+- **«وقتی یک سنجه به هدف تبدیل شود، دیگر سنجه‌ی خوبی نیست»**؛ متریک‌های حجمی را با متریک نتیجه و کیفیت متعادل کنید (p. 219).
+- **متریک‌ها نگه‌داری می‌خواهند:** تاریخچه‌ی تغییر، نسخه، صاحب، بازخورد، و بازنشستگی (pp. 221–223).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Why Measure Anything at All? — p. 207
-- Metrics as a Product — p. 208
-  - Design Intentionally — p. 209
-  - The Trap of Want Versus Need — p. 209
-  - Constructing Questions — p. 211
-  - Choosing the Right Metrics for Your Context — p. 212
-  - Take Stock of What You Already Measure — p. 214
-- Velocity: The Most Misused Metric in Software — p. 215
-  - Why Velocity Goes Wrong — p. 215
-  - How to Use Velocity Correctly — p. 216
-- Build Your Metrics with Your Customers in Mind — p. 216
-  - The Human Side of Metrics — p. 217
-  - Balancing Quantitative and Qualitative Data — p. 218
-  - Humans and Metrics — p. 219
-  - Make Metrics Visible and Accessible — p. 221
-- Metrics Need Ongoing Maintenance, Just Like Code — p. 221
-- AI Doesn’t Change Your Approach to Metrics — p. 223
-- Conclusion: Measurement as Illumination — p. 224
+- اصلاً چرا چیزی را اندازه بگیریم؟ — p. 207
+- متریک به‌مثابه محصول — p. 208
+  - عامدانه طراحی کنید — p. 209
+  - دام خواستن در برابر نیاز داشتن — p. 209
+  - ساختن پرسش‌ها — p. 211
+  - انتخاب متریک درست برای زمینه‌ی خودتان — p. 212
+  - ببینید همین حالا چه چیزی را اندازه می‌گیرید — p. 214
+- بخش velocity: بدمصرف‌شده‌ترین متریک نرم‌افزار — p. 215
+  - چرا velocity بد از آب درمی‌آید — p. 215
+  - چطور درست از velocity استفاده کنیم — p. 216
+- متریک‌ها را با نگاه به مشتری‌هایتان بسازید — p. 216
+  - سمت انسانی متریک‌ها — p. 217
+  - تعادل داده‌ی کمی و کیفی — p. 218
+  - آدم‌ها و متریک‌ها — p. 219
+  - متریک‌ها را دیدنی و در دسترس کنید — p. 221
+- متریک‌ها هم مثل کد نگه‌داری پیوسته می‌خواهند — p. 221
+- هوش مصنوعی رویکردتان به متریک را عوض نمی‌کند — p. 223
+- جمع‌بندی: اندازه‌گیری به‌مثابه روشنایی — p. 224
 
-## Notes
+## یادداشت‌ها
 
-The aim is metrics that help you understand what's happening, find problems before they escalate, and decide where to focus — not vanity metrics, and not "an overeager hall monitor" (p. 207).
+هدف، متریک‌هایی است که کمک کنند بفهمید چه خبر است، مسئله‌ها را پیش از بزرگ شدن پیدا کنید و تصمیم بگیرید کجا تمرکز کنید؛ نه متریک پوچ و نه «مبصر بیش از حد مشتاق» (p. 207).
 
-### Why Measure Anything at All?
+### اصلاً چرا چیزی را اندازه بگیریم؟
 
-Improving without measuring is "based on vibes rather than reality." Good metrics identify problems before they become disasters and show whether improvement efforts — that fancy CI/CD pipeline — actually work. Poor ones create perverse incentives and demoralize teams (pp. 207–208).
+بهتر شدن بدون اندازه‌گیری «بر پایه‌ی حس است، نه واقعیت». متریک خوب مسئله را پیش از تبدیل شدن به فاجعه پیدا می‌کند و نشان می‌دهد تلاش‌های بهبود، مثل آن pipeline شیک CI/CD، واقعاً جواب داده‌اند یا نه. متریک بد انگیزه‌های وارونه می‌سازد و تیم‌ها را دلسرد می‌کند (pp. 207–208).
 
-> **In Practice: April's Story** (p. 208). Marcus says the team is "crushing it" (10,000 requests per second), Sarah says it's struggling (slow delivery), Derek says all is fine (no database outages). April's first metric — feature cycle time from ticket to production — shows an average of 47 days, with features bouncing between siloed engineers.
+> **کادر In Practice: داستان April** (p. 208). مهندسی به نام Marcus می‌گوید تیم «می‌ترکاند» با ۱۰٬۰۰۰ درخواست در ثانیه، Sarah می‌گوید تیم به زحمت افتاده چون تحویل کند است، و Derek می‌گوید همه چیز خوب است چون دیتابیس قطعی ندارد. اولین متریک April، یعنی زمان چرخه‌ی feature از ticket تا production، میانگین ۴۷ روز را نشان می‌دهد، با featureهایی که بین مهندس‌های در سیلو بالا و پایین می‌پرند.
 
-### Metrics as a Product
+> **In practice:** بهتر شدن pipeline بدون metric حدس است: Prometheus و Grafana هم برای platform‌اند و هم برای تیم.
+>
+> **Your turn:** تیم GitLab CI را بازطراحی کرد. چطور نشان می‌دهید بهتر شده است؟
+>
+> *Answer:* زمان pipeline در CI، زمان از باز شدن تا merge یک merge request، و نرخ deployهایی که rollback شدند، پیش و پس از تغییر. کتاب می‌گوید metric خوب نشان می‌دهد تلاش بهبود واقعاً جواب داده است (pp. 207–208).
 
-The classic observability trap is spending 90% of the effort on infrastructure and 10% on analysis; data isn't insight. Like a product, metrics have customers, needn't be perfect at launch, and improve over time (p. 208).
+### متریک به‌مثابه محصول
 
-#### Design Intentionally
+دام کلاسیک observability این است که ۹۰٪ تلاش صرف زیرساخت شود و ۱۰٪ صرف تحلیل؛ داده بینش نیست. متریک هم مثل محصول مشتری دارد، لازم نیست روز اول بی‌نقص باشد، و به‌مرور بهتر می‌شود (p. 208).
 
-Ask questions that one or more metrics answer, tied to real business needs, and ask your customers what they need (p. 209):
+#### عامدانه طراحی کنید
 
-| Customer | Typical need (p. 209) |
+پرسش‌هایی بپرسید که یک یا چند متریک جوابشان می‌دهند، به نیاز واقعی کسب‌وکار گره بخورند، و از مشتری‌هایتان بپرسید چه لازم دارند (p. 209):
+
+| مشتری | نیاز معمول (p. 209) |
 |---|---|
-| Engineers | 95% of the time, how they work and the friction in it |
-| Engineering managers | Bottlenecks and improvements |
-| Leaders outside engineering | Strategic concerns — costs, returns, velocity |
+| مهندس‌ها | ۹۵٪ وقت‌ها، شیوه‌ی کارشان و اصطکاک داخلش |
+| مدیرهای مهندسی | گلوگاه‌ها و بهبودها |
+| رهبرهای بیرون از مهندسی | دغدغه‌های راهبردی، یعنی هزینه و بازده و سرعت |
 
-#### The Trap of Want Versus Need
+#### دام خواستن در برابر نیاز داشتن
 
-Stakeholders ask for what sounds impressive. A CEO read GitHub and called two engineers far more productive because they committed thousands of lines — they were frontend engineers committing npm packages, JavaScript and CSS (pp. 209–210).
+ذی‌نفع‌ها چیزی را می‌خواهند که چشمگیر به نظر می‌رسد. مدیرعاملی GitHub را نگاه کرد و دو مهندس را خیلی بهره‌ورتر خواند چون هزاران خط commit کرده بودند؛ آن‌ها مهندس frontend بودند و پکیج npm و جاوااسکریپت و CSS را commit می‌کردند (pp. 209–210).
 
-> **In Practice: April's Story** (p. 210). The VP of product calls Marcus the "MVP" for his solid-green contribution graph. Marcus commits 50 times a day (formatting, console.log, WIP); Derek once a week with tested features. April asks: "What decision would you make differently if you knew who committed more often?" — none — and moves to deployment frequency and change failure rate.
+> **کادر In Practice: داستان April** (p. 210). معاون محصول Marcus را به‌خاطر نمودار مشارکت یکدست سبزش «بهترین بازیکن» می‌نامد. Marcus روزی ۵۰ بار commit می‌کند، با قالب‌بندی و console.log و کار نیمه‌تمام؛ Derek هفته‌ای یک‌بار با featureهای تست‌شده. April می‌پرسد: «اگر بدانید چه کسی بیشتر commit می‌کند، چه تصمیمی را جور دیگری می‌گیرید؟» و پاسخ هیچ است، پس به تکرار deployment و نرخ خرابی تغییر می‌رود.
 
-Questions like "Which team is most productive?" or "How many hours do engineers work?" aren't bad — they're attempts to quantify an unfamiliar domain. Don't demean the asker; find the underlying question by asking what decision the answer would change. It often boils down to "Are we okay?" — will we meet objectives, are we getting value for money, is quality sufficient, are we executing? (pp. 210–211)
+پرسش‌هایی مثل «کدام تیم بهره‌ورتر است؟» یا «مهندس‌ها چند ساعت کار می‌کنند؟» بد نیستند؛ تلاشی برای کمی کردن حوزه‌ای ناآشنایند. پرسنده را کوچک نکنید؛ پرسش زیرین را با پرسیدن این‌که پاسخ چه تصمیمی را عوض می‌کند پیدا کنید. اغلب ته آن همین است: «حالمان خوب است؟»، یعنی به هدف‌ها می‌رسیم، پولمان ارزش دارد، کیفیت کافی است، و داریم اجرا می‌کنیم (pp. 210–211)؟
 
-> **Try it:** [Metrics picker](../widgets/10-metrics-picker.html) — translate stakeholder questions into the questions behind them, and build a five-or-six-metric set from DORA plus the context metrics for your biggest pain point.
+> **Try it:** [انتخاب‌گر متریک](../widgets/10-metrics-picker.html)؛ پرسش‌های ذی‌نفع‌ها را به پرسش پشتشان ترجمه کنید و مجموعه‌ای پنج شش‌تایی از DORA به‌علاوه‌ی متریک‌های زمینه‌ای بزرگ‌ترین نقطه‌ی دردتان بسازید.
 
-#### Constructing Questions
+#### ساختن پرسش‌ها
 
-Group research into themes and break big questions down by granularity — for "Is our engineering velocity acceptable?" leadership asks how fast we ship; engineering leaders ask about story points, estimate accuracy and deploy counts; engineers ask about cycle time and CI duration. Every answer needs a metric and a measurable success criterion (p. 211).
+پژوهشتان را در درون‌مایه‌ها گروه کنید و پرسش‌های بزرگ را بر پایه‌ی سطح جزئیات بشکنید؛ برای «آیا سرعت مهندسی ما قابل‌قبول است؟» رهبری می‌پرسد چقدر سریع تحویل می‌دهیم، رهبرهای مهندسی درباره‌ی story point و دقت تخمین و تعداد deploy می‌پرسند، و مهندس‌ها درباره‌ی زمان چرخه و مدت CI. هر پاسخی به یک متریک و یک معیار موفقیت اندازه‌پذیر نیاز دارد (p. 211).
 
-| *Table 10-1* (p. 212) | Example |
+| *جدول ۱۰-۱* (p. 212) | نمونه |
 |---|---|
-| High level | Our engineering velocity is acceptable and meets our business goals |
-| Question | How long do CI or CI/CD runs take to build, test and deploy code? |
-| Success criteria | CI test runs under 15 minutes; CI/CD runs under 30 minutes to run and deploy |
-| Metrics | CI test run time; CI/CD deployment run time |
-| Maintenance goal | 95% of both kinds of runs meet or beat the criteria |
+| سطح بالا | سرعت مهندسی ما قابل‌قبول است و به هدف‌های کسب‌وکار می‌رسد |
+| پرسش | اجرای CI یا CI/CD چقدر طول می‌کشد تا کد را build و تست و deploy کند؟ |
+| معیار موفقیت | اجرای تست CI زیر ۱۵ دقیقه؛ اجرای CI/CD زیر ۳۰ دقیقه تا اجرا و استقرار |
+| متریک‌ها | زمان اجرای تست CI؛ زمان اجرای استقرار CI/CD |
+| هدف نگه‌داری | ۹۵٪ هر دو نوع اجرا به معیار برسند یا از آن بهتر باشند |
 
-#### Choosing the Right Metrics for Your Context
+#### انتخاب متریک درست برای زمینه‌ی خودتان
 
-Metric overload is as counterproductive as none. Start with **DORA** — well tested, outcome-focused, buildable from existing tooling (pp. 212–213):
+غرق شدن در متریک به همان اندازه‌ی نداشتنش ضدبازده است. با **DORA** شروع کنید، که خوب آزموده شده و نتیجه‌محور است و از ابزار موجود ساخته می‌شود (pp. 212–213):
 
-| DORA metric | Measures (p. 212) |
+| متریک DORA | چه چیزی را اندازه می‌گیرد (p. 212) |
 |---|---|
-| Deployment frequency | How often you deploy to production |
-| Lead time for changes | Commit to running in production |
-| Change failure rate | Share of deployments needing immediate fixes |
-| Time to restore service | How quickly you recover from incidents |
+| تکرار deployment | هر چند وقت یک‌بار به production استقرار می‌دهید |
+| زمان رسیدن تغییر | از commit تا اجرا شدن در production |
+| نرخ خرابی تغییر | سهم استقرارهایی که فوری رفع لازم دارند |
+| زمان بازیابی سرویس | چقدر سریع از حادثه برمی‌گردید |
 
-Then add one or two for your biggest pain point (p. 213):
+بعد یکی دو متریک برای بزرگ‌ترین نقطه‌ی دردتان اضافه کنید (p. 213):
 
-| Pain point | Context metrics (p. 213) |
+| نقطه‌ی درد | متریک زمینه‌ای (p. 213) |
 |---|---|
-| Reliability | Incident volume by severity; mean time between failures |
-| Delivery predictability | Feature cycle time (idea to production); sprint goal achievement rate |
-| Quality | Bug escape rate; test coverage for critical paths |
-| Team health | Quarterly developer satisfaction surveys; on-call load distribution |
+| reliability | حجم حادثه به تفکیک شدت؛ میانگین زمان بین خرابی‌ها |
+| پیش‌بینی‌پذیری تحویل | زمان چرخه‌ی feature از ایده تا production؛ نرخ رسیدن به هدف sprint |
+| کیفیت | نرخ فرار باگ؛ پوشش تست مسیرهای حیاتی |
+| سلامت تیم | نظرسنجی فصلی رضایت توسعه‌دهنده؛ توزیع بار on-call |
 
-Rollout: start small with DORA → collect four to six weeks of baseline → add context metrics → review quarterly which metrics drive decisions. Aim for balance, not maximizing one number (pp. 213–214).
+راه‌اندازی: کوچک با DORA شروع کنید، چهار تا شش هفته خط پایه جمع کنید، متریک‌های زمینه‌ای را اضافه کنید، و فصلی بازبینی کنید کدام متریک‌ها واقعاً به تصمیم می‌رسند. دنبال تعادل باشید، نه بیشینه کردن یک عدد (pp. 213–214).
 
-#### Take Stock of What You Already Measure
+#### ببینید همین حالا چه چیزی را اندازه می‌گیرید
 
-Git, CI/CD, issue trackers and monitoring already hold most of the data; teams James worked with dropped an expensive metrics platform after combining Jira, GitHub and CircleCI. Some answer 80% of questions with a simple dashboard; others justify a vendor — start small either way. "The best metrics solution is the one your team will actually use" (pp. 214–215).
+مخزن git و CI/CD و ابزار پیگیری مسئله و monitoring از قبل بیشتر داده را دارند؛ تیم‌هایی که James با آن‌ها کار می‌کرد بعد از ترکیب Jira و GitHub و CircleCI یک platform گران متریک را کنار گذاشتند. بعضی‌ها با یک داشبورد ساده به ۸۰٪ پرسش‌ها جواب می‌دهند و بعضی‌ها واقعاً به یک فروشنده نیاز دارند؛ در هر صورت کوچک شروع کنید. «بهترین راه‌حل متریک همانی است که تیمتان واقعاً به کارش می‌برد» (pp. 214–215).
 
-### Velocity: The Most Misused Metric in Software
+### مفهوم velocity: بدمصرف‌شده‌ترین متریک نرم‌افزار
 
-**Velocity is a capacity planning tool, not a productivity metric** — comparing teams is like comparing a sports car's mileage with a delivery truck's (p. 215).
+**مقدار velocity ابزار برنامه‌ریزی ظرفیت است، نه متریک بهره‌وری**؛ مقایسه‌ی تیم‌ها با آن مثل مقایسه‌ی مصرف سوخت یک خودروی اسپرت با یک کامیون توزیع است (p. 215).
 
-| Mistake | Why it fails (p. 215) |
+| اشتباه | چرا شکست می‌خورد (p. 215) |
 |---|---|
-| Treating it as performance | Points are arbitrary and unique to each team |
-| Targets from past peaks | Teams inflate estimates or cut corners |
-| Comparing teams | Different estimation, problems and composition — "apples to spaceships" |
+| عملکرد دانستنش | pointها دلبخواهی‌اند و برای هر تیم یکتا |
+| هدف‌گذاری از روی اوج‌های گذشته | تیم‌ها تخمین را باد می‌کنند یا از کار می‌زنند |
+| مقایسه‌ی تیم‌ها | تخمین و مسئله و ترکیب تیم فرق دارد؛ «مقایسه‌ی سیب با سفینه» |
 
-James saw an organization "standardize" story points across teams: estimation arguments, inflated points, demoralized teams, worse quality — and the effort was abandoned (p. 215).
+کادر James سازمانی را دید که story pointها را بین تیم‌ها «یکدست» کرد: بحث بر سر تخمین، pointهای بادکرده، تیم‌های دلسرد، و کیفیت بدتر؛ و آخرش کل تلاش رها شد (p. 215).
 
-> **In Practice: April's Story** (p. 216). A previous manager's individual points leaderboard: Marcus split tasks into five one-point stories, Sarah inflated estimates, Derek stopped caring, juniors avoided anything over three points. April removed it, tracked team velocity privately with a three-sprint rolling average, and told the VP that asking who completed most points is like asking which musician played the most notes.
+> **کادر In Practice: داستان April** (p. 216). جدول امتیاز فردیِ مدیر قبلی: Marcus کار را به پنج story یک‌امتیازی می‌شکست، Sarah تخمین را باد می‌کرد، Derek بی‌خیال شد، و تازه‌کارها از هر چیزی بالای سه امتیاز فرار می‌کردند. April جدول را برداشت، velocity تیمی را خصوصی و با میانگین متحرک سه sprint دنبال کرد، و به معاون گفت پرسیدن این‌که چه کسی بیشترین point را زده مثل پرسیدن این است که کدام نوازنده بیشترین نت را نواخته.
 
-**Use it correctly:** for capacity planning, watching for dramatic changes, and within the team. A team James worked with saw a 40% drop over two sprints, found technical debt in a critical component, and — because the metric wasn't judging them — safely made the case for a debt sprint (p. 216).
+**درست به کارش ببرید:** برای برنامه‌ریزی ظرفیت، برای دیدن تغییرهای شدید، و داخل خود تیم. تیمی که James با آن کار می‌کرد در دو sprint ۴۰٪ افت دید، بدهی فنی را در یک مؤلفه‌ی حیاتی پیدا کرد، و چون آن متریک قضاوتشان نمی‌کرد توانست با خیال راحت پرونده‌ی یک sprint بدهی را جلو ببرد (p. 216).
 
-> **Run it:** the [velocity target](../lab/10-velocity-target/README.md) experiment simulates a team planning with velocity versus one told to hit a higher points target, and counts what the extra points really buy.
+> **Run it:** آزمایش [هدف‌گذاری velocity](../lab/10-velocity-target/README.md) تیمی را که با velocity برنامه می‌ریزد در برابر تیمی شبیه‌سازی می‌کند که باید به هدف بالاتری از point برسد، و می‌شمارد آن pointهای اضافه واقعاً چه می‌خرند.
 
-### Build Your Metrics with Your Customers in Mind
+> **In practice:** شمار ticketهای بسته‌شده‌ی تیم داده همان velocity است و همان خطرها را دارد.
+>
+> **Your turn:** مدیری می‌خواهد تیم داده و تیم backend را با شمار ticket مقایسه کند. چه می‌گویید؟
+>
+> *Answer:* ticketهای دو تیم اندازه و نوع متفاوت دارند؛ مقایسه بی‌معناست و فقط ticketها را کوچک‌تر می‌کند. velocity ابزار برنامه‌ریزی ظرفیت درون یک تیم است، نه metric بهره‌وری (p. 215).
 
-Dashboards aren't the only format: reports can feed workshops and runbooks. Watch how people use them, and do more research if they struggle (pp. 216–217).
+### متریک‌ها را با نگاه به مشتری‌هایتان بسازید
 
-#### The Human Side of Metrics
+داشبورد تنها قالب نیست: گزارش‌ها می‌توانند خوراک کارگاه و runbook شوند. ببینید آدم‌ها چطور به کارشان می‌برند، و اگر به زحمت افتادند بیشتر پژوهش کنید (pp. 216–217).
 
-- **Measure teams, not individuals** — individual metrics create unhealthy competition (p. 217).
-- **Spot struggling people through qualitative signals:** code review patterns, collaboration, delivery patterns, knowledge sharing (p. 217).
-- **Metrics as context, not judgment; support, not surveillance** — "How can I help you be more effective?" (p. 218)
-- **Involve teams in choosing metrics; keep a blameless culture** (p. 218).
+#### سمت انسانی متریک‌ها
 
-> **In Practice: April's Story** (p. 218). April publishes review time by reviewer; Derek is three times slower, so he starts rubber-stamping — and bug escapes triple in two weeks. His slow reviews had caught 89% of production bugs before shipping. She switches to team-level review time paired with bug escape rate, and pairs Derek with juniors.
+- **تیم را اندازه بگیرید، نه افراد را**؛ متریک فردی رقابت ناسالم می‌سازد (p. 217).
+- **آدم‌های به‌زحمت‌افتاده را از سیگنال‌های کیفی پیدا کنید:** الگوی code review، همکاری، الگوی تحویل، به اشتراک گذاشتن دانش (p. 217).
+- **متریک زمینه است، نه قضاوت؛ پشتیبانی است، نه نظارت پلیسی**؛ «چطور می‌توانم کمک کنم اثربخش‌تر باشی؟» (p. 218)
+- **تیم‌ها را در انتخاب متریک دخیل کنید و فرهنگ بی‌سرزنش را نگه دارید** (p. 218).
 
-#### Balancing Quantitative and Qualitative Data
+> **کادر In Practice: داستان April** (p. 218). او زمان review را به تفکیک بازبین منتشر می‌کند؛ Derek سه برابر کندتر است، پس شروع می‌کند به مهر زدن بی‌خواندن، و ظرف دو هفته فرار باگ سه برابر می‌شود. همان reviewهای کند ۸۹٪ باگ‌های production را پیش از انتشار می‌گرفت. April به زمان review در سطح تیم همراه با نرخ فرار باگ می‌رود و Derek را با تازه‌کارها pair می‌کند.
 
-The why behind a number may not be technical. Ask about morale in retrospectives; ask customers through NPS or a one-click happy/neutral/sad survey. The richest insight combines trends with explanations (pp. 218–219).
+#### تعادل داده‌ی کمی و کیفی
 
-#### Humans and Metrics
+«چرا»ی پشت یک عدد شاید اصلاً فنی نباشد. در retrospective درباره‌ی روحیه بپرسید؛ از مشتری‌ها با NPS یا نظرسنجی تک‌کلیکیِ خوب و خنثی و بد بپرسید. غنی‌ترین بینش از ترکیب روندها با توضیح‌ها می‌آید (pp. 218–219).
 
-People change behaviour in response to measurement (p. 219):
+#### آدم‌ها و متریک‌ها
 
-| Hazard | What happens (pp. 219–221) |
+آدم‌ها در واکنش به اندازه‌گیری رفتارشان را عوض می‌کنند (p. 219):
+
+| خطر | چه می‌شود (pp. 219–221) |
 |---|---|
-| **Goodhart's Law** | "When a measure becomes a target, it ceases to be a good measure" — measure outcomes as well as volumes |
-| **Demand characteristics** | People guess why something is measured and subconsciously act to fit |
-| **Context ignorance** | Share every metric with what it measures and what its value means, or people fill gaps with assumptions |
-| **"What gets measured gets done"** | Invisible work — mentoring, documentation, careful reviews, debt, security — is crowded out; name what you don't measure, rotate focus metrics, protect time (like Google's "20% time") |
+| **قانون Goodhart** | «وقتی یک سنجه به هدف تبدیل شود دیگر سنجه‌ی خوبی نیست»؛ کنار حجم، نتیجه را هم اندازه بگیرید |
+| **ویژگی‌های تقاضا** | آدم‌ها حدس می‌زنند چرا چیزی اندازه‌گیری می‌شود و ناخودآگاه طوری رفتار می‌کنند که جور دربیاید |
+| **بی‌خبری از زمینه** | هر متریکی را همراه با چیزی که اندازه می‌گیرد و معنای مقدارش به اشتراک بگذارید، وگرنه آدم‌ها جاهای خالی را با فرض پر می‌کنند |
+| **«هر چه اندازه گرفته شود انجام می‌شود»** | کار نامرئی، یعنی منتورینگ و مستندسازی و review دقیق و بدهی و امنیت، کنار زده می‌شود؛ بگویید چه چیزی را اندازه نمی‌گیرید، متریک‌های کانون توجه را بچرخانید، و وقت محافظت‌شده بگذارید، مثل «۲۰ درصد وقت» در Google |
 
-> **In Practice: April's Story** (p. 219). The board demands better velocity; points rise from 30 to 45 a sprint — by skipping documentation and "trivial" reviews and deferring debt. Two months later a routine deployment takes production down for six hours. April shows quality metrics fell as velocity rose and introduces a balanced scorecard: velocity, quality and stability must all stay within range.
+> **کادر In Practice: داستان April** (p. 219). هیئت‌مدیره velocity بهتر می‌خواهد؛ pointها از ۳۰ به ۴۵ در هر sprint می‌رسند، با رد کردن مستندسازی و reviewهای «بی‌اهمیت» و عقب انداختن بدهی. دو ماه بعد یک deployment معمولی production را شش ساعت پایین می‌آورد. April نشان می‌دهد با بالا رفتن velocity متریک‌های کیفیت افتاده‌اند و کارت امتیاز متوازنی می‌آورد که در آن velocity و کیفیت و پایداری باید همه در بازه بمانند.
 
-#### Make Metrics Visible and Accessible
+#### متریک‌ها را دیدنی و در دسترس کنید
 
-Team screens, automated reports into team channels, and reviews in meetings — part of everyday conversation (p. 221).
+نمایشگرهای تیمی، گزارش خودکار در کانال تیم، و مرور در جلسه‌ها؛ بخشی از گفت‌وگوی روزمره (p. 221).
 
-### Metrics Need Ongoing Maintenance, Just Like Code
+### متریک‌ها هم مثل کد نگه‌داری پیوسته می‌خواهند
 
-- **Version and log changes:** excluding weekends from review time is a big change — minor versions for tweaks, major for breaks in comparability, or a new, well-named metric (p. 221).
-- **Clear ownership:** a "product manager for your metrics" watches data quality, alignment, questions and improvements (pp. 221–222).
-- **Listen and evolve:** check-ins, surveys, watching which metrics drive decisions, and removing those that don't (p. 222).
-- **Keep up with change:** new data sources, deprecated tools, new ways of working such as trunk-based development (p. 222).
-- **Phase out** metrics that no longer help — after checking who uses them, which reports include them, keeping historical data, and looking for better replacements (p. 223).
+- **نسخه‌بندی و ثبت تغییر:** بیرون گذاشتن آخر هفته‌ها از زمان review تغییر بزرگی است؛ برای اصلاح‌های کوچک نسخه‌ی فرعی و برای شکستن قابلیت مقایسه نسخه‌ی اصلی بگذارید، یا متریک تازه‌ای با نام خوب بسازید (p. 221).
+- **مالکیت روشن:** یک «product manager برای متریک‌هایتان» که مراقب کیفیت داده و هم‌راستایی و پرسش‌ها و بهبودهاست (pp. 221–222).
+- **گوش بدهید و تکامل بدهید:** سرکشی، نظرسنجی، دیدن این‌که کدام متریک‌ها به تصمیم می‌رسند، و برداشتن آن‌هایی که نمی‌رسند (p. 222).
+- **با تغییر همراه شوید:** منبع داده‌ی تازه، ابزار منسوخ، شیوه‌های تازه‌ی کار مثل توسعه‌ی trunk-based (p. 222).
+- **بازنشسته کنید** متریک‌هایی را که دیگر کمک نمی‌کنند، بعد از وارسی این‌که چه کسی به کارشان می‌برد، کدام گزارش‌ها دارندشان، نگه داشتن داده‌ی تاریخی، و گشتن دنبال جایگزین بهتر (p. 223).
 
-### AI Doesn’t Change Your Approach to Metrics
+### هوش مصنوعی رویکردتان به متریک را عوض نمی‌کند
 
-The method stays; the measurements adapt: segment AI and non-AI work, measure satisfaction, quality and outcomes, usage, collaboration, time saved — and trust in AI output (pp. 223–224).
+روش همان می‌ماند و اندازه‌گیری‌ها تطبیق می‌یابند: کار با هوش مصنوعی را از کار بدون آن جدا کنید، و رضایت و کیفیت و نتیجه و میزان استفاده و همکاری و زمان صرفه‌جویی‌شده را اندازه بگیرید، به‌علاوه‌ی اعتماد به خروجی هوش مصنوعی (pp. 223–224).
 
-> **In Practice: April's Story** (p. 224). After adopting GitHub Copilot, the VP expects velocity to double. Segmented data: boilerplate three times faster, complex logic barely changed; juniors 40% faster but with twice the bugs at first; seniors used it for docs, improving quality by 60%. New metrics: the share of AI code surviving review, time debugging AI suggestions, documentation completeness.
+> **کادر In Practice: داستان April** (p. 224). بعد از آوردن GitHub Copilot، معاون انتظار دارد velocity دو برابر شود. داده‌ی تفکیک‌شده: کد قالبی سه برابر سریع‌تر، منطق پیچیده تقریباً بدون تغییر؛ تازه‌کارها ۴۰٪ سریع‌تر ولی اولش با دو برابر باگ؛ و آدم‌های ارشد از آن برای مستندات استفاده کردند و کیفیت را ۶۰٪ بالا بردند. متریک‌های تازه: سهم کد هوش مصنوعی که از review جان سالم به در می‌برد، زمان debug پیشنهادهای هوش مصنوعی، و کامل بودن مستندات.
 
-### Conclusion: Measurement as Illumination
+### جمع‌بندی: اندازه‌گیری به‌مثابه روشنایی
 
-Metrics are guides, not the destination: "instruments for understanding, not hammers for judgment." Speed, quality, cost and well-being are in constant tension; start simple and build psychological safety around measurement (pp. 224–225).
+متریک‌ها راهنمایند، نه مقصد: «ابزارهایی برای فهمیدن، نه چکش‌هایی برای قضاوت». سرعت و کیفیت و هزینه و سلامت آدم‌ها همیشه با هم در کشش‌اند؛ ساده شروع کنید و دور اندازه‌گیری امنیت روانی بسازید (pp. 224–225).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Many metrics | Coverage | Overload; nobody acts on them |
-| DORA plus one or two | Focus on outcomes | Blind spots — name them |
-| Individual metrics | Apparent precision | Gaming, competition, worse quality |
-| Team metrics plus qualitative signals | Safety; real causes | Requires managerial attention |
-| Velocity as a target | Short-term points | Inflated estimates, skipped quality, fragility |
-| Building on existing tools | Cheap, quick | Less polish than a platform |
-| Buying a metrics platform | Analytics and visualization | Cost — prove it helps first |
+| متریک زیاد | پوشش | غرق‌شدگی؛ کسی رویشان عمل نمی‌کند |
+| DORA به‌علاوه‌ی یکی دوتا | تمرکز بر نتیجه | نقطه‌های کور، که باید نامشان را بگویید |
+| متریک فردی | ظاهر دقت | بازی دادن سنجه، رقابت، کیفیت بدتر |
+| متریک تیمی به‌علاوه‌ی سیگنال کیفی | امنیت؛ علت‌های واقعی | توجه مدیریتی می‌خواهد |
+| velocity به‌عنوان هدف | point کوتاه‌مدت | تخمین بادکرده، کیفیت ردشده، شکنندگی |
+| ساختن روی ابزار موجود | ارزان و سریع | صیقل کمتر از یک platform |
+| خریدن platform متریک | تحلیل و تصویرسازی | هزینه؛ اول ثابت کنید کمک می‌کند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **DORA** grew out of the *State of DevOps* reports and the book *Accelerate* (Forsgren, Humble and Kim, 2018); recent DORA reports add a fifth metric for reliability and a rework rate.
-- **Goodhart's Law** in the book's wording is Marilyn Strathern's 1997 paraphrase of Charles Goodhart's 1975 observation about monetary targets.
-- **The SPACE framework** (Forsgren et al., 2021) — satisfaction, performance, activity, communication, efficiency — formalizes the book's mix of quantitative and qualitative measures.
+- **مجموعه‌ی DORA** از گزارش‌های *State of DevOps* و کتاب *Accelerate* از Forsgren و Humble و Kim در سال ۲۰۱۸ درآمده؛ گزارش‌های اخیر DORA یک متریک پنجم برای reliability و یک نرخ دوباره‌کاری هم اضافه کرده‌اند.
+- **قانون Goodhart** به شکلی که کتاب نقلش می‌کند بازنویسی Marilyn Strathern در سال ۱۹۹۷ از مشاهده‌ی Charles Goodhart در سال ۱۹۷۵ درباره‌ی هدف‌های پولی است.
+- **چارچوب SPACE** از Forsgren و همکاران در سال ۲۰۲۱، یعنی رضایت و performance و فعالیت و ارتباط و کارآمدی، همان ترکیب کمی و کیفی کتاب را رسمی می‌کند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Velocity target](../lab/10-velocity-target/README.md) — a seeded simulation of planning with velocity versus targeting it, with reported points, real work and escaped bugs.
-- **Related chapters:** [6. Shipping Products and Code](06-shipping-products-and-code-in-chaotic-environments.md) (estimates and process), [7. Budgeting, Costs, and Vendors](07-budgeting-costs-and-vendors.md) (cost metrics), [8. Technical Principles and Strategy](08-technical-principles-and-strategy.md) (visibility), [9. Collaborative Technical Practices](09-collaborative-technical-practices-and-decision-making.md) (psychological safety).
+- **Run it:** [هدف‌گذاری velocity](../lab/10-velocity-target/README.md)؛ شبیه‌سازی seed‌دار برنامه‌ریزی با velocity در برابر هدف گرفتنش، با pointهای گزارش‌شده و کار واقعی و باگ‌های فراری.
+- **فصل‌های مرتبط:** [فصل ۶: تحویل محصول و کد](06-shipping-products-and-code-in-chaotic-environments.md) که تخمین و process را دارد، [فصل ۷: بودجه، هزینه و فروشنده‌ها](07-budgeting-costs-and-vendors.md) که متریک هزینه را می‌گوید، [فصل ۸: اصول و استراتژی فنی](08-technical-principles-and-strategy.md) که دیده شدن را دارد، و [فصل ۹: کارهای فنی مشارکتی](09-collaborative-technical-practices-and-decision-making.md) که امنیت روانی را می‌گوید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What two functions do good metrics serve?**
+1. **متریک خوب چه دو کاری می‌کند؟**
 
-   *Answer:* They identify problems before they become disasters, and show whether improvement efforts are working (p. 208).
+   *Answer:* مسئله‌ها را پیش از تبدیل شدن به فاجعه پیدا می‌کند، و نشان می‌دهد تلاش‌های بهبود جواب داده‌اند یا نه (p. 208).
 
-2. **A stakeholder asks which engineer commits the most code. What should you ask back?**
+2. **یک ذی‌نفع می‌پرسد کدام مهندس بیشترین کد را commit می‌کند. در جواب چه باید پرسید؟**
 
-   *Answer:* What decision would the answer change — then answer the underlying question, which is often "Are we okay?" (pp. 210–211)
+   *Answer:* این پاسخ چه تصمیمی را عوض می‌کند؛ و بعد به پرسش زیرین جواب بدهید که اغلب همان «حالمان خوب است؟» است (pp. 210–211).
 
-3. **Which is not one of the four DORA metrics?**
-   - [ ] Deployment frequency
-   - [ ] Change failure rate
-   - [x] Story points per sprint
-   - [ ] Time to restore service
+3. **کدام‌یک جزو چهار متریک DORA نیست؟**
+   - [ ] تکرار deployment
+   - [ ] نرخ خرابی تغییر
+   - [x] مفهوم story point در هر sprint
+   - [ ] زمان بازیابی سرویس
 
    *Answer:* p. 212.
 
-4. **What is velocity for?**
+4. **مقدار velocity به چه درد می‌خورد؟**
 
-   *Answer:* Capacity planning within the team — not measuring productivity or comparing teams (p. 215).
+   *Answer:* برنامه‌ریزی ظرفیت داخل خود تیم؛ نه اندازه‌گیری بهره‌وری و نه مقایسه‌ی تیم‌ها (p. 215).
 
-5. **Why did bug escapes triple after April published review time by reviewer?**
+5. **چرا بعد از انتشار زمان review به تفکیک بازبین، فرار باگ سه برابر شد؟**
 
-   *Answer:* Derek, the slow but thorough reviewer, started rubber-stamping to improve his number; his reviews had caught 89% of production bugs (p. 218).
+   *Answer:* بازبین کند ولی دقیق، یعنی Derek، برای بهتر کردن عددش شروع کرد به مهر زدن بی‌خواندن؛ همان reviewهایش ۸۹٪ باگ‌های production را می‌گرفت (p. 218).
 
-6. **State Goodhart's Law as the book quotes it.**
+6. **قانون Goodhart را همان‌طور که کتاب نقل می‌کند بگویید.**
 
-   *Answer:* "When a measure becomes a target, it ceases to be a good measure" (p. 219).
+   *Answer:* «وقتی یک سنجه به هدف تبدیل شود، دیگر سنجه‌ی خوبی نیست» (p. 219).
 
-7. **How do you stop invisible work being crowded out by metrics?**
+7. **چطور جلوی کنار زده شدن کار نامرئی به‌دست متریک‌ها را بگیریم؟**
 
-   *Answer:* Say explicitly what you don't measure and why it matters, rotate focus metrics, and protect time for unmeasured work (pp. 220–221).
+   *Answer:* صریح بگویید چه چیزی را اندازه نمی‌گیرید و چرا مهم است، متریک‌های کانون توجه را بچرخانید، و برای کار اندازه‌گیری‌نشده وقت محافظت‌شده بگذارید (pp. 220–221).

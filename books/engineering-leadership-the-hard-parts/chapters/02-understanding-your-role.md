@@ -3,232 +3,246 @@ book: engineering-leadership-the-hard-parts
 chapter: 2
 title: "Understanding Your Role"
 pages: "13–34"
+translated_title: "فهمیدن نقشتان"
+lang: fa
 ---
 
-# 2. Understanding Your Role
+# فصل ۲: فهمیدن نقشتان
 
-[← 1. Embracing the Unknown](01-embracing-the-unknown.md) · [Book](../README.md) · [3. Navigating Chaos →](03-navigating-chaos.md)
+[فصل ۱: پذیرفتن ناشناخته →](01-embracing-the-unknown.md) · [کتاب](../README.md) · [فصل ۳: راه بردن در آشوب ←](03-navigating-chaos.md)
 
-## Summary
+## خلاصه
 
-Before leading anyone you need to be clear on your own job, and in chaotic environments nobody hands you a usable description of it. The chapter builds one around five pillars — people, mission, plan, process and product — mapping each to the symptoms of chaos from Chapter 1 (Figure 2-1, Table 2-1). Along the way it warns against retreating into comfortable technical work, argues that leaders must be "generalists with range" and that action beats inaction, and gives an exercise per pillar, illustrated with April, a new leader of PixelCurl's StudioOps team. The result is a personal, living role description (pp. 13–34).
+پیش از رهبری کردن کسی باید درباره‌ی شغل خودتان روشن باشید، و در محیط‌های آشوب‌زده هیچ‌کس شرح قابل‌استفاده‌ای از آن دستتان نمی‌دهد. این فصل یکی می‌سازد، حول پنج ستون، یعنی آدم‌ها و مأموریت و برنامه و process و محصول، و هر کدام را به نشانه‌های آشوب فصل ۱ نگاشت می‌کند (شکل ۲-۱، جدول ۲-۱). در این مسیر هشدار می‌دهد که به کار فنیِ راحت عقب‌نشینی نکنید، استدلال می‌کند رهبرها باید «همه‌فن‌حریف با دامنه» باشند و عمل از بی‌عملی بهتر است، و برای هر ستون یک تمرین می‌دهد، با داستان April که تازه رهبر تیم StudioOps در شرکت PixelCurl شده. نتیجه شرح نقشی شخصی و زنده است (pp. 13–34).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Your team will mirror you:** if you're confused they'll be lost; you don't need all the answers, just the framework of five pillars (p. 14).
-- **Job descriptions are "glorified ads"** that rarely survive first contact with the job; write a living role description of what you actually do (pp. 15–18).
-- **Don't retreat to the comfortable.** Constantly doing individual-contributor work is hiding, not leading — leading engineers is a new job, not a promotion (p. 16).
-- **Be a generalist with range**, and know when to go deep; **action beats inaction** when information is incomplete (pp. 16–17).
-- **Turn the mission into measurable goals** — "reduce customer onboarding time by 20%," not "improve performance" (p. 23).
-- **It's not prioritizing if it doesn't hurt;** a "no" today is not "never" (p. 26).
-- **Less process is more** — build it with the team, evolve it, and measure friction with a two-minute "process pulse" survey and two-week experiments (pp. 28–31).
-- **Outcomes matter more than output**, quality isn't perfection, and invisible work (infrastructure, debt, tools) deserves recognition (pp. 31–32).
+- **تیمتان آینه‌ی شماست:** اگر گیج باشید آن‌ها سردرگم می‌شوند؛ لازم نیست همه‌ی جواب‌ها را داشته باشید، فقط چارچوب پنج ستون را (p. 14).
+- **شرح شغل‌ها «آگهی‌های آب‌و‌تاب‌دار»اند** که به‌ندرت از اولین برخورد با خود شغل جان سالم به در می‌برند؛ سندی زنده از کاری که واقعاً می‌کنید بنویسید (pp. 15–18).
+- **به کار راحت عقب‌نشینی نکنید.** انجام دادن دائمی کار individual contributor پنهان شدن است، نه رهبری؛ رهبری مهندس‌ها شغلی تازه است، نه یک ارتقا (p. 16).
+- **همه‌فن‌حریف با دامنه باشید** و بدانید کِی باید عمیق شوید؛ وقتی اطلاعات ناقص است **عمل از بی‌عملی بهتر است** (pp. 16–17).
+- **مأموریت را به هدف‌های اندازه‌پذیر تبدیل کنید**، مثلاً «زمان onboarding مشتری را ۲۰٪ کم کنیم»، نه «performance را بهتر کنیم» (p. 23).
+- **اگر درد نداشته باشد اولویت‌بندی نیست؛** و «نه»ی امروز «هیچ‌وقت» نیست (p. 26).
+- **کمتر بودن process بهتر است**؛ با تیم بسازیدش، تکاملش بدهید، و اصطکاک را با یک نظرسنجی دو‌دقیقه‌ای «نبض process» و آزمایش‌های دو‌هفته‌ای اندازه بگیرید (pp. 28–31).
+- **نتیجه از خروجی مهم‌تر است**، کیفیت یعنی بی‌نقص بودن نیست، و کار نامرئی مثل زیرساخت و بدهی و ابزار هم قدردانی می‌خواهد (pp. 31–32).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- What’s Your Job, Exactly? — p. 13
-  - The Five Pillars of Engineering Leadership — p. 15
-  - Boss, Where’s the Roadmap? — p. 15
-  - Don’t Retreat to the Comfortable — p. 16
-  - Engineering Leadership Is About Being a “Generalist with Range” — p. 16
-  - Action Beats Inaction Every Time — p. 17
-  - Role Description: A Do-It-Yourself Blueprint — p. 17
-- People: It All Starts with Your Team — p. 18
-  - What’s Your Starting Point? — p. 18
-  - What’s Your Mission? — p. 19
-  - What Tools Do You Need to Get There? — p. 19
-- Mission: You’ve Got a Crew; Now You Need a Place to Go — p. 22
-  - Where to Start — p. 22
-  - Getting Your Team on Board — p. 23
-  - Turn the Mission into Action — p. 23
-- Plan: You Know Where to Go; Now Chart the Course — p. 25
-  - Build with Your Partners — p. 25
-  - Know What to Prioritize — p. 25
-  - Turn Strategy into Action — p. 26
-  - Adjust, but Stay Focused — p. 26
-- Process: The System That Keeps Things Moving — p. 28
-  - Keep It Lean, but Effective — p. 28
-  - Make Process a Team Effort — p. 29
-  - Adjust As You Go — p. 29
-- Product: What Are We Actually Delivering? — p. 31
-  - Know What Success Looks Like — p. 31
-  - Balance Quality with Speed — p. 32
-  - Outcomes Aren’t Always Features — p. 32
-- Conclusion: Pulling It All Together — p. 34
+- دقیقاً شغلتان چیست؟ — p. 13
+  - پنج ستون رهبری مهندسی — p. 15
+  - رئیس، نقشه‌ی راه کجاست؟ — p. 15
+  - به کار راحت عقب‌نشینی نکنید — p. 16
+  - رهبری مهندسی یعنی «همه‌فن‌حریف با دامنه» بودن — p. 16
+  - عمل همیشه از بی‌عملی بهتر است — p. 17
+  - شرح نقش: نقشه‌ای که خودتان می‌کشید — p. 17
+- آدم‌ها: همه چیز از تیمتان شروع می‌شود — p. 18
+  - نقطه‌ی شروعتان کجاست؟ — p. 18
+  - مأموریتتان چیست؟ — p. 19
+  - برای رسیدن به آن چه ابزاری لازم دارید؟ — p. 19
+- مأموریت: خدمه دارید؛ حالا مقصد لازم دارید — p. 22
+  - از کجا شروع کنیم — p. 22
+  - همراه کردن تیم — p. 23
+  - تبدیل مأموریت به عمل — p. 23
+- برنامه: می‌دانید کجا بروید؛ حالا مسیر را بکشید — p. 25
+  - با شریک‌هایتان بسازید — p. 25
+  - بدانید چه چیزی را اولویت بدهید — p. 25
+  - تبدیل استراتژی به عمل — p. 26
+  - تنظیم کنید ولی متمرکز بمانید — p. 26
+- بخش process: سیستمی که کارها را در حرکت نگه می‌دارد — p. 28
+  - سبک ولی اثربخش نگهش دارید — p. 28
+  - بخش process را کار تیمی کنید — p. 29
+  - در مسیر تنظیمش کنید — p. 29
+- محصول: واقعاً داریم چه چیزی تحویل می‌دهیم؟ — p. 31
+  - بدانید موفقیت چه شکلی است — p. 31
+  - تعادل کیفیت و سرعت — p. 32
+  - نتیجه همیشه feature نیست — p. 32
+- جمع‌بندی: کنار هم گذاشتن همه — p. 34
 
-## Notes
+## یادداشت‌ها
 
-Your job in chaos is to create clarity, build stability and keep the team anchored: set direction when none exists and connect engineers to the bigger picture, even when that picture is blurry. Treat this chapter as onboarding to the role (p. 13).
+شغل شما در آشوب این است که روشنی بسازید، ثبات بیاورید و تیم را لنگر بیندازید: وقتی جهتی نیست جهت تعیین کنید و مهندس‌ها را به تصویر بزرگ‌تر وصل کنید، حتی وقتی آن تصویر تار است. این فصل را onboarding خودتان برای این نقش بدانید (p. 13).
 
-### What’s Your Job, Exactly?
+### دقیقاً شغلتان چیست؟
 
-You'll wear a thousand hats — people leader, technical guide, strategist, product manager, firefighter, sometimes therapist — and the challenge is knowing which to wear when (p. 13). Your role is the glue, and **your team will mirror you** (p. 14). The framework is five pillars, each addressing symptoms of chaos from Chapter 1:
+هزار کلاه سرتان می‌گذارید؛ رهبر آدم‌ها، راهنمای فنی، استراتژیست، مدیر محصول، آتش‌نشان و گاهی تراپیست، و چالش این است که بدانید کِی کدام را بگذارید (p. 13). نقش شما چسب کار است و **تیمتان آینه‌ی شماست** (p. 14). چارچوب، پنج ستون است که هر کدام به نشانه‌هایی از آشوب فصل ۱ می‌پردازند:
 
-![Chaos symptoms on the left connected through five leadership pillars to clarity on the right](../figures/02-01.png)
+![نشانه‌های آشوب در سمت چپ که از دل پنج ستون رهبری به روشنی در سمت راست می‌رسند](../figures/02-01.png)
 
-*Figure 2-1 (p. 14): follow each symptom of chaos to the pillars that address it — most symptoms are reached from more than one pillar.*
+*Figure 2-1 (p. 14): هر نشانه‌ی آشوب را تا ستون‌هایی دنبال کنید که به آن می‌پردازند؛ به بیشتر نشانه‌ها از بیش از یک ستون می‌شود رسید.*
 
-| *Table 2-1. Leadership intervention framework* (p. 14) | Intervention approach |
+| *جدول ۲-۱. چارچوب مداخله‌ی رهبری* (p. 14) | رویکرد مداخله |
 |---|---|
-| **People** | Addresses high turnover, blame culture, outsized responsibility and poor communication |
-| **Mission** | Tackles lack of strategy, poor communication and disconnection from purpose |
-| **Plan** | Resolves lack of strategy, ownership issues, crisis mode, absence of structure, no measurement |
-| **Process** | Fixes undefined processes, absence of structure, lack of ownership, frequent crises and no measurement |
-| **Product** | Establishes meaningful measurement, outcome focus, quality standards, delivered value and strategic alignment |
+| **آدم‌ها** | به ریزش بالای نیرو، فرهنگ سرزنش، مسئولیت بیش از اندازه و ارتباط ضعیف می‌پردازد |
+| **مأموریت** | سراغ نبود استراتژی، ارتباط ضعیف و بریدگی از هدف می‌رود |
+| **برنامه** | نبود استراتژی، مسئله‌های مالکیت، حالت بحران، نبود ساختار و نبود اندازه‌گیری را حل می‌کند |
+| **process** | processهای تعریف‌نشده، نبود ساختار، نبود مالکیت، بحران‌های پرتکرار و نبود اندازه‌گیری را درست می‌کند |
+| **محصول** | اندازه‌گیری معنادار، تمرکز بر نتیجه، استانداردهای کیفیت، ارزش تحویل‌شده و هم‌راستایی راهبردی را برقرار می‌کند |
 
-#### The Five Pillars of Engineering Leadership
+#### پنج ستون رهبری مهندسی
 
-| Pillar | Your job (p. 15) |
+| ستون | شغل شما (p. 15) |
 |---|---|
-| **People** | Build a culture, support growth, make engineers work as a unit — not just manage headcount |
-| **Mission** | The "why": connect what engineers do to the company's goals and their impact |
-| **Plan** | Roadmap, priorities and delegation — direction and focus, not dictated detail |
-| **Process** | Support engineers rather than bog them down; ineffective processes destroy progress |
-| **Product** | Deliver outcomes that matter, with measurable impact — feature, fix or internal tool |
+| **آدم‌ها** | فرهنگ بسازید، از رشد پشتیبانی کنید و کاری کنید مهندس‌ها مثل یک واحد کار کنند، نه فقط تعداد نیرو را مدیریت کنید |
+| **مأموریت** | همان «چرا»: کاری که مهندس‌ها می‌کنند را به هدف‌های شرکت و اثرشان وصل کنید |
+| **برنامه** | نقشه‌ی راه و اولویت‌ها و واگذاری؛ جهت و تمرکز، نه دیکته کردن جزئیات |
+| **process** | پشتیبان مهندس‌ها باشد نه باتلاقشان؛ process بی‌اثر پیشرفت را نابود می‌کند |
+| **محصول** | نتیجه‌هایی تحویل بدهید که اهمیت دارند و اثرشان اندازه‌پذیر است، چه feature باشد چه رفع باگ چه ابزار داخلی |
 
-#### Boss, Where’s the Roadmap?
+#### رئیس، نقشه‌ی راه کجاست؟
 
-Most leaders get a vague mandate to "lead the team"; even a detailed job description wouldn't survive the first month, because responsibilities shift as the organization grows. You need a **living document** of your responsibilities and how you'll fulfil them (pp. 15–16).
+بیشتر رهبرها فقط یک مأموریت مبهم می‌گیرند که «تیم را رهبری کن»؛ حتی شرح شغل باجزئیات هم از ماه اول جان سالم به در نمی‌برد، چون با بزرگ شدن سازمان مسئولیت‌ها جابه‌جا می‌شوند. به **سندی زنده** از مسئولیت‌هایتان و شیوه‌ی انجامشان نیاز دارید (pp. 15–16).
 
-#### Don’t Retreat to the Comfortable
+#### به کار راحت عقب‌نشینی نکنید
 
-When chaos arrives the temptation is to freeze or dive back into refactoring and bug fixing. Constantly doing individual contributors' work means "you're not leading; you're hiding." Your value is how well you empower the team; **leading engineers is not a promotion but a new job** (p. 16).
+وقتی آشوب می‌رسد، وسوسه این است که خشکتان بزند یا دوباره توی refactoring و رفع باگ شیرجه بزنید. انجام دادن دائمی کار individual contributorها یعنی «شما رهبری نمی‌کنید؛ پنهان شده‌اید». ارزش شما در این است که چقدر خوب تیم را توانمند می‌کنید؛ **رهبری مهندس‌ها ارتقا نیست، شغلی تازه است** (p. 16).
 
-#### Engineering Leadership Is About Being a “Generalist with Range”
+#### رهبری مهندسی یعنی «همه‌فن‌حریف با دامنه» بودن
 
-Leaders need a little knowledge about many things and the ability to move between them — the authors cite Robert A. Heinlein's "Specialization is for insects" (*Time Enough for Love*, 1973). It's no excuse for shallow thinking: know how everything fits together and when to go deep — context switching with purpose (p. 16).
+رهبرها به کمی دانش درباره‌ی چیزهای زیاد و توانایی جابه‌جا شدن بینشان نیاز دارند؛ نویسنده‌ها به جمله‌ی Robert A. Heinlein ارجاع می‌دهند که «تخصص مال حشره‌هاست»، در *Time Enough for Love* سال ۱۹۷۳. این بهانه‌ی فکر سطحی نیست: بدانید همه چیز چطور به هم وصل است و کِی باید عمیق شوید؛ یعنی جابه‌جایی هدفمند بین زمینه‌ها (p. 16).
 
-#### Action Beats Inaction Every Time
+#### عمل همیشه از بی‌عملی بهتر است
 
-The risk in chaos isn't doing the wrong thing but doing nothing, waiting for clarity that may never come. Decide with incomplete information, adapt and iterate; taking action when nobody else will sets you apart (p. 17).
+ریسک در آشوب انجام دادن کار اشتباه نیست، هیچ کاری نکردن است و منتظر روشنی‌ای ماندن که شاید هیچ‌وقت نیاید. با اطلاعات ناقص تصمیم بگیرید، تطبیق بدهید و تکرار کنید؛ عمل کردن وقتی هیچ‌کس دیگری عمل نمی‌کند شما را متمایز می‌کند (p. 17).
 
-#### Role Description: A Do-It-Yourself Blueprint
+#### شرح نقش: نقشه‌ای که خودتان می‌کشید
 
-Documenting your responsibilities is the first "hard part" — it means writing well. Job descriptions are "glorified ads," and team charters are often vague boilerplate from a forgotten workshop. A grounded role description gives direction and helps you show what you've accomplished (pp. 17–18).
+مستند کردن مسئولیت‌هایتان اولین «بخش سخت» است، چون یعنی باید خوب بنویسید. شرح شغل‌ها «آگهی‌های آب‌و‌تاب‌دار»اند و منشور تیم‌ها اغلب متن کلیشه‌ای مبهمی از کارگاهی فراموش‌شده است. شرح نقشِ زمینی هم جهت می‌دهد و هم کمک می‌کند نشان بدهید چه کرده‌اید (pp. 17–18).
 
-### People: It All Starts with Your Team
+### آدم‌ها: همه چیز از تیمتان شروع می‌شود
 
-Leadership starts with listening and seeing clearly; don't get lost in missed deadlines, feature churn or tech debt — first understand what makes your people tick and what holds them back (p. 18).
+رهبری با شنیدن و روشن دیدن شروع می‌شود؛ در ضرب‌الاجل‌های از‌دست‌رفته و تغییر مدام featureها و بدهی فنی گم نشوید، اول بفهمید آدم‌هایتان با چه چیزی کار می‌کنند و چه چیزی جلویشان را گرفته (p. 18).
 
-| Question | What to look at (pp. 18–20) |
+| پرسش | به چه نگاه کنید (pp. 18–20) |
 |---|---|
-| **What's your starting point?** | Inherited or new team; key players and gaps in skills and cohesion; silos; trust or tug-of-war. When building from scratch, every hire sets the trajectory. And **how much influence do you really have?** Knowing what you can't change focuses your effort |
-| **What's your mission?** | A team greater than the sum of its parts that "flows" because it understands the mission and its role; software development is social |
-| **What tools do you need?** | **Morale** — not fixed with snacks or shout-outs but with small wins and honest conversations. **Performance management** — ongoing feedback, guidance not evaluation; you're accountable even without company support. **Hiring and onboarding** — the first 30 days set the tone |
+| **نقطه‌ی شروعتان کجاست؟** | تیم را به ارث برده‌اید یا تازه است؛ آدم‌های کلیدی و شکاف‌های مهارتی و انسجامی؛ سیلوها؛ اعتماد یا طناب‌کشی. وقتی از صفر می‌سازید، هر استخدام مسیر را تعیین می‌کند. و **واقعاً چقدر نفوذ دارید؟** دانستن این‌که چه چیزی را نمی‌توانید عوض کنید تلاشتان را متمرکز می‌کند |
+| **مأموریتتان چیست؟** | تیمی که از جمع اجزایش بزرگ‌تر است و «روان» کار می‌کند چون مأموریت و نقش خودش را می‌فهمد؛ توسعه‌ی نرم‌افزار کاری اجتماعی است |
+| **چه ابزاری لازم دارید؟** | **روحیه**، که با تنقلات و تقدیر درست نمی‌شود بلکه با بردهای کوچک و گفت‌وگوهای صادقانه. **مدیریت عملکرد**، یعنی بازخورد پیوسته و راهنمایی به‌جای ارزیابی؛ حتی بدون پشتیبانی شرکت هم شما پاسخ‌گویید. **استخدام و onboarding**، که ۳۰ روز اولش لحن کار را تعیین می‌کند |
 
-> **Exercise: Defining Your Role as a People Leader** (pp. 20–21). Assess the starting point in two or three sentences; describe the end state specifically; write five to seven actionable responsibilities. **April**, who has just taken over PixelCurl's talented but fractured StudioOps team — siloed seniors, under-mentored juniors, slipping deadlines — writes responsibilities such as weaving collaboration into daily work, mentoring engineering managers so she can focus on strategy, hiring three engineers to fill frontend and DevOps gaps, building structured onboarding, and connecting code to users' problems.
+> **تمرین: تعریف نقشتان به‌عنوان رهبر آدم‌ها** (pp. 20–21). نقطه‌ی شروع را در دو سه جمله بسنجید؛ وضعیت نهایی را مشخص توصیف کنید؛ پنج تا هفت مسئولیت عمل‌شدنی بنویسید. **April** که تازه تیم بااستعداد ولی از‌هم‌گسیخته‌ی StudioOps در PixelCurl را تحویل گرفته، با آدم‌های ارشدِ در سیلو و تازه‌کارهای بی‌منتور و ضرب‌الاجل‌های در حال لغزش، مسئولیت‌هایی می‌نویسد مثل بافتن همکاری در کار روزمره، منتور شدن برای مدیرهای مهندسی تا خودش روی استراتژی تمرکز کند، استخدام سه مهندس برای پر کردن شکاف frontend و DevOps، ساختن onboarding ساختارمند، و وصل کردن کد به مسئله‌های کاربرها.
 
-### Mission: You’ve Got a Crew; Now You Need a Place to Go
+> **In practice:** اولین کار در تیم داده‌ای تازه فهمیدن این است که آدم‌ها با چه چیزی کلنجار می‌روند، نه انتخاب ابزار.
+>
+> **Your turn:** تازه lead تیم شده‌اید. در هفته‌ی اول چه چیزی را از هر نفر می‌پرسید؟
+>
+> *Answer:* کدام بخش pipeline بیشتر از همه وقتش را می‌گیرد، کدام alert او را شب بیدار می‌کند، و چه چیزی جلوی کارش را گرفته. کتاب رهبری را با شنیدن و فهمیدن نقطه‌ی شروع تیم آغاز می‌کند (pp. 18–20).
 
-Engineers thrive when they see how their work shapes the product, users and the company; leaders solve problems, so **get the team closer to the problems**. If the mission isn't clear from the top, give your team its own — technical excellence, innovation, solving tough user problems (p. 22).
+### مأموریت: خدمه دارید؛ حالا مقصد لازم دارید
 
-| Step | How (pp. 22–23) |
+مهندس‌ها وقتی می‌درخشند که ببینند کارشان چطور به محصول و کاربرها و شرکت شکل می‌دهد؛ رهبرها مسئله حل می‌کنند، پس **تیم را به مسئله‌ها نزدیک کنید**. اگر مأموریت از بالا روشن نیست، به تیمتان مأموریت خودش را بدهید: سرآمدی فنی، نوآوری، حل مسئله‌های سخت کاربرها (p. 22).
+
+| قدم | چطور (pp. 22–23) |
 |---|---|
-| **Where to start** | Is the company mission understood, or are engineers coding without seeing the link — or choosing technologies because they're interesting? Translate high-level priorities into something tangible |
-| **Getting your team on board** | Alignment requires personal connection: show how the new API improves customer experience, how infrastructure lays groundwork for scale |
-| **Turn the mission into action** | Measurable goals: "Reduce customer onboarding time by 20%," not "improve performance"; "increase uptime to support enterprise clients," not "reduce technical debt." If the mission is unclear, go get it from product, marketing and leadership |
+| **از کجا شروع کنیم** | مأموریت شرکت فهمیده شده، یا مهندس‌ها کد می‌زنند بدون این‌که پیوندش را ببینند، یا فناوری را چون جذاب است انتخاب می‌کنند؟ اولویت‌های سطح بالا را به چیزی ملموس ترجمه کنید |
+| **همراه کردن تیم** | هم‌راستایی به پیوند شخصی نیاز دارد: نشان بدهید API تازه تجربه‌ی مشتری را چطور بهتر می‌کند و زیرساخت چطور پایه‌ی مقیاس گرفتن را می‌ریزد |
+| **تبدیل مأموریت به عمل** | هدف‌های اندازه‌پذیر: «زمان onboarding مشتری را ۲۰٪ کم کنیم»، نه «performance را بهتر کنیم»؛ «uptime را تا جایی ببریم که مشتری سازمانی را پشتیبانی کند»، نه «بدهی فنی را کم کنیم». اگر مأموریت روشن نیست، بروید از product و بازاریابی و رهبری بگیریدش |
 
-> **Exercise: Mission Alignment with Measurable Impact** (pp. 24–25). (1) Diagnose a Chapter 1 symptom that disconnection from the mission feeds. (2) Define one measurable change in 90 days — e.g. engineers can explain how their project connects to company goals, and less than 20% of capacity goes to unplanned, unaligned work. (3) Two or three concrete actions — monthly impact sessions, quarterly roadmap reviews with business leadership, shared metrics. (4) A 30-day leading indicator — engineers connect work to outcomes unprompted.
+> **تمرین: هم‌راستایی مأموریت با اثر اندازه‌پذیر** (pp. 24–25). ۱) یکی از نشانه‌های فصل ۱ را تشخیص بدهید که بریدگی از مأموریت به آن خوراک می‌دهد. ۲) یک تغییر اندازه‌پذیر در ۹۰ روز تعریف کنید؛ مثلاً مهندس‌ها بتوانند بگویند پروژه‌شان چطور به هدف‌های شرکت وصل است، و کمتر از ۲۰٪ ظرفیت صرف کار برنامه‌ریزی‌نشده و ناهم‌راستا شود. ۳) دو سه اقدام مشخص: جلسه‌های ماهانه‌ی اثر، بازبینی فصلی نقشه‌ی راه با رهبری کسب‌وکار، و متریک‌های مشترک. ۴) یک شاخص پیشرو در ۳۰ روز: مهندس‌ها بدون این‌که بپرسید کارشان را به نتیجه وصل کنند.
 
-### Plan: You Know Where to Go; Now Chart the Course
+### برنامه: می‌دانید کجا بروید؛ حالا مسیر را بکشید
 
-A plan creates focus, alignment and momentum, and you're not expected to make it alone: "a leader who plans alone is destined for bottlenecks" (p. 25).
+برنامه تمرکز و هم‌راستایی و شتاب می‌سازد، و قرار هم نیست تنها بسازیدش: «رهبری که تنها برنامه می‌ریزد سرنوشتش گلوگاه شدن است» (p. 25).
 
-| Practice | Detail (pp. 25–27) |
+| کار | جزئیات (pp. 25–27) |
 |---|---|
-| **Build with your partners** | Product (customer needs), marketing (market shifts), sales (what's breaking the deal); let technical leads own pieces of the roadmap |
-| **Know what to prioritize** | When everything is important, nothing is. "It's not prioritizing if it doesn't hurt." Saying no matters; a "no" today is not "never." Explain the reasons |
-| **Turn strategy into action** | Break goals into specific, measurable steps; delegate to technical leads and steer instead of micromanaging; build in milestone checkpoints |
-| **Adjust, but stay focused** | No plan survives first contact with reality; core objectives stay while tactics change; show how changes fit the mission |
+| **با شریک‌هایتان بسازید** | product برای نیاز مشتری، بازاریابی برای تغییرهای بازار، فروش برای چیزی که معامله را می‌شکند؛ و بگذارید سرپرست‌های فنی صاحب تکه‌هایی از نقشه‌ی راه باشند |
+| **بدانید چه چیزی را اولویت بدهید** | وقتی همه چیز مهم است، هیچ چیز مهم نیست. «اگر درد نداشته باشد اولویت‌بندی نیست.» نه گفتن مهم است؛ «نه»ی امروز «هیچ‌وقت» نیست. دلیل‌ها را توضیح بدهید |
+| **تبدیل استراتژی به عمل** | هدف‌ها را به قدم‌های مشخص و اندازه‌پذیر بشکنید؛ به سرپرست‌های فنی واگذار کنید و به‌جای ذره‌بین گذاشتن هدایت کنید؛ و ایستگاه‌های بازبینی در milestoneها بگذارید |
+| **تنظیم کنید ولی متمرکز بمانید** | هیچ برنامه‌ای از اولین برخورد با واقعیت جان سالم به در نمی‌برد؛ هدف‌های اصلی می‌مانند و تاکتیک‌ها عوض می‌شوند؛ نشان بدهید تغییرها چطور به مأموریت می‌خورند |
 
-> **Exercise: Defining Your Role in Strategic Planning** (pp. 27–28). Assess current planning, define a collaborative approach, and add two or three responsibilities. April's team is stuck reacting to product's latest demands, so she collaborates with product, marketing and operations; balances features with technical debt and scalability; and delegates roadmap pieces to technical leads.
+> **تمرین: تعریف نقشتان در برنامه‌ریزی راهبردی** (pp. 27–28). برنامه‌ریزی فعلی را بسنجید، رویکرد مشارکتی تعریف کنید و دو سه مسئولیت اضافه کنید. تیم April گیر واکنش نشان دادن به آخرین خواسته‌های product افتاده، پس او با product و بازاریابی و عملیات همکاری می‌کند، بین feature و بدهی فنی و مقیاس‌پذیری تعادل برقرار می‌کند، و تکه‌هایی از نقشه‌ی راه را به سرپرست‌های فنی واگذار می‌کند.
 
-### Process: The System That Keeps Things Moving
+### مفهوم process: سیستمی که کارها را در حرکت نگه می‌دارد
 
-Process is the engine of execution; done wrong it's the bottleneck. **Less is more**: support, not control (p. 28).
+مفهوم process موتور اجراست؛ اگر بد ساخته شود گلوگاه است. **کمتر بهتر است**: پشتیبانی، نه کنترل (p. 28).
 
-- **Keep it lean, but effective.** Long approvals, endless meetings and cumbersome reviews kill momentum; keep code reviews, deployment and feedback loops but streamline them. Ask "Is this helping us get better, or is it slowing us down?" — if the latter, cut it (p. 28).
-- **Make process a team effort** — created with or by the team, not for it, which builds ownership (p. 29).
-- **Adjust as you go** — what worked for 5 people may fail for 20 (p. 29).
+- **سبک ولی اثربخش نگهش دارید.** تأییدهای طولانی و جلسه‌های بی‌پایان و بازبینی‌های سنگین شتاب را می‌کشند؛ code review و deployment و حلقه‌های بازخورد را نگه دارید ولی روانشان کنید. بپرسید «این دارد کمک می‌کند بهتر شویم یا دارد کندمان می‌کند؟» و اگر دومی است، حذفش کنید (p. 28).
+- **مفهوم process را کار تیمی کنید**، یعنی با تیم یا توسط تیم ساخته شود، نه برای تیم، که حس مالکیت می‌سازد (p. 29).
+- **در مسیر تنظیمش کنید**، چون چیزی که برای ۵ نفر کار می‌کرد شاید برای ۲۰ نفر شکست بخورد (p. 29).
 
-> **Exercise: The Process Pulse Survey** (pp. 29–31). A two-minute anonymous survey, because your team is the process's user: how often you got 2+ uninterrupted hours this week; how often you find unofficial ways to get things done; what you wait for most (reviews or approvals, others' work, access, decisions from above, information, nothing); how quickly you get a go-ahead; "how do things really work around here?"; and the one thing you'd change. **Read** it for patterns — waiting, workarounds, missing focus time — as signals of friction, not complaints. **Iterate** on the single pattern that slows the most people most often with a two-week experiment: same-day approval of routine changes, protected two-hour morning focus blocks, a fast lane for small low-risk requests, simpler deployment. **Measure** by rerunning the pulse after two weeks and sharing what you learned.
+> **تمرین: نظرسنجی نبض process** (pp. 29–31). یک نظرسنجی ناشناس دو‌دقیقه‌ای، چون کاربرِ process خود تیم شماست: این هفته چند بار دو ساعت بی‌وقفه داشتید؛ چند بار راه غیررسمی برای انجام دادن کار پیدا کردید؛ بیشتر منتظر چه چیزی می‌مانید، یعنی review و تأیید، کار دیگران، دسترسی، تصمیم از بالا، اطلاعات، یا هیچ؛ چقدر زود چراغ سبز می‌گیرید؛ «این‌جا کارها واقعاً چطور پیش می‌روند؟»؛ و آن یک چیزی که عوضش می‌کردید. **بخوانیدش** و دنبال الگو بگردید، مثل انتظار و دور زدن و نبود وقت تمرکز، که نشانه‌ی اصطکاک‌اند، نه شکایت. **تکرار کنید** روی همان یک الگویی که بیشترین آدم‌ها را بیشترین بار کند می‌کند، با آزمایشی دو‌هفته‌ای: تأیید همان‌روزِ تغییرهای معمول، بلوک‌های تمرکز دو‌ساعته‌ی محافظت‌شده در صبح، مسیر سریع برای درخواست‌های کوچکِ کم‌ریسک، یا deployment ساده‌تر. **اندازه بگیرید** با اجرای دوباره‌ی نظرسنجی بعد از دو هفته و گفتن آنچه یاد گرفته‌اید.
 
-> **Try it:** [Process pulse](../widgets/02-process-pulse.html) — run the book's survey on a simulated team, find the friction that slows the most people, and try one of its two-week experiments.
+> **Try it:** [نبض process](../widgets/02-process-pulse.html)؛ همان نظرسنجی کتاب را روی یک تیم شبیه‌سازی‌شده اجرا کنید، اصطکاکی را که بیشترین آدم‌ها را کند می‌کند پیدا کنید و یکی از آزمایش‌های دو‌هفته‌ای‌اش را امتحان کنید.
 
-### Product: What Are We Actually Delivering?
+### محصول: واقعاً داریم چه چیزی تحویل می‌دهیم؟
 
-**Outcomes matter more than output** — the difference between a team that releases features and one that delivers value (p. 31).
+**نتیجه از خروجی مهم‌تر است**؛ همان تفاوت تیمی که feature منتشر می‌کند با تیمی که ارزش تحویل می‌دهد (p. 31).
 
-| Practice | Detail (pp. 31–32) |
+| کار | جزئیات (pp. 31–32) |
 |---|---|
-| **Know what success looks like** | What problem are you solving? Tie every feature to an outcome — experience, speed, reliability, scale, revenue, cost. Success is fluid: a feature this quarter, lower infrastructure costs the next |
-| **Balance quality with speed** | Speed without quality is a disaster waiting to happen; set clear standards for "done." Quality isn't perfection — know when something is good enough to ship |
-| **Outcomes aren't always features** | Infrastructure, technical debt and internal tools are "the silent engines"; explain their value and celebrate hidden wins |
+| **بدانید موفقیت چه شکلی است** | چه مسئله‌ای را حل می‌کنید؟ هر featureای را به یک نتیجه گره بزنید: تجربه، سرعت، reliability، مقیاس، درآمد، هزینه. موفقیت سیال است: این فصل یک feature و فصل بعد کم کردن هزینه‌ی زیرساخت |
+| **تعادل کیفیت و سرعت** | سرعت بدون کیفیت فاجعه‌ای در راه است؛ برای «تمام‌شده» استاندارد روشن بگذارید. کیفیت یعنی بی‌نقص بودن نیست؛ بدانید کِی چیزی به‌اندازه‌ی کافی خوب است که تحویل شود |
+| **نتیجه همیشه feature نیست** | زیرساخت و بدهی فنی و ابزارهای داخلی «موتورهای خاموش»اند؛ ارزششان را توضیح بدهید و بردهای پنهان را جشن بگیرید |
 
-> **Exercise: Redefining Your Role for Impact** (pp. 33–34). Assess your team's focus, define how you'll move from output to outcomes, and add responsibilities. April's team raced to ship and quality slipped, so she defines success metrics that put impact over output, balances speed with quality, and emphasizes invisible work.
+> **تمرین: بازتعریف نقشتان برای اثرگذاری** (pp. 33–34). تمرکز تیمتان را بسنجید، تعریف کنید چطور از خروجی به نتیجه می‌روید، و مسئولیت اضافه کنید. تیم April برای تحویل دادن می‌دوید و کیفیت افتاده بود، پس او سنجه‌های موفقیتی تعریف می‌کند که اثر را بر خروجی مقدم می‌دانند، سرعت را با کیفیت متعادل می‌کند و روی کار نامرئی تأکید می‌گذارد.
 
-### Conclusion: Pulling It All Together
+> **In practice:** خروجی تیم داده جدول و داشبورد است؛ نتیجه، تصمیمی است که کسی با آن می‌گیرد.
+>
+> **Your turn:** تیم این فصل ۱۲ داشبورد تازه در Metabase منتشر کرده. چطور می‌فهمید ارزش تحویل داده است؟
+>
+> *Answer:* از Metabase بپرسید کدام داشبوردها واقعاً باز می‌شوند و از صاحبانشان بپرسید چه تصمیمی را عوض کرده‌اند؛ داشبورد بی‌بیننده خروجی است، نه نتیجه. کتاب نتیجه را مهم‌تر از خروجی می‌داند و هر feature را به یک نتیجه گره می‌زند (pp. 31–32).
 
-You now have a role description across people, mission, plan, process and product. Leadership isn't static: revisit these questions as the team and company evolve (p. 34).
+### جمع‌بندی: کنار هم گذاشتن همه
 
-## Trade-offs at a glance
+حالا شرح نقشی دارید که آدم‌ها و مأموریت و برنامه و process و محصول را پوشش می‌دهد. رهبری ایستا نیست: همراه با تکامل تیم و شرکت دوباره سراغ این پرسش‌ها بروید (p. 34).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Retreating into technical work | Comfort, visible output | You're hiding, not leading |
-| Generalist with range | Moves between domains; sees the whole | Must still know when to go deep |
-| Acting on incomplete information | Momentum; sets you apart | Sometimes wrong; needs iteration |
-| Planning alone | Speed, control | Bottlenecks; missing context |
-| Saying "not today" | Focus and clarity | Disappointed stakeholders |
-| Heavy process | Control | Bureaucracy; lost momentum |
-| Team-made, lean process | Ownership; less friction | Must be re-evaluated as the team grows |
-| Speed over quality | Ship first | Debt, bugs, eroded trust |
+| عقب‌نشینی به کار فنی | راحتی، خروجی دیدنی | پنهان شده‌اید، نه رهبری |
+| همه‌فن‌حریف با دامنه | بین حوزه‌ها جابه‌جا می‌شوید؛ کل را می‌بینید | باز هم باید بدانید کِی عمیق شوید |
+| عمل کردن با اطلاعات ناقص | شتاب؛ متمایزتان می‌کند | گاهی اشتباه است؛ به تکرار نیاز دارد |
+| تنها برنامه ریختن | سرعت، کنترل | گلوگاه؛ از دست دادن زمینه |
+| گفتن «امروز نه» | تمرکز و روشنی | ذی‌نفع ناراضی |
+| process سنگین | کنترل | دیوان‌سالاری؛ شتاب از دست می‌رود |
+| process سبکِ ساخته‌ی تیم | مالکیت؛ اصطکاک کمتر | با بزرگ شدن تیم باید دوباره سنجیده شود |
+| سرعت بر کیفیت | اول تحویل می‌دهید | بدهی، باگ، اعتماد فرسوده |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Range.** "Generalist with range" echoes David Epstein's *Range: Why Generalists Triumph in a Specialized World* (2019), which argues that broad experience helps in "wicked," unpredictable environments.
-- **The pulse survey** resembles lightweight developer-experience surveys used in industry; the [widget](../widgets/02-process-pulse.html) simulates answers from an invented team and invented effects of each experiment.
+- **دامنه.** عبارت «همه‌فن‌حریف با دامنه» با کتاب *Range: Why Generalists Triumph in a Specialized World* از David Epstein در سال ۲۰۱۹ هم‌صداست، که می‌گوید تجربه‌ی گسترده در محیط‌های «شرور» و پیش‌بینی‌ناپذیر کمک می‌کند.
+- **نظرسنجی نبض** شبیه نظرسنجی‌های سبک تجربه‌ی توسعه‌دهنده است که در صنعت به کار می‌روند؛ [این ویجت](../widgets/02-process-pulse.html) پاسخ‌های یک تیم ساختگی و اثرهای ساختگی هر آزمایش را شبیه‌سازی می‌کند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. Embracing the Unknown](01-embracing-the-unknown.md) (the symptoms the pillars address), [4. Building Cohesive Teams](04-building-cohesive-teams.md) (people), [5. Setting Direction](05-setting-direction.md) (mission), [6. Shipping Products and Code](06-shipping-products-and-code-in-chaotic-environments.md) (plan, process and product), [8. Technical Principles and Strategy](08-technical-principles-and-strategy.md), [9. Collaborative Technical Practices](09-collaborative-technical-practices-and-decision-making.md).
+- **فصل‌های مرتبط:** [فصل ۱: پذیرفتن ناشناخته](01-embracing-the-unknown.md) که نشانه‌هایی را می‌گوید که ستون‌ها به آن‌ها می‌پردازند، [فصل ۴: ساختن تیم‌های منسجم](04-building-cohesive-teams.md) برای ستون آدم‌ها، [فصل ۵: تعیین جهت](05-setting-direction.md) برای مأموریت، [فصل ۶: تحویل محصول و کد](06-shipping-products-and-code-in-chaotic-environments.md) برای برنامه و process و محصول، [فصل ۸: اصول و استراتژی فنی](08-technical-principles-and-strategy.md)، و [فصل ۹: کارهای فنی مشارکتی](09-collaborative-technical-practices-and-decision-making.md).
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **Name the five pillars and one symptom of chaos each addresses.**
+1. **پنج ستون را نام ببرید و برای هر کدام یک نشانه‌ی آشوب که به آن می‌پردازد.**
 
-   *Answer:* People (high turnover, blame culture), mission (lack of strategy, disconnection from purpose), plan (crisis mode, ownership issues), process (undefined processes, absence of structure), product (no meaningful measurement, outcome focus) — Table 2-1 (p. 14).
+   *Answer:* آدم‌ها برای ریزش بالای نیرو و فرهنگ سرزنش، مأموریت برای نبود استراتژی و بریدگی از هدف، برنامه برای حالت بحران و مسئله‌های مالکیت، process برای processهای تعریف‌نشده و نبود ساختار، و محصول برای نبود اندازه‌گیری معنادار و تمرکز بر نتیجه؛ جدول ۲-۱ (p. 14).
 
-2. **Why write your own role description when you already have a job description?**
-   - [ ] HR requires it
-   - [x] Job descriptions are aspirational ads written before you start; a living description reflects what you actually do and helps show progress
-   - [ ] It replaces the team charter
+2. **وقتی شرح شغل دارید چرا شرح نقش خودتان را بنویسید؟**
+   - [ ] واحد HR می‌خواهد
+   - [x] شرح شغل‌ها آگهی‌هایی آرمانی‌اند که پیش از شروع شما نوشته شده‌اند؛ شرح زنده کاری را نشان می‌دهد که واقعاً می‌کنید و کمک می‌کند پیشرفت را نشان بدهید
+   - [ ] جای منشور تیم را می‌گیرد
 
    *Answer:* pp. 15–18.
 
-3. **What does "don't retreat to the comfortable" warn against?**
+3. **«به کار راحت عقب‌نشینی نکنید» از چه چیزی برحذر می‌دارد؟**
 
-   *Answer:* Diving back into individual-contributor technical work when chaos arrives — that's hiding, not leading; your value is in empowering the team (p. 16).
+   *Answer:* از شیرجه زدن دوباره در کار فنیِ individual contributor وقتی آشوب می‌رسد؛ این پنهان شدن است نه رهبری، چون ارزش شما در توانمند کردن تیم است (p. 16).
 
-4. **Rewrite "improve performance" the way the book recommends.**
+4. **عبارت «performance را بهتر کنیم» را به شیوه‌ای که کتاب می‌گوید بازنویسی کنید.**
 
-   *Answer:* As a specific, measurable goal tied to the mission, e.g. "Reduce customer onboarding time by 20%" (p. 23).
+   *Answer:* به شکل هدفی مشخص و اندازه‌پذیر که به مأموریت گره خورده، مثلاً «زمان onboarding مشتری را ۲۰٪ کم کنیم» (p. 23).
 
-5. **What test does the book give for real prioritization?**
+5. **کتاب چه آزمونی برای اولویت‌بندی واقعی می‌دهد؟**
 
-   *Answer:* "It's not prioritizing if it doesn't hurt" — you must make tough calls and say no (p. 26).
+   *Answer:* «اگر درد نداشته باشد اولویت‌بندی نیست»؛ باید تصمیم‌های سخت بگیرید و نه بگویید (p. 26).
 
-6. **After a process pulse survey, how should you act on the results?**
-   - [ ] Fix every issue it reveals at once
-   - [x] Pick the single pattern that slows the most people most often and run a small two-week experiment, then rerun the survey
-   - [ ] Add an approval step for each problem
+6. **بعد از نظرسنجی نبض process چطور باید روی نتیجه‌ها عمل کرد؟**
+   - [ ] همه‌ی مسئله‌هایی را که رو می‌کند یک‌دفعه درست کنید
+   - [x] همان یک الگویی را که بیشترین آدم‌ها را بیشترین بار کند می‌کند بردارید و آزمایشی کوچک و دو‌هفته‌ای اجرا کنید و بعد نظرسنجی را دوباره بگیرید
+   - [ ] برای هر مشکل یک مرحله‌ی تأیید اضافه کنید
 
    *Answer:* pp. 30–31.
 
-7. **Why do outcomes "aren't always features" matter to a leader?**
+7. **چرا «نتیجه همیشه feature نیست» برای یک رهبر مهم است؟**
 
-   *Answer:* Invisible work — infrastructure, technical debt, internal tools — powers the product; the leader must explain its value and celebrate it so the team stays motivated (p. 32).
+   *Answer:* کار نامرئی، یعنی زیرساخت و بدهی فنی و ابزارهای داخلی، محصول را می‌راند؛ رهبر باید ارزشش را توضیح بدهد و جشنش بگیرد تا تیم انگیزه‌اش را حفظ کند (p. 32).

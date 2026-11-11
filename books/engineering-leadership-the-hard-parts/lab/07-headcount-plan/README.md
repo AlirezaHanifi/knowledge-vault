@@ -1,18 +1,20 @@
-# Headcount plan
+# برنامه‌ی نیرو
 
-What do three engineering hires really cost, and how much do they add in their first year? The script applies the book's rules of thumb for fully loaded cost to April's three $150,000 hires, then compares hiring all three at once with staggering them, using the book's ramp-up figures.
+سه استخدام مهندسی واقعاً چقدر آب می‌خورند و در سال اول چقدر اضافه می‌کنند؟ اسکریپت قاعده‌های سرانگشتی کتاب درباره‌ی هزینه‌ی تمام‌شده را روی سه استخدام ۱۵۰٬۰۰۰ دلاری April به کار می‌برد و بعد استخدام هر سه با هم را با استخدام پلکانی مقایسه می‌کند، با همان عددهای جا افتادن کتاب.
 
-*Illustrates Engineering Leadership: The Hard Parts, “Headcount Planning and Costs”, pp. 133–136. The implementation is the vault’s own: the existing team of ten and the hiring months are assumptions; the cost ranges, ramp-up and drag figures are the book's; the calculation is deterministic.*
+*این آزمایش بخش «برنامه‌ریزی نیرو و هزینه‌هایش» از کتاب Engineering Leadership: The Hard Parts را نشان می‌دهد، صص. ۱۳۳–۱۳۶. پیاده‌سازی مال خود vault است: تیم ده‌نفره‌ی موجود و ماه‌های استخدام فرض‌اند؛ بازه‌های هزینه و عددهای جا افتادن و افت کشیدگی از کتاب‌اند؛ و محاسبه قطعی است.*
 
-## Run
+خروجی انگلیسی می‌ماند، چون بیشتر ترمینال‌ها متن راست‌به‌چپ را بد نشان می‌دهند.
 
-Python 3.10+, standard library only, deterministic:
+## اجرا
+
+با Python نسخه‌ی ۳٫۱۰ به بالا، فقط کتابخانه‌ی استاندارد، و قطعی:
 
 ```sh
 python3 headcount_plan.py
 ```
 
-## Expected output
+## خروجی مورد انتظار
 
 ```text
 3 hires at $150,000 base; existing team of 10
@@ -29,13 +31,13 @@ staggered (months 1, 3, 5)        141.0   +21.0         90%
 Attrition at 10-15% a year on 13 people: 1.3-1.9 backfills a year
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Both ends of the book's ranges land inside its 1.3–1.8× rule, and the low end is close to the book's "closer to $675,000" for April's three hires (p. 134) — a budget of $450,000 is short by a third or more.
-- "Worst month" is the existing team's capacity in its hardest month. Batch hiring drops it to 70% in month 1 (three hires × 10% drag), the onboarding bottleneck the book warns about (p. 134); staggering never goes below 90%.
-- Batch hiring still delivers more over the year, because the hires ramp up sooner. Three hires add roughly two engineers' worth of output in year one, not three.
-- Attrition means some of next year's hiring is replacement, not growth.
+- هر دو سر بازه‌ی کتاب داخل همان قاعده‌ی ۱٫۳ تا ۱٫۸ برابر می‌افتند، و سر پایین بازه نزدیک «حدود ۶۷۵٬۰۰۰ دلار» کتاب برای سه استخدام April است (ص. ۱۳۴)؛ بودجه‌ی ۴۵۰٬۰۰۰ دلاری یک‌سوم یا بیشتر کم می‌آورد.
+- «بدترین ماه» ظرفیت تیم موجود در سخت‌ترین ماهش است. استخدام دسته‌ای آن را در ماه اول به ۷۰٪ می‌رساند، یعنی سه استخدام ضرب در ۱۰٪ افت، که همان گلوگاه onboarding است که کتاب هشدارش را می‌دهد (ص. ۱۳۴)؛ حالت پلکانی هیچ‌وقت زیر ۹۰٪ نمی‌رود.
+- استخدام دسته‌ای با این همه در کل سال بیشتر تحویل می‌دهد، چون آدم‌ها زودتر جا می‌افتند. سه استخدام در سال اول حدود دو مهندس به خروجی اضافه می‌کنند، نه سه‌تا.
+- ریزش نیرو یعنی بخشی از استخدام سال بعد جایگزینی است، نه رشد.
 
-## Related
+## پیوندها
 
-- Chapter note: [7. Budgeting, Costs, and Vendors](../../chapters/07-budgeting-costs-and-vendors.md) — “Headcount Planning and Costs”, pp. 133–136
+- یادداشت فصل: [فصل ۷: بودجه، هزینه و فروشنده‌ها](../../chapters/07-budgeting-costs-and-vendors.md)، بخش «برنامه‌ریزی نیرو و هزینه‌هایش»، صص. ۱۳۳–۱۳۶

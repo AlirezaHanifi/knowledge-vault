@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Drift Diagnostic</title>
-<meta name="description" content="Tick the signs of drift you see; the book&#x27;s Table 5-1 gives the likely root causes, one action for this week and the practice that keeps drift away. Illustrates Engineering Leadership: The Hard Parts, Chapter 5.">
+<title>تشخیص رانش</title>
+<meta name="description" content="نشانه‌های رانشی را که می‌بینید تیک بزنید؛ جدول ۵-۱ کتاب ریشه‌های محتمل و یک اقدام برای همین هفته و رویه‌ای را می‌دهد که رانش را دور نگه می‌دارد. برای فصل ۵ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>.sign { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
   .plan { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; margin-top: 8px; background: var(--surface); font-size: .9rem; }
@@ -14,46 +14,46 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-setting-direction.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Drift diagnostic</span>
+      <a href="../chapters/05-setting-direction.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">تشخیص رانش</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Setting Direction</div>
-  <h1>Drift diagnostic</h1>
-  <p class="lede">Drift looks like momentum from outside and feels like motion without meaning from inside. Tick the signs you recognise. <strong>Two or more</strong> mean the team has lost focus — then choose <strong>one</strong> immediate action and do it this week.</p>
-  <p class="source-note">Illustrates “Table 5-1. The drift diagnostic” (p. 77) and its two-or-more rule (p. 78). The signs, causes, actions and practices are the book’s; the interactive form is the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۵ · تعیین جهت</div>
+  <h1>تشخیص رانش</h1>
+  <p class="lede">رانش از بیرون شبیه شتاب است و از درون حس حرکت بدون معنا دارد. نشانه‌هایی را که می‌شناسید تیک بزنید. <strong>دوتا یا بیشتر</strong> یعنی تیم تمرکزش را از دست داده، و آن‌وقت <strong>یک</strong> اقدام فوری بردارید و همین هفته انجامش بدهید.</p>
+  <p class="source-note">این شبیه‌سازی «جدول ۵-۱. ابزار تشخیص رانش» (ص. ۷۷) و قاعده‌ی دوتا یا بیشترش (ص. ۷۸) را نشان می‌دهد. نشانه‌ها و ریشه‌ها و اقدام‌ها و رویه‌ها از خود کتاب‌اند؛ فرم تعاملی مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim stack">
-    <fieldset class="panel"><legend class="panel-title">Which of these do you see on your team?</legend><div id="signs"></div></fieldset>
+    <fieldset class="panel"><legend class="panel-title">کدام‌یک از این‌ها را در تیمتان می‌بینید؟</legend><div id="signs"></div></fieldset>
     <div id="verdict" class="callout" aria-live="polite"></div>
-    <div class="panel"><p class="panel-title">What the table says</p><div id="plans"><p class="field-hint">Tick a sign to see its root cause, immediate action and sustained practice.</p></div>
-      <div id="pickwrap" style="margin-top:10px" hidden><label for="pick">Your one action this week</label><br><select id="pick"></select></div>
+    <div class="panel"><p class="panel-title">جدول چه می‌گوید</p><div id="plans"><p class="field-hint">یک نشانه را تیک بزنید تا ریشه و اقدام فوری و رویه‌ی پایدارش را ببینید.</p></div>
+      <div id="pickwrap" style="margin-top:10px" hidden><label for="pick">آن یک اقدام شما برای این هفته</label><br><select id="pick"></select></div>
     </div>
-    <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li>Every sign is a symptom of a decision someone avoided — too many priorities, a tough call not made, trade-offs not named.</li>
-    <li>Immediate actions are small and concrete (one six-week goal, a “stop doing” list); sustained practices keep drift from returning.</li>
-    <li>The book’s rule is one action <em>this week</em>, not a programme: even several signs call for one move first.</li>
+    <li>هر نشانه، نشانه‌ی تصمیمی است که کسی از آن طفره رفته: اولویت‌های زیاد، تصمیم سختی که گرفته نشده، یا معامله‌هایی که نامشان برده نشده.</li>
+    <li>اقدام‌های فوری کوچک و ملموس‌اند، مثل یک هدف شش‌هفته‌ای یا فهرست «این‌ها را نمی‌کنیم»؛ و رویه‌های پایدار نمی‌گذارند رانش برگردد.</li>
+    <li>قاعده‌ی کتاب یک اقدام <em>در همین هفته</em> است، نه یک برنامه‌ی بزرگ: حتی با چند نشانه هم اول یک حرکت لازم است.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-setting-direction.html"><small>Lesson</small>5. Setting Direction</a></li>
+    <li><a href="../chapters/05-setting-direction.html"><small>درس</small>فصل ۵: تعیین جهت</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -63,44 +63,44 @@
 
   var log = Kit.log(document.getElementById("log"));
   var T = [
-    ["People say “We’ll circle back,” but never do", "Too many competing priorities, no clear focus", "Choose one main goal for the next six weeks", "Track all work visibly; untracked work gets deprioritized"],
-    ["Teams constantly ask “What should we work on first?”", "Leadership avoiding tough priority calls", "Make a clear priority decision and explain your reasoning", "Communicate priorities repeatedly until the message sticks"],
-    ["Work gets completed but doesn’t build toward anything", "Reacting to whatever seems urgent instead of following a plan", "Create an explicit “stop doing” list", "Review every meeting’s purpose before it happens"],
-    ["The best team members start looking elsewhere", "Important decisions stuck because everyone needs to agree", "Share regular updates on what you’re building and why", "Create safe ways to disagree and ask hard questions"],
-    ["The same arguments resurface in every planning session", "Decisions made without acknowledging what’s given up", "Name what you’re not doing", "Follow up after decisions to keep commitment strong"]
+    ["آدم‌ها می‌گویند «بعداً برمی‌گردیم سراغش» ولی هیچ‌وقت برنمی‌گردند", "اولویت‌های رقیب زیاد و نبود تمرکز روشن", "یک هدف اصلی برای شش هفته‌ی بعد انتخاب کنید", "همه‌ی کار را دیدنی ثبت کنید؛ کار ثبت‌نشده اولویتش پایین می‌آید"],
+    ["تیم‌ها مدام می‌پرسند «اول روی چه کار کنیم؟»", "رهبری از تصمیم‌های سخت اولویت فرار می‌کند", "تصمیم اولویت روشنی بگیرید و دلیلش را بگویید", "اولویت‌ها را آن‌قدر تکرار کنید که پیام بنشیند"],
+    ["کارها تمام می‌شوند ولی چیزی ساخته نمی‌شود", "واکنش به هر چیزی که فوری به نظر می‌رسد، به‌جای دنبال کردن یک برنامه", "فهرست صریحِ «این‌ها را نمی‌کنیم» بسازید", "هدف هر جلسه را پیش از برگزاری‌اش بسنجید"],
+    ["بهترین آدم‌های تیم دنبال جای دیگری می‌گردند", "تصمیم‌های مهم گیر کرده‌اند چون همه باید موافق باشند", "منظم بگویید چه می‌سازید و چرا", "راه‌های امنی برای مخالفت و پرسش سخت بسازید"],
+    ["همان بحث‌ها در هر جلسه‌ی برنامه‌ریزی برمی‌گردند", "تصمیم‌ها بدون به زبان آوردن چیزی که از دست می‌رود گرفته می‌شوند", "نام ببرید چه چیزی را انجام نمی‌دهید", "بعد از تصمیم پیگیری کنید تا تعهد قوی بماند"]
   ];
   var on = T.map(function () { return false; }), box = document.getElementById("signs"), pick = document.getElementById("pick");
   T.forEach(function (t, i) {
     var id = "d" + i, cb = Kit.el("input", { type: "checkbox", id: id });
-    cb.addEventListener("change", function () { on[i] = cb.checked; log.add((cb.checked ? "Seen: " : "Cleared: ") + t[0], cb.checked ? "warn" : "muted"); render(); });
+    cb.addEventListener("change", function () { on[i] = cb.checked; log.add((cb.checked ? "دیده شد: " : "برداشته شد: ") + t[0], cb.checked ? "warn" : "muted"); render(); });
     box.appendChild(Kit.el("div", { class: "sign" }, cb, Kit.el("label", { for: id }, t[0])));
   });
-  pick.addEventListener("change", function () { if (pick.value !== "") { log.add("This week: " + T[+pick.value][2], "ok"); verdict(); } });
+  pick.addEventListener("change", function () { if (pick.value !== "") { log.add("این هفته: " + T[+pick.value][2], "ok"); verdict(); } });
   function verdict() {
     var n = on.filter(Boolean).length, v = document.getElementById("verdict");
-    if (n === 0) { v.className = "callout"; v.textContent = "No signs ticked."; }
-    else if (n === 1) { v.className = "callout"; v.textContent = "One sign: worth watching, but not yet the book’s threshold for lost focus."; }
-    else { v.className = "callout " + (pick.value !== "" ? "ok" : "warn"); v.textContent = n + " signs: by the book’s rule the team has lost focus. " + (pick.value !== "" ? "This week: " + T[+pick.value][2].toLowerCase() + "." : "Choose one immediate action and do it this week."); }
+    if (n === 0) { v.className = "callout"; v.textContent = "هیچ نشانه‌ای تیک نخورده."; }
+    else if (n === 1) { v.className = "callout"; v.textContent = "یک نشانه: ارزش پاییدن دارد، ولی هنوز به آستانه‌ی کتاب برای از دست رفتن تمرکز نرسیده."; }
+    else { v.className = "callout " + (pick.value !== "" ? "ok" : "warn"); v.textContent = n + " نشانه: با قاعده‌ی کتاب، تیم تمرکزش را از دست داده. " + (pick.value !== "" ? "این هفته: " + T[+pick.value][2] + "." : "یک اقدام فوری انتخاب کنید و همین هفته انجامش بدهید."); }
   }
   function render() {
     var pl = Kit.clear(document.getElementById("plans")), prev = pick.value; Kit.clear(pick);
-    pick.appendChild(Kit.el("option", { value: "" }, "Choose one…"));
+    pick.appendChild(Kit.el("option", { value: "" }, "یکی را انتخاب کنید…"));
     T.forEach(function (t, i) {
       if (!on[i]) return;
       pl.appendChild(Kit.el("div", { class: "plan" }, Kit.el("h3", null, t[0]), Kit.el("dl", null,
-        Kit.el("dt", null, "Root cause"), Kit.el("dd", null, t[1]), Kit.el("dt", null, "Immediate action"), Kit.el("dd", null, t[2]), Kit.el("dt", null, "Sustained practice"), Kit.el("dd", null, t[3]))));
+        Kit.el("dt", null, "ریشه"), Kit.el("dd", null, t[1]), Kit.el("dt", null, "اقدام فوری"), Kit.el("dd", null, t[2]), Kit.el("dt", null, "رویه‌ی پایدار"), Kit.el("dd", null, t[3]))));
       pick.appendChild(Kit.el("option", { value: String(i) }, t[2]));
     });
-    if (!on.some(Boolean)) pl.appendChild(Kit.el("p", { class: "field-hint" }, "Tick a sign to see its root cause, immediate action and sustained practice."));
+    if (!on.some(Boolean)) pl.appendChild(Kit.el("p", { class: "field-hint" }, "یک نشانه را تیک بزنید تا ریشه و اقدام فوری و رویه‌ی پایدارش را ببینید."));
     pick.value = prev !== "" && on[+prev] ? prev : "";
     document.getElementById("pickwrap").hidden = on.filter(Boolean).length < 2;
     verdict();
   }
   render();
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "How many signs from the diagnostic mean a team has lost focus?", options: ["One", "Two or more", "All five"], answer: 1, explain: "p. 78." },
-    { q: "Work keeps getting done but builds toward nothing. What is the table’s immediate action?", options: ["Hire more people", "Create an explicit “stop doing” list", "Add a weekly status report"], answer: 1, explain: "The root cause is reacting to whatever seems urgent (p. 77)." },
-    { q: "The same arguments resurface in every planning session. Why, according to the table?", options: ["Decisions were made without acknowledging what’s given up", "The team is lazy", "Planning sessions are too short"], answer: 0, explain: "Name what you’re not doing (p. 77)." }
+    { q: "چند نشانه از این ابزار تشخیص یعنی تیم تمرکزش را از دست داده؟", options: ["یکی", "دوتا یا بیشتر", "هر پنج‌تا"], answer: 1, explain: "ص. ۷۸." },
+    { q: "کارها تمام می‌شوند ولی چیزی ساخته نمی‌شود. اقدام فوری جدول چیست؟", options: ["آدم بیشتری استخدام کنید", "فهرست صریحِ «این‌ها را نمی‌کنیم» بسازید", "گزارش وضعیت هفتگی اضافه کنید"], answer: 1, explain: "ریشه‌اش واکنش به هر چیزی است که فوری به نظر می‌رسد (ص. ۷۷)." },
+    { q: "همان بحث‌ها در هر جلسه‌ی برنامه‌ریزی برمی‌گردند. به گفته‌ی جدول چرا؟", options: ["تصمیم‌ها بدون به زبان آوردن چیزی که از دست می‌رود گرفته شده‌اند", "تیم تنبل است", "جلسه‌های برنامه‌ریزی کوتاه‌اند"], answer: 0, explain: "نام ببرید چه چیزی را انجام نمی‌دهید (ص. ۷۷)." }
   ]);
 
 })();

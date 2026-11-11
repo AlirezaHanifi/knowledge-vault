@@ -3,50 +3,52 @@ book: engineering-leadership-the-hard-parts
 chapter: 11
 title: "Fitting It All Together"
 pages: "227–240"
+translated_title: "کنار هم گذاشتن همه چیز"
+lang: fa
 ---
 
-# 11. Fitting It All Together
+# فصل ۱۱: کنار هم گذاشتن همه چیز
 
-[← 10. Metrics That Matter](10-metrics-that-matter-for-engineering-teams.md) · [Book](../README.md)
+[فصل ۱۰: متریک‌هایی که مهم‌اند →](10-metrics-that-matter-for-engineering-teams.md) · [کتاب](../README.md)
 
-## Summary
+## خلاصه
 
-The closing chapter ties the book together: leadership in chaos is showing up and making things a little better each day — and sometimes walking away is right for your health. With the leader as the conductor of a symphony, it layers the book's themes: a **foundation** of people and psychological safety, plus capability; a **lighthouse** of direction rather than drift; an **engine** of minimal, adaptable process; a **compass** of a few metrics with context; and an **ecosystem** beyond the team. It describes how organizations evolve from chaos to capability, admits that everything is harder than it sounds, and sets out a practice of one change at a time. Skills built in chaos become superpowers in stability, and the chapter ends with a call to lead while looking after yourself (pp. 227–239).
+فصل پایانی کتاب را به هم گره می‌زند: رهبری در آشوب یعنی حاضر شدن و هر روز کمی بهتر کردن اوضاع، و گاهی هم کنار کشیدن برای سلامتی‌تان همان کار درست است. با تصویر رهبر به‌عنوان رهبر ارکستر، درون‌مایه‌های کتاب را لایه‌لایه می‌چیند: **پایه‌ای** از آدم‌ها و امنیت روانی به‌علاوه‌ی توانمندی؛ **فانوس دریایی** جهت به‌جای رانش؛ **موتور** processی کمینه و تطبیق‌پذیر؛ **قطب‌نمای** چند متریک همراه با زمینه؛ و **زیست‌بومی** فراتر از تیم. می‌گوید سازمان‌ها چطور از آشوب به توانمندی تکامل می‌یابند، می‌پذیرد که همه چیز سخت‌تر از آن است که به نظر می‌رسد، و رویه‌ای می‌گذارد که هر بار یک چیز را عوض کنید. مهارت‌هایی که در آشوب ساخته می‌شوند در ثبات به ابرقدرت تبدیل می‌شوند، و فصل با دعوتی به رهبری کردن همراه با مراقبت از خودتان تمام می‌شود (pp. 227–239).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Every part influences every other,** creating virtuous or vicious cycles (p. 228).
-- **Without psychological safety nothing else works** — but "a safe team that can't execute is just a support group" (pp. 228–229).
-- **Direction in chaos creates coherence now;** a decent decision today usually beats a perfect one next month (pp. 229–230).
-- **Process should be just enough to prevent disorder** and grow in response to real problems; "good enough" is a legitimate target (pp. 230–231).
-- **A few metrics, each with a story** — "numbers cosplaying as truth" otherwise (pp. 231–232).
-- **Change one thing at a time,** for at least a month, then add the next (pp. 235–236).
-- **Take care of yourself;** build a support network (pp. 235, 238).
+- **هر بخش روی بخش‌های دیگر اثر می‌گذارد** و چرخه‌های فضیلت‌آمیز یا معیوب می‌سازد (p. 228).
+- **بدون امنیت روانی هیچ چیز دیگری کار نمی‌کند**، ولی «تیم امنی که نمی‌تواند اجرا کند فقط یک گروه هم‌دردی است» (pp. 228–229).
+- **جهت در آشوب همین حالا انسجام می‌سازد؛** تصمیم آبرومند امروز معمولاً از تصمیم بی‌نقص ماه بعد بهتر است (pp. 229–230).
+- **مفهوم process باید فقط به‌اندازه‌ی جلوگیری از بی‌نظمی باشد** و در پاسخ به مسئله‌های واقعی رشد کند؛ «به‌اندازه‌ی کافی خوب» هدف مشروعی است (pp. 230–231).
+- **چند متریک، هر کدام با یک روایت**؛ وگرنه «عددهایی‌اند که نقش حقیقت را بازی می‌کنند» (pp. 231–232).
+- **هر بار یک چیز را عوض کنید**، دست‌کم برای یک ماه، و بعد بعدی را اضافه کنید (pp. 235–236).
+- **مراقب خودتان باشید؛** شبکه‌ای از پشتیبانی بسازید (pp. 235, 238).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- The Symphony of Chaos — p. 228
-- The Foundation: People and Safety — p. 228
-- The Lighthouse: Direction, Not Drift — p. 229
-- The Engine: Process and Execution — p. 230
-- The Compass: Metrics and Measurement — p. 231
-- The Ecosystem: Building Beyond Your Team — p. 232
-- The Evolution: From Chaos to Capability — p. 233
-- The Reality: It’s Harder Than It Looks — p. 234
-- The Practice: Making It Real — p. 235
-- The Future: Beyond Survival — p. 236
-- The Call: Your Turn to Lead — p. 237
-- The End, and the Beginning — p. 238
+- سمفونی آشوب — p. 228
+- پایه: آدم‌ها و امنیت — p. 228
+- فانوس دریایی: جهت، نه رانش — p. 229
+- موتور: process و اجرا — p. 230
+- قطب‌نما: متریک و اندازه‌گیری — p. 231
+- زیست‌بوم: ساختن فراتر از تیمتان — p. 232
+- تکامل: از آشوب تا توانمندی — p. 233
+- واقعیت: سخت‌تر از آن است که به نظر می‌رسد — p. 234
+- رویه: واقعی کردنش — p. 235
+- آینده: فراتر از بقا — p. 236
+- دعوت: نوبت شماست که رهبری کنید — p. 237
+- پایان، و آغاز — p. 238
 
-## Notes
+## یادداشت‌ها
 
-Chaos "doesn't give out medals for endurance." Leadership in chaos isn't a perfect playbook but persistence — though persistence must not cost your mental and physical health; "Taking care of yourself first is always the right choice" (p. 227).
+آشوب «برای تحمل کردن مدال نمی‌دهد». رهبری در آشوب دستورالعمل بی‌نقص نیست، پشتکار است، هرچند پشتکار نباید به قیمت سلامت روانی و جسمی‌تان تمام شود؛ «اول مراقب خودتان بودن همیشه انتخاب درستی است» (p. 227).
 
-### The Symphony of Chaos
+### سمفونی آشوب
 
-The leader is a conductor guiding the orchestra with cues and feedback: people are the foundation, technical infrastructure enables, processes flow beneath the surface, and metrics provide feedback. Success is momentum despite turbulence, not a perfect system (p. 228). The pieces interlock: principles shape collaboration, communication builds safety, and metrics show whether the rest works (p. 228).
+رهبر مثل رهبر ارکستری است که با اشاره و بازخورد گروه را هدایت می‌کند: آدم‌ها پایه‌اند، زیرساخت فنی ممکن‌کننده است، processها زیر سطح جاری‌اند، و متریک‌ها بازخورد می‌دهند. موفقیت یعنی شتاب داشتن با وجود تلاطم، نه سیستمی بی‌نقص (p. 228). تکه‌ها در هم قفل‌اند: اصول به همکاری شکل می‌دهند، ارتباط امنیت می‌سازد، و متریک‌ها نشان می‌دهند بقیه کار می‌کنند یا نه (p. 228).
 
 ```mermaid
 flowchart BT
@@ -57,45 +59,57 @@ flowchart BT
   X["Ecosystem<br/>other teams, leadership, vendors, budget<br/>(Ch. 3, 7, 9)"] --- E
 ```
 
-*The chapter's layers as a diagram — the arrangement and chapter mapping are the vault's.*
+*لایه‌های این فصل به شکل نمودار؛ چیدمان و نگاشت فصل‌ها مال vault است.*
 
-### The Foundation: People and Safety
+### پایه: آدم‌ها و امنیت
 
-"If there is no trust, there is no team." Without safety, organizational scar tissue builds: innovation slows, problems fester, debt hides (pp. 228–229). Chaos itself feels unsafe, so the leader becomes the stability through consistency — listening to concerns, learning from mistakes, thanking challengers (p. 229). Safety also needs capability: user stories, code reviews, RFCs and retrospectives are scaffolding (p. 229).
+«اگر اعتمادی نباشد، تیمی نیست.» بدون امنیت، بافت زخمِ سازمانی ساخته می‌شود: نوآوری کند می‌شود، مسئله‌ها چرک می‌کنند و بدهی پنهان می‌ماند (pp. 228–229). خود آشوب حس ناامنی می‌دهد، پس رهبر با یکدستی خودش به ثبات تبدیل می‌شود، یعنی به نگرانی‌ها گوش می‌دهد، از اشتباه‌ها یاد می‌گیرد و از کسانی که به چالش می‌کشند تشکر می‌کند (p. 229). امنیت به توانمندی هم نیاز دارد: user story و code review و RFC و retrospective داربست‌اند (p. 229).
 
-### The Lighthouse: Direction, Not Drift
+### فانوس دریایی: جهت، نه رانش
 
-Direction isn't predicting the future; it's choosing a heading — north is "improve reliability," east "rapid feature development" — and knowing which ways you're *not* going. Principles create alignment without constant coordination. Be thoughtfully decisive: gather enough information, communicate, commit long enough to see results, adjust on new information without second-guessing every concern (pp. 229–230).
+جهت یعنی پیش‌بینی آینده نیست؛ یعنی انتخاب یک سمت، که شمال «بهتر کردن reliability» باشد و شرق «توسعه‌ی سریع feature»، و دانستن این‌که به کدام سمت‌ها *نمی‌روید*. اصول بدون هماهنگی دائمی هم‌راستایی می‌سازند. سنجیده قاطع باشید: اطلاعات کافی جمع کنید، اعلام کنید، آن‌قدر پایش بمانید که نتیجه را ببینید، و با اطلاعات تازه تنظیم کنید بی‌آن‌که با هر نگرانی‌ای همه چیز را زیر سؤال ببرید (pp. 229–230).
 
-### The Engine: Process and Execution
+### موتور: process و اجرا
 
-Process should be "just enough to prevent disorder, but not so much that it prevents adaptation": a standup under 15 minutes, a simple Kanban board, reviews that aren't bottlenecks (p. 230). Every process costs time, energy and cognitive load (p. 231):
+مفهوم process باید «فقط به‌اندازه‌ی جلوگیری از بی‌نظمی باشد، ولی نه آن‌قدر که جلوی تطبیق را بگیرد»: standup زیر ۱۵ دقیقه، یک تخته‌ی ساده‌ی Kanban، و reviewهایی که گلوگاه نیستند (p. 230). هر processی وقت و انرژی و بار ذهنی خرج می‌کند (p. 231):
 
-| Stage | Minimal viable process (p. 231) |
+| مرحله | کمینه‌ی process قابل‌استفاده (p. 231) |
 |---|---|
-| Survival mode | Daily check-in and a shared priority list |
-| Stabilizing | Add lightweight planning sessions |
-| Growing | More structured communication patterns |
+| حالت بقا | یک سرکشی روزانه و یک فهرست مشترک اولویت |
+| در حال تثبیت | جلسه‌های برنامه‌ریزی سبک اضافه کنید |
+| در حال رشد | الگوهای ارتباطی ساختارمندتر |
 
-In chaos, "polished work is often irrelevant work": ship what solves 80% of the problem and iterate, but be intentional about the trade-offs and plan to address them (p. 231).
+در آشوب، «کار صیقل‌خورده اغلب کار بی‌ربط است»: چیزی را تحویل بدهید که ۸۰٪ مسئله را حل می‌کند و تکرار کنید، ولی درباره‌ی معامله‌هایش عامدانه باشید و برای رسیدگی به آن‌ها برنامه بریزید (p. 231).
 
-### The Compass: Metrics and Measurement
+> **In practice:** process تیم داده باید سبک باشد: standup کوتاه، یک board ساده، و reviewی که گلوگاه نیست.
+>
+> **Your turn:** merge requestها در تیم به‌طور میانگین سه روز منتظر review می‌مانند. چه کار می‌کنید؟
+>
+> *Answer:* review را گلوگاه دیده و آن را سبک کنید: merge request کوچک‌تر، checkهای خودکار بیشتر در CI، و زمان روزانه برای review. کتاب process را فقط به‌اندازه‌ی جلوگیری از بی‌نظمی می‌خواهد (p. 230).
 
-Don't measure everything; pick metrics for the current challenge — MTTR and change failure rate for reliability, cycle time and deployment frequency for delivery, bug rates and coverage for quality (pp. 231–232). In chaos, metrics swing for reasons unrelated to performance — a vendor outage, an emergency, finally tracking bugs properly — so every metric needs a story: otherwise "numbers cosplaying as truth" (p. 232).
+### قطب‌نما: متریک و اندازه‌گیری
 
-### The Ecosystem: Building Beyond Your Team
+همه چیز را اندازه نگیرید؛ متریک‌ها را برای چالش فعلی بردارید، یعنی MTTR و نرخ خرابی تغییر برای reliability، زمان چرخه و تکرار deployment برای تحویل، و نرخ باگ و پوشش برای کیفیت (pp. 231–232). در آشوب، متریک‌ها به دلیل‌هایی بی‌ربط به عملکرد نوسان می‌کنند، مثل قطعی یک فروشنده یا یک اورژانس یا این‌که بالاخره باگ‌ها را درست ثبت کرده‌اید، پس هر متریکی به یک روایت نیاز دارد؛ وگرنه «عددهایی‌اند که نقش حقیقت را بازی می‌کنند» (p. 232).
 
-RFCs give other teams visibility; documentation serves the support engineer at 2:00 a.m.; metrics build leadership's confidence. Communicate proactively upward — not hiding problems. Vendors and budgets form an extended capability network. Misalignment is expensive in chaos: every hour aligning with product saves days of rework (pp. 232–233).
+> **In practice:** متریک‌های تیم داده را برای چالش فعلی انتخاب کنید، نه همه را با هم.
+>
+> **Your turn:** این فصل incidentهای داده زیاد بوده. کدام دو metric را در Grafana جلوی تیم می‌گذارید؟
+>
+> *Answer:* MTTR برای incidentهای داده و نرخ خرابی تغییر، یعنی deployهایی که داده‌ی غلط ساختند؛ وقتی پایدار شد، سراغ metricهای تحویل بروید. کتاب متریک را بر اساس چالش فعلی انتخاب می‌کند (pp. 231–232).
 
-### The Evolution: From Chaos to Capability
+### زیست‌بوم: ساختن فراتر از تیمتان
 
-Chaos doesn't last: organizations evolve beyond it or fail. Progress is non-linear — two steps forward, one back. Each practice builds lasting capability: the RFC process may grow into architecture review, basic metrics into an insights platform. Skipping to the end state usually fails. Leaders grow too: instincts, networks, reputation (pp. 233–234).
+سندهای RFC به تیم‌های دیگر دید می‌دهند؛ مستندات به کار مهندس پشتیبانی ساعت ۲ بامداد می‌آیند؛ و متریک‌ها اعتماد رهبری را می‌سازند. پیش‌دستانه رو به بالا ارتباط بگیرید و مسئله‌ها را پنهان نکنید. فروشنده‌ها و بودجه شبکه‌ی توانمندی گسترده‌ای می‌سازند. ناهم‌راستایی در آشوب گران است: هر ساعتی که صرف هم‌راستایی با product می‌شود روزها دوباره‌کاری را صرفه‌جویی می‌کند (pp. 232–233).
 
-### The Reality: It’s Harder Than It Looks
+### تکامل: از آشوب تا توانمندی
 
-"Build psychological safety" means hundreds of small actions over months or years. "Set clear direction" means deciding with incomplete information, being wrong and admitting it. "Lightweight processes" means fighting process inflation — saying no to a process that helps one person but slows everyone else. "Meaningful metrics" means resisting measuring what's easy (pp. 234–235). Find outlets: Juan's photography ("film develops faster than organizations do"), James's productivity tools — and there's no shame in walking away (p. 235).
+آشوب ماندگار نیست: سازمان‌ها یا از آن فراتر می‌روند یا شکست می‌خورند. پیشرفت خطی نیست؛ دو قدم جلو و یک قدم عقب. هر رویه توانمندی ماندگاری می‌سازد: process مربوط به RFC می‌تواند به بازبینی معماری رشد کند و متریک‌های پایه به یک platform بینش. پریدن مستقیم به وضعیت نهایی معمولاً شکست می‌خورد. رهبرها هم رشد می‌کنند: حس‌ها، شبکه‌ها، و اعتبار (pp. 233–234).
 
-### The Practice: Making It Real
+### واقعیت: سخت‌تر از آن است که به نظر می‌رسد
+
+«امنیت روانی بسازید» یعنی صدها اقدام کوچک در ماه‌ها یا سال‌ها. «جهت روشن بگذارید» یعنی تصمیم گرفتن با اطلاعات ناقص و اشتباه کردن و پذیرفتنش. «process سبک» یعنی جنگیدن با تورم process، یعنی نه گفتن به processی که به یک نفر کمک می‌کند و بقیه را کند. «متریک معنادار» یعنی مقاومت در برابر اندازه گرفتن چیزی که اندازه‌گیری‌اش آسان است (pp. 234–235). دریچه‌ای برای خودتان پیدا کنید: عکاسی Juan، که «فیلم سریع‌تر از سازمان‌ها ظاهر می‌شود»، و ابزارهای بهره‌وری James؛ و کنار کشیدن هم شرمی ندارد (p. 235).
+
+### رویه: واقعی کردنش
 
 ```mermaid
 flowchart LR
@@ -106,69 +120,69 @@ flowchart LR
   E --> C
 ```
 
-One lasting improvement beats ten superficial ones that evaporate under pressure. Find allies — the senior engineer holding things together (or hire one), a like-minded product manager, operations (pp. 235–236).
+یک بهبود ماندگار از ده بهبود سطحی بهتر است که زیر فشار بخار می‌شوند. هم‌پیمان پیدا کنید: همان مهندس ارشدی که همه چیز را سر پا نگه داشته، یا استخدامش کنید، یک product manager هم‌فکر، و واحد عملیات (pp. 235–236).
 
-### The Future: Beyond Survival
+### آینده: فراتر از بقا
 
-Capabilities built in chaos become superpowers in stability: decision-making with incomplete information becomes agility; shipping iteratively becomes continuous delivery; safety under pressure becomes innovation. "You're not just fighting fires; you're building a fireproof foundation" (p. 236).
+توانمندی‌هایی که در آشوب ساخته می‌شوند در ثبات ابرقدرت می‌شوند: تصمیم‌گیری با اطلاعات ناقص به چابکی تبدیل می‌شود؛ تحویل تکرارشونده به continuous delivery؛ و امنیت زیر فشار به نوآوری. «شما فقط آتش خاموش نمی‌کنید؛ دارید پایه‌ای ضدآتش می‌سازید» (p. 236).
 
-### The Call: Your Turn to Lead
+### دعوت: نوبت شماست که رهبری کنید
 
-No book can tell you exactly what to do; leadership in chaos is judgment, courage and persistence. Chaos is increasingly the norm, so the skill matters. Be present rather than perfect; you don't have to be a hero — leadership lives in small acts repeated consistently (p. 237). Extend safety and a sustainable pace to yourself, build a support network, learn selectively, keep perspective (p. 238).
+هیچ کتابی نمی‌تواند دقیقاً بگوید چه کار کنید؛ رهبری در آشوب قضاوت و شجاعت و پشتکار است. آشوب بیش از پیش به قاعده تبدیل می‌شود، پس این مهارت اهمیت دارد. به‌جای بی‌نقص بودن، حاضر باشید؛ لازم نیست قهرمان باشید، چون رهبری در کارهای کوچکی زندگی می‌کند که پیوسته تکرار می‌شوند (p. 237). امنیت و سرعت پایدار را به خودتان هم تعمیم بدهید، شبکه‌ی پشتیبانی بسازید، گزینشی یاد بگیرید، و چشم‌انداز را نگه دارید (p. 238).
 
-### The End, and the Beginning
+### پایان، و آغاز
 
-Engineering leadership in chaos is "not a problem to be solved but a practice to be developed." Your team needs you to help them find answers and navigate uncertainty — present, consistent, thoughtful and human. Make something better than it was yesterday (pp. 238–239).
+رهبری مهندسی در آشوب «مسئله‌ای برای حل کردن نیست، رویه‌ای است برای پروراندن». تیم شما لازم دارد کمک کنید پاسخ‌ها را پیدا کنند و از دل بلاتکلیفی رد شوند؛ حاضر و یکدست و سنجیده و انسانی. چیزی را از دیروزش بهتر کنید (pp. 238–239).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Deciding now with incomplete information | Momentum | Sometimes wrong — admit and adjust |
-| Waiting for certainty | Comfort | The context changes before you decide |
-| Adding process | Order | Time, energy, cognitive load |
-| "Good enough" and iterate | Speed, relevance | Deliberate debt to track |
-| Changing many things at once | Feels urgent | Overwhelm; nothing sticks |
-| One change at a time | Lasting improvement | Feels slow |
-| Persisting | Progress | Burnout, if it outweighs your health |
+| تصمیم گرفتن همین حالا با اطلاعات ناقص | شتاب | گاهی اشتباه است؛ بپذیرید و تنظیم کنید |
+| انتظار برای قطعیت | راحتی | تا تصمیم بگیرید زمینه عوض شده |
+| اضافه کردن process | نظم | وقت و انرژی و بار ذهنی |
+| «به‌اندازه‌ی کافی خوب» و بعد تکرار | سرعت، ربط داشتن | بدهی عامدانه‌ای که باید پیگیری شود |
+| عوض کردن چند چیز با هم | حس فوریت | غرق‌شدگی؛ هیچ چیز نمی‌ماند |
+| هر بار یک تغییر | بهبود ماندگار | حس کندی |
+| پشتکار | پیشرفت | فرسودگی، اگر از سلامتتان سنگین‌تر شود |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **"In the arena"** (p. 237) echoes Theodore Roosevelt's 1910 "Citizenship in a Republic" speech, often quoted in leadership writing.
-- **Minimal viable process** parallels the Cynefin framework's advice for chaotic domains — act first to establish stability, then sense and respond (Snowden and Boone, *HBR*, 2007).
+- **عبارت «در میدان»** (p. 237) یادآور سخنرانی «Citizenship in a Republic» از Theodore Roosevelt در سال ۱۹۱۰ است که در نوشته‌های رهبری زیاد نقل می‌شود.
+- **کمینه‌ی process قابل‌استفاده** با توصیه‌ی چارچوب Cynefin برای قلمروهای آشوب‌زده هم‌راستاست، یعنی اول عمل کنید تا ثبات برقرار شود و بعد حس کنید و پاسخ بدهید (Snowden و Boone، *HBR*، ۲۰۰۷).
 
-## Connections
+## پیوندها
 
-- **Related chapters:** every earlier chapter — [1. Embracing the Unknown](01-embracing-the-unknown.md), [3. Navigating Chaos](03-navigating-chaos.md) (safety and leadership modes), [5. Setting Direction](05-setting-direction.md), [6. Shipping Products and Code](06-shipping-products-and-code-in-chaotic-environments.md), [9. Collaborative Technical Practices](09-collaborative-technical-practices-and-decision-making.md), [10. Metrics That Matter](10-metrics-that-matter-for-engineering-teams.md).
-- **Other books:** *The Manager's Path* ends with a similar call to manage yourself first.
+- **فصل‌های مرتبط:** همه‌ی فصل‌های پیشین، یعنی [فصل ۱: پذیرفتن ناشناخته](01-embracing-the-unknown.md)، [فصل ۳: راه بردن در آشوب](03-navigating-chaos.md) که امنیت و حالت‌های رهبری را دارد، [فصل ۵: تعیین جهت](05-setting-direction.md)، [فصل ۶: تحویل محصول و کد](06-shipping-products-and-code-in-chaotic-environments.md)، [فصل ۹: کارهای فنی مشارکتی](09-collaborative-technical-practices-and-decision-making.md)، و [فصل ۱۰: متریک‌هایی که مهم‌اند](10-metrics-that-matter-for-engineering-teams.md).
+- **کتاب‌های دیگر:** *The Manager's Path* هم با دعوتی مشابه تمام می‌شود که اول خودتان را مدیریت کنید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **Why is safety alone not enough?**
+1. **چرا امنیت به‌تنهایی کافی نیست؟**
 
-   *Answer:* "A safe team that can't execute is just a support group" — it also needs capability and cohesion, built with practices such as user stories, reviews, RFCs and retrospectives (p. 229).
+   *Answer:* «تیم امنی که نمی‌تواند اجرا کند فقط یک گروه هم‌دردی است»؛ به توانمندی و انسجام هم نیاز دارد که با رویه‌هایی مثل user story و review و RFC و retrospective ساخته می‌شوند (p. 229).
 
-2. **What does direction mean when you can't predict the future?**
+2. **وقتی نمی‌توانید آینده را پیش‌بینی کنید، جهت یعنی چه؟**
 
-   *Answer:* Choosing a general heading — and which ways you're not going — to create coherence in the present (pp. 229–230).
+   *Answer:* انتخاب یک سمت کلی، و این‌که به کدام سمت‌ها نمی‌روید، تا همین حالا انسجام ساخته شود (pp. 229–230).
 
-3. **What is the minimal viable process in pure survival mode?**
-   - [x] A daily check-in and a shared list of priorities
-   - [ ] Sprint planning, grooming, pointing, demos and architecture reviews
-   - [ ] No process at all
+3. **کمینه‌ی process قابل‌استفاده در حالت بقای محض چیست؟**
+   - [x] یک سرکشی روزانه و یک فهرست مشترک اولویت
+   - [ ] برنامه‌ریزی sprint و مرتب‌سازی و امتیازدهی و دمو و بازبینی معماری
+   - [ ] اصلاً هیچ processی
 
    *Answer:* p. 231.
 
-4. **Why does every metric need a story in chaos?**
+4. **چرا در آشوب هر متریکی به یک روایت نیاز دارد؟**
 
-   *Answer:* Metrics swing for reasons unrelated to team performance — vendor outages, emergencies, new tracking — so raw numbers mislead (p. 232).
+   *Answer:* متریک‌ها به دلیل‌هایی بی‌ربط به عملکرد تیم نوسان می‌کنند، مثل قطعی فروشنده و اورژانس و ثبت تازه، پس عدد خام گمراه می‌کند (p. 232).
 
-5. **How do the authors recommend implementing the book?**
+5. **نویسنده‌ها برای پیاده کردن کتاب چه پیشنهاد می‌دهند؟**
 
-   *Answer:* Take stock, pick one thing, commit to it for at least a month, observe and adjust, then add one more (pp. 235–236).
+   *Answer:* وضعیت را بسنجید، یک چیز را بردارید، دست‌کم یک ماه پایش بمانید، نتیجه را ببینید و تنظیم کنید، و بعد یکی دیگر اضافه کنید (pp. 235–236).
 
-6. **What happens to capabilities built in chaos once things stabilize?**
+6. **وقتی اوضاع باثبات شود، سر توانمندی‌هایی که در آشوب ساخته شده‌اند چه می‌آید؟**
 
-   *Answer:* They become superpowers — agility, continuous delivery, innovative culture (p. 236).
+   *Answer:* به ابرقدرت تبدیل می‌شوند، یعنی چابکی و continuous delivery و فرهنگ نوآور (p. 236).

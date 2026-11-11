@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Metrics Picker</title>
-<meta name="description" content="Translate stakeholder questions into the questions behind them, then build a five-or-six-metric set from the four DORA metrics plus the context metrics for your biggest pain point. Illustrates Engineering Leadership: The Hard Parts, Chapter 10.">
+<title>انتخاب‌گر متریک</title>
+<meta name="description" content="پرسش‌های ذی‌نفع‌ها را به پرسش پشتشان ترجمه کنید و بعد مجموعه‌ای پنج شش‌تایی از چهار متریک DORA به‌علاوه‌ی متریک‌های زمینه‌ای بزرگ‌ترین نقطه‌ی دردتان بسازید. برای فصل ۱۰ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>.qrow { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
   .qrow .badge { grid-column: 1 / -1; justify-self: start; white-space: normal; } .qrow select { max-width: 16em; }
@@ -13,60 +13,60 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
-      <a href="../chapters/10-metrics-that-matter-for-engineering-teams.html">Chapter 10</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Metrics picker</span>
+      <a href="../chapters/10-metrics-that-matter-for-engineering-teams.html">فصل ۱۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">انتخاب‌گر متریک</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 10 · Metrics That Matter for Engineering Teams</div>
-  <h1>Metrics picker</h1>
-  <p class="lede">Treat metrics as a product: start from the question your customers are really asking, not the one they typed. Then build a <strong>small</strong> set — the four DORA metrics plus one or two for your biggest pain point.</p>
-  <p class="source-note">Illustrates “The Trap of Want Versus Need” (pp. 209–211) and “Choosing the Right Metrics for Your Context” (pp. 212–214). The questions, their underlying meanings, the DORA metrics, the context metrics and the rollout steps are the book’s; the exercise is the vault’s.</p>
+  <div class="eyebrow">فصل ۱۰ · متریک‌هایی که برای تیم‌های مهندسی مهم‌اند</div>
+  <h1>انتخاب‌گر متریک</h1>
+  <p class="lede">متریک را مثل یک محصول ببینید: از پرسشی شروع کنید که مشتری‌هایتان واقعاً می‌پرسند، نه آن چیزی که تایپ کرده‌اند. بعد مجموعه‌ای <strong>کوچک</strong> بسازید: چهار متریک DORA به‌علاوه‌ی یکی دوتا برای بزرگ‌ترین نقطه‌ی دردتان.</p>
+  <p class="source-note">این شبیه‌سازی «دام خواستن در برابر نیاز داشتن» (صص. ۲۰۹–۲۱۱) و «انتخاب متریک درست برای زمینه‌ی خودتان» (صص. ۲۱۲–۲۱۴) را نشان می‌دهد. پرسش‌ها و معنای زیرینشان و متریک‌های DORA و متریک‌های زمینه‌ای و قدم‌های راه‌اندازی از خود کتاب‌اند؛ خود تمرین مال vault است.</p>
 
   <div class="tabs" id="tabs">
-    <div role="tablist" aria-label="Exercise">
-      <button role="tab" id="t1" aria-controls="p1" aria-selected="true" type="button">1 · The question behind the question</button>
-      <button role="tab" id="t2" aria-controls="p2" aria-selected="false" type="button">2 · Build a metric set</button>
+    <div role="tablist" aria-label="تمرین">
+      <button role="tab" id="t1" aria-controls="p1" aria-selected="true" type="button">۱ · پرسش پشت پرسش</button>
+      <button role="tab" id="t2" aria-controls="p2" aria-selected="false" type="button">۲ · ساختن مجموعه‌ی متریک</button>
     </div>
     <div role="tabpanel" id="p1" aria-labelledby="t1"></div>
     <div role="tabpanel" id="p2" aria-labelledby="t2" hidden>
       <div class="stack" style="margin-top:12px">
         <div id="pain"></div>
-        <div class="panel"><p class="panel-title" id="settitle">Your metric set</p><ol class="mset" id="set"></ol></div>
-        <div class="panel"><p class="panel-title">Rollout</p>
-          <label class="check"><input type="checkbox" id="r1"> Start small: the four DORA metrics from existing Git, CI/CD and monitoring tools</label>
-          <label class="check"><input type="checkbox" id="r2"> Collect four to six weeks of baseline before changing anything</label>
-          <label class="check"><input type="checkbox" id="r3"> Once DORA is stable, add the one or two context metrics</label>
-          <label class="check"><input type="checkbox" id="r4"> Each quarter, keep the metrics that drive decisions and retire the rest</label>
+        <div class="panel"><p class="panel-title" id="settitle">مجموعه‌ی متریک شما</p><ol class="mset" id="set"></ol></div>
+        <div class="panel"><p class="panel-title">راه‌اندازی</p>
+          <label class="check"><input type="checkbox" id="r1"> کوچک شروع کنید: چهار متریک DORA از همان ابزارهای موجود git و CI/CD و monitoring</label>
+          <label class="check"><input type="checkbox" id="r2"> پیش از عوض کردن چیزی، چهار تا شش هفته خط پایه جمع کنید</label>
+          <label class="check"><input type="checkbox" id="r3"> وقتی DORA باثبات شد، آن یکی دو متریک زمینه‌ای را اضافه کنید</label>
+          <label class="check"><input type="checkbox" id="r4"> هر فصل، متریک‌هایی را که به تصمیم می‌رسند نگه دارید و بقیه را بازنشسته کنید</label>
           <div id="roll" class="callout" aria-live="polite" style="margin-top:8px"></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="panel" style="margin-top:12px"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+  <div class="panel" style="margin-top:12px"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li>Questions like “who commits the most?” aren’t stupid; they are attempts to quantify an unfamiliar domain. Ask what decision the answer would change.</li>
-    <li>Many questions boil down to “Are we okay?” — will we meet objectives, are we getting value for money, is quality good enough?</li>
-    <li>DORA balances speed (deployment frequency, lead time) with stability (change failure rate, time to restore). Five or six metrics is enough to act on.</li>
-    <li>Measure teams, not individuals, and tell people what you are <em>not</em> measuring, so invisible work isn’t crowded out.</li>
+    <li>پرسش‌هایی مثل «چه کسی بیشترین commit را می‌زند؟» احمقانه نیستند؛ تلاشی برای کمی کردن حوزه‌ای ناآشنایند. بپرسید پاسخ چه تصمیمی را عوض می‌کند.</li>
+    <li>ته خیلی از پرسش‌ها همین است: «حالمان خوب است؟»، یعنی به هدف‌ها می‌رسیم، پولمان ارزش دارد، و کیفیت به‌اندازه‌ی کافی خوب است؟</li>
+    <li>مجموعه‌ی DORA بین سرعت، یعنی تکرار deployment و زمان رسیدن تغییر، و ثبات، یعنی نرخ خرابی تغییر و زمان بازیابی، تعادل برقرار می‌کند. پنج شش متریک برای عمل کردن کافی است.</li>
+    <li>تیم را اندازه بگیرید نه افراد را، و به آدم‌ها بگویید چه چیزی را <em>اندازه نمی‌گیرید</em>، تا کار نامرئی کنار زده نشود.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهمتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/10-metrics-that-matter-for-engineering-teams.html"><small>Lesson</small>10. Metrics That Matter for Engineering Teams</a></li>
+    <li><a href="../chapters/10-metrics-that-matter-for-engineering-teams.html"><small>درس</small>فصل ۱۰: متریک‌هایی که برای تیم‌های مهندسی مهم‌اند</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -75,53 +75,53 @@
   "use strict";
 
   var log = Kit.log(document.getElementById("log"));
-  var U = { pred: "Is delivery predictable, and where are the bottlenecks?", conf: "Can I be confident in delivery and the value we provide?", none: "Nothing — no decision would change; look at deployment frequency and change failure rate instead", ok: "Are we okay — will we meet our objectives?" };
+  var U = { pred: "تحویل پیش‌بینی‌پذیر است و گلوگاه‌ها کجایند؟", conf: "می‌توانم به تحویل و ارزشی که می‌دهیم مطمئن باشم؟", none: "هیچ؛ هیچ تصمیمی عوض نمی‌شود، پس به‌جایش به تکرار deployment و نرخ خرابی تغییر نگاه کنید", ok: "حالمان خوب است؛ به هدف‌هایمان می‌رسیم؟" };
   var Qs = [
-    ["“Which team is the most productive?”", "pred", "p. 210"],
-    ["“How many hours do the engineers work every day?”", "conf", "pp. 210–211"],
-    ["“Who committed the most code this month?”", "none", "April asks what decision it would change; the VP admits none (p. 210)"],
-    ["“How’s the engineering team doing?”", "ok", "p. 211"]
+    ["«کدام تیم بهره‌ورترین است؟»", "pred", "ص. ۲۱۰"],
+    ["«مهندس‌ها هر روز چند ساعت کار می‌کنند؟»", "conf", "صص. ۲۱۰–۲۱۱"],
+    ["«این ماه چه کسی بیشترین کد را commit کرده؟»", "none", "April می‌پرسد چه تصمیمی را عوض می‌کند و معاون می‌پذیرد که هیچ (ص. ۲۱۰)"],
+    ["«تیم مهندسی چطور است؟»", "ok", "ص. ۲۱۱"]
   ];
   var p1 = document.getElementById("p1");
-  p1.appendChild(Kit.el("p", { style: "margin-top:12px" }, "What is each stakeholder really asking?"));
+  p1.appendChild(Kit.el("p", { style: "margin-top:12px" }, "هر ذی‌نفع واقعاً چه می‌پرسد؟"));
   Qs.forEach(function (q, i) {
-    var id = "q" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "not answered");
-    sel.appendChild(Kit.el("option", { value: "" }, "Choose…")); Object.keys(U).forEach(function (k) { sel.appendChild(Kit.el("option", { value: k }, U[k])); });
+    var id = "q" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "پاسخ داده نشده");
+    sel.appendChild(Kit.el("option", { value: "" }, "انتخاب کنید…")); Object.keys(U).forEach(function (k) { sel.appendChild(Kit.el("option", { value: k }, U[k])); });
     sel.addEventListener("change", function () {
       if (!sel.value) return; var ok = sel.value === q[1];
-      b.className = "badge " + (ok ? "ok" : "warn"); b.textContent = (ok ? "✓ " : "The book’s reading: " + U[q[1]] + " ") + "(" + q[2] + ")";
-      log.add(q[0] + (ok ? " — matches the book" : " — the book reads it differently"), ok ? "ok" : "warn");
+      b.className = "badge " + (ok ? "ok" : "warn"); b.textContent = (ok ? "✓ " : "خوانش کتاب: " + U[q[1]] + " ") + "(" + q[2] + ")";
+      log.add(q[0] + (ok ? " — با کتاب می‌خواند" : " — کتاب جور دیگری می‌خواندش"), ok ? "ok" : "warn");
     });
     p1.appendChild(Kit.el("div", { class: "qrow" }, Kit.el("label", { for: id }, q[0]), sel, b));
   });
-  var DORA = ["Deployment frequency — how often you deploy to production", "Lead time for changes — commit to running in production", "Change failure rate — deployments needing immediate fixes", "Time to restore service — how quickly you recover from incidents"];
+  var DORA = ["تکرار deployment: هر چند وقت یک‌بار به production استقرار می‌دهید", "زمان رسیدن تغییر: از commit تا اجرا در production", "نرخ خرابی تغییر: استقرارهایی که فوری رفع لازم دارند", "زمان بازیابی سرویس: چقدر سریع از حادثه برمی‌گردید"];
   var P = {
-    rel: ["Reliability", ["Production incident volume by severity", "Mean time between failures (MTBF)"]],
-    pred: ["Delivery predictability", ["Feature cycle time (idea to production)", "Sprint goal achievement rate"]],
-    qual: ["Quality", ["Bug escape rate (production versus preproduction)", "Testing coverage for critical paths"]],
-    health: ["Team health", ["Developer satisfaction surveys (quarterly)", "On-call load distribution"]]
+    rel: ["reliability", ["حجم حادثه‌های production به تفکیک شدت", "میانگین زمان بین خرابی‌ها، یعنی MTBF"]],
+    pred: ["پیش‌بینی‌پذیری تحویل", ["زمان چرخه‌ی feature، از ایده تا production", "نرخ رسیدن به هدف sprint"]],
+    qual: ["کیفیت", ["نرخ فرار باگ، یعنی production در برابر پیش از آن", "پوشش تست مسیرهای حیاتی"]],
+    health: ["سلامت تیم", ["نظرسنجی فصلی رضایت توسعه‌دهنده", "توزیع بار on-call"]]
   };
   function draw(k) {
     var ol = Kit.clear(document.getElementById("set"));
     DORA.forEach(function (d) { ol.appendChild(Kit.el("li", null, d)); });
-    P[k][1].forEach(function (d) { ol.appendChild(Kit.el("li", { class: "ctx" }, d + " (context)")); });
-    document.getElementById("settitle").textContent = "Your metric set — DORA plus " + P[k][0].toLowerCase() + " (6 metrics)";
+    P[k][1].forEach(function (d) { ol.appendChild(Kit.el("li", { class: "ctx" }, d + " (زمینه‌ای)")); });
+    document.getElementById("settitle").textContent = "مجموعه‌ی متریک شما: DORA به‌علاوه‌ی " + P[k][0] + "، یعنی ۶ متریک";
   }
-  document.getElementById("pain").appendChild(Kit.segmented({ label: "Biggest current pain point", value: "rel", options: Object.keys(P).map(function (k) { return { value: k, label: P[k][0] }; }), onChange: function (k) { draw(k); log.add("Pain point: " + P[k][0], "muted"); } }).element);
+  document.getElementById("pain").appendChild(Kit.segmented({ label: "بزرگ‌ترین نقطه‌ی درد فعلی", value: "rel", options: Object.keys(P).map(function (k) { return { value: k, label: P[k][0] }; }), onChange: function (k) { draw(k); log.add("نقطه‌ی درد: " + P[k][0], "muted"); } }).element);
   draw("rel");
   function roll() {
     var c = ["r1", "r2", "r3", "r4"].map(function (id) { return document.getElementById(id).checked; }), n = c.filter(Boolean).length, r = document.getElementById("roll");
-    if (c[2] && !(c[0] && c[1])) { r.className = "callout warn"; r.textContent = "Context metrics come after DORA is in place and you have a four-to-six-week baseline."; }
-    else if (n === 4) { r.className = "callout ok"; r.textContent = "That is the book’s rollout. Remember: the goal is balance across all of them, not maximizing one."; }
-    else { r.className = "callout"; r.textContent = n + " of 4 steps planned."; }
+    if (c[2] && !(c[0] && c[1])) { r.className = "callout warn"; r.textContent = "متریک‌های زمینه‌ای بعد از جا افتادن DORA و داشتن خط پایه‌ی چهار تا شش هفته‌ای می‌آیند."; }
+    else if (n === 4) { r.className = "callout ok"; r.textContent = "همین راه‌اندازی کتاب است. یادتان باشد هدف تعادل بین همه‌شان است، نه بیشینه کردن یکی."; }
+    else { r.className = "callout"; r.textContent = n + " قدم از ۴ قدم برنامه‌ریزی شده."; }
   }
-  ["r1", "r2", "r3", "r4"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { roll(); if (e.target.checked) log.add("Planned: " + e.target.parentNode.textContent.trim(), "muted"); }); });
+  ["r1", "r2", "r3", "r4"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { roll(); if (e.target.checked) log.add("برنامه‌ریزی شد: " + e.target.parentNode.textContent.trim(), "muted"); }); });
   roll();
   Kit.tabs(document.getElementById("tabs"));
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Which is a DORA metric?", options: ["Lines of code", "Story points per sprint", "Change failure rate"], answer: 2, explain: "p. 212." },
-    { q: "Delivery predictability is your biggest pain point. Which context metrics does the book suggest?", options: ["Feature cycle time and sprint goal achievement rate", "MTBF and incident volume", "Developer satisfaction and on-call load"], answer: 0, explain: "p. 213." },
-    { q: "How long should you collect baseline data before making changes?", options: ["One day", "Four to six weeks", "A year"], answer: 1, explain: "p. 213." }
+    { q: "کدام‌یک متریک DORA است؟", options: ["خط‌های کد", "story point در هر sprint", "نرخ خرابی تغییر"], answer: 2, explain: "ص. ۲۱۲." },
+    { q: "بزرگ‌ترین نقطه‌ی درد شما پیش‌بینی‌پذیری تحویل است. کتاب کدام متریک‌های زمینه‌ای را پیشنهاد می‌دهد؟", options: ["زمان چرخه‌ی feature و نرخ رسیدن به هدف sprint", "میانگین زمان بین خرابی‌ها و حجم حادثه", "رضایت توسعه‌دهنده و بار on-call"], answer: 0, explain: "ص. ۲۱۳." },
+    { q: "پیش از تغییر دادن چیزی چقدر باید داده‌ی خط پایه جمع کنید؟", options: ["یک روز", "چهار تا شش هفته", "یک سال"], answer: 1, explain: "ص. ۲۱۳." }
   ]);
 
 })();

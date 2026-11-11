@@ -3,253 +3,267 @@ book: engineering-leadership-the-hard-parts
 chapter: 8
 title: "Technical Principles and Strategy"
 pages: "147–172"
+translated_title: "اصول و استراتژی فنی"
+lang: fa
 ---
 
-# 8. Technical Principles and Strategy
+# فصل ۸: اصول و استراتژی فنی
 
-[← 7. Budgeting, Costs, and Vendors](07-budgeting-costs-and-vendors.md) · [Book](../README.md) · [9. Collaborative Technical Practices →](09-collaborative-technical-practices-and-decision-making.md)
+[فصل ۷: بودجه، هزینه و فروشنده‌ها →](07-budgeting-costs-and-vendors.md) · [کتاب](../README.md) · [فصل ۹: کارهای فنی مشارکتی ←](09-collaborative-technical-practices-and-decision-making.md)
 
-## Summary
+## خلاصه
 
-Technical strategy sounds like a 200-slide deck, but it just asks what your technology, principles, architecture and capabilities need to look like to meet business goals, and how to get there. It belongs in your roadmap and must flex in chaotic environments. The chapter builds it in layers: an inventory of the current landscape, human and technical; a short set of team-made technical principles; scaling without overengineering by choosing boring technology and spending innovation tokens carefully; a strategy document with granularity that fades over time; and implementation that allocates people fairly, manages risk, communicates the vision and leads by example (pp. 147–171).
+استراتژی فنی مثل یک اسلاید ۲۰۰ صفحه‌ای به نظر می‌رسد، ولی فقط می‌پرسد فناوری و اصول و معماری و توانمندی‌هایتان برای رسیدن به هدف‌های کسب‌وکار باید چه شکلی باشند و چطور به آن‌جا برسید. جایش در نقشه‌ی راه شماست و در محیط آشوب‌زده باید خم شود. این فصل آن را لایه‌لایه می‌سازد: سیاهه‌ای از چشم‌انداز فعلی، هم انسانی و هم فنی؛ مجموعه‌ای کوتاه از اصول فنیِ ساخته‌ی تیم؛ مقیاس گرفتن بدون مهندسی بیش از حد با انتخاب فناوری کسل‌کننده و خرج محتاطانه‌ی token نوآوری؛ سندی از استراتژی که جزئیاتش با گذشت زمان کم می‌شود؛ و اجرایی که آدم‌ها را منصفانه تخصیص می‌دهد، ریسک را مدیریت می‌کند، چشم‌انداز را اعلام می‌کند و با عمل الگو می‌شود (pp. 147–171).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Strategy aligns tech choices with business goals** — including non-functional needs such as security, compliance and availability, which chaotic organizations either ignore or overcompensate for (p. 148).
-- **Start with an inventory:** a rough architecture diagram, tools, owners, single points of failure and gaps — plus the people and processes behind them (pp. 149–153).
-- **Technical principles are a compass:** they stop you making things worse and guide everyday decisions such as code review; build them with the team (pp. 153–158).
-- **Scale on evidence, not projections;** build only what differentiates you (p. 158).
-- **Choose boring technology:** every non-boring choice spends one of roughly three innovation tokens (pp. 160–162).
-- **Plan with fading granularity** — detailed for the next quarter, directional for the last — and review monthly (p. 163).
-- **The strategy document is living,** and is only worth something when leaders model it (pp. 164–171).
+- **استراتژی انتخاب‌های فنی را با هدف‌های کسب‌وکار هم‌راستا می‌کند**، از جمله نیازهای غیرکارکردی مثل امنیت و انطباق و در دسترس بودن، که سازمان‌های آشوب‌زده یا نادیده‌شان می‌گیرند یا بیش از حد رویشان می‌روند (p. 148).
+- **با یک سیاهه شروع کنید:** نمودار درشتی از معماری، ابزارها، صاحب‌ها، نقطه‌های تکِ شکست و شکاف‌ها، به‌علاوه‌ی آدم‌ها و processهای پشتشان (pp. 149–153).
+- **اصول فنی قطب‌نمایند:** جلوی بدتر کردن اوضاع را می‌گیرند و تصمیم‌های روزمره مثل code review را هدایت می‌کنند؛ با تیم بسازیدشان (pp. 153–158).
+- **بر پایه‌ی شواهد مقیاس بگیرید، نه پیش‌بینی؛** فقط چیزی را بسازید که متمایزتان می‌کند (p. 158).
+- **فناوری کسل‌کننده را انتخاب کنید:** هر انتخاب غیرکسل‌کننده یکی از آن حدوداً سه token نوآوری را خرج می‌کند (pp. 160–162).
+- **با جزئیات رو به کاهش برنامه بریزید**، یعنی باجزئیات برای سه‌ماهه‌ی اول و جهت‌دار برای آخری، و ماهانه بازبینی کنید (p. 163).
+- **سند استراتژی زنده است** و فقط وقتی ارزشی دارد که رهبرها خودشان الگویش باشند (pp. 164–171).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Why Does Technical Strategy Matter? — p. 148
-- Building a Foundation — p. 149
-- You Need More than Technical Widgets — p. 151
-- Establishing Technical Principles — p. 153
-  - Example Technical Principles — p. 154
-  - Crafting Technical Principles Workshop — p. 156
-  - Living Your Principles — p. 158
-- Scaling Without Overengineering — p. 158
-  - Choose Boring Technology — p. 160
-- Developing Your Technical Strategy — p. 162
-  - Choosing Granularity — p. 163
-  - Balancing Flexibility with Direction — p. 164
-  - Collaborative Development — p. 164
-  - Elements of a Technical Strategy Document — p. 164
-  - The Living Document Approach — p. 167
-  - Making Technical Strategies Real — p. 167
-- Conclusion: Enabling Execution with Technical Strategy — p. 171
+- چرا استراتژی فنی اهمیت دارد؟ — p. 148
+- ساختن یک پایه — p. 149
+- فقط قطعه‌های فنی کافی نیستند — p. 151
+- برقرار کردن اصول فنی — p. 153
+  - نمونه‌هایی از اصول فنی — p. 154
+  - کارگاه ساختن اصول فنی — p. 156
+  - زندگی کردن با اصولتان — p. 158
+- مقیاس گرفتن بدون مهندسی بیش از حد — p. 158
+  - فناوری کسل‌کننده را انتخاب کنید — p. 160
+- پروراندن استراتژی فنی‌تان — p. 162
+  - انتخاب سطح جزئیات — p. 163
+  - تعادل انعطاف و جهت — p. 164
+  - پروراندن مشارکتی — p. 164
+  - اجزای سند استراتژی فنی — p. 164
+  - رویکرد سند زنده — p. 167
+  - واقعی کردن استراتژی فنی — p. 167
+- جمع‌بندی: ممکن کردن اجرا با استراتژی فنی — p. 171
 
-## Notes
+## یادداشت‌ها
 
-Technical strategy is "the comprehensive plan that aligns technology decisions, architecture choices, and capability development with business objectives." It is part roadmap, part blueprint — architecture document plus a register of tools and their selection criteria — and it underpins plans to add people and skills (p. 147).
+استراتژی فنی «برنامه‌ی جامعی است که تصمیم‌های فناوری و انتخاب‌های معماری و پروراندن توانمندی را با هدف‌های کسب‌وکار هم‌راستا می‌کند». بخشی نقشه‌ی راه است و بخشی نقشه‌ی ساختمان، یعنی سند معماری به‌علاوه‌ی فهرستی از ابزارها و معیار انتخابشان، و پایه‌ی برنامه‌ی افزودن آدم و مهارت است (p. 147).
 
-### Why Does Technical Strategy Matter?
+### چرا استراتژی فنی اهمیت دارد؟
 
-- It keeps every technical decision — from architecture down to "Which JavaScript framework should we use this week?" — aligned with what the company is trying to achieve (p. 148).
-- Rigid plans go stale fast; strategy must be flexible and iterative, balancing speed against flailing (p. 148).
-- **Non-functional needs belong in it:** GDPR if you have EU customers, SOC 2 if customers expect it, two cloud regions if you've promised uptime. Document today's needs and avoid premature optimization (p. 148).
-- **Product strategy says what and why; technical strategy says how.** In early companies they're inseparable; later they diverge but must stay aligned (p. 148).
+- هر تصمیم فنی را، از معماری تا «این هفته کدام framework جاوااسکریپتی؟»، با چیزی که شرکت دنبالش است هم‌راستا نگه می‌دارد (p. 148).
+- برنامه‌های خشک زود کهنه می‌شوند؛ استراتژی باید انعطاف‌پذیر و تکرارشونده باشد و بین سرعت و دست‌وپا زدن تعادل برقرار کند (p. 148).
+- **نیازهای غیرکارکردی جایشان همین‌جاست:** مقررات GDPR اگر مشتری اروپایی دارید، گواهی SOC 2 اگر مشتری‌ها انتظارش را دارند، و دو منطقه‌ی cloud اگر uptime قول داده‌اید. نیاز امروز را مستند کنید و از بهینه‌سازی زودهنگام پرهیز کنید (p. 148).
+- **استراتژی محصول می‌گوید چه و چرا؛ استراتژی فنی می‌گوید چطور.** در شرکت‌های اولیه این دو جدایی‌ناپذیرند؛ بعدتر از هم فاصله می‌گیرند ولی باید هم‌راستا بمانند (p. 148).
 
-### Building a Foundation
+### ساختن یک پایه
 
-You must know where you stand. The inventory rarely starts as complete documentation — more likely a list of applications, languages, frameworks and tools that you evolve into something more mature (p. 149).
+باید بدانید کجا ایستاده‌اید. سیاهه به‌ندرت از مستندات کامل شروع می‌شود؛ محتمل‌تر این است که فهرستی از اپلیکیشن‌ها و زبان‌ها و frameworkها و ابزارها باشد که به چیزی پخته‌تر تکاملش می‌دهید (p. 149).
 
-![Architecture sketch: GitHub, GitHub Actions and a GCP registry deploy into a GCP cloud containing React admin and customer apps, a NodeJS backend on Kubernetes, Google pub/sub to a vendor, Redis and Postgres, with Looker reporting and observability tools PagerDuty, Sentry, DataDog and Mixpanel alongside](../figures/08-01.png)
+![طرح معماری: مخزن GitHub و GitHub Actions و یک registry در GCP که به داخل یک cloud در GCP استقرار می‌دهند، شامل اپلیکیشن‌های React برای مدیر و مشتری، یک backend با NodeJS روی Kubernetes، سرویس pub/sub گوگل به سمت یک فروشنده، و Redis و Postgres، در کنار گزارش‌گیری Looker و ابزارهای observability یعنی PagerDuty و Sentry و DataDog و Mixpanel](../figures/08-01.png)
 
-*Figure 8-1 (p. 149): James's first-day sketch of a startup's systems, drawn from conversations with the team — not rocket science; boxes, arrows and the tools around them are enough to start.*
+*Figure 8-1 (p. 149): طرحی که James در روز اولش از سیستم‌های یک استارتاپ کشید، از دل گفت‌وگو با تیم؛ کار سختی نیست و کادر و پیکان و ابزارهای دور و برش برای شروع کافی‌اند.*
 
-By the end of his first week James had annotated the diagram with more workflows, documented most other tools and gaps, found single points of failure, matched systems to owners (Rae for the backend, Jeff for the React frontend, Jess for CI/CD), noted weaknesses such as backend test coverage below 50%, checked for documentation and procedures (not much), assessed security and compliance, and started to formulate what to tackle first (p. 150).
+تا پایان هفته‌ی اول، James نمودار را با گردش‌کارهای بیشتر حاشیه‌نویسی کرده بود، بیشتر ابزارها و شکاف‌های دیگر را مستند کرده بود، نقطه‌های تکِ شکست را پیدا کرده بود، سیستم‌ها را به صاحب‌هایشان وصل کرده بود، یعنی Rae برای backend و Jeff برای frontend با React و Jess برای CI/CD، ضعف‌هایی مثل پوشش تست backend زیر ۵۰٪ را یادداشت کرده بود، دنبال مستندات و رویه‌ها گشته بود که چیز زیادی نبود، امنیت و انطباق را سنجیده بود و شروع کرده بود به صورت‌بندی این‌که اول سراغ چه چیزی برود (p. 150).
 
-### You Need More than Technical Widgets
+### فقط قطعه‌های فنی کافی نیستند
 
-Strategies are implemented and operated by people, so understand team expertise, workflows and dependencies too: "The most brilliant technical strategy in the world that your team can't execute" is a useless artifact (p. 151).
+استراتژی را آدم‌ها پیاده و اجرا می‌کنند، پس تخصص تیم و گردش‌کارها و وابستگی‌ها را هم بفهمید: «درخشان‌ترین استراتژی فنی دنیا که تیمتان نتواند اجرایش کند» سندی بی‌فایده است (p. 151).
 
-![Mind map titled CTO / VP of Engineering: the first 90 Days, with four branches — Company, Product, Humans and Technical — each splitting into topics such as recruiting, costs, planning, developer experience, ops, testing, data, incidents and security](../figures/08-02.png)
+![نقشه‌ی ذهنی با عنوان CTO یا VP of Engineering و ۹۰ روز اول، با چهار شاخه، یعنی شرکت و محصول و انسان‌ها و فنی، که هر کدام به موضوع‌هایی مثل استخدام و هزینه و برنامه‌ریزی و تجربه‌ی توسعه‌دهنده و عملیات و تست و داده و حادثه و امنیت می‌شکنند](../figures/08-02.png)
 
-*Figure 8-2 (p. 152): James's checklist of what to ask about in a new organization, across four domains — company, product, humans and technical. Skim each item and decide: fine, needs work, or missing (and should that worry me?).*
+*Figure 8-2 (p. 152): فهرست وارسی James از چیزهایی که در سازمانی تازه باید درباره‌شان پرسید، در چهار حوزه، یعنی شرکت و محصول و انسان‌ها و فنی. هر قلم را سرسری نگاه کنید و تصمیم بگیرید: خوب است، کار دارد، یا اصلاً نیست و آیا باید نگرانم کند.*
 
-For each item, reach one of three conclusions: no action needed; needs work (decide what and when); or nothing's there — should that worry me? Then prioritize what's broken (p. 153).
+برای هر قلم به یکی از سه نتیجه برسید: کاری لازم نیست؛ کار دارد، که باید بگویید چه کاری و کِی؛ یا هیچ چیزی نیست و باید بپرسید این باید نگرانم کند؟ بعد چیزهای خراب را اولویت بدهید (p. 153).
 
-### Establishing Technical Principles
+### برقرار کردن اصول فنی
 
-The best principles are clear, concise, jargon-free, **forward-looking and aspirational**, and specific enough to guide everyday decisions while flexible enough not to block innovation — otherwise the team bypasses them (p. 153). Even when much of the environment violates them, principles have a two-fold function (pp. 153–154):
+بهترین اصول روشن و فشرده و بدون اصطلاح تخصصی‌اند، **رو به جلو و آرمانی‌اند**، و آن‌قدر مشخص‌اند که تصمیم روزمره را هدایت کنند و آن‌قدر منعطف‌اند که جلوی نوآوری را نگیرند؛ وگرنه تیم دورشان می‌زند (p. 153). حتی وقتی بخش زیادی از محیط آن‌ها را نقض می‌کند، اصول دو کار می‌کنند (pp. 153–154):
 
-1. **They stop you making things worse** — a compass against throwing good money after bad.
-2. **They guide decisions throughout the lifecycle** — the best ones are referenced when reviewing a pull request, a product design or a new technology.
+۱. **جلوی بدتر کردن اوضاع را می‌گیرند**؛ قطب‌نمایی در برابر ریختن پول خوب پشت پول بد.
+۲. **در کل چرخه‌ی عمر تصمیم‌ها را هدایت می‌کنند**؛ بهترین‌هایشان آن‌هایی‌اند که سر review یک pull request یا طراحی یک محصول یا انتخاب فناوری تازه به آن‌ها ارجاع می‌دهند.
 
-#### Example Technical Principles
+#### نمونه‌هایی از اصول فنی
 
-Fourteen examples; each supports business goals by reducing costs, raising customer satisfaction, or enabling growth (pp. 154–155):
+چهارده نمونه که هر کدام با کم کردن هزینه یا بالا بردن رضایت مشتری یا ممکن کردن رشد به هدف‌های کسب‌وکار خدمت می‌کنند (pp. 154–155):
 
-| Principle | Business reason (pp. 154–155) |
+| اصل | دلیل کسب‌وکاری (pp. 154–155) |
 |---|---|
-| Simplicity first | Lower support costs, faster onboarding |
-| Scalability | Customer growth without rewrites |
-| Modularity | Parallel development, faster time to market |
-| Reliability | Retention, less churn |
-| Maintainability | Lower long-term costs |
-| Documentation | Faster onboarding, fewer silos |
-| Testing | No untested or failing code is merged — fewer defects |
-| Visibility | Observability and metrics enable data-driven decisions |
-| Security by design | Lower breach risk, customer trust |
-| Performance awareness | Better user experience, balanced against practical needs |
-| Consistency | Lower cognitive load |
-| Automation | Lower operating costs |
-| Openness | Open standards avoid vendor lock-in |
-| Evolution | Lower future refactoring costs |
+| اول سادگی | هزینه‌ی پشتیبانی کمتر، onboarding سریع‌تر |
+| مقیاس‌پذیری | رشد مشتری بدون بازنویسی |
+| ماژولار بودن | توسعه‌ی موازی، رسیدن سریع‌تر به بازار |
+| reliability | نگه‌داشت مشتری، churn کمتر |
+| قابلیت نگه‌داری | هزینه‌ی بلندمدت کمتر |
+| مستندسازی | onboarding سریع‌تر، سیلوی کمتر |
+| تست | هیچ کد تست‌نشده یا شکست‌خورده‌ای merge نمی‌شود؛ نقص کمتر |
+| دیده شدن | observability و متریک تصمیم داده‌محور را ممکن می‌کنند |
+| امنیت از پایه | ریسک نشت کمتر، اعتماد مشتری |
+| حواس‌جمعی به performance | تجربه‌ی بهتر کاربر، متعادل با نیازهای عملی |
+| یکدستی | بار ذهنی کمتر |
+| automation | هزینه‌ی عملیاتی کمتر |
+| گشودگی | استانداردهای باز از قفل شدن به فروشنده جلوگیری می‌کنند |
+| تکامل | هزینه‌ی refactoring آینده کمتر |
 
-#### Crafting Technical Principles Workshop
+#### کارگاه ساختن اصول فنی
 
-A one-hour collaborative format, so principles come from collective wisdom, not individual preference (pp. 156–157):
+قالبی مشارکتی و یک‌ساعته، تا اصول از خرد جمعی دربیایند نه از سلیقه‌ی یک نفر (pp. 156–157):
 
 ```mermaid
 flowchart TB
   A["1 · Idea dump<br/>10 min"] --> B["2 · Group and name<br/>10 min"] --> C["3 · Vote<br/>3 votes each, 5 min"] --> D["4 · Draft<br/>meaning, why, example<br/>15 min"] --> E["5 · Discuss and rank<br/>15 min"] --> F["6 · Review and share<br/>5 min"]
 ```
 
-Put the result into architecture decision records, code review checklists and onboarding material (p. 157).
+نتیجه را در architecture decision recordها و فهرست وارسی code review و مواد onboarding بگذارید (p. 157).
 
-> **In Practice: April's Story** (p. 157). April starts the workshop from pain points: undocumented frontend code, unreadable stored procedures, an auth system needing manual restarts. The team derives "documentation before deployment," "boring technology first" and "observable by default." Seniors resist until April shows the hours lost that quarter just deciphering each other's code.
+> **کادر In Practice: داستان April** (p. 157). او کارگاه را از نقطه‌های درد شروع می‌کند: کد frontend مستندنشده، stored procedureهای ناخوانا، و سیستم احراز هویتی که دستی باید ری‌استارت شود. تیم به «مستندسازی پیش از استقرار» و «اول فناوری کسل‌کننده» و «به‌طور پیش‌فرض قابل‌مشاهده» می‌رسد. آدم‌های ارشد مقاومت می‌کنند تا April ساعت‌هایی را نشان می‌دهد که آن فصل فقط صرف رمزگشایی کد همدیگر شده.
 
-#### Living Your Principles
+#### زندگی کردن با اصولتان
 
-All leaders — CTOs to engineering managers, staff and principal engineers — must champion the principles so they shape everything from strategy to code (p. 158).
+همه‌ی رهبرها، از CTO تا مدیرهای مهندسی و staff و principal engineerها، باید پرچم‌دار اصول باشند تا همه چیز را از استراتژی تا کد شکل بدهند (p. 158).
 
-### Scaling Without Overengineering
+> **In practice:** چند اصل فنی روشن تصمیم‌های روزمره‌ی تیم داده را بدون جلسه حل می‌کند.
+>
+> **Your turn:** سه اصل برای platform داده‌ی خودتان بنویسید.
+>
+> *Answer:* نمونه: «هر جدول Gold مالک و تست دارد»، «هر چیزی که در production اجرا می‌شود از git و Argo CD می‌آید»، «PII پیش از warehouse hash می‌شود». کتاب اصول خوب را فشرده، آرمانی و آن‌قدر مشخص می‌خواهد که تصمیم روزمره را هدایت کنند (pp. 153–157).
 
-Keep it simple; tackle today's requirements and let real demand and data drive scaling decisions (p. 158). The key trade-offs are **differentiation versus commodity** (build only what differentiates you; buy the rest) and **just-in-time scalability** (scale on evidence, not optimistic projections) (p. 158).
+### مقیاس گرفتن بدون مهندسی بیش از حد
 
-- **Example: databases.** PostgreSQL is a strong first choice for most applications — performant, well supported, with a healthy ecosystem — combined with a sensible schema (bigint for integer fields that may grow). SQLite fits embedded and development use; CockroachDB fits when you genuinely need global distribution and can afford the complexity (pp. 158–159).
+ساده نگهش دارید؛ سراغ نیاز امروز بروید و بگذارید تقاضای واقعی و داده تصمیم‌های مقیاس را برانند (p. 158). معامله‌های کلیدی **تمایز در برابر کالا**، یعنی فقط چیزی را بسازید که متمایزتان می‌کند و بقیه را بخرید، و **مقیاس‌پذیری به‌موقع**، یعنی بر پایه‌ی شواهد مقیاس بگیرید نه پیش‌بینی خوش‌بینانه، هستند (p. 158).
 
-> **In Practice: April's Story** (p. 159). StudioOps runs MongoDB, PostgreSQL, Redis, Elasticsearch and DynamoDB — each "what that senior engineer knows best." The AWS bill is $45,000 a month, $12,000 of it for five databases. Consolidating onto PostgreSQL (keeping Redis) cuts the bill to $31,000 and deployment time by 40%.
+- **نمونه: دیتابیس‌ها.** دیتابیس PostgreSQL برای بیشتر اپلیکیشن‌ها انتخاب اول خوبی است، چون پربازده و خوب‌پشتیبانی‌شده است و زیست‌بوم سالمی دارد، البته همراه با schema عاقلانه، مثل استفاده از bigint برای فیلدهای عددی‌ای که ممکن است بزرگ شوند. دیتابیس SQLite به کاربرد تعبیه‌شده و توسعه می‌خورد؛ و CockroachDB وقتی که واقعاً به توزیع جهانی نیاز دارید و از پس پیچیدگی‌اش برمی‌آیید (pp. 158–159).
 
-- **Use cloud and SaaS** elasticity rather than architecture that predicts every future (p. 159). Juan's corporation had built its own ticketing and service-management tools — bread and butter, not differentiation — and switched to buying (p. 160).
-- **Adaptable architecture** evolves incrementally: microservices where appropriate (not by default), abstraction layers, clear API boundaries, strong ecosystems (p. 160).
+> **کادر In Practice: داستان April** (p. 159). تیم StudioOps دیتابیس‌های MongoDB و PostgreSQL و Redis و Elasticsearch و DynamoDB را با هم می‌گرداند، هر کدام چون «همان چیزی است که آن مهندس ارشد بهتر بلد است». صورت‌حساب AWS ماهی ۴۵٬۰۰۰ دلار است که ۱۲٬۰۰۰ دلارش برای پنج دیتابیس است. جمع کردنشان روی PostgreSQL با نگه داشتن Redis صورت‌حساب را به ۳۱٬۰۰۰ دلار و زمان استقرار را ۴۰٪ کم می‌کند.
 
-#### Choose Boring Technology
+- **از کشسانی cloud و SaaS استفاده کنید** به‌جای معماری‌ای که می‌خواهد هر آینده‌ای را پیش‌بینی کند (p. 159). شرکت بزرگی که Juan در آن بود ابزارهای ticketing و مدیریت سرویس خودش را ساخته بود، که نان‌و‌آب نبود و تمایز هم نمی‌آورد، و به خریدن رو آورد (p. 160).
+- **معماری تطبیق‌پذیر** تدریجی تکامل می‌یابد: microservice جایی که به کار می‌آید نه به‌طور پیش‌فرض، لایه‌های انتزاع، مرزهای روشن API، و زیست‌بوم‌های قوی (p. 160).
 
-Every decision is a trade-off; be explicit about what you prioritize. Resist rewriting in the latest language or Hacker News framework (p. 160). The book quotes Dan McKinley's **innovation tokens**: every company gets about three, and each non-boring technology choice spends one (pp. 160–161). Boring isn't bad — PostgreSQL, Python and cron are boring and good. Today the authors would put "We should use Kubernetes" or "we need a service mesh" in the token bucket (p. 161). Every refactoring effort is effort not spent on the product (p. 161).
+#### فناوری کسل‌کننده را انتخاب کنید
 
-> **In Practice: April's Story** (p. 162). Marcus proposes rewriting authentication in Rust. It handles 1,000 requests per second at a p99 of 50 ms in Node.js; Rust might reach 20 ms, but nobody on the team knows Rust. Two tokens are already spent — the animation rendering engine and real-time collaboration, both differentiators. The proposal is withdrawn; a week of Node.js optimization reaches 35 ms.
+هر تصمیمی یک معامله است؛ صریح بگویید چه چیزی را مقدم می‌دانید. در برابر بازنویسی با تازه‌ترین زبان یا framework صفحه‌ی اول Hacker News مقاومت کنید (p. 160). کتاب از **token نوآوری** Dan McKinley نقل می‌کند: هر شرکت حدود سه‌تا دارد و هر انتخاب فناوری غیرکسل‌کننده یکی را خرج می‌کند (pp. 160–161). کسل‌کننده یعنی بد نیست؛ PostgreSQL و Python و cron کسل‌کننده و خوب‌اند. نویسنده‌ها می‌گویند امروز «باید Kubernetes بگیریم» یا «به service mesh نیاز داریم» را در سطل token می‌گذارند (p. 161). هر تلاش refactoring تلاشی است که صرف محصول نشده (p. 161).
 
-New technology should create measurable value: lower operating costs, faster development, a bigger market, happier customers or new revenue — otherwise you're probably spending tokens unwisely (p. 162).
+> **کادر In Practice: داستان April** (p. 162). مهندسی به نام Marcus پیشنهاد می‌دهد احراز هویت با Rust بازنویسی شود. سیستم فعلی با Node.js در ثانیه ۱٬۰۰۰ درخواست را با p99 برابر ۵۰ میلی‌ثانیه جواب می‌دهد؛ Rust شاید به ۲۰ میلی‌ثانیه برسد، ولی هیچ‌کس در تیم Rust بلد نیست. دو token از قبل خرج شده، یعنی موتور رندر انیمیشن و همکاری بلادرنگ که هر دو متمایزکننده‌اند. پیشنهاد پس گرفته می‌شود و یک هفته بهینه‌سازی Node.js به ۳۵ میلی‌ثانیه می‌رسد.
 
-> **Try it:** [Innovation tokens](../widgets/08-innovation-tokens.html) — build a stack from boring and shiny choices with three tokens to spend, and see which choices the book's reasoning would let you keep.
+فناوری تازه باید ارزش اندازه‌پذیر بسازد: هزینه‌ی عملیاتی کمتر، توسعه‌ی سریع‌تر، بازار بزرگ‌تر، مشتری راضی‌تر یا درآمد تازه؛ وگرنه احتمالاً دارید tokenها را نابخردانه خرج می‌کنید (p. 162).
 
-### Developing Your Technical Strategy
+> **Try it:** [tokenهای نوآوری](../widgets/08-innovation-tokens.html)؛ با سه token، یک stack از انتخاب‌های کسل‌کننده و براق بسازید و ببینید استدلال کتاب اجازه می‌دهد کدام انتخاب‌ها بمانند.
 
-Strategy is like planning a holiday: destination, route, and room for detours — dynamic rather than static (pp. 162–163).
+> **In practice:** وسوسه‌ی افزودن Kafka، streaming یا shard کردن ClickHouse پیش از نیاز واقعی همیشه هست.
+>
+> **Your turn:** کسی می‌خواهد loader ساعتی را به streaming تبدیل کند. چه داده‌ای می‌خواهید پیش از تصمیم؟
+>
+> *Answer:* کدام تصمیم کسب‌وکار با تأخیر یک‌ساعته آسیب می‌بیند، و هزینه‌ی نگهداری یک سیستم streaming. کتاب می‌گوید سراغ نیاز امروز بروید و بگذارید تقاضای واقعی تصمیم مقیاس را براند (pp. 158–161).
 
-- **Choosing granularity.** Pick a practical window — a quarter can be a lifetime; a year is possible. Fade detail: high in Q1, medium in Q2 and Q3, low in Q4; review monthly (p. 163). April's plan: Q1 consolidate to PostgreSQL, monitor all services, standardize REST; Q2 auth consolidation, React 18, CI/CD; Q3 scale and debt; Q4 directional. By week 6 the migration was slower than expected, so she narrowed Q1 to MongoDB and pushed DynamoDB to Q2: **the strategy stays, the tactics adapt** (p. 163).
-- **Flexibility with direction.** A compass, not turn-by-turn GPS; principles are guardrails, not concrete barriers (p. 164).
-- **Collaborative development.** Get input from engineers, product and leadership — but not decision by committee (p. 164).
+### پروراندن استراتژی فنی‌تان
 
-#### Elements of a Technical Strategy Document
+استراتژی مثل برنامه‌ریزی سفر است: مقصد، مسیر، و جا برای انحراف؛ پویاست نه ایستا (pp. 162–163).
 
-| Section | Contents (pp. 164–167) |
+- **انتخاب سطح جزئیات.** پنجره‌ای عملی بردارید؛ یک سه‌ماهه می‌تواند یک عمر باشد و یک سال هم ممکن است. جزئیات را کم کنید: زیاد در سه‌ماهه‌ی اول، متوسط در دوم و سوم، کم در چهارم؛ و ماهانه بازبینی کنید (p. 163). برنامه‌ی April: سه‌ماهه‌ی اول جمع کردن روی PostgreSQL و monitoring همه‌ی سرویس‌ها و یکدست کردن REST؛ سه‌ماهه‌ی دوم جمع کردن احراز هویت و React 18 و CI/CD؛ سه‌ماهه‌ی سوم مقیاس و بدهی؛ سه‌ماهه‌ی چهارم جهت‌دار. تا هفته‌ی ششم مهاجرت کندتر از انتظار بود، پس سه‌ماهه‌ی اول را به MongoDB محدود کرد و DynamoDB را به دوم انداخت: **استراتژی می‌ماند و تاکتیک تطبیق می‌یابد** (p. 163).
+- **انعطاف همراه با جهت.** قطب‌نما، نه GPS با دستور پیچ‌به‌پیچ؛ اصول نرده‌ی محافظ‌اند، نه دیوار بتنی (p. 164).
+- **پروراندن مشارکتی.** از مهندس‌ها و product و رهبری نظر بگیرید، ولی تصمیم را به کمیته نسپارید (p. 164).
+
+#### اجزای سند استراتژی فنی
+
+| بخش | محتوا (pp. 164–167) |
 |---|---|
-| Introduction and overview | Purpose, audience, intended outcomes |
-| Strategic vision and objectives | How technology supports company goals ("can't release version 2 unless we support more users") or the product roadmap |
-| Current technology landscape | Existing systems with strengths and weaknesses; refreshed as things improve |
-| Future state landscape | The core: what will be deprecated, evolved, decommissioned — including processes such as incident reviews |
-| Technical principles | Lived here or cited |
-| Implementation roadmap | Phased plan, explicit about how technical and product work interweave — lanes (for example 70/30), opportunistic pulls, or embedded work |
-| People, resources and teams | Team members, tools, budgets, reorganizations |
-| Risk management and contingency | Specific, quantified risks with concrete mitigations, time frames and success criteria |
-| Governance and decision making | Roles and review procedures (RFCs in Chapter 9) |
-| Monitoring and continuous improvement | Qualitative and quantitative metrics; checkpoints every two sprints or monthly |
+| مقدمه و نمای کلی | هدف، مخاطب، نتیجه‌های مورد انتظار |
+| چشم‌انداز و هدف‌های راهبردی | این‌که فناوری چطور از هدف‌های شرکت پشتیبانی می‌کند، مثل «تا از کاربر بیشتر پشتیبانی نکنیم نسخه‌ی دو را نمی‌توانیم منتشر کنیم»، یا نقشه‌ی راه محصول |
+| چشم‌انداز فعلی فناوری | سیستم‌های موجود با نقاط قوت و ضعف؛ با بهتر شدن اوضاع به‌روز می‌شود |
+| چشم‌انداز وضعیت آینده | هسته‌ی سند: چه چیزی منسوخ، چه چیزی تکامل و چه چیزی بازنشسته می‌شود، از جمله processهایی مثل بازبینی حادثه |
+| اصول فنی | یا همین‌جا نوشته می‌شوند یا به آن‌ها ارجاع می‌شود |
+| نقشه‌ی راه اجرا | برنامه‌ی مرحله‌ای، با صراحت درباره‌ی این‌که کار فنی و محصولی چطور در هم بافته می‌شوند؛ مثلاً خط‌های جدا با نسبت ۷۰ به ۳۰، برداشتن فرصتی، یا کار جاسازی‌شده |
+| آدم‌ها و منابع و تیم‌ها | اعضای تیم، ابزارها، بودجه‌ها، بازسازی‌های سازمانی |
+| مدیریت ریسک و برنامه‌ی جایگزین | ریسک‌های مشخص و کمی‌شده با کاهش‌دهنده‌های ملموس و بازه‌ی زمانی و معیار موفقیت |
+| حاکمیت و تصمیم‌گیری | نقش‌ها و رویه‌های بازبینی؛ سند RFC در فصل ۹ |
+| پایش و بهبود پیوسته | متریک‌های کیفی و کمی؛ ایستگاه‌های بازبینی هر دو sprint یا ماهانه |
 
-The book's risk examples: a third-party auth service with three outages in six months (fallback within five minutes, alert at two-second response times); a payments knowledge silo with one engineer, Rajiv (weekly walkthroughs, two more engineers able to support it by Q3); and a monolith where bug fixes take 30% longer than six months ago (extract two services by Q2) (p. 166).
+نمونه‌های ریسک در کتاب: سرویس احراز هویت طرف سوم با سه قطعی در شش ماه، با راه‌حل جایگزین در پنج دقیقه و هشدار سر زمان پاسخ دو ثانیه؛ سیلوی دانش پرداخت‌ها با یک مهندس به نام Rajiv، با مرور هفتگی و دو مهندس دیگر که تا سه‌ماهه‌ی سوم بتوانند پشتیبانی‌اش کنند؛ و monolithی که رفع باگ در آن ۳۰٪ بیشتر از شش ماه پیش طول می‌کشد، با بیرون کشیدن دو سرویس تا سه‌ماهه‌ی دوم (p. 166).
 
-#### The Living Document Approach
+#### رویکرد سند زنده
 
-Like James's first-day diagram, the strategy evolves; review it monthly or quarterly so it doesn't sit forgotten in a folder (p. 167).
+مثل همان نمودار روز اول James، استراتژی هم تکامل می‌یابد؛ ماهانه یا فصلی بازبینی‌اش کنید تا در پوشه‌ای فراموش‌شده ننشیند (p. 167).
 
-#### Making Technical Strategies Real
+#### واقعی کردن استراتژی فنی
 
-Most strategies fail between "Here's what we should do" and "We're actually doing it" (p. 167).
+بیشتر استراتژی‌ها بین «این کاری است که باید بکنیم» و «واقعاً داریم انجامش می‌دهیم» شکست می‌خورند (p. 167).
 
-| Practice | What it means (pp. 168–171) |
+| کار | یعنی چه (pp. 168–171) |
 |---|---|
-| Resource allocation without burnout | Spread the hard work; nobody fixes the legacy monolith four quarters running. "Your poor planning should not constitute an emergency for your team." |
-| Tech future-you won't curse | Like a tattoo — will it solve real problems, and can we maintain it when its champion leaves? |
-| Risk management | Plan for the biggest risks; know who's responsible; revisit often |
-| "But that's not what I meant!" | "Done" differs between engineering, product and customer success — create shared language and document decisions and reasoning |
-| Finger on the pulse | Technical and human metrics (Chapter 10) |
-| Balancing all the things | Make trade-offs explicit and record them |
-| Building capabilities | Training and room to learn; productivity dips before it improves |
-| Communicating the vision | Concrete goals ("reducing customer-facing errors by 50%…"), repeated in every medium |
-| Leading by example | Actions speak louder than words — model the principles |
+| تخصیص منابع بدون فرسودگی | کار سخت را پخش کنید؛ هیچ‌کس چهار سه‌ماهه‌ی پیاپی monolith قدیمی را درست نمی‌کند. «برنامه‌ریزی بد شما نباید برای تیمتان اورژانس بسازد.» |
+| فناوری‌ای که خودِ آینده‌تان نفرینتان نکند | مثل خالکوبی است؛ مسئله‌ی واقعی را حل می‌کند و وقتی مدافعش رفت می‌توانیم نگهش داریم؟ |
+| مدیریت ریسک | برای بزرگ‌ترین ریسک‌ها برنامه بریزید؛ بدانید چه کسی مسئول است؛ و مدام بازبینی کنید |
+| «منظورم این نبود!» | «تمام‌شده» برای مهندسی و محصول و موفقیت مشتری فرق دارد؛ زبان مشترک بسازید و تصمیم‌ها و دلیلشان را مستند کنید |
+| دست روی نبض | متریک‌های فنی و انسانی (فصل ۱۰) |
+| تعادل بین همه چیز | معامله‌ها را صریح کنید و ثبتشان کنید |
+| ساختن توانمندی | آموزش و فضا برای یاد گرفتن؛ بهره‌وری پیش از بهتر شدن افت می‌کند |
+| اعلام چشم‌انداز | هدف‌های ملموس مثل «کم کردن ۵۰ درصدی خطاهای رو به مشتری…»، تکرارشده در هر رسانه‌ای |
+| الگو بودن با عمل | عمل بلندتر از حرف است؛ خودتان اصول را زندگی کنید |
 
-> **In Practice: April's Story** (pp. 169–170). Facing 4K rendering for a key customer against compliance-driven security work, the team chose critical security patches in two sprints, then 4K, then the full overhaul in Q2 — recorded in an architecture decision record. For the PostgreSQL move she ran "PostgreSQL Fridays," bought a course and allocated four hours a week for learning: velocity fell 30% in month one, but by month two the team shipped faster than before.
+> **کادر In Practice: داستان April** (pp. 169–170). روبه‌روی رندر 4K برای یک مشتری کلیدی در برابر کار امنیتیِ ناشی از انطباق، تیم انتخاب کرد اول وصله‌های امنیتی حیاتی در دو sprint، بعد 4K، و بعد بازسازی کامل در سه‌ماهه‌ی دوم، که در یک architecture decision record ثبت شد. برای مهاجرت به PostgreSQL «جمعه‌های PostgreSQL» گذاشت، یک دوره خرید و هفته‌ای چهار ساعت برای یادگیری تخصیص داد: ماه اول velocity ۳۰٪ افت کرد، ولی تا ماه دوم تیم سریع‌تر از قبل تحویل می‌داد.
 
-### Conclusion: Enabling Execution with Technical Strategy
+### جمع‌بندی: ممکن کردن اجرا با استراتژی فنی
 
-A good strategy sets a clear direction that evolves, balances innovation and practicality, and focuses on outcomes, not cool technology (p. 171).
+استراتژی خوب جهتی روشن می‌گذارد که تکامل می‌یابد، بین نوآوری و عمل‌گرایی تعادل برقرار می‌کند، و روی نتیجه تمرکز دارد، نه روی فناوری جذاب (p. 171).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Boring technology | Stability, hiring pool, deep team knowledge | Forgo possible (often small) gains |
-| Spending an innovation token | Differentiation where it matters | Operational overhead, instability, smaller hiring pool |
-| One consolidated datastore | Simpler operations, lower bill | Migration effort; a learning dip |
-| Scaling ahead of demand | Headroom | Wasted resources; complexity for a future that may not happen |
-| Detailed long-range plans | Apparent certainty | Obsolete quickly in chaos |
-| Strategy by committee | Everyone heard | A watered-down strategy |
-| Explicit trade-off records | Shared understanding | Writing time |
+| فناوری کسل‌کننده | ثبات، استخر استخدام، دانش عمیق تیم | از سودهای ممکن و اغلب کوچک می‌گذرید |
+| خرج کردن یک token نوآوری | تمایز در جایی که مهم است | سربار عملیاتی، بی‌ثباتی، استخر استخدام کوچک‌تر |
+| یک data warehouse یکپارچه | عملیات ساده‌تر، صورت‌حساب کمتر | زحمت مهاجرت؛ افت یادگیری |
+| مقیاس گرفتن جلوتر از تقاضا | فضای تنفس | منابع هدررفته؛ پیچیدگی برای آینده‌ای که شاید نیاید |
+| برنامه‌های باجزئیات بلندمدت | ظاهر قطعیت | در آشوب زود کهنه می‌شوند |
+| استراتژی با کمیته | صدای همه شنیده می‌شود | استراتژی رقیق‌شده |
+| ثبت صریح معامله‌ها | فهم مشترک | وقت نوشتن |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Dan McKinley's "Choose Boring Technology"** (2015) is the essay the book quotes at length; it also argues for a small, well-understood toolset because each new tool's operational cost is paid forever.
-- **Architecture decision records** (Michael Nygard's 2011 format: context, decision, consequences) are a lightweight home for April's trade-off records; Chapter 9 covers RFCs.
-- **Will Larson's *Staff Engineer*** treats writing engineering strategy as synthesizing several design documents — a useful complement to the document outline above.
+- **یادداشت «Choose Boring Technology» از Dan McKinley** در سال ۲۰۱۵ همان متنی است که کتاب مفصل از آن نقل می‌کند؛ آن یادداشت می‌گوید مجموعه‌ی ابزار کوچک و خوب‌شناخته‌شده بهتر است، چون هزینه‌ی عملیاتی هر ابزار تازه برای همیشه پرداخت می‌شود.
+- **سندهای architecture decision record** با قالب Michael Nygard در سال ۲۰۱۱، یعنی زمینه و تصمیم و پیامد، خانه‌ی سبکی برای ثبت معامله‌های April هستند؛ فصل ۹ درباره‌ی RFC حرف می‌زند.
+- **کتاب *Staff Engineer* از Will Larson** نوشتن استراتژی مهندسی را جمع‌بندی چند سند طراحی می‌داند، که مکمل خوبی برای ساختار سند بالاست.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [5. Setting Direction](05-setting-direction.md) (vision and strategy), [6. Shipping Products and Code](06-shipping-products-and-code-in-chaotic-environments.md) (prioritization), [7. Budgeting, Costs, and Vendors](07-budgeting-costs-and-vendors.md) (build versus buy), [9. Collaborative Technical Practices](09-collaborative-technical-practices-and-decision-making.md) (RFCs and decision making), [10. Metrics That Matter](10-metrics-that-matter-for-engineering-teams.md).
-- **Other books:** *The Manager's Path* discusses the CTO and VP of Engineering roles that Figure 8-2's 90-day checklist is written for.
+- **فصل‌های مرتبط:** [فصل ۵: تعیین جهت](05-setting-direction.md) که چشم‌انداز و استراتژی را می‌گوید، [فصل ۶: تحویل محصول و کد](06-shipping-products-and-code-in-chaotic-environments.md) که اولویت‌بندی را دارد، [فصل ۷: بودجه، هزینه و فروشنده‌ها](07-budgeting-costs-and-vendors.md) که ساختن در برابر خریدن را می‌گوید، [فصل ۹: کارهای فنی مشارکتی](09-collaborative-technical-practices-and-decision-making.md) که RFC و تصمیم‌گیری را دارد، و [فصل ۱۰: متریک‌هایی که مهم‌اند](10-metrics-that-matter-for-engineering-teams.md).
+- **کتاب‌های دیگر:** *The Manager's Path* درباره‌ی نقش‌های CTO و VP of Engineering حرف می‌زند، همان نقش‌هایی که فهرست وارسی ۹۰ روزه‌ی شکل ۸-۲ برایشان نوشته شده.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What two functions do technical principles serve even when your environment doesn't yet match them?**
+1. **اصول فنی حتی وقتی محیطتان هنوز با آن‌ها نمی‌خواند، چه دو کاری می‌کنند؟**
 
-   *Answer:* They stop you making things worse, and they guide everyday decisions — code review, product design, choosing new technology (p. 154).
+   *Answer:* جلوی بدتر کردن اوضاع را می‌گیرند، و تصمیم‌های روزمره را هدایت می‌کنند، یعنی code review و طراحی محصول و انتخاب فناوری تازه (p. 154).
 
-2. **In the first-90-days mind map, what three conclusions can you reach for each item?**
+2. **در نقشه‌ی ذهنی ۹۰ روز اول، برای هر قلم به کدام سه نتیجه می‌شود رسید؟**
 
-   *Answer:* No action needed; needs work (decide what and when); or nothing's there — and should that worry me? (p. 153)
+   *Answer:* کاری لازم نیست؛ کار دارد، که باید بگویید چه کاری و کِی؛ یا هیچ چیزی نیست و باید بپرسید این باید نگرانم کند (p. 153)؟
 
-3. **What does "just-in-time scalability" mean?**
-   - [ ] Pre-build for the largest load you can imagine
-   - [x] Scale only when you have evidence you need to
-   - [ ] Avoid scaling at all
+3. **«مقیاس‌پذیری به‌موقع» یعنی چه؟**
+   - [ ] از پیش برای بزرگ‌ترین باری که می‌توانید تصور کنید بسازید
+   - [x] فقط وقتی مقیاس بگیرید که شواهد نیازش را نشان بدهند
+   - [ ] اصلاً مقیاس نگیرید
 
-   *Answer:* Not based on optimistic projections (p. 158).
+   *Answer:* نه بر پایه‌ی پیش‌بینی‌های خوش‌بینانه (p. 158).
 
-4. **How many innovation tokens does a company get in McKinley's model?**
-   - [ ] One
-   - [x] About three
-   - [ ] As many as it has teams
+4. **در مدل McKinley هر شرکت چند token نوآوری دارد؟**
+   - [ ] یکی
+   - [x] حدود سه‌تا
+   - [ ] به تعداد تیم‌هایش
 
    *Answer:* pp. 160–161.
 
-5. **Why did April turn down rewriting authentication in Rust?**
+5. **چرا April بازنویسی احراز هویت با Rust را رد کرد؟**
 
-   *Answer:* It would spend the last innovation token on a 30 ms gain nobody had asked for, with no Rust skills on the team; a week of Node.js optimization got p99 to 35 ms (p. 162).
+   *Answer:* آخرین token نوآوری را خرج سود ۳۰ میلی‌ثانیه‌ای‌ای می‌کرد که کسی نخواسته بود، آن هم بدون مهارت Rust در تیم؛ و یک هفته بهینه‌سازی Node.js مقدار p99 را به ۳۵ میلی‌ثانیه رساند (p. 162).
 
-6. **How should planning granularity change over a year?**
+6. **سطح جزئیات برنامه‌ریزی در طول یک سال چطور باید عوض شود؟**
 
-   *Answer:* High detail for Q1, medium for Q2 and Q3, low or directional for Q4, reviewed monthly (p. 163).
+   *Answer:* جزئیات زیاد برای سه‌ماهه‌ی اول، متوسط برای دوم و سوم، و کم یا جهت‌دار برای چهارم، با بازبینی ماهانه (p. 163).
 
-7. **What makes a risk entry in the strategy document actionable?**
+7. **چه چیزی یک ردیف ریسک در سند استراتژی را عمل‌شدنی می‌کند؟**
 
-   *Answer:* Specific risk, ideally quantified, plus a concrete mitigation with time frames and success criteria (pp. 166–167).
+   *Answer:* ریسک مشخص و در حالت ایده‌آل کمی‌شده، به‌علاوه‌ی کاهش‌دهنده‌ای ملموس با بازه‌ی زمانی و معیار موفقیت (pp. 166–167).

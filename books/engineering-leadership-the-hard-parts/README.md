@@ -12,111 +12,112 @@ toc_source: "Book PDF bookmarks (O'Reilly, First Edition, 2026)"
 toc_verified: "2026-11-07"
 source_file: "book.pdf (kept locally, gitignored; 273 PDF pages; printed page = PDF page − 20)"
 cover: "cover.jpg"
+lang: fa
 ---
 
 # Engineering Leadership: The Hard Parts
 
-**Open [`index.html`](index.html) in a browser** for the interactive version: one slide-by-slide lesson per chapter, with embedded simulations and self-checks. Everything here also reads fine on GitHub.
+**نسخه‌ی تعاملی را با باز کردن [`index.html`](index.html) در مرورگر ببینید**: برای هر فصل یک درس اسلاید‌به‌اسلاید، با شبیه‌سازی‌های جاسازی‌شده و خودسنجی. همین متن روی GitHub هم خوب خوانده می‌شود.
 
-## About
+## درباره‌ی کتاب
 
-*Engineering Leadership: The Hard Parts* is about leading engineering teams when the organization around them is chaotic: unclear ownership, shifting priorities, constant crises. The authors met in a breakfast group for startup engineering leaders and kept seeing the same patterns of chaos and dysfunction in organizations of every size. They first turned their approaches into a training course, then into this book (Preface, p. xiii). It is written for new engineering managers, directors and VPs in organizations outgrowing their processes, and staff engineers and architects leading without formal authority (p. xiv). Much leadership advice assumes a stable, well-resourced organization; this book aims to work where that isn't true (pp. xiv–xv).
+کتاب *Engineering Leadership: The Hard Parts* درباره‌ی رهبری تیم‌های مهندسی است وقتی سازمان دور و برشان آشوب‌زده است: مالکیت نامشخص، اولویت‌های مدام در حال تغییر، و بحران پیوسته. نویسنده‌ها در جمعی صبحانه برای رهبران مهندسی استارتاپ‌ها با هم آشنا شدند و مدام همان الگوهای آشوب و ناکارکردی را در سازمان‌هایی از هر اندازه می‌دیدند. اول رویکردهایشان را به یک دوره‌ی آموزشی تبدیل کردند و بعد به این کتاب (پیش‌گفتار، ص. xiii). کتاب برای مدیرها و directorها و VPهای تازه‌ی مهندسی در سازمان‌هایی نوشته شده که از processهای خودشان جلو زده‌اند، و برای staff engineerها و معمارهایی که بدون اختیار رسمی رهبری می‌کنند (p. xiv). بیشتر توصیه‌های رهبری سازمانی باثبات و پر‌منابع را فرض می‌گیرند؛ این کتاب می‌خواهد جایی کار کند که این فرض برقرار نیست (pp. xiv–xv).
 
-The book is built on five pillars of leadership — **people, mission, plan, process and product** — introduced in Chapter 1 and turned into a role description in Chapter 2. Recurring **In Practice** boxes follow April as she takes over PixelCurl's fractured StudioOps team. **Exercises** — the Process Pulse survey, the drift diagnostic, the impact-versus-effort mapping session, a technical principles workshop — give leaders something to run the next week.
+کتاب روی پنج ستون رهبری ساخته شده: **آدم‌ها، مأموریت، برنامه، process و محصول**، که در فصل ۱ معرفی می‌شوند و در فصل ۲ به شرح نقش تبدیل می‌شوند. جعبه‌های تکرارشونده‌ی **In Practice** داستان April را دنبال می‌کنند که تیم از‌هم‌گسیخته‌ی StudioOps در شرکت PixelCurl را تحویل می‌گیرد. **تمرین‌ها**، یعنی نظرسنجی Process Pulse و تشخیص رانش و جلسه‌ی نگاشت اثر در برابر تلاش و کارگاه اصول فنی، به رهبرها چیزی می‌دهند که هفته‌ی بعد اجرا کنند.
 
-## What's in this folder
+## محتوای این پوشه
 
-| Path | What it is |
+| مسیر | چیست |
 |---|---|
-| [`chapters/NN-*.md`](chapters/01-embracing-the-unknown.md) | Chapter notes, **the source of truth**. Each `.md` has a generated `.html` lesson next to it |
-| [`figures/`](figures/02-01.png) | The book's own figures, cropped from the PDF; `figures.tsv` records each crop's page and box |
-| [`widgets/`](widgets/02-process-pulse.html) | Hand-built simulations, embedded in the lessons; each also opens on its own |
-| [`lab/`](lab/05-focus-vs-spread/README.md) | Runnable Python experiments with expected output |
-| `index.html` | The book hub, generated from this README and the chapters |
+| [`chapters/NN-*.md`](chapters/01-embracing-the-unknown.md) | یادداشت فصل‌ها، **منبع اصلی**. کنار هر `.md` یک درس `.html` ساخته می‌شود |
+| [`figures/`](figures/02-01.png) | شکل‌های خود کتاب، بریده‌شده از PDF؛ فایل `figures.tsv` صفحه و کادر هر برش را ثبت می‌کند |
+| [`widgets/`](widgets/02-process-pulse.html) | شبیه‌سازی‌های دست‌ساز که در درس‌ها جاسازی شده‌اند؛ هر کدام جداگانه هم باز می‌شوند |
+| [`lab/`](lab/05-focus-vs-spread/README.md) | آزمایش‌های اجراشدنی Python با خروجی مورد انتظار |
+| `index.html` | صفحه‌ی کتاب که از همین README و فصل‌ها ساخته می‌شود |
 
-## How the book fits together
+## کتاب چطور به هم وصل است
 
-The book moves from recognizing chaos and defining your role, through people and direction, to the mechanics of shipping, budgets, technical strategy, collaboration and measurement, before pulling everything together.
+کتاب از شناختن آشوب و تعریف کردن نقش شما شروع می‌کند، از آدم‌ها و جهت می‌گذرد و به سازوکار تحویل دادن و بودجه و استراتژی فنی و همکاری و اندازه‌گیری می‌رسد، و بعد همه را کنار هم می‌گذارد.
 
 ```mermaid
 flowchart TB
-    C1["1 · Embracing the Unknown<br/>symptoms of chaos"] --> C2["2 · Understanding Your Role<br/>five pillars"]
-    C2 --> C3["3 · Navigating Chaos<br/>leadership range"]
-    C3 --> C4["4 · Building Cohesive Teams<br/>people"]
-    C4 --> C5["5 · Setting Direction<br/>mission"]
-    C5 --> C6["6 · Shipping Products and Code<br/>plan and product"]
-    C6 --> C7["7 · Budgeting, Costs, and Vendors"]
-    C6 --> C8["8 · Technical Principles and Strategy"]
-    C8 --> C9["9 · Collaborative Practices<br/>and Decision Making"]
-    C9 --> C10["10 · Metrics That Matter"]
-    C7 & C10 --> C11["11 · Fitting It All Together"]
+    C1["فصل ۱: پذیرفتن ناشناخته<br/>نشانه‌های آشوب"] --> C2["فصل ۲: فهمیدن نقشتان<br/>پنج ستون"]
+    C2 --> C3["فصل ۳: راه بردن در آشوب<br/>دامنه‌ی رهبری"]
+    C3 --> C4["فصل ۴: ساختن تیم‌های منسجم<br/>آدم‌ها"]
+    C4 --> C5["فصل ۵: تعیین جهت<br/>مأموریت"]
+    C5 --> C6["فصل ۶: تحویل محصول و کد<br/>برنامه و محصول"]
+    C6 --> C7["فصل ۷: بودجه، هزینه و فروشنده‌ها"]
+    C6 --> C8["فصل ۸: اصول و استراتژی فنی"]
+    C8 --> C9["فصل ۹: کارهای فنی مشارکتی<br/>و تصمیم‌گیری"]
+    C9 --> C10["فصل ۱۰: متریک‌هایی که مهم‌اند"]
+    C7 & C10 --> C11["فصل ۱۱: کنار هم گذاشتن همه چیز"]
 ```
 
-*The chapter order is the book's; the arrows and the pillar labels are the vault's reading of how the chapters build on each other.*
+*ترتیب فصل‌ها مال کتاب است؛ پیکان‌ها و برچسب ستون‌ها خوانش vault است از این‌که فصل‌ها چطور روی هم سوار می‌شوند.*
 
-Some threads run through the whole book:
+چند رشته در کل کتاب کشیده شده‌اند:
 
-- **Just enough process** — light-touch over heavy-handed: the Process Pulse (2), motion over bureaucracy (3), lightweight sprints and estimates (6), RFCs instead of governance boards (9), minimal viable process (11).
-- **Focus** — clarity as the work: drift and a short list of priorities (5), impact versus effort (6), budgeting as prioritization with dollar signs (7), innovation tokens (8).
-- **Psychological safety** — from chaos that feels unsafe (3) and team trust (4) to safe disagreement (9), metrics that don't punish people (10), and "without safety, nothing else works" (11).
-- **Look after yourself** — leaving isn't failure (1), burnout masquerading as resistance (3), and walking away to protect your health (11).
+- **به‌اندازه process**، یعنی سبک به‌جای سنگین: نظرسنجی Process Pulse (۲)، حرکت به‌جای دیوان‌سالاری (۳)، sprint و تخمین سبک (۶)، RFC به‌جای شوراهای حاکمیتی (۹)، و کمینه‌ی process قابل‌استفاده (۱۱).
+- **تمرکز**، یعنی روشنی خودش کار است: رانش و فهرست کوتاه اولویت‌ها (۵)، اثر در برابر تلاش (۶)، بودجه به‌عنوان اولویت‌بندیِ دلاردار (۷)، و token نوآوری (۸).
+- **امنیت روانی**: از آشوبی که حس ناامنی می‌دهد (۳) و اعتماد تیم (۴) تا مخالفت امن (۹)، متریک‌هایی که آدم‌ها را تنبیه نمی‌کنند (۱۰)، و «بدون امنیت هیچ چیز دیگری کار نمی‌کند» (۱۱).
+- **مراقب خودتان باشید**: رفتن شکست نیست (۱)، فرسودگی‌ای که لباس مقاومت می‌پوشد (۳)، و کنار کشیدن برای حفظ سلامتی (۱۱).
 
-## Chapters
+## فصل‌ها
 
-| # | Chapter | Pages |
+| # | فصل | صفحه‌ها |
 |---:|---|---|
-| 1 | [Embracing the Unknown](chapters/01-embracing-the-unknown.md) | 1–11 |
-| 2 | [Understanding Your Role](chapters/02-understanding-your-role.md) | 13–34 |
-| 3 | [Navigating Chaos](chapters/03-navigating-chaos.md) | 35–58 |
-| 4 | [Building Cohesive Teams](chapters/04-building-cohesive-teams.md) | 59–73 |
-| 5 | [Setting Direction](chapters/05-setting-direction.md) | 75–92 |
-| 6 | [Shipping Products and Code in Chaotic Environments](chapters/06-shipping-products-and-code-in-chaotic-environments.md) | 93–122 |
-| 7 | [Budgeting, Costs, and Vendors](chapters/07-budgeting-costs-and-vendors.md) | 123–145 |
-| 8 | [Technical Principles and Strategy](chapters/08-technical-principles-and-strategy.md) | 147–172 |
-| 9 | [Collaborative Technical Practices and Decision Making](chapters/09-collaborative-technical-practices-and-decision-making.md) | 173–206 |
-| 10 | [Metrics That Matter for Engineering Teams](chapters/10-metrics-that-matter-for-engineering-teams.md) | 207–226 |
-| 11 | [Fitting It All Together](chapters/11-fitting-it-all-together.md) | 227–240 |
+| ۱ | [پذیرفتن ناشناخته](chapters/01-embracing-the-unknown.md) | ۱–۱۱ |
+| ۲ | [فهمیدن نقشتان](chapters/02-understanding-your-role.md) | ۱۳–۳۴ |
+| ۳ | [راه بردن در آشوب](chapters/03-navigating-chaos.md) | ۳۵–۵۸ |
+| ۴ | [ساختن تیم‌های منسجم](chapters/04-building-cohesive-teams.md) | ۵۹–۷۳ |
+| ۵ | [تعیین جهت](chapters/05-setting-direction.md) | ۷۵–۹۲ |
+| ۶ | [تحویل محصول و کد در محیط‌های آشوب‌زده](chapters/06-shipping-products-and-code-in-chaotic-environments.md) | ۹۳–۱۲۲ |
+| ۷ | [بودجه، هزینه و فروشنده‌ها](chapters/07-budgeting-costs-and-vendors.md) | ۱۲۳–۱۴۵ |
+| ۸ | [اصول و استراتژی فنی](chapters/08-technical-principles-and-strategy.md) | ۱۴۷–۱۷۲ |
+| ۹ | [کارهای فنی مشارکتی و تصمیم‌گیری](chapters/09-collaborative-technical-practices-and-decision-making.md) | ۱۷۳–۲۰۶ |
+| ۱۰ | [متریک‌هایی که برای تیم‌های مهندسی مهم‌اند](chapters/10-metrics-that-matter-for-engineering-teams.md) | ۲۰۷–۲۲۶ |
+| ۱۱ | [کنار هم گذاشتن همه چیز](chapters/11-fitting-it-all-together.md) | ۲۲۷–۲۴۰ |
 
-Page ranges are printed pages. Front matter (the preface) takes pp. xiii–xviii; the book ends with an index (p. 241).
+شماره‌ها صفحه‌ی چاپی‌اند. مطالب ابتدای کتاب، یعنی پیش‌گفتار، صص. xiii–xviii را می‌گیرند و کتاب با یک نمایه در ص. ۲۴۱ تمام می‌شود.
 
-## Key concepts
+## مفهوم‌های کلیدی
 
-These ideas recur across chapters; each row lists the chapters that discuss them. The definitions are the vault's summaries of the book's explanations.
+این ایده‌ها در چند فصل تکرار می‌شوند و هر ردیف فصل‌هایی را که به آن می‌پردازند فهرست می‌کند. تعریف‌ها خلاصه‌ی vault از توضیح کتاب‌اند.
 
-| Concept | Definition | Chapters |
+| مفهوم | تعریف | فصل‌ها |
 |---|---|---|
-| Symptoms of chaos | Ten signs — lack of ownership, no structure, outsized responsibility, undefined process, poor communication, blame, turnover, no strategy, constant crisis, no measurement. | [1](chapters/01-embracing-the-unknown.md) · [2](chapters/02-understanding-your-role.md) |
-| Five pillars | People, mission, plan, process and product — the parts of an engineering leader's role. | [1](chapters/01-embracing-the-unknown.md) · [2](chapters/02-understanding-your-role.md) · [11](chapters/11-fitting-it-all-together.md) |
-| Pockets of stability | Areas you control and make calm, which can model change for the rest of the organization. | [1](chapters/01-embracing-the-unknown.md) · [11](chapters/11-fitting-it-all-together.md) |
-| Leadership range | Deliberate switches in tone, pace and focus: diagnose context, thrive in chaos, focus on outcomes, shift between roles. | [3](chapters/03-navigating-chaos.md) |
-| Pilot, medic, engineer | Three leadership modes: zoom out for direction, stabilize and rebuild trust, or get into the work. | [3](chapters/03-navigating-chaos.md) · [11](chapters/11-fitting-it-all-together.md) |
-| Team capabilities | Seven observable abilities — from turning ambiguity into action to connecting effort to outcomes — that a team builds one or two at a time. | [4](chapters/04-building-cohesive-teams.md) |
-| Drift | Motion without meaning: busy from outside, hollowing out the team inside; diagnosed with Table 5-1. | [5](chapters/05-setting-direction.md) · [11](chapters/11-fitting-it-all-together.md) |
-| Impact versus effort | A two-by-two grid for ordering work: quick wins first, big bets broken down, the danger zone avoided. | [6](chapters/06-shipping-products-and-code-in-chaotic-environments.md) · [7](chapters/07-budgeting-costs-and-vendors.md) |
-| Unit economics | COGS, CAC, LTV and gross margin — the terms that turn technical decisions into business ones. | [7](chapters/07-budgeting-costs-and-vendors.md) |
-| Fully loaded cost | A person's real cost, typically 1.3–1.8× base salary, plus ramp-up and attrition. | [7](chapters/07-budgeting-costs-and-vendors.md) |
-| Build versus buy | Build only what differentiates the business; buy commodity services. | [7](chapters/07-budgeting-costs-and-vendors.md) · [8](chapters/08-technical-principles-and-strategy.md) |
-| Technical principles | A short, team-made set of guides (simplicity first, documentation, testing…) that shape both code and culture. | [8](chapters/08-technical-principles-and-strategy.md) · [9](chapters/09-collaborative-technical-practices-and-decision-making.md) · [11](chapters/11-fitting-it-all-together.md) |
-| Innovation tokens | Dan McKinley's model: about three non-boring technology choices per company — spend them on differentiators. | [8](chapters/08-technical-principles-and-strategy.md) |
-| RFCs and ADRs | Requests for comments decide collaboratively before building; architecture decision records document what was decided. | [8](chapters/08-technical-principles-and-strategy.md) · [9](chapters/09-collaborative-technical-practices-and-decision-making.md) |
-| Psychological safety | The belief you won't be punished for speaking up — the foundation of collaborative decisions and of everything else. | [3](chapters/03-navigating-chaos.md) · [9](chapters/09-collaborative-technical-practices-and-decision-making.md) · [10](chapters/10-metrics-that-matter-for-engineering-teams.md) · [11](chapters/11-fitting-it-all-together.md) |
-| DORA metrics | Deployment frequency, lead time for changes, change failure rate, time to restore — the starting set, plus one or two context metrics. | [10](chapters/10-metrics-that-matter-for-engineering-teams.md) · [11](chapters/11-fitting-it-all-together.md) |
-| Goodhart's Law | When a measure becomes a target, it ceases to be a good measure — velocity is the classic case. | [10](chapters/10-metrics-that-matter-for-engineering-teams.md) |
+| نشانه‌های آشوب | ده نشانه: نبود مالکیت، نبود ساختار، مسئولیت بیش از اندازه، process تعریف‌نشده، ارتباط ضعیف، سرزنش، ریزش نیرو، نبود استراتژی، بحران پیوسته، و نبود اندازه‌گیری. | [۱](chapters/01-embracing-the-unknown.md) · [۲](chapters/02-understanding-your-role.md) |
+| پنج ستون | آدم‌ها، مأموریت، برنامه، process و محصول؛ بخش‌های نقش یک رهبر مهندسی. | [۱](chapters/01-embracing-the-unknown.md) · [۲](chapters/02-understanding-your-role.md) · [۱۱](chapters/11-fitting-it-all-together.md) |
+| جزیره‌های ثبات | حوزه‌هایی که در کنترل شمایند و آرامشان می‌کنید، و می‌توانند برای بقیه‌ی سازمان الگوی تغییر شوند. | [۱](chapters/01-embracing-the-unknown.md) · [۱۱](chapters/11-fitting-it-all-together.md) |
+| دامنه‌ی رهبری | جابه‌جایی عامدانه در لحن و سرعت و تمرکز: تشخیص زمینه، دوام آوردن در آشوب، تمرکز بر نتیجه، و رفتن بین نقش‌ها. | [۳](chapters/03-navigating-chaos.md) |
+| خلبان، امدادگر، مهندس | سه حالت رهبری: زوم کردن به عقب برای تعیین جهت، آرام کردن اوضاع و بازسازی اعتماد، یا رفتن وسط خود کار. | [۳](chapters/03-navigating-chaos.md) · [۱۱](chapters/11-fitting-it-all-together.md) |
+| توانمندی‌های تیم | هفت توانایی قابل‌مشاهده، از تبدیل ابهام به عمل تا وصل کردن تلاش به نتیجه، که تیم یکی دوتا یکی دوتا می‌سازدشان. | [۴](chapters/04-building-cohesive-teams.md) |
+| رانش | حرکت بدون معنا: از بیرون شلوغ و از درون تهی‌کننده‌ی تیم؛ با جدول ۵-۱ تشخیص داده می‌شود. | [۵](chapters/05-setting-direction.md) · [۱۱](chapters/11-fitting-it-all-together.md) |
+| اثر در برابر تلاش | یک شبکه‌ی دو‌در‌دو برای ترتیب دادن کار: اول بردهای سریع، شکستن شرط‌های بزرگ، و پرهیز از منطقه‌ی خطر. | [۶](chapters/06-shipping-products-and-code-in-chaotic-environments.md) · [۷](chapters/07-budgeting-costs-and-vendors.md) |
+| اقتصاد واحد | معیارهای COGS و CAC و LTV و حاشیه‌ی ناخالص؛ اصطلاح‌هایی که تصمیم فنی را به تصمیم کسب‌وکاری تبدیل می‌کنند. | [۷](chapters/07-budgeting-costs-and-vendors.md) |
+| هزینه‌ی تمام‌شده‌ی نیرو | هزینه‌ی واقعی یک نفر، معمولاً ۱٫۳ تا ۱٫۸ برابر حقوق پایه، به‌علاوه‌ی زمان جا افتادن و ریزش. | [۷](chapters/07-budgeting-costs-and-vendors.md) |
+| ساختن در برابر خریدن | فقط چیزی را بسازید که کسب‌وکار را متمایز می‌کند؛ سرویس‌های کالایی را بخرید. | [۷](chapters/07-budgeting-costs-and-vendors.md) · [۸](chapters/08-technical-principles-and-strategy.md) |
+| اصول فنی | مجموعه‌ای کوتاه و ساخته‌ی خود تیم، مثل اول سادگی و مستندسازی و تست، که هم به کد و هم به فرهنگ شکل می‌دهد. | [۸](chapters/08-technical-principles-and-strategy.md) · [۹](chapters/09-collaborative-technical-practices-and-decision-making.md) · [۱۱](chapters/11-fitting-it-all-together.md) |
+| token نوآوری | مدل Dan McKinley: هر شرکت حدود سه انتخاب فناوری غیرکسل‌کننده دارد؛ خرجشان کنید سر چیزی که متمایزتان می‌کند. | [۸](chapters/08-technical-principles-and-strategy.md) |
+| سند RFC و ADR | سند RFC پیش از ساختن، تصمیم را مشارکتی می‌گیرد؛ سند ADR ثبت می‌کند چه تصمیمی گرفته شد. | [۸](chapters/08-technical-principles-and-strategy.md) · [۹](chapters/09-collaborative-technical-practices-and-decision-making.md) |
+| امنیت روانی | این باور که بابت حرف زدن تنبیه نمی‌شوید؛ پایه‌ی تصمیم‌های مشارکتی و پایه‌ی همه چیز دیگر. | [۳](chapters/03-navigating-chaos.md) · [۹](chapters/09-collaborative-technical-practices-and-decision-making.md) · [۱۰](chapters/10-metrics-that-matter-for-engineering-teams.md) · [۱۱](chapters/11-fitting-it-all-together.md) |
+| متریک‌های DORA | تکرار deployment، زمان رسیدن تغییر، نرخ خرابی تغییر و زمان بازیابی؛ مجموعه‌ی شروع، به‌علاوه‌ی یکی دو متریک زمینه‌ای. | [۱۰](chapters/10-metrics-that-matter-for-engineering-teams.md) · [۱۱](chapters/11-fitting-it-all-together.md) |
+| قانون Goodhart | وقتی یک سنجه به هدف تبدیل شود، دیگر سنجه‌ی خوبی نیست؛ velocity نمونه‌ی کلاسیکش است. | [۱۰](chapters/10-metrics-that-matter-for-engineering-teams.md) |
 
-## How these notes work
+## این یادداشت‌ها چطور نوشته شده‌اند
 
-- **Everything above *Beyond the book* in a chapter note restates the book**, with page references. Supplementary material, meaning outside sources and the vault's interpretation, lives under *Beyond the book* or in `> **Vault note:**` callouts.
-- **Page numbers are printed pages** (PDF page − 20).
-- The book's recurring boxes — In Practice (April's story) and Exercises — appear as callouts with their pages.
-- Section outlines are the book's own table of contents, taken from the PDF's bookmarks.
-- The book's figures are cropped from the PDF and shown with their label, printed page and a caption saying what to look at; Mermaid diagrams are the vault's own summaries, and their captions say so.
-- *Check yourself* questions and answers are the vault's, written from the notes; the answers cite pages.
-- Simulations and experiments are the vault's own implementations of situations the book describes — the Process Pulse, leadership modes, team capabilities, the drift diagnostic, impact versus effort, unit economics, innovation tokens, choosing a medium, choosing metrics, focus versus spread, headcount costs and velocity targets. Each says which pages it illustrates and what it invents.
+- **هر چیزی که در یادداشت یک فصل بالای *فراتر از کتاب* است، خود کتاب را بازگو می‌کند**، با ارجاع به صفحه. مطالب مکمل، یعنی منابع بیرونی و خوانش vault، زیر *فراتر از کتاب* یا در کادرهای `> **Vault note:**` می‌آیند.
+- **شماره‌ی صفحه‌ها صفحه‌ی چاپی‌اند** (صفحه‌ی PDF منهای ۲۰).
+- جعبه‌های تکرارشونده‌ی کتاب، یعنی In Practice با داستان April و تمرین‌ها، به شکل کادر با شماره‌ی صفحه‌شان می‌آیند.
+- فهرست بخش‌ها همان فهرست مطالب خود کتاب است که از bookmarkهای PDF برداشته شده.
+- شکل‌های کتاب از PDF بریده شده‌اند و با برچسب و صفحه‌ی چاپی و زیرنویسی که می‌گوید به چه چیزی نگاه کنید نشان داده می‌شوند؛ نمودارهای Mermaid جمع‌بندی خود vault هستند و زیرنویسشان همین را می‌گوید.
+- پرسش‌های *خودتان را بسنجید* و پاسخ‌هایشان مال vault است و از روی همین یادداشت‌ها نوشته شده؛ پاسخ‌ها به صفحه ارجاع می‌دهند.
+- شبیه‌سازی‌ها و آزمایش‌ها پیاده‌سازی خود vault از موقعیت‌هایی‌اند که کتاب شرح می‌دهد: نظرسنجی Process Pulse، حالت‌های رهبری، توانمندی‌های تیم، تشخیص رانش، اثر در برابر تلاش، اقتصاد واحد، token نوآوری، انتخاب رسانه، انتخاب متریک، تمرکز در برابر پراکندگی، هزینه‌ی نیرو و هدف‌گذاری velocity. هر کدام می‌گویند کدام صفحه‌ها را نشان می‌دهند و چه چیزی را خودشان ساخته‌اند.
 
-## Source
+## منبع
 
-- **Primary source:** the publisher's PDF of the First Edition (2026; first release 2026-01-20), © 2026 Worthwhile Technology LLC and James Turnbull, O'Reilly Media (273 PDF pages). The PDF is kept outside version control (see `.gitignore`).
-- **Table of contents:** taken from the PDF's bookmark outline; printed page numbers come from the page footers.
-- **Structure:** front matter (preface), eleven chapters and an index.
-- **Coverage:** all eleven chapters are covered.
-- **Figures:** the book has eight figures in Chapters 2–8; seven are shown in the notes (Figures 2-1, 3-1, 5-1, 6-2, 7-1, 8-1 and 8-2). Figure 6-1, the user story template, is given as text instead. The book's tables are reproduced as Markdown tables.
+- **منبع اصلی:** نسخه‌ی PDF ناشر از ویراست اول در سال ۲۰۲۶، با انتشار اول در ۲۰۲۶-۰۱-۲۰، © ۲۰۲۶ Worthwhile Technology LLC و James Turnbull، O'Reilly Media، با ۲۷۳ صفحه‌ی PDF. این PDF بیرون از version control نگه داشته می‌شود؛ `.gitignore` را ببینید.
+- **فهرست مطالب:** از bookmarkهای PDF برداشته شده و شماره‌ی صفحه‌های چاپی از پانویس صفحه‌ها می‌آیند.
+- **ساختار:** مطالب ابتدای کتاب شامل پیش‌گفتار، یازده فصل، و یک نمایه.
+- **پوشش:** هر یازده فصل پوشش داده شده‌اند.
+- **شکل‌ها:** کتاب هشت شکل در فصل‌های ۲ تا ۸ دارد که هفت‌تایشان در یادداشت‌ها آمده‌اند، یعنی شکل‌های ۲-۱ و ۳-۱ و ۵-۱ و ۶-۲ و ۷-۱ و ۸-۱ و ۸-۲. شکل ۶-۱، یعنی قالب user story، به‌جای تصویر به شکل متن آمده. جدول‌های کتاب به شکل جدول Markdown بازسازی شده‌اند.
