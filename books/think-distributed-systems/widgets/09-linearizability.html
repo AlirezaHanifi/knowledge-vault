@@ -1,65 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Is This History Linearizable?</title>
-<meta name="description" content="Move the operations of three processes on a register along a timeline and let the checker search for a sequential order that gives the same results and respects real time, or explain why none exists. Illustrates Think Distributed Systems, Chapter 9.">
+<title>آیا این تاریخ linearizable است؟</title>
+<meta name="description" content="عملیات سه process روی یک register را روی خط زمان جابه‌جا کنید و بگذارید سنجنده ترتیبی ترتیبی بجوید که همان نتیجه‌ها را بدهد و زمان واقعی را محترم بشمارد، یا توضیح بدهد چرا هیچ‌کدام نیست. تصویری از فصل ۹ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  svg.tl { width: 100%; height: auto; display: block; } svg.tl text { fill: var(--ink); font-size: 11px; font-family: var(--mono); }
+  svg.tl { width: 100%; height: auto; display: block; direction: ltr; } svg.tl text { fill: var(--ink); font-size: 11px; font-family: var(--mono); }
   svg.tl rect.op { fill: var(--accent-soft); stroke: var(--accent); } svg.tl rect.op.rd { fill: var(--surface-2); stroke: var(--ink); }
   svg.tl line.lp { stroke: var(--ok); stroke-width: 2; }
-  table.ops { width: 100%; border-collapse: collapse; font-size: .8rem; } table.ops td, table.ops th { border-bottom: 1px solid var(--line); padding: 3px 4px; text-align: left; }
+  table.ops { width: 100%; border-collapse: collapse; font-size: .8rem; } table.ops td, table.ops th { border-bottom: 1px solid var(--line); padding: 3px 4px; text-align: right; }
   table.ops input { width: 3.5em; } table.ops select { max-width: 6em; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/09-consistency.html">Chapter 9</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Linearizability checker</span>
+      <a href="../chapters/09-consistency.html">فصل ۹</a><span aria-hidden="true">/</span>
+      <span aria-current="page">سنجنده‌ی linearizability</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 9 · Consistency</div>
-  <h1>Is this history linearizable?</h1>
-  <p class="lede">Each operation is an interval from <strong>invocation</strong> to <strong>completion</strong>. A history is <strong>linearizable</strong> if some sequential history gives the same results (sequential equivalence) and keeps every pair of non-overlapping operations in their real-time order. Operations that overlap may be ordered either way.</p>
-  <p class="source-note">Illustrates “Linearizability” and “Formal definition of linearizability” (pp. 121–124, Figures 9.7–9.8, Table 9.3). The presets for Figures 9.7 and 9.8 are re-expressed as register histories; the other presets and the brute-force checker are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۹ · consistency</div>
+  <h1>آیا این تاریخ linearizable است؟</h1>
+  <p class="lede">هر عملیاتی بازه‌ای است از <strong>فراخوانی</strong> تا <strong>تمام شدن</strong>. تاریخ <strong>linearizable</strong> است اگر تاریخی ترتیبی همان نتیجه‌ها را بدهد، یعنی هم‌ارزی ترتیبی، و هر زوج عملیاتی که هم‌پوشان نیستند را در ترتیب real-timeشان نگه دارد. عملیاتی که هم‌پوشان‌اند می‌توانند هر طور مرتب شوند.</p>
+  <p class="source-note">تصویری از «linearizability» و «تعریف صوری linearizability» (صص. ۱۲۱–۱۲۴، شکل‌های ۹.۷ و ۹.۸، جدول ۹.۳). آن از‌پیش‌آماده‌ها برای شکل‌های ۹.۷ و ۹.۸ به‌شکل تاریخ register از نو بیان شده‌اند؛ و بقیه‌ی از‌پیش‌آماده‌ها و سنجنده‌ی سرسختی مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel"><div id="tl"></div><div class="callout" id="out" style="margin-top:10px" aria-live="polite"></div></div>
-      <div class="panel"><p class="panel-title">Operations (times 0–20)</p><div class="table-wrap"><table class="ops" id="ops"></table></div></div>
+      <div class="panel"><p class="panel-title">عملیات؛ زمان ۰ تا ۲۰</p><div class="table-wrap"><table class="ops" id="ops"></table></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="preset"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="preset"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Figure 9.7:</strong> process A writes 10, gets OK, then reads 0. No order can put the read after the write <em>and</em> return 0, so it isn’t linearizable.</li>
-    <li><strong>Overlap gives freedom.</strong> A read that overlaps a write may return the old or the new value; both have a valid linearization point.</li>
-    <li><strong>Two reads that disagree with real time</strong>: if B reads the new value and C, starting later, reads the old one, no single order of the write explains both.</li>
+    <li><strong>شکل ۹.۷:</strong> process A مقدار ۱۰ را می‌نویسد، تأیید می‌گیرد، بعد ۰ می‌خواند. هیچ ترتیبی نمی‌تواند خواندن را پس از نوشتن بگذارد <em>و</em> ۰ برگرداند، پس linearizable نیست.</li>
+    <li><strong>هم‌پوشانی آزادی می‌دهد.</strong> خواندنی که با نوشتنی هم‌پوشان است می‌تواند مقدار قدیم یا تازه را برگرداند؛ هر دو نقطه‌ی خطی‌سازی معتبر دارند.</li>
+    <li><strong>دو خواندن که با زمان واقعی نمی‌خوانند</strong>: اگر B مقدار تازه را بخواند و C، که دیرتر شروع می‌کند، قدیم را، هیچ ترتیب تنهایی از آن نوشتن هر دو را توضیح نمی‌دهد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/09-consistency.html"><small>Lesson</small>9. Consistency</a></li>
+    <li><a href="../chapters/09-consistency.html"><small>درس</small>فصل ۹: consistency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -82,7 +82,8 @@ function stats(rows) {
     f98: [{ p: "B", k: "w", v: 1, s: 1, e: 3 }, { p: "B", k: "w", v: 2, s: 5, e: 7 }, { p: "A", k: "r", v: 1, s: 9, e: 12 }],
     ok3: [{ p: "A", k: "w", v: 1, s: 1, e: 5 }, { p: "B", k: "w", v: 2, s: 3, e: 9 }, { p: "C", k: "r", v: 1, s: 10, e: 13 }]
   }, ops, pre = "f97";
-  function load(k) { pre = k; ops = PRE[k].map(function (o) { return Object.assign({}, o); }); log.add("Loaded preset: " + k, "muted"); render(); }
+  var PNAME = { f97: "شکل ۹.۷", f98: "شکل ۹.۸ به‌شکل register", overlap: "خواندن هم‌پوشان", inversion: "وارونگی خواندن", ok3: "نوشتن‌های هم‌زمان" };
+  function load(k) { pre = k; ops = PRE[k].map(function (o) { return Object.assign({}, o); }); log.add("از‌پیش‌آماده بار شد: " + PNAME[k], "muted"); render(); }
   function name(o) { return o.p + ":" + (o.k === "w" ? "write(" + o.v + ")" : "read→" + o.v); }
   function check() {
     var n = ops.length, best = null, idx = ops.map(function (_, i) { return i; }), tried = 0;
@@ -104,7 +105,7 @@ function stats(rows) {
   function render() {
     var W = 560, procs = ["A", "B", "C"].filter(function (p) { return ops.some(function (o) { return o.p === p; }); }), H = 30 + procs.length * 46;
     var sx = function (v) { return 40 + v * (W - 60) / 20; }, res = check();
-    var s = Kit.svg("svg", { class: "tl", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Timeline of " + ops.length + " operations" });
+    var s = Kit.svg("svg", { class: "tl", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "خط زمان " + ops.length + " عملیات" });
     for (var g = 0; g <= 20; g += 5) { var tt = Kit.svg("text", { x: sx(g) - 4, y: H - 4 }); tt.textContent = g; s.appendChild(tt); }
     procs.forEach(function (p, pi) { var y = 14 + pi * 46, lab = Kit.svg("text", { x: 4, y: y + 18 }); lab.textContent = p; s.appendChild(lab);
       ops.forEach(function (o, i) { if (o.p !== p) return;
@@ -115,37 +116,37 @@ function stats(rows) {
     });
     var d = Kit.clear(document.getElementById("tl")); d.appendChild(s);
     var out = document.getElementById("out");
-    if (res.order) { out.className = "callout ok"; out.textContent = "Linearizable. A valid order: " + res.order.map(function (i) { return name(ops[i]); }).join(" → ") + ". Green ticks mark illustrative linearization points."; }
+    if (res.order) { out.className = "callout ok"; out.textContent = "linearizable است. ترتیبی معتبر: " + res.order.map(function (i) { return name(ops[i]); }).join(" → ") + ". تیک‌های سبز نقطه‌های خطی‌سازی را تصویری نشان می‌دهند."; }
     else {
       var why = "";
-      ops.forEach(function (o) { if (o.k === "r" && !why) { var w = ops.filter(function (q) { return q.k === "w" && q.v === o.v; }); if (o.v !== 0 && !w.length) why = name(o) + " returns a value nobody wrote."; else if (w.length && w.every(function (q) { return q.s > o.e; })) why = name(o) + " completes before any write of " + o.v + " starts."; } });
-      out.className = "callout bad"; out.textContent = "Not linearizable: no sequential order gives these results while respecting real time. " + (why || "Every real-time-respecting order makes some read return a different value.");
+      ops.forEach(function (o) { if (o.k === "r" && !why) { var w = ops.filter(function (q) { return q.k === "w" && q.v === o.v; }); if (o.v !== 0 && !w.length) why = "عملیات " + name(o) + " مقداری برمی‌گرداند که هیچ‌کس ننوشته."; else if (w.length && w.every(function (q) { return q.s > o.e; })) why = "عملیات " + name(o) + " پیش از شروع هر نوشتنی از " + o.v + " تمام می‌شود."; } });
+      out.className = "callout bad"; out.textContent = "linearizable نیست: هیچ ترتیب ترتیبی‌ای این نتیجه‌ها را با محترم شمردن زمان واقعی نمی‌دهد. " + (why || "هر ترتیبی که زمان واقعی را محترم بشمارد یکی از خواندن‌ها را وا می‌دارد مقدار دیگری برگرداند.");
     }
     var t = Kit.clear(document.getElementById("ops"));
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["Proc", "Op", "Value", "Start", "End"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["process", "عملیات", "مقدار", "آغاز", "پایان"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
     var tb = Kit.el("tbody");
     ops.forEach(function (o, i) {
-      function num(key) { var inp = Kit.el("input", { type: "number", min: 0, max: 20, value: o[key], "aria-label": name(o) + " " + key }); inp.addEventListener("change", function () { var v = Math.max(0, Math.min(20, +inp.value)); o[key] = v; if (o.e <= o.s) { if (key === "s") o.e = Math.min(20, o.s + 1); else o.s = Math.max(0, o.e - 1); } log.add(name(o) + ": interval " + o.s + "–" + o.e, "muted"); render(); }); return inp; }
-      var val = Kit.el("select", { "aria-label": name(o) + " value" }); [0, 1, 2, 10].forEach(function (v) { val.appendChild(Kit.el("option", { value: v }, String(v))); }); val.value = o.v;
+      function num(key) { var inp = Kit.el("input", { type: "number", min: 0, max: 20, value: o[key], "aria-label": name(o) + " " + (key === "s" ? "آغاز" : "پایان") }); inp.addEventListener("change", function () { var v = Math.max(0, Math.min(20, +inp.value)); o[key] = v; if (o.e <= o.s) { if (key === "s") o.e = Math.min(20, o.s + 1); else o.s = Math.max(0, o.e - 1); } log.add(name(o) + ": بازه " + o.s + "–" + o.e, "muted"); render(); }); return inp; }
+      var val = Kit.el("select", { "aria-label": name(o) + " مقدار" }); [0, 1, 2, 10].forEach(function (v) { val.appendChild(Kit.el("option", { value: v }, String(v))); }); val.value = o.v;
       val.addEventListener("change", function () { o.v = +val.value; render(); });
       tb.appendChild(Kit.el("tr", null, Kit.el("td", null, o.p), Kit.el("td", null, o.k === "w" ? "write" : "read"), Kit.el("td", null, val), Kit.el("td", null, num("s")), Kit.el("td", null, num("e"))));
     });
     t.appendChild(tb);
-    stats([["Operations", ops.length], ["Orders tried", res.tried], ["Linearizable", res.order ? "yes" : "no", res.order ? "ok" : "bad"]]);
+    stats([["عملیات", ops.length], ["ترتیب‌های آزموده", res.tried], ["linearizable", res.order ? "بله" : "نه", res.order ? "ok" : "bad"]]);
   }
-  document.getElementById("preset").appendChild(Kit.segmented({ label: "History", value: pre, options: [{ value: "f97", label: "Fig. 9.7" }, { value: "f98", label: "Fig. 9.8 (as a register)" }, { value: "overlap", label: "Overlapping read" }, { value: "inversion", label: "Read inversion" }, { value: "ok3", label: "Concurrent writes" }], onChange: load }).element);
+  document.getElementById("preset").appendChild(Kit.segmented({ label: "تاریخ", value: pre, options: [{ value: "f97", label: "شکل ۹.۷" }, { value: "f98", label: "شکل ۹.۸ به‌شکل register" }, { value: "overlap", label: "خواندن هم‌پوشان" }, { value: "inversion", label: "وارونگی خواندن" }, { value: "ok3", label: "نوشتن‌های هم‌زمان" }], onChange: load }).element);
   load("f97");
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "A read overlaps a write of 1 to a register that held 0. Which results are linearizable?",
-      options: ["Only 1", "Only 0", "Either 0 or 1"], answer: 2,
-      explain: "Overlapping operations may be ordered either way (p. 123)." },
-    { q: "What does real-time ordering require?",
-      options: ["Every operation is instantaneous", "An operation invoked after another completed must see its effects", "Processes are synchronized"], answer: 1,
-      explain: "p. 123." },
-    { q: "Is “linearizable” a fact about a history or a guarantee about a system?",
-      options: ["Only a fact", "Only a guarantee", "Both: a fact about one history, a guarantee when it holds for every possible history"], answer: 2,
-      explain: "p. 123." }
+    { q: "خواندنی با نوشتن ۱ روی registerی هم‌پوشان است که ۰ داشت. کدام نتیجه‌ها خطی‌پذیرند؟",
+      options: ["تنها ۱", "تنها ۰", "هر یک از ۰ یا ۱"], answer: 2,
+      explain: "عملیات هم‌پوشان می‌توانند هر طور مرتب شوند (ص. ۱۲۳)." },
+    { q: "ترتیب real-time چه می‌خواهد؟",
+      options: ["این‌که هر عملیاتی لحظه‌ای باشد", "این‌که عملیاتی که پس از تمام شدن عملیاتی دیگر فرا خوانده شده اثرهایش را ببیند", "این‌که processها هم‌گام باشند"], answer: 1,
+      explain: "ص. ۱۲۳." },
+    { q: "linearizability واقعیتی درباره‌ی یک تاریخ است یا تضمینی درباره‌ی یک سیستم؟",
+      options: ["تنها واقعیت", "تنها تضمین", "هر دو: واقعیتی درباره‌ی یک تاریخ، و تضمینی وقتی برای هر تاریخ ممکنی برقرار باشد"], answer: 2,
+      explain: "ص. ۱۲۳." }
   ]);
 })();
 </script>

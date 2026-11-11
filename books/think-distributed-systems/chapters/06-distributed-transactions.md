@@ -3,190 +3,204 @@ book: think-distributed-systems
 chapter: 6
 title: "Distributed transactions"
 pages: "79–89"
+translated_title: "تراکنش توزیع‌شده"
+lang: fa
 ---
 
-# 6. Distributed transactions
+# فصل ۶: تراکنش توزیع‌شده
 
-[← 5. Transactions](05-transactions.md) · [Book](../README.md) · [7. Partitioning →](07-partitioning.md)
+[فصل ۵: تراکنش →](05-transactions.md) · [کتاب](../README.md) · [فصل ۷: پارتیشن‌بندی ←](07-partitioning.md)
 
-## Summary
+## خلاصه
 
-A **distributed transaction** spans several **resource managers (RMs)**: databases, but also systems such as message queues (p. 79). Moving Chapter 5's transfer onto two RMs turns one transaction into two, and raises the question of how to make them commit or abort **together**. The answer is an **atomic commit protocol** (pp. 79–80).
+یک **تراکنش توزیع‌شده** روی چند **resource manager**، یعنی RM، کشیده می‌شود: دیتابیس‌ها، و همچنین سیستم‌هایی مثل صف پیام (p. 79). بردن انتقال فصل ۵ روی دو RM، یک تراکنش را به دو تراکنش تبدیل می‌کند، و این پرسش را پیش می‌کشد که چطور **با هم** commit یا abort کنند. پاسخ یک **پروتکل تعهد اتمی** است (pp. 79–80).
 
-On one RM, atomicity is a single local write of a commit or abort entry; on several RMs it needs a protocol, specified by safety (no conflicting decisions) and liveness (everyone eventually decides) (pp. 81–82). Protocols are **blocking** or **nonblocking** (p. 82). The chapter models a global transaction as a state vector of local transactions, each *working → prepared → committed or aborted* (pp. 82–83). It then walks through **Two-Phase Commit**: the Prepare and Commit phases, the asymmetry of Vote-to-Commit vs. Abort, recovery rules for RMs that fail at each point, and the coordinator failure that **blocks** prepared RMs (pp. 83–86). Improvements, such as RMs asking each other, reduce blocking. Timing out and aborting can violate **safety** (pp. 86–88).
+روی یک RM، اتمی بودن یک نوشتن محلی تک از ورودی commit یا abort است؛ و روی چند RM به پروتکلی نیاز دارد که با ایمنی، یعنی بی تصمیم متناقض، و زنده‌بودن، یعنی سرانجام همه تصمیم می‌گیرند، مشخص می‌شود (pp. 81–82). پروتکل‌ها یا **بندآور**ند یا **نابندآور** (p. 82). فصل یک تراکنش سراسری را به‌عنوان برداری از حالت تراکنش‌های محلی مدل می‌کند که هر کدام از *working* به *prepared* و بعد به *committed* یا *aborted* می‌روند (pp. 82–83). بعد **Two-Phase Commit** را می‌گردد: فازهای Prepare و Commit، نامتقارنی Vote-to-Commit در برابر Abort، قاعده‌های بازیابی برای RMهایی که در هر نقطه شکست می‌خورند، و شکست coordinator که RMهای prepared را **بند می‌آورد** (pp. 83–86). بهبودها، مثل این که RMها از هم بپرسند، بند آمدن را کم می‌کنند. timeout خوردن و abort کردن می‌تواند **ایمنی** را نقض کند (pp. 86–88).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Resource manager** is the general term for any participant in a distributed transaction, such as a database or a message queue (p. 79).
-- **One RM:** atomicity is one atomic write of a commit or abort entry. A crash before it is treated as abort on recovery (p. 81).
-- **Many RMs:** an atomic commit protocol ensures that subtransactions *unanimously* commit or abort. Safety: no RM commits while another aborts. Liveness: every RM eventually stays committed or stays aborted forever (pp. 81–82).
-- **Blocking** protocols keep safety but not liveness when a participant fails. **Nonblocking** protocols keep both despite a single participant failure (p. 82).
-- **Local transaction states:** working, prepared, committed, aborted. A global transaction's state is the vector of these, plus in-flight messages (pp. 82–83).
-- **2PC** has one transaction coordinator (TC) and two or more RMs. In Prepare, RMs vote; in Commit, the TC decides commit only if *every* vote is Vote-to-Commit (pp. 83–85).
-- **The asymmetry:** in Prepare, an RM can unilaterally *abort* but can never unilaterally *commit* (p. 85).
-- **RM failures don't block 2PC; a TC failure can.** An RM that voted to commit is stuck until the TC is repaired (pp. 85–86).
-- **Timing out to abort is unsafe.** With imperfect clocks, a recovered TC's Commit can land inside some RMs' timeout windows and outside others' (p. 87).
+- **مفهوم resource manager** واژه‌ی عمومی هر شرکت‌کننده‌ای در یک تراکنش توزیع‌شده است، مثل یک دیتابیس یا یک صف پیام (p. 79).
+- **یک RM:** اتمی بودن یک نوشتن اتمی از ورودی commit یا abort است. crash پیش از آن، سر بازیابی abort حساب می‌شود (p. 81).
+- **چند RM:** یک پروتکل تعهد اتمی مطمئن می‌شود که زیر‌تراکنش‌ها *یک‌صدا* commit یا abort کنند. ایمنی: هیچ RMی در حالی که دیگری abort می‌کند commit نمی‌کند. liveness: هر RMی سرانجام برای همیشه committed یا aborted می‌ماند (pp. 81–82).
+- **پروتکل‌های بندآور** سر شکست یک شرکت‌کننده ایمنی را نگه می‌دارند ولی liveness را نه. **پروتکل‌های نابندآور** با وجود شکست یک شرکت‌کننده هر دو را نگه می‌دارند (p. 82).
+- **حالت‌های تراکنش محلی:** working و prepared و committed و aborted. حالت یک تراکنش سراسری برداری از این‌هاست، به‌علاوه‌ی پیام‌های در پرواز (pp. 82–83).
+- **روش 2PC** یک coordinator تراکنش، یعنی TC، و دو RM یا بیشتر دارد. در Prepare، RMها رأی می‌دهند؛ و در Commit، coordinator فقط وقتی commit را تصمیم می‌گیرد که *هر* رأی Vote-to-Commit باشد (pp. 83–85).
+- **نامتقارنی:** در Prepare، یک RM می‌تواند یک‌طرفه *abort* کند ولی هیچ‌وقت نمی‌تواند یک‌طرفه *commit* کند (p. 85).
+- **شکست RM روش 2PC را بند نمی‌آورد؛ شکست TC می‌تواند.** RMی که به commit رأی داده تا تعمیر TC گیر می‌کند (pp. 85–86).
+- **مفهوم timeout خوردن برای abort ناایمن است.** با ساعت‌های ناقص، Commit یک TC بازگشته می‌تواند داخل پنجره‌ی timeout بعضی RMها بنشیند و بیرون پنجره‌ی بقیه (p. 87).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 6.1 Atomic commitment: From a single RM to multiple RMs — p. 79
-  - 6.1.1 Transaction on a single RM — p. 81
-  - 6.1.2 Transaction on multiple RMs — p. 81
-  - 6.1.3 Blocking and nonblocking — p. 82
-- 6.2 The essence of distributed transactions — p. 82
-- 6.3 Two-Phase Commit protocol — p. 83
-  - 6.3.1 In the absence of failure — p. 83
-  - 6.3.2 In the presence of failure — p. 85
-  - 6.3.3 Improvement — p. 86
+- ۶.۱ تعهد اتمی: از یک RM به چند RM — ص. ۷۹
+  - ۶.۱.۱ تراکنش روی یک RM — ص. ۸۱
+  - ۶.۱.۲ تراکنش روی چند RM — ص. ۸۱
+  - ۶.۱.۳ بندآور و نابندآور — ص. ۸۲
+- ۶.۲ جوهر تراکنش توزیع‌شده — ص. ۸۲
+- ۶.۳ پروتکل Two-Phase Commit — ص. ۸۳
+  - ۶.۳.۱ در نبود شکست — ص. ۸۳
+  - ۶.۳.۲ در حضور شکست — ص. ۸۵
+  - ۶.۳.۳ بهبود — ص. ۸۶
 
-## Notes
+## یادداشت‌ها
 
-The book uses *resource manager* and *database system* interchangeably from here on (p. 79).
+کتاب از این‌جا به بعد *resource manager* و *سیستم دیتابیس* را به‌جای هم به کار می‌برد (p. 79).
 
-### 6.1 Atomic commitment: From a single RM to multiple RMs
+### ۶.۱ تعهد اتمی: از یک RM به چند RM
 
-Listing 6.1 is the transfer as one transaction on one RM. Listing 6.2 splits it: RM1 debits the source and RM2 credits the target, each in its own `BEGIN … COMMIT` (pp. 79–80). How do we make the *composition* of two subtransactions a transaction in itself (Figure 6.1)? With an **atomic commit protocol** (p. 80).
+فهرست ۶.۱ همان انتقال به‌عنوان یک تراکنش روی یک RM است. فهرست ۶.۲ می‌شکندش: مؤلفه‌ی RM1 مبدأ را بدهکار و RM2 مقصد را بستانکار می‌کند، و هر کدام در `BEGIN … COMMIT` خودش (pp. 79–80). چطور *ترکیب* دو زیر‌تراکنش را خودش یک تراکنش کنیم (شکل ۶.۱)؟ با یک **پروتکل تعهد اتمی** (p. 80).
 
-The chapter focuses on **atomicity** only, and doesn't explicitly discuss consistency, isolation or durability (p. 81).
+فصل فقط روی **اتمی بودن** تمرکز دارد، و صریح درباره‌ی consistency و جداسازی و durableی بحث نمی‌کند (p. 81).
 
-#### 6.1.1–6.1.2 Single RM vs. multiple RMs (pp. 81–82)
+#### ۶.۱.۱ و ۶.۱.۲ یک RM در برابر چند RM (pp. 81–82)
 
-| | Atomicity comes from… | Failure before the decision |
+| | اتمی بودن از کجا می‌آید… | شکست پیش از تصمیم |
 |---|---|---|
-| **One RM** | One atomic write of a commit or abort entry to local state | On recovery, proceed as though an abort entry exists |
-| **Many RMs** | An atomic commit protocol that coordinates the commits (Figure 6.2) | The protocol must decide |
+| **یک RM** | یک نوشتن اتمی از ورودی commit یا abort در حالت محلی | سر بازیابی، طوری جلو بروید که گویی ورودی abort هست |
+| **چند RM** | پروتکل تعهد اتمی که commitها را هماهنگ می‌کند (شکل ۶.۲) | پروتکل باید تصمیم بگیرد |
 
-The correctness of an atomic commit protocol (pp. 81–82):
+درستی یک پروتکل تعهد اتمی (pp. 81–82):
 
-| Guarantee | Formula | In words |
+| تضمین | فرمول | به زبان ساده |
 |---|---|---|
-| **Safety** | ∄ rm₁, rm₂: state[rm₁] = commit ∧ state[rm₂] = abort | No two RMs reach conflicting decisions |
-| **Liveness** | ∀ rm: ◇□ state[rm] = commit ∨ ◇□ state[rm] = abort | Every RM is *eventually always* committed or eventually always aborted |
+| **ایمنی** | ∄ rm₁, rm₂: state[rm₁] = commit ∧ state[rm₂] = abort | هیچ دو RMی به تصمیم‌های متناقض نمی‌رسند |
+| **liveness** | ∀ rm: ◇□ state[rm] = commit ∨ ◇□ state[rm] = abort | هر RMی *سرانجام همیشه* committed یا سرانجام همیشه aborted است |
 
-#### 6.1.3 Blocking and nonblocking (p. 82)
+#### ۶.۱.۳ بندآور و نابندآور (p. 82)
 
-| Protocol type | When a participant fails |
+| گونه‌ی پروتکل | وقتی شرکت‌کننده‌ای شکست می‌خورد |
 |---|---|
-| **Blocking** | Safety, but not necessarily liveness |
-| **Nonblocking** | Safety *and* liveness despite a single participant failure: one failure can't stop the others from deciding |
+| **بندآور** | ایمنی، ولی نه لزوماً liveness |
+| **نابندآور** | ایمنی *و* liveness با وجود شکست یک شرکت‌کننده: یک شکست نمی‌تواند جلوی تصمیم بقیه را بگیرد |
 
-### 6.2 The essence of distributed transactions
+> **In practice:** هر جا دو سیستم با هم باید «همه یا هیچ» شوند، مثلاً ClickHouse و یک فایل در object storage، مسئله‌ی تعهد اتمی پیدا می‌شود.
+>
+> **Your turn:** export شبانه یک فایل CSV در bucket می‌نویسد و در ClickHouse ثبت می‌کند که export انجام شده. ترتیب این دو چه باید باشد؟
+>
+> *Answer:* اول فایل، بعد ثبت؛ و ثبت را idempotent کنید. اگر بین این دو fail شود، اجرای بعدی فایل را بازنویسی و ثبت را کامل می‌کند. با چند RM بدون پروتکل تعهد، فقط ترتیبی را برمی‌گزینید که حالت میانی‌اش بی‌خطر است (pp. 79–82).
 
-A **distributed (global) transaction** consists of two or more **nondistributed (local) transactions** (Figure 6.3) (p. 82). Each local transaction follows the state machine of Figure 6.4 (pp. 82–83):
+### ۶.۲ جوهر تراکنش توزیع‌شده
 
-![States of a local transaction: Working goes to Prepared or directly to Aborted; Prepared goes to Committed or Aborted](../figures/06-04.png)
+یک **تراکنش توزیع‌شده یا سراسری** از دو یا چند **تراکنش غیر‌توزیع‌شده یا محلی** ساخته می‌شود (شکل ۶.۳) (p. 82). هر تراکنش محلی state machine شکل ۶.۴ را دنبال می‌کند (pp. 82–83):
 
-*Figure 6.4 (p. 83): Working can abort on its own; once Prepared, the transaction waits for someone else's decision.*
+![حالت‌های یک تراکنش محلی: Working به Prepared یا مستقیم به Aborted می‌رود؛ و Prepared به Committed یا Aborted](../figures/06-04.png)
 
-A prepared transaction executes no more operations but hasn't yet decided. Committed and aborted are final and irreversible (p. 82). The global state is a **state vector** of the local states, plus the outstanding messages in the network. Figure 6.5 steps (working, working) → (prepared, working) → (prepared, prepared) → (committed, prepared) → (committed, committed) (p. 83).
+*Figure 6.4 (p. 83): حالت Working می‌تواند خودش abort کند؛ و همین که Prepared شد، تراکنش منتظر تصمیم کس دیگری می‌ماند.*
 
-### 6.3 Two-Phase Commit protocol
+تراکنشی که prepared است دیگر عملیاتی اجرا نمی‌کند ولی هنوز تصمیم نگرفته. حالت‌های committed و aborted نهایی و برگشت‌ناپذیرند (p. 82). حالت سراسری یک **بردار حالت** از حالت‌های محلی است، به‌علاوه‌ی پیام‌های معلق در شبکه. شکل ۶.۵ از (working, working) به (prepared, working) به (prepared, prepared) به (committed, prepared) به (committed, committed) قدم می‌زند (p. 83).
 
-2PC is the best-known and most-studied atomic commit protocol. It guarantees safety and liveness without participant failures, but only safety if one *specific* participant, the coordinator, fails. It is therefore **blocking** (p. 83).
+### ۶.۳ پروتکل Two-Phase Commit
 
-#### 6.3.1 In the absence of failure (pp. 83–85)
+روش 2PC شناخته‌شده‌ترین و بیشترین‌مطالعه‌شده پروتکل تعهد اتمی است. بی شکست شرکت‌کننده ایمنی و liveness را تضمین می‌کند، ولی اگر یک شرکت‌کننده‌ی *معین*، یعنی هماهنگ‌کننده، شکست بخورد فقط ایمنی را. پس **بندآور** است (p. 83).
 
-The client begins a transaction on each RM and runs ordinary reads and writes. Then, instead of asking the RMs to commit, it asks the **TC** to commit, which starts 2PC (Figure 6.6):
+#### ۶.۳.۱ در نبود شکست (pp. 83–85)
 
-![Sequence diagram between client, transaction coordinator and two resource managers: the client begins t1 on both RMs, runs the usual transaction, then sends commit t1 to the coordinator; in the prepare phase the coordinator sends prepare and both RMs vote to commit; in the commit phase it sends commit, both RMs ack, and the coordinator acks the client](../figures/06-06.png)
+نقش client روی هر RM تراکنشی شروع می‌کند و خواندن و نوشتن معمولی اجرا. بعد به‌جای این که از RMها بخواهد commit کنند، از **TC** می‌خواهد commit کند، که 2PC را شروع می‌کند (شکل ۶.۶):
 
-*Figure 6.6 (p. 84): the client hands the commit to the coordinator; each phase is one round trip to every RM. What each party logs at each step is in the table below.*
+![نمودار ترتیب بین client و coordinator تراکنش و دو resource manager: client تراکنش t1 را روی هر دو RM شروع می‌کند، تراکنش معمولی را اجرا، و بعد commit t1 را به coordinator می‌فرستد؛ در فاز prepare coordinator prepare می‌فرستد و هر دو RM به commit رأی می‌دهند؛ در فاز commit، commit می‌فرستد، هر دو RM تأیید می‌کنند، و coordinator به client تأیید می‌دهد](../figures/06-06.png)
 
-| Phase | Step (pp. 84–85) |
+*Figure 6.6 (p. 84): client دستور commit را به coordinator می‌دهد؛ و هر فاز یک رفت‌و‌برگشت به هر RM است. این که هر طرف در هر قدم چه چیزی را log می‌کند در جدول پایین است.*
+
+| فاز | قدم (pp. 84–85) |
 |---|---|
-| **1 · Prepare** | TC persists ⟨Prepare, Timeout⟩ and sends ⟨Prepare⟩ to all RMs |
-| | To commit, an RM persists ⟨Vote-to-Commit⟩ and sends it. To abort, it persists ⟨Abort⟩, sends it **and aborts at once** |
-| **2 · Commit** | All voted to commit ⇒ TC persists ⟨Commit⟩ and sends ⟨Commit⟩ to all |
-| | At least one ⟨Abort⟩ *or a timeout* ⇒ TC persists ⟨Abort⟩ and sends ⟨Abort⟩ to all |
-| | Each RM persists ⟨Commit⟩ or ⟨Abort⟩ and commits or aborts its local transaction |
+| **۱ · Prepare** | مؤلفه‌ی TC سه‌تایی ⟨Prepare, Timeout⟩ را durable می‌کند و ⟨Prepare⟩ را به همه‌ی RMها می‌فرستد |
+| | برای commit، یک RM مقدار ⟨Vote-to-Commit⟩ را durable و می‌فرستد. برای abort، مقدار ⟨Abort⟩ را durable می‌کند، می‌فرستد **و فوری abort می‌کند** |
+| **۲ · Commit** | همه به commit رأی دادند ⇐ مؤلفه‌ی TC مقدار ⟨Commit⟩ را durable می‌کند و ⟨Commit⟩ را به همه می‌فرستد |
+| | دست‌کم یک ⟨Abort⟩ *یا یک timeout* ⇐ مؤلفه‌ی TC مقدار ⟨Abort⟩ را durable و ⟨Abort⟩ را به همه می‌فرستد |
+| | هر RMی مقدار ⟨Commit⟩ یا ⟨Abort⟩ را durable می‌کند و تراکنش محلی‌اش را commit یا abort |
 
-**Aha! moment, the asymmetry** (p. 85): the vote isn't a Vote-to-Commit/Vote-to-Abort pair or a Commit/Abort pair. It's a **Vote-to-Commit/Abort** pair. During Prepare, an RM can't commit on its own, but it can abort on its own.
+**لحظه‌ی آها!، نامتقارنی** (p. 85): رأی، زوج Vote-to-Commit و Vote-to-Abort نیست، و زوج Commit و Abort هم نه. زوج **Vote-to-Commit و Abort** است. در طول Prepare، یک RM نمی‌تواند خودش commit کند، ولی می‌تواند خودش abort کند.
 
-#### 6.3.2 In the presence of failure (pp. 85–86)
+#### ۶.۳.۲ در حضور شکست (pp. 85–86)
 
-The system model is the partially synchronous one of Chapter 2 (p. 85).
+مدل سیستم همان partially synchronous فصل ۲ است (p. 85).
 
-**RM failure doesn't block 2PC.** What a recovering RM does depends on the last entry in its log (Figures 6.7–6.10):
+**شکست RM روش 2PC را بند نمی‌آورد.** کاری که یک RM در حال بازیابی می‌کند به آخرین ورودی logش بستگی دارد (شکل‌های ۶.۷ تا ۶.۱۰):
 
-| Last persisted entry | Meaning | On recovery |
+| آخرین ورودی durable | معنا | سر بازیابی |
 |---|---|---|
-| Neither ⟨Vote-to-Commit⟩ nor ⟨Abort⟩ | "We haven't promised yet" | Persist ⟨Abort⟩ and send ⟨Abort⟩ to the TC |
-| ⟨Vote-to-Commit⟩ | "We already promised" | **Ask the TC** for the decision |
-| ⟨Commit⟩ | "We already committed" | **REDO**, so the operations take effect |
-| ⟨Abort⟩ | "We already aborted" | **UNDO**, so no operation takes effect |
+| نه ⟨Vote-to-Commit⟩ و نه ⟨Abort⟩ | «هنوز قول نداده‌ایم» | مقدار ⟨Abort⟩ را durable و ⟨Abort⟩ را به TC بفرست |
+| مقدار ⟨Vote-to-Commit⟩ | «از قبل قول داده‌ایم» | **از TC بپرس** تصمیم چه بود |
+| مقدار ⟨Commit⟩ | «از قبل commit کرده‌ایم» | **REDO**، تا عملیات‌ها اثر کنند |
+| مقدار ⟨Abort⟩ | «از قبل abort کرده‌ایم» | **UNDO**، تا هیچ عملیاتی اثر نکند |
 
-**TC failure may block 2PC** (p. 86): an RM that has persisted ⟨Vote-to-Commit⟩ is stuck until the TC is repaired. In Figure 6.11, the TC fails during Commit *after* telling RM1 to commit. RM2 can neither commit nor abort, because it doesn't know what anyone else did.
+**شکست TC می‌تواند روش 2PC را بند بیاورد** (p. 86): RMی که ⟨Vote-to-Commit⟩ را durable کرده تا تعمیر TC گیر است. در شکل ۶.۱۱، مؤلفه‌ی TC در طول Commit و *بعد از* گفتن به RM1 که commit کند شکست می‌خورد. مؤلفه‌ی RM2 نه می‌تواند commit کند و نه abort، چون نمی‌داند بقیه چه کردند.
 
-![The same 2PC sequence as before, with a cross on the transaction coordinator's line in the commit phase after it sent commit to resource manager 1 and before it sent commit to resource manager 2](../figures/06-11.png)
+![همان ترتیب 2PC قبلی، با یک ضربدر روی خط coordinator تراکنش در فاز commit، بعد از آن که commit را به resource manager ۱ فرستاد و پیش از آن که به resource manager ۲ بفرستد](../figures/06-11.png)
 
-*Figure 6.11 (p. 87): RM1 has committed; RM2 has voted and can only wait for a coordinator that is down.*
+*Figure 6.11 (p. 87): مؤلفه‌ی RM1 commit کرده و RM2 رأی داده و فقط می‌تواند منتظر coordinatorی بماند که از کار افتاده.*
 
-> **Try it:** [2PC: recovery and blocking](../widgets/06-two-phase-commit.html) — run 2PC between a coordinator and two RMs, crash any of them at any step, watch each recovering RM apply the rule for its last log entry, then try the two "improvements": asking a peer, and timing out to abort.
+> **Try it:** [روش 2PC: بازیابی و بند آمدن](../widgets/06-two-phase-commit.html)؛ روش 2PC را بین یک coordinator و دو RM اجرا کنید، هر کدامشان را در هر قدمی crash کنید، ببینید هر RM در حال بازیابی قاعده‌ی آخرین ورودی logش را اعمال می‌کند، و بعد دو «بهبود» را امتحان کنید: پرسیدن از همتا، و timeout خوردن برای abort.
 
-#### 6.3.3 Improvement (pp. 86–88)
+#### ۶.۳.۳ بهبود (pp. 86–88)
 
-Many 2PC variants improve liveness. They have fewer blocking executions, but still some (p. 86).
+خیلی از گونه‌های 2PC liveness را بهتر می‌کنند. اجراهای بندآور کمتری دارند، ولی باز هم چندتایی (p. 86).
 
-| Idea | When it works | When it doesn't (pp. 87–88) |
+| ایده | کِی کار می‌کند | کِی نمی‌کند (pp. 87–88) |
 |---|---|---|
-| **Ask the other RMs** | If some RMj has already committed or aborted, RMi can safely do the same | If all RMs voted to commit and none has received the decision (Figure 6.12), nobody knows |
-| **Time out and abort** | — | **Unsafe**: clocks aren't perfectly synchronized, so when the TC recovers and sends ⟨Commit⟩, some RMs think it arrived within their window and commit, while others have already aborted |
+| **از RMهای دیگر بپرس** | اگر RMj از قبل commit یا abort کرده باشد، RMi می‌تواند امن همان کار را بکند | اگر همه‌ی RMها به commit رأی داده باشند و هیچ‌کدام تصمیم را نگرفته باشد (شکل ۶.۱۲)، کسی نمی‌داند |
+| **timeout بخور و abort کن** | — | **ناایمن**: ساعت‌ها کاملاً synchronous نیستند، پس وقتی TC برمی‌گردد و ⟨Commit⟩ می‌فرستد، بعضی RMها فکر می‌کنند داخل پنجره‌شان رسیده و commit می‌کنند، در حالی که بقیه از قبل abort کرده‌اند |
 
-The book calls this "a helpful reminder" of how subtle distributed protocols are (p. 87).
+کتاب این را «یادآوری مفیدی» از ظریف بودن پروتکل‌های توزیع‌شده می‌نامد (p. 87).
 
-## Trade-offs at a glance
+> **In practice:** نوشتن در ClickHouse و ذخیره‌ی cursor در dlt دو resource manager جدا هستند و هیچ coordinatorی بینشان نیست.
+>
+> **Your turn:** چرا 2PC بین ClickHouse و state loader پیاده نمی‌کنید؟
+>
+> *Answer:* ClickHouse فاز prepare ندارد، و 2PC اگر coordinator وسط کار بیفتد بندآور است: participantها تا برگشتن آن منتظر می‌مانند. at-least-once با insert idempotent همان نتیجه را بدون coordinator می‌دهد (pp. 83–88).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| One RM | Atomicity from a single local write | Data must live in one place |
-| 2PC | Atomicity across RMs; tolerates RM failures | Blocking when the TC fails; an extra round trip and forced log writes |
-| RMs ask their peers | Fewer blocked executions | Still blocks when everyone is prepared and nobody knows |
-| Timeout-and-abort | Liveness | Breaks safety: conflicting decisions |
-| A nonblocking protocol (outside the book) | Liveness despite a single failure | More rounds, or consensus on the decision |
+| یک RM | اتمی بودن از یک نوشتن محلی تک | داده باید در یک جا زندگی کند |
+| روش 2PC | اتمی بودن بین RMها؛ شکست RM را تحمل می‌کند | سر شکست TC بند می‌آید؛ یک رفت‌و‌برگشت اضافه و نوشتن‌های اجباری log |
+| پرسیدن RMها از همتاهایشان | اجراهای بندآمده‌ی کمتر | باز هم وقتی همه prepared‌اند و کسی نمی‌داند بند می‌آید |
+| timeout خوردن و abort کردن | liveness | ایمنی را می‌شکند: تصمیم‌های متناقض |
+| پروتکلی نابندآور، بیرون از کتاب | liveness با وجود یک شکست | دورهای بیشتر، یا consensus روی تصمیم |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Making 2PC nonblocking.** The standard fix is to replicate the coordinator's *decision* with consensus, as in Gray and Lamport's *Paxos Commit* or Spanner's Paxos-replicated participant groups. A crashed coordinator is then replaced by another replica that knows the decision. **Three-Phase Commit** adds a pre-commit phase but isn't safe under network partitions. Compare both in [Database Internals Ch. 13](../../database-internals/chapters/13-distributed-transactions.md) and its commit-protocol simulation.
-- **Locks held while blocked.** A prepared RM must keep holding its locks until it learns the decision, so a blocked 2PC also blocks other transactions on the same rows. That's why [DDIA Ch. 8](../../designing-data-intensive-applications/chapters/08-transactions.md) is cautious about XA transactions in practice.
-- **Sagas** avoid atomic commit altogether: each local transaction commits on its own, and failures are handled by compensation, the backward recovery of [Chapter 3](03-failure-tolerance.md). Helland's "Life beyond Distributed Transactions", cited in [Chapter 5](05-transactions.md), argues for this style.
+- **نابندآور کردن 2PC.** اصلاح استاندارد این است که *تصمیم* coordinator را با consensus تکرار کنید، مثل *Paxos Commit* از Gray و Lamport یا گروه‌های شرکت‌کننده‌ی Paxos‌تکرار‌شده در Spanner. آن‌وقت coordinator crash‌کرده با replicaی دیگری عوض می‌شود که تصمیم را می‌داند. روش **Three-Phase Commit** فازی پیش از commit اضافه می‌کند ولی زیر پارتیشن شبکه ایمن نیست. هر دو را در [فصل ۱۳ کتاب Database Internals](../../database-internals/chapters/13-distributed-transactions.md) و شبیه‌سازی پروتکل commitش مقایسه کنید.
+- **قفل‌هایی که در حال بند آمدن نگه داشته می‌شوند.** یک RM آماده باید قفل‌هایش را تا دانستن تصمیم نگه دارد، پس یک 2PC بندآمده تراکنش‌های دیگر روی همان ردیف‌ها را هم بند می‌آورد. از همین‌جاست که [فصل ۸ کتاب DDIA](../../designing-data-intensive-applications/chapters/08-transactions.md) درباره‌ی تراکنش‌های XA در عمل محتاط است.
+- **الگوی saga**ها کلاً از تعهد اتمی می‌پرهیزند: هر تراکنش محلی خودش commit می‌کند، و شکست‌ها با جبران مدیریت می‌شوند، یعنی همان بازیابی رو‌به‌عقب [فصل ۳](03-failure-tolerance.md). مقاله‌ی «Life beyond Distributed Transactions» از Helland، که در [فصل ۵](05-transactions.md) ارجاع شده، برای همین سبک استدلال می‌کند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. Thinking in distributed systems](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) (the behavior space of a two-participant transaction), [3. Failure tolerance](03-failure-tolerance.md) (blocking as fail-safe), [5. Transactions](05-transactions.md) (Undo, Redo and atomicity on one RM), [10. Distributed consensus](10-distributed-consensus.md) (the tool for nonblocking commitment), [11. Durable executions](11-durable-executions.md) (processes across services without 2PC).
+- **فصل‌های مرتبط:** [فصل ۱: فکر کردن در سیستم‌های توزیع‌شده](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) که فضای رفتار تراکنشی دو‌شرکت‌کننده‌ای را دارد، [فصل ۳: تحمل شکست](03-failure-tolerance.md) که بند آمدن را به‌عنوان fail-safe دارد، [فصل ۵: تراکنش](05-transactions.md) که Undo و Redo و اتمی بودن روی یک RM را دارد، [فصل ۱۰: consensus توزیع‌شده](10-distributed-consensus.md) که ابزار تعهد نابندآور را دارد، و [فصل ۱۱: اجراهای durable](11-durable-executions.md) که فرایندهای بین سرویس‌ها بی 2PC را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **State the safety and liveness properties of an atomic commit protocol.**
+1. **خاصیت‌های ایمنی و liveness یک پروتکل تعهد اتمی را بیان کنید.**
 
-   *Answer:* Safety: no two RMs end with one committed and the other aborted. Liveness: every RM is eventually always committed or eventually always aborted (pp. 81–82).
+   *Answer:* ایمنی: هیچ دو RMی با یکی committed و دیگری aborted تمام نمی‌شوند. liveness: هر RMی سرانجام همیشه committed یا سرانجام همیشه aborted است (pp. 81–82).
 
-2. **What separates a blocking protocol from a nonblocking one?**
+2. **چه چیزی پروتکل بندآور را از نابندآور جدا می‌کند؟**
 
-   *Answer:* A blocking protocol guarantees safety but not liveness when a participant fails. A nonblocking one guarantees both despite a single participant failure (p. 82).
+   *Answer:* پروتکل بندآور سر شکست یک شرکت‌کننده ایمنی را تضمین می‌کند ولی liveness را نه. نابندآور با وجود شکست یک شرکت‌کننده هر دو را تضمین می‌کند (p. 82).
 
-3. **Which pair of responses can an RM give in the Prepare phase?**
-   - [ ] Vote-to-Commit or Vote-to-Abort
-   - [x] Vote-to-Commit or Abort
-   - [ ] Commit or Abort
+3. **یک RM در فاز Prepare کدام زوج پاسخ را می‌تواند بدهد؟**
+   - [ ] مقدار Vote-to-Commit یا Vote-to-Abort
+   - [x] مقدار Vote-to-Commit یا Abort
+   - [ ] مقدار Commit یا Abort
 
-   *Answer:* An RM can unilaterally abort but can't unilaterally commit (p. 85).
+   *Answer:* یک RM می‌تواند یک‌طرفه abort کند ولی نمی‌تواند یک‌طرفه commit کند (p. 85).
 
-4. **An RM crashes after persisting ⟨Vote-to-Commit⟩. What does it do on recovery, and why?**
+4. **یک RM بعد از durable کردن ⟨Vote-to-Commit⟩ crash می‌کند. سر بازیابی چه می‌کند و چرا؟**
 
-   *Answer:* It asks the TC for the decision. It has promised to commit, so it may no longer abort on its own, but it doesn't know whether others committed (pp. 85–86).
+   *Answer:* از TC تصمیم را می‌پرسد. قول commit داده، پس دیگر نمی‌تواند خودش abort کند، ولی نمی‌داند بقیه commit کرده‌اند یا نه (pp. 85–86).
 
-5. **Why can a TC failure block 2PC while an RM failure can't?**
+5. **چرا شکست TC می‌تواند 2PC را بند بیاورد ولی شکست RM نه؟**
 
-   *Answer:* A recovering RM can always work out what to do from its own log, or by asking the TC. RMs that voted to commit depend on the TC's decision, and nobody else may have it (pp. 85–86).
+   *Answer:* یک RM در حال بازیابی همیشه می‌تواند از log خودش یا با پرسیدن از TC بفهمد چه کند. RMهایی که به commit رأی داده‌اند به تصمیم TC وابسته‌اند، و ممکن است هیچ‌کس دیگری نداشته باشدش (pp. 85–86).
 
-6. **Why is "time out and abort" unsafe for prepared RMs?**
+6. **چرا «timeout بخور و abort کن» برای RMهای آماده ناایمن است؟**
 
-   *Answer:* Clocks aren't perfectly synchronized. A recovered TC's Commit may arrive inside some RMs' timeout windows (they commit) and outside others' (they've aborted), so decisions conflict (p. 87).
+   *Answer:* ساعت‌ها کاملاً synchronous نیستند. دستور Commit یک TC بازگشته می‌تواند داخل پنجره‌ی timeout بعضی RMها برسد، که commit می‌کنند، و بیرون پنجره‌ی بقیه، که از قبل abort کرده‌اند، پس تصمیم‌ها متناقض می‌شوند (p. 87).
 
-7. **When does asking the other RMs fail to help?**
+7. **پرسیدن از RMهای دیگر کِی کمکی نمی‌کند؟**
 
-   *Answer:* When all RMs voted to commit and none has yet received ⟨Commit⟩ or ⟨Abort⟩ (Figure 6.12) (p. 87).
+   *Answer:* وقتی همه‌ی RMها به commit رأی داده‌اند و هیچ‌کدام هنوز ⟨Commit⟩ یا ⟨Abort⟩ نگرفته (شکل ۶.۱۲) (p. 87).

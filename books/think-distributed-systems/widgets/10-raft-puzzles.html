@@ -1,17 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Raft&#x27;s Election Restriction and the Three Puzzles</title>
-<meta name="description" content="Load the book&#x27;s three Raft puzzles or build your own logs, see which nodes the up-to-date rule lets win an election, crash the leader, elect a new one and check whether request 9 survives. Illustrates Think Distributed Systems, Chapter 10.">
+<title>محدودیت انتخاب Raft و آن سه معما</title>
+<meta name="description" content="سه معمای Raft کتاب را بار کنید یا لاگ خودتان را بسازید، ببینید قاعده‌ی به‌روز بودن می‌گذارد کدام نودها انتخابی را ببرند، leader را از کار بیندازید، leader تازه‌ای انتخاب کنید و بسنجید که درخواست ۹ جان به در می‌برد یا نه. تصویری از فصل ۱۰ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .nodes { display: grid; gap: 8px; }
   .node { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); }
   .node.down { opacity: .55; border-style: dashed; } .node.leader { border-color: var(--accent); border-width: 2px; }
   .head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .85rem; }
-  .log { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0; }
+  .log { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0; direction: ltr; }
   .e { width: 2.3em; text-align: center; border: 1px solid var(--line-strong); border-radius: 3px; font-family: var(--mono); font-size: .78rem; padding: 2px 0; background: var(--surface); }
   .e small { display: block; font-size: .62rem; color: var(--muted); } .e.c { background: var(--ok-soft); border-color: var(--ok); } .e.r9 { outline: 2px solid var(--warn); }
   .btns { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -20,21 +20,21 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/10-distributed-consensus.html">Chapter 10</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Raft puzzles</span>
+      <a href="../chapters/10-distributed-consensus.html">فصل ۱۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">معماهای Raft</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 10 · Distributed consensus</div>
-  <h1>Raft’s election restriction and the three puzzles</h1>
-  <p class="lede">Raft elects only a candidate whose log is <strong>at least as up to date</strong> as a quorum’s: the later last term wins, and with equal last terms the longer log wins. Because any two quorums intersect, a committed entry is in every future leader’s log. An entry that isn’t committed yet may be kept or lost, depending on who can win.</p>
-  <p class="source-note">Illustrates “State machine safety” and “Raft puzzles” (pp. 141–144, Figures 10.7–10.10). Log lengths follow the figures. Which entries belong to terms 1, 2 and 3 (1–3, 4–6, 7–9) and where the commit index sits (entry 7) are the vault’s reading of the figures, as are the editing buttons and the simplified election and repair steps. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۰ · consensus توزیع‌شده</div>
+  <h1>محدودیت انتخاب Raft و آن سه معما</h1>
+  <p class="lede">الگوریتم Raft تنها نامزدی را انتخاب می‌کند که لاگش <strong>دست‌کم همان‌قدر به‌روز</strong> باشد که لاگ quorumی: term آخر دیرتر می‌برد، و با termهای آخر برابر لاگ بلندتر. چون هر دو quorumی اشتراک دارند، entryی commit‌شده در لاگ هر leader آینده‌ای هست. entryی که هنوز commit نشده می‌تواند بماند یا گم شود، بسته به این‌که چه کسی می‌تواند ببرد.</p>
+  <p class="source-note">تصویری از «ایمنی state machine» و «معماهای Raft» (صص. ۱۴۱–۱۴۴، شکل‌های ۱۰.۷ تا ۱۰.۱۰). طول لاگ‌ها از شکل‌ها پی می‌گیرد. این‌که کدام entryها به termهای ۱ و ۲ و ۳ تعلق دارند، یعنی ۱ تا ۳ و ۴ تا ۶ و ۷ تا ۹، و این‌که commit index کجا می‌نشیند، یعنی entry ۷، خوانش vault از شکل‌هاست، و همچنین دکمه‌های ویرایش و قدم‌های ساده‌شده‌ی انتخاب و تعمیر. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
@@ -42,29 +42,29 @@
         <div class="callout" id="out" style="margin-top:10px" aria-live="polite"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="preset"></div><div class="btns" style="margin-top:10px"><button class="btn small danger" id="crash">Crash the leader</button><button class="btn small" id="recover">Recover crashed nodes</button></div>
-        <p class="field-hint">Green entries are at or below that node’s commit index. Entry 9 has an orange outline.</p></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="preset"></div><div class="btns" style="margin-top:10px"><button class="btn small danger" id="crash">leader را از کار بینداز</button><button class="btn small" id="recover">نودهای از کار افتاده را بازیاب</button></div>
+        <p class="field-hint">entryهای سبز روی commit index آن نود یا زیر آن‌اند. entry ۹ خط‌دور نارنجی دارد.</p></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Puzzle 1:</strong> node 2 has the longest log, so it is the leader of term 3: the leader appends client requests first.</li>
-    <li><strong>Puzzle 2:</strong> crash node 2. Nodes 1 and 3 never saw request 9, so whoever wins term 4 doesn’t have it, and when node 2 recovers its 9 is overwritten. That is allowed, since 9 was never committed.</li>
-    <li><strong>Puzzle 3:</strong> node 1 holds 9 too. Crash node 2 and only node 1 can win, because node 3’s log is less up to date. Node 1 replicates 9 to node 3 and commits it.</li>
-    <li>Build your own logs with + and −, and check that a candidate can win only if a quorum of live nodes, itself included, has logs no more up to date than its own.</li>
+    <li><strong>معمای ۱:</strong> نود ۲ بلندترین لاگ را دارد، پس leader term ۳ است: آن leader درخواست‌های کلاینت را اول می‌افزاید.</li>
+    <li><strong>معمای ۲:</strong> نود ۲ را از کار بیندازید. نودهای ۱ و ۳ هیچ‌وقت درخواست ۹ را ندیدند، پس هر کسی term ۴ را ببرد آن را ندارد، و وقتی نود ۲ بازیابی شود entry ۹ش روی‌نویسی می‌شود. این مجاز است، چون ۹ هیچ‌وقت commit نشده بود.</li>
+    <li><strong>معمای ۳:</strong> نود ۱ هم entry ۹ را دارد. نود ۲ را از کار بیندازید و تنها نود ۱ می‌تواند ببرد، چون لاگ نود ۳ کم‌تر به‌روز است. نود ۱ entry ۹ را به نود ۳ تکرار و commitش می‌کند.</li>
+    <li>با + و − لاگ خودتان را بسازید، و بسنجید که نامزدی تنها وقتی می‌تواند ببرد که quorumی از نودهای زنده، با احتساب خودش، لاگ‌هایی داشته باشند که از خودش به‌روزتر نیستند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/10-distributed-consensus.html"><small>Lesson</small>10. Distributed consensus</a></li>
+    <li><a href="../chapters/10-distributed-consensus.html"><small>درس</small>فصل ۱۰: consensus توزیع‌شده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -85,68 +85,68 @@ function stats(rows) {
   function load(k) {
     pre = k; L = PRE[k].map(function (n) { var a = []; for (var i = 1; i <= n; i++) a.push({ v: i, t: termOf(i) }); return a; });
     down = [false, false, false]; leader = 1; term = 3; commit = [7, 7, 7];
-    log.clear(); log.add("Puzzle " + k.slice(1) + " loaded. Node 2 leads term 3.", "muted"); render();
+    log.clear(); log.add("معمای " + k.slice(1) + " بار شد. نود ۲ leader term ۳ است.", "muted"); render();
   }
   function last(n) { var a = L[n]; return a.length ? a[a.length - 1].t : 0; }
   function atLeast(a, b) { return last(a) !== last(b) ? last(a) > last(b) : L[a].length >= L[b].length; }
   function voters(c) { return [0, 1, 2].filter(function (n) { return !down[n] && atLeast(c, n); }); }
   function elect(c) {
     term++; leader = c; var vs = voters(c);
-    log.add("Term " + term + ": node " + (c + 1) + " wins with votes from nodes " + vs.map(function (n) { return n + 1; }).join(" and "), "ok");
+    log.add("term " + term + ": نود " + (c + 1) + " با رأی نودهای " + vs.map(function (n) { return n + 1; }).join(" و ") + " می‌برد", "ok");
     [0, 1, 2].forEach(function (n) { if (!down[n] && n !== c) { L[n] = L[c].map(function (e) { return { v: e.v, t: e.t }; }); } });
     var cmt = L[c].length; [0, 1, 2].forEach(function (n) { if (!down[n]) commit[n] = cmt; });
-    log.add("Node " + (c + 1) + " replicates its log to the live followers; a quorum now holds entries 1–" + cmt + ", so they are committed", "ok");
+    log.add("نود " + (c + 1) + " لاگش را به followerهای زنده تکرار می‌کند؛ حالا quorumی entryهای ۱ تا " + cmt + " را دارد، پس commit شده‌اند", "ok");
     render();
   }
   function render() {
-    document.getElementById("term").textContent = "Term " + term + (leader !== null ? ", leader node " + (leader + 1) : ", no leader");
+    document.getElementById("term").textContent = "term " + term + (leader !== null ? "، با leader نود " + (leader + 1) : "، بی leader");
     var box = Kit.clear(document.getElementById("nodes")), live = [0, 1, 2].filter(function (n) { return !down[n]; });
     [0, 1, 2].forEach(function (n) {
-      var lg = Kit.el("div", { class: "log", role: "list", "aria-label": "Node " + (n + 1) + " log" });
-      L[n].forEach(function (e, i) { lg.appendChild(Kit.el("span", { class: "e" + (i < commit[n] ? " c" : "") + (e.v === 9 ? " r9" : ""), role: "listitem", "aria-label": "entry " + e.v + ", term " + e.t + (i < commit[n] ? ", committed" : "") }, String(e.v), Kit.el("small", null, "t" + e.t))); });
-      var btns = Kit.el("div", { class: "btns" }), plus = Kit.el("button", { class: "btn small", "aria-label": "Append an entry to node " + (n + 1) }, "+"), minus = Kit.el("button", { class: "btn small", "aria-label": "Remove the last entry of node " + (n + 1) }, "−");
+      var lg = Kit.el("div", { class: "log", role: "list", "aria-label": "لاگ نود " + (n + 1) });
+      L[n].forEach(function (e, i) { lg.appendChild(Kit.el("span", { class: "e" + (i < commit[n] ? " c" : "") + (e.v === 9 ? " r9" : ""), role: "listitem", "aria-label": "entry " + e.v + "، term " + e.t + (i < commit[n] ? "، commit‌شده" : "") }, String(e.v), Kit.el("small", null, "t" + e.t))); });
+      var btns = Kit.el("div", { class: "btns" }), plus = Kit.el("button", { class: "btn small", "aria-label": "افزودن entryی به نود " + (n + 1) }, "+"), minus = Kit.el("button", { class: "btn small", "aria-label": "برداشتن آخرین entry نود " + (n + 1) }, "−");
       plus.addEventListener("click", function () { L[n].push({ v: L[n].length + 1, t: term }); render(); });
       minus.addEventListener("click", function () { if (L[n].length) L[n].pop(); commit[n] = Math.min(commit[n], L[n].length); render(); });
       btns.appendChild(plus); btns.appendChild(minus);
       var verdict = "";
-      if (down[n]) verdict = "crashed";
+      if (down[n]) verdict = "از کار افتاده";
       else if (leader === null) {
         var vs = voters(n);
-        if (vs.length >= 2) { var b = Kit.el("button", { class: "btn small primary" }, "Elect node " + (n + 1)); b.addEventListener("click", function () { elect(n); }); btns.appendChild(b); verdict = "eligible: votes from " + vs.map(function (x) { return x + 1; }).join(", "); }
-        else { var better = live.filter(function (m) { return m !== n && !atLeast(n, m); }); verdict = "can’t win: " + (better.length ? "node " + better.map(function (x) { return x + 1; }).join(", ") + " has a more up-to-date log" : "too few live nodes"); }
+        if (vs.length >= 2) { var b = Kit.el("button", { class: "btn small primary" }, "نود " + (n + 1) + " را انتخاب کن"); b.addEventListener("click", function () { elect(n); }); btns.appendChild(b); verdict = "واجد شرط: رأی از نودهای " + vs.map(function (x) { return x + 1; }).join("، "); }
+        else { var better = live.filter(function (m) { return m !== n && !atLeast(n, m); }); verdict = "نمی‌تواند ببرد: " + (better.length ? "لاگ نود " + better.map(function (x) { return x + 1; }).join("، ") + " به‌روزتر است" : "نودهای زنده کم‌اند"); }
       }
       box.appendChild(Kit.el("div", { class: "node" + (down[n] ? " down" : "") + (leader === n ? " leader" : "") },
-        Kit.el("div", { class: "head" }, Kit.el("strong", null, "Node " + (n + 1)), leader === n ? Kit.el("span", { class: "badge" }, "leader") : null, Kit.el("span", null, "last term " + last(n) + ", length " + L[n].length), verdict ? Kit.el("span", { class: "field-hint" }, verdict) : null), lg, btns));
+        Kit.el("div", { class: "head" }, Kit.el("strong", null, "نود " + (n + 1)), leader === n ? Kit.el("span", { class: "badge" }, "leader") : null, Kit.el("span", null, "term آخر " + last(n) + "، طول " + L[n].length), verdict ? Kit.el("span", { class: "field-hint" }, verdict) : null), lg, btns));
     });
     var has9 = function (n) { return L[n].some(function (e) { return e.v === 9; }); };
     var o = document.getElementById("out"), committed9 = live.some(function (n) { return has9(n) && commit[n] >= 9; });
-    if (leader === null) { o.className = "callout warn"; o.textContent = "No leader. Live nodes: " + live.map(function (n) { return n + 1; }).join(", ") + ". Elect an eligible node."; }
-    else if (committed9) { o.className = "callout ok"; o.textContent = "Request 9 is committed: it is now in every future leader’s log."; }
-    else if (term > 3 && !has9(leader)) { o.className = "callout bad"; o.textContent = "Request 9 is lost: the term-" + term + " leader never had it. This is safe, because it was never committed."; }
-    else { o.className = "callout"; o.textContent = "Request 9 is not committed yet: whether it survives depends on who leads next."; }
+    if (leader === null) { o.className = "callout warn"; o.textContent = "بی leader. نودهای زنده: " + live.map(function (n) { return n + 1; }).join("، ") + ". نودی واجد شرط انتخاب کنید."; }
+    else if (committed9) { o.className = "callout ok"; o.textContent = "درخواست ۹ commit شده: حالا در لاگ هر leader آینده‌ای هست."; }
+    else if (term > 3 && !has9(leader)) { o.className = "callout bad"; o.textContent = "درخواست ۹ گم شد: leader term " + term + " هیچ‌وقت نداشتش. این ایمن است، چون هیچ‌وقت commit نشده بود."; }
+    else { o.className = "callout"; o.textContent = "درخواست ۹ هنوز commit نشده: جان به در بردنش به این بستگی دارد که بعدی را چه کسی leadership می‌کند."; }
     document.getElementById("crash").disabled = leader === null;
-    stats([["Term", term], ["Live nodes", live.length + " of 3", live.length >= 2 ? "ok" : "bad"], ["Request 9", committed9 ? "committed" : leader !== null && term > 3 && !has9(leader) ? "lost" : "pending", committed9 ? "ok" : "warn"]]);
+    stats([["term", term], ["نودهای زنده", live.length + " از ۳", live.length >= 2 ? "ok" : "bad"], ["درخواست ۹", committed9 ? "commit‌شده" : leader !== null && term > 3 && !has9(leader) ? "گم‌شده" : "در انتظار", committed9 ? "ok" : "warn"]]);
   }
-  document.getElementById("preset").appendChild(Kit.segmented({ label: "Puzzle", value: pre, options: [{ value: "p1", label: "Puzzle 1" }, { value: "p2", label: "Puzzle 2" }, { value: "p3", label: "Puzzle 3" }], onChange: load }).element);
-  document.getElementById("crash").addEventListener("click", function () { if (leader === null) return; down[leader] = true; log.add("Node " + (leader + 1) + " crashes. The followers' election timers expire.", "bad"); leader = null; render(); });
+  document.getElementById("preset").appendChild(Kit.segmented({ label: "معما", value: pre, options: [{ value: "p1", label: "معمای ۱" }, { value: "p2", label: "معمای ۲" }, { value: "p3", label: "معمای ۳" }], onChange: load }).element);
+  document.getElementById("crash").addEventListener("click", function () { if (leader === null) return; down[leader] = true; log.add("نود " + (leader + 1) + " از کار می‌افتد. وقت تایمر انتخاب followerها سر می‌رود.", "bad"); leader = null; render(); });
   document.getElementById("recover").addEventListener("click", function () {
     [0, 1, 2].forEach(function (n) { if (!down[n]) return; down[n] = false;
-      if (leader !== null) { var lost = L[n].filter(function (e, i) { return !L[leader][i] || L[leader][i].v !== e.v || L[leader][i].t !== e.t; }).length; L[n] = L[leader].map(function (e) { return { v: e.v, t: e.t }; }); commit[n] = commit[leader]; log.add("Node " + (n + 1) + " recovers and learns of term " + term + "; the leader overwrites its log" + (lost ? " (" + lost + " uncommitted entr" + (lost > 1 ? "ies" : "y") + " discarded)" : ""), lost ? "warn" : "ok"); }
-      else log.add("Node " + (n + 1) + " recovers", "ok");
+      if (leader !== null) { var lost = L[n].filter(function (e, i) { return !L[leader][i] || L[leader][i].v !== e.v || L[leader][i].t !== e.t; }).length; L[n] = L[leader].map(function (e) { return { v: e.v, t: e.t }; }); commit[n] = commit[leader]; log.add("نود " + (n + 1) + " بازیابی می‌شود و از term " + term + " خبردار؛ آن leader لاگش را روی‌نویسی می‌کند" + (lost ? "؛ " + lost + " entry commit‌نشده انداخته شد" : ""), lost ? "warn" : "ok"); }
+      else log.add("نود " + (n + 1) + " بازیابی می‌شود", "ok");
     }); render();
   });
   load("p1");
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Two logs end in entries of terms 3 and 2. Which is more up to date?",
-      options: ["The longer one", "The one whose last entry has term 3", "They are equal"], answer: 1,
-      explain: "Different last terms: the later term wins (p. 141)." },
-    { q: "In Puzzle 2, why is losing request 9 acceptable?",
-      options: ["It was a duplicate", "It was never committed, so state machine safety isn't violated", "Node 3 has it"], answer: 1,
-      explain: "p. 142." },
-    { q: "In Puzzle 3, why must request 9 survive even though node 2 never advanced its commit index?",
-      options: ["Node 1 acknowledged it and can't know whether node 2 committed and answered the client", "Raft never loses entries", "Node 3 has it"], answer: 0,
-      explain: "pp. 142–144." }
+    { q: "دو لاگ با entryهایی از termهای ۳ و ۲ تمام می‌شوند. کدام به‌روزتر است؟",
+      options: ["بلندتر", "آن یکی که entry آخرش term ۳ دارد", "برابرند"], answer: 1,
+      explain: "termهای آخر فرق دارند: term دیرتر می‌برد (ص. ۱۴۱)." },
+    { q: "در معمای ۲، چرا گم شدن درخواست ۹ پذیرفتنی است؟",
+      options: ["تکراری بود", "هیچ‌وقت commit نشده بود، پس ایمنی state machine نقض نمی‌شود", "نود ۳ داردش"], answer: 1,
+      explain: "ص. ۱۴۲." },
+    { q: "در معمای ۳، چرا درخواست ۹ باید جان به در ببرد هرچند نود ۲ هیچ‌وقت commit indexش را جلو نبرد؟",
+      options: ["نود ۱ تأییدش کرد و نمی‌تواند بداند که نود ۲ commit کرد و به کلاینت پاسخ داد یا نه", "الگوریتم Raft هیچ‌وقت entry گم نمی‌کند", "نود ۳ داردش"], answer: 0,
+      explain: "صص. ۱۴۲–۱۴۴." }
   ]);
 })();
 </script>

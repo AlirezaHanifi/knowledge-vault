@@ -1,18 +1,18 @@
-# Retry strategies vs. failure classes
+# راهبردهای کوشش دوباره در برابر رده‌های شکست
 
-Which retry strategy fits which kind of failure? This experiment runs 10,000 attempts at a step against three failure models that follow the book's temporal classes. A **transient** failure fails each attempt independently (30%). An **intermittent** one lingers: an outage lasts a random time, about 6 s on average. A **permanent** one never goes away by itself. Each failure meets four strategies: no retry, five immediate retries, eight retries 1 s apart, and capped exponential backoff with jitter. A step gives up after 30 s.
+کدام راهبرد کوشش دوباره به کدام گونه از شکست می‌خورد؟ این آزمایش ده هزار کوشش روی یک قدم را در برابر سه مدل شکست اجرا می‌کند که از رده‌های زمانی کتاب پی می‌گیرند. شکست **transient** هر کوششی را مستقل باز می‌ماند، با ۳۰٪. شکست **متناوب** می‌پاید: قطعی‌ای زمانی تصادفی می‌کشد، به‌طور میانگین حدود ۶ ثانیه. شکست **دائم** هیچ‌وقت خودش نمی‌رود. هر شکستی با چهار راهبرد روبه‌رو می‌شود: بی کوشش دوباره، پنج کوشش دوباره‌ی فوری، هشت کوشش دوباره با فاصله‌ی ۱ ثانیه، و عقب‌نشینی نمایی سقف‌دار با jitter. هر قدمی پس از ۳۰ ثانیه دست می‌کشد.
 
-*Illustrates Think Distributed Systems, “Failure classification” and “Failure mitigation”, pp. 47–53: transient failures suit immediate retries, intermittent ones retries with backoff, and permanent ones need repair. The failure probabilities, outage length, strategy parameters and implementation are the vault's (seeded).*
+*تصویری از «رده‌بندی شکست» و «کاهش شکست» کتاب Think Distributed Systems، صص. ۴۷–۵۳: شکست‌های transient به کوشش دوباره‌ی فوری می‌خورند، متناوب‌ها به کوشش دوباره با عقب‌نشینی، و دائم‌ها تعمیر لازم دارند. احتمال‌های شکست و طول قطعی و پارامترهای راهبرد و پیاده‌سازی مال vault است، با seed.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 retry_strategies.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 10,000 trials per cell; a step gives up after 30 s of retrying
@@ -34,13 +34,13 @@ permanent     fixed 1 s x8       0.0%      8.00                —
 permanent     exp. backoff       0.0%     10.14                —
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Against **transient** failures, any retry works and immediate retries are fastest: backoff only adds waiting.
-- Against **intermittent** failures, immediate retries are used up while the outage lasts (under 1% success). Spreading attempts over time with backoff succeeds about 99% of the time, at the price of several seconds' delay.
-- Against **permanent** failures, no strategy succeeds. Retrying only burns attempts, which is why the book's escalation ends with suspend and repair, or compensation.
-- The strategies' attempt counts are similar against intermittent failures; what differs is *when* the attempts happen.
+- در برابر شکست‌های **transient**، هر کوشش دوباره‌ای کار می‌کند و کوشش‌های فوری سریع‌ترند: عقب‌نشینی فقط انتظار می‌افزاید.
+- در برابر شکست‌های **متناوب**، کوشش‌های فوری تا وقتی قطعی پاست ته می‌کشند، با موفقیت زیر ۱٪. پخش کردن کوشش‌ها در زمان با عقب‌نشینی تقریباً ۹۹٪ وقت‌ها موفق می‌شود، به بهای چند ثانیه latency.
+- در برابر شکست‌های **دائم**، هیچ راهبردی موفق نمی‌شود. کوشش دوباره فقط کوشش می‌سوزاند، که از همین‌جاست که ارتقای کتاب با معلق کردن و تعمیر، یا با جبران، تمام می‌شود.
+- شمار کوشش‌های راهبردها در برابر شکست متناوب شبیه هم است؛ آن چیزی که فرق دارد *زمان* رخ دادن کوشش‌هاست.
 
-## Related
+## مرتبط
 
-- Chapter note: [3. Failure tolerance](../../chapters/03-failure-tolerance.md) — “Failure mitigation”, pp. 52–53
+- یادداشت فصل: [فصل ۳: تحمل شکست](../../chapters/03-failure-tolerance.md) — «کاهش شکست»، صص. ۵۲–۵۳

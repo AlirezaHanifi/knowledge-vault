@@ -1,67 +1,67 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Restart, Resume and Replay</title>
-<meta name="description" content="Run the book&#x27;s alphabet() process, crash it after any step, recover by restart, by resuming from a save point or by log-based replay, and check the resulting trace against each equivalence function; then branch on the clock outside a step and watch replay diverge. Illustrates Think Distributed Systems, Chapter 11.">
+<title>شروع دوباره، ادامه و replay</title>
+<meta name="description" content="process alphabet() کتاب را اجرا کنید، پس از هر قدمی از کارش بیندازید، با شروع دوباره یا ادامه از نقطه‌ی ذخیره یا replay log‌محور بازیابی‌اش کنید، و رد حاصل را با هر تابع هم‌ارزی بسنجید؛ بعد بیرون یک قدم روی ساعت شاخه بزنید و ببینید replay واگرا می‌شود. تصویری از فصل ۱۱ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .trace { font-family: var(--mono); font-size: 1.15rem; padding: 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); word-break: break-all; }
+  .trace { font-family: var(--mono); font-size: 1.15rem; padding: 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); word-break: break-all; direction: ltr; text-align: left; }
   .trace .dup { color: var(--warn); text-decoration: underline; } .trace .x { color: var(--bad); } .trace .div { color: var(--bad); font-weight: 700; }
   .durable { font-family: var(--mono); font-size: .8rem; margin-top: 6px; }
-  table.eq { width: 100%; border-collapse: collapse; font-size: .85rem; } table.eq td, table.eq th { border-bottom: 1px solid var(--line); padding: 4px; text-align: left; }
+  table.eq { width: 100%; border-collapse: collapse; font-size: .85rem; } table.eq td, table.eq th { border-bottom: 1px solid var(--line); padding: 4px; text-align: right; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/11-durable-executions.html">Chapter 11</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Restart, resume and replay</span>
+      <a href="../chapters/11-durable-executions.html">فصل ۱۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">شروع دوباره و ادامه و replay</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 11 · Durable executions</div>
-  <h1>Restart, resume and replay</h1>
-  <p class="lede"><code>alphabet()</code> prints a to f, one letter per step. A crash interrupts it; recovery continues it. Recovery is <strong>failure-transparent</strong> if the recovered trace is <strong>equivalent</strong> to the failure-free trace a•b•c•d•e•f•✓, and the application chooses what counts as equivalent.</p>
-  <p class="source-note">Illustrates “The concept of failure-transparent recovery”, “Strategies of failure-transparent recovery” and “Durable execution” (pp. 149–155, Listings 11.2, 11.6–11.7, Figure 11.5). The crash points, the save-point interval and the clock-branching step are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۱ · اجرای پایا</div>
+  <h1>شروع دوباره، ادامه و replay</h1>
+  <p class="lede">تابع <code>alphabet()</code> حرف‌های a تا f را چاپ می‌کند و هر قدمی یک حرف. از کار افتادنی وقفه‌اش می‌اندازد؛ و بازیابی ادامه‌اش می‌دهد. بازیابی <strong>failure-transparent</strong> است اگر رد بازیابی‌شده <strong>هم‌ارز</strong> رد بی‌شکست a•b•c•d•e•f•✓ باشد، و برنامه برمی‌دارد که چه چیزی هم‌ارز به حساب می‌آید.</p>
+  <p class="source-note">تصویری از «مفهوم بازیابی failure-transparent» و «راهبردهای بازیابی failure-transparent» و «اجرای پایا» (صص. ۱۴۹–۱۵۵، فهرست‌های ۱۱.۲ و ۱۱.۶ و ۱۱.۷، شکل ۱۱.۵). نقطه‌های از کار افتادن و فاصله‌ی نقطه‌های ذخیره و آن قدم شاخه‌زنی روی ساعت مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Trace (failure-free: a•b•c•d•e•f•✓)</p><div class="trace" id="trace" aria-live="polite"></div><div class="durable" id="durable"></div>
+      <div class="panel"><p class="panel-title">رد؛ بی‌شکست a•b•c•d•e•f•✓ است</p><div class="trace" id="trace" aria-live="polite"></div><div class="durable" id="durable"></div>
         <div class="callout" id="div" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">Is the recovered trace equivalent?</p><div class="table-wrap"><table class="eq" id="eq"></table></div></div>
+      <div class="panel"><p class="panel-title">آیا رد بازیابی‌شده هم‌ارز است؟</p><div class="table-wrap"><table class="eq" id="eq"></table></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="strat"></div><div id="crash" style="margin-top:10px"></div><div id="when" style="margin-top:10px"></div><div id="ksl" style="margin-top:10px"></div><div id="nsl"></div>
-        <label style="display:block;margin-top:8px"><input type="checkbox" id="nd"> Branch on the clock between steps c and d, outside a step</label></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="strat"></div><div id="crash" style="margin-top:10px"></div><div id="when" style="margin-top:10px"></div><div id="ksl" style="margin-top:10px"></div><div id="nsl"></div>
+        <label style="display:block;margin-top:8px"><input type="checkbox" id="nd"> شاخه زدن روی ساعت میان قدم‌های c و d، بیرون یک قدم</label></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Restart</strong> repeats every step done before the crash, so only the restart equivalence accepts it, and only if the steps are idempotent.</li>
-    <li><strong>Resume</strong> repeats the steps since the last save point; with a save point after every step, it repeats at most the step that crashed.</li>
-    <li><strong>Log-based replay</strong> feeds logged outputs back instead of re-executing, so it repeats only a step that ran but wasn’t logged yet: “duplicate the last event”.</li>
-    <li><strong>Nondeterminism breaks replay.</strong> If code outside a step reads the clock, the replayed run can yield a different step than the log recorded, and the runtime must stop.</li>
+    <li><strong>شروع دوباره</strong> هر قدمی را که پیش از از کار افتادن شده بود تکرار می‌کند، پس تنها هم‌ارزی شروع دوباره قبولش می‌کند، و تنها اگر قدم‌ها idempotent باشند.</li>
+    <li><strong>ادامه</strong> قدم‌های پس از آخرین نقطه‌ی ذخیره را تکرار می‌کند؛ با نقطه‌ی ذخیره پس از هر قدمی، حداکثر همان قدمی را تکرار می‌کند که از کار افتاد.</li>
+    <li><strong>replay log‌محور</strong> به‌جای اجرای دوباره خروجی‌های لاگ‌شده را برمی‌گرداند، پس تنها قدمی را تکرار می‌کند که اجرا شد ولی هنوز لاگ نشده بود: «تکرار آخرین رویداد».</li>
+    <li><strong>ناقطعیت replay را می‌شکند.</strong> اگر کدی بیرون یک قدم ساعت را بخواند، اجرای replay‌شده می‌تواند قدمی غیر از آن چیزی بدهد که log ثبت کرده، و runtime باید بایستد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/11-durable-executions.html"><small>Lesson</small>11. Durable executions</a></li>
+    <li><a href="../chapters/11-durable-executions.html"><small>درس</small>فصل ۱۱: اجرای پایا</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -78,18 +78,19 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log"));
   var cfg = { s: "replay", c: 3, when: "before", k: 2, n: 2, nd: false };
+  var SNAME = { restart: "شروع دوباره", resume: "ادامه از نقطه‌ی ذخیره", replay: "replay log‌محور" };
   function stepsFor(clockOdd) { var s = ["a", "b", "c"]; s.push(cfg.nd && clockOdd ? "D" : "d"); return s.concat(["e", "f"]); }
   function run() {
     var first = stepsFor(false), c = cfg.c, ran = first.slice(0, c), recorded = cfg.when === "after" ? c : c - 1;
     var res = { pre: ran, post: [], start: 0, diverged: null, durable: "" };
     if (c === 0) { res.post = first; return res; }
     var second = stepsFor(true);
-    if (cfg.s === "restart") { res.start = 0; res.post = second; res.durable = "Nothing durable: the process starts over."; }
+    if (cfg.s === "restart") { res.start = 0; res.post = second; res.durable = "چیزی پایا نیست: process از نو شروع می‌کند."; }
     else if (cfg.s === "resume") {
       var save = Math.floor(recorded / cfg.k) * cfg.k; res.start = save; res.post = second.slice(save);
-      res.durable = "Save points after steps " + (cfg.k === 1 ? "1, 2, 3…" : cfg.k + ", " + 2 * cfg.k + "…") + "; last completed save point: " + (save ? "after step " + save + " (" + first[save - 1] + ")" : "none, so start from the beginning") + ".";
+      res.durable = "نقطه‌ی ذخیره پس از قدم‌های " + (cfg.k === 1 ? "۱ و ۲ و ۳ …" : cfg.k + " و " + 2 * cfg.k + " …") + "؛ آخرین نقطه‌ی ذخیره‌ی تمام‌شده: " + (save ? "پس از قدم " + save + " یعنی " + first[save - 1] : "هیچ، پس از اول شروع می‌شود") + ".";
     } else {
-      var L = first.slice(0, recorded); res.durable = "Durable log: [" + L.map(function (x, i) { return "step " + (i + 1) + " → printed " + x; }).join(", ") + "]";
+      var L = first.slice(0, recorded); res.durable = "log پایا: [" + L.map(function (x, i) { return "قدم " + (i + 1) + " → چاپ " + x; }).join("، ") + "]";
       for (var i = 0; i < L.length; i++) if (second[i] !== L[i]) { res.diverged = { at: i + 1, logged: L[i], yielded: second[i] }; break; }
       res.start = recorded; res.post = res.diverged ? [] : second.slice(recorded);
     }
@@ -101,42 +102,42 @@ function stats(rows) {
     r.pre.forEach(function (x, i) { add((i ? "•" : "") + x); });
     var full = r.pre.concat(r.post), dup = 0;
     if (cfg.c > 0) { add((r.pre.length ? "•" : "") + "💥", "x"); dup = r.pre.length - r.start; }
-    if (r.diverged) add(" replay stopped", "div");
+    if (r.diverged) add(" replay ایستاد", "div");
     else r.post.forEach(function (x, i) { add((i || cfg.c > 0 ? "•" : "") + x, i < dup ? "dup" : null); });
     if (!r.diverged) add("•✓");
     document.getElementById("durable").textContent = r.durable;
     var d = document.getElementById("div");
     var wrong = !r.diverged && r.pre.indexOf("d") >= 0 && r.post.indexOf("D") >= 0;
-    if (r.diverged) { d.className = "callout bad"; d.textContent = "Nondeterminism detected: the log says step " + r.diverged.at + " printed " + r.diverged.logged + ", but the replayed code yielded " + r.diverged.yielded + ". Replay can't continue."; }
-    else if (wrong) { d.className = "callout bad"; d.textContent = "The rerun took the other branch: the trace contains both d and D, so it describes no failure-free execution."; }
-    else if (cfg.c === 0) { d.className = "callout ok"; d.textContent = "No crash: the failure-free execution."; }
-    else { d.className = "callout " + (dup ? "warn" : "ok"); d.textContent = dup ? dup + " event" + (dup > 1 ? "s" : "") + " repeated after the crash (underlined): correct only if those steps are idempotent." : "Nothing repeated: the recovered trace is identical to the failure-free one."; }
+    if (r.diverged) { d.className = "callout bad"; d.textContent = "ناقطعیت تشخیص داده شد: log می‌گوید قدم " + r.diverged.at + " حرف " + r.diverged.logged + " را چاپ کرد، ولی کد replay‌شده " + r.diverged.yielded + " را yield کرد. replay نمی‌تواند ادامه بدهد."; }
+    else if (wrong) { d.className = "callout bad"; d.textContent = "اجرای دوباره آن شاخه‌ی دیگر را برداشت: رد هم d دارد و هم D، پس هیچ اجرای بی‌شکستی را وصف نمی‌کند."; }
+    else if (cfg.c === 0) { d.className = "callout ok"; d.textContent = "بی از کار افتادن: همان اجرای بی‌شکست."; }
+    else { d.className = "callout " + (dup ? "warn" : "ok"); d.textContent = dup ? dup + " رویداد پس از از کار افتادن تکرار شد، که زیرش خط دارد: تنها وقتی درست است که آن قدم‌ها idempotent باشند." : "چیزی تکرار نشد: رد بازیابی‌شده با رد بی‌شکست یکسان است."; }
     var ok = !r.diverged && !wrong, rows = [
-      ["Identity", ok && dup === 0], ["Valid to duplicate the last event", ok && dup <= 1], ["Valid to duplicate the last " + cfg.n + " events", ok && dup <= cfg.n], ["Restart (duplicate everything)", ok]];
+      ["همانی", ok && dup === 0], ["تکرار آخرین رویداد مجاز است", ok && dup <= 1], ["تکرار " + cfg.n + " رویداد آخر مجاز است", ok && dup <= cfg.n], ["شروع دوباره، یعنی تکرار همه چیز", ok]];
     var t = Kit.clear(document.getElementById("eq"));
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", { scope: "col" }, "Equivalence function"), Kit.el("th", { scope: "col" }, "Accepts this trace?"))));
-    var tb = Kit.el("tbody"); rows.forEach(function (x) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, x[0]), Kit.el("td", null, Kit.el("span", { class: "badge " + (x[1] ? "ok" : "bad") }, x[1] ? "✓ yes" : "✗ no")))); }); t.appendChild(tb);
-    stats([["Events", full.length], ["Repeated", r.diverged ? "—" : dup, dup ? "warn" : "ok"], ["Replay", r.diverged ? "diverged" : "ok", r.diverged ? "bad" : "ok"]]);
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", { scope: "col" }, "تابع هم‌ارزی"), Kit.el("th", { scope: "col" }, "این رد را قبول می‌کند؟"))));
+    var tb = Kit.el("tbody"); rows.forEach(function (x) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, x[0]), Kit.el("td", null, Kit.el("span", { class: "badge " + (x[1] ? "ok" : "bad") }, x[1] ? "✓ بله" : "✗ نه")))); }); t.appendChild(tb);
+    stats([["رویدادها", full.length], ["تکرار‌شده", r.diverged ? "—" : dup, dup ? "warn" : "ok"], ["replay", r.diverged ? "واگرا" : "درست", r.diverged ? "bad" : "ok"]]);
   }
-  var CR = [{ value: "0", label: "No crash" }]; "abcdef".split("").forEach(function (x, i) { CR.push({ value: String(i + 1), label: "after " + x }); });
-  document.getElementById("strat").appendChild(Kit.segmented({ label: "Recovery strategy", value: cfg.s, options: [{ value: "restart", label: "Restart" }, { value: "resume", label: "Resume from save point" }, { value: "replay", label: "Log-based replay" }], onChange: function (v) { cfg.s = v; log.add("Strategy: " + v, "muted"); render(); } }).element);
-  document.getElementById("crash").appendChild(Kit.segmented({ label: "Crash", value: String(cfg.c), options: CR, onChange: function (v) { cfg.c = +v; log.add(+v ? "Crash after step " + "abcdef"[v - 1] : "No crash", +v ? "bad" : "muted"); render(); } }).element);
-  document.getElementById("when").appendChild(Kit.segmented({ label: "The crash happens", value: cfg.when, options: [{ value: "before", label: "before the step is recorded" }, { value: "after", label: "after it is recorded" }], onChange: function (v) { cfg.when = v; render(); } }).element);
-  document.getElementById("ksl").appendChild(Kit.slider({ label: "Resume: save point every k steps", min: 1, max: 6, step: 1, value: cfg.k, onInput: function (v) { cfg.k = v; render(); } }).element);
-  document.getElementById("nsl").appendChild(Kit.slider({ label: "n for “duplicate the last n events”", min: 1, max: 5, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; render(); } }).element);
-  document.getElementById("nd").addEventListener("change", function (e) { cfg.nd = e.target.checked; log.add(cfg.nd ? "Code outside a step now reads the clock: the first run prints d, a rerun prints D" : "Deterministic again", cfg.nd ? "warn" : "muted"); render(); });
+  var CR = [{ value: "0", label: "بی از کار افتادن" }]; "abcdef".split("").forEach(function (x, i) { CR.push({ value: String(i + 1), label: "پس از " + x }); });
+  document.getElementById("strat").appendChild(Kit.segmented({ label: "راهبرد بازیابی", value: cfg.s, options: [{ value: "restart", label: "شروع دوباره" }, { value: "resume", label: "ادامه از نقطه‌ی ذخیره" }, { value: "replay", label: "replay log‌محور" }], onChange: function (v) { cfg.s = v; log.add("راهبرد: " + SNAME[v], "muted"); render(); } }).element);
+  document.getElementById("crash").appendChild(Kit.segmented({ label: "از کار افتادن", value: String(cfg.c), options: CR, onChange: function (v) { cfg.c = +v; log.add(+v ? "از کار افتادن پس از قدم " + "abcdef"[v - 1] : "بی از کار افتادن", +v ? "bad" : "muted"); render(); } }).element);
+  document.getElementById("when").appendChild(Kit.segmented({ label: "از کار افتادن کِی رخ می‌دهد", value: cfg.when, options: [{ value: "before", label: "پیش از ثبت آن قدم" }, { value: "after", label: "پس از ثبتش" }], onChange: function (v) { cfg.when = v; render(); } }).element);
+  document.getElementById("ksl").appendChild(Kit.slider({ label: "ادامه: نقطه‌ی ذخیره هر k قدم", min: 1, max: 6, step: 1, value: cfg.k, onInput: function (v) { cfg.k = v; render(); } }).element);
+  document.getElementById("nsl").appendChild(Kit.slider({ label: "مقدار n برای «تکرار n رویداد آخر»", min: 1, max: 5, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; render(); } }).element);
+  document.getElementById("nd").addEventListener("change", function (e) { cfg.nd = e.target.checked; log.add(cfg.nd ? "کدی بیرون یک قدم حالا ساعت را می‌خواند: اجرای اول d چاپ می‌کند و اجرای دوباره D" : "بازهم قطعی", cfg.nd ? "warn" : "muted"); render(); });
   render();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "The process crashes after printing c, before recording it. What does log-based replay print after the crash?",
+    { q: "process پس از چاپ c و پیش از ثبتش از کار می‌افتد. replay log‌محور پس از از کار افتادن چه چاپ می‌کند؟",
       options: ["d e f", "c d e f", "a b c d e f"], answer: 1,
-      explain: "c ran but wasn't logged, so it is executed again: “valid to duplicate the last event” (p. 150)." },
-    { q: "Why does log-based durable execution require determinism?",
-      options: ["To be fast", "Replay must follow the same path the log recorded", "To keep the log short"], answer: 1,
-      explain: "p. 154." },
-    { q: "Why can't a restart preserve a one-week delay?",
-      options: ["It resets the delay, which starts again from zero", "Timers are not durable in any strategy", "It can"], answer: 0,
-      explain: "Listing 11.4, p. 151." }
+      explain: "حرف c اجرا شد ولی لاگ نشده بود، پس بازهم اجرا می‌شود: «تکرار آخرین رویداد مجاز است» (ص. ۱۵۰)." },
+    { q: "چرا اجرای پایای log‌محور قطعیت لازم دارد؟",
+      options: ["برای سرعت", "replay باید همان مسیری را پی بگیرد که log ثبت کرده", "برای کوتاه ماندن log"], answer: 1,
+      explain: "ص. ۱۵۴." },
+    { q: "چرا شروع دوباره نمی‌تواند latencyی یک‌هفته‌ای را نگه دارد؟",
+      options: ["latency را صفر می‌کند، که از نو از صفر شروع می‌شود", "تایمرها در هیچ راهبردی پایا نیستند", "می‌تواند"], answer: 0,
+      explain: "فهرست ۱۱.۴، ص. ۱۵۱." }
   ]);
 })();
 </script>

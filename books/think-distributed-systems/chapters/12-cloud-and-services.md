@@ -3,78 +3,80 @@ book: think-distributed-systems
 chapter: 12
 title: "Cloud and services"
 pages: "156–167"
+translated_title: "cloud و سرویس‌ها"
+lang: fa
 ---
 
-# 12. Cloud and services
+# فصل ۱۲: cloud و سرویس‌ها
 
-[← 11. Durable executions](11-durable-executions.md) · [Book](../README.md)
+[فصل ۱۱: اجرای پایا →](11-durable-executions.md) · [کتاب](../README.md)
 
-## Summary
+## خلاصه
 
-Cloud, cloud-native, serverless and microservices are everywhere, yet their meanings are vague. This "paradox of popularity" motivates the final chapter, which offers the author's accurate, concise definitions. They are consistent with industry understanding but not industry standards (p. 156).
+واژه‌های cloud و cloud-native و serverless و microservices همه‌جا هستند، ولی معناهایشان مبهم. همین «پارادوکس همه‌گیری» انگیزه‌ی فصل آخر است، که تعریف‌های دقیق و موجز نویسنده را عرضه می‌کند. با فهم صنعت سازگارند ولی استاندارد صنعت نیستند (p. 156).
 
-The chapter starts from the shift the author lived through at SAP between 2008 and 2018, from ticket-driven VMs to on-demand machines. That turned systems from **proactive and static** into **reactive and dynamic**, and made **elasticity** possible (p. 157). It then builds the definitions:
+فصل از آن جابه‌جایی شروع می‌کند که نویسنده بین ۲۰۰۸ و ۲۰۱۸ در SAP از سر گذراند، از VMهای تیکت‌محور به ماشین‌های درخواستی. همین سیستم‌ها را از **پیش‌کنشی و ایستا** به **واکنشی و پویا** تبدیل کرد، و **کشسانی** را ممکن (p. 157). بعد تعریف‌ها را می‌سازد:
 
-- **Cloud computing** separates resource consumers from resource providers that let them acquire and release resources on demand (pp. 157–158).
-- **Cloud-native** means scalable and reliable *by construction*, not merely hosted in the cloud (pp. 158–159).
-- **Serverless** means resources are acquired *after* an event arrives, with **cold and hot paths** (pp. 159–161).
-- **A service** is a *contract* between a component and the rest of the system, not the set of components implementing it. A movie-recommendation service grows from one process into a dynamic web of processes, load balancers and autoscalers while its contract stays constant (pp. 161–166).
+- **محاسبات cloud** consumer منبع را از تأمین‌کننده‌ی منبع جدا می‌کند، که می‌گذارد منبع درخواستی گرفته و رها شود (pp. 157–158).
+- **مفهوم cloud-native** یعنی مقیاس‌پذیر و قابل اطمینان *بنا به ساخت*، و نه فقط میزبانی‌شده در cloud (pp. 158–159).
+- **مفهوم serverless** یعنی منبع‌ها *پس از* رسیدن رویداد گرفته می‌شوند، با **مسیر سرد و گرم** (pp. 159–161).
+- **سرویس** یک *قرارداد* میان یک مؤلفه و بقیه‌ی سیستم است، نه آن مجموعه از مؤلفه‌ها که پیاده‌اش می‌کنند. سرویس پیشنهاد فیلم از یک process به تاری پویا از process و load balancer و autoscaler رشد می‌کند در حالی که قراردادش ثابت می‌ماند (pp. 161–166).
 
-The book closes with a band whose musicians read the same sheet differently, and an appeal to maximize the overlap between our mental models and reality (p. 166).
+کتاب با گروهی موسیقی تمام می‌شود که نوازنده‌هایش همان نت را طور دیگری می‌خوانند، و با فراخوانی به بیشینه کردن هم‌پوشانی مدل‌های ذهنی ما و واقعیت (p. 166).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Elasticity** is achieving scalability and reliability by acquiring and releasing resources on demand (Figure 12.1). It replaced long-lived, well-known resources with short-lived ones, and a static topology with a dynamic, self-regulating one (p. 157).
-- **Cloud computing** = resource consumers + resource providers + on-demand acquire and release. Platforms are public (AWS, Google Cloud, Azure) or private (company-run OpenStack, Cloud Foundry, Kubernetes) (pp. 157–158).
-- **A cloud application** is any application hosted on a cloud platform. **A cloud-native application** is scalable and reliable *by construction*, using the cloud's acquire and release; the qualities are *assured*, not merely requested (p. 158).
-- **Platform building blocks:** a **supervisor** replaces failed resources, a **scaler** matches resources to demand and a **load balancer** distributes requests. In Kubernetes these are a Deployment, a HorizontalPodAutoscaler and a Service (pp. 158–159).
-- **Lift and shift** brings limited benefits. A vanilla WordPress install in the cloud isn't cloud-native, because it has no load or failure detection and mitigation. Containers and microservices are technology and architecture choices, not the definition (p. 159).
-- **Traditional:** acquire → receive → process → release. **Serverless:** receive → acquire → process → release, so the system must work out the resources it needs *from the event itself* (pp. 160–161).
-- **Cold path:** acquisition happens between receiving and processing. **Hot path:** resources are already held from earlier events (p. 161).
-- **A service is a contract, not components.** From a component's local view there's only itself and "the rest of the system". The recommendation service's implementation keeps changing; its contract, Get: ID → [ID], is the only constant (pp. 162–166).
+- **کشسانی** یعنی رسیدن به مقیاس‌پذیری و قابلیت اطمینان با گرفتن و رها کردن درخواستی منبع (شکل ۱۲.۱). منبع‌های دیرزیست و خوش‌شناخته را با کوتاه‌زیست‌ها عوض کرد، و توپولوژی ایستا را با توپولوژی پویا و خودتنظیم (p. 157).
+- **محاسبات cloud** برابر consumer منبع به‌علاوه‌ی تأمین‌کننده‌ی منبع به‌علاوه‌ی گرفتن و رها کردن درخواستی است. پلتفرم‌ها عمومی‌اند، مثل AWS و Google Cloud و Azure، یا خصوصی، مثل OpenStack و Cloud Foundry و Kubernetesی که شرکت می‌گرداند (pp. 157–158).
+- **برنامه‌ی cloud** هر برنامه‌ای است که روی پلتفرمی cloud میزبانی شده. **برنامه‌ی cloud-native** *بنا به ساخت* مقیاس‌پذیر و قابل اطمینان است و گرفتن و رها کردن cloud را به کار می‌برد؛ آن کیفیت‌ها *تأمین‌شده*اند و نه فقط خواسته‌شده (p. 158).
+- **قطعه‌های سازنده‌ی پلتفرم:** **supervisor** منبع‌های شکسته را عوض می‌کند، **scaler** منبع را با تقاضا جور می‌کند و **load balancer** درخواست‌ها را پخش. در Kubernetes این‌ها یک Deployment و یک HorizontalPodAutoscaler و یک Service‌اند (pp. 158–159).
+- **بردار و بگذار** سود محدودی می‌آورد. نصب خالی WordPress در cloud کلود-نیتیو نیست، چون تشخیص و کاهش بار و شکست ندارد. container و microservice انتخاب فناوری و معماری‌اند و نه خود تعریف (p. 159).
+- **سنتی:** گرفتن ← گرفتن رویداد ← پردازش ← رها کردن. **serverless:** گرفتن رویداد ← گرفتن منبع ← پردازش ← رها کردن، پس سیستم باید منبع‌های لازمش را *از خود رویداد* در بیاورد (pp. 160–161).
+- **مسیر سرد:** گرفتن منبع میان گرفتن رویداد و پردازش رخ می‌دهد. **مسیر گرم:** منبع‌ها از رویدادهای پیشین از قبل در دست‌اند (p. 161).
+- **سرویس قرارداد است، نه مؤلفه.** از نگاه محلی یک مؤلفه، فقط خودش هست و «بقیه‌ی سیستم». پیاده‌سازی سرویس پیشنهاد مدام عوض می‌شود؛ و قراردادش، یعنی Get: ID → [ID]، تنها ثابت است (pp. 162–166).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 12.1 From proactive to reactive — p. 157
-- 12.2 Cloud computing — p. 157
-- 12.3 Cloud-native computing — p. 158
-- 12.4 Serverless computing — p. 159
-  - 12.4.1 Traditional — p. 160
-  - 12.4.2 Serverless — p. 160
-  - 12.4.3 Cold path vs. hot path — p. 161
-- 12.5 Service — p. 161
-  - 12.5.1 Global view vs. local view — p. 162
-  - 12.5.2 Example recommendation service — p. 163
-- 12.6 Final thoughts — p. 166
+- ۱۲.۱ از پیش‌کنشی به واکنشی — ص. ۱۵۷
+- ۱۲.۲ محاسبات cloud — ص. ۱۵۷
+- ۱۲.۳ محاسبات cloud-native — ص. ۱۵۸
+- ۱۲.۴ محاسبات serverless — ص. ۱۵۹
+  - ۱۲.۴.۱ سنتی — ص. ۱۶۰
+  - ۱۲.۴.۲ serverless — ص. ۱۶۰
+  - ۱۲.۴.۳ مسیر سرد در برابر مسیر گرم — ص. ۱۶۱
+- ۱۲.۵ سرویس — ص. ۱۶۱
+  - ۱۲.۵.۱ نگاه جهانی در برابر نگاه محلی — ص. ۱۶۲
+  - ۱۲.۵.۲ نمونه: سرویس پیشنهاد — ص. ۱۶۳
+- ۱۲.۶ اندیشه‌های پایانی — ص. ۱۶۶
 
-## Notes
+## یادداشت‌ها
 
-### 12.1 From proactive to reactive
+### ۱۲.۱ از پیش‌کنشی به واکنشی
 
-At SAP in 2008, getting one virtual machine meant a support ticket, management approval and a wait for provisioning, followed by months of configuration and maintenance. By the time the author left a decade later, sets of VMs appeared and disappeared on demand, limited only by budget (p. 157).
+در SAP سال ۲۰۰۸، گرفتن یک ماشین مجازی یعنی تیکت پشتیبانی و تأیید مدیریت و انتظار برای تدارک، و پس از آن ماه‌ها config و نگهداشت. وقتی نویسنده یک دهه بعد رفت، دسته‌های VM درخواستی پیدا و ناپدید می‌شدند، و تنها حدشان بودجه بود (p. 157).
 
-| | Before the cloud | With the cloud (p. 157) |
+| | پیش از cloud | با cloud (p. 157) |
 |---|---|---|
-| Resources | Few, **long-lived**, well-known, with stable identities and network addresses | Many, **short-lived**, with short-lived properties, especially network addresses |
-| Engineering stance | **Predict** load and failure and address them **proactively** | **Observe** load and failure and address them **reactively**: systems self-regulate |
-| Topology | Static | Dynamic |
+| منبع‌ها | کم، **دیرزیست**، خوش‌شناخته، با هویت و نشانی شبکه‌ی پایدار | زیاد، **کوتاه‌زیست**، با خاصیت‌های کوتاه‌زیست، به‌ویژه نشانی شبکه |
+| موضع مهندسی | بار و شکست را **پیش‌بینی** کن و **پیش‌کنشی** رسیدگی‌شان کن | بار و شکست را **مشاهده** کن و **واکنشی** رسیدگی‌شان کن: سیستم‌ها خودتنظیم‌اند |
+| توپولوژی | ایستا | پویا |
 
-**Elasticity** is the ability to achieve scalability and reliability by acquiring and releasing resources on demand (Figure 12.1) (p. 157).
+**کشسانی** توانایی رسیدن به مقیاس‌پذیری و قابلیت اطمینان با گرفتن و رها کردن درخواستی منبع است (شکل ۱۲.۱) (p. 157).
 
-### 12.2 Cloud computing
+### ۱۲.۲ محاسبات cloud
 
-Cloud computing separates the world into **resource consumers** and **resource providers**. A consumer acquires and releases virtually unlimited resources, such as compute (VMs) or storage (disks), on demand from a **cloud platform** (p. 157).
+محاسبات cloud دنیا را به **consumer منبع** و **تأمین‌کننده‌ی منبع** جدا می‌کند. consumer منبع‌هایی عملاً بی‌حد، مثل محاسبه با VM یا ذخیره‌سازی با دیسک، را درخواستی از یک **پلتفرم cloud** می‌گیرد و رها می‌کند (p. 157).
 
-| Platform | Offers resources… | Examples (p. 158) |
+| پلتفرم | منبع به … عرضه می‌کند | نمونه‌ها (p. 158) |
 |---|---|---|
-| **Public** | Outside its own organization | AWS, Google Cloud Platform, Microsoft Azure |
-| **Private** | Only inside its own organization | Company-run OpenStack, Cloud Foundry and Kubernetes instances |
+| **عمومی** | بیرون سازمان خودش | AWS، Google Cloud Platform، Microsoft Azure |
+| **خصوصی** | فقط درون سازمان خودش | نمونه‌های OpenStack و Cloud Foundry و Kubernetes که شرکت می‌گرداند |
 
-These two aspects, the consumer/provider split and on-demand acquire and release, are the **core primitives** from which the chapter defines cloud-native and serverless (p. 158).
+همین دو جنبه، یعنی جدایی consumer و تأمین‌کننده و گرفتن و رها کردن درخواستی، آن **اولیه‌های مغزی**اند که فصل از رویشان cloud-native و serverless را تعریف می‌کند (p. 158).
 
-### 12.3 Cloud-native computing
+### ۱۲.۳ محاسبات cloud-native
 
 ```mermaid
 flowchart TB
@@ -84,75 +86,81 @@ flowchart TB
     C --> CN["Cloud-native<br/>(scalable and reliable by construction)"]
 ```
 
-*After Figures 12.2–12.3.* *By construction* contrasts with *by requirement*: the design and implementation guarantee scalability and reliability, rather than merely desiring them (p. 158).
+*برگرفته از شکل‌های ۱۲.۲ و ۱۲.۳.* عبارت *بنا به ساخت* در برابر *بنا به نیازمندی* می‌نشیند: طراحی و پیاده‌سازی مقیاس‌پذیری و قابلیت اطمینان را تضمین می‌کنند، و نه فقط آرزویشان (p. 158).
 
-| Building block | Role | Kubernetes example (pp. 158–159) |
+| قطعه‌ی سازنده | نقش | نمونه‌ی Kubernetes (pp. 158–159) |
 |---|---|---|
-| **Supervisor** | Monitors resources; acquires a replacement when one is believed to have failed | Deployment |
-| **Scaler** | Acquires or releases resources to match demand | HorizontalPodAutoscaler |
-| **Load balancer** | Distributes requests across available resources | Service |
+| **supervisor** | منبع‌ها را می‌پاید؛ وقتی باور شود یکی شکسته جانشینی می‌گیرد | Deployment |
+| **scaler** | منبع می‌گیرد یا رها می‌کند تا با تقاضا جور شود | HorizontalPodAutoscaler |
+| **load balancer** | درخواست‌ها را بین منبع‌های موجود پخش می‌کند | Service |
 
-These tools don't make an application cloud-native by themselves. Scalability and reliability need a holistic design at the platform *and* the application level: failure tolerance, partitioning and redundancy, as in the rest of the book (p. 159). Two aha! moments (p. 159):
+این ابزارها خودشان برنامه‌ای را cloud-native نمی‌کنند. مقیاس‌پذیری و قابلیت اطمینان طراحی کلی‌نگر در سطح پلتفرم *و* سطح برنامه لازم دارند: تحمل شکست و پارتیشن‌بندی و افزونگی، چنان‌که در بقیه‌ی کتاب (p. 159). دو لحظه‌ی آها! (p. 159):
 
-- **Lift and shift**, moving an existing application to the cloud with few or no changes, gains little. Elasticity has to be designed in.
-- **Cloud-native "technologies".** Common definitions stress containers, microservices and dynamic orchestration, plus *declarative* and *immutable*. Containers are a technical choice and microservices an architectural one; picking others doesn't stop an application from being scalable and reliable by construction.
+- **بردار و بگذار**، یعنی جابه‌جا کردن برنامه‌ای موجود به cloud با تغییر کم یا هیچ، کم به دست می‌دهد. کشسانی را باید در طرح گنجاند.
+- **«فناوری‌های» cloud-native.** تعریف‌های رایج روی container و microservice و orchestration پویا تأکید می‌کنند، به‌علاوه‌ی *اعلانی* و *immutable*. container انتخابی فنی است و microservice انتخابی معماری؛ و برداشتن گزینه‌های دیگر جلو مقیاس‌پذیر و قابل اطمینان بودن برنامه بنا به ساخت را نمی‌گیرد.
 
-### 12.4 Serverless computing
+> **In practice:** platform ما cloud-native است: Kubernetes podها را بر اساس state مطلوب جابه‌جا و بازسازی می‌کند و Argo CD state مطلوب را از git می‌گیرد.
+>
+> **Your turn:** چرا loader نباید چیزی روی دیسک محلی pod نگه دارد؟
+>
+> *Answer:* Kubernetes هر وقت لازم بداند pod را جابه‌جا یا بازسازی می‌کند و دیسک محلی از بین می‌رود. state پایدار باید بیرون از pod باشد، در ClickHouse، دیتابیس، یا یک PersistentVolume؛ cloud-native یعنی هر نمونه یک‌بارمصرف است (pp. 158–159).
 
-The minimal model (Figure 12.4): a system has **resources** (compute, network, storage) and handles **events** (requests). It must be able to acquire resources, release resources, receive events and process events. The universal constraint: an event can't be processed before its resources are acquired (pp. 159–160).
+### ۱۲.۴ محاسبات serverless
 
-| Environment | Order of actions | Acquisition is… (pp. 160–161) |
+مدل کمینه (شکل ۱۲.۴): سیستم **منبع** دارد، یعنی محاسبه و شبکه و ذخیره‌سازی، و **رویداد** رسیدگی می‌کند، یعنی درخواست. باید بتواند منبع بگیرد، منبع رها کند، رویداد بگیرد و رویداد پردازش کند. قید جهان‌شمول: رویدادی پیش از گرفتن منبع‌هایش پردازش‌شدنی نیست (pp. 159–160).
+
+| محیط | ترتیب کنش‌ها | گرفتن منبع … است (pp. 160–161) |
 |---|---|---|
-| **Traditional** (Figure 12.5) | Acquire → receive → process → release | **Proactive**: done a priori by the operator |
-| **Serverless** (Figure 12.6) | Receive → acquire → process → release | **Reactive**: done on demand, so the system must determine the needed resources *from the event itself* |
+| **سنتی** (شکل ۱۲.۵) | گرفتن منبع ← گرفتن رویداد ← پردازش ← رها کردن | **پیش‌کنشی**: پیشاپیش و به دست گرداننده انجام می‌شود |
+| **serverless** (شکل ۱۲.۶) | گرفتن رویداد ← گرفتن منبع ← پردازش ← رها کردن | **واکنشی**: درخواستی انجام می‌شود، پس سیستم باید منبع‌های لازم را *از خود رویداد* در بیاورد |
 
-#### 12.4.3 Cold path vs. hot path (p. 161)
+#### ۱۲.۴.۳ مسیر سرد در برابر مسیر گرم (p. 161)
 
-Real serverless platforms don't release resources immediately. They keep them for a while in anticipation of more events:
+پلتفرم‌های واقعی serverless منبع‌ها را فوری رها نمی‌کنند. مدتی به امید رویدادهای بیشتر نگهشان می‌دارند:
 
-| Path | Sequence (Figure 12.7) |
+| مسیر | دنباله (شکل ۱۲.۷) |
 |---|---|
-| **Cold** | Receive → **acquire** → process: acquisition sits between receiving and processing |
-| **Hot** | Receive → process: resources are already held |
+| **سرد** | گرفتن رویداد ← **گرفتن منبع** ← پردازش: گرفتن منبع میان گرفتن رویداد و پردازش می‌نشیند |
+| **گرم** | گرفتن رویداد ← پردازش: منبع‌ها از قبل در دست‌اند |
 
-![A timeline: receive event, acquire resource, process event (the cold path), then receive event, process event (the hot path), and finally release resource](../figures/12-07.png)
+![خط زمانی: گرفتن رویداد، گرفتن منبع، پردازش رویداد که مسیر سرد است، بعد گرفتن رویداد، پردازش رویداد که مسیر گرم است، و در آخر رها کردن منبع](../figures/12-07.png)
 
-*Figure 12.7 (p. 161): only the first event pays for acquisition; events that arrive while resources are held skip it.*
+*Figure 12.7 (p. 161): تنها رویداد اول بهای گرفتن منبع را می‌دهد؛ رویدادهایی که وقتی منبع‌ها در دست‌اند می‌رسند از آن رد می‌شوند.*
 
-> **Try it:** [Cold path, hot path](../widgets/12-serverless-paths.html) — send bursts of events to a traditional (pre-provisioned) system and to a serverless one, change how long the serverless platform keeps resources after an event, and trade cold-path latency against resources held idle.
+> **Try it:** [مسیر سرد و مسیر گرم](../widgets/12-serverless-paths.html)؛ رگبارهایی از رویداد را به سیستمی سنتی، یعنی پیش‌تدارک‌شده، و به سیستمی serverless بفرستید، عوض کنید که پلتفرم serverless پس از رویدادی منبع‌ها را چه مدتی نگه می‌دارد، و latency مسیر سرد را با منبع‌هایی که بی‌کار نگه داشته شده‌اند بده‌بستان کنید.
 
-### 12.5 Service
+### ۱۲.۵ سرویس
 
-"Microservices" invites endless debate. To clarify what constitutes one rather than critique it, the author uses the less charged word **service** (p. 161).
+واژه‌ی «microservices» بحثی بی‌پایان را دعوت می‌کند. نویسنده، برای روشن کردن این‌که چه چیزی یکی را می‌سازد و نه نقدش، واژه‌ی کم‌بارتر **سرویس** را به کار می‌برد (p. 161).
 
-The familiar whiteboard ritual: rectangles for services and lines for interactions. Then the rectangles get duplicated, and load balancers, autoscalers, databases, queues and timers appear. Where are the boundaries now? Is each rectangle an autonomous service, or do rectangles that share a label form one? Are databases inside or outside the boundary? (pp. 161–162)
+آن آیین آشنای وایت‌برد: مستطیل برای سرویس و خط برای تعامل. بعد مستطیل‌ها تکرار می‌شوند، و load balancer و autoscaler و دیتابیس و queue و تایمر پیدا می‌شوند. حالا مرزها کجایند؟ آیا هر مستطیلی سرویسی خودمختار است، یا مستطیل‌هایی که برچسب مشترک دارند یکی را می‌سازند؟ دیتابیس‌ها درون مرزند یا بیرونش؟ (pp. 161–162)
 
-#### 12.5.1 Global view vs. local view (p. 162)
+#### ۱۲.۵.۱ نگاه جهانی در برابر نگاه محلی (p. 162)
 
-- An all-knowing observer sees C1, C2 and the network (Figure 12.8).
-- C1 sees only "me … and the rest of the system" (Figure 12.9).
-- From C1's local view, a service isn't a component or a set of components. It's a **contract** specifying the interaction between C1 and the rest of the system.
+- ناظری همه‌دان C1 و C2 و شبکه را می‌بیند (شکل ۱۲.۸).
+- مؤلفه‌ی C1 تنها «من … و بقیه‌ی سیستم» را می‌بیند (شکل ۱۲.۹).
+- از نگاه محلی C1، سرویس یک مؤلفه یا مجموعه‌ای از مؤلفه نیست. یک **قرارداد** است که تعامل میان C1 و بقیه‌ی سیستم را مشخص می‌کند.
 
-The echo service: POST to `http://echo.io` and get your request body back. The component isn't addressing a machine at echo.io; it's invoking a **systemwide contract**. This is a logical view rather than a physical one (p. 162).
+سرویس echo: به `http://echo.io` یک POST بدهید و تن درخواستتان را پس بگیرید. مؤلفه ماشینی در echo.io را نشانی نمی‌دهد؛ **قراردادی سیستم‌سراسری** را فرا می‌خواند. این نگاهی منطقی است و نه فیزیکی (p. 162).
 
-#### 12.5.2 Example recommendation service (pp. 163–166)
+#### ۱۲.۵.۲ نمونه: سرویس پیشنهاد (pp. 163–166)
 
-The contract is **Get: ID → [ID]**: given a movie id, return a list of movie ids. The implementation evolves:
+قرارداد همان **Get: ID → [ID]** است: شناسه‌ی فیلمی بده، فهرستی از شناسه‌ی فیلم بگیر. پیاده‌سازی تکامل می‌یابد:
 
-| Step | Implementation | Problem it solves |
+| قدم | پیاده‌سازی | مسئله‌ای که حل می‌کند |
 |---|---|---|
-| Figure 12.10 | One Python process querying a database | Functionally correct, but neither scalable nor reliable |
-| Figure 12.11 | Duplicated processes (redundancy) | A single process's limits |
-| Figure 12.12 | A **primary** group (real recommendations from the database) and a **backup** group (static "fake" recommendations from an always-available local file) | The database being overloaded or down |
-| Figure 12.13 | A **smart load balancer** that defaults to primary and retries on backup after an error, plus an **autoscaler** per group | Unequal groups; load and failure within groups |
-| Figure 12.14 | Redundant load balancers and autoscalers | Those components' own load and failures |
-| Figure 12.15 | Autoscalers shared across groups, even across service boundaries | Correcting the false 1:1 picture |
+| شکل ۱۲.۱۰ | یک process Python که دیتابیسی را query می‌کند | کارکردی درست است، ولی نه مقیاس‌پذیر و نه قابل اطمینان |
+| شکل ۱۲.۱۱ | processهای تکرارشده، یعنی redundancy | حدهای یک process تنها |
+| شکل ۱۲.۱۲ | گروه **اصلی**، یعنی پیشنهادهای واقعی از دیتابیس، و گروه **پشتیبان**، یعنی پیشنهادهای ایستا و «قلابی» از فایلی محلی که همیشه در دسترس است | بیش‌بار یا از دسترس خارج شدن دیتابیس |
+| شکل ۱۲.۱۳ | یک **load balancer هوشمند** که پیش‌فرض سراغ اصلی می‌رود و پس از خطا روی پشتیبان دوباره می‌کوشد، به‌علاوه‌ی یک **autoscaler** برای هر گروه | گروه‌های نابرابر؛ بار و شکست درون گروه‌ها |
+| شکل ۱۲.۱۴ | load balancerها و autoscalerهای افزونه | بار و شکست خود آن مؤلفه‌ها |
+| شکل ۱۲.۱۵ | autoscalerهای مشترک بین گروه‌ها، و حتی از مرزهای سرویس رد شده | تصحیح آن تصویر یک‌به‌یک غلط |
 
-![A load balancer above two groups of recommendation processes, a primary group and a backup group, each managed by its own autoscaler](../figures/12-13.png)
+![یک load balancer بالای دو گروه از processهای پیشنهاد، یعنی گروهی اصلی و گروهی پشتیبان، که هر یک autoscaler خودش می‌گرداندش](../figures/12-13.png)
 
-*Figure 12.13 (p. 164): the load balancer chooses between groups; the autoscalers change how many processes each group has.*
+*Figure 12.13 (p. 164): این load balancer بین گروه‌ها برمی‌دارد؛ و autoscalerها عوض می‌کنند که هر گروه چند process دارد.*
 
-The final implementation is a dynamic, ever-changing set of components, some dedicated to this service and some shared. **The contract is the only constant.** A consumer ignores all of this and asks "the rest of the system" for recommendations (p. 166).
+پیاده‌سازی نهایی مجموعه‌ای پویا و همیشه‌متغیر از مؤلفه است، که برخی به این سرویس اختصاص دارند و برخی مشترک‌اند. **قرارداد تنها ثابت است.** consumer همه‌ی این‌ها را نادیده می‌گیرد و از «بقیه‌ی سیستم» پیشنهاد می‌خواهد (p. 166).
 
 ```mermaid
 flowchart TB
@@ -165,65 +173,71 @@ flowchart TB
     AS2[Autoscaler] -.-> B1 & B2
 ```
 
-*The vault's summary of Figures 12.13–12.15, with the retry path and data sources the figures leave out.*
+*خلاصه‌ی vault از شکل‌های ۱۲.۱۳ تا ۱۲.۱۵، با مسیر کوشش دوباره و منبع‌های داده که شکل‌ها جا می‌گذارندشان.*
 
-### 12.6 Final thoughts
+> **In practice:** prediction API ما سرویسی است که مدل را از MLflow بار می‌کند و feature را از ClickHouse می‌خواند.
+>
+> **Your turn:** ClickHouse کند شده و latency سرویس پیش‌بینی بالا رفته. سرویس چه باید بکند؟
+>
+> *Answer:* timeout کوتاه روی خواندن feature و یک fallback، مثلاً پیش‌بینی پیش‌فرض یا feature کش‌شده، تا کندی یک dependency به کندی همه‌ی کاربران تبدیل نشود؛ و latency هر dependency را جدا در Prometheus بسنجید. سرویس فقط نگاه محلی به سلامت dependencyهایش دارد (pp. 161–166).
 
-A band whose musicians read the same note as a C and as an F produces dissonance. Shallow, misaligned understanding of terms such as cloud, serverless and microservices does the same to engineers. Figure 12.16 draws Reality, My Mental Model and Your Mental Model as overlapping circles, and **thinking in distributed systems aims to maximize their intersection**. The book ends by urging readers to keep digging into the core of every concept (p. 166).
+### ۱۲.۶ اندیشه‌های پایانی
 
-## Trade-offs at a glance
+گروهی موسیقی که نوازنده‌هایش همان نت را یکی C و یکی F می‌خوانند ناسازی می‌سازد. فهم سطحی و ناجور از واژه‌هایی مثل cloud و serverless و microservices همین را با مهندس‌ها می‌کند. شکل ۱۲.۱۶ واقعیت و مدل ذهنی من و مدل ذهنی شما را به‌شکل دایره‌هایی هم‌پوشان می‌کشد، و **فکر کردن در سیستم‌های توزیع‌شده هدفش بیشینه کردن اشتراکشان است**. کتاب تمام می‌شود و خواننده‌ها را به کندن پیوسته در مغز هر مفهومی تشویق می‌کند (p. 166).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌خرد | چه هزینه‌ای دارد |
 |---|---|---|
-| Traditional (proactive) provisioning | No acquisition latency on the request path | Paying for idle capacity; must predict load |
-| Serverless (reactive) | Pay per use; no capacity planning | Cold-path latency; the system must infer resources from the event |
-| Long keep-alive after an event | More hot paths | Idle resources held |
-| Lift and shift | A fast migration | Little elasticity |
-| Cloud-native by construction | Scalability and reliability assured | Detection and mitigation must be designed into the application |
-| Primary + static backup | Always answers | Degraded ("fake") answers when the database fails |
-| Service as a contract | Freedom to change the implementation | Boundaries are logical, not visible in the topology |
+| تدارک سنتی که پیش‌کنشی است | روی مسیر درخواست latency گرفتن منبع ندارد | بهای ظرفیت بی‌کار؛ باید بار را پیش‌بینی کرد |
+| serverless که واکنشی است | پرداخت بر حسب مصرف؛ برنامه‌ریزی ظرفیت ندارد | latency مسیر سرد؛ سیستم باید منبع را از رویداد استنباط کند |
+| نگه داشتن طولانی پس از رویداد | مسیرهای گرم بیشتر | منبع‌های بی‌کار که نگه داشته شده‌اند |
+| بردار و بگذار | مهاجرتی سریع | کشسانی کم |
+| cloud-native بنا به ساخت | مقیاس‌پذیری و قابلیت اطمینان تأمین‌شده | تشخیص و کاهش را باید در برنامه طراحی کرد |
+| اصلی به‌علاوه‌ی پشتیبان ایستا | همیشه پاسخ می‌دهد | پاسخ‌های تنزل‌یافته و «قلابی» وقتی دیتابیس می‌شکند |
+| سرویس به‌شکل قرارداد | آزادی عوض کردن پیاده‌سازی | مرزها منطقی‌اند، و در توپولوژی دیدنی نیستند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Graceful degradation.** The recommendation service's backup group is a *fallback*. Netflix popularized this for recommendations, alongside circuit breakers (stop calling a failing dependency for a while) and bulkheads (isolate resources per dependency). In Chapter 3's terms, the backup is nonmasking: still live, but with weaker answers.
-- **Cold-start mitigation.** Real platforms reduce cold paths with provisioned or minimum instances (traditional acquisition again, for a baseline), snapshotting initialized runtimes, and lighter isolation (lightweight VMs, V8 isolates). Each moves some acquisition back before the event.
-- **Contracts in practice.** If a service is its contract, the contract deserves versioning and compatibility rules. [DDIA Ch. 5](../../designing-data-intensive-applications/chapters/05-encoding-and-evolution.md) covers schema evolution for the data that services exchange.
+- **تنزل باوقار.** گروه پشتیبان سرویس پیشنهاد یک *fallback* است. Netflix این را برای پیشنهاد همه‌گیر کرد، در کنار circuit breaker، یعنی مدتی دست از صدا زدن وابستگی شکسته بردار، و bulkhead، یعنی منبع را به‌تفکیک وابستگی منزوی کن. به زبان فصل ۳، پشتیبان ناپوشاننده است: باز هم زنده، ولی با پاسخ‌های ضعیف‌تر.
+- **کاهش شروع سرد.** پلتفرم‌های واقعی مسیرهای سرد را با نمونه‌های تدارک‌شده یا کمینه، یعنی بازهم گرفتن سنتی برای یک خط پایه، و با snapshot گرفتن از runtimeهای آماده‌شده، و با isolationی سبک‌تر، یعنی VMهای سبک‌وزن و isolateهای V8، کم می‌کنند. هر کدام کمی از گرفتن منبع را به پیش از رویداد برمی‌گرداند.
+- **قرارداد در عمل.** اگر سرویس همان قراردادش باشد، قرارداد نسخه‌بندی و قاعده‌های consistency را سزاوار است. [فصل ۵ کتاب DDIA](../../designing-data-intensive-applications/chapters/05-encoding-and-evolution.md) تکامل schema را برای داده‌ای که سرویس‌ها تبادل می‌کنند پوشش می‌دهد.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. Thinking in distributed systems](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) (global vs. local view, responsiveness), [3. Failure tolerance](03-failure-tolerance.md) (supervision, retries and escalation), [7. Partitioning](07-partitioning.md) and [8. Replication](08-replication.md) (what "by construction" requires), [11. Durable executions](11-durable-executions.md) (processes that survive their short-lived resources).
+- **فصل‌های مرتبط:** [فصل ۱: فکر کردن در سیستم‌های توزیع‌شده](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) که نگاه جهانی در برابر محلی و پاسخ‌دهی را دارد، [فصل ۳: تحمل شکست](03-failure-tolerance.md) که سرپرستی و کوشش دوباره و ارتقا را دارد، [فصل ۷: پارتیشن‌بندی](07-partitioning.md) و [فصل ۸: replication](08-replication.md) که آن چیزی را دارند که «بنا به ساخت» لازم دارد، و [فصل ۱۱: اجرای پایا](11-durable-executions.md) که processهایی را دارد که از منبع‌های کوتاه‌زیستشان جان به در می‌برند.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **What is elasticity in the book's terms?**
+1. **کشسانی به زبان کتاب چیست؟**
 
-   *Answer:* The ability to achieve scalability and reliability by acquiring and releasing resources on demand to meet demand (p. 157).
+   *Answer:* توانایی رسیدن به مقیاس‌پذیری و قابلیت اطمینان با گرفتن و رها کردن درخواستی منبع برای برآوردن تقاضا (p. 157).
 
-2. **Why isn't a vanilla WordPress install on a cloud platform cloud-native?**
+2. **چرا نصب خالی WordPress روی پلتفرمی cloud کلود-نیتیو نیست؟**
 
-   *Answer:* It's a cloud application, but it isn't scalable and reliable by construction: it lacks load and failure detection and mitigation (pp. 158–159).
+   *Answer:* برنامه‌ای cloud است، ولی بنا به ساخت مقیاس‌پذیر و قابل اطمینان نیست: تشخیص و کاهش بار و شکست ندارد (pp. 158–159).
 
-3. **Name the three platform building blocks and their Kubernetes counterparts.**
+3. **سه قطعه‌ی سازنده‌ی پلتفرم و همتاهای Kubernetesشان را نام ببرید.**
 
-   *Answer:* Supervisor (Deployment), scaler (HorizontalPodAutoscaler), load balancer (Service) (pp. 158–159).
+   *Answer:* supervisor که Deployment است، scaler که HorizontalPodAutoscaler است، و load balancer که Service است (pp. 158–159).
 
-4. **What distinguishes serverless from traditional computing in the minimal model?**
-   - [ ] Serverless has no servers
-   - [x] Resources are acquired after the event is received, not before
-   - [ ] Events are processed without resources
+4. **در مدل کمینه، چه چیزی serverless را از محاسبات سنتی جدا می‌کند؟**
+   - [ ] مفهوم serverless سروری ندارد
+   - [x] منبع‌ها پس از گرفتن رویداد گرفته می‌شوند و نه پیش از آن
+   - [ ] رویدادها بی منبع پردازش می‌شوند
 
-   *Answer:* Serverless acquires resources reactively, so the system must determine them from the event (pp. 160–161).
+   *Answer:* محیط serverless منبع‌ها را واکنشی می‌گیرد، پس سیستم باید از رویداد درشان بیاورد (pp. 160–161).
 
-5. **What is a hot path?**
+5. **مسیر گرم چیست؟**
 
-   *Answer:* Receiving and processing an event without acquiring resources in between, because resources from earlier events are still held (p. 161).
+   *Answer:* گرفتن و پردازش رویدادی بی گرفتن منبع در میانه، چون منبع‌های رویدادهای پیشین هنوز در دست‌اند (p. 161).
 
-6. **From a component's local view, what is a service?**
+6. **از نگاه محلی یک مؤلفه، سرویس چیست؟**
 
-   *Answer:* A contract specifying its interaction with the rest of the system, not the set of components that implement it (p. 162).
+   *Answer:* قراردادی که تعاملش با بقیه‌ی سیستم را مشخص می‌کند، نه آن مجموعه از مؤلفه‌ها که پیاده‌اش می‌کنند (p. 162).
 
-7. **How does the recommendation service stay available when its database fails?**
+7. **سرویس پیشنهاد چطور وقتی دیتابیسش می‌شکند در دسترس می‌ماند؟**
 
-   *Answer:* A smart load balancer retries failed requests on a backup group that serves static recommendations from a local file (pp. 163–164).
+   *Answer:* یک load balancer هوشمند درخواست‌های شکسته را روی گروهی پشتیبان دوباره می‌کوشد که پیشنهادهای ایستا را از فایلی محلی سرویس می‌دهد (pp. 163–164).

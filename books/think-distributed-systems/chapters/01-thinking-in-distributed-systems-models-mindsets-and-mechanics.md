@@ -3,258 +3,272 @@ book: think-distributed-systems
 chapter: 1
 title: "Thinking in distributed systems: Models, mindsets, and mechanics"
 pages: "1–22"
+translated_title: "فکر کردن در سیستم‌های توزیع‌شده: مدل‌ها، ذهنیت‌ها و مکانیک"
+lang: fa
 ---
 
-# 1. Thinking in distributed systems: Models, mindsets, and mechanics
+# فصل ۱: فکر کردن در سیستم‌های توزیع‌شده: مدل‌ها، ذهنیت‌ها و مکانیک
 
-[Book](../README.md) · [2. System models, order, and time →](02-system-models-order-and-time.md)
+[کتاب](../README.md) · [فصل ۲: مدل سیستم، ترتیب و زمان ←](02-system-models-order-and-time.md)
 
-## Summary
+## خلاصه
 
-The book's premise is that every modern application is distributed. The question is only *how* distributed, because no single component can handle unbounded load or survive inevitable failures (pp. 1–2). A **distributed system** is a collection of collaborating, concurrent components that communicate by sending and receiving messages over a network. Its behavior and complexity **emerge** from the components and their interactions (p. 1).
+فرض بنیادی کتاب این است که هر برنامه‌ی امروزی توزیع‌شده است. پرسش فقط این است که *چقدر* توزیع‌شده، چون هیچ مؤلفه‌ی تنهایی نمی‌تواند بار unbounded را تاب بیاورد یا از شکست‌های ناگزیر جان سالم ببرد (pp. 1–2). یک **سیستم توزیع‌شده** مجموعه‌ای از مؤلفه‌های همکار و هم‌زمان است که با فرستادن و گرفتن پیام روی یک شبکه ارتباط می‌گیرند. رفتار و پیچیدگی‌اش از خود مؤلفه‌ها و تعاملشان **پدیدار** می‌شود (p. 1).
 
-The chapter is about **mental models**: internal representations of a system that should be **correct** (no falsehoods) and **complete** (no relevant omissions) (pp. 3–4). It describes a system as a **state machine** that takes one step at a time, and correctness as **safety plus liveness** (pp. 8–11). **Scalability and reliability** are responsiveness under load and under failure (p. 12). Two big ideas run through the rest of the book: **systems of systems** (holons) and **global versus local views** (pp. 13–16). The chapter's recurring analogy is **Distributed Systems Incorporated**, an office building whose rooms are components and whose pneumatic tubes are the network (pp. 16–18). It ends by defining race conditions and serializability without code, over the set of possible interleavings (pp. 21–22).
+این فصل درباره‌ی **مدل‌های ذهنی** است: نمایش‌های درونی یک سیستم که باید **درست** باشند، یعنی نادرستی نداشته باشند، و **کامل**، یعنی چیز مربوطی را نینداخته باشند (pp. 3–4). سیستم را به‌عنوان **state machine** توصیف می‌کند که هر بار یک قدم برمی‌دارد، و درستی را به‌عنوان **ایمنی به‌علاوه‌ی liveness** (pp. 8–11). **مقیاس‌پذیری و قابلیت اطمینان** همان پاسخ‌گویی زیر بار و زیر شکست‌اند (p. 12). دو ایده‌ی بزرگ در بقیه‌ی کتاب می‌دوند: **سیستمی از سیستم‌ها**، یعنی holon، و **نگاه سراسری در برابر محلی** (pp. 13–16). قیاس تکرارشونده‌ی فصل **شرکت سیستم‌های توزیع‌شده** است، ساختمانی اداری که اتاق‌هایش مؤلفه‌اند و لوله‌های بادی‌اش شبکه (pp. 16–18). و با تعریف شرایط مسابقه و serializability بی هیچ کدی، روی مجموعه‌ی interleavingهای ممکن، تمام می‌شود (pp. 21–22).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Knowing isn't understanding.** Learning the rules of chess is quick; mastering its strategy is not. The book aims for understanding (p. 3).
-- **A good mental model is correct and complete.** Every fact in the model is a fact of the system, and every *relevant* fact of the system is in the model. What counts as relevant depends on what you're trying to do (p. 4).
-- **Different models can all be valid.** Some are equivalent (the network buffers in-flight messages, or each component does), and some deliberately capture different aspects (pp. 5–7).
-- **Behavior is a sequence of states.** At any moment exactly one component, or the network, takes exactly one step, either external (send or receive) or internal (pp. 8–9).
-- **Correctness = safety and liveness.** Safety: something bad never happens. Liveness: something good eventually happens. A system is correct if every possible behavior meets both (Lamport) (pp. 9–10).
-- **Scalability and reliability are responsiveness:** keeping the error rate below the error budget under load and under failure. Both are **application-specific** and **emergent** (pp. 12–13).
-- **The core challenge is thinking globally while acting locally.** A component sees only its own state, yet the system must behave correctly as a whole. Split brain is the classic failure of this (pp. 15–20).
-- **A race condition** exists when some interleavings of concurrent processes are considered incorrect. **Serializability** demands that every interleaving equal P·Q or Q·P (pp. 21–22).
+- **دانستن همان فهمیدن نیست.** یاد گرفتن قاعده‌های شطرنج تند است و تسلط بر راهبردش نه. کتاب هدفش فهمیدن است (p. 3).
+- **مدل ذهنی خوب درست و کامل است.** هر واقعیت مدل واقعیتی از سیستم است، و هر واقعیت *مربوط* سیستم در مدل هست. این که چه چیزی مربوط حساب می‌شود به کاری بستگی دارد که می‌خواهید بکنید (p. 4).
+- **مدل‌های مختلف می‌توانند همه معتبر باشند.** بعضی‌شان هم‌ارزند، مثل این که شبکه پیام‌های در پرواز را بافر کند یا هر مؤلفه، و بعضی‌شان آگاهانه جنبه‌های مختلفی را می‌گیرند (pp. 5–7).
+- **رفتار دنباله‌ای از حالت‌هاست.** در هر لحظه دقیقاً یک مؤلفه، یا خود شبکه، دقیقاً یک قدم برمی‌دارد، یا بیرونی، یعنی فرستادن یا گرفتن، یا درونی (pp. 8–9).
+- **درستی برابر ایمنی و liveness است.** ایمنی: چیز بدی هیچ‌وقت نمی‌افتد. liveness: چیز خوبی سرانجام می‌افتد. سیستم درست است اگر هر رفتار ممکن هر دو را برآورده کند، به گفته‌ی Lamport (pp. 9–10).
+- **مقیاس‌پذیری و قابلیت اطمینان همان پاسخ‌گویی‌اند:** نگه داشتن نرخ خطا زیر بودجه‌ی خطا، زیر بار و زیر شکست. هر دو **وابسته به برنامه**اند و **پدیدار** (pp. 12–13).
+- **چالش اصلی، سراسری فکر کردن و محلی عمل کردن است.** یک مؤلفه فقط حالت خودش را می‌بیند، و با این حال سیستم باید به‌عنوان یک کل درست رفتار کند. مغز دو‌پاره شکست کلاسیک همین است (pp. 15–20).
+- **شرایط مسابقه** وقتی هست که بعضی interleavingهای processهای هم‌زمان نادرست حساب شوند. ویژگی **serializability** می‌خواهد که هر interleaving برابر P·Q یا Q·P باشد (pp. 21–22).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 1.1 Software engineering and mental models — p. 2
-  - 1.1.1 Mental models: The foundation of reasoning — p. 3
-  - 1.1.2 Correct mental models — p. 4
-  - 1.1.3 Complete mental models — p. 4
-- 1.2 Mental model of software systems — p. 4
-- 1.3 Different types of models — p. 5
-  - 1.3.1 Different models describing the same aspects — p. 5
-  - 1.3.2 Different models describing different aspects of a system — p. 6
-- 1.4 Thinking about distributed systems — p. 8
-  - 1.4.1 Correctness — p. 9
-  - 1.4.2 Scalability and reliability — p. 12
-  - 1.4.3 Responsiveness — p. 12
-- 1.5 Two big ideas — p. 13
-  - 1.5.1 Systems of systems — p. 13
-  - 1.5.2 Global view vs. local view — p. 15
-- 1.6 Distributed Systems Incorporated — p. 16
-- 1.7 Navigating complexity — p. 18
-  - 1.7.1 Simple yet complex — p. 18
-  - 1.7.2 Emergent behavior — p. 19
-  - 1.7.3 Changing perspective — p. 19
-  - 1.7.4 Think globally; act locally — p. 20
-- 1.8 Thinking above the code — p. 21
+- ۱.۱ مهندسی نرم‌افزار و مدل‌های ذهنی — ص. ۲
+  - ۱.۱.۱ مدل‌های ذهنی: پایه‌ی استدلال — ص. ۳
+  - ۱.۱.۲ مدل‌های ذهنی درست — ص. ۴
+  - ۱.۱.۳ مدل‌های ذهنی کامل — ص. ۴
+- ۱.۲ مدل ذهنی سیستم‌های نرم‌افزاری — ص. ۴
+- ۱.۳ گونه‌های مختلف مدل — ص. ۵
+  - ۱.۳.۱ مدل‌های مختلفی که همان جنبه‌ها را توصیف می‌کنند — ص. ۵
+  - ۱.۳.۲ مدل‌های مختلفی که جنبه‌های مختلف یک سیستم را توصیف می‌کنند — ص. ۶
+- ۱.۴ فکر کردن درباره‌ی سیستم‌های توزیع‌شده — ص. ۸
+  - ۱.۴.۱ درستی — ص. ۹
+  - ۱.۴.۲ مقیاس‌پذیری و قابلیت اطمینان — ص. ۱۲
+  - ۱.۴.۳ پاسخ‌گویی — ص. ۱۲
+- ۱.۵ دو ایده‌ی بزرگ — ص. ۱۳
+  - ۱.۵.۱ سیستمی از سیستم‌ها — ص. ۱۳
+  - ۱.۵.۲ نگاه سراسری در برابر نگاه محلی — ص. ۱۵
+- ۱.۶ شرکت سیستم‌های توزیع‌شده — ص. ۱۶
+- ۱.۷ راه بردن در پیچیدگی — ص. ۱۸
+  - ۱.۷.۱ ساده و با این حال پیچیده — ص. ۱۸
+  - ۱.۷.۲ رفتار پدیدار — ص. ۱۹
+  - ۱.۷.۳ عوض کردن چشم‌انداز — ص. ۱۹
+  - ۱.۷.۴ سراسری فکر کن؛ محلی عمل کن — ص. ۲۰
+- ۱.۸ فکر کردن بالای کد — ص. ۲۱
 
-## Notes
+## یادداشت‌ها
 
-Why distribute at all? Engineers judge a system by **correctness, scalability and reliability**: it must do its job under increasing load and despite inevitable failures. One component can be functional, but it can't absorb unbounded load or survive its own crash, so we need more than one (p. 2). The author shares his own "aha! moments" throughout the book (p. 2).
+اصلاً چرا توزیع کنیم؟ مهندس‌ها سیستم را با **درستی و مقیاس‌پذیری و قابلیت اطمینان** می‌سنجند: باید کارش را زیر بار رو‌به‌افزایش و با وجود شکست‌های ناگزیر بکند. یک مؤلفه می‌تواند کارآ باشد، ولی نمی‌تواند بار unbounded را جذب کند یا از crash خودش جان سالم ببرد، پس به بیشتر از یکی نیاز داریم (p. 2). نویسنده «لحظه‌های آها!» خودش را در کل کتاب می‌گوید (p. 2).
 
-### 1.1 Software engineering and mental models
+### ۱.۱ مهندسی نرم‌افزار و مدل‌های ذهنی
 
-Software engineering is often confusing because we lack shared, robust models. Civil engineering has physics, mathematics and standard diagrams, while software engineers can't agree on what a microservice, the cloud or serverless is (p. 2). The goal is an **accurate, concise mental model**: an internal representation you can reason with confidently, instead of poking the system and rationalizing what it does (p. 2).
+مهندسی نرم‌افزار اغلب گیج‌کننده است چون مدل‌های مشترک و محکم نداریم. مهندسی عمران فیزیک و ریاضی و نمودارهای استاندارد دارد، در حالی که مهندس‌های نرم‌افزار نمی‌توانند توافق کنند microservice یا cloud یا serverless چیست (p. 2). هدف یک **مدل ذهنی دقیق و فشرده** است: نمایشی درونی که با اطمینان بتوانید با آن استدلال کنید، به‌جای سیخونک زدن به سیستم و توجیه کردن کاری که می‌کند (p. 2).
 
-#### Mental models, correct and complete (pp. 3–4)
+#### مدل‌های ذهنی، درست و کامل (pp. 3–4)
 
-A **model** represents a target system; a **mental model** is the internal representation that underlies comprehension and communication (p. 3). Think of both as sets of facts:
+یک **مدل** سیستمی هدف را نمایش می‌دهد؛ و یک **مدل ذهنی** نمایش درونی‌ای است که زیر فهم و ارتباط می‌نشیند (p. 3). هر دو را مجموعه‌ای از واقعیت‌ها ببینید:
 
-| | Is a set of facts that constitutes… | Good when… (p. 4) |
+| | مجموعه‌ای از واقعیت‌هاست که می‌سازد… | کِی خوب است… (p. 4) |
 |---|---|---|
-| **System** | the ground truth | — |
-| **Mental model** | our perceived truth | **correct**: every model fact is a system fact (no falsehoods); **complete**: every *relevant* system fact is a model fact (no omissions) |
+| **سیستم** | حقیقت زمینی | — |
+| **مدل ذهنی** | حقیقت درک‌شده‌ی ما | **درست**: هر واقعیت مدل واقعیتی از سیستم است، یعنی نادرستی ندارد؛ **کامل**: هر واقعیت *مربوط* سیستم واقعیتی در مدل است، یعنی چیزی نیفتاده |
 
-The book's circuit example (Figure 1.1): a model that gives the bulb's resistance as 3.0 Ω is correct and complete for computing current, but incomplete for brightness, which also needs luminous efficiency (p. 4).
+نمونه‌ی مدار کتاب (شکل ۱.۱): مدلی که مقاومت لامپ را ۳٫۰ اهم می‌دهد برای حساب کردن جریان درست و کامل است، ولی برای روشنایی ناقص، که به بازده نوری هم نیاز دارد (p. 4).
 
-### 1.2 Mental model of software systems
+### ۱.۲ مدل ذهنی سیستم‌های نرم‌افزاری
 
-Software systems are **virtual** constructs. Components and networks aren't physical things you can find; the system *behaves as though* it were made of them. So several equivalent models can describe the observable behavior equally well (p. 4). The author follows Edward A. Lee's view that so many layers separate software from electrons in silicon that the physical connection becomes meaningless (p. 4).
+سیستم‌های نرم‌افزاری ساخت‌هایی **مجازی**اند. مؤلفه‌ها و شبکه‌ها چیزهای فیزیکی‌ای نیستند که بتوانید پیدایشان کنید؛ سیستم *طوری رفتار می‌کند که گویی* از آن‌ها ساخته شده. پس چند مدل هم‌ارز می‌توانند رفتار مشاهده‌شدنی را به‌یک‌اندازه خوب توصیف کنند (p. 4). نویسنده نگاه Edward A. Lee را دنبال می‌کند که آن‌قدر لایه، نرم‌افزار را از الکترون‌های داخل سیلیکون جدا می‌کند که پیوند فیزیکی بی‌معنا می‌شود (p. 4).
 
-> **Vault note:** the book's sidebar "Beware the analogy" (p. 5) warns that analogies, such as electricity flowing like water, transfer understanding only up to the point where the similarity ends. Students often don't know where that point is.
+> **Vault note:** کادر کناری «مواظب قیاس باش» در کتاب (p. 5) هشدار می‌دهد که قیاس‌ها، مثل جاری شدن برق مثل آب، فهم را فقط تا جایی منتقل می‌کنند که شباهت تمام می‌شود. دانشجوها اغلب نمی‌دانند آن نقطه کجاست.
 
-### 1.3 Different types of models
+### ۱.۳ گونه‌های مختلف مدل
 
-Distributed systems are described informally or formally, as action machines, state machines, state-action machines or process algebras. Each perspective adds depth, and studying several exposes omissions and inconsistencies in your thinking (p. 5).
+سیستم‌های توزیع‌شده غیررسمی یا رسمی توصیف می‌شوند، به‌عنوان ماشین کنش، ماشین حالت، state machine‌کنش، یا جبر process. هر چشم‌انداز عمق اضافه می‌کند، و مطالعه‌ی چندتایشان افتادگی‌ها و ناسازگاری‌های فکرتان را آشکار می‌کند (p. 5).
 
-| Relationship | Example (pp. 5–7) |
+| رابطه | نمونه (pp. 5–7) |
 |---|---|
-| **Same aspects, equivalent models** (Figure 1.2) | The network as a bus *plus* a buffer of in-flight messages (Figure 1.3), or the network as a bus with a buffer in each component (Figure 1.4). Both can express loss, duplication and reordering; the choice is preference |
-| **Different aspects** (Figure 1.5) | Lamport's TLA+ course: the *Transaction Commit* protocol (an abstraction of all distributed transaction protocols) ignores messages; *Two-Phase Commit* (one implementation) models them, so only it can represent lost, duplicated or reordered messages |
+| **همان جنبه‌ها، مدل‌های هم‌ارز** (شکل ۱.۲) | شبکه به‌عنوان یک bus *به‌علاوه‌ی* یک بافر از پیام‌های در پرواز (شکل ۱.۳)، یا شبکه به‌عنوان bus با یک بافر در هر مؤلفه (شکل ۱.۴). هر دو می‌توانند گم شدن و تکراری و بی‌ترتیبی را بیان کنند؛ انتخاب سلیقه است |
+| **جنبه‌های مختلف** (شکل ۱.۵) | دوره‌ی TLA+ از Lamport: پروتکل *Transaction Commit*، یعنی انتزاعی از همه‌ی پروتکل‌های تراکنش توزیع‌شده، پیام‌ها را نادیده می‌گیرد؛ و *Two-Phase Commit*، یعنی یک پیاده‌سازی، مدلشان می‌کند، پس فقط آن می‌تواند پیام گم‌شده یا تکراری یا بی‌ترتیب را نمایش بدهد |
 
-![Six components with their states connected through a network that holds a single buffer of in-flight messages](../figures/01-03.png)
+![شش مؤلفه با حالتشان که از راه شبکه‌ای وصل شده‌اند که یک بافر تکِ پیام‌های در پرواز دارد](../figures/01-03.png)
 
-*Figure 1.3 (p. 6): one model puts every in-flight message in the network's buffer…*
+*Figure 1.3 (p. 6): یک مدل هر پیام در پرواز را در بافر شبکه می‌گذارد…*
 
-![The same six components, but each component's state now includes its own buffer, and the network has none](../figures/01-04.png)
+![همان شش مؤلفه، ولی حالت هر مؤلفه حالا بافر خودش را دارد و شبکه هیچ بافری ندارد](../figures/01-04.png)
 
-*Figure 1.4 (p. 7): …the other gives each component a buffer. Both can lose, duplicate and reorder messages.*
+*Figure 1.4 (p. 7): …و دیگری به هر مؤلفه یک بافر می‌دهد. هر دو می‌توانند پیام را گم و تکرار و بی‌ترتیب کنند.*
 
-The sidebar on the blind men and the elephant makes the same point: when you meet a different model, ask *why* the author chose it before deciding it's wrong (p. 8).
+کادر کناری مردهای نابینا و فیل همین نکته را می‌گوید: وقتی به مدلی متفاوت رسیدید، پیش از آن که غلطش بدانید بپرسید نویسنده *چرا* انتخابش کرده (p. 8).
 
-### 1.4 Thinking about distributed systems
+### ۱.۴ فکر کردن درباره‌ی سیستم‌های توزیع‌شده
 
-Each component has **exclusive access to its local state**, and the network has exclusive access to its own, including in-flight messages (Figure 1.6) (p. 8). The system's behavior is a **sequence of states**, a state machine, where each step moves the system to the next state (Figure 1.7) (pp. 8–9).
+هر مؤلفه **دسترسی انحصاری به حالت محلی‌اش** دارد، و شبکه دسترسی انحصاری به حالت خودش، از جمله پیام‌های در پرواز (شکل ۱.۶) (p. 8). رفتار سیستم **دنباله‌ای از حالت‌هاست**، یعنی یک ماشین حالت، که هر قدمش سیستم را به حالت بعدی می‌برد (شکل ۱.۷) (pp. 8–9).
 
-| Step type | Examples (p. 8) |
+| گونه‌ی قدم | نمونه (p. 8) |
 |---|---|
-| **External** | Sending a message, receiving a message |
-| **Internal** | Local computation, accessing local state |
+| **بیرونی** | فرستادن یک پیام، گرفتن یک پیام |
+| **درونی** | محاسبه‌ی محلی، دسترسی به حالت محلی |
 
-The model assumes that at any moment, exactly one component or the network completes exactly one step (p. 8). Other texts call components actors, agents, processes or nodes, and call steps actions or events (p. 9).
+مدل فرض می‌کند در هر لحظه دقیقاً یک مؤلفه یا خود شبکه دقیقاً یک قدم را کامل می‌کند (p. 8). متن‌های دیگر به مؤلفه‌ها actor یا agent یا process یا نود می‌گویند، و به قدم‌ها کنش یا رویداد (p. 9).
 
-#### 1.4.1 Correctness (pp. 9–12)
+#### ۱.۴.۱ درستی (pp. 9–12)
 
-Lamport's definition, from "Proving the Correctness of Multiprocess Programs" (pp. 9–10):
+تعریف Lamport، از «Proving the Correctness of Multiprocess Programs» (pp. 9–10):
 
-- **Safety:** something bad never happens.
-- **Liveness:** something good eventually happens.
-- A system is correct if *every possible behavior* satisfies both (Figure 1.8).
+- **ایمنی:** چیز بدی هیچ‌وقت نمی‌افتد.
+- **مفهوم liveness:** چیز خوبی سرانجام می‌افتد.
+- سیستم درست است اگر *هر رفتار ممکنی* هر دو را برآورده کند (شکل ۱.۸).
 
-![Venn diagram inside the set of all possible behaviors: one set satisfies safety, another satisfies liveness, and their intersection is the correct behaviors](../figures/01-08.png)
+![نمودار ون داخل مجموعه‌ی همه‌ی رفتارهای ممکن: یک مجموعه ایمنی را برآورده می‌کند، دیگری liveness را، و اشتراکشان رفتارهای درست است](../figures/01-08.png)
 
-*Figure 1.8 (p. 10): correctness is the intersection; a behavior that is safe but stuck, or live but wrong, falls outside it.*
+*Figure 1.8 (p. 10): درستی همان اشتراک است؛ رفتاری که ایمن ولی گیرکرده است، یا زنده ولی غلط، بیرون از آن می‌افتد.*
 
-The book's example is a distributed transaction that sets `b` at participant P1 and `a` at participant P2 (Listing 1.1). Each participant is *working*, *committed* or *aborted*, and each step moves one participant out of *working* (Figure 1.9) (pp. 10–11):
+نمونه‌ی کتاب تراکنشی توزیع‌شده است که `b` را در شرکت‌کننده‌ی P1 و `a` را در شرکت‌کننده‌ی P2 می‌گذارد (فهرست ۱.۱). هر شرکت‌کننده یا *working* است یا *committed* یا *aborted*، و هر قدم یکی از شرکت‌کننده‌ها را از *working* بیرون می‌برد (شکل ۱.۹) (pp. 10–11):
 
-![The state space of two participants: from both working, four transitions lead to one participant committed or aborted, and from there to four end states; the working states are boxed as violating liveness, and the mixed committed/aborted states are boxed as violating safety](../figures/01-09.png)
+![فضای حالت دو شرکت‌کننده: از هر دو در working، چهار گذار به یک شرکت‌کننده‌ی committed یا aborted می‌رسند و از آن‌جا به چهار حالت پایانی؛ حالت‌های working به‌عنوان نقض liveness کادر خورده‌اند و حالت‌های قاطی commit و abort به‌عنوان نقض ایمنی](../figures/01-09.png)
 
-*Figure 1.9 (p. 11): staying in “working” forever violates **liveness** ("can't stay here"); reaching a mixed commit/abort state violates **safety** ("must not get here"). Together they say both participants eventually reach the same decision.*
+*Figure 1.9 (p. 11): ماندن همیشگی در «working» **liveness** را نقض می‌کند، یعنی «نمی‌شود این‌جا ماند»؛ و رسیدن به حالتی قاطی از commit و abort **ایمنی** را، یعنی «نباید به این‌جا رسید». با هم می‌گویند هر دو شرکت‌کننده سرانجام به همان تصمیم می‌رسند.*
 
-The model deliberately ignores keys, values and locks: the author asserts that they're irrelevant here, and you may disagree without either of you being wrong (p. 12).
+مدل آگاهانه کلید و مقدار و قفل را نادیده می‌گیرد: نویسنده ادعا می‌کند این‌جا بی‌ربطند، و شما می‌توانید مخالف باشید بی آن که هیچ‌کدامتان غلط بگویید (p. 12).
 
-> **Try it:** [Behavior space of a transaction](../widgets/01-behavior-space.html) — step the two participants of Figure 1.9 one transition at a time and see which behaviors violate safety, which get stuck and violate liveness, and which are correct.
+> **Try it:** [فضای رفتار یک تراکنش](../widgets/01-behavior-space.html)؛ دو شرکت‌کننده‌ی شکل ۱.۹ را گذار‌به‌گذار قدم بدهید و ببینید کدام رفتارها ایمنی را نقض می‌کنند، کدام‌ها گیر می‌کنند و liveness را نقض، و کدام‌ها درست‌اند.
 
-#### 1.4.2–1.4.3 Scalability, reliability and responsiveness (p. 12)
+#### ۱.۴.۲ و ۱.۴.۳ مقیاس‌پذیری، قابلیت اطمینان و پاسخ‌گویی (p. 12)
 
-Alpern and Schneider proved that every property is an intersection of a safety and a liveness property, but the author doesn't think about scalability and reliability that way (p. 12). He uses **responsiveness**, a system's ability to meet its service-level objectives:
+سیستم Alpern و Schneider ثابت کردند که هر خاصیتی اشتراک یک خاصیت ایمنی و یک liveness است، ولی نویسنده به مقیاس‌پذیری و قابلیت اطمینان این‌طور فکر نمی‌کند (p. 12). او **پاسخ‌گویی** را به کار می‌برد، یعنی توانایی سیستم در برآورده کردن هدف‌های سطح سرویسش:
 
-- **Scalability:** being responsive in the presence of **load**.
-- **Reliability:** being responsive in the presence of **failure**.
+- **مقیاس‌پذیری:** پاسخ‌گو بودن در حضور **بار**.
+- **قابلیت اطمینان:** پاسخ‌گو بودن در حضور **شکست**.
 
-| Concept | Definition (p. 12) |
+| مفهوم | تعریف (p. 12) |
 |---|---|
-| **Service-level indicator (SLI)** | A quantitative observation of the system's behavior |
-| **Service-level objective (SLO)** | A predicate on an SLI: does this observation meet the objective? |
-| **Error rate** | Observations that miss their objective ÷ all observations, over a fixed interval |
-| **Error budget** | The acceptable upper limit on the error rate |
+| **شاخص سطح سرویس**، یعنی SLI | مشاهده‌ای کمی از رفتار سیستم |
+| **هدف سطح سرویس**، یعنی SLO | محمولی روی یک SLI: این مشاهده هدف را برآورده می‌کند؟ |
+| **نرخ خطا** | مشاهده‌هایی که هدفشان را از دست می‌دهند تقسیم بر همه‌ی مشاهده‌ها، در بازه‌ای ثابت |
+| **بودجه‌ی خطا** | سقف پذیرفتنی نرخ خطا |
 
-**Responsiveness** means keeping the error rate below the error budget. Two aha! moments follow (p. 13):
+**پاسخ‌گویی** یعنی نگه داشتن نرخ خطا زیر بودجه‌ی خطا. دو لحظه‌ی آها! دنبالش می‌آیند (p. 13):
 
-- These guarantees are **application-specific**: what one team calls broken, another calls acceptable.
-- They are **emergent**: no single component can absorb infinite load or survive a crash, so the guarantees come from the components and their interactions.
+- این تضمین‌ها **وابسته به برنامه**اند: آن چیزی که یک تیم خراب می‌نامد، تیم دیگری پذیرفتنی می‌نامد.
+- و **پدیدار**ند: هیچ مؤلفه‌ی تنهایی نمی‌تواند بار بی‌نهایت را جذب کند یا از crash جان سالم ببرد، پس تضمین‌ها از خود مؤلفه‌ها و تعاملشان می‌آیند.
 
-### 1.5 Two big ideas
+> **In practice:** pipeline ما خودش یک سیستم توزیع‌شده است: loader در یک pod، دیتابیس منبع، ClickHouse با دو replica و Airflow که همه را هماهنگ می‌کند.
+>
+> **Your turn:** DAG در Airflow «success» نشان می‌دهد ولی جدول Gold عدد دیروز را دارد. درستی این سیستم را با کدام دو نوع ویژگی می‌سنجید؟
+>
+> *Answer:* safety، یعنی «هیچ‌وقت عدد غلط منتشر نشود»، مثلاً با تست مقایسه‌ی شمار ردیف‌ها در هر لایه؛ و liveness، یعنی «داده‌ی تازه بالاخره برسد»، که با metric تازگی هر جدول در Prometheus و alert روی آن سنجیده می‌شود. success در Airflow فقط می‌گوید taskها تمام شده‌اند، نه این‌که هیچ‌کدام از این دو برقرار است (pp. 9–12).
 
-#### Systems of systems (pp. 13–15)
+### ۱.۵ دو ایده‌ی بزرگ
 
-The definition suggests components are atomic, but most are **subsystems** (Figure 1.10) (p. 13). Arthur Koestler's **holon** (*The Ghost in the Machine*, 1967) is a whole in itself and part of a larger whole; a hierarchy of holons is a **holarchy** (Figure 1.11). Holarchies can capture the "messy" organization of real systems and let you zoom in or out (p. 14).
+#### سیستمی از سیستم‌ها (pp. 13–15)
 
-The book's example is a multitenant database replicated by consensus (Paxos, Raft or Viewstamped Replication), with two tenants and three nodes. You can view it as one cluster made of three nodes, or as two tenant databases each made of the nodes (Figure 1.12). Which entities you treat as atomic depends on the point you're making (pp. 14–15).
+تعریف این حس را می‌دهد که مؤلفه‌ها اتمی‌اند، ولی بیشترشان **زیرسیستم**اند (شکل ۱.۱۰) (p. 13). مفهوم **holon** از Arthur Koestler، در کتاب *The Ghost in the Machine* سال ۱۹۶۷، چیزی است که خودش یک کل است و بخشی از کلی بزرگ‌تر؛ و سلسله‌مراتبی از holonها یک **holarchy** است (شکل ۱.۱۱). holarchyها می‌توانند سازمان «به‌هم‌ریخته»ی سیستم‌های واقعی را بگیرند و بگذارند زوم کنید یا دور شوید (p. 14).
 
-#### Global view vs. local view (pp. 15–16)
+نمونه‌ی کتاب یک دیتابیس چند‌مستأجری است که با consensus تکرار شده، یعنی Paxos یا Raft یا Viewstamped Replication، با دو مستأجر و سه نود. می‌توانید یک cluster ببینیدش که از سه نود ساخته شده، یا دو دیتابیس مستأجر که هر کدام از آن نودها ساخته شده‌اند (شکل ۱.۱۲). این که کدام موجودیت‌ها را اتمی ببینید به نکته‌ای بستگی دارد که می‌خواهید بگویید (pp. 14–15).
 
-An all-knowing observer has a **global view** and can determine the whole system state (Figure 1.13). A component has a **local view**: only its own state and its own channel to the network (Figure 1.14). To learn the global state, it needs the other components to send their local states (pp. 15–16). A component never talks *directly* to another. C1 hands a message addressed to C2 to the network, which may or may not deliver it (p. 16).
+#### نگاه سراسری در برابر نگاه محلی (pp. 15–16)
 
-### 1.6 Distributed Systems Incorporated
+ناظری همه‌دان **نگاه سراسری** دارد و می‌تواند کل حالت سیستم را تعیین کند (شکل ۱.۱۳). یک مؤلفه **نگاه محلی** دارد: فقط حالت خودش و کانال خودش به شبکه (شکل ۱.۱۴). برای دانستن حالت سراسری، لازم است مؤلفه‌های دیگر حالت محلی‌شان را بفرستند (pp. 15–16). یک مؤلفه هیچ‌وقت *مستقیم* با دیگری حرف نمی‌زند. مؤلفه‌ی C1 پیامی را که به C2 آدرس خورده به شبکه می‌دهد، که ممکن است تحویلش بدهد یا ندهد (p. 16).
 
-The book's running analogy is a corporation in an office building (Figure 1.15) (pp. 16–17):
+> **In practice:** هر جزء stack فقط نگاه محلی خودش را دارد: loader نمی‌داند ClickHouse چه دارد و Grafana فقط آن چیزی را می‌بیند که export شده.
+>
+> **Your turn:** on-call باید بفهمد چرا داشبورد مدیریت خالی است. چرا لاگ یک pod تنها کافی نیست و چه چیزی نگاه سراسری می‌دهد؟
+>
+> *Answer:* هر pod فقط نگاه محلی دارد؛ trace با OpenTelemetry که از task در Airflow تا insert در ClickHouse یک trace id دارد، به‌همراه metric هر مرحله، نزدیک‌ترین چیز به نگاه سراسری است، و آن هم فقط تقریبی است (pp. 13–15).
 
-| Building | Distributed system |
+### ۱.۶ شرکت سیستم‌های توزیع‌شده
+
+قیاس جاری کتاب شرکتی در یک ساختمان اداری است (شکل ۱.۱۵) (pp. 16–17):
+
+| ساختمان | سیستم توزیع‌شده |
 |---|---|
-| Rooms and their occupants | Concurrent components with local state |
-| Pneumatic tubes through the mailroom | The network |
-| The building's mailbox | The external interface |
+| اتاق‌ها و ساکنانشان | مؤلفه‌های هم‌زمان با حالت محلی |
+| لوله‌های بادی که از اتاق نامه می‌گذرند | شبکه |
+| صندوق‌نامه‌ی ساختمان | interface بیرونی |
 
-It can express failure concerns (pp. 17–18):
+می‌تواند دغدغه‌های شکست را بیان کند (pp. 17–18):
 
-- **Crash semantics:** a short break is a *transient* failure, a vacation an *intermittent* one, and leaving the company a *permanent* one.
-- **Message-delivery semantics:** Bob in the mailroom may lose, duplicate or reorder messages.
+- **معنای crash:** یک وقفه‌ی کوتاه شکستی *transient* است، یک مرخصی شکستی *گاه‌به‌گاه*، و ترک کردن شرکت شکستی *دائمی*.
+- **معنای تحویل پیام:** Bob در اتاق نامه می‌تواند پیام‌ها را گم یا تکرار یا بی‌ترتیب کند.
 
-If an employee sends a request and gets no reply, they can't tell whether the request or the response was lost, and resending risks processing it twice (p. 18). The book suggests modelling Kubernetes or Kafka the same way (p. 18).
+اگر کارمندی درخواستی بفرستد و پاسخی نگیرد، نمی‌تواند بگوید درخواست گم شده یا پاسخ، و فرستادن دوباره خطر دو بار پردازش شدن دارد (p. 18). کتاب پیشنهاد می‌دهد Kubernetes یا Kafka را هم همین‌طور مدل کنید (p. 18).
 
-### 1.7 Navigating complexity
+### ۱.۷ راه بردن در پیچیدگی
 
-| Idea | Meaning (pp. 18–20) |
+| ایده | معنا (pp. 18–20) |
 |---|---|
-| **Simple yet complex** | Simple employees following simple rules can make a complex company |
-| **Emergent behavior** | Scalability and reliability can't be traced to one employee; this is the basis of building reliable systems from unreliable parts |
-| **Changing perspective** | Black box vs. white box is a change of *resolution*: both are still the all-knowing global view (Figure 1.16). The real shift is to a component's **local** view (Figure 1.17) |
-| **Think globally; act locally** | Design a *global* algorithm that each component implements as a *local* algorithm. **Split brain**, where two rooms both believe they are the team leader (Figure 1.18), shows how hard that is |
+| **ساده و با این حال پیچیده** | کارمندهای ساده‌ای که قاعده‌های ساده را رعایت می‌کنند می‌توانند شرکتی پیچیده بسازند |
+| **رفتار پدیدار** | مقیاس‌پذیری و قابلیت اطمینان را نمی‌شود به یک کارمند ردیابی کرد؛ این پایه‌ی ساختن سیستم‌های قابل‌اعتماد از قطعه‌های نامطمئن است |
+| **عوض کردن چشم‌انداز** | جعبه‌ی سیاه در برابر جعبه‌ی سفید عوض کردن *تفکیک‌پذیری* است: هر دو باز هم همان نگاه سراسری همه‌دان‌اند (شکل ۱.۱۶). جابه‌جایی واقعی، رفتن به نگاه **محلی** یک مؤلفه است (شکل ۱.۱۷) |
+| **سراسری فکر کن؛ محلی عمل کن** | یک الگوریتم *سراسری* طراحی کنید که هر مؤلفه به‌عنوان الگوریتمی *محلی* پیاده‌اش کند. **مغز دو‌پاره**، که دو اتاق هر دو باور دارند leader تیم‌اند (شکل ۱.۱۸)، نشان می‌دهد این چقدر سخت است |
 
-### 1.8 Thinking above the code
+### ۱.۸ فکر کردن بالای کد
 
-The book has almost no code, by design: static snippets are poor at capturing dynamic systems (p. 21). A code-based definition makes race conditions look limited to single-variable updates. The book's model is more general (pp. 21–22):
+کتاب آگاهانه تقریباً هیچ کدی ندارد: تکه‌های ایستا در گرفتن سیستم‌های پویا ضعیف‌اند (p. 21). تعریفی کد‌محور، شرایط مسابقه را طوری نشان می‌دهد که انگار به به‌روزرسانی یک متغیر محدود است. مدل کتاب عمومی‌تر است (pp. 21–22):
 
-- A **process** is a sequence of atomic actions: P = a·b·c, Q = x·y·z.
-- The **concurrent composition** (P | Q) is the set of all possible interleavings of their actions.
-- A **race condition** is a situation in which a *subset* of (P | Q) is considered incorrect. You are the arbiter of correctness (Figure 1.19).
-- **Serializability:** (P | Q) is correct if every interleaving has the same effect as P·Q or Q·P (Figure 1.20).
+- یک **process** دنباله‌ای از کنش‌های اتمی است: P = a·b·c و Q = x·y·z.
+- **ترکیب هم‌زمان**، یعنی (P | Q)، مجموعه‌ی همه‌ی interleavingهای ممکن کنش‌هایشان است.
+- **شرایط مسابقه** وضعیتی است که *زیرمجموعه*ای از (P | Q) نادرست حساب می‌شود. داور درستی شمایید (شکل ۱.۱۹).
+- **ویژگی serializability:** ترکیب (P | Q) درست است اگر هر interleaving همان اثر P·Q یا Q·P را داشته باشد (شکل ۱.۲۰).
 
-The model applies at every level: threads, cooperative and preemptive multitasking, single-core and multicore machines, and multiple machines (p. 21).
+مدل در هر سطحی به کار می‌آید: thread، چند‌کاره‌ی تعاونی و انحصاری، ماشین‌های تک‌هسته‌ای و چند‌هسته‌ای، و چند ماشین (p. 21).
 
-> **Try it:** [Interleavings and race conditions](../widgets/01-interleavings.html) — two processes each read, increment and write a shared counter. List all 20 interleavings of their actions, mark which ones are incorrect, and check which are equivalent to a serial order.
+> **Try it:** [interleavingها و شرایط مسابقه](../widgets/01-interleavings.html)؛ دو process هر کدام یک شمارنده‌ی مشترک را می‌خوانند و یکی اضافه می‌کنند و می‌نویسند. هر بیست interleaving کنش‌هایشان را فهرست کنید، نادرست‌ها را علامت بزنید، و بررسی کنید کدام‌ها با ترتیبی پشت‌سرهم هم‌ارزند.
 
-### Summary
+### خلاصه
 
-The chapter summary (pp. 22): a mental model is the basis of comprehension and communication; understanding beats knowing; the core challenge is a coherent whole built from components with only local knowledge; guarantees are reasoned about as safety and liveness plus scalability and reliability; and Distributed Systems Incorporated is a way to visualize it all.
+خلاصه‌ی فصل (p. 22): مدل ذهنی پایه‌ی فهم و ارتباط است؛ فهمیدن از دانستن بهتر است؛ چالش اصلی کلی منسجم است که از مؤلفه‌هایی با دانش فقط محلی ساخته شده؛ درباره‌ی تضمین‌ها با ایمنی و liveness به‌علاوه‌ی مقیاس‌پذیری و قابلیت اطمینان استدلال می‌شود؛ و شرکت سیستم‌های توزیع‌شده راهی برای تجسم همه‌ی این‌هاست.
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Lens | What it captures | What it leaves out |
+| عدسی | چه چیزی را می‌گیرد | چه چیزی را نمی‌گیرد |
 |---|---|---|
-| Black-box global view | The system's observable behavior | How components cooperate |
-| White-box global view | Every component's state and the network | What any one component can actually know |
-| Local view | What a component can observe and decide | Everything outside it |
-| Safety + liveness | Functional correctness of every behavior | Load and failure (use responsiveness) |
-| Responsiveness (SLIs/SLOs) | Scalability and reliability | Functional correctness |
+| نگاه سراسری جعبه‌سیاه | رفتار مشاهده‌شدنی سیستم | این که مؤلفه‌ها چطور همکاری می‌کنند |
+| نگاه سراسری جعبه‌سفید | حالت هر مؤلفه و شبکه | این که هر مؤلفه واقعاً چه می‌تواند بداند |
+| نگاه محلی | آن چیزی که یک مؤلفه می‌تواند ببیند و تصمیم بگیرد | هر چیزی بیرون از آن |
+| ایمنی به‌علاوه‌ی liveness | درستی کارکردی هر رفتار | بار و شکست؛ برای آن‌ها پاسخ‌گویی |
+| پاسخ‌گویی با SLI و SLO | مقیاس‌پذیری و قابلیت اطمینان | درستی کارکردی |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **How many interleavings?** Two processes of *m* and *n* atomic actions have C(m + n, m) interleavings, so 20 for 3 + 3 and 184,756 for 10 + 10. That growth is why model checkers such as TLA+'s TLC explore state spaces mechanically. The [interleavings widget](../widgets/01-interleavings.html) enumerates the 3 + 3 case exactly.
-- **Lost update.** The book's race-condition definition covers the classic *lost update*. If two processes each read a counter, add one and write it back, many interleavings end with the counter at 1 instead of 2. [DDIA Ch. 8](../../designing-data-intensive-applications/chapters/08-transactions.md) discusses the same anomaly under weak isolation.
-- **SRE vocabulary.** The SLI/SLO/error-budget terms follow Google's *Site Reliability Engineering* books, which the author recommends (p. 12). In practice SLOs are usually stated as percentiles over a window, for example "99% of requests under 300 ms over 28 days".
+- **چند درهم‌آمیختگی؟** دو process با *m* و *n* کنش اتمی، C(m + n, m) interleaving دارند، پس بیست برای سه و سه، و ۱۸۴۷۵۶ برای ده و ده. همین رشد است که model checkerهایی مثل TLC در TLA+ را وادار می‌کند فضای حالت را ماشینی بکاوند. [ویجت interleaving](../widgets/01-interleavings.html) حالت سه و سه را دقیق برمی‌شمارد.
+- **به‌روزرسانی گم‌شده.** تعریف شرایط مسابقه در کتاب همان *به‌روزرسانی گم‌شده*ی کلاسیک را می‌پوشاند. اگر دو process هر کدام شمارنده‌ای را بخوانند و یکی اضافه کنند و بازبنویسند، خیلی از interleavingها با شمارنده‌ی ۱ به‌جای ۲ تمام می‌شوند. [فصل ۸ کتاب DDIA](../../designing-data-intensive-applications/chapters/08-transactions.md) همین ناهنجاری را زیر جداسازی ضعیف بحث می‌کند.
+- **واژگان SRE.** واژه‌های SLI و SLO و بودجه‌ی خطا از کتاب‌های *Site Reliability Engineering* در Google می‌آیند که نویسنده توصیه‌شان می‌کند (p. 12). در عمل SLOها معمولاً به‌عنوان صدک روی یک پنجره بیان می‌شوند، مثلاً «۹۹٪ درخواست‌ها زیر ۳۰۰ میلی‌ثانیه در بیست‌و‌هشت روز».
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. System models, order, and time](02-system-models-order-and-time.md) (the assumptions behind every model), [3. Failure tolerance](03-failure-tolerance.md) (safety and liveness under failure), [5. Transactions](05-transactions.md) (serializability in depth), [6. Distributed transactions](06-distributed-transactions.md) (the transaction of Figure 1.9), [12. Cloud and services](12-cloud-and-services.md) (global and local views of a service).
+- **فصل‌های مرتبط:** [فصل ۲: مدل سیستم، ترتیب و زمان](02-system-models-order-and-time.md) که فرض‌های پشت هر مدل را دارد، [فصل ۳: تحمل شکست](03-failure-tolerance.md) که ایمنی و liveness زیر شکست را دارد، [فصل ۵: تراکنش](05-transactions.md) که serializability را عمیق می‌گیرد، [فصل ۶: تراکنش توزیع‌شده](06-distributed-transactions.md) که تراکنش شکل ۱.۹ را دارد، و [فصل ۱۲: cloud و سرویس‌ها](12-cloud-and-services.md) که نگاه سراسری و محلی یک سرویس را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **What makes a mental model good?**
+1. **چه چیزی یک مدل ذهنی را خوب می‌کند؟**
 
-   *Answer:* It is correct (every fact of the model is a fact of the system) and complete (every relevant fact of the system is in the model). Relevance depends on the question you're asking (p. 4).
+   *Answer:* درست باشد، یعنی هر واقعیت مدل واقعیتی از سیستم باشد، و کامل، یعنی هر واقعیت مربوط سیستم در مدل باشد. مربوط بودن به پرسشی بستگی دارد که می‌پرسید (p. 4).
 
-2. **In Figure 1.9, which state violates safety and which situation violates liveness?**
+2. **در شکل ۱.۹، کدام حالت ایمنی را نقض می‌کند و کدام وضعیت liveness را؟**
 
-   *Answer:* Any state where one participant committed and the other aborted violates safety. Staying in "working" forever violates liveness (p. 11).
+   *Answer:* هر حالتی که یک شرکت‌کننده commit کرده و دیگری abort، ایمنی را نقض می‌کند. ماندن همیشگی در «working» liveness را نقض می‌کند (p. 11).
 
-3. **The author defines reliability as…**
-   - [ ] the absence of failures
-   - [x] the ability to be responsive in the presence of failure
-   - [ ] the ability to be responsive in the presence of load
+3. **نویسنده قابلیت اطمینان را این‌طور تعریف می‌کند…**
+   - [ ] نبود شکست
+   - [x] توانایی پاسخ‌گو بودن در حضور شکست
+   - [ ] توانایی پاسخ‌گو بودن در حضور بار
 
-   *Answer:* Scalability is responsiveness under load; reliability is responsiveness under failure (p. 12).
+   *Answer:* مقیاس‌پذیری پاسخ‌گویی زیر بار است و قابلیت اطمینان پاسخ‌گویی زیر شکست (p. 12).
 
-4. **What is the error budget?**
+4. **بودجه‌ی خطا چیست؟**
 
-   *Answer:* An acceptable upper limit on the error rate, which is the share of observations that miss their SLO in a fixed interval. A system is responsive while its error rate stays below the budget (p. 12).
+   *Answer:* سقف پذیرفتنی نرخ خطا، که همان سهم مشاهده‌هایی است که SLOشان را در بازه‌ای ثابت از دست می‌دهند. سیستم تا وقتی پاسخ‌گوست که نرخ خطایش زیر بودجه بماند (p. 12).
 
-5. **What is a holon, and why is it useful here?**
+5. **مفهوم holon چیست و چرا این‌جا به کار می‌آید؟**
 
-   *Answer:* An entity that is both a whole and part of a larger whole (Koestler). It lets you treat a component as atomic or as a subsystem, depending on the point you're making (pp. 13–15).
+   *Answer:* موجودیتی که هم خودش یک کل است و هم بخشی از کلی بزرگ‌تر، به گفته‌ی Koestler. می‌گذارد یک مؤلفه را اتمی ببینید یا زیرسیستم، بسته به نکته‌ای که می‌خواهید بگویید (pp. 13–15).
 
-6. **Why can't C1 "talk to" C2 directly?**
+6. **چرا C1 نمی‌تواند مستقیم «با C2 حرف بزند»؟**
 
-   *Answer:* C1 sends a message addressed to C2 to the network, which may or may not deliver it. C1 really communicates with the rest of the system (p. 16).
+   *Answer:* مؤلفه‌ی C1 پیامی را که به C2 آدرس خورده به شبکه می‌دهد، که ممکن است تحویلش بدهد یا ندهد. C1 در واقع با بقیه‌ی سیستم ارتباط می‌گیرد (p. 16).
 
-7. **Define a race condition without code.**
+7. **شرایط مسابقه را بی کد تعریف کنید.**
 
-   *Answer:* For concurrent processes P and Q, (P | Q) is the set of all interleavings of their actions. A race condition exists when some subset of those interleavings is considered incorrect (p. 21).
+   *Answer:* برای processهای هم‌زمان P و Q، ترکیب (P | Q) مجموعه‌ی همه‌ی interleavingهای کنش‌هایشان است. شرایط مسابقه وقتی هست که زیرمجموعه‌ای از آن interleavingها نادرست حساب شود (p. 21).

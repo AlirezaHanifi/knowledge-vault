@@ -1,66 +1,66 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>2PC: Recovery and Blocking</title>
-<meta name="description" content="Run Two-Phase Commit between a coordinator and two resource managers, crash one of them at a chosen step, watch each recovering RM apply the rule for its last log entry, then try the two improvements: asking a peer, and timing out to abort. Illustrates Think Distributed Systems, Chapter 6.">
+<title>الگوریتم 2PC: بازیابی و بند آمدن</title>
+<meta name="description" content="الگوریتم Two-Phase Commit را میان یک coordinator و دو resource manager اجرا کنید، یکی‌شان را در قدمی که می‌خواهید از کار بیندازید، ببینید هر RM در حال بازیابی قاعده‌ی آخرین entry logش را اعمال می‌کند، و بعد آن دو بهبود را بیازمایید: پرسیدن از همتا، و timeout و abort. تصویری از فصل ۶ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .pt { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); font-size: .82rem; }
   .pt h3 { margin: 0 0 4px; font-size: .9rem; } .pt .s { font-weight: 600; }
   .pt.commit { border-color: var(--ok); background: var(--ok-soft); } .pt.abort { border-color: var(--bad); background: var(--bad-soft); } .pt.blocked { border-color: var(--warn); background: var(--warn-soft); } .pt.down { opacity: .55; border-style: dashed; }
-  .pt ol { margin: 4px 0 0; padding-left: 18px; font-family: var(--mono); font-size: .76rem; }
+  .pt ol { margin: 4px 0 0; padding-right: 18px; font-family: var(--mono); font-size: .76rem; }
   @media (max-width: 560px) { .parts { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
-      <a href="../chapters/06-distributed-transactions.html">Chapter 6</a><span aria-hidden="true">/</span>
-      <span aria-current="page">2PC recovery</span>
+      <a href="../chapters/06-distributed-transactions.html">فصل ۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">بازیابی 2PC</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 6 · Distributed transactions</div>
-  <h1>Two-Phase Commit: recovery and blocking</h1>
-  <p class="lede">Each participant persists a log entry before it acts. After a crash, an RM decides what to do from its <strong>last log entry</strong>: no promise yet → abort; Vote-to-Commit → ask the coordinator; Commit → redo; Abort → undo. An RM that voted to commit can’t decide alone, so a crashed <strong>coordinator</strong> can block it.</p>
-  <p class="source-note">Illustrates “Two-Phase Commit protocol”, “In the presence of failure” and “Improvement” (pp. 83–88, Figures 6.6–6.12). The scenario list and the coordinator’s recovery time are the vault’s; the recovery rules are the book’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۶ · تراکنش توزیع‌شده</div>
+  <h1>الگوریتم Two-Phase Commit: بازیابی و بند آمدن</h1>
+  <p class="lede">هر شرکت‌کننده‌ای پیش از عمل کردن entryی در log پایا می‌کند. پس از از کار افتادنی، هر RM از <strong>آخرین entry log</strong>ش تصمیم می‌گیرد چه کند: هنوز قولی نداده ← abort؛ Vote-to-Commit ← از coordinator بپرس؛ Commit ← دوباره انجام بده؛ Abort ← واگردان. آن RMی که رأی به commit داده نمی‌تواند تنها تصمیم بگیرد، پس <strong>coordinator</strong>ی که از کار افتاده می‌تواند بندش بیاورد.</p>
+  <p class="source-note">تصویری از «پروتکل Two-Phase Commit» و «در حضور شکست» و «بهبود» (صص. ۸۳–۸۸، شکل‌های ۶.۶ تا ۶.۱۲). فهرست صحنه‌ها و زمان بازیابی coordinator مال vault است؛ و قاعده‌های بازیابی مال کتاب. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel"><div class="parts" id="parts"></div><div class="callout" id="out" style="margin-top:10px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="scen"></div><div id="term" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="scen"></div><div id="term" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>RM crashes before voting.</strong> It hasn’t promised anything, so on recovery it logs Abort and tells the coordinator, which aborts everyone. Nothing blocks.</li>
-    <li><strong>RM crashes after voting to commit.</strong> It has promised, so on recovery it must ask the coordinator for the decision.</li>
-    <li><strong>Coordinator crashes after telling RM1 to commit (Figure 6.11).</strong> RM2 is blocked. Asking RM1 helps here: RM1 committed, so RM2 may too.</li>
-    <li><strong>Coordinator crashes before any Commit (Figure 6.12).</strong> Nobody knows the decision. Asking peers doesn’t help, and timing out to abort is unsafe: when the coordinator returns with Commit, an RM whose timer hasn’t fired commits while the other has already aborted.</li>
+    <li><strong>RM پیش از رأی دادن از کار می‌افتد.</strong> قولی نداده، پس سر بازیابی Abort را ثبت می‌کند و به coordinator می‌گوید، که همه را abort می‌کند. چیزی بند نمی‌آید.</li>
+    <li><strong>RM پس از رأی به commit از کار می‌افتد.</strong> قول داده، پس سر بازیابی باید تصمیم را از coordinator بپرسد.</li>
+    <li><strong>coordinator پس از گفتن commit به RM1 از کار می‌افتد (شکل ۶.۱۱).</strong> مؤلفه‌ی RM2 بند آمده. این‌جا پرسیدن از RM1 کمک می‌کند: مؤلفه‌ی RM1 commit کرده، پس RM2 هم می‌تواند.</li>
+    <li><strong>coordinator پیش از هر Commitی از کار می‌افتد (شکل ۶.۱۲).</strong> هیچ‌کس تصمیم را نمی‌داند. پرسیدن از همتا کمکی نمی‌کند، و timeout و abort ناایمن است: وقتی coordinator با Commit برگردد، آن RMی که تایمرش شلیک نکرده commit می‌کند در حالی که آن یکی از قبل abort کرده.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/06-distributed-transactions.html"><small>Lesson</small>6. Distributed transactions</a></li>
+    <li><a href="../chapters/06-distributed-transactions.html"><small>درس</small>فصل ۶: تراکنش توزیع‌شده</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -77,94 +77,95 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log"));
   var cfg = { scen: "ok", term: "wait" }, steps, k, P;
-  var NAMES = ["Coordinator", "RM1", "RM2"];
+  var NAMES = ["coordinator", "RM1", "RM2"];
+  var ST = { working: "کار‌کنان", preparing: "در آماده‌سازی", prepared: "آماده", committed: "commit‌شده", aborted: "abort‌شده", blocked: "بند آمده", down: "از کار افتاده", asking: "در حال پرسیدن", recovering: "در بازیابی" };
   function plan() {
     steps = []; var sc = cfg.scen;
     function st(text, who, entry, state, kind) { steps.push({ text: text, who: who, entry: entry, state: state, kind: kind }); }
-    st("Client asks the coordinator to commit t1", -1, null, null, "muted");
-    st("Coordinator logs ⟨Prepare⟩ and sends Prepare to RM1 and RM2", 0, "Prepare", "preparing");
+    st("کلاینت از coordinator می‌خواهد t1 را commit کند", -1, null, null, "muted");
+    st("coordinator entry ⟨Prepare⟩ را ثبت می‌کند و Prepare را به RM1 و RM2 می‌فرستد", 0, "Prepare", "preparing");
     if (sc === "rmBefore") {
-      st("⚡ RM1 crashes before logging a vote", 1, null, "down", "bad");
-      st("RM2 logs ⟨Vote-to-Commit⟩ and votes", 2, "Vote-to-Commit", "prepared");
-      st("Coordinator times out waiting for RM1: logs ⟨Abort⟩ and sends Abort", 0, "Abort", "aborted", "warn");
-      st("RM2 logs ⟨Abort⟩ and aborts", 2, "Abort", "aborted");
-      st("RM1 recovers. Last entry: none, so it hasn't promised: it logs ⟨Abort⟩ and sends Abort", 1, "Abort", "aborted", "ok");
+      st("⚡ مؤلفه‌ی RM1 پیش از ثبت رأیی از کار می‌افتد", 1, null, "down", "bad");
+      st("مؤلفه‌ی RM2 entry ⟨Vote-to-Commit⟩ را ثبت می‌کند و رأی می‌دهد", 2, "Vote-to-Commit", "prepared");
+      st("وقت coordinator در انتظار RM1 سر می‌رود: entry ⟨Abort⟩ را ثبت می‌کند و Abort می‌فرستد", 0, "Abort", "aborted", "warn");
+      st("مؤلفه‌ی RM2 entry ⟨Abort⟩ را ثبت می‌کند و abort می‌کند", 2, "Abort", "aborted");
+      st("مؤلفه‌ی RM1 بازیابی می‌شود. آخرین entry: هیچ، پس قولی نداده: entry ⟨Abort⟩ را ثبت می‌کند و Abort می‌فرستد", 1, "Abort", "aborted", "ok");
       return;
     }
-    st("RM1 logs ⟨Vote-to-Commit⟩ and votes", 1, "Vote-to-Commit", "prepared");
-    st("RM2 logs ⟨Vote-to-Commit⟩ and votes", 2, "Vote-to-Commit", "prepared");
+    st("مؤلفه‌ی RM1 entry ⟨Vote-to-Commit⟩ را ثبت می‌کند و رأی می‌دهد", 1, "Vote-to-Commit", "prepared");
+    st("مؤلفه‌ی RM2 entry ⟨Vote-to-Commit⟩ را ثبت می‌کند و رأی می‌دهد", 2, "Vote-to-Commit", "prepared");
     if (sc === "rmAfter") {
-      st("⚡ RM2 crashes right after voting", 2, null, "down", "bad");
-      st("All votes were Vote-to-Commit: coordinator logs ⟨Commit⟩ and sends Commit", 0, "Commit", "committed");
-      st("RM1 logs ⟨Commit⟩ and commits", 1, "Commit", "committed");
-      st("RM2 recovers. Last entry: Vote-to-Commit, so it promised: it asks the coordinator", 2, null, "asking", "warn");
-      st("Coordinator answers Commit; RM2 logs ⟨Commit⟩ and commits (REDO)", 2, "Commit", "committed", "ok");
+      st("⚡ مؤلفه‌ی RM2 درست پس از رأی دادن از کار می‌افتد", 2, null, "down", "bad");
+      st("همه‌ی رأی‌ها Vote-to-Commit بودند: coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit می‌فرستد", 0, "Commit", "committed");
+      st("مؤلفه‌ی RM1 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند", 1, "Commit", "committed");
+      st("مؤلفه‌ی RM2 بازیابی می‌شود. آخرین entry: Vote-to-Commit، پس قول داده: از coordinator می‌پرسد", 2, null, "asking", "warn");
+      st("coordinator پاسخ Commit می‌دهد؛ مؤلفه‌ی RM2 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند، یعنی REDO", 2, "Commit", "committed", "ok");
       return;
     }
     if (sc === "ok") {
-      st("All votes were Vote-to-Commit: coordinator logs ⟨Commit⟩ and sends Commit", 0, "Commit", "committed");
-      st("RM1 logs ⟨Commit⟩ and commits", 1, "Commit", "committed");
-      st("RM2 logs ⟨Commit⟩ and commits", 2, "Commit", "committed", "ok");
+      st("همه‌ی رأی‌ها Vote-to-Commit بودند: coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit می‌فرستد", 0, "Commit", "committed");
+      st("مؤلفه‌ی RM1 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند", 1, "Commit", "committed");
+      st("مؤلفه‌ی RM2 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند", 2, "Commit", "committed", "ok");
       return;
     }
     if (sc === "tcAfter") {
-      st("Coordinator logs ⟨Commit⟩ and sends Commit to RM1", 0, "Commit", "committed");
-      st("RM1 logs ⟨Commit⟩ and commits", 1, "Commit", "committed");
-      st("⚡ Coordinator crashes before sending Commit to RM2", 0, null, "down", "bad");
+      st("coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit را به RM1 می‌فرستد", 0, "Commit", "committed");
+      st("مؤلفه‌ی RM1 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند", 1, "Commit", "committed");
+      st("⚡ coordinator پیش از فرستادن Commit به RM2 از کار می‌افتد", 0, null, "down", "bad");
     } else {
-      st("⚡ Coordinator crashes after collecting the votes, before sending any decision", 0, null, "down", "bad");
+      st("⚡ coordinator پس از جمع کردن رأی‌ها و پیش از فرستادن هر تصمیمی از کار می‌افتد", 0, null, "down", "bad");
     }
     var t = cfg.term, rm1Knows = sc === "tcAfter";
     if (t === "wait") {
-      st("RM2 voted to commit: it can't decide alone and waits for the coordinator (blocked)", 2, null, "blocked", "warn");
-      if (!rm1Knows) st("RM1 is in the same position (blocked)", 1, null, "blocked", "warn");
-      st("…later, the coordinator is repaired and reads its log", 0, null, sc === "tcAfter" ? "committed" : "recovering", "muted");
-      if (rm1Knows) st("It finds ⟨Commit⟩ and resends Commit; RM2 commits", 2, "Commit", "committed", "ok");
-      else { st("No decision was logged, so it decides now: logs ⟨Commit⟩ and sends Commit", 0, "Commit", "committed"); st("RM1 and RM2 commit", 1, "Commit", "committed"); st("RM2 commits", 2, "Commit", "committed", "ok"); }
+      st("مؤلفه‌ی RM2 رأی به commit داده: نمی‌تواند تنها تصمیم بگیرد و منتظر coordinator می‌ماند، یعنی بند آمده", 2, null, "blocked", "warn");
+      if (!rm1Knows) st("مؤلفه‌ی RM1 هم در همان وضع است و بند آمده", 1, null, "blocked", "warn");
+      st("… بعدتر، coordinator تعمیر می‌شود و logش را می‌خواند", 0, null, sc === "tcAfter" ? "committed" : "recovering", "muted");
+      if (rm1Knows) st("entry ⟨Commit⟩ را پیدا می‌کند و Commit را دوباره می‌فرستد؛ مؤلفه‌ی RM2 commit می‌کند", 2, "Commit", "committed", "ok");
+      else { st("هیچ تصمیمی ثبت نشده بود، پس همین حالا تصمیم می‌گیرد: entry ⟨Commit⟩ را ثبت می‌کند و Commit می‌فرستد", 0, "Commit", "committed"); st("مؤلفه‌های RM1 و RM2 commit می‌کنند", 1, "Commit", "committed"); st("مؤلفه‌ی RM2 commit می‌کند", 2, "Commit", "committed", "ok"); }
     } else if (t === "peer") {
-      if (rm1Knows) { st("RM2 asks RM1, which has already committed", 2, null, "asking", "muted"); st("RM2 may safely commit too", 2, "Commit", "committed", "ok"); }
-      else { st("RM2 asks RM1, but RM1 also only voted to commit and has no decision", 2, null, "blocked", "warn"); st("Both remain blocked until the coordinator returns", 1, null, "blocked", "warn"); }
+      if (rm1Knows) { st("مؤلفه‌ی RM2 از RM1 می‌پرسد، که از قبل commit کرده", 2, null, "asking", "muted"); st("مؤلفه‌ی RM2 می‌تواند ایمن هم commit کند", 2, "Commit", "committed", "ok"); }
+      else { st("مؤلفه‌ی RM2 از RM1 می‌پرسد، ولی RM1 هم فقط رأی به commit داده و تصمیمی ندارد", 2, null, "blocked", "warn"); st("هر دو تا برگشتن coordinator بند آمده می‌مانند", 1, null, "blocked", "warn"); }
     } else {
-      if (rm1Knows) { st("RM2's timeout fires: it logs ⟨Abort⟩ and aborts", 2, "Abort", "aborted", "bad"); }
+      if (rm1Knows) { st("وقت RM2 سر می‌رود: entry ⟨Abort⟩ را ثبت می‌کند و abort می‌کند", 2, "Abort", "aborted", "bad"); }
       else {
-        st("RM2's timeout fires first: it logs ⟨Abort⟩ and aborts", 2, "Abort", "aborted", "warn");
-        st("The coordinator recovers, decides Commit and sends it", 0, "Commit", "committed");
-        st("RM1's clock runs slower, so Commit arrives inside its window: RM1 commits", 1, "Commit", "committed", "bad");
+        st("وقت RM2 اول سر می‌رود: entry ⟨Abort⟩ را ثبت می‌کند و abort می‌کند", 2, "Abort", "aborted", "warn");
+        st("coordinator بازیابی می‌شود، Commit را تصمیم می‌گیرد و می‌فرستدش", 0, "Commit", "committed");
+        st("ساعت RM1 کندتر می‌رود، پس Commit درون پنجره‌اش می‌رسد: مؤلفه‌ی RM1 commit می‌کند", 1, "Commit", "committed", "bad");
       }
     }
   }
-  function reset() { plan(); k = 0; P = NAMES.map(function () { return { log: [], state: "working" }; }); log.clear(); log.add("Client began t1 on RM1 and RM2 and ran its reads and writes.", "muted"); render(); }
+  function reset() { plan(); k = 0; P = NAMES.map(function () { return { log: [], state: "working" }; }); log.clear(); log.add("کلاینت t1 را روی RM1 و RM2 شروع کرد و خواندن‌ها و نوشتن‌هایش را اجرا کرد.", "muted"); render(); }
   function step() { if (k >= steps.length) return false; var s = steps[k++]; if (s.who >= 0) { if (s.entry) P[s.who].log.push(s.entry); if (s.state) P[s.who].state = s.state; } log.add(s.text, s.kind || "muted"); render(); return k < steps.length; }
   function render() {
     var b = Kit.clear(document.getElementById("parts"));
     P.forEach(function (p, i) {
       var cls = p.state === "committed" ? "commit" : p.state === "aborted" ? "abort" : p.state === "blocked" ? "blocked" : p.state === "down" ? "down" : "";
       var ol = Kit.el("ol"); p.log.forEach(function (e) { ol.appendChild(Kit.el("li", null, "⟨" + e + "⟩")); });
-      b.appendChild(Kit.el("div", { class: "pt " + cls }, Kit.el("h3", null, NAMES[i]), Kit.el("div", { class: "s" }, p.state), Kit.el("div", null, "Log:"), p.log.length ? ol : Kit.el("div", null, "(empty)")));
+      b.appendChild(Kit.el("div", { class: "pt " + cls }, Kit.el("h3", null, NAMES[i]), Kit.el("div", { class: "s" }, ST[p.state] || p.state), Kit.el("div", null, "log:"), p.log.length ? ol : Kit.el("div", null, "(خالی)")));
     });
     var rm = [P[1].state, P[2].state], o = document.getElementById("out"), fin = k >= steps.length;
     var split = rm.indexOf("committed") >= 0 && rm.indexOf("aborted") >= 0, blk = rm.indexOf("blocked") >= 0;
-    if (split) { o.className = "callout bad"; o.textContent = "Safety violated: one RM committed and the other aborted."; }
-    else if (fin && blk) { o.className = "callout warn"; o.textContent = "Blocked: safe, but not live until the coordinator returns."; }
-    else if (fin) { o.className = "callout ok"; o.textContent = "Both RMs reached the same decision: " + rm[0] + "."; }
-    else { o.className = "callout"; o.textContent = "In progress."; }
-    stats([["Step", k + " / " + steps.length], ["RM1 / RM2", rm.join(" / "), split ? "bad" : blk ? "warn" : ""]]);
+    if (split) { o.className = "callout bad"; o.textContent = "ایمنی نقض شد: یک RM commit کرد و دیگری abort."; }
+    else if (fin && blk) { o.className = "callout warn"; o.textContent = "بند آمده: ایمن است، ولی تا برگشتن coordinator زنده نه."; }
+    else if (fin) { o.className = "callout ok"; o.textContent = "هر دو RM به همان تصمیم رسیدند: " + (ST[rm[0]] || rm[0]) + "."; }
+    else { o.className = "callout"; o.textContent = "در جریان."; }
+    stats([["قدم", k + " / " + steps.length], ["RM1 و RM2", rm.map(function (x) { return ST[x] || x; }).join(" / "), split ? "bad" : blk ? "warn" : ""]]);
   }
-  document.getElementById("scen").appendChild(Kit.segmented({ label: "Failure", value: cfg.scen, options: [{ value: "ok", label: "None" }, { value: "rmBefore", label: "RM1 before voting" }, { value: "rmAfter", label: "RM2 after voting" }, { value: "tcAfter", label: "TC after first Commit" }, { value: "tcBefore", label: "TC before any Commit" }], onChange: function (v) { cfg.scen = v; reset(); } }).element);
-  document.getElementById("term").appendChild(Kit.segmented({ label: "Prepared RMs, when the TC is gone", value: cfg.term, options: [{ value: "wait", label: "Wait for the TC" }, { value: "peer", label: "Ask a peer" }, { value: "timeout", label: "Time out and abort" }], onChange: function (v) { cfg.term = v; reset(); } }).element);
+  document.getElementById("scen").appendChild(Kit.segmented({ label: "شکست", value: cfg.scen, options: [{ value: "ok", label: "هیچ" }, { value: "rmBefore", label: "RM1 پیش از رأی" }, { value: "rmAfter", label: "RM2 پس از رأی" }, { value: "tcAfter", label: "TC پس از Commit اول" }, { value: "tcBefore", label: "TC پیش از هر Commitی" }], onChange: function (v) { cfg.scen = v; reset(); } }).element);
+  document.getElementById("term").appendChild(Kit.segmented({ label: "RMهای آماده، وقتی TC نیست", value: cfg.term, options: [{ value: "wait", label: "منتظر TC بمان" }, { value: "peer", label: "از همتا بپرس" }, { value: "timeout", label: "وقت سر برود و abort" }], onChange: function (v) { cfg.term = v; reset(); } }).element);
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1100 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "An RM recovers and its last entry is ⟨Vote-to-Commit⟩. It must…",
-      options: ["abort", "commit", "ask the coordinator"], answer: 2,
-      explain: "It has promised but doesn't know the decision (p. 85)." },
-    { q: "Why can 2PC tolerate RM failures without blocking?",
-      options: ["RMs never fail", "A recovering RM can decide from its log or by asking the coordinator", "The client decides"], answer: 1,
-      explain: "pp. 85–86." },
-    { q: "Why is “time out and abort” unsafe for prepared RMs?",
-      options: ["Timeouts are slow", "With unsynchronized clocks, a late Commit can reach one RM inside its window and another after it aborted", "Abort is never allowed"], answer: 1,
-      explain: "p. 87." }
+    { q: "یک RM بازیابی می‌شود و آخرین entryش ⟨Vote-to-Commit⟩ است. باید …",
+      options: ["abort کند", "commit کند", "از coordinator بپرسد"], answer: 2,
+      explain: "قول داده ولی تصمیم را نمی‌داند (ص. ۸۵)." },
+    { q: "چرا 2PC می‌تواند شکست RMها را بی بند آمدن تحمل کند؟",
+      options: ["RMها هیچ‌وقت نمی‌شکنند", "هر RM در حال بازیابی می‌تواند از logش یا با پرسیدن از coordinator تصمیم بگیرد", "کلاینت تصمیم می‌گیرد"], answer: 1,
+      explain: "صص. ۸۵–۸۶." },
+    { q: "چرا «وقت سر برود و abort» برای RMهای آماده ناایمن است؟",
+      options: ["timeout کند است", "با ساعت‌های ناهم‌گام، Commitی late می‌تواند به یک RM درون پنجره‌اش برسد و به آن یکی پس از abort کردنش", "هیچ‌وقت abort مجاز نیست"], answer: 1,
+      explain: "ص. ۸۷." }
   ]);
 })();
 </script>

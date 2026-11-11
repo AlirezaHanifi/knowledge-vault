@@ -1,18 +1,18 @@
-# Range, hash and consistent hashing
+# بازه و hash و consistent hashing
 
-How evenly does each assignment strategy spread items, and how many move when five partitions become six? Following the shape of the book's experiment, this script assigns 200,000 words to partitions by first-letter range (the book's letter groups), by `hash mod n`, and by a consistent-hashing ring with 100 virtual nodes per partition. It prints per-partition counts and their standard deviation, then the share of words that stay put on 5 → 6.
+هر راهبرد تخصیص قلم‌ها را چقدر یکنواخت پخش می‌کند، و وقتی پنج پارتیشن شش می‌شوند چند تا جابه‌جا می‌شوند؟ این اسکریپت، که شکل آزمایش کتاب را پی می‌گیرد، دویست هزار کلمه را با بازه‌ی حرف اول، یعنی همان گروه‌های حرفی کتاب، و با `hash mod n` و با حلقه‌ی consistent hashing با صد نود مجازی برای هر پارتیشن تخصیص می‌دهد. شمارش هر پارتیشن و انحراف معیارشان را چاپ می‌کند، و بعد سهم کلمه‌هایی که سر پنج به شش سر جایشان می‌مانند.
 
-*Illustrates Think Distributed Systems, Listings 7.3–7.9 and Table 7.2, pp. 99–103. The book used `/usr/share/dict/words` (235,976 words) and the `uhashring` package; this script generates words with an approximate English first-letter distribution (seeded) and builds its own ring with MD5. The counts differ from the book's; the pattern doesn't.*
+*تصویری از فهرست‌های ۷.۳ تا ۷.۹ و جدول ۷.۲ کتاب Think Distributed Systems، صص. ۹۹–۱۰۳. کتاب فایل `/usr/share/dict/words` با ۲۳۵۹۷۶ کلمه و بسته‌ی `uhashring` را به کار برد؛ این اسکریپت کلمه‌ها را با توزیع تقریبی حرف اول انگلیسی و با seed می‌سازد و حلقه‌ی خودش را با MD5 بنا می‌کند. شمارش‌ها با کتاب فرق دارند؛ و الگو نه.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 assignment_strategies.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 200,000 words; ideal per partition: 40,000 (5 partitions), 33,333 (6)
@@ -33,13 +33,13 @@ consistent hashing
   5 -> 6: 167,644 stay (83.8%), 32,356 relocate (16.2%)
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Range partitioning follows the language: the a–e and p–t partitions get four times as many words as u–z.
-- `hash mod n` is almost perfectly even, but only about 1 in 6 words keeps its partition on 5 → 6 (16.8% here, 16.7% in the book).
-- Consistent hashing keeps about 84% of words in place, so only about n/m move (the book measured 81.5% staying), at the cost of a somewhat less even spread.
-- Range relocation is about half here (51.4% in the book): moving letter boundaries moves every word whose first letter changes group.
+- پارتیشن‌بندی بازه‌ای از زبان پی می‌گیرد: پارتیشن‌های a–e و p–t چهار برابر u–z کلمه می‌گیرند.
+- عبارت `hash mod n` تقریباً بی‌عیب یکنواخت است، ولی سر پنج به شش تنها تقریباً ۱ کلمه از ۶ پارتیشنش را نگه می‌دارد، یعنی ۱۶٫۸٪ این‌جا و ۱۶٫۷٪ در کتاب.
+- روش consistent hashing تقریباً ۸۴٪ کلمه‌ها را سر جا نگه می‌دارد، پس تنها تقریباً n/m جابه‌جا می‌شوند، که کتاب ۸۱٫۵٪ ماندن را اندازه گرفت، به بهای پخشی کمی ناـیکنواخت‌تر.
+- جابه‌جایی بازه‌ای این‌جا تقریباً نصف است، و در کتاب ۵۱٫۴٪: جابه‌جا کردن مرزهای حرفی هر کلمه‌ای را جابه‌جا می‌کند که گروه حرف اولش عوض می‌شود.
 
-## Related
+## مرتبط
 
-- Chapter note: [7. Partitioning](../../chapters/07-partitioning.md) — “Repartitioning” and “Consistent hashing”, pp. 101–103
+- یادداشت فصل: [فصل ۷: پارتیشن‌بندی](../../chapters/07-partitioning.md) — «پارتیشن‌بندی دوباره» و «consistent hashing»، صص. ۱۰۱–۱۰۳

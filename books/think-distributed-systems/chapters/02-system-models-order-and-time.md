@@ -3,250 +3,264 @@ book: think-distributed-systems
 chapter: 2
 title: "System models, order, and time"
 pages: "23–39"
+translated_title: "مدل سیستم، ترتیب و زمان"
+lang: fa
 ---
 
-# 2. System models, order, and time
+# فصل ۲: مدل سیستم، ترتیب و زمان
 
-[← 1. Thinking in distributed systems: Models, mindsets, and mechanics](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) · [Book](../README.md) · [3. Failure tolerance →](03-failure-tolerance.md)
+[فصل ۱: فکر کردن در سیستم‌های توزیع‌شده →](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) · [کتاب](../README.md) · [فصل ۳: تحمل شکست ←](03-failure-tolerance.md)
 
-## Summary
+## خلاصه
 
-Every algorithm is correct only *relative to* a **system model**: a set of assumptions about components, the network and timing (p. 24). The chapter goes through the timing models (synchronous, asynchronous with no or a weak notion of time, and partially synchronous), the component failure models (Crash-Stop, Omission, Crash-Recovery, Byzantine) and the network failures (reordering, duplication, loss) (pp. 25–30). It then states the author's **realistic system model**: partially synchronous, non-Byzantine components that crash and recover, over an unreliable network (p. 30).
+هر الگوریتمی فقط *نسبت به* یک **مدل سیستم** درست است: مجموعه‌ای از فرض‌ها درباره‌ی مؤلفه‌ها و شبکه و زمان‌بندی (p. 24). این فصل مدل‌های زمان‌بندی را می‌گردد، یعنی همگام، asynchronous با هیچ یا با درکی ضعیف از زمان، و نیمه‌همگام، و مدل‌های شکست مؤلفه را، یعنی Crash-Stop و Omission و Crash-Recovery و بیزانسی، و شکست‌های شبکه را، یعنی بی‌ترتیبی و تکراری و گم شدن (pp. 25–30). بعد **مدل سیستم واقع‌بینانه**ی نویسنده را بیان می‌کند: نیمه‌همگام، با مؤلفه‌های غیر‌بیزانسی که crash می‌کنند و برمی‌گردند، روی شبکه‌ای نامطمئن (p. 30).
 
-The second half is about **order**. Most actions don't commute, so establishing order is fundamental (p. 30). The chapter defines a race condition over executions and fixes the example with a coordinator that tags requests (pp. 30–32). It covers Lamport's **happened-before** relation, causality, and a precise definition of concurrency versus parallelism (pp. 32–35). It closes with **clock consistency** and the two kinds of clock: physical clocks (skew, drift, NTP, time-of-day vs. monotonic) and logical clocks (Lamport clocks, Kafka offsets, etcd sequence numbers) (pp. 35–38).
+نیمه‌ی دوم درباره‌ی **ترتیب** است. بیشتر کنش‌ها جابه‌جا‌پذیر نیستند، پس برقرار کردن ترتیب بنیادی است (p. 30). فصل شرایط مسابقه را روی اجراها تعریف می‌کند و نمونه را با یک coordinator که درخواست‌ها را برچسب می‌زند اصلاح (pp. 30–32). رابطه‌ی **happened-before** از Lamport و علیت و تعریفی دقیق از concurrency در برابر موازی‌کاری را می‌پوشاند (pp. 32–35). و با **consistency ساعت** و دو گونه ساعت تمام می‌شود: ساعت‌های فیزیکی با skew و drift و NTP و ساعت زمان‌روز در برابر یکنوا، و ساعت‌های منطقی با ساعت Lamport و offsetهای Kafka و شماره‌های ترتیب etcd (pp. 35–38).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **A system model is the rules of the game.** An algorithm that is correct under one set of assumptions may be wrong under another; a small rule change can unravel a strategy (p. 24).
-- **"Asynchronous" is ambiguous.** With *no* notion of time, a component can't use timeouts. With a *weak* notion (unsynchronized clocks of unknown deviation), it can. Some problems are solvable only in the second (pp. 25–26).
-- **Real systems are partially synchronous**, synchronous most of the time and asynchronous sometimes. Protocols therefore guarantee safety and liveness while things are synchronous, and keep **safety over liveness** otherwise (p. 26).
-- **Four component failure models:** Crash-Stop (ceases to exist), Omission (takes a break, keeps its memory), Crash-Recovery (may lose state) and Byzantine (anything, including deception) (pp. 27–28).
-- **The network may reorder, duplicate or lose messages, but it cannot lie** (pp. 28–30).
-- **Happened-before** (Lamport, 1978) is a partial order built from intra-component order and send→receive pairs, closed under transitivity. It captures *potential* causality (pp. 32–34).
-- **Concurrency is logical; parallelism is physical.** Two operations are concurrent if neither's end happened before the other's begin, and parallel if they overlap in time (pp. 34–35).
-- **Clock consistency:** a → b ⇒ C(a) < C(b). Physical clocks measure durations within a component; logical clocks order events across components (pp. 35, 38).
+- **مدل سیستم همان قاعده‌های بازی است.** الگوریتمی که زیر مجموعه‌ای از فرض‌ها درست است می‌تواند زیر مجموعه‌ای دیگر غلط باشد؛ تغییر کوچکی در قاعده‌ها می‌تواند یک راهبرد را از هم بپاشد (p. 24).
+- **واژه‌ی «asynchronous» مبهم است.** با *هیچ* درکی از زمان، یک مؤلفه نمی‌تواند timeout به کار ببرد. با درکی *ضعیف*، یعنی ساعت‌های asynchronous با انحراف ناشناخته، می‌تواند. بعضی مسئله‌ها فقط در دومی حل‌شدنی‌اند (pp. 25–26).
+- **سیستم‌های واقعی partially synchronousاند**، یعنی بیشتر وقت‌ها synchronous و گاهی asynchronous. پس پروتکل‌ها ایمنی و liveness را تا وقتی synchronous است تضمین می‌کنند، و وگرنه **ایمنی را بر liveness** نگه می‌دارند (p. 26).
+- **چهار مدل شکست مؤلفه:** Crash-Stop یعنی دیگر وجود ندارد، Omission یعنی استراحت می‌کند و حافظه‌اش را نگه می‌دارد، Crash-Recovery یعنی می‌تواند حالت را از دست بدهد، و بیزانسی یعنی هر چیزی، از جمله فریب (pp. 27–28).
+- **شبکه می‌تواند پیام‌ها را بی‌ترتیب یا تکراری یا گم کند، ولی نمی‌تواند دروغ بگوید** (pp. 28–30).
+- **رابطه‌ی happened-before** از Lamport در سال ۱۹۷۸، ترتیبی جزئی است که از ترتیب درون یک مؤلفه و زوج‌های فرستادن و گرفتن ساخته می‌شود و زیر تعدی بسته است. علیت *بالقوه* را می‌گیرد (pp. 32–34).
+- **مفهوم concurrency منطقی است و موازی‌کاری فیزیکی.** دو عملیات هم‌زمان‌اند اگر پایان هیچ‌کدام پیش از شروع دیگری نیفتاده باشد، و موازی‌اند اگر در زمان هم‌پوشانی داشته باشند (pp. 34–35).
+- **مفهوم consistency ساعت:** اگر a → b آن‌گاه C(a) < C(b). ساعت‌های فیزیکی مدت‌ها را داخل یک مؤلفه می‌سنجند و ساعت‌های منطقی رویدادها را بین مؤلفه‌ها مرتب می‌کنند (pp. 35, 38).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- 2.1 System models — p. 23
-  - 2.1.1 Theory and practice — p. 24
-  - 2.1.2 Synchronous distributed systems — p. 25
-  - 2.1.3 Asynchronous distributed systems — p. 25
-  - 2.1.4 Partially synchronous systems — p. 26
-  - 2.1.5 Component and network behavior — p. 27
-  - 2.1.6 Realistic system models — p. 30
-- 2.2 Order and time — p. 30
-  - 2.2.1 The happened-before relationship — p. 32
-  - 2.2.2 Time and clocks — p. 35
-  - 2.2.3 Physical time and physical clocks — p. 35
-  - 2.2.4 Logical time and logical clocks — p. 37
-  - 2.2.5 Physical clocks vs. logical clocks — p. 38
+- ۲.۱ مدل‌های سیستم — ص. ۲۳
+  - ۲.۱.۱ نظریه و عمل — ص. ۲۴
+  - ۲.۱.۲ سیستم‌های توزیع‌شده‌ی synchronous — ص. ۲۵
+  - ۲.۱.۳ سیستم‌های توزیع‌شده‌ی asynchronous — ص. ۲۵
+  - ۲.۱.۴ سیستم‌های partially synchronous — ص. ۲۶
+  - ۲.۱.۵ رفتار مؤلفه و شبکه — ص. ۲۷
+  - ۲.۱.۶ مدل‌های سیستم واقع‌بینانه — ص. ۳۰
+- ۲.۲ ترتیب و زمان — ص. ۳۰
+  - ۲.۲.۱ رابطه‌ی happened-before — ص. ۳۲
+  - ۲.۲.۲ زمان و ساعت — ص. ۳۵
+  - ۲.۲.۳ زمان فیزیکی و ساعت‌های فیزیکی — ص. ۳۵
+  - ۲.۲.۴ زمان منطقی و ساعت‌های منطقی — ص. ۳۷
+  - ۲.۲.۵ ساعت فیزیکی در برابر ساعت منطقی — ص. ۳۸
 
-## Notes
+## یادداشت‌ها
 
-### 2.1 System models
+### ۲.۱ مدل‌های سیستم
 
-A **system model** is a set of assumptions about the system's components, its network and its timing behavior (Table 2.1) (p. 24):
+یک **مدل سیستم** مجموعه‌ای از فرض‌ها درباره‌ی مؤلفه‌های سیستم و شبکه‌اش و رفتار زمانی‌اش است (جدول ۲.۱) (p. 24):
 
-| One system model | Another system model |
+| یک مدل سیستم | مدل سیستمی دیگر |
 |---|---|
-| Components may not fail | Components may fail |
-| Messages may not get lost | Messages may get lost |
-| Clocks are perfectly synchronized | Clocks are not perfectly synchronized |
+| مؤلفه‌ها نمی‌توانند شکست بخورند | مؤلفه‌ها می‌توانند شکست بخورند |
+| پیام‌ها نمی‌توانند گم شوند | پیام‌ها می‌توانند گم شوند |
+| ساعت‌ها کاملاً synchronousاند | ساعت‌ها کاملاً synchronous نیستند |
 
-The book's aha! moment compares a system model to a **board game**: the rules set the stage, and even a slight rule change can make a carefully devised strategy ineffective (p. 24).
+لحظه‌ی آها! کتاب مدل سیستم را با **بازی رومیزی** مقایسه می‌کند: قاعده‌ها صحنه را می‌چینند، و حتی تغییری کوچک در قاعده می‌تواند راهبردی با‌دقت‌چیده‌شده را بی‌اثر کند (p. 24).
 
-#### Theory and practice (pp. 24–25)
+#### نظریه و عمل (pp. 24–25)
 
-| Kind | Typically used to reason about | Example |
+| گونه | معمولاً برای استدلال درباره‌ی | نمونه |
 |---|---|---|
-| **Theoretical** | Impossibilities, and lower and upper bounds on components or messages | — |
-| **Practical** | Possibilities, weighed against development and operational cost, scalability and reliability | — |
-| **Both** | — | The models underlying Viewstamped Replication, Paxos and Raft |
+| **نظری** | ناممکن بودن‌ها، و کران پایین و بالا روی مؤلفه‌ها یا پیام‌ها | — |
+| **عملی** | ممکن بودن‌ها، سنجیده در برابر هزینه‌ی توسعه و عملیات و مقیاس‌پذیری و قابلیت اطمینان | — |
+| **هر دو** | — | مدل‌های زیربنای Viewstamped Replication و Paxos و Raft |
 
-#### Timing models (pp. 25–26)
+#### مدل‌های زمان‌بندی (pp. 25–26)
 
-![A spectrum from the synchronous system model through the partially synchronous model to the asynchronous model; the two ends are labelled theoretical and the middle, highlighted, practical](../figures/02-02.png)
+![طیفی از مدل سیستم synchronous تا مدل partially synchronous تا مدل ناهمگام؛ دو سر طیف نظری برچسب خورده‌اند و وسط که برجسته است عملی](../figures/02-02.png)
 
-*Figure 2.2 (p. 26): the two extremes are theoretical; real systems are partially synchronous.*
+*Figure 2.2 (p. 26): دو سر طیف نظری‌اند؛ سیستم‌های واقعی partially synchronousاند.*
 
-| Model | Clocks | Event timing | Consequence |
+| مدل | ساعت‌ها | زمان‌بندی رویداد | پی‌آمد |
 |---|---|---|---|
-| **Synchronous** | Perfectly synchronized, or deviating by a known upper bound | Strict, or with bounded delay | Strong notion of physical time |
-| **Asynchronous, no notion of time** | None | Arbitrary time or arbitrary delay | **No timeouts**, and timeouts are crucial for failure detection and mitigation |
-| **Asynchronous, weak notion of time** | Unsynchronized, with unknown deviation | Arbitrary | **Timeouts are possible** |
-| **Partially synchronous** | — | Synchronous most of the time, asynchronous at other times | Matches experience, like home internet that is usually fast but sometimes times out |
+| **synchronous** | کاملاً همگام، یا با انحرافی که کران بالایش شناخته است | سخت‌گیرانه، یا با latency bounded | درکی قوی از زمان فیزیکی |
+| **ناهمگام، بی هیچ درکی از زمان** | ندارد | زمان دلخواه یا latency دلخواه | **هیچ timeoutی نداریم**، و timeout برای تشخیص و کاهش شکست حیاتی است |
+| **ناهمگام، با درکی ضعیف از زمان** | ناهمگام، با انحراف ناشناخته | دلخواه | **timeout ممکن است** |
+| **partially synchronous** | — | بیشتر وقت‌ها همگام، و گاهی asynchronous | با تجربه می‌خورد، مثل اینترنت خانگی که معمولاً تند است و گاهی timeout می‌خورد |
 
-Neither the synchronous nor the asynchronous model says anything about component failure or message loss; those are separate assumptions (pp. 25–26). When you meet the term *asynchronous system*, first work out which notion of time it assumes, then whether that matters in context (p. 25). The typical protocol design is to guarantee safety and liveness when the system runs synchronously, and to put **safety over liveness** when it runs asynchronously: nothing bad happens, even if nothing good happens for a while (p. 26).
+نه مدل synchronous و نه asynchronous چیزی درباره‌ی شکست مؤلفه یا گم شدن پیام نمی‌گویند؛ آن‌ها فرض‌های جدایی‌اند (pp. 25–26). وقتی به واژه‌ی *سیستم asynchronous* رسیدید، اول بفهمید کدام درک از زمان را فرض می‌کند، و بعد این که آیا در آن زمینه مهم است (p. 25). طراحی معمول پروتکل این است که وقتی سیستم synchronous می‌گردد ایمنی و liveness را تضمین کند، و وقتی asynchronous می‌گردد **ایمنی را بر liveness** بگذارد: چیز بدی نمی‌افتد، حتی اگر مدتی چیز خوبی هم نیفتد (p. 26).
 
-#### 2.1.5 Component and network behavior (pp. 27–30)
+#### ۲.۱.۵ رفتار مؤلفه و شبکه (pp. 27–30)
 
-The component failure models are nested (Figure 2.3): each is more general than the one before.
+مدل‌های شکست مؤلفه تو‌در‌توی هم‌اند (شکل ۲.۳): هر کدام از قبلی عمومی‌تر است.
 
-| Component failure | What happens (pp. 27–28) | In short |
+| شکست مؤلفه | چه می‌شود (pp. 27–28) | کوتاه |
 |---|---|---|
-| **Crash-Stop** | Stops executing steps at an arbitrary moment and never performs another | It ceases to exist |
-| **Omission** | Stops for an arbitrary duration, then resumes from the state where it stopped | It takes a break, with no memory loss |
-| **Crash-Recovery** | Stops for an arbitrary duration, then resumes, but may lose state | Partial or total memory loss |
-| **Byzantine** | Behaves arbitrarily, including deliberately deviating from its algorithm | Anything might happen |
+| **Crash-Stop** | در لحظه‌ای دلخواه قدم برداشتن را متوقف می‌کند و دیگر هیچ قدمی برنمی‌دارد | دیگر وجود ندارد |
+| **Omission** | مدتی دلخواه می‌ایستد و بعد از همان حالتی که ایستاده بود ادامه می‌دهد | استراحت می‌کند، بی از دست دادن حافظه |
+| **Crash-Recovery** | مدتی دلخواه می‌ایستد و بعد ادامه می‌دهد، ولی می‌تواند حالت را از دست بدهد | از دست دادن جزئی یا کامل حافظه |
+| **بیزانسی** | دلخواه رفتار می‌کند، از جمله انحراف آگاهانه از الگوریتمش | هر چیزی ممکن است بیفتد |
 
-| Network failure | What happens (pp. 28–29) |
+| شکست شبکه | چه می‌شود (pp. 28–29) |
 |---|---|
-| **Reordering** | Messages are delivered in a different order from the one they were sent in (Figure 2.8) |
-| **Duplication** | A message is delivered more than once (Figure 2.9) |
-| **Loss** | A message is never delivered (Figure 2.10) |
+| **بی‌ترتیبی** | پیام‌ها به ترتیبی غیر از ترتیب فرستاده شدنشان تحویل می‌شوند (شکل ۲.۸) |
+| **تکراری** | پیامی بیشتر از یک‌بار تحویل می‌شود (شکل ۲.۹) |
+| **گم شدن** | پیامی هیچ‌وقت تحویل نمی‌شود (شکل ۲.۱۰) |
 
-A network with these failures is called **unreliable**. However, the book assumes that *a network cannot lie*: a delivered message was sent by some component of the system (p. 30).
+شبکه‌ای با این شکست‌ها **نامطمئن** نامیده می‌شود. با این حال کتاب فرض می‌کند *شبکه نمی‌تواند دروغ بگوید*: پیامی که تحویل شده را مؤلفه‌ای از سیستم فرستاده بوده (p. 30).
 
-#### 2.1.6 Realistic system models (p. 30)
+#### ۲.۱.۶ مدل‌های سیستم واقع‌بینانه (p. 30)
 
-The model the author has in mind throughout the book:
+مدلی که نویسنده در کل کتاب در ذهن دارد:
 
-- **Partially synchronous**: synchronous most of the time.
-- Components subject to **Crash-Stop, Omission and Crash-Recovery** failures. They forget *volatile* state and remember *durable* state.
-- Communication over an **unreliable network** that may reorder, drop or duplicate messages.
-- **Byzantine failures largely ignored**, although they matter in domains such as cryptocurrency.
+- **مفهوم partially synchronous**: بیشتر وقت‌ها synchronous.
+- مؤلفه‌هایی که شکست‌های **Crash-Stop و Omission و Crash-Recovery** می‌خورند. حالت *فرار* را فراموش می‌کنند و حالت *durable* را به یاد می‌آورند.
+- ارتباط روی **شبکه‌ای نامطمئن** که می‌تواند پیام‌ها را بی‌ترتیب یا حذف یا تکرار کند.
+- **شکست‌های بیزانسی بیشتر نادیده گرفته می‌شوند**، گرچه در حوزه‌هایی مثل رمزارز مهم‌اند.
 
-### 2.2 Order and time
+> **In practice:** مدل سیستم درست برای stack ما partially synchronous است: بیشتر وقت‌ها شبکه و podها سریع‌اند ولی هیچ سقف تضمین‌شده‌ای نیست.
+>
+> **Your turn:** چرا `execution_timeout` روی taskهای Airflow لازم است، و چرا هیچ مقداری برایش «درست» نیست؟
+>
+> *Answer:* در مدل asynchronous نمی‌شود task کند را از task مرده تشخیص داد؛ timeout فرضی از نوع partially synchronous است که اجازه می‌دهد کار جلو برود. timeout کوتاه کار سالم را می‌کشد و timeout بلند کار مرده را دیر کشف می‌کند (pp. 24–27).
 
-Components don't merely communicate; they **collaborate and coordinate**, which means managing dependencies between their steps. Actions are generally not commutative, so the result depends on the order in which they're applied (p. 30).
+### ۲.۲ ترتیب و زمان
 
-**The proposer/acceptor example** (pp. 30–32):
+مؤلفه‌ها فقط ارتباط نمی‌گیرند؛ **همکاری و هماهنگی** می‌کنند، که یعنی مدیریت وابستگی بین قدم‌هایشان. کنش‌ها معمولاً جابه‌جا‌پذیر نیستند، پس نتیجه به ترتیب اعمال شدنشان بستگی دارد (p. 30).
 
-- Setup: two proposers, P1 and P2, broadcast arithmetic requests to two acceptors, A1 and A2, which start at 0 and apply requests in arrival order.
-- If both requests are (+2), order doesn't matter, because the operations commute.
-- If P1 sends (+2) and P2 sends (×2), A1 can end at 4 (applying +2 then ×2) while A2 ends at 2 (applying ×2 then +2) (Figure 2.11).
-- The book's definition: a system has a **race condition** if it has multiple possible executions, some considered correct and some incorrect (p. 31).
-- The fix is a **coordinator** C that starts at 0, tags each request with its current value, broadcasts it and increments (Figure 2.12). An acceptor that sees a larger tag than expected has skipped a step, and waits for the missing request.
+**نمونه‌ی proposer و acceptor** (pp. 30–32):
 
-In Figure 2.12, P1 sends first, but the network delivers P2's (×2) to C first. That's acceptable: the proposers never coordinated, and C can't observe them sending. C broadcasts ⟨×2, 0⟩ and ⟨+2, 1⟩, and both acceptors apply them in tag order regardless of arrival order (p. 32).
+- چیدمان: دو proposer به نام P1 و P2 درخواست‌های حسابی را به دو acceptor به نام A1 و A2 پخش می‌کنند، که از صفر شروع می‌کنند و درخواست‌ها را به ترتیب رسیدن اعمال.
+- اگر هر دو درخواست (+۲) باشند، ترتیب مهم نیست، چون عملیات‌ها جابه‌جا‌پذیرند.
+- اگر P1 عملیات (+۲) و P2 عملیات (×۲) را بفرستد، A1 می‌تواند به ۴ برسد، با اعمال +۲ و بعد ×۲، در حالی که A2 به ۲ می‌رسد، با اعمال ×۲ و بعد +۲ (شکل ۲.۱۱).
+- تعریف کتاب: سیستمی **شرایط مسابقه** دارد اگر چند اجرای ممکن داشته باشد که بعضی درست و بعضی نادرست حساب شوند (p. 31).
+- اصلاح، یک **coordinator** به نام C است که از صفر شروع می‌کند، هر درخواست را با مقدار فعلی‌اش برچسب می‌زند، پخشش می‌کند و یکی اضافه (شکل ۲.۱۲). acceptorی که برچسبی بزرگ‌تر از انتظار ببیند از قدمی پریده، و منتظر درخواست غایب می‌ماند.
 
-> **Try it:** [Proposers, acceptors and a coordinator](../widgets/02-coordinator-ordering.html) — replay Figures 2.11 and 2.12: shuffle the network's delivery order and watch the acceptors diverge without a coordinator, then converge once requests carry the coordinator's tags.
+در شکل ۲.۱۲، P1 اول می‌فرستد، ولی شبکه عملیات (×۲) از P2 را اول به C تحویل می‌دهد. این پذیرفتنی است: proposerها هیچ‌وقت هماهنگ نکردند، و C نمی‌تواند فرستادنشان را ببیند. مؤلفه‌ی C پیام‌های ⟨×۲، ۰⟩ و ⟨+۲، ۱⟩ را پخش می‌کند، و هر دو acceptor آن‌ها را بی توجه به ترتیب رسیدن، به ترتیب برچسب اعمال می‌کنند (p. 32).
 
-#### 2.2.1 The happened-before relationship (pp. 32–35)
+> **Try it:** [proposerها و acceptorها و یک coordinator](../widgets/02-coordinator-ordering.html)؛ شکل‌های ۲.۱۱ و ۲.۱۲ را دوباره اجرا کنید: ترتیب تحویل شبکه را به هم بزنید و ببینید acceptorها بی coordinator از هم جدا می‌شوند، و بعد همین که درخواست‌ها برچسب coordinator را حمل کنند به هم می‌رسند.
 
-From Lamport's 1978 paper "Time, Clocks, and the Ordering of Events in a Distributed System" (pp. 32–33):
+#### ۲.۲.۱ رابطه‌ی happened-before (pp. 32–35)
 
-| Rule | Definition |
+از مقاله‌ی سال ۱۹۷۸ Lamport با عنوان «Time, Clocks, and the Ordering of Events in a Distributed System» (pp. 32–33):
+
+| قاعده | تعریف |
 |---|---|
-| **Intracomponent** | a and b occur at the same component and a precedes b ⇒ a → b (Figure 2.13) |
-| **Intercomponent** | a is a Send Message event and b is the matching Receive Message event ⇒ a → b (Figure 2.14) |
-| **Transitivity** | a → b and b → c ⇒ a → c (Figure 2.15) |
+| **درون‌مؤلفه‌ای** | اگر a و b در همان مؤلفه بیفتند و a پیش از b باشد، آن‌گاه a → b (شکل ۲.۱۳) |
+| **بین‌مؤلفه‌ای** | اگر a رویداد فرستادن پیام باشد و b رویداد گرفتن متناظرش، آن‌گاه a → b (شکل ۲.۱۴) |
+| **تعدی** | اگر a → b و b → c، آن‌گاه a → c (شکل ۲.۱۵) |
 
-Happened-before is a **partial order**: for any two events, a → b, b → a, or a ∥ b (concurrent) (Table 2.2) (p. 33). It captures **causality** in the sense that a *potentially* influenced b, not that it actually did (p. 34).
+رابطه‌ی happened-before یک **ترتیب جزئی** است: برای هر دو رویداد، یا a → b، یا b → a، یا a ∥ b که یعنی هم‌زمان (جدول ۲.۲) (p. 33). **علیت** را به این معنا می‌گیرد که a *بالقوه* روی b اثر گذاشته، و نه این که واقعاً گذاشته (p. 34).
 
-![Events a and b on component 1 and c on component 2; b sends a message received as c, and a dashed arrow from a to c marks the transitive relation](../figures/02-15.png)
+![رویدادهای a و b روی مؤلفه‌ی ۱ و c روی مؤلفه‌ی ۲؛ رویداد b پیامی می‌فرستد که به‌عنوان c گرفته می‌شود، و یک فلش خط‌چین از a به c رابطه‌ی تعدی را علامت می‌زند](../figures/02-15.png)
 
-*Figure 2.15 (p. 34): a → b within a component and b → c across the message give a → c (the dashed arrow), though a never sent anything to c.*
+*Figure 2.15 (p. 34): رابطه‌ی a → b داخل یک مؤلفه و b → c از راه پیام، رابطه‌ی a → c را می‌دهند، یعنی همان فلش خط‌چین، گرچه a هیچ‌وقت چیزی به c نفرستاد.*
 
-The aha! moment on **concurrency vs. parallelism** (pp. 34–35):
+لحظه‌ی آها! درباره‌ی **concurrency در برابر موازی‌کاری** (pp. 34–35):
 
-- Concurrency is about *events* (moments) and parallelism about *operations* (spans), so treat an operation as a pair of begin and end events.
-- Two operations are **concurrent** if neither one's end event happened before the other's begin event. Concurrency is determined by logical time.
-- Two operations are **parallel** if they overlap in time. Parallelism is determined by physical time.
+- مفهوم concurrency درباره‌ی *رویداد*هاست، یعنی لحظه‌ها، و موازی‌کاری درباره‌ی *عملیات*ها، یعنی بازه‌ها، پس یک عملیات را زوجی از رویداد شروع و پایان ببینید.
+- دو عملیات **هم‌زمان**اند اگر رویداد پایان هیچ‌کدام پیش از رویداد شروع دیگری نیفتاده باشد. concurrency را زمان منطقی تعیین می‌کند.
+- دو عملیات **موازی**اند اگر در زمان هم‌پوشانی داشته باشند. موازی‌کاری را زمان فیزیکی تعیین می‌کند.
 
-#### 2.2.2 Time and clocks (p. 35)
+#### ۲.۲.۲ زمان و ساعت (p. 35)
 
-Clocks are the system's source of timestamps. To order events, a clock must guarantee **clock consistency**:
+ساعت‌ها سرچشمه‌ی timestamp سیستم‌اند. برای مرتب کردن رویدادها، یک ساعت باید **consistency ساعت** را تضمین کند:
 
-> a → b ⇒ C(a) < C(b)
+> اگر a → b آن‌گاه C(a) < C(b)
 
-#### 2.2.3 Physical time and physical clocks (pp. 35–37)
+#### ۲.۲.۳ زمان فیزیکی و ساعت‌های فیزیکی (pp. 35–37)
 
-The **wall clock** is a hypothetical perfect clock that only an all-knowing observer has. Every real component has its own imperfect physical clock (p. 35).
+**ساعت دیواری** ساعتی بی‌نقص و فرضی است که فقط ناظری همه‌دان دارد. هر مؤلفه‌ی واقعی ساعت فیزیکی ناقص خودش را دارد (p. 35).
 
-| Problem or remedy | Meaning (pp. 35–37) |
+| مسئله یا چاره | معنا (pp. 35–37) |
 |---|---|
-| **Clock skew** | A *fixed offset* between two clocks: the book's example starts 5 minutes apart and stays 5 minutes apart (Figure 2.16) |
-| **Clock drift** | A different *tick frequency*: clocks that start equal gradually diverge (Figure 2.17) |
-| **NTP** | An NTP server broadcasts its reading and clients adjust their clocks to match, mitigating skew and drift |
-| **Time-of-day clock** | As close as possible to wall-clock time, but may move **backward** when synchronized, so it can violate clock consistency even against itself |
-| **Monotonic clock** | Independent of wall-clock time, never moves backward, consistent against itself, so comparable **only within one component** |
+| **skew ساعت** | *افست ثابتی* بین دو ساعت: نمونه‌ی کتاب با پنج دقیقه فاصله شروع می‌کند و پنج دقیقه فاصله می‌ماند (شکل ۲.۱۶) |
+| **drift ساعت** | *بسامد تیک* متفاوت: ساعت‌هایی که برابر شروع می‌کنند کم‌کم از هم دور می‌شوند (شکل ۲.۱۷) |
+| **پروتکل NTP** | یک سرور NTP خوانشش را پخش می‌کند و clientها ساعتشان را با آن میزان می‌کنند، که skew و drift را کم می‌کند |
+| **ساعت زمان‌روز** | تا جای ممکن نزدیک زمان ساعت دیواری است، ولی سر synchronization می‌تواند **به عقب** برود، پس حتی در برابر خودش هم می‌تواند consistency ساعت را نقض کند |
+| **ساعت یکنوا** | مستقل از زمان ساعت دیواری است، هیچ‌وقت به عقب نمی‌رود، در برابر خودش سازگار است، پس **فقط داخل یک مؤلفه** مقایسه‌شدنی است |
 
-#### 2.2.4 Logical time and logical clocks (pp. 37–38)
+#### ۲.۲.۴ زمان منطقی و ساعت‌های منطقی (pp. 37–38)
 
-A **Lamport clock** is a counter kept by each component (p. 37):
+یک **ساعت Lamport** شمارنده‌ای است که هر مؤلفه نگه می‌دارد (p. 37):
 
-- Increment it on every internal or external step, and tag the event with its value.
-- On receiving a message, set the clock to the maximum of the current value and the received timestamp, plus 1. Figure 2.18 shows max(1, 3) + 1 = 4.
-- This gives causally related events strictly increasing values.
+- سر هر قدم درونی یا بیرونی یکی اضافه کنید، و رویداد را با مقدارش برچسب بزنید.
+- سر گرفتن پیام، ساعت را روی بیشینه‌ی مقدار فعلی و timestamp گرفته‌شده به‌علاوه‌ی یک بگذارید. شکل ۲.۱۸ نشان می‌دهد max(1, 3) + 1 = 4.
+- این به رویدادهای علّی‌مرتبط مقدارهای اکیداً صعودی می‌دهد.
 
-![Two component timelines with Lamport timestamps: the first counts 1, 2, 3 and sends a message at 3; the second is at 1, receives it and jumps to max(1, 3) + 1 = 4, then 5](../figures/02-18.png)
+![دو خط زمان مؤلفه با timestampهای Lamport: اولی ۱ و ۲ و ۳ می‌شمارد و در ۳ پیامی می‌فرستد؛ دومی روی ۱ است، می‌گیردش و به max(1, 3) + 1 = 4 می‌پرد، بعد ۵](../figures/02-18.png)
 
-*Figure 2.18 (p. 38): on receipt the clock jumps past the sender's timestamp, so the receive event is always later than the send.*
+*Figure 2.18 (p. 38): سر گرفتن، ساعت از timestamp فرستنده جلو می‌زند، پس رویداد گرفتن همیشه دیرتر از فرستادن است.*
 
-The author has never used Lamport clocks himself, but logical clocks hide in many places (pp. 37–38):
+نویسنده خودش هیچ‌وقت ساعت Lamport به کار نبرده، ولی ساعت‌های منطقی در خیلی از جاها قایم‌اند (pp. 37–38):
 
-| System | "Clock" | "Timestamp" | Comparable… |
+| سیستم | «ساعت» | «timestamp» | مقایسه‌شدنی در… |
 |---|---|---|---|
-| **Apache Kafka** | A partition | The message offset | Within a partition, not across partitions |
-| **etcd** | A key | Its sequence number, which enables compare-and-swap | Within a key, not across keys |
+| **Apache Kafka** | یک پارتیشن | offset پیام | داخل یک پارتیشن، و نه بین پارتیشن‌ها |
+| **etcd** | یک کلید | شماره‌ی ترتیبش، که compare-and-swap را ممکن می‌کند | داخل یک کلید، و نه بین کلیدها |
 
-> **Try it:** [Happened-before and Lamport clocks](../widgets/02-happened-before.html) — build a space-time diagram of three components, pick any two events to see whether one happened before the other or they are concurrent, and check clock consistency: whenever a → b, C(a) < C(b), but not the reverse.
+> **Try it:** [رابطه‌ی happened-before و ساعت‌های Lamport](../widgets/02-happened-before.html)؛ نمودار فضا‌زمان سه مؤلفه را بسازید، هر دو رویدادی را انتخاب کنید تا ببینید یکی پیش از دیگری افتاده یا هم‌زمان‌اند، و consistency ساعت را بررسی: هر وقت a → b آن‌گاه C(a) < C(b)، ولی برعکسش نه.
 
-#### 2.2.5 Physical clocks vs. logical clocks (p. 38)
+#### ۲.۲.۵ ساعت فیزیکی در برابر ساعت منطقی (p. 38)
 
-| | Physical clocks | Logical clocks |
+| | ساعت فیزیکی | ساعت منطقی |
 |---|---|---|
-| Used for | Durations between events *within* a component | Order of events *across* components |
-| Weakness | Skew, drift, synchronization problems | Don't measure duration |
+| به کار می‌رود برای | مدت بین رویدادها *داخل* یک مؤلفه | ترتیب رویدادها *بین* مؤلفه‌ها |
+| نقطه‌ی ضعف | skew و drift و مسئله‌های synchronization | مدت را نمی‌سنجند |
 
-They're commonly used together (p. 38).
+معمولاً با هم به کار می‌روند (p. 38).
 
-## Trade-offs at a glance
+> **In practice:** cursor در loader روی `update_date` است که ساعت دیتابیس منبع آن را می‌گذارد، و ساعت‌ها هیچ‌وقت دقیقاً هم‌خوان نیستند.
+>
+> **Your turn:** loader همه‌ی ردیف‌های با `update_date` بزرگ‌تر از cursor را می‌خواند و گاهی ردیفی گم می‌شود. چرا، و چه کار می‌کنید؟
+>
+> *Answer:* تراکنشی که زودتر شروع شده ولی دیرتر commit شده `update_date` قدیمی‌تری از cursor دارد و دیگر دیده نمی‌شود: ترتیب timestamp با ترتیب واقعی رخدادها یکی نیست. با یک lookback window، مثلاً cursor منهای ده دقیقه، و dedup در Silver این را جبران کنید. ساعت فیزیکی ترتیب happened-before را تضمین نمی‌کند (pp. 30–38).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Synchronous model | Simple reasoning, timeouts that are always accurate | Unrealistic |
-| Asynchronous, no notion of time | Algorithms that are correct anywhere | No timeouts, so some problems are unsolvable |
-| Partially synchronous model | Realism, with liveness while things are well behaved | Must keep safety when things aren't |
-| Time-of-day clock | Comparable with wall-clock time | May move backward |
-| Monotonic clock | Never moves backward | Meaningful only within one component |
-| Coordinator tagging | A single total order for every acceptor | An extra hop, and a component that can fail |
+| مدل synchronous | استدلال ساده، و timeoutهایی که همیشه دقیق‌اند | غیرواقع‌بینانه |
+| ناهمگام، بی هیچ درکی از زمان | الگوریتم‌هایی که هر جایی درست‌اند | هیچ timeoutی نداریم، پس بعضی مسئله‌ها حل‌نشدنی‌اند |
+| مدل partially synchronous | واقع‌بینی، با liveness تا وقتی اوضاع خوب است | وقتی خوب نیست باید ایمنی را نگه داشت |
+| ساعت زمان‌روز | با زمان ساعت دیواری مقایسه‌شدنی است | می‌تواند به عقب برود |
+| ساعت یکنوا | هیچ‌وقت به عقب نمی‌رود | فقط داخل یک مؤلفه معنا دارد |
+| برچسب زدن coordinator | یک ترتیب کلی برای هر acceptor | یک پرش اضافه، و مؤلفه‌ای که می‌تواند شکست بخورد |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **The converse of clock consistency fails.** Lamport clocks give a → b ⇒ C(a) < C(b), but C(a) < C(b) does *not* imply a → b: concurrent events also get ordered numbers. **Vector clocks** keep one counter per component and give a ⇔ relationship. See [DDIA Ch. 6](../../designing-data-intensive-applications/chapters/06-replication.md) and [Database Internals Ch. 11](../../database-internals/chapters/11-replication-and-consistency.md), which has a vector-clock simulation.
-- **FLP.** The "no notion of time" model is the setting of Fischer, Lynch and Paterson's 1985 result: deterministic consensus is impossible with even one crash failure. Partial synchrony, from Dwork, Lynch and Stockmeyer (1988), is the standard escape hatch. The book returns to this in [Chapter 10](10-distributed-consensus.md).
-- **The coordinator is a sequencer.** The coordinator of Figure 2.12 is a total-order broadcast through a single sequencer. Kafka's partition leader works similarly, as does a Raft leader assigning log indexes; consensus is what makes such a sequencer replaceable when it fails.
+- **عکس consistency ساعت برقرار نیست.** ساعت‌های Lamport می‌دهند که اگر a → b آن‌گاه C(a) < C(b)، ولی C(a) < C(b) *نمی‌گوید* a → b: رویدادهای هم‌زمان هم عددهای مرتب می‌گیرند. **ساعت‌های برداری** برای هر مؤلفه یک شمارنده نگه می‌دارند و رابطه‌ای دو‌طرفه می‌دهند. [فصل ۶ کتاب DDIA](../../designing-data-intensive-applications/chapters/06-replication.md) و [فصل ۱۱ کتاب Database Internals](../../database-internals/chapters/11-replication-and-consistency.md) را ببینید، که شبیه‌سازی ساعت برداری دارد.
+- **نتیجه‌ی FLP.** مدل «بی هیچ درکی از زمان» صحنه‌ی نتیجه‌ی سال ۱۹۸۵ Fischer و Lynch و Paterson است: consensus قطعی حتی با یک شکست crash ناممکن است. نیمه‌همگامی، از Dwork و Lynch و Stockmeyer در سال ۱۹۸۸، راه فرار استاندارد است. کتاب در [فصل ۱۰](10-distributed-consensus.md) به آن برمی‌گردد.
+- **نقش coordinator یک sequencer است.** coordinator شکل ۲.۱۲ یک پخش ترتیب‌کلی از راه یک sequencer تک است. leader پارتیشن Kafka هم همین‌طور کار می‌کند، و leader Raft که index‌های log را می‌دهد؛ و consensus همان چیزی است که چنین sequencerی را سر شکست جابه‌جا‌شدنی می‌کند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [1. Thinking in distributed systems](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) (race conditions over interleavings), [3. Failure tolerance](03-failure-tolerance.md) (failure models in practice), [4. Message delivery and processing](04-message-delivery-and-processing.md) (living with an unreliable network), [9. Consistency](09-consistency.md) (ordering guarantees), [10. Distributed consensus](10-distributed-consensus.md) (partial synchrony and leaders).
+- **فصل‌های مرتبط:** [فصل ۱: فکر کردن در سیستم‌های توزیع‌شده](01-thinking-in-distributed-systems-models-mindsets-and-mechanics.md) که شرایط مسابقه روی interleavingها را دارد، [فصل ۳: تحمل شکست](03-failure-tolerance.md) که مدل‌های شکست در عمل را دارد، [فصل ۴: تحویل و پردازش پیام](04-message-delivery-and-processing.md) که زندگی با شبکه‌ای نامطمئن را دارد، [فصل ۹: consistency](09-consistency.md) که تضمین‌های ترتیب را دارد، و [فصل ۱۰: consensus توزیع‌شده](10-distributed-consensus.md) که partially synchronousی و leaderها را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why does the meaning of "asynchronous" matter?**
+1. **چرا معنای «asynchronous» مهم است؟**
 
-   *Answer:* With no notion of time, components can't use timeouts. With a weak notion of time (unsynchronized clocks), they can, and some problems are solvable only then (pp. 25–26).
+   *Answer:* بی هیچ درکی از زمان، مؤلفه‌ها نمی‌توانند timeout به کار ببرند. با درکی ضعیف از زمان، یعنی ساعت‌های ناهمگام، می‌توانند، و بعضی مسئله‌ها فقط آن‌وقت حل‌شدنی‌اند (pp. 25–26).
 
-2. **How do Omission and Crash-Recovery failures differ?**
+2. **شکست Omission و Crash-Recovery چه تفاوتی دارند؟**
 
-   *Answer:* Both stop for an arbitrary duration and resume. After an Omission failure the component keeps its state; after a Crash-Recovery failure it may lose some or all of it (pp. 27–28).
+   *Answer:* هر دو مدتی دلخواه می‌ایستند و ادامه می‌دهند. بعد از شکست Omission مؤلفه حالتش را نگه می‌دارد؛ و بعد از شکست Crash-Recovery می‌تواند بخشی یا همه‌اش را از دست بدهد (pp. 27–28).
 
-3. **Which of these is part of the author's realistic system model?**
-   - [ ] Byzantine components
-   - [x] Partial synchrony, and components that crash and recover over an unreliable network
-   - [ ] A synchronous network that never loses messages
+3. **کدام یکی از این‌ها بخشی از مدل سیستم واقع‌بینانه‌ی نویسنده است؟**
+   - [ ] مؤلفه‌های بیزانسی
+   - [x] نیمه‌همگامی، و مؤلفه‌هایی که روی شبکه‌ای نامطمئن crash می‌کنند و برمی‌گردند
+   - [ ] شبکه‌ای synchronous که هیچ‌وقت پیام گم نمی‌کند
 
-   *Answer:* Partially synchronous; Crash-Stop, Omission and Crash-Recovery failures; an unreliable network. Byzantine failures are largely ignored (p. 30).
+   *Answer:* نیمه‌همگام؛ با شکست‌های Crash-Stop و Omission و Crash-Recovery؛ روی شبکه‌ای نامطمئن. شکست‌های بیزانسی بیشتر نادیده گرفته می‌شوند (p. 30).
 
-4. **In Figure 2.11, why do A1 and A2 end with different values, and how does the coordinator fix it?**
+4. **در شکل ۲.۱۱ چرا A1 و A2 با مقدارهای مختلف تمام می‌شوند، و coordinator چطور درستش می‌کند؟**
 
-   *Answer:* (+2) and (×2) don't commute, and the acceptors receive them in different orders. The coordinator tags requests with increasing numbers, so each acceptor applies them in tag order and waits for gaps to fill (pp. 31–32).
+   *Answer:* عملیات‌های (+۲) و (×۲) جابه‌جا‌پذیر نیستند، و acceptorها آن‌ها را به ترتیب‌های مختلف می‌گیرند. coordinator درخواست‌ها را با عددهای صعودی برچسب می‌زند، پس هر acceptor آن‌ها را به ترتیب برچسب اعمال می‌کند و منتظر پر شدن جاهای خالی می‌ماند (pp. 31–32).
 
-5. **When are two operations concurrent, and when are they parallel?**
+5. **دو عملیات کِی هم‌زمان‌اند و کِی موازی؟**
 
-   *Answer:* Concurrent if neither's end event happened before the other's begin event, which is logical time. Parallel if they overlap in physical time (pp. 34–35).
+   *Answer:* هم‌زمان‌اند اگر رویداد پایان هیچ‌کدام پیش از رویداد شروع دیگری نیفتاده باشد، که زمان منطقی است. و موازی‌اند اگر در زمان فیزیکی هم‌پوشانی داشته باشند (pp. 34–35).
 
-6. **What is the difference between clock skew and clock drift?**
+6. **تفاوت skew ساعت و drift ساعت چیست؟**
 
-   *Answer:* Skew is a fixed offset between two clocks. Drift is a difference in tick frequency, which makes clocks diverge over time (pp. 35–36).
+   *Answer:* مقدار skew افستی ثابت بین دو ساعت است. مقدار drift تفاوتی در بسامد تیک است، که ساعت‌ها را در طول زمان از هم دور می‌کند (pp. 35–36).
 
-7. **Why can't monotonic-clock readings from two components be compared?**
+7. **چرا خوانش ساعت یکنوا از دو مؤلفه مقایسه‌شدنی نیست؟**
 
-   *Answer:* Monotonic clocks are independent of wall-clock time; they guarantee consistency only against themselves, within one component (p. 37).
+   *Answer:* ساعت‌های یکنوا مستقل از زمان ساعت دیواری‌اند؛ consistency را فقط در برابر خودشان و داخل یک مؤلفه تضمین می‌کنند (p. 37).
