@@ -1,18 +1,18 @@
-# Flexible Paxos quorum intersection
+# همپوشانی quorum در Flexible Paxos
 
-Do all of Paxos's quorums have to be majorities? For 3 to 7 acceptors, this experiment enumerates every election (phase 1) quorum of size Q₁ and every replication (phase 2) quorum of size Q₂. It checks whether each pair always overlaps and prints a disjoint pair when one exists. It also shows how many failures each phase tolerates, and does the PBFT arithmetic for n = 3f + 1.
+آیا همه‌ی quorumهای Paxos باید اکثریت باشند؟ برای ۳ تا ۷ عضو acceptor، این آزمایش هر quorum انتخابی (فاز ۱) به اندازه‌ی Q₁ و هر quorum replicationی (فاز ۲) به اندازه‌ی Q₂ را برمی‌شمارد. می‌سنجد که هر جفتی همیشه همپوشانی دارد یا نه، و اگر جفتی جدا باشد چاپش می‌کند. نشان می‌دهد هر فاز چند شکست را تاب می‌آورد، و حساب PBFT را برای n = 3f + 1 می‌کند.
 
-*Illustrates Database Internals, “Flexible Paxos”, pp. 296–297 (only Q₁ + Q₂ > N is required) and “PBFT Algorithm”, p. 306 (n = 3f + 1, quorums of 2f and 2f + 1). The brute-force check is the vault's own.*
+*تصویری از «Flexible Paxos» کتاب Database Internals، صص. ۲۹۶–۲۹۷ (تنها Q₁ + Q₂ > N لازم است) و «الگوریتم PBFT»، ص. ۳۰۶ (رابطه‌ی n = 3f + 1 و quorumهای 2f و 2f + 1). آن سنجش جست‌وجوی فراگیر مال خود vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 flexible_paxos.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 Safe (Q1, Q2) pairs: every election quorum meets every replication quorum
@@ -37,13 +37,13 @@ PBFT: n = 3f + 1, commit quorum 2f + 1
  3  10           6            7            4                  1
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- The brute force agrees with the book's rule: a configuration is safe exactly when Q₁ + Q₂ > N.
-- With five acceptors, Q₁ = 4 and Q₂ = 2 is safe. Replication then survives three failures, but a new election needs four live acceptors: the availability-for-latency trade on p. 297.
-- With Q₁ = 3 and Q₂ = 2 there is a disjoint pair, so a new leader could miss a value the old one replicated.
-- In PBFT, any two commit quorums of 2f + 1 overlap in at least f + 1 replicas, so at least one honest replica is in both.
+- آن جست‌وجوی فراگیر با قاعده‌ی کتاب می‌خواند: چیدمانی ایمن است دقیقاً وقتی Q₁ + Q₂ > N.
+- با پنج acceptor، مقدار Q₁ = 4 و Q₂ = 2 ایمن است. replication بعد سه شکست را تاب می‌آورد، ولی انتخابی تازه چهار acceptor زنده می‌خواهد: همان بده‌بستان availability در برابر latency در ص. ۲۹۷.
+- با Q₁ = 3 و Q₂ = 2 جفتی جدا هست، پس leaderی تازه می‌تواند مقداری را که آن قدیمی replication کرده بود از دست بدهد.
+- در PBFT، هر دو quorum تأییدی به اندازه‌ی 2f + 1 دست‌کم در f + 1 نسخه همپوشانی دارند، پس دست‌کم یک نسخه‌ی درست‌کار در هر دو هست.
 
-## Related
+## مرتبط
 
-- Chapter note: [14. Consensus](../../chapters/14-consensus.md) — “Flexible Paxos”, pp. 296–297; “PBFT Algorithm”, p. 306
+- یادداشت فصل: [فصل ۱۴: consensus](../../chapters/14-consensus.md) — «Flexible Paxos»، صص. ۲۹۶–۲۹۷؛ «الگوریتم PBFT»، ص. ۳۰۶

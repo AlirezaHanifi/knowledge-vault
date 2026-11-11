@@ -3,372 +3,386 @@ book: database-internals
 chapter: 11
 title: "Replication and Consistency"
 pages: "215–242"
+translated_title: "replication و consistency"
+lang: fa
 ---
 
-# 11. Replication and Consistency
+# فصل ۱۱: replication و consistency
 
-[← 10. Leader Election](10-leader-election.md) · [Book](../README.md) · [12. Anti-Entropy and Dissemination →](12-anti-entropy-and-dissemination.md)
+[فصل ۱۰: انتخاب leader →](10-leader-election.md) · [کتاب](../README.md) · [فصل ۱۲: anti-entropy و پخش ←](12-anti-entropy-and-dissemination.md)
 
-## Summary
+## خلاصه
 
-**Fault tolerance** means continuing to operate correctly when components fail. Its first step is removing single points of failure through **redundancy**, which users normally don't see (p. 215). **Replication** keeps multiple copies of the data. Updating all copies atomically is equivalent to consensus and is expensive, so systems look for cheaper ways to make data *look* consistent while allowing some divergence (p. 215). In multi-datacenter deployments, **geo-replication** also lowers latency by keeping copies near clients (pp. 215–216).
+**مفهوم fault tolerance** یعنی ادامه دادن درست به کار وقتی مؤلفه‌ها می‌شکنند. نخستین قدمش برداشتن نقطه‌های شکست تنها از راه **redundancy** است، که کاربرها معمولاً نمی‌بینندش (p. 215). **replication** چند کپی از داده نگه می‌دارد. به‌روز کردن اتمی همه‌ی کپی‌ها با consensus هم‌ارز و گران است، پس سیستم‌ها راه‌های ارزان‌تری می‌جویند تا داده سازگار *به نظر برسد* و در همان حال کمی واگرایی مجاز باشد (p. 215). در deploymentهای چند‌دیتاسنتری، **replication جغرافیایی** با نگه داشتن کپی‌ها نزدیک کلاینت‌ها latency را هم پایین می‌آورد (pp. 215–216).
 
-The chapter covers:
+فصل این‌ها را می‌پوشاند:
 
-- **Availability and CAP:** CP versus AP, PACELC, the pitfalls of CAP, and **harvest and yield** as a softer alternative (pp. 216–219).
-- **Shared-memory foundations:** registers (safe, regular, atomic) and the ordering of concurrent operations (pp. 219–222).
-- **Consistency models**, from strongest to weakest (pp. 223–234):
-  - strict (impossible);
-  - **linearizability**, with linearization points, its cost, composability and **RIFL**;
-  - **sequential**;
-  - **causal**, with COPS, Eiger and **vector clocks**;
-  - the **session models**, which combine into PRAM.
-- **Eventual consistency** and **tunable consistency** (N, W, R; quorums; witness replicas) (pp. 234–237).
-- **Strong eventual consistency** with **CRDTs:** G-Counter, PN-Counter, LWW and multivalue registers, G-Set and two-phase sets, and JSON CRDTs (pp. 238–240).
+- **مفهوم availability و CAP:** حالت CP در برابر AP، قاعده‌ی PACELC، دام‌های CAP، و **برداشت و بازده** به‌شکل جایگزینی نرم‌تر (pp. 216–219).
+- **پایه‌های حافظه‌ی مشترک:** register، یعنی ایمن و منظم و اتمی، و ترتیب‌دهی عملیات هم‌زمان (pp. 219–222).
+- **مفهوم consistency modelها**، از قوی‌ترین تا ضعیف‌ترین (pp. 223–234):
+  - سخت‌گیرانه، که ناممکن است؛
+  - **مفهوم linearizability**، با نقطه‌های خطی‌سازی و هزینه‌اش و ترکیب‌پذیری‌اش و **RIFL**؛
+  - **ترتیبی**؛
+  - **علّی**، با COPS و Eiger و **ساعت برداری**؛
+  - و **مدل‌های session**، که در PRAM ترکیب می‌شوند.
+- **مفهوم eventual consistency** و **consistency قابل تنظیم** با N و W و R و quorum و replicaهای شاهد (pp. 234–237).
+- **مفهوم eventual consistency قوی** با **CRDT**: شمارنده‌ی G-Counter و PN-Counter، register از جنس LWW و چند‌مقداری، مجموعه‌ی G-Set و مجموعه‌های دو‌فازی، و CRDTهای JSON (pp. 238–240).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **CAP:** during a partition you can't have both availability (every nonfailing node responds) and linearizability. Partition tolerance isn't a knob you can turn (pp. 217–218).
-- **CAP's C and A aren't ACID's C or everyday "high availability".** CAP availability has no latency bound and requires *every* nonfailed node to respond (p. 218).
-- **Harvest** = completeness of the answer; **yield** = fraction of requests that succeed. Trading them is often better than failing outright (p. 219).
-- **Linearizability:** each operation takes effect at a single point between invocation and completion, so there are no stale reads after a completed write. It composes across objects but needs coordination, typically consensus (pp. 223–226).
-- **Sequential consistency** keeps each process's order and gives all readers the *same* order, but no real-time bound, and it doesn't compose (pp. 227–229).
-- **Causal consistency** orders only causally related operations; vector clocks detect concurrency but can't resolve it, which is why Cassandra uses last-write-wins (pp. 229–233).
-- **R + W > N guarantees overlap**, but quorum reads aren't monotonic after an incomplete write unless read repair blocks (pp. 235–236).
-- **n copy + m witness replicas give the availability of n + m copies,** as long as every majority includes at least one copy (p. 237).
-- **CRDTs merge commutatively**, so replicas can diverge freely and still converge without losing operations (pp. 238–240).
+- **قاعده‌ی CAP:** در میانه‌ی پارتیشنی نمی‌شود هم دسترس‌پذیری، یعنی پاسخ هر نود نشکسته‌ای، و هم linearizability را داشت. partition tolerance پیچی نیست که بچرخانید (pp. 217–218).
+- **مفهوم C و A در CAP نه C در ACID‌اند و نه «availability بالا»ی روزمره.** availability CAP کران latencyی ندارد و می‌خواهد *هر* نود نشکسته‌ای پاسخ بدهد (p. 218).
+- **برداشت** یعنی تمامیت پاسخ؛ و **بازده** یعنی سهم درخواست‌هایی که موفق می‌شوند. بده‌بستانشان اغلب از یک‌سر شکستن بهتر است (p. 219).
+- **مفهوم linearizability:** هر عملیاتی در یک نقطه میان فراخوانی و تمام شدن اثر می‌کند، پس پس از نوشتنی تمام‌شده خواندن کهنه‌ای نیست. بین objectها ترکیب می‌شود ولی هم‌آهنگی لازم دارد، که معمولاً consensus است (pp. 223–226).
+- **مفهوم consistency ترتیبی** ترتیب هر processی را نگه می‌دارد و به همه‌ی خواننده‌ها *همان* ترتیب را می‌دهد، ولی کران real-time نه، و ترکیب نمی‌شود (pp. 227–229).
+- **مفهوم consistency علّی** تنها عملیات علّیت‌دار را مرتب می‌کند؛ ساعت‌های برداری concurrency را تشخیص می‌دهند ولی نمی‌توانند حلش کنند، که از همین‌جاست که Cassandra آخرین‌نوشتن‌می‌برد به کار می‌برد (pp. 229–233).
+- **شرط R + W > N هم‌پوشانی را تضمین می‌کند**، ولی خواندن‌های quorum پس از نوشتنی ناتمام یکنوا نیستند مگر read repair بند بیاورد (pp. 235–236).
+- **مفهوم n کپی به‌علاوه‌ی m replica شاهد availability n + m کپی را می‌دهند**، تا وقتی هر اکثریتی دست‌کم یک کپی داشته باشد (p. 237).
+- **همه‌ی CRDTها commutative merge می‌کنند**، پس replicaها می‌توانند آزاد واگرا شوند و باز هم بی گم کردن عملیات هم‌گرا (pp. 238–240).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Achieving Availability — p. 216
-- Infamous CAP — p. 216
-  - Use CAP Carefully — p. 217
-  - Harvest and Yield — p. 218
-- Shared Memory — p. 219
-- Ordering — p. 221
-- Consistency Models — p. 222
-  - Strict Consistency — p. 223
-  - Linearizability — p. 223
-  - Sequential Consistency — p. 227
-  - Causal Consistency — p. 229
-  - Session Models — p. 233
-  - Eventual Consistency — p. 234
-- Tunable Consistency — p. 235
-- Witness Replicas — p. 236
-- Strong Eventual Consistency and CRDTs — p. 238
-- Summary — p. 240
+- رسیدن به availability — ص. ۲۱۶
+- بخش CAP بدنام — ص. ۲۱۶
+  - بخش CAP را با دقت به کار ببرید — ص. ۲۱۷
+  - برداشت و بازده — ص. ۲۱۸
+- حافظه‌ی مشترک — ص. ۲۱۹
+- ترتیب‌دهی — ص. ۲۲۱
+- بخش consistency modelها — ص. ۲۲۲
+  - بخش consistency سخت‌گیرانه — ص. ۲۲۳
+  - بخش linearizability — ص. ۲۲۳
+  - بخش consistency ترتیبی — ص. ۲۲۷
+  - بخش consistency علّی — ص. ۲۲۹
+  - مدل‌های session — ص. ۲۳۳
+  - بخش eventual consistency — ص. ۲۳۴
+- بخش consistency قابل تنظیم — ص. ۲۳۵
+- بخش replicaهای شاهد — ص. ۲۳۶
+- بخش eventual consistency قوی و CRDT — ص. ۲۳۸
+- خلاصه — ص. ۲۴۰
 
-## Notes
+## یادداشت‌ها
 
-Systems with a single source of truth fail over **explicitly** by promoting a replica. Others need no reconfiguration and stay consistent by collecting responses from several participants (p. 215). Replication involves three events: **write**, **replica update** and **read**. Even if replicas update after the client's write returns, the client must still observe operations in a particular order (p. 216).
+سیستم‌هایی که یک سرچشمه‌ی حقیقت دارند **صریح** failover می‌کنند، با ارتقای replicaیی. بقیه چیدمان دوباره لازم ندارند و با جمع کردن پاسخ از چند شرکت‌کننده سازگار می‌مانند (p. 215). replication سه رویداد را در بر دارد: **نوشتن** و **به‌روزرسانی replica** و **خواندن**. حتی اگر replicaها پس از برگشتن نوشتن کلاینت به‌روز شوند، کلاینت باز هم باید عملیات را به ترتیبی معین مشاهده کند (p. 216).
 
-### Achieving availability
+### رسیدن به availability
 
-Intermittent failures shouldn't affect availability: to users, the system should keep working as if nothing happened (p. 216). Software underpins banking, communication and travel, so downtime costs customers and money (p. 216). Availability requires redundancy, which in turn creates the problem of synchronizing copies and recovering them (p. 216).
+شکست‌های متناوب نباید روی availability اثر بگذارند: از دید کاربرها، سیستم باید همین‌طور انگار چیزی رخ نداده کار کند (p. 216). نرم‌افزار زیر بانک‌داری و ارتباط و سفر را گرفته، پس از دسترس خارج بودن مشتری و پول خرج دارد (p. 216). availability redundancy لازم دارد، که به‌نوبت مسئله‌ی هم‌گام کردن کپی‌ها و بازیابی‌شان را می‌سازد (p. 216).
 
-### Infamous CAP
+### قاعده‌ی بدنام CAP
 
-**Availability**: every request eventually gets a successful response. **Consistency** here means **linearizability** (p. 216). Brewer's **CAP conjecture**, proved by Gilbert and Lynch, states that under network partitions a system can't guarantee both. Systems pick strong consistency with best-effort availability, or availability with best-effort consistency. "Best effort" means guarantees hold when nothing fails and may weaken during partitions (p. 217).
+**مفهوم availability**: هر درخواستی در غایت پاسخی موفق می‌گیرد. **consistency** این‌جا یعنی **linearizability** (p. 216). **حدس CAP** بروئر، که گیلبرت و لینچ اثباتش کردند، می‌گوید که زیر پارتیشن شبکه سیستمی نمی‌تواند هر دو را تضمین کند. سیستم‌ها یا consistency قوی با availability بهترین‌تلاش را برمی‌دارند، یا availability با consistency بهترین‌تلاش. «بهترین تلاش» یعنی تضمین‌ها وقتی چیزی نمی‌شکند برقرارند و می‌توانند در پارتیشن ضعیف شوند (p. 217).
 
-| Choice | Behaviour (p. 217) | Example |
+| انتخاب | رفتار (p. 217) | نمونه |
 |---|---|---|
-| **CP** | Fails requests rather than serving possibly inconsistent data | Consensus requiring a majority |
-| **AP** | Serves possibly inconsistent values | A database that accepts writes while any replica is up; may lose data |
+| **CP** | به‌جای سرویس دادن داده‌ی شاید ناسازگار درخواست‌ها را می‌شکند | consensus که اکثریتی می‌خواهد |
+| **AP** | مقدارهای شاید ناسازگار سرویس می‌دهد | دیتابیسی که تا هر replicaیی سرپاست نوشتن می‌پذیرد؛ می‌تواند داده گم کند |
 
-**PACELC** (Abadi) extends this: with a Partition, choose Availability or Consistency; Else, choose Latency or Consistency (p. 217).
+قاعده‌ی **PACELC** از ابادی این را گسترش می‌دهد: با پارتیشنی، availability یا consistency را بردارید؛ وگرنه، latency یا consistency را (p. 217).
 
-#### Use CAP carefully
+#### قاعده‌ی CAP را با دقت به کار ببرید
 
-- CAP is about **partitions**, not crashes. A partitioned node can serve inconsistent data; a crashed node serves nothing. So consistency problems can occur with every node up (pp. 217–218).
-- The triangle picture misleads. You can trade C for A, but **partition tolerance can't be tuned** (p. 218).
-- CAP's **C** isn't ACID's C (preserving invariants), and its **A** isn't high availability: CAP puts no bound on latency and demands that *every* nonfailed node respond (p. 218).
-- So-called AP databases still serve consistent results when enough replicas are alive and they're used correctly, for example with quorums. CAP is a rule of thumb (p. 218, note 1).
+- قاعده‌ی CAP درباره‌ی **پارتیشن** است و نه از کار افتادن. نودی پارتیشن‌شده می‌تواند داده‌ی ناسازگار سرویس بدهد؛ و نودی از کار افتاده چیزی سرویس نمی‌دهد. پس مسئله‌های consistency می‌توانند با همه‌ی نودها سرپا رخ بدهند (pp. 217–218).
+- آن تصویر مثلثی گمراه می‌کند. می‌شود C را با A بده‌بستان کرد، ولی **partition tolerance تنظیم‌شدنی نیست** (p. 218).
+- حرف **C** در CAP نه C در ACID است، یعنی نگه داشتن ناوردا، و **A**ش نه availability بالا: CAP هیچ کرانی روی latency نمی‌گذارد و می‌خواهد *هر* نود نشکسته‌ای پاسخ بدهد (p. 218).
+- دیتابیس‌هایی که AP نامیده می‌شوند باز هم وقتی replicaهای کافی زنده باشند و درست به کار بروند، مثلاً با quorum، نتیجه‌های سازگار سرویس می‌دهند. قاعده‌ی CAP یک سرانگشتی است (p. 218).
 
-#### Harvest and yield
+#### برداشت و بازده
 
-Fox and Brewer relax both properties into tunable metrics (p. 219):
+فاکس و بروئر هر دو خاصیت را به سنجه‌هایی تنظیم‌پذیر شل می‌کنند (p. 219):
 
-| Metric | Meaning |
+| سنجه | معنا |
 |---|---|
-| **Harvest** | How complete the answer is: returning 99 of 100 rows can beat failing |
-| **Yield** | Successful requests ÷ attempted requests. Not the same as uptime: a busy node is up but can still fail requests |
+| **برداشت** | پاسخ چقدر کامل است: برگرداندن ۹۹ ردیف از ۱۰۰ می‌تواند از شکستن بهتر باشد |
+| **بازده** | درخواست‌های موفق تقسیم بر درخواست‌های کوشیده. مثل بالا بودن نیست: نودی مشغول بالاست ولی باز هم می‌تواند درخواست را بشکند |
 
-Raise yield by answering from the available partitions only, so other users keep being served when some nodes are down. Alternatively, demand full harvest only for critical data (p. 219).
+بازده را با پاسخ دادن تنها از پارتیشن‌های موجود بالا ببرید، تا وقتی برخی نودها خواب‌اند کاربرهای دیگر همین‌طور سرویس بگیرند. یا برداشت کامل را تنها برای داده‌ی حیاتی بخواهید (p. 219).
 
-### Shared memory
+### حافظه‌ی مشترک
 
-To clients, a distributed store looks like shared memory, an array of **registers**. Each operation has an **invocation** and a **completion** event, and fails if its process crashes before completion (p. 219). Two operations are **sequential** if one completes before the other is invoked, and **concurrent** otherwise, including when one starts after and ends before the other (Figure 11-1) (pp. 219–220).
+از دید کلاینت‌ها، انباره‌ای توزیع‌شده مثل حافظه‌ی مشترک به نظر می‌رسد، یعنی آرایه‌ای از **register**. هر عملیاتی رویدادی **فراخوانی** و **تمام شدن** دارد، و اگر processاش پیش از تمام شدن از کار بیفتد می‌شکند (p. 219). دو عملیات **ترتیبی**اند اگر یکی پیش از فرا خوانده شدن آن یکی تمام شود، و در غیر این صورت **هم‌زمان**، از جمله وقتی یکی دیرتر شروع و زودتر تمام شود (شکل ۱۱-۱) (pp. 219–220).
 
-| Register | During a concurrent write, a read may return (p. 220) |
+| register | در میانه‌ی نوشتنی هم‌زمان، خواندنی می‌تواند … برگرداند (p. 220) |
 |---|---|
-| **Safe** | Any value in the register's range: a binary register can "flicker" |
-| **Regular** | The last completed write's value or the overlapping write's value; not visible to all readers at once (like a primary with read replicas) |
-| **Atomic** | Linearizable: one moment splits old from new for everyone |
+| **ایمن** | هر مقداری در بازه‌ی register: registerی دوگانی می‌تواند «سوسو» بزند |
+| **منظم** | مقدار آخرین نوشتن تمام‌شده یا مقدار آن نوشتن هم‌پوشان؛ یک‌جا برای همه‌ی خواننده‌ها دیدنی نیست، مثل یک اصلی با replicaهای خواندن |
+| **اتمی** | linearizable: لحظه‌ای قدیم را برای همه از تازه جدا می‌کند |
 
-### Ordering
+### ترتیب‌دهی
 
-Each process executes its operations sequentially, and together they form a **global history** in which operations may run concurrently (p. 221). With P1 doing `write(x, 1); read(x)` and P2 doing `read(x)`, the write may complete before both reads, interleave with them, or follow both (p. 221). There are two difficulties: operations may **overlap**, and the effects of nonoverlapping operations may not be **visible** immediately. Consistency models resolve the ambiguity (pp. 221–222).
+هر processی عملیاتش را ترتیبی اجرا می‌کند، و با هم یک **تاریخ جهانی** می‌سازند که در آن عملیات می‌توانند هم‌زمان اجرا شوند (p. 221). با P1 که `write(x, 1); read(x)` می‌کند و P2 که `read(x)`، آن نوشتن می‌تواند پیش از هر دو خواندن تمام شود، یا لابه‌لایشان برود، یا پس از هر دو بیاید (p. 221). دو دشواری هست: عملیات می‌توانند **هم‌پوشان** باشند، و اثر عملیات ناهم‌پوشان می‌تواند فوری **دیدنی** نباشد. consistency modelها آن ابهام را حل می‌کنند (pp. 221–222).
 
-### Consistency models
+### مفهوم consistency modelها
 
-A **consistency model** is a contract between participants: what replicas must do, and what clients can expect from reads and writes (p. 222). It separates "all possible histories" from "histories allowed under model X." Models can be **state-centric** (which invariants hold between copies) or **operation-centric** (constraints on the order of operations) (p. 222). Without a global clock, every participant has its own view of state and time, like special relativity for data. Synchronization costs latency, CPU, disk and network I/O, and waiting (pp. 222–223).
+**مفهوم consistency model** قراردادی میان شرکت‌کننده‌هاست: این‌که replicaها چه باید بکنند، و کلاینت‌ها از خواندن و نوشتن چه می‌توانند چشم داشته باشند (p. 222). «همه‌ی تاریخ‌های ممکن» را از «تاریخ‌های مجاز زیر مدل X» جدا می‌کند. مدل‌ها می‌توانند **state-based** باشند، یعنی کدام ناوردا میان کپی‌ها برقرار است، یا **عملیات‌محور**، یعنی قید روی ترتیب عملیات (p. 222). بی ساعتی جهانی، هر شرکت‌کننده‌ای نمای خودش از حالت و زمان دارد، مثل نسبیت خاص برای داده. synchronization latency و CPU و I/O دیسک و شبکه و انتظار خرج دارد (pp. 222–223).
 
-#### Strict consistency
+#### مفهوم consistency سخت‌گیرانه
 
-Any write is instantly visible to every later read, measured by a global clock. It's impossible to implement because of physics (p. 223).
+هر نوشتنی فوری برای هر خواندن بعدی دیدنی است، که با ساعتی جهانی سنجیده می‌شود. به‌خاطر فیزیک پیاده‌کردنی نیست (p. 223).
 
-#### Linearizability
+#### linearizability
 
-The strongest **single-object, single-operation** model (p. 223).
+قوی‌ترین مدل **تک‌objectی و تک‌عملیاتی** (p. 223).
 
-- A write's effect becomes visible to all readers **exactly once**, at some point between its start and end. No one sees partial or incomplete writes (p. 223).
-- Overlapping operations may take effect in either order. Once a read returns a value, every later read returns that value or a newer one (p. 223).
-- Effects can't appear before an operation starts, which would need an oracle, and must appear before it completes (pp. 223–224).
-- It respects both each process's order and real-time order across processes, giving a **total order**. Linearizable writes imply mutual exclusion (p. 224).
+- اثر نوشتنی **دقیقاً یک بار** برای همه‌ی خواننده‌ها دیدنی می‌شود، در نقطه‌ای میان شروع و پایانش. هیچ‌کس نوشتن جزئی یا ناتمام نمی‌بیند (p. 223).
+- عملیات هم‌پوشان می‌توانند به هر ترتیبی اثر کنند. همین که خواندنی مقداری برگرداند، هر خواندن بعدی همان مقدار یا تازه‌تر را برمی‌گرداند (p. 223).
+- اثرها نمی‌توانند پیش از شروع عملیاتی پیدا شوند، که غیب‌گویی لازم می‌داشت، و باید پیش از تمام شدنش پیدا شوند (pp. 223–224).
+- هم ترتیب هر processی و هم ترتیب real-time بین processها را محترم می‌شمارد، که **ترتیبی کلی** می‌دهد. نوشتن‌های linearizable طرد متقابل را می‌رسانند (p. 224).
 
-Figure 11-2: P1 runs `write(x, 1)`, P2 runs `write(x, 2)`, P3 runs three reads, and x starts as ∅ (p. 224):
+شکل ۱۱-۲: process P1 عملیات `write(x, 1)` را اجرا می‌کند، P2 عملیات `write(x, 2)` را، P3 سه خواندن، و x از ∅ شروع می‌کند (p. 224):
 
-![Timelines: P1's write of 1 and P2's longer, overlapping write of 2; below, P3's three reads a, b, c may return ∅, 1 or 2, then 1 or 2, then only 2](../figures/11-02.png)
+![خط‌های زمان: نوشتن ۱ به دست P1 و نوشتن بلندتر و هم‌پوشان ۲ به دست P2؛ پایین‌تر، سه خواندن a و b و c از P3 که می‌توانند ∅ یا ۱ یا ۲، بعد ۱ یا ۲، و بعد تنها ۲ برگردانند](../figures/11-02.png)
 
-*Figure 11-2 (p. 224): what a read may return depends on which writes it overlaps; once both writes finish, only 2 is valid.*
+*Figure 11-2 (p. 224): این‌که خواندنی چه می‌تواند برگرداند به این بستگی دارد که با کدام نوشتن‌ها هم‌پوشان است؛ همین که هر دو نوشتن تمام شوند، تنها ۲ معتبر است.*
 
-| Read | Overlaps | May return |
+| خواندن | با چه هم‌پوشان است | چه می‌تواند برگرداند |
 |---|---|---|
-| 1st | both writes in flight | ∅, 1 or 2 |
-| 2nd | write 1 done, write 2 in flight | 1 or 2 |
-| 3rd | both done; write 2 ordered after write 1 | 2 |
+| اول | هر دو نوشتن در پرواز | ∅ یا ۱ یا ۲ |
+| دوم | نوشتن ۱ تمام، نوشتن ۲ در پرواز | ۱ یا ۲ |
+| سوم | هر دو تمام؛ نوشتن ۲ پس از نوشتن ۱ مرتب شده | ۲ |
 
-**Linearization point** (pp. 225–226): operations aren't instantaneous, but their effects appear so. After the point, every process sees the new value or a later one, so there are no stale reads, reads are monotonic, and values don't alternate. The operation's effects must become visible between t₁ (request issued) and t₂ (response received) (Figures 11-3, 11-4). Locks, atomic read/write or read-modify-write primitives implement the point (p. 225).
+**نقطه‌ی خطی‌سازی** (pp. 225–226): عملیات لحظه‌ای نیستند، ولی اثرشان لحظه‌ای به نظر می‌رسد. پس از آن نقطه، هر processی مقدار تازه یا بعدتر را می‌بیند، پس خواندن کهنه‌ای نیست، خواندن‌ها یکنوا هستند، و مقدارها در میان نمی‌روند. اثر عملیات باید میان t₁، یعنی فرستادن درخواست، و t₂، یعنی گرفتن پاسخ، دیدنی شود (شکل‌های ۱۱-۳ و ۱۱-۴). قفل یا اولیه‌های خواندن و نوشتن اتمی یا خواندن‌تغییر‌نوشتن آن نقطه را پیاده می‌کنند (p. 225).
 
-![An operation's interval on a timeline, with a cross marking the linearization point that divides before from after](../figures/11-04.png)
+![بازه‌ی عملیاتی روی خط زمان، با ضربدری که نقطه‌ی خطی‌سازی را علامت می‌زند و پیش را از پس جدا می‌کند](../figures/11-04.png)
 
-*Figure 11-4 (p. 226): the operation takes effect at one instant inside its interval; reads after it must see the new value.*
+*Figure 11-4 (p. 226): عملیات در لحظه‌ای درون بازه‌اش اثر می‌کند؛ خواندن‌های پس از آن باید مقدار تازه را ببینند.*
 
-> **Vault note:** the book's sidebar on CAS (p. 225). Compare-and-swap changes a value only if it's unchanged. Beware the **ABA problem**: if two other writes change A to B and back to A, a CAS expecting A still succeeds.
+> **Vault note:** کادر کناری کتاب درباره‌ی CAS (p. 225). عبارت compare-and-swap مقداری را تنها وقتی عوض می‌کند که عوض نشده باشد. مراقب **مسئله‌ی ABA** باشید: اگر دو نوشتن دیگر A را به B و برگردانند به A، CASی که چشم A دارد باز هم موفق می‌شود.
 
-**Cost** (p. 226):
+**هزینه** (p. 226):
 
-- Even CPUs don't give linearizable memory access by default, because synchronization instructions are slow and cause cross-core traffic and cache invalidations.
-- Concurrent code achieves it by preparing a result and publishing it with CAS, as in a lock-free queue.
-- Distributed systems need **consensus**: a consensus module ensures that operations are applied identically across the cluster.
-- Linearizability is **local** (composable): if every object is linearizable, the system is too. Multi-object operations still need extra synchronization (p. 226).
+- حتی پردازنده‌ها پیش‌فرض دسترسی linearizable به حافظه نمی‌دهند، چون دستورهای synchronization کند‌اند و ترافیک بین‌هسته‌ای و بی‌اعتبار شدن cache می‌سازند.
+- کد هم‌زمان به آن می‌رسد با آماده کردن نتیجه‌ای و منتشر کردنش با CAS، چنان‌که در queueی بی‌قفل.
+- سیستم‌های توزیع‌شده **consensus** لازم دارند: یک ماژول consensus تأمین می‌کند که عملیات یکسان در کل cluster اعمال شوند.
+- مفهوم linearizability **محلی** یعنی ترکیب‌پذیر است: اگر هر objectی linearizable باشد، سیستم هم هست. عملیات چند‌objectی باز هم synchronization اضافه لازم دارند (p. 226).
 
-**RIFL** (Reusable Infrastructure for Linearizability) makes RPCs linearizable (p. 227):
+روش **RIFL**، یعنی Reusable Infrastructure for Linearizability، RPCها را linearizable می‌کند (p. 227):
 
-- Each message is identified by a **client ID** plus a client-local sequence number. IDs come from **leases** issued by a system-wide service, and an operation sent with an expired lease isn't committed.
-- Without RIFL, C1's write V1 times out, C2 writes V2, and C1's retry of V1 overwrites V2, losing C2's write. With RIFL, the retry returns the stored **completion object** instead of re-executing.
-- Completion objects are stored durably and created **atomically** with the data mutation. They live until the client promises not to retry or is detected as crashed.
-- Clients renew leases to signal liveness. Expired leases get garbage-collected.
-- Guaranteeing at most one execution, plus atomic visibility, makes the operation linearizable, mostly independently of the storage system (p. 227).
+- هر پیامی با یک **ID کلاینت** به‌علاوه‌ی شماره‌ی ترتیب کلاینت‌محلی شناسایی می‌شود. IDها از **lease**هایی می‌آیند که سرویسی سیستم‌سراسری صادر می‌کند، و عملیاتی که با lease منقضی فرستاده شود commit نمی‌شود.
+- بی RIFL، نوشتن V1 از C1 وقتش سر می‌رود، C2 مقدار V2 را می‌نویسد، و کوشش دوباره‌ی C1 برای V1 روی V2 می‌نویسد، و نوشتن C2 گم می‌شود. با RIFL، کوشش دوباره به‌جای اجرای دوباره همان **object تمام شدن** ذخیره‌شده را برمی‌گرداند.
+- همه‌ی objectهای تمام شدن پایا ذخیره می‌شوند و **اتمی** با تغییر داده ساخته. تا وقتی کلاینت قول بدهد دوباره نکوشد یا از کار افتاده تشخیص داده شود زندگی می‌کنند.
+- کلاینت‌ها leaseها را تمدید می‌کنند تا زنده بودن را خبر بدهند. leaseهای منقضی garbage collectorی می‌شوند.
+- تضمین حداکثر یک اجرا، به‌علاوه‌ی دیدنی بودن اتمی، عملیات را linearizable می‌کند، بیشتر مستقل از سیستم ذخیره‌سازی (p. 227).
 
-#### Sequential consistency
+#### مفهوم consistency ترتیبی
 
-Operations are ordered as if run in *some* sequence that preserves each process's program order. A process's view may be arbitrarily stale globally (pp. 227–228). Lamport introduced it for multiprocessors: requests to one memory cell are FIFO-ordered, there's no global order across independent cells, and reads may come from the cell or from the latest queued write (p. 228). The key point: **all processes observe the same order** (p. 228).
+عملیات چنان مرتب می‌شوند که انگار در *یک* دنباله اجرا شده‌اند که ترتیب برنامه‌ی هر processی را نگه می‌دارد. نمای processی می‌تواند جهانی هر قدر کهنه باشد (pp. 227–228). Lamport این را برای چندپردازنده‌ها معرفی کرد: درخواست‌ها به یک خانه‌ی حافظه FIFO مرتب می‌شوند، ترتیب جهانی‌ای بین خانه‌های مستقل نیست، و خواندن‌ها می‌توانند از آن خانه یا از تازه‌ترین نوشتن در صف بیایند (p. 228). نکته‌ی مغزی: **همه‌ی processها همان ترتیب را مشاهده می‌کنند** (p. 228).
 
-> **Vault note:** the book's comparison (p. 228). Both models require a global order, but linearizability also respects **real time**. Under sequential consistency, order is guaranteed only for writes from the same origin. Linearizable histories compose; sequentially consistent ones don't.
+> **Vault note:** مقایسه‌ی کتاب (p. 228). هر دو مدل ترتیبی جهانی می‌خواهند، ولی linearizability **زمان واقعی** را هم محترم می‌شمارد. زیر consistency ترتیبی، ترتیب تنها برای نوشتن‌های یک خاستگاه تضمین می‌شود. تاریخ‌های linearizable ترکیب می‌شوند؛ و ترتیبی‌سازگارها نه.
 
-Figure 11-5 shows `write(x, 1)` happening before `write(x, 2)` in wall-clock time, yet both P3 and P4 observe 2 and then 1. Either order is valid as long as every reader sees the same one. Stale reads can come from replicas receiving the same order at different times (pp. 228–229). CPUs don't guarantee sequential consistency either and need **memory barriers** (fences) (p. 229).
+شکل ۱۱-۵ نشان می‌دهد که `write(x, 1)` به ساعت دیواری پیش از `write(x, 2)` رخ می‌دهد، ولی هم P3 و هم P4 اول ۲ و بعد ۱ را مشاهده می‌کنند. هر ترتیبی معتبر است تا وقتی هر خواننده‌ای همان را ببیند. خواندن کهنه می‌تواند از replicaهایی بیاید که همان ترتیب را در زمان‌های مختلف می‌گیرند (pp. 228–229). پردازنده‌ها هم consistency ترتیبی را تضمین نمی‌کنند و **سد حافظه**، یعنی fence، لازم دارند (p. 229).
 
-![P1 writes 1, later P2 writes 2; P3 and P4 each read 2 and then 1](../figures/11-05.png)
+![process P1 مقدار ۱ را می‌نویسد، بعدتر P2 مقدار ۲ را؛ processهای P3 و P4 هر یک اول ۲ و بعد ۱ را می‌خوانند](../figures/11-05.png)
 
-*Figure 11-5 (p. 229): both readers see the writes in the same order — the reverse of real time — which sequential consistency allows.*
+*Figure 11-5 (p. 229): هر دو خواننده نوشتن‌ها را به همان ترتیب می‌بینند، یعنی وارون زمان واقعی، که consistency ترتیبی مجازش می‌کند.*
 
-#### Causal consistency
+#### مفهوم consistency علّی
 
-Causally related operations are seen in the same order by everyone; concurrent ones may be seen in different orders (p. 229).
+عملیات علّیت‌دار به همان ترتیب به دید همه می‌رسند؛ و هم‌زمان‌ها می‌توانند به ترتیب‌های مختلف دیده شوند (p. 229).
 
-- Without causality (Figure 11-6), P3 may see 1 then 2 while P4 sees 2 then 1 (p. 230).
-- With causality (Figure 11-7), a write carries its **dependencies**: `write(x, ∅, 1) → t1`, then `write(x, t1, 2)`. A write that arrives early is held until its dependencies arrive, so a **happened-before** relationship is established logically, without physical clocks (pp. 230–231).
+- بی علیت (شکل ۱۱-۶)، process P3 می‌تواند اول ۱ و بعد ۲ را ببیند در حالی که P4 اول ۲ و بعد ۱ (p. 230).
+- با علیت (شکل ۱۱-۷)، نوشتنی **وابستگی‌هایش** را حمل می‌کند: `write(x, ∅, 1) → t1`، بعد `write(x, t1, 2)`. نوشتنی که زود برسد تا رسیدن وابستگی‌هایش نگه داشته می‌شود، پس رابطه‌ی **پیش‌از‌رخ‌دادن** منطقی و بی ساعت فیزیکی برپا می‌شود (pp. 230–231).
 
-![P1's write(x, ∅, 1) returns t1; P2's later write(x, t1, 2) names t1 as its dependency](../figures/11-07.png)
+![عملیات `write(x, ∅, 1)` از P1 مقدار t1 را برمی‌گرداند؛ عملیات دیرتر `write(x, t1, 2)` از P2 مقدار t1 را به‌شکل وابستگی‌اش نام می‌برد](../figures/11-07.png)
 
-*Figure 11-7 (p. 230): the second write carries the timestamp of the one it depends on, so no replica can apply it first.*
+*Figure 11-7 (p. 230): نوشتن دوم timestamp آن یکی را که به آن وابسته است حمل می‌کند، پس هیچ replicaیی نمی‌تواند اول اعمالش کند.*
 
-- The analogy is a forum thread: replies follow what they reply to, and threads can branch (p. 231).
-- Causal systems provide the **session guarantees** listed below (p. 231).
-- Implementation: logical clocks plus context metadata in every message. A server applies an operation only after all its predecessors and buffers anything that arrives too early (p. 231).
+- قیاسش رشته‌ای در انجمن است: پاسخ‌ها از آن چیزی که پاسخش می‌دهند پی می‌گیرند، و رشته‌ها می‌توانند شاخه بزنند (p. 231).
+- سیستم‌های علّی **تضمین‌های session** را که زیر فهرست شده‌اند می‌دهند (p. 231).
+- پیاده‌سازی: ساعت منطقی به‌علاوه‌ی metadata بافتار در هر پیامی. سروری عملیاتی را تنها پس از همه‌ی پیشین‌هایش اعمال می‌کند و هر چیزی را که زیادی زود برسد buffer می‌کند (p. 231).
 
-| System | Tracks | Conflicts (p. 231) |
+| سیستم | چه چیزی را پی می‌گیرد | تعارض‌ها (p. 231) |
 |---|---|---|
-| **COPS** | Dependencies through key versions | Key order plus application-specific functions |
-| **Eiger** | Operation order, including across nodes (multipartition transactions) | Last-write-wins |
+| **COPS** | وابستگی‌ها از راه نسخه‌ی کلید | ترتیب کلید به‌علاوه‌ی تابع‌های برنامه‌ویژه |
+| **Eiger** | ترتیب عملیات، از جمله بین نودها، یعنی تراکنش‌های چند‌پارتیشنی | آخرین‌نوشتن‌می‌برد |
 
-**Vector clocks** (pp. 232–233):
+**ساعت‌های برداری** (pp. 232–233):
 
-- Messages {M1(∅, t1), M2(M1, t2), M3(M2, t3)} that arrive out of order are buffered until their dependencies arrive. Dynamo and Riak use vector clocks for this.
-- Each process keeps **one logical clock per process**. It increments its own on each event, and on receipt takes the **element-wise maximum**.
-- On a write, if a value already exists locally, a new version is appended to the version vector, linking the two causally. Otherwise a new chain starts.
-- To improve availability, replicas may accept *conflicting* writes, creating **divergent histories**. Figure 11-9 shows one replica seeing 1, 5, 7, 8 and another 1, 5, 3. Riak exposes these to users (p. 232).
-- Vector clocks **detect** conflicts but don't resolve them. Resolution is application-specific and needs stored causal history plus garbage collection, so Cassandra chose **last-write-wins** instead (p. 233).
+- پیام‌های {M1(∅, t1), M2(M1, t2), M3(M2, t3)} که بی‌ترتیب برسند تا رسیدن وابستگی‌هایشان buffer می‌شوند. سیستم‌های Dynamo و Riak برای این ساعت برداری به کار می‌برند.
+- هر processی **یک ساعت منطقی برای هر processی** نگه می‌دارد. مال خودش را سر هر رویدادی می‌افزاید، و سر گرفتن **بیشینه‌ی عنصر‌به‌عنصر** را برمی‌دارد.
+- سر نوشتنی، اگر مقداری از قبل محلی وجود داشته باشد، نسخه‌ای تازه به بردار نسخه افزوده می‌شود، که آن دو را علّی پیوند می‌دهد. وگرنه زنجیره‌ای تازه شروع می‌شود.
+- برای بهتر کردن دسترس‌پذیری، replicaها می‌توانند نوشتن‌های *متعارض* بپذیرند، که **تاریخ‌های واگرا** می‌سازد. شکل ۱۱-۹ نشان می‌دهد که یک replica ۱ و ۵ و ۷ و ۸ را می‌بیند و دیگری ۱ و ۵ و ۳. سیستم Riak این‌ها را به کاربرها عرضه می‌کند (p. 232).
+- ساعت‌های برداری تعارض را **تشخیص می‌دهند** ولی حلشان نمی‌کنند. حل برنامه‌ویژه است و تاریخ علّی ذخیره‌شده به‌علاوه‌ی garbage collectorی لازم دارد، پس Cassandra در عوض **آخرین‌نوشتن‌می‌برد** را برداشت (p. 233).
 
-> **Try it:** [Vector clocks and causal delivery](../widgets/11-vector-clocks.html) — send messages between three processes, deliver them out of order, and watch the receiver buffer what isn't causally ready. Compare two clocks to see "before", "after" or "concurrent".
+> **Try it:** [ساعت برداری و تحویل علّی](../widgets/11-vector-clocks.html)؛ میان سه process پیام بفرستید، بی‌ترتیب تحویلشان بدهید، و ببینید گیرنده آن چیزی را که علّی آماده نیست buffer می‌کند. دو ساعت را مقایسه کنید تا «پیش» یا «پس» یا «هم‌زمان» را ببینید.
 
-#### Session models
+#### مدل‌های session
 
-**Session** (client-centric) models describe what *one* client observes as it talks to possibly different replicas. Each client's operations are sequential, and nothing is assumed about incomplete operations (p. 233).
+مدل‌های **session**، که کلاینت‌محورند، وصف می‌کنند که *یک* کلاینت در حال حرف زدن با replicaهای شاید مختلف چه مشاهده می‌کند. عملیات هر کلاینتی ترتیبی است، و درباره‌ی عملیات ناتمام چیزی فرض نمی‌شود (p. 233).
 
-| Model | Guarantee (pp. 233–234) |
+| مدل | تضمین (pp. 233–234) |
 |---|---|
-| **Read-own-writes** | A read after `write(x, V)`, on any replica, returns V or later |
-| **Monotonic reads** | After observing V, later reads return V or something newer |
-| **Monotonic writes** | A client's writes become visible to everyone in its order; otherwise old data can be "resurrected" |
-| **Writes-follow-reads** (session causality) | A write is ordered after the writes its earlier reads observed |
+| **خواندن نوشته‌های خود** | خواندنی پس از `write(x, V)`، روی هر replicaیی، مقدار V یا بعدتر را برمی‌گرداند |
+| **خواندن یکنوا** | پس از مشاهده‌ی V، خواندن‌های بعدی V یا چیزی تازه‌تر را برمی‌گردانند |
+| **نوشتن یکنوا** | نوشتن‌های کلاینتی به ترتیب خودش برای همه دیدنی می‌شوند؛ وگرنه داده‌ی قدیم می‌تواند «رستاخیز» کند |
+| **نوشتن از خواندن پی می‌گیرد** که علیت session است | نوشتنی پس از آن نوشتن‌هایی مرتب می‌شود که خواندن‌های پیشینش مشاهده کرده بودند |
 
-These say nothing about *other* clients, but they must hold for every client (p. 234). **PRAM (FIFO) consistency** = monotonic reads + monotonic writes + read-own-writes: one process's writes propagate in order, while different processes' writes may be seen in different orders (p. 234).
+این‌ها درباره‌ی کلاینت‌های *دیگر* چیزی نمی‌گویند، ولی باید برای هر کلاینتی برقرار باشند (p. 234). **consistency PRAM** که FIFO هم است برابر خواندن یکنوا به‌علاوه‌ی نوشتن یکنوا به‌علاوه‌ی خواندن نوشته‌های خود است: نوشتن‌های یک process به ترتیب پخش می‌شوند، در حالی که نوشتن‌های processهای مختلف می‌توانند به ترتیب‌های مختلف دیده شوند (p. 234).
 
-#### Eventual consistency
+#### eventual consistency
 
-Updates propagate **asynchronously**. If no new updates arrive, eventually all accesses return the latest value (Vogels). Conflicts are reconciled by last-write-wins or vector clocks, which may change what counts as "latest" (p. 234). "Eventually" has no time bound, but it works well in practice (pp. 234–235).
+به‌روزرسانی‌ها **asynchronous** پخش می‌شوند. اگر به‌روزرسانی تازه‌ای نرسد، در غایت همه‌ی دسترسی‌ها تازه‌ترین مقدار را برمی‌گردانند، از وگلز. تعارض‌ها با آخرین‌نوشتن‌می‌برد یا ساعت برداری آشتی داده می‌شوند، که می‌تواند عوض کند چه چیزی «تازه‌ترین» به حساب می‌آید (p. 234). واژه‌ی «در غایت» کران زمانی ندارد، ولی در عمل خوب کار می‌کند (pp. 234–235).
 
-### Tunable consistency
+> **In practice:** warehouse ما دو replica دارد: insert به یکی می‌رود و از راه ClickHouse Keeper به دیگری replicate می‌شود.
+>
+> **Your turn:** داشبوردی بلافاصله بعد از load از replica دیگر می‌خواند و ردیف‌های تازه را نمی‌بیند. این چه مدلی است و چطور درستش می‌کنید؟
+>
+> *Answer:* replication asynchronous است و آن replica هنوز part را fetch نکرده؛ این eventual consistency است و read-your-writes نیست. یا insert را با `insert_quorum` بنویسید، یا خواندن‌های حساس را با `select_sequential_consistency` به replica به‌روز بفرستید (pp. 222–235).
 
-Eventually consistent systems usually let you tune consistency with three variables (p. 235):
+### مفهوم consistency قابل تنظیم
 
-| Variable | Meaning |
+سیستم‌های سازگار غایی معمولاً می‌گذارند consistency را با سه متغیر تنظیم کنید (p. 235):
+
+| متغیر | معنا |
 |---|---|
-| **N**, replication factor | Nodes storing a copy |
-| **W**, write consistency | Acknowledgments needed for a write to succeed |
-| **R**, read consistency | Responses needed for a read to succeed |
+| **N** که ضریب replication است | نودهایی که کپی‌ای ذخیره می‌کنند |
+| **W** که consistency نوشتن است | تأییدهایی که برای موفق شدن نوشتنی لازم است |
+| **R** که consistency خواندن است | پاسخ‌هایی که برای موفق شدن خواندنی لازم است |
 
-- **R + W > N** guarantees that read and write sets overlap, so a read sees the latest write. N = 3, W = 2, R = 2 tolerates one failure. The third replica is updated asynchronously or by anti-entropy (Ch. 12) (p. 235).
-- The coordinator submits writes to N nodes and waits for W, or W − 1 if it's a replica itself. It collects R read responses. **Speculative execution** sends extra read requests and counts whichever answer first (p. 235).
-- W = 1, R = N suits write-heavy systems but needs every replica for reads. W = N, R = 1 lets any node serve the latest value (pp. 235–236).
-- Higher levels mean more latency and stricter availability requirements; lower levels mean more availability and less consistency (p. 236).
+- شرط **R + W > N** تضمین می‌کند که مجموعه‌های خواندن و نوشتن هم‌پوشان‌اند، پس خواندنی تازه‌ترین نوشتن را می‌بیند. با N = 3 و W = 2 و R = 2 یک شکست تحمل می‌شود. replica سوم asynchronous یا با anti-entropy از فصل ۱۲ به‌روز می‌شود (p. 235).
+- آن coordinator نوشتن‌ها را به N نود می‌دهد و منتظر W می‌ماند، یا W − 1 اگر خودش replicaیی باشد. مقدار R پاسخ خواندن را جمع می‌کند. **اجرای حدسی** درخواست خواندن اضافه می‌فرستد و هر پاسخی را که اول بیاید به حساب می‌آورد (p. 235).
+- حالت W = 1 و R = N به سیستم‌های پرنوشتن می‌خورد ولی برای خواندن هر replicaیی لازم است. حالت W = N و R = 1 می‌گذارد هر نودی تازه‌ترین مقدار را سرویس بدهد (pp. 235–236).
+- سطح‌های بالاتر یعنی latency بیشتر و نیازمندی availability سخت‌گیرانه‌تر؛ و سطح‌های پایین‌تر یعنی availability بیشتر و consistency کم‌تر (p. 236).
 
-**Quorums** (p. 236): ⌊N/2⌋ + 1 nodes form a majority. With 2f + 1 nodes, up to f can fail. A quorum system can't survive losing a majority: with 3 replicas and 2 down, nothing proceeds. **Quorums aren't monotonic after incomplete writes**: a write that reached 1 of 3 replicas may or may not be returned, depending on which replicas a read contacts, so values can alternate. Monotonic reads need *blocking* read repair, at a cost in availability (Ch. 12) (p. 236).
+**مفهوم quorum**ها (p. 236): تعداد ⌊N/2⌋ + 1 نود اکثریتی می‌سازند. با 2f + 1 نود، تا f تا می‌توانند بشکنند. سیستمی quorumی نمی‌تواند از دست دادن اکثریتی را جان به در ببرد: با ۳ replica و ۲ خواب، چیزی پیش نمی‌رود. **quorumها پس از نوشتن‌های ناتمام یکنوا نیستند**: نوشتنی که به ۱ از ۳ replica رسیده می‌تواند برگردانده شود یا نه، بسته به این‌که خواندنی با کدام replicaها تماس می‌گیرد، پس مقدارها می‌توانند در میان بروند. خواندن یکنوا read repair *بند‌آور* لازم دارد، به بهای دسترس‌پذیری، از فصل ۱۲ (p. 236).
 
-> **Try it:** [Quorums and witness replicas](../widgets/11-quorum-witness.html) — set N, W and R, mark some replicas as witnesses, fail nodes, and see which reads and writes still succeed and whether a read is guaranteed to see the latest write.
+> **Try it:** [quorum و replicaهای شاهد](../widgets/11-quorum-witness.html)؛ مقدار N و W و R را بگذارید، برخی replicaها را شاهد علامت بزنید، نودها را بشکنید، و ببینید کدام خواندن‌ها و نوشتن‌ها باز هم موفق می‌شوند و خواندنی تضمین می‌شود تازه‌ترین نوشتن را ببیند یا نه.
 
-### Witness replicas
+> **In practice:** `insert_quorum` همان W کتاب است: چند replica باید نوشتن را تأیید کنند.
+>
+> **Your turn:** با دو replica `insert_quorum=2` گذاشته‌اید و یکی برای ارتقا down است. چه می‌شود؟
+>
+> *Answer:* insert fail می‌شود: availability را با consistency عوض کرده‌اید. با N=2 و W=2 هر نوشتن به همه‌ی replicaها نیاز دارد؛ برای ارتقا یا W را موقتاً کم کنید یا loadها را عقب بیندازید (pp. 235–236).
 
-Majorities guarantee overlap, but every replica stores a full copy, so RF = 5 means five copies (p. 236). **Witness replicas** normally store only the *fact* that a write happened. When copy replicas time out or fail, a witness is upgraded to hold the record temporarily, and it reverts once repair brings the copies back up to date (pp. 236–237).
+### نقش replicaهای شاهد
 
-The book's example, [1c, 2c, 3w] (p. 237):
+اکثریت‌ها هم‌پوشانی را تضمین می‌کنند، ولی هر replicaیی کپی کامل ذخیره می‌کند، پس RF = 5 یعنی پنج کپی (p. 236). **replicaهای شاهد** معمولاً تنها *این واقعیت* را ذخیره می‌کنند که نوشتنی رخ داده. وقتی replicaهای کپی وقتشان سر برود یا بشکنند، شاهدی ارتقا می‌یابد تا موقت آن رکورد را داشته باشد، و همین که تعمیر کپی‌ها را به‌روز کند برمی‌گردد (pp. 236–237).
 
-- **Write while 2c is down:** store the record temporarily on 3w, repair 2c later, then drop the witness's copy.
-- **Read when the record is on 1c and 3w but not on 2c:** any two nodes form a quorum. With [1c, 2c], fetch from 1c and repair 2c. With [2c, 3w], fetch from 3w.
+نمونه‌ی کتاب با [1c, 2c, 3w] (p. 237):
 
-*n* copy + *m* witness replicas give the same availability as *n* + *m* copies if (p. 237):
+- **نوشتن در حالی که 2c خواب است:** رکورد را موقت روی 3w ذخیره کن، بعدتر 2c را تعمیر کن، بعد کپی آن شاهد را بینداز.
+- **خواندن وقتی رکورد روی 1c و 3w است ولی روی 2c نه:** هر دو نودی quorumی می‌سازند. با [1c, 2c]، از 1c بگیر و 2c را تعمیر کن. با [2c, 3w]، از 3w بگیر.
 
-- reads and writes use majorities (N/2 + 1);
-- every quorum includes at least one copy replica.
+تعداد *n* کپی به‌علاوه‌ی *m* replica شاهد همان availability *n* + *m* کپی را می‌دهند اگر (p. 237):
 
-Spanner and Cassandra implement witnesses (p. 237).
+- خواندن و نوشتن اکثریت، یعنی N/2 + 1، به کار ببرند؛
+- هر quorumی دست‌کم یک replica کپی داشته باشد.
 
-### Strong eventual consistency and CRDTs
+سیستم‌های Spanner و Cassandra شاهد پیاده می‌کنند (p. 237).
 
-**Strong eventual consistency (SEC)** sits between strong and eventual consistency. Updates may arrive late or out of order, but once all of them arrive, replicas **merge to the same valid state** (p. 238). **Conflict-free replicated data types** (CRDTs, Shapiro et al.; used in Redis) can apply operations in any order with the same result. Replicated counters, for example, can be incremented independently during a partition and merged afterwards without losing anything (p. 238).
+### مفهوم eventual consistency قوی و CRDT
 
-Operation-based **CmRDTs** require operations to be (p. 238):
+**مفهوم eventual consistency قوی** که SEC است میان consistency قوی و غایی می‌نشیند. به‌روزرسانی‌ها می‌توانند دیر یا بی‌ترتیب برسند، ولی همین که همه‌شان برسند، replicaها **در همان حالت معتبر merge می‌شوند** (p. 238). **نوع داده‌های تکرارشده‌ی بی‌تعارض**، یعنی CRDT از شاپیرو و همکاران که در Redis به کار می‌رود، می‌توانند عملیات را به هر ترتیبی با همان نتیجه اعمال کنند. مثلاً شمارنده‌های تکرارشده می‌توانند در میانه‌ی پارتیشنی مستقل افزوده شوند و بعد بی گم کردن چیزی merge (p. 238).
 
-- **side-effect free**;
-- **commutative** (x • y = y • x);
-- **causally ordered**: delivered only once the state they need has been reached.
+عملیات‌محورها، یعنی **CmRDT**، لازم دارند که عملیات (p. 238):
 
-**G-Counter** (grow-only counter): each node keeps a vector of last-known counts and updates only its own slot. Merge takes the element-wise **max**, and the value is the **sum** (p. 239):
+- **بی‌اثر جانبی** باشند؛
+- **مفهوم commutative** باشند، یعنی x • y = y • x؛
+- **علّی مرتب** باشند: تنها وقتی تحویل شوند که آن حالتی که لازم دارند رسیده باشد.
 
-| Step | Node 1 | Node 2 | Node 3 |
+**ساختار G-Counter**، یعنی شمارنده‌ی فقط‌رشدی: هر نودی برداری از آخرین شمارش‌های معلوم نگه می‌دارد و تنها خانه‌ی خودش را به‌روز می‌کند. merge بیشینه‌ی **عنصر‌به‌عنصر** را برمی‌دارد، و مقدار **جمع** است (p. 239):
+
+| قدم | نود ۱ | نود ۲ | نود ۳ |
 |---|---|---|---|
-| Initial | [0, 0, 0] | [0, 0, 0] | [0, 0, 0] |
-| Increment on 1 and 3 | [1, 0, 0] | [0, 0, 0] | [0, 0, 1] |
-| After merges | [1, 0, 1] | [1, 0, 1] | [1, 0, 1] → sum = 2 |
+| آغازین | [0, 0, 0] | [0, 0, 0] | [0, 0, 0] |
+| افزودن روی ۱ و ۳ | [1, 0, 0] | [0, 0, 0] | [0, 0, 1] |
+| پس از mergeها | [1, 0, 1] | [1, 0, 1] | [1, 0, 1] ← جمع برابر ۲ |
 
-| CRDT | How (pp. 239–240) |
+| CRDT | چطور (pp. 239–240) |
 |---|---|
-| **PN-Counter** | Two vectors: P for increments, N for decrements. **Super-peers** avoid propagating huge vectors |
-| **LWW register** | Keep the value with the largest globally ordered timestamp; the merge is commutative |
-| **Multivalue register** | Keep all concurrent values; the application picks one |
-| **G-Set** | Grow-only set; union is commutative |
-| **Two-set (add/remove)** | Only elements in the add-set can enter the remove-set; value = add-set − remove-set |
-| **JSON CRDT** | Insertions, deletions and assignments on nested lists and maps, merged on the client in any order (Kleppmann) |
+| **PN-Counter** | دو بردار: P برای افزودن و N برای کاستن. **ابرهمتا**ها از پخش شدن بردارهای غول‌آسا می‌پرهیزند |
+| **register از جنس LWW** | مقداری را با بزرگ‌ترین timestamp جهانی‌مرتب نگه دار؛ آن merge commutative است |
+| **register چند‌مقداری** | همه‌ی مقدارهای هم‌زمان را نگه دار؛ برنامه یکی را برمی‌دارد |
+| **G-Set** | مجموعه‌ی فقط‌رشدی؛ اجتماع commutative است |
+| **مجموعه‌ی دو‌تایی با افزودن و برداشتن** | تنها عنصرهای مجموعه‌ی افزودن می‌توانند به مجموعه‌ی برداشتن وارد شوند؛ مقدار برابر مجموعه‌ی افزودن منهای مجموعه‌ی برداشتن |
+| **CRDT از جنس JSON** | درج و حذف و انتساب روی فهرست‌ها و نقشه‌های تو‌در‌تو، که روی کلاینت به هر ترتیبی merge می‌شوند، از کلپمان |
 
-> **Try it:** [CRDT counters and sets](../widgets/11-crdt.html) — partition three replicas, increment, decrement, add and remove on each side, heal the partition, and watch G-Counter, PN-Counter and two-phase-set states merge to the same value in any order.
+> **Try it:** [شمارنده‌ها و مجموعه‌های CRDT](../widgets/11-crdt.html)؛ سه replica را پارتیشن کنید، در هر سو بیفزایید و بکاهید و اضافه و برداشته کنید، پارتیشن را ترمیم کنید، و ببینید حالت‌های G-Counter و PN-Counter و مجموعه‌ی دو‌فازی به هر ترتیبی به همان مقدار merge می‌شوند.
 
-### Summary
+### خلاصه
 
-Replication improves availability but needs coordination (p. 240). The single-operation models, from most to fewest guarantees (pp. 240–241):
+مفهوم replication availability را بهتر می‌کند ولی هم‌آهنگی لازم دارد (p. 240). مدل‌های تک‌عملیاتی، از پرتضمین‌ترین تا کم‌تضمین‌ترین (pp. 240–241):
 
 ```mermaid
 flowchart LR
     L["Linearizability<br/>instantaneous, real-time order"] --> S["Sequential<br/>one total order, per-process order kept"] --> C["Causal<br/>causally related ops in the same order"] --> P["PRAM / FIFO<br/>per-process order; others may differ"]
 ```
 
-Session models: read-own-writes, monotonic reads, monotonic writes and writes-follow-reads (p. 241). Stacking weaker systems on stronger ones, or ignoring the consistency of underlying systems, can cause unrecoverable inconsistencies and data loss (p. 241).
+مدل‌های session: خواندن نوشته‌های خود، خواندن یکنوا، نوشتن یکنوا و نوشتن از خواندن پی می‌گیرد (p. 241). روی هم چیدن سیستم‌های ضعیف‌تر روی قوی‌ترها، یا نادیده گرفتن consistency سیستم‌های زیرین، می‌تواند ناسازگاری جبران‌نشدنی و گم شدن داده بسازد (p. 241).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Model | Real-time order | Same order for all | Composable | Coordination cost |
+| مدل | ترتیب real-time | همان ترتیب برای همه | ترکیب‌پذیر | هزینه‌ی هم‌آهنگی |
 |---|---|---|---|---|
-| Linearizable | ✓ | ✓ | ✓ | Highest (consensus) |
-| Sequential | ✗ | ✓ | ✗ | High |
-| Causal | ✗ | Only causally related | — | Dependency metadata |
-| PRAM | ✗ | Only per writer | — | Low |
-| Eventual | ✗ | ✗, converges eventually | — | Lowest |
-| Strong eventual (CRDT) | ✗ | Converges deterministically | — | Merge metadata |
+| linearizable | ✓ | ✓ | ✓ | بالاترین، یعنی consensus |
+| ترتیبی | ✗ | ✓ | ✗ | بالا |
+| علّی | ✗ | تنها علّیت‌دارها | — | metadata وابستگی |
+| PRAM | ✗ | تنها برای هر نویسنده‌ای | — | کم |
+| غایی | ✗ | ✗، در غایت هم‌گرا می‌شود | — | کم‌ترین |
+| غایی قوی با CRDT | ✗ | قطعی هم‌گرا می‌شود | — | metadata مربوط به merge |
 
-| N, W, R | Tolerates | Note |
+| N و W و R | چه تحمل می‌شود | یادداشت |
 |---|---|---|
-| 3, 2, 2 | 1 failure for reads and writes | Overlap guaranteed |
-| 3, 1, 3 | Write: 2 failures; read: none | Write-heavy |
-| 3, 3, 1 | Write: none; read: 2 failures | Read-heavy |
-| 3, 1, 1 | Many | R + W ≤ N: stale reads possible |
+| ۳ و ۲ و ۲ | یک شکست برای خواندن و نوشتن | هم‌پوشانی تضمین‌شده |
+| ۳ و ۱ و ۳ | نوشتن: ۲ شکست؛ خواندن: هیچ | پرنوشتن |
+| ۳ و ۳ و ۱ | نوشتن: هیچ؛ خواندن: ۲ شکست | پرخواندن |
+| ۳ و ۱ و ۱ | زیاد | شرط R + W ≤ N: خواندن کهنه ممکن است |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Jepsen's consistency map** (jepsen.io/consistency) arranges these models, and transactional ones such as serializability and snapshot isolation, in one hierarchy. It shows *strict serializability* as linearizability plus serializability.
-- **Delta-state CRDTs** ship only the recent change to the state rather than the whole state or every operation. They're the practical form behind many production CRDT systems, and Riak's data types are an early example.
-- [DDIA Ch. 10](../../designing-data-intensive-applications/chapters/10-consistency-and-consensus.md) gives the application developer's view of linearizability, with real-world examples (uniqueness constraints, leader locks).
+- **نقشه‌ی consistency Jepsen** در jepsen.io/consistency این مدل‌ها، و تراکنشی‌هایی مثل serializable بودن و isolationی snapshot، را در یک سلسله‌مراتب می‌چیند. عبارت *strict serializability* را linearizability به‌علاوه‌ی serializable بودن نشان می‌دهد.
+- **همه‌ی CRDTهای حالت‌دلتایی** تنها تغییر تازه‌ی حالت را می‌فرستند و نه کل حالت یا هر عملیاتی. شکل عملی پشت خیلی از سیستم‌های CRDT در production‌اند، و نوع داده‌های Riak نمونه‌ای اولیه.
+- [فصل ۱۰ کتاب DDIA](../../designing-data-intensive-applications/chapters/10-consistency-and-consensus.md) نمای توسعه‌دهنده‌ی برنامه از linearizability را می‌دهد، با نمونه‌های دنیای واقعی مثل قید یکتایی و قفل leader.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [5. Transaction Processing and Recovery](05-transaction-processing-and-recovery.md) (serializability versus linearizability), [12. Anti-Entropy and Dissemination](12-anti-entropy-and-dissemination.md) (read repair, hinted handoff, Merkle trees), [14. Consensus](14-consensus.md) (implementing linearizability).
-- **Run it:** [Quorum overlap and stale reads](../lab/11-quorum-staleness/README.md) — simulates writes and reads against N replicas under random failures for several (W, R) choices, and counts stale reads when R + W ≤ N against R + W > N.
+- **فصل‌های مرتبط:** [فصل ۵: پردازش تراکنش و بازیابی](05-transaction-processing-and-recovery.md) که serializable بودن در برابر linearizability را دارد، [فصل ۱۲: anti-entropy و پخش](12-anti-entropy-and-dissemination.md) که read repair و hinted handoff و درخت Merkle را دارد، و [فصل ۱۴: consensus](14-consensus.md) که پیاده کردن linearizability را دارد.
+- **Run it:** [هم‌پوشانی quorum و خواندن کهنه](../lab/11-quorum-staleness/README.md)؛ نوشتن و خواندن در برابر N replica را زیر شکست تصادفی برای چند انتخاب (W, R) شبیه‌سازی می‌کند، و خواندن‌های کهنه را وقتی R + W ≤ N در برابر R + W > N می‌شمارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why is partition tolerance not a real choice in CAP?**
+1. **چرا partition tolerance در CAP انتخابی واقعی نیست؟**
 
-   *Answer:* Partitions happen whether you choose them or not. What you can trade is consistency against availability *during* a partition (p. 218).
+   *Answer:* پارتیشن‌ها رخ می‌دهند، برداریدشان یا نه. آن چیزی که بده‌بستان‌شدنی است consistency در برابر availability *در میانه‌ی* پارتیشنی است (p. 218).
 
-2. **How does CAP availability differ from "high availability"?**
+2. **مفهوم availability CAP با «availability بالا» چه تفاوتی دارد؟**
 
-   *Answer:* CAP availability puts no bound on latency and requires every nonfailed node to answer every request. High availability means neither (p. 218).
+   *Answer:* availability CAP هیچ کرانی روی latency نمی‌گذارد و می‌خواهد هر نود نشکسته‌ای به هر درخواستی پاسخ بدهد. availability بالا هیچ‌کدام را نمی‌خواهد (p. 218).
 
-3. **What's the difference between harvest and yield?**
+3. **تفاوت برداشت و بازده چیست؟**
 
-   *Answer:* Harvest is how complete an answer is (99 of 100 rows); yield is the fraction of requests that succeed (p. 219).
+   *Answer:* برداشت یعنی پاسخی چقدر کامل است، مثل ۹۹ ردیف از ۱۰۰؛ و بازده یعنی سهم درخواست‌هایی که موفق می‌شوند (p. 219).
 
-4. **In Figure 11-2, why can the third read only return 2?**
+4. **در شکل ۱۱-۲، چرا خواندن سوم تنها می‌تواند ۲ برگرداند؟**
 
-   *Answer:* Both writes have completed and write 2 is ordered after write 1. After a linearization point, reads can't return an older value (p. 224).
+   *Answer:* هر دو نوشتن تمام شده‌اند و نوشتن ۲ پس از نوشتن ۱ مرتب شده. پس از نقطه‌ی خطی‌سازی، خواندن‌ها نمی‌توانند مقداری قدیمی‌تر برگردانند (p. 224).
 
-5. **What distinguishes sequential consistency from linearizability?**
-   - [ ] Sequential consistency allows different readers to see different orders
-   - [x] Linearizability also respects real-time order and composes; sequential consistency does neither
-   - [ ] They're identical for single objects
+5. **چه چیزی consistency ترتیبی را از linearizability جدا می‌کند؟**
+   - [ ] مفهوم consistency ترتیبی می‌گذارد خواننده‌های مختلف ترتیب‌های مختلفی ببینند
+   - [x] مفهوم linearizability ترتیب real-time را هم محترم می‌شمارد و ترکیب می‌شود؛ و consistency ترتیبی هیچ‌کدام
+   - [ ] برای objectهای تنها یکسان‌اند
 
-   *Answer:* Both have a global order, but only linearizability ties it to wall-clock time, and sequentially consistent schedules aren't composable (p. 228).
+   *Answer:* هر دو ترتیبی جهانی دارند، ولی تنها linearizability آن را به ساعت دیواری node می‌زند، و زمان‌بندی‌های ترتیبی‌سازگار ترکیب‌پذیر نیستند (p. 228).
 
-6. **What problem does RIFL's completion object solve?**
+6. **ساختار object تمام شدن در RIFL چه مسئله‌ای را حل می‌کند؟**
 
-   *Answer:* A retried RPC that was already applied would re-execute and could overwrite a later write from another client. RIFL returns the stored completion result instead of re-executing (p. 227).
+   *Answer:* یک RPC دوباره‌کوشیده که از قبل اعمال شده بود دوباره اجرا می‌شد و می‌توانست روی نوشتن دیرتر کلاینتی دیگر بنویسد. روش RIFL به‌جای اجرای دوباره همان نتیجه‌ی تمام شدن ذخیره‌شده را برمی‌گرداند (p. 227).
 
-7. **What can vector clocks tell you, and what can't they?**
+7. **ساعت‌های برداری چه چیزی را می‌توانند بگویند، و چه چیزی را نه؟**
 
-   *Answer:* They tell you whether two versions are causally ordered or concurrent, i.e. whether there's a conflict. They don't say how to resolve it, which is application-specific (pp. 232–233).
+   *Answer:* می‌گویند که دو نسخه علّی مرتب‌اند یا هم‌زمان، یعنی تعارضی هست یا نه. نمی‌گویند چطور حلش کنید، که برنامه‌ویژه است (pp. 232–233).
 
-8. **N = 3, W = 2, R = 2. A write reached only one replica before failing. Is a later quorum read guaranteed to return it?**
+8. **با N = 3 و W = 2 و R = 2، نوشتنی پیش از شکستن تنها به یک replica رسید. آیا تضمین می‌شود خواندنی quorumی بعدتر برش گرداند؟**
 
-   *Answer:* No. Depending on which two replicas it contacts, it may return the new or the old value, and successive reads may alternate. Monotonic reads need blocking read repair (p. 236).
+   *Answer:* نه. بسته به این‌که با کدام دو replica تماس بگیرد، می‌تواند مقدار تازه یا قدیم را برگرداند، و خواندن‌های پیاپی می‌توانند در میان بروند. خواندن یکنوا read repair بند‌آور لازم دارد (p. 236).
 
-9. **With replicas [1c, 2c, 3w], which pairs can serve a consistent read?**
+9. **با replicaهای [1c, 2c, 3w]، کدام زوج‌ها می‌توانند خواندنی سازگار سرویس بدهند؟**
 
-   *Answer:* Any pair: [1c, 2c], [1c, 3w] or [2c, 3w]. Every majority contains at least one copy replica or a witness temporarily holding the record (p. 237).
+   *Answer:* هر زوجی: [1c, 2c] یا [1c, 3w] یا [2c, 3w]. هر اکثریتی دست‌کم یک replica کپی دارد یا شاهدی که موقت آن رکورد را دارد (p. 237).
 
-10. **Why can a G-Counter be incremented on both sides of a partition without losing increments?**
+10. **چرا G-Counter می‌تواند در هر دو سوی پارتیشنی افزوده شود بی گم شدن افزودن‌ها؟**
 
-    *Answer:* Each node updates only its own slot, and merge takes the element-wise maximum, which is commutative. After healing, every node's increments are kept, and the value is the sum (pp. 238–239).
+    *Answer:* هر نودی تنها خانه‌ی خودش را به‌روز می‌کند، و merge بیشینه‌ی عنصر‌به‌عنصر را برمی‌دارد، که commutative است. پس از ترمیم، افزودن‌های هر نودی نگه داشته می‌شوند، و مقدار همان جمع است (pp. 238–239).

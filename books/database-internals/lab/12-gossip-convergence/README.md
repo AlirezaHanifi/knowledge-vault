@@ -1,18 +1,18 @@
-# Gossip convergence
+# هم‌گرایی gossip
 
-How quickly does gossip reach a whole cluster, and how many messages does it waste? Starting from one node, every node that knows the information pushes it to `fanout` random peers each round. The experiment counts rounds until everyone knows, messages per node, and the share of messages that reach nodes that already knew. It covers 100, 1,000 and 10,000 nodes, averaged over 20 seeded runs.
+روش gossip چه تند به کل یک cluster می‌رسد، و چند پیام را هدر می‌دهد؟ از یک node که آغاز شود، هر nodeی که خبر را می‌داند در هر دور آن را به `fanout` همتای تصادفی push می‌کند. آزمایش دورها را تا وقتی همه بدانند، پیام‌های هر گره، و سهم پیام‌هایی که به nodeهای از قبل دانا می‌رسند می‌شمارد. ۱۰۰ و ۱٬۰۰۰ و ۱۰٬۰۰۰ node را می‌پوشاند، میانگین ۲۰ اجرای با seed.
 
-*Illustrates Database Internals, “Gossip Dissemination”, pp. 250–253: information spreads in a logarithmic number of rounds, with redundant messages to nodes that are already infected. The vault simplifies by having every infected node keep pushing until all are infected, with no interest loss. The cluster sizes, fanouts and implementation are the vault's.*
+*تصویری از «پخش با gossip» کتاب Database Internals، صص. ۲۵۰–۲۵۳: خبر در شمار دورهای لگاریتمی پهن می‌شود، با پیام‌های زیادی به nodeهایی که از پیش آلوده‌اند. این vault ساده‌اش می‌کند و هر node آلوده‌ای تا آلوده شدن همه push می‌کند، بی هیچ از دست رفتن علاقه. اندازه‌های cluster و fanoutها و پیاده‌سازی مال vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 gossip.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 Push gossip from one node, averaged over 20 seeded runs
@@ -29,13 +29,13 @@ Push gossip from one node, averaged over 20 seeded runs
  10000      3    10.6    13.3           11.1        91%
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Rounds grow with log N: going from 100 to 10,000 nodes, 100 times more, adds only about 10 rounds at fanout 1.
-- A larger fanout cuts rounds and pushes them below log₂ N, but each node then sends more messages per round.
-- Most messages are redundant, 80–90% here, because nodes keep pushing after almost everyone knows. That is why real systems stop after a node has hit too many peers that already knew (interest loss).
-- Messages per node grow only slowly with cluster size, which is why gossip scales.
+- دورها با log N رشد می‌کنند: از ۱۰۰ به ۱۰٬۰۰۰ گره، صد برابر بیشتر، در fanout ۱ تنها حدود ۱۰ دور می‌افزاید.
+- مقدار fanout بزرگ‌تر دورها را می‌بُرد و زیر log₂ N می‌کشاند، ولی بعد هر node در هر دور پیام بیشتری می‌فرستد.
+- بیشتر پیام‌ها زیادی‌اند، اینجا ۸۰ تا ۹۰ درصد، چون nodeها پس از دانا شدن تقریباً همه باز push می‌کنند. همین است که سیستم‌های واقعی را وامی‌دارد پس از آنکه nodeی به همتاهای از قبل دانای زیادی خورد بایستند، یعنی از دست رفتن علاقه.
+- پیام هر node تنها آرام با اندازه‌ی cluster رشد می‌کند، و همین است که روش gossip را مقیاس‌پذیر کرده.
 
-## Related
+## مرتبط
 
-- Chapter note: [12. Anti-Entropy and Dissemination](../../chapters/12-anti-entropy-and-dissemination.md) — “Gossip Dissemination”, pp. 250–253
+- یادداشت فصل: [فصل ۱۲: anti-entropy و پخش](../../chapters/12-anti-entropy-and-dissemination.md) — «پخش با gossip»، صص. ۲۵۰–۲۵۳

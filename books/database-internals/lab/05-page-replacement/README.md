@@ -1,18 +1,18 @@
-# Page-replacement hit ratios
+# نسبت برخورد در جانشینی صفحه
 
-Which eviction policy keeps a buffer pool most useful? This experiment replays a page-reference trace shaped like a B-Tree workload. Every lookup touches the root, one internal page and one leaf, and leaf popularity is skewed. Halfway through, one full scan reads every leaf once. The trace runs under FIFO, LRU, CLOCK and LFU at four cache sizes. The experiment also replays the classic reference string that shows Bélády's anomaly.
+کدام سیاست بیرون‌انداختن یک buffer pool را سودمندتر نگه می‌دارد؟ این آزمایش رد مرجع‌دهی به صفحه‌ای را replay می‌کند که شکلش به بار کاری B-Tree می‌خورد. هر جست‌وجو ریشه و یک صفحه‌ی درونی و یک برگ را دست می‌زند، و محبوبیت برگ‌ها نامتوازن است. در میانه‌ی راه، یک پیمایش کامل هر برگ را یک بار می‌خواند. آن رد زیر FIFO و LRU و CLOCK و LFU در چهار اندازه‌ی cache اجرا می‌شود. آزمایش همان رشته‌ی مرجع کلاسیک را هم replay می‌کند که ناسازگاری Bélády را نشان می‌دهد.
 
-*Illustrates Database Internals, “Page Replacement”, pp. 85–88 (FIFO and LRU, CLOCK, LFU and TinyLFU). The trace, its skew and the cache sizes are the vault's (seeded); so is the implementation. Bélády's reference string is the standard textbook example.*
+*تصویری از «جانشینی صفحه» کتاب Database Internals، صص. ۸۵–۸۸ (روش FIFO و LRU، سپس CLOCK، سپس LFU و TinyLFU). آن رد و نامتوازنی و اندازه‌های cache مال vault است، با seed؛ و پیاده‌سازی هم. رشته‌ی مرجع Bélády مثال استاندارد کتاب‌های درسی است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 page_replacement.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 Trace: 30,000 lookups (root, internal, leaf) + one 4,000-leaf scan = 94,001 page references
@@ -28,13 +28,13 @@ Bélády's anomaly, reference string 1 2 3 4 1 2 5 1 2 3 4 5
   FIFO with 4 frames: 10 faults   LRU: 8 faults
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- FIFO evicts the root and internal pages even though every lookup needs them, so it has the lowest hit ratio at every size.
-- CLOCK stays within about two points of LRU while needing only a reference bit per frame, which is why it's used as a cheaper LRU approximation.
-- LFU wins on this trace: frequency protects hot pages from the one-off scan, which pushes them out of LRU's recency order.
-- Bélády's anomaly: FIFO has *more* faults with 4 frames than with 3 (10 against 9). LRU can't do that, because it is a stack algorithm.
+- روش FIFO ریشه و صفحه‌های درونی را بیرون می‌اندازد، گرچه هر جست‌وجو به آن‌ها نیاز دارد، پس در هر اندازه‌ای کم‌ترین نسبت برخورد را دارد.
+- روش CLOCK تا حدود دو واحد از LRU فاصله می‌گیرد در حالی که تنها به یک بیت مرجع برای هر frame نیاز دارد، و همین است که آن را تقریبی ارزان‌تر از LRU کرده.
+- روش LFU روی این رد می‌برد: بسامد صفحه‌های گرم را از آن پیمایش یک‌باره پناه می‌دهد، که آن‌ها را از ترتیب تازگی LRU بیرون می‌راند.
+- ناسازگاری Bélády: روش FIFO با ۴ frame خطای *بیشتری* از ۳ frame دارد، ۱۰ در برابر ۹. روش LRU نمی‌تواند چنین کند، چون الگوریتمی پشته‌ای است.
 
-## Related
+## مرتبط
 
-- Chapter note: [5. Transaction Processing and Recovery](../../chapters/05-transaction-processing-and-recovery.md) — “Buffer Management”, pp. 81–88
+- یادداشت فصل: [فصل ۵: پردازش تراکنش و بازیابی](../../chapters/05-transaction-processing-and-recovery.md) — «مدیریت buffer»، صص. ۸۱–۸۸

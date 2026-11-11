@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ARIES Recovery</title>
-<meta name="description" content="Run a short workload with steal/no-force buffering and a fuzzy checkpoint, crash at any point, then step through ARIES analysis, redo and undo, including compensation log records that make recovery restartable. Illustrates Database Internals, Chapter 5.">
+<title>بازیابی ARIES</title>
+<meta name="description" content="بار کاری کوتاهی را با buffer کردن steal و no-force و یک checkpoint مه‌آلود اجرا کنید، در هر نقطه‌ای از کار بیندازید، بعد تحلیل و redo و undo در ARIES را قدم‌به‌قدم بگذرانید، از جمله رکوردهای log جبرانی که بازیابی را از‌سر‌شدنی می‌کنند. تصویری از فصل ۵ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   table.lg { width: 100%; border-collapse: collapse; font-size: .8rem; font-family: var(--mono); }
-  table.lg td, table.lg th { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: left; white-space: nowrap; }
+  table.lg td, table.lg th { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: right; white-space: nowrap; }
   table.lg tr.lost td { color: var(--ink-3); text-decoration: line-through; }
   table.lg tr.cur td { background: var(--accent-soft); }
   table.lg tr.clr td { color: var(--warn); }
@@ -22,21 +22,21 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-transaction-processing-and-recovery.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">ARIES recovery</span>
+      <a href="../chapters/05-transaction-processing-and-recovery.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">بازیابی ARIES</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Transaction Processing and Recovery</div>
-  <h1>ARIES: analysis, redo, undo</h1>
-  <p class="lede">ARIES is <strong>steal/no-force</strong>: uncommitted changes may reach disk, and committed ones may not have. After a crash it <strong>analyses</strong> the log from the last checkpoint to rebuild the transaction and dirty-page tables, <strong>redoes</strong> every logged change whose page on disk is older, repeating history, and then <strong>undoes</strong> the transactions that never committed. Each undo writes a <strong>compensation log record (CLR)</strong>, so a crash during recovery never undoes the same change twice.</p>
-  <p class="source-note">Illustrates “Recovery”, “Steal and Force Policies” and “ARIES” (pp. 88–93). The workload (three transactions, four pages, one checkpoint and two page flushes) is the vault’s; so are the simplifications: the whole log is durable, checkpoints are a single record, and pages hold one number, and no two uncommitted transactions write the same page (as strict locking would ensure). Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۵ · پردازش تراکنش و بازیابی</div>
+  <h1>الگوریتم ARIES: تحلیل و redo و undo</h1>
+  <p class="lede">الگوریتم ARIES از جنس <strong>steal و no-force</strong> است: تغییرهای commit‌نشده می‌توانند به دیسک برسند، و commit‌شده‌ها می‌توانند نرسیده باشند. پس از از کار افتادنی، log را از آخرین checkpoint <strong>تحلیل</strong> می‌کند تا جدول‌های تراکنش و صفحه‌ی کثیف را دوباره بسازد، هر تغییر لاگ‌شده‌ای را که صفحه‌اش روی دیسک قدیمی‌تر است <strong>redo</strong> می‌کند، که تکرار تاریخ است، و بعد آن تراکنش‌هایی را <strong>undo</strong> می‌کند که هیچ‌وقت commit نکردند. هر undoیی یک <strong>رکورد log جبرانی</strong>، یعنی CLR، می‌نویسد، پس از کار افتادنی در میانه‌ی بازیابی هیچ‌وقت همان تغییر را دو بار undo نمی‌کند.</p>
+  <p class="source-note">تصویری از «بازیابی» و «سیاست‌های steal و force» و «الگوریتم ARIES» (صص. ۸۸–۹۳). آن بار کاری، یعنی سه تراکنش و چهار صفحه و یک checkpoint و دو flush صفحه، مال vault است؛ و همچنین این ساده‌سازی‌ها: کل log پایاست، checkpointها یک رکورد تنها‌اند، صفحه‌ها یک عدد دارند، و هیچ دو تراکنش commit‌نشده‌ای همان صفحه را نمی‌نویسند، چنان‌که قفل‌گذاری سخت‌گیرانه تأمینش می‌کرد. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
@@ -44,31 +44,31 @@
         <div class="tables"><div class="mini" id="tt"></div><div class="mini" id="dpt"></div><div class="mini" id="disk"></div><div class="mini" id="buf"></div></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="crash"></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="crash"></div>
         <div id="player" style="margin-top:12px"></div>
-        <div class="row" style="margin-top:8px"><button class="btn small danger" type="button" id="again">Crash again, during recovery</button></div>
-        <p class="field-hint">Records after the crash line were never written. Step through recovery; crash again during undo to see CLRs at work.</p></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+        <div class="row" style="margin-top:8px"><button class="btn small danger" type="button" id="again">بازهم از کار بینداز، در میانه‌ی بازیابی</button></div>
+        <p class="field-hint">رکوردهای پس از خط از کار افتادن هیچ‌وقت نوشته نشدند. بازیابی را قدم‌به‌قدم بگذرانید؛ در میانه‌ی undo بازهم از کار بیندازید تا CLRها را در کار ببینید.</p></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Redo repeats history.</strong> Redo reapplies every logged change, including those of transactions that will be undone, whenever the page on disk is older than the record (its page LSN is lower).</li>
-    <li><strong>Steal means undo.</strong> The flush of P4 writes T3’s uncommitted value to disk. Crash before T3 commits and undo must restore the old value.</li>
-    <li><strong>No-force means redo.</strong> T1 commits, but its change to P3 was never flushed; only the log makes it durable. Crash at the end and T2, which never committed, is undone on all three pages it touched.</li>
-    <li><strong>CLRs are redo-only.</strong> Crash again during undo: the next recovery redoes the CLRs and continues from their <em>undo-next</em> pointer instead of undoing anything twice.</li>
+    <li><strong>redo تاریخ را تکرار می‌کند.</strong> redo هر تغییر لاگ‌شده‌ای را، از جمله مال تراکنش‌هایی که undo خواهند شد، هر جا صفحه‌ی روی دیسک از آن رکورد قدیمی‌تر باشد، یعنی LSN صفحه‌اش پایین‌تر، دوباره اعمال می‌کند.</li>
+    <li><strong>steal یعنی undo.</strong> flush کردن P4 مقدار commit‌نشده‌ی T3 را روی دیسک می‌نویسد. پیش از commit کردن T3 از کار بیندازید و undo باید مقدار قدیم را بازگرداند.</li>
+    <li><strong>no-force یعنی redo.</strong> تراکنش T1 commit می‌کند، ولی تغییرش روی P3 هیچ‌وقت flush نشد؛ تنها log پایایش می‌کند. در پایان از کار بیندازید و T2، که هیچ‌وقت commit نکرد، روی هر سه صفحه‌ای که به‌شان دست زده undo می‌شود.</li>
+    <li><strong>CLRها تنها redo‌شدنی‌اند.</strong> در میانه‌ی undo بازهم از کار بیندازید: بازیابی بعدی CLRها را redo می‌کند و از اشاره‌گر <em>undo-next</em>شان ادامه می‌دهد، به‌جای این‌که چیزی را دو بار undo کند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>Lesson</small>5. Transaction Processing and Recovery</a></li>
+    <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>درس</small>فصل ۵: پردازش تراکنش و بازیابی</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -84,6 +84,7 @@ function stats(rows) {
   }
 
   var log = Kit.log(document.getElementById("log"));
+  var PH = { analysis: "تحلیل", redo: "redo", undo: "undo", done: "تمام" };
   var EVENTS = [
     { t: "upd", tx: "T1", page: "P1", before: 10, after: 11 }, { t: "upd", tx: "T2", page: "P2", before: 20, after: 21 },
     { t: "upd", tx: "T1", page: "P3", before: 30, after: 31 }, { t: "flush", page: "P1" }, { t: "ckpt" },
@@ -92,7 +93,6 @@ function stats(rows) {
   var PAGES = ["P1", "P2", "P3", "P4"], crashAt = 11, L, disk, buf, rec, again = 0;
   function copy(o) { return JSON.parse(JSON.stringify(o)); }
 
-  // flush markers are not log records, so compute LSNs without them from the start
   function normal() {
     L = []; disk = {}; flushes = []; var mem = {}, tt = {}, dpt = {};
     PAGES.forEach(function (p, k) { disk[p] = { v: [10, 20, 30, 40][k], lsn: 0 }; mem[p] = copy(disk[p]); });
@@ -112,9 +112,9 @@ function stats(rows) {
     rec = { phase: "analysis", tt: ck ? copy(ck.tt) : {}, dpt: ck ? copy(ck.dpt) : {}, cur: ck ? ck.lsn + 1 : 1, undo: {}, winners: [] };
     Object.keys(rec.tt).forEach(function (tx) { rec.tt[tx] = { last: rec.tt[tx] }; });
     log.add(msg, "bad");
-    log.add("Analysis starts " + (ck ? "from the checkpoint at LSN " + ck.lsn + " with its transaction and dirty-page tables" : "from the beginning of the log (no checkpoint)"), "muted");
+    log.add("تحلیل " + (ck ? "از checkpoint سر LSN " + ck.lsn + " با جدول‌های تراکنش و صفحه‌ی کثیفش شروع می‌شود" : "از آغاز log شروع می‌شود، چون checkpointی نیست"), "muted");
   }
-  function reset() { again = 0; normal(); log.clear(); startRecovery("Crash after event " + crashAt + " of " + EVENTS.length + ": " + L.length + " log records are durable; the buffer pool is lost."); render(); }
+  function reset() { again = 0; normal(); log.clear(); startRecovery("از کار افتادن پس از رویداد " + crashAt + " از " + EVENTS.length + ": " + L.length + " رکورد log پایاست؛ و buffer pool گم شده."); render(); }
   function byLsn(n) { return L[n - 1]; }
 
   function step() {
@@ -123,81 +123,81 @@ function stats(rows) {
       if (R.cur > L.length) {
         var recs = Object.keys(R.dpt).map(function (p) { return R.dpt[p]; });
         R.redoFrom = recs.length ? Math.min.apply(null, recs) : L.length + 1; R.cur = R.redoFrom; R.phase = "redo";
-        log.add("Analysis done: losers {" + Object.keys(R.tt).join(", ") + "}; redo starts at LSN " + (recs.length ? R.redoFrom : "— (no dirty pages)"), "warn");
+        log.add("تحلیل تمام شد: بازنده‌ها {" + Object.keys(R.tt).join("، ") + "}؛ redo سر LSN " + (recs.length ? R.redoFrom : "— چون صفحه‌ی کثیفی نیست") + " شروع می‌شود", "warn");
         render(); return true;
       }
       var x = byLsn(R.cur++);
-      if (x.t === "upd" || x.t === "clr") { R.tt[x.tx] = { last: x.lsn }; if (R.dpt[x.page] === undefined) R.dpt[x.page] = x.lsn; log.add("Analysis LSN " + x.lsn + ": " + x.tx + " active, last LSN " + x.lsn + (R.dpt[x.page] === x.lsn ? "; " + x.page + " dirty from " + x.lsn : ""), "muted"); }
-      else if (x.t === "commit" || x.t === "end") { delete R.tt[x.tx]; log.add("Analysis LSN " + x.lsn + ": " + x.tx + " " + (x.t === "commit" ? "committed" : "finished"), "ok"); }
-      else log.add("Analysis LSN " + x.lsn + ": checkpoint", "muted");
+      if (x.t === "upd" || x.t === "clr") { R.tt[x.tx] = { last: x.lsn }; if (R.dpt[x.page] === undefined) R.dpt[x.page] = x.lsn; log.add("تحلیل LSN " + x.lsn + ": " + x.tx + " فعال است، با آخرین LSN " + x.lsn + (R.dpt[x.page] === x.lsn ? "؛ " + x.page + " از " + x.lsn + " کثیف است" : ""), "muted"); }
+      else if (x.t === "commit" || x.t === "end") { delete R.tt[x.tx]; log.add("تحلیل LSN " + x.lsn + ": " + x.tx + " " + (x.t === "commit" ? "commit کرد" : "تمام کرد"), "ok"); }
+      else log.add("تحلیل LSN " + x.lsn + ": checkpoint", "muted");
       render(); return true;
     }
     if (R.phase === "redo") {
       if (R.cur > L.length) {
         R.phase = "undo"; Object.keys(R.tt).forEach(function (tx) { var l = byLsn(R.tt[tx].last); R.undo[tx] = l.t === "clr" ? l.undoNext : l.lsn; });
-        log.add("Redo done: the buffer now matches the moment of the crash. Undo losers: " + (Object.keys(R.undo).join(", ") || "none"), "warn");
+        log.add("redo تمام شد: buffer حالا با لحظه‌ی از کار افتادن می‌خواند. بازنده‌های undo: " + (Object.keys(R.undo).join("، ") || "هیچ"), "warn");
         render(); return true;
       }
       var y = byLsn(R.cur++);
       if (y.t !== "upd" && y.t !== "clr") { render(); return true; }
-      if (R.dpt[y.page] === undefined || R.dpt[y.page] > y.lsn) log.add("Redo LSN " + y.lsn + ": skip, " + y.page + " was not dirty then", "muted");
-      else if (buf[y.page].lsn >= y.lsn) log.add("Redo LSN " + y.lsn + ": skip, " + y.page + " page LSN " + buf[y.page].lsn + " ≥ " + y.lsn + " (already on disk)", "muted");
-      else { buf[y.page] = { v: y.after, lsn: y.lsn }; log.add("Redo LSN " + y.lsn + ": " + y.page + " := " + y.after + (y.t === "clr" ? " (CLR)" : ""), "ok"); }
+      if (R.dpt[y.page] === undefined || R.dpt[y.page] > y.lsn) log.add("redo سر LSN " + y.lsn + ": رد می‌شود، چون " + y.page + " آن وقت کثیف نبود", "muted");
+      else if (buf[y.page].lsn >= y.lsn) log.add("redo سر LSN " + y.lsn + ": رد می‌شود، چون LSN صفحه‌ی " + y.page + " برابر " + buf[y.page].lsn + " و ≥ " + y.lsn + " است و از قبل روی دیسک", "muted");
+      else { buf[y.page] = { v: y.after, lsn: y.lsn }; log.add("redo سر LSN " + y.lsn + ": " + y.page + " := " + y.after + (y.t === "clr" ? " که CLR است" : ""), "ok"); }
       render(); return true;
     }
     if (R.phase === "undo") {
       var txs = Object.keys(R.undo).filter(function (t) { return R.undo[t]; });
       Object.keys(R.undo).forEach(function (t) { if (!R.undo[t]) { endTx(t); } });
-      if (!txs.length) { R.phase = "done"; log.add("Recovery complete. Committed work is present, loser work is gone.", "ok"); render(); return false; }
+      if (!txs.length) { R.phase = "done"; log.add("بازیابی کامل شد. کار commit‌شده حاضر است، و کار بازنده‌ها رفته.", "ok"); render(); return false; }
       var tx = txs.reduce(function (a, b) { return R.undo[a] > R.undo[b] ? a : b; }), u = byLsn(R.undo[tx]);
       var clr = { lsn: L.length + 1, t: "clr", tx: tx, page: u.page, after: u.before, undoNext: u.prev };
       L.push(clr); buf[u.page] = { v: u.before, lsn: clr.lsn }; R.undo[tx] = u.prev;
-      log.add("Undo LSN " + u.lsn + " of " + tx + ": " + u.page + " := " + u.before + ", write CLR " + clr.lsn + " (undo-next " + (u.prev || "none") + ")", "warn");
+      log.add("undo سر LSN " + u.lsn + " برای " + tx + ": " + u.page + " := " + u.before + "، و نوشتن CLR " + clr.lsn + " با undo-next " + (u.prev || "هیچ"), "warn");
       if (!u.prev) endTx(tx);
       render(); return true;
     }
     return false;
   }
-  function endTx(tx) { L.push({ lsn: L.length + 1, t: "end", tx: tx }); delete rec.undo[tx]; delete rec.tt[tx]; log.add(tx + " fully rolled back: write END " + L.length, "ok"); }
+  function endTx(tx) { L.push({ lsn: L.length + 1, t: "end", tx: tx }); delete rec.undo[tx]; delete rec.tt[tx]; log.add(tx + " تماماً واگردانده شد: نوشتن END " + L.length, "ok"); }
 
   function render() {
     var ph = Kit.clear(document.getElementById("phase"));
-    ["analysis", "redo", "undo", "done"].forEach(function (p) { ph.appendChild(Kit.el("span", { class: "badge" + (rec.phase === p ? " accent" : "") }, (rec.phase === p ? "● " : "") + p)); });
+    ["analysis", "redo", "undo", "done"].forEach(function (p) { ph.appendChild(Kit.el("span", { class: "badge" + (rec.phase === p ? " accent" : "") }, (rec.phase === p ? "● " : "") + PH[p])); });
     var t = Kit.clear(document.getElementById("log-t"));
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["LSN", "Tx", "Record", "Page", "Change", "Prev / undo-next"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["LSN", "تراکنش", "رکورد", "صفحه", "تغییر", "پیشین یا undo-next"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
     var tb = Kit.el("tbody"), curL = rec.phase === "undo" ? null : rec.cur - 1;
     L.forEach(function (x) {
-      var desc = x.t === "upd" ? x.before + " → " + x.after : x.t === "clr" ? "restore " + x.after : x.t === "ckpt" ? "TT {" + Object.keys(x.tt).join(",") + "} DPT {" + Object.keys(x.dpt).map(function (p) { return p + ":" + x.dpt[p]; }).join(",") + "}" : "";
+      var desc = x.t === "upd" ? x.before + " → " + x.after : x.t === "clr" ? "بازگرداندن " + x.after : x.t === "ckpt" ? "TT {" + Object.keys(x.tt).join(",") + "} DPT {" + Object.keys(x.dpt).map(function (p) { return p + ":" + x.dpt[p]; }).join(",") + "}" : "";
       tb.appendChild(Kit.el("tr", { class: (x.t === "clr" ? "clr " : "") + (x.lsn === curL ? "cur" : "") },
-        Kit.el("td", null, x.lsn), Kit.el("td", null, x.tx || ""), Kit.el("td", null, { upd: "update", ckpt: "checkpoint", clr: "CLR", commit: "commit", end: "END" }[x.t]),
+        Kit.el("td", null, x.lsn), Kit.el("td", null, x.tx || ""), Kit.el("td", null, { upd: "به‌روزرسانی", ckpt: "checkpoint", clr: "CLR", commit: "commit", end: "END" }[x.t]),
         Kit.el("td", null, x.page || ""), Kit.el("td", null, desc), Kit.el("td", null, x.t === "upd" ? (x.prev || "–") : x.t === "clr" ? "↷ " + (x.undoNext || "–") : "")));
-      flushes.forEach(function (f) { if (f.after === x.lsn) tb.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 6 }, "— buffer flushes " + f.page + " to disk (page LSN " + f.lsn + "), not a log record —"))); });
+      flushes.forEach(function (f) { if (f.after === x.lsn) tb.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 6 }, "— buffer صفحه‌ی " + f.page + " را به دیسک flush می‌کند، با LSN صفحه " + f.lsn + "، که رکورد log نیست —"))); });
     });
-    tb.appendChild(Kit.el("tr", { class: "crash" }, Kit.el("td", { colspan: 6 }, "⚡ crash: everything above is durable")));
+    tb.appendChild(Kit.el("tr", { class: "crash" }, Kit.el("td", { colspan: 6 }, "⚡ از کار افتادن: هر چه بالاست پایاست")));
     t.appendChild(tb);
     function mini(id, title, lines) { var m = Kit.clear(document.getElementById(id)); m.appendChild(Kit.el("b", null, title)); (lines.length ? lines : ["—"]).forEach(function (l) { m.appendChild(Kit.el("div", null, l)); }); }
-    mini("tt", "Transaction table", Object.keys(rec.tt).map(function (tx) { return tx + " last " + rec.tt[tx].last + (rec.undo[tx] !== undefined ? ", undo " + (rec.undo[tx] || "–") : ""); }));
-    mini("dpt", "Dirty page table (recLSN)", Object.keys(rec.dpt).map(function (p) { return p + " : " + rec.dpt[p]; }));
-    mini("disk", "Disk at crash (value @ page LSN)", PAGES.map(function (p) { return p + " = " + disk[p].v + " @" + disk[p].lsn; }));
-    mini("buf", "Buffer during recovery", PAGES.map(function (p) { return p + " = " + buf[p].v + " @" + buf[p].lsn; }));
+    mini("tt", "جدول تراکنش", Object.keys(rec.tt).map(function (tx) { return tx + " آخرین " + rec.tt[tx].last + (rec.undo[tx] !== undefined ? "، undo " + (rec.undo[tx] || "–") : ""); }));
+    mini("dpt", "جدول صفحه‌ی کثیف با recLSN", Object.keys(rec.dpt).map(function (p) { return p + " : " + rec.dpt[p]; }));
+    mini("disk", "دیسک سر از کار افتادن، مقدار و LSN صفحه", PAGES.map(function (p) { return p + " = " + disk[p].v + " @" + disk[p].lsn; }));
+    mini("buf", "buffer در میانه‌ی بازیابی", PAGES.map(function (p) { return p + " = " + buf[p].v + " @" + buf[p].lsn; }));
     var clrs = L.filter(function (x) { return x.t === "clr"; }).length;
-    stats([["Phase", rec.phase], ["Log records", L.length], ["CLRs written", clrs, clrs ? "warn" : ""], ["Recovery restarts", again]]);
+    stats([["فاز", PH[rec.phase]], ["رکوردهای log", L.length], ["CLRهای نوشته‌شده", clrs, clrs ? "warn" : ""], ["شروع دوباره‌ی بازیابی", again]]);
   }
-  document.getElementById("crash").appendChild(Kit.slider({ label: "Crash after event", min: 1, max: EVENTS.length, step: 1, value: crashAt, hint: "Events: 3 updates, flush P1, checkpoint, T1 commits, 2 updates, flush P4, T3 commits, 1 update", onInput: function (v) { crashAt = v; reset(); } }).element);
-  document.getElementById("again").addEventListener("click", function () { again++; startRecovery("Crash during recovery: the buffer is lost again, but the log keeps every CLR written so far."); render(); });
+  document.getElementById("crash").appendChild(Kit.slider({ label: "از کار افتادن پس از رویداد", min: 1, max: EVENTS.length, step: 1, value: crashAt, hint: "رویدادها: ۳ به‌روزرسانی، flush صفحه‌ی P1، checkpoint، commit تراکنش T1، ۲ به‌روزرسانی، flush صفحه‌ی P4، commit تراکنش T3، ۱ به‌روزرسانی", onInput: function (v) { crashAt = v; reset(); } }).element);
+  document.getElementById("again").addEventListener("click", function () { again++; startRecovery("از کار افتادن در میانه‌ی بازیابی: buffer بازهم گم شد، ولی log هر CLRی را که تا این‌جا نوشته شده نگه می‌دارد."); render(); });
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 800 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why does ARIES redo changes of transactions it is about to undo?",
-      options: ["By mistake", "It repeats history: it first rebuilds the exact state at the crash, then rolls back incomplete transactions", "To check the log for corruption"], answer: 1,
-      explain: "pp. 92–93." },
-    { q: "Which buffer policy forces ARIES to have an undo phase?",
-      options: ["No-force", "Steal: pages with uncommitted changes may be flushed", "Force"], answer: 1,
-      explain: "Steal needs undo information; no-force needs redo (pp. 91–92)." },
-    { q: "What stops a second crash from undoing the same change twice?",
-      options: ["Checkpoints", "Compensation log records, which are redone but never undone and point to the next record to undo", "The dirty page table"], answer: 1,
-      explain: "CLRs make rollback and recovery survivable (p. 90)." }
+    { q: "چرا ARIES تغییرهای تراکنش‌هایی را redo می‌کند که قرار است undoشان کند؟",
+      options: ["از اشتباه", "تاریخ را تکرار می‌کند: اول حالت دقیق سر از کار افتادن را دوباره می‌سازد، بعد تراکنش‌های ناتمام را واگردان می‌کند", "برای سنجیدن خرابی log"], answer: 1,
+      explain: "صص. ۹۲–۹۳." },
+    { q: "کدام سیاست buffer ARIES را وا می‌دارد فاز undo داشته باشد؟",
+      options: ["no-force", "steal: صفحه‌هایی با تغییر commit‌نشده می‌توانند flush شوند", "force"], answer: 1,
+      explain: "steal اطلاع undo لازم دارد؛ و no-force redo (صص. ۹۱–۹۲)." },
+    { q: "چه چیزی جلو این را می‌گیرد که از کار افتادنی دوم همان تغییر را دو بار undo کند؟",
+      options: ["checkpointها", "رکوردهای log جبرانی، که redo می‌شوند ولی هیچ‌وقت undo نه و به رکورد بعدی برای undo اشاره می‌کنند", "جدول صفحه‌ی کثیف"], answer: 1,
+      explain: "CLRها واگردان و بازیابی را جان‌به‌در‌بردنی می‌کنند (ص. ۹۰)." }
   ]);
 })();
 </script>

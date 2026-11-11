@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page Replacement</title>
-<meta name="description" content="Replay a page-reference string through a buffer pool under FIFO, LRU, CLOCK and LFU, change the number of frames, and watch hits, misses, the clock hand and Bélády&#x27;s anomaly. Illustrates Database Internals, Chapter 5.">
+<title>جانشینی صفحه</title>
+<meta name="description" content="رشته‌ای از ارجاع صفحه را در buffer poolی زیر FIFO و LRU و CLOCK و LFU replay کنید، شمار قاب‌ها را عوض کنید، و hit و miss و عقربه‌ی ساعت و ناهنجاری بلیدی را ببینید. تصویری از فصل ۵ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .refs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .refs { display: flex; flex-wrap: wrap; gap: 4px; direction: ltr; }
   .ref { font-family: var(--mono); font-size: .78rem; min-width: 30px; text-align: center; padding: 3px 4px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface); }
   .ref.hit { background: var(--ok-soft); border-color: var(--ok); }
   .ref.miss { background: var(--bad-soft); border-color: var(--bad); }
@@ -19,60 +19,60 @@
   .frame.in { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
   .frame.hand { border-style: dashed; border-color: var(--warn); }
   table.cmp { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 8px; }
-  table.cmp td, table.cmp th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; }
-  table.cmp th:first-child, table.cmp td:first-child { text-align: left; }
+  table.cmp td, table.cmp th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; }
+  table.cmp th:first-child, table.cmp td:first-child { text-align: right; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/05-transaction-processing-and-recovery.html">Chapter 5</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Page replacement</span>
+      <a href="../chapters/05-transaction-processing-and-recovery.html">فصل ۵</a><span aria-hidden="true">/</span>
+      <span aria-current="page">جانشینی صفحه</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 5 · Transaction Processing and Recovery</div>
-  <h1>Page replacement: FIFO, LRU, CLOCK, LFU</h1>
-  <p class="lede">When the buffer pool is full, a page must be evicted before another can be read. <strong>FIFO</strong> evicts the oldest arrival, even the B-Tree root that every lookup needs. <strong>LRU</strong> evicts the least recently used page. <strong>CLOCK</strong> approximates LRU with one access bit per frame and a sweeping hand. <strong>LFU</strong> evicts the least frequently used page.</p>
-  <p class="source-note">Illustrates “Page Replacement” (pp. 85–88). The reference strings are the vault’s, except the Bélády string 1 2 3 4 1 2 5 1 2 3 4 5, the standard example of the anomaly. LFU ties are broken by evicting the earliest-loaded page. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۵ · پردازش تراکنش و بازیابی</div>
+  <h1>جانشینی صفحه: FIFO و LRU و CLOCK و LFU</h1>
+  <p class="lede">وقتی buffer pool پر باشد، پیش از خوانده شدن صفحه‌ای دیگر باید صفحه‌ای بیرون انداخته شود. <strong>FIFO</strong> قدیمی‌ترین رسیده را بیرون می‌اندازد، حتی آن ریشه‌ی B-Tree را که هر جست‌و‌جویی لازمش دارد. <strong>LRU</strong> کم‌تازه‌ترین صفحه‌ی به‌کار‌رفته را بیرون می‌اندازد. <strong>CLOCK</strong> با یک بیت دسترسی برای هر قابی و عقربه‌ای روبنده تقریب LRU می‌زند. <strong>LFU</strong> کم‌فراوان‌ترین صفحه‌ی به‌کار‌رفته را بیرون می‌اندازد.</p>
+  <p class="source-note">تصویری از «جانشینی صفحه» (صص. ۸۵–۸۸). رشته‌های ارجاع مال vault است، جز رشته‌ی بلیدی یعنی ۱ ۲ ۳ ۴ ۱ ۲ ۵ ۱ ۲ ۳ ۴ ۵، که نمونه‌ی استاندارد آن ناهنجاری است. تساوی در LFU با بیرون انداختن زودترین صفحه‌ی بار‌شده شکسته می‌شود. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Reference string</p><div class="refs" id="refs"></div>
-        <p class="panel-title" style="margin-top:14px">Frames</p><div class="frames" id="frames"></div>
-        <p class="field-hint">✓ hit, ✕ miss. For CLOCK, the dashed frame is under the hand and “bit 1” means referenced since the hand last passed.</p></div>
-      <div class="panel"><p class="panel-title">Faults for the whole string, by policy and frame count</p><div class="table-wrap"><table class="cmp" id="cmp"></table></div></div>
+      <div class="panel"><p class="panel-title">رشته‌ی ارجاع</p><div class="refs" id="refs"></div>
+        <p class="panel-title" style="margin-top:14px">قاب‌ها</p><div class="frames" id="frames"></div>
+        <p class="field-hint">✓ یعنی hit و ✕ یعنی miss. برای CLOCK، قاب خط‌چین زیر عقربه است و «bit 1» یعنی از آخرین گذر عقربه ارجاع شده.</p></div>
+      <div class="panel"><p class="panel-title">خطا برای کل رشته، به‌تفکیک سیاست و شمار قاب</p><div class="table-wrap"><table class="cmp" id="cmp"></table></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="preset"></div><div id="policy" style="margin-top:10px"></div><div id="frames-sl" style="margin-top:10px"></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="preset"></div><div id="policy" style="margin-top:10px"></div><div id="frames-sl" style="margin-top:10px"></div>
         <div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Bélády’s anomaly.</strong> With the Bélády string, FIFO makes 9 faults with 3 frames and 10 with 4: more memory, more misses. LRU never does this.</li>
-    <li><strong>FIFO evicts hot pages.</strong> In the B-Tree string every lookup touches the root <code>R</code>, yet FIFO evicts it as soon as it is the oldest arrival.</li>
-    <li><strong>CLOCK gives second chances.</strong> The hand clears a set bit and moves on; a page is evicted only when the hand finds its bit already cleared.</li>
-    <li><strong>Scans pollute recency.</strong> In the scan string, a one-off pass over many leaves pushes the hot pages out of LRU, while LFU keeps them because they were used often.</li>
+    <li><strong>ناهنجاری بلیدی.</strong> با رشته‌ی بلیدی، FIFO با سه قاب ۹ خطا می‌سازد و با چهار قاب ۱۰: حافظه‌ی بیشتر، miss بیشتر. روش LRU هیچ‌وقت این را نمی‌کند.</li>
+    <li><strong>FIFO صفحه‌های داغ را بیرون می‌اندازد.</strong> در رشته‌ی B-Tree هر جست‌و‌جویی به ریشه‌ی <code>R</code> دست می‌زند، با این حال FIFO همین که قدیمی‌ترین رسیده باشد بیرونش می‌اندازد.</li>
+    <li><strong>CLOCK شانس دوم می‌دهد.</strong> عقربه بیتی نشسته را پاک می‌کند و جلو می‌رود؛ و صفحه‌ای تنها وقتی بیرون انداخته می‌شود که عقربه بیتش را از قبل پاک‌شده پیدا کند.</li>
+    <li><strong>اسکن تازگی را آلوده می‌کند.</strong> در رشته‌ی اسکن، یک گذر یک‌باره روی برگ‌های زیادی صفحه‌های داغ را از LRU بیرون می‌راند، در حالی که LFU نگهشان می‌دارد چون پرتکرار به کار رفته‌اند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>Lesson</small>5. Transaction Processing and Recovery</a></li>
+    <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>درس</small>فصل ۵: پردازش تراکنش و بازیابی</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -121,7 +121,7 @@ function stats(rows) {
 
   function reset() {
     refs = PRESETS[cfg.preset].split(" "); i = 0; st = null;
-    log.clear(); log.add(cfg.policy + " with " + cfg.frames + " frame" + (cfg.frames > 1 ? "s" : "") + ", " + refs.length + " references.", "muted");
+    log.clear(); log.add("سیاست " + cfg.policy + " با " + cfg.frames + " قاب و " + refs.length + " ارجاع.", "muted");
     render(); compare();
   }
   var history = [];
@@ -129,7 +129,7 @@ function stats(rows) {
     if (i >= refs.length) return false;
     var seen = []; sim(cfg.policy, refs.slice(0, i + 1), cfg.frames, function (s) { seen.push(s); });
     history = seen; st = seen[seen.length - 1]; i++;
-    log.add("Ref " + st.p + ": " + (st.hit ? "hit" : "miss" + (st.victim !== null ? ", evict " + st.victim : ", load into a free frame")), st.hit ? "ok" : "bad");
+    log.add("ارجاع " + st.p + ": " + (st.hit ? "hit" : "miss" + (st.victim !== null ? "، با بیرون انداختن " + st.victim : "، و بار شدن در قابی آزاد")), st.hit ? "ok" : "bad");
     render(); return i < refs.length;
   }
   function render() {
@@ -141,17 +141,17 @@ function stats(rows) {
     var fr = Kit.clear(document.getElementById("frames"));
     for (var k = 0; k < cfg.frames; k++) {
       var p = st && st.frames[k] !== undefined ? st.frames[k] : null, m = p !== null ? st.meta[p] : null, extra = "";
-      if (m) extra = cfg.policy === "CLOCK" ? "bit " + m.bit : cfg.policy === "LFU" ? "used " + st.freq[p] + "×" : cfg.policy === "LRU" ? "last use t" + m.used : "loaded t" + m.loaded;
+      if (m) extra = cfg.policy === "CLOCK" ? "bit " + m.bit : cfg.policy === "LFU" ? st.freq[p] + " بار به کار رفته" : cfg.policy === "LRU" ? "آخرین کاربرد t" + m.used : "بار‌شده در t" + m.loaded;
       fr.appendChild(Kit.el("div", { class: "frame" + (st && p === st.p ? " in" : "") + (cfg.policy === "CLOCK" && st && st.hand === k ? " hand" : "") },
-        Kit.el("div", { class: "pg" }, p === null ? "—" : p), Kit.el("div", { class: "meta" }, extra || "empty"),
-        cfg.policy === "CLOCK" && st && st.hand === k ? Kit.el("div", { class: "meta" }, "▲ hand") : null));
+        Kit.el("div", { class: "pg" }, p === null ? "—" : p), Kit.el("div", { class: "meta" }, extra || "خالی"),
+        cfg.policy === "CLOCK" && st && st.hand === k ? Kit.el("div", { class: "meta" }, "▲ عقربه") : null));
     }
     var hits = history.slice(0, i).filter(function (h) { return h.hit; }).length;
-    stats([["References", i + " / " + refs.length], ["Hits", hits, "ok"], ["Misses", i - hits, i - hits ? "bad" : ""], ["Hit ratio", i ? Kit.pct(hits / i, 0) : "–"]]);
+    stats([["ارجاع‌ها", i + " / " + refs.length], ["hit", hits, "ok"], ["miss", i - hits, i - hits ? "bad" : ""], ["نسبت hit", i ? Kit.pct(hits / i, 0) : "–"]]);
   }
   function compare() {
     var t = Kit.clear(document.getElementById("cmp")), seq = PRESETS[cfg.preset].split(" ");
-    var head = Kit.el("tr", null, Kit.el("th", null, "Policy")); for (var n = 1; n <= 6; n++) head.appendChild(Kit.el("th", { scope: "col" }, n + (n === 1 ? " frame" : "")));
+    var head = Kit.el("tr", null, Kit.el("th", null, "سیاست")); for (var n = 1; n <= 6; n++) head.appendChild(Kit.el("th", { scope: "col" }, n + (n === 1 ? " قاب" : "")));
     t.appendChild(Kit.el("thead", null, head)); var tb = Kit.el("tbody");
     ["FIFO", "LRU", "CLOCK", "LFU"].forEach(function (pol) {
       var tr = Kit.el("tr", null, Kit.el("th", { scope: "row" }, pol)), prev = null;
@@ -160,22 +160,22 @@ function stats(rows) {
     });
     t.appendChild(tb);
   }
-  document.getElementById("preset").appendChild(Kit.segmented({ label: "Reference string", value: cfg.preset, options: [{ value: "belady", label: "Bélády" }, { value: "btree", label: "B-Tree lookups" }, { value: "scan", label: "Hot pages + scan" }], onChange: function (v) { cfg.preset = v; reset(); } }).element);
-  document.getElementById("policy").appendChild(Kit.segmented({ label: "Policy", value: cfg.policy, options: ["FIFO", "LRU", "CLOCK", "LFU"].map(function (x) { return { value: x, label: x }; }), onChange: function (v) { cfg.policy = v; reset(); } }).element);
-  document.getElementById("frames-sl").appendChild(Kit.slider({ label: "Frames in the buffer pool", min: 1, max: 6, step: 1, value: cfg.frames, onInput: function (v) { cfg.frames = v; reset(); } }).element);
+  document.getElementById("preset").appendChild(Kit.segmented({ label: "رشته‌ی ارجاع", value: cfg.preset, options: [{ value: "belady", label: "بلیدی" }, { value: "btree", label: "جست‌و‌جوی B-Tree" }, { value: "scan", label: "صفحه‌های داغ و اسکن" }], onChange: function (v) { cfg.preset = v; reset(); } }).element);
+  document.getElementById("policy").appendChild(Kit.segmented({ label: "سیاست", value: cfg.policy, options: ["FIFO", "LRU", "CLOCK", "LFU"].map(function (x) { return { value: x, label: x }; }), onChange: function (v) { cfg.policy = v; reset(); } }).element);
+  document.getElementById("frames-sl").appendChild(Kit.slider({ label: "قاب‌ها در buffer pool", min: 1, max: 6, step: 1, value: cfg.frames, onInput: function (v) { cfg.frames = v; reset(); } }).element);
   Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 700 });
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Why is FIFO a poor fit for a B-Tree's buffer pool?",
-      options: ["It needs too much metadata", "It evicts the root and upper levels, which every lookup needs, just because they were loaded first", "It cannot handle dirty pages"], answer: 1,
-      explain: "The book points out that FIFO would evict the root first (pp. 86–87)." },
-    { q: "What does CLOCK keep per frame?",
-      options: ["A full access timestamp", "An access bit that the sweeping hand clears, giving pages a second chance", "A frequency histogram"], answer: 1,
-      explain: "CLOCK-sweep approximates LRU compactly (p. 87)." },
-    { q: "With the Bélády string, FIFO and 4 frames makes how many faults compared with 3 frames?",
-      options: ["Fewer", "The same", "More (10 vs 9)"], answer: 2,
-      explain: "Bélády's anomaly: FIFO isn't a stack algorithm, so more frames can mean more faults. (The string is a standard example, not from the book.)" }
+    { q: "چرا FIFO به buffer pool یک B-Tree بد می‌خورد؟",
+      options: ["metadata زیادی لازم دارد", "ریشه و سطح‌های بالا را، که هر جست‌و‌جویی لازمشان دارد، تنها چون اول بار شده‌اند بیرون می‌اندازد", "نمی‌تواند صفحه‌های کثیف را رسیدگی کند"], answer: 1,
+      explain: "کتاب می‌گوید که FIFO اول ریشه را بیرون می‌انداخت (صص. ۸۶–۸۷)." },
+    { q: "CLOCK برای هر قابی چه چیزی نگه می‌دارد؟",
+      options: ["یک timestamp کامل دسترسی", "بیتی دسترسی که عقربه‌ی روبنده پاکش می‌کند و به صفحه‌ها شانس دومی می‌دهد", "یک هیستوگرام فراوانی"], answer: 1,
+      explain: "روش CLOCK-sweep جمع‌و‌جور تقریب LRU می‌زند (ص. ۸۷)." },
+    { q: "با رشته‌ی بلیدی، FIFO با چهار قاب در مقایسه با سه قاب چند خطا می‌سازد؟",
+      options: ["کم‌تر", "همان‌قدر", "بیشتر، یعنی ۱۰ در برابر ۹"], answer: 2,
+      explain: "ناهنجاری بلیدی: FIFO الگوریتم پشته‌ای نیست، پس قاب بیشتر می‌تواند یعنی خطای بیشتر. آن رشته نمونه‌ای استاندارد است و نه از کتاب." }
   ]);
 })();
 </script>

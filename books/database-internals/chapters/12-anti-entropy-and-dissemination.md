@@ -3,86 +3,88 @@ book: database-internals
 chapter: 12
 title: "Anti-Entropy and Dissemination"
 pages: "243–256"
+translated_title: "anti-entropy و پخش"
+lang: fa
 ---
 
-# 12. Anti-Entropy and Dissemination
+# فصل ۱۲: anti-entropy و پخش
 
-[← 11. Replication and Consistency](11-replication-and-consistency.md) · [Book](../README.md) · [13. Distributed Transactions →](13-distributed-transactions.md)
+[فصل ۱۱: replication و consistency →](11-replication-and-consistency.md) · [کتاب](../README.md) · [فصل ۱۳: تراکنش توزیع‌شده ←](13-distributed-transactions.md)
 
-## Summary
+## خلاصه
 
-Peer-to-peer and coordinator-to-replica messaging depends on the sender being available, and its throughput is limited to one machine (p. 243). Cluster-wide **metadata** has to spread quickly and reliably: membership (nodes joining and leaving), node states, failures, schema changes. Such messages are small and infrequent (p. 243). Demers et al. describe three ways to propagate them (Figure 12-1, pp. 243–244):
+پیام‌رسانی همتا‌به‌همتا و coordinator‌به‌replica به available بودن فرستنده وابسته است، و throughputاش به یک ماشین حد خورده (p. 243). **metadata** cluster‌سراسری باید زود و قابل اطمینان پخش شود: عضویت، یعنی پیوستن و رفتن نودها، و حالت نودها و شکست‌ها و تغییرهای schema. چنین پیام‌هایی کوچک و کم‌تکرارند (p. 243). دمرس و همکاران سه راه برای پخششان وصف می‌کنند (شکل ۱۲-۱، صص. ۲۴۳–۲۴۴):
 
-| Approach | How |
+| رویکرد | چطور |
 |---|---|
-| **Broadcast** | One process notifies all the others |
-| **Anti-entropy** | Peers periodically exchange information pairwise |
-| **Gossip** | Recipients rebroadcast cooperatively |
+| **پخش فراگیر** | یک process به همه‌ی بقیه خبر می‌دهد |
+| **anti-entropy** | همتاها دوره‌ای دو‌به‌دو اطلاع رد و بدل می‌کنند |
+| **gossip** | گیرنده‌ها هم‌کارانه دوباره پخش می‌کنند |
 
-Here **entropy** means how far node states have diverged. **Anti-entropy** brings nodes back in sync when primary delivery has failed, which shortens convergence in eventually consistent systems (p. 244). The chapter covers foreground mechanisms (**read repair** with **digest reads**, and **hinted handoff** with **sloppy quorums**) and background ones (**Merkle trees**, **bitmap version vectors**) (pp. 245–249). It then turns to **gossip**: the epidemic model, fanout, redundancy, latency and interest loss, plus **overlay networks**, **Plumtree** hybrid gossip and **HyParView** partial views (pp. 250–255).
+این‌جا **انتروپی** یعنی حالت نودها چقدر واگرا شده. **anti-entropy** وقتی تحویل اصلی باز مانده نودها را دوباره هم‌گام می‌کند، که در سیستم‌های سازگار غایی هم‌گرایی را کوتاه می‌کند (p. 244). فصل مکانیزم‌های پیش‌زمینه، یعنی **read repair** با **خواندن digest** و **hinted handoff** با **quorumهای شلخته**، و پس‌زمینه، یعنی **درخت Merkle** و **بردار نسخه‌ی bitmapی**، را می‌پوشاند (pp. 245–249). بعد به **gossip** می‌چرخد: مدل همه‌گیری و fanout و redundancy و latency و از دست دادن علاقه، به‌علاوه‌ی **شبکه‌های روپوش** و gossip دوگانه‌ی **Plumtree** و نماهای جزئی **HyParView** (pp. 250–255).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Delivery happens in two steps:** best-effort primary delivery, then periodic sync. Responsibility is shared, so the system keeps working if the coordinator fails (p. 244).
-- **Read repair fixes only what is read.** Blocking read repair gives quorum reads monotonicity at a cost in availability; asynchronous repair doesn't wait (p. 245).
-- **Digest reads** send one full read and hashes from the other replicas. Full reads follow only when digests disagree (p. 246).
-- **Hints aren't replicas.** In Cassandra, hinted writes don't count toward the replication factor unless the consistency level is `ANY`. Sloppy quorums improve availability at the cost of consistency (pp. 246–247).
-- **Merkle trees localize divergence.** Compare roots, then descend into the differing subtrees. Smaller leaf ranges are more precise but make the tree bigger (pp. 247–248).
-- **Bitmap version vectors** pinpoint missing writes as dots (i, n), but a node that stays down for a long time keeps peers from truncating their logs (pp. 248–249).
-- **Gossip reaches everyone in about log N rounds,** paying for robustness with redundant messages. Interest loss decides when propagation stops (pp. 250–251).
-- **Hybrid gossip** uses a cheap spanning tree in steady state and falls back to gossip for repair (Plumtree, HyParView) (pp. 252–255).
+- **تحویل در دو قدم رخ می‌دهد:** تحویل اصلی با بهترین تلاش، بعد synchronization دوره‌ای. مسئولیت مشترک است، پس اگر coordinator بشکند سیستم همین‌طور کار می‌کند (p. 244).
+- **عمل read repair تنها آن چیزی را درست می‌کند که خوانده می‌شود.** read repair بند‌آور به خواندن‌های quorum یکنوایی می‌دهد به بهای دسترس‌پذیری؛ و تعمیر asynchronous منتظر نمی‌ماند (p. 245).
+- **خواندن‌های digest** یک خواندن کامل و hash از بقیه‌ی replicaها می‌فرستند. خواندن کامل تنها وقتی پی می‌آید که digestها نخوانند (p. 246).
+- **مفهوم hint، replica نیست.** در Cassandra، نوشتن‌های hint‌خورده به ضریب replication حساب نمی‌شوند مگر سطح consistency `ANY` باشد. quorumهای شلخته availability را به بهای consistency بهتر می‌کنند (pp. 246–247).
+- **درخت‌های Merkle واگرایی را محلی می‌کنند.** ریشه‌ها را مقایسه کنید، بعد به زیردرخت‌های متفاوت پایین بروید. بازه‌های برگ کوچک‌تر دقیق‌ترند ولی درخت را بزرگ‌تر می‌کنند (pp. 247–248).
+- **بردارهای نسخه‌ی bitmapی** نوشتن‌های گم‌شده را به‌شکل نقطه‌ی (i, n) انگشت می‌گذارند، ولی نودی که مدت طولانی خواب بماند جلو بریدن log همتاها را می‌گیرد (pp. 248–249).
+- **پروتکل gossip در تقریباً log N دور به همه می‌رسد**، و بهای استواری را با پیام‌های زائد می‌دهد. از دست دادن علاقه تصمیم می‌گیرد پخش شدن کِی بس شود (pp. 250–251).
+- **پروتکل gossip دوگانه** در حالت پایدار درختی پوشا و ارزان به کار می‌برد و برای تعمیر به gossip برمی‌گردد، یعنی Plumtree و HyParView (pp. 252–255).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Read Repair — p. 245
-- Digest Reads — p. 246
-- Hinted Handoff — p. 246
-- Merkle Trees — p. 247
-- Bitmap Version Vectors — p. 248
-- Gossip Dissemination — p. 250
-  - Gossip Mechanics — p. 251
-  - Overlay Networks — p. 251
-  - Hybrid Gossip — p. 253
-  - Partial Views — p. 254
-- Summary — p. 255
+- بخش read repair — ص. ۲۴۵
+- خواندن digest — ص. ۲۴۶
+- بخش hinted handoff — ص. ۲۴۶
+- درخت Merkle — ص. ۲۴۷
+- بردار نسخه‌ی bitmapی — ص. ۲۴۸
+- پخش با gossip — ص. ۲۵۰
+  - مکانیک gossip — ص. ۲۵۱
+  - شبکه‌ی روپوش — ص. ۲۵۱
+  - بخش gossip دوگانه — ص. ۲۵۳
+  - نمای جزئی — ص. ۲۵۴
+- خلاصه — ص. ۲۵۵
 
-## Notes
+## یادداشت‌ها
 
-Broadcast suits small clusters. In large ones it gets **expensive** (many nodes) and **unreliable**, because it depends on one process that may not know every node and must be up at the same time as each recipient (p. 244). Relaxing the requirement means the coordinator delivers to everyone available, and anti-entropy fixes the rest (p. 244).
+پخش فراگیر به clusterهای کوچک می‌خورد. در بزرگ‌ها **گران** می‌شود، چون نودها زیادند، و **نامطمئن**، چون به یک process وابسته است که می‌تواند هر نودی را نشناسد و باید هم‌هنگام با هر گیرنده‌ای سرپا باشد (p. 244). شل کردن این نیازمندی یعنی coordinator به همه‌ی موجودها تحویل می‌دهد، و anti-entropy بقیه را درست می‌کند (p. 244).
 
-![Three ways to spread data: (a) one node sends to all; (b) pairs of nodes exchange in both directions; (c) each node forwards to a few others in turn](../figures/12-01.png)
+![سه راه پخش داده: (الف) یک نود به همه می‌فرستد؛ (ب) زوج‌های نود در هر دو جهت رد و بدل می‌کنند؛ (ج) هر نودی به‌نوبت به چندتای دیگر می‌فرستد](../figures/12-01.png)
 
-*Figure 12-1 (p. 244): broadcast (a) relies on one sender, anti-entropy (b) on periodic pairwise sync, gossip (c) on peer-to-peer forwarding.*
+*Figure 12-1 (p. 244): پخش فراگیر در (الف) به یک فرستنده تکیه می‌کند، anti-entropy در (ب) به synchronization دوره‌ای دو‌به‌دو، و gossip در (ج) به فرستادن همتا‌به‌همتا.*
 
-| Anti-entropy | Uses | Examples (p. 244) |
+| anti-entropy | چه چیزی به کار می‌برد | نمونه‌ها (p. 244) |
 |---|---|---|
-| **Foreground** | Piggybacks on read or write requests | Hinted handoff, read repair |
-| **Background** | Auxiliary structures that identify divergence | Merkle trees, update logs |
+| **پیش‌زمینه** | سوار درخواست‌های خواندن یا نوشتن می‌شود | hinted handoff و read repair |
+| **پس‌زمینه** | ساختارهای کمکی که واگرایی را شناسایی می‌کنند | درخت Merkle و log به‌روزرسانی |
 
-Comparing whole replicas pairwise means reading the whole dataset on both nodes, which is very costly. It pays to consider *how* replicas fall behind and how data is accessed (pp. 244–245).
+مقایسه‌ی دو‌به‌دوی کل replicaها یعنی خواندن کل مجموعه‌داده روی هر دو نود، که خیلی گران است. به‌صرفه است که در نظر بگیریم replicaها *چطور* عقب می‌افتند و داده چطور دسترسی می‌شود (pp. 244–245).
 
-### Read repair
+### read repair
 
-Divergence is easiest to detect during a read, and only for the data requested (p. 245). The coordinator reads from replicas, optimistically assuming they're in sync. If their responses differ, it sends the missing updates to the replicas that lack them (Dynamo) (p. 245). Dynamo-style databases with tunable consistency only contact and repair as many replicas as the consistency level needs, so quorum results are consistent even though some replicas may still miss writes (p. 245).
+واگرایی را سر خواندنی راحت‌تر از همه می‌شود تشخیص داد، و تنها برای داده‌ی خواسته‌شده (p. 245). آن coordinator از replicaها می‌خواند، و خوش‌بینانه فرض می‌گیرد هم‌گام‌اند. اگر پاسخ‌هایشان فرق داشته باشد، به‌روزرسانی‌های گم‌شده را به آن replicaهایی می‌فرستد که ندارندشان، از Dynamo (p. 245). دیتابیس‌های از جنس Dynamo با consistency قابل تنظیم تنها به آن‌قدر replica تماس می‌گیرند و تعمیرشان می‌کنند که سطح consistency لازم دارد، پس نتیجه‌های quorum سازگارند هرچند برخی replicaها می‌توانند باز هم نوشتن‌هایی را نداشته باشند (p. 245).
 
-| Mode | Behaviour (p. 245) |
+| حالت | رفتار (p. 245) |
 |---|---|
-| **Blocking** | The client waits until the replicas are repaired. Gives **monotonic reads** for quorum reads; costs availability, because repairs must be acknowledged |
-| **Asynchronous** | Schedules the repair after responding |
+| **بند‌آور** | کلاینت تا تعمیر شدن replicaها منتظر می‌ماند. برای خواندن‌های quorum **خواندن یکنوا** می‌دهد؛ availability خرج دارد، چون تعمیرها باید تأیید شوند |
+| **asynchronous** | تعمیر را پس از پاسخ دادن زمان‌بندی می‌کند |
 
-Cassandra uses iterators with **merge listeners** to compute the difference between the merged result and each replica's input (p. 245). Read repair assumes replicas are *mostly* in sync, so blocking repairs should be rare (p. 246).
+سیستم Cassandra iteratorهایی با **شنونده‌ی merge** به کار می‌برد تا تفاوت میان نتیجه‌ی merge‌شده و ورودی هر replicaیی را حساب کند (p. 245). روش read repair فرض می‌گیرد که replicaها *بیشتر* هم‌گام‌اند، پس تعمیرهای بند‌آور باید کمیاب باشند (p. 246).
 
-#### Digest reads
+#### خواندن digest
 
-The coordinator sends **one full read** and **digest** requests to the other replicas. A digest is a hash of the replica's local result (p. 246). If all digests match the hash of the full read, the replicas are in sync. If not, the coordinator doesn't know who is ahead, so it issues full reads to the mismatching replicas, reconciles, and updates the laggards (p. 246). Digests use fast noncryptographic hashes; the book cites MD5. Collisions are negligible, and other anti-entropy mechanisms would catch one anyway (p. 246).
+آن coordinator **یک خواندن کامل** و درخواست‌های **digest** را به بقیه‌ی replicaها می‌فرستد. digest یک hash از نتیجه‌ی محلی replica است (p. 246). اگر همه‌ی digestها با hash آن خواندن کامل بخوانند، replicaها هم‌گام‌اند. اگر نه، coordinator نمی‌داند کی جلوتر است، پس به replicaهای نخوان خواندن کامل می‌دهد، آشتی می‌دهد، و عقب‌مانده‌ها را به‌روز (p. 246). digestها hashهای سریع و ناـرمزنگاری به کار می‌برند؛ کتاب MD5 را می‌آورد. برخورد ناچیز است، و هر طور که باشد مکانیزم‌های دیگر anti-entropy می‌گیرندش (p. 246).
 
-### Hinted handoff
+### hinted handoff
 
-Hinted handoff is a **write-side** repair (Dynamo). If the target node doesn't acknowledge a write, the coordinator or another replica stores a **hint** and replays it when the target comes back (p. 246). In Cassandra, hinted writes **don't count toward the replication factor**, because the hint log isn't readable, unless the consistency level is `ANY` (p. 246).
+روش hinted handoff تعمیری **سمت نوشتن** است، از Dynamo. اگر نود هدف نوشتنی را تأیید نکند، coordinator یا replicaیی دیگر یک **hint** ذخیره می‌کند و همین که هدف برگردد replayش می‌کند (p. 246). در Cassandra، نوشتن‌های hint‌خورده **به ضریب replication حساب نمی‌شوند**، چون log مربوط به hint خواندنی نیست، مگر سطح consistency `ANY` باشد (p. 246).
 
-**Sloppy quorums** (Riak): when replicas fail, writes can use other healthy nodes (pp. 246–247).
+**همه‌ی quorumهای شلخته** در Riak: وقتی replicaها بشکنند، نوشتن‌ها می‌توانند نودهای سالم دیگری به کار ببرند (pp. 246–247).
 
 ```mermaid
 flowchart LR
@@ -93,41 +95,47 @@ flowchart LR
     D -. "B recovers → replay hint, then drop it" .-> B
 ```
 
-*The vault's diagram of the five-node example {A, B, C, D, E} on p. 247.*
+*نمودار vault از نمونه‌ی پنج‌نودی {A, B, C, D, E} در ص. ۲۴۷.*
 
-The catch: if {B, C} are partitioned off and a sloppy-quorum write goes to {A, D, E}, an immediate read from {B, C} misses it. Sloppy quorums trade **consistency for availability** (p. 247).
+گیرش: اگر {B, C} پارتیشن شوند و نوشتنی با quorum شلخته به {A, D, E} برود، خواندنی فوری از {B, C} از قلمش می‌اندازد. quorumهای شلخته **consistency را با availability** بده‌بستان می‌کنند (p. 247).
 
-### Merkle trees
+### درخت Merkle
 
-Read repair can't fix data that isn't being read, and comparing records pairwise is impractical (p. 247). **Merkle trees** build a compact tree of hashes: leaves hash **ranges of records** found by scanning the table, and each parent hashes its children (Figure 12-2) (pp. 247–248).
+روش read repair نمی‌تواند داده‌ای را که خوانده نمی‌شود درست کند، و مقایسه‌ی دو‌به‌دوی رکوردها ناعملی است (p. 247). **درخت‌های Merkle** درختی جمع‌و‌جور از hash می‌سازند: برگ‌ها **بازه‌هایی از رکورد** را hash می‌کنند که با اسکن کردن جدول پیدا شده‌اند، و هر پدری فرزندهایش را hash (شکل ۱۲-۲) (pp. 247–248).
 
-![A Merkle tree: four data ranges at the bottom, hashes 3 to 6 of each range above them, hashes 1 and 2 of pairs above those, and a top hash of hashes 1 and 2](../figures/12-02.png)
+![درختی Merkle: چهار بازه‌ی داده در پایین، hashهای ۳ تا ۶ از هر بازه‌ای بالای آن‌ها، hashهای ۱ و ۲ از زوج‌ها بالای آن‌ها، و یک hash سر از hashهای ۱ و ۲](../figures/12-02.png)
 
-*Figure 12-2 (p. 248): equal top hashes mean equal data; a mismatch is chased down only the subtrees whose hashes differ.*
+*Figure 12-2 (p. 248): hashهای سر برابر یعنی داده‌ی برابر؛ نخواندنی تنها در آن زیردرخت‌هایی تعقیب می‌شود که hashشان فرق دارد.*
 
-- If the **roots** match, the replicas are in sync. Otherwise compare top-down to find the differing ranges, exchanging subtrees level by level or whole trees (pp. 247–248).
-- A data change recomputes the subtree above it (p. 248).
-- Tree size (message size) trades against precision (range size) (p. 248).
+- اگر **ریشه**ها بخوانند، replicaها هم‌گام‌اند. وگرنه از بالا به پایین مقایسه کنید تا بازه‌های متفاوت پیدا شوند، و زیردرخت‌ها را سطح‌به‌سطح یا کل درخت‌ها را رد و بدل (pp. 247–248).
+- تغییر داده‌ای زیردرخت بالایش را دوباره حساب می‌کند (p. 248).
+- اندازه‌ی درخت، یعنی اندازه‌ی پیام، با دقت، یعنی اندازه‌ی بازه، بده‌بستان می‌شود (p. 248).
 
-> **Try it:** [Merkle tree repair](../widgets/12-merkle-tree.html) — diverge two replicas by editing a few keys, compare root hashes, and descend only into mismatching subtrees. Change the leaf range size to see how many hashes are exchanged and how much data must be streamed.
+> **Try it:** [تعمیر با درخت Merkle](../widgets/12-merkle-tree.html)؛ دو replica را با ویرایش چند کلید واگرا کنید، hashهای ریشه را مقایسه، و تنها به زیردرخت‌های نخوان پایین بروید. اندازه‌ی بازه‌ی برگ را عوض کنید تا ببینید چند hash رد و بدل می‌شود و چقدر داده باید جاری شود.
 
-### Bitmap version vectors
+> **In practice:** replicaهای ClickHouse با anti-entropy هم‌گرا نمی‌شوند، با یک log مشترک در Keeper.
+>
+> **Your turn:** یک replica چند ساعت down بوده. وقتی برمی‌گردد چطور داده‌ی جاافتاده را می‌گیرد؟
+>
+> *Answer:* replication queue خودش را از Keeper می‌خواند و partهای جاافتاده را از replica دیگر fetch می‌کند. این بیشتر شبیه log replication است تا read repair یا درخت Merkle، که کتاب برای سیستم‌های بی leader و بی log مشترک می‌آورد (pp. 245–248).
 
-Gonçalves et al.: each node keeps a **per-peer log** of operations it executed or received. During anti-entropy, logs are compared and missing data is replicated (p. 248).
+### بردار نسخه‌ی bitmapی
 
-- Each write is a **dot (i, n)**: the *i*-th write coordinated by node *n*, with *i* starting at 1 (p. 248).
-- A node's **logical clock** is the set of dots it has seen, directly or transitively. Its own dots have no gaps; **gaps** in other nodes' dots are missing writes (pp. 248–249).
-- Nodes exchange clocks, identify the missing dots and replicate their records. A **dotted causal container (DCC)** maps dots to causal information per key, so conflict resolution preserves causality (p. 249).
-- **Compact form:** node → (latest consecutive index, bitmap of later dots). The book's example, (3, 01101₂), means "consecutive through 3, and also seen 5, 6 and 8" (Figure 12-3, p. 249).
-- Once every node has seen everything up to *i*, the vectors are **truncated** to *i* (p. 249).
+گونسالوس و همکاران: هر نودی **logی به‌تفکیک همتا** از عملیاتی نگه می‌دارد که اجرا یا گرفته. در anti-entropy، logها مقایسه می‌شوند و داده‌ی گم‌شده تکرار (p. 248).
 
-| Pro (p. 249) | Con (p. 249) |
+- هر نوشتنی یک **نقطه‌ی (i, n)** است: نوشتن *i*ام که نود *n* هم‌آهنگش کرده، با *i* که از ۱ شروع می‌شود (p. 248).
+- **ساعت منطقی** نودی همان مجموعه‌ی نقطه‌هایی است که دیده، مستقیم یا ترایا. نقطه‌های خودش شکافی ندارند؛ و **شکاف** در نقطه‌های نودهای دیگر نوشتن‌های گم‌شده‌اند (pp. 248–249).
+- نودها ساعت‌ها را رد و بدل می‌کنند، نقطه‌های گم‌شده را شناسایی و رکوردهایشان را تکرار. یک **ظرف علّی نقطه‌دار**، یعنی DCC، نقطه‌ها را به اطلاع علّی برای هر کلیدی map می‌کند، تا حل تعارض علیت را نگه دارد (p. 249).
+- **شکل جمع‌و‌جور:** نود ← (آخرین index پیاپی، bitmap نقطه‌های بعدی). نمونه‌ی کتاب، یعنی (3, 01101₂)، یعنی «پیاپی تا ۳، و همچنین ۵ و ۶ و ۸ دیده شده‌اند» (شکل ۱۲-۳، ص. ۲۴۹).
+- همین که هر نودی هر چیزی را تا *i* دیده باشد، بردارها تا *i* **بریده می‌شوند** (p. 249).
+
+| خوبی (p. 249) | بدی (p. 249) |
 |---|---|
-| Captures causality and pinpoints exactly the missing writes | A node down for a long time blocks truncation, because peers must keep its missing data |
+| علیت را می‌گیرد و دقیقاً نوشتن‌های گم‌شده را انگشت می‌گذارد | نودی که مدت طولانی خواب باشد بریدن را بند می‌آورد، چون همتاها باید داده‌ی گم‌شده‌اش را نگه دارند |
 
-### Gossip dissemination
+### پخش با gossip
 
-**Gossip** combines broadcast's reach with anti-entropy's reliability. It's probabilistic, modelled on how rumours and epidemics spread (p. 250). The chapter opens with a Carl Jung epigraph about psychic epidemics (p. 250).
+**پروتکل gossip** گستره‌ی پخش فراگیر را با قابلیت اطمینان anti-entropy ترکیب می‌کند. احتمالاتی است، و از پخش شدن شایعه و همه‌گیری مدل گرفته (p. 250). فصل با سرلوحه‌ای از کارل یونگ درباره‌ی همه‌گیری‌های روانی باز می‌شود (p. 250).
 
 ```mermaid
 stateDiagram-v2
@@ -137,127 +145,133 @@ stateDiagram-v2
     Infective --> Removed: loss of interest
 ```
 
-*The epidemic states (Demers et al.) on p. 250.*
+*حالت‌های همه‌گیری از دمرس و همکاران در ص. ۲۵۰.*
 
-- **Infective** processes hold an update and spread it. **Susceptible** ones haven't received it. **Removed** ones have stopped spreading it (p. 250).
-- Completeness is modelled with a **loss-of-interest function** instead of a global recipient list. Efficiency means infecting as many nodes as possible with as few redundant messages as possible (p. 250).
-- Gossip suits homogeneous decentralized systems without long-term membership or topology, flexible membership and mesh networks. It's very robust: random relays find alternative paths around failures (p. 250).
+- همه‌ی processهای **واگیر** به‌روزرسانی‌ای دارند و پخشش می‌کنند. **مستعد**ها نگرفته‌اندش. **برداشته**ها پخش کردنش را بس کرده‌اند (p. 250).
+- تمامیت به‌جای فهرستی جهانی از گیرنده با یک **تابع از دست دادن علاقه** مدل می‌شود. کارایی یعنی واگیر کردن تا جای ممکن نود بیشتر با تا جای ممکن پیام زائد کم‌تر (p. 250).
+- پروتکل gossip به سیستم‌های همگن و نامرکزی بی عضویت یا توپولوژی بلند‌مدت و به عضویت انعطاف‌پذیر و شبکه‌های مش می‌خورد. خیلی استوار است: replay‌کننده‌های تصادفی گرد شکست‌ها مسیرهای جانشین پیدا می‌کنند (p. 250).
 
-#### Gossip mechanics
+#### مکانیک gossip
 
-| Term | Meaning (p. 251) |
+| اصطلاح | معنا (p. 251) |
 |---|---|
-| **Fanout f** | Number of random peers contacted per round |
-| **Redundancy** | Overhead from repeated deliveries; inherent and necessary |
-| **Latency** | Time to converge, i.e. for gossip to stop, slightly longer than delivering to everyone |
-| **Interest loss** | Probabilistic (stop with some probability each step) or by threshold (stop after too many duplicates). Counting duplicates improves latency and reduces redundancy |
+| **fanout یعنی f** | شمار همتاهای تصادفی که در هر دوری تماس گرفته می‌شوند |
+| **redundancy** | سرریز تحویل‌های تکراری؛ ذاتی و لازم است |
+| **latency** | زمان هم‌گرا شدن، یعنی بس شدن gossip، که کمی از تحویل به همه بلندتر است |
+| **از دست دادن علاقه** | احتمالاتی، یعنی با احتمالی در هر قدمی بس کن، یا با آستانه، یعنی پس از تکراری‌های زیادی بس کن. شمردن تکراری‌ها latency را بهتر و redundancy را کم می‌کند |
 
-Larger systems need a bigger fanout or must accept higher latency (p. 251). Gossip gives **convergent consistency**: nodes are more likely to agree about events further in the past (p. 251).
+سیستم‌های بزرگ‌تر fanout بزرگ‌تر لازم دارند یا باید latency بالاتری را بپذیرند (p. 251). gossip **consistency هم‌گرا** می‌دهد: احتمال توافق نودها درباره‌ی رویدادهای دورتر در گذشته بیشتر است (p. 251).
 
-> **Try it:** [Gossip dissemination](../widgets/12-gossip.html) — seed one rumour in a cluster, set fanout and the interest-loss rule, and watch susceptible, infective and removed counts per round, plus total messages and nodes never reached.
+> **Try it:** [پخش با gossip](../widgets/12-gossip.html)؛ شایعه‌ای را در clusterی بکارید، fanout و قاعده‌ی از دست دادن علاقه را بگذارید، و شمار مستعد و واگیر و برداشته را برای هر دوری ببینید، به‌علاوه‌ی کل پیام‌ها و نودهایی که هیچ‌وقت نرسیدند.
 
-#### Overlay networks
+#### شبکه‌ی روپوش
 
-Gossip is applied to a narrow set of problems. Nonepidemic approaches deliver with certainty and less redundancy (p. 251). Gossip spreads a message in about **log N rounds** but pays in duplicates, and random peer selection is robust because indirect links get around partitions, though it isn't message-optimal (pp. 251–252).
+پروتکل gossip به مجموعه‌ی تنگی از مسئله‌ها به کار بسته می‌شود. رویکردهای ناهمه‌گیری با قطعیت و با redundancy کم‌تر تحویل می‌دهند (p. 251). gossip پیامی را در تقریباً **log N دور** پخش می‌کند ولی بهایش را با تکراری می‌دهد، و برداشتن تصادفی همتا استوار است چون پیوندهای غیرمستقیم گرد پارتیشن‌ها می‌پیچند، هرچند پیام‌بهینه نیست (pp. 251–252).
 
-The middle ground is a **temporary fixed topology**: nodes sample peers and pick the best contacts by proximity (latency), forming **spanning trees**, loop-free graphs that cover the network, so delivery takes a fixed number of steps (p. 252). In Figure 12-4, full connectivity needs only some edges, but a single broken link cuts off a whole subtree (p. 252). Spanning trees can also form **islands** of peers that prefer one another. Use trees in steady state and gossip for failover and recovery (p. 252).
+میانه‌ی راه **توپولوژی ثابت موقت** است: نودها از همتاها نمونه می‌گیرند و بهترین تماس‌ها را بر حسب نزدیکی، یعنی تأخیر، برمی‌دارند، و **درخت‌های پوشا** می‌سازند، یعنی گراف‌هایی بی‌حلقه که شبکه را می‌پوشانند، پس تحویل شمار ثابتی قدم می‌برد (p. 252). در شکل ۱۲-۴، اتصال کامل تنها برخی یال‌ها را لازم دارد، ولی یک پیوند شکسته کل زیردرختی را می‌برد (p. 252). درخت‌های پوشا می‌توانند **جزیره**هایی از همتاها هم بسازند که هم را ترجیح می‌دهند. در حالت پایدار درخت به کار ببرید و برای failover و بازیابی gossip (p. 252).
 
-#### Hybrid gossip
+#### پروتکل gossip دوگانه
 
-**Plumtree** (push/lazy-push multicast trees, Leitão et al.) (pp. 253–254):
+**الگوریتم Plumtree**، یعنی درخت‌های multicast با push و push تنبل، از لیتائو و همکاران (pp. 253–254):
 
-- **Eager push:** full messages go to a small subset of peers along a spanning tree.
-- **Lazy push:** only message IDs go to everyone else. A node that sees an unknown ID requests the message, which also **heals the tree**.
-- On failures the protocol falls back to gossip through the lazy links and repairs the overlay (Figure 12-5).
+- **الگوی push مشتاق:** پیام‌های کامل روی درختی پوشا به زیرمجموعه‌ی کوچکی از همتاها می‌روند.
+- **الگوی push تنبل:** تنها ID پیام به بقیه می‌رود. نودی که IDیی ناشناس ببیند آن پیام را می‌خواهد، که **درخت را هم ترمیم می‌کند**.
+- سر شکست پروتکل از راه پیوندهای تنبل به gossip برمی‌گردد و آن روپوش را تعمیر (شکل ۱۲-۵).
 
-![Six nodes joined by solid lines forming a broadcast tree, with dashed lines between other pairs as lazy gossip links](../figures/12-05.png)
+![شش نود که با خط‌های پر به هم پیوسته‌اند و درخت پخش می‌سازند، با خط‌های خط‌چین میان زوج‌های دیگر به‌شکل پیوندهای تنبل gossip](../figures/12-05.png)
 
-*Figure 12-5 (p. 253): updates travel eagerly along the solid tree; the dashed lazy links only exchange message IDs and take over when the tree breaks.*
+*Figure 12-5 (p. 253): به‌روزرسانی‌ها مشتاق روی آن درخت پر سفر می‌کنند؛ و پیوندهای تنبل خط‌چین تنها ID پیام رد و بدل می‌کنند و وقتی درخت بشکند تحویل می‌گیرند.*
 
-- Under constant load the tree tends to minimize latency, because the first nodes to respond join it (pp. 253–254).
+- زیر بار پیوسته آن درخت گرایش دارد latency را کمینه کند، چون نخستین نودهایی که پاسخ می‌دهند به آن می‌پیوندند (pp. 253–254).
 
-#### Partial views
+#### نمای جزئی
 
-Full membership views are costly under high **churn** (nodes joining and leaving), so a **peer sampling service** keeps a **partial view**, refreshed by gossip, with some overlap for redundancy (p. 254). **HyParView** (Leitão et al.) keeps a small **active view** for dissemination and a larger **passive view** of replacement candidates (p. 254).
+نماهای عضویت کامل زیر **تلاطم** بالا، یعنی پیوستن و رفتن نودها، گران‌اند، پس یک **سرویس نمونه‌گیری همتا** یک **نمای جزئی** نگه می‌دارد که با gossip تازه می‌شود، با کمی هم‌پوشانی برای redundancy (p. 254). روش **HyParView** از لیتائو و همکاران یک **نمای فعال** کوچک برای پخش و یک **نمای غیرفعال** بزرگ‌تر از نامزدهای جانشینی نگه می‌دارد (p. 254).
 
-- Nodes periodically **shuffle**, exchanging views and adding received members to their passive views, while dropping the oldest entries to cap the size (p. 254).
-- If P1 suspects P2 in its active view, it replaces P2 with P3 from its passive view, dropping P3 if the connection fails. P3 may decline if its active view is full, unless P1's view is *empty*, in which case P3 must accept and evict someone. This lets bootstrapping nodes join quickly (p. 254).
-- HyParView converges quickly to a stable overlay after reorganization, partly because it prioritizes bootstrapping processes (p. 254).
+- نودها دوره‌ای **بر هم می‌زنند**، نماها را رد و بدل می‌کنند و اعضای گرفته‌شده را به نمای غیرفعالشان می‌افزایند، و در همان حال قدیمی‌ترین entryها را می‌اندازند تا اندازه سقف‌دار بماند (p. 254).
+- اگر P1 در نمای فعالش به P2 گمان ببرد، P2 را با P3 از نمای غیرفعالش عوض می‌کند، و P3 را می‌اندازد اگر اتصال باز بماند. process P3 می‌تواند رد کند اگر نمای فعالش پر باشد، مگر نمای P1 *خالی* باشد، که آن‌وقت P3 باید قبول کند و کسی را بیرون بیندازد. این می‌گذارد نودهای در حال راه افتادن زود بپیوندند (p. 254).
+- روش HyParView پس از سازمان دوباره زود به روپوشی پایدار هم‌گرا می‌شود، تا حدی چون processهای در حال راه افتادن را اولویت می‌دهد (p. 254).
 
-Neither Plumtree nor HyParView needs a global view of all peers (pp. 254–255).
+نه Plumtree و نه HyParView نمایی جهانی از همه‌ی همتاها لازم ندارند (pp. 254–255).
 
-### Summary
+> **In practice:** Alertmanager در حالت HA با gossip وضعیت silenceها و notificationها را بین نمونه‌ها پخش می‌کند.
+>
+> **Your turn:** دو نمونه‌ی Alertmanager دارید و یک alert دو بار به کانال تیم می‌رسد. چه چیزی شکسته است؟
+>
+> *Answer:* احتمالاً gossip بین دو نمونه، مثلاً port cluster بسته است، پس هیچ‌کدام نمی‌داند دیگری notification را فرستاده. gossip سریع ولی احتمالاتی پخش می‌کند و به شبکه‌ی سالم بین اعضا نیاز دارد (pp. 250–255).
 
-| Mechanism | Optimizes for (p. 255) | What it does |
+### خلاصه
+
+| مکانیزم | برای چه بهینه است (p. 255) | چه می‌کند |
 |---|---|---|
-| **Read repair** | Scope reduction | Reconcile what is being read |
-| **Hinted handoff** | Scope reduction | Replay individual missed writes |
-| **Bitmap version vectors** | Recency | Log recent divergent events; know exactly what to sync after a short failure |
-| **Merkle trees** | Completeness | Compare whole datasets cheaply by hashing |
+| **read repair** | کم کردن گستره | آن چیزی را که خوانده می‌شود آشتی می‌دهد |
+| **hinted handoff** | کم کردن گستره | نوشتن‌های از قلم افتاده را یکی‌یکی replay می‌کند |
+| **بردار نسخه‌ی bitmapی** | تازگی | رویدادهای واگرای تازه را log می‌کند؛ پس از شکستی کوتاه دقیقاً می‌داند چه چیزی را هم‌گام کند |
+| **درخت Merkle** | تمامیت | کل مجموعه‌داده‌ها را با hash ارزان مقایسه می‌کند |
 
-Gossip distributes information reliably at scale, and hybrid gossip cuts messages while staying partition-resistant (p. 255). Many systems use gossip for failure detection and membership. HyParView is used in **Partisan**, and Plumtree was used in **Riak core** for cluster-wide information (pp. 255–256).
+پروتکل gossip اطلاع را در مقیاس قابل اطمینان پخش می‌کند، و gossip دوگانه پیام را می‌برد و در همان حال پارتیشن‌مقاوم می‌ماند (p. 255). خیلی از سیستم‌ها gossip را برای تشخیص شکست و عضویت به کار می‌برند. روش HyParView در **Partisan** به کار می‌رود، و Plumtree در **Riak core** برای اطلاع cluster‌سراسری به کار می‌رفت (pp. 255–256).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| | Read repair | Hinted handoff | Merkle trees | Bitmap version vectors |
+| | read repair | hinted handoff | درخت Merkle | بردار نسخه‌ی bitmapی |
 |---|---|---|---|---|
-| Trigger | Reads | Failed writes | Background | Background |
-| Covers cold data | ✗ | Only missed writes | ✓ | ✓ (recent) |
-| Cost | Extra replica reads; blocking adds latency | Hint storage | Full scan to build; hashes | Per-peer logs; truncation blocked by long outages |
+| برانگیزنده | خواندن | نوشتن‌های شکسته | پس‌زمینه | پس‌زمینه |
+| داده‌ی سرد را می‌پوشاند | ✗ | تنها نوشتن‌های از قلم افتاده | ✓ | ✓ برای تازه‌ها |
+| هزینه | خواندن اضافه‌ی replica؛ بند‌آور latency می‌افزاید | ذخیره‌ی hint | اسکن کامل برای ساختن؛ hash | logهای به‌تفکیک همتا؛ بریدن با شکست‌های طولانی بند می‌آید |
 
-| Dissemination | Messages | Reliability | Latency |
+| پخش | پیام | قابلیت اطمینان | latency |
 |---|---|---|---|
-| Broadcast | N − 1 from one node | Single point of failure | One hop |
-| Gossip | Redundant, about N·f per round | Very high | ~log N rounds |
-| Spanning tree | N − 1 | One link can cut a subtree | Tree depth |
-| Plumtree | Tree + lazy IDs | High (self-healing) | Near tree depth |
+| پخش فراگیر | N − 1 از یک نود | نقطه‌ی شکست تنها | یک پرش |
+| gossip | زائد، تقریباً N·f در هر دوری | خیلی بالا | حدود log N دور |
+| درخت پوشا | N − 1 | یک پیوند می‌تواند زیردرختی را ببرد | عمق درخت |
+| Plumtree | درخت به‌علاوه‌ی IDهای تنبل | بالا، چون خودتعمیر است | نزدیک عمق درخت |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Push-pull gossip** (exchanging digests both ways) converges in O(log log N) rounds once most nodes are infected, against O(log N) for push alone. Cassandra's gossiper does a three-message SYN/ACK/ACK2 exchange of this kind every second. The [gossip lab](../lab/12-gossip-convergence/README.md) measures push-only rounds against the log N estimate.
-- **Cassandra repair** builds Merkle trees per token range (`nodetool repair`). Incremental repair marks already-repaired SSTables so later runs hash only new data, which reduces the "full scan to build" cost in the table above.
-- **Dynamo's legacy:** read repair, hinted handoff, sloppy quorums and Merkle-tree anti-entropy all come from the 2007 Dynamo paper the book cites [DECANDIA07]. [DDIA Ch. 6](../../designing-data-intensive-applications/chapters/06-replication.md) covers leaderless replication from the application side.
+- **پروتکل gossip با push و pull**، یعنی رد و بدل digest در هر دو جهت، همین که بیشتر نودها واگیر شوند در O(log log N) دور هم‌گرا می‌شود، در برابر O(log N) برای تنها push. gossiper در Cassandra هر ثانیه رد و بدلی سه‌پیامی از جنس SYN و ACK و ACK2 می‌کند. [آزمایش gossip](../lab/12-gossip-convergence/README.md) دورهای تنها‌push را در برابر برآورد log N اندازه می‌گیرد.
+- **تعمیر در Cassandra** برای هر بازه‌ی token درختی Merkle می‌سازد، با `nodetool repair`. تعمیر افزایشی SSTableهای از قبل تعمیر‌شده را علامت می‌زند تا اجراهای بعدی تنها داده‌ی تازه را hash کنند، که هزینه‌ی «اسکن کامل برای ساختن» در جدول بالا را کم می‌کند.
+- **میراث Dynamo:** روش‌های read repair و hinted handoff و quorum شلخته و anti-entropy با درخت Merkle همه از مقاله‌ی ۲۰۰۷ Dynamo می‌آیند که کتاب با [DECANDIA07] آوردش. [فصل ۶ کتاب DDIA](../../designing-data-intensive-applications/chapters/06-replication.md) replication بی‌leader را از سمت برنامه می‌پوشاند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Gossip convergence](../lab/12-gossip-convergence/README.md) — simulates push gossip with several fanouts and cluster sizes, and reports rounds to full infection, total messages and redundancy, compared with log N.
-- **Related chapters:** [9. Failure Detection](09-failure-detection.md) (gossip-style failure detection, SWIM), [11. Replication and Consistency](11-replication-and-consistency.md) (tunable consistency, quorums, vector clocks), [7. Log-Structured Storage](07-log-structured-storage.md) (tombstones and the GC grace period).
+- **Run it:** [هم‌گرایی gossip](../lab/12-gossip-convergence/README.md)؛ gossip از جنس push را با چند fanout و اندازه‌ی cluster شبیه‌سازی می‌کند، و دورهای لازم برای واگیری کامل و کل پیام‌ها و redundancy را در مقایسه با log N گزارش می‌دهد.
+- **فصل‌های مرتبط:** [فصل ۹: تشخیص شکست](09-failure-detection.md) که تشخیص شکست از جنس gossip و SWIM را دارد، [فصل ۱۱: replication و consistency](11-replication-and-consistency.md) که consistency قابل تنظیم و quorum و ساعت برداری را دارد، و [فصل ۷: ذخیره‌سازی log-structured](07-log-structured-storage.md) که tombstone و دوره‌ی مهلت GC را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **What's the difference between foreground and background anti-entropy?**
+1. **تفاوت anti-entropy پیش‌زمینه و پس‌زمینه چیست؟**
 
-   *Answer:* Foreground mechanisms ride on client requests (read repair, hinted handoff). Background ones use auxiliary structures such as Merkle trees and update logs to find divergence independently of requests (p. 244).
+   *Answer:* مکانیزم‌های پیش‌زمینه سوار درخواست‌های کلاینت می‌شوند، یعنی read repair و hinted handoff. پس‌زمینه‌ای‌ها ساختارهای کمکی مثل درخت Merkle و log به‌روزرسانی به کار می‌برند تا واگرایی را مستقل از درخواست‌ها پیدا کنند (p. 244).
 
-2. **Why does blocking read repair give quorum reads monotonicity?**
+2. **چرا read repair بند‌آور به خواندن‌های quorum یکنوایی می‌دهد؟**
 
-   *Answer:* The read doesn't return until the lagging replicas are repaired, so any later quorum read sees at least the value just returned (p. 245).
+   *Answer:* خواندن تا تعمیر شدن replicaهای عقب‌مانده برنمی‌گردد، پس هر خواندن quorum بعدی دست‌کم همان مقداری را می‌بیند که همین حالا برگردانده شد (p. 245).
 
-3. **Digests from three replicas don't all match. What does the coordinator do next?**
-   - [ ] Returns the full read anyway
-   - [x] Issues full reads to the mismatching replicas, reconciles, and updates the laggards
-   - [ ] Picks the majority digest
+3. **همه‌ی digestهای سه replica همه نمی‌خوانند. آن coordinator بعد چه می‌کند؟**
+   - [ ] هر طور که باشد آن خواندن کامل را برمی‌گرداند
+   - [x] به replicaهای نخوان خواندن کامل می‌دهد، آشتی می‌دهد، و عقب‌مانده‌ها را به‌روز می‌کند
+   - [ ] ساختار digest اکثریت را برمی‌دارد
 
-   *Answer:* A mismatch doesn't reveal which replica is ahead, so full data is needed to reconcile (p. 246).
+   *Answer:* نخواندن آشکار نمی‌کند کدام replica جلوتر است، پس داده‌ی کامل برای آشتی لازم است (p. 246).
 
-4. **Replicas are {A, B, C} and B is down. With a sloppy quorum, where does the write go, and what happens when B returns?**
+4. **همه‌ی replicaها {A, B, C} هستند و B خواب است. با quorum شلخته، نوشتن کجا می‌رود، و وقتی B برگردد چه می‌شود؟**
 
-   *Answer:* To A, C and a stand-in, D, which stores the record with a hint for B. When B recovers, D replays the hint and drops its copy (p. 247).
+   *Answer:* به A و C و جانشینی مثل D، که رکورد را با hintی برای B ذخیره می‌کند. وقتی B بازیابی شود، D آن hint را replay می‌کند و کپی‌اش را می‌اندازد (p. 247).
 
-5. **Two replicas' Merkle roots differ. How is the divergence located?**
+5. **ریشه‌ی Merkle دو replica فرق دارد. آن واگرایی چطور محلی می‌شود؟**
 
-   *Answer:* Compare child hashes top-down and descend only into mismatching subtrees until reaching the leaf ranges that differ, then repair those records (pp. 247–248).
+   *Answer:* hashهای فرزند را از بالا به پایین مقایسه کنید و تنها به زیردرخت‌های نخوان پایین بروید تا به آن بازه‌های برگی برسید که فرق دارند، بعد آن رکوردها را تعمیر کنید (pp. 247–248).
 
-6. **What does (3, 01101₂) mean in a bitmap version vector?**
+6. **عبارت (3, 01101₂) در بردار نسخه‌ی bitmapی چه معنایی دارد؟**
 
-   *Answer:* The node has seen that peer's writes consecutively up to 3, and also writes 5, 6 and 8 (p. 249).
+   *Answer:* آن نود نوشتن‌های آن همتا را پیاپی تا ۳ دیده، و همچنین نوشتن‌های ۵ و ۶ و ۸ را (p. 249).
 
-7. **In gossip, what makes a node move from infective to removed?**
+7. **در gossip، چه چیزی نودی را از واگیر به برداشته می‌برد؟**
 
-   *Answer:* Loss of interest: either a per-step probability of stopping, or too many duplicate receipts, counting toward a threshold (pp. 250–251).
+   *Answer:* از دست دادن علاقه: یا احتمالی برای بس کردن در هر قدمی، یا تکراری‌های زیادی که به آستانه‌ای حساب می‌شوند (pp. 250–251).
 
-8. **How does Plumtree repair its broadcast tree?**
+8. **روش Plumtree درخت پخشش را چطور تعمیر می‌کند؟**
 
-   *Answer:* Nodes lazily push message IDs to non-tree peers. A node that sees an ID it doesn't have requests the message, and that link is used to heal the tree (p. 253).
+   *Answer:* نودها تنبل IDهای پیام را به همتاهای غیر‌درختی push می‌کنند. نودی که IDیی ببیند که ندارد آن پیام را می‌خواهد، و همان پیوند برای ترمیم درخت به کار می‌رود (p. 253).

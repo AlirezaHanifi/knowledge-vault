@@ -3,102 +3,104 @@ book: database-internals
 chapter: 1
 title: "Introduction and Overview"
 pages: "7–24"
+translated_title: "مقدمه و نمای کلی"
+lang: fa
 ---
 
-# 1. Introduction and Overview
+# فصل ۱: مقدمه و نمای کلی
 
-[Book](../README.md) · [2. B-Tree Basics →](02-b-tree-basics.md)
+[کتاب](../README.md) · [فصل ۲: پایه‌های B-Tree ←](02-b-tree-basics.md)
 
-## Summary
+## خلاصه
 
-Part I, *Storage Engines*, opens with a classification of database management systems and definitions for terms that are often confused. Every DBMS is built a little differently, but a common architecture has emerged:
+بخش یک، یعنی *Storage Engines*، با رده‌بندی سیستم‌های مدیریت دیتابیس و تعریف اصطلاح‌هایی که اغلب قاطی می‌شوند باز می‌شود. هر DBMSی کمی طور دیگری ساخته شده، ولی معماری‌ای مشترک سر در آورده:
 
-- a **transport** layer receives queries;
-- the **query processor** parses and validates them;
-- the **optimizer** chooses an execution plan;
-- the **execution engine** runs local and remote operations;
-- the **storage engine** holds the transaction, lock, buffer and recovery managers and the access methods (pp. 8–10).
+- لایه‌ی **transport** queryها را می‌گیرد؛
+- پردازشگر query آن‌ها را parse و اعتبارسنجی می‌کند؛
+- **نقش optimizer** برنامه‌ی اجرایی را برمی‌دارد؛
+- موتور اجرا عملیات محلی و دور را اجرا می‌کند؛
+- و موتور ذخیره‌سازی مدیرهای تراکنش و قفل و buffer و بازیابی و روش‌های دسترسی را دارد (pp. 8–10).
 
-The chapter then contrasts **memory-based** with **disk-based** systems, which differ in their data structures, not only in where the data lives, and **row-oriented** with **column-oriented** layouts, which suit different access patterns. **Wide column stores** such as Bigtable are a different thing again. It also separates **data files** (heap, hashed or index-organized) from **index files**: primary vs secondary indexes, clustered vs nonclustered indexes, and direct offsets vs a primary key used as indirection. Finally, it introduces the three variables that the rest of Part I uses to tell storage structures apart: **buffering**, **mutability** and **ordering** (pp. 21–22).
+بعد فصل سیستم‌های **حافظه‌محور** را با **دیسک‌محور** مقابل می‌گذارد، که در ساختار داده‌شان فرق دارند و نه فقط در جای زندگی داده، و چیدمان **ردیف‌محور** را با **ستون‌محور**، که به الگوهای دسترسی مختلفی می‌خورند. **wide column store**هایی مثل Bigtable بازهم چیز دیگری‌اند. همچنین **فایل‌های داده**، یعنی heap یا hash‌شده یا index‌چیده، را از **فایل‌های index** جدا می‌کند: index اولیه در برابر ثانویه، index clusterی در برابر ناخوشه‌ای، و offset مستقیم در برابر کلید اولیه به‌شکل واسطه. در آخر، آن سه متغیر را معرفی می‌کند که بقیه‌ی بخش یک برای جدا کردن ساختارهای ذخیره‌سازی به کارشان می‌برد: **buffer کردن** و **mutability** و **ترتیب** (pp. 21–22).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **The storage engine is a set of cooperating managers.** Transaction and lock managers provide concurrency control; access methods, the buffer manager and the recovery manager manage pages on disk and in memory (p. 10).
-- **An in-memory database isn't a disk database with a big cache.** Its serialization format, data layout and data structures can all be different (p. 12).
-- **In-memory stores stay durable with a log plus a sorted on-disk backup.** Checkpointing applies log batches to the backup so the log can be truncated (pp. 11–12).
-- **Choose row or column layout by access pattern.** Point queries and range scans over whole records favour rows; scans of many rows that aggregate a few columns favour columns, which also vectorize and compress better (pp. 13–15).
-- **Wide column stores aren't column stores.** Bigtable and HBase group columns into families and store each family row-wise (p. 15).
-- **Index-organized tables store records in the index**, saving at least one disk seek per lookup. Heap files need a separate index (p. 18).
-- **Direct offsets make reads cheaper; primary-key indirection makes updates cheaper.** MySQL InnoDB's secondary indexes take the second route (p. 20).
+- **موتور ذخیره‌سازی مجموعه‌ای از مدیرهای هم‌کار است.** مدیرهای تراکنش و قفل concurrency control می‌دهند؛ و روش‌های دسترسی و مدیر buffer و مدیر بازیابی صفحه‌ها را روی دیسک و در حافظه می‌گردانند (p. 10).
+- **دیتابیس in-memoryی دیتابیس دیسکی با cacheی بزرگ نیست.** قالب سری‌سازی و چیدمان داده و ساختار داده‌اش همه می‌توانند فرق داشته باشند (p. 12).
+- **انباره‌های in-memoryی با یک log به‌علاوه‌ی پشتیبانی مرتب روی دیسک پایا می‌مانند.** checkpoint گرفتن دسته‌های log را روی پشتیبان اعمال می‌کند تا log بریده شود (pp. 11–12).
+- **چیدمان ردیفی یا ستونی را از الگوی دسترسی بردارید.** query نقطه‌ای و اسکن بازه‌ای روی کل رکورد به ردیف‌ها می‌خورند؛ و اسکن ردیف‌های زیاد که چند ستون را تجمیع می‌کند به ستون‌ها، که برداری شدن و فشرده شدنشان هم بهتر است (pp. 13–15).
+- **ساختار wide column store انباره‌ی ستونی نیست.** سیستم‌های Bigtable و HBase ستون‌ها را در خانواده گروه می‌کنند و هر خانواده‌ای را ردیفی ذخیره (p. 15).
+- **جدول index‌چیده رکوردها را در index ذخیره می‌کند**، و برای هر جست‌و‌جویی دست‌کم یک seek دیسک صرفه‌جویی می‌کند. فایل heap index جدایی لازم دارد (p. 18).
+- **مفهوم offset مستقیم خواندن را ارزان‌تر می‌کند؛ و واسطه‌شدن کلید اولیه به‌روزرسانی را.** indexهای ثانویه‌ی InnoDB در MySQL راه دوم را می‌روند (p. 20).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- DBMS Architecture — p. 8
-- Memory- Versus Disk-Based DBMS — p. 10
-  - Durability in Memory-Based Stores — p. 11
-- Column- Versus Row-Oriented DBMS — p. 12
-  - Row-Oriented Data Layout — p. 13
-  - Column-Oriented Data Layout — p. 14
-  - Distinctions and Optimizations — p. 15
-  - Wide Column Stores — p. 15
-- Data Files and Index Files — p. 17
-  - Data Files — p. 18
-  - Index Files — p. 18
-  - Primary Index as an Indirection — p. 20
-- Buffering, Immutability, and Ordering — p. 21
-- Summary — p. 22
+- معماری DBMS — ص. ۸
+- بخش DBMS حافظه‌محور در برابر دیسک‌محور — ص. ۱۰
+  - پایایی در انباره‌های حافظه‌محور — ص. ۱۱
+- بخش DBMS ستون‌محور در برابر ردیف‌محور — ص. ۱۲
+  - چیدمان داده‌ی ردیف‌محور — ص. ۱۳
+  - چیدمان داده‌ی ستون‌محور — ص. ۱۴
+  - تمایزها و بهینه‌سازی‌ها — ص. ۱۵
+  - بخش wide column store — ص. ۱۵
+- فایل داده و فایل index — ص. ۱۷
+  - فایل داده — ص. ۱۸
+  - فایل index — ص. ۱۸
+  - بخش index اولیه به‌شکل واسطه — ص. ۲۰
+- بخش buffer کردن و immutability و ترتیب — ص. ۲۱
+- خلاصه — ص. ۲۲
 
-## Notes
+## یادداشت‌ها
 
-Database systems serve very different purposes: hot temporary data, long-lived cold storage, complex analytics, key-only access, time series or large blobs (p. 7). One common grouping, which the book mentions but doesn't rely on (pp. 7–8):
+سیستم‌های دیتابیس هدف‌های خیلی مختلفی را سرویس می‌دهند: داده‌ی موقت داغ، ذخیره‌سازی سرد دیرزیست، تحلیل پیچیده، دسترسی فقط‌کلیدی، سری‌زمانی یا blobهای بزرگ (p. 7). یک گروه‌بندی رایج، که کتاب نامش را می‌برد ولی به آن تکیه نمی‌کند (pp. 7–8):
 
-| Category | Workload |
+| رده | بار کاری |
 |---|---|
-| **OLTP** | Many short, user-facing requests and transactions, usually predefined |
-| **OLAP** | Complex aggregations and long-running ad hoc queries; analytics and data warehousing |
-| **HTAP** | Both OLTP and OLAP properties |
+| **OLTP** | درخواست‌ها و تراکنش‌های زیاد و کوتاه و کاربر‌رو، که معمولاً پیش‌تعریف‌شده‌اند |
+| **OLAP** | تجمیع پیچیده و queryهای دیرپای موردی؛ تحلیل و data warehouse |
+| **HTAP** | هم خاصیت‌های OLTP و هم OLAP |
 
-Other labels exist (key-value, relational, document, graph), but a full taxonomy isn't needed, because the concepts in the book apply to most of them (p. 8).
+برچسب‌های دیگری هم هست، مثل key-value و رابطه‌ای و document و graph، ولی رده‌بندی کاملی لازم نیست، چون مفهوم‌های کتاب به بیشترشان به کار می‌آیند (p. 8).
 
-### DBMS architecture
+### معماری DBMS
 
-There's no common blueprint, and in code, components that look independent are often coupled for performance or edge cases (p. 8). Figure 1-1 shows common themes from the literature. Database nodes are servers and application instances are clients.
+نقشه‌ی مشترکی نیست، و در کد، مؤلفه‌هایی که مستقل به نظر می‌رسند اغلب برای کارایی یا حالت‌های حاشیه‌ای به هم گره خورده‌اند (p. 8). شکل ۱-۱ مضمون‌های مشترک ادبیات را نشان می‌دهد. نودهای دیتابیس سرورند و نمونه‌های برنامه کلاینت.
 
-![Layered DBMS: transport (cluster and client communication) feeds the query parser and optimizer, then local and remote execution, then the storage engine with transaction, lock, buffer and recovery managers around the access methods](../figures/01-01.png)
+![DBMS لایه‌ای: لایه‌ی transport، که ارتباط cluster و کلاینت را دارد، parser و optimizer را می‌خوراند، بعد اجرای محلی و دور، بعد موتور ذخیره‌سازی با مدیرهای تراکنش و قفل و buffer و بازیابی گرد روش‌های دسترسی](../figures/01-01.png)
 
-*Figure 1-1 (p. 9): a request flows top to bottom; the transport layer also links straight to remote execution, because other nodes send work too.*
+*Figure 1-1 (p. 9): درخواست از بالا به پایین جاری می‌شود؛ لایه‌ی transport یک‌راست به اجرای دور هم پیوند دارد، چون نودهای دیگر هم کار می‌فرستند.*
 
-The **transport** subsystem takes client queries and also talks to other nodes. The **query processor** parses, interprets, validates and checks access control (p. 9).
+زیرسیستم **transport** queryهای کلاینت را می‌گیرد و با نودهای دیگر هم حرف می‌زند. پردازشگر query آن‌ها را parse و تفسیر و اعتبارسنجی می‌کند و کنترل دسترسی را می‌سنجد (p. 9).
 
-The **optimizer** removes impossible and redundant parts of a query. It then picks the cheapest **execution plan** (or query plan) based on internal statistics, such as index cardinality and approximate intersection size, and on data placement, meaning which nodes hold the data and what moving it costs (p. 9).
+جزء **optimizer** بخش‌های ناممکن و زائد یک query را برمی‌دارد. بعد ارزان‌ترین **برنامه‌ی اجرایی**، یا برنامه‌ی query، را بر پایه‌ی آمارهای درونی، مثل cardinality هر indexی و اندازه‌ی تقریبی اشتراک، و بر پایه‌ی جای‌دهی داده، یعنی این‌که کدام نودها داده را دارند و جابه‌جا کردنش چه خرجی دارد، برمی‌دارد (p. 9).
 
-| Storage engine component | Responsibility (p. 10) |
+| مؤلفه‌ی موتور ذخیره‌سازی | مسئولیت (p. 10) |
 |---|---|
-| **Transaction manager** | Schedules transactions so they can't leave the database logically inconsistent |
-| **Lock manager** | Locks database objects so concurrent operations don't violate *physical* data integrity |
-| **Access methods** (storage structures) | Organize data on disk: heap files, B-Trees, LSM Trees |
-| **Buffer manager** | Caches data pages in memory |
-| **Recovery manager** | Keeps the operation log and restores state after a failure |
+| **مدیر تراکنش** | تراکنش‌ها را چنان زمان‌بندی می‌کند که نتوانند دیتابیس را منطقاً ناسازگار بگذارند |
+| **مدیر قفل** | objectهای دیتابیس را قفل می‌کند تا عملیات هم‌زمان تمامیت *فیزیکی* داده را نقض نکنند |
+| **روش‌های دسترسی** که ساختارهای ذخیره‌سازی‌اند | داده را روی دیسک سازمان می‌دهند: فایل heap و B-Tree و LSM Tree |
+| **مدیر buffer** | صفحه‌های داده را در حافظه cache می‌کند |
+| **مدیر بازیابی** | log عملیات را نگه می‌دارد و حالت را پس از شکستی بازمی‌گرداند |
 
-Together, the transaction and lock managers provide **concurrency control** (p. 10).
+مدیرهای تراکنش و قفل با هم **concurrency control** می‌دهند (p. 10).
 
-### Memory- versus disk-based DBMS
+### سیستم DBMS حافظه‌محور در برابر دیسک‌محور
 
-**In-memory** (main memory) systems keep data primarily in RAM and use disk for recovery and logging. **Disk-based** systems keep most data on disk and use memory as a cache (p. 10).
+سیستم‌های **in-memoryی**، یعنی حافظه‌ی اصلی، داده را بیشتر در RAM نگه می‌دارند و دیسک را برای بازیابی و log به کار می‌برند. سیستم‌های **دیسک‌محور** بیشتر داده را روی دیسک نگه می‌دارند و حافظه را به‌شکل cache (p. 10).
 
-| | In-memory | Disk-based |
+| | in-memoryی | دیسک‌محور |
 |---|---|---|
-| Why | Performance, low access cost, fine access granularity, simpler programming (the OS manages allocation) | Disks are cheaper and easier to maintain |
-| Limits | RAM is volatile and expensive | Must manage references, serialization, freed space and fragmentation by hand |
-| Structures | Free to use pointer-heavy structures | Wide, short trees (Ch. 2) |
+| چرا | کارایی، هزینه‌ی کم دسترسی، دانه‌ریزی دسترسی، برنامه‌نویسی ساده‌تر، چون سیستم عامل تخصیص را می‌گرداند | دیسک ارزان‌تر و نگهداشتش آسان‌تر است |
+| حدها | حافظه‌ی RAM فرار و گران است | باید ارجاع و سری‌سازی و فضای آزادشده و تکه‌تکه شدن را دستی گرداند |
+| ساختارها | آزادند ساختارهای پراشاره‌گر به کار ببرند | درخت‌های پهن و کوتاه، از فصل ۲ |
 
-**Non-Volatile Memory (NVM)** may change the picture: it reduces or removes the asymmetry between read and write latency and allows byte-addressable access (p. 11).
+حافظه‌ی **Non-Volatile Memory** که NVM است می‌تواند تصویر را عوض کند: نامتقارنی latency خواندن و نوشتن را کم یا بردارد و دسترسی بایت‌نشانی را مجاز کند (p. 11).
 
-#### Durability in memory-based stores
+#### پایایی در انباره‌های حافظه‌محور
 
-An operation is complete only once its result is written to a **sequential log** (p. 11). To avoid replaying the whole log at startup, the store also keeps a **backup copy** as a sorted disk-based structure. Changes to it are applied asynchronously, in batches. After a batch is applied, the backup is a snapshot at a point in time, and the log up to that point can be discarded. This is **checkpointing** (pp. 11–12).
+عملیاتی تنها وقتی تمام است که نتیجه‌اش در یک **log ترتیبی** نوشته شود (p. 11). انباره، برای پرهیز از replay کل log سر راه افتادن، یک **کپی پشتیبان** هم به‌شکل ساختاری مرتب و دیسکی نگه می‌دارد. تغییرهای آن asynchronous و دسته‌دسته اعمال می‌شوند. پس از اعمال هر دسته‌ای، پشتیبان snapshotی در نقطه‌ای از زمان است، و log تا آن نقطه انداختنی است. این همان **checkpoint گرفتن** است (pp. 11–12).
 
 ```mermaid
 flowchart LR
@@ -108,25 +110,25 @@ flowchart LR
     B -. "checkpoint: log up to here can be discarded" .-> L
 ```
 
-The book warns that an in-memory database is *not* just an on-disk database with a huge page cache. Serialization and data layout overheads prevent the optimizations in-memory stores can make (p. 12). Some datasets fit in memory naturally because the real world bounds them, such as school student records or a store's inventory (p. 12).
+کتاب هشدار می‌دهد که دیتابیس in-memoryی دیتابیسی دیسکی با page cacheی غول‌آسا *نیست*. سرریز سری‌سازی و چیدمان داده جلو آن بهینه‌سازی‌هایی را می‌گیرد که انباره‌های in-memoryی می‌توانند بکنند (p. 12). برخی مجموعه‌داده‌ها طبیعتاً در حافظه جا می‌شوند چون دنیای واقعی حدشان می‌زند، مثل پرونده‌ی دانش‌آموزهای یک مدرسه یا موجودی یک فروشگاه (p. 12).
 
-### Column- versus row-oriented DBMS
+### سیستم DBMS ستون‌محور در برابر ردیف‌محور
 
-A **field** is the intersection of a column and a row. A **row** is the set of values belonging to one record, usually identified by a key (p. 12). Tables can be partitioned **horizontally**, storing rows together, or **vertically**, storing columns together (Figure 1-2). Row stores include MySQL, PostgreSQL and most traditional relational databases. The pioneering open source column stores were **MonetDB** and **C-Store**, the predecessor of Vertica (p. 13).
+**فیلد** اشتراک یک ستون و یک ردیف است. **ردیف** مجموعه‌ی مقدارهایی است که به یک رکورد تعلق دارند، و معمولاً کلیدی شناسایی‌اش می‌کند (p. 12). جدول‌ها می‌توانند **افقی** پارتیشن شوند، یعنی ردیف‌ها با هم ذخیره شوند، یا **عمودی**، یعنی ستون‌ها با هم (شکل ۱-۲). انباره‌های ردیفی شامل MySQL و PostgreSQL و بیشتر دیتابیس‌های رابطه‌ای سنتی‌اند. انباره‌های ستونی پیشگام و open source عبارت **MonetDB** و **C-Store** بودند، که دومی پیشین Vertica است (p. 13).
 
-![The same Symbol, Date and Price table stored (a) column by column, one stack per column, and (b) row by row, one stack of whole records](../figures/01-02.png)
+![همان جدول Symbol و Date و Price که (الف) ستون‌به‌ستون ذخیره شده، با یک پشته برای هر ستون، و (ب) ردیف‌به‌ردیف، با یک پشته از کل رکوردها](../figures/01-02.png)
 
-*Figure 1-2 (p. 13): (a) column-oriented — each column's values sit together; (b) row-oriented — each record's fields sit together.*
+*Figure 1-2 (p. 13): (الف) ستون‌محور، که مقدارهای هر ستونی با هم می‌نشینند؛ (ب) ردیف‌محور، که فیلدهای هر رکوردی با هم می‌نشینند.*
 
-#### Row-oriented data layout
+#### چیدمان داده‌ی ردیف‌محور
 
-The layout is close to the tabular view. The book's example is user records with ID, name, birth date and phone number (p. 13). Fields of one record are usually written and read together, which improves **spatial locality**. Disks are accessed block-wise, so a block holds all columns of its rows. That's ideal for fetching whole records, but costly for queries that read one field across many records, such as only phone numbers (pp. 13–14).
+چیدمان به آن نمای جدولی نزدیک است. نمونه‌ی کتاب رکوردهای کاربر با ID و نام و تاریخ تولد و شماره‌ی تلفن است (p. 13). فیلدهای یک رکورد معمولاً با هم نوشته و خوانده می‌شوند، که **محلیت فضایی** را بهتر می‌کند. دیسک‌ها بلوک‌به‌بلوک دسترسی می‌شوند، پس بلوکی همه‌ی ستون‌های ردیف‌هایش را دارد. این برای گرفتن کل رکوردها آرمانی است، ولی برای queryهایی که یک فیلد را روی رکوردهای زیادی می‌خوانند گران، مثل فقط شماره‌های تلفن (pp. 13–14).
 
-#### Column-oriented data layout
+#### چیدمان داده‌ی ستون‌محور
 
-Values of a column are stored contiguously, for example historical stock price quotes. Queries read only the columns they need, in one pass (p. 14).
+مقدارهای یک ستون پیوسته ذخیره می‌شوند، مثلاً نرخ‌های تاریخی سهام. queryها تنها همان ستون‌هایی را که لازم دارند و در یک گذر می‌خوانند (p. 14).
 
-*The book's example (p. 14): the same table, physically stored by column*
+*نمونه‌ی کتاب (p. 14): همان جدول، که فیزیکی ستون‌به‌ستون ذخیره شده*
 
 ```text
 Symbol: 1:DOW; 2:DOW; 3:S&P; 4:S&P
@@ -134,142 +136,154 @@ Date:   1:08 Aug 2018; 2:09 Aug 2018; 3:08 Aug 2018; 4:09 Aug 2018
 Price:  1:24,314.65; 2:24,136.16; 3:2,414.45; 4:2,232.32
 ```
 
-To rebuild tuples for joins, filters and multirow aggregates, each value must be linked to its row. Storing the key with each value duplicates data, so some column stores use **virtual IDs**: the value's position (offset) (p. 14). Newer column formats and stores include Apache Parquet, Apache ORC, RCFile, Apache Kudu and ClickHouse (pp. 14–15).
+برای ساختن دوباره‌ی tupleها در join و فیلتر و تجمیع چند‌ردیفی، هر مقداری باید به ردیفش پیوند داشته باشد. ذخیره‌ی کلید با هر مقداری داده را تکرار می‌کند، پس برخی انباره‌های ستونی **ID مجازی** به کار می‌برند: جای مقدار، یعنی offsetش (p. 14). قالب‌ها و انباره‌های ستونی تازه‌تر شامل Apache Parquet و Apache ORC و RCFile و Apache Kudu و ClickHouse‌اند (pp. 14–15).
 
-#### Distinctions and optimizations
+#### تمایزها و بهینه‌سازی‌ها
 
-Layout is only one of the optimizations column stores target (p. 15):
+چیدمان تنها یکی از بهینه‌سازی‌هایی است که انباره‌های ستونی هدف می‌گیرند (p. 15):
 
-- Reading many values of one column at once improves **cache utilization**, and **vectorized** (SIMD) instructions process several values per CPU instruction.
-- Values of the same type compress better, and each type can use its best **compression** algorithm.
-- **Rule of thumb:** records read whole, point queries and range scans → rows. Scans over many rows aggregating a subset of columns → columns.
+- خواندن مقدارهای زیادی از یک ستون در یک بار **بهره‌گیری از cache** را بهتر می‌کند، و دستورهای **برداری**، یعنی SIMD، چند مقدار را در یک دستور CPU پردازش می‌کنند.
+- مقدارهای همان نوع بهتر فشرده می‌شوند، و هر نوعی می‌تواند بهترین الگوریتم **فشرده‌سازی** خودش را به کار ببرد.
+- **قاعده‌ی سرانگشتی:** رکوردهایی که کامل خوانده می‌شوند و query نقطه‌ای و اسکن بازه‌ای ← ردیف. اسکن روی ردیف‌های زیاد که زیرمجموعه‌ای از ستون‌ها را تجمیع می‌کند ← ستون.
 
-#### Wide column stores
+#### wide column store
 
-**Bigtable** and **HBase** represent data as a **multidimensional sorted map**. Columns are grouped into **column families**, and *inside* each family data is stored row-wise. This suits retrieval by a key or a sequence of keys (p. 15).
+سیستم‌های **Bigtable** و **HBase** داده را به‌شکل **نقشه‌ی مرتب چند‌بُعدی** نمایش می‌دهند. ستون‌ها در **خانواده‌های ستون** گروه می‌شوند، و *درون* هر خانواده‌ای داده ردیفی ذخیره می‌شود. این به بازیابی با یک کلید یا دنباله‌ای از کلید می‌خورد (p. 15).
 
-The canonical **Webtable** example from the Bigtable paper (pp. 15–17):
+نمونه‌ی مرجع **Webtable** از مقاله‌ی Bigtable (pp. 15–17):
 
-- The row key is the page's **reversed URL**.
-- Column families such as `contents` and `anchor` are stored separately on disk.
-- A column key is the family name plus a qualifier, for example `anchor:cnnsi.com`.
-- Each cell keeps several **versions by timestamp**.
+- کلید ردیف همان **URL برگردانده‌ی** صفحه است.
+- خانواده‌های ستون مثل `contents` و `anchor` جدا روی دیسک ذخیره می‌شوند.
+- کلید ستون برابر نام خانواده به‌علاوه‌ی یک qualifier است، مثلاً `anchor:cnnsi.com`.
+- هر cellی چند **نسخه بر حسب timestamp** نگه می‌دارد.
 
-![Webtable as a nested map: reversed-URL row keys hold a contents family with html versions at timestamps t3, t5, t6 and an anchor family with cells cnnsi.com at t9 and my.look.ca at t8](../figures/01-03.png)
+![جدول Webtable به‌شکل نقشه‌ی تو‌در‌تو: کلیدهای ردیف که URL برگردانده‌اند خانواده‌ی contents را با نسخه‌های html در timestampهای t3 و t5 و t6 و خانواده‌ی anchor را با cellهای cnnsi.com در t9 و my.look.ca در t8 دارند](../figures/01-03.png)
 
-*Figure 1-3 (p. 16): row key → column family → qualifier → timestamped versions. Physically each family is stored separately, and within a family one key's data is kept together (Figure 1-4, p. 17).*
+*Figure 1-3 (p. 16): کلید ردیف ← خانواده‌ی ستون ← qualifier ← نسخه‌های timestamp‌خورده. فیزیکی هر خانواده‌ای جدا ذخیره می‌شود، و درون خانواده‌ای داده‌ی یک کلید با هم نگه داشته می‌شود (شکل ۱-۴، ص. ۱۷).*
 
-### Data files and index files
+> **In practice:** منبع‌های ما row store‌اند و warehouse یک column store است؛ همین تفاوت توضیح می‌دهد چرا یک کوئری در یکی سریع و در دیگری کند است.
+>
+> **Your turn:** تحلیلگری `SELECT *` روی جدول ۸۰ ستونی Silver برای یک ماه می‌زند و کوئری کند است، ولی همان کوئری با سه ستون سریع است. چرا؟
+>
+> *Answer:* column store هر ستون را جدا ذخیره و فشرده می‌کند و فقط ستون‌های نام‌برده را می‌خواند؛ `SELECT *` هر ۸۰ ستون را می‌خواند و برای ساختن ردیف کنار هم می‌گذارد. column store برای اسکن و تجمیع چند ستون ساخته شده، نه برای برگرداندن ردیف کامل (pp. 12–16).
 
-Databases use files, but with their own formats instead of filesystem hierarchies, for **storage efficiency** (little overhead per record), **access efficiency** (few steps to locate a record) and **update efficiency** (few changes on disk) (p. 17).
+### فایل داده و فایل index
 
-Tables are usually separate files, and records are found through **indexes**: auxiliary structures built over a subset of fields. Index files are usually smaller than data files. Files are split into **pages** of one or more disk blocks, organized as sequences of records or as slotted pages (Ch. 3) (pp. 17–18).
+دیتابیس‌ها فایل به کار می‌برند، ولی با قالب‌های خودشان به‌جای سلسله‌مراتب فایل‌سیستم، برای **کارایی ذخیره‌سازی**، یعنی سرریز کم برای هر رکوردی، **کارایی دسترسی**، یعنی قدم‌های کم برای یافتن رکوردی، و **کارایی به‌روزرسانی**، یعنی تغییرهای کم روی دیسک (p. 17).
 
-Most modern storage systems don't delete in place. They write **deletion markers** (tombstones) holding a key and a timestamp. **Garbage collection** later rewrites live records and discards the shadowed ones (p. 18).
+جدول‌ها معمولاً فایل‌های جدایند، و رکوردها از راه **index**ها پیدا می‌شوند: ساختارهای کمکی که روی زیرمجموعه‌ای از فیلدها بنا شده‌اند. فایل‌های index معمولاً از فایل‌های داده کوچک‌ترند. فایل‌ها به **صفحه**هایی از یک بلوک دیسک یا بیشتر شکسته می‌شوند، که به‌شکل دنباله‌ای از رکورد یا به‌شکل slotted page سازمان می‌یابند، از فصل ۳ (pp. 17–18).
 
-#### Data files
+بیشتر سیستم‌های ذخیره‌سازی امروزی سر جا حذف نمی‌کنند. **علامت حذف** می‌نویسند، که tombstone نامیده می‌شود و کلیدی و timestampی دارد. **garbage collectorی** بعدتر رکوردهای زنده را دوباره می‌نویسد و آن‌هایی را که سایه افتاده‌اند می‌اندازد (p. 18).
 
-| Data file type | Organization (p. 18) |
+#### فایل داده
+
+| گونه‌ی فایل داده | سازمان (p. 18) |
 |---|---|
-| **Heap file** (heap-organized table) | No particular order, usually write order; appends need no reorganization; requires a separate index |
-| **Hashed file** | The key's hash picks a **bucket**; within a bucket, records are in append order or sorted |
-| **Index-organized table (IOT)** | Records live *in* the index, in key order; range scans read sequentially; saves at least one seek per lookup |
+| **فایل heap** که جدول heap‌چیده است | ترتیب معینی ندارد، و معمولاً ترتیب نوشتن؛ افزودن سازمان‌دهی دوباره لازم ندارد؛ index جدایی می‌خواهد |
+| **فایل hash‌شده** | مقدار hash کلید **bucket**ی را برمی‌دارد؛ درون bucketی، رکوردها به ترتیب افزودن یا مرتب‌اند |
+| **جدول index‌چیده** که IOT است | رکوردها *در* index زندگی می‌کنند، به ترتیب کلید؛ اسکن بازه‌ای ترتیبی خوانده می‌شود؛ برای هر جست‌و‌جویی دست‌کم یک seek صرفه‌جویی می‌کند |
 
-When records live in a separate file, index entries hold enough to find them, such as file offsets (**row locators**) or bucket IDs. In IOTs, the entries hold the records themselves (p. 18).
+وقتی رکوردها در فایلی جدا زندگی کنند، entryهای index آن‌قدری دارند که پیدایشان کنند، مثل offset فایل که **row locator** است، یا ID مربوط به bucket. در IOTها، entryها خود رکوردها را دارند (p. 18).
 
-#### Index files
+#### فایل index
 
-An index maps keys to the locations of records (heap files) or to primary keys (IOTs). The index on the primary file is the **primary index**, usually over the primary key. All others are **secondary**. They point either to the record or to its primary key, and they may hold several entries per search key (p. 19).
+هر indexی کلیدها را به جای رکوردها، در فایل heap، یا به کلیدهای اولیه، در IOT، map می‌کند. آن indexی که روی فایل اصلی است **index اولیه** است، و معمولاً روی کلید اولیه. بقیه همه **ثانویه**اند. یا به رکورد اشاره می‌کنند یا به کلید اولیه‌اش، و می‌توانند برای هر کلید جست‌و‌جویی چند entry داشته باشند (p. 19).
 
-![(a) An index-organized table keeps the records in the tree's leaves; (b) a separate index file whose leaves point into a data file](../figures/01-05.png)
+![(الف) جدولی index‌چیده که رکوردها را در برگ‌های درخت نگه می‌دارد؛ (ب) فایل indexی جدا که برگ‌هایش به فایل داده اشاره می‌کنند](../figures/01-05.png)
 
-*Figure 1-5 (p. 19): (a) records in the index itself; (b) the index stores offsets into a separate data file (data segments shaded).*
+*Figure 1-5 (p. 19): (الف) رکوردها در خود index؛ (ب) آن index offsetهایی را در فایل داده‌ی جدا ذخیره می‌کند، که قطعه‌های داده سایه خورده‌اند.*
 
-| | Clustered (clustering) | Nonclustered (unclustered) |
+| | clusterی | ناخوشه‌ای |
 |---|---|---|
-| Data order | Follows the key order | Doesn't follow the key order |
-| Typical | IOTs (always), most primary indexes | Secondary indexes (by definition) |
+| ترتیب داده | از ترتیب کلید پی می‌گیرد | از ترتیب کلید پی نمی‌گیرد |
+| معمولاً | IOTها، همیشه، و بیشتر indexهای اولیه | indexهای ثانویه، بنا به تعریف |
 
-If no primary key is specified, the engine may create an implicit one. MySQL InnoDB, for example, adds an auto-increment column. The terminology applies across relational systems (MySQL, PostgreSQL), Dynamo-based stores (Cassandra, Riak) and document stores (MongoDB) (p. 20).
+اگر کلید اولیه‌ای مشخص نشود، موتور می‌تواند کلیدی ضمنی بسازد. مثلاً InnoDB در MySQL ستونی خود‌افزا می‌افزاید. این اصطلاح‌ها در سیستم‌های رابطه‌ای یعنی MySQL و PostgreSQL، و انباره‌های Dynamo‌محور یعنی Cassandra و Riak، و انباره‌های document یعنی MongoDB به کار می‌آیند (p. 20).
 
-#### Primary index as an indirection
+#### ساختار index اولیه به‌شکل واسطه
 
-Should secondary indexes point at records directly or through the primary index? (p. 20)
+آیا indexهای ثانویه باید یک‌راست به رکوردها اشاره کنند یا از راه index اولیه؟ (p. 20)
 
-| | Direct offsets | Primary-key indirection |
+| | offset مستقیم | واسطه‌شدن کلید اولیه |
 |---|---|---|
-| Reads | Fewer seeks | Two lookups (secondary, then primary) |
-| Updates and relocations | Every index pointer must be updated | Only the primary index changes |
-| Suits | Read-mostly workloads with few indexes | Write-heavy workloads with many indexes; e.g. **MySQL InnoDB** |
+| خواندن | seek کم‌تر | دو جست‌و‌جو، اول ثانویه بعد اولیه |
+| به‌روزرسانی و جابه‌جایی | هر اشاره‌گر indexی باید به‌روز شود | تنها index اولیه عوض می‌شود |
+| به چه می‌خورد | بارهای بیشتر‌خوان با indexهای کم | بارهای پرنوشتن با indexهای زیاد؛ مثلاً **InnoDB در MySQL** |
 
-![(a) primary and secondary indexes both point straight into the data file; (b) the secondary index points to primary-index entries, which point to the data](../figures/01-06.png)
+![(الف) indexهای اولیه و ثانویه هر دو یک‌راست به فایل داده اشاره می‌کنند؛ (ب) index ثانویه به entryهای index اولیه اشاره می‌کند، که به داده اشاره می‌کنند](../figures/01-06.png)
 
-*Figure 1-6 (p. 21): (a) every index holds data offsets, so moving a record touches them all; (b) secondary entries go through the primary index.*
+*Figure 1-6 (p. 21): (الف) هر indexی offsetهای داده را دارد، پس جابه‌جا کردن رکوردی به همه‌شان دست می‌زند؛ (ب) entryهای ثانویه از index اولیه رد می‌شوند.*
 
-A hybrid stores both an offset and the primary key. It tries the offset first and, if it's stale, goes through the primary index and repairs the offset (p. 21).
+روشی دوگانه هم offset و هم کلید اولیه را ذخیره می‌کند. اول offset را می‌کوشد و، اگر کهنه باشد، از index اولیه رد می‌شود و offset را تعمیر می‌کند (p. 21).
 
-### Buffering, immutability, and ordering
+> **In practice:** index اولیه‌ی ClickHouse sparse است: برای هر granule، که پیش‌فرضش ۸۱۹۲ ردیف است، یک entry، و فقط روی ستون‌های `ORDER BY`.
+>
+> **Your turn:** چرا پیدا کردن یک `transaction_id` تنها در ClickHouse کند است، در حالی که دیتابیس منبع آن را در چند میلی‌ثانیه پیدا می‌کند؟
+>
+> *Answer:* منبع روی کلید index از نوع B-Tree دارد که مستقیم به ردیف می‌رسد؛ index ClickHouse فقط ستون‌های `ORDER BY` را می‌شناسد، پس برای ستونی بیرون از آن باید همه‌ی granuleها را اسکن کند، مگر یک skip index بسازید. این همان تمایز index اولیه و ثانویه در کتاب است (pp. 17–20).
 
-Data structures don't describe caching, recovery or transactions; storage engines add those (p. 21). Most of the differences between the storage structures in the book come from three variables (pp. 21–22):
+### سه اصل buffer کردن، immutability و ترتیب
 
-| Variable | Question | Examples in the book |
+ساختارهای داده cache و بازیابی و تراکنش را وصف نمی‌کنند؛ موتورهای ذخیره‌سازی آن‌ها را می‌افزایند (p. 21). بیشتر تفاوت‌های میان ساختارهای ذخیره‌سازی کتاب از سه متغیر می‌آید (pp. 21–22):
+
+| متغیر | پرسش | نمونه‌ها در کتاب |
 |---|---|---|
-| **Buffering** | Collect data in memory before writing? (beyond the unavoidable block-sized buffering) | Lazy B-Trees buffer in nodes (p. 114); two-component LSM Trees combine buffering with immutability (p. 132) |
-| **Mutability** | Update in place, or append / copy-on-write? | Copy-on-write B-Trees (p. 112); Bw-Trees are B-Tree-inspired but immutable (p. 120) |
-| **Ordering** | Store records in key order on disk? | Ordered → efficient range scans; out of order (insertion order) → write optimizations, as in Bitcask (p. 153) and WiscKey (p. 154) |
+| **buffer کردن** | داده پیش از نوشتن در حافظه جمع شود؟ فراتر از آن buffer کردن ناگزیر به اندازه‌ی بلوک | B-Treeهای تنبل در نودها buffer می‌کنند (p. 114)؛ LSM Treeهای دو‌مؤلفه‌ای buffer کردن را با immutability ترکیب می‌کنند (p. 132) |
+| **mutability** | سر جا به‌روز شود، یا افزودن و copy-on-write؟ | B-Treeهای copy-on-write (p. 112)؛ Bw-Treeها از B-Tree الهام گرفته‌اند ولی تغییرناپذیرند (p. 120) |
+| **ترتیب** | رکوردها روی دیسک به ترتیب کلید ذخیره شوند؟ | مرتب ← اسکن بازه‌ای کارا؛ بی‌ترتیب، یعنی ترتیب درج، ← بهینه‌سازی نوشتن، چنان‌که در Bitcask (p. 153) و WiscKey (p. 154) |
 
-### Summary
+### خلاصه
 
-The chapter covers DBMS architecture, memory- vs disk-based stores, row vs column layouts, data vs index files, and the buffering–mutability–ordering triad used throughout the book (pp. 22–23). Further reading: Hellerstein, Stonebraker and Hamilton's *Architecture of a Database System* (2007); Abadi et al., *The Design and Implementation of Modern Column-Oriented Database Systems* (2013); Faerber, Kemper and Larson, *Main Memory Database Systems* (2017) (p. 23).
+فصل معماری DBMS، انباره‌های حافظه‌محور در برابر دیسک‌محور، چیدمان ردیفی در برابر ستونی، فایل داده در برابر فایل index، و آن سه‌گانه‌ی buffer کردن و mutability و ترتیب را که در کل کتاب به کار می‌رود پوشش می‌دهد (pp. 22–23). خواندنی‌های بیشتر: مقاله‌ی *Architecture of a Database System* از هلرستین و استون‌بریکر و همیلتون در ۲۰۰۷؛ *The Design and Implementation of Modern Column-Oriented Database Systems* از ابادی و همکاران در ۲۰۱۳؛ و *Main Memory Database Systems* از فربر و کمپر و لارسون در ۲۰۱۷ (p. 23).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Option A | Option B |
+| انتخاب | گزینه‌ی الف | گزینه‌ی ب |
 |---|---|---|
-| Primary medium | Memory: fast, simple structures, volatile, costly | Disk: cheap, durable, needs disk-aware structures |
-| Layout | Row: whole-record access, point queries | Column: scans and aggregates, compression, SIMD |
-| Data file | Heap: cheap appends, needs an index | IOT: one fewer seek, ordered scans |
-| Secondary index target | Offset: fast reads | Primary key: cheap updates |
+| رسانه‌ی اصلی | حافظه: سریع، ساختارهای ساده، فرار، گران | دیسک: ارزان، پایا، ساختارهای دیسک‌آگاه لازم دارد |
+| چیدمان | ردیف: دسترسی به کل رکورد، query نقطه‌ای | ستون: اسکن و تجمیع، فشرده‌سازی، SIMD |
+| فایل داده | heap: افزودن ارزان، index لازم دارد | IOT: یک seek کم‌تر، اسکن مرتب |
+| هدف index ثانویه | offset: خواندن سریع | کلید اولیه: به‌روزرسانی ارزان |
 
-## Beyond the book
+## فراتر از کتاب
 
-- The third author of *Main Memory Database Systems* is Per-Åke Larson; the book's further-reading entry prints “Per-Åke Alfons”.
-- Many systems today mix the two layouts. PAX, for example, stores a page's rows column by column, and Parquet's row groups use the same idea.
+- نویسنده‌ی سوم *Main Memory Database Systems* پر-آکه لارسون است؛ entry خواندنی‌های بیشتر کتاب «Per-Åke Alfons» را چاپ می‌کند.
+- امروز خیلی از سیستم‌ها آن دو چیدمان را قاطی می‌کنند. مثلاً PAX ردیف‌های یک صفحه را ستون‌به‌ستون ذخیره می‌کند، و گروه‌های ردیف Parquet همان ایده را به کار می‌برند.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. B-Tree Basics](02-b-tree-basics.md) (wide, short trees on disk), [3. File Formats](03-file-formats.md) (pages and slotted pages), [5. Transaction Processing and Recovery](05-transaction-processing-and-recovery.md) (buffer, recovery and lock managers), [6. B-Tree Variants](06-b-tree-variants.md) (copy-on-write, lazy B-Trees, Bw-Trees), [7. Log-Structured Storage](07-log-structured-storage.md) (LSM Trees, Bitcask, WiscKey).
+- **فصل‌های مرتبط:** [فصل ۲: پایه‌های B-Tree](02-b-tree-basics.md) که درخت‌های پهن و کوتاه روی دیسک را دارد، [فصل ۳: قالب فایل](03-file-formats.md) که صفحه و slotted page را دارد، [فصل ۵: پردازش تراکنش و بازیابی](05-transaction-processing-and-recovery.md) که مدیرهای buffer و بازیابی و قفل را دارد، [فصل ۶: گونه‌های B-Tree](06-b-tree-variants.md) که copy-on-write و B-Treeهای تنبل و Bw-Tree را دارد، و [فصل ۷: ذخیره‌سازی log-structured](07-log-structured-storage.md) که LSM Tree و Bitcask و WiscKey را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Which storage engine components together provide concurrency control?**
-   - [ ] Buffer manager and recovery manager
-   - [x] Transaction manager and lock manager
-   - [ ] Access methods and query optimizer
+1. **کدام مؤلفه‌های موتور ذخیره‌سازی با هم concurrency control می‌دهند؟**
+   - [ ] مدیر buffer و مدیر بازیابی
+   - [x] مدیر تراکنش و مدیر قفل
+   - [ ] روش‌های دسترسی و optimizer برای query
 
-   *Answer:* The transaction manager keeps the database logically consistent; the lock manager protects physical integrity (p. 10).
+   *Answer:* مدیر تراکنش دیتابیس را منطقاً سازگار نگه می‌دارد؛ و مدیر قفل تمامیت فیزیکی را می‌پاید (p. 10).
 
-2. **How does an in-memory store avoid replaying its entire log after a crash?**
+2. **انباره‌ای in-memoryی چطور از replay کل logش پس از از کار افتادنی می‌پرهیزد؟**
 
-   *Answer:* It keeps a sorted on-disk backup, updated asynchronously from the log in batches. Each checkpoint lets the log up to that point be discarded (pp. 11–12).
+   *Answer:* پشتیبانی مرتب روی دیسک نگه می‌دارد، که asynchronous و دسته‌دسته از log به‌روز می‌شود. هر checkpointی می‌گذارد log تا آن نقطه انداخته شود (pp. 11–12).
 
-3. **A query computes the average price per symbol over ten years of quotes. Which layout fits?**
-   - [ ] Row-oriented
-   - [x] Column-oriented
-   - [ ] A wide column store
+3. **یک query میانگین قیمت هر symbol را روی ده سال نرخ حساب می‌کند. کدام چیدمان می‌خورد؟**
+   - [ ] ردیف‌محور
+   - [x] ستون‌محور
+   - [ ] یک wide column store
 
-   *Answer:* It scans many rows and reads only two columns. Column stores read just those columns and add cache, SIMD and compression benefits (pp. 14–15).
+   *Answer:* ردیف‌های زیادی را اسکن می‌کند و تنها دو ستون را می‌خواند. انباره‌های ستونی تنها همان ستون‌ها را می‌خوانند و سود cache و SIMD و فشرده‌سازی را هم می‌افزایند (pp. 14–15).
 
-4. **Is HBase a column-oriented database?**
+4. **آیا HBase دیتابیسی ستون‌محور است؟**
 
-   *Answer:* No. It's a wide column store: columns are grouped into families, and each family is stored row-wise as a sorted multidimensional map (p. 15).
+   *Answer:* نه. یک wide column store است: ستون‌ها در خانواده گروه می‌شوند، و هر خانواده‌ای ردیفی و به‌شکل نقشه‌ی مرتب چند‌بُعدی ذخیره می‌شود (p. 15).
 
-5. **Why does MySQL InnoDB look up the primary index after a secondary index hit?**
+5. **چرا InnoDB در MySQL پس از خوردن به index ثانویه index اولیه را جست‌و‌جو می‌کند؟**
 
-   *Answer:* Its secondary indexes store primary keys instead of offsets. Records can then move without updating every secondary index, at the cost of a second lookup (p. 20).
+   *Answer:* indexهای ثانویه‌اش به‌جای offset کلید اولیه را ذخیره می‌کنند. آن‌وقت رکوردها می‌توانند بی به‌روز شدن هر index ثانویه‌ای جابه‌جا شوند، به بهای جست‌و‌جویی دوم (p. 20).
 
-6. **Name the three variables the book uses to compare storage structures.**
+6. **آن سه متغیری را نام ببرید که کتاب برای مقایسه‌ی ساختارهای ذخیره‌سازی به کار می‌برد.**
 
-   *Answer:* Buffering, mutability (immutability) and ordering (pp. 21–22).
+   *Answer:* buffer کردن و mutability یا immutability و ترتیب (pp. 21–22).

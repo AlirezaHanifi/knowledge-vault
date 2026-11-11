@@ -3,293 +3,307 @@ book: database-internals
 chapter: 13
 title: "Distributed Transactions"
 pages: "257–278"
+translated_title: "تراکنش توزیع‌شده"
+lang: fa
 ---
 
-# 13. Distributed Transactions
+# فصل ۱۳: تراکنش توزیع‌شده
 
-[← 12. Anti-Entropy and Dissemination](12-anti-entropy-and-dissemination.md) · [Book](../README.md) · [14. Consensus →](14-consensus.md)
+[فصل ۱۲: anti-entropy و پخش →](12-anti-entropy-and-dissemination.md) · [کتاب](../README.md) · [فصل ۱۴: consensus ←](14-consensus.md)
 
-## Summary
+## خلاصه
 
-Chapter 11's consistency models cover single operations, but databases often need several operations to happen **atomically**, across partitions and nodes (p. 257). This chapter is the distributed counterpart of Ch. 5. Node-local concurrency control can't solve **multipartition** transactions, which need coordination between servers, distributed commit and rollback (p. 257). A transaction must be **recoverable**: if it fails, aborts or times out, it is rolled back completely, *on every node involved* (p. 258).
+مفهوم consistency modelها فصل ۱۱ عملیات تنها را می‌پوشانند، ولی دیتابیس‌ها اغلب لازم دارند چند عملیات **اتمی** رخ بدهند، بین پارتیشن‌ها و نودها (p. 257). این فصل همتای توزیع‌شده‌ی فصل ۵ است. concurrency control نود‌محلی نمی‌تواند تراکنش‌های **چند‌پارتیشنی** را حل کند، که هم‌آهنگی میان سرورها و commit و واگردان توزیع‌شده لازم دارند (p. 257). تراکنشی باید **بازیابی‌شدنی** باشد: اگر بشکند یا abort شود یا وقتش سر برود، تماماً واگردانده می‌شود، *روی هر نود درگیری* (p. 258).
 
-The chapter covers:
+فصل این‌ها را می‌پوشاند:
 
-- **Atomic commitment**:
-  - **Two-phase commit (2PC)**, which **blocks** if the coordinator fails after collecting votes;
-  - **Three-phase commit (3PC)**, which avoids blocking under synchronous assumptions but can **split brain** under partitions (pp. 258–266).
-- Two modern designs (pp. 266–270):
-  - **Calvin** (FaunaDB): a **sequencer** fixes a deterministic order of transaction batches before execution;
-  - **Spanner** (CockroachDB, YugaByte DB): **2PC over Paxos groups**, ordered by **TrueTime**, giving **external consistency**.
-- **Partitioning**: range sharding, hash-mod-N and **consistent hashing** (pp. 270–271).
-- **Percolator** (TiDB): snapshot isolation on Bigtable with client-driven 2PC (pp. 272–274).
-- **Coordination avoidance**: invariant confluence and **RAMP** transactions with read-atomic isolation (pp. 275–277).
+- **پروتکل commitment اتمی**:
+  - **پروتکل two-phase commit** یعنی 2PC، که اگر coordinator پس از جمع کردن رأی‌ها بشکند **بند می‌آید**؛
+  - **پروتکل three-phase commit** یعنی 3PC، که زیر فرض‌های هم‌زمان از بند آمدن می‌پرهیزد ولی زیر پارتیشن می‌تواند **split brain** بسازد (pp. 258–266).
+- دو طرح امروزی (pp. 266–270):
+  - **سیستم Calvin** که FaunaDB است: یک **sequencer** پیش از اجرا ترتیبی قطعی از دسته‌های تراکنش را ثابت می‌کند؛
+  - **سیستم Spanner** که CockroachDB و YugaByte DB هستند: **2PC روی گروه‌های Paxos**، که با **TrueTime** مرتب می‌شود و **external consistency** می‌دهد.
+- **پارتیشن‌بندی**: sharding بازه‌ای و hash moduleی و **consistent hashing** (pp. 270–271).
+- **سیستم Percolator** که TiDB است: isolationی snapshot روی Bigtable با 2PC کلاینت‌محور (pp. 272–274).
+- **پرهیز از هم‌آهنگی**: هم‌جوشی ناوردا و تراکنش‌های **RAMP** با isolationی خواندن اتمی (pp. 275–277).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Atomic commitment is unanimous.** A single "no" vote aborts the transaction, so these protocols can't tolerate Byzantine participants (p. 258).
-- **Cohorts only vote.** They can't change or propose alternatives to the transaction (p. 258).
-- **2PC's central promise:** once a cohort votes yes, it can't go back. Only the coordinator can abort (p. 262).
-- **2PC blocks on coordinator failure.** Cohorts that have voted yes can't decide alone if the coordinator dies before announcing the outcome (p. 263).
-- **3PC adds a prepare round and cohort timeouts,** but a partition during prepare lets some cohorts commit and others abort (pp. 264–266).
-- **Calvin removes coordination during execution.** Every replica gets the same ordered inputs and produces the same outputs; it needs read and write sets known up front (pp. 266–267).
-- **Spanner waits out clock uncertainty** before revealing a commit, so if T1 commits before T2 starts, ts(T1) < ts(T2) (pp. 268–270).
-- **Consistent hashing moves about K/n keys** when n nodes change, against almost all keys with hash mod N (p. 271).
-- **RAMP's read atomic isolation:** all of a transaction's writes are visible, or none, which rules out fractured reads, without mutual exclusion (p. 276).
+- **پروتکل commitment اتمی unanimous است.** یک رأی «نه» تراکنش را abort می‌کند، پس این پروتکل‌ها نمی‌توانند شرکت‌کننده‌های Byzantine را تحمل کنند (p. 258).
+- **دسته‌ها تنها رأی می‌دهند.** نمی‌توانند تراکنش را عوض کنند یا جایگزینی پیشنهاد بدهند (p. 258).
+- **قول مغزی 2PC:** همین که دسته‌ای رأی مثبت بدهد، نمی‌تواند پس بکشد. تنها coordinator می‌تواند abort کند (p. 262).
+- **روش 2PC سر شکست coordinator بند می‌آید.** دسته‌هایی که رأی مثبت داده‌اند اگر coordinator پیش از اعلام برآمد بمیرد نمی‌توانند تنها تصمیم بگیرند (p. 263).
+- **روش 3PC دوری آماده‌سازی و timeout برای دسته‌ها می‌افزاید**، ولی پارتیشنی در میانه‌ی آماده‌سازی می‌گذارد برخی دسته‌ها commit کنند و بقیه abort (pp. 264–266).
+- **سیستم Calvin هم‌آهنگی را در حین اجرا برمی‌دارد.** هر replicaیی همان ورودی‌های مرتب را می‌گیرد و همان خروجی‌ها را می‌سازد؛ مجموعه‌ی خواندن و نوشتن را از پیش معلوم لازم دارد (pp. 266–267).
+- **سیستم Spanner عدم قطعیت ساعت را به انتظار می‌نشیند** پیش از آشکار کردن commitی، پس اگر T1 پیش از شروع T2 commit کند، داریم ts(T1) < ts(T2) (pp. 268–270).
+- **روش consistent hashing وقتی n نود عوض شود تقریباً K/n کلید جابه‌جا می‌کند**، در برابر تقریباً همه‌ی کلیدها با hash moduleی (p. 271).
+- **یک isolation خواندن اتمی در RAMP:** همه‌ی نوشتن‌های تراکنشی دیدنی‌اند، یا هیچ‌کدام، که خواندن‌های شکسته را رد می‌کند، بی طرد متقابل (p. 276).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Making Operations Appear Atomic — p. 258
-- Two-Phase Commit — p. 259
-  - Cohort Failures in 2PC — p. 261
-  - Coordinator Failures in 2PC — p. 262
-- Three-Phase Commit — p. 264
-  - Coordinator Failures in 3PC — p. 265
-- Distributed Transactions with Calvin — p. 266
-- Distributed Transactions with Spanner — p. 268
-- Database Partitioning — p. 270
-  - Consistent Hashing — p. 271
-- Distributed Transactions with Percolator — p. 272
-- Coordination Avoidance — p. 275
-- Summary — p. 277
+- اتمی به نظر رساندن عملیات — ص. ۲۵۸
+- بخش two-phase commit — ص. ۲۵۹
+  - شکست دسته‌ها در 2PC — ص. ۲۶۱
+  - شکست coordinator در 2PC — ص. ۲۶۲
+- بخش three-phase commit — ص. ۲۶۴
+  - شکست coordinator در 3PC — ص. ۲۶۵
+- تراکنش توزیع‌شده با Calvin — ص. ۲۶۶
+- تراکنش توزیع‌شده با Spanner — ص. ۲۶۸
+- پارتیشن‌بندی دیتابیس — ص. ۲۷۰
+  - بخش consistent hashing — ص. ۲۷۱
+- تراکنش توزیع‌شده با Percolator — ص. ۲۷۲
+- پرهیز از هم‌آهنگی — ص. ۲۷۵
+- خلاصه — ص. ۲۷۷
 
-## Notes
+## یادداشت‌ها
 
-Transactions are state transitions from A to B with no predetermined state attached, so they can be reordered and retried (p. 257). A history is **serializable** if its dependency graph equals that of some serial history (p. 257). Even a money transfer is hundreds of small steps, so a transaction must execute first and become visible only afterwards (p. 258). Nodes fail and recover independently, yet atomicity must hold across all of them: changes reach every involved node durably, or none (Lampson) (p. 258).
+تراکنش‌ها گذار حالت از A به B هستند بی حالتی پیش‌تعیین‌شده که به‌شان چسبیده، پس مرتب‌شدنی و دوباره‌کوشیدنی‌اند (p. 257). تاریخی **serializable** است اگر گراف وابستگی‌اش با گراف تاریخی سری برابر باشد (p. 257). حتی انتقال پولی صدها قدم کوچک است، پس تراکنشی باید اول اجرا شود و تنها پس از آن دیدنی (p. 258). نودها مستقل می‌شکنند و بازیابی می‌شوند، با این حال اتمی بودن باید روی همه‌شان برقرار باشد: تغییرها پایا به هر نود درگیری می‌رسند، یا هیچ‌کدام، از لمپسون (p. 258).
 
-### Making operations appear atomic
+### اتمی به نظر رساندن عملیات
 
-**Atomic commitment** algorithms allow no disagreement. One "no" vote prevents the commit, and failed processes must reach the same conclusion as the rest. That's why they don't work with **Byzantine** failures (p. 258). The question is only *whether* to execute the proposed transaction: cohorts can't influence or replace it (p. 258).
+الگوریتم‌های **commitment اتمی** هیچ اختلافی را مجاز نمی‌کنند. یک رأی «نه» جلو commit را می‌گیرد، و processهای شکسته باید به همان نتیجه‌ی بقیه برسند. از همین‌جاست که با شکست‌های **Byzantine** کار نمی‌کنند (p. 258). پرسش تنها این است که آیا تراکنش پیشنهادشده اجرا شود: دسته‌ها نمی‌توانند روی آن اثر بگذارند یا عوضش کنند (p. 258).
 
-The algorithms leave the semantics of prepare, commit and rollback to implementers (p. 259):
+الگوریتم‌ها معناشناسی آماده‌سازی و commit و واگردان را به پیاده‌کننده‌ها می‌سپارند (p. 259):
 
-- when data is ready to commit, one pointer swap away from public;
-- how to commit so results become visible as quickly as possible;
-- how to roll back when the decision is to abort.
+- داده کِی آماده‌ی commit است، یعنی یک عوض کردن اشاره‌گر دور از عمومی شدن؛
+- چطور commit کنیم تا نتیجه‌ها تا جای ممکن زود دیدنی شوند؛
+- چطور واگردان کنیم وقتی تصمیم abort است.
 
-Users include MySQL (distributed transactions) and Kafka (producer-consumer interaction) (p. 259). The **transaction manager** schedules, coordinates, executes and tracks transactions, and ensures commits happen in all partitions and for all replicas (p. 259).
+به‌کار‌برندگان شامل MySQL برای تراکنش توزیع‌شده و Kafka برای تعامل تولید‌کننده و consumerاند (p. 259). **مدیر تراکنش** تراکنش‌ها را زمان‌بندی و هم‌آهنگ و اجرا و پی می‌گیرد، و تأمین می‌کند که commitها در همه‌ی پارتیشن‌ها و برای همه‌ی replicaها رخ بدهند (p. 259).
 
-### Two-phase commit
+### two-phase commit
 
-There's a **coordinator** (leader), which holds state, collects votes and is the reference point, and **cohorts**, usually partitions over disjoint datasets. Everyone keeps a local log of each step (p. 260). The coordinator can be the node that received the request, chosen at random, elected, assigned manually or fixed, and the role can be transferred (p. 260).
+یک **coordinator**، که leader است و حالت را دارد و رأی‌ها را جمع می‌کند و نقطه‌ی مرجع است، و **دسته**ها هستند، که معمولاً پارتیشن‌هایی روی مجموعه‌داده‌های مجزایند. همه logی محلی از هر قدمی نگه می‌دارند (p. 260). آن coordinator می‌تواند نودی باشد که درخواست را گرفته، یا تصادفی برداشته شود یا انتخاب شود یا دستی تخصیص داده شود یا ثابت باشد، و آن نقش انتقال‌پذیر است (p. 260).
 
-![Coordinator and three cohorts: in the propose phase the coordinator sends Propose and collects votes; in the commit/abort phase it sends Commit and collects acknowledgments](../figures/13-01.png)
+![coordinator و سه دسته: در فاز پیشنهاد، coordinator پیام Propose می‌فرستد و رأی‌ها را جمع می‌کند؛ در فاز commit یا abort، پیام Commit می‌فرستد و تأییدها را جمع](../figures/13-01.png)
 
-*Figure 13-1 (p. 261): two round trips — votes are persisted before the coordinator decides, and the decision is logged before it is sent.*
+*Figure 13-1 (p. 261): دو رفت‌و‌برگشت؛ رأی‌ها پیش از تصمیم coordinator پایا می‌شوند، و تصمیم پیش از فرستادنش log می‌شود.*
 
-| Phase | What happens (pp. 260–261) |
+| فاز | چه رخ می‌دهد (pp. 260–261) |
 |---|---|
-| **Prepare** | The coordinator sends **Propose**. Each cohort decides whether it can commit its part, executes the transaction locally into a **precommitted** state, and votes yes or no. Votes are persisted in the coordinator's log, and each cohort keeps a copy of its own decision |
-| **Commit/abort** | If *any* cohort votes no, everyone gets **Abort**. Only if all voted yes does everyone get **Commit** |
+| **آماده‌سازی** | آن coordinator پیام **Propose** را می‌فرستد. هر دسته‌ای تصمیم می‌گیرد که می‌تواند بخشش را commit کند یا نه، تراکنش را محلی تا حالتی **پیش‌commit‌شده** اجرا می‌کند، و رأی مثبت یا منفی می‌دهد. رأی‌ها در log آن coordinator پایا می‌شوند، و هر دسته‌ای کپی‌ای از تصمیم خودش نگه می‌دارد |
+| **commit یا abort** | اگر *هر* دسته‌ای رأی منفی بدهد، همه پیام **Abort** می‌گیرند. تنها اگر همه رأی مثبت داده باشند همه پیام **Commit** می‌گیرند |
 
-Every step is written to durable storage so state can be rebuilt after local failures and replayed for others. By commit time, the transaction's contents are already durable on every node (p. 261).
+هر قدمی روی ذخیره‌سازی پایا نوشته می‌شود تا حالت پس از شکست‌های محلی دوباره ساختنی و برای بقیه replay‌شدنی باشد. سر زمان commit، محتوای تراکنش از قبل روی هر نودی پایاست (p. 261).
 
-#### Cohort failures in 2PC
+#### شکست دسته‌ها در 2PC
 
-- **A cohort fails during propose:** the coordinator can't collect a unanimous yes and aborts. One node's failure blocks transactions, which hurts availability. Spanner runs 2PC over **Paxos groups** instead of individual nodes to fix this (pp. 261–262).
-- **A cohort fails after voting yes:** on recovery it must learn the actual decision, usually from the coordinator's persisted decision log, before serving requests, because others may have caused an abort (p. 262).
-- **Lost messages:** waits could last forever, so the coordinator times out during propose and aborts (p. 262).
+- **دسته‌ای در میانه‌ی آماده‌سازی می‌شکند:** آن coordinator نمی‌تواند رأی مثبت unanimous جمع کند و abort می‌کند. شکست یک نود تراکنش‌ها را بند می‌آورد، که به availability صدمه می‌زند. سیستم Spanner برای درستش کردن 2PC را به‌جای نودهای تک‌تک روی **گروه‌های Paxos** اجرا می‌کند (pp. 261–262).
+- **دسته‌ای پس از رأی مثبت می‌شکند:** سر بازیابی باید تصمیم واقعی را بفهمد، که معمولاً از log تصمیم پایا‌شده‌ی coordinator است، پیش از سرویس دادن به درخواست‌ها، چون بقیه می‌توانند abortی را باعث شده باشند (p. 262).
+- **پیام‌های گم‌شده:** انتظارها می‌توانستند تا ابد بکشند، پس coordinator در میانه‌ی آماده‌سازی وقتش سر می‌رود و abort می‌کند (p. 262).
 
-#### Coordinator failures in 2PC
+#### شکست coordinator در 2PC
 
-- **A cohort misses the decision:** it can learn it from peers' logs or a backup coordinator. Replicating the decision is safe because it is unanimous: a commit on one cohort means all commit (pp. 262–263).
-- **The coordinator fails after collecting votes but before broadcasting the outcome:** cohorts have *promised* to wait for its command and are left **uncertain** (Figure 13-4). If it never recovers, a replacement must collect votes again. **2PC is a blocking atomic commitment algorithm** (p. 263).
+- **دسته‌ای تصمیم را از قلم می‌اندازد:** می‌تواند از log همتاها یا از coordinatorی پشتیبان بفهمدش. تکرار کردن آن تصمیم ایمن است چون unanimous است: commit روی یک دسته یعنی همه commit می‌کنند (pp. 262–263).
+- **نقش coordinator پس از جمع کردن رأی‌ها و پیش از پخش برآمد می‌شکند:** دسته‌ها *قول داده‌اند* منتظر فرمانش بمانند و **نامطمئن** می‌مانند (شکل ۱۳-۴). اگر هیچ‌وقت بازیابی نشود، جانشینی باید رأی‌ها را دوباره جمع کند. **روش 2PC الگوریتم commitment اتمی بند‌آوری است** (p. 263).
 
-MySQL, PostgreSQL and MongoDB use 2PC; MongoDB's documentation as of v3.6 describes only transaction-like semantics (note 2). It's popular because it's simple and has few round trips, but it needs good recovery and backup coordinators (pp. 263–264).
+سیستم‌های MySQL و PostgreSQL و MongoDB از 2PC به کار می‌برند؛ مستند MongoDB تا نسخه‌ی ۳.۶ تنها معناشناسی از جنس تراکنش را وصف می‌کند، یادداشت ۲. همه‌گیر است چون ساده است و رفت‌و‌برگشت کمی دارد، ولی بازیابی خوب و coordinatorهای پشتیبان لازم دارد (pp. 263–264).
 
-### Three-phase commit
+> **In practice:** بار Bronze در ClickHouse و ذخیره‌ی cursor در dlt دو نوشتن در دو سیستم‌اند، بدون 2PC.
+>
+> **Your turn:** insert موفق شد و pod پیش از ذخیره‌ی cursor مرد. چه می‌شود، و چرا 2PC این‌جا راه معقولی نیست؟
+>
+> *Answer:* اجرای بعدی همان ردیف‌ها را دوباره می‌آورد و چون Silver dedup می‌کند، امن است. 2PC به participantهایی نیاز دارد که prepare را پشتیبانی کنند و اگر coordinator بیفتد بند می‌آید؛ at-least-once به‌علاوه‌ی dedup ساده‌تر و مقاوم‌تر است (pp. 260–264).
 
-3PC adds a step plus **timeouts on both sides**, so cohorts can commit or abort without the coordinator. It assumes a **synchronous** model with **no communication failures** (Skeen; Babaoglu and Toueg); the fine print assumes a highly reliable network without partitions (p. 259, note 1; p. 264).
+### three-phase commit
 
-![Three round trips between coordinator and cohorts: propose and vote, prepare and acknowledge, commit and committed](../figures/13-05.png)
+روش 3PC قدمی به‌علاوه‌ی **timeout در هر دو سو** می‌افزاید، تا دسته‌ها بتوانند بی coordinator commit یا abort کنند. مدلی **هم‌زمان** با **بی شکست ارتباط** را فرض می‌گیرد، از اسکین و باباوغلو و توگ؛ ریزنوشته‌اش شبکه‌ای به‌شدت قابل اطمینان و بی پارتیشن را فرض می‌گیرد (pp. 259, 264).
 
-*Figure 13-5 (p. 264): the extra prepare round means every cohort learns the decision before anyone commits, so cohorts can finish on timeout.*
+![سه رفت‌و‌برگشت میان coordinator و دسته‌ها: پیشنهاد و رأی، آماده‌سازی و تأیید، commit و commit‌شده](../figures/13-05.png)
 
-| Phase | What happens (pp. 264–265) |
+*Figure 13-5 (p. 264): آن دور آماده‌سازی اضافه یعنی هر دسته‌ای پیش از commit کردن هر کسی تصمیم را می‌فهمد، پس دسته‌ها می‌توانند timeout تمام کنند.*
+
+| فاز | چه رخ می‌دهد (pp. 264–265) |
 |---|---|
-| **Propose** | Send the value and collect votes. A coordinator crash with a timeout, or any "no", means abort |
-| **Prepare** | Tell cohorts the vote result: **Prepare** if all voted yes, else **Abort**. Cohorts that don't reach the prepared state abort on timeout |
-| **Commit** | Once all cohorts are prepared and acknowledged, the transaction **commits even if either side fails**, because everyone shares the same view. The commit message resets timeouts and finishes the round |
+| **پیشنهاد** | مقدار را بفرست و رأی‌ها را جمع کن. از کار افتادن coordinator با timeout، یا هر «نه»ای، یعنی abort |
+| **آماده‌سازی** | نتیجه‌ی رأی را به دسته‌ها بگو: پیام **Prepare** اگر همه رأی مثبت داده باشند، وگرنه **Abort**. دسته‌هایی که به حالت آماده نرسند timeout abort می‌کنند |
+| **commit** | همین که همه‌ی دسته‌ها آماده و تأییدکرده باشند، تراکنش **commit می‌کند حتی اگر هر یک از دو سو بشکند**، چون همه همان نما را مشترک دارند. پیام commit timeout‌ها را صفر و دور را تمام می‌کند |
 
-#### Coordinator failures in 3PC
+#### شکست coordinator در 3PC
 
-Transitions are coordinated: nobody advances until everyone finishes the previous phase. A cohort that hears nothing *before* passing the prepare phase aborts on timeout; *after* it, it commits (p. 265). This avoids 2PC's blocking (p. 265). The worst case is a **network partition** during prepare (Figure 13-6): prepared cohorts commit after their timeout while cut-off ones abort, a **split brain** in which everyone followed the protocol (pp. 265–266). Higher message overhead, possible contradictions and poor behaviour under partitions are probably why 3PC is rarely used (p. 266).
+گذارها هم‌آهنگ‌اند: هیچ‌کس جلو نمی‌رود تا همه فاز پیشین را تمام کنند. دسته‌ای که *پیش از* گذراندن فاز آماده‌سازی چیزی نشنود timeout abort می‌کند؛ و *پس از* آن، commit (p. 265). این از بند آمدن 2PC می‌پرهیزد (p. 265). بدترین حالت **پارتیشن شبکه** در میانه‌ی آماده‌سازی است (شکل ۱۳-۶): دسته‌های آماده پس از timeoutشان commit می‌کنند در حالی که بریده‌شده‌ها abort، که **split brain**ی است که در آن همه از پروتکل پی گرفتند (pp. 265–266). سرریز پیام بالاتر و تناقض ممکن و رفتار ضعیف زیر پارتیشن احتمالاً علت این است که 3PC کم به کار می‌رود (p. 266).
 
-> **Try it:** [2PC vs 3PC under failures](../widgets/13-commit-protocols.html) — run a commit round with three cohorts, crash the coordinator or partition a cohort at any step, and compare the outcomes: 2PC blocks with uncertain cohorts, while 3PC finishes but can split into commit and abort.
+> **Try it:** [مقایسه‌ی 2PC و 3PC زیر شکست](../widgets/13-commit-protocols.html)؛ دوری از commit را با سه دسته اجرا کنید، coordinator را از کار بیندازید یا دسته‌ای را در هر قدمی پارتیشن کنید، و برآمدها را مقایسه کنید: 2PC با دسته‌های نامطمئن بند می‌آید، در حالی که 3PC تمام می‌کند ولی می‌تواند به commit و abort بشکند.
 
-### Distributed transactions with Calvin
+### تراکنش توزیع‌شده با Calvin
 
-Have replicas agree on execution order and transaction boundaries **before** acquiring locks. Node failures then don't abort transactions, because other replicas run the same transactions (p. 266). 2PL and OCC have no deterministic order, so execution needs coordination. With deterministic order, all replicas get identical inputs and produce equivalent outputs (Thomson et al.; FaunaDB) (p. 266).
+بگذارید replicaها **پیش از** گرفتن قفل‌ها روی ترتیب اجرا و مرزهای تراکنش توافق کنند. آن‌وقت شکست نودها تراکنش‌ها را abort نمی‌کند، چون replicaهای دیگر همان تراکنش‌ها را اجرا می‌کنند (p. 266). روش‌های 2PL و OCC ترتیبی قطعی ندارند، پس اجرا هم‌آهنگی لازم دارد. با ترتیب قطعی، همه‌ی replicaها ورودی یکسان می‌گیرند و خروجی هم‌ارز می‌سازند، از تامسون و همکاران و FaunaDB (p. 266).
 
-![Three partitions, each with a sequencer, scheduler, workers and storage; every sequencer sends batches to every scheduler, and workers in different partitions exchange reads](../figures/13-07.png)
+![سه پارتیشن، که هر یک sequencer و scheduler و workerها و ذخیره‌سازی دارد؛ هر sequencerی دسته‌ها را به هر schedulerی می‌فرستد، و workerها در پارتیشن‌های مختلف خواندن رد و بدل می‌کنند](../figures/13-07.png)
 
-*Figure 13-7 (p. 268): sequencers feed all schedulers the same ordered batches; workers share only the remote reads they need.*
+*Figure 13-7 (p. 268): sequencerها همان دسته‌های مرتب را به همه‌ی schedulerها می‌خورانند؛ workerها تنها آن خواندن‌های دوری را مشترک می‌کنند که لازم دارند.*
 
-The sequencer collects transactions into 10 ms epochs and replicates the batches (via Paxos or a leader); the scheduler executes them deterministically, in parallel where safe; each worker (1) analyzes read and write sets, (2) reads local data and forwards it, (3) receives remote reads, and (4) executes and persists (pp. 266–267).
+آن sequencer تراکنش‌ها را در دوره‌های ۱۰ میلی‌ثانیه‌ای جمع می‌کند و دسته‌ها را تکرار، با Paxos یا leaderی؛ scheduler قطعی اجرایشان می‌کند، و هر جا ایمن باشد موازی؛ هر workerی (۱) مجموعه‌ی خواندن و نوشتن را تحلیل می‌کند، (۲) داده‌ی محلی را می‌خواند و می‌فرستد، (۳) خواندن‌های دور را می‌گیرد، و (۴) اجرا و پایا می‌کند (pp. 266–267).
 
-- The **sequencer** is the entry point for all transactions and fixes a global input order. Time is split into **epochs**, about 10 ms batches in the paper, which also serve as replication units (pp. 266–267).
-- The **scheduler** executes parts of transactions in parallel while preserving the sequencer's serial order. Replicas never talk to the sequencer again (p. 267).
-- Each transaction declares a **read set** and a **write set**. Calvin doesn't natively support transactions that need extra reads to determine those sets (p. 267).
-- The worker's four steps: (1) find local read-set records and the **active participants**, which hold write-set records; (2) read local records and forward them to active participants; (3) active participants receive remote reads; (4) execute and persist locally. Results aren't forwarded, because every participant computes them (p. 267).
-- Sequencers agree on each batch through **Paxos**, or through asynchronous replication with a leader, which has lower latency but costlier recovery (p. 267).
+- آن **sequencer** نقطه‌ی ورود همه‌ی تراکنش‌هاست و ترتیبی جهانی از ورودی را ثابت می‌کند. زمان به **دوره** بخش می‌شود، که در مقاله دسته‌های تقریباً ۱۰ میلی‌ثانیه‌ای‌اند، و یکای replication هم هستند (pp. 266–267).
+- آن **scheduler** بخش‌هایی از تراکنش‌ها را موازی اجرا می‌کند و در همان حال ترتیب سری sequencer را نگه می‌دارد. replicaها هیچ‌وقت دوباره با sequencer حرف نمی‌زنند (p. 267).
+- هر تراکنشی یک **مجموعه‌ی خواندن** و یک **مجموعه‌ی نوشتن** اعلام می‌کند. Calvin بومی از تراکنش‌هایی پشتیبانی نمی‌کند که برای تعیین آن مجموعه‌ها خواندن اضافه لازم دارند (p. 267).
+- چهار قدم worker: (۱) رکوردهای مجموعه‌ی خواندن محلی و **شرکت‌کننده‌های فعال** را پیدا کن، که رکوردهای مجموعه‌ی نوشتن را دارند؛ (۲) رکوردهای محلی را بخوان و به شرکت‌کننده‌های فعال بفرست؛ (۳) شرکت‌کننده‌های فعال خواندن‌های دور را می‌گیرند؛ (۴) محلی اجرا و پایا کن. نتیجه‌ها فرستاده نمی‌شوند، چون هر شرکت‌کننده‌ای حسابشان می‌کند (p. 267).
+- همه‌ی sequencerها روی هر دسته‌ای از راه **Paxos** توافق می‌کنند، یا از راه replication asynchronous با leaderی، که latency کم‌تری دارد ولی بازیابی گران‌تری (p. 267).
 
-### Distributed transactions with Spanner
+### تراکنش توزیع‌شده با Spanner
 
-Spanner is often contrasted with Calvin. Calvin reaches consensus on *sequencers*; Spanner runs **2PC over per-shard consensus groups**. Derivatives include CockroachDB and YugaByte DB (p. 268). **TrueTime** is a high-precision wall-clock API that returns an **uncertainty bound**, so operations can deliberately wait it out (p. 268).
+سیستم Spanner اغلب در برابر Calvin گذاشته می‌شود. Calvin روی *sequencer*ها به consensus می‌رسد؛ و Spanner **2PC روی گروه‌های consensus به‌تفکیک shard** اجرا می‌کند. برگرفته‌ها شامل CockroachDB و YugaByte DB‌اند (p. 268). **TrueTime** یک API ساعت دیواری پردقت است که **کران عدم قطعیت** برمی‌گرداند، پس عملیات می‌توانند عمداً به انتظارش بنشینند (p. 268).
 
-| Operation | How (pp. 268–269) |
+| عملیات | چطور (pp. 268–269) |
 |---|---|
-| **Read-write transaction** | Locks, pessimistic concurrency control, a leader replica |
-| **Read-only transaction** | Lock-free, at any replica. A leader is needed only to read at the *latest* timestamp |
-| **Snapshot read** | Consistent at a timestamp; records are versioned by commit time |
+| **تراکنش خواندن‌نوشتن** | قفل، concurrency control بدبینانه، یک replica از جنس leader |
+| **تراکنش فقط‌خواندن** | بی‌قفل، روی هر replicaیی. leader تنها برای خواندن در *تازه‌ترین* timestamp لازم است |
+| **خواندن snapshot** | در timestampی سازگار؛ رکوردها بر حسب زمان commit نسخه‌دار می‌شوند |
 
-**Architecture** (Figure 13-8, p. 269):
+**معماری** (شکل ۱۳-۸، ص. ۲۶۹):
 
-![Three replica groups; one leader replica runs 2PC with a transaction manager and lock table above its Paxos, tablet and storage layers, and connects to the leaders of other groups](../figures/13-08.png)
+![سه گروه replica؛ یک replica از جنس leader با مدیر تراکنش و جدول قفل بالای لایه‌های Paxos و tablet و ذخیره‌سازی‌اش 2PC اجرا می‌کند، و به leaderهای گروه‌های دیگر وصل می‌شود](../figures/13-08.png)
 
-*Figure 13-8 (p. 269): Paxos replicates each group; leaders add the lock table and the 2PC transaction manager for cross-group transactions.*
+*Figure 13-8 (p. 269): روش Paxos هر گروهی را تکرار می‌کند؛ leaderها جدول قفل و مدیر تراکنش 2PC را برای تراکنش‌های بین‌گروهی می‌افزایند.*
 
-- A **spanserver** holds tablets, each with a Paxos state machine. Replica sets form **Paxos groups**, the unit of placement and replication, each with a long-lived leader (Multi-Paxos).
-- Writes go through the group leader; reads can be served by any up-to-date replica.
-- The leader holds a **lock table** for 2PL and a **transaction manager** for multishard transactions. Snapshot reads skip the locks.
+- یک **spanserver** tabletها را دارد، که هر یک state machine Paxosی دارد. مجموعه‌های replica **گروه‌های Paxos** می‌سازند، که یکای جای‌دهی و replication‌اند و هر یک leaderی دیرزیست دارد، با Multi-Paxos.
+- نوشتن‌ها از leader گروه رد می‌شوند؛ و خواندن‌ها را هر replica به‌روزی می‌تواند سرویس بدهد.
+- آن leader یک **جدول قفل** برای 2PL و یک **مدیر تراکنش** برای تراکنش‌های چند‌shardی دارد. خواندن‌های snapshot از قفل‌ها می‌پرند.
 
-**Multishard commit** (pp. 269–270):
+**عمل commit چند‌shardی** (pp. 269–270):
 
-1. Group leaders coordinate a 2PC for consistency and use 2PL for isolation. Using Paxos groups as cohorts keeps 2PC available when some members are down; within a group, only the leader is contacted.
-2. Each participant leader acquires write locks, picks a **prepare timestamp** greater than any previous transaction's, and logs a prepare entry through Paxos.
-3. The coordinator picks a **commit timestamp** greater than every prepare timestamp and logs it through Paxos. It then **waits until that timestamp is in the past** (the commit wait), so clients only ever see results with past timestamps.
-4. It sends the timestamp to the client and the leaders, which log the commit in their groups and release their locks.
+۱. همه‌ی leaderهای گروه یک 2PC را برای consistency هم‌آهنگ می‌کنند و 2PL را برای isolation به کار می‌برند. به کار بردن گروه‌های Paxos به‌شکل دسته 2PC را وقتی برخی اعضا خواب‌اند available نگه می‌دارد؛ و درون گروهی، تنها با leader تماس گرفته می‌شود.
+۲. هر leader شرکت‌کننده‌ای قفل نوشتن می‌گیرد، یک **timestamp آماده‌سازی** بزرگ‌تر از هر تراکنش پیشینی برمی‌دارد، و entryی آماده‌سازی را از راه Paxos log می‌کند.
+۳. آن coordinator یک **timestamp commit** بزرگ‌تر از هر timestamp آماده‌سازی برمی‌دارد و از راه Paxos logش می‌کند. بعد **منتظر می‌ماند تا آن timestamp در گذشته باشد**، که انتظار commit است، تا کلاینت‌ها هیچ‌وقت نتیجه‌هایی با timestamp گذشته نبینند.
+۴. آن timestamp را به کلاینت و به leaderها می‌فرستد، که commit را در گروه‌هایشان log می‌کنند و قفل‌هایشان را رها.
 
-Single-shard transactions skip the transaction manager: the Paxos group and lock table are enough (p. 270). The result is **external consistency**, with real-time properties equivalent to linearizability: if T1 commits before T2 starts, ts(T1) < ts(T2) (p. 270). Multipartition transactions cost an extra 2PC round compared with Calvin (Abadi) (p. 270).
+تراکنش‌های تک‌shardی از مدیر تراکنش می‌پرند: گروه Paxos و جدول قفل کافی‌اند (p. 270). نتیجه **external consistency** است، با خاصیت‌های real-time هم‌ارز linearizability: اگر T1 پیش از شروع T2 commit کند، داریم ts(T1) < ts(T2) (p. 270). تراکنش‌های چند‌پارتیشنی در مقایسه با Calvin دور 2PC اضافه‌ای خرج دارند، از ابادی (p. 270).
 
-### Database partitioning
+### پارتیشن‌بندی دیتابیس
 
-**Partitioning** divides data into manageable segments. The simplest scheme splits it into **ranges**, each owned by one replica set, and clients or coordinators route requests by the **routing key**. This is **sharding** (p. 270).
+**پارتیشن‌بندی** داده را به قطعه‌های گرداندنی بخش می‌کند. ساده‌ترین طرح آن را به **بازه**هایی می‌شکند که هر یک را مجموعه‌ی replicaیی مالک است، و کلاینت‌ها یا coordinatorها درخواست‌ها را با **کلید مسیریابی** مسیر می‌دهند. این همان **sharding** است (p. 270).
 
-- Size partitions by load and value distribution: split hot ranges and dense ranges. Zip codes, for example, are unevenly populated (pp. 270–271).
-- When nodes join or leave, **relocate the data before updating cluster metadata** and rerouting. Some systems auto-shard using placement algorithms driven by load and data size (p. 271).
-- **Hashing** keys reduces range hotspots, because neighbouring keys land on different replica sets (p. 271).
-- **hash(v) mod N** is simple, but changing N to N′ remaps most keys, so most of the data moves (p. 271).
+- اندازه‌ی پارتیشن را از بار و توزیع مقدار بردارید: بازه‌های داغ و بازه‌های چگال را بشکنید. مثلاً کد پستی‌ها ناهموار جمعیت دارند (pp. 270–271).
+- وقتی نودها بپیوندند یا بروند، **پیش از به‌روز کردن metadata cluster داده را جابه‌جا کنید** و بعد مسیر بدهید. برخی سیستم‌ها با الگوریتم‌های جای‌دهی که بار و اندازه‌ی داده می‌رانندشان خودکار shard می‌کنند (p. 271).
+- **عمل hash کردن** کلیدها نقطه‌ی داغ بازه‌ای را کم می‌کند، چون کلیدهای همسایه روی مجموعه‌های replica مختلف می‌نشینند (p. 271).
+- عبارت **hash(v) mod N** ساده است، ولی عوض کردن N به N′ بیشتر کلیدها را دوباره map می‌کند، پس بیشتر داده جابه‌جا می‌شود (p. 271).
 
-#### Consistent hashing
+#### روش consistent hashing
 
-Cassandra and Riak map hash values onto a **ring** that wraps around. Each node sits at a position and owns the range from its predecessor's position to its own (p. 271). A join or leave affects only its **immediate neighbours**. With K keys and n nodes, only about **K/n** keys move on average (Karger et al.) (p. 271).
+سیستم‌های Cassandra و Riak مقدارهای hash را روی **حلقه**ای map می‌کنند که دور می‌زند. هر نودی در جایی می‌نشیند و بازه‌ی از جای پیشینش تا جای خودش را مالک است (p. 271). پیوستن یا رفتنی تنها روی **همسایه‌های بی‌واسطه**اش اثر می‌گذارد. با K کلید و n نود، به‌طور میانگین تنها تقریباً **K/n** کلید جابه‌جا می‌شود، از کارگر و همکاران (p. 271).
 
-### Distributed transactions with Percolator
+> **In practice:** warehouse ما امروز shard ندارد، ولی اگر روزی داشته باشد، انتخاب sharding key همین بحث است.
+>
+> **Your turn:** چرا `cityHash64(customer_id) % N` برای sharding key وقتی N عوض می‌شود دردسر دارد؟
+>
+> *Answer:* با mod N، افزودن یک shard تقریباً همه‌ی کلیدها را جابه‌جا می‌کند، و ClickHouse resharding خودکار ندارد؛ معمولاً shard تازه با weight بیشتر فقط داده‌ی تازه می‌گیرد. consistent hashing فقط حدود K/n کلید را جابه‌جا می‌کند (pp. 270–271).
 
-**Snapshot isolation (SI)** (p. 272):
+### تراکنش توزیع‌شده با Percolator
 
-- Every read in a transaction comes from a snapshot of everything committed before its start timestamp.
-- On a write-write conflict on the same cell, the **first committer wins**.
-- SI prevents **read skew**: with x + y = 100, T1 reads x = 70; T2 writes x = 50 and y = 50 and commits; T1 then reads y. Under SI it sees the old y, not 50, so its values stay consistent (Berenson et al.).
-- Its properties: repeatable reads of committed data, values consistent at a timestamp, and conflicting writes aborted and retried. Reads need no locks (p. 272).
-- It is **not serializable**: transactions that write disjoint cells can still cause **write skew** (p. 272).
+**یک isolation snapshot** که SI است (p. 272):
 
-**Percolator** is a transactional library on top of **Bigtable** (pp. 272–273).
+- هر خواندنی در تراکنشی از snapshotی از هر چیزی می‌آید که پیش از timestamp شروعش commit شده بود.
+- سر تعارض نوشتن‌نوشتن روی همان cell، **اولین commit‌کننده می‌برد**.
+- یک isolation SI جلو **کجی خواندن** را می‌گیرد: با x + y = 100، تراکنش T1 مقدار x = 70 را می‌خواند؛ T2 مقدارهای x = 50 و y = 50 را می‌نویسد و commit می‌کند؛ بعد T1 مقدار y را می‌خواند. زیر SI آن y قدیم را می‌بیند و نه ۵۰، پس مقدارهایش سازگار می‌مانند، از برنسون و همکاران.
+- خاصیت‌هایش: خواندن تکرارپذیر داده‌ی commit‌شده، مقدارهای سازگار در timestampی، و نوشتن‌های متعارض abort و دوباره‌کوشیده. خواندن‌ها قفل لازم ندارند (p. 272).
+- مفهوم serializable **نیست**: تراکنش‌هایی که cellهای مجزا می‌نویسند باز هم می‌توانند **write skew** بسازند (p. 272).
 
-- Data, write metadata (committed data locations) and locks live in **separate columns**. Bigtable's conditional mutations make each read-modify-write a single RPC (pp. 272–273).
-- A **timestamp oracle** issues cluster-wide monotonic timestamps, consulted twice: at start and at commit. Writes are buffered and committed with a **client-driven 2PC** (p. 273).
+**سیستم Percolator** کتابخانه‌ای تراکنشی روی **Bigtable** است (pp. 272–273).
 
-| Step | Figure 13-9 (pp. 273–274): credit $150 from Account2 to Account1 |
+- داده و metadata نوشتن، یعنی جای داده‌ی commit‌شده، و قفل‌ها در **ستون‌های جدا** زندگی می‌کنند. تغییرهای شرطی Bigtable هر خواندن‌تغییر‌نوشتنی را یک RPC تنها می‌کنند (pp. 272–273).
+- یک **غیب‌گوی timestamp** timestampهای یکنوای cluster‌سراسری صادر می‌کند، که دو بار پرسیده می‌شود: سر شروع و سر commit. نوشتن‌ها buffer می‌شوند و با **2PC کلاینت‌محور** commit (p. 273).
+
+| قدم | شکل ۱۳-۹ (pp. 273–274): واریز ۱۵۰ دلار از Account2 به Account1 |
 |---|---|
-| a. Initial | TS1 is the latest data for both accounts; no locks |
-| b. **Prewrite** | Lock every written cell and mark one as **primary**, used for recovery. Abort if a later write exists or any lock is held |
-| c. **Commit** | Release locks primary-first, replacing each lock with a **write record** pointing at the new data timestamp |
+| الف. آغازین | مقدار TS1 تازه‌ترین داده برای هر دو حساب است؛ قفلی نیست |
+| ب. **پیش‌نوشتن** | هر cell نوشته‌شده‌ای را قفل کن و یکی را **اصلی** علامت بزن، که برای بازیابی به کار می‌رود. اگر نوشتنی دیرتر وجود داشته باشد یا قفلی نگه داشته شده باشد abort کن |
+| ج. **commit** | قفل‌ها را اول‌اصلی رها کن، و هر قفلی را با یک **رکورد نوشتن** عوض کن که به timestamp داده‌ی تازه اشاره می‌کند |
 
-If the client dies mid-commit, a later transaction that finds an incomplete state releases the primary lock and commits, or commits the contents if the primary lock was already released. Locks are exclusive and transitions atomic (p. 273). **TiDB** follows the Percolator model and is MySQL-compatible (p. 274).
+اگر کلاینت در میانه‌ی commit بمیرد، تراکنشی دیرتر که حالتی ناتمام پیدا کند قفل اصلی را رها می‌کند و commit، یا اگر قفل اصلی از قبل رها شده بود محتوا را commit می‌کند. قفل‌ها انحصاری و گذارها اتمی‌اند (p. 273). سیستم **TiDB** از مدل Percolator پی می‌گیرد و با MySQL سازگار است (p. 274).
 
-### Coordination avoidance
+### پرهیز از هم‌آهنگی
 
-Bailis et al.: operations that are **invariant confluent** (I-confluent) need no coordination. Any two invariant-valid but diverged states can be **merged** into a valid state, so you define a merge function alongside each operation (p. 275). Transactions run against local snapshots, with any state from other partitions made available locally. Committed changes are migrated and merged into other nodes' snapshots (p. 275).
+بیلیس و همکاران: عملیاتی که **هم‌جوش ناوردا**، یعنی I-confluent، باشند هم‌آهنگی لازم ندارند. هر دو حالت ناورداـمعتبر ولی واگرا در حالتی معتبر **merge‌شدنی**اند، پس کنار هر عملیاتی تابع mergeی تعریف می‌کنید (p. 275). تراکنش‌ها در برابر snapshotهای محلی اجرا می‌شوند، و هر حالتی از پارتیشن‌های دیگر محلی در دسترس می‌شود. تغییرهای commit‌شده مهاجرت و در snapshot نودهای دیگر merge می‌شوند (p. 275).
 
-| Required property | Meaning (p. 275) |
+| خاصیت لازم | معنا (p. 275) |
 |---|---|
-| **Global validity** | Invariants hold for merged and diverged committed states; no transaction observes an invalid state |
-| **Availability** | If all nodes holding state are reachable, a transaction commits, or aborts if committing would violate an invariant |
-| **Convergence** | Without further transactions or indefinite partitions, nodes reach the same state |
-| **Coordination freedom** | Local execution doesn't depend on operations other nodes perform |
+| **اعتبار جهانی** | ناوردا برای حالت‌های commit‌شده‌ی merge‌شده و واگرا برقرار است؛ هیچ تراکنشی حالتی نامعتبر مشاهده نمی‌کند |
+| **availability** | اگر همه‌ی نودهایی که حالت را دارند دست‌یافتنی باشند، تراکنشی commit می‌کند، یا abort اگر commit کردن ناوردایی را نقض می‌کرد |
+| **هم‌گرایی** | بی تراکنش‌های بیشتر یا پارتیشن‌های بی‌پایان، نودها به همان حالت می‌رسند |
+| **آزادی از هم‌آهنگی** | اجرای محلی به عملیاتی که نودهای دیگر می‌کنند وابسته نیست |
 
-**RAMP** (Read-Atomic Multi-Partition) transactions (pp. 275–277):
+تراکنش‌های **RAMP**، یعنی Read-Atomic Multi-Partition (pp. 275–277):
 
-- **MVCC** plus metadata about in-flight writes. A reader that overlaps a writer can detect it and fetch the missing versions in an extra round.
-- **Synchronization independence:** one client's transactions never stall, abort or force waits on another's. **Partition independence:** clients contact only the partitions their transaction involves (p. 276).
-- **Read atomic isolation:** no in-flight, uncommitted or aborted changes are visible; a transaction's updates are seen in full or not at all, which rules out **fractured reads**. It gives atomic visibility *without* mutual exclusion (p. 276).
-- Local commit decisions must be globally valid: by the time a write is visible on one partition, the same transaction's writes are visible on every involved partition (p. 276).
-- Writes are installed with a two-phase **prepare** (place writes invisibly) and **commit/abort** (publish atomically across partitions) (p. 276).
-- Several versions coexist: the latest, in-flight and stale. Stale versions are kept only for in-progress reads (p. 277).
+- روش **MVCC** به‌علاوه‌ی metadata درباره‌ی نوشتن‌های در پرواز. خواننده‌ای که با نویسنده‌ای هم‌پوشان باشد می‌تواند تشخیصش بدهد و نسخه‌های گم‌شده را در دوری اضافه بگیرد.
+- **استقلال از synchronization:** تراکنش‌های یک کلاینت هیچ‌وقت تراکنش‌های دیگری را معطل یا abort نمی‌کنند یا به انتظار وا نمی‌دارند. **استقلال از پارتیشن:** کلاینت‌ها تنها با آن پارتیشن‌هایی تماس می‌گیرند که تراکنششان درگیرشان می‌کند (p. 276).
+- **یک isolation خواندن اتمی:** هیچ تغییر در پرواز یا commit‌نشده یا abort‌شده‌ای دیدنی نیست؛ به‌روزرسانی‌های تراکنشی کامل دیده می‌شوند یا هیچ، که **خواندن‌های شکسته** را رد می‌کند. دیدنی بودن اتمی را *بی* طرد متقابل می‌دهد (p. 276).
+- تصمیم‌های commit محلی باید جهانی معتبر باشند: تا وقتی نوشتنی روی پارتیشنی دیدنی شود، نوشتن‌های همان تراکنش روی هر پارتیشن درگیری دیدنی‌اند (p. 276).
+- نوشتن‌ها با دو فاز نصب می‌شوند: **آماده‌سازی** که نوشتن‌ها را نادیدنی جای می‌دهد، و **commit یا abort** که اتمی بین پارتیشن‌ها منتشرشان می‌کند (p. 276).
+- چند نسخه با هم زندگی می‌کنند: تازه‌ترین و در پرواز و کهنه. نسخه‌های کهنه تنها برای خواندن‌های در جریان نگه داشته می‌شوند (p. 277).
 
-### Summary
+### خلاصه
 
-2PC and 3PC are simple but limited. 2PC needs the coordinator, or a substitute, alive for the whole commit. 3PC relaxes that but splits brain under partitions (p. 277). Modern systems build distributed transactions on **consensus**: Calvin and Spanner both use Paxos. Consensus is more involved but more fault-tolerant, and decouples decisions from their initiators, letting participants decide *on a value* rather than whether to accept one (Gray and Lamport) (p. 277).
+روش‌های 2PC و 3PC ساده‌اند ولی محدود. روش 2PC لازم دارد coordinator، یا جانشینی، در کل commit زنده باشد. روش 3PC آن را شل می‌کند ولی زیر پارتیشن split brain می‌سازد (p. 277). سیستم‌های امروزی تراکنش توزیع‌شده را روی **consensus** بنا می‌کنند: Calvin و Spanner هر دو Paxos به کار می‌برند. consensus درگیرکننده‌تر ولی خطا‌تحمل‌تر است، و تصمیم‌ها را از آغازگرشان جدا می‌کند، و می‌گذارد شرکت‌کننده‌ها *روی مقداری* تصمیم بگیرند و نه این‌که آیا یکی را بپذیرند، از گری و Lamport (p. 277).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
 | | 2PC | 3PC | Calvin | Spanner | Percolator |
 |---|---|---|---|---|---|
-| Ordering | Coordinator | Coordinator | Sequencer epochs | TrueTime timestamps | Timestamp oracle |
-| Blocking on coordinator failure | ✓ blocks | ✗ (assumes no partitions) | ✗ (replicated sequencer) | ✗ (Paxos groups) | Client recovery via primary lock |
-| Partition behaviour | Blocks | Split brain possible | Consensus on batches | Consensus per shard | Bigtable-dependent |
-| Cost | 2 rounds | 3 rounds | Up-front read/write sets | Commit wait + 2PC across shards | 2 oracle calls + 2PC |
-| Isolation | Depends on local CC | — | Serializable (deterministic) | External consistency | Snapshot isolation |
+| ترتیب‌دهی | coordinator | coordinator | دوره‌های sequencer | timestampهای TrueTime | غیب‌گوی timestamp |
+| بند آمدن سر شکست coordinator | ✓ بند می‌آید | ✗ چون بی پارتیشن فرض می‌گیرد | ✗ چون sequencer تکرارشده | ✗ چون گروه‌های Paxos | بازیابی کلاینت از راه قفل اصلی |
+| رفتار زیر پارتیشن | بند می‌آید | split brain ممکن است | consensus روی دسته‌ها | consensus برای هر shardی | وابسته به Bigtable |
+| هزینه | ۲ دور | ۳ دور | مجموعه‌ی خواندن و نوشتن از پیش | انتظار commit به‌علاوه‌ی 2PC بین shardها | ۲ فراخوانی غیب‌گو به‌علاوه‌ی 2PC |
+| isolation | به concurrency control محلی بستگی دارد | — | serializable و قطعی | external consistency | isolationی snapshot |
 
-| Partitioning | Keys moved when n changes | Hotspots |
+| پارتیشن‌بندی | کلیدهای جابه‌جا‌شده وقتی n عوض شود | نقطه‌ی داغ |
 |---|---|---|
-| Range | Split/merge ranges | Sequential keys cluster |
-| hash mod N | Almost all | Spread |
-| Consistent hashing | ≈ K/n | Spread; vnodes even out the load |
+| بازه | شکستن و merge بازه‌ها | کلیدهای ترتیبی cluster می‌شوند |
+| hash moduleی | تقریباً همه | پخش‌شده |
+| consistent hashing | ≈ K/n | پخش‌شده؛ نودهای مجازی بار را هموار می‌کنند |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Commit wait in numbers.** Spanner's paper reports TrueTime uncertainty (ε) usually between 1 and 7 ms, so commit wait adds about 2ε per read-write transaction. CockroachDB uses NTP-bounded hybrid logical clocks instead and handles uncertainty by restarting reads rather than always waiting.
-- **Virtual nodes.** With a single position per node, consistent hashing leaves ownership uneven. Cassandra's `num_tokens` places each node at many points on the ring, so the K/n property also holds for load. The [consistent-hashing lab](../lab/13-consistent-hashing/README.md) measures keys moved and balance with and without vnodes.
-- **2PC's coordinator problem in practice.** The XA standard and PostgreSQL's `PREPARE TRANSACTION` leave "in-doubt" transactions holding locks until an operator or transaction manager resolves them: the blocking state on p. 263. See [DDIA Ch. 8](../../designing-data-intensive-applications/chapters/08-transactions.md).
+- **انتظار commit در عدد.** مقاله‌ی Spanner عدم قطعیت TrueTime یعنی ε را معمولاً میان ۱ و ۷ میلی‌ثانیه گزارش می‌دهد، پس انتظار commit تقریباً 2ε به هر تراکنش خواندن‌نوشتنی می‌افزاید. سیستم CockroachDB در عوض ساعت‌های منطقی دوگانه‌ی NTP‌کران‌دار به کار می‌برد و عدم قطعیت را با شروع دوباره‌ی خواندن‌ها رسیدگی می‌کند و نه با همیشه منتظر ماندن.
+- **نودهای مجازی.** با یک جای تنها برای هر نودی، consistent hashing مالکیت را ناهموار می‌گذارد. پارامتر `num_tokens` در Cassandra هر نودی را در جاهای زیادی روی حلقه می‌گذارد، پس آن خاصیت K/n برای بار هم برقرار است. [آزمایش consistent hashing](../lab/13-consistent-hashing/README.md) کلیدهای جابه‌جا‌شده و توازن را با و بی نود مجازی اندازه می‌گیرد.
+- **مسئله‌ی coordinator در 2PC در عمل.** استاندارد XA و `PREPARE TRANSACTION` در PostgreSQL تراکنش‌های «در شک» را می‌گذارند که قفل نگه می‌دارند تا گرداننده‌ای یا مدیر تراکنشی حلشان کند: همان حالت بند آمدن ص. ۲۶۳. [فصل ۸ کتاب DDIA](../../designing-data-intensive-applications/chapters/08-transactions.md) را ببینید.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Consistent hashing vs mod N](../lab/13-consistent-hashing/README.md) — assigns 100 000 keys to 10 nodes, adds an 11th, and counts how many keys move under `hash mod N`, a plain ring and a ring with virtual nodes, plus the per-node load spread.
-- **Related chapters:** [5. Transaction Processing and Recovery](05-transaction-processing-and-recovery.md) (2PL, snapshot isolation, MVCC), [11. Replication and Consistency](11-replication-and-consistency.md) (linearizability, external consistency), [14. Consensus](14-consensus.md) (Paxos under Calvin and Spanner), [10. Leader Election](10-leader-election.md) (per-partition leaders).
+- **Run it:** [consistent hashing در برابر moduleی](../lab/13-consistent-hashing/README.md)؛ صد هزار کلید را به ۱۰ نود تخصیص می‌دهد، یازدهمی را می‌افزاید، و می‌شمارد چند کلید زیر `hash mod N` و حلقه‌ی ساده و حلقه‌ای با نودهای مجازی جابه‌جا می‌شوند، به‌علاوه‌ی پخش بار برای هر نودی.
+- **فصل‌های مرتبط:** [فصل ۵: پردازش تراکنش و بازیابی](05-transaction-processing-and-recovery.md) که 2PL و isolationی snapshot و MVCC را دارد، [فصل ۱۱: replication و consistency](11-replication-and-consistency.md) که linearizability و external consistency را دارد، [فصل ۱۴: consensus](14-consensus.md) که Paxos زیر Calvin و Spanner را دارد، و [فصل ۱۰: انتخاب leader](10-leader-election.md) که leader برای هر پارتیشنی را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why can't atomic commitment protocols tolerate Byzantine participants?**
+1. **چرا پروتکل‌های commitment اتمی نمی‌توانند شرکت‌کننده‌های Byzantine را تحمل کنند؟**
 
-   *Answer:* They require unanimity. A participant that lies about its vote or decides arbitrarily contradicts that unanimity (p. 258).
+   *Answer:* unanimousی می‌خواهند. شرکت‌کننده‌ای که درباره‌ی رأیش دروغ بگوید یا دل‌بخواهی تصمیم بگیرد آن unanimousی را نقض می‌کند (p. 258).
 
-2. **What is the central promise a 2PC cohort makes?**
+2. **قول مغزی‌ای که دسته‌ای در 2PC می‌دهد چیست؟**
 
-   *Answer:* Once it votes yes, it won't go back on that decision. Only the coordinator can abort the transaction from then on (p. 262).
+   *Answer:* همین که رأی مثبت بدهد، از آن تصمیم پس نمی‌کشد. از آن پس تنها coordinator می‌تواند تراکنش را abort کند (p. 262).
 
-3. **The coordinator crashes after collecting all yes votes, before sending any decision. What state are the cohorts in?**
-   - [ ] They abort after a timeout
-   - [x] Uncertain: they've promised to wait and can't decide alone, so 2PC blocks
-   - [ ] They commit, since everyone voted yes
+3. **نقش coordinator پس از جمع کردن همه‌ی رأی‌های مثبت و پیش از فرستادن هر تصمیمی از کار می‌افتد. دسته‌ها در چه حالتی‌اند؟**
+   - [ ] پس از timeout abort می‌کنند
+   - [x] نامطمئن: قول داده‌اند منتظر بمانند و نمی‌توانند تنها تصمیم بگیرند، پس 2PC بند می‌آید
+   - [ ] همه commit می‌کنند، چون همه رأی مثبت دادند
 
-   *Answer:* They don't know whether the coordinator decided, or whether anyone was told (p. 263).
+   *Answer:* نمی‌دانند که coordinator تصمیم گرفته یا نه، یا این‌که به کسی گفته شده یا نه (p. 263).
 
-4. **How can 3PC end in a split brain?**
+4. **روش 3PC چطور می‌تواند در split brain تمام شود؟**
 
-   *Answer:* During a partition in the prepare phase, prepared cohorts commit after their timeout while cut-off cohorts that never got Prepare abort after theirs, all according to the protocol (pp. 265–266).
+   *Answer:* در میانه‌ی پارتیشنی در فاز آماده‌سازی، دسته‌های آماده پس از timeoutشان commit می‌کنند در حالی که دسته‌های بریده‌شده‌ای که هیچ‌وقت Prepare نگرفتند پس از مال خودشان abort، و همه بنا به پروتکل (pp. 265–266).
 
-5. **Why don't Calvin replicas need to exchange execution results?**
+5. **چرا replicaهای Calvin لازم نیست نتیجه‌های اجرا را رد و بدل کنند؟**
 
-   *Answer:* The sequencer gives every replica the same ordered input batches, and execution is deterministic, so each computes and persists the same results locally (p. 267).
+   *Answer:* آن sequencer به هر replicaیی همان دسته‌های ورودی مرتب را می‌دهد، و اجرا قطعی است، پس هر کدام همان نتیجه‌ها را محلی حساب و پایا می‌کند (p. 267).
 
-6. **What does Spanner's commit wait achieve?**
+6. **انتظار commit در Spanner به چه چیزی می‌رسد؟**
 
-   *Answer:* The coordinator waits until the chosen commit timestamp has passed, given TrueTime's uncertainty, before revealing it. Clients therefore never see results timestamped in the future, which gives external consistency (p. 270).
+   *Answer:* آن coordinator، با توجه به عدم قطعیت TrueTime، منتظر می‌ماند تا timestamp commit برداشته‌شده گذشته باشد، پیش از آشکار کردنش. پس کلاینت‌ها هیچ‌وقت نتیجه‌هایی با timestamp آینده نمی‌بینند، که external consistency می‌دهد (p. 270).
 
-7. **Ten nodes become eleven. Roughly what fraction of keys moves under hash mod N, and under consistent hashing?**
+7. **ده نود یازده می‌شوند. تقریباً چه سهمی از کلیدها زیر hash moduleی جابه‌جا می‌شود، و زیر consistent hashing؟**
 
-   *Answer:* Under mod N, most keys (≈ 10/11) change owner. Under consistent hashing, only about K/n, the keys in the range the new node takes over (p. 271).
+   *Answer:* زیر module‌ای، بیشتر کلیدها، یعنی تقریباً ۱۰/۱۱، مالکشان عوض می‌شود. زیر consistent hashing، تنها تقریباً K/n، یعنی کلیدهای آن بازه‌ای که نود تازه تحویل می‌گیرد (p. 271).
 
-8. **What is the role of Percolator's primary lock?**
+8. **نقش قفل اصلی در Percolator چیست؟**
 
-   *Answer:* It is the commit point used for recovery. If a client dies mid-commit, a later transaction checks the primary lock: if it's released, the transaction committed and its remaining locks are rolled forward; otherwise it can be cleaned up (pp. 273).
+   *Answer:* نقطه‌ی commit است که برای بازیابی به کار می‌رود. اگر کلاینتی در میانه‌ی commit بمیرد، تراکنشی دیرتر آن قفل اصلی را می‌سنجد: اگر رها شده باشد، تراکنش commit کرده و قفل‌های باقی‌مانده‌اش رو‌به‌جلو برده می‌شوند؛ وگرنه می‌شود تمیزش کرد (p. 273).
 
-9. **What anomaly does RAMP's read atomic isolation rule out?**
+9. **یک isolation خواندن اتمی در RAMP کدام ناهنجاری را رد می‌کند؟**
 
-   *Answer:* Fractured reads: seeing only some of another transaction's writes. All of a transaction's updates become visible together or not at all (p. 276).
+   *Answer:* خواندن‌های شکسته: دیدن تنها بخشی از نوشتن‌های تراکنشی دیگر. همه‌ی به‌روزرسانی‌های تراکنشی با هم دیدنی می‌شوند یا هیچ (p. 276).

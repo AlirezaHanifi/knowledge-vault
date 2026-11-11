@@ -1,79 +1,79 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LSM Merge and Compaction</title>
-<meta name="description" content="Write, overwrite and delete keys in an LSM Tree, flush memtables to sorted tables, step through the book&#x27;s merge-iteration example, and compare leveled and size-tiered compaction by tables per read, records rewritten and space used. Illustrates Database Internals, Chapter 7.">
+<title>merge و compaction در LSM</title>
+<meta name="description" content="در LSM Treeی کلید بنویسید و روی‌نویسی و حذف کنید، memtableها را به جدول‌های مرتب فلاش کنید، نمونه‌ی merge‌پیمایی کتاب را قدم‌به‌قدم بگذرانید، و compaction سطحی و size-tiered را بر حسب جدول برای هر خواندنی و رکوردهای دوباره‌نوشته‌شده و فضای به‌کار‌رفته مقایسه کنید. تصویری از فصل ۷ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .lv { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: start; margin-bottom: 8px; }
   .lv > b { font-size: .76rem; color: var(--ink-3); padding-top: 4px; }
   .tbls { display: flex; flex-wrap: wrap; gap: 6px; }
-  .tb { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 3px 5px; font-family: var(--mono); font-size: .7rem; background: var(--surface-2); max-width: 100%; }
+  .tb { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 3px 5px; font-family: var(--mono); font-size: .7rem; background: var(--surface-2); max-width: 100%; direction: ltr; text-align: left; }
   .tb.new { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
   .tb.hit { border-color: var(--warn); }
   .rec { white-space: nowrap; margin-right: 4px; }
   .rec.ts { color: var(--bad); }
   .mi { font-family: var(--mono); font-size: .78rem; }
   .mi table { border-collapse: collapse; width: 100%; }
-  .mi td, .mi th { border-bottom: 1px solid var(--line); padding: 3px 5px; text-align: left; }
+  .mi td, .mi th { border-bottom: 1px solid var(--line); padding: 3px 5px; text-align: right; }
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/07-log-structured-storage.html">Chapter 7</a><span aria-hidden="true">/</span>
-      <span aria-current="page">LSM compaction</span>
+      <a href="../chapters/07-log-structured-storage.html">فصل ۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">compaction در LSM</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 7 · Log-Structured Storage</div>
-  <h1>LSM Trees: merge-iteration and compaction</h1>
-  <p class="lede">An LSM Tree buffers writes in a <strong>memtable</strong> and flushes it as an immutable sorted table. Updates and deletes (<strong>tombstones</strong>) never touch older tables, so a read <strong>merge-iterates</strong> several tables and keeps the newest record per key. <strong>Compaction</strong> merges tables to bound that read cost. <strong>Leveled</strong> compaction keeps key ranges disjoint from level 1 on; <strong>size-tiered</strong> merges tables of similar size.</p>
-  <p class="source-note">Illustrates “LSM Tree Lookups”, “Merge-Iteration”, “Reconciliation” and “Maintenance in LSM Trees” (pp. 137–144). The merge-iteration stepper replays the book’s two-iterator example (pp. 139–140) exactly. The workload is the vault’s (seeded), and so are the thresholds: a 4-record memtable; leveled compaction with L0 merged into L1 at 2 tables, L1 holding up to 3 tables and tables of up to 4 records; size-tiered merging 3 tables of one size class. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۷ · ذخیره‌سازی log-structured</div>
+  <h1>LSM Tree: merge‌پیمایی و compaction</h1>
+  <p class="lede">LSM Tree نوشتن‌ها را در یک <strong>memtable</strong> buffer می‌کند و به‌شکل جدولی مرتب و immutable فلاشش می‌کند. به‌روزرسانی و حذف، یعنی <strong>tombstone</strong>، هیچ‌وقت به جدول‌های قدیمی‌تر دست نمی‌زنند، پس خواندنی چند جدول را <strong>merge‌پیمایی</strong> می‌کند و تازه‌ترین رکورد هر کلیدی را نگه می‌دارد. <strong>compaction</strong> جدول‌ها را merge می‌کند تا آن هزینه‌ی خواندن را کران بزند. compaction <strong>سطحی</strong> بازه‌های کلید را از سطح ۱ به بعد ناهم‌پوشان نگه می‌دارد؛ و <strong>size-tiered</strong> جدول‌های هم‌اندازه را merge می‌کند.</p>
+  <p class="source-note">تصویری از «جست‌و‌جو در LSM Tree» و «merge‌پیمایی» و «آشتی‌دهی» و «نگهداشت در LSM Tree» (صص. ۱۳۷–۱۴۴). قدم‌گذران merge‌پیمایی نمونه‌ی دو‌پیمایش‌گری کتاب (صص. ۱۳۹–۱۴۰) را دقیق replay می‌کند. بار کاری مال vault است، با seed، و همچنین این آستانه‌ها: memtable چهار‌رکوردی؛ compaction سطحی با L0 که سر ۲ جدول در L1 merge می‌شود، و L1 که تا ۳ جدول دارد و جدول‌هایی تا ۴ رکورد؛ و size-tiered که ۳ جدول از یک رده‌ی اندازه را merge می‌کند. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
-      <div class="panel"><p class="panel-title">Memtable and tables (newest first within a level)</p><div id="lsm"></div>
-        <p class="field-hint"><span class="rec ts">k07:⟂</span> is a tombstone. Each record shows key:value and, after the dot, its write timestamp. The outlined table was written last; the amber-bordered tables were consulted by the last read.</p></div>
-      <div class="panel mi"><p class="panel-title">Merge-iteration, the book’s example (pp. 139–140)</p>
-        <div class="row"><button class="btn small" type="button" id="mi-step">Step merge ›</button><button class="btn small" type="button" id="mi-reset">↺</button></div>
+      <div class="panel"><p class="panel-title">memtable و جدول‌ها، با تازه‌ترین اول درون هر سطحی</p><div id="lsm"></div>
+        <p class="field-hint">عبارت <span class="rec ts">k07:⟂</span> یک tombstone است. هر رکوردی کلید و مقدار را نشان می‌دهد و، پس از نقطه، timestamp نوشتنش را. آن جدول خط‌دور آخر از همه نوشته شد؛ و جدول‌های با مرز کهربایی را آخرین خواندن پرسید.</p></div>
+      <div class="panel mi"><p class="panel-title">merge‌پیمایی، نمونه‌ی کتاب (صص. ۱۳۹–۱۴۰)</p>
+        <div class="row"><button class="btn small" type="button" id="mi-step">قدم merge ›</button><button class="btn small" type="button" id="mi-reset">↺</button></div>
         <div id="mi" style="margin-top:8px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div id="strat"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="put">Put</button><button class="btn small danger" type="button" id="delk">Delete</button><button class="btn small" type="button" id="read">Read</button></div>
-        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="flush">Flush memtable</button><button class="btn small" type="button" id="compact">Compact</button></div>
-        <p class="field-hint">Play runs a seeded workload (mostly puts to keys 1–16, some deletes) that flushes when the memtable is full and compacts automatically.</p>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="strat"></div>
+        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="put">گذاشتن</button><button class="btn small danger" type="button" id="delk">حذف</button><button class="btn small" type="button" id="read">خواندن</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="flush">memtable را فلاش کن</button><button class="btn small" type="button" id="compact">compact کن</button></div>
+        <p class="field-hint">پخش بار کاری seed‌داری را اجرا می‌کند، یعنی بیشتر گذاشتن روی کلیدهای ۱ تا ۱۶ و کمی حذف، که وقتی memtable پر شود فلاش می‌کند و خودکار compact.</p>
         <div id="player" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Reads get more expensive between compactions.</strong> Every table in L0 or in a size tier may contain the key, so all of them are checked; from L1 on, leveled compaction needs at most one table per level.</li>
-    <li><strong>Compaction rewrites data.</strong> Records rewritten per user write is the write amplification; leveled compaction usually pays more of it in exchange for fewer tables per read.</li>
-    <li><strong>Shadowed records waste space</strong> until compaction drops them: compare records stored with live keys.</li>
-    <li><strong>Tombstones live until the bottom.</strong> A tombstone is dropped only when the merge reaches the oldest data, otherwise the deleted value could resurrect.</li>
+    <li><strong>خواندن میان compactionها گران‌تر می‌شود.</strong> هر جدولی در L0 یا در لایه‌ای از اندازه می‌تواند آن کلید را داشته باشد، پس همه‌شان سنجیده می‌شوند؛ و از L1 به بعد، compaction سطحی حداکثر یک جدول برای هر سطحی لازم دارد.</li>
+    <li><strong>compaction داده را دوباره می‌نویسد.</strong> رکوردهای دوباره‌نوشته‌شده برای هر نوشتن کاربری همان تقویت نوشتن است؛ compaction سطحی معمولاً بیشترش را می‌دهد در عوض جدول کم‌تر برای هر خواندنی.</li>
+    <li><strong>رکوردهای سایه‌خورده فضا حرام می‌کنند</strong> تا compaction بیندازدشان: رکوردهای ذخیره‌شده را با کلیدهای زنده مقایسه کنید.</li>
+    <li><strong>tombstoneها تا پایین زندگی می‌کنند.</strong> tombstoneی تنها وقتی انداخته می‌شود که merge به قدیمی‌ترین داده برسد، وگرنه آن مقدار حذف‌شده می‌توانست رستاخیز کند.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/07-log-structured-storage.html"><small>Lesson</small>7. Log-Structured Storage</a></li>
+    <li><a href="../chapters/07-log-structured-storage.html"><small>درس</small>فصل ۷: ذخیره‌سازی log-structured</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -93,15 +93,15 @@ function stats(rows) {
   function key(k) { return "k" + (k < 10 ? "0" : "") + k; }
   function reset() {
     r = Kit.rng(17); mem = {}; L0 = []; levels = [[], []]; tiers = []; ts = 0; tid = 0; writes = rewritten = 0; lastNew = null; lastHit = [];
-    log.clear(); log.add("Empty LSM Tree, " + (strat === "leveled" ? "leveled" : "size-tiered") + " compaction.", "muted"); render();
+    log.clear(); log.add("LSM Tree خالی، با compaction " + (strat === "leveled" ? "سطحی" : "size-tiered") + ".", "muted"); render();
   }
   function table(recs) { return { id: ++tid, recs: recs, lo: recs[0].k, hi: recs[recs.length - 1].k }; }
-  function put(k, del) { mem[k] = { k: k, v: del ? null : "v" + (ts + 1), ts: ++ts, del: !!del }; writes++; log.add((del ? "Delete " : "Put ") + key(k) + (del ? " → tombstone" : " = v" + ts), del ? "warn" : "ok"); if (Object.keys(mem).length >= MEM) flush(); }
+  function put(k, del) { mem[k] = { k: k, v: del ? null : "v" + (ts + 1), ts: ++ts, del: !!del }; writes++; log.add((del ? "حذف " : "گذاشتن ") + key(k) + (del ? " ← tombstone" : " = v" + ts), del ? "warn" : "ok"); if (Object.keys(mem).length >= MEM) flush(); }
   function flush() {
     var ks = Object.keys(mem).map(Number).sort(function (a, b) { return a - b; }); if (!ks.length) return;
     var t = table(ks.map(function (k) { return mem[k]; })); mem = {}; lastNew = t;
     if (strat === "leveled") L0.unshift(t); else tiers.unshift(t);
-    log.add("Flush memtable → table #" + t.id + " (" + t.recs.length + " records)", "muted"); autoCompact();
+    log.add("فلاش memtable ← جدول #" + t.id + " با " + t.recs.length + " رکورد", "muted"); autoCompact();
   }
   function merge(tables, dropTomb) {
     var best = {};
@@ -111,7 +111,6 @@ function stats(rows) {
   function chunk(recs) { var out = []; for (var i = 0; i < recs.length; i += 4) out.push(table(recs.slice(i, i + 4))); return out; }
   function overlaps(t, lo, hi) { return t.lo <= hi && t.hi >= lo; }
   function compactLevel(src, n) {
-    // merge src tables into level n (1-based index into levels)
     var lo = Math.min.apply(null, src.map(function (t) { return t.lo; })), hi = Math.max.apply(null, src.map(function (t) { return t.hi; }));
     var dst = levels[n - 1], over = dst.filter(function (t) { return overlaps(t, lo, hi); });
     var bottom = levels.slice(n).every(function (l) { return !l.length; });
@@ -119,7 +118,7 @@ function stats(rows) {
     rewritten += recs.length;
     levels[n - 1] = dst.filter(function (t) { return over.indexOf(t) < 0; }).concat(out).sort(function (a, b) { return a.lo - b.lo; });
     lastNew = out[0] || null;
-    log.add("Compact " + src.length + " table" + (src.length > 1 ? "s" : "") + " + " + over.length + " overlapping in L" + n + " → " + out.length + " table" + (out.length === 1 ? "" : "s") + " in L" + n + (bottom ? " (bottom level: tombstones dropped)" : ""), "warn");
+    log.add("compact کردن " + src.length + " جدول به‌علاوه‌ی " + over.length + " جدول هم‌پوشان در L" + n + " ← " + out.length + " جدول در L" + n + (bottom ? "؛ پایین‌ترین سطح است، پس tombstoneها انداخته شدند" : ""), "warn");
   }
   function autoCompact() {
     if (strat === "leveled") {
@@ -136,14 +135,14 @@ function stats(rows) {
           var recs = merge(grp, all); rewritten += recs.length;
           tiers = tiers.filter(function (t) { return grp.indexOf(t) < 0; });
           if (recs.length) { var nt = table(recs); tiers.push(nt); lastNew = nt; }
-          log.add("Size tier " + Math.pow(2, +c) + "–" + (Math.pow(2, +c + 1) - 1) + " records has 3 tables: merge into one of " + recs.length + " records", "warn"); again = true;
+          log.add("لایه‌ی اندازه‌ی " + Math.pow(2, +c) + " تا " + (Math.pow(2, +c + 1) - 1) + " رکورد سه جدول دارد: در یکی با " + recs.length + " رکورد merge می‌شود", "warn"); again = true;
         });
       }
     }
   }
   function forceCompact() {
     if (strat === "leveled") { if (L0.length) { var s = L0; L0 = []; compactLevel(s, 1); } else if (levels[0].length) { var t = levels[0].shift(); compactLevel([t], 2); } }
-    else if (tiers.length > 1) { var recs = merge(tiers, true); rewritten += recs.length; log.add("Major compaction: merge all " + tiers.length + " tables", "warn"); tiers = recs.length ? [table(recs)] : []; lastNew = tiers[0]; }
+    else if (tiers.length > 1) { var recs = merge(tiers, true); rewritten += recs.length; log.add("compaction بزرگ: merge کردن هر " + tiers.length + " جدول", "warn"); tiers = recs.length ? [table(recs)] : []; lastNew = tiers[0]; }
   }
   function allTables() { return strat === "leveled" ? L0.concat(levels[0], levels[1]) : tiers; }
   function consulted(k) { return allTables().filter(function (t) { return k >= t.lo && k <= t.hi; }); }
@@ -151,7 +150,7 @@ function stats(rows) {
     lastHit = consulted(k); var cand = mem[k] ? [mem[k]] : [];
     lastHit.forEach(function (t) { t.recs.forEach(function (x) { if (x.k === k) cand.push(x); }); });
     var best = cand.sort(function (a, b) { return b.ts - a.ts; })[0];
-    log.add("Read " + key(k) + ": memtable + " + lastHit.length + " table" + (lastHit.length === 1 ? "" : "s") + " checked → " + (!best || best.del ? "not found" : best.v), "muted");
+    log.add("خواندن " + key(k) + ": memtable به‌علاوه‌ی " + lastHit.length + " جدول سنجیده شد ← " + (!best || best.del ? "پیدا نشد" : best.v), "muted");
   }
   function step() {
     var k = 1 + r.int(16), roll = r.next();
@@ -162,37 +161,36 @@ function stats(rows) {
     var m = Kit.clear(document.getElementById("lsm"));
     function rowFor(label, tables, memRecs) {
       var box = Kit.el("div", { class: "tbls" });
-      if (memRecs) box.appendChild(Kit.el("div", { class: "tb" }, memRecs.length ? memRecs.map(recEl) : "empty"));
-      tables.forEach(function (t) { box.appendChild(Kit.el("div", { class: "tb" + (t === lastNew ? " new" : "") + (lastHit.indexOf(t) >= 0 ? " hit" : ""), title: "table #" + t.id }, t.recs.map(recEl))); });
+      if (memRecs) box.appendChild(Kit.el("div", { class: "tb" }, memRecs.length ? memRecs.map(recEl) : "خالی"));
+      tables.forEach(function (t) { box.appendChild(Kit.el("div", { class: "tb" + (t === lastNew ? " new" : "") + (lastHit.indexOf(t) >= 0 ? " hit" : ""), title: "جدول #" + t.id }, t.recs.map(recEl))); });
       if (!memRecs && !tables.length) box.appendChild(Kit.el("span", { class: "field-hint" }, "—"));
       m.appendChild(Kit.el("div", { class: "lv" }, Kit.el("b", null, label), box));
     }
     function recEl(x) { return Kit.el("span", { class: "rec" + (x.del ? " ts" : "") }, key(x.k) + ":" + (x.del ? "⟂" : x.v) + "·" + x.ts); }
     rowFor("mem", [], Object.keys(mem).map(Number).sort(function (a, b) { return a - b; }).map(function (k) { return mem[k]; }));
-    if (strat === "leveled") { rowFor("L0", L0); rowFor("L1", levels[0]); rowFor("L2", levels[1]); } else rowFor("tables", tiers);
+    if (strat === "leveled") { rowFor("L0", L0); rowFor("L1", levels[0]); rowFor("L2", levels[1]); } else rowFor("جدول‌ها", tiers);
     var stored = allTables().reduce(function (a, t) { return a + t.recs.length; }, 0) + Object.keys(mem).length;
     var live = {}; [mem].concat(allTables().map(function (t) { var o = {}; t.recs.forEach(function (x) { o[x.k] = x; }); return o; })).forEach(function (o) { Object.keys(o).forEach(function (k) { if (!live[k] || live[k].ts < o[k].ts) live[k] = o[k]; }); });
     var liveN = Object.keys(live).filter(function (k) { return !live[k].del; }).length, worst = 0;
     for (var k = 1; k <= 16; k++) worst = Math.max(worst, consulted(k).length);
-    stats([["Tables", allTables().length], ["Worst tables per read", worst, worst > 3 ? "warn" : ""], ["Write amplification", writes ? (1 + rewritten / writes).toFixed(2) + "×" : "–"], ["Records stored / live keys", stored + " / " + liveN, stored > 2 * liveN ? "warn" : ""]]);
+    stats([["جدول‌ها", allTables().length], ["بدترین جدول برای هر خواندنی", worst, worst > 3 ? "warn" : ""], ["تقویت نوشتن", writes ? (1 + rewritten / writes).toFixed(2) + "×" : "–"], ["رکوردهای ذخیره‌شده و کلیدهای زنده", stored + " / " + liveN, stored > 2 * liveN ? "warn" : ""]]);
   }
-  // ---- merge-iteration stepper (book's example) ----
   var MI = [
-    { it1: "k2:v1, k4:v2", it2: "k1:v3, k2:v4, k3:v5", q: "—", out: "—", note: "Two iterators over sorted tables." },
-    { it1: "k4:v2", it2: "k2:v4, k3:v5", q: "k1:v3, k2:v1", out: "—", note: "Fill the priority queue with each iterator's head." },
-    { it1: "k4:v2", it2: "k3:v5", q: "k2:v1, k2:v4", out: "k1:v3", note: "Pop the smallest, k1; refill from iterator 2." },
-    { it1: "—", it2: "—", q: "k3:v5, k4:v2", out: "k1:v3, k2:v4", note: "Two k2 records from different sources: reconcile (v4 wins), refill from both." },
-    { it1: "—", it2: "—", q: "—", out: "k1:v3, k2:v4, k3:v5, k4:v2", note: "Drain the queue: one sorted, reconciled stream." }];
+    { it1: "k2:v1، k4:v2", it2: "k1:v3، k2:v4، k3:v5", q: "—", out: "—", note: "دو iterator روی جدول‌های مرتب." },
+    { it1: "k4:v2", it2: "k2:v4، k3:v5", q: "k1:v3، k2:v1", out: "—", note: "صف اولویت را با سر هر iteratorی پر کنید." },
+    { it1: "k4:v2", it2: "k3:v5", q: "k2:v1، k2:v4", out: "k1:v3", note: "کوچک‌ترین یعنی k1 را pop کنید؛ و از iterator ۲ پر." },
+    { it1: "—", it2: "—", q: "k3:v5، k4:v2", out: "k1:v3، k2:v4", note: "دو رکورد k2 از منبع‌های مختلف: آشتی بدهید، که v4 می‌برد، و از هر دو پر کنید." },
+    { it1: "—", it2: "—", q: "—", out: "k1:v3، k2:v4، k3:v5، k4:v2", note: "صف را تخلیه کنید: جریانی مرتب و آشتی‌داده." }];
   var mi = 0;
   function renderMI() {
     var m = Kit.clear(document.getElementById("mi")), s = MI[mi];
     m.appendChild(Kit.el("table", null, Kit.el("tbody", null,
-      [["Iterator 1", s.it1], ["Iterator 2", s.it2], ["Queue", s.q], ["Output", s.out]].map(function (rw) { return Kit.el("tr", null, Kit.el("th", { scope: "row" }, rw[0]), Kit.el("td", null, rw[1])); }))));
-    m.appendChild(Kit.el("p", { class: "field-hint", "aria-live": "polite" }, "Step " + (mi + 1) + "/" + MI.length + ": " + s.note));
+      [["iterator ۱", s.it1], ["iterator ۲", s.it2], ["صف", s.q], ["خروجی", s.out]].map(function (rw) { return Kit.el("tr", null, Kit.el("th", { scope: "row" }, rw[0]), Kit.el("td", null, rw[1])); }))));
+    m.appendChild(Kit.el("p", { class: "field-hint", "aria-live": "polite" }, "قدم " + (mi + 1) + "/" + MI.length + ": " + s.note));
   }
   document.getElementById("mi-step").addEventListener("click", function () { if (mi < MI.length - 1) mi++; renderMI(); });
   document.getElementById("mi-reset").addEventListener("click", function () { mi = 0; renderMI(); });
-  document.getElementById("strat").appendChild(Kit.segmented({ label: "Compaction strategy", value: strat, options: [{ value: "leveled", label: "Leveled" }, { value: "tiered", label: "Size-tiered" }], onChange: function (v) { strat = v; reset(); } }).element);
+  document.getElementById("strat").appendChild(Kit.segmented({ label: "راهبرد compaction", value: strat, options: [{ value: "leveled", label: "سطحی" }, { value: "tiered", label: "size-tiered" }], onChange: function (v) { strat = v; reset(); } }).element);
   document.getElementById("put").addEventListener("click", function () { put(1 + r.int(16), false); render(); });
   document.getElementById("delk").addEventListener("click", function () { put(1 + r.int(16), true); render(); });
   document.getElementById("read").addEventListener("click", function () { read(1 + r.int(16)); render(); });
@@ -202,15 +200,15 @@ function stats(rows) {
   reset(); renderMI();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Two iterators both offer a record for k2. What does merge-iteration do?",
-      options: ["Returns both", "Reconciles them, typically by timestamp, and returns only the newest", "Returns the one from the first iterator"], answer: 1,
-      explain: "Each iterator holds at most one record per key, so duplicates come from different sources and are reconciled (pp. 138–140)." },
-    { q: "Why is deleting a key from the memtable not enough?",
-      options: ["The memtable is immutable", "An older table may still hold the key, which would resurrect it; a tombstone shadows it", "Deletes are not logged"], answer: 1,
-      explain: "pp. 136–137." },
-    { q: "What does leveled compaction guarantee from level 1 on?",
-      options: ["All tables are the same size", "Tables in a level have non-overlapping key ranges, so a read checks at most one table per level", "Tombstones are dropped immediately"], answer: 1,
-      explain: "pp. 142–143." }
+    { q: "هر دو iterator رکوردی برای k2 عرضه می‌کنند. merge‌پیمایی چه می‌کند؟",
+      options: ["هر دو را برمی‌گرداند", "آشتی‌شان می‌دهد، که معمولاً بر حسب timestamp است، و تنها تازه‌ترین را برمی‌گرداند", "آن یکی از iterator اول را برمی‌گرداند"], answer: 1,
+      explain: "هر iteratorی حداکثر یک رکورد برای هر کلیدی دارد، پس تکراری‌ها از منبع‌های مختلف می‌آیند و آشتی داده می‌شوند (صص. ۱۳۸–۱۴۰)." },
+    { q: "چرا حذف کلیدی از memtable کافی نیست؟",
+      options: ["memtable immutable است", "جدولی قدیمی‌تر می‌تواند باز هم آن کلید را داشته باشد، که رستاخیزش می‌کرد؛ tombstoneی سایه‌اش می‌اندازد", "حذف‌ها log نمی‌شوند"], answer: 1,
+      explain: "صص. ۱۳۶–۱۳۷." },
+    { q: "compaction سطحی از سطح ۱ به بعد چه چیزی را تضمین می‌کند؟",
+      options: ["همه‌ی جدول‌ها هم‌اندازه‌اند", "جدول‌های یک سطح بازه‌های کلید ناهم‌پوشان دارند، پس خواندنی حداکثر یک جدول در هر سطحی را می‌سنجد", "tombstoneها فوری انداخته می‌شوند"], answer: 1,
+      explain: "صص. ۱۴۲–۱۴۳." }
   ]);
 })();
 </script>

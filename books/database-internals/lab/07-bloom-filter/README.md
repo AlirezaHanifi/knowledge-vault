@@ -1,18 +1,18 @@
-# Bloom filter false positives
+# مثبت کاذب در Bloom filter
 
-How large should a Bloom filter be, and how many hash functions should it use? This experiment inserts 20,000 keys into filters of 4, 8, 10 and 16 bits per key with several numbers of hash functions. It probes 100,000 keys that were never inserted, counts the false positives, and compares the count with the standard estimate (1 − e^(−kn/m))^k.
+یک Bloom filter چقدر بزرگ باید باشد و چند تابع hash به کار ببرد؟ این آزمایش ۲۰٬۰۰۰ کلید را در filterهایی با ۴ و ۸ و ۱۰ و ۱۶ بیت برای هر کلید و با چند شمار تابع hash درج می‌کند. بعد ۱۰۰٬۰۰۰ کلید را که هیچ‌وقت درج نشده‌اند کاوش، مثبت‌های کاذب را می‌شمارد، و آن شمار را با برآورد استاندارد (1 − e^(−kn/m))^k می‌سنجد.
 
-*Illustrates Database Internals, “Bloom Filters”, pp. 146–147: false positives are possible and false negatives are not, and more bits and well-chosen hash functions lower the false-positive rate. The formula, the double-hashing scheme and the sizes are the vault's.*
+*تصویری از «Bloom filterها» کتاب Database Internals، صص. ۱۴۶–۱۴۷: مثبت کاذب شدنی است و منفی کاذب نه، و بیت بیشتر و تابع hash خوب‌چیده نرخ مثبت کاذب را پایین می‌آورد. آن فرمول و شیوه‌ی hash دوگانه و اندازه‌ها مال vault است.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 bloom_filter.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 20,000 keys inserted, 100,000 absent keys probed; no false negatives found
@@ -36,13 +36,13 @@ bits/key   k  measured   formula
       16  14    0.063%    0.053%
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Measured rates match the formula to within a few hundredths of a percent.
-- More hash functions help only up to k ≈ (m/n)·ln 2. Past that, each key sets too many bits and the rate rises again.
-- About 10 bits per key with 7 hash functions gives under 1% false positives, a common default in LSM-based stores.
-- No present key is ever reported absent: a filter can only produce false positives.
+- نرخ‌های اندازه‌گرفته تا چند صدم درصد با فرمول می‌خوانند.
+- تابع hash بیشتر تنها تا k ≈ (m/n)·ln 2 کمک می‌کند. از آن که بگذرد، هر کلید بیت‌های زیادی می‌نشاند و نرخ باز بالا می‌رود.
+- حدود ۱۰ بیت برای هر کلید با ۷ تابع hash مثبت کاذب زیر ۱ درصد می‌دهد، که پیش‌فرضی رایج در انبارهای LSM است.
+- هیچ کلید موجودی هیچ‌وقت غایب گزارش نمی‌شود: یک filter تنها مثبت کاذب می‌تواند بسازد.
 
-## Related
+## مرتبط
 
-- Chapter note: [7. Log-Structured Storage](../../chapters/07-log-structured-storage.md) — “Bloom Filters”, pp. 146–147
+- یادداشت فصل: [فصل ۷: ذخیره‌سازی log-structured](../../chapters/07-log-structured-storage.md) — «Bloom filterها»، صص. ۱۴۶–۱۴۷

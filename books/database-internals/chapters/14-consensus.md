@@ -3,97 +3,99 @@ book: database-internals
 chapter: 14
 title: "Consensus"
 pages: "279–312"
+translated_title: "consensus"
+lang: fa
 ---
 
-# 14. Consensus
+# فصل ۱۴: consensus
 
-[← 13. Distributed Transactions](13-distributed-transactions.md) · [Book](../README.md)
+[فصل ۱۳: تراکنش توزیع‌شده →](13-distributed-transactions.md) · [کتاب](../README.md)
 
-## Summary
+## خلاصه
 
-The final chapter combines links, failure models, failure detectors, leader election and consistency into **distributed consensus**: processes agreeing on a value proposed by one of them, even when some crash (p. 279). FLP rules out guaranteed consensus in bounded time in a fully asynchronous system. Consensus algorithms therefore assume asynchrony and guarantee **safety**, while an external failure detector provides **liveness**. Inaccurate detection means waiting, or restarting after a false suspicion (p. 279).
+فصل آخر پیوند و مدل شکست و failure detector و انتخاب leader و consistency را در **consensus توزیع‌شده** ترکیب می‌کند: processها روی مقداری توافق می‌کنند که یکی‌شان پیشنهادش داده، حتی وقتی برخی از کار بیفتند (p. 279). قضیه‌ی FLP consensus تضمین‌شده در زمانی bounded را در سیستمی تماماً asynchronous رد می‌کند. پس الگوریتم‌های consensus asynchronousی را فرض می‌گیرند و **ایمنی** را تضمین، در حالی که failure detectorی بیرونی **liveness** می‌دهد. تشخیص نادقیق یعنی منتظر ماندن، یا شروع دوباره پس از گمانی کاذب (p. 279).
 
-The chapter moves through:
+فصل از این‌ها می‌گذرد:
 
-- **Broadcast**: best effort, then reliable flooding, then **atomic broadcast**, which is reliable delivery in total order. It covers virtual synchrony and **ZAB**, ZooKeeper's protocol (pp. 280–285).
-- **Paxos**: the classic algorithm, quorums and failure scenarios (pp. 285–291).
-- **Paxos variants:** Multi-Paxos, Fast Paxos, EPaxos, Flexible Paxos and the generalized solution with write-once registers (pp. 291–300).
-- **Raft** (pp. 300–305).
-- **Byzantine consensus** with **PBFT** (pp. 305–309).
+- **پخش**: بهترین تلاش، بعد سیل قابل اطمینان، بعد **پخش اتمی**، که تحویل قابل اطمینان در ترتیبی کلی است. concurrency مجازی و **ZAB**، یعنی پروتکل ZooKeeper، را می‌پوشاند (pp. 280–285).
+- **الگوریتم Paxos**: الگوریتم کلاسیک و quorumها و صحنه‌های شکست (pp. 285–291).
+- **گونه‌های Paxos:** Multi-Paxos و Fast Paxos و EPaxos و Flexible Paxos و آن حل تعمیم‌یافته با registerهای یک‌بار‌نوشتنی (pp. 291–300).
+- **الگوریتم Raft** (pp. 300–305).
+- **مفهوم consensus از جنس Byzantine** با **PBFT** (pp. 305–309).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Three properties: agreement, validity, termination.** Validity rules out the trivial "always decide a default" algorithm (p. 280).
-- **Atomic broadcast is equivalent to consensus** in an asynchronous system with crash failures (p. 285).
-- **ZAB uses epochs and three phases:** discovery, synchronization, broadcast. Broadcast is like 2PC without aborts (pp. 283–284).
-- **Paxos proposers must adopt the highest-numbered accepted value** they hear about in phase 1. That's how a value accepted by even one acceptor can survive its proposer's crash (pp. 286–289).
-- **Paxos is safe under any number of failures and live with f failures out of 2f + 1** (p. 288).
-- **Multi-Paxos skips phase 1 under a stable leader.** Leases let it read locally, but they are a performance optimization relying on bounded clock drift, not a correctness guarantee (p. 291).
-- **Flexible Paxos needs only Q₁ + Q₂ > N:** the election and replication quorums must intersect, not every pair of quorums (pp. 296–297).
-- **Raft elects only candidates with every committed entry,** so log entries flow only from leader to followers (pp. 302–303).
-- **PBFT needs n = 3f + 1 replicas,** a 2f prepare quorum and a 2f + 1 commit quorum; clients wait for f + 1 matching replies (pp. 306–308).
+- **سه خاصیت: توافق و اعتبار و پایان.** اعتبار آن الگوریتم بدیهی «همیشه پیش‌فرضی را تصمیم بگیر» را رد می‌کند (p. 280).
+- **پخش اتمی با consensus هم‌ارز است** در سیستمی asynchronous با شکست از کار افتادن (p. 285).
+- **الگوریتم ZAB دوره و سه فاز به کار می‌برد:** کشف و synchronization و پخش. پخش مثل 2PC بی abort است (pp. 283–284).
+- **همه‌ی proposerهای Paxos باید آن مقدار پذیرفته‌ی بالاترین‌شماره را بردارند** که در فاز ۱ می‌شنوند. همین‌طور است که مقداری که حتی یک acceptor پذیرفته می‌تواند از کار افتادن proposerاش را جان به در ببرد (pp. 286–289).
+- **الگوریتم Paxos زیر هر شمار شکستی ایمن است و با f شکست از 2f + 1 زنده** (p. 288).
+- **الگوریتم Multi-Paxos زیر leaderی پایدار از فاز ۱ می‌پرد.** leaseها می‌گذارند محلی بخواند، ولی بهینه‌سازی کارایی‌اند که به رانش ساعت bounded تکیه می‌کنند و نه تضمین درستی (p. 291).
+- **الگوریتم Flexible Paxos تنها Q₁ + Q₂ > N را لازم دارد:** quorumهای انتخاب و replication باید اشتراک داشته باشند و نه هر زوج quorumی (pp. 296–297).
+- **الگوریتم Raft تنها نامزدهایی را انتخاب می‌کند که هر entry commit‌شده‌ای را دارند**، پس entryهای log تنها از leader به followerها جاری می‌شوند (pp. 302–303).
+- **الگوریتم PBFT تعداد n = 3f + 1 replica لازم دارد**، با quorum آماده‌سازی 2f و quorum commit 2f + 1؛ و کلاینت‌ها منتظر f + 1 پاسخ خوان می‌مانند (pp. 306–308).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Broadcast — p. 280
-- Atomic Broadcast — p. 281
-  - Virtual Synchrony — p. 282
-  - Zookeeper Atomic Broadcast (ZAB) — p. 283
-- Paxos — p. 285
-  - Paxos Algorithm — p. 286
-  - Quorums in Paxos — p. 287
-  - Failure Scenarios — p. 288
-  - Multi-Paxos — p. 291
-  - Fast Paxos — p. 292
-  - Egalitarian Paxos — p. 293
-  - Flexible Paxos — p. 296
-  - Generalized Solution to Consensus — p. 297
-- Raft — p. 300
-  - Leader Role in Raft — p. 302
-  - Failure Scenarios — p. 304
-- Byzantine Consensus — p. 305
-  - PBFT Algorithm — p. 306
-  - Recovery and Checkpointing — p. 309
-- Summary — p. 309
+- پخش — ص. ۲۸۰
+- پخش اتمی — ص. ۲۸۱
+  - بخش concurrency مجازی — ص. ۲۸۲
+  - پخش اتمی ZooKeeper که ZAB است — ص. ۲۸۳
+- بخش Paxos — ص. ۲۸۵
+  - الگوریتم Paxos — ص. ۲۸۶
+  - بخش quorum در Paxos — ص. ۲۸۷
+  - صحنه‌های شکست — ص. ۲۸۸
+  - بخش Multi-Paxos — ص. ۲۹۱
+  - بخش Fast Paxos — ص. ۲۹۲
+  - بخش Egalitarian Paxos — ص. ۲۹۳
+  - بخش Flexible Paxos — ص. ۲۹۶
+  - حل تعمیم‌یافته‌ی consensus — ص. ۲۹۷
+- بخش Raft — ص. ۳۰۰
+  - نقش leader در Raft — ص. ۳۰۲
+  - صحنه‌های شکست — ص. ۳۰۴
+- بخش consensus از جنس Byzantine — ص. ۳۰۵
+  - الگوریتم PBFT — ص. ۳۰۶
+  - بازیابی و checkpoint گرفتن — ص. ۳۰۹
+- خلاصه — ص. ۳۰۹
 
-## Notes
+## یادداشت‌ها
 
-A process is **correct** if it hasn't crashed and keeps executing algorithm steps. Consensus is useful for ordering events and keeping participants consistent: the system moves from one value to the next without losing certainty about what clients observed (p. 279).
+یک process **درست** است اگر از کار نیفتاده باشد و همین‌طور قدم‌های الگوریتم را اجرا کند. consensus برای مرتب کردن رویدادها و سازگار نگه داشتن شرکت‌کننده‌ها به کار می‌آید: سیستم از مقداری به مقدار بعدی می‌رود بی گم کردن قطعیت درباره‌ی آن چیزی که کلاینت‌ها مشاهده کردند (p. 279).
 
-| Property | Meaning (p. 280) |
+| خاصیت | معنا (p. 280) |
 |---|---|
-| **Agreement** | All correct processes decide the same value |
-| **Validity** | The decided value was proposed by one of the processes |
-| **Termination** | All correct processes eventually decide |
+| **توافق** | همه‌ی processهای درست همان مقدار را تصمیم می‌گیرند |
+| **اعتبار** | مقدار تصمیم‌شده را یکی از processها پیشنهاد داده |
+| **پایان** | همه‌ی processهای درست در غایت تصمیم می‌گیرند |
 
-### Broadcast
+### پخش
 
-Broadcast disseminates information among processes; gossip (Ch. 12) is one form. It's used for replication when a coordinator distributes data to all participants (p. 280).
+پخش اطلاع را میان processها پخش می‌کند؛ gossip از فصل ۱۲ یک شکلش است. برای replication به کار می‌رود، وقتی coordinatorی داده را به همه‌ی شرکت‌کننده‌ها پخش می‌کند (p. 280).
 
-- **Best-effort broadcast:** the sender alone makes sure messages are delivered. If it crashes partway, the broadcast fails silently and leaves some nodes with the message and others without (pp. 280–281).
-- **Reliable broadcast:** all correct processes receive the same messages even if the sender crashes. The naive version uses a failure detector plus a fallback where every receiver forwards to everyone, flooding the network with **N²** messages (Figure 14-1) (p. 281).
+- **پخش بهترین‌تلاش:** تنها فرستنده مطمئن می‌شود که پیام‌ها تحویل می‌شوند. اگر نیمه‌راه از کار بیفتد، پخش بی‌صدا باز می‌ماند و برخی نودها را با آن پیام و بقیه را بی آن می‌گذارد (pp. 280–281).
+- **پخش قابل اطمینان:** همه‌ی processهای درست همان پیام‌ها را می‌گیرند حتی اگر فرستنده از کار بیفتد. گونه‌ی ساده‌دل failure detectorی به‌علاوه‌ی جانشینی به کار می‌برد که در آن هر گیرنده‌ای به همه می‌فرستد، و شبکه را با **N²** پیام سیل می‌کند (شکل ۱۴-۱) (p. 281).
 
-### Atomic broadcast
+### پخش اتمی
 
-Flooding guarantees delivery, not order. **Atomic broadcast**, also called **total order multicast**, guarantees both (p. 281):
+سیل تحویل را تضمین می‌کند و نه ترتیب را. **پخش اتمی**، که multicast ترتیب‌کلی هم نامیده می‌شود، هر دو را تضمین می‌کند (p. 281):
 
-- **Atomicity:** all non-failed processes deliver a message, or none do.
-- **Order:** all non-failed processes deliver messages in the same order (p. 282).
+- **اتمی بودن:** همه‌ی processهای نشکسته پیامی را تحویل می‌دهند، یا هیچ‌کدام.
+- **ترتیب:** همه‌ی processهای نشکسته پیام‌ها را به همان ترتیب تحویل می‌دهند (p. 282).
 
-#### Virtual synchrony
+#### مفهوم concurrency مجازی
 
-Atomic broadcast works on a static group; **virtual synchrony** delivers totally ordered messages to a **dynamic** group (Birman) (p. 282).
+پخش اتمی روی گروهی ایستا کار می‌کند؛ و **concurrency مجازی** پیام‌های تماماً مرتب را به گروهی **پویا** تحویل می‌دهد، از برمن (p. 282).
 
-- Every message belongs to the **group view** it was sent in. Joins, leaves and failures change the view, and the change is announced to all members (p. 282).
-- **Receipt**, when one member gets a message, differs from **delivery**, when all members have it. A message sent in one view can only be delivered in that view, so views act as barriers that broadcasts can't cross (p. 282).
-- Some total-order algorithms use a single **sequencer**: simpler and faster, but liveness depends on detecting its failure (pp. 282–283).
-- Despite its soundness, virtual synchrony isn't widely used in commercial systems (p. 283).
+- هر پیامی به آن **نمای گروه**ی تعلق دارد که در آن فرستاده شده. پیوستن و رفتن و شکست نما را عوض می‌کنند، و آن تغییر به همه‌ی اعضا اعلام می‌شود (p. 282).
+- **گرفتن**، یعنی وقتی یک عضو پیامی را بگیرد، از **تحویل** فرق دارد، یعنی وقتی همه‌ی اعضا دارندش. پیامی که در نمایی فرستاده شده تنها در همان نما تحویل‌شدنی است، پس نماها مثل سدهایی عمل می‌کنند که پخش‌ها نمی‌توانند از آن‌ها رد شوند (p. 282).
+- برخی الگوریتم‌های ترتیب‌کلی یک **sequencer** تنها به کار می‌برند: ساده‌تر و سریع‌تر، ولی liveness به تشخیص شکستش وابسته است (pp. 282–283).
+- به‌رغم استواری‌اش، concurrency مجازی در سیستم‌های تجاری پرکاربرد نیست (p. 283).
 
-#### ZooKeeper Atomic Broadcast (ZAB)
+#### پخش اتمی ZooKeeper که ZAB است
 
-ZooKeeper, a hierarchical distributed key-value store, uses **ZAB** for total order and atomic delivery (p. 283). Processes are a temporary **leader** or **followers**; non-leaders forward client requests to the leader (p. 283). Time is split into **epochs** with unique, monotonically increasing numbers, and each epoch has at most one leader. Any election algorithm can pick a *prospective* leader, because the later steps guarantee safety (p. 283).
+سیستم ZooKeeper، که انباره‌ی key-value سلسله‌مراتبی و توزیع‌شده است، **ZAB** را برای ترتیب کلی و تحویل اتمی به کار می‌برد (p. 283). processها یا **leader** موقت‌اند یا **follower**؛ و غیر‌leaderها درخواست‌های کلاینت را به leader می‌فرستند (p. 283). زمان به **دوره**هایی با شماره‌های یکتا و یکنوا‌افزایشی بخش می‌شود، و هر دوره‌ای حداکثر یک leader دارد. هر الگوریتم انتخابی می‌تواند leaderی *احتمالی* بردارد، چون قدم‌های بعدی ایمنی را تضمین می‌کنند (p. 283).
 
 ```mermaid
 sequenceDiagram
@@ -111,247 +113,259 @@ sequenceDiagram
     L->>F: commit
 ```
 
-*The vault's version of Figure 14-2 (pp. 283–284).*
+*روایت vault از شکل ۱۴-۲ (pp. 283–284).*
 
-- In **synchronization**, the leader brings followers to the same history and delivers committed proposals from earlier epochs before any new ones (pp. 283–284).
-- **Broadcast** is like 2PC without aborts: votes are just acknowledgments, and proposals from leaders of wrong epochs aren't acknowledged. It continues until the leader crashes, is partitioned, or is suspected (p. 284).
-- Heartbeats run in both directions. A leader without heartbeats from a quorum steps down, and a follower that suspects the leader starts an election (p. 284).
-- The leader sends the next message only after the previous one is acknowledged, and re-delivery in order has no extra side effects (p. 284).
-- Recovery is efficient: followers report their highest committed proposal, and the leader copies from the single most up-to-date node. Broadcast takes two message rounds (pp. 284–285).
+- در **synchronization**، آن leader followerها را به همان تاریخ می‌رساند و پیشنهادهای commit‌شده‌ی دوره‌های پیشین را پیش از هر تازه‌ای تحویل می‌دهد (pp. 283–284).
+- **پخش** مثل 2PC بی abort است: رأی‌ها تنها تأییدند، و پیشنهادهای leaderهای دوره‌های غلط تأیید نمی‌شوند. ادامه می‌دهد تا آن leader از کار بیفتد یا پارتیشن شود یا گمان‌برده (p. 284).
+- همه‌ی heartbeatها در هر دو جهت اجرا می‌شوند. leaderی بی heartbeat از quorumی پایین می‌آید، و followerی که به leader گمان ببرد انتخابی شروع می‌کند (p. 284).
+- آن leader پیام بعدی را تنها پس از تأیید شدن پیشین می‌فرستد، و تحویل دوباره به ترتیب هیچ اثر جانبی اضافه‌ای ندارد (p. 284).
+- بازیابی کاراست: followerها بالاترین پیشنهاد commit‌شده‌شان را گزارش می‌دهند، و leader از تنها نود به‌روزترین کپی می‌کند. پخش دو دور پیام می‌برد (pp. 284–285).
 
 ### Paxos
 
-Atomic broadcast is equivalent to consensus in an asynchronous system with crash failures (Chandra and Toueg) (p. 285). Lamport introduced **Paxos** in "The Part-Time Parliament" (1998), then restated it in "Paxos Made Simple" (2001) (p. 285).
+پخش اتمی در سیستمی asynchronous با شکست از کار افتادن با consensus هم‌ارز است، از چاندرا و توگ (p. 285). Lamport **Paxos** را در «The Part-Time Parliament» در ۱۹۹۸ معرفی کرد، بعد در «Paxos Made Simple» در ۲۰۰۱ از نو گفتش (p. 285).
 
-| Role | Job (p. 285) |
+| نقش | کار (p. 285) |
 |---|---|
-| **Proposer** | Takes client values, creates proposals, collects votes |
-| **Acceptor** | Votes to accept or reject. Several exist for fault tolerance; a **majority** is enough for liveness |
-| **Learner** | A replica storing accepted outcomes |
+| **proposer** | مقدارهای کلاینت را می‌گیرد، پیشنهاد می‌سازد، رأی جمع می‌کند |
+| **acceptor** | به پذیرفتن یا رد کردن رأی می‌دهد. چندتا برای fault tolerance هست؛ و **اکثریتی** برای liveness کافی است |
+| **یادگیرنده** | replicaیی که برآمدهای پذیرفته‌شده را ذخیره می‌کند |
 
-Implementations usually **colocate** the roles in one process. Every proposal has a client value and a unique, monotonically increasing **proposal number**, often an (id, timestamp) pair where node IDs break ties (p. 285).
+پیاده‌سازی‌ها معمولاً نقش‌ها را در یک process **هم‌جا** می‌کنند. هر پیشنهادی یک مقدار کلاینت و یک **شماره‌ی پیشنهاد** یکتا و یکنوا‌افزایشی دارد، که اغلب زوجی (id, timestamp) است و در آن IDهای نود تساوی را می‌شکنند (p. 285).
 
-#### Paxos algorithm
+#### الگوریتم Paxos
 
-There are two phases: **voting** (propose), where proposers compete for leadership, and **replication**, where the winner distributes the value (p. 286). Votes can split between proposers, forcing a restart (p. 286).
+دو فاز هست: **رأی‌گیری**، یعنی پیشنهاد، که در آن proposerها برای leadership رقابت می‌کنند، و **replication**، که در آن برنده مقدار را پخش می‌کند (p. 286). رأی‌ها می‌توانند میان proposerها شقه شوند، که شروع دوباره را وا می‌دارد (p. 286).
 
-![A proposer sends Prepare(n) to acceptors, collects Promise(n, v), sends Accept!(n, v), and acceptors send Accepted(n, v) to the proposer and learners](../figures/14-03.png)
+![proposerی Prepare(n) را به acceptorها می‌فرستد، Promise(n, v) جمع می‌کند، Accept!(n, v) می‌فرستد، و acceptorها Accepted(n, v) را به proposer و یادگیرنده‌ها می‌فرستند](../figures/14-03.png)
 
-*Figure 14-3 (p. 287): one round to win the right to propose, one to get the value accepted; learners hear the accepted value directly.*
+*Figure 14-3 (p. 287): یک دور برای بردن حق پیشنهاد، یک دور برای پذیرفته شدن مقدار؛ یادگیرنده‌ها آن مقدار پذیرفته را یک‌راست می‌شنوند.*
 
-| Message | Acceptor rule (pp. 286–287) |
+| پیام | قاعده‌ی acceptor (pp. 286–287) |
 |---|---|
-| **Prepare(n)** | If no higher-numbered Prepare has been answered, promise not to accept anything lower than n. If a proposal was already accepted, reply **Promise(m, v_accepted)**. If a higher Prepare was answered, tell the proposer. A later Prepare may be answered if its number is higher |
-| **Accept!(n, v)** | Accept unless a Prepare(m) with m > n has been answered. On rejection, send back the highest number seen so the proposer can catch up |
+| **Prepare(n)** | اگر به هیچ Prepare بالاتر‌شماره‌ای پاسخ داده نشده، قول بده چیزی پایین‌تر از n نپذیری. اگر پیشنهادی از قبل پذیرفته شده، پاسخ **Promise(m, v_accepted)** بده. اگر به Prepare بالاتری پاسخ داده شده، به proposer بگو. به Prepare بعدی می‌شود پاسخ داد اگر شماره‌اش بالاتر باشد |
+| **Accept!(n, v)** | بپذیر مگر به Prepare(m)ی با m > n پاسخ داده شده باشد. سر رد کردن، بالاترین شماره‌ی دیده‌شده را پس بفرست تا proposer خودش را برساند |
 
-In phase 2, the proposer must use the value of the **highest-numbered** proposal among the replies, or its own if none was accepted (p. 286). Once a value is accepted by even one acceptor, later proposers have to converge on it; that's why acceptors report what they've accepted (p. 287). Learners know the decision after hearing from a majority of acceptors, and acceptors can notify them as soon as they accept (p. 287).
+در فاز ۲، proposer باید مقدار آن پیشنهاد **بالاترین‌شماره** میان پاسخ‌ها را به کار ببرد، یا مال خودش را اگر هیچ‌کدام پذیرفته نشده بود (p. 286). همین که مقداری حتی یک acceptor بپذیردش، proposerهای بعدی باید روی آن هم‌گرا شوند؛ از همین‌جاست که acceptorها گزارش می‌دهند چه چیزی را پذیرفته‌اند (p. 287). یادگیرنده‌ها پس از شنیدن از اکثریتی از acceptorها تصمیم را می‌دانند، و acceptorها می‌توانند همین که بپذیرند به‌شان خبر بدهند (p. 287).
 
-#### Quorums in Paxos
+#### مفهوم quorum در Paxos
 
-A **quorum** is the minimum number of votes for an operation, usually a majority. Any two majorities share at least one participant, which acts as an arbiter (pp. 287–288).
+**مفهوم quorum** کمینه شمار رأی برای عملیاتی است، که معمولاً اکثریتی است. هر دو اکثریتی دست‌کم یک شرکت‌کننده را مشترک دارند، که مثل داوری عمل می‌کند (pp. 287–288).
 
-- **Safety** holds under any number of failures.
-- **Liveness** holds with **f** failures if there are **2f + 1** processes (p. 288).
-- Quorums describe *blocking* properties. You can send to more nodes, including speculative redundant queries, but you only need to wait for a quorum (p. 288).
+- **ایمنی** زیر هر شمار شکستی برقرار است.
+- **مفهوم liveness** با **f** شکست برقرار است اگر **2f + 1** process باشد (p. 288).
+- همه‌ی quorumها خاصیت‌های *بند آمدن* را وصف می‌کنند. می‌شود به نودهای بیشتری فرستاد، از جمله query زائد حدسی، ولی تنها لازم است منتظر quorumی بمانید (p. 288).
 
-#### Failure scenarios
+#### صحنه‌های شکست
 
-| Figure | What happens (pp. 288–290) |
+| شکل | چه رخ می‌دهد (pp. 288–290) |
 |---|---|
-| **14-4** | P1 sends V1 only to A1 and crashes. P2 with number 2 reaches quorum {A1, A2}, sees V1 and commits **V1**. The original proposer, and its client, may never learn the result (note 1) |
-| **14-5** | Same start, but P2's quorum is {A2, A3}. It never sees V1 and commits **its own value**, even though A1 holds V1 |
-| **14-6** | A1 accepts V1 and then fails. P2's quorum doesn't overlap A1, so P2 commits its value. Later proposers that do reach A1 prefer the more recent accepted proposal |
-| **Dueling proposers** | Competing Prepares keep invalidating each other. Fix with **random backoff** |
+| **۱۴-۴** | proposer P1 مقدار V1 را تنها به A1 می‌فرستد و از کار می‌افتد. proposer P2 با شماره‌ی ۲ به quorum {A1, A2} می‌رسد، V1 را می‌بیند و **V1** را commit می‌کند. آن proposer اصلی، و کلاینتش، می‌توانند هیچ‌وقت نتیجه را نفهمند، یادداشت ۱ |
+| **۱۴-۵** | همان شروع، ولی quorum proposer P2 برابر {A2, A3} است. هیچ‌وقت V1 را نمی‌بیند و **مقدار خودش** را commit می‌کند، هرچند A1 مقدار V1 را دارد |
+| **۱۴-۶** | acceptor A1 مقدار V1 را می‌پذیرد و بعد می‌شکند. quorum proposer P2 با A1 هم‌پوشان نیست، پس P2 مقدار خودش را commit می‌کند. proposerهای بعدی که به A1 برسند آن پیشنهاد پذیرفته‌ی تازه‌تر را ترجیح می‌دهند |
+| **proposerهای دوئل‌کننده** | پیام‌های Prepare رقیب همین‌طور هم را بی‌اعتبار می‌کنند. با **عقب‌نشینی تصادفی** درست کنید |
 
-Paxos tolerates acceptor failures only while enough remain to form a majority (p. 291).
+الگوریتم Paxos شکست acceptorها را تنها تا وقتی تحمل می‌کند که آن‌قدری بمانند که اکثریتی بسازند (p. 291).
 
-> **Try it:** [Paxos, round by round](../widgets/14-paxos.html) — five acceptors, two proposers. Crash the first proposer after it has reached one acceptor, choose which acceptors the second proposer reaches, and watch which value is chosen: the book's Figures 14-4 to 14-6, plus a dueling-proposers mode.
+> **Try it:** [Paxos، دور به دور](../widgets/14-paxos.html)؛ پنج acceptor و دو proposer. proposer اول را پس از رسیدنش به یک acceptor از کار بیندازید، بردارید که proposer دوم به کدام acceptorها می‌رسد، و ببینید کدام مقدار برداشته می‌شود: شکل‌های ۱۴-۴ تا ۱۴-۶ کتاب، به‌علاوه‌ی حالت proposerهای دوئل‌کننده.
 
 #### Multi-Paxos
 
-Classic Paxos runs a propose round for every value. **Multi-Paxos** adds a **distinguished proposer** (leader) that keeps its position and goes straight to replication (p. 291).
+الگوریتم Paxos کلاسیک برای هر مقداری دوری پیشنهاد اجرا می‌کند. **Multi-Paxos** یک **proposer ممتاز**، یعنی leader، می‌افزاید که جایش را نگه می‌دارد و یک‌راست به replication می‌رود (p. 291).
 
-- **Reads:** classic Paxos reads by running a round, because the last known proposer may be stale. Multi-Paxos has the same risk if a new leader exists, so some implementations use **leases**. The leader renews them periodically, and participants promise not to accept other leaders' proposals during the lease (Chandra et al.) (p. 291).
-- Leases are a performance optimization that relies on **bounded clock synchrony**. If clocks drift too far, linearizability is lost (p. 291).
-- Multi-Paxos is a **replicated log**. A durable log survives crashes, and it is truncated after snapshotting, with snapshot and truncation applied atomically (pp. 291–292).
-- Single-decree Paxos is a **write-once register**; Multi-Paxos is an **append-only log** of such registers (Rystsov). Active Disk Paxos and **CASPaxos** offer read-modify-write registers instead (p. 292).
+- **خواندن:** Paxos کلاسیک با اجرای دوری می‌خواند، چون آخرین proposer معلوم می‌تواند کهنه باشد. Multi-Paxos اگر leaderی تازه وجود داشته باشد همان ریسک را دارد، پس برخی پیاده‌سازی‌ها **lease** به کار می‌برند. آن leader دوره‌ای تمدیدشان می‌کند، و شرکت‌کننده‌ها قول می‌دهند در طول lease پیشنهادهای leaderهای دیگر را نپذیرند، از چاندرا و همکاران (p. 291).
+- همه‌ی leaseها بهینه‌سازی کارایی‌اند که به **concurrency bounded ساعت** تکیه می‌کنند. اگر ساعت‌ها زیادی رانش کنند، linearizability گم می‌شود (p. 291).
+- الگوریتم Multi-Paxos یک **log تکرارشده** است. logی پایا از کار افتادن‌ها جان به در می‌برد، و پس از snapshot گرفتن بریده می‌شود، با snapshot و بریدن که اتمی اعمال می‌شوند (pp. 291–292).
+- الگوریتم Paxos تک‌فرمانی یک **register یک‌بار‌نوشتنی** است؛ و Multi-Paxos یک **log append-only** از چنان registerهایی، از ریستسوف. روش‌های Active Disk Paxos و **CASPaxos** در عوض registerهای خواندن‌تغییر‌نوشتن می‌دهند (p. 292).
 
 #### Fast Paxos
 
-Any proposer can contact acceptors directly, saving a round trip. The cost is a quorum of **2f + 1** instead of f + 1, and **3f + 1** acceptors (Junqueira et al.; Lamport) (p. 292).
+هر proposerی می‌تواند یک‌راست با acceptorها تماس بگیرد، که یک رفت‌و‌برگشت صرفه‌جویی می‌کند. هزینه‌اش quorumی از **2f + 1** به‌جای f + 1، و **3f + 1** acceptor است، از ژونکوئرا و همکاران و Lamport (p. 292).
 
-- In a **fast round**, a coordinator that could pick any value sends **Any**, and acceptors treat proposers' values as if they came from the coordinator (p. 292).
-- Two proposers going fast at once cause a **collision**: acceptors take different values, and the coordinator has to start a recovery round (p. 293).
-- Under high request rates, collisions and the larger replica set can make Fast Paxos *slower* than classic Paxos (p. 293).
+- در **دوری سریع**، coordinatorی که می‌توانست هر مقداری بردارد پیام **Any** می‌فرستد، و acceptorها مقدارهای proposerها را چنان می‌گیرند که انگار از coordinator آمده‌اند (p. 292).
+- دو proposer که هم‌هنگام سریع بروند **برخورد** می‌سازند: acceptorها مقدارهای مختلفی برمی‌دارند، و coordinator باید دوری بازیابی شروع کند (p. 293).
+- زیر نرخ درخواست بالا، برخورد و مجموعه‌ی replica بزرگ‌تر می‌توانند Fast Paxos را از Paxos کلاسیک *کندتر* کنند (p. 293).
 
 #### Egalitarian Paxos
 
-A single leader must be re-elected when it fails and can become a bottleneck. **Partitioning** helps, but multipartition operations then need atomic commitment (pp. 293–294). **EPaxos** (Moraru et al.) has a per-command leader and orders commands through **dependencies**. It is the first implementation of Lamport's **Generalized Paxos**, where non-conflicting writes commit independently (p. 294).
+یک leader تنها وقتی بشکند باید دوباره انتخاب شود و می‌تواند گلوگاه شود. **پارتیشن‌بندی** کمک می‌کند، ولی آن‌وقت عملیات چند‌پارتیشنی commitment اتمی لازم دارند (pp. 293–294). **EPaxos** از مورارو و همکاران برای هر فرمانی leaderی دارد و فرمان‌ها را از راه **وابستگی** مرتب می‌کند. نخستین پیاده‌سازی **Generalized Paxos** Lamport است، که در آن نوشتن‌های نامتعارض مستقل commit می‌کنند (p. 294).
 
-- A **Pre-Accept** carries the dependencies (potentially interfering commands) and a **sequence number** larger than any known dependency's (p. 294).
-- It goes to a **fast quorum** of ⌈3f/4⌉ replicas, which update the dependencies from their own logs (p. 294).
-- **Fast path:** the dependency lists agree, so commit. **Slow path:** they differ, so merge the dependencies, raise the sequence number and send **Accept** to ⌊f/2⌋ + 1 replicas before committing (pp. 294–295).
-- In Figure 14-8, P1 commits on the fast path; P5 learns about command 1 from P3 and runs Accept(2, {1}) (p. 295).
+- یک **Pre-Accept** آن وابستگی‌ها، یعنی فرمان‌هایی که می‌توانند تداخل کنند، و یک **شماره‌ی ترتیب** بزرگ‌تر از هر وابستگی معلومی را حمل می‌کند (p. 294).
+- به یک **quorum سریع** از ⌈3f/4⌉ replica می‌رود، که وابستگی‌ها را از logهای خودشان به‌روز می‌کنند (p. 294).
+- **مسیر سریع:** فهرست‌های وابستگی می‌خوانند، پس commit کن. **مسیر کند:** فرق دارند، پس وابستگی‌ها را merge کن، شماره‌ی ترتیب را بالا ببر و **Accept** را پیش از commit به ⌊f/2⌋ + 1 replica بفرست (pp. 294–295).
+- در شکل ۱۴-۸، proposer P1 روی مسیر سریع commit می‌کند؛ و P5 از P3 درباره‌ی فرمان ۱ خبردار می‌شود و Accept(2, {1}) را اجرا می‌کند (p. 295).
 
-![Five processes: P1's PreAccept(1, ∅) gets OK from P2 and P3 and commits; P5's PreAccept(2, ∅) meets a conflict reporting {1}, runs Accept(2, {1}) and then commits](../figures/14-08.png)
+![پنج process: عملیات PreAccept(1, ∅) از P1 از P2 و P3 تأیید می‌گیرد و commit می‌کند؛ عملیات PreAccept(2, ∅) از P5 با تعارضی روبه‌رو می‌شود که {1} را گزارش می‌دهد، بعد Accept(2, {1}) را اجرا و بعد commit می‌کند](../figures/14-08.png)
 
-*Figure 14-8 (p. 295): non-conflicting commands commit in one round; a discovered dependency costs P5 a second Accept round.*
+*Figure 14-8 (p. 295): فرمان‌های نامتعارض در یک دور commit می‌کنند؛ و وابستگی‌ای که کشف شود دور Accept دومی برای P5 خرج دارد.*
 
-Commands **interfere** if their execution order matters. Replicas build a dependency graph and execute in reverse dependency order, which is rare for most workloads (p. 296). Sequence numbers combine a configuration **epoch**, a node-local counter and the replica ID. Stale proposals are nacked with the newer state (p. 296).
+فرمان‌ها **تداخل** می‌کنند اگر ترتیب اجرایشان مهم باشد. replicaها گراف وابستگی می‌سازند و به ترتیب معکوس وابستگی اجرا می‌کنند، که برای بیشتر بارها کمیاب است (p. 296). شماره‌های ترتیب یک **دوره**ی چیدمان و شمارنده‌ای نود‌محلی و ID مربوط به replica را ترکیب می‌کنند. پیشنهادهای کهنه با حالت تازه‌تر nack می‌شوند (p. 296).
 
 #### Flexible Paxos
 
-Do all quorums have to intersect? In Paxos, only the **phase 1** (election) quorum has to overlap the **phase 2** (accept) quorum: **Q₁ + Q₂ > N** (Howard et al.) (pp. 296–297). Since phase 2 is far more common, Q₂ can be as small as N/2 if Q₁ = N − Q₂ + 1 (p. 297).
+آیا همه‌ی quorumها باید اشتراک داشته باشند؟ در Paxos، تنها quorum **فاز ۱**، یعنی انتخاب، باید با quorum **فاز ۲**، یعنی پذیرش، هم‌پوشان باشد: **Q₁ + Q₂ > N**، از هاوارد و همکاران (pp. 296–297). چون فاز ۲ خیلی رایج‌تر است، Q₂ می‌تواند تا N/2 کوچک باشد اگر Q₁ = N − Q₂ + 1 (p. 297).
 
-- With five acceptors, an election quorum of 4 allows replication quorums of **2**, even on *disjoint* pairs. Any new leader is known to at least one acceptor in each pair (p. 297).
-- This trades availability for latency. Elections need more live nodes, but a stable leader keeps replicating through up to **N − Q₂** failures (p. 297).
-- **Vertical Paxos** separates a smaller read quorum for lower-numbered proposals from a larger write quorum; Lampson's out and decision quorums are similar (p. 297).
+- با پنج پذیرنده، quorum انتخاب ۴ quorumهای replication **۲**ی را مجاز می‌کند، حتی روی زوج‌های *مجزا*. هر leader تازه‌ای دست‌کم به یک acceptor در هر زوجی معلوم است (p. 297).
+- این availability را با latency بده‌بستان می‌کند. انتخاب‌ها نودهای زنده‌ی بیشتری لازم دارند، ولی leaderی پایدار از راه تا **N − Q₂** شکست همین‌طور تکرار می‌کند (p. 297).
+- **الگوریتم Vertical Paxos** یک quorum خواندن کوچک‌تر برای پیشنهادهای پایین‌تر‌شماره را از quorum نوشتن بزرگ‌تر جدا می‌کند؛ و quorumهای out و decision لمپسون شبیه‌اند (p. 297).
 
-#### Generalized solution to consensus
+#### حل تعمیم‌یافته‌ی consensus
 
-Howard and Mortier restate single-decree Paxos as **write-once registers**. The book notes there were no known implementations yet (pp. 297–298).
+هاوارد و مورتیه Paxos تک‌فرمانی را به‌شکل **registerهای یک‌بار‌نوشتنی** از نو می‌گویند. کتاب می‌گوید که هنوز هیچ پیاده‌سازی معلومی نبود (pp. 297–298).
 
-- A register can be unwritten, hold a value, or hold **nil**. Registers with the same index on different servers form a **register set** with one or more quorums (p. 298).
-- A quorum's state is **Any** or **Maybe v** (undecided), or **None** or **Decided v** (decided) (p. 298).
-- **Rules:** output a value only after reading it from a quorum in the same register set; write only values received as input or read from a register; never let two quorums decide different values; never override earlier register sets' decisions (p. 298).
-- **Phase 1:** P1A(register). Servers set lower unwritten registers to nil and return what's written. With a majority, take the value from the highest-indexed non-empty register, or your own. **Phase 2:** P2A(register, value) to all servers; a majority of responses means decided (pp. 298–299).
-- Setting lower registers to nil plays the role of Paxos's higher proposal numbers. It's simpler to reason about because it uses the last known state instead of actor interactions (p. 300).
+- یک register می‌تواند نانوشته باشد، یا مقداری داشته باشد، یا **nil** داشته باشد. registerهایی با همان index روی سرورهای مختلف یک **مجموعه‌ی register** با یک quorum یا بیشتر می‌سازند (p. 298).
+- حالت quorumی برابر **Any** یا **Maybe v** یعنی تصمیم‌نشده، یا **None** یا **Decided v** یعنی تصمیم‌شده است (p. 298).
+- **قاعده‌ها:** مقداری را تنها پس از خواندنش از quorumی در همان مجموعه‌ی register بیرون بده؛ تنها مقدارهایی را بنویس که به‌شکل ورودی گرفته‌ای یا از registerی خوانده‌ای؛ هیچ‌وقت نگذار دو quorum مقدارهای مختلفی تصمیم بگیرند؛ هیچ‌وقت تصمیم‌های مجموعه‌های register پیشین را روی‌نویسی نکن (p. 298).
+- **فاز ۱:** عبارت P1A(register). سرورها registerهای پایین‌تر نانوشته را nil می‌گذارند و آن چیزی را که نوشته شده برمی‌گردانند. با اکثریتی، مقدار را از بالاترین‌شاخص register ناخالی بردارید، یا مال خودتان را. **فاز ۲:** عبارت P2A(register, value) به همه‌ی سرورها؛ اکثریتی از پاسخ‌ها یعنی تصمیم‌شده (pp. 298–299).
+- مفهوم nil گذاشتن registerهای پایین‌تر نقش شماره‌های پیشنهاد بالاتر Paxos را بازی می‌کند. استدلال درباره‌اش ساده‌تر است چون به‌جای تعامل بازیگرها آخرین حالت معلوم را به کار می‌برد (p. 300).
+
+> **In practice:** اندازه‌ی cluster در Keeper و etcd را quorum تعیین می‌کند، نه فقط ظرفیت.
+>
+> **Your turn:** چرا Keeper یا etcd را با دو node نمی‌سازیم؟
+>
+> *Answer:* quorum دو از دو است، پس از کار افتادن هر کدام کل cluster را می‌خواباند؛ دو node از یکی هم شکننده‌تر است. quorumها باید هم‌پوشانی داشته باشند، پس برای تحمل f شکست 2f+1 node لازم است، یعنی سه node برای یک شکست (pp. 285–288).
 
 ### Raft
 
-Raft (Ongaro and Ousterhout, 2014) set out to be understandable and came with a reference implementation, **LogCabin** (p. 300). Identical logs applied in the same order give the same state. Raft makes the **leader a first-class citizen**, much as atomic broadcast and Multi-Paxos do (p. 300).
+الگوریتم Raft از آنگارو و آسترهات در ۲۰۱۴ راه افتاد که فهم‌پذیر باشد و با پیاده‌سازی مرجعی به نام **LogCabin** آمد (p. 300). logهای یکسان که به همان ترتیب اعمال شوند همان حالت را می‌دهند. Raft **leader را شهروند درجه‌یک** می‌کند، همان‌طور که پخش اتمی و Multi-Paxos می‌کنند (p. 300).
 
-| Role | (p. 301) |
+| نقش | (p. 301) |
 |---|---|
-| **Candidate** | Tries to collect a majority of votes. A split vote starts a new term and a new election |
-| **Leader** | Handles client requests for a **term**, a monotonically numbered period of any length |
-| **Follower** | Persists entries and answers the leader and candidates, like a Paxos acceptor and learner. Every process starts here |
+| **نامزد** | می‌کوشد اکثریتی از رأی جمع کند. رأی شقه term تازه و انتخابی تازه شروع می‌کند |
+| **leader** | برای یک **term**، یعنی دوره‌ای شماره‌دار و یکنوا با هر طولی، درخواست‌های کلاینت را رسیدگی می‌کند |
+| **follower** | entryها را پایا می‌کند و به leader و نامزدها پاسخ می‌دهد، مثل acceptor و یادگیرنده‌ی Paxos. هر processی از این‌جا شروع می‌کند |
 
-Terms (epochs) give a global partial order without synchronized clocks. A command is identified by its term and its message number within the term. A participant that sees a higher term updates to it, and the higher term wins conflicts (p. 301).
+همه‌ی termها، یعنی دوره‌ها، ترتیبی جزئی و جهانی بی ساعت‌های هم‌گام می‌دهند. فرمانی با termش و شماره‌ی پیامش درون آن term شناسایی می‌شود. شرکت‌کننده‌ای که term بالاتری ببیند به آن به‌روز می‌شود، و term بالاتر تعارض‌ها را می‌برد (p. 301).
 
-- **Leader election:** RequestVote carries the candidate's term, its last known term and its last log entry ID. Each process votes for at most one candidate (p. 302).
-- **Heartbeats:** a follower that hears nothing for an **election timeout** starts an election (p. 302).
-- **AppendEntries:** carries the leader's term, the index and term of the preceding entry, and new entries (p. 302).
+- **انتخاب leader:** پیام RequestVote مقدار term نامزد و آخرین term معلومش و ID آخرین entry logش را حمل می‌کند. هر processی حداکثر به یک نامزد رأی می‌دهد (p. 302).
+- **پروتکل heartbeat:** followerی که برای یک **مدت انتخاب** چیزی نشنود انتخابی شروع می‌کند (p. 302).
+- **پروتکل AppendEntries:** مقدار term آن leader و index و term entry پیشین و entryهای تازه را حمل می‌کند (p. 302).
 
-#### Leader role in Raft
+#### نقش leader در Raft
 
-A follower **denies its vote** to a candidate whose log is less up to date: a lower last term, or a shorter log when the terms are equal. A leader therefore holds every committed entry. Because entries are replicated in order, comparing the last entries is enough (p. 302). The leader appends to its own log and sends to followers in parallel. Once enough followers acknowledge, the entry is **committed** (pp. 302–303). In Figure 14-11, x = 8 is appended, replicated to a majority, committed locally, and then the commit is propagated (p. 303). Committing an entry commits everything before it, and only the leader decides commitment (p. 303).
+یک follower **رأیش را رد می‌کند** به نامزدی که logش کم‌تر به‌روز است: term آخر پایین‌تر، یا logی کوتاه‌تر وقتی termها برابرند. پس leaderی هر entry commit‌شده‌ای را دارد. چون entryها به ترتیب تکرار می‌شوند، مقایسه‌ی entryهای آخر کافی است (p. 302). آن leader به log خودش می‌افزاید و موازی به followerها می‌فرستد. همین که followerهای کافی تأیید کنند، entry **commit** می‌شود (pp. 302–303). در شکل ۱۴-۱۱، مقدار x = 8 افزوده، به اکثریتی تکرار، محلی commit، و بعد آن commit پخش می‌شود (p. 303). commit کردن entryی هر چیزی را پیش از آن commit می‌کند، و تنها leader درباره‌ی commit شدن تصمیم می‌گیرد (p. 303).
 
-![Logs of five processes with leader P1: entries 1 to 3 (x=3, x=7, x=2) are committed; P1 also has uncommitted entries 4 and 5, P4 has entry 4, and P3 and P5 lag behind](../figures/14-12.png)
+![logهای پنج process با leader یعنی P1: entryهای ۱ تا ۳ با x=3 و x=7 و x=2 commit شده‌اند؛ process P1 entryهای commit‌نشده‌ی ۴ و ۵ را هم دارد، P4 entry ۴ را، و P3 و P5 عقب‌اند](../figures/14-12.png)
 
-*Figure 14-12 (p. 304): an entry is committed once a majority holds it; committing entry 3 also commits everything before it.*
+*Figure 14-12 (p. 304): entryی همین که اکثریتی داشته باشدش commit می‌شود؛ و commit کردن entry ۳ هر چیزی را پیش از آن هم commit می‌کند.*
 
-#### Failure scenarios
+#### صحنه‌های شکست
 
-- **Split votes** are made unlikely by **randomized timers**: one candidate starts earlier and wins (p. 304).
-- The leader retries unacknowledged messages and may send in parallel. Followers deduplicate by sequence ID (p. 304).
-- A follower rejects entries whose preceding (index, term) doesn't match its log. The **Log Matching** property follows: same term and index means same command and identical prefixes (p. 304).
-- Committed entries may still *look* in progress to a client, which is harmless; retry until committed (p. 304).
-- A new leader finds the highest entry it shares with each follower, has the follower discard uncommitted entries after it, and overwrites them with its own. The leader's log is never rewritten, only appended to (p. 305).
+- **رأی شقه** با **تایمرهای تصادفی** کم‌احتمال می‌شود: یک نامزد زودتر شروع می‌کند و می‌برد (p. 304).
+- آن leader پیام‌های تأیید‌نشده را دوباره می‌کوشد و می‌تواند موازی بفرستد. followerها با ID ترتیب تکراری‌زدایی می‌کنند (p. 304).
+- یک follower entryهایی را رد می‌کند که زوج (شاخص، term) پیشینشان با logش نمی‌خواند. خاصیت **خوردن log** از این پی می‌گیرد: همان term و index یعنی همان فرمان و پیشوندهای یکسان (p. 304).
+- همه‌ی entryهای commit‌شده باز هم می‌توانند از دید کلاینتی در جریان *به نظر برسند*، که بی‌آزار است؛ تا commit شدن دوباره بکوشید (p. 304).
+- یک leader تازه بالاترین entryی را پیدا می‌کند که با هر followerی مشترک دارد، آن follower را وا می‌دارد entryهای commit‌نشده‌ی پس از آن را بیندازد، و با مال خودش روی‌نویسی‌شان می‌کند. log آن leader هیچ‌وقت دوباره نوشته نمی‌شود، تنها به آن افزوده (p. 305).
 
-| Raft guarantee (p. 305) |
+| تضمین Raft (p. 305) |
 |---|
-| At most one leader per term |
-| A leader only appends; it never removes or reorders |
-| Committed entries appear in all later leaders' logs |
-| (term, message) IDs are never reused for a different entry |
+| برای هر termی حداکثر یک leader |
+| leader تنها می‌افزاید؛ هیچ‌وقت برنمی‌دارد یا مرتب دوباره نمی‌کند |
+| entryهای commit‌شده در log همه‌ی leaderهای بعدی پیدا می‌شوند |
+| زوج‌های (term, message) هیچ‌وقت برای entryی دیگر بازاستفاده نمی‌شوند |
 
-Raft is used by CockroachDB, etcd and Consul (p. 305).
+الگوریتم Raft در CockroachDB و etcd و Consul به کار می‌رود (p. 305).
 
-### Byzantine consensus
+> **In practice:** etcd زیر Kubernetes و ClickHouse Keeper زیر replication warehouse هر دو Raft اجرا می‌کنند.
+>
+> **Your turn:** Keeper سه node دارد و دو تا down می‌شوند. چه کار می‌کند و چه نه؟
+>
+> *Answer:* یک node از سه اکثریت ندارد، پس leaderی انتخاب نمی‌شود و Keeper نوشتن نمی‌پذیرد؛ جدول‌های Replicated در ClickHouse read-only می‌شوند ولی خواندن کار می‌کند. Raft ایمنی را بر availability مقدم می‌دارد: بدون quorum تصمیمی گرفته نمی‌شود (pp. 300–305).
 
-The algorithms so far assume nodes act in good faith, which allows fewer participants and fewer round trips (p. 305). Adversarial deployments, but also bugs, misconfiguration, hardware faults and corruption, call for **Byzantine** tolerance. Most such algorithms need **N²** messages per step, because every node cross-validates every other (pp. 305–306). **PBFT** (Castro and Liskov) assumes independent failures and **weak synchrony**. Communication is encrypted, and replicas know each other's public keys (p. 306).
+### مفهوم consensus از جنس Byzantine
 
-#### PBFT algorithm
+الگوریتم‌های تا این‌جا فرض می‌گیرند نودها با نیت خوب عمل می‌کنند، که شرکت‌کننده‌ی کم‌تر و رفت‌و‌برگشت کم‌تر را مجاز می‌کند (p. 305). deploymentهای خصمانه، ولی همچنین اشکال و config غلط و خطای سخت‌افزار و خرابی، تحمل **Byzantine** را می‌خواهند. بیشتر چنین الگوریتم‌هایی برای هر قدمی **N²** پیام لازم دارند، چون هر نودی هر نود دیگری را اعتبارسنجی متقابل می‌کند (pp. 305–306). **PBFT** از کاسترو و لیسکوف شکست‌های مستقل و **concurrency ضعیف** را فرض می‌گیرد. ارتباط encryption می‌شود، و replicaها کلید عمومی هم را می‌دانند (p. 306).
 
-Safety and liveness need at most (n − 1)/3 faulty replicas, so **n = 3f + 1**. There may be f faulty replicas plus f unresponsive but honest ones, and the responses from non-faulty replicas must still outnumber the faulty ones (p. 306).
+#### الگوریتم PBFT
 
-- **Views:** the primary is replica **v mod N**, and the rest are backups. A client waits for **f + 1** matching replies (p. 306).
+ایمنی و liveness حداکثر (n − 1)/3 replica عیب‌دار را لازم دارند، پس **n = 3f + 1**. می‌تواند f مؤلفه‌ی replica عیب‌دار به‌علاوه‌ی f بی‌پاسخ ولی صادق باشد، و پاسخ‌های replicaهای ناـعیب‌دار باید باز هم از عیب‌دارها بیشتر باشند (p. 306).
 
-![Client sends a request to P1; P1 sends pre-prepare to P2 and P3, while P4 is marked with a cross; replicas exchange prepare all-to-all, then commit all-to-all, then all reply to the client](../figures/14-13.png)
+- **نما:** اصلی همان replica شماره‌ی **v mod N** است، و بقیه پشتیبان‌اند. کلاینتی منتظر **f + 1** پاسخ خوان می‌ماند (p. 306).
 
-*Figure 14-13 (p. 308): pre-prepare carries the primary's signed digest; prepare needs 2f matching messages, commit 2f + 1, and the client waits for f + 1 matching replies (pp. 306–308).*
+![کلاینت درخواستی به P1 می‌فرستد؛ process P1 پیام pre-prepare را به P2 و P3 می‌فرستد، در حالی که P4 ضربدر خورده؛ replicaها prepare را همه‌به‌همه رد و بدل می‌کنند، بعد commit را همه‌به‌همه، بعد همه به کلاینت پاسخ می‌دهند](../figures/14-13.png)
 
-- **Digests** keep prepare messages small; collision resistance and signatures make them trustworthy (p. 307).
-- **View change:** replicas that suspect the primary stop responding, except to checkpoint and view-change messages, and broadcast a view change. The new primary starts the view after **2f** view-change events (p. 308).
-- **Optimizations:** clients can accept **2f + 1** matching *tentative* replies, falling back to f + 1 non-tentative ones. Read-only operations take one round trip with 2f + 1 matching responses (p. 308).
+*Figure 14-13 (p. 308): پیام pre-prepare آن digest امضا‌شده‌ی اصلی را حمل می‌کند؛ prepare تعداد 2f پیام خوان لازم دارد، commit تعداد 2f + 1، و کلاینت منتظر f + 1 پاسخ خوان می‌ماند (pp. 306–308).*
 
-#### Recovery and checkpointing
+- **ساختار digest**ها پیام‌های prepare را کوچک نگه می‌دارند؛ و مقاومت در برابر برخورد و امضاها قابل اعتمادشان می‌کنند (p. 307).
+- **عوض شدن نما:** replicaهایی که به اصلی گمان ببرند پاسخ دادن را بس می‌کنند، جز به پیام‌های checkpoint و عوض شدن نما، و عوض شدن نما را پخش می‌کنند. اصلی تازه نما را پس از **2f** رویداد عوض شدن نما شروع می‌کند (p. 308).
+- **بهینه‌سازی‌ها:** کلاینت‌ها می‌توانند **2f + 1** پاسخ *آزمایشی* خوان را بپذیرند، و به f + 1 ناـآزمایشی برگردند. عملیات read-only یک رفت‌و‌برگشت با 2f + 1 پاسخ خوان می‌برند (p. 308).
 
-Messages stay in a stable log until at least f + 1 nodes have executed them. Recovering replicas must verify the state they receive, because recovery could otherwise be an attack vector (p. 309). Every N requests, the primary broadcasts a **stable checkpoint**: the latest sequence number and a state digest. **2f + 1** responses prove it, and all older messages can be discarded (p. 309). Usually authenticated, encrypted links are enough; PBFT-style algorithms are needed when there's no trust between the parts of a system (p. 309).
+#### بازیابی و checkpoint گرفتن
 
-### Summary
+پیام‌ها در logی پایدار می‌مانند تا دست‌کم f + 1 نود اجراشان کنند. replicaهای در حال بازیابی باید حالتی را که می‌گیرند اعتبارسنجی کنند، چون وگرنه بازیابی می‌توانست مجرای حمله باشد (p. 309). هر N درخواست، اصلی یک **checkpoint پایدار** پخش می‌کند: تازه‌ترین شماره‌ی ترتیب و digestی از حالت. تعداد **2f + 1** پاسخ اثباتش می‌کند، و همه‌ی پیام‌های قدیمی‌تر انداختنی‌اند (p. 309). معمولاً پیوندهای احراز‌شده و encryption‌شده کافی‌اند؛ الگوریتم‌های از جنس PBFT وقتی لازم‌اند که میان بخش‌های سیستمی اعتمادی نیست (p. 309).
 
-| Variant | Improves (pp. 309–310) |
+### خلاصه
+
+| گونه | چه چیزی را بهتر می‌کند (pp. 309–310) |
 |---|---|
-| Multi-Paxos | Keeps the proposer and replicates many values |
-| Fast Paxos | Fewer messages through fast rounds from any proposer |
-| EPaxos | Orders by resolving dependencies between commands |
-| Flexible Paxos | Only the phase 1 and phase 2 quorums must intersect |
-| Raft | Leadership is first-class; separates log replication, leader election and safety |
-| PBFT | Cross-validation for adversarial environments |
+| Multi-Paxos | proposer را نگه می‌دارد و مقدارهای زیادی را تکرار می‌کند |
+| Fast Paxos | پیام کم‌تر از راه دورهای سریع از هر proposerی |
+| EPaxos | با حل کردن وابستگی میان فرمان‌ها مرتب می‌کند |
+| Flexible Paxos | تنها quorumهای فاز ۱ و فاز ۲ باید اشتراک داشته باشند |
+| Raft | leadership درجه‌یک است؛ replication لاگ و انتخاب leader و ایمنی را جدا می‌کند |
+| PBFT | اعتبارسنجی متقابل برای محیط‌های خصمانه |
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| | Nodes for f faults | Quorum | Leader | Messages per decision |
+| | نود برای f خطا | quorum | leader | پیام برای هر تصمیمی |
 |---|---|---|---|---|
-| Classic Paxos | 2f + 1 | Majority (f + 1) | Per round | 2 round trips |
-| Multi-Paxos / Raft / ZAB | 2f + 1 | Majority | Long-lived | 1 round trip under a stable leader |
-| Fast Paxos | 3f + 1 | 2f + 1 | Coordinator, bypassed in fast rounds | Fewer steps; collisions cost extra |
-| EPaxos | 2f + 1 | Fast ⌈3f/4⌉, slow ⌊f/2⌋ + 1 | Per command | Fast path 1 round trip |
-| Flexible Paxos | N | Q₁ + Q₂ > N | Long-lived | Small Q₂ cuts replication latency |
-| PBFT | 3f + 1 | 2f, then 2f + 1 | Primary per view | O(N²) |
+| Paxos کلاسیک | 2f + 1 | اکثریت یعنی f + 1 | برای هر دوری | ۲ رفت‌و‌برگشت |
+| Multi-Paxos و Raft و ZAB | 2f + 1 | اکثریت | دیرزیست | ۱ رفت‌و‌برگشت زیر leaderی پایدار |
+| Fast Paxos | 3f + 1 | 2f + 1 | coordinator، که در دورهای سریع دور زده می‌شود | قدم کم‌تر؛ برخورد اضافه خرج دارد |
+| EPaxos | 2f + 1 | سریع ⌈3f/4⌉، کند ⌊f/2⌋ + 1 | برای هر فرمانی | مسیر سریع ۱ رفت‌و‌برگشت |
+| Flexible Paxos | N | Q₁ + Q₂ > N | دیرزیست | Q₂ کوچک latency replication را می‌برد |
+| PBFT | 3f + 1 | اول 2f، بعد 2f + 1 | اصلی برای هر نمایی | از مرتبه‌ی O(N²) |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Fast quorum sizes.** The book's EPaxos fast quorum, ⌈3f/4⌉, is how it appears on p. 294. The EPaxos paper states it as F + ⌊(F + 1)/2⌋ replicas, *including* the command leader, for N = 2F + 1. Check the paper before relying on either number.
-- **Flexible Paxos by enumeration.** The [quorum-intersection lab](../lab/14-flexible-paxos/README.md) lists every Q₁-sized and Q₂-sized subset of N acceptors and confirms that every pair intersects exactly when Q₁ + Q₂ > N. It also finds a disjoint pair as soon as the inequality fails.
-- **Raft in practice.** Production Raft adds **PreVote**, which stops a partitioned node from disrupting the cluster with ever-higher terms, and **joint consensus** or single-server changes for membership. Both come from Ongaro's dissertation and appear in etcd/raft. For a Raft election-and-log simulation, see [DDIA Ch. 10](../../designing-data-intensive-applications/chapters/10-consistency-and-consensus.md).
+- **اندازه‌ی quorum سریع.** آن quorum سریع EPaxos در کتاب، یعنی ⌈3f/4⌉، همان‌طور است که در ص. ۲۹۴ پیدا می‌شود. مقاله‌ی EPaxos آن را F + ⌊(F + 1)/2⌋ replica می‌گوید، *با احتساب* leader فرمان، برای N = 2F + 1. پیش از تکیه به هر یک از آن عددها مقاله را بسنجید.
+- **الگوریتم Flexible Paxos با برشماری.** [آزمایش اشتراک quorum](../lab/14-flexible-paxos/README.md) هر زیرمجموعه‌ی به اندازه‌ی Q₁ و Q₂ از N acceptor را فهرست می‌کند و تأیید می‌کند که هر زوجی دقیقاً وقتی اشتراک دارد که Q₁ + Q₂ > N. همچنین همین که آن نامساوی باز بماند زوجی مجزا پیدا می‌کند.
+- **الگوریتم Raft در عمل.** Raft در production روش **PreVote** را می‌افزاید، که جلو این را می‌گیرد که نودی پارتیشن‌شده cluster را با termهای بالاتر و بالاتر بر هم بزند، و **consensus مشترک** یا تغییرهای تک‌سروری را برای عضویت. هر دو از رساله‌ی آنگارو می‌آیند و در etcd/raft پیدا می‌شوند. برای شبیه‌سازی انتخاب و log در Raft، [فصل ۱۰ کتاب DDIA](../../designing-data-intensive-applications/chapters/10-consistency-and-consensus.md) را ببینید.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Flexible Paxos quorum intersection](../lab/14-flexible-paxos/README.md) — enumerates quorum pairs for N = 3…7 and every (Q₁, Q₂), printing which configurations are safe, how many failures each phase tolerates, and the PBFT 3f + 1 arithmetic.
-- **Related chapters:** [8. Introduction and Overview](08-introduction-and-overview.md) (FLP, failure models, Byzantine faults), [9. Failure Detection](09-failure-detection.md) (liveness via detectors), [10. Leader Election](10-leader-election.md) (why election is consensus), [11. Replication and Consistency](11-replication-and-consistency.md) (R + W > N, linearizability), [13. Distributed Transactions](13-distributed-transactions.md) (Paxos groups in Spanner and Calvin).
+- **Run it:** [اشتراک quorum در Flexible Paxos](../lab/14-flexible-paxos/README.md)؛ زوج‌های quorum را برای N از ۳ تا ۷ و هر (Q₁, Q₂)ی برمی‌شمارد، و چاپ می‌کند کدام چیدمان‌ها ایمن‌اند، هر فازی چند شکست را تحمل می‌کند، و حساب 3f + 1 مربوط به PBFT.
+- **فصل‌های مرتبط:** [فصل ۸: مقدمه و نمای کلی](08-introduction-and-overview.md) که قضیه‌ی FLP و مدل‌های شکست و خطای Byzantine را دارد، [فصل ۹: تشخیص شکست](09-failure-detection.md) که liveness از راه detectorها را دارد، [فصل ۱۰: انتخاب leader](10-leader-election.md) که چرا انتخاب همان consensus است را دارد، [فصل ۱۱: replication و consistency](11-replication-and-consistency.md) که R + W > N و linearizability را دارد، و [فصل ۱۳: تراکنش توزیع‌شده](13-distributed-transactions.md) که گروه‌های Paxos در Spanner و Calvin را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌های کتاب ارجاع می‌دهند.*
 
-1. **Why is validity needed alongside agreement?**
+1. **چرا اعتبار در کنار توافق لازم است؟**
 
-   *Answer:* Without it, every process could always decide a fixed default value: unanimous but useless (p. 280).
+   *Answer:* بی آن، هر processی می‌توانست همیشه مقداری پیش‌فرض و ثابت را تصمیم بگیرد: unanimous ولی بی‌فایده (p. 280).
 
-2. **How many messages does naive reliable broadcast use, and why?**
+2. **پخش قابل اطمینان ساده‌دل چند پیام به کار می‌برد، و چرا؟**
 
-   *Answer:* About N²: every process that receives the message forwards it to every other process, so delivery survives a sender crash (p. 281).
+   *Answer:* تقریباً N²: هر processی که پیام را بگیرد به هر process دیگری می‌فرستدش، پس تحویل از کار افتادن فرستنده را جان به در می‌برد (p. 281).
 
-3. **P1 got V1 accepted only by A1, then crashed. P2 runs phase 1 with quorum {A1, A2}. Which value must P2 propose?**
-   - [x] V1, the highest-numbered accepted value it heard about
-   - [ ] Its own value, because V1 never reached a majority
-   - [ ] Either; Paxos leaves it to the proposer
+3. **نقش proposer P1 مقدار V1 را تنها به دست A1 پذیرفته‌شده کرد، بعد از کار افتاد. proposer P2 فاز ۱ را با quorum {A1, A2} اجرا می‌کند. کدام مقدار را باید پیشنهاد بدهد؟**
+   - [x] مقدار V1، که بالاترین‌شماره مقدار پذیرفته‌ای است که درباره‌اش شنیده
+   - [ ] مقدار خودش، چون V1 هیچ‌وقت به اکثریتی نرسید
+   - [ ] هر کدام؛ Paxos به proposer می‌سپاردش
 
-   *Answer:* A proposer must use the value of the highest-numbered accepted proposal among the replies (pp. 286, 289).
+   *Answer:* proposerی باید مقدار آن پیشنهاد پذیرفته‌ی بالاترین‌شماره میان پاسخ‌ها را به کار ببرد (pp. 286, 289).
 
-4. **Why are Multi-Paxos leases not a correctness guarantee?**
+4. **چرا leaseهای Multi-Paxos تضمین درستی نیستند؟**
 
-   *Answer:* They depend on bounded clock drift. If clocks drift too far, a leader may think its lease is valid after others consider it expired, and linearizability breaks (p. 291).
+   *Answer:* به رانش ساعت bounded وابسته‌اند. اگر ساعت‌ها زیادی رانش کنند، leaderی می‌تواند leaseش را معتبر بپندارد پس از آن‌که بقیه منقضی به حسابش می‌آورند، و linearizability می‌شکند (p. 291).
 
-5. **Five acceptors; replication should need only two acknowledgments. How big must the election quorum be in Flexible Paxos?**
+5. **پنج پذیرنده؛ replication باید تنها دو تأیید لازم داشته باشد. quorum انتخاب در Flexible Paxos باید چقدر بزرگ باشد؟**
 
-   *Answer:* Q₁ ≥ N − Q₂ + 1 = 4, so Q₁ + Q₂ > N (p. 297).
+   *Answer:* داریم Q₁ ≥ N − Q₂ + 1 = 4، پس Q₁ + Q₂ > N (p. 297).
 
-6. **What does a Fast Paxos collision cost?**
+6. **برخورد در Fast Paxos چه خرجی دارد؟**
 
-   *Answer:* Acceptors take different values, so the coordinator must start a new round to make them converge, which raises latency, especially under high request rates (p. 293).
+   *Answer:* acceptorها مقدارهای مختلفی برمی‌دارند، پس coordinator باید دوری تازه شروع کند تا هم‌گراشان کند، که latency را بالا می‌برد، به‌ویژه زیر نرخ درخواست بالا (p. 293).
 
-7. **When does an EPaxos leader take the slow path?**
+7. **نقش leader در EPaxos کِی مسیر کند را برمی‌دارد؟**
 
-   *Answer:* When fast-quorum replies are missing or their dependency lists disagree. It merges the dependencies, raises the sequence number and runs Accept on ⌊f/2⌋ + 1 replicas (pp. 294–295).
+   *Answer:* وقتی پاسخ‌های quorum سریع گم باشند یا فهرست‌های وابستگی‌شان نخوانند. وابستگی‌ها را merge می‌کند، شماره‌ی ترتیب را بالا می‌برد و Accept را روی ⌊f/2⌋ + 1 replica اجرا می‌کند (pp. 294–295).
 
-8. **Why do Raft log entries only flow from leader to followers?**
+8. **چرا entryهای log در Raft تنها از leader به followerها جاری می‌شوند؟**
 
-   *Answer:* Followers refuse to vote for candidates with less up-to-date logs, so any elected leader already holds every committed entry (pp. 302–303).
+   *Answer:* followerها از رأی دادن به نامزدهایی با log کم‌تر‌به‌روز پرهیز می‌کنند، پس هر leader انتخاب‌شده‌ای از قبل هر entry commit‌شده‌ای را دارد (pp. 302–303).
 
-9. **Why does PBFT need 3f + 1 replicas?**
+9. **چرا PBFT تعداد 3f + 1 replica لازم دارد؟**
 
-   *Answer:* Up to f may be faulty and another f may be unresponsive though honest. The responses from honest replicas must still outnumber the faulty ones (p. 306).
+   *Answer:* تا f تا می‌توانند عیب‌دار باشند و f تای دیگر بی‌پاسخ ولی صادق. پاسخ‌های replicaهای صادق باید باز هم از عیب‌دارها بیشتر باشند (p. 306).

@@ -1,18 +1,18 @@
-# B-Tree height vs fanout
+# ارتفاع B-Tree در برابر fanout
 
-How many pages does a lookup read, and how many comparisons does it make, as nodes get bigger? This experiment bulk-loads a B⁺-Tree of one million keys at several node capacities, either completely full or about 69% full, which is a common estimate of average occupancy under random inserts. It then runs 2,000 random lookups and counts page reads and binary-search comparisons. It ends with the book's 4-billion-key example.
+هر جست‌وجو چند صفحه می‌خواند و چند مقایسه می‌کند، وقتی nodeها بزرگ‌تر می‌شوند؟ این آزمایش درختی B⁺-Tree از یک میلیون کلید را با چند ظرفیت node یک‌جا بار می‌کند، یا کاملاً پر یا حدود ۶۹ درصد پر، که برآوردی رایج از اشغال میانگین زیر درج تصادفی است. بعد ۲٬۰۰۰ جست‌وجوی تصادفی را اجرا و خواندن صفحه‌ها و مقایسه‌های جست‌وجوی دودویی را می‌شمارد. پایانش مثال چهار میلیارد کلیدی کتاب است.
 
-*Illustrates Database Internals, “B-Tree Lookup Complexity”, pp. 37–38: a lookup reads log_N(M) pages and does log₂(M) comparisons. The 69% fill level and the bulk-loading build are the vault's; so is the implementation.*
+*تصویری از «پیچیدگی جست‌وجو در B-Tree» کتاب Database Internals، صص. ۳۷–۳۸: هر جست‌وجو به تعداد log_N(M) صفحه می‌خواند و log₂(M) مقایسه می‌کند. آن سطح پرشدگی ۶۹ درصد و ساخت یک‌جا مال vault است؛ و پیاده‌سازی هم.*
 
-## Run
+## اجرا
 
-Python 3.10+, standard library only, deterministic (seeded):
+نسخه‌ی Python ۳.۱۰ یا بالاتر، تنها کتابخانه‌ی استاندارد، قطعی با seed:
 
 ```sh
 python3 btree_height.py
 ```
 
-## Expected output
+## خروجی چشم‌داشته
 
 ```text
 1,000,000 keys; 2,000 random lookups per tree
@@ -36,13 +36,13 @@ Book's example, 4 billion keys:
   fanout 500: ceil(log_500(4e9)) = 4 page reads
 ```
 
-## What to look for
+## به چه چیزی نگاه کنید
 
-- Height, and so page reads per lookup, falls quickly with fanout: from 10 levels at capacity 4 to 3 levels at 256 or 500.
-- Comparisons barely change (about 20–23). Binary search inside each node adds up to log₂(M) whatever the fanout, so high fanout saves disk reads, not CPU work.
-- Half-full nodes cost an extra level only at small fanouts. At high fanout, the tree's height barely notices occupancy.
-- The book's numbers: 4 billion keys need 32 comparisons, and only 4 page reads at fanout 500.
+- ارتفاع، و پس خواندن صفحه در هر جست‌وجو، با fanout تند می‌افتد: از ۱۰ سطح در ظرفیت ۴ به ۳ سطح در ۲۵۶ یا ۵۰۰.
+- مقایسه‌ها به‌سختی عوض می‌شوند، حدود ۲۰ تا ۲۳. جست‌وجوی دودویی درون هر node هر چه fanout باشد به log₂(M) سر می‌زند، پس fanout بالا در خواندن دیسک صرفه‌جویی می‌کند، نه در کار CPU.
+- همه‌ی nodeهای نیمه‌پر تنها در fanout کوچک یک سطح بیشتر خرج می‌کنند. در fanout بالا ارتفاع درخت اشغال را به‌سختی حس می‌کند.
+- عددهای کتاب: چهار میلیارد کلید ۳۲ مقایسه می‌خواهد، و در fanout ۵۰۰ تنها ۴ بار خواندن صفحه.
 
-## Related
+## مرتبط
 
-- Chapter note: [2. B-Tree Basics](../../chapters/02-b-tree-basics.md) — “B-Tree Lookup Complexity”, pp. 37–38
+- یادداشت فصل: [فصل ۲: پایه‌های B-Tree](../../chapters/02-b-tree-basics.md) — «پیچیدگی جست‌وجو در B-Tree»، صص. ۳۷–۳۸

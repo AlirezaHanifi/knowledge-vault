@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vector Clocks and Causal Delivery</title>
-<meta name="description" content="Broadcast messages between three processes, deliver them in any order, and watch receivers buffer messages whose causal dependencies have not arrived yet. Compare two processes&#x27; vector clocks to see before, after or concurrent. Illustrates Database Internals, Chapter 11.">
+<title>ساعت برداری و تحویل علّی</title>
+<meta name="description" content="میان سه process پیام پخش کنید، به هر ترتیبی تحویلشان بدهید، و ببینید گیرنده‌ها پیام‌هایی را buffer می‌کنند که وابستگی علّی‌شان هنوز نرسیده. ساعت برداری دو process را مقایسه کنید تا پیش یا پس یا هم‌زمان را ببینید. تصویری از فصل ۱۱ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .procs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .proc { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); }
   .proc h3 { margin: 0 0 4px; font-size: .9rem; }
-  .vc { font-family: var(--mono); font-size: 1rem; font-weight: 600; }
+  .vc { font-family: var(--mono); font-size: 1rem; font-weight: 600; direction: ltr; }
   .seen { font-family: var(--mono); font-size: .74rem; color: var(--ink-2); margin-top: 6px; min-height: 1.2em; }
   .bufd { font-family: var(--mono); font-size: .74rem; color: var(--warn); min-height: 1.2em; }
   .net { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -20,53 +20,53 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../../../index.html">Library</a><span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="مسیر">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
-      <a href="../chapters/11-replication-and-consistency.html">Chapter 11</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Vector clocks</span>
+      <a href="../chapters/11-replication-and-consistency.html">فصل ۱۱</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ساعت برداری</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">Chapter 11 · Replication and Consistency</div>
-  <h1>Vector clocks and causal delivery</h1>
-  <p class="lede">A <strong>vector clock</strong> holds one counter per process. Each message carries its sender’s vector, so a receiver can tell whether it has already seen everything the message depends on. If it hasn’t, the message waits in a <strong>buffer</strong> until its dependencies arrive. Comparing two vectors element by element shows whether one event <strong>happened before</strong> the other or whether they are <strong>concurrent</strong>.</p>
-  <p class="source-note">Illustrates “Causal Consistency” and “Vector clocks” (pp. 230–233). The widget uses the causal-broadcast form of vector clocks, in which each entry counts the messages a process has broadcast; the book’s description increments on every event. The processes and the scenario are the vault’s. Implementation is the vault’s own.</p>
+  <div class="eyebrow">فصل ۱۱ · replication و consistency</div>
+  <h1>ساعت برداری و تحویل علّی</h1>
+  <p class="lede"><strong>ساعت برداری</strong> یک شمارنده برای هر processی دارد. هر پیامی بردار فرستنده‌اش را حمل می‌کند، پس گیرنده‌ای می‌تواند بگوید که هر چیزی را که آن پیام به آن وابسته است از قبل دیده یا نه. اگر ندیده باشد، پیام تا رسیدن وابستگی‌هایش در یک <strong>buffer</strong> منتظر می‌ماند. مقایسه‌ی عنصر‌به‌عنصر دو بردار نشان می‌دهد که رویدادی <strong>پیش از</strong> دیگری رخ داده یا <strong>هم‌زمان</strong>اند.</p>
+  <p class="source-note">تصویری از «consistency علّی» و «ساعت‌های برداری» (صص. ۲۳۰–۲۳۳). این widget شکل پخش علّی ساعت برداری را به کار می‌برد، که در آن هر خانه‌ای پیام‌هایی را می‌شمارد که processی پخش کرده؛ و وصف کتاب سر هر رویدادی می‌افزاید. processها و آن صحنه مال vault است. پیاده‌سازی مال خود vault است.</p>
 
   <div class="sim">
     <div class="stack">
       <div class="panel"><div class="procs" id="procs"></div>
-        <p class="panel-title" style="margin-top:14px">In flight (click to deliver)</p><div class="net" id="net"></div>
+        <p class="panel-title" style="margin-top:14px">در پرواز؛ برای تحویل کلیک کنید</p><div class="net" id="net"></div>
         <div class="callout" id="cmp" style="margin-top:12px"></div></div>
     </div>
     <div class="stack">
-      <div class="panel"><p class="panel-title">Controls</p><div class="row"><button class="btn small primary" type="button" data-b="0">P1 broadcasts</button><button class="btn small primary" type="button" data-b="1">P2 broadcasts</button><button class="btn small primary" type="button" data-b="2">P3 broadcasts</button></div>
+      <div class="panel"><p class="panel-title">کنترل‌ها</p><div class="row"><button class="btn small primary" type="button" data-b="0">P1 پخش می‌کند</button><button class="btn small primary" type="button" data-b="1">P2 پخش می‌کند</button><button class="btn small primary" type="button" data-b="2">P3 پخش می‌کند</button></div>
         <div id="pair" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="scen">Load the out-of-order scenario</button><button class="btn small" type="button" id="reset">↺ Reset</button></div></div>
-      <div class="panel"><p class="panel-title">Counters</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">Event log</p><ol id="log" aria-live="polite"></ol></div>
+        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="scen">صحنه‌ی بی‌ترتیب را بار کن</button><button class="btn small" type="button" id="reset">↺ از نو</button></div></div>
+      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
+      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
     </div>
   </div>
 
-  <h2>What to notice</h2>
+  <h2>به چه چیزی نگاه کنید</h2>
   <ul class="notice-list">
-    <li><strong>Run the scenario.</strong> P2 sees M1 and then broadcasts M2, so M2 depends on M1. P3 receives M2 first and buffers it, because its clock shows that it hasn’t seen M1 yet.</li>
-    <li><strong>Delivery merges clocks.</strong> Delivering a message raises the receiver’s entry for that sender, which can release buffered messages.</li>
-    <li><strong>Concurrent means incomparable.</strong> If each vector is larger somewhere, neither event knew about the other. That is how replicas detect conflicting writes.</li>
-    <li><strong>Detection is not resolution.</strong> Vector clocks tell you that two writes conflict, not which one should win.</li>
+    <li><strong>آن صحنه را اجرا کنید.</strong> process P2 پیام M1 را می‌بیند و بعد M2 را پخش می‌کند، پس M2 به M1 وابسته است. process P3 اول M2 را می‌گیرد و bufferش می‌کند، چون ساعتش نشان می‌دهد که هنوز M1 را ندیده.</li>
+    <li><strong>تحویل ساعت‌ها را merge می‌کند.</strong> تحویل پیامی خانه‌ی گیرنده برای آن فرستنده را بالا می‌برد، که می‌تواند پیام‌های buffer‌شده را آزاد کند.</li>
+    <li><strong>هم‌زمان یعنی مقایسه‌ناپذیر.</strong> اگر هر بردار جایی بزرگ‌تر باشد، هیچ رویدادی از آن یکی خبر نداشته. همین‌طور است که replicaها نوشتن‌های متعارض را تشخیص می‌دهند.</li>
+    <li><strong>تشخیص حل نیست.</strong> ساعت برداری می‌گوید که دو نوشتن تعارض دارند، و نه این‌که کدام باید ببرد.</li>
   </ul>
 
-  <h2>Check your understanding</h2>
+  <h2>فهم خودتان را بسنجید</h2>
   <div id="quiz"></div>
 
-  <h2 class="no-embed">Related</h2>
+  <h2 class="no-embed">مرتبط</h2>
   <ul class="related no-embed">
-    <li><a href="../chapters/11-replication-and-consistency.html"><small>Lesson</small>11. Replication and Consistency</a></li>
+    <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
   </ul>
-  <p class="footer">Knowledge Vault simulation · implementation is the vault’s own.</p>
+  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,18 +83,18 @@ function stats(rows) {
 
   var log = Kit.log(document.getElementById("log"));
   var vc, seen, bufs, net, mid, pair = "01";
-  function reset() { vc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; seen = [[], [], []]; bufs = [[], [], []]; net = []; mid = 0; log.clear(); log.add("Three processes with clocks [0, 0, 0].", "muted"); render(); }
+  function reset() { vc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; seen = [[], [], []]; bufs = [[], [], []]; net = []; mid = 0; log.clear(); log.add("سه process با ساعت‌های [0, 0, 0].", "muted"); render(); }
   function bcast(p) {
     vc[p][p]++; var m = { id: "M" + (++mid), from: p, vc: vc[p].slice() }; seen[p].push(m.id);
     [0, 1, 2].forEach(function (q) { if (q !== p) net.push({ m: m, to: q }); });
-    log.add("P" + (p + 1) + " broadcasts " + m.id + " " + fmt(m.vc), "ok");
+    log.add("process P" + (p + 1) + " پیام " + m.id + " " + fmt(m.vc) + " را پخش می‌کند", "ok");
   }
   function ready(q, m) { return m.vc[m.from] === vc[q][m.from] + 1 && m.vc.every(function (x, k) { return k === m.from || x <= vc[q][k]; }); }
-  function apply(q, m) { vc[q][m.from] = m.vc[m.from]; seen[q].push(m.id); log.add("P" + (q + 1) + " delivers " + m.id + " → clock " + fmt(vc[q]), "ok"); }
+  function apply(q, m) { vc[q][m.from] = m.vc[m.from]; seen[q].push(m.id); log.add("process P" + (q + 1) + " پیام " + m.id + " را تحویل می‌دهد ← ساعت " + fmt(vc[q]), "ok"); }
   function arrive(i) {
     var e = net.splice(i, 1)[0], q = e.to;
-    if (!ready(q, e.m)) { bufs[q].push(e.m); log.add("P" + (q + 1) + " receives " + e.m.id + " " + fmt(e.m.vc) + " but its clock is " + fmt(vc[q]) + ": buffer until the dependencies arrive", "warn"); }
-    else { apply(q, e.m); var again = true; while (again) { again = false; for (var k = 0; k < bufs[q].length; k++) if (ready(q, bufs[q][k])) { var b = bufs[q].splice(k, 1)[0]; log.add("…now " + b.id + " is ready", "muted"); apply(q, b); again = true; break; } } }
+    if (!ready(q, e.m)) { bufs[q].push(e.m); log.add("process P" + (q + 1) + " پیام " + e.m.id + " " + fmt(e.m.vc) + " را می‌گیرد ولی ساعتش " + fmt(vc[q]) + " است: تا رسیدن وابستگی‌ها buffer می‌شود", "warn"); }
+    else { apply(q, e.m); var again = true; while (again) { again = false; for (var k = 0; k < bufs[q].length; k++) if (ready(q, bufs[q][k])) { var b = bufs[q].splice(k, 1)[0]; log.add("… حالا " + b.id + " آماده است", "muted"); apply(q, b); again = true; break; } } }
     render();
   }
   function fmt(v) { return "[" + v.join(", ") + "]"; }
@@ -102,38 +102,38 @@ function stats(rows) {
   function render() {
     var pr = Kit.clear(document.getElementById("procs"));
     [0, 1, 2].forEach(function (p) {
-      pr.appendChild(Kit.el("div", { class: "proc" }, Kit.el("h3", null, "P" + (p + 1)), Kit.el("div", { class: "vc", "aria-label": "clock" }, fmt(vc[p])),
-        Kit.el("div", { class: "seen" }, "seen: " + (seen[p].join(" ") || "—")), Kit.el("div", { class: "bufd" }, bufs[p].length ? "buffered: " + bufs[p].map(function (m) { return m.id; }).join(" ") : "")));
+      pr.appendChild(Kit.el("div", { class: "proc" }, Kit.el("h3", null, "P" + (p + 1)), Kit.el("div", { class: "vc", "aria-label": "ساعت" }, fmt(vc[p])),
+        Kit.el("div", { class: "seen" }, "دیده: " + (seen[p].join(" ") || "—")), Kit.el("div", { class: "bufd" }, bufs[p].length ? "buffer‌شده: " + bufs[p].map(function (m) { return m.id; }).join(" ") : "")));
     });
     var n = Kit.clear(document.getElementById("net"));
     net.forEach(function (e, i) { n.appendChild(Kit.el("button", { class: "btn small", type: "button", onclick: function () { arrive(i); } }, e.m.id + " " + fmt(e.m.vc) + " → P" + (e.to + 1))); });
-    if (!net.length) n.appendChild(Kit.el("span", { class: "field-hint" }, "Nothing in flight."));
+    if (!net.length) n.appendChild(Kit.el("span", { class: "field-hint" }, "چیزی در پرواز نیست."));
     var a = +pair[0], b = +pair[1], rel = relation(vc[a], vc[b]), c = document.getElementById("cmp");
     c.className = "callout " + (rel === "concurrent" ? "warn" : "ok");
-    Kit.clear(c).appendChild(Kit.el("strong", null, "P" + (a + 1) + " " + fmt(vc[a]) + " vs P" + (b + 1) + " " + fmt(vc[b]) + ": "));
-    c.appendChild(document.createTextNode(rel === "before" ? "P" + (a + 1) + "'s state happened before P" + (b + 1) + "'s" : rel === "after" ? "P" + (b + 1) + "'s state happened before P" + (a + 1) + "'s" : rel === "equal" ? "identical" : "concurrent: neither has seen everything the other has"));
-    stats([["Messages in flight", net.length], ["Buffered", bufs[0].length + bufs[1].length + bufs[2].length, bufs.some(function (x) { return x.length; }) ? "warn" : ""]]);
+    Kit.clear(c).appendChild(Kit.el("strong", null, "P" + (a + 1) + " " + fmt(vc[a]) + " در برابر P" + (b + 1) + " " + fmt(vc[b]) + ": "));
+    c.appendChild(document.createTextNode(rel === "before" ? "حالت P" + (a + 1) + " پیش از حالت P" + (b + 1) + " رخ داده" : rel === "after" ? "حالت P" + (b + 1) + " پیش از حالت P" + (a + 1) + " رخ داده" : rel === "equal" ? "یکسان‌اند" : "هم‌زمان: هیچ‌کدام هر چیزی را که آن یکی دیده ندیده"));
+    stats([["پیام‌های در پرواز", net.length], ["buffer‌شده", bufs[0].length + bufs[1].length + bufs[2].length, bufs.some(function (x) { return x.length; }) ? "warn" : ""]]);
   }
   [].forEach.call(document.querySelectorAll("[data-b]"), function (b) { b.addEventListener("click", function () { bcast(+b.getAttribute("data-b")); render(); }); });
-  document.getElementById("pair").appendChild(Kit.segmented({ label: "Compare clocks", value: pair, options: [{ value: "01", label: "P1 vs P2" }, { value: "02", label: "P1 vs P3" }, { value: "12", label: "P2 vs P3" }], onChange: function (v) { pair = v; render(); } }).element);
+  document.getElementById("pair").appendChild(Kit.segmented({ label: "مقایسه‌ی ساعت‌ها", value: pair, options: [{ value: "01", label: "P1 و P2" }, { value: "02", label: "P1 و P3" }, { value: "12", label: "P2 و P3" }], onChange: function (v) { pair = v; render(); } }).element);
   document.getElementById("scen").addEventListener("click", function () {
     reset(); bcast(0);
     var toP2 = net.findIndex(function (e) { return e.to === 1; }); arrive(toP2); bcast(1);
-    log.add("Now deliver M2 to P3 before M1 to see buffering.", "muted"); render();
+    log.add("حالا M2 را پیش از M1 به P3 تحویل بدهید تا buffer شدن را ببینید.", "muted"); render();
   });
   document.getElementById("reset").addEventListener("click", reset);
   reset();
 
   Kit.quiz(document.getElementById("quiz"), [
-    { q: "Clocks [2, 1, 0] and [1, 1, 1]: which relation holds?",
-      options: ["The first happened before the second", "The second happened before the first", "They are concurrent"], answer: 2,
-      explain: "Each is larger in some entry, so neither dominates." },
-    { q: "Why does a receiver buffer a message?",
-      options: ["The message is a duplicate", "Its vector shows dependencies the receiver hasn't seen yet", "The network is congested"], answer: 1,
-      explain: "Out-of-order messages wait until their dependencies arrive (pp. 230–232)." },
-    { q: "Why did Cassandra choose last-write-wins instead of vector clocks?",
-      options: ["Vector clocks can't detect conflicts", "Resolving conflicts needs application logic, stored causal history and garbage collection", "LWW is causally consistent"], answer: 1,
-      explain: "p. 233." }
+    { q: "ساعت‌های [2, 1, 0] و [1, 1, 1]: کدام رابطه برقرار است؟",
+      options: ["اولی پیش از دومی رخ داده", "دومی پیش از اولی رخ داده", "هم‌زمان‌اند"], answer: 2,
+      explain: "هر کدام در خانه‌ای بزرگ‌تر است، پس هیچ‌کدام بر آن یکی چیره نیست." },
+    { q: "چرا گیرنده‌ای پیامی را buffer می‌کند؟",
+      options: ["آن پیام تکراری است", "بردارش وابستگی‌هایی را نشان می‌دهد که گیرنده هنوز ندیده", "شبکه شلوغ است"], answer: 1,
+      explain: "پیام‌های بی‌ترتیب تا رسیدن وابستگی‌هایشان منتظر می‌مانند (صص. ۲۳۰–۲۳۲)." },
+    { q: "چرا Cassandra به‌جای ساعت برداری آخرین‌نوشتن‌می‌برد را برداشت؟",
+      options: ["ساعت برداری نمی‌تواند تعارض را تشخیص بدهد", "حل تعارض منطق برنامه و تاریخ علّی ذخیره‌شده و garbage collectorی لازم دارد", "روش LWW علّی سازگار است"], answer: 1,
+      explain: "ص. ۲۳۳." }
   ]);
 })();
 </script>
