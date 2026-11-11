@@ -3,250 +3,264 @@ book: engineering-leadership-the-hard-parts
 chapter: 6
 title: "Shipping Products and Code in Chaotic Environments"
 pages: "93–122"
+translated_title: "تحویل محصول و کد در محیط‌های آشوب‌زده"
+lang: fa
 ---
 
-# 6. Shipping Products and Code in Chaotic Environments
+# فصل ۶: تحویل محصول و کد در محیط‌های آشوب‌زده
 
-[← 5. Setting Direction](05-setting-direction.md) · [Book](../README.md) · [7. Budgeting, Costs, and Vendors →](07-budgeting-costs-and-vendors.md)
+[فصل ۵: تعیین جهت →](05-setting-direction.md) · [کتاب](../README.md) · [فصل ۷: بودجه، هزینه و فروشنده‌ها ←](07-budgeting-costs-and-vendors.md)
 
-## Summary
+## خلاصه
 
-You can't do everything, so you must decide what to do and in what order — but elaborate processes in chaos mean serving the process instead of the outcome. The chapter sets five criteria for any technique (inspire confidence, focus on execution, stay lightweight, foster learning, communicate), summed up in Kevin Stewart's rule "Use a process. Not too much. Mostly agile." It then builds a lightweight prioritization toolkit: key inputs, user stories with acceptance criteria, the impact-versus-effort matrix, backlog pruning, a two-week cadence, consistent estimates, one backlog for features, bugs, debt and maintenance, and transparent communication. It closes by recognizing work that isn't a product — office moves, audits, migrations — and runs best on a linear plan alongside sprints (pp. 93–122).
+نمی‌توانید همه کار را بکنید، پس باید تصمیم بگیرید چه کاری و به چه ترتیبی، ولی process پرزرق‌وبرق در آشوب یعنی خدمت کردن به process به‌جای نتیجه. این فصل پنج معیار برای هر تکنیکی می‌گذارد، یعنی اعتماد ساختن، تمرکز بر اجرا، سبک ماندن، پروراندن یادگیری و ارتباط، که در قاعده‌ی Kevin Stewart خلاصه می‌شود: «از process استفاده کن. نه زیاد. بیشتر agile.» بعد جعبه‌ابزاری سبک برای اولویت‌بندی می‌سازد: ورودی‌های کلیدی، user story با معیار پذیرش، ماتریس اثر در برابر تلاش، هرس کردن backlog، ریتم دوهفته‌ای، تخمین‌های یکدست، یک backlog واحد برای feature و باگ و بدهی و نگه‌داری، و ارتباط شفاف. در پایان کارهایی را به رسمیت می‌شناسد که محصول نیستند، مثل جابه‌جایی دفتر و ممیزی و مهاجرت، و بهتر است روی برنامه‌ای خطی در کنار sprintها بروند (pp. 93–122).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Pick techniques that** inspire confidence, focus on execution, are lightweight and adaptable, foster learning, and support communication (p. 93).
-- **A process that works 80% of the time is a success;** acknowledge uncertainty in estimates rather than guessing wildly (p. 94).
-- **You can always add a process, but it's much harder to remove it** — start with the bare minimum (p. 96).
-- **"Use a process. Not too much. Mostly agile."** — adopt agile practices selectively, not dogmatically (pp. 96–97).
-- **Scheduling is a jigsaw, not a queue;** not all work fits the same process, and not all work is known up front (pp. 99–101).
-- **User stories feed prioritization; the impact-versus-effort matrix ranks them** — quick wins first, stage big bets, question low-impact/high-effort work (pp. 103–111).
-- **Prune the backlog,** run a steady cadence, estimate consistently, and keep features, bugs, debt and maintenance in one backlog (pp. 111–116).
-- **Not everything is a product:** linear work needs a clear endpoint, dependencies, single owners and checkpoints — run both tracks together (pp. 118–121).
+- **تکنیکی را بردارید که** اعتماد بسازد، روی اجرا متمرکز باشد، سبک و تطبیق‌پذیر باشد، یادگیری بپروراند و از ارتباط پشتیبانی کند (p. 93).
+- **یک process که ۸۰٪ وقت‌ها کار کند موفقیت است؛** به‌جای حدس‌های عجیب، بلاتکلیفی تخمین را به رسمیت بشناسید (p. 94).
+- **همیشه می‌شود process اضافه کرد، ولی برداشتنش خیلی سخت‌تر است**؛ با حداقل مطلق شروع کنید (p. 96).
+- **«از process استفاده کن. نه زیاد. بیشتر agile.»** یعنی رویه‌های agile را گزینشی بردارید، نه جزم‌اندیشانه (pp. 96–97).
+- **زمان‌بندی پازل است، نه صف؛** همه‌ی کارها به یک process نمی‌خورند و همه‌ی کارها از اول معلوم نیستند (pp. 99–101).
+- **نقش user storyها به اولویت‌بندی خوراک می‌دهند و ماتریس اثر در برابر تلاش رتبه‌شان می‌دهد**؛ اول بردهای سریع، شرط‌های بزرگ را مرحله‌بندی کنید، و کار کم‌اثرِ پرتلاش را زیر سؤال ببرید (pp. 103–111).
+- **مفهوم backlog را هرس کنید**، ریتم ثابتی داشته باشید، یکدست تخمین بزنید، و feature و باگ و بدهی و نگه‌داری را در یک backlog نگه دارید (pp. 111–116).
+- **همه چیز محصول نیست:** کار خطی به نقطه‌ی پایان روشن و وابستگی‌ها و صاحب‌های تکی و ایستگاه‌های بازبینی نیاز دارد؛ هر دو مسیر را با هم بگردانید (pp. 118–121).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Inspire Confidence — p. 94
-- Be Execution-Focused — p. 95
-- Be Lightweight and Adaptable — p. 96
-- Foster Continuous Learning — p. 98
-- Focus on Communication and Collaboration — p. 98
-- Celebrate — p. 99
-- Other Prioritization Concerns — p. 99
-  - Not All Work Is Created Equal — p. 100
-  - Not All Work Can Use the Same Process — p. 100
-  - Not All Work Is Known at the Start of Prioritization — p. 100
-- Prioritization Techniques — p. 101
-  - Key Inputs for Decision Making — p. 101
-  - Utilize Established Frameworks — p. 102
-  - Managing Backlogs Effectively — p. 111
-  - A Good Cadence — p. 112
-  - Approaching Estimates Wisely — p. 113
-  - Balancing Different Types of Work — p. 114
-  - Addressing Technical Debt — p. 115
-  - Monitoring Progress and Adjusting Priorities — p. 116
-  - Communicating Priorities Transparently — p. 117
-- Not Everything Is a Product — p. 118
-  - When Linear Makes Sense — p. 119
-  - Creating Just Enough Structure — p. 120
-  - Working the Plan, Not Serving It — p. 120
-  - Connecting Linear and Iterative Work — p. 121
-- Conclusion: Driving to Execution — p. 121
+- اعتماد بسازید — p. 94
+- متمرکز بر اجرا باشید — p. 95
+- سبک و تطبیق‌پذیر باشید — p. 96
+- یادگیری پیوسته بپرورانید — p. 98
+- روی ارتباط و همکاری تمرکز کنید — p. 98
+- جشن بگیرید — p. 99
+- ملاحظه‌های دیگر اولویت‌بندی — p. 99
+  - همه‌ی کارها یکسان نیستند — p. 100
+  - همه‌ی کارها به یک process نمی‌خورند — p. 100
+  - همه‌ی کارها در شروع اولویت‌بندی معلوم نیستند — p. 100
+- تکنیک‌های اولویت‌بندی — p. 101
+  - ورودی‌های کلیدی تصمیم‌گیری — p. 101
+  - از چارچوب‌های جاافتاده استفاده کنید — p. 102
+  - مدیریت اثربخش backlogها — p. 111
+  - ریتم خوب — p. 112
+  - عاقلانه سراغ تخمین رفتن — p. 113
+  - تعادل بین انواع کار — p. 114
+  - رسیدگی به بدهی فنی — p. 115
+  - پایش پیشرفت و تنظیم اولویت‌ها — p. 116
+  - اعلام شفاف اولویت‌ها — p. 117
+- همه چیز محصول نیست — p. 118
+  - کِی خطی منطقی است — p. 119
+  - ساختن به‌اندازه ساختار — p. 120
+  - برنامه را کار کنید، نه این‌که به آن خدمت کنید — p. 120
+  - وصل کردن کار خطی و تکرارشونده — p. 121
+- جمع‌بندی: راندن به سمت اجرا — p. 121
 
-## Notes
+## یادداشت‌ها
 
-Doing something beats doing nothing, but with limited resources you must choose what and in what order. Elaborate processes in chaos mean serving the process instead of driving the outcome; don't underestimate simplicity and common sense (p. 93). The chapter is a crash course, not a full guide to the software development lifecycle (p. 94).
+انجام دادن کاری از هیچ کاری نکردن بهتر است، ولی با منابع محدود باید انتخاب کنید چه کاری و به چه ترتیبی. process پرزرق‌وبرق در آشوب یعنی خدمت کردن به process به‌جای راندن نتیجه؛ سادگی و عقل سلیم را دست‌کم نگیرید (p. 93). این فصل یک دوره‌ی فشرده است، نه راهنمای کامل چرخه‌ی عمر توسعه‌ی نرم‌افزار (p. 94).
 
-### Inspire Confidence
+### اعتماد بسازید
 
-The authors like the **80/20 rule: a process that works 80% of the time is a success**; admit failures and turn them into learning (p. 94). Estimation is scary in chaos and early estimates will be wrong, so acknowledge uncertainty and put a stake in the ground — accept, say, a 50% variance (a week could be two) — and refine as you learn (p. 94). James once inherited an organization so stacked with process that development had halted; stripping it back to what mattered — shipping quality code — let the team ship again, and progress after months of stagnation changed its outlook (p. 94).
+نویسنده‌ها **قاعده‌ی ۸۰/۲۰ را دوست دارند: processی که ۸۰٪ وقت‌ها کار کند موفقیت است**؛ شکست‌ها را بپذیرید و به یادگیری تبدیلشان کنید (p. 94). تخمین در آشوب ترسناک است و تخمین‌های اولیه غلط از آب درمی‌آیند، پس بلاتکلیفی را به رسمیت بشناسید و میخی به زمین بکوبید، مثلاً واریانس ۵۰٪ را بپذیرید که یعنی یک هفته می‌تواند دو هفته شود، و همراه با یاد گرفتن تیزش کنید (p. 94). James یک‌بار سازمانی را تحویل گرفت که آن‌قدر process رویش تلنبار شده بود که توسعه خوابیده بود؛ کم کردنش تا همان چیزی که مهم بود، یعنی تحویل کد باکیفیت، باعث شد تیم دوباره تحویل بدهد، و پیشرفت بعد از ماه‌ها رکود نگاهش را عوض کرد (p. 94).
 
-> **In Practice: April's Story** (p. 95). April pairs senior and junior StudioOps engineers on a quick bug-fix sprint; clearing a months-old backlog together rebuilds confidence and collaboration.
+> **کادر In Practice: داستان April** (p. 95). او مهندس‌های ارشد و تازه‌کار StudioOps را در یک sprint کوتاه رفع باگ pair می‌کند؛ پاک کردن مشترک backlogی چندماهه اعتماد و همکاری را بازمی‌سازد.
 
-### Be Execution-Focused
+### متمرکز بر اجرا باشید
 
-A process that prioritizes itself over the outcome is a red flag — ceremonies that matter more than shipping, endless fine-tuning, the board-game rules reader who wants every edge case covered. "The process worked" is meaningless if it didn't deliver. Work backward from the deliverable and add the bare minimum process (p. 95).
+یک process که خودش را بر نتیجه مقدم کند پرچم قرمز است: مراسمی که از تحویل مهم‌تر می‌شود، تنظیم بی‌پایان، و آن آدمی که قاعده‌های بازی رومیزی را می‌خواند و می‌خواهد هر حالت لبه‌ای پوشش داده شود. «process کار کرد» وقتی چیزی تحویل نشده بی‌معناست. از تحویل‌دادنی به عقب کار کنید و حداقل مطلق process را اضافه کنید (p. 95).
 
-### Be Lightweight and Adaptable
+### سبک و تطبیق‌پذیر باشید
 
-**You can always add a process, but it's much harder to remove it** — people fear losing safety nets and dependencies form around processes (p. 96). Let process grow from a seedling rather than planting a forest. Kevin Stewart paraphrases Michael Pollan's *Food Rules* ("Eat food. Not too much. Mostly plants.") as **"Use a process. Not too much. Mostly agile."** (p. 96)
+**همیشه می‌شود process اضافه کرد، ولی برداشتنش خیلی سخت‌تر است**؛ آدم‌ها از دست دادن تور ایمنی را می‌ترسند و دور processها وابستگی شکل می‌گیرد (p. 96). بگذارید process مثل یک نهال رشد کند، به‌جای این‌که یک جنگل بکارید. Kevin Stewart جمله‌ی Michael Pollan در *Food Rules* را، یعنی «غذا بخور. نه زیاد. بیشتر گیاه»، این‌طور بازنویسی می‌کند: **«از process استفاده کن. نه زیاد. بیشتر agile.»** (p. 96)
 
-| Rule | Meaning (pp. 96–97) |
+| قاعده | یعنی چه (pp. 96–97) |
 |---|---|
-| **Use a process** | Individuals working separately can build an MVP, but not decide priorities at scale or collaborate across teams |
-| **Not too much** | Too much process means serving it instead of delivering |
-| **Mostly agile** | Lowercase and "mostly": agile is "the least bad approach to building products"; keep the Agile Manifesto's values (individuals and interactions, working software, customer collaboration, responding to change) and adopt practices selectively |
+| **از process استفاده کن** | آدم‌هایی که جدا کار می‌کنند می‌توانند یک MVP بسازند، ولی نمی‌توانند در مقیاس اولویت تعیین کنند یا بین تیم‌ها همکاری کنند |
+| **نه زیاد** | process زیاد یعنی به‌جای تحویل دادن به آن خدمت می‌کنید |
+| **بیشتر agile** | با حرف کوچک و با قید «بیشتر»: agile «کم‌بدترین رویکرد به ساختن محصول» است؛ ارزش‌های Agile Manifesto را نگه دارید، یعنی افراد و تعامل، نرم‌افزار کارکننده، همکاری با مشتری و پاسخ به تغییر، و رویه‌ها را گزینشی بردارید |
 
-For depth the authors point to Martin Fowler's Agile guides, *The Art of Agile Development*, *Essential Scrum* and *User Stories Applied* (p. 98).
+برای عمق بیشتر، نویسنده‌ها به راهنماهای Agile از Martin Fowler و کتاب‌های *The Art of Agile Development* و *Essential Scrum* و *User Stories Applied* ارجاع می‌دهند (p. 98).
 
-### Foster Continuous Learning, Communication and Celebration
+> **In practice:** هر check تازه در GitLab CI و هر قانون تازه در review، process است که بعداً برداشتنش سخت است.
+>
+> **Your turn:** پس از یک incident، کسی پیشنهاد می‌کند هر merge request دو تأیید بگیرد. چه می‌پرسید؟
+>
+> *Answer:* آیا این دقیقاً همان خطا را جلوگیری می‌کرد، و آیا یک check خودکار در CI ارزان‌تر است. کتاب می‌گوید process را مثل نهال رشد دهید و بدانید اضافه کردن آسان و برداشتن سخت است (p. 96).
 
-- **Measure every new process** — qualitatively (a retrospective) or quantitatively (stories completed against plan); measurable experiments support decisions (p. 98).
-- **Change is scary:** communicate openly, collaborate with the people who run the process daily, and don't change too much at once (pp. 98–99).
-- **Celebrate** successful weeks and sprints, however small — confidence in new process is fragile (p. 99).
+### پروراندن یادگیری و ارتباط و جشن
 
-### Other Prioritization Concerns
+- **هر process تازه را اندازه بگیرید**، چه کیفی با یک retrospective و چه کمی با شمردن storyهای تمام‌شده در برابر برنامه؛ آزمایش اندازه‌پذیر از تصمیم پشتیبانی می‌کند (p. 98).
+- **تغییر ترسناک است:** باز حرف بزنید، با آدم‌هایی که هر روز process را می‌گردانند همکاری کنید، و یک‌دفعه زیاد عوض نکنید (pp. 98–99).
+- **جشن بگیرید** برای هفته‌ها و sprintهای موفق، هر قدر هم کوچک؛ اعتماد به process تازه شکننده است (p. 99).
 
-| Concern | Why it matters (pp. 99–101) |
+### ملاحظه‌های دیگر اولویت‌بندی
+
+| ملاحظه | چرا مهم است (pp. 99–101) |
 |---|---|
-| **Not all work is created equal** | Work varies in size, skills, dependencies and difficulty, so scheduling is **a jigsaw puzzle, not a queue** (some colleagues insist it's Jenga) |
-| **Not all work can use the same process** | Agile suits small iterative work; an office move suits traditional project management |
-| **Not all work is known at the start** | Change keeps arriving; processes must be flexible enough to accommodate it and strong enough to protect against fluctuating priorities |
+| **همه‌ی کارها یکسان نیستند** | کارها در اندازه و مهارت و وابستگی و سختی فرق دارند، پس زمان‌بندی **پازل است، نه صف**، و بعضی همکارها اصرار دارند که Jenga است |
+| **همه‌ی کارها به یک process نمی‌خورند** | روش agile به کار کوچک و تکرارشونده می‌خورد؛ جابه‌جایی دفتر به مدیریت پروژه‌ی سنتی |
+| **همه‌ی کارها از اول معلوم نیستند** | تغییر مدام می‌رسد؛ processها باید آن‌قدر انعطاف داشته باشند که جایش بدهند و آن‌قدر محکم باشند که از نوسان اولویت‌ها محافظت کنند |
 
-### Prioritization Techniques
+### تکنیک‌های اولویت‌بندی
 
-#### Key Inputs for Decision Making
+#### ورودی‌های کلیدی تصمیم‌گیری
 
-Not perfect information, but some understanding of why, the impact and the broad requirements (p. 101):
+نه اطلاعات بی‌نقص، بلکه کمی فهم از «چرا» و اثر و نیازمندی‌های کلی (p. 101):
 
-| Input | Question (p. 102) |
+| ورودی | پرسش (p. 102) |
 |---|---|
-| **Business impact** | Does it drive revenue, satisfaction or new markets? |
-| **Urgency** | Go-to-market, contractual or competitive deadlines? |
-| **Effort** | Days, weeks or months — and does it exceed capacity? |
-| **People** | Available, with the right skills? |
-| **Dependencies** | What must finish first? |
+| **اثر کسب‌وکاری** | درآمد یا رضایت یا بازار تازه می‌آورد؟ |
+| **فوریت** | ضرب‌الاجل ورود به بازار یا قراردادی یا رقابتی هست؟ |
+| **تلاش** | روز، هفته یا ماه، و از ظرفیت بیشتر است؟ |
+| **آدم‌ها** | در دسترس‌اند و مهارت درست را دارند؟ |
+| **وابستگی‌ها** | چه چیزی اول باید تمام شود؟ |
 
-#### Utilize Established Frameworks
+#### از چارچوب‌های جاافتاده استفاده کنید
 
-Take the parts of established frameworks that work and shape them into your own system; any tool from a spreadsheet or Trello to Linear, Shortcut or Jira will do — Jira may overwhelm a small team (pp. 102–103).
+تکه‌هایی از چارچوب‌های جاافتاده را که کار می‌کنند بردارید و از آن‌ها سیستم خودتان را بسازید؛ هر ابزاری از spreadsheet و Trello تا Linear و Shortcut و Jira کار می‌کند، هرچند Jira ممکن است تیم کوچک را غرق کند (pp. 102–103).
 
-**User stories** map features to user needs and focus on an MVP that delivers value early; they're a decomposition method that feeds prioritization, and they apply to internal tools and platforms too (p. 103). The template is *as a [role], I want [capability], so that [benefit]*; variants put the benefit first, add context, or write "evil user stories" from an attacker's view (p. 104). Example: a registered user wants two-factor authentication via an authenticator app or text message to secure their account; implementation details belong in an RFC, ticket or pull request (p. 104).
+**نقش user story**ها feature را به نیاز کاربر نگاشت می‌کنند و روی MVPای تمرکز می‌کنند که زود ارزش می‌دهد؛ روشی برای شکستن کارند که به اولویت‌بندی خوراک می‌دهد، و برای ابزارهای داخلی و platform هم به کار می‌آیند (p. 103). قالبشان این است: *به‌عنوان [نقش]، می‌خواهم [قابلیت]، تا [فایده]*؛ گونه‌های دیگرش فایده را اول می‌گذارند، زمینه اضافه می‌کنند، یا «story کاربر شرور» را از دید مهاجم می‌نویسند (p. 104). نمونه: کاربری ثبت‌نام‌شده احراز هویت دو‌عاملی با اپلیکیشن authenticator یا پیامک می‌خواهد تا حسابش امن شود؛ جزئیات پیاده‌سازی جایشان در RFC یا ticket یا pull request است (p. 104).
 
-> **In Practice: April's Story** (p. 103). April frames the mentorship gap as a user story for an internal tool: a junior StudioOps engineer wants to find and book time with seniors who have specific expertise, so they get unblocked and learn.
+> **کادر In Practice: داستان April** (p. 103). او شکاف منتورینگ را به شکل user story برای یک ابزار داخلی قاب می‌گیرد: مهندس تازه‌کار StudioOps می‌خواهد آدم‌های ارشد با تخصص مشخص را پیدا کند و وقتشان را رزرو کند، تا گره کارش باز شود و یاد بگیرد.
 
-- **Acceptance criteria** define done — for 2FA in given-when-then form: *given* a registered, logged-in user on the security page, *when* they enable 2FA with an authenticator app, *then* it is enabled (p. 105).
-- **A start, not a solution.** Stories don't scale (they "multiply like rabbits"), are open to interpretation, get grouped into epics, themes and initiatives, can miss nonfunctional requirements (hence technical-only stories), and can feel like "concrete shoes" when you must pivot (pp. 105–106).
+- **معیار پذیرش** تعریف می‌کند «تمام‌شده» یعنی چه؛ برای احراز هویت دو‌عاملی در قالب given-when-then: *given* کاربر ثبت‌نام‌شده‌ی واردشده در صفحه‌ی امنیت، *when* آن را با اپلیکیشن authenticator فعال می‌کند، *then* فعال می‌شود (p. 105).
+- **شروع است، نه راه‌حل.** storyها مقیاس نمی‌گیرند و «مثل خرگوش زیاد می‌شوند»، به تفسیر باز‌ند، در epic و theme و initiative گروه می‌شوند، می‌توانند نیازمندی‌های غیرکارکردی را از قلم بیندازند که برای همین storyهای صرفاً فنی هم هست، و وقتی باید بچرخید می‌توانند مثل «کفش سیمانی» پایتان را بگیرند (pp. 105–106).
 
-**Impact-versus-effort analysis** is layered on top to decide which stories come first (p. 106): impact is the benefit to users, customers or the business; effort the time, skill and complexity required.
+**تحلیل اثر در برابر تلاش** روی همین سوار می‌شود تا تصمیم بگیرد کدام storyها اول بیایند (p. 106): اثر یعنی فایده برای کاربر و مشتری و کسب‌وکار، و تلاش یعنی زمان و مهارت و پیچیدگی لازم.
 
-![Two-by-two grid with impact on the vertical axis and effort on the horizontal, labelling the quadrants quick wins, major projects, small projects and quick tasks with advice for each](../figures/06-02.png)
+![شبکه‌ی دو‌در‌دو با اثر روی محور عمودی و تلاش روی محور افقی، که چهارخانه‌هایش برد سریع و پروژه‌ی بزرگ و پروژه‌ی کوچک و کار سریع نام دارند و برای هر کدام توصیه‌ای آمده](../figures/06-02.png)
 
-*Figure 6-2 (p. 107): read it by quadrant — top left is the primary focus, bottom right the "thankless" work to avoid.*
+*Figure 6-2 (p. 107): چهارخانه به چهارخانه بخوانیدش؛ بالا سمت چپ تمرکز اصلی است و پایین سمت راست همان کار «بی‌مزد» است که باید از آن پرهیز کرد.*
 
-| Quadrant | What to do | Book's examples (pp. 107–109) |
+| چهارخانه | چه کنید | نمونه‌های کتاب (pp. 107–109) |
 |---|---|---|
-| **High impact, low effort** — the sweet spot | Tackle first | A long-requested product-listing filter; a navigation tweak that raises retention |
-| **High impact, high effort** — strategic | Break down or time carefully | Rebuilding a core component for scale; a new module integrating many systems |
-| **Low impact, low effort** | Spare moments or morale boosters; don't let them dominate | A page colour; a tooltip tweak |
-| **Low impact, high effort** — the danger zone | Deprioritize, avoid, or reimagine cheaper | A refactor with no measurable benefit; an unrequested complex feature |
+| **اثر بالا، تلاش کم**، نقطه‌ی شیرین | اول همین را بردارید | فیلتر فهرست محصول که مدت‌ها درخواست شده؛ تغییر کوچک ناوبری که retention را بالا می‌برد |
+| **اثر بالا، تلاش زیاد**، راهبردی | بشکنیدش یا با دقت زمان‌بندی‌اش کنید | بازسازی یک مؤلفه‌ی اصلی برای مقیاس؛ ماژول تازه‌ای که چند سیستم را یکپارچه می‌کند |
+| **اثر کم، تلاش کم** | برای وقت‌های خالی یا بالا بردن روحیه؛ نگذارید غالب شوند | رنگ یک صفحه؛ تغییر یک tooltip |
+| **اثر کم، تلاش زیاد**، منطقه‌ی خطر | اولویتش را پایین بیاورید، پرهیز کنید، یا ارزان‌تر از نو تصورش کنید | refactoringی بدون فایده‌ی اندازه‌پذیر؛ featureی پیچیده که کسی نخواسته |
 
-> **In Practice: April's Story** (p. 109). A comprehensive onboarding program is high impact, high effort; weekly cross-team code reviews are high impact, low effort. April starts the reviews now and plans onboarding for next quarter.
+> **کادر In Practice: داستان April** (p. 109). برنامه‌ی جامع onboarding اثر بالا و تلاش زیاد دارد؛ code review هفتگی بین‌تیمی اثر بالا و تلاش کم. April review را همین حالا شروع می‌کند و onboarding را برای فصل بعد برنامه می‌ریزد.
 
-The matrix also starts conversations — maybe a simpler solution reaches the same outcome, or a low-impact story becomes critical as circumstances change — and it scales from a to-do list to organization-wide planning (p. 110).
+این ماتریس گفت‌وگو هم شروع می‌کند، چون شاید راه‌حل ساده‌تری به همان نتیجه برسد یا storyای کم‌اثر با عوض شدن شرایط حیاتی شود، و از یک فهرست کارهای شخصی تا برنامه‌ریزی کل سازمان مقیاس می‌گیرد (p. 110).
 
-> **Exercise: The Impact-Versus-Effort Mapping Session** (pp. 110–111). List 10–15 competing items, write each as a story or one sentence, plot them with relative sizing, then decide: two or three quick wins this week; which big item to break down; which small items are "Friday afternoon" tasks; which to deprioritize. Share the grid — disagreements are data about differing views of impact.
+> **تمرین: جلسه‌ی نگاشت اثر در برابر تلاش** (pp. 110–111). ۱۰ تا ۱۵ قلم رقیب را فهرست کنید، هر کدام را به شکل story یا یک جمله بنویسید، با اندازه‌گیری نسبی رویشان نقطه بگذارید، و بعد تصمیم بگیرید: دو سه برد سریع برای همین هفته؛ کدام قلم بزرگ شکسته شود؛ کدام قلم کوچک کار «بعدازظهر پنجشنبه» است؛ و کدام اولویتش پایین بیاید. شبکه را به اشتراک بگذارید؛ اختلاف‌نظرها خودشان داده‌اند درباره‌ی برداشت‌های متفاوت از اثر.
 
-> **Try it:** [Impact versus effort](../widgets/06-impact-effort.html) — place the book's example items and your own on the grid, and see which quadrant each lands in and what the book says to do with it.
+> **Try it:** [اثر در برابر تلاش](../widgets/06-impact-effort.html)؛ قلم‌های نمونه‌ی کتاب و قلم‌های خودتان را روی شبکه بگذارید و ببینید هر کدام در کدام چهارخانه می‌افتند و کتاب درباره‌شان چه می‌گوید.
 
-#### Managing Backlogs Effectively
+#### مدیریت اثربخش backlogها
 
-In chaos, ownership is diffuse, and both authors have managed backlogs as de facto product managers (p. 111). Review it regularly (weekly or biweekly, matching sprints) and **prune stale items**: you already have more work than capacity, and if it's important it will come up again. If pruning feels too ruthless, park ideas in an "icebox." Groom the backlog collaboratively with product, design and other stakeholders (pp. 111–112).
+در آشوب، مالکیت پخش است و هر دو نویسنده backlogها را عملاً در نقش product manager مدیریت کرده‌اند (p. 111). منظم مرورش کنید، هفتگی یا دوهفته‌ای و هم‌تراز با sprintها، و **قلم‌های کهنه را هرس کنید**: از قبل بیشتر از ظرفیتتان کار دارید، و اگر چیزی مهم باشد دوباره بالا می‌آید. اگر هرس کردن زیادی بی‌رحمانه به نظر می‌رسد، ایده‌ها را در یک «یخچال» پارک کنید. backlog را با product و design و بقیه‌ی ذی‌نفع‌ها مشترک مرتب کنید (pp. 111–112).
 
-> **In Practice: April's Story** (p. 112). In April's grooming sessions, managers Jordan and Priya prioritize team-development work alongside features; when a senior engineer proposes dropping junior training for a feature, the group discusses the long-term velocity cost of under-mentored developers.
+> **کادر In Practice: داستان April** (p. 112). در جلسه‌های مرتب‌سازی او، مدیرهایی به نام Jordan و Priya کار توسعه‌ی تیم را کنار featureها اولویت می‌دهند؛ وقتی یک مهندس ارشد پیشنهاد می‌دهد آموزش تازه‌کارها به نفع یک feature حذف شود، گروه درباره‌ی هزینه‌ی بلندمدت velocity با برنامه‌نویس‌های بی‌منتور حرف می‌زند.
 
-#### A Good Cadence
+#### ریتم خوب
 
-One-week sprints are too short and a month too long in chaos, so the authors use **two-week sprints**: week 1 starts with Monday planning, standups Tuesday–Thursday and an asynchronous Friday standup; week 2 has standups Monday–Thursday and a Friday demo and retrospective. Adjust — standups every second day may suit you better (pp. 112–113).
+مفهوم sprint یک‌هفته‌ای در آشوب خیلی کوتاه است و یک‌ماهه خیلی بلند، پس نویسنده‌ها از **sprintهای دوهفته‌ای** استفاده می‌کنند: هفته‌ی اول با برنامه‌ریزی دوشنبه شروع می‌شود، standup سه‌شنبه تا پنجشنبه و standup ناهمگام جمعه؛ هفته‌ی دوم standup دوشنبه تا پنجشنبه و دموی جمعه و retrospective. تنظیمش کنید؛ شاید standup یک روز در میان به شما بیشتر بخورد (pp. 112–113).
 
-#### Approaching Estimates Wisely
+#### عاقلانه سراغ تخمین رفتن
 
-Estimates are a powerful and dangerous compass. Seek **consistency, not perfection**: story points, time or "difficulty tokens," used in the same spirit by everyone (p. 113). **Avoid bikeshedding** about estimates or estimation methods; accept broad early ranges such as ±25% and narrow them; be transparent that estimates are guideposts, not guarantees (pp. 113–114).
+تخمین قطب‌نمایی قدرتمند و خطرناک است. دنبال **یکدستی باشید، نه بی‌نقصی**: story point یا زمان یا «ژتون سختی»، به شرطی که همه با یک روح به کار ببرندش (p. 113). **از بحث بر سر بی‌اهمیت‌ها پرهیز کنید**، چه درباره‌ی خود تخمین‌ها و چه درباره‌ی روش تخمین؛ بازه‌های اولیه‌ی پهن مثل ‎±۲۵٪‎ را بپذیرید و بعد تنگشان کنید؛ و شفاف باشید که تخمین راهنماست، نه تضمین (pp. 113–114).
 
-#### Balancing Different Types of Work
+#### تعادل بین انواع کار
 
-Treat the product as a living ecosystem: only features leave a fragile codebase; only debt and maintenance mean stagnation. Put **features, technical debt, bugs and maintenance in one backlog** under the same prioritization criteria (p. 114).
+محصول را زیست‌بومی زنده ببینید: فقط feature یعنی کدی شکننده و فقط بدهی و نگه‌داری یعنی رکود. **feature و بدهی فنی و باگ و نگه‌داری را در یک backlog** و زیر همان معیارهای اولویت‌بندی بگذارید (p. 114).
 
-> **In Practice: April's Story** (p. 115). April treats "organizational debt" like technical debt: "Implement peer programming sessions" sits next to "Refactor authentication service."
+> **کادر In Practice: داستان April** (p. 115). او با «بدهی سازمانی» مثل بدهی فنی برخورد می‌کند: «جلسه‌های برنامه‌نویسی دونفره راه بیندازیم» کنار «سرویس احراز هویت را refactor کنیم» می‌نشیند.
 
-#### Addressing Technical Debt
+#### رسیدگی به بدهی فنی
 
-Technical debt is invisible until it's not. Translate it for nonengineers as **a tax you keep paying** in slower releases or more defects, and quantify it — fixing a piece of debt might cut future feature time by 20% (p. 115). Write debt as a user story: not "our React pages and components are duplicative and unwieldy," but *as a developer maintaining the frontend, I want to refactor them … so that we deliver features faster with fewer defects* — now it can be compared with a feature (pp. 115–116).
+بدهی فنی تا وقتی خودش را نشان ندهد نامرئی است. برای آدم‌های غیرمهندس ترجمه‌اش کنید به **مالیاتی که مدام می‌دهید**، در قالب release کندتر یا نقص بیشتر، و کمی‌اش کنید؛ رفع یک تکه بدهی شاید زمان featureهای بعدی را ۲۰٪ کم کند (p. 115). بدهی را به شکل user story بنویسید: نه «صفحه‌ها و مؤلفه‌های React ما تکراری و دست‌وپاگیرند»، بلکه *به‌عنوان برنامه‌نویسی که frontend را نگه می‌دارد، می‌خواهم آن‌ها را refactor کنم… تا featureها را سریع‌تر و با نقص کمتر تحویل بدهیم*؛ حالا می‌شود با یک feature مقایسه‌اش کرد (pp. 115–116).
 
-> **Exercise: The Process-Debt Audit** (p. 116). Brain-dump process friction for 15 minutes; turn the top three into user stories; give each its current cost, the minimum viable fix (the 20% effort for 80% improvement) and a success metric; put them in the backlog. Would you tolerate the equivalent technical debt?
+> **تمرین: ممیزی بدهی process** (p. 116). ۱۵ دقیقه اصطکاک‌های process را روی کاغذ بریزید؛ سه مورد اول را به user story تبدیل کنید؛ برای هر کدام هزینه‌ی فعلی، کمینه‌ی رفع قابل‌استفاده، یعنی همان ۲۰٪ تلاش برای ۸۰٪ بهبود، و یک سنجه‌ی موفقیت بنویسید؛ و در backlog بگذاریدشان. اگر معادل فنی‌اش بود تحملش می‌کردید؟
 
-#### Monitoring Progress, Communicating Priorities
+#### پایش پیشرفت و اعلام اولویت‌ها
 
-Define success metrics per category (features shipped per quarter, time to resolve critical bugs, bottlenecks removed) and hold periodic reviews to pivot early instead of after months (pp. 116–117). Communicate the *why* of priorities, and bad news as clearly as good — "nothing erodes trust faster than silently missed deadlines" (p. 117).
+برای هر دسته سنجه‌ی موفقیت تعریف کنید، مثل featureهای تحویل‌شده در هر فصل و زمان رفع باگ‌های حیاتی و گلوگاه‌های برداشته‌شده، و بازبینی‌های دوره‌ای بگذارید تا زود بچرخید، نه بعد از ماه‌ها (pp. 116–117). «چرا»ی اولویت‌ها را اعلام کنید، و خبر بد را به همان روشنی خبر خوب بگویید؛ «هیچ چیز سریع‌تر از ضرب‌الاجل‌هایی که بی‌صدا از دست می‌روند اعتماد را نمی‌خورد» (p. 117).
 
-> **In Practice: April's Story** (p. 118). April quietly reshuffled priorities toward cohesion and the confusion eroded trust. She corrected course with a company-wide three-month plan: month one quick wins and breaking silos, month two sustainable processes, month three accelerated delivery — so the slowdown read as strategy, not chaos.
+> **کادر In Practice: داستان April** (p. 118). او بی‌سروصدا اولویت‌ها را به سمت انسجام جابه‌جا کرد و همین سردرگمی اعتماد را فرسود. مسیر را با یک برنامه‌ی سه‌ماهه‌ی اعلام‌شده به کل شرکت اصلاح کرد: ماه اول بردهای سریع و شکستن سیلوها، ماه دوم processهای پایدار، ماه سوم تحویل شتاب‌گرفته، تا کند شدن به‌جای آشوب، استراتژی خوانده شود.
 
-### Not Everything Is a Product
+### همه چیز محصول نیست
 
-Office moves, compliance requirements, infrastructure migrations and vendor evaluations have fixed endpoints and linear sequences; forcing agile onto them creates friction. The impact-versus-effort matrix still applies; the execution model changes (pp. 118–119).
+جابه‌جایی دفتر و الزام‌های انطباق و مهاجرت زیرساخت و ارزیابی فروشنده‌ها نقطه‌ی پایان ثابت و توالی خطی دارند؛ تحمیل agile به آن‌ها اصطکاک می‌سازد. ماتریس اثر در برابر تلاش همچنان به کار می‌آید؛ مدل اجرا عوض می‌شود (pp. 118–119).
 
-| When linear makes sense (p. 119) | Example |
+| کِی خطی منطقی است (p. 119) | نمونه |
 |---|---|
-| **Fixed dependencies** | No network installation before the lease is signed |
-| **External constraints** | Vendor availability, regulatory deadlines, physical logistics |
-| **Binary outcomes** | Complete success or failure, not partial shipping |
-| **Limited iteration potential** | You don't move offices again next sprint |
+| **وابستگی‌های ثابت** | تا قرارداد اجاره امضا نشود نصب شبکه‌ای در کار نیست |
+| **قیدهای بیرونی** | در دسترس بودن فروشنده، ضرب‌الاجل مقرراتی، لجستیک فیزیکی |
+| **نتیجه‌ی دوحالته** | موفقیت کامل یا شکست، نه تحویل جزئی |
+| **امکان کم تکرار** | sprint بعد دوباره دفتر را جابه‌جا نمی‌کنید |
 
-> **In Practice: April's Story** (p. 119). A team restructuring (iterative) and a security audit (linear, deadline-driven) at the same time: running the audit as sprints would fail as surely as restructuring the team with a Gantt chart.
+> **کادر In Practice: داستان April** (p. 119). یک بازسازی تیمی که تکرارشونده است و یک ممیزی امنیتی که خطی و ضرب‌الاجل‌دار است، هم‌زمان: گرداندن ممیزی به شکل sprint دقیقاً به همان اندازه شکست می‌خورد که بازسازی تیم با نمودار Gantt.
 
-**Creating just enough structure** ("Everyone has a plan until they get punched in the mouth"): define the endpoint, map critical dependencies, assign single owners (decompose any task needing several), build in checkpoints, and communicate the plan widely (p. 120). **Work the plan, don't serve it:** adjust timelines and assignments, accept wrong assumptions, keep the plan living (p. 120). **Connect the tracks:** reserve sprint capacity for linear tasks, make dependencies visible, adjust sprints near milestones, and use the same impact-versus-effort criteria (p. 121).
+**ساختن به‌اندازه ساختار**: «همه برنامه دارند تا وقتی مشت بخورند». نقطه‌ی پایان را تعریف کنید، وابستگی‌های حیاتی را نقشه کنید، برای هر کار یک صاحب مشخص بگذارید و هر کاری که چند نفر می‌خواهد را بشکنید، ایستگاه‌های بازبینی بگذارید، و برنامه را گسترده اعلام کنید (p. 120). **برنامه را کار کنید، نه این‌که به آن خدمت کنید:** زمان‌بندی و تخصیص را تنظیم کنید، بپذیرید بعضی فرض‌ها غلط بوده‌اند، و برنامه را زنده نگه دارید (p. 120). **دو مسیر را وصل کنید:** بخشی از ظرفیت sprint را برای کارهای خطی کنار بگذارید، وابستگی‌ها را دیدنی کنید، نزدیک milestoneها sprintها را تنظیم کنید، و از همان معیارهای اثر در برابر تلاش استفاده کنید (p. 121).
 
-### Conclusion: Driving to Execution
+> **In practice:** مهاجرت از یک warehouse قدیمی به ClickHouse یا ارتقای نسخه‌ی Kubernetes نقطه‌ی پایان روشن و ترتیب خطی دارد.
+>
+> **Your turn:** چرا مهاجرت را مثل یک پروژه با milestone مدیریت می‌کنید و نه مثل backlog محصول؟
+>
+> *Answer:* کار ترتیب ثابت دارد و پایانش روشن است؛ sprintهای agile آن را تکه‌تکه و اولویتش را مدام قابل مذاکره می‌کنند. کتاب می‌گوید تحمیل agile به چنین کارهایی اصطکاک می‌سازد (pp. 118–119).
 
-The tools are "designed to be wielded, not worshipped": start small, measure what matters, iterate, and never let process matter more than the outcome (p. 121).
+### جمع‌بندی: راندن به سمت اجرا
 
-## Trade-offs at a glance
+این ابزارها «ساخته شده‌اند تا به کار گرفته شوند، نه پرستیده شوند»: کوچک شروع کنید، چیزی را که مهم است اندازه بگیرید، تکرار کنید، و هیچ‌وقت نگذارید process از نتیجه مهم‌تر شود (p. 121).
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Heavy, edge-case-complete process | Feels safe | Serving the process; slow to remove |
-| Minimal process grown over time | Speed; easy to change | Gaps until it grows |
-| Wild-guess estimates | Quick answers | Lost confidence when wrong |
-| Ranges (±25–50%) | Honest; builds trust | Less precise commitments |
-| User stories | User value; early delivery | Proliferate; miss nonfunctional needs |
-| Impact-versus-effort | Quick, visual ranking | Coarse; must be revisited |
-| Aggressive backlog pruning | Lean, current backlog | Some ideas lost (they'll come back if important) |
-| One backlog for all work | Fair trade-offs; healthy balance | Harder conversations about debt |
-| Agile for linear work | Familiar ceremonies | Friction with fixed sequences |
+| process سنگین و پوشش‌دهنده‌ی همه‌ی حالت‌های لبه | حس امنیت | خدمت کردن به process؛ برداشتنش کند است |
+| process کمینه که به‌مرور رشد کند | سرعت؛ عوض کردنش آسان است | تا وقتی رشد کند شکاف هست |
+| تخمین با حدس بی‌پایه | پاسخ سریع | وقتی غلط از آب درآید اعتماد می‌رود |
+| بازه‌های ‎±۲۵ تا ۵۰ درصد‎ | صادقانه است؛ اعتماد می‌سازد | تعهدهای کم‌دقت‌تر |
+| user story | ارزش برای کاربر؛ تحویل زودهنگام | زیاد می‌شوند؛ نیاز غیرکارکردی را از قلم می‌اندازند |
+| اثر در برابر تلاش | رتبه‌بندی سریع و دیداری | درشت است؛ باید بازبینی شود |
+| هرس تهاجمی backlog | backlogی سبک و به‌روز | بعضی ایده‌ها گم می‌شوند، که اگر مهم باشند برمی‌گردند |
+| یک backlog برای همه‌ی کارها | معامله‌های منصفانه؛ تعادل سالم | گفت‌وگوهای سخت‌تر درباره‌ی بدهی |
+| agile برای کار خطی | مراسم آشنا | اصطکاک با توالی‌های ثابت |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **RICE and WSJF.** Richer scoring models — Intercom's RICE (reach × impact × confidence ÷ effort) and SAFe's Weighted Shortest Job First (cost of delay ÷ duration) — extend the impact-versus-effort idea with more inputs; the book deliberately keeps the simple 2 × 2.
-- **INVEST.** Bill Wake's checklist for good user stories (independent, negotiable, valuable, estimable, small, testable, 2003) complements the book's "conversation starters, not contracts" (p. 105).
-- **Bikeshedding** comes from C. Northcote Parkinson's law of triviality (1957): a committee spends more time on a bike shed than on a nuclear plant.
+- **روش‌های RICE و WSJF.** مدل‌های امتیازدهی غنی‌تر، یعنی RICE از Intercom با فرمول دسترسی ضرب در اثر ضرب در اطمینان تقسیم بر تلاش، و Weighted Shortest Job First در SAFe با هزینه‌ی تأخیر تقسیم بر مدت، همان ایده‌ی اثر در برابر تلاش را با ورودی‌های بیشتر گسترش می‌دهند؛ کتاب عمداً همان ۲×۲ ساده را نگه می‌دارد.
+- **سرواژه‌ی INVEST.** فهرست وارسی Bill Wake برای user storyهای خوب در سال ۲۰۰۳، یعنی مستقل و قابل‌مذاکره و ارزشمند و تخمین‌پذیر و کوچک و آزمون‌پذیر، مکمل همان «شروع‌کننده‌ی گفت‌وگو، نه قرارداد» کتاب است (p. 105).
+- **بحث بر سر بی‌اهمیت‌ها** از قانون ابتذال C. Northcote Parkinson در سال ۱۹۵۷ می‌آید: کمیته وقت بیشتری صرف انباری دوچرخه می‌کند تا نیروگاه هسته‌ای.
 
-## Connections
+## پیوندها
 
-- **Related chapters:** [2. Understanding Your Role](02-understanding-your-role.md) (plan, process and product pillars), [5. Setting Direction](05-setting-direction.md) (the direction you prioritize), [7. Budgeting, Costs, and Vendors](07-budgeting-costs-and-vendors.md) (build versus buy), [10. Metrics That Matter](10-metrics-that-matter-for-engineering-teams.md) (estimates and velocity).
+- **فصل‌های مرتبط:** [فصل ۲: فهمیدن نقشتان](02-understanding-your-role.md) که ستون‌های برنامه و process و محصول را دارد، [فصل ۵: تعیین جهت](05-setting-direction.md) که جهتی را می‌گوید که بر پایه‌اش اولویت می‌دهید، [فصل ۷: بودجه، هزینه و فروشنده‌ها](07-budgeting-costs-and-vendors.md) که ساختن در برابر خریدن را دارد، و [فصل ۱۰: متریک‌هایی که مهم‌اند](10-metrics-that-matter-for-engineering-teams.md) که تخمین و velocity را می‌گوید.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What are the five criteria the chapter sets for techniques in chaos?**
+1. **پنج معیاری که این فصل برای تکنیک‌ها در آشوب می‌گذارد کدام‌اند؟**
 
-   *Answer:* Inspire confidence, be execution-focused, be lightweight and adaptable, foster continuous learning, focus on communication and collaboration (p. 93).
+   *Answer:* اعتماد بسازد، متمرکز بر اجرا باشد، سبک و تطبیق‌پذیر باشد، یادگیری پیوسته بپروراند، و روی ارتباط و همکاری تمرکز کند (p. 93).
 
-2. **Why start with the bare minimum of process?**
-   - [ ] Processes are always harmful
-   - [x] You can always add a process, but it's much harder to remove one — people fear losing safety nets and dependencies form
-   - [ ] Agile forbids processes
+2. **چرا با حداقل مطلق process شروع کنیم؟**
+   - [ ] همه‌ی processها همیشه زیان‌آورند
+   - [x] همیشه می‌شود process اضافه کرد ولی برداشتنش خیلی سخت‌تر است؛ آدم‌ها از دست دادن تور ایمنی را می‌ترسند و وابستگی شکل می‌گیرد
+   - [ ] روش agile process را ممنوع می‌کند
 
    *Answer:* p. 96.
 
-3. **What does Kevin Stewart's rule say?**
+3. **قاعده‌ی Kevin Stewart چه می‌گوید؟**
 
-   *Answer:* "Use a process. Not too much. Mostly agile." — paraphrasing Michael Pollan's food rules (p. 96).
+   *Answer:* «از process استفاده کن. نه زیاد. بیشتر agile.»، که بازنویسی قاعده‌های غذایی Michael Pollan است (p. 96).
 
-4. **Why is scheduling work "a jigsaw, not a queue"?**
+4. **چرا زمان‌بندی کار «پازل است، نه صف»؟**
 
-   *Answer:* Work varies in size, skills, dependencies and difficulty, so you fit pieces together rather than processing a stack-ranked list (p. 100).
+   *Answer:* کارها در اندازه و مهارت و وابستگی و سختی فرق دارند، پس تکه‌ها را کنار هم جا می‌دهید، نه این‌که فهرستی رتبه‌بندی‌شده را پشت سر هم پردازش کنید (p. 100).
 
-5. **Where does a complex refactor with no measurable benefit fall in the impact-versus-effort matrix, and what should you do?**
+5. **یک refactor پیچیده بدون فایده‌ی اندازه‌پذیر در ماتریس اثر در برابر تلاش کجا می‌افتد و چه باید کرد؟**
 
-   *Answer:* Low impact, high effort — the danger zone; deprioritize or avoid it, or reimagine it in a cheaper, more valuable form (pp. 108–109).
+   *Answer:* اثر کم و تلاش زیاد، یعنی منطقه‌ی خطر؛ اولویتش را پایین بیاورید یا از آن پرهیز کنید، یا در شکلی ارزان‌تر و ارزشمندتر از نو تصورش کنید (pp. 108–109).
 
-6. **How do the authors make technical debt comparable with a feature?**
+6. **نویسنده‌ها چطور بدهی فنی را با یک feature قابل‌مقایسه می‌کنند؟**
 
-   *Answer:* Translate it into a tax with quantified cost and write it as a user story with a benefit ("so that we deliver features faster with fewer defects"), then prioritize it in the same backlog (pp. 115–116).
+   *Answer:* آن را به مالیاتی با هزینه‌ی کمی‌شده ترجمه می‌کنند و به شکل user story با فایده می‌نویسند، مثل «تا featureها را سریع‌تر و با نقص کمتر تحویل بدهیم»، و بعد در همان backlog اولویتش می‌دهند (pp. 115–116).
 
-7. **Which project characteristics call for linear planning rather than sprints?**
+7. **کدام ویژگی‌های پروژه به‌جای sprint، برنامه‌ریزی خطی می‌خواهند؟**
 
-   *Answer:* Fixed dependencies, external constraints, binary outcomes and limited iteration potential — e.g. an office move or a compliance audit (p. 119).
+   *Answer:* وابستگی‌های ثابت، قیدهای بیرونی، نتیجه‌ی دوحالته و امکان کم تکرار؛ مثلاً جابه‌جایی دفتر یا ممیزی انطباق (p. 119).

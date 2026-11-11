@@ -3,264 +3,278 @@ book: engineering-leadership-the-hard-parts
 chapter: 7
 title: "Budgeting, Costs, and Vendors"
 pages: "123–145"
+translated_title: "بودجه، هزینه و فروشنده‌ها"
+lang: fa
 ---
 
-# 7. Budgeting, Costs, and Vendors
+# فصل ۷: بودجه، هزینه و فروشنده‌ها
 
-[← 6. Shipping Products and Code](06-shipping-products-and-code-in-chaotic-environments.md) · [Book](../README.md) · [8. Technical Principles and Strategy →](08-technical-principles-and-strategy.md)
+[فصل ۶: تحویل محصول و کد →](06-shipping-products-and-code-in-chaotic-environments.md) · [کتاب](../README.md) · [فصل ۸: اصول و استراتژی فنی ←](08-technical-principles-and-strategy.md)
 
-## Summary
+## خلاصه
 
-Engineering leaders tend to see budgets as "business problems," but solving them is how you get people and resources — and in chaos a budget is an anchor that ties into planning and prioritization. The chapter (explicitly a layperson's guide, not financial or legal advice) covers why budgeting matters, including unit economics such as COGS, CAC, LTV and gross margin; fixed, variable and step costs; how to build and track a budget, with a detailed look at the fully loaded cost of headcount, ramp-up and attrition; vendor management and the build-versus-buy decision; treating contractors as part of the team; and ethics (pp. 123–145).
+رهبرهای مهندسی معمولاً بودجه را «مسئله‌ی کسب‌وکار» می‌بینند، ولی حل کردنش همان راهی است که آدم و منابع می‌گیرید، و در آشوب بودجه لنگری است که به برنامه‌ریزی و اولویت‌بندی گره می‌خورد. این فصل، که صریحاً راهنمای یک غیرمتخصص است و نه مشاوره‌ی مالی یا حقوقی، می‌گوید چرا بودجه اهمیت دارد، از جمله اقتصاد واحد با COGS و CAC و LTV و حاشیه‌ی ناخالص؛ هزینه‌های ثابت و متغیر و پله‌ای؛ ساختن و پیگیری بودجه با نگاهی دقیق به هزینه‌ی تمام‌شده‌ی نیرو و زمان جا افتادن و ریزش؛ مدیریت فروشنده‌ها و تصمیم ساختن در برابر خریدن؛ رفتار با پیمانکارها به‌عنوان بخشی از تیم؛ و اخلاق (pp. 123–145).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **Budgeting is prioritization with dollar signs attached** — the impact-versus-effort thinking from Chapter 6 scales up to it (p. 127).
-- **Your spending must match your stated priorities;** if it doesn't, change the strategy or the spending (p. 124).
-- **Unit economics turn technical decisions into business decisions:** $50,000 a month of AWS for 1,000 customers is $50 of COGS each; gross margin = (revenue − COGS) ÷ revenue (pp. 125–126).
-- **Know how costs behave:** fixed, variable, and step costs that jump at thresholds; and who pays (pp. 130–131).
-- **A person costs 1.3–1.8× base salary fully loaded;** new hires reduce team capacity at first; budget for 10–15% attrition and failed hires (pp. 133–136).
-- **Prepare best, expected and worst-case budgets;** review big costs monthly, explain variances, and share overruns (pp. 137–138).
-- **Build only your core business;** buy commodity services; never outsource your core hiring process; treat contractors as teammates (pp. 139–142).
-- **Ethics:** fair pay and decent treatment — would you be proud to see this decision on tomorrow's front page? (pp. 142–144)
+- **بودجه‌ریزی همان اولویت‌بندی است با علامت دلار چسبیده به آن**؛ همان تفکر اثر در برابر تلاش فصل ۶ در مقیاس بزرگ‌تر (p. 127).
+- **خرجتان باید با اولویت‌های اعلام‌شده‌تان بخواند؛** اگر نمی‌خواند، یا استراتژی را عوض کنید یا خرج را (p. 124).
+- **اقتصاد واحد تصمیم فنی را به تصمیم کسب‌وکاری تبدیل می‌کند:** ماهی ۵۰٬۰۰۰ دلار AWS برای ۱٬۰۰۰ مشتری یعنی ۵۰ دلار COGS برای هر مشتری؛ حاشیه‌ی ناخالص برابر است با درآمد منهای COGS تقسیم بر درآمد (pp. 125–126).
+- **بدانید هزینه‌ها چطور رفتار می‌کنند:** ثابت، متغیر، و پله‌ای که سر آستانه‌ها جهش می‌کنند؛ و این‌که چه کسی پولش را می‌دهد (pp. 130–131).
+- **هزینه‌ی تمام‌شده‌ی یک نفر ۱٫۳ تا ۱٫۸ برابر حقوق پایه است؛** تازه‌واردها اول ظرفیت تیم را کم می‌کنند؛ برای ۱۰ تا ۱۵٪ ریزش و استخدام‌های ناموفق بودجه بگذارید (pp. 133–136).
+- **بودجه‌ی بهترین و مورد‌انتظار و بدترین حالت را آماده کنید؛** هزینه‌های بزرگ را ماهانه مرور کنید، انحراف‌ها را توضیح بدهید و فراتر رفتن از بودجه را اعلام کنید (pp. 137–138).
+- **فقط هسته‌ی کسب‌وکارتان را بسازید؛** سرویس‌های کالایی را بخرید؛ هیچ‌وقت process اصلی استخدامتان را برون‌سپاری نکنید؛ و با پیمانکارها مثل هم‌تیمی رفتار کنید (pp. 139–142).
+- **اخلاق:** حقوق منصفانه و رفتار شایسته؛ از این تصمیم روی صفحه‌ی اول فردا سربلند بیرون می‌آمدید (pp. 142–144)؟
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- Why Budgeting Matters — p. 124
-  - Strategic Alignment — p. 124
-  - Cost Management — p. 124
-  - Risk Mitigation — p. 127
-  - Performance Monitoring — p. 127
-  - Resource Optimization — p. 127
-  - Stakeholder Management — p. 128
-  - Innovation and Growth — p. 129
-  - Organizational Learning — p. 129
-  - Competitive Advantage — p. 129
-- Understanding Cost Management — p. 129
-  - Fixed Costs: The Foundation — p. 130
-  - Variable Costs: The Flex Players — p. 130
-  - Step Costs: The Level-Up Costs — p. 130
-  - Who Pays? — p. 131
-  - The Human Side of Cost Management — p. 131
-- Creating and Managing a Budget — p. 131
-  - Starting with History — p. 132
-  - Categorizing Expenses — p. 132
-  - Headcount Planning and Costs — p. 133
-  - Setting Goals That Make Sense — p. 136
-  - Creating Your Budget Template — p. 137
-  - Tracking and Managing — p. 138
-  - Learning from Experience — p. 138
-- Vendor Management — p. 139
-  - The Great Build-Versus-Buy Debate — p. 139
-  - Picking Your Partners — p. 140
-  - Managing the Relationship — p. 140
-  - Outsourced People and Teams — p. 141
-- Ethics — p. 142
-  - Taking Care of Our People — p. 143
-  - Being a Good Neighbor — p. 143
-  - The Global Perspective — p. 143
-  - Looking to the Future — p. 144
-  - Making It Real — p. 144
-- Conclusion: Budget as Strategy — p. 144
+- چرا بودجه اهمیت دارد — p. 124
+  - هم‌راستایی راهبردی — p. 124
+  - مدیریت هزینه — p. 124
+  - کاهش ریسک — p. 127
+  - پایش عملکرد — p. 127
+  - بهینه کردن منابع — p. 127
+  - مدیریت ذی‌نفع‌ها — p. 128
+  - نوآوری و رشد — p. 129
+  - یادگیری سازمانی — p. 129
+  - مزیت رقابتی — p. 129
+- فهمیدن مدیریت هزینه — p. 129
+  - هزینه‌های ثابت: پایه — p. 130
+  - هزینه‌های متغیر: بازیکن‌های منعطف — p. 130
+  - هزینه‌های پله‌ای: هزینه‌ی رفتن به سطح بعد — p. 130
+  - چه کسی پولش را می‌دهد؟ — p. 131
+  - سمت انسانی مدیریت هزینه — p. 131
+- ساختن و مدیریت بودجه — p. 131
+  - شروع از تاریخچه — p. 132
+  - دسته‌بندی هزینه‌ها — p. 132
+  - برنامه‌ریزی نیرو و هزینه‌هایش — p. 133
+  - گذاشتن هدف‌هایی که معنا دارند — p. 136
+  - ساختن قالب بودجه — p. 137
+  - پیگیری و مدیریت — p. 138
+  - یاد گرفتن از تجربه — p. 138
+- مدیریت فروشنده‌ها — p. 139
+  - بحث بزرگ ساختن در برابر خریدن — p. 139
+  - انتخاب شریک‌ها — p. 140
+  - مدیریت رابطه — p. 140
+  - آدم‌ها و تیم‌های برون‌سپاری‌شده — p. 141
+- اخلاق — p. 142
+  - مراقبت از آدم‌هایمان — p. 143
+  - همسایه‌ی خوبی بودن — p. 143
+  - نگاه جهانی — p. 143
+  - نگاه به آینده — p. 144
+  - واقعی کردنش — p. 144
+- جمع‌بندی: بودجه به‌مثابه استراتژی — p. 144
 
-## Notes
+## یادداشت‌ها
 
-Budgeting is a strategic process that bridges where you are and where you want to be, not just number crunching (though there will be spreadsheets). The authors stress they are not accountants: work on budgets with your CFO or finance team (p. 123).
+بودجه‌ریزی processی راهبردی است که بین جایی که هستید و جایی که می‌خواهید باشید پل می‌زند، نه فقط عددبازی، هرچند spreadsheet هم خواهد بود. نویسنده‌ها تأکید می‌کنند حسابدار نیستند: روی بودجه با CFO یا تیم مالی کار کنید (p. 123).
 
-### Why Budgeting Matters
+### چرا بودجه اهمیت دارد
 
-The budget is the bridge between "Wouldn't it be cool if we…" and "We actually did it!" (p. 124)
+بودجه پل بین «چقدر خوب می‌شد اگر…» و «واقعاً انجامش دادیم!» است (p. 124).
 
-| Reason | What it means (pp. 124–129) |
+| دلیل | یعنی چه (pp. 124–129) |
 |---|---|
-| **Strategic alignment** | Spending matches stated priorities — customer experience can't be top priority if everything goes to internal tools |
-| **Cost management** | Understanding the relationship between spending and value, not just the cheapest option |
-| **Risk mitigation** | Provisions for financial (largest customer leaves), operational (database fails) and strategic (product made obsolete) risks |
-| **Performance monitoring** | Leading and lagging indicators, not vanity metrics |
-| **Resource optimization** | "Budgeting is simply prioritization with dollar signs attached" — your budget is the company-level backlog |
-| **Stakeholder management** | The budget communicates priorities to investors, employees and customers |
-| **Innovation and growth** | Fund both incremental improvement and transformative bets — tomatoes this summer and trees for later |
-| **Organizational learning** | Each cycle is an experiment |
-| **Competitive advantage** | Respond quickly; invest at the right time. Start simple — you can add budgeting process but rarely remove it |
+| **هم‌راستایی راهبردی** | خرج با اولویت‌های اعلام‌شده می‌خواند؛ تجربه‌ی مشتری نمی‌تواند اولویت اول باشد وقتی همه چیز خرج ابزار داخلی می‌شود |
+| **مدیریت هزینه** | فهمیدن رابطه‌ی خرج و ارزش، نه فقط برداشتن ارزان‌ترین گزینه |
+| **کاهش ریسک** | ذخیره برای ریسک مالی مثل رفتن بزرگ‌ترین مشتری، ریسک عملیاتی مثل خراب شدن دیتابیس، و ریسک راهبردی مثل منسوخ شدن محصول |
+| **پایش عملکرد** | شاخص‌های پیشرو و پسرو، نه متریک پوچ |
+| **بهینه کردن منابع** | «بودجه‌ریزی صرفاً اولویت‌بندی است با علامت دلار چسبیده به آن»؛ بودجه‌تان backlog سطح شرکت است |
+| **مدیریت ذی‌نفع‌ها** | بودجه اولویت‌ها را به سرمایه‌گذارها و کارکنان و مشتری‌ها می‌گوید |
+| **نوآوری و رشد** | هم بهبود تدریجی را تأمین کنید و هم شرط‌های دگرگون‌کننده؛ هم گوجه‌ی این تابستان و هم درخت برای بعدها |
+| **یادگیری سازمانی** | هر چرخه یک آزمایش است |
+| **مزیت رقابتی** | سریع پاسخ بدهید؛ در زمان درست سرمایه‌گذاری کنید. ساده شروع کنید، چون می‌شود process بودجه اضافه کرد ولی به‌ندرت می‌شود برش داشت |
 
-> **In Practice: April's Story** (p. 124). StudioOps claims collaboration and mentorship as priorities, yet its Q1 budget has $15,000 for individual IDE licences, $5,000 for unused productivity tracking, nothing for pair-programming tools, and $500 of "quarterly pizza" for team building. April cuts the tracking tools, buys a team pair-programming licence ($8,000), starts weekly team lunches ($600 a month) and sets aside $10,000 for a code review tool.
+> **کادر In Practice: داستان April** (p. 124). تیم StudioOps ادعا می‌کند همکاری و منتورینگ اولویت‌اند، ولی بودجه‌ی سه‌ماهه‌ی اولش ۱۵٬۰۰۰ دلار برای licenseهای انفرادی IDE دارد، ۵٬۰۰۰ دلار برای ابزار پیگیری بهره‌وری که استفاده نمی‌شود، هیچ چیز برای ابزار برنامه‌نویسی دونفره، و ۵۰۰ دلار «پیتزای فصلی» برای تیم‌سازی. April ابزار پیگیری را حذف می‌کند، license تیمی برنامه‌نویسی دونفره می‌خرد با ۸٬۰۰۰ دلار، ناهار هفتگی تیم را با ماهی ۶۰۰ دلار راه می‌اندازد و ۱۰٬۰۰۰ دلار برای ابزار code review کنار می‌گذارد.
 
-#### Understanding the income side
+#### فهمیدن سمت درآمد
 
-Engineering leaders rarely own revenue, but **unit economics** turn you from a cost centre into a strategic partner (p. 125):
+رهبرهای مهندسی به‌ندرت صاحب درآمدند، ولی **اقتصاد واحد** شما را از یک مرکز هزینه به شریکی راهبردی تبدیل می‌کند (p. 125):
 
-| Concept | Definition and example (p. 125) |
+| مفهوم | تعریف و نمونه (p. 125) |
 |---|---|
-| **Cost of goods sold (COGS)** | Direct costs of delivering the service: infrastructure, third-party fees, support. $50,000 a month in AWS for 1,000 customers = $50 per customer |
-| **Customer acquisition cost (CAC)** | Cost to land a customer; missing features that force a $5,000 sales effort per enterprise customer have a dollar impact |
-| **Lifetime value (LTV)** | Total revenue over the relationship; at $1,000 a month, churning after 10 months instead of 12 loses $2,000 of LTV |
-| **Gross margin** | (Revenue − COGS) ÷ revenue — what's left for salaries, offices and the coffee machine. At 70% aiming for 80%, optimizing a query that eats 20% of infrastructure may beat a new feature |
+| **بهای تمام‌شده‌ی کالا یا COGS** | هزینه‌های مستقیم تحویل سرویس: زیرساخت، هزینه‌ی طرف‌های سوم، پشتیبانی. ماهی ۵۰٬۰۰۰ دلار AWS برای ۱٬۰۰۰ مشتری یعنی ۵۰ دلار برای هر مشتری |
+| **هزینه‌ی جذب مشتری یا CAC** | هزینه‌ی به دست آوردن یک مشتری؛ featureهای نداشته‌ای که به ازای هر مشتری سازمانی ۵٬۰۰۰ دلار تلاش فروش تحمیل می‌کنند اثر دلاری دارند |
+| **ارزش طول عمر یا LTV** | کل درآمد در طول رابطه؛ با ماهی ۱٬۰۰۰ دلار، رفتن بعد از ۱۰ ماه به‌جای ۱۲ ماه ۲٬۰۰۰ دلار از LTV کم می‌کند |
+| **حاشیه‌ی ناخالص** | درآمد منهای COGS تقسیم بر درآمد؛ چیزی که برای حقوق و دفتر و قهوه‌ساز می‌ماند. با ۷۰٪ و هدف ۸۰٪، بهینه کردن کوئری‌ای که ۲۰٪ زیرساخت را می‌خورد شاید از یک feature تازه بهتر باشد |
 
-> **In Practice: April's Story** (p. 126). Sales discounts because competitors ship faster; churn spikes after outages. Slow bug fixing is costing PixelCurl $30,000 a month in churned revenue — now an input to April's budget and headcount.
+> **کادر In Practice: داستان April** (p. 126). فروش تخفیف می‌دهد چون رقیب‌ها سریع‌تر تحویل می‌دهند؛ و بعد از قطعی‌ها churn جهش می‌کند. کندی رفع باگ ماهی ۳۰٬۰۰۰ دلار درآمد از‌دست‌رفته برای PixelCurl آب می‌خورد، که حالا ورودی بودجه و نیروی April است.
 
-With unit economics, priorities become comparable: Feature A cuts infrastructure by $10,000 a month (+2% gross margin); Feature B enables enterprise pricing (LTV from $10,000 to $25,000). A DevOps hire can be framed as cutting infrastructure COGS by 25%, raising gross margin from 72% to 76% — "$2 million to our valuation at standard SaaS multiples." Cost management is understanding how costs behave; sometimes spending more saves money, like Terry Pratchett's Sam Vimes "Boots" theory (p. 126).
+با اقتصاد واحد، اولویت‌ها قابل‌مقایسه می‌شوند: feature اول ماهی ۱۰٬۰۰۰ دلار از زیرساخت کم می‌کند و ۲ واحد به حاشیه‌ی ناخالص اضافه؛ feature دوم قیمت‌گذاری سازمانی را ممکن می‌کند و LTV را از ۱۰٬۰۰۰ به ۲۵٬۰۰۰ دلار می‌برد. استخدام یک DevOps را می‌شود این‌طور قاب گرفت که COGS زیرساخت را ۲۵٪ کم می‌کند و حاشیه‌ی ناخالص را از ۷۲٪ به ۷۶٪ می‌برد، یعنی «۲ میلیون دلار به ارزش‌گذاری ما با ضریب‌های معمول SaaS». مدیریت هزینه یعنی فهمیدن رفتار هزینه‌ها؛ گاهی خرج بیشتر پول کم می‌کند، مثل نظریه‌ی «پوتین» Sam Vimes در نوشته‌ی Terry Pratchett (p. 126).
 
-> **Try it:** [Unit economics](../widgets/07-unit-economics.html) — set infrastructure spend, customers, price and churn, starting from the book's examples, and watch COGS per customer, gross margin and LTV move.
+> **Try it:** [اقتصاد واحد](../widgets/07-unit-economics.html)؛ از نمونه‌های کتاب شروع کنید و خرج زیرساخت و تعداد مشتری و قیمت و churn را بگذارید و ببینید COGS هر مشتری و حاشیه‌ی ناخالص و LTV چطور جابه‌جا می‌شوند.
 
-#### Resource optimization in practice
+#### بهینه کردن منابع در عمل
 
-Estimation uncertainty scales up: as with ±25% sprint estimates, budget a three-month contractor for four months, and ask what happens if a $50,000 upgrade costs $65,000 (p. 128). Treat deferred upgrades like technical debt — what's the interest rate? (p. 128)
+بلاتکلیفی تخمین در مقیاس بزرگ هم هست: همان‌طور که تخمین sprint ‎±۲۵٪‎ است، برای پیمانکار سه‌ماهه چهار ماه بودجه بگذارید، و بپرسید اگر ارتقای ۵۰٬۰۰۰ دلاری ۶۵٬۰۰۰ دلار شد چه می‌شود (p. 128). با ارتقاهای عقب‌انداخته مثل بدهی فنی برخورد کنید؛ نرخ بهره‌اش چقدر است (p. 128)؟
 
-> **In Practice: April's Story** (p. 128). If the team underestimates by 30%, headcount planning is off by the same margin, so April runs budget planning as extended sprint planning, with dollar amounts on both impact-versus-effort axes.
+> **کادر In Practice: داستان April** (p. 128). اگر تیم ۳۰٪ کمتر از واقع تخمین بزند، برنامه‌ریزی نیرو هم به همان اندازه غلط است، پس April برنامه‌ریزی بودجه را مثل برنامه‌ریزی sprintِ گسترده می‌گرداند و روی هر دو محور اثر و تلاش عدد دلاری می‌گذارد.
 
-### Understanding Cost Management
+### فهمیدن مدیریت هزینه
 
-Costs tell half the story; they matter in relation to the value created (pp. 129–130).
+هزینه‌ها نیمی از داستان‌اند؛ اهمیتشان در نسبت با ارزشی است که ساخته می‌شود (pp. 129–130).
 
-| Cost type | Examples and management (pp. 130–131) |
+| نوع هزینه | نمونه و مدیریت (pp. 130–131) |
 |---|---|
-| **Fixed costs** — the foundation | Office, permanent salaries, insurance, core infrastructure. Too many make you rigid; too few, unable to grow |
-| **Variable costs** — the flex players | Usage-based cloud and SaaS. Balance efficiency against effectiveness |
-| **Step costs** — the level-up costs | Jump at thresholds: a higher SaaS tier, a new office, expanded infrastructure — be ready before you jump |
-| **Who pays?** | Direct costs (people) are easy to allocate; indirect, shared costs (a customer's share of infrastructure) need working out — you must show investments were worthwhile |
+| **هزینه‌های ثابت**، یعنی پایه | دفتر، حقوق دائمی، بیمه، زیرساخت اصلی. زیاد بودنشان شما را خشک می‌کند و کم بودنشان ناتوان از رشد |
+| **هزینه‌های متغیر**، یعنی بازیکن‌های منعطف | cloud و SaaS بر پایه‌ی مصرف. بین کارآمدی و اثربخشی تعادل برقرار کنید |
+| **هزینه‌های پله‌ای**، یعنی رفتن به سطح بعد | سر آستانه‌ها جهش می‌کنند: سطح بالاتر SaaS، دفتر تازه، گسترش زیرساخت؛ پیش از جهش آماده باشید |
+| **چه کسی پولش را می‌دهد؟** | هزینه‌های مستقیم مثل آدم‌ها راحت تخصیص می‌یابند؛ هزینه‌های غیرمستقیم و مشترک، مثل سهم یک مشتری از زیرساخت، باید درآورده شوند، چون باید نشان بدهید سرمایه‌گذاری‌ها ارزشش را داشته‌اند |
 
-**The human side:** build a culture where senior engineers consider the cost of an architecture choice — a new tool or step cost — as part of capacity planning (p. 131).
+**سمت انسانی:** فرهنگی بسازید که در آن مهندس‌های ارشد هزینه‌ی یک انتخاب معماری، مثل ابزار تازه یا هزینه‌ی پله‌ای، را بخشی از برنامه‌ریزی ظرفیت ببینند (p. 131).
 
-### Creating and Managing a Budget
+> **In practice:** هزینه‌ی platform داده بیشتر متغیر است: CPU، دیسک و نگهداری داده.
+>
+> **Your turn:** دیسک ClickHouse هر ماه ۱۵٪ رشد می‌کند. چه کاری پیش از خریدن دیسک بیشتر انجام می‌دهید؟
+>
+> *Answer:* TTL روی partitionهای کهنه در Bronze، بررسی codec فشرده‌سازی، و حذف جدول‌هایی که کسی نمی‌خواند؛ و رشد را در Grafana به ارزشی که ساخته می‌شود گره بزنید. کتاب هزینه را در نسبت با ارزش می‌سنجد (pp. 129–131).
 
-Even with a finance team, you spend the budget and are responsible for it (p. 131).
+### ساختن و مدیریت بودجه
 
-- **Start with history** — at least three years if possible: seasons (ecommerce costs around Black Friday), customer dependencies, expense trends, one-off incidents, and the *why* behind the numbers (p. 132).
-- **Categorize expenses** — people first (base, variable pay, benefits, training, travel, entertainment), then infrastructure (cloud, space, equipment) and services (SaaS from CRM to observability, recruiting tools, lawyers, accountants, security) (p. 132).
+حتی با وجود تیم مالی، خرج‌کننده‌ی بودجه شمایید و مسئولش هم شمایید (p. 131).
 
-#### Headcount Planning and Costs
+- **از تاریخچه شروع کنید**، اگر می‌شود دست‌کم سه سال: فصل‌ها، مثل هزینه‌های ecommerce حول Black Friday، وابستگی به مشتری‌ها، روند هزینه‌ها، حادثه‌های یک‌باره، و «چرا»ی پشت عددها (p. 132).
+- **هزینه‌ها را دسته‌بندی کنید**: اول آدم‌ها، یعنی حقوق پایه و پرداخت متغیر و مزایا و آموزش و سفر و پذیرایی، بعد زیرساخت، یعنی cloud و فضا و تجهیزات، و بعد سرویس‌ها، یعنی SaaSها از CRM تا observability، ابزار استخدام، وکیل، حسابدار و امنیت (p. 132).
 
-The **fully loaded cost** of an employee is typically **1.3–1.8× base salary** (pp. 133–134):
+#### برنامه‌ریزی نیرو و هزینه‌هایش
 
-| Component | Typical size (p. 133) |
+**هزینه‌ی تمام‌شده‌ی** یک کارمند معمولاً **۱٫۳ تا ۱٫۸ برابر حقوق پایه** است (pp. 133–134):
+
+| جزء | اندازه‌ی معمول (p. 133) |
 |---|---|
-| Payroll taxes and mandates | Roughly 7.65% in the US |
-| Benefits | 20–30% of base |
-| Equipment and licences | $5,000–$10,000 a year for engineers |
-| Training and development | $2,000–$5,000 a year |
-| Recruiting | Agency fees of 15–25% of base, or recruiter time |
-| Onboarding inefficiency | New hires at about 50% productivity for three months |
+| مالیات و الزام‌های حقوق و دستمزد | در آمریکا حدود ۷٫۶۵٪ |
+| مزایا | ۲۰ تا ۳۰٪ حقوق پایه |
+| تجهیزات و license | سالی ۵٬۰۰۰ تا ۱۰٬۰۰۰ دلار برای مهندس‌ها |
+| آموزش و توسعه | سالی ۲٬۰۰۰ تا ۵٬۰۰۰ دلار |
+| استخدام | کارمزد آژانس ۱۵ تا ۲۵٪ حقوق پایه، یا وقت recruiter |
+| ناکارآمدی onboarding | تازه‌واردها تا سه ماه حدود ۵۰٪ بهره‌وری دارند |
 
-> **In Practice: April's Story** (p. 134). April budgets three engineers at $150,000 each — $450,000 — but the real cost is closer to $675,000, before counting senior engineers' mentoring time.
+> **کادر In Practice: داستان April** (p. 134). او برای سه مهندس هر کدام ۱۵۰٬۰۰۰ دلار بودجه می‌گذارد، یعنی ۴۵۰٬۰۰۰ دلار، ولی هزینه‌ی واقعی نزدیک ۶۷۵٬۰۰۰ دلار است، آن هم پیش از حساب کردن وقت منتورینگ مهندس‌های ارشد.
 
-- **Growth and attrition.** Engineering attrition runs 10–15% a year, so a 20-person team replaces two or three people annually. Each new hire reduces team capacity by 10% in their first month and 5% in their second, becoming additive in the third (p. 134).
-- **Timing.** Q4 hiring is harder; batch hiring creates an onboarding bottleneck but saves recruiter time; hire in Q1 for someone productive in Q3; don't miss the annual headcount window (p. 134).
-- **Scenarios.** April budgets best, expected and worst cases (hard-to-find DevOps talent needing contractor cover), including mentor time and the knowledge-transfer dip (p. 135).
+- **رشد و ریزش.** ریزش نیرو در مهندسی سالی ۱۰ تا ۱۵٪ است، پس تیم ۲۰ نفره سالی دو سه نفر را جایگزین می‌کند. هر تازه‌وارد در ماه اول ۱۰٪ و در ماه دوم ۵٪ از ظرفیت تیم کم می‌کند و در ماه سوم به آن اضافه می‌شود (p. 134).
+- **زمان‌بندی.** استخدام در سه‌ماهه‌ی چهارم سخت‌تر است؛ استخدام دسته‌ای وقت recruiter را کم می‌کند ولی گلوگاه onboarding می‌سازد؛ در سه‌ماهه‌ی اول استخدام کنید تا در سه‌ماهه‌ی سوم بهره‌ور باشد؛ و پنجره‌ی سالانه‌ی تعداد نیرو را از دست ندهید (p. 134).
+- **سناریوها.** April بهترین و مورد‌انتظار و بدترین حالت را بودجه می‌گذارد، از جمله سختی پیدا کردن استعداد DevOps که به پوشش پیمانکاری نیاز دارد، به‌علاوه‌ی وقت منتور و افت انتقال دانش (p. 135).
 
-| *Table 7-1. Estimated salary ranges* (p. 135) | Cost estimate | Considerations |
+| *جدول ۷-۱. بازه‌های تخمینی حقوق* (p. 135) | تخمین هزینه | ملاحظه‌ها |
 |---|---|---|
-| **Senior** | $180,000–$300,000+ | Technical leadership, architecture, mentorship |
-| **Mid** | $120,000–$180,000 | Core execution, growing autonomy |
-| **Junior** | $80,000–$120,000 | High potential, need investment, future pipeline |
+| **ارشد** | ۱۸۰٬۰۰۰ تا بیش از ۳۰۰٬۰۰۰ دلار | رهبری فنی، معماری، منتورینگ |
+| **میانی** | ۱۲۰٬۰۰۰ تا ۱۸۰٬۰۰۰ دلار | اجرای اصلی، استقلال رو به رشد |
+| **تازه‌کار** | ۸۰٬۰۰۰ تا ۱۲۰٬۰۰۰ دلار | توان بالقوه‌ی بالا، نیازمند سرمایه‌گذاری، خط لوله‌ی آینده |
 
-Startups may skew senior for speed; established companies invest in juniors. April's senior-heavy team lacks the middle layer that helps juniors grow (p. 135). **Hidden costs:** a bad hire can cost two to three times their salary, so budget 10–15% extra; key roles take three to six months; counteroffers may need 10–20% above budget; keep a fund for retention (pp. 135–136).
+استارتاپ‌ها شاید برای سرعت به سمت ارشد بچرخند و شرکت‌های جاافتاده روی تازه‌کارها سرمایه‌گذاری کنند. تیم ارشد-سنگینِ April لایه‌ی میانی‌ای را ندارد که به رشد تازه‌کارها کمک می‌کند (p. 135). **هزینه‌های پنهان:** استخدام بد می‌تواند دو سه برابر حقوقش آب بخورد، پس ۱۰ تا ۱۵٪ اضافه بودجه بگذارید؛ نقش‌های کلیدی سه تا شش ماه طول می‌کشند؛ پیشنهادهای رقابتی شاید ۱۰ تا ۲۰٪ بالاتر از بودجه بخواهند؛ و صندوقی برای نگه‌داشت نیرو داشته باشید (pp. 135–136).
 
-**The headcount business case** frames a hire as an investment: revenue enabled ("drives $X in revenue"), opportunity cost ("delaying pushes the launch by X months"), cost avoidance ("without it we'll spend $X on contractors and outages"), and team health ("current overtime rates are unsustainable") (p. 136).
+**پرونده‌ی کسب‌وکاری نیرو** استخدام را سرمایه‌گذاری قاب می‌گیرد: درآمد ممکن‌شده، یعنی «X دلار درآمد می‌آورد»؛ هزینه‌ی فرصت، یعنی «تأخیرش launch را X ماه عقب می‌اندازد»؛ هزینه‌ی اجتناب‌شده، یعنی «بدون آن X دلار خرج پیمانکار و قطعی می‌کنیم»؛ و سلامت تیم، یعنی «نرخ فعلی اضافه‌کاری پایدار نیست» (p. 136).
 
-> **Run it:** the [headcount plan](../lab/07-headcount-plan/README.md) experiment applies the book's fully loaded cost, ramp-up and attrition rules to hiring three engineers in a batch or staggered.
+> **Run it:** آزمایش [برنامه‌ی نیرو](../lab/07-headcount-plan/README.md) قاعده‌های کتاب درباره‌ی هزینه‌ی تمام‌شده و جا افتادن و ریزش را روی استخدام سه مهندس به شکل دسته‌ای یا پلکانی به کار می‌برد.
 
-#### Goals, Template, Tracking and Learning
+#### هدف و قالب و پیگیری و یادگیری
 
-- **Goals need budgets and metrics**, absolute ("reach $10 million in revenue") or relative ("grow faster than the market") (p. 136).
-- **The template** shows costs (and income, if relevant) month by month; prepare best, expected and worst-case variants (pp. 137–138).
+- **هدف‌ها به بودجه و سنجه نیاز دارند**، چه مطلق مثل «به ۱۰ میلیون دلار درآمد برسیم» و چه نسبی مثل «سریع‌تر از بازار رشد کنیم» (p. 136).
+- **قالب** هزینه‌ها و در صورت ربط درآمد را ماه به ماه نشان می‌دهد؛ نسخه‌های بهترین و مورد‌انتظار و بدترین حالت را آماده کنید (pp. 137–138).
 
-![Spreadsheet laid out month by month with income at the top, then expense sections for people, infrastructure, services and office, each with subtotals and a yearly total column](../figures/07-01.png)
+![spreadsheet چیده‌شده ماه به ماه، با درآمد در بالا و بعد بخش‌های هزینه برای آدم‌ها و زیرساخت و سرویس‌ها و دفتر، که هر کدام جمع جزء دارند و یک ستون جمع سالانه](../figures/07-01.png)
 
-*Figure 7-1 (p. 137): note the structure — a projected balance at the top, people as the largest block of expenses, and monthly columns with yearly totals on the right.*
+*Figure 7-1 (p. 137): به ساختارش نگاه کنید؛ مانده‌ی پیش‌بینی‌شده در بالا، آدم‌ها به‌عنوان بزرگ‌ترین بلوک هزینه، و ستون‌های ماهانه با جمع سالانه در سمت راست.*
 
-- **Tracking:** review significant costs (headcount, cloud) monthly, with cloud budget alerts; strategic reviews quarterly; a new budget annually (p. 138). Explain variances — price, volume, timing, efficiency — and **share overruns**; hiding them never works. Give each audience the right level of detail (p. 138).
-- **Learning:** after each cycle ask what worked, what failed, what surprised you and what you learned (pp. 138–139).
+- **پیگیری:** هزینه‌های مهم مثل نیرو و cloud را ماهانه مرور کنید و برای cloud هشدار بودجه بگذارید؛ بازبینی‌های راهبردی فصلی و بودجه‌ی تازه سالانه (p. 138). انحراف‌ها را توضیح بدهید، یعنی قیمت و حجم و زمان‌بندی و کارآمدی، و **فراتر رفتن از بودجه را اعلام کنید**؛ پنهان کردنش هیچ‌وقت جواب نمی‌دهد. به هر مخاطبی سطح درست جزئیات را بدهید (p. 138).
+- **یادگیری:** بعد از هر چرخه بپرسید چه چیزی کار کرد، چه چیزی شکست خورد، چه چیزی غافلگیرتان کرد و چه یاد گرفتید (pp. 138–139).
 
-### Vendor Management
+### مدیریت فروشنده‌ها
 
-Vendors are now strategic partners who can propel you or hold you back (p. 139).
+فروشنده‌ها حالا شریک‌های راهبردی‌اند که می‌توانند جلو ببرندتان یا نگهتان دارند (p. 139).
 
-- **Build versus buy.** **Build your core business** — what gives a competitive edge — and buy the rest; custom solutions bring years of maintenance. Your own database (unless you're a database company), scheduler or authentication and encryption are "an indulgence, not a requirement" (pp. 139–140).
+- **ساختن در برابر خریدن.** **هسته‌ی کسب‌وکارتان را بسازید**، یعنی چیزی که مزیت رقابتی می‌دهد، و بقیه را بخرید؛ راه‌حل سفارشی سال‌ها نگه‌داری می‌آورد. دیتابیس خودتان، مگر شرکت دیتابیس باشید، یا scheduler یا احراز هویت و رمزنگاری خودتان «تجمل است، نه الزام» (pp. 139–140).
 
-> **In Practice: April's Story** (p. 139). A homegrown CI/CD system built years ago consumes 20% of two senior engineers' time. Deployment isn't PixelCurl's advantage — its animation rendering engine is — so April migrates to a commercial platform and frees the seniors to mentor.
+> **کادر In Practice: داستان April** (p. 139). سیستم CI/CD خانگی‌ای که سال‌ها پیش ساخته شده ۲۰٪ وقت دو مهندس ارشد را می‌خورد. deployment مزیت PixelCurl نیست، موتور رندر انیمیشنش مزیت است، پس April به یک platform تجاری مهاجرت می‌کند و آدم‌های ارشد را برای منتورینگ آزاد.
 
-- **Picking partners** is like hiring: capability, track record, stability, cultural fit, must-haves versus nice-to-haves, longevity and cost. Good contracts define what you get, how success is measured, and what happens when things go wrong (p. 140).
-- **Managing the relationship:** regular check-ins and reviews — a partnership, not a transaction (p. 140). April's quarterly vendor reviews find three engineers separately paying for similar code-analysis tools (p. 141).
-- **Outsourced people and teams.** Partners may optimize skills and compliance over culture and growth. **Never outsource your core hiring process** — let partners find people, then use your own interviews: trust, but verify. Treat external engineers as part of the team — 1-1s, standups, architecture discussions, overlapping meeting times (James held morning US Eastern meetings to overlap with Ukraine) — and weigh legal, regulatory and data-privacy issues; you get what you pay for (pp. 141–142).
+- **انتخاب شریک‌ها** مثل استخدام است: توانمندی، کارنامه، ثبات، تناسب فرهنگی، چیزهای حتماً‌لازم در برابر خوب‌است‌باشد، ماندگاری و هزینه. قرارداد خوب تعریف می‌کند چه می‌گیرید، موفقیت چطور سنجیده می‌شود، و وقتی چیزی خراب شد چه می‌شود (p. 140).
+- **مدیریت رابطه:** جلسه و بازبینی منظم؛ یک شراکت، نه یک معامله (p. 140). بازبینی فصلی فروشنده‌های April نشان می‌دهد سه مهندس جداگانه برای ابزارهای مشابه تحلیل کد پول می‌دهند (p. 141).
+- **آدم‌ها و تیم‌های برون‌سپاری‌شده.** شریک‌ها ممکن است مهارت و انطباق را بر فرهنگ و رشد مقدم کنند. **هیچ‌وقت process اصلی استخدامتان را برون‌سپاری نکنید**؛ بگذارید شریک‌ها آدم پیدا کنند و بعد خودتان مصاحبه بگیرید: اعتماد کنید ولی وارسی هم بکنید. با مهندس‌های بیرونی مثل بخشی از تیم رفتار کنید، یعنی ۱-۱ و standup و بحث معماری و ساعت‌های جلسه‌ی هم‌پوشان، که James جلسه‌های صبح وقت شرق آمریکا می‌گذاشت تا با اوکراین هم‌پوشانی داشته باشد، و مسائل حقوقی و مقرراتی و حریم خصوصی داده را بسنجید؛ هر چقدر پول بدهید همان‌قدر می‌گیرید (pp. 141–142).
 
-> **In Practice: April's Story** (p. 141). April's interim DevOps contractor joins standups and architecture discussions and pairs with juniors — and spots a critical infrastructure issue the siloed seniors had missed.
+> **کادر In Practice: داستان April** (p. 141). پیمانکار موقت DevOps او در standupها و بحث‌های معماری شرکت می‌کند و با تازه‌کارها pair می‌کند، و مسئله‌ی حیاتی‌ای در زیرساخت پیدا می‌کند که آدم‌های ارشدِ در سیلو ندیده بودند.
 
-### Ethics
+> **In practice:** stack ما تقریباً همه‌اش open source و self-hosted است، و این خودش یک تصمیم ساختن در برابر خریدن است.
+>
+> **Your turn:** چرا ClickHouse را self-host می‌کنید و چه هزینه‌ای در این تصمیم پنهان است؟
+>
+> *Answer:* هزینه‌ی license نیست ولی زمان مهندس برای ارتقا، backup، تنظیم Keeper و on-call هست. کتاب می‌گوید هسته‌ی کسب‌وکار را بسازید و بقیه را بخرید؛ پس بپرسید نگهداری warehouse مزیت رقابتی شماست یا نه (pp. 139–141).
 
-Do the right thing because it's right — or at least to avoid damaging your brand (pp. 142–143).
+### اخلاق
 
-| Area | What it asks (pp. 143–144) |
+کار درست را بکنید چون درست است، یا دست‌کم برای این‌که به برندتان آسیب نزنید (pp. 142–143).
+
+| حوزه | چه می‌پرسد (pp. 143–144) |
 |---|---|
-| **Taking care of our people** | Fair pay, development, safe conditions. April finds juniors paid 30% below market for "learning on the job" and budgets market-rate adjustments plus mentorship time |
-| **Being a good neighbor** | Environmental and community impact |
-| **The global perspective** | Respect local customs while keeping consistent ethical and labour standards |
-| **Looking to the future** | AI and automation, intellectual property, privacy, sustainability |
-| **Making it real** | Training and safety to speak up — James saw Microsoft's scenario-based program. Ask: would we be proud to see this decision on tomorrow's front page? |
+| **مراقبت از آدم‌هایمان** | حقوق منصفانه، رشد، شرایط امن. April می‌بیند تازه‌کارها ۳۰٪ زیر بازار حقوق می‌گیرند به بهانه‌ی «یاد گرفتن سر کار» و برای اصلاح حقوق تا سطح بازار و وقت منتورینگ بودجه می‌گذارد |
+| **همسایه‌ی خوبی بودن** | اثر زیست‌محیطی و اجتماعی |
+| **نگاه جهانی** | به رسوم محلی احترام بگذارید و در همان حال استانداردهای اخلاقی و کار را یکدست نگه دارید |
+| **نگاه به آینده** | هوش مصنوعی و automation، مالکیت فکری، حریم خصوصی، پایداری |
+| **واقعی کردنش** | آموزش و امنیت برای حرف زدن؛ James برنامه‌ی سناریومحور Microsoft را دیده بود. بپرسید: از دیدن این تصمیم روی صفحه‌ی اول فردا سربلند بودیم؟ |
 
-### Conclusion: Budget as Strategy
+### جمع‌بندی: بودجه به‌مثابه استراتژی
 
-Budgeting, costs and vendors may not be why you became a leader, but bringing engineering rigour to them creates the conditions to deliver the technical vision — and the skills matter for senior ICs too (pp. 144–145).
+شاید بودجه و هزینه و فروشنده‌ها دلیل رهبر شدنتان نبوده باشد، ولی آوردن دقت مهندسی به آن‌ها شرایطی می‌سازد که چشم‌انداز فنی تحویل شود، و این مهارت‌ها برای individual contributorهای ارشد هم مهم‌اند (pp. 144–145).
 
-## Trade-offs at a glance
+## بده‌بستان‌ها در یک نگاه
 
-| Choice | Buys | Costs |
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| More fixed costs | Stable foundation | Rigidity |
-| Variable, usage-based services | Flexibility; scale with demand | Costs grow with use; less predictable |
-| Crossing a step cost | Next level of capacity | A jump in spending before value arrives |
-| Batch hiring | Recruiter efficiency | Onboarding bottleneck; bigger productivity dip |
-| Senior-heavy team | Speed and autonomy | Cost; weak junior pipeline without a middle layer |
-| Building in-house | Control; fits exactly | Years of maintenance; distraction from the core |
-| Buying commodity services | Focus on core business | Vendor dependency |
-| Treating contractors as teammates | Shared knowledge, culture | More management time |
+| هزینه‌ی ثابت بیشتر | پایه‌ی باثبات | خشکی |
+| سرویس‌های متغیر بر پایه‌ی مصرف | انعطاف؛ مقیاس گرفتن با تقاضا | هزینه با مصرف بالا می‌رود؛ پیش‌بینی‌پذیری کمتر |
+| رد شدن از یک پله‌ی هزینه | سطح بعدی ظرفیت | جهش خرج پیش از رسیدن ارزش |
+| استخدام دسته‌ای | کارآمدی recruiter | گلوگاه onboarding؛ افت بزرگ‌تر بهره‌وری |
+| تیم ارشد-سنگین | سرعت و استقلال | هزینه؛ خط لوله‌ی ضعیف تازه‌کارها بدون لایه‌ی میانی |
+| ساختن در خانه | کنترل؛ دقیقاً اندازه | سال‌ها نگه‌داری؛ دور شدن از هسته |
+| خریدن سرویس‌های کالایی | تمرکز روی هسته‌ی کسب‌وکار | وابستگی به فروشنده |
+| رفتار با پیمانکارها مثل هم‌تیمی | دانش و فرهنگ مشترک | وقت مدیریتی بیشتر |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **SaaS valuation multiples** vary widely with growth rates and market conditions; the book's "$2 million at standard SaaS multiples" (p. 126) is an illustration, not a rule.
-- **The Rule of 40** — growth rate plus profit margin of at least 40% — is a common SaaS health heuristic that finance teams may use alongside gross margin.
-- **Fully loaded cost** ratios depend heavily on country: the book's payroll-tax figure is for the US (p. 133). The [lab](../lab/07-headcount-plan/README.md) uses the book's rules of thumb with invented salaries.
+- **ضریب‌های ارزش‌گذاری SaaS** با نرخ رشد و شرایط بازار خیلی فرق می‌کنند؛ «۲ میلیون دلار با ضریب‌های معمول SaaS» در کتاب (p. 126) یک نمونه است، نه قاعده.
+- **قاعده‌ی ۴۰** یعنی نرخ رشد به‌علاوه‌ی حاشیه‌ی سود دست‌کم ۴۰، سنجه‌ی سرانگشتی رایج سلامت SaaS است که تیم‌های مالی شاید کنار حاشیه‌ی ناخالص به کار ببرند.
+- **نسبت‌های هزینه‌ی تمام‌شده** خیلی به کشور بستگی دارند: عدد مالیات حقوق در کتاب برای آمریکاست (p. 133). [این آزمایش](../lab/07-headcount-plan/README.md) از قاعده‌های سرانگشتی کتاب با حقوق‌های ساختگی استفاده می‌کند.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Headcount plan](../lab/07-headcount-plan/README.md) — fully loaded cost and first-year capacity of three hires, batch versus staggered, with the book's ramp-up and attrition rules.
-- **Related chapters:** [6. Shipping Products and Code](06-shipping-products-and-code-in-chaotic-environments.md) (impact versus effort; estimates), [4. Building Cohesive Teams](04-building-cohesive-teams.md) (growing when ready), [8. Technical Principles and Strategy](08-technical-principles-and-strategy.md) (choose boring technology), [10. Metrics That Matter](10-metrics-that-matter-for-engineering-teams.md) (leading and lagging indicators).
+- **Run it:** [برنامه‌ی نیرو](../lab/07-headcount-plan/README.md)؛ هزینه‌ی تمام‌شده و ظرفیت سال اول سه استخدام، به شکل دسته‌ای در برابر پلکانی، با قاعده‌های جا افتادن و ریزش کتاب.
+- **فصل‌های مرتبط:** [فصل ۶: تحویل محصول و کد](06-shipping-products-and-code-in-chaotic-environments.md) که اثر در برابر تلاش و تخمین را دارد، [فصل ۴: ساختن تیم‌های منسجم](04-building-cohesive-teams.md) که بزرگ شدن در زمان درست را می‌گوید، [فصل ۸: اصول و استراتژی فنی](08-technical-principles-and-strategy.md) که انتخاب فناوری کسل‌کننده را می‌گوید، و [فصل ۱۰: متریک‌هایی که مهم‌اند](10-metrics-that-matter-for-engineering-teams.md) که شاخص‌های پیشرو و پسرو را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **How does the book summarize resource optimization?**
+1. **کتاب بهینه کردن منابع را چطور خلاصه می‌کند؟**
 
-   *Answer:* "Budgeting is simply prioritization with dollar signs attached" — your budget is your company-level backlog (p. 127).
+   *Answer:* «بودجه‌ریزی صرفاً اولویت‌بندی است با علامت دلار چسبیده به آن»؛ بودجه‌تان backlog سطح شرکت است (p. 127).
 
-2. **$50,000 a month in AWS serves 1,000 customers. What is the infrastructure COGS per customer?**
-   - [ ] $5
-   - [x] $50
-   - [ ] $500
+2. **ماهی ۵۰٬۰۰۰ دلار AWS به ۱٬۰۰۰ مشتری سرویس می‌دهد. COGS زیرساخت برای هر مشتری چقدر است؟**
+   - [ ] ۵ دلار
+   - [x] ۵۰ دلار
+   - [ ] ۵۰۰ دلار
 
    *Answer:* p. 125.
 
-3. **What is a step cost?**
+3. **هزینه‌ی پله‌ای چیست؟**
 
-   *Answer:* A cost that jumps at a threshold rather than growing linearly — a higher SaaS tier, a new office, expanded infrastructure (p. 130).
+   *Answer:* هزینه‌ای که به‌جای رشد خطی سر یک آستانه جهش می‌کند، مثل سطح بالاتر SaaS یا دفتر تازه یا گسترش زیرساخت (p. 130).
 
-4. **Why did April's $450,000 for three engineers become about $675,000?**
+4. **چرا ۴۵۰٬۰۰۰ دلار April برای سه مهندس به حدود ۶۷۵٬۰۰۰ دلار رسید؟**
 
-   *Answer:* The fully loaded cost — taxes, benefits, equipment, training, recruiting, onboarding — runs 1.3–1.8× base salary (pp. 133–134).
+   *Answer:* هزینه‌ی تمام‌شده، یعنی مالیات و مزایا و تجهیزات و آموزش و استخدام و onboarding، ۱٫۳ تا ۱٫۸ برابر حقوق پایه است (pp. 133–134).
 
-5. **What happens to team capacity when a new person joins, by the book's rule of thumb?**
+5. **با قاعده‌ی سرانگشتی کتاب، وقتی یک نفر تازه می‌آید سر ظرفیت تیم چه می‌آید؟**
 
-   *Answer:* It drops by 10% in the first month and 5% in the second, and the hire becomes additive in the third month (p. 134).
+   *Answer:* ماه اول ۱۰٪ و ماه دوم ۵٪ افت می‌کند، و تازه‌وارد از ماه سوم به ظرفیت اضافه می‌شود (p. 134).
 
-6. **What should you build in-house?**
-   - [ ] Your own authentication and encryption
-   - [x] What gives your business a competitive advantage — its core
-   - [ ] Your own database, to save licence fees
+6. **چه چیزی را باید در خانه بسازید؟**
+   - [ ] احراز هویت و رمزنگاری خودتان را
+   - [x] چیزی که به کسب‌وکارتان مزیت رقابتی می‌دهد، یعنی هسته‌اش
+   - [ ] دیتابیس خودتان را، برای صرفه‌جویی در هزینه‌ی license
 
-   *Answer:* Buy commodity services; building them is "an indulgence" (pp. 139–140).
+   *Answer:* سرویس‌های کالایی را بخرید؛ ساختنشان «تجمل» است (pp. 139–140).
 
-7. **Why never outsource your core hiring process?**
+7. **چرا هیچ‌وقت نباید process اصلی استخدام را برون‌سپاری کرد؟**
 
-   *Answer:* Partners may optimize for skills and compliance rather than culture and growth; let them source people but run them through your own interviews — trust, but verify (pp. 141–142).
+   *Answer:* شریک‌ها شاید به‌جای فرهنگ و رشد برای مهارت و انطباق بهینه کنند؛ بگذارید آن‌ها آدم پیدا کنند ولی از مصاحبه‌های خودتان ردشان کنید؛ اعتماد کنید ولی وارسی هم بکنید (pp. 141–142).

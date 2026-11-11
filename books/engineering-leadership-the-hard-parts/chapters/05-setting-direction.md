@@ -3,226 +3,240 @@ book: engineering-leadership-the-hard-parts
 chapter: 5
 title: "Setting Direction"
 pages: "75–92"
+translated_title: "تعیین جهت"
+lang: fa
 ---
 
-# 5. Setting Direction
+# فصل ۵: تعیین جهت
 
-[← 4. Building Cohesive Teams](04-building-cohesive-teams.md) · [Book](../README.md) · [6. Shipping Products and Code →](06-shipping-products-and-code-in-chaotic-environments.md)
+[فصل ۴: ساختن تیم‌های منسجم →](04-building-cohesive-teams.md) · [کتاب](../README.md) · [فصل ۶: تحویل محصول و کد ←](06-shipping-products-and-code-in-chaotic-environments.md)
 
-## Summary
+## خلاصه
 
-Leaders rarely inherit too little work; they inherit a wall of "critical" priorities. The chapter's central story is Juan's Stripe LATAM team: 30 competing priorities, a team saying yes to everything, and a virtual leadership off-site in 2020 that cut them to six — two per team — after which work started compounding. The authors call the alternative **drift**: motion without meaning, which looks busy from outside and quietly hollows out a team. They give a drift diagnostic (Table 5-1), the traps that cause it, the leader's job as a "lighthouse," practices for alignment that is commitment rather than agreement, and how to change plans while keeping the story intact. The refrain: clarity isn't extra work; clarity is the work (pp. 75–92).
+رهبرها به‌ندرت کار کم به ارث می‌برند؛ دیواری از اولویت‌های «حیاتی» به ارث می‌برند. داستان مرکزی این فصل تیم Juan در Stripe برای منطقه‌ی آمریکای لاتین است: ۳۰ اولویت رقیب، تیمی که به همه چیز بله می‌گفت، و یک نشست رهبری مجازی در سال ۲۰۲۰ که آن‌ها را به شش رساند، یعنی دوتا برای هر تیم، و بعد از آن کار روی هم جمع شدن گرفت. نویسنده‌ها حالت جایگزین را **رانش** می‌نامند: حرکت بدون معنا، که از بیرون شلوغ به نظر می‌رسد و در خلوت تیم را تهی می‌کند. آن‌ها یک ابزار تشخیص رانش می‌دهند (جدول ۵-۱)، دام‌هایی که به آن می‌انجامند، نقش رهبر به‌عنوان «فانوس دریایی»، رویه‌هایی برای هم‌راستایی که تعهد است نه توافق، و شیوه‌ی عوض کردن برنامه بدون پاره کردن روایت. جمله‌ی تکرارشونده: روشنی کار اضافه نیست؛ روشنی خودِ کار است (pp. 75–92).
 
-## Key takeaways
+## نکته‌های کلیدی
 
-- **From the outside chaos looks like momentum; from the inside it feels like drift** — and drift erodes ambition at every level (p. 75).
-- **Drift starts with hedging** and shows in language: "Let's align on this," "We'll circle back" (p. 76).
-- **Two or more signs in the drift diagnostic** mean the team has lost focus; pick one immediate action this week (pp. 77–78).
-- **Good direction is focus with momentum**: the Stripe LATAM team narrowed to OXXO in Mexico and Boleto in Brazil, and the same people started compounding progress (pp. 79–81).
-- **Traps:** no clear inputs, too many inputs, hesitant leadership, reactive roadmaps and consensus traps (pp. 81–83).
-- **Be the lighthouse:** one outcome, a short horizon, a visible not-doing list, "We are doing X so that we can achieve Y" (pp. 83–84).
-- **Alignment is not agreement** — disagree and commit; run a commitment check and shut down hallway politics (pp. 84–87).
-- **Plans change; the story stays intact.** When you're sick of repeating yourself, your team is only beginning to believe you (pp. 87–92).
+- **از بیرون، آشوب شبیه شتاب است؛ از درون حس رانش دارد**، و رانش جاه‌طلبی را در همه‌ی سطح‌ها می‌خورد (p. 75).
+- **رانش با طفره رفتن شروع می‌شود** و در زبان پیدا می‌شود: «بیایید روی این هم‌راستا شویم»، «بعداً برمی‌گردیم سراغش» (p. 76).
+- **دو نشانه یا بیشتر در ابزار تشخیص رانش** یعنی تیم تمرکزش را از دست داده؛ یک اقدام فوری برای همین هفته بردارید (pp. 77–78).
+- **جهت خوب یعنی تمرکز به‌علاوه‌ی شتاب**: تیم Stripe در آمریکای لاتین روی OXXO در مکزیک و Boleto در برزیل متمرکز شد و همان آدم‌ها پیشرفتشان روی هم جمع شدن گرفت (pp. 79–81).
+- **دام‌ها:** نبود ورودی روشن، ورودی بیش از حد، رهبری مردد، نقشه‌ی راه واکنشی، و دام اجماع (pp. 81–83).
+- **فانوس دریایی باشید:** یک نتیجه، افقی کوتاه، فهرست دیدنیِ کارهایی که نمی‌کنید، و جمله‌ی «ما X را می‌کنیم تا به Y برسیم» (pp. 83–84).
+- **هم‌راستایی توافق نیست**؛ مخالفت کنید و بعد متعهد شوید؛ وارسی تعهد بگیرید و سیاست‌بازی راهرویی را تمام کنید (pp. 84–87).
+- **برنامه‌ها عوض می‌شوند؛ روایت دست‌نخورده می‌ماند.** وقتی از تکرار خودتان خسته شده‌اید، تیمتان تازه دارد باورتان می‌کند (pp. 87–92).
 
-## Section outline
+## فهرست بخش‌ها
 
-*From the book’s own table of contents (PDF bookmarks); printed page numbers.*
+*از فهرست مطالب خود کتاب، از bookmarkهای PDF؛ شماره‌ها صفحه‌ی چاپی‌اند.*
 
-- What Causes Drift — p. 76
-  - The Drift Diagnostic — p. 77
-- The Silent Cost of Drift — p. 78
-- What Good Direction Looks Like — p. 79
-- Traps That Cause Drift — p. 81
-  - No Clear Inputs — p. 81
-  - Too Many Inputs — p. 81
-  - Hesitant Leadership — p. 82
-  - Reactive Roadmaps and Consensus Traps — p. 82
-- Be the Lighthouse — p. 83
-- Creating Alignment — p. 84
-  - Why Alignment Breaks — p. 85
-  - Alignment Is Not Agreement — p. 85
-  - How Leaders Create Alignment — p. 86
-- Adapting Without Losing the Plot — p. 87
-  - If the Plan Changes, the Story Stays Intact — p. 88
-- Clarity Is the Work — p. 88
-  - Reflection — p. 90
-- Conclusion: Pulling It All Together — p. 91
+- چه چیزی رانش می‌سازد — p. 76
+  - ابزار تشخیص رانش — p. 77
+- هزینه‌ی خاموش رانش — p. 78
+- جهت خوب چه شکلی است — p. 79
+- دام‌هایی که رانش می‌سازند — p. 81
+  - نبود ورودی روشن — p. 81
+  - ورودی بیش از حد — p. 81
+  - رهبری مردد — p. 82
+  - نقشه‌ی راه واکنشی و دام اجماع — p. 82
+- فانوس دریایی باشید — p. 83
+- ساختن هم‌راستایی — p. 84
+  - چرا هم‌راستایی می‌شکند — p. 85
+  - هم‌راستایی توافق نیست — p. 85
+  - رهبرها چطور هم‌راستایی می‌سازند — p. 86
+- تطبیق بدون گم کردن رشته — p. 87
+  - اگر برنامه عوض شود، روایت دست‌نخورده می‌ماند — p. 88
+- روشنی خودِ کار است — p. 88
+  - تأمل — p. 90
+- جمع‌بندی: کنار هم گذاشتن همه — p. 91
 
-## Notes
+## یادداشت‌ها
 
-When Juan led Stripe's LATAM engineering team, headlines spoke of expansion; inside, a growing team faced **30 competing priorities** — supporting customers and deployments, exploring three new countries, regulatory compliance in Mexico and Brazil, launching local payment methods like OXXO and Boleto, company-wide security work — and said yes to everything (p. 75). Senior engineers stopped making bold architectural choices; juniors optimized for getting through code review (p. 75). At a virtual leadership off-site in 2020, engineering, product, operations and legal put all 30 on the table and made trade-offs explicit; within 60 days there were **six priorities, two per team**. Engineers had permission to say no, meetings got shorter, and work compounded (p. 76). Chaos doesn't end with more people or more process; it ends when you set direction (p. 76).
+وقتی Juan تیم مهندسی Stripe در آمریکای لاتین را رهبری می‌کرد، تیترها از گسترش می‌گفتند؛ داخل، تیمی در حال رشد با **۳۰ اولویت رقیب** روبه‌رو بود، یعنی پشتیبانی از مشتری‌ها و استقرارها، بررسی سه کشور تازه، انطباق با مقررات مکزیک و برزیل، راه‌اندازی روش‌های پرداخت محلی مثل OXXO و Boleto، و کار امنیتی در کل شرکت، و تیم به همه چیز بله می‌گفت (p. 75). مهندس‌های ارشد دیگر انتخاب‌های جسورانه‌ی معماری نمی‌کردند؛ تازه‌کارها برای رد شدن از code review بهینه می‌کردند (p. 75). در نشست رهبری مجازی سال ۲۰۲۰، مهندسی و محصول و عملیات و حقوقی هر ۳۰ مورد را روی میز گذاشتند و معامله‌ها را صریح کردند؛ ظرف ۶۰ روز **شش اولویت ماند، دوتا برای هر تیم**. مهندس‌ها اجازه‌ی نه گفتن داشتند، جلسه‌ها کوتاه‌تر شدند و کار روی هم جمع شد (p. 76). آشوب با آدم بیشتر یا process بیشتر تمام نمی‌شود؛ وقتی تمام می‌شود که جهت تعیین کنید (p. 76).
 
-### What Causes Drift
+### چه چیزی رانش می‌سازد
 
-Drift begins with good intentions: keeping options open, testing both approaches instead of choosing, splitting the difference on an architectural bet. The first symptom is **language** — "Let's align on this," "We'll circle back," "We're still figuring out the details" — meaning nobody owns the decision (p. 76). It accelerates when trade-offs go "underground": sales promises a feature, an executive drops a "quick idea" in Slack, legal escalates — each sensible, but nobody asks what stops to make room. Engineers shift from "Why does this matter?" to "Which fires do I put out today?" (p. 77)
+رانش با نیت خوب شروع می‌شود: باز نگه داشتن گزینه‌ها، آزمودن هر دو رویکرد به‌جای انتخاب، و نصف کردن یک شرط معماری. اولین نشانه **زبان** است: «بیایید روی این هم‌راستا شویم»، «بعداً برمی‌گردیم سراغش»، «هنوز داریم جزئیات را درمی‌آوریم»، یعنی هیچ‌کس صاحب تصمیم نیست (p. 76). وقتی معامله‌ها «زیرزمینی» می‌شوند شتاب می‌گیرد: فروش featureای قول می‌دهد، یک مدیر اجرایی «ایده‌ی سریعی» در Slack می‌اندازد، حقوقی چیزی را بالا می‌فرستد، و هر کدام منطقی‌اند، ولی کسی نمی‌پرسد برای باز کردن جا چه چیزی متوقف می‌شود. مهندس‌ها از «چرا این مهم است؟» به «امروز کدام آتش را خاموش کنم؟» می‌روند (p. 77).
 
-> **In Practice: April's Story** (p. 77). A senior StudioOps engineer tells April he used to care about architecture but now just cares about getting through code review — not cynicism, but adaptation to drift.
+> **کادر In Practice: داستان April** (p. 77). یک مهندس ارشد StudioOps به April می‌گوید قبلاً به معماری اهمیت می‌داد و حالا فقط به رد شدن از code review اهمیت می‌دهد؛ این بدبینی نیست، تطبیق با رانش است.
 
-| *Table 5-1. The drift diagnostic* (p. 77) | Root cause | Immediate action | Sustained practice |
+| *جدول ۵-۱. ابزار تشخیص رانش* (p. 77) | ریشه | اقدام فوری | رویه‌ی پایدار |
 |---|---|---|---|
-| People say "We'll circle back," but never do | Too many competing priorities, no clear focus | Choose one main goal for the next six weeks | Track all work visibly; untracked work gets deprioritized |
-| Teams constantly ask "What should we work on first?" | Leadership avoiding tough priority calls | Make a clear priority decision and explain your reasoning | Communicate priorities repeatedly until the message sticks |
-| Work gets completed but doesn't build toward anything | Reacting to whatever seems urgent instead of following a plan | Create an explicit "stop doing" list | Review every meeting's purpose before it happens |
-| The best team members start looking elsewhere | Important decisions stuck because everyone needs to agree | Share regular updates on what you're building and why | Create safe ways to disagree and ask hard questions |
-| The same arguments resurface in every planning session | Decisions made without acknowledging what's given up | Name what you're not doing | Follow up after decisions to keep commitment strong |
+| آدم‌ها می‌گویند «بعداً برمی‌گردیم سراغش» ولی هیچ‌وقت برنمی‌گردند | اولویت‌های رقیب زیاد و نبود تمرکز روشن | یک هدف اصلی برای شش هفته‌ی بعد انتخاب کنید | همه‌ی کار را دیدنی ثبت کنید؛ کار ثبت‌نشده اولویتش پایین می‌آید |
+| تیم‌ها مدام می‌پرسند «اول روی چه کار کنیم؟» | رهبری از تصمیم‌های سخت اولویت فرار می‌کند | تصمیم اولویت روشنی بگیرید و دلیلش را بگویید | اولویت‌ها را آن‌قدر تکرار کنید که پیام بنشیند |
+| کارها تمام می‌شوند ولی چیزی ساخته نمی‌شود | واکنش به هر چیزی که فوری به نظر می‌رسد، به‌جای دنبال کردن یک برنامه | فهرست صریحِ «این‌ها را نمی‌کنیم» بسازید | هدف هر جلسه را پیش از برگزاری‌اش بسنجید |
+| بهترین آدم‌های تیم دنبال جای دیگری می‌گردند | تصمیم‌های مهم گیر کرده‌اند چون همه باید موافق باشند | منظم بگویید چه می‌سازید و چرا | راه‌های امنی برای مخالفت و پرسش سخت بسازید |
+| همان بحث‌ها در هر جلسه‌ی برنامه‌ریزی برمی‌گردند | تصمیم‌ها بدون به زبان آوردن چیزی که از دست می‌رود گرفته می‌شوند | نام ببرید چه چیزی را انجام نمی‌دهید | بعد از تصمیم پیگیری کنید تا تعهد قوی بماند |
 
-Two or more signs from the first column mean the team has lost focus; choose one immediate action and do it this week (p. 78).
+دو نشانه یا بیشتر از ستون اول یعنی تیم تمرکزش را از دست داده؛ یک اقدام فوری انتخاب کنید و همین هفته انجامش بدهید (p. 78).
 
-> **Try it:** [Drift diagnostic](../widgets/05-drift-diagnostic.html) — tick the signs you see, and the book's table gives the likely root causes, an action for this week and the practice that keeps drift away.
+> **Try it:** [تشخیص رانش](../widgets/05-drift-diagnostic.html)؛ نشانه‌هایی را که می‌بینید تیک بزنید و جدول خود کتاب ریشه‌های محتمل و اقدام این هفته و رویه‌ای را می‌دهد که رانش را دور نگه می‌دارد.
 
-### The Silent Cost of Drift
+### هزینه‌ی خاموش رانش
 
-Drift looks busy — tickets closing, demos scheduled, full standups — while urgency has replaced clarity and **effort no longer compounds** (p. 78). It compounds instead: every unclear trade-off doubles the work, every abandoned priority leaves damage. Execution slows, decisions don't stick, engineers stop taking initiative, product managers optimize for marketing, and top performers burn out first (p. 78). At Stripe LATAM, engineers wrote regulatory documentation that might not matter and built integrations that stalled when partnerships changed; designers shipped whatever would be approved; managers counted tickets. People quit "piece by piece" (pp. 78–79).
+رانش شلوغ به نظر می‌رسد، با ticketهایی که بسته می‌شوند و دموهایی که زمان‌بندی شده‌اند و standupهای پر، در حالی که فوریت جای روشنی را گرفته و **تلاش دیگر روی هم جمع نمی‌شود** (p. 78). به‌جایش چیز دیگری جمع می‌شود: هر معامله‌ی مبهم کار را دو برابر می‌کند و هر اولویت رهاشده خرابی به جا می‌گذارد. اجرا کند می‌شود، تصمیم‌ها نمی‌مانند، مهندس‌ها ابتکار را کنار می‌گذارند، product managerها برای بازاریابی بهینه می‌کنند، و بهترین‌ها اول از همه می‌سوزند (p. 78). در تیم آمریکای لاتین Stripe، مهندس‌ها مستندات مقرراتی می‌نوشتند که شاید اهمیتی نداشت و یکپارچه‌سازی‌هایی می‌ساختند که با عوض شدن شراکت‌ها می‌خوابید؛ طراح‌ها هر چیزی را تحویل می‌دادند که تأیید می‌شد؛ مدیرها ticket می‌شمردند. آدم‌ها «تکه‌تکه» استعفا می‌دادند (pp. 78–79).
 
-> **In Practice: April's Story** (p. 79). Two senior engineers had quietly left PixelCurl the previous quarter; juniors stopped asking questions in standups; a designer now just waits to be told what to build.
+> **کادر In Practice: داستان April** (p. 79). فصل قبل دو مهندس ارشد بی‌سروصدا PixelCurl را ترک کرده بودند؛ تازه‌کارها دیگر در standup پرسش نمی‌پرسیدند؛ و یک طراح فقط منتظر می‌ماند تا به او بگویند چه بسازد.
 
-The damage is to people, not just time — but even a little clarity can flip a team's energy (p. 79).
+خرابی به آدم‌هاست، نه فقط به زمان، ولی حتی کمی روشنی می‌تواند انرژی تیم را برگرداند (p. 79).
 
-### What Good Direction Looks Like
+> **In practice:** تیم داده بیشتر از هر تیمی در معرض رانش است: صف درخواست‌های داشبورد و کوئری موردی هیچ‌وقت خالی نمی‌شود.
+>
+> **Your turn:** تیم هر هفته ده ticket می‌بندد ولی هیچ پروژه‌ی platform جلو نمی‌رود. نشانه‌ی چیست؟
+>
+> *Answer:* رانش: فوریت جای روشنی را گرفته و تلاش روی هم جمع نمی‌شود. بخشی از ظرفیت را صریحاً برای کار platform کنار بگذارید و درخواست‌های موردی را به سمت self-service در Metabase ببرید (p. 78).
 
-If drift is motion without meaning, **direction is focus with momentum** (p. 79). When Stripe LATAM narrowed to **OXXO in Mexico and Boleto in Brazil**, everyone's posture changed (pp. 79–81):
+### جهت خوب چه شکلی است
 
-| Who | Before | After |
+اگر رانش حرکت بدون معناست، **جهت تمرکز به‌علاوه‌ی شتاب است** (p. 79). وقتی تیم آمریکای لاتین Stripe روی **OXXO در مکزیک و Boleto در برزیل** متمرکز شد، حالت همه عوض شد (pp. 79–81):
+
+| چه کسی | قبل | بعد |
 |---|---|---|
-| Senior engineers | Debate felt endless — why sharpen work that may be dropped? | Pushback welcomed; trade-offs understood |
-| Junior engineers | Coding tickets into a void | Saw how work connected to Mexico and Brazil; learned faster |
-| Product managers | Jockeying to get features approved before priorities changed | Aligned with engineers; could say no and trust decisions |
-| Team leads | Refereeing every trade-off | Teams made smart calls with context |
-| Language | "We'll just get something out" | "If we add this scope, we'll miss the Brazil deadline" |
+| مهندس‌های ارشد | بحث بی‌پایان به نظر می‌رسید؛ چرا کاری را تیز کنیم که شاید حذف شود؟ | پس زدن استقبال می‌شد؛ معامله‌ها فهمیده می‌شدند |
+| مهندس‌های تازه‌کار | ticket می‌زدند در خلأ | می‌دیدند کارشان چطور به مکزیک و برزیل وصل است؛ سریع‌تر یاد می‌گرفتند |
+| product managerها | رقابت برای تأیید featureها پیش از عوض شدن اولویت‌ها | با مهندس‌ها هم‌راستا بودند؛ می‌توانستند نه بگویند و به تصمیم‌ها اعتماد کنند |
+| سرپرست‌های تیم | داوری هر معامله | تیم‌ها با زمینه‌ی کافی خودشان تصمیم‌های خوب می‌گرفتند |
+| زبان | «یک چیزی بیرون می‌دهیم دیگر» | «اگر این دامنه را اضافه کنیم، از ضرب‌الاجل برزیل جا می‌مانیم» |
 
-Clarity feels like a constraint but is freedom; the Boleto decision — **basic payments first, enhancements later** — made limits explicit. You don't need agreement, only commitment once the decision is made (p. 80).
+روشنی حس قید می‌دهد ولی آزادی است؛ تصمیم Boleto، یعنی **اول پرداخت پایه و بعد بهبودها**، مرزها را صریح کرد. به توافق نیاز ندارید، فقط به تعهد بعد از گرفته شدن تصمیم (p. 80).
 
-### Traps That Cause Drift
+### دام‌هایی که رانش می‌سازند
 
-| Trap | What it looks like | The way out (pp. 81–83) |
+| دام | چه شکلی است | راه بیرون (pp. 81–83) |
 |---|---|---|
-| **No clear inputs** | No real strategy, or a 40-slide deck that commits to nothing; at Stripe, competing signals from customers, expansion research and regulators | Set a local, even temporary, mission: "Here's what matters for the next six weeks" |
-| **Too many inputs** | A backlog that's "a landfill of competing urgencies" — 30 "critical" priorities | Write everything down and choose: dependency maps and "not doing" lists show every yes has a cost |
-| **Hesitant leadership** | Leaders see the chaos but wait for certainty; it feels like keeping options open, to engineers like abandonment | Clarity doesn't require certainty: make the call, explain why, own it |
-| **Reactive roadmaps** | Roadmaps shift with each escalation; teams follow the loudest voice | Anchor to outcomes ("Improve reliability by 50%," "Onboard 1,000 merchants") and measure every request against them |
-| **Consensus traps** | Waiting until everyone agrees; endless debate | Debate until the decision, then support it — the Mexico/Brazil focus wasn't unanimous, but everyone committed |
+| **نبود ورودی روشن** | استراتژی واقعی‌ای نیست، یا یک اسلاید ۴۰ صفحه‌ای که به هیچ چیز متعهد نمی‌شود؛ در Stripe سیگنال‌های رقیب از مشتری‌ها و پژوهش گسترش و تنظیم‌گرها | مأموریتی محلی و حتی موقت بگذارید: «این چیزی است که شش هفته‌ی آینده اهمیت دارد» |
+| **ورودی بیش از حد** | backlogی که «زباله‌دان فوریت‌های رقیب» است؛ ۳۰ اولویت «حیاتی» | همه چیز را بنویسید و انتخاب کنید: نقشه‌ی وابستگی‌ها و فهرست «این‌ها را نمی‌کنیم» نشان می‌دهند هر بله‌ای هزینه دارد |
+| **رهبری مردد** | رهبرها آشوب را می‌بینند و منتظر قطعیت می‌مانند؛ حس باز نگه داشتن گزینه‌ها دارد و برای مهندس‌ها حس رها شدن | روشنی قطعیت نمی‌خواهد: تصمیم بگیرید، دلیلش را بگویید، و پایش بایستید |
+| **نقشه‌ی راه واکنشی** | نقشه با هر ارجاع به بالا جابه‌جا می‌شود؛ تیم‌ها دنبال بلندترین صدا می‌روند | به نتیجه لنگر بیندازید، مثل «reliability را ۵۰٪ بهتر کنیم» یا «۱٬۰۰۰ فروشنده را onboard کنیم»، و هر درخواست را با آن بسنجید |
+| **دام اجماع** | انتظار تا وقتی همه موافق شوند؛ بحث بی‌پایان | تا لحظه‌ی تصمیم بحث کنید و بعد پشتش بایستید؛ تمرکز روی مکزیک و برزیل اجماعی نبود، ولی همه متعهد شدند |
 
-### Be the Lighthouse
+### فانوس دریایی باشید
 
-Once drift has set in, teams need a fixed point (p. 83). Its signs are quiet: "refine it next sprint," "We'll know more once we ship," "this came from the top" used to end debate; a backlog where nothing is evaluated against a single outcome; ambition limited to what survives review (p. 83). The answer is not a strategy deck but **a clear outcome and a short horizon**, defended for months (p. 83).
+وقتی رانش جا افتاده، تیم‌ها به یک نقطه‌ی ثابت نیاز دارند (p. 83). نشانه‌هایش آرام‌اند: «sprint بعد تیزش می‌کنیم»، «وقتی تحویل بدهیم بیشتر می‌فهمیم»، و «این از بالا آمده» که بحث را می‌بندد؛ backlogی که در آن هیچ چیز با یک نتیجه‌ی واحد سنجیده نمی‌شود؛ و جاه‌طلبی‌ای که به چیزی محدود شده که از review رد شود (p. 83). پاسخ، اسلاید استراتژی نیست بلکه **یک نتیجه‌ی روشن و افقی کوتاه** است که ماه‌ها از آن دفاع می‌کنید (p. 83).
 
-Boleto circled for months under reasonable requests — advanced fraud detection, multiple bank integrations, enhanced verification, adoption analytics — that together delayed it indefinitely. Focusing on reliable basic payments shrank the scope, and enhancements followed in later releases based on usage data (p. 84).
+کار Boleto ماه‌ها زیر درخواست‌های معقول دور خودش می‌چرخید، مثل تشخیص پیشرفته‌ی تقلب و یکپارچه‌سازی با چند بانک و احراز هویت تقویت‌شده و تحلیل پذیرش، که روی هم آن را بی‌پایان عقب می‌انداختند. تمرکز روی پرداخت پایه‌ی قابل‌اتکا دامنه را کوچک کرد، و بهبودها در نسخه‌های بعدی بر پایه‌ی داده‌ی استفاده آمدند (p. 84).
 
-> **In Practice: April's Story** (p. 84). April picks one goal: a stable rendering pipeline for the top five clients by quarter's end; the mobile app, infrastructure rewrite and experiments wait. She asks "Does this help us ship the rendering pipeline?" in every conversation. By week three the team stops asking; by week six they're moving faster than in months.
+> **کادر In Practice: داستان April** (p. 84). April یک هدف برمی‌دارد: pipeline پایدار rendering برای پنج مشتری اصلی تا پایان فصل؛ اپلیکیشن موبایل و بازنویسی زیرساخت و آزمایش‌ها صبر می‌کنند. در هر گفت‌وگو می‌پرسد «این به تحویل pipeline رندر کمک می‌کند؟» تا هفته‌ی سوم تیم دیگر نمی‌پرسد؛ تا هفته‌ی ششم سریع‌تر از ماه‌هاست.
 
-If you inherit a drifting team, start small (p. 84):
+اگر تیمی در حال رانش را تحویل گرفته‌اید، کوچک شروع کنید (p. 84):
 
-- **Name one outcome** for the next cycle, in plain language — no vanity metrics.
-- **Write a visible not-doing list** and update it whenever you say no.
-- **Anchor status updates** in one sentence: "We are doing X so that we can achieve Y."
-- **Create deadlines around uncertainty:** if you can't decide now, set a date and what will be true by then.
+- **یک نتیجه را برای چرخه‌ی بعد نام ببرید**، به زبان ساده و بدون متریک پوچ.
+- **فهرست دیدنیِ «این‌ها را نمی‌کنیم» بنویسید** و هر بار که نه می‌گویید به‌روزش کنید.
+- **گزارش وضعیت را به یک جمله لنگر بیندازید:** «ما X را می‌کنیم تا به Y برسیم».
+- **دور بلاتکلیفی ضرب‌الاجل بگذارید:** اگر الان نمی‌شود تصمیم گرفت، تاریخی بگذارید و بگویید تا آن تاریخ چه چیزی روشن خواهد بود.
 
-### Creating Alignment
+### ساختن هم‌راستایی
 
-Alignment across teams and functions is where strategies fall apart, because smart people optimize locally (p. 84).
+هم‌راستایی بین تیم‌ها و کارکردها همان‌جایی است که استراتژی‌ها از هم می‌پاشند، چون آدم‌های باهوش محلی بهینه می‌کنند (p. 84).
 
-- **Why alignment breaks.** Product chases satisfaction scores, engineers technical elegance, sales revenue, finance margins; without shared context the choices cancel out. At Stripe, partnerships pushed timelines that conflicted with compliance, and customer success promised features without checking capacity — delaying launches by months and leaving features half built (p. 85).
-- **Alignment is not agreement.** It means **disagree and commit**. Stabilize Mexico and Brazil first or expand into three new countries? The debate was heated; the call was "stabilize first, expand later," and the team committed. Conflict in the open is healthy; silence after the decision is dangerous (p. 85).
+- **چرا هم‌راستایی می‌شکند.** product دنبال نمره‌ی رضایت است، مهندس‌ها دنبال ظرافت فنی، فروش دنبال درآمد، و مالی دنبال حاشیه؛ بدون زمینه‌ی مشترک این انتخاب‌ها هم را خنثی می‌کنند. در Stripe واحد شراکت‌ها زمان‌بندی‌هایی را هل می‌داد که با انطباق مقرراتی در تعارض بود، و موفقیت مشتری بدون وارسی ظرفیت featureها را قول می‌داد؛ نتیجه‌اش ماه‌ها تأخیر در راه‌اندازی و featureهای نیمه‌کاره بود (p. 85).
+- **هم‌راستایی توافق نیست.** یعنی **مخالفت کن و متعهد شو**. اول مکزیک و برزیل را تثبیت کنیم یا به سه کشور تازه برویم؟ بحث داغ بود؛ تصمیم این شد که «اول تثبیت، بعد گسترش»، و تیم متعهد شد. تعارض علنی سالم است؛ سکوت بعد از تصمیم خطرناک است (p. 85).
 
-| How leaders create alignment | Practice (p. 86) |
+| رهبرها چطور هم‌راستایی می‌سازند | رویه (p. 86) |
 |---|---|
-| **Translate the mission into something concrete** | Not "Expand across LATAM" but "Enable the first 1,000 merchants in Brazil to accept payments" |
-| **Make the trade-offs visible** | List everything; listing all 30 made the cost of yes impossible to ignore |
-| **Close the loop after the debate** | Argue until the decision point, then execute as one team |
-| **Run a commitment check** | Each leader says what the decision means for their team; divergent answers mean you're not aligned |
-| **Shut down hallway politics** | "We made this call together. If you have new information, let's discuss it with the whole team" |
-| **Show the impact of misalignment** | Incomplete features for customers, senior people quitting — make local optimization's cost visible |
+| **مأموریت را به چیزی ملموس ترجمه کنید** | نه «در آمریکای لاتین گسترش پیدا کنیم» بلکه «کاری کنیم اولین ۱٬۰۰۰ فروشنده در برزیل بتوانند پرداخت بگیرند» |
+| **معامله‌ها را دیدنی کنید** | همه چیز را فهرست کنید؛ دیدن هر ۳۰ مورد، نادیده گرفتن هزینه‌ی بله را ناممکن کرد |
+| **بعد از بحث حلقه را ببندید** | تا نقطه‌ی تصمیم بحث کنید و بعد مثل یک تیم اجرا کنید |
+| **وارسی تعهد بگیرید** | هر رهبر بگوید این تصمیم برای تیمش چه معنایی دارد؛ پاسخ‌های واگرا یعنی هم‌راستا نیستید |
+| **سیاست‌بازی راهرویی را تمام کنید** | «این تصمیم را با هم گرفتیم. اگر اطلاعات تازه‌ای داری، بیا با همه‌ی تیم درباره‌اش حرف بزنیم» |
+| **اثر ناهم‌راستایی را نشان بدهید** | featureهای نیمه‌کاره برای مشتری، و استعفای آدم‌های ارشد؛ هزینه‌ی بهینه‌سازی محلی را دیدنی کنید |
 
-> **Exercise: The Alignment Check** (p. 87). After any major decision, each leader answers aloud: "What did we decide, and what does it mean for my team's work this quarter?" If answers diverge, don't move forward — repeat the decision until they converge.
+> **تمرین: وارسی هم‌راستایی** (p. 87). بعد از هر تصمیم بزرگ، هر رهبر بلند جواب بدهد: «چه چیزی تصمیم گرفتیم و این برای کار تیم من در این فصل چه معنایی دارد؟» اگر پاسخ‌ها واگرا بودند جلو نروید؛ تصمیم را آن‌قدر تکرار کنید تا هم‌گرا شوند.
 
-### Adapting Without Losing the Plot
+> **In practice:** تیم داده بین product، مالی و مهندسی می‌نشیند و هر کدام metric خودش را بهینه می‌کند.
+>
+> **Your turn:** مالی و product دو تعریف متفاوت از «مشتری فعال» دارند و هر دو از تیم داده می‌خواهند. چه می‌کنید؟
+>
+> *Answer:* یک تعریف مشترک در یک مدل Gold با مالک روشن، که هر دو تأیید کرده‌اند. کتاب می‌گوید هم‌راستایی جایی می‌شکند که آدم‌های باهوش محلی بهینه می‌کنند (pp. 84–86).
 
-Plans change; the problem is **unexplained change**, which erodes trust faster than bad news delivered clearly (p. 87). Under pressure to open three new countries while barely stable in Mexico and Brazil — risking a compliance crisis — Stripe LATAM's leaders kept the mission (regional growth) but changed the path: compliance and adoption first, expansion later. Some disagreed; others were relieved. Once the trade-offs and business risk were explained, the decision held (pp. 87–88).
+### تطبیق بدون گم کردن رشته
 
-**If the plan changes, the story stays intact.** People accept a shifted plan when they understand how it connects to the mission; if the story keeps changing, everything falls apart. Clarity must be renewed whenever plans bend (p. 88).
+برنامه‌ها عوض می‌شوند؛ مسئله **تغییر بدون توضیح** است، که سریع‌تر از خبر بدِ روشن‌گفته‌شده اعتماد را می‌خورد (p. 87). زیر فشار باز کردن سه کشور تازه در حالی که مکزیک و برزیل به‌زحمت باثبات بودند و خطر بحران انطباق وجود داشت، رهبرهای Stripe در آمریکای لاتین مأموریت را نگه داشتند، یعنی رشد منطقه‌ای، و مسیر را عوض کردند: اول انطباق و پذیرش، بعد گسترش. بعضی‌ها مخالف بودند و بعضی‌ها خیالشان راحت شد. وقتی معامله‌ها و ریسک کسب‌وکار توضیح داده شدند، تصمیم ماند (pp. 87–88).
 
-### Clarity Is the Work
+**اگر برنامه عوض شود، روایت دست‌نخورده می‌ماند.** آدم‌ها برنامه‌ی جابه‌جاشده را می‌پذیرند وقتی بفهمند چطور به مأموریت وصل است؛ ولی اگر روایت مدام عوض شود همه چیز فرو می‌پاشد. هر بار که برنامه خم می‌شود باید روشنی را از نو ساخت (p. 88).
 
-Teams don't burn out from hard work but from **unclear work** (p. 88). Clarity also lives in unglamorous habits (p. 89):
+### روشنی خودِ کار است
 
-- **No ticket, no work** — untracked tasks aren't active work.
-- **State the purpose of every meeting** — no purpose, no meeting.
-- **An open channel for questions** without fear.
+تیم‌ها از کار سخت نمی‌سوزند، از **کار مبهم** می‌سوزند (p. 88). روشنی در عادت‌های بی‌زرق‌وبرق هم زندگی می‌کند (p. 89):
 
-Leaders tire of repeating themselves, but "when you are sick of repeating yourself, your team is only beginning to believe you." Clarity isn't certainty; it's a sharp point to navigate toward (p. 89).
+- **بدون ticket، کاری نیست**؛ کار ثبت‌نشده کار فعال نیست.
+- **هدف هر جلسه را بگویید**؛ بدون هدف، جلسه‌ای نیست.
+- **یک کانال باز برای پرسش** بدون ترس.
 
-> **Exercise: The Clarity Workshop** (p. 90). 75–90 minutes, phones down: (1) map reality without spin (20 min); (2) choose one or two outcomes and how you'll know you succeeded (15 min); (3) draw the not-doing line (15 min); (4) craft the story — "We are doing X so we can achieve Y" (10 min); (5) commit together: each person says what it means for their work (10–20 min). The conversation matters more than the artifact.
+رهبرها از تکرار خودشان خسته می‌شوند، ولی «وقتی از تکرار خودتان خسته شده‌اید، تیمتان تازه دارد باورتان می‌کند». روشنی قطعیت نیست؛ نقطه‌ای تیز است که به سمتش جهت می‌گیرید (p. 89).
 
-#### Reflection
+> **تمرین: کارگاه روشنی** (p. 90). ۷۵ تا ۹۰ دقیقه، با تلفن‌های کنار گذاشته: ۱) واقعیت را بدون لعاب نقشه کنید، ۲۰ دقیقه؛ ۲) یکی دو نتیجه را انتخاب کنید و بگویید از کجا می‌فهمید موفق شده‌اید، ۱۵ دقیقه؛ ۳) خط «این‌ها را نمی‌کنیم» را بکشید، ۱۵ دقیقه؛ ۴) روایت را بسازید، یعنی «ما X را می‌کنیم تا به Y برسیم»، ۱۰ دقیقه؛ ۵) با هم متعهد شوید و هر کس بگوید این برای کارش چه معنایی دارد، ۱۰ تا ۲۰ دقیقه. خود گفت‌وگو از سند نهایی مهم‌تر است.
 
-Which current work is drift? What outcome would remove it? Could you defend your not-doing list in front of an executive? (p. 90)
+#### تأمل
 
-![Six-step cycle: diagnose, name outcome, force trade-offs, align team, defend and repeat, clarity achieved, with a dotted sustain arrow back to diagnosis](../figures/05-01.png)
+کدام کار فعلی رانش است؟ چه نتیجه‌ای حذفش می‌کند؟ می‌توانستید فهرست «این‌ها را نمی‌کنیم» را جلوی یک مدیر اجرایی دفاع کنید (p. 90)؟
 
-*Figure 5-1 (p. 91): the cycle runs through the chapter's tools in order — note the warning that pushback at step 5, "defend and repeat," means it's working.*
+![چرخه‌ی شش‌مرحله‌ای: تشخیص، نام بردن نتیجه، اجباری کردن معامله‌ها، هم‌راستا کردن تیم، دفاع و تکرار، و رسیدن به روشنی، با یک پیکان خط‌چین که برای تداوم به تشخیص برمی‌گردد](../figures/05-01.png)
 
-### Conclusion: Pulling It All Together
+*Figure 5-1 (p. 91): چرخه به ترتیب از ابزارهای این فصل می‌گذرد؛ و حواستان به هشدارش باشد که پس زدن در مرحله‌ی پنجم، یعنی دفاع و تکرار، نشانه‌ی کار کردنِ آن است.*
 
-The hard part is maintaining direction: after Stripe LATAM cut its priorities, sales, executives and partners kept asking for exceptions, and leaders said no dozens of times (p. 91). Direction is set, reset, defended and explained again — and it makes you a target (pp. 91–92). **Drift is the default state**; start smaller than you think: **one outcome, one not-doing list, and six weeks** (p. 92).
+### جمع‌بندی: کنار هم گذاشتن همه
 
-> **Run it:** the [focus versus spread](../lab/05-focus-vs-spread/README.md) experiment gives the same team 30 priorities or 6 and counts what gets finished in a quarter.
+بخش سخت، نگه داشتن جهت است: بعد از این‌که تیم آمریکای لاتین Stripe اولویت‌هایش را کم کرد، فروش و مدیران اجرایی و شرکا مدام درخواست استثنا می‌کردند و رهبرها ده‌ها بار نه گفتند (p. 91). جهت تعیین می‌شود، از نو تعیین می‌شود، از آن دفاع می‌شود و دوباره توضیح داده می‌شود، و شما را هدف می‌کند (pp. 91–92). **رانش حالت پیش‌فرض است**؛ کوچک‌تر از آنچه فکر می‌کنید شروع کنید: **یک نتیجه، یک فهرست «این‌ها را نمی‌کنیم»، و شش هفته** (p. 92).
 
-## Trade-offs at a glance
+> **Run it:** آزمایش [تمرکز در برابر پراکندگی](../lab/05-focus-vs-spread/README.md) به همان تیم ۳۰ اولویت یا ۶ اولویت می‌دهد و می‌شمارد در یک فصل چه چیزی تمام می‌شود.
 
-| Choice | Buys | Costs |
+## بده‌بستان‌ها در یک نگاه
+
+| انتخاب | چه می‌دهد | چه می‌گیرد |
 |---|---|---|
-| Keeping options open | Feels flexible; nobody's blocked | Drift; nothing compounds |
-| Saying yes to everything | Every stakeholder is heard | Scattered effort; top performers burn out |
-| Six priorities instead of 30 | Focus; permission to say no; compounding work | Disappointed stakeholders; some bets wait |
-| Core scope first (Boleto) | Ships; learns from real usage | Enhancements delayed |
-| Waiting for consensus | Everyone agrees | Endless debate; nothing moves |
-| Disagree and commit | Decisions stick | Some people would have chosen differently |
-| Explaining every plan change | Trust survives change | Repetition; admitting uncertainty |
+| باز نگه داشتن گزینه‌ها | حس انعطاف؛ کسی سد نمی‌شود | رانش؛ هیچ چیز روی هم جمع نمی‌شود |
+| بله گفتن به همه چیز | صدای هر ذی‌نفعی شنیده می‌شود | تلاش پراکنده؛ بهترین‌ها می‌سوزند |
+| شش اولویت به‌جای ۳۰ | تمرکز؛ اجازه‌ی نه گفتن؛ کاری که جمع می‌شود | ذی‌نفع ناراضی؛ بعضی شرط‌ها صبر می‌کنند |
+| اول دامنه‌ی اصلی، مثل Boleto | تحویل می‌دهید و از استفاده‌ی واقعی یاد می‌گیرید | بهبودها عقب می‌افتند |
+| انتظار برای اجماع | همه موافق‌اند | بحث بی‌پایان؛ هیچ چیز تکان نمی‌خورد |
+| مخالفت کن و متعهد شو | تصمیم‌ها می‌مانند | بعضی‌ها جور دیگری انتخاب می‌کردند |
+| توضیح دادن هر تغییر برنامه | اعتماد از تغییر جان سالم به در می‌برد | تکرار؛ و پذیرفتن بلاتکلیفی |
 
-## Beyond the book
+## فراتر از کتاب
 
-- **Disagree and commit** is a phrase associated with Intel's culture under Andy Grove and later Amazon's leadership principles; the book uses it as the definition of alignment (p. 85).
-- **Work in progress.** The cost of spreading effort over many priorities is what Kanban's WIP limits and Little's law address: with fixed throughput, more work in progress means each item takes longer. The [lab](../lab/05-focus-vs-spread/README.md) is a toy model of that effect with invented numbers.
+- **عبارت «disagree and commit»** با فرهنگ Intel در دوران Andy Grove و بعدتر اصول رهبری Amazon گره خورده است؛ کتاب از آن به‌عنوان تعریف هم‌راستایی استفاده می‌کند (p. 85).
+- **کار در جریان.** هزینه‌ی پخش کردن تلاش روی اولویت‌های زیاد همان چیزی است که سقف WIP در Kanban و قانون Little به آن می‌پردازند: با توان عبور ثابت، کار در جریانِ بیشتر یعنی هر قلم بیشتر طول می‌کشد. [این آزمایش](../lab/05-focus-vs-spread/README.md) مدلی اسباب‌بازی از همان اثر با عددهای ساختگی است.
 
-## Connections
+## پیوندها
 
-- **Run it:** [Focus versus spread](../lab/05-focus-vs-spread/README.md) — the same capacity across 30 priorities or 6: what finishes in a quarter, with context-switching costs.
-- **Related chapters:** [2. Understanding Your Role](02-understanding-your-role.md) (the mission pillar), [3. Navigating Chaos](03-navigating-chaos.md) (outcomes over activity), [4. Building Cohesive Teams](04-building-cohesive-teams.md) (all work visible), [6. Shipping Products and Code](06-shipping-products-and-code-in-chaotic-environments.md) (prioritizing the direction you set), [11. Fitting It All Together](11-fitting-it-all-together.md) (the lighthouse).
+- **Run it:** [تمرکز در برابر پراکندگی](../lab/05-focus-vs-spread/README.md)؛ همان ظرفیت روی ۳۰ اولویت یا ۶ اولویت: در یک فصل چه چیزی تمام می‌شود، با احتساب هزینه‌ی جابه‌جایی زمینه.
+- **فصل‌های مرتبط:** [فصل ۲: فهمیدن نقشتان](02-understanding-your-role.md) که ستون مأموریت را دارد، [فصل ۳: راه بردن در آشوب](03-navigating-chaos.md) که نتیجه را بر فعالیت مقدم می‌کند، [فصل ۴: ساختن تیم‌های منسجم](04-building-cohesive-teams.md) که دیدنی بودن همه‌ی کار را می‌گوید، [فصل ۶: تحویل محصول و کد](06-shipping-products-and-code-in-chaotic-environments.md) که اولویت‌بندی در همان جهت را می‌گوید، و [فصل ۱۱: کنار هم گذاشتن همه چیز](11-fitting-it-all-together.md) که فانوس دریایی را دارد.
 
-## Check yourself
+## خودتان را بسنجید
 
-*Questions and answers are the vault's, written from the notes above; answers cite the book's printed pages.*
+*پرسش‌ها و پاسخ‌ها مال vault است و از روی یادداشت‌های بالا نوشته شده؛ پاسخ‌ها به صفحه‌ی چاپی کتاب ارجاع می‌دهند.*
 
-1. **What changed for the Stripe LATAM team after the 2020 off-site?**
+1. **بعد از نشست سال ۲۰۲۰ چه چیزی برای تیم آمریکای لاتین Stripe عوض شد؟**
 
-   *Answer:* Thirty competing priorities became six — two per team — within 60 days; engineers could say no, meetings got shorter and work compounded (p. 76).
+   *Answer:* سی اولویت رقیب ظرف ۶۰ روز شش‌تا شد، یعنی دوتا برای هر تیم؛ مهندس‌ها می‌توانستند نه بگویند، جلسه‌ها کوتاه‌تر شدند و کار روی هم جمع شد (p. 76).
 
-2. **Which phrase is an early symptom of drift?**
-   - [ ] "If we add this scope, we'll miss the Brazil deadline"
-   - [x] "We'll circle back"
-   - [ ] "We are doing X so that we can achieve Y"
+2. **کدام عبارت نشانه‌ی زودهنگام رانش است؟**
+   - [ ] «اگر این دامنه را اضافه کنیم، از ضرب‌الاجل برزیل جا می‌مانیم»
+   - [x] «بعداً برمی‌گردیم سراغش»
+   - [ ] «ما X را می‌کنیم تا به Y برسیم»
 
-   *Answer:* It means nobody wants to own the decision (p. 76).
+   *Answer:* یعنی هیچ‌کس نمی‌خواهد صاحب تصمیم باشد (p. 76).
 
-3. **What does the drift diagnostic say to do if you see two or more of its signs?**
+3. **اگر دو نشانه یا بیشتر از ابزار تشخیص رانش را دیدید، چه باید کرد؟**
 
-   *Answer:* The team has lost focus and momentum; pick one action from the "Immediate action" column and implement it this week (p. 78).
+   *Answer:* تیم تمرکز و شتابش را از دست داده؛ یک اقدام از ستون «اقدام فوری» بردارید و همین هفته اجرایش کنید (p. 78).
 
-4. **How did the Boleto launch escape drift?**
+4. **راه‌اندازی Boleto چطور از رانش بیرون آمد؟**
 
-   *Answer:* By scoping to reliable basic payments first and shipping enhancements (fraud detection, more banks, verification, analytics) later based on usage data (p. 84).
+   *Answer:* با محدود کردن دامنه به پرداخت پایه‌ی قابل‌اتکا و تحویل دادن بهبودها، یعنی تشخیص تقلب و بانک‌های بیشتر و احراز هویت و تحلیل، در مرحله‌های بعد و بر پایه‌ی داده‌ی استفاده (p. 84).
 
-5. **What is the difference between alignment and agreement?**
+5. **تفاوت هم‌راستایی و توافق چیست؟**
 
-   *Answer:* Alignment means everyone commits full effort to the decision even if they disagree — disagree and commit (p. 85).
+   *Answer:* هم‌راستایی یعنی همه با تمام توان پشت تصمیم می‌ایستند حتی اگر مخالف باشند؛ یعنی مخالفت کن و متعهد شو (p. 85).
 
-6. **How do you run a commitment check?**
+6. **وارسی تعهد را چطور می‌گیرید؟**
 
-   *Answer:* Ask each leader what the decision means for their team's work this quarter; if answers diverge, you're not aligned and shouldn't move on (pp. 86–87).
+   *Answer:* از هر رهبر بپرسید این تصمیم برای کار تیمش در این فصل چه معنایی دارد؛ اگر پاسخ‌ها واگرا بودند هم‌راستا نیستید و نباید جلو بروید (pp. 86–87).
 
-7. **What's the smallest version of setting direction the authors recommend?**
-   - [ ] A strategy off-site and a new OKR framework
-   - [x] One outcome, one visible not-doing list, and six weeks
-   - [ ] A 40-slide strategy deck
+7. **کوچک‌ترین نسخه‌ی تعیین جهت که نویسنده‌ها پیشنهاد می‌دهند چیست؟**
+   - [ ] یک نشست استراتژی و چارچوب تازه‌ی OKR
+   - [x] یک نتیجه، یک فهرست دیدنیِ «این‌ها را نمی‌کنیم»، و شش هفته
+   - [ ] یک اسلاید استراتژی ۴۰ صفحه‌ای
 
    *Answer:* p. 92.
