@@ -7,104 +7,108 @@
 <meta name="description" content="streamهای رویداد جدول ۳-۱ و ۳-۲ کتاب را دوباره اجرا کنید، تأخیر مجاز و اندازه‌ی پنجره را عوض کنید، و ببینید کدام رویدادها نادیده گرفته می‌شوند و پنجره‌ها کِی منتشر. تصویری از فصل ۳ کتاب Data Engineering Design Patterns.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  svg.tl { width: 100%; height: auto; display: block; }
-  svg.tl .axis { stroke: var(--line-strong); }
-  svg.tl .tick { fill: var(--ink-3); font-size: 10px; }
-  svg.tl .win { fill: var(--surface-2); stroke: var(--line-strong); }
-  svg.tl .win.buf { fill: var(--accent-soft); stroke: var(--accent); }
-  svg.tl .win.out { fill: var(--ok-soft); stroke: var(--ok); }
-  svg.tl .wlabel { fill: var(--ink-2); font-size: 10px; }
-  svg.tl .ev { fill: var(--accent); }
-  svg.tl .ev.late { fill: var(--bad); }
-  svg.tl .ev.next { fill: none; stroke: var(--ink-3); stroke-dasharray: 2 2; }
-  svg.tl .evl { fill: var(--ink); font-size: 10px; }
-  svg.tl .wm { stroke: var(--warn); stroke-width: 2; }
-  svg.tl .wmt { fill: var(--warn); font-size: 11px; font-weight: 600; }
-  .tbl { max-height: 220px; overflow-y: auto; margin-top: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
-  table.data td { font-family: var(--mono); font-size: .74rem; vertical-align: top; }
-  table.data tr.cur td { background: var(--accent-soft); }
-  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .78rem; color: var(--ink-2); margin-top: 6px; }
+  /* The event-time line: windows above the axis, events on it; their time labels are stacked into rows so close events never overlap. */
+  .wm-tl { width: 100%; height: auto; display: block; max-height: 212px; }
+  .wm-tl .wm-axis { stroke: var(--line-strong); }
+  .wm-tl .wm-tick { fill: var(--ink-3); font-size: 13px; }
+  .wm-tl .wm-win { fill: var(--surface-2); stroke: var(--line-strong); }
+  .wm-tl .wm-win.buf { fill: var(--accent-soft); stroke: var(--accent); }
+  .wm-tl .wm-win.out { fill: var(--ok-soft); stroke: var(--ok); }
+  .wm-tl .wm-wl { fill: var(--ink-2); font-size: 14px; }
+  .wm-tl .wm-ev { fill: var(--accent); }
+  .wm-tl .wm-next { fill: none; stroke: var(--ink-3); stroke-dasharray: 3 2; }
+  .wm-tl .wm-x { stroke: var(--bad); stroke-width: 2.5; }
+  .wm-tl .wm-evl { fill: var(--ink); font-size: 13px; }
+  .wm-tl .wm-evl.late { fill: var(--bad); }
+  .wm-tl .wm-line { stroke: var(--warn); stroke-width: 2.5; }
+  .wm-tl .wm-lt { fill: var(--warn); font-size: 14px; font-weight: 700; }
+  .wm-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .82rem; color: var(--ink-2); margin-top: 4px; }
+  .wm-tbl { max-height: 112px; overflow-y: auto; margin-top: 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .wm-tbl table.data td, .wm-tbl table.data th { font-size: .82rem; vertical-align: top; }
+  .wm-tbl table.data td { font-family: var(--mono); }
+  .wm-tbl table.data tr.wm-cur td { background: var(--accent-soft); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
       <a href="../chapters/03-error-management-design-patterns.html">فصل ۳</a><span aria-hidden="true">/</span>
-      <span aria-current="page">مقدار watermark</span>
+      <span aria-current="page">الگوی Late Data Detector</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۳ · الگوهای طراحی مدیریت خطا</div>
-  <h1>مقدار watermark و late data</h1>
-  <p class="lede">یک job streaming نمی‌تواند تا ابد منتظر عقب‌مانده‌ها بماند. بیشینه‌ی زمان رویدادی را که دیده دنبال می‌کند و یک تأخیر مجاز از آن کم می‌کند تا <strong>watermark</strong> در بیاید. رویدادهای قدیمی‌تر از watermark lateاند و نادیده گرفته می‌شوند، و یک پنجره همین که watermark از پایانش بگذرد منتشر می‌شود. مقدار watermark هیچ‌وقت به عقب نمی‌رود.</p>
-  <p class="source-note">تصویری از «الگو: Late Data Detector» (صص. ۵۱–۵۷). جدول ۳-۱ را دوباره اجرا می‌کند، یعنی دو micro-batch با تأخیر سی‌دقیقه‌ای (ص. ۵۴)، و جدول ۳-۲ را، یعنی پنج رویداد ۲۰۲۳-۰۶-۳۰ با تأخیر یک‌ساعته و پنجره‌های ده‌دقیقه‌ای (ص. ۵۶). هر مرحله یک micro-batch را پردازش می‌کند: رویدادها با watermark <em>پیش از</em> آن دسته بررسی می‌شوند و بعد watermark به‌روز. پنجره‌ها روی stream جدول ۳-۱ افزوده‌ی vault است. مثل جدول کتاب، گرد کردن watermark به کران‌های پنجره در Spark نادیده گرفته شده. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>watermark و late data</h1>
+      <p class="lede">مقدار watermark بیشینه‌ی زمان رویدادِ دیده‌شده منهای یک تأخیر مجاز است: رویدادهای قدیمی‌تر از آن late هستند و نادیده گرفته می‌شوند، و پنجره وقتی منتشر می‌شود که watermark از پایانش بگذرد. سناریو جدول‌های ۳-۱ و ۳-۲ کتاب را دسته به دسته پخش می‌کند.</p>
+      <p class="source-note">برای «الگو: Late Data Detector» (صص. ۵۱–۵۷): جدول ۳-۱، دو micro-batch با تأخیر سی‌دقیقه‌ای (ص. ۵۴)، و جدول ۳-۲، پنج رویداد ۲۰۲۳-۰۶-۳۰ با تأخیر یک‌ساعته و پنجره‌های ده‌دقیقه‌ای (ص. ۵۶). رویدادهای هر دسته با watermark <em>پیش از</em> آن دسته سنجیده می‌شوند. پنجره‌ها روی stream جدول ۳-۱ افزوده‌ی vault است و مثل جدول کتاب، گرد کردن watermark به کران پنجره در Spark نادیده گرفته شده. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel">
-        <svg class="tl" id="tl" role="img" aria-label="خط زمان رویداد با رویدادها و پنجره‌ها و watermark"></svg>
-        <div class="legend"><span>● رویداد به‌موقع</span><span style="color:var(--bad)">✕ late و نادیده‌گرفته‌شده</span><span style="color:var(--accent)">▭ … پنجره‌ی بافرشده</span><span style="color:var(--ok)">▭ ✓ پنجره‌ی منتشرشده</span><span style="color:var(--warn)">│ مقدار watermark</span></div>
-        <div class="tbl"><table class="data"><thead><tr><th>دسته</th><th>زمان رویدادها</th><th>watermark ورودی ← خروجی</th><th>نادیده‌گرفته‌شده</th><th>پنجره‌های منتشرشده</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <svg class="wm-tl" id="tl" role="img" aria-label="خط زمان رویداد با رویدادها، پنجره‌ها و watermark"></svg>
+        <div class="wm-legend"><span>● رویداد پذیرفته</span><span>✕ late و نادیده‌گرفته</span><span>▭ … پنجره‌ی در حال بافر</span><span>▭ ✓ پنجره‌ی منتشرشده</span><span>│ watermark (خط نارنجی)</span><span>○ دسته‌ی بعدی</span></div>
+        <div class="wm-tbl"><table class="data"><thead><tr><th>دسته</th><th>زمان رویدادها</th><th>watermark پیش ← پس</th><th>نادیده</th><th>پنجره‌ی منتشرشده</th></tr></thead><tbody id="rows"></tbody></table></div>
       </div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">کنترل‌ها</p>
-        <div id="scen"></div>
-        <div id="sliders" style="margin-top:10px"></div>
-        <div id="player" style="margin-top:12px"></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">حالت job</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="scen"></div>
+        <div class="tweak-group" id="sliders"></div>
+        <div class="tweak-group">
+          <button class="btn primary small" type="button" id="next">دسته‌ی بعدی</button>
+        </div>
       </div>
-      <div class="panel"><p class="panel-title">حالت</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>late بودن نسبت به watermark است و نه نسبت به ساعت.</strong> در جدول ۳-۱، رویدادهای ۹:۲۰ و ۹:۳۱ دور انداخته می‌شوند چون دسته‌ی اول از قبل watermark را به ۹:۳۶ برده.</li>
-    <li><strong>مقدار watermark فقط جلو می‌رود.</strong> دسته‌ای که بیشینه‌ی زمان رویدادش پایین است نامزد کوچک‌تری می‌سازد که دور انداخته می‌شود (ص. ۵۴).</li>
-    <li><strong>پنجره‌ها منتظر watermark می‌مانند.</strong> در جدول ۳-۲ هیچ چیز منتشر نمی‌شود تا ۰۴:۳۱ مقدار watermark را به ۰۳:۳۱ ببرد. آن‌وقت هر دو پنجره‌ی ۰۳:۰۰ یک‌جا بسته می‌شوند.</li>
-    <li><strong>تأخیر مجاز را به دو ساعت ببرید.</strong> رویداد ۰۱:۵۰ حالا پذیرفته می‌شود، ولی هر پنجره بیشتر در حالت نگه داشته می‌شود.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>late بودن نسبت به watermark است، نه نسبت به ساعت.</strong> در جدول ۳-۱، رویدادهای ۹:۲۰ و ۹:۳۱ دور انداخته می‌شوند چون دسته‌ی اول watermark را به ۹:۳۶ برده است.</li>
+      <li><strong>مقدار watermark فقط جلو می‌رود.</strong> دسته‌ای که بیشینه‌ی زمان رویدادش پایین است نامزد کوچک‌تری می‌سازد که دور انداخته می‌شود (ص. ۵۴).</li>
+      <li><strong>پنجره‌ها منتظر watermark می‌مانند.</strong> در جدول ۳-۲ هیچ چیز منتشر نمی‌شود تا ۴:۳۱ مقدار watermark را به ۳:۳۱ ببرد؛ آن‌وقت هر دو پنجره‌ی ساعت ۳ یک‌جا بسته می‌شوند.</li>
+      <li><strong>تأخیر مجاز را به دو ساعت ببرید.</strong> رویداد ۱:۵۰ حالا پذیرفته می‌شود، ولی هر پنجره بیشتر در state نگه داشته می‌شود.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/03-error-management-design-patterns.html"><small>درس</small>فصل ۳: الگوهای طراحی مدیریت خطا</a></li>
-    <li><a href="../lab/03-dedup-window/README.md"><small>آزمایش</small>پنجره‌ی تکراری‌زدایی در برابر تکراری‌های از‌دست‌رفته</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/03-error-management-design-patterns.html"><small>درس</small>فصل ۳: الگوهای طراحی مدیریت خطا</a></li>
+      <li><a href="../lab/03-dedup-window/README.md"><small>آزمایش</small>پنجره‌ی deduplication در برابر تکراری‌های جاافتاده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var log = Kit.log(document.getElementById("log"));
+  var said = ["", ""]; var log = { add: function (t, k) { said = [Kit.digits(t), k || ""]; }, clear: function () { said = ["", ""]; } };
   function hm(h, m) { return h * 60 + m; }
   function fmt(t) { if (t === null) return "–"; var h = Math.floor(t / 60), m = t % 60; return h + ":" + (m < 10 ? "0" : "") + m; }
   var SCEN = {
-    t31: { label: "جدول ۳-۱", lateness: 30, win: 10, batches: [[hm(10, 0), hm(10, 5), hm(10, 6)], [hm(9, 20), hm(9, 31), hm(10, 7)]], lo: hm(9, 10), hi: hm(10, 20),
-      intro: "جدول ۳-۱: تأخیر مجاز سی دقیقه، با دو micro-batch." },
-    t32: { label: "جدول ۳-۲", lateness: 60, win: 10, batches: [[hm(3, 15)], [hm(3, 0)], [hm(1, 50)], [hm(3, 11)], [hm(4, 31)]], lo: hm(1, 40), hi: hm(4, 50),
-      intro: "جدول ۳-۲: تأخیر مجاز یک ساعت، پنجره‌های ده‌دقیقه‌ای، یک رویداد در هر دسته." }
+    t31: { label: "جدول ۳-۱", lateness: 30, win: 10, batches: [[hm(10, 0), hm(10, 5), hm(10, 6)], [hm(9, 20), hm(9, 31), hm(10, 7)]], lo: hm(9, 10), hi: hm(10, 20) },
+    t32: { label: "جدول ۳-۲", lateness: 60, win: 10, batches: [[hm(3, 15)], [hm(3, 0)], [hm(1, 50)], [hm(3, 11)], [hm(4, 31)]], lo: hm(1, 40), hi: hm(4, 50) }
   };
-  var cfg = { scen: "t32", lateness: 60, win: 10 }, s;
+  var cfg = { scen: "t31", lateness: 30, win: 10 }, s, tour;
 
-  function reset() {
-    var sc = SCEN[cfg.scen];
-    s = { i: 0, wm: null, maxEv: null, events: [], windows: {}, rows: [], ignored: 0 };
-    log.clear(); log.add(sc.intro + " تأخیر حالا " + cfg.lateness + " دقیقه و پنجره " + cfg.win + " دقیقه است.", "muted");
-    render();
-  }
+  function fresh() { s = { i: 0, wm: null, events: [], windows: {}, rows: [], ignored: 0, last: null }; log.clear(); }
   function winStart(t) { return Math.floor(t / cfg.win) * cfg.win; }
 
   function step() {
@@ -129,70 +133,103 @@
       if (w.state === "buf" && s.wm !== null && w.start + cfg.win <= s.wm) { w.state = "out"; emitted.push(w); }
     });
     s.ignored += ignored.length;
-    s.rows.push({ n: s.i + 1, ev: batch.map(fmt).join(", "), wm: (wmIn === null ? "–" : fmt(wmIn)) + " → " + fmt(wmOut) + (cand !== null && wmIn !== null && cand < wmIn ? " (نامزد " + fmt(cand) + " دور انداخته شد)" : ""),
-      ign: ignored.length ? ignored.map(fmt).join(", ") : "–", out: emitted.length ? emitted.map(function (w) { return fmt(w.start) + "–" + fmt(w.start + cfg.win); }).join(", ") : "–" });
-    log.add("دسته‌ی " + (s.i + 1) + " با [" + batch.map(fmt).join(", ") + "]: مقدار watermark از " + (wmIn === null ? "تنظیم‌نشده" : fmt(wmIn)) + " به " + fmt(wmOut), "");
-    ignored.forEach(function (t) { log.add("  زمان " + fmt(t) + " پیش از watermark " + fmt(wmIn) + " است ← نادیده گرفته شد", "bad"); });
-    emitted.forEach(function (w) { log.add("  پنجره‌ی " + fmt(w.start) + "–" + fmt(w.start + cfg.win) + " بسته و منتشر شد، با " + w.n + " رویداد", "ok"); });
+    var dropped = cand !== null && wmIn !== null && cand < wmIn;
+    s.last = { batch: batch, wmIn: wmIn, wmOut: wmOut, cand: cand, dropped: dropped, ignored: ignored, emitted: emitted };
+    s.rows.push({ n: s.i + 1, ev: batch.map(fmt).join("، "), wm: (wmIn === null ? "–" : fmt(wmIn)) + " ← " + fmt(wmOut) + (dropped ? " (نامزد " + fmt(cand) + " رد شد)" : ""),
+      ign: ignored.length ? ignored.map(fmt).join("، ") : "–", out: emitted.length ? emitted.map(function (w) { return fmt(w.start) + "–" + fmt(w.start + cfg.win); }).join("، ") : "–" });
+    var msg = "دسته‌ی " + (s.i + 1) + " با " + batch.map(fmt).join("، ") + ": watermark از " + (wmIn === null ? "تنظیم‌نشده" : fmt(wmIn)) + " به " + fmt(wmOut) + " رسید";
+    if (ignored.length) msg += "؛ " + ignored.map(fmt).join(" و ") + " پیش از watermark بودند و نادیده گرفته شدند";
+    if (emitted.length) msg += "؛ پنجره‌ی " + emitted.map(function (w) { return fmt(w.start) + "–" + fmt(w.start + cfg.win); }).join(" و ") + " منتشر شد";
+    log.add(msg + ".", ignored.length ? "bad" : emitted.length ? "ok" : "");
     s.i++;
-    render();
     return s.i < sc.batches.length;
   }
 
   function render() {
     var sc = SCEN[cfg.scen], root = Kit.clear(document.getElementById("tl"));
-    var W = 640, H = 210, L = 20, R = 20, lo = sc.lo, hi = sc.hi;
+    var W = 900, H = 250, L = 24, R = 24, lo = sc.lo, hi = sc.hi, AX = 176;
     function X(t) { return L + (t - lo) / (hi - lo) * (W - L - R); }
     root.setAttribute("viewBox", "0 0 " + W + " " + H);
     Object.keys(s.windows).forEach(function (k) {
       var w = s.windows[k];
-      root.appendChild(Kit.svg("rect", { class: "win " + w.state, x: X(w.start), y: 40, width: X(w.start + cfg.win) - X(w.start), height: 90, rx: 3 }));
-      root.appendChild(Kit.svg("text", { class: "wlabel", x: (X(w.start) + X(w.start + cfg.win)) / 2, y: 52, "text-anchor": "middle" }, w.state === "out" ? "✓" : "…"));
+      root.appendChild(Kit.svg("rect", { class: "wm-win " + w.state, x: X(w.start), y: 46, width: X(w.start + cfg.win) - X(w.start), height: AX - 46, rx: 3 }));
+      root.appendChild(Kit.svg("text", { class: "wm-wl", x: (X(w.start) + X(w.start + cfg.win)) / 2, y: 64, "text-anchor": "middle" }, w.state === "out" ? "✓" : "…"));
     });
-    root.appendChild(Kit.svg("line", { class: "axis", x1: L, x2: W - R, y1: 150, y2: 150 }));
+    root.appendChild(Kit.svg("line", { class: "wm-axis", x1: L, x2: W - R, y1: AX, y2: AX }));
     var stepT = (hi - lo) > 120 ? 30 : 10;
     for (var t = Math.ceil(lo / stepT) * stepT; t <= hi; t += stepT) {
-      root.appendChild(Kit.svg("line", { class: "axis", x1: X(t), x2: X(t), y1: 147, y2: 153 }));
-      root.appendChild(Kit.svg("text", { class: "tick", x: X(t), y: 168, "text-anchor": "middle" }, fmt(t)));
+      root.appendChild(Kit.svg("line", { class: "wm-axis", x1: X(t), x2: X(t), y1: AX - 4, y2: AX + 4 }));
+      root.appendChild(Kit.svg("text", { class: "wm-tick", x: X(t), y: AX + 20, "text-anchor": "middle" }, Kit.digits(fmt(t))));
     }
-    var rowY = {};
-    s.events.forEach(function (e, idx) {
-      var y = 115 - ((rowY[e.t] = (rowY[e.t] || 0) + 1) - 1) * 14;
-      if (e.late) {
-        root.appendChild(Kit.svg("path", { class: "wm", style: "stroke:var(--bad)", d: "M" + (X(e.t) - 5) + " " + (y - 5) + "L" + (X(e.t) + 5) + " " + (y + 5) + "M" + (X(e.t) + 5) + " " + (y - 5) + "L" + (X(e.t) - 5) + " " + (y + 5) }));
-      } else root.appendChild(Kit.svg("circle", { class: "ev", cx: X(e.t), cy: y, r: 5 }));
-      root.appendChild(Kit.svg("text", { class: "evl", x: X(e.t), y: idx % 2 ? y + 17 : y - 9, "text-anchor": "middle" }, fmt(e.t)));
+    // Events sit on a dot row; labels take the first of four rows (two above, two below) where they fit.
+    var EV = 132, rows = [EV - 14, EV + 26, EV - 32, EV + 44], ends = [-1e9, -1e9, -1e9, -1e9], seen = {};
+    s.events.slice().sort(function (a, b) { return a.t - b.t; }).forEach(function (e) {
+      var x = X(e.t), k = (seen[e.t] = (seen[e.t] || 0) + 1) - 1, y = EV - k * 12;
+      if (e.late) root.appendChild(Kit.svg("path", { class: "wm-x", d: "M" + (x - 6) + " " + (y - 6) + "L" + (x + 6) + " " + (y + 6) + "M" + (x + 6) + " " + (y - 6) + "L" + (x - 6) + " " + (y + 6) }));
+      else root.appendChild(Kit.svg("circle", { class: "wm-ev", cx: x, cy: y, r: 6 }));
+      var lvl = 0; while (lvl < 3 && ends[lvl] > x - 20) lvl++;
+      ends[lvl] = x + 20;
+      root.appendChild(Kit.svg("text", { class: "wm-evl" + (e.late ? " late" : ""), x: x, y: rows[lvl], "text-anchor": "middle" }, Kit.digits(fmt(e.t))));
     });
-    if (s.i < sc.batches.length) sc.batches[s.i].forEach(function (t) {
-      root.appendChild(Kit.svg("circle", { class: "ev next", cx: X(t), cy: 190, r: 5 }));
-    });
-    if (s.i < sc.batches.length) root.appendChild(Kit.svg("text", { class: "tick", x: L, y: 194 }, "دسته‌ی بعدی ○"));
+    if (s.i < sc.batches.length) {
+      sc.batches[s.i].forEach(function (t) { root.appendChild(Kit.svg("circle", { class: "wm-next", cx: X(t), cy: AX + 44, r: 6 })); });
+      root.appendChild(Kit.svg("text", { class: "wm-tick", x: W - R, y: AX + 49, "text-anchor": "end" }, "دسته‌ی بعدی"));
+    }
     if (s.wm !== null) {
-      var wx = Math.max(L, Math.min(W - R, X(s.wm)));
-      root.appendChild(Kit.svg("line", { class: "wm", x1: wx, x2: wx, y1: 18, y2: 150 }));
-      root.appendChild(Kit.svg("text", { class: "wmt", x: wx + 4, y: 28 }, "مقدار watermark " + fmt(s.wm) + (X(s.wm) < L ? " (بیرون از نمودار)" : "")));
+      var wx = Math.max(L, Math.min(W - R, X(s.wm))), right = wx > W / 2;
+      root.appendChild(Kit.svg("line", { class: "wm-line", x1: wx, x2: wx, y1: 18, y2: AX }));
+      root.appendChild(Kit.svg("text", { class: "wm-lt", x: right ? wx - 6 : wx + 6, y: 32, "text-anchor": right ? "end" : "start" }, Kit.digits("watermark " + fmt(s.wm)) + (X(s.wm) < L ? " ◂ بیرون از نمودار" : "")));
     }
-    var rows = Kit.clear(document.getElementById("rows"));
-    s.rows.forEach(function (r, i) {
-      rows.appendChild(Kit.el("tr", { class: i === s.rows.length - 1 ? "cur" : null }, Kit.el("td", null, String(r.n)), Kit.el("td", null, r.ev), Kit.el("td", null, r.wm), Kit.el("td", null, r.ign), Kit.el("td", null, r.out)));
+    var tb = Kit.clear(document.getElementById("rows"));
+    s.rows.slice().reverse().forEach(function (r, i) {
+      tb.appendChild(Kit.el("tr", { class: i === 0 ? "wm-cur" : null }, Kit.el("td", null, Kit.digits(String(r.n))), Kit.el("td", null, r.ev), Kit.el("td", null, r.wm), Kit.el("td", null, r.ign), Kit.el("td", null, r.out)));
     });
+    if (!s.rows.length) tb.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 5 }, "هنوز دسته‌ای پردازش نشده")));
     var buf = 0, out = 0;
     Object.keys(s.windows).forEach(function (k) { if (s.windows[k].state === "buf") buf++; else out++; });
     var st = Kit.clear(document.getElementById("stats"));
-    [["مقدار watermark", fmt(s.wm), "warn"], ["رویداد نادیده‌گرفته‌شده", s.ignored, s.ignored ? "bad" : ""], ["پنجره‌ی بافرشده", buf, ""], ["پنجره‌ی منتشرشده", out, "ok"]].forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    [["stream", sc.label, ""], ["تأخیر مجاز", cfg.lateness + " دقیقه", ""], ["پنجره", cfg.win + " دقیقه", ""], ["watermark", fmt(s.wm), "warn"],
+     ["نادیده‌گرفته", s.ignored, s.ignored ? "bad" : ""], ["پنجره‌ی در بافر", buf, ""], ["پنجره‌ی منتشرشده", out, out ? "ok" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
     });
+    scenS.set(cfg.scen); lat.set(cfg.lateness); win.set(cfg.win);
   }
 
-  var lat = Kit.slider({ label: "تأخیر مجاز", min: 0, max: 150, step: 5, value: cfg.lateness, unit: " دقیقه", onInput: function (v) { cfg.lateness = v; reset(); } });
-  var win = Kit.slider({ label: "اندازه‌ی پنجره", min: 5, max: 30, step: 5, value: cfg.win, unit: " دقیقه", onInput: function (v) { cfg.win = v; reset(); } });
-  document.getElementById("scen").appendChild(Kit.segmented({ label: "stream رویداد", value: cfg.scen,
+  /* ---------- the drawer: every handler is render() then tour.free(text, kind) ---------- */
+  function restartSay() { return SCEN[cfg.scen].label + " از اول، با تأخیر مجاز " + cfg.lateness + " دقیقه و پنجره‌های " + cfg.win + " دقیقه‌ای. «دسته‌ی بعدی» را بزنید."; }
+  var lat = Kit.slider({ label: "تأخیر مجاز", min: 0, max: 150, step: 5, value: cfg.lateness, unit: " دقیقه", onInput: function (v) { cfg.lateness = v; fresh(); render(); tour.free(restartSay(), ""); } });
+  var win = Kit.slider({ label: "اندازه‌ی پنجره", min: 5, max: 30, step: 5, value: cfg.win, unit: " دقیقه", onInput: function (v) { cfg.win = v; fresh(); render(); tour.free(restartSay(), ""); } });
+  var scenS = Kit.segmented({ label: "stream رویداد", value: cfg.scen,
     options: [{ value: "t31", label: "جدول ۳-۱" }, { value: "t32", label: "جدول ۳-۲" }],
-    onChange: function (v) { cfg.scen = v; cfg.lateness = SCEN[v].lateness; cfg.win = SCEN[v].win; lat.set(cfg.lateness); win.set(cfg.win); reset(); } }).element);
+    onChange: function (v) { cfg.scen = v; cfg.lateness = SCEN[v].lateness; cfg.win = SCEN[v].win; fresh(); render(); tour.free(restartSay(), ""); } });
+  document.getElementById("scen").appendChild(scenS.element);
   document.getElementById("sliders").appendChild(lat.element);
   document.getElementById("sliders").appendChild(win.element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1200 });
-  reset();
+  document.getElementById("next").addEventListener("click", function () { step(); render(); tour.free(said[0], said[1]); });
+
+  /* ---------- the scenario: each run() replays the stream from its first batch ---------- */
+  function scene(sc, n, lateness) { return function () { cfg.scen = sc; cfg.lateness = lateness || SCEN[sc].lateness; cfg.win = SCEN[sc].win; fresh(); for (var i = 0; i < n; i++) step(); }; }
+  function L() { return s.last; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene("t31", 0), render: render, interval: 6500,
+    intro: "محور افقی زمان رویداد است. هر قدم یک micro-batch را پردازش می‌کند: رویدادها با watermark قبلی سنجیده می‌شوند و بعد watermark جلو می‌رود.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: جدول، تأخیر مجاز و اندازه‌ی پنجره را عوض کنید و دسته به دسته جلو بروید.",
+    steps: [
+      { kind: "ok", run: scene("t31", 1),
+        say: function () { return "جدول ۳-۱، دسته‌ی اول: بیشینه‌ی زمان رویداد " + fmt(Math.max.apply(null, L().batch)) + " است و تأخیر مجاز ۳۰ دقیقه، پس watermark روی " + fmt(L().wmOut) + " می‌نشیند (ص. ۵۴)."; } },
+      { kind: "bad", run: scene("t31", 2),
+        say: function () { return "دسته‌ی دوم: " + L().ignored.map(fmt).join(" و ") + " از watermark " + fmt(L().wmIn) + " قدیمی‌ترند، پس late هستند و نادیده گرفته می‌شوند؛ " + fmt(hm(10, 7)) + " پذیرفته می‌شود و watermark به " + fmt(L().wmOut) + " می‌رود (ص. ۵۴)."; } },
+      { kind: "bad", run: scene("t32", 3),
+        say: function () { return "جدول ۳-۲ با تأخیر یک ساعت: ۳:۱۵ مقدار watermark را به ۲:۱۵ برد، ۳:۰۰ پذیرفته شد، و ۱:۵۰ پیش از watermark بود و نادیده گرفته شد (ص. ۵۶)."; } },
+      { kind: "warn", run: scene("t32", 4),
+        say: function () { return "رویداد ۳:۱۱ نامزد " + fmt(L().cand) + " را می‌سازد که از watermark فعلی " + fmt(L().wmIn) + " کمتر است و رد می‌شود: watermark فقط جلو می‌رود. هنوز هیچ پنجره‌ای منتشر نشده (ص. ۵۶)."; } },
+      { kind: "ok", run: scene("t32", 5),
+        say: function () { return "رویداد ۴:۳۱ مقدار watermark را به " + fmt(L().wmOut) + " می‌برد و پنجره‌های " + L().emitted.map(function (w) { return fmt(w.start) + "–" + fmt(w.start + cfg.win); }).join(" و ") + " یک‌جا بسته و منتشر می‌شوند (ص. ۵۶)."; } },
+      { kind: "warn", run: scene("t32", 5, 120),
+        say: function () { return "همان stream با تأخیر مجاز دو ساعت: " + (s.ignored ? s.ignored + " رویداد نادیده گرفته شد" : "رویداد ۱:۵۰ هم پذیرفته می‌شود") + "، اما watermark فقط به " + fmt(s.wm) + " رسیده و پنجره‌ها بیشتر در state می‌مانند."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "مقدار watermark ۹:۳۶ است. بیشینه‌ی زمان رویداد یک دسته ۱۰:۰۰ است و تأخیر مجاز سی دقیقه. watermark تازه چه می‌شود؟",
