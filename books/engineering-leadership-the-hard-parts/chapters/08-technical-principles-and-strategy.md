@@ -110,10 +110,14 @@ lang: fa
 
 قالبی مشارکتی و یک‌ساعته، تا اصول از خرد جمعی دربیایند نه از سلیقه‌ی یک نفر (pp. 156–157):
 
-```mermaid
-flowchart TB
-  A["1 · Idea dump<br/>10 min"] --> B["2 · Group and name<br/>10 min"] --> C["3 · Vote<br/>3 votes each, 5 min"] --> D["4 · Draft<br/>meaning, why, example<br/>15 min"] --> E["5 · Discuss and rank<br/>15 min"] --> F["6 · Review and share<br/>5 min"]
-```
+| گام | کار | زمان |
+|---|---|---|
+| ۱ | ریختن ایده‌ها | ۱۰ دقیقه |
+| ۲ | گروه‌بندی و نام‌گذاری | ۱۰ دقیقه |
+| ۳ | رأی دادن، هر نفر سه رأی | ۵ دقیقه |
+| ۴ | پیش‌نویس: معنا، چرایی، نمونه | ۱۵ دقیقه |
+| ۵ | بحث و رتبه‌بندی | ۱۵ دقیقه |
+| ۶ | بازبینی و به اشتراک گذاشتن | ۵ دقیقه |
 
 نتیجه را در architecture decision recordها و فهرست وارسی code review و مواد onboarding بگذارید (p. 157).
 

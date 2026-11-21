@@ -6,15 +6,26 @@
 <title>سنجش توانمندی تیم</title>
 <meta name="description" content="یک تیم را روی هفت توانمندی قابل‌مشاهده‌ی کتاب و با نمونه‌های قوی و ضعیف خودش امتیاز بدهید و ببینید اول کدام یکی دوتا را بسازید. برای فصل ۴ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.cap { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 10px; background: var(--surface); }
-  .cap h3 { margin: 0 0 6px; font-size: .95rem; } .ex { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: .84rem; margin-bottom: 8px; }
-  .ex div { padding: 6px 8px; border-radius: 6px; background: var(--surface-2); } .ex b { display: block; font-size: .78rem; color: var(--ink-3); }
-  @media (max-width: 560px) { .ex { grid-template-columns: 1fr; } }</style>
+<style>
+  /* One row per capability: a three-step meter and the book's example that matches the rating; the one or two to work on first are outlined. */
+  .tc-rows { display: grid; gap: 5px; }
+  .tc-row { display: grid; grid-template-columns: minmax(11em, 15em) 13em 1fr; gap: 10px; align-items: center; border: 1.5px solid transparent; border-radius: var(--radius-sm); padding: 4px 8px; }
+  .tc-row.pick { border-color: var(--s2); background: var(--warn-soft); }
+  .tc-name { font-weight: 600; font-size: .86rem; }
+  .tc-meter { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+  .tc-meter span { font-size: .8rem; text-align: center; border-radius: 5px; padding: 2px 0; background: var(--surface-2); color: var(--ink-3); border: 1px solid var(--line); }
+  .tc-meter span.on.l0 { background: var(--bad-soft); border-color: var(--bad); color: var(--ink); font-weight: 700; }
+  .tc-meter span.on.l1 { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 700; }
+  .tc-meter span.on.l2 { background: var(--ok-soft); border-color: var(--ok); color: var(--ink); font-weight: 700; }
+  .tc-ex { font-size: .8rem; color: var(--ink-2); line-height: 1.45; }
+  .tc-ex b { color: var(--ink); }
+  @media (max-width: 760px) { .tc-row { grid-template-columns: 1fr; } }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
       <a href="../chapters/04-building-cohesive-teams.html">فصل ۴</a><span aria-hidden="true">/</span>
@@ -25,40 +36,57 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۴ · ساختن تیم‌های منسجم</div>
-  <h1>سنجش توانمندی تیم</h1>
-  <p class="lede">چارچوب توانمندی برای تیم همان کاری را می‌کند که نردبان برای فرد: نشان می‌دهد «بهتر» چه شکلی است. تیمی را که می‌شناسید روی <strong>هفت توانمندی</strong> کتاب امتیاز بدهید، که هر کدام نمونه‌ی قوی و ضعیف خودش را دارد، و این سنجش یکی دوتا را پیشنهاد می‌دهد که اول رویشان کار کنید.</p>
-  <p class="source-note">این شبیه‌سازی «توانمندی به‌عنوان ابزاری در سطح تیم» و «تیم‌های درخشان چه می‌کنند» را نشان می‌دهد، صص. ۶۷–۷۱. توانمندی‌ها و نمونه‌ها از خود کتاب‌اند؛ امتیازدهی سه‌پله‌ای و پیشنهاد «اول ضعیف‌ترین» ساده‌سازی vault از حلقه‌ی بسنج و چندتا بردار و بساز است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>سنجش توانمندی تیم</h1>
+      <p class="lede">چارچوب توانمندی برای تیم همان کاری را می‌کند که نردبان برای فرد: نشان می‌دهد «بهتر» چه شکلی است. تور یک تیم را روی <strong>هفت توانمندی</strong> کتاب می‌سنجد، با نمونه‌ی قوی یا ضعیف هر کدام، و یکی دوتا را برمی‌دارد که اول رویشان کار شود.</p>
+      <p class="source-note">این شبیه‌سازی «توانمندی به‌عنوان ابزاری در سطح تیم» و «تیم‌های درخشان چه می‌کنند» را نشان می‌دهد، صص. ۶۷–۷۱. توانمندی‌ها و نمونه‌ها از خود کتاب‌اند؛ امتیازدهی سه‌پله‌ای و پیشنهاد «اول ضعیف‌ترین» ساده‌سازی vault از حلقه‌ی بسنج و چندتا بردار و بساز است.</p>
+    </header>
 
-  <div class="sim stack">
-    <div id="caps" class="stack"></div>
-    <div class="panel"><p class="panel-title">نیم‌رخ</p><div class="stats" id="stats"></div><div id="verdict" class="callout" aria-live="polite" style="margin-top:10px"></div></div>
-    <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="tc-rows" id="tc-rows"></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">نیم‌رخ</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <label class="field-head" for="tc-cap">توانمندی</label><select id="tc-cap"></select>
+          <div id="tc-rate"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li>نمونه‌ها <strong>قابل‌مشاهده‌اند</strong>: می‌توانید ببینید تیمی وابستگی را دو هفته جلوتر علامت می‌زند، یا از پست یک مشتری خبر قطعی را می‌فهمد. همین باعث می‌شود سنجش گفت‌وگو بماند، نه نمره.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>نمونه‌ها <strong>قابل‌مشاهده‌اند</strong>: می‌توانید ببینید تیمی وابستگی را دو هفته جلوتر علامت می‌زند، یا از پست یک مشتری خبر قطعی را می‌فهمد. همین باعث می‌شود سنجش گفت‌وگو بماند، نه نمره.</li>
     <li>لازم نیست از روز اول هر هفت‌تا را داشته باشید. بسنجید، یکی دوتا بردارید، بسازیدشان، و دوباره بسنجید.</li>
     <li>چند نمونه‌ی ضعیف در واقع مسئله‌ی اعتمادند، مثل سه هفته سکوت یا تقصیر انداختن گردن API تیم دیگر، پس بهتر کردن یک توانمندی اغلب بقیه را هم بالا می‌برد.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/04-building-cohesive-teams.html"><small>درس</small>فصل ۴: ساختن تیم‌های منسجم</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/04-building-cohesive-teams.html"><small>درس</small>فصل ۴: ساختن تیم‌های منسجم</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var log = Kit.log(document.getElementById("log"));
   var C = [
     ["تبدیل ابهام به عمل", "پرسش‌های متمرکز می‌پرسد، مثلاً «بهتر کردن onboarding» درباره‌ی ریزش در اولین session است یا فعال‌سازی روز هفتم، و جهت پیشنهاد می‌دهد", "هفته‌ها می‌چرخد و چیزی «تقریباً مهم» می‌سازد"],
     ["ارتباط بی‌وقفه", "وضعیت را زود می‌گوید، ریسک را در standup علامت می‌زند و با زمینه کمک می‌خواهد", "سه هفته ساکت می‌ماند و بعد «راستش، عقبیم»"],
@@ -68,27 +96,53 @@
     ["سرمایه‌گذاری روی سلامت تیم", "برای تازه‌واردها همراه و برنامه‌ی ۹۰ روزه دارد؛ اجازه می‌دهد کسی بگوید «ظرفیتم پر است»", "دو هفته طول می‌کشد تا اپلیکیشن روی لپ‌تاپ بالا بیاید؛ فرسودگی عادی است"],
     ["وصل کردن تلاش به نتیجه", "«بهبود onboarding ریزش را ۱۲٪ کم کرد…»", "«این sprint پنج feature تحویل دادیم»"]
   ];
-  var L = { 0: "ضعیف", 1: "در حال رشد", 2: "قوی" }, r = C.map(function () { return 1; }), wrap = document.getElementById("caps");
-  C.forEach(function (c, i) {
-    var box = Kit.el("div", { class: "cap" }, Kit.el("h3", null, (i + 1) + ". " + c[0]),
-      Kit.el("div", { class: "ex" }, Kit.el("div", null, Kit.el("b", null, "تیم قوی"), c[1]), Kit.el("div", null, Kit.el("b", null, "تیم ضعیف"), c[2])));
-    box.appendChild(Kit.segmented({ label: "امتیاز برای " + c[0], value: "1", options: [{ value: "0", label: "ضعیف" }, { value: "1", label: "در حال رشد" }, { value: "2", label: "قوی" }],
-      onChange: function (v) { r[i] = +v; log.add(c[0] + ": " + L[v], v === "2" ? "ok" : v === "0" ? "bad" : "muted"); render(); } }).element);
-    wrap.appendChild(box);
-  });
+  var L = ["ضعیف", "در حال رشد", "قوی"], r = C.map(function () { return 1; }), cur = 0, tour;
+  function k(v) { return Kit.digits(String(v)); }
+  var capSel = document.getElementById("tc-cap");
+  C.forEach(function (c, i) { capSel.appendChild(Kit.el("option", { value: String(i) }, k(i + 1) + ". " + c[0])); });
+  function picks() { var min = Math.min.apply(null, r), p = []; r.forEach(function (x, i) { if (x === min && p.length < 2) p.push(i); }); return { min: min, p: min === 2 ? [] : p, tied: r.filter(function (x) { return x === min; }).length }; }
   function render() {
-    var st = Kit.clear(document.getElementById("stats")), cnt = [0, 0, 0]; r.forEach(function (x) { cnt[x]++; });
-    [["قوی", cnt[2], "ok"], ["در حال رشد", cnt[1], ""], ["ضعیف", cnt[0], cnt[0] ? "bad" : ""]].forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1])))); });
-    var min = Math.min.apply(null, r), pick = []; r.forEach(function (x, i) { if (x === min && pick.length < 2) pick.push(i); });
-    var v = document.getElementById("verdict");
-    if (min === 2) { v.className = "callout ok"; v.textContent = "در هر هفت توانمندی قوی است. با بزرگ شدن تیم دوباره بسنجید، چون چیزی که برای ۵ نفر کار می‌کرد شاید برای ۲۰ نفر کار نکند."; return; }
-    var many = r.filter(function (x) { return x === min; }).length;
-    v.className = "callout " + (min === 0 ? "warn" : "");
-    v.textContent = "اول روی این‌ها کار کنید: " + pick.map(function (i) { return C[i][0]; }).join(" و ") + ". مسیر رشد: " + pick.map(function (i) { return C[i][1]; }).join("؛ ") + "." +
-      (many > 2 ? " (" + many + " توانمندی پایین‌ترین امتیاز را با هم دارند؛ توصیه‌ی کتاب هنوز هر بار یکی دوتاست، پس آن‌هایی را بردارید که بیشتر به تحویل آسیب می‌زنند.)" : "");
+    var pk = picks(), rows = Kit.clear(document.getElementById("tc-rows"));
+    C.forEach(function (c, i) {
+      var m = Kit.el("div", { class: "tc-meter", role: "img", "aria-label": c[0] + ": " + L[r[i]] });
+      L.forEach(function (l, j) { m.appendChild(Kit.el("span", { class: (j === r[i] ? "on " : "") + "l" + j }, l)); });
+      var ex = r[i] === 2 ? [Kit.el("b", null, "تیم قوی: "), c[1]] : r[i] === 0 ? [Kit.el("b", null, "تیم ضعیف: "), c[2]] : [Kit.el("b", null, "مسیر رشد: "), c[1]];
+      rows.appendChild(Kit.el("div", { class: "tc-row" + (pk.p.indexOf(i) >= 0 ? " pick" : "") }, Kit.el("span", { class: "tc-name" }, (pk.p.indexOf(i) >= 0 ? "◆ " : "") + k(i + 1) + ". " + c[0]), m, Kit.el("span", { class: "tc-ex" }, ex)));
+    });
+    var cnt = [0, 0, 0]; r.forEach(function (x) { cnt[x]++; });
+    var st = Kit.clear(document.getElementById("stats"));
+    [["قوی", k(cnt[2]), "ok"], ["در حال رشد", k(cnt[1]), ""], ["ضعیف", k(cnt[0]), cnt[0] ? "bad" : ""], ["اول روی", pk.p.length ? k(pk.p.length) + " توانمندی ◆" : "هیچ", pk.p.length ? "warn" : "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    capSel.value = String(cur); rate.set(String(r[cur]));
   }
-  render();
+  function advice() {
+    var pk = picks();
+    if (!pk.p.length) return ["در هر هفت توانمندی قوی است. با بزرگ شدن تیم دوباره بسنجید، چون چیزی که برای ۵ نفر کار می‌کرد شاید برای ۲۰ نفر کار نکند.", "ok"];
+    return ["اول روی این‌ها کار کنید: " + pk.p.map(function (i) { return C[i][0]; }).join(" و ") + "." + (pk.tied > 2 ? " " + k(pk.tied) + " توانمندی پایین‌ترین امتیاز را با هم دارند؛ توصیه‌ی کتاب هنوز هر بار یکی دوتاست، پس آن‌هایی را بردارید که بیشتر به تحویل آسیب می‌زنند." : ""), pk.min === 0 ? "warn" : ""];
+  }
+
+  /* ---------- the drawer ---------- */
+  capSel.addEventListener("change", function () { cur = +capSel.value; render(); tour.free(C[cur][0] + ": " + L[r[cur]] + ".", ""); });
+  var rate = Kit.segmented({ label: "امتیاز", value: "1", options: L.map(function (l, j) { return { value: String(j), label: l }; }), onChange: function (v) { r[cur] = +v; render(); var a = advice(); tour.free(C[cur][0] + ": " + L[+v] + ". " + a[0], a[1]); } });
+  document.getElementById("tc-rate").appendChild(rate.element);
+
+  /* ---------- the scenario ---------- */
+  function scene(v, c) { return function () { r = v.slice(); cur = c; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene([1, 1, 1, 1, 1, 1, 1], 0), render: render, interval: 8000,
+    intro: "هر ردیف یکی از هفت توانمندی کتاب است، با سه پله. کنار هر ردیف نمونه‌ی کتاب برای همان پله می‌آید؛ ◆ یعنی اول روی این کار کنید.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و تیمی را که می‌شناسید امتیاز بدهید.",
+    steps: [
+      { kind: "warn", run: scene([1, 0, 0, 2, 2, 1, 1], 1), say: function () { return "تیمی که اجرا و دیدن ریسکش قوی است ولی سه هفته ساکت می‌ماند و تقصیر را گردن API تیم دیگر می‌اندازد. " + advice()[0]; } },
+      { kind: "", run: scene([1, 0, 0, 2, 2, 1, 1], 2), say: "نمونه‌ها قابل‌مشاهده‌اند، پس سنجش گفت‌وگو می‌ماند، نه نمره. این دو نمونه‌ی ضعیف در واقع مسئله‌ی اعتمادند، پس بهتر کردنشان اغلب بقیه را هم بالا می‌برد (صص. ۶۷–۷۱)." },
+      { kind: "ok", run: scene([1, 1, 1, 2, 2, 1, 1], 2), say: function () { return "بسنج، یکی دوتا بردار، بساز، دوباره بسنج: حالا هر دو در حال رشدند و هیچ توانمندی ضعیفی نمانده. " + advice()[0]; } },
+      { kind: "warn", run: scene([0, 1, 0, 0, 2, 0, 1], 0), say: function () { return "تیم تازه‌ای با چهار توانمندی ضعیف. لازم نیست از روز اول هر هفت‌تا را داشته باشید. " + advice()[0]; } },
+      { kind: "ok", run: scene([2, 2, 2, 2, 2, 2, 2], 6), say: function () { return advice()[0]; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چارچوب توانمندی تیم به چه درد می‌خورد؟", options: ["نمره دادن به تیم‌ها برای پاداش", "تعریف این‌که «بهتر» برای یک تیم چه شکلی است؛ راهنمایی، نه ارزیابی", "جایگزین کردن نردبان شغلی افراد"], answer: 1, explain: "صص. ۶۷–۶۸." },
     { q: "کدام جمله نشانه‌ی تیمی است که با انضباط اجرا می‌کند؟", options: ["«باید تعداد نیرو را دو برابر کنیم تا به تعهدهایمان برسیم»", "«با ۷۰٪ بار پیش می‌رویم و هر دو هفته تحویل می‌دهیم… بیایید درباره‌ی معامله‌های دامنه حرف بزنیم»", "«این sprint پنج feature تحویل دادیم»"], answer: 1, explain: "ص. ۷۰." },

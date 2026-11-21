@@ -6,15 +6,27 @@
 <title>خلبان، امدادگر یا مهندس؟</title>
 <meta name="description" content="فرسودگی را از روی نشانه‌هایش از مقاومت تشخیص بدهید و بعد برای موقعیت‌های خود کتاب حالت رهبری را انتخاب کنید: خلبان، امدادگر یا مهندس. برای فصل ۳ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.item { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
-  .item .badge { grid-column: 1 / -1; justify-self: start; white-space: normal; } .item select { max-width: 12em; }
-  .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .modes .cell { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; font-size: .84rem; background: var(--surface); }
-  .modes h3 { margin: 0 0 4px; font-size: .9rem; } @media (max-width: 560px) { .modes { grid-template-columns: 1fr; } }</style>
+<style>
+  /* Left: six signs sorted into resistance or burnout. Right: situations placed under the three modes, including April's post-incident meeting. */
+  .lm2-wrap { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 14px; height: 100%; }
+  .lm2-part h3 { margin: 0 0 6px; font-size: .9rem; }
+  .lm2-cols { display: grid; gap: 8px; }
+  .lm2-cols.two { grid-template-columns: 1fr 1fr; } .lm2-cols.three { grid-template-columns: repeat(3, 1fr); }
+  .lm2-bin { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 8px; background: var(--surface); min-height: 150px; }
+  .lm2-bin.lit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .lm2-bin .lm2-h { font-weight: 700; font-size: .88rem; }
+  .lm2-bin .lm2-d { font-size: .8rem; color: var(--ink-2); margin: 2px 0 6px; }
+  .lm2-chip { font-size: .8rem; border-radius: 8px; padding: 3px 8px; margin: 4px 0; background: var(--surface-2); border: 1px solid var(--line); line-height: 1.45; }
+  .lm2-chip.new { background: var(--accent-soft); border-color: var(--accent); }
+  .lm2-chip.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .lm2-chip b { font-weight: 700; }
+  @media (max-width: 760px) { .lm2-wrap, .lm2-cols.three { grid-template-columns: 1fr; } }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
       <a href="../chapters/03-navigating-chaos.html">فصل ۳</a><span aria-hidden="true">/</span>
@@ -25,92 +37,142 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۳ · راه بردن در آشوب</div>
-  <h1>خلبان، امدادگر یا مهندس؟</h1>
-  <p class="lede">دامنه یعنی عامدانه جابه‌جا شدن. اول نشانه‌ها را بخوانید، چون <strong>فرسودگی اغلب لباس مقاومت می‌پوشد</strong> و این دو پاسخ‌های مخالف هم می‌خواهند. بعد حالتی را بردارید که هر لحظه لازم دارد: <strong>خلبان</strong> برای زوم به عقب، <strong>امدادگر</strong> برای آرام کردن، و <strong>مهندس</strong> برای رفتن وسط خود کار.</p>
-  <p class="source-note">این شبیه‌سازی «چهار عدسی برای خواندن زمینه» (ص. ۳۹) و «جابه‌جایی بین نقش‌ها» (صص. ۵۱–۵۶) را نشان می‌دهد. نشانه‌ها و حالت‌ها و موقعیت‌ها از خود کتاب‌اند، از جمله جلسه‌ی پس از حادثه‌ی April (ص. ۵۶)؛ تمرین چیدن مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>خلبان، امدادگر یا مهندس؟</h1>
+      <p class="lede">دامنه یعنی عامدانه جابه‌جا شدن. اول نشانه‌ها را بخوانید، چون <strong>فرسودگی اغلب لباس مقاومت می‌پوشد</strong> و این دو پاسخ‌های مخالف هم می‌خواهند. بعد حالتی را بردارید که هر لحظه لازم دارد: <strong>خلبان</strong> برای زوم به عقب، <strong>امدادگر</strong> برای آرام کردن، و <strong>مهندس</strong> برای رفتن وسط خود کار.</p>
+      <p class="source-note">این شبیه‌سازی «چهار عدسی برای خواندن زمینه» (ص. ۳۹) و «جابه‌جایی بین نقش‌ها» (صص. ۵۱–۵۶) را نشان می‌دهد. نشانه‌ها و حالت‌ها و موقعیت‌ها از خود کتاب‌اند، از جمله جلسه‌ی پس از حادثه‌ی April (ص. ۵۶)؛ تمرین چیدن مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="tabs" id="tabs">
-    <div role="tablist" aria-label="تمرین">
-      <button role="tab" id="t1" aria-controls="p1" aria-selected="true" type="button">۱ · فرسودگی یا مقاومت؟</button>
-      <button role="tab" id="t2" aria-controls="p2" aria-selected="false" type="button">۲ · حالت را انتخاب کنید</button>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="lm2-wrap">
+          <div class="lm2-part"><h3>۱ · فرسودگی یا مقاومت؟ (ص. ۳۹)</h3><div class="lm2-cols two" id="lm2-signs"></div></div>
+          <div class="lm2-part"><h3>۲ · کدام حالت؟ (صص. ۵۱–۵۶)</h3><div class="lm2-cols three" id="lm2-modes"></div></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">چیده‌شده</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <label class="field-head" for="lm2-sign">نشانه</label><select id="lm2-sign"></select>
+          <label class="field-head" for="lm2-read">خوانش</label><select id="lm2-read"></select>
+          <button class="btn primary small" type="button" id="lm2-put1">بگذار</button>
+        </div>
+        <div class="tweak-group">
+          <label class="field-head" for="lm2-sit">موقعیت</label><select id="lm2-sit"></select>
+          <label class="field-head" for="lm2-mode">حالت</label><select id="lm2-mode"></select>
+          <button class="btn primary small" type="button" id="lm2-put2">بگذار</button>
+        </div>
+        <div class="tweak-group">
+          <button class="btn small" type="button" id="lm2-reveal">دیدن پاسخ‌های کتاب</button>
+          <button class="btn small" type="button" id="lm2-clear">پاک کردن</button>
+        </div>
+      </div>
     </div>
-    <div role="tabpanel" id="p1" aria-labelledby="t1"></div>
-    <div role="tabpanel" id="p2" aria-labelledby="t2" hidden></div>
   </div>
-  <div class="panel" style="margin-top:12px"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li>مقاومت بلند است، یعنی پس زدن و نگرانی‌های گفته‌شده. فرسودگی ساکت است، یعنی کناره‌گیری و افت کیفیت و پیرویِ توخالی.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>مقاومت بلند است، یعنی پس زدن و نگرانی‌های گفته‌شده. فرسودگی ساکت است، یعنی کناره‌گیری و افت کیفیت و پیرویِ توخالی.</li>
     <li>برخورد با فرسودگی مثل مقاومت، یعنی محکم‌تر فروختن چشم‌انداز، بار بیشتری روی دوشش می‌گذارد؛ پاسخ کتاب محافظت از ظرفیت است: کند کردن، کم کردن دامنه، و فضا دادن برای بازیابی.</li>
     <li>یک جلسه می‌تواند هر سه حالت را لازم داشته باشد. April با عوض شدن گفت‌وگو از خلبان به امدادگر و بعد به مهندس می‌رود، و تیم باید بداند <em>چرا</em> جابه‌جا شده‌اید.</li>
     <li>هر حالتی وقتی بیش از حد استفاده شود برعکس عمل می‌کند: خلبان برای تیم غرق‌شده دور به نظر می‌رسد، مهندس استقلال را از بین می‌برد، و کار امدادگر می‌تواند به کار عاطفیِ نابرابر تبدیل شود.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/03-navigating-chaos.html"><small>درس</small>فصل ۳: راه بردن در آشوب</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/03-navigating-chaos.html"><small>درس</small>فصل ۳: راه بردن در آشوب</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var log = Kit.log(document.getElementById("log"));
-  function opts(sel, list) { sel.appendChild(Kit.el("option", { value: "" }, "انتخاب کنید…")); list.forEach(function (o) { sel.appendChild(Kit.el("option", { value: o[0] }, o[1])); }); }
-  // بخش اول
-  var p1 = document.getElementById("p1");
-  p1.appendChild(Kit.el("p", { style: "margin-top:12px" }, "هر نشانه کدام را نشان می‌دهد؟ جدول ۳-۲ و ص. ۳۹"));
   var S = [["پس زدن فعال در برنامه‌ریزی", "r"], ["مهندس‌هایی که نگرانی‌شان را درباره‌ی جهت تازه می‌گویند", "r"], ["ساکت شدن آدم‌ها در جلسه‌هایی که قبلاً پرشور بود", "b"],
            ["افت کیفیت کد از مهندس‌های قوی", "b"], ["همه موافق‌اند و هیچ چیز عوض نمی‌شود؛ پیرویِ توخالی", "b"], ["بحث درباره‌ی این‌که آیا این برنامه درست است", "r"]];
-  var LBL = { r: "مقاومت", b: "فرسودگی" }, RESP = { r: "چشم‌انداز را شفاف کنید و همراهی را بازسازی کنید", b: "از ظرفیت محافظت کنید؛ کند کنید، دامنه را کم کنید، و فضای بازیابی بدهید" };
-  var tally = { ok: 0, done: {} }, sum = Kit.el("div", { class: "callout", "aria-live": "polite" }, "هر شش نشانه را بچینید.");
-  S.forEach(function (s, i) {
-    var id = "s" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "چیده نشده"); opts(sel, [["r", "مقاومت"], ["b", "فرسودگی"]]);
-    sel.addEventListener("change", function () {
-      if (!sel.value) return; var ok = sel.value === s[1]; tally.done[i] = ok;
-      b.className = "badge " + (ok ? "ok" : "bad"); b.textContent = (ok ? "✓ " : "✗ کتاب این را ") + LBL[s[1]] + " می‌خواند ← " + RESP[s[1]];
-      log.add(s[0] + ": " + LBL[s[1]], ok ? "ok" : "bad");
-      var n = Object.keys(tally.done).length, c = Object.keys(tally.done).filter(function (k) { return tally.done[k]; }).length;
-      sum.className = "callout " + (n === S.length ? (c === n ? "ok" : "warn") : "");
-      sum.textContent = n === S.length ? c + " مورد از " + n + " مورد با کتاب می‌خواند. همان نشانه‌ی «تکان نخوردن» می‌تواند مداخله‌های مخالف هم بخواهد." : c + " مورد از " + n + " نشانه‌ی چیده‌شده با کتاب می‌خواند.";
-    });
-    p1.appendChild(Kit.el("div", { class: "item" }, Kit.el("label", { for: id }, s[0]), sel, b));
-  });
-  p1.appendChild(sum);
-  // بخش دوم
-  var p2 = document.getElementById("p2");
-  var M = { pilot: ["خلبان", "زوم به عقب برای تعیین جهت", "اولویت‌ها مبهم‌اند؛ بحث تاکتیکی؛ ذی‌نفع‌های رقیب"], medic: ["امدادگر", "آرام کردن و بازسازی اعتماد", "تنش بالا می‌رود؛ کسی فرسوده یا منزوی شده؛ تصمیم سختی تازه اعلام شده"], engineer: ["مهندس", "رفتن وسط خود کار", "با وجود روشنی شتاب خوابیده؛ جزئیات سد شده‌اند؛ تیم باید شما را کنار خودش ببیند"] };
-  var grid = Kit.el("div", { class: "modes", style: "margin-top:12px" });
-  Object.keys(M).forEach(function (k) { grid.appendChild(Kit.el("div", { class: "cell" }, Kit.el("h3", null, M[k][0] + " — " + M[k][1]), Kit.el("span", null, "کِی به کار بیاید: " + M[k][2]))); });
-  p2.appendChild(grid);
+  var B = { r: ["مقاومت", "بلند است. پاسخ: چشم‌انداز را شفاف کنید و همراهی را بازسازی کنید."], b: ["فرسودگی", "ساکت است. پاسخ: از ظرفیت محافظت کنید؛ کند کنید، دامنه را کم کنید، فضای بازیابی بدهید."] };
+  var M = { pilot: ["خلبان", "زوم به عقب برای تعیین جهت"], medic: ["امدادگر", "آرام کردن و بازسازی اعتماد"], engineer: ["مهندس", "رفتن وسط خود کار"] };
   var C = [
     ["بحث معماری سه جلسه است که دور خودش می‌چرخد.", "pilot", "بازقاب‌بندی‌اش حول اثر روی کاربر و رو کردن معامله‌های واقعی (ص. ۵۲)."],
-    ["یک مهندس ارشد ساکت، از سومین تغییر دامنه در این ماه به بعد ساکت‌تر هم شده.", "medic", "خصوصی سراغش بروید؛ شاید زیر تغییرهای دامنه غرق شده باشد (ص. ۵۳)."],
+    ["یک مهندس ارشد ساکت، از سومین تغییر دامنه در این ماه ساکت‌تر هم شده.", "medic", "خصوصی سراغش بروید؛ شاید زیر تغییرهای دامنه غرق شده باشد (ص. ۵۳)."],
     ["همه با برنامه‌ی مهاجرت موافق‌اند، ولی دو هفته است تکان نخورده.", "engineer", "بروید وسط خود کار؛ نمونه‌ی کتاب pair کردن با یک برنامه‌نویس تازه‌کار روی یک مهاجرت پیچیده است (ص. ۵۴)."],
-    ["جلسه‌ی پس از حادثه‌ی April شروع می‌شود: کسب‌وکار زمان‌بندی می‌خواهد.", "pilot", "او با قاب گرفتن قطعی و نیازهای زیرساخت شروع می‌کند (ص. ۵۶)."],
-    ["تنش بین product و مهندس‌های ارشدِ در حالت دفاعی بالا می‌رود.", "medic", "او فشار و ظرفیت تیم را به رسمیت می‌شناسد (ص. ۵۶)."],
-    ["بحث روی این‌که کدام رفع اول بیاید می‌خوابد.", "engineer", "او وارد جزئیات می‌شود و رفع‌ها را نقشه می‌کند (ص. ۵۶)."]
+    ["جلسه‌ی April، گام ۱: کسب‌وکار زمان‌بندی می‌خواهد.", "pilot", "او با قاب گرفتن قطعی و نیازهای زیرساخت شروع می‌کند (ص. ۵۶)."],
+    ["جلسه‌ی April، گام ۲: تنش بین product و مهندس‌های ارشدِ در حالت دفاعی بالا می‌رود.", "medic", "او فشار و ظرفیت تیم را به رسمیت می‌شناسد (ص. ۵۶)."],
+    ["جلسه‌ی April، گام ۳: بحث روی این‌که کدام رفع اول بیاید می‌خوابد.", "engineer", "او وارد جزئیات می‌شود و رفع‌ها را نقشه می‌کند (ص. ۵۶)."]
   ];
-  C.forEach(function (c, i) {
-    var id = "c" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "حالتی انتخاب نشده");
-    opts(sel, Object.keys(M).map(function (k) { return [k, M[k][0]]; }));
-    sel.addEventListener("change", function () {
-      if (!sel.value) return; var ok = sel.value === c[1];
-      b.className = "badge " + (ok ? "ok" : "warn"); b.textContent = (ok ? "✓ " : "انتخاب کتاب: " + M[c[1]][0] + ". ") + c[2];
-      log.add((i >= 3 ? "جلسه‌ی April: " : "") + M[sel.value][0] + (ok ? " — می‌خواند" : " — کتاب می‌گوید " + M[c[1]][0]), ok ? "ok" : "warn");
+  var st = { s: {}, c: {}, last: null }, tour;
+  function k(v) { return Kit.digits(String(v)); }
+  function fill(sel, first, list) { Kit.clear(sel); sel.appendChild(Kit.el("option", { value: "" }, first)); list.forEach(function (o) { sel.appendChild(Kit.el("option", { value: o[0] }, o[1])); }); }
+  var selS = document.getElementById("lm2-sign"), selR = document.getElementById("lm2-read"), selC = document.getElementById("lm2-sit"), selM = document.getElementById("lm2-mode");
+  fill(selS, "یک نشانه…", S.map(function (s, i) { return [String(i), s[0]]; })); fill(selR, "…", [["r", "مقاومت"], ["b", "فرسودگی"]]);
+  fill(selC, "یک موقعیت…", C.map(function (c, i) { return [String(i), c[0]]; })); fill(selM, "…", Object.keys(M).map(function (x) { return [x, M[x][0]]; }));
+
+  function chip(text, ok, isNew, book) { return Kit.el("div", { class: "lm2-chip" + (ok ? (isNew ? " new" : "") : " bad") }, (ok ? "✓ " : "✗ ") + text + (ok ? "" : " — کتاب: " + book)); }
+  function render() {
+    var sg = Kit.clear(document.getElementById("lm2-signs")), md = Kit.clear(document.getElementById("lm2-modes"));
+    ["r", "b"].forEach(function (key) {
+      var bin = Kit.el("div", { class: "lm2-bin" + (st.last && st.last[0] === "s" && st.s[st.last[1]] === key ? " lit" : "") }, Kit.el("div", { class: "lm2-h" }, B[key][0]), Kit.el("div", { class: "lm2-d" }, B[key][1]));
+      S.forEach(function (s, i) { if (st.s[i] === key) bin.appendChild(chip(s[0], s[1] === key, st.last && st.last[0] === "s" && st.last[1] === i, B[s[1]][0])); });
+      sg.appendChild(bin);
     });
-    if (i === 3) p2.appendChild(Kit.el("p", { class: "panel-title", style: "margin-top:14px" }, "یک جلسه، سه جابه‌جایی: جلسه‌ی پس از حادثه‌ی April"));
-    p2.appendChild(Kit.el("div", { class: "item" }, Kit.el("label", { for: id }, c[0]), sel, b));
+    Object.keys(M).forEach(function (key) {
+      var bin = Kit.el("div", { class: "lm2-bin" + (st.last && st.last[0] === "c" && st.c[st.last[1]] === key ? " lit" : "") }, Kit.el("div", { class: "lm2-h" }, M[key][0]), Kit.el("div", { class: "lm2-d" }, M[key][1]));
+      C.forEach(function (c, i) { if (st.c[i] === key) bin.appendChild(chip(c[0], c[1] === key, st.last && st.last[0] === "c" && st.last[1] === i, M[c[1]][0])); });
+      md.appendChild(bin);
+    });
+    var ns = Object.keys(st.s).length, os = Object.keys(st.s).filter(function (i) { return S[i][1] === st.s[i]; }).length;
+    var nc = Object.keys(st.c).length, oc = Object.keys(st.c).filter(function (i) { return C[i][1] === st.c[i]; }).length;
+    var out = Kit.clear(document.getElementById("stats"));
+    [["نشانه‌های چیده‌شده", k(ns) + " از ۶", ""], ["هم‌خوان با کتاب", k(os) + " از " + k(ns), ns && os < ns ? "bad" : ns ? "ok" : ""],
+     ["موقعیت‌های چیده‌شده", k(nc) + " از ۶", ""], ["هم‌خوان با کتاب", k(oc) + " از " + k(nc), nc && oc < nc ? "bad" : nc ? "ok" : ""]].forEach(function (x) {
+      out.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(x[1]))));
+    });
+  }
+
+  /* ---------- the drawer ---------- */
+  document.getElementById("lm2-put1").addEventListener("click", function () {
+    if (selS.value === "" || !selR.value) { tour.free("یک نشانه و یک خوانش انتخاب کنید.", "warn"); return; }
+    var i = +selS.value, ok = S[i][1] === selR.value; st.s[i] = selR.value; st.last = ["s", i]; render();
+    tour.free((ok ? "✓ " : "✗ کتاب این را " + B[S[i][1]][0] + " می‌خواند. ") + B[S[i][1]][0] + " " + B[S[i][1]][1], ok ? "ok" : "bad");
   });
-  Kit.tabs(document.getElementById("tabs"));
+  document.getElementById("lm2-put2").addEventListener("click", function () {
+    if (selC.value === "" || !selM.value) { tour.free("یک موقعیت و یک حالت انتخاب کنید.", "warn"); return; }
+    var i = +selC.value, ok = C[i][1] === selM.value; st.c[i] = selM.value; st.last = ["c", i]; render();
+    tour.free((ok ? "✓ " : "انتخاب کتاب: " + M[C[i][1]][0] + ". ") + C[i][2], ok ? "ok" : "warn");
+  });
+  document.getElementById("lm2-reveal").addEventListener("click", function () { S.forEach(function (s, i) { st.s[i] = s[1]; }); C.forEach(function (c, i) { st.c[i] = c[1]; }); st.last = null; render(); tour.free("پاسخ‌های کتاب چیده شد: سه نشانه‌ی بلند مقاومت‌اند و سه نشانه‌ی ساکت فرسودگی؛ جلسه‌ی April هر سه حالت را به ترتیب لازم دارد.", "ok"); });
+  document.getElementById("lm2-clear").addEventListener("click", function () { st = { s: {}, c: {}, last: null }; render(); tour.free("همه پاک شد. نشانه‌ها و موقعیت‌ها را خودتان بچینید.", ""); });
+
+  /* ---------- the scenario: book answers, placed a few at a time ---------- */
+  function scene(si, ci, last) { return function () { st = { s: {}, c: {}, last: last }; si.forEach(function (i) { st.s[i] = S[i][1]; }); ci.forEach(function (i) { st.c[i] = C[i][1]; }); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene([], [], null), render: render, interval: 8000,
+    intro: "سمت راست دو ستون برای خواندن نشانه‌ها، سمت چپ سه حالت رهبری. تور پاسخ‌های کتاب را یکی‌یکی می‌چیند؛ کارت تازه پررنگ است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، «پاک کردن» را بزنید و خودتان بچینید؛ کارت قرمز یعنی با کتاب نمی‌خواند.",
+    steps: [
+      { kind: "", run: scene([0, 1, 5], [], ["s", 5]), say: "مقاومت بلند است: پس زدن در برنامه‌ریزی، گفتن نگرانی، بحث درباره‌ی درستی برنامه. پاسخش شفاف کردن چشم‌انداز و بازسازی همراهی است (ص. ۳۹)." },
+      { kind: "warn", run: scene([0, 1, 5, 2, 3, 4], [], ["s", 4]), say: "فرسودگی ساکت است: کناره‌گیری، افت کیفیت، پیرویِ توخالی. برخورد با آن مثل مقاومت، یعنی محکم‌تر فروختن چشم‌انداز، بار بیشتری روی دوشش می‌گذارد؛ پاسخ کتاب محافظت از ظرفیت است (ص. ۳۹)." },
+      { kind: "", run: scene([0, 1, 2, 3, 4, 5], [0, 1, 2], ["c", 2]), say: "هر موقعیت حالت خودش را می‌خواهد: بحثی که دور خودش می‌چرخد خلبان، مهندسِ غرق‌شده امدادگر، و برنامه‌ای که همه با آن موافق‌اند و تکان نمی‌خورد مهندس (صص. ۵۲–۵۴)." },
+      { kind: "ok", run: scene([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5], ["c", 5]), say: "یک جلسه، سه جابه‌جایی: April در جلسه‌ی پس از حادثه با قاب گرفتن قطعی شروع می‌کند، فشار تیم را به رسمیت می‌شناسد و بعد رفع‌ها را نقشه می‌کند (ص. ۵۶). تیم باید بداند چرا جابه‌جا شده‌اید (ص. ۵۴)." },
+      { kind: "bad", run: function () { scene([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5], ["c", 1])(); st.c[1] = "pilot"; }, say: "اشتباه رایج: رفتار خلبانی با مهندسِ غرق‌شده، یعنی کشیدن تصویر بزرگ برای کسی که زیر کار مانده. کتاب می‌گوید خلبان برای تیمی که زیر مسئله‌های عملیاتی غرق است دور به نظر می‌رسد (ص. ۵۳)." }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "تیمی که قبلاً پرشور بود ساکت شده و کیفیت می‌لغزد. کتاب اول چه پیشنهاد می‌دهد؟", options: ["چشم‌انداز را دوباره بفروشید", "از ظرفیت محافظت کنید: کند کنید، دامنه را کم کنید، فضای بازیابی بدهید", "ایستگاه تأیید اضافه کنید"], answer: 1, explain: "این‌ها نشانه‌های فرسودگی‌اند که لباس مقاومت می‌پوشند (ص. ۳۹)." },
     { q: "حالت خلبان کِی برعکس عمل می‌کند؟", options: ["وقتی اولویت‌ها مبهم‌اند", "وقتی تیم زیر مسئله‌های عملیاتی غرق است", "وقتی ذی‌نفع‌ها رقیب‌اند"], answer: 1, explain: "ص. ۵۳." },

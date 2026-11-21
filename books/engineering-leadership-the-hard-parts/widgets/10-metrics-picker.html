@@ -6,14 +6,37 @@
 <title>انتخاب‌گر متریک</title>
 <meta name="description" content="پرسش‌های ذی‌نفع‌ها را به پرسش پشتشان ترجمه کنید و بعد مجموعه‌ای پنج شش‌تایی از چهار متریک DORA به‌علاوه‌ی متریک‌های زمینه‌ای بزرگ‌ترین نقطه‌ی دردتان بسازید. برای فصل ۱۰ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.qrow { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
-  .qrow .badge { grid-column: 1 / -1; justify-self: start; white-space: normal; } .qrow select { max-width: 16em; }
-  .mset li { margin: 3px 0; } .mset .ctx { font-weight: 600; }</style>
+<style>
+  /* Left: what a stakeholder typed, and what they really ask. Right: the metric set (DORA + two for the pain point) and the four rollout steps. */
+  .mp-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  .mp-wrap h3 { margin: 0 0 6px; font-size: .9rem; }
+  .mp-q { display: grid; grid-template-columns: minmax(0, 1fr) 1.4em minmax(0, 1.25fr); gap: 6px; align-items: center; margin-bottom: 6px; font-size: .82rem; line-height: 1.45; }
+  .mp-q .ask { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 5px 8px; background: var(--surface); }
+  .mp-q .arr { text-align: center; color: var(--ink-3); font-size: 1rem; }
+  .mp-q .need { border: 1.5px dashed var(--line-strong); border-radius: var(--radius-sm); padding: 5px 8px; color: var(--ink-3); min-height: 2.2em; }
+  .mp-q .need.on { border-style: solid; border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+  .mp-q .need.bad { border-style: solid; border-color: var(--bad); background: var(--bad-soft); color: var(--ink); }
+  .mp-set { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 10px; }
+  .mp-chip { font-size: .8rem; line-height: 1.4; border-radius: 6px; padding: 4px 8px; background: var(--surface-2); border: 1px solid var(--line); }
+  .mp-chip b { display: block; font-size: .78rem; color: var(--ink-2); }
+  .mp-chip.ctx { background: var(--warn-soft); border-color: var(--s2); }
+  .mp-chip.off { opacity: .45; }
+  .mp-roll { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .mp-step { font-size: .8rem; line-height: 1.4; border-radius: 6px; padding: 4px 6px; border: 1.5px dashed var(--line-strong); color: var(--ink-3); }
+  .mp-step.on { border-style: solid; border-color: var(--ok); background: var(--ok-soft); color: var(--ink); }
+  .mp-step.early { border-style: solid; border-color: var(--bad); background: var(--bad-soft); color: var(--ink); }
+  .mp-step b { display: block; }
+  #mp-ctl select { max-width: 100%; }
+  #mp-ctl { display: grid; gap: 2px; }
+  #mp-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; }
+  #mp-steps legend { grid-column: 1 / -1; }
+  @media (max-width: 760px) { .mp-wrap, .mp-roll { grid-template-columns: 1fr; } }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
       <a href="../chapters/10-metrics-that-matter-for-engineering-teams.html">فصل ۱۰</a><span aria-hidden="true">/</span>
@@ -24,57 +47,60 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۰ · متریک‌هایی که برای تیم‌های مهندسی مهم‌اند</div>
-  <h1>انتخاب‌گر متریک</h1>
-  <p class="lede">متریک را مثل یک محصول ببینید: از پرسشی شروع کنید که مشتری‌هایتان واقعاً می‌پرسند، نه آن چیزی که تایپ کرده‌اند. بعد مجموعه‌ای <strong>کوچک</strong> بسازید: چهار متریک DORA به‌علاوه‌ی یکی دوتا برای بزرگ‌ترین نقطه‌ی دردتان.</p>
-  <p class="source-note">این شبیه‌سازی «دام خواستن در برابر نیاز داشتن» (صص. ۲۰۹–۲۱۱) و «انتخاب متریک درست برای زمینه‌ی خودتان» (صص. ۲۱۲–۲۱۴) را نشان می‌دهد. پرسش‌ها و معنای زیرینشان و متریک‌های DORA و متریک‌های زمینه‌ای و قدم‌های راه‌اندازی از خود کتاب‌اند؛ خود تمرین مال vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>انتخاب‌گر متریک</h1>
+      <p class="lede">متریک را مثل یک محصول ببینید: از پرسشی شروع کنید که مشتری‌هایتان واقعاً می‌پرسند، نه آن چیزی که تایپ کرده‌اند. تور پشت چهار پرسش ذی‌نفع‌ها را می‌خواند و بعد مجموعه‌ای <strong>کوچک</strong> می‌سازد: چهار متریک DORA به‌علاوه‌ی یکی دوتا برای بزرگ‌ترین نقطه‌ی درد، با راه‌اندازی قدم‌به‌قدم.</p>
+      <p class="source-note">این شبیه‌سازی «دام خواستن در برابر نیاز داشتن» (صص. ۲۰۹–۲۱۱) و «انتخاب متریک درست برای زمینه‌ی خودتان» (صص. ۲۱۲–۲۱۴) را نشان می‌دهد. پرسش‌ها و معنای زیرینشان و متریک‌های DORA و متریک‌های زمینه‌ای و قدم‌های راه‌اندازی از خود کتاب‌اند؛ خود تمرین مال vault است.</p>
+    </header>
 
-  <div class="tabs" id="tabs">
-    <div role="tablist" aria-label="تمرین">
-      <button role="tab" id="t1" aria-controls="p1" aria-selected="true" type="button">۱ · پرسش پشت پرسش</button>
-      <button role="tab" id="t2" aria-controls="p2" aria-selected="false" type="button">۲ · ساختن مجموعه‌ی متریک</button>
-    </div>
-    <div role="tabpanel" id="p1" aria-labelledby="t1"></div>
-    <div role="tabpanel" id="p2" aria-labelledby="t2" hidden>
-      <div class="stack" style="margin-top:12px">
-        <div id="pain"></div>
-        <div class="panel"><p class="panel-title" id="settitle">مجموعه‌ی متریک شما</p><ol class="mset" id="set"></ol></div>
-        <div class="panel"><p class="panel-title">راه‌اندازی</p>
-          <label class="check"><input type="checkbox" id="r1"> کوچک شروع کنید: چهار متریک DORA از همان ابزارهای موجود git و CI/CD و monitoring</label>
-          <label class="check"><input type="checkbox" id="r2"> پیش از عوض کردن چیزی، چهار تا شش هفته خط پایه جمع کنید</label>
-          <label class="check"><input type="checkbox" id="r3"> وقتی DORA باثبات شد، آن یکی دو متریک زمینه‌ای را اضافه کنید</label>
-          <label class="check"><input type="checkbox" id="r4"> هر فصل، متریک‌هایی را که به تصمیم می‌رسند نگه دارید و بقیه را بازنشسته کنید</label>
-          <div id="roll" class="callout" aria-live="polite" style="margin-top:8px"></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="mp-wrap">
+          <div><h3>۱ · پرسش پشت پرسش (صص. ۲۰۹–۲۱۱)</h3><div id="mp-qs"></div></div>
+          <div><h3 id="mp-settitle">۲ · مجموعه‌ی متریک (صص. ۲۱۲–۲۱۴)</h3><div class="mp-set" id="mp-set"></div><h3>راه‌اندازی</h3><div class="mp-roll" id="mp-roll"></div></div>
         </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">مجموعه‌ی متریک</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="mp-ctl"></div>
+        <div class="tweak-group"><div id="mp-pain"></div></div>
+        <fieldset class="tweak-group" id="mp-steps" aria-label="قدم‌های راه‌اندازی"></fieldset>
       </div>
     </div>
   </div>
-  <div class="panel" style="margin-top:12px"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li>پرسش‌هایی مثل «چه کسی بیشترین commit را می‌زند؟» احمقانه نیستند؛ تلاشی برای کمی کردن حوزه‌ای ناآشنایند. بپرسید پاسخ چه تصمیمی را عوض می‌کند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>پرسش‌هایی مثل «چه کسی بیشترین commit را می‌زند؟» احمقانه نیستند؛ تلاشی برای کمی کردن حوزه‌ای ناآشنایند. بپرسید پاسخ چه تصمیمی را عوض می‌کند.</li>
     <li>ته خیلی از پرسش‌ها همین است: «حالمان خوب است؟»، یعنی به هدف‌ها می‌رسیم، پولمان ارزش دارد، و کیفیت به‌اندازه‌ی کافی خوب است؟</li>
     <li>مجموعه‌ی DORA بین سرعت، یعنی تکرار deployment و زمان رسیدن تغییر، و ثبات، یعنی نرخ خرابی تغییر و زمان بازیابی، تعادل برقرار می‌کند. پنج شش متریک برای عمل کردن کافی است.</li>
     <li>تیم را اندازه بگیرید نه افراد را، و به آدم‌ها بگویید چه چیزی را <em>اندازه نمی‌گیرید</em>، تا کار نامرئی کنار زده نشود.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/10-metrics-that-matter-for-engineering-teams.html"><small>درس</small>فصل ۱۰: متریک‌هایی که برای تیم‌های مهندسی مهم‌اند</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/10-metrics-that-matter-for-engineering-teams.html"><small>درس</small>فصل ۱۰: متریک‌هایی که برای تیم‌های مهندسی مهم‌اند</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var log = Kit.log(document.getElementById("log"));
   var U = { pred: "تحویل پیش‌بینی‌پذیر است و گلوگاه‌ها کجایند؟", conf: "می‌توانم به تحویل و ارزشی که می‌دهیم مطمئن باشم؟", none: "هیچ؛ هیچ تصمیمی عوض نمی‌شود، پس به‌جایش به تکرار deployment و نرخ خرابی تغییر نگاه کنید", ok: "حالمان خوب است؛ به هدف‌هایمان می‌رسیم؟" };
   var Qs = [
     ["«کدام تیم بهره‌ورترین است؟»", "pred", "ص. ۲۱۰"],
@@ -82,42 +108,81 @@
     ["«این ماه چه کسی بیشترین کد را commit کرده؟»", "none", "April می‌پرسد چه تصمیمی را عوض می‌کند و معاون می‌پذیرد که هیچ (ص. ۲۱۰)"],
     ["«تیم مهندسی چطور است؟»", "ok", "ص. ۲۱۱"]
   ];
-  var p1 = document.getElementById("p1");
-  p1.appendChild(Kit.el("p", { style: "margin-top:12px" }, "هر ذی‌نفع واقعاً چه می‌پرسد؟"));
-  Qs.forEach(function (q, i) {
-    var id = "q" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "پاسخ داده نشده");
-    sel.appendChild(Kit.el("option", { value: "" }, "انتخاب کنید…")); Object.keys(U).forEach(function (k) { sel.appendChild(Kit.el("option", { value: k }, U[k])); });
-    sel.addEventListener("change", function () {
-      if (!sel.value) return; var ok = sel.value === q[1];
-      b.className = "badge " + (ok ? "ok" : "warn"); b.textContent = (ok ? "✓ " : "خوانش کتاب: " + U[q[1]] + " ") + "(" + q[2] + ")";
-      log.add(q[0] + (ok ? " — با کتاب می‌خواند" : " — کتاب جور دیگری می‌خواندش"), ok ? "ok" : "warn");
-    });
-    p1.appendChild(Kit.el("div", { class: "qrow" }, Kit.el("label", { for: id }, q[0]), sel, b));
-  });
-  var DORA = ["تکرار deployment: هر چند وقت یک‌بار به production استقرار می‌دهید", "زمان رسیدن تغییر: از commit تا اجرا در production", "نرخ خرابی تغییر: استقرارهایی که فوری رفع لازم دارند", "زمان بازیابی سرویس: چقدر سریع از حادثه برمی‌گردید"];
+  var DORA = [["تکرار deployment", "هر چند وقت یک‌بار به production"], ["زمان رسیدن تغییر", "از commit تا production"], ["نرخ خرابی تغییر", "استقرارهایی که فوری رفع لازم دارند"], ["زمان بازیابی سرویس", "چقدر سریع از حادثه برمی‌گردید"]];
   var P = {
     rel: ["reliability", ["حجم حادثه‌های production به تفکیک شدت", "میانگین زمان بین خرابی‌ها، یعنی MTBF"]],
     pred: ["پیش‌بینی‌پذیری تحویل", ["زمان چرخه‌ی feature، از ایده تا production", "نرخ رسیدن به هدف sprint"]],
     qual: ["کیفیت", ["نرخ فرار باگ، یعنی production در برابر پیش از آن", "پوشش تست مسیرهای حیاتی"]],
     health: ["سلامت تیم", ["نظرسنجی فصلی رضایت توسعه‌دهنده", "توزیع بار on-call"]]
   };
-  function draw(k) {
-    var ol = Kit.clear(document.getElementById("set"));
-    DORA.forEach(function (d) { ol.appendChild(Kit.el("li", null, d)); });
-    P[k][1].forEach(function (d) { ol.appendChild(Kit.el("li", { class: "ctx" }, d + " (زمینه‌ای)")); });
-    document.getElementById("settitle").textContent = "مجموعه‌ی متریک شما: DORA به‌علاوه‌ی " + P[k][0] + "، یعنی ۶ متریک";
+  var R = [["کوچک شروع کنید", "چهار متریک DORA از همان git و CI/CD و monitoring"], ["خط پایه", "چهار تا شش هفته، پیش از عوض کردن چیزی"], ["زمینه‌ای", "وقتی DORA باثبات شد، آن یکی دو متریک را اضافه کنید"], ["هرس فصلی", "متریک‌هایی را که به تصمیم می‌رسند نگه دارید، بقیه را بازنشسته کنید"]];
+  var st, tour, rbox = [];
+  function k(v) { return Kit.digits(String(v)); }
+  function fresh() { st = { ans: {}, pain: "", roll: [false, false, false, false] }; }
+  function early() { return st.roll[2] && !(st.roll[0] && st.roll[1]); }
+  function rollMsg() {
+    var n = st.roll.filter(Boolean).length;
+    if (early()) return ["متریک‌های زمینه‌ای بعد از جا افتادن DORA و داشتن خط پایه‌ی چهار تا شش هفته‌ای می‌آیند (ص. ۲۱۳).", "warn"];
+    if (n === 4) return ["همین راه‌اندازی کتاب است. هدف تعادل بین همه‌شان است، نه بیشینه کردن یکی.", "ok"];
+    return [k(n) + " قدم از ۴ قدم برنامه‌ریزی شده.", ""];
   }
-  document.getElementById("pain").appendChild(Kit.segmented({ label: "بزرگ‌ترین نقطه‌ی درد فعلی", value: "rel", options: Object.keys(P).map(function (k) { return { value: k, label: P[k][0] }; }), onChange: function (k) { draw(k); log.add("نقطه‌ی درد: " + P[k][0], "muted"); } }).element);
-  draw("rel");
-  function roll() {
-    var c = ["r1", "r2", "r3", "r4"].map(function (id) { return document.getElementById(id).checked; }), n = c.filter(Boolean).length, r = document.getElementById("roll");
-    if (c[2] && !(c[0] && c[1])) { r.className = "callout warn"; r.textContent = "متریک‌های زمینه‌ای بعد از جا افتادن DORA و داشتن خط پایه‌ی چهار تا شش هفته‌ای می‌آیند."; }
-    else if (n === 4) { r.className = "callout ok"; r.textContent = "همین راه‌اندازی کتاب است. یادتان باشد هدف تعادل بین همه‌شان است، نه بیشینه کردن یکی."; }
-    else { r.className = "callout"; r.textContent = n + " قدم از ۴ قدم برنامه‌ریزی شده."; }
+  function render() {
+    var qs = Kit.clear(document.getElementById("mp-qs"));
+    Qs.forEach(function (q, i) {
+      var a = st.ans[i], ok = a === q[1];
+      qs.appendChild(Kit.el("div", { class: "mp-q" }, Kit.el("div", { class: "ask" }, q[0]), Kit.el("div", { class: "arr", "aria-hidden": "true" }, "←"),
+        Kit.el("div", { class: "need" + (a ? (ok ? " on" : " bad") : "") }, a ? (ok ? "" : "✗ ") + U[a] + (ok ? " (" + q[2] + ")" : "") : "؟")));
+    });
+    var set = Kit.clear(document.getElementById("mp-set")), on = st.roll[0] || !!st.pain;
+    DORA.forEach(function (d) { set.appendChild(Kit.el("div", { class: "mp-chip" + (on ? "" : " off"), title: d[1] }, Kit.el("b", null, "DORA"), d[0])); });
+    if (st.pain) P[st.pain][1].forEach(function (d) { set.appendChild(Kit.el("div", { class: "mp-chip ctx" }, Kit.el("b", null, "زمینه‌ای · " + P[st.pain][0]), d)); });
+    document.getElementById("mp-settitle").textContent = "۲ · مجموعه‌ی متریک" + (st.pain ? ": DORA به‌علاوه‌ی " + P[st.pain][0] : "") + " (صص. ۲۱۲–۲۱۴)";
+    var ro = Kit.clear(document.getElementById("mp-roll"));
+    R.forEach(function (r, i) { ro.appendChild(Kit.el("div", { class: "mp-step" + (st.roll[i] ? (i === 2 && early() ? " early" : " on") : "") }, Kit.el("b", null, (st.roll[i] ? "✓ " : "") + k(i + 1) + ". " + r[0]), r[1])); });
+    var n = Object.keys(st.ans).length, c = Object.keys(st.ans).filter(function (i) { return Qs[i][1] === st.ans[i]; }).length;
+    var out = Kit.clear(document.getElementById("stats"));
+    [["پرسش‌های خوانده‌شده", k(n) + " از ۴", n && c < n ? "warn" : ""], ["متریک‌ها", k(on ? 4 + (st.pain ? 2 : 0) : 0), ""], ["راه‌اندازی", k(st.roll.filter(Boolean).length) + " از ۴ قدم", early() ? "bad" : st.roll.every(Boolean) ? "ok" : ""]].forEach(function (x) {
+      out.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    qMean.value = st.ans[+qPick.value] || ""; rbox.forEach(function (b, i) { b.checked = st.roll[i]; }); if (st.pain) pain.set(st.pain);
   }
-  ["r1", "r2", "r3", "r4"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { roll(); if (e.target.checked) log.add("برنامه‌ریزی شد: " + e.target.parentNode.textContent.trim(), "muted"); }); });
-  roll();
-  Kit.tabs(document.getElementById("tabs"));
+
+  /* ---------- the drawer ---------- */
+  var qPick = Kit.el("select", { id: "mp-qq" }), qMean = Kit.el("select", { id: "mp-qm" });
+  Qs.forEach(function (q, i) { qPick.appendChild(Kit.el("option", { value: String(i) }, q[0])); });
+  qMean.appendChild(Kit.el("option", { value: "" }, "معنای زیرین…")); Object.keys(U).forEach(function (x) { qMean.appendChild(Kit.el("option", { value: x }, U[x])); });
+  qPick.addEventListener("change", function () { qMean.value = st.ans[+qPick.value] || ""; });
+  qMean.addEventListener("change", function () {
+    var i = +qPick.value, q = Qs[i]; if (qMean.value) st.ans[i] = qMean.value; else delete st.ans[i]; render();
+    var ok = qMean.value === q[1]; tour.free(q[0] + (ok ? " ✓ " + U[q[1]] + " (" + q[2] + ")." : " — خوانش کتاب: " + U[q[1]] + " (" + q[2] + ")."), ok ? "ok" : "warn");
+  });
+  var ctl = document.getElementById("mp-ctl");
+  ctl.appendChild(Kit.el("label", { class: "field-head", for: "mp-qq" }, "پرسش ذی‌نفع")); ctl.appendChild(qPick);
+  ctl.appendChild(Kit.el("label", { class: "field-head", for: "mp-qm" }, "واقعاً چه می‌پرسد؟")); ctl.appendChild(qMean);
+  var pain = Kit.segmented({ label: "بزرگ‌ترین نقطه‌ی درد", value: "rel", options: Object.keys(P).map(function (x) { return { value: x, label: P[x][0] }; }), onChange: function (v) { st.pain = v; render(); tour.free("مجموعه‌ی شما: چهار متریک DORA به‌علاوه‌ی " + P[v][1].join(" و ") + "؛ یعنی ۶ متریک.", ""); } });
+  document.getElementById("mp-pain").appendChild(pain.element);
+  R.forEach(function (r, i) {
+    var cb = Kit.el("input", { type: "checkbox", id: "mp-r" + i });
+    cb.addEventListener("change", function () { st.roll[i] = cb.checked; render(); var m = rollMsg(); tour.free(m[0], m[1]); });
+    rbox.push(cb); document.getElementById("mp-steps").appendChild(Kit.el("label", { class: "check", for: "mp-r" + i }, cb, " " + r[0]));
+  });
+
+  /* ---------- the scenario ---------- */
+  function scene(ans, p, roll) { return function () { fresh(); ans.forEach(function (i) { st.ans[i] = Qs[i][1]; }); st.pain = p; st.roll = roll.slice(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene([], "", [false, false, false, false]), render: render, interval: 8000,
+    intro: "سمت راست پرسشی است که ذی‌نفع تایپ کرده و کنارش آنچه واقعاً می‌پرسد. سمت چپ مجموعه‌ی متریک و چهار قدم راه‌اندازی آن.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، پرسش‌ها را خودتان بخوانید و نقطه‌ی درد تیمتان را بردارید.",
+    steps: [
+      { kind: "", run: scene([0], "", [false, false, false, false]), say: "«کدام تیم بهره‌ورترین است؟» در واقع می‌پرسد تحویل پیش‌بینی‌پذیر است و گلوگاه‌ها کجایند (ص. ۲۱۰). از پرسشی شروع کنید که واقعاً پرسیده شده." },
+      { kind: "warn", run: scene([0, 1, 2], "", [false, false, false, false]), say: "شمردن commitها: April می‌پرسد این عدد چه تصمیمی را عوض می‌کند، و معاون می‌پذیرد که هیچ (ص. ۲۱۰). ساعت کار هم در واقع پرسشی درباره‌ی اطمینان به تحویل است." },
+      { kind: "bad", run: scene([0, 1, 2, 3], "rel", [false, false, true, false]), say: function () { return "مجموعه‌ی کوچک: چهار متریک DORA (ص. ۲۱۲) به‌علاوه‌ی دوتا برای reliability. ولی متریک زمینه‌ای را پیش از DORA و خط پایه اضافه کرده‌ایم: " + rollMsg()[0]; } },
+      { kind: "", run: scene([0, 1, 2, 3], "pred", [true, true, false, false]), say: "اگر درد اصلی پیش‌بینی‌پذیری تحویل باشد، دو متریک زمینه‌ای «زمان چرخه‌ی feature» و «نرخ رسیدن به هدف sprint» هستند (ص. ۲۱۳). اول DORA از ابزارهای موجود، بعد چهار تا شش هفته خط پایه." },
+      { kind: "ok", run: scene([0, 1, 2, 3], "pred", [true, true, true, true]), say: function () { return rollMsg()[0] + " هر فصل متریک‌هایی را که به تصمیم نمی‌رسند بازنشسته کنید."; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "کدام‌یک متریک DORA است؟", options: ["خط‌های کد", "story point در هر sprint", "نرخ خرابی تغییر"], answer: 2, explain: "ص. ۲۱۲." },
     { q: "بزرگ‌ترین نقطه‌ی درد شما پیش‌بینی‌پذیری تحویل است. کتاب کدام متریک‌های زمینه‌ای را پیشنهاد می‌دهد؟", options: ["زمان چرخه‌ی feature و نرخ رسیدن به هدف sprint", "میانگین زمان بین خرابی‌ها و حجم حادثه", "رضایت توسعه‌دهنده و بار on-call"], answer: 0, explain: "ص. ۲۱۳." },
