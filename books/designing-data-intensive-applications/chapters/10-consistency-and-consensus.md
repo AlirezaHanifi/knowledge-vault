@@ -133,13 +133,17 @@ lang: fa
 
 *Figure 10-7 (p. 414): در طول قطعی، یک سیستم linearizable باید clientهای یک طرف را منتظر بگذارد یا خطا بدهد؛ در دسترس ماندن یعنی کنار گذاشتن linearizability.*
 
+##### قضیه‌ی CAP و محدودیت‌هایش (pp. 414–416)
+
 | مفهوم CAP چیست | چه نیست |
 |---|---|
 | قاعده‌ی سرانگشتی Brewer در سال ۲۰۰۰ که مهندس‌ها را به طراحی shared-nothing هل داد و به راه افتادن NoSQL کمک کرد؛ این بده‌بستان از دهه‌ی ۱۹۷۰ شناخته شده بود | «دو تا از سه تا را انتخاب کن»؛ partition انتخابی نیست؛ بهتر: *وقتی partition هست، یا consistent یا available* |
 | به‌طور رسمی: یک مدل consistency، یعنی linearizability، و یک نوع fault، یعنی network partition، که طبق داده‌های Google **کمتر از ۸٪ حادثه‌ها**ست | برای طراحی مفید است: درباره‌ی latency و node مرده چیزی نمی‌گوید؛ «availability» آن با کاربرد رایج فرق دارد؛ خیلی از سیستم‌ها نه CP‌اند نه AP |
 | مدل **PACELC** آن را تعمیم می‌دهد: اگر Partition، بین A و C؛ وگرنه، Else، بین Latency و Consistency | امروز: نتیجه‌های دقیق‌تر جایش را گرفته‌اند؛ به تعبیر کتاب بهتر است رویش نمانیم |
 
-**هزینه‌ی واقعی latency است، همیشه** (pp. 416–417): حتی **حافظه‌ی RAM روی یک CPU چند-coreی linearizable نیست**؛ cacheهای هر core و store bufferها یعنی core دیگری بدون memory barrier ممکن است داده‌ی کهنه بخواند؛ و این برای کارایی کنار گذاشته شده، نه برای تحمل fault. Attiya و Welch اثبات کردند خواندن و نوشتن linearizable زمانی **متناسب با عدم قطعیت latency شبکه** می‌گیرد؛ الگوریتم سریع‌تری وجود ندارد، پس سیستم‌های حساس به latency مدل‌های ضعیف‌تر را انتخاب می‌کنند؛ فصل ۱۳.
+##### مفهوم linearizability و latency شبکه (pp. 416–417)
+
+هزینه‌ی واقعی **latency** است، همیشه: حتی **حافظه‌ی RAM روی یک CPU چند-coreی linearizable نیست**؛ cacheهای هر core و store bufferها یعنی core دیگری بدون memory barrier ممکن است داده‌ی کهنه بخواند؛ و این برای کارایی کنار گذاشته شده، نه برای تحمل fault. Attiya و Welch اثبات کردند خواندن و نوشتن linearizable زمانی **متناسب با عدم قطعیت latency شبکه** می‌گیرد؛ الگوریتم سریع‌تری وجود ندارد، پس سیستم‌های حساس به latency مدل‌های ضعیف‌تر را انتخاب می‌کنند؛ فصل ۱۳.
 
 ### مولدهای ID و logical clockها
 
@@ -156,6 +160,18 @@ lang: fa
 
 یک **logical clock** رویدادها را می‌شمارد نه ثانیه‌ها را. الزام‌ها: timestampهای فشرده و یکتا، یک **ترتیب کامل**، و **سازگاری با ترتیب علّی**؛ یعنی اگر A پیش از B رخ داده، ts(A) < ts(B). یک شمارنده‌ی تک‌node این را دارد؛ روش‌های بالا نه (p. 420).
 
+##### مفهوم Lamport timestamp (pp. 420–421)
+
+هر node یک counter دارد و هر timestamp زوج (counter, node ID) است. با هر رویداد counter یکی زیاد می‌شود، و nodeی که counter بزرگ‌تری در یک پیام ببیند counter خودش را به آن می‌رساند. مرتب کردن بر اساس counter و بعد node ID یک ترتیب کامل می‌دهد که با ترتیب علّی سازگار است (pp. 420–421).
+
+![سه کاربر Aaliyah، Bryce و Caleb پیام‌های چت با Lamport timestampهایی مثل (1, "Aaliyah") و (2, "Bryce") رد و بدل می‌کنند؛ پاسخ همیشه counter بزرگ‌تری از پیامی دارد که به آن جواب می‌دهد](../figures/10-09.png)
+
+*Figure 10-9 (p. 421): مرتب کردن با (counter, node ID) یک ترتیب کامل می‌دهد که در آن هر پاسخ بعد از پیامی است که به آن جواب داده.*
+
+> **Try it:** [ساعت دیواری، Lamport clock و vector clock](../widgets/10-logical-clocks.html): چت Aaliyah و Bryce و Caleb کتاب را به سه روش مرتب کنید.
+
+##### مفهوم hybrid logical clock و vector clock (pp. 421–423)
+
 | ساعت | چطور | چه می‌دهد | چه ندارد |
 |---|---|---|---|
 | **مفهوم Lamport timestamp**، ۱۹۷۸ | زوج (counter, node ID)؛ با هر رویداد یکی زیاد می‌شود؛ با دیدن counter بزرگ‌تر به آن می‌پرد | ترتیب کامل سازگار با ترتیب علّی؛ (1, Aaliyah) < (1, Caleb) < (2, Bryce)؛ شکل ۱۰-۹ | مفهوم linearizability؛ هیچ پیوندی با زمان فیزیکی؛ nodeهایی که هرگز با هم حرف نمی‌زنند از هم دور می‌شوند |
@@ -163,12 +179,6 @@ lang: fa
 | **مفهوم vector clock** | یک counter برای هر node | تشخیص concurrency | اندازه: یک عدد صحیح برای هر node |
 
 مفهوم Lamport clock و hybrid clock شناسه‌ی تراکنش خوبی برای MVCC می‌سازند، چون آن‌وقت snapshotها ترتیب علّی را رعایت می‌کنند (p. 422).
-
-![سه کاربر Aaliyah، Bryce و Caleb پیام‌های چت با Lamport timestampهایی مثل (1, "Aaliyah") و (2, "Bryce") رد و بدل می‌کنند؛ پاسخ همیشه counter بزرگ‌تری از پیامی دارد که به آن جواب می‌دهد](../figures/10-09.png)
-
-*Figure 10-9 (p. 421): مرتب کردن با (counter, node ID) یک ترتیب کامل می‌دهد که در آن هر پاسخ بعد از پیامی است که به آن جواب داده.*
-
-> **Try it:** [ساعت دیواری، Lamport clock و vector clock](../widgets/10-logical-clocks.html): چت Aaliyah و Bryce و Caleb کتاب را به سه روش مرتب کنید.
 
 > **In practice:** بخش loader در reference stack ممکن است برای هر ردیف Bronze یک شناسه‌ی load بسازد، و Silver گاهی «آخرین» نسخه‌ی هر ردیف را لازم دارد.
 >
@@ -180,18 +190,24 @@ lang: fa
 
 مفهوم linearizability بیش از ترتیب علّی لازم دارد: اگر A پیش از شروع B تمام شده، ID مربوط به B بزرگ‌تر است **حتی اگر هرگز با هم حرف نزده باشند**. شکل ۱۰-۱۰: کاربر A روی لپ‌تاپ حسابش را خصوصی می‌کند، بعد با گوشی عکسی آپلود می‌کند؛ حساب‌ها و عکس‌ها در دو دیتابیس با Lamport یا hybrid clock زندگی می‌کنند، عکس timestamp *کوچک‌تری* می‌گیرد، و یک خواندن snapshot بین این دو، عکس شرم‌آور را به یک غریبه نشان می‌دهد. راه‌حل‌ها: بررسی مجوز پیش از نوشتن، که آسان فراموش می‌شود؛ دنبال کردن timestampها برای هر دستگاه، که بین دستگاه‌ها سخت است؛ یا ساده‌ترین: یک مولد ID با linearizability (pp. 423–424).
 
+##### پیاده‌سازی مولد ID با linearizability (pp. 424–425)
+
 | پیاده‌سازی | چطور | بده‌بستان |
 |---|---|---|
 | یک node | افزایش atomic، ذخیره‌ی پایدار و replication با single-leader؛ **timestamp oracle** در TiDB و TiKV، برگرفته از Percolator در Google؛ واگذاری **batch**های ذخیره‌شده، که ممکن است IDهایی جا بیفتند اما هرگز تکراری یا جابه‌جا نمی‌شوند | نمی‌شود shard کرد یا بین regionها پخش کرد؛ همه‌ی درخواست‌ها به یک region می‌روند؛ اما ساده و پرthroughput است |
 | ساعت‌های synchronous با عدم قطعیت، یعنی TrueTime در Spanner | صبر به اندازه‌ی بازه‌ی عدم قطعیت | بدون ارتباط، حتی بین regionها؛ سخت‌افزار ساعت دقیقاً synchronous لازم دارد |
 
-**مفهوم constraint بیش از ساعت لازم دارد** (p. 425): کمترین timestamp را برنده‌ی یک username یا قفل بگیرید؛ اما یک node فقط وقتی می‌تواند بداند کمترین است که از **همه‌ی** nodeهایی که ممکن است timestamp داده باشند خبر بگیرد؛ یک node دست‌نیافتنی همه‌چیز را متوقف می‌کند. قفل و lease با تحمل fault **مفهوم consensus** لازم دارند.
+##### اجرای constraint با logical clock (p. 425)
+
+مفهوم constraint بیش از ساعت لازم دارد: کمترین timestamp را برنده‌ی یک username یا قفل بگیرید؛ اما یک node فقط وقتی می‌تواند بداند کمترین است که از **همه‌ی** nodeهایی که ممکن است timestamp داده باشند خبر بگیرد؛ یک node دست‌نیافتنی همه‌چیز را متوقف می‌کند. قفل و lease با تحمل fault **مفهوم consensus** لازم دارند.
 
 ### مفهوم consensus
 
 روی یک node آسان است و با تحمل fault سخت: failover یک leader linearizable بدون split brain، و fence کردن leader متوقف‌شده؛ یک شمارنده‌ی fetch-and-add مقاوم در برابر crash؛ یک CAS با تحمل fault (pp. 425–426). همه‌ی این‌ها **consensus** هستند: توافق nodeها روی یک مقدار. شناخته‌شده‌ترین الگوریتم‌ها: **Viewstamped Replication، Paxos، Raft و Zab**؛ همه غیر-Byzantine؛ نسخه‌های مقاوم در برابر Byzantine فرض می‌کنند کمتر از یک‌سوم nodeها خراب‌اند، مثل blockchainها (p. 426).
 
-**نتیجه‌ی FLP**، از Fischer و Lynch و Paterson: هیچ الگوریتم قطعی‌ای در مدل asynchronous نمی‌تواند *پایان یافتن* را تضمین کند اگر ممکن باشد یک node crash کند. با timeout، حتی اگر گاهی اشتباه باشد، یا با تصادف، consensus حل‌شدنی است؛ در عمل کار می‌کند (p. 426).
+#### محال بودن consensus (p. 426)
+
+نتیجه‌ی **FLP**، از Fischer و Lynch و Paterson: هیچ الگوریتم قطعی‌ای در مدل asynchronous نمی‌تواند *پایان یافتن* را تضمین کند اگر ممکن باشد یک node crash کند. با timeout، حتی اگر گاهی اشتباه باشد، یا با تصادف، consensus حل‌شدنی است؛ در عمل کار می‌کند (p. 426).
 
 #### مفهوم consensus روی یک مقدار (pp. 427–429)
 
@@ -216,16 +232,31 @@ flowchart LR
     C -. "only for 2 nodes<br/>(consensus number 2)" .- FAA["Fetch-and-add<br/>(ID generator)"]
 ```
 
-- **هم‌ارزی CAS و consensus** (p. 429): یک register را null کنید؛ هر proposer با CAS آن را از null به مقدار خودش تغییر می‌دهد؛ مقدار ذخیره‌شده تصمیم است. برعکس، روی پیشنهادهای CAS هم‌زمان consensus اجرا کنید. نوشتن‌های شرطی object storeها CAS توزیع‌شده‌اند.
-- **هم‌ارزی log مشترک و consensus** (pp. 429–431): یک log با **eventual append، reliable delivery، append-only، agreement و validity**، که با **total order broadcast**، یا atomic broadcast، پیاده می‌شود. هر چیزی را که اول ظاهر شود تصمیم بگیرید؛ برعکس، برای هر خانه‌ی log یک نمونه‌ی consensus اجرا کنید. single-leader replication بدون failover در liveness شکست می‌خورد.
-- **مفهوم fetch-and-add** (pp. 431–432): با CAS پیاده‌شدنی است؛ اما به‌عنوان consensus، بازنده‌ها اگر برنده crash کند نمی‌توانند بفهمند چه کسی برده؛ فقط برای دو node consensus را حل می‌کند: **consensus number 2**، در برابر **∞** برای CAS و log مشترک.
-- **مفهوم atomic commitment** (pp. 432–433): uniform agreement، integrity، validity، یعنی commit فقط اگر همه رأی commit داده باشند، **nontriviality**، یعنی همه yes و بدون timeout پس commit، و termination. از consensus می‌سازیدش با broadcast کردن رأی‌ها و پیشنهاد commit یا abort؛ و consensus را از آن می‌سازید با تراکنش‌هایی که CAS تک‌node روی یک quorum انجام می‌دهند.
+##### هم‌ارزی CAS و consensus (p. 429)
+
+یک register را null کنید؛ هر proposer با CAS آن را از null به مقدار خودش تغییر می‌دهد؛ مقدار ذخیره‌شده تصمیم است. برعکس، روی پیشنهادهای CAS هم‌زمان consensus اجرا کنید. نوشتن‌های شرطی object storeها CAS توزیع‌شده‌اند.
+
+##### هم‌ارزی log مشترک و consensus (pp. 429–431)
+
+یک log با **eventual append، reliable delivery، append-only، agreement و validity**، که با **total order broadcast**، یا atomic broadcast، پیاده می‌شود. هر چیزی را که اول ظاهر شود تصمیم بگیرید؛ برعکس، برای هر خانه‌ی log یک نمونه‌ی consensus اجرا کنید. single-leader replication بدون failover در liveness شکست می‌خورد.
+
+##### مفهوم fetch-and-add به‌عنوان consensus (pp. 431–432)
+
+با CAS پیاده‌شدنی است؛ اما به‌عنوان consensus، بازنده‌ها اگر برنده crash کند نمی‌توانند بفهمند چه کسی برده؛ فقط برای دو node consensus را حل می‌کند: **consensus number 2**، در برابر **∞** برای CAS و log مشترک.
+
+##### مفهوم atomic commitment به‌عنوان consensus (pp. 432–433)
+
+ویژگی‌هایش uniform agreement، integrity، validity، یعنی commit فقط اگر همه رأی commit داده باشند، **nontriviality**، یعنی همه yes و بدون timeout پس commit، و termination. از consensus می‌سازیدش با broadcast کردن رأی‌ها و پیشنهاد commit یا abort؛ و consensus را از آن می‌سازید با تراکنش‌هایی که CAS تک‌node روی یک quorum انجام می‌دهند.
 
 #### مفهوم consensus در عمل (pp. 433–437)
 
+##### استفاده از log مشترک (pp. 433–434)
+
 بیشتر سیستم‌ها **log مشترک** می‌دهند: Raft، VR و Zab مستقیم؛ Paxos یک مقدار را تصمیم می‌گیرد اما به شکل **Multi-Paxos** استفاده می‌شود (p. 433). یک log مشترک **state machine replication** می‌دهد، و event sourcing، تراکنش‌های serializable با stored procedureهای قطعی، consensus برای هر صندلی، یعنی اولین entry برای هر صندلی، شمارنده‌ها و fencing tokenها، مثل `zxid` در ZooKeeper. دیتابیس‌های shardشده‌ی strongly consistent برای هر shard یک log نگه می‌دارند، که تضمین‌های بین shardها را محدود می‌کند (pp. 433–434).
 
-**از single-leader replication تا consensus** (pp. 434–435): failover دستی در termination شکست می‌خورد؛ failover خودکار انگار برای انتخاب leaderی که consensus را حل می‌کند خودش consensus لازم دارد. راه خروج: تضمین یک leader یکتا **در هر epoch**؛ شماره‌ی *ballot* در Paxos، شماره‌ی *view* در VR، و **term** در Raft. nodeی که timeout می‌خورد انتخاباتی با epoch بزرگ‌تر شروع می‌کند؛ epochهای بزرگ‌تر برنده‌اند.
+##### از single-leader replication تا consensus (pp. 434–435)
+
+مفهوم failover دستی در termination شکست می‌خورد؛ failover خودکار انگار برای انتخاب leaderی که consensus را حل می‌کند خودش consensus لازم دارد. راه خروج: تضمین یک leader یکتا **در هر epoch**؛ شماره‌ی *ballot* در Paxos، شماره‌ی *view* در VR، و **term** در Raft. nodeی که timeout می‌خورد انتخاباتی با epoch بزرگ‌تر شروع می‌کند؛ epochهای بزرگ‌تر برنده‌اند.
 
 ```mermaid
 flowchart LR
@@ -235,6 +266,8 @@ flowchart LR
 
 دو quorum باید **هم‌پوشانی** داشته باشند، پس یک رأی‌گیری موفق برای پیشنهاد ثابت می‌کند leader تازه‌تری وجود ندارد. برخلاف 2PC: هر کسی می‌تواند انتخابات را شروع کند، و فقط یک quorum، نه همه‌ی participantها، باید جواب بدهد (p. 435).
 
+##### نکته‌های ظریف consensus (pp. 435–437)
+
 | نکته‌ی ظریف (pp. 435–437) | |
 |---|---|
 | مفهوم durability | هر entry پیش از خبر دادن به client به‌صورت synchronous به یک quorum replicate می‌شود |
@@ -243,7 +276,9 @@ flowchart LR
 | خواندن‌های linearizable | باید آن‌ها هم با یک quorum تأیید شوند، مثل etcd |
 | عضویت | افزونه‌های reconfiguration nodeها را اضافه و حذف می‌کنند و regionها را جابه‌جا می‌کنند |
 
-**مزایا و معایب** (p. 437): consensus یعنی **«single-leader replication که درست انجام شده»**؛ failover خودکار بدون گم شدن commitها و بدون split brain؛ هر failover خودکاری بدون یک الگوریتم اثبات‌شده احتمالاً ناامن است. هزینه‌ها: یک اکثریت سخت؛ ۳ node یک خرابی را تحمل می‌کنند و ۵ node دو خرابی را؛ هر عملیات با یک quorum حرف می‌زند، پس اضافه کردن node آن را *کندتر* می‌کند؛ سمت اقلیت یک partition مسدود است؛ تنظیم timeout بین regionها سخت است، و timeout کوتاه یعنی انتخابات بی‌پایان؛ حالت‌های لبه، مثلاً یک لینک بی‌ثبات می‌تواند leader بودن در Raft را برای همیشه دست‌به‌دست کند، برای همین Raft فاز **pre-vote** دارد؛ و **EPaxos** بدون leader در برابر nodeهای کند مقاوم‌تر است.
+##### مزایا و معایب consensus (p. 437)
+
+مفهوم consensus یعنی **«single-leader replication که درست انجام شده»**؛ failover خودکار بدون گم شدن commitها و بدون split brain؛ هر failover خودکاری بدون یک الگوریتم اثبات‌شده احتمالاً ناامن است. هزینه‌ها: یک اکثریت سخت؛ ۳ node یک خرابی را تحمل می‌کنند و ۵ node دو خرابی را؛ هر عملیات با یک quorum حرف می‌زند، پس اضافه کردن node آن را *کندتر* می‌کند؛ سمت اقلیت یک partition مسدود است؛ تنظیم timeout بین regionها سخت است، و timeout کوتاه یعنی انتخابات بی‌پایان؛ حالت‌های لبه، مثلاً یک لینک بی‌ثبات می‌تواند leader بودن در Raft را برای همیشه دست‌به‌دست کند، برای همین Raft فاز **pre-vote** دارد؛ و **EPaxos** بدون leader در برابر nodeهای کند مقاوم‌تر است.
 
 > **Try it:** [مفهوم consensus: انتخاب leader و replicate کردن log](../widgets/10-consensus.html): یک cluster پنج‌nodeی به سبک Raft با termها، رأی‌ها، commit با اکثریت، crash و partition.
 
@@ -265,9 +300,15 @@ flowchart LR
 | اعلان تغییر | نظارت روی کلیدها: خبر پیوستن و خرابی بدون polling | نه |
 | config | ذخیره‌ی تنظیمات و اعلان هنگام تغییر؛ polling یک فایل یا URL هم کار می‌کند | نه |
 
-**تقسیم کار** (pp. 439–440): انتخاب یک leader یا primary، مثلاً برای دیتابیس‌ها و job schedulerها، و واگذاری shardها به nodeها با پیوستن و خرابی nodeها؛ با عملیات atomic، ephemeral node و اعلان، و ترجیحاً با کتابخانه‌هایی مثل Apache Curator. یک سرویس ثابت ۳ تا ۵ nodeی consensus را برای سیستمی با هزاران shard «برون‌سپاری» می‌کند. داده باید آهسته تغییر کند، مثل «10.1.1.23 leader مربوط به shard 7 است» که در حد دقیقه تا ساعت عوض می‌شود؛ state پرتغییر جایش در یک دیتابیس یا Apache BookKeeper است.
+#### مدیریت configuration با coordination service (pp. 439–440)
 
-**مفهوم service discovery** (p. 440): با تشخیص خرابی و اعلان راحت است، اما consensus برایش زیادی است؛ discovery باید بیشتر سریع و در دسترس باشد تا linearizable، پس cacheاش کنید، با TTL و لایه‌های DNS. **مفهوم observer** در ZooKeeper log را بدون رأی دادن replicate می‌کند: خواندن‌های کهنه اما در دسترس، و throughput خواندن بیشتر.
+##### تقسیم کار بین nodeها (pp. 439–440)
+
+انتخاب یک leader یا primary، مثلاً برای دیتابیس‌ها و job schedulerها، و واگذاری shardها به nodeها با پیوستن و خرابی nodeها؛ با عملیات atomic، ephemeral node و اعلان، و ترجیحاً با کتابخانه‌هایی مثل Apache Curator. یک سرویس ثابت ۳ تا ۵ nodeی consensus را برای سیستمی با هزاران shard «برون‌سپاری» می‌کند. داده باید آهسته تغییر کند، مثل «10.1.1.23 leader مربوط به shard 7 است» که در حد دقیقه تا ساعت عوض می‌شود؛ state پرتغییر جایش در یک دیتابیس یا Apache BookKeeper است.
+
+##### مفهوم service discovery (p. 440)
+
+با تشخیص خرابی و اعلان راحت است، اما consensus برایش زیادی است؛ discovery باید بیشتر سریع و در دسترس باشد تا linearizable، پس cacheاش کنید، با TTL و لایه‌های DNS. **مفهوم observer** در ZooKeeper log را بدون رأی دادن replicate می‌کند: خواندن‌های کهنه اما در دسترس، و throughput خواندن بیشتر.
 
 **کی از consensus استفاده نکنیم** (p. 443): اگر strong consistency لازم نیست، replication بدون leader یا multi-leader، همراه با logical clock، availability و کارایی بهتری می‌دهد.
 

@@ -7,8 +7,8 @@
 <meta name="description" content="صاحب یک lease متوقف می‌شود، lease منقضی می‌شود، client دیگری جایش را می‌گیرد، و client متوقف‌شده بیدار می‌شود و باز هم می‌نویسد. fencing token را روشن کنید و ببینید storage آن را رد می‌کند. برای فصل ۹ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .lane-label { font-size: 12px; font-weight: 600; }
-  .axis text { font-size: 10px; fill: var(--ink-3); }
+  .lane-label { font-size: 14px; font-weight: 600; }
+  .axis text { font-size: 12px; fill: var(--ink-3); }
   .axis line { stroke: var(--line); }
   .lane-bg { fill: var(--surface-2); }
   .bar-lease { fill: var(--accent-soft); stroke: var(--accent); }
@@ -19,12 +19,14 @@
   .ev.bad circle { fill: var(--bad); }
   .ev.warn circle { fill: var(--warn); }
   .ev.muted circle { fill: var(--ink-3); }
-  .ev text { font-size: 10px; }
+  .ev text { font-size: 13px; font-weight: 600; }
   .now { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 3 3; }
-  .store { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+  #stage svg { display: block; width: 100%; max-height: 330px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8rem; color: var(--ink-2); margin-top: 6px; }
+  .legend i { display: inline-block; width: 18px; height: 10px; border-radius: 2px; vertical-align: middle; margin-inline-end: 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -38,55 +40,61 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · دردسرهای سیستم‌های توزیع‌شده</div>
-  <h1>مفهوم lease، process pause و fencing token</h1>
-  <p class="lede">Client 1 یک lease دارد که اجازه‌ی نوشتن یک فایل را می‌دهد. lease را بررسی می‌کند و بعد در یک توقف طولانی garbage collection گیر می‌کند. lease منقضی می‌شود، Client 2 جایش را می‌گیرد و می‌نویسد؛ و بعد Client 1 بیدار می‌شود، هنوز با این باور که lease دارد، و آن هم می‌نویسد.</p>
-  <p class="source-note">برای بخش‌های «مفهوم process pause» در صص. ۳۶۶–۳۷۱ و «قفل و lease توزیع‌شده» در صص. ۳۷۳–۳۷۷، با شکل‌های ۹-۴ و ۹-۵ و توکن‌های ۳۳ و ۳۴. زمان به tick انتزاعی است و lease ده tick طول می‌کشد. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مفهوم lease، process pause و fencing token</h1>
+      <p class="lede">این‌جا Client 1 یک lease ده‌tickی می‌گیرد، آن را بررسی می‌کند و بعد برای مدتی متوقف می‌شود. اگر توقف از lease طولانی‌تر باشد، Client 1 بیدار می‌شود و هنوز خیال می‌کند lease دارد. fencing token تنها چیزی است که جلوی نوشتن کهنه‌اش را می‌گیرد.</p>
+      <p class="source-note">برای صص. ۳۷۳–۳۷۶ و شکل‌های ۹-۴ و ۹-۶، با توکن‌های ۳۳ و ۳۴ کتاب. زمان‌بندی به tick مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="stage" id="stage" dir="ltr"></div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">کنترل‌ها</p>
-        <div id="player"></div>
-        <div id="pause-slot" style="margin-top:12px"></div>
-        <label class="check" style="margin-top:12px"><input type="checkbox" id="fence"> سرویس storage توکن‌ها را بررسی کند</label>
-      </div>
-      <div class="panel">
-        <p class="panel-title">مفهوم storage</p>
-        <div class="store">
-          <div class="stat"><span class="stat-label">محتوای فایل</span><span class="stat-value" id="content">—</span></div>
-          <div class="stat"><span class="stat-label">بزرگ‌ترین توکن دیده‌شده</span><span class="stat-value" id="maxtok">—</span></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div id="stage" dir="ltr"></div>
+        <div class="legend" aria-hidden="true">
+          <span><i style="background:var(--accent-soft);border:1px solid var(--accent)"></i>lease مربوط به Client 1</span>
+          <span><i style="background:var(--warn-soft);border:1px solid var(--warn)"></i>توقف GC</span>
+          <span><i style="background:color-mix(in srgb, var(--s3) 18%, transparent);border:1px solid var(--s3)"></i>lease مربوط به Client 2</span>
+          <span>✓ نوشتن پذیرفته‌شده · ✗ نوشتن ردشده، با شماره‌ی توکن · نقطه‌ی خاکستری: درخواست ردشده‌ی lease</span>
         </div>
-        <div class="callout" id="outcome" style="margin-top:12px">پخش را بزنید یا timeline را قدم به قدم جلو ببرید.</div>
       </div>
-      <div class="panel">
-        <p class="panel-title">گزارش رویدادها</p>
-        <ol id="log"></ol>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">مفهوم storage</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="pause-slot"></div>
+        <div class="tweak-group"><label class="check"><input type="checkbox" id="fence"> سرویس storage توکن‌ها را بررسی کند</label></div>
+        <div class="tweak-group"><div class="row">
+          <button class="btn primary small" type="button" id="tick">یک tick جلو</button>
+          <button class="btn small" type="button" id="all">اجرای کامل</button>
+        </div></div>
       </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>بررسی و نوشتن atomic نیستند.</strong> Client 1 در tick دوم lease را بررسی کرد و معتبر دید؛ هیچ چیز جلوی گذشتن زمان را پیش از عمل بر اساس آن دانسته نمی‌گیرد.</li>
-    <li><strong>یک process متوقف‌شده نمی‌داند متوقف شده.</strong> از دید Client 1 اصلاً زمانی نگذشته.</li>
-    <li><strong>توقف‌های کوتاه بی‌خطرند.</strong> طول توقف را کمتر از طول lease کنید: Client 1 کارش را تمام می‌کند و lease را پیش از این‌که کسی لازمش داشته باشد آزاد می‌کند.</li>
-    <li><strong>مفهوم fencing بررسی را به خود منبع می‌برد.</strong> سرویس storage بزرگ‌ترین توکنی را که دیده به خاطر می‌سپارد و قدیمی‌ترها را رد می‌کند؛ دیگر باور client اهمیتی ندارد.</li>
-    <li><strong>مفهوم fencing همه‌چیز را حل نمی‌کند.</strong> با توقف ۸ تا ۹ tick، Client 1 بعد از انقضای lease اما پیش از اولین نوشتن Client 2 می‌نویسد؛ storage هنوز توکن بزرگ‌تری ندیده، پس نوشتن را می‌پذیرد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>بررسی و نوشتن atomic نیستند.</strong> Client 1 در tick دوم lease را بررسی کرد و معتبر دید؛ هیچ چیز جلوی گذشتن زمان را پیش از عمل بر اساس آن دانسته نمی‌گیرد (صص. ۳۶۶–۳۶۷).</li>
+      <li><strong>یک process متوقف‌شده نمی‌داند متوقف شده.</strong> از دید Client 1 اصلاً زمانی نگذشته (ص. ۳۷۴).</li>
+      <li><strong>مفهوم fencing بررسی را به خود منبع می‌برد.</strong> سرویس storage بزرگ‌ترین توکنی را که دیده به خاطر می‌سپارد و قدیمی‌ترها را رد می‌کند؛ دیگر باور client اهمیتی ندارد (ص. ۳۷۵).</li>
+      <li><strong>صاحب تازه باید فوراً بنویسد.</strong> تا storage توکن تازه را ندیده باشد، نوشتن zombie پذیرفته می‌شود (ص. ۳۷۵).</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
-    <li><a href="10-consensus.html"><small>شبیه‌سازی</small>مفهوم consensus: انتخاب leader و replicate کردن log</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
+      <li><a href="10-consensus.html"><small>شبیه‌سازی</small>مفهوم consensus: انتخاب leader و replicate کردن log</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -97,8 +105,8 @@
   var X0 = 92, DX = 27, LANE_H = 46, TOP = 26;
   var LANES = [["c1", "Client 1"], ["lock", "Lock service"], ["store", "Storage"], ["c2", "Client 2"]];
   var pause = 14, fencing = false, now = -1, events = [], applied = 0;
-  var store = { content: null, max: null };
-  var log = Kit.log(Kit.$("#log"));
+  var store = { content: null, max: null }, tour, said = ["", ""];
+  var log = { add: function (t, k) { said = [Kit.digits(t), k || ""]; } };
 
   // Build the whole scenario for a given pause length.
   function plan() {
@@ -139,14 +147,15 @@
   }
 
   function outcome() {
-    var box = Kit.$("#outcome");
+    var box = {};
     var c1 = events.filter(function (e) { return e.write && e.write.token === 33; })[0];
     var c2 = events.filter(function (e) { return e.write && e.write.token === 34; })[0];
-    if (applied < events.length) { box.className = "callout"; box.textContent = "در حال اجرا… t = " + Math.max(now, 0); return; }
+    if (applied < events.length) { box.className = "callout"; box.textContent = "در حال اجرا… t = " + Math.max(now, 0); return box; }
     if (c1.t < LEASE) { box.className = "callout ok"; box.textContent = "امن: توقف از lease کوتاه‌تر بود، پس Client 1 وقتی واقعاً lease داشت نوشت."; }
     else if (c1.kind === "bad") { box.className = "callout ok"; box.textContent = "جلوگیری شد: storage پیش‌تر توکن ۳۴ را دیده بود، پس نوشتن کهنه با توکن ۳۳ رد شد. داده‌ی Client 2 سالم می‌ماند."; }
     else if (c1.t > c2.t) { box.className = "callout bad"; box.textContent = "خراب شد: Client 1 با lease منقضی داده‌ی Client 2 را بازنویسی کرد. fencing token را روشن کنید و دوباره اجرا کنید."; }
     else { box.className = "callout warn"; box.textContent = "Client 1 بعد از انقضای lease اما پیش از اولین نوشتن Client 2 نوشت؛ storage توکن بزرگ‌تری ندیده بود، پس پذیرفت. بعد نوشتن Client 2 جایش را گرفت."; }
+    return box;
   }
 
   function x(t) { return X0 + t * DX; }
@@ -189,29 +198,49 @@
     });
     if (now >= 0) root.appendChild(S("line", { class: "now", x1: x(vis), x2: x(vis), y1: TOP - 4, y2: H - 6 }));
     Kit.clear(Kit.$("#stage")).appendChild(root);
-    Kit.$("#content").textContent = store.content || "—";
-    Kit.$("#maxtok").textContent = store.max === null ? "—" : store.max;
-    outcome();
+    var o = outcome(), k = o.className.replace("callout", "").trim();
+    var RES = { ok: "سالم", bad: "خراب", warn: "پذیرفته با lease منقضی", "": "در جریان" };
+    var st = Kit.clear(Kit.$("#stats"));
+    [["زمان", "t = " + Math.max(now, 0), ""], ["طول توقف", pause + " tick", pause + 2 >= LEASE ? "warn" : ""], ["بررسی توکن", fencing ? "روشن" : "خاموش", ""],
+     ["محتوای فایل", store.content || "—", ""], ["بزرگ‌ترین توکن دیده‌شده", store.max === null ? "—" : String(store.max), ""], ["نتیجه", RES[k], k]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(x[1]))));
+    });
+    slider.set(pause); Kit.$("#fence").checked = fencing;
+    Kit.$("#tick").disabled = Kit.$("#all").disabled = applied >= events.length;
   }
 
   function reset() {
-    events = plan(); now = -1; applied = 0; store = { content: null, max: null };
-    log.clear(); draw();
+    events = plan(); now = -1; applied = 0; store = { content: null, max: null }; said = ["", ""];
   }
   function step() {
     if (applied >= events.length) return false;
     now += 1;
     while (applied < events.length && events[applied].t <= now) apply(events[applied++]);
-    draw();
     return applied < events.length;
   }
+  function runAll() { while (step()) {} }
 
-  Kit.player({ mount: Kit.$("#player"), step: step, reset: reset, interval: 450 });
-  var s = Kit.slider({ label: "طول توقف GC", min: 2, max: 18, value: pause, unit: " tick",
-    hint: "طول lease ده tick است.", onInput: function (v) { pause = v; reset(); } });
-  Kit.$("#pause-slot").appendChild(s.element);
-  Kit.$("#fence").addEventListener("change", function (e) { fencing = e.target.checked; reset(); });
-  reset();
+  var slider = Kit.slider({ label: "طول توقف GC", min: 2, max: 18, value: pause, unit: " tick",
+    hint: "طول lease ده tick است.", onInput: function (v) { pause = v; reset(); draw(); tour.free("طول توقف عوض شد. «اجرای کامل» یا «یک tick جلو» را بزنید.", ""); } });
+  Kit.$("#pause-slot").appendChild(slider.element);
+  Kit.$("#fence").addEventListener("change", function (e) { fencing = e.target.checked; reset(); draw(); tour.free(fencing ? "بررسی توکن روشن شد." : "بررسی توکن خاموش شد.", ""); });
+  Kit.$("#tick").addEventListener("click", function () { step(); draw(); tour.free(said[0] || "tick بعدی.", said[1]); });
+  Kit.$("#all").addEventListener("click", function () { runAll(); draw(); var o = outcome(); tour.free(o.textContent, o.className.replace("callout", "").trim()); });
+
+  /* ---------- the scenario ---------- */
+  function play(p, f) { return function () { pause = p; fencing = f; reset(); runAll(); }; }
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: function () { pause = 4; fencing = false; reset(); }, render: draw, interval: 5600,
+    intro: "این‌جا Client 1 در t = 0 یک lease ده‌tickی با توکن ۳۳ می‌گیرد، در t = 2 آن را بررسی می‌کند و بعد یک توقف GC شروع می‌شود. Client 2 هم lease را می‌خواهد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، طول توقف را عوض کنید و tick به tick جلو بروید.",
+    steps: [
+      { kind: "ok", run: play(4, false), say: "توقف ۴ tick است، کوتاه‌تر از lease. Client 1 بیدار می‌شود، lease هنوز معتبر است، می‌نویسد و lease را آزاد می‌کند. بعد Client 2 با توکن ۳۴ نوبت می‌گیرد." },
+      { kind: "bad", run: play(14, false), say: "توقف ۱۴ tick است. lease در t = 10 منقضی می‌شود و Client 2 آن را می‌گیرد و می‌نویسد. Client 1 در t = 16 بیدار می‌شود، خیال می‌کند هنوز lease دارد، و داده‌ی Client 2 را خراب می‌کند (شکل ۹-۴، ص. ۳۷۴)." },
+      { kind: "ok", run: play(14, true), say: "همان توقف، این بار storage توکن‌ها را بررسی می‌کند. پیش‌تر توکن ۳۴ را دیده، پس نوشتن Client 1 با توکن ۳۳ رد می‌شود (شکل ۹-۶، ص. ۳۷۵)." },
+      { kind: "warn", run: play(8, true), say: "توقف ۸ tick: Client 1 در t = 10 بیدار می‌شود، درست وقتی lease منقضی شده و Client 2 هنوز ننوشته. storage توکن بزرگ‌تری ندیده، پس نوشتن کهنه پذیرفته می‌شود. برای همین صاحب تازه باید فوراً بنویسد (ص. ۳۷۵)." }
+    ]
+  });
 
   Kit.quiz(Kit.$("#quiz"), [
     { q: "چرا بررسی lease درست پیش از نوشتن Client 1 را امن نمی‌کند؟",

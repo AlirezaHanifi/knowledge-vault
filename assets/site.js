@@ -70,7 +70,12 @@
       i = Math.max(0, Math.min(slides.length - 1, i));
       if (i === current) return;
       current = i;
-      slides.forEach(function (s, k) { s.hidden = k !== i; });
+      slides.forEach(function (s, k) {
+        if (k !== i && !s.hidden) Array.prototype.forEach.call(s.querySelectorAll(".widget-frame iframe[src]"), function (f) {
+          try { f.contentWindow.postMessage({ kvPause: true }, "*"); } catch (err) { /* not loaded */ }
+        });
+        s.hidden = k !== i;
+      });
       links.forEach(function (a, k) {
         if (k === i) a.setAttribute("aria-current", "step"); else a.removeAttribute("aria-current");
       });
@@ -156,7 +161,12 @@
     window.addEventListener("message", function (e) {
       if (!e.data || typeof e.data.kvHeight !== "number") return;
       all.forEach(function (f) {
-        if (f.contentWindow === e.source && e.data.kvHeight > 100) f.style.height = Math.ceil(e.data.kvHeight) + 8 + "px";
+        if (f.contentWindow !== e.source) return;
+        // A stage simulation fills the slide (CSS sizes it); others grow to their content.
+        f.parentNode.classList.toggle("fill", !!e.data.kvStage);
+        // kvHeight is then the least height at which nothing in the stage is squeezed.
+        if (e.data.kvStage) { f.style.height = ""; f.style.minHeight = e.data.kvHeight ? Math.ceil(e.data.kvHeight) + "px" : ""; }
+        else { f.style.minHeight = ""; if (e.data.kvHeight > 100) f.style.height = Math.ceil(e.data.kvHeight) + 8 + "px"; }
       });
     });
     // The kit reports height on its own; asking again on load covers a report sent before we listened.

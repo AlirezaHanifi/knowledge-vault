@@ -321,6 +321,161 @@ svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
 .card .card-title { font-weight: 650; font-size: 1.08rem; }
 .card .card-desc { color: var(--ink-2); font-size: .92rem; }
 
+/* ---------- stage: a simulation that fits one screen and plays on its own ----------
+   <body class="stage-page">
+     <main class="page">
+       <div class="stage-screen">              exactly one screen tall on wide displays
+         <header class="stage-head"> h1 + one-line .lede + .source-note </header>
+         <div class="sim-stage">
+           <div class="stage-caption"></div>   narrated step (Kit.tour)
+           <div class="stage-scene"></div>     the picture: most of the space
+           <aside class="stage-side"></aside>  the numbers that matter, as one strip above the scene
+           <div class="stage-bar"></div>       play / back / next / restart / "change it yourself"
+           <div class="stage-tweak"></div>     controls: hidden until the reader opens them (Kit.tour {tweak}),
+                                               then a column beside the scene
+         </div>
+       </div>
+       <section class="stage-more"> what to notice, quiz, related: below the fold, not embedded </section>
+   Embedded in a lesson, only .sim-stage shows and it fills the frame the lesson gives it.
+   Readability rules: nothing in the scene is smaller than .8rem, scenes are laid out with
+   flex/grid (they reflow) or an SVG whose viewBox is near its shown size, labels never overlap. */
+
+.stage-page .page { max-width: 1280px; padding-top: 14px; }
+.stage-screen { display: flex; flex-direction: column; }
+.stage-head h1 { font-size: clamp(1.3rem, 2.4vw, 1.6rem); margin-bottom: .2em; }
+.stage-head .lede { font-size: .98rem; margin-bottom: .3rem; max-width: none; }
+.stage-head .source-note { font-size: .8rem; margin-bottom: .6rem; max-width: none; }
+.sim-stage {
+  display: grid; gap: 8px 12px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas: "caption" "side" "scene" "bar";
+}
+/* Open controls take a column beside the picture; the picture reflows narrower. */
+.sim-stage:has(.stage-tweak:not([hidden])) {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 290px);
+  grid-template-areas: "caption caption" "side side" "scene tweak" "bar bar";
+}
+.stage-caption { grid-area: caption; }
+.stage-scene { grid-area: scene; min-height: 0; overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; font-size: .95rem; }
+/* The numbers that matter, always in view: one strip of label + big value. */
+.stage-side { grid-area: side; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.stage-side .panel { display: contents; }
+.stage-side .panel-title { display: none; }
+.stage-side .stats { display: flex; flex-wrap: wrap; gap: 6px; }
+.stage-side .stat {
+  display: flex; align-items: baseline; gap: 8px; padding: 3px 12px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+}
+.stage-side .stat-label { font-size: .82rem; letter-spacing: 0; }
+.stage-side .stat-value { font-size: 1.1rem; white-space: nowrap; }
+.stage-bar { grid-area: bar; }
+.stage-tweak {
+  grid-area: tweak; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: auto;
+  padding: 10px 12px; border: 1px dashed var(--accent); border-radius: var(--radius); background: var(--surface-2);
+}
+.stage-tweak[hidden] { display: none; }
+.stage-tweak .tweak-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.stage-tweak .btn { padding: 6px 12px; min-height: 34px; font-size: .88rem; }
+.stage-tweak input[type="text"] { width: 64px; }
+.tour-caption {
+  display: flex; gap: 10px; align-items: baseline; min-height: 3.4em;
+  padding: 8px 14px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid var(--accent);
+  font-size: 1rem; line-height: 1.6;
+}
+.tour-caption.ok { background: var(--ok-soft); border-color: var(--ok); }
+.tour-caption.warn { background: var(--warn-soft); border-color: var(--warn); }
+.tour-caption.bad { background: var(--bad-soft); border-color: var(--bad); }
+.tour-caption.end, .tour-caption.free { background: var(--surface); border-style: dashed; }
+.tour-count { flex: none; font-size: .78rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+/* Scenario bar: [back | play | next]  ● ● ◉ ○ ○ (click a dot to jump)  [restart · speed · change it yourself] */
+.tour-bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.tour-bar .btn { min-height: 38px; }
+.tour-bar .ico { flex: none; display: block; }
+html[dir="rtl"] .tour-bar .ico-dir { transform: scaleX(-1); }
+.tour-transport { display: inline-flex; gap: 4px; align-items: center; }
+.tour-transport .tour-play { min-width: 112px; justify-content: center; font-weight: 650; font-size: .95rem; padding-inline: 16px; }
+.tour-transport .tour-step { padding-inline: 10px 12px; }
+.tour-tools { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-inline-start: auto; }
+.tour-speed { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: .82rem; color: var(--ink-2); cursor: pointer; }
+.tour-speed input[type="range"] { width: 68px; margin: 0; }
+/* Long scenarios (many dots) need the room: the speed slider keeps its value but drops its word. */
+.tour-bar:has(.tour-many) .tour-speed-label { display: none; }
+.tour-speed-val { min-width: 2.6em; font-weight: 700; color: var(--ink); text-align: center; font-variant-numeric: tabular-nums; }
+.tour-dots { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
+.tour-dot {
+  appearance: none; border: 0; background: none; padding: 0; cursor: pointer;
+  width: 22px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px;
+}
+.tour-dots.tour-many { gap: 0; }
+.tour-dots.tour-many .tour-dot { width: 14px; }
+.tour-dots.tour-many .tour-dot i { width: 10px; height: 10px; }
+.tour-dots.tour-many .tour-dot.tour-now { width: 28px; }
+.tour-dots.tour-many .tour-dot.tour-now i { width: 24px; }
+.tour-bar .btn.icon-only { padding-inline: 10px; }
+.tour-dot:hover { background: var(--surface-2); }
+.tour-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tour-dot i {
+  display: block; position: relative; overflow: hidden; width: 12px; height: 12px; border-radius: 999px;
+  background: var(--surface); border: 2px solid var(--line-strong); box-sizing: border-box;
+  transition: width var(--step), background var(--step), border-color var(--step);
+}
+.tour-dot.tour-done i { background: var(--accent); border-color: var(--accent); }
+.tour-dot.tour-now { width: 38px; }
+.tour-dot.tour-now i { width: 30px; border-color: var(--accent); background: var(--accent-soft); }
+.tour-dot.tour-now i::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: left center; transform: scaleX(1); }
+html[dir="rtl"] .tour-dot.tour-now i::after { transform-origin: right center; }
+.tour-dot.tour-now.tour-run i::after { animation: tour-fill var(--dwell, 3s) linear both; }
+@keyframes tour-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .tour-dot.tour-now.tour-run i::after { animation: none; } }
+.tour-end {
+  margin: 0; flex: 1 1 0; min-width: 120px; font-size: .86rem; line-height: 1.45; color: var(--ink-2);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tour-end[hidden] { display: none; }
+.tour-bar.tour-ended .tour-play, .tour-bar.tour-ended .tweak-toggle { box-shadow: 0 0 0 3px var(--accent-soft); }
+.stage-more { margin-top: 28px; }
+
+/* lens map (Kit.lensMap): seven stages in one row, each with a 5-step meter toward the lens's axis */
+.stage-scene:has(> .lm-pipe) { display: flex; flex-direction: column; justify-content: center; }
+.lm-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 10px; }
+.lm-lens { font-weight: 700; font-size: 1.05rem; }
+.lm-axis { font-size: .85rem; color: var(--ink-2); }
+.lm-axis b { color: var(--s1); font-weight: 400; letter-spacing: -1px; }
+.lm-pipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px; }
+.lm-stage {
+  font: inherit; text-align: start; cursor: pointer; display: grid; gap: 6px; align-content: start;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink);
+  padding: 10px 10px 12px; min-width: 0; min-height: 150px; transition: border-color var(--step), box-shadow var(--step);
+}
+.lm-stage:hover { border-color: var(--line-strong); }
+.lm-stage[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: var(--accent-soft); }
+.lm-zone { font-size: .75rem; color: var(--ink-3); font-weight: 700; }
+.lm-name { font-weight: 650; font-size: 1.02rem; }
+.lm-tag { font-size: .88rem; color: var(--ink-2); line-height: 1.45; overflow-wrap: anywhere; }
+.lm-meter { display: flex; gap: 3px; }
+.lm-meter i { display: block; width: 100%; height: 10px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+.lm-meter i.on { background: var(--s1); border-color: var(--s1); }
+.lm-foot { margin: 12px 0 0; font-size: .85rem; color: var(--ink-3); }
+.lm-hint { font-size: .85rem; color: var(--ink-2); margin: 0; }
+.stage-tweak .segmented { flex-wrap: wrap; }
+
+@media (min-width: 640px) {
+  .stage-screen { height: calc(100vh - 53px - 14px); min-height: 420px; padding-bottom: 12px; }
+  .sim-stage { flex: 1; min-height: 0; }
+}
+@media (max-width: 639px) {
+  .sim-stage, .sim-stage:has(.stage-tweak:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr); grid-template-rows: auto;
+    grid-template-areas: "caption" "side" "scene" "bar" "tweak";
+  }
+  .tour-transport .tour-step .btn-label { display: none; }
+  .tour-tools { margin-inline-start: 0; }
+}
+html.embed .stage-head, html.embed .stage-more { display: none; }
+html.embed.stage-fill .stage-page .page { padding: 2px; }
+html.embed.stage-fill .stage-screen { height: calc(100vh - 4px); min-height: 0; padding: 0; }
+
 /* ---------- embedded in a lesson (page.html#embed) ---------- */
 
 html.embed body { background: transparent; }

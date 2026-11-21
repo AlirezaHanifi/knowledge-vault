@@ -705,7 +705,16 @@ def lesson_slides(ch: Chapter) -> list[dict]:
         if intro.strip():
             content_slides(slugify(parent), h3, intro, t["from_book"])
         for h4, sub in subs[1:]:
-            content_slides(slugify(strip_pages(h4)[0]), h4, sub, parent)
+            # A `#####` heading (the book's own sub-subsection) gets a slide of its own,
+            # after the `####` section's lead-in.
+            parts = sections(sub, 5)
+            if len(parts) == 1:
+                content_slides(slugify(strip_pages(h4)[0]), h4, sub, parent)
+                continue
+            if parts[0][1].strip():
+                content_slides(slugify(strip_pages(h4)[0]), h4, parts[0][1], parent)
+            for h5, body in parts[1:]:
+                content_slides(slugify(strip_pages(h5)[0]), h5, body, strip_pages(h4)[0])
 
     if ch.h2.get("Trade-offs at a glance"):
         slides.append(slide("trade-offs", t["tradeoffs"], md(ch.h2["Trade-offs at a glance"], link),

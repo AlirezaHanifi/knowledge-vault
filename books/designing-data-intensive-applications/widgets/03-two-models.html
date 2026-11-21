@@ -7,36 +7,42 @@
 <meta name="description" content="یک رزومه، یک بار به شکل JSON document و یک بار به شکل جدول‌های relational. هفت عملیات روزمره را روی هر دو اجرا کنید و ببینید هر کدام به کدام ردیف‌ها یا خط‌ها دست می‌زند، چقدر هزینه دارد و کدام مدل می‌برد. برای فصل ۳ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .ops { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); margin-top: 10px; }
-  .op { font: inherit; text-align: start; cursor: pointer; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); padding: 8px 10px; display: grid; gap: 2px; }
-  .op:hover { border-color: var(--line-strong); }
-  .op[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-  .op small { color: var(--ink-3); font-size: .74rem; }
-  .op .mark { font-size: .74rem; font-weight: 700; }
-  .cols { display: grid; gap: 14px; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr) minmax(0, 4fr); margin-top: 14px; }
-  @media (max-width: 980px) { .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .cols > :last-child { grid-column: 1 / -1; } }
-  @media (max-width: 640px) { .cols { grid-template-columns: minmax(0, 1fr); } }
-  pre.doc { margin: 0; font-family: var(--mono); font-size: .72rem; line-height: 1.5; overflow-x: auto; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 0; }
-  pre.doc span { display: block; padding: 0 8px 0 2.2em; text-indent: -1.4em; border-left: 3px solid transparent; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .models { display: grid; gap: 10px 14px; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); align-items: start; }
+  @media (max-width: 760px) { .models { grid-template-columns: minmax(0, 1fr); } }
+  .models .panel-title { margin: 0 0 4px; }
+  pre.doc { margin: 0; font-family: var(--mono); font-size: .8rem; line-height: 1.28; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 0; direction: ltr; }
+  pre.doc span { display: block; padding: 0 8px 0 2.2em; text-indent: -1.4em; border-left: 3px solid transparent; white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity var(--step), background var(--step); }
   pre.doc span.hl, table.data tr.hl td { background: var(--accent-soft); }
   pre.doc span.hl { border-left-color: var(--accent); }
-  pre.doc span.dim, table.data tr.dim td { opacity: .45; }
-  .tbls { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
-  .tbls .tname { font-family: var(--mono); font-size: .76rem; font-weight: 700; color: var(--ink-2); margin: 0 0 3px; }
-  .tbls table.data { font-size: .74rem; }
-  .tbls table.data td, .tbls table.data th { padding: 3px 6px; }
-  .cost { margin: 0 0 10px; font-size: .9rem; }
-  .cost b { display: block; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
-  .win { display: inline-block; font-size: .78rem; font-weight: 700; border-radius: 999px; padding: 1px 9px; border: 1px solid var(--line-strong); }
-  .win.doc { border-color: var(--s1); color: var(--s1); }
-  .win.rel { border-color: var(--s2); color: var(--s2); }
-  .score { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: .84rem; }
-  .why { font-size: .88rem; margin: 8px 0; }
-  .practice { font-size: .86rem; border-inline-start: 3px solid var(--s3); padding-block: 4px; padding-inline: 10px 0; color: var(--ink-2); }
-  .practice b { color: var(--s3); }
+  pre.doc span.dim, table.data tr.dim td { opacity: .4; }
+  .tbls { display: grid; gap: 8px 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); direction: ltr; }
+  .tbls .wide { grid-column: 1 / -1; }
+  .tbls table.data td { white-space: nowrap; }
+  .tbls .tname { font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--ink-2); margin: 0 0 2px; }
+  .tbls table.data { font-size: .8rem; }
+  .tbls table.data td, .tbls table.data th { padding: 1px 6px; line-height: 1.35; }
+  .verdict { display: grid; gap: 8px 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin-top: 6px; font-size: .84rem; }
+  .verdict > div { border-inline-start: 3px solid var(--line-strong); padding-inline-start: 8px; }
+  .verdict b { display: block; font-size: .8rem; color: var(--ink-3); }
+  .verdict .w { border-color: var(--ok); }
+  .verdict .w b::after { content: " ✓ می‌برد"; color: var(--ok); }
+  .verdict .practice { border-color: var(--s3); }
+  .ops { display: grid; gap: 6px; }
+  /* The two models need the full width to stay readable, so here the open controls sit under the picture, not beside it. */
+  @media (min-width: 640px) {
+    .sim-stage:has(.stage-tweak:not([hidden])) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) auto auto; grid-template-areas: "caption" "side" "scene" "tweak" "bar"; }
+    .stage-tweak { flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 8px 14px; }
+    .stage-tweak { padding: 8px 10px; }
+    .ops { display: flex; flex-wrap: wrap; gap: 4px; }
+    .op { padding: 3px 8px; font-size: .84rem; }
+    .stage-tweak .segmented button { padding-block: 3px; }
+  }
+  .op { font: inherit; font-size: .88rem; text-align: start; cursor: pointer; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); padding: 6px 8px; }
+  .op[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .op .mark { font-size: .8rem; color: var(--ink-3); margin-inline-start: 6px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -50,54 +56,66 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۳ · مدل‌های داده و زبان‌های کوئری</div>
-  <h1>یک profile، دو مدل</h1>
-  <p class="lede">یک رزومه، یک بار به شکل JSON document و یک بار به شکل جدول. یک عملیات روزمره انتخاب کنید و ببینید هر مدل به چه چیزهایی باید دست بزند. هیچ‌کدام همیشه نمی‌برد: شکل دسترسی تعیین می‌کند.</p>
-  <p class="source-note">برای «مدل relational در برابر مدل document» در صص. ۶۷–۸۴: کاربر ۲۵۱ از مثال‌های ۳-۱ و ۳-۲ در صص. ۷۰ و ۷۶، جدول‌های شکل ۳-۱ و ۳-۳، جابه‌جایی ترتیب و ارجاع به آیتم تودرتو در ص. ۸۰، migration اسم در ص. ۸۱ و locality در ص. ۸۲. کاربر ۴۶۷ رکورد آزمایشی خود vault است؛ متن هزینه‌ها و خط‌های <em>در عمل</em> مال خود vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>یک profile، دو مدل</h1>
+      <p class="lede">یک رزومه، یک بار به شکل JSON document و یک بار به شکل جدول. هفت عملیات روزمره را ببینید: هر کدام به چه چیزهایی دست می‌زند و کدام مدل می‌برد.</p>
+      <p class="source-note">برای صص. ۶۷–۸۴: کاربر ۲۵۱ از مثال‌های ۳-۱ و ۳-۲، جدول‌های شکل ۳-۱ و ۳-۳، ترتیب و ارجاع به آیتم تودرتو (ص. ۸۰)، migration اسم (ص. ۸۱) و locality (ص. ۸۲). کاربر ۴۶۷، متن هزینه‌ها و خط‌های در عمل مال خود vault است.</p>
+    </header>
 
-  <div class="panel" style="margin-top:20px">
-    <div class="row"><div id="orgmode"></div></div>
-    <div class="ops" id="ops" role="group" aria-label="عملیات‌ها"></div>
-    <div class="score" id="score" aria-live="polite"></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="models">
+          <div><p class="panel-title">مدل document</p><pre class="doc" id="doc" lang="en"></pre></div>
+          <div><p class="panel-title">مدل relational</p><div class="tbls" id="tbls" lang="en"></div></div>
+        </div>
+        <div class="verdict" id="verdict" aria-live="polite"></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">امتیاز</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="orgmode"></div>
+        <div class="tweak-group ops" id="ops" role="group" aria-label="عملیات‌ها"></div>
+      </div>
+    </div>
   </div>
 
-  <div class="cols">
-    <div class="panel">
-      <p class="panel-title">مدل document</p>
-      <pre class="doc" id="doc"></pre>
-    </div>
-    <div class="panel">
-      <p class="panel-title">مدل relational</p>
-      <div class="tbls" id="tbls" lang="en" dir="ltr"></div>
-    </div>
-    <div class="panel" aria-live="polite" id="verdict"></div>
-  </div>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>خواندن کل یک درخت به نفع document است.</strong> صفحه‌ی profile به یک document دست می‌زند اما به ردیف‌هایی در پنج جدول: این همان locality است، ص. ۸۲، و همان shredding که کتاب درباره‌اش هشدار می‌دهد، ص. ۸۰.</li>
+      <li><strong>هر چیزی که از مرز documentها رد شود به نفع جدول است.</strong> «چه کسی در ۵۱۴ کار کرده؟»، تغییر نام یک سازمان و اشاره به یک سمت، همه از ID و join می‌گذرند؛ صص. ۷۵–۸۰.</li>
+      <li><strong>سازمان‌ها را به ID تبدیل کنید</strong>، مثل مثال ۳-۲: تغییر نام یک write می‌شود، اما صفحه‌ی profile حالا lookup لازم دارد. مفهوم normalization هزینه را از write به read منتقل می‌کند؛ صص. ۷۲–۷۴.</li>
+    </ul>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>خواندن کل یک درخت به نفع document است.</strong> صفحه‌ی profile به یک document دست می‌زند اما به ردیف‌هایی در پنج جدول: این همان locality است، ص. ۸۲، و همان shredding که کتاب درباره‌اش هشدار می‌دهد، ص. ۸۰.</li>
-    <li><strong>هر چیزی که از مرز documentها رد شود به نفع جدول است.</strong> «چه کسی در ۵۱۴ کار کرده؟»، تغییر نام یک سازمان و اشاره به یک سمت، همه از ID و join می‌گذرند؛ صص. ۷۵–۸۰.</li>
-    <li><strong>سازمان‌ها را به ID تبدیل کنید</strong>، مثل مثال ۳-۲: تغییر نام یک write می‌شود، اما صفحه‌ی profile حالا lookup لازم دارد. مفهوم normalization هزینه را از write به read منتقل می‌کند؛ صص. ۷۲–۷۴.</li>
-  </ul>
+    <h2>همین عملیات‌ها در عمل</h2>
+    <ul class="notice-list" id="practice"></ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/03-data-models-and-query-languages.html#کدام-مدل-را-کی-به-کار-ببریم"><small>درس</small>فصل ۳: کدام مدل را کی به کار ببریم</a></li>
-    <li><a href="03-normalization.html"><small>شبیه‌سازی</small>داده را normalize کنیم یا denormalize؟</a></li>
-    <li><a href="03-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۳ در طول یک pipeline داده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2>مرتبط</h2>
+    <ul class="related">
+      <li><a href="../chapters/03-data-models-and-query-languages.html#کدام-مدل-را-کی-به-کار-ببریم"><small>درس</small>فصل ۳: کدام مدل را کی به کار ببریم</a></li>
+      <li><a href="03-normalization.html"><small>شبیه‌سازی</small>داده را normalize کنیم یا denormalize؟</a></li>
+      <li><a href="03-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۳ در طول یک pipeline داده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var el = Kit.el;
-  var orgMode = "names", current = null, done = {};
+  var el = Kit.el, d = Kit.digits;
+  var orgMode, current, done, tour;
 
   function docLines() {
     var ids = orgMode === "ids";
@@ -117,27 +135,25 @@
       ["edu1", '    {"school_name": "Harvard University", "start": 1988, "end": 1991},'],
       ["edu2", '    {"school_name": "Columbia University", "start": 1981, "end": 1983}'],
       ["educ", "  ],"],
-      ["ci", '  "contact_info": {"website": "https://barackobama.com",'],
-      ["ci2", '                   "x": "https://x.com/barackobama"}'],
+      ["ci", '  "contact_info": {"website": "…", "x": "…"}'],
       ["close", "}"],
-      ["gap", ""],
       ["u467", ids ? '{"user_id": 467, …, "positions": [{"job_title": "Policy adviser", "org_id": 514}]}'
                    : '{"user_id": 467, …, "positions": [{"job_title": "Policy adviser", "organization": "United States Senate"}]}']
-    ].concat(ids ? [["gap2", ""], ["o513", '{"org_id": 513, "name": "United States of America"}'], ["o514", '{"org_id": 514, "name": "United States Senate"}']] : []);
+    ].concat(ids ? [["o513", '{"org_id": 513, "name": "United States of America"}'], ["o514", '{"org_id": 514, "name": "United States Senate"}']] : []);
   }
   var ALL251 = ["open", "uid", "name", "headline", "region", "pos", "pos1", "pos2", "posc", "edu", "edu1", "edu2", "educ", "ci", "ci2", "close"];
 
   var TABLES = [
     { name: "users", cols: ["user_id", "first_name", "last_name", "region_id"], rows: [
       ["u251", "251", "Barack", "Obama", "us:91"], ["u467", "467", "Sam", "Rivera", "us:91"]] },
-    { name: "positions", cols: ["position_id", "user_id", "job_title", "org_id", "sort"], rows: [
-      ["p1", "p1", "251", "President", "513", "1"], ["p2", "p2", "251", "US Senator (D-IL)", "514", "2"], ["p3", "p3", "467", "Policy adviser", "514", "1"]] },
     { name: "organizations", cols: ["org_id", "name"], rows: [
       ["o513", "513", "United States of America"], ["o514", "514", "United States Senate"]] },
+    { name: "positions", wide: true, cols: ["position_id", "user_id", "job_title", "org_id", "sort"], rows: [
+      ["p1", "p1", "251", "President", "513", "1"], ["p2", "p2", "251", "US Senator (D-IL)", "514", "2"], ["p3", "p3", "467", "Policy adviser", "514", "1"]] },
     { name: "education", cols: ["user_id", "school_name", "start", "end"], rows: [
       ["e1", "251", "Harvard University", "1988", "1991"], ["e2", "251", "Columbia University", "1981", "1983"]] },
     { name: "contact_info", cols: ["user_id", "type", "url"], rows: [
-      ["c1", "251", "website", "https://barackobama.com"], ["c2", "251", "x", "https://x.com/barackobama"]] }
+      ["c1", "251", "website", "barackobama.com"], ["c2", "251", "x", "x.com/barackobama"]] }
   ];
 
   /* each op: doc/rel = {hl, cost}; docIds overrides doc when organizations are IDs */
@@ -189,16 +205,18 @@
   ];
 
   function pick(o, part) { return orgMode === "ids" && o[part + "Ids"] ? o[part + "Ids"] : o[part]; }
+  function opBy(k) { return OPS.filter(function (o) { return o.key === k; })[0]; }
+  function choose(k) { current = k; done[k + ":" + orgMode] = pick(opBy(k), "win"); }
 
   function render() {
-    var op = OPS.filter(function (o) { return o.key === current; })[0];
+    var op = opBy(current);
     var dhl = op ? pick(op, "doc").hl : [], rhl = op ? op.rel.hl : [];
-    var pre = Kit.clear(Kit.$("#doc"));
+    var pre = Kit.clear(document.getElementById("doc"));
     docLines().forEach(function (l) { pre.appendChild(el("span", { class: op ? (dhl.indexOf(l[0]) >= 0 ? "hl" : "dim") : "" }, l[1] || " ")); });
 
-    var tb = Kit.clear(Kit.$("#tbls"));
+    var tb = Kit.clear(document.getElementById("tbls"));
     TABLES.forEach(function (t) {
-      tb.appendChild(el("div", null, el("p", { class: "tname" }, t.name),
+      tb.appendChild(el("div", { class: t.wide ? "wide" : "" }, el("p", { class: "tname" }, t.name),
         el("div", { class: "table-wrap" }, el("table", { class: "data" },
           el("thead", null, el("tr", null, t.cols.map(function (c) { return el("th", null, c); }))),
           el("tbody", null, t.rows.map(function (r) {
@@ -206,43 +224,65 @@
           }))))));
     });
 
-    var v = Kit.clear(Kit.$("#verdict"));
-    if (!op) {
-      v.appendChild(el("p", { class: "panel-title" }, "نتیجه"));
-      v.appendChild(el("p", null, "یک عملیات از بالا انتخاب کنید. خط‌ها و ردیف‌های پررنگ همان چیزهایی‌اند که به آن‌ها دست می‌زند."));
-    } else {
+    var v = Kit.clear(document.getElementById("verdict"));
+    if (op) {
       var w = pick(op, "win");
-      v.appendChild(el("p", { class: "panel-title" }, op.label));
-      v.appendChild(el("p", { class: "cost" }, el("b", null, "مدل document"), pick(op, "doc").cost));
-      v.appendChild(el("p", { class: "cost" }, el("b", null, "مدل relational"), op.rel.cost));
-      v.appendChild(el("span", { class: "win " + w }, w === "doc" ? "مدل document می‌برد" : w === "rel" ? "مدل relational می‌برد" : "هیچ‌کدام قاطعانه نمی‌برد"));
-      v.appendChild(el("p", { class: "why" }, op.why));
-      v.appendChild(el("p", { class: "practice" }, el("b", null, "در عمل: "), op.practice));
+      v.appendChild(el("div", { class: w === "doc" ? "w" : "" }, el("b", null, "مدل document"), pick(op, "doc").cost));
+      v.appendChild(el("div", { class: w === "rel" ? "w" : "" }, el("b", null, "مدل relational"), op.rel.cost));
     }
 
     Array.prototype.forEach.call(document.querySelectorAll(".op"), function (b) {
-      var o = OPS.filter(function (x) { return x.key === b.getAttribute("data-op"); })[0];
+      var o = opBy(b.getAttribute("data-op")), r = done[o.key + ":" + orgMode];
       b.setAttribute("aria-pressed", String(o.key === current));
-      var w = pick(o, "win");
-      b.querySelector(".mark").textContent = done[o.key] ? (w === "doc" ? "✓ مدل document" : w === "rel" ? "✓ مدل relational" : "= مساوی") : "";
+      b.querySelector(".mark").textContent = r ? (r === "doc" ? "✓ document" : r === "rel" ? "✓ relational" : "= مساوی") : "";
     });
     var tally = { doc: 0, rel: 0, tie: 0 }, n = 0;
-    OPS.forEach(function (o) { if (done[o.key]) { tally[pick(o, "win")]++; n++; } });
-    Kit.$("#score").textContent = n ? "امتحان‌شده " + n + " از " + OPS.length + ": document " + tally.doc + " · relational " + tally.rel + " · مساوی " + tally.tie : "";
+    Object.keys(done).forEach(function (k) { tally[done[k]]++; n++; });
+    var st = Kit.clear(document.getElementById("stats"));
+    [["عملیات", op ? op.label : "–"], ["سازمان‌ها", orgMode === "ids" ? "ID" : "اسم کپی‌شده"],
+     ["برد document", tally.doc], ["برد relational", tally.rel], ["مساوی", tally.tie]].forEach(function (x) {
+      st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value" }, d(String(x[1])))));
+    });
+    org.set(orgMode);
   }
 
-  var ops = Kit.$("#ops");
+  OPS.forEach(function (o) { document.getElementById("practice").appendChild(el("li", null, el("strong", null, o.label + ". "), o.practice)); });
+
+  /* ---------- the tweak drawer ---------- */
+  var ops = document.getElementById("ops");
   OPS.forEach(function (o) {
     ops.appendChild(el("button", { class: "op", type: "button", "data-op": o.key, "aria-pressed": "false",
-      onclick: function () { current = o.key; done[o.key] = true; render(); } },
-      el("span", null, o.label), el("small", null, o.sub), el("span", { class: "mark" })));
+      onclick: function () {
+        choose(o.key); render(); tour.free(o.label + ": " + o.why, "free");
+        // With the controls open the scene may be shorter than both models: bring the touched lines into view.
+        var h = document.querySelector("pre.doc span.hl"); if (h) h.scrollIntoView({ block: "nearest" });
+      } },
+      el("span", null, o.label), el("span", { class: "mark" })));
   });
-  Kit.$("#orgmode").appendChild(Kit.segmented({ label: "documentها سازمان را چطور ذخیره می‌کنند", value: orgMode,
-    options: [{ value: "names", label: "سازمان به شکل اسم کپی‌شده، مثال ۳-۱" }, { value: "ids", label: "سازمان به شکل ID، مثال ۳-۲" }],
-    onChange: function (v) { orgMode = v; render(); } }).element);
-  render();
+  var org = Kit.segmented({ label: "documentها سازمان را چطور ذخیره می‌کنند", value: "names",
+    options: [{ value: "names", label: "اسم کپی‌شده، مثال ۳-۱" }, { value: "ids", label: "ID، مثال ۳-۲" }],
+    onChange: function (v) { orgMode = v; if (current) choose(current); render();
+      tour.free(v === "ids" ? "حالا documentها به سازمان با org_id ارجاع می‌دهند، مثل مثال ۳-۲." : "حالا اسم سازمان در هر document کپی شده است، مثل مثال ۳-۱.", "free"); } });
+  document.getElementById("orgmode").appendChild(org.element);
 
-  Kit.quiz(Kit.$("#quiz"), [
+  /* ---------- the scenario: the seven operations, then organizations as IDs ---------- */
+  var steps = OPS.map(function (o) {
+    return { say: function () { return o.label + ": " + o.why; }, kind: o.win === "doc" ? "ok" : o.win === "rel" ? "warn" : "",
+             run: function () { orgMode = "names"; choose(o.key); } };
+  });
+  steps.push({ say: "حالا سازمان‌ها را به ID تبدیل کنید، مثل مثال ۳-۲. تغییر نام یک write می‌شود و دیگر به نفع جدول نیست…", kind: "ok",
+               run: function () { orgMode = "ids"; choose("rename"); } });
+  steps.push({ say: "…اما صفحه‌ی profile حالا ۲ lookup اضافه برای اسم سازمان‌ها دارد: یک join در کد اپلیکیشن. normalization هزینه را از write به read می‌برد (صص. ۷۲–۷۴).", kind: "warn",
+               run: function () { orgMode = "ids"; choose("page"); } });
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { orgMode = "names"; current = null; done = {}; }, render: render, interval: 4600,
+    intro: "کاربر ۲۵۱ یک بار به شکل document و یک بار به شکل پنج جدول. خط‌ها و ردیف‌های پررنگ همان‌هایی‌اند که هر عملیات به آن‌ها دست می‌زند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: عملیات‌ها را با سازمان به شکل اسم و به شکل ID امتحان کنید.",
+    steps: steps
+  });
+
+  Kit.quiz(document.getElementById("quiz"), [
     { q: "یک اپ تنظیمات هر مشتری را همیشه به شکل یک آبجکت load می‌کند و هیچ‌وقت روی چند مشتری کوئری نمی‌زند. کدام مدل مناسب است؟",
       options: ["مدل relational، شکسته به یک جدول برای هر گروه تنظیمات", "یک document برای هر مشتری", "یک graph", "یک star schema"],
       answer: 1, explain: "درخت خودکفایی که یک‌جا load می‌شود مورد مدل document است؛ شکستنش فقط بی‌دلیل جدول و join اضافه می‌کند (ص. ۸۰)." },

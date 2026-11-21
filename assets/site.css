@@ -131,6 +131,12 @@ details.outline ul { font-size: .92rem; }
 /* widget */
 .widget-frame { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); overflow: hidden; }
 .widget-frame iframe { display: block; width: 100%; height: 720px; border: 0; background: transparent; }
+/* a stage simulation fills what is left of the viewport under the slide heading */
+.widget-frame.fill iframe { height: max(520px, calc(100vh - var(--top-h) - var(--nav-h) - 124px)); }
+.slide-widget { padding-top: 16px; padding-bottom: calc(var(--nav-h) + 12px); }
+.slide-widget .slide-head { margin-bottom: 10px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.slide-widget .slide-head .eyebrow { margin: 0; }
+.slide-widget .slide-head h2 { font-size: clamp(1.2rem, 2.1vw, 1.5rem); }
 .widget-open { font-size: .85rem; color: var(--ink-3); margin-top: 10px; }
 
 /* quiz */

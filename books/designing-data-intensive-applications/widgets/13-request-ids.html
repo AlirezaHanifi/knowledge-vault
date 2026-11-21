@@ -7,23 +7,28 @@
 <meta name="description" content="۱۱ دلار را روی یک شبکه‌ی ناپایدار منتقل کنید: پاسخ‌ها گم می‌شوند، client دوباره تلاش می‌کند و پول دو بار جابه‌جا می‌شود، مگر یک request ID از client تا یک uniqueness constraint در دیتابیس برود. برای فصل ۱۳ DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
+  .stage-scene:has(> .ri) { display: flex; flex-direction: column; justify-content: center; }
+  .ri { display: grid; gap: 10px; }
   .hops { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .hop { border: 1.5px solid var(--line-strong); border-radius: var(--radius); padding: 8px 10px; background: var(--surface); font-size: .8rem; }
-  .hop h3 { font-size: .85rem; margin: 0 0 4px; }
-  .hop .sub { color: var(--ink-3); font-size: .74rem; }
-  .accts { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+  .hop { border: 1.5px solid var(--line-strong); border-radius: var(--radius); padding: 6px 10px; background: var(--surface); font-size: .85rem; }
+  .hop h3 { font-size: .95rem; margin: 0 0 4px; }
+  .hop .sub { color: var(--ink-2); font-size: .82rem; line-height: 1.5; }
+  .mid { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: stretch; }
+  .accts { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .acct { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); }
-  .acct .bal { font-family: var(--mono); font-size: 1.3rem; font-weight: 600; }
-  .acct .exp { font-size: .74rem; color: var(--ink-3); }
+  .acct .bal { font-family: var(--mono); font-size: 1.35rem; font-weight: 700; }
+  .acct .exp { font-size: .8rem; color: var(--ink-3); }
+  .acct.off { border-color: var(--bad); }
   .acct.off .bal { color: var(--bad); }
-  table.data td { font-family: var(--mono); font-size: .74rem; }
+  pre.sql { font-size: .8rem; line-height: 1.45; background: var(--surface-2); padding: 8px 10px; border-radius: var(--radius-sm); margin: 0; white-space: pre-wrap; }
+  table.data td { font-family: var(--mono); font-size: .8rem; }
   table.data tr.dup td { background: var(--bad-soft); }
   table.data tr.rej td { color: var(--ink-3); text-decoration: line-through; }
-  .tbl { max-height: 190px; overflow-y: auto; margin-top: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
-  pre.sql { font-size: .72rem; background: var(--surface-2); padding: 8px 10px; border-radius: var(--radius-sm); margin: 10px 0 0; white-space: pre-wrap; }
+  .tbl { max-height: 124px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  @media (max-width: 760px) { .hops, .mid { grid-template-columns: 1fr; } }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -37,76 +42,84 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۳ · فلسفه‌ی سیستم‌های streaming</div>
-  <h1>مفهوم exactly-once سرتاسری</h1>
-  <p class="lede">کاربری یک انتقال را می‌فرستد؛ commit می‌شود، اما پاسخ روی یک اتصال ضعیف گم می‌شود، پس دوباره دکمه‌ی ارسال را می‌زند. برای سرور و دیتابیس این retry درخواستی کاملاً تازه است و هر تراکنش commit می‌شود. فقط شناسه‌ای که در client ساخته و در دیتابیس بررسی شود می‌تواند این دو را از هم جدا کند.</p>
-  <p class="source-note">برای بخش‌های «حذف تکراری‌ها»، «شناسایی یکتای درخواست‌ها» و «استدلال end-to-end» در صص. ۵۶۳–۵۶۶، و مثال ۱۳-۲: انتقال ۱۱ دلار از حساب 4321 به 1234 با محافظت یک <code>request_id</code> یکتا. گم شدن پاسخ‌ها تصادفی است اما با seed ثابت؛ هر client بعد از سه تلاش منصرف می‌شود. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مفهوم exactly-once سرتاسری</h1>
+      <p class="lede">یک انتقال ۱۱ دلاری commit می‌شود اما پاسخش گم می‌شود، و کاربر دوباره می‌فرستد. برای سرور و دیتابیس این retry درخواستی تازه است؛ فقط شناسه‌ای که در client ساخته و در دیتابیس بررسی شود این دو را از هم جدا می‌کند.</p>
+      <p class="source-note">برای صص. ۵۶۳–۵۶۶ و مثال ۱۳-۲: انتقال ۱۱ دلار از حساب 4321 به 1234 با یک <code>request_id</code> یکتا. گم شدن پاسخ‌ها تصادفی است اما با seed ثابت؛ هر client بعد از سه تلاش منصرف می‌شود. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="hops">
-        <div class="hop"><h3>مرورگر client</h3><div class="sub" id="h-client"></div></div>
-        <div class="hop"><h3>وب‌سرور</h3><div class="sub">هر retry به شکل یک درخواست HTTP تازه و یک تراکنش دیتابیس تازه می‌رسد.</div></div>
-        <div class="hop"><h3>دیتابیس</h3><div class="sub" id="h-db"></div></div>
-      </div>
-      <div class="accts" id="accts"></div>
-      <div class="tbl"><table class="data"><thead><tr><th>#</th><th>request_id</th><th>مبدأ و مقصد</th><th>مبلغ</th><th>نتیجه</th></tr></thead><tbody id="rows"></tbody></table></div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">تنظیمات</p>
-        <label class="check"><input type="checkbox" id="rid"> مرورگر یک request ID می‌فرستد و دیتابیس <code>UNIQUE (request_id)</code> دارد</label>
-        <div id="sliders" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" type="button" id="one">ارسال یک انتقال</button>
-          <button class="btn" type="button" id="many">ارسال ۵۰ انتقال</button>
-          <button class="btn" type="button" id="reset">↺ از اول</button>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="ri">
+          <div class="hops">
+            <div class="hop"><h3>مرورگر client</h3><div class="sub" id="h-client"></div></div>
+            <div class="hop"><h3>وب‌سرور</h3><div class="sub">هر retry به شکل یک درخواست HTTP تازه و یک تراکنش تازه می‌رسد.</div></div>
+            <div class="hop"><h3>دیتابیس</h3><div class="sub" id="h-db"></div></div>
+          </div>
+          <div class="mid">
+            <div class="accts" id="accts"></div>
+            <pre class="sql" id="sql" dir="ltr" lang="en"></pre>
+          </div>
+          <div class="tbl"><table class="data"><thead><tr><th>#</th><th>request_id</th><th>مبدأ و مقصد</th><th>مبلغ</th><th>نتیجه</th></tr></thead><tbody id="rows"></tbody></table></div>
         </div>
-        <pre class="sql" id="sql" dir="ltr" lang="en"></pre>
       </div>
-      <div class="panel">
-        <p class="panel-title">شمارنده‌ها</p>
-        <div class="stats" id="stats"></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><label class="check"><input type="checkbox" id="rid"> مرورگر request ID می‌فرستد و دیتابیس <code>UNIQUE (request_id)</code> دارد</label></div>
+        <div class="tweak-group" id="sliders"></div>
+        <div class="tweak-group">
+          <button class="btn primary small" type="button" id="one">ارسال یک انتقال</button>
+          <button class="btn small" type="button" id="many">ارسال ۵۰ انتقال</button>
+        </div>
       </div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>هر قدم «قابل‌اعتماد» است و باز هم نتیجه غلط است.</strong> مفهوم TCP بسته‌های تکراری را حذف می‌کند و دیتابیس هر انتقال را اتمی اجرا می‌کند، اما retry کاربر یک اتصال تازه و یک تراکنش تازه است.</li>
-    <li><strong>راه‌حل کل مسیر را می‌پوشاند.</strong> شناسه را در client بسازید؛ مثلاً در یک فیلد پنهان فرم. آن را تا آخر ببرید و بگذارید یک uniqueness constraint درج دوم را رد کند؛ کل تراکنش abort می‌شود.</li>
-    <li><strong>جدول requests یک event log است.</strong> موجودی‌ها را می‌شود downstream از آن مشتق کرد، به شرطی که هر رویداد دقیقاً یک بار پردازش شود؛ باز هم با همان request ID.</li>
-    <li><strong>استدلال end-to-end:</strong> لایه‌های پایین‌تر می‌توانند مشکل را کمیاب‌تر کنند، اما فقط دو سر مسیر می‌توانند کارکرد را درست کنند (ص. ۵۶۵).</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>هر قدم «قابل‌اعتماد» است و باز هم نتیجه غلط است.</strong> مفهوم TCP بسته‌های تکراری را حذف می‌کند و دیتابیس هر انتقال را اتمی اجرا می‌کند، اما retry کاربر یک اتصال تازه و یک تراکنش تازه است.</li>
+      <li><strong>راه‌حل کل مسیر را می‌پوشاند.</strong> شناسه را در client بسازید؛ مثلاً در یک فیلد پنهان فرم. آن را تا آخر ببرید و بگذارید یک uniqueness constraint درج دوم را رد کند؛ کل تراکنش abort می‌شود.</li>
+      <li><strong>جدول requests یک event log است.</strong> موجودی‌ها را می‌شود downstream از آن مشتق کرد، به شرطی که هر رویداد دقیقاً یک بار پردازش شود؛ باز هم با همان request ID.</li>
+      <li><strong>استدلال end-to-end:</strong> لایه‌های پایین‌تر می‌توانند مشکل را کمیاب‌تر کنند، اما فقط دو سر مسیر می‌توانند کارکرد را درست کنند (ص. ۵۶۵).</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/13-a-philosophy-of-streaming-systems.html"><small>درس</small>فصل ۱۳: فلسفه‌ی سیستم‌های streaming</a></li>
-    <li><a href="13-dual-writes.html"><small>شبیه‌سازی</small>مفهوم dual write در برابر change log</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/13-a-philosophy-of-streaming-systems.html"><small>درس</small>فصل ۱۳: فلسفه‌ی سیستم‌های streaming</a></li>
+      <li><a href="13-dual-writes.html"><small>شبیه‌سازی</small>مفهوم dual write در برابر change log</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { rid: false, loss: 30 }, s, r;
+  var said = ["", ""]; var log = { add: function (t, k) { said = [Kit.digits(t), k || ""]; }, clear: function () { said = ["", ""]; } };
+  var cfg = { rid: false, loss: 30 }, s, r, tour;
 
   function uuid() { var h = "0123456789ABCDEF", out = ""; for (var i = 0; i < 8; i++) out += h[r.int(16)]; return out + "-…"; }
-  function reset() {
+  function fresh() {
     r = Kit.rng(13);
     s = { bal: { 4321: 1000, 1234: 1000 }, intended: 0, executed: 0, dup: 0, rejected: 0, rows: [], seen: {}, failed: 0 };
-    log.clear(); log.add("هر دو حساب با $1,000.00 شروع می‌کنند.", "muted");
-    render();
+    log.clear();
   }
 
-  function transfer(quiet) {
+  // `lost` (optional) scripts which replies get lost, so the tour shows the same story every time.
+  function transfer(quiet, lost) {
     var id = uuid(), attempt = 0, committedOnce = false, gotReply = false;
     s.intended++;
     while (!gotReply && attempt < 3) {
@@ -116,57 +129,68 @@
       if (dup) {
         s.rejected++;
         s.rows.push({ n: s.rows.length + 1, rid: rid, outcome: "رد شد: request_id تکراری", cls: "rej" });
-        if (!quiet) log.add("تلاش " + attempt + ": درج روی request_id یکتا شکست می‌خورد؛ تراکنش abort شد و پولی جابه‌جا نشد", "ok");
+        if (!quiet) log.add("تلاش " + attempt + ": درج روی request_id یکتا شکست خورد؛ تراکنش abort شد و پولی جابه‌جا نشد.", "ok");
       } else {
         s.bal[4321] -= 11; s.bal[1234] += 11; s.executed++;
         if (committedOnce) s.dup++;
         if (cfg.rid) s.seen[id] = true;
         s.rows.push({ n: s.rows.length + 1, rid: rid, outcome: committedOnce ? "دوباره commit شد" : "commit شد", cls: committedOnce ? "dup" : "" });
-        if (!quiet) log.add("تلاش " + attempt + ": تراکنش commit شد و $11.00 جابه‌جا شد" + (committedOnce ? "؛ برای بار دوم!" : ""), committedOnce ? "bad" : "ok");
+        if (!quiet) log.add("تلاش " + attempt + ": تراکنش commit شد و ۱۱ دلار جابه‌جا شد" + (committedOnce ? "؛ برای بار دوم!" : "."), committedOnce ? "bad" : "ok");
         committedOnce = true;
       }
-      gotReply = !r.chance(cfg.loss / 100);
-      if (!gotReply && !quiet) log.add("…پاسخ گم شد؛ کاربر خطا می‌بیند و دوباره می‌فرستد", "warn");
+      gotReply = lost ? !lost[attempt - 1] : !r.chance(cfg.loss / 100);
     }
     if (!gotReply) s.failed++;
-    if (!quiet) render();
   }
+  function batch(n) { var before = s.dup; for (var i = 0; i < n; i++) transfer(true); return s.dup - before; }
 
   function render() {
     var acc = Kit.clear(document.getElementById("accts"));
     [[4321, -1], [1234, 1]].forEach(function (a) {
       var exp = 1000 + a[1] * 11 * s.intended, off = s.bal[a[0]] !== exp;
       acc.appendChild(Kit.el("div", { class: "acct" + (off ? " off" : "") }, Kit.el("div", { class: "exp" }, "حساب " + a[0]),
-        Kit.el("div", { class: "bal" }, "$" + s.bal[a[0]].toFixed(2)), Kit.el("div", { class: "exp" }, "باید باشد $" + exp.toFixed(2))));
+        Kit.el("div", { class: "bal", dir: "ltr" }, "$" + s.bal[a[0]].toFixed(2)), Kit.el("div", { class: "exp" }, (off ? "✗ " : "✓ ") + "باید باشد $" + exp.toFixed(2))));
     });
     var rows = Kit.clear(document.getElementById("rows"));
-    s.rows.slice(-40).forEach(function (row) {
+    s.rows.slice(-40).reverse().forEach(function (row) {
       rows.appendChild(Kit.el("tr", { class: row.cls || null }, Kit.el("td", null, String(row.n)), Kit.el("td", null, row.rid), Kit.el("td", null, "4321 → 1234"), Kit.el("td", null, "11.00"), Kit.el("td", null, row.outcome)));
     });
+    if (!s.rows.length) rows.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 5 }, "هنوز تراکنشی نیست.")));
     var stats = Kit.clear(document.getElementById("stats"));
-    [["انتقال‌های مدنظر", s.intended, ""], ["اجراشده", s.executed, s.executed > s.intended ? "bad" : "ok"], ["تکراری‌ها", s.dup, s.dup ? "bad" : "ok"], ["مفهوم retry ردشده", s.rejected, ""]].forEach(function (x) {
-      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    [["مفهوم request ID", cfg.rid ? "روشن" : "خاموش", ""], ["پاسخ‌های گم‌شده", cfg.loss + "%", ""], ["انتقال‌های مدنظر", s.intended, ""], ["اجراشده", s.executed, s.executed > s.intended ? "bad" : "ok"], ["تکراری‌ها", s.dup, s.dup ? "bad" : "ok"], ["مفهوم retry ردشده", s.rejected, ""]].forEach(function (x) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
     });
-    document.getElementById("h-client").textContent = cfg.rid ? "برای هر فرم یک request ID می‌سازد و با هر retry دوباره می‌فرستدش." : "فرم را دوباره می‌فرستد؛ هیچ چیز نشان نمی‌دهد retry همان درخواست قبلی است.";
+    document.getElementById("h-client").textContent = cfg.rid ? "برای هر فرم یک request ID می‌سازد و با هر retry همان را دوباره می‌فرستد." : "فرم را دوباره می‌فرستد؛ هیچ چیز نشان نمی‌دهد retry همان درخواست قبلی است.";
     document.getElementById("h-db").textContent = cfg.rid ? "ستون requests.request_id یکتاست: درج دوم کل تراکنش را abort می‌کند." : "هر تراکنشی را که می‌گیرد commit می‌کند.";
     document.getElementById("sql").textContent = cfg.rid
-      ? "BEGIN;\nINSERT INTO requests (request_id, from_account, to_account, amount)\n  VALUES ('…', 4321, 1234, 11.00);   -- fails if seen before\nUPDATE accounts SET balance = balance + 11.00 WHERE account_id = 1234;\nUPDATE accounts SET balance = balance - 11.00 WHERE account_id = 4321;\nCOMMIT;"
-      : "BEGIN;\nUPDATE accounts SET balance = balance + 11.00 WHERE account_id = 1234;\nUPDATE accounts SET balance = balance - 11.00 WHERE account_id = 4321;\nCOMMIT;";
+      ? "BEGIN;\nINSERT INTO requests (request_id, from_account,\n    to_account, amount)\n  VALUES ('…', 4321, 1234, 11.00); -- fails if seen\nUPDATE accounts SET balance = balance + 11.00\n  WHERE account_id = 1234;\nUPDATE accounts SET balance = balance - 11.00\n  WHERE account_id = 4321;\nCOMMIT;"
+      : "BEGIN;\nUPDATE accounts SET balance = balance + 11.00\n  WHERE account_id = 1234;\nUPDATE accounts SET balance = balance - 11.00\n  WHERE account_id = 4321;\nCOMMIT;";
+    ridBox.checked = cfg.rid; loss.set(cfg.loss);
   }
 
-  document.getElementById("rid").addEventListener("change", function (e) { cfg.rid = e.target.checked; reset(); });
-  document.getElementById("sliders").appendChild(Kit.slider({ label: "پاسخ‌های گم‌شده", min: 0, max: 60, step: 5, value: cfg.loss, unit: "%", onInput: function (v) { cfg.loss = v; } }).element);
-  document.getElementById("one").addEventListener("click", function () { transfer(false); });
-  document.getElementById("many").addEventListener("click", function () {
-    var before = s.dup;
-    for (var i = 0; i < 50; i++) transfer(true);
-    log.add("۵۰ انتقال دیگر: " + (s.dup - before) + " بار اجرای تکراری", s.dup > before ? "bad" : "ok");
-    render();
-  });
-  document.getElementById("reset").addEventListener("click", reset);
-  reset();
+  var ridBox = document.getElementById("rid");
+  var loss = Kit.slider({ label: "پاسخ‌های گم‌شده", min: 0, max: 60, step: 5, value: cfg.loss, unit: "%", onInput: function (v) { cfg.loss = v; render(); tour.free("از این به بعد " + Kit.digits(String(v)) + "% پاسخ‌ها گم می‌شوند.", ""); } });
+  document.getElementById("sliders").appendChild(loss.element);
+  ridBox.addEventListener("change", function (e) { cfg.rid = e.target.checked; fresh(); render(); tour.free(cfg.rid ? "حساب‌ها از نو: حالا هر انتقال یک request ID دارد." : "حساب‌ها از نو: بدون request ID.", ""); });
+  document.getElementById("one").addEventListener("click", function () { transfer(false); render(); tour.free(said[0], said[1]); });
+  document.getElementById("many").addEventListener("click", function () { var d = batch(50); render(); tour.free("۵۰ انتقال دیگر: " + Kit.digits(String(d)) + " اجرای تکراری.", d ? "bad" : "ok"); });
 
-  Kit.quiz(document.getElementById("quiz"), [
+  /* ---------- the scenario ---------- */
+  function scene(rid, fn) { return function () { cfg.rid = rid; cfg.loss = 30; fresh(); fn(); }; }
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: scene(false, function () {}), render: render, interval: 6500,
+    intro: "دو حساب با ۱٬۰۰۰ دلار. هر ردیف جدول یک تراکنش است که به دیتابیس رسید؛ کارت قرمز یعنی موجودی با تعداد انتقال‌های مدنظر نمی‌خواند.",
+    end: "«خودتان تغییر بدهید» را باز کنید: request ID را روشن و خاموش کنید، درصد گم شدن پاسخ‌ها را عوض کنید و انتقال بفرستید.",
+    steps: [
+      { kind: "bad", run: scene(false, function () { transfer(false, [true, false]); }), say: "بدون request ID: تراکنش اول commit شد اما پاسخ گم شد. کاربر دوباره فرستاد و دیتابیس آن را تراکنشی تازه دید: ۲۲ دلار جابه‌جا شد به جای ۱۱ (ص. ۵۶۴)." },
+      { kind: "ok", run: scene(true, function () { transfer(false, [true, false]); }), say: "همان ماجرا با request ID: retry همان شناسه را می‌فرستد، درج در جدول requests روی uniqueness constraint شکست می‌خورد و کل تراکنش abort می‌شود. پول یک بار جابه‌جا شد (مثال ۱۳-۲، ص. ۵۶۵)." },
+      { kind: "bad", run: scene(false, function () { batch(50); }), say: function () { return "پنجاه انتقال بدون request ID، با ۳۰% پاسخ گم‌شده: " + s.dup + " اجرای تکراری، و موجودی هر حساب " + (s.executed - s.intended) * 11 + " دلار با مقدار درست فاصله دارد، با این‌که TCP و تراکنش‌ها هر دو «قابل‌اعتماد» بودند."; } },
+      { kind: "ok", run: scene(true, function () { batch(50); }), say: function () { return "همان پنجاه انتقال با request ID: " + s.rejected + " retry رد شد و هیچ تکراری نماند. فقط بررسی سرتاسری، از client تا دیتابیس، این را تضمین می‌کند (استدلال end-to-end، ص. ۵۶۵)."; } }
+    ]
+  });
+
+  Kit.quiz(Kit.$("#quiz"), [
     { q: "اولین POST commit شد اما پاسخش گم شد؛ کاربر دوباره می‌فرستد. دیتابیس چه می‌بیند؟",
       options: ["یک بسته‌ی TCP تکراری که دورش می‌ریزد", "یک درخواست جدا و یک تراکنش جدا", "هیچ؛ مرورگرها هرگز دوباره نمی‌فرستند"],
       answer: 1, explain: "از دید وب‌سرور و دیتابیس، retry درخواستی تازه است (ص. ۵۶۴)." },

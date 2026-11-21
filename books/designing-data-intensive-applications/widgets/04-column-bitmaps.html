@@ -7,80 +7,96 @@
 <meta name="description" content="یک fact table را ستونی ذخیره کنید، یک ستون را به یک bitmap برای هر مقدار متمایز تبدیل کنید، bitmapها را run-length encode کنید و فیلترهای IN و AND را با OR و AND بیتی جواب بدهید. برای فصل ۴ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .grid24 { display: grid; gap: 3px; font-family: var(--mono); font-size: .72rem; overflow-x: auto; }
+  .grid24 { display: grid; gap: 2px; font-family: var(--mono); font-size: .72rem; line-height: 1.25; overflow-x: auto; }
   .ln { display: grid; grid-template-columns: 118px repeat(24, minmax(14px, 1fr)) 84px; gap: 1px; align-items: center; }
   .ln .lbl { white-space: nowrap; color: var(--ink-2); }
-  .ln .c { text-align: center; padding: 2px 0; border-radius: 2px; background: var(--surface-2); }
+  .ln .c { text-align: center; padding: 0; border-radius: 2px; background: var(--surface-2); }
   .ln .c.match { background: var(--ok-soft); color: var(--ok); font-weight: 700; }
-  .ln .b { height: 16px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
+  .ln .b { height: 12px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); }
   .ln .b.on { background: var(--s1); border-color: var(--s1); }
   .ln.sel .lbl { font-weight: 700; color: var(--accent); }
   .ln.result .b.on { background: var(--ok); border-color: var(--ok); }
   .ln.result .lbl { font-weight: 700; color: var(--ok); }
   .ln .rle { color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 6px; }
   .ln.head .c { background: none; color: var(--ink-3); }
-  .sub { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin: 8px 0 2px; }
+  .sub { font-size: .74rem; font-weight: 600; color: var(--ink-3); margin: 3px 0 0; direction: rtl; text-align: start; }
   .chips { display: flex; gap: 6px; flex-wrap: wrap; }
   .chips button { font: inherit; font-family: var(--mono); font-size: .8rem; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2); cursor: pointer; }
   .chips button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  code.q { display: block; font-size: .82rem; background: var(--surface-2); padding: 8px 10px; border-radius: var(--radius-sm); margin-top: 10px; white-space: pre-wrap; }
+  code.q { display: block; font-size: .78rem; background: var(--surface-2); padding: 5px 10px; border-radius: var(--radius-sm); margin-bottom: 6px; white-space: pre-wrap; }
+  .ln .b { transition: background var(--step); }
+  .grid24 .focus .lbl { color: var(--accent); font-weight: 700; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
       <a href="../chapters/04-storage-and-retrieval.html">فصل ۴</a><span aria-hidden="true">/</span>
-      <span aria-current="page">ذخیره‌سازی ستونی</span>
+      <span aria-current="page">ذخیره‌سازی ستونی و bitmap</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۴ · ذخیره‌سازی و بازیابی</div>
-  <h1>ذخیره‌سازی ستونی و bitmap index</h1>
-  <p class="lede">هر column store مقدارهای هر ستون را کنار هم و با ترتیب ردیف یکسان نگه می‌دارد. ستونی با مقدارهای متمایز کم به یک bitmap برای هر مقدار تبدیل می‌شود، یک بیت برای هر ردیف، و این bitmapهای پر از صفر با run-length encoding تقریباً به هیچ می‌رسند. بعد فیلترها به OR و AND بیتی تبدیل می‌شوند.</p>
-  <p class="source-note">برای «ذخیره‌سازی column-oriented»، «فشرده‌سازی ستون‌ها» و «ترتیب مرتب‌سازی در ذخیره‌سازی ستونی» در صص. ۱۳۷–۱۴۱، شکل‌های ۴-۷ و ۴-۸ و دو مثال <code>WHERE</code> در ص. ۱۴۰. بیست‌وچهار ردیف فروش داده‌ی آزمایشی خود vault است؛ بلوک‌های واقعی هزاران تا میلیون‌ها ردیف دارند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>ذخیره‌سازی ستونی و bitmap index</h1>
+      <p class="lede">هر column store مقدارهای هر ستون را کنار هم و با ترتیب ردیف یکسان نگه می‌دارد. ستونی با مقدارهای متمایز کم به یک bitmap برای هر مقدار تبدیل می‌شود که با run-length encoding تقریباً هیچ جا نمی‌گیرد، و فیلترها به OR و AND بیتی تبدیل می‌شوند.</p>
+      <p class="source-note">برای صص. ۱۳۷–۱۴۱، شکل‌های ۴-۷ و ۴-۸ و دو مثال <code>WHERE</code> در ص. ۱۴۰. بیست‌وچهار ردیف فروش داده‌ی آزمایشی خود vault است؛ بلوک‌های واقعی هزاران تا میلیون‌ها ردیف دارند.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="grid24" id="grid" dir="ltr" role="img" aria-label="ستون‌ها و bitmapها؛ خط نتیجه ردیف‌های منطبق را نشان می‌دهد"></div>
-      <p class="field-hint" style="margin-top:8px">هر ستون یک خط است: ردیف <em>k</em> در هر خط جایگاه <em>k</em> است. ستون run-length encoding در سمت راست طول runهای پشت‌سرهم را از صفر شروع می‌کند؛ <code>3,2,19</code> یعنی ۳ صفر، ۲ یک و ۱۹ صفر.</p>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">کوئری</p>
-        <div class="field"><span class="field-head">شرط product_sk IN (…)، یعنی OR بیتی</span><div class="chips" id="prod"></div></div>
-        <div class="field" style="margin-top:10px"><span class="field-head">شرط AND store_sk = …، یعنی AND بیتی</span><div id="store"></div></div>
-        <code class="q" id="sql"></code>
-        <label class="check" style="margin-top:12px"><input type="checkbox" id="sorted"> ردیف‌ها را بر اساس product_sk و بعد store_sk مرتب کن</label>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <code class="q" id="sql" dir="ltr"></code>
+        <div class="grid24" id="grid" dir="ltr" role="img" aria-label="ستون‌ها و bitmapها؛ خط نتیجه ردیف‌های منطبق را نشان می‌دهد"></div>
       </div>
-      <div class="panel wide">
-        <p class="panel-title">نتیجه</p>
-        <div class="stats" id="stats"></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <span class="field-head">شرط product_sk IN (…)، یعنی OR بیتی</span>
+          <div class="chips" id="prod"></div>
+        </div>
+        <div class="tweak-group">
+          <span class="field-head">شرط AND store_sk = …، یعنی AND بیتی</span>
+          <div id="store"></div>
+        </div>
+        <div class="tweak-group">
+          <label class="check"><input type="checkbox" id="sorted"> ردیف‌ها را بر اساس product_sk و بعد store_sk مرتب کن</label>
+          <p class="field-hint">ستون سمت راست هر bitmap طول runها را از صفر شروع می‌کند: <code>3,2,19</code> یعنی ۳ صفر، ۲ یک و ۱۹ صفر.</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>ردیف k همه‌جا بیت k است.</strong> AND کردن bitmap محصول با bitmap فروشگاه فقط به این دلیل کار می‌کند که همه‌ی ستون‌ها ردیف‌ها را با یک ترتیب نگه می‌دارند.</li>
-    <li><strong>bitmapهای sparse فشرده می‌شوند.</strong> هر bitmap بیشتر صفر است؛ run-length encoding به جای ۲۴ بیت چند عدد ذخیره می‌کند.</li>
-    <li><strong>مرتب‌سازی به فشرده‌سازی کمک می‌کند.</strong> بر اساس product_sk مرتب کنید تا یک‌های هر محصول یک run پیوسته شوند؛ اولین ستون sort بهتر از همه فشرده می‌شود، ص. ۱۴۱.</li>
-    <li><strong>فقط ستون‌های لازم خوانده می‌شوند.</strong> کوئری product_sk و store_sk را لازم دارد؛ بقیه‌ی ستون‌ها هیچ‌وقت از دیسک خوانده نمی‌شوند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>ردیف k همه‌جا بیت k است.</strong> AND کردن bitmap محصول با bitmap فروشگاه فقط به این دلیل کار می‌کند که همه‌ی ستون‌ها ردیف‌ها را با یک ترتیب نگه می‌دارند.</li>
+      <li><strong>bitmapهای sparse فشرده می‌شوند.</strong> هر bitmap بیشتر صفر است؛ run-length encoding به جای ۲۴ بیت چند عدد ذخیره می‌کند.</li>
+      <li><strong>مرتب‌سازی به فشرده‌سازی کمک می‌کند.</strong> بر اساس product_sk مرتب کنید تا یک‌های هر محصول یک run پیوسته شوند؛ اولین ستون sort بهتر از همه فشرده می‌شود، ص. ۱۴۱.</li>
+      <li><strong>فقط ستون‌های لازم خوانده می‌شوند.</strong> کوئری product_sk و store_sk را لازم دارد؛ بقیه‌ی ستون‌ها هیچ‌وقت از دیسک خوانده نمی‌شوند.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/04-storage-and-retrieval.html"><small>درس</small>فصل ۴: ذخیره‌سازی و بازیابی</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/04-storage-and-retrieval.html"><small>درس</small>فصل ۴: ذخیره‌سازی و بازیابی</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -92,7 +108,8 @@
   for (var i = 0; i < 24; i++) {
     BASE.push({ date_key: 140102 + Math.floor(i / 6), product_sk: PRODUCTS[r.int(PRODUCTS.length)], store_sk: STORES[r.int(STORES.length)], quantity: 1 + r.int(5) });
   }
-  var state = { prods: [31, 68, 69], store: 0, sorted: false };
+  var state, rleNow = 0, tour;
+  function reset() { state = { prods: [], store: 0, sorted: false }; }
 
   function rows() {
     if (!state.sorted) return BASE;
@@ -115,7 +132,7 @@
   }
   function render() {
     var rs = rows();
-    var prodOr = rs.map(function () { return 0; });
+    var prodOr = rs.map(function () { return state.prods.length ? 0 : 1; });
     state.prods.forEach(function (p) { bitmap(rs, "product_sk", p).forEach(function (b, i) { prodOr[i] |= b; }); });
     var storeBits = state.store ? bitmap(rs, "store_sk", state.store) : null;
     var result = storeBits ? prodOr.map(function (b, i) { return b & storeBits[i]; }) : prodOr;
@@ -136,41 +153,63 @@
       rleTotal += rle(b).length;
       grid.appendChild(bitLine("= " + p, b, state.prods.indexOf(p) >= 0 ? "sel" : null));
     });
-    grid.appendChild(Kit.el("div", { class: "sub" }, "کوئری"));
+    var querying = state.prods.length || state.store;
+    if (querying) grid.appendChild(Kit.el("div", { class: "sub" }, "اجرای کوئری روی bitmapها"));
     if (state.prods.length) grid.appendChild(bitLine("OR (" + state.prods.join(",") + ")", prodOr));
     if (storeBits) grid.appendChild(bitLine("store_sk = " + state.store, storeBits, "sel"));
-    grid.appendChild(bitLine(storeBits ? "AND → نتیجه" : "نتیجه", result, "result"));
+    if (querying) grid.appendChild(bitLine(storeBits ? "AND → result" : "result", result, "result"));
 
     var where = [];
     if (state.prods.length) where.push("product_sk IN (" + state.prods.join(", ") + ")");
     if (state.store) where.push("store_sk = " + state.store);
-    document.getElementById("sql").textContent = "SELECT SUM(quantity) FROM fact_sales" + (where.length ? "\nWHERE " + where.join("\n  AND ") : "") + ";";
+    document.getElementById("sql").textContent = "SELECT SUM(quantity) FROM fact_sales" + (where.length ? " WHERE " + where.join(" AND ") : "") + ";";
 
-    var matches = result.reduce(function (a, b) { return a + b; }, 0);
+    if (!querying) result = rs.map(function () { return 0; });
+    var matches = querying ? result.reduce(function (a, b) { return a + b; }, 0) : "–";
     var qty = rs.reduce(function (a, row, i) { return a + (result[i] ? row.quantity : 0); }, 0);
     var stats = Kit.clear(document.getElementById("stats"));
-    [["ردیف‌های منطبق", matches], ["مقدار SUM(quantity)", qty], ["بیت‌های bitmap", PRODUCTS.length * rs.length], ["عددهای RLE", rleTotal]].forEach(function (s) {
-      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value" }, String(s[1]))));
+    [["ردیف منطبق", matches, querying ? "ok" : ""], ["مقدار SUM(quantity)", querying ? qty : "–", ""], ["بیت‌های bitmap", PRODUCTS.length * rs.length, ""],
+     ["عددهای RLE", rleTotal, state.sorted ? "ok" : ""], ["ترتیب ردیف‌ها", state.sorted ? "مرتب‌شده" : "ترتیب درج", ""]].forEach(function (s) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value " + s[2] }, Kit.digits(String(s[1])))));
     });
+    rleNow = rleTotal;
+    Array.prototype.forEach.call(document.querySelectorAll("#prod button"), function (b) { b.setAttribute("aria-pressed", String(state.prods.indexOf(+b.textContent) >= 0)); });
+    storeSeg.set(state.store); document.getElementById("sorted").checked = state.sorted;
   }
 
   var prod = document.getElementById("prod");
   PRODUCTS.forEach(function (p) {
-    var b = Kit.el("button", { type: "button", "aria-pressed": String(state.prods.indexOf(p) >= 0) }, String(p));
+    var b = Kit.el("button", { type: "button", "aria-pressed": "false" }, String(p));
     b.addEventListener("click", function () {
       var i = state.prods.indexOf(p);
       if (i >= 0) state.prods.splice(i, 1); else state.prods.push(p);
       state.prods.sort(function (a, b2) { return a - b2; });
-      b.setAttribute("aria-pressed", String(i < 0));
-      render();
+      render(); tour.free("فیلتر محصول: " + (state.prods.length ? state.prods.join("، ") + "؛ bitmapهایشان با هم OR می‌شوند." : "هیچ؛ همه‌ی ردیف‌ها."), "free");
     });
     prod.appendChild(b);
   });
-  document.getElementById("store").appendChild(Kit.segmented({ label: "فیلتر فروشگاه", value: 0,
+  var storeSeg = Kit.segmented({ label: "فیلتر فروشگاه", value: 0,
     options: [{ value: 0, label: "همه" }].concat(STORES.map(function (s) { return { value: s, label: String(s) }; })),
-    onChange: function (v) { state.store = v; render(); } }).element);
-  document.getElementById("sorted").addEventListener("change", function (e) { state.sorted = e.target.checked; render(); });
-  render();
+    onChange: function (v) { state.store = v; render(); tour.free(v ? "نتیجه‌ی OR با bitmap فروشگاه " + v + " به شکل AND ترکیب شد." : "فیلتر فروشگاه برداشته شد.", "free"); } });
+  document.getElementById("store").appendChild(storeSeg.element);
+  document.getElementById("sorted").addEventListener("change", function (e) { state.sorted = e.target.checked; render(); tour.free(Kit.digits("حالا RLE به " + rleNow + " عدد نیاز دارد."), "free"); });
+
+  /* ---------- the scenario ---------- */
+  function set(o) { return function () { for (var k in o) state[k] = o[k]; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: reset, render: render, interval: 4600,
+    intro: "جدول fact_sales با ۲۴ ردیف، ستون‌به‌ستون ذخیره شده است. هر خط یک ستون است و ردیف k در همه‌ی خط‌ها جایگاه k است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: محصول و فروشگاه را عوض کنید و مرتب‌سازی را روشن و خاموش کنید.",
+    steps: [
+      { say: "هر ستون جدا ذخیره می‌شود، اما همه با ترتیب ردیف یکسان؛ کوئری فقط ستون‌هایی را می‌خواند که لازم دارد (شکل ۴-۷، ص. ۱۳۸).", run: function () {} },
+      { say: "ستون product_sk فقط ۶ مقدار متمایز دارد، پس برای هر مقدار یک bitmap با یک بیت برای هر ردیف ساخته می‌شود (شکل ۴-۸، ص. ۱۳۹).", run: function () {} },
+      { say: function () { return Kit.digits("هر bitmap بیشتر صفر است. run-length encoding به جای " + PRODUCTS.length * 24 + " بیت فقط " + rleNow + " عدد نگه می‌دارد؛ ستون سمت راست همین عددهاست (ص. ۱۳۹)."); }, run: function () {} },
+      { say: "فیلتر IN روی محصول‌های ۳۱، ۶۸ و ۶۹: سه bitmap load و با هم OR می‌شوند (ص. ۱۴۰).", kind: "ok", run: set({ prods: [31, 68, 69] }) },
+      { say: "فیلتر فروشگاه ۳: نتیجه‌ی OR با bitmap فروشگاه AND می‌شود. این فقط چون بیت k در هر دو ردیف k است کار می‌کند (ص. ۱۴۰).", kind: "ok", run: set({ store: 3 }) },
+      { say: function () { return Kit.digits("ردیف‌ها بر اساس product_sk و بعد store_sk مرتب شدند: یک‌های هر محصول کنار هم افتادند و RLE به " + rleNow + " عدد رسید (ص. ۱۴۱)."); }, kind: "ok", run: set({ sorted: true }) }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "هر column store شرط WHERE product_sk IN (31, 68, 69) را چطور جواب می‌دهد؟",

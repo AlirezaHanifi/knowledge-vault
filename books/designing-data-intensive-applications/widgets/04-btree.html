@@ -7,10 +7,10 @@
 <meta name="description" content="در یک B-tree کوچک کلید درج و جست‌وجو کنید: ارجاع pageها را از ریشه دنبال کنید، split شدن pageهای پر و یک سطح بلندتر شدن درخت را ببینید، و وسط split با write-ahead log و بدون آن crash کنید. برای فصل ۴ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .tree { display: grid; gap: 22px; padding: 6px 0; }
+  .tree { display: grid; gap: 18px; padding: 4px 0; }
   .level { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .level-name { font-size: .72rem; color: var(--ink-3); text-align: center; margin-bottom: -14px; direction: rtl; }
-  .page-box { display: inline-flex; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); font-family: var(--mono); font-size: .78rem; min-height: 30px; }
+  .page-box { display: inline-flex; transition: border-color var(--step), box-shadow var(--step); border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); font-family: var(--mono); font-size: .78rem; min-height: 30px; }
   .page-box .k { padding: 5px 6px; border-right: 1px solid var(--line); min-width: 30px; text-align: center; }
   .page-box .k:last-child { border-right: 0; }
   .page-box .free { color: var(--ink-3); }
@@ -20,13 +20,15 @@
   .page-box.written .pid { background: color-mix(in srgb, var(--s2) 18%, var(--surface)); color: var(--ink); }
   .page-box.orphan { border-style: dashed; border-color: var(--bad); }
   .page-box .hit { background: var(--ok-soft); font-weight: 700; }
-  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .78rem; color: var(--ink-2); margin-top: 14px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .78rem; color: var(--ink-2); margin-top: 10px; }
   .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 2px solid; margin-inline-end: 5px; vertical-align: -2px; }
   .legend .lp { border-color: var(--accent); } .legend .lw { border-color: var(--s2); } .legend .lo { border-color: var(--bad); border-style: dashed; }
-  .orphans { margin-top: 14px; }
+  .orphans { margin-top: 10px; }
+  .orphans:empty { display: none; }
+
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -40,57 +42,63 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۴ · ذخیره‌سازی و بازیابی</div>
-  <h1>pageها، جست‌وجو و split در B-tree</h1>
-  <p class="lede">ساختار B-tree دیتابیس را به pageهای اندازه‌ثابت می‌شکند و آن‌ها را در جا بازنویسی می‌کند. جست‌وجو ارجاع pageها را از ریشه تا یک leaf دنبال می‌کند؛ درج در یک page پر آن را دو تکه می‌کند و والد را به‌روز می‌کند، گاهی تا بالای درخت، و درخت همین‌طور ریشه‌ی تازه می‌گیرد.</p>
-  <p class="source-note">برای «ساختار B-tree» و «قابل‌اعتماد کردن B-treeها» در صص. ۱۲۵–۱۲۸ و شکل‌های ۴-۵ و ۴-۶. هر page این‌جا حداکثر ۴ کلید دارد، پس branching factor برابر ۵ است، نه چند صد مثل دیتابیس واقعی؛ leafها فقط کلید دارند و حذف کنار گذاشته شده. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>pageها، جست‌وجو و split در B-tree</h1>
+      <p class="lede">ساختار B-tree دیتابیس را به pageهای اندازه‌ثابت می‌شکند و آن‌ها را در جا بازنویسی می‌کند. جست‌وجو از ریشه تا یک leaf پایین می‌رود؛ درج در page پر آن را دو تکه می‌کند و گاهی تا ریشه بالا می‌رود.</p>
+      <p class="source-note">برای صص. ۱۲۵–۱۲۸ و شکل‌های ۴-۵ و ۴-۶. هر page این‌جا حداکثر ۴ کلید دارد (branching factor برابر ۵، نه چند صد)؛ leafها فقط کلید دارند و حذف کنار گذاشته شده.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="tree" id="tree" dir="ltr" aria-label="pageهای B-tree به تفکیک سطح"></div>
-      <div class="orphans" id="orphans" dir="ltr"></div>
-      <div class="legend"><span><i class="lp"></i>pageهای خوانده‌شده در آخرین عملیات</span><span><i class="lw"></i>pageهای نوشته‌شده در آخرین عملیات</span><span><i class="lo"></i>صفحه‌ی orphan؛ دسترس‌ناپذیر</span></div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">عملیات‌ها</p>
-        <div class="row">
-          <label for="key">کلید</label><input id="key" type="number" min="1" max="999" value="334" style="width:90px">
-          <button class="btn primary" type="button" id="ins">درج</button>
-          <button class="btn" type="button" id="get">جست‌وجو</button>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" type="button" id="rand">درج ۵ کلید تصادفی</button>
-          <button class="btn" type="button" id="reset">↺ از اول</button>
-        </div>
-        <label class="check" style="margin-top:12px"><input type="checkbox" id="crash"> وسط split بعدی crash کن</label>
-        <label class="check" style="margin-top:6px"><input type="checkbox" id="wal" checked> فایل write-ahead log</label>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="tree" id="tree" dir="ltr" aria-label="pageهای B-tree به تفکیک سطح"></div>
+        <div class="orphans" id="orphans" dir="ltr"></div>
+        <div class="legend"><span><i class="lp"></i>page خوانده‌شده در آخرین عملیات</span><span><i class="lw"></i>page نوشته‌شده در آخرین عملیات</span><span><i class="lo"></i>page از نوع orphan، دسترس‌ناپذیر</span></div>
       </div>
-      <div class="panel">
-        <p class="panel-title">شمارنده‌ها</p>
-        <div class="stats" id="stats"></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <div class="row">
+            <label for="key">کلید</label><input id="key" type="number" min="1" max="999" value="334" style="width:90px">
+            <button class="btn primary" type="button" id="ins">درج</button>
+            <button class="btn" type="button" id="get">جست‌وجو</button>
+          </div>
+          <div class="row"><button class="btn" type="button" id="rand">درج ۵ کلید تصادفی</button></div>
+        </div>
+        <div class="tweak-group">
+          <label class="check"><input type="checkbox" id="crash"> وسط split بعدی crash کن</label>
+          <label class="check"><input type="checkbox" id="wal" checked> فایل write-ahead log</label>
+        </div>
       </div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>جست‌وجو در هر سطح یک page می‌خواند.</strong> عمق فقط وقتی بیشتر می‌شود که ریشه split شود، پس نسبت به تعداد کلیدها لگاریتمی می‌ماند؛ به گفته‌ی کتاب، چهار سطح page چهار کیلوبایتی با branching factor ۵۰۰ تا ۲۵۰ ترابایت جا می‌دهد.</li>
-    <li><strong>بیشتر درج‌ها یک page می‌نویسند.</strong> هر split دو نیمه و والد را می‌نویسد؛ گاهی یک زنجیره در هر سطح یک page را بازنویسی می‌کند.</li>
-    <li><strong>هر split چند page را بازنویسی می‌کند.</strong> بدون WAL وسط کار crash کنید: نیمه‌ی چپ روی دیسک است اما والد هیچ‌وقت از نیمه‌ی راست باخبر نشده، پس کلیدهایش orphan می‌شوند. با WAL، بازیابی درج را دوباره اجرا می‌کند.</li>
-    <li><strong>مقایسه با LSM-tree.</strong> این‌جا pageها در جا عوض می‌شوند؛ LSM-tree فقط append می‌کند و بعداً فایل‌های کامل را حذف می‌کند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>جست‌وجو در هر سطح یک page می‌خواند.</strong> عمق فقط وقتی بیشتر می‌شود که ریشه split شود، پس نسبت به تعداد کلیدها لگاریتمی می‌ماند؛ به گفته‌ی کتاب، چهار سطح page چهار کیلوبایتی با branching factor ۵۰۰ تا ۲۵۰ ترابایت جا می‌دهد.</li>
+      <li><strong>بیشتر درج‌ها یک page می‌نویسند.</strong> هر split دو نیمه و والد را می‌نویسد؛ گاهی یک زنجیره در هر سطح یک page را بازنویسی می‌کند.</li>
+      <li><strong>هر split چند page را بازنویسی می‌کند.</strong> بدون WAL وسط کار crash کنید: نیمه‌ی چپ روی دیسک است اما والد هیچ‌وقت از نیمه‌ی راست باخبر نشده، پس کلیدهایش orphan می‌شوند. با WAL، بازیابی درج را دوباره اجرا می‌کند.</li>
+      <li><strong>مقایسه با LSM-tree.</strong> این‌جا pageها در جا عوض می‌شوند؛ LSM-tree فقط append می‌کند و بعداً فایل‌های کامل را حذف می‌کند.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/04-storage-and-retrieval.html"><small>درس</small>فصل ۴: ذخیره‌سازی و بازیابی</a></li>
-    <li><a href="04-lsm-tree.html"><small>شبیه‌سازی</small>درون یک LSM-tree</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/04-storage-and-retrieval.html"><small>درس</small>فصل ۴: ذخیره‌سازی و بازیابی</a></li>
+      <li><a href="04-lsm-tree.html"><small>شبیه‌سازی</small>درون یک LSM-tree</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -98,7 +106,9 @@
 (function () {
   "use strict";
   var MAX = 4; // keys per page
-  var log = Kit.log(document.getElementById("log"));
+  var crashBox = document.getElementById("crash"), walBox = document.getElementById("wal");
+  var msg = ["", "free"], tour;
+  function note(t, k) { msg = [t, k || "free"]; }
   var root, nextId, read, written, orphans, hitKey, totalWrites, rnd, ops;
 
   function page(leaf, keys, children) { return { id: nextId++, leaf: leaf, keys: keys || [], children: children || [] }; }
@@ -133,26 +143,25 @@
     read = []; written = []; hitKey = key;
     var before = clone(root), beforeNext = nextId;
     var res = insertInto(root, key);
-    if (res === "dup") { if (!quiet) log.add("کلید " + key + " از قبل در درخت هست", "muted"); return; }
+    if (res === "dup") { note("کلید " + key + " از قبل در درخت هست."); return; }
     if (res) { root = page(false, [res.boundary], [root, res.right]); written.push(root.id); }
     var split = written.length > 1;
-    if (split && document.getElementById("crash").checked) {
-      document.getElementById("crash").checked = false;
+    if (split && crashBox.checked) {
+      crashBox.checked = false;
       crashMidSplit(key, before, beforeNext);
       return;
     }
     totalWrites += new Set(written).size; ops++;
-    if (!quiet) log.add("درج " + key + ": خواندن " + read.length + " page و نوشتن " + new Set(written).size + " page" + (split ? "؛ split شد" + (res ? " و ریشه‌ی تازه ساخته شد" : "") : ""), split ? "warn" : "ok");
-    render();
+    note("درج " + key + ": " + read.length + " page خوانده و " + new Set(written).size + " page نوشته شد" + (split ? "؛ page پر split شد" + (res ? " و ریشه‌ی تازه ساخته شد، پس درخت یک سطح عمیق‌تر شد" : "") : "") + ".", split ? "warn" : "ok");
   }
 
   // The leaf's new left half reached disk; the new right page and the parent update did not.
   function crashMidSplit(key, before, beforeNext) {
-    var wal = document.getElementById("wal").checked;
+    var wal = walBox.checked;
     if (wal) {
       totalWrites += new Set(written).size; ops++;
-      log.add("وسط split برای " + key + " crash شد. بازیابی درج را از write-ahead log دوباره اجرا می‌کند: درخت سازگار است.", "ok");
-      render(); return;
+      note("وسط split برای " + key + " crash شد. بازیابی درج را از write-ahead log دوباره اجرا می‌کند و درخت سازگار می‌ماند.", "ok");
+      return;
     }
     var afterLeafId = read[read.length - 1];
     var leftKeys = findPage(root, afterLeafId).keys.slice();
@@ -162,8 +171,7 @@
     leaf.keys = leftKeys;
     orphans.push({ id: rightPage ? rightPage.id : nextId++, keys: rightPage ? rightPage.keys.slice() : [] });
     written = [afterLeafId]; read = [];
-    log.add("وسط split برای " + key + " بدون WAL crash شد: نیمه‌ی چپ page قدیمی را بازنویسی کرد، اما والد هیچ‌وقت ارجاعی به نیمه‌ی راست نگرفت. کلیدهای " + orphans[orphans.length - 1].keys.join("، ") + " حالا دسترس‌ناپذیرند.", "bad");
-    render();
+    note("وسط split برای " + key + " بدون WAL crash شد: نیمه‌ی چپ page قدیمی را بازنویسی کرد، اما والد هیچ‌وقت ارجاعی به نیمه‌ی راست نگرفت. کلیدهای " + orphans[orphans.length - 1].keys.join("، ") + " حالا دسترس‌ناپذیرند.", "bad");
   }
   function findPage(n, id) { if (n.id === id) return n; for (var i = 0; i < n.children.length; i++) { var f = findPage(n.children[i], id); if (f) return f; } return null; }
   function findSibling(n, id) {
@@ -180,8 +188,7 @@
     for (;;) { read.push(n.id); if (n.leaf) break; n = n.children[childIndex(n, key)]; }
     var found = n.keys.indexOf(key) >= 0;
     var lost = orphans.some(function (o) { return o.keys.indexOf(key) >= 0; });
-    log.add("جست‌وجوی " + key + ": خواندن " + read.length + " page ← " + (found ? "پیدا شد" : lost ? "پیدا نشد، چون در یک page orphan است" : "پیدا نشد"), found ? "ok" : lost ? "bad" : "muted");
-    render();
+    note("جست‌وجوی " + key + ": " + read.length + " page از ریشه تا leaf خوانده شد و کلید " + (found ? "پیدا شد." : lost ? "پیدا نشد، چون در یک page orphan است." : "پیدا نشد."), found ? "ok" : lost ? "bad" : "free");
   }
 
   function levels() { var out = [], cur = [root]; while (cur.length) { out.push(cur); cur = [].concat.apply([], cur.map(function (n) { return n.children; })); } return out; }
@@ -205,9 +212,11 @@
     var o = Kit.clear(document.getElementById("orphans"));
     if (orphans.length) o.appendChild(Kit.el("div", { class: "level" }, orphans.map(function (p) { return box({ id: p.id, leaf: true, keys: p.keys, children: [] }, " orphan"); })));
     var stats = Kit.clear(document.getElementById("stats"));
-    [["عمق", lv.length], ["تعداد page", lv.reduce(function (a, r) { return a + r.length; }, 0)], ["تعداد کلید", count(root)],
-     ["نوشتن به ازای درج", ops ? (totalWrites / ops).toFixed(2) : "–"]].forEach(function (s) {
-      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value" }, String(s[1]))));
+    var lost = orphans.reduce(function (a, o) { return a + o.keys.length; }, 0);
+    [["عمق درخت", lv.length, ""], ["تعداد page", lv.reduce(function (a, r) { return a + r.length; }, 0), ""], ["تعداد کلید", count(root), ""],
+     ["page خوانده‌شده", read.length || "–", ""], ["page نوشته‌شده", written.length ? new Set(written).size : "–", written.length > 1 ? "warn" : ""],
+     ["کلید orphan", lost, lost ? "bad" : "ok"], ["WAL", walBox.checked ? "روشن" : "خاموش", walBox.checked ? "ok" : "warn"]].forEach(function (s) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value " + s[2] }, Kit.digits(String(s[1])))));
     });
   }
 
@@ -216,20 +225,38 @@
     // Shaped like Figure 4-6: the page for 333–400 is full, so inserting 334 splits it.
     root = page(false, [200, 333, 400], [page(true, [100, 120, 150]), page(true, [200, 250, 270, 300]),
                                          page(true, [333, 337, 340, 345]), page(true, [400, 410, 470])]);
-    log.clear();
     read = []; written = []; hitKey = null;
-    log.add("شروع: دو سطح و ۱۴ کلید. ۳۳۴ را درج کنید تا page پر ۳۳۳ تا ۳۴۵ مثل شکل ۴-۶ split شود.", "muted");
-    render();
   }
 
   var keyInput = document.getElementById("key");
   function key() { var v = parseInt(keyInput.value, 10); return v >= 1 && v <= 999 ? v : null; }
-  document.getElementById("ins").addEventListener("click", function () { var k = key(); if (k) insert(k); });
-  document.getElementById("get").addEventListener("click", function () { var k = key(); if (k) lookup(k); });
-  document.getElementById("rand").addEventListener("click", function () { for (var i = 0; i < 5; i++) insert(1 + rnd.int(999)); });
-  document.getElementById("reset").addEventListener("click", reset);
-  keyInput.addEventListener("keydown", function (e) { if (e.key === "Enter") { var k = key(); if (k) insert(k); } });
-  reset();
+  function act(fn) { return function () { var k = key(); if (!k) return; fn(k); render(); tour.free(msg[0], msg[1]); }; }
+  document.getElementById("ins").addEventListener("click", act(insert));
+  document.getElementById("get").addEventListener("click", act(lookup));
+  document.getElementById("rand").addEventListener("click", function () { var ks = []; for (var i = 0; i < 5; i++) { var k = 1 + rnd.int(999); ks.push(k); insert(k); } render(); tour.free("درج " + ks.join("، ") + ". آخری: " + msg[0], msg[1]); });
+  keyInput.addEventListener("keydown", function (e) { if (e.key === "Enter") act(insert)(); });
+  crashBox.addEventListener("change", function () { tour.free(crashBox.checked ? "split بعدی وسط کار crash می‌کند. کلیدی درج کنید که به یک page پر می‌رود." : "crash خاموش شد.", "free"); });
+  walBox.addEventListener("change", function () { render(); tour.free(walBox.checked ? "WAL روشن است: بازیابی بعد از crash درج را دوباره اجرا می‌کند." : "WAL خاموش است: crash وسط split می‌تواند page orphan جا بگذارد.", walBox.checked ? "ok" : "warn"); });
+
+  /* ---------- the scenario ---------- */
+  function said() { return msg[0]; }
+  function op(fn, k) { return function () { fn(k); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { crashBox.checked = false; walBox.checked = true; reset(); }, render: render, interval: 4400,
+    intro: "یک B-tree دوسطحی با ۱۴ کلید، به شکل شکل ۴-۶: ریشه بازه‌ها را به ۴ page از نوع leaf تقسیم می‌کند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: کلید درج یا جست‌وجو کنید و crash را با WAL و بدون آن امتحان کنید.",
+    steps: [
+      { say: function () { return said() + " هر سطح یک page است (شکل ۴-۵، ص. ۱۲۶)."; }, kind: "ok", run: op(lookup, 270) },
+      { say: function () { return said() + " page پر ۳۳۳ تا ۳۴۵ دو نیمه شد و ریشه کلید مرزی تازه گرفت (شکل ۴-۶، ص. ۱۲۷)."; }, kind: "warn", run: op(insert, 334) },
+      { say: function () { return said() + " بیشتر درج‌ها فقط یک page می‌نویسند."; }, kind: "ok", run: op(insert, 420) },
+      { say: said, kind: "warn", run: op(insert, 430) },
+      { say: function () { return said() + " عمق فقط با split ریشه بیشتر می‌شود؛ کتاب می‌گوید چهار سطح page چهار کیلوبایتی با branching factor ۵۰۰ تا ۲۵۰ ترابایت جا می‌دهد (ص. ۱۲۷)."; }, kind: "ok", run: op(lookup, 470) },
+      { say: said, kind: "bad", run: function () { walBox.checked = false; crashBox.checked = true; insert(260); } },
+      { say: said, kind: "bad", run: op(lookup, 270) },
+      { say: function () { return "همان crash، این بار با WAL (ص. ۱۲۸): " + said(); }, kind: "ok", run: function () { reset(); [334, 420, 430].forEach(function (k) { insert(k); }); walBox.checked = true; crashBox.checked = true; insert(260); } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا جست‌وجو در B-treeای با میلیون‌ها کلید فقط چند page می‌خواند؟",

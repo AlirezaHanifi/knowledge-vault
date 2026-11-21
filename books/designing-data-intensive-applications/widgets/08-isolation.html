@@ -7,16 +7,16 @@
 <meta name="description" content="دو تراکنش درهم‌تنیده را قدم به قدم اجرا کنید و ببینید هر سطح isolation جلوی کدام ناهنجاری را می‌گیرد: dirty read، read skew، lost update و write skew. برای فصل ۸ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .timeline { display: grid; grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr); gap: 4px 10px; font-size: .86rem; }
+  .timeline { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr); gap: 3px 10px; font-size: .84rem; }
   .timeline .h { font-weight: 600; font-size: .8rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
-  .timeline .n { color: var(--ink-3); font-family: var(--mono); font-size: .76rem; padding-top: 6px; }
-  .op { padding: 5px 8px; border-radius: var(--radius-sm); border: 1px solid transparent; font-family: var(--mono); font-size: .8rem; min-height: 30px; }
+  .timeline .n { color: var(--ink-3); font-family: var(--mono); font-size: .76rem; padding-top: 4px; }
+  .op { padding: 3px 8px; border-radius: var(--radius-sm); border: 1px solid transparent; font-family: var(--mono); font-size: .8rem; min-height: 26px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 10px; }
   .op.todo { border-color: var(--line); color: var(--ink-3); }
   .op.cur { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
   .op.done { border-color: var(--line); background: var(--surface); }
   .op.wait { border-color: var(--warn); background: var(--warn-soft); }
   .op.abort { border-color: var(--bad); background: var(--bad-soft); }
-  .op .res { display: block; font-family: var(--font); font-size: .78rem; color: var(--ink-2); margin-top: 2px; }
+  .op .res { font-family: var(--font); font-size: .76rem; color: var(--ink-2); }
   .ver { font-family: var(--mono); font-size: .8rem; }
   .ver .unc { color: var(--warn); }
   .ver .old { color: var(--ink-3); text-decoration: line-through; }
@@ -25,9 +25,15 @@
   table.matrix tr.sel td { background: var(--accent-soft); }
   table.matrix td.focus { outline: 2px solid var(--accent); outline-offset: -2px; font-weight: 600; }
   .yes { color: var(--bad); } .no { color: var(--ok); } .dep { color: var(--warn); }
+  .story { color: var(--ink-2); font-size: .86rem; margin: 0 0 8px; }
+  .outcome { margin-top: 8px; font-size: .86rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); }
+  .outcome.ok { border-color: var(--ok); } .outcome.bad { border-color: var(--bad); } .outcome.warn { border-color: var(--warn); }
+  .dbrow { font-size: .8rem; margin-top: 8px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .dbrow b { font-family: var(--mono); font-weight: 600; }
+  .acts { display: flex; gap: 6px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -41,53 +47,65 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۸ · تراکنش‌ها</div>
-  <h1>سطح‌های isolation، یک interleaving در هر بار</h1>
-  <p class="lede">مفهوم race condition بین تراکنش‌ها فقط با interleavingهای خاصی ظاهر می‌شود. یک ناهنجاری و یک سطح isolation انتخاب کنید و همان interleaving را قدم به قدم اجرا کنید تا ببینید دیتابیس آن را راه می‌دهد، یک تراکنش را منتظر نگه می‌دارد یا یکی را abort می‌کند.</p>
-  <p class="source-note">سناریوها از مثال‌های کتاب‌اند: dirty read شمارنده‌ی پیام‌های خوانده‌نشده در شکل ۸-۲ و ص. ۲۸۵؛ دو حساب ۵۰۰ دلاری Aaliyah برای read skew در شکل ۸-۶ و ص. ۲۹۴؛ شمارنده‌ای که از ۴۲ افزایش می‌یابد برای lost update در شکل ۸-۱ و ص. ۲۸۲؛ و خروج Aaliyah و Bryce از on-call برای write skew در صص. ۳۰۳–۳۰۴. موتور یک مدل ساده‌ی MVCC است که vault نوشته: قفل نوشتن در سطح ردیف در همه‌ی سطح‌ها؛ snapshot isolation به‌طور اختیاری با update هم‌زمان abort می‌کند، مثل repeatable read در PostgreSQL در ص. ۳۰۱؛ و «serializable» یک SSI ساده است که تراکنش خواندنی-نوشتنی را در commit abort می‌کند اگر چیزی که خوانده با یک commit هم‌زمان بازنویسی شده باشد.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>سطح‌های isolation، یک interleaving در هر بار</h1>
+      <p class="lede">مفهوم race condition بین تراکنش‌ها فقط با interleavingهای خاصی ظاهر می‌شود. هر قدم یک ناهنجاری کتاب را زیر یک سطح isolation اجرا می‌کند: دو ستون دو تراکنش‌اند، و زیر هر دستور نتیجه‌اش آمده.</p>
+      <p class="source-note">برای صص. ۲۸۵–۳۲۲ با مثال‌های کتاب: شمارنده‌ی پیام‌های خوانده‌نشده، دو حساب ۵۰۰ دلاری Aaliyah در شکل ۸-۶، شمارنده‌ای که دو بار بالا می‌رود، و پزشک‌های on-call در شکل ۸-۸. مدل serializable این‌جا SSI ساده‌شده است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="row" style="margin-bottom:12px"><div id="scenario"></div></div>
-      <p id="story" style="color:var(--ink-2);font-size:.95rem"></p>
-      <div class="timeline" id="timeline"></div>
-      <div class="callout" id="outcome" style="margin-top:14px" aria-live="polite"></div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">سطح isolation</p>
-        <div id="level"></div>
-        <label class="check" style="margin-top:10px" id="detect-wrap"><input type="checkbox" id="detect" checked> مدل snapshot isolation، lost update را تشخیص بدهد</label>
-        <div style="margin-top:12px" id="player"></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <p class="story" id="story"></p>
+        <div class="timeline" id="timeline"></div>
+        <div class="dbrow" id="db"></div>
+        <div class="outcome" id="outcome" aria-live="polite"></div>
       </div>
-      <div class="panel">
-        <p class="panel-title">ردیف‌های دیتابیس و نسخه‌هایشان</p>
-        <div id="db"></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><span class="field-head">ناهنجاری</span><div id="scenario"></div></div>
+        <div class="tweak-group"><span class="field-head">سطح isolation</span><div id="level"></div>
+          <label class="check" id="detect-wrap"><input type="checkbox" id="detect" checked> مدل snapshot isolation، lost update را تشخیص بدهد</label></div>
+        <div class="tweak-group"><div class="acts">
+          <button class="btn primary small" type="button" id="one">دستور بعدی</button>
+          <button class="btn small" type="button" id="all">اجرای کامل</button>
+          <button class="btn small" type="button" id="again">از اول همین interleaving</button>
+        </div></div>
       </div>
     </div>
   </div>
 
-  <h2>هر سطح جلوی چه چیزی را می‌گیرد</h2>
-  <p class="source-note">جدول ۸-۱ در ص. ۳۳۵، برای مرجع؛ خانه‌ی برجسته سناریو و سطح فعلی است.</p>
-  <div class="table-wrap panel"><table class="data matrix" id="matrix"></table></div>
+  <section class="stage-more">
+    <h2>هر سطح جلوی چه چیزی را می‌گیرد</h2>
+    <p class="source-note">جدول ۸-۱ در ص. ۳۳۵، برای مرجع؛ خانه‌ی برجسته سناریو و سطح فعلی است.</p>
+    <div class="table-wrap panel"><table class="data matrix" id="matrix"></table></div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li>همه‌ی سطح‌های این‌جا جلوی <strong>dirty write</strong> را می‌گیرند: نویسنده‌ی دوم یک ردیف منتظر می‌ماند تا اولی commit یا abort کند؛ با رنگ کهربایی نشان داده شده.</li>
-    <li><strong>مدل read committed</strong> اجازه می‌دهد هر دستور آخرین داده‌ی commitشده را ببیند، پس دو خواندن در یک تراکنش ممکن است دو لحظه‌ی متفاوت را ببینند؛ یعنی read skew.</li>
-    <li><strong>مدل snapshot isolation</strong> از یک snapshot سازگار می‌خواند. این‌که جلوی lost update را بگیرد به پیاده‌سازی بستگی دارد؛ checkbox را عوض کنید.</li>
-    <li><strong>مفهوم write skew</strong> از snapshot isolation رد می‌شود، چون دو تراکنش ردیف‌های <em>متفاوتی</em> را می‌نویسند و هیچ conflict نوشتنی برای تشخیص نیست. فقط serializable isolation آن را می‌گیرد، با abort کردن یک تراکنش که اپلیکیشن باید retryاش کند.</li>
-  </ul>
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>همه‌ی سطح‌های این‌جا جلوی <strong>dirty write</strong> را می‌گیرند: نویسنده‌ی دوم یک ردیف منتظر می‌ماند تا اولی commit یا abort کند؛ با رنگ کهربایی نشان داده شده (ص. ۲۹۱).</li>
+      <li><strong>مدل read committed</strong> اجازه می‌دهد هر دستور آخرین داده‌ی commitشده را ببیند، پس دو خواندن در یک تراکنش ممکن است دو لحظه‌ی متفاوت را ببینند؛ یعنی read skew (صص. ۲۹۳–۲۹۴).</li>
+      <li><strong>مدل snapshot isolation</strong> از یک snapshot سازگار می‌خواند. این‌که جلوی lost update را بگیرد به پیاده‌سازی بستگی دارد (ص. ۳۰۱).</li>
+      <li><strong>مفهوم write skew</strong> از snapshot isolation رد می‌شود، چون دو تراکنش ردیف‌های <em>متفاوتی</em> را می‌نویسند. فقط serializable isolation آن را می‌گیرد، با abort کردن یک تراکنش که اپلیکیشن باید retryاش کند (صص. ۳۰۳–۳۰۵، ۳۲۱).</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/08-transactions.html"><small>درس</small>فصل ۸: تراکنش‌ها</a></li>
-    <li><a href="../lab/08-write-skew/README.md"><small>آزمایش</small>مفهوم MVCC، write skew و SSI در Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/08-transactions.html"><small>درس</small>فصل ۸: تراکنش‌ها</a></li>
+      <li><a href="../lab/08-write-skew/README.md"><small>آزمایش</small>مفهوم MVCC، write skew و SSI در Python</a></li>
+      <li><a href="08-two-phase-commit.html"><small>شبیه‌سازی</small>مفهوم two-phase commit</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -158,8 +176,9 @@
     }
   };
 
-  var scenario = "skew", level = "rc";
+  var scenario = "skew", level = "rc", detect = true, tour;
   var db, txs, pos, pending, ts, done, results;
+  var D = function (x) { return Kit.digits(String(x)); };
 
   function committed(d, key) {
     var vs = d[key].filter(function (v) { return v.commit !== null; });
@@ -173,7 +192,6 @@
     txs = { 1: { id: 1, start: null, status: "active", locals: {}, reads: {} }, 2: { id: 2, start: null, status: "active", locals: {}, reads: {} } };
     pos = 0; pending = { 1: [], 2: [] }; done = false;
     results = sc.steps.map(function () { return { state: "todo", res: "" }; });
-    render();
   }
 
   function begin(t) { if (t.start === null) t.start = ts; }
@@ -225,7 +243,7 @@
       if (val === undefined) return { state: "done", res: "شرط برقرار نیست؛ چیزی نوشته نشد" };
       var h = holder(t, s.key);
       if (h) return { state: "wait", res: "منتظر قفل T" + h + " روی " + s.key };
-      if ((level === "si" && document.getElementById("detect").checked) || level === "ser") {
+      if ((level === "si" && detect) || level === "ser") {
         var newer = db[s.key].some(function (v) { return v.commit !== null && v.commit > t.start && v.tx !== t.id; });
         if (newer) return { state: "abort", res: abort(t, "abort شد: update هم‌زمان روی " + s.key) };
       }
@@ -258,14 +276,11 @@
     for (var tx = 1; tx <= 2; tx++) {
       if (pending[tx].length) {
         var i = pending[tx][0], r = exec(i);
-        if (r.state !== "wait") { results[i] = r; pending[tx].shift(); render(); return true; }
+        if (r.state !== "wait") { results[i] = r; pending[tx].shift(); return true; }
       }
     }
     var steps = SCENARIOS[scenario].steps;
-    if (pos >= steps.length) {
-      if (pending[1].length || pending[2].length) { done = true; render(); return false; }
-      done = true; render(); return false;
-    }
+    if (pos >= steps.length) { done = true; return false; }
     var j = pos++, s = steps[j];
     if (pending[s.tx].length) { pending[s.tx].push(j); results[j] = { state: "wait", res: "در صف پشت یک دستور منتظر" }; }
     else {
@@ -274,8 +289,18 @@
       if (res.state === "wait") pending[s.tx].push(j);
     }
     if (pos >= steps.length && !pending[1].length && !pending[2].length) done = true;
-    render();
     return !done;
+  }
+  function runAll() { var guard = 0; while (!done && guard++ < 40) step(); }
+  // The verdict of a finished interleaving: [text, kind]
+  function verdict() {
+    if (!done) return ["دستور " + D(Math.min(pos, SCENARIOS[scenario].steps.length)) + " از " + D(SCENARIOS[scenario].steps.length) + " اجرا شد.", ""];
+    var L = { 1: txs[1].locals, 2: txs[2].locals, aborted: [1, 2].filter(function (x) { return txs[x].status === "aborted"; }) };
+    var bad = SCENARIOS[scenario].check(L, db);
+    var aborted = scenario === "dirty" ? [] : L.aborted;
+    if (bad) return ["ناهنجاری: " + bad, "bad"];
+    if (aborted.length) return ["با abort جلوگیری شد: تراکنش " + aborted.map(D).join(" و ") + " abort شد و اپلیکیشن باید retryاش کند.", "warn"];
+    return ["جلوگیری شد: این interleaving نتیجه‌ی درستی داد.", "ok"];
   }
 
   function render() {
@@ -289,31 +314,27 @@
     sc.steps.forEach(function (s, i) {
       var r = results[i], cls = "op " + (i === pos && !done ? "cur" : r.state);
       var cell = el("div", { class: cls }, el("span", { lang: "en", dir: "ltr" }, s.text), r.res ? el("span", { class: "res" }, r.res) : null);
-      tl.appendChild(el("div", { class: "n" }, i + 1));
+      tl.appendChild(el("div", { class: "n" }, D(i + 1)));
       tl.appendChild(s.tx === 1 ? cell : el("div"));
       tl.appendChild(s.tx === 2 ? cell : el("div"));
     });
     var dbEl = Kit.clear(document.getElementById("db"));
-    var tbl = el("table", { class: "data" }, el("tr", null, el("th", null, "ردیف"), el("th", null, "نسخه‌ها، از قدیمی به جدید")));
+    dbEl.appendChild(el("span", { class: "muted" }, "مقدارهای commitشده:"));
     Object.keys(db).forEach(function (k) {
-      tbl.appendChild(el("tr", null, el("td", { class: "mono" }, k), el("td", { class: "ver", lang: "en", dir: "ltr" },
-        db[k].map(function (v, i) {
-          var tag = v.aborted ? "old" : v.commit === null ? "unc" : "";
-          return el("span", { class: tag }, (i ? " → " : "") + v.value + (v.tx ? " (T" + v.tx + (v.aborted ? ", aborted" : v.commit === null ? ", uncommitted" : "") + ")" : ""));
-        }))));
+      var last = db[k][db[k].length - 1];
+      dbEl.appendChild(el("span", { lang: "en", dir: "ltr" }, el("b", null, k), " = " + committed(db, k) +
+        (last.commit === null && !last.aborted ? "  (T" + last.tx + " uncommitted: " + last.value + ")" : "")));
     });
-    dbEl.appendChild(tbl);
-    var out = Kit.clear(document.getElementById("outcome"));
-    if (!done) { out.className = "callout"; out.appendChild(el("p", null, "مفهوم interleaving را قدم به قدم اجرا کنید: " + Math.min(pos, sc.steps.length) + " از " + sc.steps.length + ".")); }
-    else {
-      var L = { 1: txs[1].locals, 2: txs[2].locals, aborted: [1, 2].filter(function (x) { return txs[x].status === "aborted"; }) };
-      var bad = sc.check(L, db);
-      var aborted = [1, 2].filter(function (x) { return txs[x].status === "aborted"; });
-      if (scenario === "dirty") aborted = [];
-      if (bad) { out.className = "callout bad"; out.appendChild(el("p", null, el("strong", null, "ناهنجاری. "), bad)); }
-      else if (aborted.length) { out.className = "callout warn"; out.appendChild(el("p", null, el("strong", null, "با abort جلوگیری شد. "), "تراکنش " + aborted.join(" و ") + " abort شد؛ اپلیکیشن باید retryاش کند.")); }
-      else { out.className = "callout ok"; out.appendChild(el("p", null, el("strong", null, "جلوگیری شد. "), "این interleaving نتیجه‌ی درستی داد.")); }
-    }
+    var v = verdict(), out = document.getElementById("outcome");
+    out.className = "outcome " + v[1]; out.textContent = Kit.digits(v[0]);
+    var LV = { ru: "read uncommitted", rc: "read committed", si: "snapshot isolation", ser: "serializable" };
+    var st = Kit.clear(document.getElementById("stats"));
+    [["ناهنجاری", sc.label.replace("مفهوم ", ""), ""], ["سطح isolation", LV[level] + (level === "si" ? (detect ? "، با تشخیص" : "، بدون تشخیص") : ""), ""],
+     ["تراکنش ۱", ST[txs[1].status], txs[1].status === "aborted" ? "warn" : ""], ["تراکنش ۲", ST[txs[2].status], txs[2].status === "aborted" ? "warn" : ""],
+     ["نتیجه", !done ? "در جریان" : v[1] === "bad" ? "ناهنجاری" : v[1] === "warn" ? "abort" : "درست", v[1]]].forEach(function (x) {
+      st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    scenSeg.set(scenario); levelSeg.set(level); document.getElementById("detect").checked = detect;
     renderMatrix();
     document.getElementById("detect-wrap").hidden = level !== "si";
   }
@@ -337,14 +358,38 @@
     });
   }
 
-  document.getElementById("scenario").appendChild(Kit.segmented({ label: "ناهنجاری", value: scenario,
+  function fresh(text) { reset(); render(); tour.free(text, ""); }
+  var scenSeg = Kit.segmented({ label: "ناهنجاری", value: scenario,
     options: Object.keys(SCENARIOS).map(function (k) { return { value: k, label: SCENARIOS[k].label }; }),
-    onChange: function (v) { scenario = v; player.pause(); reset(); } }).element);
-  document.getElementById("level").appendChild(Kit.segmented({ label: "سطح isolation", value: level, options: LEVELS,
-    onChange: function (v) { level = v; player.pause(); reset(); } }).element);
-  document.getElementById("detect").addEventListener("change", function () { player.pause(); reset(); });
-  var player = Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
-  reset();
+    onChange: function (v) { scenario = v; fresh("سناریو عوض شد. «دستور بعدی» یا «اجرای کامل» را بزنید."); } });
+  document.getElementById("scenario").appendChild(scenSeg.element);
+  var levelSeg = Kit.segmented({ label: "سطح isolation", value: level, options: LEVELS,
+    onChange: function (v) { level = v; fresh("سطح isolation عوض شد. «دستور بعدی» یا «اجرای کامل» را بزنید."); } });
+  document.getElementById("level").appendChild(levelSeg.element);
+  document.getElementById("detect").addEventListener("change", function (e) { detect = e.target.checked; fresh(detect ? "تشخیص lost update روشن شد." : "تشخیص lost update خاموش شد."); });
+  function after() { render(); var v = verdict(); tour.free(v[0], v[1]); }
+  document.getElementById("one").addEventListener("click", function () { if (done) reset(); step(); after(); });
+  document.getElementById("all").addEventListener("click", function () { if (done) reset(); runAll(); after(); });
+  document.getElementById("again").addEventListener("click", function () { fresh("همان interleaving از اول."); });
+
+  /* ---------- the scenario ---------- */
+  function play(sc, lv, det) { return function () { scenario = sc; level = lv; detect = det !== false; reset(); runAll(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { scenario = "dirty"; level = "ru"; detect = true; reset(); }, render: render, interval: 5600,
+    intro: "هر قدم یک interleaving کامل را زیر یک سطح isolation اجرا می‌کند. از ضعیف‌ترین سطح شروع می‌کنیم و ناهنجاری‌ها را یکی‌یکی می‌بندیم.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و هر ناهنجاری را زیر هر سطح، دستور به دستور، اجرا کنید.",
+    steps: [
+      { kind: "bad", run: play("dirty", "ru"), say: "زیر read uncommitted، کاربر ۲ شمارنده‌ی ۳ را می‌خواند که تراکنش ۱ هنوز commit نکرده و بعد abort می‌کند: dirty read (ص. ۲۹۰)." },
+      { kind: "ok", run: play("dirty", "rc"), say: "زیر read committed، کاربر ۲ فقط مقدار commitشده یعنی ۲ را می‌بیند. دیتابیس مقدار قدیم را تا commit نگه می‌دارد (صص. ۲۹۰–۲۹۲)." },
+      { kind: "bad", run: play("skew", "rc"), say: "زیر read committed، خواندن اول Aaliyah پیش از انتقال است و دومی بعد از آن. هر دو commitشده‌اند، اما جمعشان ۹۰۰ است: read skew (شکل ۸-۶، ص. ۲۹۴)." },
+      { kind: "ok", run: play("skew", "si"), say: "زیر snapshot isolation، تراکنش ۲ هر دو حساب را از snapshot لحظه‌ی شروعش می‌خواند و جمع ۱٬۰۰۰ است (صص. ۲۹۴–۲۹۷)." },
+      { kind: "bad", run: play("lost", "si", false), say: "دو read-modify-write روی شمارنده‌ی ۴۲. snapshot isolation بدون تشخیص: هر دو ۴۳ می‌نویسند و یک افزایش گم می‌شود: lost update (ص. ۲۹۹)." },
+      { kind: "warn", run: play("lost", "si"), say: "همان interleaving با تشخیص خودکار lost update، مثل PostgreSQL در repeatable read: نوشتن دوم abort می‌شود و باید retry شود (ص. ۳۰۱)." },
+      { kind: "bad", run: play("wskew", "si"), say: "دو پزشک on-call هر کدام می‌بینند دو نفر on-call هستند و خودشان را خارج می‌کنند. ردیف‌های متفاوتی نوشته شد، پس snapshot isolation conflictی نمی‌بیند: write skew (شکل ۸-۸، صص. ۳۰۳–۳۰۴)." },
+      { kind: "warn", run: play("wskew", "ser"), say: "زیر serializable از نوع SSI، تراکنش دوم هنگام commit abort می‌شود: فرضش، یعنی دو پزشک on-call، را تراکنش دیگر نادرست کرده (صص. ۳۲۰–۳۲۱)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا snapshot isolation جلوی write skew on-call را نمی‌گیرد؟",

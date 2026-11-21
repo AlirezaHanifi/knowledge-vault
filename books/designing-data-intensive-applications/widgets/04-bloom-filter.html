@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>درون یک Bloom filter</title>
+<meta name="description" content="مثال شکل ۴-۴ را قدم‌به‌قدم ببینید: کلیدها بیت‌ها را روشن می‌کنند، «قطعاً نیست» یک SSTable را رد می‌کند و false positive با بیت بیشتر برای هر کلید کم می‌شود. برای فصل ۴ ویراست دوم DDIA.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  /* Up to 48 bits: a fixed grid of numbered cells, so the numbers never collide; more: a dense strip. */
+  .bits { direction: ltr; margin: 4px 0 12px; }
+  .bits.labelled { display: grid; grid-template-columns: repeat(var(--cols, 16), minmax(0, 46px)); gap: 10px 4px; }
+  .bits.small { display: flex; flex-wrap: wrap; gap: 3px; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
+  .cell small { font-size: .78rem; line-height: 1; color: var(--ink-3); font-family: var(--mono); }
+  .bit { display: grid; place-items: center; width: 100%; height: 38px; border: 1px solid var(--line-strong);
+         border-radius: 4px; background: var(--surface); font-family: var(--mono); font-size: 1rem; transition: background var(--step); }
+  .bits.big .bit { height: 44px; font-size: 1.15rem; }
+  .bit.on { background: var(--s4); border-color: var(--s4); color: var(--accent-ink); font-weight: 700; }
+  .bit.set { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .bit.hit { outline: 3px solid var(--ok); outline-offset: 1px; }
+  .bit.miss { outline: 3px dashed var(--bad); outline-offset: 1px; }
+  .bits.small .bit { width: 13px; height: 13px; border-radius: 2px; font-size: 0; }
+  .bits.small .bit.set, .bits.small .bit.hit, .bits.small .bit.miss { outline-width: 2px; }
+  .keys .chip { font-size: .85rem; padding: 3px 8px; }
+  .row-label { font-size: .8rem; color: var(--ink-3); margin: 2px 0; }
+  .keys { display: flex; flex-wrap: wrap; gap: 4px; min-height: 30px; }
+  .keys .chip.now { border-color: var(--accent); background: var(--accent-soft); }
+  .probe { display: grid; gap: 6px; margin-top: 8px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface-2); }
+  .probe .verdict { font-weight: 650; }
+  .probe .verdict.ok { color: var(--ok); } .probe .verdict.bad { color: var(--bad); } .probe .verdict.warn { color: var(--warn); }
+  .hash { font-family: var(--mono); direction: ltr; unicode-bidi: isolate; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .78rem; color: var(--ink-3); margin-top: 10px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-inline-end: 4px; border-radius: 2px; vertical-align: -1px; }
+  .legend .l-on::before { background: var(--s4); }
+  .legend .l-set::before { outline: 2px solid var(--accent); }
+  .legend .l-hit::before { outline: 2px solid var(--ok); }
+  .legend .l-miss::before { outline: 2px dashed var(--bad); }
+  .query-row input[type="text"] { width: 110px; }
+  .empty { color: var(--ink-3); font-size: .8rem; font-style: italic; }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-storage-and-retrieval.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ساختار Bloom filter</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>درون یک Bloom filter</h1>
+      <p class="lede">هر SSTable یک آرایه‌ی بیتی کوچک دارد که بدون خواندن فایل می‌گوید کلیدی «قطعاً این‌جا نیست» یا «شاید هست».</p>
+      <p class="source-note">برای «Bloom filters» در صص. ۱۲۲–۱۲۳ و شکل ۴-۴. سه کلید شکل ۴-۴ همان hashهای کتاب را دارند؛ بقیه‌ی کلیدها با hash خود vault ساخته می‌شوند. پیاده‌سازی مال خود vault است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <p class="row-label" id="keys-label">کلیدهای داخل SSTable</p>
+        <div class="keys" id="keys"></div>
+        <p class="row-label" id="bits-label">بیت‌های Bloom filter</p>
+        <div class="bits" id="bits" role="img"></div>
+        <div class="probe" id="probe" hidden></div>
+        <div class="legend" aria-hidden="true">
+          <span class="l-on">بیت ۱</span><span class="l-set">بیتی که کلید تازه روشن کرد</span>
+          <span class="l-hit">بیت کوئری: ۱</span><span class="l-miss">بیت کوئری: ۰</span>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="knobs"></div>
+        <div class="tweak-group query-row">
+          <label for="q">کلید</label>
+          <input id="q" type="text" maxlength="12" value="handheld" autocomplete="off" lang="en">
+          <button class="btn" type="button" id="ask">جست‌وجو</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>«نه» قطعی است، «بله» نه.</strong> اگر حتی یکی از بیت‌های کوئری صفر باشد، کلید هیچ‌وقت درج نشده؛ هیچ false negativeی وجود ندارد. اگر همه یک باشند، شاید بیت‌ها را کلیدهای دیگر روشن کرده باشند.</li>
+      <li><strong>هزینه‌ی false positive کم است.</strong> فقط یک بلوک بی‌دلیل خوانده می‌شود و جست‌وجو در SSTable قدیمی‌تر ادامه پیدا می‌کند (ص. ۱۲۳).</li>
+      <li><strong>بیت بیشتر برای هر کلید، خطای کمتر.</strong> قاعده‌ی کتاب: ۱۰ بیت برای هر کلید حدود ۱٪، و هر ۵ بیت بیشتر ده برابر کمتر (ص. ۱۲۳). شمارنده‌ها را با فرمول (1 − e<sup>−kn/m</sup>)<sup>k</sup> مقایسه کنید.</li>
+      <li><strong>range query از آن سودی نمی‌برد.</strong> فیلتر فقط به سؤال «این کلید دقیق این‌جاست؟» جواب می‌دهد.</li>
+    </ul>
+
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2>مرتبط</h2>
+    <ul class="related">
+      <li><a href="../chapters/04-storage-and-retrieval.html#ساختار-bloom-filter"><small>درس</small>فصل ۴: Bloom filter</a></li>
+      <li><a href="04-lsm-tree.html"><small>شبیه‌سازی</small>درون یک LSM-tree</a></li>
+      <li><a href="../lab/04-lsm-tree/README.md"><small>آزمایش</small>یک LSM-tree اجراشدنی در Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var el = Kit.el, d = Kit.digits;
+  // Figure 4-4: a 12-bit hash read as three 4-bit bit numbers.
+  var BOOK = { handbag: [2, 9, 4], handoff: [9, 15, 5], handheld: [6, 11, 2] };
+  var WORDS = ["hammock", "handsome", "hangout", "handiwork", "harbor", "harvest", "hazard", "headset", "hearth", "helmet",
+    "heron", "hiking", "hockey", "holiday", "honey", "horizon", "hotel", "humor", "hunter", "husky", "icicle", "igloo",
+    "impala", "inkwell", "island", "ivory", "jacket", "jasmine", "jigsaw", "jockey", "juggler", "jungle", "kayak",
+    "kernel", "kettle", "kitten", "koala", "ladder", "lagoon", "lantern"];
+  var S, tour;
+
+  function fnv(s, seed) {
+    var h = 2166136261 ^ seed;
+    for (var i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+    return h >>> 0;
+  }
+  // Bit numbers for a key. While the filter is the book's (16 bits, 3 hashes), the
+  // figure's keys keep the figure's numbers; otherwise double hashing h1 + i·h2.
+  function positions(key) {
+    if (S.m === 16 && S.k === 3 && BOOK[key]) return BOOK[key].slice();
+    var h1 = fnv(key, 0), h2 = fnv(key, 0x9e3779b9) | 1, out = [];
+    for (var i = 0; i < S.k; i++) out.push((h1 + Math.imul(i, h2) >>> 0) % S.m);
+    return out;
+  }
+  function rebuild() {
+    S.bits = new Array(S.m).fill(0);
+    S.keys.forEach(function (key) { positions(key).forEach(function (b) { S.bits[b] = 1; }); });
+    S.measured = null;
+  }
+  function add(key) {
+    S.keys.push(key);
+    S.fresh = positions(key);
+    S.fresh.forEach(function (b) { S.bits[b] = 1; });
+    S.now = key; S.probe = null; S.measured = null;
+  }
+  function query(key) {
+    var pos = positions(key), zero = pos.filter(function (b) { return !S.bits[b]; });
+    var present = S.keys.indexOf(key) >= 0;
+    S.probe = { key: key, pos: pos, zero: zero, present: present,
+                verdict: zero.length ? "no" : present ? "yes" : "fp" };
+    S.fresh = []; S.now = null;
+    if (S.probe.verdict === "fp") S.wasted++;
+    return S.probe.verdict;
+  }
+  function measure() {
+    if (S.measured !== null) return S.measured;
+    var fp = 0, N = 2000;
+    for (var i = 0; i < N; i++) {
+      var key = "absent-" + i;
+      if (positions(key).every(function (b) { return S.bits[b]; })) fp++;
+    }
+    S.measured = fp / N;
+    return S.measured;
+  }
+  function predicted() {
+    var n = S.keys.length;
+    return n ? Math.pow(1 - Math.exp(-S.k * n / S.m), S.k) : 0;
+  }
+  function firstFalsePositive() {
+    for (var i = 0; i < 500; i++) {
+      var key = "ghost" + i;
+      if (S.keys.indexOf(key) < 0 && positions(key).every(function (b) { return S.bits[b]; })) return key;
+    }
+    return "ghost0";
+  }
+  function addRandom(count) {
+    var added = 0;
+    for (var i = 0; added < count && i < 1000; i++) {
+      var key = i < WORDS.length ? WORDS[i] : "key" + i;
+      if (S.keys.indexOf(key) < 0) { S.keys.push(key); added++; }
+    }
+    rebuild(); S.fresh = []; S.now = null; S.probe = null;
+  }
+  function setSize(m, k) { S.m = m; S.k = k; rebuild(); S.fresh = []; S.probe = null; syncKnobs(); }
+
+  function fresh() {
+    S = { m: 16, k: 3, keys: [], bits: [], fresh: [], now: null, probe: null, wasted: 0, measured: null };
+    rebuild();
+  }
+
+  /* ---------- drawing ---------- */
+  function render() {
+    var keys = Kit.clear(document.getElementById("keys"));
+    if (!S.keys.length) keys.appendChild(el("span", { class: "empty" }, "هنوز کلیدی نیست"));
+    var show = S.keys.length > 24 ? S.keys.slice(-24) : S.keys;
+    if (show.length < S.keys.length) keys.appendChild(el("span", { class: "chip" }, "… +" + (S.keys.length - show.length)));
+    show.forEach(function (key) {
+      var label = key + (S.m === 16 && S.k === 3 && BOOK[key] ? " → " + positions(key).join(",") : "");
+      keys.appendChild(el("span", { class: "chip" + (key === S.now ? " now" : "") }, label));
+    });
+
+    var bits = Kit.clear(document.getElementById("bits"));
+    var small = S.m > 48;
+    bits.className = "bits" + (small ? " small" : " labelled") + (S.m <= 24 ? " big" : "");
+    bits.style.setProperty("--cols", S.m <= 16 ? S.m : S.m <= 24 ? 12 : 16);
+    var q = S.probe ? S.probe.pos : [];
+    S.bits.forEach(function (on, b) {
+      var cls = "bit" + (on ? " on" : "");
+      if (S.fresh.indexOf(b) >= 0) cls += " set";
+      if (q.indexOf(b) >= 0) cls += on ? " hit" : " miss";
+      var box = el("span", { class: cls, title: "بیت " + d(b) + ": " + d(on) }, String(on));
+      bits.appendChild(small ? box : el("span", { class: "cell" }, box, el("small", null, d(b))));
+    });
+    var ones = S.bits.filter(Boolean).length;
+    bits.setAttribute("aria-label", d(ones) + " بیت از " + d(S.m) + " بیت یک است");
+    document.getElementById("bits-label").textContent = d("بیت‌های Bloom filter: " + S.m + " بیت، " + S.k + " تابع hash، " + ones + " بیت روشن");
+
+    var probe = document.getElementById("probe");
+    Kit.clear(probe);
+    probe.hidden = !S.probe;
+    if (S.probe) {
+      var p = S.probe;
+      var bitsTxt = p.pos.map(function (b) { return b + "→" + S.bits[b]; }).join("  ");
+      probe.appendChild(el("div", null, "کوئری ", el("span", { class: "hash" }, p.key), " · بیت‌ها: ", el("span", { class: "hash" }, bitsTxt)));
+      var v = p.verdict === "no" ? ["ok", "دست‌کم یک بیت صفر است ← قطعاً در این SSTable نیست؛ فایل خوانده نمی‌شود."]
+            : p.verdict === "yes" ? ["ok", "همه‌ی بیت‌ها یک‌اند ← شاید باشد؛ بلوک خوانده می‌شود و کلید واقعاً آن‌جاست."]
+            : ["bad", "همه‌ی بیت‌ها یک‌اند اما این کلید هرگز درج نشده ← false positive: یک بلوک بی‌دلیل خوانده شد."];
+      probe.appendChild(el("div", { class: "verdict " + v[0] }, v[1]));
+    }
+
+    var fp = measure(), st = Kit.clear(document.getElementById("stats"));
+    [["کلید (n)", S.keys.length], ["بیت برای هر کلید", S.keys.length ? (S.m / S.keys.length).toFixed(1) : "–"],
+     ["پیش‌بینی فرمول", S.keys.length ? Kit.pct(predicted(), 1) : "–"], ["اندازه‌گیری‌شده", S.keys.length ? Kit.pct(fp, 1) : "–"],
+     ["خواندن بی‌دلیل", S.wasted]].forEach(function (x) {
+      st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value" }, d(String(x[1])))));
+    });
+  }
+
+  /* ---------- the knobs ---------- */
+  var mS, kS, nS;
+  var knobs = document.getElementById("knobs");
+  mS = Kit.slider({ label: "تعداد بیت‌ها (m)", min: 8, max: 400, value: 16, onInput: function (v) {
+    setSize(v, S.k); render();
+    tour.free(d("فیلتر با " + v + " بیت دوباره ساخته شد: " + (S.keys.length ? (v / S.keys.length).toFixed(1) + " بیت برای هر کلید" : "هنوز کلیدی نیست") + "."), "free");
+  } });
+  kS = Kit.slider({ label: "تعداد تابع‌های hash (k)", min: 1, max: 8, value: 3, onInput: function (v) {
+    setSize(S.m, v); render();
+    tour.free(d("حالا هر کلید " + v + " بیت را روشن می‌کند. k کم یعنی بیت کمتر برای چک؛ k زیاد یعنی آرایه زودتر پر می‌شود. کمینه‌ی خطا نزدیک k ≈ ۰٫۷ × m/n است."), "free");
+  } });
+  nS = Kit.slider({ label: "تعداد کلیدها (n)", min: 0, max: 40, value: 0, onInput: function (v) {
+    S.keys = []; addRandom(v); render();
+    tour.free(d(v + " کلید درج شد؛ " + S.bits.filter(Boolean).length + " بیت از " + S.m + " روشن است."), "free");
+  } });
+  [mS, kS, nS].forEach(function (s) { knobs.appendChild(s.element); });
+  function syncKnobs() { mS.set(S.m); kS.set(S.k); nS.set(Math.min(40, S.keys.length)); }
+
+  document.getElementById("ask").addEventListener("click", function () {
+    var key = document.getElementById("q").value.trim().toLowerCase();
+    if (!key) return;
+    var v = query(key); render();
+    tour.free(v === "no" ? "«" + key + "» قطعاً نیست: یک بیت صفر کافی است." : v === "yes" ? "«" + key + "» شاید هست، و واقعاً هست." : "«" + key + "» false positive است: همه‌ی بیت‌هایش را کلیدهای دیگر روشن کرده‌اند.",
+      v === "fp" ? "bad" : "ok");
+  });
+  document.getElementById("q").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("ask").click(); });
+
+  /* ---------- the scenario: Figure 4-4, then the rule of thumb ---------- */
+  var ghost = "";
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { fresh(); syncKnobs(); }, render: render, interval: 3400,
+    intro: "یک SSTable تازه با Bloom filter ۱۶ بیتی و ۳ تابع hash، مثل شکل ۴-۴.",
+    end: "سناریو تمام شد. حالا «خودتان تغییر بدهید» را باز کنید: m، k و n را عوض کنید یا کلیدی را جست‌وجو کنید و ببینید عدد اندازه‌گیری‌شده با فرمول چقدر نزدیک است.",
+    steps: [
+      { say: "یک SSTable تازه flush شده است. Bloom filterش ۱۶ بیت دارد و همه صفرند؛ هر کلید با ۳ تابع hash سه بیت را نشان می‌دهد.",
+        run: function () {} },
+      { say: "کلید handbag درج می‌شود: hashش ۲، ۹ و ۴ است، پس این سه بیت یک می‌شوند (شکل ۴-۴).",
+        run: function () { add("handbag"); } },
+      { say: "کلید handoff بیت‌های ۹، ۱۵ و ۵ را می‌خواهد. بیت ۹ از قبل یک بود: کلیدها بیت‌ها را با هم شریک می‌شوند.",
+        run: function () { add("handoff"); } },
+      { say: "خواندن handheld: بیت‌های ۶، ۱۱ و ۲. بیت ۶ و ۱۱ صفرند، پس این کلید قطعاً در این SSTable نیست و فایل اصلاً خوانده نمی‌شود.", kind: "ok",
+        run: function () { query("handheld"); } },
+      { say: "خواندن handbag: هر سه بیت یک‌اند ← «شاید هست». sparse index و بلوک خوانده می‌شود و کلید واقعاً آن‌جاست.", kind: "ok",
+        run: function () { query("handbag"); } },
+      { say: "حالا ۸ کلید دیگر اضافه می‌شود. در ۱۶ بیت، بیشتر بیت‌ها روشن شده‌اند؛ فیلتر دیگر چیز زیادی را رد نمی‌کند.",
+        run: function () { S.k = 3; addRandom(8); } },
+      { say: function () { return "کلید " + ghost + " هرگز درج نشده، اما هر سه بیتش یک است: false positive. یک بلوک بی‌دلیل خوانده می‌شود و جست‌وجو در SSTable قدیمی‌تر ادامه پیدا می‌کند."; }, kind: "bad",
+        run: function () { ghost = firstFalsePositive(); query(ghost); } },
+      { say: "با ۱۰ کلید در ۱۶ بیت، یعنی ۱٫۶ بیت برای هر کلید، شمارنده‌ها را ببینید: false positive خیلی بالاست.", kind: "warn",
+        run: function () { S.probe = null; } },
+      { say: "قاعده‌ی کتاب: ۱۰ بیت برای هر کلید. با ۴۰ کلید و ۴۰۰ بیت و ۷ تابع hash، خطای اندازه‌گیری‌شده حدود ۱٪ است (ص. ۱۲۳).", kind: "ok",
+        run: function () { S.keys = []; S.m = 400; S.k = 7; addRandom(40); syncKnobs(); } },
+      { say: "و ۵ بیت کمتر برای هر کلید، یعنی ۲۰۰ بیت با ۴ تابع hash، خطا را حدود ده برابر بالا می‌برد؛ همان قاعده از سمت دیگر.", kind: "warn",
+        run: function () { S.m = 200; S.k = 4; rebuild(); syncKnobs(); } }
+    ]
+  });
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "فیلتر Bloom یک SSTable برای کلیدی «نه» می‌گوید. چه می‌دانید؟",
+      options: ["کلید قطعاً در آن SSTable نیست", "کلید احتمالاً در آن SSTable نیست", "کلید حذف شده است"],
+      answer: 0, explain: "یک بیت صفر یعنی هیچ کلیدی با این hash درج نشده؛ Bloom filter هیچ false negativeی ندارد (ص. ۱۲۳)." },
+    { q: "چرا false positive در LSM-tree مشکل جدی نیست؟",
+      options: ["فقط یک بلوک بی‌دلیل خوانده می‌شود و جست‌وجو ادامه پیدا می‌کند", "چون compaction آن را درست می‌کند", "چون فیلتر هر بار دوباره ساخته می‌شود"],
+      answer: 0, explain: "در بدترین حالت sparse index و بلوک خوانده می‌شود، کلید پیدا نمی‌شود و جست‌وجو به SSTable قدیمی‌تر می‌رود (ص. ۱۲۳)." },
+    { q: "برای false positive حدود ۰٫۱٪ تقریباً چند بیت برای هر کلید لازم است؟",
+      options: ["حدود ۱۵ بیت", "حدود ۱۰ بیت", "حدود ۱۰۰ بیت"],
+      answer: 0, explain: "۱۰ بیت حدود ۱٪ می‌دهد و هر ۵ بیت بیشتر خطا را ده برابر کم می‌کند (ص. ۱۲۳)." }
+  ]);
+})();
+</script>
+</body>
+</html>
