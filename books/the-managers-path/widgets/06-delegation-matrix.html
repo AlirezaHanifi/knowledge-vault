@@ -6,15 +6,25 @@
 <title>واگذار کنم یا خودم انجام بدهم؟</title>
 <meta name="description" content="کارهای نمونه‌ی خود کتاب را در چهارخانه‌های فوریت و اهمیت جدول ۶-۱ و چهارخانه‌های پیچیدگی و تکرار جدول ۶-۲ بچینید و ببینید هر جایگاه چه می‌گوید. برای فصل ۶ کتاب The Manager's Path.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.quad { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; } .quad .cell { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; min-height: 88px; background: var(--surface); }
-  .quad .cell h3 { margin: 0 0 2px; font-size: .86rem; } .quad .cell .act { font-size: .78rem; color: var(--ink-3); margin-bottom: 4px; }
-  .task { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: .88rem; }
-  .task select { max-width: 14em; } .task .badge { grid-column: 1 / -1; justify-self: start; }</style>
+<style>
+  /* A 2×2 matrix from the book; each task lands in a quadrant as a chip, marked against the book's answer. */
+  .dm-title { font-weight: 600; font-size: .95rem; margin: 0 0 8px; }
+  .dm-quad { display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; align-items: stretch; }
+  .dm-ax { font-size: .85rem; color: var(--ink-2); text-align: center; align-self: end; }
+  .dm-ax.row { align-self: center; writing-mode: vertical-rl; transform: rotate(180deg); }
+  .dm-cell { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; min-height: 118px; background: var(--surface); }
+  .dm-cell.lit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .dm-cell .act { font-weight: 600; font-size: .9rem; margin-bottom: 6px; }
+  .dm-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .dm-chip { font-size: .85rem; border-radius: 999px; padding: 2px 10px; background: var(--surface-2); border: 1px solid var(--line); }
+  .dm-chip.new { background: var(--accent-soft); border-color: var(--accent); }
+  .dm-chip.bad { background: var(--bad-soft); border-color: var(--bad); }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
       <a href="../chapters/06-managing-multiple-teams.html">فصل ۶</a><span aria-hidden="true">/</span>
@@ -25,82 +35,140 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۶ · مدیریت چند تیم</div>
-  <h1>واگذار کنم یا خودم انجام بدهم؟</h1>
-  <p class="lede">دو جدول کوچک بخش بزرگی از این فصل را حمل می‌کنند. <strong>جدول ۶-۱</strong> اهمیت را از فوریت جدا می‌کند و <strong>جدول ۶-۲</strong> با پیچیدگی و تکرار تصمیم می‌گیرد چه چیزی واگذار شود. نمونه‌های خود کتاب را بچینید و با پاسخ‌هایش بسنجید.</p>
-  <p class="source-note">این شبیه‌سازی بخش «مدیریت وقتتان: اصلاً چه چیزی مهم است؟» (جدول ۶-۱، صص. ۱۰۳–۱۰۶) و «تصمیم‌ها و واگذاری» (جدول ۶-۲، صص. ۱۰۸–۱۰۹) را نشان می‌دهد. کارها نمونه‌های خود کتاب‌اند؛ تمرین چیدن مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>واگذار کنم یا خودم انجام بدهم؟</h1>
+      <p class="lede">دو جدول کوچک بخش بزرگی از این فصل را حمل می‌کنند. <strong>جدول ۶-۱</strong> اهمیت را از فوریت جدا می‌کند و <strong>جدول ۶-۲</strong> با پیچیدگی و تکرار تصمیم می‌گیرد چه چیزی واگذار شود. تور نمونه‌های خود کتاب را در چهارخانه‌ها می‌چیند؛ بعد خودتان بچینید.</p>
+      <p class="source-note">برای بخش «مدیریت وقتتان: اصلاً چه چیزی مهم است؟» (جدول ۶-۱، صص. ۱۰۳–۱۰۶) و «تصمیم‌ها و واگذاری» (جدول ۶-۲، صص. ۱۰۸–۱۰۹). کارها نمونه‌های خود کتاب‌اند؛ تمرین چیدن مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="tabs" id="tabs">
-    <div role="tablist" aria-label="کدام جدول">
-      <button role="tab" id="t1" aria-controls="p1" aria-selected="true" type="button">جدول ۶-۱ · وقت شما</button>
-      <button role="tab" id="t2" aria-controls="p2" aria-selected="false" type="button">جدول ۶-۲ · واگذاری</button>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <p class="dm-title" id="ttl"></p>
+        <div class="dm-quad" id="quad" role="group"></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">چیدن</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><div id="tbl"></div>
+          <button class="btn small" type="button" id="reveal">دیدن پاسخ‌های کتاب</button>
+          <button class="btn small" type="button" id="clear">پاک کردن</button></div>
+        <div class="tweak-group">
+          <label class="field-head" for="task">کار</label>
+          <select id="task"></select>
+          <label class="field-head" for="cell">چهارخانه</label>
+          <select id="cell"></select>
+          <button class="btn primary small" type="button" id="put">بگذار</button>
+        </div>
+      </div>
     </div>
-    <div role="tabpanel" id="p1" aria-labelledby="t1"></div>
-    <div role="tabpanel" id="p2" aria-labelledby="t2" hidden></div>
   </div>
-  <div class="panel" style="margin-top:12px"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>مهم ولی غیرفوری</strong> همان چهارخانه‌ای است که از دست می‌رود: آماده شدن برای جلسه‌ها، برنامه‌ی استخدام، و اختلاف با مدیر تیمی دیگر. در این level به شما اعتماد می‌شود که پیش از فوری شدنشان برای رئیستان، رتق‌وفتقشان کنید.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>مهم ولی غیرفوری</strong> همان چهارخانه‌ای است که از دست می‌رود: آماده شدن برای جلسه‌ها، برنامه‌ی استخدام، و اختلاف با مدیر تیمی دیگر. در این level به شما اعتماد می‌شود که پیش از فوری شدنشان برای رئیستان، رتق‌وفتقشان کنید.</li>
     <li><strong>کار ساده و کم‌تکرار مال خودتان است</strong>؛ توضیح دادنش از انجام دادنش بیشتر طول می‌کشد، حتی اگر حس کنید در شأنتان نیست.</li>
     <li><strong>کار پیچیده و پرتکرار بزرگ‌ترین فرصت پروراندن تیم است</strong>: کارهایی را که فقط خودتان بلدید یاد بدهید، وگرنه ارتقا گرفتنتان سخت می‌شود.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/06-managing-multiple-teams.html"><small>درس</small>فصل ۶: مدیریت چند تیم</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/06-managing-multiple-teams.html"><small>درس</small>فصل ۶: مدیریت چند تیم</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var log = Kit.log(document.getElementById("log"));
   var T = [
-    { mount: "p1", title: "جدول ۶-۱. اولویت دادن به وقتتان (ص. ۱۰۴)", cols: ["غیرفوری", "فوری"], rows: ["مهم", "غیرمهم"],
+    { title: "جدول ۶-۱. اولویت دادن به وقتتان (ص. ۱۰۴)", short: "جدول ۶-۱ · وقت شما", cols: ["غیرفوری", "فوری"], rows: ["مهم", "غیرمهم"],
       cells: [["استراتژیک: برایش وقت باز کنید", "کار بدیهی"], ["پرهیز بدیهی", "حواس‌پرتی وسوسه‌انگیز"]],
       tasks: [["قطعی سرویس در production", 0, 1, "ص. ۱۰۴"], ["ارزیابی‌های عملکرد که فردا موعدشان است", 0, 1, "ص. ۱۰۴"], ["پیشنهاد کاری پیش از منقضی شدن پیشنهاد رقیب", 0, 1, "ص. ۱۰۴"],
               ["آماده شدن برای یک جلسه تا خوب پیش برود", 0, 0, "ص. ۱۰۴"], ["نوشتن شرح شغل و برنامه‌ی استخدام", 0, 0, "ص. ۱۰۵"], ["حرف زدن با مدیر تیمی دیگر درباره‌ی یک اختلاف", 0, 0, "ص. ۱۰۵"],
-              ["نقطه‌ی قرمز ایمیل‌های خوانده‌نشده", 1, 1, "ایمیل حس فوریت می‌دهد ولی بدترین کانال برای اطلاعات فوری است (ص. ۱۰۴)"]] },
-    { mount: "p2", title: "جدول ۶-۲. تصمیم به واگذاری یا انجام دادن خودتان (ص. ۱۰۸)", cols: ["پرتکرار", "کم‌تکرار"], rows: ["ساده", "پیچیده"],
+              ["نقطه‌ی قرمز ایمیل‌های خوانده‌نشده", 1, 1, "ص. ۱۰۴"]] },
+    { title: "جدول ۶-۲. تصمیم به واگذاری یا انجام دادن خودتان (ص. ۱۰۸)", short: "جدول ۶-۲ · واگذاری", cols: ["پرتکرار", "کم‌تکرار"], rows: ["ساده", "پیچیده"],
       cells: [["واگذار کنید", "خودتان انجام بدهید"], ["واگذار کنید، با احتیاط", "برای تمرین واگذار کنید"]],
       tasks: [["گرداندن standup روزانه", 0, 0, "ص. ۱۰۸"], ["نوشتن خلاصه‌ی پیشرفت هفتگی", 0, 0, "ص. ۱۰۸"], ["گرفتن گاه‌به‌گاه بلیت یک کنفرانس", 0, 1, "ص. ۱۰۸"],
               ["اجرای اسکریپت گزارش فصلی", 0, 1, "ص. ۱۰۸"], ["ارزیابی عملکرد و برنامه‌ی استخدام", 1, 1, "صص. ۱۰۸–۱۰۹"], ["برنامه‌ریزی پروژه و طراحی سیستم", 1, 0, "ص. ۱۰۹"],
               ["آدم کلیدی بودن وسط یک قطعی", 1, 0, "ص. ۱۰۹"]] }
   ];
-  T.forEach(function (t) {
-    var p = document.getElementById(t.mount), sel = [], marks = [];
-    p.appendChild(Kit.el("p", { class: "panel-title", style: "margin-top:12px" }, t.title));
-    var grid = Kit.el("div", { class: "quad", role: "group", "aria-label": t.title }), lists = [];
-    t.rows.forEach(function (r, ri) { t.cols.forEach(function (c, ci) { var ul = Kit.el("ul", { style: "margin:0;padding-right:1.1em;font-size:.82rem" }); lists.push(ul);
-      grid.appendChild(Kit.el("div", { class: "cell" }, Kit.el("h3", null, r + " · " + c), Kit.el("div", { class: "act" }, "← " + t.cells[ri][ci]), ul)); }); });
-    var opts = [Kit.el("option", { value: "" }, "یک چهارخانه انتخاب کنید…")];
-    t.rows.forEach(function (r, ri) { t.cols.forEach(function (c, ci) { opts.push(Kit.el("option", { value: ri + "," + ci }, r + " · " + c)); }); });
-    var list = Kit.el("div", { style: "margin-top:12px" });
-    t.tasks.forEach(function (k, i) {
-      var id = t.mount + "-s" + i, s = Kit.el("select", { id: id }, opts.map(function (o) { return o.cloneNode(true); })), b = Kit.el("span", { class: "badge", "aria-live": "polite" }, "چیده نشده");
-      s.addEventListener("change", function () {
-        if (!s.value) { b.className = "badge"; b.textContent = "چیده نشده"; draw(); return; }
-        var v = s.value.split(",").map(Number), ok = v[0] === k[1] && v[1] === k[2];
-        b.className = "badge " + (ok ? "ok" : "bad");
-        b.textContent = ok ? "✓ " + t.cells[k[1]][k[2]] + " — " + k[3] : "✗ کتاب آن را زیر " + t.rows[k[1]] + " · " + t.cols[k[2]] + " می‌گذارد";
-        log.add(k[0] + ": " + (ok ? "با کتاب می‌خواند" : "کتاب می‌گوید " + t.cells[k[1]][k[2]]), ok ? "ok" : "bad"); draw();
+  var cfg = { t: 0 }, s, tour;
+  function fresh() { s = { put: {}, fresh: [], lit: null }; }
+  function place(i, rc) { s.put[i] = rc; s.fresh.push(i); }
+  function book(idx) { var t = T[cfg.t]; s.fresh = []; s.lit = null; idx.forEach(function (i) { place(i, [t.tasks[i][1], t.tasks[i][2]]); s.lit = [t.tasks[i][1], t.tasks[i][2]]; }); }
+
+  function render() {
+    var t = T[cfg.t], q = Kit.clear(document.getElementById("quad"));
+    document.getElementById("ttl").textContent = Kit.digits(t.title);
+    q.setAttribute("aria-label", t.title);
+    q.appendChild(Kit.el("span")); t.cols.forEach(function (c) { q.appendChild(Kit.el("span", { class: "dm-ax" }, c)); });
+    var right = 0, n = 0;
+    t.rows.forEach(function (r, ri) {
+      q.appendChild(Kit.el("span", { class: "dm-ax row" }, r));
+      t.cols.forEach(function (c, ci) {
+        var chips = Kit.el("div", { class: "dm-chips" });
+        Object.keys(s.put).forEach(function (k) {
+          var p = s.put[k], task = t.tasks[k]; if (p[0] !== ri || p[1] !== ci) return;
+          var ok = task[1] === ri && task[2] === ci;
+          chips.appendChild(Kit.el("span", { class: "dm-chip" + (ok ? "" : " bad") + (s.fresh.indexOf(+k) >= 0 ? " new" : "") }, (ok ? "" : "✕ ") + task[0]));
+        });
+        q.appendChild(Kit.el("div", { class: "dm-cell" + (s.lit && s.lit[0] === ri && s.lit[1] === ci ? " lit" : ""), "aria-label": r + " · " + c }, Kit.el("div", { class: "act" }, t.cells[ri][ci]), chips));
       });
-      sel.push(s); list.appendChild(Kit.el("div", { class: "task" }, Kit.el("label", { for: id }, k[0]), s, b));
     });
-    var reveal = Kit.el("button", { class: "btn", type: "button" }, "دیدن پاسخ‌های کتاب");
-    reveal.addEventListener("click", function () { t.tasks.forEach(function (k, i) { sel[i].value = k[1] + "," + k[2]; sel[i].dispatchEvent(new Event("change")); }); });
-    function draw() { lists.forEach(function (ul) { Kit.clear(ul); }); sel.forEach(function (s, i) { if (!s.value) return; var v = s.value.split(",").map(Number); lists[v[0] * 2 + v[1]].appendChild(Kit.el("li", null, t.tasks[i][0])); }); }
-    p.appendChild(grid); p.appendChild(list); p.appendChild(Kit.el("div", { class: "row", style: "margin-top:10px" }, reveal));
+    Object.keys(s.put).forEach(function (k) { n++; var task = t.tasks[k]; if (task[1] === s.put[k][0] && task[2] === s.put[k][1]) right++; });
+    var st = Kit.clear(document.getElementById("stats"));
+    [["جدول", t.short, ""], ["کارهای چیده‌شده", Kit.digits(n + " از " + t.tasks.length), ""], ["هم‌خوان با کتاب", Kit.digits(String(right)), right === n && n ? "ok" : ""], ["ناهم‌خوان", Kit.digits(String(n - right)), n - right ? "bad" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    tblS.set(String(cfg.t));
+    var ts = document.getElementById("task"), keep = ts.value;
+    Kit.clear(ts); t.tasks.forEach(function (k, i) { ts.appendChild(Kit.el("option", { value: String(i) }, (s.put[i] ? "✓ " : "") + k[0])); });
+    if (keep && +keep < t.tasks.length) ts.value = keep;
+    var cs = Kit.clear(document.getElementById("cell"));
+    t.rows.forEach(function (r, ri) { t.cols.forEach(function (c, ci) { cs.appendChild(Kit.el("option", { value: ri + "," + ci }, r + " · " + c + " ← " + t.cells[ri][ci])); }); });
+  }
+
+  /* ---------- the drawer: every handler is render() then tour.free(text, kind) ---------- */
+  var tblS = Kit.segmented({ label: "کدام جدول", value: "0", options: [{ value: "0", label: T[0].short }, { value: "1", label: T[1].short }], onChange: function (v) { cfg.t = +v; fresh(); render(); tour.free(Kit.digits(T[cfg.t].title) + ": هر کار را در چهارخانه‌ای بگذارید که فکر می‌کنید کتاب می‌گذارد.", ""); } });
+  document.getElementById("tbl").appendChild(tblS.element);
+  document.getElementById("put").addEventListener("click", function () {
+    var t = T[cfg.t], i = +document.getElementById("task").value, rc = document.getElementById("cell").value.split(",").map(Number), k = t.tasks[i], ok = k[1] === rc[0] && k[2] === rc[1];
+    s.fresh = []; s.lit = rc; place(i, rc); render();
+    tour.free(Kit.digits(k[0] + ": " + (ok ? "با کتاب می‌خواند، " + t.cells[rc[0]][rc[1]] + " (" + k[3] + ")." : "کتاب آن را زیر " + t.rows[k[1]] + " · " + t.cols[k[2]] + " می‌گذارد، یعنی " + t.cells[k[1]][k[2]] + " (" + k[3] + ").")), ok ? "ok" : "bad");
   });
-  Kit.tabs(document.getElementById("tabs"));
+  document.getElementById("reveal").addEventListener("click", function () { book(T[cfg.t].tasks.map(function (_, i) { return i; })); s.lit = null; render(); tour.free("همه‌ی کارها جایی که کتاب می‌گذارد. هر کاری که شما جای دیگری گذاشته بودید حالا جابه‌جا شده.", "ok"); });
+  document.getElementById("clear").addEventListener("click", function () { fresh(); render(); tour.free("چهارخانه‌ها خالی شدند.", ""); });
+
+  /* ---------- the scenario ---------- */
+  function scene(t, upto, idx) { return function () { cfg.t = t; fresh(); upto.forEach(function (g) { book(g); }); if (idx) book(idx); }; }
+  var A = [0, 1, 2], B = [3, 4, 5], C = [6], D = [0, 1, 2, 3], E = [4, 5, 6];
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene(0, []), render: render, interval: 8000,
+    intro: "جدول ۶-۱ کارها را با دو پرسش می‌چیند: مهم است؟ فوری است؟ تور نمونه‌های خود کتاب را یکی‌یکی در چهارخانه‌ها می‌گذارد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، چهارخانه‌ها را پاک کنید و خودتان بچینید.",
+    steps: [
+      { kind: "ok", run: scene(0, [], A), say: "مهم و فوری: قطعی production، ارزیابی‌هایی که فردا موعدشان است، پیشنهاد کاری پیش از پیشنهاد رقیب. این‌ها بدیهی‌اند؛ خودشان را به شما تحمیل می‌کنند (ص. ۱۰۴)." },
+      { kind: "warn", run: scene(0, [A], B), say: "مهم ولی غیرفوری: آماده شدن برای جلسه، نوشتن شرح شغل، حرف زدن با مدیر تیم دیگر. این‌ها استراتژیک‌اند و باید برایشان وقت باز کنید: در این سطح، رئیستان به شما اعتماد می‌کند که پیش از فوری شدن رتق‌وفتقشان کنید (صص. ۱۰۴–۱۰۶)." },
+      { kind: "bad", run: scene(0, [A, B], C), say: "فوری ولی غیرمهم: نقطه‌ی قرمز ایمیل‌ها حس فوریت می‌دهد، ولی ایمیل بدترین کانال برای اطلاعات واقعاً فوری است. حواس‌پرتی وسوسه‌انگیز (ص. ۱۰۴)." },
+      { kind: "ok", run: scene(1, [], D), say: "جدول ۶-۲: کار ساده و پرتکرار، مثل standup و خلاصه‌ی هفتگی، را واگذار کنید. کار ساده‌ی کم‌تکرار، مثل گرفتن بلیت کنفرانس یا اجرای اسکریپت فصلی، را خودتان انجام بدهید، چون توضیح دادنش از انجام دادنش بیشتر طول می‌کشد (ص. ۱۰۸)." },
+      { kind: "warn", run: scene(1, [D], E), say: "کار پیچیده و کم‌تکرار، مثل ارزیابی و برنامه‌ی استخدام، مال شماست، ولی تمرین خوبی است: بگذارید یک tech lead در ارزیابی یک کارآموز کمک کند. کار پیچیده و پرتکرار، مثل برنامه‌ریزی پروژه، طراحی سیستم و آدم کلیدی قطعی بودن، بزرگ‌ترین فرصت پروراندن استعداد است؛ واگذارش کنید تا تیم رشد کند (صص. ۱۰۸–۱۰۹)." }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "کتاب می‌گوید باید برای کدام چهارخانه وقت باز کنید؟", options: ["مهم و فوری", "مهم ولی غیرفوری", "غیرمهم ولی فوری"], answer: 1, explain: "«استراتژیک: برایش وقت باز کنید» (ص. ۱۰۴)." },
     { q: "کاری ساده است ولی فقط فصلی یک‌بار انجامش می‌دهید. جدول ۶-۲ چه می‌گوید؟", options: ["واگذار کنید", "خودتان انجام بدهید", "برای تمرین واگذار کنید"], answer: 1, explain: "توضیح دادنش از انجام دادنش بیشتر طول می‌کشد (ص. ۱۰۸)." },
