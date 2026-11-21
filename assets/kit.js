@@ -670,7 +670,7 @@
   /* ---------- formatting ---------- */
 
   function fmtMs(v) { return v >= 1000 ? (v / 1000).toFixed(2) + " s" : Math.round(v) + " ms"; }
-  function pct(v, places) { return (v * 100).toFixed(places === undefined ? 1 : places) + "%"; }
+  function pct(v, places) { return (v * 100).toFixed(places === undefined ? 1 : places) + (FA ? "٪" : "%"); }
   function percentile(sorted, p) {
     if (!sorted.length) return NaN;
     var i = Math.min(sorted.length - 1, Math.max(0, Math.ceil(p * sorted.length) - 1));

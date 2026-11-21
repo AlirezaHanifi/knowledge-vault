@@ -7,25 +7,28 @@
 <meta name="description" content="تجمیع هر شریک را به‌ترتیب زمان رویداد به brokerی با معنای commit جزئی تحویل بدهید، یکی‌یکی یا با درخواست bulk ساده یا با binهایی که حداکثر یک رکورد از هر کلید دارند، و ببینید کدام کلیدها بی‌ترتیب در می‌آیند. تصویری از فصل ۵ کتاب Data Engineering Design Patterns.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .lanes { display: grid; gap: 8px; }
-  .lane { display: grid; grid-template-columns: 90px 1fr 80px; gap: 8px; align-items: center; font-size: .8rem; }
-  .lane .k { font-weight: 600; color: var(--ink-2); }
-  .recs { display: flex; flex-wrap: wrap; gap: 4px; min-height: 26px; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
-  .rec { font-family: var(--mono); font-size: .74rem; padding: 2px 6px; border-radius: var(--radius-sm); background: var(--ok-soft); border: 1px solid var(--ok); }
-  .rec.ooo { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
-  .rec.pend { background: transparent; border: 1px dashed var(--line-strong); color: var(--ink-3); }
-  .rec.fly { background: var(--accent-soft); border-color: var(--accent); }
-  .bins { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .bin { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 8px; font-size: .74rem; background: var(--surface-2); }
-  .bin.done { opacity: .55; } .bin.cur { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-  .bin b { display: block; font-size: .72rem; color: var(--ink-3); margin-bottom: 3px; }
-  .ok-l { color: var(--ok); font-size: .74rem; } .bad-l { color: var(--bad); font-size: .74rem; font-weight: 600; }
+  /* One lane per partner: delivered records in arrival order (✕ marks one that landed after a newer record), then pending ones. */
+  .bp-lanes { display: grid; gap: 8px; }
+  .bp-lane { display: grid; grid-template-columns: 84px minmax(0, 1fr) 86px; gap: 10px; align-items: center; font-size: .9rem; }
+  .bp-lane .bp-k { font-weight: 600; color: var(--ink-2); }
+  .bp-recs { display: flex; flex-wrap: wrap; gap: 5px; min-height: 34px; padding: 4px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+  .bp-rec { font-family: var(--mono); font-size: .85rem; padding: 2px 8px; border-radius: var(--radius-sm); background: var(--ok-soft); border: 1px solid var(--ok); }
+  .bp-rec.bp-ooo { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); font-weight: 700; }
+  .bp-rec.bp-pend { background: transparent; border: 1px dashed var(--line-strong); color: var(--ink-2); }
+  .bp-verdict { font-size: .85rem; }
+  .bp-verdict.ok { color: var(--ok); } .bp-verdict.bad { color: var(--bad); font-weight: 700; }
+  .bp-bins-h { font-size: .85rem; color: var(--ink-2); margin: 12px 0 6px; }
+  .bp-bins { display: flex; flex-wrap: wrap; gap: 8px; }
+  .bp-bin { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 10px; font-size: .85rem; font-family: var(--mono); background: var(--surface-2); }
+  .bp-bin.bp-done { opacity: .6; } .bp-bin.bp-cur { border: 2px solid var(--accent); }
+  .bp-bin b { display: block; font-family: var(--sans); font-size: .82rem; color: var(--ink-2); margin-bottom: 3px; }
+  @media (max-width: 640px) { .bp-lane { grid-template-columns: 64px minmax(0, 1fr); } .bp-verdict { grid-column: 2; } }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
       <a href="../chapters/05-data-value-design-patterns.html">فصل ۵</a><span aria-hidden="true">/</span>
@@ -36,46 +39,58 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · الگوهای طراحی ارزش داده</div>
-  <h1>بسته‌بندی bin در برابر commit جزئی</h1>
-  <p class="lede">بعضی APIهای bulk می‌توانند <strong>جزئی commit</strong> کنند، یعنی بخشی از درخواست می‌نشیند و بقیه شکست می‌خورد. اگر ۱۰:۲۰ بنشیند و ۱۰:۰۰ و ۱۰:۱۰ تلاش دوباره بخورند، consumer بی‌ترتیب می‌خواندشان. الگوی Bin Pack Orderer رکوردها را مرتب و طوری بسته‌بندی می‌کند که هر bin حداکثر یک رکورد از هر کلید داشته باشد. binها را پشت سر هم می‌فرستد و تلاش‌های دوباره‌ی هر bin را پیش از شروع bin بعدی تمام می‌کند.</p>
-  <p class="source-note">تصویری از «الگو: Bin Pack Orderer» (صص. ۱۵۳–۱۵۸). نمونه‌ی commit جزئی، یعنی ۱۰:۰۰ و ۱۰:۱۰ و ۱۰:۲۰، از ص. ۱۵۴ می‌آید، و ساختن bin از شکل ۵-۹. شریک‌ها و رکوردهایشان و شانس شکست هر رکورد مال خود vault است و با seed. هر رکورد شکست‌خورده در درخواست بعدی تلاش دوباره می‌خورد. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>بسته‌بندی bin در برابر commit جزئی</h1>
+      <p class="lede">یک API bulk می‌تواند جزئی commit کند: اگر ۱۰:۲۰ بنشیند و ۱۰:۰۰ در تلاش دوباره برسد، consumer بی‌ترتیب می‌خواند. Bin Pack Orderer رکوردها را مرتب می‌کند، در binهایی با حداکثر یک رکورد از هر کلید می‌گذارد و binها را پشت سر هم می‌فرستد.</p>
+      <p class="source-note">برای «الگو: Bin Pack Orderer» (صص. ۱۵۳–۱۵۸). نمونه‌ی commit جزئی (۱۰:۰۰ و ۱۰:۱۰ و ۱۰:۲۰) از ص. ۱۵۴ است و ساختن bin از شکل ۵-۹ (صص. ۱۵۵–۱۵۶). شریک‌ها، رکوردهایشان و شانس شکست هر رکورد (با seed) مال خود vault است؛ هر رکورد شکست‌خورده در درخواست بعدی تلاش دوباره می‌خورد. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel">
-        <div class="lanes" id="lanes"></div>
-        <div class="bins" id="bins"></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="bp-lanes" id="lanes"></div>
+        <p class="bp-bins-h" id="binsH"></p>
+        <div class="bp-bins" id="bins"></div>
       </div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">کنترل‌ها</p>
-        <div id="mode"></div>
-        <div id="sliders" style="margin-top:10px"></div>
-        <div id="player" style="margin-top:12px"></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="mode"></div>
+        <div class="tweak-group" id="sliders"></div>
+        <div class="tweak-group">
+          <div class="row">
+            <button class="btn primary small" type="button" id="next">درخواست بعدی</button>
+            <button class="btn small" type="button" id="all">تا آخر</button>
+          </div>
+        </div>
       </div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>درخواست bulk ساده ترتیب کلیدها را به هم می‌زند.</strong> هر وقت رکوردی زودتر شکست بخورد و رکورد بعدی همان کلید موفق شود، تلاش دوباره بعد از آن می‌نشیند.</li>
-    <li><strong>binها نمی‌توانند ترتیب را به هم بزنند.</strong> هیچ binی دو رکورد از یک کلید ندارد، و bin <em>k+1</em> تا کامل نوشته شدن bin <em>k</em> منتظر می‌ماند.</li>
-    <li><strong>شمار درخواست‌ها را مقایسه کنید.</strong> یکی‌یکی فرستادن هم مرتب است، ولی برای هر رکورد یک درخواست خرج می‌کند. binها تقریباً به اندازه‌ی شمار رکوردهای بلندترین کلید درخواست می‌خواهند، به‌علاوه‌ی تلاش‌های دوباره.</li>
-    <li><strong>شانس شکست را صفر بگذارید.</strong> آن‌وقت هر سه راهبرد درست‌اند و bulk برنده است. ترتیب فقط زیر شکست جزئی می‌شکند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>درخواست bulk ساده ترتیب کلیدها را به هم می‌زند.</strong> هر وقت رکوردی شکست بخورد و رکورد بعدی همان کلید بنشیند، تلاش دوباره بعد از آن می‌نشیند.</li>
+      <li><strong>binها نمی‌توانند ترتیب را به هم بزنند.</strong> هیچ binی دو رکورد از یک کلید ندارد، و bin <em>k+1</em> تا کامل نوشته شدن bin <em>k</em> منتظر می‌ماند.</li>
+      <li><strong>شمار درخواست‌ها را مقایسه کنید.</strong> یکی‌یکی فرستادن هم مرتب است، ولی برای هر رکورد دست‌کم یک درخواست خرج می‌کند. binها تقریباً به اندازه‌ی رکوردهای بلندترین کلید درخواست می‌خواهند، به‌علاوه‌ی تلاش‌های دوباره.</li>
+      <li><strong>شانس شکست را صفر کنید.</strong> آن‌وقت هر سه راهبرد درست‌اند و bulk برنده است؛ ترتیب فقط زیر شکست جزئی می‌شکند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-data-value-design-patterns.html"><small>درس</small>فصل ۵: الگوهای طراحی ارزش داده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-data-value-design-patterns.html"><small>درس</small>فصل ۵: الگوهای طراحی ارزش داده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,72 +98,102 @@
 (function () {
   "use strict";
   var DATA = { "شریک A": ["10:00", "10:10", "10:20"], "شریک B": ["10:00", "10:10"], "شریک C": ["10:00", "10:10", "10:20", "10:30"], "شریک D": ["10:20"] };
-  var KEYS = Object.keys(DATA), log = Kit.log(document.getElementById("log"));
-  var cfg = { mode: "bulk", fail: 30 }, s, r;
+  var KEYS = Object.keys(DATA), MODES = { one: "یکی‌یکی", bulk: "bulk ساده", bins: "با bin" };
+  var said = ["", ""]; var log = { add: function (t, k) { said = [Kit.digits(t), k || ""]; }, clear: function () { said = ["", ""]; } };
+  var cfg = { mode: "bulk", fail: 30 }, s, r, tour;
 
-  function reset() {
+  function fresh() {
     r = Kit.rng(6);
     var all = [];
     KEYS.forEach(function (k) { DATA[k].forEach(function (t, i) { all.push({ k: k, t: t, i: i }); }); });
     all.sort(function (a, b) { return a.k < b.k ? -1 : a.k > b.k ? 1 : a.i - b.i; });
     var bins = [];
     all.forEach(function (x) { (bins[x.i] = bins[x.i] || []).push(x); });
-    s = { all: all, bins: bins, bin: 0, pending: cfg.mode === "bins" ? bins[0].slice() : all.slice(), out: {}, req: 0, last: [] };
+    s = { all: all, bins: bins, bin: 0, pending: cfg.mode === "bins" ? bins[0].slice() : all.slice(), out: {}, req: 0, retries: 0, failedLast: [] };
     KEYS.forEach(function (k) { s.out[k] = []; });
-    log.clear(); log.add(cfg.mode === "bins" ? "رکوردها بر حسب کلید و زمان رویداد مرتب و بعد در " + bins.length + " bin بسته‌بندی شدند." : cfg.mode === "one" ? "یک رکورد در هر درخواست، با تلاش دوباره تا نشستنش." : "یک درخواست bulk با همه‌ی " + all.length + " رکورد؛ شکست‌ها در درخواست بعدی تلاش دوباره می‌خورند.", "muted");
-    render();
+    log.clear();
   }
   function done() { return KEYS.every(function (k) { return s.out[k].length === DATA[k].length; }); }
+  function tag(x) { return x.k.slice(-1) + "@" + x.t; }
+  function oooKeys() { return KEYS.filter(function (k) { var m = -1; return s.out[k].some(function (x) { var o = x.i < m; m = Math.max(m, x.i); return o; }); }); }
 
   function step() {
-    if (done()) return false;
-    if (!s.pending.length && cfg.mode === "bins") { s.bin++; s.pending = s.bins[s.bin].slice(); log.add("bin شماره‌ی " + (s.bin + 1) + " شروع می‌شود.", "muted"); }
+    if (done()) { log.add("همه‌ی رکوردها تحویل شده‌اند.", "muted"); return false; }
+    if (!s.pending.length && cfg.mode === "bins") s.pending = s.bins[++s.bin].slice();
     var batch = cfg.mode === "one" ? [s.pending[0]] : s.pending.slice();
     s.req++;
     var failed = [], ok = [];
     batch.forEach(function (x) { if (r.chance(cfg.fail / 100)) failed.push(x); else ok.push(x); });
+    s.retries += failed.length;
     ok.forEach(function (x) { s.out[x.k].push(x); });
     s.pending = s.pending.filter(function (x) { return failed.indexOf(x) >= 0 || batch.indexOf(x) < 0; });
-    s.last = batch;
-    var msg = "درخواست " + s.req + ": تعداد " + batch.length + " رکورد می‌فرستد، " + ok.length + " می‌نشیند" + (failed.length ? "، و " + failed.length + " شکست می‌خورد: " + failed.map(function (x) { return x.k.slice(-1) + "@" + x.t; }).join(", ") : "");
-    var broke = ok.filter(function (x) { var o = s.out[x.k]; return o.length > 1 && o[o.length - 2].i > x.i; });
-    log.add(msg, failed.length ? "warn" : "ok");
-    broke.forEach(function (x) { log.add("  رکورد " + x.t + " از " + x.k + " بعد از رکوردی تازه‌تر نشست: بی‌ترتیب", "bad"); });
-    if (cfg.mode === "bins" && !s.pending.length && s.bin < s.bins.length - 1) log.add("  bin شماره‌ی " + (s.bin + 1) + " کامل نوشته شد", "ok");
-    render();
+    s.failedLast = failed;
+    var broke = ok.filter(function (x) { var o = s.out[x.k]; return o.slice(0, -1).some(function (y) { return y.i > x.i; }); });
+    log.add("درخواست " + s.req + (cfg.mode === "bins" ? " (bin " + (s.bin + 1) + ")" : "") + ": " + batch.length + " رکورد فرستاد، " + ok.length + " نشست" + (failed.length ? " و " + failed.length + " شکست خورد: " + failed.map(tag).join("، ") : "") +
+      (broke.length ? ". " + broke.map(tag).join("، ") + " بعد از رکوردی تازه‌تر نشست." : "."), broke.length ? "bad" : failed.length ? "warn" : "ok");
     return !done();
   }
+  function finish() { var n = 0; while (!done() && n++ < 300) step(); }
 
   function render() {
     var lanes = Kit.clear(document.getElementById("lanes"));
-    var ooo = 0;
     KEYS.forEach(function (k) {
-      var recs = Kit.el("div", { class: "recs", "aria-label": "رکوردهای تحویل‌شده‌ی " + k });
-      var maxI = -1, bad = false;
-      s.out[k].forEach(function (x) { var o = x.i < maxI; if (o) bad = true; maxI = Math.max(maxI, x.i); recs.appendChild(Kit.el("span", { class: "rec" + (o ? " ooo" : "") }, x.t + (o ? " ✕" : ""))); });
-      s.pending.forEach(function (x) { if (x.k === k) recs.appendChild(Kit.el("span", { class: "rec pend" }, x.t + " …")); });
-      if (bad) ooo++;
+      var recs = Kit.el("div", { class: "bp-recs", "aria-label": "رکوردهای تحویل‌شده‌ی " + k }), maxI = -1, bad = false;
+      s.out[k].forEach(function (x) { var o = x.i < maxI; if (o) bad = true; maxI = Math.max(maxI, x.i); recs.appendChild(Kit.el("span", { class: "bp-rec" + (o ? " bp-ooo" : "") }, Kit.digits(x.t) + (o ? " ✕" : ""))); });
+      s.pending.forEach(function (x) { if (x.k === k) recs.appendChild(Kit.el("span", { class: "bp-rec bp-pend" }, Kit.digits(x.t) + " …")); });
       var full = s.out[k].length === DATA[k].length;
-      lanes.appendChild(Kit.el("div", { class: "lane" }, Kit.el("span", { class: "k" }, k), recs,
-        Kit.el("span", { class: bad ? "bad-l" : "ok-l" }, bad ? "بی‌ترتیب" : full ? "مرتب ✓" : "")));
+      lanes.appendChild(Kit.el("div", { class: "bp-lane" }, Kit.el("span", { class: "bp-k" }, k), recs,
+        Kit.el("span", { class: "bp-verdict " + (bad ? "bad" : "ok") }, bad ? "✕ بی‌ترتیب" : full ? "✓ مرتب" : "")));
     });
     var bins = Kit.clear(document.getElementById("bins"));
+    document.getElementById("binsH").textContent = cfg.mode === "bins" ? "binها، به ترتیب انتشار:" : "";
     if (cfg.mode === "bins") s.bins.forEach(function (b, i) {
-      bins.appendChild(Kit.el("div", { class: "bin" + (i < s.bin || (i === s.bin && !s.pending.length) ? " done" : i === s.bin ? " cur" : "") }, Kit.el("b", null, "bin " + (i + 1)), b.map(function (x) { return x.k.slice(-1) + "@" + x.t; }).join(" · ")));
+      var st = i < s.bin || (i === s.bin && !s.pending.length) ? " bp-done" : i === s.bin ? " bp-cur" : "";
+      bins.appendChild(Kit.el("div", { class: "bp-bin" + st }, Kit.el("b", null, Kit.digits("bin " + (i + 1)) + (st === " bp-done" ? " ✓" : st ? " ◂" : "")), Kit.digits(b.map(tag).join(" · "))));
     });
+    var delivered = KEYS.reduce(function (a, k) { return a + s.out[k].length; }, 0), ooo = oooKeys().length;
     var st = Kit.clear(document.getElementById("stats"));
-    var delivered = KEYS.reduce(function (a, k) { return a + s.out[k].length; }, 0);
-    [["درخواست", s.req, ""], ["تحویل‌شده", delivered + " / " + s.all.length, ""], ["کلید بی‌ترتیب", ooo, ooo ? "bad" : "ok"]].forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    [["راهبرد", MODES[cfg.mode], ""], ["شانس شکست", cfg.fail + "٪", ""], ["درخواست", s.req, ""], ["تلاش دوباره", s.retries, ""],
+     ["تحویل‌شده", delivered + " از " + s.all.length, ""], ["کلید بی‌ترتیب", ooo, ooo ? "bad" : "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
     });
+    modeS.set(cfg.mode); failS.set(cfg.fail);
   }
 
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "راهبرد تحویل", value: cfg.mode,
-    options: [{ value: "one", label: "یکی‌یکی" }, { value: "bulk", label: "bulk ساده" }, { value: "bins", label: "با bin" }],
-    onChange: function (v) { cfg.mode = v; reset(); } }).element);
-  document.getElementById("sliders").appendChild(Kit.slider({ label: "شانس شکست هر رکورد در یک درخواست", min: 0, max: 60, step: 5, value: cfg.fail, unit: "٪", onInput: function (v) { cfg.fail = v; reset(); } }).element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
-  reset();
+  /* ---------- the drawer: every handler is render() then tour.free(text, kind) ---------- */
+  function restartSay() { return "راهبرد " + MODES[cfg.mode] + " با شانس شکست " + cfg.fail + "٪، از اول. «درخواست بعدی» را بزنید."; }
+  var modeS = Kit.segmented({ label: "راهبرد تحویل", value: cfg.mode,
+    options: [{ value: "one", label: MODES.one }, { value: "bulk", label: MODES.bulk }, { value: "bins", label: MODES.bins }],
+    onChange: function (v) { cfg.mode = v; fresh(); render(); tour.free(restartSay(), ""); } });
+  var failS = Kit.slider({ label: "شانس شکست هر رکورد در یک درخواست", min: 0, max: 60, step: 5, value: cfg.fail, unit: "٪", onInput: function (v) { cfg.fail = v; fresh(); render(); tour.free(restartSay(), ""); } });
+  document.getElementById("mode").appendChild(modeS.element);
+  document.getElementById("sliders").appendChild(failS.element);
+  document.getElementById("next").addEventListener("click", function () { step(); render(); tour.free(said[0], said[1]); });
+  document.getElementById("all").addEventListener("click", function () {
+    finish(); render(); var o = oooKeys();
+    tour.free(Kit.digits("همه تحویل شد با " + s.req + " درخواست و " + s.retries + " تلاش دوباره؛ " + (o.length ? o.length + " کلید بی‌ترتیب است." : "همه‌ی کلیدها مرتب‌اند.")), o.length ? "bad" : "ok");
+  });
+
+  /* ---------- the scenario: each run() resends the same records from scratch ---------- */
+  function scene(mode, fail, n) { return function () { cfg.mode = mode; cfg.fail = fail; fresh(); if (n < 0) finish(); else for (var i = 0; i < n; i++) step(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene("bulk", 30, 0), render: render, interval: 6500,
+    intro: "ده رکورد از چهار شریک باید به یک API برسند و هر شریک رکوردهایش را به ترتیب زمان ببیند. هر رکورد در هر درخواست ۳۰٪ شانس شکست دارد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: راهبرد و شانس شکست را عوض کنید و درخواست به درخواست جلو بروید.",
+    steps: [
+      { kind: "warn", run: scene("bulk", 30, 1),
+        say: function () { return "یک درخواست bulk با هر ده رکورد. commit جزئی است: " + s.failedLast.map(tag).join("، ") + " شکست خوردند و بقیه نشستند، پس رکوردهای بعدی همان کلیدها زودتر رسیده‌اند (ص. ۱۵۴)."; } },
+      { kind: "bad", run: scene("bulk", 30, -1),
+        say: function () { var o = oooKeys(); return "تلاش‌های دوباره تا آخر: " + s.req + " درخواست، و " + o.length + " شریک (" + o.join("، ") + ") رکوردهایشان را بی‌ترتیب گرفتند؛ ✕ رکوردی را نشان می‌دهد که بعد از رکوردی تازه‌تر نشست."; } },
+      { kind: "warn", run: scene("one", 30, -1),
+        say: function () { return "یکی‌یکی فرستادن مرتب است، چون هر رکورد تا نشستنش تکرار می‌شود؛ اما " + s.req + " درخواست خرج کرد، یکی برای هر رکورد به‌علاوه‌ی " + s.retries + " تلاش دوباره (ص. ۱۵۵)."; } },
+      { kind: "ok", run: scene("bins", 30, -1),
+        say: function () { return "با bin: رکوردها مرتب و در " + s.bins.length + " bin گذاشته شدند، هر bin حداکثر یک رکورد از هر کلید. با " + s.req + " درخواست و " + s.retries + " تلاش دوباره، هیچ کلیدی بی‌ترتیب نشد (شکل ۵-۹، صص. ۱۵۵–۱۵۶)."; } },
+      { kind: "ok", run: scene("bulk", 0, -1),
+        say: function () { return "بدون شکست، bulk ساده با " + s.req + " درخواست همه را مرتب می‌رساند. ترتیب فقط زیر commit جزئی می‌شکند؛ هزینه‌ی binها مرتب‌سازی و کد سفارشی است (ص. ۱۵۷)."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "هر bin چه چیزی دارد؟",

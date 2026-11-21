@@ -642,7 +642,7 @@ def strip_pages(title: str) -> tuple[str, str]:
 
 
 def add_content_slides(slides: list[dict], sid: str, title: str, text: str, eyebrow: str, *,
-                       link, t: dict, lang: str, wpages: dict) -> None:
+                       link, t: dict, lang: str, wpages: dict, nav: str = "") -> None:
     """One slide for a section's prose, then one per `> **Try it:**` widget it embeds."""
     title, pages = strip_pages(title)
     kept, widgets = [], []
@@ -652,7 +652,7 @@ def add_content_slides(slides: list[dict], sid: str, title: str, text: str, eyeb
     body = "\n".join(kept).strip()
     if body:
         slides.append(slide(sid, title, md(body, link), eyebrow=eyebrow, pages=pages_label(pages, lang),
-                            nav=nav_label(title)))
+                            nav=nav or nav_label(title)))
     for m in widgets:
         file = m.group(2).split("/")[-1]
         w = wpages.get(file, {"title": m.group(1)})
@@ -678,8 +678,15 @@ def lesson_slides(ch: Chapter) -> list[dict]:
     slides: list[dict] = []
     wpages = {w["file"]: w for w in book.widget_pages()}
 
-    def content_slides(sid: str, title: str, text: str, eyebrow: str):
-        add_content_slides(slides, sid, title, text, eyebrow, link=link, t=t, lang=ch.lang, wpages=wpages)
+    def content_slides(sid: str, title: str, text: str, eyebrow: str, nav: str = ""):
+        add_content_slides(slides, sid, title, text, eyebrow, link=link, t=t, lang=ch.lang, wpages=wpages, nav=nav)
+
+    # `#####` titles that repeat in a chapter (a pattern book's Problem/Solution/…) are named
+    # with their `####` section in the slide list.
+    h5_count: dict[str, int] = {}
+    for m in re.finditer(r"^##### (.+)$", ch.h2.get("Notes", ""), flags=re.M):
+        k = nav_label(m.group(1))
+        h5_count[k] = h5_count.get(k, 0) + 1
 
     # Cover: summary + the book's own outline.
     outline = ch.h2.get("Section outline", "")
@@ -711,10 +718,15 @@ def lesson_slides(ch: Chapter) -> list[dict]:
             if len(parts) == 1:
                 content_slides(slugify(strip_pages(h4)[0]), h4, sub, parent)
                 continue
+            h4_id, h4_name = slugify(strip_pages(h4)[0]), strip_pages(h4)[0]
             if parts[0][1].strip():
-                content_slides(slugify(strip_pages(h4)[0]), h4, parts[0][1], parent)
-            for h5, body in parts[1:]:
-                content_slides(slugify(strip_pages(h5)[0]), h5, body, strip_pages(h4)[0])
+                content_slides(h4_id, h4, parts[0][1], parent)
+            for k, (h5, body) in enumerate(parts[1:]):
+                # A generic title (Problem, Solution…) without a lead-in: the first slide keeps the `####` anchor.
+                repeated = h5_count.get(nav_label(h5), 0) > 1
+                sid = h4_id if repeated and k == 0 and not parts[0][1].strip() else slugify(strip_pages(h5)[0])
+                nav = nav_label(h5) + " · " + re.sub(r"^[^:]+:\s*", "", nav_label(h4)) if repeated else ""
+                content_slides(sid, h5, body, h4_name, nav)
 
     if ch.h2.get("Trade-offs at a glance"):
         slides.append(slide("trade-offs", t["tradeoffs"], md(ch.h2["Trade-offs at a glance"], link),

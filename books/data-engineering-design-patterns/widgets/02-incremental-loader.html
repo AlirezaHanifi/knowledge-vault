@@ -3,29 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>بار‌گذاری افزایشی و backfill</title>
-<meta name="description" content="بار‌گذاری افزایشی ساعتی را با delta column بی‌کران، delta column bounded یا پارتیشن زمانی اجرا کنید، بعد ردیف‌ها را سخت حذف کنید و ساعت‌های قدیمی را backfill تا ببینید هر پیاده‌سازی چه می‌خواند و چه چیزی را از دست می‌دهد. تصویری از فصل ۲ کتاب Data Engineering Design Patterns.">
+<title>بارگذاری افزایشی و backfill</title>
+<meta name="description" content="بارگذاری افزایشی ساعتی را با delta column unbounded، delta column bounded یا پارتیشن زمانی اجرا کنید، بعد ردیف‌ها را حذف کنید و ساعت‌های قدیمی را backfill کنید تا ببینید هر پیاده‌سازی چه می‌خواند و چه چیزی را از دست می‌دهد. تصویری از فصل ۲ کتاب Data Engineering Design Patterns.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .grid-h { display: grid; grid-template-columns: 74px repeat(var(--n), minmax(0, 1fr)); gap: 3px; align-items: start; font-size: .72rem; }
-  .grid-h .lab { color: var(--ink-3); font-weight: 600; padding-top: 3px; }
-  .grid-h .hcol { text-align: center; color: var(--ink-3); font-family: var(--mono); }
-  .cell { display: flex; flex-wrap: wrap; gap: 2px; min-height: 22px; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
-  .cell.read { border-color: var(--accent); background: var(--accent-soft); }
-  .row-sq { width: 14px; height: 14px; border-radius: 3px; background: var(--s1); font-size: 9px; line-height: 14px; text-align: center; color: var(--surface); font-family: var(--mono); }
-  .row-sq.del { background: transparent; border: 1px dashed var(--ink-3); color: var(--ink-3); }
-  .row-sq.soft { background: var(--warn); }
-  .row-sq.stale { background: var(--bad); }
-  .tbl { max-height: 170px; overflow-y: auto; margin-top: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
-  table.data td { font-family: var(--mono); font-size: .74rem; }
-  pre.sql { font-size: .72rem; background: var(--surface-2); padding: 8px 10px; border-radius: var(--radius-sm); margin: 10px 0 0; white-space: pre-wrap; }
-  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .76rem; color: var(--ink-2); margin-top: 8px; }
+  /* Source and Bronze as two rows of hourly cells; rows are squares whose glyph (×, d, !) carries the meaning, not only the colour. */
+  .il-grid { display: grid; grid-template-columns: 70px repeat(var(--n), minmax(0, 1fr)); gap: 4px; align-items: stretch; font-size: .85rem; }
+  .il-grid .il-lab { color: var(--ink-2); font-weight: 600; align-self: center; }
+  .il-grid .il-h { text-align: center; color: var(--ink-3); font-family: var(--mono); }
+  .il-grid .il-h.il-now { color: var(--accent); font-weight: 700; }
+  .il-cell { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 3px; min-height: 44px; padding: 4px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+  .il-cell.il-read { border: 2px solid var(--accent); background: var(--accent-soft); }
+  .il-sq { width: 17px; height: 17px; border-radius: 4px; background: var(--s1); font-size: 12px; line-height: 17px; text-align: center; color: var(--surface); font-family: var(--mono); font-weight: 700; }
+  .il-sq.il-del { background: transparent; border: 1.5px dashed var(--ink-3); color: var(--ink-2); line-height: 14px; }
+  .il-sq.il-soft { background: var(--warn); }
+  .il-sq.il-stale { background: var(--bad); }
+  .il-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .82rem; color: var(--ink-2); margin-top: 8px; }
+  .il-legend .il-sq { display: inline-block; vertical-align: -3px; margin-inline-end: 4px; }
+  .il-low { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 12px; margin-top: 10px; }
+  .il-sql { font-size: .82rem; background: var(--surface-2); padding: 8px 10px; border-radius: var(--radius-sm); margin: 0; white-space: pre-wrap; direction: ltr; text-align: left; }
+  .il-tbl { max-height: 122px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .il-tbl table.data td, .il-tbl table.data th { font-size: .82rem; }
+  .il-tbl table.data td:nth-child(2) { font-family: var(--mono); direction: ltr; unicode-bidi: isolate; text-align: right; }
+  .il-check { display: flex; gap: 8px; align-items: baseline; font-size: .9rem; }
+  @media (max-width: 640px) { .il-low { grid-template-columns: 1fr; } .il-grid { grid-template-columns: 52px repeat(var(--n), minmax(0, 1fr)); } }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DEDP</a><span aria-hidden="true">/</span>
       <a href="../chapters/02-data-ingestion-design-patterns.html">فصل ۲</a><span aria-hidden="true">/</span>
@@ -36,78 +43,89 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۲ · الگوهای طراحی ورود داده</div>
-  <h1>بار‌گذاری افزایشی و backfill</h1>
-  <p class="lede">الگوی Incremental Loader فقط چیزی را می‌آورد که از اجرای قبلی تازه است. ردیف‌های تازه را با یک <strong>delta column</strong> پیدا می‌کند، مثل زمان ورود، یا با خواندن <strong>پارتیشن</strong> ساعت اجرا. هر دو در اجراهای معمولی یکسان به نظر می‌آیند. تفاوتشان وقتی در می‌آید که ردیفی حذف شود یا backfill کنید.</p>
-  <p class="source-note">تصویری از «الگو: Incremental Loader» (صص. ۱۲–۱۶). کتاب پیاده‌سازی delta column و پارتیشن زمانی را توضیح می‌دهد، و حذف سخت در برابر حذف نرم، و این که backfill با delta column unbounded چطور به یک بار‌گذاری کامل تبدیل می‌شود، مگر پنجره‌ی ورود bounded باشد. ردیف‌های منبع ساخته می‌شوند، یعنی با seed و دو تا پنج ردیف در ساعت. اجراهای delta column ردیف‌های تازه را اضافه و پرچم‌های حذف نرم را اعمال می‌کنند. یک اجرای پارتیشن، پارتیشن خودش را کپی می‌کند، با حذف‌ها، همان‌طور که `aws s3 sync … --delete` در کتاب می‌کند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>بارگذاری افزایشی و backfill</h1>
+      <p class="lede">الگوی Incremental Loader فقط چیزی را می‌آورد که از اجرای قبلی تازه است: با یک delta column مثل زمان ورود، یا با خواندن پارتیشن ساعت اجرا. سناریو نشان می‌دهد هر روش با حذف‌ها و با backfill چه می‌کند.</p>
+      <p class="source-note">برای «الگو: Incremental Loader» (صص. ۱۲–۱۶): پیاده‌سازی delta column و پارتیشن زمانی، حذف سخت در برابر حذف نرم، و backfill با delta column unbounded که به بارگذاری کامل تبدیل می‌شود مگر پنجره‌ای bounded داشته باشد. ده ساعت و دو تا پنج ردیف در هر ساعت داده‌ی ساختگی خود vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel">
-        <div class="grid-h" id="grid"></div>
-        <div class="legend"><span><span class="row-sq" style="display:inline-block"></span> ردیف</span><span><span class="row-sq del" style="display:inline-block">×</span> سخت‌حذف‌شده در منبع</span><span><span class="row-sq soft" style="display:inline-block">d</span> نرم‌حذف‌شده با پرچم</span><span><span class="row-sq stale" style="display:inline-block">!</span> باز هم در Bronze ولی رفته از منبع</span><span style="color:var(--accent)">▭ خوانده‌شده در آخرین اجرا</span></div>
-        <div class="tbl"><table class="data"><thead><tr><th>اجرا</th><th>چه می‌خواند</th><th class="num">ردیف خوانده‌شده</th></tr></thead><tbody id="runs"></tbody></table></div>
-      </div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">پیاده‌سازی</p>
-        <div id="mode"></div>
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="soft"> تأمین‌کننده حذف نرم می‌کند، یعنی UPDATE … is_deleted = true</label>
-        <pre class="sql" id="sql"></pre>
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" type="button" id="run">اجرای ساعت بعدی</button>
-          <button class="btn" type="button" id="del">حذف یک ردیف</button>
-        </div>
-        <div class="row" style="margin-top:8px">
-          <label for="bf" class="sr-only">ساعتی که backfill شود</label>
-          <select id="bf"></select>
-          <button class="btn" type="button" id="backfill">backfill ساعت</button>
-          <button class="btn" type="button" id="reset">↺ از نو</button>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="il-grid" id="grid"></div>
+        <div class="il-legend"><span><span class="il-sq"></span>ردیف</span><span><span class="il-sq il-del">×</span>حذف سخت در منبع</span><span><span class="il-sq il-soft">d</span>حذف نرم با پرچم</span><span><span class="il-sq il-stale">!</span>در Bronze مانده ولی از منبع رفته</span><span>▭ قاب آبی: خوانده‌شده در آخرین اجرا</span></div>
+        <div class="il-low">
+          <pre class="il-sql" id="sql"></pre>
+          <div class="il-tbl"><table class="data"><thead><tr><th>اجرا</th><th>چه می‌خواند</th><th class="num">ردیف</th></tr></thead><tbody id="runs"></tbody></table></div>
         </div>
       </div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <div id="mode"></div>
+          <label class="il-check"><input type="checkbox" id="soft"> تأمین‌کننده حذف نرم می‌کند، یعنی UPDATE … is_deleted = true</label>
+        </div>
+        <div class="tweak-group">
+          <div class="row">
+            <button class="btn primary small" type="button" id="run">اجرای ساعت بعدی</button>
+            <button class="btn small" type="button" id="del">حذف یک ردیف</button>
+          </div>
+          <div class="row">
+            <label for="bf" class="sr-only">ساعتی که backfill شود</label>
+            <select id="bf"></select>
+            <button class="btn small" type="button" id="backfill">backfill این ساعت</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>حذف سخت برای یک delta column نامرئی است.</strong> چند ساعت اجرا کنید، یک ردیف را حذف کنید، و باز اجرا کنید. لایه‌ی Bronze ردیف را نگه می‌دارد چون هیچ چیز تازه‌ای حذف را حمل نمی‌کند. حذف نرم را روشن کنید و حذف به‌عنوان یک به‌روزرسانی می‌رسد.</li>
-    <li><strong>backfill unbounded همان بار‌گذاری کامل است.</strong> بعد از هشت ساعت، ساعت ۱ را با delta column unbounded backfill کنید. از ساعت ۱ تا حالا همه چیز را می‌خواند. پنجره‌ی bounded یک ساعت می‌خواند.</li>
-    <li><strong>پارتیشن‌ها طبیعتاً کران‌دارند.</strong> یک اجرای پارتیشن دقیقاً ساعت خودش را می‌خواند. synchronous کردن آن پارتیشن حذف‌های داخلش را هم می‌آورد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>حذف سخت برای delta column نامرئی است.</strong> چند ساعت اجرا کنید، یک ردیف را حذف کنید و باز اجرا کنید: لایه‌ی Bronze ردیف را نگه می‌دارد، چون هیچ ردیف تازه‌ای حذف را حمل نمی‌کند. حذف نرم را روشن کنید تا حذف به شکل یک به‌روزرسانی برسد.</li>
+      <li><strong>یک backfill unbounded همان بارگذاری کامل است.</strong> بعد از هشت ساعت، ساعت ۱ را با delta column unbounded backfill کنید: از ساعت ۱ تا حالا همه چیز را می‌خواند. پنجره‌ی bounded فقط یک ساعت می‌خواند.</li>
+      <li><strong>پارتیشن‌ها خودشان کران‌دارند.</strong> هر اجرای پارتیشن دقیقاً ساعت خودش را می‌خواند، و sync کردن آن پارتیشن با <code>--delete</code> حذف‌های داخلش را هم می‌آورد.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/02-data-ingestion-design-patterns.html"><small>درس</small>فصل ۲: الگوهای طراحی ورود داده</a></li>
-    <li><a href="../lab/02-incremental-window/README.md"><small>آزمایش</small>backfill افزایشی bounded در برابر unbounded</a></li>
-    <li><a href="02-compactor.html"><small>شبیه‌سازی</small>فایل‌های کوچک و compaction</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/02-data-ingestion-design-patterns.html"><small>درس</small>فصل ۲: الگوهای طراحی ورود داده</a></li>
+      <li><a href="../lab/02-incremental-window/README.md"><small>آزمایش</small>backfill افزایشی bounded در برابر unbounded</a></li>
+      <li><a href="02-compactor.html"><small>شبیه‌سازی</small>فایل‌های کوچک و compaction</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var HOURS = 10, log = Kit.log(document.getElementById("log"));
-  var cfg = { mode: "unbounded", soft: false }, s, r;
+  var HOURS = 10;
+  var said = ["", ""]; var log = { add: function (t, k) { said = [Kit.digits(t), k || ""]; }, clear: function () { said = ["", ""]; } };
+  var cfg = { mode: "unbounded", soft: false }, s, r, tour;
   var MODES = {
-    unbounded: { label: "delta column", sql: "SELECT * FROM visits\nWHERE ingestion_time >= :run_hour_start" },
+    unbounded: { label: "delta unbounded", sql: "SELECT * FROM visits\nWHERE ingestion_time >= :run_hour_start" },
     bounded: { label: "delta bounded", sql: "SELECT * FROM visits\nWHERE ingestion_time BETWEEN :run_hour_start\n  AND :run_hour_start + INTERVAL '1 HOUR'" },
     partition: { label: "پارتیشن", sql: "aws s3 sync s3://input/hour=:h \\\n  s3://bronze/hour=:h --delete" }
   };
 
-  function reset() {
+  function fresh() {
     r = Kit.rng(2);
-    s = { now: 0, src: [], bronze: {}, runs: [], lastRead: null, nextId: 1 };
+    s = { now: 0, src: [], bronze: {}, runs: [], lastRead: null, nextId: 1, lastDel: null };
     for (var h = 0; h < HOURS; h++) { var n = 2 + r.int(4); for (var i = 0; i < n; i++) s.src.push({ id: s.nextId++, h: h, ing: h, del: false, soft: false }); }
-    log.clear(); log.add("جدول منبع آماده است. لایه‌ی Bronze خالی است و ساعت روی صفر.", "muted");
-    render();
+    log.clear();
   }
 
   function load(h, label) {
@@ -124,88 +142,109 @@
         if (b.h === h && !read.some(function (x) { return x.id === b.id; })) { delete s.bronze[id]; removed++; }
       });
     }
-    var range = cfg.mode === "partition" ? "پارتیشن hour=" + h : "مقدار ingestion_time در بازه‌ی [" + lo + ", " + hi + ")";
-    s.runs.push({ label: label, range: range, n: read.length });
-    s.lastRead = { lo: cfg.mode === "partition" ? h : lo, hi: cfg.mode === "partition" ? h + 1 : hi, part: cfg.mode === "partition" };
-    log.add(label + ": می‌خواند " + range + " ← " + read.length + " ردیف" + (removed ? "، و " + removed + " ردیف حذف‌شده را از Bronze برمی‌دارد" : ""), read.length > 8 ? "warn" : "ok");
+    var range = cfg.mode === "partition" ? "hour=" + h : "[" + lo + ", " + hi + ")";
+    s.runs.push({ label: label, range: range, n: read.length, removed: removed });
+    s.lastRead = { lo: cfg.mode === "partition" ? h : lo, hi: cfg.mode === "partition" ? h + 1 : hi };
+    log.add(label + ": " + (cfg.mode === "partition" ? "پارتیشن " : "بازه‌ی ingestion_time ") + range + " را می‌خواند و " + read.length + " ردیف می‌آورد" + (removed ? "، و " + removed + " ردیف حذف‌شده را از Bronze برمی‌دارد" : "") + ".", read.length > 8 ? "warn" : "ok");
   }
-
   function runNext() {
     if (s.now >= HOURS) { log.add("ساعت دیگری برای اجرا نمانده.", "muted"); return; }
-    s.now++;
-    load(s.now - 1, "اجرای ساعت " + (s.now - 1));
-    render();
+    s.now++; load(s.now - 1, "اجرای ساعت " + (s.now - 1));
   }
   function del() {
     var cands = s.src.filter(function (x) { return !x.del && !x.soft && s.bronze[x.id]; });
-    if (!cands.length) { log.add("اول چند ساعت اجرا کنید: این‌جا فقط ردیف‌های وارد‌شده ارزش حذف دارند.", "muted"); return; }
+    if (!cands.length) { log.add("اول چند ساعت اجرا کنید: فقط ردیف‌های واردشده ارزش حذف دارند.", "muted"); return; }
     var row = cands[r.int(cands.length)];
-    if (cfg.soft) {
-      row.soft = true; row.ing = s.now;
-      log.add("تأمین‌کننده ردیف " + row.id + " از ساعت " + row.h + " را نرم حذف می‌کند: is_deleted = true و ingestion_time = " + s.now, "warn");
-    } else {
-      row.del = true;
-      log.add("تأمین‌کننده ردیف " + row.id + " از ساعت " + row.h + " را با DELETE سخت حذف می‌کند", "warn");
-    }
-    render();
+    s.lastDel = row;
+    if (cfg.soft) { row.soft = true; row.ing = s.now; log.add("تأمین‌کننده ردیف " + row.id + " از ساعت " + row.h + " را نرم حذف می‌کند: is_deleted = true و ingestion_time = " + s.now + ".", "warn"); }
+    else { row.del = true; log.add("تأمین‌کننده ردیف " + row.id + " از ساعت " + row.h + " را با DELETE سخت حذف می‌کند.", "warn"); }
   }
-  function backfill() {
-    var h = parseInt(document.getElementById("bf").value, 10);
-    if (isNaN(h) || h >= s.now) { log.add("فقط ساعتی را می‌توانید backfill کنید که از قبل اجرا شده.", "muted"); return; }
+  function backfill(h) {
+    if (isNaN(h) || h >= s.now) { log.add("فقط ساعتی را می‌توانید backfill کنید که قبلاً اجرا شده.", "muted"); return; }
     load(h, "backfill ساعت " + h);
-    render();
   }
+  function staleCount() {
+    return Object.keys(s.bronze).filter(function (id) { var sr = s.src.filter(function (x) { return x.id === +id; })[0]; return sr && sr.del; }).length;
+  }
+  function lastRun() { return s.runs.length ? s.runs[s.runs.length - 1] : { n: 0, range: "" }; }
 
   function render() {
     var g = Kit.clear(document.getElementById("grid"));
     g.style.setProperty("--n", HOURS);
-    g.appendChild(Kit.el("div", { class: "lab" }, "ساعت"));
-    for (var h = 0; h < HOURS; h++) g.appendChild(Kit.el("div", { class: "hcol" }, String(h) + (h === s.now ? "◂" : "")));
+    g.appendChild(Kit.el("div", { class: "il-lab" }, "ساعت"));
+    for (var h = 0; h < HOURS; h++) g.appendChild(Kit.el("div", { class: "il-h" + (h === s.now ? " il-now" : "") }, Kit.digits(String(h)) + (h === s.now ? " ◂" : "")));
     function inRead(h) { return s.lastRead && h >= s.lastRead.lo && h < s.lastRead.hi; }
     [["منبع", false], ["Bronze", true]].forEach(function (def) {
-      g.appendChild(Kit.el("div", { class: "lab" }, def[0]));
+      g.appendChild(Kit.el("div", { class: "il-lab" }, def[0]));
       for (var h = 0; h < HOURS; h++) {
-        var cell = Kit.el("div", { class: "cell" + (!def[1] && inRead(h) ? " read" : "") });
+        var cell = Kit.el("div", { class: "il-cell" + (!def[1] && inRead(h) ? " il-read" : "") });
         if (!def[1]) {
           s.src.forEach(function (row) {
             var at = cfg.mode === "partition" ? row.h : row.ing;
             if (at !== h || row.h >= s.now) return;
-            cell.appendChild(Kit.el("span", { class: "row-sq" + (row.del ? " del" : row.soft ? " soft" : ""), title: "ردیف " + row.id + (row.del ? " — حذف‌شده" : row.soft ? " — نرم‌حذف‌شده" : "") }, row.del ? "×" : row.soft ? "d" : ""));
+            cell.appendChild(Kit.el("span", { class: "il-sq" + (row.del ? " il-del" : row.soft ? " il-soft" : ""), title: "ردیف " + row.id }, row.del ? "×" : row.soft ? "d" : ""));
           });
         } else {
           Object.keys(s.bronze).forEach(function (id) {
             var b = s.bronze[id]; if (b.h !== h) return;
-            var srcRow = s.src.filter(function (x) { return x.id === b.id; })[0];
-            var stale = srcRow && srcRow.del;
-            cell.appendChild(Kit.el("span", { class: "row-sq" + (stale ? " stale" : b.soft ? " soft" : ""), title: "ردیف " + b.id + (stale ? " — در منبع حذف شده" : b.soft ? " — پرچم حذف خورده" : "") }, stale ? "!" : b.soft ? "d" : ""));
+            var sr = s.src.filter(function (x) { return x.id === b.id; })[0], stale = sr && sr.del;
+            cell.appendChild(Kit.el("span", { class: "il-sq" + (stale ? " il-stale" : b.soft ? " il-soft" : ""), title: "ردیف " + b.id }, stale ? "!" : b.soft ? "d" : ""));
           });
         }
         g.appendChild(cell);
       }
     });
     var runs = Kit.clear(document.getElementById("runs"));
-    s.runs.slice().reverse().forEach(function (x) { runs.appendChild(Kit.el("tr", null, Kit.el("td", null, x.label), Kit.el("td", null, x.range), Kit.el("td", { class: "num" }, String(x.n)))); });
-    var stale = Object.keys(s.bronze).filter(function (id) { var sr = s.src.filter(function (x) { return x.id === +id; })[0]; return sr && sr.del; }).length;
-    var last = s.runs.length ? s.runs[s.runs.length - 1].n : 0;
+    s.runs.slice().reverse().forEach(function (x) { runs.appendChild(Kit.el("tr", null, Kit.el("td", null, Kit.digits(x.label)), Kit.el("td", null, x.range), Kit.el("td", { class: "num" }, Kit.digits(String(x.n))))); });
+    if (!s.runs.length) runs.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 3 }, "هنوز اجرایی نیست")));
+    var stale = staleCount(), last = lastRun().n;
     var st = Kit.clear(document.getElementById("stats"));
-    [["ساعت فعلی", s.now, ""], ["ردیف در Bronze", Object.keys(s.bronze).length, ""], ["ردیف خوانده‌شده در آخرین اجرا", last, last > 8 ? "warn" : ""], ["ردیف حذف‌شده‌ی مانده در Bronze", stale, stale ? "bad" : "ok"]].forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, String(x[1]))));
+    [["پیاده‌سازی", MODES[cfg.mode].label, ""], ["حذف در منبع", cfg.soft ? "نرم" : "سخت", ""], ["ساعت فعلی", s.now, ""], ["ردیف در Bronze", Object.keys(s.bronze).length, ""],
+     ["خوانده در آخرین اجرا", last, last > 8 ? "warn" : ""], ["حذف‌شده‌ی مانده در Bronze", stale, stale ? "bad" : "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
     });
     document.getElementById("sql").textContent = MODES[cfg.mode].sql;
     var bf = Kit.clear(document.getElementById("bf"));
-    for (var k = 0; k < s.now; k++) bf.appendChild(Kit.el("option", { value: k }, "ساعت " + k));
+    for (var k = 0; k < s.now; k++) bf.appendChild(Kit.el("option", { value: k }, Kit.digits("ساعت " + k)));
     if (!s.now) bf.appendChild(Kit.el("option", { value: "" }, "هنوز ساعتی نیست"));
+    modeS.set(cfg.mode); softB.checked = cfg.soft;
   }
 
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "پیاده‌سازی", value: cfg.mode,
+  /* ---------- the drawer: every handler is render() then tour.free(text, kind) ---------- */
+  var modeS = Kit.segmented({ label: "پیاده‌سازی", value: cfg.mode,
     options: Object.keys(MODES).map(function (k) { return { value: k, label: MODES[k].label }; }),
-    onChange: function (v) { cfg.mode = v; reset(); } }).element);
-  document.getElementById("soft").addEventListener("change", function (e) { cfg.soft = e.target.checked; log.add(cfg.soft ? "تأمین‌کننده به حذف نرم سوئیچ می‌کند." : "تأمین‌کننده حذف سخت می‌کند.", "muted"); });
-  document.getElementById("run").addEventListener("click", runNext);
-  document.getElementById("del").addEventListener("click", del);
-  document.getElementById("backfill").addEventListener("click", backfill);
-  document.getElementById("reset").addEventListener("click", reset);
-  reset();
+    onChange: function (v) { cfg.mode = v; fresh(); render(); tour.free("پیاده‌سازی حالا " + MODES[v].label + " است و جدول از ساعت صفر شروع می‌شود.", ""); } });
+  document.getElementById("mode").appendChild(modeS.element);
+  var softB = document.getElementById("soft");
+  softB.addEventListener("change", function () { cfg.soft = softB.checked; render(); tour.free(cfg.soft ? "تأمین‌کننده از این به بعد حذف نرم می‌کند." : "تأمین‌کننده از این به بعد حذف سخت می‌کند.", ""); });
+  function act(f) { return function () { f(); render(); tour.free(said[0], said[1]); }; }
+  document.getElementById("run").addEventListener("click", act(runNext));
+  document.getElementById("del").addEventListener("click", act(del));
+  document.getElementById("backfill").addEventListener("click", act(function () { backfill(parseInt(document.getElementById("bf").value, 10)); }));
+
+  /* ---------- the scenario: each run() rebuilds the table from hour zero ---------- */
+  function hours(n) { for (var i = 0; i < n; i++) runNext(); }
+  function scene(mode, soft, script) { return function () { cfg.mode = mode; cfg.soft = soft; fresh(); script(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene("unbounded", false, function () {}), render: render, interval: 6500,
+    intro: "ردیف بالا جدول منبع است و ردیف پایین لایه‌ی Bronze، هر ستون یک ساعت. هر اجرا ساعت تازه را می‌آورد و قاب آبی نشان می‌دهد چه چیزی خوانده شد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: پیاده‌سازی را عوض کنید، ساعت‌ها را اجرا کنید، ردیف حذف کنید و ساعت‌های قدیمی را backfill کنید.",
+    steps: [
+      { kind: "ok", run: scene("unbounded", false, function () { hours(4); }),
+        say: function () { return "چهار اجرای ساعتی با delta column: هر اجرا فقط ردیف‌هایی را می‌آورد که ingestion_time آن‌ها از اجرای قبلی تازه‌تر است؛ حالا " + Object.keys(s.bronze).length + " ردیف در Bronze است (ص. ۱۲)."; } },
+      { kind: "bad", run: scene("unbounded", false, function () { hours(4); del(); hours(2); }),
+        say: function () { return "تأمین‌کننده ردیف " + s.lastDel.id + " را با DELETE سخت حذف کرد و دو ساعت دیگر اجرا شد. ردیف حذف‌شده هیچ مقدار delta تازه‌ای ندارد، پس در Bronze با علامت ! می‌ماند (ص. ۱۳)."; } },
+      { kind: "ok", run: scene("unbounded", true, function () { hours(4); del(); hours(2); }),
+        say: function () { return "حالا تأمین‌کننده حذف نرم می‌کند: is_deleted = true و ingestion_time تازه. اجرای بعدی ردیف " + s.lastDel.id + " را دوباره می‌خواند و پرچم حذف (d) به Bronze می‌رسد (ص. ۱۳)."; } },
+      { kind: "bad", run: scene("unbounded", false, function () { hours(8); backfill(1); }),
+        say: function () { return "بعد از هشت ساعت، ساعت ۱ را backfill می‌کنیم. delta column unbounded همه چیز از ساعت ۱ تا حالا را می‌خواند: " + lastRun().n + " ردیف به جای یک ساعت؛ backfill به بارگذاری کامل تبدیل شد (ص. ۱۴)."; } },
+      { kind: "ok", run: scene("bounded", false, function () { hours(8); backfill(1); }),
+        say: function () { return "همان backfill با پنجره‌ی bounded یک‌ساعته: فقط " + lastRun().n + " ردیف ساعت ۱ خوانده می‌شود (ص. ۱۴)."; } },
+      { kind: "ok", run: scene("partition", false, function () { hours(6); del(); backfill(s.lastDel.h); }),
+        say: function () { return "با پارتیشن زمانی، ردیف " + s.lastDel.id + " از ساعت " + s.lastDel.h + " سخت حذف شد و آن پارتیشن دوباره sync شد. aws s3 sync با --delete کل پارتیشن را کپی می‌کند، پس ردیف حذف‌شده از Bronze هم می‌رود (صص. ۱۴–۱۶)."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "تأمین‌کننده روی ردیفی که loader با delta column از قبل وارد کرده DELETE می‌زند. اجرای بعدی چه می‌بیند؟",
