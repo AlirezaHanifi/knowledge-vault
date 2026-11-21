@@ -6,16 +6,30 @@
 <title>tokenهای نوآوری</title>
 <meta name="description" content="برای تیم StudioOps آپریل با حدود سه token نوآوری یک stack از انتخاب‌های کسل‌کننده و براق بسازید و ببینید tokenها خرج چیزی می‌شوند که کسب‌وکار را متمایز می‌کند یا نه. برای فصل ۸ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.layer { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 10px; background: var(--surface); }
-  .layer legend { font-weight: 600; font-size: .92rem; padding: 0 4px; } .layer label { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; font-size: .9rem; }
-  .tok { font-size: .78rem; color: var(--ink-3); white-space: nowrap; } .meter { display: flex; gap: 6px; margin: 4px 0 8px; }
-  .meter span { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; font-size: .8rem; font-weight: 700; }
-  .meter span.used { background: var(--accent); border-color: var(--accent-ink); color: var(--surface); } .meter span.over { background: var(--bad); border-color: var(--bad); color: var(--surface); }</style>
+<style>
+  /* The token wallet (about three) and one row per stack layer; the chosen option is outlined, with its token cost. */
+  .it-meter { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: .86rem; }
+  .it-meter span.t { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; font-weight: 700; font-size: .85rem; }
+  .it-meter span.t.used { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .it-meter span.t.over { background: var(--bad); border-color: var(--bad); color: #fff; }
+  .it-meter span.wall { border-left: 2px dashed var(--ink-3); height: 34px; }
+  .it-rows { display: grid; gap: 6px; }
+  .it-row { display: grid; grid-template-columns: 8.5em 1fr; gap: 8px; align-items: stretch; }
+  .it-lay { font-weight: 700; font-size: .86rem; align-self: center; }
+  .it-opts { display: flex; gap: 6px; }
+  .it-opt { flex: 1; font-size: .8rem; line-height: 1.45; border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 4px 8px; color: var(--ink-3); background: var(--surface); }
+  .it-opt.on { color: var(--ink); border-color: var(--accent); background: var(--accent-soft); }
+  .it-opt.on.waste { border-color: var(--s2); background: var(--warn-soft); }
+  .it-opt b { display: block; font-size: .8rem; }
+  .it-sel { max-width: 100%; }
+  #it-ctl { display: grid; gap: 2px; }
+  @media (max-width: 760px) { .it-row { grid-template-columns: 1fr; } .it-opts { flex-direction: column; } }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
       <a href="../chapters/08-technical-principles-and-strategy.html">فصل ۸</a><span aria-hidden="true">/</span>
@@ -26,41 +40,56 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۸ · اصول و استراتژی فنی</div>
-  <h1>tokenهای نوآوری</h1>
-  <p class="lede">در مدل Dan McKinley که کتاب نقلش می‌کند، هر شرکت <strong>حدود سه token نوآوری</strong> دارد و هر انتخاب فناوری‌ای که کسل‌کننده نباشد یکی را خرج می‌کند. برای تیم April یک stack انتخاب کنید و ببینید tokenهایتان کجا می‌روند: به چیزی که کسب‌وکار را متمایز می‌کند، یا به ۳۰ میلی‌ثانیه سریع‌تر کردن احراز هویت.</p>
-  <p class="source-note">این شبیه‌سازی «مقیاس گرفتن بدون مهندسی بیش از حد» و «فناوری کسل‌کننده را انتخاب کنید» را نشان می‌دهد، صص. ۱۵۸–۱۶۲، از جمله جمع کردن دیتابیس‌ها (ص. ۱۵۹) و پیشنهاد Rust (ص. ۱۶۲). انتخاب‌ها از کتاب می‌آیند و هزینه‌ی tokenشان از نمونه‌های McKinley و به‌روزرسانی نویسنده‌ها، که حالا Kubernetes و service mesh هم حساب می‌شوند؛ قیمت token برای ترکیب پنج‌دیتابیسی و دیتابیس خانگی مال vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>tokenهای نوآوری</h1>
+      <p class="lede">در مدل Dan McKinley که کتاب نقلش می‌کند، هر شرکت <strong>حدود سه token نوآوری</strong> دارد و هر انتخاب فناوری‌ای که کسل‌کننده نباشد یکی را خرج می‌کند. تور برای تیم April یک stack می‌چیند و نشان می‌دهد tokenها کجا می‌روند: به چیزی که کسب‌وکار را متمایز می‌کند، یا به ۳۰ میلی‌ثانیه سریع‌تر کردن احراز هویت.</p>
+      <p class="source-note">این شبیه‌سازی «مقیاس گرفتن بدون مهندسی بیش از حد» و «فناوری کسل‌کننده را انتخاب کنید» را نشان می‌دهد، صص. ۱۵۸–۱۶۲، از جمله جمع کردن دیتابیس‌ها (ص. ۱۵۹) و پیشنهاد Rust (ص. ۱۶۲). انتخاب‌ها از کتاب می‌آیند و هزینه‌ی tokenشان از نمونه‌های McKinley و به‌روزرسانی نویسنده‌ها، که حالا Kubernetes و service mesh هم حساب می‌شوند؛ قیمت token برای ترکیب پنج‌دیتابیسی و دیتابیس خانگی مال vault است.</p>
+    </header>
 
-  <div class="sim stack">
-    <div id="layers" class="stack"></div>
-    <div class="panel"><p class="panel-title">tokenهای خرج‌شده</p><div class="meter" id="meter" role="img"></div><div id="verdict" class="callout" aria-live="polite"></div></div>
-    <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="it-meter" id="it-meter" role="img"></div>
+        <div class="it-rows" id="it-rows"></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">کیف پول token</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="it-ctl"></div>
+      </div>
+    </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li>کسل‌کننده یعنی بد نیست. ابزارهای PostgreSQL و Python و cron هم کسل‌کننده‌اند <em>و</em> خوب؛ از قبل می‌دانید چطور خراب می‌شوند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>کسل‌کننده یعنی بد نیست. ابزارهای PostgreSQL و Python و cron هم کسل‌کننده‌اند <em>و</em> خوب؛ از قبل می‌دانید چطور خراب می‌شوند.</li>
     <li>April tokenهایش را جایی خرج می‌کند که مشتری می‌بیند: موتور رندر انیمیشن و همکاری بلادرنگ. و همین چیزی برای بازنویسی با Rust که کسی نخواسته باقی نمی‌گذارد.</li>
     <li>هر انتخاب غیرکسل‌کننده سربار عملیاتی و استخر استخدام کوچک‌تر و چیزهای بیشتری برای یاد گرفتن تازه‌کارها می‌آورد؛ هزینه‌اش یک‌بار پرداخت نمی‌شود، هر روز پرداخت می‌شود.</li>
     <li>فناوری تازه باید ارزش اندازه‌پذیر بسازد: هزینه‌ی کمتر، توسعه‌ی سریع‌تر، بازار بزرگ‌تر، مشتری راضی‌تر یا درآمد تازه. اگر نمی‌توانید بگویید کدام، احتمالاً دارید یک token را نابخردانه خرج می‌کنید.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/08-technical-principles-and-strategy.html"><small>درس</small>فصل ۸: اصول و استراتژی فنی</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/08-technical-principles-and-strategy.html"><small>درس</small>فصل ۸: اصول و استراتژی فنی</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var log = Kit.log(document.getElementById("log"));
   var L = [
     ["رندر انیمیشن", [["موتور رندر سفارشی، یعنی مزیت رقابتی محصول", 1, true], ["رندرکننده‌ی آماده", 0, false]]],
     ["همکاری", [["قابلیت همکاری بلادرنگ، یعنی یک متمایزکننده", 1, true], ["فقط اشتراک‌گذاری با خروجی گرفتن", 0, false]]],
@@ -68,29 +97,63 @@
     ["داده", [["دیتابیس PostgreSQL برای همه چیز به‌جز caching، با نگه داشتن Redis", 0, false], ["ترکیب MongoDB و PostgreSQL و Redis و Elasticsearch و DynamoDB، هر کدام محبوب یک آدم ارشد", 2, false], ["نوشتن دیتابیس خودمان", 3, false]]],
     ["platform", [["سرویس‌های مدیریت‌شده‌ی cloud", 0, false], ["ابزار Kubernetes", 1, false], ["ابزار Kubernetes به‌علاوه‌ی یک service mesh", 2, false]]]
   ];
-  var pick = [0, 0, 0, 0, 0], box = document.getElementById("layers");
-  L.forEach(function (l, i) {
-    var fs = Kit.el("fieldset", { class: "layer" }, Kit.el("legend", null, l[0]));
-    l[1].forEach(function (o, j) {
-      var id = "o" + i + "-" + j, r = Kit.el("input", { type: "radio", name: "l" + i, id: id, value: String(j) }); if (j === pick[i]) r.checked = true;
-      r.addEventListener("change", function () { pick[i] = j; log.add(l[0] + ": " + o[0].split("، ")[0] + (o[1] ? "، " + o[1] + " token" : "، کسل‌کننده"), o[1] ? (o[2] ? "ok" : "warn") : "muted"); render(); });
-      fs.appendChild(Kit.el("label", { for: id }, r, Kit.el("span", null, o[0], " ", Kit.el("span", { class: "tok" }, o[1] ? "· " + o[1] + " token" : "· کسل‌کننده"))));
-    });
-    box.appendChild(fs);
-  });
-  function render() {
-    var spent = 0, diff = 0, waste = [];
-    L.forEach(function (l, i) { var o = l[1][pick[i]]; spent += o[1]; if (o[1]) { if (o[2]) diff += o[1]; else waste.push(l[0]); } });
-    var m = Kit.clear(document.getElementById("meter")), n = Math.max(3, spent);
-    for (var k = 0; k < n; k++) m.appendChild(Kit.el("span", { class: k < spent ? (k < 3 ? "used" : "over") : "" }, String(k + 1)));
-    m.setAttribute("aria-label", spent + " token از حدود ۳ token نوآوری خرج شده");
-    var v = document.getElementById("verdict");
-    if (spent > 3) { v.className = "callout bad"; v.textContent = spent + " token، یعنی بیشتر از چیزی که کیف پول دارد. " + (waste.length ? "tokenهای خرج‌شده روی " + waste.join("، ") + " کسب‌وکار را متمایز نمی‌کنند؛ همان‌جا باید به کسل‌کننده برگردید." : "حتی متمایزکننده‌ها هم می‌توانند کیف پول را خالی کنند."); }
-    else if (waste.length) { v.className = "callout warn"; v.textContent = spent + " token از حدود ۳ token، ولی بخشی‌اش خرج " + waste.join("، ") + " شده که کسب‌وکار را متمایز نمی‌کند. توجه محدودتان را همان‌جا می‌خواهید؟"; }
-    else if (spent === 0) { v.className = "callout"; v.textContent = "هیچ tokenی خرج نشده. امن است، ولی جایی سرمایه‌گذاری می‌کنید که محصول را متفاوت کند؟"; }
-    else { v.className = "callout ok"; v.textContent = spent + " token از حدود ۳ token، و همه‌اش روی چیزی که کسب‌وکار را متمایز می‌کند؛ همان انتخاب April. بقیه کسل‌کننده می‌مانند."; }
+  var pick = [0, 0, 0, 0, 0], tour, sels = [];
+  function k(v) { return Kit.digits(String(v)); }
+  function tally() { var spent = 0, diff = 0, waste = []; L.forEach(function (l, i) { var o = l[1][pick[i]]; spent += o[1]; if (o[1]) { if (o[2]) diff += o[1]; else waste.push(l[0]); } }); return { spent: spent, diff: diff, waste: waste }; }
+  function verdict() {
+    var t = tally();
+    if (t.spent > 3) return [k(t.spent) + " token، یعنی بیشتر از چیزی که کیف پول دارد. " + (t.waste.length ? "tokenهای خرج‌شده روی " + t.waste.join("، ") + " کسب‌وکار را متمایز نمی‌کنند؛ همان‌جا باید به کسل‌کننده برگردید." : "حتی متمایزکننده‌ها هم می‌توانند کیف پول را خالی کنند."), "bad"];
+    if (t.waste.length) return [k(t.spent) + " token از حدود ۳ token، ولی بخشی‌اش خرج " + t.waste.join("، ") + " شده که کسب‌وکار را متمایز نمی‌کند. توجه محدودتان را همان‌جا می‌خواهید؟", "warn"];
+    if (!t.spent) return ["هیچ tokenی خرج نشده. امن است، ولی جایی سرمایه‌گذاری می‌کنید که محصول را متفاوت کند؟", ""];
+    return [k(t.spent) + " token از حدود ۳ token، و همه‌اش روی چیزی که کسب‌وکار را متمایز می‌کند؛ همان انتخاب April. بقیه کسل‌کننده می‌مانند.", "ok"];
   }
-  render();
+  function render() {
+    var t = tally(), m = Kit.clear(document.getElementById("it-meter")), n = Math.max(3, t.spent);
+    m.appendChild(Kit.el("span", null, "tokenها:"));
+    for (var j = 0; j < n; j++) { if (j === 3) m.appendChild(Kit.el("span", { class: "wall", title: "حدود سه token" })); m.appendChild(Kit.el("span", { class: "t" + (j < t.spent ? (j < 3 ? " used" : " over") : "") }, k(j + 1))); }
+    m.appendChild(Kit.el("span", null, "· خط‌چین: مرز حدود سه token · قرمز: بیش از کیف پول"));
+    m.setAttribute("aria-label", Kit.digits(t.spent + " token از حدود ۳ token نوآوری خرج شده"));
+    var rows = Kit.clear(document.getElementById("it-rows"));
+    L.forEach(function (l, i) {
+      var opts = Kit.el("div", { class: "it-opts" });
+      l[1].forEach(function (o, j) {
+        var on = j === pick[i];
+        opts.appendChild(Kit.el("div", { class: "it-opt" + (on ? " on" + (o[1] && !o[2] ? " waste" : "") : "") }, Kit.el("b", null, (on ? "● " : "○ ") + (o[1] ? k(o[1]) + " token" + (o[2] ? " · متمایزکننده" : "") : "کسل‌کننده")), o[0]));
+      });
+      rows.appendChild(Kit.el("div", { class: "it-row" }, Kit.el("span", { class: "it-lay" }, l[0]), opts));
+      sels[i].value = String(pick[i]);
+    });
+    var st = Kit.clear(document.getElementById("stats"));
+    [["خرج‌شده", k(t.spent) + " از ~۳", t.spent > 3 ? "bad" : t.spent ? "" : ""], ["روی متمایزکننده", k(t.diff), t.diff ? "ok" : ""], ["روی بقیه", k(t.spent - t.diff), t.spent - t.diff ? "warn" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+  }
+
+  /* ---------- the drawer ---------- */
+  L.forEach(function (l, i) {
+    var id = "it-s" + i, sel = Kit.el("select", { id: id, class: "it-sel" });
+    l[1].forEach(function (o, j) { sel.appendChild(Kit.el("option", { value: String(j) }, (o[1] ? Kit.digits(o[1] + " token: ") : "کسل‌کننده: ") + o[0].split("، ")[0])); });
+    sel.addEventListener("change", function () { pick[i] = +sel.value; render(); var v = verdict(); tour.free(l[0] + ": " + l[1][pick[i]][0].split("، ")[0] + ". " + v[0], v[1]); });
+    sels.push(sel);
+    document.getElementById("it-ctl").appendChild(Kit.el("div", null, Kit.el("label", { class: "field-head", for: id }, l[0]), sel));
+  });
+
+  /* ---------- the scenario ---------- */
+  function scene(p) { return function () { pick = p.slice(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene([1, 1, 0, 0, 0]), render: render, interval: 8000,
+    intro: "هر ردیف یک لایه از stack تیم April است و گزینه‌ی انتخاب‌شده کادر دارد. دایره‌های بالا tokenهای نوآوری‌اند؛ کیف پول حدود سه‌تاست (صص. ۱۶۰–۱۶۱).",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و stack خودتان را بچینید.",
+    steps: [
+      { kind: "", run: scene([1, 1, 0, 0, 0]), say: function () { return "همه چیز کسل‌کننده. " + verdict()[0]; } },
+      { kind: "ok", run: scene([0, 0, 0, 0, 0]), say: function () { return "موتور رندر سفارشی و همکاری بلادرنگ همان چیزی‌اند که محصول را متفاوت می‌کنند. " + verdict()[0]; } },
+      { kind: "warn", run: scene([0, 0, 1, 0, 0]), say: function () { return "پیشنهاد Rust برای سرویس احراز هویت (ص. ۱۶۲): شاید ۳۰ میلی‌ثانیه سریع‌تر، در حالی که ماندن روی Node.js و یک هفته بهینه‌سازی p99 را به ۳۵ می‌رساند. " + verdict()[0]; } },
+      { kind: "bad", run: scene([0, 0, 1, 1, 0]), say: function () { return "پنج دیتابیس، هر کدام محبوب یک آدم ارشد (ص. ۱۵۹). " + verdict()[0]; } },
+      { kind: "ok", run: scene([0, 0, 0, 0, 0]), say: function () { return "کتاب: پیشنهاد Rust پس گرفته می‌شود و یک هفته بهینه‌سازی Node.js به ۳۵ میلی‌ثانیه می‌رسد (ص. ۱۶۲)؛ داده روی PostgreSQL و Redis جمع می‌شود (ص. ۱۵۹). " + verdict()[0]; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "در مدل McKinley هر شرکت تقریباً چند token نوآوری دارد؟", options: ["یکی", "حدود سه‌تا", "برای هر تیم یکی"], answer: 1, explain: "صص. ۱۶۰–۱۶۱." },
     { q: "چرا تیم April روی PostgreSQL جمع شد و فقط Redis را نگه داشت؟", options: ["چون PostgreSQL بی‌نقص است", "برای کم کردن پیچیدگی عملیاتی؛ صورت‌حساب AWS ماهی از ۴۵٬۰۰۰ به ۳۱٬۰۰۰ دلار افتاد", "چون MongoDB بد است"], answer: 1, explain: "ص. ۱۵۹." },

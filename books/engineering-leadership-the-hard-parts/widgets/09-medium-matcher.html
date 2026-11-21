@@ -6,13 +6,25 @@
 <title>جورکننده‌ی رسانه</title>
 <meta name="description" content="برای هر پیام یک کانال انتخاب کنید، یعنی ویدئو یا صوت یا چت یا ایمیل یا حضوری یا مستندات یا نمودار، و با نقاط قوتی که کتاب برای هر رسانه می‌گوید مقایسه کنید. برای فصل ۹ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.msg { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
-  .msg .badge { grid-column: 1 / -1; justify-self: start; white-space: normal; } .msg select { max-width: 14em; }</style>
+<style>
+  /* Messages (rows) by media (columns): green ✓ = a medium the book points to, ● = the chosen one, ✗ = chosen but not the book's. */
+  .mm-tab { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: .8rem; table-layout: fixed; }
+  .mm-tab th { font-weight: 600; color: var(--ink-2); padding: 2px; line-height: 1.3; vertical-align: bottom; }
+  .mm-tab th.mm-m { width: 15em; text-align: right; }
+  .mm-tab td { text-align: center; height: 26px; border-radius: 5px; background: var(--surface-2); border: 1.5px solid transparent; font-weight: 700; }
+  .mm-tab td.mm-m { text-align: right; background: none; font-weight: 400; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mm-tab tr.lit td.mm-m { font-weight: 700; color: var(--accent); }
+  .mm-tab td.okc { background: var(--ok-soft); color: var(--ok); }
+  .mm-tab td.pick { border-color: var(--accent); }
+  .mm-tab td.wrong { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+  .mm-key { font-size: .8rem; color: var(--ink-2); margin: 6px 0 0; }
+  #mm-msg, #mm-med { max-width: 100%; }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
       <a href="../chapters/09-collaborative-technical-practices-and-decision-making.html">فصل ۹</a><span aria-hidden="true">/</span>
@@ -23,70 +35,128 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · کارهای فنی مشارکتی و تصمیم‌گیری</div>
-  <h1>جورکننده‌ی رسانه</h1>
-  <p class="lede">هر نوع اطلاعاتی بهتر از کانالی جاری می‌شود. برای هر پیام، رسانه‌ای را که به کار می‌بردید انتخاب کنید. کتاب به‌ندرت یک پاسخ درست می‌دهد، پس چند انتخاب می‌توانند درست باشند، و برای چیزی که بیشتر از همه مهم است پاسخ این است که <strong>چندرسانه‌ای پخشش کنید</strong>.</p>
-  <p class="source-note">این شبیه‌سازی از «رسانه‌ها و شیوه‌ها» تا «مستندات» را نشان می‌دهد، صص. ۱۸۰–۱۸۷. نقاط قوت هر رسانه و نمونه‌ها از خود کتاب‌اند؛ تبدیلشان به یک تمرین جورکردن و این‌که کدام رسانه‌ها درست حساب شوند، مال vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>جورکننده‌ی رسانه</h1>
+      <p class="lede">هر نوع اطلاعاتی بهتر از کانالی جاری می‌شود. تور برای هر پیام رسانه‌ای برمی‌دارد و خانه‌هایی را که کتاب درست می‌داند روشن می‌کند. کتاب به‌ندرت یک پاسخ درست می‌دهد، و برای چیزی که بیشتر از همه مهم است پاسخ این است که <strong>چندرسانه‌ای پخشش کنید</strong>.</p>
+      <p class="source-note">این شبیه‌سازی از «رسانه‌ها و شیوه‌ها» تا «مستندات» را نشان می‌دهد، صص. ۱۸۰–۱۸۷. نقاط قوت هر رسانه و نمونه‌ها از خود کتاب‌اند؛ تبدیلشان به یک تمرین جورکردن و این‌که کدام رسانه‌ها درست حساب شوند، مال vault است.</p>
+    </header>
 
-  <div class="sim stack">
-    <div class="panel" id="msgs"></div>
-    <div class="panel"><p class="panel-title">امتیاز</p><div class="stats" id="stats"></div></div>
-    <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <table class="mm-tab" id="mm-tab"></table>
+        <p class="mm-key">✓ سبز: رسانه‌ای که کتاب به آن اشاره می‌کند · ● کادر آبی: رسانه‌ی انتخاب‌شده · ✗ قرمز: انتخاب‌شده ولی نه آن‌که کتاب می‌گوید.</p>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">جورکردن</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <label class="field-head" for="mm-msg">پیام</label><select id="mm-msg"></select>
+          <label class="field-head" for="mm-med">رسانه</label><select id="mm-med"></select>
+          <button class="btn primary small" type="button" id="mm-put">بفرست</button>
+        </div>
+        <div class="tweak-group">
+          <button class="btn small" type="button" id="mm-reveal">دیدن پاسخ‌های کتاب</button>
+          <button class="btn small" type="button" id="mm-clear">پاک کردن</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li>ویدئو برای احساس و رابطه و بحث پیچیده است، و برای کار فنیِ باجزئیات تا وقتی ساختار نداشته باشد عموماً افتضاح است. از اسلاید پرهیز کنید.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>ویدئو برای احساس و رابطه و بحث پیچیده است، و برای کار فنیِ باجزئیات تا وقتی ساختار نداشته باشد عموماً افتضاح است. از اسلاید پرهیز کنید.</li>
     <li>صوت کم‌استفاده مانده: یک پیام صوتی دو‌دقیقه‌ای هم نگرانی فنی را می‌رساند و هم لحن پشتیبان را.</li>
     <li>ایمیل هنوز آن‌جا برنده است که رسمیت یا ردِ مکتوب می‌خواهید یا باید از مرز سازمان‌ها رد شوید، ولی threadی با ده ایمیل یا بیشتر رسانه‌ی دیگری می‌خواهد.</li>
     <li>اسپم یعنی همان پیام روی همان رسانه بارها و بارها. پخش چندرسانه‌ای، یعنی ایمیل و چت و سند و یک تماس، همان راهی است که پیام مهم واقعاً می‌نشیند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-collaborative-technical-practices-and-decision-making.html"><small>درس</small>فصل ۹: کارهای فنی مشارکتی و تصمیم‌گیری</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-collaborative-technical-practices-and-decision-making.html"><small>درس</small>فصل ۹: کارهای فنی مشارکتی و تصمیم‌گیری</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var log = Kit.log(document.getElementById("log"));
   var M = { video: "تماس تصویری", audio: "پیام صوتی", chat: "thread چت", email: "ایمیل", person: "حضوری", docs: "مستندات", visual: "نمودار مشترک", multi: "چند رسانه با هم" };
   var X = [
-    ["بررسی گزینه‌های طراحی یک سیستم تازه با تیم", ["visual", "person", "video"], "ابزارهای همکاری تصویری و وایت‌برد به معماری می‌خورند؛ وایت‌برد حضوری هنوز برای ایده‌پردازی سیال از نسخه‌ی دیجیتال بهتر است (صص. ۱۸۰، ۱۸۵)."],
-    ["توضیح دادن با لحنی پشتیبان که چرا رویکرد یک هم‌تیمی در یک pull request ممکن است دردسر بسازد", ["audio", "video", "person"], "کتاب برای بازخورد مهم review پیام صوتی ناهمگام پیشنهاد می‌دهد؛ لحن آن‌جا می‌ماند که نظر متنی می‌بازد (ص. ۱۸۲)."],
-    ["هماهنگ کردن release امروز با سه هم‌تیمی", ["chat"], "هماهنگی روزمره به چت ماندگار با threadهای مرتب می‌خورد (ص. ۱۸۰)."],
-    ["فرستادن پیشنهاد فنیِ سنجیده به یک شرکت شریک", ["email"], "ایمیل برای رسمیت و ردِ مکتوب و رد شدن از مرز سازمان‌ها می‌درخشد (ص. ۱۸۴)."],
-    ["کمک به آشنا شدن دو مهندس در دو قاره", ["video", "person"], "ویدئو رابطه می‌سازد؛ نمونه‌ی کتاب قهوه‌ی مجازی بدون دستور جلسه است (ص. ۱۸۲)."],
-    ["مذاکره‌ی قرارداد یک API بین دو تیم", ["docs"], "مذاکره‌ی قرارداد در سندهای ساختارمندی بهتر پیش می‌رود که تغییر و بحث را ثبت می‌کنند (ص. ۱۸۰)."],
-    ["گفتن به تیم که اپلیکیشن را روی لپ‌تاپ چطور راه بیندازند", ["docs"], "مستندات رویه‌ای، یعنی قدم‌های روشن با نمونه، که کنار کد نگه داشته می‌شوند (ص. ۱۸۶)."],
-    ["به اشتراک گذاشتن یک گزارش کوتاه وضعیت هفتگی", ["chat", "email", "docs", "audio"], "ابزارهای ناهمگام معمولاً برای وضعیت بهترند؛ ویدئو را برای تعامل بلادرنگ نگه دارید (ص. ۱۸۲)."],
-    ["اعلام تغییری بزرگ در اولویت‌ها", ["multi"], "چندرسانه‌ای پخشش کنید: ایمیل و یک به‌روزرسانی در چت و سند و یک تماس؛ این اسپم نیست، همان راهی است که همه واقعاً می‌شنوند (ص. ۱۸۱)."]
+    ["گزینه‌های طراحی یک سیستم تازه", "بررسی گزینه‌های طراحی یک سیستم تازه با تیم", ["visual", "person", "video"], "ابزارهای همکاری تصویری و وایت‌برد به معماری می‌خورند؛ وایت‌برد حضوری هنوز برای ایده‌پردازی سیال از نسخه‌ی دیجیتال بهتر است (صص. ۱۸۰، ۱۸۵)."],
+    ["بازخورد پشتیبان روی یک PR", "توضیح دادن با لحنی پشتیبان که چرا رویکرد یک هم‌تیمی در یک pull request ممکن است دردسر بسازد", ["audio", "video", "person"], "کتاب برای بازخورد مهم review پیام صوتی ناهمگام پیشنهاد می‌دهد؛ لحن آن‌جا می‌ماند که نظر متنی می‌بازد (ص. ۱۸۲)."],
+    ["هماهنگی release امروز", "هماهنگ کردن release امروز با سه هم‌تیمی", ["chat"], "هماهنگی روزمره به چت ماندگار با threadهای مرتب می‌خورد (ص. ۱۸۰)."],
+    ["پیشنهاد فنی به شرکت شریک", "فرستادن پیشنهاد فنیِ سنجیده به یک شرکت شریک", ["email"], "ایمیل برای رسمیت و ردِ مکتوب و رد شدن از مرز سازمان‌ها می‌درخشد (ص. ۱۸۴)."],
+    ["آشنایی دو مهندس در دو قاره", "کمک به آشنا شدن دو مهندس در دو قاره", ["video", "person"], "ویدئو رابطه می‌سازد؛ نمونه‌ی کتاب قهوه‌ی مجازی بدون دستور جلسه است (ص. ۱۸۲)."],
+    ["مذاکره‌ی قرارداد API", "مذاکره‌ی قرارداد یک API بین دو تیم", ["docs"], "مذاکره‌ی قرارداد در سندهای ساختارمندی بهتر پیش می‌رود که تغییر و بحث را ثبت می‌کنند (ص. ۱۸۰)."],
+    ["راه‌اندازی اپ روی لپ‌تاپ", "گفتن به تیم که اپلیکیشن را روی لپ‌تاپ چطور راه بیندازند", ["docs"], "مستندات رویه‌ای، یعنی قدم‌های روشن با نمونه، که کنار کد نگه داشته می‌شوند (ص. ۱۸۶)."],
+    ["گزارش وضعیت هفتگی", "به اشتراک گذاشتن یک گزارش کوتاه وضعیت هفتگی", ["chat", "email", "docs", "audio"], "ابزارهای ناهمگام معمولاً برای وضعیت بهترند؛ ویدئو را برای تعامل بلادرنگ نگه دارید (ص. ۱۸۲)."],
+    ["اعلام تغییر بزرگ اولویت‌ها", "اعلام تغییری بزرگ در اولویت‌ها", ["multi"], "چندرسانه‌ای پخشش کنید: ایمیل و یک به‌روزرسانی در چت و سند و یک تماس؛ این اسپم نیست، همان راهی است که همه واقعاً می‌شنوند (ص. ۱۸۱)."]
   ];
-  var got = {}, box = document.getElementById("msgs");
-  X.forEach(function (x, i) {
-    var id = "m" + i, sel = Kit.el("select", { id: id }), b = Kit.el("span", { class: "badge" }, "رسانه‌ای انتخاب نشده");
-    sel.appendChild(Kit.el("option", { value: "" }, "یک رسانه انتخاب کنید…")); Object.keys(M).forEach(function (k) { sel.appendChild(Kit.el("option", { value: k }, M[k])); });
-    sel.addEventListener("change", function () {
-      if (!sel.value) return; var ok = x[1].indexOf(sel.value) >= 0; got[i] = ok;
-      b.className = "badge " + (ok ? "ok" : "warn"); b.textContent = (ok ? "✓ " : "کتاب به " + x[1].map(function (k) { return M[k]; }).join(" یا ") + " اشاره می‌کند. ") + x[2];
-      log.add(x[0] + " ← " + M[sel.value] + (ok ? " ✓" : ""), ok ? "ok" : "warn"); score();
+  var KEYS = Object.keys(M), st = { pick: {}, shown: {}, last: -1 }, tour;
+  function k(v) { return Kit.digits(String(v)); }
+  var sm = document.getElementById("mm-msg"), sd = document.getElementById("mm-med");
+  X.forEach(function (x, i) { sm.appendChild(Kit.el("option", { value: String(i) }, x[0])); });
+  KEYS.forEach(function (key) { sd.appendChild(Kit.el("option", { value: key }, M[key])); });
+  function render() {
+    var t = Kit.clear(document.getElementById("mm-tab")), hr = Kit.el("tr", null, Kit.el("th", { class: "mm-m" }, "پیام"));
+    KEYS.forEach(function (key) { hr.appendChild(Kit.el("th", null, M[key])); });
+    t.appendChild(Kit.el("thead", null, hr));
+    var tb = Kit.el("tbody");
+    X.forEach(function (x, i) {
+      var tr = Kit.el("tr", { class: i === st.last ? "lit" : "" }, Kit.el("td", { class: "mm-m", title: x[1] }, x[0]));
+      KEYS.forEach(function (key) {
+        var good = x[2].indexOf(key) >= 0, show = st.shown[i], p = st.pick[i] === key, cls = [], txt = "";
+        if (show && good) { cls.push("okc"); txt = "✓"; }
+        if (p) { cls.push(good ? "pick" : "wrong"); txt = good ? "● ✓" : "✗"; }
+        tr.appendChild(Kit.el("td", { class: cls.join(" "), "aria-label": M[key] + (p ? "، انتخاب‌شده" : "") + (show && good ? "، پیشنهاد کتاب" : "") }, txt));
+      });
+      tb.appendChild(tr);
     });
-    box.appendChild(Kit.el("div", { class: "msg" }, Kit.el("label", { for: id }, x[0]), sel, b));
-  });
-  function score() {
-    var n = Object.keys(got).length, c = Object.keys(got).filter(function (k) { return got[k]; }).length, st = Kit.clear(document.getElementById("stats"));
-    [["پاسخ‌داده‌شده", n + " از " + X.length], ["هم‌خوان با کتاب", String(c), n && c === n ? "ok" : ""]].forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
+    t.appendChild(tb);
+    var n = Object.keys(st.pick).length, c = Object.keys(st.pick).filter(function (i) { return X[i][2].indexOf(st.pick[i]) >= 0; }).length;
+    var out = Kit.clear(document.getElementById("stats"));
+    [["پیام‌های فرستاده", k(n) + " از " + k(X.length), ""], ["هم‌خوان با کتاب", k(c) + " از " + k(n), n && c < n ? "warn" : n ? "ok" : ""], ["پیام‌هایی با بیش از یک پاسخ درست", k(X.filter(function (x) { return x[2].length > 1; }).length), ""]].forEach(function (x) {
+      out.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    if (st.last >= 0) sm.value = String(st.last);
   }
-  score();
+  function said(i) { var x = X[i], ok = x[2].indexOf(st.pick[i]) >= 0; return [(ok ? "✓ " + M[st.pick[i]] + ". " : "کتاب به " + x[2].map(function (key) { return M[key]; }).join(" یا ") + " اشاره می‌کند. ") + x[3], ok ? "ok" : "warn"]; }
+
+  /* ---------- the drawer ---------- */
+  document.getElementById("mm-put").addEventListener("click", function () { var i = +sm.value; st.pick[i] = sd.value; st.shown[i] = true; st.last = i; render(); var s = said(i); tour.free(s[0], s[1]); });
+  document.getElementById("mm-reveal").addEventListener("click", function () { X.forEach(function (_, i) { st.shown[i] = true; }); st.last = -1; render(); tour.free("همه‌ی پاسخ‌های کتاب روشن شد: چهار پیام بیش از یک رسانه‌ی درست دارند، و تغییر بزرگ اولویت‌ها همه‌ی رسانه‌ها را با هم می‌خواهد.", "ok"); });
+  document.getElementById("mm-clear").addEventListener("click", function () { st = { pick: {}, shown: {}, last: -1 }; render(); tour.free("همه پاک شد. پیامی بردارید و رسانه‌اش را انتخاب کنید.", ""); });
+
+  /* ---------- the scenario: [row, chosen medium] pairs, cumulative ---------- */
+  var PLAY = [[[0, "visual"]], [[1, "chat"]], [[2, "chat"], [3, "email"]], [[5, "docs"], [6, "docs"], [7, "video"]], [[4, "video"], [8, "multi"]]];
+  function scene(upto) { return function () { st = { pick: {}, shown: {}, last: -1 }; for (var s = 0; s < upto; s++) PLAY[s].forEach(function (p) { st.pick[p[0]] = p[1]; st.shown[p[0]] = true; st.last = p[0]; }); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene(0), render: render, interval: 8000,
+    intro: "هر ردیف یک پیام است و هر ستون یک رسانه. تور برای هر پیام رسانه‌ای انتخاب می‌کند و خانه‌هایی را که کتاب درست می‌داند سبز می‌کند (صص. ۱۸۰–۱۸۷).",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، «پاک کردن» را بزنید و رسانه‌ها را خودتان انتخاب کنید.",
+    steps: [
+      { kind: "ok", run: scene(1), say: function () { return "نمودار مشترک برای بررسی طراحی؛ حضوری و تصویری هم درست‌اند. " + X[0][3]; } },
+      { kind: "bad", run: scene(2), say: function () { return "بازخورد حساس در یک thread چت لحنش را می‌بازد. " + said(1)[0]; } },
+      { kind: "ok", run: scene(3), say: function () { return "هماهنگی روزمره در چت؛ پیشنهاد رسمی به یک شرکت دیگر با ایمیل. در این تمرین هر کدام فقط یک پاسخ دارد (صص. ۱۸۰، ۱۸۴)."; } },
+      { kind: "warn", run: scene(4), say: function () { return "قرارداد API و راه‌اندازی اپ هر دو مستندات‌اند (صص. ۱۸۰، ۱۸۶). گزارش وضعیت هفتگی با تماس تصویری: " + said(7)[0]; } },
+      { kind: "ok", run: scene(5), say: function () { return "رابطه با ویدئو ساخته می‌شود (ص. ۱۸۲). " + X[8][3]; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چه چیزی پخش چندرسانه‌ای را از اسپم جدا می‌کند؟", options: ["تعداد گیرنده‌ها", "پخش چندرسانه‌ای از چند رسانه استفاده می‌کند و اسپم همان رسانه را تکرار می‌کند", "هیچ چیز"], answer: 1, explain: "ص. ۱۸۱." },
     { q: "ایمیل thread شما از ده پاسخ گذشته. کتاب چه پیشنهاد می‌دهد؟", options: ["یک‌بار دیگر به همه پاسخ بدهید", "گفت‌وگو را به رسانه‌ی مناسب‌تری ببرید", "آدم‌های بیشتری اضافه کنید"], answer: 1, explain: "ص. ۱۸۵." },

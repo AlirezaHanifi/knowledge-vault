@@ -6,15 +6,29 @@
 <title>تشخیص رانش</title>
 <meta name="description" content="نشانه‌های رانشی را که می‌بینید تیک بزنید؛ جدول ۵-۱ کتاب ریشه‌های محتمل و یک اقدام برای همین هفته و رویه‌ای را می‌دهد که رانش را دور نگه می‌دارد. برای فصل ۵ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.sign { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
-  .plan { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; margin-top: 8px; background: var(--surface); font-size: .9rem; }
-  .plan h3 { margin: 0 0 6px; font-size: .95rem; } .plan dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 10px; } .plan dt { color: var(--ink-3); } .plan dd { margin: 0; }
-  @media (max-width: 520px) { .plan dl { grid-template-columns: 1fr; } }</style>
+<style>
+  /* Table 5-1 as rows: a ticked sign shows its root cause, immediate action and sustainable practice; ★ marks the one action for this week. */
+  .dd-tab { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  .dd-tab th { text-align: right; font-size: .8rem; color: var(--ink-2); font-weight: 600; padding: 4px 8px; border-bottom: 1.5px solid var(--line-strong); }
+  .dd-tab td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.45; }
+  .dd-tab tr.off td { color: var(--ink-3); }
+  .dd-tab tr.off td.dd-x { color: var(--ink-3); font-style: italic; }
+  .dd-tab tr.on td:first-child { font-weight: 600; }
+  .dd-tab td.dd-tick { width: 1.8em; text-align: center; font-size: 1rem; }
+  .dd-tab tr.on td.dd-tick { color: var(--s2); }
+  .dd-tab td.star { background: var(--ok-soft); font-weight: 700; }
+  .dd-gauge { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: .85rem; }
+  .dd-gauge span.c { width: 26px; height: 14px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line-strong); }
+  .dd-gauge span.c.on { background: var(--s2); border-color: var(--s2); }
+  .dd-gauge span.t { border-left: 2px dashed var(--bad); height: 22px; margin: 0 2px; }
+  .dd-signs label { display: flex; gap: 6px; align-items: flex-start; font-size: .84rem; margin: 3px 0; }
+  #dd-pick { max-width: 100%; }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
       <a href="../chapters/05-setting-direction.html">فصل ۵</a><span aria-hidden="true">/</span>
@@ -25,43 +39,56 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · تعیین جهت</div>
-  <h1>تشخیص رانش</h1>
-  <p class="lede">رانش از بیرون شبیه شتاب است و از درون حس حرکت بدون معنا دارد. نشانه‌هایی را که می‌شناسید تیک بزنید. <strong>دوتا یا بیشتر</strong> یعنی تیم تمرکزش را از دست داده، و آن‌وقت <strong>یک</strong> اقدام فوری بردارید و همین هفته انجامش بدهید.</p>
-  <p class="source-note">این شبیه‌سازی «جدول ۵-۱. ابزار تشخیص رانش» (ص. ۷۷) و قاعده‌ی دوتا یا بیشترش (ص. ۷۸) را نشان می‌دهد. نشانه‌ها و ریشه‌ها و اقدام‌ها و رویه‌ها از خود کتاب‌اند؛ فرم تعاملی مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>تشخیص رانش</h1>
+      <p class="lede">رانش از بیرون شبیه شتاب است و از درون حس حرکت بدون معنا دارد. تور نشانه‌های جدول ۵-۱ را یکی‌یکی روشن می‌کند: <strong>دوتا یا بیشتر</strong> یعنی تیم تمرکزش را از دست داده، و آن‌وقت <strong>یک</strong> اقدام فوری برمی‌دارید و همین هفته انجامش می‌دهید.</p>
+      <p class="source-note">این شبیه‌سازی «جدول ۵-۱. ابزار تشخیص رانش» (ص. ۷۷) و قاعده‌ی دوتا یا بیشترش (ص. ۷۸) را نشان می‌دهد. نشانه‌ها و ریشه‌ها و اقدام‌ها و رویه‌ها از خود کتاب‌اند؛ فرم تعاملی مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim stack">
-    <fieldset class="panel"><legend class="panel-title">کدام‌یک از این‌ها را در تیمتان می‌بینید؟</legend><div id="signs"></div></fieldset>
-    <div id="verdict" class="callout" aria-live="polite"></div>
-    <div class="panel"><p class="panel-title">جدول چه می‌گوید</p><div id="plans"><p class="field-hint">یک نشانه را تیک بزنید تا ریشه و اقدام فوری و رویه‌ی پایدارش را ببینید.</p></div>
-      <div id="pickwrap" style="margin-top:10px" hidden><label for="pick">آن یک اقدام شما برای این هفته</label><br><select id="pick"></select></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <table class="dd-tab"><thead><tr><th></th><th>نشانه</th><th>ریشه</th><th>اقدام فوری</th><th>رویه‌ی پایدار</th></tr></thead><tbody id="dd-body"></tbody></table>
+        <div class="dd-gauge" id="dd-gauge" role="img"></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">رانش</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <fieldset class="tweak-group dd-signs" id="dd-signs"><legend class="field-head">در تیمتان کدام را می‌بینید؟</legend></fieldset>
+        <div class="tweak-group"><label class="field-head" for="dd-pick">آن یک اقدام این هفته</label><select id="dd-pick"></select></div>
+      </div>
     </div>
-    <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li>هر نشانه، نشانه‌ی تصمیمی است که کسی از آن طفره رفته: اولویت‌های زیاد، تصمیم سختی که گرفته نشده، یا معامله‌هایی که نامشان برده نشده.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>هر نشانه، نشانه‌ی تصمیمی است که کسی از آن طفره رفته: اولویت‌های زیاد، تصمیم سختی که گرفته نشده، یا معامله‌هایی که نامشان برده نشده.</li>
     <li>اقدام‌های فوری کوچک و ملموس‌اند، مثل یک هدف شش‌هفته‌ای یا فهرست «این‌ها را نمی‌کنیم»؛ و رویه‌های پایدار نمی‌گذارند رانش برگردد.</li>
     <li>قاعده‌ی کتاب یک اقدام <em>در همین هفته</em> است، نه یک برنامه‌ی بزرگ: حتی با چند نشانه هم اول یک حرکت لازم است.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-setting-direction.html"><small>درس</small>فصل ۵: تعیین جهت</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-setting-direction.html"><small>درس</small>فصل ۵: تعیین جهت</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var log = Kit.log(document.getElementById("log"));
   var T = [
     ["آدم‌ها می‌گویند «بعداً برمی‌گردیم سراغش» ولی هیچ‌وقت برنمی‌گردند", "اولویت‌های رقیب زیاد و نبود تمرکز روشن", "یک هدف اصلی برای شش هفته‌ی بعد انتخاب کنید", "همه‌ی کار را دیدنی ثبت کنید؛ کار ثبت‌نشده اولویتش پایین می‌آید"],
     ["تیم‌ها مدام می‌پرسند «اول روی چه کار کنیم؟»", "رهبری از تصمیم‌های سخت اولویت فرار می‌کند", "تصمیم اولویت روشنی بگیرید و دلیلش را بگویید", "اولویت‌ها را آن‌قدر تکرار کنید که پیام بنشیند"],
@@ -69,34 +96,62 @@
     ["بهترین آدم‌های تیم دنبال جای دیگری می‌گردند", "تصمیم‌های مهم گیر کرده‌اند چون همه باید موافق باشند", "منظم بگویید چه می‌سازید و چرا", "راه‌های امنی برای مخالفت و پرسش سخت بسازید"],
     ["همان بحث‌ها در هر جلسه‌ی برنامه‌ریزی برمی‌گردند", "تصمیم‌ها بدون به زبان آوردن چیزی که از دست می‌رود گرفته می‌شوند", "نام ببرید چه چیزی را انجام نمی‌دهید", "بعد از تصمیم پیگیری کنید تا تعهد قوی بماند"]
   ];
-  var on = T.map(function () { return false; }), box = document.getElementById("signs"), pick = document.getElementById("pick");
+  var SH = ["«بعداً برمی‌گردیم سراغش»", "«اول روی چه کار کنیم؟»", "کار تمام می‌شود، چیزی ساخته نمی‌شود", "بهترین‌ها دنبال جای دیگرند", "بحث‌های تکراری در برنامه‌ریزی"];
+  var on = T.map(function () { return false; }), pickV = "", tour, boxes = [];
+  function k(v) { return Kit.digits(String(v)); }
+  var pick = document.getElementById("dd-pick"), fs = document.getElementById("dd-signs");
   T.forEach(function (t, i) {
-    var id = "d" + i, cb = Kit.el("input", { type: "checkbox", id: id });
-    cb.addEventListener("change", function () { on[i] = cb.checked; log.add((cb.checked ? "دیده شد: " : "برداشته شد: ") + t[0], cb.checked ? "warn" : "muted"); render(); });
-    box.appendChild(Kit.el("div", { class: "sign" }, cb, Kit.el("label", { for: id }, t[0])));
+    var cb = Kit.el("input", { type: "checkbox", id: "dd-c" + i });
+    cb.addEventListener("change", function () { on[i] = cb.checked; if (!cb.checked && pickV === String(i)) pickV = ""; render(); var v = verdict(); tour.free((cb.checked ? "دیده شد: " : "برداشته شد: ") + t[0] + ". " + v[0], v[1]); });
+    boxes.push(cb); fs.appendChild(Kit.el("label", { for: "dd-c" + i }, cb, Kit.el("span", null, SH[i])));
   });
-  pick.addEventListener("change", function () { if (pick.value !== "") { log.add("این هفته: " + T[+pick.value][2], "ok"); verdict(); } });
+  pick.addEventListener("change", function () { pickV = pick.value; render(); var v = verdict(); tour.free(v[0], v[1]); });
+  function n() { return on.filter(Boolean).length; }
   function verdict() {
-    var n = on.filter(Boolean).length, v = document.getElementById("verdict");
-    if (n === 0) { v.className = "callout"; v.textContent = "هیچ نشانه‌ای تیک نخورده."; }
-    else if (n === 1) { v.className = "callout"; v.textContent = "یک نشانه: ارزش پاییدن دارد، ولی هنوز به آستانه‌ی کتاب برای از دست رفتن تمرکز نرسیده."; }
-    else { v.className = "callout " + (pick.value !== "" ? "ok" : "warn"); v.textContent = n + " نشانه: با قاعده‌ی کتاب، تیم تمرکزش را از دست داده. " + (pick.value !== "" ? "این هفته: " + T[+pick.value][2] + "." : "یک اقدام فوری انتخاب کنید و همین هفته انجامش بدهید."); }
+    var c = n();
+    if (!c) return ["هیچ نشانه‌ای تیک نخورده.", ""];
+    if (c === 1) return ["یک نشانه: ارزش پاییدن دارد، ولی هنوز به آستانه‌ی کتاب برای از دست رفتن تمرکز نرسیده (ص. ۷۸).", ""];
+    return [k(c) + " نشانه: با قاعده‌ی کتاب، تیم تمرکزش را از دست داده (ص. ۷۸). " + (pickV !== "" ? "این هفته: " + T[+pickV][2] + "." : "یک اقدام فوری انتخاب کنید و همین هفته انجامش بدهید."), pickV !== "" ? "ok" : "warn"];
   }
   function render() {
-    var pl = Kit.clear(document.getElementById("plans")), prev = pick.value; Kit.clear(pick);
-    pick.appendChild(Kit.el("option", { value: "" }, "یکی را انتخاب کنید…"));
+    var b = Kit.clear(document.getElementById("dd-body"));
     T.forEach(function (t, i) {
-      if (!on[i]) return;
-      pl.appendChild(Kit.el("div", { class: "plan" }, Kit.el("h3", null, t[0]), Kit.el("dl", null,
-        Kit.el("dt", null, "ریشه"), Kit.el("dd", null, t[1]), Kit.el("dt", null, "اقدام فوری"), Kit.el("dd", null, t[2]), Kit.el("dt", null, "رویه‌ی پایدار"), Kit.el("dd", null, t[3]))));
-      pick.appendChild(Kit.el("option", { value: String(i) }, t[2]));
+      var tr = Kit.el("tr", { class: on[i] ? "on" : "off" }, Kit.el("td", { class: "dd-tick", "aria-label": on[i] ? "دیده شد" : "دیده نشد" }, on[i] ? "●" : "○"), Kit.el("td", null, t[0]));
+      if (on[i]) { tr.appendChild(Kit.el("td", null, t[1])); tr.appendChild(Kit.el("td", { class: pickV === String(i) ? "star" : "" }, (pickV === String(i) ? "★ " : "") + t[2])); tr.appendChild(Kit.el("td", null, t[3])); }
+      else tr.appendChild(Kit.el("td", { class: "dd-x", colspan: "3" }, "دیده نشده"));
+      b.appendChild(tr);
     });
-    if (!on.some(Boolean)) pl.appendChild(Kit.el("p", { class: "field-hint" }, "یک نشانه را تیک بزنید تا ریشه و اقدام فوری و رویه‌ی پایدارش را ببینید."));
-    pick.value = prev !== "" && on[+prev] ? prev : "";
-    document.getElementById("pickwrap").hidden = on.filter(Boolean).length < 2;
-    verdict();
+    var c = n(), g = Kit.clear(document.getElementById("dd-gauge"));
+    g.appendChild(Kit.el("span", null, "نشانه‌های دیده‌شده:"));
+    T.forEach(function (_, i) { if (i === 2) g.appendChild(Kit.el("span", { class: "t", title: "آستانه" })); g.appendChild(Kit.el("span", { class: "c" + (i < c ? " on" : "") })); });
+    g.appendChild(Kit.el("span", null, Kit.digits(c + " از ۵ · خط‌چین قرمز: آستانه‌ی دوتا یا بیشتر")));
+    g.setAttribute("aria-label", Kit.digits(c + " نشانه از ۵ دیده شده؛ آستانه دو نشانه است"));
+    Kit.clear(pick); pick.appendChild(Kit.el("option", { value: "" }, "یکی را انتخاب کنید…"));
+    T.forEach(function (t, i) { if (on[i]) pick.appendChild(Kit.el("option", { value: String(i) }, t[2])); });
+    pick.value = pickV; pick.disabled = c < 2;
+    boxes.forEach(function (cb, i) { cb.checked = on[i]; });
+    var st = Kit.clear(document.getElementById("stats"));
+    [["نشانه‌ها", k(c) + " از ۵", c >= 2 ? "warn" : ""], ["آستانه‌ی کتاب", "۲ یا بیشتر", ""], ["وضعیت", c >= 2 ? "تمرکز از دست رفته" : c ? "زیر نظر" : "روشن", c >= 2 ? "bad" : "ok"], ["اقدام این هفته", pickV !== "" ? "۱ ★" : "—", pickV !== "" ? "ok" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
   }
-  render();
+
+  /* ---------- the scenario ---------- */
+  function scene(list, p) { return function () { on = T.map(function (_, i) { return list.indexOf(i) >= 0; }); pickV = p; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene([], ""), render: render, interval: 8000,
+    intro: "هر ردیف یک نشانه‌ی جدول ۵-۱ است (ص. ۷۷). وقتی نشانه‌ای دیده شود، ریشه و اقدام فوری و رویه‌ی پایدارش باز می‌شود.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، نشانه‌هایی را که در تیم خودتان می‌بینید تیک بزنید و یک اقدام برای این هفته بردارید.",
+    steps: [
+      { kind: "", run: scene([2], ""), say: function () { return "کارها تمام می‌شوند ولی چیزی ساخته نمی‌شود. " + verdict()[0]; } },
+      { kind: "warn", run: scene([2, 4], ""), say: function () { return "همان بحث‌ها در هر جلسه‌ی برنامه‌ریزی برمی‌گردند. " + verdict()[0] + " هر نشانه پشتش تصمیمی است که کسی از آن طفره رفته."; } },
+      { kind: "ok", run: scene([2, 4], "2"), say: function () { return verdict()[0] + " اقدام‌های فوری کوچک و ملموس‌اند؛ رویه‌ی پایدار، یعنی سنجیدن هدف هر جلسه، نمی‌گذارد رانش برگردد."; } },
+      { kind: "warn", run: scene([0, 1, 2, 3, 4], ""), say: "هر پنج نشانه. وسوسه این است که یک برنامه‌ی بزرگ بنویسید، ولی قاعده‌ی کتاب هنوز یک اقدام در همین هفته است." },
+      { kind: "ok", run: scene([0, 1, 2, 3, 4], "1"), say: function () { return verdict()[0] + " بقیه‌ی اقدام‌ها می‌مانند برای هفته‌های بعد."; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چند نشانه از این ابزار تشخیص یعنی تیم تمرکزش را از دست داده؟", options: ["یکی", "دوتا یا بیشتر", "هر پنج‌تا"], answer: 1, explain: "ص. ۷۸." },
     { q: "کارها تمام می‌شوند ولی چیزی ساخته نمی‌شود. اقدام فوری جدول چیست؟", options: ["آدم بیشتری استخدام کنید", "فهرست صریحِ «این‌ها را نمی‌کنیم» بسازید", "گزارش وضعیت هفتگی اضافه کنید"], answer: 1, explain: "ریشه‌اش واکنش به هر چیزی است که فوری به نظر می‌رسد (ص. ۷۷)." },

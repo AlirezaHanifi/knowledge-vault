@@ -6,12 +6,22 @@
 <title>اقتصاد واحد</title>
 <meta name="description" content="خرج زیرساخت و تعداد مشتری و قیمت و بقیه‌ی هزینه‌های مستقیم و طول عمر مشتری را بگذارید و ببینید COGS هر مشتری و حاشیه‌ی ناخالص و ارزش طول عمر چطور جابه‌جا می‌شوند. برای فصل ۷ کتاب Engineering Leadership: The Hard Parts.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style></style>
+<style>
+  /* Top: one customer's monthly price split into infrastructure COGS, other direct costs and gross margin. Bottom: the customer's lifetime, month by month. */
+  .ue-svg { width: 100%; display: block; max-height: 330px; direction: ltr; }
+  .ue-svg text { font-size: 13px; fill: var(--ink); } .ue-svg text.mut { fill: var(--ink-2); } .ue-svg text.big { font-size: 15px; font-weight: 700; }
+  .ue-svg .inf { fill: var(--s1); } .ue-svg .oth { fill: var(--s2); } .ue-svg .mar { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 1.5; }
+  .ue-svg .ghost { fill: none; stroke: var(--ink-3); stroke-dasharray: 4 3; }
+  .ue-svg .mo { fill: var(--accent-soft); stroke: var(--accent); } .ue-svg .lost { fill: var(--bad-soft); stroke: var(--bad); stroke-dasharray: 4 3; }
+  .ue-svg text.inv { fill: #fff; font-weight: 700; }
+  .ue-key { font-size: .82rem; color: var(--ink-2); margin: 6px 0 0; }
+  .ue-key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-left: 4px; }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">ELHP</a><span aria-hidden="true">/</span>
       <a href="../chapters/07-budgeting-costs-and-vendors.html">فصل ۷</a><span aria-hidden="true">/</span>
@@ -22,69 +32,129 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۷ · بودجه، هزینه و فروشنده‌ها</div>
-  <h1>اقتصاد واحد</h1>
-  <p class="lede">اقتصاد واحد تصمیم فنی را به تصمیم کسب‌وکاری تبدیل می‌کند. از نمونه‌ی کتاب شروع کنید، یعنی <strong>ماهی ۵۰٬۰۰۰ دلار زیرساخت برای ۱٬۰۰۰ مشتری یعنی ۵۰ دلار برای هر کدام</strong>، و بعد دو اهرمش را امتحان کنید: featureای که ماهی ۱۰٬۰۰۰ دلار صرفه‌جویی می‌کند، و استخدام یک DevOps که هزینه‌ی زیرساخت را ۲۵٪ کم می‌کند.</p>
-  <p class="source-note">این شبیه‌سازی «فهمیدن سمت درآمد» و «مدیریت هزینه» را نشان می‌دهد، صص. ۱۲۵–۱۲۶. تعریف‌ها و عددهای نمونه از خود کتاب‌اند؛ قیمت پیش‌فرض، یعنی ماهی ۵۰۰ دلار، و بقیه‌ی هزینه‌های مستقیم، یعنی ۱۰۰ دلار برای هر مشتری، مال vault هستند و طوری انتخاب شده‌اند که هم حاشیه‌ی ۷۰ درصدی کتاب و هم «۱۰٬۰۰۰ دلار در ماه یعنی ۲ واحد حاشیه» هر دو برقرار بمانند.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>اقتصاد واحد</h1>
+      <p class="lede">اقتصاد واحد تصمیم فنی را به تصمیم کسب‌وکاری تبدیل می‌کند. تور از نمونه‌ی کتاب شروع می‌کند، یعنی <strong>ماهی ۵۰٬۰۰۰ دلار زیرساخت برای ۱٬۰۰۰ مشتری، ۵۰ دلار برای هر کدام</strong>، دو اهرمش را امتحان می‌کند، یعنی featureای که ماهی ۱۰٬۰۰۰ دلار صرفه‌جویی می‌کند و استخدام یک DevOps که زیرساخت را ۲۵٪ کم می‌کند، و بعد به ارزش طول عمر می‌رسد.</p>
+      <p class="source-note">این شبیه‌سازی «فهمیدن سمت درآمد» و «مدیریت هزینه» را نشان می‌دهد، صص. ۱۲۵–۱۲۶. تعریف‌ها و عددهای نمونه از خود کتاب‌اند؛ قیمت پیش‌فرض، یعنی ماهی ۵۰۰ دلار، و بقیه‌ی هزینه‌های مستقیم، یعنی ۱۰۰ دلار برای هر مشتری، مال vault هستند و طوری انتخاب شده‌اند که هم حاشیه‌ی ۷۰ درصدی کتاب و هم «۱۰٬۰۰۰ دلار در ماه یعنی ۲ واحد حاشیه» هر دو برقرار بمانند.</p>
+    </header>
 
-  <div class="sim stack">
-    <div class="panel stack" id="controls"></div>
-    <div class="row"><button class="btn" id="fa" type="button">feature اول: ۱۰٬۰۰۰ دلار در ماه از زیرساخت کم کن</button><button class="btn" id="dv" type="button">استخدام DevOps: ۲۵٪ از زیرساخت کم کن</button><button class="btn" id="rs" type="button">بازگشت به نمونه‌ی کتاب</button></div>
-    <div class="panel"><p class="panel-title">به ازای هر مشتری در هر ماه</p><div class="stats" id="stats"></div></div>
-    <div id="verdict" class="callout" aria-live="polite"></div>
-    <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <svg class="ue-svg" id="ue" viewBox="0 0 700 300" role="img"></svg>
+        <p class="ue-key"><i style="background:var(--s1)"></i>COGS زیرساخت · <i style="background:var(--s2)"></i>بقیه‌ی هزینه‌های مستقیم · <i style="background:var(--ok-soft);border:1.5px solid var(--ok)"></i>حاشیه‌ی ناخالص · کادر خط‌چین: وضعیت پیش از اهرم · ماه‌های قرمز: درآمدی که با رفتن زودتر از ماه ۱۲ از دست می‌رود.</p>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">به ازای هر مشتری در ماه</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ue-ctl"></div>
+        <div class="tweak-group">
+          <button class="btn small" type="button" id="ue-fa">feature: ۱۰٬۰۰۰ دلار کمتر</button>
+          <button class="btn small" type="button" id="ue-dv">DevOps: ۲۵٪ کمتر</button>
+          <button class="btn small" type="button" id="ue-rs">نمونه‌ی کتاب</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li>معیار COGS هر هزینه‌ی مستقیم سرویس دادن به یک مشتری را در بر می‌گیرد، یعنی زیرساخت و هزینه‌ی طرف‌های سوم و پشتیبانی، نه فقط صورت‌حساب cloud.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>معیار COGS هر هزینه‌ی مستقیم سرویس دادن به یک مشتری را در بر می‌گیرد، یعنی زیرساخت و هزینه‌ی طرف‌های سوم و پشتیبانی، نه فقط صورت‌حساب cloud.</li>
     <li>کم کردن زیرساخت، حاشیه‌ی ناخالص را به‌اندازه‌ی سهمش از درآمد جابه‌جا می‌کند: این‌جا ۱۰٬۰۰۰ دلار از درآمد ماهانه‌ی ۵۰۰٬۰۰۰ دلاری یعنی دو واحد.</li>
     <li>ارزش طول عمر همان‌جایی است که reliability خودش را در پول نشان می‌دهد: مشتری‌ای که دو ماه زودتر می‌رود، دو ماه درآمد را با خودش می‌برد.</li>
     <li>پیش‌فرض‌های vault نمونه‌اند. عددهای خودتان را بگذارید؛ نکته این است که درباره‌ی کار مهندسی با همین زبان حرف بزنید.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/07-budgeting-costs-and-vendors.html"><small>درس</small>فصل ۷: بودجه، هزینه و فروشنده‌ها</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/07-budgeting-costs-and-vendors.html"><small>درس</small>فصل ۷: بودجه، هزینه و فروشنده‌ها</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
+  var D = { infra: 50000, cust: 1000, price: 500, other: 100, life: 12 }, s, base = null, tour, ctl = {};
+  function money(v) { return "$" + (v < 100 && Math.round(v) !== v ? v.toFixed(1) : Math.round(v).toLocaleString("en-US")); }
+  function fresh() { s = JSON.parse(JSON.stringify(D)); base = null; }
+  function calc(x) { x = x || s; var ic = x.infra / x.cust, cogs = ic + x.other; return { ic: ic, cogs: cogs, gm: (x.price - cogs) / x.price, ltv: x.price * x.life, rev: x.price * x.cust }; }
+  function pt(v) { return Kit.digits((Math.round(v * 1000) / 10) + "٪"); }
 
-  var log = Kit.log(document.getElementById("log"));
-  var D = { infra: 50000, cust: 1000, price: 500, other: 100, life: 12 }, s = JSON.parse(JSON.stringify(D)), base = null, ctl = {};
-  var money = function (v) { return "$" + Math.round(v).toLocaleString("en-US"); };
-  [["infra", "خرج زیرساخت در ماه", 5000, 150000, 1000, money, "cloud و میزبانی؛ در کتاب ۵۰٬۰۰۰ دلار برای ۱٬۰۰۰ مشتری"],
-   ["cust", "تعداد مشتری", 100, 5000, 50, function (v) { return v.toLocaleString("en-US"); }, null],
-   ["price", "قیمت هر مشتری در ماه", 100, 2000, 50, money, null],
-   ["other", "بقیه‌ی هزینه‌های مستقیم هر مشتری در ماه", 0, 400, 10, money, "هزینه‌ی طرف‌های سوم، پشتیبانی"],
-   ["life", "میانگین طول عمر مشتری", 1, 36, 1, function (v) { return v + " ماه"; }, "نمونه‌ی کتاب: رفتن در ماه ۱۰ به‌جای ۱۲"]
-  ].forEach(function (c) {
-    ctl[c[0]] = Kit.slider({ label: c[1], min: c[2], max: c[3], step: c[4], value: s[c[0]], format: c[5], hint: c[6], onInput: function (v) { s[c[0]] = v; render(); } });
-    document.getElementById("controls").appendChild(ctl[c[0]].element);
-  });
-  function calc() { var ic = s.infra / s.cust, cogs = ic + s.other, gm = (s.price - cogs) / s.price; return { ic: ic, cogs: cogs, gm: gm, ltv: s.price * s.life, early: s.price * 2, rev: s.price * s.cust }; }
   function render() {
-    var r = calc(), st = Kit.clear(document.getElementById("stats"));
-    [["COGS زیرساخت", money(r.ic)], ["کل COGS", money(r.cogs)], ["حاشیه‌ی ناخالص", Math.round(r.gm * 1000) / 10 + "٪", r.gm >= 0.8 ? "ok" : r.gm < 0.5 ? "bad" : ""],
-     ["ارزش طول عمر", money(r.ltv)], ["ارزش از‌دست‌رفته با رفتن دو ماه زودتر", money(r.early), "warn"], ["درآمد ماهانه‌ی همه‌ی مشتری‌ها", money(r.rev)]].forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
-    var v = document.getElementById("verdict");
-    if (base !== null) { var d = (r.gm - base.gm) * 100; v.className = "callout " + (d > 0 ? "ok" : ""); v.textContent = base.label + ": حاشیه‌ی ناخالص از " + (Math.round(base.gm * 1000) / 10) + "٪ به " + (Math.round(r.gm * 1000) / 10) + "٪ رفت، یعنی " + (d >= 0 ? "+" : "") + d.toFixed(1) + " واحد."; }
-    else { v.className = "callout"; v.textContent = "حاشیه‌ی ناخالص برابر است با درآمد منهای COGS تقسیم بر درآمد. یکی از اهرم‌های کتاب را در بالا امتحان کنید."; }
+    var r = calc(), g = Kit.clear(document.getElementById("ue")), W = 520, x0 = 150, sc = W / Math.max(s.price, r.cogs, 1);
+    g.appendChild(Kit.svg("text", { x: x0 - 10, y: 30, "text-anchor": "end", class: "big" }, "هر مشتری"));
+    g.appendChild(Kit.svg("text", { x: x0 - 10, y: 48, "text-anchor": "end", class: "mut" }, "در ماه"));
+    var segs = [["inf", r.ic, "زیرساخت"], ["oth", s.other, "بقیه"], ["mar", Math.max(0, s.price - r.cogs), "حاشیه"]], x = x0;
+    segs.forEach(function (sg) {
+      var w = sg[1] * sc; if (w <= 0) return;
+      g.appendChild(Kit.svg("rect", { class: sg[0], x: x, y: 14, width: w, height: 44, rx: 3 }));
+      if (w > 46) g.appendChild(Kit.svg("text", { x: x + w / 2, y: 41, "text-anchor": "middle", class: sg[0] === "mar" ? "" : "inv" }, Kit.digits(money(sg[1]))));
+      x += w;
+    });
+    if (base) { var bw = base.ic * sc; g.appendChild(Kit.svg("rect", { class: "ghost", x: x0, y: 10, width: bw, height: 52, rx: 3 })); g.appendChild(Kit.svg("text", { x: x0 + bw, y: 78, "text-anchor": "middle", class: "mut" }, Kit.digits("پیش‌تر " + money(base.ic)))); }
+    g.appendChild(Kit.svg("text", { x: x0 + W, y: 98, direction: "rtl", class: "mut" }, Kit.digits("قیمت " + money(s.price) + " · COGS " + money(r.cogs) + " · حاشیه‌ی ناخالص " + pt(r.gm))));
+    /* lifetime */
+    var n = Math.max(s.life, 12), mw = W / n;
+    g.appendChild(Kit.svg("text", { x: x0 - 10, y: 168, "text-anchor": "end", class: "big" }, "عمر مشتری"));
+    g.appendChild(Kit.svg("text", { x: x0 - 10, y: 186, "text-anchor": "end", class: "mut" }, "هر خانه یک ماه"));
+    for (var m = 0; m < n; m++) {
+      var lost = m >= s.life;
+      g.appendChild(Kit.svg("rect", { class: lost ? "lost" : "mo", x: x0 + m * mw + 1, y: 150, width: mw - 2, height: 40, rx: 3 }));
+      if (mw > 22 && (m === 0 || (m + 1) % (n > 24 ? 6 : 3) === 0 || m === n - 1)) g.appendChild(Kit.svg("text", { x: x0 + m * mw + mw / 2, y: 208, "text-anchor": "middle", class: "mut" }, Kit.digits(String(m + 1))));
+    }
+    var lostM = Math.max(0, 12 - s.life);
+    g.appendChild(Kit.svg("text", { x: x0 + W, y: 240, direction: "rtl" }, Kit.digits("ارزش طول عمر: " + money(r.ltv) + (lostM ? "  ·  از دست رفته نسبت به ماه ۱۲: " + money(lostM * s.price) : ""))));
+    g.appendChild(Kit.svg("text", { x: x0 + W, y: 266, direction: "rtl", class: "mut" }, Kit.digits("درآمد ماهانه‌ی همه‌ی مشتری‌ها: " + money(r.rev) + "  ·  " + s.cust.toLocaleString("en-US") + " مشتری")));
+    g.setAttribute("aria-label", "قیمت هر مشتری " + money(s.price) + "، COGS زیرساخت " + money(r.ic) + "، کل COGS " + money(r.cogs) + "، حاشیه‌ی ناخالص " + pt(r.gm) + "؛ ارزش طول عمر " + money(r.ltv));
+    var st = Kit.clear(document.getElementById("stats"));
+    [["COGS زیرساخت", money(r.ic), ""], ["کل COGS", money(r.cogs), ""], ["حاشیه‌ی ناخالص", pt(r.gm) + (base ? " (" + (r.gm >= base.gm ? "+" : "") + Kit.digits(((r.gm - base.gm) * 100).toFixed(1)) + " واحد)" : ""), r.gm >= 0.8 ? "ok" : r.gm < 0.5 ? "bad" : ""],
+     ["ارزش طول عمر", money(r.ltv), lostM ? "warn" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    Object.keys(ctl).forEach(function (key) { ctl[key].set(s[key]); });
   }
-  function lever(label, f) { base = calc(); base.label = label; s.infra = Math.max(0, f(s.infra)); ctl.infra.set(s.infra); log.add(label + " ← زیرساخت ماهی " + money(s.infra), "ok"); render(); }
-  document.getElementById("fa").addEventListener("click", function () { lever("feature اول", function (x) { return x - 10000; }); });
-  document.getElementById("dv").addEventListener("click", function () { lever("استخدام DevOps", function (x) { return x * 0.75; }); });
-  document.getElementById("rs").addEventListener("click", function () { s = JSON.parse(JSON.stringify(D)); base = null; Object.keys(ctl).forEach(function (k) { ctl[k].set(s[k]); }); log.add("به نمونه‌ی کتاب برگشت", "muted"); render(); });
-  render();
+  function lever(label, f) { base = calc(); base.label = label; s.infra = Math.max(0, f(s.infra)); }
+  function moved() { var r = calc(); return base.label + ": زیرساخت ماهی " + money(s.infra) + "، COGS زیرساخت هر مشتری " + money(base.ic) + " ← " + money(r.ic) + "، حاشیه‌ی ناخالص " + pt(base.gm) + " ← " + pt(r.gm) + "."; }
+
+  /* ---------- the drawer ---------- */
+  [["infra", "زیرساخت در ماه", 5000, 150000, 1000, money], ["cust", "تعداد مشتری", 100, 5000, 50, function (v) { return v.toLocaleString("en-US"); }],
+   ["price", "قیمت هر مشتری در ماه", 100, 2000, 50, money], ["life", "طول عمر مشتری", 1, 36, 1, function (v) { return Kit.digits(v + " ماه"); }]].forEach(function (c) {
+    ctl[c[0]] = Kit.slider({ label: c[1], min: c[2], max: c[3], step: c[4], value: D[c[0]], format: c[5], onInput: function (v) { s[c[0]] = v; render(); var r = calc(); tour.free("COGS هر مشتری " + money(r.cogs) + "، حاشیه‌ی ناخالص " + pt(r.gm) + "، ارزش طول عمر " + money(r.ltv) + ".", ""); } });
+    document.getElementById("ue-ctl").appendChild(ctl[c[0]].element);
+  });
+  document.getElementById("ue-fa").addEventListener("click", function () { lever("feature", function (x) { return x - 10000; }); render(); tour.free(moved(), "ok"); });
+  document.getElementById("ue-dv").addEventListener("click", function () { lever("استخدام DevOps", function (x) { return x * 0.75; }); render(); tour.free(moved(), "ok"); });
+  document.getElementById("ue-rs").addEventListener("click", function () { fresh(); render(); tour.free("برگشت به نمونه‌ی کتاب: ماهی ۵۰٬۰۰۰ دلار زیرساخت برای ۱٬۰۰۰ مشتری.", ""); });
+
+  /* ---------- the scenario ---------- */
+  function scene(f) { return function () { fresh(); if (f) f(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene(null), render: render, interval: 8000,
+    intro: "نوار بالا قیمت ماهانه‌ی یک مشتری است، بخش‌شده به هزینه‌های مستقیم (COGS) و حاشیه. خانه‌های پایین ماه‌های عمر مشتری‌اند. قیمت ۵۰۰ دلار و بقیه‌ی هزینه‌ی ۱۰۰ دلار مال vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و عددهای خودتان را بگذارید؛ نکته این است که درباره‌ی کار مهندسی با همین زبان حرف بزنید.",
+    steps: [
+      { kind: "", run: scene(null), say: function () { var r = calc(); return "نمونه‌ی کتاب: ماهی ۵۰٬۰۰۰ دلار زیرساخت برای ۱٬۰۰۰ مشتری یعنی COGS زیرساخت " + money(r.ic) + " برای هر کدام (ص. ۱۲۵). حاشیه‌ی ناخالص یعنی درآمد منهای COGS تقسیم بر درآمد: " + pt(r.gm) + "."; } },
+      { kind: "ok", run: scene(function () { lever("feature", function (x) { return x - 10000; }); }), say: function () { return moved() + " ۱۰٬۰۰۰ دلار از درآمد ماهانه‌ی ۵۰۰٬۰۰۰ دلاری یعنی دو واحد حاشیه (صص. ۱۲۵–۱۲۶)."; } },
+      { kind: "ok", run: scene(function () { lever("استخدام DevOps", function (x) { return x * 0.75; }); }), say: function () { return moved() + " اهرم دوم کتاب همان کار را از راه دیگری می‌کند."; } },
+      { kind: "", run: scene(function () { base = calc(); base.label = "دو برابر مشتری"; s.cust = 2000; }), say: function () { var r = calc(); return "مدل vault: اگر همان زیرساخت به ۲٬۰۰۰ مشتری سرویس بدهد، COGS زیرساخت هر مشتری " + money(r.ic) + " می‌شود و حاشیه " + pt(r.gm) + ". COGS فقط صورت‌حساب cloud نیست؛ بقیه‌ی هزینه‌های مستقیم ثابت مانده‌اند."; } },
+      { kind: "warn", run: scene(function () { s.price = 1000; s.life = 10; }), say: function () { return "ارزش طول عمر: مشتری ماهی ۱٬۰۰۰ دلاری که به‌جای ماه ۱۲ در ماه ۱۰ می‌رود، " + money(2 * s.price) + " را با خودش می‌برد (ص. ۱۲۵). همین‌جا reliability خودش را در پول نشان می‌دهد."; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "ماهی ۵۰٬۰۰۰ دلار زیرساخت به ۱٬۰۰۰ مشتری سرویس می‌دهد. COGS زیرساخت هر مشتری چقدر است؟", options: ["۵ دلار", "۵۰ دلار", "۵۰۰ دلار"], answer: 1, explain: "ص. ۱۲۵." },
     { q: "حاشیه‌ی ناخالص چطور حساب می‌شود؟", options: ["درآمد تقسیم بر COGS", "درآمد منهای COGS تقسیم بر درآمد", "درآمد منهای حقوق‌ها"], answer: 1, explain: "ص. ۱۲۵." },

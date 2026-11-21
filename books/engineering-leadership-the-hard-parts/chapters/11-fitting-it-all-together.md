@@ -51,7 +51,7 @@ lang: fa
 رهبر مثل رهبر ارکستری است که با اشاره و بازخورد گروه را هدایت می‌کند: آدم‌ها پایه‌اند، زیرساخت فنی ممکن‌کننده است، processها زیر سطح جاری‌اند، و متریک‌ها بازخورد می‌دهند. موفقیت یعنی شتاب داشتن با وجود تلاطم، نه سیستمی بی‌نقص (p. 228). تکه‌ها در هم قفل‌اند: اصول به همکاری شکل می‌دهند، ارتباط امنیت می‌سازد، و متریک‌ها نشان می‌دهند بقیه کار می‌کنند یا نه (p. 228).
 
 ```mermaid
-flowchart BT
+flowchart LR
   F["Foundation<br/>people, safety, capability<br/>(Ch. 2–4, 9)"] --> L["Lighthouse<br/>direction, principles<br/>(Ch. 5, 8)"]
   L --> E["Engine<br/>lightweight process<br/>(Ch. 6, 9)"]
   E --> C["Compass<br/>a few metrics with context<br/>(Ch. 10)"]
