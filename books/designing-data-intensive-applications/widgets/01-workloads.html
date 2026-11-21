@@ -7,17 +7,29 @@
 <meta name="description" content="کوئری‌ها را به OLTP یا OLAP و مجموعه‌داده‌ها را به system of record یا derived دسته‌بندی کنید، با بازخوردی از همان مشخصه‌هایی که کتاب به کار می‌برد. برای فصل ۱ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .deck { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); align-items: start; }
-  .item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-  .item.right { border-color: var(--ok); background: var(--ok-soft); }
-  .item.wrong { border-color: var(--bad); background: var(--bad-soft); }
-  .item .why { grid-column: 1 / -1; font-size: .88rem; color: var(--ink-2); }
-  .item .what { font-weight: 550; }
-  @media (max-width: 560px) { .item { grid-template-columns: minmax(0, 1fr); } }
-  .score { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+  .now { display: grid; gap: 8px; justify-items: center; text-align: center; padding: 6px 0 12px; min-height: 92px; }
+  .now .set { font-size: .82rem; color: var(--ink-3); font-weight: 700; }
+  .now .card { font-size: 1.12rem; font-weight: 600; padding: 10px 18px; border: 2px solid var(--accent); border-radius: var(--radius);
+               background: var(--accent-soft); max-width: 560px; animation: drop 420ms ease-out; }
+  .now .card.done { border-color: var(--line); background: var(--surface-2); color: var(--ink-3); font-weight: 400; animation: none; }
+  .now .pick { display: flex; gap: 8px; }
+  .now .pick .btn { min-width: 150px; font-size: 1rem; }
+  @keyframes drop { from { transform: translateY(-8px); opacity: .3; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .now .card { animation: none; } }
+  .bins { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  .bin { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; background: var(--surface-2); min-height: 120px; }
+  .bin h3 { margin: 0 0 8px; font-size: 1rem; display: flex; justify-content: space-between; }
+  .bin h3 small { color: var(--ink-3); font-weight: 400; }
+  .bin ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .bin li { font-size: .9rem; padding: 5px 9px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--line); line-height: 1.5; }
+  .bin li.fresh { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .bin li.wrong { border-color: var(--bad); background: var(--bad-soft); }
+  .bin li.wrong::before { content: "✗ "; color: var(--bad); font-weight: 700; }
+  .bin li.right::before { content: "✓ "; color: var(--ok); font-weight: 700; }
+  @media (max-width: 560px) { .bins { grid-template-columns: minmax(0, 1fr); } .now .pick .btn { min-width: 0; } }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -31,51 +43,54 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱ · بده‌بستان‌ها در معماری سیستم‌های داده</div>
-  <h1>دسته‌بندی workloadها</h1>
-  <p class="lede">دو تمایز در سراسر کتاب تکرار می‌شود: workload عملیاتی در برابر تحلیلی، و system of record در برابر derived data. هر مورد را دسته‌بندی کنید؛ بازخورد، مشخصه‌ای را که تعیین‌کننده است نام می‌برد.</p>
-  <p class="source-note">برای بخش‌های «مشخصه‌های پردازش تراکنش و تحلیل» (صص. ۵–۷ و جدول ۱-۱) و «مفهوم system of record و derived data» (صص. ۱۰–۱۱). نمونه‌ها و پیاده‌سازی مال خود vault است.</p>
-
-  <div class="tabs" style="margin-top:20px">
-    <div role="tablist" aria-label="تمرین‌ها">
-      <button role="tab" id="t1" aria-controls="p1" aria-selected="true">OLTP یا OLAP؟</button>
-      <button role="tab" id="t2" aria-controls="p2" aria-selected="false">record یا derived؟</button>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>دسته‌بندی workloadها</h1>
+      <p class="lede">دو تمایزی که در سراسر کتاب تکرار می‌شود: workload عملیاتی در برابر تحلیلی، و system of record در برابر derived data. اول ببینید هر مورد کجا می‌رود و چرا؛ بعد خودتان دسته‌بندی کنید.</p>
+      <p class="source-note">برای بخش‌های «مشخصه‌های پردازش تراکنش و تحلیل» (صص. ۵–۷ و جدول ۱-۱) و «مفهوم system of record و derived data» (صص. ۱۰–۱۱). نمونه‌ها و پیاده‌سازی مال خود vault است.</p>
+    </header>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <aside class="stage-side"><div class="stats" id="stats"></div></aside>
+      <div class="stage-scene">
+        <div class="now" id="now" aria-live="polite"></div>
+        <div class="bins" id="bins"></div>
+      </div>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <p class="panel-title">تمرین</p>
+        <div id="setpick"></div>
+        <button class="btn primary" type="button" id="practice">خودم دسته‌بندی می‌کنم</button>
+        <p style="font-size:.85rem;color:var(--ink-2);margin:0">سبدها خالی می‌شوند و هر مورد را خودتان در یکی می‌گذارید؛ بازخورد، مشخصه‌ی تعیین‌کننده را می‌گوید.</p>
+      </div>
     </div>
-    <div role="tabpanel" id="p1" aria-labelledby="t1"><div class="deck" id="deck1"></div></div>
-    <div role="tabpanel" id="p2" aria-labelledby="t2"><div class="deck" id="deck2"></div></div>
   </div>
 
-  <div class="panel" style="margin-top:16px">
-    <p class="panel-title">امتیاز</p>
-    <div class="score">
-      <div class="stat"><span class="stat-label">پاسخ داده‌شده</span><span class="stat-value" id="answered">0</span></div>
-      <div class="stat"><span class="stat-label">درست</span><span class="stat-value ok" id="correct">0</span></div>
-    </div>
-    <p style="margin:10px 0 0"><button class="btn small" type="button" id="reset">↺ شروع دوباره</button></p>
-  </div>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>الگوی دسترسی تعیین می‌کند، نه خود داده.</strong> همان جدول orders هم به point lookupهای عملیاتی جواب می‌دهد و هم به تجمیع‌های یک‌ساله‌ی تحلیلی.</li>
+      <li><strong>این‌که چه کسی می‌پرسد مهم است.</strong> کوئری عملیاتی از کاربر نهایی و از راه اپلیکیشن می‌آید؛ کوئری تحلیلی از تحلیلگر و data scientist، برای پشتیبانی از تصمیم.</li>
+      <li><strong>داده‌ی derived را می‌شود دور ریخت و دوباره ساخت.</strong> اگر بشود آن را از جای دیگری دوباره حساب کرد، system of record نیست؛ حتی اگر کپی‌ای باشد که هر روز به آن تکیه می‌کنید.</li>
+    </ul>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>الگوی دسترسی تعیین می‌کند، نه خود داده.</strong> همان جدول orders هم به point lookupهای عملیاتی جواب می‌دهد و هم به تجمیع‌های یک‌ساله‌ی تحلیلی.</li>
-    <li><strong>این‌که چه کسی می‌پرسد مهم است.</strong> کوئری عملیاتی از کاربر نهایی و از راه اپلیکیشن می‌آید؛ کوئری تحلیلی از تحلیلگر و data scientist، برای پشتیبانی از تصمیم.</li>
-    <li><strong>داده‌ی derived را می‌شود دور ریخت و دوباره ساخت.</strong> اگر بشود آن را از جای دیگری دوباره حساب کرد، system of record نیست؛ حتی اگر کپی‌ای باشد که هر روز به آن تکیه می‌کنید.</li>
-  </ul>
-
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/01-trade-offs-in-data-systems-architecture.html"><small>درس</small>فصل ۱: بده‌بستان‌ها در معماری سیستم‌های داده</a></li>
-    <li><a href="04-lsm-tree.html"><small>شبیه‌سازی</small>درون یک LSM-tree، storage برای OLTP</a></li>
-  </ul>
-  <p class="footer">تمرین Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2>مرتبط</h2>
+    <ul class="related">
+      <li><a href="../chapters/01-trade-offs-in-data-systems-architecture.html#مشخصههای-پردازش-تراکنش-و-تحلیل"><small>درس</small>فصل ۱: مشخصه‌های پردازش تراکنش و تحلیل</a></li>
+      <li><a href="../chapters/01-trade-offs-in-data-systems-architecture.html#مفهوم-system-of-record-و-derived-data"><small>درس</small>فصل ۱: system of record و derived data</a></li>
+      <li><a href="01-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۱ در طول یک pipeline داده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var el = Kit.el;
+  var el = Kit.el, d = Kit.digits;
   var SETS = [
-    { mount: "#deck1", choices: ["OLTP", "OLAP"], items: [
+    { label: "OLTP یا OLAP؟", choices: ["OLTP", "OLAP"], items: [
       ["نمایش سبد خرید مشتری ۴۷۱۱", 0, "یک point query که چند رکورد را با کلید برای کاربر نهایی می‌آورد."],
       ["درآمد کل هر فروشگاه در هر ماه طی دو سال گذشته", 1, "تجمیع روی تعداد زیادی رکورد؛ الگوی کلاسیک خواندن تحلیلی."],
       ["تغییر آدرس تحویل یک سفارش", 0, "به‌روزرسانی یک رکورد: الگوی نوشتن عملیاتی."],
@@ -85,7 +100,7 @@
       ["آیا بعد از طراحی تازه‌ی هفته‌ی پیش conversion افت کرد؟", 1, "پرسش یک تحلیلگر روی تاریخچه‌ی رویدادها، نه آخرین وضعیت."],
       ["بررسی موجودی فعلی یک حساب پیش از پرداخت", 0, "آخرین وضعیت یک رکورد را در مسیر حیاتی درخواست کاربر می‌خواند."]
     ] },
-    { mount: "#deck2", choices: ["system of record", "derived"], items: [
+    { label: "record یا derived؟", choices: ["system of record", "derived"], items: [
       ["جدول orders که سرویس checkout در آن می‌نویسد", 0, "هر سفارش اول این‌جا نوشته می‌شود؛ نسخه‌ی معتبر آن واقعیت است."],
       ["یک full-text search index روی توضیح محصول‌ها", 1, "از داده‌ی محصول ساخته می‌شود؛ اگر از دست برود، با reindex دوباره ساخته می‌شود."],
       ["یک cache از صفحه‌های رندرشده‌ی محصول", 1, "کپی‌ای که از داده‌ی دیگری حساب شده تا خواندن سریع‌تر شود."],
@@ -94,39 +109,74 @@
       ["event logی که یک اپلیکیشن event-sourced هر کار کاربر را اول در آن ثبت می‌کند", 0, "رویدادها اول این‌جا نوشته می‌شوند و viewهای دیگر از آن‌ها derive می‌شوند."]
     ] }
   ];
-  var answered = 0, correct = 0;
 
-  function score() {
-    Kit.$("#answered").textContent = answered;
-    Kit.$("#correct").textContent = correct;
+  // S.set: which exercise; S.placed: [{i, bin, ok}] in the order placed; S.next: item on the table
+  var S, tour, practice = false;
+  function fresh(k) { S = { set: k || 0, placed: [], next: 0, last: null }; }
+
+  function place(i, bin) {
+    var it = SETS[S.set].items[i];
+    S.placed.push({ i: i, bin: bin, ok: bin === it[1] });
+    S.next = i + 1; S.last = S.placed.length - 1;
   }
-  function build() {
-    answered = 0; correct = 0; score();
-    SETS.forEach(function (set) {
-      var deck = Kit.clear(Kit.$(set.mount));
-      set.items.forEach(function (it) {
-        var why = el("div", { class: "why", "aria-live": "polite" });
-        var buttons = set.choices.map(function (c, ci) {
-          var b = el("button", { class: "btn small", type: "button" }, c);
-          b.addEventListener("click", function () {
-            if (card.dataset.done) return;
-            card.dataset.done = "1";
-            var ok = ci === it[1];
-            answered++; if (ok) correct++; score();
-            card.classList.add(ok ? "right" : "wrong");
-            buttons.forEach(function (x, xi) { x.disabled = true; if (xi === it[1]) x.setAttribute("aria-pressed", "true"); });
-            why.textContent = (ok ? "درست است. " : "جوابش " + set.choices[it[1]] + " است. ") + it[2];
-          });
-          return b;
-        });
-        var card = el("div", { class: "item" }, el("span", { class: "what" }, it[0]), el("div", { class: "row" }, buttons), why);
-        deck.appendChild(card);
-      });
+
+  function render() {
+    var set = SETS[S.set], now = Kit.clear(Kit.$("#now"));
+    now.appendChild(el("span", { class: "set" }, d("تمرین " + (S.set + 1) + " از ۲ · " + set.label)));
+    if (S.next < set.items.length) {
+      now.appendChild(el("div", { class: "card" }, set.items[S.next][0]));
+      if (practice) now.appendChild(el("div", { class: "pick" }, set.choices.map(function (c, ci) {
+        return el("button", { class: "btn", type: "button", onclick: function () { answer(ci); } }, c);
+      })));
+    } else {
+      now.appendChild(el("div", { class: "card done" }, "همه‌ی موردهای این تمرین دسته‌بندی شدند."));
+    }
+    var bins = Kit.clear(Kit.$("#bins"));
+    set.choices.forEach(function (c, ci) {
+      var inBin = S.placed.filter(function (p) { return p.bin === ci; });
+      bins.appendChild(el("section", { class: "bin" },
+        el("h3", null, c, el("small", null, d(inBin.length + " مورد"))),
+        el("ul", null, inBin.map(function (p) {
+          var cls = (S.placed.indexOf(p) === S.last ? "fresh " : "") + (practice ? (p.ok ? "right" : "wrong") : "");
+          return el("li", { class: cls }, set.items[p.i][0]);
+        }))));
+    });
+    var st = Kit.clear(Kit.$("#stats")), done = S.placed.length, right = S.placed.filter(function (p) { return p.ok; }).length;
+    [["دسته‌بندی‌شده", d(done + " از " + set.items.length)], [practice ? "درست" : "حالت", practice ? d(String(right)) : "نمایش"]].forEach(function (x) {
+      st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value" }, x[1])));
     });
   }
-  Kit.tabs(document.querySelector(".tabs"));
-  Kit.$("#reset").addEventListener("click", build);
-  build();
+
+  function answer(ci) {
+    var set = SETS[S.set], it = set.items[S.next], ok = ci === it[1];
+    place(S.next, ci); render();
+    tour.free((ok ? "درست است: " : "نه، جای «" + it[0] + "» در " + set.choices[it[1]] + " است. ") + it[2], ok ? "ok" : "bad");
+  }
+
+  var seg = Kit.segmented({ label: "تمرین", value: 0, options: SETS.map(function (x, k) { return { value: k, label: x.label }; }),
+    onChange: function (v) { fresh(v); render(); } });
+  Kit.$("#setpick").appendChild(seg.element);
+  Kit.$("#practice").addEventListener("click", function () {
+    practice = true; fresh(seg.value()); render();
+    tour.free("نوبت شماست: برای هر مورد یکی از دو دکمه را بزنید.", "free");
+  });
+
+  // The scenario sorts both exercises: one card per step, with the reason in the caption.
+  var steps = [];
+  SETS.forEach(function (set, k) {
+    steps.push({ say: k === 0 ? "دسته‌بندی اول: OLTP یعنی point query و نوشتن تک‌رکورد برای کاربر نهایی؛ OLAP یعنی اسکن و تجمیع روی رکوردهای زیاد برای تحلیلگر (جدول ۱-۱)."
+        : "دسته‌بندی دوم: system of record نسخه‌ی معتبر است که داده‌ی تازه اول آن‌جا نوشته می‌شود؛ derived از روی داده‌ی دیگری ساخته می‌شود و می‌شود دوباره ساختش.",
+      run: function () { S.set = k; S.placed = []; S.next = 0; S.last = null; } });
+    set.items.forEach(function (it, i) {
+      steps.push({ say: "«" + it[0] + "» ← " + set.choices[it[1]] + ". " + it[2], kind: "ok", run: function () { S.set = k; place(i, it[1]); } });
+    });
+  });
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: function () { practice = false; fresh(0); seg.set(0); }, render: render, steps: steps, interval: 3000,
+    intro: "هر مورد را نگاه کنید: سناریو آن را در سبد درستش می‌گذارد و دلیلش را می‌گوید.",
+    end: "هر دو تمرین تمام شد. «خودتان تغییر بدهید» را باز کنید و همین موردها را خودتان دسته‌بندی کنید."
+  });
 })();
 </script>
 </body>

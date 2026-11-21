@@ -7,13 +7,15 @@
 <meta name="description" content="سرور را به سمت ظرفیتش هل بدهید و ببینید انتظار در صف چطور منفجر می‌شود، بعد یک اوج بار با retry سمت client اضافه کنید و ببینید سیستم برنمی‌گردد. برای فصل ۲ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .charts { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
-  .charts figure { margin: 0; }
-  .charts figcaption { font-size: .78rem; color: var(--ink-3); margin-bottom: 4px; }
-  .wide-chart { grid-column: 1 / -1; }
+  /* Three small charts side by side; their viewBox is narrow so the SVG text scales up, never down. */
+  .charts { display: grid; gap: 12px 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); align-content: center; }
+  .charts figure { margin: 0; min-width: 0; }
+  .charts figcaption { font-size: .85rem; color: var(--ink-2); margin-bottom: 4px; }
+  .charts svg { max-height: 260px; }
+  .toggle { display: flex; gap: 8px; align-items: baseline; font-size: .9rem; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -27,69 +29,78 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۲ · تعریف نیازمندی‌های غیرکارکردی</div>
-  <h1>صف، overload و retry storm</h1>
-  <p class="lede">سرور هر بار فقط روی یک درخواست کار می‌کند، پس هر درخواستی که وقت مشغول بودنش برسد در صف منتظر می‌ماند. نزدیک ظرفیت، همین انتظارها بیشترِ response time را می‌سازند؛ و اگر clientها درخواست‌های time-outشده را retry کنند، یک اوج کوتاه می‌تواند سیستم را در overload گیر بیندازد.</p>
-  <p class="source-note">برای «توصیف performance» در صص. ۳۷–۳۹، یعنی شکل ۲-۳، انتظار در صف و head-of-line blocking، و کادر «وقتی سیستمی که زیر بار مانده بهبود نمی‌یابد» در ص. ۳۸، یعنی retry storm، metastable failure، backoff و load shedding. مدل: یک سرور FIFO با ورود تصادفی seedدار و زمان سرویس ۱۰ میلی‌ثانیه، با گاهی یک درخواست کند ۱۰۰ میلی‌ثانیه‌ای؛ clientها بعد از ۱ ثانیه time out می‌شوند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>صف، overload و retry storm</h1>
+      <p class="lede">سرور هر بار یک درخواست را سرویس می‌دهد و بقیه در صف منتظر می‌مانند. نزدیک ظرفیت، همین انتظار بیشترِ response time می‌شود؛ و retry می‌تواند یک اوج کوتاه را به overloadی تبدیل کند که با تمام شدن اوج هم تمام نمی‌شود.</p>
+      <p class="source-note">برای صص. ۳۷–۳۹ (شکل ۲-۳، انتظار در صف و head-of-line blocking) و کادر ص. ۳۸ (retry storm، metastable failure، backoff و load shedding). مدل: یک سرور FIFO با ورود تصادفی seedدار، زمان سرویس ۱۰ میلی‌ثانیه و گاهی ۱۰۰ میلی‌ثانیه؛ timeout سمت client ۱ ثانیه است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="charts">
-        <figure>
-          <figcaption>response time بر حسب بار؛ بار ثابت، بدون retry</figcaption>
-          <svg id="curve" role="img" aria-label="میانه و p99 مقدار response time با نزدیک شدن بار به ظرفیت تند بالا می‌روند"></svg>
-        </figure>
-        <figure>
-          <figcaption>درخواست‌های منتظر در صف طی ۲۰ ثانیه</figcaption>
-          <svg id="queue" role="img" aria-label="طول صف در طول زمان"></svg>
-        </figure>
-        <figure class="wide-chart">
-          <figcaption>درخواست در ثانیه: رسیده، با retryها، در برابر جواب‌گرفته در مهلت ۱ ثانیه</figcaption>
-          <svg id="rates" role="img" aria-label="نرخ درخواست‌های ورودی و goodput در طول زمان"></svg>
-        </figure>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="charts">
+          <figure>
+            <figcaption>response time بر حسب بار، بدون retry</figcaption>
+            <svg id="curve" role="img" aria-label="میانه و p99 مقدار response time با نزدیک شدن بار به ظرفیت تند بالا می‌روند"></svg>
+          </figure>
+          <figure>
+            <figcaption>درخواست‌های منتظر در صف، طی ۲۰ ثانیه</figcaption>
+            <svg id="queue" role="img" aria-label="طول صف در طول زمان"></svg>
+          </figure>
+          <figure>
+            <figcaption>درخواست در ثانیه: رسیده در برابر جواب به‌موقع</figcaption>
+            <svg id="rates" role="img" aria-label="نرخ درخواست‌های ورودی و goodput در طول زمان"></svg>
+          </figure>
+        </div>
       </div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">بار</p>
-        <div id="sliders"></div>
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="spike" checked> اوج بار ×۱٫۶ از ثانیه‌ی ۶ تا ۹</label>
-        <div class="field" style="margin-top:10px"><span class="field-head">وقتی درخواستی time out می‌شود، client…</span><div id="retry"></div></div>
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="shed"> سرور load shedding می‌کند؛ با ۴۰ درخواست در صف، بقیه را رد می‌کند</label>
-      </div>
-      <div class="panel wide">
-        <p class="panel-title">در کل اجرا</p>
-        <div class="stats" id="stats"></div>
-        <p class="field-hint" id="verdict" aria-live="polite" style="margin:10px 0 0"></p>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">در کل اجرا</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="sliders"></div>
+        <div class="tweak-group">
+          <label class="toggle"><input type="checkbox" id="spike"> اوج بار ×۱٫۶ از ثانیه‌ی ۶ تا ۹</label>
+          <label class="toggle"><input type="checkbox" id="shed"> load shedding: با ۴۰ درخواست در صف، بقیه رد می‌شوند</label>
+        </div>
+        <div class="tweak-group"><span class="field-head">وقتی درخواستی time out می‌شود، client…</span><div id="retry"></div></div>
       </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>زانوی نمودار.</strong> مقدار response time در بار کم تخت می‌ماند و بعد از حدود ۸۰٪ ظرفیت تند بالا می‌رود؛ نه چون هر درخواست کندتر می‌شود، بلکه چون هر کدام پشت بقیه بیشتر منتظر می‌ماند.</li>
-    <li><strong>پدیده‌ی head-of-line blocking.</strong> سهم درخواست‌های کند را بالا ببرید: چند درخواست ۱۰۰ میلی‌ثانیه‌ای درخواست‌های سریعِ پشت سرشان را معطل می‌کنند، پس p99 خیلی سریع‌تر از میانه رشد می‌کند.</li>
-    <li><strong>پدیده‌ی metastable failure.</strong> با ۸۵٪ بار و retry فوری، اوج در ثانیه‌ی ۹ تمام می‌شود اما صف هیچ‌وقت خالی نمی‌شود: درخواست‌های time-outشده هنوز سرویس می‌گیرند و کارشان هدر می‌رود، و retryهایشان بار را باز هم بیشتر می‌کنند.</li>
-    <li><strong>راه‌حل‌های کتاب.</strong> backoff همراه با jitter تعداد درخواست‌های فرستاده‌شده را کم می‌کند، اما به‌تنهایی این طوفان را تمام نمی‌کند: سرور هنوز روی درخواست‌هایی کار می‌کند که clientشان قید آن‌ها را زده. load shedding را اضافه کنید تا صف کوتاه بماند، درخواست‌های پذیرفته‌شده به‌موقع تمام شوند و سیستم برگردد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>زانوی نمودار.</strong> مقدار response time در بار کم تخت می‌ماند و بعد از حدود ۸۰٪ ظرفیت تند بالا می‌رود؛ نه چون هر درخواست کندتر می‌شود، بلکه چون هر کدام پشت بقیه بیشتر منتظر می‌ماند.</li>
+      <li><strong>پدیده‌ی head-of-line blocking.</strong> سهم درخواست‌های کند را بالا ببرید: چند درخواست ۱۰۰ میلی‌ثانیه‌ای درخواست‌های سریعِ پشت سرشان را معطل می‌کنند، پس p99 خیلی سریع‌تر از میانه رشد می‌کند.</li>
+      <li><strong>پدیده‌ی metastable failure.</strong> با ۸۵٪ بار و retry فوری، اوج در ثانیه‌ی ۹ تمام می‌شود اما صف هیچ‌وقت خالی نمی‌شود: درخواست‌های time-outشده هنوز سرویس می‌گیرند و کارشان هدر می‌رود، و retryهایشان بار را باز هم بیشتر می‌کنند.</li>
+      <li><strong>راه‌حل‌های کتاب.</strong> backoff همراه با jitter تعداد درخواست‌های فرستاده‌شده را کم می‌کند، اما به‌تنهایی این طوفان را تمام نمی‌کند: سرور هنوز روی درخواست‌هایی کار می‌کند که clientشان قید آن‌ها را زده. load shedding را اضافه کنید تا صف کوتاه بماند، درخواست‌های پذیرفته‌شده به‌موقع تمام شوند و سیستم برگردد.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/02-defining-nonfunctional-requirements.html"><small>درس</small>فصل ۲: تعریف نیازمندی‌های غیرکارکردی</a></li>
-    <li><a href="02-tail-latency.html"><small>شبیه‌سازی</small>percentileها و tail latency</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2>مرتبط</h2>
+    <ul class="related">
+      <li><a href="../chapters/02-defining-nonfunctional-requirements.html"><small>درس</small>فصل ۲: تعریف نیازمندی‌های غیرکارکردی</a></li>
+      <li><a href="02-tail-latency.html"><small>شبیه‌سازی</small>percentileها و tail latency</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
+  var d = Kit.digits, tour, last = null;
   var DURATION = 20000, TIMEOUT = 1000, FAST = 10, SLOW = 100, QUEUE_LIMIT = 40;
-  var cfg = { load: 0.85, slow: 0.02, spike: true, retry: "immediate", shed: false };
+  var cfg;
+  function defaults() { return { load: 0.5, slow: 0.02, spike: false, retry: "never", shed: false }; }
 
   function capacity(slow) { return 1000 / ((1 - slow) * FAST + slow * SLOW); } // requests per second
 
@@ -139,20 +150,21 @@
   }
 
   var curveCache = {};
+  function round(v) { return String(Math.round(v)); }
   function render() {
     var key = cfg.slow.toFixed(3);
     var cv = curveCache[key] || (curveCache[key] = curve(cfg.slow));
     var yMax = Math.max(100, Math.ceil(Math.max.apply(null, cv.p99.map(function (p) { return p[1]; })) / 100) * 100);
     Kit.lineChart(document.getElementById("curve"), {
-      width: 360, height: 210, xMax: 100, yMax: Math.min(yMax, 2000), xLabel: "بار، درصد ظرفیت", yFormat: Kit.fmtMs,
+      width: 300, height: 200, xMax: 100, yMax: Math.min(yMax, 2000), xLabel: "بار، ٪ ظرفیت", yFormat: Kit.fmtMs, yTicks: 3, xTicks: 4,
       series: [{ points: cv.p50, cls: "s1", label: "میانه", dots: true }, { points: cv.p99, cls: "s2", label: "p99", dots: true }],
-      marks: [{ x: cfg.load * 100, label: "شما" }]
+      marks: [{ x: cfg.load * 100, label: "بار" }]
     });
 
     var res = simulate(cfg, DURATION);
     // queue length sampled every 100 ms: requests that arrived but have not started
     var qpts = [], step = 100, deltas = [];
-    res.done.forEach(function (d) { if (!d.rejected && d.s > d.a) deltas.push([d.a, 1], [d.s, -1]); });
+    res.done.forEach(function (x) { if (!x.rejected && x.s > x.a) deltas.push([x.a, 1], [x.s, -1]); });
     deltas.sort(function (a, b) { return a[0] - b[0]; });
     var k = 0, n = 0, qmax = 1;
     for (var t = 0; t <= DURATION; t += step) {
@@ -161,53 +173,85 @@
     }
     var bands = cfg.spike ? [{ from: 6, to: 9, label: "اوج" }] : [];
     Kit.lineChart(document.getElementById("queue"), {
-      width: 360, height: 210, xMax: 20, yMax: Math.max(10, Math.ceil(qmax / 10) * 10), xLabel: "زمان، ثانیه", bands: bands,
+      width: 300, height: 200, xMax: 20, yMax: Math.max(10, Math.ceil(qmax / 10) * 10), xLabel: "زمان، ثانیه", bands: bands, yTicks: 3, xTicks: 4, yFormat: round,
       series: [{ points: qpts, cls: "s4" }]
     });
 
     var bins = 40, inRate = new Array(bins).fill(0), good = new Array(bins).fill(0), w = DURATION / bins;
-    res.done.forEach(function (d) {
-      inRate[Math.min(bins - 1, Math.floor(d.a / w))]++;
-      if (!d.rejected && d.rt <= TIMEOUT) good[Math.min(bins - 1, Math.floor(d.f / w))]++;
+    res.done.forEach(function (x) {
+      inRate[Math.min(bins - 1, Math.floor(x.a / w))]++;
+      if (!x.rejected && x.rt <= TIMEOUT) good[Math.min(bins - 1, Math.floor(x.f / w))]++;
     });
     function perSec(arr) { return arr.map(function (v, i) { return [(i + 0.5) * w / 1000, v * 1000 / w]; }); }
     var cap = capacity(cfg.slow), rmax = Math.max.apply(null, inRate) * 1000 / w;
     Kit.lineChart(document.getElementById("rates"), {
-      width: 740, height: 200, xMax: 20, yMax: Math.ceil(Math.max(rmax, cap * 1.2) / 50) * 50, xLabel: "زمان، ثانیه", bands: bands,
-      series: [{ points: perSec(inRate), cls: "s2", label: "رسیده با retry" },
-               { points: perSec(good), cls: "ok", label: "جواب به‌موقع" },
+      width: 300, height: 200, xMax: 20, yMax: Math.ceil(Math.max(rmax, cap * 1.2) / 50) * 50, xLabel: "زمان، ثانیه", bands: bands, yTicks: 3, xTicks: 4, yFormat: round,
+      series: [{ points: perSec(inRate), cls: "s2", label: "رسیده" },
+               { points: perSec(good), cls: "ok", label: "به‌موقع" },
                { points: [[0, cap], [20, cap]], cls: "s4 dashed", label: "ظرفیت" }]
     });
 
-    var rts = res.done.filter(function (d) { return !d.rejected; }).map(function (d) { return d.rt; }).sort(function (a, b) { return a - b; });
+    var rts = res.done.filter(function (x) { return !x.rejected; }).map(function (x) { return x.rt; }).sort(function (a, b) { return a - b; });
     var total = res.done.length;
-    var stats = document.getElementById("stats");
-    Kit.clear(stats);
-    [["میانه", Kit.fmtMs(Kit.percentile(rts, 0.5)), ""],
-     ["p99", Kit.fmtMs(Kit.percentile(rts, 0.99)), Kit.percentile(rts, 0.99) > TIMEOUT ? "bad" : ""],
+    var tail = qpts.slice(-20).reduce(function (a, p) { return a + p[1]; }, 0) / 20;
+    last = { stuck: tail > 30, p99: Kit.percentile(rts, 0.99), p50: Kit.percentile(rts, 0.5) };
+    var stats = Kit.clear(document.getElementById("stats"));
+    [["بار", Kit.pct(cfg.load, 0), ""],
+     ["میانه", Kit.fmtMs(last.p50), ""],
+     ["p99", Kit.fmtMs(last.p99), last.p99 > TIMEOUT ? "bad" : ""],
      ["time out", Kit.pct(res.timedOut / total, 0), res.timedOut / total > 0.1 ? "bad" : ""],
      ["ردشده", Kit.pct(res.rejected / total, 0), res.rejected ? "warn" : ""],
-     ["درخواست فرستاده‌شده", String(total), ""]].forEach(function (s) {
-      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value " + s[2] }, s[1])));
+     ["پایان اجرا", last.stuck ? "هنوز overload" : "برگشته", last.stuck ? "bad" : "ok"]].forEach(function (s) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value " + s[2] }, d(s[1]))));
     });
-    var tail = qpts.slice(-20).reduce(function (a, p) { return a + p[1]; }, 0) / 20;
-    document.getElementById("verdict").textContent =
-      tail > 30 ? "خیلی بعد از اوج، در پایان اجرا هنوز overload است: یک metastable failure."
-      : cfg.spike ? "صف بعد از اوج خالی می‌شود: سیستم برمی‌گردد."
-      : "بار ثابت: صف را با نمودار response time مقایسه کنید.";
   }
 
+  /* ---------- the tweak drawer ---------- */
   var sliders = document.getElementById("sliders");
-  sliders.appendChild(Kit.slider({ label: "بار ورودی", min: 10, max: 98, value: 85, unit: "٪ ظرفیت",
-    onInput: function (v) { cfg.load = v / 100; render(); } }).element);
-  sliders.appendChild(Kit.slider({ label: "درخواست‌های کند ۱۰۰ میلی‌ثانیه‌ای", min: 0, max: 10, step: 0.5, value: 2, unit: "%",
-    onInput: function (v) { cfg.slow = v / 100; render(); } }).element);
-  document.getElementById("retry").appendChild(Kit.segmented({ label: "سیاست retry", value: "immediate",
-    options: [{ value: "never", label: "قیدش را می‌زند" }, { value: "immediate", label: "فوری retry می‌کند" }, { value: "backoff", label: "backoff با jitter" }],
-    onChange: function (v) { cfg.retry = v; render(); } }).element);
-  document.getElementById("spike").addEventListener("change", function (e) { cfg.spike = e.target.checked; render(); });
-  document.getElementById("shed").addEventListener("change", function (e) { cfg.shed = e.target.checked; render(); });
-  render();
+  var loadS = Kit.slider({ label: "بار ورودی", min: 10, max: 98, value: 50, unit: "٪ ظرفیت",
+    onInput: function (v) { cfg.load = v / 100; render(); tour.free(d("بار " + v + "٪ ظرفیت است. " + (last.stuck ? "صف در پایان اجرا هنوز پر است." : "میانه " + Kit.fmtMs(last.p50) + " و p99 " + Kit.fmtMs(last.p99) + ".")), "free"); } });
+  var slowS = Kit.slider({ label: "درخواست‌های کند ۱۰۰ میلی‌ثانیه‌ای", min: 0, max: 10, step: 0.5, value: 2, unit: "٪",
+    onInput: function (v) { cfg.slow = v / 100; render(); tour.free(d(v + "٪ درخواست‌ها کندند؛ p99 حالا " + Kit.fmtMs(last.p99) + " است."), "free"); } });
+  sliders.appendChild(loadS.element); sliders.appendChild(slowS.element);
+  var RETRY = { never: "قیدش را می‌زند", immediate: "فوری retry می‌کند", backoff: "backoff با jitter" };
+  var retryS = Kit.segmented({ label: "سیاست retry", value: "never",
+    options: Object.keys(RETRY).map(function (k) { return { value: k, label: RETRY[k] }; }),
+    onChange: function (v) { cfg.retry = v; render(); tour.free("client حالا " + RETRY[v] + ". " + (last.stuck ? "سیستم بعد از اوج برنمی‌گردد." : "سیستم برمی‌گردد."), last.stuck ? "bad" : "free"); } });
+  document.getElementById("retry").appendChild(retryS.element);
+  var spikeB = document.getElementById("spike"), shedB = document.getElementById("shed");
+  spikeB.addEventListener("change", function () { cfg.spike = spikeB.checked; render(); tour.free(cfg.spike ? "اوج بار روشن شد." : "اوج بار خاموش شد.", "free"); });
+  shedB.addEventListener("change", function () { cfg.shed = shedB.checked; render(); tour.free(cfg.shed ? "سرور حالا load shedding می‌کند." : "load shedding خاموش شد.", "free"); });
+  function set(c) {
+    Object.keys(c).forEach(function (k) { cfg[k] = c[k]; });
+    loadS.set(Math.round(cfg.load * 100)); slowS.set(cfg.slow * 100); retryS.set(cfg.retry);
+    spikeB.checked = cfg.spike; shedB.checked = cfg.shed;
+  }
+
+  /* ---------- the scenario: the knee, head-of-line blocking, then a retry storm and its cures ---------- */
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { cfg = defaults(); set({}); }, render: render, interval: 4200,
+    intro: "یک سرور با ظرفیت حدود ۸۵ درخواست در ثانیه. اول بار را بالا می‌بریم، بعد یک اوج کوتاه و retry اضافه می‌کنیم.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: بار، سهم درخواست‌های کند، سیاست retry و load shedding را عوض کنید.",
+    steps: [
+      { say: "بار ۵۰٪ ظرفیت: صف تقریباً خالی است و response time کمی بیشتر از زمان سرویس است.", kind: "ok",
+        run: function () { set({ load: 0.5 }); } },
+      { say: "بار ۸۵٪: هر درخواست هنوز ۱۰ میلی‌ثانیه سرویس می‌گیرد، اما پشت بقیه بیشتر منتظر می‌ماند. نمودار اول از «زانو» رد شده است (ص. ۳۷).", kind: "warn",
+        run: function () { set({ load: 0.85 }); } },
+      { say: "بار ۹۵٪: صف مدام بلند و کوتاه می‌شود و p99 چند برابر میانه است. این انتظار را فقط client می‌بیند، نه سرور (ص. ۳۹).", kind: "bad",
+        run: function () { set({ load: 0.95 }); } },
+      { say: "پدیده‌ی head-of-line blocking: با بار ۷۰٪ اما ۱۰٪ درخواست کند ۱۰۰ میلی‌ثانیه‌ای، درخواست‌های سریع پشت کندها می‌مانند و p99 بالا می‌رود (ص. ۳۸).", kind: "warn",
+        run: function () { set({ load: 0.7, slow: 0.1 }); } },
+      { say: "بار ۸۵٪ با یک اوج ×۱٫۶ در ثانیه‌ی ۶ تا ۹. clientهایی که time out می‌شوند قیدش را می‌زنند، پس صف بعد از اوج خالی می‌شود.", kind: "ok",
+        run: function () { set({ load: 0.85, slow: 0.02, spike: true, retry: "never" }); } },
+      { say: "همان اوج، اما clientها فوری retry می‌کنند: اوج تمام می‌شود و صف هرگز خالی نمی‌شود. این metastable failure است (ص. ۳۸).", kind: "bad",
+        run: function () { set({ retry: "immediate" }); } },
+      { say: "روش backoff با jitter درخواست‌های فرستاده‌شده را کم می‌کند، اما سرور هنوز روی درخواست‌هایی کار می‌کند که clientشان رفته است.", kind: "warn",
+        run: function () { set({ retry: "backoff" }); } },
+      { say: "حالا load shedding هم: با ۴۰ درخواست در صف، سرور بقیه را زود رد می‌کند. درخواست‌های پذیرفته‌شده به‌موقع تمام می‌شوند و سیستم برمی‌گردد (ص. ۳۸).", kind: "ok",
+        run: function () { set({ shed: true }); } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "زمان سرویس ۱۰ میلی‌ثانیه می‌ماند، اما response time در بار ۹۵٪ چند برابر بار ۵۰٪ است. چرا؟",

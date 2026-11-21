@@ -22,22 +22,23 @@
   .graph .node .n { font-size: 12.5px; font-weight: 650; fill: var(--ink); }
   .graph .badge { font-size: 10.5px; font-weight: 700; fill: var(--ink); }
   .graph .arrow { fill: var(--ink-3); }
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .8rem; color: var(--ink-2); margin-top: 8px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .78rem; color: var(--ink-2); margin-top: 4px; }
   .legend b { font-family: var(--mono); }
-  pre.q { margin: 0; font-family: var(--mono); font-size: .76rem; line-height: 1.45; overflow-x: auto; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 0; }
+  pre.q { margin: 0; font-family: var(--mono); font-size: .7rem; line-height: 1.25; overflow-x: auto; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 5px 0; }
   pre.q span { display: block; padding: 0 10px; border-left: 3px solid transparent; }
   pre.q span.hl { background: var(--accent-soft); border-left-color: var(--accent); }
-  .qhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 12px 0 6px; font-size: .82rem; color: var(--ink-3); }
-  .sets { display: grid; gap: 6px; font-size: .86rem; }
-  .sets div { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 6px; }
-  .sets code { font-size: .8rem; }
-  .phase { font-weight: 650; margin: 0 0 6px; }
-  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .qhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 3px 0 3px; font-size: .82rem; color: var(--ink-3); }
+  .sets { display: grid; gap: 2px; font-size: .78rem; line-height: 1.35; }
+  .sets div { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 6px; }
+  .sets code { font-size: .74rem; }
+  .gt { display: grid; gap: 10px 16px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+  @media (max-width: 760px) { .gt { grid-template-columns: 1fr; } }
+  .gt .graph svg { max-height: 330px; }
   .only-book, .only-tx { display: none; }
-  body.book .only-book, body.tx .only-tx { display: block; }
+  .stage-page.book .only-book, .stage-page.tx .only-tx { display: block; }
 </style>
 </head>
-<body class="book">
+<body class="stage-page book">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -51,64 +52,71 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۳ · مدل‌های داده و زبان‌های کوئری</div>
-  <h1>دنبال کردن edgeها</h1>
-  <p class="lede">کوئری گراف نمی‌داند چند join لازم دارد. هر بار یک دور جلو بروید و ببینید مجموعه‌ی vertexهای رسیده چطور بزرگ می‌شود تا وقتی چیز تازه‌ای پیدا نشود. هر چهار زبان یک چیز را می‌گویند؛ فقط مقدار تایپ فرق دارد.</p>
-  <p class="source-note">برای «مدل‌های داده‌ی گراف‌مانند» در صص. ۸۴–۹۸: گراف شکل ۳-۶ در ص. ۸۶، کوئری مثال‌های ۳-۵، ۳-۶، ۳-۱۰ و ۳-۱۲، و دورهای شکل ۳-۷ در ص. ۹۸. SQL کوتاه‌شده‌ی مثال ۳-۶ است که ۳۱ خط است. گراف انتقال پول و سقف hop آن مثال آزمایشی خود vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>دنبال کردن edgeها</h1>
+      <p class="lede">کوئری گراف از قبل نمی‌داند چند join لازم دارد: دور به دور جلو می‌رود تا دوری چیز تازه‌ای پیدا نکند. Cypher، SQL، SPARQL و Datalog همین دورها را می‌گویند؛ فقط مقدار تایپ فرق دارد.</p>
+      <p class="source-note">برای صص. ۸۴–۹۸: گراف شکل ۳-۶ (ص. ۸۶)، مثال‌های ۳-۵، ۳-۶، ۳-۱۰ و ۳-۱۲ و دورهای شکل ۳-۷ (ص. ۹۸). SQL کوتاه‌شده‌ی مثال ۳-۶ است. گراف انتقال پول و سقف hop مثال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel graph">
-        <svg id="svg" viewBox="0 0 720 440" role="img" aria-labelledby="svg-title"><title id="svg-title">گراف</title></svg>
-        <div class="legend" id="legend"></div>
-      </div>
-      <div class="panel">
-        <div class="qhead"><span id="qname"></span><span id="qlines"></span></div>
-        <pre class="q" id="query"></pre>
-      </div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <div id="dataset"></div>
-        <div class="only-book" style="margin-top:10px"><div id="lang"></div></div>
-        <div class="only-tx" style="margin-top:10px"><div id="union"></div><div id="hops" style="margin-top:8px"></div></div>
-        <div class="btns">
-          <button class="btn primary" type="button" id="step">یک دور جلو</button>
-          <button class="btn" type="button" id="all">اجرا تا آخر</button>
-          <button class="btn" type="button" id="reset">از اول</button>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="gt">
+          <div class="graph">
+            <svg id="svg" viewBox="0 0 720 440" role="img" aria-labelledby="svg-title"><title id="svg-title">گراف</title></svg>
+            <div class="legend" id="legend"></div>
+          </div>
+          <div aria-live="polite">
+            <div class="sets" id="sets"></div>
+            <div class="qhead"><span id="qname"></span><span id="qlines"></span></div>
+            <pre class="q" id="query" lang="en" dir="ltr"></pre>
+          </div>
         </div>
       </div>
-      <div class="panel" aria-live="polite">
-        <p class="phase" id="phase"></p>
-        <div class="sets" id="sets"></div>
-      </div>
-      <div class="panel">
-        <div class="stats">
-          <div class="stat"><span class="stat-label">دور</span><span class="stat-value" id="s-round">0</span></div>
-          <div class="stat"><span class="stat-label" id="s-rows-l">ردیف‌های تولیدشده</span><span class="stat-value" id="s-rows">0</span></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <div id="dataset"></div>
+          <div class="only-book" style="margin-top:8px"><div id="lang"></div></div>
+          <div class="only-tx" style="margin-top:8px"><div id="union"></div><div id="hops" style="margin-top:8px"></div></div>
+        </div>
+        <div class="tweak-group">
+          <div class="row">
+            <button class="btn primary" type="button" id="step">یک دور جلو</button>
+            <button class="btn" type="button" id="all">اجرا تا آخر</button>
+            <button class="btn" type="button" id="restart">از دور صفر</button>
+          </div>
         </div>
       </div>
-      <div class="panel wide"><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>هر دور یعنی یک join بیشتر.</strong> ایالت Idaho یک edge از نوع WITHIN با United States فاصله دارد و Saint-Lô چهار edge با Europe. هیچ تعداد ثابتی از join هر دو را پوشش نمی‌دهد، پس کوئری آن‌قدر تکرار می‌شود تا یک دور چیزی اضافه نکند؛ صص. ۹۰–۹۱.</li>
-    <li><strong>همان دورها، چهار نگارش.</strong> وسط قدم زدن زبان را عوض کنید: <code>WITHIN*0..</code>، <code>:within*</code>، یک recursive CTE و قاعده‌ی ۲ در Datalog همه یعنی «این edge را صفر بار یا بیشتر دنبال کن»؛ صص. ۸۹–۹۷.</li>
-    <li><strong>جایی که SQL گاز می‌گیرد cycle است.</strong> در گراف انتقال، پول مسیر A → B → D → E → A را می‌رود. با <code>UNION</code> حساب‌های تکراری کنار گذاشته می‌شوند و کوئری خودش می‌ایستد؛ با <code>UNION ALL</code> هر مسیر یک ردیف تازه است و فقط سقف hop جلویش را می‌گیرد. ص. ۹۲ cycle را یکی از جزئیات اضافه می‌شمارد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>هر دور یعنی یک join بیشتر.</strong> ایالت Idaho یک edge از نوع WITHIN با United States فاصله دارد و Saint-Lô چهار edge با Europe. هیچ تعداد ثابتی از join هر دو را پوشش نمی‌دهد، پس کوئری آن‌قدر تکرار می‌شود تا یک دور چیزی اضافه نکند؛ صص. ۹۰–۹۱.</li>
+      <li><strong>همان دورها، چهار نگارش.</strong> وسط قدم زدن زبان را عوض کنید: <code>WITHIN*0..</code>، <code>:within*</code>، یک recursive CTE و قاعده‌ی ۲ در Datalog همه یعنی «این edge را صفر بار یا بیشتر دنبال کن»؛ صص. ۸۹–۹۷.</li>
+      <li><strong>جایی که SQL گاز می‌گیرد cycle است.</strong> در گراف انتقال، پول مسیر A → B → D → E → A را می‌رود. با <code>UNION</code> حساب‌های تکراری کنار گذاشته می‌شوند و کوئری خودش می‌ایستد؛ با <code>UNION ALL</code> هر مسیر یک ردیف تازه است و فقط سقف hop جلویش را می‌گیرد. ص. ۹۲ cycle را یکی از جزئیات اضافه می‌شمارد.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/03-data-models-and-query-languages.html#کوئری-گراف-در-sql"><small>درس</small>فصل ۳: کوئری گراف در SQL</a></li>
-    <li><a href="03-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۳ در طول یک pipeline داده</a></li>
-    <li><a href="03-join-fanout.html"><small>شبیه‌سازی</small>چرا جمع بزرگ‌تر می‌شود؟</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/03-data-models-and-query-languages.html"><small>درس</small>فصل ۳: مدل‌های داده و زبان‌های کوئری</a></li>
+      <li><a href="03-pipeline-map.html"><small>شبیه‌سازی</small>فصل ۳ در طول یک pipeline داده</a></li>
+      <li><a href="03-join-fanout.html"><small>شبیه‌سازی</small>چرا جمع بزرگ‌تر می‌شود؟</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -155,17 +163,17 @@
   };
 
   var LANGS = {
-    cypher: { name: "زبان Cypher · مثال ۳-۵", lines: [
+    cypher: { tag: "Cypher", name: "زبان Cypher · مثال ۳-۵", lines: [
       "MATCH",
       "  (person) -[:BORN_IN]->  () -[:WITHIN*0..]-> (:Location {name:'United States'}),",
       "  (person) -[:LIVES_IN]-> () -[:WITHIN*0..]-> (:Location {name:'Europe'})",
       "RETURN person.name"],
       hl: { seed: [1, 2], round: [1, 2], people: [1, 2], answer: [0, 3] } },
-    sql: { name: "زبان SQL · مثال ۳-۶، کوتاه‌شده", lines: [
+    sql: { tag: "SQL", name: "زبان SQL · مثال ۳-۶، کوتاه‌شده", lines: [
       "WITH RECURSIVE",
       "  in_usa(vertex_id) AS (",
       "      SELECT vertex_id FROM vertices",
-      "        WHERE label = 'Location' AND properties->>'name' = 'United States'",
+      "        WHERE properties->>'name' = 'United States'",
       "    UNION",
       "      SELECT edges.tail_vertex FROM edges",
       "        JOIN in_usa ON edges.head_vertex = in_usa.vertex_id",
@@ -183,7 +191,7 @@
       "  JOIN lives_in_europe ON vertices.vertex_id = lives_in_europe.vertex_id;"],
       full: 31,
       hl: { seed: [1, 2, 3, 9], round: [4, 5, 6, 7, 9], people: [10, 11, 12, 13, 15], answer: [16, 17, 18] } },
-    sparql: { name: "زبان SPARQL · مثال ۳-۱۰", lines: [
+    sparql: { tag: "SPARQL", name: "زبان SPARQL · مثال ۳-۱۰", lines: [
       "PREFIX : <urn:example:>",
       "SELECT ?personName WHERE {",
       "  ?person :name ?personName.",
@@ -191,7 +199,7 @@
       "  ?person :livesIn / :within* / :name \"Europe\".",
       "}"],
       hl: { seed: [3, 4], round: [3, 4], people: [3, 4], answer: [1, 2] } },
-    datalog: { name: "زبان Datalog · مثال ۳-۱۲", lines: [
+    datalog: { tag: "Datalog", name: "زبان Datalog · مثال ۳-۱۲", lines: [
       "within_recursive(LocID, PlaceName) :- location(LocID, PlaceName, _).  /* Rule 1 */",
       "within_recursive(LocID, PlaceName) :- within(LocID, ViaID),           /* Rule 2 */",
       "                                      within_recursive(ViaID, PlaceName).",
@@ -224,7 +232,9 @@
   /* ---------- state ---------- */
   var dataset = "book", lang = "cypher", unionMode = "union", maxHops = 6;
   var st;
-  var log = Kit.log(Kit.$("#log"), { max: 14 });
+  var msgs = [], mk = "free", tour;
+  function note(t, k) { msgs.push(t); if (k && k !== "muted") mk = k; }
+  function said() { return msgs.join(" "); }
 
   function byId(g, id) { return g.nodes.filter(function (n) { return n.id === id; })[0]; }
   function name(id) { var g = dataset === "book" ? BOOK : TXG; return byId(g, id).n; }
@@ -237,11 +247,11 @@
   function reset() {
     if (dataset === "book") st = { phase: "start", round: 0, a: [], b: [], born: [], lives: [], answer: [], rows: 0, walk: [] };
     else st = { phase: "start", round: 0, frontier: [], rows: 0, paths: {}, reached: [], walk: [], done: false };
-    render();
   }
 
   /* one step; returns false when finished */
   function step() {
+    msgs = []; mk = "free";
     if (dataset === "book") return stepBook();
     return stepTx();
   }
@@ -249,7 +259,7 @@
   function stepBook() {
     if (st.phase === "start") {
       st.phase = "seed"; st.a = ["us"]; st.b = ["eu"]; st.rows = 2; st.walk = [];
-      log.add("شروع: vertexهایی با اسم United States و Europe پیدا می‌شوند؛ index روی name کمک می‌کند، ص. ۹۰.", "muted");
+      note("شروع: vertexهایی با اسم United States و Europe پیدا می‌شوند؛ index روی name کمک می‌کند، ص. ۹۰.", "muted");
       return true;
     }
     if (st.phase === "seed" || st.phase === "round") {
@@ -259,23 +269,23 @@
       st.walk = BOOK.edges.filter(function (e) { return e[2] === "within" && (na.indexOf(e[0]) >= 0 || nb.indexOf(e[0]) >= 0); });
       if (!na.length && !nb.length) {
         st.phase = "people";
-        log.add("دور " + st.round + ": مکان تازه‌ای نیست، پس recursion می‌ایستد.", "ok");
+        note("دور " + st.round + ": مکان تازه‌ای نیست، پس recursion می‌ایستد.", "ok");
         st.born = into(st.a, "born_in"); st.lives = into(st.b, "lives_in");
         st.rows += st.born.length + st.lives.length;
         st.walk = BOOK.edges.filter(function (e) { return (e[2] === "born_in" && st.a.indexOf(e[1]) >= 0) || (e[2] === "lives_in" && st.b.indexOf(e[1]) >= 0); });
-        log.add("دنبال کردن born_in به مجموعه‌ی US: " + st.born.map(name).join("، ") + ". دنبال کردن lives_in به مجموعه‌ی Europe: " + st.lives.map(name).join("، ") + ".", "muted");
+        note("دنبال کردن born_in به مجموعه‌ی US: " + st.born.map(name).join("، ") + ". دنبال کردن lives_in به مجموعه‌ی Europe: " + st.lives.map(name).join("، ") + ".", "muted");
         return true;
       }
       st.phase = "round";
       st.a = st.a.concat(na); st.b = st.b.concat(nb); st.rows += na.length + nb.length;
-      log.add("دور " + st.round + ": یک edge ورودی WITHIN دیگر این‌ها را اضافه می‌کند: " + na.concat(nb).map(name).join("، ") + ".", "muted");
+      note("دور " + st.round + ": یک edge ورودی WITHIN دیگر این‌ها را اضافه می‌کند: " + na.concat(nb).map(name).join("، ") + ".", "muted");
       return true;
     }
     if (st.phase === "people") {
       st.phase = "answer"; st.walk = [];
       st.answer = st.born.filter(function (p) { return st.lives.indexOf(p) >= 0; });
       st.rows += st.answer.length;
-      log.add("اشتراک دو مجموعه‌ی آدم‌ها: " + st.answer.map(name).join("، ") + ". شخص Alain در Europe زندگی می‌کند اما در US به دنیا نیامده.", "ok");
+      note("اشتراک دو مجموعه‌ی آدم‌ها: " + st.answer.map(name).join("، ") + ". شخص Alain در Europe زندگی می‌کند اما در US به دنیا نیامده.", "ok");
       return true;
     }
     return false;
@@ -285,12 +295,12 @@
     if (st.done) return false;
     if (st.phase === "start") {
       st.phase = "round"; st.frontier = [{ acc: "A", hops: 0 }]; st.rows = 1; st.paths = { A: 1 }; st.reached = ["A"]; st.walk = [];
-      log.add("شروع: حساب flagشده‌ی A.", "muted");
+      note("شروع: حساب flagشده‌ی A.", "muted");
       return true;
     }
     if (st.round >= maxHops) {
       st.done = true;
-      log.add("سقف hop یعنی " + maxHops + " رسید. " + (unionMode === "all" ? "بدون آن، cycle مسیر A → B → D → E → A تا ابد ردیف اضافه می‌کرد." : "اگر چیز تازه‌ای پیدا نمی‌شد، کوئری به‌هرحال همین‌جا می‌ایستاد."), unionMode === "all" ? "warn" : "muted");
+      note("سقف hop یعنی " + maxHops + " رسید. " + (unionMode === "all" ? "بدون آن، cycle مسیر A → B → D → E → A تا ابد ردیف اضافه می‌کرد." : "اگر چیز تازه‌ای پیدا نمی‌شد، کوئری به‌هرحال همین‌جا می‌ایستاد."), unionMode === "all" ? "warn" : "muted");
       return false;
     }
     st.round++;
@@ -310,10 +320,10 @@
     st.frontier = next;
     if (!next.length) {
       st.done = true;
-      log.add("دور " + st.round + ": ردیف تازه‌ای نیست، پس recursion بعد از " + st.rows + " ردیف خودش می‌ایستد.", "ok");
+      note("دور " + st.round + ": ردیف تازه‌ای نیست، پس recursion بعد از " + st.rows + " ردیف خودش می‌ایستد.", "ok");
       return false;
     }
-    log.add("دور " + st.round + ": " + next.length + " ردیف تازه: " + next.map(function (n) { return n.acc; }).join("، ") + ".", unionMode === "all" && next.some(function (n) { return st.paths[n.acc] > 1; }) ? "warn" : "muted");
+    note("دور " + st.round + ": " + next.length + " ردیف تازه: " + next.map(function (n) { return n.acc; }).join("، ") + ".", unionMode === "all" && next.some(function (n) { return st.paths[n.acc] > 1; }) ? "warn" : "muted");
     return true;
   }
 
@@ -400,22 +410,23 @@
     lines.forEach(function (l, i) { pre.appendChild(el("span", { class: hl.indexOf(i) >= 0 ? "hl" : "" }, l || " ")); });
   }
 
+  var rowsLabel = "";
   function drawSets() {
     var box = Kit.clear(Kit.$("#sets"));
-    function row(label, ids) { box.appendChild(el("div", null, el("span", null, label), el("code", null, ids.length ? ids.map(name).join(", ") : "—"))); }
-    var ph = Kit.$("#phase");
+    function row(label, ids, always) { if (!ids.length && !always) return; box.appendChild(el("div", null, el("span", null, label), el("code", null, ids.length ? ids.map(name).join(", ") : "—"))); }
     if (dataset === "book") {
-      ph.textContent = { start: "برای شروع، یک دور جلو بروید.", seed: "ساختن دو مجموعه‌ی اولیه‌ی مکان", round: "دور " + st.round + ": دنبال کردن edgeهای ورودی WITHIN", people: "عمل recursion تمام شد: پیدا کردن آدم‌ها", answer: "تمام شد: اشتراک" }[st.phase];
-      row("in_usa", st.a); row("in_europe", st.b); row("born_in_usa", st.born); row("lives_in_europe", st.lives); row("جواب", st.answer);
-      Kit.$("#s-rows-l").textContent = "ردیف‌های تولیدشده";
+      row("in_usa", st.a, true); row("in_europe", st.b, true); row("born_in_usa", st.born); row("lives_in_europe", st.lives); row("جواب", st.answer);
+      rowsLabel = "ردیف تولیدشده";
     } else {
-      ph.textContent = st.phase === "start" ? "برای شروع، یک دور جلو بروید." : (st.done ? "بعد از " + st.round + " دور تمام شد" : "دور " + st.round + ": دنبال کردن انتقال‌های خروجی");
-      row("تازه در این دور", st.frontier.map(function (f) { return f.acc; }));
-      row("حساب‌های رسیده", st.reached);
-      Kit.$("#s-rows-l").textContent = unionMode === "all" ? "ردیف‌ها یا مسیرها" : "ردیف‌ها یا حساب‌ها";
+      row("تازه در این دور", st.frontier.map(function (f) { return f.acc; }), true);
+      row("حساب‌های رسیده", st.reached, true);
+      rowsLabel = unionMode === "all" ? "ردیف (یکی برای هر مسیر)" : "ردیف (یکی برای هر حساب)";
     }
-    Kit.$("#s-round").textContent = st.round;
-    Kit.$("#s-rows").textContent = st.rows;
+    var stats = Kit.clear(Kit.$("#stats"));
+    [["گراف", dataset === "book" ? "آدم‌ها و مکان‌ها" : "انتقال پول", ""], ["زبان", dataset === "book" ? LANGS[lang].tag : (unionMode === "all" ? "UNION ALL" : "UNION"), ""],
+     ["دور", st.round, ""], [rowsLabel, st.rows, dataset === "tx" && unionMode === "all" && st.rows > 9 ? "warn" : ""]].concat(dataset === "tx" && unionMode === "all" ? [["سقف hop", maxHops, ""]] : []).forEach(function (x) {
+      stats.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
+    });
   }
 
   function render() {
@@ -423,27 +434,51 @@
     drawGraph(); drawQuery(); drawSets();
     Kit.$("#step").disabled = dataset === "book" ? st.phase === "answer" : st.done;
     Kit.$("#all").disabled = Kit.$("#step").disabled;
+    dsSeg.set(dataset); langSeg.set(lang); unionSeg.set(unionMode); hop.set(maxHops);
   }
 
-  /* ---------- controls ---------- */
-  Kit.$("#dataset").appendChild(Kit.segmented({ label: "گراف", value: dataset,
+  /* ---------- the tweak drawer ---------- */
+  var dsSeg = Kit.segmented({ label: "گراف", value: dataset,
     options: [{ value: "book", label: "کتاب: آدم‌ها و مکان‌ها" }, { value: "tx", label: "در عمل: انتقال پول" }],
-    onChange: function (v) { dataset = v; log.clear(); reset(); log.add(v === "book" ? "چه کسی از US به Europe مهاجرت کرده؟ مثال ۳-۵" : "پول حساب flagشده‌ی A به کدام حساب‌ها می‌رسد؟", "muted"); } }).element);
-  Kit.$("#lang").appendChild(Kit.segmented({ label: "زبان کوئری", value: lang,
+    onChange: function (v) { dataset = v; reset(); render(); tour.free(v === "book" ? "چه کسی از US به Europe مهاجرت کرده؟ (مثال ۳-۵)" : "پول حساب flagشده‌ی A به کدام حساب‌ها می‌رسد؟", "free"); } });
+  Kit.$("#dataset").appendChild(dsSeg.element);
+  var langSeg = Kit.segmented({ label: "زبان کوئری", value: lang,
     options: [{ value: "cypher", label: "Cypher" }, { value: "sql", label: "SQL" }, { value: "sparql", label: "SPARQL" }, { value: "datalog", label: "Datalog" }],
-    onChange: function (v) { lang = v; drawQuery(); } }).element);
-  Kit.$("#union").appendChild(Kit.segmented({ label: "Recursive CTE", value: unionMode,
-    options: [{ value: "union", label: "UNION" }, { value: "all", label: "UNION ALL و hop" }],
-    onChange: function (v) { unionMode = v; log.clear(); reset(); } }).element);
-  var hop = Kit.slider({ label: "سقف hop", min: 1, max: 8, value: maxHops, onInput: function (v) { maxHops = v; reset(); } });
+    onChange: function (v) { lang = v; render(); tour.free("همان دورها، با نگارش " + LANGS[v].tag + ".", "free"); } });
+  Kit.$("#lang").appendChild(langSeg.element);
+  var unionSeg = Kit.segmented({ label: "عملگر در recursive CTE", value: unionMode,
+    options: [{ value: "union", label: "UNION" }, { value: "all", label: "UNION ALL و سقف hop" }],
+    onChange: function (v) { unionMode = v; reset(); render(); tour.free("از اول با " + (v === "all" ? "UNION ALL" : "UNION") + ".", "free"); } });
+  Kit.$("#union").appendChild(unionSeg.element);
+  var hop = Kit.slider({ label: "سقف hop", min: 1, max: 8, value: maxHops, onInput: function (v) { maxHops = v; reset(); render(); tour.free(Kit.digits("سقف hop " + v + " شد؛ از اول."), "free"); } });
   Kit.$("#hops").appendChild(hop.element);
 
-  Kit.$("#step").addEventListener("click", function () { step(); render(); });
-  Kit.$("#all").addEventListener("click", function () { var n = 0; while (step() && n++ < 50) {} render(); });
-  Kit.$("#reset").addEventListener("click", function () { log.clear(); reset(); });
+  function runAll() { var n = 0; msgs = []; var all = []; while (n++ < 50) { var more = step(); all = all.concat(msgs); if (!more) break; } msgs = all.slice(-2); }
+  Kit.$("#step").addEventListener("click", function () { step(); render(); tour.free(said() || "تمام شد.", mk); });
+  Kit.$("#all").addEventListener("click", function () { runAll(); render(); tour.free(said() || "تمام شد.", mk); });
+  Kit.$("#restart").addEventListener("click", function () { reset(); render(); tour.free("از اول؛ «یک دور جلو» را بزنید.", "free"); });
 
-  reset();
-  log.add("چه کسی از US به Europe مهاجرت کرده؟ مثال ۳-۵", "muted");
+  /* ---------- the scenario ---------- */
+  function book(l, n) { return function () { dataset = "book"; lang = l; for (var i = 0; i < n; i++) step(); }; }
+  function tx(mode, hops, n) { return function () { dataset = "tx"; unionMode = mode; maxHops = hops; reset(); if (n === "all") runAll(); else for (var i = 0; i < n; i++) step(); }; }
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: function () { dataset = "book"; lang = "cypher"; unionMode = "union"; maxHops = 6; reset(); }, render: render, interval: 4600,
+    intro: "چه کسی در US به دنیا آمده و در Europe زندگی می‌کند؟ گراف شکل ۳-۶ و کوئری مثال ۳-۵. هر قدم یک دور از کوئری است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: گراف، زبان، UNION یا UNION ALL و سقف hop را عوض کنید و دور به دور جلو بروید.",
+    steps: [
+      { say: said, run: book("cypher", 1) },
+      { say: function () { return said() + " زبان Cypher این تکرار را با ستاره‌ی :WITHIN* می‌گوید."; }, run: book("cypher", 1) },
+      { say: function () { return said() + " همین دور در SQL یک recursive CTE است؛ کتاب برایش ۳۱ خط می‌نویسد (ص. ۹۱)."; }, run: book("sql", 1) },
+      { say: function () { return said() + " در SPARQL همین می‌شود :within* (ص. ۹۶)."; }, run: book("sparql", 1) },
+      { say: function () { return said() + " در Datalog قاعده‌ی ۲ هر بار یک edge از نوع WITHIN اضافه می‌کند (شکل ۳-۷، ص. ۹۸)."; }, run: book("datalog", 1) },
+      { say: said, kind: "ok", run: book("cypher", 1) },
+      { say: said, kind: "ok", run: book("cypher", 1) },
+      { say: function () { return "در عمل، گراف انتقال پول با یک cycle. با UNION حساب تکراری کنار می‌رود: " + said(); }, kind: "ok", run: tx("union", 8, "all") },
+      { say: function () { return "با UNION ALL هر مسیر یک ردیف است. " + said() + " حساب A دوباره رسیده است."; }, kind: "warn", run: tx("all", 6, 5) },
+      { say: function () { return said() + " فقط سقف hop جلوی cycle را گرفت."; }, kind: "bad", run: tx("all", 6, "all") }
+    ]
+  });
 
   Kit.quiz(Kit.$("#quiz"), [
     { q: "چرا کوئری US به Europe را نمی‌شود با تعداد ثابتی join نوشت؟",

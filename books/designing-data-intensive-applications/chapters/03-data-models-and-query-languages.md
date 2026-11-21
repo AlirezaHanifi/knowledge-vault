@@ -79,7 +79,11 @@ flowchart TB
 
 #### مسئله‌ی object-relational mismatch (pp. 68–71)
 
-به ترجمه‌ی بین شیءهای داخل کد و جدول‌ها و ردیف‌ها و ستون‌ها **impedance mismatch** می‌گویند؛ اصطلاحی از الکترونیک. ابزارهای **ORM** مثل ActiveRecord و Hibernate کد تکراری را کم می‌کنند:
+به ترجمه‌ی بین شیءهای داخل کد و جدول‌ها و ردیف‌ها و ستون‌ها **impedance mismatch** می‌گویند؛ اصطلاحی از الکترونیک (p. 68).
+
+##### ابزارهای object-relational mapping یا ORM (pp. 68–69)
+
+ابزارهای **ORM** مثل ActiveRecord و Hibernate کد تکراری را کم می‌کنند:
 
 | مشکلات ORM | مزایای ORM |
 |---|---|
@@ -89,7 +93,9 @@ flowchart TB
 | schemaهای تولیدشده ممکن است ناشیانه یا ناکارآمد باشند | |
 | نوشتن کوئری ناکارآمد آسان است؛ **مسئله‌ی N+1**: یک کوئری برای N کامنت، و بعد N کوئری برای نویسنده‌هایشان به جای یک join | |
 
-**مدل document برای رابطه‌ی one-to-many** (pp. 69–71). یک رزومه را دو جور می‌شود ذخیره کرد؛ مثال ۳-۱ کتاب پروفایل LinkedIn کاربر ۲۵۱، Barack Obama، است:
+##### مدل document برای رابطه‌ی one-to-many (pp. 69–71)
+
+یک رزومه را دو جور می‌شود ذخیره کرد؛ مثال ۳-۱ کتاب پروفایل LinkedIn کاربر ۲۵۱، Barack Obama، است:
 
 | مدل relational، شکل ۳-۱ | یک document JSON، مثال ۳-۱ |
 |---|---|
@@ -113,6 +119,8 @@ flowchart TB
 
 چرا به جای متن «Washington, DC, United States» مقدار `region_id: "us:91"` را ذخیره کنیم؟ یک فهرست استاندارد املای یکسان، رفع ابهام بین DC و ایالت، یک جا برای به‌روزرسانی، localization و جست‌وجوی بهتر می‌دهد؛ مثلاً دانستن این‌که Washington در ساحل شرقی است (p. 72).
 
+##### بده‌بستان‌های normalization (pp. 73–74)
+
 | | Normalized: ذخیره‌ی ID | Denormalized: کپی متن |
 |---|---|---|
 | داده‌ی معنادار برای انسان | یک بار ذخیره می‌شود؛ IDها هیچ‌وقت لازم نیست عوض شوند | در هر رکورد تکرار می‌شود |
@@ -122,7 +130,8 @@ flowchart TB
 
 داده‌ی denormalized نوعی **derived data** است: برای سازگار نگه داشتن کپی‌ها فرایندی مثل یک atomic transaction یا stream processing لازم است (p. 74). دیتابیس‌های document به سمت denormalization می‌روند، چون joinشان اغلب ضعیف است؛ MongoDB می‌تواند با `$lookup` در یک aggregation pipeline هم join بزند (p. 73).
 
-**دوباره شبکه‌ی اجتماعی** (pp. 74–75):
+##### مفهوم denormalization در مثال شبکه‌ی اجتماعی (pp. 74–75)
+
 
 - در timelineهای materialized شبکه‌ی X فقط ID پست و ID فرستنده و کمی اطلاعات reply و repost ذخیره می‌شود، نه متن پست.
 - هر خواندن IDها را **hydrate** می‌کند: محتوای پست، تعداد like و پروفایل‌ها را می‌آورد. این یک join در کد اپلیکیشن است.
@@ -186,7 +195,9 @@ flowchart TB
 | کاربران ترتیب آیتم‌ها را عوض می‌کنند، مثل فهرست کارها به شکل آرایه‌ی JSON؛ مدل relational به شماره‌گذاری دوباره، linked list یا fractional indexing نیاز دارد | باید مستقیم با ID به آیتم‌های تودرتو ارجاع دهید |
 | رکوردها ناهمگن‌اند، یا ساختارشان را سیستم‌های بیرونی تعیین می‌کنند | همه‌ی رکوردها ساختار مشترکی دارند که ارزش مستندسازی و اعمال دارد |
 
-**تفاوت schema-on-read و schema-on-write** (pp. 80–82). واژه‌ی «schemaless» گمراه‌کننده است: کدی که داده را می‌خواند همچنان ساختاری را فرض می‌کند.
+##### انعطاف schema در مدل document (pp. 80–82)
+
+واژه‌ی «schemaless» گمراه‌کننده است: کدی که داده را می‌خواند همچنان ساختاری را فرض می‌کند.
 
 | | Schema-on-read در document | Schema-on-write در relational |
 |---|---|---|
@@ -196,7 +207,9 @@ flowchart TB
 
 هیچ‌کدام مطلقاً برنده نیست؛ این بحث آینه‌ی بحث static typing در برابر dynamic typing است (p. 81).
 
-**ویژگی locality** (p. 82): document به شکل یک رشته‌ی JSON، XML یا BSON ذخیره می‌شود.
+##### مفهوم locality داده برای خواندن و نوشتن (p. 82)
+
+هر document به شکل یک رشته‌ی JSON، XML یا BSON ذخیره می‌شود.
 
 | کمک می‌کند | ضرر می‌زند |
 |---|---|
@@ -207,7 +220,9 @@ flowchart TB
 
 > **Try it:** [یک پروفایل، دو مدل](../widgets/03-two-models.html): هفت عملیات روزمره را روی یک رزومه، یک بار به شکل document و یک بار به شکل جدول، اجرا کنید و ببینید هر کدام به نفع کدام مدل است.
 
-**زبان‌های کوئری برای documentها** (pp. 82–83): فقط دسترسی key-value، secondary index، یا زبان‌های غنی مثل XQuery و XPath برای XML، JSON Pointer و JSONPath، و aggregation pipeline در MongoDB. گزارش کتاب از تعداد کوسه‌های دیده‌شده در هر ماه، یک بار با SQL و یک بار با pipeline:
+##### زبان‌های کوئری برای documentها (pp. 82–83)
+
+پشتیبانی کوئری در دیتابیس‌های document از کم تا زیاد است: فقط دسترسی key-value، secondary index، یا زبان‌های غنی مثل XQuery و XPath برای XML، JSON Pointer و JSONPath، و aggregation pipeline در MongoDB. گزارش کتاب از تعداد کوسه‌های دیده‌شده در هر ماه، یک بار با SQL و یک بار با pipeline:
 
 ```sql
 SELECT date_trunc('month', observation_timestamp) AS observation_month,
@@ -227,7 +242,9 @@ db.observations.aggregate([
 ]);
 ```
 
-**همگرایی** (pp. 83–84): دیتابیس‌های relational نوع داده و عملگر و index برای JSON گرفتند؛ MongoDB و Couchbase و RethinkDB هم join، secondary index و کوئری declarative. ترکیب این دو قدرتمند است، و مقاله‌ی اصلی Codd هم از اول relationهای تودرتو را با اسم «nonsimple domains» مجاز می‌دانست.
+##### همگرایی دیتابیس‌های document و relational (pp. 83–84)
+
+دیتابیس‌های relational نوع داده و عملگر و index برای JSON گرفتند؛ MongoDB و Couchbase و RethinkDB هم join، secondary index و کوئری declarative. ترکیب این دو قدرتمند است، و مقاله‌ی اصلی Codd هم از اول relationهای تودرتو را با اسم «nonsimple domains» مجاز می‌دانست.
 
 > **In practice:** در این pipeline، loader از نوع schema-on-write است، چون ستون‌هایش را فهرست می‌کند، و SQL لایه‌ی Silver از نوع schema-on-read.
 >
@@ -314,8 +331,30 @@ flowchart LR
 | vertex دیگری باشد | یک **edge** است | (lucy, marriedTo, alain) |
 
 - سیستم‌های واقعی metadata اضافه می‌کنند: Neptune از quad استفاده می‌کند که ID گراف هم دارد، و Datomic از پنج‌تایی‌ای با ID تراکنش و پرچم حذف (p. 92).
-- داده را می‌شود با **Turtle**، که زیرمجموعه‌ای از N3 است، یا با RDF/XML نوشت؛ RDF برای نام‌ها از URI استفاده می‌کند تا «within» ناشرهای مختلف با هم برخورد نکنند (pp. 93–95).
-- پروژه‌ی **Semantic Web** آن‌طور که تصور می‌شد موفق نشد، اما میراثش در JSON-LD، ontologyهای زیست‌پزشکی، Open Graph فیس‌بوک برای پیش‌نمایش لینک‌ها، Wikidata و Schema.org زنده است (p. 94).
+- فرمت **Turtle**، زیرمجموعه‌ای از N3، همین tripleها را خوانا می‌نویسد؛ با `;` چند ویژگی یک subject در یک خط می‌آید (p. 93):
+
+```turtle
+@prefix : <urn:example:>.
+_:lucy  a :Person;   :name "Lucy";          :bornIn _:idaho.
+_:idaho a :Location; :name "Idaho";         :type "state";   :within _:usa.
+_:usa   a :Location; :name "United States"; :type "country"; :within _:namerica.
+```
+
+##### ایده‌ی Semantic Web (p. 94)
+
+بخشی از کار روی triple storeها از Semantic Web آمد: تلاشی در اوایل دهه‌ی ۲۰۰۰ برای این‌که داده روی وب به شکلی استاندارد و ماشین‌خوان هم منتشر شود. آن‌طور که تصور می‌شد موفق نشد، اما میراثش زنده است: JSON-LD، ontologyهای زیست‌پزشکی، Open Graph فیس‌بوک برای پیش‌نمایش لینک‌ها، Wikidata و Schema.org. tripleها حتی بیرون از Semantic Web هم مدل داخلی خوبی برای اپلیکیشن‌اند (p. 94).
+
+##### مدل داده‌ی RDF (pp. 94–95)
+
+| ویژگی RDF | معنی |
+|---|---|
+| یک مدل، چند encoding | فرمت Turtle یکی از encodingهای RDF است؛ RDF/XML پرحرف‌تر است و ابزارهایی مثل Apache Jena بینشان تبدیل می‌کنند (p. 94) |
+| نام‌ها URIاند | predicateی مثل `<http://my-company.com/namespace#within>` با `within` ناشر دیگری برخورد نمی‌کند، پس داده‌ها را می‌شود با هم ترکیب کرد (p. 95) |
+| URI لازم نیست باز شود | فقط namespace است؛ مثال‌های کتاب `urn:example:` را یک بار بالای فایل تعریف می‌کنند (p. 95) |
+
+##### زبان کوئری SPARQL (pp. 95–96)
+
+زبان کوئری triple storeها روی RDF، که «sparkle» تلفظ می‌شود؛ از Cypher قدیمی‌تر است و Cypher الگویابی‌اش را از آن وام گرفته (p. 95). چون RDF بین property و edge فرقی نمی‌گذارد، هر دو با یک نحو match می‌شوند (p. 96).
 
 ```sparql
 PREFIX : <urn:example:>
@@ -326,7 +365,7 @@ SELECT ?personName WHERE {
 }
 ```
 
-*مثال ۳-۱۰ کتاب: همان کوئری در SPARQL، که «sparkle» تلفظ می‌شود و Cypher الگویابی‌اش را از آن وام گرفته است (p. 95).*
+*مثال ۳-۱۰ کتاب: همان کوئری آمریکا به اروپا؛ `?person :bornIn / :within* ?location` همان `(person) -[:BORN_IN]-> () -[:WITHIN*0..]-> (location)` در Cypher است (p. 95).*
 
 #### زبان Datalog: کوئری‌های recursive رابطه‌ای (pp. 96–98)
 

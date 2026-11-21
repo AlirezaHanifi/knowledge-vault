@@ -7,13 +7,17 @@
 <meta name="description" content="یک timeout برای مرده اعلام کردن یک node انتخاب کنید: ببینید latency heartbeatها با صف‌های شبکه و process pause چطور تغییر می‌کند، و شک‌های نادرست را با تشخیص کند یک crash واقعی بسنجید. برای فصل ۹ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .twocol { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); align-items: start; }
+  .twocol { display: grid; gap: 8px 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
   .twocol figure { margin: 0; }
-  .twocol figcaption { font-size: .78rem; color: var(--ink-3); margin-bottom: 4px; }
+  .twocol figcaption { font-size: .8rem; color: var(--ink-2); margin-bottom: 2px; }
   .full { grid-column: 1 / -1; }
+  #gaps { display: block; width: 100%; }
+  @media (max-width: 760px) { .twocol { grid-template-columns: minmax(0, 1fr); } }
+  .twocol svg text { font-size: 12px; }
+  #fp, #det { display: block; width: 100%; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -27,58 +31,63 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · دردسرهای سیستم‌های توزیع‌شده</div>
-  <h1>یک node کی مرده است؟</h1>
-  <p class="lede">یک ناظر هر ۱۰۰ میلی‌ثانیه یک heartbeat از یک node می‌شنود. سکوت ممکن است یعنی node crash کرده؛ یا فقط یک packet در صف مانده یا process برای garbage collection متوقف شده. تصمیم با timeout است: اگر کوتاه باشد nodeهای زنده مرده اعلام می‌شوند، اگر بلند باشد یک crash واقعی دیده نمی‌شود.</p>
-  <p class="source-note">برای بخش‌های «تشخیص fault» و «مفهوم timeout و latencyهای unbounded»، از جمله congestion و صف‌ها، در صص. ۳۵۱–۳۵۵: latencyهای بی‌کران، کران 2d + r که شبکه‌های واقعی نمی‌دهند، و timeoutهای خودتنظیم مثل Phi Accrual. heartbeatها، توزیع latency و crash در ثانیه‌ی ۵۰ مدل خود vault هستند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>یک node کی مرده است؟</h1>
+      <p class="lede">یک ناظر هر ۱۰۰ میلی‌ثانیه یک heartbeat از یک node می‌شنود. سکوت ممکن است یعنی node crash کرده، یا فقط یک packet در صف مانده یا process برای garbage collection متوقف شده. timeout کوتاه nodeهای زنده را مرده اعلام می‌کند و timeout بلند crash واقعی را دیر می‌بیند.</p>
+      <p class="source-note">برای صص. ۳۵۱–۳۵۵. heartbeatها، توزیع latency و crash در ثانیه‌ی ۵۰ مدل خود vault هستند.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="twocol" dir="ltr">
-        <figure class="full">
-          <figcaption dir="rtl">فاصله از heartbeat قبلی از دید ناظر؛ ۶۰ ثانیه، و node در ثانیه‌ی ۵۰ crash می‌کند</figcaption>
-          <svg id="gaps" role="img" aria-label="فاصله‌ی heartbeatها در طول زمان با خط timeout"></svg>
-        </figure>
-        <figure>
-          <figcaption dir="rtl">حکم‌های نادرست «مرده» در دقیقه بر حسب timeout</figcaption>
-          <svg id="fp" role="img" aria-label="با بزرگ شدن timeout شک‌های نادرست کم می‌شوند"></svg>
-        </figure>
-        <figure>
-          <figcaption dir="rtl">زمان تشخیص crash واقعی بر حسب timeout</figcaption>
-          <svg id="det" role="img" aria-label="latency تشخیص با timeout بیشتر می‌شود"></svg>
-        </figure>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="twocol" dir="ltr">
+          <figure class="full">
+            <figcaption dir="rtl">فاصله از heartbeat قبلی در ۶۰ ثانیه؛ node در ثانیه‌ی ۵۰ crash می‌کند و نقطه‌های قرمز «مرده»‌های نادرست‌اند</figcaption>
+            <svg id="gaps" role="img" aria-label="فاصله‌ی heartbeatها در طول زمان با خط timeout"></svg>
+          </figure>
+          <figure>
+            <figcaption dir="rtl">حکم‌های نادرست «مرده» در دقیقه بر حسب timeout</figcaption>
+            <svg id="fp" role="img" aria-label="با بزرگ شدن timeout شک‌های نادرست کم می‌شوند"></svg>
+          </figure>
+          <figure>
+            <figcaption dir="rtl">زمان تشخیص crash واقعی بر حسب timeout</figcaption>
+            <svg id="det" role="img" aria-label="latency تشخیص با timeout بیشتر می‌شود"></svg>
+          </figure>
+        </div>
       </div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">شبکه و node</p>
-        <div id="sliders"></div>
-      </div>
-      <div class="panel wide">
-        <p class="panel-title">با این timeout</p>
-        <div class="stats" id="stats"></div>
-        <p class="field-hint" id="verdict" aria-live="polite" style="margin:8px 0 0"></p>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">با این timeout</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="sliders"></div>
       </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>هیچ مقدار امنی نیست.</strong> هر timeout دو نمودار را با هم معامله می‌کند؛ فقط می‌توانید روی منحنی جابه‌جا شوید.</li>
-    <li><strong>توقف‌ها و صف‌ها تعیین‌کننده‌اند.</strong> نرخ توقف یا latency صف را بالا ببرید: فاصله‌ها دنباله‌ی بلندی پیدا می‌کنند و timeoutهای کوتاه node زنده را مرده اعلام می‌کنند.</li>
-    <li><strong>حکم نادرست «مرده» گران است.</strong> ممکن است node هنوز مشغول کار باشد در حالی که دیگری جایش را گرفته، پس یک کار دو بار اجرا می‌شود؛ و جابه‌جا کردن بارش می‌تواند سیستمی پربار را به cascading failure بکشاند (ص. ۳۵۲).</li>
-    <li><strong>اول اندازه بگیرید، بعد تطبیق بدهید.</strong> کتاب پیشنهاد می‌کند timeout را به‌صورت تجربی از زمان‌های رفت‌وبرگشت مشاهده‌شده انتخاب کنید، یا مثل Phi Accrual خودکار تنظیمش کنید (ص. ۳۵۵).</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>هیچ مقدار امنی نیست.</strong> هر timeout دو نمودار پایین را با هم معامله می‌کند؛ فقط می‌توانید روی منحنی جابه‌جا شوید.</li>
+      <li><strong>توقف‌ها و صف‌ها تعیین‌کننده‌اند.</strong> وقتی نرخ توقف یا latency صف بالا می‌رود، فاصله‌ها دنباله‌ی بلندی پیدا می‌کنند و timeoutهای کوتاه node زنده را مرده اعلام می‌کنند (صص. ۳۵۳–۳۵۴).</li>
+      <li><strong>حکم نادرست «مرده» گران است.</strong> ممکن است node هنوز مشغول کار باشد در حالی که دیگری جایش را گرفته، پس یک کار دو بار اجرا می‌شود؛ و جابه‌جا کردن بارش می‌تواند سیستمی پربار را به cascading failure بکشاند (ص. ۳۵۲).</li>
+      <li><strong>اول اندازه بگیرید، بعد تطبیق بدهید.</strong> کتاب پیشنهاد می‌کند timeout را به‌صورت تجربی از زمان‌های رفت‌وبرگشت مشاهده‌شده انتخاب کنید، یا مثل Phi Accrual خودکار تنظیمش کنید (ص. ۳۵۵).</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
-    <li><a href="09-fencing.html"><small>شبیه‌سازی</small>مفهوم lease، process pause و fencing token</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
+      <li><a href="09-fencing.html"><small>شبیه‌سازی</small>مفهوم lease، process pause و fencing token</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -86,7 +95,7 @@
 (function () {
   "use strict";
   var INTERVAL = 100, CRASH = 50000, END = 60000;
-  var cfg = { timeout: 300, queue: 20, pauses: 3 };
+  var cfg = { timeout: 300, queue: 20, pauses: 0 }, tour, last = {};
 
   // Heartbeat arrival times at the monitor. Each is sent every 100 ms (unless the process is paused)
   // and delayed by 1 ms + an exponential queueing delay.
@@ -113,7 +122,7 @@
     var yMax = Math.max(400, Math.ceil(Math.max(gmax, cfg.timeout) / 200) * 200);
     var mapped = pts.map(function (p) { return [p[0], Math.min(p[1], yMax)]; });
     var c = Kit.lineChart(document.getElementById("gaps"), {
-      width: 740, height: 190, xMax: END / 1000, yMax: yMax, xLabel: "زمان (s)", yFormat: Kit.fmtMs, xTicks: 6,
+      width: 1200, height: 168, xMax: END / 1000, yMax: yMax, xLabel: "زمان (s)", yFormat: Kit.fmtMs, xTicks: 6,
       bands: [{ from: CRASH / 1000, to: Math.min(END, CRASH + e.detect) / 1000, label: "مرده، هنوز دیده نشده" }],
       series: [{ points: mapped, cls: "s1" }, { points: [[0, cfg.timeout], [END / 1000, cfg.timeout]], cls: "bad dashed", label: "timeout" }]
     });
@@ -126,26 +135,46 @@
       fp.push([t, ev.falseDead * 60000 / CRASH]); det.push([t, ev.detect / 1000]);
     });
     var fpMax = Math.max(1, Math.ceil(Math.max.apply(null, fp.map(function (p) { return p[1]; }))));
-    Kit.lineChart(document.getElementById("fp"), { width: 360, height: 200, xMax: 2000, yMax: fpMax, xLabel: "timeout (ms)",
+    Kit.lineChart(document.getElementById("fp"), { width: 600, height: 160, xMax: 2000, yMax: fpMax, xLabel: "timeout (ms)",
       series: [{ points: fp, cls: "s2", dots: true }], marks: [{ x: cfg.timeout }] });
-    Kit.lineChart(document.getElementById("det"), { width: 360, height: 200, xMax: 2000, yMax: 2.5, xLabel: "timeout (ms)", yFormat: function (v) { return v.toFixed(1) + " s"; },
+    Kit.lineChart(document.getElementById("det"), { width: 600, height: 160, xMax: 2000, yMax: 2.5, xLabel: "timeout (ms)", yFormat: function (v) { return v.toFixed(1) + " s"; },
       series: [{ points: det, cls: "s4", dots: true }], marks: [{ x: cfg.timeout }] });
 
+    last = { fp: (e.falseDead * 60000 / CRASH).toFixed(1), det: Kit.fmtMs(e.detect), n: e.falseDead };
     var stats = Kit.clear(document.getElementById("stats"));
     [["«مرده»ی نادرست در دقیقه", (e.falseDead * 60000 / CRASH).toFixed(1), e.falseDead ? "bad" : "ok"], ["مفهوم crash تشخیص داده شد بعد از", Kit.fmtMs(e.detect), e.detect > 1000 ? "warn" : ""],
      ["بلندترین فاصله", Kit.fmtMs(gmax), ""]].forEach(function (x) {
-      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(x[1]))));
     });
-    document.getElementById("verdict").textContent = e.falseDead
-      ? "مفهوم node زنده پیش از crash واقعی " + e.falseDead + " بار مرده اعلام شد."
-      : "در این اجرا هشدار نادرستی نبود؛ اما تشخیص crash واقعی " + Kit.fmtMs(e.detect) + " طول می‌کشد.";
+    S.timeout.set(cfg.timeout); S.queue.set(cfg.queue); S.pauses.set(cfg.pauses);
+  }
+  function verdict() {
+    return Kit.digits(last.n ? "این node زنده پیش از crash واقعی " + last.n + " بار مرده اعلام شد، و crash واقعی بعد از " + last.det + " دیده شد."
+      : "هشدار نادرستی نبود؛ اما تشخیص crash واقعی " + last.det + " طول کشید.");
   }
 
-  var sl = document.getElementById("sliders");
-  sl.appendChild(Kit.slider({ label: "مقدار timeout", min: 120, max: 2000, step: 20, value: cfg.timeout, format: Kit.fmtMs, onInput: function (v) { cfg.timeout = v; render(); } }).element);
-  sl.appendChild(Kit.slider({ label: "میانگین latency صف", min: 1, max: 100, value: cfg.queue, unit: " ms", onInput: function (v) { cfg.queue = v; render(); } }).element);
-  sl.appendChild(Kit.slider({ label: "توقف process با GC", min: 0, max: 6, step: 0.5, value: cfg.pauses, unit: " در دقیقه", hint: "هر توقف ۰٫۲ تا ۱٫۲ ثانیه طول می‌کشد.", onInput: function (v) { cfg.pauses = v; render(); } }).element);
-  render();
+  var sl = document.getElementById("sliders"), S = {};
+  function free() { render(); tour.free(verdict(), last.n ? "bad" : "ok"); }
+  S.timeout = Kit.slider({ label: "مقدار timeout", min: 120, max: 2000, step: 20, value: cfg.timeout, format: Kit.fmtMs, onInput: function (v) { cfg.timeout = v; free(); } });
+  S.queue = Kit.slider({ label: "میانگین latency صف", min: 1, max: 100, value: cfg.queue, unit: " ms", onInput: function (v) { cfg.queue = v; free(); } });
+  S.pauses = Kit.slider({ label: "توقف process با GC", min: 0, max: 6, step: 0.5, value: cfg.pauses, unit: " در دقیقه", hint: "هر توقف ۰٫۲ تا ۱٫۲ ثانیه طول می‌کشد.", onInput: function (v) { cfg.pauses = v; free(); } });
+  [S.timeout, S.queue, S.pauses].forEach(function (x) { sl.appendChild(x.element); });
+
+  /* ---------- the scenario ---------- */
+  function set(t, q, p) { return function () { cfg.timeout = t; cfg.queue = q; cfg.pauses = p; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: set(300, 20, 0), render: render, interval: 6000,
+    intro: "اگر latency شبکه کرانی مثل d داشت و پاسخ node کرانی مثل r، می‌شد timeout را 2d + r گذاشت. شبکه‌های asynchronous چنین کرانی ندارند (ص. ۳۵۳). این‌جا یک ناظر را با یک timeout می‌بینیم.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و timeout، latency صف و توقف‌ها را عوض کنید.",
+    steps: [
+      { run: set(300, 20, 0), kind: "ok", say: function () { return "شبکه‌ی آرام، بدون توقف GC، و timeout برابر ۳۰۰ میلی‌ثانیه. " + verdict(); } },
+      { run: set(300, 20, 6), kind: "bad", say: function () { return "حالا process گاهی برای garbage collection متوقف می‌شود. node زنده است، اما سکوتش از timeout بیشتر می‌شود (صص. ۳۵۲، ۳۶۷). " + verdict(); } },
+      { run: set(300, 80, 6), kind: "bad", say: function () { return "مفهوم congestion هم اضافه شد: heartbeatها در صف switch و سیستم‌عامل منتظر می‌مانند و فاصله‌ها دنباله‌ی بلندی پیدا می‌کنند (صص. ۳۵۳–۳۵۴). " + verdict(); } },
+      { run: set(1500, 80, 6), kind: "warn", say: function () { return "مقدار timeout را به ۱٫۵ ثانیه می‌بریم. هشدارهای نادرست کم می‌شوند، اما ناظر crash واقعی را دیرتر می‌بیند (ص. ۳۵۲). " + verdict(); } },
+      { run: set(1500, 20, 0), kind: "warn", say: function () { return "شبکه دوباره آرام است اما timeout هنوز ۱٫۵ ثانیه است، پس تشخیص بی‌دلیل کند مانده. هیچ timeout ثابتی برای همه‌ی شرایط درست نیست. کتاب پیشنهاد می‌کند timeout را از توزیع اندازه‌گیری‌شده‌ی رفت‌وبرگشت انتخاب کنید یا مثل Phi Accrual مدام تطبیقش دهید (صص. ۳۵۴–۳۵۵)."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا نمی‌شود به‌سادگی timeout را 2d + r گذاشت؟",

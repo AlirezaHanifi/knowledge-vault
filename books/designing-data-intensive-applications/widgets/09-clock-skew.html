@@ -8,19 +8,21 @@
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
   .tl .life { stroke: var(--line-strong); }
-  .tl .name { font-size: 12px; font-weight: 600; }
+  .tl .name { font-size: 14px; font-weight: 600; }
   .tl .ev { fill: var(--surface); stroke: var(--s1); stroke-width: 2; }
   .tl .ev.b { stroke: var(--s2); }
   .tl .rep { stroke: var(--ink-3); stroke-width: 1.2; stroke-dasharray: 4 3; fill: none; marker-end: url(#tip); }
   .tl #tip path { fill: var(--ink-3); }
-  .tl .lbl { font-size: 11px; }
-  .tl .ts { font-size: 10.5px; font-family: var(--mono); fill: var(--ink-2); }
+  .tl .lbl { font-size: 13.5px; }
+  .tl .ts { font-size: 12.5px; font-family: var(--mono); fill: var(--ink-2); }
   .tl .ok { fill: var(--ok); font-weight: 700; } .tl .bad { fill: var(--bad); font-weight: 700; }
-  .tl .real { font-size: 10px; fill: var(--ink-3); }
-  .twocol { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); align-items: start; }
+  .tl .real { font-size: 12px; fill: var(--ink-3); }
+  .twocol { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); align-items: start; }
+  .twocol svg { display: block; width: 100%; max-height: 330px; }
+  .twocol .panel-title { margin: 0 0 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -34,62 +36,67 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · دردسرهای سیستم‌های توزیع‌شده</div>
-  <h1>مفهوم clock skew و last write wins</h1>
-  <p class="lede">قاعده‌ی last write wins مقداری را نگه می‌دارد که بزرگ‌ترین timestamp را دارد؛ اما timestamp از ساعت همان nodeی می‌آید که نوشتن را پذیرفته. اگر آن ساعت چند میلی‌ثانیه کند باشد، نوشتنی که آشکارا بعدتر رخ داده timestamp زودتری می‌گیرد و بی هیچ خطایی دور ریخته می‌شود.</p>
-  <p class="source-note">برای بخش «مفهوم timestamp برای ترتیب رویدادها» در صص. ۳۶۲–۳۶۴ و شکل ۹-۳: <span lang="en">x = 1</span> با برچسب ۴۲٫۰۰۴ ثانیه و افزایش با برچسب ۴۲٫۰۰۳ ثانیه. نمودار پایین آزمایش خود vault است: ۴۰۰ نوشتن وابسته که به نوبت بین دو node می‌روند، با فاصله‌ی حدود ۵ میلی‌ثانیه. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مفهوم clock skew و last write wins</h1>
+      <p class="lede">قاعده‌ی last write wins مقداری را نگه می‌دارد که بزرگ‌ترین timestamp را دارد، و timestamp از ساعت nodeی می‌آید که نوشتن را پذیرفته. اگر آن ساعت چند میلی‌ثانیه کند باشد، نوشتنی که بعدتر رخ داده timestamp زودتری می‌گیرد و بی‌صدا دور ریخته می‌شود.</p>
+      <p class="source-note">برای صص. ۳۶۲–۳۶۴ و شکل ۹-۳. نمودار سمت چپ آزمایش خود vault است: ۴۰۰ نوشتن وابسته که به نوبت بین دو node می‌روند، با فاصله‌ی حدود ۵ میلی‌ثانیه.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="twocol">
-        <div>
-          <p class="panel-title">اجرای دوباره‌ی شکل ۹-۳</p>
-          <div class="stage" dir="ltr"><svg class="tl" id="tl" viewBox="0 0 360 240" role="img" aria-label="سه node؛ نتیجه را در حکم ببینید"></svg></div>
-        </div>
-        <div>
-          <p class="panel-title">نوشتن‌های گم‌شده بر حسب clock skew، آزمایش vault</p>
-          <svg id="chart" dir="ltr" role="img" aria-label="سهم نوشتن‌های گم‌شده با clock skew بالا می‌رود"></svg>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="twocol">
+          <div>
+            <p class="panel-title">شکل ۹-۳ با ساعت فعلی node 3</p>
+            <svg class="tl" id="tl" dir="ltr" viewBox="0 0 420 240" role="img" aria-label="سه node؛ نتیجه در متن بالای صحنه آمده"></svg>
+          </div>
+          <div>
+            <p class="panel-title">سهم نوشتن‌های گم‌شده بر حسب عقب بودن ساعت، آزمایش vault</p>
+            <svg id="chart" dir="ltr" role="img" aria-label="سهم نوشتن‌های گم‌شده با clock skew بالا می‌رود"></svg>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">ساعت‌ها و حل conflict</p>
-        <div id="sliders"></div>
-        <div class="field" style="margin-top:10px"><span class="field-head">وقتی یک نوشتن مقداری را بازنویسی می‌کند…</span><div id="mode"></div></div>
-      </div>
-      <div class="panel wide">
-        <p class="panel-title">حکم در node 2</p>
-        <div class="stats" id="stats"></div>
-        <p class="field-hint" id="verdict" aria-live="polite" style="margin:8px 0 0"></p>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">حکم در node 2</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="sliders"></div>
+        <div class="tweak-group"><span class="field-head">وقتی یک نوشتن مقداری را بازنویسی می‌کند…</span><div id="mode"></div></div>
       </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>ترتیب علّی در برابر timestamp.</strong> افزایش B مقدار <span lang="en">x = 1</span> را می‌خواند، پس باید بعد از نوشتن A باشد؛ اما وقتی node 3 فقط ۳ میلی‌ثانیه کند است، برچسب زودتری می‌خورد و node 2 مقدار <span lang="en">x = 1</span> را نگه می‌دارد.</li>
-    <li><strong>گم شدن بی‌صدا.</strong> هیچ چیز شکست نمی‌خورد؛ افزایش فقط ناپدید می‌شود. نمودار نشان می‌دهد وقتی skew به فاصله‌ی بین نوشتن‌های وابسته نزدیک می‌شود، گم شدن‌ها چقدر سریع بالا می‌روند.</li>
-    <li><strong>راه‌حل کتاب.</strong> به نوشتنی که بازنویسی می‌کند timestampی بالاتر از مقداری که جایگزین می‌کند بدهید؛ به قیمت این‌که اول آن را بخوانید. هر قدر هم skew باشد، هیچ نوشتنی گم نمی‌شود.</li>
-    <li><strong>از آن هم بهتر:</strong> مفهوم logical clock و version vector رویدادها را با ترتیب علّی مرتب می‌کنند، نه با کریستال quartz (صص. ۳۶۴ و ۴۲۰).</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>ترتیب علّی در برابر timestamp.</strong> افزایش B مقدار <span lang="en">x = 1</span> را می‌خواند، پس بعد از نوشتن A است؛ اما وقتی node 3 فقط ۳ میلی‌ثانیه کند است، برچسب زودتری می‌خورد و node 2 مقدار <span lang="en">x = 1</span> را نگه می‌دارد (ص. ۳۶۳).</li>
+      <li><strong>گم شدن بی‌صدا.</strong> هیچ چیز شکست نمی‌خورد؛ افزایش فقط ناپدید می‌شود. نمودار vault نشان می‌دهد وقتی skew به فاصله‌ی بین نوشتن‌های وابسته نزدیک می‌شود، گم شدن‌ها چقدر سریع بالا می‌روند.</li>
+      <li><strong>راه‌حل کتاب.</strong> به نوشتنی که بازنویسی می‌کند timestampی بالاتر از مقداری که جایگزین می‌کند بدهید؛ به قیمت این‌که اول آن را بخوانید (ص. ۳۶۳).</li>
+      <li><strong>از آن هم بهتر:</strong> مفهوم logical clock رویدادها را با شمارنده مرتب می‌کند، نه با کریستال quartz (صص. ۳۶۴ و ۴۱۷).</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
-    <li><a href="10-logical-clocks.html"><small>شبیه‌سازی</small>مرتب کردن رویدادها با logical clock</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-the-trouble-with-distributed-systems.html"><small>درس</small>فصل ۹: دردسرهای سیستم‌های توزیع‌شده</a></li>
+      <li><a href="10-logical-clocks.html"><small>شبیه‌سازی</small>مرتب کردن رویدادها با logical clock</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var cfg = { skew: -3, mode: "lww" };
+  var cfg = { skew: 0, mode: "lww" }, tour;
 
   // Figure 9-3 in real time (ms after 42.000 s): A writes on node 1 at 4.0; it reaches node 3 at 5.0;
   // B increments on node 3 at 6.0; both writes reach node 2 later. Node 1's clock is exact.
@@ -119,48 +126,71 @@
     var Y = { 1: 50, 3: 130, 2: 210 }, X = function (ms) { return 60 + ms * 30; };
     [1, 3, 2].forEach(function (n) {
       svgEl.appendChild(Kit.svg("text", { class: "name", x: 6, y: Y[n] + 4 }, "Node " + n));
-      svgEl.appendChild(Kit.svg("line", { class: "life", x1: 60, x2: 350, y1: Y[n], y2: Y[n] }));
+      svgEl.appendChild(Kit.svg("line", { class: "life", x1: 60, x2: 410, y1: Y[n], y2: Y[n] }));
     });
     svgEl.appendChild(Kit.svg("text", { class: "real", x: 60, y: 18 }, "real time →"));
     // A's write on node 1
     svgEl.appendChild(Kit.svg("circle", { class: "ev", cx: X(4), cy: Y[1], r: 6 }));
-    svgEl.appendChild(Kit.svg("text", { class: "lbl", x: X(4) - 10, y: Y[1] - 14 }, "A: x = 1"));
-    svgEl.appendChild(Kit.svg("text", { class: "ts", x: X(4) - 10, y: Y[1] + 20 }, "ts " + f.tsA.toFixed(3)));
+    svgEl.appendChild(Kit.svg("text", { class: "lbl", x: X(4), y: Y[1] - 14, "text-anchor": "middle" }, "A: x = 1"));
+    svgEl.appendChild(Kit.svg("text", { class: "ts", x: X(4) - 10, y: Y[1] + 22, "text-anchor": "end" }, "ts " + f.tsA.toFixed(3)));
     svgEl.appendChild(Kit.svg("path", { class: "rep", d: "M" + X(4) + " " + (Y[1] + 6) + " L" + (X(5) + 2) + " " + (Y[3] - 8) }));
     // B's increment on node 3
     svgEl.appendChild(Kit.svg("circle", { class: "ev b", cx: X(6), cy: Y[3], r: 6 }));
     svgEl.appendChild(Kit.svg("text", { class: "lbl", x: X(6) + 10, y: Y[3] - 10 }, "B: x += 1 → 2"));
-    svgEl.appendChild(Kit.svg("text", { class: "ts", x: X(6) + 10, y: Y[3] + 18 }, "ts " + f.tsB.toFixed(3)));
+    svgEl.appendChild(Kit.svg("text", { class: "ts", x: X(6) - 10, y: Y[3] + 22, "text-anchor": "end" }, "ts " + f.tsB.toFixed(3)));
     // replication to node 2
     svgEl.appendChild(Kit.svg("path", { class: "rep", d: "M" + X(4) + " " + (Y[1] + 6) + " L" + (X(8.5) - 2) + " " + (Y[2] - 8) }));
     svgEl.appendChild(Kit.svg("path", { class: "rep", d: "M" + X(6) + " " + (Y[3] + 6) + " L" + (X(8)) + " " + (Y[2] - 8) }));
     svgEl.appendChild(Kit.svg("text", { class: "lbl " + (f.keeps === 2 ? "ok" : "bad"), x: X(8.3), y: Y[2] + 22, "text-anchor": "middle" },
-      "x = " + f.keeps + (f.keeps === 2 ? " ✓" : "  (increment lost)")));
+      "node 2 keeps x = " + f.keeps + (f.keeps === 2 ? " ✓" : " ✗ increment lost")));
 
     var pts = [], ptsFix = [];
     for (var sk = 0; sk <= 12; sk += 0.5) { pts.push([sk, lostShare(-sk, "lww") * 100]); ptsFix.push([sk, lostShare(-sk, "bump") * 100]); }
     Kit.lineChart(document.getElementById("chart"), {
       width: 360, height: 230, xMax: 12, yMax: 60, xLabel: "عقب بودن node 3 (ms)", yFormat: function (v) { return v + "%"; },
-      series: [{ points: pts, cls: "s2", label: "LWW" }, { points: ptsFix, cls: "ok", label: "ts بالاتر از مقدار قبلی" }],
+      series: [{ points: pts, cls: "s2", label: "LWW" }, { points: ptsFix, cls: "ok", label: "قاعده‌ی کتاب" }],
       marks: [{ x: Math.max(0, Math.min(12, -cfg.skew)), label: "اکنون" }]
     });
 
     var stats = Kit.clear(document.getElementById("stats"));
     [["مفهوم timestamp برای A", f.tsA.toFixed(3), ""], ["مفهوم timestamp برای B", f.tsB.toFixed(3), f.tsB <= f.tsA ? "bad" : ""], ["مقداری که node 2 نگه می‌دارد", "x = " + f.keeps, f.keeps === 2 ? "ok" : "bad"]].forEach(function (x) {
-      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, Kit.digits(x[0])), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(x[1]))));
     });
-    document.getElementById("verdict").textContent = f.keeps === 2
-      ? (cfg.mode === "bump" && 42.006 + cfg.skew / 1000 <= 42.004 ? "نوشتن B به بالای مقداری که بازنویسی کرده برده شد، پس با وجود ساعت کند می‌ماند." : "مفهوم timestamp برای B دیرتر است، پس LWW از قضا افزایش را نگه می‌دارد.")
+    stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, "گم‌شده در آزمایش vault"), Kit.el("span", { class: "stat-value" }, Kit.digits(Math.round(lostShare(cfg.skew, cfg.mode) * 100) + "٪"))));
+    slider.set(cfg.skew); modeSeg.set(cfg.mode);
+  }
+  function verdict() {
+    var f = figure();
+    return f.keeps === 2
+      ? (cfg.mode === "bump" && 42.006 + cfg.skew / 1000 <= 42.004 ? "نوشتن B به بالای مقداری که بازنویسی کرده برده شد، پس با وجود ساعت کند می‌ماند." : "مفهوم timestamp برای B دیرتر است، پس LWW افزایش را نگه می‌دارد.")
       : "افزایش B بعد از نوشتن A رخ داد، اما timestampش زودتر است: node 2 دورش می‌ریزد. هیچ خطایی گزارش نمی‌شود.";
   }
 
-  document.getElementById("sliders").appendChild(Kit.slider({ label: "اختلاف ساعت node 3", min: -10, max: 5, step: 0.5, value: cfg.skew,
+  var slider = Kit.slider({ label: "اختلاف ساعت node 3", min: -10, max: 5, step: 0.5, value: cfg.skew,
     format: function (v) { return (v > 0 ? "+" : "") + v + " ms"; }, hint: "ساعت node 1 دقیق است؛ عدد منفی یعنی node 3 کند است.",
-    onInput: function (v) { cfg.skew = v; render(); } }).element);
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "حل conflict", value: cfg.mode,
+    onInput: function (v) { cfg.skew = v; render(); tour.free(verdict(), figure().keeps === 2 ? "ok" : "bad"); } });
+  document.getElementById("sliders").appendChild(slider.element);
+  var modeSeg = Kit.segmented({ label: "حل conflict", value: cfg.mode,
     options: [{ value: "lww", label: "مدل LWW ساده با ساعت نویسنده" }, { value: "bump", label: "مفهوم timestamp بالاتر از مقدار قبلی" }],
-    onChange: function (v) { cfg.mode = v; render(); } }).element);
-  render();
+    onChange: function (v) { cfg.mode = v; render(); tour.free(verdict(), figure().keeps === 2 ? "ok" : "bad"); } });
+  document.getElementById("mode").appendChild(modeSeg.element);
+
+  /* ---------- the scenario ---------- */
+  function set(sk, md) { return function () { cfg.skew = sk; cfg.mode = md; }; }
+  function pct(sk, md) { return Kit.digits(Math.round(lostShare(sk, md) * 100) + "٪"); }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: set(0, "lww"), render: render, interval: 5600,
+    intro: "مثال شکل ۹-۳: client A روی node 1 مقدار x را ۱ می‌کند، client B روی node 3 آن را یکی زیاد می‌کند، و node 2 هر دو را می‌گیرد و با last write wins یکی را نگه می‌دارد. ساعت node 1 دقیق است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و ساعت node 3 را جلو و عقب ببرید.",
+    steps: [
+      { kind: "ok", run: set(0, "lww"), say: "ساعت node 3 هم دقیق است. افزایش B دو میلی‌ثانیه بعد رخ می‌دهد و timestamp بزرگ‌تری می‌گیرد، پس node 2 مقدار ۲ را نگه می‌دارد." },
+      { kind: "bad", run: set(-3, "lww"), say: "ساعت node 3 فقط ۳ میلی‌ثانیه عقب است. افزایش B برچسب ۴۲٫۰۰۳ می‌خورد، کمتر از ۴۲٫۰۰۴ نوشتن A، و node 2 بی‌صدا مقدار ۱ را نگه می‌دارد (شکل ۹-۳، ص. ۳۶۳)." },
+      { kind: "bad", run: set(-8, "lww"), say: function () { return "در آزمایش vault با نوشتن‌های پشت‌سرهم، ۸ میلی‌ثانیه عقب بودن یعنی حدود " + pct(-8, "lww") + " از نوشتن‌ها گم می‌شوند: nodeی که ساعتش کند است نمی‌تواند نوشته‌ی node تندتر را بازنویسی کند (ص. ۳۶۳)."; } },
+      { kind: "ok", run: set(-3, "bump"), say: "راه‌حل کتاب: مقدار تازه همیشه timestampی بالاتر از مقداری که بازنویسی می‌کند بگیرد. افزایش B حالا ۴۲٫۰۰۵ می‌گیرد و می‌ماند (ص. ۳۶۳)." },
+      { kind: "ok", run: set(-8, "bump"), say: "با همین قاعده، حتی ۸ میلی‌ثانیه skew هیچ نوشتنی را گم نمی‌کند؛ هزینه‌اش خواندن مقدار قبلی پیش از نوشتن است. راه کلی‌تر logical clock است که اصلاً به ساعت تکیه نمی‌کند (ص. ۳۶۴)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا node 2 در شکل ۹-۳ افزایش را دور می‌ریزد؟",

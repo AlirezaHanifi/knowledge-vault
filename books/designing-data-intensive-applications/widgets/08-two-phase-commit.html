@@ -9,16 +9,17 @@
 <style>
   .seq .life { stroke: var(--line-strong); stroke-dasharray: 4 4; }
   .seq .head rect { fill: var(--surface-2); stroke: var(--line-strong); }
-  .seq .head text { font-size: 12px; font-weight: 600; }
+  .seq .head text { font-size: 14px; font-weight: 600; }
   .seq .msg { stroke: var(--ink-2); stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
   .seq .msg.lost { stroke: var(--bad); stroke-dasharray: 5 4; marker-end: none; }
   .seq .msg.yes { stroke: var(--ok); } .seq .msg.no { stroke: var(--bad); }
-  .seq .lbl { font-size: 11px; fill: var(--ink-2); }
-  .seq .note { font-size: 11px; fill: var(--ink-3); font-style: italic; }
+  .seq .lbl { font-size: 14px; fill: var(--ink-2); }
+  .seq .note { font-size: 13px; fill: var(--ink-3); font-style: italic; }
   .seq .disk { fill: var(--accent); }
   .seq .crash { stroke: var(--bad); stroke-width: 3; }
   .seq #arrow path { fill: var(--ink-2); }
-  .states { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 8px; }
+  .states { display: grid; gap: 8px; font-size: .84rem; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 6px; }
+  .seq { display: block; width: 100%; height: 300px; }
   .st { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; font-size: .8rem; background: var(--surface); }
   .st b { display: block; font-size: .85rem; }
   .st.doubt { border-color: var(--warn); background: var(--warn-soft); }
@@ -27,7 +28,7 @@
   .st.down { opacity: .55; border-style: dashed; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -41,55 +42,64 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۸ · تراکنش‌ها</div>
-  <h1>مفهوم two-phase commit و participant در حالت in doubt</h1>
-  <p class="lede">مفهوم 2PC یک تراکنش را با دو قول بین nodeها atomic می‌کند: participantی که yes می‌دهد حق abort را از دست می‌دهد، و تصمیم coordinator وقتی در log نوشته شد قطعی است. هزینه‌اش: اگر coordinator بعد از رأی‌ها crash کند، participantها فقط می‌توانند صبر کنند؛ in doubt، با قفل‌هایشان.</p>
-  <p class="source-note">برای بخش «مفهوم two-phase commit»، از جمله نظام قول‌ها و خرابی coordinator، در صص. ۳۲۴–۳۲۸ و شکل‌های ۸-۱۳ و ۸-۱۴. دو participant، یک تراکنش، و پیام‌ها به ترتیب؛ coordinatorهای واقعی timeout و retry هم دارند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مفهوم two-phase commit و participant در حالت in doubt</h1>
+      <p class="lede">مفهوم 2PC یک تراکنش را با دو قول بین nodeها atomic می‌کند: participantی که yes می‌دهد حق abort را از دست می‌دهد، و تصمیمی که coordinator در log نوشت قطعی است. هزینه‌اش این است که اگر coordinator بعد از رأی‌ها crash کند، participantها فقط می‌توانند با قفل‌هایشان صبر کنند.</p>
+      <p class="source-note">برای صص. ۳۲۴–۳۲۷ و شکل‌های ۸-۱۳ و ۸-۱۴: دو participant، یک تراکنش و پیام‌ها به ترتیب. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="states" id="states"></div>
-      <div class="stage"><svg class="seq" id="seq" dir="ltr" viewBox="0 0 520 330" role="img" aria-label="ترتیب پیام‌های 2PC؛ گزارش رویدادها را ببینید"></svg></div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">سناریو</p>
-        <div id="scenario"></div>
-        <p class="field-hint" id="scenario-hint" style="margin-top:6px"></p>
-        <div id="player" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" type="button" id="recover" disabled>بازیابی coordinator</button>
-          <button class="btn danger" type="button" id="giveup" disabled>دیتابیس ۱ کوتاه می‌آید و abort می‌کند</button>
-        </div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="states" id="states" aria-live="polite"></div>
+        <svg class="seq" id="seq" dir="ltr" viewBox="0 0 800 330" preserveAspectRatio="xMidYMin meet" role="img" aria-label="ترتیب پیام‌های 2PC؛ متن بالای صحنه هر قدم را توضیح می‌دهد"></svg>
       </div>
-      <div class="panel wide"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><span class="field-head">سناریو</span><div id="scenario"></div><p class="field-hint" id="scenario-hint"></p></div>
+        <div class="tweak-group"><div class="row">
+          <button class="btn primary small" type="button" id="next">پیام بعدی</button>
+          <button class="btn small" type="button" id="recover" disabled>بازیابی coordinator</button>
+          <button class="btn danger small" type="button" id="giveup" disabled>دیتابیس ۱ کوتاه می‌آید و abort می‌کند</button>
+        </div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>پیش از رأی‌ها، هر کسی می‌تواند abort کند.</strong> یک رأی منفی یا prepareی که timeout شود coordinator را وادار می‌کند همه‌جا abort کند.</li>
-    <li><strong>مفهوم commit point یک نوشتن روی دیسک است.</strong> تصمیم وقتی در log coordinator باشد قطعی است؛ بعد از آن درخواست‌های commit تا موفق شوند retry می‌شوند، حتی به participantی که crash کرده و برگشته.</li>
-    <li><strong>حالت in doubt.</strong> coordinator را بعد از تصمیم crash کنید: دیتابیس ۱ رأی yes داده، پس نه می‌تواند خودش commit کند و نه abort، و قفل‌هایش تا بازیابی coordinator نگه داشته می‌شوند.</li>
-    <li><strong>مفهوم timeout کمکی نمی‌کند.</strong> بگذارید دیتابیس ۱ کوتاه بیاید و abort کند در حالی که دیتابیس ۲ commit کرده: atomicity می‌شکند. برای همین به 2PC پروتکل blocking می‌گویند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>پیش از رأی‌ها، هر کسی می‌تواند abort کند.</strong> یک رأی no یا prepareی که timeout شود coordinator را وادار می‌کند همه‌جا abort کند (ص. ۳۲۵).</li>
+      <li><strong>مفهوم commit point یک نوشتن روی دیسک است.</strong> تصمیم وقتی در log coordinator باشد قطعی است؛ بعد از آن درخواست commit تا موفق شود retry می‌شود، حتی به participantی که crash کرده و برگشته (ص. ۳۲۵).</li>
+      <li><strong>حالت in doubt.</strong> participantی که yes داده نه می‌تواند خودش commit کند و نه abort، و قفل‌هایش تا بازیابی coordinator می‌مانند (صص. ۳۲۶–۳۲۷).</li>
+      <li><strong>مفهوم timeout کمکی نمی‌کند.</strong> اگر دیتابیس ۱ بعد از timeout یک‌طرفه abort کند، با دیتابیس ۲ که commit کرده ناسازگار می‌شود. برای همین به 2PC پروتکل blocking می‌گویند (صص. ۳۲۶–۳۲۷).</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/08-transactions.html"><small>درس</small>فصل ۸: تراکنش‌ها</a></li>
-    <li><a href="10-consensus.html"><small>شبیه‌سازی</small>مفهوم consensus: انتخاب leader و replicate کردن log</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/08-transactions.html"><small>درس</small>فصل ۸: تراکنش‌ها</a></li>
+      <li><a href="08-isolation.html"><small>شبیه‌سازی</small>سطح‌های isolation</a></li>
+      <li><a href="10-consensus.html"><small>شبیه‌سازی</small>مفهوم consensus: انتخاب leader و replicate کردن log</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var X = { C: 80, D1: 260, D2: 440 }, NAMES = { C: "coordinator", D1: "DB 1", D2: "DB 2" };
+  var X = { C: 110, D1: 400, D2: 690 }, NAMES = { C: "coordinator", D1: "DB 1", D2: "DB 2" };
   var FA_NAMES = { C: "coordinator", D1: "دیتابیس ۱", D2: "دیتابیس ۲" };
   var STATE = { running: "در حال اجرا", active: "فعال", prepared: "prepared", "in doubt": "in doubt", committed: "commitشده", aborted: "abortشده", crashed: "crashشده", done: "تمام", "decided commit": "تصمیم: commit", "decided abort": "تصمیم: abort" };
   var SCEN = {
@@ -100,16 +110,14 @@
     ccrash: "مفهوم coordinator بعد از تصمیم به commit crash می‌کند، در حالی که فقط به دیتابیس ۲ رسیده؛ شکل ۸-۱۴.",
     cearly: "مفهوم coordinator بعد از رأی‌ها اما پیش از نوشتن تصمیمش crash می‌کند."
   };
-  var log = Kit.log(document.getElementById("log"));
-  var scen = "ccrash", s, plan;
+  var said = ["", ""], tour;
+  var log = { add: function (t, k) { said = [t, k || ""]; } };
+  var scen = "ok", s, plan;
 
   function reset() {
     s = { y: 64, items: [], st: { C: "running", D1: "active", D2: "active" }, down: {}, decision: null, logged: false, pc: 0, waiting: false, broken: false };
     plan = build();
-    log.clear(); log.add("تراکنش T1 در دیتابیس ۱ و ۲ می‌نویسد. برای شروع commit، قدم بعد را بزنید.", "muted");
-    document.getElementById("recover").disabled = true;
-    document.getElementById("giveup").disabled = true;
-    render();
+    log.add("تراکنش T1 در دیتابیس ۱ و ۲ نوشته است. برای شروع commit، «پیام بعدی» را بزنید.", "");
   }
   function msg(from, to, label, cls) { s.items.push({ t: "msg", from: from, to: to, label: label, cls: cls || "", y: s.y }); s.y += 30; }
   function note(at, text) { s.items.push({ t: "note", at: at, text: text, y: s.y }); s.y += 22; }
@@ -155,42 +163,39 @@
     if (s.st.D1 === "prepared") s.st.D1 = "in doubt";
     if (s.st.D2 === "prepared") s.st.D2 = "in doubt";
     log.add(text, "bad");
-    document.getElementById("recover").disabled = false;
-    document.getElementById("giveup").disabled = s.st.D1 !== "in doubt";
   }
 
-  function step() { if (s.pc >= plan.length) return false; plan[s.pc++](); render(); return s.pc < plan.length; }
+  function step() { if (s.pc >= plan.length) return false; plan[s.pc++](); return s.pc < plan.length; }
+  function upTo(n) { while (s.pc < plan.length && (n === undefined || s.pc < n)) step(); }
+  function canRecover() { return !!s.down.C; }
+  function canGiveUp() { return !!s.down.C && s.st.D1 === "in doubt"; }
 
-  document.getElementById("recover").addEventListener("click", function () {
+  function recover() {
     s.down.C = false;
     note("C", "restart و خواندن log");
     var dec = s.logged ? s.decision : "abort";
-    if (!s.logged) { s.decision = "abort"; disk("C", "no decision in log → ABORT T1"); log.add("رکورد commit در log نیست، پس T1 abort می‌شود", "warn"); }
+    if (!s.logged) { s.decision = "abort"; s.logged = true; disk("C", "no decision in log → ABORT T1"); log.add("رکورد commit در log نیست، پس T1 abort می‌شود", "warn"); }
     else log.add("مفهوم log می‌گوید «" + dec + "»: آن را دوباره برای هر participantی که هنوز in doubt است بفرست", "ok");
     ["D1", "D2"].forEach(function (d) {
       if (s.st[d] === "in doubt") { msg("C", d, dec); s.st[d] = dec === "commit" ? "committed" : "aborted"; }
     });
     s.st.C = "done";
     log.add(s.broken ? "خیلی دیر است: دیتابیس ۱ abort کرده در حالی که دیتابیس ۲ commit کرده. تراکنش دیگر atomic نیست." : "همه‌ی participantها T1 را به یک شکل تمام کرده‌اند.", s.broken ? "bad" : "ok");
-    document.getElementById("recover").disabled = true; document.getElementById("giveup").disabled = true;
-    render();
-  });
-  document.getElementById("giveup").addEventListener("click", function () {
+  }
+  function giveup() {
     s.st.D1 = "aborted"; s.broken = s.decision === "commit";
     note("D1", "timeout و abort یک‌طرفه");
     log.add(s.broken ? "دیتابیس ۱ abort کرد، اما coordinator تصمیم به commit گرفته بود و دیتابیس ۲ commit کرده بود: ناسازگار!" : "دیتابیس ۱ یک‌طرفه abort کرد؛ این بار شانس آورد", s.broken ? "bad" : "warn");
-    document.getElementById("giveup").disabled = true;
-    render();
-  });
+  }
 
   function render() {
     var svgEl = Kit.clear(document.getElementById("seq"));
     var H = Math.max(330, s.y + 20);
-    svgEl.setAttribute("viewBox", "0 0 520 " + H);
+    svgEl.setAttribute("viewBox", "0 0 800 " + H);
     svgEl.appendChild(Kit.svg("defs", null, Kit.svg("marker", { id: "arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, Kit.svg("path", { d: "M0 0 L10 5 L0 10 z" }))));
     Object.keys(X).forEach(function (k) {
       svgEl.appendChild(Kit.svg("line", { class: "life", x1: X[k], x2: X[k], y1: 40, y2: H - 10 }));
-      svgEl.appendChild(Kit.svg("g", { class: "head" }, Kit.svg("rect", { x: X[k] - 55, y: 8, width: 110, height: 26, rx: 6 }), Kit.svg("text", { x: X[k], y: 25, "text-anchor": "middle" }, NAMES[k])));
+      svgEl.appendChild(Kit.svg("g", { class: "head" }, Kit.svg("rect", { x: X[k] - 65, y: 6, width: 130, height: 28, rx: 6 }), Kit.svg("text", { x: X[k], y: 25, "text-anchor": "middle" }, NAMES[k])));
     });
     s.items.forEach(function (it) {
       if (it.t === "msg") {
@@ -210,6 +215,19 @@
         svgEl.appendChild(Kit.svg("text", { class: "note", x: cx + 14, y: it.y + 4 }, "crash"));
       }
     });
+    var outcome = s.broken ? "ناسازگار" : (s.st.D1 === "committed" && s.st.D2 === "committed") ? "commit همه‌جا" :
+      (s.st.D1 === "aborted" && s.st.D2 === "aborted") ? "abort همه‌جا" : (s.st.D1 === "in doubt" || s.st.D2 === "in doubt") ? "گیر کرده" : "در جریان";
+    var ok = outcome === "commit همه‌جا" || outcome === "abort همه‌جا";
+    var sx = Kit.clear(document.getElementById("stats"));
+    [["سناریو", LABELS[scen], ""], ["پیام‌ها", Kit.digits(s.pc + " از " + plan.length), ""],
+     ["تصمیم در log", s.logged ? s.decision : "هنوز نه", s.logged ? (s.decision === "commit" ? "ok" : "warn") : ""],
+     ["نتیجه", outcome, s.broken ? "bad" : ok ? "ok" : outcome === "گیر کرده" ? "warn" : ""]].forEach(function (x) {
+      sx.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    document.getElementById("next").disabled = s.pc >= plan.length;
+    document.getElementById("recover").disabled = !canRecover();
+    document.getElementById("giveup").disabled = !canGiveUp();
+    scenSeg.set(scen); document.getElementById("scenario-hint").textContent = SCEN[scen];
     var st = Kit.clear(document.getElementById("states"));
     ["C", "D1", "D2"].forEach(function (k) {
       var v = s.st[k], cls = v === "in doubt" ? "doubt" : v === "committed" ? "committed" : v === "aborted" ? "aborted" : "";
@@ -218,13 +236,35 @@
     });
   }
 
-  document.getElementById("scenario").appendChild(Kit.segmented({ label: "سناریو", value: scen,
-    options: [{ value: "ok", label: "موفقیت" }, { value: "no", label: "رأی no" }, { value: "timeout", label: "گم شدن prepare" },
-              { value: "pcrash", label: "crash یک participant" }, { value: "ccrash", label: "crash مربوط به coordinator" }, { value: "cearly", label: "crash پیش از log" }],
-    onChange: function (v) { scen = v; document.getElementById("scenario-hint").textContent = SCEN[v]; player.reset(); } }).element);
-  document.getElementById("scenario-hint").textContent = SCEN[scen];
-  var player = Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1100, speeds: false });
-  reset();
+  var LABELS = { ok: "موفقیت", no: "رأی no", timeout: "گم شدن prepare", pcrash: "crash یک participant", ccrash: "crash بعد از تصمیم", cearly: "crash پیش از log" };
+  var scenSeg = Kit.segmented({ label: "سناریو", value: scen,
+    options: Object.keys(LABELS).map(function (k) { return { value: k, label: LABELS[k] }; }),
+    onChange: function (v) { scen = v; reset(); render(); tour.free(said[0], said[1]); } });
+  document.getElementById("scenario").appendChild(scenSeg.element);
+  function act(f) { return function () { f(); render(); tour.free(said[0], said[1]); }; }
+  document.getElementById("next").addEventListener("click", act(function () { step(); }));
+  document.getElementById("recover").addEventListener("click", act(recover));
+  document.getElementById("giveup").addEventListener("click", act(giveup));
+
+  /* ---------- the scenario ---------- */
+  function go(sc, n, then) { return function () { scen = sc; reset(); upTo(n); if (then) then(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { scen = "ok"; reset(); }, render: render, interval: 5200,
+    intro: "تراکنش T1 در دو دیتابیس نوشته است و حالا باید در هر دو commit شود یا در هیچ‌کدام. coordinator این کار را در دو فاز انجام می‌دهد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، سناریو را عوض کنید و پیام به پیام جلو بروید.",
+    steps: [
+      { run: go("ok", 4), say: "فاز ۱: coordinator از هر دو دیتابیس می‌پرسد «می‌توانی commit کنی؟». هر کدام اول T1 را روی دیسک می‌نویسد و بعد yes می‌دهد؛ از این لحظه حق abort ندارد (شکل ۸-۱۳، صص. ۳۲۴–۳۲۵)." },
+      { kind: "ok", run: go("ok"), say: "فاز ۲: coordinator تصمیم commit را در log خودش می‌نویسد. این commit point است و بعد از آن تصمیم برگشت‌ناپذیر است. سپس به هر دو خبر می‌دهد (ص. ۳۲۵)." },
+      { kind: "warn", run: go("no"), say: "اگر یک participant رأی no بدهد، coordinator تصمیم abort را ثبت می‌کند و به همه می‌گوید abort کنند (ص. ۳۲۵)." },
+      { kind: "warn", run: go("timeout"), say: "پیام prepare به دیتابیس ۲ گم شده و پاسخی تا پایان timeout نمی‌آید. پیش از commit point این هم مثل رأی no است: abort همه‌جا (ص. ۳۲۵)." },
+      { kind: "ok", run: go("pcrash"), say: "دیتابیس ۱ بعد از yes دادن crash می‌کند. تصمیم commit گرفته شده، پس coordinator تا ابد retry می‌کند؛ دیتابیس ۱ که برگشت، T1 را commit می‌کند (ص. ۳۲۵)." },
+      { kind: "bad", run: go("ccrash"), say: "حالا coordinator بعد از تصمیم commit و پیش از خبر دادن به دیتابیس ۱ crash می‌کند. دیتابیس ۱ yes داده و نمی‌داند چه شد: in doubt است و قفل‌های T1 را نگه می‌دارد (شکل ۸-۱۴، صص. ۳۲۶–۳۲۷)." },
+      { kind: "bad", run: go("ccrash", undefined, giveup), say: "اگر دیتابیس ۱ بعد از timeout یک‌طرفه abort کند، با دیتابیس ۲ که commit کرده ناسازگار می‌شود. timeout کمکی نمی‌کند (ص. ۳۲۶)." },
+      { kind: "ok", run: go("ccrash", undefined, recover), say: "تنها راه، صبر برای coordinator است. coordinator بالا می‌آید، log را می‌خواند و commit را دوباره به دیتابیس ۱ می‌فرستد (ص. ۳۲۷)." },
+      { kind: "warn", run: go("cearly", undefined, recover), say: "اگر coordinator پیش از نوشتن تصمیم crash کرده باشد، بعد از بازیابی رکورد commit پیدا نمی‌کند و T1 را abort می‌کند (ص. ۳۲۷)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "participant با رأی yes چه قولی می‌دهد؟",

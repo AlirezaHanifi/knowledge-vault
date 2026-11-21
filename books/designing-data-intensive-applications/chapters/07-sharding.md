@@ -123,7 +123,7 @@ lang: fa
 | **نسخه‌ی Cassandra و ScyllaDB** | فضای hash به بازه‌هایی با مرز تصادفی تقسیم می‌شود، چند بازه برای هر node؛ ۱۶ در Cassandra و ۲۵۶ در ScyllaDB؛ شکل ۷-۶ | node تازه بخش‌هایی از چند بازه را از چند node می‌گیرد | عدم توازن‌ها با تعداد زیاد بازه‌ها جبران می‌شوند | Cassandra و ScyllaDB |
 | **مدل consistent hashing**، مثل rendezvous یا highest random weight، و jump | کلیدها یکنواخت پخش می‌شوند و کمترین تعداد کلید جابه‌جا می‌شود | node تازه کلیدهای تکی پراکنده از همه‌ی nodeها را می‌گیرد | واژه‌ی «consistent» این‌جا ربطی به consistency در replica یا ACID ندارد | سیستم‌های مختلف |
 
-مفهوم data warehouseها همین کار را با واژه‌های دیگر می‌کنند: partition key و **cluster column** در BigQuery، micro-partition و cluster key در Snowflake، و Delta Lake؛ clustering به فشرده‌سازی و فیلتر کردن هم کمک می‌کند (p. 262).
+##### مفهوم rebalancing با hash (pp. 259–262)
 
 ![کلیدهای ۰ تا ۲۳ که اول با hash mod 3 روی سه node و بعد با hash mod 4 روی چهار node پخش می‌شوند: تقریباً هر کلیدی روی node دیگری می‌افتد](../figures/07-03.png)
 
@@ -134,6 +134,10 @@ lang: fa
 *Figure 7-6 (p. 262): با مرزهای تصادفی و چند بازه برای هر node، node تازه از هر node موجود سهمی می‌گیرد.*
 
 > **Try it:** [مفهوم sharding و rebalancing](../widgets/07-sharding.html): زیر hash mod N، تعداد ثابت shard و rendezvous hashing یک node اضافه کنید، و hot spot بسازید و کمش کنید.
+
+##### مفهوم partitioning و range query در data warehouse (p. 262)
+
+مفهوم data warehouseها همین کار را با واژه‌های دیگر می‌کنند: partition key و **cluster column** در BigQuery، micro-partition و cluster key در Snowflake، و Delta Lake؛ clustering به فشرده‌سازی و فیلتر کردن هم کمک می‌کند (p. 262).
 
 > **In practice:** کلید `ORDER BY` در MergeTree همان کاری را می‌کند که کتاب به cluster column در BigQuery و cluster key در Snowflake نسبت می‌دهد: ردیف‌ها را داخل هر partition مرتب نگه می‌دارد (p. 262).
 >
@@ -197,11 +201,15 @@ lang: fa
 | چه کسی به کار می‌برد | MongoDB، Riak، Cassandra، Elasticsearch، SolrCloud و VoltDB | CockroachDB، TiDB و YugabyteDB؛ DynamoDB هر دو را دارد |
 | کجا خوب است | بارهای پرنوشتن | وقتی throughput خواندن از نوشتن بیشتر است و postings listها کوتاه‌اند |
 
-ساختن secondary index خودتان در یک key-value store یعنی سازگار نگه داشتنش با خودتان است؛ race condition و خرابی جزئی به‌راحتی آن را از داده جدا می‌کنند (p. 269).
+#### مدل local secondary index (pp. 268–269)
 
 ![دو shard که هر کدام یک primary key index از ماشین‌ها و یک local secondary index روی رنگ و سازنده دارند؛ کوئری ماشین‌های قرمز باید از هر دو shard بپرسد](../figures/07-09.png)
 
 *Figure 7-9 (p. 269): هر local index فقط رکوردهای shard خودش را پوشش می‌دهد، پس کوئری بر اساس رنگ به همه‌ی shardها پخش می‌شود.*
+
+ساختن secondary index خودتان در یک key-value store یعنی سازگار نگه داشتنش با خودتان است؛ race condition و خرابی جزئی به‌راحتی آن را از داده جدا می‌کنند (p. 269).
+
+#### مدل global secondary index (pp. 270–271)
 
 ![همان دو shard با یک global secondary index که خودش بر اساس term shard شده: رنگ‌های a تا r در shard ۰ و s تا z در shard ۱؛ کوئری ماشین‌های قرمز از یک index shard می‌خواند](../figures/07-10.png)
 

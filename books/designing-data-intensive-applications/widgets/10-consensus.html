@@ -27,9 +27,17 @@
   .cell { font-family: var(--mono); font-size: .72rem; padding: 3px 5px; border-radius: 4px; border: 1.5px dashed var(--line-strong); background: var(--surface); }
   .cell.committed { border-style: solid; }
   .cell.t0 { border-color: var(--s1); } .cell.t1 { border-color: var(--s2); } .cell.t2 { border-color: var(--s3); } .cell.t3 { border-color: var(--s4); } .cell.t4 { border-color: var(--s5); }
+  .cscene { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; height: 100%; }
+  @media (max-width: 760px) { .cscene { grid-template-columns: minmax(0, 1fr); } }
+  #ring { display: block; width: 100%; max-height: 360px; }
+  .logs { font-size: .95rem; gap: 10px; }
+  .logrow .who { font-size: 1rem; }
+  .cell { font-size: .85rem; padding: 4px 7px; }
+  .role-label { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; fill: var(--ink-2); }
+  .cscene .panel-title { font-size: .88rem; margin-bottom: 10px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -43,52 +51,64 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۰ · مفهوم consistency و consensus</div>
-  <h1>مفهوم consensus: انتخاب leader و replicate کردن log</h1>
-  <p class="lede">الگوریتم‌های consensus همان single-leader replication با failover خودکار و امن‌اند. nodeی که دیگر از leader خبری نمی‌شنود، انتخاباتی برای یک epoch تازه و بزرگ‌تر شروع می‌کند که Raft به آن <em>term</em> می‌گوید؛ یک quorum باید به آن رأی بدهد، و یک quorum باید هر entry در log را ذخیره کند تا commitشده حساب شود.</p>
-  <p class="source-note">برای بخش‌های «از single-leader replication تا consensus» و نکته‌های ظریف consensus در صص. ۴۳۴–۴۳۶، و هزینه‌ی quorum در «مزایا و معایب» در ص. ۴۳۶. یک مدل آموزشی که آزادانه از Raft followerی می‌کند: leaderها کل log را می‌فرستند نه entryهای افزایشی را، compaction و تغییر عضویت ندارد، و زمان به tick انتزاعی است. پیاده‌سازی مال خود vault است و الگوریتم production نیست.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مفهوم consensus: انتخاب leader و replicate کردن log</h1>
+      <p class="lede">الگوریتم‌های consensus همان single-leader replication با failover خودکار و امن‌اند. nodeی که از leader خبری نمی‌شنود، انتخاباتی برای یک term بزرگ‌تر شروع می‌کند؛ یک quorum باید به آن رأی بدهد، و یک quorum باید هر entry را ذخیره کند تا commitشده حساب شود.</p>
+      <p class="source-note">برای صص. ۴۳۴–۴۳۷. مدلی آموزشی که آزادانه از Raft الهام گرفته: leader کل log را می‌فرستد، compaction و تغییر عضویت ندارد و زمان به tick است. پیاده‌سازی مال خود vault است و الگوریتم production نیست.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="stage" dir="ltr"><svg class="ring-svg" id="ring" viewBox="0 0 420 330" role="img" aria-label="پنج node؛ تغییرها را در گزارش رویدادها ببینید"></svg></div>
-      <div class="stats" id="stats" style="margin-top:8px"></div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">کنترل‌ها</p>
-        <div id="player"></div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" type="button" id="req">نوشتن client</button>
-          <button class="btn danger" type="button" id="kill">crash کردن leader</button>
-          <button class="btn" type="button" id="part" aria-pressed="false">جدا کردن <span dir="ltr">{A,B} | {C,D,E}</span></button>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="cscene">
+          <svg class="ring-svg" id="ring" dir="ltr" viewBox="0 0 420 340" role="img" aria-label="پنج node؛ وضعیت در متن بالای صحنه آمده"></svg>
+          <div>
+            <p class="panel-title">مفهوم log در هر node: هر خانه یک entry است، اول term و بعد دستور؛ کادر پیوسته یعنی commitشده.</p>
+            <div class="logs" id="logs" dir="ltr"></div>
+          </div>
         </div>
-        <p class="field-hint" style="margin-top:8px">برای crash یا restart یک node رویش کلیک کنید، یا focus کنید و Enter بزنید.</p>
-        <div id="sliders" style="margin-top:8px"></div>
       </div>
-      <div class="panel">
-        <p class="panel-title">مفهوم log در هر node؛ term·cmd، و خط پیوسته یعنی commitشده</p>
-        <div class="logs" id="logs" dir="ltr"></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت cluster</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><div class="row">
+          <button class="btn primary small" type="button" id="live" aria-pressed="false">اجرای زنده</button>
+          <button class="btn small" type="button" id="tick">یک tick</button>
+          <button class="btn small" type="button" id="req">نوشتن client</button>
+          <button class="btn danger small" type="button" id="kill">crash کردن leader</button>
+          <button class="btn small" type="button" id="part" aria-pressed="false">جدا کردن leader در اقلیت</button>
+        </div><p class="field-hint">برای crash یا restart یک node رویش کلیک کنید، یا focus کنید و Enter بزنید.</p></div>
+        <div class="tweak-group" id="sliders"></div>
       </div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>مفهوم epoch leader را در هر term یکتا می‌کند، نه در کل زمان.</strong> بعد از درمان partition، leader قدیمی با term کوچک‌تر همان لحظه که term بزرگ‌تری ببیند کنار می‌رود.</li>
-    <li><strong>نوشتن اکثریت لازم دارد.</strong> مفهوم leader را در اقلیت <span dir="ltr">{A,B}</span> جدا کنید: همچنان نوشتن‌های client را می‌پذیرد اما هرگز نمی‌تواند commitشان کند. سمت اکثریت leader تازه‌ای انتخاب می‌کند و ادامه می‌دهد؛ وقتی partition درمان شود، entryهای commitنشده‌ی اقلیت بازنویسی می‌شوند.</li>
-    <li><strong>رأی‌ها تازگی log را بررسی می‌کنند.</strong> یک node فقط به candidateی رأی می‌دهد که log او دست‌کم به اندازه‌ی log خودش به‌روز باشد، پس leader تازه همیشه همه‌ی entryهای commitشده را دارد.</li>
-    <li><strong>پنج node دو خرابی را تحمل می‌کنند.</strong> node سوم را crash کنید تا cluster از پیشرفت بایستد؛ امن، اما در دسترس نیست.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>مفهوم epoch، leader را در هر term یکتا می‌کند، نه در کل زمان.</strong> بعد از درمان partition، leader قدیمی با term کوچک‌تر همان لحظه که term بزرگ‌تری ببیند کنار می‌رود (ص. ۴۳۴).</li>
+      <li><strong>نوشتن اکثریت لازم دارد.</strong> leaderی که در اقلیت جدا شده همچنان نوشتن‌های client را می‌پذیرد اما هرگز نمی‌تواند commitشان کند؛ سمت اکثریت leader تازه‌ای انتخاب می‌کند و ادامه می‌دهد (ص. ۴۳۵).</li>
+      <li><strong>رأی‌ها تازگی log را بررسی می‌کنند.</strong> یک node فقط به candidateی رأی می‌دهد که log او دست‌کم به اندازه‌ی log خودش به‌روز باشد، پس leader تازه همیشه همه‌ی entryهای commitشده را دارد (صص. ۴۳۵–۴۳۶).</li>
+      <li><strong>پنج node دو خرابی را تحمل می‌کنند.</strong> با سه node خاموش، cluster از پیشرفت می‌ایستد؛ امن، اما در دسترس نیست (ص. ۴۳۷).</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/10-consistency-and-consensus.html"><small>درس</small>فصل ۱۰: مفهوم consistency و consensus</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/10-consistency-and-consensus.html"><small>درس</small>فصل ۱۰: مفهوم consistency و consensus</a></li>
+      <li><a href="08-two-phase-commit.html"><small>شبیه‌سازی</small>مفهوم two-phase commit</a></li>
+      <li><a href="09-fencing.html"><small>شبیه‌سازی</small>مفهوم lease و fencing token</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -98,18 +118,19 @@
   var el = Kit.el, svg = Kit.svg;
   var NAMES = ["A", "B", "C", "D", "E"], N = 5, MAJ = 3;
   var HEARTBEAT = 4, cfg = { tMin: 14, tMax: 28, delay: 2 };
-  var log = Kit.log(document.getElementById("log"));
+  var said = ["", ""], tour, liveTimer = null, last = {};
+  var log = { add: function (t, k) { said = [Kit.digits(t), k || ""]; } };
   var S, r;
 
   function fresh() {
     r = Kit.rng(17);
-    S = { t: 0, msgs: [], partition: false, cmd: 0, nodes: NAMES.map(function (n, i) {
+    S = { t: 0, msgs: [], partition: false, minority: [], cmd: 0, nodes: NAMES.map(function (n, i) {
       return { id: i, name: n, up: true, role: "follower", term: 0, votedFor: null, votes: 0, log: [], commit: 0,
                timer: timeout(), hb: 0, match: [0, 0, 0, 0, 0] };
     }) };
   }
   function timeout() { return cfg.tMin + r.int(cfg.tMax - cfg.tMin + 1); }
-  function side(i) { return i < 2 ? 0 : 1; }
+  function side(i) { return S.minority.indexOf(i) >= 0 ? 0 : 1; }
   function connected(a, b) { return !S.partition || side(a) === side(b); }
   function lastTerm(n) { return n.log.length ? n.log[n.log.length - 1].term : 0; }
 
@@ -185,7 +206,11 @@
       if (n.role === "leader") { if (++n.hb >= HEARTBEAT) { n.hb = 0; n.match[n.id] = n.log.length; heartbeat(n); } }
       else if (--n.timer <= 0) startElection(n);
     });
-    render();
+  }
+  function runUntil(cond, max) { for (var k = 0; k < (max || 300); k++) { if (cond()) return true; step(); } return cond(); }
+  function setPartition(on) {
+    S.partition = on;
+    if (on) { var L = leader(), a = L ? L.id : 0; S.minority = [a, (a + 1) % N]; } else S.minority = [];
   }
 
   function leader() {
@@ -212,7 +237,6 @@
     n.up = !n.up;
     if (n.up) { n.role = "follower"; n.timer = timeout(); log.add(n.name + " دوباره بالا آمد؛ term و log روی دیسک مانده‌اند", "muted"); }
     else log.add(n.name + " crash کرد" + (n.role === "leader" ? "؛ leader بود" : ""), "bad");
-    render();
   }
 
   var POS = [];
@@ -234,8 +258,8 @@
     S.nodes.forEach(function (n, i) {
       var g = svg("g", { class: "node " + (n.up ? n.role : "down"), tabindex: 0, role: "button",
         "aria-label": "node " + n.name + "، " + (n.up ? n.role : "crashed") + "، term " + n.term + ". برای " + (n.up ? "crash" : "restart") + " بزنید" });
-      g.addEventListener("click", function () { toggle(i); });
-      g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggle(i); } });
+      g.addEventListener("click", function () { toggle(i); after(); });
+      g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggle(i); after(); } });
       var x = POS[i][0], y = POS[i][1];
       g.appendChild(svg("circle", { cx: x, cy: y, r: 30 }));
       if (n.up && n.role !== "leader") {
@@ -243,9 +267,10 @@
         var x2 = x + 36 * Math.sin(ang), y2 = y - 36 * Math.cos(ang);
         g.appendChild(svg("path", { class: "timer", d: "M " + x + " " + (y - 36) + " A 36 36 0 " + (ang > Math.PI ? 1 : 0) + " 1 " + x2.toFixed(1) + " " + y2.toFixed(1) }));
       }
-      g.appendChild(svg("text", { x: x, y: y - 4, "text-anchor": "middle", "font-size": 16, "font-weight": 700 }, n.name));
-      g.appendChild(svg("text", { x: x, y: y + 13, "text-anchor": "middle", "font-size": 10, class: "muted" },
-        n.up ? (n.role === "leader" ? "LEADER" : n.role === "candidate" ? "candidate" : "follower") + " · t" + n.term : "crashed"));
+      g.appendChild(svg("text", { x: x, y: y + 1, "text-anchor": "middle", "font-size": 18, "font-weight": 700 }, n.name));
+      g.appendChild(svg("text", { x: x, y: y + 17, "text-anchor": "middle", "font-size": 12, class: "muted" }, "t" + n.term));
+      g.appendChild(svg("text", { x: x, y: y + 54, "text-anchor": "middle", "font-size": 13, "font-weight": n.role === "leader" && n.up ? 700 : 400, class: "role-label" },
+        n.up ? (n.role === "leader" ? "LEADER" : n.role) : "crashed"));
       s.appendChild(g);
     });
     var logs = Kit.clear(document.getElementById("logs"));
@@ -254,33 +279,70 @@
         el("span", { class: "who" }, n.name + (n.role === "leader" && n.up ? " ★" : "") + (n.up ? "" : " ✕")),
         el("div", { class: "cells" }, n.log.length ? n.log.map(function (e, k) {
           return el("span", { class: "cell t" + (e.term % 5) + (k < n.commit ? " committed" : ""), title: k < n.commit ? "committed" : "not committed" }, e.term + "·" + e.cmd);
-        }) : el("span", { class: "muted", style: "font-size:.78rem" }, "empty"))));
+        }) : el("span", { class: "muted", style: "font-size:.82rem" }, "خالی"))));
     });
     var L = leader(), up = S.nodes.filter(function (n) { return n.up; }).length;
     var st = Kit.clear(document.getElementById("stats"));
-    [["مفهوم tick", S.t, ""], ["مفهوم leader", L ? L.name + " (t" + L.term + ")" : "هیچ", L ? "ok" : "warn"], ["nodeهای بالا", up + " / 5", up >= MAJ ? "ok" : "bad"],
-     ["commitشده", L ? L.commit : Math.max.apply(null, S.nodes.map(function (n) { return n.commit; })), ""]]
-      .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, x[1]))); });
-  }
-
-  document.getElementById("req").addEventListener("click", function () { clientWrite(); render(); });
-  document.getElementById("kill").addEventListener("click", function () { var L = leader(); if (L) toggle(L.id); else log.add("هیچ leaderی برای crash نیست", "muted"); });
-  var partBtn = document.getElementById("part");
-  partBtn.addEventListener("click", function () {
-    S.partition = !S.partition;
+    var leaders = S.nodes.filter(function (n) { return n.up && n.role === "leader"; });
+    [["زمان", "tick " + S.t, ""], ["مفهوم leader", leaders.length ? leaders.map(function (n) { return n.name + " در term " + n.term; }).join(" و ") : "هیچ", leaders.length === 1 ? "ok" : "warn"],
+     ["nodeهای بالا", up + " از ۵", up >= MAJ ? "ok" : "bad"], ["entryهای commitشده", String(Math.max.apply(null, S.nodes.map(function (n) { return n.commit; }))), ""],
+     ["شبکه", S.partition ? "partition: " + S.minority.map(function (i) { return NAMES[i]; }).join("،") + " جدا" : "سالم", S.partition ? "warn" : ""]]
+      .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, Kit.digits(x[1])))); });
     partBtn.setAttribute("aria-pressed", String(S.partition));
-    log.add(S.partition ? "مفهوم network partition: {A,B} به {C,D,E} نمی‌رسد" : "مفهوم partition درمان شد", S.partition ? "warn" : "muted");
-    render();
+    partBtn.textContent = S.partition ? "درمان partition" : "جدا کردن leader در اقلیت";
+  }
+  function after() { render(); tour.free(said[0] || "تغییر اعمال شد.", said[1]); }
+
+  var partBtn = document.getElementById("part");
+  document.getElementById("req").addEventListener("click", function () { clientWrite(); after(); });
+  document.getElementById("kill").addEventListener("click", function () { var L = leader(); if (L) toggle(L.id); else log.add("هیچ leaderی برای crash نیست", ""); after(); });
+  partBtn.addEventListener("click", function () {
+    setPartition(!S.partition);
+    log.add(S.partition ? "مفهوم network partition: " + S.minority.map(function (i) { return NAMES[i]; }).join(" و ") + " از بقیه جدا شدند" : "مفهوم partition درمان شد", S.partition ? "warn" : "");
+    after();
+  });
+  document.getElementById("tick").addEventListener("click", function () { step(); after(); });
+  var liveBtn = document.getElementById("live");
+  function stopLive() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } liveBtn.setAttribute("aria-pressed", "false"); liveBtn.textContent = "اجرای زنده"; }
+  liveBtn.addEventListener("click", function () {
+    if (liveTimer) { stopLive(); return; }
+    liveBtn.setAttribute("aria-pressed", "true"); liveBtn.textContent = "توقف اجرای زنده";
+    tour.free("مفهوم cluster زنده اجرا می‌شود؛ پیام‌ها را روی خط‌ها ببینید.", "");
+    liveTimer = setInterval(function () { step(); render(); }, 260);
   });
   var sl = document.getElementById("sliders");
   sl.appendChild(Kit.slider({ label: "latency پیام", min: 1, max: 6, value: cfg.delay, unit: " tick", onInput: function (v) { cfg.delay = v; } }).element);
   sl.appendChild(Kit.slider({ label: "کمینه‌ی timeout انتخابات", min: 8, max: 26, value: cfg.tMin, unit: " tick", hint: "به‌طور تصادفی بین کمینه و کمینه به‌علاوه‌ی ۱۴، تا candidateها به‌ندرت با هم برخورد کنند",
     onInput: function (v) { cfg.tMin = v; cfg.tMax = v + 14; } }).element);
 
-  Kit.player({ mount: document.getElementById("player"), step: step, interval: 260,
-    reset: function () { fresh(); partBtn.setAttribute("aria-pressed", "false"); log.clear(); log.add("از اول: همه follower در term صفر", "muted"); render(); } });
-  fresh(); render();
-  log.add("پخش را بزنید. followerی که timerش، کمان سبز، تمام شود انتخابات را شروع می‌کند.", "muted");
+  /* ---------- the scenario ---------- */
+  function hasLeader() { return !!leader(); }
+  function name(n) { return n ? n.name : "?"; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { stopLive(); cfg.delay = 2; cfg.tMin = 14; cfg.tMax = 28; fresh(); }, render: render, interval: 6000,
+    intro: "پنج node، همه follower در term صفر و بدون leader. هر follower یک timer دارد، کمان سبز دور هر node، که با هر tick کوتاه‌تر می‌شود.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، «اجرای زنده» را بزنید و nodeها را crash کنید.",
+    steps: [
+      { kind: "ok", run: function () { runUntil(hasLeader); var L = leader(); last.l1 = name(L); last.t1 = L ? L.term : 0; },
+        say: function () { return Kit.digits("timer مربوط به " + last.l1 + " اول تمام شد: برای term " + last.t1 + " candidate شد، رأی یک اکثریت را گرفت و leader شد (صص. ۴۳۴–۴۳۵)."); } },
+      { kind: "ok", run: function () { for (var k = 0; k < 3; k++) clientWrite(); runUntil(function () { var L = leader(); return L && L.commit >= 3; }); },
+        say: "سه نوشتن client به leader رسید. هر entry وقتی commitشده است که روی اکثریت، یعنی دست‌کم سه node، ذخیره شده باشد؛ خط پیوسته‌ی خانه‌ها همین را نشان می‌دهد (ص. ۴۳۵)." },
+      { kind: "warn", run: function () { var L = leader(); last.dead = name(L); if (L) toggle(L.id); runUntil(hasLeader); var N2 = leader(); last.l2 = name(N2); last.t2 = N2 ? N2.term : 0; },
+        say: function () { return Kit.digits("مفهوم leader یعنی " + last.dead + " crash کرد. followerها دیگر heartbeat نمی‌گیرند، و " + last.l2 + " در term " + last.t2 + " leader شد. او هر سه entry commitشده را دارد، چون فقط به candidateی رأی می‌دهند که log او عقب‌تر نباشد (صص. ۴۳۵–۴۳۶)."); } },
+      { kind: "warn", run: function () {
+          S.nodes.forEach(function (n) { if (!n.up) toggle(n.id); }); runUntil(function () { return false; }, 12);
+          setPartition(true); var old = leader(); last.old = name(old); clientWrite();
+          runUntil(function () { return S.nodes.some(function (n) { return n.up && n.role === "leader" && side(n.id) === 1; }); });
+          clientWrite(); runUntil(function () { return S.nodes.some(function (n) { return n.role === "leader" && side(n.id) === 1 && n.commit >= 4; }); });
+        },
+        say: function () { return Kit.digits("node خاموش برگشت، و بعد شبکه طوری قطع شد که leader یعنی " + last.old + " با یک node دیگر در اقلیت ماند. او نوشتن تازه را می‌پذیرد اما بدون اکثریت نمی‌تواند commitش کند. سمت اکثریت leader تازه‌ای با term بزرگ‌تر انتخاب کرد و نوشتن آن‌جا commit شد (ص. ۴۳۵)."); } },
+      { kind: "ok", run: function () { setPartition(false); runUntil(function () { return S.nodes.filter(function (n) { return n.role === "leader"; }).length === 1 && S.nodes.every(function (n) { return n.log.length === leader().log.length; }); }); },
+        say: "مفهوم partition درمان شد. leader قدیمی term بزرگ‌تر را می‌بیند و کنار می‌رود، و entry commitنشده‌اش با log مربوط به leader تازه بازنویسی می‌شود. یکتایی leader در هر term است، نه در کل زمان (صص. ۴۳۴–۴۳۵)." },
+      { kind: "bad", run: function () { var downs = 0; S.nodes.forEach(function (n) { if (downs < 3 && n.role !== "leader") { toggle(n.id); downs++; } }); runUntil(function () { return false; }, 40); clientWrite(); runUntil(function () { return false; }, 20); },
+        say: "سه node از پنج خاموش شدند. leader دیگر اکثریتی ندارد، پس نوشتن تازه هرگز commit نمی‌شود. cluster امن است اما در دسترس نیست: پنج node فقط دو خرابی را تحمل می‌کنند (ص. ۴۳۷)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "دو node هر دو فکر می‌کنند leader هستند. الگوریتم consensus چطور این را امن نگه می‌دارد؟",

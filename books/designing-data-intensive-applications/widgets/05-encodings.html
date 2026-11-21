@@ -9,7 +9,7 @@
 <style>
   .bytes { display: flex; flex-wrap: wrap; gap: 4px; }
   .byte {
-    font: 600 .78rem/1 var(--mono); width: 34px; height: 40px; border-radius: 5px; cursor: pointer;
+    font: 600 .76rem/1 var(--mono); width: 31px; height: 36px; transition: outline-color var(--step); border-radius: 5px; cursor: pointer;
     border: 1px solid var(--line); background: var(--surface); color: var(--ink);
     display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0;
   }
@@ -22,89 +22,108 @@
   .byte.name { background: var(--warn-soft); }
   .byte.sel { outline: 2px solid var(--accent); outline-offset: 1px; }
   .byte.same { background: var(--accent-soft); }
-  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .8rem; color: var(--ink-2); margin-top: 10px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .78rem; color: var(--ink-2); margin: 6px 0 8px; }
   .legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: middle; margin-inline-end: 4px; border: 1px solid var(--line); }
   .bars { display: grid; gap: 8px; }
   .bar-row { display: grid; grid-template-columns: 120px 1fr 72px; gap: 8px; align-items: center; font-size: .85rem; }
   .bar-track { height: 14px; background: var(--surface-2); border-radius: 7px; overflow: hidden; }
   .bar-fill { height: 100%; background: var(--accent); border-radius: 7px; }
   .bar-row.on { font-weight: 700; }
-  .detail { min-height: 96px; }
+  .detail { min-height: 74px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px; background: var(--surface); }
   pre.schema { font-size: .78rem; background: var(--surface-2); border-radius: var(--radius-sm); padding: 8px 10px; overflow-x: auto; margin: 0; }
+  .enc { display: grid; gap: 10px 18px; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); align-items: start; }
+  @media (max-width: 760px) { .enc { grid-template-columns: 1fr; } }
+  .enc .panel-title { margin: 0 0 4px; }
+  .byte.sel { outline: 3px solid var(--accent); outline-offset: 1px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DDIA</a><span aria-hidden="true">/</span>
       <a href="../chapters/05-encoding-and-evolution.html">فصل ۵</a><span aria-hidden="true">/</span>
-      <span aria-current="page">قالب‌های encoding</span>
+      <span aria-current="page">چهار encoding</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · قالب‌های encoding و تکامل</div>
-  <h1>یک رکورد، چهار encoding</h1>
-  <p class="lede">یک رکورد سه‌فیلدی، با چهار encoding. قالب متنی JSON اسم همه‌ی فیلدها را می‌نویسد؛ MessagePack باینری‌اش می‌کند اما اسم‌ها را نگه می‌دارد؛ Protocol Buffers به جای اسم شماره‌ی tag می‌گذارد؛ و Avro هیچ شناسه‌ای نمی‌نویسد و به schema تکیه می‌کند. یک بایت را انتخاب کنید تا معنایش را ببینید.</p>
-  <p class="source-note">برای بخش‌های «قالب JSON و XML و نسخه‌های باینری‌شان»، «قالب Protocol Buffers» و «قالب Avro» در صص. ۱۶۵–۱۷۷، با رکورد نمونه‌ی کتاب و اندازه‌هایش: ۸۱، ۶۶، ۳۳ و ۳۲ بایت. encoderها پیاده‌سازی کوچک خود vault از این wire formatها هستند؛ آزمایش همراه در lab همین اندازه‌ها را در Python بازتولید می‌کند.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>یک رکورد، چهار encoding</h1>
+      <p class="lede">یک رکورد سه‌فیلدی با چهار encoding. قالب JSON اسم همه‌ی فیلدها را به شکل متن می‌نویسد، MessagePack همان را باینری می‌کند، Protocol Buffers به جای اسم شماره‌ی tag می‌گذارد و Avro هیچ شناسه‌ای نمی‌نویسد و به schema تکیه می‌کند.</p>
+      <p class="source-note">برای صص. ۱۶۵–۱۷۷ با رکورد نمونه‌ی کتاب و اندازه‌هایش: ۸۱، ۶۶، ۳۳ و ۳۲ بایت. encoderها پیاده‌سازی کوچک خود vault هستند؛ lab همراه همین اندازه‌ها را در Python بازتولید می‌کند.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="row" style="margin-bottom:12px"><div id="fmt"></div></div>
-      <div class="bytes" id="bytes" lang="en" dir="ltr" role="list" aria-label="بایت‌های encodeشده"></div>
-      <div class="legend">
-        <span><i style="border-bottom:3px solid var(--s1)"></i>userName</span>
-        <span><i style="border-bottom:3px solid var(--s2)"></i>favoriteNumber</span>
-        <span><i style="border-bottom:3px solid var(--s3)"></i>interests</span>
-        <span><i style="background:var(--warn-soft)"></i>اسم فیلد</span>
-        <span><i style="background:var(--surface-2)"></i>type، tag یا طول</span>
-        <span><i></i>داده‌ی مقدار</span>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="enc">
+          <div>
+            <p class="panel-title" id="fmt-title"></p>
+            <div class="bytes" id="bytes" lang="en" dir="ltr" role="list" aria-label="بایت‌های encodeشده"></div>
+            <div class="legend">
+              <span><i style="border-bottom:3px solid var(--s1)"></i>userName</span>
+              <span><i style="border-bottom:3px solid var(--s2)"></i>favoriteNumber</span>
+              <span><i style="border-bottom:3px solid var(--s3)"></i>interests</span>
+              <span><i style="background:var(--warn-soft)"></i>اسم فیلد</span>
+              <span><i style="background:var(--surface-2)"></i>type، tag یا طول</span>
+              <span><i></i>داده‌ی مقدار</span>
+            </div>
+            <div class="detail" id="detail" aria-live="polite"></div>
+          </div>
+          <div>
+            <p class="panel-title">اندازه‌ی همین رکورد</p>
+            <div class="bars" id="bars"></div>
+            <p class="panel-title" style="margin-top:12px">schema</p>
+            <pre class="schema" id="schema"></pre>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="stack">
-      <div class="panel detail" aria-live="polite">
-        <p class="panel-title">بایت انتخاب‌شده</p>
-        <div id="detail"><p style="color:var(--ink-3);margin:0">روی یک بایت بروید یا focus کنید.</p></div>
-      </div>
-      <div class="panel">
-        <p class="panel-title">اندازه‌ی همین رکورد</p>
-        <div class="bars" id="bars"></div>
-      </div>
-      <div class="panel">
-        <p class="panel-title">رکورد</p>
-        <pre class="schema" id="schema"></pre>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="fmt"></div>
+        <div class="tweak-group"><p class="field-hint">روی هر بایت بروید، کلیک یا focus کنید تا معنایش را ببینید.</p></div>
       </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>اسم فیلدها بیشتر حجم JSON و MessagePack را می‌گیرند.</strong> بایت‌های رنگی را بشمارید: فقط «favoriteNumber» در هر رکورد ۱۴ تا ۱۶ بایت خرج دارد.</li>
-    <li><strong>قالب Protocol Buffers به جای اسم tag می‌فرستد.</strong> یک بایت شماره‌ی tag و wire type را با هم دارد، پس تغییر نام فیلد در schema هیچ چیز را روی سیم عوض نمی‌کند؛ اما تغییر tag همه‌ی رکوردهای ذخیره‌شده را می‌شکند.</li>
-    <li><strong>قالب Avro فقط مقدارها را می‌فرستد.</strong> بدون writer's schema حتی نمی‌شود فهمید یک فیلد کجا تمام می‌شود و بعدی کجا شروع؛ خواننده writer's schema را با schema خودش تطبیق می‌دهد.</li>
-    <li><strong>عددها طول متغیر پیدا می‌کنند.</strong> عدد ۱۳۳۷ به شکل varint دو بایت می‌گیرد و عددهای کوچک یک بایت.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>اسم فیلدها بیشتر حجم JSON و MessagePack را می‌گیرند.</strong> بایت‌های رنگی را بشمارید: فقط «favoriteNumber» در هر رکورد ۱۴ تا ۱۶ بایت خرج دارد.</li>
+      <li><strong>قالب Protocol Buffers به جای اسم tag می‌فرستد.</strong> یک بایت شماره‌ی tag و wire type را با هم دارد، پس تغییر نام فیلد در schema هیچ چیز را روی سیم عوض نمی‌کند؛ اما تغییر tag همه‌ی رکوردهای ذخیره‌شده را می‌شکند.</li>
+      <li><strong>قالب Avro فقط مقدارها را می‌فرستد.</strong> بدون writer's schema حتی نمی‌شود فهمید یک فیلد کجا تمام می‌شود و بعدی کجا شروع؛ خواننده writer's schema را با schema خودش تطبیق می‌دهد.</li>
+      <li><strong>عددها طول متغیر پیدا می‌کنند.</strong> عدد ۱۳۳۷ به شکل varint دو بایت می‌گیرد و عددهای کوچک یک بایت.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-encoding-and-evolution.html"><small>درس</small>فصل ۵: قالب‌های encoding و تکامل</a></li>
-    <li><a href="../lab/05-schema-evolution/README.md"><small>آزمایش</small>encodingهای باینری و تکامل schema</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-encoding-and-evolution.html"><small>درس</small>فصل ۵: قالب‌های encoding و تکامل</a></li>
+      <li><a href="05-schema-evolution.html"><small>شبیه‌سازی</small>writer's schema و reader's schema</a></li>
+      <li><a href="../lab/05-schema-evolution/README.md"><small>آزمایش</small>encodingهای باینری و تکامل schema</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var el = Kit.el;
+  var el = Kit.el, dg = Kit.digits;
   var RECORD = { userName: "Martin", favoriteNumber: 1337, interests: ["daydreaming", "hacking"] };
   var FIELDS = ["userName", "favoriteNumber", "interests"];
 
@@ -164,48 +183,69 @@
   ];
   var sizes = {};
   FORMATS.forEach(function (f) { sizes[f.id] = f.enc().length; });
-  var current = FORMATS[0], selected = null;
-
-  function show(i, data) {
-    Array.prototype.forEach.call(document.querySelectorAll(".byte"), function (b, k) {
-      b.classList.toggle("sel", k === i);
-    });
-    var d = data[i];
-    Kit.clear(Kit.$("#detail")).appendChild(el("div", null,
-      el("p", { style: "margin:0 0 6px" }, el("span", { class: "badge accent" }, "بایت " + (i + 1) + " از " + data.length), " ",
-        el("code", null, "0x" + ("0" + d.b.toString(16)).slice(-2)), " ", el("code", null, d.b.toString(2).padStart(8, "0"))),
-      el("p", { style: "margin:0 0 4px;font-weight:600" }, d.f >= 0 ? FIELDS[d.f] : "کل رکورد"),
-      el("p", { style: "margin:0;color:var(--ink-2);font-size:.9rem" }, d.note)));
+  var fmt, sel, data, tour;
+  function byId(id) { return FORMATS.filter(function (f) { return f.id === id; })[0]; }
+  function hex(b) { return ("0" + b.toString(16)).slice(-2); }
+  function find(test) { for (var i = 0; i < data.length; i++) if (test(data[i], i)) return i; return null; }
+  function detail() {
+    var box = Kit.clear(document.getElementById("detail"));
+    if (sel === null) { box.appendChild(el("p", { style: "margin:0;color:var(--ink-3)" }, dg("قالب " + fmt.label + ": " + data.length + " بایت که " + data.filter(function (d) { return d.kind === "name"; }).length + " تای آن اسم فیلد است."))); return; }
+    var d = data[sel];
+    box.appendChild(el("p", { style: "margin:0 0 4px" }, el("span", { class: "badge accent" }, dg("بایت " + (sel + 1) + " از " + data.length)), " ",
+      el("code", null, "0x" + hex(d.b)), " ", el("code", null, d.b.toString(2).padStart(8, "0")), " · ", el("strong", null, d.f >= 0 ? FIELDS[d.f] : "کل رکورد")));
+    box.appendChild(el("p", { style: "margin:0;color:var(--ink-2);font-size:.88rem" }, d.note));
   }
   function render() {
-    var data = current.enc(), box = Kit.clear(Kit.$("#bytes"));
+    data = fmt.enc();
+    document.getElementById("fmt-title").textContent = dg("بایت‌های " + fmt.label + "، به ترتیب روی سیم");
+    var box = Kit.clear(document.getElementById("bytes"));
     data.forEach(function (d, i) {
       var ch = d.b >= 32 && d.b < 127 ? String.fromCharCode(d.b) : "·";
-      var b = el("button", { type: "button", role: "listitem", class: "byte f" + (d.f < 0 ? 3 : d.f) + " " + d.kind,
-        "aria-label": "بایت " + (i + 1) + ": " + d.note }, ("0" + d.b.toString(16)).slice(-2), el("small", null, ch));
-      b.addEventListener("mouseenter", function () { show(i, data); });
-      b.addEventListener("focus", function () { show(i, data); });
-      b.addEventListener("click", function () { show(i, data); });
+      var b = el("button", { type: "button", role: "listitem", class: "byte f" + (d.f < 0 ? 3 : d.f) + " " + d.kind + (i === sel ? " sel" : ""),
+        "aria-label": "بایت " + (i + 1) + ": " + d.note }, hex(d.b), el("small", null, ch));
+      function pick() { sel = i; Array.prototype.forEach.call(box.children, function (c, k) { c.classList.toggle("sel", k === i); }); detail(); }
+      b.addEventListener("mouseenter", pick); b.addEventListener("focus", pick); b.addEventListener("click", pick);
       box.appendChild(b);
     });
-    Kit.$("#schema").textContent = current.schema;
-    Kit.$("#schema").dir = current.prose ? "rtl" : "ltr";
-    Kit.$("#schema").style.fontFamily = current.prose ? "var(--font)" : "";
-    var bars = Kit.clear(Kit.$("#bars"));
+    detail();
+    var sch = document.getElementById("schema");
+    sch.textContent = fmt.schema; sch.dir = fmt.prose ? "rtl" : "ltr"; sch.style.fontFamily = fmt.prose ? "var(--font)" : "";
+    var bars = Kit.clear(document.getElementById("bars"));
     FORMATS.forEach(function (f) {
-      bars.appendChild(el("div", { class: "bar-row" + (f === current ? " on" : "") },
+      bars.appendChild(el("div", { class: "bar-row" + (f === fmt ? " on" : "") },
         el("span", null, f.label), el("span", { class: "bar-track" }, el("span", { class: "bar-fill", style: "display:block;width:" + (sizes[f.id] / sizes.json * 100) + "%" })),
-        el("span", null, sizes[f.id] + " بایت")));
+        el("span", null, dg(sizes[f.id] + " بایت"))));
     });
-    Kit.clear(Kit.$("#detail")).appendChild(el("p", { style: "color:var(--ink-3);margin:0" },
-      "قالب " + current.label + ": " + data.length + " بایت، که " + data.filter(function (d) { return d.kind === "name"; }).length + " تا از آن‌ها اسم فیلد است. روی یک بایت بروید یا focus کنید."));
+    var names = data.filter(function (d) { return d.kind === "name"; }).length;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["قالب", fmt.label, ""], ["اندازه", data.length + " بایت", ""], ["بایت اسم فیلد", names, names ? "warn" : "ok"],
+     ["نسبت به JSON", Math.round(data.length / sizes.json * 100) + "٪", data.length < sizes.json ? "ok" : ""], ["schema لازم است؟", fmt.id === "json" || fmt.id === "msgpack" ? "نه" : "بله", ""]].forEach(function (x) {
+      st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, dg(String(x[1])))));
+    });
+    seg.set(fmt.id);
   }
-
   var seg = Kit.segmented({ label: "قالب encoding", value: "json",
     options: FORMATS.map(function (f) { return { value: f.id, label: f.label }; }),
-    onChange: function (v) { current = FORMATS.filter(function (f) { return f.id === v; })[0]; render(); } });
-  Kit.$("#fmt").appendChild(seg.element);
-  render();
+    onChange: function (v) { fmt = byId(v); sel = null; render(); tour.free(dg("قالب " + fmt.label + ": " + data.length + " بایت."), "free"); } });
+  document.getElementById("fmt").appendChild(seg.element);
+
+  /* ---------- the scenario ---------- */
+  function show(id, test) { return function () { fmt = byId(id); data = fmt.enc(); sel = test ? find(test) : null; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { fmt = FORMATS[0]; sel = null; }, render: render, interval: 4600,
+    intro: "رکورد نمونه‌ی کتاب: userName، favoriteNumber و interests. هر قدم همین رکورد را بایت به بایت در یک قالب نشان می‌دهد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، قالب را عوض کنید و روی بایت‌ها بروید.",
+    steps: [
+      { say: "قالب JSON بدون فاصله: ۸۱ بایت. بایت‌های زرد اسم فیلدها هستند که در هر رکورد تکرار می‌شوند (ص. ۱۶۹).", kind: "warn", run: show("json", function (d) { return d.kind === "name"; }) },
+      { say: "قالب MessagePack: ۶۶ بایت. بایت اول 0x83 یعنی یک object با سه فیلد (ص. ۱۶۸).", run: show("msgpack", function (d, i) { return i === 0; }) },
+      { say: "اما اسم فیلدها هنوز هستند: فقط اسم favoriteNumber با header خودش ۱۵ بایت است. برای همین فقط کمی از JSON کوچک‌تر است (ص. ۱۶۹).", kind: "warn", run: show("msgpack", function (d) { return d.f === 1 && d.kind === "meta"; }) },
+      { say: "قالب Protocol Buffers: ۳۳ بایت. بایت اول شماره‌ی tag برابر ۱ و wire type را با هم دارد؛ اسمی روی سیم نیست (شکل ۵-۳، ص. ۱۷۰).", kind: "ok", run: show("protobuf", function (d, i) { return i === 0; }) },
+      { say: "عدد ۱۳۳۷ به شکل varint دو بایت است: بیت بالایی بایت اول یعنی «بایت دیگری هم می‌آید» (ص. ۱۷۰).", run: show("protobuf", function (d) { return d.f === 1 && d.kind === "data"; }) },
+      { say: "قالب Avro: ۳۲ بایت، فقط طول‌ها و مقدارها پشت سر هم. هیچ tag یا اسمی نیست (شکل ۵-۴، ص. ۱۷۳).", kind: "ok", run: show("avro", function (d, i) { return i === 0; }) },
+      { say: "این بایت شاخه‌ی union را مشخص می‌کند: favoriteNumber از نوع long است، نه null. بدون writer's schema نمی‌شود فهمید هیچ بایتی چه معنایی دارد (صص. ۱۷۲–۱۷۳).", kind: "warn", run: show("avro", function (d) { return d.f === 1 && d.kind === "meta"; }) }
+    ]
+  });
 
   Kit.quiz(Kit.$("#quiz"), [
     { q: "چرا MessagePack برای این رکورد فقط کمی از JSON کوچک‌تر است؟",

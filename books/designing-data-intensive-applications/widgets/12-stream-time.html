@@ -19,9 +19,19 @@
   .close { stroke: var(--s5); stroke-width: 2; }
   td.bad { color: var(--bad); font-weight: 600; }
   td.ok { color: var(--ok); }
+  .st-scene { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(290px, 1fr); gap: 14px; align-items: start; }
+  .st-plot svg { display: block; width: 100%; max-height: 330px; }
+  .st-plot text { font-size: 13px; fill: var(--ink-2); }
+  .st-cap { font-size: .82rem; color: var(--ink-2); margin: 0 0 4px; }
+  .st-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .82rem; color: var(--ink-2); margin-top: 4px; }
+  .st-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 4px; vertical-align: -1px; }
+  .st-scene table.data { font-size: .9rem; }
+  .st-scene td.mono { white-space: nowrap; }
+  .st-scene table.data th, .st-scene table.data td { padding: 4px 8px; }
+  @media (max-width: 900px) { .st-scene { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -35,46 +45,60 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۲ · پردازش stream</div>
-  <h1>مفهوم event time، processing time و late event</h1>
-  <p class="lede">هر رویداد زمان رخ دادنش را دارد، یعنی event time، اما دیرتر به پردازش‌کننده‌ی stream می‌رسد، یعنی processing time. window بر اساس زمان رسیدن آسان است اما وقتی latencyها متغیرند غلط است؛ window بر اساس event time درست است اما تصمیمی را تحمیل می‌کند: یک window کی کامل است، و با رویدادهایی که بعد از آن می‌رسند چه می‌شود؟</p>
-  <p class="source-note">برای بخش «استدلال درباره‌ی زمان» در صص. ۵۱۸–۵۲۳: event time در برابر processing time، عددهای ساختگی processing time در شکل ۱۲-۸، مدیریت رویدادهای دیررس، یعنی نادیده گرفتن یا انتشار اصلاحیه در ص. ۵۲۰، و tumbling window در ص. ۵۲۲. مدل رسیدن رویدادها تصویرسازی خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مفهوم event time، processing time و late event</h1>
+      <p class="lede">هر رویداد زمان رخ دادنش را دارد، یعنی event time، اما دیرتر به پردازش‌کننده می‌رسد، یعنی processing time. window بر اساس event time درست است، اما باید تصمیم بگیرید یک window کی کامل است و با late eventها چه می‌کنید.</p>
+      <p class="source-note">برای صص. ۵۱۸–۵۲۲ و شکل ۱۲-۸، با tumbling windowهای ده‌ثانیه‌ای. مدل رسیدن رویدادها تصویرسازی خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <p class="panel-title">هر نقطه یک رویداد است · محور افقی event time · محور عمودی زمان رسیدن، یعنی processing time</p>
-      <div class="stage" id="plot" dir="ltr" role="img" aria-label="پراکندگی رویدادها بر اساس event time و زمان رسیدن، با tumbling windowها و زمان بسته شدنشان"></div>
-      <div class="table-wrap" style="margin-top:12px"><table class="data" id="table"></table></div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">مفهوم stream</p>
-        <div id="sliders"></div>
-        <div class="field" style="margin-top:12px"><span class="field-head">late eventها بعد از بسته شدن window</span><div id="policy"></div></div>
-        <div style="margin-top:12px" id="player"></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene st-scene">
+        <div class="st-plot">
+          <p class="st-cap">هر نقطه یک رویداد است: افقی event time، عمودی زمان رسیدن. خط‌های طلایی زمان بسته شدن هر window است.</p>
+          <div id="plot" dir="ltr" role="img" aria-label="پراکندگی رویدادها بر اساس event time و زمان رسیدن، با tumbling windowها و زمان بسته شدنشان"></div>
+          <div class="st-legend" aria-hidden="true"><span><i style="background:var(--accent)"></i>به‌موقع رسید</span><span><i style="background:var(--bad)"></i>مفهوم late: بعد از بسته شدن window</span><span><i style="background:var(--ink-3);opacity:.4"></i>هنوز نرسیده</span></div>
+        </div>
+        <div class="table-wrap"><table class="data" id="table"></table></div>
       </div>
-      <div class="panel"><p class="panel-title">جمع‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log"></ol></div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">جمع‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <button class="btn primary small" type="button" id="tick">۵ ثانیه جلو</button>
+          <button class="btn small" type="button" id="all">تا آخر</button>
+        </div>
+        <div class="tweak-group" id="policy"></div>
+        <div class="tweak-group" id="sliders" style="flex-direction:column;align-items:stretch"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>مفهوم window بر اساس processing time با latency کج می‌شود</strong>: ستون «بر اساس رسیدن» رویدادها را در windowی می‌شمارد که اتفاقاً در آن رسیده‌اند، نه windowی که به آن تعلق دارند. latency را بالا ببرید یا رویدادهای آفلاین را بیشتر کنید تا دو ستون از هم دور شوند.</li>
-    <li><strong>صبر بیشتر late eventها را کم می‌کند اما نتیجه را دیر می‌کند.</strong> مهلت بسته شدن بده‌بستان بین کامل بودن و latency است؛ وقتی بعضی دستگاه‌ها مدت زیادی آفلاین‌اند، هیچ تنظیمی هر دو را نمی‌دهد.</li>
-    <li><strong>نادیده گرفتن late eventها</strong> شمارش‌ها را برای همیشه غلط می‌گذارد؛ تعداد دورریخته‌ها را دنبال کنید. <strong>انتشار اصلاحیه</strong> درستشان می‌کند، اما consumerهای downstreamی باید با تغییر مقدار یک window بعد از اولین انتشار کنار بیایند.</li>
-  </ul>
-  <div class="callout"><p><strong>یادداشت vault:</strong> کتاب پردازش‌کننده‌ای را توصیف می‌کند که پیام ویژه‌ای به معنای «رویدادی زودتر از <em>t</em> دیگر نمی‌آید» می‌فرستد. چارچوب‌های stream معمولاً به این <em>watermark</em> می‌گویند؛ قاعده‌ی مهلت در اینجا ساده‌ترین روش ابتکاری از این دست است.</p></div>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>مفهوم window بر اساس processing time با latency کج می‌شود</strong>: ستون «بر اساس رسیدن» رویدادها را در windowی می‌شمارد که اتفاقاً در آن رسیده‌اند، نه windowی که به آن تعلق دارند. latency را بالا ببرید یا رویدادهای آفلاین را بیشتر کنید تا دو ستون از هم دور شوند.</li>
+      <li><strong>صبر بیشتر late eventها را کم می‌کند اما نتیجه را دیر می‌کند.</strong> مهلت بسته شدن بده‌بستان بین کامل بودن و latency است؛ وقتی بعضی دستگاه‌ها مدت زیادی آفلاین‌اند، هیچ تنظیمی هر دو را نمی‌دهد.</li>
+      <li><strong>نادیده گرفتن late eventها</strong> شمارش‌ها را برای همیشه غلط می‌گذارد؛ تعداد دورریخته‌ها را دنبال کنید. <strong>انتشار اصلاحیه</strong> درستشان می‌کند، اما consumerهای downstreamی باید با تغییر مقدار یک window بعد از اولین انتشار کنار بیایند.</li>
+    </ul>
+    <div class="callout"><p><strong>یادداشت vault:</strong> کتاب پردازش‌کننده‌ای را توصیف می‌کند که پیام ویژه‌ای به معنای «رویدادی زودتر از <em>t</em> دیگر نمی‌آید» می‌فرستد. چارچوب‌های stream معمولاً به این <em>watermark</em> می‌گویند؛ قاعده‌ی مهلت در اینجا ساده‌ترین روش ابتکاری از این دست است.</p></div>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/12-stream-processing.html"><small>درس</small>فصل ۱۲: پردازش stream</a></li>
-    <li><a href="../lab/12-stream-windows/README.md"><small>آزمایش</small>مفهوم tumbling window در Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> یک قدم، <kbd>R</kbd> از اول.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/12-stream-processing.html"><small>درس</small>فصل ۱۲: پردازش stream</a></li>
+      <li><a href="../lab/12-stream-windows/README.md"><small>آزمایش</small>مفهوم tumbling window در Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -83,8 +107,10 @@
   "use strict";
   var el = Kit.el, svg = Kit.svg;
   var W = 10, SPAN = 60, TMAX = 100; // window size (s), event-time span, processing-time axis
-  var cfg = { delay: 2, offline: 0.06, grace: 4, policy: "drop" };
-  var events = [], now = 0, closed = {}, log = Kit.log(document.getElementById("log"));
+  var D = Kit.digits, said = ["", ""], tour;
+  var cfg, events = [], now = 0, closed = {};
+  var log = { add: function (t, k) { said = [D(t), k || ""]; } };
+  var DEF = { delay: 2, offline: 0.06, grace: 4, policy: "drop" };
 
   function generate() {
     var r = Kit.rng(31);
@@ -99,8 +125,7 @@
   function win(t) { return Math.floor(t / W); }
   function closesAt(w) { return (w + 1) * W + cfg.grace; }
 
-  function reset() { now = 0; closed = {}; generate(); log.clear(); log.add("مفهوم processing time از ۰ ثانیه شروع می‌شود؛ پخش را بزنید.", "muted"); render(); }
-
+  function restart() { now = 0; closed = {}; generate(); said = ["", ""]; }
   function step() {
     if (now >= TMAX) return false;
     var prev = now; now = Math.min(TMAX, now + 1);
@@ -108,82 +133,109 @@
       if (!closed[w] && closesAt(w) <= now) {
         var n = events.filter(function (e) { return win(e.et) === w && e.at <= closesAt(w); }).length;
         closed[w] = { first: n, corrections: 0 };
-        log.add("t=" + now + "s مفهوم window [" + w * W + ", " + (w + 1) * W + ") با شمارش " + n + " بسته شد", "ok");
+        log.add("در t=" + now + "s مقدار window [" + w * W + ", " + (w + 1) * W + ") با شمارش " + n + " بسته شد.", "ok");
       }
     }
     events.forEach(function (e) {
       var w = win(e.et);
       if (closed[w] && e.at > prev && e.at <= now && e.at > closesAt(w)) {
-        if (cfg.policy === "drop") log.add("late event با event time " + e.et.toFixed(1) + "s برای window بسته‌ی " + w + "؛ دور ریخته شد", "bad");
-        else { closed[w].corrections++; log.add("late event برای window " + w + "؛ اصلاحیه منتشر شد", "warn"); }
+        if (cfg.policy === "drop") log.add("یک late event با event time " + e.et.toFixed(1) + "s برای window بسته‌ی w" + w + " رسید و دور ریخته شد.", "bad");
+        else { closed[w].corrections++; log.add("یک late event برای window w" + w + " رسید و اصلاحیه منتشر شد.", "warn"); }
       }
     });
-    render();
     return now < TMAX;
+  }
+  function runTo(t) { while (now < t && step()) {} }
+  function totals() {
+    var late = 0, dropped = 0, wrongArrival = 0;
+    for (var k = 0; k < SPAN / W; k++) {
+      var l = events.filter(function (e) { return win(e.et) === k && e.at > closesAt(k) && e.at <= now; }).length;
+      late += l; if (closed[k] && cfg.policy === "drop") dropped += l;
+      var truth = events.filter(function (e) { return win(e.et) === k; }).length;
+      var byArrival = events.filter(function (e) { return e.at <= now && Math.floor(e.at / W) === k; }).length;
+      if (now >= TMAX && byArrival !== truth) wrongArrival++;
+    }
+    return { late: late, dropped: dropped, wrongArrival: wrongArrival };
   }
 
   function render() {
-    var Wd = 640, H = 340, L = 44, B = 34, T = 10, R = 10;
+    var Wd = 640, H = 330, L = 50, B = 36, T = 10, R = 12;
     var x = function (t) { return L + (Wd - L - R) * t / SPAN; };
     var y = function (t) { return H - B - (H - B - T) * Math.min(t, TMAX) / TMAX; };
     var s = svg("svg", { viewBox: "0 0 " + Wd + " " + H, "aria-hidden": "true" });
     for (var w = 0; w < SPAN / W; w++) {
       s.appendChild(svg("rect", { class: "band" + (w % 2 ? " alt" : ""), x: x(w * W), y: T, width: x(W) - x(0), height: H - B - T }));
       s.appendChild(svg("line", { class: "close", x1: x(w * W), x2: x((w + 1) * W), y1: y(closesAt(w)), y2: y(closesAt(w)) }));
-      s.appendChild(svg("text", { x: x(w * W + W / 2), y: H - B + 14, "text-anchor": "middle", "font-size": 11, class: "muted" }, "w" + w));
+      s.appendChild(svg("text", { x: x(w * W + W / 2), y: H - B + 16, "text-anchor": "middle" }, "w" + w));
     }
     [0, 25, 50, 75, 100].forEach(function (t) {
       s.appendChild(svg("line", { class: "grid", x1: L, x2: Wd - R, y1: y(t), y2: y(t) }));
-      s.appendChild(svg("text", { x: L - 6, y: y(t) + 4, "text-anchor": "end", "font-size": 11, class: "muted" }, t + "s"));
+      s.appendChild(svg("text", { x: L - 6, y: y(t) + 4, "text-anchor": "end" }, t + "s"));
     });
-    s.appendChild(svg("text", { x: (L + Wd) / 2, y: H - 4, "text-anchor": "middle", "font-size": 11, class: "muted" }, "event time →"));
+    s.appendChild(svg("text", { x: (L + Wd) / 2, y: H - 3, "text-anchor": "middle" }, "event time →"));
     s.appendChild(svg("line", { class: "axis", x1: L, x2: Wd - R, y1: H - B, y2: H - B }));
     s.appendChild(svg("line", { class: "axis", x1: L, x2: L, y1: T, y2: H - B }));
     s.appendChild(svg("line", { class: "diag", x1: x(0), y1: y(0), x2: x(SPAN), y2: y(SPAN) }));
     s.appendChild(svg("line", { class: "now", x1: L, x2: Wd - R, y1: y(now), y2: y(now) }));
-    s.appendChild(svg("text", { x: Wd - R - 4, y: y(now) < 24 ? y(now) + 14 : y(now) - 5, "text-anchor": "end", "font-size": 11, fill: "var(--accent)" }, "now = " + now + "s"));
+    s.appendChild(svg("text", { x: Wd - R - 4, y: y(now) < 26 ? y(now) + 16 : y(now) - 6, "text-anchor": "end", style: "fill:var(--accent);font-weight:700" }, "now = " + now + "s"));
     events.forEach(function (e) {
       var late = e.at > closesAt(win(e.et));
-      s.appendChild(svg("circle", { class: "ev" + (e.at > now ? " pending" : late ? " late" : ""), cx: x(e.et), cy: y(e.at), r: late ? 4 : 3 }));
+      s.appendChild(svg("circle", { class: "ev" + (e.at > now ? " pending" : late ? " late" : ""), cx: x(e.et), cy: y(e.at), r: late && e.at <= now ? 4.5 : 3.2 }));
     });
-    Kit.clear(document.getElementById("plot")).appendChild(s);
+    Kit.clear(Kit.$("#plot")).appendChild(s);
 
-    var tb = Kit.clear(document.getElementById("table"));
-    tb.appendChild(el("tr", null, ["مفهوم window", "شمارش واقعی", "بر اساس رسیدن", "منتشرشده", "lateها", "نهایی"].map(function (h, i) { return el("th", { class: i ? "num" : null }, h); })));
-    var dropped = 0, totalLate = 0;
+    var tb = Kit.clear(Kit.$("#table"));
+    tb.appendChild(el("tr", null, ["مفهوم window", "واقعی", "بر اساس رسیدن", "منتشرشده", "late", "نهایی"].map(function (h, i) { return el("th", { class: i ? "num" : null }, h); })));
     for (var k = 0; k < SPAN / W; k++) {
       var truth = events.filter(function (e) { return win(e.et) === k; }).length;
       var byArrival = events.filter(function (e) { return e.at <= now && Math.floor(e.at / W) === k; }).length;
       var c = closed[k];
       var late = events.filter(function (e) { return win(e.et) === k && e.at > closesAt(k) && e.at <= now; }).length;
-      totalLate += late;
       var fin = !c ? "–" : cfg.policy === "drop" ? c.first : c.first + c.corrections;
-      if (c && cfg.policy === "drop") dropped += late;
       tb.appendChild(el("tr", null,
-        el("td", { class: "mono" }, "[" + k * W + ", " + (k + 1) * W + ")"),
-        el("td", { class: "num" }, truth),
-        el("td", { class: "num" + (byArrival !== truth && now >= TMAX ? " bad" : "") }, byArrival),
-        el("td", { class: "num" }, c ? c.first : "باز"),
-        el("td", { class: "num" + (late ? " bad" : "") }, late),
-        el("td", { class: "num " + (c ? (fin === truth || now < TMAX ? "ok" : "bad") : "") }, fin)));
+        el("td", { class: "mono" }, "w" + k + " [" + k * W + "," + (k + 1) * W + ")"),
+        el("td", { class: "num" }, D(String(truth))),
+        el("td", { class: "num" + (byArrival !== truth && now >= TMAX ? " bad" : "") }, D(String(byArrival))),
+        el("td", { class: "num" }, c ? D(String(c.first)) : "باز"),
+        el("td", { class: "num" + (late ? " bad" : "") }, D(String(late))),
+        el("td", { class: "num " + (c ? (fin === truth || now < TMAX ? "ok" : "bad") : "") }, D(String(fin)))));
     }
-    var st = Kit.clear(document.getElementById("stats"));
-    [["اکنون", now + " s", ""], ["lateها", totalLate, totalLate ? "warn" : "ok"], ["دورریخته", dropped, dropped ? "bad" : "ok"]]
-      .forEach(function (x) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value " + x[2] }, x[1]))); });
+    var t = totals(), st = Kit.clear(Kit.$("#stats"));
+    [["اکنون", now + " ثانیه", ""], ["latency معمول", cfg.delay + " ثانیه", ""], ["آفلاین", Kit.pct(cfg.offline, 0), ""], ["مهلت بستن", cfg.grace + " ثانیه", ""],
+     ["سیاست", cfg.policy === "drop" ? "نادیده گرفتن" : "انتشار اصلاحیه", ""], ["مفهوم late", t.late, t.late ? "warn" : "ok"], ["دورریخته", t.dropped, t.dropped ? "bad" : "ok"]]
+      .forEach(function (v) { st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, v[0]), el("span", { class: "stat-value " + v[2] }, D(String(v[1]))))); });
+    sDelay.set(cfg.delay); sOff.set(cfg.offline); sGrace.set(cfg.grace); seg.set(cfg.policy);
+    Kit.$("#tick").disabled = Kit.$("#all").disabled = now >= TMAX;
   }
 
-  var sl = document.getElementById("sliders");
-  sl.appendChild(Kit.slider({ label: "latency معمول شبکه", min: 0.5, max: 8, step: 0.5, value: cfg.delay, unit: " s", onInput: function (v) { cfg.delay = v; reset(); } }).element);
-  sl.appendChild(Kit.slider({ label: "رویدادهای دستگاه‌های آفلاین", min: 0, max: 0.3, step: 0.01, value: cfg.offline, format: function (v) { return Kit.pct(v, 0); },
-    hint: "روی دستگاه buffer می‌شوند و ۱۰ تا ۳۵ ثانیه بعد فرستاده می‌شوند", onInput: function (v) { cfg.offline = v; reset(); } }).element);
-  sl.appendChild(Kit.slider({ label: "مهلت پیش از بستن window", min: 0, max: 30, value: cfg.grace, unit: " s", hint: "خط‌های طلایی: زمانی که هر window کامل اعلام می‌شود",
-    onInput: function (v) { cfg.grace = v; reset(); } }).element);
-  document.getElementById("policy").appendChild(Kit.segmented({ label: "سیاست late event", value: cfg.policy,
+  function changed(msg) { restart(); render(); tour.free(msg + " زمان از ۰ شروع شد؛ «۵ ثانیه جلو» یا «تا آخر» را بزنید.", ""); }
+  var sDelay = Kit.slider({ label: "latency معمول شبکه", min: 0.5, max: 8, step: 0.5, value: DEF.delay, unit: " s", onInput: function (v) { cfg.delay = v; changed("مقدار latency عوض شد."); } });
+  var sOff = Kit.slider({ label: "رویدادهای دستگاه‌های آفلاین", min: 0, max: 0.3, step: 0.01, value: DEF.offline, format: function (v) { return Kit.pct(v, 0); },
+    hint: "روی دستگاه buffer می‌شوند و ۱۰ تا ۳۵ ثانیه بعد می‌رسند", onInput: function (v) { cfg.offline = v; changed("سهم دستگاه‌های آفلاین عوض شد."); } });
+  var sGrace = Kit.slider({ label: "مهلت پیش از بستن window", min: 0, max: 30, value: DEF.grace, unit: " s", onInput: function (v) { cfg.grace = v; changed("مهلت بستن عوض شد."); } });
+  [sDelay, sOff, sGrace].forEach(function (x) { Kit.$("#sliders").appendChild(x.element); });
+  var seg = Kit.segmented({ label: "سیاست late event", value: DEF.policy,
     options: [{ value: "drop", label: "نادیده گرفتن" }, { value: "correct", label: "انتشار اصلاحیه" }],
-    onChange: function (v) { cfg.policy = v; reset(); } }).element);
+    onChange: function (v) { cfg.policy = v; changed(v === "drop" ? "حالا late eventها دور ریخته می‌شوند." : "حالا برای late eventها اصلاحیه منتشر می‌شود."); } });
+  Kit.$("#policy").appendChild(seg.element);
+  Kit.$("#tick").addEventListener("click", function () { said = ["", ""]; runTo(now + 5); render(); tour.free(said[0] || "پنج ثانیه گذشت و late eventی نرسید.", said[1]); });
+  Kit.$("#all").addEventListener("click", function () { runTo(TMAX); render(); var t = totals(); tour.free("تا t = ۱۰۰ ثانیه: " + D(String(t.late)) + " late event" + (cfg.policy === "drop" ? "، " + D(String(t.dropped)) + " دورریخته." : " که با اصلاحیه شمرده شدند."), t.dropped ? "bad" : "ok"); });
 
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 250 });
-  reset();
+  /* ---------- the scenario ---------- */
+  function setup(c, t) { return function () { cfg = Object.assign({}, DEF, c); restart(); runTo(t); }; }
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: function () { cfg = Object.assign({}, DEF); restart(); }, render: render, interval: 6000,
+    intro: "شصت ثانیه رویداد، در شش tumbling window ده‌ثانیه‌ای. هر window چهار ثانیه بعد از پایانش بسته و شمارشش منتشر می‌شود.",
+    end: "«خودتان تغییر بدهید» را باز کنید: latency، سهم دستگاه‌های آفلاین، مهلت بستن و سیاست late event را عوض کنید.",
+    steps: [
+      { run: setup({}, 35), say: "تا ۳۵ ثانیه: بیشتر رویدادها کمی بعد از رخ دادن می‌رسند، پس نقطه‌ها نزدیک خط‌چین قطری‌اند. سه window اول بسته و شمارششان منتشر شده." },
+      { kind: "warn", run: setup({}, 100), say: function () { var t = totals(); return "تا آخر: " + D(String(t.late)) + " رویداد بعد از بسته شدن windowشان رسیدند و دور ریخته شدند. ستون «بر اساس رسیدن»، یعنی window با processing time، در " + D(String(t.wrongArrival)) + " window از شمارش واقعی فاصله دارد (صص. ۵۱۹–۵۲۰)."; } },
+      { kind: "bad", run: setup({ offline: 0.2 }, 100), say: function () { var t = totals(); return "بیست درصد رویدادها از دستگاه‌هایی می‌آیند که مدتی آفلاین بودند. حالا " + D(String(t.dropped)) + " رویداد دور ریخته می‌شود و ستون «نهایی» قرمز است: شمارش‌ها برای همیشه غلط‌اند (ص. ۵۲۱)."; } },
+      { kind: "warn", run: setup({ offline: 0.2, grace: 30 }, 100), say: function () { var t = totals(); return "مهلت بستن ۳۰ ثانیه شد. دورریخته‌ها به " + D(String(t.dropped)) + " رسید، اما هر window حالا ۳۰ ثانیه دیرتر منتشر می‌شود: بده‌بستان بین کامل بودن و latency (ص. ۵۲۰)."; } },
+      { kind: "ok", run: setup({ offline: 0.2, policy: "correct" }, 100), say: "مهلت دوباره ۴ ثانیه است، اما این بار برای هر late event اصلاحیه منتشر می‌شود. ستون «نهایی» با شمارش واقعی یکی است، به شرطی که downstream بتواند عوض شدن یک window منتشرشده را مدیریت کند (ص. ۵۲۰)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "یک job مربوط به stream restart می‌شود و یک ساعت صف عقب‌افتاده را در دو دقیقه پردازش می‌کند. شمارش‌های دقیقه‌ای بر اساس processing time چه می‌شوند؟",

@@ -158,11 +158,17 @@ flowchart TB
 | **مفهوم resource manager** | دید کلی از nodeها و منابع؛ state در یک coordination service | سیستم YARN با ZooKeeper و Kubernetes با etcd |
 | **مفهوم scheduler** | تصمیم این‌که کدام task کجا اجرا شود؛ sub-schedulerهای مخصوص هر اپلیکیشن | مفهوم ApplicationMaster در YARN و operatorها در Kubernetes |
 
-**تخصیص منابع** (pp. 463–464): پنج node، ۱۶۰ core، دو job که هر کدام ۱۰۰ می‌خواهند؛ تقسیم ۸۰ و ۸۰؟ **gang scheduling**، یعنی صبر تا ۱۰۰ core آزاد شود، با nodeهای بیکار و احتمال deadlock یا گرسنگی؟ **preempt**، با کار هدررفته؟ تخصیص بهینه **NP-hard** است، پس schedulerها از روش‌های ابتکاری استفاده می‌کنند: FIFO، dominant resource fairness، صف‌های اولویت، زمان‌بندی با ظرفیت یا سهمیه، و bin packing.
+##### تخصیص منابع (pp. 463–464)
 
-**زمان‌بندی workflowها** (pp. 464–465): یک **workflow**، یعنی DAGی از jobها، وقتی پیش می‌آید که خروجی یک job به jobهای چند تیم غذا بدهد، داده بین ابزارها جابه‌جا شود، مثل Spark به HDFS به Trino به S3، یا مرحله‌ها sharding متفاوتی لازم داشته باشند. pipeها داده را مستقیم با backpressure رد می‌کنند، و Spark و Flink هم می‌توانند، اما معمولاً هر job در DFS یا object store می‌نویسد و بعدی از آن می‌خواند؛ جدا از هم در زمان. schedulerهای هر job وابستگی‌ها را مدیریت نمی‌کنند، پس **Airflow، Dagster و Prefect** این کار را می‌کنند؛ workflowهای ۵۰ تا ۱۰۰ jobی رایج‌اند. این با workflowهای orchestrate کردن RPC در فصل ۵ یکی نیست.
+پنج node، ۱۶۰ core، دو job که هر کدام ۱۰۰ می‌خواهند؛ تقسیم ۸۰ و ۸۰؟ **gang scheduling**، یعنی صبر تا ۱۰۰ core آزاد شود، با nodeهای بیکار و احتمال deadlock یا گرسنگی؟ **preempt**، با کار هدررفته؟ تخصیص بهینه **NP-hard** است، پس schedulerها از روش‌های ابتکاری استفاده می‌کنند: FIFO، dominant resource fairness، صف‌های اولویت، زمان‌بندی با ظرفیت یا سهمیه، و bin packing.
 
-**مدیریت fault** (pp. 465–466): کارهای طولانی خرابی خواهند دید، و همین‌طور **preemption** عمدی instanceهای ارزان و کم‌اولویت **spot** یا **preemptible**، که از خرابی سخت‌افزار رایج‌تر است. چون خروجی از صفر ساخته می‌شود، خروجی نیمه‌کاره را پاک کنید و **فقط task شکست‌خورده را retry کنید**.
+##### زمان‌بندی workflowها (pp. 464–465)
+
+یک **workflow**، یعنی DAGی از jobها، وقتی پیش می‌آید که خروجی یک job به jobهای چند تیم غذا بدهد، داده بین ابزارها جابه‌جا شود، مثل Spark به HDFS به Trino به S3، یا مرحله‌ها sharding متفاوتی لازم داشته باشند. pipeها داده را مستقیم با backpressure رد می‌کنند، و Spark و Flink هم می‌توانند، اما معمولاً هر job در DFS یا object store می‌نویسد و بعدی از آن می‌خواند؛ جدا از هم در زمان. schedulerهای هر job وابستگی‌ها را مدیریت نمی‌کنند، پس **Airflow، Dagster و Prefect** این کار را می‌کنند؛ workflowهای ۵۰ تا ۱۰۰ jobی رایج‌اند. این با workflowهای orchestrate کردن RPC در فصل ۵ یکی نیست.
+
+##### مدیریت fault (pp. 465–466)
+
+کارهای طولانی خرابی خواهند دید، و همین‌طور **preemption** عمدی instanceهای ارزان و کم‌اولویت **spot** یا **preemptible**، که از خرابی سخت‌افزار رایج‌تر است. چون خروجی از صفر ساخته می‌شود، خروجی نیمه‌کاره را پاک کنید و **فقط task شکست‌خورده را retry کنید**.
 
 | داده‌ی میانی بین taskها | تحمل fault |
 |---|---|
@@ -239,9 +245,13 @@ flowchart LR
 
 مفهوم clusterهای **بیش از ۱۰٬۰۰۰ ماشین** که چندین petabyte را پردازش می‌کنند به گفته‌ی کتاب «کم‌وبیش حل‌شده» است، پس تمرکز به مدل برنامه‌نویسی رفت. **مفهوم SQL** زبان مشترک شد: کد کمتر، کاوش تعاملی، و **cost-based optimizer**هایی، در Hive، Trino، Spark و Flink، که الگوریتم join را انتخاب می‌کنند و ترتیب joinها را عوض می‌کنند. جایگزین‌های خاص: Apache Pig برای pipelineهای relational قدم‌به‌قدم، Morel، jq و JMESPath و JSONPath، و Gremlin برای graph (pp. 473–474).
 
-**پردازش batch و warehouseهای cloud به هم نزدیک می‌شوند** (pp. 474–475): چارچوب‌های batch صاحب SQL، Parquet و اجرای vectorized یا compiled شدند؛ warehouseها صاحب scale در cloud، shuffle و تحمل fault، و مدل‌های غیر-SQL، مثل BigQuery DataFrames و Snowpark در Snowflake. با این حال الگوریتم‌های graph تکراری، ML پیچیده و داده‌ی چندرسانه‌ای AI در SQL سخت‌اند؛ warehouseها در کار ردیف‌به‌ردیف ضعیف‌ترند و اغلب از Spark یا Flink گران‌ترند. انتخاب به هزینه، راحتی و در دسترس بودن برمی‌گردد.
+##### پردازش batch و warehouseهای cloud به هم نزدیک می‌شوند (pp. 474–475)
 
-**مفهوم DataFrame** (p. 475) interfaceهای R و Pandas را به Spark، Flink و Daft می‌آورد. DataFrameهای محلی index و ترتیب دارند؛ نوع توزیع‌شده معمولاً ندارد، که کارایی را غافلگیرکننده می‌کند. Pandas مشتاقانه اجرا می‌کند؛ Spark اول یک query plan می‌سازد و بهینه‌اش می‌کند؛ Daft عملیات کوچک را سمت client و بزرگ را سمت سرور اجرا می‌کند و Apache Arrow را به اشتراک می‌گذارد.
+چارچوب‌های batch صاحب SQL، Parquet و اجرای vectorized یا compiled شدند؛ warehouseها صاحب scale در cloud، shuffle و تحمل fault، و مدل‌های غیر-SQL، مثل BigQuery DataFrames و Snowpark در Snowflake. با این حال الگوریتم‌های graph تکراری، ML پیچیده و داده‌ی چندرسانه‌ای AI در SQL سخت‌اند؛ warehouseها در کار ردیف‌به‌ردیف ضعیف‌ترند و اغلب از Spark یا Flink گران‌ترند. انتخاب به هزینه، راحتی و در دسترس بودن برمی‌گردد.
+
+##### مفهوم DataFrame (p. 475)
+
+این مفهوم interfaceهای R و Pandas را به Spark، Flink و Daft می‌آورد. DataFrameهای محلی index و ترتیب دارند؛ نوع توزیع‌شده معمولاً ندارد، که کارایی را غافلگیرکننده می‌کند. Pandas مشتاقانه اجرا می‌کند؛ Spark اول یک query plan می‌سازد و بهینه‌اش می‌کند؛ Daft عملیات کوچک را سمت client و بزرگ را سمت سرور اجرا می‌کند و Apache Arrow را به اشتراک می‌گذارد.
 
 ### کاربردهای batch
 

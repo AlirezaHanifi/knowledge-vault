@@ -7,14 +7,14 @@
 <meta name="description" content="در schema نمونه‌ی Avro کتاب، یعنی Person، فیلد با default و بدون default اضافه، حذف یا تغییر نام بدهید و ببینید کد قدیم و جدید هنوز رکوردهای همدیگر را می‌خوانند یا نه. برای فصل ۵ ویراست دوم DDIA.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .schemas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
-  .schema { font-family: var(--mono); font-size: .8rem; background: var(--surface-2); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .schemas { display: grid; gap: 10px 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .schema { font-family: var(--mono); font-size: .8rem; background: var(--surface-2); border-radius: var(--radius-sm); padding: 6px 10px; }
   .schema .f { display: flex; justify-content: space-between; gap: 8px; padding: 2px 4px; border-radius: 3px; }
   .schema .f.new { background: var(--ok-soft); }
   .schema .f.gone { text-decoration: line-through; color: var(--ink-3); }
   .schema .f .d { color: var(--ink-3); }
-  .flow { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); margin-top: 14px; }
-  .case { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: var(--surface); }
+  .flow { display: grid; gap: 10px 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); margin-top: 10px; }
+  .case { transition: border-color var(--step); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: var(--surface); }
   .case.ok { border-color: var(--ok); }
   .case.bad { border-color: var(--bad); }
   .case h3 { font-size: .9rem; margin: 0 0 4px; }
@@ -22,9 +22,10 @@
   .case pre { margin: 6px 0 0; font-size: .76rem; white-space: pre-wrap; background: var(--surface-2); padding: 6px 8px; border-radius: 4px; }
   .changes { display: grid; gap: 6px; }
   .changes button { justify-content: flex-start; }
+  .schemas .panel-title { margin: 0 0 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
     <nav class="crumbs" aria-label="مسیر صفحه">
@@ -38,52 +39,59 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · قالب‌های encoding و تکامل</div>
-  <h1>مقایسه‌ی writer's schema و reader's schema</h1>
-  <p class="lede">قالب Avro با دو schema decode می‌کند: writer's schema، که رکورد با آن encode شده، و reader's schema، که اپلیکیشن انتظارش را دارد. فیلدها با اسم جفت می‌شوند؛ فیلدی که فقط نویسنده دارد نادیده گرفته می‌شود و فیلدی که فقط خواننده دارد default خواننده را می‌گیرد. این‌که این تطبیق در هر دو جهت کار کند، forward و backward compatibility را تعیین می‌کند.</p>
-  <p class="source-note">برای بخش «قالب Avro»، از جمله writer's schema و reader's schema و قاعده‌های تکامل schema در صص. ۱۷۲–۱۷۵، با schema و رکورد نمونه‌ی کتاب، یعنی <code>Person</code> با Martin و 1337 و daydreaming و hacking. قاعده‌های شماره‌ی tag در Protocol Buffers از ص. ۱۷۱ در نکته‌ها آمده. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مقایسه‌ی writer's schema و reader's schema</h1>
+      <p class="lede">قالب Avro با دو schema decode می‌کند و فیلدها را با اسم جفت می‌کند: فیلدی که فقط نویسنده دارد نادیده گرفته می‌شود و فیلدی که فقط خواننده دارد default خواننده را می‌گیرد. این‌که تطبیق در هر دو جهت کار کند، backward و forward compatibility را تعیین می‌کند.</p>
+      <p class="source-note">برای صص. ۱۷۲–۱۷۵ با schema و رکورد نمونه‌ی کتاب: <code>Person</code> با Martin، 1337، daydreaming و hacking. قاعده‌ی tag در Protocol Buffers از ص. ۱۷۱ در نکته‌ها آمده.</p>
+    </header>
 
-  <div class="sim">
-    <div class="panel">
-      <div class="schemas">
-        <div><p class="panel-title">نسخه‌ی قدیم schema، یعنی v1</p><div class="schema" id="v1" lang="en" dir="ltr"></div></div>
-        <div><p class="panel-title">نسخه‌ی جدید schema، یعنی v2</p><div class="schema" id="v2" lang="en" dir="ltr"></div></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="schemas">
+          <div><p class="panel-title">نسخه‌ی قدیم schema، یعنی v1</p><div class="schema" id="v1" lang="en" dir="ltr"></div></div>
+          <div><p class="panel-title">نسخه‌ی جدید schema، یعنی v2</p><div class="schema" id="v2" lang="en" dir="ltr"></div></div>
+        </div>
+        <div class="flow" id="flow"></div>
       </div>
-      <div class="flow" id="flow"></div>
-    </div>
-    <div class="stack">
-      <div class="panel">
-        <p class="panel-title">نسخه‌ی جدید schema را تغییر بدهید</p>
-        <div class="changes" id="changes"></div>
-        <button class="btn small" type="button" id="reset" style="margin-top:10px">↺ بازگشت به v1</button>
-      </div>
-      <div class="panel wide">
-        <p class="panel-title">نتیجه</p>
-        <div class="stats" id="stats"></div>
-        <p class="field-hint" id="rule" aria-live="polite" style="margin:8px 0 0"></p>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <span class="field-head">تغییرهای v2 (هر کدام را روشن یا خاموش کنید)</span>
+          <div class="changes" id="changes"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <h2>به چه چیزی دقت کنید</h2>
-  <ul class="notice-list">
-    <li><strong>مقدار default است که تغییر را بی‌خطر می‌کند.</strong> فقط فیلدهایی را اضافه یا حذف کنید که default دارند، تا هر دو جهت کار کنند (ص. ۱۷۵).</li>
-    <li><strong>اضافه کردن بدون default</strong> backward compatibility را می‌شکند: کد جدید وقتی رکورد قدیم را می‌خواند چیزی برای گذاشتن در فیلد ندارد.</li>
-    <li><strong>حذف بدون default</strong> forward compatibility را می‌شکند: کد قدیم وقتی رکورد جدید را می‌خواند فیلدی را که لازم دارد پیدا نمی‌کند.</li>
-    <li><strong>تغییر نام با alias</strong> سازگار backward است اما forward نه؛ خواننده‌های قدیم اسم تازه را نمی‌شناسند.</li>
-    <li><strong>قالب Protocol Buffers به جای اسم از شماره‌ی tag استفاده می‌کند:</strong> اسم‌ها آزادانه عوض می‌شوند، هیچ tagی دوباره به کار نمی‌رود و tagهای ناشناخته رد می‌شوند (ص. ۱۷۱).</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>مقدار default است که تغییر را بی‌خطر می‌کند.</strong> فقط فیلدهایی را اضافه یا حذف کنید که default دارند، تا هر دو جهت کار کنند (ص. ۱۷۵).</li>
+      <li><strong>اضافه کردن بدون default</strong> backward compatibility را می‌شکند: کد جدید وقتی رکورد قدیم را می‌خواند چیزی برای گذاشتن در فیلد ندارد.</li>
+      <li><strong>حذف بدون default</strong> forward compatibility را می‌شکند: کد قدیم وقتی رکورد جدید را می‌خواند فیلدی را که لازم دارد پیدا نمی‌کند.</li>
+      <li><strong>تغییر نام با alias</strong> سازگار backward است اما forward نه؛ خواننده‌های قدیم اسم تازه را نمی‌شناسند.</li>
+      <li><strong>قالب Protocol Buffers به جای اسم از شماره‌ی tag استفاده می‌کند:</strong> اسم‌ها آزادانه عوض می‌شوند، هیچ tagی دوباره به کار نمی‌رود و tagهای ناشناخته رد می‌شوند (ص. ۱۷۱).</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-encoding-and-evolution.html"><small>درس</small>فصل ۵: قالب‌های encoding و تکامل</a></li>
-    <li><a href="../lab/05-schema-evolution/README.md"><small>آزمایش</small>encodingهای باینری و تکامل schema</a></li>
-    <li><a href="05-encodings.html"><small>شبیه‌سازی</small>یک رکورد، چهار encoding</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-encoding-and-evolution.html"><small>درس</small>فصل ۵: قالب‌های encoding و تکامل</a></li>
+      <li><a href="../lab/05-schema-evolution/README.md"><small>آزمایش</small>encodingهای باینری و تکامل schema</a></li>
+      <li><a href="05-encodings.html"><small>شبیه‌سازی</small>یک رکورد، چهار encoding</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -103,7 +111,7 @@
     { id: "rmNoDef", label: "حذف interests، که default ندارد", remove: "interests" },
     { id: "rename", label: "تغییر نام userName به name با alias", rename: ["userName", "name"] }
   ];
-  var active = {};
+  var active = {}, verdict = "ok", tour;
 
   function v2() {
     var fields = V1.map(function (f) { return Object.assign({}, f); });
@@ -166,25 +174,41 @@
         res.error ? Kit.el("pre", { style: "font-family:var(--font)" }, "decode شکست می‌خورد: " + res.error) : Kit.el("pre", { lang: "en", dir: "ltr" }, show(res.value)),
         res.notes && res.notes.length ? Kit.el("div", { class: "field-hint", style: "margin-top:6px" }, res.notes.join(" · ")) : null));
     });
+    var n = Object.keys(active).filter(function (k) { return active[k]; }).length;
     var stats = Kit.clear(document.getElementById("stats"));
-    [["backward compatibility", back.error ? "شکسته" : "برقرار", back.error ? "bad" : "ok"], ["forward compatibility", fwd.error ? "شکسته" : "برقرار", fwd.error ? "bad" : "ok"]].forEach(function (s) {
-      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value " + s[2] }, s[1])));
+    [["تغییر در v2", n, ""], ["backward compatibility", back.error ? "شکسته" : "برقرار", back.error ? "bad" : "ok"], ["forward compatibility", fwd.error ? "شکسته" : "برقرار", fwd.error ? "bad" : "ok"],
+     ["rolling upgrade", back.error || fwd.error ? "ناامن" : "امن", back.error || fwd.error ? "bad" : "ok"]].forEach(function (s) {
+      stats.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, s[0]), Kit.el("span", { class: "stat-value " + s[2] }, Kit.digits(String(s[1])))));
     });
-    document.getElementById("rule").textContent = back.error || fwd.error
-      ? "قاعده: فقط فیلدی را می‌شود اضافه یا حذف کرد که مقدار default دارد."
-      : Object.keys(active).some(function (k) { return active[k]; }) ? "هر دو جهت کار می‌کند، پس کد قدیم و جدید در یک rolling upgrade می‌توانند کنار هم اجرا شوند." : "یکی از تغییرها را انتخاب کنید.";
+    Array.prototype.forEach.call(document.querySelectorAll("#changes button"), function (b) { b.setAttribute("aria-pressed", String(!!active[b.dataset.id])); });
+    verdict = back.error || fwd.error ? "bad" : "ok";
   }
 
   var box = document.getElementById("changes");
   CHANGES.forEach(function (c) {
-    var b = Kit.el("button", { class: "btn small", type: "button", "aria-pressed": "false" }, c.label);
-    b.addEventListener("click", function () { active[c.id] = !active[c.id]; b.setAttribute("aria-pressed", String(!!active[c.id])); render(); });
+    var b = Kit.el("button", { class: "btn small", type: "button", "aria-pressed": "false", "data-id": c.id }, c.label);
+    b.addEventListener("click", function () { active[c.id] = !active[c.id]; render();
+      tour.free((active[c.id] ? "روشن: " : "خاموش: ") + c.label + (verdict === "ok" ? ". هر دو جهت کار می‌کند." : ". یک جهت شکست؛ قاعده: فقط فیلد default‌دار را اضافه یا حذف کنید."), verdict); });
     box.appendChild(b);
   });
-  document.getElementById("reset").addEventListener("click", function () {
-    active = {}; box.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", "false"); }); render();
+
+  /* ---------- the scenario ---------- */
+  function only(id) { return function () { active = {}; if (id) id.split(" ").forEach(function (k) { active[k] = true; }); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: function () { active = {}; }, render: render, interval: 4600,
+    intro: "رکورد Martin با schema نسخه‌ی v1 نوشته شده. هر قدم یک تغییر در v2 را امتحان می‌کند و هر دو جهت خواندن را نشان می‌دهد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و تغییرها را با هم ترکیب کنید.",
+    steps: [
+      { say: "بدون تغییر: خواننده‌ی v2 رکورد v1 را می‌خواند (backward) و خواننده‌ی v1 رکورد v2 را (forward). فیلدها با اسم جفت می‌شوند (شکل ۵-۶، ص. ۱۷۴).", kind: "ok", run: only("") },
+      { say: "افزودن photoUrl با default: کد جدید برای رکورد قدیم null می‌گذارد و کد قدیم فیلد ناشناخته را نادیده می‌گیرد. هر دو جهت برقرار است (ص. ۱۷۵).", kind: "ok", run: only("addDef") },
+      { say: "افزودن country بدون default: کد جدید وقتی رکورد قدیم را می‌خواند چیزی برای country ندارد، پس backward compatibility می‌شکند (ص. ۱۷۵).", kind: "bad", run: only("addNoDef") },
+      { say: "حذف interests که default ندارد: کد قدیم در رکورد جدید interests را پیدا نمی‌کند، پس forward compatibility می‌شکند (ص. ۱۷۵).", kind: "bad", run: only("rmNoDef") },
+      { say: "حذف favoriteNumber که default برابر null دارد: هر دو جهت برقرار است. null فقط وقتی default است که در union باشد (ص. ۱۷۵).", kind: "ok", run: only("rmDef") },
+      { say: "تغییر نام با alias در reader's schema: کد جدید اسم قدیم را می‌شناسد، اما کد قدیم اسم تازه را نه؛ backward برقرار، forward شکسته (ص. ۱۷۵).", kind: "warn", run: only("rename") },
+      { say: "قاعده‌ی کتاب: فقط فیلدهایی را اضافه یا حذف کنید که default دارند. این دو تغییر با هم امن‌اند و کد قدیم و جدید در یک rolling upgrade کنار هم کار می‌کنند.", kind: "ok", run: only("addDef rmDef") }
+    ]
   });
-  render();
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "در Avro، forward compatibility یعنی چه؟",
