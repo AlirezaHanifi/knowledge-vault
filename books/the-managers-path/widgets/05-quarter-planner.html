@@ -6,14 +6,19 @@
 <title>برنامه‌ریز ظرفیت یک فصل</title>
 <meta name="description" content="اندازه‌ی تیم و فصل و سهم کار نگه‌دارنده را بگذارید و ببینید وقتی تخمین‌ها دو برابر می‌شوند و قاعده‌ی ۱۰ هفته اعمال می‌شود کدام پروژه‌ها جا می‌شوند. برای فصل ۵ کتاب The Manager's Path.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.bars { width: 100%; display: block; } .bars rect.cap { fill: var(--surface-2); stroke: var(--line-strong); } .bars rect.sus { fill: var(--s3); }
-  .bars rect.fit { fill: var(--s1); } .bars rect.over { fill: var(--bad); } .bars text { font-size: 12px; }
-  .plist label.check { margin: 4px 0; }</style>
+<style>
+  /* The quarter's engineer-weeks as one bar; under it, sustaining work and the projects that fit, then the ones that spill to next quarter. */
+  .qp-bars { width: 100%; display: block; max-height: 112px; direction: ltr; }
+  .qp-bars rect.cap { fill: var(--surface-2); stroke: var(--line-strong); } .qp-bars rect.sus { fill: var(--s3); }
+  .qp-bars rect.fit { fill: var(--s1); } .qp-bars rect.over { fill: var(--bad); fill-opacity: .7; } .qp-bars text { font-size: 13px; fill: var(--ink); }
+  .qp-key { font-size: .85rem; color: var(--ink-2); margin: 4px 0 8px; }
+  table.qp-t { font-size: .85rem; } table.qp-t td, table.qp-t th { padding: 3px 8px; }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
       <a href="../chapters/05-managing-a-team.html">فصل ۵</a><span aria-hidden="true">/</span>
@@ -24,80 +29,117 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · مدیریت یک تیم</div>
-  <h1>برنامه‌ریز ظرفیت یک فصل</h1>
-  <p class="lede">با قاعده‌های سرانگشتی برنامه بریزید: حدود <strong>۱۰ هفته‌ی مفید برای هر مهندس در هر فصل</strong>، <strong>۲۰٪ برای کار نگه‌دارنده</strong>، و <strong>دو برابر کردن تخمین‌های سرانگشتی</strong>. بعد ببینید واقعاً چه چیزی جا می‌شود.</p>
-  <p class="source-note">این شبیه‌سازی بخش «قاعده‌های سرانگشتی مدیریت پروژه» را نشان می‌دهد (صص. ۹۳–۹۵). فهرست پروژه‌ها و تخمین‌هایشان ساختگی‌اند، و اندازه‌ی تفاوت فصل‌ها هم همین‌طور: کتاب فقط می‌گوید فصل اول معمولاً پربارترین است و فصل چهارم کم‌بارترین. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>برنامه‌ریز ظرفیت یک فصل</h1>
+      <p class="lede">با قاعده‌های سرانگشتی برنامه بریزید: حدود <strong>۱۰ هفته‌ی مفید برای هر مهندس در هر فصل</strong>، <strong>۲۰٪ برای کار نگه‌دارنده</strong>، و <strong>دو برابر کردن تخمین‌های سرانگشتی</strong>. بعد ببینید واقعاً چه چیزی جا می‌شود.</p>
+      <p class="source-note">برای بخش «قاعده‌های سرانگشتی مدیریت پروژه» (صص. ۹۳–۹۵). فهرست پروژه‌ها و تخمین‌هایشان ساختگی‌اند، و اندازه‌ی تفاوت فصل‌ها هم همین‌طور: کتاب فقط می‌گوید فصل اول معمولاً پربارترین است و فصل چهارم کم‌بارترین. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">هفته‌ی مهندسی در این فصل</p><svg class="bars" id="bars" viewBox="0 0 520 120" role="img"></svg>
-        <p class="field-hint">سبز: کار نگه‌دارنده · آبی: پروژه‌هایی که جا می‌شوند · قرمز: پروژه‌هایی که جا نمی‌شوند.</p>
-        <div class="table-wrap"><table class="data" id="tbl"><caption class="sr-only">پروژه‌ها به ترتیب اولویت</caption></table></div>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="team"></div><div id="q" style="margin-top:10px"></div><div id="sus" style="margin-top:10px"></div>
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="dbl" checked> تخمین‌های سرانگشتی دو برابر شوند</label></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <svg class="qp-bars" id="bars" viewBox="0 0 640 130" role="img"></svg>
+        <p class="qp-key">سبز: کار نگه‌دارنده · آبی: پروژه‌هایی که جا می‌شوند · قرمز: پروژه‌هایی که به فصل بعد می‌روند.</p>
+        <div class="table-wrap"><table class="data qp-t" id="tbl"><caption class="sr-only">پروژه‌ها به ترتیب اولویت</caption></table></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">فصل</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><div id="team"></div><div id="q"></div></div>
+        <div class="tweak-group"><div id="sus"></div>
+          <label class="check"><input type="checkbox" id="dbl" checked> تخمین‌های سرانگشتی دو برابر شوند</label></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>سیزده هفته‌ی تقویمی حدود ده هفته‌ی مفید است</strong>: مرخصی و جلسه و فصل ارزیابی و قطعی و onboarding بقیه‌اش را می‌برند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>سیزده هفته‌ی تقویمی حدود ده هفته‌ی مفید است</strong>: مرخصی و جلسه و فصل ارزیابی و قطعی و onboarding بقیه‌اش را می‌برند.</li>
     <li><strong>تیک دو برابر کردن را بردارید و همه چیز جا می‌شود</strong>، البته روی کاغذ. تخمین‌های سرانگشتی خوش‌بینانه‌اند و کتاب برای همین دو برابرشان می‌کند.</li>
     <li><strong>اگر کار نگه‌دارنده را روی ۰٪ بگذارید</strong>، به‌اندازه‌ی یک پروژه وقت در این فصل آزاد می‌شود، و کتاب هشدار می‌دهد که زمان‌بندی کردن featureها تا ۱۰۰٪ ظرفیت خودِ featureها را کند می‌کند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-managing-a-team.html"><small>درس</small>فصل ۵: مدیریت یک تیم</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-managing-a-team.html"><small>درس</small>فصل ۵: مدیریت یک تیم</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  var log = Kit.log(document.getElementById("log"));
   var Q = { Q1: 10.5, Q2: 10, Q3: 10, Q4: 9 };
-  var QNAME = { Q1: "سه‌ماهه‌ی اول", Q2: "سه‌ماهه‌ی دوم", Q3: "سه‌ماهه‌ی سوم", Q4: "سه‌ماهه‌ی چهارم" };
   var P = [["بازطراحی checkout", 10], ["فیلترهای search", 6], ["رفع باگ ورود در موبایل", 2], ["خروجی گرفتن از گزارش‌ها", 5], ["API شرکای تجاری", 8], ["ابزار پنل مدیریت", 4]];
-  var cfg = { n: 5, q: "Q2", sus: 20, dbl: true }, prev = null;
+  var cfg = { n: 5, q: "Q2", sus: 20, dbl: true }, r = {}, tour;
+  function f1(v) { return Kit.digits(String(Math.round(v * 10) / 10)); }
+
+  function plan() {
+    r = { cap: cfg.n * Q[cfg.q] }; r.sus = r.cap * cfg.sus / 100; r.left = r.cap - r.sus; r.used = 0; r.fits = 0; r.rows = [];
+    P.forEach(function (p) { var e = p[1] * (cfg.dbl ? 2 : 1), ok = r.used + e <= r.left + 1e-9; if (ok) { r.used += e; r.fits++; } r.rows.push([p[0], p[1], e, ok]); });
+  }
+  function kind() { return r.fits === P.length && cfg.dbl && cfg.sus >= 20 ? "ok" : (!cfg.dbl || cfg.sus < 20) ? "warn" : r.fits <= 3 ? "bad" : "warn"; }
+  function summary() {
+    return Kit.digits(r.fits + " پروژه از " + P.length + " جا می‌شود.") + (!cfg.dbl || cfg.sus < 20 ? " " : "") + (!cfg.dbl ? "تخمین سرانگشتیِ دو برابر نشده خوش‌بینانه است: انتظار عقب افتادن داشته باشید. " : "") + (cfg.sus < 20 ? "کمتر از ۲۰٪ کار نگه‌دارنده: بدهی و قطعی از سهم featureها خواهند خورد." : "");
+  }
   function render() {
-    var cap = cfg.n * Q[cfg.q], sus = cap * cfg.sus / 100, left = cap - sus, used = 0, fits = 0, rows = [];
-    P.forEach(function (p) { var e = p[1] * (cfg.dbl ? 2 : 1), ok = used + e <= left; if (ok) { used += e; fits++; } rows.push([p[0], p[1], e, ok]); });
-    var g = Kit.clear(document.getElementById("bars")), total = Math.max(cap, sus + rows.reduce(function (a, r) { return a + r[2]; }, 0)), X = function (v) { return 10 + v / total * 500; };
-    g.appendChild(Kit.svg("rect", { class: "cap", x: X(0), y: 20, width: X(cap) - X(0), height: 30 }));
-    g.appendChild(Kit.svg("text", { x: X(0), y: 14 }, "ظرفیت: " + cap.toFixed(1) + " هفته‌ی مهندسی"));
-    g.appendChild(Kit.svg("rect", { class: "sus", x: X(0), y: 60, width: X(sus) - X(0), height: 24 }));
-    var x = sus, xf = sus; rows.forEach(function (r) { if (r[3]) { g.appendChild(Kit.svg("rect", { class: "fit", x: X(xf), y: 60, width: X(xf + r[2]) - X(xf) - 1, height: 24 })); xf += r[2]; } });
-    x = xf; rows.forEach(function (r) { if (!r[3]) { g.appendChild(Kit.svg("rect", { class: "over", x: X(x), y: 90, width: X(x + r[2]) - X(x) - 1, height: 18 })); x += r[2]; } });
-    g.setAttribute("aria-label", cap.toFixed(1) + " هفته‌ی مهندسی: " + sus.toFixed(1) + " هفته کار نگه‌دارنده، و " + fits + " پروژه از " + P.length + " پروژه جا می‌شود");
+    plan();
+    var g = Kit.clear(document.getElementById("bars")), total = Math.max(r.cap, r.sus + r.rows.reduce(function (a, x) { return a + x[2]; }, 0)), X = function (v) { return 10 + v / total * 620; };
+    g.appendChild(Kit.svg("rect", { class: "cap", x: X(0), y: 22, width: X(r.cap) - X(0), height: 30 }));
+    g.appendChild(Kit.svg("text", { x: X(0), y: 15 }, Kit.digits("ظرفیت: " + f1(r.cap) + " هفته‌ی مهندسی")));
+    g.appendChild(Kit.svg("rect", { class: "sus", x: X(0), y: 60, width: Math.max(0, X(r.sus) - X(0)), height: 26 }));
+    var xf = r.sus; r.rows.forEach(function (x) { if (x[3]) { g.appendChild(Kit.svg("rect", { class: "fit", x: X(xf), y: 60, width: X(xf + x[2]) - X(xf) - 1, height: 26 })); xf += x[2]; } });
+    var xo = xf; r.rows.forEach(function (x) { if (!x[3]) { g.appendChild(Kit.svg("rect", { class: "over", x: X(xo), y: 94, width: X(xo + x[2]) - X(xo) - 1, height: 22 })); xo += x[2]; } });
+    g.setAttribute("aria-label", Kit.digits(f1(r.cap) + " هفته‌ی مهندسی: " + f1(r.sus) + " هفته کار نگه‌دارنده، و " + r.fits + " پروژه از " + P.length + " جا می‌شود"));
     var t = Kit.clear(document.getElementById("tbl"));
     t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "پروژه، به ترتیب اولویت"), Kit.el("th", { class: "num" }, "تخمین سرانگشتی"), Kit.el("th", { class: "num" }, "برنامه‌ریزی‌شده"), Kit.el("th", null, "همین فصل؟"))));
-    var tb = Kit.el("tbody"); rows.forEach(function (r) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, r[0]), Kit.el("td", { class: "num" }, r[1] + " هفته"), Kit.el("td", { class: "num" }, r[2] + " هفته"), Kit.el("td", null, Kit.el("span", { class: "badge " + (r[3] ? "ok" : "bad") }, r[3] ? "✓ جا می‌شود" : "✗ فصل بعد")))); }); t.appendChild(tb);
-    var v = document.getElementById("verdict"); v.className = "callout " + (fits === P.length ? (cfg.dbl && cfg.sus >= 20 ? "ok" : "warn") : "warn");
-    v.textContent = fits + " پروژه از " + P.length + " پروژه جا می‌شود. " + (!cfg.dbl ? "تخمین سرانگشتیِ دو برابر نشده خوش‌بینانه است: انتظار عقب افتادن داشته باشید. " : "") + (cfg.sus < 20 ? "کمتر از ۲۰٪ کار نگه‌دارنده: بدهی و قطعی از سهم featureها خواهند خورد." : "");
-    if (prev !== null && prev !== fits) log.add(fits + " پروژه جا می‌شود (" + cfg.n + " مهندس، " + QNAME[cfg.q] + "، " + cfg.sus + "٪ کار نگه‌دارنده" + (cfg.dbl ? "، با دو برابر کردن" : "") + ")", fits > prev ? "ok" : "warn"); prev = fits;
-    stats([["ظرفیت", cap.toFixed(1) + " هفته"], ["کار نگه‌دارنده", sus.toFixed(1) + " هفته"], ["برنامه‌ریزی‌شده برای پروژه‌ها", used + " هفته"], ["پروژه‌هایی که جا می‌شوند", fits + " / " + P.length, fits === P.length ? "ok" : "warn"]]);
+    var tb = Kit.el("tbody"); r.rows.forEach(function (x) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, x[0]), Kit.el("td", { class: "num" }, Kit.digits(x[1] + " هفته")), Kit.el("td", { class: "num" }, Kit.digits(x[2] + " هفته")), Kit.el("td", null, Kit.el("span", { class: "badge " + (x[3] ? "ok" : "bad") }, x[3] ? "✓ جا می‌شود" : "✗ فصل بعد")))); }); t.appendChild(tb);
+    var st = Kit.clear(document.getElementById("stats"));
+    [["ظرفیت", f1(r.cap) + " هفته", ""], ["کار نگه‌دارنده", f1(r.sus) + " هفته", cfg.sus < 20 ? "warn" : ""], ["برنامه‌ریزی‌شده برای پروژه‌ها", f1(r.used) + " هفته", ""], ["پروژه‌هایی که جا می‌شوند", Kit.digits(r.fits + " از " + P.length), r.fits === P.length ? "ok" : "warn"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(x[1]))));
+    });
+    teamS.set(cfg.n); qS.set(cfg.q); susS.set(cfg.sus); dbl.checked = cfg.dbl;
   }
-  document.getElementById("team").appendChild(Kit.slider({ label: "تعداد مهندس‌ها", min: 2, max: 10, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; render(); } }).element);
-  document.getElementById("q").appendChild(Kit.segmented({ label: "سه‌ماهه", value: cfg.q, options: ["Q1", "Q2", "Q3", "Q4"].map(function (k) { return { value: k, label: k.slice(1) + " · " + Q[k] + " هفته" }; }), onChange: function (v) { cfg.q = v; render(); } }).element);
-  document.getElementById("sus").appendChild(Kit.slider({ label: "کار نگه‌دارنده", min: 0, max: 40, step: 5, value: cfg.sus, unit: "٪", onInput: function (v) { cfg.sus = v; render(); } }).element);
-  document.getElementById("dbl").addEventListener("change", function (e) { cfg.dbl = e.target.checked; render(); });
-  render();
+
+  /* ---------- the drawer: every handler is render() then tour.free(text, kind) ---------- */
+  function changed() { render(); tour.free(summary(), kind()); }
+  var teamS = Kit.slider({ label: "تعداد مهندس‌ها", min: 2, max: 10, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; changed(); } });
+  document.getElementById("team").appendChild(teamS.element);
+  var qS = Kit.segmented({ label: "سه‌ماهه", value: cfg.q, options: ["Q1", "Q2", "Q3", "Q4"].map(function (k) { return { value: k, label: Kit.digits(k.slice(1) + " · " + Q[k] + " هفته") }; }), onChange: function (v) { cfg.q = v; changed(); } });
+  document.getElementById("q").appendChild(qS.element);
+  var susS = Kit.slider({ label: "کار نگه‌دارنده", min: 0, max: 40, step: 5, value: cfg.sus, format: function (v) { return Kit.pct(v / 100, 0); }, onInput: function (v) { cfg.sus = v; changed(); } });
+  document.getElementById("sus").appendChild(susS.element);
+  var dbl = document.getElementById("dbl");
+  dbl.addEventListener("change", function () { cfg.dbl = dbl.checked; changed(); });
+
+  /* ---------- the scenario ---------- */
+  function scene(n, q, sus, d) { return function () { cfg.n = n; cfg.q = q; cfg.sus = sus; cfg.dbl = d; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene(5, "Q2", 20, false), render: render, interval: 7000,
+    intro: "نوار خاکستری کل هفته‌های مهندسی این فصل است. زیرش اول کار نگه‌دارنده می‌آید و بعد پروژه‌ها به ترتیب اولویت؛ هرچه جا نشود قرمز می‌شود و به فصل بعد می‌رود.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و تیم و فصل خودتان را بگذارید.",
+    steps: [
+      { kind: "warn", run: scene(5, "Q2", 20, false), say: function () { return "پنج مهندس، هر کدام حدود ده هفته‌ی مفید در فصل، نه سیزده هفته (ص. ۹۴)، و ۲۰٪ برای کار نگه‌دارنده. با تخمین‌های سرانگشتی خام، همه چیز روی کاغذ جا می‌شود. " + summary(); } },
+      { kind: "bad", run: scene(5, "Q2", 20, true), say: function () { return "کتاب تخمین سرانگشتی را دو برابر می‌کند (ص. ۹۵). همان فهرست حالا " + Kit.digits(String(P.length - r.fits)) + " پروژه را به فصل بعد می‌فرستد؛ این همان برنامه‌ی واقع‌بینانه است."; } },
+      { kind: "warn", run: scene(5, "Q2", 0, true), say: function () { return "حذف کار نگه‌دارنده یک پروژه‌ی دیگر را جا می‌دهد، اما کتاب هشدار می‌دهد که زمان‌بندی featureها تا ۱۰۰٪ ظرفیت، خود featureها را کند می‌کند: تست، debug، تمیزکاری و مهاجرت سهم خودشان را می‌خواهند (ص. ۹۴). " + summary(); } },
+      { kind: "bad", run: scene(5, "Q4", 20, true), say: function () { return "کتاب می‌گوید فصل چهارم معمولاً کم‌بارترین است (ص. ۹۴). با فرض نه هفته‌ی مفید: " + summary(); } },
+      { kind: "ok", run: scene(7, "Q2", 20, true), say: function () { return "دو مهندس بیشتر: " + summary() + " دقت کنید که ابزار پنل مدیریت جلوتر از API شرکا جا شد، چون کوچک‌تر است؛ ترتیب اولویت را خودتان باید نگه دارید."; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "کتاب در هر فصل برای هر مهندس چند هفته‌ی مفید برنامه می‌ریزد؟", options: ["۱۳", "حدود ۱۰", "۶"], answer: 1, explain: "ص. ۹۴." },
     { q: "کتاب چه سهمی از وقت را برای کار نگه‌دارنده کنار می‌گذارد؟", options: ["۰٪", "۲۰٪", "۵۰٪"], answer: 1, explain: "تست، debug، تمیزکاری و مهاجرت (ص. ۹۴)." },

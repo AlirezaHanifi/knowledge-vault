@@ -6,13 +6,26 @@
 <title>این کدام نقش ارشد است؟</title>
 <meta name="description" content="بلوک‌های سازنده‌ای را که یک شغل ارشد فناوری در بر می‌گیرد تیک بزنید و ببینید با کدام ترکیب و عنوان کتاب می‌خواند. برای فصل ۸ کتاب The Manager's Path.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.roles label.check { margin: 6px 0; } .combo { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; margin-bottom: 8px; background: var(--surface); }
-  .combo.best { border-color: var(--accent); background: var(--accent-soft); } .combo .ttl { font-weight: 600; } .combo .parts { font-size: .82rem; color: var(--ink-2); }</style>
+<style>
+  /* Seven building-block roles on top; under them the seven combinations the author has seen, best overlap first. */
+  .lr-roles { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .lr-role { font-size: .85rem; border-radius: 999px; padding: 3px 11px; border: 1.5px solid var(--line); color: var(--ink-3); background: var(--surface); }
+  .lr-role.on { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); font-weight: 600; }
+  .lr-combos { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .lr-combo { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px; background: var(--surface); }
+  .lr-combo.best { border-color: var(--accent); background: var(--accent-soft); }
+  .lr-combo.dim { opacity: .55; }
+  .lr-combo .ttl { font-weight: 600; font-size: .88rem; } .lr-combo .parts { font-size: .82rem; color: var(--ink-2); margin-top: 2px; }
+  .lr-combo .badge { font-size: .8rem; }
+  .lr-check { display: flex; gap: 6px; align-items: baseline; font-size: .88rem; margin: 3px 0; }
+  .lr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  @media (max-width: 640px) { .lr-combos { grid-template-columns: 1fr; } }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
       <a href="../chapters/08-the-big-leagues.html">فصل ۸</a><span aria-hidden="true">/</span>
@@ -23,45 +36,56 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۸ · لیگ بزرگ‌ها</div>
-  <h1>این کدام نقش ارشد است؟</h1>
-  <p class="lede">کتاب به‌جای تعریف کردن هر عنوان، <strong>هفت نقشی را فهرست می‌کند که رهبران ارشد فناوری بازی می‌کنند</strong>، به‌همراه ترکیب‌هایی که نویسنده دیده و عنوان‌های معمولشان. یک شغل را با بلوک‌های سازنده‌اش توصیف کنید و ببینید شبیه کدام ترکیب است.</p>
-  <p class="source-note">این شبیه‌سازی بخش «مدل‌هایی برای فکر کردن به رهبری ارشد فناوری» را نشان می‌دهد (صص. ۱۶۲–۱۶۴). نقش‌ها و ترکیب‌ها و عنوان‌ها از کتاب‌اند؛ امتیاز هم‌خوانی مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>این کدام نقش ارشد است؟</h1>
+      <p class="lede">کتاب به‌جای تعریف کردن هر عنوان، <strong>هفت نقشی را فهرست می‌کند که رهبران ارشد فناوری بازی می‌کنند</strong>، به‌همراه ترکیب‌هایی که نویسنده دیده و عنوان‌های معمولشان. یک شغل را با بلوک‌های سازنده‌اش توصیف کنید و ببینید شبیه کدام ترکیب است.</p>
+      <p class="source-note">برای بخش «مدل‌هایی برای فکر کردن به رهبری ارشد فناوری» (صص. ۱۶۲–۱۶۴). نقش‌ها، ترکیب‌ها و عنوان‌ها از کتاب‌اند؛ امتیاز هم‌خوانی مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">ترکیب‌های کتاب، با نزدیک‌ترین هم‌خوانی در بالا</p><div id="combos" aria-live="polite"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">این شغل شامل چیست؟</p><div class="roles" id="roles"></div>
-        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="clear">پاک کردن</button></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="lr-roles" id="chips" aria-label="نقش‌های انتخاب‌شده"></div>
+        <div class="lr-combos" id="combos"></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">هم‌خوانی</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group lr-grid" id="roles"></div>
+        <div class="tweak-group"><button class="btn small" type="button" id="clear">پاک کردن همه</button></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>یک عنوان شغل‌های خیلی متفاوتی را پوشش می‌دهد.</strong> عنوان CTO در پنج ترکیب از هفت ترکیب پیدا می‌شود.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>یک عنوان شغل‌های خیلی متفاوتی را پوشش می‌دهد.</strong> عنوان CTO در پنج ترکیب از هفت ترکیب پیدا می‌شود.</li>
     <li><strong>بیشتر CTOهای قوی یک کارکرد استراتژیک را نگه می‌دارند</strong>، چه کسب‌وکاری، چه فناورانه، چه هر دو (ص. ۱۶۴).</li>
     <li><strong>سازمان به‌علاوه‌ی اجرا</strong> هسته‌ی نقش VP of Engineering است؛ با اضافه شدن مدیر اجرایی کسب‌وکار به شغل یک general manager تبدیل می‌شود.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/08-the-big-leagues.html"><small>درس</small>فصل ۸: لیگ بزرگ‌ها</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/08-the-big-leagues.html"><small>درس</small>فصل ۸: لیگ بزرگ‌ها</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var log = Kit.log(document.getElementById("log"));
   var R = [["rd", "تحقیق و توسعه", "آزمایشگری، پژوهش، فناوری تازه"], ["strat", "استراتژی فناوری و چشم‌انداز", "این‌که فناوری چطور کسب‌وکار را بزرگ می‌کند"],
            ["org", "سازمان", "برنامه‌ی نیرو، ساختار سازمانی"], ["exec", "اجرا", "نقشه‌ی راه، برنامه‌ریزی، برداشتن سدها"],
            ["ext", "چهره‌ی بیرونی فناوری", "جلسه‌های فروش، سخنرانی، برند مهندسی"], ["infra", "زیرساخت و عملیات فنی", "همه‌ی زیرساخت و گرداندنش"],
@@ -70,26 +94,57 @@
            [["org", "exec", "biz"], "VP of Engineering یا General Manager"], [["infra", "org", "exec"], "CTO یا CIO و شاید VP of Technical Operations"],
            [["strat", "biz", "exec"], "Head of Product یا Chief Product Officer و گاهی CTO"], [["rd", "biz"], "CTO یا Chief Scientist، هم‌بنیان‌گذار"],
            [["org", "exec"], "VP of Engineering و گاهی Chief of Staff"]];
-  var on = {}, boxes = [], name = {}; R.forEach(function (r) { name[r[0]] = r[1]; });
-  var mount = document.getElementById("roles");
-  R.forEach(function (r) { var cb = Kit.el("input", { type: "checkbox", value: r[0] }); boxes.push(cb);
-    cb.addEventListener("change", function () { on[r[0]] = cb.checked; log.add((cb.checked ? "اضافه شد: " : "برداشته شد: ") + r[1], "muted"); render(); });
-    mount.appendChild(Kit.el("label", { class: "check" }, cb, Kit.el("span", null, Kit.el("strong", null, r[1]), " — " + r[2]))); });
-  document.getElementById("clear").addEventListener("click", function () { boxes.forEach(function (b) { b.checked = false; }); on = {}; log.add("پاک شد", "muted"); render(); });
+  var on = {}, boxes = {}, name = {}, top = null, tour;
+  R.forEach(function (r) { name[r[0]] = r[1]; });
+
   function render() {
     var sel = R.filter(function (r) { return on[r[0]]; }).map(function (r) { return r[0]; });
-    var scored = C.map(function (c) { var hit = c[0].filter(function (k) { return on[k]; }).length, union = sel.length + c[0].length - hit; return { c: c, hit: hit, j: union ? hit / union : 0 }; });
-    scored.sort(function (a, b) { return b.j - a.j; });
+    var chips = Kit.clear(document.getElementById("chips"));
+    R.forEach(function (r) { chips.appendChild(Kit.el("span", { class: "lr-role" + (on[r[0]] ? " on" : "") }, (on[r[0]] ? "✓ " : "") + r[1])); });
+    var scored = C.map(function (c, i) { var hit = c[0].filter(function (k) { return on[k]; }).length, union = sel.length + c[0].length - hit; return { c: c, i: i, hit: hit, j: union ? hit / union : 0 }; });
+    scored.sort(function (a, b) { return b.j - a.j || a.i - b.i; });
+    top = sel.length && scored[0].j > 0 ? scored[0] : null;
     var m = Kit.clear(document.getElementById("combos"));
-    if (!sel.length) m.appendChild(Kit.el("p", { class: "field-hint" }, "نقش‌ها را در ستون کناری تیک بزنید؛ ترکیب‌ها بر پایه‌ی هم‌پوشانی مرتب می‌شوند."));
     scored.forEach(function (s, i) {
-      var exact = s.hit === s.c[0].length && s.c[0].length === sel.length, best = sel.length && i === 0 && s.j > 0;
-      m.appendChild(Kit.el("div", { class: "combo" + (best ? " best" : "") },
-        Kit.el("div", { class: "ttl" }, s.c[1], " ", sel.length ? Kit.el("span", { class: "badge " + (exact ? "ok" : s.hit ? "warn" : "") }, exact ? "هم‌خوانی کامل" : s.hit + " نقش از " + s.c[0].length + " نقش") : null),
+      var exact = s.hit === s.c[0].length && s.c[0].length === sel.length, best = top && i === 0;
+      m.appendChild(Kit.el("div", { class: "lr-combo" + (best ? " best" : "") + (sel.length && !s.hit ? " dim" : "") },
+        Kit.el("div", { class: "ttl" }, s.c[1], " ", sel.length ? Kit.el("span", { class: "badge " + (exact ? "ok" : s.hit ? "warn" : "") }, exact ? "هم‌خوانی کامل" : Kit.digits(s.hit + " از " + s.c[0].length)) : null),
         Kit.el("div", { class: "parts" }, s.c[0].map(function (k) { return (on[k] ? "✓ " : "") + name[k]; }).join(" + "))));
     });
+    var cto = C.filter(function (c) { return c[1].indexOf("CTO") >= 0; }).length;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["نقش‌های انتخاب‌شده", Kit.digits(String(sel.length)), ""], ["نزدیک‌ترین ترکیب", top ? top.c[1].split(/ یا |، | و /)[0] : "—", top ? "ok" : ""], ["هم‌پوشانی", top ? Kit.pct(top.j, 0) : "—", top && top.j === 1 ? "ok" : top ? "warn" : ""], ["ترکیب‌هایی که می‌توانند CTO باشند", Kit.digits(cto + " از " + C.length), ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    R.forEach(function (r) { boxes[r[0]].checked = !!on[r[0]]; });
   }
-  render();
+  function summary() { return top ? "نزدیک‌ترین ترکیب: " + top.c[1] + "، با " + Kit.pct(top.j, 0) + " هم‌پوشانی." : "هیچ نقشی انتخاب نشده."; }
+
+  /* ---------- the drawer: every handler is render() then tour.free(text, kind) ---------- */
+  var mount = document.getElementById("roles");
+  R.forEach(function (r) {
+    var cb = Kit.el("input", { type: "checkbox", value: r[0] }); boxes[r[0]] = cb;
+    cb.addEventListener("change", function () { on[r[0]] = cb.checked; render(); tour.free((cb.checked ? "اضافه شد: " : "برداشته شد: ") + r[1] + ". " + summary(), top && top.j === 1 ? "ok" : ""); });
+    mount.appendChild(Kit.el("label", { class: "lr-check", title: r[2] }, cb, Kit.el("span", null, r[1])));
+  });
+  document.getElementById("clear").addEventListener("click", function () { on = {}; render(); tour.free("همه‌ی نقش‌ها برداشته شدند. یک شغل را با بلوک‌های سازنده‌اش بسازید.", ""); });
+
+  /* ---------- the scenario ---------- */
+  function scene(keys) { return function () { on = {}; keys.forEach(function (k) { on[k] = true; }); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene([]), render: render, interval: 7500,
+    intro: "بالا هفت نقشی است که کتاب برای رهبران ارشد فناوری فهرست می‌کند؛ پایین هفت ترکیبی که نویسنده دیده، با عنوان‌های معمولشان (صص. ۱۶۲–۱۶۴). کتاب به‌جای تعریف کردن عنوان‌ها همین بلوک‌ها را می‌دهد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و شغل رهبر ارشد شرکت خودتان را با این بلوک‌ها توصیف کنید.",
+    steps: [
+      { kind: "ok", run: scene(["biz", "strat", "org", "exec"]), say: "مدیر اجرایی کسب‌وکار، استراتژی، سازمان و اجرا با هم: کتاب این را CTO یا Head of Engineering در سطح VP یا SVP می‌بیند (ص. ۱۶۳)." },
+      { kind: "ok", run: scene(["rd", "strat", "ext"]), say: "تحقیق و توسعه، استراتژی و چهره‌ی بیرونی، معمولاً در شرکتی که نرم‌افزار می‌فروشد: باز هم CTO، یا Chief Scientist و Chief Architect (ص. ۱۶۳). یک عنوان، شغلی کاملاً دیگر." },
+      { kind: "ok", run: scene(["org", "exec"]), say: "فقط سازمان و اجرا، یعنی «بازی زمینی»: VP of Engineering و گاهی Chief of Staff (ص. ۱۶۴)." },
+      { kind: "warn", run: scene(["org", "exec", "infra"]), say: "همان سازمان و اجرا با زیرساخت: حالا ترکیب CTO یا CIO یا VP of Technical Operations جلو می‌آید (ص. ۱۶۴). یک نقش اضافه عنوان را عوض می‌کند." },
+      { kind: "warn", run: scene(["rd", "biz"]), say: function () { return "تحقیق و توسعه با مدیر اجرایی کسب‌وکار: CTO یا Chief Scientist هم‌بنیان‌گذار (ص. ۱۶۴). عنوان CTO در " + Kit.digits(String(C.filter(function (c) { return c[1].indexOf("CTO") >= 0; }).length)) + " ترکیب از ۷ آمده؛ بیشتر CTOهای قوی فقط در این مشترک‌اند که یک کارکرد استراتژیک را نگه می‌دارند (ص. ۱۶۴)."; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "کتاب کدام ترکیب را به VP of Engineering و گاهی Chief of Staff نسبت می‌دهد؟", options: ["تحقیق و توسعه به‌علاوه‌ی مدیر اجرایی کسب‌وکار", "سازمان به‌علاوه‌ی اجرا", "زیرساخت به‌علاوه‌ی چهره‌ی بیرونی"], answer: 1, explain: "ص. ۱۶۴." },
     { q: "به گفته‌ی کتاب، بیشتر CTOهای قوی چه چیزی را نگه می‌دارند؟", options: ["زیردست مستقیم در هر تیم", "یک کارکرد استراتژیک، چه کسب‌وکاری چه فناورانه چه هر دو", "مالکیت زیرساخت"], answer: 1, explain: "ص. ۱۶۴." },

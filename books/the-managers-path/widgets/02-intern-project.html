@@ -6,13 +6,21 @@
 <title>اندازه‌گیری پروژه‌ی کارآموز</title>
 <meta name="description" content="طول دوره، سرعت کارآموز و بقیه‌ی برنامه‌های دوره را بگذارید و ببینید پروژه‌ای به اندازه‌ی نصف دوره تمام می‌شود یا نه. برای فصل ۲ کتاب The Manager's Path.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.tl { width: 100%; display: block; } .tl rect.work { fill: var(--s1); } .tl rect.other { fill: var(--surface-2); stroke: var(--line-strong); }
-  .tl rect.pres { fill: var(--s3); } .tl rect.need { fill: none; stroke: var(--s2); stroke-width: 2; stroke-dasharray: 5 3; } .tl text { font-size: 12px; }</style>
+<style>
+  /* One summer, week by week: a bar of weeks available for the project, then the project's real length split into three milestones. */
+  .ip-tl { width: 100%; display: block; max-height: 300px; direction: ltr; }
+  .ip-tl rect.work { fill: var(--s1); } .ip-tl rect.other { fill: var(--surface-2); stroke: var(--line-strong); }
+  .ip-tl rect.pres { fill: var(--s3); } .ip-tl rect.ms { fill: var(--s2); fill-opacity: .25; stroke: var(--s2); stroke-width: 1.5; }
+  .ip-tl rect.ms.miss { fill: none; stroke-dasharray: 5 3; }
+  .ip-tl line.end { stroke: var(--bad); stroke-width: 2; stroke-dasharray: 4 3; }
+  .ip-tl text { font-size: 13px; fill: var(--ink); } .ip-tl text.muted { fill: var(--ink-3); }
+  .ip-key { font-size: .85rem; color: var(--ink-2); margin: 6px 0 0; }
+</style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TMP</a><span aria-hidden="true">/</span>
       <a href="../chapters/02-mentoring.html">فصل ۲</a><span aria-hidden="true">/</span>
@@ -23,79 +31,127 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۲ · منتورینگ</div>
-  <h1>اندازه‌گیری پروژه‌ی کارآموز</h1>
-  <p class="lede">پروژه‌ای مشخص و مرتبط ولی غیرفوری آماده داشته باشید، در اندازه‌ای که <strong>یک تازه‌وارد در حدود نیمی از دوره تمامش کند</strong>؛ پنج هفته کار برای کارآموز ده هفته‌ای، و برنامه بریزید که کارآموز آخر دوره آن را ارائه بدهد.</p>
-  <p class="source-note">این شبیه‌سازی بخش «منتورِ یک کارآموز» و جعبه‌ی Ask the CTO درباره‌ی کارآموز تابستانی را نشان می‌دهد (صص. ۱۲–۱۶). دلیل‌ها از کتاب‌اند، یعنی این‌که کارآموزها کند پیش می‌روند و آموزش و برنامه‌های جمعی وقت می‌برند (ص. ۱۶)؛ عددهای سرعت و بقیه‌ی برنامه‌ها و هفته‌ای که برای ارائه کنار گذاشته شده فرض‌های vault هستند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>اندازه‌گیری پروژه‌ی کارآموز</h1>
+      <p class="lede">پروژه‌ای مشخص و مرتبط ولی غیرفوری آماده داشته باشید، در اندازه‌ای که <strong>یک تازه‌وارد در حدود نیمی از دوره تمامش کند</strong>، و برنامه بریزید که کارآموز آخر دوره آن را ارائه بدهد. تور نشان می‌دهد چرا نصف دوره حاشیه‌ی اضافه نیست.</p>
+      <p class="source-note">برای بخش «منتورِ یک کارآموز» و جعبه‌ی Ask the CTO درباره‌ی کارآموز تابستانی (صص. ۱۲–۱۶). دلیل‌ها از کتاب‌اند، یعنی این‌که کارآموزها کند پیش می‌روند و آموزش و برنامه‌های جمعی وقت می‌برند (ص. ۱۶)؛ عددهای سرعت و بقیه‌ی برنامه‌ها، هفته‌ی ارائه و سه milestone فرض‌های vault هستند. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">تابستان، هفته به هفته</p>
-        <svg class="tl" id="tl" viewBox="0 0 520 150" role="img"></svg>
-        <p class="field-hint">آبی: هفته‌های موجود برای پروژه · خاکستری: بقیه‌ی برنامه‌ها · سبز: ارائه · نارنجی خط‌چین: پروژه برای این کارآموز واقعاً چقدر طول می‌کشد.</p>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="half">اندازه‌ی نصف دوره</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <svg class="ip-tl" id="tl" viewBox="0 0 640 190" role="img"></svg>
+        <p class="ip-key">آبی: هفته‌های موجود برای پروژه · خاکستری: بقیه‌ی برنامه‌ها · سبز: ارائه · نارنجی: سه milestone پروژه با سرعت این کارآموز؛ خط‌چین یعنی پیش از ارائه تمام نمی‌شود.</p>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">تابستان</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+        <div class="tweak-group">
+          <button class="btn primary small" type="button" id="half">اندازه‌ی نصف دوره</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>نصف دوره حاشیه‌ی اضافه نیست</strong>: کتاب انتظار دارد کارآموز کند پیش برود، و آموزش و برنامه‌های جمعی و ارائه‌ی پایانی هفته‌های واقعی می‌برند (ص. ۱۶).</li>
-    <li><strong>پروژه‌ای به اندازه‌ی کل دوره</strong> تقریباً هیچ‌وقت تمام نمی‌شود و کارآموز بدون دمو می‌ماند؛ و کارآموزی که حس کند کارش مهم بوده برمی‌گردد.</li>
-    <li><strong>پروژه را به milestone بشکنید</strong> (ص. ۱۳): اگر کارآموز جلو زد milestone بعدی آماده است، و اگر گیر کرد باز هم یکی از milestoneهای اول نتیجه‌ای است.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>نصف دوره حاشیه‌ی اضافه نیست</strong>: کتاب انتظار دارد کارآموز کند پیش برود، و آموزش و برنامه‌های جمعی و ارائه‌ی پایانی هفته‌های واقعی می‌برند (ص. ۱۶).</li>
+      <li><strong>پروژه‌ای به اندازه‌ی کل دوره</strong> تقریباً هیچ‌وقت تمام نمی‌شود و کارآموز بدون دمو می‌ماند؛ و کارآموزی که حس کند کارش مهم بوده برمی‌گردد.</li>
+      <li><strong>پروژه را به milestone بشکنید</strong> (ص. ۱۳): اگر کارآموز جلو زد milestone بعدی آماده است، و اگر گیر کرد باز هم یکی از milestoneهای اول نتیجه‌ای است.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/02-mentoring.html"><small>درس</small>فصل ۲: منتورینگ</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/02-mentoring.html"><small>درس</small>فصل ۲: منتورینگ</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
+  var cfg = { weeks: 10, project: 5, pace: 0.7, other: 15 }, m, tour;
+  function f1(v) { return Kit.digits(v.toFixed(1)); }
 
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  function model() {
+    var W = cfg.weeks, avail = Math.max(0, (W - 1) * (1 - cfg.other / 100)), need = cfg.project / cfg.pace, done = 0;
+    for (var k = 1; k <= 3; k++) if (need * k / 3 <= avail + 1e-9) done = k;
+    m = { W: W, avail: avail, need: need, done: done, ok: need <= avail + 1e-9 };
+    m.tight = m.ok && need > avail * 0.85;
   }
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { weeks: 10, project: 5, pace: 0.7, other: 15 }, last = null;
+
+  function render() {
+    model();
+    var g = Kit.clear(document.getElementById("tl")), L = 20, R = 620, MAX = 16, X = function (w) { return L + Math.min(w, MAX) / MAX * (R - L); };
+    for (var i = 0; i <= MAX; i += 2) g.appendChild(Kit.svg("text", { x: X(i), y: 182, "text-anchor": "middle", class: "muted" }, Kit.digits(String(i))));
+    g.appendChild(Kit.svg("text", { x: R, y: 22, "text-anchor": "end" }, Kit.digits("دوره: " + m.W + " هفته")));
+    g.appendChild(Kit.svg("rect", { class: "work", x: X(0), y: 32, width: X(m.avail) - X(0), height: 34 }));
+    g.appendChild(Kit.svg("rect", { class: "other", x: X(m.avail), y: 32, width: X(m.W - 1) - X(m.avail), height: 34 }));
+    g.appendChild(Kit.svg("rect", { class: "pres", x: X(m.W - 1), y: 32, width: X(m.W) - X(m.W - 1), height: 34 }));
+    g.appendChild(Kit.svg("line", { class: "end", x1: X(m.avail), x2: X(m.avail), y1: 26, y2: 140 }));
+    for (var k = 0; k < 3; k++) {
+      var a = m.need * k / 3, b = m.need * (k + 1) / 3, miss = k >= m.done;
+      g.appendChild(Kit.svg("rect", { class: "ms" + (miss ? " miss" : ""), x: X(a) + 1, y: 92, width: Math.max(2, X(b) - X(a) - 2), height: 30 }));
+      if (X(b) - X(a) > 40) g.appendChild(Kit.svg("text", { x: (X(a) + X(b)) / 2, y: 112, "text-anchor": "middle" }, (miss ? "✕ " : "✓ ") + Kit.digits(String(k + 1))));
+    }
+    g.appendChild(Kit.svg("text", { x: L, y: 160 }, Kit.digits("پروژه با این سرعت " + m.need.toFixed(1) + " هفته می‌برد" + (m.need > MAX ? "، بیرون از نمودار" : ""))));
+    g.setAttribute("aria-label", Kit.digits("دوره‌ای " + m.W + " هفته‌ای با " + m.avail.toFixed(1) + " هفته برای پروژه؛ پروژه " + m.need.toFixed(1) + " هفته طول می‌کشد و " + m.done + " از ۳ milestone تمام می‌شود."));
+    var st = Kit.clear(document.getElementById("stats"));
+    [["سهم پروژه از دوره", Kit.pct(cfg.project / m.W, 0), ""], ["هفته‌های موجود برای پروژه", f1(m.avail), ""],
+     ["هفته‌هایی که پروژه می‌برد", f1(m.need), m.ok ? (m.tight ? "warn" : "ok") : "bad"],
+     ["حاشیه", f1(m.avail - m.need) + " هفته", m.ok ? "ok" : "bad"], ["milestoneهای تمام‌شده", Kit.digits(m.done + " از ۳"), m.done === 3 ? "ok" : m.done ? "warn" : "bad"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    Object.keys(sl).forEach(function (k) { sl[k].set(cfg[k]); });
+  }
+  function verdict() {
+    return m.ok ? (m.tight ? "به‌زحمت تمام می‌شود؛ جایی برای شروع کند یا یک milestone از دست رفته نمی‌ماند." : "تمام می‌شود، با " + f1(m.avail - m.need) + " هفته برای صیقل دادن و تمرین ارائه.")
+      : "تمام نمی‌شود: تابستان " + f1(m.need - m.avail) + " هفته زودتر از پروژه تمام می‌شود و " + Kit.digits(String(m.done)) + " از ۳ milestone آماده است.";
+  }
+
+  /* ---------- the drawer: every handler is render() then tour.free(text, kind) ---------- */
   var ctl = document.getElementById("ctl"), sl = {};
-  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
+  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); tour.free(verdict(), m.ok ? (m.tight ? "warn" : "ok") : "bad"); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
   add("weeks", { label: "طول دوره‌ی کارآموزی", min: 8, max: 14, step: 1, unit: " هفته" });
   add("project", { label: "اندازه‌ی پروژه بر حسب هفته‌ی یک تازه‌وارد", min: 2, max: 14, step: 0.5, unit: " هفته" });
-  add("pace", { label: "سرعت کارآموز نسبت به یک تازه‌وارد", min: 0.4, max: 1.2, step: 0.05, format: function (v) { return Math.round(v * 100) + "%"; }, hint: "فرض vault" });
-  add("other", { label: "بقیه‌ی برنامه‌ها: راه‌اندازی، رویدادها، جلسه‌ی ۱-۱", min: 0, max: 40, step: 5, unit: "%", hint: "فرض vault" });
-  document.getElementById("half").addEventListener("click", function () { cfg.project = cfg.weeks / 2; sl.project.set(cfg.project); render(); log.add("پروژه به اندازه‌ی نصف دوره تنظیم شد: " + cfg.project + " هفته‌ی تازه‌وارد.", "muted"); });
-  function render() {
-    var W = cfg.weeks, pres = 1, avail = Math.max(0, (W - pres) * (1 - cfg.other / 100)), need = cfg.project / cfg.pace;
-    var g = Kit.clear(document.getElementById("tl")), L = 20, R = 500, X = function (w) { return L + w / 14 * (R - L); };
-    for (var i = 0; i <= 14; i += 2) g.appendChild(Kit.svg("text", { x: X(i), y: 140, "text-anchor": "middle", class: "muted" }, i + " هفته"));
-    g.appendChild(Kit.svg("rect", { class: "work", x: X(0), y: 30, width: X(avail) - X(0), height: 34 }));
-    g.appendChild(Kit.svg("rect", { class: "other", x: X(avail), y: 30, width: X(W - pres) - X(avail), height: 34 }));
-    g.appendChild(Kit.svg("rect", { class: "pres", x: X(W - pres), y: 30, width: X(W) - X(W - pres), height: 34 }));
-    g.appendChild(Kit.svg("text", { x: X(0), y: 20 }, "دوره: " + W + " هفته"));
-    g.appendChild(Kit.svg("rect", { class: "need", x: X(0), y: 80, width: Math.min(X(need), R + 10) - X(0), height: 24 }));
-    g.appendChild(Kit.svg("text", { x: X(0) + 6, y: 97 }, "پروژه " + need.toFixed(1) + " هفته طول می‌کشد" + (need > 14 ? "، بیرون از نمودار" : "")));
-    var ok = need <= avail, tight = ok && need > avail * 0.85;
-    g.setAttribute("aria-label", "دوره‌ای " + W + " هفته‌ای با " + avail.toFixed(1) + " هفته برای پروژه؛ پروژه " + need.toFixed(1) + " هفته طول می‌کشد.");
-    var v = document.getElementById("verdict"); v.className = "callout " + (ok ? (tight ? "warn" : "ok") : "bad");
-    v.textContent = ok ? (tight ? "به‌زحمت تمام می‌شود؛ جایی برای شروع کند یا یک milestone از دست رفته نمی‌ماند." : "تمام می‌شود، با وقت اضافه برای صیقل دادن و تمرین ارائه.") : "تمام نمی‌شود: تابستان " + (need - avail).toFixed(1) + " هفته زودتر از پروژه تمام می‌شود.";
-    var state = ok ? (tight ? "tight" : "ok") : "late"; if (last && state !== last) log.add(state === "late" ? "پروژه دیگر جا نمی‌شود." : state === "tight" ? "پروژه به‌زحمت جا می‌شود." : "پروژه راحت جا می‌شود.", state === "late" ? "bad" : state === "tight" ? "warn" : "ok"); last = state;
-    stats([["سهم پروژه از دوره", Math.round(cfg.project / W * 100) + "%"], ["هفته‌های موجود برای پروژه", avail.toFixed(1)], ["هفته‌هایی که می‌برد", need.toFixed(1), ok ? "ok" : "bad"], ["حاشیه‌ی باقی‌مانده", (avail - need).toFixed(1) + " هفته", ok ? "ok" : "bad"]]);
-  }
-  render();
+  add("pace", { label: "سرعت کارآموز نسبت به یک تازه‌وارد", min: 0.4, max: 1.2, step: 0.05, format: function (v) { return Kit.pct(v, 0); }, hint: "فرض vault" });
+  add("other", { label: "بقیه‌ی برنامه‌ها: راه‌اندازی، رویدادها، جلسه‌ی ۱-۱", min: 0, max: 40, step: 5, format: function (v) { return Kit.pct(v / 100, 0); }, hint: "فرض vault" });
+  document.getElementById("half").addEventListener("click", function () { cfg.project = cfg.weeks / 2; render(); tour.free("پروژه به اندازه‌ی نصف دوره تنظیم شد. " + verdict(), m.ok ? "ok" : "bad"); });
+
+  /* ---------- the scenario ---------- */
+  function scene(w, p, pace, other) { return function () { cfg.weeks = w; cfg.project = p; cfg.pace = pace; cfg.other = other; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene(10, 5, 1, 0), render: render, interval: 7000,
+    intro: "نوار بالا تابستان ده‌هفته‌ای است و خط قرمز جایی است که وقت پروژه تمام می‌شود. نوار پایین پروژه است، با سرعت این کارآموز و در سه milestone.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و دوره‌ی کارآموزی تیم خودتان را بسازید.",
+    steps: [
+      { kind: "ok", run: scene(10, 5, 1, 0),
+        say: "روی کاغذ: پروژه‌ی پنج هفته‌ای برای یک تازه‌وارد، در دوره‌ی ده‌هفته‌ای بدون هیچ برنامه‌ی دیگری. این همان قاعده‌ی نصف دوره است (صص. ۱۵–۱۶) و این‌جا انگار جای زیادی خالی می‌ماند." },
+      { kind: "warn", run: scene(10, 5, 0.7, 15),
+        say: function () { return "کارآموز کندتر از تازه‌وارد پیش می‌رود و آموزش و برنامه‌های جمعی وقت می‌برند (ص. ۱۶): با ۷۰٪ سرعت و ۱۵٪ برنامه‌ی دیگر، همان پروژه " + f1(m.need) + " هفته می‌برد و حاشیه " + f1(m.avail - m.need) + " هفته است. نصف دوره حاشیه نبود؛ لازم بود."; } },
+      { kind: "bad", run: scene(10, 10, 0.7, 15),
+        say: function () { return "پروژه‌ای به اندازه‌ی کل دوره: " + f1(m.need) + " هفته کار در " + f1(m.avail) + " هفته‌ی موجود. کارآموز بدون دمو می‌ماند و فقط " + Kit.digits(String(m.done)) + " از ۳ milestone آماده است."; } },
+      { kind: "warn", run: scene(10, 5, 0.5, 15),
+        say: function () { return "همان پروژه‌ی نصف دوره با کارآموزی که گیر کرده (۵۰٪ سرعت): تمام نمی‌شود، اما " + Kit.digits(String(m.done)) + " milestone آماده است. شکستن پروژه به milestone یعنی گیر کردن هم نتیجه‌ای دارد (ص. ۱۳)."; } },
+      { kind: "ok", run: scene(12, 6, 0.9, 15),
+        say: function () { return "دوره‌ی دوازده‌هفته‌ای با کارآموزی سریع‌تر و پروژه‌ی نصف دوره: " + f1(m.avail - m.need) + " هفته برای صیقل دادن و تمرین ارائه می‌ماند؛ کارآموزی که حس کند کارش مهم بوده برمی‌گردد (صص. ۱۳، ۱۶)."; } }
+    ]
+  });
+
   Kit.quiz(document.getElementById("quiz"), [
     { q: "با قاعده‌ی کتاب، پروژه‌ی کارآموز ۱۰ هفته‌ای باید چقدر بزرگ باشد؟", options: ["۱۰ هفته کارِ یک تازه‌وارد", "حدود ۵ هفته کارِ یک تازه‌وارد", "هر چه تیم امسال تابستان لازم دارد"], answer: 1, explain: "حدود نصف دوره، برای یک تازه‌وارد (صص. ۱۵–۱۶)." },
     { q: "پروژه نباید چه چیزی باشد؟", options: ["مرتبط", "فوری", "مشخص"], answer: 1, explain: "مشخص و مرتبط، ولی غیرفوری (ص. ۱۶)." },
