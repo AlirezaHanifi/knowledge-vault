@@ -125,6 +125,7 @@ lang: fa
 اگر جای دو مرحله‌ی آخر عوض شود، یعنی اول load و بعد transform داخل خود warehouse، اسمش **ELT** می‌شود (p. 7). connectorهایی مثل Fivetran و Singer و Airbyte داده را از APIهای سرویس‌های SaaS می‌کشند (p. 8).
 
 - سیستم‌های **HTAP**، یعنی hybrid transactional/analytical processing، وعده می‌دهند هر دو کار را یک سیستم انجام دهد، اما اغلب یک موتور OLTP و یک موتور تحلیلی است پشت یک interface. برای اپلیکیشن‌هایی مناسب است که روی همان داده به هر دو نوع کوئری نیاز دارند، مثل تشخیص تقلب. جای warehouse را نمی‌گیرد، چون یک سازمان دیتابیس عملیاتی زیادی دارد ولی معمولاً یک warehouse (pp. 8–9).
+
 ##### از data warehouse تا data lake (pp. 9–10)
 
 مفهوم **data lake** یک repository مرکزی از *فایل‌ها* با هر فرمتی: رکوردها در Avro یا Parquet، و همچنین متن، تصویر، ویدئو، داده‌ی حسگر، feature vector و ژنوم. معمولاً روی object storage ارزان قرار دارد. مخاطبش data scientistها هستند که کارهایی مثل feature engineering، NLP و computer vision برایشان در SQL دست‌وپاگیر است و Pandas و scikit-learn و R یا Spark را ترجیح می‌دهند. نگه داشتن شکل خام داده به هر consumer اجازه می‌دهد آن را به روش خودش transform کند: **«sushi principle»، یعنی داده‌ی خام بهتر است** (pp. 9–10).
