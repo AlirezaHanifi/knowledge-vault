@@ -110,7 +110,7 @@ dbClient.query(addMemberQuery, _.at(member, ["email", "encryptedPassword"]));
 
 تابع `renameKeys` روی آن map از کلید تحویل می‌برد: برای هر کلید کهنه‌ای مقدار را زیر کلید تازه می‌گذارد، بعد کهنه را `_.omit` می‌کند. تابع `renameResultKeys` آن را روی ردیف‌ها می‌نگارد (listing ۱۰.۱۴، ص. ۲۰۹). این شدنی است چون فیلدها پویا و با رشته دسترس‌پذیرند، که **فیلدها را شهروند درجه‌یک** می‌کند (p. 209). مانند هر تابع داده‌ای، تست unit می‌شود (listing ۱۰.۱۵). همان تابع در پرسشی روی کاربران `email` را به `userEmail` نام‌عوض می‌کند، چون از داده‌ای که رویش کار می‌کند جدا شده (listing ۱۰.۱۶، صص. ۲۱۰–۲۱۱).
 
-> **Try it:** [نام‌عوض کردن کلیدها](../widgets/10-rename-keys.html) — آن map از کلید را ویرایش کنید و ببینید `renameResultKeys` چطور با همان یک کد ردیف‌های کتاب و کاربر را از نو شکل می‌دهد، کلیدهای نبوده را هم.
+> **Try it:** [تغییر نام کلیدها](../widgets/10-rename-keys.html) — سه راه تغییر نام ستون‌ها را مقایسه کنید، قدم‌به‌قدم از reduce در `renameKeys` بگذرید و keyMap را ویرایش کنید تا ببینید همان یک کد چطور ردیف‌های کتاب و کاربر را شکل می‌دهد، حتی وقتی کلیدی در ردیف نیست.
 
 > **Vault note:** کتاب `publicationYear` را «Pascal case» می‌نامد (p. 207)؛ و نام رایج آن سبک camel case است. سبک Pascal case حرف نخست را هم بزرگ می‌کند، یعنی `PublicationYear`.
 
@@ -138,7 +138,7 @@ dbClient.query(addMemberQuery, _.at(member, ["email", "encryptedPassword"]));
 | `nth(arr, n)` | عضوی در index `n` |
 | `groupBy(coll, f)` | mapی از `f(element)` به عضوهایی که ساختندش |
 
-> **Try it:** [گروه و گرد](../widgets/10-group-aggregate.html) — کتاب و نویسنده به خروجی join بیفزایید و از `groupBy` و `aggregateField` قدم‌به‌قدم بگذرید تا ببینید سه ردیف چطور دو کتاب می‌شود.
+> **Try it:** [گروه‌بندی و تجمیع](../widgets/10-group-aggregate.html) — کتاب و نویسنده به خروجی join بیفزایید و از `groupBy` و `aggregateField` قدم‌به‌قدم بگذرید تا ببینید سه ردیف چطور دو کتاب می‌شود.
 
 > **Run it:** [آزمایش ردیف‌ها به‌شکل map](../lab/10-rows-as-maps/README.md) جدول‌های این فصل را در SQLite بار می‌کند، ردیف‌ها را به‌شکل dictionary می‌آورد، اعتبارسنجی‌شان می‌کند، کلیدها را نام‌عوض و آن join را گرد.
 

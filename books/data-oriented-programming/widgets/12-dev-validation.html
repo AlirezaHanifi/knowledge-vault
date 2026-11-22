@@ -6,14 +6,37 @@
 <title>اعتبارسنجی درون سیستم</title>
 <meta name="description" content="تابع searchBooksByTitle را با catalogها و پرسش‌های معتبر و شکسته صدا بزنید، میان dev و staging و production سوئیچ کنید، و ببینید سنجش طرح آرگومان و مقدار بازگشتی هر اشتباهی را گزارش می‌کند یا ردش می‌دهد. تصویری از فصل ۱۲ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
+<style>
+  /* The call as a pipeline: argument check, body, return check, each gate showing pass, fail or skipped. */
+  .dv-flow { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: stretch; margin-bottom: 12px; }
+  .dv-node { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 9px; background: var(--surface); font-size: .78rem; line-height: 1.45; position: relative; }
+  .dv-node b { display: block; font-size: .84rem; }
+  .dv-node small { color: var(--ink-3); }
+  .dv-node .st { display: block; margin-top: 3px; font-weight: 700; }
+  .dv-node.pass { border-color: var(--ok); } .dv-node.pass .st { color: var(--ok); }
+  .dv-node.fail { border-color: var(--bad); background: var(--bad-soft); } .dv-node.fail .st { color: var(--bad); }
+  .dv-node.skip { border-style: dashed; color: var(--ink-3); } .dv-node.skip .st { color: var(--ink-3); }
+  .dv-node.none { opacity: .45; }
+  .dv-node.warn { border-color: var(--warn); } .dv-node.warn .st { color: var(--warn); }
+  .dv-cols { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 14px; }
+  .dv-cols h3 { margin: 0 0 6px; font-size: .84rem; }
+  .dv-in { font-size: .8rem; line-height: 1.7; }
+  .dv-in code { font-size: .76rem; }
+  .dv-broken { margin: 6px 0 0; padding: 0; list-style: none; }
+  .dv-broken li { font-size: .78rem; border-inline-start: 3px solid var(--bad); padding: 2px 8px; margin-bottom: 4px; background: var(--bad-soft); border-radius: 3px; }
+  .dv-out { font-family: var(--mono); font-size: .72rem; line-height: 1.5; direction: ltr; text-align: left; white-space: pre-wrap; word-break: break-word; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px; max-height: 200px; overflow: hidden; margin: 0; }
+  .dv-out.err { border-color: var(--bad); background: var(--bad-soft); }
+  .dv-out .u { background: var(--warn-soft); color: var(--warn); font-weight: 700; }
+  .dv-verdict { margin-top: 8px; font-size: .88rem; padding: 7px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
+  .dv-verdict.ok { border-color: var(--ok); } .dv-verdict.warn { border-color: var(--warn); } .dv-verdict.bad { border-color: var(--bad); }
+  textarea.dv-cat { width: 100%; font-family: var(--mono); font-size: .72rem; min-height: 64px; height: 64px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px; direction: ltr; text-align: left; box-sizing: border-box; }
+  .tweak-group label.cb { display: flex; gap: 6px; align-items: center; font-size: .82rem; margin-bottom: 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/12-advanced-data-validation.html">فصل ۱۲</a><span aria-hidden="true">/</span>
@@ -24,50 +47,67 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۲ · اعتبارسنجی پیشرفته‌ی داده</div>
-  <h1>اعتبارسنجی درون سیستم</h1>
-  <p class="lede">اعتبارسنجی مرزی از production پاس می‌دارد. <strong>درون</strong> سیستم، دیو آرگومان‌های تابعی و مقدار بازگشتی‌اش را با طرح‌ها اعتبارسنجی می‌کند، ولی تنها وقتی <code>dev()</code> درست باشد: در هر محیطی جز production. بعد هر اشتباهی زود شکست می‌خورد، با پیامی که می‌گوید چه غلط است و کجا.</p>
-  <p class="source-note">تصویری از بخش‌های ۱۲.۱ و ۱۲.۲ (listingهای ۱۲.۱ تا ۱۲.۱۱، صص. ۲۴۸–۲۵۷): طرح‌های catalog و کتاب و نسخه‌ی کتاب و نویسنده، طرح tuple با <code>prefixItems</code>، mapهای همگن با <code>additionalProperties</code>، و آن دو سنجش تنها در dev. آن catalog کتاب‌ها و نویسنده‌های listing ۱۵.۱۰ را با نسخه‌های کتاب listing ۱۴.۱۰ کنار هم می‌گذارد؛ و شناسه‌ی نویسنده‌ها و تاریخ خرید مال vault است. متن خطاها از سبک Ajv پی می‌گیرد. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>اعتبارسنجی درون سیستم</h1>
+      <p class="lede">اعتبارسنجی در مرز سیستم از production محافظت می‌کند. <strong>درون</strong> سیستم، دیو آرگومان‌ها و مقدار بازگشتی تابع را با schema بررسی می‌کند، ولی فقط وقتی <code>dev()</code> برقرار است، یعنی در هر محیطی جز production. آن‌وقت هر اشتباه زود و با پیامی روشن شکست می‌خورد.</p>
+      <p class="source-note">تصویری از بخش‌های ۱۲.۱ و ۱۲.۲ (listingهای ۱۲.۱ تا ۱۲.۱۱، صص. ۲۴۸–۲۵۷) و اصلاح listing ۱۲.۲۸ (ص. ۲۶۸): schemaهای catalog، کتاب، نسخه‌ی کتاب و نویسنده، tuple با <code>prefixItems</code>، mapهای همگن با <code>additionalProperties</code> و دو بررسی که فقط در dev اجرا می‌شوند. catalog، شناسه‌ی نویسنده‌ها، تاریخ خرید و سناریوهای خراب از vault است. پیام‌ها به سبک Ajv است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">مقدار catalogData به JSON</p><textarea class="code" id="cat" spellcheck="false" aria-label="مقدار catalogData به‌شکل JSON" style="min-height:260px"></textarea></div>
-      <div class="panel"><p class="panel-title">خروجی</p><div class="callout" id="verdict"></div><pre class="code" id="out"></pre></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="sc">صحنه</label><select id="sc"></select>
-        <label class="field-head" for="q" style="margin-top:10px">مقدار query به JSON</label><input id="q" class="code" style="width:100%">
-        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="swap"> فرستادن آرگومان‌ها به ترتیب غلط</label>
-        <div id="env" style="margin-top:10px"></div>
-        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="fix"> پیاده کردن چاره‌ی دیو (listing ۱۲.۲۸)</label>
-        <button class="btn primary" id="go" type="button" style="margin-top:10px">صدا زدن searchBooksByTitle</button></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="dv-flow" id="flow"></div>
+          <div class="dv-cols">
+            <div><h3>ورودی</h3><div class="dv-in" id="in"></div></div>
+            <div><h3 id="outT">خروجی</h3><pre class="dv-out mono" id="out"></pre></div>
+          </div>
+          <div class="dv-verdict" id="verdict" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این فراخوانی</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="env"></div>
+        <div class="tweak-group"><label class="field-head" for="sc">سناریو</label><select id="sc" style="width:100%"></select></div>
+        <div class="tweak-group"><label class="field-head" for="q">مقدار query به‌شکل JSON</label><input id="q" style="width:100%;direction:ltr;text-align:left;font-family:var(--mono)">
+          <label class="cb"><input type="checkbox" id="swap"> آرگومان‌ها با ترتیب غلط فرستاده شوند</label>
+          <label class="cb"><input type="checkbox" id="fix"> اصلاح دیو اعمال شود (listing ۱۲.۲۸)</label></div>
+        <div class="tweak-group"><label class="field-head" for="cat">مقدار catalogData به‌شکل JSON</label><textarea class="dv-cat" id="cat" spellcheck="false"></textarea></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>در production بیشتر اشتباه‌ها خاموش در می‌روند</strong>: عددی به‌جای پرسش یا آرگومان‌های جابه‌جا تنها <code>[]</code> برمی‌گردانند، و نویسنده‌ای جاافتاده در نام‌ها <code>undefined</code> می‌دهد.</li>
-    <li><strong>کتابی بی عنوان</strong> در production با <code>TypeError</code>ی از JavaScript عمیق درون آن filter می‌شکند، همان گونه خطای ناروشنی که دیو با آن دست‌وپنجه نرم می‌کرد. در dev، آن سنجش آرگومان مسیر دقیق را نام می‌برد.</li>
-    <li><strong>سنجش مقدار بازگشتی</strong> آنچه را می‌گیرد که سنجش آرگومان نمی‌تواند: آرگومان‌هایی معتبر که باز آن تابع را وامی‌دارند داده‌ای برگرداند که قراردادش را می‌شکند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>در production بیشتر اشتباه‌ها بی‌صدا رد می‌شوند:</strong> query عددی یا آرگومان‌های جابه‌جا فقط <code>[]</code> برمی‌گردانند و نویسنده‌ی غایب <code>undefined</code> می‌دهد.</li>
+      <li><strong>کتاب بدون title</strong> در production با یک <code>TypeError</code> از عمق filter می‌شکند؛ همان پیام مبهمی که دیو از آن گله داشت (ص. ۲۴۸). در dev، بررسی آرگومان مسیر دقیق را می‌گوید.</li>
+      <li><strong>بررسی مقدار بازگشتی</strong> چیزی را می‌گیرد که بررسی آرگومان نمی‌تواند: آرگومان معتبری که تابع را وادار می‌کند داده‌ای خارج از قرارداد برگرداند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/12-advanced-data-validation.html"><small>درس</small>فصل ۱۲: اعتبارسنجی پیشرفته‌ی داده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+      <ul class="related no-embed">
+        <li><a href="../chapters/12-advanced-data-validation.html"><small>درس</small>فصل ۱۲: اعتبارسنجی پیشرفته‌ی داده</a></li>
+      </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-// A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
+  // A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
   // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
   // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
   function jsType(x) { return x === null ? "null" : Array.isArray(x) ? "array" : typeof x; }
@@ -140,15 +180,7 @@
     return infos; }
   function show(x) { return JSON.stringify(x, function (k, v) { return v === undefined ? "«undefined»" : v; }, 2); }
 
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
 
-  var log = Kit.log(document.getElementById("log")), env = "dev";
   var BASE = { booksByIsbn: {
       "978-1982137274": { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", authorIds: ["sean-covey", "stephen-covey"],
         bookItems: [{ id: "book-item-123", libId: "hudson-park-lib", purchaseDate: "2021-04-18", isLent: true }, { id: "book-item-17", libId: "nyc-central-lib", purchaseDate: "2020-11-02", isLent: false }] },
@@ -161,35 +193,85 @@
       "alan-moore": { id: "alan-moore", name: "Alan Moore", bookIsbns: ["978-1779501127"] } } };
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
   var SC = [
-    ["catalog و پرسش معتبر", function (c) { return [c, "Watch"]; }],
-    ["پرسش عددی است", function (c) { return [c, 42]; }],
-    ["کتاب Watchmen عنوان ندارد", function (c) { delete c.booksByIsbn["978-1779501127"].title; return [c, "Watch"]; }],
-    ["سال نشر رشته است", function (c) { c.booksByIsbn["978-1779501127"].publicationYear = "1987"; return [c, "Watch"]; }],
-    ["نسخه‌ی کتابی isLent ندارد", function (c) { delete c.booksByIsbn["978-1982137274"].bookItems[1].isLent; return [c, "Habits"]; }],
-    ["نام Dave Gibbons از authorsById جاافتاده", function (c) { delete c.authorsById["dave-gibbons"]; return [c, "Watch"]; }]];
-  var sel = document.getElementById("sc");
-  SC.forEach(function (s, i) { sel.appendChild(Kit.el("option", { value: i }, s[0])); });
-  function load() { var r = SC[+sel.value][1](clone(BASE)); document.getElementById("cat").value = JSON.stringify(r[0], null, 2); document.getElementById("q").value = JSON.stringify(r[1]); document.getElementById("swap").checked = false; run(true); }
-  function run(quiet) { var v = document.getElementById("verdict"), out = document.getElementById("out"), cat, q, dev = env !== "production", fixed = document.getElementById("fix").checked, argC = dev ? "pass" : "skipped", retC = dev ? "pass" : "skipped";
-    try { cat = JSON.parse(document.getElementById("cat").value); q = JSON.parse(document.getElementById("q").value); }
-    catch (e) { v.className = "callout warn"; v.textContent = "آن JSON معتبر نیست: " + e.message; out.textContent = ""; return; }
-    var a = document.getElementById("swap").checked ? [q, cat] : [cat, q], kind, msg;
-    try { var res = searchBooksByTitle(a[0], a[1], dev, fixed); out.textContent = show(res);
-      var silent = JSON.stringify(res).indexOf("null") >= 0 || show(res).indexOf("«undefined»") >= 0;
-      kind = silent ? "warn" : "ok"; msg = "شمار " + res.length + " خبر کتاب برگشت" + (dev ? "؛ و هر دو سنجش رد شد." : silent ? "، با مقدارهای undefined که کسی نسنجیدشان." : "؛ و هیچ چیز سنجیده نشد.");
-      if (!dev && res.length === 0) { kind = "warn"; msg = "آرایه‌ای تهی برگشت، بی هیچ نشانی از اینکه «هیچ خوانشی نیست» واقعی است یا اشتباهی."; } }
-    catch (e) { out.textContent = "";
-      if (e && e.check) { kind = "bad"; msg = e.message; if (e.check === "args") { argC = "fail"; retC = "not reached"; } else retC = "fail"; }
-      else { kind = "bad"; msg = "خطای نگرفته‌ی " + (e && e.name ? e.name + ": " + e.message : String(e)); argC = dev ? "pass" : "skipped"; retC = "not reached"; } }
-    v.className = "callout " + kind; v.textContent = msg;
-    if (!quiet) log.add("[" + env + "] " + SC[+sel.value][0] + (document.getElementById("swap").checked ? "، جابه‌جا" : "") + " → " + msg, kind);
-    stats([["محیط", env], ["تابع dev()", String(dev)], ["سنجش آرگومان", argC, argC === "fail" ? "bad" : argC === "pass" ? "ok" : ""], ["سنجش بازگشت", retC, retC === "fail" ? "bad" : retC === "pass" ? "ok" : ""]]); }
-  document.getElementById("env").appendChild(Kit.segmented({ label: "محیط", value: env, options: [{ value: "dev", label: "dev" }, { value: "staging", label: "staging" }, { value: "production", label: "production" }], onChange: function (x) { env = x; run(); } }).element);
-  sel.addEventListener("change", function () { load(); log.add("صحنه: " + SC[+sel.value][0] + ".", "muted"); });
-  document.getElementById("go").addEventListener("click", function () { run(); });
-  document.getElementById("fix").addEventListener("change", function () { run(); });
-  document.getElementById("swap").addEventListener("change", function () { run(); });
-  load();
+    ["داده‌ی catalog و query معتبر", function (c) { return [c, "Watch"]; }, []],
+    ["مقدار query عدد است", function (c) { return [c, 42]; }, ["مقدار query برابر 42 است، نه رشته"]],
+    ["کتاب Watchmen فیلد title ندارد", function (c) { delete c.booksByIsbn["978-1779501127"].title; return [c, "Watch"]; }, ["فیلد booksByIsbn/978-1779501127/title حذف شده"]],
+    ["فیلد publicationYear رشته است", function (c) { c.booksByIsbn["978-1779501127"].publicationYear = "1987"; return [c, "Watch"]; }, ["مقدار publicationYear رشته‌ی \"1987\" است، نه عدد"]],
+    ["یک نسخه‌ی کتاب isLent ندارد", function (c) { delete c.booksByIsbn["978-1982137274"].bookItems[1].isLent; return [c, "Habits"]; }, ["فیلد bookItems/1/isLent حذف شده"]],
+    ["نویسنده‌ی Dave Gibbons در authorsById نیست", function (c) { delete c.authorsById["dave-gibbons"]; return [c, "Watch"]; }, ["کلید authorsById/dave-gibbons حذف شده، ولی Watchmen هنوز به آن اشاره می‌کند"]]];
+  var env = "dev", sc = 0, swap = false, fixed = false, tour, ctl = {};
+  var sel = document.getElementById("sc"); SC.forEach(function (s, i) { sel.appendChild(Kit.el("option", { value: i }, s[0])); });
+  function load() { var r = SC[sc][1](clone(BASE)); document.getElementById("cat").value = JSON.stringify(r[0], null, 1); document.getElementById("q").value = JSON.stringify(r[1]); }
+  function node(cls, title, sub, st) { return Kit.el("div", { class: "dv-node " + cls }, Kit.el("b", {}, title), Kit.el("small", { class: "mono" }, sub), Kit.el("span", { class: "st" }, st)); }
+  function render() {
+    var dev = env !== "production", cat, q, res = null, err = null, gate = { args: dev ? "pass" : "skip", body: "pass", ret: dev ? "pass" : "skip" }, parseErr = null;
+    try { cat = JSON.parse(document.getElementById("cat").value); q = JSON.parse(document.getElementById("q").value); } catch (e) { parseErr = e.message; }
+    if (!parseErr) {
+      var a = swap ? [q, cat] : [cat, q];
+      try { res = searchBooksByTitle(a[0], a[1], dev, fixed); }
+      catch (e) { if (e && e.check === "args") { err = { kind: "args", text: e.message }; gate.args = "fail"; gate.body = gate.ret = "none"; } else if (e && e.check === "return") { err = { kind: "ret", text: e.message }; gate.ret = "fail"; } else { err = { kind: "crash", text: "Uncaught " + (e && e.name ? e.name + ": " + e.message : String(e)) }; gate.body = "fail"; gate.ret = "none"; } }
+    }
+    var silent = res && (show(res).indexOf("«undefined»") >= 0 || (!dev && res.length === 0));
+    if (silent) gate.body = "warn";
+    var ST = { pass: "✓ رد شد", fail: "✗ شکست", skip: "— اجرا نشد", none: "· نرسید", warn: "⚠ بی‌صدا" };
+    var F = Kit.clear(document.getElementById("flow"));
+    F.appendChild(node("", "فراخوانی", "searchBooksByTitle(" + (swap ? "query, catalog" : "catalog, query") + ")", "محیط: " + env + "، dev() = " + dev));
+    F.appendChild(node(gate.args, "بررسی آرگومان‌ها", "searchBooksArgsSchema", ST[gate.args]));
+    F.appendChild(node(gate.body, "بدنه‌ی تابع", "_.filter + _.map", ST[gate.body]));
+    F.appendChild(node(gate.ret, "بررسی مقدار بازگشتی", "searchBooksResponseSchema", ST[gate.ret]));
+    F.appendChild(node(err ? "fail" : silent ? "warn" : "pass", "نتیجه", err ? "throw" : "return", err ? "✗ خطا" : silent ? "⚠ مشکوک" : "✓ معتبر"));
+    var I = Kit.clear(document.getElementById("in"));
+    I.appendChild(Kit.el("div", {}, "یک catalog سالم: ۲ کتاب، ۴ نویسنده، ۳ نسخه‌ی کتاب. query = ", Kit.el("code", {}, document.getElementById("q").value)));
+    var broken = SC[sc][2].slice(); if (swap) broken.push("ترتیب آرگومان‌ها جابه‌جا شده");
+    if (broken.length) { var ul = Kit.el("ul", { class: "dv-broken" }); broken.forEach(function (b) { ul.appendChild(Kit.el("li", {}, b)); }); I.appendChild(Kit.el("div", {}, "چیزی که خراب است:")); I.appendChild(ul); }
+    else I.appendChild(Kit.el("p", { class: "dv-in", style: "color:var(--ok)" }, "هیچ چیز خراب نیست."));
+    if (fixed) I.appendChild(Kit.el("p", { class: "dv-in" }, "اصلاح listing ۱۲.۲۸: نویسنده‌ی غایب «Not available» می‌شود."));
+    var O = Kit.clear(document.getElementById("out"));
+    O.className = "dv-out mono" + (err || parseErr ? " err" : "");
+    document.getElementById("outT").textContent = err || parseErr ? "پیام خطا" : "مقدار بازگشتی";
+    if (parseErr) O.textContent = "JSON نامعتبر: " + parseErr;
+    else if (err) O.textContent = err.text;
+    else show(res).split("«undefined»").forEach(function (part, i) { if (i) O.appendChild(Kit.el("span", { class: "u" }, "undefined")); O.appendChild(document.createTextNode(part)); });
+    var v = document.getElementById("verdict"), msg, kind;
+    if (parseErr) { msg = "متن catalog یا query JSON معتبر نیست."; kind = "warn"; }
+    else if (err && err.kind === "args") { msg = "در dev، بررسی آرگومان پیش از اجرای بدنه شکست خورد و پیام دقیقاً می‌گوید کجای داده مشکل دارد."; kind = "bad"; }
+    else if (err && err.kind === "ret") { msg = "آرگومان‌ها معتبر بودند ولی تابع چیزی برگرداند که با schema پاسخ نمی‌خواند؛ بررسی مقدار بازگشتی آن را گرفت."; kind = "bad"; }
+    else if (err) { msg = "بدون بررسی، خطا از عمق کد بیرون می‌زند و نمی‌گوید کدام داده مقصر است."; kind = "bad"; }
+    else if (silent) { msg = res.length === 0 ? "یک آرایه‌ی خالی برگشت و معلوم نیست واقعاً کتابی نبود یا داده اشتباه بود." : "نتیجه undefined دارد و چون در production چیزی بررسی نمی‌شود، کسی متوجه نمی‌شود."; kind = "warn"; }
+    else { msg = Kit.digits(String(res.length)) + " کتاب برگشت" + (dev ? " و هر دو بررسی رد شدند." : "؛ در production چیزی بررسی نشد."); kind = "ok"; }
+    v.className = "dv-verdict " + kind; v.textContent = msg;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["dev()", String(dev), ""], ["بررسی آرگومان", ST[gate.args], gate.args === "fail" ? "bad" : gate.args === "pass" ? "ok" : ""], ["بررسی بازگشت", ST[gate.ret], gate.ret === "fail" ? "bad" : gate.ret === "pass" ? "ok" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" + (x[0] === "dev()" ? " mono" : "") }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    ctl.env.set(env); sel.value = String(sc); document.getElementById("swap").checked = swap; document.getElementById("fix").checked = fixed;
+  }
+  function say() { return document.getElementById("verdict").textContent; }
+  ctl.env = Kit.segmented({ label: "محیط", value: env, options: [{ value: "dev", label: "dev" }, { value: "staging", label: "staging" }, { value: "production", label: "production" }], onChange: function (x) { env = x; render(); tour.free(say(), ""); } });
+  document.getElementById("env").appendChild(ctl.env.element);
+  sel.addEventListener("change", function () { sc = +sel.value; load(); render(); tour.free(say(), ""); });
+  ["q", "cat"].forEach(function (id) { document.getElementById(id).addEventListener("input", function () { render(); tour.free(say(), ""); }); });
+  document.getElementById("swap").addEventListener("change", function (e) { swap = e.target.checked; render(); tour.free(say(), ""); });
+  document.getElementById("fix").addEventListener("change", function (e) { fixed = e.target.checked; render(); tour.free(say(), ""); });
+
+  /* ---------- the scenario ---------- */
+  function at(e, s, sw, fx) { return function () { env = e; sc = s; swap = !!sw; fixed = !!fx; load(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at("dev", 0), render: render, interval: 8000,
+    intro: "بالا مسیر یک فراخوانی است: بررسی آرگومان‌ها، بدنه، بررسی مقدار بازگشتی. هر دروازه می‌گوید رد شد، شکست خورد یا اصلاً اجرا نشد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، سناریو و محیط را عوض کنید یا catalog را مستقیم ویرایش کنید.",
+    steps: [
+      { kind: "ok", run: at("dev", 0), say: "در dev هر دو بررسی اجرا می‌شوند: آرگومان‌ها به‌شکل یک tuple با prefixItems (listing ۱۲.۸) و مقدار بازگشتی با searchBooksResponseSchema (listingهای ۱۲.۱۰ و ۱۲.۱۱). داده‌ی سالم از هر دو رد می‌شود." },
+      { kind: "warn", run: at("production", 1), say: "در production بررسی درونی خاموش است، چون داده قبلاً در مرز سیستم بررسی شده و تکرارش هزینه دارد؛ مثل assertionها در Java (ص. ۲۵۵). query عددی فقط یک آرایه‌ی خالی برمی‌گرداند." },
+      { kind: "bad", run: at("dev", 1), say: "همان اشتباه در dev: بررسی آرگومان پیش از بدنه شکست می‌خورد و می‌گوید data/1 باید رشته باشد. این همان پیام روشنی است که دیو کم داشت (ص. ۲۴۸)." },
+      { kind: "bad", run: at("dev", 0, true), say: "آرگومان‌ها با ترتیب غلط: catalog جای query نشسته. tuple در schema ترتیب را هم بررسی می‌کند، پس خطا فوراً معلوم می‌شود." },
+      { kind: "bad", run: at("production", 2), say: "کتاب بدون title در production: filter روی undefined تابع includes را صدا می‌زند و یک TypeError از عمق کد بیرون می‌زند، بدون این‌که بگوید کدام کتاب." },
+      { kind: "bad", run: at("dev", 2), say: "همان catalog در dev: بررسی آرگومان مسیر دقیق را می‌گوید، data/0/booksByIsbn/978-1779501127، و title غایب را." },
+      { kind: "bad", run: at("dev", 5), say: "این بار catalog از نظر schema معتبر است ولی Dave Gibbons در authorsById نیست. تابع undefined برمی‌گرداند و بررسی مقدار بازگشتی آن را می‌گیرد؛ همان باگی که تست schema-based فصل پیدا کرد (ص. ۲۶۸)." },
+      { kind: "ok", run: at("dev", 5, false, true), say: "اصلاح دیو در listing ۱۲.۲۸: برای نویسنده‌ی غایب، _.get مقدار پیش‌فرض «Not available» را برمی‌گرداند. حالا هر دو بررسی رد می‌شوند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "تابع dev() کِی درست برمی‌گرداند؟",

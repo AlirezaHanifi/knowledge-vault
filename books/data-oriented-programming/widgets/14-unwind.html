@@ -3,121 +3,178 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>باز کردن و گروه کردن</title>
+<title>باز کردن و گروه‌بندی</title>
 <meta name="description" content="تابع unwind را روی هر کتابی از فصل ۱۴ کتاب Data-Oriented Programming قدم‌به‌قدم ببینید، بعد flatMap و groupBy روی bookItems.libId، و تماشا کنید عنوان و ISBN هر کتابی با نسخه‌هایش سفر می‌کند؛ نسخه‌ای در کتابخانه‌ای تازه بیفزایید، یا ببینید setی mutationی با unwind چه می‌کند.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
-  #st { direction: rtl; }
+<style>
+  .uw-cols { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.1fr) auto minmax(0, 1fr); gap: 8px; align-items: start; }
+  .uw-col h3 { margin: 0 0 6px; font-size: .82rem; }
+  .uw-col h3 small { display: block; font-weight: 400; color: var(--ink-3); font-family: var(--mono); direction: ltr; text-align: right; font-size: .7rem; }
+  .uw-col.off { opacity: .3; }
+  .uw-arrow { align-self: center; font-size: 1.2rem; color: var(--ink-3); }
+  .uw-card { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 4px 8px; margin-bottom: 6px; font-family: var(--mono); font-size: .7rem; line-height: 1.5; direction: ltr; text-align: left; background: var(--surface); }
+  .uw-card .t { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .uw-card.b0 { border-inline-start: 4px solid var(--s1, var(--accent)); }
+  .uw-card.b1 { border-inline-start: 4px solid var(--s2, var(--ok)); }
+  .uw-card.b2 { border-inline-start: 4px solid var(--s3, var(--warn)); }
+  .uw-card.same { outline: 2px dashed var(--bad); outline-offset: 1px; }
+  .uw-card.new { animation: uwIn .5s ease; }
+  @media (prefers-reduced-motion: reduce) { .uw-card.new { animation: none; } }
+  @keyframes uwIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .uw-it { display: inline-block; border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; margin: 1px 2px 0 0; font-size: .66rem; }
+  .uw-it.lib-nyc { border-color: var(--accent); } .uw-it.lib-hudson { border-color: var(--ok); } .uw-it.lib-brooklyn { border-color: var(--warn); }
+  .uw-grp { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 4px 6px; margin-bottom: 8px; background: var(--surface-2); }
+  .uw-grp > b { display: block; font-family: var(--mono); font-size: .74rem; direction: ltr; text-align: left; margin-bottom: 4px; }
+  .uw-grp .uw-card { margin-bottom: 4px; }
+  .uw-verdict { margin-top: 8px; font-size: .86rem; padding: 7px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
+  .uw-verdict.ok { border-color: var(--ok); } .uw-verdict.bad { border-color: var(--bad); } .uw-verdict.warn { border-color: var(--warn); }
+  .uw-code { font-family: var(--mono); font-size: .68rem; direction: ltr; text-align: left; white-space: pre; margin: 6px 0 0; padding: 4px 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .uw-code .hl { background: var(--accent-soft); font-weight: 700; }
+  .tweak-group label.cb { display: flex; gap: 6px; align-items: center; font-size: .82rem; margin-bottom: 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/14-advanced-data-manipulation.html">فصل ۱۴</a><span aria-hidden="true">/</span>
-      <span aria-current="page">باز کردن و گروه کردن</span>
+      <span aria-current="page">باز کردن و گروه‌بندی</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۴ · دست‌کاری پیشرفته‌ی داده</div>
-  <h1>باز کردن و گروه کردن</h1>
-  <p class="lede">برای گروه کردن نسخه‌های کتاب با کتابخانه، هر نسخه‌ای عنوان و ISBN کتابش را می‌خواهد. تابع <code>unwind(map, field)</code>، به پیروی از <code>$unwind</code> در MongoDB، برای هر عضوی از آن فیلد آرایه‌ای یک کپی از آن map برمی‌گرداند، با فیلدی که روی همان عضو گذاشته شده. بعد <code>groupBy</code> روی <code>bookItems.libId</code> باقی را می‌کند.</p>
-  <p class="source-note">تصویری از بخش ۱۴.۴ (شکل ۱۴.۲؛ listingهای ۱۴.۱۶ تا ۱۴.۱۹، صص. ۳۰۵–۳۰۹): خروجی چشم‌داشته، منطق کسب‌وکار با <code>flatMap</code> و <code>unwind</code> و <code>_.groupBy</code>، و پیاده‌سازی <code>unwind</code> با <code>_.map</code> و <code>_.set</code>. نسخه‌ی افزوده و سنجش set mutationی مال vault است؛ کادر vault در ص. ۳۰۹ درس را ببینید. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>باز کردن و گروه‌بندی</h1>
+      <p class="lede">برای گروه‌بندی نسخه‌های کتاب بر اساس کتابخانه، هر نسخه باید عنوان و ISBN کتابش را همراه داشته باشد. <code>unwind(map, field)</code>، که از <code>$unwind</code> در MongoDB الهام گرفته، <strong>برای هر عضو آرایه یک کپی از map می‌سازد که آن فیلد فقط همان عضو را دارد</strong>. بعد <code>groupBy</code> روی <code>bookItems.libId</code> بقیه‌ی کار را انجام می‌دهد.</p>
+      <p class="source-note">تصویری از بخش ۱۴.۴ (شکل ۱۴.۲، listingهای ۱۴.۱۶ تا ۱۴.۱۹، صص. ۳۰۵–۳۰۹): خروجی مورد انتظار، منطق کسب‌وکار با <code>flatMap</code>، <code>unwind</code> و <code>_.groupBy</code>، و پیاده‌سازی <code>unwind</code> با <code>_.map</code> و <code>_.set</code>. نسخه‌ی اضافه در کتابخانه‌ی تازه و آزمایش <code>set</code> با mutation از vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="st">قدم</p><p class="field-hint" id="expl" aria-live="polite"></p><pre class="code" id="out" style="max-height:420px;overflow:auto"></pre></div>
-      <div class="panel"><p class="panel-title">آن کد (listingهای ۱۴.۱۷ و ۱۴.۱۹)</p><pre class="code">function unwind(map, field) {
-  var arr = _.get(map, field);
-  return _.map(arr, function(elem) {
-    return _.set(map, field, elem);
-  });
-}
-var bookItems = flatMap(books, function(book) {
-  return unwind(book, "bookItems");
-});
-_.groupBy(bookItems, "bookItems.libId");</pre></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ply"></div>
-        <button class="btn small" id="add" type="button" style="margin-top:10px">افزودن نسخه‌ای در کتابخانه‌ای تازه</button>
-        <label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="mut"> به کار بردن <code>set</code>ی mutationی</label></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="uw-cols">
+            <div class="uw-col" id="c0"></div><span class="uw-arrow" aria-hidden="true">←</span>
+            <div class="uw-col" id="c1"></div><span class="uw-arrow" aria-hidden="true">←</span>
+            <div class="uw-col" id="c2"></div>
+          </div>
+          <div class="uw-verdict" id="verdict" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این مرحله</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="stC"></div>
+        <div class="tweak-group"><label class="cb"><input type="checkbox" id="add"> نسخه‌ای در brooklyn-lib (مثال vault)</label>
+          <label class="cb"><input type="checkbox" id="mut"> استفاده از set همراه با mutation (vault)</label></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>هر map بازشده‌ای باقی را نگه می‌دارد</strong>: فیلدهای <code>isbn</code> و <code>title</code> با هر نسخه‌ی تنهایی همراه می‌روند.</li>
-    <li><strong>هیچ کلونی لازم نیست</strong> چون داده immutable است: تابع <code>_.set</code> هر بار mapی تازه برمی‌گرداند و آن کتاب اصلی دست‌نخورده می‌ماند.</li>
-    <li><strong>با setی mutationی</strong>، هر «کپی»ای همان یک شیء است، پس همه‌شان نسخه‌ی آخر را نشان می‌دهند و آن گروه کردن در یک کتابخانه فرو می‌ریزد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>هر map بازشده بقیه‌ی فیلدها را نگه می‌دارد:</strong> <code>isbn</code> و <code>title</code> با هر نسخه همراه می‌شوند.</li>
+      <li><strong>نیازی به clone نیست</strong>، چون داده immutable است: <code>_.set</code> هر بار map تازه‌ای برمی‌گرداند و کتاب اصلی دست‌نخورده می‌ماند (ص. ۳۰۹).</li>
+      <li><strong>از vault: با set همراه با mutation</strong> همه‌ی «کپی‌ها» یک شیء‌اند، پس همه آخرین نسخه را نشان می‌دهند و گروه‌بندی به هم می‌ریزد.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/14-advanced-data-manipulation.html"><small>درس</small>فصل ۱۴: دست‌کاری پیشرفته‌ی داده</a></li>
-    <li><a href="../lab/14-custom-data-tools/README.md"><small>آزمایش</small>توابع update و flatMap و countByBoolField و unwind به Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/14-advanced-data-manipulation.html"><small>درس</small>فصل ۱۴: دست‌کاری پیشرفته‌ی داده</a></li>
+      <li><a href="../lab/14-custom-data-tools/README.md"><small>آزمایش</small>توابع update و flatMap و countByBoolField و unwind به Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-var BOOKS = [
-    { isbn: "978-1779501127", title: "Watchmen", bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }] },
+  var BOOKS = [
+    { isbn: "978-1779501127", title: "Watchmen", bookItems: [{ id: "book-item-1", libId: "nyc-central-lib" }] },
     { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", bookItems: [
-      { id: "book-item-123", libId: "hudson-park-lib", isLent: true }, { id: "book-item-17", libId: "nyc-central-lib", isLent: false }] }];
+      { id: "book-item-123", libId: "hudson-park-lib" }, { id: "book-item-17", libId: "nyc-central-lib" }] }];
+  var stage = 3, added = false, mut = false, tour, ctl = {};
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
-  function flatMap(coll, f) { return [].concat.apply([], coll.map(typeof f === "string" ? function (x) { return x[f]; } : f)); }
-
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), books = clone(BOOKS), step = 0, added = false;
   function setImm(m, f, v) { var r = Object.assign({}, m); r[f] = v; return r; }
   function setMut(m, f, v) { m[f] = v; return m; }
-  function unwind(map, field) { var set = document.getElementById("mut").checked ? setMut : setImm, arr = map[field].slice();
-    return arr.map(function (elem) { return set(map, field, elem); }); }
-  function groupBy(coll, path) { var g = {}; coll.forEach(function (x) { var k = path.split(".").reduce(function (a, p) { return a && a[p]; }, x); (g[k] = g[k] || []).push(x); }); return g; }
-  function stages() { var bs = clone(books), s = [["ورودی: کتاب‌ها (listing ۱۴.۱۰)", "دو کتاب؛ دومی دو نسخه‌ی کتاب دارد. نسخه‌ها عنوان یا ISBN کتابشان را نمی‌دانند.", bs]];
-    var per = bs.map(function (b) { return unwind(b, "bookItems"); });
-    per.forEach(function (u, i) { s.push(["unwind(books[" + i + "], \"bookItems\")", "شمار " + u.length + " map، هر کدام با یک نسخه و فیلدهای دیگر آن کتاب.", u]); });
-    var flat = flatMap(per, function (u) { return u; });
-    s.push(["flatMap: یک فهرست از mapهای بازشده", "در کل " + flat.length + " map.", flat]);
-    var g = groupBy(flat, "bookItems.libId");
-    s.push(["_.groupBy(bookItems, \"bookItems.libId\")", "شمار " + Object.keys(g).length + " کتابخانه: " + Object.keys(g).join(", ") + ".", g]);
-    return s; }
-  function render() { var s = stages(), cur = s[step], last = s[s.length - 1][2];
-    document.getElementById("st").textContent = "قدم " + (step + 1) + " از " + s.length + ": " + cur[0];
-    document.getElementById("expl").textContent = cur[1];
-    document.getElementById("out").textContent = JSON.stringify(cur[2], null, 2);
-    var flat = s[s.length - 2][2], distinct = new Set(flat.map(function (x) { return JSON.stringify(x.bookItems); })).size;
-    stats([["کتاب‌ها", books.length], ["نسخه‌های کتاب", flatMap(books, "bookItems").length], ["نسخه‌های بازشده‌ی جدا", distinct, distinct < flat.length ? "bad" : "ok"], ["کتابخانه‌ها", Object.keys(last).length]]);
-    return s.length; }
-  var p = Kit.player({ mount: document.getElementById("ply"), interval: 1400,
-    step: function () { var n = stages().length; if (step >= n - 1) return false; step++; render(); log.add(stages()[step][0] + ": " + stages()[step][1], "ok"); return step < n - 1; },
-    reset: function () { step = 0; render(); log.add("از نو به کتاب‌های ورودی.", "muted"); } });
-  document.getElementById("add").addEventListener("click", function () { if (added) return; added = true; books[0].bookItems.push({ id: "book-item-42", libId: "brooklyn-lib", isLent: false });
-    document.getElementById("add").disabled = true; step = 0; render(); log.add("نسخه‌ی book-item-42 در brooklyn-lib به Watchmen افزوده شد، مثال vault. باز قدم‌به‌قدم بگذرید.", "muted"); });
-  document.getElementById("mut").addEventListener("change", function (e) { step = 0; render(); log.add(e.target.checked ? "set mutationی: هر map بازشده‌ای همان یک شیء است." : "set immutable: هر map بازشده‌ای تازه است.", e.target.checked ? "warn" : "ok"); });
-  render();
+  function unwind(map, field) { var set = mut ? setMut : setImm, arr = map[field].slice(); return arr.map(function (elem) { return set(map, field, elem); }); }
+  function libCls(id) { return "lib-" + id.split("-")[0]; }
+  function itemChip(it) { return Kit.el("span", { class: "uw-it " + libCls(it.libId) }, it.id + " @ " + it.libId); }
+  function render() {
+    var books = clone(BOOKS); if (added) books[0].bookItems.push({ id: "book-item-42", libId: "brooklyn-lib" });
+    var expected = {}, items = 0; books.forEach(function (b) { b.bookItems.forEach(function (it) { expected[it.libId] = 1; items++; }); });
+    var per = books.map(function (b, i) { return stage >= 1 && (stage >= 2 || i === 1) ? unwind(b, "bookItems") : null; });
+    var flat = []; per.forEach(function (u, i) { if (u) u.forEach(function (m) { flat.push([m, i]); }); });
+    var objs = flat.map(function (x) { return x[0]; }), distinctObj = objs.filter(function (o, i) { return objs.indexOf(o) === i; }).length;
+    var C0 = Kit.clear(document.getElementById("c0"));
+    C0.appendChild(Kit.el("h3", {}, "کتاب‌ها", Kit.el("small", {}, "listing 14.10")));
+    books.forEach(function (b, i) { var src = mut && per[i] ? per[i][0] : b;
+      C0.appendChild(Kit.el("div", { class: "mono uw-card b" + i }, Kit.el("div", { class: "t" }, b.title), Kit.el("div", {}, "isbn: " + b.isbn), Kit.el("div", {}, "bookItems: "), Kit.el("div", {}, Array.isArray(src.bookItems) ? src.bookItems.map(itemChip) : [itemChip(src.bookItems), Kit.el("span", { style: "color:var(--bad)" }, " ← mutated!")]))); });
+    var C1 = Kit.clear(document.getElementById("c1")); C1.className = "uw-col" + (stage >= 1 ? "" : " off");
+    C1.appendChild(Kit.el("h3", {}, "خروجی: mapهای بازشده", Kit.el("small", {}, stage >= 2 ? "flatMap(books, unwind)" : "unwind(books[1], \"bookItems\")")));
+    if (stage < 1) C1.appendChild(Kit.el("p", { class: "mono uw-card", style: "color:var(--ink-3)" }, "…"));
+    flat.forEach(function (x, k) { var m = x[0], same = mut && objs.indexOf(m) !== k || mut && objs.lastIndexOf(m) !== k;
+      C1.appendChild(Kit.el("div", { class: "mono uw-card b" + x[1] + (same ? " same" : "") }, Kit.el("div", { class: "t" }, m.title + " · " + m.isbn), Kit.el("div", {}, "bookItems: ", itemChip(m.bookItems)))); });
+    var C2 = Kit.clear(document.getElementById("c2")); C2.className = "uw-col" + (stage >= 3 ? "" : " off");
+    C2.appendChild(Kit.el("h3", {}, "گروه‌ها بر اساس کتابخانه", Kit.el("small", {}, "_.groupBy(…, \"bookItems.libId\")")));
+    var g = {}, order = [];
+    if (stage >= 3) flat.forEach(function (x) { var k = x[0].bookItems.libId; if (!g[k]) { g[k] = []; order.push(k); } g[k].push(x); });
+    else C2.appendChild(Kit.el("p", { class: "mono uw-card", style: "color:var(--ink-3)" }, "…"));
+    order.forEach(function (k) { var box = Kit.el("div", { class: "uw-grp" }, Kit.el("b", { class: "mono " + libCls(k) }, "\"" + k + "\": [" + g[k].length + "]"));
+      g[k].forEach(function (x) { box.appendChild(Kit.el("div", { class: "mono uw-card b" + x[1] }, Kit.el("div", { class: "t" }, x[0].bookItems.id + " · " + x[0].title))); }); C2.appendChild(box); });
+    var v = document.getElementById("verdict"), msg, kind = "ok";
+    if (stage === 0) msg = "نسخه‌ها داخل کتاب‌ها هستند و خودشان عنوان یا ISBN کتاب را نمی‌دانند. می‌خواهیم آن‌ها را بر اساس libId گروه کنیم (listing ۱۴.۱۶).";
+    else if (stage === 1) msg = mut ? "با set همراه با mutation، هر دو «کپی» همان شیء کتاب‌اند و هر دو آخرین نسخه را نشان می‌دهند." : "کتاب دوم دو نسخه دارد، پس unwind دو map برمی‌گرداند؛ هر کدام با یک نسخه و همان isbn و title (شکل ۱۴.۲).";
+    else if (stage === 2) msg = Kit.digits(String(flat.length)) + " map بازشده در یک فهرست" + (mut ? "، ولی فقط " + Kit.digits(String(distinctObj)) + " شیء جدا؛ کپی‌ها همه یکی‌اند." : ".");
+    else { var ok = order.length === Object.keys(expected).length && distinctObj === flat.length;
+      msg = ok ? Kit.digits(String(order.length)) + " کتابخانه و هر نسخه با عنوان کتابش؛ همان خروجی مورد انتظار listing ۱۴.۱۶." : "گروه‌بندی غلط است: " + Kit.digits(String(order.length)) + " کتابخانه به جای " + Kit.digits(String(Object.keys(expected).length)) + "، چون set همراه با mutation همه‌ی کپی‌ها را یکی کرد.";
+      kind = ok ? "ok" : "bad"; }
+    if (mut && stage >= 1 && kind === "ok") kind = "warn";
+    v.className = "uw-verdict " + kind; v.textContent = msg;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["نسخه‌ها", String(items)], ["تعداد mapهای بازشده", String(flat.length)], ["شیءهای جدا", String(distinctObj), distinctObj < flat.length ? "bad" : ""], ["کتابخانه‌ها", stage >= 3 ? String(order.length) : "—", kind === "bad" ? "bad" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
+    ctl.st.set(String(stage)); document.getElementById("add").checked = added; document.getElementById("mut").checked = mut;
+  }
+  function say() { return document.getElementById("verdict").textContent; }
+  ctl.st = Kit.segmented({ label: "مرحله", value: "3", options: [{ value: "0", label: "کتاب‌ها" }, { value: "1", label: "باز کردن یک کتاب" }, { value: "2", label: "flatMap" }, { value: "3", label: "groupBy" }], onChange: function (x) { stage = +x; render(); tour.free(say(), ""); } });
+  document.getElementById("stC").appendChild(ctl.st.element);
+  document.getElementById("add").addEventListener("change", function (e) { added = e.target.checked; render(); tour.free(say(), ""); });
+  document.getElementById("mut").addEventListener("change", function (e) { mut = e.target.checked; render(); tour.free(say(), e.target.checked ? "bad" : ""); });
+
+  /* ---------- the scenario ---------- */
+  function at(s, a, m) { return function () { stage = s; added = !!a; mut = !!m; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(3), render: render, interval: 8000,
+    intro: "از راست به چپ: کتاب‌ها، mapهای بازشده و گروه‌ها بر اساس کتابخانه. رنگ لبه‌ی هر کارت نشان می‌دهد از کدام کتاب آمده.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، مرحله را عوض کنید یا set همراه با mutation را امتحان کنید.",
+    steps: [
+      { kind: "", run: at(0), say: "دو کتاب listing ۱۴.۱۰ با سه نسخه. خروجی مورد انتظار (listing ۱۴.۱۶، ص. ۳۰۶) نسخه‌ها را بر اساس کتابخانه گروه می‌کند و هر نسخه باید عنوان و ISBN کتابش را داشته باشد." },
+      { kind: "", run: at(1), say: "تئو از عملگر $unwind در MongoDB یاد می‌کند (ص. ۳۰۷). unwind روی کتاب دوم دو map می‌سازد؛ هر کدام با یک نسخه و بقیه‌ی فیلدهای کتاب (شکل ۱۴.۲)." },
+      { kind: "", run: at(2), say: "دیو با flatMap روی همه‌ی کتاب‌ها unwind را اجرا می‌کند و سه map بازشده در یک فهرست می‌گیرد (listing ۱۴.۱۷)." },
+      { kind: "ok", run: at(3), say: "حالا _.groupBy روی مسیر bookItems.libId همان خروجی مورد انتظار را می‌دهد: دو کتابخانه، هر نسخه با عنوان کتابش." },
+      { kind: "ok", run: at(2), say: "پیاده‌سازی unwind فقط _.map و _.set است (listing ۱۴.۱۹). چون داده immutable است، _.set هر بار map تازه‌ای می‌سازد و نیازی به clone نیست (ص. ۳۰۹)." },
+      { kind: "bad", run: at(3, false, true), say: "از vault: اگر set داده را mutate کند، هر سه «کپی» یک شیء‌اند و همه آخرین نسخه را دارند. گروه‌بندی غلط می‌شود و کتاب اصلی هم خراب می‌شود." },
+      { kind: "ok", run: at(3, true), say: "از vault: نسخه‌ای از Watchmen در brooklyn-lib. همان کد بدون تغییر یک گروه سوم می‌سازد." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "عبارت unwind({\"customer-id\": \"joe\", \"items\": [a, b]}, \"items\") چه برمی‌گرداند؟",

@@ -6,18 +6,36 @@
 <title>نام نویسنده بر پایه‌ی پرکاری</title>
 <meta name="description" content="شمار کتاب‌های نویسنده‌ای را از مرزهای ۱۰ و ۱۱ و ۵۰ و ۵۱ بگذرانید و میان HTML و Markdown سوئیچ کنید تا مقدار توزیعی Author.myName و متد برگزیده و نام قالب‌گرفته را ببینید. تصویری از فصل ۱۳ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
-  table.mt td, table.mt th { font-family: var(--mono); font-size: .8rem; } table.mt tr.hit td { background: var(--accent-soft); font-weight: 600; }
-  .bands { display: grid; grid-template-columns: 10fr 40fr 30fr; gap: 2px; font-size: .75rem; margin: 6px 0; } .bands span { padding: 4px 6px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
-  .bands span.on { background: var(--accent-soft); border-color: var(--accent); font-weight: 600; } .rendered { font-size: 1.3rem; direction: ltr; }
-  table.mt td { direction: ltr; text-align: left; } table.mt th { text-align: right; } #dv { direction: ltr; }
+<style>
+  .an-line { position: relative; margin: 20px 4px 22px; height: 34px; direction: ltr; }
+  .an-band { position: absolute; top: 0; height: 34px; border: 1.5px solid var(--line); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-family: var(--mono); color: var(--ink-3); background: var(--surface); box-sizing: border-box; }
+  .an-band.on { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .an-tick { position: absolute; top: 38px; font-size: .7rem; color: var(--ink-3); transform: translateX(-50%); font-family: var(--mono); }
+  .an-mark { position: absolute; top: -8px; width: 3px; height: 50px; background: var(--ink); transform: translateX(-50%); border-radius: 2px; }
+  .an-mark span { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: .74rem; font-weight: 700; white-space: nowrap; font-family: var(--mono); }
+  .an-flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.4fr); gap: 8px; align-items: center; margin-bottom: 8px; }
+  .an-box { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px; background: var(--surface); font-size: .78rem; line-height: 1.5; }
+  .an-box b { display: block; font-size: .82rem; }
+  .an-box code { font-size: .74rem; }
+  .an-arrow { font-size: 1.2rem; color: var(--ink-3); }
+  .an-dv { font-family: var(--mono); font-size: .9rem; font-weight: 700; color: var(--accent); direction: ltr; display: block; }
+  .an-mt { display: grid; grid-template-columns: auto repeat(2, minmax(0, 1fr)); gap: 4px; direction: ltr; font-size: .76rem; }
+  .an-mt .h { font-weight: 700; color: var(--ink-3); padding: 2px 6px; font-family: var(--mono); }
+  .an-cell { border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; font-family: var(--mono); background: var(--surface); }
+  .an-cell small { display: block; color: var(--ink-3); }
+  .an-cell.hit { border: 2px solid var(--accent); background: var(--accent-soft); }
+  .an-cell.new { border-style: dashed; color: var(--ink-3); }
+  .an-out { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 8px; }
+  .an-raw { font-family: var(--mono); font-size: .86rem; direction: ltr; text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; margin: 0; }
+  .an-ren { font-size: 1.1rem; direction: ltr; text-align: left; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px; margin: 0; background: var(--surface); }
+  .an-h { margin: 0 0 4px; font-size: .8rem; color: var(--ink-3); }
+  .tweak-group label.cb { display: flex; gap: 6px; align-items: center; font-size: .82rem; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/13-polymorphism.html">فصل ۱۳</a><span aria-hidden="true">/</span>
@@ -28,78 +46,129 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۳ · polymorphism</div>
-  <h1>نام نویسنده بر پایه‌ی پرکاری</h1>
-  <p class="lede">ویژگی «ناچیز» نانسی: نام نویسنده‌ای را ایتالیک یا توپر یا هر دو نشان بدهید، بسته به شمار کتاب‌هایی که نوشته، به HTML یا Markdown. دیو توزیع پویا را می‌شناسد: آن تابع توزیع‌کننده <code>[prolificity level, format]</code> را می‌دهد، و شش متد کوچک قالب‌دهی را می‌کنند.</p>
-  <p class="source-note">تصویری از بخش ۱۳.۵ (جدول ۱۳.۱؛ listingهای ۱۳.۲۳ تا ۱۳.۲۹، صص. ۲۸۹–۲۹۳): تابع <code>Author.prolificityLevel</code> که ۱۰ و کم‌تر low است و ۵۱ و بیشتر high و وگرنه medium، تابع <code>authorNameDispatch</code>، و آن شش متد HTML و Markdown. شمار کتاب‌ها لغزنده‌ی vault است؛ و نویسنده‌ی پیش‌فرض تست کتاب. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>نام نویسنده بر پایه‌ی پرکاری</h1>
+      <p class="lede">درخواست نانسی ساده است: نام نویسنده بسته به تعداد کتاب‌هایش ایتالیک، توپر یا هر دو باشد، در HTML یا Markdown. دیو آن را با یک multimethod حل می‌کند: <strong>تابع dispatch مقدار <code>[prolificity level, format]</code> را می‌سازد و شش متد کوچک هر کدام یک خانه از جدول را پوشش می‌دهند</strong>.</p>
+      <p class="source-note">تصویری از بخش ۱۳.۵ (جدول ۱۳.۱، listingهای ۱۳.۲۱ تا ۱۳.۲۹، صص. ۲۸۹–۲۹۳): <code>Author.prolificityLevel</code> که ۱۰ کتاب و کمتر را low، ۵۱ و بیشتر را high و بقیه را medium می‌داند، <code>authorNameDispatch</code>، شش متد HTML و Markdown و نویسنده‌ی تست کتاب. اسلایدر تعداد کتاب و پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">سطح پرکاری (listing ۱۳.۲۳)</p><div class="bands" id="bands"><span>سطح low: ۰ تا ۱۰</span><span>سطح medium: ۱۱ تا ۵۰</span><span>سطح high: ۵۱ و بیشتر</span></div>
-        <pre class="code" id="call"></pre><p class="field-hint">مقدار توزیعی: <code id="dv"></code></p></div>
-      <div class="panel"><p class="panel-title">جدول متدهای Author.myName</p><div class="table-wrap"><table class="data mt" id="mt"></table></div></div>
-      <div class="panel"><p class="panel-title">خروجی</p><pre class="code" id="raw"></pre><p class="field-hint">رندرشده:</p><p class="rendered" id="ren" aria-live="polite"></p></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="nm">نام نویسنده</label><input id="nm" style="width:100%;direction:ltr;text-align:left" value="Yehonathan Sharvit">
-        <div id="n" style="margin-top:10px"></div><div id="fmt" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="an-line" id="line"></div>
+          <div class="an-flow">
+            <div class="an-box" id="arg"></div><span class="an-arrow" aria-hidden="true">←</span>
+            <div class="an-box"><b>تابع authorNameDispatch</b><span class="an-dv" id="dv"></span></div><span class="an-arrow" aria-hidden="true">←</span>
+            <div><p class="an-h">جدول متدهای Author.myName</p><div class="an-mt" id="mt"></div><p class="an-h" style="margin-top:4px">متد انتخاب‌شده: <code class="mono" id="mname"></code></p></div>
+          </div>
+          <div class="an-out">
+            <div><p class="an-h">مقدار بازگشتی</p><pre class="an-raw" id="raw"></pre></div>
+            <div><p class="an-h">نمایش‌داده‌شده</p><p class="an-ren" id="ren" aria-live="polite"></p></div>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این فراخوانی</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><label class="field-head" for="nm">نام نویسنده</label><input id="nm" style="width:100%;direction:ltr;text-align:left" value="Yehonathan Sharvit"></div>
+        <div class="tweak-group" id="nC"></div>
+        <div class="tweak-group" id="fC"></div>
+        <div class="tweak-group"><label class="cb"><input type="checkbox" id="third"> قالب سوم، مثال vault (سه متد تازه)</label></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>آن مرزها از بیرون دربرگیرنده‌اند</strong>: ۱۰ کتاب هنوز low است و ۵۱ از پیش high؛ و ۱۱ تا ۵۰ همان medium.</li>
-    <li><strong>قالب‌ها رشته‌ی خالی‌اند</strong>، یعنی <code>"html"</code> یا <code>"markdown"</code>، که با <code>enum</code>ی در طرح آرگومان تابع توزیع‌کننده اعتبارسنجی می‌شوند.</li>
-    <li><strong>افزودن قالب سومی</strong> سه متد تازه و مقدار enum تازه‌ای می‌خواست، و هیچ تغییری در آن شش متد موجود.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>مرزها در دو سر بسته‌اند:</strong> ۱۰ کتاب هنوز low است و ۵۱ کتاب دیگر high؛ ۱۱ تا ۵۰ medium است.</li>
+      <li><strong>مقدار dispatch فقط داده است:</strong> آرایه‌ای از دو رشته، مثل <code>["low", "html"]</code>، که کلید جدول متدهاست.</li>
+      <li><strong>از vault:</strong> قالب سوم یعنی سه متد تازه و یک مقدار تازه در enum؛ هیچ‌کدام از شش متد موجود عوض نمی‌شود.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/13-polymorphism.html"><small>درس</small>فصل ۱۳: polymorphism</a></li>
-    <li><a href="../lab/13-multimethods/README.md"><small>آزمایش</small>multimethodها از صفر به Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/13-polymorphism.html"><small>درس</small>فصل ۱۳: polymorphism</a></li>
+      <li><a href="../lab/13-multimethods/README.md"><small>آزمایش</small>multimethodها از صفر به Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), cfg = { n: 1, fmt: "html" }, last = "";
-  var WRAP = { low: { html: ["<i>", "</i>"], markdown: ["*", "*"] }, medium: { html: ["<b>", "</b>"], markdown: ["**", "**"] }, high: { html: ["<b><i>", "</i></b>"], markdown: ["***", "***"] } };
-  function level(n) { if (n <= 10) return "low"; if (n >= 51) return "high"; return "medium"; }
+  var n = 1, fmt = "html", third = false, tour, ctl = {};
+  var WRAP = { low: { html: ["<i>", "</i>"], markdown: ["*", "*"], asciidoc: ["_", "_"] }, medium: { html: ["<b>", "</b>"], markdown: ["**", "**"], asciidoc: ["*", "*"] }, high: { html: ["<b><i>", "</i></b>"], markdown: ["***", "***"], asciidoc: ["*_", "_*"] } };
+  var MAX = 80;
+  function level(k) { if (k <= 10) return "low"; if (k >= 51) return "high"; return "medium"; }
   function cap(s) { return s[0].toUpperCase() + s.slice(1); }
-  function render() { var name = document.getElementById("nm").value || "?", lv = level(cfg.n), dv = [lv, cfg.fmt], w = WRAP[lv][cfg.fmt], out = w[0] + name + w[1];
-    document.getElementById("call").textContent = "Author.myName({\"name\": " + JSON.stringify(name) + ", \"bookIsbns\": [" + cfg.n + " ISBNs]}, " + JSON.stringify(cfg.fmt) + ")";
-    document.getElementById("dv").textContent = JSON.stringify(dv);
-    Array.prototype.forEach.call(document.getElementById("bands").children, function (s, i) { var on = ["low", "medium", "high"][i] === lv; s.className = on ? "on" : ""; s.setAttribute("aria-current", on ? "true" : "false"); });
-    var mt = Kit.clear(document.getElementById("mt")), tb = Kit.el("tbody");
-    mt.appendChild(Kit.el("thead", null, Kit.el("tr", null, [Kit.el("th", null, "مقدار توزیعی"), Kit.el("th", null, "متد"), Kit.el("th", null, "نام را در این می‌پوشاند"), Kit.el("th", null, "")])));
-    ["html", "markdown"].forEach(function (f) { ["low", "medium", "high"].forEach(function (l) { var hit = l === lv && f === cfg.fmt;
-      tb.appendChild(Kit.el("tr", { class: hit ? "hit" : "" }, [Kit.el("td", null, JSON.stringify([l, f])), Kit.el("td", null, "authorName" + cap(l) + (f === "html" ? "Html" : "Markdown")), Kit.el("td", null, WRAP[l][f][0] + "…" + WRAP[l][f][1]), Kit.el("td", { style: "direction:rtl;text-align:right" }, hit ? "برگزیده →" : "")])); }); });
-    mt.appendChild(tb);
+  function pct(k) { return (k / MAX * 100) + "%"; }
+  function render() {
+    if (fmt === "asciidoc" && !third) fmt = "html";
+    var name = document.getElementById("nm").value || "?", lv = level(n), w = WRAP[lv][fmt], out = w[0] + name + w[1];
+    var L = Kit.clear(document.getElementById("line"));
+    [["low", 0, 10.5, "low · ≤10"], ["medium", 10.5, 50.5, "medium · 11–50"], ["high", 50.5, MAX, "high · ≥51"]].forEach(function (b) {
+      L.appendChild(Kit.el("div", { class: "an-band" + (b[0] === lv ? " on" : ""), style: "left:" + pct(b[1]) + ";width:" + ((b[2] - b[1]) / MAX * 100) + "%" }, (b[0] === lv ? "▶ " : "") + b[3])); });
+    [[0, "0"], [10.5, "10 | 11"], [50.5, "50 | 51"], [80, "80"]].forEach(function (t) { L.appendChild(Kit.el("span", { class: "an-tick", style: "left:" + pct(t[0]) }, t[1])); });
+    L.appendChild(Kit.el("div", { class: "an-mark", style: "left:" + pct(Math.min(n, MAX)) }, Kit.el("span", {}, n + " books")));
+    var A = Kit.clear(document.getElementById("arg"));
+    A.appendChild(Kit.el("b", {}, "فراخوانی Author.myName"));
+    A.appendChild(Kit.el("code", { class: "mono", style: "direction:ltr;display:block;text-align:left" }, "{name: " + JSON.stringify(name) + ",\n bookIsbns: [" + n + " ISBNs]}, " + JSON.stringify(fmt)));
+    document.getElementById("dv").textContent = JSON.stringify([lv, fmt]);
+    var M = Kit.clear(document.getElementById("mt")), fm = third ? ["html", "markdown", "asciidoc"] : ["html", "markdown"];
+    M.style.gridTemplateColumns = "auto repeat(" + fm.length + ", minmax(0, 1fr))";
+    M.appendChild(Kit.el("span", { class: "h" }, ""));
+    fm.forEach(function (f) { M.appendChild(Kit.el("span", { class: "h" }, f)); });
+    ["low", "medium", "high"].forEach(function (l) { M.appendChild(Kit.el("span", { class: "h" }, l));
+      fm.forEach(function (f) { var hit = l === lv && f === fmt;
+        M.appendChild(Kit.el("div", { class: "an-cell" + (hit ? " hit" : "") + (f === "asciidoc" ? " new" : "") }, (hit ? "▶ " : "") + WRAP[l][f][0] + "…" + WRAP[l][f][1])); }); });
+    document.getElementById("mname").textContent = "authorName" + cap(lv) + cap(fmt);
     document.getElementById("raw").textContent = JSON.stringify(out);
     var ren = Kit.clear(document.getElementById("ren")), node = document.createTextNode(name);
     if (lv !== "medium") node = Kit.el("i", null, node); if (lv !== "low") node = Kit.el("b", null, node); ren.appendChild(node);
-    if (lv !== last) { if (last) log.add("شمار " + cfg.n + " کتاب: سطح " + lv + " → " + JSON.stringify(out), "ok"); last = lv; }
-    stats([["کتاب‌ها", cfg.n], ["سطح", lv], ["ایتالیک", lv !== "medium" ? "بله" : "نه"], ["توپر", lv !== "low" ? "بله" : "نه"]]); }
-  document.getElementById("n").appendChild(Kit.slider({ label: "شمار کتاب‌ها یا bookIsbns", min: 0, max: 80, value: cfg.n, onInput: function (v) { cfg.n = v; render(); } }).element);
-  document.getElementById("fmt").appendChild(Kit.segmented({ label: "قالب", value: cfg.fmt, options: [{ value: "html", label: "HTML" }, { value: "markdown", label: "Markdown" }], onChange: function (v) { cfg.fmt = v; render(); log.add("قالب " + v + ".", "muted"); } }).element);
-  document.getElementById("nm").addEventListener("input", render);
-  render();
+    var st = Kit.clear(document.getElementById("stats"));
+    [["کتاب‌ها", String(n)], ["سطح", lv], ["ایتالیک", lv !== "medium" ? "بله" : "نه"], ["توپر", lv !== "low" ? "بله" : "نه"], ["متدها", String(fm.length * 3)]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value" }, x[1]))); });
+    ctl.n.set(n); ctl.f.set(fmt); document.getElementById("third").checked = third;
+    ctl.f.element.querySelectorAll("button").forEach(function (b) { if (b.textContent === "AsciiDoc") b.disabled = !third; });
+  }
+  function say() { var lv = level(n); return "تعداد " + Kit.digits(String(n)) + " کتاب یعنی سطح " + lv + "؛ مقدار dispatch برابر " + JSON.stringify([lv, fmt]) + " است."; }
+  ctl.n = Kit.slider({ label: "تعداد کتاب‌ها (bookIsbns)", min: 0, max: MAX, value: n, onInput: function (x) { n = x; render(); tour.free(say(), ""); } });
+  document.getElementById("nC").appendChild(ctl.n.element);
+  ctl.f = Kit.segmented({ label: "قالب", value: fmt, options: [{ value: "html", label: "HTML" }, { value: "markdown", label: "Markdown" }, { value: "asciidoc", label: "AsciiDoc" }], onChange: function (x) { fmt = x; render(); tour.free(say(), ""); } });
+  document.getElementById("fC").appendChild(ctl.f.element);
+  document.getElementById("nm").addEventListener("input", function () { render(); tour.free(say(), ""); });
+  document.getElementById("third").addEventListener("change", function (e) { third = e.target.checked; render(); tour.free(third ? "سه متد تازه اضافه شد و شش متد قبلی دست نخوردند." : say(), ""); });
+
+  /* ---------- the scenario ---------- */
+  function at(k, f, t) { return function () { n = k; fmt = f; third = !!t; document.getElementById("nm").value = "Yehonathan Sharvit"; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(1, "html"), render: render, interval: 8000,
+    intro: "بالا محور تعداد کتاب‌هاست با سه سطح پرکاری. پایین، فراخوانی به تابع dispatch می‌رسد و مقدار آن یک خانه از جدول شش‌تایی متدها را انتخاب می‌کند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و تعداد کتاب‌ها را از مرزهای ۱۰/۱۱ و ۵۰/۵۱ رد کنید.",
+    steps: [
+      { kind: "", run: at(1, "html"), say: "جدول ۱۳.۱ نانسی (ص. ۲۹۰): ۱۰ کتاب و کمتر ایتالیک، ۱۱ تا ۵۰ توپر، ۵۱ و بیشتر هر دو. نویسنده‌ی تست دیو یک کتاب دارد، پس low است و HTML آن <i>…</i> می‌شود (listing ۱۳.۲۸)." },
+      { kind: "", run: at(1, "markdown"), say: "همان نویسنده با قالب markdown: مقدار dispatch برابر [\"low\", \"markdown\"] است و خروجی *Yehonathan Sharvit* (listing ۱۳.۲۹)." },
+      { kind: "warn", run: at(10, "markdown"), say: "مرز اول: ۱۰ کتاب هنوز low است، چون prolificityLevel شرط books <= 10 را دارد (listing ۱۳.۲۳)." },
+      { kind: "ok", run: at(11, "markdown"), say: "با ۱۱ کتاب سطح medium می‌شود؛ متد authorNameMediumMarkdown نام را بین دو ستاره می‌گذارد (listing ۱۳.۲۷)." },
+      { kind: "warn", run: at(50, "html"), say: "تعداد ۵۰ کتاب هنوز medium است و در HTML فقط <b> می‌گیرد (listing ۱۳.۲۵)." },
+      { kind: "ok", run: at(51, "html"), say: "با ۵۱ کتاب شرط books >= 51 برقرار است: سطح high، هم توپر و هم ایتالیک." },
+      { kind: "ok", run: at(51, "asciidoc", true), say: "از vault: قالب سوم فقط یک ستون تازه با سه متد است، به‌اضافه‌ی یک مقدار در enum قالب‌ها (listing ۱۳.۲۱). هیچ‌کدام از شش متد قبلی ویرایش نمی‌شوند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "نویسنده‌ای دقیقاً ۵۰ کتاب نوشته. کدام سطح؟",

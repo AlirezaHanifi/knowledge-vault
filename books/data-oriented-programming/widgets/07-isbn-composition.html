@@ -6,15 +6,36 @@
 <title>ترکیب ISBN</title>
 <meta name="description" content="فیلدهای ISBNی را که پاسخ کتاب Open Library دارد روشن و خاموش کنید و ببینید allOf با anyOf چطور می‌پذیردش، در حالی که oneOf کتاب Watchmen را که هر دو را دارد رد می‌کرد. تصویری از فصل ۷ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; } table.tt td, table.tt th { text-align: center; } table.tt td.y { color: var(--ok); } table.tt td.n { color: var(--bad); font-weight: 600; } table.tt tr.cur td { background: var(--accent-soft); }
-  #verdict { direction: ltr; text-align: left; }
+<style>
+  /* The composed schema as nested boxes that light up per sub-schema; the data beside it; all combinations below. */
+  .ic-wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .ic-wrap h3 { font-size: .86rem; margin: 0 0 6px; }
+  .ic-box { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 9px; margin: 0; background: var(--surface); }
+  .ic-box.ok { border-color: var(--ok); } .ic-box.bad { border-color: var(--bad); background: var(--bad-soft); }
+  .ic-box .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: .84rem; }
+  .ic-box .hd code { font-weight: 700; }
+  .ic-box .sub { font-size: .74rem; color: var(--ink-2); margin: 1px 0 4px; }
+  .ic-in { display: grid; gap: 6px; margin-top: 4px; }
+  .ic-in.row { grid-template-columns: 1fr 1fr; }
+  .ic-st { font-size: .76rem; font-weight: 700; white-space: nowrap; }
+  .ic-st.ok { color: var(--ok); } .ic-st.bad { color: var(--bad); }
+  .ic-verdict { margin-top: 8px; font-size: .78rem; padding: 6px 9px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface-2); direction: ltr; text-align: left; }
+  .ic-verdict.ok { border-color: var(--ok); } .ic-verdict.bad { border-color: var(--bad); }
+  .ic-data { font-size: .74rem; white-space: pre; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 7px 9px; margin: 0; direction: ltr; text-align: left; line-height: 1.4; overflow: hidden; }
+  .ic-data .off { color: var(--ink-3); text-decoration: line-through; }
+  .ic-data .on { background: var(--accent-soft); border-radius: 2px; }
+  table.ic-tt { width: 100%; border-collapse: collapse; font-size: .76rem; margin-top: 8px; }
+  table.ic-tt caption { font-size: .76rem; color: var(--ink-2); text-align: start; padding-bottom: 3px; }
+  table.ic-tt th, table.ic-tt td { border-bottom: 1px solid var(--line); padding: 2px 6px; text-align: center; }
+  table.ic-tt td.y { color: var(--ok); } table.ic-tt td.n { color: var(--bad); font-weight: 600; }
+  table.ic-tt tr.cur td { background: var(--accent-soft); font-weight: 600; }
+  .tweak-group label.cb { display: flex; gap: 6px; align-items: center; font-size: .84rem; margin: 3px 0; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/07-basic-data-validation.html">فصل ۷</a><span aria-hidden="true">/</span>
@@ -25,55 +46,70 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۷ · اعتبارسنجی پایه‌ی داده</div>
-  <h1>ترکیب ISBN</h1>
-  <p class="lede">هر پاسخی از Open Library همیشه <code>isbn_10</code> یا <code>isbn_13</code> یا هر دو را دارد: کتاب‌های نشرشده پیش از ۲۰۰۷ نخستی را دارند، دیرترها دومی را، و کتاب‌های بازنشرشده مانند <em>Watchmen</em> هر دو را. قاعده‌ی تئو همان <code>basic AND (isbn13 OR isbn10)</code> است: در JSON Schema یعنی <code>allOf</code> و <code>anyOf</code>.</p>
-  <p class="source-note">تصویری از بخش ۷.۴، یعنی ترکیب طرح (listingهای ۷.۱۶ تا ۷.۱۹، صص. ۱۵۴–۱۵۷). آن پاسخ همان Watchmen از listing ۷.۱۶ است؛ و سنجش <code>oneOf</code> از یادآوری کتاب پی می‌گیرد که <code>oneOf</code> هست، و آن جدول درستی مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>ترکیب ISBN</h1>
+      <p class="lede">هر پاسخ Open Library دست‌کم یکی از <code>isbn_10</code> و <code>isbn_13</code> را دارد و <em>Watchmen</em> هر دو را. قاعده‌ی تئو <code>basic AND (isbn13 OR isbn10)</code> است که در JSON Schema می‌شود <code>allOf</code> و <code>anyOf</code>.</p>
+      <p class="source-note">تصویری از بخش ۷.۴، ترکیب schema (صص. ۱۵۴–۱۵۷): پاسخ Watchmen از listing ۷.۱۶ (ص. ۱۵۴)، قاعده‌ی ۲۰۰۷ (ص. ۱۵۵)، schema ترکیبی listing ۷.۱۸ (ص. ۱۵۶) و یادداشت کتاب درباره‌ی <code>oneOf</code> (ص. ۱۵۷). حذف فیلدها، آزمایش <code>oneOf</code> و جدول ترکیب‌ها از vault است. اعتبارسنج زیرمجموعه‌ی کوچکی از JSON Schema است که vault نوشته است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">پاسخ آن کتاب</p><pre class="code" id="data"></pre></div>
-      <div class="panel"><p class="panel-title">هر ترکیبی</p><div class="table-wrap"><table class="tt" id="tt"></table></div><div class="callout" id="verdict" style="margin-top:8px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><label style="display:flex;gap:6px"><input type="checkbox" id="i10" checked> فیلد <code>isbn_10</code> را دارد</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="i13" checked> فیلد <code>isbn_13</code> را دارد</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="tt0" checked> فیلد <code>title</code> را دارد</label>
-        <div id="comb" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="ic-wrap">
+          <div>
+            <h3>ترکیب schemaها: bookInfoSchema (listing ۷.۱۸)</h3>
+            <div id="tree"></div>
+            <div class="ic-verdict mono" id="verdict" aria-live="polite"></div>
+          </div>
+          <div>
+            <h3>پاسخ API برای این کتاب</h3>
+            <pre class="ic-data mono" id="data"></pre>
+            <table class="ic-tt" id="tt"></table>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">اعتبارسنجی</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <label class="cb"><input type="checkbox" id="t"> فیلد <code>title</code> را دارد</label>
+          <label class="cb"><input type="checkbox" id="a"> فیلد <code>isbn_10</code> را دارد</label>
+          <label class="cb"><input type="checkbox" id="b"> فیلد <code>isbn_13</code> را دارد</label>
+        </div>
+        <div class="tweak-group" id="comb"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>کلیدواژه‌ی <code>allOf</code> همان AND است</strong>: طرح پایه‌ی کتاب باید برپا باشد، فیلد اجباری <code>title</code> هم.</li>
-    <li><strong>کلیدواژه‌ی <code>anyOf</code> همان OR است</strong>: یک ISBN یا هر دو خوب است، که همان قاعده‌ای است که تئو می‌گوید.</li>
-    <li><strong>کلیدواژه‌ی <code>oneOf</code> همان «دقیقاً یکی» است</strong>: کتاب <em>Watchmen</em> را رد می‌کرد، که هر دو ISBN را دارد چون پس از ۲۰۰۷ بازنشر شد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong><code>allOf</code> یعنی AND:</strong> schema پایه باید برقرار باشد، که فیلد اجباری <code>title</code> هم جزو آن است.</li>
+      <li><strong><code>anyOf</code> یعنی OR:</strong> یک ISBN یا هر دو قبول است؛ همان قاعده‌ای که تئو می‌گوید.</li>
+      <li><strong><code>oneOf</code> یعنی «دقیقاً یکی»:</strong> با آن، <em>Watchmen</em> رد می‌شد، چون هر دو ISBN را دارد.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/07-basic-data-validation.html"><small>درس</small>فصل ۷: اعتبارسنجی پایه‌ی داده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/07-basic-data-validation.html"><small>درس</small>فصل ۷: اعتبارسنجی پایه‌ی داده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
   // A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
   // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
   // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
@@ -118,23 +154,71 @@ function stats(rows) {
   }
   function errorsText(errs) { return errs.map(function (e) { return "data" + e.instancePath + " " + e.message; }).join(", "); }
 
-  var log = Kit.log(document.getElementById("log")), comb = "anyOf";
+
+  var cfg = { t: true, a: true, b: true, comb: "anyOf" }, tour;
   var basic = { type: "object", required: ["title"], properties: { title: { type: "string" }, publishers: { type: "array", items: { type: "string" } }, number_of_pages: { type: "integer" }, isbn_13: { type: "array", items: { type: "string" } }, isbn_10: { type: "array", items: { type: "string" } } } };
   var m13 = { type: "object", required: ["isbn_13"] }, m10 = { type: "object", required: ["isbn_10"] };
-  function schema() { var o = {}; o[comb] = [m13, m10]; return { allOf: [basic, o] }; }
+  function schema(c) { var o = {}; o[c] = [m13, m10]; return { allOf: [basic, o] }; }
   function book(t, a, b) { var x = { publishers: ["DC Comics"], number_of_pages: 334 }; if (b) x.isbn_13 = ["9780930289232"]; if (t) x.title = "Watchmen"; if (a) x.isbn_10 = ["0930289234"]; x.publish_date = "April 1, 1995"; return x; }
-  function render() { var t = document.getElementById("tt0").checked, a = document.getElementById("i10").checked, b = document.getElementById("i13").checked, d = book(t, a, b), errs = validate(schema(), d, true);
-    document.getElementById("data").textContent = JSON.stringify(d, null, 2);
-    var tb = Kit.clear(document.getElementById("tt")); tb.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["title", "isbn_10", "isbn_13", "allOf + anyOf", "allOf + oneOf"].map(function (h) { return Kit.el("th", null, h); }))));
+  function ok(s, d) { return validate(s, d, false).length === 0; }
+  function box(code, sub, good, kids, row) {
+    var b = Kit.el("div", { class: "ic-box " + (good ? "ok" : "bad") },
+      Kit.el("div", { class: "hd" }, Kit.el("code", null, code), Kit.el("span", { class: "ic-st " + (good ? "ok" : "bad") }, good ? "✓ برقرار" : "✗ برقرار نیست")),
+      sub ? Kit.el("p", { class: "sub" }, sub) : null);
+    if (kids) b.appendChild(Kit.el("div", { class: "ic-in" + (row ? " row" : "") }, kids));
+    return b;
+  }
+  function render() {
+    var d = book(cfg.t, cfg.a, cfg.b), S = schema(cfg.comb), errs = validate(S, d, true);
+    var g13 = ok(m13, d), g10 = ok(m10, d), n = (g13 ? 1 : 0) + (g10 ? 1 : 0), gc = cfg.comb === "anyOf" ? n >= 1 : n === 1;
+    var tree = Kit.clear(document.getElementById("tree"));
+    tree.appendChild(box("allOf", "یعنی AND: داده باید با همه‌ی schemaهای زیر جور باشد", errs.length === 0, [
+      box("basicBookInfoSchema", "فیلد اجباری title و نوع هر فیلد", ok(basic, d)),
+      box(cfg.comb, (cfg.comb === "anyOf" ? "یعنی OR، دست‌کم یکی" : "یعنی دقیقاً یکی") + " — " + Kit.digits(String(n)) + " از ۲ جور است", gc, [
+        box("mandatoryIsbn13", "فیلد اجباری isbn_13", g13), box("mandatoryIsbn10", "فیلد اجباری isbn_10", g10)], true)]));
+    var v = document.getElementById("verdict"); v.className = "ic-verdict mono " + (errs.length ? "bad" : "ok");
+    v.textContent = "validate(bookInfoSchema, bookInfo) → " + (errs.length ? "false: " + errorsText(errs) : "true");
+    var pre = Kit.clear(document.getElementById("data"));
+    function ln(txt, on, cls) { pre.appendChild(Kit.el("span", { class: on ? cls || "" : "off" }, txt)); pre.appendChild(document.createTextNode("\n")); }
+    ln("{"); ln('  "publishers": ["DC Comics"],', true); ln('  "number_of_pages": 334,', true);
+    ln('  "isbn_13": ["9780930289232"],', cfg.b, "on"); ln('  "title": "Watchmen",', cfg.t, "on"); ln('  "isbn_10": ["0930289234"],', cfg.a, "on");
+    ln('  "publish_date": "April 1, 1995",', true); ln('  …', true); ln("}");
+    var tb = Kit.clear(document.getElementById("tt"));
+    tb.appendChild(Kit.el("caption", null, "همه‌ی ترکیب‌ها، با allOf روی هر کدام (ردیف رنگی: داده‌ی فعلی)"));
+    tb.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["title", "isbn_10", "isbn_13", "anyOf", "oneOf"].map(function (h) { return Kit.el("th", { class: "mono" }, h); }))));
     var body = Kit.el("tbody");
-    [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0], [0, 1, 1]].forEach(function (r) { var dd = book(r[0], r[1], r[2]), sv = comb, res = ["anyOf", "oneOf"].map(function (c) { comb = c; return validate(schema(), dd, false).length === 0; }); comb = sv;
-      body.appendChild(Kit.el("tr", { class: r[0] === +t && r[1] === +a && r[2] === +b ? "cur" : "" }, r.map(function (x) { return Kit.el("td", null, x ? "بله" : "—"); }).concat(res.map(function (ok) { return Kit.el("td", { class: ok ? "y" : "n" }, ok ? "✓ معتبر" : "✗ نامعتبر"); })))); });
+    [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0], [0, 1, 1]].forEach(function (r) {
+      var dd = book(r[0], r[1], r[2]), cur = r[0] === +cfg.t && r[1] === +cfg.a && r[2] === +cfg.b;
+      body.appendChild(Kit.el("tr", { class: cur ? "cur" : "" }, r.map(function (x) { return Kit.el("td", null, x ? "✓" : "—"); }).concat(["anyOf", "oneOf"].map(function (c) { var y = ok(schema(c), dd); return Kit.el("td", { class: y ? "y" : "n" }, y ? "✓ معتبر" : "✗ رد"); }))));
+    });
     tb.appendChild(body);
-    var v = document.getElementById("verdict"); v.className = "callout " + (errs.length ? "bad" : "ok"); v.textContent = "With " + comb + ": " + (errs.length ? errorsText(errs) : "valid.");
-    stats([["معتبر", errs.length ? "نه" : "بله", errs.length ? "bad" : "ok"], ["فیلدهای ISBN", (a ? 1 : 0) + (b ? 1 : 0)], ["ترکیب‌کننده", comb]]); }
-  ["i10", "i13", "tt0"].forEach(function (id) { document.getElementById(id).addEventListener("change", function (e) { render(); log.add("فیلد " + id.replace("i", "isbn_").replace("tt0", "title") + (e.target.checked ? " افزوده شد" : " برداشته شد"), "muted"); }); });
-  document.getElementById("comb").appendChild(Kit.segmented({ label: "ترکیب‌کننده برای ISBNها", value: comb, options: [{ value: "anyOf", label: "anyOf، کتاب" }, { value: "oneOf", label: "oneOf" }], onChange: function (v) { comb = v; render(); log.add("کلیدواژه‌ی " + v + (v === "oneOf" ? " به کار است: کتاب Watchmen با هر دو ISBN حالا رد می‌شود." : " به کار است."), v === "oneOf" ? "warn" : "ok"); } }).element);
-  render();
+    var s = Kit.clear(document.getElementById("stats"));
+    [["معتبر", errs.length ? "نه" : "بله", errs.length ? "bad" : "ok"], ["فیلدهای ISBN", Kit.digits(String(n)), ""], ["ترکیب", cfg.comb, ""]].forEach(function (x) {
+      s.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    ["t", "a", "b"].forEach(function (k) { document.getElementById(k).checked = cfg[k]; }); seg.set(cfg.comb);
+  }
+  function verdict() { return validate(schema(cfg.comb), book(cfg.t, cfg.a, cfg.b), true).length ? "نامعتبر." : "معتبر."; }
+  ["t", "a", "b"].forEach(function (k) { document.getElementById(k).addEventListener("change", function (e) { cfg[k] = e.target.checked; render(); tour.free("داده عوض شد: " + verdict(), ""); }); });
+  var seg = Kit.segmented({ label: "ترکیب برای ISBNها", value: cfg.comb, options: [{ value: "anyOf", label: "anyOf (کتاب)" }, { value: "oneOf", label: "oneOf" }],
+    onChange: function (v) { cfg.comb = v; render(); tour.free("ترکیب " + v + ": " + verdict(), v === "oneOf" ? "warn" : ""); } });
+  document.getElementById("comb").appendChild(seg.element);
+
+  /* ---------- the scenario ---------- */
+  function set(t, a, b, c) { return function () { cfg.t = t; cfg.a = a; cfg.b = b; cfg.comb = c; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: set(true, true, true, "anyOf"), render: render, interval: 8000,
+    intro: "سمت راست schema ترکیبی است و هر جعبه نشان می‌دهد برای این داده برقرار است یا نه. سمت چپ پاسخ API است؛ فیلدهای خط‌خورده حذف شده‌اند. جدول زیر آن همه‌ی ترکیب‌ها را نشان می‌دهد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و فیلدها و نوع ترکیب را عوض کنید.",
+    steps: [
+      { kind: "ok", run: set(true, true, true, "anyOf"), say: "پاسخ Watchmen (listing ۷.۱۶، ص. ۱۵۴) هر دو ISBN را دارد، چون در ۱۹۸۶ منتشر شد و بعد از ۲۰۰۷ دوباره چاپ شد (ص. ۱۵۵). basic برقرار است و anyOf هم: معتبر (ص. ۱۵۷)." },
+      { kind: "ok", run: set(true, true, false, "anyOf"), say: "کتابی که قبل از ۲۰۰۷ منتشر شده فقط isbn_10 دارد (ص. ۱۵۵). یکی از دو شاخه‌ی anyOf کافی است، پس باز هم معتبر است." },
+      { kind: "bad", run: set(true, false, false, "anyOf"), say: "هیچ ISBNی نیست: هیچ‌کدام از دو شاخه‌ی anyOf برقرار نیست، پس allOf هم شکست می‌خورد. همین بود که جو می‌خواست: یکی از ISBNها باید باشد (ص. ۱۵۵)." },
+      { kind: "bad", run: set(false, true, true, "anyOf"), say: "فیلد title حذف شد: ISBNها سر جایشان‌اند ولی basicBookInfoSchema فیلد title را اجباری می‌داند. allOf یعنی AND؛ یک شکست کافی است." },
+      { kind: "warn", run: set(true, true, true, "oneOf"), say: "آزمایش vault: کتاب از oneOf هم نام می‌برد، یعنی دقیقاً یکی (ص. ۱۵۷). با oneOf همان Watchmen که هر دو ISBN را دارد رد می‌شود؛ پس anyOf انتخاب درست است." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "کتابی نشرشده پیش از ۲۰۰۷ در پاسخ Open Library کدام ISBN را دارد؟",

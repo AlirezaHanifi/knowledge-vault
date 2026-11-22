@@ -96,7 +96,7 @@ lang: fa
 | عمل abort | حل دستی ناسازی |
 | hash map یا node برگ یا فیلد داده | درخت یا پوشه، blob یا فایل، خط کد |
 
-> **Try it:** [reconciliation دادن دو mutation](../widgets/05-reconcile.html) — دو mutation را از همان یک کتابخانه‌ی ناچیز آغاز کنید، یکی را commit کنید، بعد آن یکی را و ببینید فاز commit تند پیش می‌رود یا درهم می‌آمیزد یا abort می‌کند.
+> **Try it:** [reconcile کردن دو mutation](../widgets/05-reconcile.html) — دو mutation را از همان کتابخانه‌ی کوچک شروع کنید، یکی را commit کنید و بعد دیگری را، و ببینید فاز commit کار را با fast-forward، three-way merge یا abort تمام می‌کند.
 
 > **In practice:** Argo CD هم مدام reconcile می‌کند: state واقعی cluster را با state مطلوب در git مقایسه می‌کند و تفاوت را برطرف می‌کند.
 >

@@ -7,13 +7,29 @@
 <meta name="description" content="مجموعه‌ای را از هزار تا ده میلیارد عضو بزرگ کنید و کپی سطحی کامل را با کپی مسیر در ضریب شاخه‌های ۲ و ۳۲ بسنجید، با شمردن عضوهای کپی‌شده و cache lineهای دست‌خورده در هر به‌روزرسانی. تصویری از فصل ۹ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  table td { direction: ltr; text-align: left; } table th { text-align: right; }
+  /* Left: copied cells per update against collection size, both on log scales. Right: the three strategies at the current size. */
+  .sc-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .sc-grid svg { width: 100%; display: block; }
+  .sc-cap { font-size: .78rem; color: var(--ink-3); margin: 0 0 4px; }
+  .sc-row { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 7px 10px; margin-bottom: 8px; background: var(--surface); }
+  .sc-row h3 { margin: 0 0 5px; font-size: .9rem; }
+  .sc-m { display: grid; grid-template-columns: 7.6em minmax(0, 1fr) 6.2em; gap: 6px; align-items: center; font-size: .76rem; margin: 3px 0; }
+  .sc-track { height: 11px; background: var(--surface-2); border-radius: 3px; direction: ltr; position: relative; overflow: hidden; }
+  .sc-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+  .sc-fill.s3 { background: var(--s3, var(--bad)); } .sc-fill.s2 { background: var(--s2); } .sc-fill.s1 { background: var(--s1); }
+  .sc-v { font-family: var(--mono); direction: ltr; text-align: left; font-size: .74rem; }
+  .sc-tbl { width: 100%; border-collapse: collapse; font-size: .8rem; margin-bottom: 10px; }
+  .sc-tbl th, .sc-tbl td { padding: 6px 6px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: middle; }
+  .sc-tbl thead th { font-size: .74rem; color: var(--ink-3); font-weight: 600; }
+  .sc-tbl tr.best th { color: var(--ok); }
+  .sc-tbl td .sc-track { margin-bottom: 2px; }
+  .sc-verdict { font-size: .88rem; padding: 8px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/09-persistent-data-structures.html">فصل ۹</a><span aria-hidden="true">/</span>
@@ -24,66 +40,111 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · ساختارهای داده‌ی persistent</div>
-  <h1>کپی در مقیاس</h1>
-  <p class="lede">شریک شدن ساختاری با کپی سطحی، مانند فصل ۴، در هر سطحی کل یک map یا آرایه را کپی می‌کند: برای داده‌ی کوچک خوب است و برای مجموعه‌های بزرگ کند. ساختارهای داده‌ی persistent تنها مسیری را کپی می‌کنند، پس آن بها با log N رشد می‌کند و تا بزرگ‌ترین مجموعه‌هایی که در حافظه جا می‌شوند «عملاً ثابت» می‌ماند.</p>
-  <p class="source-note">تصویری از بخش‌های ۹.۱ و ۹.۲ (صص. ۱۷۶–۱۸۳): اینکه چرا کپی سطحی با بزرگ شدن مجموعه‌ها کند می‌شود، عمق‌های log₂ و log₃₂، و آن کران ده‌میلیاردی با حدود ۳۳ در برابر ۶٫۶۴ سطح. عضوهای ۴بایتی از کتاب پی می‌گیرند؛ و cache line ۶۴بایتی و آن مدل بها مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>کپی در مقیاس</h1>
+      <p class="lede">در فصل ۴، structural sharing با shallow copy برای هر update کل مجموعه را کپی می‌کرد: برای داده‌ی کوچک خوب است و برای مجموعه‌ی بزرگ کند. ساختار persistent فقط مسیر را کپی می‌کند، پس هزینه با log N بالا می‌رود. مجموعه را از هزار تا ده میلیارد عضو بزرگ کنید.</p>
+      <p class="source-note">تصویری از بخش‌های ۹.۱ و ۹.۲ (صص. ۱۷۸–۱۸۳): shallow copy یک مجموعه‌ی ۱۰۰٬۰۰۰عضوی، عمق log₂ و log₃₂، شمارش آرایه‌ها به‌جای خانه‌ها و سقف ۱۰ میلیارد عضو. شمارش خانه‌ها به‌شکل عمق × ضریب شاخه و نمودار از vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">عضوهای کپی‌شده در هر به‌روزرسانی، مقیاس log₁₀</p><svg id="chart" role="img" aria-label="نمودار عضوهای کپی‌شده در هر به‌روزرسانی بر پایه‌ی اندازه‌ی مجموعه"></svg></div>
-      <div class="panel"><p class="panel-title">در همین اندازه</p><div class="table-wrap"><table id="tbl"></table></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="n"></div><div id="line"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="sc-grid">
+          <div><p class="sc-cap">خانه‌هایی که هر update کپی می‌کند؛ هر دو محور لگاریتمی (۱۰ به توان…)</p><svg id="chart" role="img" aria-label="نمودار خانه‌های کپی‌شده در هر update بر حسب اندازه‌ی مجموعه"></svg></div>
+          <div><p class="sc-cap" id="ncap"></p><div id="rows"></div><div class="sc-verdict" id="verdict" aria-live="polite"></div></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">در همین اندازه</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="n"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>کپی سطحی با N رشد می‌کند</strong>: ده میلیارد عضو یعنی کپی کردن ده میلیارد خانه برای هر به‌روزرسانی.</li>
-    <li><strong>کپی مسیر با log N رشد می‌کند</strong>: شمار ۳۴ سطح در ضریب شاخه‌ی ۲، و ۷ سطح در ۳۲. کتاب آن را به «عملاً ثابت» گرد می‌کند، گرچه در نظر ثابت نیست.</li>
-    <li><strong>cache lineها</strong> راه vault برای نشان دادن حرف کتابند: nodeی ۳۲خانه‌ای از عضوهای ۴بایتی روی دو خط ۶۴بایتی پهن می‌شود، پس به‌روزرسانی ۳۲راهه به چند ده خط دست می‌زند، در حالی که درختی دودویی برای هر سطحی یک خط را دست می‌زند ولی سطح‌های خیلی بیشتری دارد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>shallow copy با N بالا می‌رود:</strong> ده میلیارد عضو یعنی ده میلیارد خانه برای هر update.</li>
+      <li><strong>کپی مسیر با log N بالا می‌رود:</strong> ۳۴ سطح با ضریب ۲ و ۷ سطح با ۳۲. کتاب این را «در عمل ثابت» می‌نامد، هرچند از نظر تئوری ثابت نیست.</li>
+      <li><strong>ضریب ۳۲ خانه‌های بیشتری کپی می‌کند ولی آرایه‌های خیلی کمتری:</strong> کتاب می‌گوید یک آرایه‌ی ۳۲تایی با یک جفت دسترسی cache کپی می‌شود، پس هزینه را تعداد آرایه‌ها، یعنی عمق، تعیین می‌کند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-persistent-data-structures.html"><small>درس</small>فصل ۹: ساختارهای داده‌ی persistent</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-persistent-data-structures.html"><small>درس</small>فصل ۹: ساختارهای داده‌ی persistent</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), cfg = { e: 6, line: 64 };
+  var cfg = { e: 5 }, tour, ctl = {};
+  function fmt(x) { return Math.round(x).toLocaleString("en-US"); }
   function lv(n, b) { return Math.ceil(Math.log(n) / Math.log(b) - 1e-9); }
-  function cost(n, b) { var d = lv(n, b); return { levels: d, slots: d * b, lines: d * Math.ceil(b * 4 / cfg.line) }; }
-  function render() { var n = Math.pow(10, cfg.e), s = [[], [], []];
-    for (var e = 3; e <= 10; e += 0.25) { var m = Math.pow(10, e); s[0].push([e, e]); s[1].push([e, Math.log10(cost(m, 2).slots)]); s[2].push([e, Math.log10(cost(m, 32).slots)]); }
-    Kit.lineChart(document.getElementById("chart"), { xMin: 3, xMax: 10, yMax: 10, xLabel: "مقدار log₁₀ N بر حسب عضو", yLabel: "مقدار log₁₀ خانه‌های کپی‌شده", series: [{ label: "کپی سطحی", cls: "s3", points: s[0] }, { label: "کپی مسیر، b = 2", cls: "s2", points: s[1] }, { label: "کپی مسیر، b = 32", cls: "s1", points: s[2] }], marks: [{ x: cfg.e, label: "N" }] });
-    var t = Kit.clear(document.getElementById("tbl")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["راهبرد", "سطح‌ها", "خانه‌های کپی‌شده", "cache lineها"].map(function (h) { return Kit.el("th", null, h); }))));
-    var tb = Kit.el("tbody"), c2 = cost(n, 2), c32 = cost(n, 32);
-    [["کپی سطحی", "1", n.toLocaleString("en-US"), Math.ceil(n * 4 / cfg.line).toLocaleString("en-US")], ["کپی مسیر، b = 2", c2.levels, c2.slots, c2.lines], ["کپی مسیر، b = 32", c32.levels, c32.slots, c32.lines]].forEach(function (r) { tb.appendChild(Kit.el("tr", null, r.map(function (x) { return Kit.el("td", null, String(x)); }))); });
-    t.appendChild(tb);
-    stats([["مقدار N", n.toLocaleString("en-US")], ["حافظه با ۴ بایت", n * 4 >= 1e9 ? (n * 4 / 1e9).toFixed(0) + " GB" : n * 4 >= 1e6 ? (n * 4 / 1e6).toFixed(0) + " MB" : (n * 4 / 1e3).toFixed(0) + " KB"], ["مقدار log₂ N", Math.log2(n).toFixed(1)], ["مقدار log₃₂ N", (Math.log2(n) / 5).toFixed(2)]]); }
-  document.getElementById("n").appendChild(Kit.slider({ label: "اندازه‌ی مجموعه", min: 3, max: 10, step: 0.5, value: cfg.e, format: function (v) { return Math.round(Math.pow(10, v)).toLocaleString("en-US"); }, onInput: function (v) { cfg.e = v; render(); if (v === 10) log.add("ده میلیارد عضو: حدود ۴۰ گیگابایت، کران بالای کتاب. مقدار log₂ حدود ۳۳ و log₃₂ حدود ۶٫۶۴.", "ok"); } }).element);
-  document.getElementById("line").appendChild(Kit.segmented({ label: "خط cache", value: 64, options: [{ value: 32, label: "خط ۳۲بایتی" }, { value: 64, label: "خط ۶۴بایتی" }], onChange: function (v) { cfg.line = v; render(); log.add("خط‌های cache " + v + "بایتی.", "muted"); } }).element);
-  render();
+  function strategies(n) {
+    var d2 = lv(n, 2), d32 = lv(n, 32);
+    return [
+      { name: "shallow copy کل مجموعه", cls: "s3", levels: 1, cells: n, arrays: 1, note: "یک آرایه‌ی " + fmt(n) + "تایی" },
+      { name: "کپی مسیر، ضریب ۲", cls: "s2", levels: d2, cells: d2 * 2, arrays: d2 },
+      { name: "کپی مسیر، ضریب ۳۲", cls: "s1", levels: d32, cells: d32 * 32, arrays: d32 }
+    ];
+  }
+  function mem(n) { var b = n * 4; return b >= 1e9 ? fmt(b / 1e9) + " GB" : b >= 1e6 ? fmt(b / 1e6) + " MB" : fmt(b / 1e3) + " KB"; }
+  function render() {
+    var n = Math.pow(10, cfg.e), s = [[], [], []];
+    for (var e = 3; e <= 10.001; e += 0.25) { var m = Math.pow(10, e), st = strategies(m); for (var q = 0; q < 3; q++) s[q].push([e, Math.log10(st[q].cells)]); }
+    Kit.lineChart(document.getElementById("chart"), { width: 440, height: 215, xMin: 3, xMax: 10, yMax: 10, xTicks: 7, yTicks: 5, xFormat: function (v) { return Kit.digits(String(Math.round(v))); }, yFormat: function (v) { return Kit.digits(String(Math.round(v))); }, xLabel: "اندازه‌ی مجموعه، N", yLabel: "خانه‌های کپی‌شده", series: [{ label: "shallow copy", cls: "s3", points: s[0] }, { label: "ضریب ۲", cls: "s2", points: s[1] }, { label: "ضریب ۳۲", cls: "s1", points: s[2] }], marks: [{ x: cfg.e, label: "N" }] });
+    var list = strategies(n), R = Kit.clear(document.getElementById("rows"));
+    document.getElementById("ncap").textContent = "N = " + Kit.digits(fmt(n)) + " عضو، حدود " + Kit.digits(mem(n)) + " با ۴ بایت برای هر عضو";
+    var maxLog = Math.log10(Math.max(n, 10));
+    var tb = Kit.el("tbody");
+    list.forEach(function (x, i) {
+      var w = Math.max(2, Math.log10(Math.max(x.cells, 1)) / maxLog * 100);
+      tb.appendChild(Kit.el("tr", { class: i === 2 ? "best" : "" }, Kit.el("th", { scope: "row" }, x.name), Kit.el("td", { class: "sc-v" }, fmt(x.levels)),
+        Kit.el("td", {}, Kit.el("div", { class: "sc-track", role: "img", "aria-label": "خانه‌های کپی‌شده: " + fmt(x.cells) }, Kit.el("div", { class: "sc-fill " + x.cls, style: "width:" + Math.min(100, w) + "%" })), Kit.el("span", { class: "sc-v" }, fmt(x.cells))),
+        Kit.el("td", { class: "sc-v" }, fmt(x.arrays))));
+    });
+    R.appendChild(Kit.el("table", { class: "sc-tbl" }, Kit.el("thead", {}, Kit.el("tr", {}, ["راهبرد", "سطح", "خانه‌های کپی‌شده", "آرایه"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))), tb));
+    var v = document.getElementById("verdict");
+    v.textContent = "برای هر update: shallow copy " + Kit.digits(fmt(n)) + " خانه، ضریب ۲ " + Kit.digits(list[1].cells) + " خانه در " + Kit.digits(list[1].arrays) + " آرایه، ضریب ۳۲ " + Kit.digits(list[2].cells) + " خانه در فقط " + Kit.digits(list[2].arrays) + " آرایه.";
+    var stt = Kit.clear(document.getElementById("stats"));
+    [["N", Kit.digits(fmt(n))], ["log₂ N", Kit.digits((Math.log2(n)).toFixed(1))], ["log₃₂ N", Kit.digits((Math.log2(n) / 5).toFixed(2))]].forEach(function (x) {
+      stt.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label mono" }, x[0]), Kit.el("span", { class: "stat-value" }, x[1])));
+    });
+    ctl.n.set(cfg.e);
+  }
+  function say() { return document.getElementById("verdict").textContent; }
+  ctl.n = Kit.slider({ label: "اندازه‌ی مجموعه", min: 3, max: 10, step: 0.5, value: cfg.e, format: function (v) { return Kit.digits(fmt(Math.pow(10, v))); }, onInput: function (v) { cfg.e = v; render(); tour.free(say(), ""); } });
+  document.getElementById("n").appendChild(ctl.n.element);
+
+  /* ---------- the scenario ---------- */
+  function at(e) { return function () { cfg.e = e; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(3), render: render, interval: 8000,
+    intro: "یک خط shallow copy کل مجموعه است و دو خط دیگر کپی مسیر با ضریب ۲ و ۳۲. هر دو محور لگاریتمی‌اند: یک خانه بالاتر یعنی ده برابر.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و اندازه‌ی مجموعه را عوض کنید.",
+    steps: [
+      { kind: "ok", run: at(3), say: "هزار عضو: shallow copy فقط هزار خانه است. برای داده‌ی کوچک، structural sharing ساده‌ی فصل ۴ کاملاً کافی است." },
+      { kind: "bad", run: at(5), say: "۱۰۰٬۰۰۰ کتاب: به گفته‌ی جو، shallow copy روی ماشینش بیشتر از ۵۰ میلی‌ثانیه طول نمی‌کشد و تئو حساب می‌کند هر update حدود ۱۰۰ KB حافظه اضافه می‌کند. در مقیاس بزرگ، هم حافظه مشکل است و هم محاسبه (ص. ۱۷۸)." },
+      { kind: "ok", run: at(7), say: "ده میلیون: shallow copy ده میلیون خانه کپی می‌کند، ولی کپی مسیر با ضریب ۳۲ فقط ۵ آرایه. فاصله‌ی دو خط با بزرگ شدن N مدام بیشتر می‌شود." },
+      { kind: "ok", run: at(10), say: "ده میلیارد عضو، حدود ۴۰ GB، سقف منطقی یک فهرست در حافظه است. log₂ آن حدود ۳۳ است و log₃₂ آن ۶٫۶۴؛ برای همین کتاب می‌گوید خواندن و update در عمل ثابت‌اند (ص. ۱۸۳)." },
+      { kind: "", run: at(10), say: "ضریب ۳۲ خانه‌های بیشتری از ضریب ۲ کپی می‌کند، ۲۲۴ در برابر ۶۸. ولی کتاب می‌گوید هر آرایه‌ی ۳۲تایی با یک جفت دسترسی cache کپی می‌شود؛ پس ۷ آرایه از ۳۴ آرایه سریع‌تر است (ص. ۱۸۲)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "کران بالای معقول کتاب برای فهرستی در حافظه چیست، و log₃₂ آن؟",

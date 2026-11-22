@@ -6,16 +6,36 @@
 <title>گرفتن و replay</title>
 <meta name="description" content="زمینه‌ی تابعی را با console.log یا JSON.stringify بگیرید، آن catalog و پرسش گرفته‌شده را در REPLی ساختگی replay کنید، و هشت پرسش تست را روی سه version جست‌وجوی کتاب از فصل ۱۵ کتاب Data-Oriented Programming اجرا.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
-  table.q td { font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: left; } table.q th { text-align: right; }
-  #sv { direction: rtl; }
+<style>
+  .cr-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  .cr-box { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px; background: var(--surface); }
+  .cr-box.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .cr-box h3 { margin: 0 0 4px; font-size: .82rem; }
+  .cr-term { font-family: var(--mono); font-size: .7rem; line-height: 1.5; direction: ltr; text-align: left; white-space: pre-wrap; word-break: break-all; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; margin: 0; max-height: 128px; overflow: hidden; }
+  .cr-term .p { color: var(--ink-3); }
+  .cr-term .bad { color: var(--bad); font-weight: 700; }
+  .cr-term .ok { color: var(--ok); font-weight: 700; }
+  .cr-v { font-size: .78rem; margin-top: 4px; line-height: 1.6; }
+  .cr-v.ok { color: var(--ok); } .cr-v.bad { color: var(--bad); }
+  .cr-q { margin-top: 10px; }
+  .cr-q h3 { margin: 0 0 4px; font-size: .82rem; }
+  .cr-grid { display: grid; grid-template-columns: 10.5em repeat(8, minmax(0, 1fr)); gap: 3px; direction: ltr; font-size: .7rem; }
+  .cr-grid > span { padding: 3px 4px; border-radius: 3px; text-align: center; font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cr-grid .hd { color: var(--ink-3); font-weight: 700; }
+  .cr-grid .hd.y { border-bottom: 2px solid var(--ok); } .cr-grid .hd.n { border-bottom: 2px dashed var(--ink-3); }
+  .cr-grid .vn { text-align: left; font-weight: 700; }
+  .cr-grid .vn.on { background: var(--accent-soft); }
+  .cr-grid .c { border: 1px solid var(--line); }
+  .cr-grid .c.ok { border-color: var(--ok); color: var(--ok); }
+  .cr-grid .c.bad { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); font-weight: 700; }
+  .cr-grid .row-on { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .cr-legend { font-size: .72rem; color: var(--ink-3); margin: 4px 0 0; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/15-debugging.html">فصل ۱۵</a><span aria-hidden="true">/</span>
@@ -26,99 +46,139 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۵ · اشکال‌زدایی</div>
-  <h1>گرفتن و replay</h1>
-  <p class="lede">در DOP <strong>زمینه‌ی تابع</strong> تنها همان آرگومان‌هاست، و آرگومان‌ها داده‌اند. سر تابع آن‌ها را به JSON سریالی کنید، در REPLی بچسبانید، و می‌توانید آن صدا زدن را replay و کد را همان‌جا بهتر کنید، با حلقه‌ی بازخوردی خیلی کوتاه‌تر از زدن آن endpoint.</p>
-  <p class="source-note">تصویری از بخش‌های ۱۵.۲ تا ۱۵.۴ (listingهای ۱۵.۴ تا ۱۵.۲۶، صص. ۳۱۴–۳۲۸): تابع <code>console.log</code> در برابر <code>JSON.stringify</code> روی رشته‌ای با گیومه، آن catalog گرفته‌شده‌ی listing ۱۵.۹، و سه جست‌وجو: تابع حرف‌کوچک <code>startsWith</code> روی عنوان (listing ۱۵.۸)، تابع <code>hasWordStartingWith</code> روی واژه‌ها (listingهای ۱۵.۳ و ۱۵.۱۲)، و عبارت باقاعده‌ی حرف‌کوچک <code>\b</code> (listing ۱۵.۲۴). آن هشت پرسش از listingهای ۱۵.۲۵ و ۱۵.۲۶‌اند. آن REPL ساختگی است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>گرفتن و replay</h1>
+      <p class="lede">در DOP <strong>context تابع</strong> فقط همان آرگومان‌هاست و آرگومان‌ها داده‌اند. آن‌ها را هنگام فراخوانی به JSON تبدیل کنید و در REPL بچسبانید. آن‌وقت می‌توانید همان فراخوانی را replay کنید و کد را همان‌جا بهتر کنید، با حلقه‌ی بازخوردی خیلی کوتاه‌تر از صدا زدن endpoint.</p>
+      <p class="source-note">تصویری از بخش‌های ۱۵.۱ تا ۱۵.۴ (listingهای ۱۵.۴ تا ۱۵.۲۶، صص. ۳۱۳–۳۲۹): <code>console.log</code> در برابر <code>JSON.stringify</code> روی رشته‌ای با گیومه، catalog گرفته‌شده‌ی listing ۱۵.۹ و سه نسخه‌ی جست‌وجو: <code>startsWith</code> روی عنوان با حروف کوچک (۱۵.۸)، <code>hasWordStartingWith</code> روی واژه‌ها (۱۵.۳ و ۱۵.۱۲) و regex حروف کوچک با <code>\b</code> (۱۵.۲۴). هشت پرسش از listingهای ۱۵.۲۵ و ۱۵.۲۶ است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">۱ · گرفتن رشته‌ای (listingهای ۱۵.۴ تا ۱۵.۷)</p>
-          <pre class="code" id="sc"></pre><button class="btn small" id="sr" type="button">چسباندن در REPL</button><div class="callout" id="sv" style="margin-top:6px"></div></div>
-        <div class="panel"><p class="panel-title">۲ · گرفتن searchBooksByTitle (listing ۱۵.۹)</p><label class="field-head" for="tq">پرسش endpoint</label><input id="tq" value="Watch" style="width:100%;direction:ltr;text-align:left">
-          <button class="btn small" id="trig" type="button" style="margin-top:6px">زدن endpoint جست‌وجو</button><pre class="code" id="cap" style="max-height:160px;overflow:auto"></pre></div></div>
-      <div class="panel"><p class="panel-title">۳ · replay در REPL</p><label class="field-head" for="rq">مقدار query</label><input id="rq" value="Habit" style="width:100%;direction:ltr;text-align:left">
-        <pre class="code" id="rout"></pre></div>
-      <div class="panel"><p class="panel-title">۴ · آن هشت پرسش تست (listingهای ۱۵.۲۵ و ۱۵.۲۶)</p><div class="table-wrap"><table class="data q" id="qt"></table></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div><div id="ind" style="margin-top:8px"></div><div id="ver" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="cr-top">
+            <div class="cr-box" id="capB"><h3 id="capT"></h3><pre class="cr-term" id="cap"></pre><div class="cr-v" id="capV"></div></div>
+            <div class="cr-box" id="repB"><h3>محیط REPL، بدون صدا زدن endpoint</h3><pre class="cr-term" id="rep"></pre><div class="cr-v" id="repV" aria-live="polite"></div></div>
+          </div>
+          <div class="cr-q"><h3>هشت پرسش تست روی catalog گرفته‌شده (listingهای ۱۵.۲۵ و ۱۵.۲۶)</h3><div class="cr-grid mono" id="grid"></div>
+            <p class="cr-legend">چهار پرسش اول باید کتاب 7 Habits را پیدا کنند (خط سبز) و چهار تای بعد هیچ کتابی (خط‌چین).</p></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این replay</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="modeC"></div>
+        <div class="tweak-group" id="verC"></div>
+        <div class="tweak-group"><label class="field-head" for="rq">مقدار query در REPL</label><input id="rq" style="width:100%;direction:ltr;text-align:left;font-family:var(--mono)"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>تابع console.log گیومه‌ها را</strong> گرد رشته‌ای و ممیزهای معکوس پیش از گیومه‌های درونی را می‌اندازد، پس آنچه کپی می‌کنید مقداری لفظی و معتبر نیست. قالب JSON هر دو را نگه می‌دارد، و برای هر داده‌ای کار می‌کند.</li>
-    <li><strong>آن replay از داده‌ی گرفته‌شده کار می‌کشد، نه از سیستم زنده</strong>: پرسش endpoint را عوض کنید، از نو بگیرید، و آن REPL روی چیزی کار می‌کند که گرفته شده.</li>
-    <li><strong>تنها version سوم هر هشت پرسش را رد می‌کند</strong>: حرف‌کوچک کردن «habit» را درست می‌کند، و عبارت باقاعده‌ی مرز واژه پیشوندهایی را می‌چرخاند که روی چند واژه پهن می‌شوند، مانند «7 Habit» و «habits of».</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>console.log گیومه‌های دور رشته و backslash پیش از گیومه‌های داخلی را نشان نمی‌دهد</strong>، پس چیزی که کپی می‌کنید یک literal معتبر نیست. JSON هر دو را نگه می‌دارد و برای هر داده‌ای کار می‌کند.</li>
+      <li><strong>replay روی داده‌ی گرفته‌شده کار می‌کند، نه روی سیستم زنده:</strong> با عوض کردن نسخه‌ی جست‌وجو هیچ endpointی دوباره صدا زده نمی‌شود.</li>
+      <li><strong>فقط نسخه‌ی سوم هر هشت پرسش را رد می‌کند:</strong> حروف کوچک مشکل «habit» را حل می‌کند و regex مرز واژه پیشوندهای چندواژه‌ای مثل «7 Habit» و «habits of» را.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/15-debugging.html"><small>درس</small>فصل ۱۵: اشکال‌زدایی</a></li>
-    <li><a href="../lab/15-capture-replay/README.md"><small>آزمایش</small>ریختن و replay و مسابقه‌ی ریختن asynchronous به Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/15-debugging.html"><small>درس</small>فصل ۱۵: اشکال‌زدایی</a></li>
+      <li><a href="../lab/15-capture-replay/README.md"><small>آزمایش</small>ریختن و replay و مسابقه‌ی ریختن asynchronous به Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-var CATALOG = {"booksByIsbn":{"978-1982137274":{"isbn":"978-1982137274","title":"7 Habits of Highly Effective People","authorIds":["sean-covey","stephen-covey"]},"978-1779501127":{"isbn":"978-1779501127","title":"Watchmen","publicationYear":1987,"authorIds":["alan-moore","dave-gibbons"]}},"authorsById":{"stephen-covey":{"name":"Stephen Covey","bookIsbns":["978-1982137274"]},"sean-covey":{"name":"Sean Covey","bookIsbns":["978-1982137274"]},"dave-gibbons":{"name":"Dave Gibbons","bookIsbns":["978-1779501127"]},"alan-moore":{"name":"Alan Moore","bookIsbns":["978-1779501127"]}}};
+  var CATALOG = {"booksByIsbn":{"978-1982137274":{"isbn":"978-1982137274","title":"7 Habits of Highly Effective People","authorIds":["sean-covey","stephen-covey"]},"978-1779501127":{"isbn":"978-1779501127","title":"Watchmen","publicationYear":1987,"authorIds":["alan-moore","dave-gibbons"]}},"authorsById":{"stephen-covey":{"name":"Stephen Covey","bookIsbns":["978-1982137274"]},"sean-covey":{"name":"Sean Covey","bookIsbns":["978-1982137274"]},"dave-gibbons":{"name":"Dave Gibbons","bookIsbns":["978-1779501127"]},"alan-moore":{"name":"Alan Moore","bookIsbns":["978-1779501127"]}}};
   var MATCH = {
     v1: function (title, q) { return title.toLowerCase().startsWith(q.toLowerCase()); },
     v2: function (title, q) { return title.split(" ").some(function (w) { return w.startsWith(q); }); },
-    v3: function (title, q) { return title.toLowerCase().match(new RegExp("\\b" + q.toLowerCase())) != null; } };
-  function search(catalogData, query, v) {
-    return Object.keys(catalogData.booksByIsbn).map(function (k) { return catalogData.booksByIsbn[k]; })
-      .filter(function (b) { return MATCH[v](b.title, query); })
-      .map(function (b) { return { title: b.title, isbn: b.isbn, authorNames: b.authorIds.map(function (id) { return catalogData.authorsById[id].name; }) }; }); }
-
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), mode = "json", indent = false, ver = "v3", captured = null;
-  var SENT = "I like the word \"reproducibility\"", PREF = "li";
+    v3: function (title, q) { return title.toLowerCase().match(new RegExp("\\b" + q.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))) != null; } };
+  var VN = { v1: "15.8 startsWith", v2: "15.12 words", v3: "15.24 \\b regex" };
+  function search(cat, q, v) { return Object.keys(cat.booksByIsbn).map(function (k) { return cat.booksByIsbn[k]; }).filter(function (b) { return MATCH[v](b.title, q); }).map(function (b) { return b.title; }); }
   var QUERIES = [["Habit", 1], ["habit", 1], ["7 Habit", 1], ["habits of", 1], ["abit", 0], ["bit", 0], ["7 abit", 0], ["habit of", 0]];
-  function capLines() { return mode === "log" ? [SENT, PREF] : [JSON.stringify(SENT), JSON.stringify(PREF)]; }
-  function drawString() { document.getElementById("sc").textContent = "// console output\n" + capLines().join("\n"); document.getElementById("sv").className = "callout"; document.getElementById("sv").textContent = "خروجی hasWordStartingWith(sentence, prefix) همان true است"; }
-  function pasteString() { var v = document.getElementById("sv");
-    try { var a = capLines().map(function (l) { return JSON.parse(l); }); v.className = "callout ok"; v.textContent = "باز شد: " + JSON.stringify(a[0]) + " و " + JSON.stringify(a[1]) + ". همان آرگومان‌ها، همان خروجی."; log.add("زمینه‌ی رشته replay شد: یکسان.", "ok"); }
-    catch (e) { v.className = "callout bad"; v.textContent = "متن چسبانده مقداری لفظی و معتبر نیست — " + e.name + " — و باید دستی گیومه و ممیز معکوس بیفزایید."; log.add("گرفته‌ی console.log همان‌طور بازچسباندنی نیست.", "bad"); } }
-  function trigger() { var q = document.getElementById("tq").value;
-    captured = indent ? JSON.stringify(CATALOG, null, 2) + "\n" + JSON.stringify(q) : JSON.stringify(CATALOG) + "\n" + JSON.stringify(q);
-    document.getElementById("cap").textContent = captured; log.add("آن endpoint با " + JSON.stringify(q) + " زده شد؛ و زمینه گرفته شد، " + captured.length + " نویسه.", "muted"); replay(); }
-  function replay() { var out = document.getElementById("rout"), q = document.getElementById("rq").value;
-    if (!captured) { out.textContent = "نخست آن endpoint را بزنید، تا catalogی گرفته شود."; return; }
-    var lines = captured.split("\n"), cat = JSON.parse(lines.slice(0, -1).join("\n"));
-    out.textContent = "> var catalogData = /* pasted */;\n> Catalog.searchBooksByTitle(catalogData, " + JSON.stringify(q) + ");\n" + JSON.stringify(search(cat, q, ver), null, 2); table(cat); }
-  function table(cat) { var t = Kit.clear(document.getElementById("qt")), pass = 0;
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["پرسش", "چشم‌داشته", "listing ۱۵.۸", "listing ۱۵.۱۲", "listing ۱۵.۲۴"].map(function (h) { return Kit.el("th", null, h); }))));
-    var tb = Kit.el("tbody");
-    QUERIES.forEach(function (r) { var cells = [Kit.el("td", null, JSON.stringify(r[0])), Kit.el("td", { style: "direction:rtl;text-align:right" }, r[1] ? "آن کتاب" : "هیچ")];
-      ["v1", "v2", "v3"].forEach(function (v) { var got = search(cat, r[0], v).length > 0 ? 1 : 0, ok = got === r[1]; if (v === ver && ok) pass++;
-        cells.push(Kit.el("td", { class: ok ? "" : "bad" }, (ok ? "✓ " : "✗ ") + (got ? "found" : "none"))); });
-      tb.appendChild(Kit.el("tr", null, cells)); });
-    t.appendChild(tb);
-    stats([["version", { v1: "15.8", v2: "15.12", v3: "15.24" }[ver]], ["پرسش‌های ردشده", pass + " / 8", pass === 8 ? "ok" : "warn"], ["گرفته", captured.length + " chars"], ["صدا زدن endpoint", "1"]]); }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "گرفتن رشته‌ها با", value: mode, options: [{ value: "log", label: "console.log" }, { value: "json", label: "JSON.stringify" }], onChange: function (v) { mode = v; drawString(); } }).element);
-  document.getElementById("ind").appendChild(Kit.segmented({ label: "قالب JSON گرفته‌شده", value: "one", options: [{ value: "one", label: "یک‌خطی، ۱۵.۹" }, { value: "two", label: "تودررفته، ۱۵.۲۱" }], onChange: function (v) { indent = v === "two"; trigger(); } }).element);
-  document.getElementById("ver").appendChild(Kit.segmented({ label: "version جست‌وجو", value: ver, options: [{ value: "v1", label: "startsWith، ۱۵.۸" }, { value: "v2", label: "پیشوند واژه، ۱۵.۱۲" }, { value: "v3", label: "عبارت \\b، ۱۵.۲۴" }], onChange: function (v) { ver = v; replay(); log.add("version " + v + " در REPL؛ هیچ endpointی زده نشد.", "muted"); } }).element);
-  document.getElementById("sr").addEventListener("click", pasteString);
-  document.getElementById("trig").addEventListener("click", trigger);
-  document.getElementById("rq").addEventListener("input", replay);
-  drawString(); trigger();
+  var SENT = "I like the word \"reproducibility\"", PREF = "li";
+  var mode = "json", phase = "string", ver = "v1", rq = "Habit", focus = "", replays = 0, tour, ctl = {};
+  function render() {
+    var C = Kit.clear(document.getElementById("cap")), V = document.getElementById("capV");
+    document.getElementById("capB").className = "cr-box" + (focus === "cap" ? " on" : ""); document.getElementById("repB").className = "cr-box" + (focus === "rep" ? " on" : "");
+    function line(t, cls) { C.appendChild(cls ? Kit.el("span", { class: cls }, t) : document.createTextNode(t)); C.appendChild(document.createTextNode("\n")); }
+    if (phase === "string") {
+      document.getElementById("capT").textContent = "گرفتن context رشته‌ای با " + (mode === "json" ? "JSON.stringify (listing ۱۵.۷)" : "console.log (listing ۱۵.۴)");
+      line("// console output of hasWordStartingWith(sentence, prefix)", "p");
+      if (mode === "json") { line(JSON.stringify(SENT)); line(JSON.stringify(PREF)); } else { line(SENT, "bad"); line(PREF, "bad"); }
+      var ok = mode === "json";
+      V.className = "cr-v " + (ok ? "ok" : "bad");
+      V.textContent = ok ? "✓ خروجی literal معتبر است؛ در REPL چسبانده می‌شود و همان true را می‌دهد." : "✗ گیومه‌های دور رشته و backslashها افتاده‌اند. چسباندن این متن در REPL خطای نحوی می‌دهد (ص. ۳۱۷).";
+    } else {
+      document.getElementById("capT").textContent = "گرفتن آرگومان‌های searchBooksByTitle (listingهای ۱۵.۸ و ۱۵.۹)";
+      line("// endpoint triggered once with query \"Watch\"", "p"); line(JSON.stringify(CATALOG)); line(JSON.stringify("Watch"));
+      V.className = "cr-v ok"; V.textContent = "✓ هر داده‌ای با JSON گرفته می‌شود: catalog تودرتو و query.";
+    }
+    var R = Kit.clear(document.getElementById("rep")), RV = document.getElementById("repV");
+    function rl(t, cls) { R.appendChild(cls ? Kit.el("span", { class: cls }, t) : document.createTextNode(t)); R.appendChild(document.createTextNode("\n")); }
+    if (phase === "string") {
+      rl("> hasWordStartingWith(", "p"); rl(mode === "json" ? "    " + JSON.stringify(SENT) + "," : "    " + SENT + ",", mode === "json" ? "" : "bad"); rl("    " + (mode === "json" ? JSON.stringify(PREF) : PREF) + ");", mode === "json" ? "" : "bad");
+      rl(mode === "json" ? "// → true" : "// Uncaught SyntaxError", mode === "json" ? "ok" : "bad");
+      RV.className = "cr-v"; RV.textContent = mode === "json" ? "همان آرگومان‌ها، همان خروجی." : "باید گیومه‌ها و backslashها را دستی اضافه کنید.";
+    } else {
+      var res = search(CATALOG, rq, ver), exp = QUERIES.filter(function (q) { return q[0] === rq; })[0];
+      rl("> var catalogData = /* pasted JSON */;", "p"); rl("> // searchBooksByTitle as in listing " + VN[ver].split(" ")[0], "p"); rl("> Catalog.searchBooksByTitle(catalogData, " + JSON.stringify(rq) + ");");
+      rl("// → " + JSON.stringify(res), exp ? ((res.length > 0) === !!exp[1] ? "ok" : "bad") : "");
+      RV.className = "cr-v" + (exp ? ((res.length > 0) === !!exp[1] ? " ok" : " bad") : "");
+      RV.textContent = exp ? ((res.length > 0) === !!exp[1] ? "✓ همان چیزی که انتظار می‌رفت." : "✗ انتظار می‌رفت " + (exp[1] ? "کتاب 7 Habits پیدا شود." : "هیچ کتابی پیدا نشود.")) : "پرسشی خارج از هشت پرسش تست.";
+    }
+    var G = Kit.clear(document.getElementById("grid")), pass = 0;
+    G.appendChild(Kit.el("span", { class: "hd vn" }, "version"));
+    QUERIES.forEach(function (q) { G.appendChild(Kit.el("span", { class: "hd " + (q[1] ? "y" : "n"), title: q[0] }, JSON.stringify(q[0]))); });
+    ["v1", "v2", "v3"].forEach(function (v) { var on = v === ver && phase !== "string";
+      G.appendChild(Kit.el("span", { class: "vn" + (on ? " on" : "") }, (on ? "▶ " : "") + VN[v]));
+      QUERIES.forEach(function (q) { var got = search(CATALOG, q[0], v).length > 0, ok = got === !!q[1]; if (v === ver && ok) pass++;
+        G.appendChild(Kit.el("span", { class: "c " + (ok ? "ok" : "bad") + (on && q[0] === rq ? " row-on" : ""), title: got ? "found" : "none" }, (ok ? "✓ " : "✗ ") + (got ? "found" : "none"))); }); });
+    var st = Kit.clear(document.getElementById("stats"));
+    [["صدا زدن endpoint", "1"], ["نسخه‌ی جست‌وجو", VN[ver].split(" ")[0]], ["پرسش‌های درست", pass + " / 8", pass === 8 ? "ok" : "warn"], ["قالب گرفتن", mode === "json" ? "JSON" : "console.log", mode === "json" ? "ok" : "bad"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
+    ctl.mode.set(mode); ctl.ver.set(ver); document.getElementById("rq").value = rq;
+  }
+  function say() { return document.getElementById(phase === "string" ? "capV" : "repV").textContent; }
+  ctl.mode = Kit.segmented({ label: "گرفتن رشته‌ها با", value: mode, options: [{ value: "log", label: "console.log" }, { value: "json", label: "JSON.stringify" }], onChange: function (x) { mode = x; phase = "string"; focus = "cap"; render(); tour.free(say(), ""); } });
+  document.getElementById("modeC").appendChild(ctl.mode.element);
+  ctl.ver = Kit.segmented({ label: "نسخه‌ی جست‌وجو در REPL", value: ver, options: [{ value: "v1", label: "۱۵.۸" }, { value: "v2", label: "۱۵.۱۲" }, { value: "v3", label: "۱۵.۲۴" }], onChange: function (x) { ver = x; phase = "search"; focus = "rep"; render(); tour.free(say(), ""); } });
+  document.getElementById("verC").appendChild(ctl.ver.element);
+  document.getElementById("rq").addEventListener("input", function (e) { rq = e.target.value; phase = "search"; focus = "rep"; render(); tour.free(say(), ""); });
+
+  /* ---------- the scenario ---------- */
+  function at(ph, m, v, q, f) { return function () { phase = ph; mode = m; ver = v; rq = q; focus = f; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at("search", "json", "v3", "7 Habit", ""), render: render, interval: 8000,
+    intro: "راست چیزی است که هنگام صدا زدن endpoint گرفته می‌شود، چپ REPL است که همان فراخوانی را بدون سیستم زنده تکرار می‌کند. پایین هشت پرسش تست روی سه نسخه‌ی جست‌وجوست.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، query دیگری در REPL بنویسید یا نسخه‌ی جست‌وجو را عوض کنید.",
+    steps: [
+      { kind: "bad", run: at("string", "log", "v1", "Habit", "cap"), say: "در DOP context تابع همان مقدار آرگومان‌هاست (ص. ۳۱۳). دیو آرگومان‌های رشته‌ای را با console.log می‌گیرد (listing ۱۵.۴)، ولی گیومه‌ها و backslashها در خروجی نیستند و متن را نمی‌شود مستقیم در REPL چسباند (ص. ۳۱۷)." },
+      { kind: "ok", run: at("string", "json", "v1", "Habit", "rep"), say: "با JSON.stringify خروجی یک literal معتبر است (listingهای ۱۵.۶ و ۱۵.۷). دو شرط reproducibility همین‌هاست: immutability و serialize و deserialize آسان (ص. ۳۱۴)." },
+      { kind: "", run: at("search", "json", "v1", "Watch", "cap"), say: "دیو آرگومان‌های searchBooksByTitle را هم با JSON می‌گیرد و endpoint را یک بار با «Watch» صدا می‌زند (listingهای ۱۵.۸ و ۱۵.۹). catalog تودرتو هم به همان سادگی گرفته می‌شود." },
+      { kind: "bad", run: at("search", "json", "v1", "Habit", "rep"), say: "در REPL همان catalog را می‌چسباند و «Habit» را امتحان می‌کند (listing ۱۵.۱۰ و ۱۵.۱۱): نسخه‌ی startsWith روی کل عنوان هیچ چیز پیدا نمی‌کند." },
+      { kind: "ok", run: at("search", "json", "v2", "Habit", "rep"), say: "نسخه‌ی ۱۵.۱۲ پیشوند هر واژه را بررسی می‌کند و «Habit» پیدا می‌شود (listing ۱۵.۱۳). تئو می‌گوید برای تست endpoint را صدا نزن؛ REPL بازخورد سریع‌تری می‌دهد (ص. ۳۲۰)." },
+      { kind: "bad", run: at("search", "json", "v2", "7 Habit", "rep"), say: "ولی «habit» و «7 Habit» هنوز شکست می‌خورند (ص. ۳۲۱): اولی به خاطر حروف بزرگ و کوچک، دومی چون دو واژه است. ردیف وسط جدول همین را نشان می‌دهد." },
+      { kind: "ok", run: at("search", "json", "v3", "7 Habit", "rep"), say: "نسخه‌ی ۱۵.۲۴ همه‌چیز را حروف کوچک می‌کند و regex مرز واژه (\\b) می‌گذارد. هر هشت پرسش تست درست‌اند و endpoint فقط یک بار صدا زده شد." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "در DOP، برای replay صدا زدن تابعی چه باید گرفته شود؟",

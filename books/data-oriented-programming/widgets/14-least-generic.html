@@ -6,16 +6,40 @@
 <title>کم‌عمومی‌ترین ابزار</title>
 <meta name="description" content="نسخه‌های کتاب را قرض‌رفته یا نرفته کنید و میان versionهای forEach و reduce و countByBoolField از lendingRatio سوئیچ کنید: آن نسبت همان است، ولی منطق کسب‌وکار به معنایش آب می‌رود. تصویری از فصل ۱۴ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; }
-  .items label { display: flex; gap: 8px; align-items: center; font-family: var(--mono); font-size: .8rem; padding: 3px 0; direction: ltr; }
-  #verdict { direction: ltr; text-align: left; }
+<style>
+  .lg-top { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 14px; align-items: center; margin-bottom: 10px; }
+  .lg-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .lg-book { font-size: .74rem; color: var(--ink-3); margin: 0 0 0 4px; align-self: center; }
+  .lg-it { border: 1.5px solid var(--line); border-radius: 4px; padding: 3px 8px; font-family: var(--mono); font-size: .72rem; direction: ltr; background: var(--surface); }
+  .lg-it.lent { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+  .lg-ratio { border: 1.5px solid var(--ok); border-radius: var(--radius-sm); padding: 4px 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .lg-ratio.warn { border-color: var(--warn); }
+  .lg-ratio b { font-size: 1.3rem; font-family: var(--mono); direction: ltr; }
+  .lg-ratio small { color: var(--ink-3); font-size: .76rem; }
+  .lg-vers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .lg-ver { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; background: var(--surface); opacity: .6; }
+  .lg-ver.on { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .lg-ver h3 { margin: 0 0 2px; font-size: .84rem; }
+  .lg-ver .tool { font-size: .74rem; color: var(--ink-3); margin: 0 0 4px; }
+  .lg-code { font-family: var(--mono); font-size: .64rem; line-height: 1.3; direction: ltr; text-align: left; margin: 0; white-space: pre; overflow: hidden; }
+  .lg-code span { display: block; padding-left: 14px; position: relative; }
+  .lg-code span.m { background: var(--warn-soft); }
+  .lg-code span.m::before { content: "⚙"; position: absolute; left: 2px; color: var(--warn); }
+  .lg-code span.b::before { content: "★"; position: absolute; left: 2px; color: var(--ok); }
+  .lg-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 6px; background: var(--surface-2); }
+  .lg-bar i { display: block; }
+  .lg-bar .m { background: repeating-linear-gradient(45deg, var(--warn) 0 3px, var(--warn-soft) 3px 6px); }
+  .lg-bar .b { background: var(--ok); }
+  .lg-cnt { font-size: .72rem; color: var(--ink-3); margin-top: 2px; }
+  .lg-legend { font-size: .74rem; color: var(--ink-3); margin: 6px 0 0; }
+  .lg-test { font-family: var(--mono); font-size: .66rem; direction: ltr; text-align: left; margin: 0; white-space: pre; border: 1px dashed var(--accent); border-radius: var(--radius-sm); padding: 4px 8px; }
+  .tweak-group label.cb { display: flex; gap: 6px; align-items: center; font-size: .8rem; direction: ltr; justify-content: flex-end; font-family: var(--mono); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/14-advanced-data-manipulation.html">فصل ۱۴</a><span aria-hidden="true">/</span>
@@ -26,68 +50,69 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۴ · دست‌کاری پیشرفته‌ی داده</div>
-  <h1>کم‌عمومی‌ترین ابزار</h1>
-  <p class="lede">سه version از <code>lendingRatio</code> همان یک عدد را حساب می‌کنند. تابع <code>forEach</code> چاقویی سوئیسی است؛ تابع <code>reduce</code> باریک‌تر است ولی هنوز سطح‌پایین؛ و <code>countByBoolField</code> پیچ‌گوشتی‌ای است که می‌گوید چه می‌کند. سر <em>به کار بردن</em> ابزاری سودمندی، کم‌عمومی‌ترین را برگزینید که مسئله را حل می‌کند.</p>
-  <p class="source-note">تصویری از بخش ۱۴.۳ (listingهای ۱۴.۱۰ تا ۱۴.۱۵، صص. ۳۰۱–۳۰۵): آن دو کتاب با نسخه‌های تودرتو، سه version <code>lendingRatio</code>، تست unit از <code>countByBoolField</code> و پیاده‌سازی‌اش با <code>update</code>. نسخه‌های افزوده مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>کم‌عمومی‌ترین ابزار</h1>
+      <p class="lede">سه نسخه از <code>lendingRatio</code> یک عدد را حساب می‌کنند. <code>forEach</code> مثل چاقوی سوئیسی است، <code>reduce</code> محدودتر است ولی هنوز سطح پایین، و <code>countByBoolField</code> مثل پیچ‌گوشتی است: اسمش می‌گوید چه می‌کند. <strong>همیشه کم‌عمومی‌ترین ابزاری را بردارید که مسئله را حل می‌کند.</strong></p>
+      <p class="source-note">تصویری از بخش ۱۴.۳ (listingهای ۱۴.۱۰ تا ۱۴.۱۵، صص. ۳۰۱–۳۰۵): دو کتاب با نسخه‌های تودرتو، سه نسخه‌ی <code>lendingRatio</code>، تست unit <code>countByBoolField</code> و پیاده‌سازی‌اش با <code>update</code>. برچسب خط‌ها (چگونگی یا منظور)، نسخه‌های اضافه و حالت بدون نسخه از vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">نسخه‌های کتاب (listing ۱۴.۱۰)</p><div class="items" id="items"></div>
-          <button class="btn small" id="add" type="button" style="margin-top:6px">افزودن نسخه‌ی کتاب</button></div>
-        <div class="panel"><p class="panel-title">lendingRatio(books)</p><div class="callout" id="verdict" aria-live="polite"></div>
-          <p class="panel-title" style="margin-top:10px">تست unit (listing ۱۴.۱۴)</p><pre class="code" id="test"></pre></div></div>
-      <div class="panel"><p class="panel-title" id="ct">منطق کسب‌وکار</p><pre class="code" id="code"></pre></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ver"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="lg-top">
+            <div><div class="lg-items" id="items"></div></div>
+            <div class="lg-ratio" id="ratio" aria-live="polite"></div>
+          </div>
+          <div class="lg-vers" id="vers"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این نسخه</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="verC"></div>
+        <div class="tweak-group"><p class="field-head">نسخه‌های کتاب و isLent</p><div id="itemC"></div>
+          <div class="row" style="margin-top:6px"><button class="btn small" id="add" type="button">افزودن نسخه</button><button class="btn small" id="clear" type="button">حذف همه‌ی نسخه‌ها</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>آن خروجی هیچ‌وقت عوض نمی‌شود</strong>: هر سه version قرض‌رفته تقسیم بر قرض‌رفته به‌علاوه‌ی نرفته را برمی‌گردانند. آنچه عوض می‌شود این است که چه اندازه از کد در باب گشتن است و چه اندازه در باب کسب‌وکار.</li>
-    <li><strong>کوچاندن آن شمارنده‌ها به mapی</strong> همان است که می‌گذارد آن <code>reduce</code> پشت تابعی نام‌دار پنهان شود: تابع <code>countByBoolField</code> خودش یک <code>reduce</code> با <code>update</code> است.</li>
-    <li><strong>بی هیچ نسخه‌ی کتابی</strong>، هر versionی ۰ را بر ۰ بخش می‌کند. کتاب نمی‌چرخاندش؛ و widget مقدار <code>NaN</code> از JavaScript را نشان می‌دهد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>خروجی هیچ‌وقت عوض نمی‌شود:</strong> هر سه نسخه تعداد قرض‌رفته‌ها را بر تعداد کل تقسیم می‌کنند. چیزی که عوض می‌شود سهم کدی است که درباره‌ی پیمایش است، نه درباره‌ی کسب‌وکار.</li>
+      <li><strong>جمع کردن شمارنده‌ها در یک map</strong> همان چیزی است که اجازه می‌دهد <code>reduce</code> پشت یک تابع با اسم مشخص پنهان شود؛ <code>countByBoolField</code> خودش یک <code>reduce</code> با <code>update</code> است.</li>
+      <li><strong>از vault:</strong> بدون هیچ نسخه‌ای، هر سه نسخه ۰ را بر ۰ تقسیم می‌کنند و JavaScript مقدار <code>NaN</code> می‌دهد. کتاب این حالت را بررسی نمی‌کند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/14-advanced-data-manipulation.html"><small>درس</small>فصل ۱۴: دست‌کاری پیشرفته‌ی داده</a></li>
-    <li><a href="../lab/14-custom-data-tools/README.md"><small>آزمایش</small>توابع update و flatMap و countByBoolField و unwind به Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/14-advanced-data-manipulation.html"><small>درس</small>فصل ۱۴: دست‌کاری پیشرفته‌ی داده</a></li>
+      <li><a href="../lab/14-custom-data-tools/README.md"><small>آزمایش</small>توابع update و flatMap و countByBoolField و unwind به Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-var BOOKS = [
+  var BOOKS = [
     { isbn: "978-1779501127", title: "Watchmen", bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }] },
     { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", bookItems: [
       { id: "book-item-123", libId: "hudson-park-lib", isLent: true }, { id: "book-item-17", libId: "nyc-central-lib", isLent: false }] }];
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
-  function flatMap(coll, f) { return [].concat.apply([], coll.map(typeof f === "string" ? function (x) { return x[f]; } : f)); }
-
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), books = clone(BOOKS), ver = "count", nextId = 200;
-  var CODE = {
-    forEach: "function lendingRatio(books) {\n  var bookItems = flatMap(books, \"bookItems\");\n  var lent = 0;\n  var notLent = 0;\n  _.forEach(bookItems, function(item) {\n    if(_.get(item, \"isLent\")) {\n      lent = lent + 1;\n    } else {\n      notLent = notLent + 1;\n    }\n  });\n  return lent/(lent + notLent);\n}",
-    reduce: "function lendingRatio(books) {\n  var bookItems = flatMap(books, \"bookItems\");\n  var stats = _.reduce(bookItems, function(res, item) {\n    if(_.get(item, \"isLent\")) {\n      res.lent = res.lent + 1;\n    } else {\n      res.notLent = res.notLent + 1;\n    }\n    return res;\n  }, {notLent: 0, lent:0});\n  return stats.lent/(stats.lent + stats.notLent);\n}",
-    count: "function lendingRatio(books) {\n  var bookItems = flatMap(books, \"bookItems\");\n  var stats = countByBoolField(bookItems, \"isLent\", \"lent\", \"notLent\");\n  return stats.lent/(stats.lent + stats.notLent);\n}\n\n// the utility, written once (listing 14.15)\nfunction countByBoolField(coll, field, keyTrue, keyFalse) {\n  return _.reduce(coll, function(res, item) {\n    if (_.get(item, field)) {\n      return update(res, keyTrue, inc);\n    }\n    return update(res, keyFalse, inc);\n  }, {[keyTrue]: 0, [keyFalse]: 0});\n}" };
+  function flatMap(coll, f) { return [].concat.apply([], coll.map(function (x) { return x[f]; })); }
   function update(map, key, fun) { var r = Object.assign({}, map); r[key] = fun(map[key]); return r; }
   function inc(n) { return n + 1; }
   function countByBoolField(coll, field, kT, kF) { var init = {}; init[kT] = 0; init[kF] = 0; return coll.reduce(function (res, item) { return item[field] ? update(res, kT, inc) : update(res, kF, inc); }, init); }
@@ -95,22 +120,68 @@ var BOOKS = [
     forEach: function (bs) { var items = flatMap(bs, "bookItems"), lent = 0, notLent = 0; items.forEach(function (it) { if (it.isLent) lent = lent + 1; else notLent = notLent + 1; }); return lent / (lent + notLent); },
     reduce: function (bs) { var s = flatMap(bs, "bookItems").reduce(function (res, it) { if (it.isLent) res.lent = res.lent + 1; else res.notLent = res.notLent + 1; return res; }, { notLent: 0, lent: 0 }); return s.lent / (s.lent + s.notLent); },
     count: function (bs) { var s = countByBoolField(flatMap(bs, "bookItems"), "isLent", "lent", "notLent"); return s.lent / (s.lent + s.notLent); } };
-  function drawItems() { var box = Kit.clear(document.getElementById("items"));
-    books.forEach(function (b, bi) { box.appendChild(Kit.el("p", { class: "field-hint", style: "margin:6px 0 0" }, b.title));
-      b.bookItems.forEach(function (it, ii) { var cb = Kit.el("input", { type: "checkbox" }); cb.checked = it.isLent;
-        cb.addEventListener("change", function () { books[bi].bookItems[ii].isLent = cb.checked; log.add("نسخه‌ی " + it.id + (cb.checked ? " قرض رفت" : " برگشت") + ".", "muted"); render(); });
-        box.appendChild(Kit.el("label", null, [cb, it.id + " @ " + it.libId + " — isLent"])); }); }); }
-  function render() { var items = flatMap(books, "bookItems"), lent = items.filter(function (i) { return i.isLent; }).length, r = IMPL[ver](books), same = [IMPL.forEach(books), IMPL.reduce(books), IMPL.count(books)].every(function (x) { return String(x) === String(r); });
-    var v = document.getElementById("verdict"); v.className = "callout " + (isNaN(r) ? "warn" : "ok");
-    v.textContent = "→ " + (isNaN(r) ? "NaN (0 ÷ 0)" : r.toFixed(4) + " (" + lent + " / " + items.length + " lent)") + (same ? " — all three versions agree" : " — versions disagree!");
-    var lines = CODE[ver].split("\n"), bl = ver === "count" ? 5 : lines.length;
-    document.getElementById("code").textContent = CODE[ver];
-    document.getElementById("ct").textContent = { forEach: "نمونه‌ی ۱۴.۱۱: با forEach", reduce: "نمونه‌ی ۱۴.۱۲: با reduce", count: "نمونه‌ی ۱۴.۱۳: با countByBoolField" }[ver];
-    document.getElementById("test").textContent = "countByBoolField(\n  [{\"a\": true}, {\"a\": true}, {\"a\": true}, {\"a\": false}],\n  \"a\", \"aTrue\", \"aFalse\")\n// → " + JSON.stringify(countByBoolField([{ a: true }, { a: true }, { a: true }, { a: false }], "a", "aTrue", "aFalse"));
-    stats([["قرض‌رفته", lent], ["قرض‌نرفته", items.length - lent], ["نسبت", isNaN(r) ? "NaN" : r.toFixed(3)], ["خط‌های منطق کسب‌وکار", bl, ver === "count" ? "ok" : ""]]); }
-  document.getElementById("ver").appendChild(Kit.segmented({ label: "version", value: ver, options: [{ value: "forEach", label: "forEach" }, { value: "reduce", label: "reduce" }, { value: "count", label: "countByBoolField" }], onChange: function (v) { ver = v; render(); log.add("سوئیچ به version " + v + "؛ همان خروجی.", "ok"); } }).element);
-  document.getElementById("add").addEventListener("click", function () { var id = "book-item-" + (nextId++); books[0].bookItems.push({ id: id, libId: "nyc-central-lib", isLent: false }); log.add("نسخه‌ی " + id + " به Watchmen افزوده شد، قرض‌نرفته.", "muted"); drawItems(); render(); });
-  drawItems(); render();
+  // [line, kind]: "" frame, "m" mechanics, "b" business intent
+  var CODE = {
+    forEach: [["function lendingRatio(books) {", ""], ["  var bookItems = flatMap(books, \"bookItems\");", "b"], ["  var lent = 0;", "m"], ["  var notLent = 0;", "m"], ["  _.forEach(bookItems, function(item) {", "m"], ["    if(_.get(item, \"isLent\")) {", "b"], ["      lent = lent + 1;", "m"], ["    } else {", "m"], ["      notLent = notLent + 1;", "m"], ["    }", "m"], ["  });", "m"], ["  return lent/(lent + notLent);", "b"], ["}", ""]],
+    reduce: [["function lendingRatio(books) {", ""], ["  var bookItems = flatMap(books, \"bookItems\");", "b"], ["  var stats = _.reduce(bookItems,", "m"], ["    function(res, item) {", "m"], ["    if(_.get(item, \"isLent\")) {", "b"], ["      res.lent = res.lent + 1;", "m"], ["    } else {", "m"], ["      res.notLent = res.notLent + 1;", "m"], ["    }", "m"], ["    return res;", "m"], ["  }, {notLent: 0, lent: 0});", "m"], ["  return stats.lent/", "b"], ["    (stats.lent + stats.notLent);", "b"], ["}", ""]],
+    count: [["function lendingRatio(books) {", ""], ["  var bookItems = flatMap(books, \"bookItems\");", "b"], ["  var stats = countByBoolField(", "b"], ["    bookItems, \"isLent\", \"lent\", \"notLent\");", "b"], ["  return stats.lent/", "b"], ["    (stats.lent + stats.notLent);", "b"], ["}", ""]] };
+  var META = { forEach: ["با forEach", "نمونه‌ی listing ۱۴.۱۱ · چاقوی سوئیسی"], reduce: ["با reduce", "نمونه‌ی listing ۱۴.۱۲ · محدودتر، هنوز سطح پایین"], count: ["با countByBoolField", "نمونه‌ی listing ۱۴.۱۳ · پیچ‌گوشتی"] };
+  var books = clone(BOOKS), ver = "count", showTest = false, nextId = 200, tour, ctl = {};
+  function cnt(v) { var m = 0, b = 0; CODE[v].forEach(function (l) { if (l[1] === "m") m++; if (l[1] === "b") b++; }); return [m, b]; }
+  function drawItemCtl() { var box = Kit.clear(document.getElementById("itemC"));
+    books.forEach(function (b, bi) { b.bookItems.forEach(function (it, ii) { var cb = Kit.el("input", { type: "checkbox" }); cb.checked = it.isLent;
+      cb.addEventListener("change", function () { books[bi].bookItems[ii].isLent = cb.checked; render(); tour.free(say(), ""); });
+      box.appendChild(Kit.el("label", { class: "cb" }, it.id + " isLent", cb)); }); }); }
+  function render() {
+    var items = flatMap(books, "bookItems"), lent = items.filter(function (i) { return i.isLent; }).length, r = IMPL[ver](books);
+    var all = [IMPL.forEach(books), IMPL.reduce(books), IMPL.count(books)], same = all.every(function (x) { return String(x) === String(r); });
+    var I = Kit.clear(document.getElementById("items"));
+    books.forEach(function (b) { I.appendChild(Kit.el("p", { class: "lg-book" }, "کتاب " + b.title + ":"));
+      if (!b.bookItems.length) I.appendChild(Kit.el("span", { class: "lg-it" }, "[]"));
+      b.bookItems.forEach(function (it) { I.appendChild(Kit.el("span", { class: "lg-it mono" + (it.isLent ? " lent" : "") }, (it.isLent ? "● " : "○ ") + it.id + (it.isLent ? " lent" : ""))); }); });
+    var R = Kit.clear(document.getElementById("ratio")); R.className = "lg-ratio" + (isNaN(r) ? " warn" : "");
+    R.appendChild(Kit.el("small", {}, "خروجی lendingRatio(books)"));
+    R.appendChild(Kit.el("b", { class: "mono" }, isNaN(r) ? "NaN" : r.toFixed(3)));
+    R.appendChild(Kit.el("small", { class: "mono", style: "direction:ltr" }, lent + " / " + items.length + " lent"));
+    R.appendChild(Kit.el("small", {}, same ? "✓ هر سه نسخه همین عدد را می‌دهند" : "✗ نسخه‌ها فرق دارند"));
+    if (showTest) { var t = countByBoolField([{ a: true }, { a: false }, { a: true }, { a: true }], "a", "aTrue", "aFalse"); Kit.clear(R); R.className = "lg-ratio"; R.style.border = "0"; R.style.padding = "0";
+      R.appendChild(Kit.el("pre", { class: "lg-test" }, "// listing 14.14\ncountByBoolField([{a:true},{a:false},{a:true},{a:true}],\n  \"a\", \"aTrue\", \"aFalse\")  // → " + JSON.stringify(t) + "\n// listing 14.15: _.reduce + update(res, key, inc)")); } else { R.style.border = ""; R.style.padding = ""; }
+    var V = Kit.clear(document.getElementById("vers"));
+    ["forEach", "reduce", "count"].forEach(function (k) { var c = cnt(k), tot = c[0] + c[1];
+      var pre = Kit.el("pre", { class: "lg-code" }); CODE[k].forEach(function (l) { pre.appendChild(Kit.el("span", { class: l[1] }, l[0])); });
+      var card = Kit.el("div", { class: "lg-ver" + (k === ver ? " on" : "") }, Kit.el("h3", {}, (k === ver ? "▶ " : "") + META[k][0]), Kit.el("p", { class: "tool" }, META[k][1] + " · ⚙ " + c[0] + " · ★ " + c[1]), pre,
+        Kit.el("div", { class: "lg-bar", "aria-hidden": "true" }, Kit.el("i", { class: "m", style: "width:" + (c[0] / tot * 100) + "%" }), Kit.el("i", { class: "b", style: "width:" + (c[1] / tot * 100) + "%" })));
+      V.appendChild(card); });
+    var c = cnt(ver), st = Kit.clear(document.getElementById("stats"));
+    [["قرض‌رفته", String(lent)], ["قرض‌نرفته", String(items.length - lent)], ["نسبت", isNaN(r) ? "NaN" : r.toFixed(3), isNaN(r) ? "warn" : "ok"], ["خط‌های چگونگی", String(c[0]), c[0] ? "warn" : "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, x[1]))); });
+    ctl.ver.set(ver);
+  }
+  function say() { var r = IMPL[ver](books); return isNaN(r) ? "هیچ نسخه‌ای نیست: هر سه نسخه ۰ را بر ۰ تقسیم می‌کنند و NaN می‌دهند." : "نسبت " + Kit.digits(r.toFixed(3)) + " است و هر سه نسخه همین را می‌دهند."; }
+  ctl.ver = Kit.segmented({ label: "نسخه‌ی lendingRatio", value: ver, options: [{ value: "forEach", label: "forEach" }, { value: "reduce", label: "reduce" }, { value: "count", label: "countByBoolField" }], onChange: function (x) { ver = x; render(); tour.free(say(), ""); } });
+  document.getElementById("verC").appendChild(ctl.ver.element);
+  document.getElementById("add").addEventListener("click", function () { books[0].bookItems.push({ id: "book-item-" + (nextId++), libId: "nyc-central-lib", isLent: false }); drawItemCtl(); render(); tour.free(say(), ""); });
+  document.getElementById("clear").addEventListener("click", function () { books.forEach(function (b) { b.bookItems = []; }); drawItemCtl(); render(); tour.free(say(), ""); });
+
+  /* ---------- the scenario ---------- */
+  function at(v, opts) { return function () { ver = v; opts = opts || {}; showTest = !!opts.test; books = clone(BOOKS);
+    if (opts.extra) { books[0].bookItems.push({ id: "book-item-200", libId: "nyc-central-lib", isLent: true }, { id: "book-item-201", libId: "nyc-central-lib", isLent: false }); books[1].bookItems[1].isLent = true; }
+    if (opts.empty) books.forEach(function (b) { b.bookItems = []; }); drawItemCtl(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at("count"), render: render, interval: 8000,
+    intro: "بالا نسخه‌های کتاب‌ها و نسبت قرض است. پایین سه نسخه از همان تابع کنار هم‌اند. برچسب‌ها از vault است: ⚙ یعنی خط درباره‌ی چگونگی پیمایش و شمردن است و ★ یعنی درباره‌ی منظور کسب‌وکار.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، isLent نسخه‌ها را عوض کنید یا همه را حذف کنید.",
+    steps: [
+      { kind: "", run: at("forEach"), say: "دو کتاب listing ۱۴.۱۰ سه نسخه دارند و دو تا قرض رفته‌اند. دیو نسبت قرض را اول با forEach می‌نویسد (listing ۱۴.۱۱): دو شمارنده و یک if/else." },
+      { kind: "warn", run: at("forEach"), say: "تئو می‌گوید این کد بیش از حد عمومی است (ص. ۳۰۳). forEach مثل چاقوی سوئیسی است: هر کاری از آن برمی‌آید، پس از روی کد معلوم نیست چه کاری قرار است بکند." },
+      { kind: "warn", run: at("reduce"), say: "نسخه‌ی reduce (listing ۱۴.۱۲) محدودتر است، ولی بیشتر خط‌هایش هنوز درباره‌ی چگونگی شمردن است، نه درباره‌ی کتاب‌ها." },
+      { kind: "ok", run: at("count"), say: "نسخه‌ی countByBoolField (listing ۱۴.۱۳) مثل پیچ‌گوشتی است: اسمش می‌گوید چه می‌کند و reduce پشتش پنهان است. کم‌عمومی‌ترین تابعی را بردارید که مسئله را حل می‌کند." },
+      { kind: "ok", run: at("count", { test: true }), say: "دیو اول تست unit را می‌نویسد (listing ۱۴.۱۴) و بعد countByBoolField را با reduce، update و inc پیاده می‌کند (listing ۱۴.۱۵)." },
+      { kind: "ok", run: at("forEach", { extra: true }), say: "از vault: با دو نسخه‌ی تازه و تغییر isLent، نسبت عوض می‌شود ولی هر سه نسخه باز هم همان عدد را می‌دهند." },
+      { kind: "warn", run: at("count", { empty: true }), say: "از vault: بدون هیچ نسخه‌ای، هر سه نسخه ۰ را بر ۰ تقسیم می‌کنند و NaN می‌دهند. کتاب این حالت را بررسی نمی‌کند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "قاعده‌ی تئو برای برگزیدن تابعی سودمندی سر به کار بردنش چیست؟",

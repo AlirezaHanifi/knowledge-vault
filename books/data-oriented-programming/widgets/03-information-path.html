@@ -6,20 +6,32 @@
 <title>مسیرهای خبر</title>
 <meta name="description" content="در داده‌ی catalog از فصل ۳ کتاب Data-Oriented Programming کلیک‌به‌کلیک بگردید، یا مسیری تایپ کنید، و ببینید getی عمومی چطور کلیدبه‌کلید حلش می‌کند، کلیدهای جاافتاده و index آرایه‌ها هم.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>ul.tree { list-style: none; padding-right: 14px; padding-left: 0; margin: 0; font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: left; } ul.tree li { margin: 1px 0; }
-  .tree .k { color: var(--ink-2); } .tree .v { color: var(--ink); } .tree button.key { font: inherit; background: none; border: 0; padding: 0 2px; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
-  .tree .on > .lbl, .tree .on > button.key { background: var(--accent-soft); outline: 1px solid var(--accent); border-radius: 3px; }
-  .tree .new > .tag, .tree .shared > .tag { font-size: .7rem; border-radius: 3px; padding: 0 4px; margin-right: 4px; }
-  .tree .new > .tag { background: var(--warn-soft); color: var(--ink); border: 1px solid var(--warn); } .tree .shared > .tag { background: var(--ok-soft); color: var(--ink); border: 1px solid var(--ok); }
-  ol.steps { font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: left; } ol.steps li.miss { color: var(--bad); }
-  pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; direction: ltr; text-align: left; }
-  #verdict { direction: ltr; text-align: left; } #path { direction: ltr; text-align: left; }
+<style>
+  /* The catalog tree beside the step-by-step trace of get(catalogData, path). */
+  .ip-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; height: 100%; min-height: 0; }
+  .ip-col { min-height: 0; overflow: auto; }
+  .ip-col h3 { font-size: .88rem; margin: 0 0 6px; }
+  ul.ip-tree { list-style: none; padding-left: 14px; padding-right: 0; margin: 0; font-family: var(--mono); font-size: .78rem; direction: ltr; text-align: left; line-height: 1.38; }
+  #tree { padding-left: 0; }
+  .ip-tree .k { color: var(--ink-2); } .ip-tree .v { color: var(--ink); }
+  .ip-tree button.key { font: inherit; background: none; border: 0; padding: 0 2px; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
+  .ip-tree .on > button.key { background: var(--accent-soft); outline: 1.5px solid var(--accent); border-radius: 3px; font-weight: 700; }
+  .ip-tree .hit > .v { background: var(--ok-soft); outline: 1.5px solid var(--ok); border-radius: 3px; font-weight: 700; }
+  .ip-call { font-family: var(--mono); font-size: .84rem; direction: ltr; text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; margin: 0 0 8px; }
+  ol.ip-steps { font-family: var(--mono); font-size: .82rem; direction: ltr; text-align: left; margin: 0; padding-left: 26px; line-height: 1.7; }
+  ol.ip-steps li.miss { color: var(--bad); font-weight: 700; }
+  ol.ip-steps li.miss::before { content: "✗ "; }
+  .ip-res { margin-top: 8px; font-family: var(--mono); font-size: .9rem; direction: ltr; text-align: left; padding: 8px 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--ok); background: var(--ok-soft); font-weight: 700; }
+  .ip-res.miss { border-color: var(--warn); background: var(--warn-soft); }
+  .ip-note { font-size: .8rem; color: var(--ink-2); margin: 10px 0 0; line-height: 1.6; }
+  #ip-path { width: 100%; font-family: var(--mono); direction: ltr; }
+  .ip-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/03-basic-data-manipulation.html">فصل ۳</a><span aria-hidden="true">/</span>
@@ -30,95 +42,148 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۳ · دست‌کاری پایه‌ی داده</div>
-  <h1>مسیرهای خبر</h1>
-  <p class="lede">در DOP هر تکه خبری یک <strong>مسیر خبر</strong> دارد، مانند مسیر فایلی که نام‌هایش entityهای تودرتوست. یک تابع عمومی، یعنی <code>_.get</code>، هر کدامشان را می‌آورد، چون آن مسیر تنها داده است: می‌توانید در متغیری ذخیره‌اش کنید و این‌ور آن‌ور بفرستیدش.</p>
-  <p class="source-note">تصویری از بخش ۳.۳ (صص. ۵۴–۵۷): رکورد catalog از listing ۳.۵، مسیر تا عنوان Watchmen، تابع `get` دست‌ساز تئو در listing ۳.۷، و مسیرهای قاطی رشته و عدد در شکل ۳.۵. آن رد قدم‌به‌قدم مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مسیرهای خبر</h1>
+      <p class="lede">در DOP هر تکه از اطلاعات یک <strong>مسیر</strong> دارد، مثل مسیر یک فایل که نام‌هایش entityهای تودرتوست. یک تابع عمومی، یعنی <code>_.get</code>، هر کدام را می‌خواند، چون خود مسیر هم داده است: می‌شود آن را در متغیر نگه داشت و جابه‌جا کرد.</p>
+      <p class="source-note">تصویری از بخش ۳.۳ (صص. ۵۴–۵۷): رکورد catalog از listing ۳.۵، مسیر تا عنوان Watchmen، تابع <code>get</code> که تئو خودش می‌نویسد (listing ۳.۷) و مسیرهای ترکیبی رشته و عدد در شکل ۳.۵. ردگیری قدم‌به‌قدم مثل <code>_.get</code> در Lodash رفتار می‌کند و از vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">مقدار catalogData از listing ۳.۵ — روی هر کلیدی کلیک کنید</p><ul class="tree" id="tree"></ul></div>
-      <div class="panel"><p class="panel-title">تابع get(catalogData, path)</p>
-        <label class="field-head" for="path">مسیر، به‌شکل آرایه‌ی JSON</label><input id="path" type="text" style="width:100%;font-family:var(--mono)" spellcheck="false">
-        <ol class="steps" id="steps"></ol><div class="callout" id="verdict"></div>
-        <p class="field-hint">همان مسیر از راه کلاس‌ها، نشانه‌ی نقطه برای عضوها و کروشه برای کلیدهای index و وارد کردن کلاس در Java می‌خواست: کدی ویژه برای هر گونه مسیری (ص. ۵۷).</p></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><p class="panel-title">مسیرهایی از کتاب</p>
-        <button class="btn small" data-p='["booksByIsbn","978-1779501127","title"]' type="button">عنوان Watchmen (ص. ۵۵)</button>
-        <button class="btn small" data-p='["authorsById","alan-moore","bookIsbns",0]' type="button">کتاب نخست آلن مور (شکل ۳.۵)</button>
-        <button class="btn small" data-p='["booksByIsbn","978-1779501127","bookItems",1,"isLent"]' type="button">نسخه‌ی دوم قرض رفته؟</button>
-        <button class="btn small" data-p='["authorsById","dave-chester-gibbons","name"]' type="button">نویسنده‌ای جاافتاده</button></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="ip-wrap">
+          <div class="ip-col">
+            <h3>مقدار catalogData (listing ۳.۵): شاخه‌های بیرون مسیر بسته‌اند؛ روی هر کلید کلیک کنید</h3>
+            <ul class="ip-tree mono" id="tree"></ul>
+          </div>
+          <div class="ip-col">
+            <h3>ردگیری get(catalogData, path)</h3>
+            <p class="ip-call mono" id="call"></p>
+            <ol class="ip-steps mono" id="steps"></ol>
+            <div class="ip-res mono" id="res"></div>
+            <p class="ip-note">با کلاس‌ها همین مسیر یعنی نقطه برای فیلدها، کروشه برای index و import کردن کلاس در Java: برای هر نوع مسیر کد جدا (ص. ۵۷).</p>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">مسیر</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <label class="field-head" for="ip-path">مسیر، به شکل آرایه‌ی JSON (Enter بزنید)</label>
+          <input id="ip-path" type="text" spellcheck="false">
+          <div class="ip-presets">
+            <button class="btn small" data-p='["booksByIsbn","978-1779501127","title"]' type="button">عنوان Watchmen</button>
+            <button class="btn small" data-p='["authorsById","alan-moore","bookIsbns",0]' type="button">اولین کتاب آلن مور</button>
+            <button class="btn small" data-p='["booksByIsbn","978-1779501127","bookItems",1,"isLent"]' type="button">نسخه‌ی دوم امانت است؟</button>
+            <button class="btn small" data-p='["authorsById","dave-chester-gibbons","name"]' type="button">نویسنده‌ی ناموجود</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>هر مسیری رشته و عدد را قاطی می‌کند</strong>: کلید map برای رکوردها و index‌ها، و جایگاه برای آرایه‌ها.</li>
-    <li><strong>کلیدی جاافتاده آن گشت را با <code>undefined</code> تمام می‌کند</strong>، بی انداختن خطا؛ رفتار `_.get` همین است، و Lodash مقداری پیش‌فرض هم می‌پذیرد.</li>
-    <li><strong>آن مسیر مقداری درجه‌یک است.</strong> دکمه‌های سمت چپ تنها آرایه‌اند؛ و همان چند خط کد هر کدامشان را حل می‌کند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>هر مسیر رشته و عدد را با هم دارد:</strong> کلید map برای رکوردها و indexها، و شماره‌ی جایگاه برای آرایه‌ها.</li>
+      <li><strong>کلید ناموجود گشتن را با <code>undefined</code> تمام می‌کند</strong> و خطایی نمی‌دهد. این رفتار <code>_.get</code> در Lodash است؛ نسخه‌ی ساده‌ی تئو (listing ۳.۷) این حالت را نمی‌پوشاند (یادداشت vault).</li>
+      <li><strong>مسیر خودش یک مقدار است.</strong> دکمه‌های مسیر فقط آرایه‌اند و همان چند خط کد همه‌شان را حل می‌کند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/03-basic-data-manipulation.html"><small>درس</small>فصل ۳: دست‌کاری پایه‌ی داده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/03-basic-data-manipulation.html"><small>درس</small>فصل ۳: دست‌کاری پایه‌ی داده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  function catalog() { return {
+  var data = {
     booksByIsbn: {
       "978-1779501127": { isbn: "978-1779501127", title: "Watchmen", publicationYear: 1987, authorIds: ["alan-moore", "dave-gibbons"],
         bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }, { id: "book-item-2", libId: "nyc-central-lib", isLent: false }] } },
-    authorsById: { "alan-moore": { name: "Alan Moore", bookIsbns: ["978-1779501127"] }, "dave-gibbons": { name: "Dave Gibbons", bookIsbns: ["978-1779501127"] } } }; }
+    authorsById: { "alan-moore": { name: "Alan Moore", bookIsbns: ["978-1779501127"] }, "dave-gibbons": { name: "Dave Gibbons", bookIsbns: ["978-1779501127"] } } };
+  var path = [], tour;
+  function k(v) { return Kit.digits(String(v)); }
   function isObj(x) { return x !== null && typeof x === "object"; }
   function fmt(v) { return Array.isArray(v) ? "[…" + v.length + "]" : isObj(v) ? "{…" + Object.keys(v).length + "}" : JSON.stringify(v); }
-
-  var log = Kit.log(document.getElementById("log")), data = catalog(), path = ["booksByIsbn", "978-1779501127", "title"], hits = 0, misses = 0;
   function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+  function get(p, trace) {
+    var cur = data;
+    for (var i = 0; i < p.length; i++) {
+      var has = isObj(cur) && Object.prototype.hasOwnProperty.call(cur, p[i]);
+      trace.push({ key: p[i], ok: has, val: has ? cur[p[i]] : undefined });
+      if (!has) return undefined; cur = cur[p[i]];
+    }
+    return cur;
+  }
   function drawTree() {
     var root = Kit.clear(document.getElementById("tree"));
     (function walk(node, at, ul) {
-      Object.keys(node).forEach(function (k) {
-        var key = Array.isArray(node) ? Number(k) : k, p = at.concat([key]), v = node[k], onPath = same(p, path.slice(0, p.length)) && p.length <= path.length;
-        var b = Kit.el("button", { class: "key", type: "button", "aria-label": "مسیر " + JSON.stringify(p) }, Array.isArray(node) ? String(k) : JSON.stringify(k));
-        b.addEventListener("click", function () { setPath(p); log.add("کلیک روی " + JSON.stringify(p), "muted"); });
-        var li = Kit.el("li", { class: onPath ? "on" : "" }, b, ": ", isObj(v) ? Kit.el("span", { class: "k" }, Array.isArray(v) ? "[" : "{") : Kit.el("span", { class: "v" }, JSON.stringify(v)));
-        if (isObj(v)) { var sub = Kit.el("ul", { class: "tree" }); walk(v, p, sub); li.appendChild(sub); li.appendChild(Kit.el("span", { class: "k" }, Array.isArray(v) ? "]" : "}")); }
-        ul.appendChild(li); });
+      Object.keys(node).forEach(function (key0) {
+        var key = Array.isArray(node) ? Number(key0) : key0, p = at.concat([key]), v = node[key0];
+        var onPath = p.length <= path.length && same(p, path.slice(0, p.length)), end = onPath && p.length === path.length;
+        var b = Kit.el("button", { class: "key", type: "button", "aria-label": "مسیر " + JSON.stringify(p) }, Array.isArray(node) ? String(key0) : JSON.stringify(key0));
+        b.addEventListener("click", function () { path = p; render(); tour.free("مسیر " + JSON.stringify(p) + " → " + result(), ""); });
+        var open = isObj(v) && (onPath || p.length < 2);
+        var li = Kit.el("li", { class: (onPath ? "on" : "") + (end ? " hit" : "") }, b, ": ", open ? Kit.el("span", { class: "k" }, Array.isArray(v) ? "[" : "{") : Kit.el("span", { class: isObj(v) ? "k" : "v" }, isObj(v) ? fmt(v) : JSON.stringify(v)));
+        if (open) { var sub = Kit.el("ul", { class: "ip-tree" }); walk(v, p, sub); li.appendChild(sub); li.appendChild(Kit.el("span", { class: "k" }, Array.isArray(v) ? "]" : "}")); }
+        ul.appendChild(li);
+      });
     })(data, [], root);
   }
-  function get(map, p, trace) { var cur = map; for (var i = 0; i < p.length; i++) { var has = isObj(cur) && Object.prototype.hasOwnProperty.call(cur, p[i]); trace.push({ key: p[i], ok: has, val: has ? cur[p[i]] : undefined }); if (!has) return undefined; cur = cur[p[i]]; } return cur; }
-  function setPath(p) { path = p; document.getElementById("path").value = JSON.stringify(p); run(); }
-  function run() {
-    var tr = [], res = get(data, path, tr), ol = Kit.clear(document.getElementById("steps"));
-    ol.appendChild(Kit.el("li", null, "start at catalogData " + fmt(data)));
+  function result() { var r = get(path, []); return r === undefined ? "undefined" : isObj(r) ? fmt(r) : JSON.stringify(r); }
+  function render() {
+    var tr = [], res = get(path, tr), ol = Kit.clear(document.getElementById("steps"));
+    document.getElementById("call").textContent = "get(catalogData, " + JSON.stringify(path) + ")";
+    ol.appendChild(Kit.el("li", null, "start: catalogData " + fmt(data)));
     tr.forEach(function (s) { ol.appendChild(Kit.el("li", { class: s.ok ? "" : "miss" }, (typeof s.key === "number" ? "[" + s.key + "]" : "." + s.key) + " → " + (s.ok ? fmt(s.val) : "missing: stop"))); });
-    var miss = tr.some(function (s) { return !s.ok; }), v = document.getElementById("verdict");
-    if (miss) misses++; else hits++;
-    v.className = "callout " + (miss ? "warn" : "ok"); v.textContent = "get(catalogData, " + JSON.stringify(path) + ") → " + (res === undefined ? "undefined" : JSON.stringify(res));
-    drawTree(); stats([["درازی مسیر", path.length], ["کلیدهای حل‌شده", tr.filter(function (s) { return s.ok; }).length], ["مسیرهای حل‌شده", hits, "ok"], ["مسیرهای جاافتاده", misses, misses ? "warn" : ""]]);
+    var miss = tr.some(function (s) { return !s.ok; }), r = document.getElementById("res");
+    r.className = "ip-res mono" + (miss ? " miss" : ""); r.textContent = "→ " + result();
+    document.getElementById("ip-path").value = JSON.stringify(path);
+    drawTree();
+    var nums = path.filter(function (x) { return typeof x === "number"; }).length;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["طول مسیر", k(path.length), ""], ["کلیدهای رشته‌ای", k(path.length - nums), ""], ["indexهای عددی", k(nums), ""], ["کلیدهای پیداشده", k(tr.filter(function (s) { return s.ok; }).length) + " از " + k(path.length), miss ? "warn" : "ok"], ["نتیجه", miss ? "undefined" : "پیدا شد", miss ? "warn" : "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
   }
-  document.getElementById("path").addEventListener("change", function (e) { try { var p = JSON.parse(e.target.value); if (!Array.isArray(p)) throw 0; path = p; log.add("تایپ‌شده: " + JSON.stringify(p), "muted"); run(); } catch (x) { log.add("هر مسیری آرایه‌ای JSON است، مانند [\"authorsById\", \"alan-moore\", \"name\"].", "bad"); } });
-  Array.prototype.forEach.call(document.querySelectorAll("[data-p]"), function (b) { b.addEventListener("click", function () { setPath(JSON.parse(b.getAttribute("data-p"))); log.add(b.textContent + ": " + b.getAttribute("data-p"), "ok"); }); });
-  setPath(path);
+  document.getElementById("ip-path").addEventListener("change", function (e) {
+    try { var p = JSON.parse(e.target.value); if (!Array.isArray(p)) throw 0; path = p; render(); tour.free("مسیر تایپ‌شده → " + result(), ""); }
+    catch (x) { render(); tour.free("مسیر باید آرایه‌ی JSON باشد، مثل [\"authorsById\", \"alan-moore\", \"name\"].", "bad"); }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-p]"), function (b) {
+    b.addEventListener("click", function () { path = JSON.parse(b.getAttribute("data-p")); render(); tour.free(b.textContent + " → " + result(), get(path, []) === undefined ? "warn" : "ok"); });
+  });
+
+  /* ---------- the scenario ---------- */
+  function at(p) { return function () { path = p; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(["booksByIsbn", "978-1779501127", "title"]), render: render, interval: 7500,
+    intro: "سمت راست رکورد catalog است و سمت چپ قدم‌های تابع get. کلیدهای مسیر در درخت قاب می‌خورند و مقدار پایانی سبز می‌شود.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید یا روی هر کلید درخت کلیک کنید تا مسیرش ساخته شود.",
+    steps: [
+      { kind: "ok", run: at(["booksByIsbn", "978-1779501127", "title"]), say: function () { return "عنوان Watchmen: سه کلید رشته‌ای از ریشه تا مقدار، و get نتیجه را می‌دهد: " + result() + " (ص. ۵۵)."; } },
+      { kind: "ok", run: at(["authorsById", "alan-moore", "bookIsbns", 0]), say: function () { return "مسیر می‌تواند رشته و عدد را با هم داشته باشد: سه کلید map و بعد index صفر یک آرایه، که شابک اولین کتاب را می‌دهد (شکل ۳.۵)."; } },
+      { kind: "ok", run: at(["booksByIsbn", "978-1779501127", "bookItems", 1, "isLent"]), say: function () { return "نسخه‌ی دوم Watchmen امانت است؟ پنج قدم و جواب " + result() + ". همان چند خط کد get، هر عمقی را می‌خواند (listing ۳.۷)."; } },
+      { kind: "warn", run: at(["authorsById", "dave-chester-gibbons", "name"]), say: "کلید ناموجود: _.get در Lodash گشتن را در قدم دوم متوقف می‌کند و undefined برمی‌گرداند. نسخه‌ی ساده‌ی تئو در listing ۳.۷ (ص. ۵۶) این‌جا خطا می‌دهد، چون روی undefined کلید می‌خواند. این مقایسه از vault است." },
+      { kind: "ok", run: at(["authorsById", "dave-gibbons", "name"]), say: function () { return "مسیر فقط یک آرایه است؛ می‌شود آن را در متغیر نگه داشت و به تابع داد. با کلاس‌ها، هر نوع مسیر کد خودش را می‌خواست (ص. ۵۷). نتیجه: " + result() + "."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "مسیر خبر تا عنوان Watchmen در آن catalog چیست؟",
