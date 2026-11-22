@@ -7,23 +7,34 @@
 <meta name="description" content="leader شش process رتبه‌دار را از کار بیندازید، بردارید که چه کسی می‌بیند، و پیام‌های Election و Alive و Elected الگوریتم Bully را قدم‌به‌قدم بگذرانید؛ به failover نفر بعدی عوض کنید، یا cluster را پارتیشن کنید تا split brain را ببینید. تصویری از فصل ۱۰ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .ring svg { width: 100%; height: auto; max-width: 460px; display: block; margin: 0 auto; }
   .ring { direction: ltr; }
+  .ring svg { width: 100%; height: auto; max-height: 300px; display: block; margin: 0 auto; }
   .ring circle { fill: var(--surface); stroke: var(--line-strong); stroke-width: 2; }
-  .ring .leader circle { stroke: var(--accent); stroke-width: 4; }
-  .ring .down circle { stroke-dasharray: 4 3; opacity: .5; }
-  .ring text { font-family: var(--mono); font-size: 14px; fill: var(--ink); }
-  .ring .lab { font-size: 11px; fill: var(--ink-3); }
-  .ring .msg { stroke: var(--accent); stroke-width: 2; marker-end: url(#arr); }
-  .ring .msg.alive { stroke: var(--ok); } .ring .msg.elected { stroke: var(--warn); } .ring .msg.lost { stroke: var(--bad); stroke-dasharray: 4 3; }
-  .ring .part { stroke: var(--bad); stroke-width: 2; stroke-dasharray: 8 5; }
+  .ring .leader circle { stroke: var(--accent); stroke-width: 5; fill: var(--accent-soft); }
+  .ring .down circle { stroke-dasharray: 4 3; opacity: .45; }
+  .ring .me circle { stroke: var(--warn); stroke-width: 4; }
+  .ring text { font-family: var(--mono); font-size: 16px; font-weight: 700; fill: var(--ink); }
+  .ring .lab { font-size: 12px; font-weight: 600; fill: var(--ink-3); }
+  .ring .msg { stroke: var(--accent); stroke-width: 2.5; marker-end: url(#arr); }
+  .ring .msg.alive { stroke: var(--ok); } .ring .msg.elected { stroke: var(--warn); } .ring .msg.lost { stroke: var(--bad); stroke-dasharray: 5 4; }
+  .ring .mlab { font-size: 11px; font-weight: 700; fill: var(--ink-2); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+  .ring .part { stroke: var(--bad); stroke-width: 2.5; stroke-dasharray: 9 6; }
   .ring marker path { fill: var(--ink-3); }
+  .wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: .88rem; }
+  .steps li { padding: 5px 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); color: var(--ink-3); line-height: 1.6; }
+  .steps li.done { color: var(--ink); }
+  .steps li.cur { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+  .steps li.bad { border-color: var(--bad); background: var(--bad-soft); color: var(--ink); font-weight: 700; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .8rem; color: var(--ink-3); margin-top: 6px; }
+  .legend i { display: inline-block; width: 18px; height: 0; border-top: 3px solid; vertical-align: middle; margin-inline-end: 4px; }
+  .tweak-group .row { display: flex; gap: 12px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/10-leader-election.html">فصل ۱۰</a><span aria-hidden="true">/</span>
@@ -34,132 +45,159 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۰ · انتخاب leader</div>
-  <h1>انتخاب Bully و فهرست failover و split brain</h1>
-  <p class="lede">در <strong>الگوریتم Bully</strong> بالاترین‌رتبه‌ی زنده leader می‌شود. processی که ببیند leader رفته پیام <strong>Election</strong> را به هر process رتبه‌بالاتری می‌فرستد. اگر هر کدام پاسخ <strong>Alive</strong> بدهند، به بالاترینشان تحویل می‌دهد، که با <strong>Elected</strong> خودش را به همه‌ی processهای رتبه‌پایین‌تر اعلام می‌کند. <strong>failover نفر بعدی</strong> از آن دور می‌پرد: آن leader قدیم فهرستی از جانشین‌ها منتشر کرده بود، و نخستین زنده تحویل می‌گیرد. بی نیازمندی اکثریت، <strong>پارتیشنی</strong> می‌گذارد هر سویی leader خودش را انتخاب کند.</p>
-  <p class="source-note">تصویری از «الگوریتم Bully» و «failover نفر بعدی» (صص. ۲۰۷–۲۰۹، شکل‌های ۱۰-۱ و ۱۰-۲)، و مسئله‌ی split brain (ص. ۲۰۸). آن شش process و فهرست failover یعنی {5, 4} و آن پارتیشن صحنه‌ی vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>الگوریتم Bully، next-in-line failover و split brain</h1>
+      <p class="lede">در <strong>الگوریتم Bully</strong> زنده‌ترین process با بالاترین rank leader می‌شود. processی که نبودِ leader را ببیند پیام <strong>Election</strong> را به همه‌ی rankهای بالاتر می‌فرستد؛ اگر کسی <strong>Alive</strong> جواب بدهد، کار را به بالاترینِ آن‌ها می‌سپارد که با <strong>Elected</strong> خودش را به rankهای پایین‌تر اعلام می‌کند. <strong>next-in-line failover</strong> این دور را کوتاه می‌کند: leader قبلی فهرست جانشین‌ها را منتشر کرده است. بدون شرط اکثریت، <strong>partition</strong> باعث می‌شود هر طرف leader خودش را انتخاب کند.</p>
+      <p class="source-note">تصویری از «Bully Algorithm» و «Next-In-Line Failover» (صص. ۲۰۷–۲۰۹، شکل‌های ۱۰-۱ و ۱۰-۲) و مسئله‌ی split brain (ص. ۲۰۸). شش process، leader ۶ و فهرست جانشین {5, 4} همان مثال کتاب است؛ حالت‌های «۵ هم از کار افتاده» و partition صحنه‌ی vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel ring"><div id="ring" role="img"></div>
-        <p class="field-hint">حلقه‌ی کلفت leaderی را علامت می‌زند؛ و نود خط‌چین خواب است. فلش‌ها پیام‌های این قدم را نشان می‌دهند: Election و Alive و Elected؛ و فلش سرخ خط‌چین پاسخی نمی‌گیرد.</p></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="var"></div><div id="who" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px"><label class="field" style="margin:0"><input type="checkbox" id="also5"> process ۵ هم خواب است</label></div>
-        <div class="row" style="margin-top:6px"><label class="field" style="margin:0"><input type="checkbox" id="part"> پارتیشن {1, 2, 3} و {4, 5, 6} به‌جای از کار افتادن ۶</label></div>
-        <div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="wrap">
+          <div class="ring"><div id="ring" role="img"></div>
+            <div class="legend"><span><i style="border-color:var(--accent)"></i>Election</span><span><i style="border-color:var(--ok)"></i>Alive</span><span><i style="border-color:var(--warn)"></i>Elected</span><span><i style="border-color:var(--bad);border-top-style:dashed"></i>بی‌پاسخ</span></div></div>
+          <ol class="steps" id="steps" aria-live="polite"></ol>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="varC"></div>
+        <div class="tweak-group" id="whoC"></div>
+        <div class="tweak-group"><div class="row">
+          <label class="field" style="margin:0"><input type="checkbox" id="also5"> ۵ هم از کار افتاده است</label>
+          <label class="field" style="margin:0"><input type="checkbox" id="part"> partition {1, 2, 3} | {4, 5, 6} به‌جای از کار افتادن ۶</label></div></div>
+        <div class="tweak-group"><div class="row"><button class="btn small" type="button" id="back">‹ قدم قبل</button><button class="btn small primary" type="button" id="fwd">قدم بعد ›</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>این‌که چه کسی می‌بیند مهم است.</strong> اگر process ۱ ببیند، پیام Election را به پنج process می‌فرستد؛ و اگر ۵ ببیند، ساده خودش را اعلام می‌کند. شمار پیام هم‌پا عوض می‌شود.</li>
-    <li><strong>failover نفر بعدی</strong> جای دوری کامل را با یک درخواست به نخستین جانشین فهرست leader قدیم می‌گیرد، و اگر آن یکی خواب باشد به جانشین بعدی برمی‌گردد.</li>
-    <li><strong>cluster را پارتیشن کنید.</strong> process ۶ زنده است ولی از {1, 2, 3} دست‌نیافتنی؛ آن سو ۳ را انتخاب می‌کند در حالی که ۶ همین‌طور {4, 5, 6} را leadership می‌کند: یک split brain.</li>
-    <li><strong>بی اکثریت، بی ایمنی.</strong> هیچ‌کدام از این الگوریتم‌ها نمی‌سنجند که برنده می‌تواند به بیشتر cluster برسد یا نه، که همان چیزی است که پروتکل‌های consensus می‌افزایند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>اینکه چه کسی اول متوجه شود مهم است.</strong> اگر ۱ متوجه شود، Election را به پنج process می‌فرستد؛ اگر ۵ متوجه شود، تقریباً بلافاصله خودش را اعلام می‌کند. تعداد پیام‌ها همراه آن عوض می‌شود.</li>
+      <li><strong>next-in-line failover</strong> به‌جای یک دور کامل، فقط از بالاترین جانشین فهرست leader قبلی می‌پرسد و اگر او هم از کار افتاده باشد سراغ نفر بعدی می‌رود (صص. ۲۰۸–۲۰۹).</li>
+      <li><strong>cluster را partition کنید.</strong> ۶ زنده است ولی از {1, 2, 3} در دسترس نیست؛ آن طرف ۳ را انتخاب می‌کند و ۶ همچنان leader {4, 5, 6} است: split brain (ص. ۲۰۸).</li>
+      <li><strong>بدون اکثریت، ایمنی نیست.</strong> هیچ‌کدام از این الگوریتم‌ها بررسی نمی‌کنند که برنده به بیشترِ cluster دسترسی دارد؛ این همان چیزی است که پروتکل‌های consensus اضافه می‌کنند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/10-leader-election.html"><small>درس</small>فصل ۱۰: انتخاب leader</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/10-leader-election.html"><small>درس</small>فصل ۱۰: انتخاب leader</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var P = [1, 2, 3, 4, 5, 6], cfg = { variant: "bully", who: 3, also5: false, part: false }, steps, k, down, leaders, msgs;
-  function reach(a, b) { if (down[a] || down[b]) return false; if (!cfg.part) return true; var L = function (x) { return x <= 3; }; return L(a) === L(b); }
+  var PR = [1, 2, 3, 4, 5, 6], view = { variant: "bully", who: 3, also5: false, part: false, k: 99 }, tour, ctl = {}, steps, down, msg, kind;
+  function reach(a, b) { if (down[a] || down[b]) return false; if (!view.part) return true; return (a <= 3) === (b <= 3); }
   function plan() {
-    steps = []; down = {}; leaders = cfg.part ? [6] : [];
-    if (!cfg.part) down[6] = true; if (cfg.also5) down[5] = true;
-    var p = cfg.who;
-    if (down[p]) p = 1;
-    if (cfg.part && p > 3) p = 3;
-    steps.push({ text: cfg.part ? "پارتیشن: process " + p + " دیگر نمی‌تواند به leader یعنی ۶ برسد" : "leader یعنی ۶ از کار می‌افتد؛ و " + p + " می‌بیند", m: [] });
-    if (cfg.variant === "failover") {
+    steps = []; down = {};
+    if (!view.part) down[6] = true; if (view.also5) down[5] = true;
+    var p = view.who; if (down[p]) p = 1; if (view.part && p > 3) p = 3; view.p = p;
+    steps.push({ text: view.part ? "partition: " + p + " دیگر به leader (۶) دسترسی ندارد" : "leader (۶) از کار افتاد و " + p + " متوجه شد", m: [] });
+    if (view.variant === "failover") {
       var alts = [5, 4], winner = null;
       for (var i = 0; i < alts.length; i++) {
         var a = alts[i];
-        if (a === p) { winner = p; steps.push({ text: "process " + p + " بالاترین جانشین زنده‌ی فهرست ۶ است، پس خودش را اعلام می‌کند", m: [] }); break; }
+        if (a === p) { winner = p; steps.push({ text: p + " خودش بالاترین جانشین زنده‌ی فهرست ۶ است", m: [] }); break; }
         var ok = reach(p, a);
-        steps.push({ text: "process " + p + " با جانشین " + a + " تماس می‌گیرد" + (ok ? "" : ": پاسخی نیست"), m: [{ f: p, t: a, k: ok ? "election" : "lost" }] });
-        if (ok) { steps.push({ text: "process " + a + " پاسخ Alive می‌دهد؛ و " + p + " بس می‌کند", m: [{ f: a, t: p, k: "alive" }] }); winner = a; break; }
+        steps.push({ text: p + " از جانشین " + a + " می‌پرسد" + (ok ? "" : "؛ پاسخی نمی‌آید"), m: [{ f: p, t: a, k: ok ? "election" : "lost", l: "Election" }] });
+        if (ok) { steps.push({ text: a + " جواب Alive می‌دهد و " + p + " دیگر از کسی نمی‌پرسد", m: [{ f: a, t: p, k: "alive", l: "Alive" }] }); winner = a; break; }
       }
       if (winner === null) winner = bully(p);
       announce(winner);
     } else announce(bully(p));
-    k = 0; msgs = 0;
   }
   function bully(p) {
-    var higher = P.filter(function (q) { return q > p; });
-    if (!higher.length) { steps.push({ text: "process " + p + " بالاترین رتبه را دارد", m: [] }); return p; }
-    steps.push({ text: "process " + p + " پیام Election را به " + higher.join("، ") + " می‌فرستد", m: higher.map(function (q) { return { f: p, t: q, k: reach(p, q) ? "election" : "lost" }; }) });
+    var higher = PR.filter(function (q) { return q > p; });
+    if (!higher.length) { steps.push({ text: p + " بالاترین rank را دارد", m: [] }); return p; }
+    steps.push({ text: p + " پیام Election را به " + higher.join("، ") + " می‌فرستد", m: higher.map(function (q) { return { f: p, t: q, k: reach(p, q) ? "election" : "lost", l: "Election" }; }) });
     var alive = higher.filter(function (q) { return reach(p, q); });
-    if (!alive.length) { steps.push({ text: "هیچ process رتبه‌بالاتری پاسخ نمی‌دهد", m: [] }); return p; }
-    steps.push({ text: "processهای " + alive.join("، ") + " پاسخ Alive می‌دهند", m: alive.map(function (q) { return { f: q, t: p, k: "alive" }; }) });
+    if (!alive.length) { steps.push({ text: "هیچ rank بالاتری جواب نمی‌دهد", m: [] }); return p; }
+    steps.push({ text: alive.join("، ") + " جواب Alive می‌دهند", m: alive.map(function (q) { return { f: q, t: p, k: "alive", l: "Alive" }; }) });
     var top = Math.max.apply(null, alive);
-    steps.push({ text: "process " + p + " به " + top + " می‌گوید که بالاترین پاسخ‌دهنده است", m: [{ f: p, t: top, k: "election" }] });
+    steps.push({ text: p + " به " + top + "، بالاترین پاسخ‌دهنده، خبر می‌دهد", m: [{ f: p, t: top, k: "election", l: "you" }] });
     return top;
   }
   function announce(w) {
-    var lower = P.filter(function (q) { return q < w && reach(w, q); });
-    steps.push({ text: "process " + w + " پیام Elected(" + w + ") را به " + (lower.join("، ") || "هیچ‌کس") + " اعلام می‌کند", m: lower.map(function (q) { return { f: w, t: q, k: "elected" }; }), lead: w });
+    var lower = PR.filter(function (q) { return q < w && reach(w, q); });
+    steps.push({ text: w + " با Elected(" + w + ") خودش را به " + (lower.join("، ") || "هیچ‌کس") + " اعلام می‌کند", m: lower.map(function (q) { return { f: w, t: q, k: "elected", l: "Elected" }; }), lead: w });
+    if (view.part) steps.push({ text: "split brain: ۶ هنوز leader {4, 5, 6} است و " + w + " leader {1, 2, 3}", m: [], lead: w, bad: true });
   }
-  function reset() { plan(); log.clear(); log.add("رتبه‌های ۱ تا ۶؛ و ۶ آن leader است. " + (cfg.variant === "bully" ? "الگوریتم Bully." : "failover نفر بعدی، با جانشین‌های {5, 4}."), "muted"); render(null); }
-  function step() {
-    if (k >= steps.length) return false;
-    var s = steps[k++]; msgs += s.m.length;
-    if (s.lead) leaders.push(s.lead);
-    log.add(s.text, s.lead ? "ok" : s.m.some(function (m) { return m.k === "lost"; }) ? "warn" : "muted");
-    if (s.lead && cfg.part) log.add("split brain: process ۶ باز هم {4, 5, 6} را leadership می‌کند در حالی که " + s.lead + " گروه {1, 2, 3} را", "bad");
-    render(s); return k < steps.length;
-  }
-  function render(s) {
-    var W = 420, H = 320, cx = 210, cy = 160, R = 120, pos = {};
-    P.forEach(function (p, i) { var a = -Math.PI / 2 + i * 2 * Math.PI / 6; pos[p] = { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) }; });
+  function render() {
+    plan(); var k = Math.max(1, Math.min(view.k, steps.length)); view.k = k;
+    var s = steps[k - 1], leaders = view.part ? [6] : [], sent = 0;
+    steps.slice(0, k).forEach(function (x) { sent += x.m.length; if (x.lead && leaders.indexOf(x.lead) < 0) leaders.push(x.lead); });
+    var W = 440, H = 330, cx = 220, cy = 165, R = 125, pos = {};
+    PR.forEach(function (p, i) { var a = -Math.PI / 2 + i * 2 * Math.PI / 6; pos[p] = { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) }; });
     var svg = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H });
     svg.appendChild(Kit.svg("defs", null, Kit.svg("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }, Kit.svg("path", { d: "M0 0 L10 5 L0 10 z" }))));
-    if (cfg.part) svg.appendChild(Kit.svg("line", { class: "part", x1: 40, y1: 300, x2: 380, y2: 20 }));
-    (s ? s.m : []).forEach(function (m) {
+    if (view.part) svg.appendChild(Kit.svg("line", { class: "part", x1: 60, y1: 315, x2: 380, y2: 15 }));
+    s.m.forEach(function (m) {
       var a = pos[m.f], b = pos[m.t], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy), ux = dx / d, uy = dy / d;
-      svg.appendChild(Kit.svg("line", { class: "msg " + m.k, x1: a.x + ux * 24, y1: a.y + uy * 24, x2: b.x - ux * 26, y2: b.y - uy * 26 }));
+      svg.appendChild(Kit.svg("line", { class: "msg " + m.k, x1: a.x + ux * 26, y1: a.y + uy * 26, x2: b.x - ux * 28, y2: b.y - uy * 28 }));
     });
-    var cur = leaders.slice();
-    P.forEach(function (p) {
-      var g = Kit.svg("g", { class: (cur.indexOf(p) >= 0 ? "leader " : "") + (down[p] ? "down" : "") });
-      g.appendChild(Kit.svg("circle", { cx: pos[p].x, cy: pos[p].y, r: 22 }));
-      g.appendChild(Kit.svg("text", { x: pos[p].x, y: pos[p].y + 5, "text-anchor": "middle" }, String(p)));
-      g.appendChild(Kit.svg("text", { class: "lab", x: pos[p].x, y: pos[p].y + 38, "text-anchor": "middle" }, down[p] ? "خواب" : cur.indexOf(p) >= 0 ? "leader" : ""));
+    PR.forEach(function (p) {
+      var isL = leaders.indexOf(p) >= 0, g = Kit.svg("g", { class: (isL ? "leader " : "") + (down[p] ? "down " : "") + (p === view.p && !isL ? "me" : "") });
+      g.appendChild(Kit.svg("circle", { cx: pos[p].x, cy: pos[p].y, r: 24 }));
+      g.appendChild(Kit.svg("text", { x: pos[p].x, y: pos[p].y + 6, "text-anchor": "middle" }, String(p)));
+      var lab = down[p] ? "down" : isL ? "leader" : p === view.p ? "detects" : "";
+      g.appendChild(Kit.svg("text", { class: "lab", x: pos[p].x, y: pos[p].y + (pos[p].y > cy ? 42 : -32), "text-anchor": "middle" }, lab));
       svg.appendChild(g);
     });
     var m = Kit.clear(document.getElementById("ring")); m.appendChild(svg);
-    m.setAttribute("aria-label", "leaderها: " + (cur.join(" و ") || "هیچ") + (s ? ". " + s.text : ""));
-    stats([["قدم", k + " / " + steps.length], ["پیام‌های فرستاده", msgs], ["leaderها", cur.join("، ") || "هیچ", cur.length > 1 ? "bad" : cur.length ? "ok" : "warn"]]);
+    m.setAttribute("aria-label", "leader: " + (leaders.join(" و ") || "هیچ") + ". " + s.text);
+    var L = Kit.clear(document.getElementById("steps"));
+    steps.forEach(function (x, i) { L.appendChild(Kit.el("li", { class: i === k - 1 ? (x.bad ? "bad" : "cur") : i < k - 1 ? "done" : "" }, Kit.digits(i + 1) + ". " + x.text)); });
+    msg = s.text; kind = s.bad ? "bad" : s.lead ? "ok" : s.m.some(function (x) { return x.k === "lost"; }) ? "warn" : "";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["قدم", k + " / " + steps.length], ["پیام‌های فرستاده‌شده تا اینجا", sent], ["leader", leaders.join("، ") || "هیچ", leaders.length > 1 ? "bad" : leaders.length ? "ok" : "warn"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.v.set(view.variant); ctl.w.set(String(view.who)); document.getElementById("also5").checked = view.also5; document.getElementById("part").checked = view.part;
   }
-  document.getElementById("var").appendChild(Kit.segmented({ label: "الگوریتم", value: cfg.variant, options: [{ value: "bully", label: "Bully" }, { value: "failover", label: "failover نفر بعدی" }], onChange: function (v) { cfg.variant = v; reset(); } }).element);
-  document.getElementById("who").appendChild(Kit.segmented({ label: "چه کسی اول می‌بیند", value: "3", options: [1, 2, 3, 4, 5].map(function (x) { return { value: String(x), label: String(x) }; }), onChange: function (v) { cfg.who = +v; reset(); } }).element);
-  document.getElementById("also5").addEventListener("change", function (e) { cfg.also5 = e.target.checked; reset(); });
-  document.getElementById("part").addEventListener("change", function (e) { cfg.part = e.target.checked; reset(); });
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1100 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.v = Kit.segmented({ label: "الگوریتم", value: "bully", options: [{ value: "bully", label: "Bully" }, { value: "failover", label: "next-in-line failover" }], onChange: tw(function (v) { view.variant = v; view.k = 99; }) });
+  ctl.w = Kit.segmented({ label: "چه کسی اول متوجه می‌شود", value: "3", options: [1, 2, 3, 4, 5].map(function (x) { return { value: String(x), label: String(x) }; }), onChange: tw(function (v) { view.who = +v; view.k = 99; }) });
+  document.getElementById("varC").appendChild(ctl.v.element); document.getElementById("whoC").appendChild(ctl.w.element);
+  document.getElementById("also5").addEventListener("change", tw(function () { view.also5 = document.getElementById("also5").checked; view.k = 99; }));
+  document.getElementById("part").addEventListener("change", tw(function () { view.part = document.getElementById("part").checked; view.k = 99; }));
+  document.getElementById("back").addEventListener("click", tw(function () { view.k = Math.max(1, view.k - 1); }));
+  document.getElementById("fwd").addEventListener("click", tw(function () { view.k++; }));
+
+  /* ---------- the scenario ---------- */
+  function at(k, o) { return function () { o = o || {}; view = { variant: o.v || "bully", who: o.who || 3, also5: !!o.also5, part: !!o.part, k: k }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(99, { part: true }), render: render, interval: 7000,
+    intro: "شش process با rank ۱ تا ۶؛ leader فعلی ۶ است. فلش‌ها پیام‌های همین قدم‌اند و فهرست کنار، کل دور انتخاب را نشان می‌دهد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: الگوریتم، processی که اول متوجه می‌شود، از کار افتادن ۵ و partition را عوض کنید.",
+    steps: [
+      { kind: "bad", run: at(2), say: "مثال شکل ۱۰-۱: leader (۶) از کار افتاده و ۳ متوجه می‌شود. ۳ پیام Election را به همه‌ی rankهای بالاتر، ۴ و ۵ و ۶، می‌فرستد؛ ۶ جواب نمی‌دهد (ص. ۲۰۷)." },
+      { kind: "", run: at(3), say: "۴ و ۵ با Alive جواب می‌دهند، چون rankشان از ۳ بالاتر است." },
+      { kind: "", run: at(4), say: "۳ به بالاترین پاسخ‌دهنده، یعنی ۵، خبر می‌دهد تا قدم آخر را او انجام دهد." },
+      { kind: "ok", run: at(5), say: "۵ با Elected خودش را به rankهای پایین‌تر اعلام می‌کند. کل دور ۱۰ پیام خرج کرد." },
+      { kind: "warn", run: at(5, { who: 1 }), say: "اگر ۱ اول متوجه شود، دور بزرگ‌تر می‌شود: Election به پنج process، چهار Alive و در مجموع ۱۴ پیام. نتیجه همان است: ۵ leader می‌شود." },
+      { kind: "ok", run: at(4, { v: "failover" }), say: "next-in-line failover (شکل ۱۰-۲): ۶ پیش‌تر فهرست جانشین {5, 4} را داده بود. ۳ فقط از ۵ می‌پرسد، ۵ جواب Alive می‌دهد و خودش را اعلام می‌کند: ۶ پیام به‌جای ۱۰ (صص. ۲۰۸–۲۰۹)." },
+      { kind: "warn", run: at(5, { v: "failover", also5: true }), say: "اگر ۵ هم از کار افتاده باشد، پرسش از ۵ بی‌پاسخ می‌ماند و ۳ سراغ جانشین بعدی، یعنی ۴، می‌رود." },
+      { kind: "warn", run: at(2, { part: true }), say: "حالا ۶ زنده است ولی partition شبکه را به {1, 2, 3} و {4, 5, 6} تقسیم کرده. هیچ‌کدام از Electionهای ۳ به طرف دیگر نمی‌رسد." },
+      { kind: "bad", run: at(5, { part: true }), say: "۳ خودش را leader اعلام می‌کند در حالی که ۶ هنوز leader طرف دیگر است: دو leader هم‌زمان، یعنی split brain. Bully شرط اکثریت ندارد و در partition ایمنی را نقض می‌کند (ص. ۲۰۸)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "process ۳ پیام Election را به ۴ و ۵ و ۶ می‌فرستد؛ و ۴ و ۵ پاسخ Alive می‌دهند. چه کسی leader می‌شود؟",

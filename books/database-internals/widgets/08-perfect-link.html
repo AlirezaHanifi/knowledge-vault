@@ -3,23 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>از fair-loss تا پیوند بی‌عیب</title>
+<title>از fair-loss link تا perfect link</title>
 <meta name="description" content="پیام‌های شماره‌دار را روی پیوندی بفرستید که گم و تکراری و بی‌ترتیب می‌کند، بعد تأیید و بازفرست بیفزایید، و در آخر شماره‌ی ترتیب با buffer مرتب کردن دوباره و تکراری‌زدایی. مقدار n_consecutive و n_processed را ببینید. تصویری از فصل ۸ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .lane { display: flex; flex-wrap: wrap; gap: 4px; min-height: 28px; direction: ltr; }
-  .m { font-family: var(--mono); font-size: .76rem; min-width: 30px; text-align: center; padding: 3px 5px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface); }
+  .lane { display: flex; flex-wrap: wrap; gap: 4px; min-height: 30px; direction: ltr; }
+  .m { font-family: var(--mono); font-size: .86rem; min-width: 32px; text-align: center; padding: 3px 6px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); }
   .m.fly { border-color: var(--accent); background: var(--accent-soft); }
   .m.ack { border-color: var(--ok); background: var(--ok-soft); }
-  .m.bad { border-color: var(--bad); background: var(--bad-soft); }
-  .m.buf { border-style: dashed; border-color: var(--warn); }
-  .lbl { font-size: .74rem; color: var(--ink-3); margin: 10px 0 4px; }
+  .m.bad { border-color: var(--bad); background: var(--bad-soft); font-weight: 700; }
+  .m.buf { border-style: dashed; border-color: var(--warn); font-weight: 700; }
+  .m.ackmsg { border-color: var(--ok); border-style: dashed; }
+  .lbl { font-size: .84rem; color: var(--ink-3); margin: 8px 0 4px; }
+  .lbl b { color: var(--ink); }
+  .pl-ev { margin-top: 10px; font-size: .9rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.8; }
+  .pl-ev .bad { color: var(--bad); font-weight: 700; } .pl-ev .warn { color: var(--warn); font-weight: 700; } .pl-ev .ok { color: var(--ok); }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/08-introduction-and-overview.html">فصل ۸</a><span aria-hidden="true">/</span>
@@ -30,117 +35,163 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۸ · مقدمه و نمای کلی</div>
-  <h1>از fair-loss تا پیوند بی‌عیب</h1>
-  <p class="lede"><strong>پیوند fair-loss</strong> می‌تواند پیام‌ها را گم یا تکراری یا بی‌ترتیب کند، و فرستنده نمی‌تواند بگوید کدام رخ داده. <strong>تأیید</strong> به‌علاوه‌ی <strong>بازفرست</strong>، که پیوندی لجباز است، مطمئن می‌کنند که هیچ چیزی تا ابد گم نمی‌شود، ولی کوشش‌های دوباره تکراری می‌سازند. <strong>شماره‌ی ترتیب</strong> می‌گذارد گیرنده پیام‌های زودرس را در <strong>buffer مرتب کردن دوباره</strong> نگه دارد و هر چیزی را که از قبل پردازش کرده بیندازد. نتیجه <strong>پیوند بی‌عیب</strong> است: تحویل قابل اطمینان، بی تکرار، بی ساختن.</p>
-  <p class="source-note">تصویری از «پیوند» (صص. ۱۸۲–۱۸۶): پیوند fair-loss و تأیید پیام و بازفرست پیام و مسئله‌های بازفرست و ترتیب پیام و تحویل exactly-once. تنظیم گم شدن و تکرار و latency و مدت بازفرست و بار کاری ۱۲ پیامی مال vault است، با seed. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>از fair-loss link تا perfect link</h1>
+      <p class="lede">روی یک <strong>fair-loss link</strong> پیام ممکن است گم شود یا دوبار برسد و فرستنده نمی‌فهمد چه شد. <strong>ACK</strong> به‌علاوه‌ی <strong>retransmit</strong> (همان stubborn link) مطمئن می‌کند همه‌چیز بالاخره می‌رسد، ولی تکراری می‌سازد. <strong>sequence number</strong> به گیرنده اجازه می‌دهد پیام‌های زودرس را در <strong>reordering buffer</strong> نگه دارد و تکراری‌ها را دور بیندازد. نتیجه <strong>perfect link</strong> است.</p>
+      <p class="source-note">تصویری از «Links» (صص. ۱۸۲–۱۸۶): fair-loss link، message acknowledgments، message retransmits، problem with retransmits، message order و exactly-once delivery. احتمال گم شدن و تکرار، jitter، مهلت retransmit (۶ تیک) و بار کاری ۱۲ پیامی با seed ثابت انتخاب vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel">
-        <div class="lbl">فرستنده: پیام‌ها، که ✓ یعنی تأیید‌شده</div><div class="lane" id="snd"></div>
-        <div class="lbl">روی سیم؛ ← داده، → تأیید</div><div class="lane" id="wire"></div>
-        <div class="lbl">گیرنده: buffer مرتب کردن دوباره</div><div class="lane" id="buf"></div>
-        <div class="lbl">گیرنده: پردازش‌شده به ترتیب پردازش؛ ✕ یعنی تکراری یا بی‌ترتیب</div><div class="lane" id="proc"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="lvl"></div><div id="sl" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="lbl"><b>فرستنده</b>، ۱۲ پیام؛ ✓ یعنی ACK رسیده</div><div class="lane mono" id="snd"></div>
+          <div class="lbl"><b>روی شبکه</b>: «n →» پیام، «← A n» ACK</div><div class="lane mono" id="wire"></div>
+          <div class="lbl"><b>reordering buffer</b> گیرنده</div><div class="lane mono" id="buf"></div>
+          <div class="lbl"><b>پردازش‌شده</b> به ترتیب پردازش؛ ✕ یعنی تکراری یا خارج از ترتیب</div><div class="lane mono" id="proc"></div>
+          <div class="pl-ev" id="ev" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="lvC"></div>
+        <div class="tweak-group" id="slC"></div>
+        <div class="tweak-group"><div class="row">
+          <button class="btn small" type="button" id="back">‹ یک تیک عقب</button><button class="btn small primary" type="button" id="fwd">یک تیک جلو ›</button><button class="btn small" type="button" id="end">تا پایان</button><button class="btn small" type="button" id="zero">از تیک صفر</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>fair-loss تنها پیام گم می‌کند</strong> و تکراری‌ها و پیام‌های بی‌ترتیب را همان‌طور که می‌آیند پردازش می‌کند.</li>
-    <li><strong>تأیید و بازفرست</strong> در غایت همه چیز را تحویل می‌دهند، ولی تأییدی گم‌شده فرستنده را وا می‌دارد پیامی را که از قبل پردازش شده بود دوباره بفرستد: تکراری‌ها بالا می‌روند.</li>
-    <li><strong>شماره‌ی ترتیب هر دو را درست می‌کند.</strong> پیام‌های بالای n_consecutive + 1 در buffer مرتب کردن دوباره منتظر می‌مانند؛ و هر چیزی روی n_processed یا زیر آن تکراری است و انداخته می‌شود.</li>
-    <li><strong>گم شدن را صفر و jitter latency را صفر بگذارید:</strong> آن‌وقت هر سه پیوند همان‌طور رفتار می‌کنند؛ آن ماشین‌کاری تنها وقتی مهم است که شبکه بدرفتاری کند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>fair-loss link</strong> پیام گم می‌کند و گیرنده تکراری‌ها و پیام‌های خارج از ترتیب را همان‌طور که می‌رسند پردازش می‌کند (صص. ۱۸۲–۱۸۳).</li>
+      <li><strong>ACK و retransmit</strong> همه‌چیز را بالاخره می‌رسانند، ولی گم شدن یک ACK فرستنده را وادار می‌کند پیامی را که قبلاً پردازش شده دوباره بفرستد؛ پردازش تکراری فقط برای عملیات idempotent بی‌خطر است (ص. ۱۸۴).</li>
+      <li><strong>sequence number هر دو مشکل را حل می‌کند.</strong> پیامی که بالاتر از n_consecutive + 1 باشد در buffer منتظر می‌ماند و هر پیامی تا n_processed تکراری است و دور ریخته می‌شود (صص. ۱۸۵–۱۸۶).</li>
+      <li><strong>گم شدن و jitter را صفر کنید:</strong> هر سه link یک‌جور رفتار می‌کنند. این سازوکارها فقط وقتی به کار می‌آیند که شبکه بدرفتاری کند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/08-introduction-and-overview.html"><small>درس</small>فصل ۸: مقدمه و نمای کلی</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/08-introduction-and-overview.html"><small>درس</small>فصل ۸: مقدمه و نمای کلی</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
+  var N = 12, TIMEOUT = 6;
+  function runTo(cfg, T) {
+    var r = Kit.rng(21), t = 0, next = 1, wire = [], acked = {}, sentAt = {}, proc = [], buf = [], ncons = 0, nproc = 0, sends = 0, dups = 0, ooo = 0, ev = [], lost = 0;
+    function say(s, k) { ev.push([t, s, k || ""]); }
+    function send(n, re) {
+      sends++; sentAt[n] = t;
+      if (r.chance(cfg.loss / 100)) { lost++; say((re ? "بازفرست " : "فرستادن ") + n + ": روی شبکه گم شد", "bad"); return; }
+      wire.push({ n: n, at: t + 1 + r.int(cfg.jitter + 1), ack: false });
+      if (r.chance(cfg.dup / 100)) { wire.push({ n: n, at: t + 1 + r.int(cfg.jitter + 1), ack: false }); say((re ? "بازفرست " : "فرستادن ") + n + "؛ شبکه آن را دوبار تحویل می‌دهد", "warn"); }
+      else say((re ? "بازفرست " : "فرستادن ") + n, re ? "warn" : "");
+    }
+    function deliver(n) {
+      if (cfg.lvl < 2) {
+        var dup = proc.some(function (p) { return p.n === n; }), out = proc.length && n < proc[proc.length - 1].n;
+        proc.push({ n: n, bad: dup || out }); if (dup) dups++; if (out && !dup) ooo++;
+        say("گیرنده " + n + " را پردازش می‌کند" + (dup ? ": تکراری!" : out ? ": خارج از ترتیب!" : ""), dup || out ? "bad" : "ok");
+      } else {
+        if (n <= nproc || buf.indexOf(n) >= 0) { say("گیرنده نسخه‌ی تکراری " + n + " را دور می‌اندازد", ""); return; }
+        if (n !== ncons + 1) { buf.push(n); buf.sort(function (a, b) { return a - b; }); say("گیرنده " + n + " را در buffer نگه می‌دارد؛ منتظر " + (ncons + 1) + " است", "warn"); return; }
+        ncons = n; proc.push({ n: n }); nproc = n; say("گیرنده " + n + " را پردازش می‌کند", "ok");
+        while (buf.length && buf[0] === ncons + 1) { var b = buf.shift(); ncons = b; nproc = b; proc.push({ n: b, fromBuf: true }); say("و " + b + " را از buffer", "ok"); }
+      }
+    }
+    function done() { return cfg.lvl === 0 ? next > N && !wire.length : Object.keys(acked).length === N && !wire.some(function (w) { return !w.ack; }); }
+    while (t < T && !done()) {
+      t++;
+      var arriving = wire.filter(function (w) { return w.at <= t; }); wire = wire.filter(function (w) { return w.at > t; });
+      arriving.forEach(function (w) {
+        if (w.ack) { if (!acked[w.n]) say("فرستنده ACK " + w.n + " را می‌گیرد", "ok"); acked[w.n] = true; return; }
+        deliver(w.n);
+        if (cfg.lvl >= 1) { if (r.chance(cfg.loss / 100)) { lost++; say("ACK " + w.n + " گم شد", "bad"); } else wire.push({ n: w.n, at: t + 1 + r.int(cfg.jitter + 1), ack: true }); }
+      });
+      if (next <= N && t % 2 === 1) send(next++, false);
+      if (cfg.lvl >= 1) for (var n = 1; n < next; n++) if (!acked[n] && t - sentAt[n] >= TIMEOUT) send(n, true);
+    }
+    var uniq = {}; proc.forEach(function (x) { uniq[x.n] = 1; });
+    return { t: t, next: next, wire: wire, acked: acked, proc: proc, buf: buf, ncons: ncons, nproc: nproc, sends: sends, dups: dups, ooo: ooo, lost: lost, uniq: Object.keys(uniq).length, done: done(), ev: ev.filter(function (e) { return e[0] === t; }) };
   }
 
-  var log = Kit.log(document.getElementById("log"));
-  var N = 12, TIMEOUT = 6, cfg = { lvl: 2, loss: 25, dup: 10, jitter: 4 }, r, t, next, wire, acked, sentAt, proc, buf, ncons, nproc, sends, dups, ooo;
-  function reset() {
-    r = Kit.rng(21); t = 0; next = 1; wire = []; acked = {}; sentAt = {}; proc = []; buf = []; ncons = 0; nproc = 0; sends = dups = ooo = 0;
-    log.clear(); log.add(["پیوند fair-loss: هر پیامی یک بار فرستاده می‌شود.", "پیوند لجباز با تأیید: هر " + TIMEOUT + " تیک تا تأیید شدن بازفرست می‌شود.", "پیوند بی‌عیب: تأیید و بازفرست، به‌علاوه‌ی شماره‌ی ترتیب و buffer مرتب کردن دوباره و تکراری‌زدایی."][cfg.lvl], "muted"); render();
-  }
-  function send(n, re) {
-    sends++; sentAt[n] = t;
-    if (r.chance(cfg.loss / 100)) { log.add((re ? "بازفرست " : "فرستادن ") + n + ": روی سیم گم شد", "bad"); return; }
-    wire.push({ n: n, at: t + 1 + r.int(cfg.jitter + 1), ack: false });
-    if (r.chance(cfg.dup / 100)) { wire.push({ n: n, at: t + 1 + r.int(cfg.jitter + 1), ack: false }); log.add((re ? "بازفرست " : "فرستادن ") + n + "؛ پیوند تکراری‌اش می‌کند", "warn"); }
-    else log.add((re ? "بازفرست " : "فرستادن ") + n, re ? "warn" : "muted");
-  }
-  function deliver(n) {
-    if (cfg.lvl < 2) {
-      var dup = proc.some(function (p) { return p.n === n; }), out = proc.length && n < proc[proc.length - 1].n;
-      proc.push({ n: n, bad: dup || out }); if (dup) dups++; if (out && !dup) ooo++;
-      log.add("گیرنده " + n + " را پردازش می‌کند" + (dup ? ": تکراری!" : out ? ": بی‌ترتیب!" : ""), dup || out ? "bad" : "ok");
-    } else {
-      if (n <= nproc || buf.indexOf(n) >= 0) { log.add("گیرنده تکراری " + n + " را می‌اندازد، چون ≤ n_processed = " + nproc + " است یا از قبل buffer شده", "muted"); return; }
-      if (n !== ncons + 1) { buf.push(n); buf.sort(function (a, b) { return a - b; }); log.add("گیرنده " + n + " را buffer می‌کند: منتظر " + (ncons + 1), "warn"); return; }
-      ncons = n; proc.push({ n: n }); nproc = n; log.add("گیرنده " + n + " را پردازش می‌کند", "ok");
-      while (buf.length && buf[0] === ncons + 1) { var b = buf.shift(); ncons = b; nproc = b; proc.push({ n: b }); log.add("… و " + b + " را از buffer مرتب کردن دوباره", "ok"); }
-    }
-  }
-  function done() { return cfg.lvl === 0 ? next > N && !wire.length : Object.keys(acked).length === N && !wire.some(function (w) { return !w.ack; }); }
-  function step() {
-    if (done()) return false;
-    t++;
-    var arriving = wire.filter(function (w) { return w.at <= t; }); wire = wire.filter(function (w) { return w.at > t; });
-    arriving.forEach(function (w) {
-      if (w.ack) { if (!acked[w.n]) log.add("فرستنده ACK(" + w.n + ") را می‌گیرد", "ok"); acked[w.n] = true; return; }
-      deliver(w.n);
-      if (cfg.lvl >= 1) { if (r.chance(cfg.loss / 100)) log.add("تأیید ACK(" + w.n + ") گم شد", "bad"); else wire.push({ n: w.n, at: t + 1 + r.int(cfg.jitter + 1), ack: true }); }
-    });
-    if (next <= N && t % 2 === 1) send(next++, false);
-    if (cfg.lvl >= 1) for (var n = 1; n < next; n++) if (!acked[n] && t - sentAt[n] >= TIMEOUT) send(n, true);
-    render(); return !done();
-  }
+  var view = { lvl: 0, loss: 25, dup: 10, jitter: 4, T: 0 }, tour, ctl = {}, st, msg, kind;
+  var NAMES = ["fair-loss link", "stubborn link (ACK و retransmit)", "perfect link (به‌علاوه‌ی sequence number)"];
   function render() {
+    st = runTo(view, view.T); view.T = st.t;
     var s = Kit.clear(document.getElementById("snd"));
-    for (var n = 1; n <= N; n++) s.appendChild(Kit.el("span", { class: "m" + (acked[n] ? " ack" : n < next ? " fly" : "") }, n + (acked[n] ? " ✓" : "")));
+    for (var n = 1; n <= N; n++) s.appendChild(Kit.el("span", { class: "m" + (st.acked[n] ? " ack" : n < st.next ? " fly" : "") }, n + (st.acked[n] ? " ✓" : "")));
     var w = Kit.clear(document.getElementById("wire"));
-    wire.forEach(function (x) { w.appendChild(Kit.el("span", { class: "m" + (x.ack ? " ack" : " fly") }, x.ack ? "← A" + x.n : x.n + " →")); });
+    st.wire.forEach(function (x) { w.appendChild(Kit.el("span", { class: "m" + (x.ack ? " ackmsg" : " fly") }, x.ack ? "← A" + x.n : x.n + " →")); });
+    if (!st.wire.length) w.appendChild(Kit.el("span", { class: "field-hint" }, "—"));
     var b = Kit.clear(document.getElementById("buf"));
-    if (cfg.lvl < 2) b.appendChild(Kit.el("span", { class: "field-hint" }, "شماره‌ی ترتیبی نیست: چیزی buffer نمی‌شود."));
-    buf.forEach(function (x) { b.appendChild(Kit.el("span", { class: "m buf" }, x)); });
+    if (view.lvl < 2) b.appendChild(Kit.el("span", { class: "field-hint" }, "sequence number نداریم؛ چیزی نگه داشته نمی‌شود."));
+    else if (!st.buf.length) b.appendChild(Kit.el("span", { class: "field-hint" }, "خالی"));
+    st.buf.forEach(function (x) { b.appendChild(Kit.el("span", { class: "m buf" }, x)); });
     var p = Kit.clear(document.getElementById("proc"));
-    proc.forEach(function (x) { p.appendChild(Kit.el("span", { class: "m" + (x.bad ? " bad" : " ack") }, x.n + (x.bad ? " ✕" : ""))); });
-    var uniq = {}; proc.forEach(function (x) { uniq[x.n] = 1; });
-    var rows = [["فرستادن‌ها با احتساب بازفرست", sends], ["پیام‌های یکتای پردازش‌شده", Object.keys(uniq).length + " / " + N, done() && Object.keys(uniq).length < N ? "bad" : ""], ["تکراری‌های پردازش‌شده", dups, dups ? "bad" : "ok"], ["بی‌ترتیب‌های پردازش‌شده", ooo, ooo ? "bad" : "ok"]];
-    if (cfg.lvl === 2) rows.push(["n_consecutive و n_processed", ncons + " / " + nproc]);
-    stats(rows);
+    st.proc.forEach(function (x) { p.appendChild(Kit.el("span", { class: "m" + (x.bad ? " bad" : " ack") }, x.n + (x.bad ? " ✕" : ""))); });
+    if (!st.proc.length) p.appendChild(Kit.el("span", { class: "field-hint" }, "—"));
+    var ev = Kit.clear(document.getElementById("ev"));
+    ev.appendChild(Kit.el("strong", null, "تیک " + st.t + (st.done ? " (پایان)" : "") + ": "));
+    if (!st.ev.length) ev.appendChild(document.createTextNode(st.t ? "چیزی نرسید." : NAMES[view.lvl] + "؛ هنوز چیزی فرستاده نشده."));
+    st.ev.forEach(function (e, i) { if (i) ev.appendChild(document.createTextNode("؛ ")); ev.appendChild(Kit.el("span", { class: e[2] }, e[1])); });
+    msg = st.ev.map(function (e) { return e[1]; }).join("؛ ") || ("تیک " + st.t); kind = st.ev.some(function (e) { return e[2] === "bad"; }) ? "bad" : st.ev.some(function (e) { return e[2] === "warn"; }) ? "warn" : "ok";
+    var rows = [["فرستادن‌ها با retransmit", st.sends], ["گم‌شده روی شبکه (پیام و ACK)", st.lost, st.lost ? "warn" : ""], ["پیام یکتای پردازش‌شده", st.uniq + " / " + N, st.done && st.uniq < N ? "bad" : st.done ? "ok" : ""], ["تکراری پردازش‌شده", st.dups, st.dups ? "bad" : "ok"], ["خارج از ترتیب پردازش‌شده", st.ooo, st.ooo ? "bad" : "ok"]];
+    if (view.lvl === 2) rows.push(["n_consecutive / n_processed", st.ncons + " / " + st.nproc]);
+    var S2 = Kit.clear(document.getElementById("stats"));
+    rows.forEach(function (x) { S2.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.lv.set(String(view.lvl)); ctl.loss.set(view.loss); ctl.dup.set(view.dup); ctl.jit.set(view.jitter);
   }
-  document.getElementById("lvl").appendChild(Kit.segmented({ label: "پیوند", value: String(cfg.lvl), options: [{ value: "0", label: "fair-loss" }, { value: "1", label: "به‌علاوه‌ی تأیید و بازفرست" }, { value: "2", label: "به‌علاوه‌ی شماره‌ی ترتیب" }], onChange: function (v) { cfg.lvl = +v; reset(); } }).element);
-  var sl = document.getElementById("sl");
-  sl.appendChild(Kit.slider({ label: "گم شدن داده و تأیید", min: 0, max: 50, step: 5, value: cfg.loss, unit: "٪", onInput: function (v) { cfg.loss = v; reset(); } }).element);
-  sl.appendChild(Kit.slider({ label: "تکرار", min: 0, max: 40, step: 5, value: cfg.dup, unit: "٪", onInput: function (v) { cfg.dup = v; reset(); } }).element);
-  sl.appendChild(Kit.slider({ label: "jitter latency", min: 0, max: 8, step: 1, value: cfg.jitter, unit: " تیک", onInput: function (v) { cfg.jitter = v; reset(); } }).element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 450 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.lv = Kit.segmented({ label: "link", value: "0", options: [{ value: "0", label: "fair-loss" }, { value: "1", label: "+ ACK و retransmit" }, { value: "2", label: "+ sequence number" }], onChange: tw(function (v) { view.lvl = +v; }) });
+  document.getElementById("lvC").appendChild(ctl.lv.element);
+  var sl = document.getElementById("slC");
+  ctl.loss = Kit.slider({ label: "احتمال گم شدن پیام و ACK", min: 0, max: 50, step: 5, value: view.loss, unit: "٪", onInput: tw(function (v) { view.loss = v; }) });
+  ctl.dup = Kit.slider({ label: "احتمال تحویل دوباره", min: 0, max: 40, step: 5, value: view.dup, unit: "٪", onInput: tw(function (v) { view.dup = v; }) });
+  ctl.jit = Kit.slider({ label: "jitter latency", min: 0, max: 8, step: 1, value: view.jitter, unit: " تیک", onInput: tw(function (v) { view.jitter = v; }) });
+  [ctl.loss, ctl.dup, ctl.jit].forEach(function (c) { sl.appendChild(c.element); });
+  document.getElementById("back").addEventListener("click", tw(function () { view.T = Math.max(0, view.T - 1); }));
+  document.getElementById("fwd").addEventListener("click", tw(function () { view.T++; }));
+  document.getElementById("end").addEventListener("click", tw(function () { view.T = 999; }));
+  document.getElementById("zero").addEventListener("click", tw(function () { view.T = 0; }));
+
+  /* ---------- the scenario (seeded run: loss 25%, duplication 10%, jitter 4) ---------- */
+  function at(lvl, T) { return function () { view = { lvl: lvl, loss: 25, dup: 10, jitter: 4, T: T }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(2, 999), render: render, interval: 8000,
+    intro: "یک فرستنده هر دو تیک یک پیام از ۱ تا ۱۲ می‌فرستد. شبکه ۲۵٪ پیام‌ها و ACKها را گم می‌کند و ۱۰٪ را دوبار می‌رساند. هر سه link دقیقاً همین شبکه را می‌بینند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: link را عوض کنید، گم شدن را صفر یا زیاد کنید و تیک‌به‌تیک جلو بروید.",
+    steps: [
+      { kind: "", run: at(0, 8), say: "fair-loss link وقتی شبکه خوب رفتار کند: پیام‌های ۱ تا ۴ رسیدند و پردازش شدند. فرستنده هیچ راهی ندارد که بفهمد پیامی رسیده یا نه (ص. ۱۸۲)." },
+      { kind: "bad", run: at(0, 14), say: "پیام ۶ روی شبکه گم شد و شبکه پیام ۵ را دوبار رساند؛ گیرنده ۵ را دوبار پردازش کرد. fair-loss فقط قول می‌دهد که تکرار نامحدود نباشد و پیامی از خودش نسازد (ص. ۱۸۳)." },
+      { kind: "bad", run: at(0, 999), say: "پایان fair-loss: فقط ۱۰ پیام از ۱۲ رسید (۶ و ۸ برای همیشه گم شدند)، ۳ پردازش تکراری و یک پیام خارج از ترتیب." },
+      { kind: "warn", run: at(1, 8), say: "حالا گیرنده برای هر پیام ACK می‌فرستد. پیام ۴ زودتر از ۳ رسید و همان‌طور پردازش شد، و ACK آن هم گم شد (صص. ۱۸۳–۱۸۴)." },
+      { kind: "bad", run: at(1, 11), say: "ACK پیام ۲ دیر رسید، پس فرستنده بعد از ۶ تیک ۲ را retransmit کرد و گیرنده آن را دوباره پردازش کرد. فرستنده بدون ACK نمی‌داند پیام گم شده یا فقط دیر کرده است (ص. ۱۸۴)." },
+      { kind: "warn", run: at(1, 999), say: "پایان stubborn link: هر ۱۲ پیام رسید، ولی با ۳۱ بار فرستادن، ۱۳ پردازش تکراری و ۳ پیام خارج از ترتیب. این فقط برای عملیات idempotent قابل قبول است (ص. ۱۸۴)." },
+      { kind: "warn", run: at(2, 8), say: "همان اجرا با sequence number: پیام ۴ پیش از ۳ رسید، پس گیرنده آن را در reordering buffer نگه می‌دارد تا ۳ برسد (ص. ۱۸۵)." },
+      { kind: "ok", run: at(2, 9), say: "۳ رسید: n_consecutive به ۳ رسید، ۳ پردازش شد و ۴ هم بلافاصله از buffer بیرون آمد." },
+      { kind: "ok", run: at(2, 11), say: "retransmit پیام ۲ دوباره رسید، ولی ۲ ≤ n_processed است؛ گیرنده آن را بدون پردازش دور می‌اندازد (صص. ۱۸۵–۱۸۶)." },
+      { kind: "ok", run: at(2, 999), say: "پایان perfect link: همان ۳۱ بار فرستادن روی همان شبکه، ولی هر ۱۲ پیام دقیقاً یک بار و به ترتیب پردازش شد. تحویل at-least-once است و deduplication پردازش را یک‌باره می‌کند (ص. ۱۸۶)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "فرستنده‌ای تأییدی نمی‌گیرد و دوباره می‌فرستد. سر کپی اول چه می‌توانست آمده باشد؟",

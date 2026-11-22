@@ -3,26 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>failure detector φ-accrual</title>
+<title>φ-accrual در برابر timeout ثابت</title>
 <meta name="description" content="به نودی پاییده‌شده با jitter تنظیم‌پذیر heartbeat بدهید، نگهش دارید یا بکشیدش، و ببینید سطح گمان φ-accrual در برابر آستانه‌ای بالا می‌رود، کنار detectorی مهلت‌ثابت روی همان جریان heartbeat. تصویری از فصل ۹ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .chart svg { width: 100%; height: auto; display: block; }
+  .chart svg { width: 100%; height: auto; max-height: 188px; display: block; }
   .chart { direction: ltr; }
-  .chart .phi { fill: none; stroke: var(--accent); stroke-width: 2; }
-  .chart .thr { stroke: var(--bad); stroke-dasharray: 5 4; }
-  .chart .dl { stroke: var(--warn); stroke-dasharray: 2 3; }
-  .chart .hb { stroke: var(--ok); }
+  .chart .phi { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+  .chart .thr { stroke: var(--bad); stroke-width: 2; stroke-dasharray: 6 4; }
+  .chart .dl { stroke: var(--warn); stroke-width: 2; stroke-dasharray: 2 3; }
+  .chart .hb { stroke: var(--ok); stroke-width: 2; }
   .chart .ax { stroke: var(--line-strong); }
-  .chart text { font-size: 11px; fill: var(--ink-3); font-family: var(--mono); }
-  .det { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-  .det .callout { margin: 0; }
+  .chart .act { stroke: var(--ink-3); stroke-dasharray: 3 3; }
+  .chart text { font-size: 12px; fill: var(--ink-3); font-family: var(--mono); }
+  .chart text.lab { font-weight: 700; }
+  .chart text.lab.t { fill: var(--bad); } .chart text.lab.d { fill: var(--warn); }
+  .det { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .det .callout { margin: 0; padding: 6px 12px; }
+  .det .mono { direction: ltr; text-align: right; display: block; font-size: .84rem; color: var(--ink-3); }
+  .phi-ev { margin: 8px 0 0; padding: 0; list-style: none; font-size: .86rem; display: grid; gap: 3px; }
+  .phi-ev li { padding: 3px 10px; border-radius: var(--radius-sm); border-inline-start: 4px solid var(--line); background: var(--surface); }
+  .phi-ev li.warn { border-color: var(--warn); } .phi-ev li.bad { border-color: var(--bad); } .phi-ev li.ok { border-color: var(--ok); }
+  .phi-ev .ts { font-family: var(--mono); color: var(--ink-3); margin-inline-end: 6px; }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/09-failure-detection.html">فصل ۹</a><span aria-hidden="true">/</span>
@@ -33,114 +42,161 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · تشخیص شکست</div>
-  <h1>مقایسه‌ی φ-accrual با مهلتی ثابت</h1>
-  <p class="lede">detector <strong>مهلتی</strong> پس از سکوتی ثابت به نودی گمان می‌برد. detector <strong>φ-accrual</strong> پنجره‌ای لغزان از زمان‌های میان‌رسیدن heartbeatهای تازه نگه می‌دارد، میانگین و واریانسشان را تخمین می‌زند، و زمان از آخرین heartbeat را به سطح گمان <strong>φ</strong> تبدیل می‌کند: اگر همین حالا نود را مرده اعلام کنیم احتمال خطا چقدر است. نودی وقتی گمان‌برده می‌شود که φ از آستانه‌ای رد شود، پس detector با پرنوفه بودن شبکه وفق می‌یابد.</p>
-  <p class="source-note">تصویری از «failure detector φ-accrual» (صص. ۱۹۹–۲۰۰) و detector مهلتی (ص. ۱۹۷). مدل توزیع نرمال زمان‌های میان‌رسیدن مال کتاب است؛ و فرمول به‌کار‌رفته، یعنی φ = −log₁₀(1 − F(Δt))، از هایاشیبارا و همکاران پی می‌گیرد. بازه‌ی heartbeat یک ثانیه و پنجره‌ی صد نمونه و آن نگه داشتن‌ها و پیش‌فرض‌ها مال vault است، با seed. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>φ-accrual در برابر timeout ثابت</h1>
+      <p class="lede">یک failure detector مبتنی بر <strong>timeout</strong> بعد از سکوتی ثابت به نود مشکوک می‌شود. <strong>φ-accrual</strong> یک sliding window از فاصله‌ی رسیدن heartbeatهای اخیر نگه می‌دارد، میانگین و واریانس آن‌ها را تخمین می‌زند و سکوت فعلی را به سطح بدگمانی <strong>φ</strong> تبدیل می‌کند. نود وقتی مشکوک می‌شود که φ از آستانه بگذرد، پس detector خودش را با نویز شبکه تطبیق می‌دهد.</p>
+      <p class="source-note">تصویری از «Phi-Accural Failure Detector» (صص. ۱۹۹–۲۰۰) و deadline failure detector (ص. ۱۹۷)؛ بده‌بستان کارایی و دقت از ص. ۱۹۶ است. فرض توزیع نرمال از کتاب است؛ فرمول φ = −log₁₀(1 − F(Δt)) از مقاله‌ی Hayashibara و همکاران است که کتاب به آن ارجاع می‌دهد. heartbeat هر یک ثانیه، پنجره‌ی ۱۰۰ نمونه، مکث GC و پیش‌فرض‌ها با seed ثابت انتخاب vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="chart" id="chart" role="img"></div>
-        <p class="field-hint">خط آبی: مقدار φ در بیست ثانیه‌ی آخر. خط‌چین سرخ: آستانه‌ی φ. تیک‌های سبز: heartbeatهای گرفته‌شده. خط نقطه‌چین کهربایی: حد سکوت detector مهلتی، که روی مقیاس φ در همان φیی کشیده می‌شود که آن مهلت همین حالا با آن متناظر است.</p>
-        <div class="det"><div class="callout" id="d-phi"></div><div class="callout" id="d-dl"></div></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="sl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="pause">ایست GC به اندازه‌ی ۲٫۵ ثانیه</button><button class="btn small danger" type="button" id="kill">نود را بکش</button><button class="btn small" type="button" id="revive">زنده کن</button></div>
-        <div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="chart" id="chart" role="img"></div>
+          <div class="det"><div class="callout" id="d-phi"></div><div class="callout" id="d-dl"></div></div>
+          <ol class="phi-ev" id="ev" aria-live="polite"></ol>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="slC"></div>
+        <div class="tweak-group"><div class="row">
+          <button class="btn small" type="button" id="pause">مکث GC ۲٫۵ ثانیه‌ای</button><button class="btn small danger" type="button" id="kill">از کار انداختن نود</button><button class="btn small" type="button" id="revive">بالا آوردن نود</button></div></div>
+        <div class="tweak-group"><div class="row">
+          <button class="btn small primary" type="button" id="f1">۱ ثانیه جلو</button><button class="btn small" type="button" id="f5">۵ ثانیه جلو</button><button class="btn small" type="button" id="z">از صفر، بدون رویداد</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>jitter را بالا ببرید.</strong> با heartbeatهای پرنوفه detector مهلتی گمان‌های کاذب می‌سازد، در حالی که آستانه‌ی φ با واریانس بزرگ‌تر کشیده می‌شود.</li>
-    <li><strong>ایست GC</strong> نودی زنده است که سکوت می‌کند: هر دو detector می‌توانند به آن گمان ببرند، و هر دو همین که heartbeatها از سر گرفته شوند بازیابی می‌شوند.</li>
-    <li><strong>نود را بکشید</strong> و زمان تشخیص را مقایسه کنید: آستانه‌ی φ پایین یا مهلت کوتاه زودتر تشخیص می‌دهد ولی به نودهای زنده‌ی بیشتری گمان می‌برد.</li>
-    <li><strong>مقدار φ یک مقیاس است و نه حکم.</strong> φ = 1 یعنی تقریباً ۱۰٪ احتمال خطا، φ = 2 تقریباً ۱٪، و φ = 3 تقریباً ۰٫۱٪؛ و برنامه‌ها آستانه‌ی خودشان را برمی‌دارند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>jitter را بالا ببرید.</strong> با heartbeatهای پرنویز، timeout ثابت هشدار کاذب می‌دهد؛ مقیاس φ با واریانس بزرگ‌تر کش می‌آید.</li>
+      <li><strong>مکث GC</strong> نودی زنده و ساکت است: هر دو detector ممکن است به آن مشکوک شوند و هر دو با برگشتن heartbeatها دوباره اعتماد می‌کنند.</li>
+      <li><strong>نود را از کار بیندازید</strong> و زمان تشخیص را مقایسه کنید. آستانه‌ی پایین‌تر یا timeout کوتاه‌تر زودتر تشخیص می‌دهد، ولی به نودهای زنده‌ی بیشتری هم مشکوک می‌شود. detector هم کارا و هم دقیق ممکن نیست (ص. ۱۹۶).</li>
+      <li><strong>φ مقیاس است، نه حکم.</strong> φ = ۱ یعنی حدود ۱۰٪ احتمال اشتباه، φ = ۲ حدود ۱٪ و φ = ۳ حدود ۰٫۱٪؛ هر برنامه آستانه‌ی خودش را انتخاب می‌کند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-failure-detection.html"><small>درس</small>فصل ۹: تشخیص شکست</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-failure-detection.html"><small>درس</small>فصل ۹: تشخیص شکست</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var TICK = 100, cfg = { jitter: 150, thr: 8, dl: 1600 }, r, now, nextHb, last, gaps, hist, dead, pauseUntil, falsePhi, falseDl, sPhi, sDl, killedAt, detPhi, detDl;
+  var TICK = 100;
   function erfc(x) { var z = Math.abs(x), t = 1 / (1 + 0.5 * z), r_ = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))))))))); return x >= 0 ? r_ : 2 - r_; }
-  function phi(dt) {
+  function phiOf(gaps, dt) {
     if (gaps.length < 2) return 0;
     var mu = gaps.reduce(function (a, b) { return a + b; }, 0) / gaps.length;
     var sd = Math.sqrt(gaps.reduce(function (a, b) { return a + (b - mu) * (b - mu); }, 0) / gaps.length); sd = Math.max(sd, 30);
     var pLater = 0.5 * erfc((dt - mu) / (sd * Math.SQRT2));
     return Math.min(16, -Math.log(Math.max(pLater, 1e-16)) / Math.LN10);
   }
-  function reset() {
-    r = Kit.rng(13); now = 0; last = 0; gaps = []; hist = []; dead = false; pauseUntil = 0; falsePhi = falseDl = 0; sPhi = sDl = false; killedAt = null; detPhi = detDl = null;
-    nextHb = 1000 + gauss(); log.clear(); log.add("heartbeat هر یک ثانیه با " + cfg.jitter + " میلی‌ثانیه jitter، یعنی انحراف معیار.", "muted"); render();
-  }
-  function gauss() { var u = 1 - r.next(), v = r.next(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) * cfg.jitter; }
-  function step() {
-    now += TICK;
-    if (!dead && now >= nextHb) {
-      if (now >= pauseUntil) { if (last) { gaps.push(now - last); if (gaps.length > 100) gaps.shift(); } last = now; hist.push({ t: now, hb: true }); }
-      nextHb = Math.max(now + TICK, nextHb + 1000 + gauss());
+  function runTo(cfg, T) {
+    var r = Kit.rng(13), now = 0, last = 0, gaps = [], hist = [], dead = false, pauseUntil = 0, falsePhi = 0, falseDl = 0, sPhi = false, sDl = false, killedAt = null, detPhi = null, detDl = null, ev = [];
+    function gauss() { var u = 1 - r.next(), v = r.next(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) * cfg.jitter; }
+    var nextHb = 1000 + gauss();
+    while (now < T) {
+      now += TICK;
+      (cfg.acts || []).forEach(function (a) { if (a[1] !== now) return;
+        if (a[0] === "pause") { pauseUntil = now + 2500; ev.push([now, "نود ۲٫۵ ثانیه برای GC می‌ایستد؛ زنده است ولی ساکت", "warn"]); }
+        if (a[0] === "kill" && !dead) { dead = true; killedAt = now; detPhi = detDl = null; ev.push([now, "نود از کار افتاد", "bad"]); }
+        if (a[0] === "revive" && dead) { dead = false; nextHb = now + TICK; ev.push([now, "نود دوباره بالا آمد", "ok"]); } });
+      if (!dead && now >= nextHb) {
+        if (now >= pauseUntil) { if (last) { gaps.push(now - last); if (gaps.length > 100) gaps.shift(); } last = now; hist.push({ t: now, hb: true }); }
+        nextHb = Math.max(now + TICK, nextHb + 1000 + gauss());
+      }
+      var silence = now - last, p = phiOf(gaps, silence), nPhi = p >= cfg.thr, nDl = last > 0 && silence > cfg.dl, alive = !dead;
+      if (nPhi && !sPhi) { ev.push([now, "φ به " + p.toFixed(1) + " رسید و از آستانه گذشت: φ-accrual به نود مشکوک شد" + (alive ? " (هشدار کاذب)" : ""), alive ? "warn" : "bad"]); if (alive) falsePhi++; else if (detPhi === null) detPhi = now - killedAt; }
+      if (nDl && !sDl) { ev.push([now, silence + " ms سکوت، بیش از " + cfg.dl + " ms: timeout به نود مشکوک شد" + (alive ? " (هشدار کاذب)" : ""), alive ? "warn" : "bad"]); if (alive) falseDl++; else if (detDl === null) detDl = now - killedAt; }
+      if (!nPhi && sPhi) ev.push([now, "φ-accrual دوباره به نود اعتماد کرد", "ok"]);
+      if (!nDl && sDl) ev.push([now, "timeout دوباره به نود اعتماد کرد", "ok"]);
+      sPhi = nPhi; sDl = nDl;
+      hist.push({ t: now, phi: p }); while (hist.length && hist[0].t < now - 20000) hist.shift();
     }
-    var silence = now - last, p = phi(silence), nPhi = p >= cfg.thr, nDl = last > 0 && silence > cfg.dl, alive = !dead;
-    if (nPhi && !sPhi) { log.add("φ = " + p.toFixed(1) + " ≥ " + cfg.thr + ": detector φ به نود گمان می‌برد" + (alive ? "؛ گمانی کاذب" : ""), alive ? "warn" : "bad"); if (alive) falsePhi++; else if (detPhi === null) detPhi = now - killedAt; }
-    if (nDl && !sDl) { log.add("به اندازه‌ی " + silence + " میلی‌ثانیه ساکت، بیشتر از " + cfg.dl + " میلی‌ثانیه: detector مهلتی به نود گمان می‌برد" + (alive ? "؛ گمانی کاذب" : ""), alive ? "warn" : "bad"); if (alive) falseDl++; else if (detDl === null) detDl = now - killedAt; }
-    if (!nPhi && sPhi) log.add("detector φ: بازهم به نود اعتماد می‌شود", "ok");
-    if (!nDl && sDl) log.add("detector مهلتی: بازهم به نود اعتماد می‌شود", "ok");
-    sPhi = nPhi; sDl = nDl;
-    hist.push({ t: now, phi: p }); while (hist.length && hist[0].t < now - 20000) hist.shift();
-    render(); return true;
+    var mu = gaps.length ? gaps.reduce(function (a, b) { return a + b; }, 0) / gaps.length : 0, sd = gaps.length ? Math.sqrt(gaps.reduce(function (a, b) { return a + (b - mu) * (b - mu); }, 0) / gaps.length) : 0;
+    return { now: now, last: last, gaps: gaps, mu: mu, sd: sd, hist: hist, dead: dead, paused: now < pauseUntil, falsePhi: falsePhi, falseDl: falseDl, sPhi: sPhi, sDl: sDl, detPhi: detPhi, detDl: detDl, ev: ev, phi: phiOf(gaps, now - last), dlPhi: phiOf(gaps, cfg.dl) };
   }
+
+  var view = { jitter: 150, thr: 8, dl: 1600, acts: [], T: 10000 }, tour, ctl = {}, msg, kind;
   function render() {
-    var W = 600, H = 200, P = 28, maxPhi = 16, sx = function (t) { return P + (t - (now - 20000)) / 20000 * (W - P - 6); }, sy = function (v) { return H - 18 - v / maxPhi * (H - 30); };
+    var st = runTo(view, view.T), now = st.now;
+    var W = 640, H = 210, P = 34, maxPhi = 16, sx = function (t) { return P + (t - (now - 20000)) / 20000 * (W - P - 8); }, sy = function (v) { return H - 20 - v / maxPhi * (H - 32); };
     var s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H });
-    s.appendChild(Kit.svg("line", { class: "ax", x1: P, y1: H - 18, x2: W - 6, y2: H - 18 }));
+    s.appendChild(Kit.svg("line", { class: "ax", x1: P, y1: H - 20, x2: W - 8, y2: H - 20 }));
     [0, 4, 8, 12, 16].forEach(function (v) { s.appendChild(Kit.svg("text", { x: 2, y: sy(v) + 4 }, "φ" + v)); });
-    s.appendChild(Kit.svg("line", { class: "thr", x1: P, x2: W - 6, y1: sy(cfg.thr), y2: sy(cfg.thr) }));
-    var dlPhi = phi(cfg.dl); s.appendChild(Kit.svg("line", { class: "dl", x1: P, x2: W - 6, y1: sy(dlPhi), y2: sy(dlPhi) }));
-    var pts = hist.filter(function (h) { return h.phi !== undefined; }).map(function (h) { return sx(h.t).toFixed(1) + "," + sy(h.phi).toFixed(1); });
+    view.acts.forEach(function (a) { if (a[1] > now - 20000 && a[1] <= now) s.appendChild(Kit.svg("line", { class: "act", x1: sx(a[1]), x2: sx(a[1]), y1: 8, y2: H - 20 })); });
+    s.appendChild(Kit.svg("line", { class: "thr", x1: P, x2: W - 8, y1: sy(view.thr), y2: sy(view.thr) }));
+    s.appendChild(Kit.svg("text", { class: "lab t", x: W - 150, y: sy(view.thr) - 5 }, "φ threshold " + view.thr));
+    s.appendChild(Kit.svg("line", { class: "dl", x1: P, x2: W - 8, y1: sy(st.dlPhi), y2: sy(st.dlPhi) }));
+    s.appendChild(Kit.svg("text", { class: "lab d", x: P + 6, y: sy(st.dlPhi) - 5 }, "timeout " + view.dl + " ms ≈ φ" + st.dlPhi.toFixed(1)));
+    var pts = st.hist.filter(function (h) { return h.phi !== undefined; }).map(function (h) { return sx(h.t).toFixed(1) + "," + sy(h.phi).toFixed(1); });
     if (pts.length) s.appendChild(Kit.svg("polyline", { class: "phi", points: pts.join(" ") }));
-    hist.forEach(function (h) { if (h.hb) s.appendChild(Kit.svg("line", { class: "hb", x1: sx(h.t), x2: sx(h.t), y1: H - 18, y2: H - 8 })); });
-    s.appendChild(Kit.svg("text", { x: W - 60, y: H - 2 }, (now / 1000).toFixed(1) + " s"));
+    st.hist.forEach(function (h) { if (h.hb) s.appendChild(Kit.svg("line", { class: "hb", x1: sx(h.t), x2: sx(h.t), y1: H - 20, y2: H - 9 })); });
+    s.appendChild(Kit.svg("text", { x: W - 64, y: H - 1 }, "t = " + (now / 1000).toFixed(1) + " s"));
+    s.appendChild(Kit.svg("text", { x: P, y: H - 1 }, "heartbeats ▏"));
     var c = Kit.clear(document.getElementById("chart")); c.appendChild(s);
-    var p = phi(now - last);
-    c.setAttribute("aria-label", "مقدار φ برابر " + p.toFixed(1) + " است، با آستانه‌ی " + cfg.thr);
-    function box(id, title, susp, detail) { var b = document.getElementById(id); b.className = "callout " + (susp ? (dead ? "bad" : "warn") : "ok"); Kit.clear(b).appendChild(Kit.el("strong", null, title + ": " + (susp ? "گمان‌برده" : "مورد اعتماد"))); b.appendChild(Kit.el("div", { class: "field-hint" }, detail)); }
-    box("d-phi", "detector φ", sPhi, "φ = " + p.toFixed(2) + " با آستانه‌ی " + cfg.thr);
-    box("d-dl", "detector مهلتی", sDl, "به اندازه‌ی " + (now - last) + " میلی‌ثانیه ساکت، با حد " + cfg.dl + " میلی‌ثانیه");
-    stats([["نود", dead ? "مرده" : now < pauseUntil ? "ایستاده" : "زنده", dead ? "bad" : now < pauseUntil ? "warn" : "ok"], ["گمان کاذب φ و مهلتی", falsePhi + " / " + falseDl, falsePhi + falseDl ? "warn" : ""], ["زمان تشخیص φ و مهلتی", (detPhi === null ? "–" : detPhi + " میلی‌ثانیه") + " / " + (detDl === null ? "–" : detDl + " میلی‌ثانیه")]]);
+    c.setAttribute("aria-label", "φ = " + st.phi.toFixed(1) + "، آستانه " + view.thr);
+    function box(id, title, susp, detail) { var b = document.getElementById(id); b.className = "callout " + (susp ? (st.dead ? "bad" : "warn") : "ok"); Kit.clear(b).appendChild(Kit.el("strong", null, title + ": " + (susp ? "مشکوک" : "مورد اعتماد"))); b.appendChild(Kit.el("span", { class: "mono" }, detail)); }
+    box("d-phi", "φ-accrual", st.sPhi, "φ = " + st.phi.toFixed(2) + " / threshold " + view.thr);
+    box("d-dl", "timeout", st.sDl, (now - st.last) + " ms silent / limit " + view.dl + " ms");
+    var E = Kit.clear(document.getElementById("ev")), evs = st.ev.slice(-2);
+    if (!evs.length) E.appendChild(Kit.el("li", null, "هنوز رویدادی نیست؛ heartbeatها مرتب می‌رسند."));
+    evs.forEach(function (e) { E.appendChild(Kit.el("li", { class: e[2] }, Kit.el("span", { class: "ts" }, (e[0] / 1000).toFixed(1) + "s"), e[1])); });
+    msg = evs.length ? evs[evs.length - 1][1] : "heartbeatها مرتب می‌رسند."; kind = evs.length ? evs[evs.length - 1][2] : "ok";
+    var S2 = Kit.clear(document.getElementById("stats"));
+    [["نود", st.dead ? "از کار افتاده" : st.paused ? "در مکث GC" : "زنده", st.dead ? "bad" : st.paused ? "warn" : "ok"], ["میانگین / انحراف معیار فاصله‌ها", st.mu.toFixed(0) + " / " + st.sd.toFixed(0) + " ms"], ["هشدار کاذب φ / timeout", st.falsePhi + " / " + st.falseDl, st.falsePhi + st.falseDl ? "warn" : ""], ["زمان تشخیص φ / timeout", (st.detPhi === null ? "–" : st.detPhi + " ms") + " / " + (st.detDl === null ? "–" : st.detDl + " ms")]].forEach(function (x) {
+      S2.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    ctl.j.set(view.jitter); ctl.t.set(view.thr); ctl.d.set(view.dl);
   }
-  var sl = document.getElementById("sl");
-  sl.appendChild(Kit.slider({ label: "jitter مربوط به heartbeat، یعنی انحراف معیار", min: 0, max: 500, step: 25, value: cfg.jitter, unit: " میلی‌ثانیه", onInput: function (v) { cfg.jitter = v; } }).element);
-  sl.appendChild(Kit.slider({ label: "آستانه‌ی φ", min: 1, max: 12, step: 1, value: cfg.thr, onInput: function (v) { cfg.thr = v; } }).element);
-  sl.appendChild(Kit.slider({ label: "مهلت", min: 1100, max: 4000, step: 100, value: cfg.dl, unit: " میلی‌ثانیه", onInput: function (v) { cfg.dl = v; } }).element);
-  document.getElementById("pause").addEventListener("click", function () { pauseUntil = now + 2500; log.add("نود ۲٫۵ ثانیه می‌ایستد؛ زنده است، تنها ساکت", "warn"); });
-  document.getElementById("kill").addEventListener("click", function () { if (!dead) { dead = true; killedAt = now; detPhi = detDl = null; log.add("نود از کار افتاد", "bad"); } });
-  document.getElementById("revive").addEventListener("click", function () { if (dead) { dead = false; nextHb = now + TICK; log.add("نود دوباره راه افتاد", "ok"); } });
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 60 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  function act(name) { return tw(function () { view.acts = view.acts.concat([[name, view.T + 100]]); view.T += 1000; }); }
+  ctl.j = Kit.slider({ label: "jitter heartbeat (انحراف معیار)", min: 0, max: 500, step: 25, value: view.jitter, unit: " ms", onInput: tw(function (v) { view.jitter = v; }) });
+  ctl.t = Kit.slider({ label: "آستانه‌ی φ", min: 1, max: 12, step: 1, value: view.thr, onInput: tw(function (v) { view.thr = v; }) });
+  ctl.d = Kit.slider({ label: "timeout", min: 1100, max: 4000, step: 100, value: view.dl, unit: " ms", onInput: tw(function (v) { view.dl = v; }) });
+  [ctl.j, ctl.t, ctl.d].forEach(function (c) { document.getElementById("slC").appendChild(c.element); });
+  document.getElementById("pause").addEventListener("click", act("pause"));
+  document.getElementById("kill").addEventListener("click", act("kill"));
+  document.getElementById("revive").addEventListener("click", act("revive"));
+  document.getElementById("f1").addEventListener("click", tw(function () { view.T += 1000; }));
+  document.getElementById("f5").addEventListener("click", tw(function () { view.T += 5000; }));
+  document.getElementById("z").addEventListener("click", tw(function () { view.T = 10000; view.acts = []; }));
+
+  /* ---------- the scenario (seed 13; heartbeat every second) ---------- */
+  var PK = [["pause", 15000], ["kill", 25000]];
+  function at(T, o) { return function () { o = o || {}; view = { jitter: o.j || 150, thr: o.thr || 8, dl: o.dl || 1600, acts: o.acts || [], T: T }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(28000, { acts: PK }), render: render, interval: 9000,
+    intro: "خط آبی φ در ۲۰ ثانیه‌ی اخیر است و تیک‌های سبز heartbeatهای رسیده. خط‌چین قرمز آستانه‌ی φ است و خط نقطه‌چین نارنجی همان timeout ثابت، روی مقیاس φ امروز.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: jitter، آستانه و timeout را عوض کنید، مکث GC بسازید یا نود را از کار بیندازید.",
+    steps: [
+      { kind: "ok", run: at(10000), say: "heartbeat هر یک ثانیه با jitter ۱۵۰ ms. φ بعد از هر heartbeat به صفر برمی‌گردد. timeout ۱۶۰۰ ms با این نویز کم معادل φ حدود ۱۰ است (صص. ۱۹۹–۲۰۰)." },
+      { kind: "warn", run: at(23900, { j: 400, dl: 1400 }), say: "jitter ۴۰۰ ms و timeout ۱۴۰۰ ms: یک فاصله‌ی ۱٫۵ ثانیه‌ای کافی بود که timeout به نود زنده مشکوک شود. φ-accrual واریانس بیشتر را دیده و همان سکوت برایش φ حدود ۲٫۵ است، خیلی زیر آستانه‌ی ۸." },
+      { kind: "warn", run: at(16500, { acts: PK }), say: "نود برای GC ۲٫۵ ثانیه می‌ایستد؛ زنده است ولی heartbeat نمی‌فرستد. هر دو detector به آن مشکوک شدند: هشدار کاذب. detectorها مجازند چنین خطایی کنند (ص. ۱۹۶)." },
+      { kind: "ok", run: at(19000, { acts: PK }), say: "heartbeatها برگشتند و هر دو دوباره اعتماد کردند. حالا آن فاصله‌ی طولانی در پنجره است و انحراف معیار از حدود ۱۰۰ به حدود ۵۰۰ ms رسیده." },
+      { kind: "bad", run: at(26000, { acts: [["kill", 25000]] }), say: "بدون مکث GC، نود در ثانیه‌ی ۲۵ از کار می‌افتد: φ-accrual بعد از ۶۰۰ ms و timeout بعد از ۷۰۰ ms تشخیص می‌دهند." },
+      { kind: "bad", run: at(26500, { acts: PK }), say: "همان از کار افتادن، این بار بعد از مکث GC: timeout باز هم بعد از ۷۰۰ ms تشخیص می‌دهد، ولی φ هنوز زیر آستانه است." },
+      { kind: "bad", run: at(28000, { acts: PK }), say: "φ-accrual بعد از ۲۶۰۰ ms تشخیص داد. پنجره هنوز مکث GC را به یاد دارد و سکوت طولانی را «عادی‌تر» می‌بیند؛ تطبیق‌پذیری هزینه‌ی کندتر شدن دارد (برداشت vault از این اجرا)." },
+      { kind: "warn", run: at(30000, { thr: 3, acts: PK }), say: "آستانه‌ی ۳: تشخیص به ۱۵۰۰ ms رسید، ولی هشدار کاذب در مکث GC هم زودتر آمد. کارایی و دقت را نمی‌شود هم‌زمان کامل داشت (ص. ۱۹۶)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "مقدار φ چه چیزی را اندازه می‌گیرد؟",

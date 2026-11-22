@@ -7,18 +7,25 @@
 <meta name="description" content="قدم‌به‌قدم Paxos یک‌فرمانی را با پنج acceptor و دو proposer ببینید: یک دور عادی، سه صحنه‌ی شکست proposer از کتاب (شکل‌های ۱۴-۴ تا ۱۴-۶) و دو proposer در جدال. هر acceptor از همان قاعده‌ی واقعی قول و پذیرش پی می‌گیرد، پس مقدار برگزیده حساب می‌شود و از پیش نوشته نیست. تصویری از فصل ۱۴ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  table.px { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .82rem; }
-  table.px td, table.px th { border-bottom: 1px solid var(--line); padding: 5px 6px; text-align: right; }
-  table.px tr.down td { opacity: .5; text-decoration: line-through; }
-  table.px tr.touch td { background: var(--accent-soft); }
-  .props { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  .props .callout { margin: 0; font-size: .82rem; }
+  .px-wrap { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+  table.px { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  table.px td, table.px th { border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: right; }
+  table.px td { font-family: var(--mono); font-weight: 700; }
+  table.px tr.down td, table.px tr.down th { opacity: .5; text-decoration: line-through; }
+  table.px tr.touch td, table.px tr.touch th { background: var(--accent-soft); }
+  .props { display: grid; gap: 8px; }
+  .props .callout { margin: 0; font-size: .92rem; }
+  .px-ev { margin-top: 10px; font-size: .92rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.8; }
+  .px-ev.ok { border-color: var(--ok); } .px-ev.warn { border-color: var(--warn); } .px-ev.bad { border-color: var(--bad); }
+  #chosen { margin: 8px 0 0; padding: 6px 12px; }
+  .legend { font-size: .84rem; color: var(--ink-2); margin: 6px 0 0; }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/14-consensus.html">فصل ۱۴</a><span aria-hidden="true">/</span>
@@ -29,56 +36,64 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۴ · الگوریتم consensus</div>
-  <h1>الگوریتم Paxos، دور به دور</h1>
-  <p class="lede">هر proposer نخست پیام <strong>Prepare(n)</strong> را به اکثریتی از acceptorها می‌فرستد. هر کدام <strong>قول می‌دهد</strong> پیشنهادهای شماره‌کمتر از n را نشنیده بگیرد و هر مقداری را که پیش‌تر پذیرفته گزارش کند. بعد آن proposer پیام <strong>Accept!(n, v)</strong> را می‌فرستد، که در آن v مقدار <strong>پیشنهادِ پذیرفته‌شده‌ی با بالاترین شماره</strong> است که از آن خبر دارد، یا اگر چنین چیزی نبود مقدار خودش. مقداری <strong>برگزیده</strong> می‌شود همین که اکثریتی همان یک پیشنهاد را بپذیرند.</p>
-  <p class="source-note">تصویری از «الگوریتم Paxos» و «quorum‌ها در Paxos» و «صحنه‌های شکست» (صص. ۲۸۶–۲۹۱، شکل‌های ۱۴-۳ تا ۱۴-۶). صحنه‌ها از شکل‌های کتاب پی می‌گیرند: در صحنه‌ی چهارم، آن P1 با شماره‌ی ۳ از نو تلاش می‌کند تا نشان دهد proposerی دیرتر پیشنهادِ پذیرفته‌شده‌ی تازه‌تر را برمی‌گزیند. درازی صحنه‌ی جدال و چیدن پنج acceptor مال vault است. قاعده‌ی acceptorها مال کتاب است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>Paxos، دور به دور</h1>
+      <p class="lede">proposer اول پیام <strong>Prepare(n)</strong> را به اکثریت acceptorها می‌فرستد. هر acceptor <strong>قول می‌دهد</strong> پیشنهادهای با شماره‌ی کمتر از n را نپذیرد و اگر قبلاً مقداری را پذیرفته، آن را گزارش می‌کند. بعد proposer پیام <strong>Accept!(n, v)</strong> را می‌فرستد؛ v مقدار <strong>پیشنهاد پذیرفته‌شده با بالاترین شماره</strong> در جواب‌هاست، و اگر چنین مقداری نباشد مقدار خود proposer. وقتی اکثریت یک پیشنهاد را بپذیرند، آن مقدار <strong>انتخاب</strong> شده و هر دور بعدی هم همان را انتخاب می‌کند.</p>
+      <p class="source-note">تصویری از «Paxos Algorithm»، «Quorums in Paxos» و «Failure Scenarios» (صص. ۲۸۶–۲۹۱، شکل‌های ۱۴-۳ تا ۱۴-۶). صحنه‌ها همان شکل‌های کتاب‌اند؛ تلاش دوباره‌ی P1 با شماره‌ی ۳ در صحنه‌ی شکل ۱۴-۶، طول صحنه‌ی رقابت و پنج acceptor انتخاب vault است. قواعد acceptor از کتاب است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="table-wrap"><table class="px" id="acc"></table></div><div class="props" id="props"></div>
-        <div class="callout" id="chosen" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="scen"></div><div id="player" style="margin-top:12px"></div>
-        <p class="field-hint">سطرهای پررنگ در قدم پیش پیامی گرفته‌اند. سطر خط‌خورده acceptorی از کار افتاده است.</p></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="px-wrap">
+            <div><table class="px" id="acc"></table>
+              <p class="legend">ردیف آبی: در همین قدم پیام گرفته · ردیف خط‌خورده: acceptor از کار افتاده</p></div>
+            <div class="props" id="props"></div>
+          </div>
+          <div class="px-ev" id="ev" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="scenC"></div>
+        <div class="tweak-group"><div class="row"><button class="btn small primary" type="button" id="one">قدم بعدی</button><button class="btn small" type="button" id="all">تا آخر</button><button class="btn small" type="button" id="re">از اول</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>شکل ۱۴-۴.</strong> مقدار P1 تنها به A1 رسید و بعد P1 از کار افتاد. آن quorum از P2 شامل A1 است که مقدار (۱، V1) را گزارش می‌کند، پس P2 باید V1 را پیشنهاد دهد، نه مقدار خودش را.</li>
-    <li><strong>شکل ۱۴-۵.</strong> آن quorum از P2 به A1 نمی‌رسد، هیچ‌کس مقدار پذیرفته‌ای گزارش نمی‌کند، و P2 مقدار V2 را برگزیده می‌کند. مقدار V1 را یک acceptor پذیرفته بود ولی هیچ‌وقت برگزیده نشد، پس این هنوز ایمن است.</li>
-    <li><strong>شکل ۱۴-۶.</strong> عضو A1 مقدار V1 را پذیرفت و از کار افتاد؛ و V2 بی او برگزیده می‌شود. وقتی P1 از نو تلاش می‌کند و باز به A1 می‌رسد، هر دو (۱، V1) و (۲، V2) را می‌بیند و آن یکی با شماره‌ی بالاتر را برمی‌گزیند، پس همان تصمیم سر جایش می‌ماند.</li>
-    <li><strong>جدال proposerها</strong> یعنی هر کدام با شماره‌ای بالاتر قول‌های دیگری را باطل می‌کند، و هیچ‌کس تمام نمی‌کند. عقب‌نشینی تصادفی می‌گذارد یکی‌شان دوری را به پایان برساند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>شکل ۱۴-۴.</strong> مقدار P1 فقط به A1 رسید و P1 از کار افتاد. quorum ‏P2 شامل A1 است که (1, V1) را گزارش می‌کند، پس P2 باید V1 را پیشنهاد دهد، نه مقدار خودش را (ص. ۲۸۹).</li>
+      <li><strong>شکل ۱۴-۵.</strong> quorum ‏P2 شامل A1 نیست و کسی مقدار پذیرفته‌ای گزارش نمی‌کند؛ V2 انتخاب می‌شود. V1 را فقط یک acceptor پذیرفته بود و هیچ‌وقت انتخاب نشد، پس ایمنی حفظ می‌شود (صص. ۲۸۹–۲۹۰).</li>
+      <li><strong>شکل ۱۴-۶.</strong> A1 مقدار V1 را پذیرفت و از کار افتاد و V2 بدون او انتخاب شد. وقتی P1 دوباره تلاش می‌کند، هم (1, V1) و هم (2, V2) را می‌بیند و شماره‌ی بالاتر را برمی‌دارد (ص. ۲۹۰).</li>
+      <li><strong>رقابت proposerها.</strong> هرکدام با شماره‌ی بالاتر قول‌های دیگری را باطل می‌کند و هیچ‌کدام تمام نمی‌کند؛ backoff تصادفی به یکی فرصت می‌دهد (ص. ۲۹۰).</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/14-consensus.html"><small>درس</small>فصل ۱۴: الگوریتم consensus</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/14-consensus.html"><small>درس</small>فصل ۱۴: الگوریتم consensus</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var ACC = ["A1", "A2", "A3", "A4", "A5"], scen = "f4", A, P, steps, k, touched, chosen;
+  var ACC = ["A1", "A2", "A3", "A4", "A5"], view = { scen: "normal", K: 0 }, tour, ctl = {}, A, P, touched, chosen, msg, kind, steps;
   var SCEN = {
     normal: [["prep", "P1", 1, [0, 1, 2]], ["acc", "P1", [0, 1, 2]]],
     f4: [["prep", "P1", 1, [0, 1, 2]], ["acc", "P1", [0]], ["crashP", "P1"], ["prep", "P2", 2, [0, 1, 2]], ["acc", "P2", [0, 1, 2]]],
@@ -86,61 +101,80 @@ function stats(rows) {
     f6: [["prep", "P1", 1, [0, 1, 2]], ["acc", "P1", [0]], ["crashP", "P1"], ["crashA", 0], ["prep", "P2", 2, [1, 2, 3]], ["acc", "P2", [1, 2, 3]], ["recoverA", 0], ["recoverP", "P1"], ["prep", "P1", 3, [0, 1, 2]], ["acc", "P1", [0, 1, 2]]],
     duel: [["prep", "P1", 1, [0, 1, 2]], ["prep", "P2", 2, [0, 1, 2]], ["acc", "P1", [0, 1, 2]], ["prep", "P1", 3, [0, 1, 2]], ["acc", "P2", [0, 1, 2]], ["prep", "P2", 4, [0, 1, 2]], ["acc", "P1", [0, 1, 2]], ["backoff", "P2"], ["prep", "P1", 5, [0, 1, 2]], ["acc", "P1", [0, 1, 2]]]
   };
-  function reset() {
-    A = ACC.map(function () { return { promised: 0, acc: null, up: true }; });
-    P = { P1: { own: "V1", n: 0, promises: [], value: null, up: true }, P2: { own: "V2", n: 0, promises: [], value: null, up: true } };
-    steps = SCEN[scen]; k = 0; touched = []; chosen = null;
-    log.clear(); log.add("پنج acceptor؛ اکثریت یعنی ۳. مقدار دلخواه P1 همان V1 است و مقدار دلخواه P2 همان V2.", "muted"); render();
-  }
-  function names(ix) { return ix.map(function (i) { return ACC[i]; }).join("، "); }
-  function step() {
-    if (k >= steps.length) return false;
-    var s = steps[k++]; touched = [];
+  function names(ix) { return ix.map(function (i) { return ACC[i]; }).join(" و "); }
+  function pr(a) { return "(" + a.n + ", " + a.v + ")"; }
+  function apply(s) {
+    touched = []; var m = "", k = "";
     if (s[0] === "prep") {
-      var p = P[s[1]], n = s[2]; p.n = n; p.promises = []; p.value = null;
-      var replies = [];
-      s[3].forEach(function (i) {
-        var a = A[i]; if (!a.up) return; touched.push(i);
-        if (n > a.promised) { a.promised = n; p.promises.push({ i: i, acc: a.acc }); replies.push("عضو " + ACC[i] + " قول می‌دهد" + (a.acc ? " و مقدار (" + a.acc.n + "، " + a.acc.v + ") را گزارش می‌کند" : "")); }
-        else replies.push("عضو " + ACC[i] + " رد می‌کند: پیش‌تر قول " + a.promised + " را داده");
-      });
-      var ok = p.promises.length >= 3;
-      if (ok) { var best = null; p.promises.forEach(function (x) { if (x.acc && (!best || x.acc.n > best.n)) best = x.acc; }); p.value = best ? best.v : p.own; }
-      log.add("فرستنده‌ی " + s[1] + " پیام Prepare(" + n + ") را به " + names(s[3]) + " می‌فرستد. " + replies.join("؛ ") + "." + (ok ? " یک quorum از قول‌ها: " + s[1] + " مقدار " + p.value + " را پیشنهاد خواهد داد" + (p.value !== p.own ? "، که آن را پذیرفته و مال خودش نیست" : "") : " بی quorum."), ok ? "ok" : "warn");
+      var p = P[s[1]], n = s[2], rep = [], ok; p.n = n; p.promises = []; p.value = null;
+      s[3].forEach(function (i) { var a = A[i]; if (!a.up) return; touched.push(i);
+        if (n > a.promised) { a.promised = n; p.promises.push(a.acc); rep.push(ACC[i] + " قول می‌دهد" + (a.acc ? " و " + pr(a.acc) + " را گزارش می‌کند" : "")); }
+        else rep.push(ACC[i] + " رد می‌کند چون قبلاً به " + a.promised + " قول داده"); });
+      ok = p.promises.length >= 3;
+      if (ok) { var best = null; p.promises.forEach(function (x) { if (x && (!best || x.n > best.n)) best = x; }); p.value = best ? best.v : p.own; }
+      m = s[1] + " پیام Prepare(" + n + ") را به " + names(s[3]) + " می‌فرستد: " + rep.join("، ") + "." + (ok ? " quorum قول‌ها کامل است؛ " + s[1] + " مقدار " + p.value + " را پیشنهاد خواهد داد" + (p.value !== p.own ? "، نه مقدار خودش را." : ".") : " quorum کامل نشد.");
+      k = ok ? "ok" : "warn";
     } else if (s[0] === "acc") {
-      var q = P[s[1]];
-      if (!q.value) { log.add("فرستنده‌ی " + s[1] + " quorumی از قول‌ها ندارد؛ نمی‌تواند Accept! بفرستد", "muted"); render(); return k < steps.length; }
-      var res = [], bad = false;
-      s[2].forEach(function (i) {
-        var a = A[i]; if (!a.up) return; touched.push(i);
-        if (q.n >= a.promised) { a.promised = q.n; a.acc = { n: q.n, v: q.value }; res.push("عضو " + ACC[i] + " می‌پذیرد"); }
-        else { bad = true; res.push("عضو " + ACC[i] + " رد می‌کند، چون قول " + a.promised + " را داده"); }
-      });
-      log.add("فرستنده‌ی " + s[1] + " پیام Accept!(" + q.n + "، " + q.value + ") را به " + names(s[2]) + " می‌فرستد. " + res.join("؛ ") + ".", bad ? "bad" : "ok");
-    } else if (s[0] === "crashP") { P[s[1]].up = false; log.add("فرستنده‌ی " + s[1] + " از کار می‌افتد", "bad"); }
-    else if (s[0] === "recoverP") { P[s[1]].up = true; log.add("فرستنده‌ی " + s[1] + " بازیابی می‌شود و دوری تازه را آغاز می‌کند", "muted"); }
-    else if (s[0] === "crashA") { A[s[1]].up = false; log.add("عضو " + ACC[s[1]] + " از کار می‌افتد، پیش از آنکه هیچ proposer تازه‌ای از مقدارش خبردار شود", "bad"); }
-    else if (s[0] === "recoverA") { A[s[1]].up = true; touched.push(s[1]); log.add("عضو " + ACC[s[1]] + " بازیابی می‌شود و هنوز مقدار (" + A[s[1]].acc.n + "، " + A[s[1]].acc.v + ") را نگه داشته", "muted"); }
-    else if (s[0] === "backoff") log.add("فرستنده‌ی " + s[1] + " برای latencyی تصادفی عقب می‌نشیند", "warn");
+      var q = P[s[1]], res = [], bad = false;
+      if (!q.value) { m = s[1] + " quorum قول ندارد و نمی‌تواند Accept! بفرستد."; k = "warn"; }
+      else { s[2].forEach(function (i) { var a = A[i]; if (!a.up) return; touched.push(i);
+          if (q.n >= a.promised) { a.promised = q.n; a.acc = { n: q.n, v: q.value }; res.push(ACC[i] + " می‌پذیرد"); }
+          else { bad = true; res.push(ACC[i] + " رد می‌کند چون به " + a.promised + " قول داده"); } });
+        m = s[1] + " پیام Accept!(" + q.n + ", " + q.value + ") را به " + names(s[2]) + " می‌فرستد: " + res.join("، ") + "."; k = bad ? "bad" : "ok"; }
+    } else if (s[0] === "crashP") { P[s[1]].up = false; m = s[1] + " از کار می‌افتد."; k = "bad"; }
+    else if (s[0] === "recoverP") { P[s[1]].up = true; m = s[1] + " برمی‌گردد و دور تازه‌ای شروع می‌کند."; }
+    else if (s[0] === "crashA") { A[s[1]].up = false; m = ACC[s[1]] + " از کار می‌افتد، قبل از اینکه proposer دیگری مقدارش را ببیند."; k = "bad"; }
+    else if (s[0] === "recoverA") { A[s[1]].up = true; touched.push(s[1]); m = ACC[s[1]] + " برمی‌گردد و هنوز " + pr(A[s[1]].acc) + " را نگه داشته است."; }
+    else if (s[0] === "backoff") { m = s[1] + " به اندازه‌ی یک زمان تصادفی صبر می‌کند (backoff)."; k = "warn"; }
     var counts = {}; A.forEach(function (a) { if (a.acc) { var key = a.acc.n + "|" + a.acc.v; counts[key] = (counts[key] || 0) + 1; } });
-    Object.keys(counts).forEach(function (key) { if (counts[key] >= 3) { var v = key.split("|")[1]; if (!chosen) log.add("اکثریتی همان یک پیشنهاد را پذیرفت: مقدار " + v + " برگزیده است", "ok"); else if (chosen !== v) log.add("نقض ایمنی: مقدار " + v + " پس از " + chosen + " برگزیده شد", "bad"); chosen = chosen || v; } });
-    render(); return k < steps.length;
+    Object.keys(counts).forEach(function (key) { if (counts[key] >= 3 && !chosen) { chosen = key.split("|")[1]; m += " اکثریت یک پیشنهاد را پذیرفت: " + chosen + " انتخاب شد."; k = "ok"; } });
+    return [m, k];
   }
   function render() {
+    A = ACC.map(function () { return { promised: 0, acc: null, up: true }; });
+    P = { P1: { own: "V1", n: 0, promises: [], value: null, up: true }, P2: { own: "V2", n: 0, promises: [], value: null, up: true } };
+    steps = SCEN[view.scen]; touched = []; chosen = null; var K = Math.min(view.K, steps.length), r = ["پنج acceptor؛ اکثریت یعنی ۳. مقدار P1 ‏V1 است و مقدار P2 ‏V2.", ""];
+    for (var i = 0; i < K; i++) r = apply(steps[i]);
+    msg = r[0]; kind = r[1];
     var t = Kit.clear(document.getElementById("acc"));
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["عضو acceptor", "قول‌داده", "پذیرفته (n، v)"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["acceptor", "قول داده به", "پذیرفته (n, v)"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
     var tb = Kit.el("tbody");
-    A.forEach(function (a, i) { tb.appendChild(Kit.el("tr", { class: (a.up ? "" : "down ") + (touched.indexOf(i) >= 0 ? "touch" : "") }, Kit.el("th", { scope: "row" }, ACC[i] + (a.up ? "" : " · از کار افتاده")), Kit.el("td", null, a.promised || "–"), Kit.el("td", null, a.acc ? "(" + a.acc.n + "، " + a.acc.v + ")" : "–"))); });
+    A.forEach(function (a, i) { tb.appendChild(Kit.el("tr", { class: (a.up ? "" : "down ") + (touched.indexOf(i) >= 0 ? "touch" : "") }, Kit.el("th", { scope: "row", class: "mono" }, ACC[i] + (a.up ? "" : " ✗")), Kit.el("td", { class: "mono" }, a.promised || "–"), Kit.el("td", { class: "mono" }, a.acc ? pr(a.acc) : "–"))); });
     t.appendChild(tb);
-    var pr = Kit.clear(document.getElementById("props"));
-    ["P1", "P2"].forEach(function (id) { var p = P[id]; pr.appendChild(Kit.el("div", { class: "callout " + (p.up ? "" : "bad") }, Kit.el("strong", null, id + (p.up ? "" : " · از کار افتاده")), Kit.el("div", null, "مقدار دلخواه " + p.own + "؛ دور " + (p.n || "–") + (p.value ? "، پیشنهاد " + p.value : "")))); });
-    var c = document.getElementById("chosen"); c.className = "callout " + (chosen ? "ok" : "");
-    c.textContent = chosen ? "مقدار برگزیده: " + chosen + ". هر دور دیرتری هم همان " + chosen + " را برمی‌گزیند." : "هنوز هیچ مقداری برگزیده نشده.";
-    stats([["قدم", k + " / " + steps.length], ["برگزیده", chosen || "–", chosen ? "ok" : ""]]);
+    var ps = Kit.clear(document.getElementById("props"));
+    ["P1", "P2"].forEach(function (id) { var p = P[id]; ps.appendChild(Kit.el("div", { class: "callout " + (p.up ? "" : "bad") }, Kit.el("strong", { class: "mono" }, id + (p.up ? "" : " ✗")), document.createTextNode(p.up ? "" : " از کار افتاده"),
+      Kit.el("div", null, "مقدار خودش: ", Kit.el("span", { class: "mono" }, p.own), " · دور: ", Kit.el("span", { class: "mono" }, String(p.n || "–")), p.value ? " · پیشنهاد: " : "", p.value ? Kit.el("span", { class: "mono" }, p.value) : ""))); });
+    var ev = document.getElementById("ev"); ev.className = "px-ev " + kind; ev.textContent = msg;
+    var St = Kit.clear(document.getElementById("stats"));
+    [["قدم", K + " / " + steps.length], ["مقدار انتخاب‌شده", chosen ? "✓ " + chosen : "هنوز هیچ", chosen ? "ok" : ""]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    ctl.scen.set(view.scen);
   }
-  document.getElementById("scen").appendChild(Kit.segmented({ label: "صحنه", value: scen, options: [{ value: "normal", label: "دور عادی" }, { value: "f4", label: "شکل ۱۴-۴" }, { value: "f5", label: "شکل ۱۴-۵" }, { value: "f6", label: "شکل ۱۴-۶" }, { value: "duel", label: "جدال" }], onChange: function (v) { scen = v; reset(); } }).element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1300 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.scen = Kit.segmented({ label: "صحنه", value: view.scen, options: [{ value: "normal", label: "دور عادی" }, { value: "f4", label: "شکل ۱۴-۴" }, { value: "f5", label: "شکل ۱۴-۵" }, { value: "f6", label: "شکل ۱۴-۶" }, { value: "duel", label: "رقابت" }], onChange: tw(function (v) { view.scen = v; view.K = 0; }) });
+  document.getElementById("scenC").appendChild(ctl.scen.element);
+  document.getElementById("one").addEventListener("click", tw(function () { view.K = Math.min(view.K + 1, steps.length); }));
+  document.getElementById("all").addEventListener("click", tw(function () { view.K = 99; }));
+  document.getElementById("re").addEventListener("click", tw(function () { view.K = 0; }));
+
+  function at(scen, K) { return function () { view = { scen: scen, K: K }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at("f6", 99), render: render, interval: 8000,
+    intro: "پنج acceptor و دو proposer. با ۲f + ۱ = ۵ نود، Paxos خرابی ۲ نود را تحمل می‌کند و هر quorum ۳ نود است (ص. ۲۸۸). جدول نشان می‌دهد هر acceptor به چه شماره‌ای قول داده و چه پیشنهادی را پذیرفته.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: یک صحنه انتخاب کنید و قدم‌به‌قدم جلو بروید.",
+    steps: [
+      { kind: "ok", run: at("normal", 1), say: "فاز propose: ‏P1 پیام Prepare(1) را به A1 تا A3 می‌فرستد. هر سه قول می‌دهند پیشنهاد با شماره‌ی کمتر از ۱ را نپذیرند. کسی چیزی نپذیرفته، پس P1 مقدار خودش V1 را پیشنهاد می‌دهد (ص. ۲۸۶)." },
+      { kind: "ok", run: at("normal", 2), say: "فاز replication: ‏P1 پیام Accept!(1, V1) را می‌فرستد و اکثریت آن را می‌پذیرند؛ V1 انتخاب شد (صص. ۲۸۶–۲۸۷، شکل ۱۴-۳)." },
+      { kind: "bad", run: at("f4", 3), say: "شکل ۱۴-۴: ‏P1 مقدار V1 را فقط به A1 رساند و از کار افتاد. یک acceptor اکثریت نیست، پس هنوز چیزی انتخاب نشده (ص. ۲۸۹)." },
+      { kind: "ok", run: at("f4", 4), say: "P2 با شماره‌ی بالاتر ۲ شروع می‌کند و quorumش شامل A1 است. A1 گزارش می‌دهد (1, V1) را پذیرفته؛ پس P2 باید V1 را پیشنهاد دهد، نه V2 را (ص. ۲۸۹)." },
+      { kind: "ok", run: at("f4", 99), say: "P2 مقدار V1 را کامل می‌کند. خرابی proposer مانع رسیدن به consensus نشد، چون state روی چند نود replicate شده بود (ص. ۲۸۹)." },
+      { kind: "ok", run: at("f5", 99), say: "شکل ۱۴-۵: این بار quorum ‏P2 ‏A2 تا A4 است و A1 در آن نیست. کسی مقدار پذیرفته‌ای گزارش نمی‌کند و V2 انتخاب می‌شود. این امن است، چون V1 هیچ‌وقت به اکثریت نرسیده بود (صص. ۲۸۹–۲۹۰)." },
+      { kind: "ok", run: at("f6", 99), say: "شکل ۱۴-۶: ‏A1 بعد از پذیرفتن V1 از کار افتاد و V2 بدون او انتخاب شد. P1 برمی‌گردد و با شماره‌ی ۳ هر دو را می‌بیند: (1, V1) و (2, V2). شماره‌ی بالاتر را برمی‌دارد و تصمیم V2 سر جایش می‌ماند (ص. ۲۹۰)." },
+      { kind: "bad", run: at("duel", 7), say: "رقابت: هر proposer با Prepare شماره‌ی بالاتر قول‌های دیگری را باطل می‌کند، پس هر Accept! رد می‌شود و هیچ‌کدام پیش نمی‌روند (ص. ۲۹۰)." },
+      { kind: "ok", run: at("duel", 99), say: "راه‌حل backoff تصادفی است: P2 صبر می‌کند و P1 دورش را با شماره‌ی ۵ تمام می‌کند (ص. ۲۹۰)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "عضوی acceptor قول ۲ را داده و بعد پیام Accept!(۱، V1) را می‌گیرد. چه می‌کند؟",

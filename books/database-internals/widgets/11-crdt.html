@@ -7,19 +7,28 @@
 <meta name="description" content="سه replica را پارتیشن کنید، در هر سو بیفزایید و بکاهید و اضافه و برداشته کنید، بعد پارتیشن را ترمیم کنید و ببینید حالت‌های G-Counter و PN-Counter و مجموعه‌ی دو‌فازی بی توجه به ترتیب merge به همان مقدار merge می‌شوند. تصویری از فصل ۱۱ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .reps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .rp { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); font-size: .8rem; }
-  .rp h3 { margin: 0 0 6px; font-size: .9rem; display: flex; justify-content: space-between; }
-  .rp .kv { display: block; margin-bottom: 4px; }
-  .rp .val { font-weight: 600; color: var(--ink); }
-  .split { border-right: 3px dashed var(--bad); }
-  @media (max-width: 560px) { .reps { grid-template-columns: 1fr; } .split { border-right: 0; border-top: 3px dashed var(--bad); } }
+  .reps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .rp { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); }
+  .rp.who { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .rp.cut { border-style: dashed; border-color: var(--bad); }
+  .rp h3 { margin: 0 0 6px; font-size: .98rem; display: flex; justify-content: space-between; align-items: center; }
+  .rp .badge { font-size: .74rem; }
+  .rp dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; font-size: .84rem; align-items: baseline; }
+  .rp dt { color: var(--ink-3); font-size: .78rem; }
+  .rp dd { margin: 0; font-family: var(--mono); direction: ltr; text-align: left; }
+  .rp dd b { font-size: 1.05rem; }
+  .rp dd.chg { background: var(--warn-soft); border-radius: 3px; }
+  .rp .rm { text-decoration: line-through; color: var(--bad); }
+  .cr-ev { margin-top: 10px; font-size: .9rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.8; }
+  .cr-ev.ok { border-color: var(--ok); } .cr-ev.warn { border-color: var(--warn); } .cr-ev.bad { border-color: var(--bad); }
+  .cr-ev .mono { direction: ltr; unicode-bidi: isolate; }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/11-replication-and-consistency.html">فصل ۱۱</a><span aria-hidden="true">/</span>
@@ -30,98 +39,152 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۱ · replication و consistency</div>
-  <h1>CRDT: شمارنده و مجموعه‌ای که همیشه merge می‌شود</h1>
-  <p class="lede"><strong>نوع داده‌ی تکرارشده‌ی بی‌تعارض</strong> می‌گذارد replicaها مستقل به‌روزرسانی بپذیرند، حتی در میانه‌ی پارتیشنی، و باز هم هم‌گرا شوند. merge آن‌ها commutative و associative و idempotent است. <strong>G-Counter</strong> یک خانه برای هر replicaیی نگه می‌دارد، با بیشینه‌ی عنصر‌به‌عنصر merge می‌کند و به‌شکل جمع خوانده می‌شود. <strong>PN-Counter</strong> دو G-Counter را جفت می‌کند، یکی برای افزودن و یکی برای کاستن. <strong>مجموعه‌ی دو‌فازی</strong> یک مجموعه‌ی افزودن و یک مجموعه‌ی برداشتن نگه می‌دارد، و عنصری برداشته‌شده هیچ‌وقت نمی‌تواند برگردد.</p>
-  <p class="source-note">تصویری از «eventual consistency قوی» و «نوع داده‌های تکرارشده‌ی بی‌تعارض» (صص. ۲۳۸–۲۴۰)، از جمله نمونه‌ی G-Counter در جدول ۱۱-۱. replicaها و عنصرها و آن پارتیشن مال vault است. mergeها حالت‌محورند، یعنی کل حالت رد و بدل می‌شود، همان شکلی که نمونه‌های شمارنده‌ی کتاب به کار می‌برند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>CRDT: شمارنده و مجموعه‌ای که همیشه merge می‌شود</h1>
+      <p class="lede">یک <strong>CRDT</strong> اجازه می‌دهد replicaها مستقل از هم، حتی وسط partition، به‌روزرسانی بپذیرند و بعد بی‌تعارض merge شوند. در <strong>G-Counter</strong> هر replica فقط خانه‌ی خودش را در یک بردار زیاد می‌کند؛ merge بیشینه‌ی هر خانه را برمی‌دارد و مقدار، جمع خانه‌هاست. <strong>PN-Counter</strong> دو بردار P و N دارد تا کم کردن هم ممکن شود. مجموعه با یک <strong>add set</strong> و یک <strong>remove set</strong> حذف را هم پشتیبانی می‌کند.</p>
+      <p class="source-note">تصویری از «Strong Eventual Consistency and CRDTs» (صص. ۲۳۸–۲۴۰). مثال سه‌گره‌ای G-Counter عیناً همان مثال کتاب است (ص. ۲۳۹)؛ replicaها با نام A، B و C همان Node 1 تا ۳ کتاب‌اند. partition، عنصرها و ترتیب عملیات صحنه‌ی vault است. mergeها state-based است، یعنی کل حالت رد و بدل می‌شود، مثل مثال شمارنده‌ی کتاب. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="reps" id="reps"></div><div class="callout" id="conv" style="margin-top:12px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="who"></div><div id="elem" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="inc">افزودن</button><button class="btn small" type="button" id="dec">کاستن</button></div>
-        <div class="row" style="margin-top:8px"><button class="btn small primary" type="button" id="add">اضافه کردن عنصر</button><button class="btn small danger" type="button" id="rem">برداشتن عنصر</button></div>
-        <div class="row" style="margin-top:8px"><label class="field" style="margin:0"><input type="checkbox" id="part" checked> پارتیشن {A, B} و {C}</label></div>
-        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="sync">رد و بدل حالت‌ها به ترتیب تصادفی</button><button class="btn small" type="button" id="reset">↺ از نو</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="reps" id="reps"></div>
+          <div class="cr-ev" id="ev" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="whoC"></div>
+        <div class="tweak-group" id="elC"></div>
+        <div class="tweak-group"><div class="row">
+          <button class="btn small primary" type="button" id="inc">افزایش</button><button class="btn small" type="button" id="dec">کاهش</button>
+          <button class="btn small primary" type="button" id="add">اضافه کردن عنصر</button><button class="btn small danger" type="button" id="rem">حذف عنصر</button></div></div>
+        <div class="tweak-group"><div class="row">
+          <label class="field" style="margin:0"><input type="checkbox" id="part"> partition {A, B} | {C}</label>
+          <button class="btn small" type="button" id="sync">رد و بدل حالت‌ها</button><button class="btn small" type="button" id="clr">از اول</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>هیچ به‌روزرسانی‌ای گم نمی‌شود.</strong> افزودن‌هایی که در هر دو سوی پارتیشن شده همه از merge جان به در می‌برند، چون هر replicaیی تنها خانه‌ی خودش را می‌نویسد.</li>
-    <li><strong>ترتیب مهم نیست.</strong> حالت‌ها هر بار به ترتیبی تصادفی رد و بدل می‌شوند، و نتیجه همیشه همان است: max و اجتماع commutative و idempotent‌اند.</li>
-    <li><strong>G-Counter نمی‌تواند پایین برود.</strong> کاستن تنها PN-Counter را عوض می‌کند، که مقدارش جمع P منهای جمع N است.</li>
-    <li><strong>مجموعه‌های دو‌فازی برداشتن‌ها را یاد می‌سپارند.</strong> عنصری را در یک سو بردارید و در آن یکی بازهم اضافه کنید: پس از merge برداشته می‌ماند، چون مجموعه‌ی برداشتن می‌برد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>هیچ به‌روزرسانی گم نمی‌شود.</strong> افزایش‌های دو طرف partition همه بعد از merge می‌مانند، چون هر replica فقط خانه‌ی خودش را می‌نویسد (صص. ۲۳۸–۲۳۹).</li>
+      <li><strong>ترتیب مهم نیست.</strong> حالت‌ها هر بار به ترتیبی متفاوت رد و بدل می‌شوند و نتیجه همیشه یکی است، چون merge جابه‌جاپذیر است (ص. ۲۳۹). بیشینه و اجتماع idempotent هم هستند، پس تکرار یک merge هم چیزی را خراب نمی‌کند (توضیح vault).</li>
+      <li><strong>G-Counter کم نمی‌شود.</strong> کم کردن فقط PN-Counter را تغییر می‌دهد که مقدارش جمع P منهای جمع N است (ص. ۲۳۹).</li>
+      <li><strong>حذف از مجموعه همیشگی است.</strong> فقط عنصری که در add set هست می‌تواند به remove set برود و مقدار مجموعه، add set منهای remove set است؛ پس عنصر حذف‌شده با اضافه کردن دوباره برنمی‌گردد (ص. ۲۴۰).</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var NAMES = ["A", "B", "C"], ELEMS = ["apple", "fig", "pear"], who = 0, elem = "apple", part = true, R, rr, syncs;
+  var NM = ["A", "B", "C"], EL = ["apple", "fig", "pear"];
+  var view = { ops: [], who: 0, el: "apple" }, tour, ctl = {}, R, part, syncs, chg, msg, kind;
   function fresh() { return { g: [0, 0, 0], p: [0, 0, 0], n: [0, 0, 0], add: {}, rem: {} }; }
-  function reset() { R = [fresh(), fresh(), fresh()]; rr = Kit.rng(8); syncs = 0; log.clear(); log.add("سه replica، که به {A, B} و {C} پارتیشن شده‌اند.", "muted"); render(); }
   function side(i) { return part ? (i < 2 ? 0 : 1) : 0; }
   function merge(a, b) {
     for (var k = 0; k < 3; k++) { a.g[k] = Math.max(a.g[k], b.g[k]); a.p[k] = Math.max(a.p[k], b.p[k]); a.n[k] = Math.max(a.n[k], b.n[k]); }
     Object.keys(b.add).forEach(function (e) { a.add[e] = true; }); Object.keys(b.rem).forEach(function (e) { a.rem[e] = true; });
   }
-  function sync() {
-    var pairs = []; for (var i = 0; i < 3; i++) for (var j = 0; j < 3; j++) if (i !== j && side(i) === side(j)) pairs.push([i, j]);
-    for (var k = pairs.length - 1; k > 0; k--) { var x = rr.int(k + 1), t = pairs[k]; pairs[k] = pairs[x]; pairs[x] = t; }
-    pairs.forEach(function (pr) { merge(R[pr[1]], R[pr[0]]); });
-    syncs++; log.add("رد و بدل حالت‌ها: " + (pairs.map(function (pr) { return NAMES[pr[0]] + "→" + NAMES[pr[1]]; }).join("، ") || "چیزی دست‌یافتنی نیست"), "ok"); render();
-  }
   function sum(v) { return v[0] + v[1] + v[2]; }
-  function setVal(s) { return ELEMS.filter(function (e) { return s.add[e] && !s.rem[e]; }); }
+  function setVal(s) { return EL.filter(function (e) { return s.add[e] && !s.rem[e]; }); }
+  function snap(s) { return JSON.stringify([s.g, s.p, s.n, Object.keys(s.add).sort(), Object.keys(s.rem).sort()]); }
+  function apply(o, last) {
+    var i = o[1], s = R[i], e = o[2];
+    if (o[0] === "inc") { s.g[i]++; s.p[i]++; return [NM[i] + " افزایش داد؛ فقط خانه‌ی خودش در G و P.", "ok"]; }
+    if (o[0] === "dec") { s.n[i]++; return [NM[i] + " کاهش داد؛ فقط بردار N در PN-Counter. G-Counter نمی‌تواند کم شود.", "warn"]; }
+    if (o[0] === "add") { if (s.rem[e]) return [NM[i] + " دوباره " + e + " را اضافه کرد، ولی " + e + " در remove set است و در مقدار مجموعه برنمی‌گردد.", "bad"]; s.add[e] = true; return [NM[i] + " عنصر " + e + " را به add set اضافه کرد.", "ok"]; }
+    if (o[0] === "rem") { if (!s.add[e]) return [NM[i] + " نمی‌تواند " + e + " را حذف کند، چون در add set خودش نیست.", "warn"]; s.rem[e] = true; return [NM[i] + " عنصر " + e + " را به remove set برد؛ برای همیشه.", "warn"]; }
+    if (o[0] === "part") { part = o[1]; return [part ? "partition: C از A و B جدا شد." : "partition ترمیم شد.", part ? "warn" : "ok"]; }
+    if (o[0] === "sync") {
+      var pairs = o[1] || [], before = R.map(snap);
+      if (!o[1]) { for (var a = 0; a < 3; a++) for (var b = 0; b < 3; b++) if (a !== b && side(a) === side(b)) pairs.push([a, b]);
+        var rr = Kit.rng(8 + syncs); for (var k = pairs.length - 1; k > 0; k--) { var x = rr.int(k + 1), t = pairs[k]; pairs[k] = pairs[x]; pairs[x] = t; } }
+      pairs.forEach(function (pr) { if (side(pr[0]) === side(pr[1])) merge(R[pr[1]], R[pr[0]]); });
+      syncs++; if (last) R.forEach(function (s2, j) { if (snap(s2) !== before[j]) chg[j] = true; });
+      return ["رد و بدل حالت به این ترتیب: " + pairs.map(function (pr) { return NM[pr[0]] + "→" + NM[pr[1]]; }).join("، ") + ". هر خانه بیشینه می‌گیرد و هر مجموعه اجتماع.", "ok"];
+    }
+  }
+  function replay() {
+    R = [fresh(), fresh(), fresh()]; part = false; syncs = 0; chg = {}; var out = ["سه replica با حالت خالی.", ""];
+    view.ops.forEach(function (o, i) { var last = i === view.ops.length - 1; var r = apply(o, last); if (last) { out = r; if (o[0] !== "sync" && o[0] !== "part") chg[o[1]] = true; } });
+    msg = out[0]; kind = out[1];
+  }
   function render() {
+    replay();
     var m = Kit.clear(document.getElementById("reps"));
     R.forEach(function (s, i) {
-      m.appendChild(Kit.el("div", { class: "rp" + (part && i === 2 ? " split" : "") },
-        Kit.el("h3", null, Kit.el("span", null, "replica " + NAMES[i]), Kit.el("span", { class: "badge" + (i === who ? " accent" : "") }, i === who ? "کنش‌گر" : "")),
-        Kit.el("span", { class: "kv" }, "G-Counter [" + s.g.join(", ") + "] = ", Kit.el("span", { class: "val" }, sum(s.g))),
-        Kit.el("span", { class: "kv" }, "PN با P [" + s.p.join(", ") + "] و N [" + s.n.join(", ") + "] = ", Kit.el("span", { class: "val" }, sum(s.p) - sum(s.n))),
-        Kit.el("span", { class: "kv" }, "مجموعه‌ی دو‌فازی؛ افزودن {" + Object.keys(s.add).join(", ") + "} برداشتن {" + Object.keys(s.rem).join(", ") + "}"),
-        Kit.el("span", { class: "kv" }, "مقدار {", Kit.el("span", { class: "val" }, setVal(s).join(", ")), "}")));
+      var dl = Kit.el("dl");
+      function row(k, v) { dl.appendChild(Kit.el("dt", null, k)); dl.appendChild(Kit.el("dd", { class: "mono" + (chg[i] ? " chg" : "") }, v)); }
+      row("G-Counter", ["[" + s.g.join(", ") + "] = ", Kit.el("b", null, String(sum(s.g)))]);
+      row("PN-Counter", ["P[" + s.p.join(",") + "] − N[" + s.n.join(",") + "] = ", Kit.el("b", null, String(sum(s.p) - sum(s.n)))]);
+      row("add set", "{" + Object.keys(s.add).join(", ") + "}");
+      row("remove set", "{" + Object.keys(s.rem).join(", ") + "}");
+      row("مقدار مجموعه", Kit.el("b", null, "{" + setVal(s).join(", ") + "}"));
+      m.appendChild(Kit.el("div", { class: "rp" + (i === view.who ? " who" : "") + (part && i === 2 ? " cut" : "") },
+        Kit.el("h3", null, Kit.el("span", null, "replica " + NM[i]), Kit.el("span", { class: "badge" + (part ? " warn" : "") }, part ? (i === 2 ? "طرف {C}" : "طرف {A, B}") : "متصل")), dl));
     });
-    var key = function (s) { return [sum(s.g), sum(s.p) - sum(s.n), setVal(s).join(",")].join("|"); }, same = key(R[0]) === key(R[1]) && key(R[1]) === key(R[2]);
-    var c = document.getElementById("conv"); c.className = "callout " + (same ? "ok" : "warn");
-    c.textContent = same ? "✓ هر سه replica همان مقدارها را نشان می‌دهند." : "✗ replicaها اختلاف دارند؛ حالت‌ها را رد و بدل کنید، و پارتیشن را ترمیم، تا هم‌گرا شوند.";
-    stats([["پارتیشن", part ? "روشن" : "ترمیم‌شده", part ? "warn" : "ok"], ["رد و بدل حالت", syncs], ["هم‌گرا", same ? "بله" : "نه", same ? "ok" : "warn"]]);
+    var ev = document.getElementById("ev"); ev.className = "cr-ev " + kind; ev.textContent = msg;
+    var k = function (s) { return [sum(s.g), sum(s.p) - sum(s.n), setVal(s).join(",")].join("|"); }, same = k(R[0]) === k(R[1]) && k(R[1]) === k(R[2]);
+    var St = Kit.clear(document.getElementById("stats"));
+    [["partition", part ? "فعال" : "ندارد", part ? "warn" : "ok"], ["دورهای رد و بدل حالت", syncs], ["همگرا؟", same ? "بله، هر سه یکسان" : "نه، اختلاف دارند", same ? "ok" : "warn"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.w.set(String(view.who)); ctl.e.set(view.el); document.getElementById("part").checked = part;
   }
-  document.getElementById("who").appendChild(Kit.segmented({ label: "replica کنش‌گر", value: "0", options: NAMES.map(function (n, i) { return { value: String(i), label: n }; }), onChange: function (v) { who = +v; render(); } }).element);
-  document.getElementById("elem").appendChild(Kit.segmented({ label: "عنصر", value: elem, options: ELEMS.map(function (e) { return { value: e, label: e }; }), onChange: function (v) { elem = v; } }).element);
-  document.getElementById("inc").addEventListener("click", function () { R[who].g[who]++; R[who].p[who]++; log.add("replica " + NAMES[who] + ": افزودن، تنها در خانه‌ی خودش", "ok"); render(); });
-  document.getElementById("dec").addEventListener("click", function () { R[who].n[who]++; log.add("replica " + NAMES[who] + ": کاستن، تنها در PN-Counter؛ G-Counter نمی‌تواند بکاهد", "warn"); render(); });
-  document.getElementById("add").addEventListener("click", function () { if (R[who].rem[elem]) log.add("replica " + NAMES[who] + ": اضافه کردن " + elem + " اثری ندارد، چون در مجموعه‌ی برداشتن است", "warn"); else { R[who].add[elem] = true; log.add("replica " + NAMES[who] + ": اضافه کردن " + elem, "ok"); } render(); });
-  document.getElementById("rem").addEventListener("click", function () { if (!R[who].add[elem]) log.add("replica " + NAMES[who] + ": نمی‌شود " + elem + " را برداشت، چون این‌جا هیچ‌وقت اضافه نشده", "muted"); else { R[who].rem[elem] = true; log.add("replica " + NAMES[who] + ": برداشتن " + elem + " برای همیشه", "warn"); } render(); });
-  document.getElementById("part").addEventListener("change", function (e) { part = e.target.checked; log.add(part ? "پارتیشن {A, B} و {C}" : "پارتیشن ترمیم شد", part ? "warn" : "ok"); render(); });
-  document.getElementById("sync").addEventListener("click", sync);
-  document.getElementById("reset").addEventListener("click", reset);
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  function add(o) { view.ops = view.ops.concat([o]); }
+  ctl.w = Kit.segmented({ label: "replica که عمل می‌کند", value: "0", options: NM.map(function (n, i) { return { value: String(i), label: n }; }), onChange: function (v) { view.who = +v; render(); } });
+  ctl.e = Kit.segmented({ label: "عنصر", value: "apple", options: EL.map(function (e) { return { value: e, label: e }; }), onChange: function (v) { view.el = v; } });
+  document.getElementById("whoC").appendChild(ctl.w.element); document.getElementById("elC").appendChild(ctl.e.element);
+  document.getElementById("inc").addEventListener("click", tw(function () { add(["inc", view.who]); }));
+  document.getElementById("dec").addEventListener("click", tw(function () { add(["dec", view.who]); }));
+  document.getElementById("add").addEventListener("click", tw(function () { add(["add", view.who, view.el]); }));
+  document.getElementById("rem").addEventListener("click", tw(function () { add(["rem", view.who, view.el]); }));
+  document.getElementById("part").addEventListener("change", tw(function () { add(["part", document.getElementById("part").checked]); }));
+  document.getElementById("sync").addEventListener("click", tw(function () { add(["sync"]); }));
+  document.getElementById("clr").addEventListener("click", tw(function () { view.ops = []; }));
+
+  /* ---------- the scenario ---------- */
+  var B1 = [["inc", 0], ["inc", 2]], B2 = B1.concat([["sync", [[2, 0], [0, 1], [2, 1], [0, 2]]]]),
+      C1 = B2.concat([["part", true], ["inc", 0], ["inc", 1], ["inc", 2], ["inc", 2], ["dec", 2]]), C2 = C1.concat([["sync"]]), C3 = C2.concat([["part", false], ["sync"]]),
+      D1 = C3.concat([["add", 0, "apple"], ["add", 0, "fig"], ["sync"], ["part", true], ["rem", 0, "fig"], ["add", 2, "pear"]]), D2 = D1.concat([["part", false], ["sync"]]), D3 = D2.concat([["add", 2, "fig"]]);
+  function at(ops, who) { return function () { view = { ops: ops, who: who || 0, el: view.el }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(D3, 2), render: render, interval: 8000,
+    intro: "سه replica که هرکدام یک G-Counter، یک PN-Counter و یک مجموعه با add set و remove set دارند. خانه‌ی زرد یعنی در همین قدم عوض شده است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: partition بسازید، در هر طرف افزایش و حذف کنید و ببینید رد و بدل حالت، به هر ترتیبی، همه را همگرا می‌کند.",
+    steps: [
+      { kind: "", run: at(B1), say: "مثال کتاب: A و C (همان Node 1 و Node 3) هر کدام یک بار افزایش می‌دهند. A می‌شود [1, 0, 0] و C می‌شود [0, 0, 1]؛ B هنوز صفر است (ص. ۲۳۹)." },
+      { kind: "ok", run: at(B2), say: "حالت‌ها رد و بدل می‌شوند و merge برای هر خانه بیشینه را برمی‌دارد: همه [1, 0, 1] و مقدار ۲. هیچ هماهنگی دیگری لازم نیست، چون هر node فقط خانه‌ی خودش را می‌نویسد (ص. ۲۳۹)." },
+      { kind: "warn", run: at(C1, 2), say: "partition: C جدا شد. A و B هرکدام یک افزایش، و C دو افزایش و یک کاهش انجام می‌دهند؛ هر طرف مستقل کار می‌کند (ص. ۲۳۸)." },
+      { kind: "warn", run: at(C2), say: "رد و بدل حالت فقط داخل هر طرف ممکن است: A و B یکسان شدند ولی C هنوز تصویر دیگری دارد." },
+      { kind: "ok", run: at(C3), say: "partition ترمیم شد و یک دور رد و بدل کافی بود: G-Counter همه ۶، PN-Counter همه ۵. هیچ‌کدام از عملیات دوران partition گم نشد (ص. ۲۳۸)." },
+      { kind: "warn", run: at(D1, 2), say: "مجموعه: A عنصرهای apple و fig را اضافه کرد و همه sync شدند. بعد در partition، A عنصر fig را حذف کرد و C عنصر pear را اضافه کرد." },
+      { kind: "ok", run: at(D2), say: "بعد از ترمیم: add set اجتماع هر دو طرف است و remove set هم؛ مقدار مجموعه add set منهای remove set است: {apple, pear} (ص. ۲۴۰)." },
+      { kind: "bad", run: at(D3, 2), say: "C دوباره fig را اضافه می‌کند ولی fig در remove set است و برنمی‌گردد. در این نوع مجموعه حذف همیشگی است." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "مقدار G-Counter پس از merge کردن [1, 0, 0] و [0, 0, 1] چطور حساب می‌شود؟",

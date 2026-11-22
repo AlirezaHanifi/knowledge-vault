@@ -7,22 +7,32 @@
 <meta name="description" content="بار کاری کوتاهی را با buffer کردن steal و no-force و یک checkpoint مه‌آلود اجرا کنید، در هر نقطه‌ای از کار بیندازید، بعد تحلیل و redo و undo در ARIES را قدم‌به‌قدم بگذرانید، از جمله رکوردهای log جبرانی که بازیابی را از‌سر‌شدنی می‌کنند. تصویری از فصل ۵ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  table.lg { width: 100%; border-collapse: collapse; font-size: .8rem; font-family: var(--mono); }
-  table.lg td, table.lg th { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: right; white-space: nowrap; }
-  table.lg tr.lost td { color: var(--ink-3); text-decoration: line-through; }
-  table.lg tr.cur td { background: var(--accent-soft); }
+  .ar-ph { display: flex; gap: 6px; margin-bottom: 8px; }
+  .ar-ph span { font-size: .8rem; padding: 2px 12px; border-radius: 99px; border: 1.5px solid var(--line); color: var(--ink-3); }
+  .ar-ph span.on { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .ar-ph span.done { color: var(--ink-2); border-color: var(--ok); }
+  .ar-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+  table.lg { width: 100%; border-collapse: collapse; font-size: .72rem; line-height: 1.35; font-family: var(--mono); direction: ltr; }
+  table.lg td, table.lg th { border-bottom: 1px solid var(--line); padding: 1px 6px; text-align: left; white-space: nowrap; }
+  table.lg th { font-family: var(--font); color: var(--ink-3); font-weight: 600; }
+  table.lg tr.cur td { background: var(--accent-soft); font-weight: 700; }
   table.lg tr.clr td { color: var(--warn); }
-  table.lg tr.crash td { border-bottom: 3px double var(--bad); }
-  .tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
-  .mini { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; font-family: var(--mono); font-size: .78rem; background: var(--surface-2); min-height: 52px; }
-  .mini b { display: block; font-family: var(--font); font-size: .74rem; color: var(--ink-3); margin-bottom: 3px; }
-  .phase { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  table.lg tr.flush td { color: var(--ink-3); font-style: italic; font-size: .7rem; }
+  table.lg tr.crash td { border-bottom: 3px double var(--bad); color: var(--bad); font-size: .7rem; }
+  table.lg tr.post td { color: var(--warn); }
+  .ar-minis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mini { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 4px 8px; font-family: var(--mono); font-size: .76rem; background: var(--surface); min-height: 48px; direction: ltr; text-align: left; }
+  .mini b { display: block; font-family: var(--font); font-size: .72rem; color: var(--ink-3); margin-bottom: 2px; direction: rtl; text-align: right; }
+  .mini .ch { color: var(--accent); font-weight: 700; }
+  .ar-ev { margin-top: 8px; font-size: .86rem; padding: 5px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
+  .ar-ev.ok { border-color: var(--ok); } .ar-ev.warn { border-color: var(--warn); } .ar-ev.bad { border-color: var(--bad); }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/05-transaction-processing-and-recovery.html">فصل ۵</a><span aria-hidden="true">/</span>
@@ -33,57 +43,68 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · پردازش تراکنش و بازیابی</div>
-  <h1>الگوریتم ARIES: تحلیل و redo و undo</h1>
-  <p class="lede">الگوریتم ARIES از جنس <strong>steal و no-force</strong> است: تغییرهای commit‌نشده می‌توانند به دیسک برسند، و commit‌شده‌ها می‌توانند نرسیده باشند. پس از از کار افتادنی، log را از آخرین checkpoint <strong>تحلیل</strong> می‌کند تا جدول‌های تراکنش و صفحه‌ی کثیف را دوباره بسازد، هر تغییر لاگ‌شده‌ای را که صفحه‌اش روی دیسک قدیمی‌تر است <strong>redo</strong> می‌کند، که تکرار تاریخ است، و بعد آن تراکنش‌هایی را <strong>undo</strong> می‌کند که هیچ‌وقت commit نکردند. هر undoیی یک <strong>رکورد log جبرانی</strong>، یعنی CLR، می‌نویسد، پس از کار افتادنی در میانه‌ی بازیابی هیچ‌وقت همان تغییر را دو بار undo نمی‌کند.</p>
-  <p class="source-note">تصویری از «بازیابی» و «سیاست‌های steal و force» و «الگوریتم ARIES» (صص. ۸۸–۹۳). آن بار کاری، یعنی سه تراکنش و چهار صفحه و یک checkpoint و دو flush صفحه، مال vault است؛ و همچنین این ساده‌سازی‌ها: کل log پایاست، checkpointها یک رکورد تنها‌اند، صفحه‌ها یک عدد دارند، و هیچ دو تراکنش commit‌نشده‌ای همان صفحه را نمی‌نویسند، چنان‌که قفل‌گذاری سخت‌گیرانه تأمینش می‌کرد. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>الگوریتم ARIES: تحلیل و redo و undo</h1>
+      <p class="lede">ARIES یک الگوریتم <strong>steal/no-force</strong> است. بعد از crash، <strong>analysis</strong> جدول تراکنش‌ها و dirty pageها را می‌سازد، <strong>redo</strong> تاریخ را تا لحظه‌ی crash تکرار می‌کند و <strong>undo</strong> تراکنش‌های ناتمام را برمی‌گرداند و برای هر undo یک <strong>CLR</strong> می‌نویسد.</p>
+      <p class="source-note">تصویری از «Recovery»، «Log Semantics»، «Steal and Force Policies» و «ARIES» (صص. ۸۸–۹۳). بار کاری (سه تراکنش، چهار صفحه، یک checkpoint و دو flush) و این ساده‌سازی‌ها انتخاب vault است: کل log پایدار است، checkpoint یک رکورد است، هر صفحه یک عدد دارد و دو تراکنش commit‌نشده یک صفحه را نمی‌نویسند. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="phase" id="phase"></div><div class="table-wrap"><table class="lg" id="log-t"></table></div>
-        <div class="tables"><div class="mini" id="tt"></div><div class="mini" id="dpt"></div><div class="mini" id="disk"></div><div class="mini" id="buf"></div></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="crash"></div>
-        <div id="player" style="margin-top:12px"></div>
-        <div class="row" style="margin-top:8px"><button class="btn small danger" type="button" id="again">بازهم از کار بینداز، در میانه‌ی بازیابی</button></div>
-        <p class="field-hint">رکوردهای پس از خط از کار افتادن هیچ‌وقت نوشته نشدند. بازیابی را قدم‌به‌قدم بگذرانید؛ در میانه‌ی undo بازهم از کار بیندازید تا CLRها را در کار ببینید.</p></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="ar-ph" id="phase"></div>
+          <div class="ar-grid">
+            <table class="lg mono" id="log-t"></table>
+            <div><div class="ar-minis mono"><div class="mini" id="tt"></div><div class="mini" id="dpt"></div><div class="mini" id="disk"></div><div class="mini" id="buf"></div></div>
+              <div class="ar-ev" id="ev" aria-live="polite"></div></div>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این بازیابی</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="crashC"></div>
+        <div class="tweak-group"><div class="row">
+          <button class="btn small primary" type="button" id="next">قدم بعدی بازیابی</button>
+          <button class="btn small" type="button" id="toEnd">تا آخر بازیابی</button>
+          <button class="btn small danger" type="button" id="again">crash دوباره، همین حالا</button>
+          <button class="btn small" type="button" id="restart">از لحظه‌ی crash</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>redo تاریخ را تکرار می‌کند.</strong> redo هر تغییر لاگ‌شده‌ای را، از جمله مال تراکنش‌هایی که undo خواهند شد، هر جا صفحه‌ی روی دیسک از آن رکورد قدیمی‌تر باشد، یعنی LSN صفحه‌اش پایین‌تر، دوباره اعمال می‌کند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>redo تاریخ را تکرار می‌کند.</strong> redo هر تغییر لاگ‌شده‌ای را، از جمله مال تراکنش‌هایی که undo خواهند شد، هر جا صفحه‌ی روی دیسک از آن رکورد قدیمی‌تر باشد، یعنی LSN صفحه‌اش پایین‌تر، دوباره اعمال می‌کند.</li>
     <li><strong>steal یعنی undo.</strong> flush کردن P4 مقدار commit‌نشده‌ی T3 را روی دیسک می‌نویسد. پیش از commit کردن T3 از کار بیندازید و undo باید مقدار قدیم را بازگرداند.</li>
     <li><strong>no-force یعنی redo.</strong> تراکنش T1 commit می‌کند، ولی تغییرش روی P3 هیچ‌وقت flush نشد؛ تنها log پایایش می‌کند. در پایان از کار بیندازید و T2، که هیچ‌وقت commit نکرد، روی هر سه صفحه‌ای که به‌شان دست زده undo می‌شود.</li>
     <li><strong>CLRها تنها redo‌شدنی‌اند.</strong> در میانه‌ی undo بازهم از کار بیندازید: بازیابی بعدی CLRها را redo می‌کند و از اشاره‌گر <em>undo-next</em>شان ادامه می‌دهد، به‌جای این‌که چیزی را دو بار undo کند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>درس</small>فصل ۵: پردازش تراکنش و بازیابی</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>درس</small>فصل ۵: پردازش تراکنش و بازیابی</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
+  var msgs = [], log = { add: function (m, k) { msgs.push([m, k || ""]); }, clear: function () { msgs = []; } };
   var PH = { analysis: "تحلیل", redo: "redo", undo: "undo", done: "تمام" };
   var EVENTS = [
     { t: "upd", tx: "T1", page: "P1", before: 10, after: 11 }, { t: "upd", tx: "T2", page: "P2", before: 20, after: 21 },
@@ -114,7 +135,6 @@ function stats(rows) {
     log.add(msg, "bad");
     log.add("تحلیل " + (ck ? "از checkpoint سر LSN " + ck.lsn + " با جدول‌های تراکنش و صفحه‌ی کثیفش شروع می‌شود" : "از آغاز log شروع می‌شود، چون checkpointی نیست"), "muted");
   }
-  function reset() { again = 0; normal(); log.clear(); startRecovery("از کار افتادن پس از رویداد " + crashAt + " از " + EVENTS.length + ": " + L.length + " رکورد log پایاست؛ و buffer pool گم شده."); render(); }
   function byLsn(n) { return L[n - 1]; }
 
   function step() {
@@ -124,69 +144,114 @@ function stats(rows) {
         var recs = Object.keys(R.dpt).map(function (p) { return R.dpt[p]; });
         R.redoFrom = recs.length ? Math.min.apply(null, recs) : L.length + 1; R.cur = R.redoFrom; R.phase = "redo";
         log.add("تحلیل تمام شد: بازنده‌ها {" + Object.keys(R.tt).join("، ") + "}؛ redo سر LSN " + (recs.length ? R.redoFrom : "— چون صفحه‌ی کثیفی نیست") + " شروع می‌شود", "warn");
-        render(); return true;
+        return true;
       }
       var x = byLsn(R.cur++);
       if (x.t === "upd" || x.t === "clr") { R.tt[x.tx] = { last: x.lsn }; if (R.dpt[x.page] === undefined) R.dpt[x.page] = x.lsn; log.add("تحلیل LSN " + x.lsn + ": " + x.tx + " فعال است، با آخرین LSN " + x.lsn + (R.dpt[x.page] === x.lsn ? "؛ " + x.page + " از " + x.lsn + " کثیف است" : ""), "muted"); }
       else if (x.t === "commit" || x.t === "end") { delete R.tt[x.tx]; log.add("تحلیل LSN " + x.lsn + ": " + x.tx + " " + (x.t === "commit" ? "commit کرد" : "تمام کرد"), "ok"); }
       else log.add("تحلیل LSN " + x.lsn + ": checkpoint", "muted");
-      render(); return true;
+      return true;
     }
     if (R.phase === "redo") {
       if (R.cur > L.length) {
         R.phase = "undo"; Object.keys(R.tt).forEach(function (tx) { var l = byLsn(R.tt[tx].last); R.undo[tx] = l.t === "clr" ? l.undoNext : l.lsn; });
         log.add("redo تمام شد: buffer حالا با لحظه‌ی از کار افتادن می‌خواند. بازنده‌های undo: " + (Object.keys(R.undo).join("، ") || "هیچ"), "warn");
-        render(); return true;
+        return true;
       }
       var y = byLsn(R.cur++);
-      if (y.t !== "upd" && y.t !== "clr") { render(); return true; }
+      if (y.t !== "upd" && y.t !== "clr") { return true; }
       if (R.dpt[y.page] === undefined || R.dpt[y.page] > y.lsn) log.add("redo سر LSN " + y.lsn + ": رد می‌شود، چون " + y.page + " آن وقت کثیف نبود", "muted");
       else if (buf[y.page].lsn >= y.lsn) log.add("redo سر LSN " + y.lsn + ": رد می‌شود، چون LSN صفحه‌ی " + y.page + " برابر " + buf[y.page].lsn + " و ≥ " + y.lsn + " است و از قبل روی دیسک", "muted");
       else { buf[y.page] = { v: y.after, lsn: y.lsn }; log.add("redo سر LSN " + y.lsn + ": " + y.page + " := " + y.after + (y.t === "clr" ? " که CLR است" : ""), "ok"); }
-      render(); return true;
+      return true;
     }
     if (R.phase === "undo") {
       var txs = Object.keys(R.undo).filter(function (t) { return R.undo[t]; });
       Object.keys(R.undo).forEach(function (t) { if (!R.undo[t]) { endTx(t); } });
-      if (!txs.length) { R.phase = "done"; log.add("بازیابی کامل شد. کار commit‌شده حاضر است، و کار بازنده‌ها رفته.", "ok"); render(); return false; }
+      if (!txs.length) { R.phase = "done"; log.add("بازیابی کامل شد. کار commit‌شده حاضر است، و کار بازنده‌ها رفته.", "ok"); return false; }
       var tx = txs.reduce(function (a, b) { return R.undo[a] > R.undo[b] ? a : b; }), u = byLsn(R.undo[tx]);
       var clr = { lsn: L.length + 1, t: "clr", tx: tx, page: u.page, after: u.before, undoNext: u.prev };
       L.push(clr); buf[u.page] = { v: u.before, lsn: clr.lsn }; R.undo[tx] = u.prev;
       log.add("undo سر LSN " + u.lsn + " برای " + tx + ": " + u.page + " := " + u.before + "، و نوشتن CLR " + clr.lsn + " با undo-next " + (u.prev || "هیچ"), "warn");
       if (!u.prev) endTx(tx);
-      render(); return true;
+      return true;
     }
     return false;
   }
   function endTx(tx) { L.push({ lsn: L.length + 1, t: "end", tx: tx }); delete rec.undo[tx]; delete rec.tt[tx]; log.add(tx + " تماماً واگردانده شد: نوشتن END " + L.length, "ok"); }
 
-  function render() {
-    var ph = Kit.clear(document.getElementById("phase"));
-    ["analysis", "redo", "undo", "done"].forEach(function (p) { ph.appendChild(Kit.el("span", { class: "badge" + (rec.phase === p ? " accent" : "") }, (rec.phase === p ? "● " : "") + PH[p])); });
-    var t = Kit.clear(document.getElementById("log-t"));
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["LSN", "تراکنش", "رکورد", "صفحه", "تغییر", "پیشین یا undo-next"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
-    var tb = Kit.el("tbody"), curL = rec.phase === "undo" ? null : rec.cur - 1;
-    L.forEach(function (x) {
-      var desc = x.t === "upd" ? x.before + " → " + x.after : x.t === "clr" ? "بازگرداندن " + x.after : x.t === "ckpt" ? "TT {" + Object.keys(x.tt).join(",") + "} DPT {" + Object.keys(x.dpt).map(function (p) { return p + ":" + x.dpt[p]; }).join(",") + "}" : "";
-      tb.appendChild(Kit.el("tr", { class: (x.t === "clr" ? "clr " : "") + (x.lsn === curL ? "cur" : "") },
-        Kit.el("td", null, x.lsn), Kit.el("td", null, x.tx || ""), Kit.el("td", null, { upd: "به‌روزرسانی", ckpt: "checkpoint", clr: "CLR", commit: "commit", end: "END" }[x.t]),
-        Kit.el("td", null, x.page || ""), Kit.el("td", null, desc), Kit.el("td", null, x.t === "upd" ? (x.prev || "–") : x.t === "clr" ? "↷ " + (x.undoNext || "–") : "")));
-      flushes.forEach(function (f) { if (f.after === x.lsn) tb.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 6 }, "— buffer صفحه‌ی " + f.page + " را به دیسک flush می‌کند، با LSN صفحه " + f.lsn + "، که رکورد log نیست —"))); });
-    });
-    tb.appendChild(Kit.el("tr", { class: "crash" }, Kit.el("td", { colspan: 6 }, "⚡ از کار افتادن: هر چه بالاست پایاست")));
-    t.appendChild(tb);
-    function mini(id, title, lines) { var m = Kit.clear(document.getElementById(id)); m.appendChild(Kit.el("b", null, title)); (lines.length ? lines : ["—"]).forEach(function (l) { m.appendChild(Kit.el("div", null, l)); }); }
-    mini("tt", "جدول تراکنش", Object.keys(rec.tt).map(function (tx) { return tx + " آخرین " + rec.tt[tx].last + (rec.undo[tx] !== undefined ? "، undo " + (rec.undo[tx] || "–") : ""); }));
-    mini("dpt", "جدول صفحه‌ی کثیف با recLSN", Object.keys(rec.dpt).map(function (p) { return p + " : " + rec.dpt[p]; }));
-    mini("disk", "دیسک سر از کار افتادن، مقدار و LSN صفحه", PAGES.map(function (p) { return p + " = " + disk[p].v + " @" + disk[p].lsn; }));
-    mini("buf", "buffer در میانه‌ی بازیابی", PAGES.map(function (p) { return p + " = " + buf[p].v + " @" + buf[p].lsn; }));
-    var clrs = L.filter(function (x) { return x.t === "clr"; }).length;
-    stats([["فاز", PH[rec.phase]], ["رکوردهای log", L.length], ["CLRهای نوشته‌شده", clrs, clrs ? "warn" : ""], ["شروع دوباره‌ی بازیابی", again]]);
+
+
+  var view = { crash: 11, n: 0, again: null }, tour, ctl = {}, last = [], againCount = 0;
+  function vstep() { var r; do { msgs = []; r = step(); } while (!msgs.length && r); last = msgs; return r; }
+  function replay() {
+    crashAt = view.crash; normal(); againCount = 0; msgs = [];
+    startRecovery("crash بعد از رویداد " + crashAt + " از " + EVENTS.length + ": " + L.length + " رکورد log پایدار است و buffer pool از دست رفته."); last = msgs;
+    for (var i = 0; i < view.n; i++) {
+      if (view.again === i) { msgs = []; againCount++; startRecovery("crash دوباره وسط بازیابی: buffer باز از دست رفت، ولی log همه‌ی CLRهای نوشته‌شده را دارد."); last = msgs; }
+      if (rec.phase === "done") { view.n = i; break; }
+      vstep();
+    }
+    if (view.again === view.n && againCount === 0) { msgs = []; againCount++; startRecovery("crash دوباره وسط بازیابی: buffer باز از دست رفت، ولی log همه‌ی CLRهای نوشته‌شده را دارد."); last = msgs; }
   }
-  document.getElementById("crash").appendChild(Kit.slider({ label: "از کار افتادن پس از رویداد", min: 1, max: EVENTS.length, step: 1, value: crashAt, hint: "رویدادها: ۳ به‌روزرسانی، flush صفحه‌ی P1، checkpoint، commit تراکنش T1، ۲ به‌روزرسانی، flush صفحه‌ی P4، commit تراکنش T3، ۱ به‌روزرسانی", onInput: function (v) { crashAt = v; reset(); } }).element);
-  document.getElementById("again").addEventListener("click", function () { again++; startRecovery("از کار افتادن در میانه‌ی بازیابی: buffer بازهم گم شد، ولی log هر CLRی را که تا این‌جا نوشته شده نگه می‌دارد."); render(); });
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 800 });
-  reset();
+  var nDurable = 0;
+  function render() {
+    replay(); nDurable = 0; L.forEach(function (x) { if (x.t !== "clr" && x.t !== "end") nDurable = x.lsn; });
+    var ph = Kit.clear(document.getElementById("phase")), order = ["analysis", "redo", "undo", "done"], pi = order.indexOf(rec.phase);
+    order.forEach(function (p, k) { ph.appendChild(Kit.el("span", { class: k === pi ? "on" : k < pi ? "done" : "" }, (k < pi ? "✓ " : k === pi ? "● " : "") + PH[p])); });
+    var t = Kit.clear(document.getElementById("log-t"));
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["LSN", "tx", "record", "page", "change", "prev/next"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    var tb = Kit.el("tbody"), curL = rec.phase === "undo" || rec.phase === "done" ? null : rec.cur - 1, crashed = false;
+    L.forEach(function (x) {
+      if (!crashed && x.lsn > nDurable) { tb.appendChild(Kit.el("tr", { class: "crash" }, Kit.el("td", { colspan: 6 }, "⚡ crash — records below are written by recovery"))); crashed = true; }
+      var desc = x.t === "upd" ? x.before + " → " + x.after : x.t === "clr" ? "restore " + x.after : x.t === "ckpt" ? "TT{" + Object.keys(x.tt).join(",") + "} DPT{" + Object.keys(x.dpt).map(function (p) { return p + ":" + x.dpt[p]; }).join(",") + "}" : "";
+      tb.appendChild(Kit.el("tr", { class: (x.t === "clr" || x.t === "end" ? "post " : "") + (x.t === "clr" ? "clr " : "") + (x.lsn === curL ? "cur" : "") },
+        Kit.el("td", null, x.lsn), Kit.el("td", null, x.tx || ""), Kit.el("td", null, { upd: "update", ckpt: "checkpoint", clr: "CLR", commit: "commit", end: "END" }[x.t]),
+        Kit.el("td", null, x.page || ""), Kit.el("td", null, desc + flushes.filter(function (f) { return f.after === x.lsn; }).map(function (f) { return "  ⤓ flush " + f.page; }).join("")), Kit.el("td", null, x.t === "upd" ? (x.prev || "–") : x.t === "clr" ? "↷ " + (x.undoNext || "–") : "")));
+
+    });
+    if (!crashed) tb.appendChild(Kit.el("tr", { class: "crash" }, Kit.el("td", { colspan: 6 }, "⚡ crash")));
+    t.appendChild(tb);
+    function mini(id, title, lines) { var m = Kit.clear(document.getElementById(id)); m.appendChild(Kit.el("b", null, title)); (lines.length ? lines : [["—"]]).forEach(function (l) { m.appendChild(Kit.el("div", { class: l[1] ? "ch" : "" }, l[0])); }); }
+    mini("tt", "جدول تراکنش‌ها", Object.keys(rec.tt).map(function (tx) { return [tx + " last " + rec.tt[tx].last + (rec.undo[tx] !== undefined ? ", undo " + (rec.undo[tx] || "–") : "")]; }));
+    mini("dpt", "dirty page table (recLSN)", Object.keys(rec.dpt).map(function (p) { return [p + " : " + rec.dpt[p]]; }));
+    mini("disk", "دیسک لحظه‌ی crash", PAGES.map(function (p) { return [p + " = " + disk[p].v + " @" + disk[p].lsn]; }));
+    mini("buf", "buffer در حال بازیابی", PAGES.map(function (p) { return [p + " = " + buf[p].v + " @" + buf[p].lsn, buf[p].v !== disk[p].v]; }));
+    var ev = document.getElementById("ev"), lm = last[last.length - 1] || ["", ""];
+    ev.className = "ar-ev " + lm[1]; ev.textContent = last.map(function (m) { return m[0]; }).join(" ");
+    var clrs = L.filter(function (x) { return x.t === "clr"; }).length;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["crash بعد از رویداد", view.crash], ["فاز", PH[rec.phase]], ["قدم بازیابی", view.n], ["CLRها", clrs, clrs ? "warn" : ""], ["crash دوباره", againCount, againCount ? "bad" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.crash.set(view.crash);
+  }
+  function say() { return document.getElementById("ev").textContent; }
+  function tw(f) { return function (v) { f(v); render(); tour.free(say(), ""); }; }
+  ctl.crash = Kit.slider({ label: "crash بعد از رویداد شماره‌ی", min: 1, max: EVENTS.length, step: 1, value: view.crash, hint: "رویدادها: ۳ update، flush صفحه‌ی P1، checkpoint، commit تراکنش T1، ۲ update، flush صفحه‌ی P4، commit تراکنش T3، ۱ update", onInput: tw(function (v) { view = { crash: v, n: 0, again: null }; }) });
+  document.getElementById("crashC").appendChild(ctl.crash.element);
+  document.getElementById("next").addEventListener("click", tw(function () { view.n++; }));
+  document.getElementById("toEnd").addEventListener("click", tw(function () { view.n = 99; }));
+  document.getElementById("again").addEventListener("click", tw(function () { view.again = view.n; }));
+  document.getElementById("restart").addEventListener("click", tw(function () { view.n = 0; view.again = null; }));
+
+  /* ---------- the scenario ---------- */
+  function at(c, n, a) { return function () { view = { crash: c, n: n, again: a === undefined ? null : a }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(11, 99), render: render, interval: 9000,
+    intro: "سمت راست WAL است: هر رکورد LSN یکتا و صعودی دارد و تا خط crash پایدار است (ص. ۹۰). کنارش جدول تراکنش‌ها، dirty page table، صفحه‌های روی دیسک لحظه‌ی crash و buffer در حال بازیابی آمده است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: نقطه‌ی crash را عوض کنید، قدم‌به‌قدم بروید و وسط undo دوباره crash بدهید.",
+    steps: [
+      { kind: "bad", run: at(11, 0), say: "crash بعد از همه‌ی رویدادها. P1 با تغییر T1 و P4 با تغییر T3 flush شده‌اند؛ تغییر commit‌شده‌ی T1 روی P3 هیچ‌وقت flush نشد. buffer pool از دست رفته و فقط log مانده است." },
+      { kind: "warn", run: at(11, 6), say: "analysis از checkpoint شروع می‌کند، T1 و T3 را commit‌شده و T2 را ناتمام می‌یابد و dirty page table را کامل می‌کند. redo از کوچک‌ترین recLSN، یعنی LSN ۲، شروع می‌شود (ص. ۹۲)." },
+      { kind: "ok", run: at(11, 8), say: "no-force: T1 commit کرد بدون این‌که P3 flush شود. redo تغییر LSN ۳ را از log دوباره اعمال می‌کند (ص. ۹۲)." },
+      { kind: "warn", run: at(11, 9), say: "redo تاریخ را تکرار می‌کند، حتی برای T2 که بعداً undo می‌شود: P1 دوباره ۱۲ می‌شود. اول حالت لحظه‌ی crash کامل بازسازی می‌شود (صص. ۹۲–۹۳)." },
+      { kind: "", run: at(11, 10), say: "LSN ۷ رد می‌شود: LSN صفحه‌ی P4 روی دیسک ۷ است، یعنی این تغییر از قبل روی دیسک است." },
+      { kind: "warn", run: at(11, 14), say: "undo تراکنش‌های ناتمام را برعکس ترتیب زمانی برمی‌گرداند: اول LSN ۹ و بعد LSN ۶ از T2. هر undo یک CLR با اشاره‌گر undo-next می‌نویسد (ص. ۹۳)." },
+      { kind: "ok", run: at(11, 99, 14), say: "crash دوباره درست همین‌جا. بازیابی بعدی CLRها را مثل بقیه‌ی رکوردها redo می‌کند و undo را از undo-next ادامه می‌دهد: فقط LSN ۲ می‌ماند و چیزی دو بار undo نمی‌شود (صص. ۹۰ و ۹۳)." },
+      { kind: "bad", run: at(9, 99), say: "steal: crash پیش از commit تراکنش T3، ولی P4 با مقدار commit‌نشده‌ی ۴۵ flush شده بود. undo باید P4 را به ۴۰ برگرداند؛ steal یعنی undo لازم است (صص. ۹۱–۹۲)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا ARIES تغییرهای تراکنش‌هایی را redo می‌کند که قرار است undoشان کند؟",
