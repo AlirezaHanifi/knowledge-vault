@@ -7,15 +7,22 @@
 <meta name="description" content="حرف تایپ کنید و ببینید از چهار تبدیل کتاب رد می‌شوند، یعنی زیرمجموعه و امضا و جست‌و‌جوی دیکشنری و گروه‌بندی بر حسب طول، بعد یک قدم را بشکنید و ببینید یک تاپل خطا بقیه‌ی pipeline را قطع می‌کند. تصویری از موضوع ۳۰ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .stage { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); margin-top: 8px; }
-  .stage.err { border-color: var(--bad); background: var(--bad-soft); } .stage.skip { opacity: .5; }
-  .stage h3 { margin: 0 0 4px; font-size: .9rem; } .stage code { word-break: break-word; } .pipe { text-align: center; color: var(--ink-3); font-family: var(--mono); }
+  .flow { display: grid; gap: 4px; }
+  .stg { display: grid; grid-template-columns: 250px 1fr; gap: 12px; align-items: center; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 7px 10px; background: var(--surface-2); transition: opacity .25s; }
+  .stg.err { border-color: var(--bad); background: var(--bad-soft); } .stg.skip { opacity: .5; border-style: dashed; } .stg.wait { opacity: .25; }
+  .stg.new { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .stg b { font-size: .9rem; } .stg b code { direction: ltr; unicode-bidi: isolate; }
+  .stg .val { font-family: var(--mono); font-size: .82rem; direction: ltr; text-align: left; word-break: break-word; }
+  .stg .val.fa { direction: rtl; text-align: right; font-family: inherit; }
+  .pipe { text-align: center; color: var(--ink-3); font-family: var(--mono); font-size: .78rem; direction: ltr; }
+  .fc { display: grid; gap: 8px; }
+  #letters { width: 100%; font-family: var(--mono); direction: ltr; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
       <a href="../chapters/05-bend-or-break.html">فصل ۵</a><span aria-hidden="true">/</span>
@@ -26,82 +33,117 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · خم شو، یا بشکن</div>
-  <h1>pipeline آناگرام</h1>
-  <p class="lede">برنامه را یک <strong>pipeline از تبدیل‌ها</strong> ببینید: داده وارد می‌شود، هر قدم آن را به چیزی تازه تبدیل می‌کند، و تابع اصلی مثل خود نیازمندی خوانده می‌شود. هر نتیجه را به‌عنوان <code>{:ok, value}</code> یا <code>{:error, reason}</code> بپیچید، و اولین خطا یک‌راست تا آخر جاری می‌شود.</p>
-  <p class="source-note">تصویری از موضوع ۳۰، برنامه‌نویسی تبدیلی (صص. ۲۵۵–۲۷۰): یابنده‌ی آناگرام با «vinyl» (صص. ۲۵۸–۲۶۴) و مدیریت خطا با bind به نام and_then (صص. ۲۶۵–۲۷۰). کتاب از فهرست کامل کلمه‌ها استفاده می‌کند؛ این صفحه یک دیکشنری کوچک درون‌ساخت دارد که طوری انتخاب شده که نتیجه‌های کتاب و چند کلمه‌ی دیگر را داشته باشد. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>pipeline آناگرام</h1>
+      <p class="lede">برنامه را یک <strong>pipeline از تبدیل‌ها</strong> ببینید: داده وارد می‌شود، هر قدم آن را به چیزی تازه تبدیل می‌کند، و تابع اصلی مثل خود نیازمندی خوانده می‌شود. هر نتیجه را به‌عنوان <code>{:ok, value}</code> یا <code>{:error, reason}</code> بپیچید، و اولین خطا یک‌راست تا آخر جاری می‌شود.</p>
+      <p class="source-note">تصویری از موضوع ۳۰، برنامه‌نویسی تبدیلی (صص. ۲۵۵–۲۷۰): یابنده‌ی آناگرام با «vinyl» (صص. ۲۵۸–۲۶۴) و مدیریت خطا با bind به نام and_then (صص. ۲۶۵–۲۷۰). کتاب از فهرست کامل کلمه‌ها استفاده می‌کند؛ این صفحه یک دیکشنری کوچک درون‌ساخت دارد که طوری انتخاب شده که نتیجه‌های کتاب و چند کلمه‌ی دیگر را داشته باشد. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">word |&gt; all_subsets_longer_than_three |&gt; as_unique_signatures |&gt; find_in_dictionary |&gt; group_by_length</p><div id="stages"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="letters">حرف‌ها</label><input id="letters" type="text" value="vinyl" maxlength="8" style="width:100%;font-family:var(--mono);direction:ltr">
-        <p class="field-hint">تا هشت حرف. نمونه‌ی کتاب «vinyl» است.</p>
-        <label class="field-head" for="brk" style="margin-top:10px">شکستن یک قدم</label><select id="brk" style="width:100%"><option value="none">هیچ چیزی نشکسته</option><option value="dict">فایل دیکشنری غایب است، در قدم ۳</option><option value="validate">رد کردن غیرحرف، در قدم ۱</option></select></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="flow" id="stages"></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group fc">
+          <label class="field-head" for="letters">حرف‌ها (تا هشت حرف)</label><input id="letters" type="text" maxlength="8">
+          <label class="field-head" for="brk">شکستن یک قدم</label><select id="brk"><option value="none">هیچ چیزی نشکسته</option><option value="dict">فایل دیکشنری غایب است (قدم ۳)</option><option value="validate">ورودی غیرحرف (قدم ۱)</option></select>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>هر قدم فقط ورودی و خروجی خودش را می‌شناسد</strong>، پس قدم‌ها را می‌شود تنها تست کرد و هر جایی دوباره به کار برد که ورودی‌شان با خروجی قدم دیگری بخورد.</li>
-    <li><strong>امضا</strong>، یعنی حرف‌های مرتب‌شده، همان چیزی است که جست‌و‌جو را ارزان می‌کند: همه‌ی آناگرام‌ها یک امضا را شریک‌اند، پس «vinyl» و هر چیدمان دیگری از همان حرف‌ها همان کلمه‌ها را پیدا می‌کنند.</li>
-    <li><strong>با یک تاپل خطا</strong>، قدم‌های مانده رد می‌شوند و crash نمی‌شود، و مقدار نهایی pipeline همان اولین خطاست. این همان bind به نام and_then در کتاب است.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>هر قدم فقط ورودی و خروجی خودش را می‌شناسد</strong>، پس قدم‌ها را می‌شود تنها تست کرد و هر جایی دوباره به کار برد که ورودی‌شان با خروجی قدم دیگری بخورد.</li>
+      <li><strong>امضا</strong>، یعنی حرف‌های مرتب‌شده، جست‌وجو را ارزان می‌کند: همه‌ی آناگرام‌ها یک امضا دارند.</li>
+      <li><strong>با یک تاپل خطا</strong>، قدم‌های مانده رد می‌شوند و crash پیش نمی‌آید؛ مقدار نهایی pipeline همان اولین خطاست، همان bind به نام and_then در کتاب.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-bend-or-break.html"><small>درس</small>فصل ۵: خم شو، یا بشکن</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-bend-or-break.html"><small>درس</small>فصل ۵: خم شو، یا بشکن</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
   var DICT = ["ivy", "yin", "nil", "lin", "viny", "liny", "inly", "vinyl", "any", "nay", "lay", "ten", "net", "tea", "eat", "ate", "east", "seat", "teas", "least", "steal", "tales", "stale", "slate", "list", "silt", "slit", "tin", "nit", "lint", "pea", "ape", "pear", "reap", "pare", "spare", "pears", "spear"];
   function sig(w) { return w.split("").sort().join(""); }
   var INDEX = {}; DICT.forEach(function (w) { (INDEX[sig(w)] = INDEX[sig(w)] || []).push(w); });
   function subsets(s) { var out = [], n = s.length; for (var m = 1; m < (1 << n); m++) { var t = ""; for (var i = 0; i < n; i++) if (m & (1 << i)) t += s[i]; if (t.length >= 3) out.push(t); } return out; }
-  function run() {
-    var w = document.getElementById("letters").value.trim().toLowerCase(), brk = document.getElementById("brk").value;
-    var steps = [
-      ["۱ · all_subsets_longer_than_three", function (v) { if (brk === "validate" && !/^[a-z]+$/.test(v)) return { error: "ورودی غیرحرف دارد: " + JSON.stringify(v) }; if (!/^[a-z]+$/.test(v)) return { error: "ورودی باید حرف باشد" }; return { ok: subsets(v) }; }],
-      ["۲ · as_unique_signatures", function (v) { var s = {}; v.forEach(function (x) { s[sig(x)] = 1; }); return { ok: Object.keys(s) }; }],
-      ["۳ · find_in_dictionary", function (v) { if (brk === "dict") return { error: "فایل دیکشنری باز نمی‌شود" }; var f = []; v.forEach(function (s) { (INDEX[s] || []).forEach(function (x) { f.push(x); }); }); return { ok: f }; }],
-      ["۴ · group_by_length", function (v) { var g = {}; v.forEach(function (x) { (g[x.length] = g[x.length] || []).push(x); }); Object.keys(g).forEach(function (k) { g[k].sort(); }); return { ok: g }; }]
-    ];
-    var val = { ok: w }, st = Kit.clear(document.getElementById("stages")), failedAt = null;
-    st.appendChild(Kit.el("div", { class: "stage" }, Kit.el("h3", null, "ورودی"), Kit.el("code", null, "{:ok, " + JSON.stringify(w) + "}")));
-    steps.forEach(function (s, i) {
-      st.appendChild(Kit.el("div", { class: "pipe", "aria-hidden": "true" }, "|> and_then ↓"));
-      if (val.error) { st.appendChild(Kit.el("div", { class: "stage skip" }, Kit.el("h3", null, s[0] + " — رد شد"), Kit.el("code", null, "مقدار {:error, …} را عبور می‌دهد"))); return; }
-      val = s[1](val.ok); if (val.error && failedAt === null) failedAt = i + 1;
-      var show = val.error ? "{:error, " + JSON.stringify(val.error) + "}" : "{:ok, " + (Array.isArray(val.ok) ? "[" + val.ok.slice(0, 18).join(", ") + (val.ok.length > 18 ? ", … " + val.ok.length + " در کل" : "") + "]" : Object.keys(val.ok).map(function (k) { return k + " ⇐ " + val.ok[k].join(", "); }).join(" · ") || "%{}") + "}";
-      st.appendChild(Kit.el("div", { class: "stage" + (val.error ? " err" : "") }, Kit.el("h3", null, s[0] + (val.error ? " ✗" : " ✓")), Kit.el("code", null, show)));
-    });
-    var words = val.ok && !Array.isArray(val.ok) ? Object.keys(val.ok).reduce(function (a, k) { return a + val.ok[k].length; }, 0) : 0;
-    log.add(val.error ? "نتیجه‌ی pipeline: {:error, " + val.error + "}، از قدم " + failedAt : "نتیجه‌ی pipeline: " + words + " کلمه از «" + w + "»", val.error ? "bad" : "ok");
-    stats([["زیرمجموعه‌ی سه‌حرفی و بیشتر", /^[a-z]+$/.test(w) ? subsets(w).length : "—"], ["کلمه‌ی پیدا‌شده", words], ["نتیجه", val.error ? "خطا" : "درست", val.error ? "bad" : "ok"]]);
+  var DEF = { w: "vinyl", brk: "none", show: 4 }, view = Object.assign({}, DEF), tour, msg, kind, res;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  var STEPS = [
+    ["all_subsets_longer_than_three", "زیرمجموعه‌های سه‌حرفی و بیشتر", function (v) { if (!/^[a-z]+$/.test(v)) return { error: "input has non-letters: " + JSON.stringify(v) }; return { ok: subsets(v) }; }],
+    ["as_unique_signatures", "امضاهای یکتا (حرف‌های مرتب‌شده)", function (v) { var s = {}; v.forEach(function (x) { s[sig(x)] = 1; }); return { ok: Object.keys(s) }; }],
+    ["find_in_dictionary", "کلمه‌های دیکشنری با همان امضا", function (v) { if (view.brk === "dict") return { error: "cannot open dictionary file" }; var f = []; v.forEach(function (s) { (INDEX[s] || []).forEach(function (x) { f.push(x); }); }); return { ok: f }; }],
+    ["group_by_length", "گروه‌بندی بر حسب طول", function (v) { var g = {}; v.forEach(function (x) { (g[x.length] = g[x.length] || []).push(x); }); Object.keys(g).forEach(function (k) { g[k].sort(); }); return { ok: g }; }]
+  ];
+  function show(val) {
+    if (val.error) return "{:error, " + JSON.stringify(val.error) + "}";
+    var v = val.ok;
+    if (typeof v === "string") return "{:ok, " + JSON.stringify(v) + "}";
+    if (Array.isArray(v)) return "{:ok, [" + v.slice(0, 14).join(", ") + (v.length > 14 ? ", … (" + v.length + ")" : "") + "]}";
+    return "{:ok, %{" + Object.keys(v).map(function (k) { return k + " => " + v[k].join(", "); }).join(" · ") + "}}";
   }
-  document.getElementById("letters").addEventListener("input", run);
-  document.getElementById("brk").addEventListener("change", function () { if (document.getElementById("brk").value === "validate") document.getElementById("letters").value = "vin1l"; run(); });
-  run();
+  function render() {
+    var w = view.w.trim().toLowerCase(), val = { ok: w }, st = Kit.clear(document.getElementById("stages")), failedAt = null, outs = [];
+    st.appendChild(Kit.el("div", { class: "stg" }, Kit.el("b", null, "ورودی"), Kit.el("div", { class: "val mono" }, show(val))));
+    STEPS.forEach(function (s, i) {
+      st.appendChild(Kit.el("div", { class: "pipe", "aria-hidden": "true" }, "|> and_then ↓"));
+      var head = Kit.el("b", null, "قدم " + (i + 1) + ": ", Kit.el("code", { dir: "ltr" }, s[0]));
+      if (val.error) { outs.push(null); st.appendChild(Kit.el("div", { class: "stg skip" + (i >= view.show ? " wait" : "") }, head, Kit.el("div", { class: "val fa" }, "رد شد؛ خطا را دست‌نخورده عبور می‌دهد"))); return; }
+      val = s[2](val.ok); outs.push(val); if (val.error && failedAt === null) failedAt = i + 1;
+      st.appendChild(Kit.el("div", { class: "stg" + (val.error ? " err" : "") + (i >= view.show ? " wait" : i === view.show - 1 ? " new" : ""), title: s[1] }, head, Kit.el("div", { class: "val mono" }, i < view.show ? show(val) + (val.error ? " ✗" : "") : "…")));
+    });
+    res = { val: val, failedAt: failedAt, outs: outs, w: w };
+    var words = val.ok && !Array.isArray(val.ok) && typeof val.ok === "object" ? Object.keys(val.ok).reduce(function (a, k) { return a + val.ok[k].length; }, 0) : 0;
+    kind = val.error ? "bad" : "ok";
+    msg = val.error ? "نتیجه‌ی pipeline همان خطای قدم " + failedAt + " است؛ قدم‌های بعدی رد شدند و چیزی crash نکرد." : "نتیجه‌ی pipeline برای «" + w + "»: " + words + " کلمه.";
+    var Sx = Kit.clear(document.getElementById("stats"));
+    [["زیرمجموعه‌ها", /^[a-z]+$/.test(w) ? subsets(w).length : "—"], ["امضای یکتا", outs[1] && outs[1].ok ? outs[1].ok.length : "—"], ["کلمه‌ی پیداشده", words], ["نتیجه", val.error ? ":error" : ":ok", val.error ? "bad" : "ok"]].forEach(function (x) {
+      Sx.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    var L = document.getElementById("letters"); if (L.value !== view.w) L.value = view.w;
+    document.getElementById("brk").value = view.brk;
+  }
+  function tw(f) { return function () { f(); view.show = 4; render(); tour.free(msg, kind); }; }
+  document.getElementById("letters").addEventListener("input", tw(function () { view.w = document.getElementById("letters").value; }));
+  document.getElementById("brk").addEventListener("change", tw(function () { view.brk = document.getElementById("brk").value; if (view.brk === "validate") view.w = "vin1l"; else if (!/^[a-z]+$/i.test(view.w)) view.w = "vinyl"; }));
+  function N(o, i) { var v = Object.assign({}, DEF, o), w = v.w; if (i === 0) return subsets(w).length; var s = {}; subsets(w).forEach(function (x) { s[sig(x)] = 1; }); return Object.keys(s).length; }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({ show: 0 }), render: render, interval: 8000,
+    intro: "یابنده‌ی آناگرام کتاب (صص. ۲۵۸–۲۶۴): word |> all_subsets_longer_than_three |> as_unique_signatures |> find_in_dictionary |> group_by_length. دیکشنری این صفحه کوچک و انتخاب vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: حرف‌های دیگری بنویسید یا یکی از قدم‌ها را بشکنید.",
+    steps: [
+      { kind: "", run: at({ show: 0 }), say: "ورودی {:ok, \"vinyl\"} است. هر قدم مقدار قبلی را می‌گیرد و چیز تازه‌ای می‌سازد؛ تابع اصلی مثل خود نیازمندی خوانده می‌شود." },
+      { kind: "", run: at({ show: 1 }), say: function () { return "قدم ۱ همه‌ی زیرمجموعه‌های سه‌حرفی و بیشتر را می‌سازد: " + N({}, 0) + " زیرمجموعه."; } },
+      { kind: "", run: at({ show: 2 }), say: function () { return "قدم ۲ هر زیرمجموعه را به امضایش، یعنی حرف‌های مرتب‌شده، تبدیل می‌کند و تکراری‌ها را می‌اندازد: " + N({}, 1) + " امضا. امضای vinyl رشته‌ی ilnvy است (صص. ۲۵۸–۲۵۹)."; } },
+      { kind: "", run: at({ show: 3 }), say: "قدم ۳ هر امضا را در دیکشنری نگاه می‌کند. چون همه‌ی آناگرام‌ها یک امضا دارند، جست‌وجو یک lookup ساده است." },
+      { kind: "ok", run: at({ show: 4 }), say: "قدم ۴ کلمه‌ها را بر حسب طول گروه می‌کند، همان شکلی که کتاب نتیجه را نشان می‌دهد." },
+      { kind: "ok", run: at({ w: "lyniv" }), say: "چیدمان دیگری از همان حرف‌ها، lyniv، دقیقاً همان کلمه‌ها را پیدا می‌کند؛ امضاها عوض نشده‌اند." },
+      { kind: "bad", run: at({ brk: "dict" }), say: "فایل دیکشنری باز نمی‌شود: قدم ۳ {:error, …} برمی‌گرداند و and_then قدم ۴ را رد می‌کند. نتیجه‌ی نهایی همان اولین خطاست (صص. ۲۶۸–۲۷۰)." },
+      { kind: "bad", run: at({ brk: "validate", w: "vin1l" }), say: "ورودی غیرحرف همان قدم اول رد می‌شود و هیچ قدمی بعد از آن اجرا نمی‌شود. خطا مثل یک مقدار معمولی در pipeline جاری است." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "امضای «vinyl» در نمونه‌ی کتاب چیست؟",

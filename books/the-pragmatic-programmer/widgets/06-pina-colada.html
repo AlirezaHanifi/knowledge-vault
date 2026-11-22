@@ -7,14 +7,19 @@
 <meta name="description" content="دوازده مرحله‌ی پینا کولادای کتاب را پشت‌سرهم یا بر حسب وابستگی‌هایشان با یک دست یا بیشتر زمان‌بندی کنید، و ببینید مایع کردن یک‌دقیقه‌ای کجا دست متصدی بار را برای کار دیگری آزاد می‌کند. تصویری از موضوع ۳۳ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .gantt { width: 100%; } .gantt .bar { stroke: var(--line-strong); } .gantt .hand { fill: var(--accent-soft); } .gantt .mach { fill: var(--warn-soft); }
-  .gantt text { font-size: 10px; fill: var(--ink); } .gantt .lane { font-size: 11px; fill: var(--ink-2); } .gantt .axis { stroke: var(--line); }
+  .gantt { width: 100%; max-height: 220px; display: block; } .gantt .bar { stroke: var(--line-strong); } .gantt .hand { fill: var(--accent-soft); } .gantt .mach { fill: var(--warn-soft); }
+  .gantt .crit { stroke: var(--bad); stroke-width: 2; }
+  .gantt text { font-size: 11px; fill: var(--ink); } .gantt .lane { font-size: 12px; fill: var(--ink-2); } .gantt .axis { stroke: var(--line); }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; font-size: .8rem; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; background: var(--surface-2); }
+  .chip.now { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; } .chip.mach { background: var(--warn-soft); }
+  .key { font-size: .8rem; color: var(--ink-2); margin-top: 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
       <a href="../chapters/06-concurrency.html">فصل ۶</a><span aria-hidden="true">/</span>
@@ -25,67 +30,72 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۶ · concurrency</div>
-  <h1>scheduler پینا کولادا</h1>
-  <p class="lede">نمودار فعالیت نشان می‌دهد کدام کنش‌ها <strong>می‌توانند</strong> با هم بیفتند. متصدی باری که پینا کولادا را مرحله‌به‌مرحله می‌سازد کارش را از دست می‌دهد. کارهای ۱ و ۲ و ۴ و ۱۰ و ۱۱ همه می‌توانند از اول شروع شوند، و تا یک دقیقه که مخلوط‌کن می‌گردد دست متصدی آزاد است.</p>
-  <p class="source-note">تصویری از موضوع ۳۳، شکستن coupling زمانی (صص. ۲۹۲–۲۹۷، tip ۵۶): دوازده مرحله و مایع کردن یک‌دقیقه‌ای مال کتاب‌اند (صص. ۲۹۳–۲۹۵). مدت‌های دیگر و فلش‌های وابستگی، که خوانش vault از نمودار کتاب است، و scheduler حریص مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>scheduler پینا کولادا</h1>
+      <p class="lede">نمودار فعالیت نشان می‌دهد کدام کنش‌ها <strong>می‌توانند</strong> با هم بیفتند. متصدی باری که پینا کولادا را مرحله‌به‌مرحله می‌سازد کارش را از دست می‌دهد. کارهای ۱ و ۲ و ۴ و ۱۰ و ۱۱ همه می‌توانند از اول شروع شوند، و تا یک دقیقه که مخلوط‌کن می‌گردد دست متصدی آزاد است.</p>
+      <p class="source-note">تصویری از موضوع ۳۳، شکستن coupling زمانی (صص. ۲۹۲–۲۹۷، tip ۵۶): دوازده مرحله و مایع کردن یک‌دقیقه‌ای مال کتاب‌اند (صص. ۲۹۳–۲۹۵). مدت‌های دیگر و فلش‌های وابستگی، که خوانش vault از نمودار کتاب است، و scheduler حریص مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">زمان‌بندی</p><svg class="gantt" id="g" role="img"></svg>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">مرحله‌ها، که مدت‌ها جز مایع کردن مال vault است</p><div class="table-wrap"><table id="tbl"></table></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div><div id="hands" style="margin-top:10px"></div><label style="display:flex;gap:6px;margin-top:8px"><input type="checkbox" id="busy"> متصدی بار باید مخلوط‌کن را بپاید</label></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <svg class="gantt" id="g" role="img"></svg>
+          <p class="key">هر نوار یک مرحله است و عددش شماره‌ی مرحله؛ نوار زرد مایع کردن در مخلوط‌کن است و نوارهای با حاشیه‌ی قرمز روی مسیر بحرانی‌اند.</p>
+          <div class="chips" id="chips"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+        <div class="tweak-group"><label style="display:flex;gap:6px"><input type="checkbox" id="busy"> متصدی بار باید مخلوط‌کن را بپاید</label></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>پشت‌سرهم</strong>، نوشیدنی جمع همه‌ی مرحله‌ها طول می‌کشد. با دنبال کردن وابستگی‌ها، دست دوم از قبل کوتاهش می‌کند، چون باز کردن‌ها و اندازه گرفتن و آوردن به هم وابسته نیستند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>پشت‌سرهم</strong>، نوشیدنی جمع همه‌ی مرحله‌ها طول می‌کشد. با دنبال کردن وابستگی‌ها، دست دوم از قبل کوتاهش می‌کند، چون باز کردن‌ها و اندازه گرفتن و آوردن به هم وابسته نیستند.</li>
     <li><strong>پنج دست</strong> همان چیزی است که برای شروع هم‌زمان هر کار اولیه لازم است (ص. ۲۹۶). بیشتر از دست‌هایی که لازم دارید، مایع کردن یک‌دقیقه‌ای کفِ زمان است: روی هر مسیری تا سرو کردن هست.</li>
     <li><strong>مایع کردن وقت می‌برد، ولی وقت متصدی بار را نه.</strong> تیک «مخلوط‌کن را بپاید» را بردارید و لیوان و چتر در همان دقیقه آورده می‌شوند: همان «وقت می‌برد، ولی وقت کد شما را نه» کتاب.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/06-concurrency.html"><small>درس</small>فصل ۶: concurrency</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/06-concurrency.html"><small>درس</small>فصل ۶: concurrency</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var T = [[1, "باز کردن مخلوط‌کن", 5, []], [2, "باز کردن مخلوط پینا کولادا", 10, []], [3, "ریختن مخلوط در مخلوط‌کن", 5, [1, 2]], [4, "اندازه گرفتن نیم پیمانه رام سفید", 10, []], [5, "ریختن رام", 5, [1, 4]], [6, "اضافه کردن دو module یخ", 10, [1]],
+  var T = [[1, "باز کردن مخلوط‌کن", 5, []], [2, "باز کردن مخلوط پینا کولادا", 10, []], [3, "ریختن مخلوط در مخلوط‌کن", 5, [1, 2]], [4, "اندازه گرفتن نیم پیمانه رام سفید", 10, []], [5, "ریختن رام", 5, [1, 4]], [6, "اضافه کردن یخ", 10, [1]],
     [7, "بستن مخلوط‌کن", 3, [3, 5, 6]], [8, "یک دقیقه مایع کردن", 60, [7]], [9, "باز کردن مخلوط‌کن", 3, [8]], [10, "آوردن لیوان‌ها", 10, []], [11, "آوردن چترهای صورتی", 10, []], [12, "سرو کردن", 5, [9, 10, 11]]];
-  var cfg = { mode: "dep", hands: 2, busy: false };
-  function schedule() {
-    var H = cfg.mode === "serial" ? 1 : cfg.hands, free = new Array(H).fill(0), end = {}, rows = [], order = T.slice();
-    var done = 0;
+  var CRIT = [2, 3, 7, 8, 9, 12], SERIAL = T.reduce(function (a, t) { return a + t[2]; }, 0);
+  var DEF = { mode: "dep", hands: 2, busy: false, crit: false }, view = Object.assign({}, DEF), cfg = view, tour, ctl = {}, msg, kind;
+  function at(o) { return function () { view = cfg = Object.assign({}, DEF, o); }; }
+  function schedule(c) {
+    c = c || cfg; var H = c.mode === "serial" ? 1 : c.hands, free = new Array(H).fill(0), end = {}, rows = [], done = 0;
     while (done < T.length) {
-      // pick the ready task (all deps finished) that can start earliest, lowest number first
       var best = null;
-      order.forEach(function (t) { if (end[t[0]] !== undefined) return; if (cfg.mode === "serial" && t[0] !== done + 1) return;
+      T.forEach(function (t) { if (end[t[0]] !== undefined) return; if (c.mode === "serial" && t[0] !== done + 1) return;
         if (!t[3].every(function (d) { return end[d] !== undefined; })) return;
         var ready = Math.max.apply(null, [0].concat(t[3].map(function (d) { return end[d]; })));
-        var machine = t[0] === 8 && !(cfg.busy || cfg.mode === "serial");
+        var machine = t[0] === 8 && !(c.busy || c.mode === "serial");
         var h = 0; if (!machine) for (var i = 1; i < H; i++) if (free[i] < free[h]) h = i;
         var start = machine ? ready : Math.max(ready, free[h]);
         if (!best || start < best.start || (start === best.start && t[0] < best.t[0])) best = { t: t, start: start, h: machine ? -1 : h }; });
@@ -94,30 +104,49 @@ function stats(rows) {
     }
     return { rows: rows, total: Math.max.apply(null, rows.map(function (r) { return r.e; })), H: H };
   }
+  function tot(o) { return schedule(Object.assign({}, DEF, o)).total; }
   function render() {
-    var sc = schedule(), g = Kit.clear(document.getElementById("g")), lanes = sc.H + 1, W = 520, L = 64, rowH = 26, Hh = lanes * rowH + 26, X = function (t) { return L + t / Math.max(sc.total, 1) * (W - L - 8); };
+    var sc = schedule(), g = Kit.clear(document.getElementById("g")), lanes = sc.H + 1, W = 900, L = 78, rowH = Math.min(34, Math.floor(180 / lanes)), Hh = lanes * rowH + 26, X = function (t) { return L + t / Math.max(sc.total, 1) * (W - L - 12); };
     g.setAttribute("viewBox", "0 0 " + W + " " + Hh);
-    for (var i = 0; i < lanes; i++) g.appendChild(Kit.svg("text", { class: "lane", x: 4, y: i * rowH + 17 }, i < sc.H ? "دست " + (i + 1) : "مخلوط‌کن"));
-    sc.rows.forEach(function (r) { var lane = r.lane >= 0 ? r.lane : sc.H, y = lane * rowH + 4;
-      if (r.id === 8 && r.lane >= 0) g.appendChild(Kit.svg("rect", { class: "bar mach", x: X(r.s), y: sc.H * rowH + 4, width: X(r.e) - X(r.s), height: rowH - 6 }));
-      g.appendChild(Kit.svg("rect", { class: "bar " + (r.id === 8 ? "mach" : "hand"), x: X(r.s), y: y, width: Math.max(2, X(r.e) - X(r.s)), height: rowH - 6 }));
-      if (X(r.e) - X(r.s) > 12) g.appendChild(Kit.svg("text", { x: X(r.s) + 3, y: y + 14 }, String(r.id))); });
-    for (var s = 0; s <= sc.total; s += 30) { g.appendChild(Kit.svg("line", { class: "axis", x1: X(s), x2: X(s), y1: lanes * rowH, y2: lanes * rowH + 6 })); g.appendChild(Kit.svg("text", { class: "lane", x: X(s) - 6, y: lanes * rowH + 20 }, s + "s")); }
+    for (var i = 0; i < lanes; i++) g.appendChild(Kit.svg("text", { class: "lane", x: 4, y: i * rowH + rowH / 2 + 4 }, i < sc.H ? "دست " + (i + 1) : "مخلوط‌کن"));
+    sc.rows.forEach(function (r) { var lane = r.lane >= 0 ? r.lane : sc.H, y = lane * rowH + 3, hgt = rowH - 6, cr = cfg.crit && CRIT.indexOf(r.id) >= 0 ? " crit" : "";
+      if (r.id === 8 && r.lane >= 0) g.appendChild(Kit.svg("rect", { class: "bar mach", x: X(r.s), y: sc.H * rowH + 3, width: X(r.e) - X(r.s), height: hgt }));
+      g.appendChild(Kit.svg("rect", { class: "bar " + (r.id === 8 ? "mach" : "hand") + cr, x: X(r.s), y: y, width: Math.max(2, X(r.e) - X(r.s)), height: hgt }));
+      if (X(r.e) - X(r.s) > 14) g.appendChild(Kit.svg("text", { x: (X(r.s) + X(r.e)) / 2, y: y + hgt / 2 + 4, "text-anchor": "middle" }, String(r.id))); });
+    var stepS = sc.total > 100 ? 30 : 15;
+    for (var s = 0; s <= sc.total; s += stepS) { g.appendChild(Kit.svg("line", { class: "axis", x1: X(s), x2: X(s), y1: lanes * rowH, y2: lanes * rowH + 6 })); g.appendChild(Kit.svg("text", { class: "lane", x: X(s), y: lanes * rowH + 20, "text-anchor": "middle" }, s + "s")); }
     g.setAttribute("aria-label", "زمان‌بندی با " + sc.H + " دست: نوشیدنی بعد از " + sc.total + " ثانیه سرو می‌شود");
-    var serial = T.reduce(function (a, t) { return a + t[2]; }, 0), crit = 86;
-    var v = document.getElementById("verdict"); v.className = "callout " + (sc.total <= crit ? "ok" : sc.total < serial ? "warn" : "bad");
-    v.textContent = sc.total >= serial ? "مرحله‌به‌مرحله: " + sc.total + " ثانیه. متصدی بار یک دقیقه‌ی تمام جلوی مخلوط‌کن بی‌کار است." :
-      sc.total <= crit ? sc.total + " ثانیه، که همان مسیر بحرانی است: بی مخلوط‌کن تندتر چیزی بیشتر به دست نمی‌آید." : sc.total + " ثانیه با " + sc.H + " دست، از " + serial + " ثانیه‌ی پشت‌سرهم پایین آمده؛ و مسیر بحرانی " + crit + " ثانیه است.";
-    var tb = Kit.clear(document.getElementById("tbl")); tb.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "#"), Kit.el("th", null, "مرحله"), Kit.el("th", null, "نیاز به"), Kit.el("th", null, "زمان"), Kit.el("th", null, "اجرا در"))));
-    var body = Kit.el("tbody"); T.forEach(function (t) { var r = sc.rows.filter(function (x) { return x.id === t[0]; })[0]; body.appendChild(Kit.el("tr", null, Kit.el("td", null, String(t[0])), Kit.el("td", null, t[1]), Kit.el("td", null, t[3].join(", ") || "—"), Kit.el("td", null, t[2] + " ثانیه"), Kit.el("td", null, r.s + "–" + r.e + " ثانیه"))); }); tb.appendChild(body);
-    stats([["سرو بعد از", sc.total + " ثانیه", sc.total <= crit ? "ok" : ""], ["زمان پشت‌سرهم", serial + " ثانیه"], ["مسیر بحرانی", crit + " ثانیه"], ["دست", sc.H]]);
-    return sc;
+    var ch = Kit.clear(document.getElementById("chips"));
+    T.forEach(function (t) { var free0 = !t[3].length; ch.appendChild(Kit.el("span", { class: "chip" + (t[0] === 8 ? " mach" : free0 ? " now" : "") }, t[0] + " " + t[1] + " · " + t[2] + " ثانیه" + (t[3].length ? " · بعد از " + t[3].join("، ") : " · آزاد"))); });
+    kind = sc.total <= 86 ? "ok" : sc.total >= SERIAL ? "bad" : "";
+    msg = sc.total >= SERIAL ? "مرحله‌به‌مرحله: " + sc.total + " ثانیه؛ متصدی بار یک دقیقه‌ی تمام جلوی مخلوط‌کن بی‌کار است." :
+      sc.total <= 86 ? sc.total + " ثانیه، که همان مسیر بحرانی است: بی مخلوط‌کن تندتر چیزی بیشتر به دست نمی‌آید." : sc.total + " ثانیه با " + sc.H + " دست، از " + SERIAL + " ثانیه‌ی پشت‌سرهم پایین آمده.";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["سرو بعد از", sc.total + " ثانیه", kind], ["پشت‌سرهم", SERIAL + " ثانیه"], ["مسیر بحرانی", "۸۶ ثانیه"], ["دست", sc.H]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.mode.set(cfg.mode); ctl.hands.set(cfg.hands); document.getElementById("busy").checked = cfg.busy;
   }
-  function changed(msg) { var sc = render(); log.add(msg + " ← سرو بعد از " + sc.total + " ثانیه", "muted"); }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "زمان‌بندی", value: cfg.mode, options: [{ value: "serial", label: "مرحله‌به‌مرحله" }, { value: "dep", label: "بر حسب وابستگی" }], onChange: function (v) { cfg.mode = v; changed(v === "serial" ? "پشت‌سرهم" : "بر حسب وابستگی"); } }).element);
-  document.getElementById("hands").appendChild(Kit.slider({ label: "دست‌ها", min: 1, max: 6, step: 1, value: cfg.hands, onInput: function (v) { cfg.hands = v; changed(v + " دست"); } }).element);
-  document.getElementById("busy").addEventListener("change", function (e) { cfg.busy = e.target.checked; changed(e.target.checked ? "متصدی بار مخلوط‌کن را می‌پاید" : "مخلوط‌کن خودش می‌گردد"); });
-  render();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var box = document.getElementById("ctl");
+  ctl.mode = Kit.segmented({ label: "زمان‌بندی", value: "dep", options: [{ value: "serial", label: "مرحله‌به‌مرحله" }, { value: "dep", label: "بر حسب وابستگی" }], onChange: tw(function (v) { cfg.mode = v; }) });
+  ctl.hands = Kit.slider({ label: "دست‌ها", min: 1, max: 6, step: 1, value: 2, onInput: tw(function (v) { cfg.hands = v; }) });
+  box.appendChild(ctl.mode.element); box.appendChild(ctl.hands.element);
+  document.getElementById("busy").addEventListener("change", tw(function () { cfg.busy = document.getElementById("busy").checked; }));
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "دوازده مرحله‌ی پینا کولادای کتاب و مایع کردن یک‌دقیقه‌ای‌اش (صص. ۲۹۳–۲۹۵). مدت‌های دیگر، فلش‌های وابستگی و scheduler حریص فرض vault‌اند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و دست‌ها و پاییدن مخلوط‌کن را عوض کنید.",
+    steps: [
+      { kind: "bad", run: at({ mode: "serial" }), say: function () { return "متصدی باری که مرحله‌ها را یکی‌یکی می‌کند: " + tot({ mode: "serial" }) + " ثانیه، و یک دقیقه‌ی تمام جلوی مخلوط‌کن می‌ایستد. کتاب می‌گوید چنین متصدی‌ای کارش را از دست می‌دهد (ص. ۲۹۵)."; } },
+      { kind: "", run: at({ hands: 1 }), say: function () { return "همان یک دست، ولی بر حسب وابستگی: مخلوط‌کن خودش می‌گردد و لیوان و چتر در همان دقیقه آورده می‌شوند. " + tot({ hands: 1 }) + " ثانیه."; } },
+      { kind: "", run: at({ hands: 2 }), say: function () { return "دست دوم: کارهای ۱ و ۲ و ۴ و ۱۰ و ۱۱ به هم وابسته نیستند و می‌توانند از اول شروع شوند (ص. ۲۹۵). " + tot({ hands: 2 }) + " ثانیه."; } },
+      { kind: "ok", run: at({ hands: 5, crit: true }), say: function () { return "پنج دست، همان قدر که برای شروع هم‌زمان همه‌ی کارهای اولیه لازم است (ص. ۲۹۶): " + tot({ hands: 5 }) + " ثانیه. نوارهای قرمز مسیر بحرانی‌اند: باز کردن مخلوط، ریختن، بستن، مایع کردن، باز کردن و سرو."; } },
+      { kind: "ok", run: at({ hands: 6, crit: true }), say: function () { return "دست ششم چیزی عوض نمی‌کند: باز " + tot({ hands: 6 }) + " ثانیه. مایع کردن یک‌دقیقه‌ای روی هر مسیری تا سرو هست و کفِ زمان است."; } },
+      { kind: "bad", run: at({ hands: 1, busy: true }), say: function () { return "با یک دست، اگر متصدی بار باید مخلوط‌کن را بپاید، آن دقیقه دستش را می‌گیرد: " + tot({ hands: 1, busy: true }) + " ثانیه در برابر " + tot({ hands: 1 }) + ". بهترین فرصت concurrency کاری است که وقت می‌برد ولی وقت کد شما را نه (صص. ۲۹۶–۲۹۷)."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "در نمودار پینا کولادای کتاب کدام کارها می‌توانند بی‌درنگ شروع شوند؟",

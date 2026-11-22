@@ -7,17 +7,26 @@
 <meta name="description" content="برنامه‌ی لاک‌پشتی تمرین ۴ کتاب را اجرا کنید، برنامه‌ی خودتان را بنویسید، ببینید هر خط به یک دستور یا یک خطا تجزیه می‌شود، و با گسترش جدول دستورها دستوری تازه اضافه کنید. تصویری از موضوع ۱۴ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  textarea { width: 100%; min-height: 170px; font-family: var(--mono); font-size: .9rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
-  .canvas { width: 100%; height: 260px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .two { display: grid; grid-template-columns: 1fr 1.1fr; gap: 16px; align-items: start; }
+  .sub { font-size: .85rem; color: var(--ink-2); margin: 0 0 6px; font-weight: 600; }
+  .canvas { width: 100%; max-height: 150px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); display: block; }
   .canvas .ink { fill: none; stroke-width: 3; stroke-linecap: round; } .canvas .p1 { stroke: var(--s1); } .canvas .p2 { stroke: var(--s2); } .canvas .p3 { stroke: var(--s3); }
   .canvas .turtle { fill: var(--ink); } .canvas .gridl { stroke: var(--line); stroke-width: 1; }
-  .parsed td:first-child { font-family: var(--mono); }
+  table.t { width: 100%; font-size: .8rem; } table.t td, table.t th { padding: 1px 6px; vertical-align: top; }
+  table.t code { direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+  table.t tr.new { background: var(--ok-soft); font-weight: 600; }
+  table.t tr.err td { color: var(--bad); }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; font-size: .8rem; }
+  .chip { border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 8px; background: var(--surface-2); }
+  .chip.new { border-color: var(--ok); background: var(--ok-soft); font-weight: 600; }
+  textarea { width: 100%; min-height: 150px; font-family: var(--mono); font-size: .86rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px; direction: ltr; text-align: left; }
+  .fc { display: flex; flex-direction: column; gap: 6px; align-items: stretch; margin-top: 8px; font-size: .86rem; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
       <a href="../chapters/02-a-pragmatic-approach.html">فصل ۲</a><span aria-hidden="true">/</span>
@@ -28,68 +37,84 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۲ · رویکرد pragmatic</div>
-  <h1>یک زبان کوچک گرافیک لاک‌پشتی</h1>
-  <p class="lede">تمرین ۴ یک parser برای زبان بیرونی کوچکی از <strong>دستورهای تک‌حرفی می‌خواهد که بعضی‌شان یک عدد هم می‌گیرند</strong>، طوری طراحی‌شده که اضافه کردن دستور تازه ساده باشد. جدولی که هر حرف را به قاعده‌ی آرگومان و کنشش map می‌کند، خود parser را ریز نگه می‌دارد.</p>
-  <p class="source-note">تصویری از موضوع ۱۴، زبان‌های دامنه، تمرین ۴ (صص. ۱۳۰–۱۳۱): دستور P یک قلم انتخاب می‌کند، D و U قلم را پایین و بالا می‌برند، و N و E و S و W در یک جهت می‌کشند، به سانتی‌متر. دستور مورب و مقیاس بوم و پیام‌های خطا مال vault است. پیاده‌سازی مال خود vault است؛ پاسخ ممکن کتاب در پیوستش است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>یک زبان کوچک گرافیک لاک‌پشتی</h1>
+      <p class="lede">تمرین ۴ یک parser برای زبان بیرونی کوچکی از <strong>دستورهای تک‌حرفی می‌خواهد که بعضی‌شان یک عدد هم می‌گیرند</strong>، طوری طراحی‌شده که اضافه کردن دستور تازه ساده باشد. جدولی که هر حرف را به قاعده‌ی آرگومان و کنشش map می‌کند، خود parser را ریز نگه می‌دارد.</p>
+      <p class="source-note">تصویری از موضوع ۱۴، زبان‌های دامنه، تمرین ۴ (صص. ۱۳۰–۱۳۱): دستور P یک قلم انتخاب می‌کند، D و U قلم را پایین و بالا می‌برند، و N و E و S و W در یک جهت می‌کشند، به سانتی‌متر. دستور مورب و مقیاس بوم و پیام‌های خطا مال vault است. پیاده‌سازی مال خود vault است؛ پاسخ ممکن کتاب در پیوستش است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">برنامه</p><label class="sr-only" for="src">برنامه‌ی لاک‌پشتی</label><textarea id="src" spellcheck="false" dir="ltr"></textarea>
-        <div class="row" style="margin-top:8px"><button class="btn primary" id="run" type="button">اجرا</button><button class="btn" id="ex" type="button">مستطیل کتاب</button><button class="btn" id="bad" type="button">برنامه‌ی خطادار</button></div></div>
-      <div class="panel"><p class="panel-title">نقاشی، که یک سانتی‌متر بیست پیکسل است و قلم‌ها ۱ تا ۳</p><svg class="canvas" id="cv" viewBox="0 0 400 260" role="img" aria-label="نقاشی لاک‌پشت"></svg></div>
-      <div class="panel"><p class="panel-title">خط‌های تجزیه‌شده</p><div class="table-wrap"><table class="parsed" id="parsed"></table></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><p class="panel-title">جدول دستورها</p><div class="table-wrap"><table id="cmds"></table></div>
-        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="addx"> اضافه کردن <code>X n</code>: کشیدن شمال‌شرق به اندازه‌ی n سانتی‌متر</label></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="two">
+          <div>
+            <p class="sub">نقاشی (یک سانتی‌متر = ۲۰ پیکسل، قلم‌های ۱ تا ۳)</p>
+            <svg class="canvas" id="cv" viewBox="0 0 400 260" role="img" aria-label="نقاشی لاک‌پشت"></svg>
+            <p class="sub" style="margin-top:8px">جدول دستورها</p><div class="chips" id="cmds"></div>
+          </div>
+          <div>
+            <p class="sub">برنامه، خط به خط، و آنچه parser از هر خط فهمید</p>
+            <table class="t" id="parsed"></table>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <div><label class="field-head" for="src">برنامه‌ی لاک‌پشتی</label><textarea id="src" spellcheck="false" dir="ltr"></textarea></div>
+          <div class="fc"><button class="btn" id="ex" type="button">مستطیل کتاب</button><button class="btn" id="bad" type="button">برنامه‌ی خطادار</button>
+          <label><input type="checkbox" id="addx"> اضافه کردن <code>X n</code> (شمال‌شرق)</label></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>خود parser هیچ‌وقت عوض نمی‌شود</strong> وقتی <code>X</code> را اضافه می‌کنید: یک ردیف تازه در جدول کافی است. این همان طراحی «اضافه کردن دستور تازه ساده باشد» است که تمرین می‌خواهد.</li>
-    <li><strong>خطاها برای هر خط‌اند</strong>: حرف ناشناس یا آرگومان غایب یا اضافه با شماره‌ی خطش خبر می‌شود، و بقیه‌ی برنامه باز هم اجرا می‌شود.</li>
-    <li><strong>comment بعد از #</strong> اول برداشته می‌شود، دقیقاً مثل برنامه‌ی نمونه‌ی کتاب.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>خود parser هیچ‌وقت عوض نمی‌شود</strong> وقتی <code>X</code> را اضافه می‌کنید: یک ردیف تازه در جدول کافی است، همان طراحی‌ای که تمرین می‌خواهد.</li>
+      <li><strong>خطاها برای هر خط‌اند</strong>: حرف ناشناس یا آرگومان غایب یا اضافه با شماره‌ی خطش گزارش می‌شود، و بقیه‌ی برنامه باز هم اجرا می‌شود.</li>
+      <li><strong>متن بعد از #</strong> اول برداشته می‌شود، مثل comment در برنامه‌ی نمونه‌ی کتاب.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/02-a-pragmatic-approach.html"><small>درس</small>فصل ۲: رویکرد pragmatic</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/02-a-pragmatic-approach.html"><small>درس</small>فصل ۲: رویکرد pragmatic</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
   var BOOK = "P 2 # select pen 2\nD # pen down\nW 2 # draw west 2cm\nN 1 # then north 1\nE 2 # then east 2\nS 1 # then back south\nU # pen up";
   var BAD = "P 1\nD\nE 3\nQ 2 # unknown command\nN\nS 1 2\nU";
   var DIRS = { N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0], X: [Math.SQRT1_2, -Math.SQRT1_2] };
   function move(d) { return function (t, n) { var dx = DIRS[d][0] * n * 20, dy = DIRS[d][1] * n * 20; if (t.down) t.lines.push([t.x, t.y, t.x + dx, t.y + dy, t.pen]); t.x += dx; t.y += dy; }; }
-  var TABLE = {
+  var BASE = {
     P: { arg: true, doc: "انتخاب قلم n", fn: function (t, n) { t.pen = n; } },
     D: { arg: false, doc: "قلم پایین", fn: function (t) { t.down = true; } },
     U: { arg: false, doc: "قلم بالا", fn: function (t) { t.down = false; } },
-    N: { arg: true, doc: "کشیدن شمال n سانتی‌متر", fn: move("N") }, E: { arg: true, doc: "کشیدن شرق n سانتی‌متر", fn: move("E") },
-    S: { arg: true, doc: "کشیدن جنوب n سانتی‌متر", fn: move("S") }, W: { arg: true, doc: "کشیدن غرب n سانتی‌متر", fn: move("W") }
-  };
-  function parse(src) {
+    N: { arg: true, doc: "شمال n سانتی‌متر", fn: move("N") }, E: { arg: true, doc: "شرق n سانتی‌متر", fn: move("E") },
+    S: { arg: true, doc: "جنوب n سانتی‌متر", fn: move("S") }, W: { arg: true, doc: "غرب n سانتی‌متر", fn: move("W") }
+  }, XROW = { arg: true, doc: "شمال‌شرق n سانتی‌متر", fn: move("X") };
+  var DEF = { src: BOOK, x: false }, view = Object.assign({}, DEF), tour, msg, kind;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function table() { var T = Object.assign({}, BASE); if (view.x) T.X = XROW; return T; }
+  // The parser: one generic loop driven by the command table; adding a command never touches it.
+  function parse(src, TABLE) {
     return src.split("\n").map(function (raw, i) {
       var line = raw.replace(/#.*$/, "").trim(); if (!line) return { n: i + 1, raw: raw, skip: true };
       var parts = line.split(/\s+/), cmd = TABLE[parts[0].toUpperCase()];
@@ -100,21 +125,18 @@ function stats(rows) {
       return { n: i + 1, raw: raw, cmd: parts[0].toUpperCase(), num: num };
     });
   }
-  function renderTable() {
-    var t = Kit.clear(document.getElementById("cmds"));
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "حرف"), Kit.el("th", null, "آرگومان"), Kit.el("th", null, "کنش"))));
-    var tb = Kit.el("tbody"); Object.keys(TABLE).forEach(function (k) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, Kit.el("code", null, k)), Kit.el("td", null, TABLE[k].arg ? "n" : "—"), Kit.el("td", null, TABLE[k].doc))); }); t.appendChild(tb);
-  }
-  function run() {
-    var ps = parse(document.getElementById("src").value), t = { x: 260, y: 140, pen: 1, down: false, lines: [] }, ok = 0, bad = 0;
+  function render() {
+    var TABLE = table(), ps = parse(view.src, TABLE), t = { x: 260, y: 140, pen: 1, down: false, lines: [] }, ok = 0, bad = 0, errs = [];
+    var ct = Kit.clear(document.getElementById("cmds"));
+    Object.keys(TABLE).forEach(function (k) { ct.appendChild(Kit.el("span", { class: "chip" + (k === "X" ? " new" : "") }, Kit.el("code", { dir: "ltr" }, k + (TABLE[k].arg ? " n" : "")), " " + TABLE[k].doc)); });
     var pt = Kit.clear(document.getElementById("parsed"));
     pt.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "خط"), Kit.el("th", null, "منبع"), Kit.el("th", null, "تجزیه‌شده به"))));
     var tb = Kit.el("tbody");
     ps.forEach(function (p) {
       if (p.skip) return;
-      if (p.err) { bad++; log.add("خط " + p.n + ": " + p.err, "bad"); tb.appendChild(Kit.el("tr", null, Kit.el("td", null, String(p.n)), Kit.el("td", null, Kit.el("code", null, p.raw)), Kit.el("td", null, Kit.el("span", { class: "badge bad" }, "✗ خطا"), " " + p.err))); return; }
+      if (p.err) { bad++; errs.push(p.n); tb.appendChild(Kit.el("tr", { class: "err" }, Kit.el("td", { class: "mono" }, String(p.n)), Kit.el("td", null, Kit.el("code", { dir: "ltr" }, p.raw)), Kit.el("td", null, "✗ " + p.err))); return; }
       ok++; TABLE[p.cmd].fn(t, p.num);
-      tb.appendChild(Kit.el("tr", null, Kit.el("td", null, String(p.n)), Kit.el("td", null, Kit.el("code", null, p.raw)), Kit.el("td", null, Kit.el("span", { class: "badge ok" }, "✓"), " " + p.cmd + (p.num !== null ? "(" + p.num + ")" : "") + " — " + TABLE[p.cmd].doc)));
+      tb.appendChild(Kit.el("tr", null, Kit.el("td", { class: "mono" }, String(p.n)), Kit.el("td", null, Kit.el("code", { dir: "ltr" }, p.raw.replace(/\s*#.*$/, ""))), Kit.el("td", null, "✓ " + TABLE[p.cmd].doc.replace(" n", p.num !== null ? " " + p.num : ""))));
     });
     pt.appendChild(tb);
     var cv = Kit.clear(document.getElementById("cv"));
@@ -122,19 +144,34 @@ function stats(rows) {
     for (var gy = 0; gy <= 260; gy += 20) cv.appendChild(Kit.svg("line", { class: "gridl", x1: 0, x2: 400, y1: gy, y2: gy }));
     t.lines.forEach(function (l) { cv.appendChild(Kit.svg("line", { class: "ink p" + Math.min(3, Math.max(1, Math.round(l[4]))), x1: l[0], y1: l[1], x2: l[2], y2: l[3] })); });
     cv.appendChild(Kit.svg("circle", { class: "turtle", cx: t.x, cy: t.y, r: 5 }));
-    cv.setAttribute("aria-label", "نقاشی لاک‌پشت: " + t.lines.length + " پاره‌خط؛ لاک‌پشت در فاصله‌ی " + ((t.x - 260) / 20).toFixed(1) + " و " + ((140 - t.y) / 20).toFixed(1) + " سانتی‌متری از شروع، با قلم " + (t.down ? "پایین" : "بالا"));
-    log.add("تعداد " + ok + " دستور اجرا شد، " + bad + " خطا، و " + t.lines.length + " پاره‌خط کشیده شد", bad ? "warn" : "ok");
-    stats([["دستور اجرا‌شده", ok, "ok"], ["خطا", bad, bad ? "bad" : ""], ["پاره‌خط کشیده‌شده", t.lines.length], ["دستور در جدول", Object.keys(TABLE).length]]);
+    cv.setAttribute("aria-label", "نقاشی لاک‌پشت: " + t.lines.length + " پاره‌خط، قلم " + (t.down ? "پایین" : "بالا"));
+    kind = bad ? "warn" : "ok";
+    msg = ok + " دستور اجرا شد و " + t.lines.length + " پاره‌خط کشیده شد" + (bad ? "؛ " + bad + " خط خطا داشت (خط " + errs.join(" و ") + ") و بقیه باز هم اجرا شدند." : "، بدون خطا.");
+    var St = Kit.clear(document.getElementById("stats"));
+    [["دستور اجراشده", ok, "ok"], ["خطا", bad, bad ? "bad" : ""], ["پاره‌خط", t.lines.length], ["ردیف جدول", Object.keys(TABLE).length]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    if (document.getElementById("src").value !== view.src) document.getElementById("src").value = view.src;
+    document.getElementById("addx").checked = view.x;
   }
-  var src = document.getElementById("src"); src.value = BOOK;
-  document.getElementById("run").addEventListener("click", run);
-  document.getElementById("ex").addEventListener("click", function () { src.value = BOOK; run(); });
-  document.getElementById("bad").addEventListener("click", function () { src.value = BAD; run(); });
-  document.getElementById("addx").addEventListener("change", function (e) {
-    if (e.target.checked) { TABLE.X = { arg: true, doc: "کشیدن شمال‌شرق n سانتی‌متر", fn: move("X") }; if (src.value.indexOf("X ") < 0) src.value += "\nD\nX 3\nU"; log.add("یک ردیف به جدول اضافه شد: X n. خود parser دست‌نخورده است.", "ok"); }
-    else { delete TABLE.X; log.add("حرف X از جدول برداشته شد.", "muted"); }
-    renderTable(); run(); });
-  renderTable(); run();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var src = document.getElementById("src");
+  src.addEventListener("input", tw(function () { view.src = src.value; }));
+  document.getElementById("ex").addEventListener("click", tw(function () { view.src = BOOK; }));
+  document.getElementById("bad").addEventListener("click", tw(function () { view.src = BAD; }));
+  document.getElementById("addx").addEventListener("change", tw(function (e) { view.x = e.target.checked; if (view.x && view.src.indexOf("X ") < 0) view.src += "\nD\nX 3\nU"; }));
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "تمرین ۴ کتاب: یک parser برای زبانی از دستورهای تک‌حرفی که بعضی‌شان یک عدد می‌گیرند، طوری که اضافه کردن دستور تازه ساده باشد (صص. ۱۳۰–۱۳۱). دستور مورب X و پیام‌های خطا مال vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: برنامه‌ی خودتان را بنویسید، یا X را به جدول اضافه کنید.",
+    steps: [
+      { kind: "ok", run: at({}), say: "برنامه‌ی نمونه‌ی کتاب: قلم ۲ را بردار، پایین بگذار، ۲ سانتی‌متر غرب، ۱ شمال، ۲ شرق، ۱ جنوب، و قلم را بالا ببر. نتیجه یک مستطیل است." },
+      { kind: "", run: at({}), say: "خود parser یک حلقه‌ی کلی است: متن بعد از # را برمی‌دارد، حرف اول را در جدول دستورها پیدا می‌کند و بررسی می‌کند عدد لازم دارد یا نه. همه‌ی دانش زبان در آن جدول است." },
+      { kind: "warn", run: at({ src: BAD }), say: "برنامه‌ی خطادار: Q در جدول نیست، N عددش را ندارد و S دو عدد گرفته. هر خطا با شماره‌ی خطش گزارش می‌شود و بقیه‌ی دستورها باز هم اجرا می‌شوند." },
+      { kind: "ok", run: at({ x: true, src: BOOK + "\nD\nX 3\nU" }), say: "یک دستور تازه: X n یعنی شمال‌شرق. فقط یک ردیف به جدول اضافه شد و parser دست نخورد. همین است که تمرین از «ساده بودن اضافه کردن دستور» می‌خواهد." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "خط «W 2» در نمونه‌ی کتاب چه می‌کند؟",

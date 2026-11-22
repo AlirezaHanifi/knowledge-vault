@@ -7,14 +7,21 @@
 <meta name="description" content="فاصله‌ی ایستادن را با فاصله‌ی پرتاب چراغ‌های جلو با عددهای NHTSA کتاب مقایسه کنید، بعد انتخاب کنید تیم پیش از گرفتن بازخورد چند قدم را متعهد می‌شود و ببینید هر تغییر مسیر چقدر کار را دور می‌ریزد. تصویری از موضوع ۲۷ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .road { width: 100%; height: 90px; } .road .beam { fill: var(--warn-soft); stroke: var(--warn); } .road .stop { fill: var(--accent-soft); stroke: var(--accent); }
-  .road .over { fill: var(--bad-soft); stroke: var(--bad); } .road text { font-size: 11px; fill: var(--ink-2); } .road .car { fill: var(--ink); }
+  .sub { font-size: .85rem; color: var(--ink-2); margin: 0 0 4px; font-weight: 600; }
+  .road { width: 100%; height: auto; max-height: 96px; display: block; direction: ltr; }
+  .road .beam { fill: var(--warn-soft); stroke: var(--warn); } .road .stop { fill: var(--ok-soft); stroke: var(--ok); }
+  .road .over { fill: var(--bad-soft); stroke: var(--bad); } .road text { font-size: 12px; fill: var(--ink); font-family: var(--sans, inherit); } .road .car { fill: var(--ink); }
+  .road .tick { font-size: 10px; fill: var(--ink-3); }
+  .two { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .panelx { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; }
+  .panelx.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  #chart { width: 100%; max-height: 180px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
       <a href="../chapters/04-pragmatic-paranoia.html">فصل ۴</a><span aria-hidden="true">/</span>
@@ -25,87 +32,127 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۴ · بدگمانی pragmatic</div>
-  <h1>جلو زدن از نور چراغ‌ها</h1>
-  <p class="lede">نور پایین حدود <strong>۱۶۰ فوت</strong> را روشن می‌کند، ولی خودرو در سرعت ۴۰ مایل بر ساعت ۱۸۹ فوت و در ۷۰ مایل بر ساعت ۴۶۴ فوت برای ایستادن لازم دارد. در نرم‌افزار، چراغ‌های جلو همان بازخوردند. <strong>نرخ بازخورد سرعت مجاز شماست</strong>، پس همیشه قدم‌های کوچک بردارید.</p>
-  <p class="source-note">تصویری از موضوع ۲۷، از نور چراغ‌هایت جلو نزن (صص. ۲۲۲–۲۲۵، tip ۴۲): عددهای NHTSA یعنی ۱۶۰ فوت پرتاب و ۱٫۵ ثانیه زمان واکنش و کاهش سرعت ۱۷٫۰۲ فوت بر مجذور ثانیه. فرمول فاصله‌ی ایستادن، یعنی فاصله‌ی واکنش به‌علاوه‌ی v²/2a، همان ۱۸۹ فوت و ۴۶۴ فوت کتاب را بازتولید می‌کند. مدل پروژه در نیمه‌ی پایین، یعنی تغییر مسیر تصادفی با هزینه‌ی ثابت برای هر بررسی بازخورد، مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>جلو زدن از نور چراغ‌ها</h1>
+      <p class="lede">نور پایین حدود <strong>۱۶۰ فوت</strong> را روشن می‌کند، ولی خودرو در سرعت ۴۰ مایل بر ساعت ۱۸۹ فوت و در ۷۰ مایل بر ساعت ۴۶۴ فوت برای ایستادن لازم دارد. در نرم‌افزار، چراغ‌های جلو همان بازخوردند. <strong>نرخ بازخورد سرعت مجاز شماست</strong>، پس همیشه قدم‌های کوچک بردارید.</p>
+      <p class="source-note">تصویری از موضوع ۲۷، از نور چراغ‌هایت جلو نزن (صص. ۲۲۲–۲۲۵، tip ۴۲): عددهای NHTSA یعنی ۱۶۰ فوت پرتاب و ۱٫۵ ثانیه زمان واکنش و کاهش سرعت ۱۷٫۰۲ فوت بر مجذور ثانیه. فرمول فاصله‌ی ایستادن، یعنی فاصله‌ی واکنش به‌علاوه‌ی v²/2a، همان ۱۸۹ فوت و ۴۶۴ فوت کتاب را بازتولید می‌کند. مدل پروژه در نیمه‌ی پایین، یعنی تغییر مسیر تصادفی با هزینه‌ی ثابت برای هر بررسی بازخورد، مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">فاصله‌ی ایستادن در برابر پرتاب چراغ‌های جلو</p><svg class="road" id="road" viewBox="0 0 520 90" role="img"></svg>
-        <div class="callout" id="carv" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">کار هدر‌رفته در هر صد قدم، بر حسب قدم‌های متعهد‌شده پیش از بازخورد</p><svg id="chart" role="img" aria-label="هزینه بر حسب اندازه‌ی دسته"></svg>
-        <div class="callout" id="projv" style="margin-top:8px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mph"></div><hr><div id="batch"></div><div id="chg"></div><div id="fb"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="two">
+          <div class="panelx" id="pcar">
+            <p class="sub">خودرو: فاصله‌ی ایستادن در برابر پرتاب نور پایین (۱۶۰ فوت)</p>
+            <svg class="road" id="road" viewBox="0 0 640 96" role="img"></svg>
+          </div>
+          <div class="panelx" id="pproj">
+            <p class="sub">نرم‌افزار: هزینه در هر صد قدم مفید، بر حسب قدم‌های متعهدشده پیش از بازخورد (مدل vault)</p>
+            <svg id="chart" role="img" aria-label="هزینه بر حسب اندازه‌ی دسته"></svg>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>عددهای کتاب در می‌آیند</strong>: ۱٫۵ ثانیه واکنش به‌علاوه‌ی ترمز با ۱۷٫۰۲ فوت بر مجذور ثانیه، در ۴۰ مایل بر ساعت ۱۸۹ فوت و در ۷۰ مایل بر ساعت ۴۶۴ فوت می‌دهد. بالای حدود ۳۶ مایل بر ساعت، تندتر از آن چیزی می‌رانید که چراغ‌هایتان می‌بینند.</li>
-    <li><strong>قدم بزرگ کار را هدر می‌دهد</strong>: وقتی مسیر در میانه‌ی یک دسته‌ی بزرگ متعهد‌شده عوض می‌شود، هر چیزی که بعد از آن نقطه ساخته شده دور انداخته می‌شود.</li>
-    <li><strong>قدم‌های ریز در این مدل مجانی نیستند</strong>، چون هر بررسی بازخورد چیزی خرج می‌کند. هر چه بازخورد ارزان‌تر باشد، مثل یک REPL یا یک unit test، بهترین قدم کوچک‌تر می‌شود.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>عددهای کتاب در می‌آیند</strong>: ۱٫۵ ثانیه واکنش به‌علاوه‌ی ترمز با ۱۷٫۰۲ فوت بر مجذور ثانیه، در ۴۰ مایل بر ساعت ۱۸۹ فوت و در ۷۰ مایل بر ساعت ۴۶۴ فوت می‌دهد.</li>
+      <li><strong>قدم بزرگ کار را هدر می‌دهد</strong>: وقتی مسیر وسط یک دسته‌ی بزرگ متعهدشده عوض می‌شود، هر چیزی که بعد از آن نقطه ساخته شده دور ریخته می‌شود.</li>
+      <li><strong>قدم‌های ریز در این مدل مجانی نیستند</strong>، چون هر بررسی بازخورد هزینه دارد. هر چه بازخورد ارزان‌تر باشد، مثل REPL یا unit test، بهترین قدم کوچک‌تر می‌شود.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/04-pragmatic-paranoia.html"><small>درس</small>فصل ۴: بدگمانی pragmatic</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/04-pragmatic-paranoia.html"><small>درس</small>فصل ۴: بدگمانی pragmatic</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { mph: 40, k: 10, p: 0.05, c: 0.5 };
+  var DEF = { mph: 40, k: 10, p: 0.05, c: 0.5, focus: "car" }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
   function stopFt(mph) { var v = mph * 5280 / 3600; return 1.5 * v + v * v / (2 * 17.02); }
   var safe = (function () { var lo = 0, hi = 100; for (var i = 0; i < 60; i++) { var m = (lo + hi) / 2; if (stopFt(m) > 160) hi = m; else lo = m; } return lo; })();
-  function cost(k, p, c) { // waste per 100 useful steps: a change of direction at step i of a batch keeps the i steps before it and wastes the rest, which were built without feedback.
+  var memo = {};
+  function cost(k, p, c) { // waste per 100 useful steps: a change of direction at step i of a batch keeps the i steps before it and wastes the rest.
+    var key = k + "|" + p + "|" + c; if (memo[key]) return memo[key];
     var r = Kit.rng(100 + k), useful = 0, wasted = 0, checks = 0;
     while (useful < 2000) { checks++; var hitAt = -1; for (var i = 0; i < k; i++) if (r.chance(p)) { hitAt = i; break; }
       if (hitAt < 0) useful += k; else { useful += hitAt; wasted += k - hitAt; } }
-    return { waste: wasted / useful * 100, fb: checks * c / useful * 100 };
+    return (memo[key] = { waste: wasted / useful * 100, fb: checks * c / useful * 100 });
   }
+  var KS = [1, 2, 3, 5, 8, 10, 15, 20, 30, 40];
+  function best(p, c) { var b = null; KS.forEach(function (k) { var x = cost(k, p, c), t = x.waste + x.fb; if (!b || t < b[1]) b = [k, t]; }); return b; }
+  function f1(x) { return x.toFixed(1); }
   function render() {
-    var d = stopFt(cfg.mph), sv = Kit.clear(document.getElementById("road")), X = function (ft) { return 40 + ft / 500 * 470; };
-    sv.appendChild(Kit.svg("rect", { class: "car", x: 8, y: 34, width: 30, height: 18, rx: 4 }));
-    sv.appendChild(Kit.svg("rect", { class: "beam", x: X(0), y: 14, width: X(160) - X(0), height: 22 }));
-    sv.appendChild(Kit.svg("text", { x: X(0) + 4, y: 29 }, "چراغ‌های جلو: ۱۶۰ فوت"));
-    sv.appendChild(Kit.svg("rect", { class: d > 160 ? "over" : "stop", x: X(0), y: 50, width: Math.min(470, X(d) - X(0)), height: 22 }));
-    sv.appendChild(Kit.svg("text", { x: X(0) + 4, y: 65 }, "فاصله‌ی ایستادن: " + Math.round(d) + " فوت" + (d > 160 ? " ✗ فراتر از نور" : " ✓")));
-    sv.setAttribute("aria-label", "در " + cfg.mph + " مایل بر ساعت، فاصله‌ی ایستادن " + Math.round(d) + " فوت است در برابر ۱۶۰ فوت پرتاب چراغ‌ها");
-    var cv = document.getElementById("carv"); cv.className = "callout " + (d > 160 ? "bad" : "ok");
-    cv.textContent = d > 160 ? "در " + cfg.mph + " مایل بر ساعت نمی‌توانید در آن چیزی که می‌بینید بایستید: " + Math.round(d - 160) + " فوت ایستادن کور. سقف ایمن حدود " + safe.toFixed(0) + " مایل بر ساعت است." : "در " + cfg.mph + " مایل بر ساعت می‌توانید داخل جاده‌ی روشن بایستید، که تا حدود " + safe.toFixed(0) + " مایل بر ساعت ایمن است.";
-    var ks = [1, 2, 3, 5, 8, 10, 15, 20, 30, 40], W = [], F = [], T = [], best = null;
-    ks.forEach(function (k) { var x = cost(k, cfg.p, cfg.c); W.push([k, x.waste]); F.push([k, x.fb]); T.push([k, x.waste + x.fb]); if (!best || x.waste + x.fb < best[1]) best = [k, x.waste + x.fb]; });
-    var me = cost(cfg.k, cfg.p, cfg.c), yMax = Math.max.apply(null, T.map(function (x) { return x[1]; }).concat([20])) * 1.1;
-    Kit.lineChart(document.getElementById("chart"), { xMax: 40, yMax: yMax, xLabel: "قدم‌های متعهد‌شده پیش از بازخورد", yLabel: "هزینه در هر صد قدم", series: [{ label: "کار هدر‌رفته", cls: "s2", points: W, dots: true }, { label: "هزینه‌ی بازخورد", cls: "s3", points: F, dots: true }, { label: "جمع", cls: "s1", points: T, dots: true }], marks: [{ x: cfg.k, label: "شما" }] });
-    var pv = document.getElementById("projv"), tot = me.waste + me.fb; pv.className = "callout " + (tot <= best[1] * 1.15 ? "ok" : "warn");
-    pv.textContent = "تعهد " + cfg.k + " قدم در هر بار، " + me.waste.toFixed(1) + " هدر می‌دهد و " + me.fb.toFixed(1) + " روی بازخورد خرج می‌کند، در هر صد قدم مفید. بهترین این‌جا: حدود " + best[0] + " قدم، با " + best[1].toFixed(1) + " هزینه.";
-    stats([["فاصله‌ی ایستادن", Math.round(d) + " فوت", d > 160 ? "bad" : "ok"], ["سرعت ایمن", safe.toFixed(0) + " مایل بر ساعت"], ["هدر در هر صد", me.waste.toFixed(1), me.waste > 20 ? "bad" : ""], ["بهترین دسته", best[0]]]);
+    var d = stopFt(view.mph), sv = Kit.clear(document.getElementById("road")), X = function (ft) { return 50 + ft / 500 * 580; };
+    sv.appendChild(Kit.svg("rect", { class: "car", x: 6, y: 38, width: 38, height: 20, rx: 5 }));
+    [0, 100, 200, 300, 400, 500].forEach(function (f) { sv.appendChild(Kit.svg("text", { class: "tick", x: X(f), y: 92, "text-anchor": "middle" }, f + " فوت")); });
+    sv.appendChild(Kit.svg("rect", { class: "beam", x: X(0), y: 10, width: X(160) - X(0), height: 28 }));
+    sv.appendChild(Kit.svg("text", { x: X(160) + 6, y: 29 }, "پرتاب چراغ ۱۶۰ فوت"));
+    sv.appendChild(Kit.svg("rect", { class: d > 160 ? "over" : "stop", x: X(0), y: 46, width: Math.min(580, X(d) - X(0)), height: 28 }));
+    var lx = Math.min(X(d) + 6, 520); sv.appendChild(Kit.svg("text", { x: d > 420 ? X(0) + 8 : lx, y: 65 }, "ایستادن " + Math.round(d) + " فوت" + (d > 160 ? " ✗" : " ✓")));
+    sv.setAttribute("aria-label", "در " + view.mph + " مایل بر ساعت، فاصله‌ی ایستادن " + Math.round(d) + " فوت است در برابر ۱۶۰ فوت پرتاب چراغ‌ها");
+    var b = best(view.p, view.c), me = cost(view.k, view.p, view.c), W = [], Fb = [], T = [];
+    KS.forEach(function (k) { var x = cost(k, view.p, view.c); W.push([k, x.waste]); Fb.push([k, x.fb]); T.push([k, x.waste + x.fb]); });
+    var yMax = Math.max.apply(null, T.map(function (x) { return x[1]; }).concat([20])) * 1.1;
+    Kit.lineChart(document.getElementById("chart"), { width: 820, height: 200, xMax: 40, yMax: yMax, xLabel: "قدم‌های متعهدشده پیش از بازخورد", yLabel: "هزینه", xFormat: function (x) { return String(Math.round(x)); }, yFormat: function (y) { return String(Math.round(y)); },
+      series: [{ label: "کار هدررفته", cls: "s2", points: W, dots: true }, { label: "هزینه‌ی بازخورد", cls: "s3", points: Fb, dots: true }, { label: "جمع", cls: "s1", points: T, dots: true }], marks: [{ x: view.k, label: "شما" }] });
+    document.getElementById("pcar").classList.toggle("on", view.focus === "car");
+    document.getElementById("pproj").classList.toggle("on", view.focus === "proj");
+    if (view.focus === "car") { kind = d > 160 ? "bad" : "ok"; msg = d > 160 ? "در " + view.mph + " مایل بر ساعت فاصله‌ی ایستادن " + Math.round(d) + " فوت است، " + Math.round(d - 160) + " فوت بیشتر از جاده‌ی روشن." : "در " + view.mph + " مایل بر ساعت داخل جاده‌ی روشن می‌ایستید (" + Math.round(d) + " فوت)."; }
+    else { var tot = me.waste + me.fb; kind = tot <= b[1] * 1.15 ? "ok" : "warn"; msg = "تعهد " + view.k + " قدم پیش از هر بازخورد: " + f1(me.waste) + " هدر و " + f1(me.fb) + " هزینه‌ی بازخورد در هر صد قدم. بهترین این‌جا حدود " + b[0] + " قدم است."; }
+    var St = Kit.clear(document.getElementById("stats"));
+    [["فاصله‌ی ایستادن (فوت)", Math.round(d), d > 160 ? "bad" : "ok"], ["سرعت ایمن (mph)", safe.toFixed(0)], ["هدر در هر صد", f1(me.waste), me.waste > 20 ? "bad" : ""], ["بهترین دسته", b[0], "ok"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    ctl.mph.set(view.mph); ctl.k.set(view.k); ctl.p.set(view.p); ctl.c.set(view.c);
   }
-  document.getElementById("mph").appendChild(Kit.slider({ label: "سرعت", min: 20, max: 80, step: 5, value: cfg.mph, unit: " مایل بر ساعت", onInput: function (v) { cfg.mph = v; render(); log.add("سرعت " + v + " مایل بر ساعت ← " + Math.round(stopFt(v)) + " فوت برای ایستادن", stopFt(v) > 160 ? "bad" : "ok"); } }).element);
-  document.getElementById("batch").appendChild(Kit.slider({ label: "قدم‌های متعهد‌شده پیش از بازخورد", min: 1, max: 40, step: 1, value: cfg.k, onInput: function (v) { cfg.k = v; render(); } }).element);
-  document.getElementById("chg").appendChild(Kit.slider({ label: "شانس عوض شدن مسیر در هر قدم", min: 0.01, max: 0.2, step: 0.01, value: cfg.p, format: function (v) { return Kit.pct(v, 0); }, onInput: function (v) { cfg.p = v; render(); log.add("مسیر در " + Kit.pct(v, 0) + " قدم‌ها عوض می‌شود", "muted"); } }).element);
-  document.getElementById("fb").appendChild(Kit.slider({ label: "هزینه‌ی یک بررسی بازخورد", min: 0.1, max: 3, step: 0.1, value: cfg.c, unit: " قدم", onInput: function (v) { cfg.c = v; render(); } }).element);
-  render();
+  function tw(focus, f) { return function (v) { f(v); view.focus = focus; render(); tour.free(msg, kind); }; }
+  var box = document.getElementById("ctl");
+  ctl.mph = Kit.slider({ label: "سرعت خودرو", min: 20, max: 80, step: 5, value: view.mph, unit: " mph", onInput: tw("car", function (v) { view.mph = v; }) });
+  ctl.k = Kit.slider({ label: "قدم‌های متعهدشده پیش از بازخورد", min: 1, max: 40, step: 1, value: view.k, onInput: tw("proj", function (v) { view.k = v; }) });
+  ctl.p = Kit.slider({ label: "شانس عوض شدن مسیر در هر قدم", min: 0.01, max: 0.2, step: 0.01, value: view.p, format: function (v) { return Math.round(v * 100) + "%"; }, onInput: tw("proj", function (v) { view.p = v; }) });
+  ctl.c = Kit.slider({ label: "هزینه‌ی یک بررسی بازخورد", min: 0.1, max: 3, step: 0.1, value: view.c, unit: " قدم", onInput: tw("proj", function (v) { view.c = v; }) });
+  [ctl.mph, ctl.k, ctl.p, ctl.c].forEach(function (c) { box.appendChild(c.element); });
+  function C(o) { var v = Object.assign({}, DEF, o); return cost(v.k, v.p, v.c); }
+  function B(o) { var v = Object.assign({}, DEF, o); return best(v.p, v.c)[0]; }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "به گفته‌ی NHTSA نور پایین حدود ۱۶۰ فوت را روشن می‌کند (ص. ۲۲۲). فاصله‌ی ایستادن = ۱٫۵ ثانیه واکنش + ترمز با ۱۷٫۰۲ فوت بر مجذور ثانیه. نیمه‌ی پایین همین ایده را روی نرم‌افزار می‌برد (مدل vault).",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: سرعت خودرو، اندازه‌ی قدم، شانس تغییر مسیر و هزینه‌ی بازخورد را عوض کنید.",
+    steps: [
+      { kind: "bad", run: at({}), say: "در ۴۰ مایل بر ساعت فاصله‌ی ایستادن ۱۸۹ فوت است، بیشتر از ۱۶۰ فوتی که چراغ‌ها روشن می‌کنند (صص. ۲۲۲–۲۲۳)." },
+      { kind: "bad", run: at({ mph: 70 }), say: "در ۷۰ مایل بر ساعت ۴۶۴ فوت: نزدیک سه برابر جاده‌ی روشن. هر چیزی که در تاریکی جلوتر باشد، دیگر نمی‌شود جلویش ایستاد." },
+      { kind: "ok", run: at({ mph: 35 }), say: function () { return "با همین فرمول، سقف ایمن حدود " + safe.toFixed(0) + " مایل بر ساعت است؛ در ۳۵ مایل بر ساعت داخل نور می‌ایستید. کتاب می‌گوید چراغ‌های نرم‌افزار، یعنی بازخورد، هم محدودند (ص. ۲۲۳)."; } },
+      { kind: "", run: at({ focus: "proj" }), say: function () { var x = C({}); return "نرم‌افزار: هر قدم ۵٪ شانس دارد مسیر را عوض کند. با ۱۰ قدم پیش از هر بازخورد، " + f1(x.waste) + " قدم در هر صد هدر می‌رود و " + f1(x.fb) + " خرج بازخورد می‌شود."; } },
+      { kind: "bad", run: at({ focus: "proj", k: 40 }), say: function () { return "قدم بزرگ، یعنی ۴۰ قدم بی بازخورد: هدر به " + f1(C({ k: 40 }).waste) + " می‌رسد. وقتی مسیر وسط دسته عوض شود، هر چه بعدش ساخته شده دور ریخته می‌شود."; } },
+      { kind: "ok", run: at({ focus: "proj", k: 5 }), say: function () { return "نکته‌ی ۴۲: همیشه قدم‌های کوچک بردارید (ص. ۲۲۳). در این مدل بهترین اندازه حدود " + B({}) + " قدم است؛ نرخ بازخورد سرعت مجاز شماست."; } },
+      { kind: "warn", run: at({ focus: "proj", k: 8, c: 2 }), say: function () { return "اگر هر بررسی بازخورد گران باشد (۲ قدم)، بهترین اندازه به حدود " + B({ c: 2 }) + " قدم بزرگ می‌شود: آدم کمتر سر می‌زند و بیشتر در تاریکی می‌راند."; } },
+      { kind: "ok", run: at({ focus: "proj", k: 1, c: 0.05 }), say: function () { return "بازخورد خیلی ارزان، مثل REPL یا unit test (ص. ۲۲۳)، بهترین اندازه را تا " + B({ c: 0.05 }) + " قدم پایین می‌آورد. برای همین ارزان کردن بازخورد خودش سرعت را بالا می‌برد."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "به عددهای NHTSA در کتاب، نور پایین چقدر را روشن می‌کند؟",
