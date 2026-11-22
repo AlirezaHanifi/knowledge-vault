@@ -7,17 +7,24 @@
 <meta name="description" content="سیستمی شش‌ماژولی را با داده‌ی سراسری مشترک و فراخوانی بین‌لایه‌ای و قاعده‌ی تکراری و اعتبارسنجی پخش‌شده یا بی آن‌ها سیم‌کشی کنید؛ یک نیازمندی را عوض کنید و بشمارید چند ماژول باید عوض شوند. تصویری از موضوع ۱۰ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
+  .two { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
   .mods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .mod { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; background: var(--surface-2); font-size: .85rem; min-height: 64px; }
+  .mod { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; background: var(--surface-2); font-size: .9rem; min-height: 70px; }
   .mod b { display: block; } .mod small { color: var(--ink-3); }
   .mod.hit { background: var(--bad-soft); border-color: var(--bad); } .mod.home { background: var(--accent-soft); border-color: var(--accent); }
-  .reqs { display: grid; gap: 6px; } .reqs label { display: flex; gap: 6px; align-items: baseline; font-size: .88rem; }
+  .sub { font-size: .85rem; color: var(--ink-2); margin: 0 0 6px; font-weight: 600; }
+  .cpl { margin-top: 10px; display: grid; gap: 4px; font-size: .84rem; color: var(--ink-2); }
+  .cpl span.on { color: var(--bad); font-weight: 600; }
+  table.t { width: 100%; font-size: .86rem; } table.t td, table.t th { padding: 4px 6px; } table.t tr.cur { font-weight: 700; background: var(--accent-soft); }
+  .fc { display: grid; gap: 6px; font-size: .88rem; } .fc label { display: flex; gap: 6px; align-items: baseline; }
+  select#req { width: 100%; }
+  table.t td.mono { direction: ltr; unicode-bidi: isolate; text-align: right; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
       <a href="../chapters/02-a-pragmatic-approach.html">فصل ۲</a><span aria-hidden="true">/</span>
@@ -28,88 +35,123 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۲ · رویکرد pragmatic</div>
-  <h1>ویژگی orthogonality و موج یک تغییر</h1>
-  <p class="lede">در سیستمی <strong>orthogonal</strong>، عوض کردن یک چیز روی بقیه اثر ندارد. سنجه‌ی کتاب: اگر نیازمندی‌های پشت یک تابع خیلی عوض شوند، چند ماژول اثر می‌گیرند؟ در سیستمی orthogonal پاسخ <strong>یکی</strong> است.</p>
-  <p class="source-note">تصویری از موضوع ۱۰، ویژگی orthogonality (صص. ۹۳–۱۰۳، tipهای ۱۷ و ۱۸)، از جمله interface موبایل برای کنترل‌کننده‌ی نیروگاه حرارتی (ص. ۹۷) و داده‌ی سراسری (ص. ۹۸) و توابع شبیه به هم (ص. ۹۹). شش ماژول و چهار coupling و این که هر نیازمندی به کدام ماژول‌ها می‌خورد مال خود vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>ویژگی orthogonality و موج یک تغییر</h1>
+      <p class="lede">در سیستمی <strong>orthogonal</strong>، عوض کردن یک چیز روی بقیه اثر ندارد. سنجه‌ی کتاب: اگر نیازمندی‌های پشت یک تابع خیلی عوض شوند، چند ماژول اثر می‌گیرند؟ در سیستمی orthogonal پاسخ <strong>یکی</strong> است.</p>
+      <p class="source-note">تصویری از موضوع ۱۰، ویژگی orthogonality (صص. ۹۳–۱۰۳، tipهای ۱۷ و ۱۸)، از جمله interface موبایل برای کنترل‌کننده‌ی نیروگاه حرارتی (ص. ۹۷) و داده‌ی سراسری (ص. ۹۸) و توابع شبیه به هم (ص. ۹۹). شش ماژول و چهار coupling و این که هر نیازمندی به کدام ماژول‌ها می‌خورد مال خود vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">ماژول‌ها</p><div class="mods" id="mods"></div>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">ماژول‌هایی که هر نیازمندی به آن‌ها می‌خورد</p><div class="table-wrap"><table id="tbl"></table></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="req">نیازمندی‌ای که عوض می‌شود</label><select id="req" style="width:100%"></select>
-        <p class="panel-title" style="margin-top:12px">couplingهای این طراحی</p><div class="reqs" id="cpl"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="two">
+          <div>
+            <p class="sub" id="rt">ماژول‌ها</p>
+            <div class="mods" id="mods"></div>
+            <div class="cpl" id="cplv"></div>
+          </div>
+          <div>
+            <p class="sub">ماژول‌هایی که هر نیازمندی به آن‌ها می‌خورد</p>
+            <table class="t" id="tbl"></table>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <label class="field-head" for="req">نیازمندی‌ای که عوض می‌شود</label><select id="req"></select>
+        </div>
+        <div class="tweak-group"><p class="field-head">couplingهای این طراحی</p><div class="fc" id="cpl"></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>بی هیچ coupling</strong> هر نیازمندی دقیقاً در یک ماژول می‌نشیند: همان سنجه‌ی کتاب برای orthogonality.</li>
-    <li><strong>یک داده‌ی سراسری مشترک</strong>، یعنی نرخ مالیات، interface و گزارش‌ها را هم به تغییر مالیات می‌کشاند، و همین دلیلی است که کتاب داده‌ی سراسری را سرچشمه‌ی coupling می‌بیند.</li>
-    <li><strong>اعتبارسنجی پخش‌شده</strong> بدترین موج است: یک تصمیم که همه‌جا تکرار شده یعنی عوض کردن تأمین‌کننده‌ی login به هر ماژولی می‌خورد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>بی هیچ coupling</strong> هر نیازمندی دقیقاً در یک ماژول می‌نشیند: همان سنجه‌ی کتاب برای orthogonality.</li>
+      <li><strong>یک داده‌ی سراسری مشترک</strong>، یعنی نرخ مالیات، interface و گزارش‌ها را هم به تغییر مالیات می‌کشاند؛ کتاب داده‌ی سراسری را سرچشمه‌ی coupling می‌بیند.</li>
+      <li><strong>اعتبارسنجی پخش‌شده</strong> بدترین موج است: عوض کردن تأمین‌کننده‌ی login به هر ماژولی می‌خورد.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/02-a-pragmatic-approach.html"><small>درس</small>فصل ۲: رویکرد pragmatic</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/02-a-pragmatic-approach.html"><small>درس</small>فصل ۲: رویکرد pragmatic</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
   var MODS = [["ui", "interface وب", "صفحه‌ها و فرم‌ها"], ["mobile", "interface موبایل", "client تازه"], ["logic", "منطق صورت‌حساب", "قاعده‌ها و مالیات"], ["store", "ذخیره‌سازی", "دسترسی دیتابیس"], ["reports", "گزارش‌ها", "صورت‌حساب ماهانه"], ["auth", "اعتبارسنجی", "login و session"]];
   var REQ = [["tax", "عوض کردن قاعده‌ی مالیات", "logic"], ["db", "رفتن به دیتابیسی دیگر", "store"], ["mobile", "اضافه کردن interface موبایل", "mobile"], ["report", "قالب تازه‌ی گزارش", "reports"], ["login", "عوض کردن تأمین‌کننده‌ی login", "auth"]];
   var CPL = [["glob", "نرخ مالیات داده‌ی سراسری مشترکی است که interface و گزارش‌ها می‌خوانندش"], ["cross", "interfaceها مستقیم از دیتابیس کوئری می‌گیرند و از لایه‌ی منطق می‌پرند"], ["dup", "گزارش‌ها حساب مالیات را از نو پیاده می‌کنند"], ["auth", "هر ماژولی خودش session را بررسی می‌کند"]];
-  var on = { glob: false, cross: false, dup: false, auth: false }, req = "tax";
+  var DEF = { req: "tax", glob: false, cross: false, dup: false, auth: false }, view = Object.assign({}, DEF), tour, msg, kind, boxes = {};
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
   function hits(r) {
     var home = REQ.filter(function (x) { return x[0] === r; })[0][2], s = {}; s[home] = 1;
-    if (on.glob && r === "tax") { s.ui = 1; s.reports = 1; }
-    if (on.dup && r === "tax") s.reports = 1;
-    if (on.cross && r === "db") { s.ui = 1; s.mobile = 1; }
-    if (on.cross && r === "mobile") s.store = 1;
-    if (on.auth && r === "login") MODS.forEach(function (m) { s[m[0]] = 1; });
-    if (on.auth && r === "mobile") s.auth = 1;
+    if (view.glob && r === "tax") { s.ui = 1; s.reports = 1; }
+    if (view.dup && r === "tax") s.reports = 1;
+    if (view.cross && r === "db") { s.ui = 1; s.mobile = 1; }
+    if (view.cross && r === "mobile") s.store = 1;
+    if (view.auth && r === "login") MODS.forEach(function (m) { s[m[0]] = 1; });
+    if (view.auth && r === "mobile") s.auth = 1;
     return { home: home, set: Object.keys(s) };
   }
+  function rname(r) { return REQ.filter(function (x) { return x[0] === r; })[0][1]; }
   function render() {
-    var h = hits(req), m = Kit.clear(document.getElementById("mods"));
+    var h = hits(view.req), m = Kit.clear(document.getElementById("mods"));
+    document.getElementById("rt").textContent = "ماژول‌ها برای «" + rname(view.req) + "»";
     MODS.forEach(function (x) { var isHome = x[0] === h.home, hit = h.set.indexOf(x[0]) >= 0;
-      m.appendChild(Kit.el("div", { class: "mod" + (isHome ? " home" : hit ? " hit" : "") }, Kit.el("b", null, x[1] + (isHome ? " ●" : hit ? " ✗" : "")), Kit.el("small", null, isHome ? "جایی که تغییر به آن تعلق دارد" : hit ? "این هم باید عوض شود" : x[2]))); });
-    var n = h.set.length, v = document.getElementById("verdict");
-    v.className = "callout " + (n === 1 ? "ok" : n <= 3 ? "warn" : "bad");
-    v.textContent = n === 1 ? "یک ماژول عوض می‌شود: این بخش از طراحی orthogonal است." : n + " ماژول برای یک نیازمندی عوض می‌شوند، که " + (n - 1) + " تایشان فقط به‌خاطر coupling.";
+      m.appendChild(Kit.el("div", { class: "mod" + (isHome ? " home" : hit ? " hit" : "") }, Kit.el("b", null, x[1] + (isHome ? " ●" : hit ? " ✗" : "")), Kit.el("small", null, isHome ? "جای خود این تغییر" : hit ? "این هم باید عوض شود" : x[2]))); });
+    var cv = Kit.clear(document.getElementById("cplv")), any = false;
+    CPL.forEach(function (x) { if (view[x[0]]) { any = true; cv.appendChild(Kit.el("span", { class: "on" }, "✗ " + x[1])); } });
+    if (!any) cv.appendChild(Kit.el("span", null, "✓ هیچ couplingی روشن نیست"));
     var t = Kit.clear(document.getElementById("tbl")), total = 0;
     t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "نیازمندی"), Kit.el("th", null, "ماژول"), Kit.el("th", null, "اضافه"))));
-    var tb = Kit.el("tbody"); REQ.forEach(function (r) { var k = hits(r[0]).set.length; total += k; tb.appendChild(Kit.el("tr", r[0] === req ? { "aria-current": "true", style: "font-weight:600" } : null, Kit.el("td", null, r[1]), Kit.el("td", null, String(k)), Kit.el("td", null, k > 1 ? "+" + (k - 1) : "—"))); });
+    var tb = Kit.el("tbody"); REQ.forEach(function (r) { var k = hits(r[0]).set.length; total += k; tb.appendChild(Kit.el("tr", r[0] === view.req ? { class: "cur", "aria-current": "true" } : null, Kit.el("td", null, r[1]), Kit.el("td", { class: "mono" }, String(k)), Kit.el("td", { class: "mono" }, k > 1 ? "+" + (k - 1) : "—"))); });
     t.appendChild(tb);
-    stats([["ماژول‌های دست‌خورده‌ی حالا", n, n > 1 ? "bad" : "ok"], ["در هر پنج نیازمندی", total, total > 5 ? "bad" : "ok"], ["آرمانی، یعنی orthogonal", 5]]);
+    var n = h.set.length; kind = n === 1 ? "ok" : n <= 3 ? "warn" : "bad";
+    msg = "«" + rname(view.req) + "»: " + (n === 1 ? "فقط یک ماژول عوض می‌شود؛ این بخش از طراحی orthogonal است." : n + " ماژول عوض می‌شوند، که " + (n - 1) + " تایشان فقط به‌خاطر coupling است.");
+    var St = Kit.clear(document.getElementById("stats"));
+    [["ماژول‌های دست‌خورده", n, n > 1 ? "bad" : "ok"], ["جمع پنج نیازمندی", total, total > 5 ? "bad" : "ok"], ["آرمانی (orthogonal)", 5]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    sel.value = view.req; CPL.forEach(function (x) { boxes[x[0]].checked = view[x[0]]; });
   }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
   var sel = document.getElementById("req"); REQ.forEach(function (r) { sel.appendChild(Kit.el("option", { value: r[0] }, r[1])); });
-  sel.addEventListener("change", function () { req = sel.value; var h = hits(req); log.add(sel.options[sel.selectedIndex].text + ": " + h.set.length + " ماژول", h.set.length > 1 ? "warn" : "ok"); render(); });
-  var c = document.getElementById("cpl"); CPL.forEach(function (x) { var cb = Kit.el("input", { type: "checkbox", id: "c-" + x[0] });
-    cb.addEventListener("change", function () { on[x[0]] = cb.checked; log.add((cb.checked ? "اضافه شد: " : "برداشته شد: ") + x[1], cb.checked ? "warn" : "muted"); render(); });
+  sel.addEventListener("change", tw(function () { view.req = sel.value; }));
+  var c = document.getElementById("cpl"); CPL.forEach(function (x) { var cb = Kit.el("input", { type: "checkbox", id: "c-" + x[0] }); boxes[x[0]] = cb;
+    cb.addEventListener("change", tw(function () { view[x[0]] = cb.checked; }));
     c.appendChild(Kit.el("label", { for: "c-" + x[0] }, cb, x[1])); });
-  render();
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "سنجه‌ی کتاب برای orthogonality: اگر نیازمندی‌های پشت یک تابع خیلی عوض شوند، چند ماژول اثر می‌گیرند؟ در سیستم orthogonal فقط یکی (ص. ۹۶). شش ماژول و چهار coupling این صحنه فرض vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: نیازمندی را عوض کنید و couplingها را یکی‌یکی روشن کنید.",
+    steps: [
+      { kind: "ok", run: at({}), say: "بی هیچ coupling: عوض کردن قاعده‌ی مالیات فقط به منطق صورت‌حساب می‌خورد. جدول نشان می‌دهد هر پنج نیازمندی هر کدام یک ماژول‌اند: جمع ۵." },
+      { kind: "ok", run: at({ req: "mobile" }), say: "مثال کتاب: اضافه کردن interface موبایل به کنترل‌کننده‌ی نیروگاه باید فقط به interface بخورد، نه به منطق کنترل (ص. ۹۷). اینجا هم یک ماژول." },
+      { kind: "warn", run: at({ glob: true }), say: "نرخ مالیات را داده‌ی سراسری کنید: حالا interface وب و گزارش‌ها هم با تغییر مالیات عوض می‌شوند. کتاب داده‌ی سراسری را سرچشمه‌ی coupling می‌داند (ص. ۹۸)." },
+      { kind: "warn", run: at({ glob: true, cross: true, req: "db" }), say: "اگر interfaceها از لایه‌ی منطق بپرند و مستقیم کوئری بزنند، رفتن به دیتابیس دیگر به سه ماژول می‌خورد." },
+      { kind: "bad", run: at({ glob: true, cross: true, auth: true, req: "login" }), say: "اعتبارسنجی پخش‌شده بدترین موج است: هر ماژول خودش session را بررسی می‌کند، پس عوض کردن تأمین‌کننده‌ی login هر شش ماژول را عوض می‌کند." },
+      { kind: "bad", run: at({ glob: true, cross: true, dup: true, auth: true, req: "login" }), say: "با هر چهار coupling، جمع پنج نیازمندی از ۵ به ۱۶ ماژول می‌رسد. هر ماژول اضافه یعنی کار بیشتر، تست بیشتر و جای بیشتر برای باگ." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "سنجه‌ی کتاب برای این که طراحی orthogonal است یا نه چیست؟",

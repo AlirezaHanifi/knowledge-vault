@@ -7,16 +7,23 @@
 <meta name="description" content="یک پس‌رفت را در تاریخچه‌ای از releaseها، یا رکوردی را که برنامه را در یک مجموعه‌داده‌ی بزرگ crash می‌کند، یک‌بار قدم‌به‌قدم و یک‌بار با نصف کردن شکار کنید، و مقایسه کنید هر کدام چند اجرای تست می‌برد. تصویری از موضوع ۲۰ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .strip { display: grid; grid-template-columns: repeat(32, 1fr); gap: 2px; }
-  .it { height: 22px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); font-size: .6rem; display: grid; place-items: center; font-family: var(--mono); }
+  .sub { font-size: .9rem; color: var(--ink-2); margin: 0 0 8px; font-weight: 600; }
+  .strip { display: grid; gap: 2px; }
+  .it { height: 24px; border-radius: 2px; background: var(--surface-2); border: 1px solid var(--line); font-size: .62rem; display: grid; place-items: center; font-family: var(--mono); }
+  .strip.dense .it { height: 11px; font-size: 0; border-radius: 1px; }
   .it.good { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); } .it.bad { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
-  .it.out { opacity: .35; } .it.probe { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .it.out { opacity: .3; } .it.probe { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .hint { font-size: .84rem; color: var(--ink-3); margin: 8px 0 0; }
+  .ruler { display: flex; justify-content: space-between; font-size: .78rem; color: var(--ink-3); margin-top: 4px; }
+  .cmp { margin-top: 14px; display: grid; gap: 6px; font-size: .86rem; }
+  .cmp .row { display: grid; grid-template-columns: 150px 1fr 60px; gap: 8px; align-items: center; }
+  .cmp .bar { height: 14px; border-radius: 3px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
       <a href="../chapters/03-the-basic-tools.html">فصل ۳</a><span aria-hidden="true">/</span>
@@ -27,103 +34,137 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۳ · ابزارهای پایه</div>
-  <h1>نصف کردن دودویی</h1>
-  <p class="lede">وقتی باگی جایی در تاریخچه‌ای بلند یا مجموعه‌داده‌ای بزرگ در می‌آید، قلم‌به‌قلم از آن رد نشوید. <strong>نصفش کنید</strong>، تست کنید، و نیمی را نگه دارید که باز هم مسئله را نشان می‌دهد: با n قلم، این حدود log₂ n تست می‌برد و نه تا n تست.</p>
-  <p class="source-note">تصویری از «نصف کردن دودویی» در موضوع ۲۰، debug کردن (صص. ۱۷۴–۱۷۵): یافتن اولین releaseی که پس‌رفت دارد، و یافتن رکوردی که برنامه را crash می‌کند. اندازه‌ی تاریخچه و مقصر پنهان، که seed‌دار است، و تصویر مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>نصف کردن دودویی</h1>
+      <p class="lede">وقتی باگی جایی در تاریخچه‌ای بلند یا مجموعه‌داده‌ای بزرگ در می‌آید، قلم‌به‌قلم از آن رد نشوید. <strong>نصفش کنید</strong>، تست کنید، و نیمی را نگه دارید که باز هم مسئله را نشان می‌دهد: با n قلم، این حدود log₂ n تست می‌برد و نه تا n تست.</p>
+      <p class="source-note">تصویری از «نصف کردن دودویی» در موضوع ۲۰، debug کردن (صص. ۱۷۴–۱۷۵): یافتن اولین releaseی که پس‌رفت دارد، و یافتن رکوردی که برنامه را crash می‌کند. اندازه‌ی تاریخچه و مقصر پنهان، که seed‌دار است، و تصویر مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="st">تاریخچه</p><div class="strip" id="strip" role="img"></div>
-        <p class="field-hint" id="hint" style="margin-top:6px"></p>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div><div id="strat" style="margin-top:10px"></div><div id="nsl" style="margin-top:10px"></div><div id="play" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <p class="sub" id="st">تاریخچه</p>
+          <div class="strip" id="strip" role="img"></div>
+          <div class="ruler"><span id="r0">قدیمی‌ترین ✓</span><span id="r1">جدیدترین ✗</span></div>
+          <p class="hint" id="hint"></p>
+          <div class="cmp" id="cmp"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>عقب رفتن release‌به‌release</strong> به‌اندازه‌ی شمار releaseهای بعد از باگ تست خرج می‌کند، که می‌تواند همه‌شان باشد.</li>
-    <li><strong>نصف کردن</strong> حدود log₂ n تست می‌خواهد: هفت تست برای ۱۲۸ release و ده تست برای ۱۰۲۴. هر تست آن چیزی را که مانده نصف می‌کند، فرق نمی‌کند قلم یک release باشد یا یک رکورد.</li>
-    <li><strong>ناوردا</strong> همان چیزی است که کارش می‌اندازد: جدید‌ترین release، یا کل مجموعه‌داده، خراب شناخته شده و قدیمی‌ترین سالم، پس مقصر همیشه بینشان است.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>عقب رفتن release به release</strong> به‌اندازه‌ی شمار releaseهای بعد از باگ تست خرج می‌کند، که می‌تواند همه‌شان باشد.</li>
+      <li><strong>نصف کردن</strong> حدود log₂ n تست می‌خواهد: هفت تست برای ۱۲۸ release و ده تست برای ۱۰۲۴.</li>
+      <li><strong>ناوردا</strong> کارش می‌اندازد: جدیدترین release خراب شناخته شده و قدیمی‌ترین سالم، پس مقصر همیشه بینشان است.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/03-the-basic-tools.html"><small>درس</small>فصل ۳: ابزارهای پایه</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/03-the-basic-tools.html"><small>درس</small>فصل ۳: ابزارهای پایه</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
+  var DEF = { mode: "rel", strat: "chop", e: 7, seed: 0, t: 0 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind, s;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function init(v) {
+    var n = Math.pow(2, v.e), r = Kit.rng(11 + v.seed), z = { n: n, culprit: 1 + r.int(n - 1), lo: 0, hi: n - 1, tests: 0, known: {}, probe: null, done: false };
+    z.known[0] = "good"; z.known[n - 1] = "bad"; if (v.strat === "linear") z.next = n - 2;
+    return z;
   }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { mode: "rel", strat: "chop", n: 128, seed: 0 }, s;
-  function reset() {
-    var r = Kit.rng(11 + cfg.seed++); s = { culprit: 1 + r.int(cfg.n - 1), lo: 0, hi: cfg.n - 1, tests: 0, known: {}, probe: null, done: false };
-    // rel mode: index 0 = oldest (good), n-1 = newest (bad); the bug is in releases >= culprit.
-    s.known[0] = "good"; s.known[cfg.n - 1] = "bad"; if (cfg.strat === "linear") s.next = cfg.n - 2;
-    log.clear(); log.add(cfg.mode === "rel" ? "نسخه‌ی " + cfg.n + " تستش را شکست می‌دهد و نسخه‌ی ۱ قبول شده بود. یک releaseی بینشان شکستش." : "کل مجموعه‌داده‌ی " + cfg.n + " رکوردی برنامه را crash می‌کند. یک رکورد محرکش است.", "muted");
-    render();
-  }
-  function step() {
-    if (s.done) return false;
+  function step(z, v) {
+    if (z.done) return false;
     var m, fails;
-    if (cfg.mode === "rel") {
-      if (cfg.strat === "chop") { m = Math.floor((s.lo + s.hi) / 2); fails = m >= s.culprit; s.tests++; s.known[m] = fails ? "bad" : "good"; if (fails) s.hi = m; else s.lo = m; }
-      else { m = s.next--; fails = m >= s.culprit; s.tests++; s.known[m] = fails ? "bad" : "good"; if (fails) s.hi = m; else s.lo = m; }
-      s.probe = m; log.add("تست نسخه‌ی " + (m + 1) + ": " + (fails ? "شکست می‌خورد ✗" : "قبول می‌شود ✓"), fails ? "bad" : "ok");
-      if (s.hi - s.lo === 1) { s.done = true; log.add("در " + s.tests + " اجرای تست پیدا شد: نسخه‌ی " + (s.hi + 1) + " باگ را وارد کرد.", "ok"); }
+    if (v.mode === "rel") {
+      if (v.strat === "chop") m = Math.floor((z.lo + z.hi) / 2); else m = z.next--;
+      fails = m >= z.culprit; z.tests++; z.known[m] = fails ? "bad" : "good"; if (fails) z.hi = m; else z.lo = m;
+      z.probe = m; z.last = "تست نسخه‌ی " + (m + 1) + ": " + (fails ? "شکست می‌خورد ✗" : "قبول می‌شود ✓"); z.lastBad = fails;
+      if (z.hi - z.lo === 1) z.done = true;
     } else {
-      // data mode: candidates are records lo..hi; run the program on the first half (chop) or on a single record (linear).
-      if (cfg.strat === "chop") { var a = s.lo; m = Math.floor((s.lo + s.hi) / 2); fails = s.culprit <= m; s.tests++; s.probe = m;
-        log.add("اجرا روی رکوردهای " + (a + 1) + "–" + (m + 1) + ": " + (fails ? "crash می‌کند ✗" : "خوب اجرا می‌شود ✓"), fails ? "bad" : "ok"); if (fails) s.hi = m; else s.lo = m + 1; }
-      else { m = s.lo; fails = m === s.culprit; s.tests++; s.probe = m; if (!fails) s.lo = m + 1; else s.hi = m; log.add("اجرا روی تنها رکورد " + (m + 1) + ": " + (fails ? "crash می‌کند ✗" : "خوب است ✓"), fails ? "bad" : "ok"); }
-      if (s.lo >= s.hi) { s.done = true; s.hi = s.lo; log.add("در " + s.tests + " اجرا پیدا شد: رکورد " + (s.lo + 1) + " برنامه را crash می‌کند.", "ok"); }
+      if (v.strat === "chop") { var a = z.lo; m = Math.floor((z.lo + z.hi) / 2); fails = z.culprit <= m; z.tests++; z.probe = m;
+        z.last = "اجرا روی رکوردهای " + (a + 1) + " تا " + (m + 1) + ": " + (fails ? "crash می‌کند ✗" : "سالم اجرا می‌شود ✓"); if (fails) z.hi = m; else z.lo = m + 1; }
+      else { m = z.lo; fails = m === z.culprit; z.tests++; z.probe = m; if (!fails) z.lo = m + 1; else z.hi = m; z.last = "اجرا روی رکورد " + (m + 1) + ": " + (fails ? "crash می‌کند ✗" : "سالم است ✓"); }
+      z.lastBad = fails;
+      if (z.lo >= z.hi) { z.done = true; z.hi = z.lo; }
     }
-    render(); if (s.done) return false;
+    return true;
   }
+  function run(v, t) { var z = init(v); for (var i = 0; i < t; i++) if (!step(z, v)) break; return z; }
+  function total(v) { var z = init(v); while (step(z, v)); return z.tests; }
   function render() {
-    var st = Kit.clear(document.getElementById("strip")), n = cfg.n;
-    document.getElementById("strip").style.gridTemplateColumns = "repeat(" + Math.min(32, n) + ", 1fr)";
+    s = run(view, view.t); var n = s.n, rel = view.mode === "rel", el = document.getElementById("strip"), st = Kit.clear(el);
+    var cols = n > 128 ? 64 : Math.min(32, n); el.style.gridTemplateColumns = "repeat(" + cols + ", 1fr)"; el.classList.toggle("dense", n > 128);
     for (var i = 0; i < n; i++) {
       var cls = "it", txt = "";
-      if (cfg.mode === "rel") { var k = s.known[i]; if (k) { cls += " " + k; txt = k === "bad" ? "✗" : "✓"; } if (i < s.lo || i > s.hi) cls += " out"; if (s.done && i === s.hi) { cls += " bad probe"; txt = "!"; } }
+      if (rel) { var k = s.known[i]; if (k) { cls += " " + k; txt = k === "bad" ? "✗" : "✓"; } if (i < s.lo || i > s.hi) cls += " out"; if (s.done && i === s.hi) { cls += " bad probe"; txt = "!"; } }
       else { if (i < s.lo || i > s.hi) { cls += " good out"; txt = "✓"; } if (s.done && i === s.lo) { cls += " bad probe"; txt = "!"; } }
       if (i === s.probe && !s.done) cls += " probe";
-      st.appendChild(Kit.el("div", { class: cls, title: (cfg.mode === "rel" ? "نسخه‌ی " : "رکورد ") + (i + 1) }, txt));
+      st.appendChild(Kit.el("div", { class: cls }, txt));
     }
-    var left = s.hi - s.lo + (cfg.mode === "rel" ? -1 : 1);
-    document.getElementById("strip").setAttribute("aria-label", (cfg.mode === "rel" ? "نسخه‌ها" : "رکوردها") + ": " + Math.max(0, left) + " نامزد مانده");
-    document.getElementById("st").textContent = cfg.mode === "rel" ? n + " نسخه، با قدیمی‌ترین در چپ" : "مجموعه‌داده‌ی " + n + " رکوردی";
-    document.getElementById("hint").textContent = cfg.mode === "rel" ? "علامت ✓ یعنی تست قبول می‌شود و ✗ یعنی شکست می‌خورد؛ نسخه‌های کم‌رنگ رد شده‌اند." : "رکوردهای کم‌رنگ رد شده‌اند؛ crash در بازه‌ی روشن است.";
-    var v = document.getElementById("verdict"), worst = cfg.strat === "chop" ? Math.ceil(Math.log2(n)) : (cfg.mode === "rel" ? n - 2 : n - 1);
-    v.className = "callout " + (s.done ? "ok" : "");
-    v.textContent = s.done ? "در " + s.tests + " اجرای تست تمام شد؛ بدترین حالت این راهبرد " + worst + " است و نصف کردن حداکثر " + Math.ceil(Math.log2(n)) + " تست می‌خواهد." : Math.max(0, left) + " نامزد بعد از " + s.tests + " اجرای تست مانده.";
-    stats([["اجرای تست", s.tests], ["نامزد مانده", Math.max(0, left)], ["مقدار log₂ n", Math.log2(n).toFixed(1)], ["بدترین حالت راهبرد", worst, cfg.strat === "chop" ? "ok" : "bad"]]);
+    var left = Math.max(0, s.hi - s.lo + (rel ? -1 : 1));
+    el.setAttribute("aria-label", (rel ? "نسخه‌ها" : "رکوردها") + ": " + left + " نامزد مانده");
+    document.getElementById("st").textContent = rel ? n + " نسخه؛ آخرین نسخه تست را شکست می‌دهد و اولی قبولش می‌کرد" : "مجموعه‌داده‌ی " + n + " رکوردی که برنامه را crash می‌کند";
+    document.getElementById("r0").textContent = rel ? "نسخه‌ی ۱ ✓" : "رکورد ۱"; document.getElementById("r1").textContent = rel ? "نسخه‌ی " + n + " ✗" : "رکورد " + n;
+    document.getElementById("hint").textContent = s.tests ? s.last : (rel ? "✓ یعنی تست قبول می‌شود، ✗ یعنی شکست می‌خورد، و خانه‌های کم‌رنگ از نامزدی بیرون رفته‌اند." : "خانه‌های کم‌رنگ از نامزدی بیرون رفته‌اند؛ مقصر در بازه‌ی روشن است.");
+    var cmp = Kit.clear(document.getElementById("cmp")), tc = total(Object.assign({}, view, { strat: "chop" })), tl = total(Object.assign({}, view, { strat: "linear" })), mx = Math.max(tc, tl, 1);
+    [["نصف کردن", tc, "var(--ok)"], ["قدم‌به‌قدم", tl, "var(--bad)"]].forEach(function (x) {
+      cmp.appendChild(Kit.el("div", { class: "row" }, Kit.el("span", null, "تست لازم با " + x[0]), Kit.el("div", null, Kit.el("div", { class: "bar", style: "width:" + Math.max(1, 100 * x[1] / mx) + "%;background:" + x[2] })), Kit.el("span", { class: "mono" }, String(x[1])))); });
+    var worst = view.strat === "chop" ? Math.ceil(Math.log2(n)) : (rel ? n - 2 : n - 1);
+    kind = s.done ? "ok" : "";
+    msg = s.done ? "در " + s.tests + " اجرای تست پیدا شد: " + (rel ? "نسخه‌ی " + (s.hi + 1) + " باگ را وارد کرد." : "رکورد " + (s.lo + 1) + " برنامه را crash می‌کند.") : left + " نامزد بعد از " + s.tests + " اجرای تست مانده.";
+    var Sx = Kit.clear(document.getElementById("stats"));
+    [["اجرای تست", s.tests], ["نامزد مانده", left], ["log₂ n", Math.log2(n).toFixed(0)], ["بدترین حالت", worst, view.strat === "chop" ? "ok" : "bad"]].forEach(function (x) {
+      Sx.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    ctl.mode.set(view.mode); ctl.strat.set(view.strat); ctl.n.set(view.e); ctl.t.set(Math.min(view.t, s.tests));
   }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "دنبال چه بگردیم", value: cfg.mode, options: [{ value: "rel", label: "نسخه‌ها" }, { value: "data", label: "مجموعه‌داده" }], onChange: function (v) { cfg.mode = v; reset(); } }).element);
-  document.getElementById("strat").appendChild(Kit.segmented({ label: "راهبرد", value: cfg.strat, options: [{ value: "chop", label: "نصف کردن" }, { value: "linear", label: "قدم‌به‌قدم" }], onChange: function (v) { cfg.strat = v; reset(); } }).element);
-  document.getElementById("nsl").appendChild(Kit.slider({ label: "شمار قلم‌ها", min: 4, max: 10, step: 1, value: 7, format: function (v) { return String(Math.pow(2, v)); }, onInput: function (v) { cfg.n = Math.pow(2, v); reset(); } }).element);
-  Kit.player({ mount: document.getElementById("play"), interval: 450, step: step, reset: reset });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var box = document.getElementById("ctl");
+  ctl.mode = Kit.segmented({ label: "دنبال چه بگردیم", value: view.mode, options: [{ value: "rel", label: "نسخه‌ها" }, { value: "data", label: "مجموعه‌داده" }], onChange: tw(function (v) { view.mode = v; view.t = 0; }) });
+  ctl.strat = Kit.segmented({ label: "راهبرد", value: view.strat, options: [{ value: "chop", label: "نصف کردن" }, { value: "linear", label: "قدم‌به‌قدم" }], onChange: tw(function (v) { view.strat = v; view.t = 0; }) });
+  ctl.n = Kit.slider({ label: "شمار قلم‌ها", min: 4, max: 10, step: 1, value: 7, format: function (v) { return String(Math.pow(2, v)); }, onInput: tw(function (v) { view.e = v; view.t = 0; }) });
+  ctl.t = Kit.slider({ label: "اجراهای تست تا این‌جا", min: 0, max: 1023, step: 1, value: 0, onInput: tw(function (v) { view.t = v; }) });
+  var nb = Kit.el("button", { class: "btn", type: "button" }, "قلم‌های تازه، مقصر تازه"); nb.addEventListener("click", tw(function () { view.seed++; view.t = 0; }));
+  [ctl.mode, ctl.strat, ctl.n, ctl.t].forEach(function (c) { box.appendChild(c.element); }); box.appendChild(nb);
+  function T(o) { return total(Object.assign({}, DEF, o)); }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "تستی که حالا روی آخرین release شکست می‌خورد ولی روزی قبول می‌شد. کتاب می‌گوید release به release عقب نروید؛ نصفش کنید (صص. ۱۷۴–۱۷۵). اندازه‌ی تاریخچه و جای مقصر مال vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: راهبرد، شمار قلم‌ها و مقصر را عوض کنید و تست‌ها را یکی‌یکی جلو ببرید.",
+    steps: [
+      { kind: "", run: at({}), say: "۱۲۸ release. ناوردا: نسخه‌ی ۱ سالم است و نسخه‌ی ۱۲۸ خراب، پس اولین نسخه‌ی خراب حتماً جایی بینشان است." },
+      { kind: "", run: at({ t: 1 }), say: function () { return "اولین تست وسط بازه است: " + run(Object.assign({}, DEF), 1).last + ". نیمی از نامزدها با یک تست کنار رفتند."; } },
+      { kind: "", run: at({ t: 3 }), say: "بعد از سه تست فقط یک‌هشتم تاریخچه مانده. هر تست آنچه مانده را نصف می‌کند." },
+      { kind: "ok", run: at({ t: 99 }), say: function () { return "در " + T({}) + " تست پیدا شد، یعنی log₂ ۱۲۸. قدم‌به‌قدم برای همین مقصر " + T({ strat: "linear" }) + " تست می‌خواست (نمودار پایین)."; } },
+      { kind: "bad", run: at({ strat: "linear", t: 99 }), say: function () { return "راهبرد قدم‌به‌قدم: از جدیدترین نسخه عقب می‌رویم و هر نسخه‌ی بعد از باگ یک تست می‌خورد؛ این‌جا " + T({ strat: "linear" }) + " تست، و در بدترین حالت ۱۲۶."; } },
+      { kind: "ok", run: at({ mode: "data", t: 99 }), say: function () { return "همان روش روی داده: مجموعه‌داده‌ی بزرگی که برنامه را crash می‌کند. دو نیمش کنید و نیمی را نگه دارید که هنوز crash می‌کند (ص. ۱۷۴). این‌جا " + T({ mode: "data" }) + " اجرا."; } },
+      { kind: "ok", run: at({ e: 10, t: 99 }), say: function () { return "با ۱۰۲۴ release نصف کردن فقط " + T({ e: 10 }) + " تست می‌خواهد؛ قدم‌به‌قدم برای همین مقصر " + T({ e: 10, strat: "linear" }) + " تست. هشت برابر شدن تاریخچه فقط سه تست اضافه کرد."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "نصف کردن دودویی برای ۱۰۲۴ نسخه حدوداً چند اجرای تست می‌خواهد؟",

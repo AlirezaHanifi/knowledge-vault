@@ -6,13 +6,22 @@
 <title>شکار نمونه‌ی ناقض</title>
 <meta name="description" content="property سطح موجودی کتاب را روی Warehouse باگ‌دار و اصلاح‌شده با قلم و تعداد تصادفی اجرا کنید، حالت‌ها را تماشا کنید تا یکی شکست بخورد، و تا کوچک‌ترین نمونه‌ی نقض کوچکش کنید. تصویری از موضوع ۴۲ کتاب The Pragmatic Programmer.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.cases td { font-family: var(--mono); font-size: .82rem; } pre.unit { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
+<style>
+  .pt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .shelf { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .bin { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px 10px; background: var(--surface-2); font-size: .88rem; }
+  .bin b { font-size: 1.1rem; margin-inline-start: 4px; }
+  pre.code { font-family: var(--mono); font-size: .8rem; line-height: 1.6; white-space: pre; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; direction: ltr; text-align: left; margin: 0 0 8px; }
+  pre.code .hl { background: var(--bad-soft); color: var(--bad); } pre.code .fix { background: var(--ok-soft); color: var(--ok); }
+  .cases { width: 100%; } .cases td, .cases th { padding: 3px 8px; font-size: .85rem; } .cases td.mono { direction: ltr; unicode-bidi: isolate; }
+  .cases tr.shr td { color: var(--ink-2); }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">PP</a><span aria-hidden="true">/</span>
       <a href="../chapters/07-while-you-are-coding.html">فصل ۷</a><span aria-hidden="true">/</span>
@@ -23,85 +32,130 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۷ · وقتی کد می‌زنید</div>
-  <h1>شکار نمونه‌ی ناقض</h1>
-  <p class="lede">unit testهای دستی‌نوشته قبول می‌شوند. اما property می‌گوید <strong>موجودی نمی‌تواند از هوا بیاید یا غیب شود</strong>: آن چیزی که برداشته شده به‌علاوه‌ی آن چیزی که مانده، برابر آن چیزی است که بود. سفارش‌های تصادفی بسازید و بررسی‌اش کنید، و کامپیوتر فرضی را پیدا می‌کند که شما و کدتان شریکش بودید.</p>
-  <p class="source-note">تصویری از «یافتن فرض‌های بد» در موضوع ۴۲، تست property‌محور (صص. ۳۷۸–۳۸۳، tip ۷۱): انباری با ده کفش و دو کلاه و صفر چتر، و property و راهبردها، یعنی قلم از کفش یا کلاه و تعداد یک تا چهار، و اصلاح. سازنده و کوچک‌کننده‌ی ساده و گزینه‌ی تعداد بزرگ‌تر مال vault است؛ کتاب از Hypothesis استفاده می‌کند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>شکار نمونه‌ی ناقض</h1>
+      <p class="lede">unit testهای دستی‌نوشته قبول می‌شوند. اما property می‌گوید <strong>موجودی نمی‌تواند از هوا بیاید یا غیب شود</strong>: آن چیزی که برداشته شده به‌علاوه‌ی آن چیزی که مانده، برابر آن چیزی است که بود. سفارش‌های تصادفی بسازید و بررسی‌اش کنید، و کامپیوتر فرضی را پیدا می‌کند که شما و کدتان شریکش بودید.</p>
+      <p class="source-note">تصویری از «یافتن فرض‌های بد» در موضوع ۴۲، تست property‌محور (صص. ۳۷۸–۳۸۳، tip ۷۱): انباری با ده کفش و دو کلاه و صفر چتر، و property و راهبردها، یعنی قلم از کفش یا کلاه و تعداد یک تا چهار، و اصلاح. سازنده و کوچک‌کننده‌ی ساده و گزینه‌ی تعداد بزرگ‌تر مال vault است؛ کتاب از Hypothesis استفاده می‌کند. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">حالت‌های ساخته‌شده، با تازه‌ترین در اول</p><div class="table-wrap"><table class="cases" id="cases"></table></div>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">unit test پس‌رفت برای این شکست</p><pre class="unit" id="unit">اول یک شکست پیدا کنید.</pre></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ver"></div><div id="qmax" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small" id="one" type="button">اجرای یک حالت</button><button class="btn small primary" id="hunt" type="button">اجرا تا شکست</button><button class="btn small" id="shrink" type="button">کوچک کردن</button><button class="btn small" id="clr" type="button">پاک کردن</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="pt-grid">
+          <div>
+            <p class="ptitle">انبار و کدی که تست می‌شود</p>
+            <div class="shelf" id="shelf"></div>
+            <pre class="code mono" id="code"></pre>
+            <p class="ptitle" id="ut">property، خلاصه‌ی vault</p>
+            <pre class="code mono" id="unit"></pre>
+          </div>
+          <div>
+            <p class="ptitle" id="ct">حالت‌های ساخته‌شده، تازه‌ترین در بالا</p>
+            <table class="cases" id="cases"></table>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+        <div class="tweak-group"><div class="row"><button class="btn small" id="one" type="button">یک حالت</button><button class="btn small primary" id="hunt" type="button">اجرا تا شکست</button><button class="btn small" id="shrink" type="button">کوچک کردن</button><button class="btn small" id="clr" type="button">پاک کردن</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>همه‌ی unit testها قبول می‌شوند</strong>، چون هر بار فقط یک کلاه سفارش می‌دهند. property همان اولین باری شکست می‌خورد که سفارشی تصادفی کلاه بیشتری از موجودی می‌خواهد.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>همه‌ی unit testها قبول می‌شوند</strong>، چون هر بار فقط یک کلاه سفارش می‌دهند. property همان اولین باری شکست می‌خورد که سفارشی تصادفی کلاه بیشتری از موجودی می‌خواهد.</li>
     <li><strong>باگ جایی نیست که property نشان می‌دهد.</strong> تست درباره‌ی سطح موجودی است، ولی عیب در in_stock است که فقط بررسی می‌کند دست‌کم یکی باشد. این همان غافلگیری‌ای است که کتاب توضیح می‌دهد.</li>
     <li><strong>کوچک کردن</strong> ورودی‌های ساده‌تر را امتحان می‌کند، یعنی اولین قلم و تعدادهای کمتر، تا شکست به کوچک‌ترین حالت ممکن برسد: کلاه و سه، یعنی نمونه‌ی ناقض کتاب. به یک unit test تبدیلش کنید تا دیگر برنگردد.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/07-while-you-are-coding.html"><small>درس</small>فصل ۷: وقتی کد می‌زنید</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/07-while-you-are-coding.html"><small>درس</small>فصل ۷: وقتی کد می‌زنید</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { ver: "buggy", qmax: 4 }, rng = Kit.rng(2), cases = [], fail = null;
+  var DEF = { ver: "buggy", qmax: 4, acts: [] }, view = JSON.parse(JSON.stringify(DEF)), cfg = view, tour, ctl = {}, msg, kind, rng, cases, fail, total;
+  function at(o) { return function () { view = cfg = Object.assign(JSON.parse(JSON.stringify(DEF)), o); }; }
   function Warehouse() { this.stock = { shoes: 10, hats: 2, umbrellas: 0 }; }
   Warehouse.prototype.in_stock = function (item, q) { return cfg.ver === "buggy" ? (item in this.stock) && this.stock[item] > 0 : (item in this.stock) && this.stock[item] >= q; };
   Warehouse.prototype.take_from_stock = function (item, q) { if (q <= this.stock[item]) this.stock[item] -= q; else throw new Error("Oversold " + item); };
-  function order(wh, item, q) { if (wh.in_stock(item, q)) { wh.take_from_stock(item, q); return ["ok", item, q]; } return ["not available", item, q]; }
-  function prop(item, q) { var wh = new Warehouse(), init = wh.stock[item]; try { var r = order(wh, item, q); if (r[0] === "ok" && wh.stock[item] + q !== init) return "موجودی عوض شد"; return null; } catch (e) { return "خطا: " + e.message; } }
-  function runOne(item, q, tag) { var res = prop(item, q); cases.unshift({ item: item, q: q, res: res, tag: tag || "" }); if (cases.length > 40) cases.pop(); return res; }
+  function order(wh, item, q) { if (wh.in_stock(item, q)) { wh.take_from_stock(item, q); return "ok"; } return "not available"; }
+  function prop(item, q) { var wh = new Warehouse(), init = wh.stock[item]; try { var r = order(wh, item, q); if (r === "ok" && wh.stock[item] + q !== init) return "موجودی عوض شد"; return null; } catch (e) { return "exception: " + e.message; } }
+  function run1(item, q, tag) { var res = prop(item, q); cases.unshift({ item: item, q: q, res: res, tag: tag || "" }); total++; if (res && !fail) fail = { item: item, q: q, res: res }; return res; }
   function gen() { return [rng.pick(["shoes", "hats"]), 1 + rng.int(cfg.qmax)]; }
-  function render() {
-    var t = Kit.clear(document.getElementById("cases")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "قلم"), Kit.el("th", null, "تعداد"), Kit.el("th", null, "نتیجه"))));
-    var tb = Kit.el("tbody"); cases.slice(0, 14).forEach(function (c) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, c.item), Kit.el("td", null, String(c.q)), Kit.el("td", null, Kit.el("span", { class: "badge " + (c.res ? "bad" : "ok") }, c.res ? "✗ " + c.res : "✓ برقرار"), c.tag ? " " + c.tag : ""))); }); t.appendChild(tb);
-    var v = document.getElementById("verdict"); v.className = "callout " + (fail ? "bad" : cases.length ? "ok" : "");
-    v.textContent = fail ? "نمونه‌ی ناقض: قلم " + JSON.stringify(fail.item) + " با تعداد " + fail.q + (fail.min ? "، کوچک‌شده تا کمینه" : "، کوچک کردن را امتحان کنید") + ". " + fail.res + "." : cases.length ? "property برای همه‌ی " + cases.length + " حالت نشان‌داده‌شده تا حالا برقرار بود." : "هنوز حالتی اجرا نشده.";
-    document.getElementById("unit").textContent = fail ? "def test_order_more_than_in_stock():\n    wh = Warehouse({\"shoes\": 10, \"hats\": 2, \"umbrellas\": 0})\n    status, item, quantity = order(wh, " + JSON.stringify(fail.item) + ", " + fail.q + ")\n    assert status == \"not available\"\n    assert wh.stock_count(" + JSON.stringify(fail.item) + ") == " + ({ shoes: 10, hats: 2 })[fail.item] : "اول یک شکست پیدا کنید.";
-    stats([["حالت اجرا‌شده", cases.length], ["شکست", cases.filter(function (c) { return c.res; }).length, fail ? "bad" : ""], ["نسخه", cfg.ver === "buggy" ? "in_stock(item)" : "in_stock(item, qty)"]]);
+  function act(a) {
+    if (a === "one") { var g = gen(); run1(g[0], g[1]); }
+    else if (a === "hunt") { for (var i = 0; i < 100; i++) { var h = gen(); if (run1(h[0], h[1])) return; } }
+    else if (a === "shrink" && fail) { var cur = fail, improved = true;
+      while (improved) { improved = false; var tries = []; if (cur.item !== "shoes") tries.push(["shoes", cur.q]); for (var q = 1; q < cur.q; q++) tries.push([cur.item, q]);
+        for (var k = 0; k < tries.length; k++) { var r = prop(tries[k][0], tries[k][1]); cases.unshift({ item: tries[k][0], q: tries[k][1], res: r, tag: "کوچک کردن" }); total++; if (r) { cur = { item: tries[k][0], q: tries[k][1], res: r }; improved = true; break; } } }
+      fail = { item: cur.item, q: cur.q, res: cur.res, min: true }; }
   }
-  document.getElementById("ver").appendChild(Kit.segmented({ label: "انبار", value: cfg.ver, options: [{ value: "buggy", label: "باگ‌دار، در stock.py" }, { value: "fixed", label: "اصلاح‌شده، در stock1.py" }], onChange: function (v) { cfg.ver = v; cases = []; fail = null; log.add("به انبار " + (v === "buggy" ? "باگ‌دار" : "اصلاح‌شده") + " سوئیچ شد", "muted"); render(); } }).element);
-  document.getElementById("qmax").appendChild(Kit.slider({ label: "بزرگ‌ترین تعداد ساخته‌شده", min: 4, max: 20, step: 1, value: 4, hint: "راهبرد کتاب یک تا چهار را به کار می‌برد.", onInput: function (v) { cfg.qmax = v; } }).element);
-  document.getElementById("one").addEventListener("click", function () { var g = gen(), r = runOne(g[0], g[1]); if (r && !fail) fail = { item: g[0], q: g[1], res: r }; log.add("قلم " + g[0] + " × " + g[1] + ": " + (r || "برقرار"), r ? "bad" : "ok"); render(); });
-  document.getElementById("hunt").addEventListener("click", function () { for (var i = 0; i < 100; i++) { var g = gen(), r = runOne(g[0], g[1]); if (r) { fail = { item: g[0], q: g[1], res: r }; log.add("بعد از " + (i + 1) + " حالت شکست خورد: " + g[0] + " × " + g[1], "bad"); render(); return; } }
-    log.add("صد حالت، بی هیچ شکستی.", "ok"); render(); });
-  document.getElementById("shrink").addEventListener("click", function () {
-    if (!fail) { log.add("هنوز چیزی برای کوچک کردن نیست.", "warn"); return; }
-    var cur = { item: fail.item, q: fail.q, res: fail.res }, improved = true;
-    while (improved) { improved = false;
-      var tries = []; if (cur.item !== "shoes") tries.push(["shoes", cur.q]); for (var q = 1; q < cur.q; q++) tries.push([cur.item, q]);
-      for (var k = 0; k < tries.length; k++) { var r = runOne(tries[k][0], tries[k][1], "(کوچک کردن)"); if (r) { cur = { item: tries[k][0], q: tries[k][1], res: r }; improved = true; break; } } }
-    fail = { item: cur.item, q: cur.q, res: cur.res, min: true }; log.add("کوچک شد تا " + cur.item + " × " + cur.q, "ok"); render(); });
-  document.getElementById("clr").addEventListener("click", function () { cases = []; fail = null; log.clear(); render(); });
-  render();
+  function replay() { rng = Kit.rng(2); cases = []; fail = null; total = 0; cfg.acts.forEach(act); }
+  function render() {
+    replay();
+    var sh = Kit.clear(document.getElementById("shelf")); [["shoes", "کفش", 10], ["hats", "کلاه", 2], ["umbrellas", "چتر", 0]].forEach(function (b) { sh.appendChild(Kit.el("span", { class: "bin" }, b[1], Kit.el("b", null, String(b[2])))); });
+    var code = Kit.clear(document.getElementById("code"));
+    code.appendChild(document.createTextNode("def in_stock(self, item_name" + (cfg.ver === "fixed" ? ", quantity" : "") + "):\n    return (item_name in self.stock and\n            "));
+    code.appendChild(Kit.el("span", { class: cfg.ver === "buggy" ? (fail ? "hl" : "") : "fix" }, cfg.ver === "buggy" ? "self.stock[item_name] > 0)" : "self.stock[item_name] >= quantity)"));
+    document.getElementById("unit").textContent = fail && fail.min ?
+      "def test_order_more_than_in_stock():\n    wh = Warehouse(...)\n    status, _, _ = order(wh, " + JSON.stringify(fail.item) + ", " + fail.q + ")\n    assert status == \"not available\"" :
+      "# item: shoes | hats, quantity: 1.." + cfg.qmax + "\nstatus = order(wh, item, quantity)\nif status == \"ok\":\n    assert taken + left == initial";
+    document.getElementById("ut").textContent = fail && fail.min ? "unit test پس‌رفت برای این شکست" : "property، خلاصه‌ی vault";
+    var t = Kit.clear(document.getElementById("cases")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "قلم"), Kit.el("th", null, "تعداد"), Kit.el("th", null, "نتیجه"))));
+    var tb = Kit.el("tbody"); cases.slice(0, 9).forEach(function (c) { tb.appendChild(Kit.el("tr", { class: c.tag ? "shr" : "" }, Kit.el("td", { class: "mono" }, c.item), Kit.el("td", { class: "mono" }, String(c.q)), Kit.el("td", null, Kit.el("span", { class: "badge " + (c.res ? "bad" : "ok") }, c.res ? "✗ شکست" : "✓ برقرار"), c.tag ? " · " + c.tag : ""))); });
+    if (!cases.length) tb.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 3 }, "هنوز حالتی ساخته نشده.")));
+    t.appendChild(tb);
+    kind = fail ? (fail.min ? "warn" : "bad") : total ? "ok" : "";
+    msg = fail ? "نمونه‌ی ناقض: " + fail.item + " با تعداد " + fail.q + (fail.min ? "، کوچک‌شده تا کمینه." : ".") : total ? "property در هر " + total + " حالت برقرار بود." : "هنوز حالتی اجرا نشده.";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["حالت اجرا‌شده", total], ["شکست", cases.filter(function (c) { return c.res; }).length, fail ? "bad" : ""], ["نمونه‌ی ناقض", fail ? fail.item + " × " + fail.q : "—", fail ? "bad" : ""]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || ""), style: "direction:ltr;unicode-bidi:isolate" }, String(x[1])))); });
+    ctl.ver.set(cfg.ver); ctl.qmax.set(cfg.qmax);
+    document.getElementById("shrink").disabled = !fail || !!fail.min;
+  }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var box = document.getElementById("ctl");
+  ctl.ver = Kit.segmented({ label: "انبار", value: "buggy", options: [{ value: "buggy", label: "باگ‌دار" }, { value: "fixed", label: "اصلاح‌شده" }], onChange: tw(function (v) { cfg.ver = v; cfg.acts = []; }) });
+  ctl.qmax = Kit.slider({ label: "بزرگ‌ترین تعداد ساخته‌شده", min: 4, max: 20, step: 1, value: 4, hint: "راهبرد کتاب یک تا چهار است.", onInput: tw(function (v) { cfg.qmax = v; cfg.acts = []; }) });
+  box.appendChild(ctl.ver.element); box.appendChild(ctl.qmax.element);
+  ["one", "hunt", "shrink"].forEach(function (a) { document.getElementById(a).addEventListener("click", tw(function () { cfg.acts = cfg.acts.concat([a]); })); });
+  document.getElementById("clr").addEventListener("click", tw(function () { cfg.acts = []; }));
+  function after(o) { var keep = cfg; cfg = Object.assign(JSON.parse(JSON.stringify(DEF)), o); replay(); var r = { total: total, fail: fail }; cfg = keep; return r; }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "انبار، property و راهبردها (قلم کفش یا کلاه، تعداد یک تا چهار) از کتاب‌اند (صص. ۳۷۸–۳۸۳). سازنده و کوچک‌کننده‌ی ساده مال vault است؛ کتاب از Hypothesis استفاده می‌کند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و حالت بسازید، شکار کنید و کوچک کنید.",
+    steps: [
+      { kind: "", run: at({}), say: "انبار ده کفش، دو کلاه و صفر چتر دارد. property ساده است: چیزی که برداشته شد به‌علاوه‌ی چیزی که ماند، برابر موجودی اول است." },
+      { kind: "ok", run: at({ acts: ["one", "one", "one"] }), say: "حالت‌های تصادفی: هر کدام یک قلم و یک تعداد. این چند تا همه برقرارند؛ unit testهای دستی هم قبول می‌شدند." },
+      { kind: "bad", run: at({ acts: ["hunt"] }), say: function () { var r = after({ acts: ["hunt"] }); return "اجرا تا شکست: بعد از " + r.total + " حالت، سفارش " + r.fail.item + " با تعداد " + r.fail.q + " شکست می‌خورد، چون کلاه بیشتر از موجودی خواسته شده."; } },
+      { kind: "warn", run: at({ acts: ["hunt", "shrink"] }), say: function () { var r = after({ acts: ["hunt", "shrink"] }); return "کوچک کردن ورودی‌های ساده‌تر را امتحان می‌کند تا به کمینه برسد: " + r.fail.item + " با تعداد " + r.fail.q + "، همان نمونه‌ی ناقضی که کتاب از Hypothesis نشان می‌دهد (صص. ۳۸۱–۳۸۲)."; } },
+      { kind: "warn", run: at({ acts: ["hunt", "shrink"] }), say: "غافلگیری: تست درباره‌ی سطح موجودی بود، ولی باگ در in_stock است که فقط می‌پرسد دست‌کم یکی هست یا نه (صص. ۳۸۲–۳۸۳). پارامترهای شکست را در یک unit test معمولی کپی کنید تا برنگردد." },
+      { kind: "ok", run: at({ ver: "fixed", acts: ["hunt"] }), say: function () { var r = after({ ver: "fixed", acts: ["hunt"] }); return "اصلاح کتاب: in_stock(item, quantity) بررسی می‌کند موجودی دست‌کم به‌اندازه‌ی سفارش باشد. حالا " + r.total + " حالت بی هیچ شکستی."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "ابزار Hypothesis در کتاب چه نمونه‌ی ناقضی خبر داد؟",
