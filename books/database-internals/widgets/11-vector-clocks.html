@@ -3,24 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ساعت برداری و تحویل علّی</title>
+<title>vector clock و تحویل علّی</title>
 <meta name="description" content="میان سه process پیام پخش کنید، به هر ترتیبی تحویلشان بدهید، و ببینید گیرنده‌ها پیام‌هایی را buffer می‌کنند که وابستگی علّی‌شان هنوز نرسیده. ساعت برداری دو process را مقایسه کنید تا پیش یا پس یا هم‌زمان را ببینید. تصویری از فصل ۱۱ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .procs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .proc { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); }
-  .proc h3 { margin: 0 0 4px; font-size: .9rem; }
-  .vc { font-family: var(--mono); font-size: 1rem; font-weight: 600; direction: ltr; }
-  .seen { font-family: var(--mono); font-size: .74rem; color: var(--ink-2); margin-top: 6px; min-height: 1.2em; }
-  .bufd { font-family: var(--mono); font-size: .74rem; color: var(--warn); min-height: 1.2em; }
-  .net { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .procs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .proc { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); }
+  .proc.chg { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .proc.cmp { outline: 2px dashed var(--ink-3); outline-offset: 2px; }
+  .proc h3 { margin: 0 0 4px; font-size: .95rem; font-family: var(--mono); }
+  .vc { font-family: var(--mono); font-size: 1.25rem; font-weight: 700; direction: ltr; text-align: left; }
+  .seen, .bufd { font-family: var(--mono); font-size: .84rem; direction: ltr; text-align: left; margin-top: 4px; min-height: 1.3em; }
+  .seen { color: var(--ink-2); } .bufd { color: var(--warn); font-weight: 700; }
+  .netlbl { font-size: .84rem; color: var(--ink-3); margin: 10px 0 4px; }
+  .net { display: flex; flex-wrap: wrap; gap: 6px; direction: ltr; }
   .net button { font-family: var(--mono); }
+  .net .last { box-shadow: 0 0 0 3px var(--warn-soft); }
+  .vc-ev { margin-top: 10px; font-size: .9rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.8; }
+  .vc-ev.ok { border-color: var(--ok); } .vc-ev.warn { border-color: var(--warn); } .vc-ev.bad { border-color: var(--bad); }
+  #cmp { margin: 8px 0 0; padding: 6px 12px; }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/11-replication-and-consistency.html">فصل ۱۱</a><span aria-hidden="true">/</span>
@@ -31,98 +39,133 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۱ · replication و consistency</div>
-  <h1>ساعت برداری و تحویل علّی</h1>
-  <p class="lede"><strong>ساعت برداری</strong> یک شمارنده برای هر processی دارد. هر پیامی بردار فرستنده‌اش را حمل می‌کند، پس گیرنده‌ای می‌تواند بگوید که هر چیزی را که آن پیام به آن وابسته است از قبل دیده یا نه. اگر ندیده باشد، پیام تا رسیدن وابستگی‌هایش در یک <strong>buffer</strong> منتظر می‌ماند. مقایسه‌ی عنصر‌به‌عنصر دو بردار نشان می‌دهد که رویدادی <strong>پیش از</strong> دیگری رخ داده یا <strong>هم‌زمان</strong>اند.</p>
-  <p class="source-note">تصویری از «consistency علّی» و «ساعت‌های برداری» (صص. ۲۳۰–۲۳۳). این widget شکل پخش علّی ساعت برداری را به کار می‌برد، که در آن هر خانه‌ای پیام‌هایی را می‌شمارد که processی پخش کرده؛ و وصف کتاب سر هر رویدادی می‌افزاید. processها و آن صحنه مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>vector clock و تحویل علّی</h1>
+      <p class="lede"><strong>vector clock</strong> برای هر process یک شمارنده دارد. هر پیام بردار فرستنده را همراه خودش می‌برد، پس گیرنده می‌تواند بفهمد همه‌ی پیام‌هایی را که این پیام به آن‌ها وابسته است دیده یا نه. اگر ندیده باشد، پیام در <strong>buffer</strong> می‌ماند تا وابستگی‌هایش برسند. مقایسه‌ی خانه‌به‌خانه‌ی دو بردار نشان می‌دهد یک رویداد <strong>پیش از</strong> دیگری بوده یا دو رویداد <strong>هم‌زمان</strong>اند.</p>
+      <p class="source-note">تصویری از «Causal Consistency» و «Vector clocks» (صص. ۲۳۰–۲۳۳). این widget شکل broadcast علّی vector clock را به کار می‌برد که در آن هر خانه تعداد پیام‌های broadcast‌شده‌ی یک process را می‌شمارد؛ توصیف کتاب ساعت را با هر رویداد زیاد می‌کند. processها و سناریو انتخاب vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="procs" id="procs"></div>
-        <p class="panel-title" style="margin-top:14px">در پرواز؛ برای تحویل کلیک کنید</p><div class="net" id="net"></div>
-        <div class="callout" id="cmp" style="margin-top:12px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div class="row"><button class="btn small primary" type="button" data-b="0">P1 پخش می‌کند</button><button class="btn small primary" type="button" data-b="1">P2 پخش می‌کند</button><button class="btn small primary" type="button" data-b="2">P3 پخش می‌کند</button></div>
-        <div id="pair" style="margin-top:10px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="scen">صحنه‌ی بی‌ترتیب را بار کن</button><button class="btn small" type="button" id="reset">↺ از نو</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="procs mono" id="procs"></div>
+          <p class="netlbl">پیام‌های در راه (در حالت «خودتان تغییر بدهید» برای تحویل کلیک کنید)</p>
+          <div class="net mono" id="net"></div>
+          <div class="vc-ev" id="ev" aria-live="polite"></div>
+          <div class="callout" id="cmp"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><div class="row"><button class="btn small primary" type="button" data-b="0">P1 broadcast</button><button class="btn small primary" type="button" data-b="1">P2 broadcast</button><button class="btn small primary" type="button" data-b="2">P3 broadcast</button></div></div>
+        <div class="tweak-group" id="pairC"></div>
+        <div class="tweak-group"><div class="row"><button class="btn small" type="button" id="all">تحویل همه به ترتیب</button><button class="btn small" type="button" id="clr">از اول</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>آن صحنه را اجرا کنید.</strong> process P2 پیام M1 را می‌بیند و بعد M2 را پخش می‌کند، پس M2 به M1 وابسته است. process P3 اول M2 را می‌گیرد و bufferش می‌کند، چون ساعتش نشان می‌دهد که هنوز M1 را ندیده.</li>
-    <li><strong>تحویل ساعت‌ها را merge می‌کند.</strong> تحویل پیامی خانه‌ی گیرنده برای آن فرستنده را بالا می‌برد، که می‌تواند پیام‌های buffer‌شده را آزاد کند.</li>
-    <li><strong>هم‌زمان یعنی مقایسه‌ناپذیر.</strong> اگر هر بردار جایی بزرگ‌تر باشد، هیچ رویدادی از آن یکی خبر نداشته. همین‌طور است که replicaها نوشتن‌های متعارض را تشخیص می‌دهند.</li>
-    <li><strong>تشخیص حل نیست.</strong> ساعت برداری می‌گوید که دو نوشتن تعارض دارند، و نه این‌که کدام باید ببرد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>تحویل خارج از ترتیب را ببینید.</strong> P2 پیام M1 را دیده و بعد M2 را می‌فرستد، پس M2 به M1 وابسته است. P3 اول M2 را می‌گیرد و چون ساعتش نشان می‌دهد M1 را ندیده، M2 را نگه می‌دارد (صص. ۲۳۱–۲۳۲).</li>
+      <li><strong>تحویل، ساعت‌ها را merge می‌کند.</strong> تحویل هر پیام خانه‌ی فرستنده را در ساعت گیرنده بالا می‌برد و ممکن است پیام‌های منتظر در buffer را آزاد کند.</li>
+      <li><strong>هم‌زمان یعنی غیرقابل‌مقایسه.</strong> اگر هر بردار جایی بزرگ‌تر باشد، هیچ‌کدام از دیگری خبر نداشته است؛ replicaها نوشتن‌های متعارض را این‌طور تشخیص می‌دهند.</li>
+      <li><strong>تشخیص، حل کردن نیست.</strong> vector clock می‌گوید دو نوشتن تعارض دارند، ولی نمی‌گوید کدام باید بماند؛ این به معنای برنامه بستگی دارد (ص. ۲۳۳).</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var vc, seen, bufs, net, mid, pair = "01";
-  function reset() { vc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; seen = [[], [], []]; bufs = [[], [], []]; net = []; mid = 0; log.clear(); log.add("سه process با ساعت‌های [0, 0, 0].", "muted"); render(); }
-  function bcast(p) {
-    vc[p][p]++; var m = { id: "M" + (++mid), from: p, vc: vc[p].slice() }; seen[p].push(m.id);
-    [0, 1, 2].forEach(function (q) { if (q !== p) net.push({ m: m, to: q }); });
-    log.add("process P" + (p + 1) + " پیام " + m.id + " " + fmt(m.vc) + " را پخش می‌کند", "ok");
-  }
-  function ready(q, m) { return m.vc[m.from] === vc[q][m.from] + 1 && m.vc.every(function (x, k) { return k === m.from || x <= vc[q][k]; }); }
-  function apply(q, m) { vc[q][m.from] = m.vc[m.from]; seen[q].push(m.id); log.add("process P" + (q + 1) + " پیام " + m.id + " را تحویل می‌دهد ← ساعت " + fmt(vc[q]), "ok"); }
-  function arrive(i) {
-    var e = net.splice(i, 1)[0], q = e.to;
-    if (!ready(q, e.m)) { bufs[q].push(e.m); log.add("process P" + (q + 1) + " پیام " + e.m.id + " " + fmt(e.m.vc) + " را می‌گیرد ولی ساعتش " + fmt(vc[q]) + " است: تا رسیدن وابستگی‌ها buffer می‌شود", "warn"); }
-    else { apply(q, e.m); var again = true; while (again) { again = false; for (var k = 0; k < bufs[q].length; k++) if (ready(q, bufs[q][k])) { var b = bufs[q].splice(k, 1)[0]; log.add("… حالا " + b.id + " آماده است", "muted"); apply(q, b); again = true; break; } } }
-    render();
-  }
+  var view = { ops: [], pair: "02" }, tour, ctl = {}, vc, seen, bufs, net, mid, chg, lastNet, msg, kind;
   function fmt(v) { return "[" + v.join(", ") + "]"; }
+  function ready(q, m) { return m.vc[m.from] === vc[q][m.from] + 1 && m.vc.every(function (x, k) { return k === m.from || x <= vc[q][k]; }); }
+  function deliver(q, m, out) { vc[q][m.from] = m.vc[m.from]; seen[q].push(m.id); out.push("P" + (q + 1) + " پیام " + m.id + " را تحویل می‌دهد و ساعتش " + fmt(vc[q]) + " می‌شود"); }
+  function apply(o) {
+    var out = [], k2 = "ok";
+    if (o[0] === "b") { var p = o[1]; vc[p][p]++; var m = { id: "M" + (++mid), from: p, vc: vc[p].slice() }; seen[p].push(m.id);
+      [0, 1, 2].forEach(function (q) { if (q !== p) net.push({ m: m, to: q }); }); chg[p] = true; lastNet = m.id;
+      out.push("P" + (p + 1) + " پیام " + m.id + " را با ساعت " + fmt(m.vc) + " به همه broadcast می‌کند"); }
+    if (o[0] === "d") { var i = net.findIndex(function (e) { return e.m.id === o[1] && e.to === o[2]; }); if (i < 0) return ["", ""];
+      var e = net.splice(i, 1)[0], q = e.to; chg[q] = true;
+      if (!ready(q, e.m)) { bufs[q].push(e.m); k2 = "warn"; out.push("P" + (q + 1) + " پیام " + e.m.id + " " + fmt(e.m.vc) + " را گرفت، ولی ساعتش " + fmt(vc[q]) + " است و هنوز وابستگی‌اش را ندیده؛ پیام در buffer می‌ماند"); }
+      else { deliver(q, e.m, out); var again = true; while (again) { again = false; for (var k = 0; k < bufs[q].length; k++) if (ready(q, bufs[q][k])) { var b = bufs[q].splice(k, 1)[0]; out.push("حالا " + b.id + " هم آماده است"); deliver(q, b, out); again = true; break; } } } }
+    return [out.join("؛ ") + ".", k2];
+  }
+  function replay() {
+    vc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; seen = [[], [], []]; bufs = [[], [], []]; net = []; mid = 0; var r = ["سه process با ساعت [0, 0, 0].", ""];
+    view.ops.forEach(function (o) { chg = {}; lastNet = null; r = apply(o); });
+    if (!view.ops.length) chg = {};
+    msg = r[0]; kind = r[1];
+  }
   function relation(a, b) { var le = a.every(function (x, k) { return x <= b[k]; }), ge = a.every(function (x, k) { return x >= b[k]; }); return le && ge ? "equal" : le ? "before" : ge ? "after" : "concurrent"; }
   function render() {
-    var pr = Kit.clear(document.getElementById("procs"));
+    replay();
+    var a = +view.pair[0], b = +view.pair[1], pr = Kit.clear(document.getElementById("procs"));
     [0, 1, 2].forEach(function (p) {
-      pr.appendChild(Kit.el("div", { class: "proc" }, Kit.el("h3", null, "P" + (p + 1)), Kit.el("div", { class: "vc", "aria-label": "ساعت" }, fmt(vc[p])),
-        Kit.el("div", { class: "seen" }, "دیده: " + (seen[p].join(" ") || "—")), Kit.el("div", { class: "bufd" }, bufs[p].length ? "buffer‌شده: " + bufs[p].map(function (m) { return m.id; }).join(" ") : "")));
+      pr.appendChild(Kit.el("div", { class: "proc" + (chg[p] ? " chg" : "") + (p === a || p === b ? " cmp" : "") }, Kit.el("h3", null, "P" + (p + 1)), Kit.el("div", { class: "vc mono" }, fmt(vc[p])),
+        Kit.el("div", { class: "seen mono" }, "seen: " + (seen[p].join(" ") || "—")), Kit.el("div", { class: "bufd mono" }, bufs[p].length ? "buffered: " + bufs[p].map(function (m) { return m.id; }).join(" ") : "")));
     });
     var n = Kit.clear(document.getElementById("net"));
-    net.forEach(function (e, i) { n.appendChild(Kit.el("button", { class: "btn small", type: "button", onclick: function () { arrive(i); } }, e.m.id + " " + fmt(e.m.vc) + " → P" + (e.to + 1))); });
-    if (!net.length) n.appendChild(Kit.el("span", { class: "field-hint" }, "چیزی در پرواز نیست."));
-    var a = +pair[0], b = +pair[1], rel = relation(vc[a], vc[b]), c = document.getElementById("cmp");
+    net.forEach(function (e) { var btn = Kit.el("button", { class: "btn small" + (e.m.id === lastNet ? " last" : ""), type: "button" }, e.m.id + " " + fmt(e.m.vc) + " → P" + (e.to + 1));
+      btn.addEventListener("click", tw(function () { view.ops = view.ops.concat([["d", e.m.id, e.to]]); })); n.appendChild(btn); });
+    if (!net.length) n.appendChild(Kit.el("span", { class: "field-hint" }, "پیامی در راه نیست."));
+    var ev = document.getElementById("ev"); ev.className = "vc-ev " + kind; ev.textContent = msg;
+    var rel = relation(vc[a], vc[b]), c = document.getElementById("cmp");
     c.className = "callout " + (rel === "concurrent" ? "warn" : "ok");
-    Kit.clear(c).appendChild(Kit.el("strong", null, "P" + (a + 1) + " " + fmt(vc[a]) + " در برابر P" + (b + 1) + " " + fmt(vc[b]) + ": "));
-    c.appendChild(document.createTextNode(rel === "before" ? "حالت P" + (a + 1) + " پیش از حالت P" + (b + 1) + " رخ داده" : rel === "after" ? "حالت P" + (b + 1) + " پیش از حالت P" + (a + 1) + " رخ داده" : rel === "equal" ? "یکسان‌اند" : "هم‌زمان: هیچ‌کدام هر چیزی را که آن یکی دیده ندیده"));
-    stats([["پیام‌های در پرواز", net.length], ["buffer‌شده", bufs[0].length + bufs[1].length + bufs[2].length, bufs.some(function (x) { return x.length; }) ? "warn" : ""]]);
+    Kit.clear(c).appendChild(Kit.el("strong", null, "P" + (a + 1) + " در برابر P" + (b + 1) + ": "));
+    c.appendChild(Kit.el("span", { class: "mono", style: "direction:ltr;unicode-bidi:isolate" }, fmt(vc[a]) + " vs " + fmt(vc[b])));
+    c.appendChild(document.createTextNode(" — " + (rel === "before" ? "حالت P" + (a + 1) + " پیش از P" + (b + 1) + " است" : rel === "after" ? "حالت P" + (b + 1) + " پیش از P" + (a + 1) + " است" : rel === "equal" ? "یکسان‌اند" : "هم‌زمان‌اند: هیچ‌کدام همه‌ی چیزهایی را که دیگری دیده ندیده است")));
+    var St = Kit.clear(document.getElementById("stats")), nb = bufs[0].length + bufs[1].length + bufs[2].length;
+    [["پیام‌های در راه", net.length], ["پیام‌های منتظر در buffer", nb, nb ? "warn" : ""], ["رابطه‌ی دو ساعت مقایسه‌شده", { before: "پیش از", after: "پس از", equal: "برابر", concurrent: "هم‌زمان" }[rel], rel === "concurrent" ? "warn" : "ok"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.pair.set(view.pair);
   }
-  [].forEach.call(document.querySelectorAll("[data-b]"), function (b) { b.addEventListener("click", function () { bcast(+b.getAttribute("data-b")); render(); }); });
-  document.getElementById("pair").appendChild(Kit.segmented({ label: "مقایسه‌ی ساعت‌ها", value: pair, options: [{ value: "01", label: "P1 و P2" }, { value: "02", label: "P1 و P3" }, { value: "12", label: "P2 و P3" }], onChange: function (v) { pair = v; render(); } }).element);
-  document.getElementById("scen").addEventListener("click", function () {
-    reset(); bcast(0);
-    var toP2 = net.findIndex(function (e) { return e.to === 1; }); arrive(toP2); bcast(1);
-    log.add("حالا M2 را پیش از M1 به P3 تحویل بدهید تا buffer شدن را ببینید.", "muted"); render();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  [].forEach.call(document.querySelectorAll("[data-b]"), function (b) { b.addEventListener("click", tw(function () { view.ops = view.ops.concat([["b", +b.getAttribute("data-b")]]); })); });
+  ctl.pair = Kit.segmented({ label: "مقایسه‌ی ساعت‌ها", value: view.pair, options: [{ value: "01", label: "P1 و P2" }, { value: "02", label: "P1 و P3" }, { value: "12", label: "P2 و P3" }], onChange: tw(function (v) { view.pair = v; }) });
+  document.getElementById("pairC").appendChild(ctl.pair.element);
+  document.getElementById("all").addEventListener("click", tw(function () { replay(); view.ops = view.ops.concat(net.map(function (e) { return ["d", e.m.id, e.to]; })); }));
+  document.getElementById("clr").addEventListener("click", tw(function () { view.ops = []; }));
+
+  /* ---------- the scenario ---------- */
+  var S1 = [["b", 0]], S2 = S1.concat([["d", "M1", 1]]), S3 = S2.concat([["b", 1]]), S4 = S3.concat([["d", "M2", 2]]), S5 = S4.concat([["d", "M1", 2]]),
+      S6 = S5.concat([["b", 0], ["b", 2]]), S7 = S6.concat([["d", "M2", 0], ["d", "M3", 1], ["d", "M3", 2], ["d", "M4", 0], ["d", "M4", 1]]);
+  function at(ops, pair) { return function () { view = { ops: ops, pair: pair || "12" }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(S7, "02"), render: render, interval: 8000,
+    intro: "سه process که هرکدام یک vector clock دارند؛ خانه‌ی i تعداد پیام‌هایی است که از Pi تحویل گرفته شده. کارت آبی همان processی است که در این قدم عوض شد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: broadcast کنید و پیام‌های در راه را به هر ترتیبی که می‌خواهید تحویل دهید.",
+    steps: [
+      { kind: "", run: at(S1), say: "P1 پیام M1 را با ساعت [1, 0, 0] broadcast می‌کند. هر پیام ساعت فرستنده را همراه دارد؛ همین metadata نشان می‌دهد چه چیزی پیش از آن بوده است (ص. ۲۳۱)." },
+      { kind: "ok", run: at(S2), say: "M1 به P2 می‌رسد. P2 خانه‌ی P1 را بالا می‌برد و ساعتش [1, 0, 0] می‌شود (ص. ۲۳۲)." },
+      { kind: "", run: at(S3), say: "P2 بعد از دیدن M1 پیام M2 را با ساعت [1, 1, 0] می‌فرستد. پس M2 علّی به M1 وابسته است؛ مثل جواب دادن به یک پست در فروم (ص. ۲۳۱)." },
+      { kind: "warn", run: at(S4), say: "شبکه M2 را زودتر از M1 به P3 می‌رساند. ساعت P3 هنوز [0, 0, 0] است و M2 می‌گوید به یک پیام از P1 وابسته است؛ پس P3 آن را در buffer نگه می‌دارد (صص. ۲۳۱–۲۳۲)." },
+      { kind: "ok", run: at(S5), say: "M1 می‌رسد و تحویل داده می‌شود؛ حالا M2 آماده است و از buffer بیرون می‌آید. P3 هر دو را به ترتیب علّی دید: [1, 1, 0]." },
+      { kind: "warn", run: at(S6, "02"), say: "حالا P1 پیام M3 و P3 پیام M4 را بدون خبر از هم می‌فرستند. [2, 0, 0] و [1, 1, 1] قابل مقایسه نیستند: هرکدام جایی بزرگ‌تر است. این دو رویداد هم‌زمان‌اند، یعنی تعارض احتمالی (ص. ۲۳۲)." },
+      { kind: "ok", run: at(S7, "02"), say: "بعد از تحویل همه‌ی پیام‌ها هر سه ساعت [2, 1, 1] است. vector clock تعارض را تشخیص داد، ولی اینکه کدام نوشتن بماند تصمیم برنامه است (ص. ۲۳۳)." }
+    ]
   });
-  document.getElementById("reset").addEventListener("click", reset);
-  reset();
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "ساعت‌های [2, 1, 0] و [1, 1, 1]: کدام رابطه برقرار است؟",

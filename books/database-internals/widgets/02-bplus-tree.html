@@ -7,23 +7,30 @@
 <meta name="description" content="در B+-Treeی با گنجایش نودی که برمی‌دارید کلید درج و حذف کنید و ببینید شکستن‌ها کلید جداکننده بالا می‌برند، mergeها پایین می‌آورند، و درخت سطحی می‌گیرد یا می‌بازد. تصویری از فصل ۲ و فصل ۴ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .tree svg { min-width: 520px; }
-  .tree { direction: ltr; }
-  .tree .node rect { fill: var(--surface); stroke: var(--line-strong); }
-  .tree .node.hot rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
-  .tree .node.leaf rect { fill: var(--surface-2); }
-  .tree .node.leaf.hot rect { fill: var(--accent-soft); }
-  .tree text { font-family: var(--mono); font-size: 12px; fill: var(--ink); }
-  .tree .edge { stroke: var(--line-strong); fill: none; }
-  .tree .sib { stroke: var(--ink-3); stroke-dasharray: 3 3; fill: none; }
-  .keyrow { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; margin-top: 10px; }
-  .keyrow input { width: 6em; }
+  .bt-wrap { direction: ltr; }
+  .bt-tree svg { display: block; width: 100%; height: auto; max-height: 196px; }
+  .bt-tree .node rect { fill: var(--surface); stroke: var(--line-strong); }
+  .bt-tree .node.leaf rect { fill: var(--surface-2); }
+  .bt-tree .node.hot rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.5; }
+  .bt-tree text { font-family: var(--mono); font-size: 13px; fill: var(--ink); }
+  .bt-tree .edge { stroke: var(--line-strong); fill: none; }
+  .bt-tree .sib { stroke: var(--ink-3); stroke-dasharray: 3 3; fill: none; }
+  .bt-tree .lvl { font-size: 11px; fill: var(--ink-3); font-family: var(--sans, inherit); }
+  .bt-op { margin: 8px 0 4px; font-size: .84rem; font-weight: 700; }
+  .bt-ev { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .bt-ev li { font-size: .8rem; line-height: 1.5; padding: 3px 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); }
+  .bt-ev li b { margin-inline-end: 6px; }
+  .bt-ev li.split { border-color: var(--warn); } .bt-ev li.root { border-color: var(--accent); background: var(--accent-soft); }
+  .bt-ev li.merge { border-color: var(--bad); } .bt-ev li.borrow { border-color: var(--ok); }
+  .bt-ev li.muted { color: var(--ink-3); }
+  .keyrow { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+  .keyrow input { width: 5.5em; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/02-b-tree-basics.html">فصل ۲</a><span aria-hidden="true">/</span>
@@ -34,72 +41,68 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۲ · پایه‌های B-Tree</div>
-  <h1>شکستن و merge در B⁺-Tree</h1>
-  <p class="lede">B⁺-Tree مقدارها را تنها در برگ‌هایش نگه می‌دارد؛ و نودهای درونی <strong>کلید جداکننده</strong> دارند. در برگی پر درج کنید و <strong>می‌شکند</strong>: نصف کلیدهایش به siblingی تازه جابه‌جا می‌شوند، و کلید اول آن sibling در پدر کپی می‌شود، که می‌تواند به‌نوبت بشکند. از برگی آن‌قدر حذف کنید که underflow کند و از siblingی قرض می‌گیرد یا با یکی <strong>merge</strong> می‌شود، و جداکننده‌ای را پایین می‌کشد. درخت تنها در ریشه سطحی می‌گیرد و می‌بازد.</p>
-  <p class="source-note">تصویری از «شکستن نود B-Tree» و «merge کردن نود B-Tree» (صص. ۳۹–۴۲) و، با درج صعودی، افزودن تنها‌راست از فصل ۴. گنجایش و آستانه‌ی کم‌ریز، یعنی نصف گنجایش که به پایین گرد شده، و قدم پخش دوباره انتخاب‌های vault است؛ کلیدها تصادفی‌اند ولی seed‌دار. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>شکستن و merge در B⁺-Tree</h1>
+      <p class="lede">B⁺-Tree مقدارها را فقط در برگ‌ها نگه می‌دارد و نودهای درونی <strong>کلید جداکننده</strong> دارند. برگی که سرریز کند <strong>می‌شکند</strong> و کلید اول نود تازه به پدر promote می‌شود؛ برگی که underflow کند از sibling کلید می‌گیرد یا با آن <strong>merge</strong> می‌شود. ارتفاع درخت فقط در ریشه عوض می‌شود.</p>
+      <p class="source-note">تصویری از «B-Tree Node Splits» و «B-Tree Node Merges» (صص. ۳۹–۴۲)، «Rebalancing» و «Right-Only Appends» (صص. ۷۰–۷۲). گنجایش N، حداقل کلید (نصف N رو به پایین)، کلیدهای سناریو و ترتیب «اول قرض، بعد merge» انتخاب vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="stage tree" id="tree" role="img" aria-label="نمودار B+-Tree"></div>
-        <p class="field-hint">نودهای برجسته در آخرین عملیات عوض شده‌اند. فلش‌های خط‌چین پیوند sibling میان برگ‌ها هستند.</p></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="cap"></div><div id="order" style="margin-top:10px"></div>
-        <div class="keyrow"><label class="field" style="margin:0">کلید <input id="key" type="number" min="1" max="999" value="42"></label>
-          <button class="btn small" type="button" id="ins">درج</button><button class="btn small danger" type="button" id="del">حذف</button></div>
-        <div class="row" style="margin-top:10px"><button class="btn small" type="button" id="delr">کلیدی تصادفی را حذف کن</button></div>
-        <p class="field-hint">پخش کلیدها را یکی‌یکی به ترتیبی که برداشته‌اید درج می‌کند.</p>
-        <div id="player" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="bt-wrap"><div class="bt-tree" id="tree" role="img" aria-label="نمودار B+-Tree"></div></div>
+          <p class="bt-op" id="op"></p>
+          <ol class="bt-ev" id="ev" aria-live="polite"></ol>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این درخت</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="capC"></div>
+        <div class="tweak-group" id="orderC"></div>
+        <div class="tweak-group"><button class="btn small" type="button" id="fill">۲۴ کلید با این ترتیب درج کن</button></div>
+        <div class="tweak-group keyrow"><label class="field" style="margin:0">کلید <input id="key" type="number" min="1" max="999" value="42"></label>
+          <button class="btn small" type="button" id="ins">درج</button><button class="btn small danger" type="button" id="del">حذف</button>
+          <button class="btn small" type="button" id="delr">حذف یک کلید تصادفی</button></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>شکستن کلیدی را بالا کپی می‌کند.</strong> در شکستن برگی، کلید اول آن sibling راست تازه جداکننده‌ی پدر می‌شود؛ و در شکستن درونی، کلید میانی بالا می‌رود و تنها یک بار پیدا می‌شود.</li>
-    <li><strong>درخت از بالا رشد می‌کند.</strong> ارتفاع تنها وقتی زیاد می‌شود که ریشه بشکند، پس همه‌ی برگ‌ها در همان عمق می‌مانند.</li>
-    <li><strong>درج صعودی لبه‌ی راست را پر می‌کند.</strong> با کلیدهای مرتب هر شکستنی روی راست‌ترین برگ رخ می‌دهد، و هر نودی که جا می‌ماند تنها نیمه‌پر است. از همین‌جاست که برخی موتورها افزودن تنها‌راست را حالتی ویژه می‌گیرند.</li>
-    <li><strong>حذف می‌تواند پیش از merge قرض بگیرد.</strong> نودی که underflow می‌کند اول از siblingی با کلید اضافه کلیدی می‌گیرد؛ تنها اگر هیچ‌کدام کلیدی اضافه نداشته باشند آن دو merge می‌شوند و پدر جداکننده‌ای می‌بازد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>شکستن برگ کلید را کپی می‌کند.</strong> کلید اول نود تازه جداکننده‌ی پدر می‌شود و در برگ هم می‌ماند؛ در شکستن نود درونی کلید میانی بالا می‌رود (صص. ۳۹–۴۰).</li>
+      <li><strong>درخت از بالا رشد می‌کند.</strong> ارتفاع فقط وقتی زیاد می‌شود که ریشه بشکند، پس همه‌ی برگ‌ها هم‌عمق می‌مانند (ص. ۳۹).</li>
+      <li><strong>قرض پیش از merge.</strong> جابه‌جا کردن کلید میان siblingها همان rebalancing است که شکستن و merge را عقب می‌اندازد (ص. ۷۰).</li>
+      <li><strong>درج صعودی</strong> همه‌ی شکستن‌ها را به لبه‌ی راست می‌برد و نودهای چپ را با همان پر شدن بعد از شکستن جا می‌گذارد؛ fastpath و quickbalance از همین الگو استفاده می‌کنند (صص. ۷۱–۷۲).</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/02-b-tree-basics.html"><small>درس</small>فصل ۲: پایه‌های B-Tree</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/02-b-tree-basics.html"><small>درس</small>فصل ۲: پایه‌های B-Tree</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { cap: 3, order: "random" }, root, hot, seq, pos, splits, merges, borrows, r;
+  var cfg = { cap: 3 }, root, hot, ev, splits, merges, borrows;
   function leaf(keys) { return { leaf: true, keys: keys || [] }; }
   function minKeys() { return Math.floor(cfg.cap / 2); }
-
-  function reset() {
-    root = leaf(); hot = []; splits = merges = borrows = 0; pos = 0; r = Kit.rng(7);
-    seq = [];
-    if (cfg.order === "ascending") { for (var i = 1; i <= 40; i++) seq.push(i * 5); }
-    else { var pool = []; for (var j = 1; j <= 99; j++) pool.push(j); while (seq.length < 40) seq.push(pool.splice(r.int(pool.length), 1)[0]); }
-    log.clear(); log.add("درخت خالی، با گنجایش نود " + cfg.cap + " کلید. کلیدهای بعدی: " + seq.slice(0, 8).join("، ") + " …", "muted");
-    render();
-  }
-
+  function fresh() { root = leaf(); hot = []; ev = []; splits = merges = borrows = 0; }
   function insertRec(node, key) {
     if (node.leaf) {
       if (node.keys.indexOf(key) >= 0) return { dup: true };
@@ -107,7 +110,7 @@ function stats(rows) {
       if (node.keys.length <= cfg.cap) return null;
       var mid = Math.ceil(node.keys.length / 2), right = leaf(node.keys.slice(mid));
       node.keys = node.keys.slice(0, mid); hot.push(right); splits++;
-      log.add("برگ سرریز می‌کند: به [" + node.keys.join(" ") + "] و [" + right.keys.join(" ") + "] می‌شکند، و " + right.keys[0] + " بالا کپی می‌شود", "warn");
+      ev.push(["split", "برگ سرریز کرد و به [" + node.keys.join(" ") + "] و [" + right.keys.join(" ") + "] شکست؛ " + right.keys[0] + " به پدر promote شد."]);
       return { sep: right.keys[0], right: right };
     }
     var i = 0; while (i < node.keys.length && key >= node.keys[i]) i++;
@@ -118,100 +121,111 @@ function stats(rows) {
     var m = Math.floor(node.keys.length / 2), up = node.keys[m];
     var rn = { leaf: false, keys: node.keys.slice(m + 1), children: node.children.slice(m + 1) };
     node.keys = node.keys.slice(0, m); node.children = node.children.slice(0, m + 1); hot.push(rn); splits++;
-    log.add("نود درونی سرریز می‌کند: می‌شکند و " + up + " بالا می‌رود", "warn");
+    ev.push(["split", "نود درونی سرریز کرد و شکست؛ " + up + " بالا رفت."]);
     return { sep: up, right: rn };
   }
   function insert(key) {
-    hot = [];
     var res = insertRec(root, key);
-    if (res && res.dup) { log.add("کلید " + key + " از قبل در درخت است", "muted"); return; }
-    if (res) { root = { leaf: false, keys: [res.sep], children: [root, res.right] }; hot.push(root); log.add("ریشه شکست: درخت به " + height() + " سطح رشد می‌کند", "bad"); }
-    log.add("درج " + key, "ok");
+    if (res && res.dup) { ev.push(["muted", "کلید " + key + " از قبل در درخت است."]); return; }
+    if (res) { root = { leaf: false, keys: [res.sep], children: [root, res.right] }; hot.push(root); ev.push(["root", "ریشه شکست و ریشه‌ی تازه‌ای با " + res.sep + " ساخته شد: ارتفاع " + height() + " شد."]); }
   }
-
   function deleteRec(node, key) {
-    if (node.leaf) {
-      var k = node.keys.indexOf(key); if (k < 0) return false;
-      node.keys.splice(k, 1); hot.push(node); return true;
-    }
+    if (node.leaf) { var k = node.keys.indexOf(key); if (k < 0) return false; node.keys.splice(k, 1); hot.push(node); return true; }
     var i = 0; while (i < node.keys.length && key >= node.keys[i]) i++;
     if (!deleteRec(node.children[i], key)) return false;
     var c = node.children[i];
-    if (c.keys.length >= minKeys()) return true;
+    if (c.keys.length >= minKeys() && (c.leaf || c.children.length > 1)) return true;
     var L = i > 0 ? node.children[i - 1] : null, R = i < node.children.length - 1 ? node.children[i + 1] : null;
     if (L && L.keys.length > minKeys()) {
       if (c.leaf) { c.keys.unshift(L.keys.pop()); node.keys[i - 1] = c.keys[0]; }
       else { c.keys.unshift(node.keys[i - 1]); node.keys[i - 1] = L.keys.pop(); c.children.unshift(L.children.pop()); }
-      borrows++; hot.push(L, node); log.add("underflow: کلیدی از sibling چپ قرض گرفته می‌شود", "warn"); return true;
+      borrows++; hot.push(L, node); ev.push(["borrow", "underflow: کلیدی از sibling چپ جابه‌جا شد و جداکننده‌ی پدر به‌روز شد (rebalancing)."]); return true;
     }
     if (R && R.keys.length > minKeys()) {
       if (c.leaf) { c.keys.push(R.keys.shift()); node.keys[i] = R.keys[0]; }
       else { c.keys.push(node.keys[i]); node.keys[i] = R.keys.shift(); c.children.push(R.children.shift()); }
-      borrows++; hot.push(R, node); log.add("underflow: کلیدی از sibling راست قرض گرفته می‌شود", "warn"); return true;
+      borrows++; hot.push(R, node); ev.push(["borrow", "underflow: کلیدی از sibling راست جابه‌جا شد و جداکننده‌ی پدر به‌روز شد (rebalancing)."]); return true;
     }
     var li = L ? i - 1 : i, a = node.children[li], b = node.children[li + 1];
     if (!b) return true;
+    var sep = node.keys[li];
     if (a.leaf) a.keys = a.keys.concat(b.keys);
-    else { a.keys = a.keys.concat([node.keys[li]], b.keys); a.children = a.children.concat(b.children); }
-    log.add("underflow: با siblingی merge می‌شود، و جداکننده‌ی " + node.keys[li] + " از پدر برداشته می‌شود", "warn");
+    else { a.keys = a.keys.concat([sep], b.keys); a.children = a.children.concat(b.children); }
     node.keys.splice(li, 1); node.children.splice(li + 1, 1); merges++; hot.push(a, node);
+    ev.push(["merge", a.leaf ? "دو برگ merge شدند؛ پدر جداکننده‌ی " + sep + " و اشاره‌گر نود راست را از دست داد." : "دو نود درونی merge شدند و جداکننده‌ی " + sep + " از پدر به نود merge‌شده پایین آمد (demote)."]);
     return true;
   }
   function remove(key) {
-    hot = [];
-    if (!deleteRec(root, key)) { log.add("کلید " + key + " در درخت نیست", "muted"); return; }
-    log.add("حذف " + key, "ok");
-    if (!root.leaf && root.keys.length === 0) { root = root.children[0]; hot.push(root); log.add("ریشه خالی است: درخت به " + height() + " سطح آب می‌رود", "bad"); }
+    if (!deleteRec(root, key)) { ev.push(["muted", "کلید " + key + " در درخت نیست."]); return; }
+    if (!root.leaf && root.keys.length === 0) { root = root.children[0]; hot.push(root); ev.push(["root", "ریشه خالی شد و تنها فرزندش ریشه شد: ارتفاع " + height() + " شد."]); }
   }
-
   function height() { var h = 1, n = root; while (!n.leaf) { n = n.children[0]; h++; } return h; }
   function levels() { var out = [], cur = [root]; while (cur.length) { out.push(cur); var nx = []; cur.forEach(function (n) { if (!n.leaf) nx = nx.concat(n.children); }); cur = nx; } return out; }
-  function allKeys() { var n = root; while (!n.leaf) n = n.children[0]; var ls = levels(); return ls[ls.length - 1].reduce(function (a, l) { return a.concat(l.keys); }, []); }
+  function allKeys() { var ls = levels(); return ls[ls.length - 1].reduce(function (a, l) { return a.concat(l.keys); }, []); }
+  function apply(ops) { fresh(); ops.forEach(function (o, j) { if (j === ops.length - 1) { hot = []; ev = []; } if (o > 0) insert(o); else remove(-o); }); }
 
+  var ops = [], order = "random", tour, ctl = {}, r = Kit.rng(7);
+  var TAG = { split: "شکستن", root: "ریشه", merge: "merge", borrow: "قرض", muted: "—" };
   function render() {
-    var ls = levels(), KW = 26, PAD = 6, GAP = 12, LH = 64;
-    var nodeW = function () { return cfg.cap * KW + PAD * 2; };
-    var leaves = ls[ls.length - 1], W = Math.max(520, leaves.length * (nodeW() + GAP) + GAP), H = ls.length * LH + 10;
-    var at = new Map();
-    leaves.forEach(function (n, i) { at.set(n, { x: GAP + i * (nodeW() + GAP), y: (ls.length - 1) * LH + 6 }); });
-    for (var d = ls.length - 2; d >= 0; d--) ls[d].forEach(function (n) {
-      var a = at.get(n.children[0]), b = at.get(n.children[n.children.length - 1]);
-      at.set(n, { x: (a.x + b.x) / 2, y: d * LH + 6 });
-    });
-    var s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H, width: W, height: H });
-    ls.forEach(function (lvl) { lvl.forEach(function (n) {
-      if (n.leaf) return;
-      var p = at.get(n);
-      n.children.forEach(function (c, ci) {
-        var q = at.get(c), x1 = p.x + PAD + Math.min(ci, n.keys.length) * KW;
-        s.appendChild(Kit.svg("path", { class: "edge", d: "M" + x1 + " " + (p.y + 26) + " L" + (q.x + nodeW() / 2) + " " + q.y }));
-      });
-    }); });
-    leaves.forEach(function (n, i) { if (i < leaves.length - 1) { var p = at.get(n), q = at.get(leaves[i + 1]); s.appendChild(Kit.svg("path", { class: "sib", d: "M" + (p.x + nodeW()) + " " + (p.y + 13) + " L" + q.x + " " + (q.y + 13) })); } });
-    ls.forEach(function (lvl) { lvl.forEach(function (n) {
-      var p = at.get(n), g = Kit.svg("g", { class: "node" + (n.leaf ? " leaf" : "") + (hot.indexOf(n) >= 0 ? " hot" : "") });
-      g.appendChild(Kit.svg("rect", { x: p.x, y: p.y, width: nodeW(), height: 26, rx: 4 }));
-      for (var k = 0; k < cfg.cap; k++) {
-        if (k) g.appendChild(Kit.svg("line", { x1: p.x + PAD + k * KW, y1: p.y + 4, x2: p.x + PAD + k * KW, y2: p.y + 22, class: "edge" }));
-        if (k < n.keys.length) g.appendChild(Kit.svg("text", { x: p.x + PAD + k * KW + KW / 2, y: p.y + 17, "text-anchor": "middle" }, String(n.keys[k])));
-      }
-      s.appendChild(g);
-    }); });
+    var ls = levels(), KW = 26, PAD = 6, GAP = 14, LH = 52, LW = 44;
+    var nodeW = cfg.cap * KW + PAD * 2, leaves = ls[ls.length - 1];
+    var W = Math.max(640, LW + leaves.length * (nodeW + GAP) + GAP), H = ls.length * LH + 4, at = new Map();
+    leaves.forEach(function (n, i) { at.set(n, { x: LW + GAP + i * (nodeW + GAP), y: (ls.length - 1) * LH + 4 }); });
+    for (var d = ls.length - 2; d >= 0; d--) ls[d].forEach(function (n) { var a = at.get(n.children[0]), b = at.get(n.children[n.children.length - 1]); at.set(n, { x: (a.x + b.x) / 2, y: d * LH + 4 }); });
+    var s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "xMidYMin meet" });
+    ls.forEach(function (lvl, d) { s.appendChild(Kit.svg("text", { class: "lvl", x: 2, y: d * LH + 21 }, d === ls.length - 1 ? "leaf" : d === 0 ? "root" : "inner")); });
+    ls.forEach(function (lvl) { lvl.forEach(function (n) { if (n.leaf) return; var p = at.get(n);
+      n.children.forEach(function (c, ci) { var q = at.get(c), x1 = p.x + PAD + Math.min(ci, n.keys.length) * KW; s.appendChild(Kit.svg("path", { class: "edge", d: "M" + x1 + " " + (p.y + 26) + " L" + (q.x + nodeW / 2) + " " + q.y })); }); }); });
+    leaves.forEach(function (n, i) { if (i < leaves.length - 1) { var p = at.get(n), q = at.get(leaves[i + 1]); s.appendChild(Kit.svg("path", { class: "sib", d: "M" + (p.x + nodeW) + " " + (p.y + 13) + " L" + q.x + " " + (q.y + 13) })); } });
+    ls.forEach(function (lvl) { lvl.forEach(function (n) { var p = at.get(n), g = Kit.svg("g", { class: "node" + (n.leaf ? " leaf" : "") + (hot.indexOf(n) >= 0 ? " hot" : "") });
+      g.appendChild(Kit.svg("rect", { x: p.x, y: p.y, width: nodeW, height: 26, rx: 4 }));
+      for (var k = 0; k < cfg.cap; k++) { if (k) g.appendChild(Kit.svg("line", { x1: p.x + PAD + k * KW, y1: p.y + 4, x2: p.x + PAD + k * KW, y2: p.y + 22, class: "edge" }));
+        if (k < n.keys.length) g.appendChild(Kit.svg("text", { x: p.x + PAD + k * KW + KW / 2, y: p.y + 18, "text-anchor": "middle" }, String(n.keys[k]))); }
+      s.appendChild(g); }); });
     var mount = Kit.clear(document.getElementById("tree")); mount.appendChild(s);
-    mount.setAttribute("aria-label", "B+-Treeی با " + ls.length + " سطح؛ برگ‌ها: " + leaves.map(function (l) { return "[" + l.keys.join(" ") + "]"; }).join(" "));
-    var ks = allKeys(), occ = leaves.reduce(function (a, l) { return a + l.keys.length; }, 0) / (leaves.length * cfg.cap);
-    stats([["کلیدها", ks.length], ["ارتفاع", ls.length], ["برگ‌ها", leaves.length], ["پر شدن برگ", Kit.pct(occ, 0), occ < 0.6 ? "warn" : ""], ["شکستن‌ها", splits], ["merge و قرض", merges + " / " + borrows]]);
+    mount.setAttribute("aria-label", "B+-Tree با " + ls.length + " سطح؛ برگ‌ها: " + leaves.map(function (l) { return "[" + l.keys.join(" ") + "]"; }).join(" "));
+    var last = ops[ops.length - 1];
+    document.getElementById("op").textContent = last === undefined ? "درخت خالی است (یک برگ بدون کلید)." : "آخرین عملیات: " + (last > 0 ? "درج " : "حذف ") + Kit.digits(String(Math.abs(last)));
+    var E = Kit.clear(document.getElementById("ev"));
+    if (!ev.length && last !== undefined) E.appendChild(Kit.el("li", { class: "muted" }, "کلید در برگ جا شد؛ شکستن یا merge لازم نبود."));
+    ev.forEach(function (e) { E.appendChild(Kit.el("li", { class: e[0] }, Kit.el("b", {}, TAG[e[0]]), e[1])); });
+    var occ = leaves.reduce(function (a, l) { return a + l.keys.length; }, 0) / (leaves.length * cfg.cap);
+    var st = Kit.clear(document.getElementById("stats"));
+    [["گنجایش نود (N)", cfg.cap], ["کلیدها", allKeys().length], ["ارتفاع", ls.length], ["برگ‌ها", leaves.length], ["پر شدن برگ", Kit.pct(occ, 0), occ < 0.6 ? "warn" : ""], ["شکستن‌ها", splits], ["merge / قرض", merges + " / " + borrows]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
   }
-
-  function step() { if (pos >= seq.length) return false; insert(seq[pos++]); render(); return pos < seq.length; }
-  document.getElementById("cap").appendChild(Kit.slider({ label: "گنجایش نود", min: 2, max: 6, step: 1, value: cfg.cap, unit: " کلید", onInput: function (v) { cfg.cap = v; reset(); } }).element);
-  document.getElementById("order").appendChild(Kit.segmented({ label: "ترتیب درج", value: cfg.order, options: [{ value: "random", label: "تصادفی" }, { value: "ascending", label: "صعودی" }], onChange: function (v) { cfg.order = v; reset(); } }).element);
+  function run() { apply(ops); }
+  function say() { var e = ev[ev.length - 1]; return e ? e[1] : document.getElementById("op").textContent; }
+  function act(k) { ops = ops.concat([k]); run(); render(); tour.free(say(), ev.some(function (e) { return e[0] === "merge"; }) ? "bad" : ev.length ? "warn" : ""); }
+  function keys(n) { var out = []; if (order === "ascending") { for (var i = 1; i <= n; i++) out.push(i * 5); } else { var g = Kit.rng(7), pool = []; for (var j = 1; j <= 99; j++) pool.push(j); while (out.length < n) out.push(pool.splice(g.int(pool.length), 1)[0]); } return out; }
+  ctl.cap = Kit.slider({ label: "گنجایش نود (N)", min: 2, max: 6, step: 1, value: 3, unit: " کلید", onInput: function (v) { cfg.cap = v; run(); render(); tour.free("همان " + Kit.digits(String(ops.length)) + " عملیات با گنجایش " + Kit.digits(String(v)) + " دوباره اجرا شد: ارتفاع " + Kit.digits(String(height())) + "، شکستن‌ها " + Kit.digits(String(splits)) + ".", ""); } });
+  document.getElementById("capC").appendChild(ctl.cap.element);
+  ctl.order = Kit.segmented({ label: "ترتیب درج", value: order, options: [{ value: "random", label: "تصادفی" }, { value: "ascending", label: "صعودی" }], onChange: function (v) { order = v; } });
+  document.getElementById("orderC").appendChild(ctl.order.element);
+  document.getElementById("fill").addEventListener("click", function () { ops = keys(24); run(); hot = []; render(); tour.free("۲۴ کلید " + (order === "ascending" ? "صعودی" : "تصادفی") + " درج شد: " + Kit.digits(String(splits)) + " شکستن، ارتفاع " + Kit.digits(String(height())) + "، پر شدن برگ " + document.querySelector("#stats .stat:nth-child(5) .stat-value").textContent + ".", ""); });
   function keyVal() { var v = parseInt(document.getElementById("key").value, 10); return isNaN(v) ? null : v; }
-  document.getElementById("ins").addEventListener("click", function () { var k = keyVal(); if (k !== null) { insert(k); render(); } });
-  document.getElementById("del").addEventListener("click", function () { var k = keyVal(); if (k !== null) { remove(k); render(); } });
-  document.getElementById("delr").addEventListener("click", function () { var ks = allKeys(); if (!ks.length) return; remove(ks[r.int(ks.length)]); render(); });
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 700 });
-  reset();
+  document.getElementById("ins").addEventListener("click", function () { var k = keyVal(); if (k) act(k); });
+  document.getElementById("del").addEventListener("click", function () { var k = keyVal(); if (k) act(-k); });
+  document.getElementById("delr").addEventListener("click", function () { var ks = allKeys(); if (ks.length) act(-ks[r.int(ks.length)]); });
+
+  /* ---------- the scenario ---------- */
+  var GROW = [50, 20, 80, 35, 65, 10, 90, 40, 70, 25, 95, 60], FULL = GROW.concat([5, 45, -95, -90]);
+  function at(list, n, o) { return function () { ops = list.slice(0, n); cfg.cap = n === 0 ? 3 : (o && o.cap) || 3; ctl.cap.set(cfg.cap); run(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(FULL.concat([-80, -70, -65, -60, -50, -45, -40]), 23), render: render, interval: 8000,
+    intro: "بالا یک B⁺-Tree با گنجایش ۳ کلید در هر نود است؛ نودهای پررنگ در آخرین عملیات عوض شده‌اند و خط‌چین‌ها پیوند sibling میان برگ‌ها هستند. زیر درخت، رویدادهای آخرین عملیات آمده است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: کلید درج یا حذف کنید، گنجایش را عوض کنید، یا ۲۴ کلید صعودی بریزید.",
+    steps: [
+      { kind: "", run: at(GROW, 3), say: "سه کلید در تنها برگ درخت نشسته‌اند و برگ پر است: هر برگ حداکثر N زوج کلید و مقدار دارد (ص. ۳۹)." },
+      { kind: "warn", run: at(GROW, 4), say: "درج ۳۵ برگ را از N بیشتر می‌کند: نود تازه تخصیص می‌یابد، نصف عنصرها به آن می‌رود و کلید اولش (۵۰) promote می‌شود. چون ریشه شکست، ریشه‌ی تازه ساخته شد و ارتفاع ۲ شد (صص. ۳۹–۴۱)." },
+      { kind: "warn", run: at(GROW, 12), say: "درج ۶۰ برگی را می‌شکند، کلید promote‌شده پدرِ پر را هم می‌شکند و شکستن تا ریشه بالا می‌رود: ارتفاع ۳. همه‌ی برگ‌ها هنوز هم‌عمق‌اند (ص. ۳۹)." },
+      { kind: "ok", run: at(FULL.concat([-80]), 17), say: "حذف ۸۰ برگ را خالی می‌کند (underflow). sibling چپ کلید اضافه دارد، پس به جای merge یک کلید جابه‌جا می‌شود و جداکننده‌ی پدر به‌روز می‌شود؛ این rebalancing است (صص. ۴۱ و ۷۰)." },
+      { kind: "bad", run: at(FULL.concat([-80, -70]), 18), say: "حذف ۷۰: siblingها کلید اضافه ندارند و محتوایشان در یک نود جا می‌شود، پس merge می‌شوند و پدر جداکننده و اشاره‌گر نود راست را از دست می‌دهد (صص. ۴۱–۴۲)." },
+      { kind: "bad", run: at(FULL.concat([-80, -70, -65, -60, -50, -45, -40]), 23), say: "حذف ۴۰: merge برگ‌ها پدر را خالی می‌کند، merge نود درونی جداکننده را از ریشه پایین می‌آورد و ریشه‌ی خالی کنار می‌رود: ارتفاع از ۳ به ۲ رسید (ص. ۴۲)." },
+      { kind: "", run: function () { ops = []; for (var i = 1; i <= 24; i++) ops.push(i * 5); cfg.cap = 3; ctl.cap.set(3); run(); }, say: "درج صعودی، مثل کلید auto-increment: هر شکستن روی راست‌ترین برگ رخ می‌دهد و برگ‌های چپ دیگر عوض نمی‌شوند. PostgreSQL با fastpath و SQLite با quickbalance از همین استفاده می‌کنند (صص. ۷۱–۷۲)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "شکستن برگی در B⁺-Tree کدام کلید را بالا می‌برد؟",

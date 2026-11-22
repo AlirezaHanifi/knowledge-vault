@@ -7,21 +7,26 @@
 <meta name="description" content="شایعه‌ای را در clusterی شصت‌و‌چهار‌نودی بکارید، fanout و قاعده‌ی از دست دادن علاقه را بگذارید، و شمار مستعد و واگیر و برداشته را برای هر دوری ببینید، به‌علاوه‌ی کل پیام‌ها و redundancy و نودهایی که هیچ‌وقت نرسیدند. تصویری از فصل ۱۲ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .grid8 { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; }
-  .cell { aspect-ratio: 1; border-radius: 50%; border: 1px solid var(--line-strong); display: flex; align-items: center; justify-content: center; font-size: .55rem; font-family: var(--mono); color: var(--ink-3); }
+  .grid8 { display: grid; grid-template-columns: repeat(16, 1fr); gap: 4px; direction: ltr; }
+  .cell { aspect-ratio: 1; border-radius: 50%; border: 1.5px solid var(--line-strong); display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; font-family: var(--mono); color: var(--ink-3); background: var(--surface); }
   .cell.I { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .cell.R { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
-  .cell.hit { box-shadow: 0 0 0 2px var(--warn); }
-  .ch svg { width: 100%; height: auto; display: block; margin-top: 10px; }
+  .cell.hit { box-shadow: 0 0 0 2.5px var(--warn); }
+  .gs-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .legend { font-size: .84rem; color: var(--ink-2); margin: 8px 0 0; }
+  .ch svg { width: 100%; height: auto; max-height: 240px; display: block; }
   .ch { direction: ltr; }
-  .ch .s { stroke: var(--ink-3); fill: none; stroke-width: 2; } .ch .i { stroke: var(--accent); fill: none; stroke-width: 2; } .ch .r { stroke: var(--ok); fill: none; stroke-width: 2; stroke-dasharray: 5 3; }
-  .ch text { font-size: 10px; fill: var(--ink-3); }
+  .ch .s { stroke: var(--ink-3); fill: none; stroke-width: 2.5; } .ch .i { stroke: var(--accent); fill: none; stroke-width: 2.5; } .ch .r { stroke: var(--ok); fill: none; stroke-width: 2.5; stroke-dasharray: 6 3; }
+  .ch .now { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 3 3; }
+  .ch text { font-size: 12px; fill: var(--ink-3); font-family: var(--mono); }
+  .gs-ev { margin-top: 8px; font-size: .9rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.8; }
+  .gs-ev.ok { border-color: var(--ok); } .gs-ev.warn { border-color: var(--warn); } .gs-ev.bad { border-color: var(--bad); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/12-anti-entropy-and-dissemination.html">فصل ۱۲</a><span aria-hidden="true">/</span>
@@ -32,103 +37,144 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۲ · anti-entropy و پخش</div>
-  <h1>gossip: پخش شایعه مثل همه‌گیری</h1>
-  <p class="lede">gossip اطلاع را مثل همه‌گیری پخش می‌کند. نودی که خبر دارد <strong>واگیر</strong> است و در هر دوری آن را به <strong>fanout</strong> همتای تصادفی push می‌کند. نودهای <strong>مستعد</strong> که می‌گیرندش هم واگیر می‌شوند. پیام‌هایی به نودهایی که از قبل می‌دانند <strong>زائد</strong>اند. <strong>از دست دادن علاقه</strong> در غایت نودی را <strong>برداشته</strong> می‌کند، پس پخش کردن را بس می‌کند: یا با احتمالی در هر دوری، یا پس از زدن به آستانه‌ای از نودهایی که از قبل می‌دانستند.</p>
-  <p class="source-note">تصویری از «پخش با gossip» و «مکانیک gossip» (صص. ۲۵۰–۲۵۲): مدل همه‌گیری و fanout و redundancy و آن دو گونه‌ی از دست دادن علاقه. cluster ۶۴ نودی و seedها و بازه‌های پارامتر مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>gossip: پخش شایعه مثل همه‌گیری</h1>
+      <p class="lede">gossip اطلاع را مثل همه‌گیری پخش می‌کند. نودی که خبر دارد <strong>infective</strong> است و هر دور آن را به <strong>fanout</strong> همتای تصادفی push می‌کند. نود <strong>susceptible</strong> با گرفتن خبر infective می‌شود. پیامی که به نودی برسد که از قبل خبر داشته <strong>زائد</strong> است. با <strong>loss of interest</strong> نود به حالت <strong>removed</strong> می‌رود و دیگر پخش نمی‌کند: یا با احتمالی در هر دور، یا وقتی تعداد پیام‌های زائدش به آستانه برسد.</p>
+      <p class="source-note">تصویری از «Gossip Dissemination» و «Gossip Mechanics» (صص. ۲۵۰–۲۵۱): حالت‌های infective و susceptible و removed، fanout، redundancy، latency و دو شکل loss of interest. cluster ۶۴ نودی، seedها و شمردن پیام زائد در سمت فرستنده انتخاب vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="grid8" id="grid" role="img"></div>
-        <p class="field-hint">خالی: مستعد یعنی S. پر آبی با «I»: واگیر. سبز با «R»: برداشته. حلقه‌ی کهربایی نودی را علامت می‌زند که این دور پیامی گرفته.</p>
-        <div class="ch" id="chart"></div>
-        <p class="field-hint">برای هر دوری: خاکستری پر یعنی S، آبی پر یعنی I، و سبز خط‌چین یعنی R.</p></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="sl"></div><div id="rule" style="margin-top:10px"></div><div id="k" style="margin-top:10px"></div>
-        <div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="gs-row">
+            <div><div class="grid8 mono" id="grid" role="img"></div>
+            <p class="legend">دایره‌ی خالی: susceptible · آبی با I: infective · سبز با R: removed · حلقه‌ی نارنجی: در همین دور پیام گرفته</p></div>
+            <div><div class="ch" id="chart" aria-hidden="true"></div>
+            <p class="legend">تعداد نودها در هر دور: خاکستری S، آبی I، سبز خط‌چین R</p></div>
+          </div>
+          <div class="gs-ev" id="ev" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="g1"></div>
+        <div class="tweak-group" id="g2"></div>
+        <div class="tweak-group" id="g3"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>پخش لگاریتمی است.</strong> شمار واگیرها اول تقریباً در هر دوری ضرب می‌شود، پس ۶۴ نود در چند دور انگشت‌شمار پوشیده می‌شوند.</li>
-    <li><strong>redundancy بهای استواری است.</strong> همین که بیشتر نودها بدانند، تقریباً هر پیامی روی نودی می‌نشیند که از قبل می‌دانست.</li>
-    <li><strong>از دست دادن علاقه پوشش را با پیام بده‌بستان می‌کند.</strong> زیادی زود علاقه را از دست بدهید و شایعه پیش از رسیدن به همه می‌میرد: «هیچ‌وقت نرسید» را ببینید.</li>
-    <li><strong>fanout اول از همه مهم‌تر است.</strong> fanout بزرگ‌تر زودتر به همه می‌رسد و از دست دادن علاقه‌ی تهاجمی را جان به در می‌برد، به بهای پیام بیشتر در هر دوری.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>پخش اول تصاعدی است.</strong> با fanout ۲ تعداد نودهای infective در دورهای اول تقریباً دو برابر می‌شود؛ کتاب پخش را در حدود log N دور می‌داند (ص. ۲۵۱).</li>
+      <li><strong>redundancy بهای استواری است.</strong> وقتی بیشتر نودها خبر دارند، تقریباً هر پیامی به نودی می‌رسد که از قبل می‌دانست.</li>
+      <li><strong>رسیدن به همه با convergence فرق دارد.</strong> ممکن است همه خبر داشته باشند ولی gossip چند دور دیگر ادامه پیدا کند (ص. ۲۵۱).</li>
+      <li><strong>loss of interest پوشش را با پیام معاوضه می‌کند.</strong> اگر نودها زود علاقه را از دست بدهند، شایعه پیش از رسیدن به همه می‌میرد.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/12-anti-entropy-and-dissemination.html"><small>درس</small>فصل ۱۲: anti-entropy و پخش</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/12-anti-entropy-and-dissemination.html"><small>درس</small>فصل ۱۲: anti-entropy و پخش</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
+  var N = 64;
+  function runTo(cfg, T) {
+    var r = Kit.rng(100 + cfg.seed), st = [], dups = [], round = 0, msgs = 0, red = 0, hist, hit = {}, last = null, firstAll = null;
+    for (var i = 0; i < N; i++) { st.push("S"); dups.push(0); }
+    st[0] = "I"; hist = [[N - 1, 1, 0]];
+    function count(s) { return st.filter(function (x) { return x === s; }).length; }
+    while (round < T && count("I")) {
+      round++; hit = {}; var newI = [], m0 = msgs, r0 = red;
+      st.forEach(function (s, i) {
+        if (s !== "I") return;
+        for (var f = 0; f < cfg.fanout; f++) {
+          var j; do { j = r.int(N); } while (j === i);
+          msgs++; hit[j] = true;
+          if (st[j] === "S" && newI.indexOf(j) < 0) newI.push(j); else { red++; dups[i]++; }
+        }
+      });
+      var removed = 0;
+      st.forEach(function (s, i) { if (s !== "I") return; if (cfg.rule === "prob" ? r.chance(cfg.p / 100) : dups[i] >= cfg.k) { st[i] = "R"; removed++; } });
+      newI.forEach(function (j) { st[j] = "I"; });
+      hist.push([count("S"), count("I"), count("R")]);
+      if (!count("S") && firstAll === null) firstAll = round;
+      last = { msgs: msgs - m0, newI: newI.length, red: red - r0, removed: removed };
+    }
+    return { st: st, round: round, msgs: msgs, red: red, hist: hist, hit: hit, last: last, S: count("S"), I: count("I"), R: count("R"), firstAll: firstAll, done: !count("I") };
   }
 
-  var log = Kit.log(document.getElementById("log"));
-  var N = 64, cfg = { fanout: 2, rule: "prob", p: 25, k: 2, seed: 1 }, st, dups, round, msgs, red, hist, hit, r;
-  function reset() {
-    r = Kit.rng(100 + cfg.seed); st = []; dups = []; for (var i = 0; i < N; i++) { st.push("S"); dups.push(0); }
-    st[0] = "I"; round = 0; msgs = 0; red = 0; hist = [[N - 1, 1, 0]]; hit = {};
-    log.clear(); log.add("نود ۰ شایعه را می‌فهمد. fanout برابر " + cfg.fanout + "، و " + (cfg.rule === "prob" ? "از دست دادن علاقه با احتمال " + cfg.p + "٪ در هر دوری" : "از دست دادن علاقه پس از " + cfg.k + " پیام زائد") + ".", "muted"); render();
-  }
-  function count(s) { return st.filter(function (x) { return x === s; }).length; }
-  function step() {
-    if (!count("I")) return false;
-    round++; hit = {}; var newI = [], before = msgs, beforeRed = red;
-    st.forEach(function (s, i) {
-      if (s !== "I") return;
-      for (var f = 0; f < cfg.fanout; f++) {
-        var j; do { j = r.int(N); } while (j === i);
-        msgs++; hit[j] = true;
-        if (st[j] === "S" && newI.indexOf(j) < 0) newI.push(j); else { red++; dups[i]++; }
-      }
-    });
-    var removed = 0;
-    st.forEach(function (s, i) { if (s !== "I") return; if (cfg.rule === "prob" ? r.chance(cfg.p / 100) : dups[i] >= cfg.k) { st[i] = "R"; removed++; } });
-    newI.forEach(function (j) { st[j] = "I"; });
-    hist.push([count("S"), count("I"), count("R")]);
-    log.add("دور " + round + ": " + (msgs - before) + " پیام، " + newI.length + " واگیر تازه، " + (red - beforeRed) + " زائد، و " + removed + " که علاقه را از دست دادند", newI.length ? "ok" : "muted");
-    if (!count("I")) log.add(count("S") ? "شایعه مرد: " + count("S") + " نود هیچ‌وقت نشنیدندش" : "هر نودی شایعه را شنید", count("S") ? "bad" : "ok");
-    render(); return count("I") > 0;
-  }
+  var MAXR = 60, view = { fanout: 2, rule: "prob", p: 25, k: 3, seed: 2, R: 0 }, tour, ctl = {}, s, msg, kind;
+  function cfg() { return { fanout: view.fanout, rule: view.rule, p: view.p, k: view.k, seed: view.seed }; }
   function render() {
+    s = runTo(cfg(), view.R);
     var g = Kit.clear(document.getElementById("grid"));
-    st.forEach(function (s, i) { g.appendChild(Kit.el("div", { class: "cell " + (s === "S" ? "" : s) + (hit[i] ? " hit" : "") }, s === "S" ? "" : s)); });
-    g.setAttribute("aria-label", "دور " + round + ": " + count("S") + " مستعد، " + count("I") + " واگیر، " + count("R") + " برداشته");
-    var W = 600, H = 120, mx = Math.max(10, hist.length - 1), sx = function (i) { return 24 + i / mx * (W - 30); }, sy = function (v) { return H - 14 - v / N * (H - 20); };
-    var s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H });
-    ["s", "i", "r"].forEach(function (c, k) { s.appendChild(Kit.svg("polyline", { class: c, points: hist.map(function (h, i) { return sx(i).toFixed(1) + "," + sy(h[k]).toFixed(1); }).join(" ") })); });
-    s.appendChild(Kit.svg("text", { x: 0, y: sy(N) + 4 }, String(N))); s.appendChild(Kit.svg("text", { x: 0, y: sy(0) }, "0")); s.appendChild(Kit.svg("text", { x: W - 50, y: H - 2 }, "round " + round));
-    Kit.clear(document.getElementById("chart")).appendChild(s);
-    stats([["دور", round], ["مستعد و واگیر و برداشته", count("S") + " / " + count("I") + " / " + count("R")], ["پیام‌ها", msgs], ["زائد", msgs ? Kit.pct(red / msgs, 0) : "–", red / Math.max(1, msgs) > 0.5 ? "warn" : ""], ["هیچ‌وقت نرسید", count("I") ? "–" : count("S"), !count("I") && count("S") ? "bad" : ""]]);
+    s.st.forEach(function (x, i) { g.appendChild(Kit.el("div", { class: "cell " + (x === "S" ? "" : x) + (s.round && s.hit[i] ? " hit" : "") }, x === "S" ? "" : x)); });
+    g.setAttribute("aria-label", "دور " + s.round + ": " + s.S + " susceptible، " + s.I + " infective، " + s.R + " removed");
+    var W = 600, H = 260, mx = Math.max(12, s.hist.length - 1), sx = function (i) { return 30 + i / mx * (W - 40); }, sy = function (v) { return H - 18 - v / N * (H - 28); };
+    var sv = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H });
+    ["s", "i", "r"].forEach(function (c, k) { sv.appendChild(Kit.svg("polyline", { class: c, points: s.hist.map(function (h, i) { return sx(i).toFixed(1) + "," + sy(h[k]).toFixed(1); }).join(" ") })); });
+    sv.appendChild(Kit.svg("text", { x: 0, y: sy(N) + 4 }, String(N))); sv.appendChild(Kit.svg("text", { x: 8, y: sy(0) + 4 }, "0"));
+    sv.appendChild(Kit.svg("text", { x: W - 80, y: H - 2 }, "round " + s.round));
+    if (s.firstAll !== null) { sv.appendChild(Kit.svg("line", { class: "now", x1: sx(s.firstAll), x2: sx(s.firstAll), y1: 6, y2: H - 18 })); sv.appendChild(Kit.svg("text", { x: sx(s.firstAll) + 4, y: 14 }, "all reached")); }
+    Kit.clear(document.getElementById("chart")).appendChild(sv);
+    if (!s.round) { msg = "نود ۰ شایعه را می‌داند و ۶۳ نود دیگر susceptible‌اند."; kind = ""; }
+    else { var L = s.last; msg = "دور " + s.round + ": " + L.msgs + " پیام، " + L.newI + " نود تازه infective، " + L.red + " پیام زائد، " + L.removed + " نود removed.";
+      kind = L.newI ? "ok" : "";
+      if (s.done) { msg += s.S ? " شایعه مرد و " + s.S + " نود هیچ‌وقت آن را نشنیدند." : " gossip متوقف شد و همه خبر دارند."; kind = s.S ? "bad" : "ok"; } }
+    var ev = document.getElementById("ev"); ev.className = "gs-ev " + kind; ev.textContent = msg;
+    var St = Kit.clear(document.getElementById("stats"));
+    [["دور", s.round], ["S / I / R", s.S + " / " + s.I + " / " + s.R], ["کل پیام‌ها", s.msgs], ["سهم پیام زائد", s.msgs ? Math.round(s.red / s.msgs * 100) + "%" : "–", s.red / Math.max(1, s.msgs) > 0.5 ? "warn" : ""],
+     ["رسیدن به همه در دور", s.firstAll === null ? "–" : s.firstAll, s.firstAll === null ? "" : "ok"], ["هیچ‌وقت نرسید", s.done ? s.S : "–", s.done && s.S ? "bad" : ""]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    ctl.f.set(view.fanout); ctl.sd.set(view.seed); ctl.rule.set(view.rule); ctl.p.set(view.p); ctl.k.set(view.k); ctl.r.set(view.R);
   }
-  var sl = document.getElementById("sl");
-  sl.appendChild(Kit.slider({ label: "fanout", min: 1, max: 5, step: 1, value: cfg.fanout, onInput: function (v) { cfg.fanout = v; reset(); } }).element);
-  sl.appendChild(Kit.slider({ label: "اجرا، یعنی seed", min: 1, max: 9, step: 1, value: cfg.seed, onInput: function (v) { cfg.seed = v; reset(); } }).element);
-  document.getElementById("rule").appendChild(Kit.segmented({ label: "از دست دادن علاقه", value: cfg.rule, options: [{ value: "prob", label: "احتمالاتی" }, { value: "thr", label: "آستانه‌ای" }], onChange: function (v) { cfg.rule = v; reset(); } }).element);
-  var km = document.getElementById("k");
-  km.appendChild(Kit.slider({ label: "احتمال بس کردن در هر دوری، برای احتمالاتی", min: 5, max: 80, step: 5, value: cfg.p, unit: "٪", onInput: function (v) { cfg.p = v; reset(); } }).element);
-  km.appendChild(Kit.slider({ label: "پیام زائد پیش از بس کردن، برای آستانه‌ای", min: 1, max: 6, step: 1, value: cfg.k, onInput: function (v) { cfg.k = v; reset(); } }).element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 700 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.r = Kit.slider({ label: "دور", min: 0, max: MAXR, step: 1, value: view.R, onInput: tw(function (v) { view.R = v; }) });
+  ctl.f = Kit.slider({ label: "fanout", min: 1, max: 5, step: 1, value: view.fanout, onInput: tw(function (v) { view.fanout = v; }) });
+  ctl.sd = Kit.slider({ label: "seed اجرا", min: 1, max: 9, step: 1, value: view.seed, onInput: tw(function (v) { view.seed = v; }) });
+  ctl.rule = Kit.segmented({ label: "loss of interest", value: view.rule, options: [{ value: "prob", label: "احتمالی" }, { value: "thr", label: "آستانه‌ای" }], onChange: tw(function (v) { view.rule = v; }) });
+  ctl.p = Kit.slider({ label: "احتمال توقف در هر دور (احتمالی)", min: 5, max: 80, step: 5, value: view.p, unit: "%", onInput: tw(function (v) { view.p = v; }) });
+  ctl.k = Kit.slider({ label: "پیام زائد تا توقف (آستانه‌ای)", min: 1, max: 6, step: 1, value: view.k, onInput: tw(function (v) { view.k = v; }) });
+  document.getElementById("g1").appendChild(ctl.r.element);
+  document.getElementById("g2").appendChild(ctl.f.element); document.getElementById("g2").appendChild(ctl.sd.element);
+  document.getElementById("g3").appendChild(ctl.rule.element); document.getElementById("g3").appendChild(ctl.p.element); document.getElementById("g3").appendChild(ctl.k.element);
+
+  function at(R, o) { return function () { view = Object.assign({ fanout: 2, rule: "prob", p: 25, k: 3, seed: 2 }, o || {}, { R: R }); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(22), render: render, interval: 8000,
+    intro: "یک cluster ۶۴ نودی. نود ۰ خبری دارد که باید به همه برسد، بدون coordinator و بدون فهرست گیرنده‌ها. هر نود infective هر دور خبر را به ۲ همتای تصادفی می‌فرستد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: دور را جلو و عقب ببرید، fanout و قاعده‌ی loss of interest را عوض کنید و ببینید پوشش و تعداد پیام چه می‌شود.",
+    steps: [
+      { kind: "", run: at(0), say: "شروع: یک نود infective و ۶۳ نود susceptible. نودی که علاقه‌اش را از دست بدهد removed می‌شود و دیگر پخش نمی‌کند (ص. ۲۵۰)." },
+      { kind: "ok", run: at(3), say: "دور ۳: ۱۸ نود infective‌اند و ۱۳ نود فقط در همین دور خبر را گرفتند. با fanout ۲ تعداد نودهای مطلع تقریباً هر دور دو برابر می‌شود (ص. ۲۵۱)." },
+      { kind: "warn", run: at(5), say: "دور ۵: فقط ۴ نود بی‌خبر مانده‌اند، ولی ۵۳٪ پیام‌ها زائد بوده است. همتاها تصادفی انتخاب می‌شوند، پس هم‌پوشانی همیشه هست؛ کتاب این سربار را redundancy می‌نامد (ص. ۲۵۱)." },
+      { kind: "ok", run: at(8), say: "دور ۸: همه‌ی ۶۴ نود خبر دارند (log₂ 64 = 6). ولی ۱۴ نود هنوز infective‌اند و پخش ادامه دارد: رسیدن به همه با convergence یکی نیست (ص. ۲۵۱)." },
+      { kind: "warn", run: at(22), say: "دور ۲۲: آخرین نود هم removed شد و gossip converge کرد. در کل ۴۳۰ پیام رفت و ۸۵٪ آن‌ها زائد بود؛ redundancy بهای استواری gossip است (ص. ۲۵۱)." },
+      { kind: "bad", run: at(11, { p: 60 }), say: "حالا احتمال توقف را از ۲۵٪ به ۶۰٪ می‌بریم. پیام‌ها به ۲۰۲ کم می‌شوند، ولی شایعه در دور ۱۱ می‌میرد و ۲ نود هیچ‌وقت آن را نمی‌شنوند." },
+      { kind: "ok", run: at(10, { rule: "thr", k: 3 }), say: "loss of interest آستانه‌ای: هر نود بعد از ۳ پیام زائد پخش را متوقف می‌کند. همه در دور ۸ خبر دارند، gossip در دور ۱۰ تمام می‌شود و ۲۹۶ پیام کافی است؛ کتاب می‌گوید شمردن تکراری‌ها latency و redundancy را کم می‌کند (ص. ۲۵۱)." },
+      { kind: "warn", run: at(20, { fanout: 4 }), say: "fanout ۴ با همان قاعده‌ی احتمالی: همه در دور ۴ خبر دارند، ولی ۹۸۸ پیام رفته و ۹۴٪ زائد است. fanout و latency به اندازه‌ی cluster بستگی دارند: cluster بزرگ‌تر fanout بیشتر یا latency بیشتر می‌خواهد (ص. ۲۵۱)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چه چیزی پیام gossipی را زائد می‌کند؟",

@@ -7,20 +7,28 @@
 <meta name="description" content="روی B-Treeی برای خواندن یا درج یا حذف با latch crabbing پایین بروید: فرزند را latch کنید، بعد اگر فرزند ایمن باشد نیاکان را رها. ببینید در هر قدمی کدام latchها نگه داشته شده‌اند و چرا فرزندی پر یا کمینه پدر را latch‌خورده نگه می‌دارد. تصویری از فصل ۵ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .lvl { display: flex; justify-content: space-around; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
-  .nb { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 8px; background: var(--surface); min-width: 84px; text-align: center; font-family: var(--mono); font-size: .8rem; }
-  .nb .nm { font-family: var(--font); font-size: .7rem; color: var(--ink-3); display: flex; justify-content: space-between; gap: 6px; }
-  .nb.path { border-color: var(--ink-3); }
-  .nb.w { border-color: var(--bad); box-shadow: 0 0 0 2px var(--bad-soft); }
-  .nb.r { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-  .nb.done { opacity: .6; }
-  .tag { font-weight: 700; font-size: .7rem; }
+  .lc-tree { display: grid; gap: 22px; padding: 6px 0 4px; }
+  .lvl { display: flex; justify-content: space-around; gap: 8px; direction: ltr; }
+  .nb { border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); padding: 5px 8px; background: var(--surface); min-width: 92px; text-align: center; font-family: var(--mono); font-size: .86rem; position: relative; }
+  .nb .nm { font-size: .72rem; color: var(--ink-3); display: flex; justify-content: space-between; gap: 6px; }
+  .nb.path { border-color: var(--ink-2); border-width: 2px; }
+  .nb.off { opacity: .45; }
+  .nb.w { border-color: var(--bad); background: var(--bad-soft); box-shadow: 0 0 0 3px var(--bad-soft); }
+  .nb.r { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .nb.done { border-style: dashed; }
+  .nb .tag { font-weight: 700; }
+  .nb .cap { font-size: .68rem; font-weight: 700; color: var(--warn); }
+  .lc-held { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: .84rem; }
+  .lc-held .chip { font-family: var(--mono); }
+  .lc-ev { margin-top: 10px; font-size: .88rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
+  .lc-ev.ok { border-color: var(--ok); } .lc-ev.warn { border-color: var(--warn); } .lc-ev.bad { border-color: var(--bad); }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/05-transaction-processing-and-recovery.html">فصل ۵</a><span aria-hidden="true">/</span>
@@ -31,117 +39,141 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · پردازش تراکنش و بازیابی</div>
-  <h1>latch crabbing در پایین رفتن از B-Tree</h1>
-  <p class="lede">روش latch crabbing، که latch coupling هم نامیده می‌شود، می‌گذارد threadهای زیادی یک‌جا از B-Treeی به کار ببرند. threadی ریشه را latch می‌کند، بعد مثل خرچنگی پایین می‌رود: فرزند را <em>پیش از</em> رها کردن پدر latch می‌کند. هر نیایی را همین که فرزند <strong>ایمن</strong> باشد رها می‌کند، یعنی عملیات نمی‌تواند ساختار بالایش را عوض کند. برای خواندنی، هر فرزندی ایمن است. برای درجی، فرزندی ایمن است اگر پر نباشد؛ و برای حذفی، اگر underflow نکند.</p>
-  <p class="source-note">تصویری از «latch crabbing» (صص. ۱۰۵–۱۰۶، شکل ۵-۸). آن درخت و گنجایش نودش، یعنی ۳ کلید با کمینه‌ی ۱، و عملیات مال vault است. widget نشان می‌دهد کدام latchها نگه داشته شده‌اند؛ خودش آن شکستن یا merge را انجام نمی‌دهد. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>latch crabbing در پایین رفتن از B-Tree</h1>
+      <p class="lede">در <strong>latch crabbing</strong> (یا latch coupling) thread مثل خرچنگ پایین می‌رود: latch فرزند را <em>قبل از</em> رها کردن پدر می‌گیرد. latch پدر وقتی رها می‌شود که فرزند <strong>امن</strong> باشد، یعنی تغییر ساختاری از آن به پدر نرسد: برای خواندن همیشه، برای درج وقتی فرزند پر نیست و برای حذف وقتی فرزند بیشتر از حداقل کلید دارد.</p>
+      <p class="source-note">تصویری از «Latch crabbing» (صص. ۱۰۵–۱۰۶، شکل ۵-۹) و latchهای خواندن و نوشتن (ص. ۱۰۴). درخت، گنجایش ۳ کلید با حداقل ۱، و عملیات‌ها انتخاب vault است. شبیه‌سازی فقط نشان می‌دهد کدام latchها نگه داشته می‌شوند و خود شکستن یا merge را انجام نمی‌دهد. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel" id="tree" aria-label="B-Treeی با latch"></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="op"></div><div id="player" style="margin-top:12px"></div>
-        <p class="field-hint">برچسب نودها: <b>W</b> یعنی latch انحصاری، <b>R</b> یعنی latch مشترک؛ و «پر» و «کمینه» نودهایی را علامت می‌زنند که درجی یا حذفی را ناایمن می‌کنند.</p></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="lc-tree" id="tree" role="img"></div>
+          <div class="lc-held"><span>latchهای در دست:</span><span id="held"></span></div>
+          <div class="lc-ev" id="ev" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این پیمایش</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="opC"></div>
+        <div class="tweak-group" id="modeC"></div>
+        <div class="tweak-group"><div class="row"><button class="btn small primary" type="button" id="next">یک سطح پایین‌تر</button><button class="btn small" type="button" id="restart">از ریشه</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>خواندن حداکثر دو latch نگه می‌دارد.</strong> فرزند را latch کن، پدر را رها، تا پایین.</li>
-    <li><strong>درج در نودی با جا:</strong> پدر همین که فرزند latch بخورد و معلوم شود پر نیست رها می‌شود.</li>
-    <li><strong>فرزندی پر نیاکانش را latch‌خورده نگه می‌دارد</strong>، چون شکستنی آن‌جا می‌تواند به آن‌ها پخش شود. درج ۱۳ کل مسیر را latch‌خورده نگه می‌دارد: آن برگ و پدرش پر‌اند.</li>
-    <li><strong>حذف‌ها آینه‌ی درج‌اند.</strong> فرزندی که تنها کمینه شمار کلید را دارد می‌تواند underflow کند و mergeی را وا دارد، پس پدرش latch‌خورده می‌ماند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>خواندن حداکثر دو latch نگه می‌دارد:</strong> فرزند را latch کن، پدر را رها کن، تا برگ (ص. ۱۰۵).</li>
+      <li><strong>درج:</strong> پدر وقتی رها می‌شود که فرزند پر نباشد. اگر فرزند پر است، شکستن ممکن است به پدر برسد و پدر latch‌شده می‌ماند. درج ۱۳ کل مسیر را نگه می‌دارد چون هم A و هم L2 پرند.</li>
+      <li><strong>حذف آینه‌ی درج است:</strong> فرزندی که فقط حداقل کلید را دارد ممکن است underflow کند و merge لازم شود، پس پدرش latch‌شده می‌ماند.</li>
+      <li><strong>رویکرد خوش‌بینانه:</strong> بیشتر درج و حذف‌ها تغییر ساختاری چندسطحی ندارند، پس معمولاً فقط latch نود هدف لازم است (ص. ۱۰۵).</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>درس</small>فصل ۵: پردازش تراکنش و بازیابی</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-transaction-processing-and-recovery.html"><small>درس</small>فصل ۵: پردازش تراکنش و بازیابی</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
   var CAP = 3, MIN = 1;
   var T = { id: "R", keys: [40], kids: [
     { id: "A", keys: [10, 20, 30], kids: [{ id: "L1", keys: [1, 5] }, { id: "L2", keys: [12, 15, 18] }, { id: "L3", keys: [22, 25] }, { id: "L4", keys: [33, 35, 38] }] },
     { id: "B", keys: [60], kids: [{ id: "L5", keys: [41, 50, 55] }, { id: "L6", keys: [62] }] }] };
   var OPS = [
-    { v: "read15", label: "خواندن ۱۵", kind: "read", key: 15 },
-    { v: "ins23", label: "درج ۲۳", kind: "insert", key: 23 },
-    { v: "ins42", label: "درج ۴۲", kind: "insert", key: 42 },
-    { v: "ins13", label: "درج ۱۳", kind: "insert", key: 13 },
-    { v: "del25", label: "حذف ۲۵", kind: "delete", key: 25 },
-    { v: "del62", label: "حذف ۶۲", kind: "delete", key: 62 }];
-  var op = OPS[3], held, path, k, maxHeld, released;
-
+    { v: "read15", label: "خواندن ۱۵", kind: "read", key: 15 }, { v: "ins23", label: "درج ۲۳", kind: "insert", key: 23 },
+    { v: "ins42", label: "درج ۴۲", kind: "insert", key: 42 }, { v: "ins13", label: "درج ۱۳", kind: "insert", key: 13 },
+    { v: "del25", label: "حذف ۲۵", kind: "delete", key: 25 }, { v: "del62", label: "حذف ۶۲", kind: "delete", key: 62 }];
+  var view = { op: "ins13", k: 3, mode: "crab" }, tour, ctl = {}, op, path, held, maxHeld, msg, kind;
   function child(n, key) { var i = 0; while (i < n.keys.length && key >= n.keys[i]) i++; return n.kids[i]; }
   function safe(n) { return op.kind === "read" ? true : op.kind === "insert" ? n.keys.length < CAP : n.keys.length > MIN; }
-  function reset() {
+  function ids(a) { return a.map(function (x) { return x.id; }).join("، "); }
+  function replay() {
+    op = OPS.filter(function (o) { return o.v === view.op; })[0];
     path = [T]; while (path[path.length - 1].kids) path.push(child(path[path.length - 1], op.key));
-    held = []; k = -1; maxHeld = 0; released = 0;
-    log.clear(); log.add(op.label + ": مسیر " + path.map(function (n) { return n.id; }).join(" → "), "muted"); render();
-  }
-  function step() {
-    var mode = op.kind === "read" ? "R" : "W";
-    if (k < path.length - 1) {
-      k++; var n = path[k]; held.push(n); maxHeld = Math.max(maxHeld, held.length);
-      var msg = "latch روی " + n.id + " به‌شکل " + (mode === "R" ? "مشترک" : "انحصاری");
-      if (k > 0 && safe(n)) {
-        var rel = held.slice(0, -1); held = [n]; released += rel.length;
-        msg += "؛ " + n.id + " ایمن است" + (op.kind === "insert" ? " چون پر نیست" : op.kind === "delete" ? " چون بالای کمینه است" : "") + "، پس رها می‌شود: " + rel.map(function (x) { return x.id; }).join("، ");
-        log.add(msg, "ok");
-      } else if (k > 0) log.add(msg + "؛ " + n.id + " " + (op.kind === "insert" ? "پر است" : "روی کمینه است") + "، پس " + held.slice(0, -1).map(function (x) { return x.id; }).join("، ") + " latch‌خورده می‌مانند", "warn");
-      else log.add(msg, "muted");
-      render(); return true;
-    }
-    if (held.length) {
+    if (view.k > path.length + 1) view.k = path.length + 1;
+    held = []; maxHeld = 0; msg = op.label + ": مسیر " + path.map(function (n) { return n.id; }).join(" → ") + ". هنوز latchی گرفته نشده."; kind = "";
+    var m = op.kind === "read" ? "مشترک (read)" : "انحصاری (write)";
+    for (var k = 0; k < view.k && k < path.length; k++) {
+      var n = path[k]; held.push(n); maxHeld = Math.max(maxHeld, held.length);
+      msg = "latch " + m + " روی " + n.id + " گرفته شد"; kind = "";
+      if (k > 0 && view.mode === "all") { msg += "؛ در رویکرد ساده هیچ latchی تا پایان رها نمی‌شود."; kind = "warn"; }
+      else if (k > 0 && safe(n)) { var rel = held.slice(0, -1); held = [n]; msg += "؛ " + n.id + " امن است" + (op.kind === "insert" ? " (پر نیست)" : op.kind === "delete" ? " (بیشتر از حداقل کلید دارد)" : "") + "، پس " + ids(rel) + " رها شد."; kind = "ok"; }
+      else if (k > 0) { msg += "؛ " + n.id + " " + (op.kind === "insert" ? "پر است و ممکن است بشکند" : "فقط حداقل کلید را دارد و ممکن است merge لازم شود") + "، پس " + ids(held.slice(0, -1)) + " نگه داشته می‌شود."; kind = "warn"; }
+      else msg += "."; }
+    if (view.k === path.length + 1) {
       var leaf = path[path.length - 1];
-      if (op.kind === "read") log.add("خواندن " + op.key + " در " + leaf.id + (leaf.keys.indexOf(op.key) >= 0 ? ": پیدا شد" : ": پیدا نشد"), "ok");
-      else if (safe(leaf)) log.add(op.label + " در " + leaf.id + " جا می‌شود: بی تغییر ساختاری", "ok");
-      else log.add(op.label + " " + (op.kind === "insert" ? "نود " + leaf.id + " را می‌شکند" : "نود " + leaf.id + " را underflow می‌کند") + "؛ آن تغییر می‌تواند به " + held.slice(0, -1).map(function (x) { return x.id; }).join("، ") + " پخش شود، که باز هم latch‌خورده‌اند", "bad");
-      log.add("رها کردن " + held.map(function (x) { return x.id; }).join("، "), "muted");
-      released += held.length; held = []; k++; render(); return false;
+      if (op.kind === "read") { msg = "مقدار " + op.key + " در " + leaf.id + (leaf.keys.indexOf(op.key) >= 0 ? " پیدا شد" : " نیست") + " و latch " + leaf.id + " رها شد."; kind = "ok"; }
+      else if (safe(leaf)) { msg = op.label + " در " + leaf.id + " جا می‌شود و تغییر ساختاری لازم نیست. latchهای " + ids(held) + " رها شد."; kind = "ok"; }
+      else { msg = op.label + " " + (op.kind === "insert" ? leaf.id + " را می‌شکند" : leaf.id + " را underflow می‌کند") + " و تغییر ممکن است به " + ids(held.slice(0, -1)) + " برسد؛ چون هنوز latch‌شده‌اند، تغییر امن انجام می‌شود و بعد همه رها می‌شوند."; kind = "bad"; }
     }
-    return false;
   }
   function render() {
-    var mount = Kit.clear(document.getElementById("tree")), levels = [[T], T.kids, T.kids[0].kids.concat(T.kids[1].kids)];
-    var mode = op.kind === "read" ? "r" : "w";
-    levels.forEach(function (lvl) {
-      var row = Kit.el("div", { class: "lvl" });
+    replay();
+    var mount = Kit.clear(document.getElementById("tree")), levels = [[T], T.kids, T.kids[0].kids.concat(T.kids[1].kids)], mcls = op.kind === "read" ? "r" : "w";
+    levels.forEach(function (lvl) { var row = Kit.el("div", { class: "lvl" });
       lvl.forEach(function (n) {
-        var isHeld = held.indexOf(n) >= 0, onPath = path.indexOf(n) >= 0, passed = onPath && path.indexOf(n) <= k && !isHeld;
-        var note = n.keys.length === CAP ? "پر" : n.keys.length === MIN ? "کمینه" : "";
-        row.appendChild(Kit.el("div", { class: "nb" + (onPath ? " path" : "") + (isHeld ? " " + mode : "") + (passed ? " done" : "") },
-          Kit.el("div", { class: "nm" }, Kit.el("span", null, n.id + (note ? " · " + note : "")), isHeld ? Kit.el("span", { class: "tag" }, mode.toUpperCase()) : passed ? Kit.el("span", null, "رها‌شده") : null),
-          n.keys.join(" ")));
-      });
-      mount.appendChild(row);
-    });
-    mount.setAttribute("aria-label", "latchهای نگه‌داشته: " + (held.map(function (n) { return n.id; }).join("، ") || "هیچ"));
-    stats([["latchهای نگه‌داشته", held.length, held.length > 2 ? "warn" : ""], ["بیشترین نگه‌داشته‌ی یک‌جا", maxHeld], ["زود رها‌شده", released]]);
+        var fin = view.k === path.length + 1, pi = path.indexOf(n), isHeld = !fin && held.indexOf(n) >= 0, passed = pi >= 0 && pi < view.k && !isHeld;
+        var note = n.keys.length === CAP ? "full" : n.keys.length === MIN ? "min" : "";
+        row.appendChild(Kit.el("div", { class: "nb" + (pi >= 0 ? " path" : " off") + (isHeld ? " " + mcls : "") + (passed ? " done" : "") },
+          Kit.el("div", { class: "nm" }, Kit.el("span", null, n.id, note ? Kit.el("span", { class: "cap" }, " " + note) : null), isHeld ? Kit.el("span", { class: "tag" }, mcls === "r" ? "R latch" : "W latch") : passed ? Kit.el("span", null, "released") : null),
+          n.keys.join(" "))); });
+      mount.appendChild(row); });
+    mount.setAttribute("aria-label", "B-Tree؛ latchهای در دست: " + (ids(held) || "هیچ"));
+    var H = Kit.clear(document.getElementById("held"));
+    if (view.k === path.length + 1) H.appendChild(Kit.el("span", { class: "chip" }, "همه رها شدند")); else if (!held.length) H.appendChild(Kit.el("span", { class: "chip" }, "هیچ"));
+    else held.forEach(function (n) { H.appendChild(Kit.el("span", { class: "chip" }, n.id)); });
+    var ev = document.getElementById("ev"); ev.className = "lc-ev " + kind; ev.textContent = msg;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["عملیات", op.label], ["رویکرد", view.mode === "crab" ? "crabbing" : "همه‌ی latchها"], ["سطح", Math.min(view.k, path.length) + " / " + path.length], ["latch در دست", view.k === path.length + 1 ? 0 : held.length, held.length > 2 ? "warn" : ""], ["بیشترین هم‌زمان", maxHeld, maxHeld > 2 ? "warn" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.op.set(view.op); ctl.mode.set(view.mode);
   }
-  document.getElementById("op").appendChild(Kit.segmented({ label: "عملیات", value: op.v, options: OPS.map(function (o) { return { value: o.v, label: o.label }; }), onChange: function (v) { op = OPS.filter(function (o) { return o.v === v; })[0]; reset(); } }).element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.op = Kit.segmented({ label: "عملیات", value: view.op, options: OPS.map(function (o) { return { value: o.v, label: o.label }; }), onChange: tw(function (v) { view.op = v; view.k = 0; }) });
+  document.getElementById("opC").appendChild(ctl.op.element);
+  ctl.mode = Kit.segmented({ label: "رویکرد", value: view.mode, options: [{ value: "crab", label: "latch crabbing" }, { value: "all", label: "همه‌ی latchها تا برگ" }], onChange: tw(function (v) { view.mode = v; }) });
+  document.getElementById("modeC").appendChild(ctl.mode.element);
+  document.getElementById("next").addEventListener("click", tw(function () { if (view.k < 4) view.k++; }));
+  document.getElementById("restart").addEventListener("click", tw(function () { view.k = 0; }));
+
+  /* ---------- the scenario ---------- */
+  function at(o, k, m) { return function () { view = { op: o, k: k, mode: m || "crab" }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at("ins13", 2), render: render, interval: 8000,
+    intro: "یک B-Tree سه‌سطحی با گنجایش ۳ کلید. نودهای مسیر عملیات پررنگ‌اند، «full» یعنی نود پر است و «min» یعنی فقط حداقل کلید را دارد. نود latch‌شده رنگی است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، عملیات و رویکرد را عوض کنید و سطح‌به‌سطح پایین بروید.",
+    steps: [
+      { kind: "", run: at("read15", 1), say: "خواندن ۱۵ با latch مشترک روی ریشه شروع می‌شود. خواندن‌های هم‌زمان می‌توانند latch مشترک داشته باشند (ص. ۱۰۴)." },
+      { kind: "ok", run: at("read15", 2), say: "در مسیر خواندن، به‌محض این‌که latch فرزند گرفته شد، latch پدر رها می‌شود (ص. ۱۰۵)." },
+      { kind: "warn", run: at("ins23", 2), say: "درج ۲۳: latch انحصاری روی A. ولی A پر است و شکستنش می‌تواند به ریشه برسد، پس latch ریشه هم نگه داشته می‌شود." },
+      { kind: "ok", run: at("ins23", 3), say: "برگ L3 پر نیست، پس درج تغییر ساختاری به بالا نمی‌فرستد و latch ریشه و A رها می‌شوند؛ مثل شکل ۵-۹ (ص. ۱۰۵)." },
+      { kind: "bad", run: at("ins13", 3), say: "درج ۱۳: A پر است و L2 هم پر، پس با latch برگ هیچ‌کدام از پدرها رها نمی‌شوند و کل مسیر latch‌شده می‌ماند." },
+      { kind: "bad", run: at("ins13", 4), say: "درج ۱۳ برگ L2 را می‌شکند و این تغییر می‌تواند تا A و ریشه برود. چون latch همه‌شان هنوز در دست است، شکستن امن انجام می‌شود و بعد همه رها می‌شوند." },
+      { kind: "ok", run: at("del25", 3), say: "حذف آینه‌ی درج است: A و L3 بیشتر از حداقل کلید دارند، پس هر پدری بلافاصله رها می‌شود (ص. ۱۰۵)." },
+      { kind: "bad", run: at("del62", 3), say: "حذف ۶۲: B و L6 فقط یک کلید دارند و underflow ممکن است merge را تا بالا ببرد، پس هر سه latch نگه داشته می‌شوند." },
+      { kind: "warn", run: at("ins23", 3, "all"), say: "برای مقایسه، ساده‌ترین روش: گرفتن همه‌ی latchها از ریشه تا برگ. درج ۲۳ این‌جا سه latch نگه می‌دارد، در حالی که crabbing یکی نگه داشت؛ ریشه گلوگاه concurrency می‌شود (ص. ۱۰۵)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "در میانه‌ی خواندنی، latch پدر کِی رها می‌شود؟",

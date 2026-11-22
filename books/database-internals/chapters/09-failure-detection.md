@@ -115,7 +115,7 @@ lang: fa
 
 از مؤسسه‌ی پیشرفته‌ی علم و فناوری ژاپن می‌آید و در Cassandra و Akka به کار می‌رود، در کنار detector مهلتی Akka (p. 200).
 
-> **Try it:** [failure detector φ-accrual](../widgets/09-phi-accrual.html)؛ به نودی با jitter تنظیم‌پذیر heartbeat بدهید، نگهش دارید یا بکشیدش، و ببینید φ در برابر آستانه‌ای بالا می‌رود، کنار detectorی مهلت‌ثابت روی همان جریان.
+> **Try it:** [φ-accrual در برابر timeout ثابت](../widgets/09-phi-accrual.html)؛ به نودی با jitter تنظیم‌پذیر heartbeat بدهید، نگهش دارید یا بکشیدش، و ببینید φ در برابر آستانه‌ای بالا می‌رود، کنار detectorی مهلت‌ثابت روی همان جریان.
 
 > **In practice:** jobهای ما فاصله‌ی اجرای متفاوتی دارند: بعضی ساعتی، بعضی شبانه.
 >

@@ -7,23 +7,35 @@
 <meta name="description" content="در slotted pageی رکوردهای variable-size درج و حذف کنید: آرایه‌ی اشاره‌گر cell بر حسب کلید مرتب می‌ماند در حالی که cellها همان‌جا می‌مانند که نوشته شده‌اند؛ فضای آزادشده به فهرست availability می‌رود که با first fit یا best fit پر می‌شود، و یکپارچه‌سازی تکه‌ها را بازپس می‌گیرد. تصویری از فصل ۳ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .pagebar { position: relative; height: 64px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); overflow: hidden; direction: ltr; }
-  .seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .7rem; overflow: hidden; border-right: 1px solid var(--line); }
-  .seg.hdr { background: var(--surface-2); color: var(--ink-3); }
-  .seg.ptr { background: var(--accent-soft); color: var(--ink); top: 0; bottom: 50%; }
-  .seg.cell { background: var(--ok-soft); color: var(--ink); }
-  .seg.hole { background: repeating-linear-gradient(45deg, var(--warn-soft), var(--warn-soft) 4px, transparent 4px, transparent 8px); color: var(--warn); }
-  .seg.new { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .scale { display: flex; justify-content: space-between; font-size: .72rem; color: var(--ink-3); font-family: var(--mono); margin-top: 3px; direction: ltr; }
-  .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; margin-top: 12px; }
-  .slot { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px 6px; font-family: var(--mono); font-size: .74rem; background: var(--surface-2); direction: ltr; text-align: left; }
-  .slot b { color: var(--accent); }
+  .sp-map svg { display: block; width: 100%; height: auto; }
+  .sp-map .hdr { fill: var(--surface-2); stroke: var(--line-strong); }
+  .sp-map .ptr { fill: var(--accent-soft); stroke: var(--accent); }
+  .sp-map .ptr.new, .sp-map .cell.new { stroke-width: 3; }
+  .sp-map .cell { fill: var(--ok-soft); stroke: var(--ok); }
+  .sp-map .cell.new { stroke: var(--accent); }
+  .sp-map .hole { fill: url(#hatch); stroke: var(--warn); stroke-dasharray: 4 3; }
+  .sp-map .free { fill: var(--surface); stroke: var(--line); }
+  .sp-map .arc { fill: none; stroke: var(--ink-3); stroke-width: 1.3; }
+  .sp-map .arc.new { stroke: var(--accent); stroke-width: 2.5; }
+  .sp-map text { font-family: var(--mono); font-size: 13px; fill: var(--ink); }
+  .sp-map text.small { font-size: 11px; fill: var(--ink-3); }
+  .sp-map text.hl { font-size: 11px; fill: var(--warn); font-weight: 700; }
+  .sp-rows { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; margin-top: 8px; font-size: .82rem; }
+  .sp-rows > span { color: var(--ink-3); font-weight: 600; }
+  .sp-chips { display: flex; flex-wrap: wrap; gap: 5px; direction: ltr; justify-content: flex-start; }
+  .sp-chip { font-family: var(--mono); font-size: .76rem; border: 1.5px solid var(--line); border-radius: 4px; padding: 1px 7px; background: var(--surface); }
+  .sp-chip.p { border-color: var(--accent); } .sp-chip.p.new { background: var(--accent-soft); font-weight: 700; }
+  .sp-chip.h { border-color: var(--warn); border-style: dashed; } .sp-chip.h.pick { background: var(--warn-soft); font-weight: 700; }
+  .sp-msg { margin-top: 10px; font-size: .88rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
+  .sp-msg.ok { border-color: var(--ok); } .sp-msg.warn { border-color: var(--warn); } .sp-msg.bad { border-color: var(--bad); }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+  .tweak-group input[type=text] { width: 6em; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/03-file-formats.html">فصل ۳</a><span aria-hidden="true">/</span>
@@ -34,122 +46,170 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۳ · قالب فایل</div>
-  <h1>slotted page: اشاره‌گرهای مرتب و cellهای نامرتب</h1>
-  <p class="lede">slotted page یک <strong>آرایه‌ی اشاره‌گر cell</strong> را از آغاز صفحه و <strong>cell</strong>ها را از پایان رشد می‌دهد. کلیدها با مرتب کردن دوباره‌ی آن اشاره‌گرهای کوچک و fixed-size مرتب می‌مانند، و هیچ‌وقت cellها. cellی حذف‌شده قطعه‌ای آزاد در یک <strong>فهرست availability</strong> می‌شود، و درج‌های بعدی با <strong>first fit</strong> یا <strong>best fit</strong> بازاستفاده‌اش می‌کنند. وقتی هیچ شکاف تنهایی به آن اندازه نباشد ولی بایت‌های آزاد سر هم بیایند، صفحه <strong>یکپارچه</strong> می‌شود.</p>
-  <p class="source-note">تصویری از «slotted page» و «گرداندن داده‌ی variable-size» (صص. ۵۲–۵۸، شکل‌های ۳-۵ تا ۳-۹). صفحه‌ی ۲۵۶ بایتی و header ۸ بایتی و اشاره‌گرهای ۴ بایتی و اندازه‌ی رکوردها مال vault است، با seed. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>slotted page: اشاره‌گرهای مرتب و cellهای نامرتب</h1>
+      <p class="lede">slotted page <strong>آرایه‌ی اشاره‌گر</strong> را از ابتدای صفحه و <strong>cell</strong>ها را از انتهای آن رشد می‌دهد. ترتیب کلیدها فقط با مرتب کردن اشاره‌گرهای کوچک حفظ می‌شود و cellها جابه‌جا نمی‌شوند. cell حذف‌شده در <strong>فهرست availability</strong> ثبت می‌شود و درج بعدی با <strong>first fit</strong> یا <strong>best fit</strong> دوباره از آن استفاده می‌کند. اگر هیچ قطعه‌ی آزادی جا نداشته باشد ولی جمع فضای آزاد کافی باشد، صفحه <strong>defragment</strong> می‌شود.</p>
+      <p class="source-note">تصویری از «Slotted Pages»، «Combining Cells into Slotted Pages» و «Managing Variable-Size Data» (صص. ۵۲–۵۸، شکل‌های ۳-۵ تا ۳-۹). نام‌های Tom، Leslie و Ron مثال خود کتاب‌اند (ص. ۵۶). صفحه‌ی ۲۵۶ بایتی، header ۸ بایتی، اشاره‌گر ۴ بایتی، بقیه‌ی رکوردها و اندازه‌ها انتخاب vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">بایت‌های صفحه؛ از ۰ تا ۲۵۵</p>
-        <div class="pagebar" id="bar" role="img"></div>
-        <div class="scale"><span>0 · header, then pointers →</span><span>← cells · 255</span></div>
-        <p class="panel-title" style="margin-top:14px">اشاره‌گرهای cell به ترتیب کلید</p>
-        <div class="slots" id="slots"></div>
-        <p class="panel-title" style="margin-top:14px">فهرست availability</p>
-        <div id="avail" class="kv"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="fit"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="ins">رکوردی درج کن</button>
-          <button class="btn small danger" type="button" id="del">رکوردی تصادفی را حذف کن</button></div>
-        <div class="row" style="margin-top:8px"><button class="btn small" type="button" id="defrag">یکپارچه کن</button><button class="btn small" type="button" id="reset">↺ از نو</button></div>
-        <p class="field-hint">هر درجی رکورد بعدی را از فهرستی seed‌دار از کلید و اندازه، یعنی ۱۲ تا ۴۴ بایت، به کار می‌برد.</p></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="sp-map mono" id="map" role="img" aria-label="نقشه‌ی بایت‌های صفحه"></div>
+          <div class="sp-rows">
+            <span>آرایه‌ی اشاره‌گر (به ترتیب کلید)</span><div class="sp-chips mono" id="slots"></div>
+            <span>فهرست availability</span><div class="sp-chips mono" id="avail"></div>
+          </div>
+          <div class="sp-msg" id="msg" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این صفحه</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="fitC"></div>
+        <div class="tweak-group" id="sizeC"></div>
+        <div class="tweak-group"><div class="row"><label class="field" style="margin:0">کلید <input id="key" type="text" value="Kim" maxlength="8"></label>
+          <button class="btn small primary" type="button" id="ins">درج cell</button></div></div>
+        <div class="tweak-group"><div class="row"><label class="field" style="margin:0">cell برای حذف <select id="delSel"></select></label>
+          <button class="btn small danger" type="button" id="del">حذف</button><button class="btn small" type="button" id="defrag">defragment</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>اشاره‌گرها جابه‌جا می‌شوند و cellها نه.</strong> پس از هر درجی آرایه‌ی اشاره‌گر بر حسب کلید دوباره مرتب می‌شود، ولی بایت‌های cell سر offsetشان می‌مانند؛ ارجاع‌های بیرونی slot را به کار می‌برند و نه offset را.</li>
-    <li><strong>حذف‌ها حفره می‌گذارند.</strong> آن cell تنها آزاد علامت می‌خورد و به فهرست availability افزوده می‌شود؛ هیچ چیزی نمی‌لغزد.</li>
-    <li><strong>first fit در برابر best fit.</strong> روش first fit نخستین حفره‌ای را برمی‌دارد که به اندازه است و می‌تواند تراشه‌ای زیادی کوچک برای به کار آمدن بگذارد؛ و best fit آن حفره‌ای را برمی‌دارد که کم‌ترین را می‌گذارد.</li>
-    <li><strong>یکپارچه‌سازی جانشین است.</strong> وقتی رکورد بعدی هیچ‌جا جا نشود ولی کل بایت‌های آزاد جایش می‌دادند، cellهای زنده پیوسته دوباره نوشته می‌شوند و حفره‌ها ناپدید.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>اشاره‌گرها جابه‌جا می‌شوند و cellها نه.</strong> هر درج آرایه‌ی اشاره‌گر را بر اساس کلید مرتب نگه می‌دارد تا binary search ممکن باشد، ولی cell سر همان offset می‌ماند (ص. ۵۶).</li>
+      <li><strong>از بیرون فقط ID اسلات دیده می‌شود.</strong> برای همین صفحه می‌تواند cellها را بدون شکستن ارجاع‌های بیرونی دوباره بنویسد (ص. ۵۴).</li>
+      <li><strong>حذف حفره می‌گذارد.</strong> cell فقط حذف‌شده علامت می‌خورد و offset و اندازه‌اش به فهرست availability می‌رود؛ چیزی جابه‌جا نمی‌شود (ص. ۵۷).</li>
+      <li><strong>first fit</strong> ممکن است تکه‌ای بگذارد که به درد هیچ cellی نمی‌خورد؛ <strong>best fit</strong> قطعه‌ای را برمی‌دارد که کمترین باقی‌مانده را دارد (صص. ۵۷–۵۸).</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/03-file-formats.html"><small>درس</small>فصل ۳: قالب فایل</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/03-file-formats.html"><small>درس</small>فصل ۳: قالب فایل</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var SIZE = 256, HDR = 8, PTR = 4, fit = "first", r, cells, holes, upper, nextRec, last;
-  var WORDS = ["apple", "kiwi", "fig", "plum", "lime", "pear", "date", "grape", "melon", "mango", "peach", "lemon", "cherry", "guava", "olive", "quince"];
-  function reset() {
-    r = Kit.rng(3); cells = []; holes = []; upper = SIZE; last = null; nextRec = 0;
-    log.clear(); log.add("صفحه‌ی ۲۵۶ بایتی خالی: header ۸ بایتی، اشاره‌گرها راست رشد می‌کنند و cellها چپ.", "muted"); render();
-  }
-  function record() { var w = WORDS[nextRec % WORDS.length] + (nextRec >= WORDS.length ? nextRec : ""); nextRec++; return { key: w, size: 12 + r.int(33) }; }
+  var SIZE = 256, HDR = 8, PTR = 4, BX = 4;
+  var fit = "first", ops = [], cells, holes, upper, last, pick, msg, kind, tour, ctl = {}, size = 38;
   function lower() { return HDR + cells.length * PTR; }
-  function freeTotal() { return upper - lower() + holes.reduce(function (a, h) { return a + h.size; }, 0); }
+  function holeBytes() { return holes.reduce(function (a, h) { return a + h.size; }, 0); }
+  function freeTotal() { return upper - lower() + holeBytes(); }
   function sortCells() { cells.sort(function (a, b) { return a.key < b.key ? -1 : a.key > b.key ? 1 : 0; }); }
-  function insert() {
-    var rec = record(), need = rec.size;
-    if (upper - lower() < PTR) { log.add("جایی برای اشاره‌گر دیگری نیست: صفحه پر است", "bad"); nextRec--; return; }
+  function note(m, k) { msg = m; kind = k || ""; }
+  function insert(key, need) {
+    pick = null; last = null;
+    if (cells.some(function (c) { return c.key === key; })) { note("کلید " + key + " از قبل در صفحه است.", "warn"); return; }
     var cand = holes.filter(function (h) { return h.size >= need; }), h = null;
-    if (cand.length) h = fit === "first" ? cand[0] : cand.sort(function (a, b) { return (a.size - need) - (b.size - need); })[0];
-    if (h) {
-      rec.off = h.off; holes.splice(holes.indexOf(h), 1);
+    if (cand.length) h = fit === "first" ? cand[0] : cand.slice().sort(function (a, b) { return a.size - b.size; })[0];
+    var rec = { key: key, size: need };
+    if (h && upper - lower() >= PTR) {
+      rec.off = h.off; holes.splice(holes.indexOf(h), 1); pick = { off: h.off, size: h.size };
       if (h.size > need) holes.push({ off: h.off + need, size: h.size - need });
-      log.add("درج " + rec.key + " با " + need + " بایت در قطعه‌ای آزاد سر " + h.off + (h.size > need ? "، که ته‌مانده‌ای " + (h.size - need) + " بایتی می‌گذارد" : ""), "ok");
+      note(key + " (" + need + " بایت) با " + (fit === "first" ? "first fit در اولین قطعه‌ی کافی" : "best fit در کوچک‌ترین قطعه‌ی کافی") + " نشست: قطعه‌ی " + h.size + " بایتی در @" + h.off + (h.size > need ? "، و " + (h.size - need) + " بایت باقی ماند." : "، بدون باقی‌مانده."), h.size - need > 0 && h.size - need < 12 ? "warn" : "ok");
     } else if (upper - lower() - PTR >= need) {
-      upper -= need; rec.off = upper; log.add("درج " + rec.key + " با " + need + " بایت سر offset " + upper + " از فضای آزاد پیوسته", "ok");
+      upper -= need; rec.off = upper; note(key + " (" + need + " بایت) در مرز بالای فضای آزاد، @" + upper + "، اضافه شد و اشاره‌گرش در جای مرتب خود قرار گرفت.", "ok");
     } else if (freeTotal() - PTR >= need) {
-      log.add("رکورد " + rec.key + " با " + need + " بایت در هیچ شکافی جا نمی‌شود، ولی روی‌هم " + freeTotal() + " بایت آزاد است: اول یکپارچه کنید", "warn"); nextRec--; last = null; return;
-    } else { log.add("رکورد " + rec.key + " با " + need + " بایت حتی پس از یکپارچه‌سازی هم جا نمی‌شود: صفحه‌ی سرریز لازم می‌داشت", "bad"); nextRec--; return; }
+      note(key + " (" + need + " بایت) در هیچ قطعه‌ی پیوسته‌ای جا نمی‌شود، ولی جمعاً " + freeTotal() + " بایت آزاد است: صفحه باید defragment شود.", "warn"); return;
+    } else { note(key + " (" + need + " بایت) حتی بعد از defragment هم جا نمی‌شود: overflow page لازم است (ص. ۵۸).", "bad"); return; }
     cells.push(rec); sortCells(); last = rec;
   }
-  function del() {
-    if (!cells.length) return;
-    var c = cells[r.int(cells.length)]; cells.splice(cells.indexOf(c), 1);
-    holes.push({ off: c.off, size: c.size }); last = null;
-    log.add("حذف " + c.key + ": آن " + c.size + " بایتش سر offset " + c.off + " به فهرست availability می‌رود", "warn");
+  function del(key) {
+    var c = cells.filter(function (x) { return x.key === key; })[0]; if (!c) return;
+    cells.splice(cells.indexOf(c), 1); holes.push({ off: c.off, size: c.size }); last = null; pick = null;
+    note(key + " حذف‌شده علامت خورد: " + c.size + " بایتش در @" + c.off + " به فهرست availability رفت و هیچ cellی جابه‌جا نشد.", "warn");
   }
   function defrag() {
-    var before = holes.length; upper = SIZE;
+    var n = holes.length, b = holeBytes(); upper = SIZE;
     cells.slice().sort(function (a, b) { return b.off - a.off; }).forEach(function (c) { upper -= c.size; c.off = upper; });
-    holes = []; last = null;
-    log.add("یکپارچه‌سازی: " + cells.length + " cell زنده پیوسته دوباره نوشته شدند، و " + before + " قطعه‌ی آزاد بازپس گرفته شد", "ok");
+    holes = []; last = null; pick = null;
+    note("defragment: " + cells.length + " cell زنده پشت سر هم دوباره نوشته شدند و " + n + " قطعه‌ی آزاد (" + b + " بایت) به فضای پیوسته برگشت. IDهای اسلات عوض نشدند.", "ok");
   }
+  function replay() { fit = "first"; cells = []; holes = []; upper = SIZE; last = null; pick = null; note("صفحه‌ی خالی ۲۵۶ بایتی: header ۸ بایتی، اشاره‌گرها به راست و cellها به چپ رشد می‌کنند.", "");
+    ops.forEach(function (o) { if (o[0] === "i") insert(o[1], o[2]); else if (o[0] === "d") del(o[1]); else if (o[0] === "f") defrag(); else fit = o[1]; }); }
+  function arcY(d) { return 54 - Math.min(46, 10 + d * 0.06); }
   function render() {
-    var bar = Kit.clear(document.getElementById("bar")), pct = function (b) { return (b / SIZE * 100) + "%"; };
-    bar.appendChild(Kit.el("div", { class: "seg hdr", style: "left:0;width:" + pct(HDR) }, "hdr"));
-    cells.forEach(function (c, i) { bar.appendChild(Kit.el("div", { class: "seg ptr", style: "left:" + pct(HDR + i * PTR) + ";width:" + pct(PTR), title: "slot " + i + " → " + c.off }, "")); });
-    cells.forEach(function (c) { bar.appendChild(Kit.el("div", { class: "seg cell" + (c === last ? " new" : ""), style: "left:" + pct(c.off) + ";width:" + pct(c.size), title: c.key + " · " + c.size + " B @ " + c.off }, c.key)); });
-    holes.forEach(function (h) { bar.appendChild(Kit.el("div", { class: "seg hole", style: "left:" + pct(h.off) + ";width:" + pct(h.size), title: "free " + h.size + " B @ " + h.off }, h.size >= 14 ? "free" : "")); });
-    bar.setAttribute("aria-label", "صفحه‌ای با " + cells.length + " cell و " + holes.length + " قطعه‌ی آزاد");
+    replay();
+    var W = SIZE * BX, s = Kit.svg("svg", { viewBox: "0 0 " + W + " 150" }), Y = 58, HB = 46;
+    var defs = Kit.svg("defs"), pat = Kit.svg("pattern", { id: "hatch", width: 8, height: 8, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+    pat.appendChild(Kit.svg("rect", { width: 4, height: 8, fill: "var(--warn-soft)" })); defs.appendChild(pat); s.appendChild(defs);
+    s.appendChild(Kit.svg("rect", { class: "free", x: 0, y: Y, width: W, height: HB }));
+    s.appendChild(Kit.svg("rect", { class: "hdr", x: 0, y: Y, width: HDR * BX, height: HB }));
+    s.appendChild(Kit.svg("text", { x: HDR * BX / 2, y: Y + 28, "text-anchor": "middle", class: "small" }, "hdr"));
+    cells.forEach(function (c, i) { var x = (HDR + i * PTR) * BX;
+      s.appendChild(Kit.svg("rect", { class: "ptr" + (c === last ? " new" : ""), x: x, y: Y, width: PTR * BX, height: HB }));
+      s.appendChild(Kit.svg("text", { x: x + 8, y: Y + 28, "text-anchor": "middle", class: "small" }, String(i)));
+      var cx = x + 8, tx = (c.off + c.size / 2) * BX, my = arcY(tx - cx);
+      s.appendChild(Kit.svg("path", { class: "arc" + (c === last ? " new" : ""), d: "M" + cx + " " + Y + " C" + cx + " " + my + " " + tx + " " + my + " " + tx + " " + Y })); });
+    holes.forEach(function (h) { s.appendChild(Kit.svg("rect", { class: "hole", x: h.off * BX, y: Y, width: h.size * BX, height: HB }));
+      if (h.size >= 8) s.appendChild(Kit.svg("text", { x: (h.off + h.size / 2) * BX, y: Y + HB + 16, "text-anchor": "middle", class: "hl" }, h.size + "B free")); });
+    cells.forEach(function (c) { s.appendChild(Kit.svg("rect", { class: "cell" + (c === last ? " new" : ""), x: c.off * BX, y: Y, width: c.size * BX, height: HB }));
+      s.appendChild(Kit.svg("text", { x: (c.off + c.size / 2) * BX, y: Y + 28, "text-anchor": "middle" }, c.key));
+      s.appendChild(Kit.svg("text", { x: (c.off + c.size / 2) * BX, y: Y + HB + 16, "text-anchor": "middle", class: "small" }, c.size + "B @" + c.off)); });
+    [[0, "start"], [lower(), "lower"], [upper, "upper"]].forEach(function (m) { var x = Math.max(2, m[0] * BX);
+      s.appendChild(Kit.svg("text", { x: x, y: Y + HB + 36, "text-anchor": m[0] ? "middle" : "start", class: "small" }, m[1] + " " + m[0])); });
+    s.appendChild(Kit.svg("text", { x: W - 2, y: Y + HB + 36, "text-anchor": "end", class: "small" }, "end 256"));
+    var mount = Kit.clear(document.getElementById("map")); mount.appendChild(s);
+    mount.setAttribute("aria-label", "صفحه با " + cells.length + " cell و " + holes.length + " قطعه‌ی آزاد");
     var sl = Kit.clear(document.getElementById("slots"));
-    cells.forEach(function (c, i) { sl.appendChild(Kit.el("div", { class: "slot" }, Kit.el("b", null, "#" + i), " " + c.key, Kit.el("br"), "→ @" + c.off)); });
-    if (!cells.length) sl.appendChild(Kit.el("span", { class: "field-hint" }, "هنوز رکوردی نیست."));
+    cells.forEach(function (c, i) { sl.appendChild(Kit.el("span", { class: "sp-chip p" + (c === last ? " new" : "") }, "#" + i + " " + c.key + " → @" + c.off)); });
+    if (!cells.length) sl.appendChild(Kit.el("span", { class: "sp-chip" }, "—"));
     var av = Kit.clear(document.getElementById("avail"));
-    av.textContent = holes.length ? holes.slice().sort(function (a, b) { return a.off - b.off; }).map(function (h) { return "(@" + h.off + ", " + h.size + " B)"; }).join("  ") : "خالی";
-    var frag = holes.reduce(function (a, h) { return a + h.size; }, 0);
-    stats([["رکوردها", cells.length], ["آزاد پیوسته", (upper - lower()) + " بایت"], ["در قطعه‌های آزاد", frag + " بایت", frag ? "warn" : ""], ["بزرگ‌ترین شکاف", Math.max(upper - lower() - PTR, holes.reduce(function (a, h) { return Math.max(a, h.size); }, 0)) + " بایت"]]);
+    holes.forEach(function (h) { av.appendChild(Kit.el("span", { class: "sp-chip h" }, "@" + h.off + ", " + h.size + "B")); });
+    if (pick) av.appendChild(Kit.el("span", { class: "sp-chip h pick" }, "used @" + pick.off + ", " + pick.size + "B"));
+    if (!holes.length && !pick) av.appendChild(Kit.el("span", { class: "sp-chip" }, "empty"));
+    var m = document.getElementById("msg"); m.className = "sp-msg " + kind; m.textContent = msg;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["راهبرد", fit === "first" ? "first fit" : "best fit"], ["cellها", cells.length], ["فضای آزاد پیوسته", (upper - lower()) + " بایت"], ["در قطعه‌های آزاد", holeBytes() + " بایت", holeBytes() ? "warn" : ""], ["جمع فضای آزاد", freeTotal() + " بایت"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    var sel = Kit.clear(document.getElementById("delSel")); cells.forEach(function (c) { sel.appendChild(Kit.el("option", { value: c.key }, c.key)); });
+    ctl.fit.set(fit);
   }
-  document.getElementById("fit").appendChild(Kit.segmented({ label: "راهبرد قطعه‌ی آزاد", value: fit, options: [{ value: "first", label: "first fit" }, { value: "best", label: "best fit" }], onChange: function (v) { fit = v; log.add("راهبرد: " + (v === "first" ? "first fit" : "best fit"), "muted"); } }).element);
-  document.getElementById("ins").addEventListener("click", function () { insert(); render(); });
-  document.getElementById("del").addEventListener("click", function () { del(); render(); });
-  document.getElementById("defrag").addEventListener("click", function () { defrag(); render(); });
-  document.getElementById("reset").addEventListener("click", reset);
-  reset();
+  function act(o) { ops = ops.concat([o]); render(); tour.free(msg, kind); }
+  ctl.fit = Kit.segmented({ label: "راهبرد قطعه‌ی آزاد", value: fit, options: [{ value: "first", label: "first fit" }, { value: "best", label: "best fit" }], onChange: function (v) { act(["s", v]); } });
+  document.getElementById("fitC").appendChild(ctl.fit.element);
+  ctl.size = Kit.slider({ label: "اندازه‌ی cell تازه", min: 8, max: 120, step: 2, value: size, unit: " بایت", onInput: function (v) { size = v; } });
+  document.getElementById("sizeC").appendChild(ctl.size.element);
+  document.getElementById("ins").addEventListener("click", function () { var k = document.getElementById("key").value.trim(); if (k) act(["i", k, size]); });
+  document.getElementById("del").addEventListener("click", function () { var k = document.getElementById("delSel").value; if (k) act(["d", k]); });
+  document.getElementById("defrag").addEventListener("click", function () { act(["f"]); });
+
+  /* ---------- the scenario ---------- */
+  var BASE = [["i", "Tom", 30], ["i", "Leslie", 40], ["i", "Ron", 24], ["i", "Ana", 36], ["i", "Max", 20], ["i", "Zoe", 44]];
+  var HOLED = BASE.concat([["d", "Leslie"], ["d", "Max"]]);
+  function at(list) { return function () { ops = list; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(HOLED.concat([["s", "best"], ["i", "Kim", 18], ["i", "Lou", 38]])), render: render, interval: 8000,
+    intro: "نوار بالا ۲۵۶ بایت یک صفحه است: header، اشاره‌گرهای آبی که از چپ رشد می‌کنند و cellهای سبز که از راست رشد می‌کنند. هر کمان یک اشاره‌گر را به cell خودش وصل می‌کند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: cell با اندازه‌ی دلخواه درج کنید، حذف کنید، راهبرد را عوض کنید یا defragment بزنید.",
+    steps: [
+      { kind: "", run: at(BASE.slice(0, 2)), say: "مثال کتاب (ص. ۵۶): Tom و بعد Leslie اضافه می‌شوند. cellها به ترتیب درج کنار هم می‌نشینند، ولی اشاره‌گر #0 به Leslie اشاره می‌کند، چون اشاره‌گرها بر اساس کلید مرتب‌اند." },
+      { kind: "ok", run: at(BASE.slice(0, 3)), say: "درج Ron: cell در مرز بالای فضای آزاد می‌نشیند، ولی اشاره‌گرش وسط آرایه جا باز می‌کند تا ترتیب Leslie، Ron، Tom حفظ شود. هیچ cellی جابه‌جا نشد (صص. ۵۶–۵۷، شکل ۳-۸)." },
+      { kind: "warn", run: at(HOLED), say: "سه cell دیگر اضافه شد و بعد Leslie و Max حذف شدند. فقط علامت حذف خوردند: offset و اندازه‌ی هرکدام در فهرست availability ثبت شد و دو حفره ماند (ص. ۵۷، شکل ۳-۹)." },
+      { kind: "warn", run: at(HOLED.concat([["i", "Kim", 18]])), say: "Kim با ۱۸ بایت و first fit: اولین قطعه‌ی کافی در فهرست، حفره‌ی ۴۰ بایتی Leslie است. ۲۲ بایت باقی می‌ماند (ص. ۵۷)." },
+      { kind: "bad", run: at(HOLED.concat([["i", "Kim", 18], ["i", "Lou", 38]])), say: "حالا Lou با ۳۸ بایت در هیچ قطعه‌ی پیوسته‌ای جا نمی‌شود، در حالی که جمع فضای آزاد کافی است. first fit این‌جا صفحه را تکه‌تکه کرد." },
+      { kind: "ok", run: at(HOLED.concat([["i", "Kim", 18], ["i", "Lou", 38], ["f"], ["i", "Lou", 38]])), say: "defragment: cellهای زنده خوانده و پشت سر هم دوباره نوشته می‌شوند و فضای آزاد پیوسته می‌شود؛ بعد Lou جا می‌گیرد. چون از بیرون فقط ID اسلات دیده می‌شود، این جابه‌جایی کسی را خراب نمی‌کند (صص. ۵۴ و ۵۸)." },
+      { kind: "ok", run: at(HOLED.concat([["s", "best"], ["i", "Kim", 18], ["i", "Lou", 38]])), say: "همان درج‌ها با best fit: Kim در حفره‌ی ۲۰ بایتی Max می‌نشیند (۲ بایت باقی‌مانده) و حفره‌ی ۴۰ بایتی برای Lou می‌ماند؛ defragment لازم نشد (ص. ۵۸)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا رکوردها به‌جای offset بایتی با شماره‌ی slot ارجاع می‌شوند؟",

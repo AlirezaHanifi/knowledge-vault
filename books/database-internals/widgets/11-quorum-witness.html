@@ -3,23 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>quorum و replicaهای شاهد</title>
+<title>quorum و witness replica</title>
 <meta name="description" content="مقدار N و W و R را بگذارید، برخی replicaها را شاهد کنید، نودها را بشکنید، و نوشتن و خواندن بدهید تا ببینید کدام موفق می‌شوند، خواندنی تضمین می‌شود تازه‌ترین نوشتن را ببیند یا نه، و شاهدی کِی موقت ارتقا می‌یابد تا داده را داشته باشد. تصویری از فصل ۱۱ کتاب Database Internals.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .nodes { display: flex; flex-wrap: wrap; gap: 8px; }
-  .nd { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; min-width: 88px; background: var(--surface); text-align: center; cursor: pointer; font: inherit; color: inherit; }
-  .nd .nm { font-weight: 600; } .nd .kv { font-size: .76rem; color: var(--ink-2); }
+  .nodes { display: flex; flex-wrap: wrap; gap: 10px; direction: ltr; justify-content: center; }
+  .nd { border: 2px solid var(--line-strong); border-radius: var(--radius); padding: 10px 12px; min-width: 112px; background: var(--surface); text-align: center; font: inherit; color: inherit; cursor: pointer; }
+  .nd .nm { font-family: var(--mono); font-weight: 700; font-size: 1.15rem; }
+  .nd .kv { font-family: var(--mono); font-size: .84rem; color: var(--ink-2); margin-top: 3px; }
+  .nd .kv.tmp { color: var(--warn); font-weight: 700; }
+  .nd .role { font-size: .76rem; color: var(--ink-3); }
   .nd.w { background: var(--surface-2); border-style: dotted; }
   .nd.down { opacity: .45; border-style: dashed; }
-  .nd.inq { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .nd.inq { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .nd.inr { border-color: var(--ok); box-shadow: 0 0 0 4px var(--ok-soft); }
   .checks { display: grid; gap: 6px; margin-top: 12px; }
+  .checks .callout { margin: 0; padding: 5px 12px; font-size: .88rem; }
+  .q-ev { margin-top: 10px; font-size: .92rem; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.8; }
+  .q-ev.ok { border-color: var(--ok); } .q-ev.warn { border-color: var(--warn); } .q-ev.bad { border-color: var(--bad); }
+  .tweak-group .row { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DBI</a><span aria-hidden="true">/</span>
       <a href="../chapters/11-replication-and-consistency.html">فصل ۱۱</a><span aria-hidden="true">/</span>
@@ -30,118 +38,157 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۱ · replication و consistency</div>
-  <h1>quorum و replicaهای شاهد</h1>
-  <p class="lede">با <strong>N</strong> replica، نوشتنی <strong>W</strong> تأیید و خواندنی <strong>R</strong> پاسخ لازم دارد. اگر <strong>R + W &gt; N</strong>، هر مجموعه‌ی خواندنی با هر مجموعه‌ی نوشتنی هم‌پوشان است، پس نودی در مجموعه‌ی خواندن تازه‌ترین نوشتن را دارد. replica <strong>شاهد</strong> معمولاً تنها این واقعیت را ثبت می‌کند که نوشتنی رخ داده. وقتی replica کپی خواب باشد، شاهدی آن رکورد را موقت برمی‌دارد.</p>
-  <p class="source-note">تصویری از «consistency قابل تنظیم» و «quorum» و «replicaهای شاهد» (صص. ۲۳۵–۲۳۷). شرط کتاب برای این‌که شاهدها availability کپی‌های کامل را نگه دارند quorumهای اکثریت با دست‌کم یک replica کپی در هر quorumی است؛ و widget هر دو را می‌سنجد. این‌که درخواستی به کدام نودهای زنده می‌رسد انتخاب vault است، یعنی برای نوشتن اول کپی‌ها و برای خواندن تصادفی با seed. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>quorum و witness replica</h1>
+      <p class="lede">با <strong>N</strong> replica، هر نوشتن به <strong>W</strong> تأیید و هر خواندن به <strong>R</strong> پاسخ نیاز دارد. اگر <strong>R + W &gt; N</strong> باشد، هر مجموعه‌ی خواندن با هر مجموعه‌ی نوشتن دست‌کم یک node مشترک دارد و آن node تازه‌ترین نوشتن را دیده است. <strong>witness replica</strong> در حالت عادی فقط ثبت می‌کند که نوشتنی رخ داده؛ وقتی یک copy replica از دسترس خارج باشد، witness موقتاً خود رکورد را نگه می‌دارد.</p>
+      <p class="source-note">تصویری از «Tunable Consistency»، «Quorums» و «Witness Replicas» (صص. ۲۳۵–۲۳۷). config [1c, 2c, 3w] و سناریوی از کار افتادن 2c همان مثال کتاب است (ص. ۲۳۷). اینکه نوشتن اول به copyها می‌رسد و کدام nodeها در quorum خواندن‌اند انتخاب vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="nodes" id="nodes"></div>
-        <p class="field-hint">روی نودی کلیک کنید تا بشکند یا بازیابی شود. حرف c یعنی replica کپی و w یعنی شاهد، که نقطه‌چین است. خط‌دور آبی: نودهای quorum آخرین درخواست.</p>
-        <div class="checks" id="checks"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="sl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn small primary" type="button" id="wr">نسخه‌ی بعدی را بنویس</button><button class="btn small" type="button" id="rd">خواندن</button><button class="btn small" type="button" id="rep">تعمیر</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="nodes" id="nodes"></div>
+          <div class="q-ev" id="ev" aria-live="polite"></div>
+          <div class="checks" id="checks"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="slC"></div>
+        <div class="tweak-group"><div class="row">
+          <button class="btn small primary" type="button" id="wr">نوشتن نسخه‌ی بعدی</button><button class="btn small" type="button" id="rd">خواندن</button><button class="btn small" type="button" id="rep">repair</button><button class="btn small" type="button" id="clr">از اول</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>شرط R + W &gt; N درباره‌ی هم‌پوشانی است و نه اکثریت.</strong> حالت W = 1 و R = N هم هم‌پوشان است، ولی آن‌وقت برای خواندنی هر replicaیی باید سرپا باشد.</li>
-    <li><strong>شاهدها ذخیره‌سازی را صرفه‌جویی می‌کنند و نه availability را.</strong> با اکثریت و دست‌کم یک کپی در هر quorumی، n کپی به‌علاوه‌ی m شاهد همان‌قدر شکست را تحمل می‌کنند که n + m کپی.</li>
-    <li><strong>کپی‌ای را بشکنید و بنویسید.</strong> شاهدی در quorum نوشتن رکورد را موقت ذخیره می‌کند؛ و <em>تعمیر</em> آن کپی را به‌روز می‌کند و شاهد بازهم می‌اندازدش.</li>
-    <li><strong>شاهد زیادی آن تضمین را می‌شکند.</strong> اگر quorumی بتواند تنها از شاهد ساخته شود، خواندنی می‌تواند بداند نسخه‌ای تازه‌تر هست ولی هیچ نودی را که داده‌اش را دارد پیدا نکند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>R + W &gt; N درباره‌ی هم‌پوشانی است، نه اکثریت.</strong> W = 1 و R = N هم هم‌پوشان است، ولی آن‌وقت هر خواندن به همه‌ی replicaها نیاز دارد (ص. ۲۳۵).</li>
+      <li><strong>witness در فضا صرفه‌جویی می‌کند، نه در availability.</strong> تا وقتی هر quorum دست‌کم یک copy داشته باشد، خواندن همیشه تازه‌ترین داده را پیدا می‌کند (صص. ۲۳۶–۲۳۷).</li>
+      <li><strong>یک copy را از کار بیندازید و بنویسید.</strong> witness داخل quorum رکورد را موقتاً نگه می‌دارد؛ <em>repair</em> آن copy را به‌روز می‌کند و witness نسخه‌ی اضافه را دور می‌اندازد (ص. ۲۳۷).</li>
+      <li><strong>witness زیاد تضمین را می‌شکند.</strong> اگر quorumی فقط از witnessها ساخته شود، خواندن می‌فهمد نسخه‌ی تازه‌تری هست ولی هیچ nodeی داده‌اش را ندارد.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/11-replication-and-consistency.html"><small>درس</small>فصل ۱۱: replication و consistency</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { n: 3, w: 2, r: 2, wit: 1 }, nodes, ver, lastQ, rr;
-  function build() {
-    nodes = []; for (var i = 0; i < cfg.n; i++) nodes.push({ id: i + 1, wit: i >= cfg.n - cfg.wit, up: true, v: 0, data: 0 });
-    ver = 0; lastQ = []; rr = Kit.rng(4); log.clear(); log.add("N = " + cfg.n + " با " + (cfg.n - cfg.wit) + " کپی و " + cfg.wit + " شاهد، W = " + cfg.w + "، R = " + cfg.r, "muted"); render();
-  }
+  var view = { n: 3, w: 2, r: 2, wit: 1, ops: [] }, tour, ctl = {}, nodes, ver, lastQ, qKind, reads, msg, kind;
+  function name(x) { return x.id + (x.wit ? "w" : "c"); }
   function live() { return nodes.filter(function (x) { return x.up; }); }
-  function write() {
-    var L = live(); if (L.length < cfg.w) { log.add("نوشتن v" + (ver + 1) + " باز می‌ماند: تنها " + L.length + " نود سرپاست و W = " + cfg.w, "bad"); lastQ = []; render(); return; }
-    var copies = L.filter(function (x) { return !x.wit; }), wits = L.filter(function (x) { return x.wit; });
-    var q = copies.concat(wits).slice(0, cfg.w);
-    if (!q.some(function (x) { return !x.wit; })) { log.add("نوشتن v" + (ver + 1) + " باز می‌ماند: تنها quorum دست‌یافتنی هیچ replica کپی‌ای ندارد", "bad"); lastQ = []; render(); return; }
-    ver++; var downCopies = nodes.filter(function (x) { return !x.wit && !x.up; }).length;
-    q.forEach(function (x) { x.v = ver; if (!x.wit || downCopies) x.data = ver; });
-    lastQ = q; var up = q.filter(function (x) { return x.wit && x.data === ver; });
-    log.add("نوشتن v" + ver + " را " + q.map(function (x) { return x.id + (x.wit ? "w" : "c"); }).join("، ") + " تأیید کردند" + (up.length ? "؛ کپی‌ای خواب است، پس شاهد " + up.map(function (x) { return x.id; }).join("، ") + " رکورد را موقت ذخیره می‌کند" : ""), "ok");
-    render();
+  function apply(o) {
+    lastQ = []; qKind = "";
+    if (o[0] === "down" || o[0] === "up") { var x = nodes[o[1] - 1]; if (!x) return ["", ""]; x.up = o[0] === "up"; return [name(x) + (x.up ? " برگشت." : " از دسترس خارج شد."), x.up ? "ok" : "warn"]; }
+    if (o[0] === "write") {
+      var L = live(); if (L.length < view.w) return ["نوشتن v" + (ver + 1) + " کامل نمی‌شود: فقط " + L.length + " node در دسترس است و W = " + view.w + ".", "bad"];
+      var q = L.filter(function (x) { return !x.wit; }).concat(L.filter(function (x) { return x.wit; })).slice(0, view.w);
+      if (!q.some(function (x) { return !x.wit; })) return ["نوشتن v" + (ver + 1) + " کامل نمی‌شود: تنها quorum در دسترس هیچ copy replica ندارد.", "bad"];
+      ver++; var downCopies = nodes.filter(function (x) { return !x.wit && !x.up; }).length;
+      q.forEach(function (x) { x.v = ver; if (!x.wit || downCopies) x.data = ver; });
+      lastQ = q; qKind = "w"; var tmp = q.filter(function (x) { return x.wit && x.data === ver; });
+      return ["نوشتن v" + ver + " را " + q.map(name).join(" و ") + " تأیید کردند" + (tmp.length ? "؛ چون یک copy در دسترس نیست، " + tmp.map(name).join(" و ") + " خود رکورد را موقتاً نگه می‌دارد." : (q.some(function (x) { return x.wit; }) ? "؛ witness فقط ثبت می‌کند که نوشتن رخ داده." : ".")), "ok"];
+    }
+    if (o[0] === "read") {
+      var L2 = live(); if (L2.length < view.r) return ["خواندن کامل نمی‌شود: فقط " + L2.length + " node در دسترس است و R = " + view.r + ".", "bad"];
+      var q2 = [];
+      if (o[1]) q2 = o[1].map(function (id) { return nodes[id - 1]; }).filter(function (x) { return x && x.up; }).slice(0, view.r);
+      if (q2.length < view.r) { var pool = L2.filter(function (x) { return q2.indexOf(x) < 0; }), rr = Kit.rng(4 + reads); while (q2.length < view.r) q2.push(pool.splice(rr.int(pool.length), 1)[0]); }
+      reads++; lastQ = q2; qKind = "r";
+      var known = Math.max.apply(null, q2.map(function (x) { return x.v; })), have = Math.max.apply(null, q2.map(function (x) { return x.data; })), src = q2.filter(function (x) { return x.data === have && have; });
+      var head = "خواندن از " + q2.map(name).join(" و ") + ": ";
+      if (!ver) return [head + "هنوز چیزی نوشته نشده.", ""];
+      if (have === ver) return [head + "v" + have + " را از " + src.map(name).join(" و ") + " برمی‌گرداند؛ تازه‌ترین نسخه.", "ok"];
+      if (known === ver) return [head + "یک witness می‌داند v" + ver + " نوشته شده، ولی هیچ nodeی در این quorum داده‌اش را ندارد.", "bad"];
+      return [head + (have ? "v" + have : "هیچ داده‌ای") + " برمی‌گرداند که کهنه است؛ تازه‌ترین v" + ver + " است.", "bad"];
+    }
+    if (o[0] === "repair") {
+      if (!nodes.some(function (x) { return x.data === ver && ver; })) return ["چیزی برای repair نیست.", ""];
+      nodes.forEach(function (x) { if (x.up && !x.wit) { x.data = ver; x.v = ver; } });
+      var ok = nodes.filter(function (x) { return !x.wit; }).every(function (x) { return x.data === ver; });
+      if (ok) nodes.forEach(function (x) { if (x.wit) x.data = 0; });
+      return ["repair: copyهای در دسترس به v" + ver + " رسیدند" + (ok ? " و witnessها نسخه‌ی موقت را دور انداختند." : "؛ یک copy هنوز در دسترس نیست، پس witnessها رکورد را نگه می‌دارند."), "ok"];
+    }
   }
-  function read() {
-    var L = live(); if (L.length < cfg.r) { log.add("خواندن باز می‌ماند: تنها " + L.length + " نود سرپاست و R = " + cfg.r, "bad"); lastQ = []; render(); return; }
-    var pool = L.slice(), q = []; while (q.length < cfg.r) q.push(pool.splice(rr.int(pool.length), 1)[0]);
-    lastQ = q;
-    var known = Math.max.apply(null, q.map(function (x) { return x.v; })), have = Math.max.apply(null, q.map(function (x) { return x.data; }));
-    var msg = "خواندن از " + q.map(function (x) { return x.id + (x.wit ? "w" : "c"); }).join("، ") + ": ";
-    if (have === ver) log.add(msg + "نسخه‌ی v" + have + " را برمی‌گرداند، که تازه‌ترین است", "ok");
-    else if (known === ver) log.add(msg + "شاهدی می‌داند که v" + ver + " وجود دارد، ولی هیچ نودی در این quorum داده‌اش را ندارد", "warn");
-    else log.add(msg + "نسخه‌ی v" + have + " را برمی‌گرداند، که کهنه است؛ تازه‌ترین v" + ver + " است", "bad");
-    render();
-  }
-  function repair() {
-    var src = nodes.filter(function (x) { return x.data === ver; }).length;
-    if (!src) { log.add("چیزی برای تعمیر از آن نیست", "muted"); return; }
-    nodes.forEach(function (x) { if (x.up && !x.wit) { x.data = ver; x.v = ver; } });
-    var copiesOk = nodes.filter(function (x) { return !x.wit; }).every(function (x) { return x.data === ver; });
-    if (copiesOk) nodes.forEach(function (x) { if (x.wit) x.data = 0; });
-    log.add("تعمیر: کپی‌های زنده به v" + ver + " رسیدند" + (copiesOk ? "؛ شاهدها داده‌ی موقتشان را می‌اندازند" : "؛ کپی‌ای باز هم خواب است، پس شاهدها رکورد را نگه می‌دارند"), "ok"); lastQ = []; render();
+  function replay() {
+    view.w = Math.min(view.w, view.n); view.r = Math.min(view.r, view.n); view.wit = Math.min(view.wit, view.n - 1);
+    nodes = []; for (var i = 0; i < view.n; i++) nodes.push({ id: i + 1, wit: i >= view.n - view.wit, up: true, v: 0, data: 0 });
+    ver = 0; reads = 0; lastQ = []; qKind = ""; var out = ["N = " + view.n + " با " + (view.n - view.wit) + " copy و " + view.wit + " witness؛ W = " + view.w + " و R = " + view.r + ".", ""];
+    view.ops.forEach(function (o) { out = apply(o); });
+    msg = out[0]; kind = out[1];
   }
   function render() {
+    replay();
     var m = Kit.clear(document.getElementById("nodes"));
     nodes.forEach(function (x) {
-      m.appendChild(Kit.el("button", { type: "button", class: "nd" + (x.wit ? " w" : "") + (x.up ? "" : " down") + (lastQ.indexOf(x) >= 0 ? " inq" : ""), "aria-pressed": String(!x.up), onclick: function () { x.up = !x.up; log.add("نود " + x.id + (x.up ? " بازیابی شد" : " شکست"), x.up ? "ok" : "warn"); render(); } },
-        Kit.el("div", { class: "nm" }, x.id + (x.wit ? "w" : "c") + (x.up ? "" : " · خواب")),
-        Kit.el("div", { class: "kv" }, x.wit ? "می‌داند v" + x.v + (x.data ? "، دارد v" + x.data : "") : "دارد v" + x.data)));
+      var kv = x.wit ? [Kit.el("div", { class: "kv" }, "knows v" + x.v)].concat(x.data ? [Kit.el("div", { class: "kv tmp" }, "holds v" + x.data + " (temp)")] : []) : [Kit.el("div", { class: "kv" }, "data v" + x.data)];
+      var b = Kit.el("button", { type: "button", class: "nd" + (x.wit ? " w" : "") + (x.up ? "" : " down") + (lastQ.indexOf(x) >= 0 ? (qKind === "w" ? " inq" : " inr") : ""), "aria-pressed": String(!x.up), title: "کلیک: از کار انداختن یا برگرداندن" },
+        [Kit.el("div", { class: "nm" }, name(x)), Kit.el("div", { class: "role" }, (x.wit ? "witness" : "copy") + (x.up ? "" : " · down"))].concat(kv));
+      b.addEventListener("click", tw(function () { view.ops = view.ops.concat([[x.up ? "down" : "up", x.id]]); }));
+      m.appendChild(b);
     });
-    var c = Kit.clear(document.getElementById("checks")), maj = Math.floor(cfg.n / 2) + 1;
+    var ev = document.getElementById("ev"); ev.className = "q-ev " + kind; ev.textContent = msg;
+    var c = Kit.clear(document.getElementById("checks")), maj = Math.floor(view.n / 2) + 1;
     function check(ok, text) { c.appendChild(Kit.el("div", { class: "callout " + (ok ? "ok" : "warn") }, (ok ? "✓ " : "✗ ") + text)); }
-    check(cfg.r + cfg.w > cfg.n, "R + W = " + (cfg.r + cfg.w) + (cfg.r + cfg.w > cfg.n ? " > " : " ≤ ") + "N = " + cfg.n + ": خواندن‌ها " + (cfg.r + cfg.w > cfg.n ? "همیشه" : "همیشه نه") + " با تازه‌ترین نوشتن هم‌پوشان‌اند");
-    check(cfg.w > cfg.wit && cfg.r > cfg.wit, "هر quorumی replica کپی‌ای دارد، چون W و R از " + cfg.wit + " شاهد بزرگ‌ترند");
-    check(cfg.w >= maj && cfg.r >= maj, "quorumهای اکثریت، یعنی ⌊N/2⌋ + 1 = " + maj);
-    var L = live().length;
-    stats([["نودهای سرپا", L + " / " + cfg.n, L < cfg.n ? "warn" : ""], ["نوشتن ممکن است", L >= cfg.w ? "بله" : "نه", L >= cfg.w ? "ok" : "bad"], ["خواندن ممکن است", L >= cfg.r ? "بله" : "نه", L >= cfg.r ? "ok" : "bad"], ["تازه‌ترین نسخه", "v" + ver]]);
+    check(view.r + view.w > view.n, "R + W = " + (view.r + view.w) + (view.r + view.w > view.n ? " > " : " ≤ ") + "N = " + view.n + (view.r + view.w > view.n ? ": هر خواندن با آخرین نوشتن هم‌پوشانی دارد." : ": خواندن ممکن است نوشتن آخر را نبیند."));
+    check(view.w > view.wit && view.r > view.wit, "هر quorum دست‌کم یک copy دارد، چون W و R از تعداد witnessها (" + view.wit + ") بیشترند.");
+    check(view.w >= maj && view.r >= maj, "quorum اکثریت: ⌊N/2⌋ + 1 = " + maj);
+    var L = live().length, St = Kit.clear(document.getElementById("stats"));
+    [["nodeهای در دسترس", L + " / " + view.n, L < view.n ? "warn" : ""], ["نوشتن ممکن است؟", L >= view.w ? "بله" : "نه", L >= view.w ? "ok" : "bad"], ["خواندن ممکن است؟", L >= view.r ? "بله" : "نه", L >= view.r ? "ok" : "bad"], ["تازه‌ترین نسخه", "v" + ver]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.n.set(view.n); ctl.w.set(view.w); ctl.r.set(view.r); ctl.wit.set(view.wit);
+    ctl.w.element.querySelector("input").max = view.n; ctl.r.element.querySelector("input").max = view.n; ctl.wit.element.querySelector("input").max = view.n - 1;
   }
-  var sl = document.getElementById("sl"), sN, sW, sR, sWit;
-  function clamp() { cfg.w = Math.min(cfg.w, cfg.n); cfg.r = Math.min(cfg.r, cfg.n); cfg.wit = Math.min(cfg.wit, cfg.n - 1); sW.input.max = sR.input.max = cfg.n; sWit.input.max = cfg.n - 1; sW.set(cfg.w); sR.set(cfg.r); sWit.set(cfg.wit); }
-  sN = Kit.slider({ label: "تعداد N مربوط به replica", min: 3, max: 7, step: 1, value: cfg.n, onInput: function (v) { cfg.n = v; clamp(); build(); } });
-  sW = Kit.slider({ label: "W", min: 1, max: cfg.n, step: 1, value: cfg.w, onInput: function (v) { cfg.w = v; build(); } });
-  sR = Kit.slider({ label: "R", min: 1, max: cfg.n, step: 1, value: cfg.r, onInput: function (v) { cfg.r = v; build(); } });
-  sWit = Kit.slider({ label: "شاهدها", min: 0, max: cfg.n - 1, step: 1, value: cfg.wit, onInput: function (v) { cfg.wit = v; build(); } });
-  [sN, sW, sR, sWit].forEach(function (s) { sl.appendChild(s.element); });
-  document.getElementById("wr").addEventListener("click", write);
-  document.getElementById("rd").addEventListener("click", read);
-  document.getElementById("rep").addEventListener("click", repair);
-  build();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  function cfgSet(k) { return tw(function (v) { view[k] = v; view.ops = []; }); }
+  ctl.n = Kit.slider({ label: "N (تعداد replica)", min: 3, max: 7, step: 1, value: view.n, onInput: cfgSet("n") });
+  ctl.w = Kit.slider({ label: "W", min: 1, max: 7, step: 1, value: view.w, onInput: cfgSet("w") });
+  ctl.r = Kit.slider({ label: "R", min: 1, max: 7, step: 1, value: view.r, onInput: cfgSet("r") });
+  ctl.wit = Kit.slider({ label: "تعداد witness", min: 0, max: 6, step: 1, value: view.wit, onInput: cfgSet("wit") });
+  [ctl.n, ctl.w, ctl.r, ctl.wit].forEach(function (s) { document.getElementById("slC").appendChild(s.element); });
+  document.getElementById("wr").addEventListener("click", tw(function () { view.ops = view.ops.concat([["write"]]); }));
+  document.getElementById("rd").addEventListener("click", tw(function () { view.ops = view.ops.concat([["read"]]); }));
+  document.getElementById("rep").addEventListener("click", tw(function () { view.ops = view.ops.concat([["repair"]]); }));
+  document.getElementById("clr").addEventListener("click", tw(function () { view.ops = []; }));
+
+  /* ---------- the scenario ---------- */
+  var A = [["write"]], A2 = A.concat([["read", [2, 3]]]), A3 = A.concat([["down", 2], ["write"]]), A4 = A3.concat([["up", 2], ["read", [2, 3]]]), A5 = A4.concat([["repair"]]);
+  function at(ops, n, w, r, wit) { return function () { view = { n: n || 3, w: w || 2, r: r || 2, wit: wit === undefined ? 1 : wit, ops: ops }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(A5), render: render, interval: 8000,
+    intro: "هر کارت یک replica است: c یعنی copy که داده را نگه می‌دارد و w یعنی witness. حاشیه‌ی آبی quorum آخرین نوشتن است و حاشیه‌ی سبز quorum آخرین خواندن.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید: N، W، R و تعداد witness را عوض کنید، روی nodeها کلیک کنید تا از کار بیفتند و بنویسید و بخوانید.",
+    steps: [
+      { kind: "ok", run: at(A), say: "مثال کتاب [1c, 2c, 3w] با N = 3، W = 2 و R = 2. نوشتن v1 را دو copy تأیید می‌کنند؛ witness در حالت عادی فقط واقعیت نوشتن را ثبت می‌کند و داده نگه نمی‌دارد (صص. ۲۳۵–۲۳۷)." },
+      { kind: "ok", run: at(A2), say: "خواندن از 2c و 3w: چون R + W > N، این دو node دست‌کم یک node مشترک با quorum نوشتن دارند (2c) و v1 پیدا می‌شود (ص. ۲۳۵)." },
+      { kind: "warn", run: at(A3), say: "2c از دسترس خارج شد و v2 نوشته می‌شود. quorum نوشتن 1c و 3w است، و چون یک copy غایب است، 3w خود رکورد را موقتاً نگه می‌دارد (ص. ۲۳۷)." },
+      { kind: "ok", run: at(A4), say: "2c برگشت ولی هنوز v1 دارد. خواندن از 2c و 3w باز هم v2 را پیدا می‌کند، چون witness نسخه‌ی موقت را دارد (ص. ۲۳۷)." },
+      { kind: "ok", run: at(A5), say: "repair نسخه‌ی 2c را به v2 می‌رساند و 3w نسخه‌ی اضافه را دور می‌اندازد؛ دوباره فقط copyها داده نگه می‌دارند (ص. ۲۳۷)." },
+      { kind: "bad", run: at([["write"], ["read", [2, 3]]], 3, 2, 2, 2), say: "با دو witness، [1c, 2w, 3w]: نوشتن v1 به 1c و 2w رسید، ولی quorum خواندن [2w, 3w] هیچ copy ندارد. می‌داند v1 هست ولی داده‌اش را پیدا نمی‌کند. هر quorum باید دست‌کم یک copy داشته باشد." },
+      { kind: "bad", run: at([["write"], ["read", [2]]], 3, 1, 1, 0), say: "بدون witness ولی با W = 1 و R = 1: نوشتن فقط به 1c رسید و خواندن از 2c نسخه‌ی کهنه می‌دهد. R + W ≤ N هم‌پوشانی را تضمین نمی‌کند." },
+      { kind: "warn", run: at([["write"], ["down", 3], ["read"]], 3, 1, 3, 0), say: "W = 1 و R = N هم‌پوشان است و نوشتن سریع می‌شود، ولی خواندن به هر سه replica نیاز دارد؛ با از کار افتادن یک گره، خواندن ممکن نیست (ص. ۲۳۵)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "با N = 3 و W = 2 و R = 2، خواندن و نوشتن چند شکست را تحمل می‌کنند؟",
