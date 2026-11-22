@@ -7,17 +7,24 @@
 <meta name="description" content="عملیات increment-by(n) را به یک leader با دو follower بدهید، بین تأیید هم‌زمان و asynchronous و quorum و بین پیام‌های state-based و log‌محور جابه‌جا شوید، بعد پیوندی را قطع کنید تا latency ذاتی replication تحمیلی شود. تصویری از فصل ۸ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
+  .rm { display: grid; grid-template-columns: 1fr 1.25fr; gap: 16px; align-items: start; }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 6px; }
   .reps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .rep { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); text-align: center; }
-  .rep .v { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; } .rep.stale { border-color: var(--warn); background: var(--warn-soft); }
-  .inflight { font-family: var(--mono); font-size: .8rem; margin-top: 8px; min-height: 2.4em; }
-  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .rep { border: 2px solid var(--ok); border-radius: var(--radius-sm); padding: 6px; background: var(--surface-2); text-align: center; font-size: .82rem; }
+  .rep .v { font-family: var(--mono); font-size: 1.6rem; font-weight: 700; } .rep.stale { border-color: var(--warn); background: var(--warn-soft); } .rep.cut { border-style: dashed; }
+  .inflight { font-size: .8rem; margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .inflight span { border: 1px solid var(--line-strong); border-radius: 4px; padding: 1px 6px; font-family: var(--mono); direction: ltr; } .inflight span.held { border-color: var(--bad); color: var(--bad); border-style: dashed; }
+  .cl { margin-top: 8px; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 10px; font-size: .85rem; } .cl.ok { border-color: var(--ok); background: var(--ok-soft); } .cl.warn { border-color: var(--warn); background: var(--warn-soft); } .cl.bad { border-color: var(--bad); background: var(--bad-soft); }
+  table.tk { border-collapse: collapse; width: 100%; font-size: .8rem; direction: ltr; } table.tk td, table.tk th { border: 1px solid var(--line); text-align: center; padding: 3px 0; font-family: var(--mono); }
+  table.tk th { color: var(--ink-2); font-weight: 400; } table.tk th.rh { font-family: inherit; text-align: right; padding: 0 6px; direction: rtl; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  table.tk td.lag { background: var(--warn-soft); } table.tk td.now { box-shadow: inset 0 0 0 2px var(--accent); } table.tk td.fut { color: transparent; } table.tk td.ev { font-weight: 700; color: var(--accent); }
+  .key { font-size: .78rem; color: var(--ink-2); margin: 6px 0 0; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/08-replication.html">فصل ۸</a><span aria-hidden="true">/</span>
@@ -28,102 +35,129 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۸ · replication</div>
-  <h1>تکرار کردن یک شمارنده</h1>
-  <p class="lede">کلاینتی عملیات <strong>increment-by(n)</strong> را به leader می‌فرستد، که تغییر را روی پیوندهای نقطه‌به‌نقطه به دو follower تکرار می‌کند. replication <strong>هم‌زمان</strong> پس از تأیید هر followerی به کلاینت پاسخ می‌دهد، <strong>asynchronous</strong> فوری، و <strong>quorum</strong> پس از اکثریتی. تغییر یا به‌شکل <strong>حالت</strong> تازه سفر می‌کند یا به‌شکل <strong>عملیات</strong>.</p>
-  <p class="source-note">تصویری از «latency replication» و «replication هم‌زمان در برابر asynchronous» و «replication state-based در برابر log‌محور» و آن لحظه‌ی آها! درباره‌ی خواندن از follower (صص. ۱۱۱–۱۱۵، شکل‌های ۸.۵ تا ۸.۸). latency پیام، یعنی ۲ تیک برای هر پرش، و مدل تیک و دکمه‌های خواندن مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>تکرار کردن یک شمارنده</h1>
+      <p class="lede">کلاینتی عملیات <strong>increment-by(n)</strong> را به leader می‌فرستد، که تغییر را روی پیوندهای نقطه‌به‌نقطه به دو follower تکرار می‌کند. replication <strong>هم‌زمان</strong> پس از تأیید هر followerی به کلاینت پاسخ می‌دهد، <strong>asynchronous</strong> فوری، و <strong>quorum</strong> پس از اکثریتی. تغییر یا به‌شکل <strong>حالت</strong> تازه سفر می‌کند یا به‌شکل <strong>عملیات</strong>.</p>
+      <p class="source-note">تصویری از «latency replication» و «replication هم‌زمان در برابر asynchronous» و «replication state-based در برابر log‌محور» و آن لحظه‌ی آها! درباره‌ی خواندن از follower (صص. ۱۱۱–۱۱۵، شکل‌های ۸.۵ تا ۸.۸). latency پیام، یعنی ۲ تیک برای هر پرش، و مدل تیک و دکمه‌های خواندن مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="reps" id="reps"></div><div class="inflight" id="inflight" aria-live="polite"></div>
-        <div class="callout" id="client" style="margin-top:8px"></div>
-        <div class="btns"><button class="btn small primary" id="inc2">کلاینت: increment-by(2)</button><button class="btn small primary" id="inc3">کلاینت: increment-by(3)</button><button class="btn small" id="rdL">خواندن از leader</button><button class="btn small" id="rdF">خواندن از follower ۲</button></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ack"></div><div id="fmt" style="margin-top:10px"></div><div id="cut" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="rm">
+          <div><div class="reps" id="reps"></div><div class="inflight" id="inflight" aria-live="polite"></div><div class="cl" id="client"></div></div>
+          <div><p class="ptitle">مقدار شمارنده در هر replica، تیک به تیک</p><table class="tk" id="tk"></table>
+            <p class="key">خانه‌ی زرد یعنی آن replica از leader عقب است. ردیف «کلاینت» نشان می‌دهد عملیات کِی فرستاده شد (⇢) و کِی تأیید گرفت (✓).</p></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ack"></div>
+        <div class="tweak-group" id="fmt"></div>
+        <div class="tweak-group" id="cut"></div>
+        <div class="tweak-group" id="dup"></div>
+        <div class="tweak-group" id="tsl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>latency ذاتی:</strong> حتی با پیوندهای سالم، هر followerی هر تغییری را چند تیک پس از leader اعمال می‌کند، چون به‌روزرسانی‌ها نمی‌توانند در همان قدم به هر replicaیی برسند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>latency ذاتی:</strong> حتی با پیوندهای سالم، هر followerی هر تغییری را چند تیک پس از leader اعمال می‌کند، چون به‌روزرسانی‌ها نمی‌توانند در همان قدم به هر replicaیی برسند.</li>
     <li><strong>latency تحمیلی:</strong> پیوندی را قطع کنید و آن follower بیشتر عقب می‌افتد. کلاینت هم‌زمان حالا بی‌پایان منتظر می‌ماند؛ و کلاینت quorum باز هم پاسخش را از leader به‌علاوه‌ی آن یکی follower می‌گیرد.</li>
     <li><strong>حالت در برابر log:</strong> روی سیم یا counter = 5 می‌رود یا increment-by(3). اعمال دو بار یک پیام حالت بی‌آزار است؛ و اعمال دو بار یک عملیات نه، که از همین‌جاست که replication لاگ‌محور هر عملیات را دقیقاً یک بار و به ترتیب لازم دارد.</li>
     <li><strong>خواندن از یک follower</strong> می‌تواند مقداری قدیمی‌تر از آن چیزی برگرداند که کلاینت از قبل تأییدش را گرفته بود، که همان هشدار کتاب درباره‌ی «follower برای خواندن» است.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/08-replication.html"><small>درس</small>فصل ۸: replication</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/08-replication.html"><small>درس</small>فصل ۸: replication</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { ack: "quorum", fmt: "log", cut: "none" }, t, R, msgs, pend, opId, acked;
-  var ACK = { sync: "هم‌زمان", quorum: "quorum", async: "asynchronous" };
-  function reset() { t = 0; R = [0, 0, 0]; msgs = []; pend = []; opId = 0; acked = 0; log.clear(); log.add("leader و دو follower روی ۰. هر پرشی ۲ تیک می‌برد.", "muted"); render(); }
-  function cutLink(f) { return cfg.cut === "f" + f; }
-  function need() { return cfg.ack === "sync" ? 2 : cfg.ack === "quorum" ? 1 : 0; }
-  function inc(n) {
-    opId++; R[0] += n; var op = { id: opId, n: n, state: R[0], acks: 0, done: false, t: t };
-    log.add("t=" + t + ": مؤلفه‌ی leader عملیات increment-by(" + n + ") را اعمال می‌کند → " + R[0], "muted");
-    [1, 2].forEach(function (f) { msgs.push({ to: f, at: t + 2, op: op, kind: "rep", blocked: cutLink(f) }); });
-    pend.push(op); if (need() === 0) { op.done = true; acked = R[0]; log.add("asynchronous: کلاینت فوری تأیید می‌گیرد", "ok"); }
-    render();
-  }
-  function step() {
-    t++;
-    msgs.slice().forEach(function (m) {
-      if (m.blocked && cutLink(m.to)) { m.at = t + 1; return; }
-      if (m.at > t) return;
-      msgs.splice(msgs.indexOf(m), 1);
-      if (m.kind === "rep") {
-        if (cfg.fmt === "state") R[m.to] = Math.max(R[m.to], m.op.state); else R[m.to] += m.op.n;
-        log.add("t=" + t + ": مؤلفه‌ی follower " + m.to + " پیام " + (cfg.fmt === "state" ? "counter = " + m.op.state : "increment-by(" + m.op.n + ")") + " را می‌گیرد → " + R[m.to], "muted");
-        msgs.push({ to: 0, from: m.to, at: t + 2, op: m.op, kind: "ack", blocked: false });
-      } else {
-        m.op.acks++;
-        if (!m.op.done && m.op.acks >= need()) { m.op.done = true; acked = Math.max(acked, m.op.state); log.add("t=" + t + ": " + (cfg.ack === "sync" ? "همه‌ی followerها" : "یک quorum") + " عملیات " + m.op.id + " را تأیید کردند؛ کلاینت تأیید می‌گیرد", "ok"); }
-      }
-    });
-    render(); return true;
-  }
+  var ACK = { sync: "هم‌زمان", quorum: "quorum", async: "asynchronous" }, TMAX = 12, HOP = 2;
+  var DEF = { ack: "async", fmt: "log", cut: "none", dup: "no", T: TMAX }, OPS = [[0, 2], [1, 3]], view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function need(a) { return a === "sync" ? 2 : a === "quorum" ? 1 : 0; }
+  function sim(v) { var R = [0, 0, 0], msgs = [], ops = [], hist = [], ev = {};
+    function cut(f) { return v.cut === "f" + f; }
+    function note(t, s) { ev[t] = (ev[t] ? ev[t] + " " : "") + s; }
+    for (var t = 0; t <= v.T; t++) {
+      msgs.slice().forEach(function (m) { if (m.at > t) return; if (m.kind === "rep" && cut(m.to)) { m.held = true; return; }
+        msgs.splice(msgs.indexOf(m), 1);
+        if (m.kind === "rep") { R[m.to] = v.fmt === "state" ? Math.max(R[m.to], m.op.state) : R[m.to] + m.op.n; if (!m.dup) msgs.push({ kind: "ack", from: m.to, at: t + HOP, op: m.op }); }
+        else { m.op.acks++; if (!m.op.done && m.op.acks >= need(v.ack)) { m.op.done = t; note(t, "✓" + m.op.id); } } });
+      OPS.forEach(function (o, i) { if (o[0] !== t) return; R[0] += o[1]; var op = { id: i + 1, n: o[1], state: R[0], acks: 0, done: false };
+        ops.push(op); note(t, "⇢" + op.id);
+        [1, 2].forEach(function (f) { msgs.push({ kind: "rep", to: f, at: t + HOP, op: op }); if (v.dup === "yes" && f === 1 && i === 1) msgs.push({ kind: "rep", to: 1, at: t + HOP + 1, op: op, dup: true }); });
+        if (need(v.ack) === 0) { op.done = t; note(t, "✓" + op.id); } });
+      hist.push(R.slice()); }
+    var acked = 0; ops.forEach(function (o) { if (o.done !== false) acked = Math.max(acked, o.state); });
+    return { R: R, hist: hist, msgs: msgs, ops: ops, acked: acked, ev: ev }; }
   function render() {
+    var s = sim(view), R = s.R, cut = function (f) { return view.cut === "f" + f; };
     var b = Kit.clear(document.getElementById("reps"));
-    ["leader", "follower ۱", "follower ۲"].forEach(function (n, i) { b.appendChild(Kit.el("div", { class: "rep" + (R[i] < R[0] ? " stale" : "") }, Kit.el("div", null, n + (i && cutLink(i) ? "؛ پیوند قطع" : "")), Kit.el("div", { class: "v" }, String(R[i])), Kit.el("div", null, i && R[i] < R[0] ? (R[0] - R[i]) + " عقب‌تر" : "به‌روز"))); });
-    document.getElementById("inflight").textContent = msgs.length ? "در پرواز: " + msgs.map(function (m) { return m.kind === "rep" ? "→F" + m.to + " " + (cfg.fmt === "state" ? "counter=" + m.op.state : "inc(" + m.op.n + ")") + (m.blocked && cutLink(m.to) ? " (نگه‌داشته: پیوند قطع)" : "") : "ack F" + m.from + "→L"; }).join(" · ") : "چیزی در پرواز نیست.";
-    var waiting = pend.filter(function (o) { return !o.done; }), c = document.getElementById("client");
-    c.className = "callout " + (waiting.length ? "warn" : "ok");
-    c.textContent = waiting.length ? "کلاینت منتظر عملیات " + waiting.map(function (o) { return o.id; }).join("، ") + " است؛ تأیید " + ACK[cfg.ack] : "کلاینت برای هر عملیاتی پاسخی دارد. آخرین مقدار تأیید‌شده: " + acked + ".";
-    stats([["تیک", t], ["بیشینه‌ی عقب‌ماندگی", Math.max(R[0] - R[1], R[0] - R[2]), R[0] - Math.min(R[1], R[2]) ? "warn" : "ok"], ["عملیات منتظر", waiting.length, waiting.length ? "warn" : "ok"]]);
+    ["leader", "follower ۱", "follower ۲"].forEach(function (n, i) { b.appendChild(Kit.el("div", { class: "rep" + (R[i] !== R[0] ? " stale" : "") + (i && cut(i) ? " cut" : "") }, Kit.el("div", null, n), Kit.el("div", { class: "v" }, String(R[i])), Kit.el("div", null, i && cut(i) ? "پیوند قطع" : R[i] < R[0] ? (R[0] - R[i]) + " عقب" : R[i] > R[0] ? "جلوتر از leader!" : "به‌روز"))); });
+    var inf = Kit.clear(document.getElementById("inflight")); inf.appendChild(document.createTextNode(s.msgs.length ? "در پرواز: " : "پیامی در پرواز نیست."));
+    s.msgs.forEach(function (m) { inf.appendChild(Kit.el("span", { class: m.held ? "held" : "" }, m.kind === "rep" ? "L→F" + m.to + " " + (view.fmt === "state" ? "counter=" + m.op.state : "inc(" + m.op.n + ")") + (m.dup ? " dup" : "") : "ack F" + m.from + "→L")); });
+    var waiting = s.ops.filter(function (o) { return o.done === false; }), stale = R[2] < s.acked, c = document.getElementById("client");
+    c.className = "cl " + (waiting.length ? "warn" : stale ? "bad" : "ok");
+    c.textContent = (waiting.length ? "کلاینت هنوز منتظر تأیید عملیات " + waiting.map(function (o) { return o.id; }).join(" و ") + " است (" + ACK[view.ack] + ")." : "کلاینت برای هر دو عملیات تأیید گرفته؛ آخرین مقدار تأییدشده " + s.acked + " است.") + " خواندن از follower ۲ الان " + R[2] + " می‌دهد" + (stale ? "، کهنه‌تر از مقدار تأییدشده." : ".");
+    var tk = Kit.clear(document.getElementById("tk")), hd = Kit.el("tr", null, Kit.el("th", { class: "rh" }, "تیک"));
+    for (var t = 0; t <= TMAX; t++) hd.appendChild(Kit.el("th", null, String(t))); tk.appendChild(hd);
+    ["leader", "follower ۱", "follower ۲"].forEach(function (n, i) { var tr = Kit.el("tr", null, Kit.el("th", { class: "rh" }, n));
+      for (var t = 0; t <= TMAX; t++) { var h = s.hist[t]; tr.appendChild(Kit.el("td", { class: (h ? (h[i] !== h[0] ? "lag" : "") : "fut") + (t === view.T ? " now" : "") }, h ? String(h[i]) : "·")); } tk.appendChild(tr); });
+    var cr = Kit.el("tr", null, Kit.el("th", { class: "rh" }, "کلاینت")); for (t = 0; t <= TMAX; t++) cr.appendChild(Kit.el("td", { class: "ev" + (t > view.T ? " fut" : "") }, s.ev[t] || "")); tk.appendChild(cr);
+    var lag = Math.max(R[0] - R[1], R[0] - R[2]);
+    kind = waiting.length ? "warn" : (stale || R[1] > R[0]) ? "bad" : "ok"; msg = c.textContent;
+    var St = Kit.clear(document.getElementById("stats"));
+    [["تیک", view.T], ["تأیید پس از", ACK[view.ack]], ["بیشینه‌ی عقب‌ماندگی", lag, lag ? "warn" : "ok"], ["عملیات منتظر", waiting.length, waiting.length ? "warn" : "ok"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.ack.set(view.ack); ctl.fmt.set(view.fmt); ctl.cut.set(view.cut); ctl.dup.set(view.dup); ctl.T.set(view.T);
   }
-  document.getElementById("ack").appendChild(Kit.segmented({ label: "تأیید به کلاینت پس از", value: cfg.ack, options: [{ value: "sync", label: "همه، یعنی هم‌زمان" }, { value: "quorum", label: "quorum" }, { value: "async", label: "تنها leader، یعنی asynchronous" }], onChange: function (v) { cfg.ack = v; reset(); } }).element);
-  document.getElementById("fmt").appendChild(Kit.segmented({ label: "چه چیزی تکرار شود", value: cfg.fmt, options: [{ value: "log", label: "عملیات، یعنی log" }, { value: "state", label: "حالت" }], onChange: function (v) { cfg.fmt = v; reset(); } }).element);
-  document.getElementById("cut").appendChild(Kit.segmented({ label: "پارتیشن شبکه", value: cfg.cut, options: [{ value: "none", label: "هیچ" }, { value: "f2", label: "قطع leader ↔ follower ۲" }], onChange: function (v) { cfg.cut = v; log.add(v === "none" ? "پیوند بازگشت" : "پیوند به follower ۲ قطع شد", v === "none" ? "ok" : "bad"); render(); } }).element);
-  document.getElementById("inc2").addEventListener("click", function () { inc(2); });
-  document.getElementById("inc3").addEventListener("click", function () { inc(3); });
-  document.getElementById("rdL").addEventListener("click", function () { log.add("خواندن از leader: " + R[0], "ok"); });
-  document.getElementById("rdF").addEventListener("click", function () { log.add("خواندن از follower ۲: " + R[2] + (R[2] < acked ? "؛ کهنه، چون به کلاینت از قبل " + acked + " گفته شده بود" : ""), R[2] < acked ? "bad" : "ok"); });
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 700 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.ack = Kit.segmented({ label: "تأیید به کلاینت پس از", value: DEF.ack, options: [{ value: "sync", label: "همه، هم‌زمان" }, { value: "quorum", label: "quorum" }, { value: "async", label: "فقط leader" }], onChange: tw(function (v) { view.ack = v; }) });
+  ctl.fmt = Kit.segmented({ label: "چه چیزی تکرار شود", value: DEF.fmt, options: [{ value: "log", label: "عملیات، log" }, { value: "state", label: "حالت" }], onChange: tw(function (v) { view.fmt = v; }) });
+  ctl.cut = Kit.segmented({ label: "پارتیشن شبکه", value: DEF.cut, options: [{ value: "none", label: "هیچ" }, { value: "f2", label: "قطع پیوند follower ۲" }], onChange: tw(function (v) { view.cut = v; }) });
+  ctl.dup = Kit.segmented({ label: "تحویل تکراری عملیات ۲ به follower ۱", value: DEF.dup, options: [{ value: "no", label: "نه" }, { value: "yes", label: "بله" }], onChange: tw(function (v) { view.dup = v; }) });
+  ctl.T = Kit.slider({ label: "تیک", min: 0, max: TMAX, step: 1, value: DEF.T, onInput: tw(function (v) { view.T = v; }) });
+  ["ack", "fmt", "cut", "dup", "tsl"].forEach(function (id, i) { document.getElementById(id).appendChild([ctl.ack, ctl.fmt, ctl.cut, ctl.dup, ctl.T][i].element); });
+  function S(o) { return sim(Object.assign({}, DEF, o)); }
+  function doneAt(o, id) { return S(o).ops[id - 1].done; }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "کلاینت increment-by(2) و بعد increment-by(3) را به leader می‌فرستد و leader آن‌ها را به دو follower تکرار می‌کند (صص. ۱۱۱–۱۱۵، شکل‌های ۸.۵ تا ۸.۸). latency دو تیکی هر پرش و تحویل تکراری مدل vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و حالت تأیید، قالب پیام و پیوندها را عوض کنید.",
+    steps: [
+      { kind: "ok", run: at({ T: 1 }), say: "در asynchronous، leader عملیات را اعمال می‌کند و کلاینت همان دم تأیید می‌گیرد. followerها هنوز ۰ دارند: پیام‌ها در راه‌اند." },
+      { kind: "ok", run: at({}), say: function () { return "حتی با پیوندهای سالم، هر follower هر تغییر را " + HOP + " تیک پس از leader می‌بیند: خانه‌های زرد. این latency ذاتی replication است، چون پیام نمی‌تواند در همان قدم به همه برسد."; } },
+      { kind: "warn", run: at({ ack: "sync", T: 3 }), say: "در هم‌زمان، کلاینت فقط وقتی تأیید می‌گیرد که هر دو follower تأیید کرده باشند. در تیک ۳ هنوز منتظر است." },
+      { kind: "ok", run: at({ ack: "sync" }), say: function () { return "رفت و برگشت کامل: عملیات ۱ در تیک " + doneAt({ ack: "sync" }, 1) + " و عملیات ۲ در تیک " + doneAt({ ack: "sync" }, 2) + " تأیید می‌گیرند. بهای این تضمین، latency بیشتر برای کلاینت است." } },
+      { kind: "warn", run: at({ ack: "sync", cut: "f2" }), say: "حالا پیوند follower ۲ قطع است: latency تحمیلی. کلاینت هم‌زمان بی‌پایان منتظر می‌ماند، چون یکی از تأییدها هیچ‌وقت نمی‌رسد." },
+      { kind: "bad", run: at({ ack: "quorum", cut: "f2" }), say: function () { var s = S({ ack: "quorum", cut: "f2" }); return "با quorum، leader به‌علاوه‌ی follower ۱ کافی است و کلاینت تأیید می‌گیرد. ولی خواندن از follower ۲ مقدار " + s.R[2] + " را می‌دهد، با این‌که کلاینت از قبل " + s.acked + " را دیده: هشدار کتاب درباره‌ی خواندن از follower."; } },
+      { kind: "bad", run: at({ dup: "yes" }), say: function () { var s = S({ dup: "yes" }); return "اگر شبکه عملیات ۲ را دو بار به follower ۱ برساند، replication لاگ‌محور آن را دو بار اعمال می‌کند: follower ۱ به " + s.R[1] + " می‌رسد، جلوتر از leader. پس هر عملیات باید دقیقاً یک بار و به ترتیب برسد."; } },
+      { kind: "ok", run: at({ dup: "yes", fmt: "state" }), say: "همان تحویل تکراری با replication state-based بی‌آزار است: پیام حالت، یعنی «شمارنده برابر ۵»، هر چند بار هم برسد، همان ۵ را می‌نشاند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "با replication هم‌زمان و یک follower نادست‌یافتنی، کلاینت …",

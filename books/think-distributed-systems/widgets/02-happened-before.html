@@ -7,22 +7,24 @@
 <meta name="description" content="نمودار فضا‌زمان سه مؤلفه را با رویداد محلی و پیام بسازید، هر دو رویدادی را بردارید تا ببینید یکی پیش از دیگری رخ داده یا هم‌زمان‌اند، و consistency ساعت Lamport را بسنجید. تصویری از فصل ۲ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  svg.st { width: 100%; height: auto; display: block; direction: ltr; }
+  svg.st { width: 100%; max-height: 260px; display: block; direction: ltr; }
   svg.st .lane { stroke: var(--line-strong); stroke-width: 2; }
   svg.st .ev { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
-  svg.st .ev.sel { fill: var(--accent); }
-  svg.st .msg { stroke: var(--accent); stroke-width: 1.5; fill: none; marker-end: url(#arr); }
+  svg.st .ev.sel { fill: var(--accent); } svg.st .ev.new { stroke: var(--accent); stroke-width: 3; }
+  svg.st .msg { stroke: var(--accent); stroke-width: 1.8; fill: none; marker-end: url(#arr); }
   svg.st .msg.pend { stroke-dasharray: 4 3; }
-  svg.st text { fill: var(--ink); font-size: 11px; font-family: var(--mono); }
-  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .pick { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
-  .pick label { display: flex; flex-direction: column; font-size: .82rem; gap: 2px; }
+  svg.st text { fill: var(--ink); font-size: 13px; font-family: var(--mono); } svg.st text.ln { font-weight: 700; font-size: 14px; }
+  .relbox { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 12px; margin-top: 8px; font-size: .95rem; }
+  .relbox .f { font-family: var(--mono); direction: ltr; unicode-bidi: isolate; font-weight: 700; }
+  .relbox.ok { border-color: var(--ok); background: var(--ok-soft); } .relbox.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .key { font-size: .8rem; color: var(--ink-2); margin: 4px 0 0; }
+  .btns { display: flex; flex-wrap: wrap; gap: 5px; } .pick { display: flex; gap: 8px; } .pick label { display: flex; flex-direction: column; font-size: .8rem; gap: 2px; flex: 1; } .pick select { width: 100%; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/02-system-models-order-and-time.html">فصل ۲</a><span aria-hidden="true">/</span>
@@ -33,118 +35,126 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۲ · مدل سیستم، ترتیب و زمان</div>
-  <h1>پیش‌از‌رخ‌دادن و ساعت‌های Lamport</h1>
-  <p class="lede">رویداد a <strong>پیش از</strong> b رخ داده اگر روی همان مؤلفه باشند و a اول آمده باشد، یا اگر a فرستادن باشد و b همان گرفتن، یا بنا به ترایایی. وگرنه <strong>هم‌زمان</strong>اند. <strong>ساعت Lamport</strong> سر هر قدمی می‌افزاید و، سر گرفتن، به max(خودی، گرفته‌شده) + 1 می‌پرد، که <em>consistency ساعت</em> را تضمین می‌کند: از a → b نتیجه می‌شود C(a) &lt; C(b).</p>
-  <p class="source-note">تصویری از «رابطه‌ی پیش‌از‌رخ‌دادن» و «زمان منطقی و ساعت‌های منطقی» (صص. ۳۲–۳۸، شکل‌های ۲.۱۳ تا ۲.۱۵ و ۲.۱۸). صحنه‌ی آغازین و به کار بردن timestampهای برداری برای تصمیم درباره‌ی پیش‌از‌رخ‌دادن مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>پیش‌از‌رخ‌دادن و ساعت‌های Lamport</h1>
+      <p class="lede">رویداد a <strong>پیش از</strong> b رخ داده اگر روی همان مؤلفه باشند و a اول آمده باشد، یا اگر a فرستادن باشد و b همان گرفتن، یا بنا به ترایایی. وگرنه <strong>هم‌زمان</strong>اند. <strong>ساعت Lamport</strong> سر هر قدمی می‌افزاید و، سر گرفتن، به max(خودی، گرفته‌شده) + 1 می‌پرد، که <em>consistency ساعت</em> را تضمین می‌کند: از a → b نتیجه می‌شود C(a) &lt; C(b).</p>
+      <p class="source-note">تصویری از «رابطه‌ی پیش‌از‌رخ‌دادن» و «زمان منطقی و ساعت‌های منطقی» (صص. ۳۲–۳۸، شکل‌های ۲.۱۳ تا ۲.۱۵ و ۲.۱۸). صحنه‌ی آغازین و به کار بردن timestampهای برداری برای تصمیم درباره‌ی پیش‌از‌رخ‌دادن مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div id="diag"></div>
-        <div class="pick"><label>رویداد a<select id="ea"></select></label><label>رویداد b<select id="eb"></select></label></div>
-        <div class="callout" id="rel" style="margin-top:10px" aria-live="polite"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><p class="field-hint">قدم‌ها را یکی‌یکی بیفزایید. فرستادن پیامی را در پرواز می‌گذارد تا تحویلش بدهید.</p>
-        <div class="btns" id="locals"></div><div class="btns" id="sends"></div><div class="btns" id="delivers"></div>
-        <div class="btns"><button class="btn small" id="reset">برگشت به نمونه</button><button class="btn small" id="empty">نمودار خالی</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div id="diag"></div>
+          <p class="key">برچسب هر رویداد «شماره:timestamp Lamport» است؛ رویدادهای پررنگ آبی همان a و b مقایسه‌اند و خط‌چین‌ها پیام‌های در پروازند.</p>
+          <div class="relbox" id="rel" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group pick"><label>رویداد a<select id="ea"></select></label><label>رویداد b<select id="eb"></select></label></div>
+        <div class="tweak-group btns" id="locals"></div>
+        <div class="tweak-group btns" id="sends"></div>
+        <div class="tweak-group btns" id="delivers"></div>
+        <div class="tweak-group btns"><button class="btn small" id="reset" type="button">برگشت به نمونه</button><button class="btn small" id="empty" type="button">نمودار خالی</button></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>پیش‌از‌رخ‌دادن ترتیبی جزئی است.</strong> دو رویداد روی مؤلفه‌های مختلف که زنجیره‌ای از پیام بینشان نیست هم‌زمان‌اند، حتی اگر یکی چپ‌تر کشیده شده باشد.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>پیش‌از‌رخ‌دادن ترتیبی جزئی است.</strong> دو رویداد روی مؤلفه‌های مختلف که زنجیره‌ای از پیام بینشان نیست هم‌زمان‌اند، حتی اگر یکی چپ‌تر کشیده شده باشد.</li>
     <li><strong>consistency ساعت تنها در یک جهت برقرار است.</strong> هر جا a → b باشد، C(a) &lt; C(b). ولی C(a) &lt; C(b) برای رویدادهای هم‌زمان هم می‌تواند برقرار باشد، پس timestamp Lamport تنها نمی‌تواند بگوید a پیش از b رخ داده.</li>
     <li><strong>قاعده‌ی گرفتن</strong>، یعنی max(خودی، گرفته‌شده) + 1، همان چیزی است که ساعت مؤلفه‌ی عقب‌مانده را جلو می‌کشد، چنان‌که در شکل ۲.۱۸.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/02-system-models-order-and-time.html"><small>درس</small>فصل ۲: مدل سیستم، ترتیب و زمان</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/02-system-models-order-and-time.html"><small>درس</small>فصل ۲: مدل سیستم، ترتیب و زمان</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var N = 3, ev, pend, clk, vc, cnt;
-  var KIND = { local: "محلی", send: "فرستادن", recv: "گرفتن" };
-  function mk(c, kind, extra) {
-    cnt[c]++; var e = { id: "c" + (c + 1) + "." + cnt[c], c: c, kind: kind, x: ev.length };
-    if (kind === "recv") { clk[c] = Math.max(clk[c], extra.ts) + 1; vc[c] = vc[c].map(function (v, i) { return Math.max(v, extra.vc[i]); }); }
-    else clk[c] = clk[c] + 1;
-    vc[c][c]++; e.ts = clk[c]; e.vc = vc[c].slice(); e.from = extra && extra.from; ev.push(e); return e;
-  }
-  function blank() { ev = []; pend = []; clk = [0, 0, 0]; vc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; cnt = [0, 0, 0]; }
-  function local(c) { var e = mk(c, "local"); log.add(e.id + ": قدم محلی روی C" + (c + 1) + "، C = " + e.ts, "muted"); render(); }
-  function send(c, d) { var e = mk(c, "send"); pend.push({ from: e, to: d }); log.add(e.id + ": مؤلفه‌ی C" + (c + 1) + " به C" + (d + 1) + " با timestamp " + e.ts + " می‌فرستد", "muted"); render(); }
-  function deliver(i) { var m = pend.splice(i, 1)[0]; var before = clk[m.to]; var e = mk(m.to, "recv", { ts: m.from.ts, vc: m.from.vc, from: m.from }); log.add(e.id + ": مؤلفه‌ی C" + (m.to + 1) + " از " + m.from.id + " می‌گیرد: max(" + before + ", " + m.from.ts + ") + 1 = " + e.ts, "ok"); render(); }
-  function example() {
-    blank(); log.clear();
-    mk(0, "local"); var s1 = mk(0, "send"); mk(1, "local"); mk(2, "local"); mk(2, "local");
-    var s2 = mk(2, "send"); mk(1, "recv", { ts: s1.ts, vc: s1.vc, from: s1 }); mk(0, "recv", { ts: s2.ts, vc: s2.vc, from: s2 }); mk(1, "local");
-    log.add("نمونه بار شد: ۹ رویداد روی سه مؤلفه.", "muted"); render();
-  }
+  var N = 3, KIND = { local: "محلی", send: "فرستادن", recv: "گرفتن" };
+  var EX = [["L", 0], ["S", 0, 1], ["L", 1], ["L", 2], ["L", 2], ["S", 2, 0], ["D", 0], ["D", 0], ["L", 1]];
+  var DEF = { ops: EX, upto: 99, a: "c1.1", b: "c2.3" }, view = JSON.parse(JSON.stringify(DEF)), tour, msg, kind, ev, pend, clk;
+  function at(o) { return function () { view = Object.assign(JSON.parse(JSON.stringify(DEF)), o); }; }
+  function build(ops) { ev = []; pend = []; clk = [0, 0, 0]; var vc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], cnt = [0, 0, 0];
+    function mk(c, k, ex) { cnt[c]++; var e = { id: "c" + (c + 1) + "." + cnt[c], c: c, kind: k, x: ev.length };
+      if (k === "recv") { e.before = clk[c]; clk[c] = Math.max(clk[c], ex.ts) + 1; vc[c] = vc[c].map(function (v, i) { return Math.max(v, ex.vc[i]); }); } else clk[c]++;
+      vc[c][c]++; e.ts = clk[c]; e.vc = vc[c].slice(); e.from = ex && ex.from; ev.push(e); return e; }
+    ops.forEach(function (o) { if (o[0] === "L") mk(o[1], "local"); else if (o[0] === "S") { var e = mk(o[1], "send"); pend.push({ from: e, to: o[2] }); } else if (pend[o[1]]) { var m = pend.splice(o[1], 1)[0]; mk(m.to, "recv", { ts: m.from.ts, vc: m.from.vc, from: m.from }); } }); }
   function hb(a, b) { return a.vc.every(function (v, i) { return v <= b.vc[i]; }) && a.vc.some(function (v, i) { return v < b.vc[i]; }); }
   function render() {
-    var W = 560, H = 190, lanes = [40, 100, 160], xs = function (e) { return 60 + e.x * Math.min(52, (W - 90) / Math.max(1, ev.length)); };
-    var s = Kit.svg("svg", { class: "st", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "نمودار فضا‌زمان با " + ev.length + " رویداد" });
-    var defs = Kit.svg("defs"); var mkr = Kit.svg("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" });
+    build(view.ops.slice(0, view.upto));
+    var W = 640, H = 210, lanes = [45, 110, 175], xs = function (e) { return 70 + e.x * Math.min(62, (W - 100) / Math.max(1, ev.length)); };
+    var s = Kit.svg("svg", { class: "st mono", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "نمودار فضا‌زمان با " + ev.length + " رویداد" });
+    var defs = Kit.svg("defs"), mkr = Kit.svg("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" });
     mkr.appendChild(Kit.svg("path", { d: "M0,0 L10,5 L0,10 z", fill: "currentColor", style: "color: var(--accent)" })); defs.appendChild(mkr); s.appendChild(defs);
-    lanes.forEach(function (y, i) { s.appendChild(Kit.svg("line", { class: "lane", x1: 40, x2: W - 10, y1: y, y2: y })); var t = Kit.svg("text", { x: 4, y: y + 4 }); t.textContent = "C" + (i + 1); s.appendChild(t); });
-    var a = document.getElementById("ea").value, b = document.getElementById("eb").value;
-    ev.forEach(function (e) { if (e.from) s.appendChild(Kit.svg("line", { class: "msg", x1: xs(e.from), y1: lanes[e.from.c], x2: xs(e), y2: lanes[e.c] })); });
-    pend.forEach(function (m) { s.appendChild(Kit.svg("line", { class: "msg pend", x1: xs(m.from), y1: lanes[m.from.c], x2: xs(m.from) + 30, y2: (lanes[m.from.c] + lanes[m.to]) / 2 })); });
-    ev.forEach(function (e) {
-      s.appendChild(Kit.svg("circle", { class: "ev" + (e.id === a || e.id === b ? " sel" : ""), cx: xs(e), cy: lanes[e.c], r: 6 }));
-      var t = Kit.svg("text", { x: xs(e) - 10, y: lanes[e.c] - 10 }); t.textContent = e.id.split(".")[1] + ":" + e.ts; s.appendChild(t);
-    });
-    var d = Kit.clear(document.getElementById("diag")); d.appendChild(s);
-    d.appendChild(Kit.el("p", { class: "field-hint" }, "برچسب‌ها شماره‌ی رویداد و timestamp Lamport را نشان می‌دهند. فلش‌های خط‌چین پیام‌هایی‌اند که هنوز در پروازند."));
-    ["ea", "eb"].forEach(function (id, j) {
-      var sel = document.getElementById(id), cur = sel.value; Kit.clear(sel);
-      ev.forEach(function (e) { sel.appendChild(Kit.el("option", { value: e.id }, e.id + " (" + KIND[e.kind] + "، C = " + e.ts + ")")); });
-      if (ev.some(function (e) { return e.id === cur; })) sel.value = cur; else if (ev.length) sel.value = ev[j === 0 ? 0 : ev.length - 1].id;
-    });
-    a = document.getElementById("ea").value; b = document.getElementById("eb").value;
-    var A = ev.filter(function (e) { return e.id === a; })[0], Bv = ev.filter(function (e) { return e.id === b; })[0], rel = document.getElementById("rel");
-    if (A && Bv && A !== Bv) {
-      var r = hb(A, Bv) ? a + " → " + b : hb(Bv, A) ? b + " → " + a : a + " ∥ " + b + " (هم‌زمان)";
-      var conc = !hb(A, Bv) && !hb(Bv, A), order = A.ts < Bv.ts ? "C(" + a + ") = " + A.ts + " < C(" + b + ") = " + Bv.ts : A.ts > Bv.ts ? "C(" + a + ") = " + A.ts + " > C(" + b + ") = " + Bv.ts : "C(" + a + ") = C(" + b + ") = " + A.ts;
-      rel.className = "callout " + (conc ? "warn" : "ok");
-      rel.textContent = r + ". " + order + "." + (conc && A.ts !== Bv.ts ? " این timestampها مرتب‌اند هرچند رویدادها هم‌زمان‌اند: عکس consistency ساعت برقرار نیست." : conc ? "" : " سازگار: رویداد پیشین timestamp کوچک‌تر را دارد.");
-    } else { rel.className = "callout"; rel.textContent = "دو رویداد مختلف بردارید."; }
+    lanes.forEach(function (y, i) { s.appendChild(Kit.svg("line", { class: "lane", x1: 40, x2: W - 10, y1: y, y2: y })); s.appendChild(Kit.svg("text", { class: "ln", x: 4, y: y + 5 }, "C" + (i + 1))); });
+    if (!ev.some(function (e) { return e.id === view.a; }) && ev.length) view.a = ev[0].id;
+    if (!ev.some(function (e) { return e.id === view.b; }) && ev.length) view.b = ev[ev.length - 1].id;
+    ev.forEach(function (e) { if (e.from) s.appendChild(Kit.svg("line", { class: "msg", x1: xs(e.from), y1: lanes[e.from.c], x2: xs(e) - 5, y2: lanes[e.c] + (lanes[e.c] > lanes[e.from.c] ? -6 : 6) })); });
+    pend.forEach(function (m) { s.appendChild(Kit.svg("line", { class: "msg pend", x1: xs(m.from), y1: lanes[m.from.c], x2: xs(m.from) + 34, y2: (lanes[m.from.c] + lanes[m.to]) / 2 })); });
+    ev.forEach(function (e, i) { s.appendChild(Kit.svg("circle", { class: "ev" + (e.id === view.a || e.id === view.b ? " sel" : "") + (i === ev.length - 1 ? " new" : ""), cx: xs(e), cy: lanes[e.c], r: 7 }));
+      s.appendChild(Kit.svg("text", { x: xs(e) - 12, y: lanes[e.c] - 13 }, e.id.split(".")[1] + ":" + e.ts)); });
+    Kit.clear(document.getElementById("diag")).appendChild(s);
+    ["ea", "eb"].forEach(function (id) { var sel = Kit.clear(document.getElementById(id)); ev.forEach(function (e) { sel.appendChild(Kit.el("option", { value: e.id }, e.id + " (" + KIND[e.kind] + "، " + e.ts + ")")); }); sel.value = id === "ea" ? view.a : view.b; });
+    var A = ev.filter(function (e) { return e.id === view.a; })[0], B = ev.filter(function (e) { return e.id === view.b; })[0], rel = Kit.clear(document.getElementById("rel"));
+    if (A && B && A !== B) { var conc = !hb(A, B) && !hb(B, A);
+      var r = hb(A, B) ? A.id + " → " + B.id : hb(B, A) ? B.id + " → " + A.id : A.id + " ∥ " + B.id;
+      var o = "C(" + A.id + ")=" + A.ts + (A.ts < B.ts ? " < " : A.ts > B.ts ? " > " : " = ") + "C(" + B.id + ")=" + B.ts;
+      rel.className = "relbox " + (conc ? "warn" : "ok");
+      rel.appendChild(document.createTextNode(conc ? "هم‌زمان: " : "پیش‌از‌رخ‌دادن: ")); rel.appendChild(Kit.el("span", { class: "f mono" }, r)); rel.appendChild(document.createTextNode(" · ساعت‌ها: ")); rel.appendChild(Kit.el("span", { class: "f mono" }, o));
+      kind = conc ? "warn" : "ok"; msg = conc ? (A.ts !== B.ts ? "این دو هم‌زمان‌اند ولی timestampهایشان مرتب است: از ترتیب ساعت Lamport نمی‌شود پیش‌از‌رخ‌دادن را نتیجه گرفت." : "هم‌زمان، با timestamp برابر.") : "رویداد پیشین timestamp کوچک‌تر دارد: consistency ساعت.";
+    } else { rel.className = "relbox"; rel.textContent = "دو رویداد مختلف بردارید."; kind = ""; msg = "دو رویداد مختلف بردارید."; }
     var lc = Kit.clear(document.getElementById("locals")), sd = Kit.clear(document.getElementById("sends")), dl = Kit.clear(document.getElementById("delivers"));
-    for (var c = 0; c < N; c++) {
-      (function (c) {
-        var b1 = Kit.el("button", { class: "btn small" }, "C" + (c + 1) + " محلی"); b1.addEventListener("click", function () { local(c); }); lc.appendChild(b1);
-        for (var dd = 0; dd < N; dd++) if (dd !== c) (function (dd) { var b2 = Kit.el("button", { class: "btn small" }, "C" + (c + 1) + " → C" + (dd + 1)); b2.addEventListener("click", function () { send(c, dd); }); sd.appendChild(b2); })(dd);
-      })(c);
-    }
-    pend.forEach(function (m, i) { var b3 = Kit.el("button", { class: "btn small primary" }, "تحویل " + m.from.id + " به C" + (m.to + 1)); b3.addEventListener("click", function () { deliver(i); }); dl.appendChild(b3); });
-    var pairs = 0, concPairs = 0; for (var i = 0; i < ev.length; i++) for (var j = i + 1; j < ev.length; j++) { pairs++; if (!hb(ev[i], ev[j]) && !hb(ev[j], ev[i])) concPairs++; }
-    stats([["رویدادها", ev.length], ["پیام‌های در پرواز", pend.length], ["زوج‌های هم‌زمان", concPairs + " از " + pairs], ["ساعت‌های C1 و C2 و C3", clk.join(" / ")]]);
+    for (var c = 0; c < N; c++) (function (c) {
+      var b1 = Kit.el("button", { class: "btn small", type: "button" }, "C" + (c + 1) + " محلی"); b1.addEventListener("click", tw(function () { push(["L", c]); })); lc.appendChild(b1);
+      for (var d = 0; d < N; d++) if (d !== c) (function (d) { var b2 = Kit.el("button", { class: "btn small", type: "button" }, "C" + (c + 1) + " → C" + (d + 1)); b2.addEventListener("click", tw(function () { push(["S", c, d]); })); sd.appendChild(b2); })(d); })(c);
+    pend.forEach(function (m, i) { var b3 = Kit.el("button", { class: "btn small primary", type: "button" }, "تحویل " + m.from.id + " به C" + (m.to + 1)); b3.addEventListener("click", tw(function () { push(["D", i]); })); dl.appendChild(b3); });
+    var pairs = 0, cp = 0; for (var i = 0; i < ev.length; i++) for (var j = i + 1; j < ev.length; j++) { pairs++; if (!hb(ev[i], ev[j]) && !hb(ev[j], ev[i])) cp++; }
+    var St = Kit.clear(document.getElementById("stats"));
+    [["رویدادها", ev.length], ["در پرواز", pend.length], ["زوج هم‌زمان", cp + " / " + pairs], ["ساعت C1، C2، C3", clk.join(" , ")]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value", style: "direction:ltr;unicode-bidi:isolate" }, String(x[1])))); });
   }
-  document.getElementById("ea").addEventListener("change", render); document.getElementById("eb").addEventListener("change", render);
-  document.getElementById("reset").addEventListener("click", example);
-  document.getElementById("empty").addEventListener("click", function () { blank(); log.clear(); log.add("نمودار خالی.", "muted"); render(); });
-  example();
+  function push(o) { view.ops = view.ops.slice(0, view.upto).concat([o]); view.upto = 99; var last = view.ops.length; build(view.ops); view.b = ev[ev.length - 1].id; }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  document.getElementById("ea").addEventListener("change", tw(function () { view.a = document.getElementById("ea").value; }));
+  document.getElementById("eb").addEventListener("change", tw(function () { view.b = document.getElementById("eb").value; }));
+  document.getElementById("reset").addEventListener("click", tw(function () { view = JSON.parse(JSON.stringify(DEF)); }));
+  document.getElementById("empty").addEventListener("click", tw(function () { view.ops = []; view.upto = 99; }));
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "سه مؤلفه، رویدادهای محلی، فرستادن و گرفتن (صص. ۳۲–۳۸، شکل‌های ۲.۱۳ تا ۲.۱۵ و ۲.۱۸). صحنه‌ی نمونه و تصمیم پیش‌از‌رخ‌دادن با timestampهای برداری مال vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، رویداد بیفزایید و دو رویداد را مقایسه کنید.",
+    steps: [
+      { kind: "ok", run: at({ upto: 2, a: "c1.1", b: "c1.2" }), say: "روی یک مؤلفه، رویداد اول پیش از دومی رخ داده. ساعت Lamport سر هر قدم یکی می‌افزاید: ۱ و بعد ۲. فرستادن پیامی را در پرواز می‌گذارد." },
+      { kind: "ok", run: at({ upto: 7, a: "c1.2", b: "c2.2" }), say: "مؤلفه‌ی C2 پیام را می‌گیرد. ساعتش ۱ بود و timestamp پیام ۲؛ قاعده‌ی گرفتن max(۱، ۲) + ۱ = ۳ می‌دهد. فرستادن پیش از گرفتن رخ داده." },
+      { kind: "ok", run: at({ a: "c1.1", b: "c2.3" }), say: "ترایایی: c1.1 پیش از فرستادن است، فرستادن پیش از گرفتن، و گرفتن پیش از c2.3. پس c1.1 پیش از c2.3 رخ داده و timestampش کوچک‌تر است." },
+      { kind: "warn", run: at({ a: "c2.1", b: "c3.2" }), say: "مؤلفه‌های C2 و C3 تا این‌جا پیامی رد و بدل نکرده‌اند، پس c2.1 و c3.2 هم‌زمان‌اند. ولی ساعت‌ها ۱ و ۲ هستند: مرتب، با این‌که رویدادها مرتب نیستند." },
+      { kind: "warn", run: at({ a: "c2.1", b: "c3.2" }), say: "ویژگی consistency ساعت فقط یک جهت دارد: اگر a پیش از b باشد، C(a) < C(b). عکسش برقرار نیست، پس timestamp Lamport تنها نمی‌گوید a پیش از b رخ داده." },
+      { kind: "ok", run: at({ a: "c3.3", b: "c1.3" }), say: "مؤلفه‌ی C1 پیام C3 را می‌گیرد. ساعتش ۲ بود ولی timestamp پیام ۳ است؛ قاعده‌ی گرفتن ساعت عقب‌مانده را به ۴ جلو می‌کشد، مثل شکل ۲.۱۸." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "رویداد a فرستادنی روی C1 است و b همان گرفتن روی C2. آن‌وقت …",

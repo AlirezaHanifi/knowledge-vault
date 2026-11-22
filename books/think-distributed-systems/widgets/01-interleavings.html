@@ -7,17 +7,28 @@
 <meta name="description" content="دو process هر یک شمارنده‌ای مشترک را می‌خوانند و به‌روز می‌کنند و می‌نویسند. همه‌ی بیست لابه‌لا رفتن کنش‌هایشان را برشمارید، ببینید کدام نتیجه‌ای می‌دهند که هیچ ترتیب سری‌ای نمی‌دهد، یا لابه‌لا رفتنی را قدم‌به‌قدم بسازید. تصویری از فصل ۱ و فصل ۵ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  table.il { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .8rem; }
-  table.il td, table.il th { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: left; }
-  table.il tr.bad td { background: var(--bad-soft); } table.il tr.ok td { background: var(--ok-soft); }
-  .seq { font-family: var(--mono); font-size: .9rem; margin: 6px 0; min-height: 1.6em; direction: ltr; text-align: left; }
-  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .il-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; align-items: start; }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 6px; }
+  .lanes { display: grid; grid-template-columns: 2.5em 1fr; gap: 6px 8px; align-items: center; }
+  .lane { display: flex; gap: 4px; min-height: 34px; direction: ltr; }
+  .lane .slot { flex: 1; border: 1px dashed var(--line); border-radius: var(--radius-sm); }
+  .act { flex: 1; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 2px; text-align: center; font-family: var(--mono); font-size: .8rem; background: var(--surface-2); }
+  .act.p { background: var(--accent-soft); border-color: var(--accent); } .act.q { background: var(--warn-soft); border-color: var(--warn); }
+  .act.last { box-shadow: 0 0 0 2px var(--ink); }
+  .regs { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .reg { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 12px; font-size: .9rem; } .reg b { font-size: 1.3rem; margin-inline-start: 6px; font-family: var(--mono); }
+  .reg.x { border-color: var(--ink); }
+  .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; direction: ltr; }
+  .tile { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 5px 2px; text-align: center; font-family: var(--mono); font-size: .78rem; }
+  .tile.ok { background: var(--ok-soft); border-color: var(--ok); } .tile.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .tile.cur { box-shadow: 0 0 0 3px var(--accent); font-weight: 700; } .tile small { display: block; color: var(--ink-3); font-size: .68rem; }
+  .key { font-size: .8rem; color: var(--ink-2); margin-top: 6px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html">فصل ۱</a><span aria-hidden="true">/</span>
@@ -28,107 +39,125 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱ · فکر کردن در سیستم‌های توزیع‌شده</div>
-  <h1>لابه‌لا رفتن و شرط مسابقه</h1>
-  <p class="lede">process دنباله‌ای از کنش اتمی است. دو process هم‌زمان P و Q می‌توانند در هر <strong>لابه‌لا رفتن</strong>ی از کنش‌هایشان اجرا شوند؛ و (P | Q) مجموعه‌ی همه‌ی آن‌هاست. <strong>شرط مسابقه</strong> وقتی هست که برخی از آن لابه‌لا رفتن‌ها نادرست شمرده شوند. آن زوج process <strong>serializable</strong> است اگر هر لابه‌لا رفتنی همان اثر P·Q یا Q·P را داشته باشد.</p>
-  <p class="source-note">تصویری از «فکر کردن بالای کد» (صص. ۲۱–۲۲، شکل‌های ۱.۱۹ و ۱.۲۰) و به‌روزرسانی گم‌شده‌ی شکل ۵.۴ (ص. ۷۱). شمارنده‌ی خواندن و به‌روزرسانی و نوشتن و آن گونه‌ی ×۲ انتخاب خود vault از کنش‌هاست. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>لابه‌لا رفتن و شرط مسابقه</h1>
+      <p class="lede">process دنباله‌ای از کنش اتمی است. دو process هم‌زمان P و Q می‌توانند در هر <strong>لابه‌لا رفتن</strong>ی از کنش‌هایشان اجرا شوند؛ و (P | Q) مجموعه‌ی همه‌ی آن‌هاست. <strong>شرط مسابقه</strong> وقتی هست که برخی از آن لابه‌لا رفتن‌ها نادرست شمرده شوند. آن زوج process <strong>serializable</strong> است اگر هر لابه‌لا رفتنی همان اثر P·Q یا Q·P را داشته باشد.</p>
+      <p class="source-note">تصویری از «فکر کردن بالای کد» (صص. ۲۱–۲۲، شکل‌های ۱.۱۹ و ۱.۲۰) و به‌روزرسانی گم‌شده‌ی شکل ۵.۴ (ص. ۷۱). شمارنده‌ی خواندن و به‌روزرسانی و نوشتن و آن گونه‌ی ×۲ انتخاب خود vault از کنش‌هاست. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">لابه‌لا رفتنی بسازید</p>
-        <div class="seq" id="seq" aria-live="polite"></div><div class="kv" id="regs"></div>
-        <div class="btns"><button class="btn small" id="stepP">کنش بعدی P</button><button class="btn small" id="stepQ">کنش بعدی Q</button><button class="btn small" id="clr">از نو</button></div>
-        <div class="callout" id="res" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">همه‌ی لابه‌لا رفتن‌ها</p><div class="table-wrap" style="max-height:420px;overflow:auto"><table class="il" id="all"></table></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="qop"></div><div id="atomic" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="il-grid">
+          <div>
+            <p class="ptitle">لابه‌لا رفتنی که ساخته می‌شود، از چپ به راست</p>
+            <div class="lanes" id="lanes"></div>
+            <div class="regs" id="regs"></div>
+          </div>
+          <div>
+            <p class="ptitle" id="tt"></p>
+            <div class="tiles" id="tiles"></div>
+            <p class="key">هر خانه یک لابه‌لا رفتن و x پایانی‌اش است؛ سبز یعنی برابر یکی از دو ترتیب سری، قرمز یعنی مسابقه.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+        <div class="tweak-group"><div class="row"><button class="btn small" id="stepP" type="button">کنش بعدی P</button><button class="btn small" id="stepQ" type="button">کنش بعدی Q</button><button class="btn small" id="clr" type="button">از نو</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>وقتی خواندن و به‌روزرسانی و نوشتن کنش‌های جدا باشند</strong>، تنها همان دو لابه‌لا رفتن سری نتیجه‌ی سری را می‌دهند. در آن ۱۸ تای دیگر، یک process پیش از نوشتن آن یکی می‌خواند، و یک به‌روزرسانی گم می‌شود.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>وقتی خواندن و به‌روزرسانی و نوشتن کنش‌های جدا باشند</strong>، تنها همان دو لابه‌لا رفتن سری نتیجه‌ی سری را می‌دهند. در آن ۱۸ تای دیگر، یک process پیش از نوشتن آن یکی می‌خواند، و یک به‌روزرسانی گم می‌شود.</li>
     <li><strong>اتمی کردن به‌روزرسانی در یک کنش</strong> تنها دو لابه‌لا رفتن می‌گذارد، یعنی P·Q و Q·P، پس مسابقه‌ای نیست.</li>
     <li><strong>با +۱ و ×۲</strong> آن دو ترتیب سری نتیجه‌های مختلفی می‌دهند، یعنی ۴ و ۳. هر دو زیر serializable بودن درست‌اند؛ و هر چیز دیگری نه.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html"><small>درس</small>فصل ۱: فکر کردن در سیستم‌های توزیع‌شده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html"><small>درس</small>فصل ۱: فکر کردن در سیستم‌های توزیع‌شده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
+  var X0 = 1, DEF = { q: "inc", atomic: "no", seq: "" }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function acts(p, v) { v = v || view; var op = p === "P" ? "inc" : v.q;
+    if (v.atomic === "yes") return [{ p: p, k: "rmw", op: op, label: op === "inc" ? "x+=1" : "x*=2" }];
+    return [{ p: p, k: "r", label: "read" }, { p: p, k: "u", op: op, label: op === "inc" ? "+1" : "×2" }, { p: p, k: "w", label: "write" }]; }
+  function run(seq) { var x = X0, reg = { P: null, Q: null };
+    seq.forEach(function (a) { if (a.k === "r") reg[a.p] = x; else if (a.k === "u") reg[a.p] = a.op === "inc" ? reg[a.p] + 1 : reg[a.p] * 2; else if (a.k === "w") x = reg[a.p]; else x = a.op === "inc" ? x + 1 : x * 2; });
+    return { x: x, reg: reg }; }
+  function inter(a, b) { if (!a.length) return [b.slice()]; if (!b.length) return [a.slice()];
+    return inter(a.slice(1), b).map(function (r) { return [a[0]].concat(r); }).concat(inter(a, b.slice(1)).map(function (r) { return [b[0]].concat(r); })); }
+  function build(v) { v = v || view; var P = acts("P", v), Q = acts("Q", v), pc = { P: 0, Q: 0 }, out = [];
+    v.seq.split("").forEach(function (c) { var A = c === "P" ? P : Q; if (pc[c] < A.length) out.push(A[pc[c]++]); }); return { built: out, pc: pc, n: P.length }; }
+  function summary(v) { var P = acts("P", v), Q = acts("Q", v), ser = [run(P.concat(Q)).x, run(Q.concat(P)).x], all = inter(P, Q), bad = 0;
+    all.forEach(function (s) { if (ser.indexOf(run(s).x) < 0) bad++; }); return { ser: ser, all: all, bad: bad }; }
+  function SM(o) { return summary(Object.assign({}, DEF, o)); }
+  function render() {
+    var b = build(), r = run(b.built), sm = summary(view), done = b.pc.P >= b.n && b.pc.Q >= b.n;
+    var L = Kit.clear(document.getElementById("lanes")), total = 2 * b.n;
+    ["P", "Q"].forEach(function (p) { L.appendChild(Kit.el("b", null, p)); var lane = Kit.el("div", { class: "lane" });
+      for (var i = 0; i < total; i++) { var a = b.built[i]; lane.appendChild(a && a.p === p ? Kit.el("div", { class: "act " + p.toLowerCase() + (i === b.built.length - 1 ? " last" : "") }, a.label) : Kit.el("div", { class: "slot" })); }
+      L.appendChild(lane); });
+    var R = Kit.clear(document.getElementById("regs"));
+    [["x مشترک", r.x, "x"], ["register در P", r.reg.P === null ? "–" : r.reg.P], ["register در Q", r.reg.Q === null ? "–" : r.reg.Q]].forEach(function (x) { R.appendChild(Kit.el("div", { class: "reg " + (x[2] || "") }, x[0], Kit.el("b", null, String(x[1])))); });
+    document.getElementById("tt").textContent = "همه‌ی " + sm.all.length + " لابه‌لا رفتن؛ ترتیب‌های سری x = " + sm.ser[0] + " و " + sm.ser[1] + " می‌دهند";
+    var T = Kit.clear(document.getElementById("tiles")), curKey = done ? b.built.map(function (a) { return a.p + a.k; }).join() : null;
+    sm.all.forEach(function (s, i) { var x = run(s).x, ok = sm.ser.indexOf(x) >= 0, key = s.map(function (a) { return a.p + a.k; }).join();
+      T.appendChild(Kit.el("div", { class: "tile mono " + (ok ? "ok" : "bad") + (key === curKey ? " cur" : ""), title: s.map(function (a) { return a.p + ":" + a.label; }).join(" · ") }, "x=" + x, Kit.el("small", null, s.map(function (a) { return a.p; }).join("")))); });
+    if (done) { var ok = sm.ser.indexOf(r.x) >= 0; kind = ok ? "ok" : "bad"; msg = ok ? "x = " + r.x + ": همان اثر یک ترتیب سری." : "x = " + r.x + ": هیچ ترتیب سری‌ای این را نمی‌دهد؛ یک به‌روزرسانی گم شد."; }
+    else { kind = ""; msg = "کنش‌های P و Q را به هر ترتیبی لابه‌لای هم ببرید."; }
+    var St = Kit.clear(document.getElementById("stats"));
+    [["x در آغاز", X0], ["لابه‌لا رفتن‌ها", sm.all.length], ["نادرست", sm.bad, sm.bad ? "bad" : "ok"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    document.getElementById("stepP").disabled = b.pc.P >= b.n; document.getElementById("stepQ").disabled = b.pc.Q >= b.n;
+    ctl.q.set(view.q); ctl.atomic.set(view.atomic);
   }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var box = document.getElementById("ctl");
+  ctl.q = Kit.segmented({ label: "به‌روزرسانی Q", value: "inc", options: [{ value: "inc", label: "+۱ مثل P" }, { value: "dbl", label: "×۲" }], onChange: tw(function (v) { view.q = v; view.seq = ""; }) });
+  ctl.atomic = Kit.segmented({ label: "خواندن، به‌روزرسانی و نوشتن", value: "no", options: [{ value: "no", label: "سه کنش" }, { value: "yes", label: "یک کنش اتمی" }], onChange: tw(function (v) { view.atomic = v; view.seq = ""; }) });
+  box.appendChild(ctl.q.element); box.appendChild(ctl.atomic.element);
+  function clean() { var b = build(); return b.built.map(function (a) { return a.p; }).join(""); }
+  document.getElementById("stepP").addEventListener("click", tw(function () { view.seq = clean() + "P"; }));
+  document.getElementById("stepQ").addEventListener("click", tw(function () { view.seq = clean() + "Q"; }));
+  document.getElementById("clr").addEventListener("click", tw(function () { view.seq = ""; }));
 
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { q: "inc", atomic: "no" }, X0 = 1, built, pc;
-  function acts(p) {
-    var name = p === "P" ? "P" : "Q", op = p === "P" ? "inc" : cfg.q;
-    if (cfg.atomic === "yes") return [{ p: name, k: "rmw", op: op, label: name + ":" + (op === "inc" ? "x+=1" : "x*=2") }];
-    return [{ p: name, k: "r", label: name + ":read" }, { p: name, k: "u", op: op, label: name + ":" + (op === "inc" ? "+1" : "×2") }, { p: name, k: "w", label: name + ":write" }];
-  }
-  function run(seq) {
-    var x = X0, reg = { P: null, Q: null };
-    seq.forEach(function (a) {
-      if (a.k === "r") reg[a.p] = x;
-      else if (a.k === "u") reg[a.p] = a.op === "inc" ? reg[a.p] + 1 : reg[a.p] * 2;
-      else if (a.k === "w") x = reg[a.p];
-      else x = a.op === "inc" ? x + 1 : x * 2;
-    });
-    return { x: x, reg: reg };
-  }
-  function interleavings(a, b) {
-    if (!a.length) return [b.slice()]; if (!b.length) return [a.slice()];
-    return interleavings(a.slice(1), b).map(function (r) { return [a[0]].concat(r); }).concat(interleavings(a, b.slice(1)).map(function (r) { return [b[0]].concat(r); }));
-  }
-  function serials() { var P = acts("P"), Q = acts("Q"); return [run(P.concat(Q)).x, run(Q.concat(P)).x]; }
-  function renderAll() {
-    var P = acts("P"), Q = acts("Q"), all = interleavings(P, Q), ser = serials(), t = Kit.clear(document.getElementById("all")), bad = 0;
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["#", "لابه‌لا رفتن", "x", "حکم"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
-    var tb = Kit.el("tbody");
-    all.forEach(function (seq, i) {
-      var x = run(seq).x, ok = ser.indexOf(x) >= 0; if (!ok) bad++;
-      tb.appendChild(Kit.el("tr", { class: ok ? "ok" : "bad" }, Kit.el("td", null, String(i + 1)), Kit.el("td", null, seq.map(function (a) { return a.label; }).join(" · ")), Kit.el("td", null, String(x)), Kit.el("td", null, ok ? "✓ برابر سری" : "✗ مسابقه")));
-    });
-    t.appendChild(tb);
-    stats([["x در آغاز", X0], ["نتیجه‌های سری، یعنی P·Q و Q·P", ser[0] + ", " + ser[1]], ["لابه‌لا رفتن‌ها", all.length], ["نادرست", bad, bad ? "bad" : "ok"]]);
-  }
-  function resetBuild() { built = []; pc = { P: 0, Q: 0 }; log.clear(); log.add("x = " + X0 + ". process P یک می‌افزاید؛ و process Q " + (cfg.q === "inc" ? "یک می‌افزاید" : "دو برابر می‌کند") + ".", "muted"); renderBuild(); }
-  function stepOf(p) { var a = acts(p); if (pc[p] >= a.length) return; built.push(a[pc[p]++]); var r = run(built); log.add(built[built.length - 1].label + "  →  x = " + r.x + "، register process P = " + r.reg.P + "، register process Q = " + r.reg.Q, "muted"); renderBuild(); }
-  function renderBuild() {
-    var r = run(built), n = acts("P").length;
-    document.getElementById("seq").textContent = built.length ? built.map(function (a) { return a.label; }).join(" · ") : "(هنوز هیچ کنشی نیست)";
-    var kv = Kit.clear(document.getElementById("regs"));
-    [["x مشترک", r.x], ["register process P", r.reg.P === null ? "–" : r.reg.P], ["register process Q", r.reg.Q === null ? "–" : r.reg.Q]].forEach(function (x) { kv.appendChild(Kit.el("div", null, Kit.el("span", null, x[0] + ": "), Kit.el("strong", null, String(x[1])))); });
-    document.getElementById("stepP").disabled = pc.P >= n; document.getElementById("stepQ").disabled = pc.Q >= n;
-    var res = document.getElementById("res"), ser = serials();
-    if (pc.P >= n && pc.Q >= n) { var ok = ser.indexOf(r.x) >= 0; res.className = "callout " + (ok ? "ok" : "bad"); res.textContent = ok ? "x = " + r.x + ": همان اثر یک ترتیب سری." : "x = " + r.x + ": هیچ ترتیب سری‌ای این را نمی‌دهد. یک به‌روزرسانی گم شد."; }
-    else { res.className = "callout"; res.textContent = "کنش‌های P و Q را به هر ترتیبی لابه‌لای هم ببرید."; }
-  }
-  function reset() { renderAll(); resetBuild(); }
-  document.getElementById("qop").appendChild(Kit.segmented({ label: "به‌روزرسانی Q", value: cfg.q, options: [{ value: "inc", label: "+۱ مثل P" }, { value: "dbl", label: "×۲" }], onChange: function (v) { cfg.q = v; reset(); } }).element);
-  document.getElementById("atomic").appendChild(Kit.segmented({ label: "خواندن و به‌روزرسانی و نوشتن … است", value: cfg.atomic, options: [{ value: "no", label: "سه کنش" }, { value: "yes", label: "یک کنش اتمی" }], onChange: function (v) { cfg.atomic = v; reset(); } }).element);
-  document.getElementById("stepP").addEventListener("click", function () { stepOf("P"); });
-  document.getElementById("stepQ").addEventListener("click", function () { stepOf("Q"); });
-  document.getElementById("clr").addEventListener("click", resetBuild);
-  reset();
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "دو process هم‌زمان روی یک x مشترک (صص. ۲۱–۲۲، شکل‌های ۱.۱۹ و ۱.۲۰؛ به‌روزرسانی گم‌شده‌ی شکل ۵.۴، ص. ۷۱). شکستن به خواندن، به‌روزرسانی و نوشتن و گونه‌ی ×۲ انتخاب vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و لابه‌لا رفتن خودتان را بسازید.",
+    steps: [
+      { kind: "ok", run: at({ seq: "PPPQQQ" }), say: "x از ۱ شروع می‌شود. اول P کامل اجرا می‌شود و بعد Q: هر دو یکی می‌افزایند و x = ۳. این ترتیب سری P·Q است." },
+      { kind: "", run: at({ seq: "PQ" }), say: "حالا لابه‌لا: P می‌خواند (۱) و پیش از این که بنویسد، Q هم می‌خواند (۱)." },
+      { kind: "bad", run: at({ seq: "PQPPQQ" }), say: "هر دو ۱ را به ۲ می‌رسانند و هر دو ۲ می‌نویسند: x = ۲. یک به‌روزرسانی گم شد. این شرط مسابقه است." },
+      { kind: "bad", run: at({ seq: "PQPPQQ" }), say: function () { var s = SM({}); return "از " + s.all.length + " لابه‌لا رفتن ممکن، فقط دو ترتیب سری درست‌اند و " + s.bad + " تا یک به‌روزرسانی را گم می‌کنند."; } },
+      { kind: "ok", run: at({ atomic: "yes", seq: "PQ" }), say: "اگر خواندن، به‌روزرسانی و نوشتن یک کنش اتمی باشد، تنها دو لابه‌لا رفتن می‌ماند، یعنی P·Q و Q·P؛ پس مسابقه‌ای نیست." },
+      { kind: "ok", run: at({ q: "dbl", seq: "QQQPPP" }), say: function () { var s = SM({ q: "dbl" }); return "اگر Q دو برابر کند، دو ترتیب سری نتیجه‌های مختلف می‌دهند: P·Q به " + s.ser[0] + " می‌رسد و Q·P به " + s.ser[1] + ". serializable یعنی هر کدام از این دو قبول است، و هر چیز دیگری نه."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "دو process که هر یک سه کنش دارند چند لابه‌لا رفتن دارند؟",

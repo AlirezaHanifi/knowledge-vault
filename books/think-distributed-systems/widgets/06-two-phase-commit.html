@@ -7,18 +7,23 @@
 <meta name="description" content="الگوریتم Two-Phase Commit را میان یک coordinator و دو resource manager اجرا کنید، یکی‌شان را در قدمی که می‌خواهید از کار بیندازید، ببینید هر RM در حال بازیابی قاعده‌ی آخرین entry logش را اعمال می‌کند، و بعد آن دو بهبود را بیازمایید: پرسیدن از همتا، و timeout و abort. تصویری از فصل ۶ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
+  .tp { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
   .parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .pt { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); font-size: .82rem; }
-  .pt h3 { margin: 0 0 4px; font-size: .9rem; } .pt .s { font-weight: 600; }
-  .pt.commit { border-color: var(--ok); background: var(--ok-soft); } .pt.abort { border-color: var(--bad); background: var(--bad-soft); } .pt.blocked { border-color: var(--warn); background: var(--warn-soft); } .pt.down { opacity: .55; border-style: dashed; }
-  .pt ol { margin: 4px 0 0; padding-right: 18px; font-family: var(--mono); font-size: .76rem; }
-  @media (max-width: 560px) { .parts { grid-template-columns: 1fr; } }
+  .pt { border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); font-size: .82rem; min-height: 150px; }
+  .pt h3 { margin: 0 0 4px; font-size: .95rem; } .pt .s { font-weight: 700; margin-bottom: 4px; }
+  .pt.commit { border-color: var(--ok); background: var(--ok-soft); } .pt.abort { border-color: var(--bad); background: var(--bad-soft); } .pt.blocked { border-color: var(--warn); background: var(--warn-soft); } .pt.down { opacity: .6; border-style: dashed; }
+  .pt.act { box-shadow: 0 0 0 3px var(--accent); }
+  .pt ol { margin: 4px 0 0; padding: 0 16px 0 0; font-family: var(--mono); font-size: .78rem; } .pt .lg { font-size: .75rem; color: var(--ink-2); }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 6px; }
+  .rules { margin: 10px 0 0; font-size: .8rem; border-collapse: collapse; width: 100%; } .rules td { border-bottom: 1px solid var(--line); padding: 3px 6px; } .rules tr.on td { background: var(--accent-soft); font-weight: 700; }
+  ol.tl { margin: 0; padding: 0 1.2em 0 0; font-size: .8rem; line-height: 1.4; display: grid; gap: 2px; }
+  ol.tl li.ok { color: var(--ok); } ol.tl li.warn { color: var(--warn); } ol.tl li.bad { color: var(--bad); } ol.tl li.muted { color: var(--ink-2); } ol.tl li.last { font-weight: 700; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/06-distributed-transactions.html">فصل ۶</a><span aria-hidden="true">/</span>
@@ -29,93 +34,103 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۶ · تراکنش توزیع‌شده</div>
-  <h1>الگوریتم Two-Phase Commit: بازیابی و بند آمدن</h1>
-  <p class="lede">هر شرکت‌کننده‌ای پیش از عمل کردن entryی در log پایا می‌کند. پس از از کار افتادنی، هر RM از <strong>آخرین entry log</strong>ش تصمیم می‌گیرد چه کند: هنوز قولی نداده ← abort؛ Vote-to-Commit ← از coordinator بپرس؛ Commit ← دوباره انجام بده؛ Abort ← واگردان. آن RMی که رأی به commit داده نمی‌تواند تنها تصمیم بگیرد، پس <strong>coordinator</strong>ی که از کار افتاده می‌تواند بندش بیاورد.</p>
-  <p class="source-note">تصویری از «پروتکل Two-Phase Commit» و «در حضور شکست» و «بهبود» (صص. ۸۳–۸۸، شکل‌های ۶.۶ تا ۶.۱۲). فهرست صحنه‌ها و زمان بازیابی coordinator مال vault است؛ و قاعده‌های بازیابی مال کتاب. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>الگوریتم Two-Phase Commit: بازیابی و بند آمدن</h1>
+      <p class="lede">هر شرکت‌کننده‌ای پیش از عمل کردن entryی در log پایا می‌کند. پس از از کار افتادنی، هر RM از <strong>آخرین entry log</strong>ش تصمیم می‌گیرد چه کند: هنوز قولی نداده ← abort؛ Vote-to-Commit ← از coordinator بپرس؛ Commit ← دوباره انجام بده؛ Abort ← واگردان. آن RMی که رأی به commit داده نمی‌تواند تنها تصمیم بگیرد، پس <strong>coordinator</strong>ی که از کار افتاده می‌تواند بندش بیاورد.</p>
+      <p class="source-note">تصویری از «پروتکل Two-Phase Commit» و «در حضور شکست» و «بهبود» (صص. ۸۳–۸۸، شکل‌های ۶.۶ تا ۶.۱۲). فهرست صحنه‌ها و زمان بازیابی coordinator مال vault است؛ و قاعده‌های بازیابی مال کتاب. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="parts" id="parts"></div><div class="callout" id="out" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="scen"></div><div id="term" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="tp">
+          <div><div class="parts" id="parts"></div>
+            <table class="rules" id="rules" aria-label="قاعده‌های بازیابی RM از روی آخرین entry"></table></div>
+          <div><p class="ptitle">رویدادها</p><ol class="tl" id="tl" aria-live="polite"></ol></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="scen"></div>
+        <div class="tweak-group" id="term"></div>
+        <div class="tweak-group" id="kslot"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>RM پیش از رأی دادن از کار می‌افتد.</strong> قولی نداده، پس سر بازیابی Abort را ثبت می‌کند و به coordinator می‌گوید، که همه را abort می‌کند. چیزی بند نمی‌آید.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>RM پیش از رأی دادن از کار می‌افتد.</strong> قولی نداده، پس سر بازیابی Abort را ثبت می‌کند و به coordinator می‌گوید، که همه را abort می‌کند. چیزی بند نمی‌آید.</li>
     <li><strong>RM پس از رأی به commit از کار می‌افتد.</strong> قول داده، پس سر بازیابی باید تصمیم را از coordinator بپرسد.</li>
     <li><strong>coordinator پس از گفتن commit به RM1 از کار می‌افتد (شکل ۶.۱۱).</strong> مؤلفه‌ی RM2 بند آمده. این‌جا پرسیدن از RM1 کمک می‌کند: مؤلفه‌ی RM1 commit کرده، پس RM2 هم می‌تواند.</li>
     <li><strong>coordinator پیش از هر Commitی از کار می‌افتد (شکل ۶.۱۲).</strong> هیچ‌کس تصمیم را نمی‌داند. پرسیدن از همتا کمکی نمی‌کند، و timeout و abort ناایمن است: وقتی coordinator با Commit برگردد، آن RMی که تایمرش شلیک نکرده commit می‌کند در حالی که آن یکی از قبل abort کرده.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/06-distributed-transactions.html"><small>درس</small>فصل ۶: تراکنش توزیع‌شده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/06-distributed-transactions.html"><small>درس</small>فصل ۶: تراکنش توزیع‌شده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { scen: "ok", term: "wait" }, steps, k, P;
   var NAMES = ["coordinator", "RM1", "RM2"];
   var ST = { working: "کار‌کنان", preparing: "در آماده‌سازی", prepared: "آماده", committed: "commit‌شده", aborted: "abort‌شده", blocked: "بند آمده", down: "از کار افتاده", asking: "در حال پرسیدن", recovering: "در بازیابی" };
-  function plan() {
-    steps = []; var sc = cfg.scen;
+  var RULES = [["entry ندارد", "هنوز قول نداده: abort"], ["Vote-to-Commit", "قول داده: از coordinator بپرس"], ["Commit", "دوباره انجام بده، یعنی REDO"], ["Abort", "واگردان، یعنی UNDO"]];
+  var DEF = { scen: "ok", term: "wait", k: 99 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function plan(sc, t) {
+    var steps = [];
     function st(text, who, entry, state, kind) { steps.push({ text: text, who: who, entry: entry, state: state, kind: kind }); }
     st("کلاینت از coordinator می‌خواهد t1 را commit کند", -1, null, null, "muted");
-    st("coordinator entry ⟨Prepare⟩ را ثبت می‌کند و Prepare را به RM1 و RM2 می‌فرستد", 0, "Prepare", "preparing");
+    st("مؤلفه‌ی coordinator entry ⟨Prepare⟩ را ثبت می‌کند و Prepare را به RM1 و RM2 می‌فرستد", 0, "Prepare", "preparing");
     if (sc === "rmBefore") {
       st("⚡ مؤلفه‌ی RM1 پیش از ثبت رأیی از کار می‌افتد", 1, null, "down", "bad");
       st("مؤلفه‌ی RM2 entry ⟨Vote-to-Commit⟩ را ثبت می‌کند و رأی می‌دهد", 2, "Vote-to-Commit", "prepared");
       st("وقت coordinator در انتظار RM1 سر می‌رود: entry ⟨Abort⟩ را ثبت می‌کند و Abort می‌فرستد", 0, "Abort", "aborted", "warn");
       st("مؤلفه‌ی RM2 entry ⟨Abort⟩ را ثبت می‌کند و abort می‌کند", 2, "Abort", "aborted");
       st("مؤلفه‌ی RM1 بازیابی می‌شود. آخرین entry: هیچ، پس قولی نداده: entry ⟨Abort⟩ را ثبت می‌کند و Abort می‌فرستد", 1, "Abort", "aborted", "ok");
-      return;
+      return steps;
     }
     st("مؤلفه‌ی RM1 entry ⟨Vote-to-Commit⟩ را ثبت می‌کند و رأی می‌دهد", 1, "Vote-to-Commit", "prepared");
     st("مؤلفه‌ی RM2 entry ⟨Vote-to-Commit⟩ را ثبت می‌کند و رأی می‌دهد", 2, "Vote-to-Commit", "prepared");
     if (sc === "rmAfter") {
       st("⚡ مؤلفه‌ی RM2 درست پس از رأی دادن از کار می‌افتد", 2, null, "down", "bad");
-      st("همه‌ی رأی‌ها Vote-to-Commit بودند: coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit می‌فرستد", 0, "Commit", "committed");
+      st("همه‌ی رأی‌ها Vote-to-Commit بودند: مؤلفه‌ی coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit می‌فرستد", 0, "Commit", "committed");
       st("مؤلفه‌ی RM1 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند", 1, "Commit", "committed");
       st("مؤلفه‌ی RM2 بازیابی می‌شود. آخرین entry: Vote-to-Commit، پس قول داده: از coordinator می‌پرسد", 2, null, "asking", "warn");
-      st("coordinator پاسخ Commit می‌دهد؛ مؤلفه‌ی RM2 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند، یعنی REDO", 2, "Commit", "committed", "ok");
-      return;
+      st("مؤلفه‌ی coordinator پاسخ Commit می‌دهد؛ مؤلفه‌ی RM2 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند، یعنی REDO", 2, "Commit", "committed", "ok");
+      return steps;
     }
     if (sc === "ok") {
-      st("همه‌ی رأی‌ها Vote-to-Commit بودند: coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit می‌فرستد", 0, "Commit", "committed");
+      st("همه‌ی رأی‌ها Vote-to-Commit بودند: مؤلفه‌ی coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit می‌فرستد", 0, "Commit", "committed");
       st("مؤلفه‌ی RM1 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند", 1, "Commit", "committed");
       st("مؤلفه‌ی RM2 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند", 2, "Commit", "committed", "ok");
-      return;
+      return steps;
     }
     if (sc === "tcAfter") {
-      st("coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit را به RM1 می‌فرستد", 0, "Commit", "committed");
+      st("مؤلفه‌ی coordinator entry ⟨Commit⟩ را ثبت می‌کند و Commit را به RM1 می‌فرستد", 0, "Commit", "committed");
       st("مؤلفه‌ی RM1 entry ⟨Commit⟩ را ثبت می‌کند و commit می‌کند", 1, "Commit", "committed");
       st("⚡ coordinator پیش از فرستادن Commit به RM2 از کار می‌افتد", 0, null, "down", "bad");
     } else {
       st("⚡ coordinator پس از جمع کردن رأی‌ها و پیش از فرستادن هر تصمیمی از کار می‌افتد", 0, null, "down", "bad");
     }
-    var t = cfg.term, rm1Knows = sc === "tcAfter";
+    var rm1Knows = sc === "tcAfter";
     if (t === "wait") {
       st("مؤلفه‌ی RM2 رأی به commit داده: نمی‌تواند تنها تصمیم بگیرد و منتظر coordinator می‌ماند، یعنی بند آمده", 2, null, "blocked", "warn");
       if (!rm1Knows) st("مؤلفه‌ی RM1 هم در همان وضع است و بند آمده", 1, null, "blocked", "warn");
@@ -129,32 +144,60 @@ function stats(rows) {
       if (rm1Knows) { st("وقت RM2 سر می‌رود: entry ⟨Abort⟩ را ثبت می‌کند و abort می‌کند", 2, "Abort", "aborted", "bad"); }
       else {
         st("وقت RM2 اول سر می‌رود: entry ⟨Abort⟩ را ثبت می‌کند و abort می‌کند", 2, "Abort", "aborted", "warn");
-        st("coordinator بازیابی می‌شود، Commit را تصمیم می‌گیرد و می‌فرستدش", 0, "Commit", "committed");
+        st("مؤلفه‌ی coordinator بازیابی می‌شود، Commit را تصمیم می‌گیرد و می‌فرستدش", 0, "Commit", "committed");
         st("ساعت RM1 کندتر می‌رود، پس Commit درون پنجره‌اش می‌رسد: مؤلفه‌ی RM1 commit می‌کند", 1, "Commit", "committed", "bad");
       }
     }
+    return steps;
   }
-  function reset() { plan(); k = 0; P = NAMES.map(function () { return { log: [], state: "working" }; }); log.clear(); log.add("کلاینت t1 را روی RM1 و RM2 شروع کرد و خواندن‌ها و نوشتن‌هایش را اجرا کرد.", "muted"); render(); }
-  function step() { if (k >= steps.length) return false; var s = steps[k++]; if (s.who >= 0) { if (s.entry) P[s.who].log.push(s.entry); if (s.state) P[s.who].state = s.state; } log.add(s.text, s.kind || "muted"); render(); return k < steps.length; }
+
+  function trace(sc, term) { var steps = plan(sc, term), P = NAMES.map(function () { return { log: [], state: "working" }; }), out = [];
+    out.push({ text: "کلاینت t1 را روی RM1 و RM2 اجرا کرده و حالا commit می‌خواهد", kind: "muted", who: -1, P: JSON.parse(JSON.stringify(P)) });
+    steps.slice(1).forEach(function (s) { if (s.who >= 0) { if (s.entry) P[s.who].log.push(s.entry); if (s.state) P[s.who].state = s.state; } out.push({ text: s.text, kind: s.kind || "muted", who: s.who, P: JSON.parse(JSON.stringify(P)) }); });
+    return out; }
+  function verdict(P, fin) { var rm = [P[1].state, P[2].state], split = rm.indexOf("committed") >= 0 && rm.indexOf("aborted") >= 0, blk = rm.indexOf("blocked") >= 0;
+    if (split) return ["bad", "ایمنی نقض شد: یک RM commit کرد و دیگری abort."];
+    if (fin && blk) return ["warn", "بند آمده: ایمن است، ولی تا برگشتن coordinator زنده نیست."];
+    if (fin) return ["ok", "هر دو RM به یک تصمیم رسیدند: " + ST[rm[0]] + "."]; return null; }
   function render() {
+    var fr = trace(view.scen, view.term), n = Math.min(view.k, fr.length), f = fr[n - 1], fin = n === fr.length;
     var b = Kit.clear(document.getElementById("parts"));
-    P.forEach(function (p, i) {
-      var cls = p.state === "committed" ? "commit" : p.state === "aborted" ? "abort" : p.state === "blocked" ? "blocked" : p.state === "down" ? "down" : "";
+    f.P.forEach(function (p, i) { var cls = p.state === "committed" ? "commit" : p.state === "aborted" ? "abort" : p.state === "blocked" ? "blocked" : p.state === "down" ? "down" : "";
       var ol = Kit.el("ol"); p.log.forEach(function (e) { ol.appendChild(Kit.el("li", null, "⟨" + e + "⟩")); });
-      b.appendChild(Kit.el("div", { class: "pt " + cls }, Kit.el("h3", null, NAMES[i]), Kit.el("div", { class: "s" }, ST[p.state] || p.state), Kit.el("div", null, "log:"), p.log.length ? ol : Kit.el("div", null, "(خالی)")));
-    });
-    var rm = [P[1].state, P[2].state], o = document.getElementById("out"), fin = k >= steps.length;
-    var split = rm.indexOf("committed") >= 0 && rm.indexOf("aborted") >= 0, blk = rm.indexOf("blocked") >= 0;
-    if (split) { o.className = "callout bad"; o.textContent = "ایمنی نقض شد: یک RM commit کرد و دیگری abort."; }
-    else if (fin && blk) { o.className = "callout warn"; o.textContent = "بند آمده: ایمن است، ولی تا برگشتن coordinator زنده نه."; }
-    else if (fin) { o.className = "callout ok"; o.textContent = "هر دو RM به همان تصمیم رسیدند: " + (ST[rm[0]] || rm[0]) + "."; }
-    else { o.className = "callout"; o.textContent = "در جریان."; }
-    stats([["قدم", k + " / " + steps.length], ["RM1 و RM2", rm.map(function (x) { return ST[x] || x; }).join(" / "), split ? "bad" : blk ? "warn" : ""]]);
+      b.appendChild(Kit.el("div", { class: "pt " + cls + (f.who === i ? " act" : "") }, Kit.el("h3", null, NAMES[i]), Kit.el("div", { class: "s" }, ST[p.state] || p.state), Kit.el("div", { class: "lg" }, "entryهای log:"), p.log.length ? ol : Kit.el("div", { class: "lg" }, "خالی"))); });
+    var rt = Kit.clear(document.getElementById("rules")), m = /آخرین entry: (هیچ|Vote-to-Commit)/.exec(f.text), on = m ? (m[1] === "هیچ" ? 0 : 1) : (/REDO/.test(f.text) ? 2 : -1);
+    rt.appendChild(Kit.el("caption", { class: "ptitle", style: "text-align:right" }, "بازیابی RM از روی آخرین entry"));
+    RULES.forEach(function (r, i) { rt.appendChild(Kit.el("tr", { class: i === on ? "on" : "" }, Kit.el("td", { class: "mono" }, r[0]), Kit.el("td", null, r[1]))); });
+    var tl = Kit.clear(document.getElementById("tl"));
+    fr.slice(0, n).forEach(function (x, i) { tl.appendChild(Kit.el("li", { class: x.kind + (i === n - 1 ? " last" : "") }, x.text)); });
+    var v = verdict(f.P, fin); if (v) { kind = v[0]; msg = v[1]; } else { kind = f.kind === "bad" ? "bad" : ""; msg = f.text; }
+    var St = Kit.clear(document.getElementById("stats"));
+    [["قدم", n + " / " + fr.length], ["وضع RM1", ST[f.P[1].state]], ["وضع RM2", ST[f.P[2].state]], ["حکم", v ? (v[0] === "ok" ? "یک تصمیم" : v[0] === "warn" ? "بند آمده" : "دو تصمیم") : "در جریان", v ? v[0] : ""]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || ""), style: "unicode-bidi:isolate" }, String(x[1])))); });
+    ctl.s.set(view.scen); ctl.t.set(view.term); ctl.k.input.max = fr.length; ctl.k.set(n);
   }
-  document.getElementById("scen").appendChild(Kit.segmented({ label: "شکست", value: cfg.scen, options: [{ value: "ok", label: "هیچ" }, { value: "rmBefore", label: "RM1 پیش از رأی" }, { value: "rmAfter", label: "RM2 پس از رأی" }, { value: "tcAfter", label: "TC پس از Commit اول" }, { value: "tcBefore", label: "TC پیش از هر Commitی" }], onChange: function (v) { cfg.scen = v; reset(); } }).element);
-  document.getElementById("term").appendChild(Kit.segmented({ label: "RMهای آماده، وقتی TC نیست", value: cfg.term, options: [{ value: "wait", label: "منتظر TC بمان" }, { value: "peer", label: "از همتا بپرس" }, { value: "timeout", label: "وقت سر برود و abort" }], onChange: function (v) { cfg.term = v; reset(); } }).element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1100 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.s = Kit.segmented({ label: "شکست", value: DEF.scen, options: [{ value: "ok", label: "هیچ" }, { value: "rmBefore", label: "RM1 پیش از رأی" }, { value: "rmAfter", label: "RM2 پس از رأی" }, { value: "tcAfter", label: "TC پس از Commit اول" }, { value: "tcBefore", label: "TC پیش از هر Commitی" }], onChange: tw(function (v) { view.scen = v; view.k = 99; }) });
+  ctl.t = Kit.segmented({ label: "RMهای آماده، وقتی TC نیست", value: DEF.term, options: [{ value: "wait", label: "منتظر TC بمان" }, { value: "peer", label: "از همتا بپرس" }, { value: "timeout", label: "وقت سر برود و abort" }], onChange: tw(function (v) { view.term = v; view.k = 99; }) });
+  ctl.k = Kit.slider({ label: "قدم", min: 1, max: 20, step: 1, value: 20, onInput: tw(function (v) { view.k = v; }) });
+  ["scen", "term", "kslot"].forEach(function (id, i) { document.getElementById(id).appendChild([ctl.s, ctl.t, ctl.k][i].element); });
+  function blockAt() { var f = trace("tcAfter", "wait"); for (var i = 0; i < f.length; i++) if (f[i].P[2].state === "blocked") return i + 1; }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "یک coordinator و دو RM. هر شرکت‌کننده پیش از عمل entryی در log پایا می‌کند و پس از بازیابی از روی آخرین entry تصمیم می‌گیرد (صص. ۸۳–۸۸، شکل‌های ۶.۶ تا ۶.۱۲). فهرست صحنه‌ها مدل vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و هر شکست را با هر واکنش RMها امتحان کنید.",
+    steps: [
+      { kind: "ok", run: at({}), say: "بی شکست: coordinator اول ⟨Prepare⟩ را ثبت می‌کند، هر دو RM پیش از رأی ⟨Vote-to-Commit⟩ را ثبت می‌کنند و بعد همه ⟨Commit⟩ را. هر دو commit می‌کنند." },
+      { kind: "ok", run: at({ scen: "rmBefore" }), say: "مؤلفه‌ی RM1 پیش از رأی از کار می‌افتد. هنوز قولی نداده، پس سر بازیابی ⟨Abort⟩ را ثبت می‌کند. همه abort می‌کنند و چیزی بند نمی‌آید." },
+      { kind: "ok", run: at({ scen: "rmAfter" }), say: "مؤلفه‌ی RM2 پس از رأی به commit از کار می‌افتد. آخرین entryش Vote-to-Commit است، یعنی قول داده؛ پس از coordinator می‌پرسد و commit را دوباره انجام می‌دهد." },
+      { kind: "warn", run: function () { view = Object.assign({}, DEF, { scen: "tcAfter", k: blockAt() }); }, say: "شکل ۶.۱۱: coordinator پس از گفتن Commit به RM1 از کار می‌افتد. مؤلفه‌ی RM2 رأی داده و نمی‌تواند تنها تصمیم بگیرد: بند آمده." },
+      { kind: "ok", run: at({ scen: "tcAfter", term: "peer" }), say: "این‌جا پرسیدن از همتا کمک می‌کند: مؤلفه‌ی RM1 از قبل commit کرده، پس RM2 هم می‌تواند ایمن commit کند." },
+      { kind: "warn", run: at({ scen: "tcBefore", term: "peer" }), say: "شکل ۶.۱۲: coordinator پیش از هر Commitی از کار می‌افتد. هیچ‌کس تصمیم را نمی‌داند، پس پرسیدن از همتا هم کمکی نمی‌کند و هر دو بند می‌آیند." },
+      { kind: "bad", run: at({ scen: "tcBefore", term: "timeout" }), say: "اگر به‌جای انتظار، با timeout abort کنند چه؟ مؤلفه‌ی RM2 abort می‌کند، coordinator برمی‌گردد و Commit می‌فرستد و RM1، که تایمرش هنوز شلیک نکرده، commit می‌کند: ایمنی نقض شد." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "یک RM بازیابی می‌شود و آخرین entryش ⟨Vote-to-Commit⟩ است. باید …",
