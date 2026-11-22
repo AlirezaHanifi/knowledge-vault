@@ -7,18 +7,33 @@
 <meta name="description" content="روی یک جدول کوچک churn ترتیب شکافتن و پرسش را عوض کنید: داستان درخت متریک عوض می‌شود و رتبه‌بندی IV/WOE نه. برای نوشته‌ی ۶۲ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
-  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; display: block; }
+  .c62 { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .root { border: 1px solid var(--line-strong); border-radius: 8px; padding: 6px 10px; text-align: center; max-width: 280px; margin: 0 auto; background: var(--surface-2); font-size: .9rem; }
+  .root b { font-family: var(--mono); }
+  .split { text-align: center; font-size: .8rem; color: var(--ink-3); margin: 4px 0; }
+  .kids { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kid { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: .84rem; }
+  .kid.top { border: 2px solid var(--warn); background: var(--warn-soft); }
+  .kid h4 { margin: 0 0 4px; font-size: .92rem; font-family: var(--mono); }
+  .kid .sh { font-family: var(--mono); font-size: 1.35rem; font-weight: 700; display: block; }
+  .kid .rt { font-family: var(--mono); color: var(--ink-2); font-size: .8rem; }
+  .kid .tk { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; margin-top: 4px; direction: rtl; }
+  .kid .tk i { display: block; height: 100%; background: var(--warn); }
+  .story { margin-top: 10px; }
+  .ivrow { display: grid; grid-template-columns: 5.6rem 1fr 3.6rem; gap: 8px; align-items: center; margin: 6px 0; font-size: .9rem; }
+  .ivrow .tk { height: 20px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .ivrow .tk i { display: block; height: 100%; background: var(--ink-3); float: right; }
+  .ivrow.win .tk i { background: var(--ok); } .ivrow.win span:first-child { font-weight: 700; }
+  .ivrow .v { font-family: var(--mono); direction: ltr; text-align: left; }
+  .ivbox[hidden] { display: none; }
+  .woe { font-size: .84rem; color: var(--ink-2); margin: 8px 0 0; line-height: 1.8; }
+  .woe span { display: inline-block; margin-inline-end: 10px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/62-stop-decomposing-metric-tree.html">نوشته‌ی ۶۲</a><span aria-hidden="true">/</span>
@@ -29,60 +44,71 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۶۲ · درخت متریک را تکه‌تکه نکنید</div>
-  <h1>ترتیب و پرسش</h1>
-  <p class="lede">یک SaaS اسباب‌بازی که کانال Partner آن از هم پاشیده. عوض کنید که <strong>درخت اول کدام بُعد را می‌شکافد</strong> و چه چیزی می‌پرسید، و داستان درخت را با رتبه‌بندی IV که به ترتیب کاری ندارد مقایسه کنید.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌ی «Stop Decomposing Metric Tree» را نشان می‌دهد (بخش‌های «Method A»، «Method B» و «The Plot Twist»). داده‌ی این جدول اسباب‌بازی مال خود vault است و در روح همان نوشته ساخته شده، یعنی حدود ۵٬۹۰۰ مشتری و سه منطقه و کانال‌هایی با churn پنج و هشت و بیست‌و‌دو درصد و ARPU ده‌برابری Enterprise نسبت به SMB و منطقه‌ی EMEA که پر از Partner و Enterprise است؛ عددهایش با عددهای نوشته فرق دارند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>ترتیب و پرسش</h1>
+      <p class="lede">یک SaaS اسباب‌بازی که کانال Partner آن از هم پاشیده. عوض کنید که <strong>درخت اول کدام بُعد را می‌شکافد</strong> و چه چیزی می‌پرسید، و داستان درخت را با رتبه‌بندی IV که به ترتیب کاری ندارد مقایسه کنید.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «Stop Decomposing Metric Tree» را نشان می‌دهد (بخش‌های «Method A»، «Method B» و «The Plot Twist»). داده‌ی این جدول اسباب‌بازی مال خود vault است و در روح همان نوشته ساخته شده، یعنی حدود ۵٬۹۰۰ مشتری و سه منطقه و کانال‌هایی با churn پنج و هشت و بیست‌و‌دو درصد و ARPU ده‌برابری Enterprise نسبت به SMB و منطقه‌ی EMEA که پر از Partner و Enterprise است؛ عددهایش با عددهای نوشته فرق دارند. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">درخت: اول بر پایه‌ی <span id="firstname"></span></p><div id="tree"></div>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">معیار IV برای هر بُعد، بدون نیاز به ترتیب</p><div id="iv"></div>
-        <p class="field-hint" id="ivnote"></p></div>
-      <div class="panel"><p class="panel-title">معیار WOE هر دسته در بُعد برنده</p><div id="woe"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c62">
+          <div>
+            <p class="panel-title" id="treeT"></p>
+            <div class="root" id="root"></div>
+            <p class="split" id="split"></p>
+            <div class="kids" id="kids"></div>
+            <div class="callout warn story" id="story"></div>
+          </div>
+          <div class="ivbox" id="ivbox">
+            <p class="panel-title">IV هر بُعد، مستقل از ترتیب</p>
+            <div id="iv"></div>
+            <p class="woe" id="woe"></p>
+            <p class="key" id="ivnote" style="font-size:.8rem;color:var(--ink-3)"></p>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>داستان درخت از اولین شکاف پیروی می‌کند</strong>: اگر اول منطقه را بشکافید تقصیر گردن EMEA می‌افتد و اگر اول کانال را، گردن Partner.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>داستان درخت از اولین شکاف پیروی می‌کند</strong>: اگر اول منطقه را بشکافید تقصیر گردن EMEA می‌افتد و اگر اول کانال را، گردن Partner.</li>
     <li><strong>میله‌های IV با ترتیب شکافتن تکان نمی‌خورند</strong>، فقط با خود پرسش.</li>
     <li><strong>برای پول، برنده می‌تواند عوض شود</strong> و به segment برسد، چون Enterprise پول را متمرکز می‌کند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/62-stop-decomposing-metric-tree.html"><small>درس</small>نوشته‌ی ۶۲: درخت متریک را تکه‌تکه نکنید</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/62-stop-decomposing-metric-tree.html"><small>درس</small>نوشته‌ی ۶۲: درخت متریک را تکه‌تکه نکنید</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  function stats(id, rows) {
-    var st = Kit.clear(document.getElementById(id));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  function bar(label, frac, text, cls) {
-    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
-      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
-      Kit.el("span", { class: "v" }, text));
-  }
-  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
-
-  var log = Kit.log(document.getElementById("log"));
-  var REG = [ { n: "NA", N: 2400 }, { n: "EMEA", N: 2200 }, { n: "APAC", N: 1300 } ];
+  var FA = function (s) { return Kit.digits(String(s)); };
+  function pc(x) { return Math.round(x * 100) + "%"; }
+  var REG = [{ n: "NA", N: 2400 }, { n: "EMEA", N: 2200 }, { n: "APAC", N: 1300 }];
   var CHS = ["Organic", "Paid", "Partner"], RATE = { Organic: 0.05, Paid: 0.08, Partner: 0.22 };
   var MIX = { NA: [0.50, 0.35, 0.15], EMEA: [0.30, 0.25, 0.45], APAC: [0.50, 0.30, 0.20] };
   var SEGS = ["SMB", "Mid-Market", "Enterprise"], ARPU = { SMB: 40, "Mid-Market": 120, Enterprise: 450 };
@@ -93,42 +119,56 @@
     SEGS.forEach(function (s, si) { var n = r.N * MIX[r.n][ci] * seg[si]; cells.push({ Region: r.n, Channel: c, Segment: s, n: n, ch: n * RATE[c], mrr: n * RATE[c] * ARPU[s] }); });
   }); });
   var DIMS = { Region: REG.map(function (r) { return r.n; }), Channel: CHS, Segment: SEGS };
-  var cfg = { first: "Region", target: "rate" }, last = null;
+  var DEF = { first: "Region", target: "rate", iv: true }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
   function by(dim) { var o = {}; DIMS[dim].forEach(function (k) { o[k] = { n: 0, ch: 0, mrr: 0 }; }); cells.forEach(function (c) { var g = o[c[dim]]; g.n += c.n; g.ch += c.ch; g.mrr += c.mrr; }); return o; }
-  function totals() { var t = { n: 0, ch: 0, mrr: 0 }; cells.forEach(function (c) { t.n += c.n; t.ch += c.ch; t.mrr += c.mrr; }); return t; }
-  function woe(dim) {
-    var g = by(dim), T = totals(), rows = [], iv = 0;
-    DIMS[dim].forEach(function (k) {
-      var a, b; if (cfg.target === "rate") { a = (g[k].n - g[k].ch) / (T.n - T.ch); b = g[k].ch / T.ch; } else { a = g[k].mrr / T.mrr; b = g[k].n / T.n; }
-      var w = Math.log(a / b);
-      var contrib = (a - b) * w;
-      rows.push({ k: k, woe: w, iv: contrib }); iv += contrib;
-    });
-    return { rows: rows, iv: iv };
-  }
+  var T = { n: 0, ch: 0, mrr: 0 }; cells.forEach(function (c) { T.n += c.n; T.ch += c.ch; T.mrr += c.mrr; });
+  function woe(dim) { var g = by(dim), rows = [], iv = 0;
+    DIMS[dim].forEach(function (k) { var a, b; if (view.target === "rate") { a = (g[k].n - g[k].ch) / (T.n - T.ch); b = g[k].ch / T.ch; } else { a = g[k].mrr / T.mrr; b = g[k].n / T.n; }
+      var w = Math.log(a / b); rows.push({ k: k, woe: w }); iv += (a - b) * w; });
+    return { rows: rows, iv: iv }; }
   function render() {
-    document.getElementById("firstname").textContent = DNAME[cfg.first];
-    var T = totals(), g = by(cfg.first), tree = Kit.clear(document.getElementById("tree")), top = null;
-    DIMS[cfg.first].forEach(function (k) {
-      var share = cfg.target === "rate" ? g[k].ch / T.ch : g[k].mrr / T.mrr, rate = cfg.target === "rate" ? g[k].ch / g[k].n : g[k].mrr / g[k].n;
-      if (!top || share > top.share) top = { k: k, share: share, rate: rate };
-      tree.appendChild(bar(k, share, pct(share, 0) + " از " + (cfg.target === "rate" ? "churn" : "MRR از‌دست‌رفته"), ""));
-    });
-    var v = document.getElementById("verdict"); v.className = "callout warn";
-    v.textContent = "داستان درخت: در بُعد " + DNAME[cfg.first] + "، دسته‌ی «" + top.k + "» سهم " + pct(top.share, 0) + " از " + (cfg.target === "rate" ? "مشتری‌های churn کرده" : "MRR از‌دست‌رفته") + " را حمل می‌کند، یعنی مشکلِ " + DNAME[cfg.first] + " است. اولین شکاف را عوض کنید تا داستان عوض شود.";
+    var rate = view.target === "rate", g = by(view.first), top = null;
+    document.getElementById("treeT").textContent = rate ? "درخت متریک: churn کرده‌ها، اول بر پایه‌ی " + DNAME[view.first] : "درخت متریک: MRR ازدست‌رفته، اول بر پایه‌ی " + DNAME[view.first];
+    var root = Kit.clear(document.getElementById("root"));
+    root.appendChild(document.createTextNode(rate ? "churn کرده: " : "MRR ازدست‌رفته: ")); root.appendChild(Kit.el("b", { class: "mono" }, rate ? Math.round(T.ch) + " / " + Math.round(T.n).toLocaleString("en-US") : "$" + Math.round(T.mrr).toLocaleString("en-US")));
+    document.getElementById("split").textContent = "▼ شکاف اول: " + DNAME[view.first] + " ▼";
+    var K = Kit.clear(document.getElementById("kids"));
+    DIMS[view.first].forEach(function (k) { var sh = rate ? g[k].ch / T.ch : g[k].mrr / T.mrr; if (!top || sh > top.sh) top = { k: k, sh: sh, rt: g[k].ch / g[k].n }; });
+    DIMS[view.first].forEach(function (k) { var sh = rate ? g[k].ch / T.ch : g[k].mrr / T.mrr, rt = g[k].ch / g[k].n;
+      K.appendChild(Kit.el("div", { class: "kid" + (k === top.k ? " top" : "") }, Kit.el("h4", null, k), Kit.el("span", { class: "sh mono" }, pc(sh)), Kit.el("span", { class: "rt mono" }, "churn rate " + (rt * 100).toFixed(1) + "%"), Kit.el("div", { class: "tk" }, Kit.el("i", { style: "width:" + (sh * 100).toFixed(1) + "%" })))); });
+    document.getElementById("story").textContent = "داستان درخت: بیشترین سهم، یعنی " + FA(pc(top.sh)) + " از " + (rate ? "churn" : "MRR ازدست‌رفته") + "، مال دسته‌ی «" + top.k + "» است؛ پس مشکل از " + DNAME[view.first] + " است.";
     var ivs = Object.keys(DIMS).map(function (d) { var r = woe(d); return { d: d, iv: r.iv, rows: r.rows }; }).sort(function (a, b) { return b.iv - a.iv; });
-    var ivb = Kit.clear(document.getElementById("iv")), mx = ivs[0].iv || 1;
-    ivs.forEach(function (x, i) { ivb.appendChild(bar(DNAME[x.d], x.iv / mx, x.iv.toFixed(3), i === 0 ? "hot" : "")); });
-    document.getElementById("ivnote").textContent = cfg.target === "rate" ? "هدف: مشتری‌های churn کرده، یعنی سهم رویداد در برابر سهم غیررویداد." : "هدف: MRR از‌دست‌رفته، یعنی سهم ارزش در برابر سهم تعداد مشتری.";
-    var wb = Kit.clear(document.getElementById("woe")), wm = Math.max.apply(null, ivs[0].rows.map(function (r) { return Math.abs(r.woe); })) || 1;
-    ivs[0].rows.forEach(function (r) { wb.appendChild(bar(DNAME[ivs[0].d] + ": " + r.k, Math.abs(r.woe) / wm, (r.woe >= 0 ? "+" : "−") + Math.abs(r.woe).toFixed(2), (cfg.target === "rate" ? r.woe < 0 : r.woe > 0) ? "neg" : "pos")); });
-    stats("stats", [["درخت تقصیر را می‌اندازد گردن", DNAME[cfg.first] + ": " + top.k], ["برنده‌ی IV", DNAME[ivs[0].d], "ok"], ["درخت با IV می‌خواند؟", cfg.first === ivs[0].d ? "بله" : "نه", cfg.first === ivs[0].d ? "ok" : "bad"]]);
-    var key = cfg.first + "/" + cfg.target + "/" + ivs[0].d; if (last && key !== last) log.add("درخت تقصیر را گردن " + top.k + " می‌اندازد، در بُعد " + DNAME[cfg.first] + "؛ معیار IV بُعد " + DNAME[ivs[0].d] + " را اول می‌آورد.", cfg.first === ivs[0].d ? "ok" : "warn"); last = key;
+    document.getElementById("ivbox").hidden = !view.iv;
+    var I = Kit.clear(document.getElementById("iv")), mx = ivs[0].iv;
+    ivs.forEach(function (x, i) { I.appendChild(Kit.el("div", { class: "ivrow" + (i === 0 ? " win" : "") }, Kit.el("span", null, (i === 0 ? "★ " : "") + DNAME[x.d]), Kit.el("div", { class: "tk" }, Kit.el("i", { style: "width:" + (x.iv / mx * 100).toFixed(1) + "%" })), Kit.el("span", { class: "v mono" }, x.iv.toFixed(3)))); });
+    var W = Kit.clear(document.getElementById("woe")); W.appendChild(document.createTextNode("WOE در " + DNAME[ivs[0].d] + ": "));
+    ivs[0].rows.forEach(function (r) { W.appendChild(Kit.el("span", { class: "mono" }, r.k + " " + (r.woe >= 0 ? "+" : "−") + Math.abs(r.woe).toFixed(2))); });
+    document.getElementById("ivnote").textContent = rate ? "هدف دودویی: سهم churn نکرده‌ها در برابر سهم churn کرده‌ها." : "هدف پیوسته: سهم MRR ازدست‌رفته در برابر سهم تعداد مشتری.";
+    msg = "درخت با شکاف اول " + DNAME[view.first] + " تقصیر را گردن " + top.k + " می‌اندازد؛ IV بُعد " + DNAME[ivs[0].d] + " را اول می‌آورد."; kind = view.first === ivs[0].d ? "ok" : "warn";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["درخت تقصیر را می‌اندازد گردن", top.k], ["برنده‌ی IV", view.iv ? DNAME[ivs[0].d] : "–", "ok"], ["درخت با IV می‌خواند؟", !view.iv ? "–" : view.first === ivs[0].d ? "بله" : "نه", view.first === ivs[0].d ? "ok" : "bad"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (/^[A-Za-z]/.test(x[1]) ? "mono " : "") + (x[2] || "") }, x[1]))); });
+    ctl.first.set(view.first); ctl.target.set(view.target);
   }
-  var ctl = document.getElementById("ctl");
-  ctl.appendChild(Kit.segmented({ label: "اول بر پایه‌ی چه چیزی بشکافد", value: cfg.first, options: Object.keys(DIMS).map(function (d) { return { value: d, label: DNAME[d] }; }), onChange: function (v) { cfg.first = v; render(); } }).element);
-  ctl.appendChild(Kit.segmented({ label: "پرسش", value: cfg.target, options: [{ value: "rate", label: "چه کسی churn می‌کند؟" }, { value: "mrr", label: "پول کجا از دست می‌رود؟" }], onChange: function (v) { cfg.target = v; render(); } }).element);
-  render();
+  ctl.first = Kit.segmented({ label: "اول بر پایه‌ی چه چیزی بشکافد", value: view.first, options: Object.keys(DIMS).map(function (d) { return { value: d, label: DNAME[d] }; }), onChange: function (v) { view.first = v; view.iv = true; render(); tour.free(msg, kind); } });
+  ctl.target = Kit.segmented({ label: "پرسش", value: view.target, options: [{ value: "rate", label: "چه کسی churn می‌کند؟" }, { value: "mrr", label: "پول کجا از دست می‌رود؟" }], onChange: function (v) { view.target = v; view.iv = true; render(); tour.free(msg, kind); } });
+  [ctl.first, ctl.target].forEach(function (x) { document.getElementById("ctl").appendChild(x.element); });
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({ iv: false }), render: render, interval: 8000,
+    intro: "یک SaaS اسباب‌بازی با ۵٬۹۰۰ مشتری در سه منطقه، سه کانال و سه segment. حقیقت پنهان، مثل نوشته: یک reseller در کانال Partner از هم پاشیده و churn آن ۲۲٪ است، در برابر ۵ تا ۸٪ بقیه. EMEA بیشتر از بقیه مشتری Partner و Enterprise دارد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و شکاف اول و پرسش را عوض کنید؛ ببینید کدام عوض می‌شود: داستان درخت یا رتبه‌بندی IV.",
+    steps: [
+      { kind: "", run: at({ iv: false }), say: "۶۲۲ مشتری از ۵٬۹۰۰ نفر churn کرده‌اند. درخت متریک اول می‌پرسد کدام منطقه؟ EMEA با ۴۷٪ churn و نرخ ۱۳٫۴٪ برجسته است؛ داستان درخت: مشکل منطقه‌ای است (بخش «Method A»)." },
+      { kind: "warn", run: at({ first: "Channel", iv: false }), say: "همان داده، این بار اول بر پایه‌ی کانال: Partner با ۵۷٪ churn و نرخ ۲۲٪. داستان عوض شد: مشکل کانال است. اولین شکاف همیشه بیشترین تغییر را جذب می‌کند." },
+      { kind: "ok", run: at({}), say: "روش B نوشته هر بُعد را جداگانه با IV می‌سنجد. کانال با IV برابر ۰٫۵۱۶ برنده است و منطقه فقط ۰٫۰۵۴. WOE منفی Partner می‌گوید churn آنجا متمرکز است (بخش «Method B»)." },
+      { kind: "warn", run: at({ first: "Segment" }), say: "شکاف اول را segment کنید: درخت داستان سومی می‌گوید، SMB با بیشترین سهم churn. میله‌های IV اما تکان نمی‌خورند؛ ترتیب برای IV مهم نیست." },
+      { kind: "ok", run: at({ target: "mrr", first: "Channel" }), say: "حالا پرسش را عوض کنید: پول کجا از دست می‌رود؟ IV پیوسته سهم MRR را با سهم مشتری مقایسه می‌کند و برنده segment می‌شود (۱٫۱۱۲). Enterprise با ARPU بالا WOE برابر ۱٫۸۵ دارد (بخش «The Plot Twist»)." },
+      { kind: "warn", run: at({ target: "mrr" }), say: "درخت با شکاف منطقه برای پول هم EMEA را با ۶۱٪ MRR ازدست‌رفته مقصر می‌داند، چون Partner و Enterprise آنجا جمع‌اند. درخت یک ترتیب و یک پرسش را قفل می‌کند؛ IV با عوض کردن مخرج پرسش را عوض می‌کند (بخش «The Denominator Changes the Question»)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {

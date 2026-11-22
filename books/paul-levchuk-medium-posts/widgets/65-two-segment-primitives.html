@@ -7,18 +7,27 @@
 <meta name="description" content="یک مدل دوبخشی retention و CAC را بگذارید و نرخ بازماندگان و نیمه‌عمر دم و شدت پرتگاه و سهم دم و سقف LTV و فاصله تا سقف و payback را بخوانید. برای نوشته‌های ۴ و ۵ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
-  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; display: block; }
+  .c65 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  svg.plot { width: 100%; height: auto; max-height: 232px; display: block; direction: ltr; }
+  svg.plot text { font-family: var(--mono); font-size: 12px; fill: var(--ink-3); }
+  svg.plot .grid { stroke: var(--line); }
+  svg.plot .lab { font-size: 13px; font-weight: 700; }
+  .key { font-size: .8rem; color: var(--ink-3); margin: 4px 0 0; line-height: 1.8; }
+  table.pr { width: 100%; border-collapse: collapse; font-size: .86rem; }
+  table.pr th, table.pr td { border-bottom: 1px solid var(--line); padding: 2px 6px; text-align: right; }
+  table.pr td.n, table.pr th.n { direction: ltr; text-align: left; }
+  table.pr tr.hi td { background: var(--accent-soft); font-weight: 700; }
+  .gauge { margin-top: 6px; } .gauge .panel-title { margin-bottom: 4px; }
+  .gz { position: relative; height: 22px; display: flex; border: 1px solid var(--line-strong); border-radius: 4px; overflow: hidden; font-size: .74rem; }
+  .gz span { display: flex; align-items: center; justify-content: center; color: var(--ink-2); }
+  .gm { position: relative; height: 22px; }
+  .gm b { position: absolute; top: 0; transform: translateX(-50%); font-size: .8rem; white-space: nowrap; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/65-retention-curve-hides-more-than-it-shows.html">نوشته‌ی ۶۵</a><span aria-hidden="true">/</span>
@@ -29,92 +38,136 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۶۵ · وقتی منحنی retention بیشتر از آنچه نشان می‌دهد پنهان می‌کند</div>
-  <h1>بنیان‌های دوبخشی</h1>
-  <p class="lede">کف روز اول و churn پرتگاه و دم و طول پرتگاه را ویرایش کنید و بعد <strong>به CAC فشار بیاورید</strong>: بنیان‌ها و روز payback به‌روز می‌شوند، و فاصله تا سقف نشان می‌دهد این cohort چقدر به جایی نزدیک است که اصلاً payback ندارد.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌های «When Your Retention Curve Hides More Than It Shows» و «Two Cohorts, Same Payback Period, Very Different Investments» را نشان می‌دهد (بخش‌های «What each primitive tells you about one cohort» و «A worked example: scaling decision»). cohort نمونه از مقدارهای برازش‌شده‌ی نوشته استفاده می‌کند، یعنی d₁ برابر ۰٫۴۳۸ و c₁ برابر ۰٫۱۲۴ و c₂ برابر ۰٫۰۲۱. برای cohortهای اول و دوم، نوشته بنیان‌ها را می‌گوید ولی پارامترهای خام را نه، پس vault مقدارهای c₁ و c₂ را از شدت پرتگاه و نیمه‌عمر دم گزارش‌شده و d₁ را از نرخ بازماندگان بازسازی می‌کند؛ روزهای payback حاصل تا چند روز به ۶۱ و ۶۵ نوشته نزدیک‌اند و فاصله تا سقف تا یکی دو واحد به ۴۸٪ و ۸۳٪ آن؛ سهم دم cohort اول حدود ۸۸٪ درمی‌آید در برابر ۹۴٪ نوشته. payback خود cohort نمونه این‌جا حدود ۹۸ روز است در برابر ۹۳ روز نوشته، که تفاوت قرارداد در جمع زدن روزهای پرتگاه است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>بنیان‌های دوبخشی</h1>
+      <p class="lede">سه پارامتر برازش دوبخشی را به پنج بنیان تبدیل کنید و بعد <strong>به CAC فشار بیاورید</strong>: دو cohort با payback تقریباً یکسان، زیر فشار رفتار کاملاً متفاوتی دارند.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌های «When Your Retention Curve Hides More Than It Shows» و «Two Cohorts, Same Payback Period, Very Different Investments» را نشان می‌دهد (بخش‌های «Reading this cohort through the primitive lens»، «What each primitive tells you in this comparison» و «A worked example: scaling decision»). cohort نمونه همان پارامترهای برازش‌شده‌ی نوشته است: d₁ برابر ۰٫۴۳۸، c₁ برابر ۰٫۱۲۴ و c₂ برابر ۰٫۰۲۱. برای cohortهای A و B نوشته c₂ و بنیان‌ها را می‌دهد؛ vault مقدار c₁ را از شدت پرتگاه و d₁ را از نرخ بازماندگان بازسازی کرده است. سقف LTV مثل اعداد نوشته جمع پرتگاه به‌علاوه‌ی m·survivor/c₂ است. روز payback را vault روز به روز جمع می‌زند و برای همین چند روز با نوشته فرق دارد؛ سهم دم A هم این‌جا ۸۸٪ درمی‌آید در برابر ۹۴٪ نوشته. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">ارزش تجمعی هر کاربر جذب‌شده در برابر CAC</p>
-        <svg class="plot" id="chart" role="img" aria-label="حاشیه‌ی تجمعی هر کاربر جذب‌شده در برابر CAC"></svg>
-        <p class="field-hint">منحنی: حاشیه‌ی تجمعی. خط افقی: مقدار CAC. محل تقاطعشان روز payback است.</p></div>
-      <div class="panel"><p class="panel-title">بنیان‌ها</p><div class="stats" id="prims"></div>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">cohort</p><div id="preset"></div></div>
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c65">
+          <div><p class="panel-title">حاشیه‌ی تجمعی هر کاربر (دلار) در برابر CAC</p><div id="chart"></div>
+            <p class="key">منحنی: حاشیه‌ی تجمعی · خط‌چین قرمز: CAC · نقطه‌چین: سقف LTV · دایره: روز payback</p></div>
+          <div><p class="panel-title">بنیان‌ها</p><table class="pr mono" id="pr"></table>
+            <div class="gauge"><p class="panel-title">فاصله تا سقف (headroom)، با آستانه‌های نوشته</p>
+              <div class="gz mono"><span style="width:15%;background:var(--bad-soft)">&lt;15%</span><span style="width:25%;background:var(--warn-soft)">15–40%</span><span style="width:60%;background:var(--ok-soft)">&gt;40% comfortable</span></div>
+              <div class="gm mono" id="gm"></div></div></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>دو cohort تقریباً در یک روز برمی‌گردند</strong> ولی سقف و فاصله تا سقفشان زمین تا آسمان فرق دارد.</li>
-    <li><strong>بالا بردن CAC</strong> به فاصله‌ی cohort اول خیلی بیشتر از دومی می‌زند؛ بعد از سقف، روز payback «هیچ‌وقت» را نشان می‌دهد.</li>
-    <li><strong>جابه‌جا کردن k</strong> نرخ بازماندگان و شدت پرتگاه را جابه‌جا می‌کند، و برای همین باید پیش از مقایسه‌ی cohortها ثابت باشد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>دو cohort تقریباً در یک روز برمی‌گردند</strong> ولی سقف و فاصله تا سقفشان زمین تا آسمان فرق دارد.</li>
+      <li><strong>بالا بردن CAC</strong> فاصله‌ی cohort حجمی را خیلی سریع‌تر از بادوام می‌خورد؛ بعد از سقف، payback «هیچ‌وقت» می‌شود.</li>
+      <li><strong>اعداد برازش‌شده روی cohort ناهمگن پایین‌تر از واقع‌اند</strong>؛ برای مقایسه‌ی cohortها خوب‌اند، نه به‌عنوان عدد مطلق.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/65-retention-curve-hides-more-than-it-shows.html"><small>درس</small>نوشته‌ی ۶۵: وقتی منحنی retention بیشتر از آنچه نشان می‌دهد پنهان می‌کند</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/65-retention-curve-hides-more-than-it-shows.html"><small>درس</small>نوشته‌ی ۶۵: وقتی منحنی retention بیشتر از آنچه نشان می‌دهد پنهان می‌کند</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  function stats(id, rows) {
-    var st = Kit.clear(document.getElementById(id));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  var FA = function (s) { return Kit.digits(String(s)); };
+  var M = 0.5, K = 7, PRE = {
+    run: { name: "sample", d1: 0.438, c1: 0.124, c2: 0.021, col: "var(--s1)" },
+    a: { name: "A (volume)", d1: 0.53, c1: 0.1495, c2: 0.0115, col: "var(--s2)" },
+    b: { name: "B (durable)", d1: 0.576, c1: 0.21, c2: 0.0025, col: "var(--s1)" } };
+  var DEF = { set: "run", cac: 1, hi: "" }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function calc(p, cac) {
+    function R(t) { return t === 1 ? p.d1 : t <= K ? p.d1 * Math.pow(1 - p.c1, t - 1) : p.d1 * Math.pow(1 - p.c1, K - 1) * Math.pow(1 - p.c2, t - K); }
+    var cum = 0, pay = null, lc = 0, pts = [[0, 0]];
+    for (var t = 1; t <= 720; t++) { cum += M * R(t); if (t === K) lc = cum; if (pay === null && cum >= cac) pay = t; if (t % 6 === 0) pts.push([t, cum]); }
+    var surv = R(K), lt = M * surv / p.c2, ceil = lc + lt;
+    return { surv: surv, hl: Math.log(2) / -Math.log(1 - p.c2), ci: p.c1 / p.c2, ts: lt / ceil, ceil: ceil, head: 1 - cac / ceil, pay: pay, pts: pts };
   }
-  function money(x, d) { var s = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); return (x < 0 ? "−$" : "$") + s; }
-  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
-
-  var log = Kit.log(document.getElementById("log"));
-  var M = 0.5, BASE_CAC = 5;
-  var PRE = {
-    run: { label: "cohort نمونه‌ی نوشته‌ی ۶۵", d1: 0.438, c1: 0.124, c2: 0.021, k: 7 },
-    a: { label: "cohort اول: حجمی", d1: 0.53, c1: 0.1495, c2: 0.0115, k: 7 },
-    b: { label: "cohort دوم: بادوام", d1: 0.576, c1: 0.21, c2: 0.0025, k: 7 }
-  };
-  var cfg = Object.assign({ cac: 1 }, PRE.run), sl = {}, last = null;
-  function R(t) { if (t === 0) return 1; if (t === 1) return cfg.d1; if (t <= cfg.k) return cfg.d1 * Math.pow(1 - cfg.c1, t - 1); return cfg.d1 * Math.pow(1 - cfg.c1, cfg.k - 1) * Math.pow(1 - cfg.c2, t - cfg.k); }
-  function calc() {
-    var cac = BASE_CAC * cfg.cac, cum = 0, pay = null, pts = [[0, 0]], lc = 0;
-    for (var t = 1; t <= 720; t++) { cum += M * R(t); if (t <= cfg.k) lc = cum; if (pay === null && cum >= cac) pay = t; if (t % 12 === 0 || t === 1) pts.push([t, cum]); }
-    var surv = R(cfg.k), lt = M * R(cfg.k) * (1 - cfg.c2) / cfg.c2, ceil = lc + lt;
-    return { cac: cac, pay: pay, pts: pts, surv: surv, hl: Math.log(2) / -Math.log(1 - cfg.c2), ci: cfg.c1 / cfg.c2, ts: lt / ceil, ceil: ceil, head: 1 - cac / ceil };
-  }
+  function money(x) { return "$" + x.toFixed(2); }
   function render() {
-    var C = calc(), ok = C.head > 0;
-    Kit.lineChart(document.getElementById("chart"), { width: 520, height: 220, xMax: 720, yMax: Math.max(12, Math.min(40, C.ceil * 1.1)), xLabel: "روز", yLabel: "حاشیه‌ی تجمعی، دلار", xTicks: 6, yTicks: 5,
-      series: [{ points: C.pts, cls: "s1", label: "حاشیه‌ی تجمعی" }, { points: [[0, C.cac], [720, C.cac]], cls: ok ? "s2" : "bad", label: "CAC" }], marks: C.pay ? [{ x: C.pay, label: "payback" }] : [] });
-    stats("prims", [["نرخ بازماندگان", pct(C.surv, 1)], ["نیمه‌عمر دم", C.hl.toFixed(0) + " روز، یعنی " + (C.hl / 30).toFixed(1) + " ماه"], ["شدت پرتگاه", C.ci.toFixed(1) + " برابر"], ["سهم دم", pct(C.ts, 0)], ["سقف LTV", money(C.ceil, 2)], ["فاصله تا سقف", pct(C.head, 0), C.head > 0.4 ? "ok" : C.head > 0.15 ? "warn" : "bad"], ["روز payback", C.pay === null ? "هیچ‌وقت" : String(C.pay), C.pay === null ? "bad" : ""]]);
-    var v = document.getElementById("verdict"); v.className = "callout " + (C.head > 0.4 ? "ok" : C.head > 0.15 ? "warn" : "bad");
-    v.textContent = C.head > 0.4 ? "فاصله‌ی راحت؛ قاعده‌ی سرانگشتی نوشته: بالای ۴۰٪، که روی cohortهای تمیز کالیبره شده." : C.head > 0 ? "فاصله‌ی باریک: بالا رفتن CAC سریع می‌خوردش؛ بزرگ نکنید." : "مقدار CAC روی سقف LTV یا بالاتر از آن است: payback وجود ندارد.";
-    var st = C.head > 0.4 ? "ok" : C.head > 0.15 ? "thin" : "none"; if (last && st !== last) log.add("فاصله تا سقف حالا " + pct(C.head, 0) + " است.", st === "ok" ? "ok" : st === "thin" ? "warn" : "bad"); last = st;
+    var cac = 5 * view.cac, keys = view.set === "ab" ? ["a", "b"] : [view.set], C = {};
+    keys.forEach(function (k) { C[k] = calc(PRE[k], cac); });
+    var W = 560, Hh = 300, L = 46, R = 14, T = 12, B = 34, mx = Math.max(12, Math.min(34, Math.max.apply(null, keys.map(function (k) { return C[k].ceil; })) * 1.08), cac * 1.2);
+    function X(t) { return L + (W - L - R) * t / 720; } function Y(v) { return T + (Hh - T - B) * (1 - Math.min(v, mx) / mx); }
+    var s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + Hh, class: "plot mono", role: "img", "aria-label": "حاشیه‌ی تجمعی هر کاربر در برابر CAC" });
+    var st = mx > 20 ? 5 : 2;
+    for (var g = 0; g <= mx; g += st) { s.appendChild(Kit.svg("line", { class: "grid", x1: L, x2: W - R, y1: Y(g), y2: Y(g) })); s.appendChild(Kit.svg("text", { x: L - 6, y: Y(g) + 4, "text-anchor": "end" }, "$" + g)); }
+    [0, 120, 240, 360, 480, 600, 720].forEach(function (d) { s.appendChild(Kit.svg("text", { x: X(d), y: Hh - B + 16, "text-anchor": "middle" }, String(d))); });
+    s.appendChild(Kit.svg("text", { x: (W + L) / 2, y: Hh - 4, "text-anchor": "middle" }, "day →"));
+    s.appendChild(Kit.svg("line", { x1: L, x2: W - R, y1: Y(cac), y2: Y(cac), stroke: "var(--bad)", "stroke-width": 1.8, "stroke-dasharray": "7 5" }));
+    s.appendChild(Kit.svg("text", { class: "lab", x: L + 6, y: Y(cac) + 16, style: "fill:var(--bad)" }, "CAC " + money(cac)));
+    keys.forEach(function (k, i) { var c = C[k], col = PRE[k].col;
+      if (c.ceil <= mx) { s.appendChild(Kit.svg("line", { x1: L, x2: W - R, y1: Y(c.ceil), y2: Y(c.ceil), stroke: col, "stroke-width": 1.4, "stroke-dasharray": "1 4" }));
+        s.appendChild(Kit.svg("text", { x: W - R, y: Y(c.ceil) - 5, "text-anchor": "end", style: "fill:" + col }, PRE[k].name + " ceiling " + money(c.ceil))); }
+      s.appendChild(Kit.svg("polyline", { points: c.pts.map(function (p) { return X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }).join(" "), fill: "none", stroke: col, "stroke-width": 3 }));
+      if (c.pay !== null) { s.appendChild(Kit.svg("circle", { cx: X(c.pay), cy: Y(cac), r: 6, fill: col, stroke: "var(--surface)", "stroke-width": 2 }));
+        s.appendChild(Kit.svg("text", { class: "lab", x: X(c.pay) + (i ? 8 : -8), y: Y(cac) - 10 - i * 16, "text-anchor": "start", style: "fill:" + col }, "day " + c.pay)); } });
+    Kit.clear(document.getElementById("chart")).appendChild(s);
+    var t = Kit.clear(document.getElementById("pr")), head = [Kit.el("th", null, "بنیان")];
+    keys.forEach(function (k) { head.push(Kit.el("th", { class: "n", style: "color:" + PRE[k].col }, PRE[k].name)); }); t.appendChild(Kit.el("tr", null, head));
+    [["surv", "نرخ بازماندگان", function (c) { return (c.surv * 100).toFixed(1) + "%"; }], ["hl", "نیمه‌عمر دم", function (c) { return c.hl.toFixed(0) + " d"; }], ["ci", "شدت پرتگاه", function (c) { return c.ci.toFixed(1) + "×"; }],
+     ["ts", "سهم دم", function (c) { return (c.ts * 100).toFixed(0) + "%"; }], ["ceil", "سقف LTV", function (c) { return money(c.ceil); }], ["head", "فاصله تا سقف", function (c) { return c.head <= 0 ? "≤ 0 (insolvent)" : (c.head * 100).toFixed(0) + "%"; }],
+     ["pay", "روز payback", function (c) { return c.pay === null ? "never" : String(c.pay); }]].forEach(function (r) {
+      var row = [Kit.el("td", null, r[1])]; keys.forEach(function (k) { row.push(Kit.el("td", { class: "n" }, r[2](C[k]))); });
+      t.appendChild(Kit.el("tr", { class: view.hi.indexOf(r[0]) >= 0 ? "hi" : "" }, row)); });
+    var gm = Kit.clear(document.getElementById("gm"));
+    keys.forEach(function (k) { var h = Math.max(0, Math.min(1, C[k].head)); gm.appendChild(Kit.el("b", { style: "left:" + (h * 100).toFixed(1) + "%;color:" + PRE[k].col }, "▲ " + PRE[k].name.split(" ")[0])); });
+    var worst = Math.min.apply(null, keys.map(function (k) { return C[k].head; }));
+    kind = worst <= 0 ? "bad" : worst < 0.15 ? "warn" : "ok";
+    msg = "مقدار CAC برابر " + FA(cac.toFixed(2)) + " دلار؛ " + keys.map(function (k) { return "cohort " + PRE[k].name.split(" ")[0] + ": فاصله تا سقف " + (C[k].head <= 0 ? "صفر یا منفی، بدون payback" : FA((C[k].head * 100).toFixed(0)) + "٪"); }).join("، ") + ".";
+    var S2 = Kit.clear(document.getElementById("stats"));
+    [["CAC", money(cac)], ["ضریب CAC", view.cac.toFixed(1) + "×"], ["حاشیه در روز", "$0.50"], ["طول پرتگاه k", "7 d"]].forEach(function (x) {
+      S2.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono" }, x[1]))); });
+    ctl.cac.set(view.cac);
   }
-  var ctl = document.getElementById("ctl");
-  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
-  add("d1", { label: "مقدار d₁: retention روز اول", min: 0.2, max: 0.8, step: 0.005, format: function (v) { return v.toFixed(3); } });
-  add("c1", { label: "مقدار c₁: churn روزانه‌ی پرتگاه", min: 0.02, max: 0.4, step: 0.005, format: function (v) { return v.toFixed(3); } });
-  add("c2", { label: "مقدار c₂: churn روزانه‌ی دم", min: 0.001, max: 0.06, step: 0.0005, format: function (v) { return v.toFixed(4); } });
-  add("k", { label: "مقدار k: طول پرتگاه", min: 3, max: 14, step: 1, unit: " روز", hint: "یک قرارداد است؛ cohortها را فقط با k یکسان مقایسه کنید" });
-  add("cac", { label: "فشار روی CAC، ضریبی از پایه‌ی پنج دلار", min: 0.5, max: 6, step: 0.1, format: function (v) { return v.toFixed(1) + "× = $" + (5 * v).toFixed(2); } });
-  document.getElementById("preset").appendChild(Kit.segmented({ label: "cohort", value: "run", options: Object.keys(PRE).map(function (k) { return { value: k, label: PRE[k].label }; }),
-    onChange: function (k) { ["d1", "c1", "c2", "k"].forEach(function (f) { cfg[f] = PRE[k][f]; sl[f].set(PRE[k][f]); }); render(); log.add("بار شد: " + PRE[k].label, "muted"); } }).element);
-  render();
+  function tw(f) { return function (v) { f(v); view.hi = ""; render(); tour.free(msg, kind); }; }
+  ctl.set = Kit.segmented({ label: "cohort", value: view.set, options: [{ value: "run", label: "نمونه‌ی نوشته" }, { value: "ab", label: "مقایسه‌ی A و B" }, { value: "a", label: "فقط A" }, { value: "b", label: "فقط B" }], onChange: tw(function (v) { view.set = v; }) });
+  ctl.cac = Kit.slider({ label: "فشار روی CAC، ضریبی از پایه‌ی ۵ دلار", min: 0.5, max: 6, step: 0.1, value: view.cac, format: function (v) { return FA(v.toFixed(1)) + "×"; }, hint: "بزرگ کردن کمپین معمولاً CAC را بالا می‌برد", onInput: tw(function (v) { view.cac = v; }) });
+  [ctl.set, ctl.cac].forEach(function (x) { document.getElementById("ctl").appendChild(x.element); });
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); if (ctl.set.set) ctl.set.set(view.set); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "سه عدد از برازش دوبخشی: d₁ و c₁ و c₂. از آن‌ها چه چیزی درباره‌ی cohort می‌فهمیم؟",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و ببینید هر cohort تا چه ضریبی از CAC دوام می‌آورد.",
+    steps: [
+      { kind: "", run: at({ hi: "surv hl ci" }), say: "برای cohort نمونه، نرخ بازماندگان ۱۹٫۸٪ است: از هر پنج کاربر یکی از پرتگاه رد می‌شود. نیمه‌عمر دم ۳۳ روز و شدت پرتگاه حدود ۶ برابر است." },
+      { kind: "", run: at({ hi: "ts ceil" }), say: "همان یک‌پنجم حدود ۸۲٪ ارزش را می‌سازد. سقف LTV برابر ۱٫۰۷ دلار از پرتگاه و ۴٫۷۲ دلار از دم است، یعنی ۵٫۷۹ دلار." },
+      { kind: "warn", run: at({ hi: "head pay" }), say: "با CAC پنج دلاری فاصله تا سقف ۱۳٫۷٪ است، نزدیک منطقه‌ی قرمز. ولی سقف واقعی ۱۸٫۱۱ دلار و فاصله‌ی واقعی حدود ۷۲٪ است: روی cohort ناهمگن، برازش پایین‌تر می‌زند." },
+      { kind: "", run: at({ set: "ab", hi: "pay" }), say: "حالا دو cohort مهندسی‌شده‌ی نوشته‌ی بعدی. هر دو CAC پنج دلاری دارند و حدود دو ماه بعد برمی‌گردند؛ نوشته ۶۱ و ۶۵ روز می‌گوید. در جدول payback هر دو کنار هم شبیه‌اند." },
+      { kind: "", run: at({ set: "ab", hi: "hl ceil head" }), say: "ولی نیمه‌عمر دم A حدود ۶۰ روز و B حدود ۲۷۷ روز است. سقف LTV حدود ۹٫۵۰ در برابر ۳۰ دلار و فاصله تا سقف ۴۸٪ در برابر ۸۳٪." },
+      { kind: "warn", run: at({ set: "ab", cac: 1.5, hi: "head pay" }), say: "اگر CAC ۵۰٪ بالا برود، فاصله‌ی A طبق نوشته به ۲۱٪ می‌رسد و payback از ۶۱ به ۱۳۰ روز، یعنی بیش از دو برابر. B هنوز راحت است." },
+      { kind: "bad", run: at({ set: "ab", cac: 2, hi: "head pay" }), say: "با CAC دو برابر، cohort A دیگر هیچ‌وقت برنمی‌گردد؛ B هنوز ۶۶٪ فاصله دارد و با سه برابر هم ۵۰٪. پس تصمیم بزرگ کردن کمپین را فاصله تا سقف می‌گیرد، نه payback." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {
-    "q": "دو cohort حجمی و بادوام را با CAC پایه بار کنید. بیشترین تفاوت در چیست؟",
+    "q": "در تور، دو cohort حجمی و بادوام با CAC پایه کنار هم آمدند. بیشترین تفاوت در چیست؟",
     "options": [
       "دوره‌ی payback",
       "نیمه‌عمر دم و فاصله تا سقف",

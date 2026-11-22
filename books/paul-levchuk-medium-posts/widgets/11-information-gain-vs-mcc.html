@@ -7,23 +7,32 @@
 <meta name="description" content="معیار Information Gain همیشه مثبت است و جهت را نمی‌گوید؛ ضریب MCC همان جدول چهارخانه را می‌گیرد و علامت هم دارد. برای نوشته‌ی ۱۱ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 9rem 1fr 5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 0 0 auto; background: var(--s1); border-radius: 3px; }
-  .bar-fill.s2 { background: var(--s2); } .bar-fill.s3 { background: var(--s3); } .bar-fill.s4 { background: var(--s4); }
-  .bar-fill.bad { background: var(--bad); } .bar-fill.ok { background: var(--ok); } .bar-fill.warn { background: var(--warn); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; height: auto; display: block; }
-  svg.plot text { font-size: 10px; fill: var(--muted); }
-  svg.plot .grid { stroke: var(--line); stroke-width: 1; }
-  svg.plot .thr { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: .55; }
-
+  .c11 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  table.cm { width: 100%; border-collapse: collapse; font-size: 1rem; margin-bottom: 10px; }
+  table.cm th, table.cm td { border: 1px solid var(--line); padding: 8px 10px; text-align: center; }
+  table.cm th { background: var(--surface-2); font-weight: 600; font-size: .88rem; }
+  table.cm td { font-family: var(--mono); font-size: 1.15rem; font-weight: 700; }
+  table.cm td small { display: block; font-size: .75rem; font-weight: 400; color: var(--ink-3); }
+  .rrow { display: grid; grid-template-columns: 8.5rem 1fr 3.6rem; gap: 8px; align-items: center; margin: 6px 0; font-size: .88rem; }
+  .track { position: relative; height: 18px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; }
+  .fill { position: absolute; top: 0; bottom: 0; right: 0; border-radius: 3px; }
+  .fill.u { background: var(--s1); } .fill.n { background: var(--s5); } .fill.all { background: var(--ink-3); }
+  .avg { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+  .rrow .v { font-family: var(--mono); direction: ltr; text-align: left; }
+  .meter { margin: 6px 0 14px; }
+  .meter .lab { display: flex; justify-content: space-between; font-size: .9rem; margin-bottom: 4px; }
+  .meter .lab b { font-family: var(--mono); font-size: 1.25rem; direction: ltr; }
+  .dtrack { position: relative; height: 22px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; direction: ltr; }
+  .dtrack .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+  .dtrack .fill { right: auto; }
+  .dtrack .ends { display: flex; justify-content: space-between; font-size: .75rem; color: var(--ink-3); margin-top: 2px; direction: rtl; }
+  .fill.pos { background: var(--ok); } .fill.neg { background: var(--bad); } .fill.ig { background: var(--accent); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/11-product-feature-retention-deep-dive-mcc-coefficient.html">نوشته‌ی ۱۱</a><span aria-hidden="true">/</span>
@@ -34,40 +43,61 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۱۱ · غواصی در retention فیچر: ضریب MCC</div>
-  <h1>جهت اثر: Information Gain یا MCC</h1>
-  <p class="lede">سه عدد بدهید: چه سهمی از کاربران از feature استفاده کرده‌اند، retention آن‌ها و retention بقیه. <strong>Information Gain</strong> و <strong>MCC</strong> از یک جدول چهارخانه می‌آیند، ولی فقط یکی می‌گوید feature کمک می‌کند یا آسیب می‌زند.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌ی «Product feature retention deep dive — MCC coefficient» را نشان می‌دهد (بخش‌های «ضعف Information Gain» و «ضریب MCC»). دو retention ۷٫۹٪ و ۲۰٫۷٪ برای feature18 از نوشته است؛ سهم ۸۷٪ را vault از شمار کاربران در نوشته‌ی ۱۳ و نوشته‌ی ۱۰ ساخته، پس IG این‌جا ۰٫۰۱۳ می‌شود و نه دقیقاً ۰٫۰۱۴۰ نوشته.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>جهت اثر: Information Gain یا MCC</h1>
+      <p class="lede">سه عدد بدهید: چه سهمی از کاربران از feature استفاده کرده‌اند، retention آن‌ها و retention بقیه. <strong>Information Gain</strong> و <strong>MCC</strong> از یک جدول چهارخانه می‌آیند، ولی فقط یکی می‌گوید feature کمک می‌کند یا آسیب می‌زند.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «Product feature retention deep dive — MCC coefficient» را نشان می‌دهد (بخش‌های «ضعف Information Gain» و «ضریب MCC»). دو retention ۷٫۹٪ و ۲۰٫۷٪ برای feature18 از نوشته است؛ سهم ۸۷٪ را vault از شمار کاربران در نوشته‌ی ۱۳ و نوشته‌ی ۱۰ ساخته، پس IG این‌جا ۰٫۰۱۳ می‌شود و نه دقیقاً ۰٫۰۱۴۰ نوشته.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">جدول چهارخانه‌ی استفاده و بازگشت</p><div id="grid4"></div></div>
-      <div class="panel"><p class="panel-title">دو معیار کنار هم</p><div id="meters"></div><div class="callout" id="verdict" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازگشت به عددهای نوشته</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c11">
+          <div>
+            <p class="panel-title">از هر ۱۰٬۰۰۰ کاربر</p>
+            <table class="cm mono" id="cm"></table>
+            <p class="panel-title">retention هر گروه</p>
+            <div id="rets"></div>
+          </div>
+          <div>
+            <p class="panel-title">دو معیار از همین جدول</p>
+            <div id="meters"></div>
+            <div class="callout" id="verdict"></div>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>دو retention را جابه‌جا کنید</strong>: Information Gain عوض نمی‌شود، MCC علامتش برمی‌گردد.</li>
-    <li><strong>وقتی retention کاربران و غیرکاربران نزدیک‌اند</strong>، هر دو معیار نزدیک صفرند، هرچقدر هم feature محبوب باشد؛ همان feature41 نوشته‌ی ۱۰.</li>
-    <li><strong>علامت MCC منفی است</strong> وقتی retention کاربران feature از میانگین وزنی کل پایین‌تر باشد؛ نوشته همین را در پایان می‌گوید.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>دو retention را جابه‌جا کنید</strong>: Information Gain کمی جابه‌جا می‌شود ولی مثبت می‌ماند؛ MCC علامتش برمی‌گردد.</li>
+      <li><strong>وقتی retention کاربران و غیرکاربران نزدیک‌اند</strong>، هر دو معیار نزدیک صفرند، هرچقدر هم feature محبوب باشد؛ همان feature41 نوشته‌ی ۱۰.</li>
+      <li><strong>علامت MCC منفی است</strong> وقتی retention کاربران feature از میانگین وزنی کل پایین‌تر باشد؛ نوشته همین را در پایان می‌گوید.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/11-product-feature-retention-deep-dive-mcc-coefficient.html"><small>درس</small>نوشته‌ی ۱۱: غواصی در retention فیچر: ضریب MCC</a></li>
-    <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/11-product-feature-retention-deep-dive-mcc-coefficient.html"><small>درس</small>نوشته‌ی ۱۱: غواصی در retention فیچر: ضریب MCC</a></li>
+      <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -75,66 +105,77 @@
 (function () {
   "use strict";
   var FA = function (s) { return Kit.digits(String(s)); };
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  function bar(label, frac, text, cls) {
-    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
-      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
-      Kit.el("span", { class: "v" }, text));
-  }
-  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "٪"; }
-  function table(head, rows) {
-    var t = Kit.el("table", { class: "data" });
-    t.appendChild(Kit.el("tr", null, head.map(function (h, i) { return Kit.el("th", { class: i ? "num" : "" }, h); })));
-    rows.forEach(function (r) { t.appendChild(Kit.el("tr", null, r.map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, c); }))); });
-    return t;
-  }
-  var log = Kit.log(document.getElementById("log"));
-  var ctl = document.getElementById("ctl"), sl = {};
-  function add(key, o, cfg, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
-  function resetTo(DEF, cfg, render) { document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; if (sl[k]) sl[k].set(DEF[k]); }); render(); log.add("به عددهای نوشته برگشت.", "muted"); }); }
-
-  var DEF = { share: 87, ru: 7.9, rn: 20.7 }, cfg = Object.assign({}, DEF), lastSign = null;
   function H(p) { return p <= 0 || p >= 1 ? 0 : -(p * Math.log2(p) + (1 - p) * Math.log2(1 - p)); }
+  function pct(x) { return (x * 100).toFixed(1) + "%"; }
+  var BASE = { share: 87, ru: 7.9, rn: 20.7 }, view = Object.assign({}, BASE), tour, ctl = {}, msg, kind;
+  function sgn(x) { return (x < 0 ? "−" : x > 0 ? "+" : "") + Math.abs(x).toFixed(4); }
+  function rrow(label, v, cls, avg) {
+    var t = Kit.el("div", { class: "track" }, Kit.el("div", { class: "fill " + cls, style: "width:" + Math.min(100, v / 0.4 * 100).toFixed(1) + "%" }));
+    if (avg != null) t.appendChild(Kit.el("div", { class: "avg", style: "right:" + Math.min(100, avg / 0.4 * 100).toFixed(1) + "%", title: "میانگین وزنی کل" }));
+    return Kit.el("div", { class: "rrow" }, Kit.el("span", null, label), t, Kit.el("span", { class: "v mono" }, pct(v)));
+  }
   function render() {
-    var s = cfg.share / 100, ru = cfg.ru / 100, rn = cfg.rn / 100, N = 10000;
+    var s = view.share / 100, ru = view.ru / 100, rn = view.rn / 100, N = 10000;
     var tp = s * ru, fp = s * (1 - ru), fn = (1 - s) * rn, tn = (1 - s) * (1 - rn), r = tp + fn;
     var ig = H(r) - (s * H(ru) + (1 - s) * H(rn));
     var den = Math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)), mcc = den ? (tp * tn - fp * fn) / den : 0;
-    Kit.clear(document.getElementById("grid4")).appendChild(table(["", "برگشت", "برنگشت"], [
-      ["استفاده کرد", FA(Math.round(tp * N)), FA(Math.round(fp * N))],
-      ["استفاده نکرد", FA(Math.round(fn * N)), FA(Math.round(tn * N))]]));
-    var m = Kit.clear(document.getElementById("meters"));
-    m.appendChild(bar("Information Gain", Math.min(1, ig / 0.03), ig.toFixed(4), "s1"));
-    m.appendChild(bar("ضریب MCC، اندازه", Math.min(1, Math.abs(mcc) / 0.3), (mcc < 0 ? "−" : "+") + Math.abs(mcc).toFixed(4), mcc < 0 ? "bad" : "ok"));
+    function c(x, sub) { return Kit.el("td", null, Math.round(x * N).toLocaleString("en-US"), Kit.el("small", null, sub)); }
+    var t = Kit.clear(document.getElementById("cm"));
+    t.appendChild(Kit.el("tr", null, Kit.el("th", null, ""), Kit.el("th", null, "برگشت"), Kit.el("th", null, "برنگشت")));
+    t.appendChild(Kit.el("tr", null, Kit.el("th", null, "استفاده کرد"), c(tp, "TP"), c(fp, "FP")));
+    t.appendChild(Kit.el("tr", null, Kit.el("th", null, "استفاده نکرد"), c(fn, "FN"), c(tn, "TN")));
+    var R = Kit.clear(document.getElementById("rets"));
+    R.appendChild(rrow("کاربران feature", ru, "u", r)); R.appendChild(rrow("غیرکاربران", rn, "n", r)); R.appendChild(rrow("کل محصول (وزنی)", r, "all"));
+    var M = Kit.clear(document.getElementById("meters"));
+    var igT = Kit.el("div", { class: "dtrack" }, Kit.el("div", { class: "fill ig", style: "left:0;width:" + Math.min(100, ig / 0.03 * 100).toFixed(1) + "%" }));
+    M.appendChild(Kit.el("div", { class: "meter" }, Kit.el("div", { class: "lab" }, Kit.el("span", null, "Information Gain (همیشه ≥ ۰)"), Kit.el("b", { class: "mono" }, ig.toFixed(4))), igT,
+      Kit.el("div", { class: "dtrack-ends", style: "font-size:.75rem;color:var(--ink-3);display:flex;justify-content:space-between" }, Kit.el("span", null, "۰٫۰۳"), Kit.el("span", null, "۰"))));
+    var w = Math.min(50, Math.abs(mcc) / 0.3 * 50);
+    var mT = Kit.el("div", { class: "dtrack" }, Kit.el("div", { class: "zero" }), Kit.el("div", { class: "fill " + (mcc < 0 ? "neg" : "pos"), style: (mcc < 0 ? "left:" + (50 - w) : "left:50") + "%;width:" + w.toFixed(1) + "%" }));
+    M.appendChild(Kit.el("div", { class: "meter" }, Kit.el("div", { class: "lab" }, Kit.el("span", null, "ضریب MCC (علامت‌دار)"), Kit.el("b", { class: "mono" }, sgn(+mcc.toFixed(4)))), mT,
+      Kit.el("div", { style: "font-size:.75rem;color:var(--ink-3);display:flex;justify-content:space-between" }, Kit.el("span", null, "سمت راست: مثبت، کمک می‌کند"), Kit.el("span", null, "سمت چپ: منفی، آسیب می‌زند"))));
     var v = document.getElementById("verdict"), neg = mcc < -0.005, pos = mcc > 0.005;
     v.className = "callout " + (neg ? "warn" : pos ? "ok" : "");
-    v.textContent = neg ? "استفاده از این feature با برنگشتن همراه است. Information Gain همان را «اطلاعات زیاد» می‌خواند و جهتی نمی‌گوید." : pos ? "استفاده با برگشتن همراه است و MCC مثبت این را نشان می‌دهد." : "رابطه تقریباً صفر است: کاربران و غیرکاربران یک‌جور برمی‌گردند.";
-    var sign = neg ? -1 : pos ? 1 : 0; if (lastSign !== null && sign !== lastSign) log.add(sign < 0 ? "علامت MCC منفی شد؛ Information Gain هنوز مثبت است." : sign > 0 ? "علامت MCC مثبت شد." : "MCC به صفر رسید.", sign < 0 ? "warn" : "ok"); lastSign = sign;
-    stats([["retention کل محصول", pct(r)], ["میانگین وزنی در برابر کاربران feature", ru < r ? "کمتر از میانگین" : "بیشتر از میانگین", ru < r ? "warn" : "ok"], ["Information Gain", ig.toFixed(4)], ["ضریب MCC", (mcc < 0 ? "−" : "") + Math.abs(mcc).toFixed(4)]]);
+    v.textContent = neg ? "▼ استفاده از این feature با برنگشتن همراه است؛ Information Gain فقط می‌گوید «اطلاعات دارد»." : pos ? "▲ استفاده با برگشتن همراه است و MCC مثبت این را نشان می‌دهد." : "● رابطه تقریباً صفر است: کاربران و غیرکاربران یک‌جور برمی‌گردند.";
+    msg = "سهم " + FA(view.share) + "٪، retention کاربران " + FA(view.ru) + "٪ و غیرکاربران " + FA(view.rn) + "٪: IG برابر " + FA(ig.toFixed(4)) + " و MCC برابر " + FA(sgn(+mcc.toFixed(4))) + "."; kind = neg ? "warn" : pos ? "ok" : "";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["retention کل", pct(r)], ["کاربران feature نسبت به کل", ru < r ? "پایین‌تر" : ru > r ? "بالاتر" : "برابر", ru < r ? "warn" : "ok"], ["Information Gain", ig.toFixed(4)], ["MCC", sgn(+mcc.toFixed(4)), neg ? "bad" : pos ? "ok" : ""]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (/^[−+0-9.%]/.test(x[1]) ? "mono " : "") + (x[2] || "") }, String(x[1])))); });
+    ctl.share.set(view.share); ctl.ru.set(view.ru); ctl.rn.set(view.rn);
   }
-  add("share", { label: "سهم کاربرانی که از feature استفاده کرده‌اند", min: 1, max: 99, step: 1, unit: "٪" }, cfg, render);
-  add("ru", { label: "retention کاربرانِ feature", min: 1, max: 60, step: 0.1, unit: "٪" }, cfg, render);
-  add("rn", { label: "retention کسانی که استفاده نکرده‌اند", min: 1, max: 60, step: 0.1, unit: "٪" }, cfg, render);
-  var pre = Kit.segmented({ label: "نمونه‌ها", value: "f18", options: [{ value: "f18", label: "feature18" }, { value: "f41", label: "feature41" }, { value: "flip", label: "وارونه‌ی feature18" }], onChange: function (k) {
-    var P = { f18: [87, 7.9, 20.7], f41: [95, 9.8, 10.0], flip: [87, 20.7, 7.9] }[k];
-    ["share", "ru", "rn"].forEach(function (key, i) { cfg[key] = P[i]; sl[key].set(P[i]); }); render(); log.add("نمونه‌ی " + k.replace("f", "feature") + " بار شد.", "muted"); } });
-  ctl.insertBefore(pre.element, ctl.firstChild);
-  resetTo(DEF, cfg, render);
-  render();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.share = Kit.slider({ label: "سهم کاربرانی که از feature استفاده کرده‌اند", min: 1, max: 99, step: 1, unit: "٪", value: view.share, onInput: tw(function (v) { view.share = v; }) });
+  ctl.ru = Kit.slider({ label: "retention کاربران feature", min: 1, max: 40, step: 0.1, unit: "٪", value: view.ru, onInput: tw(function (v) { view.ru = v; }) });
+  ctl.rn = Kit.slider({ label: "retention کسانی که استفاده نکرده‌اند", min: 1, max: 40, step: 0.1, unit: "٪", value: view.rn, onInput: tw(function (v) { view.rn = v; }) });
+  var g = document.getElementById("ctl"); [ctl.share, ctl.ru, ctl.rn].forEach(function (x) { g.appendChild(x.element); });
+
+  function at(o) { return function () { view = Object.assign({}, BASE, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "هر feature یک جدول چهارخانه دارد: استفاده کرد یا نکرد، برگشت یا برنگشت. Information Gain و MCC هر دو از همین جدول حساب می‌شوند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و سه عدد را جابه‌جا کنید؛ علامت MCC را دنبال کنید.",
+    steps: [
+      { kind: "", run: at({}), say: "feature18 در نوشته: کاربرانش retention برابر ۷٫۹٪ دارند و کسانی که استفاده نکرده‌اند ۲۰٫۷٪. سهم ۸۷٪ کاربر را vault از نوشته‌های ۱۰ و ۱۳ ساخته است." },
+      { kind: "", run: at({}), say: "Information Gain این feature حدود ۰٫۰۱۳ است؛ در نوشته ۰٫۰۱۴۰ و سومین IG بالا. در فهرستی که با IG مرتب شود، feature18 بالا می‌نشیند (بخش «ضعف Information Gain»)." },
+      { kind: "warn", run: at({}), say: "ولی MCC برابر −۰٫۱۴۶ است: استفاده از feature18 با برنگشتن همراه است. IG همیشه مثبت است و جهت را نمی‌گوید؛ برای تحلیل محصول جهت لازم است." },
+      { kind: "warn", run: at({}), say: "قاعده‌ی پایان نوشته: MCC منفی است وقتی retention کاربران feature از میانگین وزنی کل پایین‌تر باشد. اینجا ۷٫۹٪ در برابر ۹٫۶٪؛ خط سیاه روی میله‌ها همان میانگین است." },
+      { kind: "ok", run: at({ share: 20, ru: 25, rn: 12 }), say: "یک feature دیگر (ساختگی): ۲۰٪ کاربر، retention ۲۵٪ در برابر ۱۲٪. IG تقریباً همان است (۰٫۰۱۴۰) ولی MCC برابر +۰٫۱۴۷. دو feature با IG هم‌اندازه و اثر وارونه." },
+      { kind: "", run: at({ share: 87, ru: 20.7, rn: 7.9 }), say: "retentionهای feature18 را جابه‌جا کنید: IG به ۰٫۰۱۰۳ می‌رسد و باز مثبت است؛ MCC اما علامت عوض می‌کند و +۰٫۱۱۰ می‌شود." },
+      { kind: "", run: at({ share: 95, ru: 9.8, rn: 10 }), say: "feature41 نوشته‌ی ۱۰: پرکاربردترین feature با ۹۵٪ کاربر، retention ۹٫۸٪ در برابر ۱۰٫۰٪. هر دو معیار نزدیک صفرند؛ محبوبیت به‌تنهایی به retention کمک نمی‌کند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {
-    "q": "نمونه‌ی «وارونه‌ی feature18» را بزنید. Information Gain چه می‌شود؟",
+    "q": "retentionهای feature18 را جابه‌جا کنید. Information Gain چه می‌شود؟",
     "options": [
-      "تغییر نمی‌کند",
+      "کمی تغییر می‌کند ولی مثبت می‌ماند",
       "منفی می‌شود",
       "صفر می‌شود"
     ],
     "answer": 0,
-    "explain": "Information Gain همیشه مثبت است و جهت را نمی‌بیند (بخش «ضعف Information Gain»)."
+    "explain": "Information Gain همیشه مثبت است و جهت را نمی‌بیند؛ فقط MCC علامت عوض می‌کند (بخش «ضعف Information Gain»)."
   },
   {
     "q": "چرا featureهای خیلی محبوب اغلب MCC منفی دارند؟",

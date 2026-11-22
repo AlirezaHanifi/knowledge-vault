@@ -7,25 +7,28 @@
 <meta name="description" content="کیفیت بدون کمیت گمراه می‌کند: featureها را روی محور محبوبیت و محور درصد برگشته‌ها با آستانه‌های صدک ۵۰ و ۸۰ در نُه خوشه بچینید. برای نوشته‌ی ۸ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 9rem 1fr 5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 0 0 auto; background: var(--s1); border-radius: 3px; }
-  .bar-fill.s2 { background: var(--s2); } .bar-fill.s3 { background: var(--s3); } .bar-fill.s4 { background: var(--s4); }
-  .bar-fill.bad { background: var(--bad); } .bar-fill.ok { background: var(--ok); } .bar-fill.warn { background: var(--warn); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; height: auto; display: block; }
-  svg.plot text { font-size: 10px; fill: var(--muted); }
-  svg.plot .grid { stroke: var(--line); stroke-width: 1; }
-  svg.plot .thr { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: .55; }
-  svg.plot circle { stroke: var(--surface); stroke-width: 1; }
-  svg.plot circle.core { fill: var(--ok); } svg.plot circle.niche { fill: var(--s4); } svg.plot circle.power { fill: var(--s1); }
-  svg.plot circle.setup { fill: var(--s2); } svg.plot circle.casual { fill: var(--s5); } svg.plot circle.others { fill: var(--muted); }
+  .c8 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  svg.plot { width: 100%; height: auto; max-height: 315px; display: block; direction: ltr; }
+  svg.plot text { font-family: var(--mono); font-size: 12px; fill: var(--ink-3); }
+  svg.plot .grid { stroke: var(--line); }
+  svg.plot .thr { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .6; }
+  svg.plot .pt circle { stroke: var(--surface); stroke-width: 1; fill: var(--ink-3); opacity: .55; }
+  svg.plot .pt text { font-size: 9px; font-weight: 700; fill: #fff; text-anchor: middle; }
+  svg.plot .core circle { fill: var(--ok); opacity: 1; } svg.plot .niche circle { fill: var(--s4); opacity: 1; } svg.plot .power circle { fill: var(--s1); opacity: 1; }
+  svg.plot .setup circle { fill: var(--s2); opacity: 1; } svg.plot .casual circle { fill: var(--s5); opacity: 1; } svg.plot .others circle { fill: var(--ink-3); opacity: 1; }
+  svg.plot .hl circle { stroke: var(--ink); stroke-width: 2.5; }
+  .legend { font-size: .84rem; color: var(--ink-2); margin: 4px 0 0; line-height: 1.7; }
+  table.top { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  table.top th, table.top td { padding: 2px 6px; border-bottom: 1px solid var(--line); text-align: right; }
+  table.top td.n { font-family: var(--mono); direction: ltr; text-align: left; }
+  table.top tr.niche td { background: var(--s4-soft, var(--surface-2)); }
+  table.top .tag { font-weight: 700; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/08-an-enhanced-version-of-the-analysis-of-how-product.html">نوشته‌ی ۸</a><span aria-hidden="true">/</span>
@@ -36,108 +39,134 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۸ · نسخه‌ی بهبودیافته‌ی تحلیل اثر featureها روی retention</div>
-  <h1>نُه خوشه‌ی featureها</h1>
-  <p class="lede">فهرستی که فقط بر حسب <strong>درصد برگشته‌ها</strong> مرتب شده، بالایش را featureهای Niche پر می‌کنند. همان featureها را روی دو محور بچینید و ببینید هسته‌ی واقعی محصول چقدر کوچک است.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌ی «An enhanced version of the analysis of how product features impact retention» را نشان می‌دهد (بخش‌های «نمودار پراکندگی کمیت و کیفیت» و «نُه خوشه‌ی featureها»). نُه خوشه و قاعده‌ی صدک ۵۰ و ۸۰ از نوشته است؛ ۴۵ feature با seed ثابت ساخته‌ی vault است، نه داده‌ی نویسنده.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>نُه خوشه‌ی featureها</h1>
+      <p class="lede">فهرستی که فقط با <strong>درصد کاربران برگشته</strong> مرتب شده، بالایش پر از featureهایی است که کاربر کمی دارند. وقتی همان featureها را روی دو محور، یعنی محبوبیت و ارزش، بچینید و با صدک ۵۰ و ۸۰ ببرید، <strong>نُه خوشه</strong> پیدا می‌شود و معلوم می‌شود هسته‌ی واقعی محصول چقدر کوچک است.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «An enhanced version of the analysis of how product features impact retention» را نشان می‌دهد (بخش‌های «نمودار پراکندگی کمیت و کیفیت» و «نُه خوشه‌ی featureها»). نُه خوشه و قاعده‌ی صدک ۵۰ و ۸۰ از نوشته است؛ ۴۵ feature با seed ثابت ساخته‌ی vault است، نه داده‌ی نویسنده.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">محبوبیت در برابر درصد برگشته‌ها</p><div id="plot-wrap"></div></div>
-      <div class="panel"><p class="panel-title">ده feature اول وقتی فقط با retention مرتب شود</p><div id="top"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازگشت به عددهای نوشته</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c8">
+          <div><div id="plot"></div>
+            <p class="legend" id="legend"></p></div>
+          <div><p class="panel-title" id="ttl"></p><table class="top mono" id="top"></table></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>بالای فهرست تک‌بعدی را Niche پر می‌کند</strong>: retention بالا با کاربران کم. پیش از core نامیدنِ یک feature، ستون تعداد کاربر را کنارش بگذارید.</li>
-    <li><strong>خوشه‌های Core و Power کوچک‌اند</strong>؛ نوشته می‌گوید معمولاً ۲ تا ۳ feature در Core و سه تا پنج در هر Power.</li>
-    <li><strong>آستانه‌ها را جابه‌جا کنید</strong> و ببینید چند feature خوشه عوض می‌کنند؛ مرز خوشه‌ها قرارداد است، نه قانون.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>بالای فهرست تک‌بعدی را Niche پر می‌کند</strong>: retention بالا با کاربر کم. قبل از اینکه featureی را core بنامید، تعداد کاربرانش را کنارش بگذارید.</li>
+      <li><strong>Core و Power کوچک‌اند</strong>؛ نوشته می‌گوید معمولاً ۲ تا ۳ feature در Core و ۳ تا ۵ در Power.</li>
+      <li><strong>آستانه‌ها قراردادند</strong>: با جابه‌جا کردن صدک‌ها چند feature خوشه عوض می‌کنند.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/08-an-enhanced-version-of-the-analysis-of-how-product.html"><small>درس</small>نوشته‌ی ۸: نسخه‌ی بهبودیافته‌ی تحلیل اثر featureها روی retention</a></li>
-    <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/08-an-enhanced-version-of-the-analysis-of-how-product.html"><small>درس</small>نوشته‌ی ۸: نسخه‌ی بهبودیافته‌ی تحلیل اثر featureها روی retention</a></li>
+      <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  var FA = function (s) { return Kit.digits(String(s)); };
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  function bar(label, frac, text, cls) {
-    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
-      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
-      Kit.el("span", { class: "v" }, text));
-  }
-  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "٪"; }
-  function table(head, rows) {
-    var t = Kit.el("table", { class: "data" });
-    t.appendChild(Kit.el("tr", null, head.map(function (h, i) { return Kit.el("th", { class: i ? "num" : "" }, h); })));
-    rows.forEach(function (r) { t.appendChild(Kit.el("tr", null, r.map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, c); }))); });
-    return t;
-  }
-  var log = Kit.log(document.getElementById("log"));
-  var ctl = document.getElementById("ctl"), sl = {};
-  function add(key, o, cfg, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
-  function resetTo(DEF, cfg, render) { document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; if (sl[k]) sl[k].set(DEF[k]); }); render(); log.add("به عددهای نوشته برگشت.", "muted"); }); }
-
   var rand = Kit.rng(8).next, F = [];
   for (var i = 1; i <= 45; i++) {
-    var pop = Math.exp(-3.3 + 2.6 * rand()) ;
+    var pop = Math.exp(-3.3 + 2.6 * rand());
     var ret = Math.max(0.03, Math.min(0.62, 0.30 - 0.32 * Math.sqrt(pop) + 0.16 * (rand() - 0.5) + (rand() < 0.15 ? 0.22 : 0)));
     F.push({ name: "feature" + i, pop: Math.min(pop, 0.95), ret: ret });
   }
-  var DEF = { lo: 50, hi: 80, view: "two" }, cfg = Object.assign({}, DEF), lastCore = null;
   function q(arr, p) { var s = arr.slice().sort(function (a, b) { return a - b; }); return Kit.percentile(s, p / 100); }
   function band(v, lo, hi) { return v > hi ? 2 : v > lo ? 1 : 0; }
   var NAMES = [["Others", "Casual3", "Niche"], ["Casual2", "Casual1", "Power2"], ["Set-up", "Power1", "Core"]];
-  var CLS = { Others: "others", Casual1: "casual", Casual2: "casual", Casual3: "casual", Niche: "niche", Power1: "power", Power2: "power", "Set-up": "setup", Core: "core" };
-  function render() {
+  function classify(lo, hi) {
     var pops = F.map(function (f) { return f.pop; }), rets = F.map(function (f) { return f.ret; });
-    var pl = q(pops, cfg.lo), ph = q(pops, cfg.hi), rl = q(rets, cfg.lo), rh = q(rets, cfg.hi);
-    F.forEach(function (f) { f.cl = NAMES[band(f.pop, pl, ph)][band(f.ret, rl, rh)]; });
-    var W = 520, H = 300, L = 44, R = 12, T = 12, B = 34, xMax = 1, yMax = 0.7;
-    function X(v) { return W - R - Math.sqrt(v / xMax) * (W - L - R); }
-    function Y(v) { return T + (1 - v / yMax) * (H - T - B); }
-    var s = Kit.svg("svg", { class: "plot", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "نمودار پراکندگی ۴۵ feature: محبوبیت روی محور افقی و درصد برگشته‌ها روی محور عمودی" });
-    [0, 0.2, 0.4, 0.6].forEach(function (v) { s.appendChild(Kit.svg("line", { class: "grid", x1: L, x2: W - R, y1: Y(v), y2: Y(v) })); s.appendChild(Kit.svg("text", { x: 4, y: Y(v) + 4 }, FA(Math.round(v * 100)) + "٪")); });
-    [0.01, 0.1, 0.4, 0.9].forEach(function (v) { s.appendChild(Kit.svg("text", { x: X(v), y: H - B + 14, "text-anchor": "middle" }, FA(Math.round(v * 100)) + "٪")); });
-    s.appendChild(Kit.svg("text", { x: (W) / 2, y: H - 4, "text-anchor": "middle" }, "درصد کاربرانی که از feature استفاده کرده‌اند ← محبوب‌تر"));
-    [pl, ph].forEach(function (v) { s.appendChild(Kit.svg("line", { class: "thr", x1: X(v), x2: X(v), y1: T, y2: H - B })); });
-    [rl, rh].forEach(function (v) { s.appendChild(Kit.svg("line", { class: "thr", x1: L, x2: W - R, y1: Y(v), y2: Y(v) })); });
-    F.forEach(function (f) { var c = Kit.svg("circle", { class: CLS[f.cl], cx: X(f.pop), cy: Y(f.ret), r: 5 }); c.appendChild(Kit.svg("title", null, f.name + "، " + f.cl + ": محبوبیت " + pct(f.pop) + "، برگشته‌ها " + pct(f.ret))); s.appendChild(c); });
-    var wrap = Kit.clear(document.getElementById("plot-wrap")); wrap.appendChild(s);
-    var counts = {}; F.forEach(function (f) { counts[f.cl] = (counts[f.cl] || 0) + 1; });
-    wrap.appendChild(Kit.el("p", { class: "field-hint" }, "رنگ‌ها: سبز Core، آبی Power، بنفش Niche، نارنجی Set-up، زرد Casual، خاکستری Others. نام خوشه‌ی هر نقطه در راهنمای آن هم آمده است."));
+    var th = { pl: q(pops, lo), ph: q(pops, hi), rl: q(rets, lo), rh: q(rets, hi) }, counts = {};
+    F.forEach(function (f) { f.cl = NAMES[band(f.pop, th.pl, th.ph)][band(f.ret, th.rl, th.rh)]; counts[f.cl] = (counts[f.cl] || 0) + 1; });
     var top = F.slice().sort(function (a, b) { return b.ret - a.ret; }).slice(0, 10);
-    var niche = top.filter(function (f) { return f.cl === "Niche"; }).length;
-    Kit.clear(document.getElementById("top")).appendChild(table(["feature", "برگشته‌ها", "محبوبیت", "خوشه"], top.map(function (f) { return [f.name, pct(f.ret), pct(f.pop), f.cl]; })));
     var others = F.filter(function (f) { return f.cl === "Others"; });
-    stats([["تعداد Core", FA(counts.Core || 0)], ["تعداد Power1 و Power2", FA((counts.Power1 || 0) + (counts.Power2 || 0))], ["Niche در ده feature اول", FA(niche) + " از ۱۰", niche >= 3 ? "warn" : ""], ["سهم featureهای Others", pct(others.length / F.length, 0)]]);
-    if (lastCore !== null && lastCore !== (counts.Core || 0)) log.add("تعداد featureهای Core حالا " + FA(counts.Core || 0) + " است.", "muted");
-    lastCore = counts.Core || 0;
+    var oUsers = others.reduce(function (a, f) { return a + f.pop; }, 0) / Math.max(1, others.length);
+    return { th: th, counts: counts, top: top, niche: top.filter(function (f) { return f.cl === "Niche"; }).length };
   }
-  add("lo", { label: "آستانه‌ی پایین، صدک", min: 30, max: 65, step: 5, format: function (v) { return "صدک " + FA(v); } }, cfg, render);
-  add("hi", { label: "آستانه‌ی بالا، صدک", min: 70, max: 90, step: 5, format: function (v) { return "صدک " + FA(v); }, hint: "نوشته صدک ۵۰ و ۸۰ را به کار می‌برد" }, cfg, render);
-  resetTo(DEF, cfg, render);
-  render();
+
+  var CLS = { Others: "others", Casual1: "casual", Casual2: "casual", Casual3: "casual", Niche: "niche", Power1: "power", Power2: "power", "Set-up": "setup", Core: "core" };
+  var LET = { core: "C", power: "P", niche: "N", setup: "S", casual: "c", others: "o" };
+  var view = { lo: 50, hi: 80, pop: true, thr: true }, tour, ctl = {}, msg, kind;
+  function pct(x) { return (x * 100).toFixed(1) + "%"; }
+  function render() {
+    var r = classify(view.lo, view.hi), th = r.th;
+    var W = 560, H = 360, L = 46, R = 12, T = 12, B = 40, yMax = 0.65;
+    function X(v) { return L + Math.sqrt(v) * (W - L - R); }
+    function Y(v) { return T + (1 - v / yMax) * (H - T - B); }
+    var s = Kit.svg("svg", { class: "plot mono", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "۴۵ feature: محبوبیت روی محور افقی و درصد کاربران برگشته روی محور عمودی" });
+    [0, 0.2, 0.4, 0.6].forEach(function (v) { s.appendChild(Kit.svg("line", { class: "grid", x1: L, x2: W - R, y1: Y(v), y2: Y(v) })); s.appendChild(Kit.svg("text", { x: L - 6, y: Y(v) + 4, "text-anchor": "end" }, Math.round(v * 100) + "%")); });
+    [0.01, 0.1, 0.4, 0.9].forEach(function (v) { s.appendChild(Kit.svg("text", { x: X(v), y: H - B + 16, "text-anchor": "middle" }, Math.round(v * 100) + "%")); });
+    s.appendChild(Kit.svg("text", { x: W / 2, y: H - 4, "text-anchor": "middle" }, "% users (popularity) →"));
+    s.appendChild(Kit.svg("text", { x: L + 4, y: T + 10 }, "↑ % returned users"));
+    if (view.thr) { [th.pl, th.ph].forEach(function (v) { s.appendChild(Kit.svg("line", { class: "thr", x1: X(v), x2: X(v), y1: T, y2: H - B })); });
+      [th.rl, th.rh].forEach(function (v) { s.appendChild(Kit.svg("line", { class: "thr", x1: L, x2: W - R, y1: Y(v), y2: Y(v) })); }); }
+    var topSet = r.top.map(function (f) { return f.name; });
+    F.forEach(function (f) { var c = view.thr ? CLS[f.cl] : "", g = Kit.svg("g", { class: "pt " + c + (!view.thr && topSet.indexOf(f.name) >= 0 ? " hl" : "") });
+      g.appendChild(Kit.svg("circle", { cx: X(f.pop), cy: Y(f.ret), r: 8 })); if (c) g.appendChild(Kit.svg("text", { x: X(f.pop), y: Y(f.ret) + 3 }, LET[c]));
+      g.appendChild(Kit.svg("title", null, f.name + (view.thr ? " · " + f.cl : "") + ": users " + pct(f.pop) + ", returned " + pct(f.ret))); s.appendChild(g); });
+    Kit.clear(document.getElementById("plot")).appendChild(s);
+    document.getElementById("legend").textContent = view.thr ? "C سبز: Core · P آبی: Power · N بنفش: Niche · S نارنجی: Set-up · c زرد: Casual · o خاکستری: Others · خط‌چین‌ها: صدک " + view.lo + " و " + view.hi : "هنوز خوشه‌ای نیست؛ حلقه‌ی پررنگ: ده feature اول فهرست retention";
+    document.getElementById("ttl").textContent = "ده feature اول وقتی فقط با درصد برگشته مرتب شود";
+    var t = Kit.clear(document.getElementById("top")), hd = ["feature", "returned"].concat(view.pop ? ["users"] : []).concat(view.thr ? ["خوشه"] : []);
+    t.appendChild(Kit.el("tr", null, hd.map(function (h) { return Kit.el("th", null, h); })));
+    r.top.forEach(function (f) { var cells = [Kit.el("td", null, f.name), Kit.el("td", { class: "n" }, pct(f.ret))];
+      if (view.pop) cells.push(Kit.el("td", { class: "n" }, pct(f.pop))); if (view.thr) cells.push(Kit.el("td", { class: "tag" }, f.cl));
+      t.appendChild(Kit.el("tr", { class: view.thr && f.cl === "Niche" ? "niche" : "" }, cells)); });
+    var n = r.counts;
+    msg = view.thr ? "با صدک " + view.lo + " و " + view.hi + ": " + (n.Core || 0) + " feature در Core، " + ((n.Power1 || 0) + (n.Power2 || 0)) + " در Power و " + r.niche + " Niche در ده feature اول." : "هنوز فقط یک بعد دیده می‌شود."; kind = "";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["Core", view.thr ? n.Core || 0 : "–"], ["Power1 + Power2", view.thr ? (n.Power1 || 0) + (n.Power2 || 0) : "–"], ["Niche در ده‌تای اول", view.thr ? r.niche + " / 10" : "–", view.thr && r.niche >= 3 ? "warn" : ""], ["Others", view.thr ? (n.Others || 0) + " / 45" : "–"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, String(x[1])))); });
+    ctl.lo.set(view.lo); ctl.hi.set(view.hi);
+  }
+  function tw(f) { return function (v) { f(v); view.pop = true; view.thr = true; render(); tour.free(msg, kind); }; }
+  ctl.lo = Kit.slider({ label: "آستانه‌ی پایین (صدک)", min: 30, max: 65, step: 5, value: view.lo, onInput: tw(function (v) { view.lo = v; }) });
+  ctl.hi = Kit.slider({ label: "آستانه‌ی بالا (صدک)", min: 70, max: 90, step: 5, value: view.hi, onInput: tw(function (v) { view.hi = v; }) });
+  document.getElementById("ctl").appendChild(ctl.lo.element); document.getElementById("ctl").appendChild(ctl.hi.element);
+
+  function at(o) { return function () { view = Object.assign({ lo: 50, hi: 80, pop: true, thr: true }, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "۴۵ feature ساختگی (با seed ثابت، نه داده‌ی نویسنده). برای هر کدام دو عدد داریم: درصد کاربرانی که از آن استفاده کرده‌اند (کمیت) و درصد کاربرانی که برگشته‌اند (کیفیت).",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و آستانه‌ها را جابه‌جا کنید تا ببینید کدام featureها خوشه عوض می‌کنند.",
+    steps: [
+      { kind: "", run: at({ pop: false, thr: false }), say: "قدم اول نوشته: فهرست featureها مرتب‌شده با درصد کاربران برگشته. feature34 با ۵۱٪ در صدر است و به نظر مهم‌ترین feature می‌آید." },
+      { kind: "warn", run: at({ thr: false }), say: "ستون تعداد کاربر را اضافه کنید: feature34 را فقط ۷٫۴٪ کاربران استفاده کرده‌اند. نوشته می‌گوید معیار کیفی بدون معیار کمی رایج‌ترین اشتباه تحلیل است." },
+      { kind: "", run: at({ thr: false }), say: "پس هر دو را روی یک نمودار پراکندگی می‌گذاریم: محور افقی محبوبیت، محور عمودی ارزش. هنوز نتیجه‌ی روشنی نمی‌شود گرفت (بخش «نمودار پراکندگی کمیت و کیفیت»)." },
+      { kind: "ok", run: at({}), say: "قاعده‌ی صدک ۵۰ و ۸۰ روی هر دو محور نُه خوشه می‌سازد. Core یعنی بالای صدک ۸۰ در هر دو؛ اینجا فقط یک feature، یعنی feature6، Core است (بخش «نُه خوشه‌ی featureها»)." },
+      { kind: "warn", run: at({}), say: "حالا دوباره به فهرست نگاه کنید: ۷ تا از ده feature اول Niche‌اند، یعنی ارزش بالا برای کاربران کم. هر feature با retention بالا core نیست (بخش «مقایسه با روش قبل و مرکز خوشه‌ها»)." },
+      { kind: "", run: at({ lo: 40, hi: 70 }), say: "آستانه‌ها را به صدک ۴۰ و ۷۰ ببرید: ۱۷ feature از ۴۵ خوشه عوض می‌کنند و Core سه عضو پیدا می‌کند. مرز خوشه‌ها قرارداد است، نه قانون." },
+      { kind: "warn", run: at({ lo: 60, hi: 90 }), say: "با صدک ۶۰ و ۹۰ دیگر هیچ featureی Core نیست. نوشته هم یادآوری می‌کند featureها با گذر زمان، تغییر UX یا جذب کاربران تازه بین خوشه‌ها جابه‌جا می‌شوند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {

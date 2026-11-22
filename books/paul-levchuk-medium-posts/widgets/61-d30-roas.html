@@ -7,18 +7,27 @@
 <meta name="description" content="سهم Churner و CPI و دقت کلاسیفایر را عوض کنید و ROAS در D30 و D180 را برای bidding ساده و pipeline کیفیت مقایسه کنید. برای نوشته‌ی ۶۱ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
-  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; display: block; }
+  .c61 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .arch { display: grid; grid-template-columns: 5.6rem 1fr; gap: 4px 10px; align-items: center; margin: 8px 0 12px; }
+  .arch .nm b { display: block; } .arch .nm small { color: var(--ink-3); font-size: .78rem; }
+  .ut { position: relative; height: 22px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; }
+  .ut .full { position: absolute; top: 0; bottom: 0; right: 0; background: var(--accent-soft); border-left: 2px solid var(--accent); }
+  .ut .d30 { position: absolute; top: 0; bottom: 0; right: 0; background: var(--accent); }
+  .arch .cap { grid-column: 2; font-size: .8rem; color: var(--ink-2); margin-top: -2px; }
+  .mixb { display: flex; height: 24px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); font-size: .78rem; }
+  .mixb span { display: flex; align-items: center; justify-content: center; color: #fff; overflow: hidden; white-space: nowrap; }
+  .mixb .w { background: var(--s4); } .mixb .g { background: var(--s1); } .mixb .c { background: var(--ink-3); }
+  svg.rb { width: 100%; height: auto; max-height: 320px; display: block; direction: ltr; }
+  svg.rb text { font-family: var(--mono); font-size: 12px; fill: var(--ink-3); }
+  svg.rb .v { font-size: 14px; font-weight: 700; fill: var(--ink); }
+  .key { font-size: .8rem; color: var(--ink-3); margin: 4px 0 0; }
+  .key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-inline-end: 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/61-d30-roas-is-the-wrong-metric-here-is-what-to-use-instead.html">نوشته‌ی 61</a><span aria-hidden="true">/</span>
@@ -29,76 +38,127 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۶۱ · D30 ROAS معیار درستی نیست</div>
-  <h1>D30 در برابر D180</h1>
-  <p class="lede">ROAS را در دو افق ببینید: Churner در <strong>D30</strong> کارا به نظر می‌رسد و Whale هنوز بیشتر ارزشش را آزاد نکرده.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌ی «D30 ROAS Is the Wrong Metric» را نشان می‌دهد (بخش‌های «You do not know who you just acquired» و «D30 lies. D180 tells the truth»). ارزش‌های Whale و Churner از نوشته‌اند و مقدار D30 برای Grinder تقریبی و مال خود vault است. داده‌ها و پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>D30 در برابر D180</h1>
+      <p class="lede">ROAS را در دو افق ببینید: Churner در <strong>D30</strong> کارا به نظر می‌رسد و Whale هنوز بیشتر ارزشش را آزاد نکرده.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «D30 ROAS Is the Wrong Metric» را نشان می‌دهد (بخش‌های «You do not know who you just acquired» و «D30 lies. D180 tells the truth»). ارزش D30 و D180 سه گونه، یعنی Whale با ۲۵ و ۱۲۰ دلار، Grinder با ۵ و ۱۸ دلار و Churner با ۰٫۲۰ دلار، و سهم ۹٪ Whale و ۶۱٪ Churner از نوشته است. فیلتر pipeline یک مدل ساده‌ی vault است و عددهای ROAS آن با شبیه‌سازی نوشته یکی نیست.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">ROAS دو سیاست در دو افق</p><div id="roas"></div>
-        <p class="field-hint">میله‌ها تا ۸ برابر مقیاس شده‌اند.</p></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c61">
+          <div>
+            <p class="panel-title">ترکیب installها</p>
+            <div class="mixb mono" id="mixb"></div>
+            <p class="panel-title" style="margin-top:12px">ارزش هر گونه: پر = تا D30، روشن = تا D180</p>
+            <div id="arch"></div>
+          </div>
+          <div>
+            <p class="panel-title">ROAS دو سیاست در دو افق</p>
+            <div id="rb"></div>
+            <p class="key"><i style="background:var(--ink-3)"></i>flat: همه‌ی installها · <i style="background:var(--ok)"></i>pipeline: فیلتر پس از ۷۲ ساعت · خط‌چین: سربه‌سر، ۱×</p>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>pipeline در D30</strong> هم بهتر است، ولی فاصله در D180 بزرگ‌تر می‌شود.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>pipeline در D30</strong> هم بهتر است، ولی فاصله در D180 بزرگ‌تر می‌شود.</li>
     <li><strong>سهم Churner</strong> flat را بیشتر از pipeline پایین می‌کشد.</li>
     <li><strong>CPI</strong> هر دو سیاست را یکسان مقیاس می‌کند و فاصله را عوض نمی‌کند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/61-d30-roas-is-the-wrong-metric-here-is-what-to-use-instead.html"><small>درس</small>نوشته‌ی 61: D30 ROAS معیار درستی نیست</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/61-d30-roas-is-the-wrong-metric-here-is-what-to-use-instead.html"><small>درس</small>نوشته‌ی 61: D30 ROAS معیار درستی نیست</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  function stats(id, rows) {
-    var st = Kit.clear(document.getElementById(id));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  function bar(label, frac, text, cls) {
-    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
-      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
-      Kit.el("span", { class: "v" }, text));
-  }
-  var log = Kit.log(document.getElementById("log"));
-  var ctl = document.getElementById("ctl");
-  var last = null;
-  function add(cfg, key, o, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; var s = Kit.slider(o); ctl.appendChild(s.element); return s; }
-
-  var cfg = { cpi: 15, churner: 61, acc: 87 };
-  var W = { share: 0.09, d30: 25, d180: 120 }, G = { d30: 8, d180: 17 }, C = { d30: 0.2, d180: 0.2 };
+  var FA = function (s) { return Kit.digits(String(s)); };
+  var VAL = { W: { d30: 25, d180: 120 }, G: { d30: 5, d180: 18 }, C: { d30: 0.2, d180: 0.2 } };
+  var DEF = { cpi: 10, churner: 61, acc: 87, pipe: true }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function money(x) { return "$" + (x < 1 ? x.toFixed(2) : x.toFixed(x < 10 ? 2 : 0)); }
+  function model() { var ch = view.churner / 100, w = 0.09, g = Math.max(0, 1 - ch - w), a = view.acc / 100;
+    function v(h, mw, mg, mc) { return mw * VAL.W[h] + mg * VAL.G[h] + mc * VAL.C[h]; }
+    var aW = w * a, aG = g * a, aC = ch * (1 - a), acc = aW + aG + aC;
+    return { w: w, g: g, ch: ch, f30: v("d30", w, g, ch), f180: v("d180", w, g, ch), p30: v("d30", aW, aG, aC) / acc, p180: v("d180", aW, aG, aC) / acc, acc: acc, whale: w * VAL.W.d180 / v("d180", w, g, ch) }; }
   function render() {
-    var ch = cfg.churner / 100, w = W.share, g = Math.max(0, 1 - ch - w), a = cfg.acc / 100;
-    function ltv(h, mw, mg, mc) { return mw * W[h] + mg * G[h] + mc * C[h]; }
-    var f30 = ltv("d30", w, g, ch), f180 = ltv("d180", w, g, ch);
-    var accW = w * a, accG = g * a, accC = ch * (1 - a), acc = accW + accG + accC;
-    var p30 = ltv("d30", accW, accG, accC) / acc, p180 = ltv("d180", accW, accG, accC) / acc;
-    var cpi = cfg.cpi;
-    var out = Kit.clear(document.getElementById("roas"));
-    [["flat · D30", f30 / cpi, ""], ["pipeline · D30", p30 / cpi, "hot"], ["flat · D180", f180 / cpi, ""], ["pipeline · D180", p180 / cpi, "hot"]].forEach(function (r) { out.appendChild(bar(r[0], r[1] / 8, r[1].toFixed(2) + "×", r[2])); });
-    stats("stats", [["سهم Churner در installها", cfg.churner + "٪"], ["ارزش D180 هر install، flat", f180.toFixed(1) + " دلار"], ["ارزش D180 هر install، pipeline", p180.toFixed(1) + " دلار", "ok"], ["سهم installهای پذیرفته‌شده", (acc * 100).toFixed(0) + "٪"]]);
-    var key = cfg.churner + "/" + cfg.acc + "/" + cfg.cpi; if (last && key !== last) log.add("D30 تفاوت flat و pipeline را " + (p30 / f30).toFixed(1) + " برابر نشان می‌دهد، ولی D180 آن را " + (p180 / f180).toFixed(1) + " برابر.", "ok"); last = key;
+    var m = model(), mb = Kit.clear(document.getElementById("mixb"));
+    [["w", "Whale", m.w], ["g", "Grinder", m.g], ["c", "Churner", m.ch]].forEach(function (x) { var p = x[2] * 100; mb.appendChild(Kit.el("span", { class: x[0], style: "width:" + p.toFixed(1) + "%" }, p >= 8 ? x[1] + " " + Math.round(p) + "%" : "")); });
+    var A = Kit.clear(document.getElementById("arch"));
+    A.className = "arch";
+    [["W", "Whale", "پرداخت‌کننده‌ی درگیر"], ["G", "Grinder", "درگیر، کم‌خرج"], ["C", "Churner", "یک‌بار و رفتن"]].forEach(function (x) { var V = VAL[x[0]];
+      A.appendChild(Kit.el("div", { class: "nm" }, Kit.el("b", null, x[1]), Kit.el("small", null, x[2])));
+      A.appendChild(Kit.el("div", { class: "ut" }, Kit.el("div", { class: "full", style: "width:" + Math.max(0.6, V.d180 / 120 * 100) + "%" }), Kit.el("div", { class: "d30", style: "width:" + Math.max(0.6, V.d30 / 120 * 100) + "%" })));
+      A.appendChild(Kit.el("div", { class: "cap mono" }, "D30 " + money(V.d30) + " / D180 " + money(V.d180) + " · " + Math.round(V.d30 / V.d180 * 100) + "% unlocked")); });
+    // ROAS bars
+    var W = 420, H = 300, L = 36, R = 10, T = 26, B = 46, bars = [["flat", "D30", m.f30], ["pipe", "D30", m.p30], ["flat", "D180", m.f180], ["pipe", "D180", m.p180]];
+    var r = bars.map(function (b) { return b[2] / view.cpi; }), mx = Math.max(2, Math.max.apply(null, r) * 1.15);
+    function Y(v) { return T + (1 - v / mx) * (H - T - B); }
+    var s = Kit.svg("svg", { class: "rb mono", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "ROAS flat و pipeline در D30 و D180" });
+    s.appendChild(Kit.svg("line", { x1: L, x2: W - R, y1: Y(1), y2: Y(1), stroke: "var(--bad)", "stroke-dasharray": "6 4", "stroke-width": 1.5 }));
+    s.appendChild(Kit.svg("text", { x: L - 4, y: Y(1) + 4, "text-anchor": "end", style: "fill:var(--bad)" }, "1×"));
+    var bw = 62, gap = [0, 72, 190, 262];
+    bars.forEach(function (b, i) { if (b[0] === "pipe" && !view.pipe) return; var x = L + 20 + gap[i], v = r[i];
+      s.appendChild(Kit.svg("rect", { x: x, y: Y(v), width: bw, height: Y(0) - Y(v), fill: b[0] === "flat" ? "var(--ink-3)" : "var(--ok)", rx: 3 }));
+      s.appendChild(Kit.svg("text", { class: "v", x: x + bw / 2, y: Y(v) - 6, "text-anchor": "middle" }, v.toFixed(2) + "×"));
+      s.appendChild(Kit.svg("text", { x: x + bw / 2, y: H - B + 16, "text-anchor": "middle" }, b[0] === "flat" ? "flat" : "pipeline")); });
+    s.appendChild(Kit.svg("line", { x1: L, x2: W - R, y1: Y(0), y2: Y(0), stroke: "var(--line-strong)" }));
+    s.appendChild(Kit.svg("text", { x: L + 20 + 67, y: H - 8, "text-anchor": "middle", style: "font-weight:700" }, "D30"));
+    s.appendChild(Kit.svg("text", { x: L + 20 + 257, y: H - 8, "text-anchor": "middle", style: "font-weight:700" }, "D180"));
+    Kit.clear(document.getElementById("rb")).appendChild(s);
+    msg = "CPI " + FA(view.cpi) + " دلار و " + FA(view.churner) + "٪ Churner: flat در D30 برابر " + FA(r[0].toFixed(2)) + "× و در D180 برابر " + FA(r[2].toFixed(2)) + "×" + (view.pipe ? "؛ pipeline در D180 برابر " + FA(r[3].toFixed(2)) + "×." : "."); kind = r[0] < 1 ? "warn" : "ok";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["ارزش D180 هر install، flat", money(m.f180)], ["ارزش D180 هر install، pipeline", view.pipe ? money(m.p180) : "–", "ok"], ["سهم Whale از ارزش D180", Math.round(m.whale * 100) + "%"], ["installهای پذیرفته در pipeline", view.pipe ? Math.round(m.acc * 100) + "%" : "–"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, x[1]))); });
+    ctl.cpi.set(view.cpi); ctl.churner.set(view.churner); ctl.acc.set(view.acc);
   }
-  add(cfg, "cpi", { label: "CPI", min: 4, max: 30, step: 1, unit: " دلار" }, render);
-  add(cfg, "churner", { label: "سهم Churner در installها", min: 20, max: 85, step: 1, unit: "٪", hint: "Whale حدود ۹٪ ثابت است و بقیه Grinder" }, render);
-  add(cfg, "acc", { label: "دقت کلاسیفایر", min: 50, max: 99, step: 1, unit: "٪", hint: "سهم غیر-Churnerهایی که پذیرفته می‌شوند؛ به همان نسبت Churner هم از فیلتر رد می‌شود" }, render);
-  render();
+  function tw(f) { return function (v) { f(v); view.pipe = true; render(); tour.free(msg, kind); }; }
+  ctl.cpi = Kit.slider({ label: "CPI", min: 4, max: 30, step: 1, unit: " دلار", value: view.cpi, onInput: tw(function (v) { view.cpi = v; }) });
+  ctl.churner = Kit.slider({ label: "سهم Churner در installها", min: 20, max: 85, step: 1, unit: "٪", value: view.churner, hint: "Whale حدود ۹٪ ثابت است و بقیه Grinder", onInput: tw(function (v) { view.churner = v; }) });
+  ctl.acc = Kit.slider({ label: "دقت فیلتر pipeline", min: 50, max: 99, step: 1, unit: "٪", value: view.acc, hint: "سهم غیر-Churnerهایی که پذیرفته می‌شوند؛ به همان نسبت Churner هم رد می‌شود", onInput: tw(function (v) { view.acc = v; }) });
+  [ctl.cpi, ctl.churner, ctl.acc].forEach(function (x) { document.getElementById("ctl").appendChild(x.element); });
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({ pipe: false }), render: render, interval: 8000,
+    intro: "نوشته installهای یک بازی را سه گونه می‌داند: Whale که خرج می‌کند، Grinder که بازی می‌کند و کم می‌خرد، و Churner که یکی دو بار بازی می‌کند و می‌رود. در لحظه‌ی install نمی‌دانید کدام را خریده‌اید.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و CPI، سهم Churner و دقت فیلتر را جابه‌جا کنید.",
+    steps: [
+      { kind: "", run: at({ pipe: false }), say: "در یک کمپین معمولی mid-core، ۶۱٪ installها Churner‌اند و حدود ۹٪ Whale. ارزش کل یک Churner فقط ۰٫۲۰ دلار است (بخش «You do not know who you just acquired»)." },
+      { kind: "warn", run: at({ pipe: false }), say: "تا D30، Churner همه‌ی ارزشش را داده است (۱۰۰٪)، ولی Whale فقط ۲۵ دلار از ۱۲۰ دلار، یعنی ۲۱٪. Grinder هم ۵ دلار از ۱۸ دلار. معیار D30 Churner را کارا و Whale را ضعیف نشان می‌دهد." },
+      { kind: "", run: at({ pipe: false }), say: "میانگین ارزش هر install در bidding یکسان، یعنی flat: ۳٫۸۷ دلار در D30 و ۱۶ دلار در D180؛ همان ۱۶ دلار نوشته. حدود دو سوم این ارزش را Whaleها می‌سازند." },
+      { kind: "warn", run: at({ pipe: false }), say: "با CPI میانگین ۱۰ دلار، ROAS این کمپین در D30 برابر ۰٫۳۹× است و زیر سربه‌سر به نظر می‌رسد؛ همان cohort در D180 به ۱٫۶۳× می‌رسد." },
+      { kind: "ok", run: at({}), say: "فیلتر pipeline که vault ساده کرده، پس از ۷۲ ساعت ۸۷٪ غیر-Churnerها را می‌پذیرد و ۸۷٪ Churnerها را رد می‌کند. در D30 فاصله‌ی دو سیاست ۰٫۴۰× است و در D180 به ۱٫۷۴× می‌رسد (بخش «D30 lies. D180 tells the truth»)." },
+      { kind: "warn", run: at({ churner: 75 }), say: "اگر سهم Churner به ۷۵٪ برسد، flat در D180 به ۱٫۳۸× پایین می‌آید ولی pipeline به ۳٫۷۸× بالا می‌رود؛ فیلتر همان Churnerها را کنار می‌گذارد." },
+      { kind: "warn", run: at({ acc: 60 }), say: "و اگر فیلتر ضعیف باشد، مثلاً دقت ۶۰٪، pipeline در D180 فقط ۲٫۰۴× است. نوشته هشدار می‌دهد دقت مدل در تولید پایین‌تر از شبیه‌سازی است و باید ماهانه دوباره آموزش ببیند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {
