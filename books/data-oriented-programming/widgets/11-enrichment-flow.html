@@ -3,153 +3,203 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>جریان غنی کردن</title>
+<title>جریان غنی‌سازی نتیجه‌ها</title>
 <meta name="description" content="فیلدهایی را که clientی می‌خواهد برگزینید و قدم‌به‌قدم از endpoint جست‌وجوی فصل ۱۱ بگذرید: اعتبارسنجی درخواست، پرسش از پایگاه داده، آوردن و دوبار صافی کردن هر رکورد Open Library، و join کردن آن دو آرایه با ISBN.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; } ol.flow li { margin: 4px 0; } ol.flow li.cur { font-weight: 600; } ol.flow li.done { color: var(--ink-2); }
-  #fields code { direction: ltr; }
+<style>
+  /* Top: the seven steps of page 234. Below: what the data looks like after the current step. */
+  .ef-steps { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-bottom: 12px; counter-reset: s; }
+  .ef-steps li { list-style: none; border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 4px 6px; font-size: .72rem; line-height: 1.35; background: var(--surface); color: var(--ink-3); }
+  .ef-steps li b { display: block; font-size: .78rem; }
+  .ef-steps li.done { color: var(--ink-2); border-color: var(--line-strong); }
+  .ef-steps li.cur { color: var(--ink); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+  .ef-steps { padding: 0; margin-top: 0; }
+  .ef-view h3 { margin: 0 0 6px; font-size: .86rem; }
+  .ef-view h3 code { font-weight: 400; color: var(--ink-3); }
+  .ef-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .ef-card { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 9px; background: var(--surface); }
+  .ef-card .who { font-size: .8rem; font-weight: 700; margin-bottom: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; direction: ltr; justify-content: flex-start; }
+  .chip { font-family: var(--mono); font-size: .7rem; padding: 1px 6px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surface-2); }
+  .chip.keep { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); font-weight: 700; }
+  .chip.rel { text-decoration: line-through; color: var(--ink-3); border-style: dashed; }
+  .chip.req { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
+  .chip.bug { color: var(--bad); border-color: var(--bad); background: var(--bad-soft); font-weight: 700; }
+  .kv { font-family: var(--mono); font-size: .72rem; line-height: 1.5; direction: ltr; text-align: left; }
+  .kv div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .kv .k { color: var(--accent); } .kv .db { background: var(--accent-soft); } .kv .ol { background: var(--ok-soft); }
+  .ef-key { font-size: .74rem; color: var(--ink-2); margin: 8px 0 0; display: flex; gap: 12px; flex-wrap: wrap; }
+  .ef-verdict { margin-top: 10px; font-size: .88rem; padding: 7px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
+  .ef-verdict.ok { border-color: var(--ok); } .ef-verdict.warn { border-color: var(--warn); } .ef-verdict.bad { border-color: var(--bad); }
+  .ef-join { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr); gap: 10px; }
+  .tweak-group .fl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 10px; }
+  .tweak-group .fl label { display: flex; gap: 6px; align-items: center; font-size: .8rem; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/11-web-services.html">فصل ۱۱</a><span aria-hidden="true">/</span>
-      <span aria-current="page">جریان غنی کردن</span>
+      <span aria-current="page">جریان غنی‌سازی نتیجه‌ها</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۱ · سرویس‌های وب</div>
-  <h1>جریان غنی کردن</h1>
-  <p class="lede">آن endpoint جست‌وجوی غنی‌شده داده را از هفت قدم می‌گذراند، و هر قدمی <strong>داده‌ی عمومی</strong> می‌گیرد و برمی‌گرداند: درخواستی بازشده، ردیف‌های پایگاه داده، پاسخ‌های بازشده‌ی Open Library که دو بار با <code>_.pick</code> صافی شده‌اند و با <code>_.keyBy</code> و <code>_.merge</code> با ISBN join شده‌اند.</p>
-  <p class="source-note">تصویری از بخش‌های ۱۱.۴ تا ۱۱.۶ (listingهای ۱۱.۸ تا ۱۱.۲۵، صص. ۲۲۷–۲۴۳): آن هفت قدم در ص. ۲۳۴، صافی دوباره‌ی فیلد با <code>relevantFields</code> نانسی در listing ۱۱.۹، و تابع <code>joinArrays</code>. رکوردهای Open Library ساختگی‌اند: کتاب 7 Habits از listing ۱۱.۶ پی می‌گیرد و The Power of Habit مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>جریان غنی‌سازی نتیجه‌ها</h1>
+      <p class="lede">یک endpoint جست‌وجوی غنی‌شده داده را از هفت قدم می‌گذراند و هر قدم <strong>داده‌ی عمومی</strong> می‌گیرد و برمی‌گرداند: درخواست parse‌شده، ردیف‌های پایگاه داده، پاسخ‌های Open Library که دو بار با <code>_.pick</code> فیلتر می‌شوند، و join آن‌ها روی ISBN با <code>_.keyBy</code> و <code>_.merge</code>.</p>
+      <p class="source-note">تصویری از بخش‌های ۱۱.۳ تا ۱۱.۶ (listingهای ۱۱.۴ تا ۱۱.۲۰، صص. ۲۲۶–۲۳۹): هفت قدم ص. ۲۳۴، فیلتر دوباره با <code>relevantFields</code> در listing ۱۱.۹ و تابع <code>joinArrays</code>. کلیدهای پاسخ 7 Habits از listingهای ۱۱.۶ و ۱۱.۱۱ آمده‌اند؛ رکورد The Power of Habit و مقدار <code>available</code> از listing ۱۱.۱۶ است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">جریان داده (ص. ۲۳۴)</p><ol class="flow" id="flow"></ol></div>
-      <div class="panel"><p class="panel-title" id="st">داده</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><p class="panel-title">فیلدهای خواسته</p><div id="fields"></div>
-        <label class="field-head" for="title" style="margin-top:8px">پرسش عنوان</label><input id="title" value="habit" style="width:100%;direction:ltr;text-align:left">
-        <div id="pl" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <ol class="ef-steps" id="steps"></ol>
+          <div class="ef-view" id="view"></div>
+          <div class="ef-verdict" id="verdict" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارش</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><p class="field-head">فیلدهایی که client می‌خواهد</p><div class="fl" id="fields"></div></div>
+        <div class="tweak-group"><label class="field-head" for="q">عبارت جست‌وجو در عنوان</label><input id="q" value="habit" style="width:100%;direction:ltr;text-align:left"></div>
+        <div class="tweak-group" id="stg"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>صافی دوباره</strong>: نخست فیلدهای روای نانسی، بعد درخواست client. فیلدی باید از هر دو رد شود تا به آن پاسخ برسد.</li>
-    <li><strong>به <code>relevantFields</code> دقیق نگاه کنید</strong>: مقدار <code>publisher</code> را فهرست می‌کند، در حالی که آن API مقدار <code>publishers</code> را برمی‌گرداند، پس همان‌طور که چاپ شده ناشران هیچ‌وقت رد نمی‌شوند. بخواهیدش و ببینید.</li>
-    <li><strong>آن join ترتیبی فرض نمی‌گیرد</strong>: هر دو آرایه با ISBN کلید می‌خورند و درهم می‌آمیزند، پس در دسترس بودن از پایگاه داده و ریزکاری‌های Open Library در یک map تخت برای هر کتاب به هم می‌رسند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>فیلتر دوباره:</strong> اول فیلدهای مجاز در <code>relevantFields</code>، بعد فیلدهایی که client خواسته. فیلد باید از هر دو رد شود تا به پاسخ برسد.</li>
+      <li><strong>به <code>relevantFields</code> دقت کنید:</strong> در آن <code>publisher</code> آمده، ولی API کلید <code>publishers</code> را برمی‌گرداند؛ پس با کد چاپ‌شده ناشرها هیچ‌وقت رد نمی‌شوند. این را vault پیدا کرده؛ آن را بخواهید و ببینید.</li>
+      <li><strong>join به ترتیب آرایه‌ها تکیه نمی‌کند:</strong> هر دو آرایه با <code>_.keyBy</code> روی ISBN کلید می‌خورند و با هم merge می‌شوند، پس <code>available</code> از پایگاه داده و جزئیات Open Library در یک map برای هر کتاب کنار هم قرار می‌گیرند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/11-web-services.html"><small>درس</small>فصل ۱۱: سرویس‌های وب</a></li>
-    <li><a href="../lab/11-join-arrays/README.md"><small>آزمایش</small>join کردن آرایه‌ها به Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/11-web-services.html"><small>درس</small>فصل ۱۱: سرویس‌های وب</a></li>
+      <li><a href="../lab/11-join-arrays/README.md"><small>آزمایش</small>join کردن آرایه‌ها به Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  // A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
-  // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
-  // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
-  function jsType(x) { return x === null ? "null" : Array.isArray(x) ? "array" : typeof x; }
-  function validate(schema, data, allErrors) {
-    var errors = [];
-    function err(path, kw, msg, sp) { errors.push({ instancePath: path, schemaPath: sp, keyword: kw, message: msg }); }
-    function v(s, d, path, sp) {
-      var start = errors.length;
-      function stop() { return !allErrors && errors.length > start; }
-      if (s.type) { var t = jsType(d), ok = s.type === t || (s.type === "integer" && t === "number" && Math.floor(d) === d) || (s.type === "number" && t === "number");
-        if (!ok) { err(path, "type", "must be " + s.type, sp + "/type"); return; } }
-      if (s.enum && !s.enum.some(function (e) { return JSON.stringify(e) === JSON.stringify(d); })) { err(path, "enum", "must be equal to one of the allowed values", sp + "/enum"); if (stop()) return; }
-      if (typeof d === "number") {
-        if (s.minimum !== undefined && d < s.minimum) { err(path, "minimum", "must be >= " + s.minimum, sp + "/minimum"); if (stop()) return; }
-        if (s.maximum !== undefined && d > s.maximum) { err(path, "maximum", "must be <= " + s.maximum, sp + "/maximum"); if (stop()) return; } }
-      if (typeof d === "string") {
-        if (s.pattern && !new RegExp(s.pattern).test(d)) { err(path, "pattern", "must match pattern \"" + s.pattern + "\"", sp + "/pattern"); if (stop()) return; }
-        if (s.format === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { err(path, "format", "must match format \"date\"", sp + "/format"); if (stop()) return; } }
-      if (jsType(d) === "object") {
-        (s.required || []).forEach(function (k) { if (stop()) return; if (!Object.prototype.hasOwnProperty.call(d, k)) err(path, "required", "must have required property '" + k + "'", sp + "/required"); });
-        if (stop()) return;
-        Object.keys(d).forEach(function (k) { if (stop()) return; var p = path + "/" + k;
-          if (s.properties && s.properties[k]) v(s.properties[k], d[k], p, sp + "/properties/" + k);
-          else if (s.additionalProperties === false) err(path, "additionalProperties", "must NOT have additional properties ('" + k + "')", sp + "/additionalProperties");
-          else if (s.additionalProperties && typeof s.additionalProperties === "object") v(s.additionalProperties, d[k], p, sp + "/additionalProperties"); });
-        if (stop()) return; }
-      if (jsType(d) === "array") {
-        var pre = s.prefixItems || [];
-        pre.forEach(function (ps, i) { if (stop()) return; if (i < d.length) v(ps, d[i], path + "/" + i, sp + "/prefixItems/" + i); });
-        if (s.items) d.forEach(function (x, i) { if (stop()) return; if (i >= pre.length) v(s.items, x, path + "/" + i, sp + "/items"); });
-        if (stop()) return; }
-      if (s.allOf) s.allOf.forEach(function (ss, i) { if (!stop()) v(ss, d, path, sp + "/allOf/" + i); });
-      if (stop()) return;
-      ["anyOf", "oneOf"].forEach(function (kw) { if (!s[kw] || stop()) return;
-        var n = s[kw].filter(function (ss) { return validate(ss, d, false).length === 0; }).length;
-        if (kw === "anyOf" && n === 0) err(path, "anyOf", "must match a schema in anyOf", sp + "/anyOf");
-        if (kw === "oneOf" && n !== 1) err(path, "oneOf", "must match exactly one schema in oneOf (" + n + " matched)", sp + "/oneOf"); });
-    }
-    v(schema, data, "", "#");
-    return errors;
-  }
-  function errorsText(errs) { return errs.map(function (e) { return "data" + e.instancePath + " " + e.message; }).join(", "); }
-
-  var log = Kit.log(document.getElementById("log")), stage = 0;
-  var ENUM = ["title", "full_title", "subtitle", "publishers", "publish_date", "weight", "physical_dimensions", "genre", "subjects", "number_of_pages"];
+  var ENUM = ["title", "full_title", "subtitle", "publisher", "publish_date", "weight", "physical_dimensions", "number_of_pages", "subjects", "publishers", "genre"];
   var RELEVANT = ["title", "full_title", "subtitle", "publisher", "publish_date", "weight", "physical_dimensions", "genre", "subjects", "number_of_pages"];
   var DB = [{ title: "7 Habits of Highly Effective People", isbn: "978-1982137274", available: true }, { title: "The Power of Habit", isbn: "978-0812981605", available: false }];
-  var OL = { "978-1982137274": { title: "7 Habits of Highly Effective People", subtitle: "Powerful Lessons in Personal Change", number_of_pages: 432, publish_date: "2020", publishers: ["Simon & Schuster, Incorporated"], isbn_13: ["9781982137274"], revision: 1, latest_revision: 1, works: [{ key: "/works/OL2629977W" }] },
+  var OL = { "978-1982137274": { authors: "[…]", created: "{…}", full_title: "7 Habits of Highly Effective People : Revised and Updated Powerful Lessons in Personal Change", isbn_13: ["9781982137274"], key: "/books/OL28896586M", languages: "[…]", latest_revision: 3, number_of_pages: 432, publish_date: "2020", publishers: ["Simon & Schuster, Incorporated"], revision: 3, subtitle: "Powerful Lessons in Personal Change", title: "7 Habits of Highly Effective People : Revised and Updated", type: "{…}", works: "[…]" },
     "978-0812981605": { title: "The Power of Habit", subtitle: "Why We Do What We Do in Life and Business", subjects: ["Social aspects", "Habit", "Change (Psychology)"], isbn_13: ["9780812981605"], publishers: ["Random House"], revision: 3 } };
-  var reqSchema = { type: "object", required: ["title", "fields"], properties: { title: { type: "string" }, fields: { type: "array", items: { enum: ENUM } } } };
-  var olSchema = { allOf: [{ type: "object", required: ["title"] }, { anyOf: [{ type: "object", required: ["isbn_13"] }, { type: "object", required: ["isbn_10"] }] }] };
-  var STEPS = ["گرفتن درخواست", "بیرون کشیدن پرسش و فیلدها", "آوردن کتاب‌های خورنده از پایگاه داده", "آوردن خبر Open Library برای هر ISBN", "بیرون کشیدن فیلدهای لازم با دو _.pick", "کنار هم گذاشتن با joinArrays بر پایه‌ی ISBN", "فرستادن پاسخ"];
-  var chosen = { title: true, weight: false, number_of_pages: true, subtitle: true, publishers: false, subjects: false };
+  var STEPS = [["دریافت", "درخواست client"], ["استخراج", "title و fields"], ["پایگاه داده", "کتاب‌های منطبق"], ["Open Library", "یک درخواست برای هر ISBN"], ["فیلتر", "دو بار _.pick"], ["ترکیب", "joinArrays روی isbn"], ["پاسخ", "ارسال به client"]];
+  var chosen = { title: true, subtitle: true, number_of_pages: true, publishers: false, subjects: false, weight: false }, stage = 0, tour, stg;
   function pick(m, ks) { var r = {}; ks.forEach(function (k) { if (k in m) r[k] = m[k]; }); return r; }
-  function compute() { var req = { title: document.getElementById("title").value, fields: Object.keys(chosen).filter(function (k) { return chosen[k]; }) };
-    var errs = validate(reqSchema, req, true), db = DB.filter(function (b) { return b.title.toLowerCase().indexOf(req.title.toLowerCase()) >= 0; }).map(function (b) { return pick(b, ["isbn", "available"]); });
-    var raw = db.map(function (b) { return OL[b.isbn]; }), filtered = db.map(function (b) { var r = pick(pick(OL[b.isbn], RELEVANT), req.fields); r.isbn = b.isbn; return r; });
-    var ka = {}, kb = {}; db.forEach(function (x) { ka[x.isbn] = x; }); filtered.forEach(function (x) { kb[x.isbn] = x; });
+  function v2s(v) { return typeof v === "string" && /^[\[{]…/.test(v) ? v : JSON.stringify(v); }
+  function kv(obj, cls) { var box = Kit.el("div", { class: "kv mono" }); Object.keys(obj).forEach(function (k) { box.appendChild(Kit.el("div", { class: cls ? cls(k) : "" }, Kit.el("span", { class: "k" }, JSON.stringify(k)), ": ", v2s(obj[k]))); }); return box; }
+  function keyed(map, c) { var box = Kit.el("div", {}); Object.keys(map).forEach(function (k) { var inner = {}; Object.keys(map[k]).forEach(function (f) { if (f !== "isbn") inner[f] = map[k][f]; }); box.appendChild(Kit.el("div", { class: "ef-card", style: "margin-bottom:6px" }, Kit.el("div", { class: "kv mono" }, Kit.el("span", { class: "k" }, JSON.stringify(k)), ": {"), kv(inner, function () { return c; }))); }); return box; }
+  function compute() {
+    var q = document.getElementById("q").value, fields = ENUM.filter(function (k) { return chosen[k]; });
+    var db = DB.filter(function (b) { return q && b.title.toLowerCase().indexOf(q.toLowerCase()) >= 0; }).map(function (b) { return pick(b, ["isbn", "available"]); });
+    var ol = db.map(function (b) { var r = pick(pick(OL[b.isbn], RELEVANT), fields); r.isbn = b.isbn; return r; });
+    var ka = {}, kb = {}; db.forEach(function (x) { ka[x.isbn] = x; }); ol.forEach(function (x) { kb[x.isbn] = x; });
     var joined = Object.keys(ka).map(function (k) { return Object.assign({}, ka[k], kb[k]); });
-    return { req: req, errs: errs, fields: req.fields, db: db, raw: raw, rawErr: raw.map(function (x) { return validate(olSchema, x, false).length; }), filtered: filtered, joined: joined }; }
-  function render() { var c = compute(), ol = Kit.clear(document.getElementById("flow"));
-    STEPS.forEach(function (s, i) { ol.appendChild(Kit.el("li", { class: i === stage ? "cur" : i < stage ? "done" : "" }, (i < stage ? "✓ " : "") + s)); });
-    var out = [c.req, { title: c.req.title, fields: c.fields, valid: !c.errs.length }, c.db, c.raw, c.filtered, c.joined, JSON.stringify(c.joined)][stage];
-    document.getElementById("st").textContent = "قدم " + (stage + 1) + ": " + STEPS[stage];
-    document.getElementById("out").textContent = typeof out === "string" ? out : JSON.stringify(out, null, 2);
-    var v = document.getElementById("verdict"), lostPub = chosen.publishers;
-    v.className = "callout " + (c.errs.length ? "bad" : stage === 4 && lostPub ? "warn" : "ok");
-    v.textContent = c.errs.length ? "درخواست نامعتبر: " + errorsText(c.errs) : stage === 3 ? "هر پاسخی با طرح Books API اعتبارسنجی شد: " + c.rawErr.filter(function (n) { return !n; }).length + " از " + c.raw.length + " معتبر." : stage === 4 && lostPub ? "فیلد «publishers» خواسته شد ولی relevantFields مقدار «publisher» را فهرست می‌کند: صافی می‌شود." : stage === 5 ? c.db.length + " ردیف پایگاه داده با " + c.filtered.length + " رکورد Open Library، بر پایه‌ی ISBN، join شد." : "قدم‌به‌قدم از آن endpoint بگذرید.";
-    stats([["فیلدهای خواسته", c.fields.length], ["کتاب‌های خورنده", c.db.length], ["فیلدهای نگه‌داشته برای هر کتاب", c.filtered.length ? Object.keys(c.filtered[0]).length - 1 : 0]]); }
-  var fbox = document.getElementById("fields"); Object.keys(chosen).forEach(function (k) { var id = "f-" + k, cb = Kit.el("input", { type: "checkbox", id: id }); cb.checked = chosen[k];
-    cb.addEventListener("change", function () { chosen[k] = cb.checked; render(); log.add("فیلد " + k + (cb.checked ? " خواسته شد" : " انداخته شد"), "muted"); });
-    fbox.appendChild(Kit.el("label", { for: id, style: "display:flex;gap:6px" }, cb, Kit.el("code", null, k))); });
-  document.getElementById("title").addEventListener("input", function () { render(); });
-  Kit.player({ mount: document.getElementById("pl"), interval: 1200, step: function () { if (stage >= 6) return false; stage++; log.add("قدم " + (stage + 1) + ": " + STEPS[stage], "muted"); render(); return stage < 6; }, reset: function () { stage = 0; render(); } });
-  render();
+    return { q: q, fields: fields, db: db, ol: ol, ka: ka, kb: kb, joined: joined };
+  }
+  function title(isbn) { return isbn === "978-1982137274" ? "7 Habits" : "The Power of Habit"; }
+  function render() {
+    var c = compute(), S = Kit.clear(document.getElementById("steps"));
+    STEPS.forEach(function (s, i) { S.appendChild(Kit.el("li", { class: i === stage ? "cur" : i < stage ? "done" : "" }, Kit.el("b", {}, Kit.digits(String(i + 1)) + ". " + s[0]), s[1])); });
+    var V = Kit.clear(document.getElementById("view")), msg = "", cls = "";
+    if (stage === 0) {
+      V.appendChild(Kit.el("h3", {}, "بدنه‌ی درخواست ", Kit.el("code", {}, "(listing ۱۱.۲)")));
+      V.appendChild(Kit.el("div", { class: "ef-card" }, kv({ title: c.q, fields: c.fields })));
+      msg = "درخواست به‌شکل رشته‌ی JSON می‌رسد و با JSON.parse به یک map تبدیل می‌شود؛ هیچ class مخصوصی لازم نیست.";
+    } else if (stage === 1) {
+      V.appendChild(Kit.el("h3", {}, "اعتبارسنجی با searchBooksRequestSchema ", Kit.el("code", {}, "(listing ۱۱.۴)")));
+      var ch = Kit.el("div", { class: "chips" }); ENUM.forEach(function (k) { ch.appendChild(Kit.el("span", { class: "chip" + (chosen[k] ? " keep" : "") }, k)); });
+      V.appendChild(Kit.el("div", { class: "ef-card" }, Kit.el("div", { class: "who" }, "مقدارهای enum مجاز برای fields؛ سبز یعنی خواسته‌شده"), ch, Kit.el("p", { class: "ef-key" }, "title = ", Kit.el("code", {}, JSON.stringify(c.q)))));
+      msg = "اعتبارسنجی درخواست موفق بود: title رشته است و هر عضو fields در enum فهرست نانسی هست (ص. ۲۲۷)."; cls = "ok";
+    } else if (stage === 2) {
+      V.appendChild(Kit.el("h3", {}, "کوئری SELECT isbn, available … LIKE ", Kit.el("code", {}, "(listing ۱۱.۱۴)")));
+      var cards = Kit.el("div", { class: "ef-cards" }); c.db.forEach(function (b) { cards.appendChild(Kit.el("div", { class: "ef-card" }, Kit.el("div", { class: "who" }, title(b.isbn)), kv(b, function () { return "db"; }))); }); V.appendChild(cards);
+      msg = c.db.length ? Kit.digits(String(c.db.length)) + " کتاب منطبق. از پایگاه داده فقط isbn و available لازم است، پس join جدولی در کار نیست (ص. ۲۳۴)." : "هیچ کتابی با این عبارت پیدا نشد."; cls = c.db.length ? "" : "warn";
+    } else if (stage === 3) {
+      V.appendChild(Kit.el("h3", {}, "پاسخ خام Books API، یک درخواست برای هر ISBN ", Kit.el("code", {}, "(listing ۱۱.۶)")));
+      var cards3 = Kit.el("div", { class: "ef-cards" }); c.db.forEach(function (b) { var ch3 = Kit.el("div", { class: "chips" }); Object.keys(OL[b.isbn]).forEach(function (k) { ch3.appendChild(Kit.el("span", { class: "chip" }, k)); }); cards3.appendChild(Kit.el("div", { class: "ef-card" }, Kit.el("div", { class: "who" }, title(b.isbn) + " · " + Kit.digits(String(Object.keys(OL[b.isbn]).length)) + " کلید"), ch3)); }); V.appendChild(cards3);
+      msg = "پاسخ‌ها پیش از هر کاری با bookInfoSchema اعتبارسنجی می‌شوند: title لازم است و یکی از isbn_13 یا isbn_10 (listing ۱۱.۸). Books API چند کتاب را با هم نمی‌پذیرد، پس برای هر کتاب یک درخواست جدا می‌رود (ص. ۲۳۵)."; cls = "ok";
+    } else if (stage === 4) {
+      V.appendChild(Kit.el("h3", {}, "فیلتر دوگانه با _.pick ", Kit.el("code", {}, "(listing ۱۱.۹)")));
+      var cards4 = Kit.el("div", { class: "ef-cards" }), bug = false;
+      c.db.forEach(function (b) { var ch4 = Kit.el("div", { class: "chips" }); Object.keys(OL[b.isbn]).forEach(function (k) { var inRel = RELEVANT.indexOf(k) >= 0, inReq = chosen[k]; var cl = inRel && inReq ? "keep" : !inRel && inReq ? "bug" : !inRel ? "rel" : "req"; if (cl === "bug") bug = true; ch4.appendChild(Kit.el("span", { class: "chip " + cl }, k)); }); cards4.appendChild(Kit.el("div", { class: "ef-card" }, Kit.el("div", { class: "who" }, title(b.isbn)), ch4)); });
+      V.appendChild(cards4);
+      V.appendChild(Kit.el("p", { class: "ef-key" }, Kit.el("span", { class: "chip keep" }, "سبز"), " از هر دو فیلتر رد شد ", Kit.el("span", { class: "chip rel" }, "خط‌خورده"), " در relevantFields نیست ", Kit.el("span", { class: "chip req" }, "زرد"), " client نخواسته ", Kit.el("span", { class: "chip bug" }, "قرمز"), " client خواسته ولی relevantFields راهش نمی‌دهد"));
+      msg = bug ? "این بار client کلید publishers را خواسته، ولی relevantFields در listing ۱۱.۹ کلید publisher را دارد؛ پس ناشرها با کد چاپ‌شده هیچ‌وقت به پاسخ نمی‌رسند. این ناسازگاری را vault پیدا کرده." : "فقط فیلدهایی که هم در relevantFields هستند و هم client خواسته می‌مانند؛ بعد isbn با _.set اضافه می‌شود تا بشود دو منبع را ترکیب کرد (ص. ۲۳۱).";
+      cls = bug ? "bad" : "ok";
+    } else if (stage === 5) {
+      V.appendChild(Kit.el("h3", {}, "ترکیب با joinArrays روی isbn ", Kit.el("code", {}, "(listing ۱۱.۱۸)")));
+      var J = Kit.el("div", { class: "ef-join" });
+      J.appendChild(Kit.el("div", {}, Kit.el("div", { class: "who mono", dir: "ltr" }, "_.keyBy(db, \"isbn\")"), keyed(c.ka, "db")));
+      J.appendChild(Kit.el("div", {}, Kit.el("div", { class: "who mono", dir: "ltr" }, "_.keyBy(openLib, \"isbn\")"), keyed(c.kb, "ol")));
+      var M = Kit.el("div", {}, Kit.el("div", { class: "who mono", dir: "ltr" }, "_.values(_.merge(mapA, mapB))"));
+      c.joined.forEach(function (o) { M.appendChild(Kit.el("div", { class: "ef-card", style: "margin-bottom:6px" }, kv(o, function (k) { return k === "available" ? "db" : k === "isbn" ? "" : "ol"; }))); });
+      J.appendChild(M); V.appendChild(J);
+      msg = "ترتیب دو آرایه لازم نیست یکی باشد: هر دو با _.keyBy روی isbn به map تبدیل می‌شوند و _.merge آن‌ها را کلید به کلید یکی می‌کند (صص. ۲۳۶–۲۳۷). آبی از پایگاه داده آمده و سبز از Open Library."; cls = "ok";
+    } else {
+      V.appendChild(Kit.el("h3", {}, "پاسخ، بعد از اعتبارسنجی با searchBooksResponseSchema ", Kit.el("code", {}, "(listing ۱۱.۲۰)")));
+      var cards6 = Kit.el("div", { class: "ef-cards" }); c.joined.forEach(function (o) { cards6.appendChild(Kit.el("div", { class: "ef-card" }, Kit.el("div", { class: "who" }, title(o.isbn)), kv(o))); }); V.appendChild(cards6);
+      msg = "پاسخ با JSON.stringify به رشته تبدیل و فرستاده می‌شود. در کل مسیر هیچ class مخصوصی برای DBBook یا OpenLibraryBook ساخته نشد (ص. ۲۳۱)."; cls = "ok";
+    }
+    var v = document.getElementById("verdict"); v.className = "ef-verdict " + cls; v.textContent = msg;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["فیلدهای خواسته‌شده", c.fields.length], ["کتاب‌های منطبق", c.db.length], ["فیلد در پاسخ هر کتاب", c.joined.length ? Object.keys(c.joined[0]).length : 0]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value" }, Kit.digits(String(x[1])))));
+    });
+    stg.set(String(stage));
+    Object.keys(chosen).forEach(function (k) { var cb = document.getElementById("f-" + k); if (cb) cb.checked = chosen[k]; });
+  }
+  function say() { return document.getElementById("verdict").textContent; }
+  var fbox = document.getElementById("fields");
+  ["title", "subtitle", "number_of_pages", "publishers", "subjects", "weight"].forEach(function (k) { var cb = Kit.el("input", { type: "checkbox", id: "f-" + k }); cb.addEventListener("change", function () { chosen[k] = cb.checked; render(); tour.free(say(), ""); }); fbox.appendChild(Kit.el("label", { for: "f-" + k }, cb, Kit.el("code", {}, k))); });
+  document.getElementById("q").addEventListener("input", function () { render(); tour.free(say(), ""); });
+  stg = Kit.segmented({ label: "قدم", value: "0", options: STEPS.map(function (s, i) { return { value: String(i), label: Kit.digits(String(i + 1)) }; }), onChange: function (v) { stage = +v; render(); tour.free(say(), ""); } });
+  document.getElementById("stg").appendChild(stg.element);
+
+  /* ---------- the scenario ---------- */
+  function at(s, pubs) { return function () { stage = s; document.getElementById("q").value = "habit"; chosen = { title: true, subtitle: true, number_of_pages: true, publishers: !!pubs, subjects: false, weight: false }; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(0), render: render, interval: 8000,
+    intro: "بالا هفت قدم ص. ۲۳۴ است و پایین شکل داده بعد از قدم فعلی. هر قدم داده‌ی عمومی می‌گیرد و داده‌ی عمومی برمی‌گرداند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، فیلدها یا عبارت جست‌وجو را عوض کنید و قدم‌ها را ببینید.",
+    steps: [
+      { kind: "", run: at(0), say: "قدم ۱: client عبارت habit و فهرست فیلدهایی را که می‌خواهد می‌فرستد. سرور رشته‌ی JSON را با JSON.parse به map تبدیل می‌کند (listing ۱۱.۲)." },
+      { kind: "ok", run: at(1), say: "قدم ۲: درخواست با یک JSON Schema اعتبارسنجی می‌شود. مقدارهای مجاز fields همان فهرستی است که نانسی داده (listingهای ۱۱.۴ و ۱۱.۵)." },
+      { kind: "", run: at(2), say: "قدم ۳: از پایگاه داده فقط isbn و available کتاب‌های منطبق می‌آید (listing ۱۱.۱۴، ص. ۲۳۴)." },
+      { kind: "ok", run: at(3), say: "قدم ۴: برای هر ISBN یک درخواست به Open Library. پاسخ خام کلیدهای زیادی دارد و اول با یک JSON Schema بررسی می‌شود (listingهای ۱۱.۶ و ۱۱.۹)." },
+      { kind: "ok", run: at(4), say: "قدم ۵: دو _.pick پشت سر هم؛ اول relevantFields، بعد فیلدهای خواسته‌شده. سبزها می‌مانند و isbn برای ترکیب اضافه می‌شود (listing ۱۱.۹)." },
+      { kind: "bad", run: at(4, true), say: "از vault: client حالا publishers را هم می‌خواهد. ولی relevantFields در listing ۱۱.۹ کلید publisher را دارد، نه publishers؛ پس ناشرها همیشه فیلتر می‌شوند." },
+      { kind: "ok", run: at(5), say: "قدم ۶: joinArrays دو آرایه را با _.keyBy روی isbn به map تبدیل می‌کند، merge می‌کند و _.values را برمی‌گرداند. ترتیب آرایه‌ها مهم نیست (listing ۱۱.۱۸)." },
+      { kind: "ok", run: at(6), say: "قدم ۷: پاسخ ترکیب‌شده با یک schema دیگر بررسی و برای client فرستاده می‌شود. داده در کل مسیر فقط از جلوی کد رد شد (listing ۱۱.۲۰)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "صافی دوباره‌ی فیلد چیست؟",

@@ -6,14 +6,32 @@
 <title>کپی مسیر</title>
 <meta name="description" content="یک عضو از vectorی persistent با ۶۴ عضو را با ضریب شاخه‌ی ۲ یا ۴ یا ۳۲ به‌روز کنید، و ببینید کدام nodeها کپی می‌شوند، کدام شریکند، و عمق چطور عوض می‌شود. تصویری از فصل ۹ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.tv { width: 100%; display: block; } .tv rect { fill: var(--surface); stroke: var(--ink-3); stroke-width: 1; } .tv rect.copy { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 2; }
-  .tv rect.leaf { fill: var(--surface-2); } .tv rect.leaf.copy { fill: var(--warn-soft); } .tv line { stroke: var(--line); } .tv line.copy { stroke: var(--warn); stroke-width: 2; } .tv text { font-size: 9px; fill: var(--ink-2); text-anchor: middle; direction: ltr; }
+<style>
+  /* Each row is one tree level over the whole index axis: the new path node's range in orange, the siblings it shares in grey. */
+  .pc-head, .pc-row { display: grid; grid-template-columns: 4.6em minmax(0, 1fr) 12.5em; gap: 8px; align-items: center; }
+  .pc-head { font-size: .72rem; color: var(--ink-3); margin-bottom: 3px; }
+  .pc-row { margin: 2px 0; font-size: .76rem; }
+  .pc-row.gap { color: var(--ink-3); font-size: .76rem; margin: 4px 0; }
+  .pc-row .lv { color: var(--ink-2); }
+  .pc-row.leaf .lv { font-weight: 700; color: var(--warn); }
+  .pc-track { position: relative; height: 14px; background: var(--surface-2); border-radius: 3px; direction: ltr; overflow: hidden; }
+  .pc-share { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(90deg, var(--line-strong) 0 1px, var(--surface-2) 1px 6px); border: 1px solid var(--line-strong); box-sizing: border-box; }
+  .pc-path { position: absolute; top: 0; bottom: 0; background: var(--warn-soft); border: 1.5px solid var(--warn); box-sizing: border-box; min-width: 3px; }
+  .pc-row.leaf .pc-path { background: var(--warn); }
+  .pc-range { font-family: var(--mono); font-size: .72rem; direction: ltr; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); }
+  .pc-axis { position: relative; height: 14px; direction: ltr; font-size: .68rem; color: var(--ink-3); }
+  .pc-axis span { position: absolute; top: 0; }
+  .pc-key { display: flex; gap: 14px; flex-wrap: wrap; font-size: .76rem; color: var(--ink-2); margin: 8px 0 0; }
+  .pc-key i { display: inline-block; width: 22px; height: 11px; vertical-align: middle; margin-inline-end: 5px; border-radius: 2px; box-sizing: border-box; }
+  .pc-key i.p { background: var(--warn-soft); border: 1.5px solid var(--warn); } .pc-key i.l { background: var(--warn); } .pc-key i.s { background: repeating-linear-gradient(90deg, var(--line-strong) 0 1px, var(--surface-2) 1px 5px); border: 1px solid var(--line-strong); }
+  .pc-sum { margin-top: 10px; font-size: .9rem; padding: 8px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
+  .pc-sum b { font-family: var(--mono); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/09-persistent-data-structures.html">فصل ۹</a><span aria-hidden="true">/</span>
@@ -24,73 +42,122 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · ساختارهای داده‌ی persistent</div>
-  <h1>کپی مسیر</h1>
-  <p class="lede">هر فهرستی persistent یک <strong>درخت</strong> است. عوض کردن یک عضو تنها nodeهای روی مسیر از ریشه تا آن برگ را کپی می‌کند؛ و باقی با version پیشین شریک است. <strong>ضریب شاخه</strong> عمق را با اندازه‌ی هر node کپی‌شده بده‌بستان می‌کند.</p>
-  <p class="source-note">تصویری از بخش ۹.۲ (شکل‌های ۹.۲ و ۹.۳، صص. ۱۷۹–۱۸۳): شکستن فهرستی به نیم و ربع، عمق log₂ N در برابر log₃₂ N، و اینکه چرا ۳۲ به cache lineها می‌خورد. آن vector ۶۴عضوی و این نقاشی مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>کپی مسیر</h1>
+      <p class="lede">یک فهرست ۱۰۰٬۰۰۰عضوی را چند بار نصف کنید تا درخت شود. حالا برای عوض کردن یک عضو فقط مسیر ریشه تا آن عضو تازه ساخته می‌شود و باقی درخت با version قبلی share می‌شود. هر ردیف یک سطح درخت است و نوار نارنجی بازه‌ای است که node تازه‌ی آن سطح پوشش می‌دهد.</p>
+      <p class="source-note">تصویری از بخش ۹.۲ (صص. ۱۷۸–۱۸۳): شکستن فهرست به نیم و ربع (شکل‌های ۹.۲ و ۹.۳)، شمارش عملیات، log₂ N در برابر log₃₂ N، cache line و ۱۰ میلیارد عضو. ضریب ۴ و ردیف‌بندی نمودار از vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="tt">درخت</p><svg class="tv" id="tv" viewBox="0 0 640 260" role="img"></svg>
-        <p class="field-hint">نارنجی: nodeهایی که آن به‌روزرسانی کپی کرده، یعنی همان مسیر. خاکستری: شریک با version پیشین.</p><div class="callout" id="verdict"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="b"></div><div id="i"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="pc-head"><span>سطح</span><span id="axisTitle"></span><span>بازه‌ی node تازه</span></div>
+          <div id="rows"></div>
+          <div class="pc-head"><span></span><div class="pc-axis" id="axis"></div><span></span></div>
+          <p class="pc-key"><span><i class="p"></i>node تازه روی مسیر</span><span><i class="l"></i>برگی که کپی می‌شود</span><span><i class="s"></i>هم‌سطح‌های share شده با version قبلی</span></p>
+          <div class="pc-sum" id="sum" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">یک به‌روزرسانی</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="n"></div>
+        <div class="tweak-group" id="b"></div>
+        <div class="tweak-group" id="s"></div>
+        <div class="tweak-group" id="i"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>تنها آن مسیر کپی می‌شود</strong>: یک node برای هر سطحی. با ضریب شاخه‌ی ۲ آن ۶ node کوچک برای ۶۴ عضو است؛ و با ۳۲ دو node پهن‌تر.</li>
-    <li><strong>عضوهای کپی‌شده در هر به‌روزرسانی</strong> عمق ضرب در ضریب شاخه است: این‌جا ۲ × ۶ = ۱۲ و ۴ × ۳ = ۱۲ و ۳۲ × ۲ = ۶۴. nodeهای پهن‌تر عضوهای بیشتری کپی می‌کنند ولی به nodeهای خیلی کم‌تری دست می‌زنند.</li>
-    <li><strong>حرف کتاب برای ۳۲</strong> همان CPU است: کپی یک آرایه‌ی ۳۲خانه‌ای جفتی دسترسی cache است، در حالی که دواندن میان nodeهای کوچک زیاد یعنی دسترسی‌های جدای زیاد به حافظه.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>با هر بار نصف کردن، کار نصف می‌شود:</strong> یک share برای هر سطح، به‌اضافه‌ی کپی برگی که عضو در آن است. ۵۰٬۰۰۱، بعد ۲۵٬۰۰۲، و با شکستن تا آخر حدود log₂ N یعنی ۱۷.</li>
+      <li><strong>ضریب ۳۲ عمق را پنج برابر کم می‌کند</strong> ولی در هر سطح ۳۲ خانه کپی می‌شود. کتاب می‌گوید برنده باز هم ۳۲ است، چون یک آرایه‌ی ۳۲تایی با یک جفت دسترسی cache کپی می‌شود و هزینه را عمق تعیین می‌کند، نه پهنای node.</li>
+      <li><strong>در عمل ثابت:</strong> حتی برای ۱۰ میلیارد عضو، log₃₂ N فقط ۶٫۶۴ است؛ پس خواندن و به‌روزرسانی فهرست persistent تقریباً زمان ثابت دارد.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-persistent-data-structures.html"><small>درس</small>فصل ۹: ساختارهای داده‌ی persistent</a></li>
-    <li><a href="../lab/09-persistent-vector/README.md"><small>آزمایش</small>یک vector persistent به Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-persistent-data-structures.html"><small>درس</small>فصل ۹: ساختارهای داده‌ی persistent</a></li>
+      <li><a href="../lab/09-persistent-vector/README.md"><small>آزمایش</small>یک vector persistent به Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
+  var cfg = { N: 100000, b: 2, s: 1, i: 75100 }, tour, ctl = {};
+  function fmt(x) { return Math.round(x).toLocaleString("en-US"); }
+  function maxS(b, N) { var s = 0, c = N; while (c > b) { s++; c = Math.ceil(N / Math.pow(b, s)); } return s; }
+  function chunk(l) { return Math.ceil(cfg.N / Math.pow(cfg.b, l)); }
+  function render() {
+    var N = cfg.N, b = cfg.b, S = Math.min(cfg.s, maxS(b, N)), i = Math.min(cfg.i, N - 1);
+    cfg.s = S; cfg.i = i;
+    var R = Kit.clear(document.getElementById("rows"));
+    function pct(x) { return (x / N * 100) + "%"; }
+    var skipFrom = S + 1 > 9 ? 4 : Infinity, skipTo = S - 3;
+    for (var l = 0; l <= S; l++) {
+      if (l === skipFrom) { R.appendChild(Kit.el("div", { class: "pc-row gap" }, Kit.el("span", { class: "lv" }, "⋮"), Kit.el("span", {}, Kit.digits(skipTo - skipFrom + 1) + " سطح دیگر؛ هر کدام بازه را نصف می‌کند"), Kit.el("span", {}))); l = skipTo; continue; }
+      var size = chunk(l), lo = Math.floor(i / size) * size, hi = Math.min(N, lo + size);
+      var track = Kit.el("div", { class: "pc-track" });
+      if (l > 0) { var ps = chunk(l - 1), plo = Math.floor(i / ps) * ps, phi = Math.min(N, plo + ps); track.appendChild(Kit.el("div", { class: "pc-share", style: "left:" + pct(plo) + ";width:" + pct(phi - plo) })); }
+      track.appendChild(Kit.el("div", { class: "pc-path", style: "left:" + pct(lo) + ";width:" + pct(hi - lo) }));
+      var leaf = l === S;
+      R.appendChild(Kit.el("div", { class: "pc-row" + (leaf ? " leaf" : ""), role: "img", "aria-label": (leaf ? "برگ" : "سطح " + l) + ": " + fmt(lo) + " تا " + fmt(hi - 1) }, Kit.el("span", { class: "lv" }, leaf ? (S ? "برگ" : "کل فهرست") : "سطح " + l), track, Kit.el("span", { class: "pc-range" }, fmt(lo) + "…" + fmt(hi - 1) + (leaf ? "  (" + fmt(hi - lo) + ")" : ""))));
+    }
+    var ax = Kit.clear(document.getElementById("axis"));
+    ax.appendChild(Kit.el("span", { style: "left:0" }, "0")); ax.appendChild(Kit.el("span", { style: "right:0" }, fmt(N - 1)));
+    ax.appendChild(Kit.el("span", { style: "left:" + Math.min(92, i / N * 100) + "%" }, "▲ " + fmt(i)));
+    document.getElementById("axisTitle").textContent = "اندیس‌های ۰ تا " + Kit.digits(fmt(N - 1)) + "، عضو " + Kit.digits(fmt(i)) + " عوض می‌شود";
+    var c = chunk(S), ops = S + c, arrays = S + 1, full = S === maxS(b, N);
+    var lg = Math.log(N) / Math.log(b);
+    var sum = document.getElementById("sum");
+    sum.innerHTML = "";
+    sum.appendChild(document.createTextNode(S === 0 ? "بدون شکستن، به‌روزرسانی یعنی کپی کل " + Kit.digits(fmt(N)) + " عضو." : Kit.digits(S) + " share (یکی در هر سطح) + کپی برگ " + Kit.digits(fmt(c)) + "عضوی = " + Kit.digits(fmt(ops)) + " عملیات" + (full ? "؛ درخت تا ته شکسته شده و عمق حدود " + Kit.digits(lg.toFixed(1)) + " است، همان log" + ({2:"₂",4:"₄",32:"₃₂"})[b] + " N." : ".")));
     var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
+    [["سطح‌های شکسته", Kit.digits(S), ""], ["عضوهای کپی‌شده‌ی برگ", Kit.digits(fmt(c)), c > 1000 ? "bad" : "ok"], ["عملیات (شمارش کتاب)", Kit.digits(fmt(ops)), ops > 1000 ? "bad" : "ok"], ["آرایه‌های کپی‌شده", Kit.digits(arrays), full ? (arrays > 8 ? "warn" : "ok") : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
     });
+    ctl.n.set(N); ctl.b.set(b); ctl.s.element.querySelector("input").max = maxS(b, N); ctl.s.set(S); ctl.i.element.querySelector("input").max = N - 1; ctl.i.set(i);
   }
+  function say() { return document.getElementById("sum").textContent; }
+  ctl.n = Kit.segmented({ label: "اندازه‌ی فهرست", value: cfg.N, options: [{ value: 100000, label: "۱۰۰٬۰۰۰" }, { value: 1e10, label: "۱۰ میلیارد" }], onChange: function (v) { cfg.N = +v; cfg.i = Math.round(cfg.N * 0.751); render(); tour.free(say(), ""); } });
+  ctl.b = Kit.segmented({ label: "ضریب شاخه", value: cfg.b, options: [{ value: 2, label: "2" }, { value: 4, label: "4" }, { value: 32, label: "32" }], onChange: function (v) { cfg.b = +v; render(); tour.free(say(), ""); } });
+  ctl.s = Kit.slider({ label: "چند بار شکسته شود", min: 0, max: maxS(2, 100000), value: cfg.s, onInput: function (v) { cfg.s = v; render(); tour.free(say(), ""); } });
+  ctl.i = Kit.slider({ label: "عضوی که عوض می‌شود", min: 0, max: cfg.N - 1, value: cfg.i, onInput: function (v) { cfg.i = v; render(); tour.free(say(), ""); } });
+  ["n", "b", "s", "i"].forEach(function (k) { document.getElementById(k).appendChild(ctl[k].element); });
 
-  var log = Kit.log(document.getElementById("log")), cfg = { b: 2, i: 41 }, N = 64;
-  function depth(b) { var d = 0, c = 1; while (c < N) { c *= b; d++; } return d; }
-  function render() { var b = cfg.b, D = depth(b), g = Kit.clear(document.getElementById("tv")), H = 260, rowH = (H - 20) / (D + 1), copied = 0;
-    var levels = []; for (var l = 0; l <= D; l++) { var count = l === D ? N : Math.ceil(N / Math.pow(b, D - l)); levels.push(count); }
-    function x(l, k) { return 10 + (k + 0.5) * (620 / levels[l]); }
-    for (var l2 = 0; l2 <= D; l2++) { var onPath = Math.floor(cfg.i / Math.pow(b, D - l2));
-      for (var k = 0; k < levels[l2]; k++) { var cp = k === onPath, w = Math.max(2, Math.min(40, 620 / levels[l2] - 2)), y = 10 + l2 * rowH;
-        if (l2 > 0) { var parent = Math.floor(k / b); g.appendChild(Kit.svg("line", { class: cp ? "copy" : "", x1: x(l2 - 1, parent), y1: 10 + (l2 - 1) * rowH + 12, x2: x(l2, k), y2: y })); }
-        g.appendChild(Kit.svg("rect", { class: (l2 === D ? "leaf " : "") + (cp ? "copy" : ""), x: x(l2, k) - w / 2, y: y, width: w, height: 12 }));
-        if (cp && l2 < D) copied++; } }
-    var lbl = Kit.svg("text", { x: x(D, cfg.i), y: 10 + D * rowH + 24 }); lbl.textContent = "#" + cfg.i; g.appendChild(lbl);
-    g.setAttribute("aria-label", "ضریب شاخه‌ی " + b + "، عمق " + D + "، و " + D + " node کپی‌شده برای عوض کردن عضو " + cfg.i);
-    document.getElementById("tt").textContent = "شمار ۶۴ عضو، با ضریب شاخه‌ی " + b + ": عمق " + D;
-    var shared = levels.slice(0, D).reduce(function (a, c) { return a + c; }, 0) - D;
-    document.getElementById("verdict").className = "callout ok";
-    document.getElementById("verdict").textContent = "عوض کردن عضو " + cfg.i + " شمار " + D + " node را کپی می‌کند، یعنی " + D * b + " خانه، و " + shared + " node درونی و خانه‌های آن " + (N - b) + " برگ دیگر را شریک می‌شود.";
-    stats([["عمق", D], ["nodeهای کپی‌شده", D, "warn"], ["خانه‌های کپی‌شده", D * b], ["کپی کامل می‌شد", N + " خانه"]]); }
-  document.getElementById("b").appendChild(Kit.segmented({ label: "ضریب شاخه", value: 2, options: [{ value: 2, label: "2" }, { value: 4, label: "4" }, { value: 32, label: "32" }], onChange: function (v) { cfg.b = v; render(); log.add("ضریب شاخه‌ی " + v + ": عمق " + depth(v) + ".", "muted"); } }).element);
-  document.getElementById("i").appendChild(Kit.slider({ label: "عضوی که عوض می‌شود", min: 0, max: N - 1, value: cfg.i, onInput: function (v) { cfg.i = v; render(); } }).element);
-  render();
+  /* ---------- the scenario ---------- */
+  function set(N, b, s) { return function () { cfg.N = N; cfg.b = b; cfg.s = s === "max" ? maxS(b, N) : s; cfg.i = N === 100000 ? 75100 : 7510000000; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: set(100000, 2, 0), render: render, interval: 8000,
+    intro: "هر ردیف یک سطح درخت است. نارنجی بازه‌ی node تازه است و راه‌راه خاکستری هم‌سطح‌هایی که بدون کپی share می‌شوند. عضو ۷۵٬۱۰۰ عوض می‌شود، مثل کتاب.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و ضریب شاخه، تعداد شکستن، عضو یا اندازه‌ی فهرست را عوض کنید.",
+    steps: [
+      { kind: "bad", run: set(100000, 2, 0), say: "یک فهرست ۱۰۰٬۰۰۰عضوی بدون درخت: هر به‌روزرسانی یک shallow copy از کل فهرست است. به گفته‌ی جو حدود ۵۰ میلی‌ثانیه و ۱۰۰ KB حافظه برای هر update؛ در مقیاس بزرگ زیاد است (ص. ۱۷۸)." },
+      { kind: "", run: set(100000, 2, 1), say: "یک بار نصف کنید (شکل ۹.۲، ص. ۱۸۰): نیمه‌ی اول با یک عملیات share می‌شود و فقط نیمه‌ی دوم کپی می‌شود. ۱ + ۵۰٬۰۰۰ = ۵۰٬۰۰۱ عملیات." },
+      { kind: "", run: set(100000, 2, 2), say: "دوباره نصف کنید (شکل ۹.۳، ص. ۱۸۱): دو share و کپی ۲۵٬۰۰۰ عضو، یعنی ۲۵٬۰۰۲ عملیات. هر شکستن کار را نصف می‌کند." },
+      { kind: "ok", run: set(100000, 2, "max"), say: "آن‌قدر بشکنید که هر برگ حداکثر ۲ عضو داشته باشد: کار حدود log₂ N است، یعنی ۱۶٫۶ برای ۱۰۰٬۰۰۰ (ص. ۱۸۱). همین ۱۷ قدم برای خواندن یک عضو هم لازم است." },
+      { kind: "ok", run: set(100000, 32, "max"), say: "ضریب شاخه‌ی ۳۲: log₃₂ N پنج برابر کمتر از log₂ N است، پس ۱۶٫۶ ÷ ۵ ≈ ۳٫۳ سطح (صص. ۱۸۱–۱۸۲). اعتراض تئو: حالا در هر سطح ۳۲ عضو کپی می‌شود، نه ۲." },
+      { kind: "ok", run: set(100000, 32, "max"), say: "جواب جو cache line است: کپی یک آرایه‌ی ۳۲تایی یک جفت دسترسی cache است، ولی ۱۶ آرایه‌ی ۲تایی در سطح‌های مختلف هر کدام جفت خودشان را می‌خواهند. هزینه را عمق تعیین می‌کند؛ ضریب ۶۴ دوباره کندتر است (ص. ۱۸۲)." },
+      { kind: "ok", run: set(1e10, 32, "max"), say: "۱۰ میلیارد عضو، حدود ۴۰ GB، سقف منطقی یک فهرست است و log₃₂ آن فقط ۶٫۶۴ است. پس در عمل خواندن و update تقریباً زمان ثابت دارند (ص. ۱۸۳)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "برای فهرستی ۱۰۰٬۰۰۰عضوی که تا برگ‌های دست‌بالا دوتایی شکسته شده، حدوداً چند سطح هست؟",

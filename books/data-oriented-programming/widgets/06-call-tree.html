@@ -6,15 +6,43 @@
 <title>درخت صدا زدن تابع‌ها</title>
 <meta name="description" content="nodeی از درخت صدا زدن جست‌وجو یا افزودن عضو در فصل ۶ کتاب Data-Oriented Programming برگزینید تا ورودی و خروجی‌اش، فیلدهایی که می‌خواند، داده‌ی تست کمینه‌ی معتبر در زمینه‌اش، و شمار موردهایی که قاعده‌ی کتاب پیش می‌گذارد را ببینید.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; } ul.ct { list-style: none; padding-right: 16px; padding-left: 0; margin: 0; font-family: var(--mono); font-size: .82rem; direction: ltr; text-align: left; } ul.ct button { font: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; margin: 2px 0; cursor: pointer; color: var(--ink); }
-  ul.ct button.ext { color: var(--ink-3); border-style: dotted; } ul.ct button[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); }
-  #nt { direction: ltr; text-align: left; }
+<style>
+  /* The call tree (fig 6.1 / 6.5) as an SVG; the selected node's tests beside it. */
+  .ct-wrap { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  #tree { width: 100%; display: block; max-height: 212px; }
+  #tree .n rect { fill: var(--surface); stroke: var(--accent); stroke-width: 1.4; }
+  #tree .n.ext rect { fill: var(--surface-2); stroke: var(--ink-3); stroke-dasharray: 2 3; }
+  #tree .n.else rect { fill: var(--surface-2); stroke: var(--ink-2); stroke-dasharray: 6 3; }
+  #tree .n text { font: 11px var(--mono); fill: var(--ink); }
+  #tree .n.ext text { fill: var(--ink-3); }
+  #tree .n { cursor: pointer; }
+  #tree .n.sel rect { fill: var(--accent-soft); stroke-width: 2.6; }
+  #tree .n:focus-visible rect { stroke: var(--ink); stroke-width: 2.6; }
+  #tree .e { stroke: var(--line-strong, var(--ink-3)); stroke-width: 1.1; fill: none; }
+  #tree .badge circle { fill: var(--accent); } #tree .badge text { font: 600 10px var(--font, sans-serif); fill: var(--surface); text-anchor: middle; }
+  .ct-key { font-size: .72rem; color: var(--ink-2); margin: 2px 0 4px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .ct-key i { display: inline-block; width: 18px; height: 10px; border: 1.4px solid var(--accent); border-radius: 2px; vertical-align: middle; margin-inline-end: 4px; }
+  .ct-key i.ext { border: 1.4px dotted var(--ink-3); } .ct-key i.else { border: 1.4px dashed var(--ink-2); }
+  .ct-depth { display: grid; gap: 2px; font-size: .74rem; }
+  .ct-depth .row { display: grid; grid-template-columns: 3.2em minmax(0, 15em) 1fr; gap: 6px; align-items: center; }
+  .ct-depth .nm { direction: ltr; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ct-depth .bar { height: 12px; background: var(--s1); border-radius: 3px; min-width: 2px; }
+  .ct-depth .row.sel { font-weight: 700; }
+  .ct-card { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface); font-size: .82rem; }
+  .ct-card h3 { font-size: .86rem; margin: 0 0 4px; direction: ltr; text-align: left; }
+  .ct-card p { margin: 2px 0; }
+  .ct-card pre { font-size: .72rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 5px 7px; margin: 3px 0; direction: ltr; text-align: left; }
+  .ct-cases { list-style: none; padding: 0; margin: 3px 0; direction: ltr; text-align: left; font-size: .68rem; line-height: 1.3; display: grid; gap: 2px; }
+  .ct-cases li { padding: 1px 6px; border-radius: 3px; background: var(--surface-2); }
+  .ct-cases li.neg { background: var(--bad-soft); }
+  .ct-cases li.bug { background: var(--warn-soft); }
+  .ct-ref { font-size: .72rem; color: var(--ink-2); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/06-unit-tests.html">فصل ۶</a><span aria-hidden="true">/</span>
@@ -25,79 +53,169 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۶ · تست‌های unit</div>
-  <h1>درخت صدا زدن تابع‌ها</h1>
-  <p class="lede">برای تست unit تابعی از DOP، <strong>درخت صدا زدن تابع‌ها</strong>یش را تا تابع‌های بیرون کدبیستان بکشید. از پایین به بالا تست کنید: nodeهای عمیق <strong>موردهای زیاد با داده‌ی ساده</strong> می‌گیرند؛ و nodeهای نزدیک ریشه <strong>موردهای کم با داده‌ی غنی‌تر</strong>، به فرض آنکه فرزندانشان از پیش کار می‌کنند.</p>
-  <p class="source-note">تصویری از بخش‌های ۶.۲ و ۶.۴ (شکل‌های ۶.۱ تا ۶.۵، جدول ۶.۲، صص. ۱۱۳–۱۳۱): درخت جست‌وجو، درخت افزودن عضو، داده‌ی کمینه‌ی معتبر در زمینه (listing ۶.۷) و آن قاعده‌ی عمق. شمار موردهای هر node خوانش vault از مثال‌های کتاب است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>درخت صدا زدن تابع‌ها</h1>
+      <p class="lede">پیش از unit test، <strong>درخت صدا زدن تابع‌ها</strong> را تا تابع‌های بیرون کدبیس بکشید. node عمیق‌تر: <strong>داده‌ی ساده‌تر و موردهای بیشتر</strong>. نزدیک ریشه: داده‌ی غنی‌تر و موردهای کمتر، چون فرض می‌شود تابع‌های پایین‌تر از قبل تست شده‌اند.</p>
+      <p class="source-note">تصویری از بخش‌های ۶.۲ تا ۶.۴ (صص. ۱۱۳–۱۳۲): درخت جست‌وجو (شکل ۶.۱، ص. ۱۱۴)، درخت افزودن عضو (شکل ۶.۵، ص. ۱۲۶)، داده‌ی کمینه که در زمینه‌ی خودش معتبر است (listing ۶.۷، ص. ۱۱۷) و جدول ۶.۲ (ص. ۱۲۱). موردهای تست همان موردهای listingهای کتاب‌اند؛ نوشتن کوتاهشان از vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="tt">درخت</p><ul class="ct" id="tree"></ul><p class="field-hint">نقطه‌چین: بیرون کدبیس برنامه، یعنی Lodash و JSON و SystemState: برگی است، و این‌جا تست نمی‌شود.</p></div>
-      <div class="panel"><p class="panel-title" id="nt">node</p><div id="info"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="which"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="ct-wrap">
+          <div>
+            <svg id="tree" role="group" aria-label="درخت صدا زدن تابع‌ها"></svg>
+            <p class="ct-key"><span><i></i>تابع کدبیس، تست می‌شود (عدد: تعداد موردها)</span><span><i class="ext"></i>بیرون کدبیس: برگ درخت</span><span><i class="else"></i>generic، جداگانه تست می‌شود</span></p>
+            <p class="ct-key" style="margin:0 0 2px">جدول ۶.۲ برای همین درخت: عمق در برابر تعداد موردها</p>
+            <div class="ct-depth" id="depth"></div>
+          </div>
+          <div class="ct-card" id="card" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">node انتخاب‌شده</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="which"></div>
+        <div class="tweak-group"><label for="pick">node</label><select id="pick" style="width:100%"></select></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>اعتبار به زمینه بسته است</strong>: catalog کمینه برای <code>authorNames</code> تنها <code>authorsById</code> را دارد، و همان آن‌جا کاملاً معتبر است، گرچه برای <code>searchBooksByTitle</code> نه.</li>
-    <li><strong>nodeهای عمیق‌تر، موردهای بیشتر، داده‌ی ساده‌تر</strong>: تابع <code>authorNames</code> موردهای تهی و یک‌شناسه و دوشناسه و شناسه‌ی ناشناس و catalog تهی می‌گیرد؛ و <code>bookInfo</code> یکی.</li>
-    <li><strong>mutationها همان stateی را تست می‌کنند که می‌سازند</strong>: تابع <code>UserManagement.addMember</code> موردهای state تهی و عضوهای موجود و منفی می‌گیرد؛ و آن <code>System.addMember</code> باstate از راه <code>SystemState.get()</code> تست می‌شود.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>اعتبار داده به زمینه بستگی دارد:</strong> catalog کمینه فقط <code>authorsById</code> را دارد. برای <code>authorNames</code> کاملاً معتبر است ولی برای <code>searchBooksByTitle</code> نه (ص. ۱۱۷).</li>
+      <li><strong>nodeهای عمیق‌تر، موردهای بیشتر و داده‌ی ساده‌تر:</strong> <code>authorNames</code> هفت مورد متفاوت دارد و <code>bookInfo</code> فقط یکی، چون فرض می‌شود تابع‌هایی که صدا می‌زند درست کار می‌کنند (ص. ۱۲۰).</li>
+      <li><strong>تست mutation سخت‌تر از query است:</strong> ورودی و خروجی هر دو state سیستم‌اند (ص. ۱۲۷)، و <code>System.addMember</code> اصلاً چیزی برنمی‌گرداند؛ پس state بعد از اجرا را با <code>_.isEqual</code> می‌سنجیم (ص. ۱۳۲).</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/06-unit-tests.html"><small>درس</small>فصل ۶: تست‌های unit</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/06-unit-tests.html"><small>درس</small>فصل ۶: تست‌های unit</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), which = "search", sel = null;
   var T = {
     search: ["Library.searchBooksByTitleJSON", [["_.get"], ["JSON.stringify"], ["Catalog.searchBooksByTitle", [["_.get"], ["_.map"], ["_.filter"], ["Catalog.bookInfo", [["_.get"], ["Catalog.authorNames", [["_.get"], ["_.map"]]]]]]]]],
     add: ["System.addMember", [["SystemState.get"], ["SystemState.commit"], ["Library.addMember", [["_.get"], ["_.set"], ["UserManagement.addMember", [["_.has"], ["_.set"]]]]]]] };
+  var CAT = '{"authorsById": {"alan-moore": {"name": "Alan Moore"}, "dave-gibbons": {…}}}';
   var INFO = {
-    "Catalog.authorNames": ["catalogData, authorIds", "آرایه‌ای از نام نویسنده‌ها", "authorsById.*.name", '{"authorsById": {"alan-moore": {"name": "Alan Moore"}, "dave-gibbons": {"name": "Dave Gibbons"}}}', ["مقدار authorIds تهی ← []", "یک شناسه ← یک نام", "دو شناسه ← دو نام", "شناسه‌ی ناشناس ← [undefined]", "مقدار catalogData تهی ← [undefined]"], "جدول ۶.۱ و listing ۶.۹ (صص. ۱۱۶–۱۱۸)"],
-    "Catalog.bookInfo": ["catalogData, book", "mapی BookInfo با title و isbn و authorNames", "book.title, book.isbn, book.authorIds, authorsById.*.name", '{"authorsById": {…}} and {"isbn": "978-1779501127", "title": "Watchmen", "authorIds": ["alan-moore", "dave-gibbons"]}', ["یک مورد: Watchmen با دو نویسنده‌اش"], "listing ۶.۱۱ (صص. ۱۱۹–۱۲۰): صداشده‌اش سالم فرض می‌شود"],
-    "Catalog.searchBooksByTitle": ["catalogData, query", "آرایه‌ای از mapهای BookInfo", "booksByIsbn.*.title به‌علاوه‌ی آنچه bookInfo می‌خواند", "catalogی با booksByIsbn و authorsById", ["پرسشی خورنده", "پرسشی بی هیچ خوانشی", "پرسشی تمام‌حرف‌کوچک که آن اشکال را می‌یابد"], "listingهای ۶.۱۶ تا ۶.۲۰ (صص. ۱۲۴–۱۲۵)"],
-    "Library.searchBooksByTitleJSON": ["libraryData, query", "رشته‌ای JSON", "مقدار catalog به‌علاوه‌ی آنچه صداشده‌هایش می‌خوانند", '{"catalog": {…}}', ["یک مورد، سنجیده پس از JSON.parse"], "listingهای ۶.۱۲ تا ۶.۱۵ (صص. ۱۲۱–۱۲۳)"],
-    "UserManagement.addMember": ["userManagementData, member", "داده‌ی پسین مدیریت کاربر، یا استثنایی", "membersByEmail.<email>", '{} or {"membersByEmail": {"franck@gmail.com": {…}}}', ["state تهی ← membersByEmail با jessie", "عضوهای موجود ← franck و jessie", "ایمیل موجود ← خطای \"Member already exists.\""], "listingهای ۶.۲۲ تا ۶.۲۴ (صص. ۱۲۸–۱۲۹)"],
-    "Library.addMember": ["libraryData, member", "داده‌ی پسین کتابخانه", "userManagement", '{"userManagement": {"membersByEmail": {…}}}', ["یک مورد: عضوهای موجود"], "listing ۶.۲۵ (صص. ۱۳۰–۱۳۱): پوششی گرد صداشده‌ای پوشیده"],
-    "System.addMember": ["member، که state ناصریح است", "هیچ: مقدار state سیستم را عوض می‌کند", "SystemState", "یک SystemState که با libraryStateBefore commit شده", ["یک مورد: سنجیدن systemState.get() با state چشم‌داشته"], "listing ۶.۲۷ (صص. ۱۳۱–۱۳۳): بخش باstate هنوز هست" ] };
-  function depth(node, name, d) { if (node[0] === name) return d; var r = -1; (node[1] || []).forEach(function (c) { var x = depth(c, name, d + 1); if (x >= 0) r = x; }); return r; }
-  function draw() { var ul = Kit.clear(document.getElementById("tree")); document.getElementById("tt").textContent = which === "search" ? "پرسش جست‌وجو (شکل ۶.۱)" : "mutation افزودن عضو (شکل ۶.۵)";
-    (function walk(n, into) { var ext = !INFO[n[0]], b = Kit.el("button", { type: "button", class: ext ? "ext" : "", "aria-pressed": String(sel === n[0]) }, n[0]);
-      b.addEventListener("click", function () { sel = n[0]; draw(); show(); log.add(ext ? "تابع " + n[0] + ": بیرون کدبیس، برگی از آن درخت." : "تابع " + n[0] + " برگزیده شد.", "muted"); });
-      var li = Kit.el("li", null, b); if (n[1]) { var sub = Kit.el("ul", { class: "ct" }); n[1].forEach(function (c) { walk(c, sub); }); li.appendChild(sub); } into.appendChild(li); })(T[which], ul); }
-  function show() { var box = Kit.clear(document.getElementById("info")), i = INFO[sel]; document.getElementById("nt").textContent = sel || "node";
-    if (!sel) { box.appendChild(Kit.el("p", null, "nodeی برگزینید.")); stats([]); return; }
-    if (!i) { box.appendChild(Kit.el("p", null, "تابع " + sel + " بیرون کدبیس برنامه است: آن درخت همین‌جا می‌ایستد و به‌شکل بخشی از این تابع تست unit نمی‌شود.")); stats([["عمق", depth(T[which], sel, 0)], ["موردهای تست", 0]]); return; }
-    [["ورودی", i[0]], ["خروجی", i[1]], ["فیلدهایی که واقعاً می‌خواند", i[2]]].forEach(function (r) { box.appendChild(Kit.el("p", null, Kit.el("strong", null, r[0] + ": "), r[1])); });
-    box.appendChild(Kit.el("p", null, Kit.el("strong", null, "داده‌ی کمینه‌ی معتبر در این زمینه:"))); box.appendChild(Kit.el("pre", { class: "code" }, i[3]));
-    box.appendChild(Kit.el("p", null, Kit.el("strong", null, "موردهای تست:"))); box.appendChild(Kit.el("ul", null, i[4].map(function (c) { return Kit.el("li", null, c); })));
-    box.appendChild(Kit.el("p", { class: "field-hint" }, i[5]));
-    var d = depth(T[which], sel, 0); stats([["عمق", d], ["موردهای تست", i[4].length, i[4].length > 2 ? "ok" : ""], ["پیچیدگی داده", d >= 3 ? "پایین" : d >= 1 ? "میانه" : "بالا"]]); }
-  document.getElementById("which").appendChild(Kit.segmented({ label: "درخت", value: which, options: [{ value: "search", label: "جست‌وجو، پرسش" }, { value: "add", label: "افزودن عضو، mutation" }], onChange: function (v) { which = v; sel = v === "search" ? "Catalog.authorNames" : "UserManagement.addMember"; draw(); show(); log.add("نمایش درخت " + (v === "search" ? "جست‌وجو" : "افزودن عضو") + ".", "muted"); } }).element);
-  sel = "Catalog.authorNames"; draw(); show();
+    "Catalog.authorNames": { io: "catalogData و authorIds ← آرایه‌ای از نام‌ها", dl: "داده‌ی کمینه (listing ۶.۷):", data: CAT, cases: [
+      "(cat, []) → []", '(cat, ["alan-moore"]) → ["Alan Moore"]', '(cat, ["alan-moore", "dave-gibbons"]) → ["Alan Moore", "Dave Gibbons"]',
+      "({}, []) → []", '({}, ["alan-moore"]) → [undefined]', '(cat, ["alan-moore", "albert-einstein"]) → ["Alan Moore", undefined]', '(cat, ["albert-einstein"]) → [undefined]'], ref: "listingهای ۶.۸ و ۶.۹ (ص. ۱۱۸)" },
+    "Catalog.bookInfo": { io: "catalogData و book ← یک map از نوع bookInfo", dl: "همان catalogData کمینه، به‌علاوه‌ی یک book:", data: "{\"isbn\": \"978-1779501127\", \"title\": \"Watchmen\", …}", cases: ['(cat, watchmen) → {title: "Watchmen", isbn, authorNames: [2]}'], ref: "listing ۶.۱۱ (ص. ۱۲۰)" },
+    "Catalog.searchBooksByTitle": { io: "catalogData و query ← آرایه‌ای از bookInfo", dl: "داده:", data: "{\"booksByIsbn\": {…}, \"authorsById\": {…}}", cases: ['(cat, "Watchmen") → [bookInfo]', '(cat, "Batman") → []', { t: '(cat, "watchmen") → [bookInfo]  ✗ bug', c: "bug" }], ref: "listingهای ۶.۱۷ و ۶.۱۸ (صص. ۱۲۴–۱۲۵)" },
+    "Library.searchBooksByTitleJSON": { io: "libraryData و query ← رشته‌ی JSON", dl: "داده‌ی کامل کتابخانه:", data: "{\"catalog\": {\"booksByIsbn\": {…}, \"authorsById\": {…}}}", cases: ['JSON.parse(f(lib, "Watchmen")) ≡ [bookInfo]', 'JSON.parse(f(lib, "Batman")) ≡ []'], ref: "listing ۶.۱۵ (ص. ۱۲۳)" },
+    "UserManagement.addMember": { io: "userManagement و member ← userManagement بعدی", dl: "عضو تازه:", data: '{"email": "jessie@gmail.com", "password": "my-secret"}', cases: ["({}, jessie) → {membersByEmail: {jessie}}", "({franck}, jessie) → {membersByEmail: {jessie, franck}}", { t: '({jessie}, jessie) → throw "Member already exists."', c: "neg" }], ref: "listingهای ۶.۲۲ تا ۶.۲۴ (صص. ۱۲۸–۱۲۹)" },
+    "Library.addMember": { io: "library و member ← library بعدی", dl: "state قبلی:", data: '{"userManagement": {"membersByEmail": {franck}}}', cases: ["({userManagement: {franck}}, jessie) → {userManagement: {jessie, franck}}"], ref: "listing ۶.۲۵ (صص. ۱۳۰–۱۳۱)" },
+    "System.addMember": { io: "systemState و member ← هیچ؛ state سیستم را عوض می‌کند", dl: "یک SystemState با مقدار اولیه‌ی libraryStateBefore", data: null, cases: ["System.addMember(state, jessie); _.isEqual(state.get(), expected)"], ref: "listing ۶.۲۷ (ص. ۱۳۲)" } };
+  var ELSE = { "SystemState.get": 1, "SystemState.commit": 1 };
+  var which = "search", sel = "Library.searchBooksByTitleJSON", tour, pick = document.getElementById("pick");
+  function kind(n) { return INFO[n] ? "" : ELSE[n] ? "else" : "ext"; }
+  function cnt(n) { return INFO[n] ? INFO[n].cases.length : 0; }
+  function W(n) { return n.length * 6.7 + 14; }
+  function layout(root) {
+    var nodes = [], edges = [], x = 0, last = null;
+    (function walk(n, d) {
+      var me = { name: n[0], d: d, i: nodes.length, kids: [] }; nodes.push(me);
+      if (!n[1]) { me.x = last ? x + (W(last.name) + W(n[0])) / 2 + 14 : W(n[0]) / 2; x = me.x; last = me; }
+      else { me.kids = n[1].map(function (c) { return walk(c, d + 1); }); me.kids.forEach(function (k) { edges.push([me, k]); }); }
+      return me;
+    })(root, 0);
+    function centre() { for (var j = nodes.length - 1; j >= 0; j--) { var n = nodes[j]; if (n.kids.length) n.x = (n.kids[0].x + n.kids[n.kids.length - 1].x) / 2; } }
+    centre();
+    for (var it = 0; it < 12; it++) {
+      var moved = false;
+      nodes.forEach(function (a) { nodes.forEach(function (b) {
+        if (a.d !== b.d || b.i <= a.i) return;
+        var need = (W(a.name) + W(b.name)) / 2 + 12 - (b.x - a.x);
+        if (need > 0.5) { moved = true; nodes.forEach(function (n) { if (n.i >= b.i && !n.kids.length) n.x += need; }); centre(); }
+      }); });
+      if (!moved) break;
+    }
+    var minX = Infinity, maxX = -Infinity;
+    nodes.forEach(function (n) { minX = Math.min(minX, n.x - W(n.name) / 2); maxX = Math.max(maxX, n.x + W(n.name) / 2); });
+    nodes.forEach(function (n) { n.x -= minX - 6; });
+    return { nodes: nodes, edges: edges, w: maxX - minX + 20 };
+  }
+  function depthOf(name) { var L = layout(T[which]), r = 0; L.nodes.forEach(function (n) { if (n.name === name) r = n.d; }); return r; }
+  function render() {
+    var L = layout(T[which]), maxD = 0, svg = Kit.clear(document.getElementById("tree")), H = 50;
+    L.nodes.forEach(function (n) { maxD = Math.max(maxD, n.d); });
+    svg.setAttribute("viewBox", "0 0 " + Math.round(L.w) + " " + ((maxD + 1) * H + 6));
+    L.edges.forEach(function (e) { svg.appendChild(Kit.svg("path", { class: "e", d: "M" + e[0].x + " " + (e[0].d * H + 30) + " C" + e[0].x + " " + (e[0].d * H + 44) + " " + e[1].x + " " + (e[1].d * H + 32) + " " + e[1].x + " " + (e[1].d * H + 46) })); });
+    L.nodes.forEach(function (n) {
+      var w = W(n.name), y = n.d * H + 10, k = kind(n.name);
+      var g = Kit.svg("g", { class: "n " + k + (n.name === sel ? " sel" : ""), tabindex: "0", role: "button", "aria-pressed": String(n.name === sel), "aria-label": n.name + (k === "ext" ? "، بیرون کدبیس" : k === "else" ? "، جداگانه تست می‌شود" : "، " + cnt(n.name) + " مورد تست") });
+      g.appendChild(Kit.svg("rect", { x: n.x - w / 2, y: y, width: w, height: 22, rx: 4 }));
+      g.appendChild(Kit.svg("text", { x: n.x, y: y + 15, "text-anchor": "middle" }, n.name));
+      if (!k) { var b = Kit.svg("g", { class: "badge" }); b.appendChild(Kit.svg("circle", { cx: n.x + w / 2, cy: y, r: 8 })); b.appendChild(Kit.svg("text", { x: n.x + w / 2, y: y + 3.5 }, Kit.digits(String(cnt(n.name))))); g.appendChild(b); }
+      function go() { sel = n.name; render(); tour.free(say(), k === "ext" ? "" : "ok"); }
+      g.addEventListener("click", go); g.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(); } });
+      svg.appendChild(g);
+    });
+    var dp = Kit.clear(document.getElementById("depth")), tested = L.nodes.filter(function (n) { return !kind(n.name); }).sort(function (a, b) { return a.d - b.d; });
+    tested.forEach(function (n) {
+      dp.appendChild(Kit.el("div", { class: "row" + (n.name === sel ? " sel" : "") }, Kit.el("span", null, "عمق " + Kit.digits(String(n.d))), Kit.el("span", { class: "nm mono" }, n.name),
+        Kit.el("span", null, Kit.el("div", { class: "bar", style: "width:" + (cnt(n.name) / 7 * 100) + "%", title: cnt(n.name) + " cases" }))));
+    });
+    var c = Kit.clear(document.getElementById("card")), i = INFO[sel], k = kind(sel), d = depthOf(sel);
+    c.appendChild(Kit.el("h3", { class: "mono" }, sel));
+    if (k === "ext") c.appendChild(Kit.el("p", null, "این تابع بیرون کدبیس برنامه است (Lodash یا JSON). درخت همین‌جا تمام می‌شود و این تابع این‌جا تست نمی‌شود (ص. ۱۱۴)."));
+    else if (k === "else") c.appendChild(Kit.el("p", null, "تابعی generic از SystemState. بیرون از زمینه‌ی این mutation جداگانه تست می‌شود و این‌جا فرض می‌کنیم تست شده است (ص. ۱۲۷)."));
+    else {
+      c.appendChild(Kit.el("p", null, Kit.el("strong", null, "ورودی و خروجی: "), i.io));
+      c.appendChild(Kit.el("p", null, Kit.el("strong", null, i.dl))); if (i.data) c.appendChild(Kit.el("pre", { class: "mono" }, i.data));
+      c.appendChild(Kit.el("p", null, Kit.el("strong", null, "موردهای تست:")));
+      c.appendChild(Kit.el("ul", { class: "ct-cases mono" }, i.cases.map(function (x) { return typeof x === "string" ? Kit.el("li", null, x) : Kit.el("li", { class: x.c }, x.t); })));
+      c.appendChild(Kit.el("p", { class: "ct-ref" }, i.ref));
+    }
+    var s = Kit.clear(document.getElementById("stats"));
+    [["عمق در درخت", Kit.digits(String(d)), ""], ["موردهای تست", k ? "—" : Kit.digits(String(cnt(sel))), cnt(sel) > 2 ? "ok" : ""], ["پیچیدگی داده", k ? "—" : (which === "search" ? d >= 3 ? "کم" : d >= 1 ? "متوسط" : "زیاد" : d >= 2 ? "متوسط" : "زیاد"), ""]].forEach(function (x) {
+      s.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    seg.set(which); fill(); pick.value = sel;
+  }
+  function say() { var k = kind(sel); return sel + (k === "ext" ? ": بیرون کدبیس، برگ درخت." : k === "else" ? ": generic، جداگانه تست می‌شود." : ": " + Kit.digits(String(cnt(sel))) + " مورد تست در عمق " + Kit.digits(String(depthOf(sel))) + "."); }
+  var filled = null;
+  function fill() { if (filled === which) return; filled = which; Kit.clear(pick); layout(T[which]).nodes.forEach(function (n) { pick.appendChild(Kit.el("option", { value: n.name }, n.name)); }); }
+  var seg = Kit.segmented({ label: "درخت", value: which, options: [{ value: "search", label: "جست‌وجو (query)" }, { value: "add", label: "افزودن عضو (mutation)" }],
+    onChange: function (v) { which = v; sel = T[v][0]; render(); tour.free("درخت " + (v === "search" ? "جست‌وجو (شکل ۶.۱)" : "افزودن عضو (شکل ۶.۵)") + ". روی nodeها کلیک کنید.", ""); } });
+  document.getElementById("which").appendChild(seg.element);
+  pick.addEventListener("change", function () { sel = pick.value; render(); tour.free(say(), ""); });
+
+  /* ---------- the scenario ---------- */
+  function at(w, s) { return function () { which = w; sel = s; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at("search", "Library.searchBooksByTitleJSON"), render: render, interval: 8500,
+    intro: "درخت را از بالا به پایین بخوانید: هر node تابع‌هایی را که صدا می‌زند فرزند خود دارد. عدد روی هر node تعداد موردهای تست آن در کتاب است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، درخت را عوض کنید یا روی هر node کلیک کنید.",
+    steps: [
+      { kind: "", run: at("search", "_.filter"), say: "شکل ۶.۱ (ص. ۱۱۴): ریشه تابعی است که می‌خواهیم تست کنیم و فرزندان هر node تابع‌هایی‌اند که صدا می‌زند. درخت را تا جایی باز می‌کنیم که به تابعی بیرون از کدبیس برسیم، مثل _.filter از Lodash؛ آن‌ها برگ‌اند." },
+      { kind: "ok", run: at("search", "Catalog.authorNames"), say: "عمیق‌ترین node: authorNames. داده‌اش کوچک است، فقط authorsById، و همین در این زمینه معتبر است (ص. ۱۱۷). با داده‌ی کوچک نوشتن موردهای زیاد آسان است: هفت مورد متفاوت." },
+      { kind: "ok", run: at("search", "Catalog.bookInfo"), say: "یک سطح بالاتر، bookInfo فقط یک مورد دارد. فرض می‌کنیم authorNames که صدا می‌زند از قبل تست شده و درست کار می‌کند؛ این فرض تعداد موردها را خیلی کم می‌کند (ص. ۱۲۰)." },
+      { kind: "warn", run: at("search", "Catalog.searchBooksByTitle"), say: "تابع searchBooksByTitle: سه مورد. مورد «watchmen» با حروف کوچک شکست می‌خورد، چون includes به بزرگی و کوچکی حرف حساس است. هدف unit test همین پیدا کردن bug است (ص. ۱۲۵)." },
+      { kind: "ok", run: at("search", "Library.searchBooksByTitleJSON"), say: "ریشه: داده‌ی کامل کتابخانه و فقط دو مورد، که بعد از JSON.parse با _.isEqual مقایسه می‌شوند. این همان جدول ۶.۲ است (ص. ۱۲۱): هر چه پایین‌تر، داده ساده‌تر و موردها بیشتر." },
+      { kind: "ok", run: at("add", "UserManagement.addMember"), say: "درخت افزودن عضو (شکل ۶.۵، ص. ۱۲۶). SystemState جداگانه تست می‌شود (ص. ۱۲۷). کار اصلی در UserManagement.addMember است: سه مورد، که یکی منفی است و انتظار خطا دارد (ص. ۱۲۹)." },
+      { kind: "warn", run: at("add", "System.addMember"), say: "تابع System.addMember چیزی برنمی‌گرداند و state سیستم را عوض می‌کند. پس state را بعد از اجرا با systemState.get() می‌گیریم و با _.isEqual می‌سنجیم (ص. ۱۳۲)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "درخت صدا زدن تابع‌ها کجا می‌ایستد؟",

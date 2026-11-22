@@ -6,19 +6,29 @@
 <title>شریک شدن ساختاری</title>
 <meta name="description" content="مقداری را عمیق در داده‌ی کتابخانه immutable بگذارید و ببینید کدام mapها تازه‌اند و کدام با version پیشین شریک؛ بعد داده‌ی شریک را با setterی بومی mutation دهید و ببینید هر دو version عوض می‌شوند. تصویری از فصل ۴ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>ul.tree { list-style: none; padding-right: 14px; padding-left: 0; margin: 0; font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: left; } ul.tree li { margin: 1px 0; }
-  .tree .k { color: var(--ink-2); } .tree .v { color: var(--ink); } .tree button.key { font: inherit; background: none; border: 0; padding: 0 2px; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
-  .tree .on > .lbl, .tree .on > button.key { background: var(--accent-soft); outline: 1px solid var(--accent); border-radius: 3px; }
-  .tree .new > .tag, .tree .shared > .tag { font-size: .7rem; border-radius: 3px; padding: 0 4px; margin-right: 4px; direction: rtl; }
-  .tree .new > .tag { background: var(--warn-soft); color: var(--ink); border: 1px solid var(--warn); } .tree .shared > .tag { background: var(--ok-soft); color: var(--ink); border: 1px solid var(--ok); }
-  pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 0; direction: ltr; text-align: left; }
-  #val, #pth { direction: ltr; text-align: left; }
+<style>
+  /* Previous and next versions as two trees; shared subtrees in the next version stay collapsed. */
+  .ss-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; height: 100%; min-height: 0; }
+  .ss-col { min-height: 0; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); }
+  .ss-col h3 { font-size: .88rem; margin: 0 0 6px; }
+  ul.ss-tree { list-style: none; padding-left: 14px; padding-right: 0; margin: 0; font-size: .78rem; direction: ltr; text-align: left; line-height: 1.42; }
+  #prev, #next { padding-left: 0; }
+  .ss-tree .k { color: var(--ink-2); }
+  .ss-tree .tag { font-size: .68rem; border-radius: 3px; padding: 0 4px; margin-left: 6px; font-family: var(--font, inherit); }
+  .ss-tree .new > .lbl { background: var(--warn-soft); outline: 1.5px solid var(--warn); border-radius: 3px; font-weight: 700; }
+  .ss-tree .new > .tag { background: var(--warn-soft); border: 1px solid var(--warn); }
+  .ss-tree .shared > .tag { background: var(--ok-soft); border: 1px solid var(--ok); }
+  .ss-tree .chg > .lbl { background: var(--accent-soft); outline: 1.5px solid var(--accent); border-radius: 3px; font-weight: 700; }
+  .ss-tree .bad > .lbl { background: var(--bad-soft); outline: 2px solid var(--bad); border-radius: 3px; font-weight: 700; }
+  .ss-empty { color: var(--ink-3); font-size: .85rem; }
+  .ss-key { font-size: .76rem; color: var(--ink-2); margin: 6px 0 0; }
+  #pth, #val { width: 100%; direction: ltr; font-family: var(--mono); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/04-state-management.html">فصل ۴</a><span aria-hidden="true">/</span>
@@ -29,92 +39,147 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۴ · مدیریت state</div>
-  <h1>شریک شدن ساختاری</h1>
-  <p class="lede">هر «set» immutability هیچ‌وقت داده‌ای را که می‌گیرد عوض نمی‌کند. mapهای تازه را تنها <strong>روی مسیر</strong> تا آن تغییر می‌سازد و هر بخش دیگری را با version پیشین شریک می‌شود. این versionها را ارزان می‌کند، ولی تنها تا وقتی کسی داده‌ی شریک را پشت سرش mutation ندهد.</p>
-  <p class="source-note">تصویری از بخش‌های ۴.۲ تا ۴.۴ (صص. ۷۴–۸۳): عوض شدن سال نشر در شکل ۴.۴، تابع <code>setImmutable</code> دیو در listing ۴.۴، و mutation آرایه‌ی شریک در listing ۴.۵. داده‌ی کتابخانه نمونه‌ی کوچک vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>شریک شدن ساختاری</h1>
+      <p class="lede">یک «set» به سبک immutable هیچ‌وقت داده‌ای را که می‌گیرد عوض نمی‌کند. فقط mapهای <strong>روی مسیر</strong> تغییر را از نو می‌سازد و بقیه را با version قبلی شریک می‌شود. این versionها را ارزان می‌کند، به شرطی که کسی داده‌ی شریک را پنهانی mutate نکند.</p>
+      <p class="source-note">تصویری از بخش‌های ۴.۲ تا ۴.۴ (صص. ۷۴–۸۳): تغییر سال انتشار در شکل ۴.۴، تابع <code>setImmutable</code> دیو در listing ۴.۴ و mutate شدن آرایه‌ی شریک در listing ۴.۵. داده‌ی کتابخانه نمونه‌ی کوچک vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">version پیشین</p><ul class="tree" id="prev"></ul></div>
-        <div class="panel"><p class="panel-title" id="nt">version پسین</p><ul class="tree" id="next"></ul></div></div>
-      <div class="callout" id="verdict"></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><label class="field-head" for="pth">مسیری که گذاشته می‌شود</label><select id="pth" style="width:100%"></select>
-        <label class="field-head" for="val" style="margin-top:8px">مقدار تازه، به JSON</label><input id="val" type="text" value="1986" style="width:100%;font-family:var(--mono)">
-        <div class="row" style="margin-top:8px"><button class="btn primary" id="set" type="button">تابع setImmutable</button> <button class="btn" id="native" type="button">setter بومی روی پیشین، listing ۴.۵</button></div>
-        <button class="btn" id="rs" type="button" style="margin-top:8px">↺ از نو</button></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="ss-wrap">
+          <div class="ss-col"><h3>نسخه‌ی قبلی (prev)</h3><ul class="ss-tree mono" id="prev"></ul></div>
+          <div class="ss-col"><h3>نسخه‌ی بعدی (next)</h3><ul class="ss-tree mono" id="next"></ul>
+            <p class="ss-key">نارنجی «تازه»: map ساخته‌شده روی مسیر. سبز «شریک»: همان شیء version قبلی، بسته نشان داده شده. قرمز: مقداری که بدون دست زدن به next عوض شد.</p></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">دو version</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <label class="field-head" for="pth">مسیری که set می‌شود</label><select id="pth"></select>
+          <label class="field-head" for="val">مقدار تازه، به JSON</label><input id="val" type="text" value="1986" spellcheck="false">
+        </div>
+        <div class="tweak-group">
+          <button class="btn primary" id="set" type="button">setImmutable</button>
+          <button class="btn" id="native" type="button">setter بومی روی prev (listing ۴.۵)</button>
+          <button class="btn" id="rs" type="button">↺ از اول</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>تنها mapهای روی مسیر تازه‌اند</strong>: خود کتابخانه، آن catalog، مقدار <code>booksByIsbn</code> و رکورد Watchmen. مقدارهای <code>userManagement</code> و <code>authorsById</code> و آرایه‌های آن کتاب در هر دو version دقیقاً همان یک شیءاند.</li>
-    <li><strong>version پیشین دست‌نخورده است</strong>: هنوز ۱۹۸۷ می‌گوید. هر دو version تقریباً بی هیچ بهایی پهلوی هم هستند.</li>
-    <li><strong>setterی بومی آن قرار را می‌شکند.</strong> عوض کردن <code>authorIds[1]</code> در version پیشین، آن پسین را هم عوض می‌کند، چون آن آرایه شریک است. همین است که mutation بومی ممنوع است، و همین است که ساختارهای داده‌ی persistent را ساخته.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>فقط mapهای روی مسیر تازه‌اند:</strong> خود کتابخانه، catalog، <code>booksByIsbn</code> و رکورد Watchmen. <code>userManagement</code>، <code>authorsById</code> و آرایه‌های کتاب در هر دو version دقیقاً همان شیءاند.</li>
+      <li><strong>version قبلی دست‌نخورده می‌ماند</strong> و هنوز ۱۹۸۷ را نشان می‌دهد. دو version تقریباً بدون هزینه کنار هم وجود دارند.</li>
+      <li><strong>setter بومی این قرار را می‌شکند.</strong> عوض کردن <code>authorIds[1]</code> در version قبلی version بعدی را هم عوض می‌کند، چون آرایه شریک است. برای همین mutation بومی ممنوع است و ساختارهای داده‌ی persistent به وجود آمده‌اند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/04-state-management.html"><small>درس</small>فصل ۴: مدیریت state</a></li>
-    <li><a href="../lab/04-structural-sharing/README.md"><small>آزمایش</small>شریک شدن ساختاری، اندازه‌گرفته</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/04-state-management.html"><small>درس</small>فصل ۴: مدیریت state</a></li>
+      <li><a href="../lab/04-structural-sharing/README.md"><small>آزمایش</small>شریک شدن ساختاری، اندازه‌گرفته</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  function catalog() { return {
-    booksByIsbn: {
-      "978-1779501127": { isbn: "978-1779501127", title: "Watchmen", publicationYear: 1987, authorIds: ["alan-moore", "dave-gibbons"],
-        bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }, { id: "book-item-2", libId: "nyc-central-lib", isLent: false }] } },
-    authorsById: { "alan-moore": { name: "Alan Moore", bookIsbns: ["978-1779501127"] }, "dave-gibbons": { name: "Dave Gibbons", bookIsbns: ["978-1779501127"] } } }; }
   function isObj(x) { return x !== null && typeof x === "object"; }
   function fmt(v) { return Array.isArray(v) ? "[…" + v.length + "]" : isObj(v) ? "{…" + Object.keys(v).length + "}" : JSON.stringify(v); }
-
-  var log = Kit.log(document.getElementById("log")), prev, next, lastPath = null, corrupted = false;
-  function lib() { return { catalog: catalog(), userManagement: { librariansByEmail: { "franck@gmail.com": { email: "franck@gmail.com", encryptedPassword: "bXlwYXNzd29yZA==" } },
-    membersByEmail: { "samantha@gmail.com": { email: "samantha@gmail.com", isBlocked: false, bookLendings: [{ bookItemId: "book-item-1", lendingDate: "2020-04-23" }] } } } }; }
+  function k(v) { return Kit.digits(String(v)); }
+  function lib() {
+    return { catalog: {
+        booksByIsbn: { "978-1779501127": { isbn: "978-1779501127", title: "Watchmen", publicationYear: 1987, authorIds: ["alan-moore", "dave-gibbons"],
+          bookItems: [{ id: "book-item-1", libId: "nyc-central-lib", isLent: true }, { id: "book-item-2", libId: "nyc-central-lib", isLent: false }] } },
+        authorsById: { "alan-moore": { name: "Alan Moore", bookIsbns: ["978-1779501127"] }, "dave-gibbons": { name: "Dave Gibbons", bookIsbns: ["978-1779501127"] } } },
+      userManagement: { librariansByEmail: { "franck@gmail.com": { email: "franck@gmail.com", encryptedPassword: "bXlwYXNzd29yZA==" } },
+        membersByEmail: { "samantha@gmail.com": { email: "samantha@gmail.com", isBlocked: false, bookLendings: [{ bookItemId: "book-item-1", lendingDate: "2020-04-23" }] } } } };
+  }
   var PATHS = [["catalog", "booksByIsbn", "978-1779501127", "publicationYear"], ["catalog", "authorsById", "alan-moore", "name"], ["userManagement", "membersByEmail", "samantha@gmail.com", "isBlocked"], ["catalog", "booksByIsbn", "978-1779501127", "bookItems", 1, "isLent"]];
-  function setImmutable(map, path, v) { var modified = v, k = path[0], rest = path.slice(1); if (rest.length > 0) modified = setImmutable(map[k], rest, v);
-    var res = Array.isArray(map) ? map.slice() : Object.assign({}, map); res[k] = modified; return res; }
-  function counts(a, b) { var n = 0, s = 0; (function w(x, y) { if (!isObj(x)) return; if (x === y) { s++; return; } n++; Object.keys(x).forEach(function (k) { w(x[k], isObj(y) ? y[k] : undefined); }); })(a, b); return { n: n, s: s }; }
-  function draw(id, root, other, tag) { var ul = Kit.clear(document.getElementById(id));
-    (function walk(node, o, ul2) { Object.keys(node).forEach(function (k) { var v = node[k], ov = isObj(o) ? o[k] : undefined, cls = !tag || !isObj(v) ? "" : (v === ov ? "shared" : "new");
-      var li = Kit.el("li", { class: cls }, Kit.el("span", { class: "lbl" }, (Array.isArray(node) ? k : JSON.stringify(k)) + ": " + (isObj(v) ? (Array.isArray(v) ? "[" : "{") : JSON.stringify(v))));
-      if (cls) li.appendChild(Kit.el("span", { class: "tag" }, cls === "new" ? "تازه" : "شریک"));
-      if (isObj(v) && !(tag && v === ov)) { var sub = Kit.el("ul", { class: "tree" }); walk(v, ov, sub); li.appendChild(sub); } else if (isObj(v)) li.appendChild(Kit.el("span", { class: "k" }, " " + fmt(v) + " (same object)"));
-      ul2.appendChild(li); }); })(root, other, ul); }
-  function render() { draw("prev", prev, null, false); if (next) draw("next", next, prev, true); else Kit.clear(document.getElementById("next")).appendChild(Kit.el("li", { class: "k", style: "direction:rtl;text-align:right" }, "مسیری برگزینید و setImmutable را بزنید."));
-    var c = next ? counts(next, prev) : { n: 0, s: 0 }, v = document.getElementById("verdict");
-    v.className = "callout " + (corrupted ? "bad" : next ? "ok" : "");
-    v.textContent = corrupted ? "آن setter بومی داده‌ی شریک را عوض کرد: version پسین هم عوض شد، گرچه کسی دستش نزد." : next ? c.n + " map تازه روی " + JSON.stringify(lastPath) + "؛ و " + c.s + " زیردرخت شریک که همان‌طور باز به کار رفت. version پیشین دست‌نخورده است." : "دو version همه چیز را جز مسیر تا آن تغییر شریک خواهند بود.";
-    stats([["mapهای تازه", c.n, c.n ? "warn" : ""], ["زیردرخت‌های شریک", c.s, "ok"], ["پیشین دست‌نخورده", corrupted ? "نه" : "بله", corrupted ? "bad" : "ok"]]); }
-  var sel = document.getElementById("pth"); PATHS.forEach(function (p, i) { sel.appendChild(Kit.el("option", { value: i }, JSON.stringify(p))); });
-  sel.addEventListener("change", function () { var p = PATHS[sel.value], cur = p.reduce(function (a, k) { return a[k]; }, prev); document.getElementById("val").value = JSON.stringify(typeof cur === "boolean" ? !cur : typeof cur === "number" ? cur - 1 : cur + " (new)"); });
-  document.getElementById("set").addEventListener("click", function () { var v; try { v = JSON.parse(document.getElementById("val").value); } catch (e) { log.add("آن مقدار باید JSON باشد؛ مثلاً 1986 یا \"Alan Moore\".", "bad"); return; }
-    lastPath = PATHS[sel.value]; next = setImmutable(prev, lastPath, v); corrupted = false; log.add("setImmutable(library, " + JSON.stringify(lastPath) + ", " + JSON.stringify(v) + ")", "ok"); render(); });
-  document.getElementById("native").addEventListener("click", function () { if (!next) { next = setImmutable(prev, PATHS[0], 1986); lastPath = PATHS[0]; }
-    prev.catalog.booksByIsbn["978-1779501127"].authorIds[1] = "dave-chester-gibbons"; corrupted = next.catalog.booksByIsbn["978-1779501127"].authorIds[1] === "dave-chester-gibbons";
-    log.add("دستور previous…authorIds[1] = \"dave-chester-gibbons\": version پسین حالا " + JSON.stringify(next.catalog.booksByIsbn["978-1779501127"].authorIds[1]) + " می‌خواند.", "bad"); render(); });
-  document.getElementById("rs").addEventListener("click", function () { prev = lib(); next = null; corrupted = false; log.add("داده‌ی کتابخانه‌ی تازه.", "muted"); render(); });
-  prev = lib(); render();
+  var AUTH = ["catalog", "booksByIsbn", "978-1779501127", "authorIds", 1];
+  var prev, next, lastPath = null, corrupted = false, tour;
+  function setImmutable(map, path, v) {
+    var modified = v, key = path[0], rest = path.slice(1);
+    if (rest.length > 0) modified = setImmutable(map[key], rest, v);
+    var res = Array.isArray(map) ? map.slice() : Object.assign({}, map); res[key] = modified; return res;
+  }
+  function counts(a, b) { var n = 0, s = 0; (function w(x, y) { if (!isObj(x)) return; if (x === y) { s++; return; } n++; Object.keys(x).forEach(function (key) { w(x[key], isObj(y) ? y[key] : undefined); }); })(a, b); return { n: n, s: s }; }
+  function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+  function onPath(p, target) { return target && p.length <= target.length && same(p, target.slice(0, p.length)); }
+  function draw(id, root, other, isNext) {
+    var ul = Kit.clear(document.getElementById(id));
+    (function walk(node, o, ul2, at) {
+      Object.keys(node).forEach(function (key0) {
+        var key = Array.isArray(node) ? Number(key0) : key0, p = at.concat([key]), v = node[key0], ov = isObj(o) ? o[key0] : undefined;
+        var cls = isNext && isObj(v) ? (v === ov ? "shared" : "new") : "";
+        var focus = onPath(p, lastPath) || (corrupted && onPath(p, AUTH));
+        if (!isObj(v) && focus && p.length === (corrupted && onPath(p, AUTH) ? AUTH.length : lastPath ? lastPath.length : -1)) cls = corrupted && onPath(p, AUTH) ? "bad" : "chg";
+        var open = isObj(v) && !(isNext && v === ov && !(corrupted && onPath(p, AUTH))) && (focus || (!lastPath && p.length < 2));
+        var li = Kit.el("li", { class: cls }, Kit.el("span", { class: "lbl" }, (Array.isArray(node) ? key0 : JSON.stringify(key0)) + ": " + (open ? (Array.isArray(v) ? "[" : "{") + (Array.isArray(v) ? "]" : "}").replace(/./, "") : isObj(v) ? fmt(v) : JSON.stringify(v))));
+        if (cls === "new" || cls === "shared") li.appendChild(Kit.el("span", { class: "tag" }, cls === "new" ? "تازه" : "شریک"));
+        if (open) { var sub = Kit.el("ul", { class: "ss-tree" }); walk(v, ov, sub, p); li.appendChild(sub); }
+        ul2.appendChild(li);
+      });
+    })(root, other, ul, []);
+  }
+  function render() {
+    draw("prev", prev, null, false);
+    if (next) draw("next", next, prev, true);
+    else Kit.clear(document.getElementById("next")).appendChild(Kit.el("li", { class: "ss-empty", style: "direction:rtl;text-align:right" }, "هنوز چیزی set نشده."));
+    var c = next ? counts(next, prev) : { n: 0, s: 0 };
+    var st = Kit.clear(document.getElementById("stats"));
+    [["mapهای تازه", k(c.n), c.n ? "warn" : ""], ["زیردرخت‌های شریک", k(c.s), c.s ? "ok" : ""], ["prev دست‌نخورده", corrupted ? "نه" : "بله", corrupted ? "bad" : "ok"], ["next دست‌نخورده", corrupted ? "نه ✗" : "بله", corrupted ? "bad" : "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+  }
+  function doSet(i, v) { lastPath = PATHS[i]; next = setImmutable(prev, lastPath, v); corrupted = false; }
+  function doNative() {
+    if (!next) doSet(0, 1986);
+    prev.catalog.booksByIsbn["978-1779501127"].authorIds[1] = "dave-chester-gibbons";
+    corrupted = next.catalog.booksByIsbn["978-1779501127"].authorIds[1] === "dave-chester-gibbons";
+  }
+  function summary() { var c = counts(next, prev); return k(c.n) + " map تازه روی مسیر و " + k(c.s) + " زیردرخت شریک که دوباره استفاده شد"; }
+  var sel = document.getElementById("pth");
+  PATHS.forEach(function (p, i) { sel.appendChild(Kit.el("option", { value: i }, JSON.stringify(p))); });
+  sel.addEventListener("change", function () { var p = PATHS[sel.value], cur = p.reduce(function (a, x) { return a[x]; }, prev); document.getElementById("val").value = JSON.stringify(typeof cur === "boolean" ? !cur : typeof cur === "number" ? cur - 1 : cur + " (new)"); });
+  document.getElementById("set").addEventListener("click", function () {
+    var v; try { v = JSON.parse(document.getElementById("val").value); } catch (e) { tour.free("مقدار باید JSON باشد، مثلاً 1986 یا \"Alan Moore\".", "bad"); return; }
+    doSet(+sel.value, v); render(); tour.free("setImmutable(library, " + JSON.stringify(lastPath) + ", " + JSON.stringify(v) + "): " + summary() + ".", "ok");
+  });
+  document.getElementById("native").addEventListener("click", function () { doNative(); render(); tour.free("prev…authorIds[1] = \"dave-chester-gibbons\": next هم حالا " + JSON.stringify(next.catalog.booksByIsbn["978-1779501127"].authorIds[1]) + " می‌گوید، چون آرایه شریک است.", "bad"); });
+  document.getElementById("rs").addEventListener("click", function () { prev = lib(); next = null; lastPath = null; corrupted = false; render(); tour.free("داده‌ی کتابخانه از اول ساخته شد.", ""); });
+
+  /* ---------- the scenario ---------- */
+  function scene(i, v, native) { return function () { prev = lib(); next = null; lastPath = null; corrupted = false; if (i !== null) doSet(i, v); if (native) doNative(); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene(null), render: render, interval: 7500,
+    intro: "سمت راست داده‌ی کتابخانه پیش از تغییر است و سمت چپ version بعد از آن. شاخه‌هایی که به تغییر ربطی ندارند بسته‌اند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، مسیر دیگری انتخاب کنید و setImmutable را بزنید.",
+    steps: [
+      { kind: "", run: scene(null), say: "داده‌ی کتابخانه: یک catalog و یک userManagement. هنوز version بعدی وجود ندارد." },
+      { kind: "ok", run: scene(0, 1986), say: function () { return "سال انتشار Watchmen ۱۹۸۶ می‌شود (شکل ۴.۴، ص. ۷۸): " + summary() + ". prev هنوز ۱۹۸۷ را نشان می‌دهد."; } },
+      { kind: "ok", run: scene(2, true), say: function () { return "مسیر دیگر، مسدود شدن سامانتا: این بار catalog کامل شریک است و فقط شاخه‌ی userManagement از نو ساخته می‌شود. " + summary() + " (listing ۴.۴، ص. ۸۱)."; } },
+      { kind: "ok", run: scene(3, true), say: function () { return "مسیر با index آرایه هم همین‌طور است: setImmutable آرایه را با slice کپی می‌کند، نه کل درخت را. " + summary() + "."; } },
+      { kind: "bad", run: scene(0, 1986, true), say: "خطر: setter بومی authorIds[1] را در prev عوض می‌کند و next هم عوض می‌شود، چون هر دو یک آرایه‌اند (listing ۴.۵، ص. ۸۲). شریک شدن فقط وقتی امن است که داده immutable بماند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "وقتی سال نشر Watchmen immutable گذاشته می‌شود، کدام mapها ساخته می‌شوند؟",

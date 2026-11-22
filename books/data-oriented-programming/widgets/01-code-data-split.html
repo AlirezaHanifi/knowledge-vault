@@ -6,18 +6,27 @@
 <title>جدا کردن کد از داده</title>
 <meta name="description" content="کلاس‌های سیستم مدیریت کتابخانه‌ی تئو را یکی‌یکی به entity کد و داده بشکنید، و ببینید رابطه‌های هر entity و شمار بخش‌های مستقل چطور عوض می‌شوند. تصویری از فصل ۱ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>.g { width: 100%; display: block; } .g rect { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.2; rx: 5; }
-  .g rect.data { fill: var(--s1-soft, var(--accent-soft)); stroke: var(--s1); } .g rect.code { fill: var(--warn-soft); stroke: var(--warn); stroke-dasharray: 4 2; }
-  .g rect.sel { stroke-width: 3; } .g text { font-size: 11px; fill: var(--ink); text-anchor: middle; dominant-baseline: middle; pointer-events: none; direction: ltr; }
-  .g line { stroke: var(--ink-3); stroke-width: 1.3; } .g line.code { stroke: var(--warn); stroke-dasharray: 5 3; } .g line.data { stroke: var(--s1); }
-  .g line.hot { stroke-width: 3; } .g g.node { cursor: pointer; } .g g.node:focus-visible rect { outline: none; stroke: var(--accent); stroke-width: 3; }
-  #rels li { direction: rtl; }
+<style>
+  /* The class graph fills the scene; the side list shows the selected entity's relations. */
+  .cd-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 14px; height: 100%; min-height: 0; }
+  .cd-g { width: 100%; height: 100%; max-height: 470px; display: block; }
+  .cd-g rect { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.2; rx: 5; }
+  .cd-g rect.data { fill: var(--accent-soft); stroke: var(--s1); } .cd-g rect.code { fill: var(--warn-soft); stroke: var(--warn); stroke-dasharray: 4 2; }
+  .cd-g rect.sel { stroke-width: 3; } .cd-g g.iso { opacity: .4; } .cd-g text { font-size: 12px; fill: var(--ink); text-anchor: middle; dominant-baseline: middle; pointer-events: none; direction: ltr; }
+  .cd-g line { stroke: var(--ink-3); stroke-width: 1.3; } .cd-g line.code { stroke: var(--warn); stroke-dasharray: 5 3; } .cd-g line.data { stroke: var(--s1); }
+  .cd-g line.hot { stroke-width: 3.2; } .cd-g g.node { cursor: pointer; } .cd-g g.node:focus-visible rect { stroke: var(--accent); stroke-width: 3; }
+  .cd-side { font-size: .85rem; overflow: auto; min-height: 0; }
+  .cd-side h3 { font-size: .9rem; margin: 0 0 6px; }
+  .cd-side ul { margin: 0; padding-inline-start: 18px; } .cd-side li { margin: 3px 0; line-height: 1.5; }
+  .cd-side li .k { font-weight: 700; } .cd-side li.data .k { color: var(--s1); } .cd-side li.code .k { color: var(--warn); }
+  .cd-key { font-size: .78rem; color: var(--ink-2); margin-top: 10px; line-height: 1.5; }
+  .sim-stage:has(.stage-tweak:not([hidden])) .cd-wrap { grid-template-columns: minmax(0, 1fr) 190px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/01-complexity-of-object-oriented-programming.html">فصل ۱</a><span aria-hidden="true">/</span>
@@ -28,99 +37,147 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱ · پیچیدگی برنامه‌نویسی object-oriented</div>
-  <h1>جدا کردن کد از داده</h1>
-  <p class="lede">در طرح OOP تئو، کلاس <code>Member</code> در پنج رابطه می‌نشیند: دو تا در باب داده‌اش، سه تا در باب کدش. به <code>MemberData</code> و <code>MemberCode</code> بشکنیدش و هر نیمی ساده‌تر می‌شود. <em>هر</em> کلاسی را بشکنید و آن نمودار به بخشی داده و بخشی کد می‌افتد که جدا فهمیدنی‌اند.</p>
-  <p class="source-note">تصویری از بخش ۱.۲.۱، یعنی رابطه‌های زیاد میان کلاس‌ها (شکل‌های ۱.۱۰ تا ۱.۱۳، صص. ۱۴–۱۶). رابطه‌ها از نقش کلاس‌ها در صص. ۹–۱۲ برداشته شده‌اند؛ و چیدمان مال vault است. رابطه‌های داده ترکیب و تداعی‌اند؛ و رابطه‌های کد کاربرد و وراثت. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>جدا کردن کد از داده</h1>
+      <p class="lede">در طراحی OOP تئو، کلاس <code>Member</code> در پنج رابطه شریک است: دو رابطه‌ی داده و سه رابطه‌ی کد. تور کلاس‌ها را یکی‌یکی به entity داده و entity کد می‌شکند تا ببینید نمودار در آخر به <strong>دو بخش مستقل</strong> تقسیم می‌شود.</p>
+      <p class="source-note">تصویری از بخش ۱.۲.۱، رابطه‌های زیاد میان کلاس‌ها (شکل‌های ۱.۱۰ تا ۱.۱۳، صص. ۱۴–۱۶). رابطه‌ها از نقش کلاس‌ها در صص. ۹–۱۲ آمده‌اند و چیدمان از vault است. رابطه‌ی داده یعنی ترکیب و تداعی؛ رابطه‌ی کد یعنی کاربرد و وراثت. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="gt">کلاس‌های تئو و رابطه‌هایشان</p>
-        <svg class="g" id="g" viewBox="0 0 640 400" role="img"></svg>
-        <p class="field-hint">آبی توپر: رابطه‌ی داده، یعنی ترکیب و تداعی. نارنجی خط‌چین: رابطه‌ی کد، یعنی کاربرد و وراثت. روی کلاسی کلیک کنید یا Enter بزنید تا بشکندش.</p>
-        <div class="callout" id="verdict" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">رابطه‌های entity برگزیده</p><ul id="rels"></ul></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><button class="btn primary" id="splitAll" type="button">شکستن هر کلاسی</button> <button class="btn" id="rs" type="button">↺ درهم کردن همه</button>
-        <button class="btn small" id="member" type="button" style="margin-top:8px">شکستن تنها Member، شکل ۱.۱۲</button></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="cd-wrap">
+          <svg class="cd-g" id="g" viewBox="0 0 640 400" role="img"></svg>
+          <div class="cd-side">
+            <h3 id="rt">رابطه‌های Member</h3>
+            <ul id="rels"></ul>
+            <p class="cd-key">آبی توپر: رابطه‌ی داده (ترکیب و تداعی). نارنجی خط‌چین: رابطه‌ی کد (کاربرد و وراثت). entity کم‌رنگ هیچ رابطه‌ای ندارد. روی هر کلاس کلیک کنید تا بشکند.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">نمودار کلاس‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group">
+          <button class="btn primary" id="splitAll" type="button">شکستن همه‌ی کلاس‌ها</button>
+          <button class="btn" id="member" type="button">فقط Member (شکل ۱.۱۲)</button>
+          <button class="btn" id="rs" type="button">↺ درهم کردن دوباره</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>پنج رابطه‌ی Member دو به‌علاوه‌ی سه می‌شود</strong>: کلاس <code>MemberData</code> رابطه‌های «Library چند تا دارد» و «چند BookLending دارد» را نگه می‌دارد؛ و <code>MemberCode</code> رابطه‌ی «از User می‌آید» و آن دو کاربرد را.</li>
-    <li><strong>شکستن هر کلاسی دو بخش مستقل به جا می‌گذارد</strong>: یکی تنها با entityهای داده و رابطه‌های داده، و یکی تنها با entityهای کد و رابطه‌های کد (شکل ۱.۱۳).</li>
-    <li><strong>هیچ رابطه‌ای میان آن دو بخش رد نمی‌شود.</strong> همین است که می‌گذارد داده را بی اندیشیدن به کد بفهمید، و برعکس: آن خروجی از جدا کردن کد از داده پی می‌گیرد، نه از بخت.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>پنج رابطه‌ی Member دو و سه می‌شود.</strong> کلاس <code>MemberData</code> دو رابطه‌ی «Library چندتا دارد» و «چند BookLending دارد» را نگه می‌دارد و <code>MemberCode</code> رابطه‌ی «از User می‌آید» و دو کاربرد را.</li>
+      <li><strong>شکستن همه‌ی کلاس‌ها دو بخش مستقل باقی می‌گذارد:</strong> یکی فقط با entityها و رابطه‌های داده، دیگری فقط با entityها و رابطه‌های کد (شکل ۱.۱۳).</li>
+      <li><strong>هیچ رابطه‌ای از یک بخش به بخش دیگر نمی‌رود.</strong> برای همین می‌شود داده را بدون فکر کردن به کد فهمید و برعکس. این نتیجه‌ی منطقی جدا کردن کد از داده است، نه اتفاق.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/01-complexity-of-object-oriented-programming.html"><small>درس</small>فصل ۱: پیچیدگی برنامه‌نویسی object-oriented</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/01-complexity-of-object-oriented-programming.html"><small>درس</small>فصل ۱: پیچیدگی برنامه‌نویسی object-oriented</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
   var N = { Library: [320, 40], Catalog: [520, 110], Librarian: [120, 110], Member: [320, 150], User: [120, 250], Book: [520, 220], Author: [520, 330], BookItem: [320, 280], BookLending: [320, 370] };
   var KIND = { data: "داده", code: "کد" };
-  // [from, to, kind, label]؛ گونه‌ی data یعنی ترکیب و تداعی، و code یعنی کاربرد و وراثت
-  var R = [["Library", "Catalog", "data", "مالک یکی است:"], ["Library", "Member", "data", "چند تا دارد:"], ["Library", "Librarian", "data", "چند تا دارد:"],
-    ["Catalog", "Book", "data", "چند تا دارد:"], ["Book", "Author", "data", "با چند تا تداعی می‌شود:"], ["Book", "BookItem", "data", "چند تا دارد:"],
-    ["BookItem", "BookLending", "data", "چند تا دارد:"], ["Member", "BookLending", "data", "چند تا دارد:"],
-    ["Member", "User", "code", "از آن می‌آید:"], ["Librarian", "User", "code", "از آن می‌آید:"], ["Librarian", "Member", "code", "از آن کار می‌کشد:"],
-    ["Librarian", "BookItem", "code", "از آن کار می‌کشد:"], ["Librarian", "BookLending", "code", "از آن کار می‌کشد:"], ["Member", "BookItem", "code", "از آن کار می‌کشد:"], ["Catalog", "Librarian", "code", "از آن کار می‌کشد:"]];
-  var split = {}, sel = "Member";
+  // [from, to, kind, label]: data = composition and association, code = usage and inheritance
+  var R = [["Library", "Catalog", "data", "یکی دارد:"], ["Library", "Member", "data", "چندتا دارد:"], ["Library", "Librarian", "data", "چندتا دارد:"],
+    ["Catalog", "Book", "data", "چندتا دارد:"], ["Book", "Author", "data", "با چندتا تداعی می‌شود:"], ["Book", "BookItem", "data", "چندتا دارد:"],
+    ["BookItem", "BookLending", "data", "چندتا دارد:"], ["Member", "BookLending", "data", "چندتا دارد:"],
+    ["Member", "User", "code", "از آن ارث می‌برد:"], ["Librarian", "User", "code", "از آن ارث می‌برد:"], ["Librarian", "Member", "code", "از آن استفاده می‌کند:"],
+    ["Librarian", "BookItem", "code", "از آن استفاده می‌کند:"], ["Librarian", "BookLending", "code", "از آن استفاده می‌کند:"], ["Member", "BookItem", "code", "از آن استفاده می‌کند:"], ["Catalog", "Librarian", "code", "از آن استفاده می‌کند:"]];
+  var split = {}, sel = "Member", tour;
+  function k(v) { return Kit.digits(String(v)); }
   function ent(cls, kind) { return split[cls] ? cls + (kind === "data" ? "Data" : "Code") : cls; }
   function edges() { return R.map(function (r) { return { a: ent(r[0], r[2]), b: ent(r[1], r[2]), kind: r[2], label: r[3] }; }); }
-  function entities() { var s = []; Object.keys(N).forEach(function (c) { if (split[c]) { s.push(c + "Data", c + "Code"); } else s.push(c); }); return s; }
-  function pos(e) { var base = e.replace(/(Data|Code)$/, ""); if (!N[base] || base === e) return N[e]; var p = N[base]; return e.slice(-4) === "Data" ? [p[0] - 46, p[1]] : [p[0] + 46, p[1]]; }
-  function components() { var es = entities(), parent = {}; es.forEach(function (e) { parent[e] = e; });
+  function entities() { var s = []; Object.keys(N).forEach(function (c) { if (split[c]) s.push(c + "Data", c + "Code"); else s.push(c); }); return s; }
+  function pos(e) { var base = e.replace(/(Data|Code)$/, ""); if (!N[base] || base === e) return N[e]; var p = N[base]; return e.slice(-4) === "Data" ? [p[0] - 48, p[1]] : [p[0] + 48, p[1]]; }
+  function components() {
+    var used = {}; edges().forEach(function (e) { used[e.a] = used[e.b] = 1; });
+    var es = entities().filter(function (e) { return used[e]; }), parent = {}; es.forEach(function (e) { parent[e] = e; });
     function f(x) { while (parent[x] !== x) x = parent[x] = parent[parent[x]]; return x; }
-    edges().forEach(function (e) { parent[f(e.a)] = f(e.b); }); var roots = {}; es.forEach(function (e) { roots[f(e)] = 1; }); return Object.keys(roots).length; }
+    edges().forEach(function (e) { parent[f(e.a)] = f(e.b); });
+    var roots = {}; es.forEach(function (e) { roots[f(e)] = 1; }); return Object.keys(roots).length;
+  }
+  function mine() { return edges().filter(function (e) { return e.a === sel || e.b === sel; }); }
   function render() {
     var g = Kit.clear(document.getElementById("g")), E = edges();
-    E.forEach(function (e) { var p = pos(e.a), q = pos(e.b), hot = e.a === sel || e.b === sel;
-      g.appendChild(Kit.svg("line", { class: e.kind + (hot ? " hot" : ""), x1: p[0], y1: p[1], x2: q[0], y2: q[1] })); });
-    entities().forEach(function (e) { var p = pos(e), base = e.replace(/(Data|Code)$/, ""), kind = split[base] ? (e.slice(-4) === "Data" ? "data" : "code") : "";
-      var w = split[base] ? 88 : Math.max(70, e.length * 7.5 + 12);
-      var grp = Kit.svg("g", { class: "node", tabindex: 0, role: "button", "aria-label": "کلاس " + e + (split[base] ? "" : "، برای شکستن بزنید") });
+    E.forEach(function (e) {
+      var p = pos(e.a), q = pos(e.b), hot = e.a === sel || e.b === sel;
+      g.appendChild(Kit.svg("line", { class: e.kind + (hot ? " hot" : ""), x1: p[0], y1: p[1], x2: q[0], y2: q[1] }));
+    });
+    entities().forEach(function (e) {
+      var p = pos(e), base = e.replace(/(Data|Code)$/, ""), kind = split[base] ? (e.slice(-4) === "Data" ? "data" : "code") : "";
+      var w = split[base] ? 92 : Math.max(74, e.length * 8 + 12);
+      var grp = Kit.svg("g", { class: "node" + (split[base] && !E.some(function (x) { return x.a === e || x.b === e; }) ? " iso" : ""), tabindex: 0, role: "button", "aria-label": "کلاس " + e + (split[base] ? "" : "، برای شکستن بزنید") });
       grp.appendChild(Kit.svg("rect", { class: kind + (e === sel ? " sel" : ""), x: p[0] - w / 2, y: p[1] - 13, width: w, height: 26 }));
       var t = Kit.svg("text", { x: p[0], y: p[1] }); t.textContent = e; grp.appendChild(t);
-      function act() { if (!split[base]) { split[base] = true; sel = base + "Data"; log.add("کلاس " + base + " به " + base + "Data و " + base + "Code شکست.", "ok"); } else sel = e; render(); }
-      grp.addEventListener("click", act); grp.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); act(); } });
-      g.appendChild(grp); });
-    var mine = E.filter(function (e) { return e.a === sel || e.b === sel; }), ul = Kit.clear(document.getElementById("rels"));
-    mine.forEach(function (e) { ul.appendChild(Kit.el("li", null, "رابطه‌ی " + KIND[e.kind] + " — " + e.a + " " + e.label + " " + e.b)); });
-    if (!mine.length) ul.appendChild(Kit.el("li", null, "هیچ رابطه‌ای نیست."));
-    var nsplit = Object.keys(split).length, comps = components(), counts = {}; E.forEach(function (e) { counts[e.a] = (counts[e.a] || 0) + 1; counts[e.b] = (counts[e.b] || 0) + 1; });
+      function act() {
+        var msg;
+        if (!split[base]) { split[base] = true; sel = base + "Data"; msg = "کلاس " + base + " به " + base + "Data و " + base + "Code شکست. " + verdict(); }
+        else { sel = e; msg = "رابطه‌های " + e + ": " + k(mine().length) + "."; }
+        render(); tour.free(msg, components() > 1 ? "ok" : "");
+      }
+      grp.addEventListener("click", act);
+      grp.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); act(); } });
+      g.appendChild(grp);
+    });
+    var M = mine(), ul = Kit.clear(document.getElementById("rels"));
+    document.getElementById("rt").textContent = "رابطه‌های " + sel + " (" + k(M.length) + ")";
+    M.forEach(function (e) { ul.appendChild(Kit.el("li", { class: e.kind }, Kit.el("span", { class: "k" }, KIND[e.kind] + ": "), e.a + " " + e.label + " " + e.b)); });
+    if (!M.length) ul.appendChild(Kit.el("li", null, "رابطه‌ای ندارد."));
+    var comps = components(), counts = {};
+    E.forEach(function (e) { counts[e.a] = (counts[e.a] || 0) + 1; counts[e.b] = (counts[e.b] || 0) + 1; });
     var maxRel = Math.max.apply(null, entities().map(function (e) { return counts[e] || 0; }));
-    document.getElementById("g").setAttribute("aria-label", "شمار " + entities().length + " entity و " + E.length + " رابطه و " + comps + " بخش مستقل");
-    var v = document.getElementById("verdict"); v.className = "callout " + (comps > 1 ? "ok" : "");
-    v.textContent = nsplit === Object.keys(N).length ? "هر کلاسی شکست: " + comps + " بخش مستقل، یکی تنها از entityهای داده و یکی تنها از entityهای کد." : comps > 1 ? comps + " بخش مستقل." : "همه چیز به هم وصل است: برای فهم هر کلاسی شاید به همه‌ی بقیه نیاز داشته باشید.";
-    stats([["entityها", entities().length], ["رابطه‌های " + sel, mine.length], ["بیشترین رابطه روی یک entity", maxRel], ["بخش‌های مستقل", comps, comps > 1 ? "ok" : ""]]);
+    document.getElementById("g").setAttribute("aria-label", k(entities().length) + " entity، " + k(E.length) + " رابطه و " + k(comps) + " بخش مستقل");
+    var st = Kit.clear(document.getElementById("stats"));
+    [["entityها", k(entities().length), ""], ["رابطه‌های " + sel, k(M.length), ""], ["بیشترین رابطه‌ی یک entity", k(maxRel), maxRel >= 5 ? "warn" : ""], ["بخش‌های مستقل", k(comps), comps > 1 ? "ok" : "bad"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
   }
-  document.getElementById("splitAll").addEventListener("click", function () { Object.keys(N).forEach(function (c) { split[c] = true; }); sel = "MemberData"; log.add("هر کلاسی شکست (شکل ۱.۱۳).", "ok"); render(); });
-  document.getElementById("member").addEventListener("click", function () { split = { Member: true }; sel = "MemberData"; log.add("تنها Member شکست: شکل ۱.۱۲.", "muted"); render(); });
-  document.getElementById("rs").addEventListener("click", function () { split = {}; sel = "Member"; log.add("کلاس‌ها باز درهم شدند: کد و داده قاطی.", "muted"); render(); });
-  render();
+  function verdict() {
+    var c = components();
+    if (Object.keys(split).length === Object.keys(N).length) return "همه‌ی کلاس‌ها شکستند: " + k(c) + " بخش مستقل، یکی فقط از entityهای داده و دیگری فقط از entityهای کد.";
+    return c > 1 ? k(c) + " بخش مستقل." : "همه چیز هنوز به هم وصل است.";
+  }
+  document.getElementById("splitAll").addEventListener("click", function () { Object.keys(N).forEach(function (c) { split[c] = true; }); sel = "MemberData"; render(); tour.free(verdict() + " (شکل ۱.۱۳)", "ok"); });
+  document.getElementById("member").addEventListener("click", function () { split = { Member: true }; sel = "MemberData"; render(); tour.free("فقط Member شکست، مثل شکل ۱.۱۲.", ""); });
+  document.getElementById("rs").addEventListener("click", function () { split = {}; sel = "Member"; render(); tour.free("کلاس‌ها دوباره درهم شدند: کد و داده قاطی‌اند.", ""); });
+
+  /* ---------- the scenario ---------- */
+  function scene(list, s) { return function () { split = {}; list.forEach(function (c) { split[c] = true; }); sel = s; }; }
+  var ALL = Object.keys(N);
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: scene([], "Member"), render: render, interval: 7000,
+    intro: "هر جعبه یک کلاس سیستم کتابخانه‌ی تئو است. خط آبی رابطه‌ی داده است و خط‌چین نارنجی رابطه‌ی کد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید یا روی کلاس‌ها کلیک کنید تا یکی‌یکی بشکنند.",
+    steps: [
+      { kind: "bad", run: scene([], "Member"), say: function () { return "طراحی قاطی: کلاس Member در " + k(mine().length) + " رابطه شریک است و کل نمودار یک تکه است. برای فهمیدن یک کلاس شاید لازم شود بقیه را هم بفهمید (ص. ۱۵)."; } },
+      { kind: "", run: scene(["Member"], "MemberData"), say: function () { return "حالا Member به دو entity شکسته است (شکل ۱.۱۲، ص. ۱۵). سهم MemberData فقط " + k(mine().length) + " رابطه‌ی داده است."; } },
+      { kind: "", run: scene(["Member"], "MemberCode"), say: function () { return "سه رابطه‌ی دیگر به MemberCode می‌رسد: " + k(mine().length) + " رابطه‌ی کد. هر نیمه ساده‌تر از کل است."; } },
+      { kind: "ok", run: scene(ALL, "MemberData"), say: function () { return "همه‌ی کلاس‌ها شکستند (شکل ۱.۱۳، ص. ۱۶). نمودار حالا " + k(components()) + " بخش مستقل دارد و هیچ رابطه‌ای از بخش داده به بخش کد نمی‌رود."; } },
+      { kind: "ok", run: scene(ALL, "LibrarianCode"), say: function () { return "همه‌ی رابطه‌های LibrarianCode، یعنی " + k(mine().length) + " رابطه، رابطه‌ی کدند. می‌شود کد را بدون فکر کردن به داده فهمید؛ این نتیجه‌ی منطقی جدایی است (ص. ۱۶)."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "در طرح قاطی، کلاس Member در چند رابطه شریک است؟",

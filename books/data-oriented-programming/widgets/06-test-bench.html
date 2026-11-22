@@ -6,13 +6,33 @@
 <title>میز تست</title>
 <meta name="description" content="موردهای تست جست‌وجوی فصل ۶ را اجرا کنید، خروجی‌ها را به‌شکل رشته یا داده‌ی بازشده بسنجید، ترتیب فیلدهای خروجی سریالی را به هم بزنید، و مورد تمام‌حرف‌کوچک را بیفزایید تا آن اشکال را بیابید و درست کنید. تصویری از فصل ۶ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; } table.cases td { font-family: var(--mono); font-size: .78rem; vertical-align: top; direction: ltr; text-align: left; } table.cases th { text-align: right; } table.cases td.pass { color: var(--ok); } table.cases td.fail { color: var(--bad); font-weight: 600; direction: rtl; text-align: right; }
+<style>
+  /* Test cases as rows: query, verdict, then expected and actual output; the code under test beside them. */
+  .tb-wrap { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .tb-wrap h3 { font-size: .86rem; margin: 0 0 6px; }
+  .tb-cases { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .tb-wrap > div { min-width: 0; }
+  .tb-case { min-width: 0; border: 1px solid var(--line); border-inline-start: 4px solid var(--ok); border-radius: var(--radius-sm); padding: 5px 9px; background: var(--surface); }
+  .tb-case.fail { border-inline-start-color: var(--bad); }
+  .tb-case.false { border-inline-start-color: var(--warn); }
+  .tb-case .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .84rem; }
+  .tb-q { font-weight: 700; direction: ltr; }
+  .tb-v { font-size: .76rem; font-weight: 600; }
+  .tb-v.ok { color: var(--ok); } .tb-v.bad { color: var(--bad); } .tb-v.warn { color: var(--warn); }
+  .tb-line { direction: ltr; text-align: left; font-size: .7rem; line-height: 1.4; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-line b { color: var(--ink); font-weight: 600; }
+  .tb-line .k1 { background: var(--accent-soft); border-radius: 2px; padding: 0 2px; }
+  .tb-code { font-size: .7rem; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 7px 9px; margin: 0 0 8px; direction: ltr; text-align: left; overflow: hidden; line-height: 1.45; }
+  .tb-code .hl { background: var(--ok-soft); display: inline-block; width: 100%; }
+  .tb-code .hl2 { background: var(--accent-soft); display: inline-block; width: 100%; }
+  .tb-note { font-size: .76rem; color: var(--ink-2); line-height: 1.6; }
+  .tweak-group label.cb { display: flex; gap: 6px; align-items: center; font-size: .84rem; margin: 3px 0; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/06-unit-tests.html">فصل ۶</a><span aria-hidden="true">/</span>
@@ -23,81 +43,132 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۶ · تست‌های unit</div>
-  <h1>میز تست</h1>
-  <p class="lede">هر موردی از تست در DOP سه قدم است: ساختن <code>dataIn</code>، ساختن <code>dataOut</code>، و سنجیدن <code>f(dataIn)</code> با <code>dataOut</code> از راه <code>_.isEqual</code>. برای تابعی که JSON برمی‌گرداند، <strong>داده را بسنجید، نه رشته‌ها را</strong>: همان یک داده می‌تواند با فیلدهایش به هر ترتیبی سریالی شود.</p>
-  <p class="source-note">تصویری از بخش‌های ۶.۱ و ۶.۳ (listingهای ۶.۱ و ۶.۲ و ۶.۱۲ تا ۶.۲۰، صص. ۱۱۱–۱۲۵): تابع <code>_.isEqual</code>، سنجیدن JSON بازشده، و آن پرسش حرف‌کوچک که اشکالی را می‌یابد. کتاب دوم و کلید ترتیب فیلد مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>میز تست</h1>
+      <p class="lede">هر مورد تست در DOP سه قدم دارد: ساختن <code>dataIn</code>، ساختن <code>dataOut</code> و مقایسه‌ی <code dir=ltr>f(dataIn)</code> با <code>dataOut</code> به کمک <code dir=ltr>_.isEqual</code>. اگر تابع JSON برمی‌گرداند، <strong>داده را مقایسه کنید، نه رشته را</strong>: یک داده را می‌شود با هر ترتیبی از فیلدها سریالی کرد.</p>
+      <p class="source-note">تصویری از بخش‌های ۶.۲ و ۶.۳ (صص. ۱۱۸–۱۲۵): مقایسه با <code dir=ltr>_.isEqual</code> (ص. ۱۱۸)، دو رشته‌ی متفاوت برای یک داده (listing ۶.۱۳، ص. ۱۲۲)، مقایسه بعد از <code dir=ltr>JSON.parse</code> (listing ۶.۱۵، ص. ۱۲۳) و مورد «watchmen» با حروف کوچک و اصلاح آن (listingهای ۶.۱۸ و ۶.۱۹، ص. ۱۲۵). کتاب دوم و مورد Habits از vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">موردهای تست برای searchBooksByTitleJSON</p><div class="table-wrap"><table class="cases" id="cases"></table></div>
-        <div class="callout" id="verdict" style="margin-top:8px"></div></div>
-      <div class="panel"><p class="panel-title">کد زیر تست</p><pre class="code" id="code"></pre></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="cmp"></div>
-        <label style="display:flex;gap:6px;margin-top:10px"><input type="checkbox" id="shuffle"> سریالی‌کننده فیلدها را به ترتیبی دیگر می‌دهد</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="lower"> افزودن مورد تمام‌حرف‌کوچک، چالش جو</label>
-        <label style="display:flex;gap:6px"><input type="checkbox" id="fix"> پیاده کردن چاره‌ی تئو: حرف‌کوچک کردن پرسش و عنوان</label>
-        <button class="btn primary" id="run" type="button" style="margin-top:8px">اجرای تست‌ها</button></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="tb-wrap">
+          <div>
+            <h3>موردهای تست برای searchBooksByTitleJSON</h3>
+            <div class="tb-cases" id="cases" aria-live="polite"></div>
+          </div>
+          <div>
+            <h3>کد زیر تست و خط مقایسه</h3>
+            <div class="tb-code mono" id="code"></div>
+            <p class="tb-note">در هر مورد، خط اول خروجی مورد انتظار است و خط دوم خروجی واقعی. اولین فیلد هر شیء رنگی است تا ترتیب فیلدها دیده شود.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">نتیجه‌ی تست‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="cmp"></div>
+        <div class="tweak-group">
+          <label class="cb"><input type="checkbox" id="shuffle"> سریالی‌کننده ترتیب فیلدها را عوض می‌کند</label>
+          <label class="cb"><input type="checkbox" id="lower"> افزودن مورد «watchmen» با حروف کوچک</label>
+          <label class="cb"><input type="checkbox" id="fix"> اصلاح تئو: query و عنوان با حروف کوچک</label>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>سنجش رشته‌ای به دلیل غلط شکست می‌خورد</strong>: ترتیب فیلدهای خروجی سریالی را عوض کنید و داده‌ی یکسان دیگر برابر نمی‌سنجد. با <code>JSON.parse</code> بازش کنید، بعد با <code>_.isEqual</code> بسنجید.</li>
-    <li><strong>مورد حرف‌کوچک به دلیل درست شکست می‌خورد</strong>: تابع <code>includes</code> به بزرگی و کوچکی حرف حساس است. یافتن آن اشکال هدف همان تست است.</li>
-    <li><strong>آن چاره کد را عوض می‌کند، نه تست‌ها را</strong>: هر دو پرسش و عنوان را حرف‌کوچک کنید، و هر موردی در هر دو حالت سنجش رد می‌شود.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>مقایسه‌ی رشته به دلیل غلط شکست می‌خورد:</strong> ترتیب فیلدها را در خروجی عوض کنید؛ داده همان است ولی رشته‌ها برابر نیستند. اول با <code dir=ltr>JSON.parse</code> باز کنید و بعد با <code dir=ltr>_.isEqual</code> مقایسه کنید.</li>
+      <li><strong>مورد حروف کوچک به دلیل درست شکست می‌خورد:</strong> <code>includes</code> به بزرگی و کوچکی حرف حساس است. پیدا کردن همین bug هدف تست است.</li>
+      <li><strong>اصلاح، کد را عوض می‌کند نه تست را:</strong> query و عنوان هر دو با حروف کوچک مقایسه می‌شوند و همه‌ی موردها در هر دو حالت مقایسه رد می‌شوند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/06-unit-tests.html"><small>درس</small>فصل ۶: تست‌های unit</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/06-unit-tests.html"><small>درس</small>فصل ۶: تست‌های unit</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), cmp = "data";
   var BOOKS = [{ isbn: "978-1779501127", title: "Watchmen", authorIds: ["alan-moore", "dave-gibbons"] }, { isbn: "978-1982137274", title: "7 Habits of Highly Effective People", authorIds: ["sean-covey", "stephen-covey"] }];
   var NAMES = { "alan-moore": "Alan Moore", "dave-gibbons": "Dave Gibbons", "sean-covey": "Sean Covey", "stephen-covey": "Stephen Covey" };
+  var cfg = { cmp: "string", shuffle: false, lower: false, fix: false }, tour;
   function info(b) { return { title: b.title, isbn: b.isbn, authorNames: b.authorIds.map(function (a) { return NAMES[a]; }) }; }
-  function stringify(x) { if (!document.getElementById("shuffle").checked) return JSON.stringify(x); return JSON.stringify(x.map(function (o) { return { isbn: o.isbn, authorNames: o.authorNames, title: o.title }; })); }
-  function search(q) { var fix = document.getElementById("fix").checked; return stringify(BOOKS.filter(function (b) { return fix ? b.title.toLowerCase().includes(q.toLowerCase()) : b.title.includes(q); }).map(info)); }
-  function isEqual(a, b) { return JSON.stringify(canon(a)) === JSON.stringify(canon(b)); }
+  function stringify(x) { return JSON.stringify(cfg.shuffle ? x.map(function (o) { return { isbn: o.isbn, authorNames: o.authorNames, title: o.title }; }) : x); }
+  function search(q) { return stringify(BOOKS.filter(function (b) { return cfg.fix ? b.title.toLowerCase().includes(q.toLowerCase()) : b.title.includes(q); }).map(info)); }
   function canon(x) { if (Array.isArray(x)) return x.map(canon); if (x && typeof x === "object") { var o = {}; Object.keys(x).sort().forEach(function (k) { o[k] = canon(x[k]); }); return o; } return x; }
-  function cases() { var c = [["Watchmen", [info(BOOKS[0])]], ["Batman", []], ["Habits", [info(BOOKS[1])]]]; if (document.getElementById("lower").checked) c.push(["watchmen", [info(BOOKS[0])]]); return c; }
-  function run(quiet) { var t = Kit.clear(document.getElementById("cases")); t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["پرسش", "چشم‌داشته یا dataOut", "خروجی", "داوری"].map(function (h) { return Kit.el("th", null, h); }))));
-    var tb = Kit.el("tbody"), pass = 0, fail = 0, falseFail = 0;
-    cases().forEach(function (c) { var out = search(c[0]), ok = cmp === "string" ? out === JSON.stringify(c[1]) : isEqual(JSON.parse(out), c[1]), sameData = isEqual(JSON.parse(out), c[1]);
-      if (ok) pass++; else { fail++; if (sameData) falseFail++; }
-      tb.appendChild(Kit.el("tr", null, Kit.el("td", null, JSON.stringify(c[0])), Kit.el("td", null, JSON.stringify(c[1])), Kit.el("td", null, out), Kit.el("td", { class: ok ? "pass" : "fail" }, ok ? "✓ رد شد" : sameData ? "✗ شکست، با همان داده!" : "✗ شکست"))); });
-    t.appendChild(tb);
-    var v = document.getElementById("verdict"); v.className = "callout " + (fail ? (falseFail === fail ? "warn" : "bad") : "ok");
-    v.textContent = !fail ? "هر " + pass + " مورد رد می‌شود." : falseFail === fail ? falseFail + " مورد تنها از آن شکست می‌خورد که فیلدها به ترتیبی دیگرند: در عوض داده‌ی بازشده را بسنجید." : (fail - falseFail) + " شکست واقعی: آن جست‌وجو به بزرگی و کوچکی حرف حساس است.";
-    document.getElementById("code").textContent = "Catalog.searchBooksByTitle = function(catalogData, query) {\n  var allBooks = _.get(catalogData, \"booksByIsbn\");\n" + (document.getElementById("fix").checked ? "  var queryLowerCased = query.toLowerCase();\n  var matchingBooks = _.filter(allBooks, function(book) {\n    return _.get(book, \"title\").toLowerCase().includes(queryLowerCased);\n  });" : "  var matchingBooks = _.filter(allBooks, function(book) {\n    return _.get(book, \"title\").includes(query);\n  });") + "\n  return _.map(matchingBooks, function(book) { return Catalog.bookInfo(catalogData, book); });\n};\n\n// test: " + (cmp === "string" ? "resultJSON === expectedJSON" : "_.isEqual(JSON.parse(resultJSON), expectedResults)");
-    if (!quiet) log.add(pass + " رد شد و " + fail + " شکست خورد (" + (cmp === "string" ? "سنجش رشته‌ای" : "سنجش داده‌ای") + ").", fail ? "bad" : "ok");
-    stats([["موردها", pass + fail], ["ردشده", pass, "ok"], ["شکست‌خورده", fail, fail ? "bad" : ""], ["شکست‌های کاذب", falseFail, falseFail ? "warn" : ""]]); }
-  document.getElementById("cmp").appendChild(Kit.segmented({ label: "سنجیدن", value: cmp, options: [{ value: "string", label: "به‌شکل رشته" }, { value: "data", label: "به‌شکل داده‌ی بازشده" }], onChange: function (v) { cmp = v; run(); } }).element);
-  ["shuffle", "lower", "fix"].forEach(function (id) { document.getElementById(id).addEventListener("change", function () { run(); }); });
-  document.getElementById("run").addEventListener("click", function () { run(); });
-  run(true);
+  function isEqual(a, b) { return JSON.stringify(canon(a)) === JSON.stringify(canon(b)); }
+  function cases() { var c = [["Watchmen", [info(BOOKS[0])]], ["Batman", []], ["Habits", [info(BOOKS[1])]]]; if (cfg.lower) c.push(["watchmen", [info(BOOKS[0])]]); return c; }
+  function line(label, str) {
+    var m = str.match(/^\[\{"(\w+)"/), el = Kit.el("div", { class: "tb-line mono" }, Kit.el("b", null, label + " "));
+    if (m) { el.appendChild(document.createTextNode('[{')); el.appendChild(Kit.el("span", { class: "k1" }, '"' + m[1] + '"')); el.appendChild(document.createTextNode(str.slice(m[0].length))); }
+    else el.appendChild(document.createTextNode(str));
+    el.title = str; return el;
+  }
+  function results() {
+    return cases().map(function (c) { var out = search(c[0]), same = isEqual(JSON.parse(out), c[1]), ok = cfg.cmp === "string" ? out === JSON.stringify(c[1]) : same; return { q: c[0], exp: JSON.stringify(c[1]), out: out, ok: ok, falseFail: !ok && same }; });
+  }
+  function render() {
+    var R = results(), box = Kit.clear(document.getElementById("cases")), pass = 0, fail = 0, ff = 0;
+    R.forEach(function (r) {
+      if (r.ok) pass++; else { fail++; if (r.falseFail) ff++; }
+      box.appendChild(Kit.el("div", { class: "tb-case" + (r.ok ? "" : r.falseFail ? " false" : " fail") },
+        Kit.el("div", { class: "top" }, Kit.el("span", { class: "tb-q mono" }, JSON.stringify(r.q)),
+          Kit.el("span", { class: "tb-v " + (r.ok ? "ok" : r.falseFail ? "warn" : "bad") }, r.ok ? "✓ رد شد" : r.falseFail ? "✗ شکست کاذب: داده یکی است" : "✗ شکست واقعی")),
+        line("expected", r.exp), line("actual  ", r.out)));
+    });
+    var code = Kit.clear(document.getElementById("code"));
+    function ln(t, cls) { code.appendChild(cls ? Kit.el("span", { class: cls }, t) : document.createTextNode(t)); code.appendChild(document.createTextNode("\n")); }
+    ln("Catalog.searchBooksByTitle = function(catalogData, query) {");
+    ln('  var allBooks = _.get(catalogData, "booksByIsbn");');
+    if (cfg.fix) { ln("  var q = query.toLowerCase();", "hl"); ln("  var matching = _.filter(allBooks, function(book) {"); ln('    return _.get(book, "title").toLowerCase().includes(q);', "hl"); }
+    else { ln("  var matching = _.filter(allBooks, function(book) {"); ln('    return _.get(book, "title").includes(query);'); }
+    ln("  });"); ln("  return _.map(matching, book => Catalog.bookInfo(catalogData, book));"); ln("};"); ln("");
+    ln(cfg.cmp === "string" ? "// test: resultJSON === expectedJSON" : "// test: _.isEqual(JSON.parse(resultJSON), expected)", "hl2");
+    var s = Kit.clear(document.getElementById("stats"));
+    [["موردها", pass + fail, ""], ["رد شده", pass, "ok"], ["شکست واقعی", fail - ff, fail - ff ? "bad" : ""], ["شکست کاذب", ff, ff ? "warn" : ""]].forEach(function (x) {
+      s.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
+    });
+    seg.set(cfg.cmp); ["shuffle", "lower", "fix"].forEach(function (k) { document.getElementById(k).checked = cfg[k]; });
+  }
+  function summary() { var R = results(), f = R.filter(function (r) { return !r.ok; }), ff = f.filter(function (r) { return r.falseFail; }).length;
+    return !f.length ? "همه‌ی " + Kit.digits(String(R.length)) + " مورد رد می‌شوند." : Kit.digits(String(f.length - ff)) + " شکست واقعی و " + Kit.digits(String(ff)) + " شکست کاذب."; }
+  var seg = Kit.segmented({ label: "مقایسه", value: cfg.cmp, options: [{ value: "string", label: "رشته با رشته" }, { value: "data", label: "داده بعد از JSON.parse" }],
+    onChange: function (v) { cfg.cmp = v; render(); tour.free(summary(), ""); } });
+  document.getElementById("cmp").appendChild(seg.element);
+  ["shuffle", "lower", "fix"].forEach(function (k) { document.getElementById(k).addEventListener("change", function (e) { cfg[k] = e.target.checked; render(); tour.free(summary(), ""); }); });
+
+  /* ---------- the scenario ---------- */
+  function set(cmp, shuffle, lower, fix) { return function () { cfg.cmp = cmp; cfg.shuffle = shuffle; cfg.lower = lower; cfg.fix = fix; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: set("string", false, false, false), render: render, interval: 8000,
+    intro: "هر کارت یک مورد تست است: query، نتیجه، خروجی مورد انتظار و خروجی واقعی. کد زیر تست و خط مقایسه کنار آن است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و حالت مقایسه، ترتیب فیلدها و اصلاح کد را عوض کنید.",
+    steps: [
+      { kind: "ok", run: set("string", false, false, false), say: "اولین فکر تئو: خروجی JSON را با رشته‌ی مورد انتظار مقایسه کن (ص. ۱۲۲). فعلاً همه رد می‌شوند، چون فیلدها اتفاقاً به همان ترتیب سریالی شده‌اند." },
+      { kind: "warn", run: set("string", true, false, false), say: "حالا سریالی‌کننده فیلدها را با ترتیب دیگری می‌نویسد. داده همان است ولی رشته فرق دارد و تست‌ها شکست می‌خورند. کتاب همین را با دو رشته برای یک داده نشان می‌دهد (listing ۶.۱۳، ص. ۱۲۲)." },
+      { kind: "ok", run: set("data", true, false, false), say: "راه درست: خروجی را با JSON.parse باز کن و داده را با _.isEqual مقایسه کن (listing ۶.۱۵، ص. ۱۲۳). ترتیب فیلدها دیگر مهم نیست و همه رد می‌شوند." },
+      { kind: "bad", run: set("data", true, true, false), say: "جو می‌پرسد: مورد query با حروف کوچک چه؟ «watchmen» شکست می‌خورد (ص. ۱۲۵). این شکست واقعی است، چون includes به بزرگی و کوچکی حرف حساس است." },
+      { kind: "ok", run: set("data", true, true, true), say: "اصلاح تئو (listing ۶.۱۹، ص. ۱۲۵): query و عنوان هر دو با حروف کوچک مقایسه می‌شوند. کد عوض شد و تست‌ها نه، و حالا همه رد می‌شوند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا خروجی searchBooksByTitleJSON را با رشته‌ای چشم‌داشته نسنجیم؟",

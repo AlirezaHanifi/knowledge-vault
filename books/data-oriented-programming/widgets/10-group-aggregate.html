@@ -3,95 +3,151 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>گروه و گرد</title>
+<title>گروه‌بندی و تجمیع</title>
 <meta name="description" content="از groupBy و aggregateField قدم‌به‌قدم بگذرید تا سه ردیف یک join از کتاب‌ها و نویسنده‌ها را به دو کتاب با نام نویسنده‌هایشان بدل کنید، بعد ردیف بیفزایید و ببینید همان یک کد عمومی می‌چرخاندشان. تصویری از فصل ۱۰ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
-  #st { direction: rtl; }
+<style>
+  /* Figure 10.3 as three columns: SQL rows, rows grouped by ISBN, one aggregated map per book. */
+  .ga-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) minmax(0, 1.35fr); gap: 12px; }
+  .ga-col h3 { margin: 0 0 6px; font-size: .86rem; display: flex; gap: 6px; align-items: baseline; }
+  .ga-col h3 code { font-size: .74rem; color: var(--ink-3); font-weight: 400; }
+  .ga-col.off { opacity: .28; }
+  .ga-card { font-family: var(--mono); font-size: .68rem; line-height: 1.4; direction: ltr; text-align: left; border: 1px solid var(--line); border-inline-start: 4px solid var(--line-strong); border-radius: 4px; padding: 3px 7px; margin-bottom: 5px; background: var(--surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ga-card div { overflow: hidden; text-overflow: ellipsis; }
+  .ga-card.b0 { border-left-color: var(--s1); } .ga-card.b1 { border-left-color: var(--s2); } .ga-card.b2 { border-left-color: var(--s4); }
+  .ga-card .k { color: var(--ink-3); } .ga-card .gone { text-decoration: line-through; color: var(--bad); } .ga-card .new { background: var(--ok-soft); color: var(--ok); font-weight: 700; padding: 0 3px; border-radius: 3px; }
+  .ga-group { border: 1.5px dashed var(--line-strong); border-radius: var(--radius-sm); padding: 6px; margin-bottom: 8px; }
+  .ga-group.focus, .ga-card.focus { outline: 2.5px solid var(--warn); outline-offset: 1px; }
+  .ga-key { font-family: var(--mono); font-size: .72rem; direction: ltr; text-align: left; margin-bottom: 4px; font-weight: 700; }
+  .ga-key.dropped { text-decoration: line-through; color: var(--ink-3); font-weight: 400; }
+  .ga-code { margin: 6px 0 0; font-family: var(--mono); font-size: .68rem; line-height: 1.55; direction: ltr; text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px; white-space: pre; overflow: hidden; }
+  .ga-code span { display: block; } .ga-code span.hl { background: var(--warn-soft); box-shadow: inset 3px 0 0 var(--warn); }
+  .tweak-group .btn { margin: 0 0 6px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/10-database-operations.html">فصل ۱۰</a><span aria-hidden="true">/</span>
-      <span aria-current="page">گروه و گرد</span>
+      <span aria-current="page">گروه‌بندی و تجمیع</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۰ · عملیات پایگاه داده</div>
-  <h1>گروه و گرد</h1>
-  <p class="lede">هر joinی برای هر جفت کتاب <em>و نویسنده</em> یک ردیف برمی‌گرداند: سه ردیف برای دو کتاب. جو آن‌ها را در برنامه با دو تابع عمومی از نو شکل می‌دهد: <code>_.groupBy</code> روی ISBN، بعد <code>aggregateField</code> که <code>author_name</code> را در <code>authorNames</code> گرد می‌کند و ردیف نخست را پایه نگه می‌دارد.</p>
-  <p class="source-note">تصویری از بخش ۱۰.۴ (listingهای ۱۰.۱۷ تا ۱۰.۲۶، جدول ۱۰.۶، شکل ۱۰.۳، صص. ۲۱۱–۲۱۸). ردیف‌ها از جدول ۱۰.۶‌اند؛ و ردیف‌های افزوده مال vault. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>گروه‌بندی و تجمیع</h1>
+      <p class="lede">یک join برای هر جفت کتاب و نویسنده یک ردیف برمی‌گرداند: سه ردیف برای دو کتاب. جو داده را در خود برنامه با دو تابع عمومی دوباره شکل می‌دهد: <code>_.groupBy</code> روی ISBN، بعد <code>aggregateField</code> که <code>author_name</code>ها را در <code>authorNames</code> جمع می‌کند.</p>
+      <p class="source-note">تصویری از بخش ۱۰.۴ (listingهای ۱۰.۱۷ تا ۱۰.۲۶، جدول ۱۰.۶ و شکل ۱۰.۳، صص. ۲۱۱–۲۱۸). ردیف‌ها از جدول ۱۰.۶ آمده‌اند و ردیف‌های اضافه از vault است. پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="st">مرحله</p><pre class="code" id="out"></pre><div class="callout" id="verdict"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="pl"></div>
-        <button class="btn" id="addA" type="button" style="margin-top:8px">افزودن هم‌نویسنده‌ای به The Power of Habit</button>
-        <button class="btn" id="addB" type="button">افزودن کتابی با یک نویسنده</button>
-        <button class="btn" id="rs" type="button">↺ ردیف‌های جدول ۱۰.۶</button></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="ga-cols">
+            <div class="ga-col" id="c0"><h3>۱. ردیف‌های SQL <code>sqlRows</code></h3><div id="rows"></div></div>
+            <div class="ga-col" id="c1"><h3>۲. گروه‌بندی <code>_.groupBy(…, "isbn")</code></h3><div id="groups"></div></div>
+            <div class="ga-col" id="c2"><h3>۳. تجمیع <code>aggregateField</code></h3><div id="out"></div><pre class="ga-code mono" id="code" aria-label="کد"></pre></div>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارش</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="stg"></div>
+        <div class="tweak-group">
+          <button class="btn" id="addA" type="button">یک نویسنده‌ی دیگر برای The Power of Habit</button>
+          <button class="btn" id="addB" type="button">یک کتاب تک‌نویسنده</button>
+          <button class="btn" id="rs" type="button">↺ ردیف‌های جدول ۱۰.۶</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>تابع <code>groupBy</code> mapی برمی‌گرداند</strong> از ISBN به ردیف‌های آن کتاب؛ و آن کلیدها بعد لازم نیستند، پس <code>_.values</code> تنها دسته‌ها را نگه می‌دارد.</li>
-    <li><strong>تابع <code>aggregateField</code> عمومی است</strong>: عبارت <code>aggregateFields(rows, "isbn", "author_name", "authorNames")</code> هر فیلدی از هر entityی را گرد می‌کرد.</li>
-    <li><strong>افزودن ردیف هیچ چیز را در کد عوض نمی‌کند</strong>: هم‌نویسنده‌ای تازه یک فهرست را درازتر می‌کند، و کتابی تازه یک دسته می‌افزاید.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>تابع <code>groupBy</code> یک map برمی‌گرداند</strong> از ISBN به ردیف‌های آن کتاب. کلیدها بعداً لازم نیستند، پس <code>_.values</code> فقط گروه‌ها را نگه می‌دارد.</li>
+      <li><strong>تابع <code>aggregateField</code> عمومی است:</strong> ردیف اول را پایه می‌گیرد، فیلد جمع‌شده را اضافه و فیلد قدیمی را حذف می‌کند. همین تابع هر فیلدی از هر entity را جمع می‌کند.</li>
+      <li><strong>ردیف تازه کد را عوض نمی‌کند:</strong> یک نویسنده‌ی تازه فقط یک فهرست را بلندتر می‌کند و یک کتاب تازه یک گروه اضافه می‌کند.</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/10-database-operations.html"><small>درس</small>فصل ۱۰: عملیات پایگاه داده</a></li>
-    <li><a href="../lab/10-rows-as-maps/README.md"><small>آزمایش</small>ردیف‌ها به‌شکل map در SQLite</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/10-database-operations.html"><small>درس</small>فصل ۱۰: عملیات پایگاه داده</a></li>
+      <li><a href="../lab/10-rows-as-maps/README.md"><small>آزمایش</small>ردیف‌ها به‌شکل map در SQLite</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), stage, rows;
   var BASE = [{ title: "7 Habits of Highly Effective People", isbn: "978-1982137274", author_name: "Sean Covey" }, { title: "7 Habits of Highly Effective People", isbn: "978-1982137274", author_name: "Stephen Covey" }, { title: "The Power of Habit", isbn: "978-0812981605", author_name: "Charles Duhigg" }];
+  var rows, stage = 0, detail = false, tour, stg;
+  var CODE_ALL = ["function aggregateFields(rows, idFieldName,", "    fieldName, aggregateFieldName) {", "  var groupedRows =", "    _.values(_.groupBy(rows, idFieldName));", "  return _.map(groupedRows, function(groupedRows) {", "    return aggregateField(groupedRows,", "      fieldName, aggregateFieldName);", "  });", "}"];
+  var CODE_ONE = ["function aggregateField(rows, fieldName,", "    aggregateFieldName) {", "  var aggregatedValues = _.map(rows, fieldName);", "  var firstRow = _.nth(rows, 0);", "  var firstRowWithAggregatedValues = _.set(firstRow,", "    aggregateFieldName, aggregatedValues);", "  return _.omit(firstRowWithAggregatedValues,", "    fieldName);", "}"];
   function groupBy(c, k) { var g = {}; c.forEach(function (r) { (g[r[k]] = g[r[k]] || []).push(r); }); return g; }
-  function aggregateField(rs, f, af) { var names = rs.map(function (r) { return r[f]; }), b = Object.assign({}, rs[0]); b[af] = names; delete b[f]; return b; }
-  var STAGES = ["sqlRows (جدول ۱۰.۶)", "_.groupBy(sqlRows, \"isbn\")", "_.values(groups)", "_.map(groups, rows => aggregateField(rows, \"author_name\", \"authorNames\"))"];
-  function render() { var g = groupBy(rows, "isbn"), vals = Object.values(g), res = vals.map(function (r) { return aggregateField(r, "author_name", "authorNames"); });
-    var out = [rows, g, vals, res][stage];
-    document.getElementById("st").textContent = "مرحله‌ی " + (stage + 1) + " از ۴: " + STAGES[stage];
-    document.getElementById("out").textContent = JSON.stringify(out, null, 2);
-    var v = document.getElementById("verdict"); v.className = "callout " + (stage === 3 ? "ok" : "");
-    v.textContent = stage === 3 ? rows.length + " ردیف به " + res.length + " کتاب بدل شد." : "قدم بزنید تا از نو شکل بگیرد.";
-    stats([["ردیف‌ها", rows.length], ["دسته‌ها", vals.length], ["کتاب‌های بیرون", stage === 3 ? res.length : "—"]]); }
-  function reset() { rows = BASE.slice(); stage = 0; render(); }
-  var pl = Kit.player({ mount: document.getElementById("pl"), interval: 1100, step: function () { if (stage >= 3) return false; stage++; log.add(STAGES[stage], "muted"); render(); return stage < 3; }, reset: function () { stage = 0; render(); log.add("بازگشت به ردیف‌های SQL.", "muted"); } });
-  document.getElementById("addA").addEventListener("click", function () { rows.push({ title: "The Power of Habit", isbn: "978-0812981605", author_name: "A. Co-Author" }); stage = 0; render(); log.add("ردیفی افزوده شد: The Power of Habit · A. Co-Author، مال vault.", "ok"); });
-  document.getElementById("addB").addEventListener("click", function () { rows.push({ title: "Watchmen", isbn: "978-1779501127", author_name: "Alan Moore" }); stage = 0; render(); log.add("ردیفی افزوده شد: Watchmen · Alan Moore.", "ok"); });
-  document.getElementById("rs").addEventListener("click", function () { reset(); log.add("ردیف‌های جدول ۱۰.۶.", "muted"); });
-  reset();
+  function aggregateField(rs, f, af) { var b = Object.assign({}, rs[0]); b[af] = rs.map(function (r) { return r[f]; }); delete b[f]; return b; }
+  function idx(isbn) { var seen = []; rows.forEach(function (r) { if (seen.indexOf(r.isbn) < 0) seen.push(r.isbn); }); return seen.indexOf(isbn); }
+  function line(k, v, cls) { return Kit.el("div", { class: cls || "" }, Kit.el("span", { class: "k" }, k + " "), typeof v === "string" ? v : JSON.stringify(v)); }
+  function card(r, extra) { var focus = detail && r.isbn === BASE[0].isbn; return Kit.el("div", { class: "ga-card mono b" + idx(r.isbn) + (extra || "") + (focus && stage === 3 ? " focus" : "") }, line("title", r.title), line("isbn", r.isbn), line("author_name", r.author_name, detail && stage === 3 && focus ? "gone" : "")); }
+  function render() {
+    var g = groupBy(rows, "isbn"), keys = Object.keys(g), res = keys.map(function (k) { return aggregateField(g[k], "author_name", "authorNames"); });
+    var A = Kit.clear(document.getElementById("rows")); rows.forEach(function (r) { A.appendChild(card(r)); });
+    var B = Kit.clear(document.getElementById("groups"));
+    if (stage >= 1) keys.forEach(function (k) { var box = Kit.el("div", { class: "ga-group" + (detail && k === BASE[0].isbn ? " focus" : ""), role: "group", "aria-label": "گروه " + k }, Kit.el("div", { class: "ga-key mono" + (stage >= 2 ? " dropped" : "") }, "\"" + k + "\": [", Kit.el("div", { class: "k" }, g[k][0].title.length > 24 ? g[k][0].title.slice(0, 22) + "…" : g[k][0].title))); g[k].forEach(function (r) { box.appendChild(Kit.el("div", { class: "ga-card mono b" + idx(r.isbn) }, line("author_name", r.author_name, detail && stage === 3 && k === BASE[0].isbn ? "gone" : ""))); }); B.appendChild(box); });
+    var C = Kit.clear(document.getElementById("out"));
+    if (stage >= 3) res.forEach(function (o, i) { if (detail && i > 0) return; C.appendChild(Kit.el("div", { class: "ga-card mono b" + i + (detail && i === 0 ? " focus" : "") }, line("title", o.title), line("isbn", o.isbn), line("authorNames", o.authorNames, "new"))); });
+    document.getElementById("c1").classList.toggle("off", stage < 1); document.getElementById("c2").classList.toggle("off", stage < 3);
+    var hlAll = stage === 1 || stage === 2 ? [2, 3] : stage === 3 ? [4, 5, 6] : [];
+    var code = detail ? CODE_ONE : CODE_ALL, hl = detail ? [2, 3, 4, 5, 6, 7] : hlAll;
+    var pre = Kit.clear(document.getElementById("code")); code.forEach(function (l, i) { pre.appendChild(Kit.el("span", { class: hl.indexOf(i) >= 0 ? "hl" : "" }, l)); });
+    var st = Kit.clear(document.getElementById("stats"));
+    [["ردیف‌های SQL", rows.length, ""], ["گروه‌ها", stage >= 1 ? keys.length : "—", ""], ["کتاب‌ها در خروجی", stage >= 3 ? (detail ? "۱ از " + res.length : res.length) : "—", stage >= 3 ? "ok" : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
+    });
+    stg.set(String(stage));
+  }
+  var MSG = ["ردیف‌های SQL: هر جفت کتاب و نویسنده یک ردیف.", "با _.groupBy ردیف‌ها بر اساس isbn گروه شدند.", "با _.values کلیدهای isbn کنار رفتند و فقط گروه‌ها ماندند.", "تابع aggregateField روی هر گروه: هر کتاب یک map با authorNames."];
+  stg = Kit.segmented({ label: "مرحله", value: "0", options: [{ value: "0", label: "ردیف‌ها" }, { value: "1", label: "groupBy" }, { value: "2", label: "values" }, { value: "3", label: "aggregate" }], onChange: function (v) { stage = +v; detail = false; render(); tour.free(MSG[stage], ""); } });
+  document.getElementById("stg").appendChild(stg.element);
+  document.getElementById("addA").addEventListener("click", function () { rows.push({ title: "The Power of Habit", isbn: "978-0812981605", author_name: "A. Co-Author" }); detail = false; render(); tour.free("یک ردیف اضافه شد (از vault): The Power of Habit با نویسنده‌ی دوم. کد همان است؛ فقط فهرست authorNames بلندتر می‌شود.", "ok"); });
+  document.getElementById("addB").addEventListener("click", function () { rows.push({ title: "Watchmen", isbn: "978-1779501127", author_name: "Alan Moore" }); detail = false; render(); tour.free("یک کتاب تازه اضافه شد (از vault): Watchmen. کد همان است؛ فقط یک گروه بیشتر ساخته می‌شود.", "ok"); });
+  document.getElementById("rs").addEventListener("click", function () { rows = BASE.slice(); detail = false; render(); tour.free("ردیف‌های جدول ۱۰.۶ برگشتند.", ""); });
+
+  /* ---------- the scenario ---------- */
+  function at(s, d, extra) { return function () { rows = BASE.slice(); if (extra) rows.push({ title: "The Power of Habit", isbn: "978-0812981605", author_name: "A. Co-Author" }, { title: "Watchmen", isbn: "978-1779501127", author_name: "Alan Moore" }); stage = s; detail = !!d; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(0), render: render, interval: 8000,
+    intro: "سه ستون همان شکل ۱۰.۳ است: ردیف‌های SQL، گروه‌ها و یک map برای هر کتاب. رنگ نوار کنار هر کارت نشان می‌دهد کارت مال کدام کتاب است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، ردیف اضافه کنید و مرحله‌ها را دوباره ببینید.",
+    steps: [
+      { kind: "", run: at(0), say: "کوئری listing ۱۰.۱۷ سه جدول books، book_authors و authors را join می‌کند. کتاب 7 Habits دو نویسنده دارد، پس دو بار می‌آید: سه ردیف برای دو کتاب (جدول ۱۰.۶، ص. ۲۱۲)." },
+      { kind: "", run: at(1), say: "قدم اول: ردیف‌های یک کتاب را با _.groupBy روی isbn کنار هم می‌گذاریم. نتیجه یک map است از isbn به فهرست ردیف‌ها (listingهای ۱۰.۲۰ و ۱۰.۲۱)." },
+      { kind: "", run: at(2), say: "کلیدهای isbn دیگر به کار نمی‌آیند. جو با _.values فقط خود گروه‌ها را نگه می‌دارد (ص. ۲۱۷)." },
+      { kind: "", run: at(3, true), say: "تابع aggregateField روی گروه 7 Habits: author_nameها با _.map جمع می‌شوند، ردیف اول پایه می‌شود، authorNames با _.set اضافه و author_name با _.omit حذف می‌شود (listingهای ۱۰.۲۲ و ۱۰.۲۳)." },
+      { kind: "ok", run: at(3), say: "تابع aggregateFields همین را روی همه‌ی گروه‌ها map می‌کند: دو map با authorNames، درست مثل listing ۱۰.۱۹ (listing ۱۰.۲۶، ص. ۲۱۷)." },
+      { kind: "ok", run: at(3, false, true), say: "از vault: یک نویسنده‌ی دوم و یک کتاب تازه اضافه شد و کد هیچ تغییری نکرد. کتاب می‌گوید شکل دادن در برنامه SQL را ساده نگه می‌دارد و همان کد برای entityهای دیگر هم کار می‌کند (ص. ۲۱۱)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "آن join برای آن دو کتاب habit چند ردیف برمی‌گرداند؟",

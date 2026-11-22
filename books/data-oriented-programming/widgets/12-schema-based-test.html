@@ -3,80 +3,119 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>تست‌های طرح‌محور</title>
+<title>تست‌های schema-based</title>
 <meta name="description" content="catalogهای تصادفی را با seed از طرح catalog بسازید، با حرف نخست عنوان نخست بجویید، و بگذارید سنجش مقدار بازگشتی تصمیم بگیرد که آن تست رد می‌شود یا نه؛ بعد چاره‌ی «Not available» دیو را پیاده و باز اجرا کنید. تصویری از فصل ۱۲ کتاب Data-Oriented Programming.">
 <link rel="stylesheet" href="../../../assets/kit.css">
-<style>pre.code { font-size: .78rem; white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 4px 0; direction: ltr; text-align: left; }
-  textarea.code { width: 100%; font-family: var(--mono); font-size: .78rem; min-height: 180px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; direction: ltr; text-align: left; }
-  #verdict { direction: ltr; text-align: left; }
+<style>
+  .sb-flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .sb-node { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 6px 9px; background: var(--surface); font-size: .78rem; line-height: 1.45; }
+  .sb-node b { display: block; font-size: .84rem; }
+  .sb-node small { color: var(--ink-3); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sb-node .st { display: block; margin-top: 3px; font-weight: 700; }
+  .sb-node.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .sb-node.pass .st { color: var(--ok); } .sb-node.pass { border-color: var(--ok); }
+  .sb-node.fail .st { color: var(--bad); } .sb-node.fail { border-color: var(--bad); background: var(--bad-soft); }
+  .sb-node.warn .st { color: var(--warn); } .sb-node.warn { border-color: var(--warn); }
+  .sb-node.none { opacity: .45; }
+  .sb-cols { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px; }
+  .sb-cols h3 { margin: 0 0 6px; font-size: .84rem; }
+  .sb-books { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .sb-book { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px 8px; font-size: .74rem; line-height: 1.5; background: var(--surface); direction: ltr; text-align: left; }
+  .sb-book.hit { border: 1.5px solid var(--accent); }
+  .sb-book .t { font-weight: 700; }
+  .sb-book .t mark { background: var(--accent-soft); color: inherit; }
+  .sb-id { display: inline-block; font-size: .68rem; padding: 0 5px; border-radius: 3px; margin: 1px 2px 0 0; border: 1px solid var(--line); }
+  .sb-id.miss { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
+  .sb-id.ok { border-color: var(--ok); color: var(--ok); }
+  .sb-auth { margin-top: 6px; font-size: .74rem; }
+  .sb-out { font-family: var(--mono); font-size: .7rem; line-height: 1.5; direction: ltr; text-align: left; white-space: pre-wrap; word-break: break-word; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px; max-height: 104px; overflow: hidden; margin: 0; }
+  .sb-out.err { border-color: var(--bad); background: var(--bad-soft); }
+  .sb-out .u { background: var(--warn-soft); color: var(--warn); font-weight: 700; }
+  .sb-grid { display: grid; grid-template-columns: repeat(40, 1fr); gap: 2px; margin-top: 6px; direction: ltr; }
+  .sb-grid span { height: 8px; border-radius: 2px; background: var(--ok); }
+  .sb-grid span.f { background: repeating-linear-gradient(45deg, var(--bad) 0 2px, var(--bad-soft) 2px 4px); }
+  .sb-grid span.cur { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .sb-legend { font-size: .74rem; color: var(--ink-3); margin-top: 4px; }
+  .sb-verdict { margin-top: 8px; font-size: .88rem; padding: 7px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface); line-height: 1.7; }
+  .sb-verdict.ok { border-color: var(--ok); } .sb-verdict.warn { border-color: var(--warn); } .sb-verdict.bad { border-color: var(--bad); }
+  .tweak-group label.cb { display: flex; gap: 6px; align-items: center; font-size: .82rem; margin-bottom: 4px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">DOP</a><span aria-hidden="true">/</span>
       <a href="../chapters/12-advanced-data-validation.html">فصل ۱۲</a><span aria-hidden="true">/</span>
-      <span aria-current="page">تست‌های طرح‌محور</span>
+      <span aria-current="page">تست‌های schema-based</span>
     </nav>
     <span data-kit-theme></span>
   </div>
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۲ · اعتبارسنجی پیشرفته‌ی داده</div>
-  <h1>تست‌های طرح‌محور</h1>
-  <p class="lede">با طرحی برای آرگومان‌ها و طرحی برای مقدار بازگشتی، تستی unit خودش را می‌نویسد: <strong>داده‌ی تصادفی بسازید که با طرح ورودی می‌خواند، آن تابع را صدا بزنید، و خروجی را با طرح خروجی بسنجید</strong>. catalogهای تصادفی نویسنده‌هایی را گواه می‌آورند که نیستند، و اشکالی که آن تست می‌یابد درست همان است.</p>
-  <p class="source-note">تصویری از بخش ۱۲.۵ (شکل ۱۲.۳؛ listingهای ۱۲.۱۹ تا ۱۲.۲۹، صص. ۲۶۲–۲۶۸): داده‌ی تصادفی از JSON Schema Faker، تستی که درست یا غلط برمی‌گرداند، پرسشی ساخته از حرف نخست عنوان کتاب نخست، آن خطای log‌شده، و چاره‌ی <code>"Not available"</code>. سازنده‌ی این‌جا بدلی کوچک از vault برای JSON Schema Faker است: واژه‌های سبک lorem، با seed، با یک تا چهار کتاب. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>تست‌های schema-based</h1>
+      <p class="lede">وقتی تابعی برای آرگومان‌ها و مقدار بازگشتی‌اش schema دارد، unit test تقریباً خودش نوشته می‌شود: <strong>داده‌ی تصادفی بسازید که با schema ورودی می‌خواند، تابع را صدا بزنید و ببینید خروجی با schema خروجی می‌خواند یا نه</strong>. همین تست ساده در کتاب باگی واقعی پیدا می‌کند: نویسنده‌هایی که در catalog نیستند.</p>
+      <p class="source-note">تصویری از بخش ۱۲.۵ (شکل ۱۲.۳، listingهای ۱۲.۱۹ تا ۱۲.۲۹، صص. ۲۶۲–۲۶۸): JSON Schema Faker، تستی که true یا false برمی‌گرداند، query ساخته از حرف اول عنوان کتاب اول، خطای log‌شده و اصلاح <code>"Not available"</code>. سازنده‌ی داده این‌جا بدل کوچکی از vault برای JSON Schema Faker است: واژه‌های lorem، با seed و یک تا چهار کتاب. اجرای ۲۰۰ seed و پیاده‌سازی از خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="grid-2"><div class="panel"><p class="panel-title">مقدار catalogData ساخته‌شده</p><pre class="code" id="cat" style="max-height:320px;overflow:auto"></pre></div>
-        <div class="panel"><p class="panel-title">searchBooksTest()</p><div class="callout" id="verdict"></div><pre class="code" id="out"></pre></div></div>
-      <div class="panel"><p class="panel-title">آن تست، پس از listing ۱۲.۲۴</p><pre class="code">function searchBooksTest() {
-  var catalogRandom = JSONSchemaFaker.generate(catalogSchema);
-  var queryRandom = firstLetterOfFirstTitle(catalogRandom);
-  try {
-    Catalog.searchBooksByTitle(catalogRandom, queryRandom);  // throws in dev
-    return true;
-  } catch (error) {
-    console.log(error);
-    return false;
-  }
-}</pre></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="seed"></div><div id="ver" style="margin-top:8px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn primary" id="one" type="button">اجرای تست</button><button class="btn" id="many" type="button">اجرای ۲۰۰ seed</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div class="sb-flow" id="flow"></div>
+          <div class="sb-cols">
+            <div><h3 id="catT">catalog تصادفی</h3><div class="sb-books" id="books"></div><div class="sb-auth" id="auth"></div></div>
+            <div><h3 id="outT">خروجی</h3><pre class="sb-out mono" id="out"></pre>
+              <h3 style="margin-top:10px">اجرای ۲۰۰ seed</h3><div id="batch"></div></div>
+          </div>
+          <div class="sb-verdict" id="verdict" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">این اجرا</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="seedC"></div>
+        <div class="tweak-group" id="fixC"></div>
+        <div class="tweak-group"><label class="cb"><input type="checkbox" id="rq"> مقدار query هم تصادفی باشد (listing ۱۲.۲۳)</label></div>
+        <div class="tweak-group"><button class="btn" id="many" type="button">اجرای ۲۰۰ seed</button></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>شناسه‌های تصادفی تقریباً هیچ‌وقت رو هم نمی‌افتند</strong>: مقدار <code>authorIds</code> کتابی و کلیدهای <code>authorsById</code> مستقل ساخته می‌شوند، پس بیشتر کتاب‌های خورنده نویسنده‌های ناشناس دارند و <code>authorNames</code> مقدار <code>undefined</code> را نگه می‌دارد.</li>
-    <li><strong>تستی می‌تواند از بخت رد شود</strong>: وقتی کتاب‌های خورنده هیچ شناسه‌ی نویسنده‌ای ندارند. اجرای seedهای زیاد نشان می‌دهد چند بار.</li>
-    <li><strong>با آن چاره</strong>، نویسنده‌ای جاافتاده به <code>"Not available"</code> بدل می‌شود که رشته است، پس هر اجرایی سنجش مقدار بازگشتی را رد می‌کند.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>شناسه‌های تصادفی تقریباً هیچ‌وقت به هم نمی‌خورند:</strong> <code>authorIds</code> هر کتاب و کلیدهای <code>authorsById</code> مستقل ساخته می‌شوند، پس بیشتر نویسنده‌ها پیدا نمی‌شوند و <code>authorNames</code> پر از <code>undefined</code> می‌شود.</li>
+      <li><strong>تست می‌تواند از بخت رد شود:</strong> وقتی کتاب‌های پیداشده هیچ authorId ندارند. اجرای ۲۰۰ seed نشان می‌دهد چند بار.</li>
+      <li><strong>query تصادفی تست را بی‌معنا می‌کند:</strong> وقتی هیچ کتابی پیدا نشود، آرایه‌ی خالی همیشه با schema می‌خواند. برای همین جو query را از حرف اول عنوان کتاب اول می‌سازد (ص. ۲۶۶).</li>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/12-advanced-data-validation.html"><small>درس</small>فصل ۱۲: اعتبارسنجی پیشرفته‌ی داده</a></li>
-    <li><a href="../lab/12-schema-based-tests/README.md"><small>آزمایش</small>تست‌های طرح‌محور با seed به Python</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/12-advanced-data-validation.html"><small>درس</small>فصل ۱۲: اعتبارسنجی پیشرفته‌ی داده</a></li>
+      <li><a href="../lab/12-schema-based-tests/README.md"><small>آزمایش</small>تست‌های طرح‌محور با seed به Python</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-// A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
+  // A small subset of JSON Schema 2020-12, for illustration: type, properties, required,
   // additionalProperties (Boolean or schema), items, prefixItems, enum, allOf/anyOf/oneOf,
   // minimum/maximum, pattern, format "date". Errors are reported in Ajv's style.
   function jsType(x) { return x === null ? "null" : Array.isArray(x) ? "array" : typeof x; }
@@ -149,15 +188,6 @@
     return infos; }
   function show(x) { return JSON.stringify(x, function (k, v) { return v === undefined ? "«undefined»" : v; }, 2); }
 
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log")), cfg = { seed: 7, fixed: false }, tally = { run: 0, pass: 0, fail: 0 };
   var W = ["lorem", "ipsum", "dolor", "sit", "amet", "ullamco", "laboris", "nisi", "aliquip", "commodo", "consequat", "duis", "aute", "irure", "culpa", "officia", "deserunt", "mollit", "anim", "est", "velit", "esse", "fugiat", "nulla"];
   function gen(seed) { var r = Kit.rng(seed);
     function word() { return r.pick(W); } function key() { return word() + r.int(100); }
@@ -170,25 +200,85 @@
     var authors = {}, na = r.int(4);
     for (var j = 0; j < na; j++) authors[key()] = { id: key(), name: str(), bookIsbns: arr(key, 2) };
     return { booksByIsbn: books, authorsById: authors }; }
-  function test(seed, quiet) { var c = gen(seed), first = vals(c.booksByIsbn)[0], q = first.title[0];
-    if (!quiet) document.getElementById("cat").textContent = JSON.stringify(c, null, 2);
-    try { var res = searchBooksByTitle(c, q, true, cfg.fixed); return { ok: true, q: q, res: res }; }
-    catch (e) { return { ok: false, q: q, err: e.message || String(e) }; } }
-  function one() { var t = test(cfg.seed), v = document.getElementById("verdict");
-    tally.run++; tally[t.ok ? "pass" : "fail"]++;
-    v.className = "callout " + (t.ok ? "ok" : "bad"); v.textContent = "query = " + JSON.stringify(t.q) + " → " + (t.ok ? "true" : "false");
-    document.getElementById("out").textContent = t.ok ? show(t.res) : t.err;
-    log.add("مقدار seed " + cfg.seed + (cfg.fixed ? "، تصحیح‌شده" : "") + ": " + (t.ok ? "رد شد" : "شکست — " + t.err), t.ok ? "ok" : "bad");
-    upd(); }
-  function many() { var p = 0, f = 0; for (var s = 1; s <= 200; s++) { if (test(s, true).ok) p++; else f++; }
-    tally.run += 200; tally.pass += p; tally.fail += f;
-    log.add("مقدارهای seed ۱ تا ۲۰۰ " + (cfg.fixed ? "با آن چاره" : "همان‌طور که چاپ شده") + ": " + p + " رد شد و " + f + " شکست خورد (" + Kit.pct(f / 200) + ").", f ? "warn" : "ok"); upd(); }
-  function upd() { stats([["version", cfg.fixed ? "تصحیح‌شده" : "listing ۱۲.۱"], ["تست‌های اجراشده", tally.run], ["ردشده", tally.pass, "ok"], ["شکست‌خورده", tally.fail, tally.fail ? "bad" : ""]]); }
-  document.getElementById("seed").appendChild(Kit.slider({ label: "مقدار seed تصادفی", min: 1, max: 200, value: cfg.seed, onInput: function (v) { cfg.seed = v; one(); } }).element);
-  document.getElementById("ver").appendChild(Kit.segmented({ label: "مقدار authorNames", value: "orig", options: [{ value: "orig", label: "همان‌طور که چاپ شده" }, { value: "fix", label: "با «Not available»" }], onChange: function (v) { cfg.fixed = v === "fix"; tally = { run: 0, pass: 0, fail: 0 }; one(); } }).element);
-  document.getElementById("one").addEventListener("click", one);
-  document.getElementById("many").addEventListener("click", many);
-  one();
+
+  var seed = 2, fixed = false, randQ = false, batch = null, focus = 0, tour, ctl = {};
+  function qFor(c, s) { if (!randQ) return vals(c.booksByIsbn)[0].title[0]; var r = Kit.rng(s * 7919 + 1); return r.pick(W).slice(0, 2 + r.int(4)) + r.pick(["", "x", "q", "z"]); }
+  function test(s) { var c = gen(s), q = qFor(c, s);
+    try { var res = searchBooksByTitle(c, q, true, fixed); return { ok: true, c: c, q: q, res: res }; }
+    catch (e) { return { ok: false, c: c, q: q, err: e.message || String(e) }; } }
+  function runBatch() { var a = []; for (var s = 1; s <= 200; s++) a.push(test(s).ok); batch = { fixed: fixed, randQ: randQ, r: a }; }
+  function node(cls, title, sub, st) { return Kit.el("div", { class: "sb-node " + cls }, Kit.el("b", {}, title), Kit.el("small", { class: "mono" }, sub), Kit.el("span", { class: "st" }, st)); }
+  function render() {
+    if (batch && (batch.fixed !== fixed || batch.randQ !== randQ)) batch = null;
+    var t = test(seed), c = t.c, hits = t.ok ? t.res.length : vals(c.booksByIsbn).filter(function (b) { return b.title.includes(t.q); }).length;
+    var vac = t.ok && hits === 0;
+    var F = Kit.clear(document.getElementById("flow"));
+    function on(i) { return focus === i ? " on" : ""; }
+    F.appendChild(node("pass" + on(1), "۱. داده‌ی تصادفی", "JSONSchemaFaker.generate", "مقدار seed = " + seed));
+    F.appendChild(node((vac ? "warn" : "pass") + on(2), "۲. ساختن query", randQ ? "random string" : "title.substring(0,1)", "query = " + JSON.stringify(t.q)));
+    F.appendChild(node((vac ? "warn" : "pass") + on(3), "۳. اجرای تابع", "searchBooksByTitle", Kit.digits(String(hits)) + " کتاب پیدا شد"));
+    F.appendChild(node((t.ok ? "pass" : "fail") + on(4), "۴. بررسی خروجی", "searchBooksResponseSchema", t.ok ? "✓ می‌خواند" : "✗ نمی‌خواند"));
+    F.appendChild(node((t.ok ? (vac ? "warn" : "pass") : "fail") + on(5), "۵. نتیجه‌ی تست", "searchBooksTest()", t.ok ? (vac ? "⚠ true بی‌معنا" : "✓ true") : "✗ false"));
+    document.getElementById("catT").textContent = "داده‌ی catalog تصادفی (seed " + Kit.digits(String(seed)) + ")";
+    var B = Kit.clear(document.getElementById("books")), A = c.authorsById, miss = 0, total = 0;
+    Object.keys(c.booksByIsbn).forEach(function (k) { var b = c.booksByIsbn[k], hit = b.title.includes(t.q), i = hit ? b.title.indexOf(t.q) : -1;
+      var tt = Kit.el("div", { class: "t" }); if (hit) { tt.appendChild(document.createTextNode(b.title.slice(0, i))); tt.appendChild(Kit.el("mark", {}, t.q)); tt.appendChild(document.createTextNode(b.title.slice(i + t.q.length))); } else tt.textContent = b.title;
+      var ids = Kit.el("div", {}, "authorIds: "); if (!b.authorIds.length) ids.appendChild(Kit.el("span", { class: "sb-id" }, "[]"));
+      b.authorIds.forEach(function (id) { var ok = Object.prototype.hasOwnProperty.call(A, id); if (hit) { total++; if (!ok) miss++; } ids.appendChild(Kit.el("span", { class: "sb-id " + (ok ? "ok" : "miss"), title: ok ? "found" : "missing" }, (ok ? "✓ " : "✗ ") + id)); });
+      B.appendChild(Kit.el("div", { class: "sb-book mono" + (hit ? " hit" : "") }, tt, ids)); });
+    var ak = Object.keys(A), au = Kit.clear(document.getElementById("auth"));
+    au.appendChild(document.createTextNode("کلیدهای authorsById: "));
+    if (!ak.length) au.appendChild(Kit.el("span", { class: "sb-id mono" }, "{}"));
+    ak.forEach(function (k) { au.appendChild(Kit.el("span", { class: "sb-id mono" }, k)); });
+    var O = Kit.clear(document.getElementById("out"));
+    O.className = "sb-out mono" + (t.ok ? "" : " err");
+    document.getElementById("outT").textContent = t.ok ? "مقدار بازگشتی ← searchBooksTest() = true" : "خطای log‌شده ← searchBooksTest() = false";
+    if (!t.ok) O.textContent = t.err.replace(/, /g, ",\n  ");
+    else show(t.res).split("«undefined»").forEach(function (part, i) { if (i) O.appendChild(Kit.el("span", { class: "u" }, "undefined")); O.appendChild(document.createTextNode(part)); });
+    var BT = Kit.clear(document.getElementById("batch")), pass = 0;
+    if (!batch) BT.appendChild(Kit.el("p", { class: "sb-legend" }, "هنوز اجرا نشده. دکمه‌ی «اجرای ۲۰۰ seed» را بزنید."));
+    else { var g = Kit.el("div", { class: "sb-grid", role: "img" });
+      batch.r.forEach(function (ok, i) { if (ok) pass++; g.appendChild(Kit.el("span", { class: (ok ? "" : "f") + (i + 1 === seed ? " cur" : ""), title: "seed " + (i + 1) + (ok ? " true" : " false") })); });
+      g.setAttribute("aria-label", pass + " of 200 seeds passed"); BT.appendChild(g);
+      BT.appendChild(Kit.el("p", { class: "sb-legend" }, "خانه‌ی پر یعنی true، هاشورخورده یعنی false. " + Kit.digits(String(pass)) + " رد شد و " + Kit.digits(String(200 - pass)) + " شکست خورد.")); }
+    var v = document.getElementById("verdict"), msg, kind;
+    if (vac) { msg = "هیچ کتابی با query نخواند، پس آرایه‌ی خالی برگشت و آرایه‌ی خالی همیشه با schema می‌خواند. تست true است ولی چیزی را نسنجیده."; kind = "warn"; }
+    else if (!t.ok) { msg = Kit.digits(String(miss)) + " شناسه‌ی نویسنده از " + Kit.digits(String(total)) + " در authorsById نیست؛ تابع برایشان undefined برمی‌گرداند و schema خروجی رشته می‌خواهد. تست باگی واقعی پیدا کرد."; kind = "bad"; }
+    else if (fixed && miss) { msg = "اصلاح دیو: نویسنده‌ی غایب «Not available» می‌شود که رشته است، پس خروجی با schema می‌خواند."; kind = "ok"; }
+    else if (!total) { msg = "کتاب‌های پیداشده هیچ authorId ندارند، پس undefined‌ای ساخته نشد و تست از بخت رد شد."; kind = "warn"; }
+    else { msg = "همه‌ی نویسنده‌ها پیدا شدند و خروجی با schema می‌خواند."; kind = "ok"; }
+    v.className = "sb-verdict " + kind; v.textContent = msg;
+    var st = Kit.clear(document.getElementById("stats"));
+    [["کتاب‌ها", vals(c.booksByIsbn).length, ""], ["کتاب‌های پیداشده", hits, ""], ["نویسنده‌ی غایب", miss + " از " + total, miss && !fixed ? "bad" : ""], ["نتیجه", t.ok ? "true" : "false", t.ok ? (vac ? "warn" : "ok") : "bad"], ["۲۰۰ seed", batch ? pass + " رد شد" : "—", batch ? (pass === 200 ? "ok" : "bad") : ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, typeof x[1] === "number" ? String(x[1]) : x[1])));
+    });
+    ctl.seed.set(seed); ctl.fix.set(fixed ? "fix" : "orig"); document.getElementById("rq").checked = randQ;
+  }
+  function say() { return document.getElementById("verdict").textContent; }
+  ctl.seed = Kit.slider({ label: "مقدار seed تصادفی", min: 1, max: 200, value: seed, onInput: function (x) { seed = x; focus = 0; render(); tour.free(say(), ""); } });
+  document.getElementById("seedC").appendChild(ctl.seed.element);
+  ctl.fix = Kit.segmented({ label: "تابع Catalog.authorNames", value: "orig", options: [{ value: "orig", label: "همان‌طور که چاپ شده" }, { value: "fix", label: "با «Not available»" }], onChange: function (x) { fixed = x === "fix"; focus = 0; render(); tour.free(say(), ""); } });
+  document.getElementById("fixC").appendChild(ctl.fix.element);
+  document.getElementById("rq").addEventListener("change", function (e) { randQ = e.target.checked; focus = 0; render(); tour.free(say(), ""); });
+  document.getElementById("many").addEventListener("click", function () { runBatch(); focus = 0; render(); tour.free(say(), ""); });
+
+  /* ---------- the scenario ---------- */
+  function at(s, fx, rq, b, f) { return function () { seed = s; fixed = !!fx; randQ = !!rq; batch = null; if (b) runBatch(); focus = f || 0; }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at(2), render: render, interval: 8000,
+    intro: "بالا جریان یک تست schema-based است (شکل ۱۲.۳): داده‌ی تصادفی بساز، تابع را اجرا کن، خروجی را با schema بسنج. پایین catalog ساخته‌شده و خروجی تابع است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و seed، اصلاح دیو یا query تصادفی را عوض کنید.",
+    steps: [
+      { kind: "", run: at(2, false, false, false, 1), say: "قدم اول: JSON Schema Faker از روی catalogSchema داده‌ای تصادفی می‌سازد که با schema می‌خواند (listingهای ۱۲.۱۹ و ۱۲.۲۰). کلیدها و عنوان‌ها واژه‌های lorem هستند و هر اجرا داده‌ی دیگری می‌دهد." },
+      { kind: "warn", run: at(2, false, true, false, 2), say: "در listing ۱۲.۲۳ مقدار query هم تصادفی است. جو می‌گوید احتمالش زیاد است که هیچ کتابی پیدا نشود (ص. ۲۶۶). آن‌وقت خروجی آرایه‌ی خالی است و تست چیزی را نمی‌سنجد." },
+      { kind: "", run: at(2, false, false, false, 2), say: "پس جو query را حرف اول عنوان کتاب اول می‌گیرد (listing ۱۲.۲۴) تا دست‌کم یک کتاب پیدا شود." },
+      { kind: "bad", run: at(2, false, false, false, 4), say: "دیو تست را اجرا می‌کند و false می‌گیرد (listing ۱۲.۲۵). خطای log‌شده می‌گوید authorNames باید رشته باشد (listing ۱۲.۲۷). شناسه‌های قرمز در authorsById نیستند، پس تابع undefined برمی‌گرداند (ص. ۲۶۸)." },
+      { kind: "bad", run: at(2, false, false, true, 5), say: "از vault: همان تست با ۲۰۰ seed. بیشترشان شکست می‌خورند، چون شناسه‌های تصادفی تقریباً هیچ‌وقت به هم نمی‌خورند. چند seed فقط از بخت رد می‌شوند، وقتی کتاب پیداشده authorId ندارد." },
+      { kind: "ok", run: at(2, true, false, false, 4), say: "اصلاح دیو در listing ۱۲.۲۸: برای نویسنده‌ی غایب، _.get مقدار پیش‌فرض «Not available» را برمی‌گرداند. این بار تست true می‌دهد (listing ۱۲.۲۹)." },
+      { kind: "ok", run: at(2, true, false, true, 5), say: "از vault: با اصلاح دیو هر ۲۰۰ seed رد می‌شوند. تست خودکار باگی را پیدا کرد که داده‌ی دست‌ساز سالم هیچ‌وقت نشانش نمی‌داد." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "سه قدم تستی unit و طرح‌محور (شکل ۱۲.۳) کدامند؟",
