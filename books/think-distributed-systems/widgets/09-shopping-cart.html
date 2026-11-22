@@ -7,16 +7,29 @@
 <meta name="description" content="دو replica سبد خرید را پارتیشن کنید، در هر سو قلم بیفزایید و بردارید، پارتیشن را ترمیم کنید و قاعده‌های آشتی‌دهی را مقایسه: اجتماع «افزودن می‌برد» Amazon، آخرین نوشتن می‌برد، مجموعه‌ی فقط‌رشدی، و مجموعه‌ی observed-remove. تصویری از فصل ۹ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .reps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .rep { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); }
-  .rep .items { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; min-height: 1.4em; direction: ltr; text-align: right; }
-  .btns { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .cart { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .rep { border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; background: var(--surface-2); text-align: center; }
+  .rep .nm { font-size: .82rem; color: var(--ink-2); font-weight: 700; }
+  .rep .items { font-family: var(--mono); font-size: 1.7rem; font-weight: 700; margin: 4px 0; direction: ltr; unicode-bidi: isolate; }
+  .rep .tags { font-family: var(--mono); font-size: .74rem; color: var(--ink-2); direction: ltr; unicode-bidi: isolate; min-height: 1.2em; }
+  .rep .tags s { color: var(--bad); }
+  .net { margin: 10px 0; padding: 6px 10px; border-radius: var(--radius-sm); text-align: center; font-size: .86rem; font-weight: 700; border: 2px dashed var(--line-strong); }
+  .net.cut { border-color: var(--bad); color: var(--bad); background: var(--bad-soft); } .net.up { border-style: solid; border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+  .merged { border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; display: flex; gap: 12px; align-items: center; justify-content: center; }
+  .merged .items { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+  .merged.ok { border-color: var(--ok); background: var(--ok-soft); } .merged.warn { border-color: var(--warn); background: var(--warn-soft); }
+  ol.tl { margin: 10px 0 0; padding: 0 1.2em 0 0; font-size: .8rem; line-height: 1.4; columns: 2; column-gap: 18px; }
+  ol.tl li.ok { color: var(--ok); } ol.tl li.warn { color: var(--warn); } ol.tl li.bad { color: var(--bad); } ol.tl li.muted { color: var(--ink-2); }
+  .opbtns { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; align-items: center; font-size: .82rem; }
+  .opbtns .row { display: flex; flex-wrap: wrap; gap: 4px; } .opbtns .btn { font-family: var(--mono); }
+  .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .opbtns .btn.small { padding: 2px 8px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/09-consistency.html">فصل ۹</a><span aria-hidden="true">/</span>
@@ -27,101 +40,144 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · consistency</div>
-  <h1>سبد خرید سازگار غایی</h1>
-  <p class="lede">در میانه‌ی پارتیشن، هر دو replica سبد در دسترس می‌مانند و تغییر می‌پذیرند. وقتی پارتیشن ترمیم شود باید <strong>هم‌گرا</strong> شوند، که یعنی حل کردن تعارض. قاعده‌ی Amazon قلم‌های افزوده را بر حذف‌شده‌ها نگه می‌دارد، پس هیچ چیزی که مشتری افزوده ناپدید نمی‌شود، ولی قلمی حذف‌شده می‌تواند <strong>برگردد</strong>.</p>
-  <p class="source-note">تصویری از «سبد خرید» و «گونه‌های eventual consistency» و «پیاده‌سازی» (صص. ۱۲۴–۱۲۶، شکل ۹.۹، جدول ۹.۴). دکمه‌ی «شکل ۹.۹» نمونه‌ی کتاب را replay می‌کند. آخرین نوشتن می‌برد و مجموعه‌ی observed-remove افزوده‌های vault برای مقایسه‌اند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>سبد خرید سازگار غایی</h1>
+      <p class="lede">در میانه‌ی پارتیشن، هر دو replica سبد در دسترس می‌مانند و تغییر می‌پذیرند. وقتی پارتیشن ترمیم شود باید <strong>هم‌گرا</strong> شوند، که یعنی حل کردن تعارض. قاعده‌ی Amazon قلم‌های افزوده را بر حذف‌شده‌ها نگه می‌دارد، پس هیچ چیزی که مشتری افزوده ناپدید نمی‌شود، ولی قلمی حذف‌شده می‌تواند <strong>برگردد</strong>.</p>
+      <p class="source-note">تصویری از «سبد خرید» و «گونه‌های eventual consistency» و «پیاده‌سازی» (صص. ۱۲۴–۱۲۶، شکل ۹.۹، جدول ۹.۴). دکمه‌ی «شکل ۹.۹» نمونه‌ی کتاب را replay می‌کند. آخرین نوشتن می‌برد و مجموعه‌ی observed-remove افزوده‌های vault برای مقایسه‌اند. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="callout" id="net"></div><div class="reps" id="reps" style="margin-top:8px"></div>
-        <div class="callout" id="out" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="rule"></div><div class="btns" style="margin-top:10px"><button class="btn small" id="part">پارتیشن</button><button class="btn small primary" id="heal">ترمیم و merge</button><button class="btn small" id="fig">replay شکل ۹.۹</button><button class="btn small" id="reset">از نو</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="cart">
+          <div class="rep" id="r0"></div>
+          <div class="rep" id="r1"></div>
+        </div>
+        <div class="net" id="net"></div>
+        <div class="merged" id="merged"></div>
+        <ol class="tl" id="tl" aria-live="polite"></ol>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="rule"></div>
+        <div class="tweak-group"><div class="opbtns" id="ops"></div><div class="acts"><button class="btn small" id="part">پارتیشن</button><button class="btn small primary" id="heal">ترمیم و merge</button><button class="btn small" id="fig">سناریوی شکل ۹.۹</button><button class="btn small" id="clr">از نو</button></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>شکل ۹.۹ با افزودن می‌برد:</strong> replica ۱ قلم A را برمی‌دارد و B را می‌افزاید، replica ۲ قلم C را می‌افزاید، و سبد merge‌شده {A, B, C} است. قلم A برمی‌گردد.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>شکل ۹.۹ با افزودن می‌برد:</strong> replica ۱ قلم A را برمی‌دارد و B را می‌افزاید، replica ۲ قلم C را می‌افزاید، و سبد merge‌شده {A, B, C} است. قلم A برمی‌گردد.</li>
     <li><strong>آخرین نوشتن می‌برد</strong> هر replicaیی را که آخر عوض شده نگه می‌دارد و تغییرهای آن سو را بی‌صدا می‌اندازد، این‌جا قلم B یا C.</li>
     <li><strong>مجموعه‌ی فقط‌رشدی</strong> پیش‌پا‌افتاده هم‌گرا می‌شود چون mergeش اجتماع است، ولی اصلاً نمی‌تواند برداشتن را بیان کند.</li>
     <li><strong>مجموعه‌ی observed-remove</strong> هر افزودنی را برچسب می‌زند، و برداشتن تنها همان برچسب‌هایی را حذف می‌کند که دیده. با {B, C} تمام می‌شود: برداشتن A می‌چسبد، و افزودن‌های هم‌زمان جان به در می‌برند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-consistency.html"><small>درس</small>فصل ۹: consistency</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-consistency.html"><small>درس</small>فصل ۹: consistency</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var ITEMS = ["A", "B", "C", "D"], rule = "adds", R, parted, clock, tagN;
-  function reset() { clock = 0; tagN = 0; R = [mk(), mk()]; addTo(0, "A", true); R[1] = clone(R[0]); parted = false; log.clear(); log.add("هر دو replica قلم {A} را دارند.", "muted"); render(); }
+  var ITEMS = ["A", "B", "C", "D"];
+  var RN = { adds: "افزودن می‌برد", lww: "آخرین نوشتن می‌برد", gset: "مجموعه‌ی فقط‌رشدی", orset: "مجموعه‌ی observed-remove" };
+  var FIG = [["p"], [0, "-", "A"], [0, "+", "B"], [1, "+", "C"]];
+  var DEF = { rule: "adds", ops: [] }, view, tour, ctl = {}, msg, kind, out;
+  function at(o) { return function () { view = JSON.parse(JSON.stringify(Object.assign({}, DEF, o))); }; }
+  view = JSON.parse(JSON.stringify(DEF));
   function mk() { return { tags: {}, removed: {}, ts: 0 }; }
   function clone(r) { return JSON.parse(JSON.stringify(r)); }
-  function items(r) { var out = []; ITEMS.forEach(function (x) { if (Object.keys(r.tags).some(function (t) { return r.tags[t] === x && !r.removed[t]; })) out.push(x); }); return out; }
-  function addTo(i, x, quiet) { var t = "t" + (++tagN); R[i].tags[t] = x; R[i].ts = ++clock; if (!parted && !quiet) R[1 - i] = clone(R[i]); if (!quiet) log.add("replica " + (i + 1) + ": عملیات add(" + x + ")" + (parted ? "" : "، و تکرار شد"), "muted"); }
-  function rem(i, x) {
-    if (rule === "gset") { log.add("مجموعه‌ی فقط‌رشدی عملیات برداشتن ندارد", "warn"); return; }
-    Object.keys(R[i].tags).forEach(function (t) { if (R[i].tags[t] === x) R[i].removed[t] = true; }); R[i].ts = ++clock;
-    if (!parted) R[1 - i] = clone(R[i]); log.add("replica " + (i + 1) + ": عملیات remove(" + x + ")" + (parted ? "" : "، و تکرار شد"), "muted");
-  }
-  function merge() {
-    var a = R[0], b = R[1], m = mk();
-    if (rule === "lww") { m = clone(a.ts >= b.ts ? a : b); log.add("آخرین نوشتن می‌برد: replica " + (a.ts >= b.ts ? 1 : 2) + " آخر عوض شد؛ سبدش جای آن یکی را می‌گیرد", "warn"); }
-    else if (rule === "adds" || rule === "gset") {
-      var u = items(a).concat(items(b)).filter(function (x, i, arr) { return arr.indexOf(x) === i; });
-      u.forEach(function (x) { m.tags["m" + x] = x; }); log.add("اجتماع هر دو سبد: هر چیزی که در یکی از سبدها بود می‌ماند", "warn");
-    } else {
-      [a, b].forEach(function (r) { Object.keys(r.tags).forEach(function (t) { m.tags[t] = r.tags[t]; if (r.removed[t]) m.removed[t] = true; }); });
-      log.add("روش observed-remove: اجتماع برچسب‌های افزودن، منهای هر برچسبی که هر سویی برداشته", "warn");
-    }
-    m.ts = ++clock; R = [m, clone(m)];
-  }
-  function render() {
-    var n = document.getElementById("net"); n.className = "callout " + (parted ? "bad" : "ok"); n.textContent = parted ? "پارتیشن‌شده: تغییرها روی همان replicaیی می‌مانند که پذیرفتشان." : "وصل: هر تغییری فوری تکرار می‌شود.";
-    var b = Kit.clear(document.getElementById("reps"));
-    [0, 1].forEach(function (i) {
-      var btns = Kit.el("div", { class: "btns" });
-      ITEMS.forEach(function (x) { var a = Kit.el("button", { class: "btn small" }, "+" + x); a.addEventListener("click", function () { addTo(i, x); render(); }); btns.appendChild(a); });
-      ITEMS.forEach(function (x) { var r = Kit.el("button", { class: "btn small" }, "−" + x); r.disabled = rule === "gset" || items(R[i]).indexOf(x) < 0; r.addEventListener("click", function () { rem(i, x); render(); }); btns.appendChild(r); });
-      b.appendChild(Kit.el("div", { class: "rep" }, Kit.el("div", null, "replica " + (i + 1)), Kit.el("div", { class: "items" }, "{" + items(R[i]).join(", ") + "}"), btns));
+  function items(r) { return ITEMS.filter(function (x) { return Object.keys(r.tags).some(function (t) { return r.tags[t] === x && !r.removed[t]; }); }); }
+  function fmt(a) { return "{" + a.join(", ") + "}"; }
+  function sim(rule, ops) {
+    var clock = 1, tagN = 1, R = [{ tags: { t1: "A" }, removed: {}, ts: 1 }], parted = false, ev = [], last = null;
+    R[1] = clone(R[0]); ev.push(["هر دو replica قلم {A} را دارند.", "muted"]);
+    ops.forEach(function (o) {
+      if (o[0] === "p") { if (!parted) { parted = true; ev.push(["پارتیشن: replicaها دیگر هم را نمی‌بینند", "bad"]); } return; }
+      if (o[0] === "h") {
+        if (!parted) return; parted = false; var a = R[0], b = R[1], m = mk(), note;
+        if (rule === "lww") { var w = a.ts >= b.ts ? 0 : 1; m = clone(R[w]); note = "آخرین نوشتن می‌برد: سبد replica " + (w + 1) + " که آخر عوض شد جای دیگری را می‌گیرد"; }
+        else if (rule === "orset") { [a, b].forEach(function (r) { Object.keys(r.tags).forEach(function (t) { m.tags[t] = r.tags[t]; if (r.removed[t]) m.removed[t] = true; }); }); note = "اجتماع برچسب‌های افزودن، منهای برچسب‌هایی که هر سو برداشته"; }
+        else { items(a).concat(items(b)).forEach(function (x) { m.tags["m" + x] = x; }); note = "اجتماع دو سبد: هر قلمی که در یکی بود می‌ماند"; }
+        m.ts = ++clock; R = [m, clone(m)]; last = { a: items(a), b: items(b), m: items(m) }; ev.push(["ترمیم و merge: " + note, "warn"]); return; }
+      var i = o[0], x = o[2];
+      if (o[1] === "+") { R[i].tags["t" + (++tagN)] = x; }
+      else { if (rule === "gset") { ev.push(["مجموعه‌ی فقط‌رشدی عملیات برداشتن ندارد: remove(" + x + ") نادیده ماند", "bad"]); return; }
+        if (items(R[i]).indexOf(x) < 0) return; Object.keys(R[i].tags).forEach(function (t) { if (R[i].tags[t] === x) R[i].removed[t] = true; }); }
+      R[i].ts = ++clock; if (!parted) R[1 - i] = clone(R[i]);
+      ev.push(["replica " + (i + 1) + ": " + (o[1] === "+" ? "add" : "remove") + "(" + x + ")" + (parted ? "" : "، و تکرار شد"), "muted"]);
     });
-    var same = items(R[0]).join() === items(R[1]).join(), o = document.getElementById("out");
-    o.className = "callout " + (same ? "ok" : "warn"); o.textContent = same ? "replicaها توافق دارند: {" + items(R[0]).join(", ") + "}." : "replicaها واگرا شده‌اند. پارتیشن را ترمیم کنید تا آشتی داده شوند.";
-    document.getElementById("part").disabled = parted; document.getElementById("heal").disabled = !parted;
-    stats([["شبکه", parted ? "پارتیشن‌شده" : "وصل", parted ? "bad" : "ok"], ["replica ۱", "{" + items(R[0]).join(", ") + "}"], ["replica ۲", "{" + items(R[1]).join(", ") + "}"]]);
+    return { R: R, parted: parted, ev: ev, last: last };
   }
-  document.getElementById("rule").appendChild(Kit.segmented({ label: "آشتی‌دهی", value: rule, options: [{ value: "adds", label: "افزودن می‌برد، مال Amazon" }, { value: "lww", label: "آخرین نوشتن می‌برد" }, { value: "gset", label: "مجموعه‌ی فقط‌رشدی" }, { value: "orset", label: "مجموعه‌ی observed-remove" }], onChange: function (v) { rule = v; reset(); } }).element);
-  document.getElementById("part").addEventListener("click", function () { parted = true; log.add("پارتیشن شبکه: replicaها نمی‌توانند حرف بزنند", "bad"); render(); });
-  document.getElementById("heal").addEventListener("click", function () { parted = false; merge(); log.add("ترمیم شد: هر دو replica حالا {" + items(R[0]).join(", ") + "} را دارند", "ok"); render(); });
-  document.getElementById("reset").addEventListener("click", reset);
-  document.getElementById("fig").addEventListener("click", function () {
-    reset(); parted = true; log.add("پارتیشن شبکه", "bad");
-    if (rule !== "gset") rem(0, "A"); addTo(0, "B"); addTo(1, "C"); render();
-    parted = false; merge(); log.add("ترمیم شد: هر دو replica حالا {" + items(R[0]).join(", ") + "} را دارند", "ok"); render();
+  function res(rule) { return fmt(sim(rule, FIG.concat([["h"]])).last.m); }
+  function render() {
+    out = sim(view.rule, view.ops); var R = out.R;
+    [0, 1].forEach(function (i) {
+      var b = Kit.clear(document.getElementById("r" + i)), tg = Kit.el("div", { class: "tags" });
+      if (view.rule === "orset") Object.keys(R[i].tags).forEach(function (t) { var s = R[i].tags[t] + "·" + t; tg.appendChild(R[i].removed[t] ? Kit.el("s", null, s) : document.createTextNode(s)); tg.appendChild(document.createTextNode(" ")); });
+      b.appendChild(Kit.el("div", { class: "nm" }, "replica " + (i + 1))); b.appendChild(Kit.el("div", { class: "items" }, fmt(items(R[i])))); b.appendChild(tg);
+    });
+    var n = document.getElementById("net"); n.className = "net " + (out.parted ? "cut" : "up");
+    n.textContent = out.parted ? "✕ پارتیشن: هر تغییر روی همان replica می‌ماند" : "✓ وصل: هر تغییر فوری تکرار می‌شود";
+    var same = items(R[0]).join() === items(R[1]).join(), mg = Kit.clear(document.getElementById("merged"));
+    mg.className = "merged " + (same ? "ok" : "warn");
+    mg.appendChild(Kit.el("span", null, same ? "✓ هر دو replica هم‌گرا شده‌اند:" : "⚠ واگرا: دو سبد متفاوت")); if (same) mg.appendChild(Kit.el("span", { class: "items" }, fmt(items(R[0]))));
+    var tl = Kit.clear(document.getElementById("tl")); out.ev.forEach(function (e) { tl.appendChild(Kit.el("li", { class: e[1] }, e[0])); });
+    if (out.parted) { kind = "warn"; msg = "هر دو replica در دسترس‌اند و تغییر می‌پذیرند، ولی سبدهایشان " + (same ? "هنوز یکی است." : "از هم جدا شده: " + fmt(items(R[0])) + " و " + fmt(items(R[1])) + "."); }
+    else if (out.last) { kind = "ok"; msg = "قاعده‌ی «" + RN[view.rule] + "» سبدهای " + fmt(out.last.a) + " و " + fmt(out.last.b) + " را به " + fmt(out.last.m) + " رساند."; }
+    else { kind = ""; msg = "هر دو replica وصل‌اند و یک سبد دارند."; }
+    var St = Kit.clear(document.getElementById("stats"));
+    [["قاعده", RN[view.rule]], ["شبکه", out.parted ? "پارتیشن" : "وصل", out.parted ? "bad" : "ok"], ["replica ۱", fmt(items(R[0])), "mono"], ["replica ۲", fmt(items(R[1])), "mono"], ["وضعیت", same ? "هم‌گرا" : "واگرا", same ? "ok" : "warn"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || ""), style: "unicode-bidi:isolate" }, String(x[1])))); });
+    ctl.r.set(view.rule); document.getElementById("part").disabled = out.parted; document.getElementById("heal").disabled = !out.parted;
+    var ob = Kit.clear(document.getElementById("ops"));
+    [0, 1].forEach(function (i) {
+      var row = Kit.el("div", { class: "row" });
+      ITEMS.forEach(function (x) { var a = Kit.el("button", { class: "btn small", "aria-label": "افزودن " + x + " به replica " + (i + 1) }, "+" + x); a.addEventListener("click", tw(function () { view.ops.push([i, "+", x]); })); row.appendChild(a); });
+      ITEMS.forEach(function (x) { var r = Kit.el("button", { class: "btn small", "aria-label": "برداشتن " + x + " از replica " + (i + 1) }, "−" + x); r.disabled = view.rule === "gset" || items(R[i]).indexOf(x) < 0; r.addEventListener("click", tw(function () { view.ops.push([i, "-", x]); })); row.appendChild(r); });
+      ob.appendChild(Kit.el("span", null, "سبد replica " + (i + 1))); ob.appendChild(row);
+    });
+  }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.r = Kit.segmented({ label: "قاعده‌ی آشتی‌دهی", value: DEF.rule, options: [{ value: "adds", label: RN.adds }, { value: "lww", label: RN.lww }, { value: "gset", label: RN.gset }, { value: "orset", label: RN.orset }], onChange: tw(function (v) { view.rule = v; }) });
+  document.getElementById("rule").appendChild(ctl.r.element);
+  document.getElementById("part").addEventListener("click", tw(function () { view.ops.push(["p"]); }));
+  document.getElementById("heal").addEventListener("click", tw(function () { view.ops.push(["h"]); }));
+  document.getElementById("fig").addEventListener("click", tw(function () { view.ops = FIG.concat([["h"]]); }));
+  document.getElementById("clr").addEventListener("click", tw(function () { view.ops = []; }));
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "سبد خرید در میانه‌ی پارتیشن هم در دسترس می‌ماند، پس دو replica باید بعداً هم‌گرا شوند (صص. ۱۲۴–۱۲۶، شکل ۹.۹). سه قاعده‌ی جز «افزودن می‌برد» مقایسه‌ی خود vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، پارتیشن بزنید، در هر سو قلم بیفزایید و بردارید و قاعده‌ها را عوض کنید.",
+    steps: [
+      { kind: "", run: at({}), say: "وصل: هر دو replica قلم {A} را دارند و هر تغییری فوری به دیگری می‌رسد." },
+      { kind: "warn", run: at({ ops: FIG }), say: "شکل ۹.۹: پارتیشن، بعد replica ۱ قلم A را برمی‌دارد و B را می‌افزاید و replica ۲ قلم C را می‌افزاید. هر دو در دسترس بودند و حالا دو سبد متفاوت دارند." },
+      { kind: "ok", run: at({ ops: FIG.concat([["h"]]) }), say: function () { return "قاعده‌ی کتاب، افزودن می‌برد: merge اجتماع دو سبد است و نتیجه " + res("adds") + ". چیزی که مشتری افزوده گم نمی‌شود، ولی A حذف‌شده برمی‌گردد."; } },
+      { kind: "bad", run: at({ rule: "lww", ops: FIG.concat([["h"]]) }), say: function () { return "آخرین نوشتن می‌برد: replica ۲ آخر عوض شده، پس سبدش کل سبد می‌شود: " + res("lww") + ". افزودن B بی‌صدا از دست رفت."; } },
+      { kind: "warn", run: at({ rule: "gset", ops: FIG.concat([["h"]]) }), say: function () { return "مجموعه‌ی فقط‌رشدی: merge آن اجتماع است و همیشه هم‌گرا می‌شود، ولی برداشتن را اصلاً بیان نمی‌کند. نتیجه " + res("gset") + "."; } },
+      { kind: "ok", run: at({ rule: "orset", ops: FIG.concat([["h"]]) }), say: function () { return "مجموعه‌ی observed-remove هر افزودن را برچسب می‌زند و برداشتن فقط برچسب‌های دیده‌شده را خط می‌زند. نتیجه " + res("orset") + ": برداشتن A می‌ماند."; } },
+      { kind: "ok", run: at({ rule: "orset", ops: [["p"], [0, "-", "A"], [1, "+", "A"], ["h"]] }), say: "افزودن هم‌زمان: replica ۱ قلم A را برمی‌دارد و replica ۲ هم‌زمان A را دوباره می‌افزاید. برچسب تازه را کسی برنداشته، پس A می‌ماند." }
+    ]
   });
-  reset();
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "در شکل ۹.۹، چرا قلم A برمی‌گردد؟",

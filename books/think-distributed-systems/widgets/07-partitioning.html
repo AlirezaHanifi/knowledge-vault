@@ -4,19 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>پارتیشن‌بندی و متوازن کردن</title>
-<meta name="description" content="بیست هزار کلمه‌ی ساختگی را با بازه‌ی حرف اول و با hash moduleی و با consistent hashing به پارتیشن‌ها تخصیص بدهید؛ شمار پارتیشن را از پنج به شش عوض کنید تا واریانس و جابه‌جایی را مقایسه کنید؛ بعد پارتیشن‌ها را روی نودها متوازن کنید و ببینید over-partitioning کجا تمام می‌شود. تصویری از فصل ۷ کتاب Think Distributed Systems.">
+<meta name="description" content="بیست هزار کلمه‌ی ساختگی را با بازه‌ی حرف اول و با hash mod n و با consistent hashing به پارتیشن‌ها تخصیص بدهید؛ شمار پارتیشن را از پنج به شش عوض کنید تا واریانس و جابه‌جایی را مقایسه کنید؛ بعد پارتیشن‌ها را روی نودها متوازن کنید و ببینید over-partitioning کجا تمام می‌شود. تصویری از فصل ۷ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bars { display: grid; gap: 4px; } .bar { display: grid; grid-template-columns: 5.5em 1fr 4.5em; gap: 6px; align-items: center; font-size: .8rem; font-family: var(--mono); }
+  .pp { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 6px; }
+  .bars { display: grid; gap: 4px; } .bar { display: grid; grid-template-columns: 4.5em 1fr 3.8em; gap: 6px; align-items: center; font-size: .8rem; }
   .bar .track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px; height: 14px; position: relative; }
   .bar .fill { background: var(--accent); height: 100%; border-radius: 3px; } .bar .fill.hot { background: var(--bad); }
-  .bar .ideal { position: absolute; top: -2px; bottom: -2px; border-left: 2px dashed var(--ink); }
+  .bar .ideal { position: absolute; top: -3px; bottom: -3px; border-inline-start: 2px dashed var(--ink); }
+  .split { display: flex; height: 22px; border-radius: 4px; overflow: hidden; margin-top: 4px; border: 1px solid var(--line-strong); }
+  .split .st { background: var(--ok); } .split .mv { background: repeating-linear-gradient(45deg, var(--bad), var(--bad) 5px, var(--bad-soft) 5px, var(--bad-soft) 10px); }
+  .slab { display: flex; justify-content: space-between; font-size: .8rem; margin-top: 3px; }
+  .nodes { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 4px; }
+  .nd { border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 2px 4px; line-height: 1.2; text-align: center; font-size: .8rem; background: var(--surface-2); }
+  .nd.idle { border-color: var(--bad); background: var(--bad-soft); border-style: dashed; } .nd b { display: block; }
+  .nd .dots { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; min-height: 10px; margin: 3px 0; } .nd .dots span { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); }
+  .note { font-size: .82rem; margin: 8px 0 0; color: var(--ink-2); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/07-partitioning.html">فصل ۷</a><span aria-hidden="true">/</span>
@@ -27,57 +37,65 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۷ · پارتیشن‌بندی</div>
-  <h1>پارتیشن‌بندی و متوازن کردن</h1>
-  <p class="lede"><strong>پارتیشن‌بندی</strong> قلم‌ها را به پارتیشن‌ها تخصیص می‌دهد؛ و <strong>متوازن کردن</strong> پارتیشن‌ها را به نودها. راهبرد تخصیص را با <strong>واریانس</strong>، یعنی این‌که قلم‌ها چقدر یکنواخت پخش می‌شوند، و <strong>جابه‌جایی</strong>، یعنی این‌که وقتی شمار پارتیشن‌ها عوض می‌شود چند قلم جابه‌جا می‌شوند، می‌سنجند. آزمایش کتاب پارتیشن‌بندی بازه‌ای را نامتوازن یافت، hash کردن را متوازن ولی آشوب‌گر، و consistent hashing را در هر دو خوب.</p>
-  <p class="source-note">تصویری از «راهبردهای رایج تخصیص قلم‌محور» و «پارتیشن‌بندی دوباره» و «consistent hashing» و «متوازن کردن و over-partitioning» (صص. ۹۷–۱۰۴، فهرست‌های ۷.۳ تا ۷.۹، جدول ۷.۲، شکل‌های ۷.۹ و ۷.۱۰). کتاب فایل <code>/usr/share/dict/words</code> را به کار برد؛ این صفحه بیست هزار کلمه با توزیع تقریبی حرف اول انگلیسی می‌سازد، پس شمارش‌ها با کتاب فرق دارند ولی الگو همان است. تابع hash یعنی FNV-1a و صد نود مجازی برای هر پارتیشن مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>پارتیشن‌بندی و متوازن کردن</h1>
+      <p class="lede"><strong>پارتیشن‌بندی</strong> قلم‌ها را به پارتیشن‌ها تخصیص می‌دهد؛ و <strong>متوازن کردن</strong> پارتیشن‌ها را به نودها. راهبرد تخصیص را با <strong>واریانس</strong>، یعنی این‌که قلم‌ها چقدر یکنواخت پخش می‌شوند، و <strong>جابه‌جایی</strong>، یعنی این‌که وقتی شمار پارتیشن‌ها عوض می‌شود چند قلم جابه‌جا می‌شوند، می‌سنجند. آزمایش کتاب پارتیشن‌بندی بازه‌ای را نامتوازن یافت، hash کردن را متوازن ولی آشوب‌گر، و consistent hashing را در هر دو خوب.</p>
+      <p class="source-note">تصویری از «راهبردهای رایج تخصیص قلم‌محور» و «پارتیشن‌بندی دوباره» و «consistent hashing» و «متوازن کردن و over-partitioning» (صص. ۹۷–۱۰۴، فهرست‌های ۷.۳ تا ۷.۹، جدول ۷.۲، شکل‌های ۷.۹ و ۷.۱۰). کتاب فایل <code>/usr/share/dict/words</code> را به کار برد؛ این صفحه بیست هزار کلمه با توزیع تقریبی حرف اول انگلیسی می‌سازد، پس شمارش‌ها با کتاب فرق دارند ولی الگو همان است. تابع hash یعنی FNV-1a و صد نود مجازی برای هر پارتیشن مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="ptitle">قلم‌ها به‌تفکیک پارتیشن</p><div class="bars" id="bars"></div>
-        <div class="callout" id="move" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">متوازن کردن پارتیشن‌ها روی نودها</p><div id="bal"></div><div class="bars" id="nodes" style="margin-top:8px"></div>
-        <div class="callout" id="balv" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="strat"></div><div id="np" style="margin-top:10px"></div><div id="psl" style="margin-top:14px"></div><div id="nsl"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="pp">
+          <div><p class="ptitle" id="ptitle"></p><div class="bars" id="bars"></div>
+            <p class="ptitle" style="margin-top:12px">رفتن از ۵ به ۶ پارتیشن: چند قلم سر جایشان می‌مانند؟</p>
+            <div class="split" id="split" role="img"></div><div class="slab"><span id="lst"></span><span id="lmv"></span></div></div>
+          <div><p class="ptitle" id="ntitle"></p><div class="nodes" id="nodes"></div><p class="note" id="nnote"></p></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="strat"></div>
+        <div class="tweak-group" id="np"></div>
+        <div class="tweak-group" id="psl"></div>
+        <div class="tweak-group" id="nsl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>بازه بر حسب حرف اول</strong> از زبان پی می‌گیرد: پارتیشن‌هایی که a–e و p–t را دارند نقطه‌ی داغ‌اند، چنان‌که در فهرست ۷.۴ کتاب.</li>
-    <li><strong>عبارت hash mod n</strong> تقریباً بی‌عیب متوازن است، ولی رفتن از پنج به شش پارتیشن قلمی را تنها وقتی سر جایش نگه می‌دارد که h module ۵ برابر h module ۶ باشد، پس تقریباً پنج‌ششم قلم‌ها جابه‌جا می‌شوند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>بازه بر حسب حرف اول</strong> از زبان پی می‌گیرد: پارتیشن‌هایی که a–e و p–t را دارند نقطه‌ی داغ‌اند، چنان‌که در فهرست ۷.۴ کتاب.</li>
+    <li><strong>عبارت hash mod n</strong> تقریباً بی‌عیب متوازن است، ولی رفتن از پنج به شش پارتیشن قلمی را تنها وقتی سر جایش نگه می‌دارد که باقی‌مانده‌ی h بر ۵ و بر ۶ برابر باشد، پس تقریباً پنج‌ششم قلم‌ها جابه‌جا می‌شوند.</li>
     <li><strong>consistent hashing</strong> تنها همان کمان‌هایی را جابه‌جا می‌کند که پارتیشن تازه تحویل می‌گیرد، یعنی تقریباً یک‌ششم قلم‌ها، و در همان حال تقریباً متوازن می‌ماند.</li>
     <li><strong>over-partitioning</strong> می‌گذارد نودها با جابه‌جا کردن کل پارتیشن‌ها بیایند و بروند، ولی همین که نودها به شمار پارتیشن‌ها رسیدند، نودهای بیشتر بی‌کار می‌مانند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/07-partitioning.html"><small>درس</small>فصل ۷: پارتیشن‌بندی</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/07-partitioning.html"><small>درس</small>فصل ۷: پارتیشن‌بندی</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { s: "range", n: 5, P: 12, N: 4 };
+  var SN = { range: "بازه بر حسب حرف اول", hash: "hash mod n", ch: "consistent hashing" };
+  var DEF = { s: "range", n: 5, P: 12, N: 4 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind, memo = {};
   var FREQ = { a: 6.1, b: 5.7, c: 9.4, d: 5.9, e: 4.0, f: 3.9, g: 3.3, h: 3.9, i: 3.8, j: 0.8, k: 1.0, l: 3.2, m: 5.6, n: 3.1, o: 3.6, p: 9.4, q: 0.5, r: 5.0, s: 11.0, t: 5.3, u: 3.3, v: 1.5, w: 2.0, x: 0.1, y: 0.3, z: 0.3 };
   var LET = Object.keys(FREQ), TOT = LET.reduce(function (a, l) { return a + FREQ[l]; }, 0);
   var r = Kit.rng(42), words = [], seen = {};
@@ -91,51 +109,74 @@ function stats(rows) {
   var RANGES = { 5: ["abcde", "fghij", "klmno", "pqrst", "uvwxyz"], 6: ["abcd", "efgh", "ijkl", "mnop", "qrst", "uvwxyz"] };
   var rings = {};
   function ring(n) { if (rings[n]) return rings[n]; var pts = []; for (var p = 0; p < n; p++) for (var v = 0; v < 100; v++) pts.push([fnv("partition-" + p + "-vnode-" + v), p]); pts.sort(function (a, b) { return a[0] - b[0]; }); return (rings[n] = pts); }
-  function place(i, n) {
-    if (cfg.s === "range") { var c = words[i][0], g = RANGES[n]; for (var k = 0; k < g.length; k++) if (g[k].indexOf(c) >= 0) return k; }
-    if (cfg.s === "hash") return HW[i] % n;
+  function place(s, i, n) {
+    if (s === "range") { var c = words[i][0], g = RANGES[n]; for (var k = 0; k < g.length; k++) if (g[k].indexOf(c) >= 0) return k; }
+    if (s === "hash") return HW[i] % n;
     var pts = ring(n), h = HW[i], lo = 0, hi = pts.length;
     while (lo < hi) { var mid = (lo + hi) >> 1; if (pts[mid][0] < h) lo = mid + 1; else hi = mid; }
     return pts[lo % pts.length][1];
   }
-  function bars(el, counts, label, ideal) {
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function measure(s, n) { var key = s + n; if (memo[key]) return memo[key];
+    var counts = new Array(n).fill(0), same = 0;
+    for (var i = 0; i < words.length; i++) { var a = place(s, i, n); counts[a]++; if (place(s, i, 5) === place(s, i, 6)) same++; }
+    var ideal = words.length / n, sd = Math.sqrt(counts.reduce(function (a, c) { return a + (c - ideal) * (c - ideal); }, 0) / n);
+    return (memo[key] = { counts: counts, same: same, stay: same / words.length, ideal: ideal, sd: sd, max: Math.max.apply(null, counts), min: Math.min.apply(null, counts) }); }
+  function bal(P, N) { var per = new Array(N).fill(0); for (var p = 0; p < P; p++) per[p % N]++; return { per: per, idle: per.filter(function (x) { return !x; }).length, mx: Math.max.apply(null, per), mn: Math.min.apply(null, per), moved: Math.floor(P / (N + 1)) }; }
+  function bars(el, counts, label, ideal, unit) {
     var b = Kit.clear(el), max = Math.max.apply(null, counts.concat([ideal * 1.6]));
-    counts.forEach(function (c, i) {
-      var tr = Kit.el("div", { class: "track" }, Kit.el("div", { class: "fill" + (c > ideal * 1.25 ? " hot" : ""), style: "width:" + (100 * c / max) + "%" }), Kit.el("div", { class: "ideal", style: "left:" + (100 * ideal / max) + "%" }));
-      b.appendChild(Kit.el("div", { class: "bar", role: "img", "aria-label": label(i) + ": " + c + (c > ideal * 1.25 ? "، نقطه‌ی داغ" : "") }, Kit.el("span", null, label(i)), tr, Kit.el("span", null, String(c))));
-    });
-  }
+    counts.forEach(function (c, i) { var hot = c > ideal * 1.25;
+      b.appendChild(Kit.el("div", { class: "bar", role: "img", "aria-label": label(i) + ": " + c + (hot ? "، نقطه‌ی داغ" : "") }, Kit.el("span", null, label(i)),
+        Kit.el("div", { class: "track" }, Kit.el("div", { class: "fill" + (hot ? " hot" : ""), style: "width:" + (100 * c / max) + "%" }), Kit.el("div", { class: "ideal", style: "inset-inline-start:" + (100 * ideal / max) + "%" })),
+        Kit.el("span", null, String(c) + (unit || "")))); }); }
   function render() {
-    var n = cfg.n, counts = new Array(n).fill(0), same = 0;
-    for (var i = 0; i < words.length; i++) { var a = place(i, n); counts[a]++; if (place(i, 5) === place(i, 6)) same++; }
-    var ideal = words.length / n;
-    document.getElementById("ptitle").textContent = "قلم‌ها به‌تفکیک پارتیشن؛ " + n + " پارتیشن، و خط‌چین آرمان " + Math.round(ideal) + " است";
-    bars(document.getElementById("bars"), counts, function (i) { return cfg.s === "range" ? RANGES[n][i][0] + "–" + RANGES[n][i].slice(-1) : "P" + i; }, ideal);
-    var sd = Math.sqrt(counts.reduce(function (a, c) { return a + (c - ideal) * (c - ideal); }, 0) / n);
-    var stay = same / words.length, mv = document.getElementById("move");
-    mv.className = "callout " + (stay > 0.75 ? "ok" : stay > 0.4 ? "warn" : "bad");
-    mv.textContent = "رفتن از پنج به شش پارتیشن: " + same + " قلم می‌مانند (" + Kit.pct(stay, 1) + ")، و " + (words.length - same) + " قلم جابه‌جا می‌شوند (" + Kit.pct(1 - stay, 1) + ").";
-    var P = cfg.P, N = cfg.N, per = new Array(N).fill(0); for (var p = 0; p < P; p++) per[p % N]++;
-    var load = per.map(function (x) { return x * (words.length / P); }).map(Math.round);
-    bars(document.getElementById("nodes"), load, function (i) { return "نود " + (i + 1); }, words.length / N);
-    var idle = per.filter(function (x) { return x === 0; }).length, bv = document.getElementById("balv");
-    var maxL = Math.max.apply(null, per), minL = Math.min.apply(null, per);
-    var moved = Math.floor(P / (N + 1));
-    if (idle) { bv.className = "callout bad"; bv.textContent = idle + " نود از " + N + " نود هیچ پارتیشنی ندارند: آن " + P + " پارتیشن cluster را سر " + P + " نود سودمند سقف می‌زنند."; }
-    else if (maxL !== minL) { bv.className = "callout warn"; bv.textContent = "هر نودی " + minL + " تا " + maxL + " پارتیشن دارد: " + P + " پارتیشن بر " + N + " نود یکنواخت بخش نمی‌شود."; }
-    else { bv.className = "callout ok"; bv.textContent = "هر نودی " + maxL + " پارتیشن دارد. افزودن نودی یعنی جابه‌جا کردن تقریباً " + moved + " پارتیشن کامل به آن."; }
-    stats([["راهبرد", ({ range: "بازه بر حسب حرف اول", hash: "hash mod n", ch: "consistent hashing" })[cfg.s]], ["انحراف معیار هر پارتیشن", Math.round(sd), sd > ideal * 0.15 ? "bad" : "ok"], ["ماندن سر پنج به شش", Kit.pct(stay, 1), stay > 0.75 ? "ok" : "bad"], ["پارتیشن و نود", P + " / " + N]]);
+    var m = measure(view.s, view.n);
+    document.getElementById("ptitle").textContent = "قلم‌ها در هر پارتیشن، با " + SN[view.s] + "؛ خط‌چین سهم برابر، یعنی " + Math.round(m.ideal) + " قلم";
+    bars(document.getElementById("bars"), m.counts, function (i) { return view.s === "range" ? RANGES[view.n][i][0] + "–" + RANGES[view.n][i].slice(-1) : "P" + i; }, m.ideal);
+    var sp = Kit.clear(document.getElementById("split")); sp.setAttribute("aria-label", Kit.pct(m.stay, 1) + " می‌مانند و " + Kit.pct(1 - m.stay, 1) + " جابه‌جا می‌شوند");
+    sp.appendChild(Kit.el("div", { class: "st", style: "width:" + 100 * m.stay + "%" })); sp.appendChild(Kit.el("div", { class: "mv", style: "width:" + 100 * (1 - m.stay) + "%" }));
+    document.getElementById("lst").textContent = "می‌مانند: " + Kit.pct(m.stay, 1); document.getElementById("lmv").textContent = "جابه‌جا: " + Kit.pct(1 - m.stay, 1);
+    var B = bal(view.P, view.N);
+    document.getElementById("ntitle").textContent = "متوازن کردن: " + view.P + " پارتیشن روی " + view.N + " نود";
+    var nd = Kit.clear(document.getElementById("nodes")); B.per.forEach(function (c, i) { var t = Kit.el("div", { class: "nd" + (c ? "" : " idle"), "aria-label": "نود " + (i + 1) + ": " + c + " پارتیشن" }, Kit.el("small", null, "نود " + (i + 1)));
+      var dots = Kit.el("div", { class: "dots" }); for (var d = 0; d < c; d++) dots.appendChild(Kit.el("span")); t.appendChild(dots); t.appendChild(Kit.el("b", null, c ? String(c) : "بی‌کار")); nd.appendChild(t); });
+    var nn = document.getElementById("nnote");
+    nn.textContent = B.idle ? B.idle + " نود از " + view.N + " نود بی‌کارند: " + view.P + " پارتیشن سقف شمار نودهای سودمند است." : B.mx !== B.mn ? "هر نود " + B.mn + " تا " + B.mx + " پارتیشن دارد: " + view.P + " بر " + view.N + " بخش‌پذیر نیست." : "هر نود " + B.mx + " پارتیشن دارد؛ افزودن نود یعنی جابه‌جا کردن حدود " + B.moved + " پارتیشن کامل.";
+    var hot = m.max > m.ideal * 1.25; kind = hot || m.stay < 0.4 ? "bad" : m.stay < 0.75 ? "warn" : "ok";
+    msg = SN[view.s] + ": " + (hot ? "نقطه‌ی داغ دارد، " : "متوازن است، ") + "و سر ۵ به ۶ " + Kit.pct(1 - m.stay, 1) + " قلم‌ها جابه‌جا می‌شوند.";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["انحراف معیار", Math.round(m.sd), m.sd > m.ideal * 0.15 ? "bad" : "ok"], ["بزرگ‌ترین / کوچک‌ترین", m.max + " / " + m.min], ["ماندن سر ۵ به ۶", Kit.pct(m.stay, 1), m.stay > 0.75 ? "ok" : "bad"], ["نود بی‌کار", B.idle, B.idle ? "bad" : "ok"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || ""), style: "direction:ltr;unicode-bidi:isolate" }, String(x[1])))); });
+    ctl.s.set(view.s); ctl.n.set(String(view.n)); ctl.P.set(view.P); ctl.N.set(view.N);
   }
-  document.getElementById("strat").appendChild(Kit.segmented({ label: "تخصیص", value: cfg.s, options: [{ value: "range", label: "بازه" }, { value: "hash", label: "hash mod n" }, { value: "ch", label: "consistent hashing" }], onChange: function (v) { cfg.s = v; log.add("راهبرد: " + ({ range: "بازه", hash: "hash mod n", ch: "consistent hashing" })[v], "muted"); render(); } }).element);
-  document.getElementById("np").appendChild(Kit.segmented({ label: "پارتیشن‌های نشان‌داده‌شده", value: "5", options: [{ value: "5", label: "۵" }, { value: "6", label: "۶" }], onChange: function (v) { cfg.n = +v; log.add("نمایش " + v + " پارتیشن", "muted"); render(); } }).element);
-  document.getElementById("psl").appendChild(Kit.slider({ label: "پارتیشن‌ها، برای متوازن کردن", min: 2, max: 24, step: 1, value: cfg.P, onInput: function (v) { cfg.P = v; render(); } }).element);
-  document.getElementById("nsl").appendChild(Kit.slider({ label: "نودها", min: 1, max: 24, step: 1, value: cfg.N, onInput: function (v) { cfg.N = v; render(); } }).element);
-  log.add("بیست هزار کلمه‌ی ساختگی ساخته شد، با seed ۴۲.", "muted");
-  render();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.s = Kit.segmented({ label: "تخصیص", value: DEF.s, options: [{ value: "range", label: "بازه" }, { value: "hash", label: "hash mod n" }, { value: "ch", label: "consistent hashing" }], onChange: tw(function (v) { view.s = v; }) });
+  ctl.n = Kit.segmented({ label: "شمار پارتیشن‌ها", value: "5", options: [{ value: "5", label: "۵" }, { value: "6", label: "۶" }], onChange: tw(function (v) { view.n = +v; }) });
+  ctl.P = Kit.slider({ label: "پارتیشن‌ها، برای متوازن کردن", min: 2, max: 24, step: 1, value: DEF.P, onInput: tw(function (v) { view.P = v; }) });
+  ctl.N = Kit.slider({ label: "نودها", min: 1, max: 24, step: 1, value: DEF.N, onInput: tw(function (v) { view.N = v; }) });
+  ["strat", "np", "psl", "nsl"].forEach(function (id, i) { document.getElementById(id).appendChild([ctl.s, ctl.n, ctl.P, ctl.N][i].element); });
+  function mv(s) { return Kit.pct(1 - measure(s, 5).stay, 0); }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "بیست هزار کلمه‌ی ساختگی، به پنج و بعد شش پارتیشن (صص. ۹۷–۱۰۴، جدول ۷.۲). کتاب فایل کلمه‌های دیکشنری را به کار برد؛ این‌جا کلمه‌ها، تابع hash و صد نود مجازی مدل vault است، پس شمارش‌ها فرق دارند ولی الگو همان است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و راهبرد، شمار پارتیشن و نودها را عوض کنید.",
+    steps: [
+      { kind: "bad", run: at({}), say: function () { var m = measure("range", 5); return "بازه بر حسب حرف اول به توزیع حرف‌ها در زبان بستگی دارد: پارتیشن‌ها از " + m.min + " تا " + m.max + " قلم دارند و میله‌های قرمز نقطه‌ی داغ‌اند، مثل فهرست ۷.۴ کتاب."; } },
+      { kind: "warn", run: at({ n: 6 }), say: function () { return "با رفتن از ۵ به ۶ پارتیشن، مرزهای بازه جابه‌جا می‌شوند و " + mv("range") + " قلم‌ها جابه‌جا می‌شوند. در آزمایش کتاب این عدد ۵۱٫۴٪ بود."; } },
+      { kind: "ok", run: at({ s: "hash" }), say: function () { var m = measure("hash", 5); return "عبارت hash mod n تقریباً بی‌عیب متوازن است: انحراف معیار فقط " + Math.round(m.sd) + " قلم، کنار سهم برابر " + Math.round(m.ideal) + "."; } },
+      { kind: "bad", run: at({ s: "hash", n: 6 }), say: function () { return "ولی قلمی فقط وقتی سر جایش می‌ماند که باقی‌مانده‌اش بر ۵ و بر ۶ یکی باشد: حدود یک‌ششم. پس " + mv("hash") + " جابه‌جا می‌شوند؛ کتاب ۸۳٫۳٪ گزارش کرد."; } },
+      { kind: "ok", run: at({ s: "ch", n: 6 }), say: function () { return "در consistent hashing پارتیشن تازه فقط کمان‌هایی از حلقه را می‌گیرد، حدود یک‌ششم: " + mv("ch") + " جابه‌جا می‌شوند، و توازن هم تقریباً می‌ماند. کتاب ۱۸٫۵٪ گزارش کرد."; } },
+      { kind: "ok", run: at({ s: "ch", P: 12, N: 4 }), say: function () { var b = bal(12, 4); return "حالا متوازن کردن: ۱۲ پارتیشن روی ۴ نود یعنی " + b.mx + " پارتیشن برای هر نود. با over-partitioning، افزودن نود یعنی جابه‌جا کردن چند پارتیشن کامل (ص. ۱۰۴)."; } },
+      { kind: "bad", run: at({ s: "ch", P: 12, N: 16 }), say: function () { var b = bal(12, 16); return "ولی همین که نودها از پارتیشن‌ها بیشتر شوند، " + b.idle + " نود از ۱۶ نود بی‌کار می‌مانند: شمار پارتیشن‌ها سقف شمار نودهای سودمند است."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "کدام راهبرد واریانس را کمینه می‌کند ولی سر عوض شدن پارتیشن‌ها بیشترین قلم را جابه‌جا می‌کند؟",
-      options: ["پارتیشن‌بندی بازه‌ای", "hash moduleی", "consistent hashing"], answer: 1,
+      options: ["پارتیشن‌بندی بازه‌ای", "hash mod n", "consistent hashing"], answer: 1,
       explain: "جدول ۷.۲ (ص. ۱۰۲): در اجرای کتاب ۸۳٫۳٪ جابه‌جا شدند." },
     { q: "با consistent hashing، از n قلم تقریباً چند تا وقتی m پارتیشن هست جابه‌جا می‌شوند؟",
       options: ["n/m", "n/2", "همه‌شان"], answer: 0,

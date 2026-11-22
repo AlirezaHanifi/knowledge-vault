@@ -7,17 +7,22 @@
 <meta name="description" content="شکل‌های ۲.۱۱ و ۲.۱۲ را replay کنید: دو proposer +۲ و ×۲ را به دو acceptor پخش می‌کنند. ترتیب تحویل شبکه را بر هم بزنید و واگرا شدن acceptorها را ببینید، بعد درخواست‌ها را از یک coordinator رد کنید که برچسبشان می‌زند تا acceptorها بتوانند مرتبشان کنند. تصویری از فصل ۲ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .accs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .acc { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; background: var(--surface-2); }
-  .acc h3 { margin: 0 0 4px; font-size: .9rem; } .acc .v { font-size: 1.6rem; font-weight: 700; font-family: var(--mono); }
-  .acc .q { font-family: var(--mono); font-size: .8rem; color: var(--muted); min-height: 1.2em; }
-  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .co { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
+  .row3 { display: flex; gap: 8px; align-items: stretch; margin-bottom: 8px; }
+  .box { flex: 1; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); }
+  .box h3 { margin: 0 0 2px; font-size: .88rem; } .box .v { font-size: 2rem; font-weight: 700; font-family: var(--mono); line-height: 1.1; }
+  .box .q { font-size: .8rem; color: var(--ink-2); min-height: 1.2em; } .box.c { border-style: dashed; } .box.off { opacity: .35; }
+  .box.bad { border-color: var(--bad); background: var(--bad-soft); } .box.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .op { font-family: var(--mono); direction: ltr; unicode-bidi: isolate; font-weight: 700; }
+  ol.steps { margin: 0; padding-inline-start: 1.4em; font-size: .86rem; line-height: 1.7; } ol.steps li.fut { color: var(--ink-3); } ol.steps li.now { font-weight: 700; color: var(--accent); }
+  ol.steps li.hold { color: var(--warn); }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 6px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/02-system-models-order-and-time.html">فصل ۲</a><span aria-hidden="true">/</span>
@@ -28,115 +33,125 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۲ · مدل سیستم، ترتیب و زمان</div>
-  <h1>proposer و acceptor و یک coordinator</h1>
-  <p class="lede">proposer P1 عملیات <strong>(+۲)</strong> را می‌فرستد و proposer P2 عملیات <strong>(×۲)</strong> را. دو acceptor از ۰ شروع می‌کنند و درخواست‌ها را به همان ترتیبی که می‌رسند اعمال می‌کنند. آن عملیات commutative نیستند، پس ترتیب‌های مختلف رسیدن acceptorها را با مقدارهای مختلف می‌گذارند. یک <strong>coordinator</strong> که هر درخواستی را با شماره‌ی ترتیب برچسب می‌زند می‌گذارد acceptorها به ترتیب برچسب اعمالشان کنند، هر ترتیبی که شبکه تحویلشان بدهد.</p>
-  <p class="source-note">تصویری از «ترتیب و زمان» (صص. ۳۰–۳۲، شکل‌های ۲.۱۱ و ۲.۱۲). ترتیب‌های تصادفی تحویل و آن seed و شمارنده‌ی کوشش مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>proposer و acceptor و یک coordinator</h1>
+      <p class="lede">proposer P1 عملیات <strong>(+۲)</strong> را می‌فرستد و proposer P2 عملیات <strong>(×۲)</strong> را. دو acceptor از ۰ شروع می‌کنند و درخواست‌ها را به همان ترتیبی که می‌رسند اعمال می‌کنند. آن عملیات commutative نیستند، پس ترتیب‌های مختلف رسیدن acceptorها را با مقدارهای مختلف می‌گذارند. یک <strong>coordinator</strong> که هر درخواستی را با شماره‌ی ترتیب برچسب می‌زند می‌گذارد acceptorها به ترتیب برچسب اعمالشان کنند، هر ترتیبی که شبکه تحویلشان بدهد.</p>
+      <p class="source-note">تصویری از «ترتیب و زمان» (صص. ۳۰–۳۲، شکل‌های ۲.۱۱ و ۲.۱۲). ترتیب‌های تصادفی تحویل و آن seed و شمارنده‌ی کوشش مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="kv" id="coord"></div><div class="accs" id="accs" style="margin-top:8px"></div>
-        <div class="callout" id="out" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div><div class="btns"><button class="btn small" id="shuffle">ترتیب تحویل تازه</button><button class="btn small" id="many">هزار کوشش تصادفی را اجرا کن</button></div>
-        <div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="co">
+          <div>
+            <div class="row3" id="props"></div>
+            <div class="row3" id="coord"></div>
+            <div class="row3" id="accs"></div>
+          </div>
+          <div><p class="ptitle">تحویل‌ها به ترتیب</p><ol class="steps" id="steps"></ol></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>بی coordinator</strong>، acceptorی که اول (+۲) و بعد (×۲) را بگیرد در ۴ تمام می‌کند، و آن یکی که اول (×۲) و بعد (+۲) را بگیرد در ۲، که همان شکل ۲.۱۱ است.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>بی coordinator</strong>، acceptorی که اول (+۲) و بعد (×۲) را بگیرد در ۴ تمام می‌کند، و آن یکی که اول (×۲) و بعد (+۲) را بگیرد در ۲، که همان شکل ۲.۱۱ است.</li>
     <li><strong>با coordinator</strong>، آن ترتیبی که C خودش آن دو درخواست را می‌گیرد <em>همان</em> ترتیب می‌شود. هر کدام پذیرفتنی است، چون proposerها هیچ‌وقت هم‌آهنگ نکردند.</li>
     <li><strong>acceptorی که برچسب ۱ را پیش از برچسب ۰ ببیند</strong> می‌داند قدمی را جا انداخته و درخواست را نگه می‌دارد تا آن گم‌شده برسد (شکل ۲.۱۲).</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/02-system-models-order-and-time.html"><small>درس</small>فصل ۲: مدل سیستم، ترتیب و زمان</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/02-system-models-order-and-time.html"><small>درس</small>فصل ۲: مدل سیستم، ترتیب و زمان</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { mode: "direct" }, seed = 3, rng, steps, k, A, C, tags, trials = null;
   var REQ = { P1: { op: "+2", f: function (x) { return x + 2; } }, P2: { op: "×2", f: function (x) { return x * 2; } } };
-  function order() { return rng.chance(0.5) ? ["P1", "P2"] : ["P2", "P1"]; }
-  function plan() {
-    rng = Kit.rng(seed); steps = [];
-    if (cfg.mode === "direct") {
-      ["A1", "A2"].forEach(function (a) { order().forEach(function (p) { steps.push({ k: "deliver", a: a, p: p }); }); });
-      steps.sort(function () { return 0; });
-      var mix = []; for (var i = 0; i < 2; i++) { mix.push(steps[i]); mix.push(steps[i + 2]); } steps = mix;
-    } else {
-      var co = order(); co.forEach(function (p, i) { steps.push({ k: "tag", p: p, t: i }); });
-      ["A1", "A2"].forEach(function (a) { var o = order(); o.forEach(function (p) { steps.push({ k: "deliver", a: a, p: p, tagged: true }); }); });
-      var d = steps.slice(2), m2 = []; for (var j = 0; j < 2; j++) { m2.push(d[j]); m2.push(d[j + 2]); } steps = steps.slice(0, 2).concat(m2);
-    }
+  var DEF = { mode: "direct", seed: 3, k: 0 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind, steps, A, C, tags, notes;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function plan(mode, seed) { var rng = Kit.rng(seed), st = [], order = function () { return rng.chance(0.5) ? ["P1", "P2"] : ["P2", "P1"]; };
+    if (mode === "direct") { var d = []; ["A1", "A2"].forEach(function (a) { order().forEach(function (p) { d.push({ k: "deliver", a: a, p: p }); }); }); st = [d[0], d[2], d[1], d[3]]; }
+    else { order().forEach(function (p, i) { st.push({ k: "tag", p: p, t: i }); }); var e = []; ["A1", "A2"].forEach(function (a) { order().forEach(function (p) { e.push({ k: "deliver", a: a, p: p, tagged: true }); }); }); st = st.concat([e[0], e[2], e[1], e[3]]); }
+    return st; }
+  function sim(mode, seed, k) {
+    var st = plan(mode, seed), A = { A1: { v: 0, next: 0, buf: [], seen: [] }, A2: { v: 0, next: 0, buf: [], seen: [] } }, C = 0, tags = {}, notes = [];
+    function apply(a, p) { A[a].v = REQ[p].f(A[a].v); A[a].seen.push(REQ[p].op); }
+    for (var i = 0; i < Math.min(k, st.length); i++) { var s = st[i];
+      if (s.k === "tag") { tags[s.p] = C; notes.push(["برچسب‌زنی: coordinator عملیات " + REQ[s.p].op + " از " + s.p + " را برچسب " + C + " می‌زند", ""]); C++; }
+      else if (!s.tagged) { apply(s.a, s.p); notes.push(["در " + s.a + "، عملیات " + REQ[s.p].op + " می‌رسد و اعمال می‌شود: " + A[s.a].v, ""]); }
+      else { var acc = A[s.a], t = tags[s.p];
+        if (t !== acc.next) { acc.buf.push(s.p); notes.push(["در " + s.a + "، برچسب " + t + " می‌رسد ولی منتظر " + acc.next + " است: نگه داشته می‌شود", "hold"]); }
+        else { apply(s.a, s.p); acc.next++; var n = "در " + s.a + "، برچسب " + t + " (" + REQ[s.p].op + ") اعمال می‌شود: " + acc.v;
+          acc.buf.slice().forEach(function (p) { if (tags[p] === acc.next) { apply(s.a, p); acc.next++; acc.buf.splice(acc.buf.indexOf(p), 1); n += "؛ سپس نگه‌داشته‌ی " + REQ[p].op + ": " + acc.v; } }); notes.push([n, ""]); } } }
+    return { st: st, A: A, C: C, notes: notes, done: k >= st.length };
   }
-  function reset() { plan(); k = 0; A = { A1: { v: 0, next: 0, buf: [] , seen: [] }, A2: { v: 0, next: 0, buf: [], seen: [] } }; C = 0; tags = {}; log.clear(); log.add(cfg.mode === "direct" ? "proposerها یک‌راست به هر دو acceptor پخش می‌کنند." : "proposerها به coordinator یعنی C می‌فرستند که C = 0 است، و آن برچسب می‌زند و پخش می‌کند.", "muted"); render(); }
-  function apply(a, p) { A[a].v = REQ[p].f(A[a].v); A[a].seen.push(REQ[p].op); }
-  function step() {
-    if (k >= steps.length) return false;
-    var s = steps[k++];
-    if (s.k === "tag") { tags[s.p] = C; log.add("مؤلفه‌ی C عملیات (" + REQ[s.p].op + ") را از " + s.p + " می‌گیرد، ⟨" + REQ[s.p].op + ", " + C + "⟩ برچسبش می‌زند و پخشش می‌کند؛ C = " + (C + 1), "muted"); C++; }
-    else if (!s.tagged) { apply(s.a, s.p); log.add("acceptor " + s.a + " عملیات (" + REQ[s.p].op + ") را از " + s.p + " می‌گیرد و اعمالش می‌کند: " + s.a + " = " + A[s.a].v, "muted"); }
-    else {
-      var acc = A[s.a], t = tags[s.p];
-      if (t !== acc.next) { acc.buf.push(s.p); log.add("acceptor " + s.a + " عملیات ⟨" + REQ[s.p].op + ", " + t + "⟩ را می‌گیرد ولی برچسب " + acc.next + " را چشم دارد: نگهش می‌دارد", "warn"); }
-      else {
-        apply(s.a, s.p); acc.next++; log.add("acceptor " + s.a + " عملیات ⟨" + REQ[s.p].op + ", " + t + "⟩ را اعمال می‌کند: " + s.a + " = " + acc.v, "ok");
-        acc.buf.slice().forEach(function (p) { if (tags[p] === acc.next) { apply(s.a, p); acc.next++; acc.buf.splice(acc.buf.indexOf(p), 1); log.add("acceptor " + s.a + " حالا آن نگه‌داشته‌ی ⟨" + REQ[p].op + ", " + tags[p] + "⟩ را اعمال می‌کند: " + s.a + " = " + acc.v, "ok"); } });
-      }
-    }
-    render(); return k < steps.length;
-  }
+  function seedWhere(mode, pred) { for (var s = 1; s < 200; s++) { var r = sim(mode, s, 99); if (pred(r)) return s; } return 1; }
+  var S_DIV = seedWhere("direct", function (r) { return r.A.A1.v !== r.A.A2.v; });
+  var S_SAME = seedWhere("direct", function (r) { return r.A.A1.v === r.A.A2.v; });
+  var S_HOLD = seedWhere("coord", function (r) { return r.notes.some(function (n) { return n[1] === "hold"; }); });
   function render() {
-    var cd = Kit.clear(document.getElementById("coord"));
-    cd.appendChild(Kit.el("div", null, Kit.el("span", null, "درخواست‌ها: "), Kit.el("strong", null, "P1 → (+2)، P2 → (×2)")));
-    if (cfg.mode === "coord") cd.appendChild(Kit.el("div", null, Kit.el("span", null, "coordinator یعنی C = "), Kit.el("strong", null, String(C))));
-    var box = Kit.clear(document.getElementById("accs"));
-    ["A1", "A2"].forEach(function (a) { box.appendChild(Kit.el("div", { class: "acc" }, Kit.el("h3", null, "acceptor " + a), Kit.el("div", { class: "v" }, String(A[a].v)), Kit.el("div", { class: "q" }, "اعمال‌شده: " + (A[a].seen.join("، ") || "–") + (A[a].buf.length ? " · نگه‌داشته " + A[a].buf.length : "")))); });
-    var out = document.getElementById("out"), fin = k >= steps.length;
-    if (!fin) { out.className = "callout"; out.textContent = "تحویل‌ها را قدم‌به‌قدم بگذرانید."; }
-    else if (A.A1.v === A.A2.v) { out.className = "callout ok"; out.textContent = "هر دو acceptor در " + A.A1.v + " تمام می‌کنند و عملیات را به همان ترتیب اعمال کردند."; }
-    else { out.className = "callout bad"; out.textContent = "acceptorها واگرا شدند: A1 = " + A.A1.v + "، A2 = " + A.A2.v + "."; }
-    var rows = [["قدم", k + " / " + steps.length], ["seed تحویل", seed]];
-    if (trials) rows.push(["واگرایی در هزار کوشش", trials.mode + ": " + trials.bad, trials.bad ? "bad" : "ok"]);
-    stats(rows);
+    var r = sim(view.mode, view.seed, view.k), coord = view.mode === "coord";
+    var Pp = Kit.clear(document.getElementById("props"));
+    ["P1", "P2"].forEach(function (p) { Pp.appendChild(Kit.el("div", { class: "box" }, Kit.el("h3", null, "proposer " + p), Kit.el("div", { class: "q" }, "درخواست: ", Kit.el("span", { class: "op" }, REQ[p].op)))); });
+    var Cc = Kit.clear(document.getElementById("coord"));
+    Cc.appendChild(Kit.el("div", { class: "box c" + (coord ? "" : " off") }, Kit.el("h3", null, coord ? "coordinator، شمارنده‌ی برچسب C = " + r.C : "coordinator ندارد: پخش یک‌راست")));
+    var Ac = Kit.clear(document.getElementById("accs")), fin = r.done;
+    ["A1", "A2"].forEach(function (a) { var x = r.A[a];
+      Ac.appendChild(Kit.el("div", { class: "box" + (fin ? (r.A.A1.v === r.A.A2.v ? " ok" : " bad") : "") }, Kit.el("h3", null, "acceptor " + a), Kit.el("div", { class: "v" }, String(x.v)),
+        Kit.el("div", { class: "q" }, "اعمال‌شده: ", Kit.el("span", { class: "op" }, x.seen.join(" , ") || "–"), x.buf.length ? " · " + x.buf.length + " نگه‌داشته" : ""))); });
+    var L = Kit.clear(document.getElementById("steps")), sim2 = sim(view.mode, view.seed, 99);
+    sim2.notes.forEach(function (n, i) { L.appendChild(Kit.el("li", { class: i < view.k ? (i === view.k - 1 ? "now" : n[1]) : "fut" }, i < view.k ? n[0] : "…")); });
+    if (!fin) { kind = ""; msg = "قدم " + view.k + " از " + r.st.length + "."; }
+    else if (r.A.A1.v === r.A.A2.v) { kind = "ok"; msg = "هر دو acceptor در " + r.A.A1.v + " تمام می‌کنند: عملیات را به یک ترتیب اعمال کردند."; }
+    else { kind = "bad"; msg = "acceptorها واگرا شدند: A1 = " + r.A.A1.v + " و A2 = " + r.A.A2.v + "."; }
+    var St = Kit.clear(document.getElementById("stats"));
+    [["قدم", view.k + " / " + r.st.length], ["seed تحویل", view.seed]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value", style: "direction:ltr;unicode-bidi:isolate" }, String(x[1])))); });
+    ctl.mode.set(view.mode); ctl.seed.set(view.seed); ctl.k.set(view.k);
   }
-  function simulate() {
-    var bad = 0;
-    for (var i = 0; i < 1000; i++) {
-      var r = Kit.rng(1000 + i), o1 = r.chance(0.5), o2 = r.chance(0.5);
-      if (cfg.mode === "direct") { if (o1 !== o2) bad++; }
-    }
-    trials = { mode: cfg.mode === "direct" ? "بی coordinator" : "با coordinator", bad: bad };
-    log.add("هزار ترتیب تصادفی تحویل: acceptorها " + bad + " بار واگرا شدند" + (cfg.mode === "coord" ? "؛ برچسب‌ها یک ترتیب را تحمیل می‌کنند" : "؛ هر جا ترتیب‌هایشان فرق کند"), bad ? "bad" : "ok");
-    render();
-  }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "مسیریابی", value: cfg.mode, options: [{ value: "direct", label: "پخش یک‌راست" }, { value: "coord", label: "از راه یک coordinator" }], onChange: function (v) { cfg.mode = v; trials = null; reset(); } }).element);
-  document.getElementById("shuffle").addEventListener("click", function () { seed++; reset(); });
-  document.getElementById("many").addEventListener("click", simulate);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1100 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var box = document.getElementById("ctl");
+  ctl.mode = Kit.segmented({ label: "مسیریابی", value: "direct", options: [{ value: "direct", label: "پخش یک‌راست" }, { value: "coord", label: "از راه coordinator" }], onChange: tw(function (v) { view.mode = v; view.k = Math.min(view.k, v === "coord" ? 6 : 4); }) });
+  ctl.seed = Kit.slider({ label: "ترتیب تحویل (seed)", min: 1, max: 20, step: 1, value: 3, onInput: tw(function (v) { view.seed = v; }) });
+  ctl.k = Kit.slider({ label: "قدم", min: 0, max: 6, step: 1, value: 0, onInput: tw(function (v) { view.k = v; }) });
+  [ctl.mode, ctl.seed, ctl.k].forEach(function (c) { box.appendChild(c.element); });
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "دو proposer، دو acceptor که از ۰ شروع می‌کنند، و عملیات +۲ و ×۲ که commutative نیستند (صص. ۳۰–۳۲، شکل‌های ۲.۱۱ و ۲.۱۲). ترتیب‌های تصادفی تحویل مال vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و seed و قدم را عوض کنید.",
+    steps: [
+      { kind: "", run: at({ seed: S_DIV, k: 2 }), say: "بی coordinator، هر proposer درخواستش را یک‌راست به هر دو acceptor می‌فرستد. هر acceptor هر چه زودتر برسد را اول اعمال می‌کند." },
+      { kind: "bad", run: at({ seed: S_DIV, k: 4 }), say: "یکی اول +۲ و بعد ×۲ را گرفت و به ۴ رسید؛ دیگری اول ×۲ و بعد +۲ را و به ۲ رسید. همان شکل ۲.۱۱: acceptorها واگرا شدند." },
+      { kind: "ok", run: at({ seed: S_SAME, k: 4 }), say: "با ترتیب تحویل دیگری ممکن است همه‌چیز درست تمام شود؛ ولی این به شانس بستگی دارد، نه به سیستم." },
+      { kind: "", run: at({ mode: "coord", seed: S_HOLD, k: 2 }), say: "حالا همه از راه یک coordinator می‌روند. هر درخواست را به ترتیب رسیدنش برچسب ۰ و ۱ می‌زند و بعد پخش می‌کند." },
+      { kind: "warn", run: at({ mode: "coord", seed: S_HOLD, k: 4 }), say: "یک acceptor برچسب ۱ را پیش از ۰ گرفت. می‌داند قدمی جا افتاده و درخواست را نگه می‌دارد تا آن گم‌شده برسد (شکل ۲.۱۲)." },
+      { kind: "ok", run: at({ mode: "coord", seed: S_HOLD, k: 6 }), say: "هر دو acceptor به یک مقدار می‌رسند. ترتیبی که coordinator درخواست‌ها را گرفت همان ترتیب شد؛ هر کدام پذیرفتنی است، چون proposerها هیچ‌وقت هم‌آهنگ نکردند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا دو درخواست (+۲) مسئله‌ای نمی‌سازند؟",

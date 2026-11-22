@@ -7,20 +7,26 @@
 <meta name="description" content="سه معمای Raft کتاب را بار کنید یا لاگ خودتان را بسازید، ببینید قاعده‌ی به‌روز بودن می‌گذارد کدام نودها انتخابی را ببرند، leader را از کار بیندازید، leader تازه‌ای انتخاب کنید و بسنجید که درخواست ۹ جان به در می‌برد یا نه. تصویری از فصل ۱۰ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
+  .tlabel { font-size: .9rem; font-weight: 700; margin: 0 0 8px; }
   .nodes { display: grid; gap: 8px; }
-  .node { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); }
-  .node.down { opacity: .55; border-style: dashed; } .node.leader { border-color: var(--accent); border-width: 2px; }
-  .head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .85rem; }
-  .log { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0; direction: ltr; }
-  .e { width: 2.3em; text-align: center; border: 1px solid var(--line-strong); border-radius: 3px; font-family: var(--mono); font-size: .78rem; padding: 2px 0; background: var(--surface); }
-  .e small { display: block; font-size: .62rem; color: var(--muted); } .e.c { background: var(--ok-soft); border-color: var(--ok); } .e.r9 { outline: 2px solid var(--warn); }
-  .btns { display: flex; flex-wrap: wrap; gap: 4px; }
+  .node { display: grid; grid-template-columns: 8em auto 1fr; gap: 14px; align-items: center; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); }
+  .node.down { opacity: .55; border-style: dashed; } .node.leader { border-color: var(--accent); background: var(--accent-soft); }
+  .nm { font-size: .86rem; line-height: 1.35; } .nm b { display: block; font-size: 1rem; }
+  .rlog { display: flex; gap: 4px; direction: ltr; }
+  .e { width: 2.7em; text-align: center; border: 1px solid var(--line-strong); border-radius: 4px; font-family: var(--mono); font-size: .95rem; font-weight: 700; padding: 3px 0; background: var(--surface); }
+  .e small { display: block; font-size: .66rem; font-weight: 400; color: var(--ink-2); } .e.c { background: var(--ok-soft); border-color: var(--ok); } .e.r9 { outline: 3px solid var(--warn); outline-offset: 1px; }
+  .verdict { font-size: .84rem; font-weight: 700; color: var(--ink-2); } .verdict.ok { color: var(--ok); } .verdict.bad { color: var(--bad); }
+  .out { margin-top: 10px; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; font-size: .9rem; font-weight: 700; }
+  .out.ok { border-color: var(--ok); background: var(--ok-soft); } .out.bad { border-color: var(--bad); background: var(--bad-soft); } .out.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .legend { font-size: .76rem; color: var(--ink-2); margin-top: 6px; }
+  .acts, .edit { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .82rem; }
+  .edit .btn.small { padding: 2px 8px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/10-distributed-consensus.html">فصل ۱۰</a><span aria-hidden="true">/</span>
@@ -31,111 +37,145 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۰ · consensus توزیع‌شده</div>
-  <h1>محدودیت انتخاب Raft و آن سه معما</h1>
-  <p class="lede">الگوریتم Raft تنها نامزدی را انتخاب می‌کند که لاگش <strong>دست‌کم همان‌قدر به‌روز</strong> باشد که لاگ quorumی: term آخر دیرتر می‌برد، و با termهای آخر برابر لاگ بلندتر. چون هر دو quorumی اشتراک دارند، entryی commit‌شده در لاگ هر leader آینده‌ای هست. entryی که هنوز commit نشده می‌تواند بماند یا گم شود، بسته به این‌که چه کسی می‌تواند ببرد.</p>
-  <p class="source-note">تصویری از «ایمنی state machine» و «معماهای Raft» (صص. ۱۴۱–۱۴۴، شکل‌های ۱۰.۷ تا ۱۰.۱۰). طول لاگ‌ها از شکل‌ها پی می‌گیرد. این‌که کدام entryها به termهای ۱ و ۲ و ۳ تعلق دارند، یعنی ۱ تا ۳ و ۴ تا ۶ و ۷ تا ۹، و این‌که commit index کجا می‌نشیند، یعنی entry ۷، خوانش vault از شکل‌هاست، و همچنین دکمه‌های ویرایش و قدم‌های ساده‌شده‌ی انتخاب و تعمیر. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>محدودیت انتخاب Raft و آن سه معما</h1>
+      <p class="lede">الگوریتم Raft تنها نامزدی را انتخاب می‌کند که لاگش <strong>دست‌کم همان‌قدر به‌روز</strong> باشد که لاگ quorumی: term آخر دیرتر می‌برد، و با termهای آخر برابر لاگ بلندتر. چون هر دو quorumی اشتراک دارند، entryی commit‌شده در لاگ هر leader آینده‌ای هست. entryی که هنوز commit نشده می‌تواند بماند یا گم شود، بسته به این‌که چه کسی می‌تواند ببرد.</p>
+      <p class="source-note">تصویری از «ایمنی state machine» و «معماهای Raft» (صص. ۱۴۱–۱۴۴، شکل‌های ۱۰.۷ تا ۱۰.۱۰). طول لاگ‌ها از شکل‌ها پی می‌گیرد. این‌که کدام entryها به termهای ۱ و ۲ و ۳ تعلق دارند، یعنی ۱ تا ۳ و ۴ تا ۶ و ۷ تا ۹، و این‌که commit index کجا می‌نشیند، یعنی entry ۷، خوانش vault از شکل‌هاست، و همچنین دکمه‌های ویرایش و قدم‌های ساده‌شده‌ی انتخاب و تعمیر. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="term"></p><div class="nodes" id="nodes"></div>
-        <div class="callout" id="out" style="margin-top:10px" aria-live="polite"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="preset"></div><div class="btns" style="margin-top:10px"><button class="btn small danger" id="crash">leader را از کار بینداز</button><button class="btn small" id="recover">نودهای از کار افتاده را بازیاب</button></div>
-        <p class="field-hint">entryهای سبز روی commit index آن نود یا زیر آن‌اند. entry ۹ خط‌دور نارنجی دارد.</p></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <p class="tlabel" id="term"></p>
+        <div class="nodes" id="nodes"></div>
+        <div class="out" id="out" aria-live="polite"></div>
+        <p class="legend">خانه‌ی سبز: commit‌شده روی آن نود · خط‌دور نارنجی: entry ۹ · زیر هر عدد، term آن entry.</p>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="preset"></div>
+        <div class="tweak-group acts" id="acts"></div>
+        <div class="tweak-group edit" id="edit"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>معمای ۱:</strong> نود ۲ بلندترین لاگ را دارد، پس leader term ۳ است: آن leader درخواست‌های کلاینت را اول می‌افزاید.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>معمای ۱:</strong> نود ۲ بلندترین لاگ را دارد، پس leader term ۳ است: آن leader درخواست‌های کلاینت را اول می‌افزاید.</li>
     <li><strong>معمای ۲:</strong> نود ۲ را از کار بیندازید. نودهای ۱ و ۳ هیچ‌وقت درخواست ۹ را ندیدند، پس هر کسی term ۴ را ببرد آن را ندارد، و وقتی نود ۲ بازیابی شود entry ۹ش روی‌نویسی می‌شود. این مجاز است، چون ۹ هیچ‌وقت commit نشده بود.</li>
     <li><strong>معمای ۳:</strong> نود ۱ هم entry ۹ را دارد. نود ۲ را از کار بیندازید و تنها نود ۱ می‌تواند ببرد، چون لاگ نود ۳ کم‌تر به‌روز است. نود ۱ entry ۹ را به نود ۳ تکرار و commitش می‌کند.</li>
     <li>با + و − لاگ خودتان را بسازید، و بسنجید که نامزدی تنها وقتی می‌تواند ببرد که quorumی از نودهای زنده، با احتساب خودش، لاگ‌هایی داشته باشند که از خودش به‌روزتر نیستند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/10-distributed-consensus.html"><small>درس</small>فصل ۱۰: consensus توزیع‌شده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/10-distributed-consensus.html"><small>درس</small>فصل ۱۰: consensus توزیع‌شده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var PRE = { p1: [8, 9, 7], p2: [8, 9, 7], p3: [9, 9, 8] }, L, down, leader, term, commit, pre = "p1";
+  var PRE = { p1: [8, 9, 7], p2: [8, 9, 7], p3: [9, 9, 8] };
+  var DEF = { pre: "p1", ops: [] }, view, tour, msg, kind, ctl = {}, st;
+  function at(o) { return function () { view = JSON.parse(JSON.stringify(Object.assign({}, DEF, o))); }; }
+  view = JSON.parse(JSON.stringify(DEF));
   function termOf(i) { return i <= 3 ? 1 : i <= 6 ? 2 : 3; }
-  function load(k) {
-    pre = k; L = PRE[k].map(function (n) { var a = []; for (var i = 1; i <= n; i++) a.push({ v: i, t: termOf(i) }); return a; });
-    down = [false, false, false]; leader = 1; term = 3; commit = [7, 7, 7];
-    log.clear(); log.add("معمای " + k.slice(1) + " بار شد. نود ۲ leader term ۳ است.", "muted"); render();
-  }
-  function last(n) { var a = L[n]; return a.length ? a[a.length - 1].t : 0; }
-  function atLeast(a, b) { return last(a) !== last(b) ? last(a) > last(b) : L[a].length >= L[b].length; }
-  function voters(c) { return [0, 1, 2].filter(function (n) { return !down[n] && atLeast(c, n); }); }
-  function elect(c) {
-    term++; leader = c; var vs = voters(c);
-    log.add("term " + term + ": نود " + (c + 1) + " با رأی نودهای " + vs.map(function (n) { return n + 1; }).join(" و ") + " می‌برد", "ok");
-    [0, 1, 2].forEach(function (n) { if (!down[n] && n !== c) { L[n] = L[c].map(function (e) { return { v: e.v, t: e.t }; }); } });
-    var cmt = L[c].length; [0, 1, 2].forEach(function (n) { if (!down[n]) commit[n] = cmt; });
-    log.add("نود " + (c + 1) + " لاگش را به followerهای زنده تکرار می‌کند؛ حالا quorumی entryهای ۱ تا " + cmt + " را دارد، پس commit شده‌اند", "ok");
-    render();
+  function fa(n) { return String(n + 1); }
+  function sim(pre, ops) {
+    var s = { L: PRE[pre].map(function (n) { var a = []; for (var i = 1; i <= n; i++) a.push({ v: i, t: termOf(i) }); return a; }), down: [false, false, false], leader: 1, term: 3, commit: [7, 7, 7], note: null, dropped: 0 };
+    function last(n) { var a = s.L[n]; return a.length ? a[a.length - 1].t : 0; }
+    function atLeast(a, b) { return last(a) !== last(b) ? last(a) > last(b) : s.L[a].length >= s.L[b].length; }
+    s.last = last; s.voters = function (c) { return [0, 1, 2].filter(function (n) { return !s.down[n] && atLeast(c, n); }); };
+    s.better = function (c) { return [0, 1, 2].filter(function (m) { return m !== c && !s.down[m] && !atLeast(c, m); }); };
+    ops.forEach(function (o) {
+      if (o[0] === "crash" && s.leader !== null) { s.down[s.leader] = true; s.note = ["crash", s.leader]; s.leader = null; }
+      else if (o[0] === "elect" && s.leader === null && s.voters(o[1]).length >= 2) {
+        var c = o[1]; s.term++; s.leader = c; s.note = ["elect", c, s.voters(c)];
+        [0, 1, 2].forEach(function (n) { if (!s.down[n] && n !== c) s.L[n] = s.L[c].map(function (e) { return { v: e.v, t: e.t }; }); });
+        [0, 1, 2].forEach(function (n) { if (!s.down[n]) s.commit[n] = s.L[c].length; }); }
+      else if (o[0] === "recover") { s.dropped = 0; [0, 1, 2].forEach(function (n) { if (!s.down[n]) return; s.down[n] = false;
+        if (s.leader !== null) { var Ld = s.L[s.leader]; s.dropped += s.L[n].filter(function (e, i) { return !Ld[i] || Ld[i].v !== e.v || Ld[i].t !== e.t; }).length; s.L[n] = Ld.map(function (e) { return { v: e.v, t: e.t }; }); s.commit[n] = s.commit[s.leader]; } }); s.note = ["recover"]; }
+      else if (o[0] === "+") { s.L[o[1]].push({ v: s.L[o[1]].length + 1, t: s.term }); }
+      else if (o[0] === "-") { var a = s.L[o[1]]; if (a.length) a.pop(); s.commit[o[1]] = Math.min(s.commit[o[1]], a.length); }
+    });
+    s.live = [0, 1, 2].filter(function (n) { return !s.down[n]; });
+    s.has9 = function (n) { return s.L[n].some(function (e) { return e.v === 9; }); };
+    s.c9 = s.live.some(function (n) { return s.has9(n) && s.commit[n] >= 9; });
+    s.lost9 = !s.c9 && s.leader !== null && s.term > 3 && !s.has9(s.leader);
+    return s;
   }
   function render() {
-    document.getElementById("term").textContent = "term " + term + (leader !== null ? "، با leader نود " + (leader + 1) : "، بی leader");
-    var box = Kit.clear(document.getElementById("nodes")), live = [0, 1, 2].filter(function (n) { return !down[n]; });
+    st = sim(view.pre, view.ops); var s = st;
+    document.getElementById("term").textContent = "دوره‌ی term " + s.term + " · " + (s.leader !== null ? "نود leader: " + fa(s.leader) : "بی leader، انتخاب در جریان");
+    var box = Kit.clear(document.getElementById("nodes"));
     [0, 1, 2].forEach(function (n) {
-      var lg = Kit.el("div", { class: "log", role: "list", "aria-label": "لاگ نود " + (n + 1) });
-      L[n].forEach(function (e, i) { lg.appendChild(Kit.el("span", { class: "e" + (i < commit[n] ? " c" : "") + (e.v === 9 ? " r9" : ""), role: "listitem", "aria-label": "entry " + e.v + "، term " + e.t + (i < commit[n] ? "، commit‌شده" : "") }, String(e.v), Kit.el("small", null, "t" + e.t))); });
-      var btns = Kit.el("div", { class: "btns" }), plus = Kit.el("button", { class: "btn small", "aria-label": "افزودن entryی به نود " + (n + 1) }, "+"), minus = Kit.el("button", { class: "btn small", "aria-label": "برداشتن آخرین entry نود " + (n + 1) }, "−");
-      plus.addEventListener("click", function () { L[n].push({ v: L[n].length + 1, t: term }); render(); });
-      minus.addEventListener("click", function () { if (L[n].length) L[n].pop(); commit[n] = Math.min(commit[n], L[n].length); render(); });
-      btns.appendChild(plus); btns.appendChild(minus);
-      var verdict = "";
-      if (down[n]) verdict = "از کار افتاده";
-      else if (leader === null) {
-        var vs = voters(n);
-        if (vs.length >= 2) { var b = Kit.el("button", { class: "btn small primary" }, "نود " + (n + 1) + " را انتخاب کن"); b.addEventListener("click", function () { elect(n); }); btns.appendChild(b); verdict = "واجد شرط: رأی از نودهای " + vs.map(function (x) { return x + 1; }).join("، "); }
-        else { var better = live.filter(function (m) { return m !== n && !atLeast(n, m); }); verdict = "نمی‌تواند ببرد: " + (better.length ? "لاگ نود " + better.map(function (x) { return x + 1; }).join("، ") + " به‌روزتر است" : "نودهای زنده کم‌اند"); }
-      }
-      box.appendChild(Kit.el("div", { class: "node" + (down[n] ? " down" : "") + (leader === n ? " leader" : "") },
-        Kit.el("div", { class: "head" }, Kit.el("strong", null, "نود " + (n + 1)), leader === n ? Kit.el("span", { class: "badge" }, "leader") : null, Kit.el("span", null, "term آخر " + last(n) + "، طول " + L[n].length), verdict ? Kit.el("span", { class: "field-hint" }, verdict) : null), lg, btns));
+      var lg = Kit.el("div", { class: "rlog", role: "list", "aria-label": "لاگ نود " + fa(n) });
+      s.L[n].forEach(function (e, i) { lg.appendChild(Kit.el("span", { class: "e" + (i < s.commit[n] ? " c" : "") + (e.v === 9 ? " r9" : ""), role: "listitem", "aria-label": "entry " + e.v + "، term " + e.t + (i < s.commit[n] ? "، commit‌شده" : "") }, String(e.v), Kit.el("small", null, "t" + e.t))); });
+      var v = "", vc = "";
+      if (s.down[n]) { v = "✕ از کار افتاده"; vc = "bad"; }
+      else if (s.leader === null) { var vs = s.voters(n), b = s.better(n);
+        if (vs.length >= 2) { v = "✓ می‌تواند ببرد: رأی نودهای " + vs.map(fa).join(" و "); vc = "ok"; }
+        else { v = "✕ نمی‌تواند ببرد: " + (b.length ? "لاگ نود " + b.map(fa).join(" و ") + " به‌روزتر است" : "نود زنده‌ی کافی نیست"); vc = "bad"; } }
+      var el = Kit.el("div", { class: "node" + (s.down[n] ? " down" : "") + (s.leader === n ? " leader" : "") },
+        Kit.el("div", { class: "nm" }, Kit.el("b", null, "نود " + fa(n) + (s.leader === n ? " · leader" : "")), "آخرین term: " + s.last(n) + " · طول: " + s.L[n].length), lg);
+      if (v) el.appendChild(Kit.el("div", { class: "verdict " + vc }, v));
+      box.appendChild(el);
     });
-    var has9 = function (n) { return L[n].some(function (e) { return e.v === 9; }); };
-    var o = document.getElementById("out"), committed9 = live.some(function (n) { return has9(n) && commit[n] >= 9; });
-    if (leader === null) { o.className = "callout warn"; o.textContent = "بی leader. نودهای زنده: " + live.map(function (n) { return n + 1; }).join("، ") + ". نودی واجد شرط انتخاب کنید."; }
-    else if (committed9) { o.className = "callout ok"; o.textContent = "درخواست ۹ commit شده: حالا در لاگ هر leader آینده‌ای هست."; }
-    else if (term > 3 && !has9(leader)) { o.className = "callout bad"; o.textContent = "درخواست ۹ گم شد: leader term " + term + " هیچ‌وقت نداشتش. این ایمن است، چون هیچ‌وقت commit نشده بود."; }
-    else { o.className = "callout"; o.textContent = "درخواست ۹ هنوز commit نشده: جان به در بردنش به این بستگی دارد که بعدی را چه کسی leadership می‌کند."; }
-    document.getElementById("crash").disabled = leader === null;
-    stats([["term", term], ["نودهای زنده", live.length + " از ۳", live.length >= 2 ? "ok" : "bad"], ["درخواست ۹", committed9 ? "commit‌شده" : leader !== null && term > 3 && !has9(leader) ? "گم‌شده" : "در انتظار", committed9 ? "ok" : "warn"]]);
+    var o = document.getElementById("out");
+    if (s.leader === null) { kind = "warn"; msg = "بی leader. " + s.live.filter(function (n) { return s.voters(n).length >= 2; }).map(function (n) { return "نود " + fa(n); }).join(" و ") + " می‌تواند ببرد."; }
+    else if (s.c9) { kind = "ok"; msg = "حالا entry ۹ commit شده: حالا در لاگ هر leader آینده‌ای هست."; }
+    else if (s.lost9) { kind = "bad"; msg = "این‌جا entry ۹ گم شد: leader تازه‌ی term " + s.term + " هیچ‌وقت نداشتش" + (s.dropped ? " و نود بازیابی‌شده " + s.dropped + " entry را انداخت" : "") + ". ایمن است، چون ۹ هیچ‌وقت commit نشده بود."; }
+    else { kind = ""; msg = "هنوز entry ۹ commit نشده: ماندنش به این بستگی دارد که leader بعدی کیست."; }
+    o.className = "out " + kind; o.textContent = msg;
+    var S2 = Kit.clear(document.getElementById("stats"));
+    [["term", s.term], ["leader", s.leader !== null ? "نود " + fa(s.leader) : "ندارد"], ["نودهای زنده", s.live.length + " از ۳", s.live.length >= 2 ? "ok" : "bad"], ["entry ۹", s.c9 ? "commit‌شده" : s.lost9 ? "گم‌شده" : "در انتظار", s.c9 ? "ok" : s.lost9 ? "bad" : "warn"]].forEach(function (x) {
+      S2.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || ""), style: "unicode-bidi:isolate" }, String(x[1])))); });
+    ctl.p.set(view.pre);
+    var ac = Kit.clear(document.getElementById("acts"));
+    var cr = Kit.el("button", { class: "btn small danger" }, "leader را از کار بینداز"); cr.disabled = s.leader === null; cr.addEventListener("click", tw(function () { view.ops.push(["crash"]); })); ac.appendChild(cr);
+    [0, 1, 2].forEach(function (n) { if (s.leader !== null || s.down[n] || s.voters(n).length < 2) return; var b = Kit.el("button", { class: "btn small primary" }, "نود " + fa(n) + " را انتخاب کن"); b.addEventListener("click", tw(function () { view.ops.push(["elect", n]); })); ac.appendChild(b); });
+    var rc = Kit.el("button", { class: "btn small" }, "بازیابی نودهای از کار افتاده"); rc.disabled = s.live.length === 3; rc.addEventListener("click", tw(function () { view.ops.push(["recover"]); })); ac.appendChild(rc);
+    var ed = Kit.clear(document.getElementById("edit")); ed.appendChild(Kit.el("span", null, "ویرایش لاگ:"));
+    [0, 1, 2].forEach(function (n) {
+      var p = Kit.el("button", { class: "btn small", "aria-label": "افزودن entry به نود " + fa(n) }, "+ نود " + fa(n)), m = Kit.el("button", { class: "btn small", "aria-label": "برداشتن آخرین entry نود " + fa(n) }, "− نود " + fa(n));
+      p.addEventListener("click", tw(function () { view.ops.push(["+", n]); })); m.addEventListener("click", tw(function () { view.ops.push(["-", n]); })); ed.appendChild(p); ed.appendChild(m); });
   }
-  document.getElementById("preset").appendChild(Kit.segmented({ label: "معما", value: pre, options: [{ value: "p1", label: "معمای ۱" }, { value: "p2", label: "معمای ۲" }, { value: "p3", label: "معمای ۳" }], onChange: load }).element);
-  document.getElementById("crash").addEventListener("click", function () { if (leader === null) return; down[leader] = true; log.add("نود " + (leader + 1) + " از کار می‌افتد. وقت تایمر انتخاب followerها سر می‌رود.", "bad"); leader = null; render(); });
-  document.getElementById("recover").addEventListener("click", function () {
-    [0, 1, 2].forEach(function (n) { if (!down[n]) return; down[n] = false;
-      if (leader !== null) { var lost = L[n].filter(function (e, i) { return !L[leader][i] || L[leader][i].v !== e.v || L[leader][i].t !== e.t; }).length; L[n] = L[leader].map(function (e) { return { v: e.v, t: e.t }; }); commit[n] = commit[leader]; log.add("نود " + (n + 1) + " بازیابی می‌شود و از term " + term + " خبردار؛ آن leader لاگش را روی‌نویسی می‌کند" + (lost ? "؛ " + lost + " entry commit‌نشده انداخته شد" : ""), lost ? "warn" : "ok"); }
-      else log.add("نود " + (n + 1) + " بازیابی می‌شود", "ok");
-    }); render();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.p = Kit.segmented({ label: "معما", value: DEF.pre, options: [{ value: "p1", label: "معمای ۱" }, { value: "p2", label: "معمای ۲" }, { value: "p3", label: "معمای ۳" }], onChange: tw(function (v) { view.pre = v; view.ops = []; }) });
+  document.getElementById("preset").appendChild(ctl.p.element);
+  function voteSay(pre, ops, n) { var s = sim(pre, ops); return s.voters(n).map(fa).join(" و "); }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "الگوریتم Raft تنها نامزدی را انتخاب می‌کند که لاگش دست‌کم به‌روزی لاگ quorumی باشد (صص. ۱۴۱–۱۴۴، شکل‌های ۱۰.۷ تا ۱۰.۱۰). مرز termها و commit index روی entry ۷ خوانش vault از شکل‌هاست.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، معما را عوض کنید، لاگ‌ها را بلند و کوتاه کنید و ببینید چه کسی می‌تواند ببرد.",
+    steps: [
+      { kind: "", run: at({ pre: "p1" }), say: "معمای ۱: نود ۲ بلندترین لاگ را دارد و leader term ۳ است. entry ۹ فقط روی خودش است و هنوز commit نشده." },
+      { kind: "warn", run: at({ pre: "p2", ops: [["crash"]] }), say: function () { return "معمای ۲: نود ۲ از کار می‌افتد. نود ۱ با رأی نودهای " + voteSay("p2", [["crash"]], 0) + " می‌تواند ببرد. لاگ نود ۳ کوتاه‌تر از نود ۱ است، پس نمی‌برد."; } },
+      { kind: "bad", run: at({ pre: "p2", ops: [["crash"], ["elect", 0]] }), say: "نود ۱ در term ۴ می‌برد و لاگش را به نود ۳ می‌دهد. entry ۹ در لاگ leader تازه نیست." },
+      { kind: "bad", run: at({ pre: "p2", ops: [["crash"], ["elect", 0], ["recover"]] }), say: "نود ۲ برمی‌گردد و leader تازه entry ۹ آن را روی‌نویسی می‌کند. این مجاز است: ۹ هیچ‌وقت commit نشده بود." },
+      { kind: "warn", run: at({ pre: "p3", ops: [["crash"]] }), say: "معمای ۳: این بار نود ۱ هم entry ۹ را دارد. نود ۲ از کار می‌افتد و باز تنها نود ۱ می‌تواند ببرد." },
+      { kind: "ok", run: at({ pre: "p3", ops: [["crash"], ["elect", 0]] }), say: "نود ۱ در term ۴ می‌برد، entry ۹ را به نود ۳ تکرار می‌کند و حالا quorumی آن را دارد: ۹ commit شد." },
+      { kind: "ok", run: at({ pre: "p3", ops: [["crash"], ["elect", 0], ["recover"]] }), say: "نود ۲ برمی‌گردد و چیزی از دست نمی‌دهد: entry commit‌شده در لاگ هر leader آینده‌ای هست." }
+    ]
   });
-  load("p1");
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "دو لاگ با entryهایی از termهای ۳ و ۲ تمام می‌شوند. کدام به‌روزتر است؟",

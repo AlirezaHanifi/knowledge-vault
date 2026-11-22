@@ -7,17 +7,23 @@
 <meta name="description" content="عملیات سه process روی یک register را روی خط زمان جابه‌جا کنید و بگذارید سنجنده ترتیبی ترتیبی بجوید که همان نتیجه‌ها را بدهد و زمان واقعی را محترم بشمارد، یا توضیح بدهد چرا هیچ‌کدام نیست. تصویری از فصل ۹ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  svg.tl { width: 100%; height: auto; display: block; direction: ltr; } svg.tl text { fill: var(--ink); font-size: 11px; font-family: var(--mono); }
-  svg.tl rect.op { fill: var(--accent-soft); stroke: var(--accent); } svg.tl rect.op.rd { fill: var(--surface-2); stroke: var(--ink); }
-  svg.tl line.lp { stroke: var(--ok); stroke-width: 2; }
-  table.ops { width: 100%; border-collapse: collapse; font-size: .8rem; } table.ops td, table.ops th { border-bottom: 1px solid var(--line); padding: 3px 4px; text-align: right; }
-  table.ops input { width: 3.5em; } table.ops select { max-width: 6em; }
+  svg.tl { width: 100%; height: auto; max-height: 270px; display: block; direction: ltr; } svg.tl text { fill: var(--ink); font-size: 13px; font-family: var(--mono); }
+  svg.tl text.pn { font-weight: 700; font-size: 15px; } svg.tl text.ax { fill: var(--ink-2); font-size: 11px; }
+  svg.tl rect.op { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; } svg.tl rect.op.rd { fill: var(--surface-2); stroke: var(--ink); }
+  svg.tl line.lp { stroke: var(--ok); stroke-width: 3; } svg.tl line.gr { stroke: var(--line); }
+  svg.tl text.lpn { fill: var(--ok); font-weight: 700; font-size: 12px; }
+  .res { margin-top: 8px; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 12px; font-size: .9rem; }
+  .res.ok { border-color: var(--ok); background: var(--ok-soft); } .res.bad { border-color: var(--bad); background: var(--bad-soft); }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 6px; direction: ltr; justify-content: flex-end; }
+  .chips span.c { border: 1px solid var(--ok); border-radius: 4px; padding: 1px 6px; font-family: var(--mono); font-size: .82rem; background: var(--surface); }
+  table.ops { width: 100%; border-collapse: collapse; font-size: .8rem; } table.ops td, table.ops th { border-bottom: 1px solid var(--line); padding: 2px 3px; text-align: right; }
+  table.ops input { width: 3.4em; } table.ops select { max-width: 4.5em; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/09-consistency.html">فصل ۹</a><span aria-hidden="true">/</span>
@@ -28,114 +34,137 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۹ · consistency</div>
-  <h1>آیا این تاریخ linearizable است؟</h1>
-  <p class="lede">هر عملیاتی بازه‌ای است از <strong>فراخوانی</strong> تا <strong>تمام شدن</strong>. تاریخ <strong>linearizable</strong> است اگر تاریخی ترتیبی همان نتیجه‌ها را بدهد، یعنی هم‌ارزی ترتیبی، و هر زوج عملیاتی که هم‌پوشان نیستند را در ترتیب real-timeشان نگه دارد. عملیاتی که هم‌پوشان‌اند می‌توانند هر طور مرتب شوند.</p>
-  <p class="source-note">تصویری از «linearizability» و «تعریف صوری linearizability» (صص. ۱۲۱–۱۲۴، شکل‌های ۹.۷ و ۹.۸، جدول ۹.۳). آن از‌پیش‌آماده‌ها برای شکل‌های ۹.۷ و ۹.۸ به‌شکل تاریخ register از نو بیان شده‌اند؛ و بقیه‌ی از‌پیش‌آماده‌ها و سنجنده‌ی سرسختی مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>آیا این تاریخ linearizable است؟</h1>
+      <p class="lede">هر عملیاتی بازه‌ای است از <strong>فراخوانی</strong> تا <strong>تمام شدن</strong>. تاریخ <strong>linearizable</strong> است اگر تاریخی ترتیبی همان نتیجه‌ها را بدهد، یعنی هم‌ارزی ترتیبی، و هر زوج عملیاتی که هم‌پوشان نیستند را در ترتیب real-timeشان نگه دارد. عملیاتی که هم‌پوشان‌اند می‌توانند هر طور مرتب شوند.</p>
+      <p class="source-note">تصویری از «linearizability» و «تعریف صوری linearizability» (صص. ۱۲۱–۱۲۴، شکل‌های ۹.۷ و ۹.۸، جدول ۹.۳). آن از‌پیش‌آماده‌ها برای شکل‌های ۹.۷ و ۹.۸ به‌شکل تاریخ register از نو بیان شده‌اند؛ و بقیه‌ی از‌پیش‌آماده‌ها و سنجنده‌ی سرسختی مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div id="tl"></div><div class="callout" id="out" style="margin-top:10px" aria-live="polite"></div></div>
-      <div class="panel"><p class="panel-title">عملیات؛ زمان ۰ تا ۲۰</p><div class="table-wrap"><table class="ops" id="ops"></table></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="preset"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div>
+          <div id="tl"></div>
+          <div class="res" id="out" aria-live="polite"></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="preset"></div>
+        <div class="tweak-group"><table class="ops" id="ops"></table></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>شکل ۹.۷:</strong> process A مقدار ۱۰ را می‌نویسد، تأیید می‌گیرد، بعد ۰ می‌خواند. هیچ ترتیبی نمی‌تواند خواندن را پس از نوشتن بگذارد <em>و</em> ۰ برگرداند، پس linearizable نیست.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>شکل ۹.۷:</strong> process A مقدار ۱۰ را می‌نویسد، تأیید می‌گیرد، بعد ۰ می‌خواند. هیچ ترتیبی نمی‌تواند خواندن را پس از نوشتن بگذارد <em>و</em> ۰ برگرداند، پس linearizable نیست.</li>
     <li><strong>هم‌پوشانی آزادی می‌دهد.</strong> خواندنی که با نوشتنی هم‌پوشان است می‌تواند مقدار قدیم یا تازه را برگرداند؛ هر دو نقطه‌ی خطی‌سازی معتبر دارند.</li>
     <li><strong>دو خواندن که با زمان واقعی نمی‌خوانند</strong>: اگر B مقدار تازه را بخواند و C، که دیرتر شروع می‌کند، قدیم را، هیچ ترتیب تنهایی از آن نوشتن هر دو را توضیح نمی‌دهد.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/09-consistency.html"><small>درس</small>فصل ۹: consistency</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/09-consistency.html"><small>درس</small>فصل ۹: consistency</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
   var PRE = {
     f97: [{ p: "A", k: "w", v: 10, s: 1, e: 4 }, { p: "A", k: "r", v: 0, s: 6, e: 9 }],
     overlap: [{ p: "A", k: "w", v: 1, s: 2, e: 12 }, { p: "B", k: "r", v: 0, s: 4, e: 7 }, { p: "C", k: "r", v: 1, s: 8, e: 14 }],
     inversion: [{ p: "A", k: "w", v: 1, s: 1, e: 16 }, { p: "B", k: "r", v: 1, s: 3, e: 6 }, { p: "C", k: "r", v: 0, s: 9, e: 12 }],
     f98: [{ p: "B", k: "w", v: 1, s: 1, e: 3 }, { p: "B", k: "w", v: 2, s: 5, e: 7 }, { p: "A", k: "r", v: 1, s: 9, e: 12 }],
     ok3: [{ p: "A", k: "w", v: 1, s: 1, e: 5 }, { p: "B", k: "w", v: 2, s: 3, e: 9 }, { p: "C", k: "r", v: 1, s: 10, e: 13 }]
-  }, ops, pre = "f97";
+  };
   var PNAME = { f97: "شکل ۹.۷", f98: "شکل ۹.۸ به‌شکل register", overlap: "خواندن هم‌پوشان", inversion: "وارونگی خواندن", ok3: "نوشتن‌های هم‌زمان" };
-  function load(k) { pre = k; ops = PRE[k].map(function (o) { return Object.assign({}, o); }); log.add("از‌پیش‌آماده بار شد: " + PNAME[k], "muted"); render(); }
+
+  var PNAME = { f97: "شکل ۹.۷", f98: "شکل ۹.۸ به‌شکل register", overlap: "خواندن هم‌پوشان", inversion: "وارونگی خواندن", ok3: "نوشتن‌های هم‌زمان" };
+  var DEF = { pre: "f97", ops: null }, view = { pre: "f97", ops: null }, tour, ctl = {}, msg, kind, ops;
+  function clone(a) { return a.map(function (o) { return Object.assign({}, o); }); }
+  function at(o) { return function () { view = { pre: o.pre || "f97", ops: o.ops ? clone(o.ops) : null }; }; }
   function name(o) { return o.p + ":" + (o.k === "w" ? "write(" + o.v + ")" : "read→" + o.v); }
-  function check() {
-    var n = ops.length, best = null, idx = ops.map(function (_, i) { return i; }), tried = 0;
+  function check(ops) {
+    var best = null, tried = 0;
     function before(a, b) { return ops[a].e < ops[b].s; }
-    function perm(prefix, rest) {
-      if (best) return;
-      if (!rest.length) {
-        tried++; var x = 0;
-        for (var i = 0; i < prefix.length; i++) { var o = ops[prefix[i]]; if (o.k === "w") x = o.v; else if (o.v !== x) return; }
-        best = prefix.slice(); return;
-      }
-      rest.forEach(function (c, j) {
-        if (rest.some(function (d) { return d !== c && before(d, c); })) return;
-        perm(prefix.concat([c]), rest.slice(0, j).concat(rest.slice(j + 1)));
-      });
-    }
-    perm([], idx); return { order: best, tried: tried };
-  }
+    function perm(prefix, rest) { if (best) return;
+      if (!rest.length) { tried++; var x = 0; for (var i = 0; i < prefix.length; i++) { var o = ops[prefix[i]]; if (o.k === "w") x = o.v; else if (o.v !== x) return; } best = prefix.slice(); return; }
+      rest.forEach(function (c, j) { if (rest.some(function (d) { return d !== c && before(d, c); })) return; perm(prefix.concat([c]), rest.slice(0, j).concat(rest.slice(j + 1))); }); }
+    perm([], ops.map(function (_, i) { return i; })); return { order: best, tried: tried }; }
+  function why(ops) { var w = "";
+    ops.forEach(function (o) { if (o.k === "r" && !w) { var ws = ops.filter(function (q) { return q.k === "w" && q.v === o.v; });
+      if (o.v !== 0 && !ws.length) w = "عملیات " + name(o) + " مقداری برمی‌گرداند که هیچ‌کس ننوشته.";
+      else if (ws.length && ws.every(function (q) { return q.s > o.e; })) w = "عملیات " + name(o) + " پیش از شروع هر نوشتنی از " + o.v + " تمام می‌شود.";
+      else if (o.v === 0) { var done = ops.filter(function (q) { return q.k === "w" && q.e < o.s; }); if (done.length) w = "خواندن " + name(o) + " پس از تمام شدن " + name(done[0]) + " شروع شده، پس دیگر نمی‌تواند ۰ ببیند."; }
+      else { var later = ops.filter(function (q) { return q.k === "w" && q.v !== o.v && ws.every(function (x) { return x.e < q.s; }) && q.e < o.s; }); if (later.length) w = "پیش از شروع " + name(o) + "، نوشتن " + name(later[0]) + " تمام شده و مقدار را عوض کرده."; } } });
+    return w || "هر ترتیبی که زمان واقعی را محترم بشمارد، یکی از خواندن‌ها را وا می‌دارد مقدار دیگری برگرداند."; }
   function render() {
-    var W = 560, procs = ["A", "B", "C"].filter(function (p) { return ops.some(function (o) { return o.p === p; }); }), H = 30 + procs.length * 46;
-    var sx = function (v) { return 40 + v * (W - 60) / 20; }, res = check();
-    var s = Kit.svg("svg", { class: "tl", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "خط زمان " + ops.length + " عملیات" });
-    for (var g = 0; g <= 20; g += 5) { var tt = Kit.svg("text", { x: sx(g) - 4, y: H - 4 }); tt.textContent = g; s.appendChild(tt); }
-    procs.forEach(function (p, pi) { var y = 14 + pi * 46, lab = Kit.svg("text", { x: 4, y: y + 18 }); lab.textContent = p; s.appendChild(lab);
+    ops = view.ops || clone(PRE[view.pre]);
+    var W = 620, procs = ["A", "B", "C"].filter(function (p) { return ops.some(function (o) { return o.p === p; }); }), H = 34 + procs.length * 56;
+    var sx = function (v) { return 34 + v * (W - 50) / 20; }, res = check(ops);
+    var s = Kit.svg("svg", { class: "tl mono", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "خط زمان " + ops.length + " عملیات" });
+    for (var g = 0; g <= 20; g += 2) { s.appendChild(Kit.svg("line", { class: "gr", x1: sx(g), x2: sx(g), y1: 6, y2: H - 18 })); s.appendChild(Kit.svg("text", { class: "ax", x: sx(g) - 4, y: H - 4 }, String(g))); }
+    procs.forEach(function (p, pi) { var y = 12 + pi * 56; s.appendChild(Kit.svg("text", { class: "pn", x: 4, y: y + 22 }, p));
       ops.forEach(function (o, i) { if (o.p !== p) return;
-        s.appendChild(Kit.svg("rect", { class: "op" + (o.k === "r" ? " rd" : ""), x: sx(o.s), y: y, width: Math.max(4, sx(o.e) - sx(o.s)), height: 26, rx: 4 }));
-        var t = Kit.svg("text", { x: sx(o.s) + 4, y: y + 17 }); t.textContent = name(o); s.appendChild(t);
-        if (res.order) { var pos = res.order.indexOf(i), lp = sx(o.s + (o.e - o.s) * (pos + 1) / (ops.length + 1)); s.appendChild(Kit.svg("line", { class: "lp", x1: lp, x2: lp, y1: y - 3, y2: y + 29 })); }
-      });
-    });
-    var d = Kit.clear(document.getElementById("tl")); d.appendChild(s);
-    var out = document.getElementById("out");
-    if (res.order) { out.className = "callout ok"; out.textContent = "linearizable است. ترتیبی معتبر: " + res.order.map(function (i) { return name(ops[i]); }).join(" → ") + ". تیک‌های سبز نقطه‌های خطی‌سازی را تصویری نشان می‌دهند."; }
-    else {
-      var why = "";
-      ops.forEach(function (o) { if (o.k === "r" && !why) { var w = ops.filter(function (q) { return q.k === "w" && q.v === o.v; }); if (o.v !== 0 && !w.length) why = "عملیات " + name(o) + " مقداری برمی‌گرداند که هیچ‌کس ننوشته."; else if (w.length && w.every(function (q) { return q.s > o.e; })) why = "عملیات " + name(o) + " پیش از شروع هر نوشتنی از " + o.v + " تمام می‌شود."; } });
-      out.className = "callout bad"; out.textContent = "linearizable نیست: هیچ ترتیب ترتیبی‌ای این نتیجه‌ها را با محترم شمردن زمان واقعی نمی‌دهد. " + (why || "هر ترتیبی که زمان واقعی را محترم بشمارد یکی از خواندن‌ها را وا می‌دارد مقدار دیگری برگرداند.");
-    }
+        s.appendChild(Kit.svg("rect", { class: "op" + (o.k === "r" ? " rd" : ""), x: sx(o.s), y: y, width: Math.max(4, sx(o.e) - sx(o.s)), height: 32, rx: 5 }));
+        s.appendChild(Kit.svg("text", { x: sx(o.s) + 5, y: y + 21 }, name(o)));
+        if (res.order) { var pos = res.order.indexOf(i), lp = sx(o.s + (o.e - o.s) * (pos + 1) / (ops.length + 1)); s.appendChild(Kit.svg("line", { class: "lp", x1: lp, x2: lp, y1: y - 4, y2: y + 36 })); s.appendChild(Kit.svg("text", { class: "lpn", x: lp + 3, y: y + 47 }, "#" + (pos + 1))); } }); });
+    Kit.clear(document.getElementById("tl")).appendChild(s);
+    var out = Kit.clear(document.getElementById("out"));
+    if (res.order) { out.className = "res ok"; out.appendChild(document.createTextNode("این تاریخ linearizable است. نقطه‌های سبز خطی‌سازی یک ترتیب ترتیبی معتبر را نشان می‌دهند:"));
+      var ch = Kit.el("div", { class: "chips mono" }); res.order.forEach(function (i, k) { if (k) ch.appendChild(Kit.el("span", null, "→")); ch.appendChild(Kit.el("span", { class: "c" }, name(ops[i]))); }); out.appendChild(ch);
+      kind = "ok"; msg = "این تاریخ linearizable است: " + res.order.map(function (i) { return name(ops[i]); }).join(" ← ") + "."; }
+    else { out.className = "res bad"; var w = why(ops); out.textContent = "این تاریخ linearizable نیست: هیچ ترتیب ترتیبی‌ای که زمان واقعی را محترم بشمارد این نتیجه‌ها را نمی‌دهد. " + w; kind = "bad"; msg = "این تاریخ linearizable نیست. " + w; }
     var t = Kit.clear(document.getElementById("ops"));
     t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["process", "عملیات", "مقدار", "آغاز", "پایان"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
     var tb = Kit.el("tbody");
     ops.forEach(function (o, i) {
-      function num(key) { var inp = Kit.el("input", { type: "number", min: 0, max: 20, value: o[key], "aria-label": name(o) + " " + (key === "s" ? "آغاز" : "پایان") }); inp.addEventListener("change", function () { var v = Math.max(0, Math.min(20, +inp.value)); o[key] = v; if (o.e <= o.s) { if (key === "s") o.e = Math.min(20, o.s + 1); else o.s = Math.max(0, o.e - 1); } log.add(name(o) + ": بازه " + o.s + "–" + o.e, "muted"); render(); }); return inp; }
+      function num(key) { var inp = Kit.el("input", { type: "number", min: 0, max: 20, value: o[key], "aria-label": name(o) + " " + (key === "s" ? "آغاز" : "پایان") });
+        inp.addEventListener("change", tw(function () { var v = Math.max(0, Math.min(20, +inp.value)), c = clone(ops), q = c[i]; q[key] = v; if (q.e <= q.s) { if (key === "s") q.e = Math.min(20, q.s + 1); else q.s = Math.max(0, q.e - 1); } view.ops = c; })); return inp; }
       var val = Kit.el("select", { "aria-label": name(o) + " مقدار" }); [0, 1, 2, 10].forEach(function (v) { val.appendChild(Kit.el("option", { value: v }, String(v))); }); val.value = o.v;
-      val.addEventListener("change", function () { o.v = +val.value; render(); });
-      tb.appendChild(Kit.el("tr", null, Kit.el("td", null, o.p), Kit.el("td", null, o.k === "w" ? "write" : "read"), Kit.el("td", null, val), Kit.el("td", null, num("s")), Kit.el("td", null, num("e"))));
-    });
+      val.addEventListener("change", tw(function () { var c = clone(ops); c[i].v = +val.value; view.ops = c; }));
+      tb.appendChild(Kit.el("tr", null, Kit.el("td", null, o.p), Kit.el("td", null, o.k === "w" ? "write" : "read"), Kit.el("td", null, val), Kit.el("td", null, num("s")), Kit.el("td", null, num("e")))); });
     t.appendChild(tb);
-    stats([["عملیات", ops.length], ["ترتیب‌های آزموده", res.tried], ["linearizable", res.order ? "بله" : "نه", res.order ? "ok" : "bad"]]);
+    var St = Kit.clear(document.getElementById("stats"));
+    [["تاریخ", PNAME[view.pre] + (view.ops ? "، ویرایش‌شده" : "")], ["عملیات", ops.length], ["ترتیب‌های آزموده", res.tried], ["linearizable", res.order ? "بله" : "نه", res.order ? "ok" : "bad"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.pre.set(view.pre);
   }
-  document.getElementById("preset").appendChild(Kit.segmented({ label: "تاریخ", value: pre, options: [{ value: "f97", label: "شکل ۹.۷" }, { value: "f98", label: "شکل ۹.۸ به‌شکل register" }, { value: "overlap", label: "خواندن هم‌پوشان" }, { value: "inversion", label: "وارونگی خواندن" }, { value: "ok3", label: "نوشتن‌های هم‌زمان" }], onChange: load }).element);
-  load("f97");
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.pre = Kit.segmented({ label: "تاریخ", value: DEF.pre, options: [{ value: "f97", label: "شکل ۹.۷" }, { value: "f98", label: "شکل ۹.۸" }, { value: "overlap", label: "هم‌پوشان" }, { value: "inversion", label: "وارونگی" }, { value: "ok3", label: "نوشتن هم‌زمان" }], onChange: tw(function (v) { view = { pre: v, ops: null }; }) });
+  document.getElementById("preset").appendChild(ctl.pre.element);
+  var INV2 = clone(PRE.inversion); INV2[2].s = 5;
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "هر عملیات بازه‌ای از فراخوانی تا تمام شدن است؛ تاریخ linearizable است اگر ترتیبی ترتیبی همان نتیجه‌ها را بدهد و زمان واقعی را محترم بشمارد (صص. ۱۲۱–۱۲۴، شکل‌های ۹.۷ و ۹.۸). از‌پیش‌آماده‌های دیگر و سنجنده مال vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و آغاز، پایان و مقدار هر عملیات را عوض کنید.",
+    steps: [
+      { kind: "bad", run: at({ pre: "f97" }), say: "شکل ۹.۷: مؤلفه‌ی A مقدار ۱۰ را می‌نویسد، تأیید می‌گیرد و بعد ۰ می‌خواند. خواندن پس از نوشتن شروع شده، پس هیچ ترتیبی نمی‌تواند آن را پیش از نوشتن بگذارد." },
+      { kind: "bad", run: at({ pre: "f98" }), say: "شکل ۹.۸، که vault به‌شکل یک register بیانش کرده: مقدار به ۲ رسیده و نوشتنش تمام شده، ولی خواندن A که بعدتر شروع می‌شود ۱ می‌دهد، مثل خواندن از replicaیی عقب‌مانده. پاسخ درست ۲ بود (ص. ۱۲۴)." },
+      { kind: "ok", run: at({ pre: "overlap" }), say: "هم‌پوشانی آزادی می‌دهد: خواندن B با نوشتن هم‌پوشان است و می‌تواند مقدار قدیم ۰ را ببیند، و C مقدار تازه را. نقطه‌های سبز ترتیبی معتبر را نشان می‌دهند." },
+      { kind: "bad", run: at({ pre: "inversion" }), say: "وارونگی خواندن: مؤلفه‌ی B مقدار تازه را می‌بیند و C، که پس از تمام شدن B شروع می‌کند، مقدار قدیم را. هر دو با نوشتن هم‌پوشان‌اند، ولی هیچ نقطه‌ی تنهایی برای نوشتن هر دو را توضیح نمی‌دهد." },
+      { kind: "ok", run: at({ pre: "inversion", ops: INV2 }), say: "حالا خواندن C را زودتر شروع کنید، تا با خواندن B هم هم‌پوشان شود. ترتیب این دو آزاد می‌شود و تاریخ linearizable است: C پیش از نوشتن و B پس از آن." },
+      { kind: "ok", run: at({ pre: "ok3" }), say: "دو نوشتن هم‌زمان هر ترتیبی می‌توانند داشته باشند. خواندن C مقدار ۱ می‌دهد، پس ترتیب معتبر نوشتن ۲ را پیش از نوشتن ۱ می‌گذارد." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "خواندنی با نوشتن ۱ روی registerی هم‌پوشان است که ۰ داشت. کدام نتیجه‌ها خطی‌پذیرند؟",

@@ -7,15 +7,23 @@
 <meta name="description" content="قدم شارژ کارت اعتباری یک تسویه‌ی فروشگاهی را در برابر شکست‌های transient و متناوب و دائم CouldNotConnect و در برابر شکست InsufficientFunds اجرا کنید، و ببینید راهبرد از کوشش دوباره‌ی فوری به عقب‌نشینی، به معلق و تعمیر و ادامه، به جبران و لایه‌ی انسانی ارتقا می‌یابد. تصویری از فصل ۳ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .ladder { display: grid; gap: 6px; }
-  .rung { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); font-size: .86rem; }
-  .rung.cur { box-shadow: inset 0 0 0 3px var(--accent); } .rung.done { opacity: .6; } .rung.win { border-color: var(--ok); background: var(--ok-soft); opacity: 1; } .rung.lose { border-color: var(--bad); background: var(--bad-soft); }
+  .esc { display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px; align-items: start; }
+  .ladder { display: grid; gap: 5px; }
+  .rung { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 7px 10px; background: var(--surface-2); font-size: .86rem; display: flex; gap: 8px; align-items: center; }
+  .rung .no { font-weight: 700; min-width: 1.2em; }
+  .rung.cur { box-shadow: inset 0 0 0 3px var(--accent); font-weight: 700; } .rung.done { opacity: .55; } .rung.win { border-color: var(--ok); background: var(--ok-soft); opacity: 1; } .rung.lose { border-color: var(--bad); background: var(--bad-soft); }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 6px; }
+  ol.tl { margin: 0; padding: 0 1.2em 0 0; font-size: .82rem; display: grid; gap: 3px; }
+  ol.tl li.ok { color: var(--ok); } ol.tl li.warn { color: var(--warn); } ol.tl li.bad { color: var(--bad); } ol.tl li.muted { color: var(--ink-2); }
+  ol.tl li.last { font-weight: 700; }
+  ol.tl .t { font-family: var(--mono); direction: ltr; unicode-bidi: isolate; display: inline-block; min-width: 3.5em; }
+  .desc { font-size: .84rem; color: var(--ink-2); margin: 8px 0 0; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/03-failure-tolerance.html">فصل ۳</a><span aria-hidden="true">/</span>
@@ -26,100 +34,119 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۳ · تحمل شکست</div>
-  <h1>رسیدگی ارتقا‌یابنده به شکست</h1>
-  <p class="lede">راهبرد آرمانی کتاب اول می‌پرسد که شکست بی‌ابهام <strong>در سطح برنامه</strong> است یا نه. اگر باشد، برنامه جبران می‌کند، یعنی بازیابی روبه‌عقب. وگرنه پلتفرم اول ملایم‌ترین شکست را فرض می‌گیرد: <strong>transient</strong>، یعنی فوری دوباره بکوش، بعد <strong>متناوب</strong>، یعنی با عقب‌نشینی دوباره بکوش، بعد <strong>دائم</strong>، یعنی معلق کن و تعمیر کن و ادامه بده. تنها آن‌وقت است که شکست به برنامه سپرده می‌شود، و اگر جبران باز بماند، به آدم‌ها.</p>
-  <p class="source-note">تصویری از «رده‌بندی شکست» و «همه را سر هم گذاشتن» (صص. ۴۷–۵۳، شکل‌های ۳.۱۰ تا ۳.۱۶). شمار کوشش‌های عقب‌نشینی، یعنی ۴، و تأخیرها، یعنی ۱ و ۲ و ۴ و ۸ ثانیه، و زمان تعمیر و مدت هر شکستی مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>رسیدگی ارتقا‌یابنده به شکست</h1>
+      <p class="lede">راهبرد آرمانی کتاب اول می‌پرسد که شکست بی‌ابهام <strong>در سطح برنامه</strong> است یا نه. اگر باشد، برنامه جبران می‌کند، یعنی بازیابی روبه‌عقب. وگرنه پلتفرم اول ملایم‌ترین شکست را فرض می‌گیرد: <strong>transient</strong>، یعنی فوری دوباره بکوش، بعد <strong>متناوب</strong>، یعنی با عقب‌نشینی دوباره بکوش، بعد <strong>دائم</strong>، یعنی معلق کن و تعمیر کن و ادامه بده. تنها آن‌وقت است که شکست به برنامه سپرده می‌شود، و اگر جبران باز بماند، به آدم‌ها.</p>
+      <p class="source-note">تصویری از «رده‌بندی شکست» و «همه را سر هم گذاشتن» (صص. ۴۷–۵۳، شکل‌های ۳.۱۰ تا ۳.۱۶). شمار کوشش‌های عقب‌نشینی، یعنی ۴، و تأخیرها، یعنی ۱ و ۲ و ۴ و ۸ ثانیه، و زمان تعمیر و مدت هر شکستی مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">نردبان (شکل ۳.۱۶)</p><div class="ladder" id="ladder"></div>
-        <div class="callout" id="out" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="fail"></div><div id="refund" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="esc">
+          <div><p class="ptitle">نردبان ارتقا (شکل ۳.۱۶)</p><div class="ladder" id="ladder"></div><p class="desc" id="desc"></p></div>
+          <div><p class="ptitle">کوشش‌ها، با زمان سپری‌شده</p><ol class="tl" id="tl" aria-live="polite"></ol></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="fail"></div>
+        <div class="tweak-group" id="refund"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>شکست transient</strong>، یعنی شروع دوباره‌ی routerی، با همان کوشش دوباره‌ی اول درست می‌شود.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>شکست transient</strong>، یعنی شروع دوباره‌ی routerی، با همان کوشش دوباره‌ی اول درست می‌شود.</li>
     <li><strong>شکست متناوب</strong>، یعنی جدول مسیریابی کهنه، از کوشش دوباره‌ی فوری و چند کوشش عقب‌نشینی جان به در می‌برد، بعد خودش پاک می‌شود: تعمیر خودکار پس از latencyی.</li>
     <li><strong>شکست دائم</strong>، یعنی گواهی منقضی‌شده، هیچ‌وقت خودش پاک نمی‌شود. معلق کردن process و گذاشتن این‌که گرداننده‌ای گواهی نصب کند و بعد ادامه دادن همان چیزی است که شارژ را از آب در می‌آورد.</li>
     <li><strong>شکست InsufficientFunds</strong> برای پلتفرم بی‌معناست، پس کوشش دوباره بی‌فایده است. برنامه قدم‌هایی را که پیشاپیش شده جبران می‌کند، و اگر آن بازپرداخت هم باز بماند، گرداننده‌ها تحویل می‌گیرند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/03-failure-tolerance.html"><small>درس</small>فصل ۳: تحمل شکست</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/03-failure-tolerance.html"><small>درس</small>فصل ۳: تحمل شکست</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { fail: "transient", refund: "ok" }, k, steps, cur, attempts, clock, result;
-  var RUNGS = ["رده‌بندی: در سطح برنامه است؟", "transient فرض بگیر: کوشش دوباره‌ی فوری", "متناوب فرض بگیر: کوشش دوباره با عقب‌نشینی", "دائم فرض بگیر: معلق کن و تعمیر کن و ادامه بده", "برنامه: جبران، یعنی بازپرداخت", "لایه‌ی انسانی: گرداننده‌ها"];
-  var DESC = { transient: "خطای CouldNotConnect · شروع دوباره‌ی router، که پس از ۱ کوشش ناکام پاک می‌شود", intermittent: "خطای CouldNotConnect · جدول مسیریابی کهنه، که پس از حدود ۱۰ ثانیه پاک می‌شود", permanent: "خطای CouldNotConnect · گواهی منقضی‌شده، که تعمیر دستی لازم دارد", app: "خطای InsufficientFunds" };
-  function works(time, repaired) {
-    if (cfg.fail === "transient") return attempts >= 2;
-    if (cfg.fail === "intermittent") return time >= 10;
-    if (cfg.fail === "permanent") return repaired;
-    return false;
-  }
-  function plan() {
-    steps = []; var time = 0, n = 0, repaired = false, done = false;
+  var RUNGS = ["رده‌بندی: در سطح برنامه است؟", "transient فرض بگیر: کوشش دوباره‌ی فوری", "متناوب فرض بگیر: کوشش دوباره با عقب‌نشینی", "دائم فرض بگیر: معلق کن، تعمیر کن، ادامه بده", "برنامه: جبران، یعنی بازپرداخت", "لایه‌ی انسانی: گرداننده‌ها"];
+  var DESC = { transient: "خطای CouldNotConnect از شروع دوباره‌ی router؛ پس از ۱ کوشش ناکام پاک می‌شود.", intermittent: "خطای CouldNotConnect از جدول مسیریابی کهنه؛ حدود ۱۰ ثانیه بعد پاک می‌شود.", permanent: "خطای CouldNotConnect از گواهی منقضی‌شده؛ تعمیر دستی لازم دارد.", app: "خطای InsufficientFunds: موجودی کارت کافی نیست." };
+  var END = { win: ["ok", "بازیابی روبه‌جلو: process تمام شد و پرداخت دقیقاً یک بار وصول شد."], back: ["warn", "بازیابی روبه‌عقب: process به‌جای تمام شدن واگردانده شد؛ درست است ولی کم‌دلخواه‌تر."], human: ["bad", "حتی جبران هم باز ماند؛ آدم‌ها باید درستش کنند."] };
+  var DEF = { fail: "transient", refund: "ok", k: 99 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind, steps;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function plan(fail, refund) {
+    var st = [], time = 0, n = 0, repaired = false, done = false;
+    function works() { return fail === "transient" ? n >= 2 : fail === "intermittent" ? time >= 10 : fail === "permanent" ? repaired : false; }
     function attempt(rung, label, wait) {
-      if (done) return; time += wait || 0; n++; attempts = n;
-      var ok = works(time, repaired);
-      steps.push({ rung: rung, text: "t=" + time + " s · کوشش " + n + " (" + label + "): " + (ok ? "شارژ موفق می‌شود" : (cfg.fail === "app" ? "خطای InsufficientFunds" : "خطای CouldNotConnect")), kind: ok ? "ok" : "warn", time: time, n: n });
-      if (ok) { done = true; steps.push({ rung: rung, text: "process ادامه می‌دهد: پرداخت دقیقاً یک بار وصول شد", kind: "ok", end: "win", time: time, n: n }); }
-    }
-    attempts = 0; attempt(0, "کوشش اول");
-    if (!done && cfg.fail === "app") {
-      steps.push({ rung: 0, text: "شکست بی‌ابهام در سطح برنامه است: کوشش دوباره‌ای نیست", kind: "bad" });
-      steps.push({ rung: 4, text: "بازیابی روبه‌عقب: قدم‌هایی که پیشاپیش تمام شده‌اند جبران می‌شوند، یعنی موجودی رزرو‌شده آزاد و بیعانه بازپرداخت می‌شود", kind: "warn" });
-      if (cfg.refund === "ok") steps.push({ rung: 4, text: "جبران موفق شد: به‌شکل مشاهده‌پذیر هم‌ارز با اعمال نشدن", kind: "ok", end: "back" });
-      else { steps.push({ rung: 4, text: "خود آن بازپرداخت باز می‌ماند", kind: "bad" }); steps.push({ rung: 5, text: "ارتقا به لایه‌ی انسانی: گرداننده‌ای بررسی می‌کند؛ و در بدترین حالت، چکی برای بازپرداخت پست می‌شود", kind: "bad", end: "human" }); }
-      return;
-    }
-    if (!done) steps.push({ rung: 0, text: "بی‌ابهام در سطح برنامه نیست: پلتفرم رسیدگی‌اش می‌کند", kind: "muted" });
+      if (done) return; time += wait || 0; n++; var ok = works();
+      st.push({ rung: rung, t: time, n: n, text: "کوشش " + n + "، " + label + ": " + (ok ? "شارژ موفق شد" : fail === "app" ? "خطای InsufficientFunds" : "خطای CouldNotConnect"), kind: ok ? "ok" : "warn" });
+      if (ok) { done = true; st.push({ rung: rung, t: time, n: n, text: "ادامه‌ی process", kind: "ok", end: "win" }); } }
+    attempt(0, "کوشش اول");
+    if (!done && fail === "app") {
+      st.push({ rung: 0, t: time, n: n, text: "شکست بی‌ابهام در سطح برنامه است: کوشش دوباره‌ای نیست", kind: "bad" });
+      st.push({ rung: 4, t: time, n: n, text: "جبران قدم‌های تمام‌شده: آزاد کردن موجودی رزرو‌شده و بازپرداخت بیعانه", kind: "warn" });
+      if (refund === "ok") st.push({ rung: 4, t: time, n: n, text: "جبران موفق شد: به‌شکل مشاهده‌پذیر هم‌ارز با اعمال نشدن", kind: "ok", end: "back" });
+      else { st.push({ rung: 4, t: time, n: n, text: "خود بازپرداخت باز ماند", kind: "bad" }); st.push({ rung: 5, t: time, n: n, text: "ارتقا به گرداننده‌ها؛ در بدترین حالت، چک بازپرداخت پست می‌شود", kind: "bad", end: "human" }); }
+      return st; }
+    if (!done) st.push({ rung: 0, t: time, n: n, text: "در سطح برنامه نیست: پلتفرم رسیدگی می‌کند", kind: "muted" });
     attempt(1, "کوشش دوباره‌ی فوری");
     [1, 2, 4, 8].forEach(function (d) { attempt(2, "عقب‌نشینی " + d + " ثانیه", d); });
-    if (!done) { steps.push({ rung: 3, text: "process معلق می‌شود؛ گرداننده‌ای شرط را تعمیر می‌کند، یعنی گواهی تازه", kind: "warn" }); time += 60; repaired = cfg.fail === "permanent"; attempt(3, "ادامه پس از تعمیر", 0); }
-    if (!done) { steps.push({ rung: 4, text: "کاهش باز ماند: ارتقا به برنامه، که جبران می‌کند", kind: "bad", end: "back" }); }
-  }
-  function fill() { var n = 0, t = 0; steps.forEach(function (s) { if (s.n !== undefined) { n = s.n; t = s.time; } else { s.n = n; s.time = t; } }); }
-  function reset() { plan(); fill(); k = 0; cur = -1; result = null; log.clear(); log.add("شکست: " + DESC[cfg.fail], "muted"); render(); }
-  function step() { if (k >= steps.length) return false; var s = steps[k++]; cur = s.rung; if (s.end) result = s.end; log.add(s.text, s.kind); render(); return k < steps.length; }
+    if (!done) { st.push({ rung: 3, t: time, n: n, text: "تعلیق process؛ گرداننده‌ای گواهی تازه نصب می‌کند", kind: "warn" }); time += 60; repaired = fail === "permanent"; attempt(3, "ادامه پس از تعمیر", 0); }
+    if (!done) st.push({ rung: 4, t: time, n: n, text: "شکست باز ماند: ارتقا به برنامه، که جبران می‌کند", kind: "bad", end: "back" });
+    return st; }
+  function fin(f, r) { var p = plan(f, r || "ok"); return p[p.length - 1]; }
   function render() {
+    steps = plan(view.fail, view.refund); var shown = steps.slice(0, Math.min(view.k, steps.length)), last = shown[shown.length - 1], cur = last.rung, result = last.end;
     var l = Kit.clear(document.getElementById("ladder"));
-    RUNGS.forEach(function (r, i) { l.appendChild(Kit.el("div", { class: "rung" + (i === cur ? " cur" : i < cur ? " done" : "") + (i === cur && result === "win" ? " win" : "") + (i === cur && result === "human" ? " lose" : "") }, (i + 1) + ". " + r)); });
-    var last = steps[Math.max(0, k - 1)] || {}, o = document.getElementById("out");
-    var msg = { win: ["ok", "بازیابی روبه‌جلو: process تمام شد."], back: ["warn", "بازیابی روبه‌عقب: process به‌جای تمام شدن واگردانده شد، که درست است ولی کم‌دلخواه‌تر."], human: ["bad", "حتی جبران هم باز ماند؛ آدم‌ها باید درستش کنند."] };
-    if (result) { o.className = "callout " + msg[result][0]; o.textContent = msg[result][1]; } else { o.className = "callout"; o.textContent = "راهبرد را قدم‌به‌قدم بگذرانید."; }
-    stats([["کوشش‌ها", last.n || (k ? 1 : 0)], ["سپری‌شده", (last.time || 0) + " ثانیه"], ["پله", cur >= 0 ? cur + 1 : "–"]]);
+    RUNGS.forEach(function (r, i) { var reached = shown.some(function (s) { return s.rung === i; });
+      l.appendChild(Kit.el("div", { class: "rung" + (i === cur ? " cur" : reached ? " done" : "") + (i === cur && result === "win" ? " win" : "") + (i === cur && result === "human" ? " lose" : "") }, Kit.el("span", { class: "no" }, String(i + 1)), Kit.el("span", null, r))); });
+    document.getElementById("desc").textContent = DESC[view.fail];
+    var tl = Kit.clear(document.getElementById("tl"));
+    shown.forEach(function (s, i) { tl.appendChild(Kit.el("li", { class: s.kind + (i === shown.length - 1 ? " last" : "") }, Kit.el("span", { class: "t" }, "t=" + s.t + "s"), " " + s.text)); });
+    if (result) { kind = END[result][0]; msg = END[result][1]; } else { kind = last.kind === "bad" ? "bad" : ""; msg = "پله‌ی " + (cur + 1) + ": " + RUNGS[cur]; }
+    var St = Kit.clear(document.getElementById("stats"));
+    [["کوشش‌ها", last.n], ["زمان سپری‌شده", last.t + " ثانیه"], ["پله", (cur + 1) + " از " + RUNGS.length], ["نتیجه", result === "win" ? "روبه‌جلو" : result === "back" ? "روبه‌عقب" : result === "human" ? "انسانی" : "در جریان", result ? END[result][0] : ""]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.fail.set(view.fail); ctl.refund.set(view.refund);
   }
-  document.getElementById("fail").appendChild(Kit.segmented({ label: "شکست", value: cfg.fail, options: [{ value: "transient", label: "transient" }, { value: "intermittent", label: "متناوب" }, { value: "permanent", label: "دائم" }, { value: "app", label: "خطای InsufficientFunds" }], onChange: function (v) { cfg.fail = v; reset(); } }).element);
-  document.getElementById("refund").appendChild(Kit.segmented({ label: "بازپرداخت، یعنی جبران", value: cfg.refund, options: [{ value: "ok", label: "موفق می‌شود" }, { value: "fail", label: "باز می‌ماند" }], onChange: function (v) { cfg.refund = v; reset(); } }).element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 1000 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.fail = Kit.segmented({ label: "شکست", value: DEF.fail, options: [{ value: "transient", label: "transient" }, { value: "intermittent", label: "متناوب" }, { value: "permanent", label: "دائم" }, { value: "app", label: "خطای InsufficientFunds" }], onChange: tw(function (v) { view.fail = v; view.k = 99; }) });
+  ctl.refund = Kit.segmented({ label: "بازپرداخت، یعنی جبران", value: DEF.refund, options: [{ value: "ok", label: "موفق می‌شود" }, { value: "fail", label: "باز می‌ماند" }], onChange: tw(function (v) { view.refund = v; view.k = 99; }) });
+  document.getElementById("fail").appendChild(ctl.fail.element); document.getElementById("refund").appendChild(ctl.refund.element);
+  function sus() { var p = plan("permanent", "ok"); for (var i = 0; i < p.length; i++) if (p[i].rung === 3) return i + 1; }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "قدم شارژ کارت در یک تسویه‌ی فروشگاهی، در برابر چهار نوع شکست (صص. ۴۷–۵۳، شکل‌های ۳.۱۰ تا ۳.۱۶). فاصله‌های backoff، زمان تعمیر و مدت هر شکست فرض vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و نوع شکست و سرنوشت بازپرداخت را عوض کنید.",
+    steps: [
+      { kind: "ok", run: at({ fail: "transient" }), say: function () { var f = fin("transient"); return "شکست transient، یعنی شروع دوباره‌ی router: پلتفرم اول ملایم‌ترین فرض را می‌گیرد و فوری دوباره می‌کوشد. شارژ همان دم در کوشش " + f.n + " موفق می‌شود."; } },
+      { kind: "ok", run: at({ fail: "intermittent" }), say: function () { var f = fin("intermittent"); return "شکست متناوب، یعنی جدول مسیریابی کهنه: کوشش فوری کافی نیست، پس backoff با فاصله‌های ۱، ۲، ۴ و ۸ ثانیه. شکست خودش پاک می‌شود و کوشش " + f.n + " در ثانیه‌ی " + f.t + " موفق است."; } },
+      { kind: "warn", run: function () { view = Object.assign({}, DEF, { fail: "permanent", k: sus() }); }, say: "شکست دائم، یعنی گواهی منقضی‌شده: هیچ کوشش دوباره‌ای، فوری یا با عقب‌نشینی، کمکی نمی‌کند. پلتفرم process را معلق می‌کند تا کسی شرط را تعمیر کند." },
+      { kind: "ok", run: at({ fail: "permanent" }), say: function () { var f = fin("permanent"); return "پس از تعمیر، process از همان قدم ادامه می‌دهد و شارژ در کوشش " + f.n + " موفق است (ثانیه‌ی " + f.t + "). هنوز بازیابی روبه‌جلو است: کار تمام شد."; } },
+      { kind: "warn", run: at({ fail: "app" }), say: "خطای InsufficientFunds بی‌ابهام در سطح برنامه است و کوشش دوباره بی‌فایده. برنامه قدم‌های تمام‌شده را جبران می‌کند: بازیابی روبه‌عقب." },
+      { kind: "bad", run: at({ fail: "app", refund: "fail" }), say: "اگر خود جبران، یعنی بازپرداخت، هم باز بماند، نردبان به آخرین پله می‌رسد: لایه‌ی انسانی. گرداننده‌ها باید درستش کنند (ص. ۵۳)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "راهبرد درباره‌ی شکستی در سطح پلتفرم اول چه فرضی می‌گیرد؟",

@@ -7,21 +7,25 @@
 <meta name="description" content="دو شرکت‌کننده‌ی تراکنش توزیع‌شده‌ی کتاب، از شکل ۱.۹، را هر بار یک گذار قدم بدهید، هر رفتاری را برشمارید، و ببینید کدام ایمنی را نقض می‌کند و کدام liveness را و کدام درست است. تصویری از فصل ۱ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .grid3 { display: grid; grid-template-columns: auto repeat(3, 1fr); gap: 6px; font-size: .82rem; }
-  .grid3 .h { font-weight: 600; text-align: center; align-self: end; }
-  .grid3 .rh { font-weight: 600; align-self: center; }
-  .cell { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px 4px; text-align: center; background: var(--surface-2); }
+  .bs { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start; }
+  .grid3 { display: grid; grid-template-columns: auto repeat(3, 1fr); gap: 6px; font-size: .85rem; }
+  .grid3 .h { font-weight: 700; text-align: center; align-self: end; }
+  .grid3 .rh { font-weight: 700; align-self: center; }
+  .cell { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 14px 4px; text-align: center; background: var(--surface-2); }
   .cell.ok { border-color: var(--ok); background: var(--ok-soft); } .cell.bad { border-color: var(--bad); background: var(--bad-soft); }
   .cell.cur { box-shadow: inset 0 0 0 3px var(--accent); font-weight: 700; }
   .cell.seen { outline: 2px dashed var(--accent); }
-  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  table.bh { width: 100%; border-collapse: collapse; font-size: .82rem; } table.bh td, table.bh th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; }
+  .path { margin-top: 8px; font-size: .88rem; color: var(--ink-2); }
+  table.bh { width: 100%; border-collapse: collapse; font-size: .84rem; } table.bh td, table.bh th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; }
+  table.bh tr.bad td { color: var(--bad); }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 6px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html">فصل ۱</a><span aria-hidden="true">/</span>
@@ -32,115 +36,113 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱ · فکر کردن در سیستم‌های توزیع‌شده</div>
-  <h1>فضای رفتار تراکنشی با دو شرکت‌کننده</h1>
-  <p class="lede">هر شرکت‌کننده‌ای <strong>کار‌کنان</strong> شروع می‌کند و در غایت به <strong>commit‌شده</strong> یا <strong>abort‌شده</strong> می‌رود؛ و هر قدمی دقیقاً یک شرکت‌کننده را جابه‌جا می‌کند. <strong>ایمنی</strong> می‌گوید سیستم هیچ‌وقت نباید به حالتی برسد که در آن یکی commit کرده و دیگری abort. <strong>liveness</strong> می‌گوید نمی‌تواند تا ابد در <em>کار‌کنان</em> بماند. سیستم درست است اگر <em>هر رفتار ممکنی</em> هر دو را برآورد.</p>
-  <p class="source-note">تصویری از «درستی» (صص. ۹–۱۲، فهرست ۱.۱، شکل ۱.۹). آن کلید پروتکل «unanimous»، که گذارها به حالت‌های قاطی را ممنوع می‌کند، راه vault است برای نشان دادن آن چیزی که سیستمی درست باید ردش کند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>فضای رفتار تراکنشی با دو شرکت‌کننده</h1>
+      <p class="lede">هر شرکت‌کننده‌ای <strong>کار‌کنان</strong> شروع می‌کند و در غایت به <strong>commit‌شده</strong> یا <strong>abort‌شده</strong> می‌رود؛ و هر قدمی دقیقاً یک شرکت‌کننده را جابه‌جا می‌کند. <strong>ایمنی</strong> می‌گوید سیستم هیچ‌وقت نباید به حالتی برسد که در آن یکی commit کرده و دیگری abort. <strong>liveness</strong> می‌گوید نمی‌تواند تا ابد در <em>کار‌کنان</em> بماند. سیستم درست است اگر <em>هر رفتار ممکنی</em> هر دو را برآورد.</p>
+      <p class="source-note">تصویری از «درستی» (صص. ۹–۱۲، فهرست ۱.۱، شکل ۱.۹). آن کلید پروتکل «unanimous»، که گذارها به حالت‌های قاطی را ممنوع می‌کند، راه vault است برای نشان دادن آن چیزی که سیستمی درست باید ردش کند. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">فضای حالت؛ ردیف‌ها P1 و ستون‌ها P2</p><div class="grid3" id="grid"></div>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">هر رفتاری</p><div class="table-wrap"><table class="bh" id="all"></table></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="proto"></div><div class="btns" id="moves"></div>
-        <div class="btns"><button class="btn small" id="stay">کار‌کنان بمان؛ قدمی دیگر می‌گذرد</button><button class="btn small" id="rand">رفتار تصادفی</button><button class="btn small" id="reset">از نو</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="bs">
+          <div><p class="ptitle">فضای حالت؛ ردیف‌ها P1 و ستون‌ها P2</p><div class="grid3" id="grid"></div><p class="path" id="path"></p></div>
+          <div><p class="ptitle">همه‌ی رفتارهای ممکن</p><table class="bh" id="all"></table></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="proto"></div>
+        <div class="tweak-group btns" id="moves"></div>
+        <div class="tweak-group btns"><button class="btn small" id="stay" type="button">کار‌کنان بمان</button><button class="btn small" id="reset" type="button">از نو</button></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>بی هم‌آهنگی، هشت رفتار کامل هست</strong>: هر یک از شرکت‌کننده‌ها می‌تواند اول جابه‌جا شود، و هر کدام commit یا abort را تصمیم می‌گیرد. چهارتایشان در حالتی قاطی تمام می‌شوند و ایمنی را نقض می‌کنند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>بی هم‌آهنگی، هشت رفتار کامل هست</strong>: هر یک از شرکت‌کننده‌ها می‌تواند اول جابه‌جا شود، و هر کدام commit یا abort را تصمیم می‌گیرد. چهارتایشان در حالتی قاطی تمام می‌شوند و ایمنی را نقض می‌کنند.</li>
     <li><strong>liveness درباره‌ی رفتارهای بی‌پایان است.</strong> رفتاری که تا ابد کار‌کنان می‌ماند هیچ‌وقت چیز بدی نمی‌کند، پس ایمن است، ولی زنده نیست. زدن «کار‌کنان بمان» همان انتظار را مدل می‌کند.</li>
     <li><strong>پروتکل unanimous</strong> گذارها به حالت‌های قاطی را برمی‌دارد. هر رفتار کامل باقی‌مانده‌ای ایمن است، ولی liveness باز هم می‌خواهد شرکت‌کننده‌ها در غایت قدم‌هایشان را بردارند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html"><small>درس</small>فصل ۱: فکر کردن در سیستم‌های توزیع‌شده</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/01-thinking-in-distributed-systems-models-mindsets-and-mechanics.html"><small>درس</small>فصل ۱: فکر کردن در سیستم‌های توزیع‌شده</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var ST = ["کار‌کنان", "commit‌شده", "abort‌شده"], cfg = { proto: "none" }, s, path, stays, rng = Kit.rng(7);
+  var ST = ["کار‌کنان", "commit‌شده", "abort‌شده"];
+  var DEF = { proto: "none", moves: [], stays: 0 }, view = JSON.parse(JSON.stringify(DEF)), tour, ctl = {}, msg, kind, s, path;
+  function at(o) { return function () { view = Object.assign(JSON.parse(JSON.stringify(DEF)), o); }; }
   function mixed(a, b) { return (a === 1 && b === 2) || (a === 2 && b === 1); }
-  function allowed(who, to) {
-    if (s[who] !== 0) return false;
-    if (cfg.proto === "unan") { var other = s[1 - who]; if (other !== 0 && other !== to) return false; }
-    return true;
-  }
-  function reset() { s = [0, 0]; path = [[0, 0]]; stays = 0; log.clear(); log.add("هر دو شرکت‌کننده کار‌کنان‌اند.", "muted"); render(); }
-  function move(who, to) {
-    if (!allowed(who, to)) return;
-    s[who] = to; path.push(s.slice());
-    log.add("P" + (who + 1) + " → " + ST[to] + "  (حالت: " + ST[s[0]] + " · " + ST[s[1]] + ")", mixed(s[0], s[1]) ? "bad" : (s[0] && s[1] ? "ok" : "muted"));
-    render();
-  }
+  function allowed(who, to) { if (s[who] !== 0) return false; if (view.proto === "unan") { var o = s[1 - who]; if (o !== 0 && o !== to) return false; } return true; }
+  function replay() { s = [0, 0]; path = [[0, 0]]; var used = []; view.moves.forEach(function (m) { if (allowed(m[0], m[1])) { s[m[0]] = m[1]; path.push(s.slice()); used.push(m); } }); return used; }
   function render() {
-    var g = Kit.clear(document.getElementById("grid"));
+    var used = replay(), g = Kit.clear(document.getElementById("grid"));
     g.appendChild(Kit.el("div")); ST.forEach(function (x) { g.appendChild(Kit.el("div", { class: "h" }, "P2 " + x)); });
-    ST.forEach(function (x, i) {
-      g.appendChild(Kit.el("div", { class: "rh" }, "P1 " + x));
-      ST.forEach(function (y, j) {
-        var seen = path.some(function (p) { return p[0] === i && p[1] === j; });
-        var cls = "cell " + (mixed(i, j) ? "bad" : (i && j ? "ok" : "")) + (s[0] === i && s[1] === j ? " cur" : "") + (seen ? " seen" : "");
-        g.appendChild(Kit.el("div", { class: cls, "aria-label": "P1 " + x + "، P2 " + y + (mixed(i, j) ? "، ایمنی را نقض می‌کند" : "") }, mixed(i, j) ? "✗ نباید این‌جا رسید" : (i && j ? "✓ تصمیم‌شده" : (i === 0 && j === 0 ? "آغاز" : "…"))));
-      });
-    });
+    ST.forEach(function (x, i) { g.appendChild(Kit.el("div", { class: "rh" }, "P1 " + x));
+      ST.forEach(function (y, j) { var seen = path.some(function (p) { return p[0] === i && p[1] === j; });
+        g.appendChild(Kit.el("div", { class: "cell " + (mixed(i, j) ? "bad" : (i && j ? "ok" : "")) + (s[0] === i && s[1] === j ? " cur" : "") + (seen ? " seen" : ""), "aria-label": "P1 " + x + "، P2 " + y + (mixed(i, j) ? "، ایمنی را نقض می‌کند" : "") },
+          mixed(i, j) ? "✗ ممنوع" : (i && j ? "✓ تصمیم‌شده" : (i === 0 && j === 0 ? "آغاز" : "…")))); }); });
+    document.getElementById("path").textContent = "رفتار تا این‌جا: " + (used.length ? used.map(function (m) { return "P" + (m[0] + 1) + " " + ST[m[1]]; }).join("، سپس ") : "هنوز قدمی برداشته نشده") + (view.stays ? "، و " + view.stays + " قدم بی‌کار" : "") + ".";
     var m = Kit.clear(document.getElementById("moves"));
-    [[0, 1], [0, 2], [1, 1], [1, 2]].forEach(function (x) {
-      var b = Kit.el("button", { class: "btn small" }, "P" + (x[0] + 1) + (x[1] === 1 ? " commit می‌کند" : " abort می‌کند"));
-      b.disabled = !allowed(x[0], x[1]); b.addEventListener("click", function () { move(x[0], x[1]); }); m.appendChild(b);
-    });
-    var v = document.getElementById("verdict"), done = s[0] && s[1];
-    if (mixed(s[0], s[1])) { v.className = "callout bad"; v.textContent = "ایمنی نقض شد: یک شرکت‌کننده commit کرد و دیگری abort."; }
-    else if (done) { v.className = "callout ok"; v.textContent = "رفتار درست: هر دو " + ST[s[0]] + " را تصمیم گرفتند."; }
-    else if (stays >= 3) { v.className = "callout warn"; v.textContent = "پس از " + stays + " قدم بی‌کار باز هم کار‌کنان. اگر این تا ابد برود، liveness نقض می‌شود، یعنی «نمی‌تواند این‌جا بماند»."; }
-    else { v.className = "callout"; v.textContent = "در جریان."; }
+    [[0, 1], [0, 2], [1, 1], [1, 2]].forEach(function (x) { var b = Kit.el("button", { class: "btn small", type: "button" }, "P" + (x[0] + 1) + (x[1] === 1 ? " commit" : " abort"));
+      b.disabled = !allowed(x[0], x[1]); b.addEventListener("click", tw(function () { view.moves = used.concat([x]); })); m.appendChild(b); });
+    var done = s[0] && s[1];
+    if (mixed(s[0], s[1])) { kind = "bad"; msg = "ایمنی نقض شد: یک شرکت‌کننده commit کرد و دیگری abort."; }
+    else if (done) { kind = "ok"; msg = "رفتار درست: هر دو " + ST[s[0]] + " را تصمیم گرفتند."; }
+    else if (view.stays >= 3) { kind = "warn"; msg = "پس از " + view.stays + " قدم بی‌کار باز هم کار‌کنان. اگر تا ابد این‌طور بماند، liveness نقض می‌شود."; }
+    else { kind = ""; msg = "در جریان."; }
     var t = Kit.clear(document.getElementById("all")), rows = [];
-    [0, 1].forEach(function (first) { [1, 2].forEach(function (a) { [1, 2].forEach(function (b) {
-      var st = [0, 0]; st[first] = a; st[1 - first] = b;
-      var ok = cfg.proto !== "unan" || a === b;
-      if (ok) rows.push(["P" + (first + 1) + " " + ST[a] + "، و بعد P" + (2 - first) + " " + ST[b], mixed(st[0], st[1])]);
-    }); }); });
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", { scope: "col" }, "رفتار"), Kit.el("th", { scope: "col" }, "حکم"))));
-    var tb = Kit.el("tbody");
-    rows.forEach(function (r) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, r[0]), Kit.el("td", null, r[1] ? "✗ ایمنی را نقض می‌کند" : "✓ ایمن و زنده"))); });
-    tb.appendChild(Kit.el("tr", null, Kit.el("td", null, "یکی از شرکت‌کننده‌ها تا ابد کار‌کنان می‌ماند"), Kit.el("td", null, "✗ liveness را نقض می‌کند")));
-    t.appendChild(tb);
-    var bad = rows.filter(function (r) { return r[1]; }).length;
-    stats([["پروتکل", cfg.proto === "unan" ? "unanimous" : "ندارد"], ["رفتارهای کامل", rows.length], ["ناقض ایمنی", bad, bad ? "bad" : "ok"], ["قدم‌های بی‌کار", stays, stays >= 3 ? "warn" : ""]]);
+    [0, 1].forEach(function (first) { [1, 2].forEach(function (a) { [1, 2].forEach(function (b) { var st = [0, 0]; st[first] = a; st[1 - first] = b;
+      if (view.proto !== "unan" || a === b) rows.push(["P" + (first + 1) + " " + ST[a] + "، سپس P" + (2 - first) + " " + ST[b], mixed(st[0], st[1])]); }); }); });
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, Kit.el("th", null, "رفتار"), Kit.el("th", null, "حکم"))));
+    var tb = Kit.el("tbody"); rows.forEach(function (r) { tb.appendChild(Kit.el("tr", { class: r[1] ? "bad" : "" }, Kit.el("td", null, r[0]), Kit.el("td", null, r[1] ? "✗ نقض ایمنی" : "✓ ایمن و زنده"))); });
+    tb.appendChild(Kit.el("tr", { class: "bad" }, Kit.el("td", null, "یکی تا ابد کار‌کنان می‌ماند"), Kit.el("td", null, "✗ نقض liveness"))); t.appendChild(tb);
+    var bad = rows.filter(function (r) { return r[1]; }).length, St = Kit.clear(document.getElementById("stats"));
+    [["پروتکل", view.proto === "unan" ? "unanimous" : "ندارد"], ["رفتارهای کامل", rows.length], ["ناقض ایمنی", bad, bad ? "bad" : "ok"], ["قدم‌های بی‌کار", view.stays, view.stays >= 3 ? "warn" : ""]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.proto.set(view.proto);
   }
-  document.getElementById("proto").appendChild(Kit.segmented({ label: "پروتکل", value: cfg.proto, options: [{ value: "none", label: "بی هم‌آهنگی" }, { value: "unan", label: "تصمیم unanimous" }], onChange: function (v) { cfg.proto = v; reset(); } }).element);
-  document.getElementById("stay").addEventListener("click", function () { if (s[0] && s[1]) return; stays++; log.add("قدمی می‌گذرد؛ هیچ‌کس کار‌کنان را ترک نمی‌کند (" + stays + ")", "warn"); render(); });
-  document.getElementById("reset").addEventListener("click", reset);
-  document.getElementById("rand").addEventListener("click", function () {
-    reset();
-    for (var guard = 0; guard < 10 && !(s[0] && s[1]); guard++) {
-      var opts = [[0, 1], [0, 2], [1, 1], [1, 2]].filter(function (x) { return allowed(x[0], x[1]); });
-      var x = opts[rng.int(opts.length)]; move(x[0], x[1]);
-    }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.proto = Kit.segmented({ label: "پروتکل", value: "none", options: [{ value: "none", label: "بی هم‌آهنگی" }, { value: "unan", label: "تصمیم unanimous" }], onChange: tw(function (v) { view.proto = v; view.moves = []; view.stays = 0; }) });
+  document.getElementById("proto").appendChild(ctl.proto.element);
+  document.getElementById("stay").addEventListener("click", tw(function () { if (!(s[0] && s[1])) view.stays++; }));
+  document.getElementById("reset").addEventListener("click", tw(function () { view.moves = []; view.stays = 0; }));
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "دو شرکت‌کننده، هر کدام کار‌کنان شروع می‌کند و به commit یا abort می‌رسد؛ هر قدم دقیقاً یکی را جابه‌جا می‌کند (صص. ۹–۱۲، فهرست ۱.۱، شکل ۱.۹). کلید unanimous مدل vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و رفتار خودتان را قدم‌به‌قدم بسازید.",
+    steps: [
+      { kind: "", run: at({}), say: "هر دو کار‌کنان‌اند. ایمنی می‌گوید هیچ‌وقت نباید یکی commit و دیگری abort کرده باشد؛ liveness می‌گوید نمی‌شود تا ابد کار‌کنان ماند." },
+      { kind: "", run: at({ moves: [[0, 1]] }), say: "قدم اول: P1 commit می‌کند. P2 هنوز کار‌کنان است." },
+      { kind: "ok", run: at({ moves: [[0, 1], [1, 1]] }), say: "P2 هم commit می‌کند: هر دو یک تصمیم گرفتند. این رفتار ایمن و زنده است." },
+      { kind: "bad", run: at({ moves: [[0, 1], [1, 2]] }), say: "ولی بی هم‌آهنگی، P2 می‌تواند abort کند. سیستم به حالتی قاطی می‌رسد و ایمنی نقض می‌شود. از هشت رفتار کامل، چهارتا همین‌طور تمام می‌شوند." },
+      { kind: "warn", run: at({ stays: 4 }), say: "رفتاری که تا ابد کار‌کنان می‌ماند هیچ کار بدی نمی‌کند، پس ایمن است؛ ولی زنده نیست. liveness درباره‌ی رفتارهای بی‌پایان است." },
+      { kind: "ok", run: at({ proto: "unan", moves: [[0, 1], [1, 2], [1, 1]] }), say: "با پروتکل unanimous، گذار به حالت قاطی برداشته می‌شود: P2 نمی‌تواند abort کند و فقط commit می‌ماند. هر چهار رفتار کامل باقی‌مانده ایمن‌اند." },
+      { kind: "", run: at({ proto: "unan" }), say: "سیستمی درست است که هر رفتار ممکنش هر دو ویژگی را برآورد. پروتکل ایمنی را تضمین کرد؛ liveness باز هم می‌خواهد شرکت‌کننده‌ها در غایت قدم بردارند." }
+    ]
   });
-  reset();
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "کدام حالت ایمنی را نقض می‌کند؟",

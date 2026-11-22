@@ -7,14 +7,23 @@
 <meta name="description" content="رگبارهای seed‌دار رویداد را به سیستمی سنتی با نمونه‌های پیش‌تدارک‌شده و به سیستمی serverless بفرستید که پس از رسیدن هر رویدادی منبع می‌گیرد؛ مدت نگه داشتن serverless را عوض کنید و latency مسیر سرد را با منبع‌هایی که بی‌کار نگه داشته شده‌اند بده‌بستان کنید. تصویری از فصل ۱۲ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  svg.tl { width: 100%; height: auto; display: block; direction: ltr; } svg.tl text { fill: var(--muted); font-size: 10px; font-family: var(--mono); }
-  svg.tl .cold { fill: var(--bad); } svg.tl .hot { fill: var(--ok); } svg.tl .q { fill: var(--warn); } svg.tl path.inst { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+  .ttl { font-size: .9rem; font-weight: 700; margin: 0 0 4px; }
+  svg.tl { width: 100%; height: auto; max-height: 196px; display: block; direction: ltr; } svg.tl text { fill: var(--ink-2); font-size: 11px; }
+  svg.tl .cold { fill: var(--bad); } svg.tl .hot { fill: var(--ok); } svg.tl .q { fill: var(--warn); } svg.tl path.inst { fill: none; stroke: var(--accent); stroke-width: 2; } svg.tl line.ax { stroke: var(--line); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .8rem; color: var(--ink-2); margin: 4px 0 8px; }
+  .legend .sw { font-weight: 700; } .legend .c { color: var(--bad); } .legend .h { color: var(--ok); } .legend .qq { color: var(--warn); } .legend .i { color: var(--accent); }
+  .bars { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .bar { font-size: .84rem; } .bar .track { height: 18px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--line-strong); overflow: hidden; margin-top: 4px; }
+  .bar .fill { height: 100%; } .bar .fill.bad { background: var(--bad); } .bar .fill.warn { background: var(--warn); } .bar .fill.ok { background: var(--ok); }
+  .bar b { font-size: 1.05rem; }
+  .verdict { margin-top: 10px; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 7px 10px; font-size: .9rem; font-weight: 700; }
+  .verdict.ok { border-color: var(--ok); background: var(--ok-soft); } .verdict.warn { border-color: var(--warn); background: var(--warn-soft); } .verdict.bad { border-color: var(--bad); background: var(--bad-soft); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/12-cloud-and-services.html">فصل ۱۲</a><span aria-hidden="true">/</span>
@@ -25,63 +34,70 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۱۲ · cloud و سرویس‌ها</div>
-  <h1>مسیر سرد و مسیر گرم</h1>
-  <p class="lede">سیستم <strong>سنتی</strong> منبع‌ها را پیش از رسیدن رویدادها می‌گیرد، یعنی گرفتن منبع ← گرفتن رویداد ← پردازش ← رها کردن. سیستم <strong>serverless</strong> پس از آن می‌گیردشان، یعنی گرفتن رویداد ← گرفتن منبع ← پردازش ← رها کردن. پلتفرم‌های واقعی منبع‌ها را مدتی پس از رویدادی نگه می‌دارند، پس رویدادی بعدی <strong>مسیر گرم</strong> را می‌گیرد و از گرفتن منبع رد می‌شود؛ وگرنه <strong>مسیر سرد</strong> را می‌گیرد.</p>
-  <p class="source-note">تصویری از «سنتی» و «serverless» و «مسیر سرد در برابر مسیر گرم» (صص. ۱۶۰–۱۶۱، شکل‌های ۱۲.۵ تا ۱۲.۷). بار کاری و زمان گرفتن منبع، یعنی ۸۰۰ میلی‌ثانیه، و زمان پردازش، یعنی ۲۰۰ میلی‌ثانیه، و سنجه‌های هزینه فرض‌های vault‌اند و نه کتاب. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مسیر سرد و مسیر گرم</h1>
+      <p class="lede">سیستم <strong>سنتی</strong> منبع‌ها را پیش از رسیدن رویدادها می‌گیرد، یعنی گرفتن منبع ← گرفتن رویداد ← پردازش ← رها کردن. سیستم <strong>serverless</strong> پس از آن می‌گیردشان، یعنی گرفتن رویداد ← گرفتن منبع ← پردازش ← رها کردن. پلتفرم‌های واقعی منبع‌ها را مدتی پس از رویدادی نگه می‌دارند، پس رویدادی بعدی <strong>مسیر گرم</strong> را می‌گیرد و از گرفتن منبع رد می‌شود؛ وگرنه <strong>مسیر سرد</strong> را می‌گیرد.</p>
+      <p class="source-note">تصویری از «سنتی» و «serverless» و «مسیر سرد در برابر مسیر گرم» (صص. ۱۶۰–۱۶۱، شکل‌های ۱۲.۵ تا ۱۲.۷). بار کاری و زمان گرفتن منبع، یعنی ۸۰۰ میلی‌ثانیه، و زمان پردازش، یعنی ۲۰۰ میلی‌ثانیه، و سنجه‌های هزینه فرض‌های vault‌اند و نه کتاب. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title" id="ttl"></p><div id="tl"></div>
-        <p class="field-hint">هر تیکی یک رویداد است: ▲ سرخ مسیر سرد است، یا در سیستم سنتی در صف، که ▲ نارنجی است؛ و ● سبز مسیر گرم. خط آبی شمار نمونه‌های نگه‌داشته است.</p>
-        <div class="callout" id="out" style="margin-top:8px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div><div id="traffic" style="margin-top:10px"></div><div id="nsl" style="margin-top:12px"></div><div id="ksl"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <p class="ttl" id="ttl"></p>
+        <div id="tl"></div>
+        <div class="legend"><span><span class="sw c">▲</span> مسیر سرد</span><span><span class="sw qq">▲</span> در صف، سیستم سنتی</span><span><span class="sw h">●</span> مسیر گرم</span><span><span class="sw i">━</span> شمار نمونه‌های نگه‌داشته</span></div>
+        <div class="bars"><div class="bar" id="bslow"></div><div class="bar" id="bidle"></div></div>
+        <div class="verdict" id="out" aria-live="polite"></div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group"><div id="mode"></div><div id="traffic" style="margin-top:8px"></div></div>
+        <div class="tweak-group"><div id="nsl"></div><div id="ksl"></div></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>سنتی:</strong> هیچ رویدادی منتظر گرفتن منبع نمی‌ماند، ولی بهای نمونه‌ها تمام مدت پرداخت می‌شود. کم باشند، رگبارها صف می‌شوند؛ زیاد باشند، بیشتر ثانیه‌منبع‌ها بی‌کارند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>سنتی:</strong> هیچ رویدادی منتظر گرفتن منبع نمی‌ماند، ولی بهای نمونه‌ها تمام مدت پرداخت می‌شود. کم باشند، رگبارها صف می‌شوند؛ زیاد باشند، بیشتر ثانیه‌منبع‌ها بی‌کارند.</li>
     <li><strong>serverless با نگه داشتن صفر:</strong> هر رویدادی مسیر سرد را می‌گیرد، و چیزی بی‌کار نگه داشته نمی‌شود.</li>
     <li><strong>نگه داشتن طولانی‌تر:</strong> رویدادهای درون یک رگبار نمونه‌ای گرم پیدا می‌کنند و مسیر گرم را می‌گیرند، به بهای نمونه‌هایی که میان رگبارها بی‌کار نگه داشته می‌شوند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/12-cloud-and-services.html"><small>درس</small>فصل ۱۲: cloud و سرویس‌ها</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/12-cloud-and-services.html"><small>درس</small>فصل ۱۲: cloud و سرویس‌ها</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { mode: "sl", traffic: "bursty", N: 3, k: 30 }, ACQ = 0.8, PROC = 0.2, T = 600;
-  function arrivals() {
+  var ACQ = 0.8, PROC = 0.2, T = 600;
+  var DEF = { mode: "trad", traffic: "bursty", N: 3, k: 30 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function arrivals(cfg) {
     var r = Kit.rng(cfg.traffic === "bursty" ? 7 : 11), out = [], t = 0;
     if (cfg.traffic === "steady") { while ((t += r.exp(4)) < T) out.push(t); return out; }
     while (t < T) { t += r.exp(70); var n = 5 + r.int(25), b = t; for (var i = 0; i < n && b < T; i++) { out.push(b); b += r.exp(0.6); } t = b; }
     return out;
   }
-  function simulate() {
-    var A = arrivals(), ev = [], held = [], busySec = A.length * PROC, rs = 0, acqSec = 0;
+  function simulate(cfg) {
+    var A = arrivals(cfg), ev = [], held = [], busySec = A.length * PROC, rs = 0, acqSec = 0;
     if (cfg.mode === "trad") {
       var free = new Array(cfg.N).fill(0);
       A.forEach(function (a) { var i = free.indexOf(Math.min.apply(null, free)), st = Math.max(a, free[i]); free[i] = st + PROC; ev.push({ t: a, lat: st + PROC - a, kind: st > a + 1e-9 ? "q" : "hot" }); });
@@ -100,26 +116,54 @@ function stats(rows) {
     var lats = ev.map(function (e) { return e.lat; }).sort(function (a, b) { return a - b; });
     return { ev: ev, held: held, rs: rs, idle: Math.max(0, rs - busySec - acqSec), mean: lats.reduce(function (a, b) { return a + b; }, 0) / lats.length, p99: lats[Math.min(lats.length - 1, Math.floor(lats.length * 0.99))], slow: ev.filter(function (e) { return e.kind !== "hot"; }).length };
   }
+
+  function sh(s) { return s.slow / s.ev.length; }
+  function sum(o) { var s = simulate(Object.assign({}, DEF, o)); return { slow: Kit.pct(sh(s), 1), idle: Kit.pct(s.idle / Math.max(1e-9, s.rs), 0), n: s.ev.length, mean: Math.round(s.mean * 1000), p99: Math.round(s.p99 * 1000) }; }
   function render() {
-    var s = simulate(), W = 600, H = 120, sx = function (t) { return 10 + t * (W - 20) / T; }, maxI = Math.max(1, Math.max.apply(null, s.held.map(function (h) { return h[1]; })));
-    var sy = function (v) { return 100 - v * 70 / maxI; };
-    var svg = Kit.svg("svg", { class: "tl", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": s.ev.length + " رویداد در " + T + " ثانیه؛ " + s.slow + " تا روی مسیر گرم نبودند" });
+    var s = simulate(view), W = 640, H = 170, sx = function (t) { return 14 + t * (W - 28) / T; }, maxI = Math.max(1, Math.max.apply(null, s.held.map(function (h) { return h[1]; })));
+    var sy = function (v) { return 136 - v * 105 / maxI; };
+    var svg = Kit.svg("svg", { class: "tl mono", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": s.ev.length + " رویداد در " + T + " ثانیه؛ " + s.slow + " تا روی مسیر گرم نبودند" });
+    svg.appendChild(Kit.svg("line", { class: "ax", x1: sx(0), x2: sx(T), y1: 136, y2: 136 }));
     var d = "M" + sx(0) + " " + sy(s.held[0][1]); s.held.forEach(function (h) { d += " H" + sx(h[0]) + " V" + sy(h[1]); }); svg.appendChild(Kit.svg("path", { class: "inst", d: d }));
-    s.ev.forEach(function (e) { var x = sx(e.t); if (e.kind === "hot") svg.appendChild(Kit.svg("circle", { class: "hot", cx: x, cy: 110, r: 2.2 })); else svg.appendChild(Kit.svg("path", { class: e.kind === "q" ? "q" : "cold", d: "M" + (x - 3) + " 114 L" + x + " 106 L" + (x + 3) + " 114 Z" })); });
-    for (var g = 0; g <= T; g += 100) { var tx = Kit.svg("text", { x: sx(g) - 6, y: 12 }); tx.textContent = g + "s"; svg.appendChild(tx); }
-    var mx = Kit.svg("text", { x: W - 70, y: sy(maxI) - 3 }); mx.textContent = "max " + maxI + " inst."; svg.appendChild(mx);
+    s.ev.forEach(function (e) { var x = sx(e.t); if (e.kind === "hot") svg.appendChild(Kit.svg("circle", { class: "hot", cx: x, cy: 152, r: 2.6 })); else svg.appendChild(Kit.svg("path", { class: e.kind === "q" ? "q" : "cold", d: "M" + (x - 3.5) + " 158 L" + x + " 147 L" + (x + 3.5) + " 158 Z" })); });
+    for (var g = 0; g <= T; g += 100) { var tx = Kit.svg("text", { x: sx(g), y: 168, "text-anchor": "middle" }); tx.textContent = g + "s"; svg.appendChild(tx); }
+    var mx = Kit.svg("text", { x: sx(0) + 2, y: sy(maxI) - 4 }); mx.textContent = maxI + " inst."; svg.appendChild(mx);
     Kit.clear(document.getElementById("tl")).appendChild(svg);
-    document.getElementById("ttl").textContent = (cfg.mode === "trad" ? "سنتی، با " + cfg.N + " نمونه‌ی پیش‌تدارک‌شده" : "serverless، با نگه داشتن " + cfg.k + " ثانیه") + " · " + s.ev.length + " رویداد در " + T + " ثانیه";
-    var idleShare = s.idle / Math.max(1e-9, s.rs), o = document.getElementById("out");
-    o.className = "callout " + (s.slow / s.ev.length > 0.3 ? "bad" : idleShare > 0.8 ? "warn" : "ok");
-    o.textContent = (cfg.mode === "trad" ? Kit.pct(s.slow / s.ev.length, 1) + " از رویدادها در صف ماندند. " : Kit.pct(s.slow / s.ev.length, 1) + " از رویدادها مسیر سرد را گرفتند. ") + Kit.pct(idleShare, 0) + " از آن " + Math.round(s.rs) + " ثانیه‌منبع بی‌کار بود.";
-    stats([["رویدادها", s.ev.length], [cfg.mode === "trad" ? "در صف" : "مسیر سرد", Kit.pct(s.slow / s.ev.length, 1), s.slow / s.ev.length > 0.3 ? "bad" : "ok"], ["latency میانگین", Math.round(s.mean * 1000) + " میلی‌ثانیه"], ["latency p99", Math.round(s.p99 * 1000) + " میلی‌ثانیه"], ["ثانیه‌منبع", Math.round(s.rs)], ["ثانیه‌منبع بی‌کار", Math.round(s.idle), idleShare > 0.8 ? "warn" : "ok"]]);
+    document.getElementById("ttl").textContent = (view.mode === "trad" ? "سیستم سنتی با " + view.N + " نمونه‌ی از پیش گرفته‌شده" : "سیستم serverless با نگه داشتن " + view.k + " ثانیه") + " · ترافیک " + (view.traffic === "bursty" ? "رگباری" : "یکنواخت") + " · " + s.ev.length + " رویداد در " + T + " ثانیه";
+    var slow = sh(s), idle = s.idle / Math.max(1e-9, s.rs), sk = slow > 0.3 ? "bad" : slow > 0.1 ? "warn" : "ok", ik = idle > 0.8 ? "bad" : idle > 0.5 ? "warn" : "ok";
+    function bar(id, label, v, k) { var b = Kit.clear(document.getElementById(id)); b.appendChild(Kit.el("div", null, label + ": ", Kit.el("b", null, Kit.pct(v, v < 0.1 ? 1 : 0)))); var t = Kit.el("div", { class: "track" }); t.appendChild(Kit.el("div", { class: "fill " + k, style: "width:" + Math.max(0.5, v * 100) + "%" })); b.appendChild(t); }
+    bar("bslow", view.mode === "trad" ? "رویدادهای در صف" : "رویدادهای مسیر سرد", slow, sk);
+    bar("bidle", "ثانیه‌منبع بی‌کار از " + Math.round(s.rs), idle, ik);
+    kind = sk === "bad" || ik === "bad" ? (sk === "bad" ? "bad" : "warn") : sk === "warn" || ik === "warn" ? "warn" : "ok";
+    msg = "مقدار latency میانگین " + Math.round(s.mean * 1000) + " و p99 برابر " + Math.round(s.p99 * 1000) + " میلی‌ثانیه؛ " + Kit.pct(idle, 0) + " از ثانیه‌منبع‌ها بی‌کار ماند.";
+    var o = document.getElementById("out"); o.className = "verdict " + kind; o.textContent = msg;
+    var St = Kit.clear(document.getElementById("stats"));
+    [["رویدادها", s.ev.length], [view.mode === "trad" ? "در صف" : "مسیر سرد", Kit.pct(slow, 1), sk], ["latency میانگین", Math.round(s.mean * 1000) + " ms", "mono"], ["latency p99", Math.round(s.p99 * 1000) + " ms", "mono"], ["ثانیه‌منبع", Math.round(s.rs)], ["بی‌کار", Math.round(s.idle), ik]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || ""), style: "unicode-bidi:isolate" + (x[2] === "mono" ? ";direction:ltr" : "") }, String(x[1])))); });
+    ctl.m.set(view.mode); ctl.t.set(view.traffic); ctl.n.set(view.N); ctl.k.set(view.k);
   }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "سیستم", value: cfg.mode, options: [{ value: "trad", label: "سنتی" }, { value: "sl", label: "serverless" }], onChange: function (v) { cfg.mode = v; log.add(v === "trad" ? "سنتی: اول گرفتن منبع، بعد گرفتن رویداد" : "serverless: اول گرفتن رویداد، بعد گرفتن منبع", "muted"); render(); } }).element);
-  document.getElementById("traffic").appendChild(Kit.segmented({ label: "ترافیک", value: cfg.traffic, options: [{ value: "bursty", label: "رگباری" }, { value: "steady", label: "یکنواخت" }], onChange: function (v) { cfg.traffic = v; log.add("ترافیک: " + (v === "bursty" ? "رگباری" : "یکنواخت"), "muted"); render(); } }).element);
-  document.getElementById("nsl").appendChild(Kit.slider({ label: "سنتی: نمونه‌ها", min: 1, max: 10, step: 1, value: cfg.N, onInput: function (v) { cfg.N = v; render(); } }).element);
-  document.getElementById("ksl").appendChild(Kit.slider({ label: "serverless: نگه داشتن پس از رویدادی", min: 0, max: 120, step: 5, value: cfg.k, unit: " ثانیه", onInput: function (v) { cfg.k = v; render(); } }).element);
-  render();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.m = Kit.segmented({ label: "سیستم", value: DEF.mode, options: [{ value: "trad", label: "سنتی" }, { value: "sl", label: "serverless" }], onChange: tw(function (v) { view.mode = v; }) });
+  ctl.t = Kit.segmented({ label: "ترافیک", value: DEF.traffic, options: [{ value: "bursty", label: "رگباری" }, { value: "steady", label: "یکنواخت" }], onChange: tw(function (v) { view.traffic = v; }) });
+  ctl.n = Kit.slider({ label: "سنتی: شمار نمونه‌ها", min: 1, max: 10, step: 1, value: DEF.N, onInput: tw(function (v) { view.N = v; }) });
+  ctl.k = Kit.slider({ label: "serverless: نگه داشتن پس از رویداد", min: 0, max: 120, step: 5, value: DEF.k, unit: " ثانیه", onInput: tw(function (v) { view.k = v; }) });
+  document.getElementById("mode").appendChild(ctl.m.element); document.getElementById("traffic").appendChild(ctl.t.element);
+  document.getElementById("nsl").appendChild(ctl.n.element); document.getElementById("ksl").appendChild(ctl.k.element);
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "سیستم سنتی منبع را پیش از رویداد می‌گیرد و serverless پس از آن؛ منبع نگه‌داشته مسیر گرم می‌سازد (صص. ۱۶۰–۱۶۱، شکل‌های ۱۲.۵ تا ۱۲.۷). بار کاری، ۸۰۰ میلی‌ثانیه گرفتن منبع و ۲۰۰ میلی‌ثانیه پردازش فرض vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و شمار نمونه‌ها یا زمان نگه داشتن را با هر دو نوع ترافیک بسنجید.",
+    steps: [
+      { kind: "warn", run: at({ N: 1 }), say: function () { var r = sum({ N: 1 }); return "سنتی با ۱ نمونه: منبع از پیش آماده است، ولی در رگبارها " + r.slow + " از رویدادها در صف می‌مانند و p99 به " + r.p99 + " میلی‌ثانیه می‌رسد."; } },
+      { kind: "warn", run: at({}), say: function () { var r = sum({}); return "با ۳ نمونه صف تقریباً می‌رود (" + r.slow + ")، ولی بهای نمونه‌ها تمام مدت پرداخت می‌شود و " + r.idle + " از ثانیه‌منبع‌ها بی‌کار است."; } },
+      { kind: "bad", run: at({ mode: "sl", k: 0 }), say: function () { var r = sum({ mode: "sl", k: 0 }); return "در serverless بدون نگه داشتن: هر رویداد مسیر سرد را می‌گیرد (" + r.slow + ") و latency میانگین " + r.mean + " میلی‌ثانیه می‌شود، ولی چیزی بی‌کار نمی‌ماند."; } },
+      { kind: "ok", run: at({ mode: "sl", k: 30 }), say: function () { var r = sum({ mode: "sl", k: 30 }); return "نگه داشتن ۳۰ ثانیه: رویدادهای درون یک رگبار نمونه‌ی گرم پیدا می‌کنند. تنها " + r.slow + " مسیر سرد می‌گیرند و " + r.idle + " بی‌کار است."; } },
+      { kind: "warn", run: at({ mode: "sl", k: 120 }), say: function () { var r = sum({ mode: "sl", k: 120 }); return "با نگه داشتن ۱۲۰ ثانیه مسیر سرد به " + r.slow + " می‌رسد، ولی نمونه‌ها میان رگبارها بی‌کار می‌مانند: " + r.idle + "."; } },
+      { kind: "ok", run: at({ mode: "sl", k: 30, traffic: "steady" }), say: function () { var r = sum({ mode: "sl", k: 30, traffic: "steady" }); return "با ترافیک یکنواخت، همان ۳۰ ثانیه تقریباً همه را گرم نگه می‌دارد: " + r.slow + " مسیر سرد. شکل ترافیک تعیین می‌کند کدام مدل ارزان‌تر است."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "در مدل کمینه، چه چیزی serverless را از محاسبات سنتی جدا می‌کند؟",

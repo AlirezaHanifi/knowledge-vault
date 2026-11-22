@@ -7,14 +7,21 @@
 <meta name="description" content="انتقال پول کتاب را با یک log Undo اجرا کنید، آن را میان ثبت یک Undo و اعمال عملیاتش یا در میانه‌ی بازیابی از کار بیندازید، و Undo نسبی، یعنی ده را برگردان، را با آن یکی که مقدار قدیم را بازمی‌گرداند مقایسه کنید. تنها دومی noop و idempotent است. تصویری از فصل ۵ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  table.ul { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .82rem; } table.ul td, table.ul th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; }
-  .acct { display: flex; gap: 8px; } .acct div { flex: 1; text-align: center; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); } .acct strong { font-size: 1.4rem; font-family: var(--mono); display: block; }
+  .ul5 { display: grid; grid-template-columns: 1fr 1.1fr; gap: 16px; align-items: start; }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 6px; }
+  .acct { display: flex; gap: 8px; } .acct div { flex: 1; text-align: center; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px; background: var(--surface-2); font-size: .85rem; }
+  .acct strong { font-size: 1.5rem; display: block; } .acct div.ok { border-color: var(--ok); background: var(--ok-soft); } .acct div.bad { border-color: var(--bad); background: var(--bad-soft); }
+  table.ul { width: 100%; border-collapse: collapse; font-size: .84rem; margin-top: 4px; } table.ul td, table.ul th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; }
+  table.ul td.code { font-family: var(--mono); direction: ltr; unicode-bidi: isolate; text-align: left; } table.ul tr.cur td { background: var(--accent-soft); } table.ul td.bad { color: var(--bad); font-weight: 700; }
+  ol.tl { margin: 0; padding: 0 1.2em 0 0; font-size: .82rem; line-height: 1.4; display: grid; gap: 2px; }
+  ol.tl li.ok { color: var(--ok); } ol.tl li.warn { color: var(--warn); } ol.tl li.bad { color: var(--bad); } ol.tl li.muted { color: var(--ink-2); } ol.tl li.last { font-weight: 700; }
+  ol.tl .c { font-family: var(--mono); direction: ltr; unicode-bidi: isolate; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/05-transactions.html">فصل ۵</a><span aria-hidden="true">/</span>
@@ -25,112 +32,123 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۵ · تراکنش</div>
-  <h1>یک log Undo از‌سر‌شدنی</h1>
-  <p class="lede">پیش از هر عملیاتی، دیتابیس <strong>Undo</strong>ش را به Transaction Undo Log می‌افزاید. پس از از کار افتادنی، بازیابی Undo هر عملیات commit‌نشده‌ای را به ترتیب معکوس اجرا می‌کند. ولی ثبت کردن و اعمال کردن قدم‌های جدایند، پس شاید Undoیی برای عملیاتی اجرا شود که هیچ‌وقت رخ نداده، و از کار افتادنی در میانه‌ی بازیابی Undoها را دو بار اجرا می‌کند. هر Undo باید <strong>noop</strong> و <strong>idempotent</strong> باشد: از‌سر‌شدنی.</p>
-  <p class="source-note">تصویری از «تمامیت» و «abort در سطح پلتفرم» (صص. ۷۷–۷۸) روی انتقال فهرست ۵.۱ و شکل ۵.۵. آن دو سبک Undo و نقطه‌های از کار افتادن مال vault است؛ کتاب نیازمندی را می‌گوید بی آن‌که encodingی بردارد. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>یک log Undo از‌سر‌شدنی</h1>
+      <p class="lede">پیش از هر عملیاتی، دیتابیس <strong>Undo</strong>ش را به Transaction Undo Log می‌افزاید. پس از از کار افتادنی، بازیابی Undo هر عملیات commit‌نشده‌ای را به ترتیب معکوس اجرا می‌کند. ولی ثبت کردن و اعمال کردن قدم‌های جدایند، پس شاید Undoیی برای عملیاتی اجرا شود که هیچ‌وقت رخ نداده، و از کار افتادنی در میانه‌ی بازیابی Undoها را دو بار اجرا می‌کند. هر Undo باید <strong>noop</strong> و <strong>idempotent</strong> باشد: از‌سر‌شدنی.</p>
+      <p class="source-note">تصویری از «تمامیت» و «abort در سطح پلتفرم» (صص. ۷۷–۷۸) روی انتقال فهرست ۵.۱ و شکل ۵.۵. آن دو سبک Undo و نقطه‌های از کار افتادن مال vault است؛ کتاب نیازمندی را می‌گوید بی آن‌که encodingی بردارد. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><div class="acct" id="acct"></div><p class="panel-title" style="margin-top:10px">Transaction Undo Log</p><div class="table-wrap"><table class="ul" id="ulog"></table></div>
-        <div class="callout" id="out" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="style"></div><div id="crash" style="margin-top:10px"></div><div id="rcrash" style="margin-top:10px"></div><div id="player" style="margin-top:12px"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="ul5">
+          <div><div class="acct" id="acct"></div><p class="ptitle" style="margin-top:10px">Transaction Undo Log</p><table class="ul" id="ulog"></table></div>
+          <div><p class="ptitle">رویدادها</p><ol class="tl" id="tl" aria-live="polite"></ol></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="style"></div>
+        <div class="tweak-group" id="crash"></div>
+        <div class="tweak-group" id="rcrash"></div>
+        <div class="tweak-group" id="kslot"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>از کار افتادن پس از ثبت یک Undo و پیش از عملیاتش</strong>: یک Undo نسبی، یعنی «A += 10»، ده را به موجودی‌ای می‌افزاید که هیچ‌وقت برداشت نشده بود، و پول می‌سازد.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>از کار افتادن پس از ثبت یک Undo و پیش از عملیاتش</strong>: یک Undo نسبی، یعنی «A += 10»، ده را به موجودی‌ای می‌افزاید که هیچ‌وقت برداشت نشده بود، و پول می‌سازد.</li>
     <li><strong>از کار افتادن در میانه‌ی بازیابی</strong>: بازیابی از نو شروع می‌کند و همان Undoها را بازهم اجرا می‌کند. Undo نسبی که دو بار اعمال شود بیش‌تصحیح می‌کند.</li>
     <li><strong>Undo مطلق</strong>، یعنی «A := 50» که مقدار قدیم است، اگر عملیاتش هیچ‌وقت اجرا نشده باشد noop است و هر چند بار هم اجرا شود همان اثر را دارد، پس بازیابی همیشه ۵۰ و ۵۰ را بازمی‌گرداند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/05-transactions.html"><small>درس</small>فصل ۵: تراکنش</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/05-transactions.html"><small>درس</small>فصل ۵: تراکنش</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { style: "rel", crash: "afterLog1", rcrash: "no" }, acc, ulog, steps, k, phase;
-  var PH = { running: "در اجرا", committed: "commit‌شده", crashed: "از کار افتاده", recovering: "در بازیابی", recovered: "بازیابی‌شده" };
-  function undoOf(i) { var acct = i === 0 ? "A" : "B", delta = i === 0 ? 10 : -10; return cfg.style === "rel" ? { acct: acct, text: acct + " := " + acct + (delta > 0 ? " + " : " − ") + Math.abs(delta), rel: delta } : { acct: acct, text: acct + " := 50", abs: 50 }; }
-  function plan() {
-    steps = [];
-    var ops = [{ acct: "A", d: -10 }, { acct: "B", d: 10 }];
-    var points = { afterLog1: 1, afterOp1: 2, afterLog2: 3, afterOp2: 4, none: 99 };
-    var stop = points[cfg.crash], n = 0;
+  var DEF = { style: "rel", crash: "none", rcrash: "no", k: 99 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind, fr;
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  function trace(style, crash, rcrash) {
+    var acc = { A: 50, B: 50 }, ul = [], phase = "run", out = [], cur = -1;
+    function snap(text, kd, c) { out.push({ text: text, kind: kd, acc: { A: acc.A, B: acc.B }, ul: ul.map(function (e) { return { t: e.u.text, done: e.done, runs: e.runs }; }), phase: phase, cur: c === undefined ? -1 : c }); }
+    function undoOf(i) { var a = i === 0 ? "A" : "B", d = i === 0 ? 10 : -10; return style === "rel" ? { acct: a, text: a + " := " + a + (d > 0 ? " + " : " - ") + Math.abs(d), rel: d } : { acct: a, text: a + " := 50", abs: 50 }; }
+    var ops = [{ acct: "A", d: -10 }, { acct: "B", d: 10 }], stop = { afterLog1: 1, afterOp1: 2, afterLog2: 3, afterOp2: 4, none: 99 }[crash], n = 0;
+    snap("انتقال ۱۰ دلار از A به B؛ هر دو ۵۰ دارند", "muted");
     for (var i = 0; i < 2; i++) {
-      n++; if (n > stop) break; steps.push({ k: "log", i: i });
-      n++; if (n > stop) break; steps.push({ k: "op", i: i, op: ops[i] });
-    }
-    if (stop >= 99) { steps.push({ k: "commit" }); return; }
-    steps.push({ k: "crash" });
-    steps.push({ k: "recover" });
-  }
-  function reset() { plan(); k = 0; acc = { A: 50, B: 50 }; ulog = []; phase = "running"; log.clear(); log.add("انتقال ۱۰ دلار از A که ۵۰ است به B که ۵۰ است. سبک Undo: " + (cfg.style === "rel" ? "نسبی" : "مطلق، یعنی بازگرداندن مقدار قدیم"), "muted"); render(); }
-  function runUndo(e) { if (e.u.rel !== undefined) acc[e.u.acct] += e.u.rel; else acc[e.u.acct] = e.u.abs; e.runs++; }
-  function step() {
-    if (k >= steps.length) return false;
-    var s = steps[k++];
-    if (s.k === "log") { var u = undoOf(s.i); ulog.push({ u: u, runs: 0, opDone: false }); log.add("ثبت Undo: " + u.text, "muted"); }
-    else if (s.k === "op") { acc[s.op.acct] += s.op.d; ulog[s.i].opDone = true; log.add("اعمال: " + s.op.acct + " := " + s.op.acct + (s.op.d > 0 ? " + " : " − ") + Math.abs(s.op.d) + " → " + acc[s.op.acct], "muted"); }
-    else if (s.k === "commit") { phase = "committed"; log.add("commit: انتقال تمام است", "ok"); }
-    else if (s.k === "crash") { phase = "crashed"; log.add("⚡ از کار افتادن: تراکنش هیچ‌وقت commit نشد", "bad"); }
-    else if (s.k === "recover") {
-      phase = "recovering";
-      var rev = ulog.slice().reverse();
-      log.add("بازیابی: Undoهای ثبت‌شده را به ترتیب معکوس اجرا کن", "warn");
-      rev.forEach(function (e, j) {
-        if (cfg.rcrash === "yes" && j === 1) return;
-        runUndo(e); log.add("اجرای Undo " + e.u.text + (e.opDone ? "" : "؛ عملیاتش هیچ‌وقت اجرا نشد") + " → A = " + acc.A + "، B = " + acc.B, e.opDone || e.u.abs !== undefined ? "muted" : "bad");
-      });
-      if (cfg.rcrash === "yes") {
-        log.add("⚡ از کار افتادن در میانه‌ی بازیابی؛ بازیابی از سر log دوباره شروع می‌کند", "bad");
-        rev.forEach(function (e) { runUndo(e); log.add("اجرای بازهم Undo " + e.u.text + " → A = " + acc.A + "، B = " + acc.B, e.u.abs !== undefined ? "muted" : "bad"); });
-      }
-      phase = "recovered";
-    }
-    render(); return k < steps.length;
-  }
+      if (++n > stop) break; var u = undoOf(i); ul.push({ u: u, done: false, runs: 0 }); snap("ثبت Undo: |" + u.text, "muted", i);
+      if (++n > stop) break; acc[ops[i].acct] += ops[i].d; ul[i].done = true; snap("اعمال عملیات: |" + ops[i].acct + " := " + ops[i].acct + (ops[i].d > 0 ? " + " : " - ") + Math.abs(ops[i].d), "muted", i); }
+    if (stop >= 99) { phase = "committed"; snap("دستور commit: انتقال تمام است", "ok"); return out; }
+    phase = "crashed"; snap("⚡ از کار افتادن پیش از commit", "bad");
+    function run(e, again) { if (e.u.rel !== undefined) acc[e.u.acct] += e.u.rel; else acc[e.u.acct] = e.u.abs; e.runs++;
+      snap((again ? "اجرای دوباره‌ی Undo: |" : "اجرای Undo: |") + e.u.text + (e.done ? "" : "| ؛ عملیاتش هیچ‌وقت اجرا نشده بود"), (e.u.rel !== undefined && (!e.done || e.runs > 1)) ? "bad" : "muted", ul.indexOf(e)); }
+    var rev = ul.slice().reverse(); phase = "recovering"; snap("بازیابی: Undoها به ترتیب معکوس", "warn");
+    rev.forEach(function (e, j) { if (rcrash === "yes" && j === 1) return; run(e); });
+    if (rcrash === "yes") { snap("⚡ از کار افتادن در میانه‌ی بازیابی؛ بازیابی از سر log شروع می‌کند", "bad"); rev.forEach(function (e) { run(e, true); }); }
+    phase = "recovered"; var ok = acc.A === 50 && acc.B === 50; snap(ok ? "بازیابی تمام شد: حالت پیش از تراکنش" : "بازیابی تمام شد، ولی نه به حالت پیش از تراکنش", ok ? "ok" : "bad");
+    return out; }
+  function fin(s, c, r) { var f = trace(s, c, r || "no"); return f[f.length - 1].acc; }
   function render() {
+    fr = trace(view.style, view.crash, view.rcrash); var n = Math.min(view.k, fr.length), f = fr[n - 1], done = n === fr.length, sum = f.acc.A + f.acc.B;
     var a = Kit.clear(document.getElementById("acct"));
-    ["A", "B"].forEach(function (x) { a.appendChild(Kit.el("div", null, "حساب " + x, Kit.el("strong", null, String(acc[x])))); });
+    ["A", "B"].forEach(function (x) { a.appendChild(Kit.el("div", { class: done && f.phase === "recovered" ? (f.acc[x] === 50 ? "ok" : "bad") : "" }, "حساب " + x, Kit.el("strong", null, String(f.acc[x])))); });
+    a.appendChild(Kit.el("div", { class: sum === 100 ? "ok" : "bad" }, "جمع", Kit.el("strong", null, String(sum))));
     var t = Kit.clear(document.getElementById("ulog"));
-    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["#", "Undo", "عملیات اجرا شد؟", "اجراهای Undo"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
-    var tb = Kit.el("tbody"); ulog.forEach(function (e, i) { tb.appendChild(Kit.el("tr", null, Kit.el("td", null, String(i + 1)), Kit.el("td", null, e.u.text), Kit.el("td", null, e.opDone ? "بله" : "نه"), Kit.el("td", null, String(e.runs)))); });
-    if (!ulog.length) tb.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 4 }, "(خالی)"))); t.appendChild(tb);
-    var o = document.getElementById("out"), sum = acc.A + acc.B;
-    if (phase === "committed") { o.className = "callout ok"; o.textContent = "commit شد: A = 40، B = 60."; }
-    else if (phase === "recovered") { var ok = acc.A === 50 && acc.B === 50; o.className = "callout " + (ok ? "ok" : "bad"); o.textContent = ok ? "بازیابی به حالت پیش از تراکنش: ۵۰ و ۵۰." : "بازیابی A = " + acc.A + " و B = " + acc.B + " ساخت، با جمع " + sum + ": آن Undo از‌سر‌شدنی نبود."; }
-    else { o.className = "callout"; o.textContent = "فاز: " + PH[phase] + "."; }
-    stats([["سبک Undo", cfg.style === "rel" ? "نسبی" : "مطلق"], ["کل پول", sum, sum === 100 ? "ok" : "bad"], ["قدم", k + " / " + steps.length]]);
+    t.appendChild(Kit.el("thead", null, Kit.el("tr", null, ["ردیف", "Undo", "عملیاتش اجرا شد؟", "دفعات اجرای Undo"].map(function (h) { return Kit.el("th", { scope: "col" }, h); }))));
+    var tb = Kit.el("tbody"); f.ul.forEach(function (e, i) { var rel = view.style === "rel", bad = rel && (e.runs > 1 || (!e.done && e.runs));
+      tb.appendChild(Kit.el("tr", { class: i === f.cur ? "cur" : "" }, Kit.el("td", null, String(i + 1)), Kit.el("td", { class: "code mono" }, e.t), Kit.el("td", null, e.done ? "بله" : "نه"), Kit.el("td", { class: bad ? "bad" : "" }, String(e.runs)))); });
+    if (!f.ul.length) tb.appendChild(Kit.el("tr", null, Kit.el("td", { colspan: 4 }, "خالی"))); t.appendChild(tb);
+    var tl = Kit.clear(document.getElementById("tl"));
+    fr.slice(0, n).forEach(function (x, i) { var li = Kit.el("li", { class: x.kind + (i === n - 1 ? " last" : "") }); x.text.split("|").forEach(function (p, j) { li.appendChild(j % 2 ? Kit.el("span", { class: "c mono" }, p) : document.createTextNode(p)); }); tl.appendChild(li); });
+    if (!done) { kind = f.kind === "bad" ? "bad" : ""; msg = f.text.replace(/\|/g, ""); }
+    else if (f.phase === "committed") { kind = "ok"; msg = "تراکنش commit شد: A = " + f.acc.A + " و B = " + f.acc.B + "."; }
+    else if (f.acc.A === 50 && f.acc.B === 50) { kind = "ok"; msg = "بازیابی به ۵۰ و ۵۰ برگشت: Undoها از‌سر‌شدنی بودند."; }
+    else { kind = "bad"; msg = "بازیابی A = " + f.acc.A + " و B = " + f.acc.B + " ساخت، با جمع " + sum + ": Undo از‌سر‌شدنی نبود."; }
+    var St = Kit.clear(document.getElementById("stats"));
+    [["سبک Undo", view.style === "rel" ? "نسبی" : "مطلق"], ["کل پول", sum, sum === 100 ? "ok" : "bad"], ["قدم", n + " / " + fr.length]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || ""), style: "unicode-bidi:isolate" }, String(x[1])))); });
+    ctl.s.set(view.style); ctl.c.set(view.crash); ctl.r.set(view.rcrash); ctl.k.input.max = fr.length; ctl.k.set(n);
   }
-  document.getElementById("style").appendChild(Kit.segmented({ label: "سبک Undo", value: cfg.style, options: [{ value: "rel", label: "نسبی، یعنی برگرداندن" }, { value: "abs", label: "مطلق، یعنی مقدار قدیم" }], onChange: function (v) { cfg.style = v; reset(); } }).element);
-  document.getElementById("crash").appendChild(Kit.segmented({ label: "از کار افتادن", value: cfg.crash, options: [{ value: "afterLog1", label: "پس از ثبت Undo ۱" }, { value: "afterOp1", label: "پس از عملیات ۱" }, { value: "afterLog2", label: "پس از ثبت Undo ۲" }, { value: "afterOp2", label: "پیش از commit" }, { value: "none", label: "هیچ" }], onChange: function (v) { cfg.crash = v; reset(); } }).element);
-  document.getElementById("rcrash").appendChild(Kit.segmented({ label: "از کار افتادن در میانه‌ی بازیابی", value: cfg.rcrash, options: [{ value: "no", label: "نه" }, { value: "yes", label: "بله، پس از یک Undo" }], onChange: function (v) { cfg.rcrash = v; reset(); } }).element);
-  Kit.player({ mount: document.getElementById("player"), step: step, reset: reset, interval: 900 });
-  reset();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.s = Kit.segmented({ label: "سبک Undo", value: DEF.style, options: [{ value: "rel", label: "نسبی، یعنی برگرداندن" }, { value: "abs", label: "مطلق، یعنی مقدار قدیم" }], onChange: tw(function (v) { view.style = v; view.k = 99; }) });
+  ctl.c = Kit.segmented({ label: "از کار افتادن", value: DEF.crash, options: [{ value: "afterLog1", label: "پس از ثبت Undo ۱" }, { value: "afterOp1", label: "پس از عملیات ۱" }, { value: "afterLog2", label: "پس از ثبت Undo ۲" }, { value: "afterOp2", label: "پیش از commit" }, { value: "none", label: "هیچ" }], onChange: tw(function (v) { view.crash = v; view.k = 99; }) });
+  ctl.r = Kit.segmented({ label: "از کار افتادن در میانه‌ی بازیابی", value: DEF.rcrash, options: [{ value: "no", label: "نه" }, { value: "yes", label: "بله، پس از یک Undo" }], onChange: tw(function (v) { view.rcrash = v; view.k = 99; }) });
+  ctl.k = Kit.slider({ label: "قدم", min: 1, max: 20, step: 1, value: 20, onInput: tw(function (v) { view.k = v; }) });
+  ["style", "crash", "rcrash", "kslot"].forEach(function (id, i) { document.getElementById(id).appendChild([ctl.s, ctl.c, ctl.r, ctl.k][i].element); });
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "انتقال فهرست ۵.۱: ۱۰ دلار از A به B، با ثبت Undo پیش از هر عملیات (صص. ۷۷–۷۸، شکل ۵.۵). دو سبک Undo و نقطه‌های از کار افتادن مدل vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و سبک Undo و جای از کار افتادن را عوض کنید.",
+    steps: [
+      { kind: "ok", run: at({}), say: function () { var a = fin("rel", "none"); return "بی شکست: پیش از هر عملیات Undoش ثبت می‌شود، بعد عملیات اجرا می‌شود و تراکنش commit می‌شود. نتیجه A = " + a.A + " و B = " + a.B + "."; } },
+      { kind: "ok", run: at({ crash: "afterOp2" }), say: "از کار افتادن درست پیش از commit: بازیابی هر دو Undo را به ترتیب معکوس اجرا می‌کند و حساب‌ها به ۵۰ و ۵۰ برمی‌گردند. تا این‌جا Undo نسبی کافی است." },
+      { kind: "bad", run: at({ crash: "afterLog1" }), say: function () { var a = fin("rel", "afterLog1"); return "ولی ثبت و اعمال دو قدم جدایند. اگر سیستم پس از ثبت Undo و پیش از عملیات از کار بیفتد، Undo نسبی ده دلار به A می‌دهد که هیچ‌وقت برداشت نشده بود: جمع " + (a.A + a.B) + "."; } },
+      { kind: "ok", run: at({ style: "abs", crash: "afterLog1" }), say: "پس Undo باید noop باشد، یعنی اگر عملیاتش اجرا نشده بی‌اثر بماند. Undo مطلق، که مقدار قدیم را می‌نشاند، همین است: A دوباره ۵۰ می‌شود." },
+      { kind: "bad", run: at({ crash: "afterOp2", rcrash: "yes" }), say: function () { var a = fin("rel", "afterOp2", "yes"); return "از کار افتادن در میانه‌ی بازیابی هم هست: بازیابی از سر شروع می‌کند و Undoها را دوباره اجرا می‌کند. Undo نسبی حساب B دو بار اعمال می‌شود: A = " + a.A + " و B = " + a.B + "."; } },
+      { kind: "ok", run: at({ style: "abs", crash: "afterOp2", rcrash: "yes" }), say: "پس Undo باید idempotent هم باشد. Undo مطلق هر چند بار هم اجرا شود همان ۵۰ و ۵۰ را می‌دهد: noop و idempotent، یعنی از‌سر‌شدنی." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "چرا Undo پیش از عملیات ثبت می‌شود و نه پس از آن؟",

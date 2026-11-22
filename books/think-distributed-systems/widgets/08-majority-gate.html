@@ -7,16 +7,25 @@
 <meta name="description" content="ورودی‌ها را از یک gate منطقی یا از سه gate تکرارشده با voterهای اکثریت تکرارشده بگذرانید، هر مؤلفه‌ای را بشکنید، و ببینید خروجی کجا باز هم درست است؛ بعد قابلیت اطمینان را با شبیه‌سازی اندازه بگیرید و با 3p² − 2p³ مقایسه کنید. تصویری از فصل ۸ کتاب Think Distributed Systems.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
-  .comp { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px; background: var(--surface-2); font-size: .82rem; }
-  .comp .o { font-family: var(--mono); font-size: 1.2rem; font-weight: 700; } .comp.bad { border-color: var(--bad); background: var(--bad-soft); }
-  .comp label { display: block; margin-top: 4px; } .comp select { width: 100%; }
+  .mg { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start; }
+  .ptitle { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 4px; }
+  .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; } .row1 { display: grid; grid-template-columns: 1fr; justify-items: center; }
+  .comp { border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 3px 6px; background: var(--surface-2); font-size: .8rem; text-align: center; min-width: 120px; line-height: 1.25; }
+  .comp .o { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; } .comp .m { font-size: .76rem; color: var(--ink-2); }
+  .comp.ok { border-color: var(--ok); } .comp.bad { border-color: var(--bad); background: var(--bad-soft); } .comp.brk { border-style: dashed; }
+  .arrow { text-align: center; color: var(--ink-2); font-size: .75rem; line-height: 1; margin: 0; }
+  .ins { display: flex; gap: 10px; justify-content: center; font-family: var(--mono); font-size: .9rem; margin-bottom: 2px; }
+  svg.chart { width: 100%; height: auto; max-height: 200px; display: block; direction: ltr; }
+  .tsel { display: grid; gap: 3px; } .tsel label { font-size: .82rem; display: flex; justify-content: space-between; align-items: center; gap: 6px; } .tsel select { width: 9.5em; font-size: .8rem; padding: 1px 4px; min-height: 0; height: 26px; }
+  #xin { display: flex; gap: 12px; flex-wrap: wrap; font-size: .85rem; }
+  .rel { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; font-size: .8rem; }
+  .rel div { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px 6px; } .rel b { display: block; font-size: 1rem; direction: ltr; unicode-bidi: isolate; text-align: right; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">TDS</a><span aria-hidden="true">/</span>
       <a href="../chapters/08-replication.html">فصل ۸</a><span aria-hidden="true">/</span>
@@ -27,107 +36,131 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">فصل ۸ · replication</div>
-  <h1>redundancy با رأی اکثریت</h1>
-  <p class="lede">redundancy برابر <strong>replication به‌علاوه‌ی هم‌آهنگی</strong> است. سه کپی از یک gate، یعنی a و b و c، را یک <strong>gate اکثریت</strong> هم‌آهنگ می‌کند، یعنی R = (a ∧ b) ∨ (b ∧ c) ∨ (a ∧ c)، پس یک کپی شکسته رأی کم می‌آورد. آن gate اکثریت هم تکرار می‌شود، تا نقطه‌ی شکست تنهای تازه نشود.</p>
-  <p class="source-note">تصویری از «redundancy» (صص. ۱۰۷–۱۰۸، شکل ۸.۱). تابع gate، یعنی AND، و حالت‌های شکست و آن قاعده که خروجی سیستم اکثریت آن سه voter است و خود شبیه‌سازی مال vault است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>redundancy با رأی اکثریت</h1>
+      <p class="lede">redundancy برابر <strong>replication به‌علاوه‌ی هم‌آهنگی</strong> است. سه کپی از یک gate، یعنی a و b و c، را یک <strong>gate اکثریت</strong> هم‌آهنگ می‌کند، یعنی R = (a ∧ b) ∨ (b ∧ c) ∨ (a ∧ c)، پس یک کپی شکسته رأی کم می‌آورد. آن gate اکثریت هم تکرار می‌شود، تا نقطه‌ی شکست تنهای تازه نشود.</p>
+      <p class="source-note">تصویری از «redundancy» (صص. ۱۰۷–۱۰۸، شکل ۸.۱). تابع gate، یعنی AND، و حالت‌های شکست و آن قاعده که خروجی سیستم اکثریت آن سه voter است و خود شبیه‌سازی مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">ورودی‌ها</p><div id="ins"></div>
-        <p class="panel-title" style="margin-top:10px">gateها: y = x₁ ∧ x₂</p><div class="row3" id="gates"></div>
-        <p class="panel-title" style="margin-top:10px" id="vt">voterهای اکثریت</p><div class="row3" id="voters"></div>
-        <div class="callout" id="out" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">قابلیت اطمینان با شبیه‌سازی؛ صد هزار کوشش</p><div id="psl"></div><div class="stats" id="mc"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="mode"></div><button class="btn small" id="clear" style="margin-top:10px">همه را تعمیر کن</button></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویداد</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="mg">
+          <div>
+            <div class="ins" id="ins"></div><div class="arrow">↓</div>
+            <p class="ptitle" id="gt"></p><div id="gates"></div><div class="arrow" id="a2">↓</div>
+            <p class="ptitle" id="vt">سه voter اکثریت: R = (a ∧ b) ∨ (b ∧ c) ∨ (a ∧ c)</p><div class="row3" id="voters"></div><div class="arrow" id="a3">↓</div>
+            <div class="row1"><div class="comp" id="sys"></div></div>
+          </div>
+          <div><p class="ptitle" id="ct"></p><svg class="chart" id="chart" role="img" aria-label="قابلیت اطمینان بر حسب p"></svg><div class="rel" id="rel"></div></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="mode"></div>
+        <div class="tweak-group" id="xin"></div>
+        <div class="tweak-group tsel" id="gsel"></div>
+        <div class="tweak-group tsel" id="vsel"></div>
+        <div class="tweak-group" id="psl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>یک gate گیر‌کرده یا برگشته</strong> از آن دو تای دیگر رأی کم می‌آورد. دو gate شکسته با همان خروجی غلط رأی را می‌برند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>یک gate گیر‌کرده یا برگشته</strong> از آن دو تای دیگر رأی کم می‌آورد. دو gate شکسته با همان خروجی غلط رأی را می‌برند.</li>
     <li><strong>voter تنها</strong> نقطه‌ی شکست تنها را برمی‌گرداند. با سه رأی‌دهنده، یک voter شکسته هم رأی کم می‌آورد.</li>
     <li><strong>redundancy تنها وقتی به‌صرفه است که قطعه‌ها قابل اطمینان باشند.</strong> با p زیر ۰٫۵، سه کپی از یکی بدتر است، چون آن‌وقت احتمال غلط بودن اکثریت بیشتر است.</li>
-  </ul>
+    </ul>
 
-  <h2>فهم خودتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/08-replication.html"><small>درس</small>فصل ۸: replication</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/08-replication.html"><small>درس</small>فصل ۸: replication</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]),
-        Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1]))));
-    });
-  }
-
-  var log = Kit.log(document.getElementById("log"));
-  var cfg = { mode: "tmr", p: 0.95 }, x = [true, true], gf = ["ok", "ok", "ok"], vf = ["ok", "ok", "ok"];
-  var MODES = [{ value: "ok", label: "کار می‌کند" }, { value: "s0", label: "گیر‌کرده روی ۰" }, { value: "s1", label: "گیر‌کرده روی ۱" }, { value: "flip", label: "برگشته" }];
+  var MODES = [{ value: "ok", label: "کار می‌کند" }, { value: "s0", label: "گیر روی ۰" }, { value: "s1", label: "گیر روی ۱" }, { value: "flip", label: "برگشته" }], ML = {}; MODES.forEach(function (m) { ML[m.value] = m.label; });
+  var DEF = { mode: "tmr", x: [true, true], gf: ["ok", "ok", "ok"], vf: ["ok", "ok", "ok"], p: 0.95 }, view = JSON.parse(JSON.stringify(DEF)), tour, ctl = {}, msg, kind, mcMemo = {};
+  function at(o) { return function () { view = Object.assign(JSON.parse(JSON.stringify(DEF)), o); }; }
   function f(v, mode) { return mode === "s0" ? false : mode === "s1" ? true : mode === "flip" ? !v : v; }
   function maj(a, b, c) { return (a && b) || (b && c) || (a && c); }
   function b2(v) { return v ? "1" : "0"; }
+  function mc(p) { var key = p.toFixed(3); if (mcMemo[key]) return mcMemo[key];
+    var r = Kit.rng(2024), T = 100000, single = 0, tmr = 0;
+    for (var t = 0; t < T; t++) { if (r.chance(p)) single++; var g = [r.chance(p), r.chance(p), r.chance(p)], m = maj(g[0], g[1], g[2]);
+      var v = [r.chance(p) ? m : !m, r.chance(p) ? m : !m, r.chance(p) ? m : !m]; if (maj(v[0], v[1], v[2])) tmr++; }
+    return (mcMemo[key] = { single: single / T, formula: 3 * p * p - 2 * p * p * p, tmr: tmr / T }); }
+  function comp(label, o, truth, mode) { return Kit.el("div", { class: "comp " + (o === truth ? "ok" : "bad") + (mode !== "ok" ? " brk" : "") }, Kit.el("div", null, label), Kit.el("div", { class: "o mono" }, b2(o) + (o === truth ? " ✓" : " ✗")), Kit.el("div", { class: "m" }, ML[mode])); }
   function render() {
-    var ins = Kit.clear(document.getElementById("ins"));
-    x.forEach(function (v, i) { var cb = Kit.el("input", { type: "checkbox", id: "x" + i }); cb.checked = v; cb.addEventListener("change", function () { x[i] = cb.checked; render(); }); ins.appendChild(Kit.el("label", { style: "margin-left:12px" }, cb, " x" + (i + 1) + " = " + b2(v))); });
-    var truth = x[0] && x[1], n = cfg.mode === "tmr" ? 3 : 1, outs = [];
-    var g = Kit.clear(document.getElementById("gates"));
-    for (var i = 0; i < n; i++) (function (i) {
-      var o = f(truth, gf[i]); outs.push(o);
-      var sel = Kit.el("select", { "aria-label": "حالت شکست gate " + "abc"[i] }); MODES.forEach(function (m) { sel.appendChild(Kit.el("option", { value: m.value }, m.label)); }); sel.value = gf[i];
-      sel.addEventListener("change", function () { gf[i] = sel.value; log.add("gate " + "abc"[i] + ": " + sel.options[sel.selectedIndex].text, sel.value === "ok" ? "muted" : "warn"); render(); });
-      g.appendChild(Kit.el("div", { class: "comp" + (o !== truth ? " bad" : "") }, Kit.el("div", null, "gate " + (n === 1 ? "" : "abc"[i])), Kit.el("div", { class: "o" }, b2(o) + (o !== truth ? " ✗" : " ✓")), Kit.el("label", null, sel)));
-    })(i);
-    var v = Kit.clear(document.getElementById("voters")), final;
-    document.getElementById("vt").style.display = n === 3 ? "" : "none";
-    if (n === 3) {
-      var m = maj(outs[0], outs[1], outs[2]), vo = [];
-      for (var j = 0; j < 3; j++) (function (j) {
-        var o = f(m, vf[j]); vo.push(o);
-        var sel = Kit.el("select", { "aria-label": "حالت شکست voter " + (j + 1) }); MODES.forEach(function (mm) { sel.appendChild(Kit.el("option", { value: mm.value }, mm.label)); }); sel.value = vf[j];
-        sel.addEventListener("change", function () { vf[j] = sel.value; log.add("voter " + (j + 1) + ": " + sel.options[sel.selectedIndex].text, sel.value === "ok" ? "muted" : "warn"); render(); });
-        v.appendChild(Kit.el("div", { class: "comp" + (o !== truth ? " bad" : "") }, Kit.el("div", null, "voter " + (j + 1)), Kit.el("div", { class: "o" }, b2(o) + (o !== truth ? " ✗" : " ✓")), Kit.el("label", null, sel)));
-      })(j);
-      final = maj(vo[0], vo[1], vo[2]);
-    } else final = outs[0];
-    var out = document.getElementById("out"); out.className = "callout " + (final === truth ? "ok" : "bad");
-    out.textContent = "خروجی درست: " + b2(truth) + ". خروجی سیستم" + (n === 3 ? "، یعنی اکثریت voterها" : "") + ": " + b2(final) + (final === truth ? " ✓" : " ✗ سیستم شکست");
-    stats([["طرح", n === 3 ? "۳ gate و ۳ voter" : "gate تنها"], ["مؤلفه‌های شکسته", gf.slice(0, n).concat(n === 3 ? vf : []).filter(function (m) { return m !== "ok"; }).length], ["خروجی", final === truth ? "درست" : "غلط", final === truth ? "ok" : "bad"]]);
+    var truth = view.x[0] && view.x[1], n = view.mode === "tmr" ? 3 : 1, outs = [];
+    var ins = Kit.clear(document.getElementById("ins")); view.x.forEach(function (v, i) { ins.appendChild(Kit.el("span", { class: "mono" }, "x" + (i + 1) + " = " + b2(v))); });
+    document.getElementById("gt").textContent = n === 3 ? "سه کپی از gate، y = x1 ∧ x2" : "یک gate تنها، y = x1 ∧ x2";
+    var g = Kit.clear(document.getElementById("gates")); g.className = n === 3 ? "row3" : "row1";
+    for (var i = 0; i < n; i++) { var o = f(truth, view.gf[i]); outs.push(o); g.appendChild(comp(n === 3 ? "gate " + "abc"[i] : "gate", o, truth, view.gf[i])); }
+    ["vt", "voters", "a3"].forEach(function (id) { document.getElementById(id).style.display = n === 3 ? "" : "none"; });
+    var final, broken = view.gf.slice(0, n).filter(function (m) { return m !== "ok"; }).length;
+    var vv = Kit.clear(document.getElementById("voters"));
+    if (n === 3) { var m = maj(outs[0], outs[1], outs[2]), vo = [];
+      for (var j = 0; j < 3; j++) { var ov = f(m, view.vf[j]); vo.push(ov); vv.appendChild(comp("voter " + (j + 1), ov, truth, view.vf[j])); }
+      final = maj(vo[0], vo[1], vo[2]); broken += view.vf.filter(function (x) { return x !== "ok"; }).length; } else final = outs[0];
+    var sy = Kit.clear(document.getElementById("sys")); sy.className = "comp " + (final === truth ? "ok" : "bad");
+    sy.appendChild(Kit.el("div", null, "خروجی سیستم")); sy.appendChild(Kit.el("div", { class: "o mono" }, b2(final) + (final === truth ? " ✓" : " ✗"))); sy.appendChild(Kit.el("div", { class: "m" }, "درست: " + b2(truth)));
+    var R = mc(view.p);
+    document.getElementById("ct").textContent = "قابلیت اطمینان، اگر هر مؤلفه با احتمال p کار کند";
+    var pts = [], fs = []; for (var q = 0.3; q <= 1.0001; q += 0.01) { pts.push([q, q]); fs.push([q, 3 * q * q - 2 * q * q * q]); }
+    Kit.lineChart(document.getElementById("chart"), { width: 420, height: 230, xMin: 0.3, xMax: 1, yMax: 1, xTicks: 7, yTicks: 5, xLabel: "p", xFormat: function (v) { return v.toFixed(1); }, yFormat: function (v) { return Math.round(v * 100) + "%"; },
+      series: [{ points: pts, cls: "s2", label: "gate تنها" }, { points: fs, cls: "s1", label: "3p² − 2p³" }], marks: [{ x: view.p, label: "p = " + view.p.toFixed(2) }] });
+    var rel = Kit.clear(document.getElementById("rel"));
+    [["gate تنها", R.single], ["سه gate، voter بی‌عیب: 3p² − 2p³", R.formula], ["سه gate و سه voter نامطمئن، شبیه‌سازی", R.tmr]].forEach(function (x) { rel.appendChild(Kit.el("div", null, x[0], Kit.el("b", null, Kit.pct(x[1], 2)))); });
+    kind = final === truth ? "ok" : "bad"; msg = "خروجی سیستم " + b2(final) + " است و درست " + b2(truth) + "؛ " + broken + " مؤلفه‌ی شکسته.";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["طرح", n === 3 ? "سه gate و سه voter" : "یک gate"], ["مؤلفه‌ی شکسته", broken, broken ? "warn" : "ok"], ["خروجی", final === truth ? "درست" : "غلط", final === truth ? "ok" : "bad"], ["مقدار p", view.p.toFixed(3)]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+    ctl.mode.set(view.mode); ctl.p.set(view.p); ctl.x.forEach(function (cb, i) { cb.checked = view.x[i]; });
+    ctl.g.forEach(function (s, i) { s.value = view.gf[i]; s.parentNode.style.display = i < n ? "" : "none"; }); ctl.v.forEach(function (s, i) { s.value = view.vf[i]; }); document.getElementById("vsel").style.display = n === 3 ? "" : "none";
   }
-  function mc() {
-    var p = cfg.p, r = Kit.rng(2024), T = 100000, single = 0, tmr = 0, tmr1 = 0;
-    for (var t = 0; t < T; t++) {
-      if (r.chance(p)) single++;
-      var g = [r.chance(p), r.chance(p), r.chance(p)], m = maj(g[0], g[1], g[2]);
-      var v = [r.chance(p) ? m : !m, r.chance(p) ? m : !m, r.chance(p) ? m : !m];
-      if (maj(v[0], v[1], v[2])) tmr++;
-      if (r.chance(p) ? m : !m) tmr1++;
-    }
-    var formula = 3 * p * p - 2 * p * p * p;
-    var st = Kit.clear(document.getElementById("mc"));
-    [["gate تنها", Kit.pct(single / T, 2)], ["۳ gate با voter بی‌عیب: 3p² − 2p³", Kit.pct(formula, 2)], ["۳ gate با یک voter نامطمئن", Kit.pct(tmr1 / T, 2)], ["۳ gate با سه voter نامطمئن", Kit.pct(tmr / T, 2)]].forEach(function (x) {
-      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value" }, x[1])));
-    });
-  }
-  document.getElementById("mode").appendChild(Kit.segmented({ label: "طرح", value: cfg.mode, options: [{ value: "single", label: "یک gate" }, { value: "tmr", label: "سه gate و voterها" }], onChange: function (v) { cfg.mode = v; render(); } }).element);
-  document.getElementById("psl").appendChild(Kit.slider({ label: "هر مؤلفه‌ای با احتمال p کار می‌کند", min: 0.3, max: 0.999, step: 0.001, value: cfg.p, onInput: function (v) { cfg.p = v; mc(); } }).element);
-  document.getElementById("clear").addEventListener("click", function () { gf = ["ok", "ok", "ok"]; vf = ["ok", "ok", "ok"]; log.add("همه‌ی مؤلفه‌ها تعمیر شدند", "ok"); render(); });
-  render(); mc();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.mode = Kit.segmented({ label: "طرح", value: DEF.mode, options: [{ value: "single", label: "یک gate" }, { value: "tmr", label: "سه gate و voterها" }], onChange: tw(function (v) { view.mode = v; }) });
+  ctl.p = Kit.slider({ label: "هر مؤلفه با احتمال p کار می‌کند", min: 0.3, max: 0.999, step: 0.001, value: DEF.p, format: function (v) { return v.toFixed(3); }, onInput: tw(function (v) { view.p = v; }) });
+  document.getElementById("mode").appendChild(ctl.mode.element); document.getElementById("psl").appendChild(ctl.p.element);
+  ctl.x = [0, 1].map(function (i) { var cb = Kit.el("input", { type: "checkbox" }); cb.addEventListener("change", tw(function () { view.x[i] = cb.checked; })); document.getElementById("xin").appendChild(Kit.el("label", null, cb, " ورودی x" + (i + 1) + " = ۱")); return cb; });
+  function sels(mount, arr, name) { return [0, 1, 2].map(function (i) { var s = Kit.el("select"); MODES.forEach(function (m) { s.appendChild(Kit.el("option", { value: m.value }, m.label)); });
+    s.addEventListener("change", tw(function () { view[arr][i] = s.value; })); document.getElementById(mount).appendChild(Kit.el("label", null, name(i), s)); return s; }); }
+  ctl.g = sels("gsel", "gf", function (i) { return "حالت gate " + "abc"[i]; }); ctl.v = sels("vsel", "vf", function (i) { return "حالت voter " + (i + 1); });
+  function M(p) { return mc(p); }
+
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "سه کپی از یک gate، که یک gate اکثریت هم‌آهنگشان می‌کند (صص. ۱۰۷–۱۰۸، شکل ۸.۱). تابع AND، حالت‌های شکست و شبیه‌سازی مدل vault است.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، هر مؤلفه را بشکنید و p را عوض کنید.",
+    steps: [
+      { kind: "ok", run: at({}), say: "ورودی‌ها هر دو ۱ و همه‌ی مؤلفه‌ها سالم‌اند: هر سه gate ۱ می‌دهند، voterها اکثریت را می‌گیرند و خروجی درست است." },
+      { kind: "ok", run: at({ gf: ["ok", "s0", "ok"] }), say: "مؤلفه‌ی gate b روی ۰ گیر کرده. دو gate دیگر هنوز ۱ می‌دهند، پس اکثریت درست است: یک کپی شکسته رأی کم می‌آورد." },
+      { kind: "bad", run: at({ gf: ["s0", "s0", "ok"] }), say: "حالا دو gate با یک خروجی غلط گیر کرده‌اند. اکثریت با آن‌هاست و سیستم شکست می‌خورد: redundancy فقط یک شکست را می‌پوشاند." },
+      { kind: "ok", run: at({ vf: ["ok", "flip", "ok"] }), say: "خود voter هم می‌تواند بشکند. اگر تنها یکی بود، نقطه‌ی شکست تنهای تازه‌ای می‌شد؛ با سه voter، voter برگشته هم رأی کم می‌آورد." },
+      { kind: "bad", run: at({ mode: "single", gf: ["s0", "ok", "ok"] }), say: "بی redundancy همان یک شکست کافی است: یک gate تنها که روی ۰ گیر کرده خروجی را غلط می‌کند." },
+      { kind: "ok", run: at({ p: 0.95 }), say: function () { var r = M(0.95); return "با p = ۰٫۹۵، یک gate تنها " + Kit.pct(r.single, 1) + " وقت‌ها درست است و سه gate با voter بی‌عیب " + Kit.pct(r.formula, 2) + "؛ حتی با voterهای نامطمئن " + Kit.pct(r.tmr, 1) + "."; } },
+      { kind: "bad", run: at({ p: 0.4 }), say: function () { var r = M(0.4); return "ولی redundancy فقط با قطعه‌های قابل اطمینان به‌صرفه است. با p = ۰٫۴، سه کپی بدتر از یکی‌اند: " + Kit.pct(r.formula, 1) + " در برابر " + Kit.pct(r.single, 1) + "، چون اکثریت بیشتر غلط است."; } }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
     { q: "عبارت R = (a ∧ b) ∨ (b ∧ c) ∨ (a ∧ c) کِی درست است؟",
