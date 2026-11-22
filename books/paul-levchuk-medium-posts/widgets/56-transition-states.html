@@ -7,18 +7,27 @@
 <meta name="description" content="با یک ماتریس گذار هفت‌وضعیتی از هزار ثبت‌نام جدید پیش‌بینی بگیرید. برای نوشته‌ی ۵۶ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
-  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; display: block; }
+  .c56 { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  svg.dg, svg.ln { width: 100%; height: auto; display: block; direction: ltr; }
+  svg.dg { max-height: 330px; } svg.ln { max-height: 300px; }
+  svg text { font-family: var(--mono); fill: var(--ink-2); }
+  .node rect { stroke: var(--line-strong); stroke-width: 1.2; rx: 8; }
+  .node.free rect { fill: var(--surface-2); } .node.pay rect { fill: var(--ok-soft); } .node.lost rect { fill: var(--bad-soft); } .node.new rect { fill: var(--accent-soft); }
+  .node .code { font-size: 13px; font-weight: 700; fill: var(--ink); }
+  .node .n { font-size: 20px; font-weight: 700; fill: var(--ink); }
+  .node .nm { font-family: var(--font, inherit); font-size: 11px; fill: var(--ink-3); }
+  .edge { stroke: var(--ink-3); stroke-width: 1.4; fill: none; }
+  .edge.key { stroke: var(--warn); stroke-width: 3; }
+  .elab { font-size: 12px; font-weight: 700; fill: var(--ink-2); }
+  .elab.key { fill: var(--warn); font-size: 14px; }
+  svg.ln .grid { stroke: var(--line); } svg.ln .now { stroke: var(--ink); stroke-dasharray: 3 3; opacity: .5; }
+  svg.ln text { font-size: 11px; fill: var(--ink-3); }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/56-user-transition-states-diagram.html">نوشته‌ی 56</a><span aria-hidden="true">/</span>
@@ -29,77 +38,128 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۵۶ · نمودار گذار وضعیت‌های کاربر</div>
-  <h1>گذار وضعیت‌ها</h1>
-  <p class="lede">یک <strong>ماتریس گذار</strong> هفت‌وضعیتی را چند ماه جلو ببرید و ببینید احتمال یک گذار چطور تعداد کاربران پولی را عوض می‌کند.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌ی «User transition states diagram» را نشان می‌دهد (بخش‌های «Transition Problem/Opportunity Size» و «From Diagram to Transition Matrix»). احتمال‌های این جدول اسباب‌بازی مال خود vault است و غیر از حلقه‌های ۹۷٪ و ۸۸٪ و گذار ۱۵٪ و ۱۰٪ از نوشته نیامده‌اند. داده‌ها و پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>گذار وضعیت‌ها</h1>
+      <p class="lede">۱٬۰۰۰ ثبت‌نام تازه را در یک <strong>ماتریس گذار</strong> هفت‌وضعیتی ماه به ماه جلو ببرید و ببینید یک احتمال، یعنی رفتن از رایگان فعال به رایگان غیرفعال، چطور تعداد کاربران پولی را عوض می‌کند.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «User transition states diagram» را نشان می‌دهد (بخش‌های «Transition Problem/Opportunity Size» و «From Diagram to Transition Matrix»). احتمال‌های این جدول اسباب‌بازی مال خود vault است و غیر از حلقه‌های ۹۷٪ و ۸۸٪ و گذار ۱۵٪ و ۱۰٪ از نوشته نیامده‌اند. داده‌ها و پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">از ۱۰۰۰ ثبت‌نام جدید در هر وضعیت چند نفر می‌مانند</p><div id="states"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c56">
+          <div><p class="panel-title" id="dgT"></p><div id="dg"></div></div>
+          <div><p class="panel-title">کاربران پولی (AP + IP) از ۱٬۰۰۰ ثبت‌نام، ماه به ماه</p><div id="ln"></div></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>مجموع هر ردیف ۱۰۰٪ است</strong> و کاربر همیشه جایی می‌رود.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>مجموع هر ردیف ۱۰۰٪ است</strong> و کاربر همیشه جایی می‌رود.</li>
     <li><strong>کاهش یک گذار</strong> به حلقه‌ی همان وضعیت می‌رود.</li>
     <li><strong>وضعیت‌های ازدست‌رفته</strong> تقریباً جذب‌کننده‌اند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/56-user-transition-states-diagram.html"><small>درس</small>نوشته‌ی 56: نمودار گذار وضعیت‌های کاربر</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/56-user-transition-states-diagram.html"><small>درس</small>نوشته‌ی 56: نمودار گذار وضعیت‌های کاربر</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  function stats(id, rows) {
-    var st = Kit.clear(document.getElementById(id));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  function bar(label, frac, text, cls) {
-    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
-      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
-      Kit.el("span", { class: "v" }, text));
-  }
-  var log = Kit.log(document.getElementById("log"));
-  var ctl = document.getElementById("ctl");
-  var last = null;
-  function add(cfg, key, o, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; var s = Kit.slider(o); ctl.appendChild(s.element); return s; }
-
-  var S = ["NS","AF","IF","AP","IP","CF","CP"];
+  var FA = function (s) { return Kit.digits(String(s)); };
+  var KEYS = ["NS", "AF", "IF", "AP", "IP", "CF", "CP"];
   var NAME = { NS: "ثبت‌نام جدید", AF: "رایگان فعال", IF: "رایگان غیرفعال", AP: "پولی فعال", IP: "پولی غیرفعال", CF: "رایگان ازدست‌رفته", CP: "پولی ازدست‌رفته" };
-  var cfg = { aftoif: 15, months: 6 };
-  function matrix() {
-    var p = cfg.aftoif / 100;
+  var DEF = { p: 15, m: 6, cmp: false }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function matrix(pp) { var p = pp / 100;
     return { NS: { AF: 0.6, CF: 0.4 }, AF: { AF: 0.95 - p, AP: 0.05, IF: p }, IF: { AF: 0.10, AP: 0.02, CF: 0.10, IF: 0.78 },
-      AP: { AP: 0.80, IP: 0.08, AF: 0.06, IF: 0.06 }, IP: { AP: 0.10, IF: 0.20, CP: 0.10, IP: 0.60 }, CF: { CF: 0.97, AF: 0.03 }, CP: { CP: 0.88, AP: 0.05, AF: 0.07 } };
-  }
+      AP: { AP: 0.80, IP: 0.08, AF: 0.06, IF: 0.06 }, IP: { AP: 0.10, IF: 0.20, CP: 0.10, IP: 0.60 }, CF: { CF: 0.97, AF: 0.03 }, CP: { CP: 0.88, AP: 0.05, AF: 0.07 } }; }
+  function series(pp, months) { var M = matrix(pp), v = { NS: 1000, AF: 0, IF: 0, AP: 0, IP: 0, CF: 0, CP: 0 }, out = [v];
+    for (var m = 0; m < months; m++) { var nx = { NS: 0, AF: 0, IF: 0, AP: 0, IP: 0, CF: 0, CP: 0 }; for (var k in M) for (var j in M[k]) nx[j] += v[k] * M[k][j]; v = nx; out.push(v); } return out; }
+  var POS = { NS: [70, 60], AF: [230, 60], IF: [230, 170], CF: [230, 280], AP: [420, 60], IP: [420, 170], CP: [420, 280] }, BW = 130, BH = 74;
+  var CLS = { NS: "new", AF: "free", IF: "free", CF: "lost", AP: "pay", IP: "pay", CP: "lost" };
   function render() {
-    var M = matrix(), v = { NS: 1000, AF: 0, IF: 0, AP: 0, IP: 0, CF: 0, CP: 0 }, m, k, j;
-    for (m = 0; m < cfg.months; m++) { var nx = { NS: 0, AF: 0, IF: 0, AP: 0, IP: 0, CF: 0, CP: 0 }; for (k in M) for (j in M[k]) nx[j] += v[k] * M[k][j]; v = nx; }
-    var box = Kit.clear(document.getElementById("states"));
-    S.forEach(function (k) { box.appendChild(bar(k + " · " + NAME[k], v[k] / 1000, Math.round(v[k]) + " نفر", k === "AP" || k === "IP" ? "pos" : (k === "CF" || k === "CP" ? "neg" : ""))); });
-    var paying = v.AP + v.IP;
-    stats("stats", [["کاربران پولی (فعال و غیرفعال)", Math.round(paying) + " از ۱۰۰۰"], ["پولی فعال", Math.round(v.AP)], ["ازدست‌رفته‌ها", Math.round(v.CF + v.CP), "bad"]]);
-    var key = cfg.aftoif + "/" + cfg.months; if (last && key !== last) log.add("پس از " + cfg.months + " ماه حدود " + Math.round(paying) + " کاربر پولی از ۱۰۰۰ ثبت‌نام باقی می‌ماند.", "ok"); last = key;
+    var ser = series(view.p, 24), v = ser[view.m], s = Kit.svg("svg", { class: "dg mono", viewBox: "0 0 500 330", role: "img", "aria-label": "نمودار هفت وضعیت کاربر پس از " + FA(view.m) + " ماه" });
+    function edge(a, b, lab, key, dy) { var A = POS[a], B = POS[b], x1 = A[0], y1 = A[1], x2 = B[0], y2 = B[1];
+      if (x1 === x2) { y1 += BH / 2; y2 -= BH / 2; x1 += dy || 0; x2 += dy || 0; } else { x1 += BW / 2 * Math.sign(x2 - x1); x2 -= BW / 2 * Math.sign(x2 - x1); y1 += dy || 0; y2 += dy || 0; }
+      s.appendChild(Kit.svg("line", { class: "edge" + (key ? " key" : ""), x1: x1, y1: y1, x2: x2, y2: y2, "marker-end": "url(#ar" + (key ? "k" : "") + ")" }));
+      if (lab) s.appendChild(Kit.svg("text", { class: "elab" + (key ? " key" : ""), x: (x1 + x2) / 2 + (x1 === x2 ? 6 : 0), y: (y1 + y2) / 2 - (x1 === x2 ? 0 : 5), "text-anchor": x1 === x2 ? "start" : "middle" }, lab)); }
+    var defs = Kit.svg("defs");
+    [["ar", "var(--ink-3)"], ["ark", "var(--warn)"]].forEach(function (d) { var mk = Kit.svg("marker", { id: d[0], viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }); mk.appendChild(Kit.svg("path", { d: "M0,0 L10,5 L0,10 z", fill: d[1] })); defs.appendChild(mk); });
+    s.appendChild(defs);
+    edge("NS", "AF", "60%"); edge("AF", "IF", view.p + "%", true, -14); edge("IF", "AF", "10%", false, 14); edge("AF", "AP", "5%"); edge("IF", "CF", "10%"); edge("AP", "IP", "8%"); edge("IP", "CP", "10%");
+    KEYS.forEach(function (k) { var g = Kit.svg("g", { class: "node " + CLS[k] }), x = POS[k][0] - BW / 2, y = POS[k][1] - BH / 2;
+      g.appendChild(Kit.svg("rect", { x: x, y: y, width: BW, height: BH }));
+      g.appendChild(Kit.svg("text", { class: "code", x: x + 10, y: y + 18 }, k));
+      g.appendChild(Kit.svg("text", { class: "n", x: x + BW - 10, y: y + 22, "text-anchor": "end" }, String(Math.round(v[k]))));
+      g.appendChild(Kit.svg("text", { class: "nm", x: x + BW / 2, y: y + 56, "text-anchor": "middle", direction: "rtl" }, NAME[k]));
+      s.appendChild(g); });
+    s.appendChild(Kit.svg("text", { class: "elab", x: 230, y: 326, "text-anchor": "middle" }, "CF→CF 97%"));
+    s.appendChild(Kit.svg("text", { class: "elab", x: 420, y: 326, "text-anchor": "middle" }, "CP→CP 88%"));
+    Kit.clear(document.getElementById("dg")).appendChild(s);
+    document.getElementById("dgT").textContent = "وضعیت ۱٬۰۰۰ کاربر پس از " + FA(view.m) + " ماه؛ فقط گذارهای اصلی رسم شده‌اند";
+    // paying line chart
+    var W = 420, H = 300, L = 40, R = 12, T = 14, B = 34, mx = 140, l = Kit.svg("svg", { class: "ln mono", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "کاربران پولی در ۲۴ ماه" });
+    function X(m) { return L + m / 24 * (W - L - R); } function Y(n) { return T + (1 - n / mx) * (H - T - B); }
+    [0, 40, 80, 120].forEach(function (n) { l.appendChild(Kit.svg("line", { class: "grid", x1: L, x2: W - R, y1: Y(n), y2: Y(n) })); l.appendChild(Kit.svg("text", { x: L - 6, y: Y(n) + 4, "text-anchor": "end" }, String(n))); });
+    [0, 6, 12, 18, 24].forEach(function (m) { l.appendChild(Kit.svg("text", { x: X(m), y: H - B + 16, "text-anchor": "middle" }, String(m))); });
+    l.appendChild(Kit.svg("text", { x: (W + L) / 2, y: H - 4, "text-anchor": "middle" }, "month →"));
+    function path(sr, col, dash) { l.appendChild(Kit.svg("polyline", { fill: "none", stroke: col, "stroke-width": 2.5, "stroke-dasharray": dash || "", points: sr.map(function (q, m) { return X(m).toFixed(1) + "," + Y(q.AP + q.IP).toFixed(1); }).join(" ") })); }
+    if (view.p !== 15) { path(series(15, 24), "var(--ink-3)", "5 4"); l.appendChild(Kit.svg("text", { x: W - R, y: Y(series(15, 24)[24].AP + series(15, 24)[24].IP) + 16, "text-anchor": "end" }, "15% (dashed)")); }
+    path(ser, "var(--ok)");
+    l.appendChild(Kit.svg("line", { class: "now", x1: X(view.m), x2: X(view.m), y1: T, y2: H - B }));
+    l.appendChild(Kit.svg("circle", { cx: X(view.m), cy: Y(v.AP + v.IP), r: 5, fill: "var(--ok)" }));
+    l.appendChild(Kit.svg("text", { x: X(view.m) + 8, y: Y(v.AP + v.IP) - 8, style: "font-size:13px;font-weight:700;fill:var(--ink)" }, String(Math.round(v.AP + v.IP))));
+    Kit.clear(document.getElementById("ln")).appendChild(l);
+    var pay = v.AP + v.IP; msg = "با احتمال " + FA(view.p) + "٪ برای AF به IF، پس از " + FA(view.m) + " ماه حدود " + FA(Math.round(pay)) + " کاربر پولی از ۱٬۰۰۰ ثبت‌نام می‌ماند."; kind = "";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["کاربران پولی (AP + IP)", Math.round(pay) + " / 1,000"], ["پولی فعال (AP)", String(Math.round(v.AP))], ["ازدست‌رفته‌ها (CF + CP)", String(Math.round(v.CF + v.CP)), "bad"], ["ردیف AF", "AF " + (95 - view.p) + "% · IF " + view.p + "% · AP 5%"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, x[1]))); });
+    ctl.p.set(view.p); ctl.m.set(view.m);
   }
-  add(cfg, "aftoif", { label: "احتمال گذار رایگان فعال به رایگان غیرفعال", min: 5, max: 30, step: 1, unit: "٪", hint: "بقیه‌ی احتمال به حلقه‌ی خودش می‌رود، پس مجموع همیشه ۱۰۰٪ است" }, render);
-  add(cfg, "months", { label: "افق پیش‌بینی", min: 1, max: 24, step: 1, unit: " ماه" }, render);
-  render();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.p = Kit.slider({ label: "احتمال گذار رایگان فعال به رایگان غیرفعال", min: 5, max: 30, step: 1, unit: "٪", value: view.p, hint: "بقیه‌ی احتمال به حلقه‌ی خود AF می‌رود، پس مجموع ردیف همیشه ۱۰۰٪ است", onInput: tw(function (v) { view.p = v; }) });
+  ctl.m = Kit.slider({ label: "افق پیش‌بینی", min: 0, max: 24, step: 1, unit: " ماه", value: view.m, onInput: tw(function (v) { view.m = v; }) });
+  [ctl.p, ctl.m].forEach(function (x) { document.getElementById("ctl").appendChild(x.element); });
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({ m: 0 }), render: render, interval: 8000,
+    intro: "نوشته کاربران را در هفت وضعیت می‌گذارد: رایگان یا پولی، فعال یا غیرفعال یا ازدست‌رفته، به‌علاوه‌ی ثبت‌نام جدید. احتمال‌های این ماتریس اسباب‌بازی vault است، جز چند عددی که از نوشته آمده.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و احتمال AF به IF و افق را جابه‌جا کنید.",
+    steps: [
+      { kind: "", run: at({ m: 0 }), say: "ماه صفر: ۱٬۰۰۰ ثبت‌نام تازه، همه در NS. نوشته همین سؤال را می‌پرسد: از ۱٬۰۰۰ کاربر تازه، شش ماه بعد چند نفر پولی‌اند؟ (بخش «From Diagram to Transition Matrix»)" },
+      { kind: "", run: at({ m: 1 }), say: "یک ماه بعد، در ماتریس vault، ۶۰٪ رایگان فعال می‌شوند و ۴۰٪ بی‌آنکه بمانند ازدست‌رفته. هر ردیف ماتریس جمعش ۱۰۰٪ است؛ کاربر همیشه جایی می‌رود." },
+      { kind: "ok", run: at({ m: 6 }), say: "با ضرب ماتریس در خودش، شش ماه جلو می‌رویم: ۹۱ کاربر پولی (۸۰ فعال و ۱۱ غیرفعال) و ۴۰۳ رایگان ازدست‌رفته." },
+      { kind: "warn", run: at({ m: 24 }), say: "دو حلقه‌ای که نوشته عمداً از نمودار حذف کرده مهم‌اند: CF با ۹۷٪ و CP با ۸۸٪ در خودشان می‌مانند. برای همین پس از ۲۴ ماه ۵۱۱ نفر در CF جمع شده‌اند (بخش «Transition Problem/Opportunity Size»)." },
+      { kind: "ok", run: at({ p: 10 }), say: "مثال نوشته: featureی که گذار AF به IF را از ۱۵٪ به ۱۰٪ برساند. آن ۵٪ به حلقه‌ی AF می‌رود و پس از شش ماه ۹۶ کاربر پولی داریم، به‌جای ۹۱." },
+      { kind: "ok", run: at({ p: 10, m: 12 }), say: "در افق دوازده‌ماهه فاصله بیشتر است: ۱۱۸ کاربر پولی در برابر ۱۰۶. خط‌چین همان مسیر ۱۵٪ است." },
+      { kind: "warn", run: at({ p: 25 }), say: "برعکس، اگر AF به IF به ۲۵٪ برسد، پس از شش ماه فقط ۸۲ کاربر پولی می‌ماند. ماتریس اندازه‌ی هر مشکل یا فرصت را با یک عدد نشان می‌دهد." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {

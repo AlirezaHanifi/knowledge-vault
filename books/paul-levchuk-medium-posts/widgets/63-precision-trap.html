@@ -7,18 +7,22 @@
 <meta name="description" content="مقدار بودجه‌ای که یک سیگنال جذب کاربر می‌تواند خرج کند و ROAS دروازه‌اش را بگذارید و درآمد هفتگی را با bid ساده‌ی CPI مقایسه کنید. برای نوشته‌ی ۶۳ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
-  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; display: block; }
+  .c63 { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  svg.ar { width: 100%; height: auto; max-height: 300px; display: block; direction: ltr; }
+  svg.ar text { font-family: var(--mono); font-size: 12px; fill: var(--ink-3); }
+  svg.ar .grid { stroke: var(--line); }
+  svg.ar .lab { font-size: 13px; font-weight: 700; fill: var(--ink); }
+  .rv { display: grid; grid-template-columns: 7.5rem 1fr; gap: 6px 10px; align-items: center; font-size: .88rem; margin: 4px 0; }
+  .rv .tk { height: 20px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; position: relative; }
+  .rv .tk i { position: absolute; top: 0; bottom: 0; right: 0; border-radius: 3px; }
+  .rv .tk b { position: absolute; left: 6px; top: 3px; font-family: var(--mono); font-size: .84rem; background: var(--surface); padding: 0 4px; border-radius: 3px; }
+  .key { font-size: .8rem; color: var(--ink-3); margin: 4px 0 0; line-height: 1.7; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/63-best-ua-signal-less-revenue-than-nothing.html">نوشته‌ی ۶۳</a><span aria-hidden="true">/</span>
@@ -29,87 +33,116 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۶۳ · چرا بهترین سیگنال جذب کاربر از هیچ‌کاری‌نکردن درآمد کمتری می‌سازد؟</div>
-  <h1>دام دقت</h1>
-  <p class="lede">درآمد یک سیگنال برابر است با <strong>خرج انجام‌شده ضرب در ROAS</strong>. خرج قابل‌انجام را پایین بکشید و ببینید بهترین ROAS سبد چطور از هیچ‌کاری‌نکردن عقب می‌افتد.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌ی «Why does the Best UA Signal Generate Less Revenue than Doing Nothing?» را نشان می‌دهد (بخش‌های «The precision trap» و «The coverage cliff»). عددها از نوشته‌اند: بودجه‌ی هفتگی ۳۰٬۰۰۰ دلار، bid ساده‌ی CPI با ۱٫۸۲ برابر یعنی ۵۴٬۶۰۰ دلار، خرید روز اول با ۶٫۱۹ برابر روی ۱٬۲۵۹ دلار، و برتری ۵۵٬۰۵۷ و ۸۶ هزار دلاری دیدن صفحه‌ی محصول و درآمد روز هفتم، که vault آن‌ها را روی کل بودجه به ROAS حدود ۳٫۶۶ و ۴٫۶۹ برابر تبدیل کرده. مدل یک‌خطی درآمد، خوانش vault از حساب‌وکتاب نوشته است. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>دام دقت</h1>
+      <p class="lede">درآمد یک سیگنال برابر است با <strong>خرج انجام‌شده ضرب در ROAS</strong>. خرج قابل‌انجام را پایین بکشید و ببینید بهترین ROAS سبد چطور از هیچ‌کاری‌نکردن عقب می‌افتد.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «Why does the Best UA Signal Generate Less Revenue than Doing Nothing?» را نشان می‌دهد (بخش‌های «The precision trap» و «The coverage cliff»). عددها از نوشته‌اند: بودجه‌ی هفتگی ۳۰٬۰۰۰ دلار، bid ساده‌ی CPI با ۱٫۸۲ برابر یعنی ۵۴٬۶۰۰ دلار، خرید روز اول با ۶٫۱۹ برابر روی ۱٬۲۵۹ دلار، و برتری ۵۵٬۰۵۷ و ۸۶ هزار دلاری دیدن صفحه‌ی محصول و درآمد روز هفتم، که vault آن‌ها را روی کل بودجه به ROAS حدود ۳٫۶۶ و ۴٫۶۹ برابر تبدیل کرده. مدل یک‌خطی درآمد، خوانش vault از حساب‌وکتاب نوشته است. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">درآمد هفتگی: سیگنال در برابر هیچ‌کاری‌نکردن</p><div id="bars"></div>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-      <div class="panel"><p class="panel-title">ROASی که یک سیگنال برای شکست دادن bid ساده‌ی CPI لازم دارد، بر حسب خرج قابل‌انجام</p>
-        <svg class="plot" id="chart" role="img" aria-label="ROAS دروازه برای سربه‌سر شدن در برابر خرج هفتگی قابل‌انجام"></svg>
-        <p class="field-hint">منحنی: ROAS سربه‌سر برابر ۵۴٬۶۰۰ دلار تقسیم بر خرج قابل‌انجام. نقطه: سیگنال شما.</p></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
-        <div class="row" style="margin-top:10px" id="presets"></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c63">
+          <div><p class="panel-title">درآمد هفتگی = خرج انجام‌شده × ROAS؛ مساحت هر مستطیل همان درآمد است</p><div id="ar"></div>
+            <p class="key">مستطیل خط‌چین: bid ساده‌ی CPI روی کل ۳۰٬۰۰۰ دلار · مستطیل رنگی: سیگنال انتخاب‌شده · منحنی: ROAS لازم برای برابر شدن با bid ساده</p></div>
+          <div><p class="panel-title">درآمد هفتگی</p><div id="rv"></div><div class="callout" id="verdict"></div></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>با کوچک شدن خرج قابل‌انجام، ROAS سربه‌سر بالا می‌رود</strong>: در ۴٪ بودجه هیچ ROAS واقع‌بینانه‌ای برنده نمی‌شود.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>با کوچک شدن خرج قابل‌انجام، ROAS سربه‌سر بالا می‌رود</strong>: در ۴٪ بودجه هیچ ROAS واقع‌بینانه‌ای برنده نمی‌شود.</li>
     <li><strong>بالای پرتگاه پوشش</strong>، یعنی کل ۳۰٬۰۰۰ دلار، یک ROAS متوسط ۳٫۶۶ برابری با حدود ۵۵ هزار دلار از bid ساده جلو می‌زند.</li>
     <li><strong>اسلایدر ROAS به‌تنهایی هیچ‌وقت درستش نمی‌کند</strong>: حجم و کیفیت دو قید مستقل‌اند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/63-best-ua-signal-less-revenue-than-nothing.html"><small>درس</small>نوشته‌ی ۶۳: چرا بهترین سیگنال جذب کاربر از هیچ‌کاری‌نکردن درآمد کمتری می‌سازد؟</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/63-best-ua-signal-less-revenue-than-nothing.html"><small>درس</small>نوشته‌ی ۶۳: چرا بهترین سیگنال جذب کاربر از هیچ‌کاری‌نکردن درآمد کمتری می‌سازد؟</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  function stats(id, rows) {
-    var st = Kit.clear(document.getElementById(id));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  function bar(label, frac, text, cls) {
-    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
-      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
-      Kit.el("span", { class: "v" }, text));
-  }
-  function money(x, d) { var s = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); return (x < 0 ? "−$" : "$") + s; }
-  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
-
-  var log = Kit.log(document.getElementById("log"));
-  var BUDGET = 30000, FLAT = 54600, cfg = { spend: 1259, roas: 6.19 }, sl = {}, last = null;
-  var PRESETS = [ { n: "خرید روز اول", spend: 1259, roas: 6.19 }, { n: "دیدن صفحه‌ی محصول، روز اول و دوم", spend: 30000, roas: 3.66 }, { n: "درآمد روز هفتم", spend: 30000, roas: 4.69 }, { n: "bid ساده‌ی CPI", spend: 30000, roas: 1.82 } ];
+  var FA = function (s) { return Kit.digits(String(s)); };
+  function money(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
+  function usd(x) { return FA(Math.round(x).toLocaleString("en-US")) + " دلار"; }
+  var BUDGET = 30000, FLATR = 1.82, FLAT = BUDGET * FLATR;
+  var DEF = { spend: 30000, roas: 1.82, name: "bid ساده‌ی CPI" }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
   function render() {
-    var rev = cfg.spend * cfg.roas, lift = rev - FLAT, be = FLAT / cfg.spend, cov = cfg.spend / BUDGET;
-    var b = Kit.clear(document.getElementById("bars"));
-    b.appendChild(bar("bid ساده، بدون فیلتر", FLAT / 150000, money(FLAT), ""));
-    b.appendChild(bar("این سیگنال", rev / 150000, money(rev), lift >= 0 ? "pos" : "neg"));
-    var ok = lift >= 0, v = document.getElementById("verdict"); v.className = "callout " + (ok ? "ok" : "bad");
-    v.textContent = ok ? "هفته‌ای " + money(lift) + " از هیچ‌کاری‌نکردن جلوتر است." : "هفته‌ای " + money(-lift) + " از هیچ‌کاری‌نکردن بدتر است؛ با این خرج قابل‌انجام به ROAS برابر " + be.toFixed(1) + " برابر نیاز دارد تا سربه‌سر شود.";
-    if (last !== null && ok !== last) log.add(ok ? "سیگنال حالا از bid ساده‌ی CPI جلو زده." : "سیگنال حالا به bid ساده‌ی CPI می‌بازد.", ok ? "ok" : "bad"); last = ok;
-    var pts = []; for (var s = 1500; s <= 30000; s += 750) pts.push([s, Math.min(40, FLAT / s)]);
-    Kit.lineChart(document.getElementById("chart"), { width: 520, height: 210, xMax: 30000, yMax: 40, xLabel: "خرج هفتگی قابل‌انجام، دلار", yLabel: "ROAS سربه‌سر", xTicks: 6, yTicks: 4,
-      series: [{ points: pts, cls: "s2", label: "سربه‌سر" }, { points: [[cfg.spend, cfg.roas]], cls: ok ? "ok" : "bad", label: "سیگنال", dots: true }] });
-    stats("stats", [["سهم قابل‌انجام از بودجه", pct(cov, 0), cov < 0.15 ? "bad" : ""], ["درآمد هفتگی", money(rev), ok ? "ok" : "bad"], ["برتری نسبت به bid ساده", (lift >= 0 ? "+" : "") + money(lift)], ["ROAS سربه‌سر", be.toFixed(1) + " برابر"]]);
+    var rev = view.spend * view.roas, lift = rev - FLAT, be = FLAT / view.spend, ok = lift >= -1;
+    var W = 600, H = 340, L = 44, R = 14, T = 14, B = 38, ym = 8;
+    function X(v) { return L + v / BUDGET * (W - L - R); } function Y(v) { return T + (1 - Math.min(v, ym) / ym) * (H - T - B); }
+    var s = Kit.svg("svg", { class: "ar mono", viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "مستطیل درآمد سیگنال در برابر bid ساده" });
+    for (var g = 0; g <= ym; g += 2) { s.appendChild(Kit.svg("line", { class: "grid", x1: L, x2: W - R, y1: Y(g), y2: Y(g) })); s.appendChild(Kit.svg("text", { x: L - 6, y: Y(g) + 4, "text-anchor": "end" }, g + "×")); }
+    [0, 10000, 20000, 30000].forEach(function (v) { s.appendChild(Kit.svg("text", { x: X(v), y: H - B + 16, "text-anchor": "middle" }, "$" + v / 1000 + "k")); });
+    s.appendChild(Kit.svg("text", { x: (W + L) / 2, y: H - 4, "text-anchor": "middle" }, "deployable weekly spend →"));
+    s.appendChild(Kit.svg("rect", { x: X(0), y: Y(view.roas), width: X(view.spend) - X(0), height: Y(0) - Y(view.roas), fill: ok ? "var(--ok-soft)" : "var(--bad-soft)", stroke: ok ? "var(--ok)" : "var(--bad)", "stroke-width": 2 }));
+    s.appendChild(Kit.svg("rect", { x: X(0), y: Y(FLATR), width: X(BUDGET) - X(0), height: Y(0) - Y(FLATR), fill: "none", stroke: "var(--ink)", "stroke-width": 1.5, "stroke-dasharray": "6 4" }));
+    var pts = []; for (var sp = 7000; sp <= BUDGET; sp += 250) pts.push(X(sp).toFixed(1) + "," + Y(FLAT / sp).toFixed(1));
+    s.appendChild(Kit.svg("polyline", { points: pts.join(" "), fill: "none", stroke: "var(--warn)", "stroke-width": 2 }));
+    s.appendChild(Kit.svg("text", { x: X(7600), y: Y(ym) + 14, style: "fill:var(--warn)" }, "break-even"));
+    s.appendChild(Kit.svg("circle", { cx: X(view.spend), cy: Y(view.roas), r: 5, fill: ok ? "var(--ok)" : "var(--bad)" }));
+    var lx = X(view.spend) + (view.spend > 20000 ? -8 : 8);
+    s.appendChild(Kit.svg("text", { class: "lab", x: lx, y: Y(view.roas) - 8, "text-anchor": view.spend > 20000 ? "end" : "start" }, view.roas.toFixed(2) + "× · " + money(view.spend)));
+    Kit.clear(document.getElementById("ar")).appendChild(s);
+    var RV = Kit.clear(document.getElementById("rv")), mx = Math.max(FLAT, rev, 1) * 1.05;
+    [["bid ساده‌ی CPI", FLAT, "var(--ink-3)"], [view.name, rev, ok ? "var(--ok)" : "var(--bad)"]].forEach(function (x) {
+      RV.appendChild(Kit.el("span", null, x[0])); RV.appendChild(Kit.el("div", { class: "tk" }, Kit.el("i", { style: "width:" + (x[1] / mx * 100).toFixed(1) + "%;background:" + x[2] }), Kit.el("b", { class: "mono" }, money(x[1])))); });
+    RV.className = "rv";
+    var v = document.getElementById("verdict"); v.className = "callout " + (ok ? "ok" : "bad");
+    v.textContent = Math.abs(lift) < 1 ? "● این خود bid ساده است؛ مبنای مقایسه." : ok ? "▲ هفته‌ای " + usd(lift) + " جلوتر از bid ساده." : "▼ هفته‌ای " + usd(-lift) + " عقب‌تر از bid ساده؛ با این خرج به ROAS حدود " + FA(be.toFixed(1)) + " برابر نیاز دارد.";
+    msg = view.name + ": " + usd(view.spend) + " خرج با ROAS " + FA(view.roas.toFixed(2)) + " یعنی " + usd(rev) + " در هفته."; kind = ok ? "ok" : "warn";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["سهم قابل‌انجام از بودجه", Math.round(view.spend / BUDGET * 100) + "%", view.spend < 4500 ? "bad" : ""], ["درآمد هفتگی", money(rev), ok ? "ok" : "bad"], ["برتری نسبت به bid ساده", (lift >= 0 ? "+" : "−") + money(Math.abs(lift))], ["ROAS سربه‌سر", be.toFixed(1) + "×"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, x[1]))); });
+    ctl.spend.set(view.spend); ctl.roas.set(view.roas);
   }
-  var ctl = document.getElementById("ctl");
-  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
-  add("spend", { label: "خرجی که سیگنال می‌تواند انجام بدهد، از ۳۰٬۰۰۰ دلار", min: 500, max: 30000, step: 250, format: function (v) { return money(v); }, hint: "پوشش تعیینش می‌کند: چند نصب واجد شرایط‌اند" });
-  add("roas", { label: "ROAS دروازه", min: 1, max: 8, step: 0.05, format: function (v) { return v.toFixed(2) + "×"; } });
-  var pr = document.getElementById("presets");
-  PRESETS.forEach(function (p) { pr.appendChild(Kit.el("button", { class: "btn", type: "button", onclick: function () { cfg.spend = p.spend; cfg.roas = p.roas; sl.spend.set(p.spend); sl.roas.set(p.roas); render(); log.add("بار شد: " + p.n + "، با " + money(p.spend) + " و ROAS برابر " + p.roas.toFixed(2) + " برابر.", "muted"); } }, p.n)); });
-  render();
+  function tw(f) { return function (v) { f(v); view.name = "سیگنال شما"; render(); tour.free(msg, kind); }; }
+  ctl.spend = Kit.slider({ label: "خرجی که سیگنال می‌تواند انجام بدهد، از ۳۰٬۰۰۰ دلار", min: 500, max: 30000, step: 250, value: view.spend, format: function (v) { return usd(v); }, hint: "پوشش تعیینش می‌کند: چند install واجد شرایط‌اند", onInput: tw(function (v) { view.spend = v; }) });
+  ctl.roas = Kit.slider({ label: "ROAS دروازه", min: 1, max: 8, step: 0.05, value: view.roas, format: function (v) { return FA(v.toFixed(2)) + "×"; }, onInput: tw(function (v) { view.roas = v; }) });
+  [ctl.spend, ctl.roas].forEach(function (x) { document.getElementById("ctl").appendChild(x.element); });
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "بودجه‌ی هفتگی ۳۰٬۰۰۰ دلار است. هر سیگنال UA فقط روی installهایی bid می‌کند که سیگنال برایشان روشن شده؛ پس درآمد فقط به ROAS بستگی ندارد، به خرجی که واقعاً می‌شود انجام داد هم بستگی دارد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و خرج و ROAS را جابه‌جا کنید؛ نقطه باید بالای منحنی برود تا برنده شود.",
+    steps: [
+      { kind: "", run: at({}), say: "مبنا: bid ساده‌ی CPI بدون هیچ فیلتری کل ۳۰٬۰۰۰ دلار را خرج می‌کند با ROAS ۱٫۸۲ برابر؛ یعنی ۵۴٬۶۰۰ دلار درآمد در هفته. مساحت مستطیل خط‌چین همین است." },
+      { kind: "warn", run: at({ spend: 1259, roas: 6.19, name: "خرید روز اول" }), say: "بهترین سیگنال روی هر دلار: خرید در روز اول با ROAS ۶٫۱۹ برابر. ولی روی کمتر از ۱٪ installها روشن می‌شود و فقط ۱٬۲۵۹ دلار خرج‌شدنی است: حدود ۷٬۸۰۰ دلار درآمد، هفته‌ای حدود ۴۶٬۸۰۰ دلار عقب‌تر (بخش «The precision trap»)." },
+      { kind: "warn", run: at({ spend: 1259, roas: 6.19, name: "خرید روز اول" }), say: "منحنی نارنجی ROAS لازم برای برابری است. با ۱٬۲۵۹ دلار خرج، سیگنال باید حدود ۴۳ برابر بدهد؛ هیچ سیگنالی چنین چیزی نمی‌دهد. نوشته می‌گوید اگر پوشش زیر ۵٪ است، مشکل حجم است نه ROAS." },
+      { kind: "ok", run: at({ spend: 30000, roas: 3.66, name: "دیدن صفحه‌ی محصول" }), say: "دیدن صفحه‌ی محصول در روز اول و دوم روی ۳۹٪ installها روشن می‌شود و از پرتگاه پوشش رد می‌شود، پس کل بودجه خرج می‌شود. هفته‌ای ۵۵٬۰۵۷ دلار جلوتر است؛ vault آن را ROAS حدود ۳٫۶۶ برابر حساب کرده (بخش «The coverage cliff»)." },
+      { kind: "ok", run: at({ spend: 30000, roas: 4.69, name: "درآمد روز هفتم" }), say: "درآمد روز هفتم همه‌ی installها را می‌بیند و هفته‌ای ۸۶ هزار دلار جلوتر است (حدود ۴٫۶۹ برابر). نوشته یادآوری می‌کند این سیگنال به حلقه‌ی تصمیم دیگری تعلق دارد، چون باید هفت روز صبر کرد." },
+      { kind: "", run: at({ spend: 12590, roas: 6.19, name: "خرید روز اول، ده برابر پوشش" }), say: "فرض vault: اگر خرید روز اول ده برابر installها را پوشش می‌داد (۱۲٬۵۹۰ دلار)، با همان ۶٫۱۹ برابر به ۷۷٬۹۳۲ دلار می‌رسید و برنده می‌شد. حجم و کیفیت دو قید مستقل‌اند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {
-    "q": "حالت «خرید روز اول» را بار کنید. چرا سیگنالی با ۶٫۱۹ برابر می‌بازد؟",
+    "q": "در قدم «خرید روز اول»، چرا سیگنالی با ۶٫۱۹ برابر می‌بازد؟",
     "options": [
       "معیار ROAS آن غلط است",
       "فقط حدود ۱٬۲۵۹ دلار می‌تواند خرج کند، پس درآمدش حدود ۷٬۸۰۰ دلار است در برابر ۵۴٬۶۰۰ دلار",
@@ -129,14 +162,14 @@
     "explain": "۵۴٬۶۰۰ تقسیم بر ۱٬۲۵۹ حدود ۴۳ برابر می‌شود، که هیچ سیگنالی نمی‌تواند بدهد."
   },
   {
-    "q": "کدام دو حالت آماده برنده می‌شوند و چرا؟",
+    "q": "در تور، کدام دو سیگنال از bid ساده جلو می‌زنند و چرا؟",
     "options": [
       "دیدن صفحه‌ی محصول و درآمد روز هفتم: کل بودجه را با ROAS آبرومندی خرج می‌کنند",
       "خرید روز اول و bid ساده‌ی CPI",
       "فقط خرید روز اول"
     ],
     "answer": 0,
-    "explain": "پوششش از پرتگاه رد می‌شود، پس خرج انجام‌شده کل ۳۰٬۰۰۰ دلار است (بخش «The coverage cliff»)."
+    "explain": "پوشش هر دو از پرتگاه رد می‌شود، پس خرج انجام‌شده کل ۳۰٬۰۰۰ دلار است (بخش «The coverage cliff»)."
   }
 ]);
 })();

@@ -7,18 +7,33 @@
 <meta name="description" content="سه قاعده برای سه حرکت شکل‌گیری streak: روشنی به‌عنوان دروازه، نیروهای کوچک به‌عنوان جمع، و قفل شدن به‌عنوان برهم‌کنش. برای نوشته‌های ۷ و ۹ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
-  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; display: block; }
+  .c70 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+  .mv { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--surface); transition: opacity .3s, border-color .3s; }
+  .mv.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .mv.off { opacity: .45; }
+  .mv h3 { margin: 0 0 2px; font-size: 1rem; }
+  .mv .rule { font-size: .8rem; color: var(--ink-3); margin: 0 0 6px; }
+  svg.ch { width: 100%; height: auto; max-height: 200px; display: block; direction: ltr; }
+  svg.ch text { font-family: var(--mono); font-size: 12px; fill: var(--ink-3); }
+  svg.ch .grid { stroke: var(--line); }
+  svg.ch .lab { font-size: 13px; font-weight: 700; }
+  .fr { display: grid; grid-template-columns: 1fr 5.5rem; gap: 4px 8px; align-items: center; font-size: .84rem; margin: 3px 0; }
+  .fr .tk { height: 16px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px; position: relative; direction: ltr; }
+  .fr .tk i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--s2); border-radius: 2px; transition: width .4s; }
+  .fr.x span:first-child { text-decoration: line-through; color: var(--ink-3); }
+  .big { display: flex; align-items: baseline; gap: 8px; margin: 8px 0 2px; }
+  .big b { font-size: 1.6rem; }
+  .fz { display: grid; grid-template-columns: 5.5rem 1fr; gap: 4px 8px; align-items: center; font-size: .82rem; margin-top: 6px; }
+  .fz .tk { height: 18px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px; position: relative; direction: ltr; }
+  .fz .tk i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ok); border-radius: 2px; }
+  .fz .tk b { position: absolute; left: 6px; top: 0; font-size: .8rem; }
+  .fc { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: center; } .fc label { display: flex; gap: 5px; align-items: center; font-size: .84rem; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/70-getting-in-building-it-locking-in.html">نوشته‌ی ۷۰</a><span aria-hidden="true">/</span>
@@ -29,102 +44,139 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۷۰ · ورود، ساختن، قفل شدن</div>
-  <h1>دروازه، جمع، برهم‌کنش</h1>
-  <p class="lede">روشنی را جابه‌جا کنید، نیروهای کوچک را خاموش کنید و دست‌یافتنی بودن و روزهای نگه‌داشته‌شده و تازگی را تغییر بدهید، تا ببینید شکل‌گیری روی <strong>یک دروازه و یک جمع و یک برهم‌کنش</strong> می‌چرخد، نه روی یک سربالایی صاف.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌های «Why Duolingo Streaks Work, in Four Questions» و «Duolingo: Getting In, Building It, Locking In» را نشان می‌دهد (بخش‌های «Getting in»، «Building it» و «Locking in»). نمودارهای نوشته شبیه‌سازی مدل خود نویسنده‌اند و vault آن مدل را ندارد: شکل‌های تابعی این‌جا، یعنی یک دروازه‌ی smoothstep و جمع با وزن برابر و یک جمله‌ی اشباع‌شونده برای تکرار و تازگیِ نمایی، به‌همراه آن ۵ نیرو، فرض‌های vault هستند که برای نشان دادن همان شکل‌هایی انتخاب شده‌اند که نوشته می‌گوید. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>دروازه، جمع، برهم‌کنش</h1>
+      <p class="lede">سه حرکت شکل‌گیری streak سه قاعده‌ی متفاوت دارند: <strong>یک دروازه، یک جمع و یک برهم‌کنش</strong>. تور را ببینید و بعد خودتان روشنی، نیروها و هفته‌ی اول را تغییر بدهید.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌های «Why Duolingo Streaks Work, in Four Questions» و «Duolingo: Getting In, Building It, Locking In» را نشان می‌دهد (بخش‌های «Getting in»، «Building it» و «Locking in»). نمودارهای نوشته شبیه‌سازی مدل خود نویسنده‌اند و vault آن مدل را ندارد: شکل‌های تابعی این‌جا، یعنی یک دروازه‌ی smoothstep و جمع با وزن برابر و یک جمله‌ی اشباع‌شونده برای تکرار و تازگیِ نمایی، به‌همراه آن ۵ نیرو، فرض‌های vault هستند که برای نشان دادن همان شکل‌هایی انتخاب شده‌اند که نوشته می‌گوید. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">ورود: دروازه در برابر صیقل</p>
-        <svg class="plot" id="c1" role="img" aria-label="کشش streak در برابر روشنی، یک‌بار با دروازه و یک‌بار با صیقل جمعی ساده"></svg>
-        <p class="field-hint">آبی: دروازه، یعنی روشنی بقیه‌ی نیروها را ضرب می‌کند. نارنجی: صیقل، یعنی روشنی فقط جمع می‌شود. نشان خط‌چین: تنظیم فعلی شما.</p></div>
-      <div class="panel"><p class="panel-title">ساختن: یک جمع</p><div id="forces"></div>
-        <p class="field-hint" id="sumnote"></p></div>
-      <div class="panel"><p class="panel-title">قفل شدن: یک برهم‌کنش</p>
-        <svg class="plot" id="c3" role="img" aria-label="احتمال قفل شدن عادت در برابر روزهای نگه‌داشته‌شده"></svg>
-        <p class="field-hint">احتمال قفل شدن برابر است با دست‌یافتنی بودن ضرب در تکرار، که حدود یک هفته اشباع می‌شود، ضرب در تازگی.</p></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
-        <div id="fchk" class="field-hint" style="margin-top:6px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازنشانی</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c70">
+          <div class="mv" id="m1"><h3>۱. ورود</h3><p class="rule">روشنی یک دروازه است، نه صیقل</p><div id="g1"></div></div>
+          <div class="mv" id="m2"><h3>۲. ساختن</h3><p class="rule">پنج نیروی کوچک جمع می‌شوند، بعد از دروازه</p><div id="g2"></div></div>
+          <div class="mv" id="m3"><h3>۳. قفل شدن</h3><p class="rule">دست‌یافتنی بودن × تکرار × تازگی</p><div id="g3"></div></div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+        <div class="tweak-group fc" id="fc"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>زیر دروازه</strong> اضافه کردن نیرو هیچ چیزی را عوض نمی‌کند؛ بالای آن، خط صیقل و خط دروازه به هم می‌رسند.</li>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>زیر دروازه</strong> اضافه کردن نیرو هیچ چیزی را عوض نمی‌کند؛ بالای آن، خط صیقل و خط دروازه به هم می‌رسند.</li>
     <li><strong>در جمع</strong> هر نیرو به همان اندازه‌ی کم می‌ارزد، پس برداشتن هر کدام هزینه‌ی مشابهی دارد؛ feature قهرمانی در کار نیست.</li>
     <li><strong>قفل شدن یک ضرب است</strong>: هر عاملی را نزدیک صفر بگذارید، چه دست‌یافتنی بودن چه روزها چه تازگی، و احتمال فرو می‌ریزد، هر قدر هم بقیه قوی باشند.</li>
-  </ul>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/70-getting-in-building-it-locking-in.html"><small>درس</small>نوشته‌ی ۷۰: ورود، ساختن، قفل شدن</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/70-getting-in-building-it-locking-in.html"><small>درس</small>نوشته‌ی ۷۰: ورود، ساختن، قفل شدن</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  function stats(id, rows) {
-    var st = Kit.clear(document.getElementById(id));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
-
-  var log = Kit.log(document.getElementById("log"));
-  var FORCES = ["حس پیشرفت", "یادآوری به‌موقع", "معنای streak", "عددی که دیده می‌شود", "برد کوچک داخل درس"];
-  var DEF = { clarity: 0.8, att: 0.7, days: 7, newness: 0 }, cfg = Object.assign({}, DEF), on = [true, true, true, true, true], sl = {};
+  var FA = function (s) { return Kit.digits(String(s)); };
+  var FN = ["progress", "reminder", "meaning", "visible number", "small win"], FFA = ["حس پیشرفت", "یادآوری به‌موقع", "معنای streak", "عددی که دیده می‌شود", "برد کوچک داخل درس"];
+  var DEF = { clarity: 0.8, on: [1, 1, 1, 1, 1], att: 0.7, days: 7, newness: 0, focus: 0, freeze: false }, view = Object.assign({}, DEF), tour, ctl = {}, cbs = [], msg, kind;
   function gate(c) { var x = Math.max(0, Math.min(1, (c - 0.3) / 0.4)); return x * x * (3 - 2 * x); }
-  function nForces() { return on.filter(Boolean).length; }
+  function nOn() { return view.on.reduce(function (a, b) { return a + b; }, 0); }
   function rep(d) { return 1 - Math.exp(-d / 3.5); }
   function fresh(n) { return Math.exp(-n / 14); }
   function lock(att, d, n) { return Math.max(0, Math.min(1, att)) * rep(d) * fresh(n); }
-  function pull() { return gate(cfg.clarity) * nForces() / 5; }
-  function chart1() {
-    var pts = function (f) { var a = []; for (var c = 0; c <= 1.0001; c += 0.05) a.push([c, f(c)]); return a; };
-    Kit.lineChart(document.getElementById("c1"), { width: 520, height: 200, xMax: 1, yMax: 1, xLabel: "روشنی", yLabel: "کشش streak", xTicks: 5, yTicks: 4,
-      series: [ { points: pts(function (c) { return gate(c) * nForces() / 5; }), cls: "s1", label: "دروازه" }, { points: pts(function (c) { return c * nForces() / 5; }), cls: "s2", label: "صیقل" } ],
-      marks: [{ x: cfg.clarity, label: "اکنون" }] });
-  }
-  function chart3() {
-    var a = []; for (var d = 0; d <= 14; d += 0.5) a.push([d, lock(cfg.att, d, cfg.newness)]);
-    Kit.lineChart(document.getElementById("c3"), { width: 520, height: 200, xMax: 14, yMax: 1, xLabel: "روزهای نگه‌داشته‌شده", yLabel: "احتمال قفل شدن", xTicks: 7, yTicks: 4,
-      series: [{ points: a, cls: "s3", label: "قفل شدن" }], marks: [{ x: cfg.days, label: "اکنون" }] });
+  function chart(o) {
+    var W = 360, H = 200, L = 38, R = 10, T = 10, B = 30, s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + H, class: "ch mono", role: "img", "aria-label": o.aria });
+    function X(v) { return L + (W - L - R) * v / o.xMax; } function Y(v) { return T + (H - T - B) * (1 - v); }
+    [0, 0.5, 1].forEach(function (g) { s.appendChild(Kit.svg("line", { class: "grid", x1: L, x2: W - R, y1: Y(g), y2: Y(g) })); s.appendChild(Kit.svg("text", { x: L - 5, y: Y(g) + 4, "text-anchor": "end" }, (g * 100) + "%")); });
+    o.xt.forEach(function (t) { s.appendChild(Kit.svg("text", { x: X(t), y: H - B + 15, "text-anchor": "middle" }, String(t))); });
+    s.appendChild(Kit.svg("text", { x: (W + L) / 2, y: H - 2, "text-anchor": "middle" }, o.xl));
+    if (o.zone) s.appendChild(Kit.svg("rect", { x: X(o.zone[0]), y: T, width: X(o.zone[1]) - X(o.zone[0]), height: H - T - B, fill: "var(--bad-soft)" }));
+    o.lines.forEach(function (ln) { var p = []; for (var v = 0; v <= o.xMax + 1e-9; v += o.xMax / 60) p.push(X(v).toFixed(1) + "," + Y(ln.f(v)).toFixed(1));
+      s.appendChild(Kit.svg("polyline", { points: p.join(" "), fill: "none", stroke: ln.col, "stroke-width": ln.w || 2.5, "stroke-dasharray": ln.dash || "" }));
+      if (ln.lab) s.appendChild(Kit.svg("text", { class: "lab", x: X(ln.lx), y: Y(ln.f(ln.lx)) + (ln.dy || -8), "text-anchor": ln.anchor || "start", style: "fill:" + ln.col }, ln.lab)); });
+    s.appendChild(Kit.svg("line", { x1: X(o.now), x2: X(o.now), y1: T, y2: H - B, stroke: "var(--ink)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+    s.appendChild(Kit.svg("circle", { cx: X(o.now), cy: Y(o.nowY), r: 6, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2 }));
+    return s;
   }
   function render() {
-    chart1(); chart3();
-    var p = pull(), l = lock(cfg.att, cfg.days, cfg.newness), l2 = lock(Math.min(1, cfg.att + 0.2), cfg.days, cfg.newness), l1w = lock(cfg.att + 0.2, 7, 0) - lock(cfg.att, 7, 0), l10 = lock(cfg.att + 0.2, 7, 63) - lock(cfg.att, 7, 63);
-    document.getElementById("sumnote").textContent = nForces() + " نیرو از ۵ نیروی کوچک روشن است: کشش برابر " + pct(p, 0) + " بیشینه. وقتی روشنی بالاست، برداشتن یکی " + (gate(cfg.clarity) * 20).toFixed(0) + " واحد هزینه دارد؛ و روشنیِ زیر ۰٫۳ کل جمع را صفر می‌کند.";
-    stats("stats", [["کشش streak", pct(p, 0), p < 0.3 ? "bad" : "ok"], ["احتمال قفل شدن", pct(l, 0), l < 0.3 ? "bad" : "ok"], ["۰٫۲ دست‌یافتنی بودن بیشتر، مثل یک freeze رایگان", "+" + ((l2 - l) * 100).toFixed(1) + " واحد"], ["همان freeze در هفته‌ی اول در برابر هفته‌ی دهم", "+" + (l1w * 100).toFixed(0) + " در برابر +" + (l10 * 100).toFixed(1) + " واحد"]]);
+    var n = nOn(), g = gate(view.clarity), pull = g * n / 5, L0 = lock(view.att, view.days, view.newness);
+    ["m1", "m2", "m3"].forEach(function (id, i) { document.getElementById(id).className = "mv" + (view.focus === i + 1 ? " on" : view.focus ? " off" : ""); });
+    var g1 = Kit.clear(document.getElementById("g1"));
+    g1.appendChild(chart({ aria: "کشش streak بر حسب روشنی: دروازه در برابر صیقل", xMax: 1, xt: [0, 0.3, 0.7, 1], xl: "clarity →", zone: [0, 0.3], now: view.clarity, nowY: pull,
+      lines: [{ f: function (c) { return c * n / 5; }, col: "var(--ink-3)", dash: "5 4", w: 2, lab: "polish", lx: 0.12, dy: -10 }, { f: function (c) { return gate(c) * n / 5; }, col: "var(--s1)", w: 3, lab: "gate", lx: 0.72, dy: 18 }] }));
+    g1.appendChild(Kit.el("div", { class: "big" }, Kit.el("b", { class: "mono" }, Math.round(pull * 100) + "%"), Kit.el("span", null, "کشش streak")));
+    var g2 = Kit.clear(document.getElementById("g2"));
+    FFA.forEach(function (f, i) { var w = view.on[i] ? g * 20 : 0;
+      g2.appendChild(Kit.el("div", { class: "fr" + (view.on[i] ? "" : " x") }, Kit.el("span", null, f), Kit.el("div", { class: "tk" }, Kit.el("i", { style: "width:" + (w * 5).toFixed(0) + "%" })))); });
+    g2.appendChild(Kit.el("div", { class: "big" }, Kit.el("b", { class: "mono" }, Math.round(pull * 100) + "%"), Kit.el("span", null, "جمع نیروها × دروازه (" + FA(Math.round(g * 100)) + "٪)")));
+    g2.appendChild(Kit.el("p", { class: "rule" }, "هر نیرو حداکثر ۲۰٪؛ قهرمانی در کار نیست."));
+    var g3 = Kit.clear(document.getElementById("g3"));
+    g3.appendChild(chart({ aria: "احتمال قفل شدن بر حسب روزهای نگه‌داشته‌شده", xMax: 14, xt: [0, 2, 4, 7, 10, 14], xl: "days kept →", now: view.days, nowY: L0,
+      lines: [{ f: function (d) { return lock(view.att, d, view.newness); }, col: "var(--s3)", w: 3, lab: "lock-in " + Math.round(L0 * 100) + "%", lx: 8, dy: -10 }] }));
+    var w1 = (lock(view.att + 0.2, 7, 0) - lock(view.att, 7, 0)) * 100, w10 = (lock(view.att + 0.2, 7, 63) - lock(view.att, 7, 63)) * 100;
+    var fz = Kit.el("div", { class: "fz", style: view.freeze ? "" : "display:none" });
+    [["هفته‌ی اول", w1], ["هفته‌ی دهم", w10]].forEach(function (r) { fz.appendChild(Kit.el("span", null, r[0])); fz.appendChild(Kit.el("div", { class: "tk" }, Kit.el("i", { style: "width:" + Math.max(1, r[1] / 25 * 100).toFixed(0) + "%" }), Kit.el("b", { class: "mono" }, "+" + r[1].toFixed(1) + " pts"))); });
+    g3.appendChild(Kit.el("p", { class: "rule", style: view.freeze ? "margin-top:6px" : "display:none" }, "همان کمک، یعنی ۰٫۲ دست‌یافتنی بودن بیشتر:")); g3.appendChild(fz);
+    msg = "روشنی " + FA(view.clarity.toFixed(2)) + " و " + FA(n) + " نیرو: کشش " + FA(Math.round(pull * 100)) + "٪. با " + FA(view.days) + " روز نگه‌داشته‌شده، احتمال قفل شدن " + FA(Math.round(L0 * 100)) + "٪.";
+    kind = pull < 0.3 || L0 < 0.2 ? "bad" : "ok";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["روشنی", view.clarity.toFixed(2)], ["نیروهای روشن", n + " / 5"], ["دست‌یافتنی بودن", view.att.toFixed(2)], ["روزهای نگه‌داشته‌شده", view.days + " d"], ["روز از شروع تلاش", view.newness + " d"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono" }, x[1]))); });
+    ["clarity", "att", "days", "newness"].forEach(function (k) { ctl[k].set(view[k]); });
+    cbs.forEach(function (c, i) { c.checked = !!view.on[i]; });
   }
-  var ctl = document.getElementById("ctl");
-  function add(key, o) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
-  add("clarity", { label: "روشنی: کاربر streak را می‌فهمد؟", min: 0, max: 1, step: 0.05, format: function (v) { return v.toFixed(2); }, hint: "آستانه‌ی دروازه حدود ۰٫۳ تا ۰٫۷، که شکلش مال vault است" });
-  add("att", { label: "دست‌یافتنی بودن", min: 0, max: 1, step: 0.05, format: function (v) { return v.toFixed(2); } });
-  add("days", { label: "روزهای نگه‌داشته‌شده تا حالا", min: 0, max: 14, step: 1, unit: " روز", hint: "زانو نزدیک یک هفته؛ نوشته این را از گفته‌های عمومی Duolingo قرض گرفته" });
-  add("newness", { label: "روزهای گذشته از شروع این تلاش، یعنی تازگی", min: 0, max: 63, step: 1, unit: " روز", hint: "تازگی با گذشت زمان محو می‌شود" });
-  var fc = document.getElementById("forces");
-  FORCES.forEach(function (name, i) {
-    var id = "force" + i, cb = Kit.el("input", { type: "checkbox", id: id, checked: "checked" });
-    cb.addEventListener("change", function () { on[i] = cb.checked; log.add(name + (cb.checked ? " برگشت." : " برداشته شد.") + " کشش حالا " + pct(pull(), 0) + " است.", cb.checked ? "ok" : "warn"); render(); });
-    fc.appendChild(Kit.el("label", { for: id, style: "display:flex;gap:8px;align-items:center;margin:4px 0" }, cb, name));
+  function tw(f) { return function (v) { f(v); view.focus = 0; view.freeze = true; render(); tour.free(msg, kind); }; }
+  ctl.clarity = Kit.slider({ label: "روشنی: کاربر streak را می‌فهمد؟", min: 0, max: 1, step: 0.05, value: view.clarity, format: function (v) { return FA(v.toFixed(2)); }, onInput: tw(function (v) { view.clarity = v; }) });
+  ctl.att = Kit.slider({ label: "دست‌یافتنی بودن", min: 0, max: 1, step: 0.05, value: view.att, format: function (v) { return FA(v.toFixed(2)); }, onInput: tw(function (v) { view.att = v; }) });
+  ctl.days = Kit.slider({ label: "روزهای نگه‌داشته‌شده", min: 0, max: 14, step: 1, unit: " روز", value: view.days, onInput: tw(function (v) { view.days = v; }) });
+  ctl.newness = Kit.slider({ label: "روزهای گذشته از شروع این تلاش", min: 0, max: 63, step: 1, unit: " روز", value: view.newness, onInput: tw(function (v) { view.newness = v; }) });
+  ["clarity", "att", "days", "newness"].forEach(function (k) { document.getElementById("ctl").appendChild(ctl[k].element); });
+  FFA.forEach(function (name, i) { var cb = Kit.el("input", { type: "checkbox", id: "force" + i, checked: "checked" }); cbs.push(cb);
+    cb.addEventListener("change", tw(function () { view.on = view.on.slice(); view.on[i] = cb.checked ? 1 : 0; }));
+    document.getElementById("fc").appendChild(Kit.el("label", { for: "force" + i }, cb, name)); });
+
+  function at(o) { return function () { view = Object.assign({}, DEF, { on: DEF.on.slice() }, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({ focus: 1, clarity: 0.2 }), render: render, interval: 8000,
+    intro: "بیشتر streakها در همان هفته‌ی اول می‌میرند. سه حرکت شکل‌گیری، یعنی ورود و ساختن و قفل شدن، یک سربالایی صاف نیستند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، نیروها را خاموش کنید و هر عامل قفل شدن را نزدیک صفر ببرید.",
+    steps: [
+      { kind: "bad", run: at({ focus: 1, clarity: 0.2 }), say: "روشنی ۰٫۲: کاربر هنوز نمی‌فهمد streak چیست. هر پنج نیرو روشن‌اند ولی کشش صفر است. خط‌چین «صیقل» همین‌جا ۲۰٪ می‌داد؛ دروازه هیچ (بخش «Getting in»)." },
+      { kind: "warn", run: at({ focus: 1, clarity: 0.4 }), say: "روشنی ۰٫۴: دروازه تازه کمی باز شده و کشش ۱۶٪ است، در حالی که مدل صیقل ۴۰٪ می‌گفت. انگیزه روی سردرگمی، ضرب در تقریباً صفر است." },
+      { kind: "ok", run: at({ focus: 1 }), say: "روشنی ۰٫۸: دروازه کاملاً باز است و همه‌ی نیروها با قدرت کامل رد می‌شوند. اولین پرسش این است که کاربر اصلاً streak را می‌فهمد، نه این‌که چه feature انگیزشی اضافه کنیم." },
+      { kind: "warn", run: at({ focus: 2, on: [1, 0, 1, 1, 1] }), say: "بعد از دروازه نیروها جمع می‌شوند. یادآوری را بردارید: کشش ۸۰٪ می‌شود. هر نیرو کمی کمک می‌کند و هیچ‌کدام مجانی حذف نمی‌شود (بخش «Building it»)." },
+      { kind: "bad", run: at({ focus: 2, on: [1, 0, 0, 0, 0] }), say: "فقط یک نیرو، هر قدر هم عالی: ۲۰٪. یک اهرم تنها به جایی نمی‌رسد؛ گستردگی از عمق بهتر است." },
+      { kind: "warn", run: at({ focus: 3, days: 2 }), say: "قفل شدن یک ضرب است. با دو روز تکرار، احتمال قفل شدن ۳۰٪ است. منحنی تا حدود یک هفته تند بالا می‌رود و بعد کند می‌شود (بخش «Locking in»)." },
+      { kind: "bad", run: at({ focus: 3, att: 0.1 }), say: "هفت روز تکرار و کاربر کاملاً تازه، ولی streak دست‌نیافتنی به نظر می‌رسد (۰٫۱): احتمال قفل شدن ۹٪ است. یک عامل نزدیک صفر کل ضرب را پایین می‌کشد." },
+      { kind: "ok", run: at({ focus: 3, freeze: true }), say: "فرض vault: همان کمک، مثلاً یک freeze رایگان که دست‌یافتنی بودن را ۰٫۲ بالا می‌برد، در هفته‌ی اول ۱۷ واحد به قفل شدن اضافه می‌کند و در هفته‌ی دهم تقریباً هیچ. هفته‌ی اول را مثل یک حالت خاص محافظت کنید." }
+    ]
   });
-  document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; sl[k].set(DEF[k]); }); fc.querySelectorAll("input").forEach(function (c, i) { c.checked = true; on[i] = true; }); render(); log.add("بازنشانی شد.", "muted"); });
-  render();
 
   Kit.quiz(document.getElementById("quiz"), [
   {
-    "q": "روشنی را با روشن بودن هر پنج نیرو روی ۰٫۲ بگذارید. کشش streak چقدر است؟",
+    "q": "وقتی روشنی ۰٫۲ است و هر پنج نیرو روشن‌اند، کشش streak چقدر است؟",
     "options": [
       "حدود ۴۰٪",
       "حدود ۸۰٪",

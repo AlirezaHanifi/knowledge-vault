@@ -7,23 +7,27 @@
 <meta name="description" content="نسبت DAU/MAU یک عدد فشرده است؛ توزیع Lness همان مخاطب را به L1 تا L4+ می‌شکند و نشان می‌دهد retention از کجا می‌آید. برای نوشته‌ی ۲۳ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 9rem 1fr 5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 0 0 auto; background: var(--s1); border-radius: 3px; }
-  .bar-fill.s2 { background: var(--s2); } .bar-fill.s3 { background: var(--s3); } .bar-fill.s4 { background: var(--s4); }
-  .bar-fill.bad { background: var(--bad); } .bar-fill.ok { background: var(--ok); } .bar-fill.warn { background: var(--warn); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; height: auto; display: block; }
-  svg.plot text { font-size: 10px; fill: var(--muted); }
-  svg.plot .grid { stroke: var(--line); stroke-width: 1; }
-  svg.plot .thr { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; opacity: .55; }
-
+  .c23 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 20px; align-items: start; }
+  .waffle { display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; direction: ltr; max-width: 420px; }
+  .waffle span { aspect-ratio: 1; border-radius: 3px; font: 700 8px/1 var(--mono); color: #fff; display: flex; align-items: center; justify-content: center; }
+  .g1 { background: var(--s2); } .g2 { background: var(--s1); } .g4 { background: var(--ok); }
+  .waffle span { opacity: .3; } .waffle span.ret { opacity: 1; box-shadow: 0 0 0 2px var(--ink); }
+  .key span { display: inline-block; margin-inline-end: 12px; }
+  .key { font-size: .84rem; color: var(--ink-2); margin: 6px 0 0; line-height: 1.8; }
+  .key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-inline-end: 4px; }
+  .rrow { display: grid; grid-template-columns: 7.5rem 1fr 3.4rem; gap: 8px; align-items: center; margin: 5px 0; font-size: .88rem; }
+  .track { position: relative; height: 18px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; }
+  .fill { position: absolute; top: 0; bottom: 0; right: 0; border-radius: 3px; } .fill.all { background: var(--ink-3); }
+  .rrow .v { font-family: var(--mono); direction: ltr; text-align: left; }
+  .mix { display: flex; height: 26px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); font-size: .8rem; margin: 4px 0 8px; }
+  .mix span { display: flex; align-items: center; justify-content: center; color: #fff; white-space: nowrap; overflow: hidden; }
+  .sub { font-size: .82rem; color: var(--ink-3); margin: 0 0 8px; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/23-plg-growth-retaining-users.html">نوشته‌ی ۲۳</a><span aria-hidden="true">/</span>
@@ -34,40 +38,62 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۲۳ · رشد PLG: نگه داشتن کاربران</div>
-  <h1>توزیع Lness در برابر یک عدد</h1>
-  <p class="lede">دو مخاطب می‌توانند <strong>میانگین روز فعال برابر</strong> داشته باشند و retention کاملاً متفاوت. توزیع Lness را تغییر دهید و ببینید عدد فشرده چه چیزی را پنهان می‌کند.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌ی «PLG Growth: retaining users» را نشان می‌دهد (بخش‌های «توزیع Lness» و «رابطه‌ی stickiness و retention»). سهم‌های پیش‌فرض، یعنی ۸۲٪ L1 و ۱٫۳٪ L4+، و retention هفته‌ی سوم، یعنی ۲٫۳٪ برای L1 و ۳۱٫۸٪ برای L4+، از نوشته است؛ retention گروه L2 و L3 فرض vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>توزیع Lness در برابر یک عدد</h1>
+      <p class="lede">دو مخاطب می‌توانند <strong>میانگین روز فعال برابر</strong> داشته باشند و retention کاملاً متفاوت. توزیع Lness را تغییر دهید و ببینید عدد فشرده چه چیزی را پنهان می‌کند.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «PLG Growth: retaining users» را نشان می‌دهد (بخش‌های «توزیع Lness» و «رابطه‌ی stickiness و retention»). سهم‌های پیش‌فرض، یعنی ۸۲٪ L1 و ۱٫۳٪ L4+، و retention هفته‌ی سوم، یعنی ۲٫۳٪ برای L1 و ۳۱٫۸٪ برای L4+، از نوشته است؛ retention گروه L2 و L3 فرض vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">توزیع Lness هفته‌ی ثبت‌نام</p><div id="dist"></div></div>
-      <div class="panel"><p class="panel-title">retention هفته‌ی سوم هر گروه و کل</p><div id="ret"></div><div class="callout" id="verdict" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="reset">بازگشت به عددهای نوشته</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c23">
+          <div>
+            <p class="panel-title" id="wt"></p>
+            <div class="waffle mono" id="waffle" role="img"></div>
+            <p class="key" id="key"></p>
+          </div>
+          <div>
+            <p class="panel-title">retention هفته‌ی سوم هر گروه</p>
+            <div id="ret"></div>
+            <p class="panel-title" style="margin-top:12px">کاربران برگشته از کدام گروه‌اند</p>
+            <div class="mix" id="mix"></div>
+            <p class="sub" id="sub"></p>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">عددهای فشرده</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>سهم L4+ کوچک است ولی retention کل را می‌سازد</strong>: آن را از ۱٫۳٪ به ۱۰٪ ببرید.</li>
-    <li><strong>نمونه‌ی «میانگین برابر» را بزنید</strong>: روز فعال در هفته تقریباً همان است ولی retention دیگر است.</li>
-    <li><strong>نسبت DAU/MAU کف دارد</strong>: هرگز زیر ۱ ÷ ۳۰، یعنی ۳٫۲٪، نمی‌رود و WAU/MAU زیر ۲۰٪؛ پس یک عدد پایین هم چیزی کم دارد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>سهم L4+ کوچک است ولی سهم بزرگی از برگشتی‌ها را می‌سازد</strong>: آن را از ۱٫۳٪ به ۱۰٪ ببرید.</li>
+      <li><strong>دو توزیع با میانگین برابر</strong> را مقایسه کنید: روز فعال در هفته یکی است ولی retention فرق می‌کند.</li>
+      <li><strong>نسبت DAU/MAU کف دارد</strong>: هرگز زیر ۱ ÷ ۳۰، یعنی ۳٫۲٪، نمی‌رود و WAU/MAU زیر ۲۰٪؛ پس یک عدد پایین هم چیزی کم دارد.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/23-plg-growth-retaining-users.html"><small>درس</small>نوشته‌ی ۲۳: رشد PLG: نگه داشتن کاربران</a></li>
-    <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/23-plg-growth-retaining-users.html"><small>درس</small>نوشته‌ی ۲۳: رشد PLG: نگه داشتن کاربران</a></li>
+      <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
@@ -75,50 +101,56 @@
 (function () {
   "use strict";
   var FA = function (s) { return Kit.digits(String(s)); };
-  function stats(rows) {
-    var st = Kit.clear(document.getElementById("stats"));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
-  }
-  function bar(label, frac, text, cls) {
-    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
-      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
-      Kit.el("span", { class: "v" }, text));
-  }
-  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "٪"; }
-  function table(head, rows) {
-    var t = Kit.el("table", { class: "data" });
-    t.appendChild(Kit.el("tr", null, head.map(function (h, i) { return Kit.el("th", { class: i ? "num" : "" }, h); })));
-    rows.forEach(function (r) { t.appendChild(Kit.el("tr", null, r.map(function (c, i) { return Kit.el("td", { class: i ? "num" : "" }, c); }))); });
-    return t;
-  }
-  var log = Kit.log(document.getElementById("log"));
-  var ctl = document.getElementById("ctl"), sl = {};
-  function add(key, o, cfg, render) { o.value = cfg[key]; o.onInput = function (v) { cfg[key] = v; render(); }; sl[key] = Kit.slider(o); ctl.appendChild(sl[key].element); }
-  function resetTo(DEF, cfg, render) { document.getElementById("reset").addEventListener("click", function () { Object.keys(DEF).forEach(function (k) { cfg[k] = DEF[k]; if (sl[k]) sl[k].set(DEF[k]); }); render(); log.add("به عددهای نوشته برگشت.", "muted"); }); }
-
-  var DEF = { l1: 82, l23: 16.7, l4: 1.3 }, cfg = Object.assign({}, DEF), RET = { l1: 0.023, l23: 0.10, l4: 0.318 }, DAYS = { l1: 1, l23: 2.4, l4: 4.8 }, last = null;
-  function norm() { var t = cfg.l1 + cfg.l23 + cfg.l4; return { l1: cfg.l1 / t, l23: cfg.l23 / t, l4: cfg.l4 / t }; }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "%"; }
+  var RET = { l1: 0.023, l23: 0.10, l4: 0.318 }, DAYS = { l1: 1, l23: 2.4, l4: 4.8 }, G = ["l1", "l23", "l4"], CL = { l1: "g1", l23: "g2", l4: "g4" }, LB = { l1: "1", l23: "2", l4: "4" };
+  var BASE = { l1: 82, l23: 16.7, l4: 1.3 }, view = Object.assign({}, BASE), tour, ctl = {}, msg, kind;
+  function norm() { var t = view.l1 + view.l23 + view.l4 || 1; return { l1: view.l1 / t, l23: view.l23 / t, l4: view.l4 / t }; }
+  function seats(s, n) { var raw = G.map(function (g) { return s[g] * n; }), out = raw.map(Math.floor), left = n - out.reduce(function (a, b) { return a + b; }, 0);
+    raw.map(function (r, i) { return [r - out[i], i]; }).sort(function (a, b) { return b[0] - a[0]; }).slice(0, left).forEach(function (x) { out[x[1]]++; }); return out; }
+  function rrow(label, v, cls) { return Kit.el("div", { class: "rrow" }, Kit.el("span", null, label), Kit.el("div", { class: "track" }, Kit.el("div", { class: "fill " + cls, style: "width:" + Math.min(100, v / 0.35 * 100).toFixed(1) + "%" })), Kit.el("span", { class: "v mono" }, pct(v))); }
   function render() {
-    var s = norm(), days = s.l1 * DAYS.l1 + s.l23 * DAYS.l23 + s.l4 * DAYS.l4, ret = s.l1 * RET.l1 + s.l23 * RET.l23 + s.l4 * RET.l4;
-    var d = Kit.clear(document.getElementById("dist"));
-    d.appendChild(bar("L1، یک روز", s.l1, pct(s.l1), "s2")); d.appendChild(bar("L2 و L3", s.l23, pct(s.l23), "s1")); d.appendChild(bar("L4+، چهار روز و بیشتر", s.l4, pct(s.l4), "ok"));
-    var r = Kit.clear(document.getElementById("ret"));
-    r.appendChild(bar("L1", RET.l1 / 0.4, pct(RET.l1), "s2")); r.appendChild(bar("L2 و L3، فرض vault", RET.l23 / 0.4, pct(RET.l23), "s1")); r.appendChild(bar("L4+", RET.l4 / 0.4, pct(RET.l4), "ok")); r.appendChild(bar("کل cohort", ret / 0.4, pct(ret), "warn"));
-    var share4 = s.l4 * RET.l4 / ret, v = document.getElementById("verdict");
-    v.className = "callout"; v.textContent = "کاربران L4+ " + pct(s.l4) + " cohort‌اند ولی " + pct(share4, 0) + " کاربران برگشته در هفته‌ی سوم را می‌سازند.";
-    var key = Math.round(ret * 1000); if (last !== null && key !== last) log.add("retention کل: " + pct(ret) + " با میانگین " + FA(days.toFixed(2)) + " روز فعال در هفته.", "muted"); last = key;
-    stats([["میانگین روز فعال در هفته", FA(days.toFixed(2))], ["معادل تقریبی DAU/WAU", pct(days / 7, 0)], ["retention هفته‌ی سوم کل", pct(ret)], ["سهم برگشتی‌ها از L4+", pct(share4, 0), share4 > 0.3 ? "ok" : ""]]);
+    var s = norm(), days = G.reduce(function (a, g) { return a + s[g] * DAYS[g]; }, 0), ret = G.reduce(function (a, g) { return a + s[g] * RET[g]; }, 0);
+    var n = seats(s, 200), W = Kit.clear(document.getElementById("waffle"));
+    G.forEach(function (g, i) { var k = Math.round(n[i] * RET[g]); for (var j = 0; j < n[i]; j++) W.appendChild(Kit.el("span", { class: CL[g] + (j < k ? " ret" : "") }, LB[g])); });
+    W.setAttribute("aria-label", "از ۲۰۰ کاربر: " + FA(n[0]) + " L1، " + FA(n[1]) + " L2 و L3، " + FA(n[2]) + " L4+");
+    document.getElementById("wt").textContent = "یک cohort دویست‌نفره؛ هر مربع یک کاربر";
+    var K = Kit.clear(document.getElementById("key"));
+    [["g1", "یک روز در هفته (L1)", n[0]], ["g2", "دو یا سه روز (L2 و L3)", n[1]], ["g4", "چهار روز و بیشتر (L4+)", n[2]]].forEach(function (x) { K.appendChild(Kit.el("span", null, Kit.el("i", { class: x[0] }), x[1] + ": " + FA(x[2]) + " نفر")); });
+    K.appendChild(Kit.el("span", null, "مربع پررنگ با قاب: برگشته در هفته‌ی سوم؛ کم‌رنگ: برنگشته"));
+    var R = Kit.clear(document.getElementById("ret"));
+    R.appendChild(rrow("L1", RET.l1, "g1")); R.appendChild(rrow("L2 و L3 (فرض vault)", RET.l23, "g2")); R.appendChild(rrow("L4+", RET.l4, "g4")); R.appendChild(rrow("کل cohort", ret, "all"));
+    var M = Kit.clear(document.getElementById("mix")), sh = {};
+    G.forEach(function (g) { sh[g] = ret ? s[g] * RET[g] / ret : 0; var w = sh[g] * 100;
+      M.appendChild(Kit.el("span", { class: CL[g], style: "width:" + w.toFixed(1) + "%" }, w >= 9 ? (g === "l23" ? "L2–3 " : g === "l1" ? "L1 " : "L4+ ") + FA(Math.round(w)) + "٪" : "")); });
+    document.getElementById("sub").textContent = "گروه L4+ فقط " + FA(pct(s.l4)) + " از cohort است ولی " + FA(pct(sh.l4, 0)) + " از برگشتی‌ها را می‌سازد.";
+    msg = "میانگین " + FA(days.toFixed(2)) + " روز فعال در هفته و retention کل " + FA(pct(ret)) + "؛ سهم L4+ از برگشتی‌ها " + FA(pct(sh.l4, 0)) + "."; kind = "";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["میانگین روز فعال در هفته", days.toFixed(2)], ["معادل تقریبی DAU/WAU", pct(days / 7)], ["retention هفته‌ی سوم کل", pct(ret)], ["سهم L4+ از برگشتی‌ها", pct(sh.l4, 0), sh.l4 > 0.3 ? "ok" : ""]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, x[1]))); });
+    ctl.l1.set(view.l1); ctl.l23.set(view.l23); ctl.l4.set(view.l4);
   }
-  add("l1", { label: "وزن L1", min: 0, max: 100, step: 0.5, unit: "" }, cfg, render);
-  add("l23", { label: "وزن L2 و L3", min: 0, max: 100, step: 0.5, unit: "" }, cfg, render);
-  add("l4", { label: "وزن L4+", min: 0, max: 30, step: 0.1, unit: "", hint: "سه وزن به ۱۰۰٪ نرمال می‌شوند" }, cfg, render);
-  var pre = Kit.segmented({ label: "نمونه‌ها", value: "post", options: [{ value: "post", label: "cohort نوشته" }, { value: "same", label: "میانگین برابر" }], onChange: function (k) {
-    var P = k === "post" ? [82, 16.7, 1.3] : [93.3, 0, 6.7];
-    ["l1", "l23", "l4"].forEach(function (key, i) { cfg[key] = P[i]; sl[key].set(P[i]); }); render();
-    log.add(k === "post" ? "توزیع cohort هفته‌ی ۲۰۲۲-۱۹ بار شد." : "توزیعی دوقطبی با همان میانگین روز فعال بار شد.", "muted"); } });
-  ctl.insertBefore(pre.element, ctl.firstChild);
-  resetTo(DEF, cfg, render);
-  render();
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.l1 = Kit.slider({ label: "وزن L1", min: 0, max: 100, step: 0.5, value: view.l1, onInput: tw(function (v) { view.l1 = v; }) });
+  ctl.l23 = Kit.slider({ label: "وزن L2 و L3", min: 0, max: 100, step: 0.5, value: view.l23, onInput: tw(function (v) { view.l23 = v; }) });
+  ctl.l4 = Kit.slider({ label: "وزن L4+", min: 0, max: 40, step: 0.1, value: view.l4, hint: "سه وزن به ۱۰۰٪ نرمال می‌شوند", onInput: tw(function (v) { view.l4 = v; }) });
+  [ctl.l1, ctl.l23, ctl.l4].forEach(function (x) { document.getElementById("ctl").appendChild(x.element); });
+
+  function at(o) { return function () { view = Object.assign({}, BASE, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "Lness یعنی کاربر در هفته چند روز فعال بوده است: L1 یک روز، L4+ چهار روز و بیشتر. نوشته به‌جای عدد فشرده‌ی DAU/MAU همین توزیع را نگاه می‌کند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و وزن‌ها را جابه‌جا کنید؛ میانگین روز فعال و retention را کنار هم دنبال کنید.",
+    steps: [
+      { kind: "", run: at({}), say: "cohort هفته‌ی ۲۰۲۲-۱۹ در نوشته: حدود ۸۲٪ کاربران فقط یک روز در هفته فعال بوده‌اند (L1) و فقط ۱٫۳٪ چهار روز و بیشتر (L4+) (بخش «توزیع Lness»)." },
+      { kind: "ok", run: at({}), say: "retention هفته‌ی سوم: L1 فقط ۲٫۳٪، L4+ دست‌کم ۳۱٫۸٪. یعنی ۱٫۳٪ کاربران ۱۰٪ برگشتی‌ها را می‌سازند. retention گروه L2 و L3 را vault ۱۰٪ فرض کرده است." },
+      { kind: "ok", run: at({ l1: 73.3, l4: 10 }), say: "سهم L4+ را از ۱٫۳٪ به ۱۰٪ ببرید: retention کل از ۳٫۹۷٪ به ۶٫۵۴٪ می‌رسد و نیمی از برگشتی‌ها L4+ می‌شوند." },
+      { kind: "", run: at({ l1: 0, l23: 100, l4: 0 }), say: "یک cohort فرضی که همه L2 یا L3 باشند: میانگین ۲٫۴ روز فعال در هفته و retention ۱۰٪." },
+      { kind: "warn", run: at({ l1: 63.2, l23: 0, l4: 36.8 }), say: "و cohort دوقطبی با همان ۲٫۴ روز میانگین: ۶۳٪ L1 و ۳۷٪ L4+. DAU/WAU یکی است، retention ۱۳٫۲٪ است. عدد فشرده توزیع را پنهان می‌کند." },
+      { kind: "warn", run: at({}), say: "نوشته یک دام دیگر هم می‌گوید: DAU/MAU هیچ‌وقت زیر ۳٫۲٪ (یک تقسیم بر ۳۰) نمی‌رود و WAU/MAU زیر ۲۰٪. پس این نسبت‌ها را باید با احتیاط خواند (بخش «مفهوم stickiness و سنجش آن»)." },
+      { kind: "ok", run: at({}), say: "در هفته‌های بعد، سهم L4+ میان کاربران مانده از ۴٫۰٪ به ۵٫۲٪ و ۶٫۴٪ می‌رسد و سهم L1 کم می‌شود؛ برای همین retention در دوره‌های بعد بهتر می‌شود (بخش «رابطه‌ی stickiness و retention»)." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {
@@ -132,7 +164,7 @@
     "explain": "یک توزیع نشان می‌دهد retention از کدام گروه می‌آید (بخش «مفهوم stickiness و سنجش آن»)."
   },
   {
-    "q": "در نمونه‌ی «میانگین برابر» چه دیدید؟",
+    "q": "در دو cohort با میانگین ۲٫۴ روز فعال در هفته چه دیدید؟",
     "options": [
       "با همان میانگین روز فعال، retention کل بالاتر است چون L4+ بزرگ‌تر شده",
       "retention دقیقاً همان می‌ماند",

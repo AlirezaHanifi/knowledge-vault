@@ -7,18 +7,29 @@
 <meta name="description" content="دو مدل retention را روی پنجره‌ای از یک cohort سه‌بخشی برازش کنید و LTV روز ۷۲۰ آن‌ها را با حقیقت مقایسه کنید. برای نوشته‌ی ۶۴ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .bar-row { display: grid; grid-template-columns: 8.5rem 1fr 4.5rem; gap: 8px; align-items: center; margin: 4px 0; font-size: .88rem; }
-  .bar-track { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; height: 16px; position: relative; }
-  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 3px; }
-  .bar-fill.hot { background: var(--s2); } .bar-fill.neg { background: var(--bad); } .bar-fill.pos { background: var(--ok); }
-  .bar-row .v { font-family: var(--mono); text-align: end; }
-  svg.plot { width: 100%; display: block; }
+  .c64 { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  svg.plot { width: 100%; height: auto; max-height: 285px; display: block; direction: ltr; }
+  svg.plot text { font-family: var(--mono); font-size: 12px; fill: var(--ink-3); }
+  svg.plot .grid { stroke: var(--line); }
+  svg.plot .lab { font-size: 13px; font-weight: 700; }
+  .key { font-size: .8rem; color: var(--ink-3); margin: 4px 0 0; line-height: 1.8; }
+  .lv { display: grid; grid-template-columns: 6.5rem 1fr; gap: 6px 10px; align-items: center; font-size: .88rem; margin: 4px 0 6px; }
+  .lv .tk { height: 22px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; position: relative; }
+  .lv .tk i { position: absolute; top: 0; bottom: 0; right: 0; border-radius: 3px; }
+  .lv .tk b { position: absolute; left: 6px; top: 2px; font-size: .84rem; background: var(--surface); padding: 0 4px; border-radius: 3px; }
+  .split { display: flex; height: 24px; border: 1px solid var(--line-strong); border-radius: 4px; overflow: hidden; font-size: .8rem; margin: 4px 0 2px; }
+  .split span { display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }
+  table.au { width: 100%; border-collapse: collapse; font-size: .8rem; margin-top: 2px; }
+  table.au th, table.au td { border-bottom: 1px solid var(--line); padding: 2px 6px; text-align: right; }
+  table.au td.n { direction: ltr; text-align: left; }
+  table.au tr.avg td { font-weight: 700; border-top: 1.5px solid var(--line-strong); }
+  .dim { opacity: .35; }
 </style>
 </head>
-<body>
+<body class="stage-page">
 <header class="topbar">
   <div class="topbar-inner">
-    <nav class="crumbs" aria-label="مسیر">
+    <nav class="crumbs" aria-label="مسیر صفحه">
       <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
       <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
       <a href="../chapters/64-long-tail-eats-your-ltv-model.html">نوشته‌ی ۶۴</a><span aria-hidden="true">/</span>
@@ -29,92 +40,130 @@
 </header>
 
 <main class="page">
-  <div class="eyebrow">نوشته‌ی ۶۴ · وقتی دم بلند مدل LTV را می‌خورد</div>
-  <h1>دمی که نمی‌بینید</h1>
-  <p class="lede">همان cohort سه‌بخشی نوشته را بسازید، منحنی‌های ساده را روی روزهایی که می‌بینید برازش کنید و ببینید <strong>با بلندتر شدن پنجره، پیش‌بینی چطور جابه‌جا می‌شود</strong>.</p>
-  <p class="source-note">این شبیه‌سازی نوشته‌ی «When the Long Tail Eats Your LTV Model» را نشان می‌دهد (بخش‌های «The Setup» و «The result»). ترکیب، یعنی ۶۵٪ با churn روزانه‌ی ۸۵٪ و ۲۵٪ با ۸٪ و ۱۰٪ با ۰٫۳٪، و حاشیه‌ی ۰٫۵۰ دلار و LTV واقعی ۱۶٫۲۰ دلار از خود نوشته‌اند؛ برازش‌های این‌جا نسخه‌های ساده و بی‌نویز vault از دو تا از چهار مدل نوشته‌اند، یعنی دوبخشی با d₁ و c₁ از روز اول و هفتم و c₂ از آخر پنجره، و یک نمایی با کمترین مربعات، پس خطاها با میانگین ۳۰ اجرای نوشته فرق دارند. پیاده‌سازی مال خود vault است.</p>
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>دمی که نمی‌بینید</h1>
+      <p class="lede">همان cohort سه‌بخشی نوشته را بسازید، منحنی دوبخشی را روی روزهایی که می‌بینید برازش کنید و ببینید <strong>دمی که پنجره نمی‌بیند چطور LTV را می‌خورد</strong>.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «When the Long Tail Eats Your LTV Model» را نشان می‌دهد (بخش‌های «The Setup»، «The result» و «Why does the in-sample fit anti-predict the LTV error?»). ترکیب سه‌بخشی، حاشیه‌ی ۰٫۵۰ دلار، LTV واقعی ۱۶٫۲۰ دلار و جدول خطای چهار مدل از خود نوشته‌اند. برازش دوبخشی این‌جا نسخه‌ی ساده و بی‌نویز vault است: d₁ و c₁ از روز اول و هفتم و c₂ از آخر پنجره؛ برای همین خطایش با میانگین ۳۰ اجرای نویزدار نوشته کمی فرق دارد. پیاده‌سازی مال خود vault است.</p>
+    </header>
 
-  <div class="sim">
-    <div class="stack">
-      <div class="panel"><p class="panel-title">retention: حقیقت و دو برازش، بدون نویز</p>
-        <svg class="plot" id="chart" role="img" aria-label="منحنی‌های retention برای ترکیب واقعی و دو مدل برازش‌شده روی پنجره‌ی مشاهده"></svg>
-        <p class="field-hint">آبی تیره: حقیقت، یعنی ترکیب سه‌بخشی. نارنجی: برازش دوبخشی. بنفش: نمایی تکی. نشان خط‌چین: پایان پنجره‌ی مشاهده.</p></div>
-      <div class="panel"><p class="panel-title">مقدار LTV در روز ۷۲۰، با حاشیه‌ی ۰٫۵۰ دلار برای هر روزِ کاربر فعال</p><div id="bars"></div>
-        <div class="callout" id="verdict" style="margin-top:10px"></div></div>
-    </div>
-    <div class="stack">
-      <div class="panel"><p class="panel-title">کنترل‌ها</p><div id="ctl"></div>
-        <div class="row" style="margin-top:10px"><button class="btn" type="button" id="w60">پنجره‌ی ۶۰ روزه، مثل نوشته</button><button class="btn" type="button" id="w180">پنجره‌ی ۱۸۰ روزه</button></div></div>
-      <div class="panel"><p class="panel-title">شمارنده‌ها</p><div class="stats" id="stats"></div></div>
-      <div class="panel"><p class="panel-title">گزارش رویدادها</p><ol id="log" aria-live="polite"></ol></div>
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c64">
+          <div><p class="panel-title">retention روزانه، مقیاس لگاریتمی</p><div id="chart"></div>
+            <p class="key">منحنی آبی: حقیقت، یعنی ترکیب سه‌بخشی · خط‌چین نارنجی: برازش دوبخشی · ناحیه‌ی سایه‌دار: پنجره‌ای که تحلیلگر می‌بیند</p></div>
+          <div>
+            <p class="panel-title">مقدار LTV در روز ۷۲۰ (حاشیه‌ی ۰٫۵۰ دلار در روز)</p><div class="lv mono" id="lv"></div>
+            <p class="panel-title">ارزش واقعی کجاست؟</p><div class="split mono" id="split"></div>
+            <div id="au"><p class="panel-title" style="margin-top:10px">نتیجه‌ی نوشته: میانگین خطای LTV در ۳۰ اجرا</p>
+              <table class="au mono"><tr><th>مدل</th><th>خطا</th><th>دم را</th></tr>
+                <tr><td>exponential</td><td class="n">+42%</td><td>بالا می‌زند</td></tr>
+                <tr><td>sBG</td><td class="n">+44%</td><td>بالا می‌زند</td></tr>
+                <tr><td>two-segment</td><td class="n">−64%</td><td>پایین می‌زند</td></tr>
+                <tr><td>bi-exponential</td><td class="n">−65%</td><td>پایین می‌زند</td></tr>
+                <tr class="avg"><td>average of 4</td><td class="n">$14.48 (−11%)</td><td>نزدیک حقیقت</td></tr></table></div>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
     </div>
   </div>
 
-  <h2>به چه چیزی نگاه کنید</h2>
-  <ul class="notice-list">
-    <li><strong>برازش‌ها داخل پنجره شبیه هم‌اند</strong> و بعد از آن از هم جدا می‌شوند.</li>
-    <li><strong>بیشترِ LTV واقعی</strong> بیرون از پنجره‌ی ۶۰ روزه می‌افتد، و برای همین پیش‌بینی بیشترش برون‌یابی است.</li>
-    <li><strong>نمایی و دوبخشی در دو جهت مخالف خطا می‌کنند</strong>، و برای همین اختلافشان اطلاعات دارد.</li>
-  </ul>
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>برازش داخل پنجره خوب است</strong> و بیرون آن فرو می‌ریزد؛ خوب برازش کردن روی پنجره چیزی درباره‌ی دقت LTV نمی‌گوید.</li>
+      <li><strong>بیشتر LTV واقعی بیرون پنجره‌ی ۶۰ روزه است</strong>، و برای همین پیش‌بینی بیشترش برون‌یابی است.</li>
+      <li><strong>مدل‌ها در دو جهت مخالف خطا می‌کنند</strong>، پس اختلافشان اطلاعات دارد و میانگینشان به حقیقت نزدیک‌تر است.</li>
+    </ul>
 
-  <h2>فهمتان را بسنجید</h2>
-  <div id="quiz"></div>
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
 
-  <h2 class="no-embed">مرتبط</h2>
-  <ul class="related no-embed">
-    <li><a href="../chapters/64-long-tail-eats-your-ltv-model.html"><small>درس</small>نوشته‌ی ۶۴: وقتی دم بلند مدل LTV را می‌خورد</a></li>
-  </ul>
-  <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است.</p>
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/64-long-tail-eats-your-ltv-model.html"><small>درس</small>نوشته‌ی ۶۴: وقتی دم بلند مدل LTV را می‌خورد</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
 </main>
 
 <script src="../../../assets/kit.js"></script>
 <script>
 (function () {
   "use strict";
-  function stats(id, rows) {
-    var st = Kit.clear(document.getElementById(id));
-    rows.forEach(function (x) { st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + (x[2] || "") }, String(x[1])))); });
+  var FA = function (s) { return Kit.digits(String(s)); };
+  var H = 720, M = 0.5, DEF = { win: 60, fit: false, shade: false, au: false, loyal: 0.3 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function seg() { return [{ w: 0.65, c: 0.85 }, { w: 0.25, c: 0.08 }, { w: 0.10, c: view.loyal / 100 }]; }
+  function truth(t) { var s = 0; seg().forEach(function (g) { s += g.w * Math.pow(1 - g.c, t); }); return s; }
+  function ltv(f, a, b) { var s = 0; for (var t = a || 1; t <= (b || H); t++) s += f(t); return M * s; }
+  function fit(T) {
+    var d1 = truth(1), r7 = truth(7), c1 = 1 - Math.pow(r7 / d1, 1 / 6), c2 = 1 - Math.pow(truth(T) / r7, 1 / (T - 7));
+    return { c2: c2, f: function (t) { return t <= 1 ? d1 : t <= 7 ? d1 * Math.pow(1 - c1, t - 1) : r7 * Math.pow(1 - c2, t - 7); } };
   }
-  function bar(label, frac, text, cls) {
-    return Kit.el("div", { class: "bar-row" }, Kit.el("span", null, label),
-      Kit.el("div", { class: "bar-track" }, Kit.el("div", { class: "bar-fill " + (cls || ""), style: "width:" + Math.max(0, Math.min(100, frac * 100)).toFixed(1) + "%" })),
-      Kit.el("span", { class: "v" }, text));
-  }
-  function money(x, d) { var s = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); return (x < 0 ? "−$" : "$") + s; }
-  function pct(x, d) { return (x * 100).toFixed(d == null ? 0 : d) + "٪"; }
-
-  var log = Kit.log(document.getElementById("log"));
-  var SEG = [ { w: 0.65, c: 0.85 }, { w: 0.25, c: 0.08 }, { w: 0.10, c: 0.003 } ], H = 720, M = 0.5, cfg = { win: 60 }, sl = {}, last = null;
-  function truth(t) { var s = 0; SEG.forEach(function (g) { s += g.w * Math.pow(1 - g.c, t); }); return s; }
-  function ltv(f) { var s = 0; for (var t = 1; t <= H; t++) s += f(t); return M * s; }
-  function fits(T) {
-    var d1 = truth(1), r7 = truth(7), rT = truth(T);
-    var c1 = 1 - Math.pow(r7 / d1, 1 / 6), c2 = T > 7 ? 1 - Math.pow(rT / r7, 1 / (T - 7)) : 0.02;
-    var two = function (t) { return t <= 1 ? d1 : t <= 7 ? d1 * Math.pow(1 - c1, t - 1) : r7 * Math.pow(1 - c2, t - 7); };
-    var num = 0, den = 0; for (var t = 1; t <= T; t++) { num += t * Math.log(truth(t)); den += t * t; }
-    var lam = -num / den, ex = function (t) { return Math.exp(-lam * t); };
-    return { two: two, ex: ex, c2: c2 };
-  }
+  function money(x) { return "$" + x.toFixed(2); }
   function render() {
-    var T = cfg.win, F = fits(T), L = ltv(truth), Lt = ltv(F.two), Le = ltv(F.ex), err = function (x) { return (x / L - 1) * 100; };
-    var pts = function (f) { var a = []; for (var t = 0; t <= H; t += 12) a.push([t, t === 0 ? 1 : f(t)]); return a; };
-    Kit.lineChart(document.getElementById("chart"), { width: 520, height: 220, xMax: H, yMax: 0.5, xLabel: "روز", yLabel: "retention", xTicks: 6, yTicks: 5,
-      series: [ { points: pts(truth), cls: "s1", label: "حقیقت" }, { points: pts(F.two), cls: "s2", label: "دوبخشی" }, { points: pts(F.ex), cls: "s4", label: "نمایی" } ], marks: [{ x: T, label: "پنجره" }] });
-    var b = Kit.clear(document.getElementById("bars"));
-    b.appendChild(bar("حقیقت", L / 30, money(L, 2), ""));
-    b.appendChild(bar("دوبخشی", Lt / 30, money(Lt, 2) + " (" + (err(Lt) >= 0 ? "+" : "") + err(Lt).toFixed(0) + "٪)", Math.abs(err(Lt)) > 25 ? "neg" : "pos"));
-    b.appendChild(bar("نمایی", Le / 30, money(Le, 2) + " (" + (err(Le) >= 0 ? "+" : "") + err(Le).toFixed(0) + "٪)", Math.abs(err(Le)) > 25 ? "neg" : "pos"));
-    var obs = 0; for (var t = 1; t <= T; t++) obs += truth(t); var share = 1 - M * obs / L, bad = Math.abs(err(Lt)) > 25, v = document.getElementById("verdict");
-    v.className = "callout " + (bad ? "bad" : "ok"); v.textContent = bad ? "هر دو برازش بیش از ۲۵٪ خطا دارند: بیشتر ارزش بیرون از چیزی است که پنجره نشان می‌دهد." : "پنجره‌ی بلند صاف شدن دم را نشان داده؛ برازش‌ها نزدیک‌ترند.";
-    if (last !== null && bad !== last) log.add(bad ? "برازش‌ها دوباره بیش از ۲۵٪ خطا دارند." : "پنجره‌ی بلندتر برازش‌ها را به زیر ۲۵٪ آورد.", bad ? "bad" : "ok"); last = bad;
-    stats("stats", [["LTV واقعی در روز ۷۲۰", money(L, 2)], ["LTV بیرون از پنجره", pct(share, 0), share > 0.5 ? "warn" : ""], ["churn دمِ برازش‌شده، یعنی c₂", pct(F.c2, 2)], ["سهم برون‌یابی از پیش‌بینی", pct((H - T) / H, 0)]]);
+    var T = view.win, F = fit(T), L = ltv(truth), Lf = ltv(F.f), err = (Lf / L - 1) * 100, out = 1 - ltv(truth, 1, T) / L;
+    var W = 560, Hh = 320, Lm = 52, R = 14, Tm = 12, B = 34, lo = Math.log10(0.0005), hi = Math.log10(0.6);
+    function X(t) { return Lm + (W - Lm - R) * t / H; } function Y(v) { return Tm + (Hh - Tm - B) * (hi - Math.log10(Math.max(v, 0.0005))) / (hi - lo); }
+    var s = Kit.svg("svg", { viewBox: "0 0 " + W + " " + Hh, class: "plot mono", role: "img", "aria-label": "retention واقعی و برازش دوبخشی روی مقیاس لگاریتمی" });
+    if (view.shade) { s.appendChild(Kit.svg("rect", { x: X(0), y: Tm, width: X(T) - X(0), height: Hh - Tm - B, fill: "var(--accent-soft)" }));
+      s.appendChild(Kit.svg("text", { class: "lab", x: X(T) + 6, y: Tm + 14, style: "fill:var(--accent)" }, "D" + T)); }
+    [[0.001, "0.1%"], [0.01, "1%"], [0.1, "10%"], [0.5, "50%"]].forEach(function (g) { s.appendChild(Kit.svg("line", { class: "grid", x1: Lm, x2: W - R, y1: Y(g[0]), y2: Y(g[0]) })); s.appendChild(Kit.svg("text", { x: Lm - 6, y: Y(g[0]) + 4, "text-anchor": "end" }, g[1])); });
+    [0, 120, 240, 360, 480, 600, 720].forEach(function (d) { s.appendChild(Kit.svg("text", { x: X(d), y: Hh - B + 16, "text-anchor": "middle" }, String(d))); });
+    s.appendChild(Kit.svg("text", { x: (W + Lm) / 2, y: Hh - 4, "text-anchor": "middle" }, "day →"));
+    function line(f, col, w, dash) { var p = []; for (var t = 1; t <= H; t += t < 20 ? 1 : 6) p.push(X(t).toFixed(1) + "," + Y(f(t)).toFixed(1)); s.appendChild(Kit.svg("polyline", { points: p.join(" "), fill: "none", stroke: col, "stroke-width": w, "stroke-dasharray": dash || "" })); }
+    line(truth, "var(--s1)", 3);
+    s.appendChild(Kit.svg("text", { class: "lab", x: X(700), y: Y(truth(700)) - 8, "text-anchor": "end", style: "fill:var(--s1)" }, "truth " + (truth(720) * 100).toFixed(1) + "%"));
+    if (view.fit) { line(F.f, "var(--s2)", 2.5, "7 4");
+      var lx = Math.min(T + 70, 600), f7 = F.f(720);
+      s.appendChild(Kit.svg("text", { class: "lab", x: X(lx), y: Y(F.f(lx)) - 10, "text-anchor": "start", style: "fill:var(--s2)" }, "fit: D720 " + (f7 < 0.0001 ? "≈ 0%" : (f7 * 100).toFixed(2) + "%"))); }
+    Kit.clear(document.getElementById("chart")).appendChild(s);
+    var lv = Kit.clear(document.getElementById("lv")), mx = Math.max(L, Lf, 20);
+    [["حقیقت", L, "var(--s1)", money(L)], ["برازش دوبخشی", Lf, "var(--s2)", view.fit ? money(Lf) + " (" + (err >= 0 ? "+" : "−") + Math.abs(err).toFixed(0) + "%)" : "?"]].forEach(function (x) {
+      lv.appendChild(Kit.el("span", null, x[0])); lv.appendChild(Kit.el("div", { class: "tk" }, Kit.el("i", { style: "width:" + ((x === undefined || (x[0] !== "حقیقت" && !view.fit)) ? 0 : x[1] / mx * 100).toFixed(1) + "%;background:" + x[2] }), Kit.el("b", null, x[3]))); });
+    var sp = Kit.clear(document.getElementById("split")), inP = Math.round((1 - out) * 100);
+    sp.appendChild(Kit.el("span", { style: "width:" + inP + "%;background:var(--accent-soft)" }, "D1–" + T + ": " + inP + "%"));
+    sp.appendChild(Kit.el("span", { style: "width:" + (100 - inP) + "%;background:var(--warn-soft)" }, "D" + T + "–720: " + (100 - inP) + "%"));
+    document.getElementById("au").className = view.au ? "" : "dim";
+    msg = "پنجره‌ی " + FA(T) + " روزه: برازش دوبخشی LTV را " + FA(money(Lf).slice(1)) + " دلار می‌دهد، در برابر " + FA(money(L).slice(1)) + " دلار واقعی (" + FA(Math.abs(err).toFixed(0)) + "٪ " + (err < 0 ? "کمتر" : "بیشتر") + ").";
+    kind = Math.abs(err) > 25 ? "warn" : "ok";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["LTV واقعی", money(L)], ["ارزش بیرون پنجره", Math.round(out * 100) + "%", out > 0.5 ? "warn" : ""], ["سهم برون‌یابی از افق", Math.round((H - T) / H * 100) + "%"], ["churn دم در برازش (c₂)", (F.c2 * 100).toFixed(2) + "%/day"], ["churn واقعی بخش وفادار", view.loyal.toFixed(1) + "%/day"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, x[1]))); });
+    ctl.win.set(view.win); ctl.loyal.set(view.loyal);
   }
-  var ctl = document.getElementById("ctl");
-  sl.win = Kit.slider({ label: "پنجره‌ی مشاهده", min: 14, max: 360, step: 1, value: cfg.win, unit: " روز", onInput: function (v) { cfg.win = v; render(); } }); ctl.appendChild(sl.win.element);
-  function setw(w) { cfg.win = w; sl.win.set(w); render(); log.add("پنجره روی " + w + " روز تنظیم شد.", "muted"); }
-  document.getElementById("w60").addEventListener("click", function () { setw(60); });
-  document.getElementById("w180").addEventListener("click", function () { setw(180); });
-  render();
+  function tw(f) { return function (v) { f(v); view.fit = true; view.shade = true; view.au = true; render(); tour.free(msg, kind); }; }
+  ctl.win = Kit.slider({ label: "پنجره‌ی مشاهده", min: 14, max: 240, step: 1, unit: " روز", value: view.win, hint: "روزهایی که برازش می‌بیند؛ افق پیش‌بینی ۷۲۰ روز است", onInput: tw(function (v) { view.win = v; }) });
+  ctl.loyal = Kit.slider({ label: "churn روزانه‌ی بخش وفادار (۱۰٪ cohort)", min: 0.1, max: 1.5, step: 0.1, unit: "٪", value: view.loyal, hint: "در نوشته ۰٫۳٪ است؛ هرچه کمتر، دم بلندتر", onInput: tw(function (v) { view.loyal = v; }) });
+  [ctl.win, ctl.loyal].forEach(function (x) { document.getElementById("ctl").appendChild(x.element); });
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "پنج هزار install که شصت روز پیش آمده‌اند. LTV آن‌ها در روز ۷۲۰ چقدر است؟",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، پنجره را بلند و کوتاه کنید و churn بخش وفادار را تغییر بدهید.",
+    steps: [
+      { kind: "", run: at({}), say: "سه بخش با churn روزانه‌ی خیلی متفاوت: ۶۵٪ با ۸۵٪، ۲۵٪ با ۸٪ و ۱۰٪ با ۰٫۳٪. منحنی جمعی: روز اول ۴۳٪، روز هفتم ۲۴٪، روز سی‌ام ۱۱٪ و روز شصتم ۸٪ (بخش «The Setup»)." },
+      { kind: "warn", run: at({ shade: true }), say: "تحلیلگر فقط روز ۱ تا ۶۰ را می‌بیند، پس حدود ۹۰٪ افق پیش‌بینی برون‌یابی است. نوشته می‌گوید روزهای ۶۰ تا ۷۲۰ حدود ۶۵٪ ارزش را می‌سازند؛ در این ترکیب بی‌نویز vault، سهم بیرون پنجره ۷۴٪ است." },
+      { kind: "bad", run: at({ shade: true, fit: true }), say: "برازش دوبخشی داخل پنجره تقریباً روی حقیقت است، ولی نرخ دم را از میانگین روز ۷ تا ۶۰ می‌گیرد: ۱٫۹۲٪ در روز. بعد از روز ۶۰ تقریباً همه‌ی ماندگارها از بخش وفادار با ۰٫۳٪ churn‌اند، پس حقیقت صاف می‌شود و برازش سقوط می‌کند." },
+      { kind: "bad", run: at({ shade: true, fit: true }), say: "نتیجه: ۷٫۲۱ دلار در برابر ۱۶٫۲۰ دلار، ۵۵٪ کمتر. نوشته با نویز و ۳۰ اجرا ۶۴٪ کمتر گزارش می‌کند، با اینکه این مدل بهترین برازش داخل پنجره را داشت (بخش «Why does the in-sample fit anti-predict the LTV error?»)." },
+      { kind: "ok", run: at({ shade: true, fit: true, au: true }), say: "جدول نوشته: دو مدل دم را بالا می‌زنند و دو مدل پایین. هیچ‌کدام وسط نیست، ولی میانگین هر چهار ۱۴٫۴۸ دلار است، فقط ۱۱٪ دور از حقیقت (بخش «The result»)." },
+      { kind: "warn", run: at({ shade: true, fit: true, au: true, win: 120 }), say: "فرض vault: با پنجره‌ی ۱۲۰ روزه، c₂ به ۱٫۰۸٪ می‌رسد و خطا به ۲۶٪ کمتر کم می‌شود. پنجره کم‌کم صاف شدن دم را می‌بیند." },
+      { kind: "ok", run: at({ shade: true, fit: true, au: true, win: 180 }), say: "با پنجره‌ی ۱۸۰ روزه هنوز ۷۵٪ افق برون‌یابی است، ولی داده شکل صاف شدن دم را نشان داده؛ در این مدل خطا به ۳٪ می‌رسد. نوشته پنجره‌ی بلند را ارزان‌ترین دفاع در برابر ریسک دم می‌داند." }
+    ]
+  });
 
   Kit.quiz(document.getElementById("quiz"), [
   {
@@ -138,14 +187,14 @@
     "explain": "پنجره‌ی مشاهده‌ی بلند ارزان‌ترین دفاع در برابر ریسک دم بلند است (بخش «What this means for operational UA work»)."
   },
   {
-    "q": "چرا نمایی این‌جا بالاتر از واقع می‌زند؟",
+    "q": "چرا میانگین چهار مدل نوشته به حقیقت نزدیک‌تر از هر مدل تکی است؟",
     "options": [
-      "دم را بی‌نقص برازش می‌کند",
-      "نمی‌تواند پرتگاه تند را برازش کند، پس retention اولیه را بیش از واقع می‌زند",
-      "حاشیه را نادیده می‌گیرد"
+      "چون هر مدل جداگانه خوب برازش شده است",
+      "چون دو مدل دم را بالا و دو مدل پایین می‌زنند و خطاها هم را خنثی می‌کنند",
+      "چون میانگین‌گیری نویز روزانه را حذف می‌کند"
     ],
     "answer": 1,
-    "explain": "نرخ تکی برای پرتگاه خیلی ملایم است (بخش «The bias directions are predictable»)."
+    "explain": "خطاها ساختاری و در دو جهت مخالف‌اند، پس میانگین ۱۴٫۴۸ دلار فقط ۱۱٪ از ۱۶٫۲۰ دلار فاصله دارد (بخش «The bias directions are predictable, and you can use that»)."
   }
 ]);
 })();
