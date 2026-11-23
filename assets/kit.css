@@ -198,17 +198,17 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); width
 
 /* ---------- feedback ---------- */
 
-.log {
+.kit-log {
   font-family: var(--mono); font-size: .8rem; line-height: 1.5;
   background: var(--surface-2); border-radius: var(--radius-sm); padding: 8px 10px;
   height: 170px; overflow-y: auto; margin: 0; list-style: none;
 }
-.log li { padding: 2px 0; border-bottom: 1px dashed var(--line); }
-.log li:last-child { border-bottom: 0; }
-.log .ok { color: var(--ok); }
-.log .warn { color: var(--warn); }
-.log .bad { color: var(--bad); }
-.log .muted { color: var(--ink-3); }
+.kit-log li { padding: 2px 0; border-bottom: 1px dashed var(--line); }
+.kit-log li:last-child { border-bottom: 0; }
+.kit-log .ok { color: var(--ok); }
+.kit-log .warn { color: var(--warn); }
+.kit-log .bad { color: var(--bad); }
+.kit-log .muted { color: var(--ink-3); }
 
 .badge {
   display: inline-flex; align-items: center; gap: 4px; font-size: .75rem; font-weight: 600;

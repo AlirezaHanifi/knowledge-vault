@@ -122,7 +122,7 @@
   // log(listElement) -> { add(text, kind), clear() }; kind: ok | warn | bad | muted
   function log(list, opts) {
     opts = opts || {};
-    list.classList.add("log");
+    list.classList.add("kit-log");
     list.setAttribute("aria-live", "polite");
     list.setAttribute("aria-relevant", "additions");
     var max = opts.max || 200;

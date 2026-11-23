@@ -6,7 +6,10 @@
 The rules live in scripts/fa_terms.tsv: one coined Persian word per line and the
 English term a Persian-speaking engineer actually says. scripts/validate.py
 fails on any match; this script lists them, and `--fix` rewrites them in place,
-keeping Persian suffixes (replicaها، processی). The rules are
+keeping Persian suffixes (replicaها، processی). A match ending in «ای» is
+listed but never rewritten: after a final ه it is either the adjective suffix
+(«پیمانه‌ای» = modular) or the indefinite one, and glueing «ی» onto the English
+word («moduleی») reads as neither, so reword it by hand. The rules are
 ordered: phrases before the words inside them. Read the diff after a fix: a
 rewritten word can land at the start of a line, which a Persian line must not.
 
@@ -90,9 +93,12 @@ def english(eng: str, suffix: str | None) -> str:
     s = suffix.lstrip("‌")
     if s == "ی" and suffix.startswith("‌"):  # ezafe after a final ه: «پردازه‌ی» → «process»
         return eng
-    if s == "ای":
-        s = "ی"
     return eng + s
+
+
+def manual(eng: str, suffix: str | None) -> bool:
+    """«…ای» after a Latin replacement is ambiguous (adjective or indefinite): fix by hand."""
+    return bool(suffix) and suffix.lstrip("\u200c") == "ای" and not re.match(rf"[{FA}]", eng[-1])
 
 
 def scan(fix: bool, only: set[str]) -> list[str]:
@@ -108,9 +114,10 @@ def scan(fix: bool, only: set[str]) -> list[str]:
                     continue
                 for m in rx.finditer(text):
                     line = text.count("\n", 0, m.start()) + 1
-                    found.append(f"{f.relative_to(ROOT)}:{line}: «{m.group(0)}» → {eng}")
+                    hand = " (reword by hand)" if manual(eng, m.group(1)) else ""
+                    found.append(f"{f.relative_to(ROOT)}:{line}: «{m.group(0)}» → {eng}{hand}")
                 if fix:
-                    text = rx.sub(lambda m: english(eng, m.group(1)), text)
+                    text = rx.sub(lambda m: m.group(0) if manual(eng, m.group(1)) else english(eng, m.group(1)), text)
             if fix and text != orig:
                 f.write_text(text, encoding="utf-8")
     return found
