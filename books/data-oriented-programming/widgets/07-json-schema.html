@@ -17,7 +17,8 @@
   .js-res { margin-top: 8px; display: grid; gap: 6px; }
   .js-verdict { font-size: .76rem; padding: 6px 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); direction: ltr; text-align: left; font-weight: 600; white-space: pre-wrap; }
   .js-verdict.ok { border-color: var(--ok); color: var(--ok); } .js-verdict.bad { border-color: var(--bad); color: var(--bad); }
-  .js-errs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .js-errs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; max-height: 6.6em; overflow-y: auto; }
+  /* With every error listed the list scrolls in its own box, the picture stays put. */
   .js-err { border: 1px solid var(--bad); background: var(--bad-soft); border-radius: var(--radius-sm); padding: 4px 8px; font-size: .74rem; direction: ltr; text-align: left; line-height: 1.5; }
   .js-err b { font-weight: 700; }
   .js-hidden { border: 1px dashed var(--ink-3); border-radius: var(--radius-sm); padding: 4px 8px; font-size: .76rem; color: var(--ink-2); }

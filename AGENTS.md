@@ -17,7 +17,7 @@ A knowledge vault turns technical books into interactive lessons. Everything abo
 | `books/<slug>/index.html`, `index.html` | Book hub and library page, generated |
 | `practice/reference-stack.md` | The reference stack: a generic data-team platform that *In practice* callouts are written against |
 | `assets/` | `kit.css`/`kit.js` (design tokens, controls, simulation helpers), `site.css`/`site.js` (lessons and hubs), `vendor/mermaid.min.js` |
-| `scripts/` | `build.py` (Markdown → HTML), `validate.py` (the gatekeeper; CI runs it), `pdf.py` (outline, text and page search in a source PDF), `fa_terms.py` + `fa_terms.tsv` (Persian checks: banned coined terms, Latin-first lines; `--fix` rewrites terms) |
+| `scripts/` | `build.py` (Markdown → HTML), `validate.py` (the gatekeeper; CI runs it), `pdf.py` (outline, text and page search in a source PDF), `fa_terms.py` + `fa_terms.tsv` (Persian checks: banned coined terms, Latin-first lines; `--fix` rewrites terms), `check_widgets.py` (drives every widget's tour and drawer in a headless browser at 1280×800 and fails on errors, overlapping labels or a scrolling picture; needs Playwright, so CI runs it) |
 
 ## Skills
 
@@ -43,7 +43,7 @@ A knowledge vault turns technical books into interactive lessons. Everything abo
 7. **Offline and dependency-free.** Pages use only `assets/` (classic scripts, no CDNs, no modules, no build tools beyond `scripts/build.py`); they must work from `file://`. Experiments use the Python standard library with seeded randomness.
 8. **Accessible and themable.** Native labelled controls, `aria-live` logs for state changes, meaning never by colour alone, colours only from kit tokens (light and dark), reduced motion respected.
 9. **Small and real.** No empty folders, stubs or placeholders; create a file with its first real content. Prefer extending an existing note, widget or kit helper over adding a new one.
-10. **Done means checked.** `python3 scripts/build.py && python3 scripts/validate.py` pass; experiments match their README output; changed pages were opened in a browser with a clean console (see `check-site`).
+10. **Done means checked.** `python3 scripts/build.py && python3 scripts/validate.py` pass, and `scripts/check_widgets.py` for changed widgets or kit code; experiments match their README output; changed pages were opened in a browser with a clean console (see `check-site`).
 
 ## Names and vocabularies
 
