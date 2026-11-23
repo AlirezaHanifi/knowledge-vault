@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ریزش دوره‌ی اول و بازگشت CAC</title>
+<meta name="description" content="سه cohort که فقط در ریزش دوره‌ی اول فرق دارند: درآمد انباشته، دوره‌ی بازگشت سرمایه و cohortهای تازه‌ای که با همان درآمد می‌شود خرید. برای نوشته‌ی ۳۶ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .c36 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  #acc { width: 100%; display: block; }
+  #acc .cac { stroke: var(--bad); stroke-width: 1.6; stroke-dasharray: 6 4; }
+  #acc .cac-lab { fill: var(--bad); font-size: 12px; font-weight: 700; }
+  #acc .pay { fill: var(--surface); stroke-width: 2; }
+  table.t36 { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  table.t36 th, table.t36 td { padding: 6px 6px; border-bottom: 1px solid var(--line); text-align: center; }
+  table.t36 thead th { font-size: .8rem; vertical-align: bottom; }
+  table.t36 thead th i { display: block; width: 22px; height: 3px; border-radius: 2px; margin: 0 auto 4px; }
+  table.t36 tbody th { text-align: right; font-weight: 400; color: var(--ink-2); }
+  table.t36 td { font-family: var(--mono); direction: ltr; }
+  table.t36 tr.hot td, table.t36 tr.hot th { font-weight: 700; color: var(--ink); background: var(--accent-soft); }
+  .key { font-size: .78rem; color: var(--ink-3); margin: 4px 0 0; }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/36-user-cohort-retention.html">نوشته‌ی ۳۶</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ریزش دوره‌ی اول و بازگشت CAC</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>ریزش دوره‌ی اول و بازگشت CAC</h1>
+      <p class="lede">سه cohort با هزینه‌ی جذب یکسان که <strong>فقط در ریزش دوره‌ی اول</strong> فرق دارند. ببینید درآمد انباشته‌ی هرکدام کِی از CAC می‌گذرد و تا پایان دوره‌ی ۱۲ چند cohort تازه را می‌شود با آن خرید.</p>
+      <p class="source-note">این شبیه‌سازی بخش «Special memo for paid User Acquisition» از نوشته‌ی «User cohort retention» را نشان می‌دهد. منحنی‌های بقا، درآمد انباشته و CAC برابر ۱٬۵۰۰ دلار از جدول خود نوشته است؛ دوره‌ی بازگشت با درون‌یابی میان دو دوره و دو اسلایدر مال vault است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c36">
+          <div>
+            <p class="panel-title">درآمد انباشته‌ی هر cohort در ۱۲ دوره</p>
+            <svg id="acc" role="img" aria-label="درآمد انباشته‌ی سه cohort و خط CAC"></svg>
+            <p class="key">خط چین قرمز: CAC · دایره روی هر منحنی: جایی که درآمد انباشته به CAC می‌رسد</p>
+          </div>
+          <table class="t36" aria-live="polite"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>بعد از دوره‌ی اول هر سه cohort یک‌جور رفتار می‌کنند</strong>؛ همه‌ی فاصله از همان یک دوره می‌آید.</li>
+      <li><strong>فاصله‌ی مطلق cohortها دوره به دوره کم می‌شود</strong>، ولی فاصله‌ی درآمد انباشته بزرگ می‌ماند.</li>
+      <li><strong>CAC را بالا ببرید</strong>: cohort بد زودتر از بقیه دیگر به CAC نمی‌رسد.</li>
+    </ul>
+
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/36-user-cohort-retention.html"><small>درس</small>نوشته‌ی ۳۶: retention در cohortهای کاربر</a></li>
+      <li><a href="37-blended-survival.html"><small>شبیه‌سازی</small>بقای آمیخته در برابر بقای cohort</a></li>
+      <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var FA = function (s) { return Kit.digits(String(s)); };
+  function usd(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
+  // The post's table (survival S and accumulated revenue Acc per period t = 0…11, revenue $500 in period 0).
+  var C = [
+    { id: "good", name: "شروع خوب", cls: "s1", S: [1, .75, .64, .57, .52, .50, .47, .45, .43, .40, .38, .36],
+      A: [500, 875, 1194, 1477, 1738, 1986, 2222, 2446, 2658, 2860, 3052, 3234], post: 4, nc: "1.16" },
+    { id: "avg", name: "شروع متوسط", cls: "s2", S: [1, .50, .43, .38, .35, .33, .31, .30, .28, .27, .26, .24],
+      A: [500, 750, 963, 1152, 1326, 1491, 1648, 1797, 1939, 2073, 2201, 2323], post: 6, nc: "0.55" },
+    { id: "bad", name: "شروع بد", cls: "s3", S: [1, .35, .30, .26, .24, .23, .22, .21, .20, .19, .18, .17],
+      A: [500, 675, 824, 956, 1078, 1194, 1304, 1408, 1507, 1601, 1691, 1776], post: 9, nc: "0.18" }
+  ];
+  var DEF = { cac: 1500, r0: 500, hl: "" }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+
+  // Payback: the period in which accumulated revenue reaches CAC, interpolated between two periods
+  // and counted from 1 (period t = 0 is the first). Returns null when it is not reached by t = 11.
+  function payback(acc, cac) {
+    if (acc[0] >= cac) return 1;
+    for (var t = 1; t < acc.length; t++) if (acc[t] >= cac) return t + (cac - acc[t - 1]) / (acc[t] - acc[t - 1]);
+    return null;
+  }
+  function f1(x) { return FA(x.toFixed(1)); }
+
+  function render() {
+    var k = view.r0 / 500, rows = C.map(function (c) {
+      var acc = c.A.map(function (a) { return a * k; }), p = payback(acc, view.cac);
+      return { c: c, acc: acc, p: p, tp: p === null ? null : p - 1, nc: (acc[11] - view.cac) / view.cac };
+    });
+    var top = Math.max(view.cac, rows[0].acc[11]), yMax = Math.ceil(top * 1.08 / 1000) * 1000;
+    var svg = document.getElementById("acc");
+    var ax = Kit.lineChart(svg, { width: 560, height: 272, xMax: 11, yMax: yMax, xTicks: 11, yTicks: yMax / 1000,
+      xLabel: "دوره t", yLabel: "درآمد انباشته", yFormat: function (v) { return "$" + (v >= 1000 ? (v / 1000) + "k" : v); },
+      series: rows.map(function (r) { return { points: r.acc.map(function (a, t) { return [t, a]; }), cls: r.c.cls, label: r.c.name, dots: true }; }) });
+    var NS = "http://www.w3.org/2000/svg";
+    function add(tag, at, text) { var e = document.createElementNS(NS, tag); for (var a in at) e.setAttribute(a, at[a]); if (text) e.textContent = text; svg.appendChild(e); return e; }
+    add("line", { class: "cac", x1: ax.x(0), x2: ax.x(11), y1: ax.y(view.cac), y2: ax.y(view.cac) });
+    add("text", { class: "cac-lab", x: ax.x(11) - 4, y: ax.y(view.cac) + 15, "text-anchor": "end" }, "CAC " + usd(view.cac));
+    rows.forEach(function (r) { if (r.tp !== null) add("circle", { class: "pay chart-line " + r.c.cls, cx: ax.x(r.tp), cy: ax.y(view.cac), r: 5 }); });
+
+    var H = Kit.clear(document.getElementById("thead")), B = Kit.clear(document.getElementById("tbody"));
+    H.appendChild(Kit.el.apply(null, ["tr", null, Kit.el("th", null, "")].concat(rows.map(function (r) {
+      return Kit.el("th", { scope: "col" }, Kit.el("i", { style: "background:var(--" + r.c.cls + ")" }), r.c.name); }))));
+    [["drop", "ریزش دوره‌ی اول", function (r) { return (1 - r.c.S[1]).toFixed(2); }],
+     ["drop", "بقا در t=۱۱", function (r) { return r.c.S[11].toFixed(2); }],
+     ["acc", "درآمد انباشته در ۱۲ دوره", function (r) { return usd(r.acc[11]); }],
+     ["pay", "دوره‌ی بازگشت سرمایه", function (r) { return r.p === null ? "> 12" : "≈ " + r.p.toFixed(1); }],
+     ["nc", "cohort تازه تا پایان دوره‌ی ۱۲", function (r) { return r.nc > 0 ? r.nc.toFixed(2) : "0"; }]].forEach(function (x) {
+      B.appendChild(Kit.el.apply(null, ["tr", { class: view.hl === x[0] ? "hot" : "" }, Kit.el("th", { scope: "row" }, x[1])].concat(rows.map(function (r) {
+        return Kit.el("td", null, x[2](r)); })))); });
+
+    var g = rows[0], b = rows[2];
+    msg = "CAC " + FA(usd(view.cac)) + " و درآمد دوره‌ی صفر " + FA(usd(view.r0)) + ": بازگشت سرمایه‌ی شروع خوب " + (g.p === null ? "بیش از ۱۲ دوره" : "حدود " + f1(g.p) + " دوره") +
+      " و شروع بد " + (b.p === null ? "بیش از ۱۲ دوره" : "حدود " + f1(b.p) + " دوره") + ".";
+    kind = b.p === null ? "bad" : "warn";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["CAC هر cohort", usd(view.cac)], ["درآمد دوره‌ی صفر", usd(view.r0)],
+     ["اختلاف درآمد خوب و بد در ۱۲ دوره", usd(g.acc[11] - b.acc[11]), "warn"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, x[1]))); });
+    ctl.cac.set(view.cac); ctl.r0.set(view.r0);
+  }
+  function tw(f) { return function (v) { f(v); view.hl = ""; render(); tour.free(msg, kind); }; }
+  ctl.cac = Kit.slider({ label: "CAC هر cohort", min: 500, max: 3000, step: 100, value: view.cac, format: function (v) { return FA(usd(v)); },
+    hint: "۱٬۵۰۰ دلار عدد نوشته است", onInput: tw(function (v) { view.cac = v; }) });
+  ctl.r0 = Kit.slider({ label: "درآمد دوره‌ی صفر", min: 250, max: 1000, step: 50, value: view.r0, format: function (v) { return FA(usd(v)); },
+    hint: "۵۰۰ دلار از جدول نوشته؛ هر دوره به همان نسبت جابه‌جا می‌شود", onInput: tw(function (v) { view.r0 = v; }) });
+  document.getElementById("ctl").appendChild(ctl.cac.element);
+  document.getElementById("ctl").appendChild(ctl.r0.element);
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "نوشته سه cohort می‌سازد که جذب هرکدام ۱٬۵۰۰ دلار خرج داشته و بعد از دوره‌ی اول یک‌جور رفتار می‌کنند. فقط ریزش دوره‌ی اول فرق دارد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و CAC یا درآمد دوره‌ی صفر را جابه‌جا کنید.",
+    steps: [
+      { kind: "", run: at({ hl: "drop" }), say: "بقا در دوره‌ی ۱ برابر ۰٫۷۵ و ۰٫۵۰ و ۰٫۳۵ است؛ یعنی ریزش دوره‌ی اول ۰٫۲۵ و ۰٫۵۰ و ۰٫۶۵ (بخش «Special memo for paid User Acquisition»)." },
+      { kind: "", run: at({ hl: "acc" }), say: "در جدول نوشته در هر دوره ۱۰٪ کاربران ۵ دلار می‌دهند. درآمد انباشته در ۱۲ دوره ۳٬۲۳۴ و ۲٬۳۲۳ و ۱٬۷۷۶ دلار است." },
+      { kind: "warn", run: at({ hl: "pay" }), say: "نوشته دوره‌ی بازگشت سرمایه را ۴ و ۶ و ۹ دوره می‌شمارد. درون‌یابی vault میان دو دوره همان را می‌دهد: حدود ۴٫۱ و ۶٫۱ و ۸٫۹." },
+      { kind: "warn", run: at({ hl: "nc" }), say: "درآمد مازاد بر CAC تا پایان دوره‌ی ۱۲ را می‌شود دوباره خرج جذب کرد: ۱٫۱۶ cohort تازه برای شروع خوب، ۰٫۵۵ برای متوسط و فقط ۰٫۱۸ برای بد." },
+      { kind: "bad", run: at({ cac: 2000, hl: "pay" }), say: "فرض vault: اگر CAC به ۲٬۰۰۰ دلار برسد، شروع خوب حدود ۶٫۱ دوره و متوسط حدود ۹٫۵ دوره طول می‌کشد، و شروع بد تا پایان دوره‌ی ۱۲ اصلاً به CAC نمی‌رسد." },
+      { kind: "", run: at({}), say: "برداشت نوشته: کوچک کردن ریزش دوره‌ی اول برای رشد سریع با جذب پولی مهم است، چون درآمد زودتر برمی‌گردد و زودتر دوباره خرج جذب می‌شود." }
+    ]
+  });
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "سه cohort بعد از دوره‌ی اول یک‌جور رفتار می‌کنند. پس فاصله‌ی درآمدشان از کجا می‌آید؟",
+      options: ["از ریزش دوره‌ی اول", "از ریزش دم بلند", "از CAC متفاوت"], answer: 0,
+      explain: "CAC هر سه ۱٬۵۰۰ دلار است و فقط بقا در دوره‌ی ۱ فرق دارد (بخش «Special memo for paid User Acquisition»)." },
+    { q: "چرا دوره‌ی بازگشت سرمایه‌ی کوتاه‌تر از درآمد انباشته‌ی بیشتر هم مهم‌تر است؟",
+      options: ["چون درآمد زودتر دوباره خرج جذب cohort تازه می‌شود", "چون CAC را کم می‌کند", "چون ریزش دم بلند را کم می‌کند"], answer: 0,
+      explain: "شروع خوب تا پایان دوره‌ی ۱۲ پول ۱٫۱۶ cohort تازه را برمی‌گرداند و شروع بد فقط ۰٫۱۸." },
+    { q: "CAC را به ۲٬۰۰۰ دلار ببرید. کدام cohort تا پایان دوره‌ی ۱۲ به CAC نمی‌رسد؟",
+      options: ["شروع بد", "شروع متوسط", "هیچ‌کدام"], answer: 0,
+      explain: "درآمد انباشته‌ی شروع بد در ۱۲ دوره ۱٬۷۷۶ دلار است، کمتر از ۲٬۰۰۰ (فرض vault برای CAC)." }
+  ]);
+})();
+</script>
+</body>
+</html>

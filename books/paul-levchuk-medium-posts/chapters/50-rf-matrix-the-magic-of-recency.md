@@ -84,6 +84,8 @@ source_url: https://medium.com/@paul.levchuk/rf-matrix-the-magic-of-recency-098c
 
 در نوشته‌ی بعد ([فصل ۵۱](51-rf-matrix-frequency-dimension.md)) بعد Frequency را می‌آموزیم.
 
+> **Try it:** [ماتریس RF و قدرت Recency](../widgets/50-recency-matrix.html): آستانه‌ی Recency را جابه‌جا کنید و سهم مشتریان، خریداران و درآمد ۳۰ روز بعد را کنار هم ببینید.
+
 > **Vault note:** درصدهای ۷۵٪ و ۹۰٪ و ۷۹٪ از داده‌ی یک کسب‌وکار آنلاین با فاصله‌ی خرید ماهانه است؛ برای محصول فصلی یا سالانه الگو همان است ولی آستانه‌ها عوض می‌شود.
 
 > **In practice:** بین‌های Recency را یک بار در Gold تعریف کنید و برای هر نقطه‌ی بررسی نگه دارید تا رابطه‌ی Recency و خرید ۳۰ روز بعد را بشود هر ماه دوباره سنجید.
