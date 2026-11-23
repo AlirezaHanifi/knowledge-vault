@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مدل تصحیحی LTV</title>
+<meta name="description" content="مدل y_logt که روی ۳ دوره‌ی اول آموزش دیده LTV را کم برآورد می‌کند؛ مدل تصحیحی خطی که از خطای ۷ دوره‌ی اول یاد می‌گیرد خطا را بیشتر از ۸۰٪ کم می‌کند. برای نوشته‌ی ۴۷ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .c47 { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  #ltv { width: 100%; display: block; }
+  #ltv .chart-line.warn { stroke-dasharray: 7 5; }
+  #ltv .chart-line.ok { stroke-dasharray: 3 3; stroke-width: 2.6; }
+  .key { font-size: .76rem; color: var(--ink-3); margin: 2px 0 0; }
+  .key .sw { display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--s1); vertical-align: middle; margin-inline-end: 4px; }
+  .key .sw.warn { border-top: 3px dashed var(--warn); } .key .sw.ok { border-top: 3px dotted var(--ok); }
+  .mape { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .big { border: 1.5px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+  .big .lab { font-size: .8rem; color: var(--ink-2); }
+  .big b { display: block; font-family: var(--mono); font-size: 1.5rem; direction: ltr; text-align: right; }
+  .big.ini { border-color: var(--warn); } .big.cor { border-color: var(--ok); }
+  .formula { font-family: var(--mono); direction: ltr; text-align: center; font-size: .8rem; color: var(--ink-2); margin: 0 0 8px; }
+  table.post { width: 100%; border-collapse: collapse; font-size: .78rem; }
+  table.post caption { text-align: right; font-size: .78rem; color: var(--ink-3); margin-bottom: 2px; }
+  table.post th, table.post td { padding: 2px 6px; border-bottom: 1px solid var(--line); }
+  table.post th { text-align: right; font-weight: 400; color: var(--ink-2); }
+  table.post td { font-family: var(--mono); direction: ltr; text-align: center; }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/47-ltv-forecasting-battle-for-accuracy.html">نوشته‌ی ۴۷</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مدل تصحیحی LTV</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مدل تصحیحی LTV</h1>
+      <p class="lede">مدل <span class="mono">y_logt</span> که فقط ۳ دوره‌ی اول را دیده، LTV را هرچه جلوتر می‌رود کمتر برآورد می‌کند و خطایش خطی بزرگ می‌شود. <strong>مدل دوم از همین خطا یاد می‌گیرد</strong>؛ ببینید چند دوره باید صبر کرد تا یادگیری کافی باشد.</p>
+      <p class="source-note">این شبیه‌سازی روش نوشته‌ی «LTV forecasting: battle for accuracy» را اجرا می‌کند: مدل اولیه روی ۳ دوره، مدل تصحیحی خطی روی خطای ۷ دوره‌ی اول، و LTV تصحیح‌شده برابر پیش‌بینی به‌اضافه‌ی a ضرب دوره به‌اضافه‌ی b. نوشته داده‌ی خامش را منتشر نکرده؛ منحنی LTV فرض vault است، شبیه نمودار نوشته و با retention نسبی که بعد از دوره‌ی ۶ روی ۰٫۹۵ ثابت می‌شود. جدول MAPE سمت چپ پایین اعداد خود نوشته است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c47">
+          <div>
+            <p class="panel-title">LTV تا امروز و دو پیش‌بینی، دوره‌های ۳۰ روزه</p>
+            <svg id="ltv" role="img" aria-label="LTV تا امروز، پیش‌بینی مدل اولیه و مدل تصحیح‌شده"></svg>
+            <p class="key"><i class="sw s1"></i>LTV تا امروز · <i class="sw warn dash"></i>مدل اولیه <bdi>y_logt</bdi> · <i class="sw ok dot"></i>مدل تصحیح‌شده · خط‌های عمودی: پایان دوره‌های آموزش و پایان دوره‌های یادگیری خطا</p>
+          </div>
+          <div aria-live="polite">
+            <div class="mape">
+              <div class="big ini"><span class="lab">MAPE مدل اولیه</span><b id="m1" class="mono"></b></div>
+              <div class="big cor"><span class="lab">MAPE مدل تصحیح‌شده</span><b id="m2" class="mono"></b></div>
+            </div>
+            <p class="formula mono" id="formula"></p>
+            <table class="post">
+              <caption>اعداد نوشته: MAPE مدل اولیه ← تصحیح‌شده</caption>
+              <tbody>
+                <tr><th scope="row">همه‌ی کاربران</th><td>10.5% → 1.9%</td></tr>
+                <tr><th scope="row">کانال Organic</th><td>9.0% → 0.9%</td></tr>
+                <tr><th scope="row">کانال Paid</th><td>10.5% → 1.9%</td></tr>
+                <tr><th scope="row">کانال Direct</th><td>23.6% → 1.7%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>خطای مدل اولیه خطی بزرگ می‌شود</strong>؛ همین الگو را مدل دوم می‌تواند یاد بگیرد.</li>
+      <li><strong>تصحیح از همان ۳ دوره‌ی آموزش</strong> تقریباً هیچ چیز اضافه نمی‌کند؛ باید دوره‌هایی را دید که مدل اولیه ندیده است.</li>
+      <li><strong>retention دم را عوض کنید</strong>: تصحیح خطی فرض می‌کند رانش خطا ادامه دارد، و اگر رفتار دم فرق کند دوباره خطا می‌کند.</li>
+    </ul>
+
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/47-ltv-forecasting-battle-for-accuracy.html"><small>درس</small>نوشته‌ی ۴۷: پیش‌بینی LTV، نبرد برای دقت</a></li>
+      <li><a href="36-first-period-payback.html"><small>شبیه‌سازی</small>ریزش دوره‌ی اول و بازگشت CAC</a></li>
+      <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var FA = function (s) { return Kit.digits(String(s)); };
+  var T = 36;
+  // Vault assumption: LTV to date per user = revenue per user summed over 30-day periods. Revenue in
+  // period t is revenue in t−1 times the relative retention, which settles at `tail` from period 6 on.
+  var MID = [0.62, 0.80, 0.84, 0.82, 0.80, 0.95];
+  function curve(tail) {
+    var rev = [41, 13.5], out = [], s = 0;
+    for (var t = 2; t < T; t++) rev.push(rev[t - 1] * (t - 2 < MID.length ? MID[t - 2] : tail));
+    rev.forEach(function (v) { s += v; out.push(s); });
+    return out;
+  }
+  function fit(xs, ys) {   // least squares y = c + k·x → [c, k]
+    var n = xs.length, mx = 0, my = 0, sxy = 0, sxx = 0;
+    xs.forEach(function (x, i) { mx += x / n; my += ys[i] / n; });
+    xs.forEach(function (x, i) { sxy += (x - mx) * (ys[i] - my); sxx += (x - mx) * (x - mx); });
+    var k = sxy / sxx; return [my - k * mx, k];
+  }
+  function range(n) { var a = []; for (var i = 0; i < n; i++) a.push(i); return a; }
+  function mape(L, q) { var s = 0; L.forEach(function (v, t) { s += Math.abs(v - q[t]) / v; }); return s / L.length * 100; }
+
+  var DEF = { n: 3, m: 7, tail: 0.95 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+  function render() {
+    var L = curve(view.tail);
+    var f0 = fit(range(view.n).map(function (t) { return Math.log(t + 1); }), L.slice(0, view.n));
+    var P = L.map(function (_, t) { return f0[0] + f0[1] * Math.log(t + 1); });
+    var f1 = fit(range(view.m), range(view.m).map(function (t) { return L[t] - P[t]; })), b = f1[0], a = f1[1];
+    var Cr = P.map(function (p, t) { return p + a * t + b; });
+    var m1 = mape(L, P), m2 = mape(L, Cr), imp = (1 - m2 / m1) * 100;
+    var top = Math.max(L[T - 1], Cr[T - 1]), yMax = Math.ceil(top / 40) * 40;
+    Kit.lineChart(document.getElementById("ltv"), { width: 660, height: 262, xMax: T - 1, legend: false, yMax: yMax, xTicks: 7, yTicks: yMax / 40,
+      xLabel: "دوره‌ی ۳۰ روزه", yLabel: "LTV", yFormat: function (v) { return "$" + v; },
+      series: [{ points: L.map(function (v, t) { return [t, v]; }), cls: "s1", label: "LTV تا امروز" },
+               { points: P.map(function (v, t) { return [t, v]; }), cls: "warn", label: "y_logt، " + FA(view.n) + " دوره" },
+               { points: Cr.map(function (v, t) { return [t, v]; }), cls: "ok", label: "تصحیح‌شده، " + FA(view.m) + " دوره" }],
+      marks: [{ x: view.n - 1 }, { x: view.m - 1 }] });
+    document.getElementById("m1").textContent = m1.toFixed(1) + "%";
+    document.getElementById("m2").textContent = m2.toFixed(1) + "%";
+    document.getElementById("formula").textContent = "LTV(adj) = LTV(y_logt) + " + a.toFixed(3) + "·t " + (b < 0 ? "− " : "+ ") + Math.abs(b).toFixed(2);
+    msg = "مدل اولیه روی " + FA(view.n) + " دوره و تصحیح روی خطای " + FA(view.m) + " دوره: MAPE از " + FA(m1.toFixed(1)) + "٪ به " + FA(m2.toFixed(1)) + "٪.";
+    kind = imp >= 60 ? "" : "warn";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["LTV واقعی در دوره‌ی ۳۵", "$" + L[T - 1].toFixed(1)], ["پیش‌بینی اولیه", "$" + P[T - 1].toFixed(1), "warn"],
+     ["پیش‌بینی تصحیح‌شده", "$" + Cr[T - 1].toFixed(1), "ok"], ["کاهش MAPE", Math.round(imp) + "%"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, x[1]))); });
+    ctl.n.set(view.n); ctl.m.set(view.m); ctl.tail.set(view.tail);
+  }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  ctl.n = Kit.slider({ label: "دوره‌های آموزش مدل اولیه", min: 2, max: 6, step: 1, value: view.n, format: function (v) { return FA(v); },
+    hint: "۳ عدد نوشته است", onInput: tw(function (v) { view.n = v; }) });
+  ctl.m = Kit.slider({ label: "دوره‌های یادگیری خطا", min: 3, max: 12, step: 1, value: view.m, format: function (v) { return FA(v); },
+    hint: "۷ عدد نوشته است، چون retention نسبی بعد از دوره‌ی ۶ ثابت می‌شود", onInput: tw(function (v) { view.m = v; }) });
+  ctl.tail = Kit.slider({ label: "retention نسبی دم (فرض vault)", min: 0.90, max: 0.98, step: 0.01, value: view.tail, format: function (v) { return FA(v.toFixed(2)); },
+    hint: "۰٫۹۵ میانگینی است که نوشته بعد از دوره‌ی ۶ می‌بیند", onInput: tw(function (v) { view.tail = v; }) });
+  ["n", "m", "tail"].forEach(function (k) { document.getElementById("ctl").appendChild(ctl[k].element); });
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "منحنی آبی LTV تا امروز است، فرض vault شبیه نمودار نوشته: ۴۱ دلار در دوره‌ی صفر و حدود ۱۳۸ دلار در دوره‌ی ۳۵.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و دوره‌های آموزش، دوره‌های یادگیری خطا و retention دم را جابه‌جا کنید.",
+    steps: [
+      { kind: "warn", run: at({}), say: "مدل y_logt فقط ۳ دوره‌ی اول را دیده. فقط در همان دوره‌ها خوب می‌نشیند و بعد عقب می‌افتد: در دوره‌ی ۳۵ حدود ۱۱۲ دلار در برابر ۱۳۸. MAPE در داده‌ی vault ۱۱٫۹٪ است و در نوشته ۱۰٫۵٪." },
+      { kind: "", run: at({}), say: "خطا با زمان خطی بزرگ می‌شود؛ یعنی الگوی ظریفی هست که مدل یاد نگرفته. مدل دوم یک خط روی خطای ۷ دوره‌ی اول می‌نشاند و به پیش‌بینی اضافه می‌کند. MAPE به ۱٫۹٪ می‌رسد، ۸۴٪ کمتر؛ نوشته ۸۲٪ گزارش می‌کند." },
+      { kind: "bad", run: at({ m: 3 }), say: "فرض vault: اگر تصحیح هم فقط از همان ۳ دوره یاد بگیرد، خطایی برای یادگرفتن نمی‌بیند و MAPE فقط به ۱۱٫۵٪ می‌رسد." },
+      { kind: "warn", run: at({ m: 5 }), say: "با ۵ دوره MAPE ۴٫۰٪ است و با ۱۰ دوره ۱٫۱٪. نوشته ۷ دوره را برمی‌گزیند چون retention نسبی بعد از دوره‌ی ۶ تقریباً ثابت می‌شود: انتظار کافی، نه بیشتر." },
+      { kind: "warn", run: at({ n: 6 }), say: "فرض vault: مدل اولیه روی ۶ دوره بهتر است (۸٫۷٪)، ولی تصحیحی که فقط یک دوره‌ی تازه می‌بیند کمی کمک می‌کند و به ۶٫۱٪ می‌رسد." },
+      { kind: "bad", run: at({ tail: 0.98 }), say: "فرض vault: اگر retention دم ۰٫۹۸ باشد، رانش خطا بعد از دوره‌ی ۷ عوض می‌شود و تصحیح خطی به ۷٫۱٪ می‌رسد. خود نوشته ایرادش را می‌گوید: تصحیح روی داده‌ی تجمیع‌شده‌ی همه‌ی cohortها ساخته شده، و نوشته‌ی ۴۸ آن را cohort به cohort می‌آزماید." },
+      { kind: "", run: at({}), say: "در نوشته، برای کانال‌های Organic و Paid و Direct هر مدل تصحیح‌شده MAPE را حدود ۸۸٪ بهتر کرد؛ از شواهد اصلی که retention کاربر مهم‌ترین سیگنال مدل‌سازی LTV است." }
+    ]
+  });
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "چرا می‌شود خطای مدل اولیه را با مدل دوم تصحیح کرد؟",
+      options: ["چون خطا با زمان خطی بزرگ می‌شود و الگویی دارد", "چون خطا تصادفی است", "چون مدل اولیه بیش‌برازش دارد"], answer: 0,
+      explain: "الگوی منظم خطا یعنی چیزی که مدل اولیه یاد نگرفته (بخش «LTV Series»)." },
+    { q: "نوشته مدل تصحیحی را روی چند دوره یاد می‌دهد و چرا؟",
+      options: ["۷ دوره، چون retention نسبی بعد از دوره‌ی ۶ تقریباً ثابت می‌شود", "۳ دوره، مثل مدل اولیه", "۳۶ دوره، همه‌ی داده"], answer: 0,
+      explain: "۳ دوره برای دیدن تغییر شیب کافی نیست و انتظار خیلی طولانی هم برای بازاریابی بهینه نیست." },
+    { q: "تصحیح را فقط روی ۳ دوره یاد بدهید. چه می‌شود؟",
+      options: ["تقریباً هیچ بهبودی نمی‌دهد", "خطا صفر می‌شود", "خطا دو برابر می‌شود"], answer: 0,
+      explain: "مدل اولیه همان دوره‌ها را دیده و خطایش آنجا تقریباً صفر است (فرض vault)." }
+  ]);
+})();
+</script>
+</body>
+</html>
