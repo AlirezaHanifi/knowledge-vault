@@ -152,8 +152,14 @@ def skipped(p: Path) -> bool:
     return bool(SKIP_PARTS & set(parts)) or any(x.startswith(".") for x in parts)
 
 
+SCRIPT_BODY_RE = re.compile(r"(<(script|style)\b[^>]*>)(.*?)(</\2>)", re.S | re.I)
+
+
 def check_html_links(p: Path) -> None:
-    text = p.read_text(encoding="utf-8")
+    # Script and style bodies are code, not markup: `img.src = "x"` is not a reference.
+    # Blank them out, keeping newlines so line numbers still match.
+    text = SCRIPT_BODY_RE.sub(lambda m: m.group(1) + re.sub(r"[^\n]", " ", m.group(3)) + m.group(4),
+                              p.read_text(encoding="utf-8"))
     for no, line in enumerate(text.splitlines(), 1):
         for target in HTML_REF_RE.findall(line):
             if re.match(r"^[a-z]+:|^//|^\$\{", target):
