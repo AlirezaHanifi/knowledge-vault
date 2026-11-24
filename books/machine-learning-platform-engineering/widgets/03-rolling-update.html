@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rolling update و rollback</title>
+<meta name="description" content="یک Deployment سه‌replica را با image سالم یا خراب به نسخه‌ی تازه ببرید، ببینید دو ReplicaSet چطور یکی‌یکی بالا و پایین می‌روند، rollout خراب کجا می‌ایستد و rollout undo چه می‌کند. تصویری از فصل ۳ کتاب Machine Learning Platform Engineering.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .ru-wrap { display: grid; gap: 14px; }
+  .ru-rs { border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 8px 10px; background: var(--surface); }
+  .ru-rs h3 { margin: 0 0 6px; font-size: .9rem; display: flex; justify-content: space-between; gap: 8px; }
+  .ru-rs h3 code { font-size: .85rem; }
+  .ru-pods { display: flex; gap: 8px; min-height: 58px; flex-wrap: wrap; }
+  .ru-pod { width: 112px; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 4px 6px; font-size: .8rem; line-height: 1.35; background: var(--surface-2); }
+  .ru-pod b { display: block; font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: start; }
+  .ru-pod.run { border-color: var(--ok); background: var(--ok-soft); }
+  .ru-pod.new { border-style: dashed; border-color: var(--warn); background: var(--warn-soft); }
+  .ru-pod.err { border-color: var(--bad); background: var(--bad-soft); border-style: dotted; }
+  .ru-pod.term { opacity: .55; border-style: dashed; }
+  .ru-empty { font-size: .8rem; color: var(--ink-3); align-self: center; }
+  .ru-get { font-family: var(--mono); font-size: .8rem; direction: ltr; text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px; margin: 0; white-space: pre; overflow: hidden; }
+  .ru-get .hl { color: var(--bad); font-weight: 700; }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">MLPE</a><span aria-hidden="true">/</span>
+      <a href="../chapters/03-building-applications-on-kubernetes.html">فصل ۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">rolling update و rollback</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>rolling update و rollback</h1>
+      <p class="lede">شیء <strong>Deployment</strong> برای هر نسخه یک <strong>ReplicaSet</strong> می‌سازد و podها را یکی‌یکی از قدیمی به تازه می‌برد. اگر image تازه pull نشود، rollout می‌ایستد و podهای قدیمی سر جایشان می‌مانند تا شما undo کنید.</p>
+      <p class="source-note">تصویری از «Deployment» با برنامه‌ی hello-joker (صص. ۵۹–۶۲). سه replica، ترتیب «یکی بالا، یکی پایین» و ستون‌های kubectl از خروجی‌های کتاب است. کتاب image خراب را پس از rollout کامل v2 می‌آزماید؛ این‌جا هر دو rollout از v1 شروع می‌شوند. زمان‌بندی هر قدم و نام podها مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="ru-wrap">
+          <div class="ru-rs"><h3><span>ReplicaSet قدیمی</span><code id="oldTag"></code></h3><div class="ru-pods" id="oldPods"></div></div>
+          <div class="ru-rs"><h3><span>ReplicaSet تازه</span><code id="newTag"></code></h3><div class="ru-pods" id="newPods"></div></div>
+          <pre class="ru-get" id="get" aria-label="خروجی kubectl get deployment"></pre>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">وضعیت rollout</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="img"></div>
+        <div class="tweak-group">
+          <button class="btn primary small" type="button" id="act">یک قدم rollout</button>
+          <button class="btn small" type="button" id="undo">kubectl rollout undo</button>
+          <button class="btn small" type="button" id="again">از اول</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>با image سالم، در هر لحظه دست‌کم سه pod آماده هست: pod تازه اول Running می‌شود و فقط بعد یکی از قدیمی‌ها پایین می‌آید.</li>
+      <li>با image خراب، ستون <code>READY</code> همان <code>3/3</code> می‌ماند ولی <code>UP-TO-DATE</code> روی <code>1</code> گیر می‌کند: کاربرها خطا نمی‌بینند، ولی نسخه‌ی تازه هم نرسیده (ص. ۶۱).</li>
+      <li>دستور <code>kubectl rollout undo</code> فقط pod خراب را برمی‌دارد؛ podهای قدیمی هیچ‌وقت پایین نیامده بودند (ص. ۶۲).</li>
+    </ul>
+
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/03-building-applications-on-kubernetes.html"><small>درس</small>فصل ۳: ساختن برنامه روی Kubernetes</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var N = 3, cfg = { img: "good" }, S, tour, msg = "", kind = "";
+  var SUF = ["7xk2p", "m4qd9", "z8rtw", "c2vbn", "h6jfa", "p9lse"];
+  function fresh() { S = { old: [0, 1, 2].map(function (i) { return { id: SUF[i], st: "run" }; }), neu: [], n: 3, undone: false, done: false }; msg = ""; kind = ""; }
+  function ready() { return S.old.concat(S.neu).filter(function (p) { return p.st === "run"; }).length; }
+  // One controller tick: maxSurge 1, maxUnavailable 0 (25% of 3, rounded) — a new pod must be Running before an old one goes.
+  function step() {
+    if (S.undone || S.done) { msg = S.undone ? "rollout برگشته است؛ «از اول» را بزنید." : "rollout تمام شده است."; kind = ""; return; }
+    S.old = S.old.filter(function (p) { return p.st !== "term"; });
+    var pending = S.neu.filter(function (p) { return p.st === "new" || p.st === "err"; })[0];
+    if (pending) {
+      if (cfg.img === "bad") { pending.st = "err"; msg = "pod تازه نمی‌تواند image را pull کند (ErrImagePull)، پس هیچ pod قدیمی پایین نمی‌آید: rollout ایستاده است."; kind = "bad"; return; }
+      pending.st = "run";
+      var victim = S.old.filter(function (p) { return p.st === "run"; })[0];
+      if (victim) victim.st = "term";
+      msg = "pod تازه Running شد، پس یک pod قدیمی terminate می‌شود. podهای آماده هنوز " + ready() + " تاست."; kind = "ok";
+      if (!S.old.some(function (p) { return p.st === "run"; }) && S.neu.length === N) { S.done = true; msg = "هر سه pod روی نسخه‌ی تازه‌اند: ReplicaSet قدیمی صفر و تازه سه."; }
+      return;
+    }
+    if (S.neu.length < N) { S.neu.push({ id: SUF[S.n++], st: "new" }); msg = "ReplicaSet تازه یک pod می‌سازد (surge): حالا " + (S.old.length + S.neu.length) + " pod داریم."; kind = "warn"; }
+  }
+  function undo() {
+    var keep = S.old.filter(function (p) { return p.st === "run"; });
+    while (keep.length < N) keep.push({ id: SUF[S.n++ % SUF.length], st: "run" });
+    S.old = keep; S.neu = []; S.undone = true;
+    msg = "دستور rollout undo دوباره ReplicaSet قبلی را به کار می‌گیرد: سه pod روی نسخه‌ی قبلی، ReplicaSet تازه صفر."; kind = "ok";
+  }
+  var LBL = { run: "Running", new: "ContainerCreating", err: "ErrImagePull", term: "Terminating" };
+  function pods(el, list) {
+    Kit.clear(el);
+    if (!list.length) { el.appendChild(Kit.el("span", { class: "ru-empty" }, "هیچ pod")); return; }
+    list.forEach(function (p) { el.appendChild(Kit.el("div", { class: "ru-pod " + p.st, role: "img", "aria-label": "pod " + p.id + ": " + LBL[p.st] }, Kit.el("b", null, "joker-" + p.id), Kit.el("span", { dir: "ltr" }, LBL[p.st]))); });
+  }
+  function render() {
+    var tag = cfg.img === "good" ? "varunmallya/hello-joker:v2" : "varunmallya/hello-joker:missing";
+    Kit.$("#oldTag").textContent = "varunmallya/hello-joker:v1"; Kit.$("#newTag").textContent = tag;
+    pods(Kit.$("#oldPods"), S.old); pods(Kit.$("#newPods"), S.neu);
+    var r = ready(), upd = S.undone ? N : S.neu.filter(function (p) { return p.st !== "term"; }).length, avail = r;
+    var g = Kit.$("#get"); Kit.clear(g);
+    g.appendChild(document.createTextNode("$ kubectl get deployment joker-deployment\nNAME               READY   UP-TO-DATE   AVAILABLE\njoker-deployment   " + Math.min(r, N) + "/" + N + "     "));
+    var stuck = cfg.img === "bad" && !S.undone && S.neu.some(function (p) { return p.st === "err"; });
+    g.appendChild(Kit.el("span", { class: stuck ? "hl" : "" }, String(upd)));
+    g.appendChild(document.createTextNode("            " + Math.min(avail, N)));
+    var st = Kit.clear(Kit.$("#stats"));
+    [["pod آماده", Math.min(r, N) + " از " + N, r >= N ? "ok" : "bad"],
+     ["pod قدیمی", S.old.filter(function (p) { return p.st !== "term"; }).length, ""],
+     ["pod تازه‌ی آماده", S.neu.filter(function (p) { return p.st === "run"; }).length, ""],
+     ["وضعیت", S.undone ? "برگشته" : S.done ? "تمام" : stuck ? "ایستاده" : "در جریان", stuck ? "bad" : S.done || S.undone ? "ok" : "warn"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
+    });
+    imgCtl.set(cfg.img);
+  }
+  var imgCtl = Kit.segmented({ label: "image تازه", value: "good", options: [{ value: "good", label: "image سالم v2" }, { value: "bad", label: "tag اشتباه" }], onChange: function (v) { cfg.img = v; fresh(); render(); tour.free(v === "good" ? "image سالم انتخاب شد؛ قدم به قدم rollout کنید." : "tagی انتخاب شد که در registry نیست؛ rollout کنید و ببینید کجا می‌ایستد.", ""); } });
+  Kit.$("#img").appendChild(imgCtl.element);
+  Kit.$("#act").addEventListener("click", function () { step(); render(); tour.free(msg, kind); });
+  Kit.$("#undo").addEventListener("click", function () { undo(); render(); tour.free(msg, kind); });
+  Kit.$("#again").addEventListener("click", function () { fresh(); render(); tour.free("دوباره سه pod روی v1.", ""); });
+
+  function scene(img, n, u) { return function () { cfg.img = img; fresh(); for (var i = 0; i < n; i++) step(); if (u) undo(); }; }
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: scene("good", 0), render: render, interval: 6500,
+    intro: "سه pod از hello-joker روی v1 اجرا می‌شوند. ردیف بالا ReplicaSet قدیمی است و ردیف پایین ReplicaSet نسخه‌ی تازه؛ زیرشان خروجی kubectl get deployment.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید، image را انتخاب کنید و قدم به قدم rollout و undo کنید.",
+    steps: [
+      { kind: "warn", run: scene("good", 1), say: "با عوض کردن tag به v2، ReplicaSet تازه یک pod می‌سازد. podهای قدیمی هنوز همه ترافیک را می‌گیرند (ص. ۶۰)." },
+      { kind: "ok", run: scene("good", 2), say: "تنها وقتی pod تازه Running شد، یکی از podهای قدیمی terminate می‌شود؛ شمار podهای آماده از سه کمتر نمی‌شود." },
+      { kind: "ok", run: scene("good", 6), say: "همین رقص سه بار تکرار می‌شود، از ۳ و ۰ تا ۰ و ۳، همان دنباله‌ای که کتاب در خروجی kubectl نشان می‌دهد (صص. ۶۰–۶۱)." },
+      { kind: "bad", run: scene("bad", 2), say: "حالا tagی که در registry نیست: pod تازه ErrImagePull می‌گیرد. READY همان 3/3 است ولی UP-TO-DATE روی 1 می‌ماند و rollout جلو نمی‌رود (ص. ۶۱)." },
+      { kind: "ok", run: scene("bad", 2, true), say: "دستور kubectl rollout undo آن pod خراب را برمی‌دارد و Deployment به ReplicaSet قبلی برمی‌گردد؛ کاربرها هیچ‌وقت چیزی ندیدند (ص. ۶۲)." }
+    ]
+  });
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "وقتی image تازه pull نمی‌شود، Deployment سه‌replica چه می‌کند؟", options: ["همه‌ی podهای قدیمی را پایین می‌آورد", "می‌ایستد و سه pod قدیمی را نگه می‌دارد", "خودکار به نسخه‌ی قبل rollback می‌کند"], answer: 1, explain: "ص. ۶۱: UP-TO-DATE روی 1 می‌ماند و rollback با rollout undo دستی است." },
+    { q: "چرا در این rollout شمار podهای آماده هیچ‌وقت زیر سه نمی‌رود؟", options: ["چون pod قدیمی فقط بعد از Running شدن pod تازه پایین می‌آید", "چون Kubernetes ترافیک را قطع می‌کند", "چون ReplicaSet قدیمی حذف می‌شود"], answer: 0, explain: "صص. ۶۰–۶۱؛ این همان rolling update بی‌اثر روی کاربر است." }
+  ]);
+})();
+</script>
+</body>
+</html>

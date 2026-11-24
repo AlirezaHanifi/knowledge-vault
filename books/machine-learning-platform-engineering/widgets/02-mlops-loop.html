@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حلقه‌ی MLOps و سطح‌های بلوغ</title>
+<meta name="description" content="یک مدل را یک سال جلو ببرید، drift تزریق کنید و ببینید در سطح بلوغ ۰ و ۱ و ۲ چقدر طول می‌کشد تا افت دیده و مدل تازه deploy شود. تصویری از فصل ۲ کتاب Machine Learning Platform Engineering.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .ml-wrap { display: grid; gap: 6px; }
+  .ml-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--ink-2); margin: 0; }
+  .ml-legend span::before { content: ""; display: inline-block; width: 16px; margin-inline-end: 5px; vertical-align: middle; border-top: 2px dashed var(--line-strong); }
+  .ml-legend .d::before { border-color: var(--bad); } .ml-legend .s::before { border-color: var(--warn); } .ml-legend .f::before { border-color: var(--ok); }
+  .ml-legend .g::before { border: 0; height: 10px; background: var(--bad-soft); }
+  .ml-steps { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .ml-step { border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 2px 3px; font-size: .8rem; line-height: 1.25; text-align: center; background: var(--surface-2); }
+  .ml-step small { display: block; font-size: .8rem; color: var(--ink-2); }
+  .ml-step.auto { border-color: var(--ok); background: var(--ok-soft); }
+  .ml-step.none { border-color: var(--bad); background: var(--bad-soft); border-style: dashed; }
+  .ml-chart { width: 100%; height: auto; display: block; direction: ltr; }
+  .ml-chart text { font-family: var(--font); font-size: 12px; fill: var(--ink-2); }
+  .ml-chart .grid { stroke: var(--line); }
+  .ml-chart .axis { stroke: var(--line-strong); }
+  .ml-chart .acc { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+  .ml-chart .gap { fill: var(--bad-soft); }
+  .ml-chart .mk { stroke-width: 2; stroke-dasharray: 4 3; }
+  .ml-chart .mk.d { stroke: var(--bad); } .ml-chart .mk.s { stroke: var(--warn); } .ml-chart .mk.f { stroke: var(--ok); }
+  .ml-chart .lbl { font-weight: 700; fill: var(--ink); }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">MLPE</a><span aria-hidden="true">/</span>
+      <a href="../chapters/02-what-is-mlops.html">فصل ۲</a><span aria-hidden="true">/</span>
+      <span aria-current="page">حلقه‌ی MLOps و سطح‌های بلوغ</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>حلقه‌ی MLOps و سطح‌های بلوغ</h1>
+      <p class="lede">حلقه‌ی MLOps از جمع‌آوری داده تا مانیتورینگ و نگه‌داری می‌چرخد. هرچه گام‌های بیشتری از آن خودکار باشند، drift زودتر دیده و مدل تازه زودتر deploy می‌شود؛ این‌جا همان یک سال را در سه سطح بلوغ مقایسه می‌کنید.</p>
+      <p class="source-note">تصویری از «چرخه‌ی عمر تکرارشونده‌ی MLOps» و «سطح‌های بلوغ MLOps» (صص. ۲۵–۳۶ و ۴۰). اینکه کدام گام در هر سطح دستی یا خودکار است از کتاب است؛ دقت مدل، اندازه‌ی افت و همه‌ی زمان‌ها، یعنی چند هفته طول می‌کشد تا افت دیده و رفع شود، فرض‌های vault‌اند و کتاب عددی برایشان نمی‌دهد. پیاده‌سازی مال خود vault است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="ml-wrap">
+          <div class="ml-steps" id="steps"></div>
+          <svg class="ml-chart" id="chart" viewBox="0 0 760 184" role="img"></svg>
+          <p class="ml-legend" id="legend"></p>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">در یک سال</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="g1"></div>
+        <div class="tweak-group" id="g2"></div>
+        <div class="tweak-group" id="g3"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>در سطح ۰ بیشتر زمان افت صرف <em>دیدن</em> آن می‌شود، نه رفعش: مانیتورینگی نیست و کسی خبر نمی‌دهد (صص. ۳۴ و ۴۰).</li>
+      <li>سطح ۱ drift معمولی را با pipeline retraining خودکار زود جبران می‌کند، ولی تغییری که به خود pipeline نیاز دارد، مثل feature تازه، هنوز دستی است.</li>
+      <li>سطح ۲ همان تغییر pipeline را هم با build و deploy خودکار کوتاه می‌کند؛ این همان فرقی است که کتاب میان سطح ۱ و ۲ می‌گذارد (ص. ۴۰).</li>
+    </ul>
+
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/02-what-is-mlops.html"><small>درس</small>فصل ۲: MLOps چیست؟</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var STEPS = ["جمع‌آوری داده", "تحلیل داده", "آموزش", "ارزیابی", "deploy", "مانیتورینگ", "نگه‌داری", "CI/CD خود pipeline"];
+  // Per level: which loop steps are automated (book, p. 40), and the vault's assumed weeks to notice, to retrain, to change the pipeline.
+  var LV = {
+    0: { name: "سطح ۰", mode: ["دستی", "دستی", "دستی", "دستی", "دستی", "ندارد", "دستی", "ندارد"], det: 8, fix: 4, pipe: 4 },
+    1: { name: "سطح ۱", mode: ["خودکار", "دستی", "خودکار", "خودکار", "خودکار", "خودکار", "دستی", "دستی"], det: 1, fix: 1, pipe: 6 },
+    2: { name: "سطح ۲", mode: ["خودکار", "دستی", "خودکار", "خودکار", "خودکار", "خودکار", "دستی", "خودکار"], det: 1, fix: 1, pipe: 2 }
+  };
+  var GOOD = 0.90, DROP = 0.12, DROP2 = 0.10, W = 52;
+  var DEF = { lv: 0, d1: 10, two: true }, cfg = Object.assign({}, DEF), tour, msg = "", kind = "";
+  function sim() {
+    var L = LV[cfg.lv], acc = [], ev = [], d2 = cfg.d1 + 20;
+    var f1 = cfg.d1 + L.det + L.fix;
+    ev.push({ w: cfg.d1, t: "drift", k: "d" }, { w: cfg.d1 + L.det, t: "دیده شد", k: "s" }, { w: f1, t: "deploy", k: "f" });
+    var p1 = d2 + L.det + (cfg.lv ? 1 : 0), f2 = d2 + L.det + (cfg.lv ? L.pipe : L.fix + L.pipe);
+    if (cfg.two) ev.push({ w: d2, t: "feature تازه لازم", k: "d" }, { w: d2 + L.det, t: "دیده شد", k: "s" }, { w: f2, t: "pipeline تازه", k: "f" });
+    for (var w = 0; w <= W; w++) {
+      var a = GOOD;
+      if (w >= cfg.d1 && w < f1) a -= DROP;
+      if (cfg.two && w >= d2 && w < f2) a -= (cfg.lv && w >= p1 ? DROP2 * 0.6 : DROP2);
+      acc.push(a);
+    }
+    var lost = acc.reduce(function (s, a) { return s + (GOOD - a); }, 0), bad = acc.filter(function (a) { return a < GOOD - 1e-9; }).length;
+    return { acc: acc, ev: ev, lost: lost, bad: bad, f1: f1 - cfg.d1, f2: f2 - d2, L: L };
+  }
+  function X(w) { return 40 + w * 700 / W; } function Y(a) { return 12 + (0.93 - a) * 140 / 0.2; }
+  function render() {
+    var r = sim(), L = r.L, s = Kit.clear(Kit.$("#chart"));
+    var sp = Kit.clear(Kit.$("#steps"));
+    STEPS.forEach(function (n, i) { var m = L.mode[i]; sp.appendChild(Kit.el("div", { class: "ml-step " + (m === "خودکار" ? "auto" : m === "ندارد" ? "none" : "") }, n, Kit.el("small", null, m))); });
+    [0.75, 0.8, 0.85, 0.9].forEach(function (a) { s.appendChild(Kit.svg("line", { class: "grid", x1: 40, x2: 740, y1: Y(a), y2: Y(a) }));
+      var t = Kit.svg("text", { x: 34, y: Y(a) + 4, "text-anchor": "end" }); t.textContent = Kit.digits(a.toFixed(2)); s.appendChild(t); });
+    s.appendChild(Kit.svg("line", { class: "axis", x1: 40, x2: 740, y1: 160, y2: 160 }));
+    [0, 13, 26, 39, 52].forEach(function (w) { var t = Kit.svg("text", { x: X(w), y: 178, "text-anchor": "middle" }); t.textContent = "هفته‌ی " + Kit.digits(String(w)); s.appendChild(t); });
+    var d = "";
+    r.acc.forEach(function (a, w) { d += (w ? "L" : "M") + X(w) + "," + Y(a) + " L" + X(w + 1 > W ? W : w + 1) + "," + Y(a) + " "; });
+    var gap = ""; r.acc.forEach(function (a, w) { if (a < GOOD) gap += "M" + X(w) + "," + Y(GOOD) + "H" + X(Math.min(W, w + 1)) + "V" + Y(a) + "H" + X(w) + "Z "; });
+    if (gap) s.appendChild(Kit.svg("path", { class: "gap", d: gap }));
+    s.appendChild(Kit.svg("path", { class: "acc", d: d }));
+    r.ev.forEach(function (e) { if (e.w <= W) s.appendChild(Kit.svg("line", { class: "mk " + e.k, x1: X(e.w), x2: X(e.w), y1: 10, y2: 160 })); });
+    var lg = Kit.clear(Kit.$("#legend"));
+    [["d", "رخداد: " + r.ev.filter(function (e) { return e.k === "d"; }).map(function (e) { return e.t + " در هفته‌ی " + e.w; }).join("، ")],
+     ["s", "افت دیده شد"], ["f", "مدل یا pipeline تازه deploy شد"], ["g", "هفته‌های زیر دقت عادی"]].forEach(function (x) { lg.appendChild(Kit.el("span", { class: x[0] }, Kit.digits(x[1]))); });
+    s.setAttribute("aria-label", "دقت مدل در ۵۲ هفته؛ " + r.bad + " هفته زیر دقت عادی");
+    kind = r.bad > 15 ? "bad" : r.bad > 6 ? "warn" : "ok";
+    msg = L.name + ": مدل " + r.bad + " هفته از سال زیر دقت عادی کار کرد؛ رفع drift " + r.f1 + " هفته" + (cfg.two ? " و رفع تغییر pipeline " + r.f2 + " هفته" : "") + " طول کشید.";
+    var st = Kit.clear(Kit.$("#stats"));
+    [["هفته‌های افت", r.bad, kind], ["تا رفع drift", r.f1 + " هفته", ""], ["تا pipeline تازه", cfg.two ? r.f2 + " هفته" : "—", ""], ["دقت ازدست‌رفته", (r.lost * 100).toFixed(0) + " امتیاز‌هفته", ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, Kit.digits(String(x[1])))));
+    });
+    c1.set(String(cfg.lv)); c2.set(cfg.d1); c3.set(cfg.two ? "y" : "n");
+  }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var c1 = Kit.segmented({ label: "سطح بلوغ", value: "0", options: [{ value: "0", label: "سطح ۰" }, { value: "1", label: "سطح ۱" }, { value: "2", label: "سطح ۲" }], onChange: tw(function (v) { cfg.lv = +v; }) });
+  var c2 = Kit.slider({ label: "هفته‌ی drift", min: 1, max: 30, step: 1, value: DEF.d1, format: function (v) { return Kit.digits(String(v)); }, onInput: tw(function (v) { cfg.d1 = v; }) });
+  var c3 = Kit.segmented({ label: "تغییری که pipeline تازه می‌خواهد", value: "y", options: [{ value: "y", label: "با feature تازه" }, { value: "n", label: "فقط drift" }], onChange: tw(function (v) { cfg.two = v === "y"; }) });
+  [c1, c2, c3].forEach(function (c, i) { Kit.$("#g" + (i + 1)).appendChild(c.element); });
+
+  function at(o) { return function () { cfg = Object.assign({}, DEF, o); }; }
+  function bad(o) { var k = cfg; cfg = Object.assign({}, DEF, o); var r = sim(); cfg = k; return r.bad; }
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: at({ two: false }), render: render, interval: 7500,
+    intro: "بالا هفت گام حلقه و CI/CD خود pipeline است، سبز یعنی خودکار. نمودار دقت مدل در یک سال است؛ ناحیه‌ی قرمز هفته‌هایی است که مدل زیر دقت عادی کار کرد. عددها فرض vault‌اند و فقط مقایسه‌ی سطح‌ها معنا دارد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و سطح و هفته‌ی drift را عوض کنید.",
+    steps: [
+      { kind: "bad", run: at({ two: false }), say: function () { return "سطح ۰: آموزش و deploy با اسکریپت دستی‌اند و مانیتورینگی نیست (ص. ۴۰). drift هفته‌ها دیده نمی‌شود و مدل " + bad({ two: false }) + " هفته بد کار می‌کند."; } },
+      { kind: "ok", run: at({ lv: 1, two: false }), say: function () { return "سطح ۱: آن‌چه deploy می‌شود pipeline retraining است و مانیتورینگ آن را trigger می‌کند (ص. ۴۰). همان drift فقط " + bad({ lv: 1, two: false }) + " هفته افت می‌دهد."; } },
+      { kind: "warn", run: at({ lv: 1 }), say: "ولی اگر جبران افت feature تازه بخواهد، retraining خودکار فقط بخشی را برمی‌گرداند؛ تغییر خود pipeline در سطح ۱ هنوز دستی است." },
+      { kind: "ok", run: at({ lv: 2 }), say: "سطح ۲: build و deploy خود pipelineها خودکار است و فقط تحلیل داده و مدل دستی می‌ماند (ص. ۴۰). تغییر pipeline هم زود به production می‌رسد." },
+      { kind: "bad", run: at({}), say: function () { return "و همان سال در سطح ۰: " + bad({}) + " هفته افت. کتاب می‌گوید خودکارسازی حلقه مستقیم به سرعت ساختن مدل تازه تبدیل می‌شود (ص. ۴۰)."; } }
+    ]
+  });
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "معیار سطح ۱ از دید کتاب چیست؟", options: ["deploy مدل با یک اسکریپت", "deploy یک pipeline retraining کامل که مدل را پیوسته به سرویس می‌رساند", "اینکه data scientistها component بسازند"], answer: 1, explain: "ص. ۴۰." },
+    { q: "در این شبیه‌سازی، در سطح ۰ بیشتر زمان افت صرف چه می‌شود؟", options: ["آموزش مدل", "دیدن افت، چون مانیتورینگی نیست", "deploy"], answer: 1, explain: "زمان‌ها فرض vault‌اند، ولی نبود مانیتورینگ در سطح ۰ از کتاب است (ص. ۴۰)." }
+  ]);
+})();
+</script>
+</body>
+</html>
