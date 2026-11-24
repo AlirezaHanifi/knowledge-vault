@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>رنگ‌بندی cohort: مقدار یا آمار</title>
+<meta name="description" content="یک جدول cohort با سه رنگ‌بندی: اعداد مطلق، درصد با رنگ پیش‌فرض، و رنگ‌بندی آماری با میانگین و انحراف معیار ۷ روز قبل. برای نوشته‌ی ۳۹ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  table.ch { border-collapse: separate; border-spacing: 2px 1px; font-size: .8rem; line-height: 1.3; direction: ltr; margin: 0 auto; }
+  table.ch th, table.ch td { padding: 1px 8px; text-align: center; border-radius: 3px; font-family: var(--mono); min-width: 2.6em; }
+  table.ch thead th { color: var(--ink-3); font-weight: 600; }
+  table.ch tbody th { color: var(--ink-2); font-weight: 600; text-align: left; }
+  table.ch td.n0 { min-width: 3.4em; }
+  table.ch td.hi { outline: 2px solid var(--ok); outline-offset: -2px; font-weight: 700; }
+  table.ch td.lo { outline: 2px solid var(--bad); outline-offset: -2px; font-weight: 700; }
+  table.ch tr.hl th, table.ch tr.hl td { box-shadow: inset 0 0 0 2px var(--ink); }
+  table.ch .colhl { box-shadow: inset 0 0 0 2px var(--ink); }
+  table.ch td.dim { opacity: .35; }
+  .key { font-size: .76rem; color: var(--ink-3); margin: 4px 0 0; text-align: center; }
+  .key b.hi { color: var(--ok); } .key b.lo { color: var(--bad); }
+  .seg-lab { font-size: .8rem; color: var(--ink-2); margin: 0 0 4px; }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/39-how-to-draw-and-read-user-cohorts-properly.html">نوشته‌ی ۳۹</a><span aria-hidden="true">/</span>
+      <span aria-current="page">رنگ‌بندی cohort: مقدار یا آمار</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>رنگ‌بندی cohort: مقدار یا آمار</h1>
+      <p class="lede">یک جدول cohort، سه رنگ‌بندی. رنگ‌بندی پیش‌فرض بر پایه‌ی مقدار همه‌جا رنگ می‌ریزد؛ <strong>رنگ‌بندی آماری</strong> فقط سلولی را رنگ می‌کند که از میانگین روزهای قبل بیش از دو انحراف معیار فاصله دارد.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «How to color and read user cohorts properly» را نشان می‌دهد. اندازه‌ی cohortها و درصدهای هر دوره از جدول خود نوشته است و قاعده‌ی آماری هم: میانگین و انحراف معیار ۷ روز قبل، بدون خود روز، و آستانه‌ی دو انحراف معیار. فرض vault: اعداد مطلق از اندازه ضرب در درصد گردشده ساخته شده‌اند، روزهای اول با هرچند روز قبلی که هست (دست‌کم دو روز) حساب می‌شوند، و طیف رنگ پیش‌فرض را vault ساخته است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <table class="ch" aria-live="polite"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+        <p class="key" id="key"></p>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"><p class="seg-lab">رنگ‌بندی</p></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>در اعداد مطلق</strong> cohortهای بزرگ‌تر همیشه سبزترند؛ رنگ اندازه را نشان می‌دهد نه کیفیت را.</li>
+      <li><strong>در درصد با رنگ پیش‌فرض</strong> رنگ از ستون‌های دیرتر می‌آید و ستون t=۱، که بحرانی‌ترین دوره است، تقریباً یک‌رنگ می‌ماند.</li>
+      <li><strong>در رنگ‌بندی آماری</strong> فقط چهار سلول رنگ می‌گیرند و هرکدام داستانی دارد.</li>
+    </ul>
+
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/39-how-to-draw-and-read-user-cohorts-properly.html"><small>درس</small>نوشته‌ی ۳۹: cohortهای کاربر را درست رنگ‌آمیزی و بخوانید</a></li>
+      <li><a href="37-blended-survival.html"><small>شبیه‌سازی</small>بقای آمیخته در برابر بقای cohort</a></li>
+      <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var FA = function (s) { return Kit.digits(String(s)); };
+  // The post's table: cohort day, users in period 0, share active in periods 1…11.
+  var D = [
+    ["3/1", 1204, [.66, .50, .38, .32, .28, .26, .23, .21, .19, .18, .16]],
+    ["3/2", 1014, [.69, .50, .39, .33, .28, .25, .23, .21, .19, .18, .16]],
+    ["3/3", 1061, [.68, .52, .41, .35, .31, .27, .25, .23, .20, .18, .17]],
+    ["3/4", 1014, [.68, .52, .41, .35, .31, .28, .26, .24, .21, .19, .18]],
+    ["3/5", 1130, [.65, .48, .38, .31, .27, .24, .22, .20, .18, .17, .15]],
+    ["3/6", 1183, [.68, .51, .40, .34, .30, .27, .24, .22, .20, .18, .17]],
+    ["3/7", 1248, [.67, .50, .39, .33, .29, .26, .24, .22, .20, .18, .16]],
+    ["3/8", 1162, [.69, .52, .41, .35, .31, .27, .25, .23, .21, .19, .17]],
+    ["3/9", 1157, [.68, .49, .39, .34, .30, .27, .24, .22, .20, .18, .17]],
+    ["3/10", 1445, [.65, .47, .36, .31, .27, .25, .23, .21, .19, .17, .15]],
+    ["3/11", 1467, [.66, .50, .39, .34, .30, .26, .24, .22, .19, .18, .16]],
+    ["3/12", 1300, [.67, .52, .41, .35, .31, .27, .25, .23, .20, .19, .17]],
+    ["3/13", 1276, [.65, .49, .37, .31, .27, .24, .22, .20, .18, .16, .15]],
+    ["3/14", 1300, [.66, .48, .37, .31, .27, .25, .22, .20, .19, .17, .15]]
+  ];
+  var DEF = { mode: "abs", win: 7, k: 2, rows: [], col: 0 }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+
+  // Three-colour scale from the kit's tokens: low → bad, middle → surface, high → ok.
+  function shade(v, lo, hi) {
+    var u = hi > lo ? (v - lo) / (hi - lo) : .5, side = u < .5 ? "--bad" : "--ok", pc = Math.round(Math.abs(u - .5) * 2 * 55);
+    return "background: color-mix(in srgb, var(" + side + ") " + pc + "%, var(--surface))";
+  }
+  function mean(a) { return a.reduce(function (s, x) { return s + x; }, 0) / a.length; }
+  function sd(a) { var m = mean(a); return Math.sqrt(a.reduce(function (s, x) { return s + (x - m) * (x - m); }, 0) / (a.length - 1)); }
+  // The post's rule: compare a day with the mean ± k·SD of up to `win` days before it (not itself).
+  function flag(vals, i) {
+    var prev = vals.slice(Math.max(0, i - view.win), i);
+    if (prev.length < 2) return "";
+    var m = mean(prev), s = sd(prev);
+    return vals[i] > m + view.k * s ? "hi" : vals[i] < m - view.k * s ? "lo" : "";
+  }
+
+  function render() {
+    var abs = view.mode === "abs", n0s = D.map(function (r) { return r[1]; }), t1s = D.map(function (r) { return r[2][0]; });
+    var cell = function (r, t) { return abs ? Math.round(r[1] * r[2][t]) : r[2][t]; };
+    var all = []; D.forEach(function (r) { for (var t = 0; t < 11; t++) all.push(cell(r, t)); });
+    var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all), nLo = Math.min.apply(null, n0s), nHi = Math.max.apply(null, n0s);
+    var H = Kit.clear(document.getElementById("thead")), B = Kit.clear(document.getElementById("tbody")), flags = [];
+    var hr = [Kit.el("th", { scope: "col" }, "cohort"), Kit.el("th", { scope: "col" }, "t=0")];
+    for (var t = 1; t <= 11; t++) hr.push(Kit.el("th", { scope: "col", class: view.col === t ? "colhl" : "" }, String(t)));
+    H.appendChild(Kit.el("tr", null, hr));
+    D.forEach(function (r, i) {
+      var tds = [Kit.el("th", { scope: "row" }, r[0])], f;
+      if (view.mode === "stat") {
+        f = flag(n0s, i); if (f) flags.push([r[0], "t=0", f]);
+        tds.push(Kit.el("td", { class: "n0 " + f, style: f ? shade(f === "hi" ? 1 : 0, 0, 1) : "" }, String(r[1])));
+      } else tds.push(Kit.el("td", { class: "n0", style: shade(r[1], nLo, nHi) }, String(r[1])));
+      for (var t = 0; t < 11; t++) {
+        var v = cell(r, t), txt = abs ? String(v) : v.toFixed(2), cls = view.col === t + 1 ? "colhl" : "";
+        if (view.mode === "stat") {
+          f = t === 0 ? flag(t1s, i) : ""; if (f) flags.push([r[0], "t=1", f]);
+          tds.push(Kit.el("td", { class: cls + " " + f, style: f ? shade(f === "hi" ? 1 : 0, 0, 1) : "" }, txt));
+        } else tds.push(Kit.el("td", { class: cls, style: shade(v, lo, hi) }, txt));
+      }
+      B.appendChild(Kit.el("tr", { class: view.rows.indexOf(r[0]) >= 0 ? "hl" : "" }, tds));
+    });
+    var key = document.getElementById("key");
+    Kit.clear(key);
+    if (view.mode === "stat") {
+      key.appendChild(document.createTextNode("فقط ستون‌های t=۰ و t=۱ آزموده می‌شوند · "));
+      key.appendChild(Kit.el("b", { class: "hi" }, "قاب سبز")); key.appendChild(document.createTextNode(": بالاتر از میانگین + " + FA(view.k) + "σ · "));
+      key.appendChild(Kit.el("b", { class: "lo" }, "قاب قرمز")); key.appendChild(document.createTextNode(": پایین‌تر از میانگین − " + FA(view.k) + "σ · پنجره: " + FA(view.win) + " روز قبل"));
+    } else key.textContent = (abs ? "اعداد مطلق: اندازه × درصد (فرض vault)" : "درصد کاربران فعال در هر دوره") + " · طیف رنگ روی همه‌ی سلول‌های t≥۱، ستون t=۰ جدا";
+    var colored = view.mode === "stat" ? flags.length : D.length * 12;
+    msg = view.mode === "stat" ? "رنگ‌بندی آماری با پنجره‌ی " + FA(view.win) + " روز و آستانه‌ی " + FA(view.k) + " انحراف معیار: " + FA(flags.length) + " سلول رنگ گرفت" + (flags.length ? ": " + flags.map(function (x) { return FA(x[0]) + " در " + FA(x[1]) + (x[2] === "hi" ? " بالا" : " پایین"); }).join("، ") : "") + "."
+      : (abs ? "اعداد مطلق" : "درصد") + " با رنگ پیش‌فرض: هر " + FA(colored) + " سلول رنگ دارند.";
+    kind = view.mode === "stat" ? "" : "warn";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["سلول‌های رنگی", FA(colored) + " از " + FA(D.length * 12), view.mode === "stat" ? "" : "warn"],
+     ["پنجره‌ی آماری", FA(view.win) + " روز"], ["آستانه", FA(view.k) + "σ"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono " + (x[2] || "") }, x[1]))); });
+    ctl.mode.set(view.mode); ctl.win.set(view.win); ctl.k.set(view.k);
+  }
+  function tw(f) { return function (v) { f(v); view.rows = []; view.col = 0; render(); tour.free(msg, kind); }; }
+  ctl.mode = Kit.segmented({ label: "رنگ‌بندی", value: view.mode, options: [{ value: "abs", label: "اعداد مطلق" }, { value: "pct", label: "درصد" }, { value: "stat", label: "آماری" }],
+    onChange: tw(function (v) { view.mode = v; }) });
+  ctl.win = Kit.slider({ label: "پنجره‌ی روزهای قبل", min: 3, max: 10, step: 1, value: view.win, format: function (v) { return FA(v) + " روز"; },
+    hint: "۷ روز عدد نوشته است؛ رنگ‌بندی را آماری می‌کند", onInput: tw(function (v) { view.win = v; view.mode = "stat"; }) });
+  ctl.k = Kit.slider({ label: "آستانه به انحراف معیار", min: 1, max: 3, step: .5, value: view.k, format: function (v) { return FA(v) + "σ"; },
+    hint: "۲ عدد نوشته است", onInput: tw(function (v) { view.k = v; view.mode = "stat"; }) });
+  var C = document.getElementById("ctl");
+  C.appendChild(ctl.mode.element); C.appendChild(ctl.win.element); C.appendChild(ctl.k.element);
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "چهارده cohort روزانه از ۳/۱ تا ۳/۱۴، هرکدام با تعداد کاربران در t=۰ و سهم کاربران فعال در ۱۱ دوره‌ی بعد، از جدول خود نوشته.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و پنجره و آستانه را جابه‌جا کنید.",
+    steps: [
+      { kind: "warn", run: at({ mode: "abs", rows: ["3/2", "3/11"] }), say: "با اعداد مطلق و رنگ پیش‌فرض برداشت اول این است که cohortهای اول بدتر بودند و بعد بهتر شدند. ولی ۳/۲ دارای ۱٬۰۱۴ کاربر است و ۳/۱۱ دارای ۱٬۴۶۷ کاربر، ۴۰٪ بزرگ‌تر (بخش «اعداد مطلق با رنگ‌بندی شرطی»)." },
+      { kind: "warn", run: at({ mode: "pct", rows: ["3/2", "3/11"] }), say: "با درصد، ۳/۲ که در اعداد مطلق بدترین به نظر می‌آمد بدترین نیست و ۳/۱۱ هم بهترین نیست. نتیجه‌ی نوشته: cohort را با اعداد مطلق رنگ نکنید." },
+      { kind: "warn", run: at({ mode: "pct", col: 1 }), say: "ستون t=۱ از بحرانی‌ترین دوره‌هاست. با رنگ پیش‌فرض مشکلی در آن پیدا نمی‌شود: رنگ همه‌جا هست و برای این ستون تنوع کافی ندارد (بخش «درصد با رنگ‌بندی شرطی»)." },
+      { kind: "", run: at({ mode: "stat" }), say: "رنگ‌بندی آماری: اندازه در t=۰ و درصد در t=۱ هر روز با میانگین و انحراف معیار ۷ روز قبل مقایسه می‌شود. فقط چهار سلول رنگ می‌گیرند." },
+      { kind: "", run: at({ mode: "stat", rows: ["3/5", "3/10", "3/11"] }), say: "داستان نوشته: ۳/۵ مشکل retention است و باید داده را دید. ۳/۱۰ و ۳/۱۱ مقیاس شدید جذب‌اند، کاربران خیلی بیشتر و retention پایین‌تر؛ باید به بازاریابی بازخورد داد." },
+      { kind: "warn", run: at({ mode: "stat", k: 1 }), say: "فرض vault: با آستانه‌ی یک انحراف معیار هشت سلول رنگ می‌گیرند. نوشته می‌پذیرد که روش جهانی نیست و پنجره‌ی ۷ روز دلخواه است." }
+    ]
+  });
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "چرا رنگ کردن cohort با اعداد مطلق گمراه‌کننده است؟",
+      options: ["چون cohortها اندازه‌ی متفاوتی دارند و بزرگ‌تر بودن به معنای بهتر بودن نیست", "چون اعداد مطلق گرد شده‌اند", "چون درصد همیشه دقیق‌تر است"], answer: 0,
+      explain: "۳/۱۱ چهل درصد بزرگ‌تر از ۳/۲ است و در اعداد مطلق سبزتر دیده می‌شود (بخش «اعداد مطلق با رنگ‌بندی شرطی»)." },
+    { q: "رنگ‌بندی آماری ۳/۵ را در t=۱ قرمز می‌کند. با چه چیزی مقایسه‌اش می‌کند؟",
+      options: ["میانگین منهای دو انحراف معیار روزهای قبل، بدون خود ۳/۵", "میانگین کل جدول", "کمترین مقدار ستون"], answer: 0,
+      explain: "روز تحلیل در میانگین و انحراف معیار نمی‌آید (بخش «رنگ‌بندی با آمار»)." },
+    { q: "۳/۱۰ در t=۰ سبز و در t=۱ قرمز است. نوشته چه می‌گوید؟",
+      options: ["مقیاس جذب، کاربران کم‌نیت آورده؛ به بازاریابی بازخورد بدهید", "محصول خراب شده است", "خطای اندازه‌گیری است و باید نادیده گرفت"], answer: 0,
+      explain: "در جذب پولی معمول است؛ تیم بازاریابی targeting را عوض کرده بود (بخش «داستان cohortها»)." }
+  ]);
+})();
+</script>
+</body>
+</html>

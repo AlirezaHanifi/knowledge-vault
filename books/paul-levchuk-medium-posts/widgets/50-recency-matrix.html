@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ماتریس RF و قدرت Recency</title>
+<meta name="description" content="ماتریس RF با ۴٬۳۰۲ مشتری: چه سهمی از خریداران و درآمد ۳۰ روز بعد از مشتریان اخیر می‌آید. برای نوشته‌ی ۵۰ از مجموعه‌ی Levchuk.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .c50 { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  table.rf { width: 100%; border-collapse: separate; border-spacing: 2px; font-size: .84rem; direction: ltr; }
+  table.rf th, table.rf td { padding: 4px 6px; text-align: center; border-radius: 3px; font-family: var(--mono); }
+  table.rf thead th { color: var(--ink-3); font-weight: 600; font-size: .78rem; }
+  table.rf thead th.in { color: var(--ink); background: var(--accent-soft); }
+  table.rf tbody th { color: var(--ink-2); text-align: left; font-weight: 600; }
+  table.rf td.in { outline: 2px solid var(--accent); outline-offset: -2px; }
+  table.rf tr.tot th, table.rf tr.tot td { font-weight: 700; border-top: 2px solid var(--line-strong); }
+  table.rf tr.hl th, table.rf tr.hl td { box-shadow: inset 0 0 0 2px var(--ink); }
+  .axis { font-size: .76rem; color: var(--ink-3); display: flex; justify-content: space-between; direction: ltr; margin: 2px 4px 0; }
+  .big { border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; margin-bottom: 8px; }
+  .big .lab { font-size: .84rem; color: var(--ink-2); }
+  .big b { display: block; font-family: var(--mono); font-size: 1.6rem; direction: ltr; text-align: right; }
+  .big.cust { border-color: var(--line-strong); } .big.buy { border-color: var(--s1); } .big.rev { border-color: var(--s2); }
+  .seg-lab { font-size: .8rem; color: var(--ink-2); margin: 8px 0 4px; }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">Levchuk</a><span aria-hidden="true">/</span>
+      <a href="../chapters/50-rf-matrix-the-magic-of-recency.html">نوشته‌ی ۵۰</a><span aria-hidden="true">/</span>
+      <span aria-current="page">ماتریس RF و قدرت Recency</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>ماتریس RF و قدرت Recency</h1>
+      <p class="lede">مشتریان در نقطه‌ی بررسی بر پایه‌ی Recency، روز از آخرین خرید، و Frequency، تعداد خرید، چیده شده‌اند. آستانه‌ی Recency را جابه‌جا کنید و ببینید <strong>چه سهمی از خریداران و درآمد ۳۰ روز بعد</strong> از مشتریان اخیر می‌آید.</p>
+      <p class="source-note">این شبیه‌سازی نوشته‌ی «RF matrix: the magic of Recency» را نشان می‌دهد. همه‌ی اعداد از جدول خود نوشته است: تعداد مشتری در هر خانه، و درصد ردیفی خریداران و درآمد ۳۰ روز بعد. جمع‌های تجمعی برای هر آستانه را vault حساب کرده است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="c50">
+          <div>
+            <p class="panel-title" id="ttl"></p>
+            <table class="rf" aria-live="polite"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+            <p class="axis"><span>← قدیمی‌تر</span><span>Recency به روز</span><span>اخیرتر →</span></p>
+          </div>
+          <div>
+            <div class="big cust"><span class="lab" id="lCust"></span><b id="vCust" class="mono"></b></div>
+            <div class="big buy"><span class="lab" id="lBuy"></span><b id="vBuy" class="mono"></b></div>
+            <div class="big rev"><span class="lab" id="lRev"></span><b id="vRev" class="mono"></b></div>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">شمارنده‌ها</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="ctl"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li><strong>مشتریان با Recency تا ۳۰ روز</strong> فقط ۱۷٪ پایگاه‌اند ولی سه‌چهارم خریداران ۳۰ روز بعد را می‌سازند.</li>
+      <li><strong>رابطه غیرخطی است</strong>: افزودن ستون ۳۰ تا ۶۰ حدود ۱۴ واحد اضافه می‌کند و ستون‌های قدیمی‌تر تقریباً هیچ.</li>
+      <li><strong>در هر ردیف Frequency</strong> همین الگو تکرار می‌شود؛ Recency برای مشتری یک‌بار خرید هم کار می‌کند.</li>
+    </ul>
+
+    <h2>فهمتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/50-rf-matrix-the-magic-of-recency.html"><small>درس</small>نوشته‌ی ۵۰: ماتریس RF و جادوی Recency</a></li>
+      <li><a href="../chapters/49-rf-matrix-introduction.html"><small>درس</small>نوشته‌ی ۴۹: معرفی ماتریس RF</a></li>
+      <li><a href="../framework.html"><small>چارچوب</small>چارچوب تحلیلی مجموعه</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var FA = function (s) { return Kit.digits(String(s)); };
+  // The post's RF matrix. Recency bins run oldest → most recent, as in the post.
+  var R = ["360+", "180-360", "120-180", "60-120", "30-60", "<=30"], F = ["10+", "4-9", "3", "2", "1"];
+  var CNT = [[0, 4, 7, 10, 7, 37], [13, 70, 59, 66, 59, 190], [9, 61, 47, 58, 59, 96], [72, 170, 80, 128, 93, 148], [712, 734, 301, 490, 253, 269]];
+  // Row shares (%) of the customers who buy in the next 30 days, and of their revenue.
+  var BUY = [[0, 3.4, 0, 6.9, 10.3, 79.3], [0, 3.8, 0, 3.8, 11.5, 80.8], [0, 0, 2.4, 9.8, 14.6, 73.2], [1.7, 0, 3.4, 5.2, 20.7, 69.0], [2.4, 2.4, 4.9, 12.2, 9.8, 68.3]];
+  var REV = [[0, 4.0, 0, 11.8, 9.7, 74.5], [0, 6.5, 0, 4.9, 8.6, 80.0], [0, 0, 0.9, 7.9, 11.9, 79.3], [0.7, 0, 0.5, 0.9, 24.4, 73.7], [0.5, 0.1, 3.0, 4.7, 4.2, 87.5]];
+  var TCNT = [806, 1039, 494, 752, 471, 740], TBUY = [0.7, 2.2, 1.8, 6.6, 13.6, 75.1], TREV = [0.2, 3.2, 0.6, 5.3, 11.7, 79.0], ALL = 4302;
+  var CUT = [{ v: 5, label: "≤ ۳۰" }, { v: 4, label: "≤ ۶۰" }, { v: 3, label: "≤ ۱۲۰" }, { v: 2, label: "≤ ۱۸۰" }, { v: 1, label: "≤ ۳۶۰" }];
+  var CUTNAME = { 5: "۳۰", 4: "۶۰", 3: "۱۲۰", 2: "۱۸۰", 1: "۳۶۰" };
+  var DEF = { view: "cnt", cut: 5, row: "" }, view = Object.assign({}, DEF), tour, ctl = {}, msg, kind;
+
+  function sum(a, from) { var s = 0; for (var j = from; j < a.length; j++) s += a[j]; return s; }
+  function shade(v, mx) { return "background: color-mix(in srgb, var(--s1) " + Math.round(Math.min(1, v / mx) * 55) + "%, var(--surface))"; }
+
+  function render() {
+    var data = view.view === "cnt" ? CNT : view.view === "buy" ? BUY : REV, tot = view.view === "cnt" ? TCNT : view.view === "buy" ? TBUY : TREV;
+    var fmt = view.view === "cnt" ? function (v) { return v ? String(v) : ""; } : function (v) { return v.toFixed(1) + "%"; };
+    var mx = view.view === "cnt" ? 800 : 90;
+    document.getElementById("ttl").textContent = view.view === "cnt" ? "تعداد مشتری در هر خانه (Frequency × Recency)" : view.view === "buy" ? "درصد ردیفی خریداران ۳۰ روز بعد" : "درصد ردیفی درآمد ۳۰ روز بعد";
+    var H = Kit.clear(document.getElementById("thead")), B = Kit.clear(document.getElementById("tbody"));
+    H.appendChild(Kit.el("tr", null, [Kit.el("th", { scope: "col" }, "F \\ R")].concat(R.map(function (r, j) { return Kit.el("th", { scope: "col", class: j >= view.cut ? "in" : "" }, r); }))));
+    data.forEach(function (row, i) {
+      B.appendChild(Kit.el("tr", { class: view.row === F[i] ? "hl" : "" }, [Kit.el("th", { scope: "row" }, F[i])].concat(row.map(function (v, j) {
+        return Kit.el("td", { class: j >= view.cut ? "in" : "", style: shade(v, mx) }, fmt(v)); }))));
+    });
+    B.appendChild(Kit.el("tr", { class: "tot" }, [Kit.el("th", { scope: "row" }, "Total")].concat(tot.map(function (v, j) {
+      return Kit.el("td", { class: j >= view.cut ? "in" : "" }, view.view === "cnt" ? v.toLocaleString("en-US") : v.toFixed(1) + "%"); }))));
+
+    var cust = sum(TCNT, view.cut) / ALL * 100, buy = sum(TBUY, view.cut), rev = sum(TREV, view.cut), name = CUTNAME[view.cut];
+    document.getElementById("lCust").textContent = "سهم مشتریان با Recency تا " + name + " روز";
+    document.getElementById("lBuy").textContent = "سهم آن‌ها از خریداران ۳۰ روز بعد";
+    document.getElementById("lRev").textContent = "سهم آن‌ها از درآمد ۳۰ روز بعد";
+    document.getElementById("vCust").textContent = cust.toFixed(1) + "%";
+    document.getElementById("vBuy").textContent = buy.toFixed(1) + "%";
+    document.getElementById("vRev").textContent = rev.toFixed(1) + "%";
+    msg = "Recency تا " + name + " روز: " + FA(cust.toFixed(1)) + "٪ مشتریان، " + FA(buy.toFixed(1)) + "٪ خریداران و " + FA(rev.toFixed(1)) + "٪ درآمد ۳۰ روز بعد."; kind = "";
+    var St = Kit.clear(document.getElementById("stats"));
+    [["مشتریان در نقطه‌ی بررسی", ALL.toLocaleString("en-US")], ["مشتریان اخیر", sum(TCNT, view.cut).toLocaleString("en-US")],
+     ["خریدار یک‌بار", (sum(CNT[4], 0) / ALL * 100).toFixed(1) + "%"]].forEach(function (x) {
+      St.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value mono" }, x[1]))); });
+    ctl.view.set(view.view); ctl.cut.set(view.cut);
+  }
+  function tw(f) { return function (v) { f(v); view.row = ""; render(); tour.free(msg, kind); }; }
+  var C = document.getElementById("ctl");
+  C.appendChild(Kit.el("p", { class: "seg-lab" }, "جدول"));
+  ctl.view = Kit.segmented({ label: "جدول", value: view.view, options: [{ value: "cnt", label: "تعداد مشتری" }, { value: "buy", label: "خریداران" }, { value: "rev", label: "درآمد" }],
+    onChange: tw(function (v) { view.view = v; }) });
+  C.appendChild(ctl.view.element);
+  C.appendChild(Kit.el("p", { class: "seg-lab" }, "آستانه‌ی Recency"));
+  ctl.cut = Kit.segmented({ label: "آستانه‌ی Recency", value: view.cut, options: CUT.map(function (c) { return { value: c.v, label: c.label }; }),
+    onChange: tw(function (v) { view.cut = v; }) });
+  C.appendChild(ctl.cut.element);
+
+  function at(o) { return function () { view = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: document.getElementById("caption"), barMount: document.getElementById("bar"), tweak: document.getElementById("tweak"),
+    reset: at({}), render: render, interval: 8000,
+    intro: "نوشته ماتریس RF نقطه‌ی بررسی قبلی را می‌گیرد، مثلاً ۳۰ آوریل برای ۳۱ مه، و می‌شمارد کدام مشتریان در ۳۰ روز بعد خریده‌اند.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و جدول و آستانه را جابه‌جا کنید.",
+    steps: [
+      { kind: "", run: at({ view: "cnt" }), say: "۴٬۳۰۲ مشتری در نقطه‌ی بررسی. فقط ۷۴۰ نفر، ۱۷٫۲٪، در ۳۰ روز اخیر خریده‌اند؛ همان عددی که نوشته‌ی ۴۹ سهم مشتریان با پتانسیل بالا می‌داند." },
+      { kind: "", run: at({ view: "buy" }), say: "حالا درصد ردیفی خریداران ۳۰ روز بعد: ۷۵٪ همه‌ی کسانی که ۳۰ روز بعد می‌خرند از ستون Recency تا ۳۰ روز می‌آیند (بخش «RF matrix»)." },
+      { kind: "", run: at({ view: "buy", cut: 4 }), say: "با افزودن ستون ۳۰ تا ۶۰ روز سهم به حدود ۹۰٪ می‌رسد؛ در جدول ۸۸٫۷٪." },
+      { kind: "warn", run: at({ view: "buy", cut: 3 }), say: "سه ستون قدیمی‌تر از ۱۲۰ روز با هم فقط ۴٫۷٪ خریداران را می‌سازند؛ نوشته می‌گوید حداکثر ۵٪. کمپین دیرهنگام بازفعال‌سازی تقریباً بی‌اثر است." },
+      { kind: "", run: at({ view: "rev" }), say: "همان مشتریان با Recency تا ۳۰ روز ۷۹٪ درآمد ۳۰ روز بعد را هم می‌سازند؛ مشتریان اخیر محرک اصلی رشد آینده‌اند." },
+      { kind: "", run: at({ view: "buy", row: "1" }), say: "الگو در هر ردیف Frequency تکرار می‌شود. حتی برای خریداران یک‌بار، ۶۴٫۱٪ پایگاه، ۶۸٫۳٪ خریداران ۳۰ روز بعد از ستون تا ۳۰ روز می‌آیند." }
+    ]
+  });
+
+  Kit.quiz(document.getElementById("quiz"), [
+    { q: "مشتریان با Recency تا ۳۰ روز چه سهمی از خریداران ۳۰ روز بعد را می‌سازند؟",
+      options: ["حدود ۷۵٪", "حدود ۱۷٪", "حدود ۴۵٪"], answer: 0,
+      explain: "۱۷٪ پایگاه، ولی ۷۵٪ خریداران و ۷۹٪ درآمد (بخش «RF matrix»)." },
+    { q: "چرا کمپین بازفعال‌سازی برای مشتریان با Recency بالای ۱۲۰ روز کم‌اثر است؟",
+      options: ["چون این مشتریان روی هم حداکثر ۵٪ خریداران ۳۰ روز بعدند", "چون تعدادشان کم است", "چون Frequency آن‌ها بالاست"], answer: 0,
+      explain: "۲٬۳۳۹ مشتری در این ستون‌ها هستند ولی فقط ۴٫۷٪ خریداران؛ نوشته پایش Recency پیش از رسیدن به آستانه را توصیه می‌کند." },
+    { q: "چرا نوشته دوره‌ی ثابت ۳۰ روزه را به «ماه بعد» ترجیح می‌دهد؟",
+      options: ["چون طول ماه‌ها فرق دارد و درصدها در نقطه‌های مختلف قابل مقایسه نمی‌ماند", "چون ۳۰ روز کوتاه‌تر است", "چون Recency به روز است"], answer: 0,
+      explain: "بخش «RF matrix»: افق ۳۰ روزه‌ی ثابت." }
+  ]);
+})();
+</script>
+</body>
+</html>
