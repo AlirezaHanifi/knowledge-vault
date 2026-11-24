@@ -9,7 +9,7 @@
 <style>
   .tlabel { font-size: .9rem; font-weight: 700; margin: 0 0 8px; }
   .nodes { display: grid; gap: 8px; }
-  .node { display: grid; grid-template-columns: 8em auto 1fr; gap: 14px; align-items: center; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface-2); }
+  .node { display: grid; grid-template-columns: 10.5em auto 1fr; gap: 14px; align-items: center; border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 5px 10px; background: var(--surface-2); }
   .node.down { opacity: .55; border-style: dashed; } .node.leader { border-color: var(--accent); background: var(--accent-soft); }
   .nm { font-size: .86rem; line-height: 1.35; } .nm b { display: block; font-size: 1rem; }
   .rlog { display: flex; gap: 4px; direction: ltr; }
@@ -133,7 +133,7 @@
         if (vs.length >= 2) { v = "✓ می‌تواند ببرد: رأی نودهای " + vs.map(fa).join(" و "); vc = "ok"; }
         else { v = "✕ نمی‌تواند ببرد: " + (b.length ? "لاگ نود " + b.map(fa).join(" و ") + " به‌روزتر است" : "نود زنده‌ی کافی نیست"); vc = "bad"; } }
       var el = Kit.el("div", { class: "node" + (s.down[n] ? " down" : "") + (s.leader === n ? " leader" : "") },
-        Kit.el("div", { class: "nm" }, Kit.el("b", null, "نود " + fa(n) + (s.leader === n ? " · leader" : "")), "آخرین term: " + s.last(n) + " · طول: " + s.L[n].length), lg);
+        Kit.el("div", { class: "nm" }, Kit.el("b", null, "نود " + fa(n) + (s.leader === n ? " · leader" : "")), "طول " + s.L[n].length + " · term آخر " + s.last(n)), lg);
       if (v) el.appendChild(Kit.el("div", { class: "verdict " + vc }, v));
       box.appendChild(el);
     });

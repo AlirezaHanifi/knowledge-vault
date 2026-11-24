@@ -134,7 +134,7 @@
       var row = [Kit.el("td", null, r[1])]; keys.forEach(function (k) { row.push(Kit.el("td", { class: "n" }, r[2](C[k]))); });
       t.appendChild(Kit.el("tr", { class: view.hi.indexOf(r[0]) >= 0 ? "hi" : "" }, row)); });
     var gm = Kit.clear(document.getElementById("gm"));
-    keys.forEach(function (k) { var h = Math.max(0, Math.min(1, C[k].head)); gm.appendChild(Kit.el("b", { style: "left:" + (h * 100).toFixed(1) + "%;color:" + PRE[k].col }, "▲ " + PRE[k].name.split(" ")[0])); });
+    keys.forEach(function (k) { var h = Math.max(0, Math.min(1, C[k].head)); gm.appendChild(Kit.el("b", { style: "left:" + (h * 100).toFixed(1) + "%;color:" + PRE[k].col + (h < 0.08 ? ";transform:translateX(-10%)" : h > 0.92 ? ";transform:translateX(-90%)" : "") }, "▲ " + PRE[k].name.split(" ")[0])); });
     var worst = Math.min.apply(null, keys.map(function (k) { return C[k].head; }));
     kind = worst <= 0 ? "bad" : worst < 0.15 ? "warn" : "ok";
     msg = "مقدار CAC برابر " + FA(cac.toFixed(2)) + " دلار؛ " + keys.map(function (k) { return "cohort " + PRE[k].name.split(" ")[0] + ": فاصله تا سقف " + (C[k].head <= 0 ? "صفر یا منفی، بدون payback" : FA((C[k].head * 100).toFixed(0)) + "٪"); }).join("، ") + ".";

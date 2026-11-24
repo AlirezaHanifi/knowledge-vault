@@ -7,7 +7,7 @@
 <meta name="description" content="تغییر MRR از‌دست‌رفته را با LMDI به اثرهای حجم و mix و rate و ARPU بشکنید و با داشبوردهای منطقه‌اول و کانال‌اول مقایسه کنید. برای نوشته‌ی ۷۱ از مجموعه‌ی Levchuk.">
 <link rel="stylesheet" href="../../../assets/kit.css">
 <style>
-  .c71 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; align-items: start; }
+  .c71 { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.25fr); gap: 18px; align-items: start; }
   svg.db { width: 100%; height: auto; max-height: 210px; display: block; direction: ltr; }
   svg.db text { font-family: var(--mono); font-size: 12px; fill: var(--ink-2); }
   svg.db .lab { font-size: 13px; font-weight: 700; fill: var(--ink); }
@@ -101,7 +101,7 @@
     S.forEach(function (s) { s.y0 = s.n0 * s.r0 * s.a; s.y1 = s.n1 * s.r1 * s.a; s.w = Math.abs(s.y1 - s.y0) < 1e-9 ? s.y0 : (s.y1 - s.y0) / (Math.log(s.y1) - Math.log(s.y0));
       s.vol = s.w * Math.log(N1 / N0); s.mix = s.w * Math.log((s.n1 / N1) / (s.n0 / N0)); s.rate = s.w * Math.log(s.r1 / s.r0); s.arpu = 0; s.d = s.y1 - s.y0;
       ["vol", "mix", "rate", "arpu", "d"].forEach(function (k) { T[k] += s[k]; }); }); T.N0 = N0; T.N1 = N1; return T; }
-  function m(x, d) { var a = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); return (x < -1e-9 ? "−$" : "+$") + a; }
+  function m(x, d) { d = Math.abs(x) >= 100 ? 0 : d || 0; var a = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); return (x < -1e-9 ? "−$" : "+$") + a; }
   function render() {
     var S = slices(), T = lmdi(S), D = T.d || 1e-9;
     function by(k) { var o = {}; S.forEach(function (s) { o[s[k]] = (o[s[k]] || 0) + s.d; }); return o; }
@@ -130,7 +130,7 @@
     Kit.clear(document.getElementById("wf")).appendChild(w);
     var t = Kit.el("table", { class: "sl mono" + (view.show >= 3 ? "" : " dim") });
     t.appendChild(Kit.el("tr", null, ["slice", "cust.", "rate", "ΔMRR", "vol", "mix", "rate eff."].map(function (h) { return Kit.el("th", null, h); })));
-    S.forEach(function (x) { t.appendChild(Kit.el("tr", { class: view.hi.indexOf(x.name) >= 0 ? "hi" : "" }, [x.name, x.n0 + "→" + x.n1, Math.round(x.r0 * 100) + "→" + Math.round(x.r1 * 100) + "%", m(x.d), view.show >= 4 ? m(x.vol, 2) : "…", view.show >= 4 ? m(x.mix, 2) : "…", view.show >= 4 ? m(x.rate, 2) : "…"].map(function (c, i) { return Kit.el("td", { class: i === 3 ? "c" : "" }, c); }))); });
+    S.forEach(function (x) { t.appendChild(Kit.el("tr", { class: view.hi.indexOf(x.name) >= 0 ? "hi" : "" }, [x.name, x.n0 + "→" + x.n1, Math.round(x.r0 * 100) + "→" + Math.round(x.r1 * 100) + "%", m(x.d), view.show >= 4 ? m(x.vol) : "…", view.show >= 4 ? m(x.mix) : "…", view.show >= 4 ? m(x.rate) : "…"].map(function (c, i) { return Kit.el("td", { class: i === 3 ? "c" : "" }, c); }))); });
     t.appendChild(Kit.el("tr", { class: "tot" }, ["total", T.N0 + "→" + T.N1, "", m(T.d), view.show >= 4 ? m(T.vol, 0) : "…", view.show >= 4 ? m(T.mix, 0) : "…", view.show >= 4 ? m(T.rate, 0) : "…"].map(function (c) { return Kit.el("td", null, c); })));
     Kit.clear(document.getElementById("tbl")).appendChild(t);
     var big = [["vol", "حجم"], ["mix", "mix"], ["rate", "rate"]].sort(function (a, b) { return Math.abs(T[b[0]]) - Math.abs(T[a[0]]); })[0];

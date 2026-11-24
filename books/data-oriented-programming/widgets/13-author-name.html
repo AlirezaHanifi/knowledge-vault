@@ -122,7 +122,9 @@
     [["low", 0, 10.5, "low · ≤10"], ["medium", 10.5, 50.5, "medium · 11–50"], ["high", 50.5, MAX, "high · ≥51"]].forEach(function (b) {
       L.appendChild(Kit.el("div", { class: "an-band" + (b[0] === lv ? " on" : ""), style: "left:" + pct(b[1]) + ";width:" + ((b[2] - b[1]) / MAX * 100) + "%" }, (b[0] === lv ? "▶ " : "") + b[3])); });
     [[0, "0"], [10.5, "10 | 11"], [50.5, "50 | 51"], [80, "80"]].forEach(function (t) { L.appendChild(Kit.el("span", { class: "an-tick", style: "left:" + pct(t[0]) }, t[1])); });
-    L.appendChild(Kit.el("div", { class: "an-mark", style: "left:" + pct(Math.min(n, MAX)) }, Kit.el("span", {}, n + " books")));
+    // Near either end the label hangs inward, so it never leaves the line.
+    var edge = n / MAX < 0.08 ? "translateX(-6%)" : n / MAX > 0.92 ? "translateX(-94%)" : "";
+    L.appendChild(Kit.el("div", { class: "an-mark", style: "left:" + pct(Math.min(n, MAX)) }, Kit.el("span", { style: edge ? "transform:" + edge : null }, n + " books")));
     var A = Kit.clear(document.getElementById("arg"));
     A.appendChild(Kit.el("b", {}, "فراخوانی Author.myName"));
     A.appendChild(Kit.el("code", { class: "mono", style: "direction:ltr;display:block;text-align:left" }, "{name: " + JSON.stringify(name) + ",\n bookIsbns: [" + n + " ISBNs]}, " + JSON.stringify(fmt)));

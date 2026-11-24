@@ -147,7 +147,7 @@
   function arcY(d) { return 54 - Math.min(46, 10 + d * 0.06); }
   function render() {
     replay();
-    var W = SIZE * BX, s = Kit.svg("svg", { viewBox: "0 0 " + W + " 150" }), Y = 58, HB = 46;
+    var W = SIZE * BX, s = Kit.svg("svg", { viewBox: "0 0 " + W + " 166" }), Y = 58, HB = 46;
     var defs = Kit.svg("defs"), pat = Kit.svg("pattern", { id: "hatch", width: 8, height: 8, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
     pat.appendChild(Kit.svg("rect", { width: 4, height: 8, fill: "var(--warn-soft)" })); defs.appendChild(pat); s.appendChild(defs);
     s.appendChild(Kit.svg("rect", { class: "free", x: 0, y: Y, width: W, height: HB }));
@@ -163,8 +163,12 @@
     cells.forEach(function (c) { s.appendChild(Kit.svg("rect", { class: "cell" + (c === last ? " new" : ""), x: c.off * BX, y: Y, width: c.size * BX, height: HB }));
       s.appendChild(Kit.svg("text", { x: (c.off + c.size / 2) * BX, y: Y + 28, "text-anchor": "middle" }, c.key));
       s.appendChild(Kit.svg("text", { x: (c.off + c.size / 2) * BX, y: Y + HB + 16, "text-anchor": "middle", class: "small" }, c.size + "B @" + c.off)); });
-    [[0, "start"], [lower(), "lower"], [upper, "upper"]].forEach(function (m) { var x = Math.max(2, m[0] * BX);
-      s.appendChild(Kit.svg("text", { x: x, y: Y + HB + 36, "text-anchor": m[0] ? "middle" : "start", class: "small" }, m[1] + " " + m[0])); });
+    // A pointer label that would touch the one before it drops to a second row.
+    var edge = -Infinity;
+    [[0, "start"], [lower(), "lower"], [upper, "upper"]].forEach(function (m) { var x = Math.max(2, m[0] * BX), txt = m[1] + " " + m[0], w = txt.length * 7.6;
+      var left = m[0] ? x - w / 2 : x, row = left < edge + 8 ? 1 : 0;
+      if (!row) edge = left + w;
+      s.appendChild(Kit.svg("text", { x: x, y: Y + HB + 36 + row * 16, "text-anchor": m[0] ? "middle" : "start", class: "small" }, txt)); });
     s.appendChild(Kit.svg("text", { x: W - 2, y: Y + HB + 36, "text-anchor": "end", class: "small" }, "end 256"));
     var mount = Kit.clear(document.getElementById("map")); mount.appendChild(s);
     mount.setAttribute("aria-label", "صفحه با " + cells.length + " cell و " + holes.length + " قطعه‌ی آزاد");

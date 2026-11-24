@@ -244,7 +244,24 @@
       st.appendChild(el("div", { class: "stat" }, el("span", { class: "stat-label" }, x[0]), el("span", { class: "stat-value" }, d(String(x[1])))));
     });
     org.set(orgMode);
+    fit();
   }
+
+  // With the controls open under the picture there is less height: the two models then
+  // scroll inside their own boxes (the verdict stays in view), each showing its highlighted part.
+  function fit() {
+    var sc = document.querySelector(".stage-scene"), m = document.querySelector(".models");
+    Array.prototype.forEach.call(m.children, function (c) { c.style.maxHeight = ""; c.style.overflowY = ""; });
+    var over = sc.scrollHeight - sc.clientHeight;
+    if (over <= 0) return;
+    var h = Math.max(140, m.offsetHeight - over - 4);
+    Array.prototype.forEach.call(m.children, function (c) {
+      c.style.maxHeight = h + "px"; c.style.overflowY = "auto";
+      var hl = c.querySelector(".hl");
+      if (hl) c.scrollTop = Math.max(0, hl.getBoundingClientRect().top - c.getBoundingClientRect().top + c.scrollTop - 24);
+    });
+  }
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); }).observe(document.querySelector(".stage-scene"));
 
   OPS.forEach(function (o) { document.getElementById("practice").appendChild(el("li", null, el("strong", null, o.label + ". "), o.practice)); });
 

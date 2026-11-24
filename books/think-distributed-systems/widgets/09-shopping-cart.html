@@ -18,7 +18,8 @@
   .merged { border: 2px solid var(--line-strong); border-radius: var(--radius-sm); padding: 8px 10px; display: flex; gap: 12px; align-items: center; justify-content: center; }
   .merged .items { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; }
   .merged.ok { border-color: var(--ok); background: var(--ok-soft); } .merged.warn { border-color: var(--warn); background: var(--warn-soft); }
-  ol.tl { margin: 10px 0 0; padding: 0 1.2em 0 0; font-size: .8rem; line-height: 1.4; columns: 2; column-gap: 18px; }
+  ol.tl { margin: 10px 0 0; padding: 0 1.2em 0 0; font-size: .8rem; line-height: 1.4; columns: 2; column-gap: 18px; max-height: 7.2em; overflow-y: auto; }
+  /* The reader can add many operations: the log then scrolls in its own box, the picture stays put. */
   ol.tl li.ok { color: var(--ok); } ol.tl li.warn { color: var(--warn); } ol.tl li.bad { color: var(--bad); } ol.tl li.muted { color: var(--ink-2); }
   .opbtns { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; align-items: center; font-size: .82rem; }
   .opbtns .row { display: flex; flex-wrap: wrap; gap: 4px; } .opbtns .btn { font-family: var(--mono); }

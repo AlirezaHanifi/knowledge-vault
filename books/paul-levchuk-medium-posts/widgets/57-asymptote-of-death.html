@@ -102,13 +102,16 @@
     line([[0, view.cac], [N, view.cac]], "var(--bad)", 1.8, "7 5");
     s.appendChild(Kit.svg("text", { class: "lab", x: W - R, y: Y(view.cac) - 6, "text-anchor": "end", fill: "var(--bad)", style: "fill:var(--bad)" }, "CAC $" + view.cac));
     var nv = []; for (i = 0; i <= N; i++) nv.push([i, view.price * i]); line(nv, "var(--ink-3)", 2, "3 4");
-    if (pbN !== null) { s.appendChild(Kit.svg("circle", { cx: X(pbN), cy: Y(view.price * pbN), r: 5, fill: "var(--ink-3)" })); s.appendChild(Kit.svg("text", { class: "lab", x: X(pbN) - 8, y: Y(view.price * pbN) - 8, "text-anchor": "end" }, "naive: " + pbN + " mo")); }
+    var naiveLab = null;
+    if (pbN !== null) { s.appendChild(Kit.svg("circle", { cx: X(pbN), cy: Y(view.price * pbN), r: 5, fill: "var(--ink-3)" })); var nt = "naive: " + pbN + " mo", room = X(pbN) - 8 - nt.length * 7.8 > L + 4;
+      naiveLab = Kit.svg("text", { class: "lab", x: X(pbN) + (room ? -8 : 8), y: Y(view.price * pbN) - (room ? 8 : 14), "text-anchor": room ? "end" : "start", style: "paint-order:stroke;stroke:var(--surface);stroke-width:4px" }, nt); }
     if (view.real) {
       line([[0, ceil], [N, ceil]], "var(--s1)", 1.4, "1 4");
       s.appendChild(Kit.svg("text", { x: W - R, y: Y(ceil) + 16, "text-anchor": "end", style: "fill:var(--s1)" }, "ceiling $" + ceil.toFixed(2)));
       var rl = []; for (i = 0; i <= Math.min(view.upto, N); i++) rl.push([i, cum[i]]); line(rl, "var(--s1)", 3);
       if (pbR !== null && pbR <= view.upto) { s.appendChild(Kit.svg("circle", { cx: X(pbR), cy: Y(cum[pbR]), r: 6, fill: "var(--ok)" })); s.appendChild(Kit.svg("text", { class: "lab", x: X(pbR) + 8, y: Y(cum[pbR]) + 18, style: "fill:var(--ok)" }, "real: " + pbR + " mo")); }
     }
+    if (naiveLab) s.appendChild(naiveLab); // drawn last, with a halo, so the curves pass under it
     Kit.clear(document.getElementById("chart")).appendChild(s);
     var t = Kit.clear(document.getElementById("mo"));
     t.appendChild(Kit.el("tr", null, Kit.el("th", null, "ماه"), Kit.el("th", null, "درآمد هر کاربر"), Kit.el("th", null, "تجمعی")));

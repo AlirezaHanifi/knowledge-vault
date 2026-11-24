@@ -618,18 +618,30 @@
   //   marks: [{ x, label }] }) — redraws the whole chart. Style via .chart-* classes
   // and series classes (s1…s5, ok, bad, warn) so both themes work.
   function lineChart(root, o) {
-    var W = o.width || 520, H = o.height || 220, L = 44, R = 12, T = 12, B = 34;
+    var W = o.width || 520, H = o.height || 220, R = 12, T = 12;
     var xMax = o.xMax, yMax = o.yMax || 1, x0 = o.xMin || 0;
-    function X(v) { return L + (v - x0) / (xMax - x0) * (W - L - R); }
-    function Y(v) { return T + (1 - Math.min(v, yMax) / yMax) * (H - T - B); }
+    var yt = o.yTicks || 4, xt = o.xTicks || 5;
     clear(root);
     root.setAttribute("viewBox", "0 0 " + W + " " + H);
     root.classList.add("chart");
+    // Margins follow the rendered text, so ticks never run into the axis titles at the
+    // kit's minimum font size: the y ticks' widest label sets the left margin.
+    function textWidth(str, cls) {
+      var t = svg("text", { class: cls, x: 0, y: -100 }, str), w = 0;
+      root.appendChild(t);
+      try { w = t.getComputedTextLength(); } catch (e) { /* not rendered */ }
+      root.removeChild(t);
+      return w || String(str).length * 7.5;
+    }
+    var tickW = 0;
+    for (var a = 0; a <= yt; a++) tickW = Math.max(tickW, textWidth((o.yFormat || String)(yMax * a / yt), "chart-tick"));
+    var L = Math.max(44, Math.ceil(tickW) + 10 + (o.yLabel ? 22 : 0)), B = o.xLabel ? 44 : 28;
+    function X(v) { return L + (v - x0) / (xMax - x0) * (W - L - R); }
+    function Y(v) { return T + (1 - Math.min(v, yMax) / yMax) * (H - T - B); }
     (o.bands || []).forEach(function (b) {
       root.appendChild(svg("rect", { class: "chart-band", x: X(b.from), y: T, width: X(b.to) - X(b.from), height: H - T - B }));
       if (b.label) root.appendChild(svg("text", { class: "chart-note", x: X(b.from) + 4, y: T + 28 }, b.label));
     });
-    var yt = o.yTicks || 4, xt = o.xTicks || 5;
     for (var i = 0; i <= yt; i++) {
       var yv = yMax * i / yt;
       root.appendChild(svg("line", { class: "chart-grid", x1: L, x2: W - R, y1: Y(yv), y2: Y(yv) }));
@@ -648,9 +660,16 @@
       root.appendChild(svg("path", { class: "chart-line " + (s.cls || "s1"), d: d }));
       if (s.dots) s.points.forEach(function (pt) { root.appendChild(svg("circle", { class: "chart-dot " + (s.cls || "s1"), cx: X(pt[0]), cy: Y(pt[1]), r: 2.5 })); });
     });
+    // Mark labels sit just above the axis; one that would touch an earlier label moves up a row.
+    var placed = [];
     (o.marks || []).forEach(function (m) {
       root.appendChild(svg("line", { class: "chart-mark", x1: X(m.x), x2: X(m.x), y1: T, y2: H - B }));
-      if (m.label) root.appendChild(svg("text", { class: "chart-note", x: X(m.x) + 4, y: H - B - 6 }, m.label));
+      if (!m.label) return;
+      var x = X(m.x) + 4, w = textWidth(m.label, "chart-note"), row = 0;
+      if (x + w > W - R) x = X(m.x) - 4 - w;
+      while (placed.some(function (p) { return p.row === row && x < p.x + p.w + 6 && p.x < x + w + 6; })) row++;
+      placed.push({ x: x, w: w, row: row });
+      root.appendChild(svg("text", { class: "chart-note", x: x, y: H - B - 6 - row * 16 }, m.label));
     });
     if (o.legend !== false && (o.series || []).some(function (s) { return s.label; })) {
       var lx = L + 8;

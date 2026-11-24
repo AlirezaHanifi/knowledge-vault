@@ -18,3 +18,21 @@ jobs:
         run: python scripts/validate.py
       - name: Lint Markdown
         uses: DavidAnson/markdownlint-cli2-action@v20
+
+  widgets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install a headless browser
+        run: pip install playwright==1.65.2 && python -m playwright install --with-deps chromium
+      - name: Drive every widget's tour and controls at 1280x800
+        run: python scripts/check_widgets.py --shots widget-shots
+      - name: Keep screenshots of failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: widget-shots
+          path: widget-shots/

@@ -107,7 +107,7 @@
   function k(v) { return Kit.digits(String(v)); }
   function fresh() { items = BASE.map(function (x) { return x.slice(); }); }
   function quad(it) { return (it[1] > 5 ? "h" : "l") + (it[2] > 5 ? "h" : "l"); }
-  function X(e) { return 70 + (e - 0.5) / 10 * 440; } function Y(i) { return 340 - (i - 0.5) / 10 * 320; }
+  function X(e) { return 70 + (e - 0.5) / 10 * 440; } function Y(i) { return i > 5 ? 166 - (i - 6) / 4 * 100 : 326 - (i - 1) / 4 * 100; } // below each quadrant's title
   function render() {
     var g = Kit.clear(document.getElementById("ie-g")), q = quad(items[cur]);
     [["hl", 70, 20], ["hh", 290, 20], ["ll", 70, 180], ["lh", 290, 180]].forEach(function (c) {
