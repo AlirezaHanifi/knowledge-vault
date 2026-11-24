@@ -16,6 +16,7 @@ Technical books turned into interactive lessons. For each book there is one fold
 | [The Pragmatic Programmer](books/the-pragmatic-programmer/README.md) | David Thomas, Andrew Hunt |
 | [The Manager's Path](books/the-managers-path/README.md) | Camille Fournier |
 | [Engineering Leadership: The Hard Parts](books/engineering-leadership-the-hard-parts/README.md) | Juan Pablo Buriticá, James Turnbull |
+| [Machine Learning Platform Engineering](books/machine-learning-platform-engineering/README.md) | Benjamin Tan Wei Hao, Shanoop Padmanabhan, Varun Mallya |
 
 ## Articles
 

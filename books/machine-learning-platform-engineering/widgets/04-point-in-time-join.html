@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>point-in-time join</title>
+<meta name="description" content="زمان رویداد و TTL را جابه‌جا کنید و ببینید point-in-time join کدام مقدار feature را برای یک ردیف آموزش برمی‌دارد، و join ساده‌ی «آخرین مقدار» کجا از آینده نشت می‌کند. تصویری از فصل ۴ کتاب Machine Learning Platform Engineering.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .pj-wrap { display: grid; gap: 12px; }
+  .pj-line { width: 100%; height: auto; display: block; direction: ltr; }
+  .pj-line text { font-family: var(--font); font-size: 13px; fill: var(--ink-2); }
+  .pj-line .axis { stroke: var(--line-strong); stroke-width: 2; }
+  .pj-line .tick { stroke: var(--line); }
+  .pj-line .win { fill: var(--accent-soft); stroke: var(--accent); stroke-dasharray: 4 3; }
+  .pj-line .feat { fill: var(--surface); stroke: var(--ink-2); stroke-width: 2; }
+  .pj-line .feat.pick { fill: var(--ok); stroke: var(--ok); }
+  .pj-line .feat.leak { fill: var(--bad); stroke: var(--bad); }
+  .pj-line .ev { stroke: var(--ink); stroke-width: 2.5; }
+  .pj-line .lbl { font-weight: 700; fill: var(--ink); }
+  .pj-tab { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .pj-tab th, .pj-tab td { border: 1px solid var(--line); padding: 4px 8px; text-align: start; }
+  .pj-tab th { background: var(--surface-2); }
+  .pj-tab td.ok { background: var(--ok-soft); } .pj-tab td.bad { background: var(--bad-soft); } .pj-tab td.warn { background: var(--warn-soft); }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">MLPE</a><span aria-hidden="true">/</span>
+      <a href="../chapters/04-designing-reliable-ml-systems.html">فصل ۴</a><span aria-hidden="true">/</span>
+      <span aria-current="page">point-in-time join</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>point-in-time join</h1>
+      <p class="lede">برای هر ردیف آموزش، feature درست <strong>آخرین مقدار ثبت‌شده پیش از زمان رویداد</strong> است، و <strong>TTL</strong> می‌گوید تا چند روز عقب‌تر می‌شود دنبالش گشت. join ساده‌ی «آخرین مقدار» این مرز را نمی‌شناسد و مقداری از آینده را به مدل می‌دهد.</p>
+      <p class="source-note">تصویری از «feature store» با Feast (صص. ۱۱۵–۱۱۷). تاریخ‌های ۷ ژانویه، ۲۱ مه و ۴ دسامبر، رویداد ۲۲ مه و TTL دوروزه مثال‌های کتاب‌اند؛ نام مقدارها (نسخه‌ی ۱ تا ۳) و سال بی‌کبیسه مال vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="pj-wrap">
+          <svg class="pj-line" id="line" viewBox="0 0 760 150" role="img" aria-label="خط زمان یک سال با سه مقدار feature، رویداد و پنجره‌ی TTL"></svg>
+          <table class="pj-tab" aria-live="polite">
+            <thead><tr><th>روش</th><th>مقداری که برمی‌دارد</th><th>درست است؟</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">ردیف آموزش</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="evg"></div>
+        <div class="tweak-group" id="ttlg"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>رویداد را از ۲۲ مه به بعد از ۴ دسامبر ببرید: تنها آن‌جاست که «آخرین مقدار» و point-in-time یکی می‌شوند.</li>
+      <li>با TTL کوچک و رویدادی که چند روز پس از آخرین ثبت است، point-in-time چیزی برنمی‌گرداند؛ خالی بودن بهتر از مقدار کهنه یا آینده است، ولی باید بدانید چرا خالی است.</li>
+      <li>کتاب TTL را ۳۶۵ روز می‌گذارد تا هیچ مقداری به خاطر TTL کوچک جا نیفتد (ص. ۱۱۷).</li>
+    </ul>
+
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/04-designing-reliable-ml-systems.html"><small>درس</small>فصل ۴: طراحی سیستم‌های ML قابل‌اطمینان</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var MON = ["ژانویه", "فوریه", "مارس", "آوریل", "مه", "ژوئن", "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر", "دسامبر"];
+  var LEN = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], START = [];
+  LEN.reduce(function (a, l, i) { START[i] = a; return a + l; }, 0);
+  function doy(m, d) { return START[m] + d; }
+  function date(n) { var m = 11; while (m > 0 && START[m] >= n) m--; return Kit.digits(String(n - START[m])) + " " + MON[m]; }
+  var FEAT = [{ d: doy(0, 7), v: "نسخه‌ی ۱" }, { d: doy(4, 21), v: "نسخه‌ی ۲" }, { d: doy(11, 4), v: "نسخه‌ی ۳" }];
+  var DEF = { ev: doy(4, 22), ttl: 365 }, cfg = Object.assign({}, DEF), tour, msg = "", kind = "";
+
+  function pit() { var c = null; FEAT.forEach(function (f) { if (f.d <= cfg.ev && f.d >= cfg.ev - cfg.ttl) c = f; }); return c; }
+  function before() { var c = null; FEAT.forEach(function (f) { if (f.d <= cfg.ev) c = f; }); return c; }
+  function X(n) { return 30 + (n - 1) * 700 / 364; }
+  function C(x) { return Math.max(85, Math.min(675, x)); }
+  function render() {
+    var p = pit(), last = FEAT[FEAT.length - 1], leak = last.d > cfg.ev, b = before();
+    var s = Kit.clear(Kit.$("#line"));
+    s.appendChild(Kit.svg("line", { class: "axis", x1: 30, x2: 730, y1: 90, y2: 90 }));
+    START.forEach(function (st, i) { s.appendChild(Kit.svg("line", { class: "tick", x1: X(st + 1), x2: X(st + 1), y1: 84, y2: 96 }));
+      var t = Kit.svg("text", { x: X(st + 15), y: 115, "text-anchor": "middle" }); t.textContent = MON[i].slice(0, 3); s.appendChild(t); });
+    var lo = Math.max(1, cfg.ev - cfg.ttl);
+    s.appendChild(Kit.svg("rect", { class: "win", x: X(lo), y: 70, width: Math.max(2, X(cfg.ev) - X(lo)), height: 40, rx: 3 }));
+    var wt = Kit.svg("text", { x: C((X(lo) + X(cfg.ev)) / 2), y: 140, "text-anchor": "middle" }); wt.textContent = "پنجره‌ی TTL: " + Kit.digits(String(cfg.ttl)) + " روز"; s.appendChild(wt);
+    FEAT.forEach(function (f, i) {
+      var c = "feat" + (p === f ? " pick" : "") + (f === last && leak ? " leak" : "");
+      s.appendChild(Kit.svg("circle", { class: c, cx: X(f.d), cy: 90, r: 8 }));
+      var t = Kit.svg("text", { x: C(X(f.d)), y: i === 1 ? 44 : 62, "text-anchor": "middle" }); t.textContent = f.v + " · " + date(f.d); s.appendChild(t);
+    });
+    s.appendChild(Kit.svg("line", { class: "ev", x1: X(cfg.ev), x2: X(cfg.ev), y1: 18, y2: 108 }));
+    var et = Kit.svg("text", { class: "lbl", x: C(X(cfg.ev)), y: 14, "text-anchor": "middle" }); et.textContent = "رویداد: " + date(cfg.ev); s.appendChild(et);
+
+    var why = !p ? (b ? "آخرین ثبت پیش از رویداد (" + date(b.d) + ") بیرون پنجره‌ی TTL است" : "پیش از رویداد هیچ مقداری ثبت نشده") : "آخرین مقدار پیش از رویداد، درون TTL";
+    var rows = Kit.clear(Kit.$("#rows"));
+    [["point-in-time (Feast)", p ? p.v + " از " + date(p.d) : "خالی", p ? "ok" : "warn", p ? "درست: " + why : "خالی: " + why],
+     ["join ساده‌ی «آخرین مقدار»", last.v + " از " + date(last.d), leak ? "bad" : "ok", leak ? "نشت از آینده: این مقدار " + Kit.digits(String(last.d - cfg.ev)) + " روز پس از رویداد ثبت شده" : "این‌جا درست است، چون رویداد پس از همه‌ی ثبت‌هاست"]].forEach(function (r) {
+      rows.appendChild(Kit.el("tr", null, Kit.el("td", null, r[0]), Kit.el("td", null, r[1]), Kit.el("td", { class: r[2] }, r[3])));
+    });
+    kind = leak ? "bad" : p ? "ok" : "warn";
+    msg = "رویداد " + date(cfg.ev) + " با TTL " + Kit.digits(String(cfg.ttl)) + " روز: point-in-time " + (p ? p.v : "خالی") + " برمی‌دارد و join ساده " + (leak ? "از آینده نشت می‌کند." : "هم درست است.");
+    var st = Kit.clear(Kit.$("#stats"));
+    [["زمان رویداد", date(cfg.ev), ""], ["TTL", Kit.digits(String(cfg.ttl)) + " روز", ""], ["مقدار point-in-time", p ? p.v : "خالی", p ? "ok" : "warn"], ["نشت در join ساده", leak ? "بله" : "نه", leak ? "bad" : "ok"]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2] }, x[1])));
+    });
+    evCtl.set(cfg.ev); ttlCtl.set(cfg.ttl);
+  }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var evCtl = Kit.slider({ label: "زمان رویداد", min: 1, max: 365, step: 1, value: DEF.ev, format: date, onInput: tw(function (v) { cfg.ev = v; }) });
+  var ttlCtl = Kit.slider({ label: "TTL", min: 1, max: 365, step: 1, value: DEF.ttl, format: function (v) { return Kit.digits(String(v)) + " روز"; }, onInput: tw(function (v) { cfg.ttl = v; }) });
+  Kit.$("#evg").appendChild(evCtl.element); Kit.$("#ttlg").appendChild(ttlCtl.element);
+
+  function at(o) { return function () { cfg = Object.assign({}, DEF, o); }; }
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: at({}), render: render, interval: 7000,
+    intro: "یک کاربر، سه مقدار feature در طول سال و یک رویداد آموزش. خط سیاه زمان رویداد است و نوار رنگی پنجره‌ی TTL؛ جدول زیر می‌گوید هر روش کدام مقدار را برمی‌دارد.",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و رویداد و TTL را جابه‌جا کنید.",
+    steps: [
+      { kind: "ok", run: at({}), say: "مثال کتاب: featureها در ۷ ژانویه، ۲۱ مه و ۴ دسامبر ثبت شده‌اند و رویداد ۲۲ مه است. مقدار درست مال ۲۱ مه است (ص. ۱۱۵)." },
+      { kind: "bad", run: at({}), say: "همین ردیف با join ساده‌ی «آخرین مقدار» مقدار ۴ دسامبر را می‌گیرد، یعنی چیزی که مدل در لحظه‌ی پیش‌بینی هرگز نمی‌دانست: نشت از آینده." },
+      { kind: "ok", run: at({ ttl: 2 }), say: "با TTL دوروزه، Feast برای ۲۲ مه فقط تا ۲۰ مه عقب می‌رود (ص. ۱۱۷). ۲۱ مه هنوز درون پنجره است." },
+      { kind: "warn", run: at({ ev: doy(4, 26), ttl: 2 }), say: "رویداد را به ۲۶ مه ببرید: آخرین ثبت پنج روز پیش است و بیرون TTL، پس point-in-time خالی برمی‌گرداند. برای همین کتاب TTL را ۳۶۵ روز می‌گذارد (ص. ۱۱۷)." },
+      { kind: "ok", run: at({ ev: doy(11, 20) }), say: "تنها وقتی رویداد پس از آخرین ثبت باشد، دو روش یکی می‌شوند؛ داده‌ی آموزش تاریخی تقریباً هیچ‌وقت این‌طور نیست." }
+    ]
+  });
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "رویداد ۲۲ مه است و featureها در ۷ ژانویه، ۲۱ مه و ۴ دسامبر ثبت شده‌اند. point-in-time join کدام را برمی‌دارد؟", options: ["۷ ژانویه", "۲۱ مه", "۴ دسامبر"], answer: 1, explain: "آخرین مقدار پیش از رویداد (ص. ۱۱۵)." },
+    { q: "TTL در FeatureView چه چیزی را محدود می‌کند؟", options: ["عمر داده در online store", "اینکه Feast در ساخت داده‌ی تاریخی تا کجا عقب برود", "شمار featureهای هر entity"], answer: 1, explain: "ص. ۱۱۷." }
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مسیریابی و cache در برابر هزینه</title>
+<meta name="description" content="سهم پرسش‌های ساده، نرخ hit cache معنایی و شمار پرسش ماهانه را عوض کنید و هزینه‌ی ماهانه‌ی یک مدل گران برای همه را با مسیریابی سه‌لایه و cache مقایسه کنید. تصویری از فصل ۱۳ کتاب Machine Learning Platform Engineering.">
+<link rel="stylesheet" href="../../../assets/kit.css">
+<style>
+  .lc-wrap { display: grid; gap: 14px; }
+  .lc-row { display: grid; grid-template-columns: 11em 1fr 7.5em; gap: 8px; align-items: center; font-size: .85rem; }
+  .lc-track { position: relative; height: 22px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; }
+  .lc-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .lc-fill.base { background: var(--bad); } .lc-fill.best { background: var(--ok); }
+  .lc-fill.host { background: repeating-linear-gradient(45deg, var(--warn), var(--warn) 6px, var(--warn-soft) 6px, var(--warn-soft) 12px); }
+  .lc-val { font-family: var(--mono); direction: ltr; text-align: left; font-size: .85rem; }
+  .lc-mix { display: flex; height: 26px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line-strong); }
+  .lc-mix span { display: flex; align-items: center; justify-content: center; font-size: .8rem; color: var(--paper); overflow: hidden; white-space: nowrap; }
+  .lc-mix .s { background: var(--ok); } .lc-mix .m { background: var(--accent); } .lc-mix .c { background: var(--bad); }
+  .lc-mix .h { background: var(--surface-2); color: var(--ink-2); }
+  .lc-h { font-size: .82rem; color: var(--ink-2); font-weight: 700; margin: 0 0 4px; }
+  .lc-note { font-size: .82rem; color: var(--ink-2); margin: 0; }
+</style>
+</head>
+<body class="stage-page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <nav class="crumbs" aria-label="مسیر صفحه">
+      <a href="../../../index.html">کتابخانه</a><span aria-hidden="true">/</span>
+      <a href="../index.html">MLPE</a><span aria-hidden="true">/</span>
+      <a href="../chapters/13-production-llm-system-design.html">فصل ۱۳</a><span aria-hidden="true">/</span>
+      <span aria-current="page">مسیریابی و cache در برابر هزینه</span>
+    </nav>
+    <span data-kit-theme></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="stage-screen">
+    <header class="stage-head">
+      <h1>مسیریابی و cache در برابر هزینه</h1>
+      <p class="lede">هزینه‌ی LLM به ازای token است و سقف ندارد. یک <strong>router</strong> ارزان هر پرسش را به ارزان‌ترین مدلی که از پسش برمی‌آید می‌فرستد، و <strong>cache معنایی</strong> پرسش‌های تکراری را اصلاً به مدل نمی‌رساند.</p>
+      <p class="source-note">تصویری از «بهینه‌سازی هزینه» (صص. ۴۴۲–۴۵۱). هزینه‌ی هر پرسش در سه لایه همان سه عدد کتاب است برای ۲۰۰۰ token ورودی و ۵۰۰ خروجی: حدود ۰٫۰۳۵، ۰٫۰۰۳ و ۰٫۰۰۰۵ دلار (ص. ۴۴۳)؛ کتاب این‌ها را برای GPT-4 و Gemini Flash و مدل متن‌باز hosted می‌دهد، نه برای سه مدل router خودش. هزینه‌ی خود router، یعنی یک‌پنجم پرسش ارزان، و نادیده گرفتن هزینه‌ی embedding و زیرساخت مدل متن‌باز فرض‌های vault است. پیاده‌سازی مال خود vault است.</p>
+    </header>
+
+    <div class="sim-stage">
+      <div class="stage-caption" id="caption"></div>
+      <div class="stage-scene">
+        <div class="lc-wrap">
+          <div><p class="lc-h">پرسش‌ها به کجا می‌روند</p><div class="lc-mix" id="mix" role="img"></div></div>
+          <div><p class="lc-h">هزینه‌ی ماهانه</p><div id="bars"></div></div>
+          <p class="lc-note" id="note"></p>
+        </div>
+      </div>
+      <aside class="stage-side">
+        <div class="panel">
+          <p class="panel-title">در ماه</p>
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+      <div class="stage-bar" id="bar"></div>
+      <div class="stage-tweak" id="tweak">
+        <div class="tweak-group" id="g1"></div>
+        <div class="tweak-group" id="g2"></div>
+        <div class="tweak-group" id="g3"></div>
+        <div class="tweak-group" id="g4"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage-more">
+    <h2>به چه چیزی دقت کنید</h2>
+    <ul class="notice-list">
+      <li>بیشتر صرفه از پنج درصد پرسش پیچیده می‌آید که هنوز به مدل گران می‌روند: سهم پیچیده را از ۵ به ۲۰ درصد ببرید و ببینید هزینه چقدر بالا می‌رود.</li>
+      <li>تعداد پرسش را بالا ببرید تا نوار self-host از هزینه‌ی API کمتر شود؛ کتاب آستانه را بالای ۵۰۰ هزار پرسش در ماه می‌گذارد (صص. ۴۴۳–۴۴۴).</li>
+      <li>صرفه‌ی cache با نرخ hit خطی است، ولی آستانه‌ی شباهت بالاتر hit کمتر و پاسخ درست‌تر می‌دهد؛ کتاب ۰٫۹۲ را انتخاب می‌کند (صص. ۴۴۷–۴۴۹).</li>
+    </ul>
+
+    <h2>فهم خودتان را بسنجید</h2>
+    <div id="quiz"></div>
+
+    <h2 class="no-embed">مرتبط</h2>
+    <ul class="related no-embed">
+      <li><a href="../chapters/13-production-llm-system-design.html"><small>درس</small>فصل ۱۳: طراحی سیستم LLM در production</a></li>
+    </ul>
+    <p class="footer">شبیه‌سازی Knowledge Vault · پیاده‌سازی مال خود vault است · کلیدها: <kbd>Space</kbd> پخش و توقف، <kbd>←</kbd> و <kbd>→</kbd> قدم بعد و قبل، <kbd>R</kbd> از اول.</p>
+  </section>
+</main>
+
+<script src="../../../assets/kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  var PRICE = { c: 0.035, m: 0.003, s: 0.0005 }, ROUTER = PRICE.s / 5, HOST = [8000, 15000];
+  var QS = [1000, 3000, 10000, 30000, 100000, 300000, 500000, 1000000, 3000000];
+  var DEF = { simple: 70, complex: 5, hit: 0, qi: 3 }, cfg = Object.assign({}, DEF), tour, msg = "", kind = "";
+  function usd(v) { return "$" + (v >= 1000 ? Math.round(v).toLocaleString("en-US") : v >= 10 ? v.toFixed(0) : v.toFixed(2)); }
+  function qn(v) { return v >= 1e6 ? Kit.digits(String(v / 1e6)) + " میلیون" : Kit.digits(String(v / 1000)) + " هزار"; }
+  function calc() {
+    var q = QS[cfg.qi], s = cfg.simple / 100, c = Math.min(cfg.complex, 100 - cfg.simple) / 100, m = 1 - s - c, h = cfg.hit / 100;
+    var per = s * PRICE.s + m * PRICE.m + c * PRICE.c + ROUTER;
+    return { q: q, s: s, m: m, c: c, h: h, base: q * PRICE.c, routed: q * per, both: q * (1 - h) * per };
+  }
+  function render() {
+    var r = calc(), save = 1 - r.both / r.base;
+    var mix = Kit.clear(Kit.$("#mix"));
+    mix.setAttribute("aria-label", "cache " + Kit.pct(r.h, 0) + "، ساده " + Kit.pct((1 - r.h) * r.s, 0) + "، متوسط " + Kit.pct((1 - r.h) * r.m, 0) + "، پیچیده " + Kit.pct((1 - r.h) * r.c, 0));
+    [["h", r.h, "cache"], ["s", (1 - r.h) * r.s, "ساده"], ["m", (1 - r.h) * r.m, "متوسط"], ["c", (1 - r.h) * r.c, "پیچیده"]].forEach(function (x) {
+      if (x[1] > 0.001) mix.appendChild(Kit.el("span", { class: x[0], style: "width:" + 100 * x[1] + "%", title: x[2] }, x[1] > 0.07 ? x[2] + " " + Kit.pct(x[1], 0) : ""));
+    });
+    var rows = [["base", "یک مدل گران برای همه", r.base], ["", "مسیریابی سه‌لایه", r.routed], ["best", "مسیریابی + cache معنایی", r.both], ["host", "self-host متن‌باز (کف)", HOST[0]]];
+    var max = Math.max(r.base, HOST[1]), b = Kit.clear(Kit.$("#bars"));
+    rows.forEach(function (x) {
+      b.appendChild(Kit.el("div", { class: "lc-row", role: "img", "aria-label": x[1] + ": " + usd(x[2]) + " در ماه" }, Kit.el("span", null, x[1]),
+        Kit.el("div", { class: "lc-track" }, Kit.el("div", { class: "lc-fill " + x[0], style: "width:" + Math.max(0.4, 100 * x[2] / max) + "%" })),
+        Kit.el("span", { class: "lc-val" }, usd(x[2]) + (x[0] === "host" ? "–" + usd(HOST[1]) : ""))));
+    });
+    var band = r.q < 100000 ? "زیر ۱۰۰ هزار پرسش در ماه API ابری خیلی ارزان‌تر است" : r.q <= 500000 ? "بین ۱۰۰ و ۵۰۰ هزار پرسش در ماه نقطه‌ی سربه‌سر است" : r.q <= 1000000 ? "بالای ۵۰۰ هزار پرسش در ماه self-host صرفه‌ی معنادار دارد" : "بالای یک میلیون پرسش در ماه self-host اغلب ضروری است";
+    Kit.$("#note").textContent = "با " + qn(r.q) + " پرسش در ماه، به گفته‌ی کتاب " + band + " (صص. ۴۴۳–۴۴۴). DakkaBot حدود ۳۰ هزار پرسش در ماه دارد.";
+    kind = save >= 0.6 ? "ok" : save >= 0.3 ? "warn" : "bad";
+    msg = "مسیریابی و cache هزینه را از " + usd(r.base) + " به " + usd(r.both) + " در ماه می‌رسانند، یعنی " + Kit.pct(save, 0) + " صرفه.";
+    var st = Kit.clear(Kit.$("#stats"));
+    [["پرسش", qn(r.q), ""], ["هزینه‌ی هر پرسش", "$" + (r.both / r.q).toFixed(4), ""], ["صرفه در برابر مدل گران", Kit.pct(save, 0), kind], ["فراخوانی حذف‌شده با cache", Kit.pct(r.h, 0), ""]].forEach(function (x) {
+      st.appendChild(Kit.el("div", { class: "stat" }, Kit.el("span", { class: "stat-label" }, x[0]), Kit.el("span", { class: "stat-value " + x[2], style: "direction:ltr;unicode-bidi:isolate" }, Kit.digits(String(x[1])))));
+    });
+    c1.set(cfg.simple); c2.set(cfg.complex); c3.set(cfg.hit); c4.set(cfg.qi);
+  }
+  function tw(f) { return function (v) { f(v); render(); tour.free(msg, kind); }; }
+  var pc = function (v) { return Kit.digits(String(v)) + "٪"; };
+  var c1 = Kit.slider({ label: "سهم پرسش ساده", min: 0, max: 100, step: 5, value: DEF.simple, format: pc, onInput: tw(function (v) { cfg.simple = v; if (cfg.complex > 100 - v) cfg.complex = 100 - v; }) });
+  var c2 = Kit.slider({ label: "سهم پرسش پیچیده", min: 0, max: 50, step: 1, value: DEF.complex, format: pc, onInput: tw(function (v) { cfg.complex = v; if (cfg.simple > 100 - v) cfg.simple = 100 - v; }) });
+  var c3 = Kit.slider({ label: "نرخ hit cache معنایی", min: 0, max: 60, step: 5, value: DEF.hit, format: pc, onInput: tw(function (v) { cfg.hit = v; }) });
+  var c4 = Kit.slider({ label: "پرسش در ماه", min: 0, max: QS.length - 1, step: 1, value: DEF.qi, format: function (i) { return qn(QS[i]); }, onInput: tw(function (v) { cfg.qi = v; }) });
+  [c1, c2, c3, c4].forEach(function (c, i) { Kit.$("#g" + (i + 1)).appendChild(c.element); });
+
+  function at(o) { return function () { cfg = Object.assign({}, DEF, o); }; }
+  function cost(o) { var keep = cfg; cfg = Object.assign({}, DEF, o); var r = calc(); cfg = keep; return r; }
+  tour = Kit.tour({
+    captionMount: Kit.$("#caption"), barMount: Kit.$("#bar"), tweak: Kit.$("#tweak"),
+    reset: at({ simple: 0, complex: 100 }), render: render, interval: 7500,
+    intro: "نوار بالا نشان می‌دهد پرسش‌ها کجا می‌روند و نوارهای پایین هزینه‌ی ماهانه را. قیمت هر لایه از جدول هزینه‌ی کتاب است (ص. ۴۴۳).",
+    end: "سناریو تمام شد. «خودتان تغییر بدهید» را باز کنید و سهم‌ها، cache و حجم را عوض کنید.",
+    steps: [
+      { kind: "bad", run: at({ simple: 0, complex: 100 }), say: function () { return "همه چیز به مدل گران: ۱۰۰۰ پرسش در روز یعنی ۳۵ دلار در روز (ص. ۴۴۳)، و در ماه حدود " + usd(cost({}).base) + "."; } },
+      { kind: "ok", run: at({}), say: function () { var r = cost({}); return "router با تقسیم ۷۰ و ۲۵ و ۵ درصد (صص. ۴۴۵–۴۴۶) هزینه را به " + usd(r.routed) + " می‌رساند. کتاب ۶۰ تا ۸۰ درصد صرفه می‌گوید؛ این‌جا بیشتر است، چون اختلاف قیمت لایه‌ها در جدول ص. ۴۴۳ بیشتر از سه مدل Gemini است."; } },
+      { kind: "ok", run: at({ hit: 40 }), say: function () { var r = cost({ hit: 40 }); return "cache معنایی ۳۰ تا ۶۰ درصد فراخوانی‌ها را حذف می‌کند (ص. ۴۴۶). با ۴۰ درصد hit، هزینه " + usd(r.both) + " می‌شود."; } },
+      { kind: "warn", run: at({ hit: 40, simple: 55, complex: 20 }), say: "اگر router پرسش‌های بیشتری را پیچیده بداند، هزینه زود بالا می‌رود: دقت router را باید پایید و آستانه‌هایش را A/B test کرد (ص. ۴۴۶)." },
+      { kind: "warn", run: at({ qi: 7, hit: 40 }), say: function () { var r = cost({ qi: 7, hit: 40 }); return "با یک میلیون پرسش در ماه، مدل گران برای همه " + usd(r.base) + " است و کتاب self-host را اغلب ضروری می‌داند (صص. ۴۴۳–۴۴۴). در این مدل vault، مسیریابی و cache با " + usd(r.both) + " هنوز زیر کف ۸ هزار دلاری self-host می‌مانند: آستانه‌ها به این بستگی دارند که با کدام مدل مقایسه کنید."; } }
+    ]
+  });
+
+  Kit.quiz(Kit.$("#quiz"), [
+    { q: "کتاب برای سیستمی مثل DakkaBot با حدود ۳۰ هزار پرسش در ماه کدام را پیشنهاد می‌کند؟", options: ["self-host مدل متن‌باز", "API ابری با پرداخت به ازای token", "instance رزروی برای اوج"], answer: 1, explain: "زیر ۱۰۰ هزار پرسش در ماه API ابری خیلی ارزان‌تر است (صص. ۴۴۳–۴۴۴)." },
+    { q: "چرا مسیریابی سه‌لایه رایگان نیست؟", options: ["چون router هم هزینه‌ی فراخوانی دارد و باید دقتش پاییده شود", "چون cache را خاموش می‌کند", "چون فقط با یک مدل کار می‌کند"], answer: 0, explain: "چند مدل برای مانیتور و نسخه‌گذاری و دقت router (صص. ۴۴۴، ۴۴۶)." }
+  ]);
+})();
+</script>
+</body>
+</html>
